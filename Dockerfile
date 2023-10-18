@@ -4,7 +4,7 @@ WORKDIR /app
 COPY . .
 
 # install deps
-RUN yarn install
+RUN yarn install && yarn postinstall
 
 ENV NODE_ENV production
 
