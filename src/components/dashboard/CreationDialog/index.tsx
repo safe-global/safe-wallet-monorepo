@@ -44,7 +44,7 @@ const CreationDialog = () => {
     <Dialog open={open}>
       <DialogContent sx={{ paddingX: 8, paddingTop: 9, paddingBottom: 6 }}>
         <Typography variant="h3" fontWeight="700" mb={1}>
-          Welcome to {'Safe{Wallet}'}!
+          Welcome to {'BNB Safe{Wallet}'}!
         </Typography>
         <Typography variant="body2">
           Congratulations on your first step to truly unlock ownership. Enjoy the experience and discover our app.

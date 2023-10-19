@@ -4517,17 +4517,23 @@
     web3-utils "^1.8.1"
     zksync-web3 "^0.14.3"
 
-"@safe-global/safe-deployments@1.25.0", "@safe-global/safe-deployments@^1.25.0":
+"@safe-global/safe-deployments@^1.22.0":
+  version "1.22.0"
+  resolved "https://registry.yarnpkg.com/@safe-global/safe-deployments/-/safe-deployments-1.22.0.tgz#4214ac5a9ebcad7cdbf5f641b0728bc0e497286e"
+  integrity sha512-SmbeCRMlcO/EONxbV6nP6pM/60q0NIHVezxx5FMv0dIAkDffdbm25reonKlOk3AJYW1b/c6pZA0RbWDwFSJEkQ==
+  dependencies:
+    semver "^7.3.7"
+
+"@safe-global/safe-deployments@^1.25.0":
   version "1.25.0"
   resolved "https://registry.yarnpkg.com/@safe-global/safe-deployments/-/safe-deployments-1.25.0.tgz#882f0703cd4dd86cc19238319d77459ded09ec88"
   integrity sha512-j7Ml1MVZw73XMTLbyIjo+Gvohwg5HYi8WM6b3vo+AkYEO/X4TNY8eJ0T0Awip5PO9MNyZymF3QY065uccQP53A==
   dependencies:
     semver "^7.3.7"
 
-"@safe-global/safe-deployments@^1.22.0":
-  version "1.22.0"
-  resolved "https://registry.yarnpkg.com/@safe-global/safe-deployments/-/safe-deployments-1.22.0.tgz#4214ac5a9ebcad7cdbf5f641b0728bc0e497286e"
-  integrity sha512-SmbeCRMlcO/EONxbV6nP6pM/60q0NIHVezxx5FMv0dIAkDffdbm25reonKlOk3AJYW1b/c6pZA0RbWDwFSJEkQ==
+"@safe-global/safe-deployments@j75689/safe-deployments#v1.25.0-op":
+  version "1.25.0"
+  resolved "https://codeload.github.com/j75689/safe-deployments/tar.gz/73d81822b13627da3b329689bd9dd6cf24151aa0"
   dependencies:
     semver "^7.3.7"
 
