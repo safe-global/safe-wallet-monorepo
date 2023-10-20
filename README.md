@@ -46,6 +46,7 @@ Here's the list of all the required and optional variables:
 | `NEXT_PUBLIC_FIREBASE_VAPID_KEY_PRODUCTION`            | optional     | FCM vapid key on production
 | `NEXT_PUBLIC_FIREBASE_OPTIONS_STAGING`                 | optional     | FCM `initializeApp` options on staging
 | `NEXT_PUBLIC_FIREBASE_VAPID_KEY_STAGING`               | optional     | FCM vapid key on staging
+| `NEXT_DEFAULT_CHAIN_ID`                                | optional     | Default chain id to use when connecting to a wallet
 
 If you don't provide some of the optional vars, the corresponding features will be disabled in the UI.
 
