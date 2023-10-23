@@ -2,6 +2,7 @@
   "name": "safe-wallet-web",
   "homepage": "https://github.com/safe-global/safe-wallet-web",
   "license": "GPL-3.0",
+  "type": "module",
   "version": "1.19.1",
   "scripts": {
     "dev": "next dev",
@@ -132,10 +133,5 @@
     "typescript": "4.9.4",
     "typescript-plugin-css-modules": "^4.2.2",
     "webpack": "^5.88.2"
-  },
-  "tsconfig": {
-    "compilerOptions": {
-      "esModuleInterop": true
-    }
   }
 }
