@@ -26,7 +26,7 @@ export const SafeAppsSigningMethod = () => {
 
         <Grid item xs>
           <Typography mb={2}>
-            This setting determines how the {'Safe{Wallet}'} will sign message requests from Safe Apps. Gasless,
+            This setting determines how the {'BNB Safe{Wallet}'} will sign message requests from Safe Apps. Gasless,
             off-chain signing is used by default. Learn more about message signing{' '}
             <ExternalLink href={HelpCenterArticle.SIGNED_MESSAGES}>here</ExternalLink>.
           </Typography>

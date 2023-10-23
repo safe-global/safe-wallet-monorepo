@@ -14,7 +14,7 @@ const SafeLicenses = () => {
       <Box mb={4}>
         <Typography mb={3}>
           This page contains a list of attribution notices for third party software that may be contained in portions of
-          the {'Safe{Wallet}'}. We thank the open source community for all of their contributions.
+          the {'BNB Safe{Wallet}'}. We thank the open source community for all of their contributions.
         </Typography>
         <Typography variant="h2" mb={2}>
           Android

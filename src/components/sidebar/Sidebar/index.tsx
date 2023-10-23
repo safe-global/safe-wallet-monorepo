@@ -47,7 +47,6 @@ const Sidebar = (): ReactElement => {
 
         <Divider flexItem />
 
-        {/* What's new + Need help? */}
         <SidebarFooter />
       </div>
 

@@ -52,7 +52,7 @@ export const ImportFileUpload = ({
 
   return (
     <>
-      <Typography>Import {'Safe{Wallet}'} data by uploading a file in the area below.</Typography>
+      <Typography>Import {'BNB Safe{Wallet}'} data by uploading a file in the area below.</Typography>
 
       <FileUpload
         fileType={FileTypes.JSON}
@@ -74,7 +74,7 @@ export const ImportFileUpload = ({
             mr: 0.5,
           }}
         />
-        Only JSON files exported from the {'Safe{Wallet}'} can be imported.
+        Only JSON files exported from the {'BNB Safe{Wallet}'} can be imported.
       </Typography>
     </>
   )

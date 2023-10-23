@@ -134,7 +134,7 @@ export const AddCustomAppModal = ({ open, onClose, onSave, safeAppsList }: Props
                             })}
                           />
                         }
-                        label="This Safe App is not part of Safe{Wallet} and I agree to use it at my own risk."
+                        label="This Safe App is not part of BNB Safe{Wallet} and I agree to use it at my own risk."
                         sx={{ mt: 2 }}
                       />
 

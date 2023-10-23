@@ -49,7 +49,7 @@ const NewSafe = () => {
             <Accordion className={css.accordion} onClick={toggleSafeList} expanded={expanded} defaultExpanded={true}>
               <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                 <Typography variant="h4" display="inline" fontWeight={700}>
-                  My Safe Accounts
+                  My BNB Safe Accounts
                 </Typography>
               </AccordionSummary>
 
@@ -101,7 +101,7 @@ const NewSafe = () => {
               <Paper className={css.createAddCard}>
                 <SvgIcon component={NewSafeIcon} inheritViewBox sx={{ width: '42px', height: '42px' }} />
                 <Typography variant="h3" fontWeight={700} mb={1} mt={3}>
-                  Create Safe Account
+                  Create BNB Safe Account
                 </Typography>
 
                 <Typography variant="body2" mb={3}>
@@ -133,7 +133,7 @@ const NewSafe = () => {
                 </Typography>
 
                 <Typography variant="body2" mb={3}>
-                  Already have a Safe Account? Add it via its address.
+                  Already have a BNB Safe Account? Add it via its address.
                 </Typography>
 
                 <span style={{ flex: 1 }} />
