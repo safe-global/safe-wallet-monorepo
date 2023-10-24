@@ -4531,9 +4531,9 @@
   dependencies:
     semver "^7.3.7"
 
-"@safe-global/safe-deployments@j75689/safe-deployments#v1.25.0-op":
+"@safe-global/safe-deployments@bnb-chain/safe-deployments#v1.25.0-bnbchain":
   version "1.25.0"
-  resolved "https://codeload.github.com/j75689/safe-deployments/tar.gz/73d81822b13627da3b329689bd9dd6cf24151aa0"
+  resolved "https://codeload.github.com/bnb-chain/safe-deployments/tar.gz/5cd89556cd84436ebaff918bc36163c8e496280c"
   dependencies:
     semver "^7.3.7"
 
