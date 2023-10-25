@@ -56,7 +56,7 @@ export const useChainId = (): string => {
   const walletChainId =
     wallet?.chainId && configs.some(({ chainId }) => chainId === wallet.chainId) ? wallet.chainId : undefined
 
-  return defaultChainId || urlChainId || walletChainId || session.lastChainId
+  return urlChainId || walletChainId || session.lastChainId || defaultChainId
 }
 
 export default useChainId
