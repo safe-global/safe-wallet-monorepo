@@ -2,6 +2,7 @@
   "name": "safe-wallet-web",
   "homepage": "https://github.com/safe-global/safe-wallet-web",
   "license": "GPL-3.0",
+  "type": "module",
   "version": "1.19.1",
   "scripts": {
     "dev": "next dev",
@@ -18,7 +19,7 @@
     "routes": "node scripts/generate-routes.js > src/config/routes.ts && prettier -w src/config/routes.ts && cat src/config/routes.ts",
     "css-vars": "ts-node-esm ./scripts/css-vars.ts > ./src/styles/vars.css && prettier -w src/styles/vars.css",
     "generate-types": "typechain --target ethers-v5 --out-dir src/types/contracts ./node_modules/@safe-global/safe-deployments/dist/assets/**/*.json ./node_modules/@safe-global/safe-modules-deployments/dist/assets/**/*.json ./node_modules/@openzeppelin/contracts/build/contracts/ERC20.json ./node_modules/@openzeppelin/contracts/build/contracts/ERC721.json",
-    "after-install": "yarn patch-package && yarn generate-types",
+    "after-install": "yarn patch-package && yarn generate-types && yarn css-vars",
     "postinstall": "yarn after-install",
     "analyze": "cross-env ANALYZE=true yarn build",
     "cypress:open": "cross-env TZ=UTC cypress open --e2e",
@@ -132,10 +133,5 @@
     "typescript": "4.9.4",
     "typescript-plugin-css-modules": "^4.2.2",
     "webpack": "^5.88.2"
-  },
-  "tsconfig": {
-    "compilerOptions": {
-      "esModuleInterop": true
-    }
   }
 }
