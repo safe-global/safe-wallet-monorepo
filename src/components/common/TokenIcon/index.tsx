@@ -5,8 +5,8 @@ import css from './styles.module.css'
 const FALLBACK_ICON = '/images/common/token-placeholder.svg'
 
 const CUSTOM_LOGO_MAP: Record<string, string> = {
-  BNB: `https://www.bnbchainlist.org/static/images/rsz_bnb.svg`,
-  TCBNB: `https://www.bnbchainlist.org/static/images/rsz_bnb.svg`,
+  BNB: `https://s2.coinmarketcap.com/static/img/coins/64x64/1839.png`,
+  TCBNB: `https://s2.coinmarketcap.com/static/img/coins/64x64/1839.png`,
   BTC: `https://raw.githubusercontent.com/bnb-chain/opbnb-bridge-tokens/main/data/BTCB/logo.svg`,
   BTCB: `https://raw.githubusercontent.com/bnb-chain/opbnb-bridge-tokens/main/data/BTCB/logo.svg`,
   USDT: `https://raw.githubusercontent.com/bnb-chain/opbnb-bridge-tokens/main/data/USDT/logo.svg`,

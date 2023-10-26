@@ -2,7 +2,6 @@ import { addDays, isAfter } from 'date-fns'
 import type { IWalletConnectSession } from '@walletconnect/types'
 import type WalletConnect from '@walletconnect/client'
 
-import { CGW_NAMES, WALLET_KEYS } from '@/hooks/wallets/consts'
 import local from '@/services/local-storage/local'
 import { PAIRING_MODULE_STORAGE_ID } from '@/services/pairing/connector'
 
@@ -30,7 +29,7 @@ export const killPairingSession = (connector: InstanceType<typeof WalletConnect>
 }
 
 export const isPairingSupported = (disabledWallets?: string[]) => {
-  return disabledWallets && !disabledWallets.includes(CGW_NAMES[WALLET_KEYS.PAIRING] as string)
+  return false
 }
 
 export const _isPairingSessionExpired = (session: IWalletConnectSession): boolean => {
