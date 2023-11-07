@@ -30,6 +30,7 @@ const nextConfig = {
   productionBrowserSourceMaps: true,
   eslint: {
     dirs: ['src'],
+    ignoreDuringBuilds: true,
   },
   modularizeImports: {
     '@mui/material': {

@@ -52,9 +52,6 @@ const Footer = (): ReactElement | null => {
               <FooterLink href={getHref(AppRoutes.terms)}>Terms</FooterLink>
             </li>
             <li>
-              <FooterLink href={getHref(AppRoutes.privacy)}>Privacy</FooterLink>
-            </li>
-            <li>
               <FooterLink href={getHref(AppRoutes.licenses)}>Licenses</FooterLink>
             </li>
             <li>
