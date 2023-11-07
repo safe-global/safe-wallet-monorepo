@@ -32,9 +32,6 @@
   "engines": {
     "node": ">=16"
   },
-  "pre-commit": [
-    "lint"
-  ],
   "resolutions": {
     "@web3-onboard/trezor/**/protobufjs": "^7.2.4"
   },

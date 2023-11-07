@@ -1,575 +1,208 @@
-import { Typography } from '@mui/material'
-import Link from 'next/link'
-import MUILink from '@mui/material/Link'
-import { AppRoutes } from '@/config/routes'
-import { DISCORD_URL, HELP_CENTER_URL, TWITTER_URL } from '@/config/constants'
+var Wallet = "Wallet"
 
 const SafeTerms = () => {
   return (
-    <div>
-      <Typography variant="h1" mb={2}>
-        Terms and Conditions
-      </Typography>
-      <p>Last updated: May, 2023</p>
-      <h3>1. What is the scope of the Terms?</h3>
-      <ol start={1}>
-        <li>
-          These Terms and Conditions (&ldquo;Terms&rdquo;) become part of any contract (&ldquo;Agreement&rdquo;) between
-          you (&ldquo;you&rdquo;, &ldquo;yours&rdquo; or &ldquo;User&rdquo;) and Core Contributors GmbH
-          (&ldquo;CC&rdquo;, &ldquo;we&rdquo;, &ldquo;our&rdquo; or &ldquo;us&rdquo;) provided we made these Terms
-          accessible to you prior to entering into the Agreement and you consent to these Terms. We are a limited
-          liability company registered with the commercial register of Berlin Charlottenburg under company number HRB
-          240421&nbsp;B, with its registered office at the ℅ Full Node, Skalitzer Str. 85-86, 10997 Berlin, Germany. You
-          can contact us by writing to info@cc0x.dev.
-        </li>
-        <li>
-          The Agreement is concluded by using the Mobile App, Web App and/or Browser Extension&nbsp;subject to these
-          Terms.&nbsp;The use of our Services is only permitted to legal entities, partnerships and natural persons with
-          unlimited legal capacity. In particular, minors are prohibited from using our Services.
-        </li>
-        <li>
-          The application of your general terms and conditions is excluded. Your deviating, conflicting or supplementary
-          general terms and conditions shall only become part of the Agreement if and to the extent that CC has
-          expressly agreed to their application in writing. This consent requirement shall apply in any case, even if
-          for example CC, being aware of your general terms and conditions, accepts payments by the contractual partner
-          without reservations.
-        </li>
-        <li>
-          We reserve the right to change these Terms at any time and without giving reasons, while considering and
-          weighing your interests. The new Terms will be communicated to you in advance. They are considered as agreed
-          upon if you do not object to their validity within 14 days after receipt of the notification. We will
-          separately inform you about the essential changes, the possibility to object, the deadline and the
-          consequences of inactivity. If you object, the current version of the Terms remains applicable. Our right to
-          terminate the contract according to Clause 8 remains unaffected.
-        </li>
+    < div >
+      <h1 className="c6" id="h.gjdgxs"><span className="c7">Terms and Conditions</span></h1>
+      <p className="c2"><span>Last updated: November, 2023</span></p>
+      <h3 className="c8" id="h.30j0zll"><span className="c4">1. What is the scope of the Terms?</span></h3>
+      <ol className="c5 lst-kix_list_11-0 start" ><li className="c0 li-bullet-0"><span className="c3">These Terms and Conditions (&ldquo;Terms&rdquo;) become part of any contract (&ldquo;Agreement&rdquo;) between you (&ldquo;you&rdquo;, &ldquo;yours&rdquo; or &ldquo;User&rdquo;) and BNB Chain Innovation Limited (&ldquo;BNB Chain&rdquo;, &ldquo;we&rdquo;, &ldquo;our&rdquo; or &ldquo;us&rdquo;) provided we made these Terms accessible to you prior to entering into the Agreement and you consent to these Terms. </span></li><li className="c0 li-bullet-0"><span className="c3">The Agreement is concluded by using the Mobile App, Web App and/or Browser Extension subject to these Terms. The use of our Services is only permitted to legal entities, partnerships and natural persons with unlimited legal capacity. In particular, minors are prohibited from using our Services.</span></li><li className="c0 li-bullet-0"><span className="c3">The application of your general terms and conditions is excluded. Your deviating, conflicting or supplementary general terms and conditions shall only become part of the Agreement if and to the extent that BNB Chain has expressly agreed to their application in writing. This consent requirement shall apply in any case, even if for example BNB Chain, being aware of your general terms and conditions, accepts payments by the contractual partner without reservations.</span></li><li className="c0 li-bullet-0"><span>We reserve the right to change these Terms at any time and without giving reasons, while considering and weighing your interests. The new Terms will be communicated to you in advance. </span><span>They are considered as agreed upon if you do not object to their validity within 14 days after receipt of the notification</span><span>. We will separately inform you about the essential changes, the possibility to object, the deadline and the consequences of inactivity. If you object, the current version of the Terms remains applicable. Our right to terminate the contract according to </span><span className="c17">Clause 8</span><span className="c3">&nbsp;remains unaffected.</span></li></ol>
+      <h3 className="c8" id="h.1fob9te"><span>2. What do some of the </span><span>capitalized terms mean in the Agreement</span><span className="c4">?</span></h3>
+      <ol className="c5 lst-kix_list_8-0 start" >
+        <li className="c0 li-bullet-0"><span>“Blockchain” means a mathematically secured consensus ledger such as the Ethereum Virtual Machine, an Ethereum Virtual Machine compatible validation mechanism, or other decentralized validation mechanisms.</span></li>
+        <li className="c0 li-bullet-0"><span className="c3">“Transaction” means a change to the data set through a new entry in the continuous Blockchain.</span></li>
+        <li className="c0 li-bullet-0"><span className="c3">“Smart Contract” means a piece of source code deployed as an application on the Blockchain which can be executed, including self-execution of Transactions as well as execution triggered by 3rd parties.</span></li>
+        <li className="c0 li-bullet-0"><span>“Token” means a digital asset transferred in a Transaction, including </span><span>ETH, ERC20, ERC721 and ERC1155 tokens.</span></li>
+        <li className="c0 li-bullet-0"><span className="c3">“Wallet” means a cryptographic storage solution permitting you to store cryptographic assets by correlation of a (i) Public Key and (ii) a Private Key, or a Smart Contract to receive, manage and send Tokens.</span></li>
+        <li className="c0 li-bullet-0"><span className="c3">“Recovery Phrase” means a series of secret words used to generate one or more Private Keys and derived Public Keys.</span></li>
+        <li className="c0 li-bullet-0"><span className="c3">“Public Key” means a unique sequence of numbers and letters within the Blockchain to distinguish the network participants from each other.</span></li>
+        <li className="c0 li-bullet-0"><span className="c3">“Private Key” means a unique sequence of numbers and/or letters required to initiate a Blockchain Transaction and should only be known by the legal owner of the Wallet.</span></li>
       </ol>
-      <h3>2. What do some of the capitalized terms mean in the Agreement?</h3>
-      <ol start={1}>
-        <li>
-          &ldquo;Blockchain&rdquo; means a mathematically secured consensus ledger such as the Ethereum Virtual Machine,
-          an Ethereum Virtual Machine compatible validation mechanism, or other decentralized validation mechanisms.
-        </li>
-        <li>
-          &ldquo;Transaction&rdquo; means a change to the data set through a new entry in the continuous Blockchain.
-        </li>
-        <li>
-          &ldquo;Smart Contract&rdquo; means a piece of source code deployed as an application on the Blockchain which
-          can be executed, including self-execution of Transactions as well as execution triggered by 3rd parties.
-        </li>
-        <li>
-          &ldquo;Token&rdquo; means a digital asset transferred in a Transaction, including ETH, ERC20, ERC721 and
-          ERC1155 tokens.
-        </li>
-        <li>
-          &ldquo;Wallet&rdquo; means a cryptographic storage solution permitting you to store cryptographic assets by
-          correlation of a (i) Public Key and (ii) a Private Key, or a Smart Contract to receive, manage and send
-          Tokens.
-        </li>
-        <li>
-          &ldquo;Recovery Phrase&rdquo; means a series of secret words used to generate one or more Private Keys and
-          derived Public Keys.
-        </li>
-        <li>
-          &ldquo;Public Key&rdquo; means a unique sequence of numbers and letters within the Blockchain to distinguish
-          the network participants from each other.
-        </li>
-        <li>
-          &ldquo;Private Key&rdquo; means a unique sequence of numbers and/or letters required to initiate a Blockchain
-          Transaction and should only be known by the legal owner of the Wallet.
-        </li>
+      <h3 className="c8" id="h.3znysh7"><span className="c4">3. What are the Services offered?</span></h3>
+      <p className="c2"><span className="c3">Our services (“Services”) primarily consist of enabling users to create their Safe Accounts and ongoing interaction with it on the Blockchain.</span></p>
+      <ol className="c5 lst-kix_list_5-0 start">
+        <li className="c0 li-bullet-0"><span className="c3">“Safe Account”</span></li>
       </ol>
-      <h3>3. What are the Services offered?</h3>
-      <p>
-        Our services (&ldquo;Services&rdquo;) primarily consist of enabling users to create their Safe Accounts and
-        ongoing interaction with it on the Blockchain.
-      </p>
-      <ol start={1}>
-        <li>&ldquo;Safe Account&rdquo; </li>
+      <p className="c2"><span>A Safe Account is a modular, self-custodial (i.e. not supervised by us) smart contract-based wallet not provided by BNB Chain. Safe Accounts are </span><span className="c12"><a className="c9" href="https://www.google.com/url?q=https://github.com/safe-global/safe-contracts/&amp;sa=D&amp;source=editors&amp;ust=1699261916940465&amp;usg=AOvVaw19uqhSvtX8vhTRBkB1oXT9">open-source</a></span><span className="c3">&nbsp;released under LGPL-3.0.</span></p>
+      <p className="c2"><span className="c3">Smart contract wallet means, unlike a standard private key Wallet, that access control for authorizing any Transaction is defined in code. An example are multi-signature wallets which require that any Transaction must be signed by a minimum number of signing wallets whereby the specifics of the requirements to authorize a Transaction can be configured in code.</span></p>
+      <p className="c2"><span className="c3">Owners need to connect a signing wallet with a Safe Account. Safe Accounts are compatible inter alia with standard private key Wallets such as hardware wallets, browser extension wallets and mobile wallets that support WalletConnect.</span></p>
+      <ol className="c5 lst-kix_list_15-0 start">
+        <li className="c0 li-bullet-0"><span className="c3">“Safe App”</span></li>
       </ol>
-      <p>
-        A Safe Account is a modular, self-custodial (i.e. not supervised by us) smart contract-based wallet not provided
-        by CC. Safe Accounts are{' '}
-        <Link href="https://github.com/safe-global/safe-contracts/" passHref legacyBehavior>
-          <MUILink target="_blank" rel="noreferrer">
-            open-source
-          </MUILink>
-        </Link>
-        &nbsp;released under LGPL-3.0.
-      </p>
-      <p>
-        Smart contract wallet means, unlike a standard private key Wallet, that access control for authorizing any
-        Transaction is defined in code. An example are multi-signature wallets which require that any Transaction must
-        be signed by a minimum number of signing wallets whereby the specifics of the requirements to authorize a
-        Transaction can be configured in code.{' '}
-      </p>
-      <p>
-        Owners need to connect a signing wallet with a Safe Account. Safe Accounts are compatible inter alia with
-        standard private key Wallets such as hardware wallets, browser extension wallets and mobile wallets that support
-        WalletConnect.
-      </p>
-      <ol start={2}>
-        <li>&ldquo;Safe App&rdquo;</li>
+      <p className="c2"><span>You may access Safe Accounts using the BNB Safe{Wallet} web app, mobile app for iOS and android, or the browser extension (each a “Safe App”). The Safe App may be used to manage your personal digital assets on BNB</span><span>&nbsp;and other common EVM chains</span><span className="c3">&nbsp;when you connect a Safe Account with third-party services (as defined below). The Safe App provides certain features that may be amended from time to time.</span></p>
+      <ol className="c5 lst-kix_list_12-0 start">
+        <li className="c0 li-bullet-0"><span className="c3">“Third-Party Safe Apps”</span></li>
       </ol>
-      <p>
-        You may access Safe Accounts using the {'BNB Safe{Wallet}'} web app, mobile app for iOS and android, or the
-        browser extension&nbsp;(each a &ldquo;Safe App&rdquo;). The Safe App may be used to manage your personal digital
-        assets on Ethereum and other common EVM chains when you connect a Safe Account with third-party&nbsp;services
-        (as defined below). The Safe App provides certain features that may be amended from time to time.{' '}
-      </p>
-      <ol start={3}>
-        <li>&ldquo;Third-Party&nbsp;Safe Apps&rdquo;</li>
+      <h3 className="c8" id="h.3znysh7"><span className="c4">3. What are the Services offered?</span></h3>
+      <p className="c2"><span className="c3">Our services (“Services”) primarily consist of enabling users to create their Safe Accounts and ongoing interaction with it on the Blockchain.</span></p>
+      <ol className="c5 lst-kix_list_5-0 start">
+        <li className="c0 li-bullet-0"><span className="c3">“Safe Account”</span></li>
       </ol>
-      <p>
-        The Safe App allows you to connect Safe Accounts to third-party decentralized applications
-        (&ldquo;Third-Party&nbsp;Safe Apps&rdquo;) and use third-party&nbsp;services such as from the decentralized
-        finance sector, DAO Tools or services related to NFTs (&ldquo;Third-Party&nbsp;Services&quot;). The
-        Third-Party&nbsp;Safe Apps are integrated in the user interface of the Safe App via inline framing. The provider
-        of the Third-Party&nbsp;Safe App and related Third-Party Service is responsible for the operation of the service
-        and the correctness, completeness and actuality of any information provided therein. We make a pre-selection of
-        Third-Party&nbsp;Safe Apps that we show in the Safe App. However, we only perform a rough triage in advance for
-        obvious problems and functionality in terms of loading time and resolution capability of the transactions.
-        Accordingly, in the event of any (technical) issues concerning the Third-Party Services, the user must only
-        contact the respective service provider directly. The terms of service, if any, shall be governed by the
-        applicable contractual provisions between the User and the respective provider of the Third-Party&nbsp;Service.
-        Accordingly, we are not liable in the event of a breach of contract, damage or loss related to the use of such
-        Third-Party Service.
-      </p>
-      <h3>4. What do the Services not consist of?</h3>
-      <p>Our Services do not&nbsp;consist of:</p>
-      <ol start={1}>
-        <li>
-          activity regulated by the Federal Financial Supervisory Authority (BaFin) or any other regulatory agency in
-          any jurisdiction;
-        </li>
-        <li>coverage underwritten by any regulatory agency&rsquo;s compensation scheme;</li>
-        <li>
-          custody of your Recovery Phrase, Private Keys, Tokens or the ability to remove or freeze your Tokens, i.e. a
-          Safe Account is a self-custodial wallet;
-        </li>
-        <li>the storage or transmission of fiat currencies;</li>
-        <li>
-          back-up services to recover your Recovery Phrase or Private Keys, for whose safekeeping you are solely
-          responsible; CC has no means to recover your access to your Tokens, when you lose access to your Safe Account;
-        </li>
-        <li>
-          any form of legal, financial, investment, accounting, tax or other professional advice regarding Transactions
-          and their suitability to you;{' '}
-        </li>
-        <li>
-          the responsibility to monitor authorized Transactions or to check the correctness or completeness of
-          Transactions before you are authorizing them.
-        </li>
+      <p className="c2"><span>A Safe Account is a modular, self-custodial (i.e. not supervised by us) smart contract-based wallet not provided by BNB Chain. Safe Accounts are </span><span className="c12"><a className="c9" href="https://www.google.com/url?q=https://github.com/safe-global/safe-contracts/&amp;sa=D&amp;source=editors&amp;ust=1699261916940465&amp;usg=AOvVaw19uqhSvtX8vhTRBkB1oXT9">open-source</a></span><span className="c3">&nbsp;released under LGPL-3.0.</span></p>
+      <p className="c2"><span className="c3">Smart contract wallet means, unlike a standard private key Wallet, that access control for authorizing any Transaction is defined in code. An example are multi-signature wallets which require that any Transaction must be signed by a minimum number of signing wallets whereby the specifics of the requirements to authorize a Transaction can be configured in code.</span></p>
+      <p className="c2"><span className="c3">Owners need to connect a signing wallet with a Safe Account. Safe Accounts are compatible inter alia with standard private key Wallets such as hardware wallets, browser extension wallets and mobile wallets that support WalletConnect.</span></p>
+      <ol className="c5 lst-kix_list_15-0 start">
+        <li className="c0 li-bullet-0"><span className="c3">“Safe App”</span></li>
       </ol>
-      <h3>5. What do you need to know about Third-Party Services?</h3>
-      <ol start={1}>
-        <li>
-          We provide you the possibility to interact with your Safe Account through&nbsp;Third-Party Services. Any
-          activities you engage in with, or services you receive from a third party is between you and that third party
-          directly. The conditions of service provisions, if any, shall be governed by the applicable contractual
-          provisions between you and the respective provider of the Third-Party Service.{' '}
-        </li>
-        <li>
-          The Services rely in part on third-party and open-source software, including the Blockchain, and the continued
-          development and support by third parties. There is no assurance or guarantee that those third parties will
-          maintain their support of their software or that open-source software will continue to be maintained. This may
-          have a material adverse effect on the Services.
-        </li>
-        <li>This means specifically:</li>
+      <p className="c2"><span>You may access Safe Accounts using the BNB Safe{Wallet} web app, mobile app for iOS and android, or the browser extension (each a “Safe App”). The Safe App may be used to manage your personal digital assets on BNB</span><span>&nbsp;and other common EVM chains</span><span className="c3">&nbsp;when you connect a Safe Account with third-party services (as defined below). The Safe App provides certain features that may be amended from time to time.</span></p>
+      <ol className="c5 lst-kix_list_12-0 start">
+        <li className="c0 li-bullet-0"><span className="c3">“Third-Party Safe Apps”</span></li>
       </ol>
-      <ul>
-        <li>
-          We do not have any oversight over your activities with Third-Party&nbsp;Services especially by using
-          Third-Party&nbsp;Safe Apps, and therefore we do not and cannot make any representation regarding their
-          appropriateness and suitability for you.
-        </li>
-        <li>
-          Third-Party&nbsp;Services are not hosted, owned, controlled or maintained by us. We also do not participate in
-          the Transaction and will not and cannot monitor, verify, censor or edit the functioning or content of any
-          Third-Party Service.
-        </li>
-        <li>
-          We have not conducted any security audit, bug bounty or formal verification (whether internal or external) of
-          the Third-Party Services.
-        </li>
-        <li>
-          We have no control over, do not recommend, endorse, or otherwise take a position on the integrity, functioning
-          of, content and your use of Third-Party&nbsp;Services, whose sole responsibility lies with the person from
-          whom such services or content originated.
-        </li>
-        <li>
-          When you access or use Third-Party&nbsp;Services you accept that there are risks in doing so and that you
-          alone assume any such risks when choosing to interact with them. We are not liable for any errors or omissions
-          or for any damages or loss you might suffer through interacting with those Third-Party&nbsp;Services, such as
-          Third-Party&nbsp;Safe Apps.
-        </li>
-        <li>
-          You know of the inherent risks of cryptographic and Blockchain-based systems and the high volatility of Token
-          markets. Transactions undertaken in the Blockchain are irrevocable and irreversible and there is no
-          possibility to refund Token that have been deployed.
-        </li>
-        <li>
-          You should read the license requirements, terms and conditions as well as privacy policy of each
-          Third-Party&nbsp;Service that you access or use. Certain Third-Party&nbsp;Services may involve complex
-          Transactions that entail a high degree of risk.
-        </li>
-        <li>
-          If you contribute integrations to Third-Party&nbsp;Services, you are responsible for all content you
-          contribute, in any manner, and you must have all rights necessary to do so, in the manner in which you
-          contribute it. You are responsible for all your activity in connection with any such Third-Party&nbsp;Service.{' '}
-        </li>
-        <li>
-          Your interactions with persons found on or through the Third-Party&nbsp;Service, including payment and
-          delivery of goods and services, financial transactions, and any other terms associated with such dealings, are
-          solely between you and such persons. You agree that we shall not be responsible or liable for any loss or
-          damage of any sort incurred as the result of any such dealings.
-        </li>
-        <li>
-          If there is a dispute between you and the Third-Party&nbsp;Service provider or/and other users of the
-          Third-Party&nbsp;Service, you agree that we are under no obligation to become involved. In the event that you
-          have a dispute with one or more other users, you release us, our officers, employees, agents, contractors and
-          successors from claims, demands, and damages of every kind or nature, known or unknown, suspected or
-          unsuspected, disclosed or undisclosed, arising out of or in any way related to such disputes and/or our
-          Services.
-        </li>
+      <p className="c2"><span>The Safe App allows you to connect Safe Accounts to third-party decentralized applications (“Third-Party Safe Apps”) and use third-party services such as from the decentralized finance sector, DAO Tools or services related to NFTs (“Third-Party Services&quot;). The Third-Party Safe Apps are integrated in the user interface of the Safe App via inline framing. The provider of the Third-Party Safe App and related Third-Party Service is responsible for the operation of the service and the correctness, completeness and actuality of any information provided therein. We make a pre-selection of Third-Party Safe Apps that we show in the Safe App. </span><span>However, we only perform a rough triage in advance for obvious problems and functionality in terms of loading time and resolution capability of the transactions. Accordingly, in the event of any (technical) issues concerning the Third-Party Services, the user must only contact the respective service provider directly.</span><sup><a href="#cmnt1" id="cmnt_ref1">[a]</a></sup><span className="c3">&nbsp;The terms of service, if any, shall be governed by the applicable contractual provisions between the User and the respective provider of the Third-Party Service. Accordingly, we are not liable in the event of a breach of contract, damage or loss related to the use of such Third-Party Service.</span></p>
+      <h3 className="c8" id="h.2et92p0"><span className="c4">4. What do the Services not consist of?</span></h3>
+      <ol className="c5 lst-kix_list_18-0 start">
+        <li className="c0 li-bullet-0"><span className="c3">activity regulated by the Federal Financial Supervisory Authority (BaFin) or any other regulatory agency in any jurisdiction;</span></li>
+        <li className="c0 li-bullet-0"><span className="c3">coverage underwritten by any regulatory agency’s compensation scheme;</span></li>
+        <li className="c0 li-bullet-0"><span className="c3">custody of your Recovery Phrase, Private Keys, Tokens or the ability to remove or freeze your Tokens, i.e. a Safe Account is a self-custodial wallet;</span></li>
+        <li className="c0 li-bullet-0"><span className="c3">the storage or transmission of fiat currencies;</span></li>
+        <li className="c0 li-bullet-0"><span className="c3">back-up services to recover your Recovery Phrase or Private Keys, for whose safekeeping you are solely responsible; BNB Chain has no means to recover your access to your Tokens, when you lose access to your Safe Account;</span></li>
+        <li className="c0 li-bullet-0"><span className="c3">any form of legal, financial, investment, accounting, tax or other professional advice regarding Transactions and their suitability to you;</span></li>
+        <li className="c0 li-bullet-0"><span className="c3">the responsibility to monitor authorized Transactions or to check the correctness or completeness of Transactions before you are authorizing them.</span></li>
+      </ol>
+      <h3 className="c8" id="h.tyjcwt"><span className="c4">5. What do you need to know about Third-Party Services?</span></h3>
+      <ol className="c5 lst-kix_list_9-0 start">
+        <li className="c0 li-bullet-0"><span className="c3">We provide you the possibility to interact with your Safe Account through Third-Party Services. Any activities you engage in with, or services you receive from a third party is between you and that third party directly. The conditions of service provisions, if any, shall be governed by the applicable contractual provisions between you and the respective provider of the Third-Party Service.</span></li>
+        <li className="c0 li-bullet-0"><span className="c3">The Services rely in part on third-party and open-source software, including the Blockchain, and the continued development and support by third parties. There is no assurance or guarantee that those third parties will maintain their support of their software or that open-source software will continue to be maintained. This may have a material adverse effect on the Services.</span></li>
+        <li className="c0 li-bullet-0"><span className="c3">This means specifically:</span></li>
+      </ol>
+      <ul className="c5 lst-kix_list_16-0 start">
+        <li className="c0 li-bullet-0"><span className="c3">We do not have any oversight over your activities with Third-Party Services especially by using Third-Party Safe Apps, and therefore we do not and cannot make any representation regarding their appropriateness and suitability for you.</span></li>
+        <li className="c0 li-bullet-0"><span className="c3">Third-Party Services are not hosted, owned, controlled or maintained by us. We also do not participate in the Transaction and will not and cannot monitor, verify, censor or edit the functioning or content of any Third-Party Service.</span></li>
+        <li className="c0 li-bullet-0"><span className="c3">We have not conducted any security audit, bug bounty or formal verification (whether internal or external) of the Third-Party Services.</span></li>
+        <li className="c0 li-bullet-0"><span className="c3">We have no control over, do not recommend, endorse, or otherwise take a position on the integrity, functioning of, content and your use of Third-Party Services, whose sole responsibility lies with the person from whom such services or content originated.</span></li>
+        <li className="c0 li-bullet-0"><span className="c3">When you access or use Third-Party Services you accept that there are risks in doing so and that you alone assume any such risks when choosing to interact with them. We are not liable for any errors or omissions or for any damages or loss you might suffer through interacting with those Third-Party Services, such as Third-Party Safe Apps.</span></li>
+        <li className="c0 li-bullet-0"><span className="c3">You know of the inherent risks of cryptographic and Blockchain-based systems and the high volatility of Token markets. Transactions undertaken in the Blockchain are irrevocable and irreversible and there is no possibility to refund Token that have been deployed.</span></li>
+        <li className="c0 li-bullet-0"><span className="c3">You should read the license requirements, terms and conditions as well as privacy policy of each Third-Party Service that you access or use. Certain Third-Party Services may involve complex Transactions that entail a high degree of risk.</span></li>
+        <li className="c0 li-bullet-0"><span className="c3">If you contribute integrations to Third-Party Services, you are responsible for all content you contribute, in any manner, and you must have all rights necessary to do so, in the manner in which you contribute it. You are responsible for all your activity in connection with any such Third-Party Service.</span></li>
+        <li className="c0 li-bullet-0"><span className="c3">Your interactions with persons found on or through the Third-Party Service, including payment and delivery of goods and services, financial transactions, and any other terms associated with such dealings, are solely between you and such persons. You agree that we shall not be responsible or liable for any loss or damage of any sort incurred as the result of any such dealings.</span></li>
+        <li className="c0 li-bullet-0"><span className="c3">If there is a dispute between you and the Third-Party Service provider or/and other users of the Third-Party Service, you agree that we are under no obligation to become involved. In the event that you have a dispute with one or more other users, you release us, our officers, employees, agents, contractors and successors from claims, demands, and damages of every kind or nature, known or unknown, suspected or unsuspected, disclosed or undisclosed, arising out of or in any way related to such disputes and/or our Services.</span></li>
       </ul>
-      <h3>6. What are the fees for the Services?</h3>
-      <ol start={1}>
-        <li>
-          The use of the Safe App or Third-Party&nbsp;Safe Apps may cause fees, including network fees, as indicated in
-          the respective app. CC has no control over the fees charged by the Third-Party Services. CC may change its own
-          fees at any time. Price changes will be communicated to the User in due time before taking effect.
-        </li>
-        <li>
-          The User is only entitled to offset and/or assert rights of retention if his counterclaims are legally
-          established, undisputed or recognized by CC.
-        </li>
+      <h3 className="c8" id="h.3dy6vkm"><span className="c4">6. What are the fees for the Services?</span></h3>
+      <ol className="c5 lst-kix_list_17-0 start">
+        <li className="c0 li-bullet-0"><span className="c3">The use of the Safe App or Third-Party Safe Apps may cause fees, including network fees, as indicated in the respective app. BNB Chain has no control over the fees charged by the Third-Party Services. BNB Chain may change its own fees at any time. Price changes will be communicated to the User in due time before taking effect.</span></li>
+        <li className="c0 li-bullet-0"><span className="c3">The User is only entitled to offset and/or assert rights of retention if his counterclaims are legally established, undisputed or recognized by BNB Chain.</span></li>
       </ol>
-      <h3>7. Are we responsible for the security of your Private Keys, Recovery Phrase or other credentials?</h3>
-      <ol start={1}>
-        <li>
-          We shall not be responsible&nbsp;to secure your Private Keys, Recovery Phrase, credentials or other means of
-          authorization of your wallet(s).
-        </li>
-        <li>
-          You must own and control any wallet you use in connection with our Services. You are responsible for
-          implementing all appropriate measures for securing any wallet you use, including any Private Key(s), Recovery
-          Phrase, credentials or other means of authorization necessary to access such storage mechanism(s).
-        </li>
-        <li>
-          We exclude any and all liability for any security breaches or other acts or omissions, which result in your
-          loss of access or custody of any cryptographic assets stored thereon.
-        </li>
+      <h3 className="c8" id="h.1t3h5sf"><span className="c4">7. Are we responsible for the security of your Private Keys, Recovery Phrase or other credentials?</span></h3>
+      <ol className="c5 lst-kix_list_3-0 start">
+        <li className="c0 li-bullet-0"><span className="c3">We shall not be responsible to secure your Private Keys, Recovery Phrase, credentials or other means of authorization of your wallet(s).</span></li>
+        <li className="c0 li-bullet-0"><span className="c3">You must own and control any wallet you use in connection with our Services. You are responsible for implementing all appropriate measures for securing any wallet you use, including any Private Key(s), Recovery Phrase, credentials or other means of authorization necessary to access such storage mechanism(s).</span></li>
+        <li className="c0 li-bullet-0"><span className="c3">We exclude any and all liability for any security breaches or other acts or omissions, which result in your loss of access or custody of any cryptographic assets stored thereon.</span></li>
       </ol>
-      <h3>8. Can we terminate or limit your right to use our Services?</h3>
-      <ol start={1}>
-        <li>
-          We may terminate the Agreement and refuse access to the Safe&nbsp;Apps at any time giving 30 days&rsquo; prior
-          notice. The right of the parties to terminate the Agreement for cause remains unaffected. In case of our
-          termination of the Agreement, you may no longer access your Safe Account via our Services. However, you may
-          continue to access your Safe Account and any Tokens via a third-party wallet provider using your Recovery
-          Phrase and Private Keys.
-        </li>
-        <li>
-          We reserve the right to limit the use of the Safe&nbsp;Apps to a specified number of Users if necessary to
-          protect or ensure the stability and integrity of the Services. We will only be able to limit access to the
-          Services. At no time will we be able to limit or block access to or transfer your funds without your consent.
-        </li>
+      <h3 className="c8" id="h.4d34og8"><span className="c4">8. Can we terminate or limit your right to use our Services?</span></h3>
+      <ol className="c5 lst-kix_list_13-0 start">
+        <li className="c0 li-bullet-0"><span>We may terminate the Agreement and refuse access to the Safe Apps at any time giving 30 days’ prior notice</span><span className="c3">. The right of the parties to terminate the Agreement for cause remains unaffected. In case of our termination of the Agreement, you may no longer access your Safe Account via our Services. However, you may continue to access your Safe Account and any Tokens via a third-party wallet provider using your Recovery Phrase and Private Keys.</span></li>
+        <li className="c0 li-bullet-0"><span className="c3">We reserve the right to limit the use of the Safe Apps to a specified number of Users if necessary to protect or ensure the stability and integrity of the Services. We will only be able to limit access to the Services. At no time will we be able to limit or block access to or transfer your funds without your consent.</span></li>
       </ol>
-      <h3>9. Can you terminate your Agreement with us?</h3>
-      <p>You may terminate the Agreement at any time without notice.</p>
-      <h3>10. What licenses and access do we grant to you?</h3>
-      <ol start={1}>
-        <li>
-          All intellectual property rights in Safe Accounts and the Services throughout the world belong to us as owner
-          or our licensors. Nothing in these Terms gives you any rights in respect of any intellectual property owned by
-          us or our licensors and you acknowledge that you do not acquire any ownership rights by downloading the Safe
-          App or any content from the Safe App.
-        </li>
-        <li>
-          If you are a consumer we grant you a simple, limited license, but do not sell, to you the Services you
-          download solely for your own personal, non-commercial use.{' '}
-        </li>
+      <h3 className="c8" id="h.2s8eyo1"><span className="c4">9. Can you terminate your Agreement with us?</span></h3>
+      <p className="c2"><span className="c3">You may terminate the Agreement at any time without notice.</span></p>
+      <h3 className="c8" id="h.17dp8vu"><span className="c4">10. What licenses and access do we grant to you?</span></h3>
+      <ol className="c5 lst-kix_list_14-0 start">
+        <li className="c0 li-bullet-0"><span className="c3">All intellectual property rights in Safe Accounts and the Services throughout the world belong to us as owner or our licensors. Nothing in these Terms gives you any rights in respect of any intellectual property owned by us or our licensors and you acknowledge that you do not acquire any ownership rights by downloading the Safe App or any content from the Safe App.</span></li>
+        <li className="c0 li-bullet-0"><span className="c3">If you are a consumer we grant you a simple, limited license, but do not sell, to you the Services you download solely for your own personal, non-commercial use.</span></li>
       </ol>
-      <h3>11. What can you expect from the Services and can we make changes to them?</h3>
-      <ol start={1}>
-        <li>
-          Without limiting your mandatory warranties, we provide the Services to you &ldquo;as is&rdquo; and &ldquo;as
-          available&rdquo; in relation to merchantability, fitness for a particular purpose, availability, security,
-          title or non-infringement.{' '}
-        </li>
-        <li>
-          If you use the Safe App via web browser, the strict liability of CC for damages (sec. 536a German Civil Code)
-          for defects existing at the time of conclusion of the contract is precluded.{' '}
-        </li>
-        <li>The foregoing provisions will not limit CC&rsquo;s liability as defined in Clause 13. </li>
-        <li>
-          We reserve the right to change the format and features of the Services by making any updates to Services
-          available for you to download or, where your device settings permit it, by automatic delivery of updates.
-        </li>
-        <li>
-          You are not obliged to download the updated Services, but we may cease to provide and/or update prior versions
-          of the Services and, depending on the nature of the update, in some circumstances you may not be able to
-          continue using the Services until you have downloaded the updated version.
-        </li>
-        <li>
-          We may cease to provide and/or update content to the Services, with or without notice to you, if it improves
-          the Services we provide to you, or we need to do so for security, legal or any other reasons.
-        </li>
+      <h3 className="c8" id="h.3rdcrjn"><span className="c4">11. What can you expect from the Services and can we make changes to them?</span></h3>
+      <ol className="c5 lst-kix_list_19-0 start">
+        <li className="c0 li-bullet-0"><span className="c3">Without limiting your mandatory warranties, we provide the Services to you “as is” and “as available” in relation to merchantability, fitness for a particular purpose, availability, security, title or non-infringement.</span></li>
+        <li className="c0 li-bullet-0"><span className="c3">If you use the Safe App via web browser, the strict liability of BNB Chain for damages (sec. 536a German Civil Code) for defects existing at the time of conclusion of the contract is precluded.</span></li>
+        <li className="c0 li-bullet-0"><span className="c3">The foregoing provisions will not limit BNB Chain’s liability as defined in Clause 13.</span></li>
+        <li className="c0 li-bullet-0"><span className="c3">We reserve the right to change the format and features of the Services by making any updates to Services available for you to download or, where your device settings permit it, by automatic delivery of updates.</span></li>
+        <li className="c0 li-bullet-0"><span className="c3">You are not obliged to download the updated Services, but we may cease to provide and/or update prior versions of the Services and, depending on the nature of the update, in some circumstances you may not be able to continue using the Services until you have downloaded the updated version.</span></li>
+        <li className="c0 li-bullet-0"><span className="c3">We may cease to provide and/or update content to the Services, with or without notice to you, if it improves the Services we provide to you, or we need to do so for security, legal or any other reasons.</span></li>
       </ol>
-      <h3>12. What do you agree, warrant and represent?</h3>
-      <p>By using our Services you hereby agree, represent and warrant that:</p>
-      <ol start={1}>
-        <li>
-          You are not a citizen, resident, or member of any jurisdiction or group that is subject to economic sanctions
-          by the European Union or the United States or any other relevant jurisdiction.
-        </li>
-        <li>
-          You do not appear on HMT Sanctions List, the U.S. Treasury Department&rsquo;s Office of Foreign Asset
-          Control&rsquo;s sanctions lists, the U.S. commerce department&apos;s consolidated screening list, the EU
-          consolidated list of persons, groups or entities subject to EU Financial Sanctions, nor do you act on behalf
-          of a person sanctioned thereunder.
-        </li>
-        <li>You have read and understood these Terms and agree to be bound by its terms.</li>
-        <li>
-          Your usage of our Services is legal under the laws of your jurisdiction or under the laws of any other
-          jurisdiction to which you may be subject.
-        </li>
-        <li>
-          You won&rsquo;t use the Services or interact with the Services in a manner that violates any law or
-          regulation, including, without limitation, any applicable export control laws.
-        </li>
-        <li>
-          You understand the functionality, usage, storage, transmission mechanisms and intricacies associated with
-          Tokens as well as wallet (including Safe Account) and Blockchains.
-        </li>
-        <li>
-          You understand that Transactions on the Blockchain are irreversible and may not be erased and that your Safe
-          Account address and Transactions are displayed permanently and publicly.
-        </li>
-        <li>
-          You will comply with any applicable tax obligations in your jurisdiction arising from your use of the
-          Services.
-        </li>
-        <li>
-          You will not misuse or gain unauthorized access to our Services by knowingly introducing viruses, cross-site
-          scripting, Trojan horses, worms, time-bombs, keystroke loggers, spyware, adware or any other harmful programs
-          or similar computer code designed to adversely affect our Services and that in the event you do so or
-          otherwise attack our Services, we reserve the right to report any such activity to the relevant law
-          enforcement authorities and we will cooperate with those authorities as required.
-        </li>
-        <li>
-          You won&rsquo;t access without authority, interfere with, damage or disrupt any part of our Services, any
-          equipment or network on which our Services is stored, any software used in the provision of our Services or
-          any equipment or network or software owned or used by any third party.
-        </li>
-        <li>
-          You won&rsquo;t use our Services for activities that are unlawful or fraudulent or have such purpose or effect
-          or otherwise support any activities that breach applicable local, national or international law or
-          regulations.
-        </li>
-        <li>
-          You won&rsquo;t use our Services to store, trade or transmit Tokens that are proceeds of criminal or
-          fraudulent activity.
-        </li>
-        <li>
-          You understand that the Services and the underlying Blockchain are in an early development stage and we
-          accordingly do not guarantee an error-free process and give no price or liquidity guarantee.
-        </li>
-        <li>You are using the Services at your own risk.</li>
+      <h3 className="c8" id="h.26in1rg"><span className="c4">12. What do you agree, warrant and represent?</span></h3>
+      <p className="c2"><span className="c3">By using our Services you hereby agree, represent and warrant that:</span></p>
+      <ol className="c5 lst-kix_list_21-0 start">
+        <li className="c0 li-bullet-0"><span className="c3">You are not a citizen, resident, or member of any jurisdiction or group that is subject to economic sanctions by the European Union or the United States or any other relevant jurisdiction.</span></li>
+        <li className="c0 li-bullet-0"><span className="c3">You do not appear on HMT Sanctions List, the U.S. Treasury Department’s Office of Foreign Asset Control’s sanctions lists, the U.S. commerce department's consolidated screening list, the EU consolidated list of persons, groups or entities subject to EU Financial Sanctions, nor do you act on behalf of a person sanctioned thereunder.</span></li>
+        <li className="c0 li-bullet-0"><span className="c3">You have read and understood these Terms and agree to be bound by its terms.</span></li>
+        <li className="c0 li-bullet-0"><span className="c3">Your usage of our Services is legal under the laws of your jurisdiction or under the laws of any other jurisdiction to which you may be subject.</span></li>
+        <li className="c0 li-bullet-0"><span className="c3">You won’t use the Services or interact with the Services in a manner that violates any law or regulation, including, without limitation, any applicable export control laws.</span></li>
+        <li className="c0 li-bullet-0"><span className="c3">You understand the functionality, usage, storage, transmission mechanisms and intricacies associated with Tokens as well as wallet (including Safe Account) and Blockchains.</span></li>
+        <li className="c0 li-bullet-0"><span className="c3">You understand that Transactions on the Blockchain are irreversible and may not be erased and that your Safe Account address and Transactions are displayed permanently and publicly.</span></li>
+        <li className="c0 li-bullet-0"><span className="c3">You will comply with any applicable tax obligations in your jurisdiction arising from your use of the Services.</span></li>
+        <li className="c0 li-bullet-0"><span className="c3">You will not misuse or gain unauthorized access to our Services by knowingly introducing viruses, cross-site scripting, Trojan horses, worms, time-bombs, keystroke loggers, spyware, adware or any other harmful programs or similar computer code designed to adversely affect our Services and that in the event you do so or otherwise attack our Services, we reserve the right to report any such activity to the relevant law enforcement authorities and we will cooperate with those authorities as required.</span></li>
+        <li className="c0 li-bullet-0"><span className="c3">You won’t access without authority, interfere with, damage or disrupt any part of our Services, any equipment or network on which our Services is stored, any software used in the provision of our Services or any equipment or network or software owned or used by any third party.</span></li>
+        <li className="c0 li-bullet-0"><span className="c3">You won’t use our Services for activities that are unlawful or fraudulent or have such purpose or effect or otherwise support any activities that breach applicable local, national or international law or regulations.</span></li>
+        <li className="c0 li-bullet-0"><span className="c3">You won’t use our Services to store, trade or transmit Tokens that are proceeds of criminal or fraudulent activity.</span></li>
+        <li className="c0 li-bullet-0"><span className="c3">You understand that the Services and the underlying Blockchain are in an early development stage and we accordingly do not guarantee an error-free process and give no price or liquidity guarantee.</span></li>
+        <li className="c0 li-bullet-0"><span className="c3">You are using the Services at your own risk.</span></li>
       </ol>
-      <h3>13. What about our liability to you?</h3>
-      <p>We are liable to you only as follows:</p>
-      <ol start={1}>
-        <li>We are liable for damages, in any case of negligence, resulting from injury to life, body or health.</li>
-        <li>
-          We are liable for damages &ndash; regardless of the legal grounds &ndash; in the event of intent and gross
-          negligence on our part, our legal representatives, our executive employees or other vicarious agents.
-        </li>
-        <li>
-          If we do not provide the Safe App or Services to you free of charge, we are liable in case of simple
-          negligence for damages resulting from the breach of an essential contractual duty (e.g. a duty, the
-          performance of which enables the proper execution of the contract in the first place and on the compliance of
-          which the contractual partner regularly relies and may rely), whereby in the latter case of breach of an
-          essential contractual duty, our liability shall be limited to compensation of the foreseeable, typically
-          occurring damage.
-        </li>
-        <li>
-          The limitations of liability according to Clause 13.2 do not apply as far as we have assumed a guarantee or we
-          have fraudulently concealed a defect in the Services. These limitations of liability also do not apply to your
-          claims according to the Product Liability Act (&rdquo;Produkthaftungsgesetz&rdquo;) and any applicable data
-          privacy laws.
-        </li>
-        <li>
-          If you suffer damages from the loss of data, we are not liable for this, as far as the damages would have been
-          avoided by your regular and complete backup of all relevant data.
-        </li>
-        <li>
-          We take all possible measures to enable you to access our Services. In the event of disruptions to the
-          technical infrastructure, the internet connection or a relevant blockchain, we shall be exempt from our
-          obligation to perform. This also applies if we are prevented from performing due to force majeure or other
-          circumstances, the elimination of which is not possible or cannot be economically expected of CC.
-        </li>
+      <h3 className="c8" id="h.lnxbz9"><span className="c4">13. What about our liability to you?</span></h3>
+      <p className="c2"><span className="c3">We are liable to you only as follows:</span></p>
+      <ol className="c5 lst-kix_list_20-0 start">
+        <li className="c0 li-bullet-0"><span className="c3">We are liable for damages, in any case of negligence, resulting from injury to life, body or health.</span></li>
+        <li className="c0 li-bullet-0"><span className="c3">We are liable for damages – regardless of the legal grounds – in the event of intent and gross negligence on our part, our legal representatives, our executive employees or other vicarious agents.</span></li>
+        <li className="c0 li-bullet-0"><span className="c3">If we do not provide the Safe App or Services to you free of charge, we are liable in case of simple negligence for damages resulting from the breach of an essential contractual duty (e.g. a duty, the performance of which enables the proper execution of the contract in the first place and on the compliance of which the contractual partner regularly relies and may rely), whereby in the latter case of breach of an essential contractual duty, our liability shall be limited to compensation of the foreseeable, typically occurring damage.</span></li>
+        <li className="c0 li-bullet-0"><span className="c3">The limitations of liability according to Clause 13.2 do not apply as far as we have assumed a guarantee or we have fraudulently concealed a defect in the Services. These limitations of liability also do not apply to your claims according to any applicable data privacy laws.</span></li>
+        <li className="c0 li-bullet-0"><span className="c3">If you suffer damages from the loss of data, we are not liable for this, as far as the damages would have been avoided by your regular and complete backup of all relevant data.</span></li>
+        <li className="c0 li-bullet-0"><span className="c3">We take all possible measures to enable you to access our Services. In the event of disruptions to the technical infrastructure, the internet connection or a relevant blockchain, we shall be exempt from our obligation to perform. This also applies if we are prevented from performing due to force majeure or other circumstances, the elimination of which is not possible or cannot be economically expected of BNB Chain.</span></li>
       </ol>
-      <h3>14. What about viruses, bugs and security vulnerabilities?</h3>
-      <ol start={1}>
-        <li>We endeavor to provide our Service free from material bugs, security vulnerabilities or viruses.</li>
-        <li>
-          You are responsible for configuring your information technology and computer programmes to access our Services
-          and to use your own virus protection software.
-        </li>
-        <li>If you become aware of any exploits, bugs or vulnerabilities, please inform bounty@safe.global.</li>
-        <li>
-          You must not misuse our Services by knowingly introducing material that is malicious or technologically
-          harmful. If you do, your right to use our Services will cease immediately.
-        </li>
+      <h3 className="c8" id="h.35nkun2"><span className="c4">14. What about viruses, bugs and security vulnerabilities?</span></h3>
+      <ol className="c5 lst-kix_list_7-0 start">
+        <li className="c0 li-bullet-0"><span className="c3">We endeavor to provide our Service free from material bugs, security vulnerabilities or viruses.</span></li>
+        <li className="c0 li-bullet-0"><span className="c3">You are responsible for configuring your information technology and computer programmes to access our Services and to use your own virus protection software.</span></li>
+        <li className="c0 li-bullet-0"><span className="c3">If you become aware of any exploits, bugs or vulnerabilities, please inform bounty@safe.global.</span></li>
+        <li className="c0 li-bullet-0"><span className="c3">You must not misuse our Services by knowingly introducing material that is malicious or technologically harmful. If you do, your right to use our Services will cease immediately.</span></li>
       </ol>
-      <h3>15. What if an event outside our control happens that affects our Services?</h3>
-      <ol start={1}>
-        <li>
-          We may update and change our Services from time to time. We may suspend or withdraw or restrict the
-          availability of all or any part of our Services for business, operational or regulatory reasons or because of
-          a Force Majeure Event at no notice.
-        </li>
-        <li>
-          A &ldquo;Force Majeure Event&rdquo; shall mean any event, circumstance or cause beyond our reasonable control,
-          which prevents, hinders or delays the provision of our Services or makes their provision impossible or
-          onerous, including, without limitation:
-        </li>
+      <h3 className="c8" id="h.1ksv4uv"><span className="c4">15. What if an event outside our control happens that affects our Services?</span></h3>
+      <ol className="c5 lst-kix_list_10-0 start">
+        <li className="c0 li-bullet-0"><span className="c3">We may update and change our Services from time to time. We may suspend or withdraw or restrict the availability of all or any part of our Services for business, operational or regulatory reasons or because of a Force Majeure Event at no notice.</span></li>
+        <li className="c0 li-bullet-0"><span className="c3">A “Force Majeure Event” shall mean any event, circumstance or cause beyond our reasonable control, which prevents, hinders or delays the provision of our Services or makes their provision impossible or onerous, including, without limitation:</span></li>
       </ol>
-      <ul>
-        <li>acts of God, flood, storm, drought, earthquake or other natural disaster;</li>
-        <li>epidemic or pandemic (for the avoidance of doubt, including the 2020 Coronavirus Pandemic);</li>
-        <li>
-          terrorist attack, hacking or cyber threats, civil war, civil commotion or riots, war, threat of or preparation
-          for war, armed conflict, imposition of sanctions, embargo, or breaking off of diplomatic relations;
-        </li>
-        <li>
-          equipment or software malfunction or bugs including network splits or forks or unexpected changes in the
-          Blockchain, as well as hacks, phishing attacks, distributed denials of service or any other security attacks;
-        </li>
-        <li>nuclear, chemical or biological contamination;</li>
-        <li>
-          any law statutes, ordinances, rules, regulations, judgments, injunctions, orders and decrees or any action
-          taken by a government or public authority, including without limitation imposing a prohibition, or failing to
-          grant a necessary license or consent;
-        </li>
-        <li>collapse of buildings, breakdown of plant or machinery, fire, explosion or accident; and</li>
-        <li>strike, industrial action or lockout.</li>
+      <ul className="c5 lst-kix_list_6-0 start">
+        <li className="c0 li-bullet-0"><span className="c3">acts of God, flood, storm, drought, earthquake or other natural disaster;</span></li>
+        <li className="c0 li-bullet-0"><span className="c3">epidemic or pandemic (for the avoidance of doubt, including the 2020 Coronavirus Pandemic);</span></li>
+        <li className="c0 li-bullet-0"><span className="c3">terrorist attack, hacking or cyber threats, civil war, civil commotion or riots, war, threat of or preparation for war, armed conflict, imposition of sanctions, embargo, or breaking off of diplomatic relations;</span></li>
+        <li className="c0 li-bullet-0"><span className="c3">equipment or software malfunction or bugs including network splits or forks or unexpected changes in the Blockchain, as well as hacks, phishing attacks, distributed denials of service or any other security attacks;</span></li>
+        <li className="c0 li-bullet-0"><span className="c3">nuclear, chemical or biological contamination;</span></li>
+        <li className="c0 li-bullet-0"><span className="c3">any law statutes, ordinances, rules, regulations, judgments, injunctions, orders and decrees or any action taken by a government or public authority, including without limitation imposing a prohibition, or failing to grant a necessary license or consent;</span></li>
+        <li className="c0 li-bullet-0"><span className="c3">collapse of buildings, breakdown of plant or machinery, fire, explosion or accident; and</span></li>
+        <li className="c0 li-bullet-0"><span className="c3">strike, industrial action or lockout.</span></li>
       </ul>
-      <ol start={3}>
-        <li>
-          We shall not be liable or responsible to you, or be deemed to have defaulted under or breached this Agreement,
-          for any failure or delay in the provision of the Services or the performance of this Agreement, if and to the
-          extent such failure or delay is caused by or results from or is connected to acts beyond our reasonable
-          control, including the occurrence of a Force Majeure Event.
-        </li>
+      <ol className="c5 lst-kix_list_4-0 start">
+        <li className="c0 li-bullet-0"><span className="c3">We shall not be liable or responsible to you, or be deemed to have defaulted under or breached this Agreement, for any failure or delay in the provision of the Services or the performance of this Agreement, if and to the extent such failure or delay is caused by or results from or is connected to acts beyond our reasonable control, including the occurrence of a Force Majeure Event.</span></li>
       </ol>
-      <h3>16. Who is responsible for your tax liabilities?</h3>
-      <p>
-        You are solely responsible to determine if your use of the Services have tax implications, in particular income
-        tax and capital gains tax relating to the purchase or sale of Tokens, for you. By using the Services you agree
-        not to hold us liable for any tax liability associated with or arising from the operation of the Services or any
-        other action or transaction related thereto.
-      </p>
-      <h3>17. What if a court disagrees with part of this Agreement?</h3>
-      <p>
-        Should individual provisions of these Terms be or become invalid or unenforceable in whole or in part, this
-        shall not affect the validity of the remaining provisions. The invalid or unenforceable provision shall be
-        replaced by the statutory provision. If there is no statutory provision or if the statutory provision would lead
-        to an unacceptable result, the parties shall enter negotiations to replace the invalid or unenforceable
-        provision with a valid provision that comes as close as possible to the economic purpose of the invalid or
-        unenforceable provision.
-      </p>
-      <h3>18. What if we do not enforce certain rights under this Agreement?</h3>
-      <p>
-        Our failure to exercise or enforce any right or remedy provided under this Agreement or by law shall not
-        constitute a waiver of that or any other right or remedy, nor shall it prevent or restrict any further exercise
-        of that or any other right or remedy.
-      </p>
-      <h3>19. Do third parties have rights?</h3>
-      <p>
-        Unless it expressly states otherwise, this Agreement does not give rise to any third-party rights, which may be
-        enforced against us.
-      </p>
-      <h3>20. Can this Agreement be assigned?</h3>
-      <ol start={1}>
-        <li>
-          We are entitled to transfer our rights and obligations under the Agreement in whole or in part to third
-          parties with a notice period of four weeks. In this case, you have the right to terminate the Agreement
-          without notice.
-        </li>
-        <li>
-          You shall not be entitled to assign this Agreement to any third party without our express prior written
-          consent.
-        </li>
+      <h3 className="c8" id="h.44sinio"><span className="c4">16. Who is responsible for your tax liabilities?</span></h3>
+      <p className="c2"><span>You are solely responsible to determine if your use of the Services have tax implications, in particular income tax and capital gains tax relating to the purchase or sale of Tokens, for you. By using the Services you agree not to hold us liable for any tax liability associated with or arising from the operation of the Services or any other action or transaction related thereto.</span></p>
+      <h3 className="c8" id="h.2jxsxqh"><span className="c4">17. What if a court disagrees with part of this Agreement?</span></h3>
+      <p className="c2"><span>Should individual provisions of these Terms be or become invalid or unenforceable in whole or in part, this shall not affect the validity of the remaining provisions. The invalid or unenforceable provision shall be replaced by the statutory provision. If there is no statutory provision or if the statutory provision would lead to an unacceptable result, the parties shall enter negotiations to replace the invalid or unenforceable provision with a valid provision that comes as close as possible to the economic purpose of the invalid or unenforceable provision.</span></p>
+      <h3 className="c8" id="h.z337ya"><span className="c4">18. What if we do not enforce certain rights under this Agreement?</span></h3>
+      <p className="c2"><span>Our failure to exercise or enforce any right or remedy provided under this Agreement or by law shall not constitute a waiver of that or any other right or remedy, nor shall it prevent or restrict any further exercise of that or any other right or remedy.</span></p>
+      <h3 className="c8" id="h.3j2qqm3"><span className="c4">19. Do third parties have rights?</span></h3>
+      <p className="c2"><span>Unless it expressly states otherwise, this Agreement does not give rise to any third-party rights, which may be enforced against us.</span></p>
+      <h3 className="c8" id="h.1y810tw"><span className="c4">20. Can this Agreement be assigned?</span></h3>
+      <ol className="c5 lst-kix_list_1-0 start">
+        <li className="c0 li-bullet-0"><span className="c3">We are entitled to transfer our rights and obligations under the Agreement in whole or in part to third parties with a notice period of two weeks. In this case, you have the right to terminate the Agreement without notice.</span></li>
+        <li className="c0 li-bullet-0"><span className="c3">You shall not be entitled to assign this Agreement to any third party without our express prior written consent.</span></li>
       </ol>
-      <h3>21. Which Clauses of this Agreement survive termination?</h3>
-      <p>
-        All covenants, agreements, representations and warranties made in this Agreement shall survive your acceptance
-        of this Agreement and its termination.
-      </p>
-      <h3>22. Data Protection</h3>
-      <p>
-        We inform you about our processing of personal data, including the disclosure to third parties and your rights
-        as an affected party, in the{' '}
-        <Link href={AppRoutes.privacy} passHref legacyBehavior>
-          <MUILink>Privacy Policy</MUILink>
-        </Link>
-        .
-      </p>
-      <h3>23. Which laws apply to the Agreement?</h3>
-      <p>
-        The Agreement including these Terms shall be governed by German law. The application of the UN Convention on
-        Contracts for the International Sale of Goods is excluded. For consumers domiciled in another European country
-        but Germany, the mandatory provisions of the consumer protection laws of the member state in which the consumer
-        is domiciled shall also apply, provided that these are more advantageous for the consumer than the provisions of
-        the German law.
-      </p>
-      <h3>24. How can you get support for Safe Accounts and tell us about any problems?</h3>
-      <p>
-        If you want to learn more about Safe Accounts or the Service or have any problems using them or have any
-        complaints please get in touch via any of the following channels:
-      </p>
-      <ol start={1}>
-        <li>
-          Intercom:{' '}
-          <Link href={HELP_CENTER_URL} passHref legacyBehavior>
-            <MUILink target="_blank" rel="noreferrer">
-              {HELP_CENTER_URL}
-            </MUILink>
-          </Link>
-        </li>
-        <li>
-          Discord:{' '}
-          <Link href={DISCORD_URL} passHref legacyBehavior>
-            <MUILink target="_blank" rel="noreferrer">
-              {DISCORD_URL}
-            </MUILink>
-          </Link>
-        </li>
-        <li>
-          Twitter:{' '}
-          <Link href={TWITTER_URL} passHref legacyBehavior>
-            <MUILink target="_blank" rel="noreferrer">
-              {TWITTER_URL}
-            </MUILink>
-          </Link>
-        </li>
+      <h3 className="c8" id="h.4i7ojhp"><span className="c4">21. Which Clauses of this Agreement survive termination?</span></h3>
+      <p className="c2"><span>All covenants, agreements, representations and warranties made in this Agreement shall survive your acceptance of this Agreement and its termination.</span></p>
+      <h3 className="c8" id="h.2xcytpi"><span className="c4">22. Data Protection</span></h3>
+      <p className="c2"><span>We inform you about our processing of personal data, including the disclosure to third parties and your rights as an affected party, in the </span><span><a className="c9" href="https://www.google.com/url?q=https://safe.bnbchain.org/privacy&amp;sa=D&amp;source=editors&amp;ust=1699261916950411&amp;usg=AOvVaw1DhUHopR2cRlz4ac3h0uDD">Privacy Notice</a></span><span>.</span></p>
+      <h3 className="c8" id="h.1ci93xb"><span className="c4">23. Which laws apply to the Agreement?</span></h3>
+      <p className="c2"><span className="c3">The Agreement including these Terms shall be governed by the laws of Hong Kong. The application of the UN Convention on Contracts for the International Sale of Goods is excluded. </span></p>
+      <h3 className="c8" id="h.3whwml4"><span className="c4">24. How can you get support for Safe Accounts and tell us about any problems?</span></h3>
+      <p className="c2"><span className="c3">If you want to learn more about Safe Accounts or the Service or have any problems using them or have any complaints please get in touch via any of the following channels:</span></p>
+      <ol className="c5 lst-kix_list_2-0 start">
+        <li className="c11 li-bullet-0"><span>Forum:</span><span className="c12"><a className="c9" href="https://www.google.com/url?q=https://forum.bnbchain.org/&amp;sa=D&amp;source=editors&amp;ust=1699261916951071&amp;usg=AOvVaw3wHaDNZWHRjv4Ingzpsv7_">&nbsp;Build N Build</a></span></li>
+        <li className="c11 li-bullet-0"><span>Twitter:</span><span><a className="c9" href="https://www.google.com/url?q=https://twitter.com/BNBCHAIN&amp;sa=D&amp;source=editors&amp;ust=1699261916951277&amp;usg=AOvVaw0hZcG2D9YiO0Rz-CU5zjHw">&nbsp;</a></span><span className="c12"><a className="c9" href="https://www.google.com/url?q=https://twitter.com/BNBCHAIN&amp;sa=D&amp;source=editors&amp;ust=1699261916951393&amp;usg=AOvVaw3bkZiPOkdiLv3-vpl59s1o">https://twitter.com/BNBCHAIN</a></span></li>
+        <li className="c11 li-bullet-0"><span>Telegram:</span><span><a className="c9" href="https://www.google.com/url?q=https://t.me/BNBchaincommunity&amp;sa=D&amp;source=editors&amp;ust=1699261916951636&amp;usg=AOvVaw1Qcgyywo1KKG3xFDhzT-Y6">&nbsp;</a></span><span className="c12"><a className="c9" href="https://www.google.com/url?q=https://t.me/BNBchaincommunity&amp;sa=D&amp;source=editors&amp;ust=1699261916951809&amp;usg=AOvVaw30A1AmxRjU2C62O5C0D8A3">https://t.me/BNBchaincommunity</a></span></li>
+        <li className="c11 li-bullet-0"><span>Engineering Discord: </span><span className="c12"><a className="c9" href="https://www.google.com/url?q=https://discord.com/invite/bnbchain&amp;sa=D&amp;source=editors&amp;ust=1699261916952050&amp;usg=AOvVaw0RxjkkUYjm-KFKpma2GL6j">https://discord.com/invite/bnbchain</a></span><span className="c3">&nbsp;</span></li>
       </ol>
-      <h3>25. Where is the place of legal proceedings?</h3>
-      <p>
-        For users who are merchants within the meaning of the German Commercial Code (Handelsgesetzbuch), a special fund
-        (Sonderverm&ouml;gen) under public law or a legal person under public law, Berlin shall be the exclusive place
-        of jurisdiction for all disputes arising from the contractual relationship.
-      </p>
-      <h3>26. Is this all?</h3>
-      <p>
-        These Terms constitute the entire agreement between you and us in relation to the Agreement&rsquo;s subject
-        matter. It replaces and extinguishes any and all prior agreements, draft agreements, arrangements, warranties,
-        statements, assurances, representations and undertakings of any nature made by, or on behalf of either of us,
-        whether oral or written, public or private, in relation to that subject matter.
-      </p>
-    </div>
+      <h3 className="c8" id="h.2bn6wsx"><span className="c4">25. Where is the place of legal proceedings?</span></h3>
+      <p className="c2"><span className="c3">PLEASE READ THIS SECTION CAREFULLY AS IT MAY SIGNIFICANTLY AFFECT YOUR LEGAL RIGHTS, INCLUDING YOUR RIGHT TO FILE A LAWSUIT IN COURT. THIS SECTION 25 REQUIRES YOU TO SUBMIT TO BINDING ARBITRATION OF ANY AND ALL DISPUTES THAT YOU HAVE AGAINST US ARISING OUT OF OR RELATED TO THESE TERMS OR ANY USE OF THE WEBSiTE OR RELATED SERVICES AND LIMITS THE MANNER IN WHICH YOU CAN SEEK RELIEF FROM US.</span></p>
+      <p className="c1"><span className="c3"></span></p>
+      <p className="c1"><span className="c3"></span></p>
+      <p className="c2"><span className="c3">25.1 All matters relating to the Website and any dispute, controversy, difference or claim arising out of or relating to these Terms, including the existence, validity, interpretation or breach thereof or any dispute regarding non-contractual obligations arising out of or relating to it shall be referred to and finally resolved by arbitration administered by the Hong Kong International Arbitration Centre (HKIAC) under the HKIAC Administered Arbitration Rules in force when the Notice of Arbitration is submitted.</span></p>
+      <p className="c1"><span className="c3"></span></p>
+      <p className="c2"><span className="c3">25.2 The law of this arbitration clause shall be Hong Kong law. The seat of arbitration shall be in Hong Kong. Any arbitration will be conducted in the English language.</span></p>
+      <p className="c1"><span className="c3"></span></p>
+      <p className="c2"><span className="c3">25.3 The parties agree that the arbitration shall be kept confidential. The existence of the arbitration, any nonpublic information provided in the arbitration, and any submissions, orders or awards made in the arbitration shall not be disclosed to third party except the tribunal, the HKIAC, the parties, their counsels, experts, witnesses, accountants and auditors, insurers and reinsurers, and any other persons necessary to the conduct of the arbitration. Notwithstanding the foregoing, a party may disclose such confidential information to the extent that disclosure is required to fulfill a legal duty, protect or pursue a legal right, or enforce or challenge an award in bona fide legal proceedings. This confidentiality provision shall survive termination of these Terms and conclusion or stay of any arbitration brought pursuant to these Terms.</span></p>
+      <p className="c1"><span className="c3"></span></p>
+      <p className="c1"><span className="c3"></span></p>
+      <h3 className="c8" id="h.qsh70q"><span className="c4">26. Is this all?</span></h3>
+      <p className="c2"><span className="c3">These Terms constitute the entire agreement between you and us in relation to the Agreement’s subject matter. It replaces and extinguishes any and all prior agreements, draft agreements, arrangements, warranties, statements, assurances, representations and undertakings of any nature made by, or on behalf of either of us, whether oral or written, public or private, in relation to that subject matter.</span></p>
+    </div >
   )
 }
 
