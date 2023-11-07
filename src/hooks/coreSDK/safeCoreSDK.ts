@@ -81,15 +81,17 @@ export const initSafeSDK = async ({
     const isL2SafeMasterCopy = masterCopy === safeL2Deployment?.networkAddresses[chainId]
 
     // Unknown deployment, which we do not want to support
-    if (!isL1SafeMasterCopy && !isL2SafeMasterCopy) {
-      return Promise.resolve(undefined)
-    }
+    // if (!isL1SafeMasterCopy && !isL2SafeMasterCopy) {
+    //   return Promise.resolve(undefined)
+    // }
   }
 
   // Legacy Safe contracts
-  if (isLegacyVersion(safeVersion)) {
-    isL1SafeMasterCopy = true
-  }
+  // if (isLegacyVersion(safeVersion)) {
+  //   isL1SafeMasterCopy = true
+  // }
+
+  isL1SafeMasterCopy = false
 
   return Safe.create({
     ethAdapter: createReadOnlyEthersAdapter(provider),
