@@ -4,7 +4,7 @@ import { lightPalette, darkPalette } from '@safe-global/safe-react-components'
 
 const descriptionText =
   'Safe (prev. Gnosis Safe) is the most trusted platform to manage digital assets on Ethereum and multiple EVMs. Over $40B secured.'
-const titleText = 'BNB Safe{Wallet}'
+const titleText = 'BNB Safe'
 
 const MetaTags = ({ prefetchUrl }: { prefetchUrl: string }) => (
   <>

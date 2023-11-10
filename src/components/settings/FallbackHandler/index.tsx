@@ -35,7 +35,7 @@ export const FallbackHandler = (): ReactElement | null => {
 
   const tooltip = !safe.fallbackHandler ? (
     <>
-      The {'BNB Safe{Wallet}'} may not work correctly as no fallback handler is currently set.
+      The {'BNB Safe'} may not work correctly as no fallback handler is currently set.
       {txBuilder && (
         <>
           {' '}
