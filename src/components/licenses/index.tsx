@@ -16,328 +16,6 @@ const SafeLicenses = () => {
           This page contains a list of attribution notices for third party software that may be contained in portions of
           the {'BNB Safe'}. We thank the open source community for all of their contributions.
         </Typography>
-        <Typography variant="h2" mb={2}>
-          Android
-        </Typography>
-        <TableContainer component={Paper}>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell width="30%">
-                  <strong>Library</strong>
-                </TableCell>
-                <TableCell>
-                  <strong>License</strong>
-                </TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              <TableRow>
-                <TableCell>AndroidX</TableCell>
-                <TableCell>
-                  <ExternalLink href="https://android.googlesource.com/platform/frameworks/support/%2B/androidx-master-dev/LICENSE.txt">
-                    https://android.googlesource.com/platform/frameworks/support/+/androidx-master-dev/LICENSE.txt
-                  </ExternalLink>
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>Bivrost for Kotlin</TableCell>
-                <TableCell>
-                  <ExternalLink href="https://github.com/gnosis/bivrost-kotlin/blob/master/LICENSE">
-                    https://github.com/gnosis/bivrost-kotlin/blob/master/LICENSE
-                  </ExternalLink>
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>Dagger</TableCell>
-                <TableCell>
-                  <ExternalLink href="https://github.com/google/dagger#license">
-                    {' '}
-                    https://github.com/google/dagger#license{' '}
-                  </ExternalLink>
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>FloatingActionButton</TableCell>
-                <TableCell>
-                  <ExternalLink href="https://github.com/Clans/FloatingActionButton/blob/master/LICENSE">
-                    https://github.com/Clans/FloatingActionButton/blob/master/LICENSE
-                  </ExternalLink>
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>Material Progress Bar</TableCell>
-                <TableCell>
-                  <ExternalLink href="https://github.com/DreaminginCodeZH/MaterialProgressBar/blob/master/LICENSE">
-                    https://github.com/DreaminginCodeZH/MaterialProgressBar/blob/master/LICENSE
-                  </ExternalLink>
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>Kethereum</TableCell>
-                <TableCell>
-                  <ExternalLink href="https://github.com/walleth/kethereum/blob/master/LICENSE">
-                    https://github.com/walleth/kethereum/blob/master/LICENSE
-                  </ExternalLink>
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>Koptional</TableCell>
-                <TableCell>
-                  <ExternalLink href="https://github.com/gojuno/koptional#license">
-                    {' '}
-                    https://github.com/gojuno/koptional#license{' '}
-                  </ExternalLink>
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>Moshi</TableCell>
-                <TableCell>
-                  <ExternalLink href="https://github.com/square/moshi#license">
-                    {' '}
-                    https://github.com/square/moshi#license{' '}
-                  </ExternalLink>
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>OkHttp</TableCell>
-                <TableCell>
-                  <ExternalLink href="https://github.com/square/okhttp#license">
-                    {' '}
-                    https://github.com/square/okhttp#license{' '}
-                  </ExternalLink>
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>Okio</TableCell>
-                <TableCell>
-                  <ExternalLink href="https://github.com/square/okio#license">
-                    {' '}
-                    https://github.com/square/okio#license{' '}
-                  </ExternalLink>
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>Phrase</TableCell>
-                <TableCell>
-                  <ExternalLink href="https://github.com/square/phrase/#license">
-                    {' '}
-                    https://github.com/square/phrase/#license{' '}
-                  </ExternalLink>
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>Picasso</TableCell>
-                <TableCell>
-                  <ExternalLink href="https://github.com/square/picasso#license">
-                    {' '}
-                    https://github.com/square/picasso#license{' '}
-                  </ExternalLink>
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>ReTrofit</TableCell>
-                <TableCell>
-                  <ExternalLink href="https://github.com/square/reTrofit#license">
-                    {' '}
-                    https://github.com/square/reTrofit#license{' '}
-                  </ExternalLink>
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>RxAndroid</TableCell>
-                <TableCell>
-                  <ExternalLink href="https://github.com/ReactiveX/RxAndroid#license">
-                    https://github.com/ReactiveX/RxAndroid#license
-                  </ExternalLink>
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>RxBinding</TableCell>
-                <TableCell>
-                  <ExternalLink href="https://github.com/JakeWharton/RxBinding#license">
-                    https://github.com/JakeWharton/RxBinding#license
-                  </ExternalLink>
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>RxJava</TableCell>
-                <TableCell>
-                  <ExternalLink href="https://github.com/ReactiveX/RxJava#license">
-                    {' '}
-                    https://github.com/ReactiveX/RxJava#license{' '}
-                  </ExternalLink>
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>RxKotlin</TableCell>
-                <TableCell>
-                  <ExternalLink href="https://github.com/ReactiveX/RxKotlin/blob/2.x/LICENSE">
-                    https://github.com/ReactiveX/RxKotlin/blob/2.x/LICENSE
-                  </ExternalLink>
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>SpongyCastle</TableCell>
-                <TableCell>
-                  <ExternalLink href="https://github.com/rtyley/spongycastle/blob/spongy-master/LICENSE.html">
-                    https://github.com/rtyley/spongycastle/blob/spongy-master/LICENSE.html
-                  </ExternalLink>
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>Svalinn Android</TableCell>
-                <TableCell>
-                  <ExternalLink href="https://github.com/gnosis/svalinn-kotlin/blob/master/LICENSE">
-                    https://github.com/gnosis/svalinn-kotlin/blob/master/LICENSE
-                  </ExternalLink>
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>Timber</TableCell>
-                <TableCell>
-                  <ExternalLink href="https://github.com/JakeWharton/timber#license">
-                    https://github.com/JakeWharton/timber#license
-                  </ExternalLink>
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>Zxing</TableCell>
-                <TableCell>
-                  <ExternalLink href="https://github.com/zxing/zxing/blob/master/LICENSE">
-                    https://github.com/zxing/zxing/blob/master/LICENSE
-                  </ExternalLink>
-                </TableCell>
-              </TableRow>
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </Box>
-      <Box mb={4}>
-        <Typography variant="h2" mb={2}>
-          iOS
-        </Typography>
-        <TableContainer component={Paper}>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell width="30%">
-                  <strong>Library</strong>
-                </TableCell>
-                <TableCell>
-                  <strong>License</strong>
-                </TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              <TableRow>
-                <TableCell>BigInt</TableCell>
-                <TableCell>
-                  <ExternalLink href="https://github.com/attaswift/BigInt/blob/master/LICENSE.md">
-                    https://github.com/attaswift/BigInt/blob/master/LICENSE.md
-                  </ExternalLink>
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>BlockiesSwift</TableCell>
-                <TableCell>
-                  <ExternalLink href="https://github.com/gnosis/BlockiesSwift/blob/master/LICENSE">
-                    https://github.com/gnosis/BlockiesSwift/blob/master/LICENSE
-                  </ExternalLink>
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>CryptoEthereumSwift</TableCell>
-                <TableCell>
-                  <ExternalLink href="https://github.com/yuzushioh/CryptoEthereumSwift/blob/master/LICENSE">
-                    https://github.com/yuzushioh/CryptoEthereumSwift/blob/master/LICENSE
-                  </ExternalLink>
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>CryptoSwift</TableCell>
-                <TableCell>
-                  <ExternalLink href="https://github.com/krzyzanowskim/CryptoSwift#license">
-                    https://github.com/krzyzanowskim/CryptoSwift#license
-                  </ExternalLink>
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>DateTools</TableCell>
-                <TableCell>
-                  <ExternalLink href="https://github.com/gnosis/DateTools#license">
-                    {' '}
-                    https://github.com/gnosis/DateTools#license{' '}
-                  </ExternalLink>
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>EthereumKit</TableCell>
-                <TableCell>
-                  <ExternalLink href="https://github.com/D-Technologies/EthereumKit#license">
-                    https://github.com/D-Technologies/EthereumKit#license
-                  </ExternalLink>
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>Keycard.swift</TableCell>
-                <TableCell>
-                  <ExternalLink href="https://github.com/gnosis/Keycard.swift/blob/master/LICENSE">
-                    https://github.com/gnosis/Keycard.swift/blob/master/LICENSE
-                  </ExternalLink>
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>Kingfisher</TableCell>
-                <TableCell>
-                  <ExternalLink href="https://github.com/onevcat/Kingfisher#license">
-                    https://github.com/onevcat/Kingfisher#license
-                  </ExternalLink>
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>SipHash</TableCell>
-                <TableCell>
-                  <ExternalLink href="https://github.com/attaswift/SipHash/blob/master/LICENSE.md">
-                    https://github.com/attaswift/SipHash/blob/master/LICENSE.md
-                  </ExternalLink>
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>Starscream</TableCell>
-                <TableCell>
-                  <ExternalLink href="https://github.com/daltoniam/Starscream/blob/master/LICENSE">
-                    https://github.com/daltoniam/Starscream/blob/master/LICENSE
-                  </ExternalLink>
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>RsBarcodesSwift</TableCell>
-                <TableCell>
-                  <ExternalLink href="https://github.com/yeahdongcn/RSBarcodes_Swift#license">
-                    https://github.com/yeahdongcn/RSBarcodes_Swift#license
-                  </ExternalLink>
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>libidn2</TableCell>
-                <TableCell>
-                  <ExternalLink href="https://github.com/gnosis/libidn2/blob/master/COPYING.LESSERv3">
-                    https://github.com/gnosis/libidn2/blob/master/COPYING.LESSERv3
-                  </ExternalLink>
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>libunisTring</TableCell>
-                <TableCell>
-                  <ExternalLink href="https://github.com/gnosis/libunisTring/blob/master/COPYING.LIB">
-                    https://github.com/gnosis/libunisTring/blob/master/COPYING.LIB
-                  </ExternalLink>
-                </TableCell>
-              </TableRow>
-            </TableBody>
-          </Table>
-        </TableContainer>
       </Box>
       <Box>
         <Typography variant="h2" mb={2}>
@@ -733,6 +411,54 @@ const SafeLicenses = () => {
                 <TableCell>
                   <ExternalLink href="https://github.com/npm/node-semver/blob/main/LICENSE">
                     https://github.com/npm/node-semver/blob/main/LICENSE
+                  </ExternalLink>
+                </TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell>tx-service</TableCell>
+                <TableCell>
+                  <ExternalLink href="https://github.com/bnb-chain/safe-transaction-service/blob/master/LICENSE">
+                    https://github.com/bnb-chain/safe-transaction-service/blob/master/LICENSE
+                  </ExternalLink>
+                </TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell>cfg-service</TableCell>
+                <TableCell>
+                  <ExternalLink href="https://github.com/bnb-chain/safe-config-service/blob/main/LICENSE">
+                    https://github.com/bnb-chain/safe-config-service/blob/main/LICENSE
+                  </ExternalLink>
+                </TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell>gateway</TableCell>
+                <TableCell>
+                  <ExternalLink href="https://github.com/bnb-chain/safe-client-gateway/blob/main/LICENSE">
+                    https://github.com/bnb-chain/safe-client-gateway/blob/main/LICENSE
+                  </ExternalLink>
+                </TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell>web</TableCell>
+                <TableCell>
+                  <ExternalLink href="https://github.com/bnb-chain/safe-wallet-web/blob/main/LICENSE">
+                    https://github.com/bnb-chain/safe-wallet-web/blob/main/LICENSE
+                  </ExternalLink>
+                </TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell>eth-py</TableCell>
+                <TableCell>
+                  <ExternalLink href="https://github.com/bnb-chain/safe-eth-py/blob/master/LICENSE">
+                    https://github.com/bnb-chain/safe-eth-py/blob/master/LICENSE
+                  </ExternalLink>
+                </TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell>eth-py</TableCell>
+                <TableCell>
+                  <ExternalLink href="https://github.com/bnb-chain/safe-eth-py/blob/master/LICENSE">
+                    https://github.com/bnb-chain/safe-eth-py/blob/master/LICENSE
                   </ExternalLink>
                 </TableCell>
               </TableRow>

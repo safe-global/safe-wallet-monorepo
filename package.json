@@ -1,9 +1,9 @@
 {
   "name": "safe-wallet-web",
-  "homepage": "https://github.com/safe-global/safe-wallet-web",
+  "homepage": "https://github.com/bnb-chain/safe-wallet-web",
   "license": "GPL-3.0",
   "type": "module",
-  "version": "1.19.1",
+  "version": "1.9.5-bnbchain",
   "scripts": {
     "dev": "next dev",
     "start": "next dev",
