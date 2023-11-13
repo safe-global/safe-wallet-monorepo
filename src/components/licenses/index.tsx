@@ -454,14 +454,6 @@ const SafeLicenses = () => {
                   </ExternalLink>
                 </TableCell>
               </TableRow>
-              <TableRow>
-                <TableCell>eth-py</TableCell>
-                <TableCell>
-                  <ExternalLink href="https://github.com/bnb-chain/safe-eth-py/blob/master/LICENSE">
-                    https://github.com/bnb-chain/safe-eth-py/blob/master/LICENSE
-                  </ExternalLink>
-                </TableCell>
-              </TableRow>
             </TableBody>
           </Table>
         </TableContainer>
