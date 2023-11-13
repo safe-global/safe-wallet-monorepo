@@ -21,16 +21,13 @@ const SafeCookiePolicy = () => {
       </p>
       <p>
         This Cookie Policy applies to our website at{' '}
-        <Link href="https://app.safe.global" passHref legacyBehavior>
-          <MUILink>https://app.safe.global</MUILink>
+        <Link href="https://multisig.bnbchain.org/" passHref legacyBehavior>
+          <MUILink>https://multisig.bnbchain.org/</MUILink>
         </Link>
         &nbsp;and sets out some further detail on how and why we use these technologies on our website.{' '}
       </p>
       <p>
-        In this policy, &quot;we&quot;, &quot;us&quot; and &quot;our&quot; refers to Core Contributors GmbH a company
-        incorporated in Germany with its registered address at Skalitzer Str. 85-86, ℅ Full Node, 10997 Berlin, Germany.
-        The terms &ldquo;you&rdquo; and &ldquo;your&rdquo; includes our clients, business partners and users of this
-        website.{' '}
+        These Terms and Conditions (“Terms”) become part of any contract (“Agreement”) between you (“you”, “yours” or “User”) and BNB Chain Innovation Limited (“BNB Chain”, “we”, “our” or “us”) provided we made these Terms accessible to you prior to entering into the Agreement and you consent to these Terms.{' '}
       </p>
       <p>
         By using our website, you consent to storage and access to cookies and other technologies on your device, in
