@@ -46,16 +46,13 @@ const Footer = (): ReactElement | null => {
         {IS_OFFICIAL_HOST || IS_DEV ? (
           <>
             <li>
-              <Typography variant="caption">&copy;2022–{new Date().getFullYear()} Core Contributors GmbH</Typography>
+              <Typography variant="caption">&copy;2022–{new Date().getFullYear()} BNB Safe</Typography>
             </li>
             <li>
               <FooterLink href={getHref(AppRoutes.terms)}>Terms</FooterLink>
             </li>
             <li>
               <FooterLink href={getHref(AppRoutes.licenses)}>Licenses</FooterLink>
-            </li>
-            <li>
-              <FooterLink href={getHref(AppRoutes.imprint)}>Imprint</FooterLink>
             </li>
             <li>
               <FooterLink href={getHref(AppRoutes.cookie)}>Cookie policy</FooterLink>

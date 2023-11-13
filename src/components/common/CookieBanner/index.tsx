@@ -84,7 +84,7 @@ export const CookieBanner = ({
                   <Typography variant="body2">Locally stored data for core functionality</Typography>
                 </Box>
 
-                <Box mb={2}>
+                {/* <Box mb={2}>
                   <CookieCheckbox
                     checkboxProps={{ ...register(CookieType.UPDATES), id: 'beamer' }}
                     label="Beamer"
@@ -92,7 +92,7 @@ export const CookieBanner = ({
                   />
                   <br />
                   <Typography variant="body2">New features and product announcements</Typography>
-                </Box>
+                </Box> */}
 
                 <Box>
                   <CookieCheckbox
