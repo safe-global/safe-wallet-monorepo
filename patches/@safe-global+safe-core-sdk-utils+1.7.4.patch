@@ -1,0 +1,12 @@
+diff --git a/node_modules/@safe-global/safe-core-sdk-utils/dist/src/eip-3770/config.js b/node_modules/@safe-global/safe-core-sdk-utils/dist/src/eip-3770/config.js
+index 7dbddf5..92739bc 100644
+--- a/node_modules/@safe-global/safe-core-sdk-utils/dist/src/eip-3770/config.js
++++ b/node_modules/@safe-global/safe-core-sdk-utils/dist/src/eip-3770/config.js
+@@ -4,6 +4,7 @@ exports.networks = void 0;
+ // https://github.com/ethereum-lists/chains/tree/master/_data/chains
+ exports.networks = [
+     { chainId: 1, shortName: 'eth' },
++    { chainId: 141414, shortName: 'alt' },
+     { chainId: 3, shortName: 'rop' },
+     { chainId: 4, shortName: 'rin' },
+     { chainId: 5, shortName: 'gor' },
