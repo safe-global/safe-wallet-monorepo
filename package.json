@@ -33,8 +33,7 @@
     "node": ">=16"
   },
   "resolutions": {
-    "@web3-onboard/trezor/**/protobufjs": "^7.2.4",
-    "**/**/@ledgerhq/connect-kit-loader": "1.1.8"
+    "@web3-onboard/trezor/**/protobufjs": "^7.2.4"
   },
   "dependencies": {
     "@date-io/date-fns": "^2.15.0",
