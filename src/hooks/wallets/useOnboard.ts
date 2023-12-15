@@ -141,7 +141,7 @@ export const useInitOnboard = () => {
   const onboard = useStore()
   const customRpc = useAppSelector(selectRpc)
 
-  useInitPairing()
+  //useInitPairing()
 
   useEffect(() => {
     if (configs.length > 0 && chain) {
