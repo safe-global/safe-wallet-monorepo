@@ -100,12 +100,12 @@ const useSafeNotifications = (): void => {
         link: isUnsupported
           ? CLI_LINK
           : {
-              href: {
-                pathname: AppRoutes.settings.setup,
-                query: { safe: query.safe },
-              },
-              title: 'Update Safe Account',
+            href: {
+              pathname: AppRoutes.settings.setup,
+              query: { safe: query.safe },
             },
+            title: 'Update Safe Account',
+          },
 
         onClose: () => dismissUpdateNotification(OUTDATED_VERSION_KEY),
       }),
@@ -132,24 +132,24 @@ const useSafeNotifications = (): void => {
    * Show a notification when the Safe master copy is not supported
    */
 
-  useEffect(() => {
-    if (isValidMasterCopy(safe.implementationVersionState)) return
+  // useEffect(() => {
+  //   if (isValidMasterCopy(safe.implementationVersionState)) return
 
-    const id = dispatch(
-      showNotification({
-        variant: 'warning',
-        message: `This Safe Account was created with an unsupported base contract.
-           The web interface might not work correctly.
-           We recommend using the command line interface instead.`,
-        groupKey: 'invalid-mastercopy',
-        link: CLI_LINK,
-      }),
-    )
+  //   const id = dispatch(
+  //     showNotification({
+  //       variant: 'warning',
+  //       message: `This Safe Account was created with an unsupported base contract.
+  //          The web interface might not work correctly.
+  //          We recommend using the command line interface instead.`,
+  //       groupKey: 'invalid-mastercopy',
+  //       link: CLI_LINK,
+  //     }),
+  //   )
 
-    return () => {
-      dispatch(closeNotification({ id }))
-    }
-  }, [dispatch, safe.implementationVersionState])
+  //   return () => {
+  //     dispatch(closeNotification({ id }))
+  //   }
+  // }, [dispatch, safe.implementationVersionState])
 }
 
 export default useSafeNotifications
