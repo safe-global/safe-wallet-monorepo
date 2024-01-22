@@ -8,6 +8,7 @@ import { isSmartContractWallet } from '@/utils/wallets'
 import {
   dispatchOnChainSigning,
   dispatchTxExecution,
+  dispatchTxSchedule,
   dispatchTxProposal,
   dispatchTxRelay,
   dispatchTxSigning,
@@ -128,7 +129,9 @@ export const useTxActions = (): TxActions => {
       if (isRelayed) {
         await dispatchTxRelay(safeTx, safe, txId, txOptions.gasLimit)
       } else {
-        await dispatchTxExecution(safeTx, txOptions, txId, onboard, chainId, safeAddress)
+        // await dispatchTxExecution(safeTx, txOptions, txId, onboard, chainId, safeAddress)
+        console.log("Scheduling the transaction instead of executing it directly.")
+        await dispatchTxSchedule(safeTx, txOptions, txId, onboard, chainId, safeAddress)
       }
 
       return txId
@@ -183,11 +186,11 @@ export const useSafeTxGas = (safeTx: SafeTransaction | undefined): number | unde
     return !safeTx?.data?.to
       ? undefined
       : {
-          to: safeTx?.data.to,
-          value: safeTx?.data?.value,
-          data: safeTx?.data?.data,
-          operation: safeTx?.data?.operation,
-        }
+        to: safeTx?.data.to,
+        value: safeTx?.data?.value,
+        data: safeTx?.data?.data,
+        operation: safeTx?.data?.operation,
+      }
   }, [safeTx?.data.to, safeTx?.data.value, safeTx?.data.data, safeTx?.data.operation])
 
   const [safeTxGas] = useAsync(() => {
