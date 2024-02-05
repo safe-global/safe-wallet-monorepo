@@ -183,6 +183,57 @@ export const dispatchTxExecution = async (
 
 /**
  * Author: Chase
+ * Execute a transaction through HSGSuperMod (timelockcontroller)
+ * Really this shouldn't be its own function. Should probably just be a flag on the already existing function
+ */
+export const dispatchTxScheduleExec = async (
+  safeTx: SafeTransaction,
+  txOptions: TransactionOptions,
+  txId: string,
+  onboard: OnboardAPI,
+  chainId: SafeInfo['chainId'],
+  safeAddress: string,
+): Promise<string> => {
+  const sdkUnchecked = await getUncheckedSafeSDK(onboard, chainId)
+  const eventParams = { txId }
+
+  // Execute the tx
+  let result: TransactionResult | undefined
+  try {
+    result = await _scheduleTransaction(sdkUnchecked, safeTx, true, txOptions)
+    txDispatch(TxEvent.EXECUTING, eventParams)
+  } catch (error) {
+    txDispatch(TxEvent.FAILED, { ...eventParams, error: asError(error) })
+    throw error
+  }
+
+  txDispatch(TxEvent.PROCESSING, { ...eventParams, txHash: result.hash })
+
+  // Asynchronously watch the tx to be mined/validated
+  result.transactionResponse
+    ?.wait()
+    .then((receipt) => {
+      if (didRevert(receipt)) {
+        txDispatch(TxEvent.REVERTED, { ...eventParams, error: new Error('Transaction reverted by EVM') })
+      } else {
+        txDispatch(TxEvent.PROCESSED, { ...eventParams, safeAddress })
+      }
+    })
+    .catch((err) => {
+      const error = err as EthersError
+
+      if (didReprice(error)) {
+        txDispatch(TxEvent.PROCESSED, { ...eventParams, safeAddress })
+      } else {
+        txDispatch(TxEvent.FAILED, { ...eventParams, error: asError(error) })
+      }
+    })
+
+  return result.hash
+}
+
+/**
+ * Author: Chase
  * Schedule a transaction through HSGSuperMod
  */
 export const dispatchTxSchedule = async (
@@ -199,7 +250,7 @@ export const dispatchTxSchedule = async (
   // Execute the tx
   let result: TransactionResult | undefined
   try {
-    result = await _scheduleTransaction(sdkUnchecked, safeTx, txOptions)
+    result = await _scheduleTransaction(sdkUnchecked, safeTx, false, txOptions)
     txDispatch(TxEvent.EXECUTING, eventParams)
   } catch (error) {
     txDispatch(TxEvent.FAILED, { ...eventParams, error: asError(error) })
@@ -235,12 +286,14 @@ export const dispatchTxSchedule = async (
  * Author: Chase
  * From: https://github.com/safe-global/safe-core-sdk/blob/725f473aa7308b0e5748e7d2e08522645140dd52/packages/safe-core-sdk/src/Safe.ts#L855
  * @param safeTransaction 
+ * @param isScheduled true if the transaction has already been scheduled in the timelock. false otherwise
  * @param options 
  * @returns 
  */
 const _scheduleTransaction = async (
   sdk: Safe,
   safeTransaction: SafeTransaction,
+  isScheduled: boolean,
   options?: TransactionOptions
 ): Promise<TransactionResult> => {
   let transaction = safeTransaction
@@ -280,6 +333,7 @@ const _scheduleTransaction = async (
   }
   const txResponse = await _scheduleTransactionContract(
     signedSafeTransaction,
+    isScheduled,
     {
       from: signerAddress,
       ...options
@@ -291,6 +345,7 @@ const _scheduleTransaction = async (
 // from: https://github.com/safe-global/safe-core-sdk/blob/725f473aa7308b0e5748e7d2e08522645140dd52/packages/safe-ethers-lib/src/contracts/GnosisSafe/GnosisSafeContractEthers.ts#L130
 const _scheduleTransactionContract = async (
   safeTransaction: SafeTransaction,
+  isScheduled: boolean,
   options?: TransactionOptions
 ): Promise<TransactionResult> => {
   if (options && !options.gasLimit) {
@@ -312,8 +367,8 @@ const _scheduleTransactionContract = async (
     //     ...options
     //   }
     // )
-    // Need at least 90,000 for it to be enough gas.
-    options.gasLimit = 100_000;
+    // CHASE Need at least 90,000 for it to be enough gas.
+    options.gasLimit = 300_000;
   }
   const address = "0x9045781E1E982198BEd965EB3cED7b2D1EC8baa2";
   const inter: ethers.ContractInterface = JSON.parse(`[
@@ -380,6 +435,63 @@ const _scheduleTransactionContract = async (
       ],
       "stateMutability": "payable",
       "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "value",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes",
+          "name": "data",
+          "type": "bytes"
+        },
+        {
+          "internalType": "enum Enum.Operation",
+          "name": "operation",
+          "type": "uint8"
+        },
+        {
+          "internalType": "uint256",
+          "name": "safeTxGas",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "baseGas",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "gasPrice",
+          "type": "uint256"
+        },
+        {
+          "internalType": "address",
+          "name": "gasToken",
+          "type": "address"
+        },
+        {
+          "internalType": "address payable",
+          "name": "refundReceiver",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes",
+          "name": "signatures",
+          "type": "bytes"
+        }
+      ],
+      "stateMutability": "payable",
+      "type": "function",
+      "name": "executeTimelockTransaction"
     }]`);
   let metamask: ethers.providers.ExternalProvider;
   if (window.ethereum)
@@ -388,8 +500,6 @@ const _scheduleTransactionContract = async (
     console.log("Metamask not available");
     throw "Metamask not available"
   }
-
-  console.log(ethers);
 
   const provider = new ethers.providers.Web3Provider(metamask)
 
@@ -401,19 +511,39 @@ const _scheduleTransactionContract = async (
   // For this, you need the account signer...
   const signerTwo = provider.getSigner()
   const contract = new ethers.Contract(address, inter, signerTwo);
-  const txResponse = await contract.scheduleTransaction(
-    safeTransaction.data.to,
-    safeTransaction.data.value,
-    safeTransaction.data.data,
-    safeTransaction.data.operation,
-    safeTransaction.data.safeTxGas,
-    safeTransaction.data.baseGas,
-    safeTransaction.data.gasPrice,
-    safeTransaction.data.gasToken,
-    safeTransaction.data.refundReceiver,
-    safeTransaction.encodedSignatures(),
-    options
-  )
+  let txResponse: ContractTransaction
+  if (isScheduled) {
+    console.log("Dispatch: Executing through timelock")
+    txResponse = await contract.executeTimelockTransaction(
+      safeTransaction.data.to,
+      safeTransaction.data.value,
+      safeTransaction.data.data,
+      safeTransaction.data.operation,
+      safeTransaction.data.safeTxGas,
+      safeTransaction.data.baseGas,
+      safeTransaction.data.gasPrice,
+      safeTransaction.data.gasToken,
+      safeTransaction.data.refundReceiver,
+      safeTransaction.encodedSignatures(),
+      options
+    )
+  }
+  else {
+    console.log("Dispatch: Scheduling through timelock")
+    txResponse = await contract.scheduleTransaction(
+      safeTransaction.data.to,
+      safeTransaction.data.value,
+      safeTransaction.data.data,
+      safeTransaction.data.operation,
+      safeTransaction.data.safeTxGas,
+      safeTransaction.data.baseGas,
+      safeTransaction.data.gasPrice,
+      safeTransaction.data.gasToken,
+      safeTransaction.data.refundReceiver,
+      safeTransaction.encodedSignatures(),
+      options
+    )
+  }
   return toTxResult(txResponse, options)
 }
 

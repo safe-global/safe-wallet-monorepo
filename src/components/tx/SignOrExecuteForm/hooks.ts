@@ -9,6 +9,7 @@ import {
   dispatchOnChainSigning,
   dispatchTxExecution,
   dispatchTxSchedule,
+  dispatchTxScheduleExec,
   dispatchTxProposal,
   dispatchTxRelay,
   dispatchTxSigning,
@@ -125,13 +126,25 @@ export const useTxActions = (): TxActions => {
         txId = tx.txId
       }
 
+      // CHASE TEMPORARY MEASURE TO TOGGLE SCHEDULE VS EXECUTION MANUALLY
+      const IS_SCHEDULED = true;
+
       // Relay or execute the tx via connected wallet
       if (isRelayed) {
+        console.log("Relay execution")
         await dispatchTxRelay(safeTx, safe, txId, txOptions.gasLimit)
-      } else {
+      }
+      else if (!IS_SCHEDULED) {
         // await dispatchTxExecution(safeTx, txOptions, txId, onboard, chainId, safeAddress)
         console.log("Scheduling the transaction instead of executing it directly.")
         await dispatchTxSchedule(safeTx, txOptions, txId, onboard, chainId, safeAddress)
+      } else if (IS_SCHEDULED) {
+        console.log("Executing transaction through timelock")
+        await dispatchTxScheduleExec(safeTx, txOptions, txId, onboard, chainId, safeAddress)
+      }
+      else {
+        console.log("Regular execution")
+        await dispatchTxExecution(safeTx, txOptions, txId, onboard, chainId, safeAddress)
       }
 
       return txId
