@@ -127,7 +127,7 @@ export const useTxActions = (): TxActions => {
       }
 
       // CHASE TEMPORARY MEASURE TO TOGGLE SCHEDULE VS EXECUTION MANUALLY
-      const IS_SCHEDULED = true;
+      const IS_SCHEDULED = false;
 
       // Relay or execute the tx via connected wallet
       if (isRelayed) {
