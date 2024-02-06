@@ -301,15 +301,19 @@ const _scheduleTransaction = async (
   const signedSafeTransaction = await sdk.copyTransaction(transaction)
 
   const txHash = await sdk.getTransactionHash(signedSafeTransaction)
-  const ownersWhoApprovedTx = await sdk.getOwnersWhoApprovedTx(txHash)
-  for (const owner of ownersWhoApprovedTx) {
-    signedSafeTransaction.addSignature(_generatePreValidatedSignature(owner))
-  }
-  const owners = await sdk.getOwners()
   const signerAddress = await sdk.getEthAdapter().getSignerAddress()
-  if (signerAddress && owners.includes(signerAddress)) {
-    signedSafeTransaction.addSignature(_generatePreValidatedSignature(signerAddress))
-  }
+
+  // NOTE: The following adds prevalidated signatures to the transaction, which breaks since we're executing through timelock.
+  //        This may break the immediate execution feature
+  // const ownersWhoApprovedTx = await sdk.getOwnersWhoApprovedTx(txHash)
+  // for (const owner of ownersWhoApprovedTx) {
+  //   signedSafeTransaction.addSignature(_generatePreValidatedSignature(owner))
+  // }
+  // const owners = await sdk.getOwners()
+  // const signerAddress = await sdk.getEthAdapter().getSignerAddress()
+  // if (signerAddress && owners.includes(signerAddress)) {
+  //   signedSafeTransaction.addSignature(_generatePreValidatedSignature(signerAddress))
+  // }
 
   const threshold = await sdk.getThreshold()
   if (threshold > signedSafeTransaction.signatures.size) {
