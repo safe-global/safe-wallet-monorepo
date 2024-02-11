@@ -110,6 +110,142 @@ const _scheduleTransactionContract = async (
   isScheduled: boolean,
   options?: TransactionOptions
 ): Promise<TransactionResult> => {
+
+  // const address = "0x9045781E1E982198BEd965EB3cED7b2D1EC8baa2";
+  // const inter: ethers.ContractInterface = JSON.parse(`[
+  //     {
+  //       "inputs": [
+  //         {
+  //           "internalType": "address",
+  //           "name": "to",
+  //           "type": "address"
+  //         },
+  //         {
+  //           "internalType": "uint256",
+  //           "name": "value",
+  //           "type": "uint256"
+  //         },
+  //         {
+  //           "internalType": "bytes",
+  //           "name": "data",
+  //           "type": "bytes"
+  //         },
+  //         {
+  //           "internalType": "enum Enum.Operation",
+  //           "name": "operation",
+  //           "type": "uint8"
+  //         },
+  //         {
+  //           "internalType": "uint256",
+  //           "name": "safeTxGas",
+  //           "type": "uint256"
+  //         },
+  //         {
+  //           "internalType": "uint256",
+  //           "name": "baseGas",
+  //           "type": "uint256"
+  //         },
+  //         {
+  //           "internalType": "uint256",
+  //           "name": "gasPrice",
+  //           "type": "uint256"
+  //         },
+  //         {
+  //           "internalType": "address",
+  //           "name": "gasToken",
+  //           "type": "address"
+  //         },
+  //         {
+  //           "internalType": "address payable",
+  //           "name": "refundReceiver",
+  //           "type": "address"
+  //         },
+  //         {
+  //           "internalType": "bytes",
+  //           "name": "signatures",
+  //           "type": "bytes"
+  //         }
+  //       ],
+  //       "name": "scheduleTransaction",
+  //       "outputs": [
+  //         {
+  //           "internalType": "bytes32",
+  //           "name": "",
+  //           "type": "bytes32"
+  //         }
+  //       ],
+  //       "stateMutability": "payable",
+  //       "type": "function"
+  //     },
+  //     {
+  //       "inputs": [
+  //         {
+  //           "internalType": "address",
+  //           "name": "to",
+  //           "type": "address"
+  //         },
+  //         {
+  //           "internalType": "uint256",
+  //           "name": "value",
+  //           "type": "uint256"
+  //         },
+  //         {
+  //           "internalType": "bytes",
+  //           "name": "data",
+  //           "type": "bytes"
+  //         },
+  //         {
+  //           "internalType": "enum Enum.Operation",
+  //           "name": "operation",
+  //           "type": "uint8"
+  //         },
+  //         {
+  //           "internalType": "uint256",
+  //           "name": "safeTxGas",
+  //           "type": "uint256"
+  //         },
+  //         {
+  //           "internalType": "uint256",
+  //           "name": "baseGas",
+  //           "type": "uint256"
+  //         },
+  //         {
+  //           "internalType": "uint256",
+  //           "name": "gasPrice",
+  //           "type": "uint256"
+  //         },
+  //         {
+  //           "internalType": "address",
+  //           "name": "gasToken",
+  //           "type": "address"
+  //         },
+  //         {
+  //           "internalType": "address payable",
+  //           "name": "refundReceiver",
+  //           "type": "address"
+  //         },
+  //         {
+  //           "internalType": "bytes",
+  //           "name": "signatures",
+  //           "type": "bytes"
+  //         }
+  //       ],
+  //       "stateMutability": "payable",
+  //       "type": "function",
+  //       "name": "executeTimelockTransaction"
+  //     }]`);
+
+  const inter: ethers.ContractInterface = require("./contracts/hsgsupermod.abi.json")
+
+  if (signer) {
+    console.log("Signer: ", signer);
+  }
+  else {
+    console.error("Signer doesn't exist!")
+    throw "No signer"
+  }
+  const contract = new ethers.Contract(modAddress, inter, signer);
+
   if (options && !options.gasLimit) {
     // options.gasLimit = await this.estimateGas(
     //   'execTransaction',
@@ -130,141 +266,37 @@ const _scheduleTransactionContract = async (
     //   }
     // )
     // CHASE Need at least 90,000 for it to be enough gas.
-    options.gasLimit = 300_000;
+    // options.gasLimit = 300_000;
+    options.gasLimit = (await (isScheduled ?
+      contract.estimateGas.executeTimelockTransaction(
+        safeTransaction.data.to,
+        safeTransaction.data.value,
+        safeTransaction.data.data,
+        safeTransaction.data.operation,
+        safeTransaction.data.safeTxGas,
+        safeTransaction.data.baseGas,
+        safeTransaction.data.gasPrice,
+        safeTransaction.data.gasToken,
+        safeTransaction.data.refundReceiver,
+        safeTransaction.encodedSignatures(),
+        options
+      ) :
+      contract.estimateGas.scheduleTransaction(
+        safeTransaction.data.to,
+        safeTransaction.data.value,
+        safeTransaction.data.data,
+        safeTransaction.data.operation,
+        safeTransaction.data.safeTxGas,
+        safeTransaction.data.baseGas,
+        safeTransaction.data.gasPrice,
+        safeTransaction.data.gasToken,
+        safeTransaction.data.refundReceiver,
+        safeTransaction.encodedSignatures(),
+        options
+      ))).toNumber()
+    console.log("gaslimit: ", options.gasLimit)
   }
 
-  // const address = "0x9045781E1E982198BEd965EB3cED7b2D1EC8baa2";
-  const inter: ethers.ContractInterface = JSON.parse(`[
-      {
-        "inputs": [
-          {
-            "internalType": "address",
-            "name": "to",
-            "type": "address"
-          },
-          {
-            "internalType": "uint256",
-            "name": "value",
-            "type": "uint256"
-          },
-          {
-            "internalType": "bytes",
-            "name": "data",
-            "type": "bytes"
-          },
-          {
-            "internalType": "enum Enum.Operation",
-            "name": "operation",
-            "type": "uint8"
-          },
-          {
-            "internalType": "uint256",
-            "name": "safeTxGas",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "baseGas",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "gasPrice",
-            "type": "uint256"
-          },
-          {
-            "internalType": "address",
-            "name": "gasToken",
-            "type": "address"
-          },
-          {
-            "internalType": "address payable",
-            "name": "refundReceiver",
-            "type": "address"
-          },
-          {
-            "internalType": "bytes",
-            "name": "signatures",
-            "type": "bytes"
-          }
-        ],
-        "name": "scheduleTransaction",
-        "outputs": [
-          {
-            "internalType": "bytes32",
-            "name": "",
-            "type": "bytes32"
-          }
-        ],
-        "stateMutability": "payable",
-        "type": "function"
-      },
-      {
-        "inputs": [
-          {
-            "internalType": "address",
-            "name": "to",
-            "type": "address"
-          },
-          {
-            "internalType": "uint256",
-            "name": "value",
-            "type": "uint256"
-          },
-          {
-            "internalType": "bytes",
-            "name": "data",
-            "type": "bytes"
-          },
-          {
-            "internalType": "enum Enum.Operation",
-            "name": "operation",
-            "type": "uint8"
-          },
-          {
-            "internalType": "uint256",
-            "name": "safeTxGas",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "baseGas",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "gasPrice",
-            "type": "uint256"
-          },
-          {
-            "internalType": "address",
-            "name": "gasToken",
-            "type": "address"
-          },
-          {
-            "internalType": "address payable",
-            "name": "refundReceiver",
-            "type": "address"
-          },
-          {
-            "internalType": "bytes",
-            "name": "signatures",
-            "type": "bytes"
-          }
-        ],
-        "stateMutability": "payable",
-        "type": "function",
-        "name": "executeTimelockTransaction"
-      }]`);
-
-  if (signer) {
-    console.log("Signer: ", signer);
-  }
-  else {
-    console.error("Signer doesn't exist!")
-    throw "No signer"
-  }
-  const contract = new ethers.Contract(modAddress, inter, signer);
   let txResponse: ContractTransaction
   console.log("Proposed transaction: ", safeTransaction)
   if (isScheduled) {
