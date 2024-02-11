@@ -87,8 +87,11 @@ async function _timelockedTransaction(
 
   const ethad: any = sdk.getEthAdapter() // the type here is restrictive, and so doesn't let me access the signer, even though it should be available
 
+  const add = await findModuleAddress(sdk);
+
   const txResponse = await _scheduleTransactionContract(
     ethad.getSigner(),
+    add,
     signedSafeTransaction,
     isScheduled,
     {
@@ -102,6 +105,7 @@ async function _timelockedTransaction(
 // from: https://github.com/safe-global/safe-core-sdk/blob/725f473aa7308b0e5748e7d2e08522645140dd52/packages/safe-ethers-lib/src/contracts/GnosisSafe/GnosisSafeContractEthers.ts#L130
 const _scheduleTransactionContract = async (
   signer: any, // we can type the signer later
+  modAddress: string,
   safeTransaction: SafeTransaction,
   isScheduled: boolean,
   options?: TransactionOptions
@@ -129,7 +133,7 @@ const _scheduleTransactionContract = async (
     options.gasLimit = 300_000;
   }
 
-  const address = "0x9045781E1E982198BEd965EB3cED7b2D1EC8baa2";
+  // const address = "0x9045781E1E982198BEd965EB3cED7b2D1EC8baa2";
   const inter: ethers.ContractInterface = JSON.parse(`[
       {
         "inputs": [
@@ -260,7 +264,7 @@ const _scheduleTransactionContract = async (
     console.error("Signer doesn't exist!")
     throw "No signer"
   }
-  const contract = new ethers.Contract(address, inter, signer);
+  const contract = new ethers.Contract(modAddress, inter, signer);
   let txResponse: ContractTransaction
   console.log("Proposed transaction: ", safeTransaction)
   if (isScheduled) {
@@ -298,11 +302,13 @@ const _scheduleTransactionContract = async (
   return toTxResult(txResponse, options)
 }
 
-// function findModuleAddress(
-//   sdk: Safe
-// ): string {
-//   sdk.getModules()
-// }
+async function findModuleAddress(
+  sdk: Safe
+): Promise<string> {
+  const mods = await sdk.getModules();
+  console.log("hsgsuper.ts:305; mods: ", mods);
+  return mods[0] // hsgsuper prevents any other mods from being added to the safe
+}
 
 function toTxResult(
   transactionResponse: ContractTransaction,
