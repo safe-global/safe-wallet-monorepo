@@ -4,7 +4,6 @@ import type { ContractTransaction } from 'ethers'
 // From Chase
 import type Safe from '@safe-global/safe-core-sdk'
 import { BigNumber } from '@ethersproject/bignumber'
-import EthersAdapter from '@safe-global/safe-ethers-lib'
 import { ethers } from 'ethers';
 
 /**
@@ -15,17 +14,42 @@ import { ethers } from 'ethers';
  * @param options 
  * @returns 
  */
-export const _scheduleTransaction = async (
+export const scheduleTransaction = (
+  sdk: Safe,
+  safeTransaction: SafeTransaction,
+  options?: TransactionOptions
+): Promise<TransactionResult> => {
+  return _timelockedTransaction(
+    sdk,
+    safeTransaction,
+    false,
+    options
+  )
+}
+
+export const executeTransaction = (
+  sdk: Safe,
+  safeTransaction: SafeTransaction,
+  options?: TransactionOptions
+): Promise<TransactionResult> => {
+  return _timelockedTransaction(
+    sdk,
+    safeTransaction,
+    true,
+    options
+  )
+}
+
+async function _timelockedTransaction(
   sdk: Safe,
   safeTransaction: SafeTransaction,
   isScheduled: boolean,
   options?: TransactionOptions
-): Promise<TransactionResult> => {
+): Promise<TransactionResult> {
   let transaction = safeTransaction
 
   const signedSafeTransaction = await sdk.copyTransaction(transaction)
 
-  const txHash = await sdk.getTransactionHash(signedSafeTransaction)
   const signerAddress = await sdk.getEthAdapter().getSignerAddress()
 
   // NOTE: The following adds prevalidated signatures to the transaction, which breaks since we're executing through timelock.
@@ -104,6 +128,7 @@ const _scheduleTransactionContract = async (
     // CHASE Need at least 90,000 for it to be enough gas.
     options.gasLimit = 300_000;
   }
+
   const address = "0x9045781E1E982198BEd965EB3cED7b2D1EC8baa2";
   const inter: ethers.ContractInterface = JSON.parse(`[
       {
@@ -227,23 +252,6 @@ const _scheduleTransactionContract = async (
         "type": "function",
         "name": "executeTimelockTransaction"
       }]`);
-  // let metamask: ethers.providers.ExternalProvider;
-  // if (window.ethereum)
-  //     metamask = window.ethereum
-  // else {
-  //     console.log("Metamask not available");
-  //     throw "Metamask not available"
-  // }
-
-  // const provider = new ethers.providers.Web3Provider(metamask)
-
-  // // MetaMask requires requesting permission to connect users accounts
-  // await provider.send("eth_requestAccounts", []);
-
-  // // The MetaMask plugin also allows signing transactions to
-  // // send ether and pay to change state within the blockchain.
-  // // For this, you need the account signer...
-  // const signerTwo = provider.getSigner()
 
   if (signer) {
     console.log("Signer: ", signer);
@@ -290,7 +298,13 @@ const _scheduleTransactionContract = async (
   return toTxResult(txResponse, options)
 }
 
-export function toTxResult(
+// function findModuleAddress(
+//   sdk: Safe
+// ): string {
+//   sdk.getModules()
+// }
+
+function toTxResult(
   transactionResponse: ContractTransaction,
   options?: TransactionOptions
 ): TransactionResult {
@@ -298,45 +312,5 @@ export function toTxResult(
     hash: transactionResponse.hash,
     options,
     transactionResponse
-  }
-}
-
-/**
- * Chase
- * From: https://github.com/safe-global/safe-core-sdk/blob/725f473aa7308b0e5748e7d2e08522645140dd52/packages/safe-core-sdk/src/utils/signatures/SafeSignature.ts
- * Should move this out later
- */
-class EthSignSignature implements SafeSignature {
-  signer: string
-  data: string
-
-  /**
-   * Creates an instance of a Safe signature.
-   *
-   * @param signer - Ethers signer
-   * @param signature - The Safe signature
-   * @returns The Safe signature instance
-   */
-  constructor(signer: string, signature: string) {
-    this.signer = signer
-    this.data = signature
-  }
-
-  /**
-   * Returns the static part of the Safe signature.
-   *
-   * @returns The static part of the Safe signature
-   */
-  staticPart(/* dynamicOffset: number */) {
-    return this.data
-  }
-
-  /**
-   * Returns the dynamic part of the Safe signature.
-   *
-   * @returns The dynamic part of the Safe signature
-   */
-  dynamicPart() {
-    return ''
   }
 }

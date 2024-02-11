@@ -24,10 +24,9 @@ import { type OnboardAPI } from '@web3-onboard/core'
 import { asError } from '@/services/exceptions/utils'
 
 // From Chase
-import { _scheduleTransaction as schedTransaction } from '../hsgsuper'
+import * as hsgsuper from '../hsgsuper'
 import type Safe from '@safe-global/safe-core-sdk'
 import { BigNumber } from '@ethersproject/bignumber'
-import EthersAdapter from '@safe-global/safe-ethers-lib'
 import { ethers } from 'ethers';
 
 /**
@@ -201,7 +200,7 @@ export const dispatchTxScheduleExec = async (
   // Execute the tx
   let result: TransactionResult | undefined
   try {
-    result = await schedTransaction(sdkUnchecked, safeTx, true, txOptions)
+    result = await hsgsuper.executeTransaction(sdkUnchecked, safeTx, txOptions)
     txDispatch(TxEvent.EXECUTING, eventParams)
   } catch (error) {
     txDispatch(TxEvent.FAILED, { ...eventParams, error: asError(error) })
@@ -251,7 +250,7 @@ export const dispatchTxSchedule = async (
   // Execute the tx
   let result: TransactionResult | undefined
   try {
-    result = await schedTransaction(sdkUnchecked, safeTx, false, txOptions)
+    result = await hsgsuper.scheduleTransaction(sdkUnchecked, safeTx, txOptions)
     txDispatch(TxEvent.EXECUTING, eventParams)
   } catch (error) {
     txDispatch(TxEvent.FAILED, { ...eventParams, error: asError(error) })
