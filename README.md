@@ -1,15 +1,21 @@
-# <img src="/public/images/logo.svg" height="60" valign="middle" alt="Safe{Wallet}" style="background: #fff; padding: 20px; margin: 0 -20px" />
+# HSGSuper Web App
 
 [![License](https://img.shields.io/github/license/safe-global/safe-wallet-web)](https://github.com/safe-global/safe-wallet-web/blob/main/LICENSE)
-![Tests](https://img.shields.io/github/actions/workflow/status/safe-global/safe-wallet-web/test.yml?branch=main&label=tests)
-![GitHub package.json version (branch)](https://img.shields.io/github/package-json/v/safe-global/safe-wallet-web)
-[![GitPOAP Badge](https://public-api.gitpoap.io/v1/repo/safe-global/safe-wallet-web/badge)](https://www.gitpoap.io/gh/safe-global/safe-wallet-web)
 
-The default Safe web interface.
+Fork of [safe web app](https://github.com/safe-global/safe-wallet-web) to enable the scheduling and execution of transactions using [HSGSuperMod](https://github.com/Heph789/hsg-superuser), a safe module for managing on-chain councils/committees.
 
-## Contributing
+**Current features:**
+* Schedule safe transactions through the attached TimelockController
+* Execute safe transactions through the attached TimelockController
 
-Contributions, be it a bug report or a pull request, are very welcome. Please check our [contribution guidelines](CONTRIBUTING.md) beforehand.
+**Future Plans:** Currently, I am working on the backend indexer for this project. However, to make this interface fully complete, it should also:
+* allow the user to create a safe with HSGSuperMod enabled
+* allow the admin hat wearer (such as a DAO) to veto scheduled transactions
+* allow the admin hat wearer to execute transactions through the safe
+
+**Demo:** https://youtu.be/SeanzLWwVLs
+
+**Learn more about...** [Hats](https://www.hatsprotocol.xyz/) and [Safe](https://safe.global/)
 
 ## Getting started with local development
 
