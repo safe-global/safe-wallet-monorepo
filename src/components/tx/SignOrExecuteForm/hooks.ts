@@ -27,6 +27,7 @@ type TxActions = {
   signTx: (safeTx?: SafeTransaction, txId?: string, origin?: string) => Promise<string>
   executeTx: (
     txOptions: TransactionOptions,
+    isScheduled: boolean,
     safeTx?: SafeTransaction,
     txId?: string,
     origin?: string,
@@ -107,7 +108,7 @@ export const useTxActions = (): TxActions => {
       return tx.txId
     }
 
-    const executeTx: TxActions['executeTx'] = async (txOptions, safeTx, txId, origin, isRelayed) => {
+    const executeTx: TxActions['executeTx'] = async (txOptions, isScheduled, safeTx, txId, origin, isRelayed) => {
       assertTx(safeTx)
       assertWallet(wallet)
       assertOnboard(onboard)
@@ -134,11 +135,11 @@ export const useTxActions = (): TxActions => {
         console.log("Relay execution")
         await dispatchTxRelay(safeTx, safe, txId, txOptions.gasLimit)
       }
-      else if (!IS_SCHEDULED) {
+      else if (!isScheduled) {
         // await dispatchTxExecution(safeTx, txOptions, txId, onboard, chainId, safeAddress)
         console.log("Scheduling the transaction instead of executing it directly.")
         await dispatchTxSchedule(safeTx, txOptions, txId, onboard, chainId, safeAddress)
-      } else if (IS_SCHEDULED) {
+      } else if (isScheduled) {
         console.log("Executing transaction through timelock")
         await dispatchTxScheduleExec(safeTx, txOptions, txId, onboard, chainId, safeAddress)
       }

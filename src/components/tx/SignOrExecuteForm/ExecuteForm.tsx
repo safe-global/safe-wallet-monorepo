@@ -14,6 +14,7 @@ import { useIsExecutionLoop, useTxActions } from './hooks'
 import { useRelaysBySafe } from '@/hooks/useRemainingRelays'
 import useWalletCanRelay from '@/hooks/useWalletCanRelay'
 import { ExecutionMethod, ExecutionMethodSelector } from '../ExecutionMethodSelector'
+import { ExecutionType, ExecutionTypeSelector } from '../ExecutionTypeSelector'
 import { hasRemainingRelays } from '@/utils/relaying'
 import type { SignOrExecuteProps } from '.'
 import type { SafeTransaction } from '@safe-global/safe-core-sdk-types'
@@ -63,12 +64,18 @@ export const ExecuteForm = ({
   // We default to relay, but the option is only shown if we canRelay
   const [executionMethod, setExecutionMethod] = useState(ExecutionMethod.RELAY)
 
+  // For hsgsupermod, sets either to schedule or execute
+  const [executionType, setExecutionType] = useState(ExecutionType.SCHEDULE)
+
   // SC wallets can relay fully signed transactions
   const [walletCanRelay] = useWalletCanRelay(safeTx)
 
   // The transaction can/will be relayed
   const canRelay = walletCanRelay && hasRemainingRelays(relays[0])
   const willRelay = canRelay && executionMethod === ExecutionMethod.RELAY
+
+  // Scheduling vs executing
+  const isScheduled = executionType === ExecutionType.EXECUTE
 
   // Estimate gas limit
   const { gasLimit, gasLimitError } = useGasLimit(safeTx)
@@ -93,7 +100,7 @@ export const ExecuteForm = ({
 
     let executedTxId: string
     try {
-      executedTxId = await executeTx(txOptions, safeTx, txId, origin, willRelay)
+      executedTxId = await executeTx(txOptions, isScheduled, safeTx, txId, origin, false) // hardcodes relay option to false
     } catch (_err) {
       const err = asError(_err)
       trackError(Errors._804, err)
@@ -134,16 +141,14 @@ export const ExecuteForm = ({
             gasLimitError={gasLimitError}
             willRelay={willRelay}
           />
+          <div className={css.noTopBorder}>
+            <ExecutionTypeSelector
+              executionType={executionType}
+              setExecutionType={setExecutionType}
+              relays={relays[0]}
+            />
+          </div>
 
-          {canRelay && (
-            <div className={css.noTopBorder}>
-              <ExecutionMethodSelector
-                executionMethod={executionMethod}
-                setExecutionMethod={setExecutionMethod}
-                relays={relays[0]}
-              />
-            </div>
-          )}
         </div>
 
         {/* Error messages */}
@@ -177,7 +182,7 @@ export const ExecuteForm = ({
           <CheckWallet allowNonOwner={onlyExecute}>
             {(isOk) => (
               <Button variant="contained" type="submit" disabled={!isOk || submitDisabled} sx={{ minWidth: '112px' }}>
-                {!isSubmittable ? <CircularProgress size={20} /> : 'Execute'}
+                {!isSubmittable ? <CircularProgress size={20} /> : (isScheduled ? "Execute" : "Schedule")}
               </Button>
             )}
           </CheckWallet>
