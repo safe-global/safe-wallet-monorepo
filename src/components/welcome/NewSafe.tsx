@@ -1,14 +1,18 @@
 import React from 'react'
 import { Grid, SvgIcon, Typography } from '@mui/material'
 import css from './styles.module.css'
-import CheckFilled from '@/public/images/common/check-filled.svg'
+import Badge from '@/public/images/common/badges.svg'
+import LevelUp from '@/public/images/common/level-up.svg'
+import Leaderboard from '@/public/images/common/leaderboard.svg'
+import Transactions from '@/public/images/common/transactions.svg'
+import CardFooter from '@/public/images/common/footer-card.svg'
 
 import WelcomeLogin from './WelcomeLogin'
 
-const BulletListItem = ({ text }: { text: string }) => (
+const BulletListItem = ({ text, icon }: { text: string; icon: any }) => (
   <li>
-    <SvgIcon className={css.checkIcon} component={CheckFilled} inheritViewBox />
-    <Typography color="static.main" fontWeight={700}>
+    <SvgIcon className={css.checkIcon} component={icon} inheritViewBox />
+    <Typography color="static.secondary" fontWeight={700}>
       {text}
     </Typography>
   </li>
@@ -23,18 +27,36 @@ const NewSafe = () => {
         </Grid>
         <Grid item xs={12} lg={6} flex={1}>
           <div className={css.content}>
-            <Typography variant="h1" fontSize={[44, null, 52]} lineHeight={1} letterSpacing={-1.5} color="static.main">
-              Unlock a new way of ownership
+            <SvgIcon
+              component={CardFooter}
+              inheritViewBox
+              style={{
+                width: '100%',
+                height: 'auto',
+                position: 'absolute',
+                bottom: 0,
+                right: 0,
+              }}
+            />
+            <Typography
+              variant="h1"
+              fontSize={[44, null, 52]}
+              lineHeight={1}
+              letterSpacing={-1.5}
+              color="static.secondary"
+            >
+              Feel the power of the Superchain
             </Typography>
 
-            <Typography mb={1} color="static.main">
-              The most trusted decentralized custody protocol and collective asset management platform.
+            <Typography mb={1} color="static.secondary">
+              Connect to the Superchain ecosystem with your Smart Account.
             </Typography>
 
             <ul className={css.bulletList}>
-              <BulletListItem text="Stealth security with multiple signers" />
-              <BulletListItem text="Make it yours with modules and guards" />
-              <BulletListItem text="Access 130+ ecosystem apps" />
+              <BulletListItem text="Earn badges" icon={Badge} />
+              <BulletListItem text="Level Up" icon={LevelUp} />
+              <BulletListItem text="Climb the leaderboard" icon={Leaderboard} />
+              <BulletListItem text="Make your transactions" icon={Transactions} />
             </ul>
           </div>
         </Grid>

@@ -59,6 +59,7 @@ const darkPalette = {
   },
   static: {
     main: '#121312',
+    secondary: '#eeeff0;',
   },
 }
 

@@ -45,56 +45,27 @@ const WelcomeLogin = () => {
   return (
     <Paper className={css.loginCard} data-testid="welcome-login">
       <Box className={css.loginContent}>
-        <SvgIcon component={SafeLogo} inheritViewBox sx={{ height: '24px', width: '80px', ml: '-8px' }} />
+        <Box className={css.loginContent}>
+          <Typography variant="h6" mt={6} fontWeight={700}>
+            Welcome
+          </Typography>
 
-        <Typography variant="h6" mt={6} fontWeight={700}>
-          Get started
-        </Typography>
+          <Typography mb={2} textAlign="center">
+            Log In or Sign Up to create a new Superchain Account or open an existing one
+          </Typography>
+          <Button onClick={login} variant="contained" disableElevation size="medium">
+            Get started
+          </Button>
 
-        <Typography mb={2} textAlign="center">
-          {wallet
-            ? 'Open your existing Safe Accounts or create a new one'
-            : 'Connect your wallet to create a new Safe Account or open an existing one'}
-        </Typography>
-
-        <Track {...OVERVIEW_EVENTS.OPEN_ONBOARD} label={OVERVIEW_LABELS.welcome_page}>
-          <WalletLogin onLogin={onLogin} />
-        </Track>
-
-        {isSocialLoginEnabled && (
-          <>
-            <Divider sx={{ mt: 2, mb: 2, width: '100%' }}>
-              <Typography color="text.secondary" fontWeight={700} variant="overline">
-                or
-              </Typography>
-            </Divider>
-
-            <SocialSigner onLogin={onLogin} />
-          </>
-        )}
-
-        {!wallet && (
-          <>
-            <Divider sx={{ mt: 2, mb: 2, width: '100%' }}>
-              <Typography color="text.secondary" fontWeight={700} variant="overline">
-                or
-              </Typography>
-            </Divider>
-            {hasSafes ? (
-              <Link href={AppRoutes.welcome.accounts}>
-                <Button disableElevation size="small">
-                  View my accounts
-                </Button>
-              </Link>
-            ) : (
-              <Link href={AppRoutes.newSafe.load}>
-                <Button disableElevation size="small">
-                  Watch any account
-                </Button>
-              </Link>
-            )}
-          </>
-        )}
+          <Divider sx={{ mt: 2, mb: 2, width: '100%' }}>
+            <Typography color="text.secondary" fontWeight={700} variant="overline">
+              or
+            </Typography>
+          </Divider>
+          <Button variant="outlined" disableElevation size="medium">
+            Accept invite
+          </Button>
+        </Box>
       </Box>
     </Paper>
   )

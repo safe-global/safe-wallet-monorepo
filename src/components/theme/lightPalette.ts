@@ -59,6 +59,7 @@ const lightPalette = {
   },
   static: {
     main: '#121312',
+    secondary: '#eeeff0;',
   },
 }
 
