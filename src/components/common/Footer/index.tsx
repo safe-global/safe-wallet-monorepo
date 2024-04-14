@@ -4,22 +4,13 @@ import GitHubIcon from '@mui/icons-material/GitHub'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import css from './styles.module.css'
-import { AppRoutes } from '@/config/routes'
 import packageJson from '../../../../package.json'
 import AppstoreButton from '../AppStoreButton'
 import ExternalLink from '../ExternalLink'
 import MUILink from '@mui/material/Link'
 import { HELP_CENTER_URL, IS_DEV, IS_OFFICIAL_HOST } from '@/config/constants'
 
-const footerPages = [
-  AppRoutes.welcome.index,
-  AppRoutes.settings.index,
-  AppRoutes.imprint,
-  AppRoutes.privacy,
-  AppRoutes.cookie,
-  AppRoutes.terms,
-  AppRoutes.licenses,
-]
+const footerPages = ['#', '#', '#', '#']
 
 const FooterLink = ({ children, href }: { children: ReactNode; href: string }): ReactElement => {
   return href ? (
@@ -51,22 +42,22 @@ const Footer = (): ReactElement | null => {
               <Typography variant="caption">&copy;2022–{new Date().getFullYear()} Core Contributors GmbH</Typography>
             </li>
             <li>
-              <FooterLink href={getHref(AppRoutes.terms)}>Terms</FooterLink>
+              <FooterLink href="/#">Terms</FooterLink>
             </li>
             <li>
-              <FooterLink href={getHref(AppRoutes.privacy)}>Privacy</FooterLink>
+              <FooterLink href="/#">Terms</FooterLink>
             </li>
             <li>
-              <FooterLink href={getHref(AppRoutes.licenses)}>Licenses</FooterLink>
+              <FooterLink href="/#">Terms</FooterLink>
             </li>
             <li>
-              <FooterLink href={getHref(AppRoutes.imprint)}>Imprint</FooterLink>
+              <FooterLink href="/#">Terms</FooterLink>
             </li>
             <li>
-              <FooterLink href={getHref(AppRoutes.cookie)}>Cookie policy</FooterLink>
+              <FooterLink href="/#">Terms</FooterLink>
             </li>
             <li>
-              <FooterLink href={getHref(AppRoutes.settings.index)}>Preferences</FooterLink>
+              <FooterLink href="/#">Terms</FooterLink>
             </li>
             <li>
               <ExternalLink href={HELP_CENTER_URL} noIcon sx={{ span: { textDecoration: 'underline' } }}>
