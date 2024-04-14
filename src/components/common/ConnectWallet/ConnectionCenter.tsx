@@ -43,7 +43,7 @@ export const ConnectionCenter = ({ isSocialLoginEnabled }: { isSocialLoginEnable
         <Typography variant="caption" className={css.notConnected}>
           <b>Not connected</b>
           <Typography variant="inherit" sx={{ color: ({ palette }) => palette.error.main }}>
-            Connect wallet
+            LogIn or SigUp
           </Typography>
         </Typography>
 

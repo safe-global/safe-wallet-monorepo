@@ -85,15 +85,14 @@ const Header = ({ onMenuToggle, onBatchToggle }: HeaderProps): ReactElement => {
           <WalletConnect />
         </div>
       )}
+      <div className={classnames(css.element, css.networkSelector)}>
+        <NetworkSelector />
+      </div>
 
       <div className={classnames(css.element, css.connectWallet)}>
         <Track label={OVERVIEW_LABELS.top_bar} {...OVERVIEW_EVENTS.OPEN_ONBOARD}>
           <ConnectWallet />
         </Track>
-      </div>
-
-      <div className={classnames(css.element, css.networkSelector)}>
-        <NetworkSelector />
       </div>
     </Paper>
   )
