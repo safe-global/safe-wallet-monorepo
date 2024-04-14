@@ -53,7 +53,7 @@ const WelcomeLogin = () => {
           <Typography mb={2} textAlign="center">
             Log In or Sign Up to create a new Superchain Account or open an existing one
           </Typography>
-          <Button onClick={login} variant="contained" disableElevation size="medium">
+          <Button variant="contained" disableElevation size="medium">
             Get started
           </Button>
 
