@@ -13,7 +13,7 @@ import { setBaseUrl as setGatewayBaseUrl } from '@safe-global/safe-gateway-types
 import { CacheProvider, type EmotionCache } from '@emotion/react'
 import SafeThemeProvider from '@/components/theme/SafeThemeProvider'
 import '@/styles/globals.css'
-import { IS_PRODUCTION, GATEWAY_URL_STAGING, GATEWAY_URL_PRODUCTION } from '@/config/constants'
+import { IS_PRODUCTION, GATEWAY_URL_STAGING, GATEWAY_URL_PRODUCTION, PRIVY_APP_ID } from '@/config/constants'
 import { makeStore, useHydrateStore } from '@/store'
 import PageLayout from '@/components/common/PageLayout'
 import useLoadableStores from '@/hooks/useLoadableStores'
@@ -44,6 +44,7 @@ import { useNotificationTracking } from '@/components/settings/PushNotifications
 import Recovery from '@/features/recovery/components/Recovery'
 import WalletProvider from '@/components/common/WalletProvider'
 import CounterfactualHooks from '@/features/counterfactual/CounterfactualHooks'
+import { PrivyProvider } from '@privy-io/react-auth'
 
 const GATEWAY_URL = IS_PRODUCTION || cgwDebugStorage.get() ? GATEWAY_URL_PRODUCTION : GATEWAY_URL_STAGING
 
@@ -81,17 +82,31 @@ export const AppProviders = ({ children }: { children: ReactNode | ReactNode[] }
   const themeMode = isDarkMode ? 'dark' : 'light'
 
   return (
-    <SafeThemeProvider mode={themeMode}>
-      {(safeTheme: Theme) => (
-        <ThemeProvider theme={safeTheme}>
-          <SentryErrorBoundary showDialog fallback={ErrorBoundary}>
-            <WalletProvider>
-              <TxModalProvider>{children}</TxModalProvider>
-            </WalletProvider>
-          </SentryErrorBoundary>
-        </ThemeProvider>
-      )}
-    </SafeThemeProvider>
+    <PrivyProvider
+      appId={PRIVY_APP_ID}
+      config={{
+        appearance: {
+          theme: 'light',
+          accentColor: '#FF0420',
+          logo: 'https://pbs.twimg.com/profile_images/1696769956245807105/xGnB-Cdl_400x400.png',
+        },
+        embeddedWallets: {
+          createOnLogin: 'users-without-wallets',
+        },
+      }}
+    >
+      <SafeThemeProvider mode={themeMode}>
+        {(safeTheme: Theme) => (
+          <ThemeProvider theme={safeTheme}>
+            <SentryErrorBoundary showDialog fallback={ErrorBoundary}>
+              <WalletProvider>
+                <TxModalProvider>{children}</TxModalProvider>
+              </WalletProvider>
+            </SentryErrorBoundary>
+          </ThemeProvider>
+        )}
+      </SafeThemeProvider>
+    </PrivyProvider>
   )
 }
 

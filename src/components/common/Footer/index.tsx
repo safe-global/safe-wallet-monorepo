@@ -5,7 +5,6 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import css from './styles.module.css'
 import packageJson from '../../../../package.json'
-import AppstoreButton from '../AppStoreButton'
 import ExternalLink from '../ExternalLink'
 import MUILink from '@mui/material/Link'
 import { HELP_CENTER_URL, IS_DEV, IS_OFFICIAL_HOST } from '@/config/constants'
@@ -25,13 +24,13 @@ const FooterLink = ({ children, href }: { children: ReactNode; href: string }): 
 const Footer = (): ReactElement | null => {
   const router = useRouter()
 
-  if (!footerPages.some((path) => router.pathname.startsWith(path))) {
-    return null
-  }
+  // if (!footerPages.some((path) => router.pathname.startsWith(path))) {
+  //   return null
+  // }
 
-  const getHref = (path: string): string => {
-    return router.pathname === path ? '' : path
-  }
+  // const getHref = (path: string): string => {
+  //   return router.pathname === path ? '' : path
+  // }
 
   return (
     <footer className={css.container}>
@@ -39,7 +38,7 @@ const Footer = (): ReactElement | null => {
         {IS_OFFICIAL_HOST || IS_DEV ? (
           <>
             <li>
-              <Typography variant="caption">&copy;2022–{new Date().getFullYear()} Core Contributors GmbH</Typography>
+              <Typography variant="caption">Kolektivo Labs © 2024</Typography>
             </li>
             <li>
               <FooterLink href="/#">Terms</FooterLink>
@@ -73,9 +72,6 @@ const Footer = (): ReactElement | null => {
           <ExternalLink href={`${packageJson.homepage}/releases/tag/v${packageJson.version}`} noIcon>
             <SvgIcon component={GitHubIcon} inheritViewBox fontSize="inherit" sx={{ mr: 0.5 }} /> v{packageJson.version}
           </ExternalLink>
-        </li>
-        <li>
-          <AppstoreButton placement="footer" />
         </li>
       </ul>
     </footer>

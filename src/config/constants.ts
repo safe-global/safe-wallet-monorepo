@@ -107,3 +107,5 @@ export const IS_OFFICIAL_HOST = process.env.NEXT_PUBLIC_IS_OFFICIAL_HOST === 'tr
 export const REDEFINE_SIMULATION_URL = 'https://dashboard.redefine.net/reports/'
 export const REDEFINE_API = process.env.NEXT_PUBLIC_REDEFINE_API
 export const REDEFINE_ARTICLE = 'https://safe.mirror.xyz/rInLWZwD_sf7enjoFerj6FIzCYmVMGrrV8Nhg4THdwI'
+
+export const PRIVY_APP_ID = process.env.NEXT_PUBLIC_PRIVY_APP_ID || ''

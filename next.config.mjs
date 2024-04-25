@@ -32,9 +32,16 @@ const nextConfig = {
     dirs: ['src', 'cypress'],
   },
   experimental: {
-    optimizePackageImports: ['@mui/material', '@mui/icons-material', 'lodash', 'date-fns', '@sentry/react', '@gnosis.pm/zodiac'],
+    optimizePackageImports: [
+      '@mui/material',
+      '@mui/icons-material',
+      'lodash',
+      'date-fns',
+      '@sentry/react',
+      '@gnosis.pm/zodiac',
+    ],
   },
-  webpack(config) {
+  webpack(config, { isServer }) {
     config.module.rules.push({
       test: /\.svg$/i,
       issuer: { and: [/\.(js|ts|md)x?$/] },
@@ -59,6 +66,11 @@ const nextConfig = {
         },
       ],
     })
+    if (!isServer) {
+      config.resolve.fallback = {
+        fs: false,
+      }
+    }
 
     config.resolve.alias = {
       ...config.resolve.alias,

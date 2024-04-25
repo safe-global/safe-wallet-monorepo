@@ -26,3 +26,47 @@
   padding: 2px 4px;
   display: inline-flex;
 }
+
+.avatar-container {
+  width: 32px;
+}
+
+.container {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  width: 100%;
+  justify-content: flex-start;
+}
+
+.imageContainer {
+  display: flex;
+  justify-content: center;
+  position: relative;
+}
+.walletIcon {
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  bottom: -6px;
+  right: -6px;
+  border-radius: 50%;
+  border: 2px solid var(--color-background-paper);
+  background-color: var(--color-background-main);
+  overflow: hidden;
+}
+
+.walletIcon img {
+  padding: 2px;
+}
+
+.estimated-fee-warn {
+  display: flex;
+  flex-direction: row;
+  justify-self: center;
+  align-items: center;
+  padding: var(--space-2);
+  border: 1px solid var(--color-text-secondary);
+  border-radius: 6px;
+}

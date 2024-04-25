@@ -5,26 +5,26 @@ import useWallet from '@/hooks/wallets/useWallet'
 import OverviewWidget from '@/components/new-safe/create/OverviewWidget'
 import type { NamedAddress } from '@/components/new-safe/create/types'
 import type { TxStepperProps } from '@/components/new-safe/CardStepper/useCardStepper'
-import SetNameStep from '@/components/new-safe/create/steps/SetNameStep'
-import OwnerPolicyStep from '@/components/new-safe/create/steps/OwnerPolicyStep'
 import ReviewStep from '@/components/new-safe/create/steps/ReviewStep'
 import { CreateSafeStatus } from '@/components/new-safe/create/steps/StatusStep'
 import useAddressBook from '@/hooks/useAddressBook'
 import { CardStepper } from '@/components/new-safe/CardStepper'
 import { AppRoutes } from '@/config/routes'
-import { CREATE_SAFE_CATEGORY } from '@/services/analytics'
 import type { AlertColor } from '@mui/material'
 import type { CreateSafeInfoItem } from '@/components/new-safe/create/CreateSafeInfos'
-import CreateSafeInfos from '@/components/new-safe/create/CreateSafeInfos'
 import { type ReactElement, useMemo, useState } from 'react'
 import ExternalLink from '@/components/common/ExternalLink'
 import { HelpCenterArticle } from '@/config/constants'
 import { isSocialLoginWallet } from '@/services/mpc/SocialLoginModule'
 import { useMnemonicSafeName } from '@/hooks/useMnemonicName'
+import SuperChainID from './steps/SuperChainIdStep'
+import Avatar from './steps/AvatarStep'
+import type { NounProps } from './steps/AvatarStep'
 
 export type NewSafeFormData = {
   name: string
   threshold: number
+  seed: NounProps
   owners: NamedAddress[]
   saltNonce: number
   safeAddress?: string
@@ -107,36 +107,45 @@ const CreateSafe = () => {
     address: wallet?.address || '',
   }
 
-  const [safeName, setSafeName] = useState('')
+  const [walletName, setWalletName] = useState('')
+
+  const [superChainId, setSuperChainId] = useState('')
+  const [seed, setSeed] = useState<NounProps>({
+    background: 0,
+    body: 0,
+    head: 0,
+    accessory: 0,
+    glasses: 0,
+  })
   const [dynamicHint, setDynamicHint] = useState<CreateSafeInfoItem>()
   const [activeStep, setActiveStep] = useState(0)
 
   const CreateSafeSteps: TxStepperProps<NewSafeFormData>['steps'] = [
     {
-      title: 'Select network and name of your Safe Account',
-      subtitle: 'Select the network on which to create your Safe Account',
+      title: 'Select a name and ID for your Superchain Account',
+      subtitle: '',
       render: (data, onSubmit, onBack, setStep) => (
-        <SetNameStep setSafeName={setSafeName} data={data} onSubmit={onSubmit} onBack={onBack} setStep={setStep} />
-      ),
-    },
-    {
-      title: 'Signers and confirmations',
-      subtitle:
-        'Set the signer wallets of your Safe Account and how many need to confirm to execute a valid transaction.',
-      render: (data, onSubmit, onBack, setStep) => (
-        <OwnerPolicyStep
-          setDynamicHint={setDynamicHint}
+        <SuperChainID
+          onBack={onBack}
           data={data}
           onSubmit={onSubmit}
-          onBack={onBack}
+          setSuperChainId={setSuperChainId}
+          setWalletName={setWalletName}
           setStep={setStep}
         />
       ),
     },
     {
+      title: 'Customize your Superchain Account Avatar',
+      subtitle: 'This avatar will be the face of your Superchain Account',
+      render: (data, onSubmit, onBack, setStep) => (
+        <Avatar setStep={setStep} seed={seed} setSeed={setSeed} onSubmit={onSubmit} data={data} onBack={onBack} />
+      ),
+    },
+    {
       title: 'Review',
       subtitle:
-        "You're about to create a new Safe Account and will have to confirm the transaction with your connected wallet.",
+        "You're about to create a new Superchain Account and will have to confirm the transaction with your connected wallet.",
       render: (data, onSubmit, onBack, setStep) => (
         <ReviewStep data={data} onSubmit={onSubmit} onBack={onBack} setStep={setStep} />
       ),
@@ -168,6 +177,7 @@ const CreateSafe = () => {
     name: isSocialLogin ? mnemonicSafeName : '',
     owners: [defaultOwner],
     threshold: 1,
+    seed,
     saltNonce: Date.now(),
   }
 
@@ -178,7 +188,7 @@ const CreateSafe = () => {
   return (
     <Container>
       <Grid container columnSpacing={3} justifyContent="center" mt={[2, null, 7]}>
-        <Grid item xs={12}>
+        <Grid item xs={activeStep < 2 ? 12 : 8}>
           <Typography variant="h2" pb={2}>
             Create new Safe Account
           </Typography>
@@ -189,17 +199,16 @@ const CreateSafe = () => {
             initialStep={initialStep}
             onClose={onClose}
             steps={CreateSafeSteps}
-            eventCategory={CREATE_SAFE_CATEGORY}
             setWidgetStep={setActiveStep}
           />
         </Grid>
-
-        <Grid item xs={12} md={4} mb={[3, null, 0]} order={[0, null, 1]}>
-          <Grid container spacing={3}>
-            {activeStep < 2 && <OverviewWidget safeName={safeName} />}
-            {wallet?.address && <CreateSafeInfos staticHint={staticHint} dynamicHint={dynamicHint} />}
+        {activeStep < 2 && (
+          <Grid item xs={12} md={4} mb={[3, null, 0]} order={[0, null, 1]}>
+            <Grid container spacing={3}>
+              <OverviewWidget superChainId={superChainId} walletName={walletName} />
+            </Grid>
           </Grid>
-        </Grid>
+        )}
       </Grid>
     </Container>
   )

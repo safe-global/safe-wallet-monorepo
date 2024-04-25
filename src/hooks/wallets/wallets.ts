@@ -4,6 +4,7 @@ import type { InitOptions } from '@web3-onboard/core'
 import coinbaseModule from '@web3-onboard/coinbase'
 import injectedWalletModule from '@web3-onboard/injected-wallets'
 import keystoneModule from '@web3-onboard/keystone/dist/index'
+
 import ledgerModule from '@web3-onboard/ledger/dist/index'
 import trezorModule from '@web3-onboard/trezor'
 import walletConnect from '@web3-onboard/walletconnect'

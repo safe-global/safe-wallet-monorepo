@@ -1,16 +1,14 @@
 import { useCallback } from 'react'
-import useOnboard, { connectWallet } from '@/hooks/wallets/useOnboard'
+
+import { usePrivy } from '@privy-io/react-auth'
 
 const useConnectWallet = () => {
-  const onboard = useOnboard()
+  const { login, ready } = usePrivy()
 
   return useCallback(() => {
-    if (!onboard) {
-      return Promise.resolve(undefined)
-    }
-
-    return connectWallet(onboard)
-  }, [onboard])
+    if (!ready) return Promise.resolve(undefined)
+    return login
+  }, [login, ready])
 }
 
 export default useConnectWallet

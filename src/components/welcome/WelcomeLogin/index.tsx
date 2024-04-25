@@ -1,18 +1,14 @@
 import { AppRoutes } from '@/config/routes'
-import { useHasFeature } from '@/hooks/useChains'
-import { FEATURES } from '@/utils/chains'
-import { Paper, SvgIcon, Typography, Divider, Box, Skeleton, Button, Link } from '@mui/material'
-import SafeLogo from '@/public/images/logo-text.svg'
+import { Paper, Typography, Divider, Box, Skeleton, Button } from '@mui/material'
 import dynamic from 'next/dynamic'
 import css from './styles.module.css'
 import { useRouter } from 'next/router'
 import { CREATE_SAFE_EVENTS } from '@/services/analytics/events/createLoadSafe'
-import { OVERVIEW_EVENTS, OVERVIEW_LABELS, trackEvent } from '@/services/analytics'
+import { trackEvent } from '@/services/analytics'
 import useWallet from '@/hooks/wallets/useWallet'
 import { useHasSafes } from '../MyAccounts/useAllSafes'
-import Track from '@/components/common/Track'
 import { useCallback, useEffect, useState } from 'react'
-import WalletLogin from './WalletLogin'
+import { usePrivy } from '@privy-io/react-auth'
 
 const SocialSigner = dynamic(() => import('@/components/common/SocialSigner'), {
   loading: () => <Skeleton variant="rounded" height={42} width="100%" />,
@@ -21,13 +17,17 @@ const SocialSigner = dynamic(() => import('@/components/common/SocialSigner'), {
 const WelcomeLogin = () => {
   const router = useRouter()
   const wallet = useWallet()
-  const isSocialLoginEnabled = useHasFeature(FEATURES.SOCIAL_LOGIN)
+  const { login, authenticated } = usePrivy()
   const { isLoaded, hasSafes } = useHasSafes()
   const [shouldRedirect, setShouldRedirect] = useState(false)
 
   const onLogin = useCallback(() => {
     setShouldRedirect(true)
   }, [])
+
+  const handleGetStarted = () => {
+    authenticated ? router.push(AppRoutes.newSafe.create) : login()
+  }
 
   useEffect(() => {
     if (!shouldRedirect) return
@@ -53,7 +53,7 @@ const WelcomeLogin = () => {
           <Typography mb={2} textAlign="center">
             Log In or Sign Up to create a new Superchain Account or open an existing one
           </Typography>
-          <Button variant="contained" disableElevation size="medium">
+          <Button onClick={handleGetStarted} variant="contained" disableElevation size="medium">
             Get started
           </Button>
 

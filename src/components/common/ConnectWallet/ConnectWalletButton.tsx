@@ -1,5 +1,5 @@
 import { Button } from '@mui/material'
-import useConnectWallet from '@/components/common/ConnectWallet/useConnectWallet'
+import { usePrivy } from '@privy-io/react-auth'
 
 const ConnectWalletButton = ({
   onConnect,
@@ -12,11 +12,11 @@ const ConnectWalletButton = ({
   small?: boolean
   text?: string
 }): React.ReactElement => {
-  const connectWallet = useConnectWallet()
+  const { login } = usePrivy()
 
   const handleConnect = () => {
+    login()
     onConnect?.()
-    connectWallet()
   }
 
   return (

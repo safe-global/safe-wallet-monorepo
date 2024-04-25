@@ -10,7 +10,7 @@ import EthHashInfo from '@/components/common/EthHashInfo'
 import ChainSwitcher from '@/components/common/ChainSwitcher'
 import { IS_PRODUCTION } from '@/config/constants'
 import { isSocialLoginWallet } from '@/services/mpc/SocialLoginModule'
-import useOnboard, { type ConnectedWallet, switchWallet } from '@/hooks/wallets/useOnboard'
+import useOnboard, { type ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import { useRouter } from 'next/router'
 import useAddressBook from '@/hooks/useAddressBook'
 import { useAppSelector } from '@/store'
@@ -19,6 +19,7 @@ import madProps from '@/utils/mad-props'
 import useSocialWallet from '@/hooks/wallets/mpc/useSocialWallet'
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew'
 import useChainId from '@/hooks/useChainId'
+import { usePrivy } from '@privy-io/react-auth'
 
 type WalletInfoProps = {
   wallet: ConnectedWallet
@@ -43,20 +44,19 @@ export const WalletInfo = ({
 }: WalletInfoProps) => {
   const chainInfo = useAppSelector((state) => selectChainById(state, wallet.chainId))
   const prefix = chainInfo?.shortName
+  const { logout } = usePrivy()
 
-  const handleSwitchWallet = () => {
-    if (onboard) {
-      handleClose()
-      switchWallet(onboard)
-    }
-  }
+  // const handleSwitchWallet = () => {
+  //   if (onboard) {
+  //     handleClose()
+  //     switchWallet(onboard)
+  //   }
+  // }
 
   const resetAccount = () => socialWalletService?.__deleteAccount()
 
   const handleDisconnect = () => {
-    onboard?.disconnectWallet({
-      label: wallet.label,
-    })
+    logout()
 
     handleClose()
   }
@@ -134,9 +134,9 @@ export const WalletInfo = ({
       <Box display="flex" flexDirection="column" gap={2} width={1}>
         <ChainSwitcher fullWidth />
 
-        <Button variant="contained" size="small" onClick={handleSwitchWallet} fullWidth>
+        {/* <Button variant="contained" size="small" onClick={handleSwitchWallet} fullWidth>
           Switch wallet
-        </Button>
+        </Button> */}
 
         <Button
           onClick={handleDisconnect}

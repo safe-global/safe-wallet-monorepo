@@ -1,30 +1,53 @@
-import ChainIndicator from '@/components/common/ChainIndicator'
-import WalletOverview from 'src/components/common/WalletOverview'
-import { useCurrentChain } from '@/hooks/useChains'
-import useWallet from '@/hooks/wallets/useWallet'
 import { Card, Grid, Typography } from '@mui/material'
 import type { ReactElement } from 'react'
-import SafeLogo from '@/public/images/logo-no-text.svg'
-
 import css from '@/components/new-safe/create/OverviewWidget/styles.module.css'
+import WalletOverview from '../../../common/WalletOverview'
+import ChainIndicator from '../../../common/ChainIndicator'
+import useWallet from '@/hooks/wallets/useWallet'
 
 const LOGO_DIMENSIONS = '22px'
 
-const OverviewWidget = ({ safeName }: { safeName: string }): ReactElement | null => {
+const OverviewWidget = ({
+  superChainId,
+  walletName,
+}: {
+  superChainId: string
+  walletName: string
+}): ReactElement | null => {
   const wallet = useWallet()
-  const chain = useCurrentChain()
   const rows = [
     ...(wallet ? [{ title: 'Wallet', component: <WalletOverview wallet={wallet} /> }] : []),
-    ...(chain ? [{ title: 'Network', component: <ChainIndicator chainId={chain.chainId} inline /> }] : []),
-    ...(safeName !== '' ? [{ title: 'Name', component: <Typography>{safeName}</Typography> }] : []),
+    ...(wallet
+      ? [
+          {
+            title: 'Network',
+            component: <ChainIndicator inline />,
+          },
+        ]
+      : []),
+    ...(superChainId !== ''
+      ? [
+          {
+            title: 'Account ID',
+            component: <Typography>{superChainId}</Typography>,
+          },
+        ]
+      : []),
+    ...(walletName !== ''
+      ? [
+          {
+            title: 'Wallet Name',
+            component: <Typography>{walletName}</Typography>,
+          },
+        ]
+      : []),
   ]
 
   return (
     <Grid item xs={12}>
       <Card className={css.card}>
         <div className={css.header}>
-          <SafeLogo alt="Safe logo" width={LOGO_DIMENSIONS} height={LOGO_DIMENSIONS} />
-          <Typography variant="h4">Your Safe Account preview</Typography>
+          <Typography variant="h4">Your Superchain Account preview</Typography>
         </div>
         {wallet ? (
           rows.map((row) => (
