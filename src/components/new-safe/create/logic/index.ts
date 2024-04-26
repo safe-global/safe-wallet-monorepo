@@ -1,10 +1,11 @@
 import type { SafeVersion } from '@safe-global/safe-core-sdk-types'
-import { type BrowserProvider, type Provider } from 'ethers'
+import { Interface, type BrowserProvider, type Provider } from 'ethers'
 
 import { getSafeInfo, type SafeInfo, type ChainInfo, relayTransaction } from '@safe-global/safe-gateway-typescript-sdk'
 import {
   getReadOnlyFallbackHandlerContract,
   getReadOnlyGnosisSafeContract,
+  getReadOnlyMultiSendCallOnlyContract,
   getReadOnlyProxyFactoryContract,
 } from '@/services/contracts/safeContracts'
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
@@ -19,7 +20,7 @@ import { AppRoutes } from '@/config/routes'
 import { SAFE_APPS_EVENTS, trackEvent } from '@/services/analytics'
 import type { AppDispatch, AppThunk } from '@/store'
 import { showNotification } from '@/store/notificationsSlice'
-import { SafeFactory } from '@safe-global/protocol-kit'
+import { SafeFactory, encodeMultiSendData } from '@safe-global/protocol-kit'
 import type Safe from '@safe-global/protocol-kit'
 import type { DeploySafeProps } from '@safe-global/protocol-kit'
 import { createEthersAdapter, isValidSafeVersion } from '@/hooks/coreSDK/safeCoreSDK'
@@ -28,6 +29,7 @@ import { backOff } from 'exponential-backoff'
 import { LATEST_SAFE_VERSION } from '@/config/constants'
 import { EMPTY_DATA, ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
 import { formatError } from '@/utils/formatters'
+import { type Address, encodeFunctionData } from 'viem'
 
 export type SafeCreationProps = {
   owners: string[]
@@ -41,17 +43,43 @@ export type SafeCreationProps = {
 export const getSafeDeployProps = async (
   safeParams: SafeCreationProps,
   callback: (txHash: string) => void,
-  chainId: string,
+  chain: ChainInfo,
 ): Promise<DeploySafeProps & { callback: DeploySafeProps['callback'] }> => {
-  const readOnlyFallbackHandlerContract = await getReadOnlyFallbackHandlerContract(chainId, LATEST_SAFE_VERSION)
+  const readOnlyFallbackHandlerContract = await getReadOnlyFallbackHandlerContract(chain.chainId, LATEST_SAFE_VERSION)
 
+  // const multiSendCallData = encodeMultiSendData([
+  //   {
+  //     to: '0x2dd68b007B46fBe91B9A7c3EDa5A7a1063cB5b47' as Address,
+  //     data: encodeFunctionData({
+  //       abi: [],
+  //       functionName: 'enableModules',
+  //       args: [['0xA6F72E92cf1232144846659c8DdA3f87f4DC2C37']],
+  //     }),
+  //     value: '0',
+  //     operation: 1,
+  //   },
+  // ])
+  const moduleManager = new Interface(['function enableModules(address[] calldata modules)'])
+  console.debug({
+    safeAccountConfig: {
+      threshold: safeParams.threshold,
+      owners: safeParams.owners,
+      fallbackHandler: await readOnlyFallbackHandlerContract.getAddress(),
+      data: moduleManager.encodeFunctionData('enableModules', [['0xA6F72E92cf1232144846659c8DdA3f87f4DC2C37']]),
+      to: '0x8EcD4ec46D4D2a6B64fE960B3D64e8B94B2234eb',
+    },
+    saltNonce: (safeParams.saltNonce + 14).toString(),
+    callback,
+  })
   return {
     safeAccountConfig: {
       threshold: safeParams.threshold,
       owners: safeParams.owners,
       fallbackHandler: await readOnlyFallbackHandlerContract.getAddress(),
+      data: moduleManager.encodeFunctionData('enableModules', [['0xA6F72E92cf1232144846659c8DdA3f87f4DC2C37']]),
+      to: '0x8EcD4ec46D4D2a6B64fE960B3D64e8B94B2234eb',
     },
-    saltNonce: safeParams.saltNonce.toString(),
+    saltNonce: (safeParams.saltNonce + 14).toString(),
     callback,
   }
 }
@@ -77,6 +105,7 @@ export const createNewSafe = async (
   safeVersion?: SafeVersion,
 ): Promise<Safe> => {
   const safeFactory = await getSafeFactory(ethersProvider, safeVersion)
+  console.debug(props)
   return safeFactory.deploySafe(props)
 }
 
@@ -104,12 +133,39 @@ export const encodeSafeCreationTx = async ({
   const readOnlySafeContract = await getReadOnlyGnosisSafeContract(chain, LATEST_SAFE_VERSION)
   const readOnlyProxyContract = await getReadOnlyProxyFactoryContract(chain.chainId, LATEST_SAFE_VERSION)
   const readOnlyFallbackHandlerContract = await getReadOnlyFallbackHandlerContract(chain.chainId, LATEST_SAFE_VERSION)
+  console.debug(
+    await getReadOnlyMultiSendCallOnlyContract(chain.chainId, LATEST_SAFE_VERSION).then(
+      async (response) => await response.getAddress(),
+    ),
+  )
+  // const multiSendCallData = encodeMultiSendData([
+  //   {
+  //     to: '0x2dd68b007B46fBe91B9A7c3EDa5A7a1063cB5b47',
+  //     data: encodeFunctionData({
+  //       abi: [
+  //         {
+  //           inputs: [{ internalType: 'address[]', name: 'modules', type: 'address[]' }],
+  //           name: 'enableModules',
+  //           outputs: [],
+  //           stateMutability: 'nonpayable',
+  //           type: 'function',
+  //         },
+  //       ],
+  //       functionName: 'enableModules',
+  //       args: [['0xA6F72E92cf1232144846659c8DdA3f87f4DC2C37' as Address]],
+  //     }),
+  //     value: '0',
+  //     operation: 1,
+  //   },
+  // ])
+
+  const moduleManager = new Interface(['function enableModules(address[] calldata modules)'])
 
   const setupData = readOnlySafeContract.encode('setup', [
     owners,
     threshold,
-    ZERO_ADDRESS,
-    EMPTY_DATA,
+    '0x8EcD4ec46D4D2a6B64fE960B3D64e8B94B2234eb',
+    moduleManager.encodeFunctionData('enableModules', [['0xA6F72E92cf1232144846659c8DdA3f87f4DC2C37']]),
     await readOnlyFallbackHandlerContract.getAddress(),
     ZERO_ADDRESS,
     '0',
@@ -119,7 +175,7 @@ export const encodeSafeCreationTx = async ({
   return readOnlyProxyContract.encode('createProxyWithNonce', [
     await readOnlySafeContract.getAddress(),
     setupData,
-    saltNonce,
+    saltNonce + 14,
   ])
 }
 

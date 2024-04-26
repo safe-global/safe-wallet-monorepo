@@ -87,18 +87,13 @@ export const useSafeCreation = (
         waitForCreateSafeTx(taskId, setStatus)
       } else {
         const tx = await getSafeCreationTxInfo(provider, owners, threshold, saltNonce, chain, wallet)
-
         const safeParams = {
           threshold,
           owners: owners.map((owner) => owner.address),
           saltNonce,
         }
 
-        const safeDeployProps = await getSafeDeployProps(
-          safeParams,
-          (txHash) => createSafeCallback(txHash, tx),
-          chain.chainId,
-        )
+        const safeDeployProps = await getSafeDeployProps(safeParams, (txHash) => createSafeCallback(txHash, tx), chain)
 
         const gasLimit = await estimateSafeCreationGas(chain, provider, tx.from, safeParams)
 
@@ -110,10 +105,11 @@ export const useSafeCreation = (
             }
           : { gasPrice: maxFeePerGas?.toString(), gasLimit: gasLimit.toString() }
 
-        await createNewSafe(provider, {
+        const response = await createNewSafe(provider, {
           ...safeDeployProps,
           options,
         })
+        console.debug(await response.getAddress())
         setStatus(SafeCreationStatus.SUCCESS)
       }
     } catch (err) {
