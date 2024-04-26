@@ -11,7 +11,7 @@ const WalletProvider = ({ children }: { children: ReactNode }): ReactElement => 
 
   useEffect(() => {
     if (!authenticated) return setWallet(null)
-    if (!wallets || !ready) return
+    if (!wallets[0] || !ready) return
     ;(async () => {
       setWallet({
         ...wallets[0],

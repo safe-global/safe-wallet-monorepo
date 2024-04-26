@@ -58,6 +58,9 @@ import Identicon from '@/components/common/Identicon'
 // import PayNowPayLater from '@/features/counterfactual/PayNowPayLater'
 import { usePendingSafe } from '../StatusStep/usePendingSafe'
 import useWallet from '@/hooks/wallets/useWallet'
+import PayNowPayLater from '@/features/counterfactual/PayNowPayLater'
+import { getAvailableSaltNonce } from '../../logic/utils'
+import { computeNewSafeAddress } from '../../logic'
 // import { usePendingSafe } from '../StatusStep/usePendingSafe';
 
 export const NetworkFee = ({
@@ -196,28 +199,24 @@ const ReviewStep = ({ data, onBack, setStep, onSubmit }: StepRenderProps<NewSafe
         },
       }
 
-      console.debug(props)
+      const saltNonce = await getAvailableSaltNonce(provider, {
+        ...props,
+        saltNonce: '0',
+      })
+      const safeAddress = await computeNewSafeAddress(provider, {
+        ...props,
+        saltNonce,
+      })
 
-      // const saltNonce = await getAvailableSaltNonce(provider, {
-      //   ...props,
-      //   saltNonce: '0',
-      // });
-      // const safeAddress = await computeNewSafeAddress(provider, {
-      //   ...props,
-      //   saltNonce,
-      // });
+      const pendingSafe = {
+        ...data,
+        saltNonce: Number(saltNonce),
+        safeAddress,
+        willRelay: false,
+      }
 
-      // const pendingSafe = {
-      //   ...data,
-      //   saltNonce: Number(saltNonce),
-      //   safeAddress,
-      //   willRelay: false,
-      // };
-
-      // console.debug(pendingSafe)
-
-      // setPendingSafe(pendingSafe);
-      // onSubmit(pendingSafe);
+      setPendingSafe(pendingSafe)
+      onSubmit(pendingSafe)
     } catch (_err) {
       console.error(_err)
       setSubmitError('Error creating the Safe Account. Please try again later.')
@@ -238,7 +237,7 @@ const ReviewStep = ({ data, onBack, setStep, onSubmit }: StepRenderProps<NewSafe
         <>
           <Divider />
           <Box className={layoutCss.row}>
-            {/* <PayNowPayLater /> */}
+            <PayNowPayLater />
 
             <Grid className={css['estimated-fee-warn']} item>
               <Typography component="div">
