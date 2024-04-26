@@ -20,7 +20,7 @@ import { AppRoutes } from '@/config/routes'
 import { SAFE_APPS_EVENTS, trackEvent } from '@/services/analytics'
 import type { AppDispatch, AppThunk } from '@/store'
 import { showNotification } from '@/store/notificationsSlice'
-import { SafeFactory, encodeMultiSendData } from '@safe-global/protocol-kit'
+import { SafeFactory } from '@safe-global/protocol-kit'
 import type Safe from '@safe-global/protocol-kit'
 import type { DeploySafeProps } from '@safe-global/protocol-kit'
 import { createEthersAdapter, isValidSafeVersion } from '@/hooks/coreSDK/safeCoreSDK'
@@ -29,7 +29,6 @@ import { backOff } from 'exponential-backoff'
 import { LATEST_SAFE_VERSION } from '@/config/constants'
 import { EMPTY_DATA, ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
 import { formatError } from '@/utils/formatters'
-import { type Address, encodeFunctionData } from 'viem'
 
 export type SafeCreationProps = {
   owners: string[]
@@ -68,7 +67,7 @@ export const getSafeDeployProps = async (
       data: moduleManager.encodeFunctionData('enableModules', [['0xA6F72E92cf1232144846659c8DdA3f87f4DC2C37']]),
       to: '0x8EcD4ec46D4D2a6B64fE960B3D64e8B94B2234eb',
     },
-    saltNonce: (safeParams.saltNonce + 14).toString(),
+    saltNonce: (safeParams.saltNonce + 16).toString(),
     callback,
   })
   return {
@@ -79,7 +78,7 @@ export const getSafeDeployProps = async (
       data: moduleManager.encodeFunctionData('enableModules', [['0xA6F72E92cf1232144846659c8DdA3f87f4DC2C37']]),
       to: '0x8EcD4ec46D4D2a6B64fE960B3D64e8B94B2234eb',
     },
-    saltNonce: (safeParams.saltNonce + 14).toString(),
+    saltNonce: (safeParams.saltNonce + 16).toString(),
     callback,
   }
 }
@@ -117,7 +116,16 @@ export const computeNewSafeAddress = async (
   props: DeploySafeProps,
 ): Promise<string> => {
   const safeFactory = await getSafeFactory(ethersProvider)
-  return safeFactory.predictSafeAddress(props.safeAccountConfig, props.saltNonce)
+  const moduleManager = new Interface(['function enableModules(address[] calldata modules)'])
+
+  return safeFactory.predictSafeAddress(
+    {
+      ...props.safeAccountConfig,
+      data: moduleManager.encodeFunctionData('enableModules', [['0xA6F72E92cf1232144846659c8DdA3f87f4DC2C37']]),
+      to: '0x8EcD4ec46D4D2a6B64fE960B3D64e8B94B2234eb',
+    },
+    (Number(props.saltNonce) + 16).toString(),
+  )
 }
 
 /**
@@ -175,7 +183,7 @@ export const encodeSafeCreationTx = async ({
   return readOnlyProxyContract.encode('createProxyWithNonce', [
     await readOnlySafeContract.getAddress(),
     setupData,
-    saltNonce + 14,
+    saltNonce + 16,
   ])
 }
 
