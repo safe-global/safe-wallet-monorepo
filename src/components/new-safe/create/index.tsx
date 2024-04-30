@@ -11,7 +11,6 @@ import useAddressBook from '@/hooks/useAddressBook'
 import { CardStepper } from '@/components/new-safe/CardStepper'
 import { AppRoutes } from '@/config/routes'
 import type { AlertColor } from '@mui/material'
-import type { CreateSafeInfoItem } from '@/components/new-safe/create/CreateSafeInfos'
 import { type ReactElement, useMemo, useState } from 'react'
 import ExternalLink from '@/components/common/ExternalLink'
 import { HelpCenterArticle } from '@/config/constants'
@@ -117,7 +116,6 @@ const CreateSafe = () => {
     accessory: 0,
     glasses: 0,
   })
-  const [dynamicHint, setDynamicHint] = useState<CreateSafeInfoItem>()
   const [activeStep, setActiveStep] = useState(0)
 
   const CreateSafeSteps: TxStepperProps<NewSafeFormData>['steps'] = [
@@ -178,7 +176,7 @@ const CreateSafe = () => {
     owners: [defaultOwner],
     threshold: 1,
     seed,
-    saltNonce: Date.now(),
+    saltNonce: Date.now() + Math.floor(Math.random() * 1000),
   }
 
   const onClose = () => {

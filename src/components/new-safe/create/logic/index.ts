@@ -45,40 +45,20 @@ export const getSafeDeployProps = async (
   chain: ChainInfo,
 ): Promise<DeploySafeProps & { callback: DeploySafeProps['callback'] }> => {
   const readOnlyFallbackHandlerContract = await getReadOnlyFallbackHandlerContract(chain.chainId, LATEST_SAFE_VERSION)
+  const moduleManager = new Interface(['function enableModulesAndGuard(address[] calldata modules, address guard)'])
 
-  // const multiSendCallData = encodeMultiSendData([
-  //   {
-  //     to: '0x2dd68b007B46fBe91B9A7c3EDa5A7a1063cB5b47' as Address,
-  //     data: encodeFunctionData({
-  //       abi: [],
-  //       functionName: 'enableModules',
-  //       args: [['0xA6F72E92cf1232144846659c8DdA3f87f4DC2C37']],
-  //     }),
-  //     value: '0',
-  //     operation: 1,
-  //   },
-  // ])
-  const moduleManager = new Interface(['function enableModules(address[] calldata modules)'])
-  console.debug({
-    safeAccountConfig: {
-      threshold: safeParams.threshold,
-      owners: safeParams.owners,
-      fallbackHandler: await readOnlyFallbackHandlerContract.getAddress(),
-      data: moduleManager.encodeFunctionData('enableModules', [['0xA6F72E92cf1232144846659c8DdA3f87f4DC2C37']]),
-      to: '0x8EcD4ec46D4D2a6B64fE960B3D64e8B94B2234eb',
-    },
-    saltNonce: (safeParams.saltNonce + 16).toString(),
-    callback,
-  })
   return {
     safeAccountConfig: {
       threshold: safeParams.threshold,
       owners: safeParams.owners,
       fallbackHandler: await readOnlyFallbackHandlerContract.getAddress(),
-      data: moduleManager.encodeFunctionData('enableModules', [['0xA6F72E92cf1232144846659c8DdA3f87f4DC2C37']]),
-      to: '0x8EcD4ec46D4D2a6B64fE960B3D64e8B94B2234eb',
+      data: moduleManager.encodeFunctionData('enableModulesAndGuard', [
+        ['0xAEa2e5E99fD2b75331590AB64a3C87972498fbed'],
+        '0xF1269529d531A6b84076E32A96758508A598f303',
+      ]),
+      to: '0x7930F16F30A8821B480718Dae0932CCd0B917b16',
     },
-    saltNonce: (safeParams.saltNonce + 16).toString(),
+    saltNonce: safeParams.saltNonce.toString(),
     callback,
   }
 }
@@ -116,15 +96,17 @@ export const computeNewSafeAddress = async (
   props: DeploySafeProps,
 ): Promise<string> => {
   const safeFactory = await getSafeFactory(ethersProvider)
-  const moduleManager = new Interface(['function enableModules(address[] calldata modules)'])
-
+  const moduleManager = new Interface(['function enableModulesAndGuard(address[] calldata modules, address guard)'])
   return safeFactory.predictSafeAddress(
     {
       ...props.safeAccountConfig,
-      data: moduleManager.encodeFunctionData('enableModules', [['0xA6F72E92cf1232144846659c8DdA3f87f4DC2C37']]),
-      to: '0x8EcD4ec46D4D2a6B64fE960B3D64e8B94B2234eb',
+      data: moduleManager.encodeFunctionData('enableModulesAndGuard', [
+        ['0xAEa2e5E99fD2b75331590AB64a3C87972498fbed'],
+        '0xF1269529d531A6b84076E32A96758508A598f303',
+      ]),
+      to: '0x7930F16F30A8821B480718Dae0932CCd0B917b16',
     },
-    (Number(props.saltNonce) + 16).toString(),
+    Number(props.saltNonce).toString(),
   )
 }
 
@@ -146,34 +128,17 @@ export const encodeSafeCreationTx = async ({
       async (response) => await response.getAddress(),
     ),
   )
-  // const multiSendCallData = encodeMultiSendData([
-  //   {
-  //     to: '0x2dd68b007B46fBe91B9A7c3EDa5A7a1063cB5b47',
-  //     data: encodeFunctionData({
-  //       abi: [
-  //         {
-  //           inputs: [{ internalType: 'address[]', name: 'modules', type: 'address[]' }],
-  //           name: 'enableModules',
-  //           outputs: [],
-  //           stateMutability: 'nonpayable',
-  //           type: 'function',
-  //         },
-  //       ],
-  //       functionName: 'enableModules',
-  //       args: [['0xA6F72E92cf1232144846659c8DdA3f87f4DC2C37' as Address]],
-  //     }),
-  //     value: '0',
-  //     operation: 1,
-  //   },
-  // ])
-
-  const moduleManager = new Interface(['function enableModules(address[] calldata modules)'])
+  const moduleManager = new Interface(['function enableModulesAndGuard(address[] calldata modules, address guard)'])
 
   const setupData = readOnlySafeContract.encode('setup', [
     owners,
     threshold,
-    '0x8EcD4ec46D4D2a6B64fE960B3D64e8B94B2234eb',
-    moduleManager.encodeFunctionData('enableModules', [['0xA6F72E92cf1232144846659c8DdA3f87f4DC2C37']]),
+    '0x7930F16F30A8821B480718Dae0932CCd0B917b16',
+    moduleManager.encodeFunctionData('enableModulesAndGuard', [
+      ['0xAEa2e5E99fD2b75331590AB64a3C87972498fbed'],
+      '0xF1269529d531A6b84076E32A96758508A598f303',
+    ]),
+
     await readOnlyFallbackHandlerContract.getAddress(),
     ZERO_ADDRESS,
     '0',
@@ -183,7 +148,7 @@ export const encodeSafeCreationTx = async ({
   return readOnlyProxyContract.encode('createProxyWithNonce', [
     await readOnlySafeContract.getAddress(),
     setupData,
-    saltNonce + 16,
+    saltNonce,
   ])
 }
 
