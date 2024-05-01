@@ -136,9 +136,6 @@ export const SafeSetupOverview = ({
 
 const ReviewStep = ({ data, onBack, setStep, onSubmit }: StepRenderProps<NewSafeFormData>) => {
   const wallet = useWallet()
-  const isWrongChain = useMemo(() => {
-    return wallet?.chainId !== 'eip155:10'
-  }, [wallet])
   useSyncSafeCreationStep(setStep)
   const chain = useCurrentChain()
   const provider = useWeb3()
@@ -173,11 +170,10 @@ const ReviewStep = ({ data, onBack, setStep, onSubmit }: StepRenderProps<NewSafe
 
   const totalFee = getTotalFeeFormatted(maxFeePerGas, gasLimit, chain)
 
-  // Only 1 out of 1 safe setups are supported for now
   const isCounterfactual = true
 
   const handleBack = () => {
-    // onBack(data);
+    onBack(data)
   }
 
   const createSafe = async () => {

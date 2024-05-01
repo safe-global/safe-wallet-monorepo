@@ -38,17 +38,17 @@ const getStep = (status: SafeCreationStatus) => {
       }
     case SafeCreationStatus.SUCCESS:
       return {
-        description: 'Your Safe Account is being indexed..',
+        description: 'Your Superchain Account is being indexed..',
         instruction: 'The account will be ready for use shortly. Please do not leave this page.',
       }
     case SafeCreationStatus.INDEXED:
       return {
-        description: 'Your Safe Account was successfully created!',
+        description: 'Your Superchain Account was successfully created!',
         instruction: '',
       }
     case SafeCreationStatus.INDEX_FAILED:
       return {
-        description: 'Your Safe Account is successfully created!',
+        description: 'Your Superchain Account is successfully created!',
         instruction:
           'You can already open Safe{Wallet}. It might take a moment until it becomes fully usable in the interface.',
       }

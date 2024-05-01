@@ -3,10 +3,9 @@ import React from 'react'
 import css from './styles.module.css'
 import { Box, Button, Divider, Grid, IconButton, List, ListItem, ListItemText, SvgIcon } from '@mui/material'
 import layoutCss from '@/components/new-safe/create/styles.module.css'
-import { buildSVG } from '@nouns/sdk'
 import ArrowForward from '@/public/images/common/right-arrow.svg'
 import ArrowBack from '@/public/images/common/left-arrow.svg'
-import { getNounData, ImageData } from '@nouns/assets'
+import { ImageData } from '@nouns/assets'
 import type { StepRenderProps } from '@/components/new-safe/CardStepper/useCardStepper'
 import type { NewSafeFormData } from '../..'
 import NounsAvatar from '@/components/common/NounsAvatar'
@@ -39,14 +38,23 @@ function Avatar({
   seed,
   setSeed,
   onSubmit,
+  onBack,
+  data,
 }: {
   setStep: (step: number) => void
   seed: NounProps
   setSeed: React.Dispatch<React.SetStateAction<NounProps>>
 } & StepRenderProps<NewSafeFormData>) {
   const handleNext = () => {
-    onSubmit(seed)
+    onSubmit({
+      ...data,
+      seed,
+    })
     setStep(2)
+  }
+
+  const handleBack = () => {
+    onBack(data)
   }
 
   const handleChangeBodyPart = (part: keyof NounProps, delta: number) => {
@@ -122,7 +130,7 @@ function Avatar({
       <Divider />
       <Box className={layoutCss.row}>
         <Box display="flex" flexDirection="row" justifyContent="space-between" gap={3}>
-          <Button data-testid="cancel-btn" variant="outlined" size="small">
+          <Button onClick={handleBack} data-testid="cancel-btn" variant="outlined" size="small">
             Cancel
           </Button>
           <Button

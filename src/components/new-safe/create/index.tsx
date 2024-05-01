@@ -11,7 +11,7 @@ import useAddressBook from '@/hooks/useAddressBook'
 import { CardStepper } from '@/components/new-safe/CardStepper'
 import { AppRoutes } from '@/config/routes'
 import type { AlertColor } from '@mui/material'
-import { type ReactElement, useMemo, useState } from 'react'
+import { type ReactElement, useState } from 'react'
 import ExternalLink from '@/components/common/ExternalLink'
 import { HelpCenterArticle } from '@/config/constants'
 import { isSocialLoginWallet } from '@/services/mpc/SocialLoginModule'
@@ -137,7 +137,7 @@ const CreateSafe = () => {
       title: 'Customize your Superchain Account Avatar',
       subtitle: 'This avatar will be the face of your Superchain Account',
       render: (data, onSubmit, onBack, setStep) => (
-        <Avatar setStep={setStep} seed={seed} setSeed={setSeed} onSubmit={onSubmit} data={data} onBack={onBack} />
+        <Avatar setStep={setStep} onBack={onBack} seed={seed} setSeed={setSeed} onSubmit={onSubmit} data={data} />
       ),
     },
     {
@@ -163,8 +163,6 @@ const CreateSafe = () => {
     },
   ]
 
-  const staticHint = useMemo(() => staticHints[activeStep], [activeStep])
-
   const mnemonicSafeName = useMnemonicSafeName()
 
   // Jump to review screen when using social login
@@ -176,7 +174,7 @@ const CreateSafe = () => {
     owners: [defaultOwner],
     threshold: 1,
     seed,
-    saltNonce: Date.now() + Math.floor(Math.random() * 1000),
+    saltNonce: Date.now(),
   }
 
   const onClose = () => {
