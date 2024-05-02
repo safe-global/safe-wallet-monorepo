@@ -2,8 +2,17 @@ import { computeNewSafeAddress } from '@/components/new-safe/create/logic/index'
 import { isSmartContract } from '@/hooks/wallets/web3'
 import type { DeploySafeProps } from '@safe-global/protocol-kit'
 import type { BrowserProvider } from 'ethers'
+import type { NounProps } from '../steps/AvatarStep'
 
-export const getAvailableSaltNonce = async (provider: BrowserProvider, props: DeploySafeProps): Promise<string> => {
+export const getAvailableSaltNonce = async (
+  provider: BrowserProvider,
+  props: DeploySafeProps & {
+    superChainProps: {
+      name: string
+      seed: NounProps
+    }
+  },
+): Promise<string> => {
   const safeAddress = await computeNewSafeAddress(provider, props)
   const isContractDeployed = await isSmartContract(provider, safeAddress)
 

@@ -1,0 +1,36 @@
+[
+  {
+    "type": "function",
+    "name": "setupSuperChainAccount",
+    "inputs": [
+      { "name": "modules", "type": "address[]", "internalType": "address[]" },
+      {
+        "name": "superChainModule",
+        "type": "address",
+        "internalType": "address"
+      },
+      { "name": "guard", "type": "address", "internalType": "address" },
+      { "name": "owner", "type": "address", "internalType": "address" },
+      {
+        "name": "seed",
+        "type": "tuple",
+        "internalType": "struct NounMetadata",
+        "components": [
+          { "name": "id", "type": "uint256", "internalType": "uint256" },
+          {
+            "name": "background",
+            "type": "uint48",
+            "internalType": "uint48"
+          },
+          { "name": "body", "type": "uint48", "internalType": "uint48" },
+          { "name": "accessory", "type": "uint48", "internalType": "uint48" },
+          { "name": "head", "type": "uint48", "internalType": "uint48" },
+          { "name": "glasses", "type": "uint48", "internalType": "uint48" }
+        ]
+      },
+      { "name": "superChainID", "type": "string", "internalType": "string" }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  }
+]

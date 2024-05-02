@@ -10,11 +10,12 @@ import { ImplementationVersionState } from '@safe-global/safe-gateway-typescript
 import type { ChainInfo, SafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import type { GetContractProps, SafeVersion } from '@safe-global/safe-core-sdk-types'
 import { assertValidSafeVersion, createEthersAdapter, createReadOnlyEthersAdapter } from '@/hooks/coreSDK/safeCoreSDK'
-import type { BrowserProvider } from 'ethers'
+import { Interface, type BrowserProvider } from 'ethers'
 import type { EthersAdapter, SafeContractEthers, SignMessageLibEthersContract } from '@safe-global/protocol-kit'
 import semver from 'semver'
 
 import type CompatibilityFallbackHandlerEthersContract from '@safe-global/protocol-kit/dist/src/adapters/ethers/contracts/CompatibilityFallbackHandler/CompatibilityFallbackHandlerEthersContract'
+import { SUPER_CHAIN_SETUP_ABI } from '@/features/superChain/constants'
 
 // `UNKNOWN` is returned if the mastercopy does not match supported ones
 // @see https://github.com/safe-global/safe-client-gateway/blob/main/src/routes/safes/handlers/safes.rs#L28-L31
@@ -127,6 +128,10 @@ export const getReadOnlyFallbackHandlerContract = async (
     singletonDeployment: getFallbackHandlerContractDeployment(chainId, safeVersion),
     ..._getValidatedGetContractProps(safeVersion),
   })
+}
+
+export const getSuperChainSetupInterface = () => {
+  return new Interface(SUPER_CHAIN_SETUP_ABI)
 }
 
 // Sign messages deployment

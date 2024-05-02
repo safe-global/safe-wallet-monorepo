@@ -50,7 +50,6 @@ import classnames from 'classnames'
 import { useMemo, useState } from 'react'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 // import { useWallet } from '@/hooks/useWallet'
-import useWalletCanPay from '@/hooks/useWalletCanPay'
 import NounsAvatar from '@/components/common/NounsAvatar'
 import type { NounProps } from '../AvatarStep'
 import Identicon from '@/components/common/Identicon'
@@ -144,29 +143,19 @@ const ReviewStep = ({ data, onBack, setStep, onSubmit }: StepRenderProps<NewSafe
   const [isCreating, setIsCreating] = useState<boolean>(false)
   const [submitError, setSubmitError] = useState<string>()
 
-  // const ownerAddresses = useMemo(
-  //   () => data.owners.map((owner) => owner.address),
-  //   [data.owners]
-  // );
-
   const safeParams = useMemo(() => {
     return {
       owners: data.owners.map((owner) => owner.address),
       threshold: data.threshold,
       saltNonce: Date.now(),
+      name: data.name,
+      seed: data.seed,
     }
-  }, [data.owners])
+  }, [data.owners, data.threshold, data.name, data.seed])
 
   const { gasLimit } = useEstimateSafeCreationGas(safeParams)
 
   const maxFeePerGas = gasPrice?.maxFeePerGas
-  const maxPriorityFeePerGas = gasPrice?.maxPriorityFeePerGas
-
-  const walletCanPay = useWalletCanPay({
-    gasLimit,
-    maxFeePerGas,
-    maxPriorityFeePerGas,
-  })
 
   const totalFee = getTotalFeeFormatted(maxFeePerGas, gasLimit, chain)
 
@@ -187,11 +176,20 @@ const ReviewStep = ({ data, onBack, setStep, onSubmit }: StepRenderProps<NewSafe
         LATEST_SAFE_VERSION,
       )
 
-      const props: DeploySafeProps = {
+      const props: DeploySafeProps & {
+        superChainProps: {
+          name: string
+          seed: NounProps
+        }
+      } = {
         safeAccountConfig: {
           threshold: data.threshold,
           owners: data.owners.map((owner) => owner.address),
           fallbackHandler: await readOnlyFallbackHandlerContract.getAddress(),
+        },
+        superChainProps: {
+          name: data.name,
+          seed: data.seed,
         },
       }
 

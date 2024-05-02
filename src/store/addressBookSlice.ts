@@ -46,6 +46,7 @@ export const addressBookSlice = createSlice({
 export const { setAddressBook, upsertAddressBookEntry, removeAddressBookEntry } = addressBookSlice.actions
 
 export const selectAllAddressBooks = (state: RootState): AddressBookState => {
+  console.debug(state)
   return state[addressBookSlice.name]
 }
 
