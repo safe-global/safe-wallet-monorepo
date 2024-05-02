@@ -8,7 +8,7 @@ export const getAvailableSaltNonce = async (
   provider: BrowserProvider,
   props: DeploySafeProps & {
     superChainProps: {
-      name: string
+      id: string
       seed: NounProps
     }
   },

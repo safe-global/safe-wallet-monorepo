@@ -75,8 +75,9 @@ export const useSafeCreation = (
     setIsCreating(true)
     dispatch(closeByGroupKey({ groupKey: SAFE_CREATION_ERROR_KEY }))
 
-    const { owners, threshold, saltNonce, name, seed } = pendingSafe
+    const { owners, threshold, saltNonce, id, seed } = pendingSafe
     const ownersAddresses = owners.map((owner) => owner.address)
+    console.debug({ pendingSafe })
 
     try {
       if (willRelay) {
@@ -86,12 +87,12 @@ export const useSafeCreation = (
         setStatus(SafeCreationStatus.PROCESSING)
         waitForCreateSafeTx(taskId, setStatus)
       } else {
-        const tx = await getSafeCreationTxInfo(provider, owners, threshold, saltNonce, chain, wallet, name, seed)
+        const tx = await getSafeCreationTxInfo(provider, owners, threshold, saltNonce, chain, wallet, id, seed)
         const safeParams = {
           threshold,
           owners: owners.map((owner) => owner.address),
           saltNonce,
-          name,
+          id,
           seed,
         }
 

@@ -26,6 +26,7 @@ export type NewSafeFormData = {
   seed: NounProps
   owners: NamedAddress[]
   saltNonce: number
+  id: string
   safeAddress?: string
   willRelay?: boolean
 }
@@ -173,6 +174,7 @@ const CreateSafe = () => {
     name: isSocialLogin ? mnemonicSafeName : '',
     owners: [defaultOwner],
     threshold: 1,
+    id: superChainId,
     seed,
     saltNonce: Date.now(),
   }

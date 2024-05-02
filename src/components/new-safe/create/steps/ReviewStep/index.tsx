@@ -148,10 +148,10 @@ const ReviewStep = ({ data, onBack, setStep, onSubmit }: StepRenderProps<NewSafe
       owners: data.owners.map((owner) => owner.address),
       threshold: data.threshold,
       saltNonce: Date.now(),
-      name: data.name,
+      id: data.id,
       seed: data.seed,
     }
-  }, [data.owners, data.threshold, data.name, data.seed])
+  }, [data.owners, data.threshold, data.id, data.seed])
 
   const { gasLimit } = useEstimateSafeCreationGas(safeParams)
 
@@ -178,7 +178,7 @@ const ReviewStep = ({ data, onBack, setStep, onSubmit }: StepRenderProps<NewSafe
 
       const props: DeploySafeProps & {
         superChainProps: {
-          name: string
+          id: string
           seed: NounProps
         }
       } = {
@@ -188,7 +188,7 @@ const ReviewStep = ({ data, onBack, setStep, onSubmit }: StepRenderProps<NewSafe
           fallbackHandler: await readOnlyFallbackHandlerContract.getAddress(),
         },
         superChainProps: {
-          name: data.name,
+          id: data.id,
           seed: data.seed,
         },
       }

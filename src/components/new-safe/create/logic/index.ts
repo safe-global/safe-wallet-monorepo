@@ -41,7 +41,7 @@ export type SafeCreationProps = {
   owners: string[]
   threshold: number
   saltNonce: number
-  name: string
+  id: string
   seed: NounProps
 }
 
@@ -54,7 +54,7 @@ export const getSafeDeployProps = async (
   chain: ChainInfo,
 ): Promise<DeploySafeProps & { callback: DeploySafeProps['callback'] }> => {
   const readOnlyFallbackHandlerContract = await getReadOnlyFallbackHandlerContract(chain.chainId, LATEST_SAFE_VERSION)
-  const { data, to } = getSuperChainSetupCallData(safeParams.seed, safeParams.name, safeParams.owners[0])
+  const { data, to } = getSuperChainSetupCallData(safeParams.seed, safeParams.id, safeParams.owners[0])
   return {
     safeAccountConfig: {
       threshold: safeParams.threshold,
@@ -70,14 +70,28 @@ export const getSafeDeployProps = async (
 
 const getSuperChainSetupCallData = (seed: NounProps, superChainID: string, owner: string) => {
   const moduleManager = getSuperChainSetupInterface()
-
+  console.debug([
+    [ERC4337_MODULE_ADDRESS],
+    SUPER_CHAIN_ACCOUNT_MODULE_ADDRESS,
+    SUPER_CHAIN_ACCOUNT_GUARD_ADDRESS,
+    owner,
+    [0, seed.background, seed.body, seed.accessory, seed.head, seed.glasses],
+    superChainID,
+  ])
   return {
     data: moduleManager.encodeFunctionData('setupSuperChainAccount', [
       [ERC4337_MODULE_ADDRESS],
       SUPER_CHAIN_ACCOUNT_MODULE_ADDRESS,
       SUPER_CHAIN_ACCOUNT_GUARD_ADDRESS,
       owner,
-      [0, seed.background, seed.body, seed.accessory, seed.head, seed.glasses],
+      {
+        id: 0,
+        background: seed.background,
+        body: seed.body,
+        accessory: seed.accessory,
+        head: seed.head,
+        glasses: seed.glasses,
+      },
       superChainID,
     ]),
     to: SUPER_CHAIN_SETUP_ADDRESS,
@@ -117,14 +131,14 @@ export const computeNewSafeAddress = async (
   props: DeploySafeProps & {
     superChainProps: {
       seed: NounProps
-      name: string
+      id: string
     }
   },
 ): Promise<string> => {
   const safeFactory = await getSafeFactory(ethersProvider)
   const { to, data } = getSuperChainSetupCallData(
     props.superChainProps.seed,
-    props.superChainProps.name,
+    props.superChainProps.id,
     props.safeAccountConfig.owners[0],
   )
   return safeFactory.predictSafeAddress(
@@ -146,14 +160,14 @@ export const encodeSafeCreationTx = async ({
   threshold,
   saltNonce,
   chain,
-  name,
+  id,
   seed,
 }: SafeCreationProps & { chain: ChainInfo }) => {
   const readOnlySafeContract = await getReadOnlyGnosisSafeContract(chain, LATEST_SAFE_VERSION)
   const readOnlyProxyContract = await getReadOnlyProxyFactoryContract(chain.chainId, LATEST_SAFE_VERSION)
   const readOnlyFallbackHandlerContract = await getReadOnlyFallbackHandlerContract(chain.chainId, LATEST_SAFE_VERSION)
 
-  const { data, to } = getSuperChainSetupCallData(seed, name, owners[0])
+  const { data, to } = getSuperChainSetupCallData(seed, id, owners[0])
 
   const setupData = readOnlySafeContract.encode('setup', [
     owners,
@@ -183,7 +197,7 @@ export const getSafeCreationTxInfo = async (
   saltNonce: NewSafeFormData['saltNonce'],
   chain: ChainInfo,
   wallet: ConnectedWallet,
-  name: string,
+  id: string,
   seed: NounProps,
 ): Promise<PendingSafeTx> => {
   const readOnlyProxyContract = await getReadOnlyProxyFactoryContract(chain.chainId, LATEST_SAFE_VERSION)
@@ -193,7 +207,7 @@ export const getSafeCreationTxInfo = async (
     threshold,
     saltNonce,
     chain,
-    name,
+    id,
     seed,
   })
 
