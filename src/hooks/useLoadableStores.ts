@@ -20,6 +20,8 @@ import { txQueueSlice } from '@/store/txQueueSlice'
 import { spendingLimitSlice } from '@/store/spendingLimitsSlice'
 import useLoadSpendingLimits from '@/hooks/loadables/useLoadSpendingLimits'
 import { safeMessagesSlice } from '@/store/safeMessagesSlice'
+import { useLoadSuperChainAccount } from './loadables/useLoadSuperChainAccount'
+import { superChainAccountSlice } from '@/store/superChainAccountSlice'
 
 // Dispatch into the corresponding store when the loadable is loaded
 const useUpdateStore = (slice: Slice, useLoadHook: () => AsyncResult<unknown>): void => {
@@ -46,6 +48,7 @@ const useLoadableStores = () => {
   useUpdateStore(txQueueSlice, useLoadTxQueue)
   useUpdateStore(safeMessagesSlice, useLoadMessages)
   useUpdateStore(spendingLimitSlice, useLoadSpendingLimits)
+  useUpdateStore(superChainAccountSlice, useLoadSuperChainAccount)
 }
 
 export default useLoadableStores
