@@ -15,6 +15,7 @@ import useRecovery from '@/features/recovery/hooks/useRecovery'
 import { useIsRecoverySupported } from '@/features/recovery/hooks/useIsRecoverySupported'
 import Balances from '@/pages/balances'
 import SuperChainEOAS from '../common/SuperChainEOAS'
+import SafeAppsDashboardSection from './SafeAppsDashboardSection/SafeAppsDashboardSection'
 const RecoveryHeader = dynamic(() => import('@/features/recovery/components/RecoveryHeader'))
 const RecoveryWidget = dynamic(() => import('@/features/recovery/components/RecoveryWidget'))
 
@@ -29,7 +30,7 @@ const Dashboard = (): ReactElement => {
 
   return (
     <>
-      <Grid container>
+      <Grid container spacing={3} rowSpacing={5}>
         {supportsRecovery && <RecoveryHeader />}
 
         <Grid item xs={12}>
@@ -62,10 +63,10 @@ const Dashboard = (): ReactElement => {
             <Grid item xs={12}>
               <GovernanceSection />
             </Grid>
-
+*/}
             <Grid item xs={12}>
               <SafeAppsDashboardSection />
-            </Grid> */}
+            </Grid>
           </>
         )}
       </Grid>

@@ -31,8 +31,8 @@ const Balances: NextPage = () => {
         <CurrencySelect />
       </AssetsHeader> */}
 
-      <main className={css.container}>
-        <Typography fontWeight={600} fontSize={16} marginBottom={1}>
+      <div className={css.container}>
+        <Typography component="h2" fontWeight={600} fontSize={16} marginBottom={1}>
           Assets
         </Typography>
 
@@ -41,7 +41,7 @@ const Balances: NextPage = () => {
         ) : (
           <AssetsTable setShowHiddenAssets={setShowHiddenAssets} showHiddenAssets={showHiddenAssets} />
         )}
-      </main>
+      </div>
     </>
   )
 }
