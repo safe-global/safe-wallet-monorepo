@@ -109,9 +109,9 @@ const SafeHeader = (): ReactElement => {
             <ExplorerButton {...blockExplorerLink} className={css.iconButton} icon={LinkIconBold} />
           </Track>
 
-          <CounterfactualStatusButton />
+          {/* <CounterfactualStatusButton /> */}
 
-          <EnvHintButton />
+          {/* <EnvHintButton /> */}
         </div>
       </div>
 

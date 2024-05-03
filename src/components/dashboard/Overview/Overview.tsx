@@ -12,9 +12,10 @@ import { Button, Grid, Skeleton, Typography } from '@mui/material'
 import { WidgetBody, WidgetContainer } from '../styled'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useVisibleBalances } from '@/hooks/useVisibleBalances'
-import ArrowIconNW from '@/public/images/common/arrow-top-right.svg'
+
 import ArrowIconSE from '@/public/images/common/arrow-se.svg'
 import BuyCryptoButton from '@/components/common/BuyCryptoButton'
+import { selectCurrentSuperChainAccount } from '@/store/superChainAccountSlice'
 
 const SkeletonOverview = (
   <>
@@ -39,6 +40,8 @@ const Overview = (): ReactElement => {
   const { safe, safeLoading, safeLoaded } = useSafeInfo()
   const { balances, loading: balancesLoading } = useVisibleBalances()
   const { setTxFlow } = useContext(TxModalContext)
+  const data = useAppSelector(selectCurrentSuperChainAccount)
+  console.debug(data)
 
   const fiatTotal = useMemo(
     () => (balances.fiatTotal ? formatCurrency(balances.fiatTotal, currency) : ''),
@@ -91,7 +94,7 @@ const Overview = (): ReactElement => {
                   <Grid item xs={12} sm="auto">
                     <BuyCryptoButton />
                   </Grid>
-
+                  {/* 
                   <Grid item xs={6} sm="auto">
                     <Button
                       onClick={handleOnSend}
@@ -103,7 +106,7 @@ const Overview = (): ReactElement => {
                     >
                       Send
                     </Button>
-                  </Grid>
+                  </Grid> */}
                   <Grid item xs={6} sm="auto">
                     <Track {...OVERVIEW_EVENTS.SHOW_QR} label="dashboard">
                       <QrCodeButton>
