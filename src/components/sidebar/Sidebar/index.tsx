@@ -30,11 +30,10 @@ const Sidebar = (): ReactElement => {
         {/* <ChainIndicator showLogo={false} /> */}
 
         {/* Open the safes list */}
-        <button data-testid="open-safes-icon" className={css.drawerButton} onClick={onDrawerToggle}>
+        {/* <button data-testid="open-safes-icon" className={css.drawerButton} onClick={onDrawerToggle}>
           <ChevronRight />
-        </button>
+        </button> */}
 
-        {/* Address, balance, copy button, etc */}
         <SidebarHeader />
 
         <Divider />

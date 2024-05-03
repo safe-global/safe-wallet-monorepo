@@ -1,11 +1,11 @@
-import { Box, FormControlLabel, Grid, Paper, Switch, Typography } from '@mui/material'
-import EthHashInfo from '@/components/common/EthHashInfo'
-import QRCode from '@/components/common/QRCode'
+import { Box, Button, Grid, Paper, Typography } from '@mui/material'
+// import EthHashInfo from '@/components/common/EthHashInfo'
+// import QRCode from '@/components/common/QRCode'
 import { useCurrentChain } from '@/hooks/useChains'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import { useAppDispatch, useAppSelector } from '@/store'
-import { selectSettings, setQrShortName } from '@/store/settingsSlice'
-import BuyCryptoButton from '@/components/common/BuyCryptoButton'
+import { selectSettings } from '@/store/settingsSlice'
+// import BuyCryptoButton from '@/components/common/BuyCryptoButton'
 
 const AddFundsCTA = () => {
   const safeAddress = useSafeAddress()
@@ -16,9 +16,13 @@ const AddFundsCTA = () => {
   const qrCode = `${qrPrefix}${safeAddress}`
 
   return (
-    <Paper>
-      <Grid container gap={3} alignItems="center" justifyContent="center" p={4}>
-        <Grid item>
+    <Paper
+      style={{
+        height: '100%',
+      }}
+    >
+      {/* <Grid container gap={3} alignItems="center" justifyContent="center" p={4}> */}
+      {/* <Grid item>
           <div>
             <Box p={2} border="1px solid" borderColor="border.light" borderRadius={1} display="inline-block">
               <QRCode value={qrCode} size={195} />
@@ -31,26 +35,25 @@ const AddFundsCTA = () => {
             }
             label={<>QR code with chain prefix</>}
           />
-        </Grid>
+        </Grid> */}
 
-        <Grid item container xs={12} md={6} gap={2} flexDirection="column">
-          <Typography variant="h3" fontWeight="bold">
+      <Grid container gap={2} height="100%" alignItems="center" justifyContent="center" p={4} flexDirection="column">
+        {/* <Typography variant="h3" fontWeight="bold">
             Add funds to get started
-          </Typography>
+          </Typography> */}
 
-          <Typography>
-            Add funds directly from your bank account or copy your address to send tokens from a different account.
-          </Typography>
+        <Typography>Top up your account with funds to get started</Typography>
 
-          <Box bgcolor="background.main" p={2} borderRadius="6px" alignSelf="flex-start" fontSize="14px">
+        {/* <Box bgcolor="background.main" p={2} borderRadius="6px" alignSelf="flex-start" fontSize="14px">
             <EthHashInfo address={safeAddress} shortAddress={false} showCopyButton hasExplorer avatarSize={24} />
-          </Box>
+          </Box> */}
 
-          <Box alignSelf="flex-start">
-            <BuyCryptoButton />
-          </Box>
-        </Grid>
+        {/* <BuyCryptoButton /> */}
+        <Button variant="contained" color="primary" size="large">
+          Add funds
+        </Button>
       </Grid>
+      {/* </Grid> */}
     </Paper>
   )
 }

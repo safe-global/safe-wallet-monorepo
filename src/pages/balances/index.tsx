@@ -8,9 +8,11 @@ import { useState } from 'react'
 
 import PagePlaceholder from '@/components/common/PagePlaceholder'
 import NoAssetsIcon from '@/public/images/balances/no-assets.svg'
-import HiddenTokenButton from '@/components/balances/HiddenTokenButton'
-import CurrencySelect from '@/components/balances/CurrencySelect'
-import TokenListSelect from '@/components/balances/TokenListSelect'
+import { Typography } from '@mui/material'
+import css from './styles.module.css'
+// import HiddenTokenButton from '@/components/balances/HiddenTokenButton'
+// import CurrencySelect from '@/components/balances/CurrencySelect'
+// import TokenListSelect from '@/components/balances/TokenListSelect'
 
 const Balances: NextPage = () => {
   const { error } = useBalances()
@@ -23,13 +25,17 @@ const Balances: NextPage = () => {
         <title>{'Safe{Wallet} – Assets'}</title>
       </Head>
 
-      <AssetsHeader>
+      {/* <AssetsHeader>
         <HiddenTokenButton showHiddenAssets={showHiddenAssets} toggleShowHiddenAssets={toggleShowHiddenAssets} />
         <TokenListSelect />
         <CurrencySelect />
-      </AssetsHeader>
+      </AssetsHeader> */}
 
-      <main>
+      <main className={css.container}>
+        <Typography fontWeight={600} fontSize={16} marginBottom={1}>
+          Assets
+        </Typography>
+
         {error ? (
           <PagePlaceholder img={<NoAssetsIcon />} text="There was an error loading your assets" />
         ) : (

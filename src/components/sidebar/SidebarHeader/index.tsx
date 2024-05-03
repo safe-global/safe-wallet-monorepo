@@ -25,12 +25,13 @@ import EthHashInfo from '@/components/common/EthHashInfo'
 import QrCodeButton from '../QrCodeButton'
 import Track from '@/components/common/Track'
 import { OVERVIEW_EVENTS } from '@/services/analytics/events/overview'
-import { SvgIcon } from '@mui/material'
+import { Box, LinearProgress, SvgIcon } from '@mui/material'
 import { useVisibleBalances } from '@/hooks/useVisibleBalances'
 import EnvHintButton from '@/components/settings/EnvironmentVariables/EnvHintButton'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import ExplorerButton from '@/components/common/ExplorerButton'
 import CopyTooltip from '@/components/common/CopyTooltip'
+import NounsAvatar from '@/components/common/NounsAvatar'
 
 const SafeHeader = (): ReactElement => {
   const currency = useAppSelector(selectCurrency)
@@ -54,7 +55,34 @@ const SafeHeader = (): ReactElement => {
     <div className={css.container}>
       <div className={css.info}>
         <div data-testid="safe-header-info" className={css.safe}>
-          <div data-testid="safe-icon">
+          <div className={css.nouns}>
+            <NounsAvatar
+              seed={{
+                accessory: 0,
+                body: 0,
+                background: 0,
+                glasses: 0,
+                head: 0,
+              }}
+            />
+          </div>
+          <div className={css.superchainInfo}>
+            <span className={css.superchainLevel}>
+              Level: <span>1</span>
+            </span>
+            <div className={css.superChainData}>
+              <p className={css.superChainId}>
+                luuk<span>.superchain</span>
+              </p>
+              <p className={css.superChainData_points}>
+                SC points: <span>0</span>
+              </p>
+              <p className={css.superChainData_points}>
+                Points to level up: <span>100</span>
+              </p>
+            </div>
+          </div>
+          {/* <div data-testid="safe-icon">
             {safeAddress ? (
               <SafeIcon address={safeAddress} threshold={threshold} owners={owners?.length} />
             ) : (
@@ -83,7 +111,7 @@ const SafeHeader = (): ReactElement => {
                 />
               )}
             </Typography>
-          </div>
+          </div> */}
         </div>
 
         <div className={css.iconButtons}>
@@ -108,14 +136,48 @@ const SafeHeader = (): ReactElement => {
           <Track {...OVERVIEW_EVENTS.OPEN_EXPLORER}>
             <ExplorerButton {...blockExplorerLink} className={css.iconButton} icon={LinkIconBold} />
           </Track>
-
+          <Box
+            sx={{
+              width: '158px',
+              height: '34px',
+              borderRadius: '6px',
+              border: '2px',
+              position: 'relative',
+              display: 'flex',
+              alignItems: 'center',
+            }}
+          >
+            <LinearProgress
+              variant="determinate"
+              color="inherit"
+              value={70}
+              sx={{ width: '100%', height: 34, backgroundColor: 'white', color: '#E8EDF5', borderRadius: '6px' }}
+            />
+            <Box
+              sx={{
+                position: 'absolute',
+                left: 0,
+                right: 0,
+                top: 0,
+                bottom: 0,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'white',
+              }}
+            >
+              <Typography color="black" fontWeight={600} variant="body2" component="div">
+                Wk. Gas balance
+              </Typography>
+            </Box>
+          </Box>
           {/* <CounterfactualStatusButton /> */}
 
           {/* <EnvHintButton /> */}
         </div>
       </div>
 
-      <NewTxButton />
+      {/* <NewTxButton /> */}
     </div>
   )
 }
