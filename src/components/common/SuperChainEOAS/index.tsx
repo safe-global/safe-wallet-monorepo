@@ -4,7 +4,11 @@ import css from './styles.module.css'
 // import CurrencySelect from '@/components/balances/CurrencySelect'
 // import TokenListSelect from '@/components/balances/TokenListSelect'
 import MoreIcon from '@/public/images/common/more.svg'
+import useSafeInfo from '@/hooks/useSafeInfo'
+import EthHashInfo from '../EthHashInfo'
 const SuperChainEOAS = () => {
+  const { safe } = useSafeInfo()
+
   return (
     <div className={css.container}>
       <Typography fontWeight={600} fontSize={16} marginBottom={1}>
@@ -31,6 +35,26 @@ const SuperChainEOAS = () => {
               <SvgIcon component={MoreIcon} />
             </Box>
             <Divider />
+            <Box
+              p={2}
+              alignItems="center"
+              display="flex"
+              justifyContent="space-between"
+              width="100%"
+              flexDirection="row"
+            >
+              {safe.owners.map((owner, key) => (
+                <EthHashInfo
+                  avatarSize={30}
+                  key={key}
+                  address={owner.value}
+                  showCopyButton
+                  shortAddress={false}
+                  showName={false}
+                  hasExplorer
+                />
+              ))}
+            </Box>
           </Box>
         </Grid>
       </Paper>

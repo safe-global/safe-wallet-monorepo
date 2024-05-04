@@ -1,5 +1,6 @@
 .container td:last-of-type button {
   opacity: 0;
+  height: 100%;
   transition: opacity 0.2s;
 }
 
