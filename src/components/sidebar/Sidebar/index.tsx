@@ -1,8 +1,5 @@
 import { useCallback, useState, type ReactElement } from 'react'
 import { Box, Divider, Drawer } from '@mui/material'
-import ChevronRight from '@mui/icons-material/ChevronRight'
-
-import ChainIndicator from '@/components/common/ChainIndicator'
 import SidebarHeader from '@/components/sidebar/SidebarHeader'
 import SidebarNavigation from '@/components/sidebar/SidebarNavigation'
 import SidebarFooter from '@/components/sidebar/SidebarFooter'

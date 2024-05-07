@@ -53,6 +53,7 @@
     "@gnosis.pm/zodiac": "^4.0.1",
     "@mui/icons-material": "^5.14.20",
     "@mui/material": "^5.14.20",
+    "@mui/styles": "^5.15.16",
     "@mui/x-date-pickers": "^5.0.20",
     "@nouns/assets": "^0.5.0",
     "@nouns/sdk": "^0.4.0",

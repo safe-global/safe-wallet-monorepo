@@ -1,0 +1,37 @@
+.optimismBadge {
+  background-color: var(--color-secondary-dark);
+  color: white;
+}
+
+.description {
+  color: var(--color-primary-light);
+}
+
+.container {
+  padding: 12px 24px;
+}
+.container p {
+  margin: 0;
+}
+.amountButton {
+  width: 42px;
+  height: 56px;
+}
+
+.topUpButton {
+  height: 56px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.noun {
+  width: 40px;
+  height: 40px;
+  border-radius: 15%;
+}
+
+.select {
+  /* color: white; */
+  font-weight: 600;
+  /* background-color: black; */
+}

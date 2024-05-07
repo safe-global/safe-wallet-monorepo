@@ -49,6 +49,7 @@ const SuperChainEOAS = () => {
                   key={key}
                   address={owner.value}
                   showCopyButton
+                  prefix=""
                   shortAddress={false}
                   showName={false}
                   hasExplorer
