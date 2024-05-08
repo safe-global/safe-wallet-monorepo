@@ -16,7 +16,6 @@ import { useIsRecoverySupported } from '@/features/recovery/hooks/useIsRecoveryS
 import Balances from '@/pages/balances'
 import SuperChainEOAS from '../common/SuperChainEOAS'
 import SafeAppsDashboardSection from './SafeAppsDashboardSection/SafeAppsDashboardSection'
-import TopUpModal from '../superChain/TopUpModal'
 const RecoveryHeader = dynamic(() => import('@/features/recovery/components/RecoveryHeader'))
 const RecoveryWidget = dynamic(() => import('@/features/recovery/components/RecoveryWidget'))
 
