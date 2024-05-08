@@ -1,17 +1,17 @@
 import type { NextPage } from 'next'
 import Head from 'next/head'
 
-import Dashboard from '@/components/dashboard'
+import Badges from '@/components/badges'
 
 const Home: NextPage = () => {
   return (
     <>
       <Head>
-        <title>Super Chain Account – Dashboard</title>
+        <title>Super Chain Account – Badges</title>
       </Head>
 
       <main>
-        <Dashboard />
+        <Badges />
       </main>
     </>
   )
