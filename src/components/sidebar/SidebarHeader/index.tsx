@@ -1,15 +1,10 @@
-import TokenAmount from '@/components/common/TokenAmount'
-import CounterfactualStatusButton from '@/features/counterfactual/CounterfactualStatusButton'
 import { type ReactElement, useMemo } from 'react'
 import Typography from '@mui/material/Typography'
 import IconButton from '@mui/material/IconButton'
-import Skeleton from '@mui/material/Skeleton'
 import Tooltip from '@mui/material/Tooltip'
 
 import { formatCurrency } from '@/utils/formatNumber'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import SafeIcon from '@/components/common/SafeIcon'
-import NewTxButton from '@/components/sidebar/NewTxButton'
 import { useAppSelector } from '@/store'
 import { selectCurrency } from '@/store/settingsSlice'
 
@@ -21,13 +16,11 @@ import LinkIconBold from '@/public/images/sidebar/link-bold.svg'
 import { selectSettings } from '@/store/settingsSlice'
 import { useCurrentChain } from '@/hooks/useChains'
 import { getBlockExplorerLink } from '@/utils/chains'
-import EthHashInfo from '@/components/common/EthHashInfo'
 import QrCodeButton from '../QrCodeButton'
 import Track from '@/components/common/Track'
 import { OVERVIEW_EVENTS } from '@/services/analytics/events/overview'
 import { Box, LinearProgress, SvgIcon } from '@mui/material'
 import { useVisibleBalances } from '@/hooks/useVisibleBalances'
-import EnvHintButton from '@/components/settings/EnvironmentVariables/EnvHintButton'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import ExplorerButton from '@/components/common/ExplorerButton'
 import CopyTooltip from '@/components/common/CopyTooltip'
@@ -136,41 +129,44 @@ const SafeHeader = (): ReactElement => {
           <Track {...OVERVIEW_EVENTS.OPEN_EXPLORER}>
             <ExplorerButton {...blockExplorerLink} className={css.iconButton} icon={LinkIconBold} />
           </Track>
-          <Box
-            sx={{
-              width: '158px',
-              height: '34px',
-              borderRadius: '6px',
-              border: '2px',
-              position: 'relative',
-              display: 'flex',
-              alignItems: 'center',
-            }}
-          >
-            <LinearProgress
-              variant="determinate"
-              color="inherit"
-              value={70}
-              sx={{ width: '100%', height: 34, backgroundColor: 'white', color: '#E8EDF5', borderRadius: '6px' }}
-            />
+          <Tooltip title={<Typography align="center">Remaining weekly gas covered by Superchain Eco</Typography>}>
             <Box
               sx={{
-                position: 'absolute',
-                left: 0,
-                right: 0,
-                top: 0,
-                bottom: 0,
+                width: '158px',
+                height: '34px',
+                borderRadius: '6px',
+                border: '2px',
+                position: 'relative',
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'center',
-                color: 'white',
               }}
             >
-              <Typography color="black" fontWeight={600} variant="body2" component="div">
-                Wk. Gas balance
-              </Typography>
+              <LinearProgress
+                variant="determinate"
+                color="inherit"
+                value={70}
+                sx={{ width: '100%', height: 34, backgroundColor: 'white', color: '#E8EDF5', borderRadius: '6px' }}
+              />
+              <Box
+                sx={{
+                  position: 'absolute',
+                  left: 0,
+                  right: 0,
+                  top: 0,
+                  bottom: 0,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: 'white',
+                }}
+              >
+                <Typography color="black" fontWeight={600} variant="body2" component="div">
+                  Wk. Gas balance
+                </Typography>
+              </Box>
             </Box>
-          </Box>
+          </Tooltip>
+
           {/* <CounterfactualStatusButton /> */}
 
           {/* <EnvHintButton /> */}
