@@ -1,5 +1,6 @@
-import { Grid, Typography } from '@mui/material'
+import { Grid, Stack, Typography } from '@mui/material'
 import React from 'react'
+import Badge from '../badge'
 
 function BadgesContent() {
   return (
@@ -10,7 +11,16 @@ function BadgesContent() {
         </Typography>
       </Grid>
       <Grid xs={12} item>
-        There are the badges
+        <Stack direction="row" spacing={2} justifyContent="space-between" useFlexGap flexWrap="wrap">
+          <Badge />
+          <Badge />
+          <Badge />
+          <Badge />
+          <Badge />
+          <Badge />
+          <Badge />
+          <Badge />
+        </Stack>
       </Grid>
     </Grid>
   )

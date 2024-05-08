@@ -1,0 +1,14 @@
+.badgeContainer {
+  width: clamp(200px, 100%, 250px);
+  padding: 24px;
+}
+
+.badgeContainer > div {
+  padding: 0;
+}
+
+.hearth {
+  position: absolute;
+  top: 0;
+  right: 0;
+}
