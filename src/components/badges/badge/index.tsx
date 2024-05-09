@@ -45,8 +45,8 @@ function Badge({
         </Stack>
       </CardContent>
       <CardActions>
-        <Box width="100%" display="flex" pt={3} justifyContent="center" alignItems="center">
-          {points} <SvgIcon component={SuperChainPoints} inheritViewBox fontSize="medium" />
+        <Box width="100%" display="flex" gap={1} pt={3} justifyContent="center" alignItems="center">
+          <strong> {points} </strong> <SvgIcon component={SuperChainPoints} inheritViewBox fontSize="medium" />
         </Box>
       </CardActions>
     </Card>
