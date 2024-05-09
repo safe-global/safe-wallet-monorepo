@@ -27,7 +27,7 @@ function Badge({
           <IconButton className={css.hearth}>
             <SvgIcon component={Hearth} inheritViewBox fontSize="small" />
           </IconButton>
-          <Image src={image} alt={networkOrProtocol} />
+          <img src={image} alt={networkOrProtocol} />
           <Typography margin={0} fontWeight={600} fontSize={16} textAlign="center" variant="h4">
             {title}
           </Typography>

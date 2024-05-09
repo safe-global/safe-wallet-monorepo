@@ -68,7 +68,6 @@
     "@safe-global/safe-modules-deployments": "^1.2.0",
     "@sentry/react": "^7.91.0",
     "@spindl-xyz/attribution-lite": "^1.4.0",
-    "@supabase/supabase-js": "^2.43.1",
     "@tkey-mpc/common-types": "^8.2.2",
     "@truffle/hdwallet-provider": "^2.1.4",
     "@walletconnect/utils": "^2.11.3",
