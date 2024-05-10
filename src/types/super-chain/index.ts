@@ -1,5 +1,5 @@
+import type { Tables } from 'database.types'
 import type { Address } from 'viem'
-import type { Tables } from './database.types'
 
 export type SuperChainAccount = {
   smartAccount: Address
