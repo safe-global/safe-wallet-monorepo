@@ -70,14 +70,6 @@ export const getSafeDeployProps = async (
 
 const getSuperChainSetupCallData = (seed: NounProps, superChainID: string, owner: string) => {
   const moduleManager = getSuperChainSetupInterface()
-  console.debug([
-    [ERC4337_MODULE_ADDRESS],
-    SUPER_CHAIN_ACCOUNT_MODULE_ADDRESS,
-    SUPER_CHAIN_ACCOUNT_GUARD_ADDRESS,
-    owner,
-    [0, seed.background, seed.body, seed.accessory, seed.head, seed.glasses],
-    superChainID,
-  ])
   return {
     data: moduleManager.encodeFunctionData('setupSuperChainAccount', [
       [ERC4337_MODULE_ADDRESS],
@@ -119,7 +111,6 @@ export const createNewSafe = async (
   safeVersion?: SafeVersion,
 ): Promise<Safe> => {
   const safeFactory = await getSafeFactory(ethersProvider, safeVersion)
-  console.debug(props)
   return safeFactory.deploySafe(props)
 }
 

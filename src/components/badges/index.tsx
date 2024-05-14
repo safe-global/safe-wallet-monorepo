@@ -8,7 +8,6 @@ import { BACKEND_BASE_URI } from '@/config/constants'
 import type { ResponseBadges } from '@/types/super-chain'
 
 function Badges() {
-  console.debug({ BACKEND_BASE_URI })
   const [data, error, loading] = useAsync<{
     currentBadges: ResponseBadges[]
     totalPoints: number
@@ -27,7 +26,6 @@ function Badges() {
     [],
     false,
   )
-  console.debug({ data, error, loading })
   return (
     <Grid spacing={2} container>
       <BadgesHeader />

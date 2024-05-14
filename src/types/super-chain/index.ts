@@ -6,7 +6,6 @@ export type SuperChainAccount = {
   superChainID: string
   points: bigint
   level: bigint
-  eoas: Address[]
   noun: bigint[]
 }
 

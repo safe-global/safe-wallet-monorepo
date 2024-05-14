@@ -4,7 +4,6 @@ import Badge from '../badge'
 import type { ResponseBadges } from '@/types/super-chain'
 
 function BadgesContent({ badges, isLoading }: { badges?: ResponseBadges[]; isLoading: boolean }) {
-  console.debug({ badges, isLoading })
   if (isLoading || !badges) return <Typography>Loading...</Typography>
   return (
     <Grid container item spacing={1}>

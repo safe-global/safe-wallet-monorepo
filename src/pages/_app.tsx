@@ -45,6 +45,7 @@ import Recovery from '@/features/recovery/components/Recovery'
 import WalletProvider from '@/components/common/WalletProvider'
 import CounterfactualHooks from '@/features/counterfactual/CounterfactualHooks'
 import { PrivyProvider } from '@privy-io/react-auth'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
 const GATEWAY_URL = IS_PRODUCTION || cgwDebugStorage.get() ? GATEWAY_URL_PRODUCTION : GATEWAY_URL_STAGING
 
@@ -81,32 +82,36 @@ export const AppProviders = ({ children }: { children: ReactNode | ReactNode[] }
   const isDarkMode = useDarkMode()
   const themeMode = isDarkMode ? 'dark' : 'light'
 
+  const queryClient = new QueryClient()
+
   return (
-    <PrivyProvider
-      appId={PRIVY_APP_ID}
-      config={{
-        appearance: {
-          theme: 'light',
-          accentColor: '#FF0420',
-          logo: 'https://pbs.twimg.com/profile_images/1696769956245807105/xGnB-Cdl_400x400.png',
-        },
-        embeddedWallets: {
-          createOnLogin: 'users-without-wallets',
-        },
-      }}
-    >
-      <SafeThemeProvider mode={themeMode}>
-        {(safeTheme: Theme) => (
-          <ThemeProvider theme={safeTheme}>
-            <SentryErrorBoundary showDialog fallback={ErrorBoundary}>
-              <WalletProvider>
-                <TxModalProvider>{children}</TxModalProvider>
-              </WalletProvider>
-            </SentryErrorBoundary>
-          </ThemeProvider>
-        )}
-      </SafeThemeProvider>
-    </PrivyProvider>
+    <QueryClientProvider client={queryClient}>
+      <PrivyProvider
+        appId={PRIVY_APP_ID}
+        config={{
+          appearance: {
+            theme: 'light',
+            accentColor: '#FF0420',
+            logo: 'https://pbs.twimg.com/profile_images/1696769956245807105/xGnB-Cdl_400x400.png',
+          },
+          embeddedWallets: {
+            createOnLogin: 'users-without-wallets',
+          },
+        }}
+      >
+        <SafeThemeProvider mode={themeMode}>
+          {(safeTheme: Theme) => (
+            <ThemeProvider theme={safeTheme}>
+              <SentryErrorBoundary showDialog fallback={ErrorBoundary}>
+                <WalletProvider>
+                  <TxModalProvider>{children}</TxModalProvider>
+                </WalletProvider>
+              </SentryErrorBoundary>
+            </ThemeProvider>
+          )}
+        </SafeThemeProvider>
+      </PrivyProvider>
+    </QueryClientProvider>
   )
 }
 

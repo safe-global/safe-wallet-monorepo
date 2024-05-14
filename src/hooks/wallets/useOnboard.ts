@@ -40,7 +40,6 @@ export const initOnboard = async (
 
 // Get the most recently connected wallet address
 export const getConnectedWallet = (wallets: WalletState[]): ConnectedWallet | null => {
-  console.debug(wallets)
   if (!wallets) return null
 
   const primaryWallet = wallets[0]
@@ -74,7 +73,6 @@ export const getConnectedWallet = (wallets: WalletState[]): ConnectedWallet | nu
       icon: primaryWallet.icon,
       balance,
     }
-    console.debug(Number(primaryWallet.chains[0].id).toString(10))
   } catch (e) {
     logError(Errors._106, e)
     return null

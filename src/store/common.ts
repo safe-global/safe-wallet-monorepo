@@ -6,12 +6,12 @@ export type Loadable<T> = {
   error?: string
 }
 
-export const makeLoadableSlice = <N extends string, T>(name: N, data: T) => {
+export const makeLoadableSlice = <N extends string, T>(name: N, data: T, initialLoadingState?: boolean) => {
   type SliceState = Loadable<T>
 
   const initialState: SliceState = {
     data,
-    loading: false,
+    loading: initialLoadingState ? true : false,
   }
 
   const slice = createSlice({
