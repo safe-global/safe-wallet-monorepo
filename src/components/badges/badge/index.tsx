@@ -4,9 +4,8 @@ import SuperChainPoints from '@/public/images/common/superChain.svg'
 import Hearth from '@/public/images/common/hearth.svg'
 import HeartFilled from '@/public/images/common/hearth-filled.svg'
 import css from './styles.module.css'
-import { useAppSelector } from '@/store'
-import { selectSuperChainAccount } from '@/store/superChainAccountSlice'
 import type { Address } from 'viem'
+import useSafeInfo from '@/hooks/useSafeInfo'
 function Badge({
   image,
   title,
@@ -30,7 +29,7 @@ function Badge({
   switchFavorite: ({ id, account, isFavorite }: { id: number; account: Address; isFavorite: boolean }) => Promise<void>
   isSwitchFavoritePending: boolean
 }) {
-  const { data: superChainAccount, loading: isSuperChainAccountLoading } = useAppSelector(selectSuperChainAccount)
+  const { safeAddress, safeLoading } = useSafeInfo()
   const handleSwitchFavorite = async (id: number, account: Address, isFavorite: boolean) => {
     await switchFavorite({ id, account, isFavorite })
     console.debug('favorite switched')
@@ -40,8 +39,8 @@ function Badge({
       <CardContent>
         <Stack padding={0} justifyContent="center" alignItems="center" spacing={1} position="relative">
           <IconButton
-            disabled={isSwitchFavoritePending || isSuperChainAccountLoading}
-            onClick={() => handleSwitchFavorite(id, superChainAccount.smartAccount, !isFavorite)}
+            disabled={isSwitchFavoritePending || safeLoading}
+            onClick={() => handleSwitchFavorite(id, safeAddress as Address, !isFavorite)}
             className={css.hearth}
           >
             <SvgIcon component={isFavorite ? HeartFilled : Hearth} color="secondary" inheritViewBox fontSize="small" />

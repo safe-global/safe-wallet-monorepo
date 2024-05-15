@@ -1,5 +1,5 @@
 import { Grid } from '@mui/material'
-import React, { useEffect } from 'react'
+import React from 'react'
 import BadgesHeader from './header'
 import BadgesActions from './actions'
 import BadgesContent from './content'
@@ -10,26 +10,24 @@ import { selectSuperChainAccount } from '@/store/superChainAccountSlice'
 import badgesService from '@/features/superChain/services/badges.service'
 
 function Badges() {
-  const superChainAccount = useAppSelector(selectSuperChainAccount)
-  const { data, isLoading, isRefetching, error, dataUpdatedAt } = useQuery<{
+  const { data: superChainAccount, loading: isSuperChainLoading } = useAppSelector(selectSuperChainAccount)
+  const { data, isLoading, error } = useQuery<{
     currentBadges: ResponseBadges[]
     totalPoints: number
   }>({
-    queryKey: ['badges', superChainAccount.data.smartAccount],
-    queryFn: async () => await badgesService.getBadges(superChainAccount.data.smartAccount),
+    queryKey: ['badges', superChainAccount.smartAccount],
+    queryFn: async () => await badgesService.getBadges(superChainAccount.smartAccount),
   })
-
-  useEffect(() => {
-    console.debug('This is pretty weird', { data })
-  }, [data])
-
-  useEffect(() => {
-    console.debug({ dataUpdatedAt })
-  }, [dataUpdatedAt])
 
   return (
     <Grid spacing={2} container>
-      <BadgesHeader />
+      <BadgesHeader
+        level={Number(superChainAccount.level)}
+        points={Number(superChainAccount.points)}
+        pointsToNextLevel={Number(superChainAccount.points) * 2}
+        totalBadges={data?.currentBadges.length}
+        isLoading={isLoading || isSuperChainLoading}
+      />
       <BadgesActions />
       <BadgesContent badges={data?.currentBadges} isLoading={isLoading} error={error} />
     </Grid>
