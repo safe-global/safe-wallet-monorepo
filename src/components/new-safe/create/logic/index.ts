@@ -77,7 +77,6 @@ const getSuperChainSetupCallData = (seed: NounProps, superChainID: string, owner
       SUPER_CHAIN_ACCOUNT_GUARD_ADDRESS,
       owner,
       {
-        id: 0,
         background: seed.background,
         body: seed.body,
         accessory: seed.accessory,

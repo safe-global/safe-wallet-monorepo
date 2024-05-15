@@ -16,7 +16,6 @@
         "type": "tuple",
         "internalType": "struct NounMetadata",
         "components": [
-          { "name": "id", "type": "uint256", "internalType": "uint256" },
           {
             "name": "background",
             "type": "uint48",
