@@ -2,9 +2,55 @@ import { Grid, Stack, Typography } from '@mui/material'
 import React from 'react'
 import Badge from '../badge'
 import type { ResponseBadges } from '@/types/super-chain'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import badgesService from '@/features/superChain/services/badges.service'
+import { type Address } from 'viem'
+import { useAppSelector } from '@/store'
+import { selectSuperChainAccount } from '@/store/superChainAccountSlice'
 
-function BadgesContent({ badges, isLoading }: { badges?: ResponseBadges[]; isLoading: boolean }) {
-  if (isLoading || !badges) return <Typography>Loading...</Typography>
+type Params = {
+  id: number
+  account: string
+  isFavorite: boolean
+}
+
+function BadgesContent({
+  badges,
+  isLoading,
+  error,
+}: {
+  badges?: ResponseBadges[]
+  isLoading: boolean
+  error: Error | null
+}) {
+  const queryClient = useQueryClient()
+  const superChainAccount = useAppSelector(selectSuperChainAccount)
+
+  const { mutateAsync, isPending } = useMutation<void, Error, Params, unknown>({
+    mutationFn: async (params) => {
+      return await badgesService.switchFavoriteBadge(params.id, params.account as Address, params.isFavorite)
+    },
+    onSuccess: async (_, variables) => {
+      queryClient.setQueryData(['badges', superChainAccount.data.smartAccount], (oldData: any) => {
+        return {
+          ...oldData,
+          currentBadges: oldData.currentBadges.map((badge: ResponseBadges) => {
+            if (badge.id === variables.id) {
+              return {
+                ...badge,
+                favorite: !badge.favorite,
+              }
+            }
+            return badge
+          }),
+        }
+      })
+    },
+  })
+  if (isLoading) return <Typography>Loading...</Typography>
+  if (error) return <Typography>Error: {error.message}</Typography>
+  if (!badges) return <Typography>No badges found</Typography>
+
   return (
     <Grid container item spacing={1}>
       {badges.find((badge) => !!badge.favorite) && (
@@ -29,6 +75,8 @@ function BadgesContent({ badges, isLoading }: { badges?: ResponseBadges[]; isLoa
                     points={badge.points}
                     tiers={[1, 2, 3]}
                     isFavorite={badge.favorite!}
+                    switchFavorite={mutateAsync}
+                    isSwitchFavoritePending={isPending}
                   />
                 ))}
             </Stack>
@@ -55,6 +103,8 @@ function BadgesContent({ badges, isLoading }: { badges?: ResponseBadges[]; isLoa
                 points={badge.points}
                 tiers={[1, 2, 3]}
                 isFavorite={badge.favorite!}
+                switchFavorite={mutateAsync}
+                isSwitchFavoritePending={isPending}
               />
             ))}
         </Stack>

@@ -1,7 +1,7 @@
-import type { Address } from 'viem'
+import { zeroAddress, type Address } from 'viem'
 import axios from 'axios'
 import { BACKEND_BASE_URI } from '@/config/constants'
-import type { AccountBadge } from '@/types/super-chain'
+import type { AccountBadge, ResponseBadges } from '@/types/super-chain'
 class BadgesService {
   httpInstance = axios.create({
     baseURL: BACKEND_BASE_URI,
@@ -19,6 +19,20 @@ class BadgesService {
         params,
       },
     )
+  }
+  public async getBadges(account?: Address): Promise<{
+    currentBadges: ResponseBadges[]
+    totalPoints: number
+  }> {
+    const response = await this.httpInstance.get<{
+      currentBadges: ResponseBadges[]
+      totalPoints: number
+    }>('/get-badges', {
+      headers: {
+        account: account || zeroAddress,
+      },
+    })
+    return response.data
   }
 }
 const badgesService = new BadgesService()

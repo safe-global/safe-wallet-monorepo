@@ -4,10 +4,9 @@ import SuperChainPoints from '@/public/images/common/superChain.svg'
 import Hearth from '@/public/images/common/hearth.svg'
 import HeartFilled from '@/public/images/common/hearth-filled.svg'
 import css from './styles.module.css'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import badgesService from '@/features/superChain/services/badges.service'
 import { useAppSelector } from '@/store'
 import { selectSuperChainAccount } from '@/store/superChainAccountSlice'
+import type { Address } from 'viem'
 function Badge({
   image,
   title,
@@ -17,6 +16,8 @@ function Badge({
   tiers,
   isFavorite,
   id,
+  switchFavorite,
+  isSwitchFavoritePending,
 }: {
   image: string
   title: string
@@ -26,25 +27,23 @@ function Badge({
   tiers: number[]
   isFavorite: boolean
   id: number
+  switchFavorite: ({ id, account, isFavorite }: { id: number; account: Address; isFavorite: boolean }) => Promise<void>
+  isSwitchFavoritePending: boolean
 }) {
-  const queryClient = useQueryClient()
   const { data: superChainAccount, loading: isSuperChainAccountLoading } = useAppSelector(selectSuperChainAccount)
-  const { mutate, isPending } = useMutation({
-    mutationFn: async () => {
-      if (isSuperChainAccountLoading) return null
-      return await badgesService.switchFavoriteBadge(id, superChainAccount.smartAccount, !isFavorite)
-    },
-    onSuccess: async () => {
-      await queryClient.refetchQueries({ queryKey: ['badges'] })
-      console.info('Badge favorite status updated')
-    },
-  })
-
+  const handleSwitchFavorite = async (id: number, account: Address, isFavorite: boolean) => {
+    await switchFavorite({ id, account, isFavorite })
+    console.debug('favorite switched')
+  }
   return (
     <Card className={css.badgeContainer}>
       <CardContent>
         <Stack padding={0} justifyContent="center" alignItems="center" spacing={1} position="relative">
-          <IconButton disabled={isPending} onClick={() => mutate()} className={css.hearth}>
+          <IconButton
+            disabled={isSwitchFavoritePending || isSuperChainAccountLoading}
+            onClick={() => handleSwitchFavorite(id, superChainAccount.smartAccount, !isFavorite)}
+            className={css.hearth}
+          >
             <SvgIcon component={isFavorite ? HeartFilled : Hearth} color="secondary" inheritViewBox fontSize="small" />
           </IconButton>
           <img src={image} alt={networkOrProtocol} />

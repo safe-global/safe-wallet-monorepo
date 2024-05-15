@@ -1,41 +1,37 @@
 import { Grid } from '@mui/material'
-import React from 'react'
+import React, { useEffect } from 'react'
 import BadgesHeader from './header'
 import BadgesActions from './actions'
 import BadgesContent from './content'
-import { BACKEND_BASE_URI } from '@/config/constants'
 import type { ResponseBadges } from '@/types/super-chain'
 import { useQuery } from '@tanstack/react-query'
 import { useAppSelector } from '@/store'
 import { selectSuperChainAccount } from '@/store/superChainAccountSlice'
+import badgesService from '@/features/superChain/services/badges.service'
 
 function Badges() {
   const superChainAccount = useAppSelector(selectSuperChainAccount)
-  const { data, isLoading, isRefetching } = useQuery<{
+  const { data, isLoading, isRefetching, error, dataUpdatedAt } = useQuery<{
     currentBadges: ResponseBadges[]
     totalPoints: number
   }>({
-    queryKey: ['badges', superChainAccount.data?.smartAccount],
-    queryFn: async () => {
-      if (superChainAccount.loading) return null
-      const response = await fetch(`${BACKEND_BASE_URI}/get-badges`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          Account: superChainAccount.data?.smartAccount,
-        },
-      })
-      console.debug({ response })
-      return await response.json()
-    },
+    queryKey: ['badges', superChainAccount.data.smartAccount],
+    queryFn: async () => await badgesService.getBadges(superChainAccount.data.smartAccount),
   })
 
-  console.debug({ isRefetching })
+  useEffect(() => {
+    console.debug('This is pretty weird', { data })
+  }, [data])
+
+  useEffect(() => {
+    console.debug({ dataUpdatedAt })
+  }, [dataUpdatedAt])
+
   return (
     <Grid spacing={2} container>
       <BadgesHeader />
       <BadgesActions />
-      <BadgesContent badges={data?.currentBadges} isLoading={isLoading} />
+      <BadgesContent badges={data?.currentBadges} isLoading={isLoading} error={error} />
     </Grid>
   )
 }
