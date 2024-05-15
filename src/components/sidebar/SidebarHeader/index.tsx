@@ -41,11 +41,11 @@ const SafeHeader = (): ReactElement => {
 
   const nounSeed = useMemo(() => {
     return {
-      background: superChainSmartAccount.data.noun[0],
-      body: superChainSmartAccount.data.noun[1],
-      accessory: superChainSmartAccount.data.noun[2],
-      head: superChainSmartAccount.data.noun[3],
-      glasses: superChainSmartAccount.data.noun[4],
+      background: Number(superChainSmartAccount.data.noun[0]),
+      body: Number(superChainSmartAccount.data.noun[1]),
+      accessory: Number(superChainSmartAccount.data.noun[2]),
+      head: Number(superChainSmartAccount.data.noun[3]),
+      glasses: Number(superChainSmartAccount.data.noun[4]),
     }
   }, [superChainSmartAccount])
 
