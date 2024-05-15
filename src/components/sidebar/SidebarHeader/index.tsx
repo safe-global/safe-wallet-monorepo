@@ -55,54 +55,24 @@ const SafeHeader = (): ReactElement => {
         <div className={css.info}>
           <div data-testid="safe-header-info" className={css.safe}>
             <div className={css.nouns}>
-              <Skeleton />
+              <Skeleton variant="rectangular" width="100%" height="100%" />
             </div>
             <div className={css.superchainInfo}>
               <span className={css.superchainLevel}>
-                <Skeleton />
+                <Skeleton width="100%" />
               </span>
               <div className={css.superChainData}>
                 <p className={css.superChainId}>
-                  <Skeleton />
+                  <Skeleton width="100px" height="16px" />
                 </p>
                 <p className={css.superChainData_points}>
-                  <Skeleton />
+                  <Skeleton width="100px" height="16px" />
                 </p>
                 <p className={css.superChainData_points}>
-                  <Skeleton />
+                  <Skeleton width="100px" height="16px" />
                 </p>
               </div>
             </div>
-            {/* <div data-testid="safe-icon">
-        {safeAddress ? (
-          <SafeIcon address={safeAddress} threshold={threshold} owners={owners?.length} />
-        ) : (
-          <Skeleton variant="circular" width={40} height={40} />
-        )}
-      </div>
-
-      <div className={css.address}>
-        {safeAddress ? (
-          <EthHashInfo address={safeAddress} shortAddress showAvatar={false} />
-        ) : (
-          <Typography variant="body2">
-            <Skeleton variant="text" width={86} />
-            <Skeleton variant="text" width={120} />
-          </Typography>
-        )}
-
-        <Typography data-testid="currency-section" variant="body2" fontWeight={700}>
-          {safe.deployed ? (
-            fiatTotal || <Skeleton variant="text" width={60} />
-          ) : (
-            <TokenAmount
-              value={balances.items[0]?.balance}
-              decimals={balances.items[0]?.tokenInfo.decimals}
-              tokenSymbol={balances.items[0]?.tokenInfo.symbol}
-            />
-          )}
-        </Typography>
-      </div> */}
           </div>
 
           <div className={css.iconButtons}>
