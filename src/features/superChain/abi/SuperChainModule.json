@@ -75,11 +75,6 @@
           { "name": "points", "type": "uint256", "internalType": "uint256" },
           { "name": "level", "type": "uint16", "internalType": "uint16" },
           {
-            "name": "eoas",
-            "type": "address[]",
-            "internalType": "address[]"
-          },
-          {
             "name": "noun",
             "type": "tuple",
             "internalType": "struct NounMetadata",
