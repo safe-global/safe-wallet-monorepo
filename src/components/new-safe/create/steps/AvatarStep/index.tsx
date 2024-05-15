@@ -28,8 +28,8 @@ const SET_NAME_STEP_FORM_ID = 'create-safe-set-name-step-form'
 export type NounProps = {
   background: number
   body: number
-  head: number
   accessory: number
+  head: number
   glasses: number
 }
 
