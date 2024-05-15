@@ -11,7 +11,7 @@ import { selectSuperChainAccount } from '@/store/superChainAccountSlice'
 
 function Badges() {
   const superChainAccount = useAppSelector(selectSuperChainAccount)
-  const { data, isLoading } = useQuery<{
+  const { data, isLoading, isRefetching } = useQuery<{
     currentBadges: ResponseBadges[]
     totalPoints: number
   }>({
@@ -29,6 +29,8 @@ function Badges() {
       return await response.json()
     },
   })
+
+  console.debug({ isRefetching })
   return (
     <Grid spacing={2} container>
       <BadgesHeader />

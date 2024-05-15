@@ -4,6 +4,10 @@ import SuperChainPoints from '@/public/images/common/superChain.svg'
 import Hearth from '@/public/images/common/hearth.svg'
 import HeartFilled from '@/public/images/common/hearth-filled.svg'
 import css from './styles.module.css'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import badgesService from '@/features/superChain/services/badges.service'
+import { useAppSelector } from '@/store'
+import { selectSuperChainAccount } from '@/store/superChainAccountSlice'
 function Badge({
   image,
   title,
@@ -12,6 +16,7 @@ function Badge({
   points,
   tiers,
   isFavorite,
+  id,
 }: {
   image: string
   title: string
@@ -20,12 +25,26 @@ function Badge({
   points: number
   tiers: number[]
   isFavorite: boolean
+  id: number
 }) {
+  const queryClient = useQueryClient()
+  const { data: superChainAccount, loading: isSuperChainAccountLoading } = useAppSelector(selectSuperChainAccount)
+  const { mutate, isPending } = useMutation({
+    mutationFn: async () => {
+      if (isSuperChainAccountLoading) return null
+      return await badgesService.switchFavoriteBadge(id, superChainAccount.smartAccount, !isFavorite)
+    },
+    onSuccess: async () => {
+      await queryClient.refetchQueries({ queryKey: ['badges'] })
+      console.info('Badge favorite status updated')
+    },
+  })
+
   return (
     <Card className={css.badgeContainer}>
       <CardContent>
         <Stack padding={0} justifyContent="center" alignItems="center" spacing={1} position="relative">
-          <IconButton className={css.hearth}>
+          <IconButton disabled={isPending} onClick={() => mutate()} className={css.hearth}>
             <SvgIcon component={isFavorite ? HeartFilled : Hearth} color="secondary" inheritViewBox fontSize="small" />
           </IconButton>
           <img src={image} alt={networkOrProtocol} />

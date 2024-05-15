@@ -9,7 +9,7 @@ export type SuperChainAccount = {
   noun: bigint[]
 }
 
-type AccountBadge = Omit<
+export type AccountBadge = Omit<
   Tables<'accountbadges'>,
   'account' | 'id' | 'isdeleted' | 'isClaimed' | 'lastclaim' | 'lastclaimBlock'
 >

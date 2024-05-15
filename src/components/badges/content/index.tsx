@@ -21,6 +21,7 @@ function BadgesContent({ badges, isLoading }: { badges?: ResponseBadges[]; isLoa
                 .map((badge) => (
                   <Badge
                     key={badge.id}
+                    id={badge.id}
                     image={badge.image!}
                     title={badge.name}
                     description={badge.description!}
@@ -46,6 +47,7 @@ function BadgesContent({ badges, isLoading }: { badges?: ResponseBadges[]; isLoa
             .map((badge) => (
               <Badge
                 key={badge.id}
+                id={badge.id}
                 image={badge.image!}
                 title={badge.name}
                 description={badge.description!}
