@@ -2,7 +2,21 @@ import { Box, Button, Grid, InputAdornment, MenuItem, Select, SvgIcon, TextField
 import React from 'react'
 import SearchIcon from '@/public/images/common/search.svg'
 import History from '@/public/images/common/history.svg'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import useSafeInfo from '@/hooks/useSafeInfo'
+import badgesService from '@/features/superChain/services/badges.service'
+import type { Address } from 'viem'
 function BadgesActions() {
+  const { safeAddress, safe } = useSafeInfo()
+  const queryClient = useQueryClient()
+  const { mutate } = useMutation({
+    mutationFn: async () => await badgesService.attestBadges(safeAddress as Address),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['superChainAccount', safe.owners[0].value] })
+
+      queryClient.invalidateQueries({ queryKey: ['badges', safeAddress] })
+    },
+  })
   return (
     <Grid container spacing={1} item>
       <Grid item>
@@ -36,6 +50,7 @@ function BadgesActions() {
               fullWidth
               variant="contained"
               color="secondary"
+              onClick={() => mutate()}
               endIcon={<SvgIcon component={History} inheritViewBox color="primary" />}
             >
               Update badges

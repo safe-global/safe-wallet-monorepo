@@ -34,6 +34,14 @@ class BadgesService {
     })
     return response.data
   }
+  public async attestBadges(account?: Address) {
+    const response = await this.httpInstance.post(
+      '/attest-badges',
+      {},
+      { headers: { account: account || zeroAddress } },
+    )
+    return response.data
+  }
 }
 const badgesService = new BadgesService()
 export default badgesService
