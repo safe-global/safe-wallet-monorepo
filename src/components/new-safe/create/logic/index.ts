@@ -36,7 +36,6 @@ import {
   SUPER_CHAIN_SETUP_ADDRESS,
 } from '@/features/superChain/constants'
 import type { NounProps } from '../steps/AvatarStep'
-import { zeroAddress } from 'viem'
 
 export type SafeCreationProps = {
   owners: string[]

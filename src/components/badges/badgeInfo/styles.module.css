@@ -1,0 +1,14 @@
+.drawer {
+  padding-top: var(--header-height);
+  overflow: hidden;
+  height: 100%;
+  width: 340px;
+  max-width: 90vw;
+}
+
+.actionBtn {
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  color: var(--color-primary-light);
+}

@@ -1,6 +1,7 @@
 .badgeContainer {
   width: clamp(200px, 100%, 250px);
   padding: 24px;
+  cursor: pointer;
 }
 
 .badgeContainer > div {

@@ -1,6 +1,7 @@
 import { Box, Button, Grid, InputAdornment, MenuItem, Select, SvgIcon, TextField, Typography } from '@mui/material'
 import React from 'react'
 import SearchIcon from '@/public/images/common/search.svg'
+// import LoadingButton from '@mui/lab/LoadingButton'
 import History from '@/public/images/common/history.svg'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import useSafeInfo from '@/hooks/useSafeInfo'
@@ -9,7 +10,7 @@ import type { Address } from 'viem'
 function BadgesActions() {
   const { safeAddress, safe } = useSafeInfo()
   const queryClient = useQueryClient()
-  const { mutate } = useMutation({
+  const { mutate, isPending } = useMutation({
     mutationFn: async () => await badgesService.attestBadges(safeAddress as Address),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['superChainAccount', safe.owners[0].value] })
@@ -48,12 +49,12 @@ function BadgesActions() {
             </Select>
             <Button
               fullWidth
-              variant="contained"
+              variant={isPending ? 'outlined' : 'contained'}
               color="secondary"
               onClick={() => mutate()}
               endIcon={<SvgIcon component={History} inheritViewBox color="primary" />}
             >
-              Update badges
+              {isPending ? 'Loading' : 'Update badges'}
             </Button>
           </Box>
         </Grid>

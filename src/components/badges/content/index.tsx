@@ -1,11 +1,12 @@
-import { Grid, Stack, Typography } from '@mui/material'
-import React from 'react'
+import { Drawer, Grid, Stack, Typography } from '@mui/material'
+import React, { useState } from 'react'
 import Badge from '../badge'
 import type { ResponseBadges } from '@/types/super-chain'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import badgesService from '@/features/superChain/services/badges.service'
 import { type Address } from 'viem'
 import useSafeInfo from '@/hooks/useSafeInfo'
+import BadgeInfo from '../badgeInfo'
 
 type Params = {
   id: number
@@ -24,6 +25,7 @@ function BadgesContent({
 }) {
   const queryClient = useQueryClient()
   const { safeAddress, safeLoaded } = useSafeInfo()
+  const [currentBadge, setCurrentBadge] = useState<ResponseBadges | null>(null)
 
   const { mutateAsync, isPending } = useMutation<void, Error, Params, unknown>({
     mutationFn: async (params) => {
@@ -76,6 +78,7 @@ function BadgesContent({
                     isFavorite={badge.favorite!}
                     switchFavorite={mutateAsync}
                     isSwitchFavoritePending={isPending}
+                    setCurrentBadge={setCurrentBadge}
                   />
                 ))}
             </Stack>
@@ -104,10 +107,14 @@ function BadgesContent({
                 isFavorite={badge.favorite!}
                 switchFavorite={mutateAsync}
                 isSwitchFavoritePending={isPending}
+                setCurrentBadge={setCurrentBadge}
               />
             ))}
         </Stack>
       </Grid>
+      <Drawer variant="temporary" anchor="right" open={!!currentBadge}>
+        <BadgeInfo switchFavorite={mutateAsync} setCurrentBadge={setCurrentBadge} currentBadge={currentBadge} />
+      </Drawer>
     </Grid>
   )
 }

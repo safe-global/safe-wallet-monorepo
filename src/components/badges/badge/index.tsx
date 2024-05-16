@@ -1,11 +1,12 @@
 import { Box, Card, CardActions, CardContent, IconButton, Stack, SvgIcon, Typography } from '@mui/material'
-import React from 'react'
+import React, { SyntheticEvent } from 'react'
 import SuperChainPoints from '@/public/images/common/superChain.svg'
 import Hearth from '@/public/images/common/hearth.svg'
 import HeartFilled from '@/public/images/common/hearth-filled.svg'
 import css from './styles.module.css'
 import type { Address } from 'viem'
 import useSafeInfo from '@/hooks/useSafeInfo'
+import type { ResponseBadges } from '@/types/super-chain'
 function Badge({
   image,
   title,
@@ -17,6 +18,7 @@ function Badge({
   id,
   switchFavorite,
   isSwitchFavoritePending,
+  setCurrentBadge,
 }: {
   image: string
   title: string
@@ -28,19 +30,34 @@ function Badge({
   id: number
   switchFavorite: ({ id, account, isFavorite }: { id: number; account: Address; isFavorite: boolean }) => Promise<void>
   isSwitchFavoritePending: boolean
+  setCurrentBadge: (badge: ResponseBadges) => void
 }) {
   const { safeAddress, safeLoading } = useSafeInfo()
-  const handleSwitchFavorite = async (id: number, account: Address, isFavorite: boolean) => {
+  const handleSwitchFavorite = async (event: SyntheticEvent, id: number, account: Address, isFavorite: boolean) => {
+    event.stopPropagation()
     await switchFavorite({ id, account, isFavorite })
     console.debug('favorite switched')
   }
+
+  const handlePickBadge = () => {
+    const badge: ResponseBadges = {
+      id,
+      name: title,
+      description,
+      networkorprotocol: networkOrProtocol,
+      points,
+      favorite: isFavorite,
+      image,
+    }
+    setCurrentBadge(badge)
+  }
   return (
-    <Card className={css.badgeContainer}>
+    <Card onClick={handlePickBadge} className={css.badgeContainer}>
       <CardContent>
         <Stack padding={0} justifyContent="center" alignItems="center" spacing={1} position="relative">
           <IconButton
             disabled={isSwitchFavoritePending || safeLoading}
-            onClick={() => handleSwitchFavorite(id, safeAddress as Address, !isFavorite)}
+            onClick={(e) => handleSwitchFavorite(e, id, safeAddress as Address, !isFavorite)}
             className={css.hearth}
           >
             <SvgIcon component={isFavorite ? HeartFilled : Hearth} color="secondary" inheritViewBox fontSize="small" />
