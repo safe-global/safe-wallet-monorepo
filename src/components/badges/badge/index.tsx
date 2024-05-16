@@ -1,5 +1,5 @@
 import { Box, Card, CardActions, CardContent, IconButton, Stack, SvgIcon, Typography } from '@mui/material'
-import React, { SyntheticEvent } from 'react'
+import React, { type SyntheticEvent } from 'react'
 import SuperChainPoints from '@/public/images/common/superChain.svg'
 import Hearth from '@/public/images/common/hearth.svg'
 import HeartFilled from '@/public/images/common/hearth-filled.svg'

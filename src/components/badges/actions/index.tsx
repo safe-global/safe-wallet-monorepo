@@ -13,9 +13,8 @@ function BadgesActions() {
   const { mutate, isPending } = useMutation({
     mutationFn: async () => await badgesService.attestBadges(safeAddress as Address),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['superChainAccount', safe.owners[0].value] })
-
-      queryClient.invalidateQueries({ queryKey: ['badges', safeAddress] })
+      queryClient.refetchQueries({ queryKey: ['superChainAccount', safe.owners[0].value] })
+      queryClient.refetchQueries({ queryKey: ['badges', safeAddress] })
     },
   })
   return (

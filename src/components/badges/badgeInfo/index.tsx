@@ -15,7 +15,7 @@ function BadgeInfo({
   switchFavorite,
 }: {
   currentBadge: ResponseBadges | null
-  setCurrentBadge: (_: null) => void
+  setCurrentBadge: (_: null | ResponseBadges) => void
   switchFavorite: ({ id, account, isFavorite }: { id: number; account: Address; isFavorite: boolean }) => Promise<void>
 }) {
   const { safe } = useSafeInfo()
@@ -24,6 +24,10 @@ function BadgeInfo({
       id: currentBadge?.id!,
       account: safe.address as unknown as Address,
       isFavorite: !currentBadge?.favorite,
+    })
+    setCurrentBadge({
+      ...currentBadge!,
+      favorite: !currentBadge?.favorite,
     })
     console.debug('favorite switched')
   }
@@ -38,7 +42,7 @@ function BadgeInfo({
         justifyContent="center"
         alignItems="center"
       >
-        <img src={currentBadge?.image} />
+        <img src={currentBadge?.image!} />
         <Box display="flex" gap={1} position="absolute" top="10%" right="0">
           <IconButton className={css.actionBtn}>
             <SvgIcon component={Share} color="inherit" inheritViewBox fontSize="small" />
