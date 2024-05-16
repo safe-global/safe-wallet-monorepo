@@ -42,7 +42,7 @@ function BadgeInfo({
         justifyContent="center"
         alignItems="center"
       >
-        <img src={currentBadge?.image!} />
+        <img src={currentBadge?.image} />
         <Box display="flex" gap={1} position="absolute" top="10%" right="0">
           <IconButton className={css.actionBtn}>
             <SvgIcon component={Share} color="inherit" inheritViewBox fontSize="small" />
