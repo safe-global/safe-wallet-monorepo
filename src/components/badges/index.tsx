@@ -8,15 +8,19 @@ import { useQuery } from '@tanstack/react-query'
 import { useAppSelector } from '@/store'
 import { selectSuperChainAccount } from '@/store/superChainAccountSlice'
 import badgesService from '@/features/superChain/services/badges.service'
+import useSafeInfo from '@/hooks/useSafeInfo'
 
 function Badges() {
   const { data: superChainAccount, loading: isSuperChainLoading } = useAppSelector(selectSuperChainAccount)
+  const { safeAddress, safeLoaded } = useSafeInfo()
+
   const { data, isLoading, error } = useQuery<{
     currentBadges: ResponseBadges[]
     totalPoints: number
   }>({
-    queryKey: ['badges', superChainAccount.smartAccount],
-    queryFn: async () => await badgesService.getBadges(superChainAccount.smartAccount),
+    queryKey: ['badges', safeAddress, safeLoaded],
+    queryFn: async () => await badgesService.getBadges(safeAddress as `0x${string}`),
+    enabled: !!safeLoaded,
   })
 
   return (

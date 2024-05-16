@@ -5,8 +5,7 @@ import type { ResponseBadges } from '@/types/super-chain'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import badgesService from '@/features/superChain/services/badges.service'
 import { type Address } from 'viem'
-import { useAppSelector } from '@/store'
-import { selectSuperChainAccount } from '@/store/superChainAccountSlice'
+import useSafeInfo from '@/hooks/useSafeInfo'
 
 type Params = {
   id: number
@@ -24,14 +23,14 @@ function BadgesContent({
   error: Error | null
 }) {
   const queryClient = useQueryClient()
-  const superChainAccount = useAppSelector(selectSuperChainAccount)
+  const { safeAddress, safeLoaded } = useSafeInfo()
 
   const { mutateAsync, isPending } = useMutation<void, Error, Params, unknown>({
     mutationFn: async (params) => {
       return await badgesService.switchFavoriteBadge(params.id, params.account as Address, params.isFavorite)
     },
     onSuccess: async (_, variables) => {
-      queryClient.setQueryData(['badges', superChainAccount.data.smartAccount], (oldData: any) => {
+      queryClient.setQueryData(['badges', safeAddress, safeLoaded], (oldData: any) => {
         return {
           ...oldData,
           currentBadges: oldData.currentBadges.map((badge: ResponseBadges) => {
