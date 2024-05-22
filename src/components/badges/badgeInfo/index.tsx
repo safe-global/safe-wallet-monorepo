@@ -1,5 +1,5 @@
 import { Box, IconButton, Stack, SvgIcon, Typography } from '@mui/material'
-import React from 'react'
+import React, { useMemo } from 'react'
 import css from './styles.module.css'
 import type { ResponseBadges } from '@/types/super-chain'
 import Link from 'next/link'
@@ -19,10 +19,16 @@ function BadgeInfo({
   switchFavorite: ({ id, account, isFavorite }: { id: number; account: Address; isFavorite: boolean }) => Promise<void>
 }) {
   const { safe } = useSafeInfo()
+
+  const unClaimed = useMemo(() => {
+    if (!currentBadge?.claimableTier || !currentBadge?.lastclaimtier) return false
+    return currentBadge?.lastclaimtier === currentBadge?.claimableTier
+  }, [currentBadge])
+
   const handleSwitchFavorite = async () => {
     await switchFavorite({
       id: currentBadge?.id!,
-      account: safe.address as unknown as Address,
+      account: safe.address.value as Address,
       isFavorite: !currentBadge?.favorite,
     })
     setCurrentBadge({
@@ -42,7 +48,19 @@ function BadgeInfo({
         justifyContent="center"
         alignItems="center"
       >
-        <img src={currentBadge?.image} />
+        {currentBadge.lastclaimtier ? (
+          <img
+            src={currentBadge.tiers[currentBadge.claimableTier!]['3DImage']}
+            className={!unClaimed ? css.unclaimed : undefined}
+            alt={currentBadge.networkorprotocol}
+          />
+        ) : (
+          <img
+            src={currentBadge.tiers[0]['3DImage']}
+            className={!unClaimed ? css.unclaimed : undefined}
+            alt={currentBadge.networkorprotocol}
+          />
+        )}
         <Box display="flex" gap={1} position="absolute" top="10%" right="0">
           <IconButton className={css.actionBtn}>
             <SvgIcon component={Share} color="inherit" inheritViewBox fontSize="small" />
@@ -79,12 +97,28 @@ function BadgeInfo({
         flexDirection="column"
         borderColor="secondary.main"
       >
-        <Typography fontSize={12} fontWeight={600} color="secondary">
-          Unlock Next Tier:
-        </Typography>
-        <Typography fontSize={12} fontWeight={400}>
-          400 something on somewhere
-        </Typography>
+        {currentBadge.lastclaimtier ? (
+          <>
+            <Typography fontSize={12} fontWeight={600} color="secondary.main">
+              Unlock Next Tier:
+            </Typography>
+            <Typography fontSize={12} fontWeight={400}>
+              {currentBadge.tierdescription.replace(
+                '{{variable}}',
+                currentBadge.tiers[currentBadge.claimableTier! + 1].minValue.toString(),
+              )}
+            </Typography>
+          </>
+        ) : (
+          <>
+            <Typography fontSize={12} fontWeight={600} color="secondary.main">
+              Unlock First Tier:
+            </Typography>
+            <Typography fontSize={12} fontWeight={400}>
+              {currentBadge.tierdescription.replace('{{variable}}', currentBadge.tiers[0].minValue.toString())}
+            </Typography>
+          </>
+        )}
       </Box>
       <Box
         border={2}
@@ -99,13 +133,17 @@ function BadgeInfo({
       >
         <Typography fontSize={12} fontWeight={500}>
           <strong>Network: </strong>
-          Ethereum
+          {currentBadge.networkorprotocol}
         </Typography>
         <Typography fontSize={12} fontWeight={500}>
-          <strong>Current Tier:</strong> 0
+          <strong>Current Tier:</strong> {currentBadge.lastclaimtier ?? 0}
         </Typography>
         <Typography fontSize={12} fontWeight={500}>
-          <strong>Next rewards:</strong> 0
+          {currentBadge.lastclaimtier ? (
+            <strong>Next rewards: {currentBadge.tiers[currentBadge.claimableTier! + 1].points}</strong>
+          ) : (
+            <strong>First rewards: {currentBadge.tiers[0].points} </strong>
+          )}
         </Typography>
       </Box>
       <Box

@@ -12,3 +12,6 @@
   padding: 0;
   color: var(--color-primary-light);
 }
+.unclaimed {
+  opacity: 0.5;
+}

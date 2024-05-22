@@ -67,15 +67,8 @@ function BadgesContent({
                 .filter((badge) => !!badge.favorite)
                 .map((badge) => (
                   <Badge
+                    data={badge}
                     key={badge.id}
-                    id={badge.id}
-                    image={badge.image!}
-                    title={badge.name}
-                    description={badge.description!}
-                    networkOrProtocol={badge.networkorprotocol!}
-                    points={badge.points}
-                    tiers={[1, 2, 3]}
-                    isFavorite={badge.favorite!}
                     switchFavorite={mutateAsync}
                     isSwitchFavoritePending={isPending}
                     setCurrentBadge={setCurrentBadge}
@@ -96,15 +89,8 @@ function BadgesContent({
             .filter((badge) => !badge.favorite)
             .map((badge) => (
               <Badge
+                data={badge}
                 key={badge.id}
-                id={badge.id}
-                image={badge.image!}
-                title={badge.name}
-                description={badge.description!}
-                networkOrProtocol={badge.networkorprotocol!}
-                points={badge.points}
-                tiers={[1, 2, 3]}
-                isFavorite={badge.favorite!}
                 switchFavorite={mutateAsync}
                 isSwitchFavoritePending={isPending}
                 setCurrentBadge={setCurrentBadge}

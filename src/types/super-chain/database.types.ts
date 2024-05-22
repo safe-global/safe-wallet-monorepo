@@ -24,7 +24,7 @@ export type Database = {
           isdeleted: boolean | null
           lastclaim: string | null
           lastclaimblock: number | null
-          points: number
+          lastclaimtier: number | null
         }
         Insert: {
           account: string
@@ -34,7 +34,7 @@ export type Database = {
           isdeleted?: boolean | null
           lastclaim?: string | null
           lastclaimblock?: number | null
-          points: number
+          lastclaimtier?: number | null
         }
         Update: {
           account?: string
@@ -44,7 +44,7 @@ export type Database = {
           isdeleted?: boolean | null
           lastclaim?: string | null
           lastclaimblock?: number | null
-          points?: number
+          lastclaimtier?: number | null
         }
         Relationships: [
           {
@@ -69,6 +69,7 @@ export type Database = {
           description: string
           id: number
           isactive: boolean | null
+          lastclaimtier: number | null
           name: string
           network: string
           networkorprotocol: string
@@ -80,6 +81,7 @@ export type Database = {
           description: string
           id?: number
           isactive?: boolean | null
+          lastclaimtier?: number | null
           name: string
           network: string
           networkorprotocol: string
@@ -91,6 +93,7 @@ export type Database = {
           description?: string
           id?: number
           isactive?: boolean | null
+          lastclaimtier?: number | null
           name?: string
           network?: string
           networkorprotocol?: string
