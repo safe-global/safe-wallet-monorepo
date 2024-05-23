@@ -25,7 +25,7 @@ function Badge({
     console.debug('favorite switched')
   }
   const unClaimed = useMemo(() => {
-    if (!data?.claimableTier || !data?.lastclaimtier) return false
+    if (data?.claimableTier === null || data?.lastclaimtier === null) return false
     return data?.lastclaimtier === data?.claimableTier
   }, [data])
   console.debug('unClaimed', unClaimed)
@@ -51,7 +51,7 @@ function Badge({
               fontSize="small"
             />
           </IconButton>
-          {data.lastclaimtier ? (
+          {data.lastclaimtier !== null ? (
             <img
               src={data.tiers[data.claimableTier!]['3DImage']}
               className={!unClaimed ? css.unclaimed : undefined}
@@ -71,7 +71,7 @@ function Badge({
             {data.description}
           </Typography>
           <Box border={2} borderRadius={1} padding="12px" borderColor="secondary.main">
-            {data.lastclaimtier ? (
+            {data.lastclaimtier !== null ? (
               <>
                 <Typography margin={0} textAlign="center" color="secondary.main">
                   Unlock Next Tier:
@@ -98,7 +98,7 @@ function Badge({
       </CardContent>
       <CardActions>
         <Box width="100%" display="flex" gap={1} pt={3} justifyContent="center" alignItems="center">
-          <strong>{data.lastclaimtier ? data.points : data.tiers[0].points}</strong>{' '}
+          <strong>{data.lastclaimtier !== null ? data.points : data.tiers[0].points}</strong>{' '}
           <SvgIcon component={SuperChainPoints} inheritViewBox fontSize="medium" />
         </Box>
       </CardActions>

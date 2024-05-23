@@ -21,7 +21,8 @@ function BadgeInfo({
   const { safe } = useSafeInfo()
 
   const unClaimed = useMemo(() => {
-    if (!currentBadge?.claimableTier || !currentBadge?.lastclaimtier) return false
+    if (currentBadge?.claimableTier === null || currentBadge?.lastclaimtier === null) return false
+
     return currentBadge?.lastclaimtier === currentBadge?.claimableTier
   }, [currentBadge])
 
@@ -48,7 +49,7 @@ function BadgeInfo({
         justifyContent="center"
         alignItems="center"
       >
-        {currentBadge.lastclaimtier ? (
+        {currentBadge.lastclaimtier !== null ? (
           <img
             src={currentBadge.tiers[currentBadge.claimableTier!]['3DImage']}
             className={!unClaimed ? css.unclaimed : undefined}
@@ -97,7 +98,7 @@ function BadgeInfo({
         flexDirection="column"
         borderColor="secondary.main"
       >
-        {currentBadge.lastclaimtier ? (
+        {currentBadge.lastclaimtier !== null ? (
           <>
             <Typography fontSize={12} fontWeight={600} color="secondary.main">
               Unlock Next Tier:
@@ -136,10 +137,10 @@ function BadgeInfo({
           {currentBadge.networkorprotocol}
         </Typography>
         <Typography fontSize={12} fontWeight={500}>
-          <strong>Current Tier:</strong> {currentBadge.lastclaimtier ?? 0}
+          <strong>Current Tier:</strong> {currentBadge.lastclaimtier !== null ? currentBadge.lastclaimtier + 1 : 0}
         </Typography>
         <Typography fontSize={12} fontWeight={500}>
-          {currentBadge.lastclaimtier ? (
+          {currentBadge.lastclaimtier !== null ? (
             <strong>Next rewards: {currentBadge.tiers[currentBadge.claimableTier! + 1].points}</strong>
           ) : (
             <strong>First rewards: {currentBadge.tiers[0].points} </strong>
