@@ -1,5 +1,5 @@
 import { Box, Button, Grid, InputAdornment, MenuItem, Select, SvgIcon, TextField, Typography } from '@mui/material'
-import React from 'react'
+import React, { useState } from 'react'
 
 import SearchIcon from '@/public/images/common/search.svg'
 import History from '@/public/images/common/history.svg'
@@ -11,6 +11,8 @@ import ClaimModal from '../modals/ClaimModal'
 import LevelUpModal from '../modals/LevelUpModal'
 function BadgesActions({ claimable }: { claimable: boolean }) {
   const { safeAddress, safe } = useSafeInfo()
+  const [isClaimModalOpen, setIsClaimModalOpen] = useState(false)
+  const [isLevelUpModalOpen, setIsLevelUpModalOpen] = useState(false)
   const queryClient = useQueryClient()
   const { mutate, isPending } = useMutation({
     mutationFn: async () => await badgesService.attestBadges(safeAddress as Address),
@@ -19,10 +21,19 @@ function BadgesActions({ claimable }: { claimable: boolean }) {
       queryClient.refetchQueries({ queryKey: ['badges', safeAddress] })
     },
   })
+
+  const handleCloseClaimModal = () => {
+    setIsClaimModalOpen(false)
+  }
+
+  const handleCloseLevelUpModal = () => {
+    setIsLevelUpModalOpen(false)
+  }
+
   return (
     <>
-      <ClaimModal />
-      <LevelUpModal />
+      <ClaimModal open={isClaimModalOpen} onClose={handleCloseClaimModal} />
+      <LevelUpModal open={isLevelUpModalOpen} onClose={handleCloseLevelUpModal} />
       <Grid container spacing={1} item>
         <Grid item>
           <Typography variant="h3" fontSize={16} fontWeight={600}>

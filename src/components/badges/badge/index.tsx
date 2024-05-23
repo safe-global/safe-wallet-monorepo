@@ -22,13 +22,12 @@ function Badge({
   const handleSwitchFavorite = async (event: SyntheticEvent, id: number, account: Address, isFavorite: boolean) => {
     event.stopPropagation()
     await switchFavorite({ id, account, isFavorite })
-    console.debug('favorite switched')
   }
   const unClaimed = useMemo(() => {
     if (data?.claimableTier === null || data?.lastclaimtier === null) return false
     return data?.lastclaimtier === data?.claimableTier
   }, [data])
-  console.debug('unClaimed', unClaimed)
+
   const handlePickBadge = () => {
     const badge: ResponseBadges = {
       ...data,

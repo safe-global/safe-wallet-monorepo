@@ -3,11 +3,12 @@ import React from 'react'
 import Shiny from '@/public/images/common/shiny-animation.svg'
 import SuperChainPoints from '@/public/images/common/superChain.svg'
 import css from './styles.module.css'
-function ClaimModal() {
+function ClaimModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   return (
     <Dialog
       className={css.claimModal}
-      open={false}
+      open={open}
+      onClose={onClose}
       aria-labelledby="modal-modal-title"
       aria-describedby="modal-modal-description"
     >
@@ -46,34 +47,6 @@ function ClaimModal() {
           />
           <img
             src="https://ikjhtwwevrmwwjatccqi.supabase.co/storage/v1/object/public/Badges/2DImages/BaseUser-1.svg"
-            alt="some"
-          />
-          <img
-            src="https://ikjhtwwevrmwwjatccqi.supabase.co/storage/v1/object/public/Badges/2DImages/BaseUser-1.svg"
-            alt="some"
-          />
-          <img
-            src="https://ikjhtwwevrmwwjatccqi.supabase.co/storage/v1/object/public/Badges/2DImages/BaseUser-1.svg"
-            alt="some"
-          />
-          <img
-            src="https://ikjhtwwevrmwwjatccqi.supabase.co/storage/v1/object/public/Badges/2DImages/OPUser-1.svg"
-            alt="some"
-          />
-          <img
-            src="https://ikjhtwwevrmwwjatccqi.supabase.co/storage/v1/object/public/Badges/2DImages/BaseUser-1.svg"
-            alt="some"
-          />
-          <img
-            src="https://ikjhtwwevrmwwjatccqi.supabase.co/storage/v1/object/public/Badges/2DImages/BaseUser-1.svg"
-            alt="some"
-          />
-          <img
-            src="https://ikjhtwwevrmwwjatccqi.supabase.co/storage/v1/object/public/Badges/2DImages/BaseUser-1.svg"
-            alt="some"
-          />
-          <img
-            src="https://ikjhtwwevrmwwjatccqi.supabase.co/storage/v1/object/public/Badges/2DImages/OPUser-1.svg"
             alt="some"
           />
         </Box>

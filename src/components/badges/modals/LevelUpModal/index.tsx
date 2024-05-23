@@ -1,5 +1,5 @@
 import React from 'react'
-import { Box, Button, Dialog, IconButton, SvgIcon, Typography } from '@mui/material'
+import { Box, Button, Dialog, SvgIcon, Typography } from '@mui/material'
 import css from './styles.module.css'
 import Tooltip from '@mui/material/Tooltip'
 
@@ -7,12 +7,13 @@ import PerkRaffle from '@/public/images/superchain/perk-raffle.svg'
 import PerkRebate from '@/public/images/superchain/perk-rebate.svg'
 import PerkCashback from '@/public/images/superchain/perk-cashback.svg'
 import StarAnimation from '../StarsAnimation'
-function LevelUpModal() {
+function LevelUpModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   return (
     <>
       <Dialog
         className={css.claimModal}
-        open
+        open={open}
+        onClose={onClose}
         aria-labelledby="modal-modal-title"
         aria-describedby="modal-modal-description"
       >
