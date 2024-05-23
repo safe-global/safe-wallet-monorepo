@@ -1,0 +1,28 @@
+.claimModal :global .MuiDialog-paper {
+  width: 480px;
+  margin: 0;
+  position: relative;
+  overflow-y: visible;
+  margin-bottom: 60px;
+}
+
+.pointsBox {
+  background-color: #ecf0f7;
+  border-radius: 6px;
+}
+
+.outsideButton {
+  position: absolute;
+  bottom: -60px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 12px 40px 12px 40px;
+
+  min-width: 300px;
+}
+
+.perk {
+  border-radius: 100%;
+  width: 42px;
+  height: 42px;
+}

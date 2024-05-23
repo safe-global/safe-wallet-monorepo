@@ -90,7 +90,7 @@
     "ethers": "^6.11.1",
     "exponential-backoff": "^3.1.0",
     "firebase": "^10.3.1",
-    "framer-motion": "^10.13.1",
+    "framer-motion": "^11.2.6",
     "fuse.js": "^6.6.2",
     "idb-keyval": "^6.2.1",
     "js-cookie": "^3.0.1",

@@ -1,0 +1,61 @@
+.claimModal :global .MuiDialog-paper {
+  width: 480px;
+  margin: 0;
+  position: relative;
+  overflow-y: visible;
+  margin-bottom: 60px;
+}
+
+.pointsBox {
+  background-color: #ecf0f7;
+  border-radius: 6px;
+}
+
+.outsideButton {
+  position: absolute;
+  bottom: -60px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 12px 40px 12px 40px;
+  min-width: 240px;
+}
+
+.levelUpButton {
+  position: absolute;
+  bottom: -60px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 8px 40px 8px 40px;
+  width: 240px;
+  background: radial-gradient(46.04% 263.1% at 50% 50%, #ff0420 0%, #b50317 100%)
+    /* warning: gradient uses a rotation that is not supported by CSS and may not behave as expected */;
+  cursor: pointer;
+  color: white;
+  border: 0;
+  border-radius: 6px;
+  text-align: center;
+  font-weight: bold;
+  position: relative;
+  overflow: hidden;
+}
+
+.shine {
+  position: absolute;
+  top: 0;
+  left: -100%; /* Empieza fuera del botón */
+  width: 100%;
+  height: 100%;
+  animation: shine-animation 2s infinite;
+}
+
+@keyframes shine-animation {
+  0% {
+    left: -100%;
+  }
+  50% {
+    left: 20%;
+  }
+  100% {
+    left: 100%;
+  }
+}

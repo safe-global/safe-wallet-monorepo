@@ -32,7 +32,7 @@ function Badges() {
         totalBadges={data?.currentBadges.length}
         isLoading={isLoading || isSuperChainLoading}
       />
-      <BadgesActions claimable={isClaimable} />
+      <BadgesActions claimable={isClaimable ?? false} />
       <BadgesContent badges={data?.currentBadges} isLoading={isLoading} error={error} />
     </Grid>
   )
