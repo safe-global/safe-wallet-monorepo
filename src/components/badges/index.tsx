@@ -1,5 +1,5 @@
 import { Grid } from '@mui/material'
-import React from 'react'
+import React, { useMemo } from 'react'
 import BadgesHeader from './header'
 import BadgesActions from './actions'
 import BadgesContent from './content'
@@ -22,7 +22,7 @@ function Badges() {
     queryFn: async () => await badgesService.getBadges(safeAddress as `0x${string}`),
     enabled: !!safeLoaded,
   })
-
+  const isClaimable = useMemo(() => data?.currentBadges.some((badge) => badge.claimable), [data?.currentBadges])
   return (
     <Grid spacing={2} container>
       <BadgesHeader
@@ -32,7 +32,7 @@ function Badges() {
         totalBadges={data?.currentBadges.length}
         isLoading={isLoading || isSuperChainLoading}
       />
-      <BadgesActions />
+      <BadgesActions claimable={isClaimable} />
       <BadgesContent badges={data?.currentBadges} isLoading={isLoading} error={error} />
     </Grid>
   )

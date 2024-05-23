@@ -7,7 +7,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import badgesService from '@/features/superChain/services/badges.service'
 import type { Address } from 'viem'
-function BadgesActions() {
+function BadgesActions({ claimable }: { claimable: boolean }) {
   const { safeAddress, safe } = useSafeInfo()
   const queryClient = useQueryClient()
   const { mutate, isPending } = useMutation({
@@ -48,6 +48,7 @@ function BadgesActions() {
             </Select>
             <Button
               fullWidth
+              disabled={!claimable || isPending}
               variant={isPending ? 'outlined' : 'contained'}
               color="secondary"
               onClick={() => mutate()}

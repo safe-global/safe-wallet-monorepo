@@ -26,4 +26,5 @@ export type ResponseBadges = Omit<AccountBadge, 'lastclaimblock' | 'badgeid'> &
     claimableTier: number | null
     points: number
     tiers: Tiers[]
+    claimable: boolean
   }
