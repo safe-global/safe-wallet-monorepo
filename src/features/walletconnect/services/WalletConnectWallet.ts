@@ -80,15 +80,11 @@ class WalletConnectWallet {
     })
   }
 
-  private getNamespaces(proposal: WalletKitTypes.SessionProposal, currentChainId: string, safeAddress: string) {
+  private getNamespaces(proposal: Web3WalletTypes.SessionProposal, currentChainId: string, safeAddress: string) {
     // As workaround, we pretend to support all the required chains plus the current Safe's chain
     const requiredChains = proposal.params.requiredNamespaces[EIP155]?.chains || []
-    const optionalChains = proposal.params.optionalNamespaces[EIP155]?.chains || []
 
-    const supportedChainIds = [currentChainId].concat(
-      requiredChains.map(stripEip155Prefix),
-      optionalChains.map(stripEip155Prefix),
-    )
+    const supportedChainIds = [currentChainId].concat(requiredChains.map(stripEip155Prefix))
 
     const eip155ChainIds = supportedChainIds.map(getEip155ChainId)
     const eip155Accounts = eip155ChainIds.map((eip155ChainId) => `${eip155ChainId}:${safeAddress}`)
