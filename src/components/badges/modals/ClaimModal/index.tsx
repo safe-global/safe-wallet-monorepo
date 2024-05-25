@@ -1,9 +1,10 @@
-import { Box, Dialog, SvgIcon, Typography } from '@mui/material'
+import { Box, Button, Dialog, SvgIcon, Typography } from '@mui/material'
 import React from 'react'
 import Shiny from '@/public/images/common/shiny-animation.svg'
 import SuperChainPoints from '@/public/images/common/superChain.svg'
 import css from './styles.module.css'
-function ClaimModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+import type { ClaimData } from '../../actions'
+function ClaimModal({ open, onClose, data }: { open: boolean; onClose: () => void; data: ClaimData | null }) {
   return (
     <Dialog
       className={css.claimModal}
@@ -29,26 +30,9 @@ function ClaimModal({ open, onClose }: { open: boolean; onClose: () => void }) {
           </Typography>
         </Box>
         <Box display="flex" gap="24px" flexWrap="wrap" maxWidth="360px">
-          <img
-            src="https://ikjhtwwevrmwwjatccqi.supabase.co/storage/v1/object/public/Badges/2DImages/BaseUser-1.svg"
-            alt="some"
-          />
-          <img
-            src="https://ikjhtwwevrmwwjatccqi.supabase.co/storage/v1/object/public/Badges/2DImages/BaseUser-1.svg"
-            alt="some"
-          />
-          <img
-            src="https://ikjhtwwevrmwwjatccqi.supabase.co/storage/v1/object/public/Badges/2DImages/BaseUser-1.svg"
-            alt="some"
-          />
-          <img
-            src="https://ikjhtwwevrmwwjatccqi.supabase.co/storage/v1/object/public/Badges/2DImages/OPUser-1.svg"
-            alt="some"
-          />
-          <img
-            src="https://ikjhtwwevrmwwjatccqi.supabase.co/storage/v1/object/public/Badges/2DImages/BaseUser-1.svg"
-            alt="some"
-          />
+          {data?.claimedBadges.map((badge, index) => (
+            <img key={index} src={badge} alt="Badge" />
+          ))}
         </Box>
         <Box
           className={css.pointsBox}
@@ -58,20 +42,23 @@ function ClaimModal({ open, onClose }: { open: boolean; onClose: () => void }) {
           alignItems="center"
           padding="8px 14px 8px 16px"
         >
-          <strong>40</strong>
+          <strong>{data?.totalPoints}</strong>
           <SvgIcon component={SuperChainPoints} inheritViewBox fontSize="medium" />
         </Box>
         <Typography color="GrayText" fontSize={16}>
           You still need <strong> 40 SC Point to level-up</strong>
         </Typography>
       </Box>
-      {/* <Button variant="contained" className={css.outsideButton}>
-      Continue
-    </Button> */}
-      <button className={css.levelUpButton}>
-        Level-up
-        <Shiny className={css.shine} />
-      </button>
+      {data?.isLevelUp ? (
+        <button className={css.levelUpButton}>
+          Level-up
+          <Shiny className={css.shine} />
+        </button>
+      ) : (
+        <Button variant="contained" className={css.outsideButton}>
+          Continue
+        </Button>
+      )}
     </Dialog>
   )
 }

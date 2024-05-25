@@ -6,6 +6,13 @@
   },
   {
     "type": "function",
+    "name": "SuperChainIDRegistered",
+    "inputs": [{ "name": "", "type": "string", "internalType": "string" }],
+    "outputs": [{ "name": "", "type": "bool", "internalType": "bool" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
     "name": "_addTierTreshold",
     "inputs": [{ "name": "_treshold", "type": "uint256", "internalType": "uint256" }],
     "outputs": [],
@@ -117,7 +124,7 @@
       { "name": "_points", "type": "uint256", "internalType": "uint256" },
       { "name": "recipent", "type": "address", "internalType": "address" }
     ],
-    "outputs": [],
+    "outputs": [{ "name": "levelUp", "type": "bool", "internalType": "bool" }],
     "stateMutability": "nonpayable"
   },
   {
@@ -187,6 +194,16 @@
     ],
     "outputs": [],
     "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "simulateIncrementSuperChainPoints",
+    "inputs": [
+      { "name": "_points", "type": "uint256", "internalType": "uint256" },
+      { "name": "recipent", "type": "address", "internalType": "address" }
+    ],
+    "outputs": [{ "name": "levelUp", "type": "bool", "internalType": "bool" }],
+    "stateMutability": "view"
   },
   {
     "type": "function",

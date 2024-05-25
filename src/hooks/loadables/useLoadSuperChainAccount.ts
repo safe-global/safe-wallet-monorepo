@@ -2,18 +2,18 @@ import type { SuperChainAccount } from '@/types/super-chain'
 import type { AsyncResult } from '../useAsync'
 import useSuperChainAccount from '../super-chain/useSuperChainAccount'
 import useSafeInfo from '../useSafeInfo'
-import { zeroAddress } from 'viem'
 import { useQuery } from '@tanstack/react-query'
 
 export const useLoadSuperChainAccount = (): AsyncResult<SuperChainAccount> => {
   const { safe } = useSafeInfo()
-  const { owners } = safe
+  const { address } = safe
   const { getReadOnlySuperChainSmartAccount } = useSuperChainAccount()
   const SuperChainAccountContractReadOnly = getReadOnlySuperChainSmartAccount()
+  console.debug(safe)
   const { data, isLoading, error } = useQuery<SuperChainAccount>({
-    queryKey: ['superChainAccount', owners[0]?.value],
+    queryKey: ['superChainAccount', address.value],
     queryFn: async () => {
-      const response = await SuperChainAccountContractReadOnly.superChainAccount(owners[0]?.value || zeroAddress)
+      const response = await SuperChainAccountContractReadOnly.getSuperChainAccount(address.value)
       return {
         smartAccount: response[0],
         superChainID: response[1],

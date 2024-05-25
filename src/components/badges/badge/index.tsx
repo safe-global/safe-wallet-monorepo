@@ -7,6 +7,8 @@ import css from './styles.module.css'
 import type { Address } from 'viem'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import type { ResponseBadges } from '@/types/super-chain'
+import classNames from 'classnames'
+import Complete from '@/public/images/common/complete.svg'
 function Badge({
   data,
   isSwitchFavoritePending,
@@ -35,7 +37,10 @@ function Badge({
     setCurrentBadge(badge)
   }
   return (
-    <Card onClick={handlePickBadge} className={css.badgeContainer}>
+    <Card
+      onClick={handlePickBadge}
+      className={classNames(css.badgeContainer, data.tiers.length - 1 === data.lastclaimtier && css.badgeComplete)}
+    >
       <CardContent>
         <Stack padding={0} justifyContent="center" alignItems="center" spacing={1} position="relative">
           <IconButton
@@ -52,12 +57,16 @@ function Badge({
           </IconButton>
           {data.lastclaimtier !== null ? (
             <img
+              width={72}
+              height={72}
               src={data.tiers[data.claimableTier!]['3DImage']}
               className={!unClaimed ? css.unclaimed : undefined}
               alt={data.networkorprotocol}
             />
           ) : (
             <img
+              width={72}
+              height={72}
               src={data.tiers[0]['3DImage']}
               className={!unClaimed ? css.unclaimed : undefined}
               alt={data.networkorprotocol}
@@ -69,36 +78,46 @@ function Badge({
           <Typography margin={0} fontSize={14} fontWeight={400} textAlign="center" color="text.secondary">
             {data.description}
           </Typography>
-          <Box border={2} borderRadius={1} padding="12px" borderColor="secondary.main">
-            {data.lastclaimtier !== null ? (
-              <>
-                <Typography margin={0} textAlign="center" color="secondary.main">
-                  Unlock Next Tier:
-                </Typography>
-                <Typography textAlign="center" margin={0}>
-                  {data.tierdescription.replace(
-                    '{{variable}}',
-                    data.tiers[data.claimableTier! + 1].minValue.toString(),
-                  )}
-                </Typography>
-              </>
-            ) : (
-              <>
-                <Typography margin={0} textAlign="center" color="secondary.main">
-                  Unlock First Tier:
-                </Typography>
-                <Typography textAlign="center" margin={0}>
-                  {data.tierdescription.replace('{{variable}}', data.tiers[0].minValue.toString())}
-                </Typography>
-              </>
-            )}
-          </Box>
+          {data.tiers.length - 1 !== data.lastclaimtier && (
+            <Box border={2} borderRadius={1} padding="12px" borderColor="secondary.main">
+              {data.lastclaimtier !== null ? (
+                <>
+                  <Typography margin={0} textAlign="center" color="secondary.main">
+                    Unlock Next Tier:
+                  </Typography>
+                  <Typography textAlign="center" margin={0}>
+                    {data.tierdescription.replace(
+                      '{{variable}}',
+                      data.tiers[data.claimableTier! + 1].minValue.toString(),
+                    )}
+                  </Typography>
+                </>
+              ) : (
+                <>
+                  <Typography margin={0} textAlign="center" color="secondary.main">
+                    Unlock First Tier:
+                  </Typography>
+                  <Typography textAlign="center" margin={0}>
+                    {data.tierdescription.replace('{{variable}}', data.tiers[0].minValue.toString())}
+                  </Typography>
+                </>
+              )}
+            </Box>
+          )}
         </Stack>
       </CardContent>
       <CardActions>
         <Box width="100%" display="flex" gap={1} pt={3} justifyContent="center" alignItems="center">
-          <strong>{data.lastclaimtier !== null ? data.points : data.tiers[0].points}</strong>{' '}
-          <SvgIcon component={SuperChainPoints} inheritViewBox fontSize="medium" />
+          {data.tiers.length - 1 !== data.lastclaimtier ? (
+            <>
+              <strong>{data.lastclaimtier !== null ? data.points : data.tiers[0].points}</strong>{' '}
+              <SvgIcon component={SuperChainPoints} inheritViewBox fontSize="medium" />
+            </>
+          ) : (
+            <>
+              <strong>Complete</strong> <SvgIcon component={Complete} inheritViewBox fontSize="medium" />
+            </>
+          )}
         </Box>
       </CardActions>
     </Card>

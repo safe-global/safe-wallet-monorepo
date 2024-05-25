@@ -1,4 +1,4 @@
-import { Drawer, Grid, Stack, Typography } from '@mui/material'
+import { Drawer, Grid, Skeleton, Stack, Typography } from '@mui/material'
 import React, { useState } from 'react'
 import Badge from '../badge'
 import type { ResponseBadges } from '@/types/super-chain'
@@ -7,6 +7,7 @@ import badgesService from '@/features/superChain/services/badges.service'
 import { type Address } from 'viem'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import BadgeInfo from '../badgeInfo'
+import css from './styles.module.css'
 
 type Params = {
   id: number
@@ -48,9 +49,36 @@ function BadgesContent({
       })
     },
   })
-  if (isLoading) return <Typography>Loading...</Typography>
-  if (error) return <Typography>Error: {error.message}</Typography>
-  if (!badges) return <Typography>No badges found</Typography>
+  if (isLoading)
+    return (
+      <Grid container item spacing={1}>
+        <Grid xs={12} item>
+          <Stack direction="row" spacing={2} useFlexGap flexWrap="wrap">
+            <Skeleton className={css.badgeSkeleton} variant="rectangular" width={245} height={324} />
+            <Skeleton className={css.badgeSkeleton} variant="rectangular" width={245} height={324} />
+            <Skeleton className={css.badgeSkeleton} variant="rectangular" width={245} height={324} />
+            <Skeleton className={css.badgeSkeleton} variant="rectangular" width={245} height={324} />
+          </Stack>
+        </Grid>
+      </Grid>
+    )
+  if (error)
+    return (
+      <Grid container item spacing={1}>
+        <Grid xs={12} item>
+          <Typography>Error: {error.message}</Typography>
+        </Grid>
+      </Grid>
+    )
+
+  if (!badges)
+    return (
+      <Grid container item spacing={1}>
+        <Grid xs={12} item>
+          <Typography>No badges founded</Typography>
+        </Grid>
+      </Grid>
+    )
 
   return (
     <Grid container item spacing={1}>

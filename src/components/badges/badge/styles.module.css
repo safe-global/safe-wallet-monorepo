@@ -1,7 +1,16 @@
 .badgeContainer {
   width: clamp(200px, 100%, 250px);
   padding: 24px;
+
   cursor: pointer;
+}
+
+.badgeComplete {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border: 2px solid #11d535;
+  background-color: #fafffb;
 }
 
 .badgeContainer > div {

@@ -9,16 +9,25 @@ import badgesService from '@/features/superChain/services/badges.service'
 import type { Address } from 'viem'
 import ClaimModal from '../modals/ClaimModal'
 import LevelUpModal from '../modals/LevelUpModal'
+
+export type ClaimData = {
+  claimedBadges: string[]
+  totalPoints: number
+  isLevelUp: boolean
+}
 function BadgesActions({ claimable }: { claimable: boolean }) {
-  const { safeAddress, safe } = useSafeInfo()
+  const { safeAddress } = useSafeInfo()
   const [isClaimModalOpen, setIsClaimModalOpen] = useState(false)
+  const [claimData, setClaimData] = useState<ClaimData | null>(null)
   const [isLevelUpModalOpen, setIsLevelUpModalOpen] = useState(false)
   const queryClient = useQueryClient()
   const { mutate, isPending } = useMutation({
     mutationFn: async () => await badgesService.attestBadges(safeAddress as Address),
-    onSuccess: () => {
-      queryClient.refetchQueries({ queryKey: ['superChainAccount', safe.owners[0].value] })
+    onSuccess: (data) => {
+      queryClient.refetchQueries({ queryKey: ['superChainAccount', safeAddress] })
       queryClient.refetchQueries({ queryKey: ['badges', safeAddress] })
+      setClaimData(data)
+      setIsClaimModalOpen(true)
     },
   })
 
@@ -32,7 +41,7 @@ function BadgesActions({ claimable }: { claimable: boolean }) {
 
   return (
     <>
-      <ClaimModal open={isClaimModalOpen} onClose={handleCloseClaimModal} />
+      <ClaimModal data={claimData} open={isClaimModalOpen} onClose={handleCloseClaimModal} />
       <LevelUpModal open={isLevelUpModalOpen} onClose={handleCloseLevelUpModal} />
       <Grid container spacing={1} item>
         <Grid item>
