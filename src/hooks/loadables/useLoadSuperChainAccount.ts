@@ -9,7 +9,6 @@ export const useLoadSuperChainAccount = (): AsyncResult<SuperChainAccount> => {
   const { address } = safe
   const { getReadOnlySuperChainSmartAccount } = useSuperChainAccount()
   const SuperChainAccountContractReadOnly = getReadOnlySuperChainSmartAccount()
-  console.debug(safe)
   const { data, isLoading, error } = useQuery<SuperChainAccount>({
     queryKey: ['superChainAccount', address.value],
     queryFn: async () => {
