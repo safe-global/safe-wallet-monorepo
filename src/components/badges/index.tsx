@@ -30,6 +30,15 @@ function Badges() {
         points={Number(superChainAccount.points)}
         pointsToNextLevel={Number(superChainAccount.points) * 2}
         totalBadges={data?.currentBadges.length}
+        completeBadges={
+          data?.currentBadges.reduce((acc, badge) => {
+            if (!badge.lastclaimtier) return acc
+            if (badge.lastclaimtier === badge.tiers.length - 1) {
+              acc += 1
+            }
+            return acc
+          }, 0) ?? 0
+        }
         isLoading={isLoading || isSuperChainLoading}
       />
       <BadgesActions claimable={isClaimable ?? false} />

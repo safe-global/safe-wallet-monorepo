@@ -4,7 +4,17 @@ import Shiny from '@/public/images/common/shiny-animation.svg'
 import SuperChainPoints from '@/public/images/common/superChain.svg'
 import css from './styles.module.css'
 import type { ClaimData } from '../../actions'
-function ClaimModal({ open, onClose, data }: { open: boolean; onClose: () => void; data: ClaimData | null }) {
+function ClaimModal({
+  open,
+  onClose,
+  data,
+  onLevelUp,
+}: {
+  open: boolean
+  onClose: () => void
+  data: ClaimData | null
+  onLevelUp: () => void
+}) {
   return (
     <Dialog
       className={css.claimModal}
@@ -50,12 +60,12 @@ function ClaimModal({ open, onClose, data }: { open: boolean; onClose: () => voi
         </Typography>
       </Box>
       {data?.isLevelUp ? (
-        <button className={css.levelUpButton}>
+        <button onClick={onLevelUp} className={css.levelUpButton}>
           Level-up
           <Shiny className={css.shine} />
         </button>
       ) : (
-        <Button variant="contained" className={css.outsideButton}>
+        <Button onClick={onClose} variant="contained" className={css.outsideButton}>
           Continue
         </Button>
       )}

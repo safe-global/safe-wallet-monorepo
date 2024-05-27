@@ -5,11 +5,13 @@ function BadgesHeader({
   level,
   points,
   pointsToNextLevel,
+  completeBadges,
   totalBadges,
   isLoading,
 }: {
   level?: number
   points?: number
+  completeBadges: number
   pointsToNextLevel?: number
   totalBadges?: number
   isLoading: boolean
@@ -72,7 +74,7 @@ function BadgesHeader({
             <Skeleton variant="text" width={44} height={44} />
           ) : (
             <Typography variant="h4" fontWeight={600} fontSize={44}>
-              1/{totalBadges}
+              {completeBadges}/{totalBadges}
             </Typography>
           )}
         </Box>

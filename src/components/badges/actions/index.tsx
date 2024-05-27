@@ -9,6 +9,8 @@ import badgesService from '@/features/superChain/services/badges.service'
 import type { Address } from 'viem'
 import ClaimModal from '../modals/ClaimModal'
 import LevelUpModal from '../modals/LevelUpModal'
+import { useRouter } from 'next/router'
+import { AppRoutes } from '@/config/routes'
 
 export type ClaimData = {
   claimedBadges: string[]
@@ -17,6 +19,7 @@ export type ClaimData = {
 }
 function BadgesActions({ claimable }: { claimable: boolean }) {
   const { safeAddress } = useSafeInfo()
+  const router = useRouter()
   const [isClaimModalOpen, setIsClaimModalOpen] = useState(false)
   const [claimData, setClaimData] = useState<ClaimData | null>(null)
   const [isLevelUpModalOpen, setIsLevelUpModalOpen] = useState(false)
@@ -37,11 +40,16 @@ function BadgesActions({ claimable }: { claimable: boolean }) {
 
   const handleCloseLevelUpModal = () => {
     setIsLevelUpModalOpen(false)
+    router.push({ pathname: AppRoutes.home, query: { safe: router.query.safe } })
+  }
+
+  const handleLevelUp = () => {
+    setIsLevelUpModalOpen(true)
   }
 
   return (
     <>
-      <ClaimModal data={claimData} open={isClaimModalOpen} onClose={handleCloseClaimModal} />
+      <ClaimModal onLevelUp={handleLevelUp} data={claimData} open={isClaimModalOpen} onClose={handleCloseClaimModal} />
       <LevelUpModal open={isLevelUpModalOpen} onClose={handleCloseLevelUpModal} />
       <Grid container spacing={1} item>
         <Grid item>

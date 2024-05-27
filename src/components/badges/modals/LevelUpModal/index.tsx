@@ -108,7 +108,7 @@ function LevelUpModal({ open, onClose }: { open: boolean; onClose: () => void })
             </Box>
           </Box>
         </Box>
-        <Button variant="contained" className={css.outsideButton}>
+        <Button onClick={onClose} variant="contained" className={css.outsideButton}>
           Return to Dashboard
         </Button>
         <StarAnimation />
