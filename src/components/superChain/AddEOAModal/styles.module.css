@@ -1,0 +1,16 @@
+.claimModal :global .MuiDialog-paper {
+  margin: 0;
+  position: relative;
+  overflow-y: visible;
+  margin-bottom: 60px;
+  width: 480px;
+}
+
+.outsideActions {
+  position: absolute;
+  bottom: -60px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  gap: 24px;
+}

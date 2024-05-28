@@ -6,7 +6,7 @@ import css from './styles.module.css'
 import MoreIcon from '@/public/images/common/more.svg'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import EthHashInfo from '../EthHashInfo'
-import AddEOAModal from '@/components/superChain/AddEOA'
+import AddEOAModal from '@/components/superChain/AddEOAModal'
 import { useState } from 'react'
 const SuperChainEOAS = () => {
   const { safe } = useSafeInfo()
