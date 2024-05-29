@@ -15,9 +15,7 @@ function usePimlico() {
   const [smartAccountClient, setSmartAccountClient] = useState<SmartAccountClient>()
   const superChainSmartAccount = useAppSelector(selectSuperChainAccount)
   useEffect(() => {
-    console.debug('before async')
     ;(async () => {
-      console.debug('inside async')
       if (!wallet || superChainSmartAccount.loading || superChainSmartAccount.error) return
       const eip1193provider = wallet?.provider
 
