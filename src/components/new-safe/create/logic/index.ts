@@ -3,7 +3,6 @@ import { type BrowserProvider, type Provider } from 'ethers'
 
 import { getSafeInfo, type SafeInfo, type ChainInfo, relayTransaction } from '@safe-global/safe-gateway-typescript-sdk'
 import {
-  getReadOnlyFallbackHandlerContract,
   getReadOnlyGnosisSafeContract,
   getReadOnlyProxyFactoryContract,
   getSuperChainSetupInterface,
@@ -53,13 +52,14 @@ export const getSafeDeployProps = async (
   callback: (txHash: string) => void,
   chain: ChainInfo,
 ): Promise<DeploySafeProps & { callback: DeploySafeProps['callback'] }> => {
-  const readOnlyFallbackHandlerContract = await getReadOnlyFallbackHandlerContract(chain.chainId, LATEST_SAFE_VERSION)
+  // const readOnlyFallbackHandlerContract = await getReadOnlyFallbackHandlerContract(chain.chainId, LATEST_SAFE_VERSION)
+
   const { data, to } = getSuperChainSetupCallData(safeParams.seed, safeParams.id, safeParams.owners[0])
   return {
     safeAccountConfig: {
       threshold: safeParams.threshold,
       owners: safeParams.owners,
-      fallbackHandler: await readOnlyFallbackHandlerContract.getAddress(),
+      fallbackHandler: ERC4337_MODULE_ADDRESS,
       data,
       to,
     },
@@ -124,8 +124,9 @@ export const computeNewSafeAddress = async (
       id: string
     }
   },
+  safeVersion?: SafeVersion,
 ): Promise<string> => {
-  const safeFactory = await getSafeFactory(ethersProvider)
+  const safeFactory = await getSafeFactory(ethersProvider, safeVersion)
   const { to, data } = getSuperChainSetupCallData(
     props.superChainProps.seed,
     props.superChainProps.id,
@@ -155,7 +156,7 @@ export const encodeSafeCreationTx = async ({
 }: SafeCreationProps & { chain: ChainInfo }) => {
   const readOnlySafeContract = await getReadOnlyGnosisSafeContract(chain, LATEST_SAFE_VERSION)
   const readOnlyProxyContract = await getReadOnlyProxyFactoryContract(chain.chainId, LATEST_SAFE_VERSION)
-  const readOnlyFallbackHandlerContract = await getReadOnlyFallbackHandlerContract(chain.chainId, LATEST_SAFE_VERSION)
+  // const readOnlyFallbackHandlerContract = await getReadOnlyFallbackHandlerContract(chain.chainId, LATEST_SAFE_VERSION)
 
   const { data, to } = getSuperChainSetupCallData(seed, id, owners[0])
 
@@ -164,7 +165,7 @@ export const encodeSafeCreationTx = async ({
     threshold,
     to,
     data,
-    await readOnlyFallbackHandlerContract.getAddress(),
+    ERC4337_MODULE_ADDRESS,
     ZERO_ADDRESS,
     '0',
     ZERO_ADDRESS,
@@ -362,8 +363,8 @@ export const relaySafeCreation = async (
 
   const readOnlyProxyFactoryContract = await getReadOnlyProxyFactoryContract(chain.chainId, safeVersion)
   const proxyFactoryAddress = await readOnlyProxyFactoryContract.getAddress()
-  const readOnlyFallbackHandlerContract = await getReadOnlyFallbackHandlerContract(chain.chainId, safeVersion)
-  const fallbackHandlerAddress = await readOnlyFallbackHandlerContract.getAddress()
+  // const readOnlyFallbackHandlerContract = await getReadOnlyFallbackHandlerContract(chain.chainId, safeVersion)
+  // const fallbackHandlerAddress = await readOnlyFallbackHandlerContract.getAddress()
   const readOnlySafeContract = await getReadOnlyGnosisSafeContract(chain)
   const safeContractAddress = await readOnlySafeContract.getAddress()
 
@@ -372,7 +373,7 @@ export const relaySafeCreation = async (
     threshold,
     to: ZERO_ADDRESS,
     data: EMPTY_DATA,
-    fallbackHandler: fallbackHandlerAddress,
+    fallbackHandler: ERC4337_MODULE_ADDRESS,
     paymentToken: ZERO_ADDRESS,
     payment: 0,
     paymentReceiver: ZERO_ADDRESS,

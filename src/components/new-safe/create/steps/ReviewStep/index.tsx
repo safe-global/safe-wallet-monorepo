@@ -60,6 +60,8 @@ import useWallet from '@/hooks/wallets/useWallet'
 import PayNowPayLater from '@/features/counterfactual/PayNowPayLater'
 import { getAvailableSaltNonce } from '../../logic/utils'
 import { computeNewSafeAddress } from '../../logic'
+import { SafeVersion } from 'permissionless/accounts'
+import { ERC4337_MODULE_ADDRESS } from '@/features/superChain/constants'
 // import { usePendingSafe } from '../StatusStep/usePendingSafe';
 
 export const NetworkFee = ({
@@ -171,10 +173,9 @@ const ReviewStep = ({ data, onBack, setStep, onSubmit }: StepRenderProps<NewSafe
     setIsCreating(true)
 
     try {
-      const readOnlyFallbackHandlerContract = await getReadOnlyFallbackHandlerContract(
-        chain.chainId,
-        LATEST_SAFE_VERSION,
-      )
+      const safeVersion = LATEST_SAFE_VERSION as SafeVersion
+
+      // const readOnlyFallbackHandlerContract = await getReadOnlyFallbackHandlerContract(chain.chainId, safeVersion)
 
       const props: DeploySafeProps & {
         superChainProps: {
@@ -185,22 +186,15 @@ const ReviewStep = ({ data, onBack, setStep, onSubmit }: StepRenderProps<NewSafe
         safeAccountConfig: {
           threshold: data.threshold,
           owners: data.owners.map((owner) => owner.address),
-          fallbackHandler: await readOnlyFallbackHandlerContract.getAddress(),
+          fallbackHandler: ERC4337_MODULE_ADDRESS,
         },
         superChainProps: {
           id: data.id,
           seed: data.seed,
         },
       }
-
-      const saltNonce = await getAvailableSaltNonce(provider, {
-        ...props,
-        saltNonce: '0',
-      })
-      const safeAddress = await computeNewSafeAddress(provider, {
-        ...props,
-        saltNonce,
-      })
+      const saltNonce = await getAvailableSaltNonce(provider, { ...props, saltNonce: '0' }, safeVersion)
+      const safeAddress = await computeNewSafeAddress(provider, { ...props, saltNonce }, safeVersion)
 
       const pendingSafe = {
         ...data,

@@ -24,7 +24,7 @@ export async function getSmartAccountClient(signer: SmartAccountSigner, safeAddr
     entryPoint: ENTRYPOINT_ADDRESS_V07,
     signer,
     safeVersion: '1.4.1',
-    // address: '0xc42524d1Cb8AA03936CAc6b6DE3a88A5C7B2f52c',
+    address: safeAddress,
   })
 
   const smartAccountClient = createSmartAccountClient({
