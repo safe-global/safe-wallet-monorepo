@@ -8,9 +8,18 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import EthHashInfo from '../EthHashInfo'
 import AddEOAModal from '@/components/superChain/AddEOAModal'
 import { useState } from 'react'
+import usePopulatedEOASRequest from '@/hooks/super-chain/usePopulatedEOASRequest'
+import { Address } from 'viem'
 const SuperChainEOAS = () => {
   const { safe } = useSafeInfo()
   const [isAddEOAOpen, setIsAddEOAOpen] = useState(false)
+  const {
+    data,
+    loading: populatedOwnersLoading,
+    error,
+  } = usePopulatedEOASRequest('0x0a4b0Da68E7e14003cfD63736159B8e865a50E0f')
+
+  console.debug({ data: data?.ownerPopulateds, populatedOwnersLoading, error })
 
   return (
     <div className={css.container}>
@@ -42,17 +51,31 @@ const SuperChainEOAS = () => {
             <Divider />
             <Box
               p={2}
+              gap={2}
               alignItems="center"
               display="flex"
               justifyContent="space-between"
               width="100%"
-              flexDirection="row"
+              flexDirection="column"
             >
               {safe.owners.map((owner, key) => (
                 <EthHashInfo
                   avatarSize={30}
                   key={key}
                   address={owner.value}
+                  showCopyButton
+                  prefix=""
+                  shortAddress={false}
+                  showName={false}
+                  hasExplorer
+                />
+              ))}
+              {data?.ownerPopulateds?.map((owner: { newOwner: string }, key: number) => (
+                <EthHashInfo
+                  isPopulated={true}
+                  avatarSize={30}
+                  key={key}
+                  address={owner.newOwner}
                   showCopyButton
                   prefix=""
                   shortAddress={false}

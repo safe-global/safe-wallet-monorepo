@@ -10,8 +10,9 @@ import SrcEthHashInfo, { type EthHashInfoProps } from './SrcEthHashInfo'
 const EthHashInfo = ({
   showName = true,
   avatarSize = 40,
+  isPopulated = false,
   ...props
-}: EthHashInfoProps & { showName?: boolean }): ReactElement => {
+}: EthHashInfoProps & { showName?: boolean; isPopulated?: boolean }): ReactElement => {
   const settings = useAppSelector(selectSettings)
   const currentChainId = useChainId()
   const chain = useChain(props.chainId || currentChainId)
@@ -24,7 +25,10 @@ const EthHashInfo = ({
       prefix={chain?.shortName}
       copyPrefix={settings.shortName.copy}
       {...props}
+      isPopulated={isPopulated}
       name={name}
+      hasExplorer={!isPopulated}
+      showCopyButton={!isPopulated}
       customAvatar={props.customAvatar}
       ExplorerButtonProps={{ title: link?.title || '', href: link?.href || '' }}
       avatarSize={avatarSize}

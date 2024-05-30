@@ -9,6 +9,7 @@ import ExplorerButton, { type ExplorerButtonProps } from '../../ExplorerButton'
 import { shortenAddress } from '@/utils/formatters'
 import ImageFallback from '../../ImageFallback'
 import css from './styles.module.css'
+import classNames from 'classnames'
 
 export type EthHashInfoProps = {
   address: string
@@ -35,6 +36,7 @@ const SrcEthHashInfo = ({
   address,
   customAvatar,
   prefix = '',
+  isPopulated = false,
   copyPrefix = true,
   showPrefix = true,
   shortAddress = true,
@@ -47,7 +49,7 @@ const SrcEthHashInfo = ({
   ExplorerButtonProps,
   children,
   trusted = true,
-}: EthHashInfoProps): ReactElement => {
+}: EthHashInfoProps & { isPopulated?: boolean }): ReactElement => {
   const shouldPrefix = isAddress(address)
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
@@ -65,7 +67,7 @@ const SrcEthHashInfo = ({
     <div className={css.container}>
       {showAvatar && (
         <div
-          className={css.avatarContainer}
+          className={classNames([css.avatarContainer, isPopulated && css.disabled])}
           style={avatarSize !== undefined ? { width: `${avatarSize}px`, height: `${avatarSize}px` } : undefined}
         >
           {customAvatar ? (

@@ -45,6 +45,7 @@
     "@gnosis.pm/zodiac/**/ethers": "^6.11.1"
   },
   "dependencies": {
+    "@apollo/client": "^3.10.4",
     "@covalenthq/client-sdk": "^1.0.2",
     "@ducanh2912/next-pwa": "^9.7.1",
     "@emotion/cache": "^11.11.0",
@@ -92,6 +93,7 @@
     "firebase": "^10.3.1",
     "framer-motion": "^11.2.6",
     "fuse.js": "^6.6.2",
+    "graphql": "^16.8.1",
     "idb-keyval": "^6.2.1",
     "js-cookie": "^3.0.1",
     "lodash": "^4.17.21",

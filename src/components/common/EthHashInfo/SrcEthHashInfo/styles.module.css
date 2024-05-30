@@ -22,3 +22,7 @@
   gap: 0.25em;
   white-space: nowrap;
 }
+
+.disabled {
+  filter: grayscale(1);
+}
