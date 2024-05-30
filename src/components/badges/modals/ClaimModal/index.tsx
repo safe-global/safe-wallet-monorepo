@@ -40,7 +40,7 @@ function ClaimModal({
           </Typography>
         </Box>
         <Box display="flex" gap="24px" flexWrap="wrap" maxWidth="360px">
-          {data?.claimedBadges.map((badge, index) => (
+          {data?.badgeImages.map((badge, index) => (
             <img key={index} src={badge} alt="Badge" />
           ))}
         </Box>

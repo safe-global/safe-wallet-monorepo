@@ -44,6 +44,7 @@ function BadgesActions({ claimable }: { claimable: boolean }) {
   }
 
   const handleLevelUp = () => {
+    setIsClaimModalOpen(false)
     setIsLevelUpModalOpen(true)
   }
 

@@ -9,15 +9,10 @@ import EthHashInfo from '../EthHashInfo'
 import AddEOAModal from '@/components/superChain/AddEOAModal'
 import { useState } from 'react'
 import usePopulatedEOASRequest from '@/hooks/super-chain/usePopulatedEOASRequest'
-import { Address } from 'viem'
 const SuperChainEOAS = () => {
   const { safe } = useSafeInfo()
   const [isAddEOAOpen, setIsAddEOAOpen] = useState(false)
-  const {
-    data,
-    loading: populatedOwnersLoading,
-    error,
-  } = usePopulatedEOASRequest('0x0a4b0Da68E7e14003cfD63736159B8e865a50E0f')
+  const { data, loading: populatedOwnersLoading, error } = usePopulatedEOASRequest(safe.address.value)
 
   console.debug({ data: data?.ownerPopulateds, populatedOwnersLoading, error })
 
