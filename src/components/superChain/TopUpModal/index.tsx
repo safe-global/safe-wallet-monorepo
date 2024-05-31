@@ -1,4 +1,4 @@
-import type { ReactElement } from 'react'
+import { useMemo, type ReactElement } from 'react'
 import ModalDialog from '@/components/common/ModalDialog'
 import { Box, Button, Grid, MenuItem, Select, SvgIcon } from '@mui/material'
 import { makeStyles } from '@mui/styles'
@@ -10,6 +10,8 @@ import ExplorerButton from '@/components/common/ExplorerButton'
 import Image from 'next/image'
 import OETH from '@/public/images/currencies/ethereum.svg'
 import lightPalette from '@/components/theme/lightPalette'
+import { useAppSelector } from '@/store'
+import { selectSuperChainAccount } from '@/store/superChainAccountSlice'
 const useStyles = makeStyles({
   select: {
     color: 'white',
@@ -34,6 +36,16 @@ const useStyles = makeStyles({
   },
 })
 const TopUpModal = ({ open, onClose }: { open: boolean; onClose: () => void }): ReactElement => {
+  const superChainSmartAccount = useAppSelector(selectSuperChainAccount)
+  const nounSeed = useMemo(() => {
+    return {
+      background: Number(superChainSmartAccount.data.noun[0]),
+      body: Number(superChainSmartAccount.data.noun[1]),
+      accessory: Number(superChainSmartAccount.data.noun[2]),
+      head: Number(superChainSmartAccount.data.noun[3]),
+      glasses: Number(superChainSmartAccount.data.noun[4]),
+    }
+  }, [superChainSmartAccount])
   const classes = useStyles()
   return (
     <ModalDialog open={open} hideChainIndicator dialogTitle="Top-up your account" onClose={onClose}>
@@ -97,32 +109,26 @@ const TopUpModal = ({ open, onClose }: { open: boolean; onClose: () => void }): 
           </Box>
         </Grid>
         <Grid item>
-          <Box display="flex" gap={2} alignItems="center" className={css.container}>
-            <div className={css.noun}>
-              <NounsAvatar
-                seed={{
-                  accessory: 0,
-                  body: 0,
-                  background: 0,
-                  glasses: 0,
-                  head: 0,
-                }}
-              />
-            </div>
-            <Box>
-              <p>luuk.superchain</p>
-              <Box display="flex" lineHeight={1.2} gap={1}>
-                <p>
-                  <strong>oeth:</strong>
-                  0xD0be338562D78fAf8B3Sv567a9943bfaab0a3051e
-                </p>
-                <CopyButton text="0xD0be338562D78fAf8B3Sv567a9943bfaab0a3051e" />
-                <Box color="border.main">
-                  <ExplorerButton />
+          {!superChainSmartAccount.loading && (
+            <Box display="flex" gap={2} alignItems="center" className={css.container}>
+              <div className={css.noun}>
+                <NounsAvatar seed={nounSeed} />
+              </div>
+              <Box>
+                <p>{superChainSmartAccount.data.superChainID}</p>
+                <Box display="flex" lineHeight={1.2} gap={1}>
+                  <p>
+                    <strong>oeth:</strong>
+                    {superChainSmartAccount.data.smartAccount}
+                  </p>
+                  <CopyButton text="0xD0be338562D78fAf8B3Sv567a9943bfaab0a3051e" />
+                  <Box color="border.main">
+                    <ExplorerButton />
+                  </Box>
                 </Box>
               </Box>
             </Box>
-          </Box>
+          )}
         </Grid>
       </Grid>
     </ModalDialog>
