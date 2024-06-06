@@ -16,6 +16,7 @@ import { useIsRecoverySupported } from '@/features/recovery/hooks/useIsRecoveryS
 import Balances from '@/pages/balances'
 import SuperChainEOAS from '../common/SuperChainEOAS'
 import SafeAppsDashboardSection from './SafeAppsDashboardSection/SafeAppsDashboardSection'
+import AddEOAAddedModal from './AddEOAAddedModal'
 const RecoveryHeader = dynamic(() => import('@/features/recovery/components/RecoveryHeader'))
 const RecoveryWidget = dynamic(() => import('@/features/recovery/components/RecoveryWidget'))
 
@@ -23,7 +24,7 @@ const Dashboard = (): ReactElement => {
   const router = useRouter()
   const { safe } = useSafeInfo()
   const { [CREATION_MODAL_QUERY_PARM]: showCreationModal = '' } = router.query
-
+  const showEOAAddedModal = true
   const supportsRecovery = useIsRecoverySupported()
   const [recovery] = useRecovery()
   const showRecoveryWidget = supportsRecovery && !recovery
@@ -70,6 +71,7 @@ const Dashboard = (): ReactElement => {
         )}
       </Grid>
       {showCreationModal ? <CreationDialog /> : null}
+      <AddEOAAddedModal />
     </>
   )
 }
