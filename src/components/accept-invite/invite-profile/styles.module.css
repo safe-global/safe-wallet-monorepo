@@ -1,0 +1,28 @@
+.container {
+  padding: 12px;
+  border-radius: 6px;
+  justify-content: space-between;
+  display: flex;
+  border: 1px solid #a0a5ad;
+}
+
+.avatar-container {
+  width: 40px;
+  height: 40px;
+  border-radius: 6px;
+}
+
+.trashButton {
+  width: auto;
+  height: 100%;
+  border-radius: 6px;
+  background: #ffe6e9;
+}
+
+.acceptButton {
+  height: 40px;
+  width: 110px;
+  font-size: 14px;
+  padding-top: 0;
+  padding-bottom: 0;
+}

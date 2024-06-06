@@ -29,6 +29,9 @@ const WelcomeLogin = () => {
     authenticated ? router.push(AppRoutes.newSafe.create) : login()
   }
 
+  const handleAcceptInvite = () => {
+    authenticated ? router.push(AppRoutes.invites) : login()
+  }
   useEffect(() => {
     if (!shouldRedirect) return
 
@@ -62,7 +65,7 @@ const WelcomeLogin = () => {
               or
             </Typography>
           </Divider>
-          <Button variant="outlined" disableElevation size="medium">
+          <Button onClick={handleAcceptInvite} variant="outlined" disableElevation size="medium">
             Accept invite
           </Button>
         </Box>

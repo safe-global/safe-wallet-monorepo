@@ -10,6 +10,8 @@ import { shortenAddress } from '@/utils/formatters'
 import ImageFallback from '../../ImageFallback'
 import css from './styles.module.css'
 import classNames from 'classnames'
+import { IconButton, SvgIcon, Typography } from '@mui/material'
+import Close from '@/public/images/common/close-rounded.svg'
 
 export type EthHashInfoProps = {
   address: string
@@ -28,6 +30,7 @@ export type EthHashInfoProps = {
   children?: ReactNode
   trusted?: boolean
   ExplorerButtonProps?: ExplorerButtonProps
+  shortAddressSize?: number
 }
 
 const stopPropagation = (e: SyntheticEvent) => e.stopPropagation()
@@ -49,6 +52,7 @@ const SrcEthHashInfo = ({
   ExplorerButtonProps,
   children,
   trusted = true,
+  shortAddressSize,
 }: EthHashInfoProps & { isPopulated?: boolean }): ReactElement => {
   const shouldPrefix = isAddress(address)
   const theme = useTheme()
@@ -59,7 +63,7 @@ const SrcEthHashInfo = ({
   const addressElement = (
     <>
       {showPrefix && shouldPrefix && prefix && <b>{prefix}:</b>}
-      <span>{shortAddress || isMobile ? shortenAddress(address) : address}</span>
+      <span>{shortAddress || isMobile ? shortenAddress(address, shortAddressSize ?? 4) : address}</span>
     </>
   )
 

@@ -13,7 +13,7 @@ import { useRouter } from 'next/router'
 import { AppRoutes } from '@/config/routes'
 
 export type ClaimData = {
-  claimedBadges: string[]
+  badgeImages: string[]
   totalPoints: number
   isLevelUp: boolean
 }

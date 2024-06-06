@@ -26,3 +26,8 @@
 .disabled {
   filter: grayscale(1);
 }
+
+.removeEoa {
+  background-color: var(--color-primary-light);
+  word-break: keep-all;
+}
