@@ -5,10 +5,13 @@ import css from './styles.module.css'
 import CopyAddressButton from '@/components/common/CopyAddressButton'
 import ExplorerButton from '@/components/common/ExplorerButton'
 import { zeroAddress } from 'viem'
+import { useRouter } from 'next/router'
 function AddEOAAddedModal() {
   const stopPropagation = (e: SyntheticEvent) => e.stopPropagation()
   const [open, setOpen] = useState(true)
   const onClose = () => setOpen(false)
+  const router = useRouter()
+  const { superChainId = '' } = router.query
 
   return (
     <Dialog
@@ -37,7 +40,7 @@ function AddEOAAddedModal() {
           </Typography>
           <Stack alignItems="center" direction="row">
             <Typography id="modal-modal-description" fontSize={16}>
-              <strong>luuk.superchain</strong>
+              <strong>{superChainId}</strong>
             </Typography>
             <CopyAddressButton address={zeroAddress} />
             <ExplorerButton onClick={stopPropagation} />

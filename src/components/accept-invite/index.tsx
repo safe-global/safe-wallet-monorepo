@@ -6,9 +6,23 @@ import { useState } from 'react'
 import usePendingEOASRequests from '@/hooks/super-chain/usePendingEOASRequests'
 import useWallet from '@/hooks/wallets/useWallet'
 import { type Address, zeroAddress } from 'viem'
+
+export type ModalContext = {
+  safe: Address | null
+  newOwner: Address | null
+  superChainId: string | null
+  isOpen: boolean
+}
+
+const initialModalContext: ModalContext = {
+  isOpen: false,
+  safe: null,
+  newOwner: null,
+  superChainId: null,
+}
 const AcceptInvite = () => {
   const wallet = useWallet()
-  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [modalContext, setModalContext] = useState<ModalContext>(initialModalContext)
   const { data, loading: pendingEOASRequestLoading } = usePendingEOASRequests(
     (wallet?.address as Address) || zeroAddress,
   )
@@ -30,7 +44,7 @@ const AcceptInvite = () => {
             </Stack>
           </Grid>
           <Grid pt={4} item xs={12}>
-            <InvitesCard loading={pendingEOASRequestLoading} populations={data} setIsModalOpen={setIsModalOpen} />
+            <InvitesCard loading={pendingEOASRequestLoading} populations={data} setModalContext={setModalContext} />
           </Grid>
           <Grid item xs={12}>
             <Alert severity="warning" sx={{ mt: 3 }}>
@@ -40,7 +54,7 @@ const AcceptInvite = () => {
           </Grid>
         </Grid>
       </Container>
-      <AlertModal open={false} onClose={() => setIsModalOpen(false)} />
+      <AlertModal modalContext={modalContext} onClose={() => setModalContext(initialModalContext)} />
     </>
   )
 }

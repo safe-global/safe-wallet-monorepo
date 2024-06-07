@@ -1,20 +1,37 @@
 import css from './styles.module.css'
-import { Card, CardHeader, CardContent, TextField, InputAdornment, SvgIcon, Stack, Pagination } from '@mui/material'
+import {
+  Card,
+  CardHeader,
+  CardContent,
+  TextField,
+  InputAdornment,
+  SvgIcon,
+  Stack,
+  Pagination,
+  Skeleton,
+} from '@mui/material'
 import SearchIcon from '@/public/images/common/search.svg'
 import InviteProfile from '../invite-profile'
 import type { PendingEOASRequest } from '@/hooks/super-chain/usePendingEOASRequests'
+import type { ModalContext } from '..'
+import type { Address } from 'viem'
 
 export function InvitesCard({
-  setIsModalOpen,
+  setModalContext,
   populations,
   loading,
 }: {
-  setIsModalOpen: (isOpen: boolean) => void
+  setModalContext: (modalContext: ModalContext) => void
   populations: PendingEOASRequest | undefined
   loading: boolean
 }) {
-  const handleOpenModal = () => {
-    setIsModalOpen(true)
+  const handleOpenModal = (safe: Address, newOwner: Address, superChainId: string) => {
+    setModalContext({
+      isOpen: true,
+      safe,
+      newOwner,
+      superChainId,
+    })
   }
 
   return (
@@ -48,15 +65,17 @@ export function InvitesCard({
               '& > .MuiInputBase-root': { padding: '8px 16px' },
             }}
           />
-          {!loading &&
+          {loading ? (
+            <>
+              <Skeleton className={css['skeleton-container']} variant="rectangular" width="100%" />
+              <Skeleton className={css['skeleton-container']} variant="rectangular" width="100%" />
+              <Skeleton className={css['skeleton-container']} variant="rectangular" width="100%" />
+            </>
+          ) : (
             populations?.ownerPopulateds.map((population) => (
-              <InviteProfile
-                key={population.id}
-                safe={population.safe}
-                superChainId={population.superChainId}
-                onClick={handleOpenModal}
-              />
-            ))}
+              <InviteProfile key={population.id} population={population} onClick={handleOpenModal} />
+            ))
+          )}
 
           <Pagination shape="rounded" count={3} />
         </Stack>

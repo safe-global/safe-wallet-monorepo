@@ -45,3 +45,11 @@
 .search {
   box-shadow: 3px 3px 2px 0px #00000014 inset;
 }
+
+.skeleton-container {
+  padding: 12px;
+  border-radius: 6px;
+  justify-content: space-between;
+  display: flex;
+  height: 64px;
+}

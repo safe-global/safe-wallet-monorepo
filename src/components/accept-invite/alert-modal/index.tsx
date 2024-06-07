@@ -1,17 +1,34 @@
 import { Alert, AlertTitle, Box, Button, Dialog, Stack, SvgIcon, Typography } from '@mui/material'
-import React from 'react'
+import React, { type SyntheticEvent } from 'react'
 import BeautyAlert from '@/public/images/common/beauty-alert.svg'
 import css from './styles.module.css'
 import CopyAddressButton from '@/components/common/CopyAddressButton'
 import ExplorerButton from '@/components/common/ExplorerButton'
 import { zeroAddress } from 'viem'
-function AlertModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+import { type ModalContext } from '..'
+import useSuperChainAccount from '@/hooks/super-chain/useSuperChainAccount'
+import { AppRoutes } from '@/config/routes'
+import { useRouter } from 'next/router'
+export const ADD_OWNER_MODAL_QUERY_PARAM = 'addOwnerModal'
+
+function AlertModal({ modalContext, onClose }: { modalContext: ModalContext; onClose: () => void }) {
   const stopPropagation = (e: SyntheticEvent) => e.stopPropagation()
+  const router = useRouter()
+  const { getWriteableSuperChainSmartAccount } = useSuperChainAccount()
+  const handleAcceptInvitation = async () => {
+    // const superChainSmartAccountContract = getWriteableSuperChainSmartAccount()
+    // await superChainSmartAccountContract?.write.addOwnerWithThreshold([modalContext.safe, modalContext.newOwner])
+    onClose()
+    router.push({
+      pathname: AppRoutes.home,
+      query: { safe: modalContext.safe, [ADD_OWNER_MODAL_QUERY_PARAM]: true, superChainId: modalContext.superChainId },
+    })
+  }
 
   return (
     <Dialog
       className={css.claimModal}
-      open={open}
+      open={modalContext.isOpen}
       onClose={onClose}
       aria-labelledby="modal-modal-title"
       aria-describedby="modal-modal-description"
@@ -51,7 +68,7 @@ function AlertModal({ open, onClose }: { open: boolean; onClose: () => void }) {
         <Button fullWidth color="background" onClick={onClose} variant="contained">
           Go back
         </Button>
-        <Button fullWidth onClick={onClose} variant="contained" color="secondary">
+        <Button fullWidth onClick={handleAcceptInvitation} variant="contained" color="secondary">
           Accept
         </Button>
       </Stack>

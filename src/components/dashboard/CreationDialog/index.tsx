@@ -10,7 +10,7 @@ import BeamerIcon from '@/public/images/sidebar/whats-new.svg'
 import HelpCenterIcon from '@/public/images/sidebar/help-center.svg'
 import { useRemoteSafeApps } from '@/hooks/safe-apps/useRemoteSafeApps'
 import { useCurrentChain } from '@/hooks/useChains'
-import { CREATION_MODAL_QUERY_PARM } from '@/components/new-safe/create/logic'
+import { CREATION_MODAL_QUERY_PARAM } from '@/components/new-safe/create/logic'
 
 const HintItem = ({ Icon, title, description }: { Icon: ElementType; title: string; description: string }) => {
   return (
@@ -34,7 +34,7 @@ const CreationDialog = () => {
   const chain = useCurrentChain()
 
   const onClose = () => {
-    const { [CREATION_MODAL_QUERY_PARM]: _, ...query } = router.query
+    const { [CREATION_MODAL_QUERY_PARAM]: _, ...query } = router.query
     router.replace({ pathname: router.pathname, query })
 
     setOpen(false)

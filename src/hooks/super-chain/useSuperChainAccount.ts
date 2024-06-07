@@ -5,7 +5,7 @@ import {
 } from '@/features/superChain/constants'
 import { publicClient } from '@/services/pimlico'
 import { Contract, JsonRpcProvider } from 'ethers'
-import { createWalletClient, custom, getContract } from 'viem'
+import { type Address, createWalletClient, custom, getContract } from 'viem'
 import usePimlico from '../usePimlico'
 import { sepolia } from 'viem/chains'
 import useWallet from '../wallets/useWallet'
@@ -41,6 +41,7 @@ function useSuperChainAccount() {
     const walletClient = createWalletClient({
       chain: sepolia,
       transport: custom(wallet.provider),
+      account: wallet.address as Address,
     })
     const SuperChainAccountContractWriteable = getContract({
       address: SUPER_CHAIN_ACCOUNT_MODULE_ADDRESS,

@@ -7,6 +7,13 @@ export type PendingEOASRequest = {
     safe: Address
     newOwner: Address
     superChainId: string
+    superChainSmartAccount: {
+      noun_background: number
+      noun_body: number
+      noun_accessory: number
+      noun_head: number
+      noun_glasses: number
+    }
   }[]
 }
 
@@ -18,6 +25,13 @@ function usePendingEOASRequests(account: Address) {
         safe
         newOwner
         superChainId
+        superChainSmartAccount {
+          noun_background
+          noun_body
+          noun_accessory
+          noun_head
+          noun_glasses
+        }
       }
     }
   `

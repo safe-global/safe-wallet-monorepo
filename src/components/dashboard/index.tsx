@@ -10,21 +10,23 @@ import Overview from '@/components/dashboard/Overview/Overview'
 // import GovernanceSection from '@/components/dashboard/GovernanceSection/GovernanceSection'
 import CreationDialog from '@/components/dashboard/CreationDialog'
 import { useRouter } from 'next/router'
-import { CREATION_MODAL_QUERY_PARM } from '../new-safe/create/logic'
+import { CREATION_MODAL_QUERY_PARAM } from '../new-safe/create/logic'
 import useRecovery from '@/features/recovery/hooks/useRecovery'
 import { useIsRecoverySupported } from '@/features/recovery/hooks/useIsRecoverySupported'
 import Balances from '@/pages/balances'
 import SuperChainEOAS from '../common/SuperChainEOAS'
 import SafeAppsDashboardSection from './SafeAppsDashboardSection/SafeAppsDashboardSection'
 import AddEOAAddedModal from './AddEOAAddedModal'
+import { ADD_OWNER_MODAL_QUERY_PARAM } from '../accept-invite/alert-modal'
 const RecoveryHeader = dynamic(() => import('@/features/recovery/components/RecoveryHeader'))
 const RecoveryWidget = dynamic(() => import('@/features/recovery/components/RecoveryWidget'))
 
 const Dashboard = (): ReactElement => {
   const router = useRouter()
   const { safe } = useSafeInfo()
-  const { [CREATION_MODAL_QUERY_PARM]: showCreationModal = '' } = router.query
-  const showEOAAddedModal = true
+  const { [CREATION_MODAL_QUERY_PARAM]: showCreationModal = '' } = router.query
+  const { [ADD_OWNER_MODAL_QUERY_PARAM]: showEOAAddedModal = '' } = router.query
+
   const supportsRecovery = useIsRecoverySupported()
   const [recovery] = useRecovery()
   const showRecoveryWidget = supportsRecovery && !recovery
@@ -71,7 +73,7 @@ const Dashboard = (): ReactElement => {
         )}
       </Grid>
       {showCreationModal ? <CreationDialog /> : null}
-      <AddEOAAddedModal />
+      {showEOAAddedModal ? <AddEOAAddedModal /> : null}
     </>
   )
 }
