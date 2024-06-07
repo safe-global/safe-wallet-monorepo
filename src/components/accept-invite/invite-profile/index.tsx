@@ -3,12 +3,23 @@ import React, { type SyntheticEvent } from 'react'
 import css from './styles.module.css'
 import NounsAvatar from '@/components/common/NounsAvatar'
 import CopyAddressButton from '@/components/common/CopyAddressButton'
-import { zeroAddress } from 'viem'
+import { type Address, zeroAddress } from 'viem'
 import ExplorerButton from '@/components/common/ExplorerButton'
 import Trash from '@/public/images/common/trash.svg'
+import { shortenAddress } from '@/utils/formatters'
+import useSuperChainAccount from '@/hooks/super-chain/useSuperChainAccount'
+import useWallet from '@/hooks/wallets/useWallet'
 
-function InviteProfile({ onClick }: { onClick: () => void }) {
+function InviteProfile({ onClick, safe, superChainId }: { onClick: () => void; safe: Address; superChainId: string }) {
   const stopPropagation = (e: SyntheticEvent) => e.stopPropagation()
+  const { getWriteableSuperChainSmartAccount } = useSuperChainAccount()
+  const wallet = useWallet()
+
+  const handleAcceptInvitation = async () => {
+    const superChainSmartAccountContract = getWriteableSuperChainSmartAccount()
+    await superChainSmartAccountContract?.write.addOwnerWithThreshold([safe, wallet?.address])
+    onClick()
+  }
 
   return (
     <Box width="100%" className={css.container}>
@@ -25,8 +36,8 @@ function InviteProfile({ onClick }: { onClick: () => void }) {
           />
         </Box>
         <Box className={css['profile-info']}>
-          <Typography className={css['profile-name']}>luuk.superchain</Typography>
-          <Typography className={css['profile-address']}>oeth:0xD0be...051e</Typography>
+          <Typography className={css['profile-name']}>{superChainId}</Typography>
+          <Typography className={css['profile-address']}>oeth:{shortenAddress(safe, 4)}</Typography>
         </Box>
         <Box className={css['actions-container']}>
           <CopyAddressButton address={zeroAddress} />
@@ -38,7 +49,7 @@ function InviteProfile({ onClick }: { onClick: () => void }) {
         <IconButton className={css.trashButton}>
           <SvgIcon component={Trash} inheritViewBox />
         </IconButton>
-        <Button onClick={() => onClick} className={css.acceptButton} variant="contained">
+        <Button onClick={handleAcceptInvitation} className={css.acceptButton} variant="contained">
           Accept
         </Button>
       </Box>

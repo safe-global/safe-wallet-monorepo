@@ -58,7 +58,7 @@ const AddEOAModal = ({ open, onClose }: { open: boolean; onClose: () => void }):
     const scsac = getSponsoredWriteableSuperChainSmartAccount()
     try {
       setStep(Steps.loadingStep)
-      const response = await scsac?.write.populateAddOwner([SmartAccountAddres as Address, data.address])
+      await scsac?.write.populateAddOwner([SmartAccountAddres as Address, data.address])
       setStep(Steps.secondStep)
     } catch (e) {
       setStep(Steps.errorStep)
@@ -70,8 +70,8 @@ const AddEOAModal = ({ open, onClose }: { open: boolean; onClose: () => void }):
     handleSubmit(onSubmit)()
   }
 
-  const onRedirectLogInScreen = () => {
-    logout()
+  const onRedirectLogInScreen = async () => {
+    await logout()
     router.push('/welcome')
   }
 

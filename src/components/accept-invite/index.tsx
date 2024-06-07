@@ -3,8 +3,18 @@ import { InvitesCard } from './invites-card'
 import css from './styles.module.css'
 import AlertModal from './alert-modal'
 import { useState } from 'react'
+import usePendingEOASRequests from '@/hooks/super-chain/usePendingEOASRequests'
+import useWallet from '@/hooks/wallets/useWallet'
+import { type Address, zeroAddress } from 'viem'
 const AcceptInvite = () => {
+  const wallet = useWallet()
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const { data, loading: pendingEOASRequestLoading } = usePendingEOASRequests(
+    (wallet?.address as Address) || zeroAddress,
+  )
+
+  console.debug({ data })
+
   return (
     <>
       <Container maxWidth="sm">
@@ -20,7 +30,7 @@ const AcceptInvite = () => {
             </Stack>
           </Grid>
           <Grid pt={4} item xs={12}>
-            <InvitesCard setIsModalOpen={setIsModalOpen} />
+            <InvitesCard loading={pendingEOASRequestLoading} populations={data} setIsModalOpen={setIsModalOpen} />
           </Grid>
           <Grid item xs={12}>
             <Alert severity="warning" sx={{ mt: 3 }}>
@@ -30,7 +40,7 @@ const AcceptInvite = () => {
           </Grid>
         </Grid>
       </Container>
-      <AlertModal open={true} onClose={() => setIsModalOpen(false)} />
+      <AlertModal open={false} onClose={() => setIsModalOpen(false)} />
     </>
   )
 }

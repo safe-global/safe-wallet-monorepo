@@ -2,8 +2,17 @@ import css from './styles.module.css'
 import { Card, CardHeader, CardContent, TextField, InputAdornment, SvgIcon, Stack, Pagination } from '@mui/material'
 import SearchIcon from '@/public/images/common/search.svg'
 import InviteProfile from '../invite-profile'
+import type { PendingEOASRequest } from '@/hooks/super-chain/usePendingEOASRequests'
 
-export function InvitesCard({ setIsModalOpen }: { setIsModalOpen: (isOpen: boolean) => void }) {
+export function InvitesCard({
+  setIsModalOpen,
+  populations,
+  loading,
+}: {
+  setIsModalOpen: (isOpen: boolean) => void
+  populations: PendingEOASRequest | undefined
+  loading: boolean
+}) {
   const handleOpenModal = () => {
     setIsModalOpen(true)
   }
@@ -39,11 +48,16 @@ export function InvitesCard({ setIsModalOpen }: { setIsModalOpen: (isOpen: boole
               '& > .MuiInputBase-root': { padding: '8px 16px' },
             }}
           />
+          {!loading &&
+            populations?.ownerPopulateds.map((population) => (
+              <InviteProfile
+                key={population.id}
+                safe={population.safe}
+                superChainId={population.superChainId}
+                onClick={handleOpenModal}
+              />
+            ))}
 
-          <InviteProfile onClick={handleOpenModal} />
-          <InviteProfile onClick={handleOpenModal} />
-          <InviteProfile onClick={handleOpenModal} />
-          <InviteProfile onClick={handleOpenModal} />
           <Pagination shape="rounded" count={3} />
         </Stack>
       </CardContent>
