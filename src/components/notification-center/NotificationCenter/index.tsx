@@ -121,7 +121,9 @@ const NotificationCenter = (): ReactElement => {
         }}
         sx={{
           '& > .MuiPaper-root': {
+            left: '50% !important',
             top: 'var(--header-height) !important',
+            transform: 'translateX(-50%) !important',
           },
         }}
         transitionDuration={0}
@@ -166,7 +168,7 @@ const NotificationCenter = (): ReactElement => {
                 </Typography>
               </>
             )}
-            <Link
+            {/* <Link
               href={{
                 pathname: AppRoutes.settings.notifications,
                 query: router.query,
@@ -177,7 +179,7 @@ const NotificationCenter = (): ReactElement => {
               <MuiLink className={css.settingsLink} variant="body2" onClick={onSettingsClick}>
                 <SvgIcon component={SettingsIcon} inheritViewBox fontSize="small" /> Push notifications settings
               </MuiLink>
-            </Link>
+            </Link> */}
           </div>
         </Paper>
       </Popover>

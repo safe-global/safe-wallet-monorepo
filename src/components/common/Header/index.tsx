@@ -11,6 +11,7 @@ import BellIcon from '@/public/images/common/notifications.svg'
 import SuperChainEco from '@/public/images/common/superchain-eco.svg'
 import Image from 'next/image'
 import ConnectWallet from '../ConnectWallet'
+import NotificationCenter from '@/components/notification-center/NotificationCenter'
 
 type HeaderProps = {
   onMenuToggle?: Dispatch<SetStateAction<boolean>>
@@ -43,8 +44,8 @@ const Header = ({ onMenuToggle }: HeaderProps): ReactElement => {
         </Link>
       </div>
 
-      <div className={classnames(css.element, css.button)}>
-        <SvgIcon component={BellIcon} inheritViewBox className={css.icon} />
+      <div className={classnames(css.element)}>
+        <NotificationCenter />
       </div>
 
       <div className={classnames(css.element, css.button)}>
