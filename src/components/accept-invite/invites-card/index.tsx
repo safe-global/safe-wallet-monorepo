@@ -9,6 +9,7 @@ import {
   Stack,
   Pagination,
   Skeleton,
+  Typography,
 } from '@mui/material'
 import SearchIcon from '@/public/images/common/search.svg'
 import InviteProfile from '../invite-profile'
@@ -33,6 +34,13 @@ export function InvitesCard({
       superChainId,
     })
   }
+  {
+    populations?.ownerPopulateds.length === 0 && (
+      <Stack spacing="12px">
+        <Typography>There are no invites found on this address</Typography>
+      </Stack>
+    )
+  }
 
   return (
     <Card className={css.card}>
@@ -45,39 +53,46 @@ export function InvitesCard({
       />
       <CardContent className={css.content}>
         <Stack justifyContent="center" alignItems="center" p="24px" spacing="12px">
-          <TextField
-            className={css.search}
-            placeholder="Search by account name or address"
-            aria-label="Search SuperChainSmartAccount by name or address"
-            variant="outlined"
-            hiddenLabel
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SvgIcon component={SearchIcon} inheritViewBox color="border" />
-                </InputAdornment>
-              ),
-              disableUnderline: true,
-            }}
-            fullWidth
-            size="small"
-            sx={{
-              '& > .MuiInputBase-root': { padding: '8px 16px' },
-            }}
-          />
           {loading ? (
             <>
+              <Skeleton className={css['skeleton-container']} variant="rectangular" width="100%" />
+
               <Skeleton className={css['skeleton-container']} variant="rectangular" width="100%" />
               <Skeleton className={css['skeleton-container']} variant="rectangular" width="100%" />
               <Skeleton className={css['skeleton-container']} variant="rectangular" width="100%" />
             </>
+          ) : populations?.ownerPopulateds.length === 0 ? (
+            <Stack spacing="12px">
+              <Typography>There are no invites found on this address</Typography>
+            </Stack>
           ) : (
-            populations?.ownerPopulateds.map((population) => (
-              <InviteProfile key={population.id} population={population} onClick={handleOpenModal} />
-            ))
+            <>
+              <TextField
+                className={css.search}
+                placeholder="Search by account name or address"
+                aria-label="Search SuperChainSmartAccount by name or address"
+                variant="outlined"
+                hiddenLabel
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SvgIcon component={SearchIcon} inheritViewBox color="border" />
+                    </InputAdornment>
+                  ),
+                  disableUnderline: true,
+                }}
+                fullWidth
+                size="small"
+                sx={{
+                  '& > .MuiInputBase-root': { padding: '8px 16px' },
+                }}
+              />
+              {populations?.ownerPopulateds.map((population) => (
+                <InviteProfile key={population.id} population={population} onClick={handleOpenModal} />
+              ))}
+              <Pagination shape="rounded" count={3} />
+            </>
           )}
-
-          <Pagination shape="rounded" count={3} />
         </Stack>
       </CardContent>
     </Card>
