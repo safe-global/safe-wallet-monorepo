@@ -1,6 +1,7 @@
 import { useState, type ReactElement, type SyntheticEvent } from 'react'
 import ModalDialog from '@/components/common/ModalDialog'
 import {
+  Alert,
   Box,
   Button,
   Dialog,
@@ -23,6 +24,7 @@ import useSafeAddress from '@/hooks/useSafeAddress'
 import useWallet from '@/hooks/wallets/useWallet'
 import { useWeb3 } from '@/hooks/wallets/web3'
 import usePimlico from '@/hooks/usePimlico'
+import { type INITIAL_STATE } from '@/components/common/SuperChainEOAS'
 
 type NewEOAEntry = {
   address: Address
@@ -35,7 +37,7 @@ enum Steps {
   errorStep = 'ERROR_STEP',
 }
 
-const AddEOAModal = ({ open, onClose }: { open: boolean; onClose: () => void }): ReactElement => {
+const AddEOAModal = ({ context, onClose }: { context: typeof INITIAL_STATE; onClose: () => void }): ReactElement => {
   const router = useRouter()
   const wallet = useWallet()
   const { logout } = usePrivy()
@@ -77,7 +79,7 @@ const AddEOAModal = ({ open, onClose }: { open: boolean; onClose: () => void }):
 
   if (step === Steps.secondStep)
     return (
-      <Dialog className={css.claimModal} open={open} onClose={onClose}>
+      <Dialog className={css.claimModal} open={context.open} onClose={onClose}>
         <DialogContent>
           <Stack justifyContent="center" alignItems="center" gap="24px" padding="36px 24px 36px 24px">
             <Box fontSize={56} height={47} width={55}>
@@ -105,29 +107,43 @@ const AddEOAModal = ({ open, onClose }: { open: boolean; onClose: () => void }):
 
   return (
     <ModalDialog
-      open={open}
+      open={context.open}
       hideChainIndicator
       dialogTitle={step === Steps.firstStep ? 'Invite address to account' : ''}
       onClose={onClose}
     >
       <form onSubmit={onFormSubmit}>
         <DialogContent>
-          <FormControl fullWidth>
-            <TextField
-              placeholder="oeth:"
-              fullWidth
-              label="Address"
-              {...register('address', {
-                required: 'Address is required',
-                pattern: {
-                  value: /^0x[a-fA-F0-9]{40}$/,
-                  message: 'Invalid Ethereum address',
-                },
-              })}
-              error={!!errors.address}
-              helperText={errors.address ? errors.address.message : ''}
-            />
-          </FormControl>
+          {context.currentAmountOfPopulatedOwners >= 3 ? (
+            <Alert
+              style={{
+                paddingTop: '24px',
+              }}
+              severity="error"
+            >
+              <Typography variant="body1">
+                You cannot invite more than 2 addresses at once. Accept the invite on the other addresses or consider
+                uninviting an address before continuing.
+              </Typography>
+            </Alert>
+          ) : (
+            <FormControl fullWidth>
+              <TextField
+                placeholder="oeth:"
+                fullWidth
+                label="Address"
+                {...register('address', {
+                  required: 'Address is required',
+                  pattern: {
+                    value: /^0x[a-fA-F0-9]{40}$/,
+                    message: 'Invalid Ethereum address',
+                  },
+                })}
+                error={!!errors.address}
+                helperText={errors.address ? errors.address.message : ''}
+              />
+            </FormControl>
+          )}
         </DialogContent>
 
         <DialogActions>

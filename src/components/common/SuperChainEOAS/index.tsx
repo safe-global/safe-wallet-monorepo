@@ -10,12 +10,19 @@ import AddEOAModal from '@/components/superChain/AddEOAModal'
 import { useState } from 'react'
 import usePopulatedEOASRequest from '@/hooks/super-chain/usePopulatedEOASRequest'
 import type { Address } from 'viem'
+export const INITIAL_STATE = {
+  open: false,
+  currentAmountOfPopulatedOwners: 0,
+}
 const SuperChainEOAS = () => {
   const { safe } = useSafeInfo()
-  const [isAddEOAOpen, setIsAddEOAOpen] = useState(false)
-  const { data, loading: populatedOwnersLoading, error } = usePopulatedEOASRequest(safe.address.value as Address)
 
-  console.debug({ data: data?.ownerPopulateds, populatedOwnersLoading, error })
+  const [addEOAContext, setAddEOAContext] = useState(INITIAL_STATE)
+  const {
+    data: populatedOwners,
+    loading: populatedOwnersLoading,
+    error,
+  } = usePopulatedEOASRequest(safe.address.value as Address)
 
   return (
     <div className={css.container}>
@@ -40,7 +47,16 @@ const SuperChainEOAS = () => {
               <Typography fontSize={16} fontWeight="600">
                 Connected wallets
               </Typography>
-              <IconButton onClick={() => setIsAddEOAOpen(true)} size="small">
+              <IconButton
+                disabled={populatedOwnersLoading}
+                onClick={() =>
+                  setAddEOAContext({
+                    open: true,
+                    currentAmountOfPopulatedOwners: 3,
+                  })
+                }
+                size="small"
+              >
                 <SvgIcon component={MoreIcon} inheritViewBox fontSize="medium" />
               </IconButton>
             </Box>
@@ -66,7 +82,7 @@ const SuperChainEOAS = () => {
                   hasExplorer
                 />
               ))}
-              {data?.ownerPopulateds?.map((owner: { newOwner: string }, key: number) => (
+              {populatedOwners?.ownerPopulateds?.map((owner: { newOwner: string }, key: number) => (
                 <EthHashInfo
                   isPopulated={true}
                   avatarSize={30}
@@ -84,7 +100,7 @@ const SuperChainEOAS = () => {
           </Box>
         </Grid>
       </Paper>
-      <AddEOAModal open={isAddEOAOpen} onClose={() => setIsAddEOAOpen(false)} />
+      <AddEOAModal context={addEOAContext} onClose={() => setAddEOAContext(INITIAL_STATE)} />
     </div>
   )
 }
