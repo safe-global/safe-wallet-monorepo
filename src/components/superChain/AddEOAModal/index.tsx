@@ -14,7 +14,7 @@ import {
   Typography,
 } from '@mui/material'
 import { useForm } from 'react-hook-form'
-import { type Address } from 'viem'
+import { zeroAddress, type Address } from 'viem'
 import InviteSent from '@/public/images/common/invite-sent.svg'
 import css from './styles.module.css'
 import { useRouter } from 'next/router'
@@ -58,7 +58,7 @@ const AddEOAModal = ({ context, onClose }: { context: typeof INITIAL_STATE; onCl
     const superChainSmartAccountReadOnly = getReadOnlySuperChainSmartAccount()
     try {
       const hasAccount = await superChainSmartAccountReadOnly?.superChainAccount(address)
-      setAddressHasSuperChainAccount(hasAccount)
+      setAddressHasSuperChainAccount(hasAccount.smartAccount !== zeroAddress)
     } catch (e) {
       console.error(e)
     } finally {
