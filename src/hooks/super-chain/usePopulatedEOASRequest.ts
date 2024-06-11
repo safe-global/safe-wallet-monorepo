@@ -15,6 +15,7 @@ function usePopulatedEOASRequest(safeAddress: Address) {
     variables: {
       safeAddress,
     },
+    pollInterval: 10000,
   })
 }
 

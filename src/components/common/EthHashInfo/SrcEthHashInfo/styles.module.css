@@ -31,3 +31,18 @@
   background-color: var(--color-primary-light);
   word-break: keep-all;
 }
+
+.removeInvite {
+  cursor: pointer;
+  justify-content: space-between;
+  align-items: center;
+  background-color: var(--color-primary-light);
+  word-break: keep-all;
+  padding: 0 9px 0 9px;
+  gap: 6px;
+  border-radius: 100px;
+  display: flex;
+  flex-direction: row;
+  border: 0;
+  justify-self: flex-end;
+}

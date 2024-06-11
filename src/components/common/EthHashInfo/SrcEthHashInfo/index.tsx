@@ -63,7 +63,13 @@ const SrcEthHashInfo = ({
   const addressElement = (
     <>
       {showPrefix && shouldPrefix && prefix && <b>{prefix}:</b>}
-      <span>{shortAddress || isMobile ? shortenAddress(address, shortAddressSize ?? 4) : address}</span>
+      <span>
+        {shortAddress || isMobile
+          ? shortenAddress(address, shortAddressSize ?? 4)
+          : isPopulated
+          ? shortenAddress(address, 6)
+          : address}
+      </span>
     </>
   )
 
@@ -113,6 +119,14 @@ const SrcEthHashInfo = ({
           {children}
         </div>
       </Box>
+      {isPopulated && (
+        <button className={css.removeInvite}>
+          <Typography color="white" fontSize={12} fontWeight={500}>
+            Invite sent
+          </Typography>
+          <SvgIcon component={Close} fontSize="small" inheritViewBox />
+        </button>
+      )}
     </div>
   )
 }
