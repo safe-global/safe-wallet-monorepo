@@ -21,9 +21,6 @@ import { useRouter } from 'next/router'
 import { usePrivy } from '@privy-io/react-auth'
 import useSuperChainAccount from '@/hooks/super-chain/useSuperChainAccount'
 import useSafeAddress from '@/hooks/useSafeAddress'
-import useWallet from '@/hooks/wallets/useWallet'
-import { useWeb3 } from '@/hooks/wallets/web3'
-import usePimlico from '@/hooks/usePimlico'
 import { type INITIAL_STATE } from '@/components/common/SuperChainEOAS'
 
 type NewEOAEntry = {
@@ -39,14 +36,14 @@ enum Steps {
 
 const AddEOAModal = ({ context, onClose }: { context: typeof INITIAL_STATE; onClose: () => void }): ReactElement => {
   const router = useRouter()
-  const wallet = useWallet()
   const { logout } = usePrivy()
   const { getSponsoredWriteableSuperChainSmartAccount, getReadOnlySuperChainSmartAccount } = useSuperChainAccount()
   const SmartAccountAddres = useSafeAddress()
-  const provider = useWeb3()
-  const { smartAccountClient } = usePimlico()
 
   const [step, setStep] = useState<Steps>(Steps.firstStep)
+  const [isChecking, setIsChecking] = useState(false)
+  const [addressHasSuperChainAccount, setAddressHasSuperChainAccount] = useState(false)
+
   const formMethods = useForm<NewEOAEntry>({
     mode: 'onChange',
   })
@@ -56,11 +53,24 @@ const AddEOAModal = ({ context, onClose }: { context: typeof INITIAL_STATE; onCl
     formState: { errors, isValid },
   } = formMethods
 
+  const checkSuperChainAccount = async (address: Address) => {
+    setIsChecking(true)
+    const superChainSmartAccountReadOnly = getReadOnlySuperChainSmartAccount()
+    try {
+      const hasAccount = await superChainSmartAccountReadOnly?.superChainAccount(address)
+      setAddressHasSuperChainAccount(hasAccount)
+    } catch (e) {
+      console.error(e)
+    } finally {
+      setIsChecking(false)
+    }
+  }
+
   const onSubmit = async (data: NewEOAEntry) => {
-    const scsac = getSponsoredWriteableSuperChainSmartAccount()
+    const superChainSmartAccountSponsored = getSponsoredWriteableSuperChainSmartAccount()
     try {
       setStep(Steps.loadingStep)
-      await scsac?.write.populateAddOwner([SmartAccountAddres as Address, data.address])
+      await superChainSmartAccountSponsored?.write.populateAddOwner([SmartAccountAddres as Address, data.address])
       setStep(Steps.secondStep)
     } catch (e) {
       setStep(Steps.errorStep)
@@ -127,22 +137,38 @@ const AddEOAModal = ({ context, onClose }: { context: typeof INITIAL_STATE; onCl
               </Typography>
             </Alert>
           ) : (
-            <FormControl fullWidth>
-              <TextField
-                placeholder="oeth:"
-                fullWidth
-                label="Address"
-                {...register('address', {
-                  required: 'Address is required',
-                  pattern: {
-                    value: /^0x[a-fA-F0-9]{40}$/,
-                    message: 'Invalid Ethereum address',
-                  },
-                })}
-                error={!!errors.address}
-                helperText={errors.address ? errors.address.message : ''}
-              />
-            </FormControl>
+            <Stack spacing={1}>
+              <FormControl fullWidth>
+                <TextField
+                  placeholder="oeth:"
+                  fullWidth
+                  label="Address"
+                  {...register('address', {
+                    required: 'Address is required',
+                    pattern: {
+                      value: /^0x[a-fA-F0-9]{40}$/,
+                      message: 'Invalid Ethereum address',
+                    },
+                    onChange: async (e) => {
+                      const address = e.target.value as Address
+                      if (/^0x[a-fA-F0-9]{40}$/.test(address)) {
+                        await checkSuperChainAccount(address)
+                      } else {
+                        setIsChecking(false)
+                        setAddressHasSuperChainAccount(false)
+                      }
+                    },
+                  })}
+                  error={!!errors.address}
+                  helperText={errors.address ? errors.address.message : ''}
+                />
+              </FormControl>
+              {addressHasSuperChainAccount && (
+                <Alert severity="error">
+                  This address is already connected to another Superchain Account. Try another address.
+                </Alert>
+              )}
+            </Stack>
           )}
         </DialogContent>
 
@@ -151,7 +177,13 @@ const AddEOAModal = ({ context, onClose }: { context: typeof INITIAL_STATE; onCl
             Cancel
           </Button>
 
-          <Button fullWidth variant="contained" color="secondary" disabled={!isValid} type="submit">
+          <Button
+            fullWidth
+            variant="contained"
+            color="secondary"
+            disabled={!isValid || isChecking || addressHasSuperChainAccount}
+            type="submit"
+          >
             Send
           </Button>
         </DialogActions>

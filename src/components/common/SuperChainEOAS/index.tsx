@@ -52,7 +52,7 @@ const SuperChainEOAS = () => {
                 onClick={() =>
                   setAddEOAContext({
                     open: true,
-                    currentAmountOfPopulatedOwners: 3,
+                    currentAmountOfPopulatedOwners: populatedOwners?.ownerPopulateds?.length || 0,
                   })
                 }
                 size="small"
