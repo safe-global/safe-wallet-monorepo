@@ -10,14 +10,19 @@ import AddEOAModal from '@/components/superChain/AddEOAModal'
 import { useState } from 'react'
 import usePopulatedEOASRequest from '@/hooks/super-chain/usePopulatedEOASRequest'
 import type { Address } from 'viem'
-export const INITIAL_STATE = {
+import RemovePopulateModal from '@/components/superChain/RemovePopulateModal'
+export const ADD_EOA_INITIAL_STATE = {
   open: false,
   currentAmountOfPopulatedOwners: 0,
 }
+export const REMOVE_POPULATE_INITIAL_STATE = {
+  open: false,
+  address: '',
+}
 const SuperChainEOAS = () => {
   const { safe } = useSafeInfo()
-
-  const [addEOAContext, setAddEOAContext] = useState(INITIAL_STATE)
+  const [removePopulateContext, setRemovePopulateContext] = useState(REMOVE_POPULATE_INITIAL_STATE)
+  const [addEOAContext, setAddEOAContext] = useState(ADD_EOA_INITIAL_STATE)
   const {
     data: populatedOwners,
     loading: populatedOwnersLoading,
@@ -86,6 +91,7 @@ const SuperChainEOAS = () => {
                 <EthHashInfo
                   isPopulated={true}
                   avatarSize={30}
+                  setRemovePopulateContext={setRemovePopulateContext}
                   key={key}
                   shortAddressSize={2}
                   address={owner.newOwner}
@@ -100,7 +106,11 @@ const SuperChainEOAS = () => {
           </Box>
         </Grid>
       </Paper>
-      <AddEOAModal context={addEOAContext} onClose={() => setAddEOAContext(INITIAL_STATE)} />
+      <RemovePopulateModal
+        context={removePopulateContext}
+        onClose={() => setRemovePopulateContext(REMOVE_POPULATE_INITIAL_STATE)}
+      />
+      <AddEOAModal context={addEOAContext} onClose={() => setAddEOAContext(ADD_EOA_INITIAL_STATE)} />
     </div>
   )
 }

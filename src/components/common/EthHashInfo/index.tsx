@@ -6,13 +6,18 @@ import { useAppSelector } from '@/store'
 import { selectSettings } from '@/store/settingsSlice'
 import { getBlockExplorerLink } from '@/utils/chains'
 import SrcEthHashInfo, { type EthHashInfoProps } from './SrcEthHashInfo'
+import { REMOVE_POPULATE_INITIAL_STATE } from '../SuperChainEOAS'
 
 const EthHashInfo = ({
   showName = true,
   avatarSize = 40,
   isPopulated = false,
   ...props
-}: EthHashInfoProps & { showName?: boolean; isPopulated?: boolean }): ReactElement => {
+}: EthHashInfoProps & {
+  showName?: boolean
+  isPopulated?: boolean
+  setRemovePopulateContext: (arg1: typeof REMOVE_POPULATE_INITIAL_STATE) => void
+}): ReactElement => {
   const settings = useAppSelector(selectSettings)
   const currentChainId = useChainId()
   const chain = useChain(props.chainId || currentChainId)

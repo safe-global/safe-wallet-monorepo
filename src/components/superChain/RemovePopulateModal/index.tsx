@@ -1,34 +1,31 @@
-import { Alert, AlertTitle, Box, Button, Dialog, Stack, SvgIcon, Typography } from '@mui/material'
+import { Box, Button, Dialog, Stack, SvgIcon, Typography } from '@mui/material'
 import React, { type SyntheticEvent } from 'react'
-import BeautyAlert from '@/public/images/common/beauty-alert.svg'
 import css from './styles.module.css'
 import CopyAddressButton from '@/components/common/CopyAddressButton'
 import ExplorerButton from '@/components/common/ExplorerButton'
 import { zeroAddress } from 'viem'
-import { type ModalContext } from '..'
-import useSuperChainAccount from '@/hooks/super-chain/useSuperChainAccount'
-import { AppRoutes } from '@/config/routes'
-import { useRouter } from 'next/router'
-export const ADD_OWNER_MODAL_QUERY_PARAM = 'addOwnerModal'
+import { REMOVE_POPULATE_INITIAL_STATE } from '@/components/common/SuperChainEOAS'
+import BeautyCancel from '@/public/images/common/beauty-cancel.svg'
 
-function AlertModal({ modalContext, onClose }: { modalContext: ModalContext; onClose: () => void }) {
+function RemovePopulateModal({
+  context,
+  onClose,
+}: {
+  context: typeof REMOVE_POPULATE_INITIAL_STATE
+  onClose: () => void
+}) {
   const stopPropagation = (e: SyntheticEvent) => e.stopPropagation()
-  const router = useRouter()
-  const { getWriteableSuperChainSmartAccount } = useSuperChainAccount()
+
   const handleAcceptInvitation = async () => {
     // const superChainSmartAccountContract = getWriteableSuperChainSmartAccount()
     // await superChainSmartAccountContract?.write.addOwnerWithThreshold([modalContext.safe, modalContext.newOwner])
     onClose()
-    router.push({
-      pathname: AppRoutes.home,
-      query: { safe: modalContext.safe, [ADD_OWNER_MODAL_QUERY_PARAM]: true, superChainId: modalContext.superChainId },
-    })
   }
 
   return (
     <Dialog
       className={css.claimModal}
-      open={modalContext.isOpen}
+      open={context.open}
       onClose={onClose}
       aria-labelledby="modal-modal-title"
       aria-describedby="modal-modal-description"
@@ -42,38 +39,33 @@ function AlertModal({ modalContext, onClose }: { modalContext: ModalContext; onC
         alignItems="center"
         fontSize="48px"
       >
-        <SvgIcon fontSize="inherit" component={BeautyAlert} inheritViewBox />
+        <SvgIcon fontSize="inherit" component={BeautyCancel} inheritViewBox />
         <Typography id="modal-modal-title" fontSize={24} fontWeight={600}>
-          Accepting invite
+          Cancel invite
         </Typography>
         <Stack alignItems="center" spacing={1}>
           <Typography id="modal-modal-description" fontSize={16}>
-            Are you sure you want to connect your wallet to:
+            Are you sure you want to cancel your invite request?
           </Typography>
           <Stack alignItems="center" direction="row">
-            <Typography id="modal-modal-description" fontSize={16}>
-              <strong>luuk.superchain</strong>
+            <Typography id="modal-modal-description" fontSize={14}>
+              {context.address}
             </Typography>
             <CopyAddressButton address={zeroAddress} />
             <ExplorerButton onClick={stopPropagation} />
           </Stack>
         </Stack>
-
-        <Alert severity="warning">
-          <AlertTitle sx={{ fontWeight: 700 }}>Note</AlertTitle>
-          You can cannot disconnect once you have accepted an invite to a Superchain Account.
-        </Alert>
       </Box>
       <Stack spacing={1} className={css.outsideButtonContainer} direction="row">
         <Button fullWidth color="background" onClick={onClose} variant="contained">
-          Go back
+          No
         </Button>
-        <Button fullWidth onClick={handleAcceptInvitation} variant="contained" color="secondary">
-          Accept
+        <Button fullWidth onClick={handleAcceptInvitation} variant="contained">
+          Yes
         </Button>
       </Stack>
     </Dialog>
   )
 }
 
-export default AlertModal
+export default RemovePopulateModal

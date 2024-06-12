@@ -12,6 +12,7 @@ import css from './styles.module.css'
 import classNames from 'classnames'
 import { IconButton, SvgIcon, Typography } from '@mui/material'
 import Close from '@/public/images/common/close-rounded.svg'
+import { REMOVE_POPULATE_INITIAL_STATE } from '../../SuperChainEOAS'
 
 export type EthHashInfoProps = {
   address: string
@@ -53,7 +54,11 @@ const SrcEthHashInfo = ({
   children,
   trusted = true,
   shortAddressSize,
-}: EthHashInfoProps & { isPopulated?: boolean }): ReactElement => {
+  setRemovePopulateContext,
+}: EthHashInfoProps & {
+  isPopulated?: boolean
+  setRemovePopulateContext: (arg1: typeof REMOVE_POPULATE_INITIAL_STATE) => void
+}): ReactElement => {
   const shouldPrefix = isAddress(address)
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
@@ -120,7 +125,15 @@ const SrcEthHashInfo = ({
         </div>
       </Box>
       {isPopulated && (
-        <button className={css.removeInvite}>
+        <button
+          onClick={() =>
+            setRemovePopulateContext({
+              open: true,
+              address: address,
+            })
+          }
+          className={css.removeInvite}
+        >
           <Typography color="white" fontSize={12} fontWeight={500}>
             Invite sent
           </Typography>
