@@ -16,8 +16,7 @@ const IndexPage: NextPage = () => {
     }
     // TODO: Replace with useLocalStorage. For now read directly from localstorage so we have value on first render
     const addedSafes = local.getItem<AddedSafesState>(addedSafesSlice.name)
-    const hasAddedSafes = addedSafes !== null && !isEmpty(addedSafes)
-    const pathname = hasAddedSafes ? AppRoutes.welcome.accounts : AppRoutes.welcome.index
+    const pathname = AppRoutes.welcome.index
 
     router.replace({
       pathname,

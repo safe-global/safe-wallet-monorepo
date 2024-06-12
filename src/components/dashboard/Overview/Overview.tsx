@@ -41,7 +41,6 @@ const Overview = (): ReactElement => {
   const { balances, loading: balancesLoading } = useVisibleBalances()
   const { setTxFlow } = useContext(TxModalContext)
   const data = useAppSelector(selectCurrentSuperChainAccount)
-  console.debug(data)
 
   const fiatTotal = useMemo(
     () => (balances.fiatTotal ? formatCurrency(balances.fiatTotal, currency) : ''),

@@ -17,7 +17,7 @@ const SocialSigner = dynamic(() => import('@/components/common/SocialSigner'), {
 const WelcomeLogin = () => {
   const router = useRouter()
   const wallet = useWallet()
-  const { login, authenticated } = usePrivy()
+  const { login, authenticated, logout, ready } = usePrivy()
   const { isLoaded, hasSafes } = useHasSafes()
   const [shouldRedirect, setShouldRedirect] = useState(false)
 
@@ -25,11 +25,20 @@ const WelcomeLogin = () => {
     setShouldRedirect(true)
   }, [])
 
-  const handleGetStarted = () => {
+  const handleGetStarted = async () => {
+    if (!ready) return
+    if (!wallet && authenticated) {
+      await logout()
+    }
     authenticated ? router.push(AppRoutes.newSafe.create) : login()
   }
 
-  const handleAcceptInvite = () => {
+  const handleAcceptInvite = async () => {
+    if (!ready) return
+    if (!wallet && authenticated) {
+      await logout()
+    }
+
     authenticated ? router.push(AppRoutes.invites) : login()
   }
   useEffect(() => {

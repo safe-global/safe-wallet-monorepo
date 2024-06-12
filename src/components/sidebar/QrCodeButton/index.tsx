@@ -1,7 +1,7 @@
 import { type ReactElement, type ReactNode, useState, Suspense } from 'react'
 import dynamic from 'next/dynamic'
 
-const QrModal = dynamic(() => import('./QrModal'))
+const TopUpModal = dynamic(() => import('@/components/superChain/TopUpModal'))
 
 const QrCodeButton = ({ children }: { children: ReactNode }): ReactElement => {
   const [modalOpen, setModalOpen] = useState<boolean>(false)
@@ -12,11 +12,7 @@ const QrCodeButton = ({ children }: { children: ReactNode }): ReactElement => {
         {children}
       </div>
 
-      {modalOpen && (
-        <Suspense>
-          <QrModal onClose={() => setModalOpen(false)} />
-        </Suspense>
-      )}
+      <TopUpModal open={modalOpen} onClose={() => setModalOpen(false)} />
     </>
   )
 }

@@ -134,8 +134,8 @@ function EnhancedTable({ rows, headCells, mobileVariant }: EnhancedTableProps) {
   const pagedRows = orderedRows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
 
   return (
-    <Box sx={{ width: '100%' }}>
-      <TableContainer data-testid="table-container" component={Paper} sx={{ width: '100%', mb: 2 }}>
+    <Box sx={{ width: '100%', height: '100%' }}>
+      <TableContainer data-testid="table-container" component={Paper} sx={{ width: '100%', mb: 2, height: '100%' }}>
         <Table aria-labelledby="tableTitle" className={mobileVariant ? css.mobileColumn : undefined}>
           <EnhancedTableHead headCells={headCells} order={order} orderBy={orderBy} onRequestSort={handleRequestSort} />
           <TableBody>

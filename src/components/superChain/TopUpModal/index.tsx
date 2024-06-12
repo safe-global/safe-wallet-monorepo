@@ -1,4 +1,4 @@
-import { useMemo, type ReactElement } from 'react'
+import { useMemo, useState, type ReactElement } from 'react'
 import ModalDialog from '@/components/common/ModalDialog'
 import { Box, Button, Grid, MenuItem, Select, SvgIcon } from '@mui/material'
 import { makeStyles } from '@mui/styles'
@@ -12,6 +12,11 @@ import OETH from '@/public/images/currencies/ethereum.svg'
 import lightPalette from '@/components/theme/lightPalette'
 import { useAppSelector } from '@/store'
 import { selectSuperChainAccount } from '@/store/superChainAccountSlice'
+import useWallet from '@/hooks/wallets/useWallet'
+import usePimlico from '@/hooks/usePimlico'
+import useSafeAddress from '@/hooks/useSafeAddress'
+import { createWalletClient, custom, parseEther, type Address } from 'viem'
+import { sepolia } from 'viem/chains'
 const useStyles = makeStyles({
   select: {
     color: 'white',
@@ -35,8 +40,12 @@ const useStyles = makeStyles({
     color: 'white',
   },
 })
+const etherValues = [0.02, 0.05, 0.1, 0.2]
 const TopUpModal = ({ open, onClose }: { open: boolean; onClose: () => void }): ReactElement => {
   const superChainSmartAccount = useAppSelector(selectSuperChainAccount)
+  const safeAddress = useSafeAddress()
+  const wallet = useWallet()
+  const [selectedValue, setSelectedValue] = useState<number | null>(null)
   const nounSeed = useMemo(() => {
     return {
       background: Number(superChainSmartAccount.data.noun[0]),
@@ -46,7 +55,22 @@ const TopUpModal = ({ open, onClose }: { open: boolean; onClose: () => void }): 
       glasses: Number(superChainSmartAccount.data.noun[4]),
     }
   }, [superChainSmartAccount])
+
   const classes = useStyles()
+
+  const handleTopUp = async () => {
+    if (!wallet) return
+    const walletClient = createWalletClient({
+      chain: sepolia,
+      transport: custom(wallet?.provider),
+    })
+    await walletClient.sendTransaction({
+      to: safeAddress,
+      account: wallet.address as Address,
+      value: parseEther(etherValues[selectedValue as number].toString()),
+    })
+  }
+
   return (
     <ModalDialog open={open} hideChainIndicator dialogTitle="Top-up your account" onClose={onClose}>
       <Grid>
@@ -90,20 +114,25 @@ const TopUpModal = ({ open, onClose }: { open: boolean; onClose: () => void }): 
                   </Box>
                 </MenuItem>
               </Select>
-              <Button className={css.amountButton} variant="outlined">
-                0.02
-              </Button>
-              <Button className={css.amountButton} variant="outlined">
-                0.5
-              </Button>
-              <Button className={css.amountButton} variant="outlined">
-                0.1
-              </Button>
-              <Button className={css.amountButton} variant="outlined">
-                0.2
-              </Button>
+              {etherValues.map((value, index) => (
+                <Button
+                  key={index}
+                  onClick={() => setSelectedValue(index)}
+                  disabled={value > wallet?.balance ?? 0}
+                  className={css.amountButton}
+                  variant={selectedValue === index ? 'contained' : 'outlined'}
+                >
+                  {value}
+                </Button>
+              ))}
             </Box>
-            <Button className={css.topUpButton} variant="contained" disabled>
+            <Button
+              className={css.topUpButton}
+              onClick={handleTopUp}
+              variant="contained"
+              color="secondary"
+              disabled={selectedValue === null}
+            >
               Top up
             </Button>
           </Box>
