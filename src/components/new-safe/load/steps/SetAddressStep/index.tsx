@@ -15,7 +15,7 @@ import {
 import layoutCss from '@/components/new-safe/create/styles.module.css'
 import NameInput from '@/components/common/NameInput'
 import InfoIcon from '@/public/images/notifications/info.svg'
-import css from '@/components/new-safe/create/steps/SetNameStep/styles.module.css'
+import css from '@/components/new-safe/create/steps/SuperChainIdStep/styles.module.css'
 import NetworkSelector from '@/components/common/NetworkSelector'
 import { useMnemonicSafeName } from '@/hooks/useMnemonicName'
 import { useAddressResolver } from '@/hooks/useAddressResolver'

@@ -16,7 +16,7 @@ const EthHashInfo = ({
 }: EthHashInfoProps & {
   showName?: boolean
   isPopulated?: boolean
-  setRemovePopulateContext: (arg1: typeof REMOVE_POPULATE_INITIAL_STATE) => void
+  setRemovePopulateContext?: (arg1: typeof REMOVE_POPULATE_INITIAL_STATE) => void
 }): ReactElement => {
   const settings = useAppSelector(selectSettings)
   const currentChainId = useChainId()

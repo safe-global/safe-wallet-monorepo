@@ -1,6 +1,6 @@
 import { createNewSafe, relaySafeCreation } from '@/components/new-safe/create/logic'
 import NetworkWarning from '@/components/new-safe/create/NetworkWarning'
-import { NetworkFee, SafeSetupOverview } from '@/components/new-safe/create/steps/ReviewStep'
+import { NetworkFee } from '@/components/new-safe/create/steps/ReviewStep'
 import ReviewRow from '@/components/new-safe/ReviewRow'
 import { TxModalContext } from '@/components/tx-flow'
 import TxCard from '@/components/tx-flow/common/TxCard'
@@ -141,7 +141,7 @@ const ActivateAccountFlow = () => {
 
         <Divider sx={{ mx: -3, my: 2 }} />
 
-        <SafeSetupOverview owners={owners.map((owner) => ({ name: '', address: owner }))} threshold={threshold} />
+        {/* <SafeSetupOverview owners={owners.map((owner) => ({ name: '', address: owner }))} threshold={threshold} /> */}
 
         <Divider sx={{ mx: -3, mt: 2, mb: 1 }} />
         <Box display="flex" flexDirection="column" gap={3}>

@@ -115,7 +115,7 @@ function TopUp({
                 <Button
                   key={index}
                   onClick={() => setSelectedValue(index)}
-                  disabled={value > (wallet?.balance ?? 0)}
+                  disabled={value > Number(wallet?.balance ?? 0)}
                   className={css.amountButton}
                   variant={selectedValue === index ? 'contained' : 'outlined'}
                 >

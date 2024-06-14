@@ -57,7 +57,7 @@ const SrcEthHashInfo = ({
   setRemovePopulateContext,
 }: EthHashInfoProps & {
   isPopulated?: boolean
-  setRemovePopulateContext: (arg1: typeof REMOVE_POPULATE_INITIAL_STATE) => void
+  setRemovePopulateContext?: (arg1: typeof REMOVE_POPULATE_INITIAL_STATE) => void
 }): ReactElement => {
   const shouldPrefix = isAddress(address)
   const theme = useTheme()
@@ -127,7 +127,7 @@ const SrcEthHashInfo = ({
       {isPopulated && (
         <button
           onClick={() =>
-            setRemovePopulateContext({
+            setRemovePopulateContext?.({
               open: true,
               address: address,
             })

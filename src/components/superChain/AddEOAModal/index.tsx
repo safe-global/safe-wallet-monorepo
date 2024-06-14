@@ -21,7 +21,7 @@ import { useRouter } from 'next/router'
 import { usePrivy } from '@privy-io/react-auth'
 import useSuperChainAccount from '@/hooks/super-chain/useSuperChainAccount'
 import useSafeAddress from '@/hooks/useSafeAddress'
-import { type INITIAL_STATE } from '@/components/common/SuperChainEOAS'
+import { type ADD_EOA_INITIAL_STATE } from '@/components/common/SuperChainEOAS'
 
 type NewEOAEntry = {
   address: Address
@@ -34,7 +34,13 @@ enum Steps {
   errorStep = 'ERROR_STEP',
 }
 
-const AddEOAModal = ({ context, onClose }: { context: typeof INITIAL_STATE; onClose: () => void }): ReactElement => {
+const AddEOAModal = ({
+  context,
+  onClose,
+}: {
+  context: typeof ADD_EOA_INITIAL_STATE
+  onClose: () => void
+}): ReactElement => {
   const router = useRouter()
   const { logout } = usePrivy()
   const { getSponsoredWriteableSuperChainSmartAccount, getReadOnlySuperChainSmartAccount } = useSuperChainAccount()

@@ -21,7 +21,7 @@ const WalletProvider = ({ children }: { children: ReactNode }): ReactElement => 
     ;(async () => {
       setWallet({
         ...wallets[0],
-        balance: await getWalletBalance(await wallets[0].getEthereumProvider(), wallets[0].address),
+        balance: (await getWalletBalance(await wallets[0].getEthereumProvider(), wallets[0].address)).toString(),
         label: 'Privy',
         provider: await wallets[0].getEthereumProvider(),
         chainId: wallets[0].chainId.split(':')[1],
