@@ -1,0 +1,17 @@
+.container :global .MuiDialog-paper {
+  width: 480px;
+  margin: 0;
+  position: relative;
+  overflow-y: visible;
+  margin-bottom: 60px;
+}
+
+.outsideButtonContainer {
+  position: absolute;
+  bottom: -60px;
+  left: 50%;
+  width: 100%;
+  transform: translateX(-50%);
+  /* padding: 12px 40px 12px 40px;
+  min-width: 240px; */
+}

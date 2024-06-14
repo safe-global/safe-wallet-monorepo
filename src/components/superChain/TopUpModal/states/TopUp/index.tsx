@@ -16,6 +16,7 @@ import useSafeAddress from '@/hooks/useSafeAddress'
 import { createWalletClient, custom, parseEther, type Address } from 'viem'
 import { sepolia } from 'viem/chains'
 import { ModalState } from '../..'
+import ModalDialog from '@/components/common/ModalDialog'
 const useStyles = makeStyles({
   select: {
     color: 'white',
@@ -42,7 +43,15 @@ const useStyles = makeStyles({
 
 const etherValues = [0.02, 0.05, 0.1, 0.2]
 
-function TopUp({ handleTopUp }: { handleTopUp: (value: bigint) => void }): ReactElement {
+function TopUp({
+  handleTopUp,
+  open,
+  onClose,
+}: {
+  handleTopUp: (value: bigint) => void
+  open: boolean
+  onClose: () => void
+}): ReactElement {
   const superChainSmartAccount = useAppSelector(selectSuperChainAccount)
   const wallet = useWallet()
 
@@ -60,7 +69,7 @@ function TopUp({ handleTopUp }: { handleTopUp: (value: bigint) => void }): React
   const classes = useStyles()
 
   return (
-    <>
+    <ModalDialog hideChainIndicator dialogTitle="Top-up your account" open={open} onClose={onClose}>
       <Grid>
         <Grid item>
           <Box display="flex" gap={2} className={classNames(css.container, css.optimismBadge)}>
@@ -106,7 +115,7 @@ function TopUp({ handleTopUp }: { handleTopUp: (value: bigint) => void }): React
                 <Button
                   key={index}
                   onClick={() => setSelectedValue(index)}
-                  disabled={value > wallet?.balance ?? 0}
+                  disabled={value > (wallet?.balance ?? 0)}
                   className={css.amountButton}
                   variant={selectedValue === index ? 'contained' : 'outlined'}
                 >
@@ -148,7 +157,7 @@ function TopUp({ handleTopUp }: { handleTopUp: (value: bigint) => void }): React
           )}
         </Grid>
       </Grid>
-    </>
+    </ModalDialog>
   )
 }
 

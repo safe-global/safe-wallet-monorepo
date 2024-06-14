@@ -1,4 +1,3 @@
-import ModalDialog from '@/components/common/ModalDialog'
 import { ReactElement, useState } from 'react'
 import LoadingTxn from './states/LoadingTxn'
 import FailedTxn from './states/FailedTxn'
@@ -6,7 +5,7 @@ import SuccessTxn from './states/SuccessTxn'
 import TopUp from './states/TopUp'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import useWallet from '@/hooks/wallets/useWallet'
-import { Address, createWalletClient, custom, parseEther } from 'viem'
+import { Address, createPublicClient, createWalletClient, custom, http, parseEther } from 'viem'
 import { sepolia } from 'viem/chains'
 
 export enum ModalState {
@@ -18,6 +17,8 @@ export enum ModalState {
 
 const TopUpModal = ({ open, onClose }: { open: boolean; onClose: () => void }): ReactElement => {
   const [modalState, setModalState] = useState<ModalState>(ModalState.TopUp)
+  const [currentValue, setCurrentValue] = useState<null | bigint>(null)
+  const [transactionHash, setTransactionHash] = useState<string | null>(null)
   const safeAddress = useSafeAddress()
   const wallet = useWallet()
 
@@ -27,31 +28,59 @@ const TopUpModal = ({ open, onClose }: { open: boolean; onClose: () => void }): 
       chain: sepolia,
       transport: custom(wallet?.provider),
     })
-    setModalState(ModalState.LoadingTXN)
+    const publicClient = createPublicClient({
+      chain: sepolia,
+      transport: http('https://rpc.ankr.com/eth_sepolia'),
+    })
     try {
-      await walletClient.sendTransaction({
+      setCurrentValue(value)
+      const tx = await walletClient.sendTransaction({
         to: safeAddress as Address,
         account: wallet.address as Address,
         value,
       })
+      setModalState(ModalState.LoadingTXN)
+      setTransactionHash(tx)
+      const result = await publicClient.waitForTransactionReceipt({
+        hash: tx,
+        pollingInterval: 1000,
+        confirmations: 1,
+      })
+      if (result.status === 'reverted') {
+        throw new Error('Transaction reverted')
+      }
+
       setModalState(ModalState.Success)
     } catch (_) {
       setModalState(ModalState.FailedTxn)
     }
   }
 
+  const handleRetry = async () => {
+    if (!currentValue) return
+    handleTopUp(currentValue)
+  }
+
+  const onCloseAndErase = () => {
+    onClose()
+    setModalState(ModalState.TopUp)
+    setCurrentValue(null)
+    setTransactionHash(null)
+  }
+
   return (
-    <ModalDialog
-      open={open}
-      hideChainIndicator
-      dialogTitle={modalState === ModalState.TopUp ? 'Top-up your account' : ''}
-      onClose={onClose}
-    >
-      {modalState === ModalState.TopUp && <TopUp handleTopUp={handleTopUp} />}
-      {modalState === ModalState.LoadingTXN && <LoadingTxn />}
-      {modalState === ModalState.FailedTxn && <FailedTxn setModalState={setModalState} />}
-      {modalState === ModalState.Success && <SuccessTxn />}
-    </ModalDialog>
+    <>
+      {modalState === ModalState.TopUp && <TopUp open={open} onClose={onCloseAndErase} handleTopUp={handleTopUp} />}
+      {modalState === ModalState.LoadingTXN && (
+        <LoadingTxn hash={transactionHash!} open={open} onClose={onCloseAndErase} />
+      )}
+      {modalState === ModalState.FailedTxn && (
+        <FailedTxn handleRetry={handleRetry} open={open} onClose={onCloseAndErase} />
+      )}
+      {modalState === ModalState.Success && (
+        <SuccessTxn hash={transactionHash!} value={currentValue!} open={open} onClose={onCloseAndErase} />
+      )}
+    </>
   )
 }
 

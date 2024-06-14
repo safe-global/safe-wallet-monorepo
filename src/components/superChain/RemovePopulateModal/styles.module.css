@@ -1,4 +1,4 @@
-.claimModal :global .MuiDialog-paper {
+.removePopulateModal :global .MuiDialog-paper {
   width: 480px;
   margin: 0;
   position: relative;

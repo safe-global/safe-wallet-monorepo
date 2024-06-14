@@ -24,7 +24,7 @@ function RemovePopulateModal({
 
   return (
     <Dialog
-      className={css.claimModal}
+      className={css.removePopulateModal}
       open={context.open}
       onClose={onClose}
       aria-labelledby="modal-modal-title"

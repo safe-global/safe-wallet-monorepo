@@ -8,6 +8,8 @@ export type ExplorerButtonProps = {
   className?: string
   icon?: ComponentType
   onClick?: (e: SyntheticEvent) => void
+  fontSize?: 'small' | 'inherit'
+  color?: 'default' | 'inherit' | 'primary' | 'secondary'
 }
 
 const ExplorerButton = ({
@@ -16,6 +18,8 @@ const ExplorerButton = ({
   icon = LinkIcon,
   className,
   onClick,
+  fontSize = 'small',
+  color = 'default',
 }: ExplorerButtonProps): ReactElement => (
   <Tooltip title={title} placement="top">
     <IconButton
@@ -27,8 +31,9 @@ const ExplorerButton = ({
       size="small"
       sx={{ color: 'inherit' }}
       onClick={onClick}
+      color={color}
     >
-      <SvgIcon component={icon} inheritViewBox fontSize="small" />
+      <SvgIcon component={icon} inheritViewBox fontSize={fontSize} />
     </IconButton>
   </Tooltip>
 )
