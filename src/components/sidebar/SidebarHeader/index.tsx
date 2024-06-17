@@ -165,7 +165,10 @@ const SafeHeader = (): ReactElement => {
                 SC points: <span>{Number(superChainSmartAccount.data.points)}</span>
               </p>
               <p className={css.superChainData_points}>
-                Points to level up: <span>100</span>
+                Points to level up:{' '}
+                <span>
+                  {Number(superChainSmartAccount.data.pointsToNextLevel ?? superChainSmartAccount.data.points)}
+                </span>
               </p>
             </div>
           </div>

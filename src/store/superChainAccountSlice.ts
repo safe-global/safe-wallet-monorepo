@@ -10,6 +10,7 @@ export const initialSuperChainAccount = {
   level: BigInt(0),
   eoas: [zeroAddress],
   noun: [BigInt(0), BigInt(0), BigInt(0), BigInt(0), BigInt(0)],
+  pointsToNextLevel: null,
 }
 
 const { slice, selector } = makeLoadableSlice('superChainAccount', initialSuperChainAccount, true)
