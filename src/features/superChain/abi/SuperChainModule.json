@@ -60,6 +60,13 @@
   },
   {
     "type": "function",
+    "name": "getNextLevelPoints",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
     "name": "getSuperChainAccount",
     "inputs": [{ "name": "_safe", "type": "address", "internalType": "address" }],
     "outputs": [
@@ -301,6 +308,31 @@
   },
   {
     "type": "event",
+    "name": "OwnerPopulationRemoved",
+    "inputs": [
+      {
+        "name": "safe",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "owner",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "superChainId",
+        "type": "string",
+        "indexed": false,
+        "internalType": "string"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
     "name": "OwnershipTransferred",
     "inputs": [
       {
@@ -380,6 +412,7 @@
     "anonymous": false
   },
   { "type": "error", "name": "InvalidShortString", "inputs": [] },
+  { "type": "error", "name": "MaxLvlReached", "inputs": [] },
   {
     "type": "error",
     "name": "OwnableInvalidOwner",
