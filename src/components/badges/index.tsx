@@ -28,7 +28,7 @@ function Badges() {
       <BadgesHeader
         level={Number(superChainAccount.level)}
         points={Number(superChainAccount.points)}
-        pointsToNextLevel={Number(superChainAccount.points) * 2}
+        pointsToNextLevel={Number(superChainAccount.pointsToNextLevel ?? superChainAccount.points)}
         totalBadges={data?.currentBadges.length}
         completeBadges={
           data?.currentBadges.reduce((acc, badge) => {

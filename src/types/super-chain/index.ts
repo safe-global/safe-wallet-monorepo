@@ -7,6 +7,7 @@ export type SuperChainAccount = {
   points: bigint
   level: bigint
   noun: bigint[]
+  pointsToNextLevel: bigint | null
 }
 
 export type Tiers = {

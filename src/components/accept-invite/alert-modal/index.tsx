@@ -16,8 +16,8 @@ function AlertModal({ modalContext, onClose }: { modalContext: ModalContext; onC
   const router = useRouter()
   const { getWriteableSuperChainSmartAccount } = useSuperChainAccount()
   const handleAcceptInvitation = async () => {
-    // const superChainSmartAccountContract = getWriteableSuperChainSmartAccount()
-    // await superChainSmartAccountContract?.write.addOwnerWithThreshold([modalContext.safe, modalContext.newOwner])
+    const superChainSmartAccountContract = getWriteableSuperChainSmartAccount()
+    await superChainSmartAccountContract?.write.addOwnerWithThreshold([modalContext.safe, modalContext.newOwner])
     onClose()
     router.push({
       pathname: AppRoutes.home,

@@ -11,6 +11,7 @@ import ClaimModal from '../modals/ClaimModal'
 import LevelUpModal from '../modals/LevelUpModal'
 import { useRouter } from 'next/router'
 import { AppRoutes } from '@/config/routes'
+import LoadingModal from '@/components/common/LoadingModal'
 
 export type ClaimData = {
   badgeImages: string[]
@@ -52,6 +53,7 @@ function BadgesActions({ claimable }: { claimable: boolean }) {
     <>
       <ClaimModal onLevelUp={handleLevelUp} data={claimData} open={isClaimModalOpen} onClose={handleCloseClaimModal} />
       <LevelUpModal open={isLevelUpModalOpen} onClose={handleCloseLevelUpModal} />
+      <LoadingModal open={isPending} title="Updating badges" />
       <Grid container spacing={1} item>
         <Grid item>
           <Typography variant="h3" fontSize={16} fontWeight={600}>
