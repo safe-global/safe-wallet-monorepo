@@ -33,11 +33,15 @@ const Dashboard = (): ReactElement => {
 
   const supportsRecovery = useIsRecoverySupported()
   const [recovery] = useRecovery()
-  const showRecoveryWidget = supportsRecovery && !recovery
 
   useEffect(() => {
     if (!wallet && ready) {
       router.push('/')
+    } else {
+      const isOwner = safe.owners.find((owner) => owner.value === wallet?.address)
+      if (!isOwner) {
+        router.push('/')
+      }
     }
   }, [wallet])
 
