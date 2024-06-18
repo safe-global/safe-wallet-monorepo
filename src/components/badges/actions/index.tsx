@@ -12,6 +12,7 @@ import LevelUpModal from '../modals/LevelUpModal'
 import { useRouter } from 'next/router'
 import { AppRoutes } from '@/config/routes'
 import LoadingModal from '@/components/common/LoadingModal'
+import FailedTxnModal from '@/components/common/ErrorModal'
 
 export type ClaimData = {
   badgeImages: string[]
@@ -25,7 +26,7 @@ function BadgesActions({ claimable }: { claimable: boolean }) {
   const [claimData, setClaimData] = useState<ClaimData | null>(null)
   const [isLevelUpModalOpen, setIsLevelUpModalOpen] = useState(false)
   const queryClient = useQueryClient()
-  const { mutate, isPending } = useMutation({
+  const { mutate, isPending, isError } = useMutation({
     mutationFn: async () => await badgesService.attestBadges(safeAddress as Address),
     onSuccess: (data) => {
       queryClient.refetchQueries({ queryKey: ['superChainAccount', safeAddress] })
@@ -54,6 +55,7 @@ function BadgesActions({ claimable }: { claimable: boolean }) {
       <ClaimModal onLevelUp={handleLevelUp} data={claimData} open={isClaimModalOpen} onClose={handleCloseClaimModal} />
       <LevelUpModal open={isLevelUpModalOpen} onClose={handleCloseLevelUpModal} />
       <LoadingModal open={isPending} title="Updating badges" />
+      <FailedTxnModal open={isError} onClose={handleCloseLevelUpModal} handleRetry={() => mutate()} />
       <Grid container spacing={1} item>
         <Grid item>
           <Typography variant="h3" fontSize={16} fontWeight={600}>
