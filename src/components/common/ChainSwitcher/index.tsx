@@ -5,17 +5,24 @@ import { useCurrentChain } from '@/hooks/useChains'
 import useOnboard from '@/hooks/wallets/useOnboard'
 import useIsWrongChain from '@/hooks/useIsWrongChain'
 import css from './styles.module.css'
-import { switchWalletChain } from '@/services/tx/tx-sender/sdk'
+// import { switchWalletChain } from '@/services/tx/tx-sender/sdk'
+import useWallet from '@/hooks/wallets/useWallet'
+import { toQuantity } from 'ethers'
 
 const ChainSwitcher = ({ fullWidth }: { fullWidth?: boolean }): ReactElement | null => {
   const chain = useCurrentChain()
   const onboard = useOnboard()
   const isWrongChain = useIsWrongChain()
+  const wallet = useWallet()
 
   const handleChainSwitch = useCallback(async () => {
-    if (!onboard || !chain) return
+    if (!wallet || !chain) return
 
-    await switchWalletChain(onboard, chain.chainId)
+    // await switchWalletChain(onboard, chain.chainId)
+    await wallet?.provider.request({
+      method: 'wallet_switchEthereumChain',
+      params: [{ chainId: toQuantity(parseInt(chain.chainId)) }],
+    })
   }, [chain, onboard])
 
   if (!isWrongChain) return null

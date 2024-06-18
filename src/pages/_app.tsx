@@ -47,6 +47,7 @@ import CounterfactualHooks from '@/features/counterfactual/CounterfactualHooks'
 import { PrivyProvider } from '@privy-io/react-auth'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ApolloClient, InMemoryCache, ApolloProvider } from '@apollo/client'
+import { sepolia } from 'viem/chains'
 
 const GATEWAY_URL = IS_PRODUCTION || cgwDebugStorage.get() ? GATEWAY_URL_PRODUCTION : GATEWAY_URL_STAGING
 
@@ -103,6 +104,7 @@ export const AppProviders = ({ children }: { children: ReactNode | ReactNode[] }
             embeddedWallets: {
               createOnLogin: 'users-without-wallets',
             },
+            supportedChains: [sepolia],
           }}
         >
           <SafeThemeProvider mode={themeMode}>
