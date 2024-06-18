@@ -88,7 +88,7 @@ function Badge({
                   <Typography textAlign="center" margin={0}>
                     {data.tierdescription.replace(
                       '{{variable}}',
-                      data.tiers[data.claimableTier! + 1].minValue.toString(),
+                      data.tiers[data.claimableTier ?? 0].minValue.toString(),
                     )}
                   </Typography>
                 </>
