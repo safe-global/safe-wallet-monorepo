@@ -35,7 +35,8 @@ const Dashboard = (): ReactElement => {
   const [recovery] = useRecovery()
 
   useEffect(() => {
-    if (!wallet && ready) {
+    if (!ready) return
+    if (!wallet) {
       router.push('/')
     } else {
       const isOwner = safe.owners.find((owner) => owner.value === wallet?.address)
