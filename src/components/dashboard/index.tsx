@@ -27,7 +27,7 @@ const Dashboard = (): ReactElement => {
   const router = useRouter()
   const wallet = useWallet()
   const { ready } = usePrivy()
-  const { safe } = useSafeInfo()
+  const { safe, safeLoaded, safeLoading } = useSafeInfo()
   const { [CREATION_MODAL_QUERY_PARAM]: showCreationModal = '' } = router.query
   const { [ADD_OWNER_MODAL_QUERY_PARAM]: showEOAAddedModal = '' } = router.query
 
@@ -35,16 +35,17 @@ const Dashboard = (): ReactElement => {
   const [recovery] = useRecovery()
 
   useEffect(() => {
-    if (!ready) return
+    if (!ready || !safeLoaded) return
     if (!wallet) {
       router.push('/')
+      alert('no wallet')
     } else {
       const isOwner = safe.owners.find((owner) => owner.value === wallet?.address)
       if (!isOwner) {
         router.push('/')
       }
     }
-  }, [wallet])
+  }, [wallet, safeLoading, ready])
 
   return (
     <>
