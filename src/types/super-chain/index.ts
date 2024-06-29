@@ -1,5 +1,6 @@
 import type { Tables } from './database.types'
 import type { Address } from 'viem'
+import type { GetUserBadgesQuery } from './.graphclient'
 
 export type SuperChainAccount = {
   smartAccount: Address
@@ -10,22 +11,9 @@ export type SuperChainAccount = {
   pointsToNextLevel: bigint | null
 }
 
-export type Tiers = {
-  '2DImage': string
-  '3DImage': string
-  minValue: number
-  points: number
-}
-
-export type AccountBadge = Omit<
-  Tables<'accountbadges'>,
-  'account' | 'id' | 'isdeleted' | 'isClaimed' | 'lastclaim' | 'lastclaimBlock'
->
-type Badge = Tables<'badges'>
-export type ResponseBadges = Omit<AccountBadge, 'lastclaimblock' | 'badgeid'> &
-  Omit<Badge, 'dataorigin' | 'isactive' | 'tiers'> & {
+export type Badge = GetUserBadgesQuery['accountBadges'][number]
+export type ResponseBadge = Pick<Badge, 'points' | 'tier'> &
+  Badge['badge'] & {
     claimableTier: number | null
-    points: number
-    tiers: Tiers[]
     claimable: boolean
   }

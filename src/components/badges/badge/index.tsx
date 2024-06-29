@@ -6,89 +6,89 @@ import HeartFilled from '@/public/images/common/hearth-filled.svg'
 import css from './styles.module.css'
 import type { Address } from 'viem'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import type { ResponseBadges } from '@/types/super-chain'
+import type { ResponseBadge } from '@/types/super-chain'
 import classNames from 'classnames'
 import Complete from '@/public/images/common/complete.svg'
 function Badge({
   data,
-  isSwitchFavoritePending,
   switchFavorite,
   setCurrentBadge,
+  isFavorite
 }: {
-  data: ResponseBadges
-  switchFavorite: ({ id, account, isFavorite }: { id: number; account: Address; isFavorite: boolean }) => Promise<void>
-  isSwitchFavoritePending: boolean
-  setCurrentBadge: (badge: ResponseBadges) => void
+  data: ResponseBadge
+  switchFavorite: () => void
+  setCurrentBadge: (badge: ResponseBadge & { isFavorite: boolean }) => void
+  isFavorite: boolean
 }) {
   const { safeAddress, safeLoading } = useSafeInfo()
-  const handleSwitchFavorite = async (event: SyntheticEvent, id: number, account: Address, isFavorite: boolean) => {
+  const handleSwitchFavorite = async (event: SyntheticEvent) => {
     event.stopPropagation()
-    await switchFavorite({ id, account, isFavorite })
+    switchFavorite()
   }
   const unClaimed = useMemo(() => {
-    if (data?.claimableTier === null || data?.lastclaimtier === null) return false
-    return data?.lastclaimtier === data?.claimableTier
+    if (data?.claimableTier === null || data?.tier === null) return false
+    return data?.tier === data?.claimableTier
   }, [data])
 
   const handlePickBadge = () => {
-    const badge: ResponseBadges = {
+    const badge: ResponseBadge = {
       ...data,
     }
-    setCurrentBadge(badge)
+    setCurrentBadge({ ...badge, isFavorite })
   }
   return (
     <Card
       onClick={handlePickBadge}
-      className={classNames(css.badgeContainer, data.tiers.length - 1 === data.lastclaimtier && css.badgeComplete)}
+      className={classNames(css.badgeContainer, data.badgeTiers.length === data.tier && css.badgeComplete)}
     >
       <CardContent>
         <Stack padding={0} justifyContent="center" alignItems="center" spacing={1} position="relative">
           <IconButton
-            disabled={isSwitchFavoritePending || safeLoading}
-            onClick={(e) => handleSwitchFavorite(e, data.id, safeAddress as Address, !data.favorite)}
+            disabled={safeLoading}
+            onClick={(e) => handleSwitchFavorite(e)}
             className={css.hearth}
           >
             <SvgIcon
-              component={data.favorite ? HeartFilled : Hearth}
+              component={isFavorite ? HeartFilled : Hearth}
               color="secondary"
               inheritViewBox
               fontSize="small"
             />
           </IconButton>
-          {data.lastclaimtier !== null ? (
+          {data.tier ? (
             <img
               width={72}
               height={72}
-              src={data.tiers[data.claimableTier!]['3DImage']}
+              src={data.badgeTiers[data.claimableTier! - 1].metadata['3DImage']}
               className={!unClaimed ? css.unclaimed : undefined}
-              alt={data.networkorprotocol}
+              alt={data.metadata.platform}
             />
           ) : (
             <img
               width={72}
               height={72}
-              src={data.tiers[0]['3DImage']}
+              src={data.badgeTiers[0].metadata['3DImage']}
               className={!unClaimed ? css.unclaimed : undefined}
-              alt={data.networkorprotocol}
+              alt={data.metadata.platform}
             />
           )}
           <Typography margin={0} fontWeight={600} fontSize={16} textAlign="center" variant="h4">
-            {data.name}
+            {data.metadata.name}
           </Typography>
           <Typography margin={0} fontSize={14} fontWeight={400} textAlign="center" color="text.secondary">
-            {data.description}
+            {data.metadata.description}
           </Typography>
-          {data.tiers.length - 1 !== data.lastclaimtier && (
+          {data.badgeTiers.length !== data.tier && (
             <Box border={2} borderRadius={1} padding="12px" borderColor="secondary.main">
-              {data.lastclaimtier !== null ? (
+              {data.tier ? (
                 <>
                   <Typography margin={0} textAlign="center" color="secondary.main">
                     Unlock Next Tier:
                   </Typography>
                   <Typography textAlign="center" margin={0}>
-                    {data.tierdescription.replace(
+                    {data.metadata.condition.replace(
                       '{{variable}}',
-                      data.tiers[data.claimableTier ?? 0].minValue.toString(),
+                      data.badgeTiers[data.claimableTier ? data.claimableTier - 1 : 0].metadata.minValue.toString(),
                     )}
                   </Typography>
                 </>
@@ -98,7 +98,7 @@ function Badge({
                     Unlock First Tier:
                   </Typography>
                   <Typography textAlign="center" margin={0}>
-                    {data.tierdescription.replace('{{variable}}', data.tiers[0].minValue.toString())}
+                    {data.metadata.condition.replace('{{variable}}', data.badgeTiers[0].metadata.minValue.toString())}
                   </Typography>
                 </>
               )}
@@ -108,9 +108,9 @@ function Badge({
       </CardContent>
       <CardActions>
         <Box width="100%" display="flex" gap={1} pt={3} justifyContent="center" alignItems="center">
-          {data.tiers.length - 1 !== data.lastclaimtier ? (
+          {data.badgeTiers.length !== data.tier ? (
             <>
-              <strong>{data.lastclaimtier !== null ? data.points : data.tiers[0].points}</strong>{' '}
+              <strong>{data.tier ? data.points : data.badgeTiers[0].points}</strong>{' '}
               <SvgIcon component={SuperChainPoints} inheritViewBox fontSize="medium" />
             </>
           ) : (

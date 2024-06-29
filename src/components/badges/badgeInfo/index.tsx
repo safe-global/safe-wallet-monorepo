@@ -1,7 +1,7 @@
 import { Box, IconButton, Stack, SvgIcon, Typography } from '@mui/material'
 import React, { useMemo } from 'react'
 import css from './styles.module.css'
-import type { ResponseBadges } from '@/types/super-chain'
+import type { ResponseBadge } from '@/types/super-chain'
 import Link from 'next/link'
 import Hearth from '@/public/images/common/hearth.svg'
 import HeartFilled from '@/public/images/common/hearth-filled.svg'
@@ -14,27 +14,28 @@ function BadgeInfo({
   setCurrentBadge,
   switchFavorite,
 }: {
-  currentBadge: ResponseBadges | null
-  setCurrentBadge: (_: null | ResponseBadges) => void
-  switchFavorite: ({ id, account, isFavorite }: { id: number; account: Address; isFavorite: boolean }) => Promise<void>
+  currentBadge: ResponseBadge & { isFavorite: boolean } | null
+  setCurrentBadge: (_: null | ResponseBadge & { isFavorite: boolean }) => void
+  switchFavorite: ({ id, account, isFavorite }: { id: number; account: Address; isFavorite: boolean }) => void
 }) {
   const { safe } = useSafeInfo()
 
   const unClaimed = useMemo(() => {
-    if (currentBadge?.claimableTier === null || currentBadge?.lastclaimtier === null) return false
+    if (currentBadge?.claimableTier === null || currentBadge?.tier === null) return false
 
-    return currentBadge?.lastclaimtier === currentBadge?.claimableTier
+    return currentBadge?.tier === currentBadge?.claimableTier
   }, [currentBadge])
 
   const handleSwitchFavorite = async () => {
-    await switchFavorite({
-      id: currentBadge?.id!,
+
+    switchFavorite({
+      id: currentBadge?.badgeId,
       account: safe.address.value as Address,
-      isFavorite: !currentBadge?.favorite,
+      isFavorite: !currentBadge?.isFavorite,
     })
     setCurrentBadge({
       ...currentBadge!,
-      favorite: !currentBadge?.favorite,
+      isFavorite: !currentBadge?.isFavorite,
     })
     console.debug('favorite switched')
   }
@@ -49,17 +50,17 @@ function BadgeInfo({
         justifyContent="center"
         alignItems="center"
       >
-        {currentBadge.lastclaimtier !== null ? (
+        {currentBadge.tier ? (
           <img
-            src={currentBadge.tiers[currentBadge.claimableTier!]['3DImage']}
+            src={currentBadge.badgeTiers[currentBadge.claimableTier! - 1].metadata['3DImage']}
             className={!unClaimed ? css.unclaimed : undefined}
-            alt={currentBadge.networkorprotocol}
+            alt={currentBadge.metadata.platform}
           />
         ) : (
           <img
-            src={currentBadge.tiers[0]['3DImage']}
+            src={currentBadge.badgeTiers[0].metadata['3DImage']}
             className={!unClaimed ? css.unclaimed : undefined}
-            alt={currentBadge.networkorprotocol}
+            alt={currentBadge.metadata.platform}
           />
         )}
         <Box display="flex" gap={1} position="absolute" top="10%" right="0">
@@ -68,7 +69,7 @@ function BadgeInfo({
           </IconButton>
           <IconButton onClick={handleSwitchFavorite} className={css.actionBtn}>
             <SvgIcon
-              component={currentBadge?.favorite ? HeartFilled : Hearth}
+              component={currentBadge?.isFavorite ? HeartFilled : Hearth}
               color="inherit"
               inheritViewBox
               fontSize="small"
@@ -81,10 +82,10 @@ function BadgeInfo({
       </Box>
       <Box display="flex" justifyContent="center" flexDirection="column" alignItems="center">
         <Typography fontSize={20} fontWeight={600}>
-          {currentBadge?.name}
+          {currentBadge?.metadata.name}
         </Typography>
         <Typography fontSize={12} fontWeight={400}>
-          {currentBadge?.description}
+          {currentBadge?.metadata.description}
         </Typography>
       </Box>
       <Box
@@ -98,15 +99,15 @@ function BadgeInfo({
         flexDirection="column"
         borderColor="secondary.main"
       >
-        {currentBadge.lastclaimtier !== null ? (
+        {currentBadge.tier ? (
           <>
             <Typography fontSize={12} fontWeight={600} color="secondary.main">
               Unlock Next Tier:
             </Typography>
             <Typography fontSize={12} fontWeight={400}>
-              {currentBadge.tierdescription.replace(
+              {currentBadge.metadata.description.replace(
                 '{{variable}}',
-                currentBadge.tiers[currentBadge.claimableTier! + 1].minValue.toString(),
+                currentBadge.badgeTiers[currentBadge.claimableTier! - 1].metadata.minValue.toString(),
               )}
             </Typography>
           </>
@@ -116,7 +117,7 @@ function BadgeInfo({
               Unlock First Tier:
             </Typography>
             <Typography fontSize={12} fontWeight={400}>
-              {currentBadge.tierdescription.replace('{{variable}}', currentBadge.tiers[0].minValue.toString())}
+              {currentBadge.metadata.description.replace('{{variable}}', currentBadge.badgeTiers[0].metadata.minValue.toString())}
             </Typography>
           </>
         )}
@@ -134,16 +135,16 @@ function BadgeInfo({
       >
         <Typography fontSize={12} fontWeight={500}>
           <strong>Network: </strong>
-          {currentBadge.networkorprotocol}
+          {currentBadge.metadata.platform}
         </Typography>
         <Typography fontSize={12} fontWeight={500}>
-          <strong>Current Tier:</strong> {currentBadge.lastclaimtier !== null ? currentBadge.lastclaimtier + 1 : 0}
+          <strong>Current Tier:</strong> {currentBadge.tier ? currentBadge.tier : 0}
         </Typography>
         <Typography fontSize={12} fontWeight={500}>
-          {currentBadge.lastclaimtier !== null ? (
-            <strong>Next rewards: {currentBadge.tiers[currentBadge.claimableTier! + 1].points}</strong>
+          {currentBadge.tier ? (
+            <strong>Next rewards: {currentBadge.badgeTiers[currentBadge.claimableTier! - 1].points}</strong>
           ) : (
-            <strong>First rewards: {currentBadge.tiers[0].points} </strong>
+            <strong>First rewards: {currentBadge.badgeTiers[0].metadata.points} </strong>
           )}
         </Typography>
       </Box>

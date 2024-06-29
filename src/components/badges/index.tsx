@@ -3,7 +3,7 @@ import React, { useMemo } from 'react'
 import BadgesHeader from './header'
 import BadgesActions from './actions'
 import BadgesContent from './content'
-import type { ResponseBadges } from '@/types/super-chain'
+import type { ResponseBadge } from '@/types/super-chain'
 import { useQuery } from '@tanstack/react-query'
 import { useAppSelector } from '@/store'
 import { selectSuperChainAccount } from '@/store/superChainAccountSlice'
@@ -15,8 +15,7 @@ function Badges() {
   const { safeAddress, safeLoaded } = useSafeInfo()
 
   const { data, isLoading, error } = useQuery<{
-    currentBadges: ResponseBadges[]
-    totalPoints: number
+    currentBadges: ResponseBadge[]
   }>({
     queryKey: ['badges', safeAddress, safeLoaded],
     queryFn: async () => await badgesService.getBadges(safeAddress as `0x${string}`),
@@ -32,8 +31,8 @@ function Badges() {
         totalBadges={data?.currentBadges.length}
         completeBadges={
           data?.currentBadges.reduce((acc, badge) => {
-            if (!badge.lastclaimtier) return acc
-            if (badge.lastclaimtier === badge.tiers.length - 1) {
+            if (!badge.tier) return acc
+            if (badge.tier === badge.badgeTiers.length) {
               acc += 1
             }
             return acc

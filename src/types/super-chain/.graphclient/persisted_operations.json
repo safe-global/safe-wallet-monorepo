@@ -1,0 +1,3 @@
+{
+  "008609423b6bcf8ca4e33fd37b4b5f53c60680a121a5094337844d631a2ec14d": "query GetUserBadges($user: Bytes!) {\n  badges {\n    badgeId\n    uri\n    badgeTiers {\n      points\n      tier\n      uri\n    }\n  }\n  accountBadges(where: {user: $user}) {\n    points\n    tier\n    badge {\n      badgeId\n      uri\n      badgeTiers {\n        points\n        tier\n        uri\n      }\n    }\n  }\n}"
+}

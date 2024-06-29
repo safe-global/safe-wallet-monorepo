@@ -1,13 +1,15 @@
 import { Drawer, Grid, Skeleton, Stack, Typography } from '@mui/material'
-import React, { useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import Badge from '../badge'
-import type { ResponseBadges } from '@/types/super-chain'
+import type { ResponseBadge } from '@/types/super-chain'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import badgesService from '@/features/superChain/services/badges.service'
 import { type Address } from 'viem'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import BadgeInfo from '../badgeInfo'
 import css from './styles.module.css'
+import local from '@/services/local-storage/local'
+import useLocalStorage from '@/services/local-storage/useLocalStorage'
 
 type Params = {
   id: number
@@ -20,35 +22,16 @@ function BadgesContent({
   isLoading,
   error,
 }: {
-  badges?: ResponseBadges[]
+  badges?: ResponseBadge[]
   isLoading: boolean
   error: Error | null
 }) {
   const queryClient = useQueryClient()
   const { safeAddress, safeLoaded } = useSafeInfo()
-  const [currentBadge, setCurrentBadge] = useState<ResponseBadges | null>(null)
+  const [currentBadge, setCurrentBadge] = useState<ResponseBadge & { isFavorite: boolean } | null>(null)
+  const [favoriteBadgesLocalStorage, setFavoriteBadgesLocalStorage] = useLocalStorage<string>('favoriteBadges')
+  const favoriteBadges = useMemo(() => safeLoaded ? badgesService.getFavoriteBadges(safeAddress as Address) : [], [safeAddress, favoriteBadgesLocalStorage, safeLoaded])
 
-  const { mutateAsync, isPending } = useMutation<void, Error, Params, unknown>({
-    mutationFn: async (params) => {
-      return await badgesService.switchFavoriteBadge(params.id, params.account as Address, params.isFavorite)
-    },
-    onSuccess: async (_, variables) => {
-      queryClient.setQueryData(['badges', safeAddress, safeLoaded], (oldData: any) => {
-        return {
-          ...oldData,
-          currentBadges: oldData.currentBadges.map((badge: ResponseBadges) => {
-            if (badge.id === variables.id) {
-              return {
-                ...badge,
-                favorite: !badge.favorite,
-              }
-            }
-            return badge
-          }),
-        }
-      })
-    },
-  })
   if (isLoading)
     return (
       <Grid container item spacing={1}>
@@ -82,7 +65,7 @@ function BadgesContent({
 
   return (
     <Grid container item spacing={1}>
-      {badges.find((badge) => !!badge.favorite) && (
+      {favoriteBadges.length && (
         <>
           <Grid item xs={12}>
             <Typography variant="h3" fontSize={12} fontWeight={600} color="primary.light">
@@ -92,14 +75,14 @@ function BadgesContent({
           <Grid xs={12} item>
             <Stack direction="row" spacing={2} useFlexGap flexWrap="wrap">
               {badges
-                .filter((badge) => !!badge.favorite)
+                .filter((badge) => favoriteBadges.includes(badge.badgeId))
                 .map((badge) => (
                   <Badge
                     data={badge}
-                    key={badge.id}
-                    switchFavorite={mutateAsync}
-                    isSwitchFavoritePending={isPending}
+                    key={badge.badgeId}
+                    switchFavorite={() => badgesService.switchFavoriteBadge(badge.badgeId, safeAddress as Address, false, setFavoriteBadgesLocalStorage)}
                     setCurrentBadge={setCurrentBadge}
+                    isFavorite
                   />
                 ))}
             </Stack>
@@ -114,20 +97,20 @@ function BadgesContent({
       <Grid xs={12} item>
         <Stack direction="row" spacing={2} useFlexGap flexWrap="wrap">
           {badges
-            .filter((badge) => !badge.favorite)
+            .filter((badge) => !favoriteBadges.includes(badge.badgeId))
             .map((badge) => (
               <Badge
                 data={badge}
-                key={badge.id}
-                switchFavorite={mutateAsync}
-                isSwitchFavoritePending={isPending}
+                key={badge.badgeId}
+                switchFavorite={() => badgesService.switchFavoriteBadge(badge.badgeId, safeAddress as Address, true, setFavoriteBadgesLocalStorage)}
                 setCurrentBadge={setCurrentBadge}
+                isFavorite={false}
               />
             ))}
         </Stack>
       </Grid>
       <Drawer variant="temporary" anchor="right" open={!!currentBadge}>
-        <BadgeInfo switchFavorite={mutateAsync} setCurrentBadge={setCurrentBadge} currentBadge={currentBadge} />
+        <BadgeInfo switchFavorite={({ id, account, isFavorite }: { id: number, account: Address, isFavorite: boolean }) => badgesService.switchFavoriteBadge(id, account, isFavorite, setFavoriteBadgesLocalStorage)} setCurrentBadge={setCurrentBadge} currentBadge={currentBadge} />
       </Drawer>
     </Grid>
   )
