@@ -38,7 +38,6 @@ const Dashboard = (): ReactElement => {
     if (!ready || !safeLoaded) return
     if (!wallet) {
       router.push('/')
-      alert('no wallet')
     } else {
       const isOwner = safe.owners.find((owner) => owner.value === wallet?.address)
       if (!isOwner) {
