@@ -19,7 +19,7 @@ export type ClaimData = {
   totalPoints: number
   isLevelUp: boolean
 }
-function BadgesActions({ claimable }: { claimable: boolean }) {
+function BadgesActions({ claimable, setFilter }: { claimable: boolean, setFilter: (filter: string) => void }) {
   const { safeAddress } = useSafeInfo()
   const router = useRouter()
   const [isClaimModalOpen, setIsClaimModalOpen] = useState(false)
@@ -67,6 +67,7 @@ function BadgesActions({ claimable }: { claimable: boolean }) {
             <TextField
               placeholder="Search by name or network"
               variant="filled"
+              onChange={(e) => setFilter(e.target.value)}
               hiddenLabel
               InputProps={{
                 startAdornment: (
