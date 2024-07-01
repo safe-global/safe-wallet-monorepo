@@ -65,7 +65,7 @@ function BadgesContent({
 
   return (
     <Grid container item spacing={1}>
-      {favoriteBadges.length && (
+      {favoriteBadges.length > 0 && (
         <>
           <Grid item xs={12}>
             <Typography variant="h3" fontSize={12} fontWeight={600} color="primary.light">
