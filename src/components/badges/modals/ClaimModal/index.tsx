@@ -4,6 +4,8 @@ import Shiny from '@/public/images/common/shiny-animation.svg'
 import SuperChainPoints from '@/public/images/common/superChain.svg'
 import css from './styles.module.css'
 import type { ClaimData } from '../../actions'
+import { useAppSelector } from '@/store'
+import { selectSuperChainAccount } from '@/store/superChainAccountSlice'
 function ClaimModal({
   open,
   onClose,
@@ -15,6 +17,8 @@ function ClaimModal({
   data: ClaimData | null
   onLevelUp: () => void
 }) {
+  const { data: superChainAccount } = useAppSelector(selectSuperChainAccount)
+
   return (
     <Dialog
       className={css.claimModal}
@@ -40,9 +44,11 @@ function ClaimModal({
           </Typography>
         </Box>
         <Box display="flex" gap="24px" flexWrap="wrap" maxWidth="360px">
-          {data?.badgeImages.map((badge, index) => (
-            <img key={index} src={badge} alt="Badge" />
-          ))}
+          {data?.badgeImages.map((badge, index) => {
+            console.debug('badge', badge, data)
+            return <img key={index} src={badge} alt="Badge" />
+          }
+          )}
         </Box>
         <Box
           className={css.pointsBox}
@@ -56,7 +62,7 @@ function ClaimModal({
           <SvgIcon component={SuperChainPoints} inheritViewBox fontSize="medium" />
         </Box>
         <Typography color="GrayText" fontSize={16}>
-          You still need <strong> 40 SC Point to level-up</strong>
+          You still need <strong> {Number(superChainAccount.pointsToNextLevel) - (Number(superChainAccount.points) + (data?.totalPoints ?? 0))} SC Point to level-up</strong>
         </Typography>
       </Box>
       {data?.isLevelUp ? (

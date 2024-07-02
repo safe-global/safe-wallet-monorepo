@@ -40,8 +40,8 @@ function Badges() {
         totalBadges={data?.currentBadges.length}
         completeBadges={
           data?.currentBadges.reduce((acc, badge) => {
-            if (!badge.tier) return acc
-            if (badge.tier === badge.badgeTiers.length) {
+            if (!Number(badge.tier)) return acc
+            if (Number(badge.tier) === badge.badgeTiers.length) {
               acc += 1
             }
             return acc

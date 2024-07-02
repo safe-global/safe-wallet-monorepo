@@ -16,6 +16,7 @@ export const useLoadSuperChainAccount = (): AsyncResult<SuperChainAccount> => {
       let pointsToNextLevel = null
       try {
         const pointsToNextLevelResponse = await SuperChainAccountContractReadOnly.getNextLevelPoints(address.value)
+        console.debug('pointsToNextLevelResponse', pointsToNextLevelResponse)
         pointsToNextLevel = pointsToNextLevelResponse
       } catch (e) {
         console.error(e)

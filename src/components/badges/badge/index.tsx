@@ -27,7 +27,7 @@ function Badge({
   }
   const unClaimed = useMemo(() => {
     if (data?.claimableTier === null || data?.tier === null) return false
-    return data?.tier === data?.claimableTier
+    return Number(data?.tier) === data?.claimableTier
   }, [data])
 
   const handlePickBadge = () => {
@@ -39,7 +39,7 @@ function Badge({
   return (
     <Card
       onClick={handlePickBadge}
-      className={classNames(css.badgeContainer, data.badgeTiers.length === data.tier && css.badgeComplete)}
+      className={classNames(css.badgeContainer, data.badgeTiers.length === Number(data.tier) && css.badgeComplete)}
     >
       <CardContent>
         <Stack padding={0} justifyContent="center" alignItems="center" spacing={1} position="relative">
@@ -55,7 +55,7 @@ function Badge({
               fontSize="small"
             />
           </IconButton>
-          {data.tier ? (
+          {!!Number(data.tier) ? (
             <img
               width={72}
               height={72}
@@ -78,9 +78,9 @@ function Badge({
           <Typography margin={0} fontSize={14} fontWeight={400} textAlign="center" color="text.secondary">
             {data.metadata.description}
           </Typography>
-          {data.badgeTiers.length !== data.tier && (
+          {data.badgeTiers.length !== Number(data.tier) && (
             <Box border={2} borderRadius={1} padding="12px" borderColor="secondary.main">
-              {data.tier ? (
+              {!!Number(data.tier) ? (
                 <>
                   <Typography margin={0} textAlign="center" color="secondary.main">
                     Unlock Next Tier:
@@ -108,9 +108,9 @@ function Badge({
       </CardContent>
       <CardActions>
         <Box width="100%" display="flex" gap={1} pt={3} justifyContent="center" alignItems="center">
-          {data.badgeTiers.length !== data.tier ? (
+          {data.badgeTiers.length !== Number(data.tier) ? (
             <>
-              <strong>{data.tier ? data.points : data.badgeTiers[0].points}</strong>{' '}
+              <strong>{!!Number(data.tier) ? data.points : data.badgeTiers[0].points}</strong>{' '}
               <SvgIcon component={SuperChainPoints} inheritViewBox fontSize="medium" />
             </>
           ) : (

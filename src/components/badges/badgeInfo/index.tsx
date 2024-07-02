@@ -50,7 +50,7 @@ function BadgeInfo({
         justifyContent="center"
         alignItems="center"
       >
-        {currentBadge.tier ? (
+        {!!Number(currentBadge.tier) ? (
           <img
             src={currentBadge.badgeTiers[currentBadge.claimableTier! - 1].metadata['3DImage']}
             className={!unClaimed ? css.unclaimed : undefined}
@@ -99,7 +99,7 @@ function BadgeInfo({
         flexDirection="column"
         borderColor="secondary.main"
       >
-        {currentBadge.tier ? (
+        {!!Number(currentBadge.tier) ? (
           <>
             <Typography fontSize={12} fontWeight={600} color="secondary.main">
               Unlock Next Tier:
@@ -141,7 +141,7 @@ function BadgeInfo({
           <strong>Current Tier:</strong> {currentBadge.tier ? currentBadge.tier : 0}
         </Typography>
         <Typography fontSize={12} fontWeight={500}>
-          {currentBadge.tier ? (
+          {!!Number(currentBadge.tier) ? (
             <strong>Next rewards: {currentBadge.badgeTiers[currentBadge.claimableTier! - 1].points}</strong>
           ) : (
             <strong>First rewards: {currentBadge.badgeTiers[0].metadata.points} </strong>
