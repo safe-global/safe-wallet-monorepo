@@ -7,7 +7,7 @@ import PerkRaffle from '@/public/images/superchain/perk-raffle.svg'
 import PerkRebate from '@/public/images/superchain/perk-rebate.svg'
 import PerkCashback from '@/public/images/superchain/perk-cashback.svg'
 import StarAnimation from '../StarsAnimation'
-function LevelUpModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+function LevelUpModal({ open, onClose, level }: { open: boolean; onClose: () => void, level: number }) {
   return (
     <>
       <Dialog
@@ -27,7 +27,7 @@ function LevelUpModal({ open, onClose }: { open: boolean; onClose: () => void })
         >
           <Box gap="12px" display="flex" flexDirection="column" justifyContent="center" alignItems="center">
             <Typography id="modal-modal-title" fontSize={24} fontWeight={600} component="h2">
-              You’ve reached level 3!
+              You’ve reached level {level}!
             </Typography>
             <Typography color="GrayText" id="modal-modal-description" fontSize={16}>
               You have unlocked the following perks:

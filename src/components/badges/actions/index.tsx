@@ -13,6 +13,8 @@ import { useRouter } from 'next/router'
 import { AppRoutes } from '@/config/routes'
 import LoadingModal from '@/components/common/LoadingModal'
 import FailedTxnModal from '@/components/common/ErrorModal'
+import { useAppSelector } from '@/store'
+import { selectSuperChainAccount } from '@/store/superChainAccountSlice'
 
 export type ClaimData = {
   badgeImages: string[]
@@ -21,6 +23,8 @@ export type ClaimData = {
 }
 function BadgesActions({ claimable, setFilter }: { claimable: boolean, setFilter: (filter: string) => void }) {
   const { safeAddress } = useSafeInfo()
+  const { data: superChainAccount } = useAppSelector(selectSuperChainAccount)
+
   const router = useRouter()
   const [isClaimModalOpen, setIsClaimModalOpen] = useState(false)
   const [claimData, setClaimData] = useState<ClaimData | null>(null)
@@ -53,7 +57,7 @@ function BadgesActions({ claimable, setFilter }: { claimable: boolean, setFilter
   return (
     <>
       <ClaimModal onLevelUp={handleLevelUp} data={claimData} open={isClaimModalOpen} onClose={handleCloseClaimModal} />
-      <LevelUpModal open={isLevelUpModalOpen} onClose={handleCloseLevelUpModal} />
+      <LevelUpModal open={isLevelUpModalOpen} level={Number(superChainAccount?.level)} onClose={handleCloseLevelUpModal} />
       <LoadingModal open={isPending} title="Updating badges" />
       <FailedTxnModal open={isError} onClose={handleCloseLevelUpModal} handleRetry={() => mutate()} />
       <Grid container spacing={1} item>
