@@ -2,6 +2,7 @@
   transition: background-color 0.3s ease-in-out, border 0.3s ease-in-out;
   border: 1px solid transparent;
   min-height: 261px;
+  cursor: pointer;
 }
 
 .categoryContainer {
