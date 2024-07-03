@@ -11,5 +11,6 @@
 .safeAppContainer {
   transition: background-color 0.3s ease-in-out, border 0.3s ease-in-out;
   border: 1px solid transparent;
-  height: 261px;
+  min-height: 261px;
+  height: 100%;
 }

@@ -13,6 +13,7 @@ import ExploreSafeAppsIcon from '@/public/images/apps/explore.svg'
 
 import css from './styles.module.css'
 import { Box, Paper } from '@mui/material'
+import SuperChainApp from './app'
 
 const SafeAppsDashboardSection = () => {
   const { rankedSafeApps, togglePin, pinnedSafeAppIds } = useSafeApps()
@@ -25,15 +26,7 @@ const SafeAppsDashboardSection = () => {
       </Typography>
 
       <Grid container spacing={3}>
-        <Grid item xs={12} sm={6} md={4} xl={4}>
-          <Paper className={css.safeAppContainer}>
-            <Box display="flex" height="100%" justifyContent="center" alignItems="center">
-              <Typography variant="h5" component="h2">
-                Cooming soon!
-              </Typography>
-            </Box>
-          </Paper>
-        </Grid>
+        <SuperChainApp />
         <Grid item xs={12} sm={6} md={4} xl={4}>
           <Paper className={css.safeAppContainer}>
             <Box display="flex" height="100%" justifyContent="center" alignItems="center">
