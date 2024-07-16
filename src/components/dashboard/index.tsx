@@ -19,7 +19,7 @@ import SafeAppsDashboardSection from './SafeAppsDashboardSection/SafeAppsDashboa
 import AddEOAAddedModal from './AddEOAAddedModal'
 import { ADD_OWNER_MODAL_QUERY_PARAM } from '../accept-invite/alert-modal'
 import useWallet from '@/hooks/wallets/useWallet'
-import { usePrivy } from '@privy-io/react-auth'
+import { usePrivy, useWallets } from '@privy-io/react-auth'
 const RecoveryHeader = dynamic(() => import('@/features/recovery/components/RecoveryHeader'))
 const RecoveryWidget = dynamic(() => import('@/features/recovery/components/RecoveryWidget'))
 
@@ -27,15 +27,16 @@ const Dashboard = (): ReactElement => {
   const router = useRouter()
   const wallet = useWallet()
   const { ready } = usePrivy()
+  const { ready: walletReady } = useWallets()
+
   const { safe, safeLoaded, safeLoading } = useSafeInfo()
   const { [CREATION_MODAL_QUERY_PARAM]: showCreationModal = '' } = router.query
   const { [ADD_OWNER_MODAL_QUERY_PARAM]: showEOAAddedModal = '' } = router.query
 
   const supportsRecovery = useIsRecoverySupported()
-  const [recovery] = useRecovery()
 
   useEffect(() => {
-    if (!ready || !safeLoaded) return
+    if (!ready || !safeLoaded || safeLoading || !walletReady) return
     if (!wallet) {
       router.push('/')
     } else {

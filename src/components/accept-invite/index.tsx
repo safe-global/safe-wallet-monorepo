@@ -27,7 +27,6 @@ const AcceptInvite = () => {
     (wallet?.address as Address) || zeroAddress,
   )
 
-  console.debug({ data })
 
   return (
     <>

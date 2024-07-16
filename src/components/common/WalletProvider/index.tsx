@@ -18,15 +18,15 @@ const WalletProvider = ({ children }: { children: ReactNode }): ReactElement => 
   useEffect(() => {
     if (!authenticated) return setWallet(null)
     if (!wallets[0] || !ready) return
-    ;(async () => {
-      setWallet({
-        ...wallets[0],
-        balance: (await getWalletBalance(await wallets[0].getEthereumProvider(), wallets[0].address)).toString(),
-        label: 'Privy',
-        provider: await wallets[0].getEthereumProvider(),
-        chainId: wallets[0].chainId.split(':')[1],
-      })
-    })()
+      ; (async () => {
+        setWallet({
+          ...wallets[0],
+          balance: (await getWalletBalance(await wallets[0].getEthereumProvider(), wallets[0].address)).toString(),
+          label: 'Privy',
+          provider: await wallets[0].getEthereumProvider(),
+          chainId: wallets[0].chainId.split(':')[1],
+        })
+      })()
   }, [wallets, ready, authenticated])
 
   return <WalletContext.Provider value={wallet}>{children}</WalletContext.Provider>

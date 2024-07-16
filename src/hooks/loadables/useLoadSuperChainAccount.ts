@@ -12,6 +12,7 @@ export const useLoadSuperChainAccount = (): AsyncResult<SuperChainAccount> => {
   const { data, isLoading, error } = useQuery<SuperChainAccount>({
     queryKey: ['superChainAccount', address.value],
     queryFn: async () => {
+      console.debug(address.value)
       const response = await SuperChainAccountContractReadOnly.getSuperChainAccount(address.value)
       let pointsToNextLevel = null
       try {

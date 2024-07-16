@@ -14,15 +14,26 @@ export const ADD_OWNER_MODAL_QUERY_PARAM = 'addOwnerModal'
 function AlertModal({ modalContext, onClose }: { modalContext: ModalContext; onClose: () => void }) {
   const stopPropagation = (e: SyntheticEvent) => e.stopPropagation()
   const router = useRouter()
-  const { getWriteableSuperChainSmartAccount } = useSuperChainAccount()
+  const { getWriteableSuperChainSmartAccount, publicClient } = useSuperChainAccount()
   const handleAcceptInvitation = async () => {
     const superChainSmartAccountContract = getWriteableSuperChainSmartAccount()
-    await superChainSmartAccountContract?.write.addOwnerWithThreshold([modalContext.safe, modalContext.newOwner])
-    onClose()
-    router.push({
-      pathname: AppRoutes.home,
-      query: { safe: modalContext.safe, [ADD_OWNER_MODAL_QUERY_PARAM]: true, superChainId: modalContext.superChainId },
-    })
+    try {
+      const hash = await superChainSmartAccountContract?.write.addOwnerWithThreshold([modalContext.safe, modalContext.newOwner])
+      await publicClient.waitForTransactionReceipt(
+        { hash: hash! }
+      )
+      onClose()
+      router.push({
+        pathname: AppRoutes.home,
+        query: { safe: modalContext.safe, [ADD_OWNER_MODAL_QUERY_PARAM]: true, superChainId: modalContext.superChainId },
+      })
+    }
+    catch (e) {
+      console.error(e)
+      onClose()
+
+    }
+
   }
 
   return (

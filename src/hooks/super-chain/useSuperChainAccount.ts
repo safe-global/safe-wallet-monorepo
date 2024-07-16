@@ -5,7 +5,7 @@ import {
 } from '@/features/superChain/constants'
 import { publicClient } from '@/services/pimlico'
 import { Contract, JsonRpcProvider } from 'ethers'
-import { type Address, createWalletClient, custom, getContract } from 'viem'
+import { type Address, createPublicClient, createWalletClient, custom, getContract, http } from 'viem'
 import usePimlico from '../usePimlico'
 import { sepolia } from 'viem/chains'
 import useWallet from '../wallets/useWallet'
@@ -53,11 +53,15 @@ function useSuperChainAccount() {
     })
     return SuperChainAccountContractWriteable
   }
-
+  const publicClient = createPublicClient({
+    chain: sepolia,
+    transport: http(),
+  })
   return {
     getReadOnlySuperChainSmartAccount,
     getSponsoredWriteableSuperChainSmartAccount,
     getWriteableSuperChainSmartAccount,
+    publicClient,
   }
 }
 
