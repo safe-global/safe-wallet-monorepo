@@ -6,8 +6,8 @@ import MenuIcon from '@mui/icons-material/Menu'
 import classnames from 'classnames'
 import css from './styles.module.css'
 import Link from 'next/link'
-import WalletConnect from '@/public/images/common/walletconnect.svg'
 import BellIcon from '@/public/images/common/notifications.svg'
+import WalletConnect from '@/features/walletconnect/components'
 import SuperChainEco from '@/public/images/common/superchain-eco.svg'
 import Image from 'next/image'
 import ConnectWallet from '../ConnectWallet'
@@ -48,8 +48,8 @@ const Header = ({ onMenuToggle }: HeaderProps): ReactElement => {
         <NotificationCenter />
       </div>
 
-      <div className={classnames(css.element, css.button)}>
-        <SvgIcon component={WalletConnect} inheritViewBox className={css.icon} />
+      <div className={classnames(css.element, css.hideMobile)}>
+        <WalletConnect />
       </div>
       <div className={classnames(css.element, css.networkSelector)}>
         <span data-testid="chain-logo" className={classnames(css.element, css.inline)}>

@@ -23,6 +23,7 @@ import { asError } from '@/services/exceptions/utils'
 import chains from '@/config/chains'
 import { LATEST_SAFE_VERSION } from '@/config/constants'
 import { createExistingTx } from './create'
+import { ConnectedWallet } from '@privy-io/react-auth'
 
 /**
  * Propose a transaction
@@ -226,13 +227,13 @@ export const dispatchTxExecution = async (
   safeTx: SafeTransaction,
   txOptions: TransactionOptions,
   txId: string,
-  onboard: OnboardAPI,
+  _wallet: ConnectedWallet,
   chainId: SafeInfo['chainId'],
   safeAddress: string,
 ): Promise<string> => {
-  const sdkUnchecked = await getUncheckedSafeSDK(onboard, chainId)
+  const sdkUnchecked = await getUncheckedSafeSDK(_wallet, chainId)
   const eventParams = { txId }
-  const wallet = await assertWalletChain(onboard, chainId)
+  const wallet = await assertWalletChain(_wallet, chainId)
 
   const signerNonce = txOptions.nonce ?? (await getUserNonce(wallet.address))
 

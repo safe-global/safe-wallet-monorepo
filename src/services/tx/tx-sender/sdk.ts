@@ -12,9 +12,9 @@ import { createWeb3 } from '@/hooks/wallets/web3'
 import { toQuantity } from 'ethers'
 import { connectWallet, getConnectedWallet } from '@/hooks/wallets/useOnboard'
 import { type OnboardAPI } from '@web3-onboard/core'
-import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import { asError } from '@/services/exceptions/utils'
 import { UncheckedJsonRpcSigner } from '@/utils/providers/UncheckedJsonRpcSigner'
+import { ConnectedWallet } from '@privy-io/react-auth'
 
 export const getAndValidateSafeSDK = (): Safe => {
   const safeSDK = getSafeSDK()
@@ -26,53 +26,49 @@ export const getAndValidateSafeSDK = (): Safe => {
   return safeSDK
 }
 
-export const switchWalletChain = async (onboard: OnboardAPI, chainId: string): Promise<ConnectedWallet | null> => {
-  const currentWallet = getConnectedWallet(onboard.state.get().wallets)
-  if (!currentWallet) return null
+export const switchWalletChain = async (wallet: ConnectedWallet, chainId: string): Promise<ConnectedWallet | null> => {
+  if (!wallet) return null
 
   // Onboard incorrectly returns WalletConnect's chainId, so it needs to be switched unconditionally
-  if (currentWallet.chainId === chainId && !isWalletConnect(currentWallet)) {
-    return currentWallet
+  if (wallet.chainId === chainId) {
+    return wallet
   }
 
   // Hardware wallets cannot switch chains
-  if (isHardwareWallet(currentWallet)) {
-    await onboard.disconnectWallet({ label: currentWallet.label })
-    const wallets = await connectWallet(onboard, { autoSelect: currentWallet.label })
-    return wallets ? getConnectedWallet(wallets) : null
-  }
+  // if (isHardwareWallet(currentWallet)) {
+  //   await onboard.disconnectWallet({ label: currentWallet.label })
+  //   const wallets = await connectWallet(onboard, { autoSelect: currentWallet.label })
+  //   return wallets ? getConnectedWallet(wallets) : null
+  // }
 
   // Onboard doesn't update immediately and otherwise returns a stale wallet if we directly get its state
   return new Promise((resolve) => {
-    const source$ = onboard.state.select('wallets').subscribe((newWallets) => {
-      const newWallet = getConnectedWallet(newWallets)
-      if (newWallet && newWallet.chainId === chainId) {
-        source$.unsubscribe()
-        resolve(newWallet)
-      }
-    })
+    // const source$ = onboard.state.select('wallets').subscribe((newWallets) => {
+    //   const newWallet = getConnectedWallet(newWallets)
+    //   if (newWallet && newWallet.chainId === chainId) {
+    //     source$.unsubscribe()
+    //     resolve(newWallet)
+    //   }
+    // })
 
     // Switch chain for all other wallets
-    currentWallet.provider
+    wallet.provider
       .request({
         method: 'wallet_switchEthereumChain',
         params: [{ chainId: toQuantity(parseInt(chainId)) }],
       })
       .catch(() => {
-        source$.unsubscribe()
-        resolve(currentWallet)
+        resolve(wallet)
       })
   })
 }
 
-export const assertWalletChain = async (onboard: OnboardAPI, chainId: string): Promise<ConnectedWallet> => {
-  const wallet = getConnectedWallet(onboard.state.get().wallets)
-
+export const assertWalletChain = async (wallet: ConnectedWallet, chainId: string): Promise<ConnectedWallet> => {
   if (!wallet) {
     throw new Error('No wallet connected.')
   }
 
-  const newWallet = await switchWalletChain(onboard, chainId)
+  const newWallet = await switchWalletChain(wallet, chainId)
 
   if (!newWallet) {
     throw new Error('No wallet connected.')
@@ -86,10 +82,10 @@ export const assertWalletChain = async (onboard: OnboardAPI, chainId: string): P
 }
 
 export const getAssertedChainSigner = async (
-  onboard: OnboardAPI,
+  _wallet: ConnectedWallet,
   chainId: SafeInfo['chainId'],
 ): Promise<JsonRpcSigner> => {
-  const wallet = await assertWalletChain(onboard, chainId)
+  const wallet = await assertWalletChain(_wallet, chainId)
   const provider = createWeb3(wallet.provider)
   return provider.getSigner()
 }
@@ -100,8 +96,8 @@ export const getAssertedChainSigner = async (
  * most of the values of transactionResponse which is needed when
  * dealing with smart-contract wallet owners
  */
-export const getUncheckedSafeSDK = async (onboard: OnboardAPI, chainId: SafeInfo['chainId']): Promise<Safe> => {
-  const signer = await getAssertedChainSigner(onboard, chainId)
+export const getUncheckedSafeSDK = async (_wallet: ConnectedWallet, chainId: SafeInfo['chainId']): Promise<Safe> => {
+  const signer = await getAssertedChainSigner(_wallet, chainId)
   const uncheckedJsonRpcSigner = new UncheckedJsonRpcSigner(signer.provider, await signer.getAddress())
   const sdk = getAndValidateSafeSDK()
 

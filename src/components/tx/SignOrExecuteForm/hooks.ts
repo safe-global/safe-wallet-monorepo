@@ -97,7 +97,6 @@ export const useTxActions = (): TxActions => {
     const executeTx: TxActions['executeTx'] = async (txOptions, safeTx, txId, origin, isRelayed) => {
       assertTx(safeTx)
       assertWallet(wallet)
-      assertOnboard(onboard)
 
       let tx: TransactionDetails | undefined
       // Relayed transactions must be fully signed, so request a final signature if needed
@@ -122,7 +121,8 @@ export const useTxActions = (): TxActions => {
       if (isRelayed) {
         await dispatchTxRelay(safeTx, safe, txId, txOptions.gasLimit)
       } else {
-        await dispatchTxExecution(safeTx, txOptions, txId, onboard, chainId, safeAddress)
+        console.debug('here2')
+        await dispatchTxExecution(safeTx, txOptions, txId, wallet, chainId, safeAddress)
       }
 
       return txId
