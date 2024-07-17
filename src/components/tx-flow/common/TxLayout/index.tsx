@@ -34,7 +34,7 @@ const TxLayoutHeader = ({
       <Box display="flex" alignItems="center">
         {icon && (
           <div className={css.icon}>
-            <SvgIcon component={icon} inheritViewBox />
+            <SvgIcon fontSize='inherit' component={icon} inheritViewBox />
           </div>
         )}
 

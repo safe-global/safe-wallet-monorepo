@@ -28,9 +28,9 @@ export const AutocompleteItem = (item: { tokenInfo: TokenInfo; balance: string }
         {item.tokenInfo.name}
       </Typography>
 
-      <Typography variant="caption" component="p">
+      {/* <Typography variant="caption" component="p">
         {formatVisualAmount(item.balance, item.tokenInfo.decimals)} {item.tokenInfo.symbol}
-      </Typography>
+      </Typography> */}
     </Grid>
   </Grid>
 )
@@ -65,8 +65,8 @@ export const CreateTokenTransfer = ({
       [TokenTransferFields.type]: disableSpendingLimit
         ? TokenTransferType.multiSig
         : isOnlySpendingLimitBeneficiary
-        ? TokenTransferType.spendingLimit
-        : params.type,
+          ? TokenTransferType.spendingLimit
+          : params.type,
       [TokenTransferFields.tokenAddress]: isOnlySpendingLimitBeneficiary
         ? balancesItems[0]?.tokenInfo.address
         : params.tokenAddress,

@@ -19,8 +19,7 @@
 }
 
 .inputs {
-  display: inline-flex;
-  align-items: center;
+  display: flex;
 }
 
 .amount {
@@ -33,25 +32,24 @@
 }
 
 .max {
-  text-transform: uppercase;
-  background-color: var(--color-background-main);
-  color: var(--color-text-primary);
-  font-size: 12px;
-  margin-right: var(--space-1);
-  min-height: 50px;
-  padding: var(--space-2);
+  text-decoration: underline;
+  cursor: pointer;
 }
 
 .select {
-  flex-shrink: 0;
+  padding-top: 0;
+  padding-bottom: 0;
 }
 
 .select :global(.MuiSelect-select) {
-  margin: var(--space-1);
+  margin: 0 var(--space-1);
   display: flex;
-  background-color: var(--color-background-main);
+  height: 100%;
+
+  background-color: var(--color-static-main);
+  color: white;
   border-radius: 6px;
-  padding: var(--space-1) var(--space-5) var(--space-1) var(--space-2) !important;
+  padding: 0 var(--space-1) !important;
 }
 
 .select :global(.MuiSelect-icon) {

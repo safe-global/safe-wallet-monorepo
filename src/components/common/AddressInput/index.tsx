@@ -121,7 +121,7 @@ const AddressInput = ({
         className={inputCss.input}
         autoComplete="off"
         autoFocus={props.focused}
-        label={<>{error?.message || props.label || `Recipient address${isDomainLookupEnabled ? ' or ENS' : ''}`}</>}
+        label={<>{error?.message || props.label || `Recipient address`}</>}
         error={!!error}
         fullWidth
         onClick={addressBook[watchedValue] ? () => setValue(name, '') : undefined}

@@ -2,7 +2,7 @@ import TxLayout from '@/components/tx-flow/common/TxLayout'
 import useTxStepper from '../../useTxStepper'
 import CreateTokenTransfer from './CreateTokenTransfer'
 import ReviewTokenTx from '@/components/tx-flow/flows/TokenTransfer/ReviewTokenTx'
-import AssetsIcon from '@/public/images/sidebar/assets.svg'
+import Send from '@/public/images/common/send.svg'
 import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
 import { TokenAmountFields } from '@/components/common/TokenAmountInput'
 
@@ -57,7 +57,7 @@ const TokenTransferFlow = ({ txNonce, ...params }: TokenTransferFlowProps) => {
     <TxLayout
       title={step === 0 ? 'New transaction' : 'Confirm transaction'}
       subtitle="Send tokens"
-      icon={AssetsIcon}
+      icon={Send}
       step={step}
       onBack={prevStep}
     >
