@@ -50,17 +50,17 @@ export const CF_TX_GROUP_KEY = 'cf-tx'
 export const dispatchTxExecutionAndDeploySafe = async (
   safeTx: SafeTransaction,
   txOptions: TransactionOptions,
-  onboard: OnboardAPI,
+  _wallet: ConnectedWallet,
   chainId: SafeInfo['chainId'],
 ) => {
-  const sdkUnchecked = await getUncheckedSafeSDK(onboard, chainId)
+  const sdkUnchecked = await getUncheckedSafeSDK(_wallet, chainId)
   const eventParams = { groupKey: CF_TX_GROUP_KEY }
 
   let result: ContractTransactionResponse | undefined
   try {
     const signedTx = await tryOffChainTxSigning(safeTx, await sdkUnchecked.getContractVersion(), sdkUnchecked)
 
-    const wallet = await assertWalletChain(onboard, chainId)
+    const wallet = await assertWalletChain(_wallet, chainId)
     const provider = createWeb3(wallet.provider)
     const signer = await provider.getSigner()
 
@@ -92,7 +92,7 @@ export const deploySafeAndExecuteTx = async (
   assertWallet(wallet)
   assertOnboard(onboard)
 
-  return dispatchTxExecutionAndDeploySafe(safeTx, txOptions, onboard, chainId)
+  return dispatchTxExecutionAndDeploySafe(safeTx, txOptions, wallet, chainId)
 }
 
 export const { getStore: getNativeBalance, setStore: setNativeBalance } = new ExternalStore<bigint>(0n)

@@ -37,6 +37,7 @@ import { isWalletRejection } from '@/utils/wallets'
 import WalletRejectionError from '@/components/tx/SignOrExecuteForm/WalletRejectionError'
 import { LATEST_SAFE_VERSION } from '@/config/constants'
 import useUserNonce from '@/components/tx/AdvancedParams/useUserNonce'
+import useWallet from '@/hooks/wallets/useWallet'
 
 export const ReviewBatch = ({ params }: { params: ExecuteBatchFlowProps }) => {
   const [isSubmittable, setIsSubmittable] = useState<boolean>(true)
@@ -60,6 +61,7 @@ export const ReviewBatch = ({ params }: { params: ExecuteBatchFlowProps }) => {
   const canRelay = hasRemainingRelays(relays)
   const willRelay = canRelay && executionMethod === ExecutionMethod.RELAY
   const onboard = useOnboard()
+  const wallet = useWallet()
 
   const [txsWithDetails, error, loading] = useAsync<TransactionDetails[]>(() => {
     if (!chain?.chainId) return
@@ -87,7 +89,7 @@ export const ReviewBatch = ({ params }: { params: ExecuteBatchFlowProps }) => {
   }, [txsWithDetails, multiSendTxs])
 
   const onExecute = async () => {
-    if (!userNonce || !onboard || !multiSendTxData || !multiSendContract || !txsWithDetails || !gasPrice) return
+    if (!userNonce || !wallet || !multiSendTxData || !multiSendContract || !txsWithDetails || !gasPrice) return
 
     const overrides: Overrides = isEIP1559
       ? { maxFeePerGas: maxFeePerGas?.toString(), maxPriorityFeePerGas: maxPriorityFeePerGas?.toString() }
@@ -99,7 +101,7 @@ export const ReviewBatch = ({ params }: { params: ExecuteBatchFlowProps }) => {
       txsWithDetails,
       multiSendContract,
       multiSendTxData,
-      onboard,
+      wallet,
       safe.chainId,
       safe.address.value,
       overrides as Overrides & { nonce: number },

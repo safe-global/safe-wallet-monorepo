@@ -26,6 +26,7 @@ import { TxModalContext } from '@/components/tx-flow'
 import { type SubmitCallback } from '@/components/tx/SignOrExecuteForm'
 import { TX_EVENTS, TX_TYPES } from '@/services/analytics/events/transactions'
 import { isWalletRejection } from '@/utils/wallets'
+import useWallet from '@/hooks/wallets/useWallet'
 
 export type SpendingLimitTxParams = {
   safeAddress: string
@@ -51,6 +52,7 @@ const ReviewSpendingLimitTx = ({
   const { setTxFlow } = useContext(TxModalContext)
   const currentChain = useCurrentChain()
   const onboard = useOnboard()
+  const wallet = useWallet()
   const { safe, safeAddress } = useSafeInfo()
   const { balances } = useBalances()
   const token = balances.items.find((item) => item.tokenInfo.address === params.tokenAddress)
@@ -83,7 +85,7 @@ const ReviewSpendingLimitTx = ({
 
   const handleSubmit = async (e: SyntheticEvent) => {
     e.preventDefault()
-    if (!onboard) return
+    if (!wallet) return
 
     trackEvent(MODALS_EVENTS.USE_SPENDING_LIMIT)
 
@@ -94,7 +96,7 @@ const ReviewSpendingLimitTx = ({
     const txOptions = getTxOptions(advancedParams, currentChain)
 
     try {
-      await dispatchSpendingLimitTxExecution(txParams, txOptions, onboard, safe.chainId, safeAddress)
+      await dispatchSpendingLimitTxExecution(txParams, txOptions, wallet, safe.chainId, safeAddress)
       onSubmit('', true)
       setTxFlow(undefined)
     } catch (_err) {

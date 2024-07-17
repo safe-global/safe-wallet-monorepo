@@ -29,6 +29,7 @@ import { isEIP712TypedData } from '@/utils/safe-messages'
 import ApprovalEditor from '@/components/tx/ApprovalEditor'
 import { ErrorBoundary } from '@sentry/react'
 import useAsync from '@/hooks/useAsync'
+import useWallet from '@/hooks/wallets/useWallet'
 
 export type SignMessageOnChainProps = {
   app?: SafeAppData
@@ -41,6 +42,7 @@ const ReviewSignMessageOnChain = ({ message, method, requestId }: SignMessageOnC
   const chainId = useChainId()
   const { safe } = useSafeInfo()
   const onboard = useOnboard()
+  const wallet = useWallet()
   const { safeTx, setSafeTx, setSafeTxError } = useContext(SafeTxContext)
   useHighlightHiddenTab()
 
@@ -108,10 +110,10 @@ const ReviewSignMessageOnChain = ({ message, method, requestId }: SignMessageOnC
   ])
 
   const handleSubmit = async () => {
-    if (!safeTx || !onboard) return
+    if (!safeTx || !wallet) return
 
     try {
-      await dispatchSafeAppsTx(safeTx, requestId, onboard, safe.chainId)
+      await dispatchSafeAppsTx(safeTx, requestId, wallet, safe.chainId)
     } catch (error) {
       setSafeTxError(asError(error))
     }

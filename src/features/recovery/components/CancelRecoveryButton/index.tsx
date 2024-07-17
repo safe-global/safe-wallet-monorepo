@@ -16,6 +16,7 @@ import { asError } from '@/services/exceptions/utils'
 import { useRecoveryTxState } from '@/features/recovery/hooks/useRecoveryTxState'
 import { RecoveryListItemContext } from '../RecoveryListItem/RecoveryListItemContext'
 import type { RecoveryQueueItem } from '@/features/recovery/services/recovery-state'
+import useWallet from '@/hooks/wallets/useWallet'
 
 export function CancelRecoveryButton({
   recovery,
@@ -29,6 +30,7 @@ export function CancelRecoveryButton({
   const { isExpired, isPending } = useRecoveryTxState(recovery)
   const { setTxFlow } = useContext(TxModalContext)
   const onboard = useOnboard()
+  const wallet = useWallet()
   const { safe } = useSafeInfo()
 
   const onClick = async (e: SyntheticEvent) => {
@@ -38,10 +40,10 @@ export function CancelRecoveryButton({
     trackEvent(RECOVERY_EVENTS.CANCEL_RECOVERY)
     if (isOwner) {
       setTxFlow(<CancelRecoveryFlow recovery={recovery} />)
-    } else if (onboard) {
+    } else if (wallet) {
       try {
         await dispatchRecoverySkipExpired({
-          onboard,
+          _wallet: wallet,
           chainId: safe.chainId,
           delayModifierAddress: recovery.address,
           recoveryTxHash: recovery.args.txHash,

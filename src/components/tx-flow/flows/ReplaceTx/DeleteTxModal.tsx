@@ -27,17 +27,18 @@ import { txDispatch, TxEvent } from '@/services/tx/txEvents'
 import { REJECT_TX_EVENTS } from '@/services/analytics/events/reject-tx'
 import { trackEvent } from '@/services/analytics'
 import { isWalletRejection } from '@/utils/wallets'
+import useWallet from '@/hooks/wallets/useWallet'
 
 type DeleteTxModalProps = {
   safeTxHash: string
   onClose: () => void
   onSuccess: () => void
-  onboard: ReturnType<typeof useOnboard>
+  wallet: ReturnType<typeof useWallet>
   chainId: ReturnType<typeof useChainId>
   safeAddress: ReturnType<typeof useSafeAddress>
 }
 
-const _DeleteTxModal = ({ safeTxHash, onSuccess, onClose, onboard, safeAddress, chainId }: DeleteTxModalProps) => {
+const _DeleteTxModal = ({ safeTxHash, onSuccess, onClose, wallet, safeAddress, chainId }: DeleteTxModalProps) => {
   const [error, setError] = useState<Error>()
   const [isLoading, setIsLoading] = useState<boolean>(false)
 
@@ -46,7 +47,7 @@ const _DeleteTxModal = ({ safeTxHash, onSuccess, onClose, onboard, safeAddress, 
     setIsLoading(true)
     trackEvent(REJECT_TX_EVENTS.DELETE_CONFIRM)
 
-    if (!onboard || !safeAddress || !chainId || !safeTxHash) {
+    if (!wallet || !safeAddress || !chainId || !safeTxHash) {
       setIsLoading(false)
       setError(new Error('Please connect your wallet first'))
       trackEvent(REJECT_TX_EVENTS.DELETE_FAIL)
@@ -54,7 +55,7 @@ const _DeleteTxModal = ({ safeTxHash, onSuccess, onClose, onboard, safeAddress, 
     }
 
     try {
-      const signer = await getAssertedChainSigner(onboard, chainId)
+      const signer = await getAssertedChainSigner(wallet, chainId)
 
       await deleteTx({
         safeTxHash,
@@ -145,7 +146,7 @@ const _DeleteTxModal = ({ safeTxHash, onSuccess, onClose, onboard, safeAddress, 
 }
 
 const DeleteTxModal = madProps(_DeleteTxModal, {
-  onboard: useOnboard,
+  wallet: useWallet,
   chainId: useChainId,
   safeAddress: useSafeAddress,
 })

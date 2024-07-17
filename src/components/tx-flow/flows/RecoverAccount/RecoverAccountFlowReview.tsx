@@ -70,7 +70,7 @@ export function RecoverAccountFlowReview({ params }: { params: RecoverAccountFlo
 
   // On modal submit
   const onSubmit = async () => {
-    if (!recovery || !onboard || !safeTx) {
+    if (!recovery || !wallet || !safeTx) {
       return
     }
 
@@ -80,7 +80,7 @@ export function RecoverAccountFlowReview({ params }: { params: RecoverAccountFlo
 
     try {
       await dispatchRecoveryProposal({
-        onboard,
+        _wallet: wallet,
         safe,
         safeTx,
         delayModifierAddress: recovery.address,

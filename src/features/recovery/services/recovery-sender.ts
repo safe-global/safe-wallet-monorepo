@@ -12,18 +12,19 @@ import { asError } from '@/services/exceptions/utils'
 import { assertWalletChain } from '../../../services/tx/tx-sender/sdk'
 import { isSmartContractWallet } from '@/utils/wallets'
 import { UncheckedJsonRpcSigner } from '@/utils/providers/UncheckedJsonRpcSigner'
+import { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 
 async function getDelayModifierContract({
-  onboard,
+  _wallet,
   chainId,
   delayModifierAddress,
 }: {
-  onboard: OnboardAPI
+  _wallet: ConnectedWallet
   chainId: string
   delayModifierAddress: string
 }) {
   // Switch signer to chain of Safe
-  const wallet = await assertWalletChain(onboard, chainId)
+  const wallet = await assertWalletChain(_wallet, chainId)
 
   const provider = createWeb3(wallet.provider)
   const isSmartContract = await isSmartContractWallet(wallet.chainId, wallet.address)
@@ -80,18 +81,18 @@ function waitForRecoveryTx({
 }
 
 export async function dispatchRecoveryProposal({
-  onboard,
+  _wallet,
   safe,
   safeTx,
   delayModifierAddress,
 }: {
-  onboard: OnboardAPI
+  _wallet: ConnectedWallet
   safe: SafeInfo
   safeTx: SafeTransaction
   delayModifierAddress: string
 }) {
   const { delayModifier, isUnchecked } = await getDelayModifierContract({
-    onboard,
+    _wallet,
     chainId: safe.chainId,
     delayModifierAddress,
   })
@@ -143,18 +144,18 @@ export async function dispatchRecoveryProposal({
 }
 
 export async function dispatchRecoveryExecution({
-  onboard,
+  _wallet,
   chainId,
   args,
   delayModifierAddress,
 }: {
-  onboard: OnboardAPI
+  _wallet: ConnectedWallet
   chainId: string
   args: TransactionAddedEvent.Log['args']
   delayModifierAddress: string
 }) {
   const { delayModifier, isUnchecked } = await getDelayModifierContract({
-    onboard,
+    _wallet,
     chainId,
     delayModifierAddress,
   })
@@ -192,18 +193,18 @@ export async function dispatchRecoveryExecution({
 }
 
 export async function dispatchRecoverySkipExpired({
-  onboard,
+  _wallet,
   chainId,
   delayModifierAddress,
   recoveryTxHash,
 }: {
-  onboard: OnboardAPI
+  _wallet: ConnectedWallet
   chainId: string
   delayModifierAddress: string
   recoveryTxHash: string
 }) {
   const { delayModifier, isUnchecked } = await getDelayModifierContract({
-    onboard,
+    _wallet,
     chainId,
     delayModifierAddress,
   })

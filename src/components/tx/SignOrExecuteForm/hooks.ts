@@ -70,7 +70,7 @@ export const useTxActions = (): TxActions => {
       if (await isSmartContractWallet(wallet.chainId, wallet.address)) {
         throw new Error('Cannot relay an unsigned transaction from a smart contract wallet')
       }
-      return await dispatchTxSigning(safeTx, version, onboard, chainId, txId)
+      return await dispatchTxSigning(safeTx, version, wallet, chainId, txId)
     }
 
     const signTx: TxActions['signTx'] = async (safeTx, txId, origin) => {
@@ -84,12 +84,12 @@ export const useTxActions = (): TxActions => {
         // Otherwise the backend won't pick up the tx
         // The signature will be added once the on-chain signature is indexed
         const id = txId || (await proposeTx(wallet.address, safeTx, txId, origin)).txId
-        await dispatchOnChainSigning(safeTx, id, onboard, chainId)
+        await dispatchOnChainSigning(safeTx, id, wallet, chainId)
         return id
       }
 
       // Otherwise, sign off-chain
-      const signedTx = await dispatchTxSigning(safeTx, version, onboard, chainId, txId)
+      const signedTx = await dispatchTxSigning(safeTx, version, wallet, chainId, txId)
       const tx = await proposeTx(wallet.address, signedTx, txId, origin)
       return tx.txId
     }

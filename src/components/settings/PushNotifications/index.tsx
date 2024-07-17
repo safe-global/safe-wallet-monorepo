@@ -32,11 +32,13 @@ import { assertWalletChain } from '@/services/tx/tx-sender/sdk'
 import ExternalLink from '@/components/common/ExternalLink'
 
 import css from './styles.module.css'
+import useWallet from '@/hooks/wallets/useWallet'
 
 export const PushNotifications = (): ReactElement => {
   const { safe, safeLoaded } = useSafeInfo()
   const isOwner = useIsSafeOwner()
   const isMac = useIsMac()
+  const wallet = useWallet()
   const [isRegistering, setIsRegistering] = useState(false)
   const [isUpdatingIndexedDb, setIsUpdatingIndexedDb] = useState(false)
   const onboard = useOnboard()
@@ -58,14 +60,14 @@ export const PushNotifications = (): ReactElement => {
   const shouldShowMacHelper = isMac || IS_DEV
 
   const handleOnChange = async () => {
-    if (!onboard) {
+    if (!wallet) {
       return
     }
 
     setIsRegistering(true)
 
     try {
-      await assertWalletChain(onboard, safe.chainId)
+      await assertWalletChain(wallet, safe.chainId)
     } catch {
       return
     }

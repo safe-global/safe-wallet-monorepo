@@ -15,6 +15,7 @@ import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { getInteractionTitle, isTxValid } from '@/components/safe-apps/utils'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import { asError } from '@/services/exceptions/utils'
+import useWallet from '@/hooks/wallets/useWallet'
 
 type ReviewSafeAppsTxProps = {
   safeAppsTx: SafeAppsTxParams
@@ -27,6 +28,7 @@ const ReviewSafeAppsTx = ({
 }: ReviewSafeAppsTxProps): ReactElement => {
   const { safe } = useSafeInfo()
   const onboard = useOnboard()
+  const wallet = useWallet()
   const chain = useCurrentChain()
   const { safeTx, setSafeTx, safeTxError, setSafeTxError } = useContext(SafeTxContext)
 
@@ -50,12 +52,12 @@ const ReviewSafeAppsTx = ({
   }, [txs, setSafeTx, setSafeTxError, params])
 
   const handleSubmit = async (txId: string) => {
-    if (!safeTx || !onboard) return
+    if (!safeTx || !wallet) return
     trackSafeAppTxCount(Number(appId))
 
     let safeTxHash = ''
     try {
-      safeTxHash = await dispatchSafeAppsTx(safeTx, requestId, onboard, safe.chainId, txId)
+      safeTxHash = await dispatchSafeAppsTx(safeTx, requestId, wallet, safe.chainId, txId)
     } catch (error) {
       setSafeTxError(asError(error))
     }

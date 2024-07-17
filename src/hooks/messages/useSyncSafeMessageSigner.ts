@@ -11,6 +11,7 @@ import {
 import { useEffect, useCallback, useState } from 'react'
 import useSafeInfo from '../useSafeInfo'
 import useOnboard from '../wallets/useOnboard'
+import useWallet from '../wallets/useWallet'
 
 const HIDE_DELAY = 3000
 
@@ -38,6 +39,7 @@ const useSyncSafeMessageSigner = (
 ) => {
   const [submitError, setSubmitError] = useState<Error | undefined>()
   const onboard = useOnboard()
+  const wallet = useWallet()
   const { safe } = useSafeInfo()
 
   // If the message gets updated in the messageSlice we dispatch it if the signature is complete
@@ -51,7 +53,7 @@ const useSyncSafeMessageSigner = (
 
   const onSign = useCallback(async () => {
     // Error is shown when no wallet is connected, this appeases TypeScript
-    if (!onboard) {
+    if (!wallet) {
       return
     }
 
@@ -60,7 +62,7 @@ const useSyncSafeMessageSigner = (
     try {
       // When collecting the first signature
       if (!message) {
-        await dispatchSafeMsgProposal({ onboard, safe, message: decodedMessage, safeAppId })
+        await dispatchSafeMsgProposal({ wallet, safe, message: decodedMessage, safeAppId })
 
         // Fetch updated message
         const updatedMsg = await fetchSafeMessage(safeMessageHash, safe.chainId)
@@ -71,7 +73,7 @@ const useSyncSafeMessageSigner = (
         }
         return updatedMsg
       } else {
-        await dispatchSafeMsgConfirmation({ onboard, safe, message: decodedMessage })
+        await dispatchSafeMsgConfirmation({ wallet, safe, message: decodedMessage })
 
         // No requestID => we are in the confirm message dialog and do not need to leave the window open
         if (!requestId) {

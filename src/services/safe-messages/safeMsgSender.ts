@@ -7,14 +7,15 @@ import { generateSafeMessageHash, isEIP712TypedData, tryOffChainMsgSigning } fro
 import { normalizeTypedData } from '@/utils/web3'
 import { getAssertedChainSigner } from '@/services/tx/tx-sender/sdk'
 import { asError } from '../exceptions/utils'
+import { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 
 export const dispatchSafeMsgProposal = async ({
-  onboard,
+  wallet,
   safe,
   message,
   safeAppId,
 }: {
-  onboard: OnboardAPI
+  wallet: ConnectedWallet
   safe: SafeInfo
   message: SafeMessage['message']
   safeAppId?: number
@@ -22,7 +23,7 @@ export const dispatchSafeMsgProposal = async ({
   const messageHash = generateSafeMessageHash(safe, message)
 
   try {
-    const signer = await getAssertedChainSigner(onboard, safe.chainId)
+    const signer = await getAssertedChainSigner(wallet, safe.chainId)
     const signature = await tryOffChainMsgSigning(signer, safe, message)
 
     let normalizedMessage = message
@@ -50,18 +51,18 @@ export const dispatchSafeMsgProposal = async ({
 }
 
 export const dispatchSafeMsgConfirmation = async ({
-  onboard,
+  wallet,
   safe,
   message,
 }: {
-  onboard: OnboardAPI
+  wallet: ConnectedWallet
   safe: SafeInfo
   message: SafeMessage['message']
 }): Promise<void> => {
   const messageHash = generateSafeMessageHash(safe, message)
 
   try {
-    const signer = await getAssertedChainSigner(onboard, safe.chainId)
+    const signer = await getAssertedChainSigner(wallet, safe.chainId)
     const signature = await tryOffChainMsgSigning(signer, safe, message)
 
     await confirmSafeMessage(safe.chainId, messageHash, {

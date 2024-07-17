@@ -93,7 +93,7 @@ export const SpeedUpModal = ({
         await dispatchSafeTxSpeedUp(
           txOptions as Omit<TransactionOptions, 'nonce'> & { nonce: number },
           txId,
-          onboard,
+          wallet,
           chainInfo.chainId,
           safeAddress,
         )
@@ -105,7 +105,7 @@ export const SpeedUpModal = ({
           txId,
           pendingTx.to,
           pendingTx.data,
-          onboard,
+          wallet,
           chainInfo?.chainId,
           safeAddress,
         )

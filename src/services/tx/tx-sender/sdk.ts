@@ -14,7 +14,7 @@ import { connectWallet, getConnectedWallet } from '@/hooks/wallets/useOnboard'
 import { type OnboardAPI } from '@web3-onboard/core'
 import { asError } from '@/services/exceptions/utils'
 import { UncheckedJsonRpcSigner } from '@/utils/providers/UncheckedJsonRpcSigner'
-import { ConnectedWallet } from '@privy-io/react-auth'
+import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 
 export const getAndValidateSafeSDK = (): Safe => {
   const safeSDK = getSafeSDK()
@@ -109,8 +109,8 @@ export const getUncheckedSafeSDK = async (_wallet: ConnectedWallet, chainId: Saf
   return sdk.connect({ ethAdapter })
 }
 
-export const getSafeSDKWithSigner = async (onboard: OnboardAPI, chainId: SafeInfo['chainId']): Promise<Safe> => {
-  const signer = await getAssertedChainSigner(onboard, chainId)
+export const getSafeSDKWithSigner = async (wallet: ConnectedWallet, chainId: SafeInfo['chainId']): Promise<Safe> => {
+  const signer = await getAssertedChainSigner(wallet, chainId)
   const sdk = getAndValidateSafeSDK()
 
   const ethAdapter = new EthersAdapter({

@@ -11,6 +11,7 @@ import { Errors, trackError } from '@/services/exceptions'
 import { asError } from '@/services/exceptions/utils'
 import { RecoveryListItemContext } from '../RecoveryListItem/RecoveryListItemContext'
 import type { RecoveryQueueItem } from '@/features/recovery/services/recovery-state'
+import useWallet from '@/hooks/wallets/useWallet'
 
 export function ExecuteRecoveryButton({
   recovery,
@@ -23,18 +24,18 @@ export function ExecuteRecoveryButton({
   const { isExecutable, isNext, isPending } = useRecoveryTxState(recovery)
   const onboard = useOnboard()
   const { safe } = useSafeInfo()
-
+  const wallet = useWallet()
   const onClick = async (e: SyntheticEvent) => {
     e.stopPropagation()
     e.preventDefault()
 
-    if (!onboard) {
+    if (!wallet) {
       return
     }
 
     try {
       await dispatchRecoveryExecution({
-        onboard,
+        _wallet: wallet,
         chainId: safe.chainId,
         args: recovery.args,
         delayModifierAddress: recovery.address,
