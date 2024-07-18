@@ -1,5 +1,5 @@
 import { type SyntheticEvent } from 'react'
-import { Button, DialogActions, FormControl, Grid, Typography, DialogContent } from '@mui/material'
+import { Button, DialogActions, FormControl, Grid, Typography, DialogContent, Box } from '@mui/material'
 import { FormProvider, useForm } from 'react-hook-form'
 import { safeFormatUnits, safeParseUnits } from '@/utils/formatters'
 import { FLOAT_REGEX } from '@/utils/validation'
@@ -67,84 +67,93 @@ const AdvancedParamsForm = ({ params, ...props }: AdvancedParamsFormProps) => {
   }
 
   return (
-    <ModalDialog open dialogTitle="Advanced parameters" hideChainIndicator>
+    <ModalDialog open dialogTitle={
+      <Typography padding={2} fontSize={24} fontWeight={700}>
+        Advanced parameters
+      </Typography >
+    }
+      hideChainIndicator>
       <FormProvider {...formMethods}>
         <form onSubmit={onFormSubmit}>
-          <DialogContent>
-            <Grid container spacing={2}>
-              <Grid item xs={12}>
-                <Typography variant="body1" fontWeight={700}>
-                  Execution parameters
-                </Typography>
-              </Grid>
+          <DialogContent >
+            <Box padding={2} paddingBottom={0}>
 
-              {/* User nonce */}
-              <Grid item xs={6}>
-                <FormControl fullWidth>
-                  <NumberField
-                    disabled={props.willRelay}
-                    label={errors.userNonce?.message || 'Wallet nonce'}
-                    error={!!errors.userNonce}
-                    {...register(AdvancedField.userNonce)}
-                  />
-                </FormControl>
-              </Grid>
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  <Typography variant="body1" fontWeight={700}>
+                    Execution parameters
+                  </Typography>
+                </Grid>
 
-              {/* Gas limit */}
-              <Grid item xs={6}>
-                <GasLimitInput recommendedGasLimit={props.recommendedGasLimit?.toString()} />
-              </Grid>
-
-              {/* Gas price */}
-              {props.isEIP1559 && (
+                {/* User nonce */}
                 <Grid item xs={6}>
                   <FormControl fullWidth>
                     <NumberField
                       disabled={props.willRelay}
-                      label={errors.maxPriorityFeePerGas?.message || 'Max priority fee (Gwei)'}
-                      error={!!errors.maxPriorityFeePerGas}
-                      required
-                      {...register(AdvancedField.maxPriorityFeePerGas, {
-                        required: true,
-                        pattern: FLOAT_REGEX,
-                        min: 0,
-                      })}
+                      label={errors.userNonce?.message || 'Wallet nonce'}
+                      error={!!errors.userNonce}
+                      {...register(AdvancedField.userNonce)}
                     />
                   </FormControl>
                 </Grid>
-              )}
 
-              <Grid item xs={6}>
-                <FormControl fullWidth>
-                  <NumberField
-                    disabled={props.willRelay}
-                    label={errors.maxFeePerGas?.message || props.isEIP1559 ? 'Max fee (Gwei)' : 'Gas price (Gwei)'}
-                    error={!!errors.maxFeePerGas}
-                    required
-                    {...register(AdvancedField.maxFeePerGas, { required: true, pattern: FLOAT_REGEX, min: 0 })}
-                  />
-                </FormControl>
+                {/* Gas limit */}
+                <Grid item xs={6}>
+                  <GasLimitInput recommendedGasLimit={props.recommendedGasLimit?.toString()} />
+                </Grid>
+
+                {/* Gas price */}
+                {props.isEIP1559 && (
+                  <Grid item xs={6}>
+                    <FormControl fullWidth>
+                      <NumberField
+                        disabled={props.willRelay}
+                        label={errors.maxPriorityFeePerGas?.message || 'Max priority fee (Gwei)'}
+                        error={!!errors.maxPriorityFeePerGas}
+                        required
+                        {...register(AdvancedField.maxPriorityFeePerGas, {
+                          required: true,
+                          pattern: FLOAT_REGEX,
+                          min: 0,
+                        })}
+                      />
+                    </FormControl>
+                  </Grid>
+                )}
+
+                <Grid item xs={6}>
+                  <FormControl fullWidth>
+                    <NumberField
+                      disabled={props.willRelay}
+                      label={errors.maxFeePerGas?.message || props.isEIP1559 ? 'Max fee (Gwei)' : 'Gas price (Gwei)'}
+                      error={!!errors.maxFeePerGas}
+                      required
+                      {...register(AdvancedField.maxFeePerGas, { required: true, pattern: FLOAT_REGEX, min: 0 })}
+                    />
+                  </FormControl>
+                </Grid>
               </Grid>
-            </Grid>
 
-            {/* Help link */}
-            <Typography mt={2}>
-              <ExternalLink href={HelpCenterArticle.ADVANCED_PARAMS}>
-                How can I configure these parameters manually?
-              </ExternalLink>
-            </Typography>
+              {/* Help link */}
+              <Typography mt={2}>
+                <ExternalLink href={HelpCenterArticle.ADVANCED_PARAMS}>
+                  How can I configure these parameters manually?
+                </ExternalLink>
+              </Typography>
+            </Box>
+
           </DialogContent>
 
           {/* Buttons */}
-          <DialogActions>
-            <Button color="inherit" onClick={onBack}>
+          <Box display='flex' gap={2} width='100%' padding={4} paddingTop={0}>
+            <Button fullWidth variant='contained' onClick={onBack}>
               Back
             </Button>
 
-            <Button variant="contained" type="submit">
+            <Button fullWidth color='secondary' variant="contained" type="submit">
               Confirm
             </Button>
-          </DialogActions>
+          </Box>
         </form>
       </FormProvider>
     </ModalDialog>

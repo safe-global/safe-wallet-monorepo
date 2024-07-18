@@ -13,7 +13,7 @@ const lightPalette = {
     dark: '#FF0420',
     main: '#FF0420',
     light: '#FF0420',
-    background: '#EFFFF4',
+    background: '#ECF0F7',
   },
   border: {
     main: '#A1A3A7',
@@ -48,7 +48,7 @@ const lightPalette = {
     default: '#F4F4F4',
     main: '#F4F4F4',
     paper: '#FFFFFF',
-    light: '#EFFFF4',
+    light: '#ECF0F7',
   },
   backdrop: {
     main: '#636669',

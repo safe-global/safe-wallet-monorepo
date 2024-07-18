@@ -70,7 +70,7 @@ export const ExecuteForm = ({
   const [walletCanRelay] = useWalletCanRelay(safeTx)
 
   // The transaction can/will be relayed
-  const canRelay = walletCanRelay && hasRemainingRelays(relays[0])
+  const canRelay = false
   const willRelay = canRelay && executionMethod === ExecutionMethod.RELAY
 
   // Estimate gas limit
@@ -196,6 +196,7 @@ export const ExecuteForm = ({
                 data-testid="execute-form-btn"
                 variant="contained"
                 type="submit"
+                color='secondary'
                 disabled={!isOk || submitDisabled}
                 sx={{ minWidth: '112px' }}
               >

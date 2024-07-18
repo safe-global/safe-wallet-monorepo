@@ -127,7 +127,7 @@ const TxLayout = ({
                       {title}
                     </Typography>
 
-                    <ChainIndicator inline />
+                    {/* <ChainIndicator inline /> */}
                   </div>
 
                   <Paper data-testid="modal-header" className={css.header}>

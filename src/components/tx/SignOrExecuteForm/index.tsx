@@ -129,7 +129,7 @@ export const SignOrExecuteForm = ({
           </ErrorMessage>
         )}
 
-        {canExecute && !props.onlyExecute && !isCounterfactualSafe && <ExecuteCheckbox onChange={setShouldExecute} />}
+        {/* {canExecute && !props.onlyExecute && !isCounterfactualSafe && <ExecuteCheckbox onChange={setShouldExecute} />} */}
 
         <WrongChainWarning />
 
@@ -137,19 +137,22 @@ export const SignOrExecuteForm = ({
 
         <RiskConfirmationError />
 
-        {isCounterfactualSafe ? (
-          <CounterfactualForm {...props} safeTx={safeTx} isCreation={isCreation} onSubmit={onFormSubmit} onlyExecute />
-        ) : willExecute ? (
+        {
+          // isCounterfactualSafe ? (
+          //   <CounterfactualForm {...props} safeTx={safeTx} isCreation={isCreation} onSubmit={onFormSubmit} onlyExecute />
+          // ) : 
+          // willExecute ? (
           <ExecuteForm {...props} safeTx={safeTx} isCreation={isCreation} onSubmit={onFormSubmit} />
-        ) : (
-          <SignForm
-            {...props}
-            safeTx={safeTx}
-            isBatchable={isBatchable}
-            isCreation={isCreation}
-            onSubmit={onFormSubmit}
-          />
-        )}
+          // ) : (
+          //   <SignForm
+          //     {...props}
+          //     safeTx={safeTx}
+          //     isBatchable={isBatchable}
+          //     isCreation={isCreation}
+          //     onSubmit={onFormSubmit}
+          //   />
+          // )
+        }
       </TxCard>
     </>
   )
