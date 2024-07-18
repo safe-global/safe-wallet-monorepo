@@ -1,6 +1,7 @@
 .box {
   width: 80px;
   height: 80px;
+  font-size: 80px;
   margin: auto;
   position: relative;
   filter: url('#gooey');
@@ -121,4 +122,17 @@
   100% {
     transform: translateX(0) translateY(50px) scale(1);
   }
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.spin {
+  animation: spin 2s linear infinite;
 }

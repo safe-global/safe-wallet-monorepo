@@ -1,7 +1,9 @@
-import { Box } from '@mui/material'
+import { Box, SvgIcon } from '@mui/material'
 import css from '@/components/new-safe/create/steps/StatusStep/LoadingSpinner/styles.module.css'
 import classnames from 'classnames'
 import { useCallback, useEffect, useRef } from 'react'
+import SuperChainStar from '@/public/images/common/superchain-star.svg'
+import SuperChainBrokenStart from '@/public/images/common/superchain-star-broken.svg'
 
 const rectTlEndTransform = 'translateX(0) translateY(20px) scaleY(1.1)'
 const rectTrEndTransform = 'translateX(30px) scaleX(2.3)'
@@ -40,28 +42,28 @@ const LoadingSpinner = ({ status }: { status: SpinnerStatus }) => {
   const isError = status === SpinnerStatus.ERROR
   const isSuccess = status === SpinnerStatus.SUCCESS
 
-  const rectTl = useRef<HTMLDivElement>(null)
-  const rectTr = useRef<HTMLDivElement>(null)
-  const rectBl = useRef<HTMLDivElement>(null)
-  const rectBr = useRef<HTMLDivElement>(null)
-  const rectCenter = useRef<HTMLDivElement>(null)
+  // const rectTl = useRef<HTMLDivElement>(null)
+  // const rectTr = useRef<HTMLDivElement>(null)
+  // const rectBl = useRef<HTMLDivElement>(null)
+  // const rectBr = useRef<HTMLDivElement>(null)
+  // const rectCenter = useRef<HTMLDivElement>(null)
 
-  const onFinish = useCallback(() => {
-    moveToEnd(rectTlEndTransform, rectTl.current)
-    moveToEnd(rectTrEndTransform, rectTr.current)
-    moveToEnd(rectBlEndTransform, rectBl.current)
-    moveToEnd(rectBrEndTransform, rectBr.current)
-  }, [rectBl, rectBr, rectTl, rectTr])
+  // const onFinish = useCallback(() => {
+  //   moveToEnd(rectTlEndTransform, rectTl.current)
+  //   moveToEnd(rectTrEndTransform, rectTr.current)
+  //   moveToEnd(rectBlEndTransform, rectBl.current)
+  //   moveToEnd(rectBrEndTransform, rectBr.current)
+  // }, [rectBl, rectBr, rectTl, rectTr])
 
-  useEffect(() => {
-    if (isSuccess) {
-      onFinish()
-    }
-  }, [isSuccess, onFinish])
+  // useEffect(() => {
+  //   if (isSuccess) {
+  //     onFinish()
+  //   }
+  // }, [isSuccess, onFinish])
 
   return (
     <Box className={classnames(css.box, { [css.rectError]: isError }, { [css.rectSuccess]: isSuccess })}>
-      <div className={classnames(css.rect, css.rectTl)} ref={rectTl} />
+      {/* <div className={classnames(css.rect, css.rectTl)} ref={rectTl} />
       <div className={classnames(css.rect, css.rectTr)} ref={rectTr} />
       <div className={classnames(css.rect, css.rectBl)} ref={rectBl} />
       <div className={classnames(css.rect, css.rectBr)} ref={rectBr} />
@@ -75,7 +77,11 @@ const LoadingSpinner = ({ status }: { status: SpinnerStatus }) => {
             <feComposite in="SourceGraphic" in2="goo" operator="atop" />
           </filter>
         </defs>
-      </svg>
+      </svg> */}
+      {isError ? <SvgIcon component={SuperChainBrokenStart} inheritViewBox fontSize="inherit" />
+
+        : <SvgIcon className={css.spin} component={SuperChainStar} inheritViewBox fontSize="inherit" />
+      }
     </Box>
   )
 }

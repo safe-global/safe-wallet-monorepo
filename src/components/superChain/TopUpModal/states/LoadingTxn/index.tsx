@@ -1,6 +1,6 @@
 import { Box, Dialog, Grid, Stack, SvgIcon, Typography } from '@mui/material'
 import React from 'react'
-import SuperChainStart from '@/public/images/common/superchain-star.svg'
+import SuperChainStar from '@/public/images/common/superchain-star.svg'
 import css from './styles.module.css'
 import { getBlockExplorerLink } from '@/utils/chains'
 import { useCurrentChain } from '@/hooks/useChains'
@@ -25,7 +25,7 @@ function LoadingTxn({ open, onClose, hash }: { open: boolean; onClose: () => voi
         <Typography fontSize={24} fontWeight={600}>
           Topping up your account
         </Typography>
-        <SvgIcon className={css.spin} component={SuperChainStart} inheritViewBox fontSize="inherit" />
+        <SvgIcon className={css.spin} component={SuperChainStar} inheritViewBox fontSize="inherit" />
         <Stack direction="row" spacing={1} alignItems="center" justifyContent="center" fontSize={12} color="GrayText">
           <Typography color="GrayText">View on explorer</Typography>
           <ExplorerButton {...blockExplorerLink} icon={LinkIconBold} fontSize="inherit" color="inherit" />
