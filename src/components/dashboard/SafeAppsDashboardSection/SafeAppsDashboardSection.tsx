@@ -30,8 +30,8 @@ const SafeAppsDashboardSection = () => {
         <Grid item xs={12} sm={6} md={4} xl={4}>
           <Paper className={css.safeAppContainer}>
             <Box display="flex" height="100%" justifyContent="center" alignItems="center">
-              <Typography variant="h5" component="h2">
-                Cooming soon!
+              <Typography variant="h5" maxWidth='80%' textAlign='center' component="h2">
+                You can connect to any DApp with wallet connect!
               </Typography>
             </Box>
           </Paper>
@@ -39,8 +39,8 @@ const SafeAppsDashboardSection = () => {
         <Grid item xs={12} sm={6} md={4} xl={4}>
           <Paper className={css.safeAppContainer}>
             <Box display="flex" height="100%" justifyContent="center" alignItems="center">
-              <Typography variant="h5" component="h2">
-                Cooming soon!
+              <Typography variant="h5" maxWidth='80%' textAlign='center' component="h2">
+                You can connect to any DApp with wallet connect!
               </Typography>
             </Box>
           </Paper>
