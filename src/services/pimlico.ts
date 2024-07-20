@@ -33,7 +33,12 @@ export async function getSmartAccountClient(signer: SmartAccountSigner, safeAddr
     chain: sepolia,
     bundlerTransport: http('https://api.pimlico.io/v2/11155111/rpc?apikey=e6fcaa0f-01c7-4f6c-93a6-260e48848daf'),
     middleware: {
-      sponsorUserOperation: paymasterClient.sponsorUserOperation, // optional
+      sponsorUserOperation: async (args) => {
+        return paymasterClient.sponsorUserOperation({
+          ...args,
+          sponsorshipPolicyId: 'sp_lively_mesmero',
+        })
+      },
       gasPrice: async () => (await pimlicoBundlerClient.getUserOperationGasPrice()).fast, // if using pimlico bundler
     },
   })
