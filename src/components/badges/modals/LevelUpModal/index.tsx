@@ -12,7 +12,7 @@ function LevelUpModal({ open, onClose, level }: { open: boolean; onClose: () => 
     <>
       <Dialog
         className={css.claimModal}
-        open={true}
+        open={open}
         onClose={onClose}
         aria-labelledby="modal-modal-title"
         aria-describedby="modal-modal-description"

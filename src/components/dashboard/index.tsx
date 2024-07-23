@@ -11,7 +11,6 @@ import Overview from '@/components/dashboard/Overview/Overview'
 import CreationDialog from '@/components/dashboard/CreationDialog'
 import { useRouter } from 'next/router'
 import { CREATION_MODAL_QUERY_PARAM } from '../new-safe/create/logic'
-import useRecovery from '@/features/recovery/hooks/useRecovery'
 import { useIsRecoverySupported } from '@/features/recovery/hooks/useIsRecoverySupported'
 import Balances from '@/pages/balances'
 import SuperChainEOAS from '../common/SuperChainEOAS'
@@ -19,9 +18,10 @@ import SafeAppsDashboardSection from './SafeAppsDashboardSection/SafeAppsDashboa
 import AddEOAAddedModal from './AddEOAAddedModal'
 import { ADD_OWNER_MODAL_QUERY_PARAM } from '../accept-invite/alert-modal'
 import useWallet from '@/hooks/wallets/useWallet'
+
 import { usePrivy, useWallets } from '@privy-io/react-auth'
+import usePimlico from '@/hooks/usePimlico'
 const RecoveryHeader = dynamic(() => import('@/features/recovery/components/RecoveryHeader'))
-const RecoveryWidget = dynamic(() => import('@/features/recovery/components/RecoveryWidget'))
 
 const Dashboard = (): ReactElement => {
   const router = useRouter()
