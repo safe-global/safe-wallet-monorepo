@@ -8,14 +8,6 @@ enum ENVIRONMENTS {
 }
 
 const ENV = (process.env.NEXT_PUBLIC_APP_ENV as ENVIRONMENTS) || ENVIRONMENTS.development
-
-const requiredEnvVars = ['NEXT_PUBLIC_JSON_RPC_PROVIDER']
-requiredEnvVars.forEach((varName) => {
-  if (!process.env[varName]) {
-    throw new Error(`Missing required environment variable: ${varName}`)
-  }
-})
-
 const environmentConfig = {
   development: {
     SUPER_CHAIN_SETUP_ADDRESS: '0x3b134026f14A697eEEE4623397E9c9DdC1223577',
