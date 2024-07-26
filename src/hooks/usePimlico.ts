@@ -1,12 +1,13 @@
 import { EIP1193Provider, useWallets } from '@privy-io/react-auth'
 import { useEffect, useState } from 'react'
 import { type Address, createWalletClient, custom } from 'viem'
-import { sepolia } from 'viem/chains'
+import { sepolia, optimism } from 'viem/chains'
 import { walletClientToSmartAccountSigner } from 'permissionless'
 import { useAppSelector } from '@/store'
 import { selectSuperChainAccount } from '@/store/superChainAccountSlice'
 import { getSmartAccountClient } from '@/services/pimlico'
 import useWallet from './wallets/useWallet'
+import { CHAIN_ID } from '@/features/superChain/constants'
 
 type SmartAccountClient = ReturnType<typeof getSmartAccountClient> extends Promise<infer U> ? U : never
 
@@ -24,7 +25,7 @@ function usePimlico() {
 
       const privyClient = createWalletClient({
         account: wallet.address as Address,
-        chain: sepolia, // Replace this with the chain used by your application
+        chain: CHAIN_ID === sepolia.id.toString() ? sepolia : optimism, // Replace this with the chain used by your application
         transport: custom(eip1193provider as EIP1193Provider),
       })
 

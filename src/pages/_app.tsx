@@ -47,7 +47,8 @@ import CounterfactualHooks from '@/features/counterfactual/CounterfactualHooks'
 import { PrivyProvider } from '@privy-io/react-auth'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ApolloClient, InMemoryCache, ApolloProvider } from '@apollo/client'
-import { sepolia } from 'viem/chains'
+import { sepolia, optimism } from 'viem/chains'
+import { CHAIN_ID } from '@/features/superChain/constants'
 
 const GATEWAY_URL = IS_PRODUCTION || cgwDebugStorage.get() ? GATEWAY_URL_PRODUCTION : GATEWAY_URL_STAGING
 
@@ -85,7 +86,7 @@ export const AppProviders = ({ children }: { children: ReactNode | ReactNode[] }
   const isDarkMode = useDarkMode()
   const themeMode = isDarkMode ? 'dark' : 'light'
   const client = new ApolloClient({
-    uri: 'https://api.studio.thegraph.com/query/72352/superchainsmartaccount/version/latest',
+    uri: CHAIN_ID === sepolia.id.toString() ? 'https://api.studio.thegraph.com/query/72352/superchainsmartaccount-testnet/version/latest' : 'https://api.studio.thegraph.com/query/72352/superchainsmartaccount/version/latest',
 
     cache: new InMemoryCache(),
   })
@@ -104,7 +105,7 @@ export const AppProviders = ({ children }: { children: ReactNode | ReactNode[] }
             embeddedWallets: {
               createOnLogin: 'users-without-wallets',
             },
-            supportedChains: [sepolia],
+            supportedChains: [CHAIN_ID === sepolia.id.toString() ? sepolia : optimism],
           }}
         >
           <SafeThemeProvider mode={themeMode}>

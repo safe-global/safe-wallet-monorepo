@@ -6,7 +6,8 @@ import TopUp from './states/TopUp'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import useWallet from '@/hooks/wallets/useWallet'
 import { Address, createPublicClient, createWalletClient, custom, http, parseEther } from 'viem'
-import { sepolia } from 'viem/chains'
+import { sepolia, optimism } from 'viem/chains'
+import { CHAIN_ID, JSON_RPC_PROVIDER } from '@/features/superChain/constants'
 
 export enum ModalState {
   TopUp,
@@ -25,12 +26,12 @@ const TopUpModal = ({ open, onClose }: { open: boolean; onClose: () => void }): 
   const handleTopUp = async (value: bigint) => {
     if (!wallet) return
     const walletClient = createWalletClient({
-      chain: sepolia,
+      chain: CHAIN_ID === sepolia.id.toString() ? sepolia : optimism,
       transport: custom(wallet?.provider),
     })
     const publicClient = createPublicClient({
-      chain: sepolia,
-      transport: http('https://rpc.ankr.com/eth_sepolia'),
+      chain: CHAIN_ID === sepolia.id.toString() ? sepolia : optimism,
+      transport: http(JSON_RPC_PROVIDER),
     })
     try {
       setCurrentValue(value)

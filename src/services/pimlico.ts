@@ -1,21 +1,22 @@
+import { CHAIN_ID, JSON_RPC_PROVIDER } from '@/features/superChain/constants'
 import { createSmartAccountClient, ENTRYPOINT_ADDRESS_V07 } from 'permissionless'
 import type { SmartAccountSigner } from 'permissionless/_types/accounts'
 import { signerToSafeSmartAccount } from 'permissionless/accounts'
 import { createPimlicoBundlerClient, createPimlicoPaymasterClient } from 'permissionless/clients/pimlico'
 import { type Address, createPublicClient, http } from 'viem'
-import { sepolia } from 'viem/chains'
+import { sepolia, optimism } from 'viem/chains'
 
 export const publicClient = createPublicClient({
-  transport: http('https://rpc.ankr.com/eth_sepolia'),
+  transport: http(JSON_RPC_PROVIDER),
 })
 
 export const paymasterClient = createPimlicoPaymasterClient({
-  transport: http('https://api.pimlico.io/v2/11155111/rpc?apikey=e6fcaa0f-01c7-4f6c-93a6-260e48848daf'),
+  transport: http(`https://api.pimlico.io/v2/${CHAIN_ID}/rpc?apikey=e6fcaa0f-01c7-4f6c-93a6-260e48848daf`),
   entryPoint: ENTRYPOINT_ADDRESS_V07,
 })
 
 export const pimlicoBundlerClient = createPimlicoBundlerClient({
-  transport: http('https://api.pimlico.io/v2/11155111/rpc?apikey=e6fcaa0f-01c7-4f6c-93a6-260e48848daf'),
+  transport: http(`https://api.pimlico.io/v2/${CHAIN_ID}/rpc?apikey=e6fcaa0f-01c7-4f6c-93a6-260e48848daf`),
   entryPoint: ENTRYPOINT_ADDRESS_V07,
 })
 
@@ -30,8 +31,8 @@ export async function getSmartAccountClient(signer: SmartAccountSigner, safeAddr
   const smartAccountClient = createSmartAccountClient({
     account: safeAccount,
     entryPoint: ENTRYPOINT_ADDRESS_V07,
-    chain: sepolia,
-    bundlerTransport: http('https://api.pimlico.io/v2/11155111/rpc?apikey=e6fcaa0f-01c7-4f6c-93a6-260e48848daf'),
+    chain: CHAIN_ID === sepolia.id.toString() ? sepolia : optimism,
+    bundlerTransport: http(`https://api.pimlico.io/v2/${CHAIN_ID}/rpc?apikey=e6fcaa0f-01c7-4f6c-93a6-260e48848daf`),
     middleware: {
       sponsorUserOperation: async (args) => {
         return paymasterClient.sponsorUserOperation({
