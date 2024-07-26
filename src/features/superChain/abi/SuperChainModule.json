@@ -118,6 +118,57 @@
   },
   {
     "type": "function",
+    "name": "getUserSuperChainAccount",
+    "inputs": [{ "name": "_owner", "type": "address", "internalType": "address" }],
+    "outputs": [
+      {
+        "name": "",
+        "type": "tuple",
+        "internalType": "struct SuperChainModule.Account",
+        "components": [
+          {
+            "name": "smartAccount",
+            "type": "address",
+            "internalType": "address"
+          },
+          {
+            "name": "superChainID",
+            "type": "string",
+            "internalType": "string"
+          },
+          { "name": "points", "type": "uint256", "internalType": "uint256" },
+          { "name": "level", "type": "uint16", "internalType": "uint16" },
+          {
+            "name": "noun",
+            "type": "tuple",
+            "internalType": "struct NounMetadata",
+            "components": [
+              {
+                "name": "background",
+                "type": "uint48",
+                "internalType": "uint48"
+              },
+              { "name": "body", "type": "uint48", "internalType": "uint48" },
+              {
+                "name": "accessory",
+                "type": "uint48",
+                "internalType": "uint48"
+              },
+              { "name": "head", "type": "uint48", "internalType": "uint48" },
+              {
+                "name": "glasses",
+                "type": "uint48",
+                "internalType": "uint48"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
     "name": "hasFirstOwnerYet",
     "inputs": [{ "name": "", "type": "address", "internalType": "address" }],
     "outputs": [{ "name": "", "type": "bool", "internalType": "bool" }],
@@ -163,7 +214,10 @@
   {
     "type": "function",
     "name": "removePopulateRequest",
-    "inputs": [{ "name": "_safe", "type": "address", "internalType": "address" }],
+    "inputs": [
+      { "name": "_safe", "type": "address", "internalType": "address" },
+      { "name": "user", "type": "address", "internalType": "address" }
+    ],
     "outputs": [],
     "stateMutability": "nonpayable"
   },
@@ -249,6 +303,13 @@
     "inputs": [{ "name": "newOwner", "type": "address", "internalType": "address" }],
     "outputs": [],
     "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "userSuperChainAccount",
+    "inputs": [{ "name": "", "type": "address", "internalType": "address" }],
+    "outputs": [{ "name": "", "type": "address", "internalType": "address" }],
+    "stateMutability": "view"
   },
   {
     "type": "event",

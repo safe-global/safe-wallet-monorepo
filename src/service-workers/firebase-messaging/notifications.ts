@@ -21,7 +21,7 @@ const GATEWAY_URL_STAGING = process.env.NEXT_PUBLIC_GATEWAY_URL_STAGING || 'http
 // localStorage cannot be accessed in service workers so we reference the flag from the environment
 const GATEWAY_URL = FIREBASE_IS_PRODUCTION ? GATEWAY_URL_PRODUCTION : GATEWAY_URL_STAGING
 
-setBaseUrl(GATEWAY_URL)
+// setBaseUrl(GATEWAY_URL)
 
 export const shouldShowServiceWorkerPushNotification = async (payload: MessagePayload): Promise<boolean> => {
   if (!isWebhookEvent(payload.data)) {
