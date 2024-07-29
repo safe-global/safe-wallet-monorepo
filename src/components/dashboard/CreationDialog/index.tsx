@@ -1,13 +1,14 @@
 import React, { type ElementType } from 'react'
 import { Box, Button, Dialog, DialogContent, Grid, SvgIcon, Typography } from '@mui/material'
 import { useRouter } from 'next/router'
+import css from './styles.module.css'
 
 import HomeIcon from '@/public/images/sidebar/home.svg'
+
+import AccountIcon from '@/public/images/sidebar/account.svg'
+import BadgesIcon from '@/public/images/sidebar/badges.svg'
+
 import TransactionIcon from '@/public/images/sidebar/transactions.svg'
-import AppsIcon from '@/public/images/sidebar/apps.svg'
-import SettingsIcon from '@/public/images/sidebar/settings.svg'
-import BeamerIcon from '@/public/images/sidebar/whats-new.svg'
-import HelpCenterIcon from '@/public/images/sidebar/help-center.svg'
 import { useRemoteSafeApps } from '@/hooks/safe-apps/useRemoteSafeApps'
 import { useCurrentChain } from '@/hooks/useChains'
 import { CREATION_MODAL_QUERY_PARAM } from '@/components/new-safe/create/logic'
@@ -41,46 +42,42 @@ const CreationDialog = () => {
   }
 
   return (
-    <Dialog open={open}>
-      <DialogContent sx={{ paddingX: 8, paddingTop: 9, paddingBottom: 6 }}>
+    <Dialog className={css.creationModal} open={open}>
+      <DialogContent sx={{ padding: 0 }}>
         <Typography variant="h3" fontWeight="700" mb={1}>
-          Welcome to {'Safe{Wallet}'}!
+          Welcome to Superchain Account!
         </Typography>
         <Typography variant="body2">
-          Congratulations on your first step to truly unlock ownership. Enjoy the experience and discover our app.
+          Congrats on your new account. Here are some of the key feature of the Superchain account:
         </Typography>
 
         <Grid container mt={2} mb={4} spacing={3}>
-          <HintItem Icon={HomeIcon} title="Home" description="Get a status overview of your Safe Account here." />
           <HintItem
-            Icon={TransactionIcon}
-            title="Transactions"
+            Icon={AccountIcon}
+            title="Account"
             description="Review, approve, execute and keep track of asset movement."
           />
           <HintItem
-            Icon={AppsIcon}
-            title="Apps"
-            description={`Over ${remoteSafeApps.length} dApps available for you on ${chain?.chainName}.`}
+            Icon={BadgesIcon}
+            title="Badges"
+            description="Keep track of your progress andd stay up to date on the latest tasks."
           />
           <HintItem
-            Icon={SettingsIcon}
-            title="Settings"
-            description="Want to change your Safe Account setup? Settings is the right place to go."
-          />
-          <HintItem Icon={BeamerIcon} title="What's new" description="Don't miss any future Safe updates." />
-          <HintItem
-            Icon={HelpCenterIcon}
-            title="Help center"
-            description="Have any questions? Check out our collection of articles."
+            Icon={TransactionIcon}
+            title="Transactions"
+            description="Receive, send and manage all your Superchain transactions in one place."
           />
         </Grid>
-
-        <Box display="flex" justifyContent="center">
-          <Button data-testid="dialog-confirm-btn" onClick={onClose} variant="contained" size="stretched">
-            Got it
-          </Button>
-        </Box>
       </DialogContent>
+      <Button
+        className={css.outsideButton}
+        data-testid="dialog-confirm-btn"
+        fullWidth
+        onClick={onClose}
+        variant="contained"
+      >
+        Got it
+      </Button>
     </Dialog>
   )
 }

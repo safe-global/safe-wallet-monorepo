@@ -1,0 +1,16 @@
+.outsideButton {
+  position: absolute;
+  bottom: -60px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 12px 40px 12px 40px;
+  min-width: 240px;
+}
+.creationModal :global .MuiDialog-paper {
+  margin: 0;
+  position: relative;
+  padding: 32px;
+  overflow-y: visible;
+  margin-bottom: 60px;
+  max-width: 480px;
+}
