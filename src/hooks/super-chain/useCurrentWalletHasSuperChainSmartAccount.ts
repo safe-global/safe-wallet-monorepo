@@ -17,7 +17,9 @@ function useCurrentWalletHasSuperChainSmartAccount() {
         if (!wallet.address) {
           return
         }
-        const hasSuperChainSmartAcount = await SuperChainAccountContractReadOnly.superChainAccount(wallet.address)
+        const hasSuperChainSmartAcount = await SuperChainAccountContractReadOnly.getUserSuperChainAccount(
+          wallet.address,
+        )
         if (hasSuperChainSmartAcount.smartAccount !== zeroAddress) {
           setHasSuperChainSmartAccount({
             hasSuperChainSmartAccount: true,

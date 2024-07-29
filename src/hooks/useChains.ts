@@ -5,6 +5,7 @@ import { useAppSelector } from '@/store'
 import { selectChainById, selectChains } from '@/store/chainsSlice'
 import { useChainId } from './useChainId'
 import { type FEATURES, hasFeature } from '@/utils/chains'
+import { CHAIN_ID } from '@/features/superChain/constants'
 
 const useChains = (): { configs: ChainInfo[]; error?: string; loading?: boolean } => {
   const state = useAppSelector(selectChains, isEqual)
@@ -26,7 +27,8 @@ export const useChain = (chainId: string): ChainInfo | undefined => {
 }
 
 export const useCurrentChain = (): ChainInfo | undefined => {
-  const chainId = useChainId()
+  const chainId = CHAIN_ID
+  console.debug('useCurrentChain', chainId)
   const chainInfo = useAppSelector((state) => selectChainById(state, chainId), isEqual)
   return chainInfo
 }

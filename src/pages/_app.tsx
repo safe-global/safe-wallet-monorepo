@@ -55,7 +55,7 @@ const GATEWAY_URL = IS_PRODUCTION || cgwDebugStorage.get() ? GATEWAY_URL_PRODUCT
 const reduxStore = makeStore()
 
 const InitApp = (): null => {
-  setGatewayBaseUrl(GATEWAY_URL)
+  // setGatewayBaseUrl(GATEWAY_URL)
   useHydrateStore(reduxStore)
   useAdjustUrl()
   useGtm()
