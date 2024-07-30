@@ -6,6 +6,8 @@ import BeautyAlert from '@/public/images/common/beauty-alert.svg'
 import { zeroAddress } from 'viem'
 import CopyAddressButton from '@/components/common/CopyAddressButton'
 import ExplorerButton from '@/components/common/ExplorerButton'
+import { useCurrentChain } from '@/hooks/useChains'
+import { getBlockExplorerLink } from '@/utils/chains'
 
 function AcceptInvite({
   modalContext,
@@ -16,6 +18,9 @@ function AcceptInvite({
   onClose: () => void
   handleAcceptInvitation: () => void
 }) {
+  const chain = useCurrentChain()
+  const blockExplorerLink = chain && modalContext.safe ? getBlockExplorerLink(chain, modalContext.safe) : undefined
+
   const stopPropagation = (e: SyntheticEvent) => e.stopPropagation()
   return (
     <Dialog
@@ -44,10 +49,10 @@ function AcceptInvite({
           </Typography>
           <Stack alignItems="center" direction="row">
             <Typography id="modal-modal-description" fontSize={16}>
-              <strong>luuk.superchain</strong>
+              <strong>{modalContext.superChainId}</strong>
             </Typography>
-            <CopyAddressButton address={zeroAddress} />
-            <ExplorerButton onClick={stopPropagation} />
+            <CopyAddressButton address={modalContext.safe ?? zeroAddress} />
+            <ExplorerButton {...blockExplorerLink} onClick={stopPropagation} />
           </Stack>
         </Stack>
 

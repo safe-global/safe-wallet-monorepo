@@ -13,8 +13,10 @@ import { type PendingEOASRequest } from '@/hooks/super-chain/usePendingEOASReque
 function InviteProfile({
   onClick,
   population,
+  onRemove,
 }: {
   onClick: (safe: Address, newOwner: Address, superChainId: string) => void
+  onRemove: (safe: Address, newOwner: Address) => void
   population: PendingEOASRequest['ownerPopulateds'][0]
 }) {
   const stopPropagation = (e: SyntheticEvent) => e.stopPropagation()
@@ -44,7 +46,7 @@ function InviteProfile({
       </Box>
 
       <Box display="flex" gap="8px" flexDirection="row">
-        <IconButton className={css.trashButton}>
+        <IconButton onClick={() => onRemove(population.safe, wallet!.address as Address)} className={css.trashButton}>
           <SvgIcon component={Trash} inheritViewBox />
         </IconButton>
         <Button

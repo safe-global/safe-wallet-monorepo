@@ -24,10 +24,11 @@ const AcceptInvite = () => {
   const wallet = useWallet()
   const [modalContext, setModalContext] = useState<ModalContext>(initialModalContext)
   const [page, setPage] = useState(1)
-  const { data, loading: pendingEOASRequestLoading } = usePendingEOASRequests(
-    (wallet?.address as Address) || zeroAddress,
-    page,
-  )
+  const {
+    data,
+    loading: pendingEOASRequestLoading,
+    refetch,
+  } = usePendingEOASRequests((wallet?.address as Address) || zeroAddress, page)
 
   return (
     <>
@@ -45,6 +46,7 @@ const AcceptInvite = () => {
           </Grid>
           <Grid pt={4} item xs={12}>
             <InvitesCard
+              refetch={refetch}
               setPage={setPage}
               loading={pendingEOASRequestLoading}
               populations={data}

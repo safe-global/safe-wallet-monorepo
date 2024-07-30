@@ -16,18 +16,22 @@ import InviteProfile from '../invite-profile'
 import type { PendingEOASRequest } from '@/hooks/super-chain/usePendingEOASRequests'
 import type { ModalContext } from '..'
 import type { Address } from 'viem'
+import useSuperChainAccount from '@/hooks/super-chain/useSuperChainAccount'
 
 export function InvitesCard({
   setPage,
   setModalContext,
   populations,
   loading,
+  refetch,
 }: {
   setPage: (page: number) => void
   setModalContext: (modalContext: ModalContext) => void
   populations: PendingEOASRequest | undefined
   loading: boolean
+  refetch: () => void
 }) {
+  const { getWriteableSuperChainSmartAccount, publicClient } = useSuperChainAccount()
   const handleOpenModal = (safe: Address, newOwner: Address, superChainId: string) => {
     setModalContext({
       isOpen: true,
@@ -35,6 +39,16 @@ export function InvitesCard({
       newOwner,
       superChainId,
     })
+  }
+  const handleRemovePopulation = async (safe: Address, newOwner: Address) => {
+    const superChainSmartAccountContract = getWriteableSuperChainSmartAccount()
+    try {
+      const hash = await superChainSmartAccountContract?.write.removepopulaterequest([safe, newOwner])
+      await publicClient.waitForTransactionReceipt({ hash: hash! })
+      refetch()
+    } catch (e) {
+      console.error(e)
+    }
   }
   {
     populations?.ownerPopulateds.length === 0 && (
@@ -90,9 +104,18 @@ export function InvitesCard({
                 }}
               />
               {populations?.ownerPopulateds.map((population) => (
-                <InviteProfile key={population.id} population={population} onClick={handleOpenModal} />
+                <InviteProfile
+                  onRemove={handleRemovePopulation}
+                  key={population.id}
+                  population={population}
+                  onClick={handleOpenModal}
+                />
               ))}
-              <Pagination onChange={(_, page) => setPage(page)} shape="rounded" count={Math.max(1, Math.ceil((populations?.meta.count ?? 0) / 5))} />
+              <Pagination
+                onChange={(_, page) => setPage(page)}
+                shape="rounded"
+                count={Math.max(1, Math.ceil((populations?.meta.count ?? 0) / 5))}
+              />
             </>
           )}
         </Stack>

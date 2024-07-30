@@ -17,6 +17,8 @@ import { createWalletClient, custom, parseEther, type Address } from 'viem'
 import { sepolia } from 'viem/chains'
 import { ModalState } from '../..'
 import ModalDialog from '@/components/common/ModalDialog'
+import { useCurrentChain } from '@/hooks/useChains'
+import { getBlockExplorerLink } from '@/utils/chains'
 const useStyles = makeStyles({
   select: {
     color: 'white',
@@ -55,6 +57,11 @@ function TopUp({
   const superChainSmartAccount = useAppSelector(selectSuperChainAccount)
   const wallet = useWallet()
 
+  const chain = useCurrentChain()
+  const blockExplorerLink =
+    chain && superChainSmartAccount.data.smartAccount
+      ? getBlockExplorerLink(chain, superChainSmartAccount.data.smartAccount)
+      : undefined
   const [selectedValue, setSelectedValue] = useState<number | null>(null)
   const nounSeed = useMemo(() => {
     return {
@@ -147,9 +154,9 @@ function TopUp({
                     <strong>oeth:</strong>
                     {superChainSmartAccount.data.smartAccount}
                   </p>
-                  <CopyButton text="0xD0be338562D78fAf8B3Sv567a9943bfaab0a3051e" />
+                  <CopyButton text={superChainSmartAccount.data.smartAccount} />
                   <Box color="border.main">
-                    <ExplorerButton />
+                    <ExplorerButton {...blockExplorerLink} />
                   </Box>
                 </Box>
               </Box>

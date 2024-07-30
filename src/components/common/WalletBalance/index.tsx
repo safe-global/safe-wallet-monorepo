@@ -13,7 +13,7 @@ const WalletBalance = ({ balance }: { balance: string | bigint | undefined }) =>
     return <>{balance}</>
   }
 
-  return <>{formatVisualAmount(balance, currentChain?.nativeCurrency.decimals ?? 18)} OETH</>
+  return <>{formatVisualAmount(balance, 5)} OETH</>
 }
 
 export default WalletBalance
