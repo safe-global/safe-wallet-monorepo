@@ -20,36 +20,38 @@ const WelcomeLogin = () => {
   const { login, authenticated, logout, ready } = usePrivy()
   const { isLoaded, hasSafes } = useHasSafes()
   const [shouldRedirect, setShouldRedirect] = useState(false)
-
+  const [redirectPath, setRedirectPath] = useState<null | string>(null)
   const onLogin = useCallback(() => {
     setShouldRedirect(true)
   }, [])
 
   const handleGetStarted = async () => {
+    setRedirectPath(AppRoutes.newSafe.create)
     if (!ready) return
     if (!wallet && authenticated) {
       await logout()
     }
     authenticated ? router.push(AppRoutes.newSafe.create) : login()
+    onLogin()
   }
 
   const handleAcceptInvite = async () => {
+    setRedirectPath(AppRoutes.invites)
     if (!ready) return
     if (!wallet && authenticated) {
       await logout()
     }
 
     authenticated ? router.push(AppRoutes.invites) : login()
+    onLogin()
   }
   useEffect(() => {
     if (!shouldRedirect) return
 
     if (wallet && isLoaded) {
-      if (hasSafes) {
-        router.push({ pathname: AppRoutes.welcome.accounts, query: router.query })
-      } else {
+      if (redirectPath) {
         trackEvent(CREATE_SAFE_EVENTS.OPEN_SAFE_CREATION)
-        router.push({ pathname: AppRoutes.newSafe.create, query: router.query })
+        router.push({ pathname: redirectPath, query: router.query })
       }
     }
   }, [hasSafes, isLoaded, router, wallet, shouldRedirect])

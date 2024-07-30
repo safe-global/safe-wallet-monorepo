@@ -45,10 +45,8 @@ function ClaimModal({
         </Box>
         <Box display="flex" gap="24px" flexWrap="wrap" maxWidth="360px">
           {data?.badgeImages.map((badge, index) => {
-            console.debug('badge', badge, data)
             return <img key={index} src={badge} alt="Badge" />
-          }
-          )}
+          })}
         </Box>
         <Box
           className={css.pointsBox}
@@ -61,12 +59,17 @@ function ClaimModal({
           <strong>{data?.totalPoints}</strong>
           <SvgIcon component={SuperChainPoints} inheritViewBox fontSize="medium" />
         </Box>
-        {
-          !data?.isLevelUp &&
+        {!data?.isLevelUp && (
           <Typography color="GrayText" fontSize={16}>
-            You still need <strong> {Number(superChainAccount.pointsToNextLevel) - (Number(superChainAccount.points) + (data?.totalPoints ?? 0))} SC Point to level-up</strong>
+            You still need{' '}
+            <strong>
+              {' '}
+              {Number(superChainAccount.pointsToNextLevel) -
+                (Number(superChainAccount.points) + (data?.totalPoints ?? 0))}{' '}
+              SC Point to level-up
+            </strong>
           </Typography>
-        }
+        )}
       </Box>
       {data?.isLevelUp ? (
         <button onClick={onLevelUp} className={css.levelUpButton}>

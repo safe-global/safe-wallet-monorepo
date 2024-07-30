@@ -14,8 +14,8 @@ function BadgeInfo({
   setCurrentBadge,
   switchFavorite,
 }: {
-  currentBadge: ResponseBadge & { isFavorite: boolean } | null
-  setCurrentBadge: (_: null | ResponseBadge & { isFavorite: boolean }) => void
+  currentBadge: (ResponseBadge & { isFavorite: boolean }) | null
+  setCurrentBadge: (_: null | (ResponseBadge & { isFavorite: boolean })) => void
   switchFavorite: ({ id, account, isFavorite }: { id: number; account: Address; isFavorite: boolean }) => void
 }) {
   const { safe } = useSafeInfo()
@@ -27,7 +27,6 @@ function BadgeInfo({
   }, [currentBadge])
 
   const handleSwitchFavorite = async () => {
-
     switchFavorite({
       id: currentBadge?.badgeId,
       account: safe.address.value as Address,
@@ -37,7 +36,6 @@ function BadgeInfo({
       ...currentBadge!,
       isFavorite: !currentBadge?.isFavorite,
     })
-    console.debug('favorite switched')
   }
   if (!currentBadge) return null
   return (
@@ -117,7 +115,10 @@ function BadgeInfo({
               Unlock First Tier:
             </Typography>
             <Typography fontSize={12} fontWeight={400}>
-              {currentBadge.metadata.description.replace('{{variable}}', currentBadge.badgeTiers[0].metadata.minValue.toString())}
+              {currentBadge.metadata.description.replace(
+                '{{variable}}',
+                currentBadge.badgeTiers[0].metadata.minValue.toString(),
+              )}
             </Typography>
           </>
         )}

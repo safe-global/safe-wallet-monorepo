@@ -62,7 +62,6 @@ const AccountItem = ({ onLinkClick, chainId, address, ...rest }: AccountItemProp
   }, [chain, getHref, address])
 
   const name = useAppSelector(selectAllAddressBooks)[chainId]?.[address]
-  console.debug(useAppSelector(selectAllAddressBooks)[chainId])
 
   const isActivating = undeployedSafe?.status.status !== 'AWAITING_EXECUTION'
 

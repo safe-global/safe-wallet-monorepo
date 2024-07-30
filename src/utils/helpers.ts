@@ -4,7 +4,6 @@ import type { SafeTransaction } from '@safe-global/safe-core-sdk-types'
 import type { OnboardAPI } from '@web3-onboard/core'
 
 export function invariant<T extends unknown>(condition: T, error: string): asserts condition {
-  console.debug({ condition })
   if (condition) {
     return
   }
