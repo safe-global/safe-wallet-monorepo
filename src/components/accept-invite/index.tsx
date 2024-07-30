@@ -26,9 +26,8 @@ const AcceptInvite = () => {
   const [page, setPage] = useState(1)
   const { data, loading: pendingEOASRequestLoading } = usePendingEOASRequests(
     (wallet?.address as Address) || zeroAddress,
-    page
+    page,
   )
-
 
   return (
     <>
@@ -45,7 +44,12 @@ const AcceptInvite = () => {
             </Stack>
           </Grid>
           <Grid pt={4} item xs={12}>
-            <InvitesCard setPage={setPage} loading={pendingEOASRequestLoading} populations={data} setModalContext={setModalContext} />
+            <InvitesCard
+              setPage={setPage}
+              loading={pendingEOASRequestLoading}
+              populations={data}
+              setModalContext={setModalContext}
+            />
           </Grid>
           <Grid item xs={12}>
             <Alert severity="warning" sx={{ mt: 3 }}>
