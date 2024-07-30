@@ -18,10 +18,12 @@ import type { ModalContext } from '..'
 import type { Address } from 'viem'
 
 export function InvitesCard({
+  setPage,
   setModalContext,
   populations,
   loading,
 }: {
+  setPage: (page: number) => void
   setModalContext: (modalContext: ModalContext) => void
   populations: PendingEOASRequest | undefined
   loading: boolean
@@ -90,7 +92,7 @@ export function InvitesCard({
               {populations?.ownerPopulateds.map((population) => (
                 <InviteProfile key={population.id} population={population} onClick={handleOpenModal} />
               ))}
-              <Pagination shape="rounded" count={3} />
+              <Pagination onChange={(_, page) => setPage(page)} shape="rounded" count={Math.max(1, Math.ceil((populations?.meta.count ?? 0) / 5))} />
             </>
           )}
         </Stack>

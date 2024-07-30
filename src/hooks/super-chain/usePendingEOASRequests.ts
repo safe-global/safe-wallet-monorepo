@@ -15,15 +15,18 @@ export type PendingEOASRequest = {
       noun_glasses: number
     }
   }[]
+  meta: {
+    count: number
+  }
 }
 
-function usePendingEOASRequests(account: Address) {
+function usePendingEOASRequests(account: Address, page = 1) {
   const GET_PENDINGREQUESTS = gql`
     query GetPendingRequests($account: String) {
-      ownerPopulateds(where: { newOwner_contains: $account }) {
+      ownerPopulateds(where: { newOwner_contains: $account }, first: 5, skip:  ${5 * (page - 1)}) {
         id
-        safe
         newOwner
+        safe
         superChainId
         superChainSmartAccount {
           noun_background
@@ -32,6 +35,9 @@ function usePendingEOASRequests(account: Address) {
           noun_head
           noun_glasses
         }
+    }
+      meta(id: "OwnerPopulated") {
+        count
       }
     }
   `
@@ -39,6 +45,7 @@ function usePendingEOASRequests(account: Address) {
   return useQuery<PendingEOASRequest>(GET_PENDINGREQUESTS, {
     variables: {
       account,
+      page,
     },
   })
 }
