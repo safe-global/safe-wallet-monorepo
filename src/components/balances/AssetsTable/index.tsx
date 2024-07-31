@@ -131,13 +131,7 @@ const AssetsTable = ({
     setShowHiddenAssets(false),
   )
 
-  const visibleAssets = useMemo(
-    () =>
-      showHiddenAssets
-        ? balances.items
-        : balances.items?.filter((item) => !hiddenAssets.includes(item.tokenInfo.address)),
-    [hiddenAssets, balances.items, showHiddenAssets],
-  )
+  const visibleAssets = useMemo(() => balances.items, [balances.items])
 
   const hasNoAssets = !loading && balances.items.length === 1 && balances.items[0].balance === '0'
 
