@@ -70,7 +70,8 @@ const WalletOverview = ({
               showName={false}
               showAvatar={false}
               avatarSize={12}
-              copyAddress={false}
+              hasExplorer={true}
+              copyAddress={true}
             />
           )}
         </Typography>
