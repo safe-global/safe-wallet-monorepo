@@ -18,7 +18,7 @@ const Setup: NextPage = () => {
   return (
     <>
       <Head>
-        <title>{'Safe{Wallet} – Settings – Setup'}</title>
+        <title>{'SuperChain SA – Settings – Setup'}</title>
       </Head>
 
       <SettingsHeader />

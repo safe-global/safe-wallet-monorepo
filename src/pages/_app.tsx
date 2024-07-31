@@ -86,7 +86,10 @@ export const AppProviders = ({ children }: { children: ReactNode | ReactNode[] }
   const isDarkMode = useDarkMode()
   const themeMode = isDarkMode ? 'dark' : 'light'
   const client = new ApolloClient({
-    uri: CHAIN_ID === sepolia.id.toString() ? 'https://api.studio.thegraph.com/query/72352/superchainsmartaccount-testnet/version/latest' : 'https://api.studio.thegraph.com/query/72352/superchainsmartaccount/version/latest',
+    uri:
+      CHAIN_ID === sepolia.id.toString()
+        ? 'https://api.studio.thegraph.com/query/72352/superchainsmartaccount-testnet/version/latest'
+        : 'https://api.studio.thegraph.com/query/72352/superchainsmartaccount/version/latest',
 
     cache: new InMemoryCache(),
   })
@@ -140,7 +143,7 @@ const WebCoreApp = ({
   return (
     <Provider store={reduxStore}>
       <Head>
-        <title key="default-title">{'Safe{Wallet}'}</title>
+        <title key="default-title">{'SuperChain SA'}</title>
         <MetaTags prefetchUrl={GATEWAY_URL} />
       </Head>
 

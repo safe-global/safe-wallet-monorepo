@@ -72,7 +72,7 @@ const Imprint: NextPage = () => {
   return (
     <>
       <Head>
-        <title>{'Safe{Wallet} – Imprint'}</title>
+        <title>{'SuperChain SA – Imprint'}</title>
       </Head>
 
       <main>{IS_OFFICIAL_HOST && <SafeImprint />}</main>

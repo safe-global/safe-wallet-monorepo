@@ -15,7 +15,7 @@ const QRCode = ({ value, size }: { value?: string; size: number }): ReactElement
       bgColor={palette.background.paper}
       fgColor={palette.text.primary}
       imageSettings={{
-        src: '/images/safe-logo-green.png',
+        src: '/images/superchain-logo.png',
         width: QR_LOGO_SIZE,
         height: QR_LOGO_SIZE,
         excavate: true,
