@@ -1,7 +1,7 @@
 {
-  "name": "Safe",
-  "short_name": "Safe",
-  "description": "Safe (prev. Gnosis Safe) is the most trusted platform to manage digital assets on Ethereum and multiple EVMs. Over $40B secured.",
+  "name": "SuperChain Smart Accounts",
+  "short_name": "SuperChain SA",
+  "description": "Earn rewards for your Superchain contributions with Superchain Accounts. Track badges, manage transactions, and view your Superchain Account. Get recognized for your participation.",
   "icons": [
     {
       "src": "/favicons/android-chrome-192x192.png",
@@ -14,6 +14,6 @@
       "type": "image/png"
     }
   ],
-  "start_url": "/",
+  "start_url": "/welcome",
   "display": "standalone"
 }
