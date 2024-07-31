@@ -13,7 +13,7 @@ function Badge({
   data,
   switchFavorite,
   setCurrentBadge,
-  isFavorite
+  isFavorite,
 }: {
   data: ResponseBadge
   switchFavorite: () => void
@@ -43,17 +43,8 @@ function Badge({
     >
       <CardContent>
         <Stack padding={0} justifyContent="center" alignItems="center" spacing={1} position="relative">
-          <IconButton
-            disabled={safeLoading}
-            onClick={(e) => handleSwitchFavorite(e)}
-            className={css.hearth}
-          >
-            <SvgIcon
-              component={isFavorite ? HeartFilled : Hearth}
-              color="secondary"
-              inheritViewBox
-              fontSize="small"
-            />
+          <IconButton disabled={safeLoading} onClick={(e) => handleSwitchFavorite(e)} className={css.hearth}>
+            <SvgIcon component={isFavorite ? HeartFilled : Hearth} color="secondary" inheritViewBox fontSize="small" />
           </IconButton>
           {!!Number(data.tier) ? (
             <img

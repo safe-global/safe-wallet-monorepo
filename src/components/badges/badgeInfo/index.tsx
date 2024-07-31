@@ -1,4 +1,4 @@
-import { Box, IconButton, Stack, SvgIcon, Typography } from '@mui/material'
+import { Box, IconButton, Stack, SvgIcon, Tooltip, Typography } from '@mui/material'
 import React, { useMemo } from 'react'
 import css from './styles.module.css'
 import type { ResponseBadge } from '@/types/super-chain'
@@ -9,6 +9,8 @@ import Share from '@/public/images/common/share.svg'
 import Close from '@/public/images/common/close.svg'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import type { Address } from 'viem'
+import SuperChainPoints from '@/public/images/common/superChain.svg'
+
 function BadgeInfo({
   currentBadge,
   setCurrentBadge,
@@ -115,7 +117,7 @@ function BadgeInfo({
               Unlock First Tier:
             </Typography>
             <Typography fontSize={12} fontWeight={400}>
-              {currentBadge.metadata.description.replace(
+              {currentBadge.metadata.condition.replace(
                 '{{variable}}',
                 currentBadge.badgeTiers[0].metadata.minValue.toString(),
               )}
@@ -175,14 +177,37 @@ function BadgeInfo({
         </Typography>
         <Box display="flex" gap="12px">
           {currentBadge?.badgeTiers.map((tier) => (
-            <img
-              style={{
-                height: 60,
-                width: 60,
-                opacity: tier.tier <= currentBadge.tier ? 1 : 0.5,
-              }}
-              src={tier.metadata['2DImage']}
-            />
+            <Tooltip
+              arrow
+              title={
+                <Box
+                  display="flex"
+                  gap="6px"
+                  padding="12px"
+                  flexDirection="column"
+                  justifyContent="center"
+                  alignItems="center"
+                >
+                  <Typography fontSize={14} fontWeight={400}>
+                    {currentBadge.metadata.condition.replace('{{variable}}', tier.metadata.minValue.toString())}
+                  </Typography>
+
+                  <Box justifyContent="center" alignItems="center" display="flex" gap={1}>
+                    <strong>{tier.points}</strong>
+                    <SvgIcon component={SuperChainPoints} inheritViewBox fontSize="medium" />
+                  </Box>
+                </Box>
+              }
+            >
+              <img
+                style={{
+                  height: 60,
+                  width: 60,
+                  opacity: tier.tier <= currentBadge.tier ? 1 : 0.5,
+                }}
+                src={tier.metadata['2DImage']}
+              />
+            </Tooltip>
           ))}
         </Box>
       </Box>
