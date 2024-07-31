@@ -43,7 +43,7 @@ export function InvitesCard({
   const handleRemovePopulation = async (safe: Address, newOwner: Address) => {
     const superChainSmartAccountContract = getWriteableSuperChainSmartAccount()
     try {
-      const hash = await superChainSmartAccountContract?.write.removepopulaterequest([safe, newOwner])
+      const hash = await superChainSmartAccountContract?.write.removePopulateRequest([safe, newOwner])
       await publicClient.waitForTransactionReceipt({ hash: hash! })
       refetch()
     } catch (e) {
