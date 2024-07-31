@@ -15,7 +15,7 @@ import { useIsRecoverySupported } from '@/features/recovery/hooks/useIsRecoveryS
 import Balances from '@/pages/balances'
 import SuperChainEOAS from '../common/SuperChainEOAS'
 import SafeAppsDashboardSection from './SafeAppsDashboardSection/SafeAppsDashboardSection'
-import AddEOAAddedModal from './AddEOAAddedModal'
+import EOAAddedModal from './EOAAddedModal'
 import { ADD_OWNER_MODAL_QUERY_PARAM } from '../accept-invite/alert-modal'
 import useWallet from '@/hooks/wallets/useWallet'
 
@@ -89,7 +89,7 @@ const Dashboard = (): ReactElement => {
         )}
       </Grid>
       {showCreationModal ? <CreationDialog /> : null}
-      {showEOAAddedModal ? <AddEOAAddedModal /> : null}
+      {showEOAAddedModal ? <EOAAddedModal /> : null}
     </>
   )
 }

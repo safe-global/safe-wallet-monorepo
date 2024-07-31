@@ -6,13 +6,19 @@ import CopyAddressButton from '@/components/common/CopyAddressButton'
 import ExplorerButton from '@/components/common/ExplorerButton'
 import { zeroAddress } from 'viem'
 import { useRouter } from 'next/router'
-function AddEOAAddedModal() {
+import { useCurrentChain } from '@/hooks/useChains'
+import { getBlockExplorerLink } from '@/utils/chains'
+import useSafeAddress from '@/hooks/useSafeAddress'
+function EOAAddedModal() {
   const stopPropagation = (e: SyntheticEvent) => e.stopPropagation()
   const [open, setOpen] = useState(true)
   const onClose = () => setOpen(false)
   const router = useRouter()
+  const address = useSafeAddress()
   const { superChainId = '' } = router.query
 
+  const chain = useCurrentChain()
+  const blockExplorerLink = chain && address ? getBlockExplorerLink(chain, address) : undefined
   return (
     <Dialog
       className={css.claimModal}
@@ -42,8 +48,8 @@ function AddEOAAddedModal() {
             <Typography id="modal-modal-description" fontSize={16}>
               <strong>{superChainId}</strong>
             </Typography>
-            <CopyAddressButton address={zeroAddress} />
-            <ExplorerButton onClick={stopPropagation} />
+            <CopyAddressButton address={address} />
+            <ExplorerButton {...blockExplorerLink} onClick={stopPropagation} />
           </Stack>
         </Stack>
       </Box>
@@ -55,4 +61,4 @@ function AddEOAAddedModal() {
   )
 }
 
-export default AddEOAAddedModal
+export default EOAAddedModal
