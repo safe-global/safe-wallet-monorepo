@@ -169,6 +169,23 @@ function BadgeInfo({
           </Typography>
         </Link>
       </Box>
+      <Box display="flex" paddingTop={2} alignItems="center" justifyContent="center" flexDirection="column" gap="20px">
+        <Typography fontWeight={600} fontSize={20}>
+          My Badges ({currentBadge.tier}/{currentBadge?.badgeTiers.length})
+        </Typography>
+        <Box display="flex" gap="12px">
+          {currentBadge?.badgeTiers.map((tier) => (
+            <img
+              style={{
+                height: 60,
+                width: 60,
+                opacity: tier.tier <= currentBadge.tier ? 1 : 0.5,
+              }}
+              src={tier.metadata['2DImage']}
+            />
+          ))}
+        </Box>
+      </Box>
     </Stack>
   )
 }
