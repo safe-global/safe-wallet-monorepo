@@ -1,5 +1,5 @@
 import { useMemo, useState, type ReactElement } from 'react'
-import { Box, Button, Grid, MenuItem, Select, SvgIcon } from '@mui/material'
+import { Box, Button, Grid, MenuItem, Select, SvgIcon, TextField } from '@mui/material'
 import { makeStyles } from '@mui/styles'
 import css from './styles.module.css'
 import classNames from 'classnames'
@@ -12,10 +12,7 @@ import lightPalette from '@/components/theme/lightPalette'
 import { useAppSelector } from '@/store'
 import { selectSuperChainAccount } from '@/store/superChainAccountSlice'
 import useWallet from '@/hooks/wallets/useWallet'
-import useSafeAddress from '@/hooks/useSafeAddress'
-import { createWalletClient, custom, parseEther, type Address } from 'viem'
-import { sepolia } from 'viem/chains'
-import { ModalState } from '../..'
+import { parseEther } from 'viem'
 import ModalDialog from '@/components/common/ModalDialog'
 import { useCurrentChain } from '@/hooks/useChains'
 import { getBlockExplorerLink } from '@/utils/chains'
@@ -43,7 +40,7 @@ const useStyles = makeStyles({
   },
 })
 
-const etherValues = [0.02, 0.05, 0.1, 0.2]
+const etherValues = [0.02, 0.05, 0.1]
 
 function TopUp({
   handleTopUp,
@@ -63,6 +60,7 @@ function TopUp({
       ? getBlockExplorerLink(chain, superChainSmartAccount.data.smartAccount)
       : undefined
   const [selectedValue, setSelectedValue] = useState<number | null>(null)
+  const [customValue, setCustomValue] = useState<string>('')
   const nounSeed = useMemo(() => {
     return {
       background: Number(superChainSmartAccount.data.noun[0]),
@@ -72,6 +70,14 @@ function TopUp({
       glasses: Number(superChainSmartAccount.data.noun[4]),
     }
   }, [superChainSmartAccount])
+  const handleCustomValueChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setCustomValue(event.target.value)
+    setSelectedValue(null)
+  }
+  const handleTopUpClick = () => {
+    const value = selectedValue !== null ? parseEther(etherValues[selectedValue].toString()) : parseEther(customValue)
+    handleTopUp(value)
+  }
 
   const classes = useStyles()
 
@@ -129,16 +135,28 @@ function TopUp({
                   {value}
                 </Button>
               ))}
+              <TextField
+                variant="outlined"
+                placeholder="0.2"
+                value={customValue}
+                onSelect={() => setSelectedValue(null)}
+                onChange={handleCustomValueChange}
+                className={css.amountButton}
+                style={{
+                  width: '100%',
+                  textAlign: 'center',
+                }}
+              />
+              <Button
+                className={css.topUpButton}
+                onClick={handleTopUpClick}
+                variant="contained"
+                color="secondary"
+                disabled={selectedValue === null && (customValue === '' || Number(customValue) === 0)}
+              >
+                Top up
+              </Button>
             </Box>
-            <Button
-              className={css.topUpButton}
-              onClick={() => handleTopUp(parseEther(etherValues[selectedValue as number].toString()))}
-              variant="contained"
-              color="secondary"
-              disabled={selectedValue === null}
-            >
-              Top up
-            </Button>
           </Box>
         </Grid>
         <Grid item>
