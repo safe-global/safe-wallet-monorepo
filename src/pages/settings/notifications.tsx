@@ -16,7 +16,7 @@ const NotificationsPage: NextPage = () => {
   return (
     <>
       <Head>
-        <title>{'SuperChain SA – Settings – Notifications'}</title>
+        <title>{'Superchain Account – Settings – Notifications'}</title>
       </Head>
 
       <SettingsHeader />

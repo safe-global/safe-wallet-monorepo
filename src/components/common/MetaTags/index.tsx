@@ -5,7 +5,7 @@ import darkPalette from '@/components/theme/darkPalette'
 
 const descriptionText =
   'Earn rewards for your Superchain contributions with Superchain Accounts. Track badges, manage transactions, and view your Superchain Account. Get recognized for your participation.'
-const titleText = 'SuperChain Smart Accounts'
+const titleText = 'Superchain Account'
 
 const MetaTags = ({ prefetchUrl }: { prefetchUrl: string }) => (
   <>
@@ -13,14 +13,14 @@ const MetaTags = ({ prefetchUrl }: { prefetchUrl: string }) => (
     {!IS_PRODUCTION && <meta name="robots" content="noindex" />}
 
     {/* Social sharing */}
-    <meta name="og:image" content="https://super-chain-smart-account-wallet.vercel.app/images/social-share.png" />
+    <meta name="og:image" content="https://account.superchain.eco/images/social-share.png" />
     <meta name="og:description" content={descriptionText} />
     <meta name="og:title" content={titleText} />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:site" content="@SuperchainEco" />
     <meta name="twitter:title" content={titleText} />
     <meta name="twitter:description" content={descriptionText} />
-    <meta name="twitter:image" content="https://super-chain-smart-account-wallet.vercel.app/images/social-share.png" />
+    <meta name="twitter:image" content="https://account.superchain.eco/images/social-share.png" />
 
     {/* CSP */}
     <meta httpEquiv="Content-Security-Policy" content={ContentSecurityPolicy} />

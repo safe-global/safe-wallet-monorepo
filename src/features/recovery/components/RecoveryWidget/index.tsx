@@ -15,7 +15,7 @@ function RecoveryWidget(): ReactElement {
   return (
     <WidgetContainer>
       <Typography component="h2" variant="subtitle1" className={css.label}>
-        New in {'SuperChain SA'}
+        New in {'Superchain Account'}
       </Typography>
 
       <WidgetBody>

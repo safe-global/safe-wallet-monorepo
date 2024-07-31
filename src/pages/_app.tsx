@@ -143,7 +143,7 @@ const WebCoreApp = ({
   return (
     <Provider store={reduxStore}>
       <Head>
-        <title key="default-title">{'SuperChain SA'}</title>
+        <title key="default-title">{'Superchain Account'}</title>
         <MetaTags prefetchUrl={GATEWAY_URL} />
       </Head>
 

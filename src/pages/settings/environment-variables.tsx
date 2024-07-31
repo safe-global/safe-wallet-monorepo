@@ -7,7 +7,7 @@ const EnvironmentVariablesPage: NextPage = () => {
   return (
     <>
       <Head>
-        <title>{'SuperChain SA – Settings – Environment variables'}</title>
+        <title>{'Superchain Account – Settings – Environment variables'}</title>
       </Head>
 
       <SettingsHeader />

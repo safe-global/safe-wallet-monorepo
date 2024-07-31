@@ -8,7 +8,7 @@ const Cookies: NextPage = () => {
   return (
     <>
       <Head>
-        <title>{'SuperChain SA – Settings – Cookies'}</title>
+        <title>{'Superchain Account – Settings – Cookies'}</title>
       </Head>
 
       <SettingsHeader />

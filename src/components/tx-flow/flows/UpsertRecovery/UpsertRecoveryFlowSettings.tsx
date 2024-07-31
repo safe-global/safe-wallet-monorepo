@@ -207,7 +207,7 @@ export function UpsertRecoveryFlowSettings({
           <TxCard>
             <FormControlLabel
               data-testid="warning-section"
-              label="I understand that the Recoverer will be able to initiate recovery of this Safe Account and that I will only be informed within the SuperChain SA."
+              label="I understand that the Recoverer will be able to initiate recovery of this Safe Account and that I will only be informed within the Superchain Account."
               control={<Checkbox checked={understandsRisk} onChange={(_, checked) => setUnderstandsRisk(checked)} />}
               sx={{ pl: 2 }}
             />

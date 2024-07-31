@@ -13,7 +13,7 @@ const CHAIN_PLACEHOLDER = '%%chain%%'
 const Warnings: Record<string, { severity: AlertColor; message: string }> = {
   BLOCKED_BRIDGE: {
     severity: 'error',
-    message: `${NAME_PLACEHOLDER} is a bridge that is incompatible with SuperChain SA — the bridged funds will be lost. Consider using a different bridge.`,
+    message: `${NAME_PLACEHOLDER} is a bridge that is incompatible with Superchain Account — the bridged funds will be lost. Consider using a different bridge.`,
   },
   WARNED_BRIDGE: {
     severity: 'warning',

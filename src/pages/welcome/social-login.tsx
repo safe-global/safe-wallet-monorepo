@@ -6,7 +6,7 @@ const SocialLogin: NextPage = () => {
   return (
     <>
       <Head>
-        <title>{'SuperChain SA – Welcome'}</title>
+        <title>{'Superchain Account – Welcome'}</title>
       </Head>
 
       <NewSafeSocial />

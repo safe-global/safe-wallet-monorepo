@@ -43,7 +43,7 @@ const NFTs: NextPage = () => {
   return (
     <>
       <Head>
-        <title>{'SuperChain SA – NFTs'}</title>
+        <title>{'Superchain Account – NFTs'}</title>
       </Head>
 
       <AssetsHeader />

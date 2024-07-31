@@ -132,7 +132,7 @@ describe('FallbackHandler', () => {
       await waitFor(() => {
         expect(
           fbHandler.queryByText(
-            new RegExp('The SuperChain SA may not work correctly as no fallback handler is currently set.'),
+            new RegExp('The Superchain Account may not work correctly as no fallback handler is currently set.'),
           ),
         ).toBeInTheDocument()
         expect(fbHandler.queryByText('Transaction Builder')).toBeInTheDocument()
@@ -157,7 +157,7 @@ describe('FallbackHandler', () => {
       await waitFor(() => {
         expect(
           fbHandler.queryByText(
-            new RegExp('The SuperChain SA may not work correctly as no fallback handler is currently set.'),
+            new RegExp('The Superchain Account may not work correctly as no fallback handler is currently set.'),
           ),
         ).toBeInTheDocument()
         expect(fbHandler.queryByText('Transaction Builder')).not.toBeInTheDocument()

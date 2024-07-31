@@ -42,9 +42,9 @@ export const createOnboard = (
     },
 
     appMetadata: {
-      name: 'SuperChain SA',
+      name: 'Superchain Account',
       icon: location.origin + '/images/logo-round.svg',
-      description: 'SuperChain SA – smart contract wallet for Ethereum (ex-Gnosis Safe multisig)',
+      description: 'Superchain Account – smart contract wallet for Ethereum (ex-Gnosis Safe multisig)',
     },
 
     connect: {

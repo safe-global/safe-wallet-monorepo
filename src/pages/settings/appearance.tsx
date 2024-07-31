@@ -32,7 +32,7 @@ const Appearance: NextPage = () => {
   return (
     <>
       <Head>
-        <title>{'SuperChain SA – Settings – Appearance'}</title>
+        <title>{'Superchain Account – Settings – Appearance'}</title>
       </Head>
 
       <SettingsHeader />

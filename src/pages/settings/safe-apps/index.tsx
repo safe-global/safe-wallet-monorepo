@@ -9,7 +9,7 @@ const SafeAppsPermissionsPage: NextPage = () => {
   return (
     <>
       <Head>
-        <title>{'SuperChain SA – Settings – Safe Apps'}</title>
+        <title>{'Superchain Account – Settings – Safe Apps'}</title>
       </Head>
 
       <SettingsHeader />

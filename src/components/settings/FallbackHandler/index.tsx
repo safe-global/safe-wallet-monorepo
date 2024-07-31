@@ -33,7 +33,7 @@ export const FallbackHandler = (): ReactElement | null => {
 
   const warning = !hasFallbackHandler ? (
     <>
-      The {'SuperChain SA'} may not work correctly as no fallback handler is currently set.
+      The {'Superchain Account'} may not work correctly as no fallback handler is currently set.
       {txBuilder && (
         <>
           {' '}
