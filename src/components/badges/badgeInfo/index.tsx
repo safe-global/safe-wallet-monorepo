@@ -176,9 +176,10 @@ function BadgeInfo({
           My Badges ({currentBadge.tier}/{currentBadge?.badgeTiers.length})
         </Typography>
         <Box display="flex" gap="12px">
-          {currentBadge?.badgeTiers.map((tier) => (
+          {currentBadge?.badgeTiers.map((tier, key) => (
             <Tooltip
               arrow
+              key={key}
               title={
                 <Box
                   display="flex"
@@ -188,7 +189,7 @@ function BadgeInfo({
                   justifyContent="center"
                   alignItems="center"
                 >
-                  <Typography fontSize={14} fontWeight={400}>
+                  <Typography fontSize={14} textAlign="center" fontWeight={400}>
                     {currentBadge.metadata.condition.replace('{{variable}}', tier.metadata.minValue.toString())}
                   </Typography>
 
