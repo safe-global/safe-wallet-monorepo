@@ -12,6 +12,7 @@ import LevelUpModal from '../modals/LevelUpModal'
 import { useRouter } from 'next/router'
 import { AppRoutes } from '@/config/routes'
 import LoadingModal from '@/components/common/LoadingModal'
+import Image from 'next/image'
 import FailedTxnModal from '@/components/common/ErrorModal'
 import { useAppSelector } from '@/store'
 import { selectSuperChainAccount } from '@/store/superChainAccountSlice'
@@ -21,7 +22,7 @@ export type ClaimData = {
   totalPoints: number
   isLevelUp: boolean
 }
-function BadgesActions({ claimable, setFilter }: { claimable: boolean, setFilter: (filter: string) => void }) {
+function BadgesActions({ claimable, setFilter }: { claimable: boolean; setFilter: (filter: string) => void }) {
   const { safeAddress } = useSafeInfo()
   const { data: superChainAccount } = useAppSelector(selectSuperChainAccount)
 
@@ -57,7 +58,11 @@ function BadgesActions({ claimable, setFilter }: { claimable: boolean, setFilter
   return (
     <>
       <ClaimModal onLevelUp={handleLevelUp} data={claimData} open={isClaimModalOpen} onClose={handleCloseClaimModal} />
-      <LevelUpModal open={isLevelUpModalOpen} level={Number(superChainAccount?.level)} onClose={handleCloseLevelUpModal} />
+      <LevelUpModal
+        open={isLevelUpModalOpen}
+        level={Number(superChainAccount?.level)}
+        onClose={handleCloseLevelUpModal}
+      />
       <LoadingModal open={isPending} title="Updating badges" />
       <FailedTxnModal open={isError} onClose={handleCloseLevelUpModal} handleRetry={() => mutate()} />
       <Grid container spacing={1} item>
@@ -86,8 +91,46 @@ function BadgesActions({ claimable, setFilter }: { claimable: boolean, setFilter
           </Grid>
           <Grid item xs={5}>
             <Box display="flex" gap={2}>
-              <Select fullWidth renderValue={() => 'Select network'}>
-                <MenuItem value="eth">Ethereum</MenuItem>
+              <Select fullWidth defaultValue="all" placeholder="Placeholder Text">
+                <MenuItem value="all">
+                  <strong>Select network</strong>
+                </MenuItem>
+                <MenuItem value="optimism">
+                  <Box display="flex" gap={1} alignItems="center">
+                    <Image
+                      src="https://safe-transaction-assets.safe.global/chains/10/chain_logo.png"
+                      alt="Optimism Logo"
+                      width={24}
+                      height={24}
+                      loading="lazy"
+                    />
+                    <strong>Optimism</strong>
+                  </Box>
+                </MenuItem>
+                <MenuItem value="base">
+                  <Box display="flex" gap={1} alignItems="center">
+                    <Image
+                      src="https://safe-transaction-assets.safe.global/chains/8453/chain_logo.png"
+                      alt="Base Logo"
+                      width={24}
+                      height={24}
+                      loading="lazy"
+                    />
+                    <strong>Base</strong>
+                  </Box>
+                </MenuItem>
+                <MenuItem value="mode">
+                  <Box display="flex" gap={1} alignItems="center">
+                    <Image
+                      src="https://account.superchain.eco/chains/34443/chain_logo.svg"
+                      alt="Mode Logo"
+                      width={24}
+                      height={24}
+                      loading="lazy"
+                    />
+                    <strong>Mode</strong>
+                  </Box>
+                </MenuItem>
               </Select>
               <Button
                 fullWidth
