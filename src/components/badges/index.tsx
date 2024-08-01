@@ -14,6 +14,7 @@ function Badges() {
   const { data: superChainAccount, loading: isSuperChainLoading } = useAppSelector(selectSuperChainAccount)
   const { safeAddress, safeLoaded } = useSafeInfo()
   const [searchTerm, setSearchTerm] = useState<string | undefined>(undefined)
+  const [selectedNetwork, setSelectedNetwork] = useState<string>('all')
 
   const { data, isLoading, error } = useQuery<{
     currentBadges: ResponseBadge[]
@@ -25,11 +26,19 @@ function Badges() {
   const isClaimable = useMemo(() => data?.currentBadges.some((badge) => badge.claimable), [data?.currentBadges])
   const filteredBadges = useMemo(() => {
     if (!data) return []
-    if (!searchTerm) return data.currentBadges
-    return data.currentBadges.filter((badge) =>
-      badge.metadata.name.toLowerCase().includes(searchTerm.toLowerCase()) || badge.metadata.platform.toLowerCase().includes(searchTerm.toLowerCase())
-    )
-  }, [data?.currentBadges, searchTerm])
+    let filtered = data.currentBadges
+    if (searchTerm) {
+      filtered = filtered.filter(
+        (badge) =>
+          badge.metadata.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          badge.metadata.platform.toLowerCase().includes(searchTerm.toLowerCase()),
+      )
+    }
+    if (selectedNetwork && selectedNetwork !== 'all') {
+      filtered = filtered.filter((badge) => badge.metadata.chain.toLowerCase() === selectedNetwork.toLowerCase())
+    }
+    return filtered
+  }, [data?.currentBadges, searchTerm, selectedNetwork])
 
   return (
     <Grid spacing={2} container>
@@ -49,7 +58,7 @@ function Badges() {
         }
         isLoading={isLoading || isSuperChainLoading}
       />
-      <BadgesActions setFilter={setSearchTerm} claimable={isClaimable ?? false} />
+      <BadgesActions setNetwork={setSelectedNetwork} setFilter={setSearchTerm} claimable={isClaimable ?? false} />
       <BadgesContent badges={filteredBadges} isLoading={isLoading} error={error} />
     </Grid>
   )

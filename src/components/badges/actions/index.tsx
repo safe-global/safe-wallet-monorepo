@@ -22,7 +22,15 @@ export type ClaimData = {
   totalPoints: number
   isLevelUp: boolean
 }
-function BadgesActions({ claimable, setFilter }: { claimable: boolean; setFilter: (filter: string) => void }) {
+function BadgesActions({
+  claimable,
+  setFilter,
+  setNetwork,
+}: {
+  claimable: boolean
+  setFilter: (filter: string) => void
+  setNetwork: (network: string) => void
+}) {
   const { safeAddress } = useSafeInfo()
   const { data: superChainAccount } = useAppSelector(selectSuperChainAccount)
 
@@ -91,7 +99,12 @@ function BadgesActions({ claimable, setFilter }: { claimable: boolean; setFilter
           </Grid>
           <Grid item xs={5}>
             <Box display="flex" gap={2}>
-              <Select fullWidth defaultValue="all" placeholder="Placeholder Text">
+              <Select
+                fullWidth
+                onChange={(e) => setNetwork(e.target.value)}
+                defaultValue="all"
+                placeholder="Placeholder Text"
+              >
                 <MenuItem value="all">
                   <strong>Select network</strong>
                 </MenuItem>
