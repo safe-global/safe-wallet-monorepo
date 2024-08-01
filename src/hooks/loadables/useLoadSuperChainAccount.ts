@@ -3,6 +3,8 @@ import type { AsyncResult } from '../useAsync'
 import useSuperChainAccount from '../super-chain/useSuperChainAccount'
 import useSafeInfo from '../useSafeInfo'
 import { useQuery } from '@tanstack/react-query'
+import { getWeeklyGasBalances } from '@/services/superchain-accounts/sponsor'
+import type { Address } from 'viem'
 
 export const useLoadSuperChainAccount = (): AsyncResult<SuperChainAccount> => {
   const { safe } = useSafeInfo()
@@ -12,7 +14,8 @@ export const useLoadSuperChainAccount = (): AsyncResult<SuperChainAccount> => {
   const { data, isLoading, error } = useQuery<SuperChainAccount>({
     queryKey: ['superChainAccount', address.value],
     queryFn: async () => {
-      const response = await SuperChainAccountContractReadOnly.getSuperChainAccount(address.value)
+      const superChainSAresponse = await SuperChainAccountContractReadOnly.getSuperChainAccount(address.value)
+      const weeklyGasBalanceResponse = await getWeeklyGasBalances(address.value as Address)
       let pointsToNextLevel = null
       try {
         const pointsToNextLevelResponse = await SuperChainAccountContractReadOnly.getNextLevelPoints(address.value)
@@ -21,12 +24,13 @@ export const useLoadSuperChainAccount = (): AsyncResult<SuperChainAccount> => {
         console.error(e)
       }
       return {
-        smartAccount: response[0],
-        superChainID: response[1],
-        points: response[2],
-        level: response[3],
-        noun: response[4],
+        smartAccount: superChainSAresponse[0],
+        superChainID: superChainSAresponse[1],
+        points: superChainSAresponse[2],
+        level: superChainSAresponse[3],
+        noun: superChainSAresponse[4],
         pointsToNextLevel,
+        weeklyGasBalance: weeklyGasBalanceResponse.data,
       }
     },
   })

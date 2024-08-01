@@ -3,9 +3,7 @@ import Typography from '@mui/material/Typography'
 import IconButton from '@mui/material/IconButton'
 import Tooltip from '@mui/material/Tooltip'
 
-import useSafeInfo from '@/hooks/useSafeInfo'
 import { useAppSelector } from '@/store'
-import { selectCurrency } from '@/store/settingsSlice'
 
 import css from './styles.module.css'
 import QrIconBold from '@/public/images/sidebar/qr-bold.svg'
@@ -19,7 +17,6 @@ import QrCodeButton from '../QrCodeButton'
 import Track from '@/components/common/Track'
 import { OVERVIEW_EVENTS } from '@/services/analytics/events/overview'
 import { Box, LinearProgress, Skeleton, SvgIcon } from '@mui/material'
-import { useVisibleBalances } from '@/hooks/useVisibleBalances'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import ExplorerButton from '@/components/common/ExplorerButton'
 import CopyTooltip from '@/components/common/CopyTooltip'
@@ -27,10 +24,7 @@ import NounsAvatar from '@/components/common/NounsAvatar'
 import { selectSuperChainAccount } from '@/store/superChainAccountSlice'
 
 const SafeHeader = (): ReactElement => {
-  const currency = useAppSelector(selectCurrency)
-  const { balances } = useVisibleBalances()
   const safeAddress = useSafeAddress()
-  const { safe } = useSafeInfo()
   const chain = useCurrentChain()
   const settings = useAppSelector(selectSettings)
   const superChainSmartAccount = useAppSelector(selectSuperChainAccount)
@@ -241,7 +235,10 @@ const SafeHeader = (): ReactElement => {
               <LinearProgress
                 variant="determinate"
                 color="inherit"
-                value={70}
+                value={Number(
+                  superChainSmartAccount.data.weeklyGasBalance.gasUsedInUSD /
+                    superChainSmartAccount.data.weeklyGasBalance.maxGasInUSD,
+                )}
                 sx={{ width: '100%', height: 34, backgroundColor: 'white', color: '#E8EDF5', borderRadius: '6px' }}
               />
               <Box
