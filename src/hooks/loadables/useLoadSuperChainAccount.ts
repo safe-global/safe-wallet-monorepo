@@ -34,5 +34,6 @@ export const useLoadSuperChainAccount = (): AsyncResult<SuperChainAccount> => {
       }
     },
   })
+  console.debug({ data, error, isLoading })
   return [data, error!, isLoading]
 }

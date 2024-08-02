@@ -21,6 +21,8 @@ import useWallet from '@/hooks/wallets/useWallet'
 
 import { usePrivy, useWallets } from '@privy-io/react-auth'
 import usePimlico from '@/hooks/usePimlico'
+import WrongNetworkModal from './WrongNetworkModal'
+import useIsWrongChain from '@/hooks/useIsWrongChain'
 const RecoveryHeader = dynamic(() => import('@/features/recovery/components/RecoveryHeader'))
 
 const Dashboard = (): ReactElement => {
@@ -32,7 +34,7 @@ const Dashboard = (): ReactElement => {
   const { safe, safeLoaded, safeLoading } = useSafeInfo()
   const { [CREATION_MODAL_QUERY_PARAM]: showCreationModal = '' } = router.query
   const { [ADD_OWNER_MODAL_QUERY_PARAM]: showEOAAddedModal = '' } = router.query
-
+  const isWrongChain = useIsWrongChain()
   const supportsRecovery = useIsRecoverySupported()
 
   useEffect(() => {
@@ -90,6 +92,7 @@ const Dashboard = (): ReactElement => {
       </Grid>
       {showCreationModal ? <CreationDialog /> : null}
       {showEOAAddedModal ? <EOAAddedModal /> : null}
+      {isWrongChain && <WrongNetworkModal />}
     </>
   )
 }

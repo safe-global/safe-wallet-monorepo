@@ -10,10 +10,11 @@ import useIntervalCounter from '../useIntervalCounter'
 import useSafeInfo from '../useSafeInfo'
 import { Errors, logError } from '@/services/exceptions'
 import { POLLING_INTERVAL } from '@/config/constants'
+import { CHAIN_ID } from '@/features/superChain/constants'
 
 export const useLoadSafeInfo = (): AsyncResult<SafeInfo> => {
   const address = useSafeAddress()
-  const chainId = useChainId()
+  const chainId = CHAIN_ID
   const [pollCount, resetPolling] = useIntervalCounter(POLLING_INTERVAL)
   const { safe } = useSafeInfo()
   const isStoredSafeValid = safe.chainId === chainId && safe.address.value === address

@@ -236,8 +236,10 @@ const SafeHeader = (): ReactElement => {
                 variant="determinate"
                 color="inherit"
                 value={Number(
-                  superChainSmartAccount.data.weeklyGasBalance.gasUsedInUSD /
-                    superChainSmartAccount.data.weeklyGasBalance.maxGasInUSD,
+                  superChainSmartAccount.data.weeklyGasBalance.maxGasInUSD
+                    ? superChainSmartAccount.data.weeklyGasBalance.gasUsedInUSD /
+                        superChainSmartAccount.data.weeklyGasBalance.maxGasInUSD
+                    : 100,
                 )}
                 sx={{ width: '100%', height: 34, backgroundColor: 'white', color: '#E8EDF5', borderRadius: '6px' }}
               />
