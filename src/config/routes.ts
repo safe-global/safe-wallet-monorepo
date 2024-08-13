@@ -12,6 +12,7 @@ export const AppRoutes = {
   addressBook: '/address-book',
   addOwner: '/addOwner',
   _offline: '/_offline',
+  leaderboard: { index: '/leaderboard', monthly: '/leaderboard/monthly', weekly: '/leaderboard/weekly' },
   apps: {
     open: '/apps/open',
     index: '/apps',

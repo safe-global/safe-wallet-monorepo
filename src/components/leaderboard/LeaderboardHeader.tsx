@@ -1,17 +1,15 @@
-import type { ReactElement, ReactNode } from 'react'
-
+import React from 'react'
 import PageHeader from '@/components/common/PageHeader'
 import css from '@/components/common/PageHeader/styles.module.css'
-import TxNavigation from '@/components/transactions/TxNavigation'
-
-const TxHeader = ({ children }: { children?: ReactNode }): ReactElement => {
+import LeaderboardNavigation from './LeaderboardNavigation'
+function LeaderboardHeader({ children }: { children?: React.ReactNode }) {
   return (
     <PageHeader
-      title="Transactioni"
+      title="Leaderboard"
       action={
         <div className={css.pageHeader}>
           <div className={css.navWrapper}>
-            <TxNavigation />
+            <LeaderboardNavigation />
           </div>
           {children && <div className={css.actionsWrapper}>{children}</div>}
         </div>
@@ -20,4 +18,4 @@ const TxHeader = ({ children }: { children?: ReactNode }): ReactElement => {
   )
 }
 
-export default TxHeader
+export default LeaderboardHeader

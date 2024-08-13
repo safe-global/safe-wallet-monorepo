@@ -14,8 +14,8 @@ import {
   waitForElementToBeRemoved,
   within,
 } from '../test-utils'
-import AppsPage from '@/pages/apps'
-import CustomSafeAppsPage from '@/pages/apps/custom'
+import AppsPage from '@/pages/_apps'
+import CustomSafeAppsPage from '@/pages/_apps/custom'
 import * as safeAppsService from '@/services/safe-apps/manifest'
 import { LS_NAMESPACE } from '@/config/constants'
 import * as chainHooks from '@/hooks/useChains'

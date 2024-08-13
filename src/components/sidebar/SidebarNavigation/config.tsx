@@ -3,7 +3,7 @@ import React from 'react'
 import { AppRoutes } from '@/config/routes'
 import AccountIcon from '@/public/images/sidebar/account.svg'
 import BadgesIcon from '@/public/images/sidebar/badges.svg'
-
+import LeaderboardIcon from '@/public/images/sidebar/leaderboard.svg'
 // import AssetsIcon from '@/public/images/sidebar/assets.svg'
 import TransactionIcon from '@/public/images/sidebar/transactions.svg'
 // import ABIcon from '@/public/images/sidebar/address-book.svg'
@@ -28,6 +28,11 @@ export const navItems: NavItem[] = [
     label: 'Badges',
     icon: <SvgIcon component={BadgesIcon} inheritViewBox />,
     href: AppRoutes.badges,
+  },
+  {
+    label: 'Leaderboard',
+    icon: <SvgIcon component={LeaderboardIcon} inheritViewBox />,
+    href: AppRoutes.leaderboard.index,
   },
   // {
   //   label: 'Assets',
@@ -114,6 +119,21 @@ export const settingsNavItems = [
   {
     label: 'Environment variables',
     href: AppRoutes.settings.environmentVariables,
+  },
+]
+
+export const leaderboardNavItems = [
+  {
+    label: 'All',
+    href: AppRoutes.leaderboard.index,
+  },
+  {
+    label: 'Last 30 days',
+    href: AppRoutes.leaderboard.monthly,
+  },
+  {
+    label: 'Last 7 days',
+    href: AppRoutes.leaderboard.weekly,
   },
 ]
 
