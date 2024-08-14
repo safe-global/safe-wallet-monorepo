@@ -2,7 +2,7 @@ import { Box, Stack, Typography } from '@mui/material'
 import React from 'react'
 import RankingProfile from './RankingProfile.tsx'
 import useLeaderboard from '@/hooks/super-chain/useLeaderboard'
-import useSafeAddress from '@/hooks/useSafeAddress.js'
+import useSafeAddress from '@/hooks/useSafeAddress'
 import type { Address } from 'viem'
 
 function Leaderboard() {
