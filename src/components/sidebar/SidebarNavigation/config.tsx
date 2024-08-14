@@ -124,7 +124,7 @@ export const settingsNavItems = [
 
 export const leaderboardNavItems = [
   {
-    label: 'All',
+    label: 'All-Time',
     href: AppRoutes.leaderboard.index,
   },
   {
