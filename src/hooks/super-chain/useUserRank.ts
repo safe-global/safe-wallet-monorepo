@@ -20,7 +20,7 @@ const GET_USER_POSITION = gql`
   }
 `
 
-export const useUserRank = (userAddress: Address, userPoints?: string, loadingFirstFetch: boolean) => {
+export const useUserRank = (userAddress: Address, loadingFirstFetch: boolean, userPoints?: string) => {
   const [rank, setRank] = useState<number | null>(null)
   const [loading, setLoading] = useState<boolean>(true)
   const [error, setError] = useState<any>(null)
@@ -50,7 +50,7 @@ export const useUserRank = (userAddress: Address, userPoints?: string, loadingFi
     const users = data.superChainSmartAccounts
 
     // Verificar si el usuario está en la lista actual
-    const userIndex = users.findIndex((user) => user.id.toLowerCase() === userAddress.toLowerCase())
+    const userIndex = users.findIndex((user: { id: string }) => user.id.toLowerCase() === userAddress.toLowerCase())
 
     if (userIndex !== -1) {
       // Si encontramos al usuario, devolvemos su posición

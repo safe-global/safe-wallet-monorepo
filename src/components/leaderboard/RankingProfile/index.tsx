@@ -12,11 +12,14 @@ type _Props = {
   level: string
   noun: NounProps
   badges: number
+  onClick?: () => void
 }
 
-function RankingProfile({ isMainProfile, position, points, name, level, badges, noun }: _Props) {
+function RankingProfile({ isMainProfile, position, points, name, level, badges, noun, onClick }: _Props) {
   return (
     <Box
+      style={{ cursor: onClick ? 'pointer' : 'default' }}
+      onClick={onClick}
       display="flex"
       width="100%"
       flexDirection="row"

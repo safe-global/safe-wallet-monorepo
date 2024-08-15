@@ -127,14 +127,14 @@ export const leaderboardNavItems = [
     label: 'All-Time',
     href: AppRoutes.leaderboard.index,
   },
-  {
-    label: 'Last 30 days',
-    href: AppRoutes.leaderboard.monthly,
-  },
-  {
-    label: 'Last 7 days',
-    href: AppRoutes.leaderboard.weekly,
-  },
+  // {
+  //   label: 'Last 30 days',
+  //   href: AppRoutes.leaderboard.monthly,
+  // },
+  // {
+  //   label: 'Last 7 days',
+  //   href: AppRoutes.leaderboard.weekly,
+  // },
 ]
 
 export const generalSettingsNavItems = [

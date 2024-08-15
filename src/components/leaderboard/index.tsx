@@ -1,23 +1,45 @@
-import { Box, Stack, Typography } from '@mui/material'
+import { Box, Skeleton, Stack, Typography } from '@mui/material'
 import React from 'react'
-import RankingProfile from './RankingProfile.tsx'
-import useLeaderboard from '@/hooks/super-chain/useLeaderboard'
+import RankingProfile from './RankingProfile/index'
+import { useLeaderboard } from '@/hooks/super-chain/useLeaderboard'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import type { Address } from 'viem'
 import { add, head, map } from 'lodash'
 import { useUserRank } from '@/hooks/super-chain/useUserRank'
 import { color } from 'framer-motion'
-import badges from '../badges/index.jsx'
 
-function Leaderboard() {
+function Leaderboard({ handleUserSelect }: { handleUserSelect: (_: string) => void }) {
   const address = useSafeAddress()
   const { data, loading } = useLeaderboard(address as Address)
   const {
     rank,
     error,
     loading: rankLoading,
-  } = useUserRank(address as Address, data?.superChainSmartAccount.points, loading)
-  if (loading || !data || rankLoading || error) return
+  } = useUserRank(address as Address, loading, data?.superChainSmartAccount.points)
+  if (error) return
+
+  if (loading || !data || rankLoading) {
+    return (
+      <main>
+        <Stack spacing={2}>
+          <Stack spacing={1}>
+            <Typography fontSize={12} fontWeight={600} color="gray">
+              YOUR RANKING
+            </Typography>
+            <Skeleton variant="rounded" height={48} />
+          </Stack>
+          <Stack spacing={1}>
+            <Typography fontSize={12} fontWeight={600} color="gray">
+              TOP USERS OF ALL-TIME
+            </Typography>
+            {Array.from(new Array(5)).map((_, index) => (
+              <Skeleton variant="rounded" height={48} />
+            ))}
+          </Stack>
+        </Stack>
+      </main>
+    )
+  }
 
   return (
     <main>
@@ -28,6 +50,7 @@ function Leaderboard() {
           </Typography>
           <RankingProfile
             isMainProfile
+            onClick={() => handleUserSelect(address)}
             position={rank!}
             points={data!.superChainSmartAccount.points}
             name={data!.superChainSmartAccount.superChainId}
@@ -51,6 +74,7 @@ function Leaderboard() {
               key={index}
               position={index + 1}
               points={user.points}
+              onClick={() => handleUserSelect(user.safe)}
               name={user.superChainId}
               level={user.level}
               isMainProfile={user.safe.toLowerCase() === address.toLowerCase()}

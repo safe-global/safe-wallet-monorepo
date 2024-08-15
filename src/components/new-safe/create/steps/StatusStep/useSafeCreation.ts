@@ -112,7 +112,6 @@ export const useSafeCreation = (
           ...safeDeployProps,
           options,
         })
-        console.debug(await response.getAddress())
         setStatus(SafeCreationStatus.SUCCESS)
       }
     } catch (err) {
