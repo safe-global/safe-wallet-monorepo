@@ -1,41 +1,42 @@
-import { gql, useQuery } from '@apollo/client'
-import React from 'react'
+import { gql, useLazyQuery, useQuery } from '@apollo/client'
 import { Address } from 'viem'
 
 export type Leaderboard = {
   superChainSmartAccounts: {
-    points: number
-    level: number
+    points: string
+    level: string
+    safe: string
     superChainId: string
     badges: {
       id: string
     }[]
-    noun_body: number
-    noun_head: number
-    noun_glasses: number
-    noun_accessory: number
-    noun_background: number
+    noun_body: string
+    noun_head: string
+    noun_glasses: string
+    noun_accessory: string
+    noun_background: string
   }[]
   superChainSmartAccount: {
-    points: number
-    level: number
+    points: string
+    level: string
     superChainId: string
     badges: {
       id: string
     }[]
-    noun_body: number
-    noun_head: number
-    noun_glasses: number
-    noun_accessory: number
-    noun_background: number
+    noun_body: string
+    noun_head: string
+    noun_glasses: string
+    noun_accessory: string
+    noun_background: string
   }
 }
 
 function useLeaderboard(user: Address) {
   const GET_LEADERBOARD = gql`
     query GetLeaderboard($userId: String) {
-      superChainSmartAccounts(first: 10, orderBy: superChainId, orderDirection: desc) {
+      superChainSmartAccounts(first: 10, orderBy: points, orderDirection: desc) {
         points
+        safe
         level
         superChainId
         badges {

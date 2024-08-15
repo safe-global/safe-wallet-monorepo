@@ -7,9 +7,9 @@ import { NounProps } from '@/components/new-safe/create/steps/AvatarStep'
 type _Props = {
   isMainProfile?: boolean
   position: number
-  points: number
+  points: string
   name: string
-  level: number
+  level: string
   noun: NounProps
   badges: number
 }

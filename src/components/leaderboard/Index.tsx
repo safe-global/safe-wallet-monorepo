@@ -4,11 +4,21 @@ import RankingProfile from './RankingProfile.tsx'
 import useLeaderboard from '@/hooks/super-chain/useLeaderboard'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import type { Address } from 'viem'
+import { add, head, map } from 'lodash'
+import { useUserRank } from '@/hooks/super-chain/useUserRank'
+import { color } from 'framer-motion'
+import badges from '../badges/index.jsx'
 
 function Leaderboard() {
   const address = useSafeAddress()
   const { data, loading } = useLeaderboard(address as Address)
-  if (loading) return
+  const {
+    rank,
+    error,
+    loading: rankLoading,
+  } = useUserRank(address as Address, data?.superChainSmartAccount.points, loading)
+  if (loading || !data || rankLoading || error) return
+
   return (
     <main>
       <Stack spacing={2}>
@@ -18,17 +28,17 @@ function Leaderboard() {
           </Typography>
           <RankingProfile
             isMainProfile
-            position={500}
+            position={rank!}
             points={data!.superChainSmartAccount.points}
             name={data!.superChainSmartAccount.superChainId}
-            level={5}
+            level={data!.superChainSmartAccount.level}
             badges={data!.superChainSmartAccount.badges.length}
             noun={{
-              accessory: data!.superChainSmartAccount.noun_accessory,
-              background: data!.superChainSmartAccount.noun_background,
-              body: data!.superChainSmartAccount.noun_body,
-              glasses: data!.superChainSmartAccount.noun_glasses,
-              head: data!.superChainSmartAccount.noun_head,
+              accessory: parseInt(data!.superChainSmartAccount.noun_accessory),
+              background: parseInt(data!.superChainSmartAccount.noun_background),
+              body: parseInt(data!.superChainSmartAccount.noun_body),
+              glasses: parseInt(data!.superChainSmartAccount.noun_glasses),
+              head: parseInt(data!.superChainSmartAccount.noun_head),
             }}
           />
         </Stack>
@@ -43,13 +53,14 @@ function Leaderboard() {
               points={user.points}
               name={user.superChainId}
               level={user.level}
+              isMainProfile={user.safe.toLowerCase() === address.toLowerCase()}
               badges={user.badges.length}
               noun={{
-                accessory: user.noun_accessory,
-                background: user.noun_background,
-                body: user.noun_body,
-                glasses: user.noun_glasses,
-                head: user.noun_head,
+                accessory: parseInt(user.noun_accessory),
+                background: parseInt(user.noun_background),
+                body: parseInt(user.noun_body),
+                glasses: parseInt(user.noun_glasses),
+                head: parseInt(user.noun_head),
               }}
             />
           ))}
