@@ -151,7 +151,7 @@ function UserInfo({
             gap="20px"
           >
             <Typography fontWeight={600} fontSize={20}>
-              Badges ({context?.badges.length})
+              Badges ({context?.badges.reduce((acc, badge) => acc + parseInt(badge.tier), 0)})
             </Typography>
             <Box display="flex" gap="12px">
               {context?.badges.map((badge, key) => (
