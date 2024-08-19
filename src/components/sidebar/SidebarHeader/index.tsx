@@ -32,7 +32,12 @@ const SafeHeader = (): ReactElement => {
   const addressCopyText = settings.shortName.copy && chain ? `${chain.shortName}:${safeAddress}` : safeAddress
 
   const blockExplorerLink = chain ? getBlockExplorerLink(chain, safeAddress) : undefined
-
+  function truncateName(name, maxLength) {
+    if (name.length > maxLength) {
+      return `${name.substring(0, maxLength)}...`
+    }
+    return name
+  }
   const nounSeed = useMemo(() => {
     return {
       background: Number(superChainSmartAccount.data.noun[0]),
@@ -152,9 +157,9 @@ const SafeHeader = (): ReactElement => {
             </span>
             <div className={css.superChainData}>
               <p className={css.superChainId}>
-                {superChainSmartAccount.data.superChainID.split('.superchain')[0]}
+                {truncateName(superChainSmartAccount.data.superChainID.split('.superchain')[0], 12)}
                 <span>.superchain</span>
-              </p>
+              </p>{' '}
               <p className={css.superChainData_points}>
                 SC points: <span>{Number(superChainSmartAccount.data.points)}</span>
               </p>
