@@ -32,7 +32,7 @@ const SafeHeader = (): ReactElement => {
   const addressCopyText = settings.shortName.copy && chain ? `${chain.shortName}:${safeAddress}` : safeAddress
 
   const blockExplorerLink = chain ? getBlockExplorerLink(chain, safeAddress) : undefined
-  function truncateName(name, maxLength) {
+  function truncateName(name: string, maxLength: number) {
     if (name.length > maxLength) {
       return `${name.substring(0, maxLength)}...`
     }
