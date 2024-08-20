@@ -175,7 +175,7 @@ function BadgeInfo({
         <Typography fontWeight={600} fontSize={20}>
           My Badges ({currentBadge.tier}/{currentBadge?.badgeTiers.length})
         </Typography>
-        <Box display="flex" gap="12px">
+        <Box display="flex" flexWrap="wrap" justifyContent="center" gap="12px">
           {currentBadge?.badgeTiers.map((tier, key) => (
             <Tooltip
               arrow
