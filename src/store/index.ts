@@ -36,11 +36,13 @@ const rootReducer = combineReducers({
   [slices.pendingSafeMessagesSlice.name]: slices.pendingSafeMessagesSlice.reducer,
   [slices.batchSlice.name]: slices.batchSlice.reducer,
   [slices.undeployedSafesSlice.name]: slices.undeployedSafesSlice.reducer,
+  [slices.contactsSlice.name]: slices.contactsSlice.reducer,
 })
 
 const persistedSlices: (keyof PreloadedState<RootState>)[] = [
   slices.sessionSlice.name,
   slices.addressBookSlice.name,
+  slices.contactsSlice.name,
   slices.pendingTxsSlice.name,
   slices.addedSafesSlice.name,
   slices.settingsSlice.name,

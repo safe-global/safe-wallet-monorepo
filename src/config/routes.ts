@@ -9,7 +9,7 @@ export const AppRoutes = {
   home: '/home',
   badges: '/badges',
   cookie: '/cookie',
-  addressBook: '/address-book',
+  contacts: '/contacts',
   addOwner: '/addOwner',
   _offline: '/_offline',
   leaderboard: { index: '/leaderboard', monthly: '/leaderboard/monthly', weekly: '/leaderboard/weekly' },

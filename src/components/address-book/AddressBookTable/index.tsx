@@ -1,5 +1,5 @@
 import { useContext, useMemo, useState } from 'react'
-import { Box } from '@mui/material'
+import { Box, Stack, Typography } from '@mui/material'
 import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
 
 import EnhancedTable from '@/components/common/EnhancedTable'
@@ -27,6 +27,9 @@ import { TxModalContext, type TxModalContextType } from '@/components/tx-flow'
 import { TokenTransferFlow } from '@/components/tx-flow/flows'
 import CheckWallet from '@/components/common/CheckWallet'
 import madProps from '@/utils/mad-props'
+import useContacts from '@/hooks/useContacts'
+import { filter, includes } from 'lodash'
+import NounsAvatar from '@/components/common/NounsAvatar'
 
 const headCells = [
   { id: 'name', label: 'Name' },
@@ -73,71 +76,109 @@ function AddressBookTable({ chain, setTxFlow }: AddressBookTableProps) {
   }
 
   const addressBook = useAddressBook()
-  const addressBookEntries = Object.entries(addressBook)
+  const contacts = useContacts()
+  const mergedEntries = useMemo(() => {
+    return Object.keys(addressBook).reduce((acc, address) => {
+      const addressBookEntry = addressBook[address] as any
+      const contactEntry = contacts[address] as any
+      if (contacts[address]) {
+        acc[address] = {
+          ...addressBookEntry,
+          ...contactEntry,
+        }
+      } else {
+        acc[address] = addressBook[address]
+      }
+      return acc
+    }, {} as { [key: string]: any })
+  }, [addressBook, contacts])
+  const mergedEntriesArray = Object.entries(mergedEntries)
   const filteredEntries = useMemo(() => {
     if (!searchQuery) {
-      return addressBookEntries
+      return mergedEntriesArray
     }
 
     const query = searchQuery.toLowerCase()
-    return addressBookEntries.filter(([address, name]) => {
+    return mergedEntriesArray.filter(([address, value]) => {
+      const name = typeof value === 'string' ? value : value.name
       return address.toLowerCase().includes(query) || name.toLowerCase().includes(query)
     })
-  }, [addressBookEntries, searchQuery])
+  }, [mergedEntriesArray, searchQuery])
 
-  const rows = filteredEntries.map(([address, name]) => ({
-    cells: {
-      name: {
-        rawValue: name,
-        content: name,
+  const rows = filteredEntries.map(([address, value]) => {
+    const name = typeof value === 'string' ? value : value.name
+
+    return {
+      cells: {
+        name: {
+          rawValue: name,
+          content: name,
+        },
+        address: {
+          rawValue: address,
+          content:
+            typeof value === 'object' && value.superChainAccount ? (
+              <Stack direction="row" alignItems="center" spacing={1} justifyContent="flex-start">
+                <Box width="40px" borderRadius="6px">
+                  <NounsAvatar seed={value.superChainAccount.nounSeed} />
+                </Box>
+                <EthHashInfo
+                  showAvatar={false}
+                  address={address}
+                  showName={false}
+                  shortAddress={false}
+                  hasExplorer
+                  showCopyButton
+                  customAddressElement={<Typography>{value.superChainAccount.id}</Typography>}
+                />
+              </Stack>
+            ) : (
+              <EthHashInfo address={address} showName={false} shortAddress={false} hasExplorer showCopyButton />
+            ),
+        },
+        actions: {
+          rawValue: '',
+          sticky: true,
+          content: (
+            <div className={tableCss.actions}>
+              <Track {...ADDRESS_BOOK_EVENTS.EDIT_ENTRY}>
+                <Tooltip title="Edit entry" placement="top">
+                  <IconButton onClick={() => handleOpenModalWithValues(ModalType.ENTRY, address, name)} size="small">
+                    <SvgIcon component={EditIcon} inheritViewBox color="border" fontSize="small" />
+                  </IconButton>
+                </Tooltip>
+              </Track>
+
+              <Track {...ADDRESS_BOOK_EVENTS.DELETE_ENTRY}>
+                <Tooltip title="Delete entry" placement="top">
+                  <IconButton onClick={() => handleOpenModalWithValues(ModalType.REMOVE, address, name)} size="small">
+                    <SvgIcon component={DeleteIcon} inheritViewBox color="error" fontSize="small" />
+                  </IconButton>
+                </Tooltip>
+              </Track>
+
+              <CheckWallet>
+                {(isOk) => (
+                  <Track {...ADDRESS_BOOK_EVENTS.SEND}>
+                    <Button
+                      data-testid="send-btn"
+                      variant="contained"
+                      color="primary"
+                      size="small"
+                      onClick={() => setTxFlow(<TokenTransferFlow recipient={address} />)}
+                      disabled={!isOk}
+                    >
+                      Send
+                    </Button>
+                  </Track>
+                )}
+              </CheckWallet>
+            </div>
+          ),
+        },
       },
-      address: {
-        rawValue: address,
-        content: <EthHashInfo address={address} showName={false} shortAddress={false} hasExplorer showCopyButton />,
-      },
-      actions: {
-        rawValue: '',
-        sticky: true,
-        content: (
-          <div className={tableCss.actions}>
-            <Track {...ADDRESS_BOOK_EVENTS.EDIT_ENTRY}>
-              <Tooltip title="Edit entry" placement="top">
-                <IconButton onClick={() => handleOpenModalWithValues(ModalType.ENTRY, address, name)} size="small">
-                  <SvgIcon component={EditIcon} inheritViewBox color="border" fontSize="small" />
-                </IconButton>
-              </Tooltip>
-            </Track>
-
-            <Track {...ADDRESS_BOOK_EVENTS.DELETE_ENTRY}>
-              <Tooltip title="Delete entry" placement="top">
-                <IconButton onClick={() => handleOpenModalWithValues(ModalType.REMOVE, address, name)} size="small">
-                  <SvgIcon component={DeleteIcon} inheritViewBox color="error" fontSize="small" />
-                </IconButton>
-              </Tooltip>
-            </Track>
-
-            <CheckWallet>
-              {(isOk) => (
-                <Track {...ADDRESS_BOOK_EVENTS.SEND}>
-                  <Button
-                    data-testid="send-btn"
-                    variant="contained"
-                    color="primary"
-                    size="small"
-                    onClick={() => setTxFlow(<TokenTransferFlow recipient={address} />)}
-                    disabled={!isOk}
-                  >
-                    Send
-                  </Button>
-                </Track>
-              )}
-            </CheckWallet>
-          </div>
-        ),
-      },
-    },
-  }))
-
+    }
+  })
   return (
     <>
       <AddressBookHeader

@@ -4,6 +4,7 @@ import { AppRoutes } from '@/config/routes'
 import AccountIcon from '@/public/images/sidebar/account.svg'
 import BadgesIcon from '@/public/images/sidebar/badges.svg'
 import LeaderboardIcon from '@/public/images/sidebar/leaderboard.svg'
+import ContactsIcon from '@/public/images/sidebar/contacts.svg'
 // import AssetsIcon from '@/public/images/sidebar/assets.svg'
 import TransactionIcon from '@/public/images/sidebar/transactions.svg'
 // import ABIcon from '@/public/images/sidebar/address-book.svg'
@@ -40,15 +41,16 @@ export const navItems: NavItem[] = [
   //   href: AppRoutes.balances.index,
   // },
   {
+    label: 'Contacts',
+    icon: <SvgIcon component={ContactsIcon} inheritViewBox />,
+    href: AppRoutes.contacts,
+  },
+  {
     label: 'Transactions',
     icon: <SvgIcon component={TransactionIcon} inheritViewBox />,
     href: AppRoutes.transactions.history,
   },
-  // {
-  //   label: 'Address book',
-  //   icon: <SvgIcon component={ABIcon} inheritViewBox />,
-  //   href: AppRoutes.addressBook,
-  // },
+
   // {
   //   label: 'Apps',
   //   icon: <SvgIcon component={AppsIcon} inheritViewBox />,

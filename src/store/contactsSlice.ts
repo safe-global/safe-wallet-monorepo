@@ -4,30 +4,33 @@ import pickBy from 'lodash/pickBy'
 import type { RootState } from '.'
 import { NounSeed } from '@nouns/assets/dist/types'
 
-export type AddressBook = {
-  [address: string]: string
+export type Contacts = {
+  [address: string]: {
+    name: string
+    superChainAccount?: { id: string; nounSeed: NounSeed }
+  }
 }
 
-export type AddressBookState = { [chainId: string]: AddressBook }
+export type ContactsState = { [chainId: string]: Contacts }
 
-const initialState: AddressBookState = {}
+const initialState: ContactsState = {}
 
-export const addressBookSlice = createSlice({
-  name: 'addressBook',
+export const contactsSlice = createSlice({
+  name: 'contacts',
   initialState,
   reducers: {
-    migrate: (state, action: PayloadAction<AddressBookState>): AddressBookState => {
+    migrate: (state, action: PayloadAction<ContactsState>): ContactsState => {
       // Don't migrate if there's data already
       if (Object.keys(state).length > 0) return state
       // Otherwise, migrate
       return action.payload
     },
 
-    setAddressBook: (_, action: PayloadAction<AddressBookState>): AddressBookState => {
+    setContacts: (_, action: PayloadAction<ContactsState>): ContactsState => {
       return action.payload
     },
 
-    upsertAddressBookEntry: (
+    upsertContact: (
       state,
       action: PayloadAction<{
         chainId: string
@@ -41,10 +44,10 @@ export const addressBookSlice = createSlice({
         return
       }
       if (!state[chainId]) state[chainId] = {}
-      state[chainId][address] = name
+      state[chainId][address] = { name, superChainAccount }
     },
 
-    removeAddressBookEntry: (state, action: PayloadAction<{ chainId: string; address: string }>) => {
+    removeContact: (state, action: PayloadAction<{ chainId: string; address: string }>) => {
       const { chainId, address } = action.payload
       if (!state[chainId]) return state
       delete state[chainId][address]
@@ -54,17 +57,17 @@ export const addressBookSlice = createSlice({
   },
 })
 
-export const { setAddressBook, upsertAddressBookEntry, removeAddressBookEntry } = addressBookSlice.actions
+export const { removeContact, setContacts, upsertContact } = contactsSlice.actions
 
-export const selectAllAddressBooks = (state: RootState): AddressBookState => {
-  return state[addressBookSlice.name]
+export const selectAllContacts = (state: RootState): ContactsState => {
+  return state[contactsSlice.name]
 }
 
-export const selectAddressBookByChain = createSelector(
-  [selectAllAddressBooks, (_, chainId: string) => chainId],
-  (allAddressBooks, chainId): AddressBook => {
-    const chainAddresses = allAddressBooks[chainId]
+export const selectContactsByChain = createSelector(
+  [selectAllContacts, (_, chainId: string) => chainId],
+  (allContacts, chainId): Contacts => {
+    const chainAddresses = allContacts[chainId] || {}
     const validAddresses = pickBy(chainAddresses, (_, key) => validateAddress(key) === undefined)
-    return chainId ? validAddresses || {} : {}
+    return validAddresses
   },
 )

@@ -32,6 +32,8 @@ export type EthHashInfoProps = {
   trusted?: boolean
   ExplorerButtonProps?: ExplorerButtonProps
   shortAddressSize?: number
+  showAddress?: boolean
+  customAddressElement?: ReactElement
 }
 
 const stopPropagation = (e: SyntheticEvent) => e.stopPropagation()
@@ -55,6 +57,8 @@ const SrcEthHashInfo = ({
   trusted = true,
   shortAddressSize,
   setRemovePopulateContext,
+  showAddress = true,
+  customAddressElement,
 }: EthHashInfoProps & {
   isPopulated?: boolean
   setRemovePopulateContext?: (arg1: typeof REMOVE_POPULATE_INITIAL_STATE) => void
@@ -67,14 +71,20 @@ const SrcEthHashInfo = ({
 
   const addressElement = (
     <>
-      {showPrefix && shouldPrefix && prefix && <b>{prefix}:</b>}
-      <span>
-        {shortAddress || isMobile
-          ? shortenAddress(address, shortAddressSize ?? 4)
-          : isPopulated
-          ? shortenAddress(address, 6)
-          : address}
-      </span>
+      {customAddressElement ? (
+        customAddressElement
+      ) : (
+        <>
+          {showPrefix && shouldPrefix && prefix && <b>{prefix}:</b>}
+          <span>
+            {shortAddress || isMobile
+              ? shortenAddress(address, shortAddressSize ?? 4)
+              : isPopulated
+              ? shortenAddress(address, 6)
+              : address}
+          </span>
+        </>
+      )}
     </>
   )
 
@@ -101,15 +111,17 @@ const SrcEthHashInfo = ({
         )}
 
         <div className={css.addressContainer}>
-          <Box fontWeight="inherit" fontSize="inherit" overflow="hidden" textOverflow="ellipsis">
-            {copyAddress ? (
-              <CopyAddressButton prefix={prefix} address={address} copyPrefix={shouldCopyPrefix} trusted={trusted}>
-                {addressElement}
-              </CopyAddressButton>
-            ) : (
-              addressElement
-            )}
-          </Box>
+          {showAddress && (
+            <Box fontWeight="inherit" fontSize="inherit" overflow="hidden" textOverflow="ellipsis">
+              {copyAddress ? (
+                <CopyAddressButton prefix={prefix} address={address} copyPrefix={shouldCopyPrefix} trusted={trusted}>
+                  {addressElement}
+                </CopyAddressButton>
+              ) : (
+                addressElement
+              )}
+            </Box>
+          )}
 
           {showCopyButton && (
             <CopyAddressButton prefix={prefix} address={address} copyPrefix={shouldCopyPrefix} trusted={trusted} />
