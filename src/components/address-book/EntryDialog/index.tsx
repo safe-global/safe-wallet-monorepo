@@ -64,18 +64,6 @@ function EntryDialog({
       upsertAddressBookEntry({
         ...newData,
         chainId: chainId || currentChainId,
-        superChainAccount: data?.superChainSmartAccount
-          ? {
-              id: data.superChainSmartAccount.superChainId,
-              nounSeed: {
-                accessory: parseInt(data.superChainSmartAccount.noun_accessory),
-                background: parseInt(data.superChainSmartAccount.noun_background),
-                body: parseInt(data.superChainSmartAccount.noun_body),
-                glasses: parseInt(data.superChainSmartAccount.noun_glasses),
-                head: parseInt(data.superChainSmartAccount.noun_head),
-              },
-            }
-          : undefined,
       }),
     )
     console.debug('upserting contact')

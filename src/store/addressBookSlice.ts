@@ -33,10 +33,9 @@ export const addressBookSlice = createSlice({
         chainId: string
         address: string
         name: string
-        superChainAccount?: { id: string; nounSeed: NounSeed }
       }>,
     ) => {
-      const { chainId, address, name, superChainAccount } = action.payload
+      const { chainId, address, name } = action.payload
       if (name.trim() === '') {
         return
       }
