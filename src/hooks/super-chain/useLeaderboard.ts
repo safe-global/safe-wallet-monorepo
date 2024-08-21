@@ -16,6 +16,7 @@ export type Leaderboard = {
     superChainId: string
     badges: {
       id: string
+      tier: string
     }[]
     noun_body: string
     noun_head: string
@@ -29,6 +30,7 @@ export type Leaderboard = {
     superChainId: string
     badges: {
       id: string
+      tier: string
     }[]
     noun_body: string
     noun_head: string
@@ -52,6 +54,7 @@ export function useLeaderboard(user: Address) {
         superChainId
         badges {
           id
+          tier
         }
         noun_body
         noun_head
@@ -66,6 +69,7 @@ export function useLeaderboard(user: Address) {
         superChainId
         badges {
           id
+          tier
         }
         noun_body
         noun_head

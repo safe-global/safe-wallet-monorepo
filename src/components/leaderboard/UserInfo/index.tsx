@@ -119,7 +119,7 @@ function UserInfo({
 
               <Box width="100%" padding="12px" bgcolor="secondary.main">
                 <Typography textAlign="center" color="white">
-                  Level: <strong>4</strong>
+                  Level: <strong>{parseInt(context?.superchainsmartaccount[3])}</strong>
                 </Typography>
               </Box>
             </Box>
