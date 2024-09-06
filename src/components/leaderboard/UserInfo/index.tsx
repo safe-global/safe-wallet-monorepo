@@ -24,7 +24,6 @@ function UserInfo({
   isLoading: boolean
   handleClose: () => void
 }) {
-  console.debug({ context })
   const chain = useCurrentChain()
   const blockExplorerLink =
     chain && context ? getBlockExplorerLink(chain, context.superchainsmartaccount[0]) : undefined

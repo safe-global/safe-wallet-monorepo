@@ -4,12 +4,13 @@ import css from './styles.module.css'
 import PerkRaffle from '@/public/images/superchain/perk-raffle.svg'
 import SuperChainEcoStamp from '@/public/images/common/superchain-eco-stamp.svg'
 import Hearth from '@/public/images/common/hearth.svg'
+import { SafeAppData } from '@safe-global/safe-gateway-typescript-sdk'
 
-function SuperChainApp() {
+function SuperChainApp({ handleClick, safeApp }: { handleClick: (safeApp: SafeAppData) => void, safeApp: SafeAppData }) {
 
     return (
         <Grid item xs={12} sm={6} md={4} xl={4}>
-            <Paper onClick={() => window.open('https://super-chain-raffle.vercel.app/', '_blank')} className={css.container}>
+            <Paper onClick={() => handleClick(safeApp)} className={css.container}>
                 <Stack padding='24px' gap='12px' justifyContent='space-between' display='flex' height='100%' direction='column' >
                     <Box display="flex" justifyContent='space-between' alignItems="center">
                         <Stack direction='row' gap='12px' justifyContent='flex-start' alignItems='center' fontSize='42px'>

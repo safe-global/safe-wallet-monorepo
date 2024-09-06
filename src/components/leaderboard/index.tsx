@@ -40,7 +40,6 @@ function Leaderboard({ handleUserSelect }: { handleUserSelect: (_: string) => vo
       </main>
     )
   }
-  console.debug({ data })
 
   return (
     <main>

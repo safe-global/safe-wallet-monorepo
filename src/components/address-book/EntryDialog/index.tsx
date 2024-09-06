@@ -50,7 +50,6 @@ function EntryDialog({
 
   const { handleSubmit, formState, watch } = methods
   const watchedAddress = watch('address')
-  console.debug({ data, loading, error })
   useEffect(() => {
     if (isValidAddress(watchedAddress)) {
       setCurrentUser(watchedAddress as Address)
@@ -66,22 +65,21 @@ function EntryDialog({
         chainId: chainId || currentChainId,
       }),
     )
-    console.debug('upserting contact')
     dispatch(
       upsertContact({
         ...newData,
         chainId: chainId || currentChainId,
         superChainAccount: data?.superChainSmartAccount
           ? {
-              id: data.superChainSmartAccount.superChainId,
-              nounSeed: {
-                accessory: parseInt(data.superChainSmartAccount.noun_accessory),
-                background: parseInt(data.superChainSmartAccount.noun_background),
-                body: parseInt(data.superChainSmartAccount.noun_body),
-                glasses: parseInt(data.superChainSmartAccount.noun_glasses),
-                head: parseInt(data.superChainSmartAccount.noun_head),
-              },
-            }
+            id: data.superChainSmartAccount.superChainId,
+            nounSeed: {
+              accessory: parseInt(data.superChainSmartAccount.noun_accessory),
+              background: parseInt(data.superChainSmartAccount.noun_background),
+              body: parseInt(data.superChainSmartAccount.noun_body),
+              glasses: parseInt(data.superChainSmartAccount.noun_glasses),
+              head: parseInt(data.superChainSmartAccount.noun_head),
+            },
+          }
           : undefined,
       }),
     )

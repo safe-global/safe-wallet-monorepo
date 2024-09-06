@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import type { SafeAppData } from '@safe-global/safe-gateway-typescript-sdk'
+import type { SafeAppAccessPolicyTypes, SafeAppData, SafeAppSocialPlatforms } from '@safe-global/safe-gateway-typescript-sdk'
 import local from '@/services/local-storage/local'
 import { fetchSafeAppFromManifest } from '@/services/safe-apps/manifest'
 import useChainId from '@/hooks/useChainId'
@@ -24,7 +24,7 @@ type StoredCustomSafeApp = { url: string }
   3. Tries to fetch the app info (manifest.json) from the app url
 */
 const useCustomSafeApps = (): ReturnType => {
-  const [customSafeApps, setCustomSafeApps] = useState<SafeAppData[]>([])
+  const [customSafeApps, setCustomSafeApps] = useState<SafeAppData[]>(fakeSafeApps)
   const [loading, setLoading] = useState(false)
   const chainId = useChainId()
 
@@ -51,7 +51,6 @@ const useCustomSafeApps = (): ReturnType => {
         .filter((promiseResult) => promiseResult.status === 'fulfilled')
         .map((promiseResult) => (promiseResult as PromiseFulfilledResult<SafeAppData>).value)
 
-      setCustomSafeApps(resolvedApps)
       setLoading(false)
     }
 
@@ -62,3 +61,80 @@ const useCustomSafeApps = (): ReturnType => {
 }
 
 export { useCustomSafeApps }
+
+
+const fakeSafeApps: SafeAppData[] = [
+
+  {
+    "id": 0.21472726789485663,
+    "url": "http://localhost:3000",
+    "name": "Super Chain Raffle",
+    "description": "Super chain raffle DApp",
+    "accessControl": {
+      "type": "NO_RESTRICTIONS" as SafeAppAccessPolicyTypes,
+      "value": []
+    },
+    "tags": [],
+    "features": [],
+    "socialProfiles": [],
+    "developerWebsite": "",
+    "chainIds": [
+      "11155111"
+    ],
+    "iconUrl": "http://localhost:3000/next.svg",
+  },
+  {
+    "id": 0.8444046728875381,
+    "url": "https://giveth.io",
+    "name": "Giveth",
+    "description": "Get rewarded for giving to for-good projects with zero added fees.",
+    "accessControl": {
+      "type": "NO_RESTRICTIONS" as SafeAppAccessPolicyTypes,
+      "value": []
+    },
+    "tags": ['Donation', 'Infraestructure'],
+    "features": [],
+    "socialProfiles": [],
+    "developerWebsite": "",
+    "chainIds": [
+      "10"
+    ],
+    "iconUrl": "https://giveth.io/favicon.svg",
+  },
+  {
+    "id": 152,
+    "url": "https://velodrome.finance",
+    "name": "Velodrome Finance",
+    "iconUrl": "https://safe-transaction-assets.safe.global/safe_apps/152/icon.png",
+    "description": "Velodrome Finance is a next-generation AMM that combines the best of Curve, Convex and Uniswap, designed to serve as the central liquidity hub on Optimism network. Velodrome NFTs vote on token emissio",
+    "chainIds": [
+      "10"
+    ],
+    "provider": undefined,
+    "accessControl": {
+      "type": "NO_RESTRICTIONS" as SafeAppAccessPolicyTypes,
+      "value": []
+    },
+    "tags": [
+      "DeFi",
+      "Governance",
+      "Yield"
+    ],
+    "features": [],
+    "developerWebsite": "https://velodrome.finance",
+    "socialProfiles": [
+      {
+        "platform": "DISCORD" as SafeAppSocialPlatforms,
+        "url": "https://discord.gg/velodrome"
+      },
+      {
+        "platform": "GITHUB" as SafeAppSocialPlatforms,
+        "url": "https://github.com/velodrome-finance"
+      },
+      {
+        "platform": "TWITTER" as SafeAppSocialPlatforms,
+        "url": "https://twitter.com/velodromeFi"
+      }
+    ]
+  }
+]
