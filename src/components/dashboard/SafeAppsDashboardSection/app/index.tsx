@@ -5,8 +5,12 @@ import PerkRaffle from '@/public/images/superchain/perk-raffle.svg'
 import SuperChainEcoStamp from '@/public/images/common/superchain-eco-stamp.svg'
 import Hearth from '@/public/images/common/hearth.svg'
 import { SafeAppData } from '@safe-global/safe-gateway-typescript-sdk'
+import useSuperChainAccount from '@/hooks/super-chain/useSuperChainAccount'
+import { useAppSelector } from '@/store'
+import { selectSuperChainAccount } from '@/store/superChainAccountSlice'
 
 function SuperChainApp({ handleClick, safeApp }: { handleClick: (safeApp: SafeAppData) => void, safeApp: SafeAppData }) {
+    const superChainSmartAccount = useAppSelector(selectSuperChainAccount)
 
     return (
         <Grid item xs={12} sm={6} md={4} xl={4}>
@@ -51,7 +55,7 @@ function SuperChainApp({ handleClick, safeApp }: { handleClick: (safeApp: SafeAp
                         <div className={css.currentLevelInfo}>
 
                             <Typography>
-                                Claim 5 tickets per week
+                                Claim {`${Number(superChainSmartAccount.data.level)} ${Number(superChainSmartAccount.data.level) > 1 ? 'tickets' : 'ticket'}`}   per week
                             </Typography>
                         </div>
                     </Box>
