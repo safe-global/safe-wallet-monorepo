@@ -7,7 +7,7 @@ import TxNavigation from '@/components/transactions/TxNavigation'
 const TxHeader = ({ children }: { children?: ReactNode }): ReactElement => {
   return (
     <PageHeader
-      title="Transactioni"
+      title="Transaction"
       action={
         <div className={css.pageHeader}>
           <div className={css.navWrapper}>

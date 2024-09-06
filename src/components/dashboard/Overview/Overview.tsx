@@ -90,9 +90,9 @@ const Overview = (): ReactElement => {
                   justifyContent="flex-end"
                   flexWrap={{ xs: 'wrap', sm: 'nowrap' }}
                 >
-                  <Grid item xs={12} sm="auto">
+                  {/* <Grid item xs={12} sm="auto">
                     <BuyCryptoButton />
-                  </Grid>
+                  </Grid> */}
                   {/* 
                   <Grid item xs={6} sm="auto">
                     <Button
