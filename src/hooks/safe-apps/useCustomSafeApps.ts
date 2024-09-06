@@ -67,7 +67,7 @@ const fakeSafeApps: SafeAppData[] = [
 
   {
     "id": 0.21472726789485663,
-    "url": "http://localhost:3000",
+    "url": "https://raffle.superchain.eco/",
     "name": "Super Chain Raffle",
     "description": "Super chain raffle DApp",
     "accessControl": {

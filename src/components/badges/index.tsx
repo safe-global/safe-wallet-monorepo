@@ -46,13 +46,10 @@ function Badges() {
         level={Number(superChainAccount.level)}
         points={Number(superChainAccount.points)}
         pointsToNextLevel={Number(superChainAccount.pointsToNextLevel ?? superChainAccount.points)}
-        totalBadges={data?.currentBadges.length}
+        totalBadges={data?.currentBadges.reduce((acc, badge) => acc + badge.badgeTiers.length, 0)}
         completeBadges={
           data?.currentBadges.reduce((acc, badge) => {
-            if (!Number(badge.tier)) return acc
-            if (Number(badge.tier) === badge.badgeTiers.length) {
-              acc += 1
-            }
+            acc += Number(badge.tier)
             return acc
           }, 0) ?? 0
         }
