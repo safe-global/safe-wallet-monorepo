@@ -64,8 +64,7 @@ function ClaimModal({
             You still need{' '}
             <strong>
               {' '}
-              {Number(superChainAccount.pointsToNextLevel) -
-                (Number(superChainAccount.points) + (data?.totalPoints ?? 0))}{' '}
+              {Number(superChainAccount.pointsToNextLevel)}
               SC Point to level-up
             </strong>
           </Typography>
