@@ -61,11 +61,10 @@ function ClaimModal({
         </Box>
         {!data?.isLevelUp && (
           <Typography color="GrayText" fontSize={16}>
-            You still need{' '}
+            You still need
             <strong>
               {' '}
-              {Number(superChainAccount.pointsToNextLevel)}
-              SC Point to level-up
+              {Number(superChainAccount.pointsToNextLevel) - Number(superChainAccount.points)} SC Point to level-up{' '}
             </strong>
           </Typography>
         )}

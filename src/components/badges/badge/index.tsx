@@ -36,6 +36,9 @@ function Badge({
     }
     setCurrentBadge({ ...badge, isFavorite })
   }
+
+  const renderNextTier = data.claimableTier === Number(data.tier)
+
   return (
     <Card
       onClick={handlePickBadge}
@@ -74,12 +77,14 @@ function Badge({
               {!!Number(data.tier) ? (
                 <>
                   <Typography margin={0} textAlign="center" color="secondary.main">
-                    Unlock Next Tier:
+                    {renderNextTier ? 'Unlock Next Tier:' : 'Unlock First Tier:'}
                   </Typography>
                   <Typography textAlign="center" margin={0}>
                     {data.metadata.condition.replace(
                       '{{variable}}',
-                      data.badgeTiers[data.claimableTier ? data.claimableTier - 1 : 0].metadata.minValue.toString(),
+                      renderNextTier
+                        ? data.badgeTiers[data.claimableTier || 0].metadata.minValue.toString()
+                        : data.badgeTiers[data.claimableTier ? data.claimableTier - 1 : 0].metadata.minValue.toString(),
                     )}
                   </Typography>
                 </>
@@ -101,7 +106,13 @@ function Badge({
         <Box width="100%" display="flex" gap={1} pt={3} justifyContent="center" alignItems="center">
           {data.badgeTiers.length !== Number(data.tier) ? (
             <>
-              <strong>{!!Number(data.tier) ? data.points : data.badgeTiers[0].points}</strong>{' '}
+              <strong>
+                {renderNextTier
+                  ? data.badgeTiers[data.claimableTier || 0].points
+                  : !!Number(data.tier)
+                  ? data.points
+                  : data.badgeTiers[0].points}
+              </strong>{' '}
               <SvgIcon component={SuperChainPoints} inheritViewBox fontSize="medium" />
             </>
           ) : (

@@ -83,8 +83,9 @@ const clientSideEmotionCache = createEmotionCache()
 const queryClient = new QueryClient()
 
 export const AppProviders = ({ children }: { children: ReactNode | ReactNode[] }) => {
-  const isDarkMode = useDarkMode()
-  const themeMode = isDarkMode ? 'dark' : 'light'
+  // const isDarkMode = useDarkMode()
+  // const themeMode = isDarkMode ? 'dark' : 'light'
+  const themeMode = 'light'
   const client = new ApolloClient({
     uri:
       CHAIN_ID === sepolia.id.toString()

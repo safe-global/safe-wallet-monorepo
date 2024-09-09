@@ -39,7 +39,12 @@ function BadgeInfo({
       isFavorite: !currentBadge?.isFavorite,
     })
   }
+
   if (!currentBadge) return null
+
+  const renderNextTier = currentBadge.claimableTier === Number(currentBadge.tier)
+  const maxTierReached = Number(currentBadge.tier) === currentBadge.badgeTiers.length
+
   return (
     <Stack padding="24px" justifyContent="flex-start" alignItems="center" spacing={2} className={css.drawer}>
       <Box
@@ -88,43 +93,47 @@ function BadgeInfo({
           {currentBadge?.metadata.description}
         </Typography>
       </Box>
-      <Box
-        border={2}
-        borderRadius={1}
-        display="flex"
-        justifyContent="center"
-        width="100%"
-        alignItems="center"
-        padding="12px"
-        flexDirection="column"
-        borderColor="secondary.main"
-      >
-        {!!Number(currentBadge.tier) ? (
-          <>
-            <Typography fontSize={12} fontWeight={600} color="secondary.main">
-              Unlock Next Tier:
-            </Typography>
-            <Typography fontSize={12} fontWeight={400}>
-              {currentBadge.metadata.description.replace(
-                '{{variable}}',
-                currentBadge.badgeTiers[currentBadge.claimableTier! - 1].metadata.minValue.toString(),
-              )}
-            </Typography>
-          </>
-        ) : (
-          <>
-            <Typography fontSize={12} fontWeight={600} color="secondary.main">
-              Unlock First Tier:
-            </Typography>
-            <Typography fontSize={12} fontWeight={400}>
-              {currentBadge.metadata.condition.replace(
-                '{{variable}}',
-                currentBadge.badgeTiers[0].metadata.minValue.toString(),
-              )}
-            </Typography>
-          </>
-        )}
-      </Box>
+      {!maxTierReached && (
+        <Box
+          border={2}
+          borderRadius={1}
+          display="flex"
+          justifyContent="center"
+          width="100%"
+          alignItems="center"
+          padding="12px"
+          flexDirection="column"
+          borderColor="secondary.main"
+        >
+          {!!Number(currentBadge.tier) ? (
+            <>
+              <Typography fontSize={12} fontWeight={600} color="secondary.main">
+                Unlock Next Tier:
+              </Typography>
+              <Typography fontSize={12} fontWeight={400}>
+                {currentBadge.metadata.description.replace(
+                  '{{variable}}',
+                  renderNextTier
+                    ? currentBadge.badgeTiers[currentBadge.claimableTier!].metadata.minValue.toString()
+                    : currentBadge.badgeTiers[currentBadge.claimableTier! - 1].metadata.minValue.toString(),
+                )}
+              </Typography>
+            </>
+          ) : (
+            <>
+              <Typography fontSize={12} fontWeight={600} color="secondary.main">
+                Unlock First Tier:
+              </Typography>
+              <Typography fontSize={12} fontWeight={400}>
+                {currentBadge.metadata.condition.replace(
+                  '{{variable}}',
+                  currentBadge.badgeTiers[0].metadata.minValue.toString(),
+                )}
+              </Typography>
+            </>
+          )}
+        </Box>
+      )}
       <Box
         border={2}
         borderRadius={1}
@@ -143,13 +152,20 @@ function BadgeInfo({
         <Typography fontSize={12} fontWeight={500}>
           <strong>Current Tier:</strong> {currentBadge.tier ? currentBadge.tier : 0}
         </Typography>
-        <Typography fontSize={12} fontWeight={500}>
-          {!!Number(currentBadge.tier) ? (
-            <strong>Next rewards: {currentBadge.badgeTiers[currentBadge.claimableTier! - 1].points}</strong>
-          ) : (
-            <strong>First rewards: {currentBadge.badgeTiers[0].metadata.points} </strong>
-          )}
-        </Typography>
+        {!maxTierReached && (
+          <Typography fontSize={12} fontWeight={500}>
+            {!!Number(currentBadge.tier) ? (
+              <strong>
+                Next rewards:{' '}
+                {renderNextTier
+                  ? currentBadge.badgeTiers[currentBadge.claimableTier!].points
+                  : currentBadge.badgeTiers[currentBadge.claimableTier! - 1].points}
+              </strong>
+            ) : (
+              <strong>First rewards: {currentBadge.badgeTiers[0].metadata.points} </strong>
+            )}
+          </Typography>
+        )}
       </Box>
       <Box
         border={2}
