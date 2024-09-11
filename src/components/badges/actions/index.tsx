@@ -153,7 +153,7 @@ function BadgesActions({
                 onClick={() => mutate()}
                 endIcon={<SvgIcon component={History} inheritViewBox color="primary" />}
               >
-                {isPending ? 'Loading' : 'Update badges'}
+                {isPending ? 'Loading' : claimable ? 'Claim badges' : 'No claimable badges'}
               </Button>
             </Box>
           </Grid>
