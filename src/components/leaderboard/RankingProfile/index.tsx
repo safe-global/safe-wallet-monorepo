@@ -28,26 +28,35 @@ function RankingProfile({ isMainProfile, position, points, name, level, badges, 
       border={isMainProfile ? 2 : 0}
       borderColor="secondary.main"
       borderRadius="6px"
-      padding="8px 24px"
+      padding={{
+        xs: '4px 8px',
+        sm: '8px 24px',
+      }}
       bgcolor="white"
     >
       <Stack direction="row" alignItems="center" justifyContent="flex-start">
-        <Box width={28} height={28} display="flex" justifyContent="center" alignItems="center">
+        <Box height={28} width={28} display="flex" justifyContent="center" alignItems="center">
           <Typography fontWeight={500}>{position}</Typography>
         </Box>
-        <Stack paddingLeft={6} direction="row" alignItems="center" gap="12px">
+        <Stack paddingLeft={{ xs: 0, sm: 6 }} direction="row" alignItems="center" gap={{ xs: '6px', sm: '12px' }}>
           <Box width={32} height={32} borderRadius="6px">
             <NounsAvatar seed={noun} />
           </Box>
           <Typography fontSize={14}>
             <strong>{name.split('.superchain')[0]}</strong>.superchain
           </Typography>
-          <Box bgcolor="GrayText" padding="3px 12px" borderRadius="100px">
+          <Box display={{ xs: 'none', sm: 'block' }} bgcolor="GrayText" padding="3px 12px" borderRadius="100px">
             <Typography fontSize={12} fontWeight={500} color="white">
               Level: {level}
             </Typography>
           </Box>
-          <Box bgcolor="GrayText" padding="3px 12px" borderRadius="100px" color="white">
+          <Box
+            display={{ xs: 'none', sm: 'block' }}
+            bgcolor="GrayText"
+            padding="3px 12px"
+            borderRadius="100px"
+            color="white"
+          >
             <Typography fontSize={12} fontWeight={500} color="white">
               Badges: {badges}
             </Typography>
