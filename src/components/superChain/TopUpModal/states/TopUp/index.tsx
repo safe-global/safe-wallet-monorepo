@@ -1,5 +1,5 @@
 import { useMemo, useState, type ReactElement } from 'react'
-import { Box, Button, Grid, MenuItem, Select, SvgIcon, TextField } from '@mui/material'
+import { Box, Button, Grid, MenuItem, Select, SvgIcon, TextField, useMediaQuery } from '@mui/material'
 import { makeStyles } from '@mui/styles'
 import css from './styles.module.css'
 import classNames from 'classnames'
@@ -16,6 +16,8 @@ import { parseEther } from 'viem'
 import ModalDialog from '@/components/common/ModalDialog'
 import { useCurrentChain } from '@/hooks/useChains'
 import { getBlockExplorerLink } from '@/utils/chains'
+import { useTheme } from '@emotion/react'
+import { shortenAddress } from '@/utils/formatters'
 const useStyles = makeStyles({
   select: {
     color: 'white',
@@ -74,6 +76,9 @@ function TopUp({
     setCustomValue(event.target.value)
     setSelectedValue(null)
   }
+
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
   const handleTopUpClick = () => {
     const value = selectedValue !== null ? parseEther(etherValues[selectedValue].toString()) : parseEther(customValue)
     handleTopUp(value)
@@ -174,7 +179,9 @@ function TopUp({
                 <Box display="flex" lineHeight={1.2} gap={1}>
                   <p>
                     <strong>oeth:</strong>
-                    {superChainSmartAccount.data.smartAccount}
+                    {isMobile
+                      ? shortenAddress(superChainSmartAccount.data.smartAccount, 4)
+                      : superChainSmartAccount.data.smartAccount}
                   </p>
                   <CopyButton text={superChainSmartAccount.data.smartAccount} />
                   <Box color="border.main">
