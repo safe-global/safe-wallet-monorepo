@@ -52,27 +52,27 @@ const SafeAppDetails = ({ app, showDefaultListWarning }: DetailsProps) => (
       </Box>
     </Box>
     <Divider sx={{ mt: 4 }} />
-    {showDefaultListWarning && (
-      <Box sx={{ display: 'flex', flexDirection: 'column', mt: 4 }}>
-        <Box sx={{ mb: 4 }}>
-          <Box sx={{ display: 'flex' }}>
-            {/* 
-            //@ts-ignore - "warning.dark" is a present in the palette */}
-            <SvgIcon component={WarningIcon} inheritViewBox color="warning.dark" />
-            <Typography variant="h5" sx={({ palette }) => ({ color: palette.warning.dark })}>
-              Warning
-            </Typography>
-          </Box>
-          <Typography variant="body1" mt={1} sx={({ palette }) => ({ color: palette.warning.dark })}>
-            The application is not in the default Safe App list
-          </Typography>
-          <Typography variant="body2" mt={2}>
-            Check the app link and ensure it comes from a trusted source
-          </Typography>
-        </Box>
-        <Divider />
-      </Box>
-    )}
+    {showDefaultListWarning &&
+      // <Box sx={{ display: 'flex', flexDirection: 'column', mt: 4 }}>
+      //   <Box sx={{ mb: 4 }}>
+      //     <Box sx={{ display: 'flex' }}>
+      //       {/*
+      //       //@ts-ignore - "warning.dark" is a present in the palette */}
+      //       <SvgIcon component={WarningIcon} inheritViewBox color="warning.dark" />
+      //       <Typography variant="h5" sx={({ palette }) => ({ color: palette.warning.dark })}>
+      //         Warning
+      //       </Typography>
+      //     </Box>
+      //     <Typography variant="body1" mt={1} sx={({ palette }) => ({ color: palette.warning.dark })}>
+      //       The application is not in the default Safe App list
+      //     </Typography>
+      //     <Typography variant="body2" mt={2}>
+      //       Check the app link and ensure it comes from a trusted source
+      //     </Typography>
+      //   </Box>
+      //   <Divider />
+      // </Box>
+      null}
   </Box>
 )
 
