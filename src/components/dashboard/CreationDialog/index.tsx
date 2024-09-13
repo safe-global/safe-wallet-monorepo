@@ -7,8 +7,10 @@ import HomeIcon from '@/public/images/sidebar/home.svg'
 
 import AccountIcon from '@/public/images/sidebar/account.svg'
 import BadgesIcon from '@/public/images/sidebar/badges.svg'
-
+import ContactsIcon from '@/public/images/sidebar/contacts.svg'
+import AppsIcon from '@/public/images/sidebar/apps.svg'
 import TransactionIcon from '@/public/images/sidebar/transactions.svg'
+import LeaderBoardIcon from '@/public/images/sidebar/leaderboard.svg'
 import { useRemoteSafeApps } from '@/hooks/safe-apps/useRemoteSafeApps'
 import { useCurrentChain } from '@/hooks/useChains'
 import { CREATION_MODAL_QUERY_PARAM } from '@/components/new-safe/create/logic'
@@ -63,23 +65,23 @@ const CreationDialog = () => {
             description="Keep track of your progress andd stay up to date on the latest tasks."
           />
           <HintItem
+            Icon={LeaderBoardIcon}
+            title="Leaderboard"
+            description="Climb the leaderboard and get to the top of the Superchain."
+          />
+          <HintItem
             Icon={TransactionIcon}
             title="Transactions"
             description="Receive, send and manage all your Superchain transactions in one place."
           />
           <HintItem
-            Icon={AccountIcon}
-            title="Account"
-            description="Review, approve, execute and keep track of asset movement."
+            Icon={ContactsIcon}
+            title="Contacts"
+            description="Keep all your address and contacts in one spot."
           />
           <HintItem
-            Icon={BadgesIcon}
-            title="Badges"
-            description="Keep track of your progress andd stay up to date on the latest tasks."
-          />
-          <HintItem
-            Icon={TransactionIcon}
-            title="Transactions"
+            Icon={AppsIcon}
+            title="Apps"
             description="Receive, send and manage all your Superchain transactions in one place."
           />
         </Grid>
