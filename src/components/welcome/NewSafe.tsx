@@ -8,6 +8,7 @@ import Transactions from '@/public/images/common/transactions.svg'
 import CardFooter from '@/public/images/common/footer-card.svg'
 
 import WelcomeLogin from './WelcomeLogin'
+import { autoBatchEnhancer } from '@reduxjs/toolkit'
 
 const BulletListItem = ({ text, icon }: { text: string; icon: any }) => (
   <li>
@@ -31,9 +32,11 @@ const NewSafe = () => {
               component={CardFooter}
               inheritViewBox
               style={{
-                width: '100%',
-                height: 'auto',
+                minWidth: '100%',
+                width: 'auto',
+                height: '211px',
                 position: 'absolute',
+                zIndex: 0,
                 bottom: 0,
                 right: 0,
               }}

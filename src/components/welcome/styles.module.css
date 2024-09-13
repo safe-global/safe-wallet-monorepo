@@ -2,6 +2,7 @@
   list-style: none;
   margin-bottom: auto;
   padding: 0;
+  z-index: 1;
 }
 
 .bulletList li {
@@ -77,6 +78,7 @@
   position: relative;
   background: linear-gradient(0deg, #8c0212, #eb001a);
   background-size: 200% 200%;
+  overflow-y: hidden;
   animation: gradient 15s ease infinite;
   border-radius: 6px;
   padding: var(--space-9);
