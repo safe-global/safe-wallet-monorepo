@@ -80,7 +80,7 @@ function BadgesActions({
           </Typography>
         </Grid>
         <Grid container spacing={2} item>
-          <Grid item xs={7}>
+          <Grid item xs={12} lg={7}>
             <TextField
               placeholder="Search by name or network"
               variant="filled"
@@ -97,7 +97,7 @@ function BadgesActions({
               fullWidth
             />
           </Grid>
-          <Grid item xs={5}>
+          <Grid item xs={12} lg={5}>
             <Box display="flex" gap={2}>
               <Select
                 fullWidth
