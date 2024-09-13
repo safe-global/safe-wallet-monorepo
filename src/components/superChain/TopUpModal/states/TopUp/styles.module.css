@@ -14,7 +14,8 @@
   margin: 0;
 }
 .amountButton {
-  width: 42px;
+  min-width: 42px;
+  max-width: 70px;
   height: 56px;
 }
 

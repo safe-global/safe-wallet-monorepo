@@ -84,7 +84,7 @@ function TopUp({
   return (
     <ModalDialog hideChainIndicator dialogTitle="Top-up your account" open={open} onClose={onClose}>
       <Grid>
-        <Grid item>
+        <Grid item xs={12}>
           <Box display="flex" gap={2} className={classNames(css.container, css.optimismBadge)}>
             <Image
               src="https://safe-transaction-assets.safe.global/chains/10/chain_logo.png"
@@ -105,61 +105,65 @@ function TopUp({
           </Box>
         </Grid>
         <Grid item>
-          <Box justifyContent="space-between" alignItems="center" display="flex" className={css.container}>
-            <Box justifyContent="flex-start" alignItems="center" gap={2} display="flex">
-              <Select
-                className={classes.select}
-                inputProps={{
-                  classes: {
-                    icon: classes.icon,
-                    root: classes.root,
-                  },
-                }}
-                value="OETH"
-              >
-                <MenuItem value="OETH">
-                  <Box pr={1} display="flex" gap={1}>
-                    <SvgIcon component={OETH} />
-                    ETH
-                  </Box>
-                </MenuItem>
-              </Select>
-              {etherValues.map((value, index) => (
-                <Button
-                  key={index}
-                  onClick={() => setSelectedValue(index)}
-                  disabled={value > Number(wallet?.balance ?? 0)}
-                  className={css.amountButton}
-                  variant={selectedValue === index ? 'contained' : 'outlined'}
-                >
-                  {value}
-                </Button>
-              ))}
-              <TextField
-                variant="outlined"
-                placeholder="0.2"
-                value={customValue}
-                onSelect={() => setSelectedValue(null)}
-                onChange={handleCustomValueChange}
-                className={css.amountButton}
-                style={{
-                  width: '100%',
-                  textAlign: 'center',
-                }}
-              />
+          <Box
+            justifyContent="flex-start"
+            gap={2}
+            flexWrap="wrap"
+            alignItems="center"
+            display="flex"
+            className={css.container}
+          >
+            <Select
+              className={classes.select}
+              inputProps={{
+                classes: {
+                  icon: classes.icon,
+                  root: classes.root,
+                },
+              }}
+              value="OETH"
+            >
+              <MenuItem value="OETH">
+                <Box pr={1} display="flex" gap={1}>
+                  <SvgIcon component={OETH} />
+                  ETH
+                </Box>
+              </MenuItem>
+            </Select>
+            {etherValues.map((value, index) => (
               <Button
-                className={css.topUpButton}
-                onClick={handleTopUpClick}
-                variant="contained"
-                color="secondary"
-                disabled={selectedValue === null && (customValue === '' || Number(customValue) === 0)}
+                key={index}
+                onClick={() => setSelectedValue(index)}
+                disabled={value > Number(wallet?.balance ?? 0)}
+                className={css.amountButton}
+                variant={selectedValue === index ? 'contained' : 'outlined'}
               >
-                Top up
+                {value}
               </Button>
-            </Box>
+            ))}
+            <TextField
+              variant="outlined"
+              placeholder="0.2"
+              value={customValue}
+              onSelect={() => setSelectedValue(null)}
+              onChange={handleCustomValueChange}
+              className={css.amountButton}
+              style={{
+                textAlign: 'center',
+              }}
+            />
+            <Button
+              className={css.topUpButton}
+              onClick={handleTopUpClick}
+              variant="contained"
+              color="secondary"
+              disabled={selectedValue === null && (customValue === '' || Number(customValue) === 0)}
+            >
+              Top up
+            </Button>
           </Box>
         </Grid>
-        <Grid item>
+        <Grid item xs={12}>
           {!superChainSmartAccount.loading && (
             <Box display="flex" gap={2} alignItems="center" className={css.container}>
               <div className={css.noun}>
