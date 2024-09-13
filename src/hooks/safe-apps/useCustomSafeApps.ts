@@ -82,7 +82,7 @@ const fakeSafeApps: SafeAppData[] = [
     "socialProfiles": [],
     "developerWebsite": "",
     "chainIds": [
-      "11155111"
+      "10"
     ],
     "iconUrl": "http://localhost:3000/next.svg",
   },
