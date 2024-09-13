@@ -12,12 +12,13 @@ import type { NextRouter } from 'next/router'
 
 import type { UrlObject } from 'url'
 import SafeAppIconCard from '@/components/safe-apps/SafeAppIconCard'
-import SafeAppActionButtons from '@/components/safe-apps/SafeAppActionButtons'
 import SafeAppTags from '@/components/safe-apps/SafeAppTags'
 import { isOptimizedForBatchTransactions } from '@/components/safe-apps/utils'
 import { AppRoutes } from '@/config/routes'
 import BatchIcon from '@/public/images/apps/batch-icon.svg'
 import css from './styles.module.css'
+import { Box, CardActions, Stack } from '@mui/material'
+import SafeAppPerks from '../SafeAppPerks'
 
 type SafeAppCardProps = {
   safeApp: SafeAppData
@@ -26,6 +27,7 @@ type SafeAppCardProps = {
   onBookmarkSafeApp?: (safeAppId: number) => void
   removeCustomApp?: (safeApp: SafeAppData) => void
   openPreviewDrawer?: (safeApp: SafeAppData) => void
+  perks?: ReactNode | string
 }
 
 const SafeAppCard = ({
@@ -35,6 +37,7 @@ const SafeAppCard = ({
   onBookmarkSafeApp,
   removeCustomApp,
   openPreviewDrawer,
+  perks,
 }: SafeAppCardProps) => {
   const router = useRouter()
 
@@ -49,6 +52,7 @@ const SafeAppCard = ({
       removeCustomApp={removeCustomApp}
       onClickSafeApp={onClickSafeApp}
       openPreviewDrawer={openPreviewDrawer}
+      perks={perks}
     />
   )
 }
@@ -72,6 +76,7 @@ type SafeAppCardViewProps = {
   onBookmarkSafeApp?: (safeAppId: number) => void
   removeCustomApp?: (safeApp: SafeAppData) => void
   openPreviewDrawer?: (safeApp: SafeAppData) => void
+  perks?: ReactNode | string
 }
 
 const SafeAppCardGridView = ({
@@ -82,6 +87,7 @@ const SafeAppCardGridView = ({
   onBookmarkSafeApp,
   removeCustomApp,
   openPreviewDrawer,
+  perks,
 }: SafeAppCardViewProps) => {
   return (
     <SafeAppCardContainer safeAppUrl={safeAppUrl} onClickSafeApp={onClickSafeApp} height="100%">
@@ -96,36 +102,35 @@ const SafeAppCardGridView = ({
             )}
 
             {/* Safe App Icon */}
-            <SafeAppIconCard src={safeApp.iconUrl} alt={`${safeApp.name} logo`} />
+            <Stack direction="row" gap="12px" justifyContent="flex-start" alignItems="center" fontSize="42px">
+              <SafeAppIconCard src={safeApp.iconUrl} alt={`${safeApp.name} logo`} />
+              <Typography className={css.safeAppTitle} gutterBottom variant="h5">
+                {safeApp.name}
+              </Typography>
+            </Stack>
+
+            <SafeAppTags tags={safeApp.tags} />
           </div>
         }
         action={
           <>
             {/* Safe App Action Buttons */}
-            <SafeAppActionButtons
+            {/* <SafeAppActionButtons
               safeApp={safeApp}
               isBookmarked={isBookmarked}
               onBookmarkSafeApp={onBookmarkSafeApp}
               removeCustomApp={removeCustomApp}
               openPreviewDrawer={openPreviewDrawer}
-            />
+            /> */}
           </>
         }
       />
 
       <CardContent className={css.safeAppContent}>
-        {/* Safe App Title */}
-        <Typography className={css.safeAppTitle} gutterBottom variant="h5">
-          {safeApp.name}
-        </Typography>
-
-        {/* Safe App Description */}
         <Typography className={css.safeAppDescription} variant="body2" color="text.secondary">
           {safeApp.description}
         </Typography>
-
-        {/* Safe App Tags */}
-        <SafeAppTags tags={safeApp.tags} />
+        <SafeAppPerks content={perks} />
       </CardContent>
     </SafeAppCardContainer>
   )

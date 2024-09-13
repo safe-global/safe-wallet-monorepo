@@ -20,15 +20,15 @@ import { fetchSafeAppFromManifest } from '@/services/safe-apps/manifest'
 import { useEffect } from 'react'
 import { useCustomSafeApps } from '@/hooks/safe-apps/useCustomSafeApps'
 import { SafeAppData } from '@safe-global/safe-gateway-typescript-sdk'
+import data from '@/pages/_settings/data'
+import { useAppSelector } from '@/store'
+import { selectSuperChainAccount } from '@/store/superChainAccountSlice'
 
 const SafeAppsDashboardSection = () => {
   const { customSafeApps } = useCustomSafeApps()
   const { isPreviewDrawerOpen, previewDrawerApp, openPreviewDrawer, closePreviewDrawer } = useSafeAppPreviewDrawer()
 
-  const handleClickSafeApp = (safeApp: SafeAppData) => {
-    openPreviewDrawer(safeApp)
-  }
-
+  const superChainSmartAccount = useAppSelector(selectSuperChainAccount)
 
   return (
     <>
@@ -38,11 +38,30 @@ const SafeAppsDashboardSection = () => {
         </Typography>
 
         <Grid container spacing={3}>
-          <SuperChainApp handleClick={handleClickSafeApp} safeApp={customSafeApps[0]} />
+          <Grid item xs={12} sm={6} md={4} xl={4}>
+            <SafeAppCard
+              safeApp={customSafeApps[0]}
+              onBookmarkSafeApp={() => {}}
+              isBookmarked={false}
+              onClickSafeApp={() => openPreviewDrawer(customSafeApps[0])}
+              openPreviewDrawer={openPreviewDrawer}
+              perks={
+                superChainSmartAccount.data.level ? (
+                  <Typography>
+                    Claim{' '}
+                    {`${Number(superChainSmartAccount.data.level)} ${
+                      Number(superChainSmartAccount.data.level) > 1 ? 'tickets' : 'ticket'
+                    }`}{' '}
+                    per week
+                  </Typography>
+                ) : null
+              }
+            />
+          </Grid>
           <Grid item xs={12} sm={6} md={4} xl={4}>
             <SafeAppCard
               safeApp={customSafeApps[1]}
-              onBookmarkSafeApp={() => { }}
+              onBookmarkSafeApp={() => {}}
               isBookmarked={false}
               onClickSafeApp={() => openPreviewDrawer(customSafeApps[1])}
               openPreviewDrawer={openPreviewDrawer}
@@ -51,13 +70,12 @@ const SafeAppsDashboardSection = () => {
           <Grid item xs={12} sm={6} md={4} xl={4}>
             <SafeAppCard
               safeApp={customSafeApps[2]}
-              onBookmarkSafeApp={() => { }}
+              onBookmarkSafeApp={() => {}}
               isBookmarked={false}
               onClickSafeApp={() => openPreviewDrawer(customSafeApps[2])}
               openPreviewDrawer={openPreviewDrawer}
             />
           </Grid>
-
 
           {/* <Paper>
           <Typography variant="h5" component="h2">
@@ -93,11 +111,7 @@ const SafeAppsDashboardSection = () => {
         onBookmark={togglePin}
         /> */}
       </WidgetContainer>
-      <SafeAppPreviewDrawer
-        isOpen={isPreviewDrawerOpen}
-        safeApp={previewDrawerApp}
-        onClose={closePreviewDrawer}
-      />
+      <SafeAppPreviewDrawer isOpen={isPreviewDrawerOpen} safeApp={previewDrawerApp} onClose={closePreviewDrawer} />
     </>
   )
 }
@@ -105,7 +119,6 @@ const SafeAppsDashboardSection = () => {
 export default SafeAppsDashboardSection
 
 const ExploreSafeAppsCard = () => {
-
   const router = useRouter()
   const safeAppsLink = `${AppRoutes.apps.index}?safe=${router.query.safe}`
 
@@ -116,7 +129,6 @@ const ExploreSafeAppsCard = () => {
       <Button data-testid="explore-apps-btn" variant="contained" size="small">
         Explore Safe Apps
       </Button>
-
     </SafeAppCardContainer>
   )
 }
