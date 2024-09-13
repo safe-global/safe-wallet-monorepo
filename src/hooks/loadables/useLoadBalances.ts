@@ -24,6 +24,14 @@ const useTokenListSetting = (): boolean | undefined => {
   return isTrustedTokenList
 }
 
+const tokensLogoToInject = [
+  {
+    address: '0x4200000000000000000000000000000000000042',
+    logoUri: '/tokens/0x4200000000000000000000000000000000000042.png',
+  }
+]
+
+
 export const useLoadBalances = (): AsyncResult<SafeBalanceResponse> => {
   const [pollCount, resetPolling] = useIntervalCounter(POLLING_INTERVAL)
   const currency = useAppSelector(selectCurrency)
@@ -35,16 +43,23 @@ export const useLoadBalances = (): AsyncResult<SafeBalanceResponse> => {
 
   // Re-fetch assets when the entire SafeInfo updates
   const [data, error, loading] = useAsync<SafeBalanceResponse | undefined>(
-    () => {
+    async () => {
       if (!chainId || !safeAddress || isTrustedTokenList === undefined) return
 
       if (!safe.deployed) {
         return getCounterfactualBalance(safeAddress, web3, chain)
       }
 
-      return getBalances(chainId, safeAddress, currency, {
+      let balances = await getBalances(chainId, safeAddress, currency, {
         trusted: isTrustedTokenList,
       })
+
+      balances.items = balances.items.map((balance) => {
+        const logo = tokensLogoToInject.find((token) => token.address === balance.tokenInfo.address)
+        return logo ? { ...balance, tokenInfo: { ...balance.tokenInfo, logoUri: logo.logoUri } } : balance
+      })
+      console.debug('Balances:', balances)
+      return balances
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [safeAddress, chainId, currency, isTrustedTokenList, pollCount, safe.deployed, web3, chain],
