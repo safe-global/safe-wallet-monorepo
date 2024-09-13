@@ -58,8 +58,8 @@ declare module '@mui/material/Button' {
 }
 
 const createSafeTheme = (mode: PaletteMode): Theme => {
-  const isDarkMode = mode === 'dark'
-  const colors = isDarkMode ? darkPalette : palette
+  const isDarkMode = false
+  const colors = palette
   const shadowColor = colors.primary.light
 
   return createTheme({

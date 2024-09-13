@@ -67,6 +67,21 @@ const CreationDialog = () => {
             title="Transactions"
             description="Receive, send and manage all your Superchain transactions in one place."
           />
+          <HintItem
+            Icon={AccountIcon}
+            title="Account"
+            description="Review, approve, execute and keep track of asset movement."
+          />
+          <HintItem
+            Icon={BadgesIcon}
+            title="Badges"
+            description="Keep track of your progress andd stay up to date on the latest tasks."
+          />
+          <HintItem
+            Icon={TransactionIcon}
+            title="Transactions"
+            description="Receive, send and manage all your Superchain transactions in one place."
+          />
         </Grid>
       </DialogContent>
       <Button
