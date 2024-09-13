@@ -63,11 +63,11 @@ const Dashboard = (): ReactElement => {
         </Grid>
         {safe.deployed && (
           <>
-            <Grid item xs={8}>
+            <Grid item xs={12} lg={8}>
               <Balances />
             </Grid>
 
-            <Grid item xs={4}>
+            <Grid item xs={12} lg={4}>
               <SuperChainEOAS />
             </Grid>
             {/* {showRecoveryWidget ? (
