@@ -23,7 +23,7 @@ const TokenAmountInput = ({
   balances: SafeBalanceResponse['items']
   selectedToken: SafeBalanceResponse['items'][number] | undefined
   maxAmount?: bigint
-  validate?: (value: string) => string | undefined,
+  validate?: (value: string) => string | undefined
 }) => {
   const {
     formState: { errors },
@@ -31,7 +31,7 @@ const TokenAmountInput = ({
     resetField,
     watch,
     setValue,
-  } = useFormContext<{ [TokenAmountFields.tokenAddress]: string;[TokenAmountFields.amount]: string }>()
+  } = useFormContext<{ [TokenAmountFields.tokenAddress]: string; [TokenAmountFields.amount]: string }>()
 
   const tokenAddress = watch(TokenAmountFields.tokenAddress)
   const isAmountError = !!errors[TokenAmountFields.tokenAddress] || !!errors[TokenAmountFields.amount]
@@ -52,17 +52,13 @@ const TokenAmountInput = ({
     })
   }, [maxAmount, selectedToken, setValue])
 
-  const currentBalance = useMemo(() => (
-    balances.find(item => item.tokenInfo.address === tokenAddress)
+  const currentBalance = useMemo(
+    () => balances.find((item) => item.tokenInfo.address === tokenAddress),
+    [balances, tokenAddress],
   )
-    , [balances, tokenAddress])
 
   return (
-    <FormControl
-      data-testid="token-amount-section"
-      className={classNames({ [css.error]: isAmountError })}
-      fullWidth
-    >
+    <FormControl data-testid="token-amount-section" className={classNames({ [css.error]: isAmountError })} fullWidth>
       <InputLabel shrink required className={css.label}>
         {errors[TokenAmountFields.tokenAddress]?.message || errors[TokenAmountFields.amount]?.message || 'Amount'}
       </InputLabel>
@@ -87,6 +83,8 @@ const TokenAmountInput = ({
           data-testid="token-balance"
           variant="standard"
           disableUnderline
+          IconComponent={() => null}
+          inputProps={{ sx: { padding: '0 !important' } }}
           className={css.select}
           {...register(TokenAmountFields.tokenAddress, {
             required: true,
@@ -104,18 +102,17 @@ const TokenAmountInput = ({
           ))}
         </Select>
       </div>
-      {
-        currentBalance && (
-          <Box width='100%' display='flex' justifyContent='flex-end' gap={1} alignItems='center' padding={1}>
-            <Typography variant="caption" component="p">
-              Balcance: {formatVisualAmount(currentBalance.balance, currentBalance.tokenInfo.decimals)} {currentBalance.tokenInfo.symbol}
-            </Typography>
-            <Typography className={css.max} data-testid="max-btn" onClick={onMaxAmountClick}>
-              Max
-            </Typography>
-          </Box>
-        )
-      }
+      {currentBalance && (
+        <Box width="100%" display="flex" justifyContent="flex-end" gap={1} alignItems="center" padding={1}>
+          <Typography variant="caption" component="p">
+            Balcance: {formatVisualAmount(currentBalance.balance, currentBalance.tokenInfo.decimals)}{' '}
+            {currentBalance.tokenInfo.symbol}
+          </Typography>
+          <Typography className={css.max} data-testid="max-btn" onClick={onMaxAmountClick}>
+            Max
+          </Typography>
+        </Box>
+      )}
     </FormControl>
   )
 }

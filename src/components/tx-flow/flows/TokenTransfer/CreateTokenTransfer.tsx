@@ -65,8 +65,8 @@ export const CreateTokenTransfer = ({
       [TokenTransferFields.type]: disableSpendingLimit
         ? TokenTransferType.multiSig
         : isOnlySpendingLimitBeneficiary
-          ? TokenTransferType.spendingLimit
-          : params.type,
+        ? TokenTransferType.spendingLimit
+        : params.type,
       [TokenTransferFields.tokenAddress]: isOnlySpendingLimitBeneficiary
         ? balancesItems[0]?.tokenInfo.address
         : params.tokenAddress,
@@ -109,15 +109,6 @@ export const CreateTokenTransfer = ({
           </FormControl>
 
           <TokenAmountInput balances={balancesItems} selectedToken={selectedToken} maxAmount={maxAmount} />
-
-          {isDisabled && (
-            <Box display="flex" alignItems="center" mt={-2} mb={3}>
-              <SvgIcon component={InfoIcon} color="error" fontSize="small" />
-              <Typography variant="body2" color="error" ml={0.5}>
-                $SAFE is currently non-transferable.
-              </Typography>
-            </Box>
-          )}
 
           {!disableSpendingLimit && spendingLimitAmount > 0n && (
             <FormControl fullWidth sx={{ mt: 3 }}>

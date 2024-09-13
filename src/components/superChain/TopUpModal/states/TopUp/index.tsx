@@ -1,5 +1,5 @@
 import { useMemo, useState, type ReactElement } from 'react'
-import { Box, Button, Grid, MenuItem, Select, SvgIcon, TextField, useMediaQuery } from '@mui/material'
+import { Box, Button, Grid, MenuItem, Select, SvgIcon, TextField, useMediaQuery, useTheme } from '@mui/material'
 import { makeStyles } from '@mui/styles'
 import css from './styles.module.css'
 import classNames from 'classnames'
@@ -16,7 +16,6 @@ import { parseEther } from 'viem'
 import ModalDialog from '@/components/common/ModalDialog'
 import { useCurrentChain } from '@/hooks/useChains'
 import { getBlockExplorerLink } from '@/utils/chains'
-import { useTheme } from '@emotion/react'
 import { shortenAddress } from '@/utils/formatters'
 const useStyles = makeStyles({
   select: {
@@ -113,7 +112,7 @@ function TopUp({
           <Box
             justifyContent="flex-start"
             gap={2}
-            flexWrap="wrap"
+            flexWrap={{ xs: 'wrap', sm: 'nowrap' }}
             alignItems="center"
             display="flex"
             className={css.container}
@@ -141,6 +140,9 @@ function TopUp({
                 onClick={() => setSelectedValue(index)}
                 disabled={value > Number(wallet?.balance ?? 0)}
                 className={css.amountButton}
+                style={{
+                  maxWidth: '50px',
+                }}
                 variant={selectedValue === index ? 'contained' : 'outlined'}
               >
                 {value}
@@ -181,7 +183,7 @@ function TopUp({
                     <strong>oeth:</strong>
                     {isMobile
                       ? shortenAddress(superChainSmartAccount.data.smartAccount, 4)
-                      : superChainSmartAccount.data.smartAccount}
+                      : shortenAddress(superChainSmartAccount.data.smartAccount, 8)}
                   </p>
                   <CopyButton text={superChainSmartAccount.data.smartAccount} />
                   <Box color="border.main">
