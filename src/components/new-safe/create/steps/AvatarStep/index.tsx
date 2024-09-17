@@ -9,21 +9,15 @@ import { ImageData } from '@nouns/assets'
 import type { StepRenderProps } from '@/components/new-safe/CardStepper/useCardStepper'
 import type { NewSafeFormData } from '../..'
 import NounsAvatar from '@/components/common/NounsAvatar'
-
-type SetNameStepForm = {
-  id: string
-  name: string
-}
+import { Head } from 'next/document'
 
 const TRAIT_LIMITS = {
   head: { min: 0, max: ImageData.images.heads.length - 1 },
   body: { min: 0, max: ImageData.images.bodies.length - 1 },
   accessory: { min: 0, max: ImageData.images.accessories.length - 1 },
   glasses: { min: 0, max: ImageData.images.glasses.length - 1 },
-  background: { min: 0, max: 1 },
+  background: { min: 0, max: ImageData.bgcolors.length - 1 },
 }
-
-const SET_NAME_STEP_FORM_ID = 'create-safe-set-name-step-form'
 
 export type NounProps = {
   background: number
@@ -31,6 +25,13 @@ export type NounProps = {
   accessory: number
   head: number
   glasses: number
+}
+export const PART_MAP: { [key in keyof NounProps]: keyof typeof ImageData.images | 'bgcolors' } = {
+  head: 'heads',
+  body: 'bodies',
+  accessory: 'accessories',
+  glasses: 'glasses',
+  background: 'bgcolors',
 }
 
 function Avatar({

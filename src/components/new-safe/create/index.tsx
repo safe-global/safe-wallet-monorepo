@@ -19,6 +19,7 @@ import { useMnemonicSafeName } from '@/hooks/useMnemonicName'
 import SuperChainID from './steps/SuperChainIdStep'
 import Avatar from './steps/AvatarStep'
 import type { NounProps } from './steps/AvatarStep'
+import { ImageData } from '@nouns/assets'
 
 export type NewSafeFormData = {
   name: string
@@ -111,11 +112,11 @@ const CreateSafe = () => {
 
   const [superChainId, setSuperChainId] = useState('')
   const [seed, setSeed] = useState<NounProps>({
-    background: 0,
-    body: 0,
-    head: 0,
-    accessory: 0,
-    glasses: 0,
+    background: Math.floor(Math.random() * ImageData.bgcolors.length),
+    body: Math.floor(Math.random() * ImageData.images.bodies.length),
+    accessory: Math.floor(Math.random() * ImageData.images.accessories.length),
+    head: Math.floor(Math.random() * ImageData.images.heads.length),
+    glasses: Math.floor(Math.random() * ImageData.images.glasses.length),
   })
   const [activeStep, setActiveStep] = useState(0)
 

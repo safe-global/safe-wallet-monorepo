@@ -1,4 +1,4 @@
-import { type ReactElement, useMemo } from 'react'
+import { type ReactElement, useContext, useMemo } from 'react'
 import Typography from '@mui/material/Typography'
 import IconButton from '@mui/material/IconButton'
 import Tooltip from '@mui/material/Tooltip'
@@ -22,6 +22,8 @@ import ExplorerButton from '@/components/common/ExplorerButton'
 import CopyTooltip from '@/components/common/CopyTooltip'
 import NounsAvatar from '@/components/common/NounsAvatar'
 import { selectSuperChainAccount } from '@/store/superChainAccountSlice'
+import { TxModalContext } from '@/components/tx-flow'
+import UpdateAvatarModal from '@/components/superChain/UpdateAvatarModal'
 
 const SafeHeader = (): ReactElement => {
   const safeAddress = useSafeAddress()
@@ -29,6 +31,7 @@ const SafeHeader = (): ReactElement => {
   const settings = useAppSelector(selectSettings)
   const superChainSmartAccount = useAppSelector(selectSuperChainAccount)
 
+  const { setTxFlow } = useContext(TxModalContext)
   const addressCopyText = settings.shortName.copy && chain ? `${chain.shortName}:${safeAddress}` : safeAddress
 
   const blockExplorerLink = chain ? getBlockExplorerLink(chain, safeAddress) : undefined
@@ -37,6 +40,9 @@ const SafeHeader = (): ReactElement => {
       return `${name.substring(0, maxLength)}...`
     }
     return name
+  }
+  const handleNounsClick = () => {
+    setTxFlow(<UpdateAvatarModal />)
   }
   const nounSeed = useMemo(() => {
     return {
@@ -148,7 +154,7 @@ const SafeHeader = (): ReactElement => {
     <div className={css.container}>
       <div className={css.info}>
         <div data-testid="safe-header-info" className={css.safe}>
-          <div className={css.nouns}>
+          <div onClick={handleNounsClick} className={css.nouns}>
             <NounsAvatar seed={nounSeed} />
           </div>
           <div className={css.superchainInfo}>

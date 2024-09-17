@@ -15,7 +15,7 @@ import { TxSecurityProvider } from '@/components/tx/security/shared/TxSecurityCo
 import ChainIndicator from '@/components/common/ChainIndicator'
 import SecurityWarnings from '@/components/tx/security/SecurityWarnings'
 
-const TxLayoutHeader = ({
+export const TxLayoutHeader = ({
   hideNonce,
   icon,
   subtitle,
@@ -34,7 +34,7 @@ const TxLayoutHeader = ({
       <Box display="flex" alignItems="center">
         {icon && (
           <div className={css.icon}>
-            <SvgIcon fontSize='inherit' component={icon} inheritViewBox />
+            <SvgIcon fontSize="inherit" component={icon} inheritViewBox />
           </div>
         )}
 
