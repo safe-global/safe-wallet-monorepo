@@ -58,7 +58,7 @@ const SafeAppIconCard = ({
       referrerPolicy="strict-origin"
       width={width}
       height={height}
-      style={{ pointerEvents: 'none', border: 0 }}
+      style={{ pointerEvents: 'none', border: 0, borderRadius: '100%' }}
       tabIndex={-1}
       loading="lazy"
     />
