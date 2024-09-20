@@ -67,7 +67,7 @@ const fakeSafeApps: SafeAppData[] = [
 
   {
     "id": 0.21472726789485663,
-    "url": "https://raffle.superchain.eco/",
+    "url": "http://localhost:3001/",
     "name": "Super Chain Raffle",
     "description": "Participate in weekly free raffle by claiming tickets based on your level.",
     "accessControl": {
@@ -108,7 +108,7 @@ const fakeSafeApps: SafeAppData[] = [
     "id": 152,
     "url": "https://velodrome.finance",
     "name": "Velodrome Finance",
-    "iconUrl": "https://safe-transaction-assets.safe.global/safe_apps/152/icon.png",
+    "iconUrl": "https://account.superchain.eco/images/apps/velodrome.jpg",
     "description": "Velodrome Finance is a next-generation AMM that combines the best of Curve, Convex and Uniswap, designed to serve as the central liquidity hub on Optimism network. Velodrome NFTs vote on token emissio",
     "chainIds": [
       "10"
