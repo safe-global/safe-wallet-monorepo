@@ -23,6 +23,7 @@ import CopyTooltip from '@/components/common/CopyTooltip'
 import NounsAvatar from '@/components/common/NounsAvatar'
 import { selectSuperChainAccount } from '@/store/superChainAccountSlice'
 import { TxModalContext } from '@/components/tx-flow'
+import SettingsIcon from '@/public/images/sidebar/settings.svg'
 import UpdateAvatarModal from '@/components/superChain/UpdateAvatarModal'
 
 const SafeHeader = (): ReactElement => {
@@ -156,6 +157,9 @@ const SafeHeader = (): ReactElement => {
         <div data-testid="safe-header-info" className={css.safe}>
           <div onClick={handleNounsClick} className={css.nouns}>
             <NounsAvatar seed={nounSeed} />
+            <Box className={css.nouns_hover}>
+              <SvgIcon component={SettingsIcon} inheritViewBox fontSize="inherit" />
+            </Box>
           </div>
           <div className={css.superchainInfo}>
             <span className={css.superchainLevel}>
