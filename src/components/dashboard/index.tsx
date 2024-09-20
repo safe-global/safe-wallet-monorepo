@@ -70,20 +70,6 @@ const Dashboard = (): ReactElement => {
             <Grid item xs={12} lg={4}>
               <SuperChainEOAS />
             </Grid>
-            {/* {showRecoveryWidget ? (
-              <Grid item xs={12} lg={6}>
-                <RecoveryWidget />
-              </Grid>
-            ) : null} */}
-
-            {/* <Grid item xs={12} lg={showRecoveryWidget ? 12 : 6}>
-              <FeaturedApps stackedLayout={!showRecoveryWidget} />
-            </Grid>
-
-            <Grid item xs={12}>
-              <GovernanceSection />
-            </Grid>
-*/}
             <Grid item xs={12}>
               <SafeAppsDashboardSection />
             </Grid>

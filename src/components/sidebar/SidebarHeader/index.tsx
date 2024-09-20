@@ -1,4 +1,4 @@
-import { type ReactElement, useContext, useMemo } from 'react'
+import { type ReactElement, useContext, useMemo, useState } from 'react'
 import Typography from '@mui/material/Typography'
 import IconButton from '@mui/material/IconButton'
 import Tooltip from '@mui/material/Tooltip'
@@ -25,13 +25,15 @@ import { selectSuperChainAccount } from '@/store/superChainAccountSlice'
 import { TxModalContext } from '@/components/tx-flow'
 import SettingsIcon from '@/public/images/sidebar/settings.svg'
 import UpdateAvatarModal from '@/components/superChain/UpdateAvatarModal'
-
+import PerksIcon from '@/public/images/common/perks.svg'
+import PerksModal from '../PerksModal'
 const SafeHeader = (): ReactElement => {
   const safeAddress = useSafeAddress()
   const chain = useCurrentChain()
   const settings = useAppSelector(selectSettings)
   const superChainSmartAccount = useAppSelector(selectSuperChainAccount)
 
+  const [openPerksModal, setOpenPerksModal] = useState(false)
   const { setTxFlow } = useContext(TxModalContext)
   const addressCopyText = settings.shortName.copy && chain ? `${chain.shortName}:${safeAddress}` : safeAddress
 
@@ -82,15 +84,11 @@ const SafeHeader = (): ReactElement => {
           </div>
 
           <div className={css.iconButtons}>
-            <Track {...OVERVIEW_EVENTS.SHOW_QR} label="sidebar">
-              <QrCodeButton>
-                <Tooltip title="Open QR code" placement="top">
-                  <IconButton className={css.iconButton}>
-                    <SvgIcon component={QrIconBold} inheritViewBox color="primary" fontSize="small" />
-                  </IconButton>
-                </Tooltip>
-              </QrCodeButton>
-            </Track>
+            <Tooltip title="View perks" placement="top">
+              <IconButton className={css.iconButton}>
+                <SvgIcon component={PerksIcon} inheritViewBox fontSize="inherit" />
+              </IconButton>
+            </Tooltip>
 
             <Track {...OVERVIEW_EVENTS.COPY_ADDRESS}>
               <CopyTooltip text={addressCopyText}>
@@ -216,15 +214,11 @@ const SafeHeader = (): ReactElement => {
         </div>
 
         <div className={css.iconButtons}>
-          <Track {...OVERVIEW_EVENTS.SHOW_QR} label="sidebar">
-            <QrCodeButton>
-              <Tooltip title="Open QR code" placement="top">
-                <IconButton className={css.iconButton}>
-                  <SvgIcon component={QrIconBold} inheritViewBox color="primary" fontSize="small" />
-                </IconButton>
-              </Tooltip>
-            </QrCodeButton>
-          </Track>
+          <Tooltip title="View perks" placement="top">
+            <IconButton className={css.iconButton} onClick={() => setOpenPerksModal(true)}>
+              <SvgIcon component={PerksIcon} inheritViewBox fontSize="inherit" />
+            </IconButton>
+          </Tooltip>
 
           <Track {...OVERVIEW_EVENTS.COPY_ADDRESS}>
             <CopyTooltip text={addressCopyText}>
@@ -287,6 +281,8 @@ const SafeHeader = (): ReactElement => {
       </div>
 
       {/* <NewTxButton /> */}
+      {/* UGLY BUT WORKING */}
+      <PerksModal open={openPerksModal} onClose={() => setOpenPerksModal(false)} />
     </div>
   )
 }
