@@ -84,7 +84,7 @@ const fakeSafeApps: SafeAppData[] = [
     "chainIds": [
       "10"
     ],
-    "iconUrl": "http://localhost:3000/next.svg",
+    "iconUrl": "https://raffle.superchain.eco/favicon.ico",
   },
   {
     "id": 0.8444046728875381,
