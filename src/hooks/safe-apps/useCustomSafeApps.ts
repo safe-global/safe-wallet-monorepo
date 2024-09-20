@@ -67,7 +67,7 @@ const fakeSafeApps: SafeAppData[] = [
 
   {
     "id": 0.21472726789485663,
-    "url": "http://localhost:3001/",
+    "url": "https://raffle.superchain.ec",
     "name": "Super Chain Raffle",
     "description": "Participate in weekly free raffle by claiming tickets based on your level.",
     "accessControl": {
