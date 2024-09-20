@@ -68,7 +68,7 @@ function BadgesHeader({
         </Grid>
         <Grid xs={6} lg={3} display="flex" flexDirection="column" gap={1}>
           <Typography variant="h3" fontSize={16} fontWeight={600} color="primary.light">
-            Total bagdes
+            Total badges
           </Typography>
           {isLoading ? (
             <Skeleton variant="text" width={44} height={44} />
