@@ -58,7 +58,7 @@ function AcceptInvite({
 
         <Alert severity="warning">
           <AlertTitle sx={{ fontWeight: 700 }}>Note</AlertTitle>
-          You can cannot disconnect once you have accepted an invite to a Superchain Account.
+          you cannot disconnect once you have accepted an invite to a Superchain Account.
         </Alert>
       </Box>
       <Stack spacing={1} className={css.outsideButtonContainer} direction="row">

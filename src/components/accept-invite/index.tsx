@@ -56,7 +56,7 @@ const AcceptInvite = () => {
           <Grid item xs={12}>
             <Alert severity="warning" sx={{ mt: 3 }}>
               <AlertTitle sx={{ fontWeight: 700 }}>Note</AlertTitle>
-              You can cannot disconnect once you have accepted an invite to a Superchain Account.
+              you cannot disconnect once you have accepted an invite to a Superchain Account.
             </Alert>
           </Grid>
         </Grid>

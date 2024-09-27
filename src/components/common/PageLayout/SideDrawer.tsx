@@ -27,7 +27,7 @@ const SideDrawer = ({ isOpen, onToggle }: SideDrawerProps): ReactElement => {
   const router = useRouter()
 
   useEffect(() => {
-    const closeSidebar = isSmallScreen || isSafeAppRoute
+    const closeSidebar = isSmallScreen
     onToggle(!closeSidebar)
   }, [isSmallScreen, isSafeAppRoute, onToggle])
 
@@ -54,7 +54,7 @@ const SideDrawer = ({ isOpen, onToggle }: SideDrawerProps): ReactElement => {
           <Sidebar />
         </aside>
       </Drawer>
-
+      {/* 
       {showSidebarToggle && (
         <div className={classnames(css.sidebarTogglePosition, isOpen && css.sidebarOpen)}>
           <div className={css.sidebarToggle} role="button" onClick={() => onToggle(!isOpen)}>
@@ -63,7 +63,7 @@ const SideDrawer = ({ isOpen, onToggle }: SideDrawerProps): ReactElement => {
             </IconButton>
           </div>
         </div>
-      )}
+      )} */}
     </>
   )
 }
