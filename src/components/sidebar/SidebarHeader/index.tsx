@@ -24,7 +24,7 @@ import NounsAvatar from '@/components/common/NounsAvatar'
 import { selectSuperChainAccount } from '@/store/superChainAccountSlice'
 import { TxModalContext } from '@/components/tx-flow'
 import SettingsIcon from '@/public/images/sidebar/settings.svg'
-import UpdateAvatarModal from '@/components/superChain/UpdateAvatarModal'
+import UpdateAvatarModal from '@/components/superChain/UpdateAvatar'
 import PerksIcon from '@/public/images/common/perks.svg'
 import PerksModal from '../PerksModal'
 const SafeHeader = (): ReactElement => {
