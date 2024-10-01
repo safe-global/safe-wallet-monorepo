@@ -2,7 +2,7 @@ import FirstSteps from '@/components/dashboard/FirstSteps'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useEffect, type ReactElement } from 'react'
 import dynamic from 'next/dynamic'
-import { Grid } from '@mui/material'
+import { CircularProgress, Grid, Typography } from '@mui/material'
 // import PendingTxsList from '@/components/dashboard/PendingTxs/PendingTxsList'
 import Overview from '@/components/dashboard/Overview/Overview'
 // import { FeaturedApps } from '@/components/dashboard/FeaturedApps/FeaturedApps'
@@ -23,6 +23,9 @@ import { usePrivy, useWallets } from '@privy-io/react-auth'
 import usePimlico from '@/hooks/usePimlico'
 import WrongNetworkModal from './WrongNetworkModal'
 import useIsWrongChain from '@/hooks/useIsWrongChain'
+import { useAppSelector } from '@/store'
+import { selectUndeployedSafe } from '@/store/slices'
+import ActivatingSuperAccount from './ActivatingSuperAccount'
 const RecoveryHeader = dynamic(() => import('@/features/recovery/components/RecoveryHeader'))
 
 const Dashboard = (): ReactElement => {
@@ -31,12 +34,14 @@ const Dashboard = (): ReactElement => {
   const { ready } = usePrivy()
   const { ready: walletReady } = useWallets()
 
-  const { safe, safeLoaded, safeLoading } = useSafeInfo()
+  const { safe, safeLoaded, safeLoading, safeAddress } = useSafeInfo()
   const { [CREATION_MODAL_QUERY_PARAM]: showCreationModal = '' } = router.query
   const { [ADD_OWNER_MODAL_QUERY_PARAM]: showEOAAddedModal = '' } = router.query
   const isWrongChain = useIsWrongChain()
   const supportsRecovery = useIsRecoverySupported()
+  const undeployedSafe = useAppSelector((state) => selectUndeployedSafe(state, safe.chainId, safeAddress))
 
+  const isActivating = !!undeployedSafe
   useEffect(() => {
     if (!ready || !safeLoaded || safeLoading || !walletReady) return
     if (!wallet) {
@@ -48,6 +53,8 @@ const Dashboard = (): ReactElement => {
       }
     }
   }, [wallet, safeLoading, ready])
+
+  if (isActivating) return <ActivatingSuperAccount />
 
   return (
     <>

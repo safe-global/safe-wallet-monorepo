@@ -68,6 +68,13 @@ export const CreateSafeStatus = ({ data, setProgressColor, setStep }: StepRender
     }
   }, [chainPrefix, pendingSafe, router, setPendingSafe])
 
+  const onStartNow = useCallback(() => {
+    const { safeAddress } = pendingSafe || {}
+    if (safeAddress) {
+      router.push(getRedirect(chainPrefix, safeAddress, router.query?.safeViewRedirectURL))
+    }
+  }, [chainPrefix, pendingSafe, router])
+
   const displaySafeLink = status >= SafeCreationStatus.INDEXED
   const isError = status >= SafeCreationStatus.WALLET_REJECTED && status <= SafeCreationStatus.TIMEOUT
 
@@ -80,6 +87,8 @@ export const CreateSafeStatus = ({ data, setProgressColor, setStep }: StepRender
       setProgressColor(lightPalette.secondary.main)
     }
   }, [isError, setProgressColor])
+
+  const showStartOver = status == SafeCreationStatus.SUCCESS
 
   return (
     <Paper
@@ -100,6 +109,16 @@ export const CreateSafeStatus = ({ data, setProgressColor, setStep }: StepRender
         </>
       )}
 
+      {showStartOver && (
+        <>
+          <Divider />
+          <Box className={layoutCss.row}>
+            <Button onClick={onStartNow} color="secondary" variant="contained">
+              Start now!
+            </Button>
+          </Box>
+        </>
+      )}
       {displaySafeLink && (
         <>
           <Divider />

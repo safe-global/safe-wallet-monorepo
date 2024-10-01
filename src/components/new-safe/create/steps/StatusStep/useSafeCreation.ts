@@ -77,7 +77,6 @@ export const useSafeCreation = (
 
     const { owners, threshold, saltNonce, id, seed } = pendingSafe
     const ownersAddresses = owners.map((owner) => owner.address)
-    console.debug({ pendingSafe })
 
     try {
       if (willRelay) {
@@ -102,10 +101,10 @@ export const useSafeCreation = (
 
         const options: DeploySafeProps['options'] = isEIP1559
           ? {
-              maxFeePerGas: maxFeePerGas?.toString(),
-              maxPriorityFeePerGas: maxPriorityFeePerGas?.toString(),
-              gasLimit: gasLimit.toString(),
-            }
+            maxFeePerGas: maxFeePerGas?.toString(),
+            maxPriorityFeePerGas: maxPriorityFeePerGas?.toString(),
+            gasLimit: gasLimit.toString(),
+          }
           : { gasPrice: maxFeePerGas?.toString(), gasLimit: gasLimit.toString() }
 
         const response = await createNewSafe(provider, {

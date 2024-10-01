@@ -58,7 +58,6 @@ export const useLoadBalances = (): AsyncResult<SafeBalanceResponse> => {
         const logo = tokensLogoToInject.find((token) => token.address === balance.tokenInfo.address)
         return logo ? { ...balance, tokenInfo: { ...balance.tokenInfo, logoUri: logo.logoUri } } : balance
       })
-      console.debug('Balances:', balances)
       return balances
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps

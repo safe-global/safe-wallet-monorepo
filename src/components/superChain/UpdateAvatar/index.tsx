@@ -125,7 +125,6 @@ const UpdateAvatarModal = () => {
         data.smartAccount as Address,
         seed,
       ])
-      console.debug(transaction)
 
       setTransactionHash(transaction!)
       setModalState(ModalState.Success)

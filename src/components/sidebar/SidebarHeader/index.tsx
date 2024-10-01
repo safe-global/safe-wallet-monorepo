@@ -57,7 +57,7 @@ const SafeHeader = (): ReactElement => {
     }
   }, [superChainSmartAccount])
 
-  if (superChainSmartAccount.loading)
+  if (superChainSmartAccount.loading || superChainSmartAccount.error)
     return (
       <div className={css.container}>
         <div className={css.info}>

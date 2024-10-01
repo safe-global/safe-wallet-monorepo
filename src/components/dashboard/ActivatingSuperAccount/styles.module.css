@@ -1,0 +1,78 @@
+.circleProgress {
+  color: var(--color-secondary-main);
+}
+
+.circleBg {
+  color: var(--color-border-light);
+  position: absolute;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: flex-start;
+  min-height: 260px;
+}
+
+.topBadge {
+  position: absolute;
+  top: 0;
+  right: 24px;
+  border-radius: 0 0 4px 4px;
+}
+
+.badgeText {
+  background-color: var(--color-secondary-light);
+  color: var(--color-static-main);
+  border-radius: 0 0 4px 4px;
+  padding: 4px 8px;
+  display: flex;
+  align-items: center;
+}
+
+.badgeTextInfo {
+  background-color: var(--color-info-main);
+}
+
+.status {
+  align-self: flex-start;
+  margin-bottom: auto;
+  color: var(--color-border-light);
+}
+
+.gradient {
+  position: absolute;
+  width: 0;
+  height: 0;
+  opacity: 0;
+  visibility: hidden;
+}
+
+.accountReady {
+  text-align: center;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+  color: var(--color-text-secondary);
+}
+
+.accountReady.completed {
+  color: var(--color-text-primary);
+}
+
+.checkIcon {
+  color: var(--color-border-light);
+}
+
+.checkIcon.completed {
+  color: var(--color-success-main);
+}
+
+.orDivider {
+  display: inline-block;
+  padding: 0 var(--space-3);
+  background: var(--color-background-paper);
+  bottom: -11px;
+  position: relative;
+}
