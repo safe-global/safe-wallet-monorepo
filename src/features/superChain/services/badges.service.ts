@@ -64,7 +64,7 @@ class BadgesService {
     return response.data
   }
   public async getPerks(account: Address) {
-    const response = await this.httpInstance.get<{ perks: Perks }>('/get-perks', {
+    const response = await this.httpInstance.get<{ perks: Perks }>('/get-user-perks', {
       headers: {
         account: account || zeroAddress,
       },
