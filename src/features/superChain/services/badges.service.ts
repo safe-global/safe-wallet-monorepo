@@ -4,6 +4,11 @@ import { BACKEND_BASE_URI } from '@/config/constants'
 import type { ResponseBadge } from '@/types/super-chain'
 import local from '@/services/local-storage/local'
 import type { Setter } from '@/services/local-storage/useLocalStorage'
+
+type Perks = {
+  name: string
+  value: number
+}[]
 class BadgesService {
   httpInstance = axios.create({
     baseURL: BACKEND_BASE_URI,
@@ -57,6 +62,14 @@ class BadgesService {
       { headers: { account: account || zeroAddress } },
     )
     return response.data
+  }
+  public async getPerks(account: Address) {
+    const response = await this.httpInstance.get<{ perks: Perks }>('/get-perks', {
+      headers: {
+        account: account || zeroAddress,
+      },
+    })
+    return response.data.perks
   }
 }
 const badgesService = new BadgesService()
