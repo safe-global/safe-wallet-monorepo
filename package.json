@@ -63,7 +63,7 @@
     "@reduxjs/toolkit": "^1.9.5",
     "@safe-global/api-kit": "^2.3.0",
     "@safe-global/protocol-kit": "^3.0.2",
-    "@safe-global/safe-apps-sdk": "^9.0.0-next.1",
+    "@safe-global/safe-apps-sdk": "9.1.0",
     "@safe-global/safe-deployments": "^1.34.0",
     "@safe-global/safe-gateway-typescript-sdk": "3.19.0",
     "@safe-global/safe-modules-deployments": "^1.2.0",
