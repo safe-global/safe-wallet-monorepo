@@ -40,7 +40,9 @@ function PerksModal({ open, onClose }: { open: boolean; onClose: () => void }) {
         <Box display="flex" width="100%" paddingTop="24px" flexDirection="column" gap="24px" flexWrap="wrap">
           {isLoading ? (
             <>
-              <Skeleton variant="rounded" width="100%" height={100} />
+              <Skeleton variant="rounded" width="100%" height={40} />
+              <Skeleton variant="rounded" width="100%" height={40} />
+              <Skeleton variant="rounded" width="100%" height={40} />
             </>
           ) : (
             <>
@@ -68,7 +70,7 @@ function PerksModal({ open, onClose }: { open: boolean; onClose: () => void }) {
                   Claim {perks.raffle?.value ?? 0} tickets per week
                 </Typography>
               </Box>
-              <Box
+              {/* <Box
                 display="flex"
                 width="100%"
                 flexDirection="row"
@@ -115,7 +117,7 @@ function PerksModal({ open, onClose }: { open: boolean; onClose: () => void }) {
                 >
                   1% Cashback on fees
                 </Typography>
-              </Box>
+              </Box> */}
             </>
           )}
         </Box>
