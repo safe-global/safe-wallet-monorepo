@@ -19,6 +19,7 @@ const SafeApps: NextPage = () => {
   const { remoteSafeApps, remoteSafeAppsLoading, pinnedSafeApps, pinnedSafeAppIds, togglePin } = useSafeApps()
   const { filteredApps, query, setQuery, setSelectedCategories, setOptimizedWithBatchFilter, selectedCategories } =
     useSafeAppsFilters(remoteSafeApps)
+  console.debug(filteredApps)
   const isFiltered = filteredApps.length !== remoteSafeApps.length
   const isSafeAppsEnabled = useHasFeature(FEATURES.SAFE_APPS)
 

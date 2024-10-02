@@ -87,22 +87,39 @@ const fakeSafeApps: SafeAppData[] = [
     "iconUrl": "https://account.superchain.eco/images/apps/raffle.jpg",
   },
   {
-    "id": 0.8444046728875381,
-    "url": "https://giveth.io",
-    "name": "Giveth",
-    "description": "Get rewarded for giving to for-good projects with zero added fees.",
+    "id": 48,
+    "url": "https://app.superfluid.finance/",
+    "name": "Superfluid",
+    "iconUrl": "https://safe-transaction-assets.safe.global/safe_apps/48/icon.png",
+    "description": "Superfluid is a new Ethereum Protocol that extends Ethereum tokens to include novel functionalities. Superfluid enables functionalities like money streaming and reward distribution.",
+    "chainIds": [
+      "10",
+    ],
     "accessControl": {
       "type": "NO_RESTRICTIONS" as SafeAppAccessPolicyTypes,
       "value": []
     },
-    "tags": ['Donation', 'Infraestructure'],
-    "features": [],
-    "socialProfiles": [],
-    "developerWebsite": "",
-    "chainIds": [
-      "10"
+    "tags": [
+      "Accounting",
+      "DAO Tooling",
+      "Payments"
     ],
-    "iconUrl": "https://giveth.io/favicon.svg",
+    "features": [],
+    "developerWebsite": "https://superfluid.finance",
+    "socialProfiles": [
+      {
+        "platform": "DISCORD" as SafeAppSocialPlatforms,
+        "url": "http://discord.superfluid.finance"
+      },
+      {
+        "platform": "GITHUB" as SafeAppSocialPlatforms,
+        "url": "https://github.com/superfluid-finance"
+      },
+      {
+        "platform": "TWITTER" as SafeAppSocialPlatforms,
+        "url": "https://twitter.com/Superfluid_HQ"
+      }
+    ]
   },
   {
     "id": 152,
