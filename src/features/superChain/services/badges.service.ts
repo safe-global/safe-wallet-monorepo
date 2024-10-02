@@ -71,6 +71,11 @@ class BadgesService {
     })
     return response.data.perks
   }
+  public async getPerksByLevel(level: number) {
+    const response = await this.httpInstance.get<{ perks: Perks }>(`/get-perks/${level}`)
+    return response.data.perks
+  }
+
 }
 const badgesService = new BadgesService()
 export default badgesService
