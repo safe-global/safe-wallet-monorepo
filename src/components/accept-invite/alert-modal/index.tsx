@@ -37,6 +37,7 @@ function AlertModal({ modalContext, onClose }: { modalContext: ModalContext; onC
         modalContext.newOwner,
       ])
       await publicClient.waitForTransactionReceipt({ hash: hash! })
+      await new Promise((resolve) => setTimeout(resolve, 5000))
       onCloseAndErase()
       router.push({
         pathname: AppRoutes.home,
