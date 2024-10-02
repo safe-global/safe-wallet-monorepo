@@ -11,7 +11,7 @@ import { useQuery } from '@tanstack/react-query'
 import badgesService from '@/features/superChain/services/badges.service'
 function LevelUpModal({ open, onClose, level }: { open: boolean; onClose: () => void; level: number }) {
   const { data, isLoading } = useQuery({
-    queryKey: ['lyvelUpModal'],
+    queryKey: ['levelUpModal', level],
     queryFn: async () => badgesService.getPerksByLevel(level),
   })
   const perks = useMemo(() => {
