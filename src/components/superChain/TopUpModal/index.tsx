@@ -63,7 +63,7 @@ const TopUpModal = ({ open, onClose }: { open: boolean; onClose: () => void }): 
           data: encodeFunctionData({
             abi: erc20Abi,
             functionName: 'transfer',
-            args: [token.address as Address, value],
+            args: [safeAddress as Address, value],
           }),
         })
       }
