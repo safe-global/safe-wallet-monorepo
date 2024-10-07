@@ -1,4 +1,4 @@
-import { useMemo, useState, type ReactElement } from 'react'
+import { useEffect, useMemo, useState, type ReactElement } from 'react'
 import { Box, Button, Grid, MenuItem, Select, SvgIcon, TextField, useMediaQuery, useTheme } from '@mui/material'
 import { makeStyles } from '@mui/styles'
 import css from './styles.module.css'
@@ -8,15 +8,19 @@ import CopyButton from '@/components/common/CopyButton'
 import ExplorerButton from '@/components/common/ExplorerButton'
 import Image from 'next/image'
 import OETH from '@/public/images/currencies/ethereum.svg'
+import OP from '@/public/images/currencies/optimism.svg'
 import lightPalette from '@/components/theme/lightPalette'
 import { useAppSelector } from '@/store'
 import { selectSuperChainAccount } from '@/store/superChainAccountSlice'
 import useWallet from '@/hooks/wallets/useWallet'
-import { parseEther } from 'viem'
+import { Address, erc20Abi, parseEther, parseUnits } from 'viem'
 import ModalDialog from '@/components/common/ModalDialog'
 import { useCurrentChain } from '@/hooks/useChains'
 import { getBlockExplorerLink } from '@/utils/chains'
 import { shortenAddress } from '@/utils/formatters'
+import useSuperChainAccount from '@/hooks/super-chain/useSuperChainAccount'
+import { getBalance, readContract } from 'viem/actions'
+import { SvgIconComponent } from '@mui/icons-material'
 const useStyles = makeStyles({
   select: {
     color: 'white',
@@ -41,17 +45,28 @@ const useStyles = makeStyles({
   },
 })
 
-const etherValues = [0.02, 0.05, 0.1]
+export type Token = {
+  values: number[]
+  decimals: number
+  address: string
+  icon: SvgIconComponent
+}
+
+const tokens: Record<string, Token> = {
+  ETH: { values: [0.02, 0.05, 0.1], decimals: 18, address: '0x0000000000000000000000000000000000000000', icon: OETH },
+  OP: { values: [10, 20, 50], decimals: 18, address: '0x4200000000000000000000000000000000000042', icon: OP },
+}
 
 function TopUp({
   handleTopUp,
   open,
   onClose,
 }: {
-  handleTopUp: (value: bigint) => void
+  handleTopUp: (value: bigint, token: Token) => void
   open: boolean
   onClose: () => void
 }): ReactElement {
+  const { publicClient } = useSuperChainAccount()
   const superChainSmartAccount = useAppSelector(selectSuperChainAccount)
   const wallet = useWallet()
 
@@ -62,6 +77,8 @@ function TopUp({
       : undefined
   const [selectedValue, setSelectedValue] = useState<number | null>(null)
   const [customValue, setCustomValue] = useState<string>('')
+  const [selectedToken, setSelectedToken] = useState<keyof typeof tokens>('ETH')
+  const [tokenBalance, setTokenBalance] = useState<number>(0)
   const nounSeed = useMemo(() => {
     return {
       background: Number(superChainSmartAccount.data.noun[0]),
@@ -79,9 +96,32 @@ function TopUp({
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
   const handleTopUpClick = () => {
-    const value = selectedValue !== null ? parseEther(etherValues[selectedValue].toString()) : parseEther(customValue)
-    handleTopUp(value)
+    const value =
+      selectedValue !== null
+        ? parseUnits(tokens[selectedToken].values[selectedValue].toString(), tokens[selectedToken].decimals)
+        : parseUnits(customValue, tokens[selectedToken].decimals)
+    handleTopUp(value, tokens[selectedToken])
   }
+
+  useEffect(() => {
+    const fetchBalance = async () => {
+      if (wallet?.address) {
+        if (selectedToken === 'ETH') {
+          return
+        } else {
+          const balance = await publicClient.readContract({
+            address: tokens[selectedToken].address as Address,
+            abi: erc20Abi,
+            functionName: 'balanceOf',
+            args: [wallet.address as Address],
+          })
+          setTokenBalance(Number(balance) / 10 ** tokens[selectedToken].decimals)
+        }
+      }
+    }
+
+    fetchBalance()
+  }, [wallet, selectedToken])
 
   const classes = useStyles()
 
@@ -119,26 +159,33 @@ function TopUp({
           >
             <Select
               className={classes.select}
+              onChange={(event) => setSelectedToken(event.target.value as keyof typeof tokens)}
               inputProps={{
                 classes: {
                   icon: classes.icon,
                   root: classes.root,
                 },
               }}
-              value="OETH"
+              value={selectedToken}
             >
-              <MenuItem value="OETH">
+              <MenuItem value="ETH">
                 <Box pr={1} display="flex" gap={1}>
                   <SvgIcon component={OETH} />
                   ETH
                 </Box>
               </MenuItem>
+              <MenuItem value="OP">
+                <Box pr={1} display="flex" gap={1}>
+                  <SvgIcon component={OP} />
+                  OP
+                </Box>
+              </MenuItem>
             </Select>
-            {etherValues.map((value, index) => (
+            {tokens[selectedToken].values.map((value, index) => (
               <Button
                 key={index}
                 onClick={() => setSelectedValue(index)}
-                disabled={value > Number(wallet?.balance ?? 0)}
+                disabled={selectedToken === 'ETH' ? value > Number(wallet?.balance) : value > tokenBalance}
                 className={css.amountButton}
                 style={{
                   maxWidth: '50px',
@@ -164,7 +211,14 @@ function TopUp({
               onClick={handleTopUpClick}
               variant="contained"
               color="secondary"
-              disabled={selectedValue === null && (customValue === '' || Number(customValue) === 0)}
+              disabled={
+                selectedValue === null &&
+                (customValue === '' ||
+                  Number(customValue) === 0 ||
+                  (selectedToken === 'ETH'
+                    ? Number(customValue) > Number(wallet?.balance ?? '0')
+                    : Number(customValue) > tokenBalance))
+              }
             >
               Top up
             </Button>

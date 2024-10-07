@@ -2,10 +2,21 @@ import { ReactElement, useState } from 'react'
 import LoadingTxn from './states/LoadingTxn'
 import FailedTxn from './states/FailedTxn'
 import SuccessTxn from './states/SuccessTxn'
-import TopUp from './states/TopUp'
+import TopUp, { Token } from './states/TopUp'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import useWallet from '@/hooks/wallets/useWallet'
-import { Address, createPublicClient, createWalletClient, custom, http, parseEther } from 'viem'
+import {
+  Address,
+  createPublicClient,
+  createWalletClient,
+  custom,
+  encodeFunctionData,
+  erc20Abi,
+  http,
+  parseEther,
+  parseUnits,
+  zeroAddress,
+} from 'viem'
 import { sepolia, optimism } from 'viem/chains'
 import { CHAIN_ID, JSON_RPC_PROVIDER } from '@/features/superChain/constants'
 
@@ -19,11 +30,12 @@ export enum ModalState {
 const TopUpModal = ({ open, onClose }: { open: boolean; onClose: () => void }): ReactElement => {
   const [modalState, setModalState] = useState<ModalState>(ModalState.TopUp)
   const [currentValue, setCurrentValue] = useState<null | bigint>(null)
+  const [currentToken, setCurrentToken] = useState<Token | null>(null)
   const [transactionHash, setTransactionHash] = useState<string | null>(null)
   const safeAddress = useSafeAddress()
   const wallet = useWallet()
 
-  const handleTopUp = async (value: bigint) => {
+  const handleTopUp = async (value: bigint, token: Token) => {
     if (!wallet) return
     const walletClient = createWalletClient({
       chain: CHAIN_ID === sepolia.id.toString() ? sepolia : optimism,
@@ -35,11 +47,26 @@ const TopUpModal = ({ open, onClose }: { open: boolean; onClose: () => void }): 
     })
     try {
       setCurrentValue(value)
-      const tx = await walletClient.sendTransaction({
-        to: safeAddress as Address,
-        account: wallet.address as Address,
-        value,
-      })
+      setCurrentToken(token)
+      let tx: `0x${string}`
+      if (token.address === zeroAddress) {
+        tx = await walletClient.sendTransaction({
+          to: safeAddress as Address,
+          account: wallet.address as Address,
+          value,
+        })
+      } else {
+        tx = await walletClient.sendTransaction({
+          to: token.address as Address,
+          account: wallet.address as Address,
+          value: 0n,
+          data: encodeFunctionData({
+            abi: erc20Abi,
+            functionName: 'transfer',
+            args: [token.address as Address, value],
+          }),
+        })
+      }
       setModalState(ModalState.LoadingTXN)
       setTransactionHash(tx)
       const result = await publicClient.waitForTransactionReceipt({
@@ -58,15 +85,15 @@ const TopUpModal = ({ open, onClose }: { open: boolean; onClose: () => void }): 
   }
 
   const handleRetry = async () => {
-    if (!currentValue) return
-    handleTopUp(currentValue)
+    if (!currentValue || !currentToken) return
+    handleTopUp(currentValue, currentToken)
   }
 
   const onCloseAndErase = () => {
-    onClose()
     setModalState(ModalState.TopUp)
     setCurrentValue(null)
     setTransactionHash(null)
+    onClose()
   }
 
   return (
@@ -79,7 +106,13 @@ const TopUpModal = ({ open, onClose }: { open: boolean; onClose: () => void }): 
         <FailedTxn handleRetry={handleRetry} open={open} onClose={onCloseAndErase} />
       )}
       {modalState === ModalState.Success && (
-        <SuccessTxn hash={transactionHash!} value={currentValue!} open={open} onClose={onCloseAndErase} />
+        <SuccessTxn
+          hash={transactionHash!}
+          value={currentValue!}
+          token={currentToken!}
+          open={open}
+          onClose={onCloseAndErase}
+        />
       )}
     </>
   )
