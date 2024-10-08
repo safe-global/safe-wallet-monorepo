@@ -55,18 +55,18 @@ class BadgesService {
     })
     return response.data
   }
-  public async attestBadges(account?: Address) {
+  public async attestBadges(account: Address, jwt: string) {
     const response = await this.httpInstance.post(
       '/attest-badges',
       {},
-      { headers: { account: account || zeroAddress } },
+      { headers: { account: account, Authorization: `Bearer ${jwt}` } },
     )
     return response.data
   }
   public async getPerks(account: Address) {
     const response = await this.httpInstance.get<{ perks: Perks }>('/get-user-perks', {
       headers: {
-        account: account || zeroAddress,
+        account: account,
       },
     })
     return response.data.perks
