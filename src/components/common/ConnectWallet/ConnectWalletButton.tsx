@@ -1,3 +1,4 @@
+import useWallet from '@/hooks/wallets/useWallet'
 import { Button } from '@mui/material'
 import { usePrivy } from '@privy-io/react-auth'
 
@@ -12,11 +13,17 @@ const ConnectWalletButton = ({
   small?: boolean
   text?: string
 }): React.ReactElement => {
-  const { login } = usePrivy()
+  const { login, ready, authenticated, logout, connectWallet } = usePrivy()
+  const wallet = useWallet()
 
-  const handleConnect = () => {
-    login()
-    onConnect?.()
+  const handleConnect = async () => {
+    if (!ready) return
+    if (!wallet && authenticated) {
+      connectWallet()
+    } else {
+      login()
+      onConnect?.()
+    }
   }
 
   return (
