@@ -20,6 +20,7 @@ import SuperChainID from './steps/SuperChainIdStep'
 import Avatar from './steps/AvatarStep'
 import type { NounProps } from './steps/AvatarStep'
 import { ImageData } from '@nouns/assets'
+import useCurrentWalletHasSuperChainSmartAccount from '@/hooks/super-chain/useCurrentWalletHasSuperChainSmartAccount'
 
 export type NewSafeFormData = {
   name: string
