@@ -1,4 +1,4 @@
-import { Box, Dialog, Grid, Stack, SvgIcon, Typography } from '@mui/material'
+import { Box, Dialog, SvgIcon, Typography } from '@mui/material'
 import React from 'react'
 import SuperChainStar from '@/public/images/common/superchain-star.svg'
 import css from './styles.module.css'

@@ -1,7 +1,6 @@
 import { Box, SvgIcon } from '@mui/material'
 import css from '@/components/new-safe/create/steps/StatusStep/LoadingSpinner/styles.module.css'
 import classnames from 'classnames'
-import { useCallback, useEffect, useRef } from 'react'
 import SuperChainStar from '@/public/images/common/superchain-star.svg'
 import SuperChainBrokenStart from '@/public/images/common/superchain-star-broken.svg'
 
@@ -78,10 +77,11 @@ const LoadingSpinner = ({ status }: { status: SpinnerStatus }) => {
           </filter>
         </defs>
       </svg> */}
-      {isError ? <SvgIcon component={SuperChainBrokenStart} inheritViewBox fontSize="inherit" />
-
-        : <SvgIcon className={css.spin} component={SuperChainStar} inheritViewBox fontSize="inherit" />
-      }
+      {isError ? (
+        <SvgIcon component={SuperChainBrokenStart} inheritViewBox fontSize="inherit" />
+      ) : (
+        <SvgIcon className={css.spin} component={SuperChainStar} inheritViewBox fontSize="inherit" />
+      )}
     </Box>
   )
 }

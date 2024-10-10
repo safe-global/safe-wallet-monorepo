@@ -4,7 +4,6 @@ import Grid from '@mui/material/Grid'
 import Button from '@mui/material/Button'
 
 import { WidgetContainer } from '../styled'
-import { useSafeApps } from '@/hooks/safe-apps/useSafeApps'
 import useSafeAppPreviewDrawer from '@/hooks/safe-apps/useSafeAppPreviewDrawer'
 
 import SafeAppCard, { SafeAppCardContainer } from '@/components/safe-apps/SafeAppCard'
@@ -12,15 +11,8 @@ import { AppRoutes } from '@/config/routes'
 import ExploreSafeAppsIcon from '@/public/images/apps/explore.svg'
 
 import css from './styles.module.css'
-import { Box, Paper, Skeleton } from '@mui/material'
-import SuperChainApp from './app'
 import SafeAppPreviewDrawer from '@/components/safe-apps/SafeAppPreviewDrawer'
-import { useCurrentChain } from '@/hooks/useChains'
-import { fetchSafeAppFromManifest } from '@/services/safe-apps/manifest'
-import { useEffect } from 'react'
 import { useCustomSafeApps } from '@/hooks/safe-apps/useCustomSafeApps'
-import { SafeAppData } from '@safe-global/safe-gateway-typescript-sdk'
-import data from '@/pages/_settings/data'
 import { useAppSelector } from '@/store'
 import { selectSuperChainAccount } from '@/store/superChainAccountSlice'
 

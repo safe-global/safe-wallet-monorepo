@@ -35,7 +35,6 @@ import useGasPrice from '@/hooks/useGasPrice'
 import { useWeb3 } from '@/hooks/wallets/web3'
 
 // import { gtmSetSafeAddress } from '@/services/analytics/gtm';
-import { getReadOnlyFallbackHandlerContract } from '@/services/contracts/safeContracts'
 // import { isSocialLoginWallet } from '@/services/mpc/SocialLoginModule';
 // import { useAppDispatch } from '@/store'
 // import { FEATURES } from '@/utils/chains'

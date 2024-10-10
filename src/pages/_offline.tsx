@@ -7,7 +7,7 @@ const Offline: NextPage = () => {
   return (
     <>
       <Head>
-        <title>{'Superchain Account – Offline'}</title>
+        <title>Superchain Account – Offline</title>
       </Head>
 
       <main>

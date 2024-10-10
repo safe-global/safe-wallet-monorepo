@@ -23,7 +23,7 @@ function ActivatingSuperAccount() {
         </svg>
         <CircularProgress variant="determinate" value={100} className={css.circleBg} size={60} thickness={5} />
         <CircularProgress
-          variant={'indeterminate'}
+          variant="indeterminate"
           value={3} // Just to give an indication of the progress even at 0%
           className={css.circleProgress}
           size={60}

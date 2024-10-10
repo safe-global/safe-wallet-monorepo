@@ -26,13 +26,11 @@ import { useAppSelector } from '@/store'
 import { selectSuperChainAccount } from '@/store/superChainAccountSlice'
 import commonCss from '@/components/tx-flow/common/styles.module.css'
 import Save from '@/public/images/common/save.svg'
-import { head } from 'lodash'
 import useSuperChainAccount from '@/hooks/super-chain/useSuperChainAccount'
 import { Address } from 'viem'
 import { TxModalContext } from '@/components/tx-flow'
 import LoadingModal from '@/components/common/LoadingModal'
 import FailedTxnModal from '@/components/common/ErrorModal'
-import SuccessTxn from '../TopUpModal/states/SuccessTxn'
 import SuccessTxnModal from '@/components/common/SuccessTxnModal'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useQueryClient } from '@tanstack/react-query'
@@ -158,7 +156,7 @@ const UpdateAvatarModal = () => {
             </div>
 
             <Paper data-testid="modal-header" className={css.header}>
-              <TxLayoutHeader icon={undefined} subtitle={'Customize your Super Account Avatar'} hideNonce={true} />
+              <TxLayoutHeader icon={undefined} subtitle="Customize your Super Account Avatar" hideNonce={true} />
             </Paper>
             <div className={css.step}>
               <TxCard>

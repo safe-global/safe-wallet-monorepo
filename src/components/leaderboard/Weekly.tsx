@@ -1,10 +1,8 @@
-import { Box, Stack, Typography } from '@mui/material'
+import { Stack, Typography } from '@mui/material'
 import React, { useMemo } from 'react'
 import RankingProfile from './RankingProfile/index'
-import { useLeaderboard, useWeeklyLeaderboard } from '@/hooks/super-chain/useLeaderboard'
+import { useWeeklyLeaderboard } from '@/hooks/super-chain/useLeaderboard'
 import useSafeAddress from '@/hooks/useSafeAddress'
-import type { Address } from 'viem'
-import { useUserRank } from '@/hooks/super-chain/useUserRank'
 
 function WeeklyLeaderboard() {
   const address = useSafeAddress()

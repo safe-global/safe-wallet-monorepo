@@ -11,7 +11,7 @@ const ShareSafeApp = () => {
   return (
     <>
       <Head>
-        <title>{`Superchain Account – Safe Apps`}</title>
+        <title>Superchain Account – Safe Apps</title>
       </Head>
 
       <main>

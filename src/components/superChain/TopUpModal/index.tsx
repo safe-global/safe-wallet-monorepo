@@ -13,8 +13,6 @@ import {
   encodeFunctionData,
   erc20Abi,
   http,
-  parseEther,
-  parseUnits,
   zeroAddress,
 } from 'viem'
 import { sepolia, optimism } from 'viem/chains'

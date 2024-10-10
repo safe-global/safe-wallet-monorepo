@@ -4,7 +4,6 @@ import {
   SUPER_CHAIN_ACCOUNT_MODULE_ADDRESS,
   SUPER_CHAIN_MODULE_ABI,
 } from '@/features/superChain/constants'
-import { publicClient } from '@/services/pimlico'
 import { Contract, JsonRpcProvider } from 'ethers'
 import { type Address, createPublicClient, createWalletClient, custom, getContract, http } from 'viem'
 import usePimlico from '../usePimlico'

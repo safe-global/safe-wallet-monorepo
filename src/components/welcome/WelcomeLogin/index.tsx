@@ -1,5 +1,5 @@
 import { AppRoutes } from '@/config/routes'
-import { Paper, Typography, Divider, Box, Skeleton, Button, Stack } from '@mui/material'
+import { Paper, Typography, Divider, Box, Button, Stack } from '@mui/material'
 import css from './styles.module.css'
 import { useRouter } from 'next/router'
 import { CREATE_SAFE_EVENTS } from '@/services/analytics/events/createLoadSafe'

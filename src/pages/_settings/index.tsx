@@ -17,7 +17,7 @@ const Settings: NextPage = () => {
   return (
     <>
       <Head>
-        <title>{'Superchain Account – Settings'}</title>
+        <title>Superchain Account – Settings</title>
       </Head>
     </>
   )

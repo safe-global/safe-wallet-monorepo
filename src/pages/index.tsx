@@ -2,7 +2,6 @@ import { useEffect } from 'react'
 import type { NextPage } from 'next'
 import { useRouter } from 'next/router'
 import { AppRoutes } from '@/config/routes'
-import { isEmpty } from 'lodash'
 import local from '@/services/local-storage/local'
 import { addedSafesSlice, type AddedSafesState } from '@/store/addedSafesSlice'
 

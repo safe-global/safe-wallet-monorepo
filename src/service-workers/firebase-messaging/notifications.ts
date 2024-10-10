@@ -1,7 +1,7 @@
 // Be careful what you import here as it will increase the service worker bundle size
 
 import { get as getFromIndexedDb } from 'idb-keyval'
-import { getChainsConfig, setBaseUrl } from '@safe-global/safe-gateway-typescript-sdk'
+import { getChainsConfig } from '@safe-global/safe-gateway-typescript-sdk'
 import type { MessagePayload } from 'firebase/messaging'
 
 import { AppRoutes } from '@/config/routes' // Has no internal imports

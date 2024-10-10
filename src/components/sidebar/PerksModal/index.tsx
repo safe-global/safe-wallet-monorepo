@@ -1,10 +1,8 @@
 import ModalDialog from '@/components/common/ModalDialog'
-import { Box, CircularProgress, DialogContent, Skeleton, SvgIcon, Tooltip, Typography } from '@mui/material'
+import { Box, DialogContent, Skeleton, SvgIcon, Tooltip, Typography } from '@mui/material'
 import React, { useMemo } from 'react'
 import css from './styles.module.css'
 import PerkRaffle from '@/public/images/superchain/perk-raffle.svg'
-import PerkRebate from '@/public/images/superchain/perk-rebate.svg'
-import PerkCashback from '@/public/images/superchain/perk-cashback.svg'
 import useCurrentPerks from '@/hooks/super-chain/useCurrentPerks'
 
 function PerksModal({ open, onClose }: { open: boolean; onClose: () => void }) {

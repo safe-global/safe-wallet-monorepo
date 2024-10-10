@@ -1,4 +1,4 @@
-import { EIP1193Provider, useWallets } from '@privy-io/react-auth'
+import { EIP1193Provider } from '@privy-io/react-auth'
 import { useEffect, useState } from 'react'
 import { type Address, createWalletClient, custom } from 'viem'
 import { sepolia, optimism } from 'viem/chains'

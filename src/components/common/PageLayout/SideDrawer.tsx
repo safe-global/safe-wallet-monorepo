@@ -1,11 +1,8 @@
 import { useRouter } from 'next/router'
 import { useEffect, type ReactElement } from 'react'
-import { IconButton, Drawer, useMediaQuery } from '@mui/material'
+import { Drawer, useMediaQuery } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import DoubleArrowRightIcon from '@mui/icons-material/KeyboardDoubleArrowRightRounded'
-import DoubleArrowLeftIcon from '@mui/icons-material/KeyboardDoubleArrowLeftRounded'
 
-import classnames from 'classnames'
 import Sidebar from '@/components/sidebar/Sidebar'
 import css from './styles.module.css'
 import useDebounce from '@/hooks/useDebounce'

@@ -17,7 +17,7 @@ import { isOptimizedForBatchTransactions } from '@/components/safe-apps/utils'
 import { AppRoutes } from '@/config/routes'
 import BatchIcon from '@/public/images/apps/batch-icon.svg'
 import css from './styles.module.css'
-import { Box, CardActions, Stack } from '@mui/material'
+import { Stack } from '@mui/material'
 import SafeAppPerks from '../SafeAppPerks'
 
 type SafeAppCardProps = {

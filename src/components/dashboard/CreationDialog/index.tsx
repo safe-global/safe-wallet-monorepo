@@ -3,8 +3,6 @@ import { Box, Button, Dialog, DialogContent, Grid, SvgIcon, Typography } from '@
 import { useRouter } from 'next/router'
 import css from './styles.module.css'
 
-import HomeIcon from '@/public/images/sidebar/home.svg'
-
 import AccountIcon from '@/public/images/sidebar/account.svg'
 import BadgesIcon from '@/public/images/sidebar/badges.svg'
 import ContactsIcon from '@/public/images/sidebar/contacts.svg'

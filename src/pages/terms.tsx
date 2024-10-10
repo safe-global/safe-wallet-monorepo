@@ -114,10 +114,10 @@ const SafeTerms = () => (
       <li>&ldquo;Safe App&rdquo;</li>
     </ol>
     <p>
-      You may access Safe Accounts using the {'Superchain Account'} web app, mobile app for iOS and android, or the
-      browser extension&nbsp;(each a &ldquo;Safe App&rdquo;). The Safe App may be used to manage your personal digital
-      assets on Ethereum and other common EVM chains when you connect a Safe Account with third-party&nbsp;services (as
-      defined below). The Safe App provides certain features that may be amended from time to time.{' '}
+      You may access Safe Accounts using the Superchain Account web app, mobile app for iOS and android, or the browser
+      extension&nbsp;(each a &ldquo;Safe App&rdquo;). The Safe App may be used to manage your personal digital assets on
+      Ethereum and other common EVM chains when you connect a Safe Account with third-party&nbsp;services (as defined
+      below). The Safe App provides certain features that may be amended from time to time.{' '}
     </p>
     <ol start={3}>
       <li>&ldquo;Third-Party&nbsp;Safe Apps&rdquo;</li>
@@ -604,7 +604,7 @@ const Terms: NextPage = () => {
   return (
     <>
       <Head>
-        <title>{'Superchain Account – Terms'}</title>
+        <title>Superchain Account – Terms</title>
       </Head>
 
       <main>{IS_OFFICIAL_HOST && <SafeTerms />}</main>

@@ -26,7 +26,7 @@ const Messages: NextPage = () => {
   return (
     <>
       <Head>
-        <title>{'Superchain Account – Messages'}</title>
+        <title>Superchain Account – Messages</title>
       </Head>
 
       <TxHeader>

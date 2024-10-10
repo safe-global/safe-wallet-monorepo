@@ -9,7 +9,6 @@ import { ImageData } from '@nouns/assets'
 import type { StepRenderProps } from '@/components/new-safe/CardStepper/useCardStepper'
 import type { NewSafeFormData } from '../..'
 import NounsAvatar from '@/components/common/NounsAvatar'
-import { Head } from 'next/document'
 
 const TRAIT_LIMITS = {
   head: { min: 0, max: ImageData.images.heads.length - 1 },

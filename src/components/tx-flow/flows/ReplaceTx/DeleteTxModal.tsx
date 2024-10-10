@@ -14,7 +14,6 @@ import {
 } from '@mui/material'
 import { Close } from '@mui/icons-material'
 import madProps from '@/utils/mad-props'
-import useOnboard from '@/hooks/wallets/useOnboard'
 import useChainId from '@/hooks/useChainId'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import { deleteTx } from '@/utils/gateway'

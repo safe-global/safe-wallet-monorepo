@@ -1,4 +1,4 @@
-import { Box, Grid, Skeleton, Stack, SvgIcon, Typography } from '@mui/material'
+import { Box, Grid, Skeleton, SvgIcon, Typography } from '@mui/material'
 import Badge from '@/public/images/common/superChain.svg'
 
 function BadgesHeader({

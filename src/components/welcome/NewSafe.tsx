@@ -8,7 +8,6 @@ import Transactions from '@/public/images/common/transactions.svg'
 import CardFooter from '@/public/images/common/footer-card.svg'
 
 import WelcomeLogin from './WelcomeLogin'
-import { autoBatchEnhancer } from '@reduxjs/toolkit'
 
 const BulletListItem = ({ text, icon }: { text: string; icon: any }) => (
   <li>

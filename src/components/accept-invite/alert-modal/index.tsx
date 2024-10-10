@@ -1,4 +1,4 @@
-import React, { useState, type SyntheticEvent } from 'react'
+import React, { useState } from 'react'
 import useSuperChainAccount from '@/hooks/super-chain/useSuperChainAccount'
 import { AppRoutes } from '@/config/routes'
 import { useRouter } from 'next/router'

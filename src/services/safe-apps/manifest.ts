@@ -73,8 +73,6 @@ const fetchAppManifest = async (appUrl: string, timeout = 5000): Promise<unknown
   }
 
   return response.json()
-
-
 }
 
 const isAppManifestValid = (json: unknown): json is AppManifest => {

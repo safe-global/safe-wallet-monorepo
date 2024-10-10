@@ -1,5 +1,5 @@
-import { type ReactElement, type BaseSyntheticEvent, useMemo, useEffect, useState } from 'react'
-import { Box, Button, DialogActions, DialogContent, Typography } from '@mui/material'
+import { type ReactElement, type BaseSyntheticEvent, useEffect, useState } from 'react'
+import { Box, Button, DialogContent, Typography } from '@mui/material'
 import { FormProvider, useForm } from 'react-hook-form'
 
 import AddressInput from '@/components/common/AddressInput'
@@ -13,8 +13,6 @@ import { isValidAddress } from '@/utils/validation'
 import { useSuperChainAccountSubgraph } from '@/hooks/super-chain/useSuperChainAccountSubgraph'
 import { Address } from 'viem'
 import NounsAvatar from '@/components/common/NounsAvatar'
-import { isValid } from 'date-fns'
-import { type } from 'os'
 import { upsertContact } from '@/store/contactsSlice'
 
 export type AddressEntry = {
@@ -71,15 +69,15 @@ function EntryDialog({
         chainId: chainId || currentChainId,
         superChainAccount: data?.superChainSmartAccount
           ? {
-            id: data.superChainSmartAccount.superChainId,
-            nounSeed: {
-              accessory: parseInt(data.superChainSmartAccount.noun_accessory),
-              background: parseInt(data.superChainSmartAccount.noun_background),
-              body: parseInt(data.superChainSmartAccount.noun_body),
-              glasses: parseInt(data.superChainSmartAccount.noun_glasses),
-              head: parseInt(data.superChainSmartAccount.noun_head),
-            },
-          }
+              id: data.superChainSmartAccount.superChainId,
+              nounSeed: {
+                accessory: parseInt(data.superChainSmartAccount.noun_accessory),
+                background: parseInt(data.superChainSmartAccount.noun_background),
+                body: parseInt(data.superChainSmartAccount.noun_body),
+                glasses: parseInt(data.superChainSmartAccount.noun_glasses),
+                head: parseInt(data.superChainSmartAccount.noun_head),
+              },
+            }
           : undefined,
       }),
     )

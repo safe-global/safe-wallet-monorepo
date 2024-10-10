@@ -10,7 +10,7 @@ const Modules: NextPage = () => {
   return (
     <>
       <Head>
-        <title>{'Superchain Account – Settings – Modules'}</title>
+        <title>Superchain Account – Settings – Modules</title>
       </Head>
 
       <SettingsHeader />

@@ -59,14 +59,14 @@ class BadgesService {
     const response = await this.httpInstance.post(
       '/attest-badges',
       {},
-      { headers: { account: account, Authorization: `Bearer ${jwt}` } },
+      { headers: { account, Authorization: `Bearer ${jwt}` } },
     )
     return response.data
   }
   public async getPerks(account: Address) {
     const response = await this.httpInstance.get<{ perks: Perks }>('/get-user-perks', {
       headers: {
-        account: account,
+        account,
       },
     })
     return response.data.perks
@@ -75,7 +75,6 @@ class BadgesService {
     const response = await this.httpInstance.get<{ perks: Perks }>(`/get-perks/${level}`)
     return response.data.perks
   }
-
 }
 const badgesService = new BadgesService()
 export default badgesService

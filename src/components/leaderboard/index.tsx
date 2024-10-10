@@ -1,12 +1,10 @@
-import { Box, Skeleton, Stack, Typography } from '@mui/material'
+import { Skeleton, Stack, Typography } from '@mui/material'
 import React from 'react'
 import RankingProfile from './RankingProfile/index'
 import { useLeaderboard } from '@/hooks/super-chain/useLeaderboard'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import type { Address } from 'viem'
-import { add, head, map } from 'lodash'
 import { useUserRank } from '@/hooks/super-chain/useUserRank'
-import { color } from 'framer-motion'
 
 function Leaderboard({ handleUserSelect }: { handleUserSelect: (_: string) => void }) {
   const address = useSafeAddress()
@@ -33,7 +31,7 @@ function Leaderboard({ handleUserSelect }: { handleUserSelect: (_: string) => vo
               TOP USERS OF ALL-TIME
             </Typography>
             {Array.from(new Array(5)).map((_, index) => (
-              <Skeleton variant="rounded" height={48} />
+              <Skeleton key={index} variant="rounded" height={48} />
             ))}
           </Stack>
         </Stack>

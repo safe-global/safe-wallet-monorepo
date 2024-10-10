@@ -1,5 +1,5 @@
 import React from 'react'
-import { Box, Button, Dialog, Grid, Stack, SvgIcon, Typography } from '@mui/material'
+import { Box, Button, Dialog, Stack, SvgIcon, Typography } from '@mui/material'
 import SuperChainBrokenStart from '@/public/images/common/superchain-star-broken.svg'
 import css from './styles.module.css'
 

@@ -12,7 +12,6 @@ import TxStatusWidget from '../TxStatusWidget'
 import css from './styles.module.css'
 import SafeLogo from '@/public/images/logo-no-text.svg'
 import { TxSecurityProvider } from '@/components/tx/security/shared/TxSecurityContext'
-import ChainIndicator from '@/components/common/ChainIndicator'
 import SecurityWarnings from '@/components/tx/security/SecurityWarnings'
 
 export const TxLayoutHeader = ({

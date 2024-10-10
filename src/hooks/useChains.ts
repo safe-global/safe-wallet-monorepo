@@ -3,7 +3,6 @@ import isEqual from 'lodash/isEqual'
 import { type ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import { useAppSelector } from '@/store'
 import { selectChainById, selectChains } from '@/store/chainsSlice'
-import { useChainId } from './useChainId'
 import { type FEATURES, hasFeature } from '@/utils/chains'
 import { CHAIN_ID } from '@/features/superChain/constants'
 

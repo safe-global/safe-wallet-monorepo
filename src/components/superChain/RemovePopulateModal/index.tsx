@@ -1,5 +1,5 @@
 import { Box, Button, Dialog, Stack, SvgIcon, Typography } from '@mui/material'
-import React, { useContext, type SyntheticEvent } from 'react'
+import React, { type SyntheticEvent } from 'react'
 import css from './styles.module.css'
 import CopyAddressButton from '@/components/common/CopyAddressButton'
 import ExplorerButton from '@/components/common/ExplorerButton'

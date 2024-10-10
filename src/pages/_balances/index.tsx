@@ -2,7 +2,6 @@ import type { NextPage } from 'next'
 import Head from 'next/head'
 
 import AssetsTable from '@/components/balances/AssetsTable'
-import AssetsHeader from '@/components/balances/AssetsHeader'
 import useBalances from '@/hooks/useBalances'
 import { useState } from 'react'
 
@@ -22,7 +21,7 @@ const Balances: NextPage = () => {
   return (
     <>
       <Head>
-        <title>{'Superchain Account – Assets'}</title>
+        <title>Superchain Account – Assets</title>
       </Head>
 
       {/* <AssetsHeader>

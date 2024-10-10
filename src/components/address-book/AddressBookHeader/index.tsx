@@ -10,8 +10,6 @@ import PageHeader from '@/components/common/PageHeader'
 import { ModalType } from '../AddressBookTable'
 import { useAppSelector } from '@/store'
 import { type AddressBookState, selectAllAddressBooks } from '@/store/addressBookSlice'
-import ImportIcon from '@/public/images/common/import.svg'
-import ExportIcon from '@/public/images/common/export.svg'
 import AddCircleIcon from '@/public/images/common/add-outlined.svg'
 import mapProps from '@/utils/mad-props'
 

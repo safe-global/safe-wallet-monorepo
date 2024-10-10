@@ -28,7 +28,6 @@ import { TokenTransferFlow } from '@/components/tx-flow/flows'
 import CheckWallet from '@/components/common/CheckWallet'
 import madProps from '@/utils/mad-props'
 import useContacts from '@/hooks/useContacts'
-import { filter, includes } from 'lodash'
 import NounsAvatar from '@/components/common/NounsAvatar'
 
 const headCells = [

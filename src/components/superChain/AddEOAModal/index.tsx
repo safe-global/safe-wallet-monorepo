@@ -1,4 +1,4 @@
-import { useState, type ReactElement, type SyntheticEvent } from 'react'
+import { useState, type ReactElement } from 'react'
 import useSuperChainAccount from '@/hooks/super-chain/useSuperChainAccount'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import { type ADD_EOA_INITIAL_STATE } from '@/components/common/SuperChainEOAS'

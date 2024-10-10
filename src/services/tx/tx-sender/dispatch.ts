@@ -18,7 +18,6 @@ import {
   tryOffChainTxSigning,
 } from './sdk'
 import { createWeb3, getUserNonce, getWeb3ReadOnly } from '@/hooks/wallets/web3'
-import { type OnboardAPI } from '@web3-onboard/core'
 import { asError } from '@/services/exceptions/utils'
 import chains from '@/config/chains'
 import { LATEST_SAFE_VERSION } from '@/config/constants'

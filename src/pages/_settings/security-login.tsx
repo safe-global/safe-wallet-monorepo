@@ -8,7 +8,7 @@ const SecurityLoginPage: NextPage = () => {
   return (
     <>
       <Head>
-        <title>{'Superchain Account – Settings – Security & Login'}</title>
+        <title>Superchain Account – Settings – Security & Login</title>
       </Head>
 
       <SettingsHeader />

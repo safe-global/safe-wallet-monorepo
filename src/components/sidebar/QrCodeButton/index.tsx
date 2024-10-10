@@ -1,4 +1,4 @@
-import { type ReactElement, type ReactNode, useState, Suspense } from 'react'
+import { type ReactElement, type ReactNode, useState } from 'react'
 import dynamic from 'next/dynamic'
 
 const TopUpModal = dynamic(() => import('@/components/superChain/TopUpModal'))

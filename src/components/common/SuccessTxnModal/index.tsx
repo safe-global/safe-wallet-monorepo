@@ -1,14 +1,11 @@
 import { Box, Button, Dialog, Stack, SvgIcon, Typography } from '@mui/material'
-import React, { useState, type SyntheticEvent } from 'react'
+import React, { type SyntheticEvent } from 'react'
 import BeautySuccess from '@/public/images/common/beauty-success.svg'
 import css from './styles.module.css'
 import CopyAddressButton from '@/components/common/CopyAddressButton'
 import ExplorerButton from '@/components/common/ExplorerButton'
-import { zeroAddress } from 'viem'
-import { useRouter } from 'next/router'
 import { useCurrentChain } from '@/hooks/useChains'
 import { getBlockExplorerLink } from '@/utils/chains'
-import useSafeAddress from '@/hooks/useSafeAddress'
 type Props = {
   title: string
   description?: string

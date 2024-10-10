@@ -1,5 +1,5 @@
 import { type SyntheticEvent } from 'react'
-import { Button, DialogActions, FormControl, Grid, Typography, DialogContent, Box } from '@mui/material'
+import { Button, FormControl, Grid, Typography, DialogContent, Box } from '@mui/material'
 import { FormProvider, useForm } from 'react-hook-form'
 import { safeFormatUnits, safeParseUnits } from '@/utils/formatters'
 import { FLOAT_REGEX } from '@/utils/validation'
@@ -67,17 +67,19 @@ const AdvancedParamsForm = ({ params, ...props }: AdvancedParamsFormProps) => {
   }
 
   return (
-    <ModalDialog open dialogTitle={
-      <Typography padding={2} fontSize={24} fontWeight={700}>
-        Advanced parameters
-      </Typography >
-    }
-      hideChainIndicator>
+    <ModalDialog
+      open
+      dialogTitle={
+        <Typography padding={2} fontSize={24} fontWeight={700}>
+          Advanced parameters
+        </Typography>
+      }
+      hideChainIndicator
+    >
       <FormProvider {...formMethods}>
         <form onSubmit={onFormSubmit}>
-          <DialogContent >
+          <DialogContent>
             <Box padding={2} paddingBottom={0}>
-
               <Grid container spacing={2}>
                 <Grid item xs={12}>
                   <Typography variant="body1" fontWeight={700}>
@@ -141,16 +143,15 @@ const AdvancedParamsForm = ({ params, ...props }: AdvancedParamsFormProps) => {
                 </ExternalLink>
               </Typography>
             </Box>
-
           </DialogContent>
 
           {/* Buttons */}
-          <Box display='flex' gap={2} width='100%' padding={4} paddingTop={0}>
-            <Button fullWidth variant='contained' onClick={onBack}>
+          <Box display="flex" gap={2} width="100%" padding={4} paddingTop={0}>
+            <Button fullWidth variant="contained" onClick={onBack}>
               Back
             </Button>
 
-            <Button fullWidth color='secondary' variant="contained" type="submit">
+            <Button fullWidth color="secondary" variant="contained" type="submit">
               Confirm
             </Button>
           </Box>

@@ -1,5 +1,9 @@
 import { useState, useEffect, useCallback } from 'react'
-import type { SafeAppAccessPolicyTypes, SafeAppData, SafeAppSocialPlatforms } from '@safe-global/safe-gateway-typescript-sdk'
+import type {
+  SafeAppAccessPolicyTypes,
+  SafeAppData,
+  SafeAppSocialPlatforms,
+} from '@safe-global/safe-gateway-typescript-sdk'
 import local from '@/services/local-storage/local'
 import { fetchSafeAppFromManifest } from '@/services/safe-apps/manifest'
 import useChainId from '@/hooks/useChainId'
@@ -62,99 +66,82 @@ const useCustomSafeApps = (): ReturnType => {
 
 export { useCustomSafeApps }
 
-
 const fakeSafeApps: SafeAppData[] = [
-
   {
-    "id": 0.21472726789485663,
-    "url": "https://raffle.superchain.eco",
-    "name": "Super Chain Raffle",
-    "description": "Participate in weekly free raffle by claiming tickets based on your level.",
-    "accessControl": {
-      "type": "NO_RESTRICTIONS" as SafeAppAccessPolicyTypes,
-      "value": []
+    id: 0.21472726789485663,
+    url: 'https://raffle.superchain.eco',
+    name: 'Super Chain Raffle',
+    description: 'Participate in weekly free raffle by claiming tickets based on your level.',
+    accessControl: {
+      type: 'NO_RESTRICTIONS' as SafeAppAccessPolicyTypes,
+      value: [],
     },
-    "tags": [
-      "DeFi",
-      "Gaming"
-    ],
-    "features": [],
-    "socialProfiles": [],
-    "developerWebsite": "",
-    "chainIds": [
-      "10"
-    ],
-    "iconUrl": "https://account.superchain.eco/images/apps/raffle.jpg",
+    tags: ['DeFi', 'Gaming'],
+    features: [],
+    socialProfiles: [],
+    developerWebsite: '',
+    chainIds: ['10'],
+    iconUrl: 'https://account.superchain.eco/images/apps/raffle.jpg',
   },
   {
-    "id": 48,
-    "url": "https://app.superfluid.finance/",
-    "name": "Superfluid",
-    "iconUrl": "https://safe-transaction-assets.safe.global/safe_apps/48/icon.png",
-    "description": "Superfluid is a new Ethereum Protocol that extends Ethereum tokens to include novel functionalities. Superfluid enables functionalities like money streaming and reward distribution.",
-    "chainIds": [
-      "10",
-    ],
-    "accessControl": {
-      "type": "NO_RESTRICTIONS" as SafeAppAccessPolicyTypes,
-      "value": []
+    id: 48,
+    url: 'https://app.superfluid.finance/',
+    name: 'Superfluid',
+    iconUrl: 'https://safe-transaction-assets.safe.global/safe_apps/48/icon.png',
+    description:
+      'Superfluid is a new Ethereum Protocol that extends Ethereum tokens to include novel functionalities. Superfluid enables functionalities like money streaming and reward distribution.',
+    chainIds: ['10'],
+    accessControl: {
+      type: 'NO_RESTRICTIONS' as SafeAppAccessPolicyTypes,
+      value: [],
     },
-    "tags": [
-      "Accounting",
-      "DAO Tooling",
-      "Payments"
+    tags: ['Accounting', 'DAO Tooling', 'Payments'],
+    features: [],
+    developerWebsite: 'https://superfluid.finance',
+    socialProfiles: [
+      {
+        platform: 'DISCORD' as SafeAppSocialPlatforms,
+        url: 'http://discord.superfluid.finance',
+      },
+      {
+        platform: 'GITHUB' as SafeAppSocialPlatforms,
+        url: 'https://github.com/superfluid-finance',
+      },
+      {
+        platform: 'TWITTER' as SafeAppSocialPlatforms,
+        url: 'https://twitter.com/Superfluid_HQ',
+      },
     ],
-    "features": [],
-    "developerWebsite": "https://superfluid.finance",
-    "socialProfiles": [
-      {
-        "platform": "DISCORD" as SafeAppSocialPlatforms,
-        "url": "http://discord.superfluid.finance"
-      },
-      {
-        "platform": "GITHUB" as SafeAppSocialPlatforms,
-        "url": "https://github.com/superfluid-finance"
-      },
-      {
-        "platform": "TWITTER" as SafeAppSocialPlatforms,
-        "url": "https://twitter.com/Superfluid_HQ"
-      }
-    ]
   },
   {
-    "id": 152,
-    "url": "https://velodrome.finance",
-    "name": "Velodrome Finance",
-    "iconUrl": "https://account.superchain.eco/images/apps/velodrome.jpg",
-    "description": "Velodrome Finance is a next-generation AMM that combines the best of Curve, Convex and Uniswap, designed to serve as the central liquidity hub on Optimism network. Velodrome NFTs vote on token emissio",
-    "chainIds": [
-      "10"
-    ],
-    "provider": undefined,
-    "accessControl": {
-      "type": "NO_RESTRICTIONS" as SafeAppAccessPolicyTypes,
-      "value": []
+    id: 152,
+    url: 'https://velodrome.finance',
+    name: 'Velodrome Finance',
+    iconUrl: 'https://account.superchain.eco/images/apps/velodrome.jpg',
+    description:
+      'Velodrome Finance is a next-generation AMM that combines the best of Curve, Convex and Uniswap, designed to serve as the central liquidity hub on Optimism network. Velodrome NFTs vote on token emissio',
+    chainIds: ['10'],
+    provider: undefined,
+    accessControl: {
+      type: 'NO_RESTRICTIONS' as SafeAppAccessPolicyTypes,
+      value: [],
     },
-    "tags": [
-      "DeFi",
-      "Governance",
-      "Yield"
+    tags: ['DeFi', 'Governance', 'Yield'],
+    features: [],
+    developerWebsite: 'https://velodrome.finance',
+    socialProfiles: [
+      {
+        platform: 'DISCORD' as SafeAppSocialPlatforms,
+        url: 'https://discord.gg/velodrome',
+      },
+      {
+        platform: 'GITHUB' as SafeAppSocialPlatforms,
+        url: 'https://github.com/velodrome-finance',
+      },
+      {
+        platform: 'TWITTER' as SafeAppSocialPlatforms,
+        url: 'https://twitter.com/velodromeFi',
+      },
     ],
-    "features": [],
-    "developerWebsite": "https://velodrome.finance",
-    "socialProfiles": [
-      {
-        "platform": "DISCORD" as SafeAppSocialPlatforms,
-        "url": "https://discord.gg/velodrome"
-      },
-      {
-        "platform": "GITHUB" as SafeAppSocialPlatforms,
-        "url": "https://github.com/velodrome-finance"
-      },
-      {
-        "platform": "TWITTER" as SafeAppSocialPlatforms,
-        "url": "https://twitter.com/velodromeFi"
-      }
-    ]
-  }
+  },
 ]

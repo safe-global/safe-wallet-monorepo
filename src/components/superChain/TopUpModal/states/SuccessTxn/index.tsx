@@ -1,7 +1,6 @@
 import { Box, Button, Dialog, Stack, SvgIcon, Typography } from '@mui/material'
 import React from 'react'
 import css from './styles.module.css'
-import OETH from '@/public/images/currencies/ethereum.svg'
 import { formatEther } from 'viem'
 import ExplorerButton from '@/components/common/ExplorerButton'
 import { useCurrentChain } from '@/hooks/useChains'

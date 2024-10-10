@@ -5,7 +5,6 @@ import PerkRaffle from '@/public/images/superchain/perk-raffle.svg'
 import SuperChainEcoStamp from '@/public/images/common/superchain-eco-stamp.svg'
 import Hearth from '@/public/images/common/hearth.svg'
 import { SafeAppData } from '@safe-global/safe-gateway-typescript-sdk'
-import useSuperChainAccount from '@/hooks/super-chain/useSuperChainAccount'
 import { useAppSelector } from '@/store'
 import { selectSuperChainAccount } from '@/store/superChainAccountSlice'
 

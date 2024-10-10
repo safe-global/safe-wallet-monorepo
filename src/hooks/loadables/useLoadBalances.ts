@@ -28,9 +28,8 @@ const tokensLogoToInject = [
   {
     address: '0x4200000000000000000000000000000000000042',
     logoUri: '/tokens/0x4200000000000000000000000000000000000042.png',
-  }
+  },
 ]
-
 
 export const useLoadBalances = (): AsyncResult<SafeBalanceResponse> => {
   const [pollCount, resetPolling] = useIntervalCounter(POLLING_INTERVAL)

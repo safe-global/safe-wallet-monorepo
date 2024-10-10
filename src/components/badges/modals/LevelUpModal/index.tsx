@@ -4,8 +4,6 @@ import css from './styles.module.css'
 import Tooltip from '@mui/material/Tooltip'
 
 import PerkRaffle from '@/public/images/superchain/perk-raffle.svg'
-import PerkRebate from '@/public/images/superchain/perk-rebate.svg'
-import PerkCashback from '@/public/images/superchain/perk-cashback.svg'
 import StarAnimation from '../StarsAnimation'
 import { useQuery } from '@tanstack/react-query'
 import badgesService from '@/features/superChain/services/badges.service'

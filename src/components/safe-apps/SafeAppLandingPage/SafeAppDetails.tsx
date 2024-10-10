@@ -3,8 +3,6 @@ import { Box } from '@mui/system'
 import Typography from '@mui/material/Typography'
 import Divider from '@mui/material/Divider'
 import ChainIndicator from '@/components/common/ChainIndicator'
-import WarningIcon from '@/public/images/notifications/warning.svg'
-import SvgIcon from '@mui/material/SvgIcon'
 import SafeAppIconCard from '@/components/safe-apps/SafeAppIconCard'
 
 type DetailsProps = {

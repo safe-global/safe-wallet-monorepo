@@ -1,5 +1,5 @@
 import { formatVisualAmount, safeFormatUnits } from '@/utils/formatters'
-import { Box, Button, Divider, FormControl, InputLabel, MenuItem, Select, TextField, Typography } from '@mui/material'
+import { Box, FormControl, InputLabel, MenuItem, Select, Typography } from '@mui/material'
 import { type SafeBalanceResponse } from '@safe-global/safe-gateway-typescript-sdk'
 import css from './styles.module.css'
 import NumberField from '@/components/common/NumberField'

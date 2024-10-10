@@ -6,7 +6,7 @@ const AddressBook: NextPage = () => {
   return (
     <>
       <Head>
-        <title>{'Superchain Account – Address book'}</title>
+        <title>Superchain Account – Address book</title>
       </Head>
 
       <AddressBookTable />

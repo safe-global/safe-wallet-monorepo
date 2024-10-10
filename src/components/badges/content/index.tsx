@@ -1,14 +1,13 @@
 import { Drawer, Grid, Skeleton, Stack, Typography } from '@mui/material'
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import Badge from '../badge'
 import type { ResponseBadge } from '@/types/super-chain'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQueryClient } from '@tanstack/react-query'
 import badgesService from '@/features/superChain/services/badges.service'
 import { type Address } from 'viem'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import BadgeInfo from '../badgeInfo'
 import css from './styles.module.css'
-import local from '@/services/local-storage/local'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 
 type Params = {
@@ -28,9 +27,12 @@ function BadgesContent({
 }) {
   const queryClient = useQueryClient()
   const { safeAddress, safeLoaded } = useSafeInfo()
-  const [currentBadge, setCurrentBadge] = useState<ResponseBadge & { isFavorite: boolean } | null>(null)
+  const [currentBadge, setCurrentBadge] = useState<(ResponseBadge & { isFavorite: boolean }) | null>(null)
   const [favoriteBadgesLocalStorage, setFavoriteBadgesLocalStorage] = useLocalStorage<string>('favoriteBadges')
-  const favoriteBadges = useMemo(() => safeLoaded ? badgesService.getFavoriteBadges(safeAddress as Address) : [], [safeAddress, favoriteBadgesLocalStorage, safeLoaded])
+  const favoriteBadges = useMemo(
+    () => (safeLoaded ? badgesService.getFavoriteBadges(safeAddress as Address) : []),
+    [safeAddress, favoriteBadgesLocalStorage, safeLoaded],
+  )
 
   if (isLoading)
     return (
@@ -80,7 +82,14 @@ function BadgesContent({
                   <Badge
                     data={badge}
                     key={badge.badgeId}
-                    switchFavorite={() => badgesService.switchFavoriteBadge(badge.badgeId, safeAddress as Address, false, setFavoriteBadgesLocalStorage)}
+                    switchFavorite={() =>
+                      badgesService.switchFavoriteBadge(
+                        badge.badgeId,
+                        safeAddress as Address,
+                        false,
+                        setFavoriteBadgesLocalStorage,
+                      )
+                    }
                     setCurrentBadge={setCurrentBadge}
                     isFavorite
                   />
@@ -102,7 +111,14 @@ function BadgesContent({
               <Badge
                 data={badge}
                 key={badge.badgeId}
-                switchFavorite={() => badgesService.switchFavoriteBadge(badge.badgeId, safeAddress as Address, true, setFavoriteBadgesLocalStorage)}
+                switchFavorite={() =>
+                  badgesService.switchFavoriteBadge(
+                    badge.badgeId,
+                    safeAddress as Address,
+                    true,
+                    setFavoriteBadgesLocalStorage,
+                  )
+                }
                 setCurrentBadge={setCurrentBadge}
                 isFavorite={false}
               />
@@ -110,7 +126,13 @@ function BadgesContent({
         </Stack>
       </Grid>
       <Drawer variant="temporary" anchor="right" open={!!currentBadge}>
-        <BadgeInfo switchFavorite={({ id, account, isFavorite }: { id: number, account: Address, isFavorite: boolean }) => badgesService.switchFavoriteBadge(id, account, isFavorite, setFavoriteBadgesLocalStorage)} setCurrentBadge={setCurrentBadge} currentBadge={currentBadge} />
+        <BadgeInfo
+          switchFavorite={({ id, account, isFavorite }: { id: number; account: Address; isFavorite: boolean }) =>
+            badgesService.switchFavoriteBadge(id, account, isFavorite, setFavoriteBadgesLocalStorage)
+          }
+          setCurrentBadge={setCurrentBadge}
+          currentBadge={currentBadge}
+        />
       </Drawer>
     </Grid>
   )

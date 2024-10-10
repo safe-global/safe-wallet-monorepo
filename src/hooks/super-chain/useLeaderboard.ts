@@ -1,12 +1,6 @@
-import badges from '@/components/badges'
-import { from, gql, useLazyQuery, useQuery } from '@apollo/client'
-import { set } from 'date-fns'
-import { id } from 'ethers'
-import { get } from 'http'
-import { floor, now, forEach, has, entries, map, values } from 'lodash'
+import { gql, useLazyQuery, useQuery } from '@apollo/client'
 import { useEffect, useState } from 'react'
-import { sort } from 'semver'
-import { Address, slice } from 'viem'
+import { Address } from 'viem'
 
 export type Leaderboard = {
   superChainSmartAccounts: {

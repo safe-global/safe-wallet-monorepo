@@ -10,7 +10,7 @@ import { shortenAddress } from '@/utils/formatters'
 import ImageFallback from '../../ImageFallback'
 import css from './styles.module.css'
 import classNames from 'classnames'
-import { IconButton, SvgIcon, Typography } from '@mui/material'
+import { SvgIcon, Typography } from '@mui/material'
 import Close from '@/public/images/common/close-rounded.svg'
 import { REMOVE_POPULATE_INITIAL_STATE } from '../../SuperChainEOAS'
 
@@ -141,7 +141,7 @@ const SrcEthHashInfo = ({
           onClick={() =>
             setRemovePopulateContext?.({
               open: true,
-              address: address,
+              address,
             })
           }
           className={css.removeInvite}

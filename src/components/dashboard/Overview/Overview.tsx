@@ -1,5 +1,4 @@
 import TokenAmount from '@/components/common/TokenAmount'
-import Track from '@/components/common/Track'
 import QrCodeButton from '@/components/sidebar/QrCodeButton'
 import { TxModalContext } from '@/components/tx-flow'
 import { NewTxFlow } from '@/components/tx-flow/flows'
@@ -14,7 +13,6 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import { useVisibleBalances } from '@/hooks/useVisibleBalances'
 
 import ArrowIconSE from '@/public/images/common/arrow-se.svg'
-import BuyCryptoButton from '@/components/common/BuyCryptoButton'
 import { selectCurrentSuperChainAccount } from '@/store/superChainAccountSlice'
 
 const SkeletonOverview = (

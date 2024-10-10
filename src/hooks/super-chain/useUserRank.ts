@@ -1,6 +1,4 @@
 import { gql, useLazyQuery } from '@apollo/client'
-import { id } from 'ethers'
-import { findIndex } from 'lodash'
 import { useState, useEffect } from 'react'
 
 type Address = string
@@ -33,7 +31,7 @@ export const useUserRank = (userAddress: Address, loadingFirstFetch: boolean, us
     const { data, error } = await fetchUserRank({
       variables: {
         points: userPoints && loadingFirstFetch ? parseInt(userPoints) : 0,
-        skip: skip,
+        skip,
       },
     })
 

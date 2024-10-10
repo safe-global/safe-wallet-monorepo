@@ -14,7 +14,6 @@ import { useIsExecutionLoop, useTxActions } from './hooks'
 import { useRelaysBySafe } from '@/hooks/useRemainingRelays'
 import useWalletCanRelay from '@/hooks/useWalletCanRelay'
 import { ExecutionMethod, ExecutionMethodSelector } from '../ExecutionMethodSelector'
-import { hasRemainingRelays } from '@/utils/relaying'
 import type { SignOrExecuteProps } from '.'
 import type { SafeTransaction } from '@safe-global/safe-core-sdk-types'
 import { TxModalContext } from '@/components/tx-flow'
@@ -196,7 +195,7 @@ export const ExecuteForm = ({
                 data-testid="execute-form-btn"
                 variant="contained"
                 type="submit"
-                color='secondary'
+                color="secondary"
                 disabled={!isOk || submitDisabled}
                 sx={{ minWidth: '112px' }}
               >

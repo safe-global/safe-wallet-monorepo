@@ -2,7 +2,6 @@ import { createSelector, createSlice, type PayloadAction } from '@reduxjs/toolki
 import { validateAddress } from '@/utils/validation'
 import pickBy from 'lodash/pickBy'
 import type { RootState } from '.'
-import { NounSeed } from '@nouns/assets/dist/types'
 
 export type AddressBook = {
   [address: string]: string

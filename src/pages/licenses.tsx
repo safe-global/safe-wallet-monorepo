@@ -16,7 +16,7 @@ const SafeLicenses = () => (
     <Box mb={4}>
       <Typography mb={3}>
         This page contains a list of attribution notices for third party software that may be contained in portions of
-        the {'Superchain Account'}. We thank the open source community for all of their contributions.
+        the Superchain Account. We thank the open source community for all of their contributions.
       </Typography>
       <Typography variant="h2" mb={2}>
         Android
@@ -717,7 +717,7 @@ const Licenses: NextPage = () => {
   return (
     <>
       <Head>
-        <title>{'Superchain Account – Licenses'}</title>
+        <title>Superchain Account – Licenses</title>
       </Head>
 
       <main>{IS_OFFICIAL_HOST && <SafeLicenses />}</main>
