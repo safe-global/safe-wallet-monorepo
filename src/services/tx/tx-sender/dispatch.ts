@@ -20,9 +20,10 @@ import {
 import { createWeb3, getUserNonce, getWeb3ReadOnly } from '@/hooks/wallets/web3'
 import { asError } from '@/services/exceptions/utils'
 import chains from '@/config/chains'
-import { LATEST_SAFE_VERSION } from '@/config/constants'
+import { BACKEND_BASE_URI, LATEST_SAFE_VERSION } from '@/config/constants'
 import { createExistingTx } from './create'
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
+import axios from 'axios'
 
 /**
  * Propose a transaction
@@ -420,13 +421,16 @@ export const dispatchTxRelay = async (
   ])
 
   try {
-    const relayResponse = await relayTransaction(safe.chainId, {
+    const relayResponse = await axios.post<{
+      taskId: string
+    }>(`${BACKEND_BASE_URI}/relay`, {
       to: safe.address.value,
       data,
       gasLimit: gasLimit?.toString(),
       version: safe.version ?? LATEST_SAFE_VERSION,
-    })
-    const taskId = relayResponse.taskId
+    });
+
+    const { taskId } = relayResponse.data
 
     if (!taskId) {
       throw new Error('Transaction could not be relayed')
