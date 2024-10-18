@@ -29,6 +29,8 @@ import { TxSecurityContext } from '../security/shared/TxSecurityContext'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import NonOwnerError from '@/components/tx/SignOrExecuteForm/NonOwnerError'
 import WalletRejectionError from '@/components/tx/SignOrExecuteForm/WalletRejectionError'
+import usePimlico from '@/hooks/usePimlico'
+import useSuperChainAccount from '@/hooks/super-chain/useSuperChainAccount'
 
 export const ExecuteForm = ({
   safeTx,
@@ -58,6 +60,8 @@ export const ExecuteForm = ({
 
   // Hooks
   const currentChain = useCurrentChain()
+  const { smartAccountClient } = usePimlico()
+  const { getSponsoredWriteableSuperChainSmartAccount } = useSuperChainAccount()
   const { executeTx } = txActions
   const { setTxFlow } = useContext(TxModalContext)
   const { needsRiskConfirmation, isRiskConfirmed, setIsRiskIgnored } = txSecurity
@@ -69,7 +73,7 @@ export const ExecuteForm = ({
   const [walletCanRelay] = useWalletCanRelay(safeTx)
 
   // The transaction can/will be relayed
-  const canRelay = false
+  const canRelay = true
   const willRelay = canRelay && executionMethod === ExecutionMethod.RELAY
 
   // Estimate gas limit

@@ -7,7 +7,7 @@ export const RELAY_SPONSORS = {
     logo: '/images/common/gnosis-chain-logo.png',
   },
   default: {
-    name: 'Safe',
+    name: '',
     logo: '/images/logo-no-text.svg',
   },
 }
