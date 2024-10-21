@@ -440,9 +440,13 @@ export const dispatchTxRelay = async (
 
     // Monitor relay tx
     waitForRelayedTx(taskId, [txId], safe.address.value)
-  } catch (error) {
-    txDispatch(TxEvent.FAILED, { txId, error: asError(error) })
-    throw error
+  } catch (error: any) {
+    if (error.code === 'ERR_BAD_RESPONSE') {
+      txDispatch(TxEvent.FAILED, { txId, error: asError(error.response.data.error) })
+    } else {
+      txDispatch(TxEvent.FAILED, { txId, error: asError(error) })
+    }
+    throw error.response.data.error
   }
 }
 
