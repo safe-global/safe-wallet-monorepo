@@ -65,7 +65,7 @@ const WelcomeLogin = () => {
           </Typography>
 
           <Typography mb={2} textAlign="center">
-            Log In or Sign Up to create a new Superchain Account or open an existing one
+            Log in to an existing Super Account or Sign Up to create your Super Account.
           </Typography>
 
           <Stack direction="row" gap={2}>

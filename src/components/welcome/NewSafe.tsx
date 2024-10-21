@@ -51,14 +51,14 @@ const NewSafe = () => {
             </Typography>
 
             <Typography mb={1} color="static.secondary">
-              Connect to the Superchain ecosystem with your Smart Account.
+              Navigate the Superchain ecosystem with your Super Account.
             </Typography>
 
             <ul className={css.bulletList}>
               <BulletListItem text="Earn badges" icon={Badge} />
               <BulletListItem text="Level Up" icon={LevelUp} />
               <BulletListItem text="Climb the leaderboard" icon={Leaderboard} />
-              <BulletListItem text="Make your transactions" icon={Transactions} />
+              <BulletListItem text="Unlock transaction perks" icon={Transactions} />
             </ul>
           </div>
         </Grid>

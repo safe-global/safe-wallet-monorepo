@@ -25,6 +25,7 @@ function LeaderboardLayout() {
           account: selectedUser,
         },
       })
+      console.debug({ response })
       return response.data
     },
     enabled: selectedUser !== zeroAddress, // Evita la consulta cuando no se ha seleccionado ningún usuario
