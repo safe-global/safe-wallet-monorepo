@@ -18,6 +18,7 @@ import useIsPending from '@/hooks/useIsPending'
 import classNames from 'classnames'
 import { isTrustedTx } from '@/utils/transactions'
 import UntrustedTxWarning from '../UntrustedTxWarning'
+import { useSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
 
 const getStatusColor = (value: TransactionStatus, palette: Palette | Record<string, Record<string, string>>) => {
   switch (value) {
@@ -40,6 +41,9 @@ type TxSummaryProps = {
 }
 
 const TxSummary = ({ item, isGrouped }: TxSummaryProps): ReactElement => {
+  // safeSDK stuff
+  // const safeSDK = useSafeSDK()
+
   const tx = item.transaction
   const wallet = useWallet()
   const txStatusLabel = useTransactionStatus(tx)

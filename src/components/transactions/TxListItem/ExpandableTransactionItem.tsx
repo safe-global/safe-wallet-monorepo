@@ -1,4 +1,10 @@
-import { type Transaction, type TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
+import {
+  DetailedExecutionInfoType,
+  TransactionInfoType,
+  TransactionTokenType,
+  type Transaction,
+  type TransactionDetails,
+} from '@safe-global/safe-gateway-typescript-sdk'
 import { Accordion, AccordionDetails, AccordionSummary, Box, Skeleton } from '@mui/material'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import TxSummary from '@/components/transactions/TxSummary'
@@ -10,6 +16,7 @@ import { BatchExecuteHoverContext } from '@/components/transactions/BatchExecute
 import css from './styles.module.css'
 import classNames from 'classnames'
 import { trackEvent, TX_LIST_EVENTS } from '@/services/analytics'
+import { getProposalId } from '@/services/tx/hsgsuper'
 
 type ExpandableTransactionItemProps = {
   isGrouped?: boolean

@@ -1,5 +1,11 @@
-import React, { type ReactElement } from 'react'
-import type { TransactionDetails, TransactionSummary } from '@safe-global/safe-gateway-typescript-sdk'
+import React, { useEffect, type ReactElement } from 'react'
+import {
+  DetailedExecutionInfoType,
+  TransactionDetails,
+  TransactionInfoType,
+  TransactionSummary,
+  TransactionTokenType,
+} from '@safe-global/safe-gateway-typescript-sdk'
 import { getTransactionDetails, Operation } from '@safe-global/safe-gateway-typescript-sdk'
 import { Box, CircularProgress } from '@mui/material'
 
@@ -30,6 +36,11 @@ import Multisend from '@/components/transactions/TxDetails/TxData/DecodedData/Mu
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useIsPending from '@/hooks/useIsPending'
 import { isTrustedTx } from '@/utils/transactions'
+import { getProposalId } from '@/services/tx/hsgsuper'
+import { useInitWeb3 } from '@/hooks/wallets/useInitWeb3'
+import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
+import { ethers } from 'ethers'
+import { useTimelockStamp } from '@/hooks/hsgsuper/hsgsuper'
 
 export const NOT_AVAILABLE = 'n/a'
 
@@ -125,6 +136,7 @@ const TxDetails = ({
 }): ReactElement => {
   const chainId = useChainId()
   const { safe } = useSafeInfo()
+  const provider = useWeb3ReadOnly()
 
   const [txDetailsData, error, loading] = useAsync<TransactionDetails>(
     async () => {
@@ -134,6 +146,46 @@ const TxDetails = ({
     [txDetails, chainId, txSummary.id, safe.txQueuedTag],
     false,
   )
+
+  const { timeStamp } = useTimelockStamp(txDetailsData)
+  console.log('Timestamp in component: ', timeStamp)
+
+  // console.log('Details: ', txDetailsData)
+  // if (
+  //   txDetailsData &&
+  //   txDetailsData.txInfo.type === TransactionInfoType.TRANSFER &&
+  //   txDetailsData.txInfo.transferInfo.type === TransactionTokenType.NATIVE_COIN &&
+  //   txDetailsData.detailedExecutionInfo?.type === DetailedExecutionInfoType.MULTISIG &&
+  //   txDetailsData.txData?.value
+  // ) {
+  //   const proposalId = getProposalId(
+  //     txDetailsData.safeAddress,
+  //     txDetailsData.txData.to.value,
+  //     txDetailsData.txData.value,
+  //     txDetailsData.txData.operation,
+  //     txDetailsData.detailedExecutionInfo.safeTxGas,
+  //     txDetailsData.detailedExecutionInfo.baseGas,
+  //     txDetailsData.detailedExecutionInfo.gasPrice,
+  //     txDetailsData.detailedExecutionInfo.gasToken,
+  //     txDetailsData.detailedExecutionInfo.refundReceiver.value,
+  //     txDetailsData.detailedExecutionInfo.confirmations,
+  //   )
+
+  //   if (provider) {
+  //     const filter = {
+  //       fromBlock: -70000,
+  //       toBlock: 'latest',
+  //       topics: [ethers.utils.id('CallScheduled(bytes32,uint256,address,uint256,bytes,bytes32,uint256)'), proposalId],
+  //     }
+  //     provider.getLogs(filter).then((logs) => {
+  //       console.log('Logs: ', logs)
+  //     })
+
+  //     // const timelock
+  //   } else {
+  //     console.log('No provider')
+  //   }
+  // }
 
   return (
     <div className={css.container}>
