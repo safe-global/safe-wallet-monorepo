@@ -229,7 +229,17 @@ const SafeHeader = (): ReactElement => {
           <Track {...OVERVIEW_EVENTS.OPEN_EXPLORER}>
             <ExplorerButton {...blockExplorerLink} className={css.iconButton} icon={LinkIconBold} />
           </Track>
-          <Tooltip title={<Typography align="center">Remaining weekly gas covered by Superchain Eco</Typography>}>
+          <Tooltip
+            title={
+              <Typography align="center">
+                Remaining weekly relayed transactions by Superchain Eco <br />
+                <strong>
+                  {Number(superChainSmartAccount.data.weeklyRelayedTransactions.relayedTransactions)} /{' '}
+                  {Number(superChainSmartAccount.data.weeklyRelayedTransactions.maxRelayedTransactions)}
+                </strong>
+              </Typography>
+            }
+          >
             <Box
               sx={{
                 width: '158px',
@@ -245,9 +255,10 @@ const SafeHeader = (): ReactElement => {
                 variant="determinate"
                 color="inherit"
                 value={Number(
-                  superChainSmartAccount.data.weeklyGasBalance.maxGasInUSD
-                    ? superChainSmartAccount.data.weeklyGasBalance.gasUsedInUSD /
-                        superChainSmartAccount.data.weeklyGasBalance.maxGasInUSD
+                  superChainSmartAccount.data.weeklyRelayedTransactions.maxRelayedTransactions
+                    ? 100 *
+                        (Number(superChainSmartAccount.data.weeklyRelayedTransactions.relayedTransactions) /
+                          Number(superChainSmartAccount.data.weeklyRelayedTransactions.maxRelayedTransactions))
                     : 100,
                 )}
                 sx={{ width: '100%', height: 34, backgroundColor: 'white', color: '#E8EDF5', borderRadius: '6px' }}
@@ -266,7 +277,7 @@ const SafeHeader = (): ReactElement => {
                 }}
               >
                 <Typography color="black" fontWeight={600} variant="body2" component="div">
-                  Wk. Gas balance
+                  Wk. transactions
                 </Typography>
               </Box>
             </Box>

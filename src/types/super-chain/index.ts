@@ -1,9 +1,9 @@
 import type { Address } from 'viem'
 import type { GetUserBadgesQuery } from './.graphclient'
 
-export type WeeklyGasBalance = {
-  maxGasInUSD: bigint
-  gasUsedInUSD: bigint
+export type WeeklyRelayedTransactions = {
+  maxRelayedTransactions: bigint
+  relayedTransactions: bigint
 }
 export type SuperChainAccount = {
   smartAccount: Address
@@ -12,7 +12,7 @@ export type SuperChainAccount = {
   level: bigint
   noun: bigint[]
   pointsToNextLevel: bigint | null
-  weeklyGasBalance: WeeklyGasBalance
+  weeklyRelayedTransactions: WeeklyRelayedTransactions
 }
 export type Badge = GetUserBadgesQuery['accountBadges'][number]
 export type ResponseBadge = { tier: string; points: string } & Badge['badge'] & {
