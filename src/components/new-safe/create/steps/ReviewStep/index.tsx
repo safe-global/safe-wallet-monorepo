@@ -27,7 +27,7 @@ import { useCurrentChain } from '@/hooks/useChains'
 import useGasPrice from '@/hooks/useGasPrice'
 // import useIsWrongChain from '@/hooks/useIsWrongChain';
 // import {
-//   MAX_HOUR_RELAYS,
+//   MAX_WEEKLY_RELAYS,
 //   useLeastRemainingRelays,
 // } from '@/hooks/useRemainingRelays';
 // import useWalletCanPay from '@/hooks/useWalletCanPay';

@@ -2,20 +2,43 @@ import useAsync from '@/hooks/useAsync'
 import useSafeInfo from './useSafeInfo'
 import { FEATURES, hasFeature } from '@/utils/chains'
 import { useCurrentChain } from '@/hooks/useChains'
-import { getRelayCount } from '@safe-global/safe-gateway-typescript-sdk'
+import { getRelayCount, RelayCountResponse } from '@safe-global/safe-gateway-typescript-sdk'
+import { useAppSelector } from '@/store'
+import { selectSuperChainAccount } from '@/store/superChainAccountSlice'
+import axios from 'axios'
+import { getWeeklyRelayedTransactions } from '@/services/superchain-accounts/sponsor'
+import { Address } from 'viem'
 
-export const MAX_HOUR_RELAYS = 5
+export const MAX_WEEKLY_RELAYS = 3
 
 export const useRelaysBySafe = () => {
-  const chain = useCurrentChain()
-  const { safe, safeAddress } = useSafeInfo()
+  const { safeAddress } = useSafeInfo()
+  const superChainSmartAccount = useAppSelector(selectSuperChainAccount)
+  return useAsync<RelayCountResponse>(() => {
+    if (superChainSmartAccount.data) {
+      return new Promise((resolve) => {
+        resolve({
+          remaining:
+            Number(superChainSmartAccount.data.weeklyRelayedTransactions.maxRelayedTransactions) -
+            Number(superChainSmartAccount.data.weeklyRelayedTransactions.relayedTransactions),
+          limit: Number(superChainSmartAccount.data.weeklyRelayedTransactions.maxRelayedTransactions),
+        } as RelayCountResponse)
+      })
+    } else {
+      if (!safeAddress) return
+      return (async () => {
+        const weeklyRelayedTransactions = await getWeeklyRelayedTransactions(safeAddress as Address)
+        return {
+          remaining:
+            Number(weeklyRelayedTransactions.data.maxRelayedTransactions) -
+            Number(weeklyRelayedTransactions.data.relayedTransactions),
+          limit: Number(weeklyRelayedTransactions.data.maxRelayedTransactions),
+        } as RelayCountResponse
+      })()
+    }
 
-  return useAsync(() => {
-    if (!safeAddress || !chain || !hasFeature(chain, FEATURES.RELAYING)) return
-
-    return getRelayCount(chain.chainId, safeAddress)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [chain, safeAddress, safe.txHistoryTag])
+  }, [safeAddress, superChainSmartAccount])
 }
 
 export const useLeastRemainingRelays = (ownerAddresses: string[]) => {
@@ -31,7 +54,7 @@ export const useLeastRemainingRelays = (ownerAddresses: string[]) => {
         return result.find((r) => r.remaining === min)
       })
       .catch(() => {
-        return { remaining: 0, limit: MAX_HOUR_RELAYS }
+        return { remaining: 0, limit: MAX_WEEKLY_RELAYS }
       })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chain, ownerAddresses, safe.txHistoryTag])

@@ -45,12 +45,6 @@ export const WalletInfo = ({
   const chainInfo = useAppSelector((state) => selectChainById(state, wallet.chainId))
   const prefix = chainInfo?.shortName
   const { logout } = usePrivy()
-  // const handleSwitchWallet = () => {
-  //   if (onboard) {
-  //     handleClose()
-  //     switchWallet(onboard)
-  //   }
-  // }
 
   const resetAccount = () => socialWalletService?.__deleteAccount()
 

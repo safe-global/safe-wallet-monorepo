@@ -37,7 +37,7 @@ export async function getSmartAccountClient(signer: SmartAccountSigner, safeAddr
       sponsorUserOperation: async (args) => {
         return paymasterClient.sponsorUserOperation({
           ...args,
-          sponsorshipPolicyId: 'sp_lively_mesmero',
+          // sponsorshipPolicyId: 'sp_lively_mesmero',
         })
       },
       gasPrice: async () => (await pimlicoBundlerClient.getUserOperationGasPrice()).fast, // if using pimlico bundler
