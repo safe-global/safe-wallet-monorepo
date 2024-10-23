@@ -5,7 +5,6 @@ import { useCurrentChain } from '@/hooks/useChains'
 import { getRelayCount, RelayCountResponse } from '@safe-global/safe-gateway-typescript-sdk'
 import { useAppSelector } from '@/store'
 import { selectSuperChainAccount } from '@/store/superChainAccountSlice'
-import axios from 'axios'
 import { getWeeklyRelayedTransactions } from '@/services/superchain-accounts/sponsor'
 import { Address } from 'viem'
 
