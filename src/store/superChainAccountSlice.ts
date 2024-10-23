@@ -10,9 +10,9 @@ export const initialSuperChainAccount: SuperChainAccount = {
   level: BigInt(0),
   noun: [BigInt(0), BigInt(0), BigInt(0), BigInt(0), BigInt(0)],
   pointsToNextLevel: null,
-  weeklyGasBalance: {
-    gasUsedInUSD: BigInt(0),
-    maxGasInUSD: BigInt(0),
+  weeklyRelayedTransactions: {
+    relayedTransactions: BigInt(0),
+    maxRelayedTransactions: BigInt(0),
   },
 }
 
