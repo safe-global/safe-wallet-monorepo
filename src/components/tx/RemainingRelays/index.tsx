@@ -6,7 +6,7 @@ import type { RelayCountResponse } from '@safe-global/safe-gateway-typescript-sd
 
 const RemainingRelays = ({ relays, tooltip }: { relays?: RelayCountResponse; tooltip?: string }) => {
   if (!tooltip) {
-    tooltip = `${relays?.limit ?? MAX_WEEKLY_RELAYS} transactions per hour for free`
+    tooltip = `${relays?.limit ?? MAX_WEEKLY_RELAYS} transactions per week for free`
   }
 
   return (
