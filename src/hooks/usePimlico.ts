@@ -1,4 +1,4 @@
-import { EIP1193Provider } from '@privy-io/react-auth'
+import { EIP1193Provider, usePrivy } from '@privy-io/react-auth'
 import { useEffect, useState } from 'react'
 import { type Address, createWalletClient, custom } from 'viem'
 import { sepolia, optimism } from 'viem/chains'
@@ -13,11 +13,14 @@ type SmartAccountClient = ReturnType<typeof getSmartAccountClient> extends Promi
 
 function usePimlico() {
   const wallet = useWallet()
+  const { getAccessToken } = usePrivy()
   const [smartAccountClient, setSmartAccountClient] = useState<SmartAccountClient>()
   const superChainSmartAccount = useAppSelector(selectSuperChainAccount)
+
   useEffect(() => {
-    ;(async () => {
-      if (!wallet || superChainSmartAccount.loading || superChainSmartAccount.error) return
+    ; (async () => {
+      const jwt = await getAccessToken()
+      if (!wallet || superChainSmartAccount.loading || superChainSmartAccount.error || !jwt) return
       const eip1193provider = wallet?.provider
 
       // Create a viem WalletClient from the embedded wallet's EIP1193 provider
@@ -30,7 +33,7 @@ function usePimlico() {
       })
 
       const signer = walletClientToSmartAccountSigner(privyClient)
-      const smartAccountClient = await getSmartAccountClient(signer, superChainSmartAccount.data.smartAccount)
+      const smartAccountClient = await getSmartAccountClient(signer, superChainSmartAccount.data.smartAccount, jwt)
       setSmartAccountClient(smartAccountClient)
     })()
   }, [wallet, superChainSmartAccount])

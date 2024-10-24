@@ -6,41 +6,53 @@ import { createPimlicoBundlerClient, createPimlicoPaymasterClient } from 'permis
 import { type Address, createPublicClient, http } from 'viem'
 import { sepolia, optimism } from 'viem/chains'
 
+const pimlicoTransport = (jwt: string) => {
+  return http(`${process.env.NEXT_PUBLIC_BACKEND_URI}/pimlico-reverse-proxy`, {
+    fetchOptions: {
+      headers: {
+        Authorization: `Bearer ${jwt}`,
+      },
+    },
+  })
+}
+
 export const publicClient = createPublicClient({
   transport: http(JSON_RPC_PROVIDER),
 })
 
-export const paymasterClient = createPimlicoPaymasterClient({
-  transport: http(`${process.env.NEXT_PUBLIC_BACKEND_URI}/sponsor-transaction`),
+export const paymasterClient = (jwt: string) =>
+  createPimlicoPaymasterClient({
+    transport: pimlicoTransport(jwt),
+    entryPoint: ENTRYPOINT_ADDRESS_V07,
+  })
+
+
+
+export const pimlicoBundlerClient = (jwt: string) => createPimlicoBundlerClient({
+  transport: pimlicoTransport(jwt),
   entryPoint: ENTRYPOINT_ADDRESS_V07,
 })
 
-export const pimlicoBundlerClient = createPimlicoBundlerClient({
-  transport: http(`${process.env.NEXT_PUBLIC_BACKEND_URI}/sponsor-transaction`),
-  entryPoint: ENTRYPOINT_ADDRESS_V07,
-})
-
-export async function getSmartAccountClient(signer: SmartAccountSigner, safeAddress: Address) {
+export async function getSmartAccountClient(signer: SmartAccountSigner, safeAddress: Address, jwt: string) {
   const safeAccount = await signerToSafeSmartAccount(publicClient, {
     entryPoint: ENTRYPOINT_ADDRESS_V07,
     signer,
     safeVersion: '1.4.1',
     address: safeAddress,
   })
-
   const smartAccountClient = createSmartAccountClient({
     account: safeAccount,
     entryPoint: ENTRYPOINT_ADDRESS_V07,
     chain: CHAIN_ID === sepolia.id.toString() ? sepolia : optimism,
-    bundlerTransport: http(`https://api.pimlico.io/v2/${CHAIN_ID}/rpc?apikey=e6fcaa0f-01c7-4f6c-93a6-260e48848daf`),
+    bundlerTransport: pimlicoTransport(jwt),
     middleware: {
-      sponsorUserOperation: async (args) => {
-        return paymasterClient.sponsorUserOperation({
+      sponsorUserOperation: async (args: any) => {
+        return paymasterClient(jwt).sponsorUserOperation({
           ...args,
-          // sponsorshipPolicyId: 'sp_lively_mesmero',
+          sponsorshipPolicyId: 'sp_lively_mesmero',
         })
       },
-      gasPrice: async () => (await pimlicoBundlerClient.getUserOperationGasPrice()).fast, // if using pimlico bundler
+      gasPrice: async () => (await pimlicoBundlerClient(jwt).getUserOperationGasPrice()).fast, // if using pimlico bundler
     },
   })
   return smartAccountClient
