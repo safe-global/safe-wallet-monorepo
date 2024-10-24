@@ -11,12 +11,12 @@ export const publicClient = createPublicClient({
 })
 
 export const paymasterClient = createPimlicoPaymasterClient({
-  transport: http(`https://api.pimlico.io/v2/${CHAIN_ID}/rpc?apikey=e6fcaa0f-01c7-4f6c-93a6-260e48848daf`),
+  transport: http(`${process.env.NEXT_PUBLIC_BACKEND_URI}/sponsor-transaction`),
   entryPoint: ENTRYPOINT_ADDRESS_V07,
 })
 
 export const pimlicoBundlerClient = createPimlicoBundlerClient({
-  transport: http(`https://api.pimlico.io/v2/${CHAIN_ID}/rpc?apikey=e6fcaa0f-01c7-4f6c-93a6-260e48848daf`),
+  transport: http(`${process.env.NEXT_PUBLIC_BACKEND_URI}/sponsor-transaction`),
   entryPoint: ENTRYPOINT_ADDRESS_V07,
 })
 
