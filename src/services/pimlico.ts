@@ -26,12 +26,11 @@ export const paymasterClient = (jwt: string) =>
     entryPoint: ENTRYPOINT_ADDRESS_V07,
   })
 
-
-
-export const pimlicoBundlerClient = (jwt: string) => createPimlicoBundlerClient({
-  transport: pimlicoTransport(jwt),
-  entryPoint: ENTRYPOINT_ADDRESS_V07,
-})
+export const pimlicoBundlerClient = (jwt: string) =>
+  createPimlicoBundlerClient({
+    transport: pimlicoTransport(jwt),
+    entryPoint: ENTRYPOINT_ADDRESS_V07,
+  })
 
 export async function getSmartAccountClient(signer: SmartAccountSigner, safeAddress: Address, jwt: string) {
   const safeAccount = await signerToSafeSmartAccount(publicClient, {

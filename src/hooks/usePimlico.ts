@@ -18,7 +18,7 @@ function usePimlico() {
   const superChainSmartAccount = useAppSelector(selectSuperChainAccount)
 
   useEffect(() => {
-    ; (async () => {
+    ;(async () => {
       const jwt = await getAccessToken()
       if (!wallet || superChainSmartAccount.loading || superChainSmartAccount.error || !jwt) return
       const eip1193provider = wallet?.provider
