@@ -3,7 +3,6 @@ import madProps from '@/utils/mad-props'
 import { type ReactElement, type SyntheticEvent, useContext, useState } from 'react'
 import { CircularProgress, Box, Button, CardActions, Divider } from '@mui/material'
 import classNames from 'classnames'
-
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import { trackError, Errors } from '@/services/exceptions'
 import { useCurrentChain } from '@/hooks/useChains'
@@ -22,15 +21,14 @@ import useGasLimit from '@/hooks/useGasLimit'
 import AdvancedParams, { useAdvancedParams } from '../AdvancedParams'
 import { asError } from '@/services/exceptions/utils'
 import { isWalletRejection } from '@/utils/wallets'
-
 import css from './styles.module.css'
 import commonCss from '@/components/tx-flow/common/styles.module.css'
 import { TxSecurityContext } from '../security/shared/TxSecurityContext'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import NonOwnerError from '@/components/tx/SignOrExecuteForm/NonOwnerError'
 import WalletRejectionError from '@/components/tx/SignOrExecuteForm/WalletRejectionError'
-import usePimlico from '@/hooks/usePimlico'
-import useSuperChainAccount from '@/hooks/super-chain/useSuperChainAccount'
+import { useQueryClient } from '@tanstack/react-query'
+import useSafeAddress from '@/hooks/useSafeAddress'
 
 export const ExecuteForm = ({
   safeTx,
@@ -57,11 +55,11 @@ export const ExecuteForm = ({
   const [isSubmittable, setIsSubmittable] = useState<boolean>(true)
   const [submitError, setSubmitError] = useState<Error | undefined>()
   const [isRejectedByUser, setIsRejectedByUser] = useState<Boolean>(false)
+  const queryClient = useQueryClient()
 
   // Hooks
   const currentChain = useCurrentChain()
-  const { smartAccountClient } = usePimlico()
-  const { getSponsoredWriteableSuperChainSmartAccount } = useSuperChainAccount()
+  const safeAddress = useSafeAddress()
   const { executeTx } = txActions
   const { setTxFlow } = useContext(TxModalContext)
   const { needsRiskConfirmation, isRiskConfirmed, setIsRiskIgnored } = txSecurity
@@ -116,6 +114,9 @@ export const ExecuteForm = ({
     // On success
     onSubmit?.(executedTxId, true)
     setTxFlow(<SuccessScreenFlow txId={executedTxId} />, undefined, false)
+    if (willRelay) {
+      queryClient.refetchQueries({ queryKey: ['superChainAccount', safeAddress] })
+    }
   }
 
   const walletCanPay = useWalletCanPay({

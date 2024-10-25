@@ -15,7 +15,7 @@ const StatusStepper = ({ status }: { status: SafeCreationStatus }) => {
         <StatusStep isLoading={!pendingSafe.safeAddress} safeAddress={pendingSafe.safeAddress}>
           <Box>
             <Typography variant="body2" fontWeight="700">
-              Your Superchain Account address
+              Your Super Account address
             </Typography>
             <EthHashInfo
               address={pendingSafe.safeAddress}
@@ -57,7 +57,7 @@ const StatusStepper = ({ status }: { status: SafeCreationStatus }) => {
       <Step>
         <StatusStep isLoading={status !== SafeCreationStatus.INDEXED} safeAddress={pendingSafe.safeAddress}>
           <Typography variant="body2" fontWeight="700">
-            Superchain Account is ready
+            Super Account is ready
           </Typography>
         </StatusStep>
       </Step>

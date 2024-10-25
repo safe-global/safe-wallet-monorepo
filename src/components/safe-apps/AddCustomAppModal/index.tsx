@@ -134,7 +134,7 @@ export const AddCustomAppModal = ({ open, onClose, onSave, safeAppsList }: Props
                             })}
                           />
                         }
-                        label="This Safe App is not part of Superchain Account and I agree to use it at my own risk."
+                        label="This Safe App is not part of Super Account and I agree to use it at my own risk."
                         sx={{ mt: 2 }}
                       />
 

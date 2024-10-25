@@ -1,7 +1,7 @@
 {
   "name": "SuperChain Smart Accounts",
-  "short_name": "Superchain Account",
-  "description": "Earn rewards for your Superchain contributions with Superchain Accounts. Track badges, manage transactions, and view your Superchain Account. Get recognized for your participation.",
+  "short_name": "Super Account",
+  "description": "Earn rewards for your Superchain contributions with Superchain Accounts. Track badges, manage transactions, and view your Super Account. Get recognized for your participation.",
   "icons": [
     {
       "src": "/favicons/android-chrome-192x192.png",

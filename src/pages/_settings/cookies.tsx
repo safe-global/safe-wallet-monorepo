@@ -1,4 +1,3 @@
-import { CookieBanner } from '@/components/common/CookieBanner'
 import SettingsHeader from '@/components/settings/SettingsHeader'
 import { Grid, Paper, Typography } from '@mui/material'
 import type { NextPage } from 'next'
@@ -8,7 +7,7 @@ const Cookies: NextPage = () => {
   return (
     <>
       <Head>
-        <title>Superchain Account – Settings – Cookies</title>
+        <title>Super Account – Settings – Cookies</title>
       </Head>
 
       <SettingsHeader />
@@ -22,9 +21,9 @@ const Cookies: NextPage = () => {
               </Typography>
             </Grid>
 
-            <Grid item container xs>
+            {/* <Grid item container xs>
               <CookieBanner />
-            </Grid>
+            </Grid> */}
           </Grid>
         </Paper>
       </main>

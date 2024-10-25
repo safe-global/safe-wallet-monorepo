@@ -1,10 +1,8 @@
 import Identicon from '@/components/common/Identicon'
 import { Box, Typography } from '@mui/material'
-import { Suspense } from 'react'
 import type { ReactElement } from 'react'
 
 import EthHashInfo from '@/components/common/EthHashInfo'
-import WalletIcon from '@/components/common/WalletIcon'
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import { useAppSelector } from '@/store'
 import { selectChainById } from '@/store/chainsSlice'
@@ -18,11 +16,11 @@ export const WalletIdenticon = ({ wallet, size = 32 }: { wallet: ConnectedWallet
   return (
     <Box className={css.imageContainer}>
       <Identicon address={wallet.address} size={size} />
-      <Suspense>
+      {/* <Suspense>
         <Box className={css.walletIcon}>
           <WalletIcon provider={wallet.label} icon={wallet.icon} width={size / 2} height={size / 2} />
         </Box>
-      </Suspense>
+      </Suspense> */}
     </Box>
   )
 }

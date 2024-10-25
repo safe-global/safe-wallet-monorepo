@@ -21,7 +21,7 @@ const Balances: NextPage = () => {
   return (
     <>
       <Head>
-        <title>Superchain Account – Assets</title>
+        <title>Super Account – Assets</title>
       </Head>
 
       {/* <AssetsHeader>

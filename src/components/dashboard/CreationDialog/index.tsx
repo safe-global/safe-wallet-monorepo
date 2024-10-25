@@ -45,42 +45,43 @@ const CreationDialog = () => {
     <Dialog className={css.creationModal} open={open}>
       <DialogContent sx={{ padding: 0 }}>
         <Typography variant="h3" fontWeight="700" mb={1}>
-          Welcome to Superchain Account!
+          Welcome to Super Account!
         </Typography>
         <Typography variant="body2">
-          Congrats on your new account. Here are some of the key feature of the Superchain account:
+          With this Super Account, you will be able to explore and contribute to the Superchain through the following
+          features:
         </Typography>
 
         <Grid container mt={2} mb={4} spacing={3}>
           <HintItem
             Icon={AccountIcon}
             title="Account"
-            description="Review, approve, execute and keep track of asset movement."
+            description="Connect your Superchain Wallets to your Super Account to track your progress."
           />
           <HintItem
             Icon={BadgesIcon}
             title="Badges"
-            description="Keep track of your progress andd stay up to date on the latest tasks."
+            description="Earn Superchain progress badges based on the accomplishment of all your connected wallets."
           />
           <HintItem
             Icon={LeaderBoardIcon}
             title="Leaderboard"
-            description="Climb the leaderboard and get to the top of the Superchain."
+            description="Earn Superchain Points to climb the Leaderboard and become the top Super Contributor."
           />
           <HintItem
             Icon={TransactionIcon}
             title="Transactions"
-            description="Receive, send and manage all your Superchain transactions in one place."
+            description="Benefit from Super Account perks, which include several weekly free transactions based on your account level."
           />
           <HintItem
             Icon={ContactsIcon}
             title="Contacts"
-            description="Keep all your address and contacts in one spot."
+            description="Keep all your addresses and contacts in one spot."
           />
           <HintItem
             Icon={AppsIcon}
             title="Apps"
-            description="Receive, send and manage all your Superchain transactions in one place."
+            description="Use native Super Account apps to benefit from special perks or engage with any app through Wallet connect."
           />
         </Grid>
       </DialogContent>
@@ -91,7 +92,7 @@ const CreationDialog = () => {
         onClick={onClose}
         variant="contained"
       >
-        Got it
+        Enter Account
       </Button>
     </Dialog>
   )

@@ -23,7 +23,7 @@ const AddOwner: NextPage = () => {
   return (
     <>
       <Head>
-        <title>Superchain Account – Add Signer</title>
+        <title>Super Account – Add Signer</title>
       </Head>
     </>
   )

@@ -10,7 +10,7 @@ const NetworkWarning = () => {
   return (
     <Alert severity="warning" sx={{ mt: 3 }}>
       <AlertTitle sx={{ fontWeight: 700 }}>Change your wallet network</AlertTitle>
-      You are trying to create a Safe Account on {chain.chainName}. Make sure that your wallet is set to the same
+      You are trying to create a Super Account on {chain.chainName}. Make sure that your wallet is set to the same
       network.
       <Box mt={2}>
         <ChainSwitcher />

@@ -1,7 +1,7 @@
 const lightPalette = {
   text: {
     primary: '#121312',
-    secondary: '#A1A3A7',
+    secondary: '#6B6B6B',
     disabled: '#DDDEE0',
   },
   primary: {
@@ -17,7 +17,7 @@ const lightPalette = {
   },
   border: {
     main: '#A1A3A7',
-    light: '#DCDEE0',
+    light: '#A0A5AD',
     background: '#F4F4F4',
   },
   error: {

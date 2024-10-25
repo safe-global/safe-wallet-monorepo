@@ -149,14 +149,14 @@ describe('TagManager', () => {
 
       expect(window.dataLayer).toHaveLength(3)
 
-      TagManager.setUserProperty(AnalyticsUserProperties.WALLET_LABEL, 'Superchain Account')
+      TagManager.setUserProperty(AnalyticsUserProperties.WALLET_LABEL, 'Super Account')
 
       expect(window.dataLayer).toHaveLength(4)
 
       expect(Array.from(window.dataLayer?.[3])).toEqual([
         'set',
         'user_properties',
-        { [AnalyticsUserProperties.WALLET_LABEL]: 'Superchain Account' },
+        { [AnalyticsUserProperties.WALLET_LABEL]: 'Super Account' },
       ])
     })
   })

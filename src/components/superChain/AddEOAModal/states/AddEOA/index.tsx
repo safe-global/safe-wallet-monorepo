@@ -92,7 +92,7 @@ function AddEOA({
               </FormControl>
               {addressHasSuperChainAccount && (
                 <Alert severity="error">
-                  This address is already connected to another Superchain Account. Try another address.
+                  This address is already connected to another Super Account. Try another address.
                 </Alert>
               )}
             </Stack>

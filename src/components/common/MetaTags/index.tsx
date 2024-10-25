@@ -4,8 +4,8 @@ import lightPalette from '@/components/theme/lightPalette'
 import darkPalette from '@/components/theme/darkPalette'
 
 const descriptionText =
-  'Earn rewards for your Superchain contributions with Superchain Accounts. Track badges, manage transactions, and view your Superchain Account. Get recognized for your participation.'
-const titleText = 'Superchain Account'
+  'Earn rewards for your Superchain contributions with Superchain Accounts. Track badges, manage transactions, and view your Super Account. Get recognized for your participation.'
+const titleText = 'Super Account'
 
 const MetaTags = ({ prefetchUrl }: { prefetchUrl: string }) => (
   <>

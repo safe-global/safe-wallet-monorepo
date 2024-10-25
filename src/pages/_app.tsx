@@ -24,7 +24,6 @@ import useSafeNotifications from '@/hooks/useSafeNotifications'
 import useTxPendingStatuses from '@/hooks/useTxPendingStatuses'
 import { useInitSession } from '@/hooks/useInitSession'
 import Notifications from '@/components/common/Notifications'
-import CookieBanner from '@/components/common/CookieBanner'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import { cgwDebugStorage } from '@/components/sidebar/DebugToggle'
 import { useTxTracking } from '@/hooks/useTxTracking'
@@ -142,7 +141,7 @@ const WebCoreApp = ({
   return (
     <Provider store={reduxStore}>
       <Head>
-        <title key="default-title">Superchain Account</title>
+        <title key="default-title">Super Account</title>
         <MetaTags prefetchUrl={GATEWAY_URL} />
       </Head>
 
@@ -156,7 +155,7 @@ const WebCoreApp = ({
             <Component {...pageProps} key={safeKey} />
           </PageLayout>
 
-          <CookieBanner />
+          {/* <CookieBanner /> */}
 
           <Notifications />
 

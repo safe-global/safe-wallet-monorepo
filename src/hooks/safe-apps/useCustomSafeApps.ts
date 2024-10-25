@@ -70,8 +70,9 @@ const fakeSafeApps: SafeAppData[] = [
   {
     id: 0.21472726789485663,
     url: 'https://raffle.superchain.eco/',
-    name: 'Super Chain Raffle',
-    description: 'Participate in weekly free raffle by claiming tickets based on your level.',
+    name: 'SuperChain Raffle',
+    description:
+      'Claim free tickets in the weekly Superchain Raffle based on your Super Account level for a chance to win rewards.',
     accessControl: {
       type: 'NO_RESTRICTIONS' as SafeAppAccessPolicyTypes,
       value: [],

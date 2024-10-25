@@ -125,7 +125,7 @@ export const CreateSafeStatus = ({ data, setProgressColor, setStep }: StepRender
           <Box className={layoutCss.row}>
             <Track {...OVERVIEW_EVENTS.OPEN_SAFE} label={OPEN_SAFE_LABELS.after_create}>
               <Button data-testid="start-using-safe-btn" color="secondary" variant="contained" onClick={onFinish}>
-                Start using Superchain Account
+                Start using Super Account
               </Button>
             </Track>
           </Box>

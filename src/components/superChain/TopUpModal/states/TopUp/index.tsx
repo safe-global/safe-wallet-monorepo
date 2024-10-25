@@ -143,8 +143,8 @@ function TopUp({
         </Grid>
         <Grid item>
           <Box className={classNames(css.container, css.description)}>
-            This is the address of your Superchain Account. Deposit funds by topping up or copying the address below.
-            Only send OETH and tokens (e.g. ERC20, ERC721) to this address.
+            This is the address of your Super Account. Deposit funds by topping up or copying the address below. Only
+            send OETH and tokens (e.g. ERC20, ERC721) to this address.
           </Box>
         </Grid>
         <Grid item>

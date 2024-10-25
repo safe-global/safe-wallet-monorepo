@@ -2,7 +2,6 @@ import { Box, IconButton, Stack, SvgIcon, Tooltip, Typography } from '@mui/mater
 import React, { useMemo } from 'react'
 import css from './styles.module.css'
 import type { ResponseBadge } from '@/types/super-chain'
-import Link from 'next/link'
 import Hearth from '@/public/images/common/hearth.svg'
 import HeartFilled from '@/public/images/common/hearth-filled.svg'
 import Share from '@/public/images/common/share.svg'
@@ -89,7 +88,7 @@ function BadgeInfo({
         <Typography fontSize={20} fontWeight={600}>
           {currentBadge?.metadata.name}
         </Typography>
-        <Typography fontSize={12} fontWeight={400}>
+        <Typography fontSize={14} fontWeight={400} color="text.secondary">
           {currentBadge?.metadata.description}
         </Typography>
       </Box>
@@ -107,7 +106,7 @@ function BadgeInfo({
         >
           {!!Number(currentBadge.tier) ? (
             <>
-              <Typography fontSize={12} fontWeight={600} color="secondary.main">
+              <Typography fontSize={14} fontWeight={600} color="secondary.main">
                 Unlock Next Tier:
               </Typography>
               <Typography fontSize={12} fontWeight={400}>
@@ -143,31 +142,34 @@ function BadgeInfo({
         padding="12px"
         flexDirection="column"
         width="100%"
-        borderColor="primary.light"
+        borderColor="border.light"
       >
-        <Typography fontSize={12} fontWeight={500}>
-          <strong>Network: </strong>
+        <Typography fontSize={14} fontWeight={500}>
+          <strong color="text.secondary">Network: </strong>
           {currentBadge.metadata.platform}
         </Typography>
-        <Typography fontSize={12} fontWeight={500}>
-          <strong>Current Tier:</strong> {currentBadge.tier ? currentBadge.tier : 0}
+        <Typography fontSize={14} fontWeight={500}>
+          <strong color="text.secondary">Current Tier:</strong> {currentBadge.tier ? currentBadge.tier : 0}
         </Typography>
         {!maxTierReached && (
-          <Typography fontSize={12} fontWeight={500}>
+          <Typography fontSize={14} fontWeight={500}>
             {!!Number(currentBadge.tier) ? (
-              <strong>
-                Next rewards:{' '}
+              <>
+                <strong color="text.secondary">Next rewards: </strong>
                 {renderNextTier
                   ? currentBadge.badgeTiers[currentBadge.claimableTier!].points
                   : currentBadge.badgeTiers[currentBadge.claimableTier! - 1].points}
-              </strong>
+              </>
             ) : (
-              <strong>First rewards: {currentBadge.badgeTiers[0].metadata.points} </strong>
+              <>
+                <strong color="text.secondary">First rewards:</strong>
+                {currentBadge.badgeTiers[0].metadata.points}
+              </>
             )}
           </Typography>
         )}
       </Box>
-      <Box
+      {/* <Box
         border={2}
         borderRadius={1}
         display="flex"
@@ -176,7 +178,7 @@ function BadgeInfo({
         width="100%"
         padding="12px"
         flexDirection="column"
-        borderColor="primary.light"
+        borderColor="border.light"
       >
         <Typography fontSize={12} fontWeight={600}>
           Website:
@@ -186,7 +188,7 @@ function BadgeInfo({
             https://something.com
           </Typography>
         </Link>
-      </Box>
+      </Box> */}
       <Box display="flex" paddingTop={2} alignItems="center" justifyContent="center" flexDirection="column" gap="20px">
         <Typography fontWeight={600} fontSize={20}>
           My Badges ({currentBadge.tier}/{currentBadge?.badgeTiers.length})

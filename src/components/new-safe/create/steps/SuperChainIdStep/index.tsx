@@ -4,9 +4,7 @@ import { FormProvider, useForm } from 'react-hook-form'
 import css from './styles.module.css'
 import { Box, Button, Divider, Grid, InputAdornment, SvgIcon, Tooltip, Typography } from '@mui/material'
 import InfoIcon from '@/public/images/notifications/info.svg'
-import MUILink from '@mui/material/Link'
 import NameInput from '@/components/common/NameInput'
-import Link from 'next/link'
 import layoutCss from '@/components/new-safe/create/styles.module.css'
 import NetworkWarning from '../../NetworkWarning'
 import type { NewSafeFormData } from '../..'
@@ -129,7 +127,7 @@ function SuperChainID({
               />
             </Grid>
           </Grid>
-          <Typography variant="body2" mt={2}>
+          {/* <Typography variant="body2" mt={2}>
             By continuing, you agree to our{' '}
             <Link href="/#" passHref legacyBehavior>
               <MUILink>terms of use</MUILink>
@@ -139,7 +137,7 @@ function SuperChainID({
               <MUILink>privacy policy</MUILink>
             </Link>
             .
-          </Typography>
+          </Typography> */}
 
           {isWrongChain && <NetworkWarning />}
         </Box>

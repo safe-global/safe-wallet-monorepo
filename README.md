@@ -1,4 +1,4 @@
-# <img src="/public/images/logo.png" height="60" valign="middle" alt="Superchain Account" style="background: #fff; padding: 20px; margin: 0 -20px" />
+# <img src="/public/images/logo.png" height="60" valign="middle" alt="Super Account" style="background: #fff; padding: 20px; margin: 0 -20px" />
 
 [![License](https://img.shields.io/github/license/safe-global/safe-wallet-web)](https://github.com/safe-global/safe-wallet-web/blob/main/LICENSE)
 ![Tests](https://img.shields.io/github/actions/workflow/status/safe-global/safe-wallet-web/test.yml?branch=main&label=tests)

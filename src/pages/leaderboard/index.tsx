@@ -43,7 +43,7 @@ function LeaderboardLayout() {
   return (
     <>
       <Head>
-        <title>Superchain Account – Leaderboard</title>
+        <title>Super Account – Leaderboard</title>
       </Head>
       <Box width="100%" height="100%">
         <LeaderboardHeader />

@@ -11,7 +11,7 @@ const Load: NextPage = () => {
   return (
     <main>
       <Head>
-        <title>Superchain Account – Add Safe Account</title>
+        <title>Super Account – Add Safe Account</title>
       </Head>
 
       {safeAddress ? (

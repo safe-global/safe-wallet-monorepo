@@ -6,7 +6,7 @@ const Accounts: NextPage = () => {
   return (
     <>
       <Head>
-        <title>Superchain Account – My accounts</title>
+        <title>Super Account – My accounts</title>
       </Head>
 
       <MyAccounts />

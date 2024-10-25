@@ -29,7 +29,7 @@ const CustomSafeApps: NextPage = () => {
   return (
     <>
       <Head>
-        <title>Superchain Account – Custom Safe Apps</title>
+        <title>Super Account – Custom Safe Apps</title>
       </Head>
 
       <SafeAppsSDKLink />

@@ -50,7 +50,7 @@ const SuperChainEOAS = () => {
               flexDirection="row"
             >
               <Typography fontSize={16} fontWeight="600">
-                Connected wallets
+                Connected Wallets
               </Typography>
               <IconButton
                 disabled={populatedOwnersLoading}

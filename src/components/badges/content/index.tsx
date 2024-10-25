@@ -2,7 +2,6 @@ import { Drawer, Grid, Skeleton, Stack, Typography } from '@mui/material'
 import React, { useMemo, useState } from 'react'
 import Badge from '../badge'
 import type { ResponseBadge } from '@/types/super-chain'
-import { useQueryClient } from '@tanstack/react-query'
 import badgesService from '@/features/superChain/services/badges.service'
 import { type Address } from 'viem'
 import useSafeInfo from '@/hooks/useSafeInfo'
@@ -25,13 +24,12 @@ function BadgesContent({
   isLoading: boolean
   error: Error | null
 }) {
-  const queryClient = useQueryClient()
   const { safeAddress, safeLoaded } = useSafeInfo()
   const [currentBadge, setCurrentBadge] = useState<(ResponseBadge & { isFavorite: boolean }) | null>(null)
   const [favoriteBadgesLocalStorage, setFavoriteBadgesLocalStorage] = useLocalStorage<string>('favoriteBadges')
   const favoriteBadges = useMemo(
     () => (safeLoaded ? badgesService.getFavoriteBadges(safeAddress as Address) : []),
-    [safeAddress, favoriteBadgesLocalStorage, safeLoaded],
+    [safeAddress, safeLoaded, favoriteBadgesLocalStorage],
   )
 
   if (isLoading)
@@ -125,7 +123,7 @@ function BadgesContent({
             ))}
         </Stack>
       </Grid>
-      <Drawer variant="temporary" anchor="right" open={!!currentBadge}>
+      <Drawer variant="temporary" anchor="right" onClose={() => setCurrentBadge(null)} open={!!currentBadge}>
         <BadgeInfo
           switchFavorite={({ id, account, isFavorite }: { id: number; account: Address; isFavorite: boolean }) =>
             badgesService.switchFavoriteBadge(id, account, isFavorite, setFavoriteBadgesLocalStorage)
