@@ -22,9 +22,6 @@ function UserInfo({
   const blockExplorerLink =
     chain && context ? getBlockExplorerLink(chain, context.superchainsmartaccount[0]) : undefined
 
-  console.debug({ context, isLoading })
-  console.debug(context?.badges[0].badge.badgeTiers[0])
-  console.debug(context?.badges[0].tier)
   const nounSeed = useMemo(() => {
     if (!context || isLoading) return null
     return {
