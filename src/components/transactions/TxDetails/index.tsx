@@ -40,19 +40,22 @@ import { getProposalId } from '@/services/tx/hsgsuper'
 import { useInitWeb3 } from '@/hooks/wallets/useInitWeb3'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
 import { ethers } from 'ethers'
-import { useTimelockStamp } from '@/hooks/hsgsuper/hsgsuper'
+import { useNow, useTimelockStamp } from '@/hooks/hsgsuper/hsgsuper'
 
 export const NOT_AVAILABLE = 'n/a'
 
 type TxDetailsProps = {
   txSummary: TransactionSummary
   txDetails: TransactionDetails
+  timestamp?: number
 }
 
-const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement => {
+const TxDetailsBlock = ({ txSummary, txDetails, timestamp }: TxDetailsProps): ReactElement => {
   const isPending = useIsPending(txSummary.id)
   const isQueue = isTxQueued(txSummary.txStatus)
   const awaitingExecution = isAwaitingExecution(txSummary.txStatus)
+  const now = useNow()
+  const isScheduled = !!timestamp && timestamp > now
   const isUnsigned =
     isMultisigExecutionInfo(txSummary.executionInfo) && txSummary.executionInfo.confirmationsSubmitted === 0
 
@@ -113,9 +116,9 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
       {/* Signers */}
       {!isUnsigned && (
         <div className={css.txSigners}>
-          <TxSigners txDetails={txDetails} txSummary={txSummary} />
+          <TxSigners txDetails={txDetails} txSummary={txSummary} timestamp={timestamp} />
 
-          {isQueue && (
+          {isQueue && !isScheduled && (
             <Box display="flex" alignItems="center" justifyContent="center" gap={1} mt={2}>
               {awaitingExecution ? <ExecuteTxButton txSummary={txSummary} /> : <SignTxButton txSummary={txSummary} />}
               <RejectTxButton txSummary={txSummary} />
@@ -129,27 +132,17 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
 
 const TxDetails = ({
   txSummary,
-  txDetails,
+  txDetailsData,
+  timestamp,
+  loading,
+  error,
 }: {
   txSummary: TransactionSummary
-  txDetails?: TransactionDetails // optional
+  timestamp?: number
+  txDetailsData?: TransactionDetails // optional
+  loading: boolean
+  error?: Error
 }): ReactElement => {
-  const chainId = useChainId()
-  const { safe } = useSafeInfo()
-  const provider = useWeb3ReadOnly()
-
-  const [txDetailsData, error, loading] = useAsync<TransactionDetails>(
-    async () => {
-      return txDetails || getTransactionDetails(chainId, txSummary.id)
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [txDetails, chainId, txSummary.id, safe.txQueuedTag],
-    false,
-  )
-
-  const { timeStamp } = useTimelockStamp(txDetailsData)
-  console.log('Timestamp in component: ', timeStamp)
-
   // console.log('Details: ', txDetailsData)
   // if (
   //   txDetailsData &&
@@ -190,7 +183,7 @@ const TxDetails = ({
   return (
     <div className={css.container}>
       {txDetailsData ? (
-        <TxDetailsBlock txSummary={txSummary} txDetails={txDetailsData} />
+        <TxDetailsBlock txSummary={txSummary} txDetails={txDetailsData} timestamp={timestamp} />
       ) : loading ? (
         <div className={css.loading}>
           <CircularProgress />

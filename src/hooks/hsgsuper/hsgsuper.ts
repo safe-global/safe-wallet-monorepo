@@ -14,9 +14,9 @@ import { useSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
 
 export const useTimelockStamp = (
   txDetails: TransactionDetails | undefined,
-): { proposalId?: string; timeStamp?: bigint; err?: string } => {
+): { proposalId?: string; timeStamp?: number; err?: string } => {
   const [proposalId, setPId] = useState<string>()
-  const [timeStamp, setTStamp] = useState<bigint>()
+  const [timeStamp, setTStamp] = useState<number>()
   const [err, setErr] = useState<string>()
   const provider = useWeb3ReadOnly()
   const safeSdk = useSafeSDK()
@@ -71,9 +71,25 @@ export const useTimelockStamp = (
       const timelock = new ethers.Contract(timelockAdd, timelockAbi, provider)
       const timestamp = await timelock.getTimestamp(proposalId)
       console.log('Timestamp: ', timestamp)
-      setTStamp(BigInt(timestamp.toString()))
+      setTStamp(Number(timestamp.toString()) * 1000)
     })
   }, [txDetails, provider, safeSdk])
 
   return { timeStamp, proposalId, err }
+}
+
+// this could be a general helper function really
+// returns updating current timestamp in *seconds*
+// gives a refresh rate in seconds
+export const useNow = (refreshRate: number = 5000) => {
+  const [now, setNow] = useState(Date.now())
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setNow(Date.now())
+    }, refreshRate)
+    return () => {
+      clearInterval(timer)
+    }
+  })
+  return now
 }
