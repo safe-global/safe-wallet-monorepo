@@ -13,11 +13,15 @@ function PerksModal({ open, onClose }: { open: boolean; onClose: () => void }) {
     if (!data) {
       return {
         raffle: { value: 0 },
+        sponsoredTxns: { value: 0 },
       }
     }
     return {
       raffle: {
         value: data.find((perk) => perk.name === 'SuperChainRaffle')?.value ?? 0,
+      },
+      sponsoredTxns: {
+        value: data.find((perk) => perk.name === 'SponsoredTxns')?.value ?? 0,
       },
     }
   }, [data])
@@ -68,30 +72,7 @@ function PerksModal({ open, onClose }: { open: boolean; onClose: () => void }) {
                   Claim {perks.raffle?.value ?? 0} tickets per week
                 </Typography>
               </Box>
-              {/* <Box
-                display="flex"
-                width="100%"
-                flexDirection="row"
-                justifyContent="flex-start"
-                gap="12px"
-                alignItems="center"
-              >
-                <Tooltip title={<Typography align="center">Mook Toltip</Typography>}>
-                  <Box display="flex" justifyContent="center" alignItems="center">
-                    <SvgIcon component={PerkRebate} inheritViewBox className={css.perk} />
-                  </Box>
-                </Tooltip>
-                <Typography
-                  fontSize={16}
-                  border={1}
-                  borderColor="secondary.main"
-                  borderRadius="6px"
-                  padding="12px"
-                  width="100%"
-                >
-                  50% Rebate on fees
-                </Typography>
-              </Box>
+
               <Box
                 display="flex"
                 width="100%"
@@ -100,9 +81,9 @@ function PerksModal({ open, onClose }: { open: boolean; onClose: () => void }) {
                 gap="12px"
                 alignItems="center"
               >
-                <Tooltip title={<Typography align="center">Mook Toltip</Typography>}>
+                <Tooltip title={<Typography align="center">Sponsored Transactions</Typography>}>
                   <Box display="flex" justifyContent="center" alignItems="center">
-                    <SvgIcon component={PerkCashback} inheritViewBox className={css.perk} />
+                    <SvgIcon component={PerkRaffle} inheritViewBox className={css.perk} />
                   </Box>
                 </Tooltip>
                 <Typography
@@ -113,9 +94,9 @@ function PerksModal({ open, onClose }: { open: boolean; onClose: () => void }) {
                   padding="12px"
                   width="100%"
                 >
-                  1% Cashback on fees
+                  {perks.sponsoredTxns?.value ?? 0} Sponsored Transactions per week
                 </Typography>
-              </Box> */}
+              </Box>
             </>
           )}
         </Box>
