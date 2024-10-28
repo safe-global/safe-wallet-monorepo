@@ -8,8 +8,6 @@ import {
 import DocsIcon from '@/public/images/sidebar/docs.svg'
 import FeedbackIcon from '@/public/images/sidebar/feedback.svg'
 import { ListItem } from '@mui/material'
-import Track from '@/components/common/Track'
-import { OVERVIEW_EVENTS } from '@/services/analytics/events/overview'
 
 const SidebarFooter = (): ReactElement => {
   // const dispatch = useAppDispatch()

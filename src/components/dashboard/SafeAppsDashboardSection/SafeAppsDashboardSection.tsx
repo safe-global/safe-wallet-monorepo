@@ -3,7 +3,6 @@ import Typography from '@mui/material/Typography'
 import Grid from '@mui/material/Grid'
 import Button from '@mui/material/Button'
 
-import { WidgetContainer } from '../styled'
 import useSafeAppPreviewDrawer from '@/hooks/safe-apps/useSafeAppPreviewDrawer'
 
 import SafeAppCard, { SafeAppCardContainer } from '@/components/safe-apps/SafeAppCard'
