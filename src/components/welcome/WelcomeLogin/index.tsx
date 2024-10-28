@@ -8,12 +8,13 @@ import useWallet from '@/hooks/wallets/useWallet'
 import { useHasSafes } from '../MyAccounts/useAllSafes'
 import { useCallback, useEffect, useState } from 'react'
 import { usePrivy } from '@privy-io/react-auth'
+import useCurrentWalletHasSuperChainSmartAccount from '@/hooks/super-chain/useCurrentWalletHasSuperChainSmartAccount'
 
 const WelcomeLogin = () => {
   const router = useRouter()
   const wallet = useWallet()
-  const { login, ready, authenticated, logout, connectWallet } = usePrivy()
-  const { isLoaded, hasSafes } = useHasSafes()
+  const { login, ready, authenticated, connectWallet } = usePrivy()
+  const { hasSuperChainSmartAccount, superChainSmartAccount, isLoading } = useCurrentWalletHasSuperChainSmartAccount()
   const [shouldRedirect, setShouldRedirect] = useState(false)
   const [redirectPath, setRedirectPath] = useState<null | string>(null)
   const onLogin = useCallback(() => {
@@ -29,32 +30,40 @@ const WelcomeLogin = () => {
       connectWallet()
     }
   }
-  const handleGetStarted = async () => {
-    setRedirectPath(AppRoutes.newSafe.create)
-    await handleLogin()
-    onLogin()
+  const handleConnect = async () => {
+    if (wallet) {
+      onLogin()
+    } else {
+      await handleLogin()
+      onLogin()
+    }
   }
 
   const handleAcceptInvite = async () => {
     setRedirectPath(AppRoutes.invites)
-    await handleLogin()
-    onLogin()
-  }
-
-  const handleConnect = async () => {
-    await handleLogin()
+    if (wallet) {
+      onLogin()
+    } else {
+      await handleLogin()
+      onLogin()
+    }
   }
 
   useEffect(() => {
     if (!shouldRedirect) return
 
-    if (wallet && isLoaded && redirectPath) {
-      if (redirectPath) {
-        trackEvent(CREATE_SAFE_EVENTS.OPEN_SAFE_CREATION)
-        router.push({ pathname: redirectPath, query: router.query })
-      }
+    const destination = redirectPath
+      ? { pathname: redirectPath, query: router.query }
+      : !isLoading &&
+        (!hasSuperChainSmartAccount
+          ? { pathname: AppRoutes.newSafe.create, query: router.query }
+          : { pathname: AppRoutes.home, query: { safe: superChainSmartAccount } })
+
+    if (destination) {
+      router.push(destination)
+      setShouldRedirect(false)
     }
-  }, [hasSafes, isLoaded, router, wallet, shouldRedirect, redirectPath])
+  }, [hasSuperChainSmartAccount, isLoading, router, wallet, shouldRedirect, redirectPath])
 
   return (
     <Paper className={css.loginCard} data-testid="welcome-login">
@@ -70,10 +79,7 @@ const WelcomeLogin = () => {
 
           <Stack direction="row" gap={2}>
             <Button onClick={handleConnect} variant="contained" disableElevation size="medium">
-              Log In
-            </Button>
-            <Button onClick={handleGetStarted} variant="contained" disableElevation size="medium">
-              Sign Up
+              Get Started
             </Button>
           </Stack>
 

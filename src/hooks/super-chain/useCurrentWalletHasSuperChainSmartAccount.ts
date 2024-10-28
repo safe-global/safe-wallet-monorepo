@@ -1,34 +1,34 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import useSuperChainAccount from './useSuperChainAccount'
 import useWallet from '../wallets/useWallet'
 import { zeroAddress } from 'viem'
 
 function useCurrentWalletHasSuperChainSmartAccount() {
-  const [hasSuperChainSmartAccount, setHasSuperChainSmartAccount] = useState({
+  const initialState = {
     hasSuperChainSmartAccount: false,
     superChainSmartAccount: zeroAddress,
-  })
+    isLoading: true,
+  }
+  const [hasSuperChainSmartAccount, setHasSuperChainSmartAccount] = useState(initialState)
   const { getReadOnlySuperChainSmartAccount } = useSuperChainAccount()
   const wallet = useWallet()
-  useEffect(() => {
+
+  const checkSuperChainAccount = useCallback(async () => {
+    if (!wallet?.address) return
+
     const SuperChainAccountContractReadOnly = getReadOnlySuperChainSmartAccount()
-    if (wallet) {
-      ;(async () => {
-        if (!wallet.address) {
-          return
-        }
-        const hasSuperChainSmartAcount = await SuperChainAccountContractReadOnly.getUserSuperChainAccount(
-          wallet.address,
-        )
-        if (hasSuperChainSmartAcount.smartAccount !== zeroAddress) {
-          setHasSuperChainSmartAccount({
-            hasSuperChainSmartAccount: true,
-            superChainSmartAccount: hasSuperChainSmartAcount.smartAccount,
-          })
-        }
-      })()
-    }
-  }, [wallet?.address])
+    const { smartAccount } = await SuperChainAccountContractReadOnly.getUserSuperChainAccount(wallet.address)
+
+    setHasSuperChainSmartAccount({
+      hasSuperChainSmartAccount: smartAccount !== zeroAddress,
+      superChainSmartAccount: smartAccount,
+      isLoading: false,
+    })
+  }, [wallet?.address, getReadOnlySuperChainSmartAccount])
+
+  useEffect(() => {
+    checkSuperChainAccount()
+  }, [checkSuperChainAccount])
 
   return hasSuperChainSmartAccount
 }

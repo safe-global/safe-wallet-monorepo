@@ -11,6 +11,8 @@ import type { NewSafeFormData } from '../..'
 import useWallet from '@/hooks/wallets/useWallet'
 import type { StepRenderProps } from '@/components/new-safe/CardStepper/useCardStepper'
 import useIsWrongChain from '@/hooks/useIsWrongChain'
+import { AppRoutes } from '@/config/routes'
+import { useRouter } from 'next/router'
 
 type SetNameStepForm = {
   id: string
@@ -35,6 +37,7 @@ function SuperChainID({
 } & StepRenderProps<NewSafeFormData>) {
   const wallet = useWallet()
   const isWrongChain = useIsWrongChain()
+  const router = useRouter()
   const formMethods = useForm<SetNameStepForm>({
     mode: 'all',
   })
@@ -58,6 +61,10 @@ function SuperChainID({
       name: data.name,
     })
     setStep(1)
+  }
+
+  const onCancel = () => {
+    router.push({ pathname: AppRoutes.index, query: router.query })
   }
 
   return (
@@ -144,7 +151,7 @@ function SuperChainID({
         <Divider />
         <Box className={layoutCss.row}>
           <Box display="flex" flexDirection="row" justifyContent="space-between" gap={3}>
-            <Button data-testid="cancel-btn" variant="outlined" size="small">
+            <Button onClick={onCancel} data-testid="cancel-btn" variant="outlined" size="small">
               Cancel
             </Button>
             <Button
