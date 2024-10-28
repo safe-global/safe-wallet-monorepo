@@ -6,7 +6,7 @@ import {
   SidebarListItemText,
 } from '@/components/sidebar/SidebarList'
 import DocsIcon from '@/public/images/sidebar/docs.svg'
-
+import FeedbackIcon from '@/public/images/sidebar/feedback.svg'
 import { ListItem } from '@mui/material'
 import Track from '@/components/common/Track'
 import { OVERVIEW_EVENTS } from '@/services/analytics/events/overview'
@@ -39,33 +39,35 @@ const SidebarFooter = (): ReactElement => {
         </ListItem>
       )} */}
 
-      {/* <Track {...OVERVIEW_EVENTS.WHATS_NEW}>
-        <ListItem disablePadding>
-          <SidebarListItemButton id={BEAMER_SELECTOR} onClick={handleBeamer}>
+      <ListItem disablePadding>
+        <a
+          target="_blank"
+          rel="noopener noreferrer"
+          href="https://tally.superchain.eco/accountsform"
+          style={{ width: '100%' }}
+        >
+          <SidebarListItemButton>
             <SidebarListItemIcon color="primary">
-              <BeamerIcon />
+              <FeedbackIcon />
             </SidebarListItemIcon>
             <SidebarListItemText data-testid="list-item-whats-new" bold>
-              What&apos;s new
+              Feedback
             </SidebarListItemText>
           </SidebarListItemButton>
-        </ListItem>
-      </Track> */}
-
-      <Track {...OVERVIEW_EVENTS.HELP_CENTER}>
-        <ListItem disablePadding>
-          <a target="_blank" rel="noopener noreferrer" href="/#" style={{ width: '100%' }}>
-            <SidebarListItemButton>
-              <SidebarListItemIcon color="primary">
-                <DocsIcon />
-              </SidebarListItemIcon>
-              <SidebarListItemText data-testid="list-item-need-help" bold>
-                Docs
-              </SidebarListItemText>
-            </SidebarListItemButton>
-          </a>
-        </ListItem>
-      </Track>
+        </a>
+      </ListItem>
+      <ListItem disablePadding>
+        <a target="_blank" rel="noopener noreferrer" href="/#" style={{ width: '100%' }}>
+          <SidebarListItemButton>
+            <SidebarListItemIcon color="primary">
+              <DocsIcon />
+            </SidebarListItemIcon>
+            <SidebarListItemText data-testid="list-item-need-help" bold>
+              Docs
+            </SidebarListItemText>
+          </SidebarListItemButton>
+        </a>
+      </ListItem>
     </SidebarList>
   )
 }
