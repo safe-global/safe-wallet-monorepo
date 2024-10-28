@@ -2,8 +2,8 @@ import React, { useMemo } from 'react'
 import { Box, Button, Dialog, Skeleton, SvgIcon, Typography } from '@mui/material'
 import css from './styles.module.css'
 import Tooltip from '@mui/material/Tooltip'
-
 import PerkRaffle from '@/public/images/superchain/perk-raffle.svg'
+import PerkSponsored from '@/public/images/superchain/perk-gas.svg'
 import StarAnimation from '../StarsAnimation'
 import { useQuery } from '@tanstack/react-query'
 import badgesService from '@/features/superChain/services/badges.service'
@@ -17,11 +17,16 @@ function LevelUpModal({ open, onClose, level }: { open: boolean; onClose: () => 
     if (!data) {
       return {
         raffle: { value: 0 },
+
+        sponsoredTxns: { value: 0 },
       }
     }
     return {
       raffle: {
         value: data.find((perk) => perk.name === 'SuperChainRaffle')?.value ?? 0,
+      },
+      sponsoredTxns: {
+        value: data.find((perk) => perk.name === 'SponsoredTxns')?.value ?? 0,
       },
     }
   }, [data])
@@ -84,6 +89,30 @@ function LevelUpModal({ open, onClose, level }: { open: boolean; onClose: () => 
                     Claim {perks.raffle?.value ?? 0} tickets per week
                   </Typography>
                 </Box>
+              </Box>
+              <Box
+                display="flex"
+                width="100%"
+                flexDirection="row"
+                justifyContent="flex-start"
+                gap="12px"
+                alignItems="center"
+              >
+                <Tooltip title={<Typography align="center">Sponsored Transactions</Typography>}>
+                  <Box display="flex" justifyContent="center" alignItems="center">
+                    <SvgIcon component={PerkSponsored} inheritViewBox className={css.perk} />
+                  </Box>
+                </Tooltip>
+                <Typography
+                  fontSize={16}
+                  border={1}
+                  borderColor="secondary.main"
+                  borderRadius="6px"
+                  padding="12px"
+                  width="100%"
+                >
+                  {perks.sponsoredTxns?.value ?? 0} Sponsored Transactions per week
+                </Typography>
               </Box>
             </>
           )}
