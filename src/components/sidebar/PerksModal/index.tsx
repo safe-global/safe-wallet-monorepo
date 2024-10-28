@@ -3,6 +3,7 @@ import { Box, DialogContent, Skeleton, SvgIcon, Tooltip, Typography } from '@mui
 import React, { useMemo } from 'react'
 import css from './styles.module.css'
 import PerkRaffle from '@/public/images/superchain/perk-raffle.svg'
+import PerkSponsored from '@/public/images/superchain/perk-gas.svg'
 import useCurrentPerks from '@/hooks/super-chain/useCurrentPerks'
 
 function PerksModal({ open, onClose }: { open: boolean; onClose: () => void }) {
@@ -83,7 +84,7 @@ function PerksModal({ open, onClose }: { open: boolean; onClose: () => void }) {
               >
                 <Tooltip title={<Typography align="center">Sponsored Transactions</Typography>}>
                   <Box display="flex" justifyContent="center" alignItems="center">
-                    <SvgIcon component={PerkRaffle} inheritViewBox className={css.perk} />
+                    <SvgIcon component={PerkSponsored} inheritViewBox className={css.perk} />
                   </Box>
                 </Tooltip>
                 <Typography
