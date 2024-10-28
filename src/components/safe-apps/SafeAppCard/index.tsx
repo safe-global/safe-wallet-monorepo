@@ -104,32 +104,23 @@ const SafeAppCardGridView = ({
             {/* Safe App Icon */}
             <Stack direction="row" gap="12px" justifyContent="flex-start" alignItems="center" fontSize="42px">
               <SafeAppIconCard src={safeApp.iconUrl} alt={`${safeApp.name} logo`} />
-              <Typography className={css.safeAppTitle} gutterBottom variant="h5">
+              <Typography textOverflow="ellipsis" className={css.safeAppTitle} gutterBottom variant="h5">
                 {safeApp.name}
               </Typography>
             </Stack>
-
-            <SafeAppTags tags={safeApp.tags} />
           </div>
-        }
-        action={
-          <>
-            {/* Safe App Action Buttons */}
-            {/* <SafeAppActionButtons
-              safeApp={safeApp}
-              isBookmarked={isBookmarked}
-              onBookmarkSafeApp={onBookmarkSafeApp}
-              removeCustomApp={removeCustomApp}
-              openPreviewDrawer={openPreviewDrawer}
-            /> */}
-          </>
         }
       />
 
       <CardContent className={css.safeAppContent}>
-        <Typography className={css.safeAppDescription} variant="body2" color="text.secondary">
+        {/* Safe App Tags */}
+        <SafeAppTags tags={safeApp.tags} />
+        {/* Safe App Description */}
+        <Typography className={css.safeAppDescription} marginBottom="12px" variant="body2" color="text.secondary">
           {safeApp.description}
         </Typography>
+
+        {/* Safe App Perks */}
         <SafeAppPerks content={perks} />
       </CardContent>
     </SafeAppCardContainer>

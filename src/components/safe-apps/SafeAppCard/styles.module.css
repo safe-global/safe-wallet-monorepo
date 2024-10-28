@@ -14,11 +14,6 @@
 
 .safeAppContent {
   padding: var(--space-2);
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  justify-content: space-between;
-  height: calc(100% - (50px + var(--space-3) + 34px + var(--space-2) + var(--space-1)));
 }
 
 .safeAppIconContainer {
