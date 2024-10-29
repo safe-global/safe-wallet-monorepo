@@ -55,7 +55,7 @@ const SidebarFooter = (): ReactElement => {
         </a>
       </ListItem>
       <ListItem disablePadding>
-        <a target="_blank" rel="noopener noreferrer" href="/#" style={{ width: '100%' }}>
+        <a target="_blank" rel="noopener noreferrer" href="https://ecosystem-accounts.super.site/" style={{ width: '100%' }}>
           <SidebarListItemButton>
             <SidebarListItemIcon color="primary">
               <DocsIcon />
