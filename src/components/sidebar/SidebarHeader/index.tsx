@@ -152,7 +152,7 @@ const SafeHeader = (): ReactElement => {
       <div className={css.info}>
         <div data-testid="safe-header-info" className={css.safe}>
           <div onClick={handleNounsClick} className={css.nouns}>
-            <NounsAvatar seed={nounSeed} className={css.nounAvatar}/>
+            <NounsAvatar seed={nounSeed} className={css.nounAvatar} />
             <Box className={css.nouns_hover}>
               <SvgIcon component={SettingsIcon} inheritViewBox fontSize="inherit" />
             </Box>
