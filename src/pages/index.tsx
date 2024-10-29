@@ -13,7 +13,6 @@ const IndexPage: NextPage = () => {
     if (!router.isReady || router.pathname !== AppRoutes.index) {
       return
     }
-    // TODO: Replace with useLocalStorage. For now read directly from localstorage so we have value on first render
     const addedSafes = local.getItem<AddedSafesState>(addedSafesSlice.name)
     const pathname = AppRoutes.welcome.index
 

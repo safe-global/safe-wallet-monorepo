@@ -11,7 +11,7 @@ import useAddressBook from '@/hooks/useAddressBook'
 import { CardStepper } from '@/components/new-safe/CardStepper'
 import { AppRoutes } from '@/config/routes'
 import type { AlertColor } from '@mui/material'
-import { type ReactElement, useState, useEffect } from 'react'
+import { type ReactElement, useState } from 'react'
 import ExternalLink from '@/components/common/ExternalLink'
 import { HelpCenterArticle } from '@/config/constants'
 import { isSocialLoginWallet } from '@/services/mpc/SocialLoginModule'
@@ -20,7 +20,6 @@ import SuperChainID from './steps/SuperChainIdStep'
 import Avatar from './steps/AvatarStep'
 import type { NounProps } from './steps/AvatarStep'
 import { ImageData } from '@nouns/assets'
-import useCurrentWalletHasSuperChainSmartAccount from '@/hooks/super-chain/useCurrentWalletHasSuperChainSmartAccount'
 
 export type NewSafeFormData = {
   name: string
@@ -101,7 +100,6 @@ const staticHints: Record<
 
 const CreateSafe = () => {
   const router = useRouter()
-  const { hasSuperChainSmartAccount, superChainSmartAccount } = useCurrentWalletHasSuperChainSmartAccount()
   const wallet = useWallet()
   const addressBook = useAddressBook()
   const defaultOwnerAddressBookName = wallet?.address ? addressBook[wallet.address] : undefined
@@ -121,15 +119,6 @@ const CreateSafe = () => {
     glasses: Math.floor(Math.random() * ImageData.images.glasses.length),
   })
   const [activeStep, setActiveStep] = useState(0)
-
-  useEffect(() => {
-    if (hasSuperChainSmartAccount) {
-      router.push({
-        pathname: '/home',
-        query: { safe: superChainSmartAccount },
-      })
-    }
-  }, [hasSuperChainSmartAccount])
 
   const CreateSafeSteps: TxStepperProps<NewSafeFormData>['steps'] = [
     {

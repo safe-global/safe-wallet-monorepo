@@ -1,6 +1,8 @@
 import type { Dispatch, ReactElement, SetStateAction } from 'react'
 import { useState } from 'react'
 import { trackEvent, MODALS_CATEGORY } from '@/services/analytics'
+import useCurrentWalletHasSuperChainSmartAccount from '@/hooks/super-chain/useCurrentWalletHasSuperChainSmartAccount'
+import { useRouter } from 'next/router'
 
 export type StepRenderProps<TData> = {
   data: TData
@@ -41,8 +43,16 @@ export const useCardStepper = <TData>({
 }: TxStepperProps<TData>) => {
   const [activeStep, setActiveStep] = useState<number>(initialStep || 0)
   const [stepData, setStepData] = useState(initialData)
-
+  const { hasSuperChainSmartAccount, superChainSmartAccount } = useCurrentWalletHasSuperChainSmartAccount()
+  const router = useRouter()
   const handleNext = () => {
+    if (hasSuperChainSmartAccount) {
+      router.push({
+        pathname: '/home',
+        query: { safe: superChainSmartAccount },
+      })
+      return
+    }
     setActiveStep((prevActiveStep) => prevActiveStep + 1)
     setWidgetStep && setWidgetStep((prevActiveStep) => prevActiveStep + 1)
     trackEvent({ category: eventCategory, action: lastStep ? 'Submit' : 'Next', label: activeStep })
