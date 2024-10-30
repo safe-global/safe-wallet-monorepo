@@ -13,6 +13,7 @@ import type { StepRenderProps } from '@/components/new-safe/CardStepper/useCardS
 import useIsWrongChain from '@/hooks/useIsWrongChain'
 import { AppRoutes } from '@/config/routes'
 import { useRouter } from 'next/router'
+import useSuperChainAccount from '@/hooks/super-chain/useSuperChainAccount'
 
 type SetNameStepForm = {
   id: string
@@ -41,14 +42,25 @@ function SuperChainID({
   const formMethods = useForm<SetNameStepForm>({
     mode: 'all',
   })
+  const { getReadOnlySuperChainSmartAccount } = useSuperChainAccount()
   const suffix = '.superchain'
 
   const {
     handleSubmit,
     formState: { errors, isValid },
+    setError,
   } = formMethods
 
-  const onFormSubmit = (data: Pick<NewSafeFormData, 'name'> & { id: string }) => {
+  const onFormSubmit = async (data: Pick<NewSafeFormData, 'name'> & { id: string }) => {
+    const SuperChainAccountContractReadOnly = getReadOnlySuperChainSmartAccount()
+    const isSuperChainIdRegistered = await SuperChainAccountContractReadOnly.superChainIDRegistered(data.id)
+    if (isSuperChainIdRegistered) {
+      setError(SetNameStepFields.id, {
+        type: 'manual',
+        message: 'Sorry, that Superchain ID already exists',
+      })
+      return
+    }
     onSubmit({
       owners: [
         {

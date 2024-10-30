@@ -1,595 +1,448 @@
 [
   {
-    "type": "function",
-    "name": "SuperChainIDRegistered",
-    "inputs": [{ "name": "$", "type": "string", "internalType": "string" }],
-    "outputs": [{ "name": "", "type": "bool", "internalType": "bool" }],
-    "stateMutability": "view"
+    "inputs": [{ "internalType": "address", "name": "target", "type": "address" }],
+    "name": "AddressEmptyCode",
+    "type": "error"
   },
   {
-    "type": "function",
-    "name": "UpdateNounAvatar",
-    "inputs": [
-      { "name": "_safe", "type": "address", "internalType": "address" },
-      {
-        "name": "_noun",
-        "type": "tuple",
-        "internalType": "struct NounMetadata",
-        "components": [
-          {
-            "name": "background",
-            "type": "uint48",
-            "internalType": "uint48"
-          },
-          { "name": "body", "type": "uint48", "internalType": "uint48" },
-          { "name": "accessory", "type": "uint48", "internalType": "uint48" },
-          { "name": "head", "type": "uint48", "internalType": "uint48" },
-          { "name": "glasses", "type": "uint48", "internalType": "uint48" }
-        ]
-      }
-    ],
-    "outputs": [],
-    "stateMutability": "nonpayable"
+    "inputs": [{ "internalType": "address", "name": "implementation", "type": "address" }],
+    "name": "ERC1967InvalidImplementation",
+    "type": "error"
   },
+  { "inputs": [], "name": "ERC1967NonPayable", "type": "error" },
+  { "inputs": [], "name": "FailedInnerCall", "type": "error" },
+  { "inputs": [], "name": "InvalidInitialization", "type": "error" },
+  { "inputs": [], "name": "MaxLvlReached", "type": "error" },
+  { "inputs": [], "name": "NotInitializing", "type": "error" },
   {
-    "type": "function",
-    "name": "_addTierTreshold",
-    "inputs": [{ "name": "_treshold", "type": "uint256", "internalType": "uint256" }],
-    "outputs": [],
-    "stateMutability": "nonpayable"
-  },
-  {
-    "type": "function",
-    "name": "_changeResolver",
-    "inputs": [{ "name": "resolver", "type": "address", "internalType": "address" }],
-    "outputs": [],
-    "stateMutability": "nonpayable"
-  },
-  {
-    "type": "function",
-    "name": "addOwnerWithThreshold",
-    "inputs": [
-      { "name": "_safe", "type": "address", "internalType": "address" },
-      { "name": "_newOwner", "type": "address", "internalType": "address" }
-    ],
-    "outputs": [],
-    "stateMutability": "nonpayable"
-  },
-  {
-    "type": "function",
-    "name": "eip712Domain",
-    "inputs": [],
-    "outputs": [
-      { "name": "fields", "type": "bytes1", "internalType": "bytes1" },
-      { "name": "name", "type": "string", "internalType": "string" },
-      { "name": "version", "type": "string", "internalType": "string" },
-      { "name": "chainId", "type": "uint256", "internalType": "uint256" },
-      {
-        "name": "verifyingContract",
-        "type": "address",
-        "internalType": "address"
-      },
-      { "name": "salt", "type": "bytes32", "internalType": "bytes32" },
-      {
-        "name": "extensions",
-        "type": "uint256[]",
-        "internalType": "uint256[]"
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "getNextLevelPoints",
-    "inputs": [{ "name": "_safe", "type": "address", "internalType": "address" }],
-    "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "getSuperChainAccount",
-    "inputs": [{ "name": "_safe", "type": "address", "internalType": "address" }],
-    "outputs": [
-      {
-        "name": "",
-        "type": "tuple",
-        "internalType": "struct ISuperChainModule.Account",
-        "components": [
-          {
-            "name": "smartAccount",
-            "type": "address",
-            "internalType": "address"
-          },
-          {
-            "name": "superChainID",
-            "type": "string",
-            "internalType": "string"
-          },
-          { "name": "points", "type": "uint256", "internalType": "uint256" },
-          { "name": "level", "type": "uint16", "internalType": "uint16" },
-          {
-            "name": "noun",
-            "type": "tuple",
-            "internalType": "struct NounMetadata",
-            "components": [
-              {
-                "name": "background",
-                "type": "uint48",
-                "internalType": "uint48"
-              },
-              { "name": "body", "type": "uint48", "internalType": "uint48" },
-              {
-                "name": "accessory",
-                "type": "uint48",
-                "internalType": "uint48"
-              },
-              { "name": "head", "type": "uint48", "internalType": "uint48" },
-              {
-                "name": "glasses",
-                "type": "uint48",
-                "internalType": "uint48"
-              }
-            ]
-          }
-        ]
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "getUserSuperChainAccount",
-    "inputs": [{ "name": "_owner", "type": "address", "internalType": "address" }],
-    "outputs": [
-      {
-        "name": "",
-        "type": "tuple",
-        "internalType": "struct ISuperChainModule.Account",
-        "components": [
-          {
-            "name": "smartAccount",
-            "type": "address",
-            "internalType": "address"
-          },
-          {
-            "name": "superChainID",
-            "type": "string",
-            "internalType": "string"
-          },
-          { "name": "points", "type": "uint256", "internalType": "uint256" },
-          { "name": "level", "type": "uint16", "internalType": "uint16" },
-          {
-            "name": "noun",
-            "type": "tuple",
-            "internalType": "struct NounMetadata",
-            "components": [
-              {
-                "name": "background",
-                "type": "uint48",
-                "internalType": "uint48"
-              },
-              { "name": "body", "type": "uint48", "internalType": "uint48" },
-              {
-                "name": "accessory",
-                "type": "uint48",
-                "internalType": "uint48"
-              },
-              { "name": "head", "type": "uint48", "internalType": "uint48" },
-              {
-                "name": "glasses",
-                "type": "uint48",
-                "internalType": "uint48"
-              }
-            ]
-          }
-        ]
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "hasFirstOwnerYet",
-    "inputs": [{ "name": "$", "type": "address", "internalType": "address" }],
-    "outputs": [{ "name": "", "type": "bool", "internalType": "bool" }],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "incrementSuperChainPoints",
-    "inputs": [
-      { "name": "_points", "type": "uint256", "internalType": "uint256" },
-      { "name": "recipent", "type": "address", "internalType": "address" }
-    ],
-    "outputs": [{ "name": "levelUp", "type": "bool", "internalType": "bool" }],
-    "stateMutability": "nonpayable"
-  },
-  {
-    "type": "function",
-    "name": "initialize",
-    "inputs": [
-      { "name": "resolver", "type": "address", "internalType": "address" },
-      { "name": "owner", "type": "address", "internalType": "address" }
-    ],
-    "outputs": [],
-    "stateMutability": "nonpayable"
-  },
-  {
-    "type": "function",
-    "name": "owner",
-    "inputs": [],
-    "outputs": [{ "name": "", "type": "address", "internalType": "address" }],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "populateAddOwner",
-    "inputs": [
-      { "name": "_safe", "type": "address", "internalType": "address" },
-      { "name": "_newOwner", "type": "address", "internalType": "address" }
-    ],
-    "outputs": [],
-    "stateMutability": "nonpayable"
-  },
-  {
-    "type": "function",
-    "name": "populatedAddOwnersWithTreshold",
-    "inputs": [{ "name": "$", "type": "address", "internalType": "address" }],
-    "outputs": [{ "name": "", "type": "address[]", "internalType": "address[]" }],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "removePopulateRequest",
-    "inputs": [
-      { "name": "_safe", "type": "address", "internalType": "address" },
-      { "name": "user", "type": "address", "internalType": "address" }
-    ],
-    "outputs": [],
-    "stateMutability": "nonpayable"
-  },
-  {
-    "type": "function",
-    "name": "renounceOwnership",
-    "inputs": [],
-    "outputs": [],
-    "stateMutability": "nonpayable"
-  },
-  {
-    "type": "function",
-    "name": "setInitialOwner",
-    "inputs": [
-      { "name": "_safe", "type": "address", "internalType": "address" },
-      { "name": "_owner", "type": "address", "internalType": "address" },
-      {
-        "name": "_noun",
-        "type": "tuple",
-        "internalType": "struct NounMetadata",
-        "components": [
-          {
-            "name": "background",
-            "type": "uint48",
-            "internalType": "uint48"
-          },
-          { "name": "body", "type": "uint48", "internalType": "uint48" },
-          { "name": "accessory", "type": "uint48", "internalType": "uint48" },
-          { "name": "head", "type": "uint48", "internalType": "uint48" },
-          { "name": "glasses", "type": "uint48", "internalType": "uint48" }
-        ]
-      },
-      { "name": "superChainID", "type": "string", "internalType": "string" }
-    ],
-    "outputs": [],
-    "stateMutability": "nonpayable"
-  },
-  {
-    "type": "function",
-    "name": "simulateIncrementSuperChainPoints",
-    "inputs": [
-      { "name": "_points", "type": "uint256", "internalType": "uint256" },
-      { "name": "recipent", "type": "address", "internalType": "address" }
-    ],
-    "outputs": [{ "name": "levelUp", "type": "bool", "internalType": "bool" }],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "superChainAccount",
-    "inputs": [{ "name": "$", "type": "address", "internalType": "address" }],
-    "outputs": [
-      {
-        "name": "",
-        "type": "tuple",
-        "internalType": "struct ISuperChainModule.Account",
-        "components": [
-          {
-            "name": "smartAccount",
-            "type": "address",
-            "internalType": "address"
-          },
-          {
-            "name": "superChainID",
-            "type": "string",
-            "internalType": "string"
-          },
-          { "name": "points", "type": "uint256", "internalType": "uint256" },
-          { "name": "level", "type": "uint16", "internalType": "uint16" },
-          {
-            "name": "noun",
-            "type": "tuple",
-            "internalType": "struct NounMetadata",
-            "components": [
-              {
-                "name": "background",
-                "type": "uint48",
-                "internalType": "uint48"
-              },
-              { "name": "body", "type": "uint48", "internalType": "uint48" },
-              {
-                "name": "accessory",
-                "type": "uint48",
-                "internalType": "uint48"
-              },
-              { "name": "head", "type": "uint48", "internalType": "uint48" },
-              {
-                "name": "glasses",
-                "type": "uint48",
-                "internalType": "uint48"
-              }
-            ]
-          }
-        ]
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "transferOwnership",
-    "inputs": [{ "name": "newOwner", "type": "address", "internalType": "address" }],
-    "outputs": [],
-    "stateMutability": "nonpayable"
-  },
-  {
-    "type": "function",
-    "name": "updateTierThreshold",
-    "inputs": [
-      { "name": "index", "type": "uint256", "internalType": "uint256" },
-      { "name": "newThreshold", "type": "uint256", "internalType": "uint256" }
-    ],
-    "outputs": [],
-    "stateMutability": "nonpayable"
-  },
-  {
-    "type": "function",
-    "name": "userSuperChainAccount",
-    "inputs": [{ "name": "$", "type": "address", "internalType": "address" }],
-    "outputs": [{ "name": "", "type": "address", "internalType": "address" }],
-    "stateMutability": "view"
-  },
-  {
-    "type": "event",
-    "name": "EIP712DomainChanged",
-    "inputs": [],
-    "anonymous": false
-  },
-  {
-    "type": "event",
-    "name": "Initialized",
-    "inputs": [
-      {
-        "name": "version",
-        "type": "uint64",
-        "indexed": false,
-        "internalType": "uint64"
-      }
-    ],
-    "anonymous": false
-  },
-  {
-    "type": "event",
-    "name": "OwnerAdded",
-    "inputs": [
-      {
-        "name": "safe",
-        "type": "address",
-        "indexed": true,
-        "internalType": "address"
-      },
-      {
-        "name": "newOwner",
-        "type": "address",
-        "indexed": true,
-        "internalType": "address"
-      },
-      {
-        "name": "superChainId",
-        "type": "string",
-        "indexed": false,
-        "internalType": "string"
-      }
-    ],
-    "anonymous": false
-  },
-  {
-    "type": "event",
-    "name": "OwnerPopulated",
-    "inputs": [
-      {
-        "name": "safe",
-        "type": "address",
-        "indexed": true,
-        "internalType": "address"
-      },
-      {
-        "name": "newOwner",
-        "type": "address",
-        "indexed": true,
-        "internalType": "address"
-      },
-      {
-        "name": "superChainId",
-        "type": "string",
-        "indexed": false,
-        "internalType": "string"
-      }
-    ],
-    "anonymous": false
-  },
-  {
-    "type": "event",
-    "name": "OwnerPopulationRemoved",
-    "inputs": [
-      {
-        "name": "safe",
-        "type": "address",
-        "indexed": true,
-        "internalType": "address"
-      },
-      {
-        "name": "owner",
-        "type": "address",
-        "indexed": true,
-        "internalType": "address"
-      },
-      {
-        "name": "superChainId",
-        "type": "string",
-        "indexed": false,
-        "internalType": "string"
-      }
-    ],
-    "anonymous": false
-  },
-  {
-    "type": "event",
-    "name": "OwnershipTransferred",
-    "inputs": [
-      {
-        "name": "previousOwner",
-        "type": "address",
-        "indexed": true,
-        "internalType": "address"
-      },
-      {
-        "name": "newOwner",
-        "type": "address",
-        "indexed": true,
-        "internalType": "address"
-      }
-    ],
-    "anonymous": false
-  },
-  {
-    "type": "event",
-    "name": "PointsIncremented",
-    "inputs": [
-      {
-        "name": "recipient",
-        "type": "address",
-        "indexed": true,
-        "internalType": "address"
-      },
-      {
-        "name": "points",
-        "type": "uint256",
-        "indexed": false,
-        "internalType": "uint256"
-      },
-      {
-        "name": "levelUp",
-        "type": "bool",
-        "indexed": false,
-        "internalType": "bool"
-      }
-    ],
-    "anonymous": false
-  },
-  {
-    "type": "event",
-    "name": "SuperChainSmartAccountCreated",
-    "inputs": [
-      {
-        "name": "safe",
-        "type": "address",
-        "indexed": true,
-        "internalType": "address"
-      },
-      {
-        "name": "initialOwner",
-        "type": "address",
-        "indexed": true,
-        "internalType": "address"
-      },
-      {
-        "name": "superChainId",
-        "type": "string",
-        "indexed": false,
-        "internalType": "string"
-      },
-      {
-        "name": "noun",
-        "type": "tuple",
-        "indexed": false,
-        "internalType": "struct NounMetadata",
-        "components": [
-          {
-            "name": "background",
-            "type": "uint48",
-            "internalType": "uint48"
-          },
-          { "name": "body", "type": "uint48", "internalType": "uint48" },
-          { "name": "accessory", "type": "uint48", "internalType": "uint48" },
-          { "name": "head", "type": "uint48", "internalType": "uint48" },
-          { "name": "glasses", "type": "uint48", "internalType": "uint48" }
-        ]
-      }
-    ],
-    "anonymous": false
-  },
-  {
-    "type": "event",
-    "name": "TierTresholdAdded",
-    "inputs": [
-      {
-        "name": "treshold",
-        "type": "uint256",
-        "indexed": false,
-        "internalType": "uint256"
-      }
-    ],
-    "anonymous": false
-  },
-  {
-    "type": "event",
-    "name": "TierTresholdUpdated",
-    "inputs": [
-      {
-        "name": "index",
-        "type": "uint256",
-        "indexed": false,
-        "internalType": "uint256"
-      },
-      {
-        "name": "newThreshold",
-        "type": "uint256",
-        "indexed": false,
-        "internalType": "uint256"
-      }
-    ],
-    "anonymous": false
-  },
-  { "type": "error", "name": "InvalidInitialization", "inputs": [] },
-  { "type": "error", "name": "MaxLvlReached", "inputs": [] },
-  { "type": "error", "name": "NotInitializing", "inputs": [] },
-  {
-    "type": "error",
+    "inputs": [{ "internalType": "address", "name": "owner", "type": "address" }],
     "name": "OwnableInvalidOwner",
-    "inputs": [{ "name": "owner", "type": "address", "internalType": "address" }]
+    "type": "error"
   },
   {
-    "type": "error",
+    "inputs": [{ "internalType": "address", "name": "account", "type": "address" }],
     "name": "OwnableUnauthorizedAccount",
-    "inputs": [{ "name": "account", "type": "address", "internalType": "address" }]
+    "type": "error"
+  },
+  { "inputs": [], "name": "UUPSUnauthorizedCallContext", "type": "error" },
+  {
+    "inputs": [{ "internalType": "bytes32", "name": "slot", "type": "bytes32" }],
+    "name": "UUPSUnsupportedProxiableUUID",
+    "type": "error"
+  },
+  {
+    "anonymous": false,
+    "inputs": [{ "indexed": false, "internalType": "uint64", "name": "version", "type": "uint64" }],
+    "name": "Initialized",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "internalType": "address", "name": "safe", "type": "address" },
+      {
+        "components": [
+          { "internalType": "uint48", "name": "background", "type": "uint48" },
+          { "internalType": "uint48", "name": "body", "type": "uint48" },
+          { "internalType": "uint48", "name": "accessory", "type": "uint48" },
+          { "internalType": "uint48", "name": "head", "type": "uint48" },
+          { "internalType": "uint48", "name": "glasses", "type": "uint48" }
+        ],
+        "indexed": false,
+        "internalType": "struct NounMetadata",
+        "name": "noun",
+        "type": "tuple"
+      }
+    ],
+    "name": "NounUpdated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "internalType": "address", "name": "safe", "type": "address" },
+      { "indexed": true, "internalType": "address", "name": "newOwner", "type": "address" },
+      { "indexed": false, "internalType": "string", "name": "superChainId", "type": "string" }
+    ],
+    "name": "OwnerAdded",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "internalType": "address", "name": "safe", "type": "address" },
+      { "indexed": true, "internalType": "address", "name": "newOwner", "type": "address" },
+      { "indexed": false, "internalType": "string", "name": "superChainId", "type": "string" }
+    ],
+    "name": "OwnerPopulated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "internalType": "address", "name": "safe", "type": "address" },
+      { "indexed": true, "internalType": "address", "name": "owner", "type": "address" },
+      { "indexed": false, "internalType": "string", "name": "superChainId", "type": "string" }
+    ],
+    "name": "OwnerPopulationRemoved",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "internalType": "address", "name": "previousOwner", "type": "address" },
+      { "indexed": true, "internalType": "address", "name": "newOwner", "type": "address" }
+    ],
+    "name": "OwnershipTransferred",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "internalType": "address", "name": "recipient", "type": "address" },
+      { "indexed": false, "internalType": "uint256", "name": "points", "type": "uint256" },
+      { "indexed": false, "internalType": "bool", "name": "levelUp", "type": "bool" }
+    ],
+    "name": "PointsIncremented",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "internalType": "address", "name": "safe", "type": "address" },
+      { "indexed": true, "internalType": "address", "name": "initialOwner", "type": "address" },
+      { "indexed": false, "internalType": "string", "name": "superChainId", "type": "string" },
+      {
+        "components": [
+          { "internalType": "uint48", "name": "background", "type": "uint48" },
+          { "internalType": "uint48", "name": "body", "type": "uint48" },
+          { "internalType": "uint48", "name": "accessory", "type": "uint48" },
+          { "internalType": "uint48", "name": "head", "type": "uint48" },
+          { "internalType": "uint48", "name": "glasses", "type": "uint48" }
+        ],
+        "indexed": false,
+        "internalType": "struct NounMetadata",
+        "name": "noun",
+        "type": "tuple"
+      }
+    ],
+    "name": "SuperChainSmartAccountCreated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [{ "indexed": false, "internalType": "uint256", "name": "treshold", "type": "uint256" }],
+    "name": "TierTresholdAdded",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": false, "internalType": "uint256", "name": "index", "type": "uint256" },
+      { "indexed": false, "internalType": "uint256", "name": "newThreshold", "type": "uint256" }
+    ],
+    "name": "TierTresholdUpdated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [{ "indexed": true, "internalType": "address", "name": "implementation", "type": "address" }],
+    "name": "Upgraded",
+    "type": "event"
+  },
+  {
+    "inputs": [],
+    "name": "UPGRADE_INTERFACE_VERSION",
+    "outputs": [{ "internalType": "string", "name": "", "type": "string" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "_safe", "type": "address" },
+      {
+        "components": [
+          { "internalType": "uint48", "name": "background", "type": "uint48" },
+          { "internalType": "uint48", "name": "body", "type": "uint48" },
+          { "internalType": "uint48", "name": "accessory", "type": "uint48" },
+          { "internalType": "uint48", "name": "head", "type": "uint48" },
+          { "internalType": "uint48", "name": "glasses", "type": "uint48" }
+        ],
+        "internalType": "struct NounMetadata",
+        "name": "_noun",
+        "type": "tuple"
+      }
+    ],
+    "name": "UpdateNounAvatar",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "address", "name": "resolver", "type": "address" }],
+    "name": "_changeResolver",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "_safe", "type": "address" },
+      { "internalType": "address", "name": "_newOwner", "type": "address" }
+    ],
+    "name": "addOwnerWithThreshold",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "uint256[]", "name": "_tresholds", "type": "uint256[]" }],
+    "name": "addTiersTreshold",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "address", "name": "_safe", "type": "address" }],
+    "name": "getNextLevelPoints",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "address", "name": "_safe", "type": "address" }],
+    "name": "getSuperChainAccount",
+    "outputs": [
+      {
+        "components": [
+          { "internalType": "address", "name": "smartAccount", "type": "address" },
+          { "internalType": "string", "name": "superChainID", "type": "string" },
+          { "internalType": "uint256", "name": "points", "type": "uint256" },
+          { "internalType": "uint16", "name": "level", "type": "uint16" },
+          {
+            "components": [
+              { "internalType": "uint48", "name": "background", "type": "uint48" },
+              { "internalType": "uint48", "name": "body", "type": "uint48" },
+              { "internalType": "uint48", "name": "accessory", "type": "uint48" },
+              { "internalType": "uint48", "name": "head", "type": "uint48" },
+              { "internalType": "uint48", "name": "glasses", "type": "uint48" }
+            ],
+            "internalType": "struct NounMetadata",
+            "name": "noun",
+            "type": "tuple"
+          }
+        ],
+        "internalType": "struct ISuperChainModule.Account",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "address", "name": "_owner", "type": "address" }],
+    "name": "getUserSuperChainAccount",
+    "outputs": [
+      {
+        "components": [
+          { "internalType": "address", "name": "smartAccount", "type": "address" },
+          { "internalType": "string", "name": "superChainID", "type": "string" },
+          { "internalType": "uint256", "name": "points", "type": "uint256" },
+          { "internalType": "uint16", "name": "level", "type": "uint16" },
+          {
+            "components": [
+              { "internalType": "uint48", "name": "background", "type": "uint48" },
+              { "internalType": "uint48", "name": "body", "type": "uint48" },
+              { "internalType": "uint48", "name": "accessory", "type": "uint48" },
+              { "internalType": "uint48", "name": "head", "type": "uint48" },
+              { "internalType": "uint48", "name": "glasses", "type": "uint48" }
+            ],
+            "internalType": "struct NounMetadata",
+            "name": "noun",
+            "type": "tuple"
+          }
+        ],
+        "internalType": "struct ISuperChainModule.Account",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "address", "name": "$", "type": "address" }],
+    "name": "hasFirstOwnerYet",
+    "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "uint256", "name": "_points", "type": "uint256" },
+      { "internalType": "address", "name": "recipent", "type": "address" }
+    ],
+    "name": "incrementSuperChainPoints",
+    "outputs": [{ "internalType": "bool", "name": "levelUp", "type": "bool" }],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "resolver", "type": "address" },
+      { "internalType": "address", "name": "owner", "type": "address" }
+    ],
+    "name": "initialize",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "owner",
+    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "_safe", "type": "address" },
+      { "internalType": "address", "name": "_newOwner", "type": "address" }
+    ],
+    "name": "populateAddOwner",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "address", "name": "$", "type": "address" }],
+    "name": "populatedAddOwnersWithTreshold",
+    "outputs": [{ "internalType": "address[]", "name": "", "type": "address[]" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "proxiableUUID",
+    "outputs": [{ "internalType": "bytes32", "name": "", "type": "bytes32" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "_safe", "type": "address" },
+      { "internalType": "address", "name": "user", "type": "address" }
+    ],
+    "name": "removePopulateRequest",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  { "inputs": [], "name": "renounceOwnership", "outputs": [], "stateMutability": "nonpayable", "type": "function" },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "_safe", "type": "address" },
+      { "internalType": "address", "name": "_owner", "type": "address" },
+      {
+        "components": [
+          { "internalType": "uint48", "name": "background", "type": "uint48" },
+          { "internalType": "uint48", "name": "body", "type": "uint48" },
+          { "internalType": "uint48", "name": "accessory", "type": "uint48" },
+          { "internalType": "uint48", "name": "head", "type": "uint48" },
+          { "internalType": "uint48", "name": "glasses", "type": "uint48" }
+        ],
+        "internalType": "struct NounMetadata",
+        "name": "_noun",
+        "type": "tuple"
+      },
+      { "internalType": "string", "name": "superChainID", "type": "string" }
+    ],
+    "name": "setInitialOwner",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "uint256", "name": "_points", "type": "uint256" },
+      { "internalType": "address", "name": "recipent", "type": "address" }
+    ],
+    "name": "simulateIncrementSuperChainPoints",
+    "outputs": [{ "internalType": "bool", "name": "levelUp", "type": "bool" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "address", "name": "$", "type": "address" }],
+    "name": "superChainAccount",
+    "outputs": [
+      {
+        "components": [
+          { "internalType": "address", "name": "smartAccount", "type": "address" },
+          { "internalType": "string", "name": "superChainID", "type": "string" },
+          { "internalType": "uint256", "name": "points", "type": "uint256" },
+          { "internalType": "uint16", "name": "level", "type": "uint16" },
+          {
+            "components": [
+              { "internalType": "uint48", "name": "background", "type": "uint48" },
+              { "internalType": "uint48", "name": "body", "type": "uint48" },
+              { "internalType": "uint48", "name": "accessory", "type": "uint48" },
+              { "internalType": "uint48", "name": "head", "type": "uint48" },
+              { "internalType": "uint48", "name": "glasses", "type": "uint48" }
+            ],
+            "internalType": "struct NounMetadata",
+            "name": "noun",
+            "type": "tuple"
+          }
+        ],
+        "internalType": "struct ISuperChainModule.Account",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "string", "name": "$", "type": "string" }],
+    "name": "superChainIDRegistered",
+    "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "address", "name": "newOwner", "type": "address" }],
+    "name": "transferOwnership",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "uint256", "name": "index", "type": "uint256" },
+      { "internalType": "uint256", "name": "newThreshold", "type": "uint256" }
+    ],
+    "name": "updateTierThreshold",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "newImplementation", "type": "address" },
+      { "internalType": "bytes", "name": "data", "type": "bytes" }
+    ],
+    "name": "upgradeToAndCall",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "address", "name": "$", "type": "address" }],
+    "name": "userSuperChainAccount",
+    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "stateMutability": "view",
+    "type": "function"
   }
 ]
