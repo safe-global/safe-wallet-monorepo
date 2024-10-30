@@ -1,19 +1,55 @@
 import { Skeleton, Stack, Typography } from '@mui/material'
-import React from 'react'
+import React, { useCallback, useRef, useState } from 'react'
 import RankingProfile from './RankingProfile/index'
 import { useLeaderboard } from '@/hooks/super-chain/useLeaderboard'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import type { Address } from 'viem'
 import { useUserRank } from '@/hooks/super-chain/useUserRank'
+import InfiniteScroll from '../common/InfiniteScroll'
 
 function Leaderboard({ handleUserSelect }: { handleUserSelect: (_: string) => void }) {
   const address = useSafeAddress()
-  const { data, loading } = useLeaderboard(address as Address)
+  const [isFetching, setIsFetching] = useState(false)
+  const [skip, setSkip] = useState(0)
+  const [hasMore, setHasMore] = useState(true)
+  const { data, loading, fetchMore } = useLeaderboard(address as Address, 0)
   const {
     rank,
     error,
     loading: rankLoading,
-  } = useUserRank(address as Address, loading, data?.superChainSmartAccount.points)
+  } = useUserRank(address as Address, loading, loading ? '0' : data?.superChainSmartAccount.points)
+
+  const handleLoadMore = useCallback(async () => {
+    if (isFetching || loading || !hasMore) return
+    setIsFetching(true)
+
+    const newSkip = skip + 20
+    setSkip(newSkip)
+
+    const { data: fetchMoreData } = await fetchMore({
+      variables: {
+        skip: newSkip,
+      },
+      updateQuery: (previousResult, { fetchMoreResult }) => {
+        if (!fetchMoreResult || !fetchMoreResult.superChainSmartAccounts.length) {
+          return previousResult
+        }
+        setIsFetching(false)
+
+        return {
+          ...fetchMoreResult,
+          superChainSmartAccounts: [
+            ...previousResult.superChainSmartAccounts,
+            ...fetchMoreResult.superChainSmartAccounts,
+          ],
+        }
+      },
+    })
+    if (!fetchMoreData || !fetchMoreData.superChainSmartAccounts.length) {
+      setHasMore(false)
+    }
+  }, [isFetching, loading, hasMore, skip, fetchMore])
+
   if (error) return
 
   if (loading || !data || rankLoading) {
@@ -63,7 +99,7 @@ function Leaderboard({ handleUserSelect }: { handleUserSelect: (_: string) => vo
             }}
           />
         </Stack>
-        <Stack spacing={1}>
+        <Stack spacing={1} height="100%">
           <Typography fontSize={12} fontWeight={600} color="gray">
             TOP USERS OF ALL-TIME
           </Typography>
@@ -86,6 +122,9 @@ function Leaderboard({ handleUserSelect }: { handleUserSelect: (_: string) => vo
               }}
             />
           ))}
+
+          {hasMore &&
+            (isFetching ? <Skeleton variant="rounded" height={48} /> : <InfiniteScroll onLoadMore={handleLoadMore} />)}
         </Stack>
       </Stack>
     </main>

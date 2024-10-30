@@ -38,10 +38,10 @@ function getTimestampForLastWeek(): number {
   return Math.floor(Date.now() / 1000) - 7 * 24 * 60 * 60 // Unix timestamp for one week ago
 }
 
-export function useLeaderboard(user: Address) {
+export function useLeaderboard(user: Address, skip: number) {
   const GET_LEADERBOARD = gql`
-    query GetLeaderboard($userId: String) {
-      superChainSmartAccounts(first: 10, orderBy: points, orderDirection: desc) {
+    query GetLeaderboard($userId: String, $skip: Int) {
+      superChainSmartAccounts(first: 20, skip: $skip, orderBy: points, orderDirection: desc) {
         points
         safe
         level
@@ -77,8 +77,9 @@ export function useLeaderboard(user: Address) {
   return useQuery<Leaderboard>(GET_LEADERBOARD, {
     variables: {
       userId: user,
+      skip,
     },
-    pollInterval: 10000,
+    // pollInterval: 10000,
   })
 }
 
@@ -190,7 +191,7 @@ export function useWeeklyLeaderboard(): { loading: boolean; error: any; leaderbo
       // Convertir el mapa a una matriz, ordenarlo por puntos, y tomar los top 10
       const sortedUsers = Array.from(pointsMap.values())
         .sort((a, b) => b.points - a.points) // Ordenar de mayor a menor
-        .slice(0, 10) // Tomar los top 10
+        .slice(0, 20) // Tomar los top 10
 
       setLeaderboard({ superChainSmartAccounts: sortedUsers })
       setLoading(false)

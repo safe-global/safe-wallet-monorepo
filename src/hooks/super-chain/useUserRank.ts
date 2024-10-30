@@ -26,7 +26,7 @@ export const useUserRank = (userAddress: Address, loadingFirstFetch: boolean, us
   const [fetchUserRank] = useLazyQuery(GET_USER_POSITION)
 
   const getUserRank = async (skip = 0, totalRank = 0): Promise<number> => {
-    if (!userAddress) return totalRank
+    if (!userAddress || !userPoints) return totalRank
 
     const { data, error } = await fetchUserRank({
       variables: {
