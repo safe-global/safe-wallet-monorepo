@@ -19,9 +19,8 @@ const TokenMenu = ({
   selectedAssetCount: number
   showHiddenAssets: boolean
 }) => {
-  if (selectedAssetCount === 0 && !showHiddenAssets) {
-    return null
-  }
+  return null
+
   return (
     <Sticky>
       <Box className={css.wrapper}>
