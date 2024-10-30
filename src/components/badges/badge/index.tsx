@@ -25,7 +25,8 @@ function Badge({
     switchFavorite()
   }
   const unClaimed = useMemo(() => {
-    if (data?.claimableTier === null || data?.tier === null) return false
+    if (data?.claimableTier === null || data?.tier === null || data.claimableTier === 0 || Number(data.tier) === 0)
+      return false
     return Number(data?.tier) === data?.claimableTier
   }, [data])
 
