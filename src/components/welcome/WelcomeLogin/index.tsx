@@ -1,5 +1,5 @@
 import { AppRoutes } from '@/config/routes'
-import { Paper, Typography, Divider, Box, Button, Stack } from '@mui/material'
+import { Paper, Typography, Divider, Box, Button, Stack, Tooltip } from '@mui/material'
 import css from './styles.module.css'
 import { useRouter } from 'next/router'
 import useWallet from '@/hooks/wallets/useWallet'
@@ -85,9 +85,16 @@ const WelcomeLogin = () => {
               or
             </Typography>
           </Divider>
-          <Button onClick={handleAcceptInvite} variant="outlined" disableElevation size="medium">
-            Accept invite
-          </Button>
+          <Tooltip
+            placement="bottom"
+            title={
+              <Typography align="center">Accept an invitation to add an extra Wallet to your Super Account.</Typography>
+            }
+          >
+            <Button onClick={handleAcceptInvite} variant="outlined" disableElevation size="medium">
+              Accept invite
+            </Button>
+          </Tooltip>
         </Box>
       </Box>
     </Paper>
