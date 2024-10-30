@@ -1,5 +1,5 @@
 import { Skeleton, Stack, Typography } from '@mui/material'
-import React, { useCallback, useRef, useState } from 'react'
+import React, { useCallback, useState } from 'react'
 import RankingProfile from './RankingProfile/index'
 import { useLeaderboard } from '@/hooks/super-chain/useLeaderboard'
 import useSafeAddress from '@/hooks/useSafeAddress'
