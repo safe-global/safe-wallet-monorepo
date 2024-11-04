@@ -162,12 +162,12 @@ function UserInfo({
                         justifyContent="center"
                         alignItems="center"
                       >
-                        {/* <Typography fontSize={14} textAlign="center" fontWeight={400}>
+                         <Typography fontSize={14} textAlign="center" fontWeight={400}>
                           {badge.badge.metadata.condition.replace(
                             '{{variable}}',
                             badge.badge.badgeTiers[parseInt(badge.tier) - 1].metadata.minValue.toString(),
                           )}
-                        </Typography> */}
+                        </Typography>
                         <Box justifyContent="center" alignItems="center" display="flex" gap={1}>
                           <strong>{badge.badge.badgeTiers[parseInt(badge.tier) - 1].points}</strong>
                           <SvgIcon component={SuperChainPoints} inheritViewBox fontSize="medium" />
