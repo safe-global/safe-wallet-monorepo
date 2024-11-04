@@ -162,7 +162,7 @@ function UserInfo({
                         justifyContent="center"
                         alignItems="center"
                       >
-                         <Typography fontSize={14} textAlign="center" fontWeight={400}>
+                        <Typography fontSize={14} textAlign="center" fontWeight={400}>
                           {badge.badge.metadata.condition.replace(
                             '{{variable}}',
                             badge.badge.badgeTiers[parseInt(badge.tier) - 1].metadata.minValue.toString(),
