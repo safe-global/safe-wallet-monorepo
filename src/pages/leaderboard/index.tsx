@@ -1,6 +1,7 @@
 import Leaderboard from '@/components/leaderboard'
 import LeaderboardHeader from '@/components/leaderboard/LeaderboardHeader'
 import UserInfo from '@/components/leaderboard/UserInfo'
+import { BACKEND_BASE_URI } from '@/config/constants'
 import { UserResponse } from '@/types/super-chain'
 
 import { Box, Drawer } from '@mui/material'
@@ -20,15 +21,10 @@ function LeaderboardLayout() {
       if (selectedUser === zeroAddress) {
         return null
       }
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URI}/user`, {
-        headers: {
-          account: selectedUser,
-        },
-      })
-      console.debug({ response })
+      const response = await axios.get(`${BACKEND_BASE_URI}/user/${selectedUser}`)
       return response.data
     },
-    enabled: selectedUser !== zeroAddress, // Evita la consulta cuando no se ha seleccionado ningún usuario
+    enabled: selectedUser !== zeroAddress,
   })
 
   const handleUserSelect = (user: string | Address) => {

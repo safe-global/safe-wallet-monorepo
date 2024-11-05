@@ -1,3 +1,4 @@
+import { BACKEND_BASE_URI } from '@/config/constants'
 import { CHAIN_ID, JSON_RPC_PROVIDER } from '@/features/superChain/constants'
 import { createSmartAccountClient, ENTRYPOINT_ADDRESS_V07 } from 'permissionless'
 import type { SmartAccountSigner } from 'permissionless/_types/accounts'
@@ -7,7 +8,7 @@ import { type Address, createPublicClient, http } from 'viem'
 import { sepolia, optimism } from 'viem/chains'
 
 const pimlicoTransport = (jwt: string) => {
-  return http(`${process.env.NEXT_PUBLIC_BACKEND_URI}/pimlico-reverse-proxy`, {
+  return http(`${BACKEND_BASE_URI}/user-op-reverse-proxy`, {
     fetchOptions: {
       headers: {
         Authorization: `Bearer ${jwt}`,

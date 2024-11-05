@@ -4,9 +4,5 @@ import axios from 'axios'
 import type { Address } from 'viem'
 
 export async function getWeeklyRelayedTransactions(account: Address) {
-  return await axios.get<WeeklyRelayedTransactions>(`${BACKEND_BASE_URI}/max-weekly-sponsorship`, {
-    headers: {
-      account,
-    },
-  })
+  return await axios.get<WeeklyRelayedTransactions>(`${BACKEND_BASE_URI}/user/${account}/sponsorship-balance`)
 }

@@ -48,27 +48,23 @@ class BadgesService {
   }> {
     const response = await this.httpInstance.get<{
       currentBadges: ResponseBadge[]
-    }>('/get-badges', {
-      headers: {
-        account: account || zeroAddress,
-      },
-    })
+    }>(`/user/${account}/badges`)
     return response.data
   }
   public async attestBadges(account: Address, jwt: string) {
     const response = await this.httpInstance.post(
-      '/attest-badges',
+      `/user/${account}/badges/claim`,
       {},
-      { headers: { account, Authorization: `Bearer ${jwt}` } },
+      { headers: { Authorization: `Bearer ${jwt}` } },
     )
     return response.data
   }
   public async getPerks(account: Address) {
-    const response = await this.httpInstance.get<{ perks: Perks }>(`/get-user-perks/${account}`)
+    const response = await this.httpInstance.get<{ perks: Perks }>(`/user/${account}/perks`)
     return response.data.perks
   }
   public async getPerksByLevel(level: number) {
-    const response = await this.httpInstance.get<{ perks: Perks }>(`/get-perks/${level}`)
+    const response = await this.httpInstance.get<{ perks: Perks }>(`/perks/${level}`)
     return response.data.perks
   }
 }
