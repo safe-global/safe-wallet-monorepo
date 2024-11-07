@@ -1,4 +1,4 @@
-import { zeroAddress, type Address } from 'viem'
+import { type Address } from 'viem'
 import axios from 'axios'
 import { BACKEND_BASE_URI } from '@/config/constants'
 import type { ResponseBadge } from '@/types/super-chain'
