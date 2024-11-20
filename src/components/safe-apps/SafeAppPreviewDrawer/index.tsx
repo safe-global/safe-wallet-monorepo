@@ -14,7 +14,6 @@ import ChainIndicator from '@/components/common/ChainIndicator'
 import SafeAppIconCard from '@/components/safe-apps/SafeAppIconCard'
 import SafeAppActionButtons from '@/components/safe-apps/SafeAppActionButtons'
 import SafeAppTags from '@/components/safe-apps/SafeAppTags'
-import SafeAppSocialLinksCard from '@/components/safe-apps/SafeAppSocialLinksCard'
 import CloseIcon from '@/public/images/common/close.svg'
 import { useOpenedSafeApps } from '@/hooks/safe-apps/useOpenedSafeApps'
 import css from './styles.module.css'
@@ -103,8 +102,6 @@ const SafeAppPreviewDrawer = ({ isOpen, safeApp, isBookmarked, onClose, onBookma
           </Button>
         </Link>
 
-        {/* Safe App Social Links */}
-        {safeApp && <SafeAppSocialLinksCard safeApp={safeApp} />}
       </Box>
     </Drawer>
   )
