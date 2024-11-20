@@ -135,7 +135,6 @@ const SafeAppsInfoModal = ({
         />
         <Grid container justifyContent="center" alignItems="center" direction="column" textAlign="center" p={3}>
           <Slider onSlideChange={handleSlideChange}>
-            {!isConsentAccepted && <LegalDisclaimer />}
 
             {!isPermissionsReviewCompleted && (
               <AllowedFeaturesList

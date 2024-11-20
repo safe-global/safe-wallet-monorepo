@@ -89,7 +89,7 @@ const useSafeAppsInfoModal = ({
 
   const isModalVisible = useMemo(() => {
     const isComponentReady = didMount.current
-    const shouldShowLegalDisclaimer = !modalInfo[chainId] || modalInfo[chainId].consentsAccepted === false
+    const shouldShowLegalDisclaimer = false
     const shouldShowAllowedFeatures = !isPermissionsReviewCompleted
     const shouldShowUnknownAppWarning =
       !remoteSafeAppsLoading && !isSafeAppInDefaultList && isFirstTimeAccessingApp && !isDisclaimerReadingCompleted
