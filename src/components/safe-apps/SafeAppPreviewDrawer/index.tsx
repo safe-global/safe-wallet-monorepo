@@ -101,7 +101,6 @@ const SafeAppPreviewDrawer = ({ isOpen, safeApp, isBookmarked, onClose, onBookma
             Open App
           </Button>
         </Link>
-
       </Box>
     </Drawer>
   )

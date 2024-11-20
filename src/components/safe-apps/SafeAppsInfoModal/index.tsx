@@ -4,7 +4,6 @@ import { Grid, LinearProgress } from '@mui/material'
 
 import type { BrowserPermission } from '@/hooks/safe-apps/permissions'
 import Slider from './Slider'
-import LegalDisclaimer from './LegalDisclaimer'
 import AllowedFeaturesList from './AllowedFeaturesList'
 import type { AllowedFeatures, AllowedFeatureSelection } from '../types'
 import { PermissionStatus } from '../types'
@@ -135,7 +134,6 @@ const SafeAppsInfoModal = ({
         />
         <Grid container justifyContent="center" alignItems="center" direction="column" textAlign="center" p={3}>
           <Slider onSlideChange={handleSlideChange}>
-
             {!isPermissionsReviewCompleted && (
               <AllowedFeaturesList
                 features={selectedFeatures}
