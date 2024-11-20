@@ -5,7 +5,7 @@ import type { ResponseBadge } from '@/types/super-chain'
 import local from '@/services/local-storage/local'
 import type { Setter } from '@/services/local-storage/useLocalStorage'
 
-type Perks = {
+export type Perks = {
   name: string
   value: number
 }[]
