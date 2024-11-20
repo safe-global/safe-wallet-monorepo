@@ -32,8 +32,9 @@ function AddEOA({
     setIsChecking(true)
     const superChainSmartAccountReadOnly = getReadOnlySuperChainSmartAccount()
     try {
-      const hasAccount = await superChainSmartAccountReadOnly?.superChainAccount(address)
-      setAddressHasSuperChainAccount(hasAccount.smartAccount !== zeroAddress)
+      const hasAccount = await superChainSmartAccountReadOnly?.userSuperChainAccount(address)
+      console.debug(hasAccount[0] !== zeroAddress)
+      setAddressHasSuperChainAccount(hasAccount[0] !== zeroAddress)
     } catch (e) {
       console.error(e)
     } finally {
@@ -57,8 +58,9 @@ function AddEOA({
                 paddingTop: '24px',
               }}
               severity="error"
+              icon={false}
             >
-              <Typography variant="body1">
+              <Typography variant="body1" color="secondary" textAlign="center">
                 You cannot invite more than 2 addresses at once. Accept the invite on the other addresses or consider
                 uninviting an address before continuing.
               </Typography>
@@ -91,8 +93,10 @@ function AddEOA({
                 />
               </FormControl>
               {addressHasSuperChainAccount && (
-                <Alert severity="error">
-                  This address is already connected to another Super Account. Try another address.
+                <Alert severity="error" icon={false}>
+                  <Typography variant="body1" color="secondary" textAlign="center">
+                    This address is already connected to another Super Account. Try another address.
+                  </Typography>
                 </Alert>
               )}
             </Stack>
