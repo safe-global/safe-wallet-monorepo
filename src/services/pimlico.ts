@@ -49,7 +49,7 @@ export async function getSmartAccountClient(signer: SmartAccountSigner, safeAddr
       sponsorUserOperation: async (args: any) => {
         return paymasterClient(jwt).sponsorUserOperation({
           ...args,
-          sponsorshipPolicyId: 'sp_lively_mesmero',
+          sponsorshipPolicyId: 'sp_burly_overlord',
         })
       },
       gasPrice: async () => (await pimlicoBundlerClient(jwt).getUserOperationGasPrice()).fast, // if using pimlico bundler
