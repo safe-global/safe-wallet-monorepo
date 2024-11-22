@@ -44,9 +44,33 @@ import CounterfactualHooks from '@/features/counterfactual/CounterfactualHooks'
 import { PrivyProvider } from '@privy-io/react-auth'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ApolloClient, InMemoryCache, ApolloProvider } from '@apollo/client'
-import { sepolia, optimism } from 'viem/chains'
 import { CHAIN_ID, SUBGRAPH_URL } from '@/features/superChain/constants'
 import { useDarkMode } from '@/hooks/useDarkMode'
+import { createAppKit } from '@reown/appkit/react'
+import { sepolia, optimism } from '@reown/appkit/networks'
+import { EthersAdapter } from '@reown/appkit-adapter-ethers'
+
+const projectId = process.env.NEXT_PUBLIC_WC_PROJECT_ID
+const metadata = {
+  name: 'AppKit',
+  description: 'AppKit Example',
+  url: 'https://example.com', // origin must match your domain & subdomain
+  icons: ['https://avatars.githubusercontent.com/u/179229932'],
+}
+
+if (!projectId) {
+  throw new Error('Project ID is not defined')
+}
+
+createAppKit({
+  adapters: [new EthersAdapter()],
+  metadata,
+  networks: [optimism],
+  projectId,
+  features: {
+    analytics: true, // Optional - defaults to your Cloud configuration
+  },
+})
 
 const GATEWAY_URL = IS_PRODUCTION || cgwDebugStorage.get() ? GATEWAY_URL_PRODUCTION : GATEWAY_URL_STAGING
 

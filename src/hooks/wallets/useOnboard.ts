@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { type WalletState, type OnboardAPI } from '@web3-onboard/core'
 import { type ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
-import type { Eip1193Provider } from 'ethers'
+import type { BrowserProvider, Eip1193Provider } from 'ethers'
 import { getAddress } from 'ethers'
 import useChains, { useCurrentChain } from '@/hooks/useChains'
 import ExternalStore from '@/services/ExternalStore'
