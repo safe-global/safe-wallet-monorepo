@@ -33,8 +33,7 @@ function AddEOA({
     const superChainSmartAccountReadOnly = getReadOnlySuperChainSmartAccount()
     try {
       const hasAccount = await superChainSmartAccountReadOnly?.userSuperChainAccount(address)
-      console.debug(hasAccount[0] !== zeroAddress)
-      setAddressHasSuperChainAccount(hasAccount[0] !== zeroAddress)
+      setAddressHasSuperChainAccount(hasAccount !== zeroAddress)
     } catch (e) {
       console.error(e)
     } finally {
