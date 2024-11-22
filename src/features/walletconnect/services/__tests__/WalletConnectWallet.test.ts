@@ -1,6 +1,6 @@
 import { toBeHex } from 'ethers'
 import type { ProposalTypes, SessionTypes, SignClientTypes, Verify } from '@walletconnect/types'
-import type { IWeb3Wallet, Web3WalletTypes } from '@walletconnect/web3wallet'
+import type { IWalletKit, WalletKitTypes } from '@reown/walletkit'
 
 import WalletConnectWallet from '../WalletConnectWallet'
 
@@ -8,8 +8,8 @@ jest.mock('@walletconnect/core', () => ({
   Core: jest.fn(),
 }))
 
-jest.mock('@walletconnect/web3wallet', () => {
-  class MockWeb3Wallet implements Partial<IWeb3Wallet> {
+jest.mock('@reown/walletkit', () => {
+  class MockWeb3Wallet implements Partial<IWalletKit> {
     static init() {
       const wallet = new MockWeb3Wallet()
 
@@ -20,7 +20,7 @@ jest.mock('@walletconnect/web3wallet', () => {
       pairing: {
         pair: jest.fn(),
       },
-    } as unknown as IWeb3Wallet['core']
+    } as unknown as IWalletKit['core']
 
     approveSession = jest.fn()
     updateSession = jest.fn()
@@ -32,7 +32,7 @@ jest.mock('@walletconnect/web3wallet', () => {
 
     events = {
       emit: jest.fn(),
-    } as unknown as IWeb3Wallet['events']
+    } as unknown as IWalletKit['events']
     on = jest.fn()
     off = jest.fn()
 
@@ -40,7 +40,7 @@ jest.mock('@walletconnect/web3wallet', () => {
   }
 
   return {
-    Web3Wallet: MockWeb3Wallet,
+    WalletKit: MockWeb3Wallet,
   }
 })
 
@@ -60,7 +60,7 @@ describe('WalletConnectWallet', () => {
 
   describe('connect', () => {
     it('should call pair with the correct parameters', async () => {
-      const pairSpy = jest.spyOn(((wallet as any).web3Wallet as IWeb3Wallet).core.pairing, 'pair')
+      const pairSpy = jest.spyOn(((wallet as any).web3Wallet as IWalletKit).core.pairing, 'pair')
 
       await wallet.connect('wc:123')
 
@@ -70,7 +70,7 @@ describe('WalletConnectWallet', () => {
 
   describe('chainChanged', () => {
     it('should call emitSessionEvent with the correct parameters', async () => {
-      const emitSessionEventSpy = jest.spyOn((wallet as any).web3Wallet as IWeb3Wallet, 'emitSessionEvent')
+      const emitSessionEventSpy = jest.spyOn((wallet as any).web3Wallet as IWalletKit, 'emitSessionEvent')
 
       await wallet.chainChanged('topic1', '1')
 
@@ -87,7 +87,7 @@ describe('WalletConnectWallet', () => {
 
   describe('accountsChanged', () => {
     it('should call emitSessionEvent with the correct parameters', async () => {
-      const emitSessionEventSpy = jest.spyOn((wallet as any).web3Wallet as IWeb3Wallet, 'emitSessionEvent')
+      const emitSessionEventSpy = jest.spyOn((wallet as any).web3Wallet as IWalletKit, 'emitSessionEvent')
 
       await wallet.accountsChanged('topic1', '1', toBeHex('0x123', 20))
 
@@ -104,7 +104,7 @@ describe('WalletConnectWallet', () => {
 
   describe('approveSession', () => {
     it('should approve the session with proposed required/optional chains/methods and required events', async () => {
-      const approveSessionSpy = jest.spyOn((wallet as any).web3Wallet as IWeb3Wallet, 'approveSession')
+      const approveSessionSpy = jest.spyOn((wallet as any).web3Wallet as IWalletKit, 'approveSession')
       approveSessionSpy.mockResolvedValue({
         namespaces: {
           eip155: {},
@@ -151,7 +151,7 @@ describe('WalletConnectWallet', () => {
             },
           },
         },
-      } as unknown as Web3WalletTypes.SessionProposal
+      } as unknown as WalletKitTypes.SessionProposal
 
       await wallet.approveSession(
         proposal,
@@ -199,7 +199,7 @@ describe('WalletConnectWallet', () => {
     })
 
     it('should call approveSession with correct namespace if no requiredNamespace is given', async () => {
-      const approveSessionSpy = jest.spyOn((wallet as any).web3Wallet as IWeb3Wallet, 'approveSession')
+      const approveSessionSpy = jest.spyOn((wallet as any).web3Wallet as IWalletKit, 'approveSession')
       approveSessionSpy.mockResolvedValue({
         namespaces: {
           eip155: {},
@@ -222,7 +222,7 @@ describe('WalletConnectWallet', () => {
             },
           },
         },
-      } as unknown as Web3WalletTypes.SessionProposal
+      } as unknown as WalletKitTypes.SessionProposal
 
       await wallet.approveSession(
         proposal,
@@ -253,8 +253,8 @@ describe('WalletConnectWallet', () => {
     })
 
     it('should call updateSession with the correct parameters', async () => {
-      const emitSessionEventSpy = jest.spyOn((wallet as any).web3Wallet as IWeb3Wallet, 'emitSessionEvent')
-      jest.spyOn((wallet as any).web3Wallet as IWeb3Wallet, 'approveSession').mockResolvedValue({
+      const emitSessionEventSpy = jest.spyOn((wallet as any).web3Wallet as IWalletKit, 'emitSessionEvent')
+      jest.spyOn((wallet as any).web3Wallet as IWalletKit, 'approveSession').mockResolvedValue({
         topic: 'topic',
         namespaces: {
           eip155: {},
@@ -291,8 +291,8 @@ describe('WalletConnectWallet', () => {
     })
 
     it('should call emitSessionEvent with the correct parameters', async () => {
-      const emitSpy = jest.spyOn(((wallet as any).web3Wallet as IWeb3Wallet).events, 'emit')
-      jest.spyOn((wallet as any).web3Wallet as IWeb3Wallet, 'approveSession').mockResolvedValue({
+      const emitSpy = jest.spyOn(((wallet as any).web3Wallet as IWalletKit).events, 'emit')
+      jest.spyOn((wallet as any).web3Wallet as IWalletKit, 'approveSession').mockResolvedValue({
         topic: 'topic',
         namespaces: {
           eip155: {},
@@ -326,8 +326,8 @@ describe('WalletConnectWallet', () => {
 
   describe('updateSession', () => {
     it('should disconnect unsupported chains', async () => {
-      const disconnectSessionSpy = jest.spyOn((wallet as any).web3Wallet as IWeb3Wallet, 'disconnectSession')
-      const emitSpy = jest.spyOn(((wallet as any).web3Wallet as IWeb3Wallet).events, 'emit')
+      const disconnectSessionSpy = jest.spyOn((wallet as any).web3Wallet as IWalletKit, 'disconnectSession')
+      const emitSpy = jest.spyOn(((wallet as any).web3Wallet as IWalletKit).events, 'emit')
 
       const session = {
         topic: 'topic1',
@@ -355,8 +355,8 @@ describe('WalletConnectWallet', () => {
     })
 
     it('should update the session with the correct namespace', async () => {
-      const updateSessionSpy = jest.spyOn((wallet as any).web3Wallet as IWeb3Wallet, 'updateSession')
-      const emitSessionEventSpy = jest.spyOn((wallet as any).web3Wallet as IWeb3Wallet, 'emitSessionEvent')
+      const updateSessionSpy = jest.spyOn((wallet as any).web3Wallet as IWalletKit, 'updateSession')
+      const emitSessionEventSpy = jest.spyOn((wallet as any).web3Wallet as IWalletKit, 'emitSessionEvent')
 
       const session = {
         topic: 'topic1',
@@ -388,8 +388,8 @@ describe('WalletConnectWallet', () => {
     })
 
     it('should not update the session if the chainId and account is already in the namespace', async () => {
-      const updateSessionSpy = jest.spyOn((wallet as any).web3Wallet as IWeb3Wallet, 'updateSession')
-      const emitSessionEventSpy = jest.spyOn((wallet as any).web3Wallet as IWeb3Wallet, 'emitSessionEvent')
+      const updateSessionSpy = jest.spyOn((wallet as any).web3Wallet as IWalletKit, 'updateSession')
+      const emitSessionEventSpy = jest.spyOn((wallet as any).web3Wallet as IWalletKit, 'emitSessionEvent')
 
       const session = {
         topic: 'topic1',
@@ -409,7 +409,7 @@ describe('WalletConnectWallet', () => {
     })
 
     it('should call emitSessionEvent with the correct parameters', async () => {
-      const emitSessionEventSpy = jest.spyOn((wallet as any).web3Wallet as IWeb3Wallet, 'emitSessionEvent')
+      const emitSessionEventSpy = jest.spyOn((wallet as any).web3Wallet as IWalletKit, 'emitSessionEvent')
 
       const session = {
         topic: 'topic',
@@ -459,8 +459,8 @@ describe('WalletConnectWallet', () => {
 
   describe('onSessionPropose', () => {
     it('should subscribe to session_proposal event', () => {
-      const onSpy = jest.spyOn((wallet as any).web3Wallet as IWeb3Wallet, 'on')
-      const offSpy = jest.spyOn((wallet as any).web3Wallet as IWeb3Wallet, 'off')
+      const onSpy = jest.spyOn((wallet as any).web3Wallet as IWalletKit, 'on')
+      const offSpy = jest.spyOn((wallet as any).web3Wallet as IWalletKit, 'off')
 
       const handler = jest.fn()
 
@@ -477,8 +477,8 @@ describe('WalletConnectWallet', () => {
 
   describe('onSessionAdd', () => {
     it('should subscribe to SESSION_ADD_EVENT event', () => {
-      const onSpy = jest.spyOn((wallet as any).web3Wallet as IWeb3Wallet, 'on')
-      const offSpy = jest.spyOn((wallet as any).web3Wallet as IWeb3Wallet, 'off')
+      const onSpy = jest.spyOn((wallet as any).web3Wallet as IWalletKit, 'on')
+      const offSpy = jest.spyOn((wallet as any).web3Wallet as IWalletKit, 'off')
 
       const handler = jest.fn()
 
@@ -495,8 +495,8 @@ describe('WalletConnectWallet', () => {
 
   describe('onSessionDelete', () => {
     it('should subscribe to session_delete event', () => {
-      const onSpy = jest.spyOn((wallet as any).web3Wallet as IWeb3Wallet, 'on')
-      const offSpy = jest.spyOn((wallet as any).web3Wallet as IWeb3Wallet, 'off')
+      const onSpy = jest.spyOn((wallet as any).web3Wallet as IWalletKit, 'on')
+      const offSpy = jest.spyOn((wallet as any).web3Wallet as IWalletKit, 'off')
 
       const handler = jest.fn()
 
@@ -514,7 +514,7 @@ describe('WalletConnectWallet', () => {
   describe('disconnectSession', () => {
     it('should call disconnectSession with the correct parameters', async () => {
       const session = { topic: 'topic1', namespaces: {} } as SessionTypes.Struct
-      const disconnectSessionSpy = jest.spyOn((wallet as any).web3Wallet as IWeb3Wallet, 'disconnectSession')
+      const disconnectSessionSpy = jest.spyOn((wallet as any).web3Wallet as IWalletKit, 'disconnectSession')
 
       await wallet.disconnectSession(session)
 
@@ -547,8 +547,8 @@ describe('WalletConnectWallet', () => {
   describe('onRequest', () => {
     it('should subscribe to session_request event', () => {
       const handler = jest.fn()
-      const onSpy = jest.spyOn((wallet as any).web3Wallet as IWeb3Wallet, 'on')
-      const offSpy = jest.spyOn((wallet as any).web3Wallet as IWeb3Wallet, 'off')
+      const onSpy = jest.spyOn((wallet as any).web3Wallet as IWalletKit, 'on')
+      const offSpy = jest.spyOn((wallet as any).web3Wallet as IWalletKit, 'off')
 
       const unsubscribe = wallet.onRequest(handler)
 
@@ -564,7 +564,7 @@ describe('WalletConnectWallet', () => {
   describe('sendSessionResponse', () => {
     it('should call respondSessionRequest with the correct parameters', async () => {
       const respondSessionRequestSpy = jest
-        .spyOn((wallet as any).web3Wallet as IWeb3Wallet, 'respondSessionRequest')
+        .spyOn((wallet as any).web3Wallet as IWalletKit, 'respondSessionRequest')
         .mockResolvedValue(undefined)
 
       await wallet.sendSessionResponse('topic1', { id: 1, jsonrpc: '2.0', result: 'result' })

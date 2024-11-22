@@ -1,6 +1,6 @@
 import { Alert, Typography } from '@mui/material'
 import { useCallback } from 'react'
-import type { Web3WalletTypes } from '@walletconnect/web3wallet'
+import type { WalletKitTypes } from '@reown/walletkit'
 
 import ChainIndicator from '@/components/common/ChainIndicator'
 import { useCompatibilityWarning } from './useCompatibilityWarning'
@@ -15,7 +15,7 @@ export const CompatibilityWarning = ({
   proposal,
   chainIds,
 }: {
-  proposal: Web3WalletTypes.SessionProposal
+  proposal: WalletKitTypes.SessionProposal
   chainIds: Array<string>
 }) => {
   const { safe } = useSafeInfo()

@@ -2,7 +2,7 @@ import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import { toBeHex } from 'ethers'
 import { useContext } from 'react'
 import type { SafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
-import type { Web3WalletTypes } from '@walletconnect/web3wallet'
+import type { WalletKitTypes } from '@reown/walletkit'
 import type { SessionTypes } from '@walletconnect/types'
 
 import { act, fireEvent, render, waitFor } from '@/tests/test-utils'
@@ -276,7 +276,7 @@ describe('WalletConnectProvider', () => {
           request: {},
           chainId: 'eip155:5', // Goerli
         },
-      } as unknown as Web3WalletTypes.SessionRequest)
+      } as unknown as WalletKitTypes.SessionRequest)
 
       await waitFor(() => {
         expect(sendSessionResponseSpy).toHaveBeenCalledWith('topic', {
@@ -335,7 +335,7 @@ describe('WalletConnectProvider', () => {
           request: {},
           chainId: 'eip155:1', // Mainnet
         },
-      } as unknown as Web3WalletTypes.SessionRequest)
+      } as unknown as WalletKitTypes.SessionRequest)
 
       await waitFor(() => {
         expect(sendSessionResponseSpy).toHaveBeenCalledWith('topic', {
@@ -404,7 +404,7 @@ describe('WalletConnectProvider', () => {
           request: { method: 'fake', params: [] },
           chainId: 'eip155:5', // Goerli
         },
-      } as unknown as Web3WalletTypes.SessionRequest)
+      } as unknown as WalletKitTypes.SessionRequest)
 
       expect(mockRequest).toHaveBeenCalledWith(
         1,
@@ -477,7 +477,7 @@ describe('WalletConnectProvider', () => {
           request: {},
           chainId: 'eip155:5', // Goerli
         },
-      } as unknown as Web3WalletTypes.SessionRequest)
+      } as unknown as WalletKitTypes.SessionRequest)
 
       expect(sendSessionResponseSpy).not.toHaveBeenCalled()
 

@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import type { AlertColor } from '@mui/material'
-import type { Web3WalletTypes } from '@walletconnect/web3wallet'
+import type { WalletKitTypes } from '@reown/walletkit'
 import useChains from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { capitalize } from '@/utils/formatters'
@@ -46,7 +46,7 @@ export const _getWarning = (origin: string, name: string, isUnsupportedChain: bo
 }
 
 export const useCompatibilityWarning = (
-  proposal: Web3WalletTypes.SessionProposal,
+  proposal: WalletKitTypes.SessionProposal,
   isUnsupportedChain: boolean,
 ): (typeof Warnings)[string] => {
   const { configs } = useChains()

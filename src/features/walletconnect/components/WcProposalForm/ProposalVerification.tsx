@@ -1,4 +1,4 @@
-import type { Web3WalletTypes } from '@walletconnect/web3wallet'
+import type { WalletKitTypes } from '@reown/walletkit'
 import { Alert, SvgIcon } from '@mui/material'
 import type { AlertColor } from '@mui/material'
 import AlertIcon from '@/public/images/notifications/alert.svg'
@@ -34,8 +34,7 @@ const Validation: {
   },
 }
 
-const ProposalVerification = ({ proposal }: { proposal: Web3WalletTypes.SessionProposal }): ReactElement | null => {
-  const { proposer } = proposal.params
+const ProposalVerification = ({ proposal }: { proposal: WalletKitTypes.SessionProposal }): ReactElement | null => {
   const { isScam, validation } = proposal.verifyContext.verified
 
   if (validation === 'UNKNOWN') {

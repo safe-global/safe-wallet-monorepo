@@ -3,7 +3,7 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import { asError } from '@/services/exceptions/utils'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import { useCallback, useContext, useEffect, useState } from 'react'
-import type { Web3WalletTypes } from '@walletconnect/web3wallet'
+import type { WalletKitTypes } from '@reown/walletkit'
 import type { SessionTypes } from '@walletconnect/types'
 import { WalletConnectContext } from '@/features/walletconnect/WalletConnectContext'
 import WcConnectionForm from '../WcConnectionForm'
@@ -28,11 +28,11 @@ const WcSessionManager = ({ sessions, uri }: WcSessionManagerProps) => {
   const { walletConnect, error, setError, open, setOpen, setIsLoading } = useContext(WalletConnectContext)
   const { safe, safeAddress } = useSafeInfo()
   const { chainId } = safe
-  const [proposal, setProposal] = useState<Web3WalletTypes.SessionProposal>()
+  const [proposal, setProposal] = useState<WalletKitTypes.SessionProposal>()
 
   // On session approve
   const onApprove = useCallback(
-    async (proposalData?: Web3WalletTypes.SessionProposal) => {
+    async (proposalData?: WalletKitTypes.SessionProposal) => {
       const sessionProposal = proposalData || proposal
 
       if (!walletConnect || !chainId || !safeAddress || !sessionProposal) return
