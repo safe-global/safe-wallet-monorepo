@@ -1,14 +1,14 @@
+import { useAppKit } from '@reown/appkit/react'
 import { useCallback } from 'react'
 
-import { usePrivy } from '@privy-io/react-auth'
 
 const useConnectWallet = () => {
-  const { login, ready } = usePrivy()
+
+  const { open } = useAppKit()
 
   return useCallback(() => {
-    if (!ready) return Promise.resolve(undefined)
-    return login
-  }, [login, ready])
+    return open
+  }, [open])
 }
 
 export default useConnectWallet

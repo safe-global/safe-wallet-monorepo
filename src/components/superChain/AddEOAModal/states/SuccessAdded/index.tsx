@@ -3,13 +3,13 @@ import css from './styles.module.css'
 import React from 'react'
 import InviteSent from '@/public/images/common/invite-sent.svg'
 import { useRouter } from 'next/router'
-import { usePrivy } from '@privy-io/react-auth'
+import { useDisconnect } from '@reown/appkit/react'
 
 function SuccessAdded({ onClose, context }: { onClose: () => void; context: any }) {
   const router = useRouter()
-  const { logout } = usePrivy()
+  const { disconnect } = useDisconnect()
   const onRedirectLogInScreen = async () => {
-    await logout()
+    await disconnect()
     router.push('/welcome')
   }
   return (

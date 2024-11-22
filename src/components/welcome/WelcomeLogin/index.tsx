@@ -4,7 +4,6 @@ import css from './styles.module.css'
 import { useRouter } from 'next/router'
 import useWallet from '@/hooks/wallets/useWallet'
 import { useCallback, useEffect, useState } from 'react'
-import { usePrivy } from '@privy-io/react-auth'
 import InfoIcon from '@/public/images/common/info.svg'
 import useCurrentWalletHasSuperChainSmartAccount from '@/hooks/super-chain/useCurrentWalletHasSuperChainSmartAccount'
 import { useAppKit } from '@reown/appkit/react'
@@ -12,7 +11,6 @@ const WelcomeLogin = () => {
   const router = useRouter()
   const { open } = useAppKit()
   const wallet = useWallet()
-  const { login, ready, authenticated, connectWallet } = usePrivy()
   const { hasSuperChainSmartAccount, superChainSmartAccount, isLoading } = useCurrentWalletHasSuperChainSmartAccount()
   const [shouldRedirect, setShouldRedirect] = useState(false)
   const [redirectPath, setRedirectPath] = useState<null | string>(null)
@@ -20,15 +18,6 @@ const WelcomeLogin = () => {
     setShouldRedirect(true)
   }, [])
 
-  const handleLogin = async () => {
-    if (!ready) return
-    if (!authenticated) {
-      login()
-    }
-    if (authenticated && !wallet) {
-      connectWallet()
-    }
-  }
   const handleConnect = async () => {
     open()
     onLogin()
@@ -39,8 +28,7 @@ const WelcomeLogin = () => {
     if (wallet) {
       onLogin()
     } else {
-      await handleLogin()
-      onLogin()
+      handleConnect()
     }
   }
 
