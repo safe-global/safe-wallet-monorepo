@@ -110,4 +110,5 @@ export const REDEFINE_API = process.env.NEXT_PUBLIC_REDEFINE_API
 export const REDEFINE_ARTICLE = 'https://safe.mirror.xyz/rInLWZwD_sf7enjoFerj6FIzCYmVMGrrV8Nhg4THdwI'
 
 
-export const BACKEND_BASE_URI = process.env.NEXT_PUBLIC_BACKEND_URI || 'https://localhost:3003/api'
+export const BACKEND_BASE_URI = `${process.env.NEXT_PUBLIC_BACKEND_URI || 'http://localhost:3003'}/api`
+export const BACKEND_AUTH_URI = `${process.env.NEXT_PUBLIC_BACKEND_URI || 'http://localhost:3003'}/auth`

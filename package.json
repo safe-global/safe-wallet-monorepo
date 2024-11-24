@@ -113,6 +113,7 @@
     "react-papaparse": "^4.0.2",
     "react-redux": "^8.0.5",
     "semver": "^7.5.2",
+    "siwe": "^2.3.2",
     "viem": "^2.21.49"
   },
   "devDependencies": {

@@ -6,10 +6,11 @@ import useWallet from '@/hooks/wallets/useWallet'
 import { useCallback, useEffect, useState } from 'react'
 import InfoIcon from '@/public/images/common/info.svg'
 import useCurrentWalletHasSuperChainSmartAccount from '@/hooks/super-chain/useCurrentWalletHasSuperChainSmartAccount'
-import { useAppKit } from '@reown/appkit/react'
+import { useAppKit, useAppKitAccount } from '@reown/appkit/react'
 const WelcomeLogin = () => {
   const router = useRouter()
   const { open } = useAppKit()
+  const { isConnected } = useAppKitAccount()
   const wallet = useWallet()
   const { hasSuperChainSmartAccount, superChainSmartAccount, isLoading } = useCurrentWalletHasSuperChainSmartAccount()
   const [shouldRedirect, setShouldRedirect] = useState(false)
@@ -33,7 +34,7 @@ const WelcomeLogin = () => {
   }
 
   useEffect(() => {
-    if (!shouldRedirect) return
+    if (!shouldRedirect || !isConnected) return
 
     const destination = redirectPath
       ? { pathname: redirectPath, query: router.query }
@@ -46,7 +47,7 @@ const WelcomeLogin = () => {
       router.push(destination)
       setShouldRedirect(false)
     }
-  }, [hasSuperChainSmartAccount, isLoading, router, wallet, shouldRedirect, redirectPath])
+  }, [hasSuperChainSmartAccount, isLoading, router, isConnected, shouldRedirect, redirectPath])
 
   return (
     <Paper className={css.loginCard} data-testid="welcome-login">

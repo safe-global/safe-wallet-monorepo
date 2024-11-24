@@ -46,8 +46,9 @@ import { ApolloClient, InMemoryCache, ApolloProvider } from '@apollo/client'
 import { CHAIN_ID, SUBGRAPH_URL } from '@/features/superChain/constants'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import { createAppKit } from '@reown/appkit/react'
-import { sepolia, optimism } from '@reown/appkit/networks'
+import { optimism, AppKitNetwork } from '@reown/appkit/networks'
 import { EthersAdapter } from '@reown/appkit-adapter-ethers'
+import { createSIWE } from '@/services/siwe'
 
 const projectId = process.env.NEXT_PUBLIC_WC_PROJECT_ID
 const metadata = {
@@ -61,13 +62,20 @@ if (!projectId) {
   throw new Error('Project ID is not defined')
 }
 
+export const chains: [AppKitNetwork, ...AppKitNetwork[]] = [optimism]
+const siweConfig = createSIWE(chains)
+
 createAppKit({
   adapters: [new EthersAdapter()],
   metadata,
-  networks: [optimism],
+  networks: chains,
   projectId,
+  siweConfig,
   features: {
-    analytics: true, // Optional - defaults to your Cloud configuration
+    analytics: true,
+  },
+  themeVariables: {
+    '--w3m-z-index': 1300,
   },
 })
 
