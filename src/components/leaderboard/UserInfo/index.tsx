@@ -1,4 +1,4 @@
-import { Box, IconButton, Skeleton, Stack, SvgIcon, Tooltip, Typography } from '@mui/material'
+import { Box, IconButton, Skeleton, Stack, SvgIcon, Typography } from '@mui/material'
 import React, { useMemo } from 'react'
 import css from './styles.module.css'
 import type { UserResponse } from '@/types/super-chain'
