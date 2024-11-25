@@ -24,7 +24,7 @@ import { TxModalContext } from '@/components/tx-flow'
 import SettingsIcon from '@/public/images/sidebar/settings.svg'
 import UpdateAvatarModal from '@/components/superChain/UpdateAvatar'
 import PerksIcon from '@/public/images/common/perks.svg'
-import PerksModal from '../PerksModal'
+import AccountOverview from '../AccountOverview'
 const SafeHeader = (): ReactElement => {
   const safeAddress = useSafeAddress()
   const chain = useCurrentChain()
@@ -291,7 +291,7 @@ const SafeHeader = (): ReactElement => {
 
       {/* <NewTxButton /> */}
       {/* UGLY BUT WORKING */}
-      <PerksModal open={openPerksModal} onClose={() => setOpenPerksModal(false)} />
+      <AccountOverview open={openPerksModal} onClose={() => setOpenPerksModal(false)} />
     </div>
   )
 }
