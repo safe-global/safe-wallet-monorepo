@@ -8,6 +8,7 @@ import SuccessAdded from './states/SuccessAdded'
 import FailedTxnModal from '@/components/common/ErrorModal'
 import { Address } from 'viem'
 import { getSession } from '@/services/siwe'
+import { OperationVariables, WatchQueryOptions } from '@apollo/client'
 
 export enum ModalState {
   AddEOA,
@@ -20,9 +21,13 @@ export type NewEOAEntry = {
 }
 
 const AddEOAModal = ({
+  updateQuery,
   context,
   onClose,
 }: {
+  updateQuery: <TVars extends OperationVariables = OperationVariables>(
+    mapFn: (previousQueryResult: any, options: Pick<WatchQueryOptions<TVars, any>, 'variables'>) => any,
+  ) => void
   context: typeof ADD_EOA_INITIAL_STATE
   onClose: () => void
 }): ReactElement => {
@@ -38,6 +43,9 @@ const AddEOAModal = ({
       setCurrentNewEOAAddress(data.address)
       setModalState(ModalState.Loading)
       await superChainSmartAccountSponsored?.write.populateAddOwner([SmartAccountAddres as Address, data.address])
+      updateQuery((data) => ({
+        ownerPopulateds: [...data.ownerPopulateds, { address: data.address }],
+      }))
       setModalState(ModalState.Success)
     } catch (e) {
       setModalState(ModalState.Error)

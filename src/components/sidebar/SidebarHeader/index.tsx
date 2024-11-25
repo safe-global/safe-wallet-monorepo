@@ -23,8 +23,8 @@ import { selectSuperChainAccount } from '@/store/superChainAccountSlice'
 import { TxModalContext } from '@/components/tx-flow'
 import SettingsIcon from '@/public/images/sidebar/settings.svg'
 import UpdateAvatarModal from '@/components/superChain/UpdateAvatar'
-import PerksIcon from '@/public/images/common/perks.svg'
-import PerksModal from '../PerksModal'
+import OverviewIcon from '@/public/images/common/overview.svg'
+import AccountOverview from '../AccountOverview'
 const SafeHeader = (): ReactElement => {
   const safeAddress = useSafeAddress()
   const chain = useCurrentChain()
@@ -82,9 +82,9 @@ const SafeHeader = (): ReactElement => {
           </div>
 
           <div className={css.iconButtons}>
-            <Tooltip title="View perks" placement="top">
+            <Tooltip title="Account overview" placement="top">
               <IconButton className={css.iconButton}>
-                <SvgIcon component={PerksIcon} inheritViewBox fontSize="inherit" />
+                <SvgIcon component={OverviewIcon} inheritViewBox fontSize="inherit" />
               </IconButton>
             </Tooltip>
 
@@ -212,9 +212,9 @@ const SafeHeader = (): ReactElement => {
         </div>
 
         <div className={css.iconButtons}>
-          <Tooltip title="View perks" placement="top">
+          <Tooltip title="Account overview" placement="top">
             <IconButton className={css.iconButton} onClick={() => setOpenPerksModal(true)}>
-              <SvgIcon component={PerksIcon} inheritViewBox fontSize="inherit" />
+              <SvgIcon component={OverviewIcon} inheritViewBox fontSize="inherit" />
             </IconButton>
           </Tooltip>
 
@@ -291,7 +291,7 @@ const SafeHeader = (): ReactElement => {
 
       {/* <NewTxButton /> */}
       {/* UGLY BUT WORKING */}
-      <PerksModal open={openPerksModal} onClose={() => setOpenPerksModal(false)} />
+      <AccountOverview open={openPerksModal} onClose={() => setOpenPerksModal(false)} />
     </div>
   )
 }

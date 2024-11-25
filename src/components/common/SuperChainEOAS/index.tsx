@@ -26,9 +26,8 @@ const SuperChainEOAS = () => {
   const {
     data: populatedOwners,
     loading: populatedOwnersLoading,
-    error,
+    updateQuery,
   } = usePopulatedEOASRequest(safe.address.value as Address)
-
   return (
     <div className={css.container}>
       <Typography fontWeight={600} fontSize={16} marginBottom={1}>
@@ -110,7 +109,11 @@ const SuperChainEOAS = () => {
         context={removePopulateContext}
         onClose={() => setRemovePopulateContext(REMOVE_POPULATE_INITIAL_STATE)}
       />
-      <AddEOAModal context={addEOAContext} onClose={() => setAddEOAContext(ADD_EOA_INITIAL_STATE)} />
+      <AddEOAModal
+        updateQuery={updateQuery}
+        context={addEOAContext}
+        onClose={() => setAddEOAContext(ADD_EOA_INITIAL_STATE)}
+      />
     </div>
   )
 }
