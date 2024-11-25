@@ -124,7 +124,7 @@ function AccountOverview({ open, onClose }: { open: boolean; onClose: () => void
                 flexWrap="wrap"
               >
                 {truncateName(superChainSmartAccount.data.superChainID.split('.superchain')[0], 12)}
-                <span>.superchain</span>
+                <span style={{ color: 'var(--color-secondary-main)' }}>.superchain</span>
               </Typography>
               <Box>
                 <Typography fontSize={14} fontWeight={500} color="var(--color-text-secondary)">
