@@ -19,19 +19,18 @@ import EOAAddedModal from './EOAAddedModal'
 import { ADD_OWNER_MODAL_QUERY_PARAM } from '../accept-invite/alert-modal'
 import useWallet from '@/hooks/wallets/useWallet'
 
-import { usePrivy, useWallets } from '@privy-io/react-auth'
 import WrongNetworkModal from './WrongNetworkModal'
 import useIsWrongChain from '@/hooks/useIsWrongChain'
 import { useAppSelector } from '@/store'
 import { selectUndeployedSafe } from '@/store/slices'
 import ActivatingSuperAccount from './ActivatingSuperAccount'
+import { useAppKitAccount } from '@reown/appkit/react'
 const RecoveryHeader = dynamic(() => import('@/features/recovery/components/RecoveryHeader'))
 
 const Dashboard = (): ReactElement => {
   const router = useRouter()
   const wallet = useWallet()
-  const { ready } = usePrivy()
-  const { ready: walletReady } = useWallets()
+  const { isConnected } = useAppKitAccount()
 
   const { safe, safeLoaded, safeLoading, safeAddress } = useSafeInfo()
   const { [CREATION_MODAL_QUERY_PARAM]: showCreationModal = '' } = router.query
@@ -42,8 +41,8 @@ const Dashboard = (): ReactElement => {
 
   const isActivating = !!undeployedSafe
   useEffect(() => {
-    if (!ready || !safeLoaded || safeLoading || !walletReady) return
-    if (!wallet) {
+    if (!safeLoaded || safeLoading) return
+    if (!isConnected) {
       router.push('/')
     } else {
       const isOwner = safe.owners.find((owner) => owner.value === wallet?.address)
@@ -51,7 +50,7 @@ const Dashboard = (): ReactElement => {
         router.push('/')
       }
     }
-  }, [wallet, safeLoading, ready])
+  }, [wallet, isConnected])
 
   if (isActivating) return <ActivatingSuperAccount />
 

@@ -19,7 +19,7 @@ import madProps from '@/utils/mad-props'
 import useSocialWallet from '@/hooks/wallets/mpc/useSocialWallet'
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew'
 import useChainId from '@/hooks/useChainId'
-import { usePrivy } from '@privy-io/react-auth'
+import { useDisconnect } from '@reown/appkit/react'
 
 type WalletInfoProps = {
   wallet: ConnectedWallet
@@ -44,12 +44,13 @@ export const WalletInfo = ({
 }: WalletInfoProps) => {
   const chainInfo = useAppSelector((state) => selectChainById(state, wallet.chainId))
   const prefix = chainInfo?.shortName
-  const { logout } = usePrivy()
+
+  const { disconnect } = useDisconnect()
 
   const resetAccount = () => socialWalletService?.__deleteAccount()
 
   const handleDisconnect = async () => {
-    await logout()
+    await disconnect()
     router.push({ pathname: AppRoutes.index })
 
     handleClose()

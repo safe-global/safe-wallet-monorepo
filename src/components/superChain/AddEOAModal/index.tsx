@@ -7,6 +7,7 @@ import LoadingModal from '@/components/common/LoadingModal'
 import SuccessAdded from './states/SuccessAdded'
 import FailedTxnModal from '@/components/common/ErrorModal'
 import { Address } from 'viem'
+import { getSession } from '@/services/siwe'
 import { OperationVariables, WatchQueryOptions } from '@apollo/client'
 
 export enum ModalState {
@@ -36,6 +37,7 @@ const AddEOAModal = ({
   const [modalState, setModalState] = useState<ModalState>(ModalState.AddEOA)
 
   const onSubmit = async (data: NewEOAEntry) => {
+    const session = getSession()
     const superChainSmartAccountSponsored = getSponsoredWriteableSuperChainSmartAccount()
     try {
       setCurrentNewEOAAddress(data.address)

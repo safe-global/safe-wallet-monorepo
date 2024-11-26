@@ -12,7 +12,7 @@ import { ThemeProvider } from '@mui/material/styles'
 import { CacheProvider, type EmotionCache } from '@emotion/react'
 import SafeThemeProvider from '@/components/theme/SafeThemeProvider'
 import '@/styles/globals.css'
-import { IS_PRODUCTION, GATEWAY_URL_STAGING, GATEWAY_URL_PRODUCTION, PRIVY_APP_ID } from '@/config/constants'
+import { IS_PRODUCTION, GATEWAY_URL_STAGING, GATEWAY_URL_PRODUCTION } from '@/config/constants'
 import { makeStore, useHydrateStore } from '@/store'
 import PageLayout from '@/components/common/PageLayout'
 import useLoadableStores from '@/hooks/useLoadableStores'
@@ -41,12 +41,43 @@ import { useNotificationTracking } from '@/components/settings/PushNotifications
 import Recovery from '@/features/recovery/components/Recovery'
 import WalletProvider from '@/components/common/WalletProvider'
 import CounterfactualHooks from '@/features/counterfactual/CounterfactualHooks'
-import { PrivyProvider } from '@privy-io/react-auth'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ApolloClient, InMemoryCache, ApolloProvider } from '@apollo/client'
-import { sepolia, optimism } from 'viem/chains'
-import { CHAIN_ID, SUBGRAPH_URL } from '@/features/superChain/constants'
+import { SUBGRAPH_URL } from '@/features/superChain/constants'
 import { useDarkMode } from '@/hooks/useDarkMode'
+import { createAppKit } from '@reown/appkit/react'
+import { optimism, AppKitNetwork } from '@reown/appkit/networks'
+import { EthersAdapter } from '@reown/appkit-adapter-ethers'
+import { createSIWE } from '@/services/siwe'
+
+const projectId = process.env.NEXT_PUBLIC_WC_PROJECT_ID
+const metadata = {
+  name: 'AppKit',
+  description: 'AppKit Example',
+  url: 'https://example.com', // origin must match your domain & subdomain
+  icons: ['https://avatars.githubusercontent.com/u/179229932'],
+}
+
+if (!projectId) {
+  throw new Error('Project ID is not defined')
+}
+
+export const chains: [AppKitNetwork, ...AppKitNetwork[]] = [optimism]
+const siweConfig = createSIWE(chains)
+
+createAppKit({
+  adapters: [new EthersAdapter()],
+  metadata,
+  networks: chains,
+  projectId,
+  siweConfig,
+  features: {
+    analytics: true,
+  },
+  themeVariables: {
+    '--w3m-z-index': 1300,
+  },
+})
 
 const GATEWAY_URL = IS_PRODUCTION || cgwDebugStorage.get() ? GATEWAY_URL_PRODUCTION : GATEWAY_URL_STAGING
 
@@ -91,32 +122,17 @@ export const AppProviders = ({ children }: { children: ReactNode | ReactNode[] }
   return (
     <QueryClientProvider client={queryClient}>
       <ApolloProvider client={client}>
-        <PrivyProvider
-          appId={PRIVY_APP_ID}
-          config={{
-            appearance: {
-              theme: 'light',
-              accentColor: '#FF0420',
-              logo: 'https://pbs.twimg.com/profile_images/1696769956245807105/xGnB-Cdl_400x400.png',
-            },
-            embeddedWallets: {
-              createOnLogin: 'users-without-wallets',
-            },
-            supportedChains: [CHAIN_ID === sepolia.id.toString() ? sepolia : optimism],
-          }}
-        >
-          <SafeThemeProvider mode={themeMode}>
-            {(safeTheme: Theme) => (
-              <ThemeProvider theme={safeTheme}>
-                <SentryErrorBoundary showDialog fallback={ErrorBoundary}>
-                  <WalletProvider>
-                    <TxModalProvider>{children}</TxModalProvider>
-                  </WalletProvider>
-                </SentryErrorBoundary>
-              </ThemeProvider>
-            )}
-          </SafeThemeProvider>
-        </PrivyProvider>
+        <SafeThemeProvider mode={themeMode}>
+          {(safeTheme: Theme) => (
+            <ThemeProvider theme={safeTheme}>
+              <SentryErrorBoundary showDialog fallback={ErrorBoundary}>
+                <WalletProvider>
+                  <TxModalProvider>{children}</TxModalProvider>
+                </WalletProvider>
+              </SentryErrorBoundary>
+            </ThemeProvider>
+          )}
+        </SafeThemeProvider>
       </ApolloProvider>
     </QueryClientProvider>
   )

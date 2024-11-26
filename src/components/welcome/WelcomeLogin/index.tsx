@@ -4,14 +4,14 @@ import css from './styles.module.css'
 import { useRouter } from 'next/router'
 import useWallet from '@/hooks/wallets/useWallet'
 import { useCallback, useEffect, useState } from 'react'
-import { usePrivy } from '@privy-io/react-auth'
 import InfoIcon from '@/public/images/common/info.svg'
 import useCurrentWalletHasSuperChainSmartAccount from '@/hooks/super-chain/useCurrentWalletHasSuperChainSmartAccount'
-
+import { useAppKit, useAppKitAccount } from '@reown/appkit/react'
 const WelcomeLogin = () => {
   const router = useRouter()
+  const { open } = useAppKit()
+  const { isConnected } = useAppKitAccount()
   const wallet = useWallet()
-  const { login, ready, authenticated, connectWallet } = usePrivy()
   const { hasSuperChainSmartAccount, superChainSmartAccount, isLoading } = useCurrentWalletHasSuperChainSmartAccount()
   const [shouldRedirect, setShouldRedirect] = useState(false)
   const [redirectPath, setRedirectPath] = useState<null | string>(null)
@@ -19,22 +19,9 @@ const WelcomeLogin = () => {
     setShouldRedirect(true)
   }, [])
 
-  const handleLogin = async () => {
-    if (!ready) return
-    if (!authenticated) {
-      login()
-    }
-    if (authenticated && !wallet) {
-      connectWallet()
-    }
-  }
   const handleConnect = async () => {
-    if (wallet) {
-      onLogin()
-    } else {
-      await handleLogin()
-      onLogin()
-    }
+    open()
+    onLogin()
   }
 
   const handleAcceptInvite = async () => {
@@ -42,13 +29,12 @@ const WelcomeLogin = () => {
     if (wallet) {
       onLogin()
     } else {
-      await handleLogin()
-      onLogin()
+      handleConnect()
     }
   }
 
   useEffect(() => {
-    if (!shouldRedirect) return
+    if (!shouldRedirect || !isConnected) return
 
     const destination = redirectPath
       ? { pathname: redirectPath, query: router.query }
@@ -61,7 +47,7 @@ const WelcomeLogin = () => {
       router.push(destination)
       setShouldRedirect(false)
     }
-  }, [hasSuperChainSmartAccount, isLoading, router, wallet, shouldRedirect, redirectPath])
+  }, [hasSuperChainSmartAccount, isLoading, router, isConnected, shouldRedirect, redirectPath])
 
   return (
     <Paper className={css.loginCard} data-testid="welcome-login">
@@ -74,13 +60,11 @@ const WelcomeLogin = () => {
           <Typography mb={2} textAlign="center">
             Log in to an existing Super Account or Sign Up to create your Super Account.
           </Typography>
-
           <Stack direction="row" gap={2}>
             <Button onClick={handleConnect} variant="contained" disableElevation size="medium">
               Connect Wallet
             </Button>
           </Stack>
-
           <Divider sx={{ mt: 2, mb: 2, width: '100%' }}>
             <Typography color="text.secondary" fontWeight={700} variant="overline">
               OR

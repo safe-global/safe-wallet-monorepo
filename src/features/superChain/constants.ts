@@ -14,7 +14,7 @@ const environmentConfig = {
     SUPER_CHAIN_ACCOUNT_MODULE_ADDRESS: '0x1Ee397850c3CA629d965453B3cF102E9A8806Ded',
     SUPER_CHAIN_ACCOUNT_GUARD_ADDRESS: '0xaaA5200c5E4C01b3Ea89F175F9cf17438C193abA',
     ERC4337_MODULE_ADDRESS: '0x75cf11467937ce3F2f357CE24ffc3DBF8fD5c226',
-    JSON_RPC_PROVIDER: process.env.NEXT_PUBLIC_JSON_RPC_PROVIDER,
+    JSON_RPC_PROVIDER: 'https://rpc.ankr.com/optimism',
     SUBGRAPH_URL: 'https://api.studio.thegraph.com/query/72352/super-accounts/version/latest',
     CHAIN_ID: '10',
   },
