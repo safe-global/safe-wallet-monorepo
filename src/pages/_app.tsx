@@ -49,15 +49,15 @@ import { createAppKit } from '@reown/appkit/react'
 import { optimism, AppKitNetwork } from '@reown/appkit/networks'
 import { EthersAdapter } from '@reown/appkit-adapter-ethers'
 import { createSIWE } from '@/services/siwe'
+import { WC_PROJECT_ID as projectId } from '@/config/constants'
 
-const projectId = process.env.NEXT_PUBLIC_WC_PROJECT_ID
 const metadata = {
   name: 'AppKit',
   description: 'AppKit Example',
   url: 'https://example.com', // origin must match your domain & subdomain
   icons: ['https://avatars.githubusercontent.com/u/179229932'],
 }
-
+console.debug('projectId', projectId)
 if (!projectId) {
   throw new Error('Project ID is not defined')
 }
