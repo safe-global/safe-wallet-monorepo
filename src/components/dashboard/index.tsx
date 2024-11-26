@@ -24,7 +24,6 @@ import useIsWrongChain from '@/hooks/useIsWrongChain'
 import { useAppSelector } from '@/store'
 import { selectUndeployedSafe } from '@/store/slices'
 import ActivatingSuperAccount from './ActivatingSuperAccount'
-import { useAppKitAccount } from '@reown/appkit/react'
 const RecoveryHeader = dynamic(() => import('@/features/recovery/components/RecoveryHeader'))
 
 const Dashboard = (): ReactElement => {

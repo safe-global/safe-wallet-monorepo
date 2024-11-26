@@ -57,7 +57,6 @@ const metadata = {
   url: 'https://example.com', // origin must match your domain & subdomain
   icons: ['https://avatars.githubusercontent.com/u/179229932'],
 }
-console.debug('projectId', projectId)
 if (!projectId) {
   throw new Error('Project ID is not defined')
 }
@@ -74,8 +73,13 @@ createAppKit({
   features: {
     analytics: true,
   },
+  allowUnsupportedChain: true,
+  themeMode: 'light',
   themeVariables: {
     '--w3m-z-index': 1300,
+    '--w3m-color-mix': '#FF0420',
+    '--w3m-accent': '#FF0420',
+    '--w3m-border-radius-master': '6px',
   },
 })
 
