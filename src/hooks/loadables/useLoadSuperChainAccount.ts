@@ -33,6 +33,9 @@ export const useLoadSuperChainAccount = (): AsyncResult<SuperChainAccount> => {
         weeklyRelayedTransactions: weeklyRelayedTransactionsResponse.data,
       }
     },
+    staleTime: 60 * 60 * 1000, // 1 hour
+    refetchInterval: false,
+    refetchOnWindowFocus: false,
   })
   return [data, error!, isLoading]
 }
