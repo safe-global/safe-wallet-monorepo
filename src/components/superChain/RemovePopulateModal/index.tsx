@@ -8,11 +8,16 @@ import { REMOVE_POPULATE_INITIAL_STATE } from '@/components/common/SuperChainEOA
 import BeautyCancel from '@/public/images/common/beauty-cancel.svg'
 import useSuperChainAccount from '@/hooks/super-chain/useSuperChainAccount'
 import useSafeAddress from '@/hooks/useSafeAddress'
+import { OperationVariables, WatchQueryOptions } from '@apollo/client'
 
 function RemovePopulateModal({
+  updateQuery,
   context,
   onClose,
 }: {
+  updateQuery: <TVars extends OperationVariables = OperationVariables>(
+    mapFn: (previousQueryResult: any, options: Pick<WatchQueryOptions<TVars, any>, 'variables'>) => any,
+  ) => void
   context: typeof REMOVE_POPULATE_INITIAL_STATE
   onClose: () => void
 }) {
@@ -23,6 +28,13 @@ function RemovePopulateModal({
   const handleRemovePopulate = async () => {
     const superChainSmartAccountContract = getSponsoredWriteableSuperChainSmartAccount()
     await superChainSmartAccountContract?.write.removePopulateRequest([SmartAccountAddres, context.address])
+    updateQuery((data) => ({
+      ownerPopulateds: [
+        ...data.ownerPopulateds.filter(
+          (owner: { address: string }) => owner.address.toLowerCase() !== context.address.toLowerCase(),
+        ),
+      ],
+    }))
     onClose()
   }
 

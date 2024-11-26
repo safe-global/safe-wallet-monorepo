@@ -106,6 +106,7 @@ const SuperChainEOAS = () => {
         </Grid>
       </Paper>
       <RemovePopulateModal
+        updateQuery={updateQuery}
         context={removePopulateContext}
         onClose={() => setRemovePopulateContext(REMOVE_POPULATE_INITIAL_STATE)}
       />
