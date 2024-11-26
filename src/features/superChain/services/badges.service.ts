@@ -12,6 +12,7 @@ export type Perks = {
 class BadgesService {
   httpInstance = axios.create({
     baseURL: BACKEND_BASE_URI,
+    withCredentials: true,
   })
   public switchFavoriteBadge(
     badgeId: number,
@@ -51,12 +52,8 @@ class BadgesService {
     }>(`/user/${account}/badges`)
     return response.data
   }
-  public async attestBadges(account: Address, jwt: string) {
-    const response = await this.httpInstance.post(
-      `/user/${account}/badges/claim`,
-      {},
-      { headers: { Authorization: `Bearer ${jwt}` } },
-    )
+  public async attestBadges(account: Address) {
+    const response = await this.httpInstance.post(`/user/${account}/badges/claim`)
     return response.data
   }
   public async getPerks(account: Address) {

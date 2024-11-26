@@ -16,7 +16,6 @@ import Image from 'next/image'
 import FailedTxnModal from '@/components/common/ErrorModal'
 import { useAppSelector } from '@/store'
 import { selectSuperChainAccount } from '@/store/superChainAccountSlice'
-import { usePrivy } from '@privy-io/react-auth'
 
 export type ClaimData = {
   badgeImages: string[]
@@ -33,7 +32,6 @@ function BadgesActions({
   setNetwork: (network: string) => void
 }) {
   const { safeAddress } = useSafeInfo()
-  const { getAccessToken } = usePrivy()
   const { data: superChainAccount } = useAppSelector(selectSuperChainAccount)
 
   const router = useRouter()
@@ -43,9 +41,7 @@ function BadgesActions({
   const queryClient = useQueryClient()
   const { mutate, isPending, isError } = useMutation({
     mutationFn: async () => {
-      const jwt = await getAccessToken()
-      if (!jwt) throw new Error('No JWT')
-      return await badgesService.attestBadges(safeAddress as Address, jwt)
+      return await badgesService.attestBadges(safeAddress as Address)
     },
     onSuccess: (data) => {
       queryClient.refetchQueries({ queryKey: ['superChainAccount', safeAddress] })
