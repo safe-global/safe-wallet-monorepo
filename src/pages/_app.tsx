@@ -52,10 +52,11 @@ import { createSIWE } from '@/services/siwe'
 import { WC_PROJECT_ID as projectId } from '@/config/constants'
 
 const metadata = {
-  name: 'AppKit',
-  description: 'AppKit Example',
-  url: 'https://example.com', // origin must match your domain & subdomain
-  icons: ['https://avatars.githubusercontent.com/u/179229932'],
+  name: 'Super Accounts',
+  description:
+    'Earn rewards for your Superchain contributions with Superchain Accounts. Track badges, manage transactions, and view your Super Account. Get recognized for your participation.',
+  url: 'https://account.superchain.eco',
+  icons: ['https://account.superchain.eco/images/superchain-logo.png'],
 }
 if (!projectId) {
   throw new Error('Project ID is not defined')
@@ -70,6 +71,7 @@ createAppKit({
   networks: chains,
   projectId,
   siweConfig,
+
   features: {
     analytics: true,
   },
