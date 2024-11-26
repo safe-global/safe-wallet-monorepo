@@ -30,7 +30,6 @@ const RecoveryHeader = dynamic(() => import('@/features/recovery/components/Reco
 const Dashboard = (): ReactElement => {
   const router = useRouter()
   const wallet = useWallet()
-  const { isConnected } = useAppKitAccount()
 
   const { safe, safeLoaded, safeLoading, safeAddress } = useSafeInfo()
   const { [CREATION_MODAL_QUERY_PARAM]: showCreationModal = '' } = router.query
@@ -42,15 +41,15 @@ const Dashboard = (): ReactElement => {
   const isActivating = !!undeployedSafe
   useEffect(() => {
     if (!safeLoaded || safeLoading) return
-    if (!isConnected) {
+    if (!wallet) {
       router.push('/')
     } else {
-      const isOwner = safe.owners.find((owner) => owner.value === wallet?.address)
+      const isOwner = safe.owners.find((owner) => owner.value.toLowerCase() == wallet?.address.toLowerCase())
       if (!isOwner) {
         router.push('/')
       }
     }
-  }, [wallet, isConnected])
+  }, [wallet])
 
   if (isActivating) return <ActivatingSuperAccount />
 
@@ -66,6 +65,7 @@ const Dashboard = (): ReactElement => {
         <Grid item xs={12}>
           <FirstSteps />
         </Grid>
+
         {safe.deployed && (
           <>
             <Grid item xs={12} lg={8}>
