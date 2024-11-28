@@ -17,7 +17,7 @@ import { isOptimizedForBatchTransactions } from '@/components/safe-apps/utils'
 import { AppRoutes } from '@/config/routes'
 import BatchIcon from '@/public/images/apps/batch-icon.svg'
 import css from './styles.module.css'
-import { Stack } from '@mui/material'
+import { Box, Stack } from '@mui/material'
 import SafeAppPerks from '../SafeAppPerks'
 
 type SafeAppCardProps = {
@@ -90,7 +90,7 @@ const SafeAppCardGridView = ({
   perks,
 }: SafeAppCardViewProps) => {
   return (
-    <SafeAppCardContainer safeAppUrl={safeAppUrl} onClickSafeApp={onClickSafeApp} height="100%">
+    <SafeAppCardContainer safeAppUrl={safeAppUrl} onClickSafeApp={onClickSafeApp} className={css.safeAppCardCointainer}>
       {/* Safe App Header */}
       <CardHeader
         className={css.safeAppHeader}
@@ -113,12 +113,14 @@ const SafeAppCardGridView = ({
       />
 
       <CardContent className={css.safeAppContent}>
-        {/* Safe App Tags */}
-        <SafeAppTags tags={safeApp.tags} />
-        {/* Safe App Description */}
-        <Typography className={css.safeAppDescription} marginBottom="12px" variant="body2" color="text.secondary">
-          {safeApp.description}
-        </Typography>
+        <Box display="flex" flexDirection="column">
+          {/* Safe App Tags */}
+          <SafeAppTags tags={safeApp.tags} />
+          {/* Safe App Description */}
+          <Typography className={css.safeAppDescription} marginBottom="12px" variant="body2" color="text.secondary">
+            {safeApp.description}
+          </Typography>
+        </Box>
 
         {/* Safe App Perks */}
         <SafeAppPerks content={perks} />
