@@ -4,7 +4,7 @@ import css from './styles.module.css'
 
 function SafeAppPerks({ content }: { content?: string | ReactNode }) {
   return (
-    <Box>
+    <Box className={!content ? css.currentLevelNotActive : undefined}>
       <div className={css.currentLevelTitle}>
         <Typography fontWeight={600} fontSize={14} color="white">
           Current Level Perk

@@ -10,3 +10,11 @@
   padding: 12px;
   border-radius: 0px 6px 6px 6px;
 }
+
+.currentLevelNotActive .currentLevelTitle {
+  background-color: #7c8086;
+}
+
+.currentLevelNotActive .currentLevelInfo {
+  border: 2px solid #7c8086;
+}
