@@ -41,7 +41,8 @@ const SuperChainEOAS = () => {
         <Grid container gap={2} height="100%" alignItems="center" justifyContent="center" flexDirection="column">
           <Box height="100%" width="100%">
             <Box
-              p={2}
+              padding="16px"
+              paddingY="12px"
               alignItems="center"
               display="flex"
               justifyContent="space-between"

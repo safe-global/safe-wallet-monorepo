@@ -66,17 +66,29 @@ const isNativeToken = (tokenInfo: TokenInfo) => {
 const headCells = [
   {
     id: 'asset',
-    label: 'Asset',
+    label: (
+      <Typography fontWeight="bold" color="black">
+        Asset
+      </Typography>
+    ),
     width: '60%',
   },
   {
     id: 'balance',
-    label: 'Balance',
+    label: (
+      <Typography fontWeight="bold" color="black">
+        Balance
+      </Typography>
+    ),
     width: '20%',
   },
   {
     id: 'value',
-    label: 'Value',
+    label: (
+      <Typography fontWeight="bold" color="black">
+        Value
+      </Typography>
+    ),
     width: '20%',
   },
   {
