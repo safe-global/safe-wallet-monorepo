@@ -1,4 +1,4 @@
-import { Box, IconButton, Skeleton, Stack, SvgIcon, Typography } from '@mui/material'
+import { Box, IconButton, Skeleton, Stack, SvgIcon, Tooltip, Typography } from '@mui/material'
 import React, { useMemo } from 'react'
 import css from './styles.module.css'
 import type { UserResponse } from '@/types/super-chain'
@@ -9,6 +9,16 @@ import ExplorerButton from '@/components/common/ExplorerButton'
 import { getBlockExplorerLink } from '@/utils/chains'
 import { useCurrentChain } from '@/hooks/useChains'
 import Badges from '@/components/superChain/Badges'
+import CopyAddressButton from '@/components/common/CopyAddressButton'
+import AddContactIcon from '@/public/images/common/add-contact.svg'
+import CopyIcon from '@/public/images/common/copy.svg'
+import CompletedIcon from '@/public/images/common/completed.svg'
+import { useAppDispatch } from '@/store'
+import { upsertAddressBookEntry } from '@/store/addressBookSlice'
+import { upsertContact } from '@/store/contactsSlice'
+import useChainId from '@/hooks/useChainId'
+import useAddressBook from '@/hooks/useAddressBook'
+import useContacts from '@/hooks/useContacts'
 
 function UserInfo({
   context,
@@ -19,7 +29,27 @@ function UserInfo({
   isLoading: boolean
   handleClose: () => void
 }) {
+  const chainId = useChainId()
+  const dispatch = useAppDispatch()
   const chain = useCurrentChain()
+  const addressBook = useAddressBook()
+  const contacts = useContacts()
+  const mergedEntries = useMemo(() => {
+    return Object.keys(addressBook).reduce((acc, address) => {
+      const addressBookEntry = addressBook[address] as any
+      const contactEntry = contacts[address] as any
+      if (contacts[address]) {
+        acc[address] = {
+          ...addressBookEntry,
+          ...contactEntry,
+        }
+      } else {
+        acc[address] = addressBook[address]
+      }
+      return acc
+    }, {} as { [key: string]: any })
+  }, [addressBook, contacts])
+  const mergedEntriesArray = Object.entries(mergedEntries)
   const blockExplorerLink =
     chain && context ? getBlockExplorerLink(chain, context.superchainsmartaccount[0]) : undefined
 
@@ -33,6 +63,31 @@ function UserInfo({
       glasses: parseInt(context!.superchainsmartaccount[4][4]),
     }
   }, [context])
+
+  const handleAddContact = async () => {
+    if (!context?.superchainsmartaccount) return
+    dispatch(
+      upsertAddressBookEntry({
+        chainId: chainId,
+        address: context?.superchainsmartaccount[0]!,
+        name: context?.superchainsmartaccount[1].split('.superchain')[0]!,
+      }),
+    )
+    dispatch(
+      upsertContact({
+        address: context.superchainsmartaccount[0],
+        name: context?.superchainsmartaccount[1].split('.superchain')[0]!,
+        chainId: chainId,
+        superChainAccount: context?.superchainsmartaccount
+          ? {
+              id: context?.superchainsmartaccount[1]!,
+              nounSeed: nounSeed!,
+            }
+          : undefined,
+      }),
+    )
+  }
+  const isContact = context && mergedEntries[context?.superchainsmartaccount[0]] !== undefined
 
   return (
     <Stack padding="24px" justifyContent="flex-start" alignItems="center" spacing={2} className={css.drawer}>
@@ -118,12 +173,40 @@ function UserInfo({
               </Box>
             </Box>
           </Box>
-          <Typography display="flex" alignItems="center" fontWeight={600} fontSize={20}>
-            {context?.superchainsmartaccount[1].split('.superchain')[0]}
-            <Typography component="span" fontSize="inherit" fontWeight="inherit" color="secondary.main">
-              .superchain
+          <Stack direction="row" gap={1}>
+            <Typography display="flex" alignItems="center" fontWeight={600} fontSize={20}>
+              {context?.superchainsmartaccount[1].split('.superchain')[0]}
+              <Typography component="span" fontSize="inherit" fontWeight="inherit" color="secondary.main">
+                .superchain
+              </Typography>
             </Typography>
-          </Typography>
+            <Stack direction="row" fontSize="20px">
+              <CopyAddressButton address={context.superchainsmartaccount[0]}>
+                <IconButton aria-label="Copy address" size="small">
+                  <SvgIcon
+                    data-testid="copy-btn-icon"
+                    color="black"
+                    component={CopyIcon}
+                    inheritViewBox
+                    fontSize="inherit"
+                  />
+                </IconButton>
+              </CopyAddressButton>
+              {isContact ? (
+                <Tooltip title="Added">
+                  <IconButton size="small">
+                    <SvgIcon inheritViewBox component={CompletedIcon} fontSize="inherit" />
+                  </IconButton>
+                </Tooltip>
+              ) : (
+                <Tooltip title="Add contact">
+                  <IconButton size="small" onClick={handleAddContact}>
+                    <SvgIcon inheritViewBox component={AddContactIcon} fontSize="inherit" />
+                  </IconButton>
+                </Tooltip>
+              )}
+            </Stack>
+          </Stack>
           <Box
             display="flex"
             gap={1}
