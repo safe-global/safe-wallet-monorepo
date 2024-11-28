@@ -12,10 +12,12 @@ const WelcomeLogin = () => {
   const { open } = useAppKit()
   const { isConnected } = useAppKitAccount()
   const wallet = useWallet()
-  const { hasSuperChainSmartAccount, superChainSmartAccount, isLoading } = useCurrentWalletHasSuperChainSmartAccount()
+  const { hasSuperChainSmartAccount, superChainSmartAccount, isLoading, refetch } =
+    useCurrentWalletHasSuperChainSmartAccount()
   const [shouldRedirect, setShouldRedirect] = useState(false)
   const [redirectPath, setRedirectPath] = useState<null | string>(null)
   const onLogin = useCallback(() => {
+    refetch()
     setShouldRedirect(true)
   }, [])
 
