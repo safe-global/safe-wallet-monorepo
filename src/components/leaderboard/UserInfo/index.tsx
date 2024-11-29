@@ -68,7 +68,7 @@ function UserInfo({
     if (!context?.superchainsmartaccount) return
     dispatch(
       upsertAddressBookEntry({
-        chainId: chainId,
+        chainId,
         address: context?.superchainsmartaccount[0]!,
         name: context?.superchainsmartaccount[1].split('.superchain')[0]!,
       }),
@@ -77,7 +77,7 @@ function UserInfo({
       upsertContact({
         address: context.superchainsmartaccount[0],
         name: context?.superchainsmartaccount[1].split('.superchain')[0]!,
-        chainId: chainId,
+        chainId,
         superChainAccount: context?.superchainsmartaccount
           ? {
               id: context?.superchainsmartaccount[1]!,
@@ -183,13 +183,7 @@ function UserInfo({
             <Stack direction="row" fontSize="20px">
               <CopyAddressButton address={context.superchainsmartaccount[0]}>
                 <IconButton aria-label="Copy address" size="small">
-                  <SvgIcon
-                    data-testid="copy-btn-icon"
-                    color="black"
-                    component={CopyIcon}
-                    inheritViewBox
-                    fontSize="inherit"
-                  />
+                  <SvgIcon data-testid="copy-btn-icon" component={CopyIcon} inheritViewBox fontSize="inherit" />
                 </IconButton>
               </CopyAddressButton>
               {isContact ? (
