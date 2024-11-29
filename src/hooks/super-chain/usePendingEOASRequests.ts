@@ -47,7 +47,6 @@ function usePendingEOASRequests(account: Address, page = 1) {
       account,
       page,
     },
-    pollInterval: 10000,
   })
 }
 

@@ -79,7 +79,6 @@ export function useLeaderboard(user: Address, skip: number) {
       userId: user,
       skip,
     },
-    // pollInterval: 10000,
   })
 }
 

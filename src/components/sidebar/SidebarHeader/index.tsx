@@ -289,9 +289,7 @@ const SafeHeader = (): ReactElement => {
         </div>
       </div>
 
-      {/* <NewTxButton /> */}
-      {/* UGLY BUT WORKING */}
-      <AccountOverview open={openPerksModal} onClose={() => setOpenPerksModal(false)} />
+      {openPerksModal && <AccountOverview open={openPerksModal} onClose={() => setOpenPerksModal(false)} />}
     </div>
   )
 }
