@@ -74,6 +74,8 @@ createAppKit({
 
   features: {
     analytics: true,
+    email: false,
+    socials: [],
   },
   allowUnsupportedChain: true,
   themeMode: 'light',
