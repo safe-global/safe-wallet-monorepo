@@ -85,7 +85,7 @@ export const createSIWE = (chains: [AppKitNetwork, ...AppKitNetwork[]]) => {
       chains: chains.map((chain: AppKitNetwork) => parseInt(chain.id.toString())),
       statement: 'Welcome to SuperAccounts!\nPlease sign this message',
     }),
-    sessionRefetchIntervalMs: 1000 * 60 * 5,
+    sessionRefetchIntervalMs: 1000 * 60,
     createMessage: ({ address, ...args }: SIWECreateMessageArgs) => formatMessage(args, address),
     getNonce,
     getSession,
