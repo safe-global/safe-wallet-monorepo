@@ -43,6 +43,7 @@ export const getProposalId = (
   safeAdd: string,
   to: string,
   value: string,
+  data: string | null,
   operation: number,
   safeTxGas: string,
   baseGas: string,
@@ -55,13 +56,12 @@ export const getProposalId = (
     // 'function execTransaction(address,uint256,bytes,uint8,uint256,uint256,uint256,address,address,bytes)',
     'function execTransaction(address to, uint256 value, bytes calldata data, uint8 operation, uint256 safeTxGas, uint256 baseGas, uint256 gasPrice, address gasToken, address refundReceiver, bytes signatures) public payable virtual returns (bool success)',
   ])
-  console.log('Encoded sigs: ', _getEncodedSignatures(signatures))
-  console.log(value)
+
   const callEncoding = iface.encodeFunctionData('execTransaction', [
     // encode exec transaction data
     to,
     value,
-    '0x', // data is empty since it's just a transfer
+    data ?? '0x', // data is empty since it's just a transfer
     operation,
     safeTxGas,
     baseGas,
@@ -70,15 +70,14 @@ export const getProposalId = (
     refundReceiver,
     _getEncodedSignatures(signatures),
   ])
-  console.log('Call: ', callEncoding)
+
   const abi = new ethers.utils.AbiCoder()
   const abiEncode = abi.encode(
     ['address', 'uint256', 'bytes', 'bytes32', 'bytes32'],
     [safeAdd, 0, callEncoding, '0x' + '00'.repeat(32), '0x' + '00'.repeat(32)],
   ) // fill out
   const hashID = ethers.utils.keccak256(abiEncode)
-  console.log('Abi Encoding: ', abiEncode)
-  console.log('HashID: ', hashID)
+
   /*
 0x6a7612020000000000000000000000001b6967bc7868f5a0cb78971427ef75ee4f8ee1c8000000000000000000000000000000000000000000000000002386f26fc1000000000000000000000000000000000000000000000000000000000000000001400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000160000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000826d34bbc5c202c1c6731ee74c630cbfb3723dd3b6193d2f71c02b83448ea4c87e4e996a46930eb30fd66321b714a76848ffab35b8b2cad011fe05a584df1c9bcf1b0dd21606b04a1608c34b73cde395ae0046ab4cc09693186b1e99027d96ee2a52155c7d336538e4861d4951a44a948f98d25c0a6b8345737012ba7eec721f81151c000000000000000000000000000000000000000000000000000000000000
   */
@@ -292,7 +291,6 @@ const _scheduleTransactionContract = async (
   const inter: ethers.ContractInterface = require('./contracts/hsgsupermod.abi.json')
 
   if (signer) {
-    console.log('Signer: ', signer)
   } else {
     console.error("Signer doesn't exist!")
     throw 'No signer'
@@ -349,13 +347,11 @@ const _scheduleTransactionContract = async (
             options,
           ))
     ).toNumber()
-    console.log('gaslimit: ', options.gasLimit)
   }
 
   let txResponse: ContractTransaction
-  console.log('Proposed transaction: ', safeTransaction)
+
   if (isScheduled) {
-    console.log('Dispatch: Executing through timelock')
     txResponse = await contract.executeTimelockTransaction(
       safeTransaction.data.to,
       safeTransaction.data.value,
@@ -370,7 +366,6 @@ const _scheduleTransactionContract = async (
       options,
     )
   } else {
-    console.log('Dispatch: Scheduling through timelock')
     txResponse = await contract.scheduleTransaction(
       safeTransaction.data.to,
       safeTransaction.data.value,
@@ -390,7 +385,7 @@ const _scheduleTransactionContract = async (
 
 export async function findModuleAddress(sdk: Safe): Promise<string> {
   const mods = await sdk.getModules()
-  console.log('hsgsuper.ts:305; mods: ', mods)
+
   return mods[0] // hsgsuper prevents any other mods from being added to the safe
 }
 

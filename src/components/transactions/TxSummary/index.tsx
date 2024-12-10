@@ -51,9 +51,9 @@ const TxSummary = ({ item, isGrouped, timestamp }: TxSummaryProps): ReactElement
   const wallet = useWallet()
   const txStatusLabel = useTransactionStatus(tx, timestamp)
   const now = useNow()
-  console.log('Now: ', now)
+
   const isScheduled = !!timestamp && timestamp > now
-  console.log('isScheduled: ', isScheduled)
+
   const distance = timestamp ? formatDistance(now, Number(timestamp)) : ''
   const isPending = useIsPending(tx.id)
   const isQueue = isTxQueued(tx.txStatus)

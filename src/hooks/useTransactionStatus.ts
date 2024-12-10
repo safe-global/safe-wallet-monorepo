@@ -39,6 +39,7 @@ const WALLET_STATUS_LABELS: Record<TxLocalStatus, string> = {
 // (hsgsuper) timeTillReady is a Unix epoch timestamp value (in seconds) giving the time till a scheduled transaction will be ready
 const useTransactionStatus = (txSummary: TransactionSummary, timeTillReady?: number): string => {
   const { txStatus, id } = txSummary
+  // console.log('ID:', id)
 
   const { replacedTxIds } = useContext(ReplaceTxHoverContext)
   const wallet = useWallet()
@@ -51,6 +52,11 @@ const useTransactionStatus = (txSummary: TransactionSummary, timeTillReady?: num
   }
 
   const statuses = wallet?.address && isSignableBy(txSummary, wallet.address) ? WALLET_STATUS_LABELS : STATUS_LABELS
+
+  // console.log('pendingTx: ', pendingTx)
+  // console.log('txStatus: ', txStatus)
+  // console.log('timeTillReady: ', timeTillReady)
+  // console.log('now: ', now)
 
   if (!pendingTx && txStatus === TransactionStatus.AWAITING_EXECUTION && timeTillReady && now < timeTillReady) {
     return statuses[ScheduledStatus] + ` (${distance})`.replace('less than ', '< ')

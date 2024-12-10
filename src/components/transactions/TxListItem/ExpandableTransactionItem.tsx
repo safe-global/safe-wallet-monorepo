@@ -52,10 +52,14 @@ export const ExpandableTransactionItem = ({
     false,
   )
 
-  const { timeStamp: _timeStamp } = useTimelockStamp(txDetailsData)
+  // console.log('Tx details: ', txDetailsData)
+
+  console.log('txDetailsData: ', txDetailsData)
+
+  const { timeStamp: _timeStamp, err } = useTimelockStamp(txDetailsData)
+  console.log('useTimelockTimestamp err: ', err)
   // const timeStamp = 1729984000000
   const timeStamp = _timeStamp
-  console.log('Timestamp in component: ', timeStamp)
 
   return (
     <Accordion
