@@ -1,5 +1,11 @@
-import React, { type ReactElement } from 'react'
-import type { TransactionDetails, TransactionSummary } from '@safe-global/safe-gateway-typescript-sdk'
+import React, { useEffect, type ReactElement } from 'react'
+import {
+  DetailedExecutionInfoType,
+  TransactionDetails,
+  TransactionInfoType,
+  TransactionSummary,
+  TransactionTokenType,
+} from '@safe-global/safe-gateway-typescript-sdk'
 import { getTransactionDetails, Operation } from '@safe-global/safe-gateway-typescript-sdk'
 import { Box, CircularProgress } from '@mui/material'
 
@@ -30,18 +36,26 @@ import Multisend from '@/components/transactions/TxDetails/TxData/DecodedData/Mu
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useIsPending from '@/hooks/useIsPending'
 import { isTrustedTx } from '@/utils/transactions'
+import { getProposalId } from '@/services/tx/hsgsuper'
+import { useInitWeb3 } from '@/hooks/wallets/useInitWeb3'
+import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
+import { ethers } from 'ethers'
+import { useNow, useTimelockStamp } from '@/hooks/hsgsuper/hsgsuper'
 
 export const NOT_AVAILABLE = 'n/a'
 
 type TxDetailsProps = {
   txSummary: TransactionSummary
   txDetails: TransactionDetails
+  timestamp?: number
 }
 
-const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement => {
+const TxDetailsBlock = ({ txSummary, txDetails, timestamp }: TxDetailsProps): ReactElement => {
   const isPending = useIsPending(txSummary.id)
   const isQueue = isTxQueued(txSummary.txStatus)
   const awaitingExecution = isAwaitingExecution(txSummary.txStatus)
+  const now = useNow()
+  const isScheduled = !!timestamp && timestamp > now
   const isUnsigned =
     isMultisigExecutionInfo(txSummary.executionInfo) && txSummary.executionInfo.confirmationsSubmitted === 0
 
@@ -102,9 +116,9 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
       {/* Signers */}
       {!isUnsigned && (
         <div className={css.txSigners}>
-          <TxSigners txDetails={txDetails} txSummary={txSummary} />
+          <TxSigners txDetails={txDetails} txSummary={txSummary} timestamp={timestamp} />
 
-          {isQueue && (
+          {isQueue && !isScheduled && (
             <Box display="flex" alignItems="center" justifyContent="center" gap={1} mt={2}>
               {awaitingExecution ? <ExecuteTxButton txSummary={txSummary} /> : <SignTxButton txSummary={txSummary} />}
               <RejectTxButton txSummary={txSummary} />
@@ -118,27 +132,58 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
 
 const TxDetails = ({
   txSummary,
-  txDetails,
+  txDetailsData,
+  timestamp,
+  loading,
+  error,
 }: {
   txSummary: TransactionSummary
-  txDetails?: TransactionDetails // optional
+  timestamp?: number
+  txDetailsData?: TransactionDetails // optional
+  loading: boolean
+  error?: Error
 }): ReactElement => {
-  const chainId = useChainId()
-  const { safe } = useSafeInfo()
+  // console.log('Details: ', txDetailsData)
+  // if (
+  //   txDetailsData &&
+  //   txDetailsData.txInfo.type === TransactionInfoType.TRANSFER &&
+  //   txDetailsData.txInfo.transferInfo.type === TransactionTokenType.NATIVE_COIN &&
+  //   txDetailsData.detailedExecutionInfo?.type === DetailedExecutionInfoType.MULTISIG &&
+  //   txDetailsData.txData?.value
+  // ) {
+  //   const proposalId = getProposalId(
+  //     txDetailsData.safeAddress,
+  //     txDetailsData.txData.to.value,
+  //     txDetailsData.txData.value,
+  //     txDetailsData.txData.operation,
+  //     txDetailsData.detailedExecutionInfo.safeTxGas,
+  //     txDetailsData.detailedExecutionInfo.baseGas,
+  //     txDetailsData.detailedExecutionInfo.gasPrice,
+  //     txDetailsData.detailedExecutionInfo.gasToken,
+  //     txDetailsData.detailedExecutionInfo.refundReceiver.value,
+  //     txDetailsData.detailedExecutionInfo.confirmations,
+  //   )
 
-  const [txDetailsData, error, loading] = useAsync<TransactionDetails>(
-    async () => {
-      return txDetails || getTransactionDetails(chainId, txSummary.id)
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [txDetails, chainId, txSummary.id, safe.txQueuedTag],
-    false,
-  )
+  //   if (provider) {
+  //     const filter = {
+  //       fromBlock: -70000,
+  //       toBlock: 'latest',
+  //       topics: [ethers.utils.id('CallScheduled(bytes32,uint256,address,uint256,bytes,bytes32,uint256)'), proposalId],
+  //     }
+  //     provider.getLogs(filter).then((logs) => {
+  //       console.log('Logs: ', logs)
+  //     })
+
+  //     // const timelock
+  //   } else {
+  //     console.log('No provider')
+  //   }
+  // }
 
   return (
     <div className={css.container}>
       {txDetailsData ? (
-        <TxDetailsBlock txSummary={txSummary} txDetails={txDetailsData} />
+        <TxDetailsBlock txSummary={txSummary} txDetails={txDetailsData} timestamp={timestamp} />
       ) : loading ? (
         <div className={css.loading}>
           <CircularProgress />

@@ -18,6 +18,9 @@ import useIsPending from '@/hooks/useIsPending'
 import classNames from 'classnames'
 import { isTrustedTx } from '@/utils/transactions'
 import UntrustedTxWarning from '../UntrustedTxWarning'
+import { useSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
+import { useNow } from '@/hooks/hsgsuper/hsgsuper'
+import { formatDistance } from 'date-fns'
 
 const getStatusColor = (value: TransactionStatus, palette: Palette | Record<string, Record<string, string>>) => {
   switch (value) {
@@ -37,12 +40,21 @@ const getStatusColor = (value: TransactionStatus, palette: Palette | Record<stri
 type TxSummaryProps = {
   isGrouped?: boolean
   item: Transaction
+  timestamp?: number
 }
 
-const TxSummary = ({ item, isGrouped }: TxSummaryProps): ReactElement => {
+const TxSummary = ({ item, isGrouped, timestamp }: TxSummaryProps): ReactElement => {
+  // safeSDK stuff
+  // const safeSDK = useSafeSDK()
+
   const tx = item.transaction
   const wallet = useWallet()
-  const txStatusLabel = useTransactionStatus(tx)
+  const txStatusLabel = useTransactionStatus(tx, timestamp)
+  const now = useNow()
+
+  const isScheduled = !!timestamp && timestamp > now
+
+  const distance = timestamp ? formatDistance(now, Number(timestamp)) : ''
   const isPending = useIsPending(tx.id)
   const isQueue = isTxQueued(tx.txStatus)
   const awaitingExecution = isAwaitingExecution(tx.txStatus)
@@ -113,7 +125,7 @@ const TxSummary = ({ item, isGrouped }: TxSummaryProps): ReactElement => {
         </Box>
       )}
 
-      {wallet && isQueue && (
+      {wallet && isQueue && !isScheduled && (
         <Box
           gridArea="actions"
           display="flex"
@@ -141,7 +153,7 @@ const TxSummary = ({ item, isGrouped }: TxSummaryProps): ReactElement => {
         color={({ palette }) => getStatusColor(tx.txStatus, palette)}
         className={classNames({ [css.untrusted]: !isTrusted })}
       >
-        {isPending && <CircularProgress size={14} color="inherit" />}
+        {(isPending || isScheduled) && <CircularProgress size={14} color="inherit" />}
 
         <Typography variant="caption" fontWeight="bold" color={({ palette }) => getStatusColor(tx.txStatus, palette)}>
           {txStatusLabel}

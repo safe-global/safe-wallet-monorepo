@@ -1,4 +1,11 @@
-import { type Transaction, type TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
+import {
+  DetailedExecutionInfoType,
+  getTransactionDetails,
+  TransactionInfoType,
+  TransactionTokenType,
+  type Transaction,
+  type TransactionDetails,
+} from '@safe-global/safe-gateway-typescript-sdk'
 import { Accordion, AccordionDetails, AccordionSummary, Box, Skeleton } from '@mui/material'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import TxSummary from '@/components/transactions/TxSummary'
@@ -10,6 +17,12 @@ import { BatchExecuteHoverContext } from '@/components/transactions/BatchExecute
 import css from './styles.module.css'
 import classNames from 'classnames'
 import { trackEvent, TX_LIST_EVENTS } from '@/services/analytics'
+import { getProposalId } from '@/services/tx/hsgsuper'
+import useSafeInfo from '@/hooks/useSafeInfo'
+import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
+import useAsync from '@/hooks/useAsync'
+import useChainId from '@/hooks/useChainId'
+import { useTimelockStamp } from '@/hooks/hsgsuper/hsgsuper'
 
 type ExpandableTransactionItemProps = {
   isGrouped?: boolean
@@ -26,6 +39,27 @@ export const ExpandableTransactionItem = ({
   const hoverContext = useContext(BatchExecuteHoverContext)
 
   const isBatched = hoverContext.activeHover.includes(item.transaction.id)
+
+  const { safe } = useSafeInfo()
+  const chainId = useChainId()
+
+  const [txDetailsData, error, loading] = useAsync<TransactionDetails>(
+    async () => {
+      return txDetails || getTransactionDetails(chainId, item.transaction.id)
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [txDetails, chainId, item.transaction.id, safe.txQueuedTag],
+    false,
+  )
+
+  // console.log('Tx details: ', txDetailsData)
+
+  console.log('txDetailsData: ', txDetailsData)
+
+  const { timeStamp: _timeStamp, err } = useTimelockStamp(txDetailsData)
+  console.log('useTimelockTimestamp err: ', err)
+  // const timeStamp = 1729984000000
+  const timeStamp = _timeStamp
 
   return (
     <Accordion
@@ -45,14 +79,20 @@ export const ExpandableTransactionItem = ({
       }}
     >
       <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={{ justifyContent: 'flex-start', overflowX: 'auto' }}>
-        <TxSummary item={item} isGrouped={isGrouped} />
+        <TxSummary item={item} timestamp={timeStamp} isGrouped={isGrouped} />
       </AccordionSummary>
 
       <AccordionDetails data-testid="accordion-details" sx={{ padding: 0 }}>
         {isCreationTxInfo(item.transaction.txInfo) ? (
           <CreateTxInfo txSummary={item.transaction} />
         ) : (
-          <TxDetails txSummary={item.transaction} txDetails={txDetails} />
+          <TxDetails
+            txSummary={item.transaction}
+            timestamp={timeStamp}
+            txDetailsData={txDetailsData}
+            loading={loading}
+            error={error}
+          />
         )}
       </AccordionDetails>
     </Accordion>
