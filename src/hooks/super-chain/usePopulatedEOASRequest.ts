@@ -1,4 +1,5 @@
 import { useQuery, gql } from '@apollo/client'
+import { ZeroAddress } from 'ethers'
 import type { Address } from 'viem'
 
 function usePopulatedEOASRequest(safeAddress: Address) {
@@ -15,6 +16,7 @@ function usePopulatedEOASRequest(safeAddress: Address) {
     variables: {
       safeAddress,
     },
+    skip: !safeAddress || safeAddress === ZeroAddress,
   })
 }
 
