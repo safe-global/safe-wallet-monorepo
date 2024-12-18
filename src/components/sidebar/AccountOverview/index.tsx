@@ -4,7 +4,6 @@ import Badges from '@/components/superChain/Badges'
 import Perks from '@/components/superChain/Perks'
 import { BACKEND_BASE_URI } from '@/config/constants'
 import useCurrentPerks from '@/hooks/super-chain/useCurrentPerks'
-import { useLeaderboard } from '@/hooks/super-chain/useLeaderboard'
 import { useUserRank } from '@/hooks/super-chain/useUserRank'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import { useAppSelector } from '@/store'
@@ -21,8 +20,7 @@ function AccountOverview({ open, onClose }: { open: boolean; onClose: () => void
   const superChainSmartAccount = useAppSelector(selectSuperChainAccount)
   const safeAddress: Address = useSafeAddress() as Address
 
-  const { data, loading } = useLeaderboard(safeAddress, 0)
-  const { rank } = useUserRank(safeAddress, loading, loading ? '0' : data?.superChainSmartAccount.points)
+  const { rank } = useUserRank(safeAddress)
 
   const { data: user, isLoading: userIsLoading } = useQuery<UserResponse>({
     queryKey: ['AccountOverview'],

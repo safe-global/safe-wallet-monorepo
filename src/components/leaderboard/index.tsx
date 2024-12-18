@@ -1,5 +1,5 @@
 import { Skeleton, Stack, Typography } from '@mui/material'
-import React, { useCallback, useState } from 'react'
+import React from 'react'
 import RankingProfile from './RankingProfile/index'
 import { useLeaderboard } from '@/hooks/super-chain/useLeaderboard'
 import useSafeAddress from '@/hooks/useSafeAddress'
@@ -9,50 +9,25 @@ import InfiniteScroll from '../common/InfiniteScroll'
 
 function Leaderboard({ handleUserSelect }: { handleUserSelect: (_: string) => void }) {
   const address = useSafeAddress()
-  const [isFetching, setIsFetching] = useState(false)
-  const [skip, setSkip] = useState(0)
-  const [hasMore, setHasMore] = useState(true)
-  const { data, loading, fetchMore } = useLeaderboard(address as Address, 0)
   const {
-    rank,
-    error,
-    loading: rankLoading,
-  } = useUserRank(address as Address, loading, loading ? '0' : data?.superChainSmartAccount.points)
+    data,
+    isLoading: leaderboardIsLoading,
+    error: leaderboardError,
+    isFetchingNextPage: leaderboardIsFetching,
+    fetchNextPage,
+    hasNextPage,
+  } = useLeaderboard()
+  const { rank, user, loading: rankIsLoading, error: rankError } = useUserRank(address as Address)
 
-  const handleLoadMore = useCallback(async () => {
-    if (isFetching || loading || !hasMore) return
-    setIsFetching(true)
-
-    const newSkip = skip + 20
-    setSkip(newSkip)
-
-    const { data: fetchMoreData } = await fetchMore({
-      variables: {
-        skip: newSkip,
-      },
-      updateQuery: (previousResult, { fetchMoreResult }) => {
-        if (!fetchMoreResult || !fetchMoreResult.superChainSmartAccounts.length) {
-          return previousResult
-        }
-        setIsFetching(false)
-
-        return {
-          ...fetchMoreResult,
-          superChainSmartAccounts: [
-            ...previousResult.superChainSmartAccounts,
-            ...fetchMoreResult.superChainSmartAccounts,
-          ],
-        }
-      },
-    })
-    if (!fetchMoreData || !fetchMoreData.superChainSmartAccounts.length) {
-      setHasMore(false)
+  const handleLoadMore = () => {
+    if (!leaderboardIsFetching && hasNextPage) {
+      fetchNextPage()
     }
-  }, [isFetching, loading, hasMore, skip, fetchMore])
+  }
 
-  if (error) return
+  if (leaderboardError) return
 
-  if (loading || !data || rankLoading) {
+  if (leaderboardIsLoading || rankIsLoading || !data || !rank || !user) {
     return (
       <main>
         <Stack spacing={2}>
@@ -86,16 +61,16 @@ function Leaderboard({ handleUserSelect }: { handleUserSelect: (_: string) => vo
             isMainProfile
             onClick={() => handleUserSelect(address)}
             position={rank!}
-            points={data!.superChainSmartAccount.points}
-            name={data!.superChainSmartAccount.superChainId}
-            level={data!.superChainSmartAccount.level}
-            badges={data!.superChainSmartAccount.badges.reduce((acc, badge) => acc + parseInt(badge.tier), 0)}
+            points={user!.total_points}
+            name={user!.superChainId}
+            level={user!.level.toString()}
+            badges={0}
             noun={{
-              accessory: parseInt(data!.superChainSmartAccount.noun_accessory),
-              background: parseInt(data!.superChainSmartAccount.noun_background),
-              body: parseInt(data!.superChainSmartAccount.noun_body),
-              glasses: parseInt(data!.superChainSmartAccount.noun_glasses),
-              head: parseInt(data!.superChainSmartAccount.noun_head),
+              accessory: user!.noun.accessory,
+              background: user!.noun.background,
+              body: user!.noun.body,
+              glasses: user!.noun.glasses,
+              head: user!.noun.head,
             }}
           />
         </Stack>
@@ -103,28 +78,34 @@ function Leaderboard({ handleUserSelect }: { handleUserSelect: (_: string) => vo
           <Typography fontSize={12} fontWeight={600} color="gray">
             TOP USERS OF ALL-TIME
           </Typography>
-          {data?.superChainSmartAccounts.map((user, index) => (
-            <RankingProfile
-              key={index}
-              position={index + 1}
-              points={user.points}
-              onClick={() => handleUserSelect(user.safe)}
-              name={user.superChainId}
-              level={user.level}
-              isMainProfile={user.safe.toLowerCase() === address.toLowerCase()}
-              badges={user.badges.reduce((acc, badge) => acc + parseInt(badge.tier), 0)}
-              noun={{
-                accessory: parseInt(user.noun_accessory),
-                background: parseInt(user.noun_background),
-                body: parseInt(user.noun_body),
-                glasses: parseInt(user.noun_glasses),
-                head: parseInt(user.noun_head),
-              }}
-            />
-          ))}
+          {data.pages.map((page, pageIndex) =>
+            page.data.map((user, index) => (
+              <RankingProfile
+                key={`${pageIndex}-${index}`}
+                position={index + 1 + pageIndex * 20}
+                points={user.total_points}
+                onClick={() => handleUserSelect(user.superaccount)}
+                name={user.superChainId}
+                level={user.level.toString()}
+                isMainProfile={user.superaccount.toLowerCase() === address.toLowerCase()}
+                badges={0}
+                noun={{
+                  accessory: user.noun.accessory,
+                  background: user.noun.background,
+                  body: user.noun.body,
+                  glasses: user.noun.glasses,
+                  head: user.noun.head,
+                }}
+              />
+            )),
+          )}
 
-          {hasMore &&
-            (isFetching ? <Skeleton variant="rounded" height={48} /> : <InfiniteScroll onLoadMore={handleLoadMore} />)}
+          {hasNextPage &&
+            (leaderboardIsFetching ? (
+              <Skeleton variant="rounded" height={48} />
+            ) : (
+              <InfiniteScroll onLoadMore={handleLoadMore} />
+            ))}
         </Stack>
       </Stack>
     </main>

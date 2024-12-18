@@ -16,7 +16,7 @@ function LeaderboardLayout() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
 
   const { data, isLoading } = useQuery<UserResponse>({
-    queryKey: ['leaderboard', selectedUser],
+    queryKey: ['leaderboard', 'select', selectedUser],
     queryFn: async () => {
       if (selectedUser === zeroAddress) {
         return null
