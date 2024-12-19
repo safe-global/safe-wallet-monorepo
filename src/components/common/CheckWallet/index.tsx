@@ -4,6 +4,7 @@ import useIsOnlySpendingLimitBeneficiary from '@/hooks/useIsOnlySpendingLimitBen
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import useWallet from '@/hooks/wallets/useWallet'
 import useConnectWallet from '../ConnectWallet/useConnectWallet'
+import { useRouter } from 'next/router'
 
 type CheckWalletProps = {
   children: (ok: boolean) => ReactElement
@@ -13,7 +14,7 @@ type CheckWalletProps = {
 
 enum Message {
   WalletNotConnected = 'Please connect your wallet',
-  NotSafeOwner = 'Your connected wallet is not an owner of this Safe Account',
+  NotSafeOwner = 'Your connected wallet is not an owner of this Safe Account. Click to claim.',
   OnlySpendingLimitBeneficiary = 'You can only create ERC-20 transactions within your spending limit',
 }
 
@@ -21,6 +22,7 @@ const CheckWallet = ({ children, allowSpendingLimit, allowNonOwner }: CheckWalle
   const wallet = useWallet()
   const isSafeOwner = useIsSafeOwner()
   const isSpendingLimit = useIsOnlySpendingLimitBeneficiary()
+  const router = useRouter()
   const connectWallet = useConnectWallet()
 
   const message = !wallet
@@ -31,11 +33,20 @@ const CheckWallet = ({ children, allowSpendingLimit, allowNonOwner }: CheckWalle
     ? Message.OnlySpendingLimitBeneficiary
     : ''
 
+  const claimRedirect = () => {
+    router.push({
+      pathname: '/claim',
+      query: { safe: router.query?.safe },
+    })
+  }
+
   if (!message) return children(true)
 
   return (
     <Tooltip title={message}>
-      <span onClick={wallet ? undefined : connectWallet}>{children(false)}</span>
+      <span onClick={wallet ? (message === Message.NotSafeOwner ? claimRedirect : undefined) : connectWallet}>
+        {children(false)}
+      </span>
     </Tooltip>
   )
 }
