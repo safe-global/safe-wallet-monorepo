@@ -7,11 +7,14 @@ import type {
 import type { ContractTransaction } from 'ethers'
 
 // From Chase
-import type Safe from '@safe-global/safe-core-sdk'
+import Safe from '@safe-global/safe-core-sdk'
 import { BigNumber } from '@ethersproject/bignumber'
 import { ethers } from 'ethers'
+import type { Web3Provider } from '@ethersproject/providers'
 import { MultisigConfirmation } from '@safe-global/safe-apps-sdk'
 import { createWeb3ReadOnly } from '@/hooks/wallets/web3'
+import { HsgsupermodAbi__factory as HsgsupermodFactory } from 'src/types/contracts/hsgsuper/factories/HsgsupermodAbi__factory'
+import { createEthersAdapter } from '@/hooks/coreSDK/safeCoreSDK'
 
 /**
  * Author: Chase
@@ -395,4 +398,52 @@ function toTxResult(transactionResponse: ContractTransaction, options?: Transact
     options,
     transactionResponse,
   }
+}
+
+export enum ClaimSignerError {
+  NoSigner = 'No signer',
+  Revert = 'Contract call reverted',
+  GasError = 'Cannot estimate gas',
+}
+
+export const claimSigner = async (
+  web3Provider: Web3Provider | undefined, // we can type the signer later
+  safeAddress: string,
+  options: TransactionOptions = {},
+): Promise<TransactionResult | undefined> => {
+  if (!web3Provider) {
+    console.log('hsgsuper: no web3Provider')
+    return
+  }
+  const ethersAdapter = createEthersAdapter(web3Provider)
+  const signer = ethersAdapter.getSigner()
+  if (!signer) {
+    console.error("Signer doesn't exist!")
+    throw ClaimSignerError.NoSigner
+  }
+
+  // const _safe = new Safe()
+  const safe = await Safe.create({
+    ethAdapter: ethersAdapter,
+    safeAddress,
+    isL1SafeMasterCopy: true,
+  })
+
+  const hsgsuperAdd = await findModuleAddress(safe)
+
+  const contract = HsgsupermodFactory.connect(hsgsuperAdd, signer)
+  if (!options.gasLimit) {
+    options.gasLimit = (
+      await contract.estimateGas.claimSigner().catch((err) => {
+        if ((err.message as string).includes('"message":"execution reverted"')) {
+          throw ClaimSignerError.Revert
+        } else {
+          throw ClaimSignerError.GasError
+        }
+      })
+    ).toNumber()
+  }
+
+  const txResponse = await contract.claimSigner()
+  return toTxResult(txResponse, options)
 }
