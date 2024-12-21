@@ -14,6 +14,38 @@ import { useSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
 import { useAppSelector } from '@/store'
 import { selectPendingTxById } from '@/store/pendingTxsSlice'
 
+export const useTimelockAddress = (): string | undefined => {
+  const [timelockAdd, setTimelockAdd] = useState<string | undefined>()
+  const safeSdk = useSafeSDK()
+  const provider = useWeb3ReadOnly()
+
+  useEffect(() => {
+    if (!safeSdk || !provider) return
+
+    findModuleAddress(safeSdk).then(async (modAdd) => {
+      const hsgsuper = new ethers.Contract(modAdd, hsgsuperAbi, provider)
+      const _timelockAdd: string = await hsgsuper.timelock()
+      setTimelockAdd(_timelockAdd)
+    })
+  }, [safeSdk, provider])
+  return timelockAdd
+}
+
+export const useHsgAddress = (): string | undefined => {
+  const [hsgAdd, setHsgAdd] = useState<string | undefined>()
+  const safeSdk = useSafeSDK()
+  const provider = useWeb3ReadOnly()
+
+  useEffect(() => {
+    if (!safeSdk || !provider) return
+
+    findModuleAddress(safeSdk).then(async (modAdd) => {
+      setHsgAdd(modAdd)
+    })
+  }, [safeSdk, provider])
+  return hsgAdd
+}
+
 export const useTimelockStamp = (
   txDetails: TransactionDetails | undefined,
 ): { proposalId?: string; timeStamp?: number; err?: string } => {

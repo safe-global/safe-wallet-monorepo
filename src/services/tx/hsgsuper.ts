@@ -4,7 +4,7 @@ import type {
   TransactionResult,
   SafeSignature,
 } from '@safe-global/safe-core-sdk-types'
-import type { ContractTransaction } from 'ethers'
+import type { ContractTransaction, Signer } from 'ethers'
 
 // From Chase
 import Safe from '@safe-global/safe-core-sdk'
@@ -12,8 +12,9 @@ import { BigNumber } from '@ethersproject/bignumber'
 import { ethers } from 'ethers'
 import type { Web3Provider } from '@ethersproject/providers'
 import { MultisigConfirmation } from '@safe-global/safe-apps-sdk'
-import { createWeb3ReadOnly } from '@/hooks/wallets/web3'
+import { createWeb3ReadOnly, getWeb3ReadOnly } from '@/hooks/wallets/web3'
 import { HsgsupermodAbi__factory as HsgsupermodFactory } from 'src/types/contracts/hsgsuper/factories/HsgsupermodAbi__factory'
+import type { HsgsupermodAbi as HsgSuperContract } from '@/types/contracts/hsgsuper/HsgsupermodAbi'
 import { createEthersAdapter } from '@/hooks/coreSDK/safeCoreSDK'
 
 /**
@@ -167,130 +168,6 @@ const _scheduleTransactionContract = async (
   isScheduled: boolean,
   options?: TransactionOptions,
 ): Promise<TransactionResult> => {
-  // const address = "0x9045781E1E982198BEd965EB3cED7b2D1EC8baa2";
-  // const inter: ethers.ContractInterface = JSON.parse(`[
-  //     {
-  //       "inputs": [
-  //         {
-  //           "internalType": "address",
-  //           "name": "to",
-  //           "type": "address"
-  //         },
-  //         {
-  //           "internalType": "uint256",
-  //           "name": "value",
-  //           "type": "uint256"
-  //         },
-  //         {
-  //           "internalType": "bytes",
-  //           "name": "data",
-  //           "type": "bytes"
-  //         },
-  //         {
-  //           "internalType": "enum Enum.Operation",
-  //           "name": "operation",
-  //           "type": "uint8"
-  //         },
-  //         {
-  //           "internalType": "uint256",
-  //           "name": "safeTxGas",
-  //           "type": "uint256"
-  //         },
-  //         {
-  //           "internalType": "uint256",
-  //           "name": "baseGas",
-  //           "type": "uint256"
-  //         },
-  //         {
-  //           "internalType": "uint256",
-  //           "name": "gasPrice",
-  //           "type": "uint256"
-  //         },
-  //         {
-  //           "internalType": "address",
-  //           "name": "gasToken",
-  //           "type": "address"
-  //         },
-  //         {
-  //           "internalType": "address payable",
-  //           "name": "refundReceiver",
-  //           "type": "address"
-  //         },
-  //         {
-  //           "internalType": "bytes",
-  //           "name": "signatures",
-  //           "type": "bytes"
-  //         }
-  //       ],
-  //       "name": "scheduleTransaction",
-  //       "outputs": [
-  //         {
-  //           "internalType": "bytes32",
-  //           "name": "",
-  //           "type": "bytes32"
-  //         }
-  //       ],
-  //       "stateMutability": "payable",
-  //       "type": "function"
-  //     },
-  //     {
-  //       "inputs": [
-  //         {
-  //           "internalType": "address",
-  //           "name": "to",
-  //           "type": "address"
-  //         },
-  //         {
-  //           "internalType": "uint256",
-  //           "name": "value",
-  //           "type": "uint256"
-  //         },
-  //         {
-  //           "internalType": "bytes",
-  //           "name": "data",
-  //           "type": "bytes"
-  //         },
-  //         {
-  //           "internalType": "enum Enum.Operation",
-  //           "name": "operation",
-  //           "type": "uint8"
-  //         },
-  //         {
-  //           "internalType": "uint256",
-  //           "name": "safeTxGas",
-  //           "type": "uint256"
-  //         },
-  //         {
-  //           "internalType": "uint256",
-  //           "name": "baseGas",
-  //           "type": "uint256"
-  //         },
-  //         {
-  //           "internalType": "uint256",
-  //           "name": "gasPrice",
-  //           "type": "uint256"
-  //         },
-  //         {
-  //           "internalType": "address",
-  //           "name": "gasToken",
-  //           "type": "address"
-  //         },
-  //         {
-  //           "internalType": "address payable",
-  //           "name": "refundReceiver",
-  //           "type": "address"
-  //         },
-  //         {
-  //           "internalType": "bytes",
-  //           "name": "signatures",
-  //           "type": "bytes"
-  //         }
-  //       ],
-  //       "stateMutability": "payable",
-  //       "type": "function",
-  //       "name": "executeTimelockTransaction"
-  //     }]`);
-
   const inter: ethers.ContractInterface = require('./contracts/hsgsupermod.abi.json')
 
   if (signer) {
@@ -301,26 +178,6 @@ const _scheduleTransactionContract = async (
   const contract = new ethers.Contract(modAddress, inter, signer)
 
   if (options && !options.gasLimit) {
-    // options.gasLimit = await this.estimateGas(
-    //   'execTransaction',
-    //   [
-    //     safeTransaction.data.to,
-    //     safeTransaction.data.value,
-    //     safeTransaction.data.data,
-    //     safeTransaction.data.operation,
-    //     safeTransaction.data.safeTxGas,
-    //     safeTransaction.data.baseGas,
-    //     safeTransaction.data.gasPrice,
-    //     safeTransaction.data.gasToken,
-    //     safeTransaction.data.refundReceiver,
-    //     safeTransaction.encodedSignatures()
-    //   ],
-    //   {
-    //     ...options
-    //   }
-    // )
-    // CHASE Need at least 90,000 for it to be enough gas.
-    // options.gasLimit = 300_000;
     options.gasLimit = (
       await (isScheduled
         ? contract.estimateGas.executeTimelockTransaction(
@@ -390,6 +247,16 @@ export async function findModuleAddress(sdk: Safe): Promise<string> {
   const mods = await sdk.getModules()
 
   return mods[0] // hsgsuper prevents any other mods from being added to the safe
+}
+
+export async function getHsgSuperContract(sdk: Safe, signer?: Signer): Promise<HsgSuperContract> {
+  const modAdd = await findModuleAddress(sdk)
+  const provider = getWeb3ReadOnly()
+  if (!signer && !provider) {
+    throw 'No signer or provider'
+  }
+
+  return HsgsupermodFactory.connect(modAdd, signer ?? (provider as ethers.providers.Provider))
 }
 
 function toTxResult(transactionResponse: ContractTransaction, options?: TransactionOptions): TransactionResult {

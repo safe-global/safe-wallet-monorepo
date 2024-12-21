@@ -8,11 +8,17 @@ import { type SafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import { createWeb3, useWeb3ReadOnly } from '@/hooks/wallets/web3'
 import { type JsonRpcProvider } from '@ethersproject/providers'
 import { type ConnectedWallet } from '@/hooks/wallets/useOnboard'
-import { getCurrentGnosisSafeContract } from '@/services/contracts/safeContracts'
+import {
+  getCurrentGnosisSafeContract,
+  getReadOnlyCurrentGnosisSafeContract,
+  getReadOnlyGnosisSafeContract,
+} from '@/services/contracts/safeContracts'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useWallet from '@/hooks/wallets/useWallet'
 import { encodeSignatures } from '@/services/tx/encodeSignatures'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
+import { useTimelockAddress } from '@/hooks/hsgsuper/hsgsuper'
+import { createReadOnlyEthersAdapter } from '@/hooks/coreSDK/safeCoreSDK'
 
 const isContractError = (error: EthersError) => {
   if (!error.reason) return false
@@ -62,15 +68,17 @@ const useIsValidExecution = (
   const { safe } = useSafeInfo()
   const readOnlyProvider = useWeb3ReadOnly()
   const isOwner = useIsSafeOwner()
+  const timelock = useTimelockAddress()
 
   const [isValidExecution, executionValidationError, isValidExecutionLoading] = useAsync(async () => {
-    if (!safeTx || !wallet || !gasLimit || !readOnlyProvider) {
+    if (!safeTx || !wallet || !gasLimit || !readOnlyProvider || !timelock) {
       return
     }
 
     try {
-      const provider = getPatchedSignerProvider(wallet, safe.chainId, readOnlyProvider)
-      const safeContract = getCurrentGnosisSafeContract(safe, provider)
+      // const provider = getPatchedSignerProvider(wallet, safe.chainId, readOnlyProvider)
+      // const ethAdapter = createReadOnlyEthersAdapter(readOnlyProvider)
+      const safeContract = getReadOnlyCurrentGnosisSafeContract(safe)
 
       /**
        * We need to call the contract directly instead of using `sdk.isValidTransaction`
@@ -89,19 +97,20 @@ const useIsValidExecution = (
         safeTx.data.gasToken,
         safeTx.data.refundReceiver,
         encodeSignatures(safeTx, isOwner ? wallet.address : undefined),
-        { from: wallet.address, gasLimit: gasLimit.toString() },
+        { from: timelock, gasLimit: gasLimit.toString() },
       )
     } catch (_err) {
       const err = _err as EthersError
 
       if (isContractError(err)) {
+        console.log('useIsValidExec err: ', err)
         // @ts-ignore
         err.reason += `: ${ContractErrorCodes[err.reason]}`
       }
 
       throw err
     }
-  }, [safeTx, wallet, gasLimit, safe, readOnlyProvider, isOwner])
+  }, [safeTx, wallet, gasLimit, safe, readOnlyProvider, isOwner, timelock])
 
   return { isValidExecution, executionValidationError, isValidExecutionLoading }
 }
