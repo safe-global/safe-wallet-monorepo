@@ -20,7 +20,7 @@ import type { SignOrExecuteProps } from '.'
 import type { SafeTransaction } from '@safe-global/safe-core-sdk-types'
 import { TxModalContext } from '@/components/tx-flow'
 import { SuccessScreenFlow } from '@/components/tx-flow/flows'
-import useGasLimit from '@/hooks/useGasLimit'
+import { useHsgGasLimit } from '@/hooks/useGasLimit'
 import AdvancedParams, { useAdvancedParams } from '../AdvancedParams'
 import { asError } from '@/services/exceptions/utils'
 
@@ -78,11 +78,13 @@ export const ExecuteForm = ({
   const isScheduled = executionType === ExecutionType.EXECUTE
 
   // Estimate gas limit
-  const { gasLimit, gasLimitError } = useGasLimit(safeTx)
+  const { gasLimit, gasLimitError } = useHsgGasLimit({ safeTx, isScheduling: executionType === ExecutionType.SCHEDULE })
+  console.log('Gas limit Error: ', gasLimitError)
   const [advancedParams, setAdvancedParams] = useAdvancedParams(gasLimit)
 
   // Check if transaction will fail
   const { executionValidationError } = useIsValidExecution(safeTx, advancedParams.gasLimit)
+  console.log('executionValid error: ', executionValidationError)
 
   // On modal submit
   const handleSubmit = async (e: SyntheticEvent) => {
@@ -148,7 +150,6 @@ export const ExecuteForm = ({
               relays={relays[0]}
             />
           </div>
-
         </div>
 
         {/* Error messages */}
@@ -182,7 +183,7 @@ export const ExecuteForm = ({
           <CheckWallet allowNonOwner={onlyExecute}>
             {(isOk) => (
               <Button variant="contained" type="submit" disabled={!isOk || submitDisabled} sx={{ minWidth: '112px' }}>
-                {!isSubmittable ? <CircularProgress size={20} /> : (isScheduled ? "Execute" : "Schedule")}
+                {!isSubmittable ? <CircularProgress size={20} /> : isScheduled ? 'Execute' : 'Schedule'}
               </Button>
             )}
           </CheckWallet>
