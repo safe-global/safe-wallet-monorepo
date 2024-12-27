@@ -1,0 +1,55 @@
+            - name: CLA assistant lite - CloudReactor fork
+  # You may pin to the exact commit or the version.
+  # uses: CloudReactor/cla-assistant-github-action@2c7fe960630c5af960ee575e434bdbdce4cb82f4
+  uses: CloudReactor/cla-assistant-github-action@v2.1.3-beta-forked
+  with:
+    # Give a path for storing CLAs in a json file 
+    path-to-signatures: # optional, default is ./signatures/cla.json
+    # provide a branch where all the CLAs are stored
+    branch: # optional, default is master
+    # users in the allow list don't have to sign the CLA document
+    allowlist: # optional, default is 
+    # provide the remote repository name where all the signatures should be stored
+    remote-repository-name: # optional
+    # provide the remote organization name where all the signatures should be stored
+    remote-organization-name: # optional
+    # Fully qualified web link to the document - example: https://github.com/cla-assistant/github-action/blob/master/SAPCLA.md
+    path-to-document: # optional
+    # Commit message when a new contributor signs the CLA in a PR
+    signed-commit-message: # optional
+    # Commit message when a new contributor signs the CLA (empty)
+    signed-empty-commit-message: # optional
+    # Commit message when a new file is created
+    create-file-commit-message: # optional
+    # Introductory message to ask new contributors to sign
+    custom-notsigned-prcomment: # optional
+    # The signature to be committed in order to sign the CLA.
+    custom-pr-sign-comment: # optional
+    # pull request comment when everyone has signed, defaults to **CLA Assistant Lite** All Contributors have signed the CLA.
+    custom-allsigned-prcomment: # optional
+    # Set this to true if you want to use a dco instead of a cla
+    use-dco-flag: # optional
+    # Will lock the pull request after merge so that the signature the contributors cannot revoke their signature comments after merge
+    lock-pullrequest-aftermerge: # optional, default is true
+
+    
+                      - name: AppSweep Mobile Application Security Testing
+  # You may pin to the exact commit or the version.
+  # uses: Guardsquare/appsweep-action@89964e712facebfc34ac7bf8944b69c8fcf7f04a
+  uses: Guardsquare/appsweep-action@v1.5
+  with:
+    # Your AppSweep API Key, should be stored as a GitHub Secret, do not hardcode your API key in your workflow
+    appsweep_api_key: 
+    # Path to your APK file to upload and scan
+    input_file: 
+    # The commit hash for this build
+    commit_hash: 
+    # The obfuscation mapping file of the build
+    mapping_file: # optional, default is 
+    # The library mapping file of the build
+    library_file: # optional, default is 
+    # The tags to append to the build
+    tags: # optional, default is []
+    # Base AppSweep URL
+    url: # optional, default is https://appsweep.guardsquare.com
+          
