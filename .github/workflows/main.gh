@@ -1,0 +1,20 @@
+            - name: GitHub Workflow Immortality
+  # You may pin to the exact commit or the version.
+  # uses: PhrozenByte/gh-workflow-immortality@ed0af7d9884eb4cc5672940ae490a0111141fbac
+  uses: PhrozenByte/gh-workflow-immortality@v1
+  with:
+    # Personal access token of the executing GitHub user
+    secret: 
+    # Loads all repositories of the authenticated GitHub user (includes both public and private repositories)
+    owner_repos: # optional
+    # Loads all repositories of which the authenticated GitHub user is a collaborator of
+    collaborator_repos: # optional
+    # Loads all repositories of organizations of which the authenticated GitHub user is a member of
+    member_repos: # optional
+    # Loads all public repositories of the given GitHub users
+    users: # optional, default is 
+    # Loads all repositories of the given GitHub organizations
+    orgs: # optional, default is 
+    # Loads the given repositories
+    repos: # optional, default is 
+          
