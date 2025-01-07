@@ -1,6 +1,6 @@
 .dialog {
   top: 52px;
-  left: 230px;
+  left: 338px;
   z-index: 3;
   transition: left 225ms cubic-bezier(0, 0, 0.2, 1) 0ms;
 }
