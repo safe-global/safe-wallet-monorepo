@@ -20,7 +20,6 @@ type UserRank = {
     superaccount: string
     total_points: string
     total_badges_minted: number
-
   }
 }
 
