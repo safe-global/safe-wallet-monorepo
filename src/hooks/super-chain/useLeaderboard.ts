@@ -17,7 +17,7 @@ export type Leaderboard = {
     superChainId: string
     superaccount: string
     total_points: string
-    total_badges_minted: number
+    total_badges: number
   }[]
   hasNextPage: boolean
 }
