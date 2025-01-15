@@ -265,6 +265,7 @@ export function clickOnSignerAddressInput(index) {
 }
 
 export function selectSignerOnAutocomplete(index) {
+  cy.wait(500)
   cy.get(addressAutocompleteOptions).eq(index).click()
 }
 

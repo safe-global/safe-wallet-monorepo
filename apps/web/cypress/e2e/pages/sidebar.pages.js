@@ -231,6 +231,7 @@ export function verifyCopyAddressBtn(data) {
 }
 
 export function verifyEtherscanLinkExists() {
+  main.verifyMinimumElementsCount(explorerBtn, 1)
   cy.get(sidebarContainer)
     .should('be.visible')
     .within(() => {
