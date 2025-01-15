@@ -28,7 +28,10 @@ const SignInBanner = ({ provider }: { provider: BrowserProvider | undefined }) =
     }
     if (!account) {
       try {
-        account = await createAccount({ address: address as `0x${string}` })
+        account = await createAccount({
+          address: address as `0x${string}`,
+          name: address.split('').slice(0, 4).join(''),
+        })
       } catch (error) {
         logError(ErrorCodes._641, error)
       }

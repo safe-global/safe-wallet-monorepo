@@ -15,10 +15,13 @@ import { FEATURES } from '@/utils/chains'
 import css from './styles.module.css'
 import { InconsistentSignerSetupWarning } from '@/features/multichain/components/SignerSetupWarning/InconsistentSignerSetupWarning'
 import useIsStakingBannerEnabled from '@/features/stake/hooks/useIsStakingBannerEnabled'
+import SignInBanner from '@/features/siweAccounts/components/EnableAccountBanner'
+import { useWeb3 } from '@/hooks/wallets/web3'
 
 const RecoveryHeader = dynamic(() => import('@/features/recovery/components/RecoveryHeader'))
 
 const Dashboard = (): ReactElement => {
+  const provider = useWeb3()
   const { safe } = useSafeInfo()
   const showSafeApps = useHasFeature(FEATURES.SAFE_APPS)
   const isStakingBannerEnabled = useIsStakingBannerEnabled()
@@ -28,6 +31,10 @@ const Dashboard = (): ReactElement => {
     <>
       <Grid container spacing={3}>
         {supportsRecovery && <RecoveryHeader />}
+
+        <Grid item xs={12}>
+          <SignInBanner provider={provider} />
+        </Grid>
 
         <Grid item xs={12}>
           <InconsistentSignerSetupWarning />
