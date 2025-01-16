@@ -1,8 +1,7 @@
 // Used for __tests__/testing-library.js
 // Learn more: https://github.com/testing-library/jest-dom
 import '@testing-library/jest-dom'
-import { TextEncoder, TextDecoder } from 'util'
-import { Request } from 'node-fetch'
+import { server } from '@/tests/server'
 
 jest.mock('@web3-onboard/coinbase', () => jest.fn())
 jest.mock('@web3-onboard/injected-wallets', () => ({ ProviderLabel: { MetaMask: 'MetaMask' } }))
@@ -36,15 +35,6 @@ jest.mock('@web3-onboard/core', () => () => ({
   },
 }))
 
-// to avoid failing tests in some environments
-const NumberFormat = Intl.NumberFormat
-const englishTestLocale = 'en'
-
-// `viem` used by the `safe-apps-sdk` uses `TextEncoder` and `TextDecoder` which are not available in jsdom for some reason
-Object.assign(global, { TextDecoder, TextEncoder, fetch: jest.fn() })
-
-jest.spyOn(Intl, 'NumberFormat').mockImplementation((locale, ...rest) => new NumberFormat([englishTestLocale], ...rest))
-
 // This is required for jest.spyOn to work with imported modules.
 // After Next 13, imported modules have `configurable: false` for named exports,
 // which means that `jest.spyOn` cannot modify the exported function.
@@ -56,16 +46,9 @@ Object.defineProperty = (obj, prop, desc) => {
   return defineProperty(obj, prop, desc)
 }
 
-// We need this, otherwise jest will fail with:
-// invalid BytesLike value on createRandom
-// https://github.com/ethers-io/ethers.js/issues/4365
-Object.defineProperty(Uint8Array, Symbol.hasInstance, {
-  value(potentialInstance) {
-    return this === Uint8Array
-      ? Object.prototype.toString.call(potentialInstance) === '[object Uint8Array]'
-      : Uint8Array[Symbol.hasInstance].call(this, potentialInstance)
-  },
+beforeAll(() => {
+  server.listen()
 })
 
-// These are required for @safe-global/safe-client-gateway-sdk
-globalThis.Request = Request
+afterEach(() => server.resetHandlers())
+afterAll(() => server.close())

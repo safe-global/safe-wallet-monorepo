@@ -35,7 +35,7 @@ export type BalancesGetBalancesV1ApiArg = {
   trusted?: boolean
   excludeSpam?: boolean
 }
-export type BalancesGetSupportedFiatCodesV1ApiResponse = unknown
+export type BalancesGetSupportedFiatCodesV1ApiResponse = /** status 200  */ string[]
 export type BalancesGetSupportedFiatCodesV1ApiArg = void
 export type Token = {
   address: string

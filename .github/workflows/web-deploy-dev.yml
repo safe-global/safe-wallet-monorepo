@@ -8,7 +8,8 @@ on:
       - dev
       - main
     paths:
-        - apps/web/**
+      - apps/web/**
+      - packages/store/**
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -43,7 +44,7 @@ jobs:
       - uses: ./.github/actions/build
         with:
           secrets: ${{ toJSON(secrets) }}
-         # if: startsWith(github.ref, 'refs/heads/main')
+          # if: startsWith(github.ref, 'refs/heads/main')
 
       #- uses: ./.github/workflows/build-storybook
 

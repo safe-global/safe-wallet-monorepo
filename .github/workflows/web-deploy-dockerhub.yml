@@ -8,6 +8,7 @@ on:
       - docker
     paths:
       - apps/web/**
+      - packages/store/**
 
   push:
     branches:
@@ -15,6 +16,7 @@ on:
       - dev
     paths:
       - apps/web/**
+      - packages/store/**
 
   release:
     types: [released]

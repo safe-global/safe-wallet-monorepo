@@ -1,8 +1,12 @@
 import { getConfigs } from '@/hooks/loadables/helpers/config'
 
+jest.mock('@/config/gateway', () => ({
+  GATEWAY_URL: 'https://safe-client.safe.global',
+  __esModule: true,
+}))
+
 jest.mock('@/pages/_app', () => ({
   ...jest.requireActual('@/pages/_app'),
-  GATEWAY_URL: 'https://safe-client.safe.global',
   __esModule: true,
 }))
 import { chainBuilder } from '@/tests/builders/chains'

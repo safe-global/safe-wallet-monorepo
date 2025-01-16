@@ -90,3 +90,5 @@ export type OrderTransactionInfo = SwapOrderTransactionInfo | TwapOrderTransacti
 
 export type PendingTransactionItems = QueuedItemPage['results'][number]
 export type HistoryTransactionItems = TransactionItemPage['results'][number]
+
+export type { BalancesGetSupportedFiatCodesV1ApiResponse as FiatCurrencies } from './AUTO_GENERATED/balances'

@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - apps/web/**
+      - packages/store/**
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true

@@ -8007,15 +8007,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@safe-global/jest-presets@workspace:config/jest-presets":
-  version: 0.0.0-use.local
-  resolution: "@safe-global/jest-presets@workspace:config/jest-presets"
-  dependencies:
-    jest-transform-stub: "npm:2.0.0"
-    ts-jest: "npm:29.2.5"
-  languageName: unknown
-  linkType: soft
-
 "@safe-global/mobile@workspace:apps/mobile":
   version: 0.0.0-use.local
   resolution: "@safe-global/mobile@workspace:apps/mobile"
@@ -8044,6 +8035,7 @@ __metadata:
     "@reduxjs/toolkit": "npm:^2.4.0"
     "@rtk-query/codegen-openapi": "npm:^2.0.0"
     "@safe-global/store": "workspace:^"
+    "@safe-global/test": "workspace:^"
     "@storybook/addon-essentials": "npm:^8.4.6"
     "@storybook/addon-interactions": "npm:^8.4.6"
     "@storybook/addon-onboarding": "npm:^8.4.6"
@@ -8244,6 +8236,18 @@ __metadata:
   dependencies:
     "@types/jest": "npm:^29.5.14"
     jest: "npm:^29.7.0"
+    ts-node: "npm:^10.9.2"
+  languageName: unknown
+  linkType: soft
+
+"@safe-global/test@workspace:^, @safe-global/test@workspace:config/test":
+  version: 0.0.0-use.local
+  resolution: "@safe-global/test@workspace:config/test"
+  dependencies:
+    "@safe-global/store": "workspace:^"
+    jest: "npm:^29.7.0"
+    jest-transform-stub: "npm:2.0.0"
+    ts-jest: "npm:29.2.5"
   languageName: unknown
   linkType: soft
 
@@ -8298,6 +8302,8 @@ __metadata:
     "@safe-global/safe-core-sdk-types": "npm:^5.0.1"
     "@safe-global/safe-gateway-typescript-sdk": "npm:3.22.6"
     "@safe-global/safe-modules-deployments": "npm:^2.2.1"
+    "@safe-global/store": "workspace:^"
+    "@safe-global/test": "workspace:^"
     "@sentry/react": "npm:^7.91.0"
     "@sentry/types": "npm:^7.74.0"
     "@spindl-xyz/attribution-lite": "npm:^1.4.0"
@@ -8359,11 +8365,13 @@ __metadata:
     gray-matter: "npm:^4.0.3"
     husky: "npm:^9.0.11"
     idb-keyval: "npm:^6.2.1"
-    jest: "npm:^29.6.2"
-    jest-environment-jsdom: "npm:^29.6.2"
+    jest: "npm:^29.7.0"
+    jest-environment-jsdom: "npm:^29.7.0"
+    jest-fixed-jsdom: "npm:^0.0.9"
     js-cookie: "npm:^3.0.1"
     lodash: "npm:^4.17.21"
     mockdate: "npm:^3.0.5"
+    msw: "npm:^2.7.0"
     next: "npm:^15.1.2"
     papaparse: "npm:^5.3.2"
     prettier: "npm:^3.3.3"
@@ -23187,7 +23195,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jest-environment-jsdom@npm:^29.2.1, jest-environment-jsdom@npm:^29.6.2":
+"jest-environment-jsdom@npm:^29.2.1, jest-environment-jsdom@npm:^29.7.0":
   version: 29.7.0
   resolution: "jest-environment-jsdom@npm:29.7.0"
   dependencies:
@@ -23249,6 +23257,15 @@ __metadata:
   bin:
     jest: bin/jest.js
   checksum: 10/772421d867497cd20e73ffc6b56e432156da378213d411f48ce3a864ceef3f7ad783cc954f27c74bd071bec109399d8f965d68ecb0d512f868338a7dc254133e
+  languageName: node
+  linkType: hard
+
+"jest-fixed-jsdom@npm:^0.0.9":
+  version: 0.0.9
+  resolution: "jest-fixed-jsdom@npm:0.0.9"
+  peerDependencies:
+    jest-environment-jsdom: ">=28.0.0"
+  checksum: 10/c0c1502c81de2c628f728d4c8cff1d66adf7dba3933d72198905bd395b95d393cc535d36469076e03c32f8f0c2200bffcc61065de0a4e5d6f83cfccad0da95cb
   languageName: node
   linkType: hard
 
@@ -23567,7 +23584,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jest@npm:^29.6.2, jest@npm:^29.7.0":
+"jest@npm:^29.7.0":
   version: 29.7.0
   resolution: "jest@npm:29.7.0"
   dependencies:

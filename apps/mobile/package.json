@@ -116,6 +116,7 @@
     "@react-native-community/datetimepicker": "8.2.0",
     "@react-native-community/slider": "4.5.5",
     "@rtk-query/codegen-openapi": "^2.0.0",
+    "@safe-global/test": "workspace:^",
     "@storybook/addon-essentials": "^8.4.6",
     "@storybook/addon-interactions": "^8.4.6",
     "@storybook/addon-onboarding": "^8.4.6",

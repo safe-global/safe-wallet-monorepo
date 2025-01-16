@@ -1,4 +1,4 @@
-const preset = require('../../config/jest-presets/presets/jest-preset')
+const preset = require('../../config/test/presets/jest-preset')
 
 module.exports = {
   ...preset,
