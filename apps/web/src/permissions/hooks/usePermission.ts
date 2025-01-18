@@ -11,7 +11,7 @@ import { usePermissions } from './usePermissions'
 export const usePermission = <P extends Permission, Props extends PermissionProps<P> = PermissionProps<P>>(
   permission: P,
   ...[props]: Props extends undefined ? [] : [props: Props]
-): { [K in Role]?: boolean } => {
+): { [_R in Role]?: boolean } => {
   const userPermissions = usePermissions()
 
   const permissionPerRole = useMemo(() => {

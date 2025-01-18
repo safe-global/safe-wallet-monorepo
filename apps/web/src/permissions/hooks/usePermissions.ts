@@ -8,7 +8,7 @@ import { getRolePermissions } from '../getRolePermissions'
  * Hook to get the permissions per role that the current user has based on the Safe and the connected wallet.
  * @returns Object that maps each role that the user has to its PermissionSet (if any defined).
  */
-export const usePermissions = (): { [K in Role]?: PermissionSet } => {
+export const usePermissions = (): { [_K in Role]?: PermissionSet } => {
   const userRoles = useRoles()
   const roleProps = useRoleProps()
 

@@ -28,8 +28,8 @@ export const getRolePermissions = <R extends Role>(
   props: {
     [K in R]?: K extends keyof RolePropsMap ? RolePropsMap[K] : undefined
   },
-): { [K in R]?: PermissionSet } => {
-  return roles.reduce<{ [K in R]?: PermissionSet }>((acc, role) => {
+) =>
+  roles.reduce<{ [_K in R]?: PermissionSet }>((acc, role) => {
     const rolePermissionSet = getRolePermissionSet(role, props[role] as RoleProps<R>)
 
     if (!rolePermissionSet) {
@@ -38,4 +38,3 @@ export const getRolePermissions = <R extends Role>(
 
     return { ...acc, [role]: rolePermissionSet }
   }, {})
-}
