@@ -18,15 +18,18 @@ export const useRoles = (): Role[] => {
   const isSpendingLimitBeneficiary = useIsSpendingLimitBeneficiary()
 
   // Map of roles and whether they are applicable to the current user
-  const roleApplicableMap: Record<Role, boolean> = {
-    [Role.Owner]: isOwner,
-    [Role.Proposer]: !!isProposer,
-    [Role.Recoverer]: isRecoverer,
-    [Role.SpendingLimitBeneficiary]: isSpendingLimitBeneficiary,
-    [Role.Executioner]: !!wallet,
-    [Role.NoWalletConnected]: !wallet,
-    [Role.ModuleRole]: false, // TODO: Implement module role
-  }
+  const roleApplicableMap: Record<Role, boolean> = useMemo(
+    () => ({
+      [Role.Owner]: isOwner,
+      [Role.Proposer]: !!isProposer,
+      [Role.Recoverer]: isRecoverer,
+      [Role.SpendingLimitBeneficiary]: isSpendingLimitBeneficiary,
+      [Role.Executioner]: !!wallet,
+      [Role.NoWalletConnected]: !wallet,
+      [Role.ModuleRole]: false, // TODO: Implement module role
+    }),
+    [isOwner, isProposer, isRecoverer, isSpendingLimitBeneficiary, wallet],
+  )
 
   const roles = useMemo(
     () =>
