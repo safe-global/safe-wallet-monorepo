@@ -10,17 +10,17 @@ export default <RolePermissionsConfig>{
     [CreateTransaction]: true,
     [ProposeTransaction]: true,
     [SignTransaction]: true,
-    [ExecuteTransaction]: ({ safeTx }) => safeTx.data.nonce === 123,
+    [ExecuteTransaction]: ({ safeTx }) => safeTx.data.nonce === 123, // TODO: implement correct logic
   }),
-  [Role.Proposer]: ({ spendingLimits }) => ({
+  [Role.Proposer]: () => ({
     [CreateTransaction]: true,
-    [ProposeTransaction]: !!spendingLimits,
-    [ExecuteTransaction]: ({ safeTx }) => !!safeTx,
+    [ProposeTransaction]: true,
+    [ExecuteTransaction]: ({ safeTx }) => !!safeTx, // TODO: implement correct logic
   }),
   [Role.Executioner]: () => ({
-    [ExecuteTransaction]: ({ safeTx }) => safeTx.data.nonce === 111,
+    [ExecuteTransaction]: ({ safeTx }) => safeTx.data.nonce === 111, // TODO: implement correct logic
   }),
   [Role.SpendingLimitBeneficiary]: ({ spendingLimits }) => ({
-    [ExecuteTransaction]: ({ safeTx }) => !!spendingLimits && safeTx.data.nonce === 123,
+    [ExecuteTransaction]: ({ safeTx }) => !!spendingLimits && safeTx.data.nonce === 123, // TODO: implement correct logic
   }),
 }

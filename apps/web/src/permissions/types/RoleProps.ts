@@ -9,9 +9,6 @@ export type RolePropsMap = {
   [Role.SpendingLimitBeneficiary]: {
     spendingLimits: SpendingLimitState[]
   }
-  [Role.Proposer]: {
-    spendingLimits: SpendingLimitState[]
-  }
 }
 
 // Extract the props for a specific role from RolePropsMap
