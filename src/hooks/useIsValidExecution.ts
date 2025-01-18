@@ -8,17 +8,12 @@ import { type SafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import { createWeb3, useWeb3ReadOnly } from '@/hooks/wallets/web3'
 import { type JsonRpcProvider } from '@ethersproject/providers'
 import { type ConnectedWallet } from '@/hooks/wallets/useOnboard'
-import {
-  getCurrentGnosisSafeContract,
-  getReadOnlyCurrentGnosisSafeContract,
-  getReadOnlyGnosisSafeContract,
-} from '@/services/contracts/safeContracts'
+import { getReadOnlyCurrentGnosisSafeContract } from '@/services/contracts/safeContracts'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useWallet from '@/hooks/wallets/useWallet'
 import { encodeSignatures } from '@/services/tx/encodeSignatures'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import { useTimelockAddress } from '@/hooks/hsgsuper/hsgsuper'
-import { createReadOnlyEthersAdapter } from '@/hooks/coreSDK/safeCoreSDK'
 
 const isContractError = (error: EthersError) => {
   if (!error.reason) return false

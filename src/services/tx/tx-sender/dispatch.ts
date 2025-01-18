@@ -1,5 +1,10 @@
 import type { SafeInfo, TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
-import type { SafeTransaction, TransactionOptions, TransactionResult, SafeSignature } from '@safe-global/safe-core-sdk-types'
+import type {
+  SafeTransaction,
+  TransactionOptions,
+  TransactionResult,
+  SafeSignature,
+} from '@safe-global/safe-core-sdk-types'
 import type { EthersError } from '@/utils/ethers-utils'
 import { didReprice, didRevert } from '@/utils/ethers-utils'
 import type MultiSendCallOnlyEthersContract from '@safe-global/safe-ethers-lib/dist/src/contracts/MultiSendCallOnly/MultiSendCallOnlyEthersContract'
@@ -27,7 +32,7 @@ import { asError } from '@/services/exceptions/utils'
 import * as hsgsuper from '../hsgsuper'
 import type Safe from '@safe-global/safe-core-sdk'
 import { BigNumber } from '@ethersproject/bignumber'
-import { ethers } from 'ethers';
+import { ethers } from 'ethers'
 
 /**
  * Propose a transaction
@@ -285,16 +290,16 @@ export const dispatchTxSchedule = async (
 /**
  * Author: Chase
  * From: https://github.com/safe-global/safe-core-sdk/blob/725f473aa7308b0e5748e7d2e08522645140dd52/packages/safe-core-sdk/src/Safe.ts#L855
- * @param safeTransaction 
+ * @param safeTransaction
  * @param isScheduled true if the transaction has already been scheduled in the timelock. false otherwise
- * @param options 
- * @returns 
+ * @param options
+ * @returns
  */
 const _scheduleTransaction = async (
   sdk: Safe,
   safeTransaction: SafeTransaction,
   isScheduled: boolean,
-  options?: TransactionOptions
+  options?: TransactionOptions,
 ): Promise<TransactionResult> => {
   let transaction = safeTransaction
 
@@ -319,8 +324,9 @@ const _scheduleTransaction = async (
   if (threshold > signedSafeTransaction.signatures.size) {
     const signaturesMissing = threshold - signedSafeTransaction.signatures.size
     throw new Error(
-      `There ${signaturesMissing > 1 ? 'are' : 'is'} ${signaturesMissing} signature${signaturesMissing > 1 ? 's' : ''
-      } missing`
+      `There ${signaturesMissing > 1 ? 'are' : 'is'} ${signaturesMissing} signature${
+        signaturesMissing > 1 ? 's' : ''
+      } missing`,
     )
   }
 
@@ -335,14 +341,10 @@ const _scheduleTransaction = async (
   if (options?.gas && options?.gasLimit) {
     throw new Error('Cannot specify gas and gasLimit together in transaction options')
   }
-  const txResponse = await _scheduleTransactionContract(
-    signedSafeTransaction,
-    isScheduled,
-    {
-      from: signerAddress,
-      ...options
-    }
-  )
+  const txResponse = await _scheduleTransactionContract(signedSafeTransaction, isScheduled, {
+    from: signerAddress,
+    ...options,
+  })
   return txResponse
 }
 
@@ -350,7 +352,7 @@ const _scheduleTransaction = async (
 const _scheduleTransactionContract = async (
   safeTransaction: SafeTransaction,
   isScheduled: boolean,
-  options?: TransactionOptions
+  options?: TransactionOptions,
 ): Promise<TransactionResult> => {
   if (options && !options.gasLimit) {
     // options.gasLimit = await this.estimateGas(
@@ -372,9 +374,9 @@ const _scheduleTransactionContract = async (
     //   }
     // )
     // CHASE Need at least 90,000 for it to be enough gas.
-    options.gasLimit = 300_000;
+    options.gasLimit = 300_000
   }
-  const address = "0x9045781E1E982198BEd965EB3cED7b2D1EC8baa2";
+  const address = '0x9045781E1E982198BEd965EB3cED7b2D1EC8baa2'
   const inter: ethers.ContractInterface = JSON.parse(`[
     {
       "inputs": [
@@ -496,28 +498,27 @@ const _scheduleTransactionContract = async (
       "stateMutability": "payable",
       "type": "function",
       "name": "executeTimelockTransaction"
-    }]`);
-  let metamask: ethers.providers.ExternalProvider;
-  if (window.ethereum)
-    metamask = window.ethereum
+    }]`)
+  let metamask: ethers.providers.ExternalProvider
+  if (window.ethereum) metamask = window.ethereum
   else {
-    console.log("Metamask not available");
-    throw "Metamask not available"
+    console.log('Metamask not available')
+    throw 'Metamask not available'
   }
 
   const provider = new ethers.providers.Web3Provider(metamask)
 
   // MetaMask requires requesting permission to connect users accounts
-  await provider.send("eth_requestAccounts", []);
+  await provider.send('eth_requestAccounts', [])
 
   // The MetaMask plugin also allows signing transactions to
   // send ether and pay to change state within the blockchain.
   // For this, you need the account signer...
   const signerTwo = provider.getSigner()
-  const contract = new ethers.Contract(address, inter, signerTwo);
+  const contract = new ethers.Contract(address, inter, signerTwo)
   let txResponse: ContractTransaction
   if (isScheduled) {
-    console.log("Dispatch: Executing through timelock")
+    console.log('Dispatch: Executing through timelock')
     txResponse = await contract.executeTimelockTransaction(
       safeTransaction.data.to,
       safeTransaction.data.value,
@@ -529,11 +530,10 @@ const _scheduleTransactionContract = async (
       safeTransaction.data.gasToken,
       safeTransaction.data.refundReceiver,
       safeTransaction.encodedSignatures(),
-      options
+      options,
     )
-  }
-  else {
-    console.log("Dispatch: Scheduling through timelock")
+  } else {
+    console.log('Dispatch: Scheduling through timelock')
     txResponse = await contract.scheduleTransaction(
       safeTransaction.data.to,
       safeTransaction.data.value,
@@ -545,20 +545,17 @@ const _scheduleTransactionContract = async (
       safeTransaction.data.gasToken,
       safeTransaction.data.refundReceiver,
       safeTransaction.encodedSignatures(),
-      options
+      options,
     )
   }
   return toTxResult(txResponse, options)
 }
 
-export function toTxResult(
-  transactionResponse: ContractTransaction,
-  options?: TransactionOptions
-): TransactionResult {
+export function toTxResult(transactionResponse: ContractTransaction, options?: TransactionOptions): TransactionResult {
   return {
     hash: transactionResponse.hash,
     options,
-    transactionResponse
+    transactionResponse,
   }
 }
 

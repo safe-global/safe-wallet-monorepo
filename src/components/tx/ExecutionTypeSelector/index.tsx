@@ -2,9 +2,6 @@ import { Box, FormControl, FormControlLabel, Radio, RadioGroup, Typography } fro
 import type { Dispatch, SetStateAction, ReactElement, ChangeEvent } from 'react'
 
 import useWallet from '@/hooks/wallets/useWallet'
-import WalletIcon from '@/components/common/WalletIcon'
-import SponsoredBy from '../SponsoredBy'
-import RemainingRelays from '../RemainingRelays'
 import type { RelayResponse } from '@/services/tx/relaying'
 
 import css from './styles.module.css'
@@ -33,7 +30,6 @@ const _ExecutionTypeSelector = ({
   noLabel?: boolean
   tooltip?: string
 }): ReactElement | null => {
-
   const onChooseExecutionType = (_: ChangeEvent<HTMLInputElement>, newExecutionType: string) => {
     setExecutionType(newExecutionType as ExecutionType)
   }
@@ -52,11 +48,7 @@ const _ExecutionTypeSelector = ({
             <FormControlLabel
               sx={{ flex: 1 }}
               value={ExecutionType.SCHEDULE}
-              label={
-                <Typography className={css.radioLabel}>
-                  Schedule
-                </Typography>
-              }
+              label={<Typography className={css.radioLabel}>Schedule</Typography>}
               control={<Radio />}
             />
 
@@ -64,11 +56,7 @@ const _ExecutionTypeSelector = ({
               data-testid="connected-wallet-execution-method"
               sx={{ flex: 1 }}
               value={ExecutionType.EXECUTE}
-              label={
-                <Typography className={css.radioLabel}>
-                  Execute
-                </Typography>
-              }
+              label={<Typography className={css.radioLabel}>Execute</Typography>}
               control={<Radio />}
             />
           </RadioGroup>

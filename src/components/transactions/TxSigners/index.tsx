@@ -30,7 +30,8 @@ import CircleIcon from '@/public/images/common/circle.svg'
 import CheckIcon from '@/public/images/common/circle-check.svg'
 import CancelIcon from '@/public/images/common/cancel.svg'
 import useTransactionStatus from '@/hooks/useTransactionStatus'
-import { TimelockStatus, TimelockTx, useNow } from '@/hooks/hsgsuper/hsgsuper'
+import type { TimelockTx } from '@/hooks/hsgsuper/hsgsuper'
+import { TimelockStatus } from '@/hooks/hsgsuper/hsgsuper'
 
 // Icons
 const Created = () => (

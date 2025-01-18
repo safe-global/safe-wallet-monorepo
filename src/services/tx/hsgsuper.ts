@@ -1,9 +1,4 @@
-import type {
-  SafeTransaction,
-  TransactionOptions,
-  TransactionResult,
-  SafeSignature,
-} from '@safe-global/safe-core-sdk-types'
+import type { SafeTransaction, TransactionOptions, TransactionResult } from '@safe-global/safe-core-sdk-types'
 import type { ContractTransaction, Signer } from 'ethers'
 
 // From Chase
@@ -11,8 +6,8 @@ import Safe from '@safe-global/safe-core-sdk'
 import { BigNumber } from '@ethersproject/bignumber'
 import { ethers } from 'ethers'
 import type { Web3Provider } from '@ethersproject/providers'
-import { MultisigConfirmation } from '@safe-global/safe-apps-sdk'
-import { createWeb3ReadOnly, getWeb3ReadOnly } from '@/hooks/wallets/web3'
+import type { MultisigConfirmation } from '@safe-global/safe-apps-sdk'
+import { getWeb3ReadOnly } from '@/hooks/wallets/web3'
 import { HsgsupermodAbi__factory as HsgsupermodFactory } from 'src/types/contracts/hsgsuper/factories/HsgsupermodAbi__factory'
 import type { HsgsupermodAbi as HsgSuperContract } from '@/types/contracts/hsgsuper/HsgsupermodAbi'
 import { createEthersAdapter } from '@/hooks/coreSDK/safeCoreSDK'

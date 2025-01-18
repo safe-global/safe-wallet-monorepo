@@ -128,23 +128,21 @@ export const useTxActions = (): TxActions => {
       }
 
       // CHASE TEMPORARY MEASURE TO TOGGLE SCHEDULE VS EXECUTION MANUALLY
-      const IS_SCHEDULED = false;
+      const IS_SCHEDULED = false
 
       // Relay or execute the tx via connected wallet
       if (isRelayed) {
-        console.log("Relay execution")
+        console.log('Relay execution')
         await dispatchTxRelay(safeTx, safe, txId, txOptions.gasLimit)
-      }
-      else if (!isScheduled) {
+      } else if (!isScheduled) {
         // await dispatchTxExecution(safeTx, txOptions, txId, onboard, chainId, safeAddress)
-        console.log("Scheduling the transaction instead of executing it directly.")
+        console.log('Scheduling the transaction instead of executing it directly.')
         await dispatchTxSchedule(safeTx, txOptions, txId, onboard, chainId, safeAddress)
       } else if (isScheduled) {
-        console.log("Executing transaction through timelock")
+        console.log('Executing transaction through timelock')
         await dispatchTxScheduleExec(safeTx, txOptions, txId, onboard, chainId, safeAddress)
-      }
-      else {
-        console.log("Regular execution")
+      } else {
+        console.log('Regular execution')
         await dispatchTxExecution(safeTx, txOptions, txId, onboard, chainId, safeAddress)
       }
 
@@ -200,11 +198,11 @@ export const useSafeTxGas = (safeTx: SafeTransaction | undefined): number | unde
     return !safeTx?.data?.to
       ? undefined
       : {
-        to: safeTx?.data.to,
-        value: safeTx?.data?.value,
-        data: safeTx?.data?.data,
-        operation: safeTx?.data?.operation,
-      }
+          to: safeTx?.data.to,
+          value: safeTx?.data?.value,
+          data: safeTx?.data?.data,
+          operation: safeTx?.data?.operation,
+        }
   }, [safeTx?.data.to, safeTx?.data.value, safeTx?.data.data, safeTx?.data.operation])
 
   const [safeTxGas] = useAsync(() => {

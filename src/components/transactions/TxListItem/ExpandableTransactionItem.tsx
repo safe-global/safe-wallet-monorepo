@@ -1,8 +1,5 @@
 import {
-  DetailedExecutionInfoType,
   getTransactionDetails,
-  TransactionInfoType,
-  TransactionTokenType,
   type Transaction,
   type TransactionDetails,
 } from '@safe-global/safe-gateway-typescript-sdk'
@@ -17,12 +14,10 @@ import { BatchExecuteHoverContext } from '@/components/transactions/BatchExecute
 import css from './styles.module.css'
 import classNames from 'classnames'
 import { trackEvent, TX_LIST_EVENTS } from '@/services/analytics'
-import { getProposalId } from '@/services/tx/hsgsuper'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
 import useAsync from '@/hooks/useAsync'
 import useChainId from '@/hooks/useChainId'
-import { useTimelockStamp, useTimelockTx } from '@/hooks/hsgsuper/hsgsuper'
+import { useTimelockTx } from '@/hooks/hsgsuper/hsgsuper'
 
 type ExpandableTransactionItemProps = {
   isGrouped?: boolean

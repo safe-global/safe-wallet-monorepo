@@ -1,5 +1,6 @@
 import { ReplaceTxHoverContext } from '@/components/transactions/GroupedTxListItems/ReplaceTxHoverProvider'
-import { TimelockTx, TimelockStatus, useNow } from '@/hooks/hsgsuper/hsgsuper'
+import type { TimelockTx } from '@/hooks/hsgsuper/hsgsuper'
+import { TimelockStatus } from '@/hooks/hsgsuper/hsgsuper'
 import { useAppSelector } from '@/store'
 import { PendingStatus, selectPendingTxById } from '@/store/pendingTxsSlice'
 import { isSignableBy } from '@/utils/transaction-guards'

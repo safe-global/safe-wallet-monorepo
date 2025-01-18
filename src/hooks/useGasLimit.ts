@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo } from 'react'
 import type { BigNumber, providers } from 'ethers'
 import type Safe from '@safe-global/safe-core-sdk'
 import { encodeSignatures } from '@/services/tx/encodeSignatures'
@@ -14,7 +14,6 @@ import { useSafeSDK } from './coreSDK/safeCoreSDK'
 import useIsSafeOwner from './useIsSafeOwner'
 import { Errors, logError } from '@/services/exceptions'
 import { useHsgAddress, useTimelockAddress } from '@/hooks/hsgsuper/hsgsuper'
-import { getHsgSuperContract } from '@/services/tx/hsgsuper'
 import { HsgsupermodAbi__factory as HsgsupermodFactory } from 'src/types/contracts/hsgsuper/factories/HsgsupermodAbi__factory'
 
 const getEncodedSafeTx = (safeSDK: Safe, safeTx: SafeTransaction, from?: string): string => {

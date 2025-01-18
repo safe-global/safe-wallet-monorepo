@@ -18,9 +18,8 @@ import useIsPending from '@/hooks/useIsPending'
 import classNames from 'classnames'
 import { isTrustedTx } from '@/utils/transactions'
 import UntrustedTxWarning from '../UntrustedTxWarning'
-import { useSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
-import { TimelockStatus, TimelockTx, useNow } from '@/hooks/hsgsuper/hsgsuper'
-import { formatDistance } from 'date-fns'
+import type { TimelockTx } from '@/hooks/hsgsuper/hsgsuper'
+import { TimelockStatus, useNow } from '@/hooks/hsgsuper/hsgsuper'
 
 const getStatusColor = (value: TransactionStatus, palette: Palette | Record<string, Record<string, string>>) => {
   switch (value) {
