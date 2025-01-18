@@ -1,5 +1,5 @@
 import { ReplaceTxHoverContext } from '@/components/transactions/GroupedTxListItems/ReplaceTxHoverProvider'
-import { useNow } from '@/hooks/hsgsuper/hsgsuper'
+import { TimelockTx, TimelockStatus, useNow } from '@/hooks/hsgsuper/hsgsuper'
 import { useAppSelector } from '@/store'
 import { PendingStatus, selectPendingTxById } from '@/store/pendingTxsSlice'
 import { isSignableBy } from '@/utils/transaction-guards'
@@ -11,15 +11,18 @@ import useWallet from './wallets/useWallet'
 
 const ReplacedStatus = 'WILL_BE_REPLACED'
 
-// edits for hsgsupermod
-const ScheduledStatus = 'SCHEDULED'
-
-type TxLocalStatus = TransactionStatus | PendingStatus | typeof ReplacedStatus | typeof ScheduledStatus
+type TxLocalStatus =
+  | TransactionStatus
+  | PendingStatus
+  | typeof ReplacedStatus
+  | Exclude<TimelockStatus, TimelockStatus.NONE>
 
 const STATUS_LABELS: Record<TxLocalStatus, string> = {
   [TransactionStatus.AWAITING_CONFIRMATIONS]: 'Awaiting confirmations',
-  [ScheduledStatus]: 'Scheduled',
-  [TransactionStatus.AWAITING_EXECUTION]: 'Awaiting execution',
+  [TimelockStatus.SCHEDULED]: 'Scheduled',
+  [TimelockStatus.CANCELLED]: 'Cancelled in timelock',
+  [TimelockStatus.READY]: 'Awaiting execution',
+  [TransactionStatus.AWAITING_EXECUTION]: 'Awaiting scheduling',
   [TransactionStatus.CANCELLED]: 'Cancelled',
   [TransactionStatus.FAILED]: 'Failed',
   [TransactionStatus.SUCCESS]: 'Success',
@@ -37,15 +40,20 @@ const WALLET_STATUS_LABELS: Record<TxLocalStatus, string> = {
 }
 
 // (hsgsuper) timeTillReady is a Unix epoch timestamp value (in seconds) giving the time till a scheduled transaction will be ready
-const useTransactionStatus = (txSummary: TransactionSummary, timeTillReady?: number): string => {
+const useTransactionStatus = (txSummary: TransactionSummary, timelockTx?: TimelockTx): string => {
   const { txStatus, id } = txSummary
   // console.log('ID:', id)
 
   const { replacedTxIds } = useContext(ReplaceTxHoverContext)
   const wallet = useWallet()
   const pendingTx = useAppSelector((state) => selectPendingTxById(state, id))
-  const now = useNow()
-  const distance = timeTillReady ? formatDistance(now, timeTillReady) : ''
+  const distance =
+    !!timelockTx && timelockTx.status === TimelockStatus.SCHEDULED
+      ? formatDistance(
+          timelockTx.timelockDetails.timestamp - timelockTx.timelockDetails.timeLeftTillReady,
+          timelockTx.timelockDetails.timestamp,
+        )
+      : ''
 
   if (replacedTxIds.includes(id)) {
     return STATUS_LABELS[ReplacedStatus]
@@ -58,9 +66,21 @@ const useTransactionStatus = (txSummary: TransactionSummary, timeTillReady?: num
   // console.log('timeTillReady: ', timeTillReady)
   // console.log('now: ', now)
 
-  if (!pendingTx && txStatus === TransactionStatus.AWAITING_EXECUTION && timeTillReady && now < timeTillReady) {
-    return statuses[ScheduledStatus] + ` (${distance})`.replace('less than ', '< ')
+  if (
+    !pendingTx &&
+    txStatus === TransactionStatus.AWAITING_EXECUTION &&
+    timelockTx &&
+    timelockTx.status !== TimelockStatus.NONE
+  ) {
+    switch (timelockTx.status) {
+      case TimelockStatus.SCHEDULED:
+        return statuses[TimelockStatus.SCHEDULED] + ` (${distance})`.replace('less than ', '< ')
+      default:
+        return statuses[timelockTx.status]
+    }
   }
+
+  // if the transaction has been cancelled
 
   return statuses[pendingTx?.status || txStatus] || ''
 }
