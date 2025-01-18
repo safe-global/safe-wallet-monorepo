@@ -9,7 +9,7 @@ import {
 import { findModuleAddress, getProposalId } from '@/services/tx/hsgsuper'
 import hsgsuperAbi from '@/services/tx/contracts/hsgsupermod.abi.json'
 import timelockAbi from '@/services/tx/contracts/timelockcontroller.abi.json'
-import { ethers } from 'ethers'
+import { BigNumber, ethers } from 'ethers'
 import { useSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
 import { useAppSelector } from '@/store'
 import { selectPendingTxById } from '@/store/pendingTxsSlice'
@@ -157,7 +157,7 @@ export type TimelockTx = ScheduledTimelockTx | ReadyTimelockTx | CancelledTimelo
 // gets timelock status, whether it is canceled, scheduled, ready, or none
 export const useTimelockTx = (txDetails: TransactionDetails | undefined): { timelockTx?: TimelockTx; err?: string } => {
   const [proposalId, setPId] = useState<string>()
-  const [timeStamp, setTStamp] = useState<number>()
+  const [timestamp, setTStamp] = useState<number>()
   const [isCancelled, setIsCancelled] = useState(false)
   const [err, setErr] = useState<string>()
   const provider = useWeb3ReadOnly()
@@ -167,7 +167,11 @@ export const useTimelockTx = (txDetails: TransactionDetails | undefined): { time
   const pendingTx = useAppSelector((state) => selectPendingTxById(state, txDetails?.txId ?? ''))
 
   // gets the canceled transactions
-  useEffect(() => {})
+  // useEffect(() => {
+  //   // cancelled transactions won't have timestamps, and no need calculate if already cancelled
+  //   if (!!timestamp || isCancelled) return
+
+  // })
 
   useEffect(() => {
     if (!txDetails) {
@@ -221,18 +225,30 @@ export const useTimelockTx = (txDetails: TransactionDetails | undefined): { time
       const hsgsuper = new ethers.Contract(modAdd, hsgsuperAbi, provider)
       const timelockAdd: string = await hsgsuper.timelock()
       const timelock = new ethers.Contract(timelockAdd, timelockAbi, provider)
-      const timestamp = await timelock.getTimestamp(proposalId)
-      if (now < timestamp * 1000) {
+      const _timestamp = Number((await timelock.getTimestamp(proposalId)).toString()) // ethers contracts return BigNumbers
+      const filter = timelock.filters.Cancelled(proposalId)
+      // console.log('typeof: ', typeof timestamp)
+      if (now < _timestamp * 1000) {
         console.log('Setting cancellation event listener: ')
-        const filter = timelock.filters.Cancelled(proposalId)
         // @chase not sure if I have to clean this up just in case
         timelock.once(filter, (propId) => {
           console.log('Cancel event ran!')
           setIsCancelled(true)
+          setTStamp(undefined)
         })
       }
-      console.log('Timestamp: ', timestamp)
-      setTStamp(Number(timestamp.toString()) * 1000)
+      if (_timestamp === 0) {
+        const logs = await timelock.queryFilter(filter)
+        if (logs.length > 0) {
+          setIsCancelled(true)
+          setTStamp(undefined)
+        }
+      }
+      // if the proposal is unscheduled timestamp function returns 0
+      else {
+        setTStamp(_timestamp * 1000)
+        setIsCancelled(false)
+      }
       setErr(undefined)
     })
   }, [txDetails, provider, safeSdk, pendingTx == undefined]) // there's probably a better way to guarantee this effect runs after this transaction is processed
@@ -250,20 +266,20 @@ export const useTimelockTx = (txDetails: TransactionDetails | undefined): { time
       },
       status: TimelockStatus.CANCELLED,
     }
-  } else if (timeStamp && timeStamp > now) {
+  } else if (timestamp && timestamp > now) {
     timelockTx = {
       timelockDetails: {
         proposalId,
-        timestamp: timeStamp,
-        timeLeftTillReady: timeStamp - now,
+        timestamp: timestamp,
+        timeLeftTillReady: timestamp - now,
       },
       status: TimelockStatus.SCHEDULED,
     } as ScheduledTimelockTx
-  } else if (timeStamp && timeStamp <= now) {
+  } else if (timestamp && timestamp <= now) {
     timelockTx = {
       timelockDetails: {
         proposalId,
-        timestamp: timeStamp,
+        timestamp: timestamp,
       },
       status: TimelockStatus.READY,
     } as ReadyTimelockTx
