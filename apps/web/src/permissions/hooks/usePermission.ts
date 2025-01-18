@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { Permission, PermissionProps, Role } from '../types'
+import type { Permission, PermissionProps, Role } from '../types'
 import { usePermissions } from './usePermissions'
 
 /**

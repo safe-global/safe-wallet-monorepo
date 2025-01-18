@@ -1,5 +1,5 @@
-import { Permission } from './Permission'
-import { PermissionProps } from './PermissionProps'
+import type { Permission } from './Permission'
+import type { PermissionProps } from './PermissionProps'
 
 // Define the type for a permission function that evaluates to a boolean
 type PermissionFn<P extends Permission, Arg extends PermissionProps<P> = PermissionProps<P>> = Arg extends undefined

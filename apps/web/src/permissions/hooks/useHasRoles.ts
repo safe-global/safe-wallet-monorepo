@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Role } from '../types'
+import type { Role } from '../types'
 import { useRoles } from './useRoles'
 import { isArrayEqualSet } from '../utils'
 

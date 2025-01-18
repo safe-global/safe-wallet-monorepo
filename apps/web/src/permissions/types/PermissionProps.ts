@@ -1,5 +1,5 @@
-import { SafeTransaction } from '@safe-global/safe-core-sdk-types'
-import { Permission } from './Permission'
+import type { SafeTransaction } from '@safe-global/safe-core-sdk-types'
+import type { Permission } from './Permission'
 
 /**
  * PermissionPropsMap defines property types for specific permissions.

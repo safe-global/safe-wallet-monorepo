@@ -1,5 +1,5 @@
 import rolePermissionConfig from './config'
-import { PermissionSet, Role, RoleProps, RolePropsMap } from './types'
+import type { PermissionSet, Role, RoleProps, RolePropsMap } from './types'
 
 /**
  * Get the PermissionSet for a specific role with the given props.

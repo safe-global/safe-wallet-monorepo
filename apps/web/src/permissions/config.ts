@@ -1,4 +1,5 @@
-import { Permission, Role, RolePermissionsConfig } from './types'
+import type { RolePermissionsConfig } from './types'
+import { Permission, Role } from './types'
 
 const { CreateTransaction, ProposeTransaction, SignTransaction, ExecuteTransaction } = Permission
 

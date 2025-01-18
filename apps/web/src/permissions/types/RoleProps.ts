@@ -1,5 +1,5 @@
-import { SpendingLimitState } from '@/store/spendingLimitsSlice'
-import { Role } from './Role'
+import type { SpendingLimitState } from '@/store/spendingLimitsSlice'
+import type { Role } from './Role'
 
 /**
  * RolePropsMap defines property types for specific roles.

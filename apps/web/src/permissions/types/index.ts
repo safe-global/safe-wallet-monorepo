@@ -1,6 +1,6 @@
-import { PermissionSet } from './PermissionSet'
-import { Role } from './Role'
-import { RoleProps } from './RoleProps'
+import type { PermissionSet } from './PermissionSet'
+import type { Role } from './Role'
+import type { RoleProps } from './RoleProps'
 
 export * from './Role'
 export * from './Permission'
