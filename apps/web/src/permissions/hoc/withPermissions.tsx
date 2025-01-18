@@ -27,7 +27,7 @@ export function withPermission<C extends React.ComponentType<any>, P extends Per
   WrappedComponent: C,
   permission: P,
 ) {
-  return ({ forceRender, permissionProps, ...props }: WrappingComponentProps<C, P>) => {
+  const WithPermissions = ({ forceRender, permissionProps, ...props }: WrappingComponentProps<C, P>) => {
     const hasPermission = useHasPermission(permission, ...(permissionProps ? [permissionProps] : []))
 
     if (!forceRender && !hasPermission) {
@@ -36,4 +36,8 @@ export function withPermission<C extends React.ComponentType<any>, P extends Per
 
     return <WrappedComponent {...(props as React.ComponentProps<C>)} />
   }
+
+  WithPermissions.displayName = 'WithPermissions'
+
+  return WithPermissions
 }
