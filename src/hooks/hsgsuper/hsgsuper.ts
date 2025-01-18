@@ -117,8 +117,163 @@ export const useTimelockStamp = (
   return { timeStamp, proposalId, err }
 }
 
+export enum TimelockStatus {
+  SCHEDULED = 'SCHEDULED',
+  CANCELLED = 'TIMELOCK_CANCELLED',
+  READY = 'TIMELOCK_READY',
+  NONE = 'TIMELOCK_NONE',
+}
+
+export type GeneralTimelockDetails = {
+  proposalId: string
+}
+
+export type ScheduledTimelockTx = {
+  timelockDetails: GeneralTimelockDetails & {
+    timestamp: number
+    timeLeftTillReady: number //
+  }
+  status: TimelockStatus.SCHEDULED
+}
+
+export type ReadyTimelockTx = {
+  timelockDetails: GeneralTimelockDetails & {
+    timestamp: number
+  }
+  status: TimelockStatus.READY
+}
+
+export type CancelledTimelockTx = {
+  timelockDetails: GeneralTimelockDetails
+  status: TimelockStatus.CANCELLED
+}
+
+export type NoneTimelockTx = {
+  status: TimelockStatus.NONE
+}
+
+export type TimelockTx = ScheduledTimelockTx | ReadyTimelockTx | CancelledTimelockTx | NoneTimelockTx
+
+// gets timelock status, whether it is canceled, scheduled, ready, or none
+export const useTimelockTx = (txDetails: TransactionDetails | undefined): { timelockTx?: TimelockTx; err?: string } => {
+  const [proposalId, setPId] = useState<string>()
+  const [timeStamp, setTStamp] = useState<number>()
+  const [isCancelled, setIsCancelled] = useState(false)
+  const [err, setErr] = useState<string>()
+  const provider = useWeb3ReadOnly()
+  const safeSdk = useSafeSDK()
+  const now = useNow()
+
+  const pendingTx = useAppSelector((state) => selectPendingTxById(state, txDetails?.txId ?? ''))
+
+  // gets the canceled transactions
+  useEffect(() => {})
+
+  useEffect(() => {
+    if (!txDetails) {
+      setErr('No txDetails')
+      return
+    }
+    // if (txDetails.txInfo.type !== TransactionInfoType.TRANSFER) {
+    //   setErr('Incorrect txInfo type')
+    //   return
+    // }
+    // if (txDetails.txInfo.transferInfo.type !== TransactionTokenType.NATIVE_COIN) {
+    //   setErr('Incorrect transferInfo type')
+    //   return
+    // }
+    if (txDetails.detailedExecutionInfo?.type !== DetailedExecutionInfoType.MULTISIG) {
+      setErr('Incorrect detailedExecInfo type')
+      return
+    }
+    if (!txDetails.txData?.value) {
+      setErr('No txData value')
+      return
+    }
+    if (!provider) {
+      setErr('No provider')
+      return
+    }
+    if (!safeSdk) {
+      setErr('No safeSdk')
+      return
+    }
+
+    const proposalId = getProposalId(
+      txDetails.safeAddress,
+      txDetails.txData.to.value,
+      txDetails.txData.value,
+      txDetails.txData.hexData ?? null,
+      txDetails.txData.operation,
+      txDetails.detailedExecutionInfo.safeTxGas,
+      txDetails.detailedExecutionInfo.baseGas,
+      txDetails.detailedExecutionInfo.gasPrice,
+      txDetails.detailedExecutionInfo.gasToken,
+      txDetails.detailedExecutionInfo.refundReceiver.value,
+      txDetails.detailedExecutionInfo.confirmations,
+    )
+
+    setPId(proposalId)
+
+    // let timelockCancelEvent
+
+    findModuleAddress(safeSdk).then(async (modAdd) => {
+      const hsgsuper = new ethers.Contract(modAdd, hsgsuperAbi, provider)
+      const timelockAdd: string = await hsgsuper.timelock()
+      const timelock = new ethers.Contract(timelockAdd, timelockAbi, provider)
+      const timestamp = await timelock.getTimestamp(proposalId)
+      if (now < timestamp * 1000) {
+        console.log('Setting cancellation event listener: ')
+        const filter = timelock.filters.Cancelled(proposalId)
+        // @chase not sure if I have to clean this up just in case
+        timelock.once(filter, (propId) => {
+          console.log('Cancel event ran!')
+          setIsCancelled(true)
+        })
+      }
+      console.log('Timestamp: ', timestamp)
+      setTStamp(Number(timestamp.toString()) * 1000)
+      setErr(undefined)
+    })
+  }, [txDetails, provider, safeSdk, pendingTx == undefined]) // there's probably a better way to guarantee this effect runs after this transaction is processed
+
+  if (!proposalId) return { err }
+
+  let timelockTx: TimelockTx = {
+    status: TimelockStatus.NONE,
+  }
+
+  if (isCancelled) {
+    timelockTx = {
+      timelockDetails: {
+        proposalId,
+      },
+      status: TimelockStatus.CANCELLED,
+    }
+  } else if (timeStamp && timeStamp > now) {
+    timelockTx = {
+      timelockDetails: {
+        proposalId,
+        timestamp: timeStamp,
+        timeLeftTillReady: timeStamp - now,
+      },
+      status: TimelockStatus.SCHEDULED,
+    } as ScheduledTimelockTx
+  } else if (timeStamp && timeStamp <= now) {
+    timelockTx = {
+      timelockDetails: {
+        proposalId,
+        timestamp: timeStamp,
+      },
+      status: TimelockStatus.READY,
+    } as ReadyTimelockTx
+  }
+
+  return { timelockTx, err }
+}
+
 // this could be a general helper function really
-// returns updating current timestamp in *seconds*
+// returns updating current timestamp in *milliseconds*
 // gives a refresh rate in seconds
 export const useNow = (refreshRate: number = 5000) => {
   const [now, setNow] = useState(Date.now())

@@ -1,4 +1,9 @@
-import { getTransactionQueue, type TransactionListPage } from '@safe-global/safe-gateway-typescript-sdk'
+import {
+  getTransactionQueue,
+  Transaction,
+  TransactionStatus,
+  type TransactionListPage,
+} from '@safe-global/safe-gateway-typescript-sdk'
 import { useAppSelector } from '@/store'
 import useAsync from './useAsync'
 import { selectTxQueue, selectQueuedTransactionsByNonce } from '@/store/txQueueSlice'
@@ -24,6 +29,9 @@ const useTxQueue = (
 
   // The latest page of the queue is always in the store
   const queueState = useAppSelector(selectTxQueue)
+  // console.log('Queue state: ', queueState)
+  // if (queueState?.data?.results.length && queueState?.data?.results.length > 1)
+  //   (queueState!.data!.results[1] as Transaction).transaction.txStatus = TransactionStatus.CANCELLED
 
   // Return the new page or the stored page
   return pageUrl

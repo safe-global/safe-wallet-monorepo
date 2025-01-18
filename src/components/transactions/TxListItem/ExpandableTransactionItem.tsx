@@ -22,7 +22,7 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
 import useAsync from '@/hooks/useAsync'
 import useChainId from '@/hooks/useChainId'
-import { useTimelockStamp } from '@/hooks/hsgsuper/hsgsuper'
+import { useTimelockStamp, useTimelockTx } from '@/hooks/hsgsuper/hsgsuper'
 
 type ExpandableTransactionItemProps = {
   isGrouped?: boolean
@@ -56,10 +56,11 @@ export const ExpandableTransactionItem = ({
 
   console.log('txDetailsData: ', txDetailsData)
 
-  const { timeStamp: _timeStamp, err } = useTimelockStamp(txDetailsData)
+  // const { timeStamp: _timeStamp, err } = useTimelockStamp(txDetailsData)
+  // const timeStamp = _timeStamp
+  const { timelockTx, err } = useTimelockTx(txDetailsData)
   console.log('useTimelockTimestamp err: ', err)
   // const timeStamp = 1729984000000
-  const timeStamp = _timeStamp
 
   return (
     <Accordion
@@ -79,7 +80,7 @@ export const ExpandableTransactionItem = ({
       }}
     >
       <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={{ justifyContent: 'flex-start', overflowX: 'auto' }}>
-        <TxSummary item={item} timestamp={timeStamp} isGrouped={isGrouped} />
+        <TxSummary item={item} timelockTx={timelockTx} isGrouped={isGrouped} />
       </AccordionSummary>
 
       <AccordionDetails data-testid="accordion-details" sx={{ padding: 0 }}>
@@ -88,7 +89,7 @@ export const ExpandableTransactionItem = ({
         ) : (
           <TxDetails
             txSummary={item.transaction}
-            timestamp={timeStamp}
+            timelockTx={timelockTx}
             txDetailsData={txDetailsData}
             loading={loading}
             error={error}

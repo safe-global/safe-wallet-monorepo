@@ -19,7 +19,7 @@ import classNames from 'classnames'
 import { isTrustedTx } from '@/utils/transactions'
 import UntrustedTxWarning from '../UntrustedTxWarning'
 import { useSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
-import { useNow } from '@/hooks/hsgsuper/hsgsuper'
+import { TimelockStatus, TimelockTx, useNow } from '@/hooks/hsgsuper/hsgsuper'
 import { formatDistance } from 'date-fns'
 
 const getStatusColor = (value: TransactionStatus, palette: Palette | Record<string, Record<string, string>>) => {
@@ -40,21 +40,20 @@ const getStatusColor = (value: TransactionStatus, palette: Palette | Record<stri
 type TxSummaryProps = {
   isGrouped?: boolean
   item: Transaction
-  timestamp?: number
+  timelockTx?: TimelockTx
 }
 
-const TxSummary = ({ item, isGrouped, timestamp }: TxSummaryProps): ReactElement => {
+const TxSummary = ({ item, isGrouped, timelockTx }: TxSummaryProps): ReactElement => {
   // safeSDK stuff
   // const safeSDK = useSafeSDK()
 
   const tx = item.transaction
   const wallet = useWallet()
-  const txStatusLabel = useTransactionStatus(tx, timestamp)
+  const txStatusLabel = useTransactionStatus(tx, timelockTx)
   const now = useNow()
 
-  const isScheduled = !!timestamp && timestamp > now
+  const isScheduled = !!timelockTx && timelockTx.status === TimelockStatus.SCHEDULED
 
-  const distance = timestamp ? formatDistance(now, Number(timestamp)) : ''
   const isPending = useIsPending(tx.id)
   const isQueue = isTxQueued(tx.txStatus)
   const awaitingExecution = isAwaitingExecution(tx.txStatus)

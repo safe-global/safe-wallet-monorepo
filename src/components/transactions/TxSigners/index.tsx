@@ -30,7 +30,7 @@ import CircleIcon from '@/public/images/common/circle.svg'
 import CheckIcon from '@/public/images/common/circle-check.svg'
 import CancelIcon from '@/public/images/common/cancel.svg'
 import useTransactionStatus from '@/hooks/useTransactionStatus'
-import { useNow } from '@/hooks/hsgsuper/hsgsuper'
+import { TimelockStatus, TimelockTx, useNow } from '@/hooks/hsgsuper/hsgsuper'
 
 // Icons
 const Created = () => (
@@ -106,16 +106,15 @@ const shouldHideConfirmations = (detailedExecutionInfo?: DetailedExecutionInfo):
 type TxSignersProps = {
   txDetails: TransactionDetails
   txSummary: TransactionSummary
-  timestamp?: number
+  timelockTx?: TimelockTx
 }
 
-export const TxSigners = ({ txDetails, txSummary, timestamp }: TxSignersProps): ReactElement | null => {
+export const TxSigners = ({ txDetails, txSummary, timelockTx }: TxSignersProps): ReactElement | null => {
   const { detailedExecutionInfo, txInfo, txId } = txDetails
   const [hideConfirmations, setHideConfirmations] = useState<boolean>(shouldHideConfirmations(detailedExecutionInfo))
   const isPending = useIsPending(txId)
-  const now = useNow()
-  const isScheduled = !!timestamp && timestamp > now
-  const txStatus = useTransactionStatus(txSummary, timestamp)
+  const isScheduled = !!timelockTx && timelockTx.status === TimelockStatus.SCHEDULED
+  const txStatus = useTransactionStatus(txSummary, timelockTx)
   const wallet = useWallet()
   const { safe } = useSafeInfo()
 

@@ -40,22 +40,21 @@ import { getProposalId } from '@/services/tx/hsgsuper'
 import { useInitWeb3 } from '@/hooks/wallets/useInitWeb3'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
 import { ethers } from 'ethers'
-import { useNow, useTimelockStamp } from '@/hooks/hsgsuper/hsgsuper'
+import { TimelockStatus, TimelockTx, useNow, useTimelockStamp } from '@/hooks/hsgsuper/hsgsuper'
 
 export const NOT_AVAILABLE = 'n/a'
 
 type TxDetailsProps = {
   txSummary: TransactionSummary
   txDetails: TransactionDetails
-  timestamp?: number
+  timelockTx?: TimelockTx
 }
 
-const TxDetailsBlock = ({ txSummary, txDetails, timestamp }: TxDetailsProps): ReactElement => {
+const TxDetailsBlock = ({ txSummary, txDetails, timelockTx }: TxDetailsProps): ReactElement => {
   const isPending = useIsPending(txSummary.id)
   const isQueue = isTxQueued(txSummary.txStatus)
   const awaitingExecution = isAwaitingExecution(txSummary.txStatus)
-  const now = useNow()
-  const isScheduled = !!timestamp && timestamp > now
+  const isScheduled = !!timelockTx && timelockTx.status === TimelockStatus.SCHEDULED
   const isUnsigned =
     isMultisigExecutionInfo(txSummary.executionInfo) && txSummary.executionInfo.confirmationsSubmitted === 0
 
@@ -116,7 +115,7 @@ const TxDetailsBlock = ({ txSummary, txDetails, timestamp }: TxDetailsProps): Re
       {/* Signers */}
       {!isUnsigned && (
         <div className={css.txSigners}>
-          <TxSigners txDetails={txDetails} txSummary={txSummary} timestamp={timestamp} />
+          <TxSigners txDetails={txDetails} txSummary={txSummary} timelockTx={timelockTx} />
 
           {isQueue && !isScheduled && (
             <Box display="flex" alignItems="center" justifyContent="center" gap={1} mt={2}>
@@ -133,12 +132,12 @@ const TxDetailsBlock = ({ txSummary, txDetails, timestamp }: TxDetailsProps): Re
 const TxDetails = ({
   txSummary,
   txDetailsData,
-  timestamp,
+  timelockTx,
   loading,
   error,
 }: {
   txSummary: TransactionSummary
-  timestamp?: number
+  timelockTx?: TimelockTx
   txDetailsData?: TransactionDetails // optional
   loading: boolean
   error?: Error
@@ -183,7 +182,7 @@ const TxDetails = ({
   return (
     <div className={css.container}>
       {txDetailsData ? (
-        <TxDetailsBlock txSummary={txSummary} txDetails={txDetailsData} timestamp={timestamp} />
+        <TxDetailsBlock txSummary={txSummary} txDetails={txDetailsData} timelockTx={timelockTx} />
       ) : loading ? (
         <div className={css.loading}>
           <CircularProgress />
