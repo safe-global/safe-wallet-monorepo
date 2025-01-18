@@ -31,7 +31,7 @@ export const usePermission = <P extends Permission, Props extends PermissionProp
       // Return the permission value (boolean) as is
       return { ...acc, [role]: permissionValue }
     }, {})
-  }, [userPermissions])
+  }, [userPermissions, permission, props])
 
   return permissionPerRole
 }

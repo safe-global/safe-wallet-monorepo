@@ -21,7 +21,7 @@ export const useHasRoles = (rolesToCheck: Role[], exclusive = false): boolean =>
     } else {
       setHasRoles(rolesToCheckSet.isSubsetOf(new Set(roles)))
     }
-  }, [rolesToCheck, roles])
+  }, [rolesToCheck, roles, exclusive])
 
   return hasRoles
 }
