@@ -1,5 +1,5 @@
 import rolePermissionConfig from './config'
-import type { PermissionSet, Role, RoleProps, RolePropsMap } from './types'
+import type { PermissionSet, Role, RoleProps } from './types'
 
 /**
  * Get the PermissionSet for a specific role with the given props.
@@ -7,7 +7,7 @@ import type { PermissionSet, Role, RoleProps, RolePropsMap } from './types'
  * @param props Specific parameters for the role
  * @returns PermissionSet for the role or undefined if no permissions are defined for the role
  */
-const getRolePermissionSet = <const R extends Role>(role: R, props: RoleProps<R>) => {
+const getRolePermissionSet = <R extends Role>(role: R, props: RoleProps<R>) => {
   const rolePermissionsFn = rolePermissionConfig[role]
 
   if (!rolePermissionsFn) {
@@ -23,12 +23,7 @@ const getRolePermissionSet = <const R extends Role>(role: R, props: RoleProps<R>
  * @param props Object with specific parameters for the roles
  * @returns Object with PermissionSet for each of the give roles that has permissions defined
  */
-export const getRolePermissions = <R extends Role>(
-  roles: R[],
-  props: {
-    [K in R]?: K extends keyof RolePropsMap ? RolePropsMap[K] : undefined
-  },
-) =>
+export const getRolePermissions = <R extends Role>(roles: R[], props: { [K in R]?: RoleProps<K> }) =>
   roles.reduce<{ [_K in R]?: PermissionSet }>((acc, role) => {
     const rolePermissionSet = getRolePermissionSet(role, props[role] as RoleProps<R>)
 
