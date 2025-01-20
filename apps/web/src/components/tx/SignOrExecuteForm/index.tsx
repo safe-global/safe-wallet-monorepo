@@ -22,12 +22,11 @@ type SignOrExecuteExtendedProps = SignOrExecuteProps & {
 }
 
 const SignOrExecute = (props: SignOrExecuteExtendedProps) => {
-  const { safeTx } = useContext(SafeTxContext)
-  const [txDetails, txDetailsLoading] = useTxDetails(props.txId)
-  const [txPreview, txPreviewLoading] = useTxPreview(safeTx?.data, undefined, props.txId)
+  const { safeTx, safeTxError } = useContext(SafeTxContext)
+  const [txDetails, , txDetailsLoading] = useTxDetails(props.txId)
+  const [txPreview, , txPreviewLoading] = useTxPreview(safeTx?.data, undefined, props.txId)
 
-  // Show the loader only the first time the tx is being loaded
-  if (!safeTx || (props.txId ? txDetailsLoading : txPreviewLoading)) {
+  if ((!safeTx && !safeTxError) || txDetailsLoading || txPreviewLoading) {
     return <SignOrExecuteSkeleton />
   }
 

@@ -345,55 +345,262 @@ exports[`SignOrExecute should display an error screen 1`] = `
       class="MuiCardContent-root cardContent css-1lt5qva-MuiCardContent-root"
     >
       <div
-        class="MuiBox-root css-17luq05"
+        class="MuiStack-root css-1sazv7p-MuiStack-root"
       >
         <div
-          class="box MuiBox-root css-0"
+          class="MuiBox-root css-0"
         >
           <div
-            class="rect rectTl"
-          />
-          <div
-            class="rect rectTr"
-          />
-          <div
-            class="rect rectBl"
-          />
-          <div
-            class="rect rectBr"
-          />
-          <div
-            class="rect rectCenter"
-          />
-          <svg
-            version="1.1"
-            xmlns="http://www.w3.org/2000/svg"
+            class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiAccordion-root MuiAccordion-rounded MuiAccordion-gutters css-1gdgqta-MuiPaper-root-MuiAccordion-root"
+            style="--Paper-shadow: none;"
           >
-            <defs>
-              <filter
-                id="gooey"
+            <h3
+              class="MuiAccordion-heading css-cy7rkm-MuiAccordion-heading"
+            >
+              <button
+                aria-expanded="false"
+                class="MuiButtonBase-root MuiAccordionSummary-root MuiAccordionSummary-gutters accordion css-10sjung-MuiButtonBase-root-MuiAccordionSummary-root"
+                data-testid="decoded-tx-summary"
+                tabindex="0"
+                type="button"
               >
-                <fegaussianblur
-                  in="SourceGraphic"
-                  result="blur"
-                  stdDeviation="3"
-                />
-                <fecolormatrix
-                  in="blur"
-                  mode="matrix"
-                  result="goo"
-                  values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 19 -9"
-                />
-                <fecomposite
-                  in="SourceGraphic"
-                  in2="goo"
-                  operator="atop"
-                />
-              </filter>
-            </defs>
-          </svg>
+                <span
+                  class="MuiAccordionSummary-content MuiAccordionSummary-contentGutters css-1r0e0ir-MuiAccordionSummary-content"
+                >
+                  Advanced details
+                  <span
+                    class=""
+                    data-mui-internal-clone-element="true"
+                  >
+                    <mock-icon
+                      aria-hidden=""
+                      class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeSmall css-17ibv3e-MuiSvgIcon-root"
+                      focusable="false"
+                    />
+                  </span>
+                  <div
+                    class="MuiBox-root css-1rr4qq7"
+                  />
+                </span>
+                <span
+                  class="MuiAccordionSummary-expandIconWrapper css-1wqf3nl-MuiAccordionSummary-expandIconWrapper"
+                >
+                  <svg
+                    aria-hidden="true"
+                    class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-1dhtbeh-MuiSvgIcon-root"
+                    data-testid="ExpandMoreIcon"
+                    focusable="false"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      d="M16.59 8.59 12 13.17 7.41 8.59 6 10l6 6 6-6z"
+                    />
+                  </svg>
+                </span>
+              </button>
+            </h3>
+            <div
+              class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-hidden css-cwrbtg-MuiCollapse-root"
+              style="min-height: 0px;"
+            >
+              <div
+                class="MuiCollapse-wrapper MuiCollapse-vertical css-1x6hinx-MuiCollapse-wrapper"
+              >
+                <div
+                  class="MuiCollapse-wrapperInner MuiCollapse-vertical css-1i4ywhz-MuiCollapse-wrapperInner"
+                >
+                  <div
+                    class="MuiAccordion-region"
+                    role="region"
+                  >
+                    <div
+                      class="MuiAccordionDetails-root css-w74p4c-MuiAccordionDetails-root"
+                      data-testid="decoded-tx-details"
+                    >
+                      <div
+                        class="MuiGrid-root MuiGrid-container css-86qz5o-MuiGrid-root"
+                      >
+                        <div
+                          class="MuiGrid-root MuiGrid-item css-1wehkfy-MuiGrid-root"
+                          data-testid="tx-row-title"
+                          style="word-break: break-word;"
+                        >
+                          <p
+                            class="MuiTypography-root MuiTypography-body1 css-shf88x-MuiTypography-root"
+                          >
+                            safeTxGas:
+                          </p>
+                        </div>
+                        <div
+                          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true css-1vd824g-MuiGrid-root"
+                          data-testid="tx-data-row"
+                        >
+                          <div
+                            class="MuiBox-root css-rurw5h"
+                          >
+                            0
+                          </div>
+                        </div>
+                      </div>
+                      <div
+                        class="MuiGrid-root MuiGrid-container css-86qz5o-MuiGrid-root"
+                      >
+                        <div
+                          class="MuiGrid-root MuiGrid-item css-1wehkfy-MuiGrid-root"
+                          data-testid="tx-row-title"
+                          style="word-break: break-word;"
+                        >
+                          <p
+                            class="MuiTypography-root MuiTypography-body1 css-shf88x-MuiTypography-root"
+                          >
+                            Raw data:
+                          </p>
+                        </div>
+                        <div
+                          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true css-1vd824g-MuiGrid-root"
+                          data-testid="tx-data-row"
+                        >
+                          <div
+                            class="MuiBox-root css-70qvj9"
+                            data-testid="tx-data-row"
+                          >
+                            <div>
+                              0
+                               bytes
+                            </div>
+                            <span
+                              aria-label="Copy to clipboard"
+                              class=""
+                              data-mui-internal-clone-element="true"
+                              style="cursor: pointer;"
+                            >
+                              <button
+                                aria-label="Copy to clipboard"
+                                class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-xyrzjn-MuiButtonBase-root-MuiIconButton-root"
+                                tabindex="0"
+                                type="button"
+                              >
+                                <mock-icon
+                                  aria-hidden=""
+                                  class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeSmall css-gvpe62-MuiSvgIcon-root"
+                                  data-testid="copy-btn-icon"
+                                  focusable="false"
+                                />
+                              </button>
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
+    </div>
+  </div>
+  <div
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root css-1w4z6qv-MuiPaper-root-MuiCard-root"
+    style="--Paper-shadow: none;"
+  >
+    <div
+      class="MuiCardContent-root cardContent css-1lt5qva-MuiCardContent-root"
+    >
+      <div
+        class="wrapper"
+      >
+        <div
+          class="icon sign"
+        >
+          <mock-icon
+            aria-hidden=""
+            class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-tqxw8e-MuiSvgIcon-root"
+            focusable="false"
+          />
+        </div>
+        <div>
+          <h5
+            class="MuiTypography-root MuiTypography-h5 css-1mp5g96-MuiTypography-root"
+          >
+            confirm
+          </h5>
+          <p
+            class="MuiTypography-root MuiTypography-body2 css-17vdyq3-MuiTypography-root"
+          >
+            You're about to 
+            create and 
+            confirm
+             this transaction.
+          </p>
+        </div>
+      </div>
+      <form>
+        <hr
+          class="MuiDivider-root MuiDivider-fullWidth nestedDivider css-1jpvyob-MuiDivider-root"
+        />
+        <div
+          class="MuiCardActions-root MuiCardActions-spacing css-1q4nm6f-MuiCardActions-root"
+        >
+          <div
+            class="MuiStack-root css-irtfmw-MuiStack-root"
+          >
+            <span
+              class=""
+              data-mui-internal-clone-element="true"
+            >
+              <span
+                data-track="batching: Add to batch"
+              >
+                <button
+                  class="MuiButtonBase-root MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeMedium MuiButton-outlinedSizeMedium MuiButton-colorPrimary MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeMedium MuiButton-outlinedSizeMedium MuiButton-colorPrimary css-16be8yl-MuiButtonBase-root-MuiButton-root"
+                  tabindex="0"
+                  type="button"
+                >
+                  <mock-icon
+                    aria-hidden=""
+                    class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-1hr8a3z-MuiSvgIcon-root"
+                    focusable="false"
+                  />
+                  Add to batch
+                </button>
+              </span>
+            </span>
+            <div
+              class="MuiBox-root css-1aqmpzz"
+            >
+               
+              <div
+                aria-orientation="horizontal"
+                class="MuiDivider-root MuiDivider-fullWidth MuiDivider-withChildren css-1lftdsp-MuiDivider-root"
+                role="separator"
+              >
+                <span
+                  class="MuiDivider-wrapper css-tuok6n-MuiDivider-wrapper"
+                >
+                  or
+                </span>
+              </div>
+            </div>
+            <span
+              aria-label="Please connect your wallet"
+              class=""
+              data-mui-internal-clone-element="true"
+            >
+              <button
+                class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary Mui-disabled MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary css-1hp2ejb-MuiButtonBase-root-MuiButton-root"
+                data-testid="sign-btn"
+                disabled=""
+                tabindex="-1"
+                type="submit"
+              >
+                Sign
+              </button>
+            </span>
+          </div>
+        </div>
+      </form>
     </div>
   </div>
 </div>
