@@ -8,6 +8,7 @@ let staticSafes = []
 
 const typeSend = data.type.send
 const typeGeneral = data.type.general
+const typeUntrustedToken = data.type.untrustedReceivedToken
 
 const safe = 'sep:0x8f4A19C85b39032A37f7a6dCc65234f966F72551'
 const txbuilder =
@@ -22,5 +23,13 @@ describe('Safe app tx history tests', () => {
     cy.visit(constants.transactionUrl + safe + txbuilder)
     createTx.verifySummaryByName(typeSend.txBuilderTitle, null, [typeGeneral.statusOk], typeSend.txBuilderAltImage)
     main.verifyValuesExist(createTx.transactionItem, [typeSend.txBuilderTitle])
+  })
+
+  it('Verify that copying sender address of untrusted token shows warning popup', () => {
+    cy.visit(constants.transactionsHistoryUrl + staticSafes.SEP_STATIC_SAFE_7)
+    createTx.toggleUntrustedTxs()
+    createTx.clickOnTransactionItemByName(typeUntrustedToken.summaryTitle, typeUntrustedToken.summaryTxInfo)
+    createTx.clickOnCopyBtn(0)
+    createTx.verifyWarningModalVisible()
   })
 })

@@ -1,17 +1,17 @@
-import * as constants from '../../support/constants'
-import * as main from '../../e2e/pages/main.page'
-import * as createwallet from '../pages/create_wallet.pages'
-import * as owner from '../pages/owners.pages'
+import * as constants from '../../support/constants.js'
+import * as main from '../pages/main.page.js'
+import * as createwallet from '../pages/create_wallet.pages.js'
+import * as owner from '../pages/owners.pages.js'
 import * as wallet from '../../support/utils/wallet.js'
 
 const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
 const signer = walletCredentials.OWNER_4_PRIVATE_KEY
 
-describe('[SMOKE] Safe creation tests', () => {
+describe('Safe creation tests 3', () => {
   beforeEach(() => {
     cy.visit(constants.welcomeUrl + '?chain=sep')
   })
-  it('[SMOKE] Verify a Wallet can be connected', () => {
+  it('Verify a Wallet can be connected', () => {
     wallet.connectSigner(signer)
     owner.waitForConnectionStatus()
     createwallet.clickOnContinueWithWalletBtn()
@@ -22,7 +22,7 @@ describe('[SMOKE] Safe creation tests', () => {
     owner.waitForConnectionStatus()
   })
 
-  it('[SMOKE] Verify that a new Wallet has default name related to the selected network', () => {
+  it('Verify that a new Wallet has default name related to the selected network', () => {
     wallet.connectSigner(signer)
     owner.waitForConnectionStatus()
     createwallet.clickOnContinueWithWalletBtn()
@@ -30,7 +30,7 @@ describe('[SMOKE] Safe creation tests', () => {
     createwallet.verifyDefaultWalletName(createwallet.defaultSepoliaPlaceholder)
   })
 
-  it('[SMOKE] Verify Add and Remove Owner Row works as expected', () => {
+  it('Verify Add and Remove Owner Row works as expected', () => {
     wallet.connectSigner(signer)
     owner.waitForConnectionStatus()
     createwallet.clickOnContinueWithWalletBtn()
@@ -46,7 +46,7 @@ describe('[SMOKE] Safe creation tests', () => {
     owner.verifyNumberOfOwners(2)
   })
 
-  it('[SMOKE] Verify Threshold Setup', () => {
+  it('Verify Threshold Setup', () => {
     wallet.connectSigner(signer)
     owner.waitForConnectionStatus()
     createwallet.clickOnContinueWithWalletBtn()

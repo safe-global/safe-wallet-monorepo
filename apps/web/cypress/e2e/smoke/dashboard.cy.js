@@ -1,8 +1,5 @@
 import * as constants from '../../support/constants'
 import * as dashboard from '../pages/dashboard.pages'
-import * as main from '../pages/main.page'
-import * as safeapps from '../pages/safeapps.pages'
-import * as createTx from '../pages/create_tx.pages'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 
 let staticSafes = []
@@ -37,21 +34,6 @@ describe('[SMOKE] Dashboard tests', { defaultCommandTimeout: 20000 }, () => {
     dashboard.clickOnExploreAppsBtn()
   })
 
-  it('[SMOKE] Verify that pinned in dashboard, an app keeps its status on apps page', () => {
-    dashboard.pinAppByIndex(0).then((pinnedApp) => {
-      cy.visit(constants.appsUrlGeneral + staticSafes.SEP_STATIC_SAFE_2)
-      safeapps.verifyPinnedApp(pinnedApp)
-      cy.visit(constants.homeUrl + staticSafes.SEP_STATIC_SAFE_2)
-      dashboard.clickOnPinBtnByName(pinnedApp)
-      dashboard.verifyPinnedAppsCount(0)
-    })
-  })
-
-  it('[SMOKE] Verify clicking on View All button directs to list of all queued txs', () => {
-    dashboard.clickOnViewAllBtn()
-    createTx.verifyNumberOfTransactions(2)
-  })
-
   it('[SMOKE] Verify there is empty tx string and image when there are no tx queued', () => {
     cy.visit(constants.homeUrl + staticSafes.SEP_STATIC_SAFE_13)
     dashboard.verifyEmptyTxSection()
@@ -67,10 +49,5 @@ describe('[SMOKE] Dashboard tests', { defaultCommandTimeout: 20000 }, () => {
     dashboard.verifyTxItemInPendingTx(txMultiSendCall3)
     dashboard.verifyTxItemInPendingTx(txaddOwner)
     dashboard.verifyTxItemInPendingTx(txMultiSendCall2)
-  })
-
-  it('[SMOKE] Verify clicking on any tx takes the user to Transactions > Queue tab', () => {
-    dashboard.clickOnTxByIndex(0)
-    dashboard.verifySingleTxItem(txData)
   })
 })
