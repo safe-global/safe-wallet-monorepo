@@ -74,11 +74,7 @@ export const CreateTokenTransfers = ({
 
   const { handleSubmit, control } = formMethods
 
-  const { fields: recipientFields, append, remove } = useFieldArray({ control, name: TokenTransfersFields.recipients })
-
-  const removeRecipient = (index: number): void => {
-    remove(index)
-  }
+  const { fields: recipientFields, append, remove: removeRecipient } = useFieldArray({ control, name: TokenTransfersFields.recipients })
 
   const addRecipient = (): void => {
     if (recipientFields.length === maxRecipients) {
