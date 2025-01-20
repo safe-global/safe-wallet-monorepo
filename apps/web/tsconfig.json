@@ -20,7 +20,8 @@
       "@safe-global/safe-apps-sdk/*": ["../../node_modules/@safe-global/safe-apps-sdk/*"],
       "@gnosis.pm/zodiac/*": ["../../node_modules/@gnosis.pm/zodiac/*"],
       "@cowprotocol/app-data": ["../../node_modules/@cowprotocol/app-data"],
-      "@/public/*": ["./public/*"]
+      "@/public/*": ["./public/*"],
+      "@safe-global/store/*": ["../../packages/store/src/*"]
     },
     "plugins": [
       {

@@ -38,6 +38,7 @@
       "oderId": "Order ID",
       "status": "Status",
       "sellFull": "Sell 1 COW",
+      "sell10Cow": "Sell 10 COW",
       "sell": "Sell",
       "oneCOW": "1 COW",
       "forAtLeast": "for at least",
@@ -59,7 +60,8 @@
       "safeAppTitile": "CowSwap",
       "title": "Swap order",
       "multiSend": "multiSend",
-      "multiSendCallOnly1_3_0": "Safe: MultiSendCallOnly 1.3.0"
+      "multiSendCallOnly1_3_0": "Safe: MultiSendCallOnly 1.3.0",
+      "altImage": "Swap order"
     }
   }
 }

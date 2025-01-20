@@ -1,5 +1,4 @@
 import { getSafeTokenAddress, getSafeLockingAddress } from '@/components/common/SafeTokenWidget'
-import { cgwDebugStorage } from '@/components/sidebar/DebugToggle'
 import { IS_PRODUCTION } from '@/config/constants'
 import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
 import { isPast } from 'date-fns'
@@ -9,6 +8,7 @@ import useAsync, { type AsyncResult } from './useAsync'
 import useSafeInfo from './useSafeInfo'
 import { getWeb3ReadOnly } from './wallets/web3'
 import memoize from 'lodash/memoize'
+import { cgwDebugStorage } from '@/config/gateway'
 
 export const VESTING_URL =
   IS_PRODUCTION || cgwDebugStorage.get()

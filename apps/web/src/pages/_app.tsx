@@ -12,7 +12,7 @@ import { setBaseUrl as setNewGatewayBaseUrl } from '@safe-global/safe-client-gat
 import { CacheProvider, type EmotionCache } from '@emotion/react'
 import SafeThemeProvider from '@/components/theme/SafeThemeProvider'
 import '@/styles/globals.css'
-import { IS_PRODUCTION, GATEWAY_URL_STAGING, GATEWAY_URL_PRODUCTION, BRAND_NAME } from '@/config/constants'
+import { BRAND_NAME } from '@/config/constants'
 import { makeStore, useHydrateStore } from '@/store'
 import PageLayout from '@/components/common/PageLayout'
 import useLoadableStores from '@/hooks/useLoadableStores'
@@ -26,7 +26,6 @@ import { useInitSession } from '@/hooks/useInitSession'
 import Notifications from '@/components/common/Notifications'
 import CookieAndTermBanner from 'src/components/common/CookieAndTermBanner'
 import { useDarkMode } from '@/hooks/useDarkMode'
-import { cgwDebugStorage } from '@/components/sidebar/DebugToggle'
 import { useTxTracking } from '@/hooks/useTxTracking'
 import { useSafeMsgTracking } from '@/hooks/messages/useSafeMsgTracking'
 import useGtm from '@/services/analytics/useGtm'
@@ -47,8 +46,7 @@ import PkModulePopup from '@/services/private-key-module/PkModulePopup'
 import GeoblockingProvider from '@/components/common/GeoblockingProvider'
 import { useVisitedSafes } from '@/features/myAccounts/hooks/useVisitedSafes'
 import OutreachPopup from '@/features/targetedOutreach/components/OutreachPopup'
-
-export const GATEWAY_URL = IS_PRODUCTION || cgwDebugStorage.get() ? GATEWAY_URL_PRODUCTION : GATEWAY_URL_STAGING
+import { GATEWAY_URL } from '@/config/gateway'
 
 const reduxStore = makeStore()
 

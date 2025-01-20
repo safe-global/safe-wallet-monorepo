@@ -10,7 +10,6 @@ import DecodedTx from '@/components/tx/DecodedTx'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import ConfirmationTitle, { ConfirmationTitleTypes } from '@/components/tx/SignOrExecuteForm/ConfirmationTitle'
 import TxChecks from '@/components/tx/SignOrExecuteForm/TxChecks'
-import useDecodeTx from '@/hooks/useDecodeTx'
 import TxCard from '../../common/TxCard'
 import { SafeTxContext } from '../../SafeTxProvider'
 import CheckWallet from '@/components/common/CheckWallet'
@@ -36,6 +35,7 @@ import { BlockaidBalanceChanges } from '@/components/tx/security/blockaid/Blocka
 import NetworkWarning from '@/components/new-safe/create/NetworkWarning'
 import { useGetTransactionDetailsQuery } from '@/store/api/gateway'
 import { skipToken } from '@reduxjs/toolkit/query'
+import useTxPreview from '@/components/tx/confirmation-views/useTxPreview'
 
 export function RecoverAccountFlowReview({ params }: { params: RecoverAccountFlowProps }): ReactElement | null {
   // Form state
@@ -46,7 +46,6 @@ export function RecoverAccountFlowReview({ params }: { params: RecoverAccountFlo
   // Hooks
   const { setTxFlow } = useContext(TxModalContext)
   const { safeTx, safeTxError, setSafeTx, setSafeTxError } = useContext(SafeTxContext)
-  const [decodedData] = useDecodeTx(safeTx)
   const { safe } = useSafeInfo()
   const wallet = useWallet()
   const onboard = useOnboard()
@@ -55,6 +54,7 @@ export function RecoverAccountFlowReview({ params }: { params: RecoverAccountFlo
   const [, executionValidationError] = useIsValidRecoveryExecTransactionFromModule(recovery?.address, safeTx)
 
   const { data: txDetails } = useGetTransactionDetailsQuery(skipToken)
+  const [txPreview] = useTxPreview(safeTx?.data, undefined, txDetails?.txId)
 
   // Proposal
   const newThreshold = Number(params[RecoverAccountFlowFields.threshold])
@@ -131,7 +131,7 @@ export function RecoverAccountFlowReview({ params }: { params: RecoverAccountFlo
 
         <Divider className={commonCss.nestedDivider} />
 
-        <DecodedTx txDetails={txDetails} tx={safeTx} decodedData={decodedData} />
+        <DecodedTx txDetails={txDetails} tx={safeTx} {...txPreview} />
 
         <BlockaidBalanceChanges />
       </TxCard>

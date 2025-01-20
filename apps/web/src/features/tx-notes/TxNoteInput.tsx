@@ -1,37 +1,38 @@
 import { useCallback, useState } from 'react'
-import { InputAdornment, Stack, TextField, Typography } from '@mui/material'
-import InfoIcon from '@/public/images/notifications/info.svg'
-import { MODALS_EVENTS, trackEvent } from '@/services/analytics'
+import { InputAdornment, Stack, TextField, Typography, Alert } from '@mui/material'
 
-const MAX_NOTE_LENGTH = 120
+const MAX_NOTE_LENGTH = 60
 
-export const TxNoteInput = ({ onSubmit }: { onSubmit: (note: string) => void }) => {
+export const TxNoteInput = ({ onChange }: { onChange: (note: string) => void }) => {
   const [note, setNote] = useState('')
 
   const onInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setNote(e.target.value)
   }, [])
 
-  const onChange = useCallback(
+  const onInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      onSubmit(e.target.value.slice(0, MAX_NOTE_LENGTH))
-      trackEvent(MODALS_EVENTS.ADD_TX_NOTE)
+      onChange(e.target.value.slice(0, MAX_NOTE_LENGTH))
     },
-    [onSubmit],
+    [onChange],
   )
 
   return (
     <>
       <Stack direction="row" alignItems="flex-end" gap={1}>
-        <Typography variant="h5">What does this transaction do?</Typography>
+        <Typography variant="h5">Optional note</Typography>
         <Typography variant="body2" color="text.secondary">
-          Optional
+          Experimental
         </Typography>
       </Stack>
 
+      <Alert severity="info">
+        The notes are <b>publicly visible</b>, do not share any private or sensitive details.
+      </Alert>
+
       <TextField
         name="note"
-        label="Add note"
+        label="Note"
         fullWidth
         slotProps={{
           htmlInput: { maxLength: MAX_NOTE_LENGTH },
@@ -46,13 +47,8 @@ export const TxNoteInput = ({ onSubmit }: { onSubmit: (note: string) => void }) 
           },
         }}
         onInput={onInput}
-        onChange={onChange}
+        onChange={onInputChange}
       />
-
-      <Typography variant="caption" color="text.secondary" display="flex" alignItems="center">
-        <InfoIcon height="1.2em" />
-        This note will be publicly visible and accessible to anyone.
-      </Typography>
     </>
   )
 }

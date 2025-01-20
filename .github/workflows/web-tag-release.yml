@@ -7,6 +7,7 @@ on:
     types: [closed]
     paths:
       - apps/web/**
+      - packages/store/**
 
 jobs:
   tag-release:
@@ -21,7 +22,7 @@ jobs:
       - name: Extract version
         id: version
         run: |
-          NEW_VERSION=$(node -p 'require("./package.json").version')
+          NEW_VERSION=$(node -p 'require("./apps/web/package.json").version')
           echo "version=v$NEW_VERSION" >> $GITHUB_OUTPUT
 
       - name: Create a git tag

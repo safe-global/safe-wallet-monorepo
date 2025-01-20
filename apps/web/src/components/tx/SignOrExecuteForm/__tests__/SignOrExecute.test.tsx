@@ -1,10 +1,10 @@
 import SignOrExecute from '../index'
 import { render } from '@/tests/test-utils'
-import * as hooks from '../hooks'
-import type { TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
+import type { TransactionPreview } from '@safe-global/safe-gateway-typescript-sdk'
 import type { SafeTxContextParams } from '@/components/tx-flow/SafeTxProvider'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { createSafeTx } from '@/tests/builders/safeTx'
+import * as useTxPreviewHooks from '@/components/tx/confirmation-views/useTxPreview'
 
 let isSafeOwner = true
 // mock useIsSafeOwner
@@ -32,10 +32,11 @@ describe('SignOrExecute', () => {
   })
 
   it('should display a confirmation screen', async () => {
-    jest.spyOn(hooks, 'useProposeTx').mockReturnValue([
+    jest.spyOn(useTxPreviewHooks, 'default').mockReturnValue([
       {
         txInfo: {},
-      } as TransactionDetails,
+        txData: {},
+      } as TransactionPreview,
       undefined,
       false,
     ])
@@ -57,7 +58,9 @@ describe('SignOrExecute', () => {
   })
 
   it('should display an error screen', async () => {
-    jest.spyOn(hooks, 'useProposeTx').mockReturnValue([undefined, new Error('This is a mock error message'), false])
+    jest
+      .spyOn(useTxPreviewHooks, 'default')
+      .mockReturnValue([undefined, new Error('This is a mock error message'), false])
 
     const { container } = render(
       <SafeTxContext.Provider

@@ -10,13 +10,13 @@ import { isChangeThresholdView } from '../utils'
 import { maybePlural } from '@/utils/formatters'
 
 interface ChangeThresholdProps {
-  txDetails?: TransactionDetails
+  txInfo?: TransactionDetails['txInfo']
 }
 
-function ChangeThreshold({ txDetails }: ChangeThresholdProps) {
+function ChangeThreshold({ txInfo }: ChangeThresholdProps) {
   const { safe } = useSafeInfo()
   const { newThreshold } = useContext(ChangeThresholdReviewContext)
-  const threshold = txDetails && isChangeThresholdView(txDetails.txInfo) && txDetails.txInfo.settingsInfo?.threshold
+  const threshold = txInfo && isChangeThresholdView(txInfo) && txInfo.settingsInfo?.threshold
 
   return (
     <>

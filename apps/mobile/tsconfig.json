@@ -4,7 +4,8 @@
     "strict": true,
     "paths": {
       "@/*": ["./*"],
-      "@safe-global/store/*": ["../../packages/store/src/*"]
+      "@safe-global/store/*": ["../../packages/store/src/*"],
+      "@safe-global/test/*": ["../../config/test/*"]
     },
     "types": ["jest", "node"]
   },

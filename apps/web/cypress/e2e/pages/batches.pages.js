@@ -27,6 +27,8 @@ const listBox = 'ul[role="listbox"]'
 const amountInput = '[name="amount"]'
 const nonceInput = 'input[name="nonce"]'
 const executeOptionsContainer = 'div[role="radiogroup"]'
+const expandedItem = 'div[class*="MuiCollapse-entered"]'
+const collapsedItem = 'div[class*="MuiCollapse-hidden"]'
 
 export function addToBatch(EOA, currentNonce, amount, verify = false) {
   fillTransactionData(EOA, amount)
@@ -114,9 +116,10 @@ export function verifyNewTxButtonStatus(param) {
 }
 
 export function isTxExpanded(index, option) {
+  let item = option ? expandedItem : collapsedItem
   cy.contains(batchedTxs)
     .parent()
     .within(() => {
-      cy.get('li').eq(index).find(`div[aria-expanded="${option}"]`)
+      cy.get('li').eq(index).find(item)
     })
 }

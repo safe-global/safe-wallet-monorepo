@@ -87,6 +87,7 @@ describe('Sidebar search tests', () => {
     sideBar.searchSafe('0xC')
     sideBar.checkSearchResults(1)
     sideBar.clearSearchInput()
+    sideBar.showAllSafes()
     sideBar.verifyAccountListSafeCount(6)
   })
 })

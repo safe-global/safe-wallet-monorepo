@@ -49,6 +49,10 @@ const deleteTxModalBtn = '[data-testid="delete-tx-btn"]'
 const toggleUntrustedBtn = '[data-testid="toggle-untrusted"]'
 const simulateTxBtn = '[data-testid="simulate-btn"]'
 const simulateSuccess = '[data-testid="simulation-success-msg"]'
+const signBtn = '[data-testid="sign-btn"]'
+export const altImgDai = 'img[alt="DAI"]'
+export const altImgCow = 'img[alt="COW"]'
+export const altImgSwaps = 'svg[alt="Swap order"]'
 
 const viewTransactionBtn = 'View transaction'
 const transactionDetailsTitle = 'Transaction details'
@@ -65,7 +69,6 @@ export const executeStr = 'Execute'
 const editBtnStr = 'Edit'
 const executionParamsStr = 'Execution parameters'
 const noLaterStr = 'No, later'
-const signBtnStr = 'Sign'
 const confirmBtnStr = 'Confirm'
 const expandAllBtnStr = 'Expand all'
 const collapseAllBtnStr = 'Collapse all'
@@ -83,7 +86,7 @@ const enabledBulkExecuteBtnTooltip = 'All highlighted transactions will be inclu
 const bulkExecuteBtnStr = 'Bulk execute'
 
 const batchModalTitle = 'Batch'
-const bulkTxStr = 'Bulk transactions'
+const swapOrder = 'Swap order settlement'
 
 export const filterTypes = {
   incoming: 'Incoming',
@@ -545,7 +548,7 @@ export function clickOnNoLaterOption() {
 }
 
 export function clickOnSignTransactionBtn() {
-  cy.get('button').contains(signBtnStr).click()
+  cy.get(signBtn).click()
 }
 
 export function clickOnConfirmTransactionBtn() {
@@ -631,7 +634,7 @@ export function verifyBulkConfirmationScreen(tx, actions) {
 }
 
 export function verifyBulkTxHistoryBlock(tx, actions) {
-  cy.contains(bulkTxStr)
+  cy.contains(swapOrder)
     .parent('div')
     .parent()
     .eq(0)

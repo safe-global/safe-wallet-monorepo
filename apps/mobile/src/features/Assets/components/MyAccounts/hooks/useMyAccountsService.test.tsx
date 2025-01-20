@@ -2,6 +2,7 @@ import { renderHook, waitFor } from '@/src/tests/test-utils'
 import { useMyAccountsService } from './useMyAccountsService'
 import { server } from '@/src/tests/server'
 import { http, HttpResponse } from 'msw'
+import { GATEWAY_URL } from '@/src/config/constants'
 
 // Mock safe item
 const mockSafeItem = {
@@ -40,7 +41,7 @@ describe('useMyAccountsService', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     server.use(
-      http.get('https://safe-client.safe.global//v1/safes', ({ request }) => {
+      http.get(`${GATEWAY_URL}/v1/safes`, ({ request }) => {
         const url = new URL(request.url)
         const safes = url.searchParams.get('safes')?.split(',') || []
 
@@ -88,7 +89,7 @@ describe('useMyAccountsService', () => {
 
   it('should not update store if no data is returned', async () => {
     server.use(
-      http.get('https://safe-client.safe.global//v1/safes', () => {
+      http.get(`${GATEWAY_URL}/v1/safes`, () => {
         return HttpResponse.json([])
       }),
     )
@@ -102,7 +103,7 @@ describe('useMyAccountsService', () => {
 
   it('should handle API errors gracefully', async () => {
     server.use(
-      http.get('https://safe-client.safe.global//v1/safes', () => {
+      http.get(`${GATEWAY_URL}/v1/safes`, () => {
         return HttpResponse.error()
       }),
     )

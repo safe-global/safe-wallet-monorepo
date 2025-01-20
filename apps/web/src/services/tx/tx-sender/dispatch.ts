@@ -236,7 +236,6 @@ export const dispatchCustomTxSpeedUp = async (
   data: string,
   provider: Eip1193Provider,
   signerAddress: string,
-  safeAddress: string,
   nonce: number,
 ) => {
   const eventParams = { txId, nonce }

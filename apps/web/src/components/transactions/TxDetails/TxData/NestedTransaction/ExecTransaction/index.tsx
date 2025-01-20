@@ -1,6 +1,6 @@
 import { Safe__factory } from '@/types/contracts'
 import { Skeleton } from '@mui/material'
-import { getConfirmationView, type TransactionData } from '@safe-global/safe-gateway-typescript-sdk'
+import { type TransactionData } from '@safe-global/safe-gateway-typescript-sdk'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 
 import DecodedTx from '@/components/tx/DecodedTx'
@@ -9,9 +9,9 @@ import { useCurrentChain } from '@/hooks/useChains'
 import { AppRoutes } from '@/config/routes'
 import { useMemo } from 'react'
 import type { SafeTransaction } from '@safe-global/safe-core-sdk-types'
-import useAsync from '@/hooks/useAsync'
 import ExternalLink from '@/components/common/ExternalLink'
 import { NestedTransaction } from '../NestedTransaction'
+import useTxPreview from '@/components/tx/confirmation-views/useTxPreview'
 
 const safeInterface = Safe__factory.createInterface()
 
@@ -55,20 +55,20 @@ export const ExecTransaction = ({
     [data?.hexData],
   )
 
-  const [decodedNestedTransaction, error] = useAsync(async () => {
-    if (chain?.chainId && data?.to.value && childSafeTx) {
-      return await getConfirmationView(
-        chain.chainId,
-        data.to.value,
-        childSafeTx.data.data,
-        childSafeTx.data.to,
-        childSafeTx.data.value.toString(),
-      )
-    }
-  }, [chain?.chainId, data?.to.value, childSafeTx])
+  const [txPreview, error] = useTxPreview(
+    childSafeTx
+      ? {
+          operation: childSafeTx.data.operation,
+          data: childSafeTx.data.data,
+          to: childSafeTx.data.to,
+          value: childSafeTx.data.value.toString(),
+        }
+      : undefined,
+    data?.to.value,
+  )
 
-  const decodedNestedTxDataBlock = decodedNestedTransaction ? (
-    <DecodedTx tx={childSafeTx} showMethodCall decodedData={decodedNestedTransaction} showAdvancedDetails={false} />
+  const decodedNestedTxDataBlock = txPreview ? (
+    <DecodedTx {...txPreview} tx={childSafeTx} showMethodCall showAdvancedDetails={false} />
   ) : null
 
   return (

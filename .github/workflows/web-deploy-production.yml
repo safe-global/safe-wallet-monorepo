@@ -28,9 +28,11 @@ jobs:
 
       - name: Create archive
         run: tar -czf "$ARCHIVE_NAME".tar.gz out
+        working-directory: apps/web
 
       - name: Create checksum
         run: sha256sum "$ARCHIVE_NAME".tar.gz > ${{ env.ARCHIVE_NAME }}-sha256-checksum.txt
+        working-directory: apps/web
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -44,10 +46,12 @@ jobs:
           BUCKET: s3://${{ secrets.AWS_STAGING_BUCKET_NAME }}/releases/${{ github.event.release.tag_name }}
           CHECKSUM_FILE: ${{ env.ARCHIVE_NAME }}-sha256-checksum.txt
         run: bash ./scripts/github/s3_upload.sh
+        working-directory: apps/web
 
       # Script to prepare production deployments
       - name: Prepare deployment
         run: bash ./scripts/github/prepare_production_deployment.sh
+        working-directory: apps/web
         env:
           PROD_DEPLOYMENT_HOOK_TOKEN: ${{ secrets.PROD_DEPLOYMENT_HOOK_TOKEN }}
           PROD_DEPLOYMENT_HOOK_URL: ${{ secrets.PROD_DEPLOYMENT_HOOK_URL }}

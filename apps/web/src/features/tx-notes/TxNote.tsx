@@ -5,9 +5,7 @@ import { isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
 import EthHashInfo from '@/components/common/EthHashInfo'
 
 export function TxNote({ txDetails }: { txDetails: TransactionDetails | undefined }) {
-  // @FIXME: update CGW types to include note
-  const note = (txDetails as TransactionDetails & { note: string | null })?.note
-
+  const note = txDetails?.note
   if (!note) return null
 
   const creator =

@@ -58,15 +58,10 @@ describe('_getRedeemDeadline', () => {
   })
 })
 
+const originalGlobalFetch = global.fetch
 describe('Allocations', () => {
-  afterEach(() => {
-    //@ts-ignore
-    global.fetch?.mockClear?.()
-  })
-
   afterAll(() => {
-    // @ts-ignore
-    delete global.fetch
+    global.fetch = originalGlobalFetch
   })
 
   beforeEach(() => {

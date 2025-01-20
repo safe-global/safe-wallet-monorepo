@@ -8,7 +8,8 @@ on:
       - dev
       - main
     paths:
-        - apps/web/**
+      - apps/web/**
+      - packages/store/**
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -43,7 +44,7 @@ jobs:
       - uses: ./.github/actions/build
         with:
           secrets: ${{ toJSON(secrets) }}
-         # if: startsWith(github.ref, 'refs/heads/main')
+          # if: startsWith(github.ref, 'refs/heads/main')
 
       #- uses: ./.github/workflows/build-storybook
 
@@ -58,18 +59,16 @@ jobs:
         if: startsWith(github.ref, 'refs/heads/main')
         env:
           BUCKET: s3://${{ secrets.AWS_STAGING_BUCKET_NAME }}/current
-        run: |
-          cd ./apps/web
-          bash  ./scripts/github/s3_upload.sh
+        working-directory: apps/web
+        run: bash  ./scripts/github/s3_upload.sh
 
       # Dev
       - name: Deploy to the dev S3
         if: startsWith(github.ref, 'refs/heads/dev')
         env:
           BUCKET: s3://${{ secrets.AWS_DEVELOPMENT_BUCKET_NAME }}
-        run: |
-          cd ./apps/web
-          bash  ./scripts/github/s3_upload.sh
+        working-directory: apps/web
+        run: bash  ./scripts/github/s3_upload.sh
 
       ### PRs ###
 
@@ -86,9 +85,8 @@ jobs:
         if: github.event.number
         env:
           BUCKET: s3://${{ secrets.AWS_REVIEW_BUCKET_NAME }}/walletweb/${{ steps.extract_branch.outputs.branch }}
-        run: |
-          cd ./apps/web
-          bash  ./scripts/github/s3_upload.sh
+        working-directory: apps/web
+        run: bash  ./scripts/github/s3_upload.sh
 
       # Comment
       - name: Post a deployment link in the PR

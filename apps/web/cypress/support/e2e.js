@@ -35,6 +35,15 @@ addCompareSnapshotCommand()
 const beamer = JSON.parse(Cypress.env('BEAMER_DATA_E2E') || '{}')
 const productID = beamer.PRODUCT_ID
 
+Cypress.on('test:before:run', () => {
+  Cypress.automation('remote:debugger:protocol', {
+    command: 'Emulation.setLocaleOverride',
+    params: {
+      locale: 'en-US',
+    },
+  })
+})
+
 before(() => {
   Cypress.on('uncaught:exception', (err, runnable) => {
     return false

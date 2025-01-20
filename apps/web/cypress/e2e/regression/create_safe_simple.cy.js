@@ -127,6 +127,7 @@ describe('Safe creation tests', () => {
         createwallet.clickOnNextBtn()
         createwallet.clickOnAddNewOwnerBtn()
         createwallet.clickOnSignerAddressInput(1)
+        main.verifyMinimumElementsCount(createwallet.addressAutocompleteOptions, 2)
         createwallet.selectSignerOnAutocomplete(2)
         owner.verifyErrorMsgInvalidAddress(constants.addressBookErrrMsg.ownerAdded)
       })

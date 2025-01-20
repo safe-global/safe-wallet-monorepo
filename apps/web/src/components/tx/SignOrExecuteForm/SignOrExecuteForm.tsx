@@ -27,13 +27,13 @@ import { BlockaidBalanceChanges } from '../security/blockaid/BlockaidBalanceChan
 import { Blockaid } from '../security/blockaid'
 import { useLazyGetTransactionDetailsQuery } from '@/store/api/gateway'
 import { useApprovalInfos } from '../ApprovalEditor/hooks/useApprovalInfos'
-import type { TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
+import type { TransactionDetails, TransactionPreview } from '@safe-global/safe-gateway-typescript-sdk'
 import NetworkWarning from '@/components/new-safe/create/NetworkWarning'
 import ConfirmationView from '../confirmation-views'
 import { SignerForm } from './SignerForm'
 import { useSigner } from '@/hooks/wallets/useWallet'
 import { trackTxEvents } from './tracking'
-import { TxNoteForm, encodeTxNote } from '@/features/tx-notes'
+import { TxNoteForm, encodeTxNote, trackAddNote } from '@/features/tx-notes'
 
 export type SubmitCallback = (txId: string, isExecuted?: boolean) => void
 
@@ -64,6 +64,7 @@ export const SignOrExecuteForm = ({
   safeTxError: ReturnType<typeof useSafeTxError>
   isCreation?: boolean
   txDetails?: TransactionDetails
+  txPreview?: TransactionPreview
 }): ReactElement => {
   const [customOrigin, setCustomOrigin] = useState<string | undefined>(props.origin)
   const { transactionExecution } = useAppSelector(selectSettings)
@@ -112,8 +113,12 @@ export const SignOrExecuteForm = ({
         !!signer?.isSafe,
         customOrigin,
       )
+
+      if (customOrigin !== props.origin) {
+        trackAddNote()
+      }
     },
-    [chainId, isCreation, onSubmit, trigger, signer?.isSafe, customOrigin],
+    [chainId, isCreation, onSubmit, trigger, signer?.isSafe, customOrigin, props.origin],
   )
 
   const onRoleExecutionSubmit = useCallback<typeof onFormSubmit>(
@@ -126,7 +131,7 @@ export const SignOrExecuteForm = ({
     [onFormSubmit],
   )
 
-  const onNoteSubmit = useCallback(
+  const onNoteChange = useCallback(
     (note: string) => {
       setCustomOrigin(encodeTxNote(note, props.origin))
     },
@@ -175,8 +180,10 @@ export const SignOrExecuteForm = ({
         {props.children}
 
         <ConfirmationView
+          txId={props.txId}
           isCreation={isCreation}
           txDetails={props.txDetails}
+          txPreview={props.txPreview}
           safeTx={safeTx}
           isBatch={props.isBatch}
           showMethodCall={props.showMethodCall}
@@ -194,7 +201,7 @@ export const SignOrExecuteForm = ({
 
       {!isCounterfactualSafe && !props.isRejection && <TxChecks />}
 
-      <TxNoteForm isCreation={isCreation ?? false} onSubmit={onNoteSubmit} txDetails={props.txDetails} />
+      <TxNoteForm isCreation={isCreation ?? false} onChange={onNoteChange} txDetails={props.txDetails} />
 
       <SignerForm willExecute={willExecute} />
 
@@ -222,7 +229,7 @@ export const SignOrExecuteForm = ({
 
         <NetworkWarning />
 
-        <UnknownContractError txData={props.txDetails?.txData} />
+        <UnknownContractError txData={props.txDetails?.txData ?? props.txPreview?.txData} />
 
         <Blockaid />
 

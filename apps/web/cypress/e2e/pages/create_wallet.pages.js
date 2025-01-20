@@ -27,7 +27,7 @@ const nextBtn = '[data-testid="next-btn"]'
 const backBtn = '[data-testid="back-btn"]'
 const cancelBtn = '[data-testid="cancel-btn"]'
 const safeActivationSection = '[data-testid="activation-section"]'
-const addressAutocompleteOptions = '[data-testid="address-item"]'
+export const addressAutocompleteOptions = '[data-testid="address-item"]'
 export const qrCode = '[data-testid="qr-code"]'
 export const addressInfo = '[data-testid="address-info"]'
 export const choiceBtn = '[data-testid="choice-btn"]'
@@ -209,7 +209,7 @@ export function clearWalletName() {
 }
 
 export function openNetworkSelector() {
-  cy.get(expandMoreIcon).parents('div').eq(1).click()
+  cy.get('header').find(expandMoreIcon).parent().click()
 }
 export function selectNetwork(network) {
   cy.wait(1000)
@@ -265,6 +265,7 @@ export function clickOnSignerAddressInput(index) {
 }
 
 export function selectSignerOnAutocomplete(index) {
+  cy.wait(500)
   cy.get(addressAutocompleteOptions).eq(index).click()
 }
 

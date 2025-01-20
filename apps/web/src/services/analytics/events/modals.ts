@@ -87,8 +87,8 @@ export const MODALS_EVENTS = {
     category: MODALS_CATEGORY,
     event: EventType.CLICK,
   },
-  ADD_TX_NOTE: {
-    action: 'Add tx note',
+  SUBMIT_TX_NOTE: {
+    action: 'Submit tx note',
     category: MODALS_CATEGORY,
     event: EventType.CLICK,
   },

@@ -58,9 +58,9 @@
       "txHashDAI": "0x7156...3e47",
       "nftHash": "0x3873...6d0b",
       "txHashEth": "0xdc6b...f250",
-      "executionDateDAI": "30/10/2023, 02:37:11",
-      "executionDateNFT": "28/09/2023, 02:48:11",
-      "executionDateEth": "19/08/2020, 08:51:31"
+      "executionDateDAI": "10/30/2023, 2:37:11 AM",
+      "executionDateNFT": "9/28/2023, 2:48:11 AM",
+      "executionDateEth": "8/19/2020, 8:51:31 AM"
     },
     "send": {
       "title": "Sent",
@@ -70,7 +70,9 @@
       "recipientAddress": "sep:0x06373d5e45AD31BD354CeBfA8dB4eD2c75B8708e",
       "transactionHash": "0x6a59...6a98",
       "altImage": "Sent",
-      "altToken": "ETH"
+      "altToken": "ETH",
+      "txBuilderTitle": "Transaction Builder",
+      "txBuilderAltImage": "Transaction Builder"
     },
     "onchainRejection": {
       "title": "On-chain rejection",

@@ -25,7 +25,7 @@ export const dynamicBaseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBas
   }
 
   const urlEnd = typeof args === 'string' ? args : args.url
-  const adjustedUrl = `${resolvedBaseUrl}/${urlEnd}`
+  const adjustedUrl = `${resolvedBaseUrl}${urlEnd}`
   const adjustedArgs = typeof args === 'string' ? adjustedUrl : { ...args, url: adjustedUrl }
 
   return rawBaseQuery(adjustedArgs, api, extraOptions)
