@@ -1,6 +1,5 @@
 export * from './chainsSlice'
 export * from './safeInfoSlice'
-export * from './balancesSlice'
 export * from './sessionSlice'
 export * from './txHistorySlice'
 export * from './txQueueSlice'

@@ -6,7 +6,6 @@ import { type AsyncResult } from './useAsync'
 // Import all the loadable hooks
 import useLoadChains from './loadables/useLoadChains'
 import useLoadSafeInfo from './loadables/useLoadSafeInfo'
-import useLoadBalances from './loadables/useLoadBalances'
 import useLoadTxHistory from './loadables/useLoadTxHistory'
 import useLoadTxQueue from './loadables/useLoadTxQueue'
 import useLoadMessages from './loadables/useLoadSafeMessages'
@@ -14,7 +13,6 @@ import useLoadMessages from './loadables/useLoadSafeMessages'
 // Import all the loadable slices
 import { chainsSlice } from '@/store/chainsSlice'
 import { safeInfoSlice } from '@/store/safeInfoSlice'
-import { balancesSlice } from '@/store/balancesSlice'
 import { txHistorySlice } from '@/store/txHistorySlice'
 import { txQueueSlice } from '@/store/txQueueSlice'
 import { spendingLimitSlice } from '@/store/spendingLimitsSlice'
@@ -41,7 +39,6 @@ const useUpdateStore = (slice: Slice, useLoadHook: () => AsyncResult<unknown>): 
 const useLoadableStores = () => {
   useUpdateStore(chainsSlice, useLoadChains)
   useUpdateStore(safeInfoSlice, useLoadSafeInfo)
-  useUpdateStore(balancesSlice, useLoadBalances)
   useUpdateStore(txHistorySlice, useLoadTxHistory)
   useUpdateStore(txQueueSlice, useLoadTxQueue)
   useUpdateStore(safeMessagesSlice, useLoadMessages)

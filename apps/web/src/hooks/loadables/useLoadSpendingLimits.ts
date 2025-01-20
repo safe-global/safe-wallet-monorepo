@@ -7,15 +7,13 @@ import useChainId from '@/hooks/useChainId'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
 import type { JsonRpcProvider } from 'ethers'
 import { getSpendingLimitContract, getSpendingLimitModuleAddress } from '@/services/contracts/spendingLimitContracts'
-import type { AddressEx, TokenInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import type { AddressEx, SafeBalanceResponse, TokenInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import { sameAddress } from '@/utils/addresses'
 import { type AllowanceModule } from '@/types/contracts'
 import { getERC20TokenInfoOnChain } from '@/utils/tokens'
 
 import { sameString } from '@safe-global/protocol-kit/dist/src/utils'
-import { useAppSelector } from '@/store'
-import { selectTokens } from '@/store/balancesSlice'
-import isEqual from 'lodash/isEqual'
+import useBalances from '../useBalances'
 
 const DEFAULT_TOKEN_INFO = {
   decimals: 18,
@@ -95,11 +93,17 @@ export const getSpendingLimits = async (
   return spendingLimits.flat().filter(discardZeroAllowance)
 }
 
+const selectTokens = (balances: SafeBalanceResponse | undefined): TokenInfo[] => {
+  if (!balances) return []
+  return balances.items.map(({ tokenInfo }) => tokenInfo)
+}
+
 export const useLoadSpendingLimits = (): AsyncResult<SpendingLimitState[]> => {
   const { safeAddress, safe, safeLoaded } = useSafeInfo()
   const chainId = useChainId()
   const provider = useWeb3ReadOnly()
-  const tokenInfoFromBalances = useAppSelector(selectTokens, isEqual)
+  const { balances } = useBalances()
+  const tokenInfoFromBalances = selectTokens(balances)
 
   const [data, error, loading] = useAsync<SpendingLimitState[] | undefined>(
     () => {

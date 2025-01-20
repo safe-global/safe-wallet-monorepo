@@ -1,19 +1,18 @@
 import type { ReactElement } from 'react'
 import React, { useMemo } from 'react'
-import type { Custom, TransactionData } from '@safe-global/safe-gateway-typescript-sdk'
+import type { Custom, SafeBalanceResponse, TokenInfo, TransactionData } from '@safe-global/safe-gateway-typescript-sdk'
 import { Box, Typography } from '@mui/material'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import TokenIcon from '@/components/common/TokenIcon'
 import SpendingLimitLabel from '@/components/common/SpendingLimitLabel'
 import { useCurrentChain } from '@/hooks/useChains'
-import { selectTokens } from '@/store/balancesSlice'
-import { useAppSelector } from '@/store'
 import { sameAddress } from '@/utils/addresses'
 import { formatVisualAmount } from '@/utils/formatters'
 import type { SpendingLimitMethods } from '@/utils/transaction-guards'
 import { isSetAllowance } from '@/utils/transaction-guards'
 import css from './styles.module.css'
 import chains from '@/config/chains'
+import useBalances from '@/hooks/useBalances'
 
 type SpendingLimitsProps = {
   txData?: TransactionData
@@ -21,9 +20,15 @@ type SpendingLimitsProps = {
   type: SpendingLimitMethods
 }
 
+const selectTokens = (balances: SafeBalanceResponse | undefined): TokenInfo[] => {
+  if (!balances) return []
+  return balances.items.map(({ tokenInfo }) => tokenInfo)
+}
+
 export const SpendingLimits = ({ txData, txInfo, type }: SpendingLimitsProps): ReactElement | null => {
   const chain = useCurrentChain()
-  const tokens = useAppSelector(selectTokens)
+  const { balances } = useBalances()
+  const tokens = selectTokens(balances)
   const isSetAllowanceMethod = useMemo(() => isSetAllowance(type), [type])
 
   const [beneficiary, tokenAddress, amount, resetTimeMin] =

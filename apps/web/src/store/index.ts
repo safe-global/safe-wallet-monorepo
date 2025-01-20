@@ -33,7 +33,6 @@ import { GATEWAY_URL } from '@/config/gateway'
 const rootReducer = combineReducers({
   [slices.chainsSlice.name]: slices.chainsSlice.reducer,
   [slices.safeInfoSlice.name]: slices.safeInfoSlice.reducer,
-  [slices.balancesSlice.name]: slices.balancesSlice.reducer,
   [slices.sessionSlice.name]: slices.sessionSlice.reducer,
   [slices.txHistorySlice.name]: slices.txHistorySlice.reducer,
   [slices.txQueueSlice.name]: slices.txQueueSlice.reducer,
