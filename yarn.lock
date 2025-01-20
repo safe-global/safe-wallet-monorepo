@@ -8105,7 +8105,7 @@ __metadata:
     react-native-mmkv: "npm:^3.1.0"
     react-native-pager-view: "npm:^6.5.1"
     react-native-quick-crypto: "npm:^0.7.11"
-    react-native-reanimated: "npm:^3.16.2"
+    react-native-reanimated: "npm:^3.16.7"
     react-native-safe-area-context: "npm:4.12.0"
     react-native-screens: "npm:^4.0.0"
     react-native-svg: "npm:15.8.0"
@@ -28754,9 +28754,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-reanimated@npm:^3.16.2":
-  version: 3.16.3
-  resolution: "react-native-reanimated@npm:3.16.3"
+"react-native-reanimated@npm:^3.16.7":
+  version: 3.16.7
+  resolution: "react-native-reanimated@npm:3.16.7"
   dependencies:
     "@babel/plugin-transform-arrow-functions": "npm:^7.0.0-0"
     "@babel/plugin-transform-class-properties": "npm:^7.0.0-0"
@@ -28773,7 +28773,7 @@ __metadata:
     "@babel/core": ^7.0.0-0
     react: "*"
     react-native: "*"
-  checksum: 10/93a51bcd6f6fd72d115a6861e381a1d0402faf9aae9cf5d0b159e4f483ee87e79c7b3a0d92b127cbc952fc96cfd5923874ec409c9ef2de0e60c1c366397052d1
+  checksum: 10/37099178efca335ea74bb0fc1b50ad898c2b24b1ed99e67bfb90e8898e1fadace2d2765a275d7d23b9c141d19fc673bb4b78dcb9f47d08921dd911c76b5040aa
   languageName: node
   linkType: hard
 
