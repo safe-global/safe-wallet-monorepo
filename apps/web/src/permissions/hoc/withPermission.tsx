@@ -1,11 +1,15 @@
-import type { Permission, PermissionProps } from '../types'
+import { Permission, PermissionProps } from '../types'
 import { useHasPermission } from '../hooks/useHasPermission'
 
 type WrappingComponentProps<
   C extends React.ComponentType<any>,
   P extends Permission,
   PProps = PermissionProps<P> extends undefined ? { permissionProps?: never } : { permissionProps: PermissionProps<P> },
-> = React.ComponentProps<C> & PProps & { forceRender?: boolean }
+> = React.ComponentProps<C> &
+  PProps & {
+    // if true, the component will be rendered even if the user does not have the permission
+    forceRender?: boolean
+  }
 
 /**
  * HOC that renders WrappedComponent only if user has a specific permission
@@ -13,17 +17,15 @@ type WrappingComponentProps<
  * @param permission permission to check
  * @returns component that renders WrappedComponent if user has permission
  * @example
- * const RandomComponent = (props: { foo: string }) => <div>{props.foo}</div>
- *
+ * const RandomComponent = (props: { hasPermission?: boolean }) => <div>hasPermission: {props.hasPermission}</div>
  * const WithProposeTxPermission = withPermission(RandomComponent, Permission.ProposeTransaction)
- * const OuterComponent = () => <WithProposeTxPermission foo="Hello" />
+ * const OuterComponent = () => <WithProposeTxPermission />
  * @example
  * const RandomComponent = (props: { foo: string }) => <div>{props.foo}</div>
- *
  * const WithExecuteTxPermission = withPermission(RandomComponent, Permission.ExecuteTransaction)
  * const OuterComponent = () => <WithExecuteTxPermission foo="Hello" permissionProps={{safeTx: {} as any}} />
  */
-export function withPermission<C extends React.ComponentType<any>, P extends Permission>(
+export function withPermission<C extends React.ComponentType<any & { hasPermission?: boolean }>, P extends Permission>(
   WrappedComponent: C,
   permission: P,
 ) {
@@ -34,7 +36,9 @@ export function withPermission<C extends React.ComponentType<any>, P extends Per
       return null
     }
 
-    return <WrappedComponent {...(props as React.ComponentProps<C>)} />
+    const wrappedProps = { ...props, hasPermission } as React.ComponentProps<C>
+
+    return <WrappedComponent {...wrappedProps} />
   }
 
   WithPermissions.displayName = 'WithPermissions'
