@@ -50,7 +50,7 @@ const useRemoteSafeApps = ({ tag, name }: UseRemoteSafeAppsProps = {}): AsyncRes
       return remoteApps.filter((app) => app.tags.includes(tag))
     }
     if (name) {
-      return remoteApps.filter((app) => app.name.includes(name))
+      return remoteApps.filter((app) => app.name === name)
     }
     return remoteApps
   }, [remoteApps, tag, name])
