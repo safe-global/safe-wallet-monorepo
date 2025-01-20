@@ -1,15 +1,13 @@
 import ModalDialog from '@/components/common/ModalDialog'
+import { AppRoutes } from '@/config/routes'
 import CSVAirdropLogo from '@/public/images/apps/csv-airdrop-app-logo.svg'
 import { Button, DialogActions, DialogContent, Grid, Typography } from '@mui/material'
-import router from 'next/router'
+import Link from 'next/link'
+import { useRouter } from 'next/router'
 import type { ReactElement } from 'react'
 
 const CSVAirdropAppModal = ({ onClose, appUrl }: { onClose: () => void; appUrl?: string }): ReactElement => {
-  const openApp = () => {
-    if (appUrl) {
-      router.push(`/apps/open?appUrl=${decodeURIComponent(appUrl)}`)
-    }
-  }
+  const router = useRouter()
 
   return (
     <ModalDialog
@@ -32,11 +30,24 @@ const CSVAirdropAppModal = ({ onClose, appUrl }: { onClose: () => void; appUrl?:
           </Typography>
         </Grid>
       </DialogContent>
-      <DialogActions style={{ textAlign: 'center', display: 'block' }}>
-        <Button variant="contained" data-testid="open-app-btn" onClick={openApp}>
-          Open CSV Airdrop
-        </Button>
-      </DialogActions>
+      {appUrl && (
+        <DialogActions style={{ textAlign: 'center', display: 'block' }}>
+          <Link
+            href={{
+              pathname: AppRoutes.apps.open,
+              query: {
+                safe: router.query.safe,
+                appUrl
+              }
+            }}
+            passHref
+          >
+            <Button variant="contained" data-testid="open-app-btn">
+              Open CSV Airdrop
+            </Button>
+          </Link>
+        </DialogActions>
+      )}
     </ModalDialog>
   )
 }
