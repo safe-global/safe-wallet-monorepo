@@ -53,7 +53,7 @@ export const CreateTokenTransfers = ({
 }): ReactElement => {
   const [csvAirdropModalOpen, setCsvAirdropModalOpen] = useState<boolean>(false)
   const [maxRecipientsAlert, setMaxRecipientsAlert] = useState<boolean>(false)
-  const { setNonce, setNonceNeeded } = useContext(SafeTxContext)
+  const { setNonce } = useContext(SafeTxContext)
   const [safeApps] = useRemoteSafeApps({ name: SafeAppsName.CSV })
 
   const maxRecipients = 5
@@ -91,10 +91,6 @@ export const CreateTokenTransfers = ({
       amount: '',
     })
   }
-
-  useEffect(() => {
-    setNonceNeeded(true)
-  }, [setNonceNeeded])
 
   return (
     <TxCard>
