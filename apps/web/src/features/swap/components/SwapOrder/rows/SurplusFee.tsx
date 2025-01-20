@@ -1,4 +1,4 @@
-import type { Order } from '@safe-global/safe-gateway-typescript-sdk'
+import type { TwapOrder } from '@safe-global/safe-gateway-typescript-sdk'
 import { getOrderFeeBps } from '@/features/swap/helpers/utils'
 import { DataRow } from '@/components/common/Table/DataRow'
 import { formatVisualAmount } from '@/utils/formatters'
@@ -7,13 +7,12 @@ import { HelpIconTooltip } from '@/features/swap/components/HelpIconTooltip'
 export const SurplusFee = ({
   order,
 }: {
-  order: Pick<Order, 'fullAppData' | 'sellToken' | 'buyToken' | 'status' | 'executedSurplusFee' | 'kind'>
+  order: Pick<TwapOrder, 'fullAppData' | 'executedFee' | 'executedFeeToken'>
 }) => {
   const bps = getOrderFeeBps(order)
-  const { executedSurplusFee, sellToken } = order
-  let token = sellToken
+  const { executedFee, executedFeeToken } = order
 
-  if (executedSurplusFee === null || typeof executedSurplusFee === 'undefined' || executedSurplusFee === '0') {
+  if (executedFee === null || executedFee === '0') {
     return null
   }
 
@@ -34,7 +33,7 @@ export const SurplusFee = ({
       }
       key="widget_fee"
     >
-      {formatVisualAmount(BigInt(executedSurplusFee), token.decimals)} {token.symbol}
+      {formatVisualAmount(BigInt(executedFee), executedFeeToken.decimals)} {executedFeeToken.symbol}
     </DataRow>
   )
 }
