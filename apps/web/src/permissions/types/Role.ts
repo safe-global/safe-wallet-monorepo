@@ -1,5 +1,6 @@
 export enum Role {
   Owner = 'Owner',
+  NestedOwner = 'NestedOwner',
   Proposer = 'Proposer',
   Executioner = 'Executioner',
   ModuleRole = 'ModuleRole',
