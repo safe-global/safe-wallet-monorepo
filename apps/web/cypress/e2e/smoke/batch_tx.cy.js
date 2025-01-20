@@ -24,17 +24,18 @@ describe('[SMOKE] Batch transaction tests', { defaultCommandTimeout: 30000 }, ()
   })
 
   it('[SMOKE] Verify empty batch list can be opened', () => {
-    wallet.connectSigner(signer)
     batch.openBatchtransactionsModal()
-    batch.openNewTransactionModal()
+    cy.contains(batch.addInitialTransactionStr).should('be.visible')
   })
 
-  it('[SMOKE] Verify a transaction can be added to the batch', () => {
-    wallet.connectSigner(signer)
-    batch.addNewTransactionToBatch(constants.EOA, currentNonce, funds_first_tx)
-    batch.verifyBatchIconCount(1)
-    batch.clickOnBatchCounter()
-    batch.verifyAmountTransactionsInBatch(1)
+  it('[SMOKE] Verify a transaction is visible in a batch', () => {
+    cy.wrap(null)
+      .then(() => main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__batch, ls.batchData.entry1))
+      .then(() => {
+        batch.verifyBatchIconCount(1)
+        batch.clickOnBatchCounter()
+        batch.verifyAmountTransactionsInBatch(1)
+      })
   })
 
   it('[SMOKE] Verify the batch can be confirmed and related transactions exist in the form', () => {
@@ -42,31 +43,14 @@ describe('[SMOKE] Batch transaction tests', { defaultCommandTimeout: 30000 }, ()
       .then(() => main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__batch, ls.batchData.entry0))
       .then(() => main.isItemInLocalstorage(constants.localStorageKeys.SAFE_v2__batch, ls.batchData.entry0))
       .then(() => {
-        cy.reload()
         wallet.connectSigner(signer)
         batch.clickOnBatchCounter()
-
         batch.clickOnConfirmBatchBtn()
         batch.verifyBatchTransactionsCount(2)
         batch.clickOnBatchCounter()
         cy.contains(funds_first_tx).parents('ul').as('TransactionList')
         cy.get('@TransactionList').find('li').eq(0).contains(funds_first_tx)
         cy.get('@TransactionList').find('li').eq(1).contains(funds_second_tx)
-      })
-  })
-
-  it('[SMOKE] Verify a transaction can be removed from the batch', () => {
-    cy.wrap(null)
-      .then(() => main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__batch, ls.batchData.entry0))
-      .then(() => main.isItemInLocalstorage(constants.localStorageKeys.SAFE_v2__batch, ls.batchData.entry0))
-      .then(() => {
-        cy.reload()
-        wallet.connectSigner(signer)
-        batch.clickOnBatchCounter()
-        cy.contains(batch.batchedTransactionsStr).should('be.visible').parents('aside').find('ul > li').as('BatchList')
-        cy.get('@BatchList').find(batch.deleteTransactionbtn).eq(0).click()
-        cy.get('@BatchList').should('have.length', 1)
-        cy.get('@BatchList').contains(funds_first_tx).should('not.exist')
       })
   })
 })

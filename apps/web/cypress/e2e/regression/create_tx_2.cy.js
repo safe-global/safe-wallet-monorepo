@@ -1,5 +1,4 @@
 import * as constants from '../../support/constants.js'
-import * as main from '../pages/main.page.js'
 import * as createtx from '../pages/create_tx.pages.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as wallet from '../../support/utils/wallet.js'
@@ -18,7 +17,7 @@ function happyPathToStepTwo() {
   createtx.clickOnNextBtn()
 }
 
-describe('[SMOKE] Create transactions tests 2', () => {
+describe('Create transactions tests 2', () => {
   before(async () => {
     staticSafes = await getSafes(CATEGORIES.static)
   })
@@ -30,7 +29,7 @@ describe('[SMOKE] Create transactions tests 2', () => {
     createtx.clickOnSendTokensBtn()
   })
 
-  it('[SMOKE] Verify advance parameters gas limit input', () => {
+  it('Verify advance parameters gas limit input', () => {
     happyPathToStepTwo()
     createtx.changeNonce('1')
     createtx.selectCurrentWallet()
@@ -38,7 +37,7 @@ describe('[SMOKE] Create transactions tests 2', () => {
     createtx.verifyAndSubmitExecutionParams()
   })
 
-  it('[SMOKE] Verify a transaction shows relayer and addToBatch button', () => {
+  it('Verify a transaction shows relayer and addToBatch button', () => {
     happyPathToStepTwo()
     createtx.verifySubmitBtnIsEnabled()
     createtx.verifyNativeTokenTransfer()

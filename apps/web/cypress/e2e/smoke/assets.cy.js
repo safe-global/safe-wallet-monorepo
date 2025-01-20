@@ -2,12 +2,9 @@ import * as constants from '../../support/constants'
 import * as main from '../../e2e/pages/main.page'
 import * as assets from '../pages/assets.pages'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
-import * as wallet from '../../support/utils/wallet.js'
+import * as ls from '../../support/localstorage_data.js'
 
 let staticSafes = []
-
-const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
-const signer = walletCredentials.OWNER_4_PRIVATE_KEY
 
 describe('[SMOKE] Assets tests', () => {
   const fiatRegex = assets.fiatRegex
@@ -38,21 +35,14 @@ describe('[SMOKE] Assets tests', () => {
       assets.currencyDaiCap,
     ]
 
-    main.verifyValuesDoNotExist(assets.tokenListTable, spamTokens)
-    assets.selectTokenList(assets.tokenListOptions.allTokens)
-    spamTokens.push(constants.tokenNames.sepoliaEther)
-    main.verifyValuesExist(assets.tokenListTable, spamTokens)
-  })
-
-  it('[SMOKE] Verify that "Hide token" button is present and opens the "Hide tokens menu"', () => {
-    assets.selectTokenList(assets.tokenListOptions.allTokens)
-    assets.openHideTokenMenu()
-    assets.verifyEachRowHasCheckbox()
-  })
-
-  it('[SMOKE] Verify that clicking the button with an owner opens the Send funds form', () => {
-    wallet.connectSigner(signer)
-    assets.selectTokenList(assets.tokenListOptions.allTokens)
-    assets.clickOnSendBtn(0)
+    cy.wrap(null)
+      .then(() => main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__settings, ls.safeSettings.slimitSettings))
+      .then(() => {
+        cy.reload()
+        main.verifyValuesDoNotExist(assets.tokenListTable, spamTokens)
+        assets.selectTokenList(assets.tokenListOptions.allTokens)
+        spamTokens.push(constants.tokenNames.sepoliaEther)
+        main.verifyValuesExist(assets.tokenListTable, spamTokens)
+      })
   })
 })

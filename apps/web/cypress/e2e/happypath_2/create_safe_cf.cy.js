@@ -9,7 +9,7 @@ const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
 // DO NOT use OWNER_2_PRIVATE_KEY for safe creation. Used for CF safes.
 const signer = walletCredentials.OWNER_2_PRIVATE_KEY
 
-describe('[SMOKE] CF Safe creation tests', () => {
+describe('CF Safe creation happy path tests', () => {
   beforeEach(() => {
     cy.visit(constants.welcomeUrl + '?chain=sep')
     // Required for data layer
@@ -18,7 +18,7 @@ describe('[SMOKE] CF Safe creation tests', () => {
     getEvents()
   })
 
-  it('[SMOKE] CF creation happy path. GA safe_created', () => {
+  it('CF creation happy path. GA safe_created', () => {
     wallet.connectSigner(signer)
     owner.waitForConnectionStatus()
     createwallet.clickOnContinueWithWalletBtn()

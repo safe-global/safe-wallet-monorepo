@@ -9,7 +9,6 @@ import { getMockAddress } from '../../support/utils/ethers.js'
 let staticSafes = []
 const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
 const signer = walletCredentials.OWNER_4_PRIVATE_KEY
-const signer2 = walletCredentials.OWNER_1_PRIVATE_KEY
 
 describe('Add Owners tests', () => {
   before(async () => {
@@ -57,6 +56,25 @@ describe('Add Owners tests', () => {
     wallet.connectSigner(signer)
     owner.openAddOwnerWindow()
     owner.typeOwnerAddress(getMockAddress())
+    owner.clickOnNextBtn()
+    owner.verifyConfirmTransactionWindowDisplayed()
+  })
+
+  it('Verify default threshold value. Verify correct threshold calculation', () => {
+    wallet.connectSigner(signer)
+    owner.openAddOwnerWindow()
+    owner.typeOwnerAddress(constants.DEFAULT_OWNER_ADDRESS)
+    owner.verifyThreshold(1, 2)
+  })
+
+  it('Verify valid Address validation', () => {
+    wallet.connectSigner(signer)
+    owner.openAddOwnerWindow()
+    owner.typeOwnerAddress(constants.SEPOLIA_OWNER_2)
+    owner.clickOnNextBtn()
+    owner.verifyConfirmTransactionWindowDisplayed()
+    owner.clickOnBackBtn()
+    owner.typeOwnerAddress(staticSafes.SEP_STATIC_SAFE_3)
     owner.clickOnNextBtn()
     owner.verifyConfirmTransactionWindowDisplayed()
   })
