@@ -6,7 +6,7 @@ import { SafeAppsName } from '@/config/constants'
 import { useRemoteSafeApps } from '@/hooks/safe-apps/useRemoteSafeApps'
 import AddIcon from '@/public/images/common/add.svg'
 import { formatVisualAmount } from '@/utils/formatters'
-import { Alert, Button, CardActions, Divider, Grid, Link, SvgIcon, Typography } from '@mui/material'
+import { Alert, Button, CardActions, Divider, Grid, Link, Stack, SvgIcon, Typography } from '@mui/material'
 import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
 import { type TokenInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import { useContext, useEffect, useState, type ReactElement } from 'react'
@@ -120,15 +120,7 @@ export const CreateTokenTransfers = ({
             </>
           ))}
 
-          <Grid
-            xs={12}
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              mb: 4,
-            }}
-          >
+          <Stack direction="row" alignItems="center" justifyContent="space-between" mb={4}>
             <Button
               data-testid="add-recipient-btn"
               variant="text"
@@ -139,7 +131,7 @@ export const CreateTokenTransfers = ({
               Add new recipient
             </Button>
             <Typography variant="body2">{`${recipientFields.length}/${maxRecipients}`}</Typography>
-          </Grid>
+          </Stack>
 
           <Divider className={commonCss.nestedDivider} />
 
