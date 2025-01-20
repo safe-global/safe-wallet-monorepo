@@ -1,16 +1,29 @@
-.progressBar {
+.progressBar,
+.safenetProgressBar {
   height: 6px;
   border-radius: 6px;
+}
+
+.progressBar,
+.safenetProgressBar {
   background-color: var(--color-border-light);
+}
+
+.progressBar :global .MuiLinearProgress-bar,
+.safenetProgressBar :global .MuiLinearProgress-bar {
+  border-radius: 6px;
 }
 
 .progressBar :global .MuiLinearProgress-bar {
   background: var(--color-primary-main);
-  border-radius: 6px;
+}
+.safenetProgressBar :global .MuiLinearProgress-bar {
+  background: linear-gradient(90deg, #32f970 0%, #eed509 100%);
 }
 
 @media (max-width: 599.95px) {
-  .progressBar {
+  .progressBar,
+  .safenetProgressBar {
     border-radius: 0;
   }
 }

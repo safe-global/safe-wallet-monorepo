@@ -1,9 +1,9 @@
-import { act, renderHook } from '@testing-library/react'
 import * as gateway from '@safe-global/safe-gateway-typescript-sdk'
+import { act, renderHook } from '@testing-library/react'
 
-import * as useChainIdHook from '@/hooks/useChainId'
-import { useRemoteSafeApps } from '@/hooks/safe-apps/useRemoteSafeApps'
 import type { SafeAppsTag } from '@/config/constants'
+import { useRemoteSafeApps } from '@/hooks/safe-apps/useRemoteSafeApps'
+import * as useChainIdHook from '@/hooks/useChainId'
 
 jest.mock('@safe-global/safe-gateway-typescript-sdk')
 
@@ -47,7 +47,7 @@ describe('useRemoteSafeApps', () => {
     ])
   })
   it('should alphabetically return the remote safe apps filtered by tag', async () => {
-    const { result } = renderHook(() => useRemoteSafeApps('test' as SafeAppsTag))
+    const { result } = renderHook(() => useRemoteSafeApps({ tag: 'test' as SafeAppsTag }))
 
     var [data, error, loading] = result.current
 
