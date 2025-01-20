@@ -7,7 +7,11 @@ import { HelpIconTooltip } from '@/features/swap/components/HelpIconTooltip'
 export const SurplusFee = ({
   order,
 }: {
-  order: Pick<Order, 'fullAppData' | 'sellToken' | 'buyToken' | 'status' | 'executedFee' | 'executedFeeToken' | 'kind'>
+  order: Pick<Order, 'fullAppData' | 'sellToken' | 'buyToken' | 'status' | 'executedSurplusFee' | 'kind'> & {
+    // TODO: Remove when migrating to new SDK
+    executedFee: string
+    executedFeeToken: Order['sellToken']
+  }
 }) => {
   const bps = getOrderFeeBps(order)
   const { executedFee, executedFeeToken } = order

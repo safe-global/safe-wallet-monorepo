@@ -158,8 +158,6 @@ export const mockSwapTransfer: SwapTransferTransactionInfo = {
   buyToken: fakeToken,
   explorerUrl: 'http://google.com',
   executedSurplusFee: '',
-  executedFee: '',
-  executedFeeToken: fakeToken2,
   receiver: '0xbob',
   owner: '0xalice',
 }
