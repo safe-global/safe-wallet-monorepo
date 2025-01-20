@@ -93,7 +93,13 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
 
         <div className={css.txData}>
           <ErrorBoundary fallback={<div>Error parsing data</div>}>
-            <TxData txDetails={txDetails} trusted={isTrustedTransfer} imitation={isImitationTransaction} />
+            <TxData
+              txData={txDetails.txData}
+              txInfo={txDetails.txInfo}
+              txDetails={txDetails}
+              trusted={isTrustedTransfer}
+              imitation={isImitationTransaction}
+            />
           </ErrorBoundary>
         </div>
 

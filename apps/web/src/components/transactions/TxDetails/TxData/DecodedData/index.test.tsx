@@ -11,7 +11,7 @@ describe('DecodedData', () => {
   it('shows an Interact with block if there is no txData but toInfo', () => {
     const { getByText } = render(<DecodedData txData={undefined} toInfo={{ value: '0x123' }} />)
 
-    expect(getByText('Interact with')).toBeInTheDocument()
+    expect(getByText('Interact with:')).toBeInTheDocument()
   })
 
   it('shows Hex encoded data if there are no parameters', () => {

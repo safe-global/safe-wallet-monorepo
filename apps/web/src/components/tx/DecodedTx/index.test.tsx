@@ -7,8 +7,10 @@ import {
   DetailedExecutionInfoType,
   SettingsInfoType,
   TransactionInfoType,
+  TransactionTokenType,
+  TransferDirection,
 } from '@safe-global/safe-gateway-typescript-sdk'
-import type { DecodedDataResponse } from '@safe-global/safe-gateway-typescript-sdk'
+import type { DecodedDataResponse, TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
 
 const txDetails = createMockTransactionDetails({
   txInfo: {
@@ -104,44 +106,54 @@ describe('DecodedTx', () => {
   it('should render a native transfer', async () => {
     const result = render(
       <DecodedTx
-        txDetails={txDetails}
-        showMultisend={false}
+        showMultisend
         tx={
           {
             data: {
-              to: '0x3430d04E42a722c5Ae52C5Bffbf1F230C2677600',
-              value: '1000000',
+              to: '0x474e5Ded6b5D078163BFB8F6dBa355C3aA5478C8',
+              value: '40737664983361196',
               data: '0x',
               operation: 0,
               baseGas: '0',
               gasPrice: '0',
               gasToken: '0x0000000000000000000000000000000000000000',
               refundReceiver: '0x0000000000000000000000000000000000000000',
-              nonce: 58,
+              nonce: 36,
               safeTxGas: '0',
             },
           } as SafeTransaction
         }
-        decodedData={{
-          method: '',
-          parameters: [
-            {
-              name: 'to',
-              type: 'address',
-              value: '0x3430d04E42a722c5Ae52C5Bffbf1F230C2677600',
-            },
-            {
-              name: 'value',
-              type: 'uint256',
-              value: '1000000',
-            },
-          ],
+        txInfo={{
+          type: TransactionInfoType.TRANSFER,
+          sender: {
+            value: '0xA77DE01e157f9f57C7c4A326eeE9C4874D0598b6',
+          },
+          recipient: {
+            value: '0x474e5Ded6b5D078163BFB8F6dBa355C3aA5478C8',
+          },
+          direction: TransferDirection.OUTGOING,
+          transferInfo: {
+            type: TransactionTokenType.NATIVE_COIN,
+            value: '40737664983361196',
+          },
         }}
-        showMethodCall
+        txData={{
+          hexData: '0x',
+          dataDecoded: undefined,
+          to: {
+            value: '0x474e5Ded6b5D078163BFB8F6dBa355C3aA5478C8',
+          },
+          value: '40737664983361196',
+          operation: 0,
+          trustedDelegateCallTarget: true,
+          addressInfoIndex: undefined,
+        }}
       />,
     )
 
-    expect(result.queryByText('Value:')).toBeInTheDocument()
+    await waitFor(() => {
+      expect(result.queryByText('native transfer')).toBeInTheDocument()
+    })
 
     fireEvent.click(result.getByText('Advanced details'))
 
@@ -170,17 +182,23 @@ describe('DecodedTx', () => {
             },
           } as SafeTransaction
         }
-        decodedData={
+        txInfo={txDetails.txInfo}
+        txData={
           {
-            method: '',
-          } as DecodedDataResponse
+            ...txDetails.txData,
+            dataDecoded: {
+              method: '',
+            } as DecodedDataResponse,
+          } as TransactionDetails['txData']
         }
         showMethodCall
       />,
     )
 
-    expect(result.queryByText('Value:')).toBeInTheDocument()
-    expect(result.queryByText('Data (hex-encoded)')).toBeInTheDocument()
+    await waitFor(() => {
+      expect(result.queryByText('Interacted with:')).toBeInTheDocument()
+      expect(result.queryByText('Data (hex-encoded)')).toBeInTheDocument()
+    })
 
     fireEvent.click(result.getByText('Advanced details'))
 
@@ -193,7 +211,6 @@ describe('DecodedTx', () => {
   it('should render an ERC20 transfer', async () => {
     const result = render(
       <DecodedTx
-        txDetails={txDetails}
         showMethodCall
         showMultisend={false}
         tx={
@@ -212,21 +229,27 @@ describe('DecodedTx', () => {
             },
           } as SafeTransaction
         }
-        decodedData={{
-          method: 'transfer',
-          parameters: [
-            {
-              name: 'to',
-              type: 'address',
-              value: '0x474e5Ded6b5D078163BFB8F6dBa355C3aA5478C8',
+        txInfo={txDetails.txInfo}
+        txData={
+          {
+            ...txDetails.txData,
+            dataDecoded: {
+              method: 'transfer',
+              parameters: [
+                {
+                  name: 'to',
+                  type: 'address',
+                  value: '0x474e5Ded6b5D078163BFB8F6dBa355C3aA5478C8',
+                },
+                {
+                  name: 'value',
+                  type: 'uint256',
+                  value: '16745726664999765048',
+                },
+              ],
             },
-            {
-              name: 'value',
-              type: 'uint256',
-              value: '16745726664999765048',
-            },
-          ],
-        }}
+          } as TransactionDetails['txData']
+        }
       />,
     )
 
@@ -263,70 +286,76 @@ describe('DecodedTx', () => {
             },
           } as SafeTransaction
         }
-        decodedData={{
-          method: 'multiSend',
-          parameters: [
-            {
-              name: 'transactions',
-              type: 'bytes',
-              value: '0x0057f1887a8bf19b14fc0df',
-              valueDecoded: [
+        txInfo={txDetails.txInfo}
+        txData={
+          {
+            ...txDetails.txData,
+            dataDecoded: {
+              method: 'multiSend',
+              parameters: [
                 {
-                  operation: 0,
-                  to: '0x57f1887a8BF19b14fC0dF6Fd9B2acc9Af147eA85',
-                  value: '0',
-                  data: '0x42842e0e0000000000000000000',
-                  dataDecoded: {
-                    method: 'safeTransferFrom',
-                    parameters: [
-                      {
-                        name: 'from',
-                        type: 'address',
-                        value: '0xA77DE01e157f9f57C7c4A326eeE9C4874D0598b6',
+                  name: 'transactions',
+                  type: 'bytes',
+                  value: '0x0057f1887a8bf19b14fc0df',
+                  valueDecoded: [
+                    {
+                      operation: 0,
+                      to: '0x57f1887a8BF19b14fC0dF6Fd9B2acc9Af147eA85',
+                      value: '0',
+                      data: '0x42842e0e0000000000000000000',
+                      dataDecoded: {
+                        method: 'safeTransferFrom',
+                        parameters: [
+                          {
+                            name: 'from',
+                            type: 'address',
+                            value: '0xA77DE01e157f9f57C7c4A326eeE9C4874D0598b6',
+                          },
+                          {
+                            name: 'to',
+                            type: 'address',
+                            value: '0x474e5Ded6b5D078163BFB8F6dBa355C3aA5478C8',
+                          },
+                          {
+                            name: 'tokenId',
+                            type: 'uint256',
+                            value: '52964617156216674852059480948658573966398315289847646343083345905048987083870',
+                          },
+                        ],
                       },
-                      {
-                        name: 'to',
-                        type: 'address',
-                        value: '0x474e5Ded6b5D078163BFB8F6dBa355C3aA5478C8',
+                    },
+                    {
+                      operation: 0,
+                      to: '0xD014e20A75437a4bd0FbB40498FF94e6F337c3e9',
+                      value: '0',
+                      data: '0x42842e0e000000000000000000000000a77de',
+                      dataDecoded: {
+                        method: 'safeTransferFrom',
+                        parameters: [
+                          {
+                            name: 'from',
+                            type: 'address',
+                            value: '0xA77DE01e157f9f57C7c4A326eeE9C4874D0598b6',
+                          },
+                          {
+                            name: 'to',
+                            type: 'address',
+                            value: '0x474e5Ded6b5D078163BFB8F6dBa355C3aA5478C8',
+                          },
+                          {
+                            name: 'tokenId',
+                            type: 'uint256',
+                            value: '412',
+                          },
+                        ],
                       },
-                      {
-                        name: 'tokenId',
-                        type: 'uint256',
-                        value: '52964617156216674852059480948658573966398315289847646343083345905048987083870',
-                      },
-                    ],
-                  },
-                },
-                {
-                  operation: 0,
-                  to: '0xD014e20A75437a4bd0FbB40498FF94e6F337c3e9',
-                  value: '0',
-                  data: '0x42842e0e000000000000000000000000a77de',
-                  dataDecoded: {
-                    method: 'safeTransferFrom',
-                    parameters: [
-                      {
-                        name: 'from',
-                        type: 'address',
-                        value: '0xA77DE01e157f9f57C7c4A326eeE9C4874D0598b6',
-                      },
-                      {
-                        name: 'to',
-                        type: 'address',
-                        value: '0x474e5Ded6b5D078163BFB8F6dBa355C3aA5478C8',
-                      },
-                      {
-                        name: 'tokenId',
-                        type: 'uint256',
-                        value: '412',
-                      },
-                    ],
-                  },
+                    },
+                  ],
                 },
               ],
             },
-          ],
-        }}
+          } as TransactionDetails['txData']
+        }
         showMethodCall
         showMultisend
       />,
@@ -338,7 +367,6 @@ describe('DecodedTx', () => {
   it('should render a function call without parameters', async () => {
     const result = render(
       <DecodedTx
-        txDetails={txDetails}
         tx={
           {
             data: {
@@ -356,10 +384,16 @@ describe('DecodedTx', () => {
           } as SafeTransaction
         }
         showMultisend={false}
-        decodedData={{
-          method: 'deposit',
-          parameters: [],
-        }}
+        txInfo={txDetails.txInfo}
+        txData={
+          {
+            ...txDetails.txData,
+            dataDecoded: {
+              method: 'deposit',
+              parameters: [],
+            },
+          } as TransactionDetails['txData']
+        }
         showMethodCall
       />,
     )

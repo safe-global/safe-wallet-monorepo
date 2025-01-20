@@ -32,7 +32,7 @@ type Story = StoryObj<typeof meta>
 export const AddOwner: Story = {
   args: {
     txInfo,
-    txDetails: {} as TransactionDetails,
+    txData: {} as TransactionDetails['txData'],
   },
 }
 
@@ -54,6 +54,6 @@ export const SwapOwner: Story = {
         },
       },
     },
-    txDetails: {} as TransactionDetails,
+    txData: {} as TransactionDetails['txData'],
   },
 }

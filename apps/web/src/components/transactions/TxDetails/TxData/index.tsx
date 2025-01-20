@@ -20,7 +20,7 @@ import {
   isTransferTxInfo,
 } from '@/utils/transaction-guards'
 import { SpendingLimits } from '@/components/transactions/TxDetails/TxData/SpendingLimits'
-import type { TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
+import { TransactionStatus, type TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
 import { type ReactElement } from 'react'
 import RejectionTxInfo from '@/components/transactions/TxDetails/TxData/Rejection'
 import DecodedData from '@/components/transactions/TxDetails/TxData/DecodedData'
@@ -36,68 +36,80 @@ import { ExecTransaction } from './NestedTransaction/ExecTransaction'
 import SafeUpdate from './SafeUpdate'
 
 const TxData = ({
+  txInfo,
+  txData,
   txDetails,
   trusted,
   imitation,
 }: {
-  txDetails: TransactionDetails
+  txInfo: TransactionDetails['txInfo']
+  txData: TransactionDetails['txData']
+  txDetails?: TransactionDetails
   trusted: boolean
   imitation: boolean
 }): ReactElement => {
   const chainId = useChainId()
-  const txInfo = txDetails.txInfo
-  const toInfo = isCustomTxInfo(txDetails.txInfo) ? txDetails.txInfo.to : undefined
 
-  if (isOrderTxInfo(txDetails.txInfo)) {
-    return <SwapOrder txData={txDetails.txData} txInfo={txDetails.txInfo} />
+  if (isOrderTxInfo(txInfo)) {
+    return <SwapOrder txData={txData} txInfo={txInfo} />
   }
 
-  if (isStakingTxDepositInfo(txDetails.txInfo)) {
-    return <StakingTxDepositDetails txData={txDetails.txData} info={txDetails.txInfo} />
+  if (isStakingTxDepositInfo(txInfo)) {
+    return <StakingTxDepositDetails txData={txData} info={txInfo} />
   }
 
-  if (isStakingTxExitInfo(txDetails.txInfo)) {
-    return <StakingTxExitDetails info={txDetails.txInfo} />
+  if (isStakingTxExitInfo(txInfo)) {
+    return <StakingTxExitDetails info={txInfo} />
   }
 
-  if (isStakingTxWithdrawInfo(txDetails.txInfo)) {
-    return <StakingTxWithdrawDetails info={txDetails.txInfo} />
+  if (isStakingTxWithdrawInfo(txInfo)) {
+    return <StakingTxWithdrawDetails info={txInfo} />
   }
 
   if (isTransferTxInfo(txInfo)) {
-    return <TransferTxInfo txInfo={txInfo} txStatus={txDetails.txStatus} trusted={trusted} imitation={imitation} />
+    return (
+      <TransferTxInfo
+        txInfo={txInfo}
+        txStatus={txDetails?.txStatus ?? TransactionStatus.AWAITING_CONFIRMATIONS}
+        trusted={trusted}
+        imitation={imitation}
+      />
+    )
   }
 
   if (isSettingsChangeTxInfo(txInfo)) {
     return <SettingsChangeTxInfo settingsInfo={txInfo.settingsInfo} />
   }
 
-  if (isCancellationTxInfo(txInfo) && isMultisigDetailedExecutionInfo(txDetails.detailedExecutionInfo)) {
+  if (txDetails && isCancellationTxInfo(txInfo) && isMultisigDetailedExecutionInfo(txDetails.detailedExecutionInfo)) {
     return <RejectionTxInfo nonce={txDetails.detailedExecutionInfo?.nonce} isTxExecuted={!!txDetails.executedAt} />
   }
 
-  const method = txDetails.txData?.dataDecoded?.method as SpendingLimitMethods
-  if (isCustomTxInfo(txInfo) && isSupportedSpendingLimitAddress(txInfo, chainId) && isSpendingLimitMethod(method)) {
-    return <SpendingLimits txData={txDetails.txData} txInfo={txInfo} type={method} />
+  if (
+    isCustomTxInfo(txInfo) &&
+    isSupportedSpendingLimitAddress(txInfo, chainId) &&
+    isSpendingLimitMethod(txData?.dataDecoded?.method)
+  ) {
+    return <SpendingLimits txData={txData} txInfo={txInfo} type={txData?.dataDecoded?.method as SpendingLimitMethods} />
   }
 
-  if (isMigrateToL2TxData(txDetails.txData, chainId)) {
+  if (txDetails && isMigrateToL2TxData(txData, chainId)) {
     return <MigrationToL2TxData txDetails={txDetails} />
   }
 
-  if (isOnChainConfirmationTxData(txDetails.txData)) {
-    return <OnChainConfirmation data={txDetails.txData} />
+  if (isOnChainConfirmationTxData(txData)) {
+    return <OnChainConfirmation data={txData} />
   }
 
-  if (isExecTxData(txDetails.txData)) {
-    return <ExecTransaction data={txDetails.txData} />
+  if (isExecTxData(txData)) {
+    return <ExecTransaction data={txData} />
   }
 
-  if (isSafeUpdateTxData(txDetails.txData)) {
-    return <SafeUpdate txData={txDetails.txData} />
+  if (isSafeUpdateTxData(txData)) {
+    return <SafeUpdate txData={txData} />
   }
 
-  return <DecodedData txData={txDetails.txData} toInfo={toInfo} />
+  return <DecodedData txData={txData} toInfo={isCustomTxInfo(txInfo) ? txInfo.to : undefined} />
 }
 
 export default TxData

@@ -8373,10 +8373,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@safe-global/safe-gateway-typescript-sdk@npm:3.22.6":
-  version: 3.22.6
-  resolution: "@safe-global/safe-gateway-typescript-sdk@npm:3.22.6"
-  checksum: 10/021f605143d507b1fc9b9be34a1a0f96aecd268d5349428e92bf636b64c9123dd992e27ce95c6c47a092a80f95a3fb1756a651322eda497d1ef867a62a8710da
+"@safe-global/safe-gateway-typescript-sdk@npm:3.22.7-beta.2":
+  version: 3.22.7-beta.2
+  resolution: "@safe-global/safe-gateway-typescript-sdk@npm:3.22.7-beta.2"
+  checksum: 10/3b882860fd6abcc682f1ff7aa17760aeb352ab15309e108f74ca9e6464bc2cae8d99c6da5980b70ea94d0d45ea9b1092e92c26cef01ab5f9d56ed9fbefbcd811
   languageName: node
   linkType: hard
 
@@ -8475,7 +8475,7 @@ __metadata:
     "@safe-global/safe-apps-sdk": "npm:^9.1.0"
     "@safe-global/safe-client-gateway-sdk": "npm:v1.60.1"
     "@safe-global/safe-core-sdk-types": "npm:^5.0.1"
-    "@safe-global/safe-gateway-typescript-sdk": "npm:3.22.6"
+    "@safe-global/safe-gateway-typescript-sdk": "npm:3.22.7-beta.2"
     "@safe-global/safe-modules-deployments": "npm:^2.2.1"
     "@safe-global/store": "workspace:^"
     "@safe-global/test": "workspace:^"

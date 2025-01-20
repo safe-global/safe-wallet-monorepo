@@ -27,7 +27,7 @@ import { BlockaidBalanceChanges } from '../security/blockaid/BlockaidBalanceChan
 import { Blockaid } from '../security/blockaid'
 import { useLazyGetTransactionDetailsQuery } from '@/store/api/gateway'
 import { useApprovalInfos } from '../ApprovalEditor/hooks/useApprovalInfos'
-import type { TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
+import type { TransactionDetails, TransactionPreview } from '@safe-global/safe-gateway-typescript-sdk'
 import NetworkWarning from '@/components/new-safe/create/NetworkWarning'
 import ConfirmationView from '../confirmation-views'
 import { SignerForm } from './SignerForm'
@@ -64,6 +64,7 @@ export const SignOrExecuteForm = ({
   safeTxError: ReturnType<typeof useSafeTxError>
   isCreation?: boolean
   txDetails?: TransactionDetails
+  txPreview?: TransactionPreview
 }): ReactElement => {
   const [customOrigin, setCustomOrigin] = useState<string | undefined>(props.origin)
   const { transactionExecution } = useAppSelector(selectSettings)
@@ -179,8 +180,10 @@ export const SignOrExecuteForm = ({
         {props.children}
 
         <ConfirmationView
+          txId={props.txId}
           isCreation={isCreation}
           txDetails={props.txDetails}
+          txPreview={props.txPreview}
           safeTx={safeTx}
           isBatch={props.isBatch}
           showMethodCall={props.showMethodCall}
@@ -226,7 +229,7 @@ export const SignOrExecuteForm = ({
 
         <NetworkWarning />
 
-        <UnknownContractError txData={props.txDetails?.txData} />
+        <UnknownContractError txData={props.txDetails?.txData ?? props.txPreview?.txData} />
 
         <Blockaid />
 
