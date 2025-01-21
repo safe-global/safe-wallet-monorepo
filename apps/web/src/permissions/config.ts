@@ -12,21 +12,21 @@ export default <RolePermissionsConfig>{
     [CreateTransaction]: true,
     [ProposeTransaction]: true,
     [SignTransaction]: true,
-    [ExecuteTransaction]: ({ safeTx }) => safeTx.data.nonce === 123, // TODO: implement correct logic
+    [ExecuteTransaction]: () => true,
     [EnablePushNotifications]: true,
   }),
   [Role.Proposer]: () => ({
     [CreateTransaction]: true,
     [ProposeTransaction]: true,
-    [ExecuteTransaction]: ({ safeTx }) => !!safeTx, // TODO: implement correct logic
+    [ExecuteTransaction]: () => true,
     [EnablePushNotifications]: true,
   }),
   [Role.Executioner]: () => ({
-    [ExecuteTransaction]: ({ safeTx }) => safeTx.data.nonce === 111, // TODO: implement correct logic
+    [ExecuteTransaction]: () => true,
     [EnablePushNotifications]: true,
   }),
   [Role.SpendingLimitBeneficiary]: ({ spendingLimits }) => ({
-    [ExecuteTransaction]: ({ safeTx }) => !!spendingLimits && safeTx.data.nonce === 123, // TODO: implement correct logic
+    [ExecuteTransaction]: () => true,
     [EnablePushNotifications]: true,
   }),
   [Role.NoWalletConnected]: () => ({
