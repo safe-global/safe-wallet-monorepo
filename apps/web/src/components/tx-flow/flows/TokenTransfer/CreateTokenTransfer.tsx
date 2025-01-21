@@ -1,7 +1,6 @@
 import { useTokenAmount, useVisibleTokens } from '@/components/tx-flow/flows/TokenTransfer/utils'
 import { type ReactElement, useContext, useEffect } from 'react'
 import { type TokenInfo } from '@safe-global/safe-gateway-typescript-sdk'
-import useIsOnlySpendingLimitBeneficiary from '@/hooks/useIsOnlySpendingLimitBeneficiary'
 import { FormProvider, useForm } from 'react-hook-form'
 import { Button, CardActions, Divider, FormControl, Grid, Typography } from '@mui/material'
 import TokenIcon from '@/components/common/TokenIcon'
@@ -13,6 +12,8 @@ import { formatVisualAmount } from '@/utils/formatters'
 import commonCss from '@/components/tx-flow/common/styles.module.css'
 import TokenAmountInput from '@/components/common/TokenAmountInput'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
+import { useHasPermission } from '@/permissions/hooks/useHasPermission'
+import { Permission } from '@/permissions/types'
 
 export const AutocompleteItem = (item: { tokenInfo: TokenInfo; balance: string }): ReactElement => (
   <Grid
@@ -51,7 +52,8 @@ export const CreateTokenTransfer = ({
   txNonce?: number
 }): ReactElement => {
   const disableSpendingLimit = txNonce !== undefined
-  const isOnlySpendingLimitBeneficiary = useIsOnlySpendingLimitBeneficiary()
+  const canCreateStandardTx = useHasPermission(Permission.CreateTransaction)
+  const canCreateSpendingLimitTx = useHasPermission(Permission.CreateSpendingLimitTransaction)
   const balancesItems = useVisibleTokens()
   const { setNonce, setNonceNeeded } = useContext(SafeTxContext)
 
@@ -66,12 +68,11 @@ export const CreateTokenTransfer = ({
       ...params,
       [TokenTransferFields.type]: disableSpendingLimit
         ? TokenTransferType.multiSig
-        : isOnlySpendingLimitBeneficiary
+        : canCreateSpendingLimitTx && !canCreateStandardTx
           ? TokenTransferType.spendingLimit
           : params.type,
-      [TokenTransferFields.tokenAddress]: isOnlySpendingLimitBeneficiary
-        ? balancesItems[0]?.tokenInfo.address
-        : params.tokenAddress,
+      [TokenTransferFields.tokenAddress]:
+        canCreateSpendingLimitTx && !canCreateStandardTx ? balancesItems[0]?.tokenInfo.address : params.tokenAddress,
     },
     mode: 'onChange',
     delayError: 500,
@@ -89,6 +90,10 @@ export const CreateTokenTransfer = ({
 
   const selectedToken = balancesItems.find((item) => item.tokenInfo.address === tokenAddress)
   const { totalAmount, spendingLimitAmount } = useTokenAmount(selectedToken)
+
+  const canCreateSpendingLimitTxWithToken = useHasPermission(Permission.CreateSpendingLimitTransaction, {
+    token: selectedToken?.tokenInfo,
+  })
 
   const isSpendingLimitType = type === TokenTransferType.spendingLimit
 
@@ -110,7 +115,7 @@ export const CreateTokenTransfer = ({
 
           <TokenAmountInput balances={balancesItems} selectedToken={selectedToken} maxAmount={maxAmount} />
 
-          {!disableSpendingLimit && spendingLimitAmount > 0n && (
+          {!disableSpendingLimit && canCreateSpendingLimitTxWithToken && (
             <FormControl fullWidth sx={{ mt: 3 }}>
               <SpendingLimitRow availableAmount={spendingLimitAmount} selectedToken={selectedToken?.tokenInfo} />
             </FormControl>
