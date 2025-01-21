@@ -1,8 +1,14 @@
 import type { RolePermissionsConfig } from './types'
 import { Permission, Role } from './types'
 
-const { CreateTransaction, ProposeTransaction, SignTransaction, ExecuteTransaction, EnablePushNotifications } =
-  Permission
+const {
+  CreateTransaction,
+  ProposeTransaction,
+  SignTransaction,
+  ExecuteTransaction,
+  EnablePushNotifications,
+  CreateSpendingLimitTransaction,
+} = Permission
 
 /**
  * Defines the permissions for each role.
@@ -28,6 +34,19 @@ export default <RolePermissionsConfig>{
   [Role.SpendingLimitBeneficiary]: ({ spendingLimits }) => ({
     [ExecuteTransaction]: () => true,
     [EnablePushNotifications]: true,
+    [CreateSpendingLimitTransaction]: ({ token }) => {
+      if (!token) {
+        return true
+      }
+
+      const spendingLimit = spendingLimits.find((sl) => sl.token.address === token.address)
+
+      if (spendingLimit) {
+        return BigInt(spendingLimit.amount) - BigInt(spendingLimit.spent) > 0
+      }
+
+      return false
+    },
   }),
   [Role.NoWalletConnected]: () => ({
     [EnablePushNotifications]: false,

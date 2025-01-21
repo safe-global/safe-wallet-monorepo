@@ -3,5 +3,6 @@ export enum Permission {
   ProposeTransaction = 'ProposeTransaction',
   SignTransaction = 'SignTransaction',
   ExecuteTransaction = 'ExecuteTransaction',
+  CreateSpendingLimitTransaction = 'CreateSpendingLimitTransaction',
   EnablePushNotifications = 'EnablePushNotifications',
 }

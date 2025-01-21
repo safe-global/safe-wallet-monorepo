@@ -1,5 +1,6 @@
 import type { SafeTransaction } from '@safe-global/safe-core-sdk-types'
 import type { Permission } from './Permission'
+import { TokenInfo } from '@safe-global/safe-gateway-typescript-sdk'
 
 /**
  * PermissionPropsMap defines property types for specific permissions.
@@ -7,6 +8,7 @@ import type { Permission } from './Permission'
  */
 export type PermissionPropsMap = {
   [Permission.ExecuteTransaction]: { safeTx: SafeTransaction }
+  [Permission.CreateSpendingLimitTransaction]: { token?: TokenInfo } | undefined
 }
 
 // Extract the props for a specific permission from PermissionPropsMap
