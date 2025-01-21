@@ -1,3 +1,4 @@
+import { IS_SAFENET_ENABLED } from '@/config/constants'
 import Image from 'next/image'
 import { useMemo, type ReactElement } from 'react'
 import ImageFallback from '../ImageFallback'
@@ -35,7 +36,7 @@ const TokenIcon = ({
         referrerPolicy="no-referrer"
         loading="lazy"
       />
-      {safenet && (
+      {IS_SAFENET_ENABLED && safenet && (
         <div className={css.safenetContainer}>
           <Image src="/images/safenet-bright.svg" alt="Safenet Logo" width={16} height={16} />
         </div>

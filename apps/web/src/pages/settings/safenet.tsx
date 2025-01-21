@@ -1,19 +1,19 @@
-import type { NextPage } from 'next'
-import Head from 'next/head'
-import { Button, CircularProgress, Grid, Paper, SvgIcon, Tooltip, Typography } from '@mui/material'
-import InfoIcon from '@/public/images/notifications/info.svg'
-
 import SettingsHeader from '@/components/settings/SettingsHeader'
-import useSafeInfo from '@/hooks/useSafeInfo'
-import { sameAddress } from '@/utils/addresses'
-import { useContext, useMemo } from 'react'
 import { TxModalContext } from '@/components/tx-flow'
 import { EnableSafenetFlow } from '@/components/tx-flow/flows/EnableSafenet'
+import { IS_SAFENET_ENABLED } from '@/config/constants'
+import useSafeInfo from '@/hooks/useSafeInfo'
+import InfoIcon from '@/public/images/notifications/info.svg'
+import type { ExtendedSafeInfo } from '@/store/safeInfoSlice'
 import type { SafenetConfigEntity } from '@/store/safenet'
 import { useGetSafenetConfigQuery } from '@/store/safenet'
-import type { ExtendedSafeInfo } from '@/store/safeInfoSlice'
-import { SAFE_FEATURES } from '@safe-global/protocol-kit/dist/src/utils'
+import { sameAddress } from '@/utils/addresses'
 import { hasSafeFeature } from '@/utils/safe-versions'
+import { Button, CircularProgress, Grid, Paper, SvgIcon, Tooltip, Typography } from '@mui/material'
+import { SAFE_FEATURES } from '@safe-global/protocol-kit/dist/src/utils'
+import type { NextPage } from 'next'
+import Head from 'next/head'
+import { useContext, useMemo } from 'react'
 
 const getSafenetTokensByChain = (chainId: number, safenetConfig: SafenetConfigEntity): string[] => {
   const tokenSymbols = Object.keys(safenetConfig.tokens)
@@ -80,6 +80,8 @@ const SafenetContent = ({ safenetConfig, safe }: { safenetConfig: SafenetConfigE
 }
 
 const SafenetPage: NextPage = () => {
+  if (!IS_SAFENET_ENABLED) return
+  
   const { safe, safeLoaded } = useSafeInfo()
   const { data: safenetConfig, isLoading: safenetConfigLoading, error: safenetConfigError } = useGetSafenetConfigQuery()
 

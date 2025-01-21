@@ -1,21 +1,22 @@
-import type { ReactElement } from 'react'
-import React, { useMemo, useState } from 'react'
-import { Link, Box } from '@mui/material'
-import { generateDataRowValue, TxDataRow } from '@/components/transactions/TxDetails/Summary/TxDataRow'
+import GradientBoxSafenet from '@/components/common/GradientBoxSafenet'
+import { TxDataRow, generateDataRowValue } from '@/components/transactions/TxDetails/Summary/TxDataRow'
+import { SafenetTxSimulation } from '@/components/tx/security/safenet'
+import { IS_SAFENET_ENABLED } from '@/config/constants'
+import useSafeInfo from '@/hooks/useSafeInfo'
+import { Errors, logError } from '@/services/exceptions'
+import { dateString } from '@/utils/formatters'
 import { isCustomTxInfo, isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
+import { Box, Link } from '@mui/material'
+import { calculateSafeTransactionHash } from '@safe-global/protocol-kit/dist/src/utils'
+import type { SafeTransaction, SafeTransactionData, SafeVersion } from '@safe-global/safe-core-sdk-types'
 import type { TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
 import { Operation } from '@safe-global/safe-gateway-typescript-sdk'
-import { dateString } from '@/utils/formatters'
-import css from './styles.module.css'
-import type { SafeTransaction, SafeTransactionData, SafeVersion } from '@safe-global/safe-core-sdk-types'
+import type { ReactElement } from 'react'
+import { useMemo, useState } from 'react'
 import SafeTxGasForm from '../SafeTxGasForm'
 import DecodedData from '../TxData/DecodedData'
-import { calculateSafeTransactionHash } from '@safe-global/protocol-kit/dist/src/utils'
-import useSafeInfo from '@/hooks/useSafeInfo'
 import { SafeTxHashDataRow } from './SafeTxHashDataRow'
-import { logError, Errors } from '@/services/exceptions'
-import { SafenetTxSimulation } from '@/components/tx/security/safenet'
-import GradientBoxSafenet from '@/components/common/GradientBoxSafenet'
+import css from './styles.module.css'
 
 interface Props {
   txDetails: TransactionDetails
@@ -76,23 +77,25 @@ const Summary = ({ txDetails, defaultExpanded = false, hideDecodedData = false }
         </TxDataRow>
       )}
 
-      <Box mt={1}>
-        <TxDataRow title="Safenet checks:">
-          <GradientBoxSafenet className={css.safenetGradientRow}>
-            <SafenetTxSimulation
-              safe={safe.address.value}
-              chainId={safe.chainId}
-              safeTx={{
-                data: safeTxData!,
-                signatures: new Map(),
-                getSignature: () => undefined,
-                addSignature: () => {},
-                encodedSignatures: () => '',
-              }}
-            />
-          </GradientBoxSafenet>
-        </TxDataRow>
-      </Box>
+      {IS_SAFENET_ENABLED && (
+        <Box mt={1}>
+          <TxDataRow title="Safenet checks:">
+            <GradientBoxSafenet className={css.safenetGradientRow}>
+              <SafenetTxSimulation
+                safe={safe.address.value}
+                chainId={safe.chainId}
+                safeTx={{
+                  data: safeTxData!,
+                  signatures: new Map(),
+                  getSignature: () => undefined,
+                  addSignature: () => {},
+                  encodedSignatures: () => '',
+                }}
+              />
+            </GradientBoxSafenet>
+          </TxDataRow>
+        </Box>
+      )}
 
       {/* Advanced TxData */}
       {txData && (

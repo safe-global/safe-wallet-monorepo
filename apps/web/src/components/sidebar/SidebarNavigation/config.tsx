@@ -1,17 +1,17 @@
-import type { ReactElement } from 'react'
-import React from 'react'
-import { AppRoutes } from '@/config/routes'
-import HomeIcon from '@/public/images/sidebar/home.svg'
-import AssetsIcon from '@/public/images/sidebar/assets.svg'
-import TransactionIcon from '@/public/images/sidebar/transactions.svg'
-import ABIcon from '@/public/images/sidebar/address-book.svg'
-import AppsIcon from '@/public/images/apps/apps-icon.svg'
-import SettingsIcon from '@/public/images/sidebar/settings.svg'
-import BridgeIcon from '@/public/images/common/bridge.svg'
-import SwapIcon from '@/public/images/common/swap.svg'
-import StakeIcon from '@/public/images/common/stake.svg'
-import { SvgIcon } from '@mui/material'
 import { Chip } from '@/components/common/Chip'
+import { IS_SAFENET_ENABLED } from '@/config/constants'
+import { AppRoutes } from '@/config/routes'
+import AppsIcon from '@/public/images/apps/apps-icon.svg'
+import BridgeIcon from '@/public/images/common/bridge.svg'
+import StakeIcon from '@/public/images/common/stake.svg'
+import SwapIcon from '@/public/images/common/swap.svg'
+import ABIcon from '@/public/images/sidebar/address-book.svg'
+import AssetsIcon from '@/public/images/sidebar/assets.svg'
+import HomeIcon from '@/public/images/sidebar/home.svg'
+import SettingsIcon from '@/public/images/sidebar/settings.svg'
+import TransactionIcon from '@/public/images/sidebar/transactions.svg'
+import { SvgIcon } from '@mui/material'
+import type { ReactElement } from 'react'
 
 export type NavItem = {
   label: string
@@ -96,11 +96,12 @@ export const balancesNavItems = [
   },
 ]
 
-export const settingsNavItems = [
-  {
-    label: 'Safenet',
-    href: AppRoutes.settings.safenet,
-  },
+const settingsNavSafenetItem = {
+  label: 'Safenet',
+  href: AppRoutes.settings.safenet,
+}
+
+const settingsNav = [
   {
     label: 'Setup',
     href: AppRoutes.settings.setup,
@@ -134,6 +135,10 @@ export const settingsNavItems = [
     href: AppRoutes.settings.environmentVariables,
   },
 ]
+
+export const settingsNavItems = (IS_SAFENET_ENABLED)
+  ? [settingsNavSafenetItem].concat(settingsNav)
+  : settingsNav
 
 export const generalSettingsNavItems = [
   {

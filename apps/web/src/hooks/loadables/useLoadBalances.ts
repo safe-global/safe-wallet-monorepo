@@ -1,19 +1,18 @@
+import { IS_SAFENET_ENABLED, POLLING_INTERVAL } from '@/config/constants'
 import { getCounterfactualBalance } from '@/features/counterfactual/utils'
 import { useWeb3 } from '@/hooks/wallets/web3'
-import { useEffect, useMemo } from 'react'
-import { getBalances, type SafeBalanceResponse } from '@safe-global/safe-gateway-typescript-sdk'
-import { useAppSelector } from '@/store'
-import useAsync, { type AsyncResult } from '../useAsync'
 import { Errors, logError } from '@/services/exceptions'
-import { selectCurrency, selectSettings, TOKEN_LISTS } from '@/store/settingsSlice'
-import { useCurrentChain } from '../useChains'
+import { useAppSelector } from '@/store'
+import { getSafenetBalances, useGetSafenetConfigQuery } from '@/store/safenet'
+import { TOKEN_LISTS, selectCurrency, selectSettings } from '@/store/settingsSlice'
 import { FEATURES, hasFeature } from '@/utils/chains'
-import { POLLING_INTERVAL } from '@/config/constants'
+import { convertSafenetBalanceToSafeClientGatewayBalance } from '@/utils/safenet'
+import { getBalances, type SafeBalanceResponse } from '@safe-global/safe-gateway-typescript-sdk'
+import { useEffect, useMemo } from 'react'
+import useAsync, { type AsyncResult } from '../useAsync'
+import { useCurrentChain } from '../useChains'
 import useIntervalCounter from '../useIntervalCounter'
 import useSafeInfo from '../useSafeInfo'
-import { useGetSafenetConfigQuery } from '@/store/safenet'
-import { convertSafenetBalanceToSafeClientGatewayBalance } from '@/utils/safenet'
-import { getSafenetBalances } from '@/store/safenet'
 
 export const useTokenListSetting = (): boolean | undefined => {
   const chain = useCurrentChain()
@@ -74,7 +73,7 @@ export const useLoadBalances = (): AsyncResult<SafeBalanceResponse> => {
         }),
       ]
 
-      if (isSafenetConfigSuccess && chainSupportedBySafenet) {
+      if (IS_SAFENET_ENABLED && isSafenetConfigSuccess && chainSupportedBySafenet) {
         balanceQueries.push(
           getSafenetBalances(safeAddress)
             .then((safenetBalances) =>

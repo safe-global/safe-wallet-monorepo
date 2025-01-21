@@ -1,16 +1,18 @@
-import { useCallback, useState, type ReactElement } from 'react'
-import { Box, Divider, Drawer } from '@mui/material'
 import ChevronRight from '@mui/icons-material/ChevronRight'
+import { Box, Divider, Drawer } from '@mui/material'
+import { useCallback, useState, type ReactElement } from 'react'
 
 import ChainIndicatorSafenet from '@/components/common/ChainIndicator/ChainIndicatorSafenet'
+import IndexingStatus from '@/components/sidebar/IndexingStatus'
+import SidebarFooter from '@/components/sidebar/SidebarFooter'
 import SidebarHeader from '@/components/sidebar/SidebarHeader'
 import SidebarNavigation from '@/components/sidebar/SidebarNavigation'
-import SidebarFooter from '@/components/sidebar/SidebarFooter'
-import IndexingStatus from '@/components/sidebar/IndexingStatus'
 
-import css from './styles.module.css'
-import { trackEvent, OVERVIEW_EVENTS } from '@/services/analytics'
+import ChainIndicator from '@/components/common/ChainIndicator'
+import { IS_SAFENET_ENABLED } from '@/config/constants'
 import MyAccounts from '@/features/myAccounts'
+import { OVERVIEW_EVENTS, trackEvent } from '@/services/analytics'
+import css from './styles.module.css'
 
 const Sidebar = (): ReactElement => {
   const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false)
@@ -28,7 +30,7 @@ const Sidebar = (): ReactElement => {
   return (
     <div data-testid="sidebar-container" className={css.container}>
       <div className={css.scroll}>
-        <ChainIndicatorSafenet />
+        {IS_SAFENET_ENABLED ? <ChainIndicatorSafenet /> : <ChainIndicator showLogo={false} />}
 
         {/* Open the safes list */}
         <button data-testid="open-safes-icon" className={css.drawerButton} onClick={onDrawerToggle}>
