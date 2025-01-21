@@ -1,6 +1,6 @@
 import type { SafeTransaction } from '@safe-global/safe-core-sdk-types'
 import type { Permission } from './Permission'
-import { TokenInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import type { TokenInfo } from '@safe-global/safe-gateway-typescript-sdk'
 
 /**
  * PermissionPropsMap defines property types for specific permissions.
