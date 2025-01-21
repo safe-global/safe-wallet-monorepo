@@ -1,73 +1,72 @@
-import { Platform } from 'react-native'
-import * as Device from 'expo-device'
-import * as Notifications from 'expo-notifications'
-import Constants from 'expo-constants'
-import * as TaskManager from 'expo-task-manager'
-import { BACKGROUND_NOTIFICATION_TASK, STORAGE_IDS } from '@/src/store/constants'
+import messaging, { FirebaseMessagingTypes } from '@react-native-firebase/messaging'
+import { STORAGE_IDS } from '@/src/store/constants'
 import Logger from '@/src/utils/logger'
+import { reduxStorage } from '@/src/store/storage'
+import NotificationsService from './NotificationService'
+import { ChannelId } from '@/src/utils/notifications'
+import { store } from '@/src/store'
+import { savePushToken } from '@/src/store/notificationsSlice'
 
-function handleRegistrationError(errorMessage: string) {
-  // TODO: Handle any visual feedback to the user
-  Logger.error(errorMessage)
-}
+type UnsubscribeFunc = () => void
 
-export async function registerForPushNotificationsAsync() {
-  if (Platform.OS === 'android') {
-    Notifications.setNotificationChannelAsync(STORAGE_IDS.DEFAULT_NOTIFICATION_CHANNEL_ID, {
-      name: STORAGE_IDS.DEFAULT_NOTIFICATION_CHANNEL_ID,
-      importance: Notifications.AndroidImportance.MAX,
-      vibrationPattern: [0, 250, 250, 250],
-      lightColor: '#FF231F7C',
-    })
+class FCMService {
+  getFCMToken = async (): Promise<string | undefined> => {
+    const fcmTokenLocal = await reduxStorage.getItem(STORAGE_IDS.SAFE_FCM_TOKEN)
+    const token = fcmTokenLocal?.data || undefined
+    if (!token) {
+      Logger.info('getFCMToken: No FCM token found')
+    }
+    return token
   }
 
-  if (Device.isDevice) {
-    const { status: existingStatus } = await Notifications.getPermissionsAsync()
-    let finalStatus = existingStatus
-    if (existingStatus !== 'granted') {
-      const { status } = await Notifications.requestPermissionsAsync()
-      finalStatus = status
-    }
-    if (finalStatus !== 'granted') {
-      handleRegistrationError('Permission not granted to get push token for push notification!')
-      return
-    }
-    const projectId = Constants?.expoConfig?.extra?.eas?.projectId ?? Constants?.easConfig?.projectId
-    if (!projectId) {
-      handleRegistrationError('Project ID not found')
-    }
+  saveFCMToken = async () => {
     try {
-      const pushTokenString = (
-        await Notifications.getExpoPushTokenAsync({
-          projectId,
-        })
-      ).data
-      console.log(pushTokenString)
-      return pushTokenString
-    } catch (e: unknown) {
-      handleRegistrationError(`${e}`)
+      const fcmToken = await messaging().getToken()
+      if (fcmToken) {
+        store.dispatch(savePushToken(fcmToken))
+      }
+    } catch (error) {
+      Logger.info('FCMService:: error saving', error)
     }
-  } else {
-    handleRegistrationError('Must use physical device for push notifications')
+  }
+
+  listenForMessagesForeground = (): UnsubscribeFunc =>
+    messaging().onMessage(async (remoteMessage: FirebaseMessagingTypes.RemoteMessage) => {
+      NotificationsService.displayNotification({
+        channelId: ChannelId.DEFAULT_NOTIFICATION_CHANNEL_ID,
+        title: remoteMessage.notification?.title || '',
+        body: remoteMessage.notification?.body || '',
+        data: remoteMessage.data,
+      })
+      Logger.info('listenForMessagesForeground :: remoteMessage', remoteMessage)
+      Logger.trace('listenForMessagesForeground: listening for messages in Foreground', remoteMessage)
+    })
+
+  listenForMessagesBackground = (): void => {
+    messaging().setBackgroundMessageHandler(async (remoteMessage: FirebaseMessagingTypes.RemoteMessage) => {
+      NotificationsService.displayNotification({
+        channelId: ChannelId.DEFAULT_NOTIFICATION_CHANNEL_ID,
+        title: remoteMessage.notification?.title || '',
+        body: remoteMessage.notification?.body || '',
+        data: remoteMessage.data,
+      })
+      Logger.info('listenForMessagesBackground :: remoteMessage', remoteMessage)
+      Logger.trace('listenForMessagesBackground: listening for messages in background', remoteMessage)
+    })
+  }
+
+  registerAppWithFCM = async () => {
+    Logger.info('registerAppWithFCM status', messaging().isDeviceRegisteredForRemoteMessages)
+    if (!messaging().registerDeviceForRemoteMessages) {
+      await messaging()
+        .registerDeviceForRemoteMessages()
+        .then((status: unknown) => {
+          Logger.info('registerDeviceForRemoteMessages status', status)
+        })
+        .catch((error) => {
+          Logger.error('registerAppWithFCM: Something went wrong', error)
+        })
+    }
   }
 }
-
-export async function initNotificationService(): Promise<void> {
-  Notifications.setNotificationHandler({
-    handleNotification: async () => ({
-      shouldShowAlert: true,
-      shouldPlaySound: true,
-      shouldSetBadge: true,
-    }),
-  })
-  TaskManager.defineTask(BACKGROUND_NOTIFICATION_TASK, async ({ data, error, executionInfo }) => {
-    console.log('✅ Received a notification in the background!', {
-      data,
-      error,
-      executionInfo,
-    })
-    // TODO: Implement Notifee to handle notifications in the background
-    return Promise.resolve()
-  })
-  Notifications.registerTaskAsync(BACKGROUND_NOTIFICATION_TASK)
-}
+export default new FCMService()
