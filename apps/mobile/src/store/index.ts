@@ -4,6 +4,7 @@ import { reduxStorage } from './storage'
 import txHistory from './txHistorySlice'
 import activeSafe from './activeSafeSlice'
 import myAccounts from './myAccountsSlice'
+import notifications from './notificationsSlice'
 import safes from './safesSlice'
 import { cgwClient, setBaseUrl } from '@safe-global/store/gateway/cgwClient'
 import devToolsEnhancer from 'redux-devtools-expo-dev-plugin'
@@ -20,6 +21,7 @@ export const rootReducer = combineReducers({
   txHistory,
   safes,
   activeSafe,
+  notifications,
   myAccounts,
   [cgwClient.reducerPath]: cgwClient.reducer,
 })
