@@ -8,9 +8,9 @@ import { usePermissions } from './usePermissions'
  * @param props Specific props to pass to the permission function (only required if configured for the permission).
  * @returns Object with the result of the permission check for each role that the user has.
  */
-export const usePermission = <P extends Permission, Props extends PermissionProps<P> = PermissionProps<P>>(
+export const usePermission = <P extends Permission>(
   permission: P,
-  ...[props]: Props extends undefined ? [] : [props: Props]
+  ...[props]: PermissionProps<P> extends undefined ? [] : [props: PermissionProps<P>]
 ): { [_R in Role]?: boolean } => {
   const userPermissions = usePermissions()
 
