@@ -17,9 +17,13 @@ type WrappingComponentProps<
  * @param permission permission to check
  * @returns component that renders WrappedComponent if user has permission
  * @example
- * const RandomComponent = (props: { hasPermission?: boolean }) => <div>hasPermission: {props.hasPermission}</div>
+ * const RandomComponent = () => <div>Hello world.</div>
  * const WithProposeTxPermission = withPermission(RandomComponent, Permission.ProposeTransaction)
  * const OuterComponent = () => <WithProposeTxPermission />
+ * @example
+ * const RandomComponent = (props: { hasPermission?: boolean }) => <div>hasPermission: {props.hasPermission}</div>
+ * const WithProposeTxPermission = withPermission(RandomComponent, Permission.ProposeTransaction)
+ * const OuterComponent = () => <WithProposeTxPermission forceRender />
  * @example
  * const RandomComponent = (props: { foo: string }) => <div>{props.foo}</div>
  * const WithExecuteTxPermission = withPermission(RandomComponent, Permission.ExecuteTransaction)
