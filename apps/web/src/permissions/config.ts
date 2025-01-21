@@ -34,7 +34,7 @@ export default <RolePermissionsConfig>{
   [Role.SpendingLimitBeneficiary]: ({ spendingLimits }) => ({
     [ExecuteTransaction]: () => true,
     [EnablePushNotifications]: true,
-    [CreateSpendingLimitTransaction]: ({ token }) => {
+    [CreateSpendingLimitTransaction]: ({ token } = {}) => {
       if (!token) {
         return true
       }
