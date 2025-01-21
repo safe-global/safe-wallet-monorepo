@@ -6,7 +6,11 @@ import type { SpendingLimitState } from '@/store/spendingLimitsSlice'
 import useChainId from '@/hooks/useChainId'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
 import type { JsonRpcProvider } from 'ethers'
-import { getSpendingLimitContract, getSpendingLimitModuleAddress } from '@/services/contracts/spendingLimitContracts'
+import {
+  ALLOWANCE_MODULE_VERSIONS,
+  getSpendingLimitContract,
+  getSpendingLimitModuleAddress,
+} from '@/services/contracts/spendingLimitContracts'
 import type { AddressEx, TokenInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import { sameAddress } from '@/utils/addresses'
 import { type AllowanceModule } from '@/types/contracts'
@@ -68,6 +72,22 @@ export const getTokensForDelegate = async (
   )
 }
 
+const getSpendingLimitVersion = (safeModules: AddressEx[], chainId: string): ALLOWANCE_MODULE_VERSIONS | undefined => {
+  const allVersions = [ALLOWANCE_MODULE_VERSIONS['0.1.0'], ALLOWANCE_MODULE_VERSIONS['0.1.1']]
+  for (let version of allVersions) {
+    const spendingLimitModuleAddress = getSpendingLimitModuleAddress(chainId, version)
+    if (!spendingLimitModuleAddress) return
+
+    const isSpendingLimitEnabled = isModuleEnabled(
+      safeModules.map((module) => module.value),
+      spendingLimitModuleAddress,
+    )
+    if (isSpendingLimitEnabled) {
+      return version
+    }
+  }
+}
+
 export const getSpendingLimits = async (
   provider: JsonRpcProvider,
   safeModules: AddressEx[],
@@ -75,16 +95,9 @@ export const getSpendingLimits = async (
   chainId: string,
   tokenInfoFromBalances: TokenInfo[],
 ): Promise<SpendingLimitState[] | undefined> => {
-  const spendingLimitModuleAddress = getSpendingLimitModuleAddress(chainId)
-  if (!spendingLimitModuleAddress) return
-
-  const isSpendingLimitEnabled = isModuleEnabled(
-    safeModules.map((module) => module.value),
-    spendingLimitModuleAddress,
-  )
-  if (!isSpendingLimitEnabled) return
-
-  const contract = getSpendingLimitContract(chainId, provider)
+  const version = getSpendingLimitVersion(safeModules, chainId)
+  if (!version) return
+  const contract = getSpendingLimitContract(chainId, provider, version)
   const delegates = await contract.getDelegates(safeAddress, 0, 100)
 
   const spendingLimits = await Promise.all(
