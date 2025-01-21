@@ -1,4 +1,4 @@
-import { SpendingLimitState } from '@/store/spendingLimitsSlice'
+import type { SpendingLimitState } from '@/store/spendingLimitsSlice'
 import { getRolePermissions } from './getRolePermissions'
 import { Role } from './types'
 
