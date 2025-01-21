@@ -15,11 +15,8 @@ import { SafeToastProvider } from '@/src/theme/provider/toastProvider'
 import { configureReanimatedLogger, ReanimatedLogLevel } from 'react-native-reanimated'
 import { OnboardingHeader } from '@/src/features/Onboarding/components/OnboardingHeader'
 import { install } from 'react-native-quick-crypto'
-import { NotificationProvider } from '@/src/context/NotificationContext'
-import { initNotificationService } from '@/src/services/notifications/FCMService'
 
 install()
-initNotificationService()
 
 configureReanimatedLogger({
   level: ReanimatedLogLevel.warn,
@@ -32,45 +29,43 @@ function RootLayout() {
   return (
     <GestureHandlerRootView>
       <Provider store={store}>
-        <NotificationProvider>
-          <PortalProvider shouldAddRootHost>
-            <BottomSheetModalProvider>
-              <PersistGate loading={null} persistor={persistor}>
-                <SafeThemeProvider>
-                  <SafeToastProvider>
-                    <Stack
-                      screenOptions={({ navigation }) => ({
-                        headerBackButtonDisplayMode: 'minimal',
-                        headerShadowVisible: false,
-                        headerLeft: (props) => (
-                          <HeaderBackButton
-                            {...props}
-                            testID={'go-back'}
-                            onPress={navigation.goBack}
-                            displayMode={'minimal'}
-                          />
-                        ),
-                      })}
-                    >
-                      <Stack.Screen
-                        name="index"
-                        options={{
-                          header: OnboardingHeader,
-                        }}
-                      />
-                      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-                      <Stack.Screen name="pending-transactions" options={{ headerShown: true, title: '' }} />
-                      <Stack.Screen name="signers" options={{ headerShown: true, title: 'Signers' }} />
-                      <Stack.Screen name="notifications" options={{ headerShown: true, title: 'Notifications' }} />
-                      <Stack.Screen name="app-settings" options={{ headerShown: true, title: 'Settings' }} />
-                      <Stack.Screen name="+not-found" />
-                    </Stack>
-                  </SafeToastProvider>
-                </SafeThemeProvider>
-              </PersistGate>
-            </BottomSheetModalProvider>
-          </PortalProvider>
-        </NotificationProvider>
+        <PortalProvider shouldAddRootHost>
+          <BottomSheetModalProvider>
+            <PersistGate loading={null} persistor={persistor}>
+              <SafeThemeProvider>
+                <SafeToastProvider>
+                  <Stack
+                    screenOptions={({ navigation }) => ({
+                      headerBackButtonDisplayMode: 'minimal',
+                      headerShadowVisible: false,
+                      headerLeft: (props) => (
+                        <HeaderBackButton
+                          {...props}
+                          testID={'go-back'}
+                          onPress={navigation.goBack}
+                          displayMode={'minimal'}
+                        />
+                      ),
+                    })}
+                  >
+                    <Stack.Screen
+                      name="index"
+                      options={{
+                        header: OnboardingHeader,
+                      }}
+                    />
+                    <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                    <Stack.Screen name="pending-transactions" options={{ headerShown: true, title: '' }} />
+                    <Stack.Screen name="signers" options={{ headerShown: true, title: 'Signers' }} />
+                    <Stack.Screen name="notifications" options={{ headerShown: true, title: 'Notifications' }} />
+                    <Stack.Screen name="app-settings" options={{ headerShown: true, title: 'Settings' }} />
+                    <Stack.Screen name="+not-found" />
+                  </Stack>
+                </SafeToastProvider>
+              </SafeThemeProvider>
+            </PersistGate>
+          </BottomSheetModalProvider>
+        </PortalProvider>
       </Provider>
     </GestureHandlerRootView>
   )
