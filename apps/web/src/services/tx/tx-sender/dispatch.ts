@@ -2,8 +2,12 @@ import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import { isMultisigExecutionInfo } from '@/utils/transaction-guards'
 import { isHardwareWallet, isSmartContractWallet } from '@/utils/wallets'
 import type { MultiSendCallOnlyContractImplementationType } from '@safe-global/protocol-kit'
-import { type ChainInfo, type SafeInfo, type TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
-import { relayTransaction } from '@/services/tx/relaying'
+import {
+  type ChainInfo,
+  relayTransaction,
+  type SafeInfo,
+  type TransactionDetails,
+} from '@safe-global/safe-gateway-typescript-sdk'
 import type {
   SafeSignature,
   SafeTransaction,
@@ -554,8 +558,6 @@ export const dispatchBatchExecutionRelay = async (
       to,
       data,
       version: safeVersion,
-      // We have no estimation in place
-      gasLimit: undefined,
     })
   } catch (error) {
     txs.forEach(({ txId }) => {
