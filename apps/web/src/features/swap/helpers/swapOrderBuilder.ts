@@ -47,6 +47,8 @@ export function orderTokenBuilder(): IBuilder<OrderToken> {
 }
 
 export function swapOrderBuilder(): IBuilder<SwapOrder> {
+  const sellToken = orderTokenBuilder().build()
+  const executedFee = faker.string.numeric()
   return Builder.new<SwapOrder>().with({
     type: 'SwapOrder' as TransactionInfoType.SWAP_ORDER,
     uid: faker.string.uuid(),
@@ -58,16 +60,20 @@ export function swapOrderBuilder(): IBuilder<SwapOrder> {
     buyAmount: faker.string.numeric(),
     executedSellAmount: faker.string.numeric(),
     executedBuyAmount: faker.string.numeric(),
-    sellToken: orderTokenBuilder().build(),
+    sellToken,
     buyToken: orderTokenBuilder().build(),
     explorerUrl:
       'https://explorer.cow.fi/orders/0x03a5d561ad2452d719a0d075573f4bed68217c696b52f151122c30e3e4426f1b05e6b5eb1d0e6aabab082057d5bb91f2ee6d11be66223d88',
-    executedSurplusFee: faker.string.numeric(),
+    executedSurplusFee: executedFee,
+    executedFee,
+    executedFeeToken: sellToken,
     fullAppData: appDataBuilder().build(),
   })
 }
 
 export function twapOrderBuilder(): IBuilder<TwapOrder> {
+  const sellToken = orderTokenBuilder().build()
+  const executedFee = faker.string.numeric()
   return Builder.new<TwapOrder>().with({
     type: 'TwapOrder' as TransactionInfoType.TWAP_ORDER,
     status: faker.helpers.arrayElement(['presignaturePending', 'open', 'cancelled', 'fulfilled', 'expired']),
@@ -80,7 +86,9 @@ export function twapOrderBuilder(): IBuilder<TwapOrder> {
     executedBuyAmount: faker.string.numeric(),
     sellToken: orderTokenBuilder().build(),
     buyToken: orderTokenBuilder().build(),
-    executedSurplusFee: faker.string.numeric(),
+    executedSurplusFee: executedFee,
+    executedFee,
+    executedFeeToken: sellToken,
     fullAppData: appDataBuilder().build(),
     numberOfParts: faker.number.int({ min: 1, max: 10 }).toString(),
     /** @description The amount of sellToken to sell in each part */
