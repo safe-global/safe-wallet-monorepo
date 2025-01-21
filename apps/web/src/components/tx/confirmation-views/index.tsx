@@ -11,6 +11,7 @@ import {
   isSafeToL2MigrationTxData,
   isSafeUpdateTxData,
   isSwapOrderTxInfo,
+  isTwapOrderTxInfo,
 } from '@/utils/transaction-guards'
 import { type ReactNode, useContext, useMemo } from 'react'
 import TxData from '@/components/transactions/TxDetails/TxData'
@@ -55,7 +56,7 @@ const getConfirmationViewComponent = ({
 
   if (isExecTxData(txData)) return <ExecTransaction data={txData} isConfirmationView />
 
-  if (isSwapOrderTxInfo(txInfo)) return <SwapOrder txInfo={txInfo} txData={txData} />
+  if (isSwapOrderTxInfo(txInfo) || isTwapOrderTxInfo(txInfo)) return <SwapOrder txInfo={txInfo} txData={txData} />
 
   if (isAnyStakingTxInfo(txInfo)) return <StakingTx txInfo={txInfo} />
 
