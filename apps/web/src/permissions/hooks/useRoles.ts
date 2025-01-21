@@ -31,7 +31,7 @@ export const useRoles = (): Role[] => {
       [Role.NoWalletConnected]: !wallet,
       [Role.ModuleRole]: false, // TODO: Implement module role
     }),
-    [isOwner, isProposer, isRecoverer, isSpendingLimitBeneficiary, wallet],
+    [isOwner, isNestedSafeOwner, isProposer, isRecoverer, isSpendingLimitBeneficiary, wallet],
   )
 
   const roles = useMemo(
