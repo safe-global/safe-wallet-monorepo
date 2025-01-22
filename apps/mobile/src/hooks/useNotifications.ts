@@ -1,14 +1,14 @@
 import { useEffect } from 'react'
 import FCMService from '@/src/services/notifications/FCMService'
-import { useAppSelector, useAppDispatch } from '../store/hooks'
+import { useAppSelector, useAppDispatch } from '@/src/store/hooks'
 import {
   selectAppNotificationStatus,
   selectDeviceNotificationStatus,
   toggleAppNotifications,
-} from '../store/notificationsSlice'
-import { STORAGE_IDS } from '../store/constants'
-import { reduxStorage } from '../store/storage'
-import NotificationService from '../services/notifications/NotificationService'
+} from '@/src/store/notificationsSlice'
+import { STORAGE_IDS } from '@/src/store/constants'
+import { reduxStorage } from '@/src/store/storage'
+import NotificationService from '@/src/services/notifications/NotificationService'
 
 const useNotifications = () => {
   const dispatch = useAppDispatch()

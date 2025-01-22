@@ -24,9 +24,10 @@ class FCMService {
       const fcmToken = await messaging().getToken()
       if (fcmToken) {
         store.dispatch(savePushToken(fcmToken))
+        reduxStorage.setItem(STORAGE_IDS.SAFE_FCM_TOKEN, fcmToken)
       }
     } catch (error) {
-      Logger.info('FCMService:: error saving', error)
+      Logger.info('FCMService :: error saving', error)
     }
   }
 
@@ -38,7 +39,6 @@ class FCMService {
         body: remoteMessage.notification?.body || '',
         data: remoteMessage.data,
       })
-      Logger.info('listenForMessagesForeground :: remoteMessage', remoteMessage)
       Logger.trace('listenForMessagesForeground: listening for messages in Foreground', remoteMessage)
     })
 
@@ -50,13 +50,11 @@ class FCMService {
         body: remoteMessage.notification?.body || '',
         data: remoteMessage.data,
       })
-      Logger.info('listenForMessagesBackground :: remoteMessage', remoteMessage)
-      Logger.trace('listenForMessagesBackground: listening for messages in background', remoteMessage)
+      Logger.trace('listenForMessagesBackground :: listening for messages in background', remoteMessage)
     })
   }
 
   registerAppWithFCM = async () => {
-    Logger.info('registerAppWithFCM status', messaging().isDeviceRegisteredForRemoteMessages)
     if (!messaging().registerDeviceForRemoteMessages) {
       await messaging()
         .registerDeviceForRemoteMessages()
