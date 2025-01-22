@@ -6,7 +6,7 @@ import { Button, Divider, FormControl, InputLabel, MenuItem, TextField } from '@
 import { type SafeBalanceResponse } from '@safe-global/safe-gateway-typescript-sdk'
 import classNames from 'classnames'
 import { useCallback, useMemo } from 'react'
-import { useFormContext } from 'react-hook-form'
+import { get, useFormContext } from 'react-hook-form'
 import css from './styles.module.css'
 
 export enum TokenAmountFields {
@@ -44,7 +44,7 @@ const TokenAmountInput = ({
   } = useFormContext()
 
   const tokenAddress = watch(fields.tokenAddress)
-  const isAmountError = !!errors[fields.tokenAddress] || !!errors[fields.amount]
+  const isAmountError = !!get(errors, fields.tokenAddress) || !!get(errors, fields.amount)
 
   const validateAmount = useCallback(
     (value: string) => {
@@ -69,7 +69,9 @@ const TokenAmountInput = ({
       fullWidth
     >
       <InputLabel shrink required className={css.label}>
-        {errors[fields.tokenAddress]?.message?.toString() || errors[fields.amount]?.message?.toString() || 'Amount'}
+        {get(errors, fields.tokenAddress)?.message?.toString() ||
+          get(errors, fields.amount)?.message?.toString() ||
+          'Amount'}
       </InputLabel>
       <div className={css.inputs}>
         <NumberField
