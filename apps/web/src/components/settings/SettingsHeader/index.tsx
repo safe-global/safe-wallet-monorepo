@@ -2,10 +2,12 @@ import type { ReactElement } from 'react'
 
 import NavTabs from '@/components/common/NavTabs'
 import PageHeader from '@/components/common/PageHeader'
-import { generalSettingsNavItems, settingsNavItems } from '@/components/sidebar/SidebarNavigation/config'
 import css from '@/components/common/PageHeader/styles.module.css'
-import useSafeAddress from '@/hooks/useSafeAddress'
+import { generalSettingsNavItems, settingsNavItems } from '@/components/sidebar/SidebarNavigation/config'
+import { AppRoutes } from '@/config/routes'
+import { useHasSafenetFeature } from '@/features/safenet'
 import { useCurrentChain } from '@/hooks/useChains'
+import useSafeAddress from '@/hooks/useSafeAddress'
 import { isRouteEnabled } from '@/utils/chains'
 import madProps from '@/utils/mad-props'
 
@@ -16,8 +18,13 @@ export const SettingsHeader = ({
   safeAddress: ReturnType<typeof useSafeAddress>
   chain: ReturnType<typeof useCurrentChain>
 }): ReactElement => {
+  const hasSafenetFeature = useHasSafenetFeature()
+
   const navItems = safeAddress
-    ? settingsNavItems.filter((route) => isRouteEnabled(route.href, chain))
+    ? settingsNavItems.filter(
+        (route) =>
+          isRouteEnabled(route.href, chain) || (hasSafenetFeature && route.href === AppRoutes.settings.safenet),
+      )
     : generalSettingsNavItems
 
   return (

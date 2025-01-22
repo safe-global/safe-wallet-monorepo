@@ -1,5 +1,4 @@
 import { Chip } from '@/components/common/Chip'
-import { IS_SAFENET_ENABLED } from '@/config/constants'
 import { AppRoutes } from '@/config/routes'
 import AppsIcon from '@/public/images/apps/apps-icon.svg'
 import BridgeIcon from '@/public/images/common/bridge.svg'
@@ -96,12 +95,11 @@ export const balancesNavItems = [
   },
 ]
 
-const settingsNavSafenetItem = {
-  label: 'Safenet',
-  href: AppRoutes.settings.safenet,
-}
-
-const settingsNav = [
+export const settingsNavItems = [
+  {
+    label: 'Safenet',
+    href: AppRoutes.settings.safenet,
+  },
   {
     label: 'Setup',
     href: AppRoutes.settings.setup,
@@ -135,8 +133,6 @@ const settingsNav = [
     href: AppRoutes.settings.environmentVariables,
   },
 ]
-
-export const settingsNavItems = IS_SAFENET_ENABLED ? [settingsNavSafenetItem].concat(settingsNav) : settingsNav
 
 export const generalSettingsNavItems = [
   {
