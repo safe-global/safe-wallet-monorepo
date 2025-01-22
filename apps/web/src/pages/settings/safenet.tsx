@@ -81,7 +81,7 @@ const SafenetContent = ({ safenetConfig, safe }: { safenetConfig: SafenetConfigE
 
 const SafenetPage: NextPage = () => {
   if (!IS_SAFENET_ENABLED) return
-  
+
   const { safe, safeLoaded } = useSafeInfo()
   const { data: safenetConfig, isLoading: safenetConfigLoading, error: safenetConfigError } = useGetSafenetConfigQuery()
 

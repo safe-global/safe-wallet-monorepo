@@ -118,13 +118,7 @@ const SafeHeader = (): ReactElement => {
       <NewTxButton />
     </div>
   )
-  return (IS_SAFENET_ENABLED) ? (
-    <GradientBoxSafenet variant="bottom">
-      {header}
-    </GradientBoxSafenet>
-  ) : (
-    header
-  )
+  return IS_SAFENET_ENABLED ? <GradientBoxSafenet variant="bottom">{header}</GradientBoxSafenet> : header
 }
 
 export default SafeHeader

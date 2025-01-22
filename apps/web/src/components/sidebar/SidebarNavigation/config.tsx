@@ -136,9 +136,7 @@ const settingsNav = [
   },
 ]
 
-export const settingsNavItems = (IS_SAFENET_ENABLED)
-  ? [settingsNavSafenetItem].concat(settingsNav)
-  : settingsNav
+export const settingsNavItems = IS_SAFENET_ENABLED ? [settingsNavSafenetItem].concat(settingsNav) : settingsNav
 
 export const generalSettingsNavItems = [
   {

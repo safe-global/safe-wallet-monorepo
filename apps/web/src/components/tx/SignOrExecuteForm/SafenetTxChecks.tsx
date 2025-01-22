@@ -26,9 +26,7 @@ const SafenetTxChecks = ({ safeTx }: { safeTx: SafeTransaction }): ReactElement 
     </TxCard>
   )
   return IS_SAFENET_ENABLED ? (
-    <GradientBoxSafenet className={css.safenetGradientCard}>
-      {txCard}
-    </GradientBoxSafenet>
+    <GradientBoxSafenet className={css.safenetGradientCard}>{txCard}</GradientBoxSafenet>
   ) : (
     txCard
   )

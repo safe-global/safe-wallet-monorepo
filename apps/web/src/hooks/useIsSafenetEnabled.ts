@@ -7,7 +7,7 @@ const useIsSafenetEnabled = () => {
   if (!IS_SAFENET_ENABLED) {
     return false
   }
-  
+
   const { safe } = useSafeInfo()
   const { data: safenetConfig } = useGetSafenetConfigQuery()
 
