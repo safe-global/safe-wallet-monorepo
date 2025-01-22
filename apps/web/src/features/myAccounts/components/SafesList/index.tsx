@@ -13,9 +13,7 @@ type SafeListProps = {
   useTransitions?: boolean
 }
 
-const renderSafeItem = (item: SafeItem | MultiChainSafeItem, onLinkClick?: () => void) => {
-  const hasSafenetFeature = useHasSafenetFeature()
-
+const renderSafeItem = (item: SafeItem | MultiChainSafeItem, onLinkClick?: () => void, hasSafenetFeature?: boolean) => {
   return isMultiChainSafeItem(item) ? (
     <MultiAccountItem onLinkClick={onLinkClick} multiSafeAccountItem={item} isSafenetEnabled={hasSafenetFeature} />
   ) : (
@@ -24,6 +22,8 @@ const renderSafeItem = (item: SafeItem | MultiChainSafeItem, onLinkClick?: () =>
 }
 
 const SafesList = ({ safes, onLinkClick, useTransitions = true }: SafeListProps) => {
+  const hasSafenetFeature = useHasSafenetFeature()
+
   if (!safes || safes.length === 0) {
     return null
   }
@@ -32,14 +32,14 @@ const SafesList = ({ safes, onLinkClick, useTransitions = true }: SafeListProps)
     <TransitionGroup>
       {safes.map((item) => (
         <Collapse key={item.address} timeout="auto">
-          {renderSafeItem(item, onLinkClick)}
+          {renderSafeItem(item, onLinkClick, hasSafenetFeature)}
         </Collapse>
       ))}
     </TransitionGroup>
   ) : (
     <>
       {safes.map((item) => (
-        <div key={item.address}>{renderSafeItem(item, onLinkClick)}</div>
+        <div key={item.address}>{renderSafeItem(item, onLinkClick, hasSafenetFeature)}</div>
       ))}
     </>
   )
