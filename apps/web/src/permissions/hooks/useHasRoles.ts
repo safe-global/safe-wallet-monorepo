@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import type { Role } from '../types'
 import { useRoles } from './useRoles'
-import { isArrayEqualSet } from '../utils'
+import { intersection, uniq } from 'lodash'
 
 /**
  * Hook to check if the current user has the given roles.
@@ -14,12 +14,14 @@ export const useHasRoles = (rolesToCheck: Role[], exclusive = false): boolean =>
   const [hasRoles, setHasRoles] = useState<boolean>(false)
 
   useEffect(() => {
-    const rolesToCheckSet = new Set(rolesToCheck)
+    const uniqueRolesToCheck = uniq(rolesToCheck)
+    const rolesIntersection = intersection(rolesToCheck, roles)
+    const hasRolesNew = rolesIntersection.length === uniqueRolesToCheck.length
 
     if (exclusive) {
-      setHasRoles(isArrayEqualSet(roles, rolesToCheckSet))
+      setHasRoles(hasRolesNew && uniq(roles).length === uniqueRolesToCheck.length)
     } else {
-      setHasRoles(rolesToCheckSet.isSubsetOf(new Set(roles)))
+      setHasRoles(hasRolesNew)
     }
   }, [rolesToCheck, roles, exclusive])
 
