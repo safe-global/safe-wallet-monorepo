@@ -37,8 +37,8 @@ const CSVAirdropAppModal = ({ onClose, appUrl }: { onClose: () => void; appUrl?:
               pathname: AppRoutes.apps.open,
               query: {
                 safe: router.query.safe,
-                appUrl
-              }
+                appUrl,
+              },
             }}
             passHref
           >

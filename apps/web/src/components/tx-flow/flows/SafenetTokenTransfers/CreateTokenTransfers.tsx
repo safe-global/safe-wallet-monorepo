@@ -5,8 +5,9 @@ import commonCss from '@/components/tx-flow/common/styles.module.css'
 import { SafeAppsName } from '@/config/constants'
 import { useRemoteSafeApps } from '@/hooks/safe-apps/useRemoteSafeApps'
 import AddIcon from '@/public/images/common/add.svg'
+import InfoOutlinedIcon from '@/public/images/notifications/info.svg'
 import { formatVisualAmount } from '@/utils/formatters'
-import { Alert, Button, CardActions, Divider, Grid, Link, Stack, SvgIcon, Typography } from '@mui/material'
+import { Alert, AlertTitle, Button, CardActions, Divider, Grid, Link, Stack, SvgIcon, Typography } from '@mui/material'
 import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
 import { type TokenInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import { useContext, useEffect, useState, type ReactElement } from 'react'
@@ -53,6 +54,8 @@ export const CreateTokenTransfers = ({
 }): ReactElement => {
   const [csvAirdropModalOpen, setCsvAirdropModalOpen] = useState<boolean>(false)
   const [maxRecipientsAlert, setMaxRecipientsAlert] = useState<boolean>(false)
+  // TODO: Calculate maxAmount and set maxAmountAlert
+  const [maxAmountAlert] = useState<boolean>(false)
   const { setNonce } = useContext(SafeTxContext)
   const [safeApps] = useRemoteSafeApps({ name: SafeAppsName.CSV })
 
@@ -74,7 +77,11 @@ export const CreateTokenTransfers = ({
 
   const { handleSubmit, control } = formMethods
 
-  const { fields: recipientFields, append, remove: removeRecipient } = useFieldArray({ control, name: TokenTransfersFields.recipients })
+  const {
+    fields: recipientFields,
+    append,
+    remove: removeRecipient,
+  } = useFieldArray({ control, name: TokenTransfersFields.recipients })
 
   const addRecipient = (): void => {
     if (recipientFields.length === maxRecipients) {
@@ -119,6 +126,20 @@ export const CreateTokenTransfers = ({
               )}
             </>
           ))}
+
+          {maxAmountAlert && (
+            <Alert severity="error" icon={<SvgIcon component={InfoOutlinedIcon} color="error" />} sx={{ mb: 2 }}>
+              <AlertTitle>
+                <Typography variant="h5" fontWeight={700}>
+                  Insufficient balance
+                </Typography>
+              </AlertTitle>
+              <Typography>
+                The total amount assigned to all recipients exceeds your available balance. Adjust the amounts you want
+                to send.
+              </Typography>
+            </Alert>
+          )}
 
           <Stack direction="row" alignItems="center" justifyContent="space-between" mb={4}>
             <Button
