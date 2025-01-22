@@ -1,4 +1,4 @@
-import { IS_SAFENET_ENABLED, POLLING_INTERVAL } from '@/config/constants'
+import { POLLING_INTERVAL } from '@/config/constants'
 import { getCounterfactualBalance } from '@/features/counterfactual/utils'
 import { useWeb3 } from '@/hooks/wallets/web3'
 import { Errors, logError } from '@/services/exceptions'
@@ -7,11 +7,13 @@ import { getSafenetBalances, useGetSafenetConfigQuery } from '@/store/safenet'
 import { TOKEN_LISTS, selectCurrency, selectSettings } from '@/store/settingsSlice'
 import { FEATURES, hasFeature } from '@/utils/chains'
 import { convertSafenetBalanceToSafeClientGatewayBalance } from '@/utils/safenet'
+import { skipToken } from '@reduxjs/toolkit/query/react'
 import { getBalances, type SafeBalanceResponse } from '@safe-global/safe-gateway-typescript-sdk'
 import { useEffect, useMemo } from 'react'
 import useAsync, { type AsyncResult } from '../useAsync'
 import { useCurrentChain } from '../useChains'
 import useIntervalCounter from '../useIntervalCounter'
+import useIsSafenetEnabled from '../useIsSafenetEnabled'
 import useSafeInfo from '../useSafeInfo'
 
 export const useTokenListSetting = (): boolean | undefined => {
@@ -45,11 +47,12 @@ const mergeBalances = (cgw: SafeBalanceResponse, sn: SafeBalanceResponse): SafeB
 
 export const useLoadBalances = (): AsyncResult<SafeBalanceResponse> => {
   const [pollCount, resetPolling] = useIntervalCounter(POLLING_INTERVAL)
+  const isSafenetEnabled = useIsSafenetEnabled()
   const {
     data: safenetConfig,
     isSuccess: isSafenetConfigSuccess,
     isLoading: isSafenetConfigLoading,
-  } = useGetSafenetConfigQuery()
+  } = useGetSafenetConfigQuery(!isSafenetEnabled ? skipToken : undefined)
   const currency = useAppSelector(selectCurrency)
   const isTrustedTokenList = useTokenListSetting()
   const { safe, safeAddress } = useSafeInfo()
@@ -73,7 +76,7 @@ export const useLoadBalances = (): AsyncResult<SafeBalanceResponse> => {
         }),
       ]
 
-      if (IS_SAFENET_ENABLED && isSafenetConfigSuccess && chainSupportedBySafenet) {
+      if (isSafenetEnabled && isSafenetConfigSuccess && chainSupportedBySafenet) {
         balanceQueries.push(
           getSafenetBalances(safeAddress)
             .then((safenetBalances) =>

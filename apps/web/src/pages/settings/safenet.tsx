@@ -1,7 +1,7 @@
 import SettingsHeader from '@/components/settings/SettingsHeader'
 import { TxModalContext } from '@/components/tx-flow'
 import { EnableSafenetFlow } from '@/components/tx-flow/flows/EnableSafenet'
-import { IS_SAFENET_ENABLED } from '@/config/constants'
+import { useHasSafenetFeature } from '@/features/safenet'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import type { ExtendedSafeInfo } from '@/store/safeInfoSlice'
@@ -10,6 +10,7 @@ import { useGetSafenetConfigQuery } from '@/store/safenet'
 import { sameAddress } from '@/utils/addresses'
 import { hasSafeFeature } from '@/utils/safe-versions'
 import { Button, CircularProgress, Grid, Paper, SvgIcon, Tooltip, Typography } from '@mui/material'
+import { skipToken } from '@reduxjs/toolkit/query/react'
 import { SAFE_FEATURES } from '@safe-global/protocol-kit/dist/src/utils'
 import type { NextPage } from 'next'
 import Head from 'next/head'
@@ -81,9 +82,14 @@ const SafenetContent = ({ safenetConfig, safe }: { safenetConfig: SafenetConfigE
 
 const SafenetPage: NextPage = () => {
   const { safe, safeLoaded } = useSafeInfo()
-  const { data: safenetConfig, isLoading: safenetConfigLoading, error: safenetConfigError } = useGetSafenetConfigQuery()
+  const hasSafenetFeature = useHasSafenetFeature()
+  const {
+    data: safenetConfig,
+    isLoading: safenetConfigLoading,
+    error: safenetConfigError,
+  } = useGetSafenetConfigQuery(!hasSafenetFeature ? skipToken : undefined)
 
-  if (!IS_SAFENET_ENABLED) return
+  if (!hasSafenetFeature) return
 
   if (!safeLoaded || safenetConfigLoading) {
     return <CircularProgress />
