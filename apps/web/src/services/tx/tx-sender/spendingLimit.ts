@@ -1,6 +1,9 @@
 import type { SpendingLimitState } from '@/store/spendingLimitsSlice'
 import { getSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
-import { getSpendingLimitModuleAddress } from '@/services/contracts/spendingLimitContracts'
+import {
+  getLatestSpendingLimitAddress,
+  getDeployedSpendingLimitModuleAddress,
+} from '@/services/contracts/spendingLimitContracts'
 import type { MetaTransactionData } from '@safe-global/safe-core-sdk-types'
 import {
   createAddDelegateTx,
@@ -8,7 +11,7 @@ import {
   createResetAllowanceTx,
   createSetAllowanceTx,
 } from '@/services/tx/spendingLimitParams'
-import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import type { ChainInfo, SafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import { parseUnits } from 'ethers'
 import { currentMinutes } from '@/utils/date'
 import { createMultiSendCallOnlyTx } from '@/services/tx/tx-sender/create'
@@ -24,20 +27,25 @@ export const createNewSpendingLimitTx = async (
   data: NewSpendingLimitData,
   spendingLimits: SpendingLimitState[],
   chainId: string,
-  chain: ChainInfo | undefined,
+  chain: ChainInfo,
+  safeModules: SafeInfo['modules'],
   deployed: boolean,
   tokenDecimals?: number,
   existingSpendingLimit?: SpendingLimitState,
 ) => {
   const sdk = getSafeSDK()
-  const spendingLimitAddress = getSpendingLimitModuleAddress(chainId)
-  if (!spendingLimitAddress || !sdk) return
+  if (!sdk) return
+
+  let spendingLimitAddress = deployed && getDeployedSpendingLimitModuleAddress(chainId, safeModules)
+  const isModuleEnabled = !!spendingLimitAddress
+  if (!isModuleEnabled) {
+    spendingLimitAddress = getLatestSpendingLimitAddress(chainId)
+  }
+  if (!spendingLimitAddress) return
 
   const txs: MetaTransactionData[] = []
 
   if (!deployed) {
-    if (!chain) return
-
     const enableModuleTx = await createEnableModuleTx(
       chain,
       await sdk.getAddress(),
@@ -53,8 +61,7 @@ export const createNewSpendingLimitTx = async (
 
     txs.push(tx)
   } else {
-    const isSpendingLimitEnabled = await sdk.isModuleEnabled(spendingLimitAddress)
-    if (!isSpendingLimitEnabled) {
+    if (!isModuleEnabled) {
       const enableModuleTx = await sdk.createEnableModuleTx(spendingLimitAddress)
 
       const tx = {

@@ -1,5 +1,8 @@
 import SignOrExecuteForm from '@/components/tx/SignOrExecuteForm'
-import { getSpendingLimitInterface, getSpendingLimitModuleAddress } from '@/services/contracts/spendingLimitContracts'
+import {
+  getSpendingLimitInterface,
+  getDeployedSpendingLimitModuleAddress,
+} from '@/services/contracts/spendingLimitContracts'
 import useChainId from '@/hooks/useChainId'
 import { useContext, useEffect } from 'react'
 import { SafeTxContext } from '../../SafeTxProvider'
@@ -12,6 +15,7 @@ import useBalances from '@/hooks/useBalances'
 import SendAmountBlock from '@/components/tx-flow/flows/TokenTransfer/SendAmountBlock'
 import SpendingLimitLabel from '@/components/common/SpendingLimitLabel'
 import { createTx } from '@/services/tx/tx-sender'
+import useSafeInfo from '@/hooks/useSafeInfo'
 
 const onFormSubmit = () => {
   trackEvent(SETTINGS_EVENTS.SPENDING_LIMIT.LIMIT_REMOVED)
@@ -20,17 +24,17 @@ const onFormSubmit = () => {
 export const RemoveSpendingLimit = ({ params }: { params: SpendingLimitState }) => {
   const { setSafeTx, setSafeTxError } = useContext(SafeTxContext)
   const chainId = useChainId()
+  const { safe } = useSafeInfo()
   const { balances } = useBalances()
   const token = balances.items.find((item) => item.tokenInfo.address === params.token.address)
 
   const amountInWei = params.amount
 
   useEffect(() => {
-    const spendingLimitAddress = getSpendingLimitModuleAddress(chainId)
+    if (!safe.modules?.length) return
 
-    if (!spendingLimitAddress) {
-      return
-    }
+    const spendingLimitAddress = getDeployedSpendingLimitModuleAddress(chainId, safe.modules)
+    if (!spendingLimitAddress) return
 
     const spendingLimitInterface = getSpendingLimitInterface()
     const txData = spendingLimitInterface.encodeFunctionData('deleteAllowance', [
@@ -45,7 +49,7 @@ export const RemoveSpendingLimit = ({ params }: { params: SpendingLimitState }) 
     }
 
     createTx(txParams).then(setSafeTx).catch(setSafeTxError)
-  }, [chainId, params.beneficiary, params.token, setSafeTx, setSafeTxError])
+  }, [chainId, params.beneficiary, params.token, setSafeTx, setSafeTxError, safe.modules])
 
   return (
     <SignOrExecuteForm onSubmit={onFormSubmit}>

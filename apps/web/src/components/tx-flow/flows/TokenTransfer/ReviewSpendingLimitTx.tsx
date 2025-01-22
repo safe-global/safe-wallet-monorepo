@@ -103,7 +103,14 @@ const ReviewSpendingLimitTx = ({
     const txOptions = getTxOptions(advancedParams, currentChain)
 
     try {
-      await dispatchSpendingLimitTxExecution(txParams, txOptions, wallet.provider, safe.chainId, safeAddress)
+      await dispatchSpendingLimitTxExecution(
+        txParams,
+        txOptions,
+        wallet.provider,
+        safe.chainId,
+        safeAddress,
+        safe.modules,
+      )
       onSubmit('', true)
       setTxFlow(undefined)
     } catch (_err) {
@@ -155,7 +162,7 @@ const ReviewSpendingLimitTx = ({
           <CheckWallet allowNonOwner checkNetwork={!submitDisabled}>
             {(isOk) => (
               <Button variant="contained" type="submit" disabled={!isOk || submitDisabled}>
-                Submit
+                Execute
               </Button>
             )}
           </CheckWallet>
