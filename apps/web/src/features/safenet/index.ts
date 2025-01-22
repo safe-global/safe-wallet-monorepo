@@ -8,7 +8,7 @@ export const useHasSafenetFeature = (): boolean | undefined => {
   if (HAS_SAFENET_FEATURE) {
     return true
   }
-  
+
   const hasSafenetFeature = currentChain ? hasFeature(currentChain, FEATURES.SAFENET) : undefined
   return hasSafenetFeature
 }

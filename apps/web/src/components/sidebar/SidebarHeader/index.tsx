@@ -22,9 +22,9 @@ import FiatValue from '@/components/common/FiatValue'
 import GradientBoxSafenet from '@/components/common/GradientBoxSafenet'
 import Track from '@/components/common/Track'
 import EnvHintButton from '@/components/settings/EnvironmentVariables/EnvHintButton'
-import { IS_SAFENET_ENABLED } from '@/config/constants'
 import { useAddressResolver } from '@/hooks/useAddressResolver'
 import { useCurrentChain } from '@/hooks/useChains'
+import useIsSafenetEnabled from '@/hooks/useIsSafenetEnabled'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import { useVisibleBalances } from '@/hooks/useVisibleBalances'
 import { OVERVIEW_EVENTS } from '@/services/analytics/events/overview'
@@ -34,6 +34,7 @@ import { SvgIcon } from '@mui/material'
 import QrCodeButton from '../QrCodeButton'
 
 const SafeHeader = (): ReactElement => {
+  const isSafenetEnabled = useIsSafenetEnabled()
   const { balances } = useVisibleBalances()
   const safeAddress = useSafeAddress()
   const { safe } = useSafeInfo()
@@ -118,7 +119,7 @@ const SafeHeader = (): ReactElement => {
       <NewTxButton />
     </div>
   )
-  return IS_SAFENET_ENABLED ? <GradientBoxSafenet variant="bottom">{header}</GradientBoxSafenet> : header
+  return isSafenetEnabled ? <GradientBoxSafenet variant="bottom">{header}</GradientBoxSafenet> : header
 }
 
 export default SafeHeader

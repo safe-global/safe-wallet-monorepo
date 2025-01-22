@@ -1,7 +1,7 @@
 import GradientBoxSafenet from '@/components/common/GradientBoxSafenet'
 import { TxDataRow, generateDataRowValue } from '@/components/transactions/TxDetails/Summary/TxDataRow'
 import { SafenetTxSimulation } from '@/components/tx/security/safenet'
-import { IS_SAFENET_ENABLED } from '@/config/constants'
+import { useHasSafenetFeature } from '@/features/safenet'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { Errors, logError } from '@/services/exceptions'
 import { dateString } from '@/utils/formatters'
@@ -26,6 +26,7 @@ interface Props {
 
 const Summary = ({ txDetails, defaultExpanded = false, hideDecodedData = false }: Props): ReactElement => {
   const { safe } = useSafeInfo()
+  const hasSafenetFeature = useHasSafenetFeature()
   const [expanded, setExpanded] = useState<boolean>(defaultExpanded)
 
   const toggleExpanded = () => {
@@ -77,7 +78,7 @@ const Summary = ({ txDetails, defaultExpanded = false, hideDecodedData = false }
         </TxDataRow>
       )}
 
-      {IS_SAFENET_ENABLED && (
+      {hasSafenetFeature && (
         <Box mt={1}>
           <TxDataRow title="Safenet checks:">
             <GradientBoxSafenet className={css.safenetGradientRow}>

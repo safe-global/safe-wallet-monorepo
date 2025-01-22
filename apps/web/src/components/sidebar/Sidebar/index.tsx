@@ -9,12 +9,13 @@ import SidebarHeader from '@/components/sidebar/SidebarHeader'
 import SidebarNavigation from '@/components/sidebar/SidebarNavigation'
 
 import ChainIndicator from '@/components/common/ChainIndicator'
-import { IS_SAFENET_ENABLED } from '@/config/constants'
 import MyAccounts from '@/features/myAccounts'
+import useIsSafenetEnabled from '@/hooks/useIsSafenetEnabled'
 import { OVERVIEW_EVENTS, trackEvent } from '@/services/analytics'
 import css from './styles.module.css'
 
 const Sidebar = (): ReactElement => {
+  const isSafenetEnabled = useIsSafenetEnabled()
   const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false)
 
   const onDrawerToggle = useCallback(() => {
@@ -30,7 +31,7 @@ const Sidebar = (): ReactElement => {
   return (
     <div data-testid="sidebar-container" className={css.container}>
       <div className={css.scroll}>
-        {IS_SAFENET_ENABLED ? <ChainIndicatorSafenet /> : <ChainIndicator showLogo={false} />}
+        {isSafenetEnabled ? <ChainIndicatorSafenet /> : <ChainIndicator showLogo={false} />}
 
         {/* Open the safes list */}
         <button data-testid="open-safes-icon" className={css.drawerButton} onClick={onDrawerToggle}>

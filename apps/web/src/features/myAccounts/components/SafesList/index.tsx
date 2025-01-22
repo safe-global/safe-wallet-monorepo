@@ -1,9 +1,9 @@
-import { IS_SAFENET_ENABLED } from '@/config/constants'
 import { isMultiChainSafeItem } from '@/features/multichain/utils/utils'
 import MultiAccountItem from '@/features/myAccounts/components/AccountItems/MultiAccountItem'
 import SingleAccountItem from '@/features/myAccounts/components/AccountItems/SingleAccountItem'
 import type { SafeItem } from '@/features/myAccounts/hooks/useAllSafes'
 import type { MultiChainSafeItem } from '@/features/myAccounts/hooks/useAllSafesGrouped'
+import { useHasSafenetFeature } from '@/features/safenet'
 import { Collapse } from '@mui/material'
 import { TransitionGroup } from 'react-transition-group'
 
@@ -14,8 +14,10 @@ type SafeListProps = {
 }
 
 const renderSafeItem = (item: SafeItem | MultiChainSafeItem, onLinkClick?: () => void) => {
+  const hasSafenetFeature = useHasSafenetFeature()
+
   return isMultiChainSafeItem(item) ? (
-    <MultiAccountItem onLinkClick={onLinkClick} multiSafeAccountItem={item} isSafenetEnabled={IS_SAFENET_ENABLED} />
+    <MultiAccountItem onLinkClick={onLinkClick} multiSafeAccountItem={item} isSafenetEnabled={hasSafenetFeature} />
   ) : (
     <SingleAccountItem onLinkClick={onLinkClick} safeItem={item} />
   )

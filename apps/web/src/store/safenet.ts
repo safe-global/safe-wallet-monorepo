@@ -1,6 +1,7 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 
-import { IS_SAFENET_ENABLED, SAFENET_API_URL } from '@/config/constants'
+import { SAFENET_API_URL } from '@/config/constants'
+import { useHasSafenetFeature } from '@/features/safenet'
 
 export type SafenetSafeEntity = {
   safe: string
@@ -50,7 +51,8 @@ export type SafenetSimulationResponse = {
 }
 
 export const getSafenetBalances = async (safeAddress: string): Promise<SafenetBalanceEntity> => {
-  if (!IS_SAFENET_ENABLED) {
+  const hasSafenetFeature = useHasSafenetFeature()
+  if (!hasSafenetFeature) {
     return {}
   }
 
