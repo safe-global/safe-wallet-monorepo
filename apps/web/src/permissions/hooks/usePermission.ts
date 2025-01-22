@@ -30,9 +30,9 @@ export const usePermission = <P extends Permission>(
         return acc
       }
 
-      if (typeof permissionValue === 'function' && props) {
+      if (typeof permissionValue === 'function') {
         // Evaluate the permission function with the given props
-        return { ...acc, [role]: permissionValue(props) }
+        return { ...acc, [role]: permissionValue(props as PermissionProps<P>) }
       }
 
       // Return the permission value (boolean) as is
