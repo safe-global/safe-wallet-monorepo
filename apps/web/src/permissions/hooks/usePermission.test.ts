@@ -3,7 +3,7 @@ import { usePermission } from './usePermission'
 import { Permission, Role } from '../types'
 import * as useRoles from './useRoles'
 import * as useRoleProps from './useRoleProps'
-import { SpendingLimitState } from '@/store/spendingLimitsSlice'
+import type { SpendingLimitState } from '@/store/spendingLimitsSlice'
 import * as getRolePermissions from '../getRolePermissions'
 
 describe('usePermission', () => {

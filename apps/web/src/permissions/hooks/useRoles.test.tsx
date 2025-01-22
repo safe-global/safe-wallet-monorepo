@@ -7,7 +7,7 @@ import * as useIsNestedSafeOwner from '@/hooks/useIsNestedSafeOwner'
 import * as useIsWalletProposer from '@/hooks/useProposers'
 import * as useIsRecoverer from '@/features/recovery/hooks/useIsRecoverer'
 import * as useIsSpendingLimitBeneficiary from '@/hooks/useIsOnlySpendingLimitBeneficiary'
-import { ConnectedWallet } from '@/hooks/wallets/useOnboard'
+import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 
 describe('useRoles', () => {
   const useWalletSpy = jest.spyOn(useWallet, 'default')
