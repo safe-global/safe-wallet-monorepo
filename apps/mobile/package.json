@@ -43,7 +43,7 @@
     "@expo/vector-icons": "^14.0.2",
     "@react-native-clipboard/clipboard": "^1.15.0",
     "@react-native-community/blur": "^4.4.1",
-    "@react-native-menu/menu": "^1.2.1",
+    "@react-native-menu/menu": "patch:@react-native-menu/menu@npm%3A1.2.1#~/.yarn/patches/@react-native-menu-menu-npm-1.2.1-99faaa4b8d.patch",
     "@react-native/babel-preset": "^0.76.2",
     "@react-navigation/material-top-tabs": "^7.1.0",
     "@react-navigation/native": "^7.0.14",

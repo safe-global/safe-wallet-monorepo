@@ -6897,13 +6897,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-native-menu/menu@npm:^1.2.1":
+"@react-native-menu/menu@npm:1.2.1":
   version: 1.2.1
   resolution: "@react-native-menu/menu@npm:1.2.1"
   peerDependencies:
     react: "*"
     react-native: "*"
   checksum: 10/e4706185636b8339ab4b8cf6519f5520b15623a308ed58049071cc76d4a9347b3544aa8071af965e4a12562d9e67184e77c5b178004b19f24c9a5dca8c84bf89
+  languageName: node
+  linkType: hard
+
+"@react-native-menu/menu@patch:@react-native-menu/menu@npm%3A1.2.1#~/.yarn/patches/@react-native-menu-menu-npm-1.2.1-99faaa4b8d.patch":
+  version: 1.2.1
+  resolution: "@react-native-menu/menu@patch:@react-native-menu/menu@npm%3A1.2.1#~/.yarn/patches/@react-native-menu-menu-npm-1.2.1-99faaa4b8d.patch::version=1.2.1&hash=ff7aa6"
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+  checksum: 10/41fa341d832276cce796a649d62b9948550d8ff0193a885a1cc2a4e5147b8aaa17f77dd80ae61c08880a441bd3da8f7a0c3e74a6151e113ee6887d50c2803c65
   languageName: node
   linkType: hard
 
@@ -7785,7 +7795,7 @@ __metadata:
     "@react-native-community/blur": "npm:^4.4.1"
     "@react-native-community/datetimepicker": "npm:8.2.0"
     "@react-native-community/slider": "npm:4.5.5"
-    "@react-native-menu/menu": "npm:^1.2.1"
+    "@react-native-menu/menu": "patch:@react-native-menu/menu@npm%3A1.2.1#~/.yarn/patches/@react-native-menu-menu-npm-1.2.1-99faaa4b8d.patch"
     "@react-native/babel-preset": "npm:^0.76.2"
     "@react-navigation/material-top-tabs": "npm:^7.1.0"
     "@react-navigation/native": "npm:^7.0.14"
