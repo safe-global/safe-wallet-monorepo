@@ -1,7 +1,7 @@
+import Image from 'next/image'
 import { useMemo, type ReactElement } from 'react'
 import ImageFallback from '../ImageFallback'
 import css from './styles.module.css'
-import Image from 'next/image'
 
 const FALLBACK_ICON = '/images/common/token-placeholder.svg'
 const COINGECKO_THUMB = '/thumb/'
@@ -25,7 +25,7 @@ const TokenIcon = ({
   }, [logoUri])
 
   return (
-    <div className={css.container}>
+    <div className={`${css.container} ${safenet && css.additionalMargin}`}>
       <ImageFallback
         src={src}
         alt={tokenSymbol}
@@ -37,7 +37,7 @@ const TokenIcon = ({
       />
       {safenet && (
         <div className={css.safenetContainer}>
-          <Image src="/images/safenet-bright.svg" alt="Safenet Logo" width={12} height={12} />
+          <Image src="/images/safenet-bright.svg" alt="Safenet Logo" width={16} height={16} />
         </div>
       )}
     </div>

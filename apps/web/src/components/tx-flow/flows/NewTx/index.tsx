@@ -1,22 +1,29 @@
-import { useCallback, useContext } from 'react'
+import ChainIndicator from '@/components/common/ChainIndicator'
+import { ProgressBar } from '@/components/common/ProgressBar'
 import { MakeASwapButton, SendTokensButton, TxBuilderButton } from '@/components/tx-flow/common/TxButton'
+import { useTxBuilderApp } from '@/hooks/safe-apps/useTxBuilderApp'
+import NewTxIcon from '@/public/images/transactions/new-tx.svg'
 import { Container, Grid, Paper, Typography } from '@mui/material'
+import { useCallback, useContext } from 'react'
 import { TxModalContext } from '../../'
 import TokenTransferFlow from '../TokenTransfer'
-import { useTxBuilderApp } from '@/hooks/safe-apps/useTxBuilderApp'
-import { ProgressBar } from '@/components/common/ProgressBar'
-import ChainIndicator from '@/components/common/ChainIndicator'
-import NewTxIcon from '@/public/images/transactions/new-tx.svg'
 
+import useIsSafenetEnabled from '@/hooks/useIsSafenetEnabled'
+import SafenetTokenTransfersFlow from '../SafenetTokenTransfers'
 import css from './styles.module.css'
 
 const NewTxFlow = () => {
   const txBuilder = useTxBuilderApp()
   const { setTxFlow } = useContext(TxModalContext)
+  const isSafenetEnabled = useIsSafenetEnabled()
 
   const onTokensClick = useCallback(() => {
+    if (isSafenetEnabled) {
+      setTxFlow(<SafenetTokenTransfersFlow />)
+      return
+    }
     setTxFlow(<TokenTransferFlow />)
-  }, [setTxFlow])
+  }, [setTxFlow, isSafenetEnabled])
 
   const progress = 10
 

@@ -1,16 +1,16 @@
-import { type ReactElement, memo } from 'react'
-import type { NextPage } from 'next'
-import Head from 'next/head'
-import { Grid, Skeleton, Typography } from '@mui/material'
 import AssetsHeader from '@/components/balances/AssetsHeader'
 import NftCollections from '@/components/nfts/NftCollections'
 import SafeAppCard from '@/components/safe-apps/SafeAppCard'
 import { BRAND_NAME, SafeAppsTag } from '@/config/constants'
 import { useRemoteSafeApps } from '@/hooks/safe-apps/useRemoteSafeApps'
+import { Grid, Skeleton, Typography } from '@mui/material'
+import type { NextPage } from 'next'
+import Head from 'next/head'
+import { memo, type ReactElement } from 'react'
 
 // `React.memo` requires a `displayName`
 const NftApps = memo(function NftApps(): ReactElement | null {
-  const [nftApps] = useRemoteSafeApps(SafeAppsTag.NFT)
+  const [nftApps] = useRemoteSafeApps({ tag: SafeAppsTag.NFT })
 
   if (nftApps?.length === 0) {
     return null

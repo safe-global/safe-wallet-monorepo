@@ -284,14 +284,18 @@ exports[`ConfirmationView should display a confirmation screen for a SETTINGS_CH
                         <div
                           class="MuiBox-root css-axw7ok"
                         >
-                          <img
-                            alt="ETH"
-                            class="image"
-                            height="26"
-                            loading="lazy"
-                            referrerpolicy="no-referrer"
-                            src="/images/common/token-placeholder.svg"
-                          />
+                          <div
+                            class="container false"
+                          >
+                            <img
+                              alt="ETH"
+                              class="image"
+                              height="26"
+                              loading="lazy"
+                              referrerpolicy="no-referrer"
+                              src="/images/common/token-placeholder.svg"
+                            />
+                          </div>
                           <p
                             class="MuiTypography-root MuiTypography-body1 css-w5uidf-MuiTypography-root"
                           >
@@ -791,14 +795,18 @@ exports[`ConfirmationView should display a confirmation with method call when th
                         <div
                           class="MuiBox-root css-axw7ok"
                         >
-                          <img
-                            alt="ETH"
-                            class="image"
-                            height="26"
-                            loading="lazy"
-                            referrerpolicy="no-referrer"
-                            src="/images/common/token-placeholder.svg"
-                          />
+                          <div
+                            class="container false"
+                          >
+                            <img
+                              alt="ETH"
+                              class="image"
+                              height="26"
+                              loading="lazy"
+                              referrerpolicy="no-referrer"
+                              src="/images/common/token-placeholder.svg"
+                            />
+                          </div>
                           <p
                             class="MuiTypography-root MuiTypography-body1 css-w5uidf-MuiTypography-root"
                           >

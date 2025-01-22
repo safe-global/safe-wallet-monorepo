@@ -1,21 +1,21 @@
-import { useTheme } from '@mui/material/styles'
-import { usePathname, useSearchParams } from 'next/navigation'
-import Link, { type LinkProps } from 'next/link'
-import { Alert, Box, Button, ButtonBase, Typography, useMediaQuery } from '@mui/material'
-import AddIcon from '@mui/icons-material/Add'
 import { SafeAppsTag } from '@/config/constants'
 import { AppRoutes } from '@/config/routes'
 import { useRemoteSafeApps } from '@/hooks/safe-apps/useRemoteSafeApps'
-import madProps from '@/utils/mad-props'
-import { type ReactNode, useMemo } from 'react'
-import Track from '../Track'
-import { OVERVIEW_EVENTS } from '@/services/analytics'
 import RampLogo from '@/public/images/common/ramp_logo.svg'
-import css from './styles.module.css'
+import { OVERVIEW_EVENTS } from '@/services/analytics'
+import madProps from '@/utils/mad-props'
+import AddIcon from '@mui/icons-material/Add'
 import ChevronRightRoundedIcon from '@mui/icons-material/ChevronRightRounded'
+import { Alert, Box, Button, ButtonBase, Typography, useMediaQuery } from '@mui/material'
+import { useTheme } from '@mui/material/styles'
+import Link, { type LinkProps } from 'next/link'
+import { usePathname, useSearchParams } from 'next/navigation'
+import { useMemo, type ReactNode } from 'react'
+import Track from '../Track'
+import css from './styles.module.css'
 
 const useOnrampAppUrl = (): string | undefined => {
-  const [onrampApps] = useRemoteSafeApps(SafeAppsTag.ONRAMP)
+  const [onrampApps] = useRemoteSafeApps({ tag: SafeAppsTag.ONRAMP })
   return onrampApps?.[0]?.url
 }
 

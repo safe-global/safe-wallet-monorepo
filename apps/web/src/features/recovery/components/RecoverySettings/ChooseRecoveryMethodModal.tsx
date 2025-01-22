@@ -1,10 +1,8 @@
 import Track from '@/components/common/Track'
-import { RECOVERY_FEEDBACK_FORM, HelpCenterArticle, SafeAppsTag } from '@/config/constants'
+import { HelpCenterArticle, RECOVERY_FEEDBACK_FORM, SafeAppsTag } from '@/config/constants'
 import { trackEvent } from '@/services/analytics'
 import { RECOVERY_EVENTS } from '@/services/analytics/events/recovery'
-import { type ChangeEvent, type ReactElement, useContext, useState, useCallback } from 'react'
-import { Controller, useForm } from 'react-hook-form'
-import Link from 'next/link'
+import CloseIcon from '@mui/icons-material/Close'
 import {
   Box,
   Button,
@@ -20,21 +18,23 @@ import {
   RadioGroup,
   Typography,
 } from '@mui/material'
-import CloseIcon from '@mui/icons-material/Close'
+import Link from 'next/link'
+import { useCallback, useContext, useState, type ChangeEvent, type ReactElement } from 'react'
+import { Controller, useForm } from 'react-hook-form'
 
-import { UpsertRecoveryFlow } from '@/components/tx-flow/flows'
 import ExternalLink from '@/components/common/ExternalLink'
+import TxStatusChip from '@/components/transactions/TxStatusChip'
+import { TxModalContext } from '@/components/tx-flow'
+import { UpsertRecoveryFlow } from '@/components/tx-flow/flows'
+import { AppRoutes } from '@/config/routes'
+import { useRemoteSafeApps } from '@/hooks/safe-apps/useRemoteSafeApps'
+import CheckIcon from '@/public/images/common/check.svg'
 import RecoveryCustomIcon from '@/public/images/common/recovery_custom.svg'
 import RecoverySygnumIcon from '@/public/images/common/recovery_sygnum.svg'
 import RecoveryZkEmailIcon from '@/public/images/common/zkemail-logo.svg'
-import { TxModalContext } from '@/components/tx-flow'
-import css from './styles.module.css'
-import CheckIcon from '@/public/images/common/check.svg'
-import { AppRoutes } from '@/config/routes'
 import { useSearchParams } from 'next/navigation'
-import { useRemoteSafeApps } from '@/hooks/safe-apps/useRemoteSafeApps'
-import TxStatusChip from '@/components/transactions/TxStatusChip'
 import { ZkEmailFakeDoorModal } from './ZkEmailFakeDoorModal'
+import css from './styles.module.css'
 
 enum RecoveryMethod {
   SelfCustody = 'SelfCustody',
@@ -54,7 +54,7 @@ export function ChooseRecoveryMethodModal({ open, onClose }: { open: boolean; on
   const { setTxFlow } = useContext(TxModalContext)
   const [openZkEmailModal, setOpenZkEmailModal] = useState(false)
   const querySafe = useSearchParams().get('safe')
-  const [matchingApps] = useRemoteSafeApps(SafeAppsTag.RECOVERY_SYGNUM)
+  const [matchingApps] = useRemoteSafeApps({ tag: SafeAppsTag.RECOVERY_SYGNUM })
   const hasSygnumApp = Boolean(matchingApps?.length)
 
   const methods = useForm<Fields>({
