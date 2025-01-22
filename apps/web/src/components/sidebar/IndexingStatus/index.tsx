@@ -4,16 +4,23 @@ import { getIndexingStatus } from '@safe-global/safe-gateway-typescript-sdk'
 import useAsync from '@/hooks/useAsync'
 import useChainId from '@/hooks/useChainId'
 import ExternalLink from '@/components/common/ExternalLink'
+import useIntervalCounter from '@/hooks/useIntervalCounter'
 
 const STATUS_PAGE = 'https://status.safe.global'
 const MAX_SYNC_DELAY = 1000 * 60 * 5 // 5 minutes
+const POLL_INTERVAL = 1000 * 60 // 1 minute
 
 const useIndexingStatus = () => {
   const chainId = useChainId()
+  const [count] = useIntervalCounter(POLL_INTERVAL)
 
-  return useAsync(() => {
-    return getIndexingStatus(chainId)
-  }, [chainId])
+  return useAsync(
+    () => {
+      return getIndexingStatus(chainId)
+    },
+    [chainId, count],
+    false,
+  )
 }
 
 const STATUSES = {
