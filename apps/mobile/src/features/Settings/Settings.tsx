@@ -68,7 +68,7 @@ export const Settings = ({ address, data }: SettingsProps) => {
                 width={80}
                 marginRight={'$2'}
               >
-                <View width={30}>
+                <View width={40}>
                   <Skeleton>
                     <Text fontWeight="700" textAlign="center" fontSize={'$4'}>
                       {owners.length}
@@ -87,7 +87,7 @@ export const Settings = ({ address, data }: SettingsProps) => {
                 borderRadius={'$6'}
                 width={80}
               >
-                <View width={30}>
+                <View width={40}>
                   <Skeleton>
                     <Text fontWeight="bold" textAlign="center" fontSize={'$4'}>
                       {threshold}/{owners.length}
