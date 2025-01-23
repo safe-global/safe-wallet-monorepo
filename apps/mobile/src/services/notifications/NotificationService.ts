@@ -153,32 +153,37 @@ class NotificationsService {
       : 'denied'
   }
 
-  onForegroundEvent = (observer: (event: NotifeeEvent) => Promise<void>): (() => void) =>
-    notifee.onForegroundEvent(observer)
-
-  onBackgroundEvent = (observer: (event: NotifeeEvent) => Promise<void>) => notifee.onBackgroundEvent(observer)
-
-  incrementBadgeCount = async (incrementBy?: number) => {
-    notifee.incrementBadgeCount(incrementBy)
+  onForegroundEvent(observer: (event: NotifeeEvent) => Promise<void>): () => void {
+    return notifee.onForegroundEvent(observer)
   }
 
-  decrementBadgeCount = async (decrementBy?: number) => {
-    notifee.decrementBadgeCount(decrementBy)
+  onBackgroundEvent(observer: (event: NotifeeEvent) => Promise<void>) {
+    return notifee.onBackgroundEvent(observer)
   }
 
-  setBadgeCount = async (count: number) => {
-    notifee.setBadgeCount(count)
+  async incrementBadgeCount(incrementBy?: number) {
+    return await notifee.incrementBadgeCount(incrementBy)
   }
 
-  getBadgeCount = async () => notifee.getBadgeCount()
+  async decrementBadgeCount(decrementBy?: number) {
+    return await notifee.decrementBadgeCount(decrementBy)
+  }
 
-  handleNotificationPress = async ({
+  async setBadgeCount(count: number) {
+    return await notifee.setBadgeCount(count)
+  }
+
+  async getBadgeCount() {
+    return await notifee.getBadgeCount()
+  }
+
+  async handleNotificationPress({
     detail,
     callback,
   }: {
     detail: EventDetail
     callback?: (remoteMessage: FirebaseMessagingTypes.RemoteMessage) => void
-  }) => {
+  }) {
     this.decrementBadgeCount(1)
     if (detail?.notification?.id) {
       await this.cancelTriggerNotification(detail.notification.id)
@@ -189,13 +194,13 @@ class NotificationsService {
     }
   }
 
-  handleNotificationEvent = async ({
+  async handleNotificationEvent({
     type,
     detail,
     callback,
   }: NotifeeEvent & {
     callback?: (remoteMessage: FirebaseMessagingTypes.RemoteMessage) => void
-  }) => {
+  }) {
     switch (type as unknown as EventType) {
       case EventType.DELIVERED:
         this.incrementBadgeCount(1)
@@ -209,27 +214,29 @@ class NotificationsService {
     }
   }
 
-  cancelTriggerNotification = async (id?: string) => {
+  async cancelTriggerNotification(id?: string) {
     if (!id) {
       return
     }
     await notifee.cancelTriggerNotification(id)
   }
 
-  getInitialNotification = async (callback: HandleNotificationCallback): Promise<void> => {
+  async getInitialNotification(callback: HandleNotificationCallback): Promise<void> {
     const event = await notifee.getInitialNotification()
     if (event) {
       callback(event.notification.data as Notification['data'])
     }
   }
 
-  cancelAllNotifications = async () => {
+  async cancelAllNotifications() {
     await notifee.cancelAllNotifications()
   }
 
-  createChannel = async (channel: AndroidChannel): Promise<string> => notifee.createChannel(channel)
+  async createChannel(channel: AndroidChannel): Promise<string> {
+    return await notifee.createChannel(channel)
+  }
 
-  displayNotification = async ({
+  async displayNotification({
     channelId,
     title,
     body,
@@ -239,7 +246,7 @@ class NotificationsService {
     title: string
     body?: string
     data?: FirebaseMessagingTypes.RemoteMessage['data']
-  }): Promise<void> => {
+  }): Promise<void> {
     try {
       await notifee.displayNotification({
         title,

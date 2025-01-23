@@ -83,7 +83,7 @@ const useNotifications = (): NotificationsProps => {
     }
 
     checkNotifications()
-  }, [isAppNotificationEnabled, fcmToken, remoteMessages])
+  }, [isAppNotificationEnabled])
 
   return { isAppNotificationEnabled, fcmToken, remoteMessages }
 }
