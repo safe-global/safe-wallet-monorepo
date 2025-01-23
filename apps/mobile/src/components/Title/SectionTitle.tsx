@@ -8,7 +8,7 @@ interface SectionTitleProps {
   paddingHorizontal?: GetThemeValueForKey<'paddingHorizontal'>
 }
 
-function SectionTitle({ title, description, paddingHorizontal = '$3' }: SectionTitleProps) {
+export function SectionTitle({ title, description, paddingHorizontal = '$3' }: SectionTitleProps) {
   return (
     <View gap="$6" paddingHorizontal={paddingHorizontal}>
       <View flexDirection={'row'} alignItems={'center'} paddingTop={'$3'}>
@@ -19,5 +19,3 @@ function SectionTitle({ title, description, paddingHorizontal = '$3' }: SectionT
     </View>
   )
 }
-
-export default SectionTitle
