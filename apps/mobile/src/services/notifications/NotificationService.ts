@@ -107,6 +107,7 @@ class NotificationsService {
 
         reduxStorage.setItem(STORAGE_IDS.PUSH_NOTIFICATIONS_PROMPT_COUNT, 0)
         reduxStorage.setItem(STORAGE_IDS.PUSH_NOTIFICATIONS_PROMPT_TIME, 0)
+        notifee.requestPermission()
         this.openSystemSettings()
         resolve(true)
       },
@@ -238,32 +239,42 @@ class NotificationsService {
     body?: string
     data?: FirebaseMessagingTypes.RemoteMessage['data']
   }): Promise<void> => {
-    await notifee.displayNotification({
+    console.log('NotificationService.displayNotification', {
+      channelId,
       title,
       body,
       data,
-      android: {
-        smallIcon: 'ic_notification_small',
-        largeIcon: 'ic_notification',
-        channelId: channelId ?? ChannelId.DEFAULT_NOTIFICATION_CHANNEL_ID,
-        pressAction: {
-          id: PressActionId.OPEN_NOTIFICATIONS_VIEW,
-          launchActivity: LAUNCH_ACTIVITY,
-        },
-      },
-      ios: {
-        launchImageName: 'Default',
-        sound: 'default',
-        interruptionLevel: 'critical',
-        foregroundPresentationOptions: {
-          alert: true,
-          sound: true,
-          badge: true,
-          banner: true,
-          list: true,
-        },
-      },
     })
+    try {
+      await notifee.displayNotification({
+        title,
+        body,
+        data,
+        android: {
+          smallIcon: 'ic_notification_small',
+          largeIcon: 'ic_notification',
+          channelId: channelId ?? ChannelId.DEFAULT_NOTIFICATION_CHANNEL_ID,
+          pressAction: {
+            id: PressActionId.OPEN_NOTIFICATIONS_VIEW,
+            launchActivity: LAUNCH_ACTIVITY,
+          },
+        },
+        ios: {
+          launchImageName: 'Default',
+          sound: 'default',
+          interruptionLevel: 'critical',
+          foregroundPresentationOptions: {
+            alert: true,
+            sound: true,
+            badge: true,
+            banner: true,
+            list: true,
+          },
+        },
+      })
+    } catch (e) {
+      console.log('NotificationService.displayNotification :: error', e)
+    }
   }
 }
 
