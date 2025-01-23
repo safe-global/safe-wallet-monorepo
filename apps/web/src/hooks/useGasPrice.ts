@@ -47,7 +47,8 @@ const isEtherscanResult = (data: any): data is EtherscanResult => {
 }
 
 const stringToBigInt = (value: string): bigint => {
-  return BigInt(value.split('.')[0])
+  const bigInt = BigInt(value.split('.')[0])
+  return bigInt === 0n ? 1n : bigInt
 }
 
 /**
