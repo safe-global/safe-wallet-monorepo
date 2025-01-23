@@ -15,4 +15,4 @@ const EnableSafenetFlow = ({ guardAddress, tokensForPresetAllowances, allowanceS
   )
 }
 
-export { EnableSafenetFlow }
+export default EnableSafenetFlow

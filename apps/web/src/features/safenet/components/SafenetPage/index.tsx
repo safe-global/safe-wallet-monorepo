@@ -1,5 +1,5 @@
 import { TxModalContext } from '@/components/tx-flow'
-import { EnableSafenetFlow } from '@/components/tx-flow/flows/EnableSafenet'
+import { EnableSafenetFlow } from '@/components/tx-flow/flows'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import type { ExtendedSafeInfo } from '@/store/safeInfoSlice'
