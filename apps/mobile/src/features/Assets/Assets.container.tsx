@@ -1,13 +1,10 @@
-import React, { useEffect } from 'react'
+import React from 'react'
 
 import { SafeTab } from '@/src/components/SafeTab'
 
 import { TokensContainer } from '@/src/features/Assets/components/Tokens'
 import { NFTsContainer } from '@/src/features/Assets/components/NFTs'
 import { AssetsHeaderContainer } from '@/src/features/Assets/components/AssetsHeader'
-
-import NotificationsService from '@/src/services/notifications/NotificationService'
-import { ChannelId } from '@/src/utils/notifications'
 
 const tabItems = [
   {
@@ -21,13 +18,5 @@ const tabItems = [
 ]
 
 export function AssetsContainer() {
-  useEffect(() => {
-    NotificationsService.displayNotification({
-      channelId: ChannelId.DEFAULT_NOTIFICATION_CHANNEL_ID,
-      title: 'Welcome to the Assets tab',
-      body: 'Here you can see your tokens and NFTs',
-    })
-  }, [])
-
   return <SafeTab items={tabItems} headerHeight={200} renderHeader={AssetsHeaderContainer} />
 }
