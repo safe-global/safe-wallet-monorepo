@@ -8,7 +8,7 @@ import { savePushToken } from '@/src/store/notificationsSlice'
 type UnsubscribeFunc = () => void
 
 class FCMService {
-  getFCMToken = async (): Promise<string | undefined> => {
+  async getFCMToken(): Promise<string | undefined> {
     const { fcmToken } = store.getState().notifications
     const token = fcmToken || undefined
     if (!token) {
@@ -17,7 +17,7 @@ class FCMService {
     return token
   }
 
-  saveFCMToken = async () => {
+  async saveFCMToken(): Promise<void> {
     try {
       const fcmToken = await messaging().getToken()
       if (fcmToken) {
@@ -51,7 +51,7 @@ class FCMService {
     })
   }
 
-  registerAppWithFCM = async () => {
+  async registerAppWithFCM(): Promise<void> {
     if (!messaging().registerDeviceForRemoteMessages) {
       await messaging()
         .registerDeviceForRemoteMessages()

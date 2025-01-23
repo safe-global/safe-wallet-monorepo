@@ -3,18 +3,16 @@ import FCMService from '@/src/services/notifications/FCMService'
 import { useAppSelector, useAppDispatch } from '@/src/store/hooks'
 import {
   selectAppNotificationStatus,
-  selectDeviceNotificationStatus,
   selectFCMToken,
   selectPromptAttempts,
   selectLastTimePromptAttempted,
   selectRemoteMessages,
   toggleAppNotifications,
 } from '@/src/store/notificationsSlice'
-import NotificationService from '@/src/services/notifications/NotificationService'
+import NotificationsService from '@/src/services/notifications/NotificationService'
 import { FirebaseMessagingTypes } from '@react-native-firebase/messaging'
 
 interface NotificationsProps {
-  isDeviceNotificationEnabled: boolean
   isAppNotificationEnabled: boolean
   fcmToken: string | null
   remoteMessages: FirebaseMessagingTypes.RemoteMessage[]
@@ -30,19 +28,22 @@ const useNotifications = (): NotificationsProps => {
    *
    * If the user has disabled notifications for the app,  we should disable app notifications
    */
-  const isDeviceNotificationEnabled = useAppSelector(selectDeviceNotificationStatus)
   const isAppNotificationEnabled = useAppSelector(selectAppNotificationStatus)
   const fcmToken = useAppSelector(selectFCMToken)
   const remoteMessages = useAppSelector(selectRemoteMessages)
+
   const promptAttempts = useAppSelector(selectPromptAttempts)
   const lastTimePromptAttempted = useAppSelector(selectLastTimePromptAttempted)
 
   useEffect(() => {
     const checkNotifications = async () => {
+      const isDeviceNotificationEnabled = await NotificationsService.isDeviceNotificationEnabled()
       if (!isDeviceNotificationEnabled) {
         /**
-         * If the user has been prompt more than 3 times within a month to enable the notifications
+         * If the user has been prompt more than 3 times within a month to enable the device notifications
          * we should only ask the user to enable it again after a month has passed
+         *
+         * This also disables app notifications if the user has disabled device notifications and denied to re-enabled it after 3 attempts
          */
         if (
           promptAttempts &&
@@ -56,7 +57,7 @@ const useNotifications = (): NotificationsProps => {
           return
         }
 
-        const { permission } = await NotificationService.getAllPermissions()
+        const { permission } = await NotificationsService.getAllPermissions()
 
         if (permission !== 'authorized') {
           return
@@ -76,9 +77,9 @@ const useNotifications = (): NotificationsProps => {
     }
 
     checkNotifications()
-  }, [isDeviceNotificationEnabled, isAppNotificationEnabled])
+  }, [isAppNotificationEnabled, fcmToken, remoteMessages])
 
-  return { isDeviceNotificationEnabled, isAppNotificationEnabled, fcmToken, remoteMessages }
+  return { isAppNotificationEnabled, fcmToken, remoteMessages }
 }
 
 export default useNotifications

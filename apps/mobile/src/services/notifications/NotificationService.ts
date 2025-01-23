@@ -31,7 +31,6 @@ class NotificationsService {
       switch (settings.authorizationStatus) {
         case AuthorizationStatus.NOT_DETERMINED:
         case AuthorizationStatus.DENIED:
-          // @ts-ignore
           return notificationChannels.reduce((map, next) => {
             map.set(next.id as ChannelId, true)
             return map
@@ -44,31 +43,37 @@ class NotificationsService {
         }
         return map
       }, new Map<ChannelId, boolean>())
-    } catch (e) {
-      Logger.error('Error checking if a user has push notifications permission', e)
+    } catch (error) {
+      Logger.error('Error checking if a user has push notifications permission', error)
       return new Map<ChannelId, boolean>()
     }
   }
 
   async getAllPermissions(shouldOpenSettings = true) {
-    const promises: Promise<string>[] = notificationChannels.map((channel: AndroidChannel) =>
-      withTimeout(this.createChannel(channel), 5000),
-    )
-    // 1 - Creates android's notifications channel
-    await Promise.allSettled(promises)
-    // 2 - Verifies granted permission from device
-    let permission = await withTimeout(this.checkCurrentPermissions(), 5000)
-    // 3 - Verifies blocked notifications
-    const blockedNotifications = await withTimeout(this.getBlockedNotifications(), 5000)
-    /**
-     * 4 - If permission has not being granted already or blocked notifications are found, open device's settings
-     * so that user can enable DEVICE notifications
-     **/
-    if ((permission !== 'authorized' || blockedNotifications.size !== 0) && shouldOpenSettings) {
-      await this.requestPushNotificationsPermission()
-      permission = await withTimeout(this.checkCurrentPermissions(), 5000)
+    try {
+      const promises: Promise<string>[] = notificationChannels.map((channel: AndroidChannel) =>
+        withTimeout(this.createChannel(channel), 5000),
+      )
+      // 1 - Creates android's notifications channel
+      await Promise.allSettled(promises)
+      // 2 - Verifies granted permission from device
+      let permission = await withTimeout(this.checkCurrentPermissions(), 5000)
+      // 3 - Verifies blocked notifications
+      const blockedNotifications = await withTimeout(this.getBlockedNotifications(), 5000)
+      /**
+       * 4 - If permission has not being granted already or blocked notifications are found, open device's settings
+       * so that user can enable DEVICE notifications
+       **/
+      if ((permission !== 'authorized' || blockedNotifications.size !== 0) && shouldOpenSettings) {
+        await this.requestPushNotificationsPermission()
+        permission = await withTimeout(this.checkCurrentPermissions(), 5000)
+      }
+      return { permission, blockedNotifications }
+    } catch (error) {
+      Logger.error('Error occurred while fetching permissions:', error)
+
+      return { permission: 'denied', blockedNotifications: new Set() }
     }
-    return { permission, blockedNotifications }
   }
 
   async isDeviceNotificationEnabled() {
@@ -77,8 +82,6 @@ class NotificationsService {
     const isAuthorized =
       permission.authorizationStatus === AuthorizationStatus.AUTHORIZED ||
       permission.authorizationStatus === AuthorizationStatus.PROVISIONAL
-
-    store.dispatch(toggleDeviceNotifications(isAuthorized))
 
     return isAuthorized
   }
@@ -92,7 +95,7 @@ class NotificationsService {
          * so we avoid to prompt the user again within a month given a maximum of 3 attempts
          */
         store.dispatch(updatePromptAttempts(1))
-        store.dispatch(updateLastTimePromptAttempted(Date.now().toString()))
+        store.dispatch(updateLastTimePromptAttempted(Date.now()))
 
         resolve(false)
       },
@@ -105,7 +108,7 @@ class NotificationsService {
         store.dispatch(updatePromptAttempts(0))
         store.dispatch(updateLastTimePromptAttempted(0))
 
-        notifee.requestPermission()
+        await notifee.requestPermission()
         this.openSystemSettings()
         resolve(true)
       },
@@ -129,8 +132,8 @@ class NotificationsService {
         'Enable Push Notifications',
         'Turn on notifications from Settings to get important alerts on wallet activity and more.',
       )
-    } catch (e) {
-      Logger.error('Error checking if a user has push notifications permission', e)
+    } catch (error) {
+      Logger.error('Error checking if a user has push notifications permission', error)
     }
   }
 
@@ -264,8 +267,8 @@ class NotificationsService {
           },
         },
       })
-    } catch (e) {
-      console.log('NotificationService.displayNotification :: error', e)
+    } catch (error) {
+      Logger.error('NotificationService.displayNotification :: error', error)
     }
   }
 }
