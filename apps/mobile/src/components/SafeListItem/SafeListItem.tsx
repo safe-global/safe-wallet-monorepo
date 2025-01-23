@@ -63,7 +63,7 @@ export function SafeListItem({
 
           {typeof label === 'string' ? (
             <Text fontSize="$4" fontWeight={600}>
-              {ellipsis(label, rightNode ? 20 : 30)}
+              {ellipsis(label, rightNode ? 21 : 30)}
             </Text>
           ) : (
             label

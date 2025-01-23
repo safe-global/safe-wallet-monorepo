@@ -130,6 +130,11 @@ jest.mock('@gorhom/bottom-sheet', () => {
   }
 })
 
+jest.mock('@react-native-clipboard/clipboard', () => ({
+  setString: jest.fn(),
+  getString: jest.fn(),
+}))
+
 beforeAll(() => server.listen())
 afterEach(() => server.resetHandlers())
 afterAll(() => server.close())
