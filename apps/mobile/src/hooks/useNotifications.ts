@@ -11,6 +11,7 @@ import {
 } from '@/src/store/notificationsSlice'
 import NotificationsService from '@/src/services/notifications/NotificationService'
 import { FirebaseMessagingTypes } from '@react-native-firebase/messaging'
+import Logger from '@/src/utils/logger'
 
 interface NotificationsProps {
   isAppNotificationEnabled: boolean
@@ -63,11 +64,16 @@ const useNotifications = (): NotificationsProps => {
           return
         }
       }
-      // Firebase Cloud Messaging
-      FCMService.registerAppWithFCM().then(() => {
-        FCMService.saveFCMToken()
+
+      try {
+        // Firebase Cloud Messaging
+        await FCMService.registerAppWithFCM()
+        await FCMService.saveFCMToken()
         FCMService.listenForMessagesBackground()
-      })
+      } catch (error) {
+        Logger.error('FCM Registration or Token Save failed', error)
+        return
+      }
 
       const unsubscribeForegroundEvent = FCMService.listenForMessagesForeground()
 
