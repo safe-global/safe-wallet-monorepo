@@ -36,7 +36,7 @@ export function withRole<C extends React.ComponentType<any & { hasRole?: boolean
     return <WrappedComponent {...wrappedProps} />
   }
 
-  WithRole.displayName = 'WithRole'
+  WithRole.displayName = WrappedComponent.displayName || WrappedComponent.name
 
   return WithRole
 }

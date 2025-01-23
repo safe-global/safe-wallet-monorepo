@@ -45,7 +45,7 @@ export function withPermission<C extends React.ComponentType<any & { hasPermissi
     return <WrappedComponent {...wrappedProps} />
   }
 
-  WithPermissions.displayName = 'WithPermissions'
+  WithPermissions.displayName = WrappedComponent.displayName || WrappedComponent.name
 
   return WithPermissions
 }
