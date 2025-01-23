@@ -6,23 +6,10 @@ import type { EIP712TypedData } from '@safe-global/safe-gateway-typescript-sdk'
 import { type SecurityResponse, type SecurityModule, SecuritySeverity } from '../types'
 import type { AssetDiff, TransactionScanResponse } from './types'
 import { BLOCKAID_API, BLOCKAID_CLIENT_ID } from '@/config/constants'
+import { numberToHex } from '@/utils/hex'
 
 /** @see https://docs.blockaid.io/docs/supported-chains */
-const API_CHAINS: Record<string, string> = {
-  1: 'ethereum',
-  10: 'optimism',
-  56: 'bsc',
-  100: 'gnosis',
-  137: 'polygon',
-  238: 'blast',
-  324: 'zksync',
-  8453: 'base',
-  42161: 'arbitrum',
-  43114: 'avalanche',
-  59144: 'linea',
-  534352: 'scroll',
-  7777777: 'zora',
-}
+
 const blockaidSeverityMap: Record<string, SecuritySeverity> = {
   Malicious: SecuritySeverity.HIGH,
   Warning: SecuritySeverity.MEDIUM,
@@ -91,15 +78,10 @@ export class BlockaidModule implements SecurityModule<BlockaidModuleRequest, Blo
     }
 
     const { chainId, safeAddress } = request
-
-    if (!API_CHAINS[chainId]) {
-      throw new Error('Security checks are not available on the current chain.')
-    }
-
     const message = BlockaidModule.prepareMessage(request)
 
     const payload: BlockaidPayload = {
-      chain: API_CHAINS[chainId],
+      chain: numberToHex(chainId),
       account_address: safeAddress,
       data: {
         method: 'eth_signTypedData_v4',
