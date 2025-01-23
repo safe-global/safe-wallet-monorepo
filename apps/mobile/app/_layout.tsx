@@ -58,6 +58,8 @@ function RootLayout() {
                       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
                       <Stack.Screen name="pending-transactions" options={{ headerShown: true, title: '' }} />
                       <Stack.Screen name="signers" options={{ headerShown: true, title: 'Signers' }} />
+                      <Stack.Screen name="signers/[address]" options={{ headerShown: true, title: '' }} />
+                      <Stack.Screen name="import-signers" options={{ headerShown: true, title: '' }} />
                       <Stack.Screen name="notifications" options={{ headerShown: true, title: 'Notifications' }} />
                       <Stack.Screen name="app-settings" options={{ headerShown: true, title: 'Settings' }} />
                       <Stack.Screen name="+not-found" />
