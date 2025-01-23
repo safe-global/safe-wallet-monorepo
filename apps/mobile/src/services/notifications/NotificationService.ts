@@ -7,13 +7,12 @@ import notifee, {
 } from '@notifee/react-native'
 import { Linking, Platform, Alert as NativeAlert } from 'react-native'
 import { store } from '@/src/store'
-import { reduxStorage } from '@/src/store/storage'
+import { updatePromptAttempts, updateLastTimePromptAttempted } from '@/src/store/notificationsSlice'
 import { toggleAppNotifications, toggleDeviceNotifications } from '@/src/store/notificationsSlice'
 
 import { HandleNotificationCallback, LAUNCH_ACTIVITY, PressActionId } from '@/src/store/constants'
 
 import { ChannelId, notificationChannels, withTimeout } from '@/src/utils/notifications'
-import { STORAGE_IDS } from '@/src/store/constants'
 import Logger from '@/src/utils/logger'
 
 import { FirebaseMessagingTypes } from '@react-native-firebase/messaging'
@@ -55,11 +54,10 @@ class NotificationsService {
     const promises: Promise<string>[] = notificationChannels.map((channel: AndroidChannel) =>
       withTimeout(this.createChannel(channel), 5000),
     )
-    let permission: string
     // 1 - Creates android's notifications channel
     await Promise.allSettled(promises)
     // 2 - Verifies granted permission from device
-    permission = await withTimeout(this.checkCurrentPermissions(), 5000)
+    let permission = await withTimeout(this.checkCurrentPermissions(), 5000)
     // 3 - Verifies blocked notifications
     const blockedNotifications = await withTimeout(this.getBlockedNotifications(), 5000)
     /**
@@ -93,9 +91,9 @@ class NotificationsService {
          * When user decides to NOT enable notifications, we should register the number of attempts and its dates
          * so we avoid to prompt the user again within a month given a maximum of 3 attempts
          */
-        const promptCount = reduxStorage.getItem(STORAGE_IDS.PUSH_NOTIFICATIONS_PROMPT_COUNT)
-        reduxStorage.setItem(STORAGE_IDS.PUSH_NOTIFICATIONS_PROMPT_COUNT, promptCount + 1)
-        reduxStorage.setItem(STORAGE_IDS.PUSH_NOTIFICATIONS_PROMPT_TIME, Date.now().toString())
+        store.dispatch(updatePromptAttempts(1))
+        store.dispatch(updateLastTimePromptAttempted(Date.now().toString()))
+
         resolve(false)
       },
     },
@@ -104,9 +102,9 @@ class NotificationsService {
       onPress: async () => {
         store.dispatch(toggleDeviceNotifications(true))
         store.dispatch(toggleAppNotifications(true))
+        store.dispatch(updatePromptAttempts(0))
+        store.dispatch(updateLastTimePromptAttempted(0))
 
-        reduxStorage.setItem(STORAGE_IDS.PUSH_NOTIFICATIONS_PROMPT_COUNT, 0)
-        reduxStorage.setItem(STORAGE_IDS.PUSH_NOTIFICATIONS_PROMPT_TIME, 0)
         notifee.requestPermission()
         this.openSystemSettings()
         resolve(true)
@@ -239,12 +237,6 @@ class NotificationsService {
     body?: string
     data?: FirebaseMessagingTypes.RemoteMessage['data']
   }): Promise<void> => {
-    console.log('NotificationService.displayNotification', {
-      channelId,
-      title,
-      body,
-      data,
-    })
     try {
       await notifee.displayNotification({
         title,

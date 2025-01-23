@@ -2,14 +2,8 @@ import { Tabs } from 'expo-router'
 import React from 'react'
 import { TabBarIcon } from '@/src/components/navigation/TabBarIcon'
 import { Navbar as AssetsNavbar } from '@/src/features/Assets/components/Navbar/Navbar'
-import useNotifications from '@/src/hooks/useNotifications'
 
 export default function TabLayout() {
-  /**
-   * Enables notifications for the app if the user has enabled them
-   */
-  useNotifications()
-
   return (
     <Tabs>
       <Tabs.Screen

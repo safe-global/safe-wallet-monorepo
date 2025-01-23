@@ -4,13 +4,23 @@ import { useAppSelector, useAppDispatch } from '@/src/store/hooks'
 import {
   selectAppNotificationStatus,
   selectDeviceNotificationStatus,
+  selectFCMToken,
+  selectPromptAttempts,
+  selectLastTimePromptAttempted,
+  selectRemoteMessages,
   toggleAppNotifications,
 } from '@/src/store/notificationsSlice'
-import { STORAGE_IDS } from '@/src/store/constants'
-import { reduxStorage } from '@/src/store/storage'
 import NotificationService from '@/src/services/notifications/NotificationService'
+import { FirebaseMessagingTypes } from '@react-native-firebase/messaging'
 
-const useNotifications = () => {
+interface NotificationsProps {
+  isDeviceNotificationEnabled: boolean
+  isAppNotificationEnabled: boolean
+  fcmToken: string | null
+  remoteMessages: FirebaseMessagingTypes.RemoteMessage[]
+}
+
+const useNotifications = (): NotificationsProps => {
   const dispatch = useAppDispatch()
   /**
    * We need to check if the user has enabled notifications for the device in order to keep listening for messages
@@ -22,12 +32,14 @@ const useNotifications = () => {
    */
   const isDeviceNotificationEnabled = useAppSelector(selectDeviceNotificationStatus)
   const isAppNotificationEnabled = useAppSelector(selectAppNotificationStatus)
+  const fcmToken = useAppSelector(selectFCMToken)
+  const remoteMessages = useAppSelector(selectRemoteMessages)
+  const promptAttempts = useAppSelector(selectPromptAttempts)
+  const lastTimePromptAttempted = useAppSelector(selectLastTimePromptAttempted)
 
   useEffect(() => {
     const checkNotifications = async () => {
       if (!isDeviceNotificationEnabled) {
-        const promptAttempts = reduxStorage.getItem(STORAGE_IDS.PUSH_NOTIFICATIONS_PROMPT_COUNT)
-
         /**
          * If the user has been prompt more than 3 times within a month to enable the notifications
          * we should only ask the user to enable it again after a month has passed
@@ -35,7 +47,8 @@ const useNotifications = () => {
         if (
           promptAttempts &&
           promptAttempts >= 3 &&
-          Date.now() - Number(reduxStorage.getItem(STORAGE_IDS.PUSH_NOTIFICATIONS_PROMPT_TIME)) < 2592000000
+          lastTimePromptAttempted &&
+          new Date().getTime() - new Date(lastTimePromptAttempted).getTime() < 2592000000
         ) {
           if (isAppNotificationEnabled) {
             dispatch(toggleAppNotifications(false))
@@ -64,6 +77,8 @@ const useNotifications = () => {
 
     checkNotifications()
   }, [isDeviceNotificationEnabled, isAppNotificationEnabled])
+
+  return { isDeviceNotificationEnabled, isAppNotificationEnabled, fcmToken, remoteMessages }
 }
 
 export default useNotifications
