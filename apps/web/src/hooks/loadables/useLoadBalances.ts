@@ -2,7 +2,7 @@ import { getCounterfactualBalance } from '@/features/counterfactual/utils'
 import { useWeb3 } from '@/hooks/wallets/web3'
 import { useMemo } from 'react'
 import { type SafeBalanceResponse } from '@safe-global/safe-gateway-typescript-sdk'
-import { useBalancesGetBalancesV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
+import { type Balances, useBalancesGetBalancesV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import { useAppSelector } from '@/store'
 import useAsync, { type AsyncResult } from '../useAsync'
 import { selectCurrency, selectSettings, TOKEN_LISTS } from '@/store/settingsSlice'
@@ -35,7 +35,7 @@ const useCounterfactualBalances = (safe: ExtendedSafeInfo) => {
     return getCounterfactualBalance(safeAddress, web3, chain)
   }, [chain, safeAddress, web3, isCounterfactual])
 
-  return data
+  return data as unknown as Balances
 }
 
 export const useRtkBalances = () => {
@@ -62,8 +62,7 @@ export const useRtkBalances = () => {
 
   return useMemo(
     () => ({
-      // @FIXME: TokenInfoType is incompatible in the new type, so use the old one for now
-      balances: (data as unknown as SafeBalanceResponse) || cfData || { items: [], fiatTotal: '' },
+      balances: data || cfData || { items: [], fiatTotal: '' },
       error: error ? new Error('message' in error ? error.message : 'Failed to load balances') : undefined,
       loading: isLoading,
     }),
@@ -71,7 +70,7 @@ export const useRtkBalances = () => {
   )
 }
 
-export const useLoadBalances = (): AsyncResult<SafeBalanceResponse> => {
+export const useLoadBalances = (): AsyncResult<Balances> => {
   const { balances, error, loading } = useRtkBalances()
 
   return [balances, error, loading]

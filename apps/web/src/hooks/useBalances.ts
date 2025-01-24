@@ -1,8 +1,8 @@
-import { type SafeBalanceResponse } from '@safe-global/safe-gateway-typescript-sdk'
+import type { Balances } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import { useRtkBalances } from './loadables/useLoadBalances'
 
 const useBalances = (): {
-  balances: SafeBalanceResponse
+  balances: Balances
   loading: boolean
   error?: string
 } => {
