@@ -3,14 +3,13 @@ import { ReviewEnableSafenet } from './ReviewEnableSafenet'
 
 export type EnableSafenetFlowProps = {
   guardAddress: string
-  tokensForPresetAllowances: string[]
-  allowanceSpender: string
+  moduleAddress: string
 }
 
-const EnableSafenetFlow = ({ guardAddress, tokensForPresetAllowances, allowanceSpender }: EnableSafenetFlowProps) => {
+const EnableSafenetFlow = ({ guardAddress, moduleAddress }: EnableSafenetFlowProps) => {
   return (
     <TxLayout title="Confirm transaction" subtitle="Enable Safenet">
-      <ReviewEnableSafenet params={{ guardAddress, tokensForPresetAllowances, allowanceSpender }} />
+      <ReviewEnableSafenet params={{ guardAddress, moduleAddress }} />
     </TxLayout>
   )
 }

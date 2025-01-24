@@ -1,9 +1,9 @@
 import { getReadOnlyGnosisSafeContract } from '@/services/contracts/safeContracts'
+import type { AddOwnerTxParams, RemoveOwnerTxParams, SwapOwnerTxParams } from '@safe-global/protocol-kit'
 import { SENTINEL_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
+import type { MetaTransactionData, SafeTransaction, SafeTransactionDataPartial } from '@safe-global/safe-core-sdk-types'
 import type { ChainInfo, TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
 import { getTransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
-import type { AddOwnerTxParams, RemoveOwnerTxParams, SwapOwnerTxParams } from '@safe-global/protocol-kit'
-import type { MetaTransactionData, SafeTransaction, SafeTransactionDataPartial } from '@safe-global/safe-core-sdk-types'
 import extractTxInfo from '../extractTxInfo'
 import { getAndValidateSafeSDK } from './sdk'
 
@@ -99,6 +99,11 @@ export const createUpdateThresholdTx = async (threshold: number): Promise<SafeTr
 export const createRemoveModuleTx = async (moduleAddress: string): Promise<SafeTransaction> => {
   const safeSDK = getAndValidateSafeSDK()
   return safeSDK.createDisableModuleTx(moduleAddress)
+}
+
+export const createEnableModuleTx = async (moduleAddress: string): Promise<SafeTransaction> => {
+  const safeSDK = getAndValidateSafeSDK()
+  return safeSDK.createEnableModuleTx(moduleAddress)
 }
 
 export const createRemoveGuardTx = async (): Promise<SafeTransaction> => {
