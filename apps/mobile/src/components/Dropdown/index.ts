@@ -1,2 +1,2 @@
-import { Dropdown } from './Dropdown'
-export { Dropdown }
+export { Dropdown } from './Dropdown'
+export { DropdownLabel } from './DropdownLabel'
