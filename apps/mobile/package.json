@@ -41,6 +41,7 @@
     "@ethersproject/shims": "^5.7.0",
     "@expo/config-plugins": "^9.0.10",
     "@expo/vector-icons": "^14.0.2",
+    "@notifee/react-native": "^9.1.8",
     "@react-native-clipboard/clipboard": "^1.15.0",
     "@react-native-community/blur": "^4.4.1",
     "@react-native-firebase/app": "^21.7.1",
