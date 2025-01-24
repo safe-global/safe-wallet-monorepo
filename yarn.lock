@@ -8213,6 +8213,7 @@ __metadata:
     ethers: "npm:^6.13.4"
     expo: "npm:~52.0.14"
     expo-blur: "npm:~14.0.1"
+    expo-build-properties: "npm:^0.13.2"
     expo-constants: "npm:~17.0.4"
     expo-dev-client: "npm:~5.0.5"
     expo-font: "npm:~13.0.3"
@@ -19944,6 +19945,18 @@ __metadata:
     react: "*"
     react-native: "*"
   checksum: 10/263fe270941b8d05792f266ac1101de34f89cd1cf69e54802bc97daf798a89d2c3bf9f72780840fd5ed0519a209f71845f4758b49757be0fdc67942fab7da477
+  languageName: node
+  linkType: hard
+
+"expo-build-properties@npm:^0.13.2":
+  version: 0.13.2
+  resolution: "expo-build-properties@npm:0.13.2"
+  dependencies:
+    ajv: "npm:^8.11.0"
+    semver: "npm:^7.6.0"
+  peerDependencies:
+    expo: "*"
+  checksum: 10/88a2b0f491112398314502cc51172d4695d62ed9998fa96d8630450a5451f5f9779e0737c997175502ab16a3eb0194efb1cac44be44d5bfa2025054e4e4ce1c7
   languageName: node
   linkType: hard
 
