@@ -75,10 +75,8 @@ const useNotifications = (): NotificationsProps => {
         return
       }
 
-      const unsubscribeForegroundEvent = FCMService.listenForMessagesForeground()
-
       return () => {
-        unsubscribeForegroundEvent()
+        FCMService.listenForMessagesForeground()()
       }
     }
 
