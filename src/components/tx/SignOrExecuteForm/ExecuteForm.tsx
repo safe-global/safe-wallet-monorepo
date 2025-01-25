@@ -79,12 +79,10 @@ export const ExecuteForm = ({
 
   // Estimate gas limit
   const { gasLimit, gasLimitError } = useHsgGasLimit({ safeTx, isScheduling: executionType === ExecutionType.SCHEDULE })
-  console.log('Gas limit Error: ', gasLimitError)
   const [advancedParams, setAdvancedParams] = useAdvancedParams(gasLimit)
 
   // Check if transaction will fail
   const { executionValidationError } = useIsValidExecution(safeTx, advancedParams.gasLimit)
-  console.log('executionValid error: ', executionValidationError)
 
   // On modal submit
   const handleSubmit = async (e: SyntheticEvent) => {

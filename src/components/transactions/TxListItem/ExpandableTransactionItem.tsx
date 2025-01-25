@@ -47,15 +47,7 @@ export const ExpandableTransactionItem = ({
     false,
   )
 
-  // console.log('Tx details: ', txDetailsData)
-
-  console.log('txDetailsData: ', txDetailsData)
-
-  // const { timeStamp: _timeStamp, err } = useTimelockStamp(txDetailsData)
-  // const timeStamp = _timeStamp
-  const { timelockTx, err } = useTimelockTx(txDetailsData)
-  console.log('useTimelockTimestamp err: ', err)
-  // const timeStamp = 1729984000000
+  const { timelockTx } = useTimelockTx(txDetailsData)
 
   return (
     <Accordion
