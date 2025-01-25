@@ -12,7 +12,7 @@ import { setBaseUrl as setGatewayBaseUrl } from '@safe-global/safe-gateway-types
 import { CacheProvider, type EmotionCache } from '@emotion/react'
 import SafeThemeProvider from '@/components/theme/SafeThemeProvider'
 import '@/styles/globals.css'
-import { IS_PRODUCTION, GATEWAY_URL_STAGING, GATEWAY_URL_PRODUCTION } from '@/config/constants'
+import { GATEWAY_URL_PRODUCTION, GATEWAY_URL_STAGING, IS_PRODUCTION } from '@/config/constants'
 import { StoreHydrator } from '@/store'
 import PageLayout from '@/components/common/PageLayout'
 import useLoadableStores from '@/hooks/useLoadableStores'
@@ -26,7 +26,6 @@ import { useInitSession } from '@/hooks/useInitSession'
 import Notifications from '@/components/common/Notifications'
 import CookieBanner from '@/components/common/CookieBanner'
 import { useDarkMode } from '@/hooks/useDarkMode'
-import { cgwDebugStorage } from '@/components/sidebar/DebugToggle'
 import { useTxTracking } from '@/hooks/useTxTracking'
 import { useSafeMsgTracking } from '@/hooks/messages/useSafeMsgTracking'
 import useGtm from '@/services/analytics/useGtm'
@@ -42,8 +41,10 @@ import { TxModalProvider } from '@/components/tx-flow'
 import { useNotificationTracking } from '@/components/settings/PushNotifications/hooks/useNotificationTracking'
 import Recovery from '@/features/recovery/components/Recovery'
 import WalletProvider from '@/components/common/WalletProvider'
+import { cgwDebugStorage } from '@/components/sidebar/DebugToggle'
 
 const GATEWAY_URL = IS_PRODUCTION || cgwDebugStorage.get() ? GATEWAY_URL_PRODUCTION : GATEWAY_URL_STAGING
+// const GATEWAY_URL = GATEWAY_URL_PRODUCTION
 
 const InitApp = (): null => {
   setGatewayBaseUrl(GATEWAY_URL)

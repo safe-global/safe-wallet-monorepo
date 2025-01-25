@@ -518,7 +518,6 @@ const _scheduleTransactionContract = async (
   const contract = new ethers.Contract(address, inter, signerTwo)
   let txResponse: ContractTransaction
   if (isScheduled) {
-    console.log('Dispatch: Executing through timelock')
     txResponse = await contract.executeTimelockTransaction(
       safeTransaction.data.to,
       safeTransaction.data.value,
@@ -533,7 +532,6 @@ const _scheduleTransactionContract = async (
       options,
     )
   } else {
-    console.log('Dispatch: Scheduling through timelock')
     txResponse = await contract.scheduleTransaction(
       safeTransaction.data.to,
       safeTransaction.data.value,

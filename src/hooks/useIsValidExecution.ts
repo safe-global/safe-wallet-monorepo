@@ -98,7 +98,6 @@ const useIsValidExecution = (
       const err = _err as EthersError
 
       if (isContractError(err)) {
-        console.log('useIsValidExec err: ', err)
         // @ts-ignore
         err.reason += `: ${ContractErrorCodes[err.reason]}`
       }

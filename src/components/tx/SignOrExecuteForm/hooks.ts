@@ -132,17 +132,13 @@ export const useTxActions = (): TxActions => {
 
       // Relay or execute the tx via connected wallet
       if (isRelayed) {
-        console.log('Relay execution')
         await dispatchTxRelay(safeTx, safe, txId, txOptions.gasLimit)
       } else if (!isScheduled) {
         // await dispatchTxExecution(safeTx, txOptions, txId, onboard, chainId, safeAddress)
-        console.log('Scheduling the transaction instead of executing it directly.')
         await dispatchTxSchedule(safeTx, txOptions, txId, onboard, chainId, safeAddress)
       } else if (isScheduled) {
-        console.log('Executing transaction through timelock')
         await dispatchTxScheduleExec(safeTx, txOptions, txId, onboard, chainId, safeAddress)
       } else {
-        console.log('Regular execution')
         await dispatchTxExecution(safeTx, txOptions, txId, onboard, chainId, safeAddress)
       }
 

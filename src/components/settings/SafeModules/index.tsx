@@ -1,11 +1,9 @@
 import EthHashInfo from '@/components/common/EthHashInfo'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { Paper, Grid, Typography, Box, IconButton, SvgIcon } from '@mui/material'
+import { Paper, Grid, Typography, Box } from '@mui/material'
 
 import ExternalLink from '@/components/common/ExternalLink'
 import { RemoveModuleFlow } from '@/components/tx-flow/flows'
-import DeleteIcon from '@/public/images/common/delete.svg'
-import CheckWallet from '@/components/common/CheckWallet'
 import { useContext } from 'react'
 import { TxModalContext } from '@/components/tx-flow'
 import { selectDelayModifierByAddress } from '@/features/recovery/services/selectors'
@@ -45,13 +43,6 @@ const ModuleDisplay = ({ moduleAddress, chainId, name }: { moduleAddress: string
         chainId={chainId}
         hasExplorer
       />
-      <CheckWallet>
-        {(isOk) => (
-          <IconButton onClick={onRemove} color="error" size="small" disabled={!isOk} title="Remove module">
-            <SvgIcon component={DeleteIcon} inheritViewBox color="error" fontSize="small" />
-          </IconButton>
-        )}
-      </CheckWallet>
     </Box>
   )
 }

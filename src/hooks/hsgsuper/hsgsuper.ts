@@ -105,7 +105,6 @@ export const useTimelockStamp = (
       const timelockAdd: string = await hsgsuper.timelock()
       const timelock = new ethers.Contract(timelockAdd, timelockAbi, provider)
       const timestamp = await timelock.getTimestamp(proposalId)
-      console.log('Timestamp: ', timestamp)
       setTStamp(Number(timestamp.toString()) * 1000)
       setErr(undefined)
     })
@@ -228,10 +227,8 @@ export const useTimelockTx = (txDetails: TransactionDetails | undefined): { time
       const _now = Date.now()
       // console.log('typeof: ', typeof timestamp)
       if (_now < _timestamp * 1000) {
-        console.log('Setting cancellation event listener: ')
         // @chase not sure if I have to clean this up just in case
-        timelock.once(filter, (propId) => {
-          console.log('Cancel event ran!')
+        timelock.once(filter, () => {
           setIsCancelled(true)
           setTStamp(undefined)
         })
