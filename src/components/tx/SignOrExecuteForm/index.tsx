@@ -63,8 +63,9 @@ export const SignOrExecuteForm = ({
   safeTx: ReturnType<typeof useSafeTx>
   safeTxError: ReturnType<typeof useSafeTxError>
 }): ReactElement => {
-  const { transactionExecution } = useAppSelector(selectSettings)
-  const [shouldExecute, setShouldExecute] = useState<boolean>(transactionExecution)
+  // const { transactionExecution } = useAppSelector(selectSettings)
+  const shouldExecute = false // can't sign and execute with hsg
+  // const [shouldExecute, setShouldExecute] = useState<boolean>(transactionExecution)
   const isCreation = !props.txId
   const isNewExecutableTx = useImmediatelyExecutable() && isCreation
   const isCorrectNonce = useValidateNonce(safeTx)
@@ -121,8 +122,6 @@ export const SignOrExecuteForm = ({
             This transaction will most likely fail. To save gas costs, avoid confirming the transaction.
           </ErrorMessage>
         )}
-
-        {canExecute && !props.onlyExecute && <ExecuteCheckbox onChange={setShouldExecute} />}
 
         <WrongChainWarning />
 

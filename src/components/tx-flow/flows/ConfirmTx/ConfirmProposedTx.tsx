@@ -35,8 +35,8 @@ const ConfirmProposedTx = ({ txSummary }: ConfirmProposedTxProps): ReactElement 
   useEffect(() => {
     createExistingTx(chainId, safeAddress, txId).then(setSafeTx).catch(setSafeTxError)
   }, [txId, safeAddress, chainId, setSafeTx, setSafeTxError])
-
-  const text = canSign ? (canExecute ? SIGN_EXECUTE_TEXT : SIGN_TEXT) : EXECUTE_TEXT
+  const text = canSign ? SIGN_TEXT : EXECUTE_TEXT
+  // const text = canSign ? (canExecute ? SIGN_EXECUTE_TEXT : SIGN_TEXT) : EXECUTE_TEXT
 
   return (
     <SignOrExecuteForm txId={txId} isExecutable={canExecute} onlyExecute={!canSign}>
