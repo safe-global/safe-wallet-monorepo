@@ -78,7 +78,6 @@ const getNonce = async (): Promise<string> => {
 export const createSIWE = (chains: [AppKitNetwork, ...AppKitNetwork[]]) => {
   return createSIWEConfig({
     signOutOnAccountChange: true,
-    signOutOnDisconnect: true,
     getMessageParams: async () => ({
       domain: window.location.host,
       uri: window.location.origin,
