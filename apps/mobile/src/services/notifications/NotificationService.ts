@@ -16,6 +16,7 @@ import { ChannelId, notificationChannels, withTimeout } from '@/src/utils/notifi
 import Logger from '@/src/utils/logger'
 
 import { FirebaseMessagingTypes } from '@react-native-firebase/messaging'
+import { router } from 'expo-router'
 
 interface AlertButton {
   text: string
@@ -96,6 +97,7 @@ class NotificationsService {
          */
         store.dispatch(updatePromptAttempts(1))
         store.dispatch(updateLastTimePromptAttempted(Date.now()))
+        router.navigate('/(tabs)')
 
         resolve(false)
       },
