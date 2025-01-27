@@ -13,7 +13,7 @@ import { useEffect, useMemo } from 'react'
 import useAsync, { type AsyncResult } from '../useAsync'
 import { useCurrentChain } from '../useChains'
 import useIntervalCounter from '../useIntervalCounter'
-import useIsSafenetEnabled from '../useIsSafenetEnabled'
+import useIsSafenetEnabled from '@/features/safenet/hooks/useIsSafenetEnabled'
 import useSafeInfo from '../useSafeInfo'
 
 export const useTokenListSetting = (): boolean | undefined => {

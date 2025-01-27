@@ -19,12 +19,11 @@ import CopyTooltip from '@/components/common/CopyTooltip'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import ExplorerButton from '@/components/common/ExplorerButton'
 import FiatValue from '@/components/common/FiatValue'
-import GradientBoxSafenet from '@/components/common/GradientBoxSafenet'
 import Track from '@/components/common/Track'
 import EnvHintButton from '@/components/settings/EnvironmentVariables/EnvHintButton'
+import useIsSafenetEnabled from '@/features/safenet/hooks/useIsSafenetEnabled'
 import { useAddressResolver } from '@/hooks/useAddressResolver'
 import { useCurrentChain } from '@/hooks/useChains'
-import useIsSafenetEnabled from '@/hooks/useIsSafenetEnabled'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import { useVisibleBalances } from '@/hooks/useVisibleBalances'
 import { OVERVIEW_EVENTS } from '@/services/analytics/events/overview'
@@ -32,6 +31,9 @@ import { selectSettings } from '@/store/settingsSlice'
 import { getBlockExplorerLink } from '@/utils/chains'
 import { SvgIcon } from '@mui/material'
 import QrCodeButton from '../QrCodeButton'
+import dynamic from 'next/dynamic'
+
+const GradientBoxSafenet = dynamic(() => import('@/features/safenet/components/GradientBoxSafenet'))
 
 const SafeHeader = (): ReactElement => {
   const isSafenetEnabled = useIsSafenetEnabled()

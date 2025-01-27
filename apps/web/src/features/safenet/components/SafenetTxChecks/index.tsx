@@ -1,6 +1,6 @@
-import GradientBoxSafenet from '@/components/common/GradientBoxSafenet'
 import TxCard from '@/components/tx-flow/common/TxCard'
-import { SafenetTxSimulation } from '@/components/tx/security/safenet'
+import GradientBoxSafenet from '../GradientBoxSafenet'
+import SafenetTxSimulation from '../SafenetTxSimulation'
 import useChainId from '@/hooks/useChainId'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import { Typography } from '@mui/material'

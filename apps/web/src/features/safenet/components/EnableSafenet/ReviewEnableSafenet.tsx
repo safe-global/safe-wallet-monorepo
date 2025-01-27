@@ -13,7 +13,7 @@ import { UNLIMITED_APPROVAL_AMOUNT } from '@/utils/tokens'
 
 const ERC20_INTERFACE = ERC20__factory.createInterface()
 
-export const ReviewEnableSafenet = ({ params }: { params: EnableSafenetFlowProps }) => {
+const ReviewEnableSafenet = ({ params }: { params: EnableSafenetFlowProps }) => {
   const { setSafeTx, safeTxError, setSafeTxError } = useContext(SafeTxContext)
 
   useEffect(() => {
@@ -56,3 +56,5 @@ export const ReviewEnableSafenet = ({ params }: { params: EnableSafenetFlowProps
     </SignOrExecuteForm>
   )
 }
+
+export default ReviewEnableSafenet

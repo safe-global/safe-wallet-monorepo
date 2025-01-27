@@ -45,7 +45,9 @@ import { addOrUpdateSafe, pinSafe, selectAllAddedSafes, unpinSafe } from '@/stor
 import { defaultSafeInfo } from '@/store/safeInfoSlice'
 import { selectOrderByPreference } from '@/store/orderByPreferenceSlice'
 import { getComparator } from '@/features/myAccounts/utils/utils'
-import GradientBoxSafenet from '@/components/common/GradientBoxSafenet'
+import dynamic from 'next/dynamic'
+
+const GradientBoxSafenet = dynamic(() => import('@/features/safenet/components/GradientBoxSafenet'))
 
 type MultiAccountItemProps = {
   multiSafeAccountItem: MultiChainSafeItem

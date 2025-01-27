@@ -1,7 +1,5 @@
-import GradientBoxSafenet from '@/components/common/GradientBoxSafenet'
 import { TxDataRow, generateDataRowValue } from '@/components/transactions/TxDetails/Summary/TxDataRow'
-import { SafenetTxSimulation } from '@/components/tx/security/safenet'
-import useIsSafenetEnabled from '@/hooks/useIsSafenetEnabled'
+import useIsSafenetEnabled from '@/features/safenet/hooks/useIsSafenetEnabled'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { Errors, logError } from '@/services/exceptions'
 import { dateString } from '@/utils/formatters'
@@ -17,6 +15,10 @@ import SafeTxGasForm from '../SafeTxGasForm'
 import DecodedData from '../TxData/DecodedData'
 import { SafeTxHashDataRow } from './SafeTxHashDataRow'
 import css from './styles.module.css'
+import dynamic from 'next/dynamic'
+
+const GradientBoxSafenet = dynamic(() => import('@/features/safenet/components/GradientBoxSafenet'))
+const SafenetTxSimulation = dynamic(() => import('@/features/safenet/components/SafenetTxSimulation'))
 
 interface Props {
   txDetails: TransactionDetails

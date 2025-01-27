@@ -1,6 +1,6 @@
 import SettingsHeader from '@/components/settings/SettingsHeader'
 import { BRAND_NAME } from '@/config/constants'
-import { useHasSafenetFeature } from '@/features/safenet'
+import { useHasSafenetFeature } from '@/features/safenet/hooks/useHasSafenetFeature'
 import { Typography } from '@mui/material'
 import type { NextPage } from 'next'
 import dynamic from 'next/dynamic'
