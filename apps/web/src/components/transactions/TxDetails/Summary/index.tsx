@@ -9,14 +9,13 @@ import { calculateSafeTransactionHash } from '@safe-global/protocol-kit/dist/src
 import type { SafeTransaction, SafeTransactionData, SafeVersion } from '@safe-global/safe-core-sdk-types'
 import type { TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
 import { Operation } from '@safe-global/safe-gateway-typescript-sdk'
+import dynamic from 'next/dynamic'
 import type { ReactElement } from 'react'
 import { useMemo, useState } from 'react'
 import SafeTxGasForm from '../SafeTxGasForm'
 import DecodedData from '../TxData/DecodedData'
 import { SafeTxHashDataRow } from './SafeTxHashDataRow'
 import css from './styles.module.css'
-
-import dynamic from 'next/dynamic'
 
 const GradientBoxSafenet = dynamic(() => import('@/features/safenet/components/GradientBoxSafenet'))
 const SafenetTxSimulation = dynamic(() => import('@/features/safenet/components/SafenetTxSimulation'))
