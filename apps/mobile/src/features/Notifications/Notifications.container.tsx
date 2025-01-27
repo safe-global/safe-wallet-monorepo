@@ -24,11 +24,11 @@ export const NotificationsContainer = () => {
   }, [isAppNotificationEnabled, isDeviceNotificationStatus])
 
   return (
-    <View paddingHorizontal="$6" marginTop="$2" style={{ flex: 1 }}>
+    <View paddingHorizontal="$4" marginTop="$2" style={{ flex: 1 }}>
       <Text fontSize="$8" fontWeight={600} marginBottom="$2">
         Notifications
       </Text>
-      <Text marginBottom="$3">
+      <Text marginBottom="$4">
         Stay up-to-date and get notified about activities in your account, based on your needs.
       </Text>
       <SafeListItem
