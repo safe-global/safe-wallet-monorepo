@@ -1,6 +1,7 @@
 import { Dimensions, StyleSheet } from 'react-native'
 import { H1, Image, View } from 'tamagui'
 import Signing from '@/assets/images/illustration.png'
+
 import TrackAnywhere from '@/assets/images/anywhere.png'
 import { CarouselItem } from './CarouselItem'
 import { ParticlesLogo } from '../ParticlesLogo'
@@ -16,6 +17,9 @@ const styles = StyleSheet.create({
   },
   signing: {
     height: Math.abs(windowHeight * 0.3),
+  },
+  notifications: {
+    height: Math.abs(windowHeight * 0.32),
   },
   textContainer: {
     textAlign: 'center',
@@ -97,5 +101,17 @@ export const items: CarouselItem[] = [
     ),
     description:
       'Sign and execute transactions securely from your mobile device. Ensuring your assets are protected, even on the move.',
+  },
+  {
+    name: 'enable-notifications',
+    imagePosition: 'bottom',
+    title: (
+      <>
+        <H1 style={styles.textContainer} fontWeight={600}>
+          Stay in the loop with account activity
+        </H1>
+      </>
+    ),
+    description: 'Get notified when you receive assets, and when transactions require your action.',
   },
 ]

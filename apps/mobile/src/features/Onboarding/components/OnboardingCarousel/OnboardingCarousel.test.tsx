@@ -1,7 +1,17 @@
 import React from 'react'
 import { OnboardingCarousel } from './OnboardingCarousel'
-import { Text, View } from 'tamagui'
+import { Text } from 'tamagui'
 import { render } from '@/src/tests/test-utils'
+
+jest.mock('@notifee/react-native', () => ({
+  AndroidImportance: {
+    NONE: 0,
+    MIN: 1,
+    LOW: 2,
+    DEFAULT: 3,
+    HIGH: 4,
+  },
+}))
 
 describe('OnboardingCarousel', () => {
   const items = [
@@ -13,12 +23,8 @@ describe('OnboardingCarousel', () => {
   // react-native-collapsible-tab-view does not returns any information about the tabs children
   // that is why we only test the children component here =/
   it('renders without crashing', () => {
-    const { getByTestId } = render(
-      <OnboardingCarousel items={items}>
-        <View testID="child-element">Child Element</View>
-      </OnboardingCarousel>,
-    )
+    const { getByTestId } = render(<OnboardingCarousel items={items} />)
 
-    expect(getByTestId('child-element')).toBeTruthy()
+    expect(getByTestId('carrousel')).toBeTruthy()
   })
 })
