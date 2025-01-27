@@ -1,14 +1,14 @@
 import ChainIndicator from '@/components/common/ChainIndicator'
 import { ProgressBar } from '@/components/common/ProgressBar'
 import { MakeASwapButton, SendTokensButton, TxBuilderButton } from '@/components/tx-flow/common/TxButton'
+import { SafenetTokenTransfersFlow } from '@/components/tx-flow/flows'
+import useIsSafenetEnabled from '@/features/safenet/hooks/useIsSafenetEnabled'
 import { useTxBuilderApp } from '@/hooks/safe-apps/useTxBuilderApp'
 import NewTxIcon from '@/public/images/transactions/new-tx.svg'
 import { Container, Grid, Paper, Typography } from '@mui/material'
 import { useCallback, useContext } from 'react'
 import { TxModalContext } from '../../'
 import TokenTransferFlow from '../TokenTransfer'
-import { SafenetTokenTransfersFlow } from '@/components/tx-flow/flows'
-import useIsSafenetEnabled from '@/features/safenet/hooks/useIsSafenetEnabled'
 import css from './styles.module.css'
 
 const NewTxFlow = () => {

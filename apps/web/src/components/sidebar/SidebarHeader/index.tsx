@@ -30,8 +30,8 @@ import { OVERVIEW_EVENTS } from '@/services/analytics/events/overview'
 import { selectSettings } from '@/store/settingsSlice'
 import { getBlockExplorerLink } from '@/utils/chains'
 import { SvgIcon } from '@mui/material'
-import QrCodeButton from '../QrCodeButton'
 import dynamic from 'next/dynamic'
+import QrCodeButton from '../QrCodeButton'
 
 const GradientBoxSafenet = dynamic(() => import('@/features/safenet/components/GradientBoxSafenet'))
 

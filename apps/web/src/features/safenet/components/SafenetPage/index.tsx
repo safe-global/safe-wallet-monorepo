@@ -10,34 +10,15 @@ import { hasSafeFeature } from '@/utils/safe-versions'
 import { Button, CircularProgress, Grid, Paper, SvgIcon, Tooltip, Typography } from '@mui/material'
 import { SAFE_FEATURES } from '@safe-global/protocol-kit/dist/src/utils'
 import type { NextPage } from 'next'
-import { useContext, useMemo } from 'react'
-
-const getSafenetTokensByChain = (chainId: number, safenetConfig: SafenetConfigEntity): string[] => {
-  const tokenSymbols = Object.keys(safenetConfig.tokens)
-
-  const tokens: string[] = []
-  for (const symbol of tokenSymbols) {
-    const tokenAddress = safenetConfig.tokens[symbol][chainId]
-    if (tokenAddress) {
-      tokens.push(tokenAddress)
-    }
-  }
-
-  return tokens
-}
+import { useContext } from 'react'
 
 const SafenetContent = ({ safenetConfig, safe }: { safenetConfig: SafenetConfigEntity; safe: ExtendedSafeInfo }) => {
   const isVersionWithGuards = hasSafeFeature(SAFE_FEATURES.SAFE_TX_GUARDS, safe.version)
   const safenetGuardAddress = safenetConfig.guards[safe.chainId]
-  const safenetProcessorAddress = safenetConfig.processors[safe.chainId]
+  const safenetModuleAddress = safenetConfig.settlementEngines[safe.chainId]
   const isSafenetGuardEnabled = isVersionWithGuards && sameAddress(safe.guard?.value, safenetGuardAddress)
   const chainSupported = safenetConfig.chains.includes(Number(safe.chainId))
   const { setTxFlow } = useContext(TxModalContext)
-
-  const safenetAssets = useMemo(
-    () => getSafenetTokensByChain(Number(safe.chainId), safenetConfig),
-    [safe.chainId, safenetConfig],
-  )
 
   switch (true) {
     case !chainSupported:
@@ -57,13 +38,7 @@ const SafenetContent = ({ safenetConfig, safe }: { safenetConfig: SafenetConfigE
           <Button
             variant="contained"
             onClick={() =>
-              setTxFlow(
-                <EnableSafenetFlow
-                  guardAddress={safenetGuardAddress}
-                  tokensForPresetAllowances={safenetAssets}
-                  allowanceSpender={safenetProcessorAddress}
-                />,
-              )
+              setTxFlow(<EnableSafenetFlow guardAddress={safenetGuardAddress} moduleAddress={safenetModuleAddress} />)
             }
             sx={{ mt: 2 }}
           >

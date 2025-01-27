@@ -1,5 +1,5 @@
 import { SAFENET_API_URL } from '@/config/constants'
-import { useHasSafenetFeature } from '@/features/safenet/hooks/useHasSafenetFeature'
+import useHasSafenetFeature from '@/features/safenet/hooks/useHasSafenetFeature'
 import type { SafePermissionsRequest } from '@/hooks/safe-apps/permissions'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import { createSafeAppsWeb3Provider } from '@/hooks/wallets/web3'
