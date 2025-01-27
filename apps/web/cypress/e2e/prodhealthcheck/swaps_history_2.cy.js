@@ -38,7 +38,7 @@ describe('[PROD] Swaps history tests 2', () => {
   })
 
   it(
-    'Verify no decoding if tx was created using CowSwap safe-app in the history',
+    'Verify there is decoding for a tx created by CowSwap safe-app in the history',
     { defaultCommandTimeout: 30000 },
     () => {
       cy.visit(

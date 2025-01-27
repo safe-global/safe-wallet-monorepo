@@ -2,12 +2,14 @@ import * as constants from '../../support/constants.js'
 import * as main from '../pages/main.page.js'
 import * as create_tx from '../pages/create_tx.pages.js'
 import * as swaps_data from '../../fixtures/swaps_data.json'
+import * as data from '../../fixtures/txhistory_data_data.json'
 import * as swaps from '../pages/swaps.pages.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 
 let staticSafes = []
 
 const swapsHistory = swaps_data.type.history
+const typeGeneral = data.type.general
 
 describe('Swaps history tests 2', () => {
   before(async () => {
@@ -102,26 +104,17 @@ describe('Swaps history tests 2', () => {
   })
 
   // Added to prod
-  // Unskip after the decoding bug is fixed on staging
-  it.skip(
-    'Verify no decoding if tx was created using CowSwap safe-app in the history',
+  it(
+    'Verify there is decoding for a tx created by CowSwap safe-app in the history',
     { defaultCommandTimeout: 30000 },
     () => {
       cy.visit(constants.transactionUrl + staticSafes.SEP_STATIC_SAFE_1 + swaps.swapTxs.safeAppSwapOrder)
-      main.verifyValuesDoNotExist('div', [
-        swapsHistory.actionApproveG,
-        swapsHistory.actionDepositG,
-        swapsHistory.amount,
-        swapsHistory.executionPrice,
-        swapsHistory.surplus,
-        swapsHistory.expiry,
-        swapsHistory.oderId,
-        swapsHistory.status,
-        swapsHistory.forAtLeast,
-        swapsHistory.forAtMost,
-      ])
-      main.verifyValuesDoNotExist(create_tx.transactionItem, [swapsHistory.title, swapsHistory.cow, swapsHistory.dai])
-      main.verifyValuesExist(create_tx.transactionItem, [swapsHistory.actionPreSignatureG])
+      const dai = swaps.createRegex(swapsHistory.forAtLeastFullDai, 'DAI')
+      const eq = swaps.createRegex(swapsHistory.DAIeqCOW, 'COW')
+      main.verifyValuesExist(create_tx.transactionItem, [swapsHistory.title])
+      create_tx.verifySummaryByName(swapsHistory.title, null, [typeGeneral.statusOk])
+      main.verifyElementsExist([create_tx.altImgDai, create_tx.altImgCow], create_tx.altImgSwaps)
+      create_tx.verifyExpandedDetails([swapsHistory.sell10Cow, dai, eq, swapsHistory.dai, swapsHistory.filled])
     },
   )
 
