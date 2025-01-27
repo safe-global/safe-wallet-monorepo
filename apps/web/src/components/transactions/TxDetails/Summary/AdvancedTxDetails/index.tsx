@@ -6,7 +6,6 @@ import { generateDataRowValue } from '@/components/transactions/TxDetails/Summar
 import { isCustomTxInfo, isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
 import type { TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
 import { Operation } from '@safe-global/safe-gateway-typescript-sdk'
-import type { SafeTransactionData } from '@safe-global/safe-core-sdk-types'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import ExpandLessIcon from '@mui/icons-material/ExpandLess'
 import DecodedData from '../../TxData/DecodedData'
