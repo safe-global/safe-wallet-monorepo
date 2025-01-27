@@ -3,6 +3,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import type { ReactElement } from 'react'
 
 import ShareIcon from '@/public/images/messages/link.svg'
+import { TX_LIST_EVENTS } from '@/services/analytics'
 import TxShareLink from '.'
 
 import css from './styles.module.css'
@@ -20,7 +21,7 @@ export function TxShareBlock({ txId }: { txId: string }): ReactElement | null {
         </AccordionDetails>
       </Accordion>
       <div className={css.copy}>
-        <TxShareLink id={txId}>
+        <TxShareLink id={txId} event={TX_LIST_EVENTS.COPY_SHARE_LINK}>
           <Button
             variant="outlined"
             size="compact"
