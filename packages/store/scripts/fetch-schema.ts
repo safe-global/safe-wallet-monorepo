@@ -2,12 +2,13 @@ const PRODUCTION_CGW_API_URL = process.env.PRODUCTION_CGW_API_URL || 'https://sa
 const STAGING_CGW_API_URL = process.env.STAGING_CGW_API_URL || 'https://safe-client.staging.5afe.dev/api-json'
 const LOCAL_CGW_API_URL = process.env.LOCAL_CGW_API_URL || 'http://localhost:3000/api-json'
 
-const apiUrl =
-  process.env.NODE_ENV === 'local'
-    ? LOCAL_CGW_API_URL
-    : process.env.NODE_ENV === 'dev'
-      ? STAGING_CGW_API_URL
-      : PRODUCTION_CGW_API_URL
+let apiUrl = PRODUCTION_CGW_API_URL
+
+if (process.env.NODE_ENV === 'local') {
+  apiUrl = LOCAL_CGW_API_URL
+} else if (process.env.NODE_ENV === 'dev') {
+  apiUrl = STAGING_CGW_API_URL
+}
 
 fetch(apiUrl)
   .then((response) => {
