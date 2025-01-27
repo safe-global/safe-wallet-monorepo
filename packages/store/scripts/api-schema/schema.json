@@ -3586,6 +3586,7 @@
         },
         "required": [
           "address",
+          "decimals",
           "logoUri",
           "name",
           "symbol",

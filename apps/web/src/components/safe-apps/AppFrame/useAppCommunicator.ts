@@ -20,7 +20,6 @@ import type {
   SignMessageParams,
   SignTypedMessageParams,
   ChainInfo,
-  SafeBalances,
   SafeInfoExtended,
 } from '@safe-global/safe-apps-sdk'
 import { Methods, RPC_CALLS } from '@safe-global/safe-apps-sdk'
@@ -34,6 +33,7 @@ import { useAppSelector } from '@/store'
 import { selectRpc } from '@/store/settingsSlice'
 import { createSafeAppsWeb3Provider } from '@/hooks/wallets/web3'
 import { useDarkMode } from '@/hooks/useDarkMode'
+import type { Balances } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 
 export enum CommunicatorMessages {
   REJECT_TRANSACTION_MESSAGE = 'Transaction was rejected',
@@ -56,7 +56,7 @@ export type UseAppCommunicatorHandlers = {
   ) => void
   onGetTxBySafeTxHash: (transactionId: string) => Promise<TransactionDetails>
   onGetEnvironmentInfo: () => EnvironmentInfo
-  onGetSafeBalances: (currency: string) => Promise<SafeBalances>
+  onGetSafeBalances: (currency: string) => Promise<Balances>
   onGetSafeInfo: () => SafeInfoExtended
   onGetChainInfo: () => ChainInfo | undefined
   onGetPermissions: (origin: string) => Permission[]
