@@ -101,7 +101,7 @@
     "@mdx-js/react": "^3.0.1",
     "@next/bundle-analyzer": "^15.0.4",
     "@next/mdx": "^15.0.4",
-    "@openzeppelin/contracts": "^4.9.6",
+    "@openzeppelin/contracts": "^5.2.0",
     "@safe-global/safe-core-sdk-types": "^5.0.1",
     "@safe-global/test": "workspace:^",
     "@sentry/types": "^7.74.0",
