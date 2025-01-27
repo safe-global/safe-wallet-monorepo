@@ -1,4 +1,4 @@
-import { ReactElement, ReactNode } from 'react'
+import type { ReactElement, ReactNode } from 'react'
 import Grid from '@mui/material/Grid2'
 
 type AdvancedDetailsDataRowProps = {
