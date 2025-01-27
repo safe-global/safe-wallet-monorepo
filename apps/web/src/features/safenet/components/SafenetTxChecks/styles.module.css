@@ -1,0 +1,7 @@
+.safenetGradientCard {
+  margin-bottom: var(--space-2);
+}
+
+.safenetGradientCard > div:last-child > div:first-child {
+  margin-bottom: 0;
+}

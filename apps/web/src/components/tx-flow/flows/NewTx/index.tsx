@@ -7,9 +7,8 @@ import { Container, Grid, Paper, Typography } from '@mui/material'
 import { useCallback, useContext } from 'react'
 import { TxModalContext } from '../../'
 import TokenTransferFlow from '../TokenTransfer'
-
-import useIsSafenetEnabled from '@/hooks/useIsSafenetEnabled'
-import SafenetTokenTransfersFlow from '../SafenetTokenTransfers'
+import { SafenetTokenTransfersFlow } from '@/components/tx-flow/flows'
+import useIsSafenetEnabled from '@/features/safenet/hooks/useIsSafenetEnabled'
 import css from './styles.module.css'
 
 const NewTxFlow = () => {

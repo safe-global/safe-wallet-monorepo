@@ -121,4 +121,5 @@ export const ECOSYSTEM_ID_ADDRESS =
 export const MULTICHAIN_HELP_ARTICLE = `${HELP_CENTER_URL}/en/articles/222612-multi-chain-safe`
 
 // Safenet
+export const HAS_SAFENET_FEATURE = process.env.NEXT_PUBLIC_HAS_SAFENET_FEATURE === 'true'
 export const SAFENET_API_URL = process.env.NEXT_PUBLIC_SAFENET_API_URL

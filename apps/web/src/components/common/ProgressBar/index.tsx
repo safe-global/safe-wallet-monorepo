@@ -1,4 +1,4 @@
-import useIsSafenetEnabled from '@/hooks/useIsSafenetEnabled'
+import useIsSafenetEnabled from '@/features/safenet/hooks/useIsSafenetEnabled'
 import type { LinearProgressProps } from '@mui/material'
 import { LinearProgress } from '@mui/material'
 

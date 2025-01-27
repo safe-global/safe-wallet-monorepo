@@ -1,19 +1,20 @@
+import { POLLING_INTERVAL } from '@/config/constants'
 import { getCounterfactualBalance } from '@/features/counterfactual/utils'
 import { useWeb3 } from '@/hooks/wallets/web3'
-import { useEffect, useMemo } from 'react'
-import { getBalances, type SafeBalanceResponse } from '@safe-global/safe-gateway-typescript-sdk'
-import { useAppSelector } from '@/store'
-import useAsync, { type AsyncResult } from '../useAsync'
 import { Errors, logError } from '@/services/exceptions'
-import { selectCurrency, selectSettings, TOKEN_LISTS } from '@/store/settingsSlice'
-import { useCurrentChain } from '../useChains'
+import { useAppSelector } from '@/store'
+import { getSafenetBalances, useGetSafenetConfigQuery } from '@/store/safenet'
+import { TOKEN_LISTS, selectCurrency, selectSettings } from '@/store/settingsSlice'
 import { FEATURES, hasFeature } from '@/utils/chains'
-import { POLLING_INTERVAL } from '@/config/constants'
-import useIntervalCounter from '../useIntervalCounter'
-import useSafeInfo from '../useSafeInfo'
-import { useGetSafenetConfigQuery } from '@/store/safenet'
 import { convertSafenetBalanceToSafeClientGatewayBalance } from '@/utils/safenet'
-import { getSafenetBalances } from '@/store/safenet'
+import { skipToken } from '@reduxjs/toolkit/query/react'
+import { getBalances, type SafeBalanceResponse } from '@safe-global/safe-gateway-typescript-sdk'
+import { useEffect, useMemo } from 'react'
+import useAsync, { type AsyncResult } from '../useAsync'
+import { useCurrentChain } from '../useChains'
+import useIntervalCounter from '../useIntervalCounter'
+import useIsSafenetEnabled from '@/features/safenet/hooks/useIsSafenetEnabled'
+import useSafeInfo from '../useSafeInfo'
 
 export const useTokenListSetting = (): boolean | undefined => {
   const chain = useCurrentChain()
@@ -46,11 +47,12 @@ const mergeBalances = (cgw: SafeBalanceResponse, sn: SafeBalanceResponse): SafeB
 
 export const useLoadBalances = (): AsyncResult<SafeBalanceResponse> => {
   const [pollCount, resetPolling] = useIntervalCounter(POLLING_INTERVAL)
+  const isSafenetEnabled = useIsSafenetEnabled()
   const {
     data: safenetConfig,
     isSuccess: isSafenetConfigSuccess,
     isLoading: isSafenetConfigLoading,
-  } = useGetSafenetConfigQuery()
+  } = useGetSafenetConfigQuery(!isSafenetEnabled ? skipToken : undefined)
   const currency = useAppSelector(selectCurrency)
   const isTrustedTokenList = useTokenListSetting()
   const { safe, safeAddress } = useSafeInfo()
@@ -74,7 +76,7 @@ export const useLoadBalances = (): AsyncResult<SafeBalanceResponse> => {
         }),
       ]
 
-      if (isSafenetConfigSuccess && chainSupportedBySafenet) {
+      if (isSafenetEnabled && isSafenetConfigSuccess && chainSupportedBySafenet) {
         balanceQueries.push(
           getSafenetBalances(safeAddress)
             .then((safenetBalances) =>

@@ -1,10 +1,17 @@
+import { useHasSafenetFeature } from './useHasSafenetFeature'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useGetSafenetConfigQuery } from '@/store/safenet'
 import { sameAddress } from '@/utils/addresses'
+import { skipToken } from '@reduxjs/toolkit/query/react'
 
 const useIsSafenetEnabled = () => {
   const { safe } = useSafeInfo()
-  const { data: safenetConfig } = useGetSafenetConfigQuery()
+  const hasSafenetFeature = useHasSafenetFeature()
+  const { data: safenetConfig } = useGetSafenetConfigQuery(!hasSafenetFeature ? skipToken : undefined)
+
+  if (!hasSafenetFeature) {
+    return false
+  }
 
   return sameAddress(safe.guard?.value, safenetConfig?.guards[safe.chainId])
 }
