@@ -86,7 +86,7 @@ const enabledBulkExecuteBtnTooltip = 'All highlighted transactions will be inclu
 const bulkExecuteBtnStr = 'Bulk execute'
 
 const batchModalTitle = 'Batch'
-const swapOrder = 'Bulk transactions'
+const swapOrder = 'Swap order settlement'
 
 export const filterTypes = {
   incoming: 'Incoming',

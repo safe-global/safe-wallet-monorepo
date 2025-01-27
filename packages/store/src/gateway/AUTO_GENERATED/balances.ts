@@ -39,7 +39,7 @@ export type BalancesGetSupportedFiatCodesV1ApiResponse = /** status 200  */ stri
 export type BalancesGetSupportedFiatCodesV1ApiArg = void
 export type Token = {
   address: string
-  decimals?: number | null
+  decimals?: number
   logoUri: string
   name: string
   symbol: string

@@ -27,12 +27,14 @@ const recipientAlert = '[data-testid="recipient-alert"]'
 const groupedItems = '[data-testid="grouped-items"]'
 const inputCurrencyPreview = '[id="input-currency-preview"]'
 const outputCurrencyPreview = '[id="output-currency-preview"]'
+const outputCurrencyTitle = (title) => `span[title*='${title}']`
 const reviewTwapBtn = '[id="do-trade-button"]'
 export const unlockOrdersBtn = '[id="unlock-advanced-orders-btn"]'
 
 const swapStrBtn = 'Swap'
 const twapStrBtn = 'TWAP'
 const confirmSwapStr = 'Confirm Swap'
+const swapAnywayStrBtn = 'Swap anyway'
 const maxStrBtn = 'Max'
 const numberOfPartsStr = /No\.? of parts/
 const sellAmountStr = 'Sell amount'
@@ -187,6 +189,15 @@ export function clickOnSwapBtn() {
 }
 
 export function clickOnReviewTwapBtn() {
+  cy.get('button')
+    .contains(swapAnywayStrBtn)
+    .should(() => {})
+    .then(($button) => {
+      if (!$button.length) {
+        return
+      }
+      cy.wrap($button).click()
+    })
   cy.get(reviewTwapBtn).click()
 }
 
@@ -478,7 +489,11 @@ export function getTwapInitialData() {
     .wrap(null)
     .then(() => {
       cy.get(inputCurrencyInput).within(() => {
-        cy.get('input')
+        cy.get('input', { timeout: 10000 })
+          .should(($input) => {
+            const value = parseFloat($input.val())
+            expect(value).to.be.greaterThan(0)
+          })
           .invoke('val')
           .then((value) => {
             formData.inputToken = value
@@ -486,7 +501,11 @@ export function getTwapInitialData() {
       })
 
       cy.get(outputCurrencyInput).within(() => {
-        cy.get('input')
+        cy.get('input', { timeout: 10000 })
+          .should(($input) => {
+            const value = parseFloat($input.val())
+            expect(value).to.be.greaterThan(0)
+          })
           .invoke('val')
           .then((value) => {
             formData.outputToken = value
@@ -568,7 +587,8 @@ export function getTwapInitialData() {
 export function checkTwapValuesInReviewScreen(formData) {
   cy.get(inputCurrencyPreview).should('contain', formData.inputToken)
   cy.get(inputCurrencyPreview).should('contain', formData.inputTokenName)
-  cy.get(outputCurrencyPreview).should('contain', formData.outputToken)
+  cy.get(outputCurrencyTitle(formData.outputToken)).should('exist')
+
   cy.get(outputCurrencyPreview).should('contain', formData.outputTokenName)
 
   cy.get('span')

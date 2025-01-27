@@ -14,6 +14,10 @@ const injectedRtkApi = api
         query: (queryArg) => ({ url: `/v1/owners/${queryArg.ownerAddress}/safes` }),
         providesTags: ['owners'],
       }),
+      ownersGetAllSafesByOwnerV2: build.query<OwnersGetAllSafesByOwnerV2ApiResponse, OwnersGetAllSafesByOwnerV2ApiArg>({
+        query: (queryArg) => ({ url: `/v2/owners/${queryArg.ownerAddress}/safes` }),
+        providesTags: ['owners'],
+      }),
     }),
     overrideExisting: false,
   })
@@ -27,7 +31,17 @@ export type OwnersGetAllSafesByOwnerV1ApiResponse = /** status 200  */ SafeList
 export type OwnersGetAllSafesByOwnerV1ApiArg = {
   ownerAddress: string
 }
+export type OwnersGetAllSafesByOwnerV2ApiResponse = /** status 200  */ {
+  [key: string]: string[]
+}
+export type OwnersGetAllSafesByOwnerV2ApiArg = {
+  ownerAddress: string
+}
 export type SafeList = {
   safes: string[]
 }
-export const { useOwnersGetSafesByOwnerV1Query, useOwnersGetAllSafesByOwnerV1Query } = injectedRtkApi
+export const {
+  useOwnersGetSafesByOwnerV1Query,
+  useOwnersGetAllSafesByOwnerV1Query,
+  useOwnersGetAllSafesByOwnerV2Query,
+} = injectedRtkApi

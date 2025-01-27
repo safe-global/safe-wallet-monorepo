@@ -7,6 +7,7 @@ import {
   SwapTransferTransactionInfo,
   ModuleExecutionInfo,
   MultisigExecutionInfo,
+  Transaction,
 } from './AUTO_GENERATED/transactions'
 import { SafeOverview } from './AUTO_GENERATED/safes'
 

@@ -24,10 +24,15 @@ export default {
       },
       infoPlist: {
         NSFaceIDUsageDescription: 'Enabling Face ID allows you to create/access secure keys.',
+        UIBackgroundModes: ['remote-notification'],
       },
       supportsTablet: true,
       appleTeamId: 'MXRS32BBL4',
       bundleIdentifier: IS_DEV ? 'global.safe.mobileapp.dev' : 'global.safe.mobileapp',
+      entitlements: {
+        'aps-environment': 'production',
+      },
+      googleServicesFile: process.env.GOOGLE_SERVICES_PLIST ?? './GoogleService-Info.plist',
     },
     android: {
       adaptiveIcon: {
@@ -36,6 +41,7 @@ export default {
         monochromeImage: './assets/images/monochrome-icon.png',
       },
       package: IS_DEV ? 'global.safe.mobileapp.dev' : 'global.safe.mobileapp',
+      googleServicesFile: process.env.GOOGLE_SERVICES_JSON ?? './google-services.json',
     },
     web: {
       bundler: 'metro',
@@ -63,6 +69,16 @@ export default {
         },
       ],
       ['./expo-plugins/withDrawableAssets.js', './assets/android/drawable'],
+      [
+        'expo-build-properties',
+        {
+          ios: {
+            useFrameworks: 'static',
+          },
+        },
+      ],
+      '@react-native-firebase/app',
+      '@react-native-firebase/messaging',
     ],
     experiments: {
       typedRoutes: true,
