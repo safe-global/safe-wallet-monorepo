@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useCallback } from 'react'
 import FCMService from '@/src/services/notifications/FCMService'
 import { useAppSelector, useAppDispatch } from '@/src/store/hooks'
 import {
@@ -12,14 +12,16 @@ import {
 import NotificationsService from '@/src/services/notifications/NotificationService'
 import { FirebaseMessagingTypes } from '@react-native-firebase/messaging'
 import Logger from '@/src/utils/logger'
+import { router } from 'expo-router'
 
 interface NotificationsProps {
   isAppNotificationEnabled: boolean
   fcmToken: string | null
   remoteMessages: FirebaseMessagingTypes.RemoteMessage[]
+  enableNotifications: () => void
 }
 
-const useNotifications = (): NotificationsProps => {
+const useNotifications = (isOnboarding?: boolean): NotificationsProps => {
   const dispatch = useAppDispatch()
   /**
    * We need to check if the user has enabled notifications for the device in order to keep listening for messages
@@ -36,7 +38,7 @@ const useNotifications = (): NotificationsProps => {
   const promptAttempts = useAppSelector(selectPromptAttempts)
   const lastTimePromptAttempted = useAppSelector(selectLastTimePromptAttempted)
 
-  useEffect(() => {
+  const enableNotifications = useCallback(() => {
     const checkNotifications = async () => {
       const isDeviceNotificationEnabled = await NotificationsService.isDeviceNotificationEnabled()
       if (!isDeviceNotificationEnabled) {
@@ -55,6 +57,11 @@ const useNotifications = (): NotificationsProps => {
           if (isAppNotificationEnabled) {
             dispatch(toggleAppNotifications(false))
           }
+
+          if (isOnboarding) {
+            router.navigate('/(tabs)')
+          }
+
           return
         }
 
@@ -83,7 +90,7 @@ const useNotifications = (): NotificationsProps => {
     checkNotifications()
   }, [isAppNotificationEnabled])
 
-  return { isAppNotificationEnabled, fcmToken, remoteMessages }
+  return { enableNotifications, isAppNotificationEnabled, fcmToken, remoteMessages }
 }
 
 export default useNotifications
