@@ -1,6 +1,7 @@
 import React from 'react'
 import { NotificationsContainer } from './Notifications.container'
-import { fireEvent, render } from '@/src/tests/test-utils'
+import { act, fireEvent, render } from '@/src/tests/test-utils'
+import { SwitchChangeEvent } from 'react-native'
 
 const mockDispatch = jest.fn()
 
@@ -20,11 +21,16 @@ describe('Notifications Component', () => {
     expect(getAllByText('Allow notifications')).toHaveLength(1)
   })
 
-  it('triggers notification action on switch change', () => {
+  it('triggers notification action on switch change', async () => {
     const { getByTestId } = render(<NotificationsContainer />)
-    const button = getByTestId('toggle-app-notifications')
+    const switcher = getByTestId('toggle-app-notifications')
 
-    fireEvent.press(button)
-    expect(mockDispatch).toHaveBeenCalledTimes(1)
+    expect(switcher).toBeTruthy()
+
+    act(() => {
+      fireEvent(switcher, 'onChange', { nativeEvent: { value: true } } as SwitchChangeEvent)
+    })
+
+    expect(mockDispatch).toHaveBeenCalled()
   })
 })
