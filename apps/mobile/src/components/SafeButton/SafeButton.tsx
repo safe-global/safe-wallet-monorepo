@@ -5,6 +5,7 @@ import { styled, Text, View } from 'tamagui'
 interface SafeButtonProps {
   onPress: () => void
   label: string
+  variant?: 'primary' | 'secondary'
 }
 
 export const StyledButtonWrapper = styled(View, {
@@ -14,11 +15,15 @@ export const StyledButtonWrapper = styled(View, {
   borderRadius: 8,
 })
 
-export function SafeButton({ onPress, label }: SafeButtonProps) {
+export function SafeButton({ onPress, label, variant = 'primary' }: SafeButtonProps) {
+  const variantStyles =
+    variant === 'primary'
+      ? { backgroundColor: '$primary', fontColor: '$background' }
+      : { backgroundColor: 'inherit', fontColor: '$primary' }
   return (
     <TouchableOpacity onPress={onPress}>
-      <StyledButtonWrapper backgroundColor="$primary">
-        <Text fontSize="$4" fontWeight={600} color="$background">
+      <StyledButtonWrapper backgroundColor={variantStyles.backgroundColor}>
+        <Text fontSize="$4" fontWeight={600} color={variantStyles.fontColor}>
           {label}
         </Text>
       </StyledButtonWrapper>
