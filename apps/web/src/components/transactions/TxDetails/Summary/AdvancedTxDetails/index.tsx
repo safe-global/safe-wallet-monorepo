@@ -42,25 +42,10 @@ export const AdvancedTxDetails = ({
 
   const { detailedExecutionInfo, txData } = txDetails
 
-  let safeTxData: SafeTransactionData | undefined = undefined
-  let confirmations, baseGas, gasPrice, gasToken, refundReceiver, safeTxGas, nonce
+  let confirmations, baseGas, gasPrice, gasToken, refundReceiver, safeTxGas
   if (isMultisigDetailedExecutionInfo(detailedExecutionInfo)) {
-    ;({ confirmations, baseGas, gasPrice, gasToken, safeTxGas, nonce } = detailedExecutionInfo)
+    ;({ confirmations, baseGas, gasPrice, gasToken, safeTxGas } = detailedExecutionInfo)
     refundReceiver = detailedExecutionInfo.refundReceiver?.value
-    if (txData) {
-      safeTxData = {
-        to: txData.to.value,
-        data: txData.hexData ?? '0x',
-        value: txData.value ?? '0',
-        operation: txData.operation as number,
-        baseGas,
-        gasPrice,
-        gasToken,
-        nonce,
-        refundReceiver,
-        safeTxGas,
-      }
-    }
   }
 
   const isCustom = isCustomTxInfo(txDetails.txInfo)
