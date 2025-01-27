@@ -6,7 +6,7 @@ import { useQuery } from '@tanstack/react-query'
 function useCurrentWalletHasSuperChainSmartAccount() {
   const wallet = useWallet()
   const { getReadOnlySuperChainSmartAccount } = useSuperChainAccount()
-  const { data, isLoading, refetch } = useQuery({
+  const { data, isLoading, refetch, isRefetching } = useQuery({
     queryKey: ['checkSuperAccount'],
     queryFn: async () => {
       if (!wallet?.address) return
@@ -20,7 +20,7 @@ function useCurrentWalletHasSuperChainSmartAccount() {
     enabled: !!wallet?.address,
   })
 
-  return { ...data, isLoading, refetch }
+  return { ...data, isLoading, refetch, isRefetching }
 }
 
 export default useCurrentWalletHasSuperChainSmartAccount

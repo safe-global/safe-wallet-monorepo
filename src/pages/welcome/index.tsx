@@ -16,7 +16,7 @@ const Welcome: NextPage = () => {
         query: { safe: superChainSmartAccount },
       })
     }
-  }, [hasSuperChainSmartAccount])
+  }, [hasSuperChainSmartAccount, superChainSmartAccount])
 
   return (
     <>
