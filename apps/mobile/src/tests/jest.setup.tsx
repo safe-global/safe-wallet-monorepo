@@ -77,6 +77,59 @@ jest.mock('redux-persist', () => {
 jest.mock('redux-devtools-expo-dev-plugin', () => ({
   default: () => jest.fn(),
 }))
+
+jest.mock('@react-native-firebase/messaging', () => {
+  const module = () => {
+    return {
+      getToken: jest.fn(() => Promise.resolve('fcmToken')),
+      deleteToken: jest.fn(() => Promise.resolve()),
+      subscribeToTopic: jest.fn(),
+      unsubscribeFromTopic: jest.fn(),
+      hasPermission: jest.fn(() => Promise.resolve(module.AuthorizationStatus.AUTHORIZED)),
+      requestPermission: jest.fn(() => Promise.resolve(module.AuthorizationStatus.AUTHORIZED)),
+      setBackgroundMessageHandler: jest.fn(() => Promise.resolve()),
+      isDeviceRegisteredForRemoteMessages: jest.fn(() => Promise.resolve(false)),
+      registerDeviceForRemoteMessages: jest.fn(() => Promise.resolve('registered')),
+      unregisterDeviceForRemoteMessages: jest.fn(() => Promise.resolve('unregistered')),
+      onMessage: jest.fn(),
+      onTokenRefresh: jest.fn(),
+    }
+  }
+
+  module.AuthorizationStatus = {
+    NOT_DETERMINED: -1,
+    DENIED: 0,
+    AUTHORIZED: 1,
+    PROVISIONAL: 2,
+  }
+
+  return module
+})
+
+jest.mock('@notifee/react-native', () => {
+  const notifee = {
+    getInitialNotification: jest.fn().mockResolvedValue(null),
+    displayNotification: jest.fn().mockResolvedValue({}),
+    onForegroundEvent: jest.fn().mockReturnValue(jest.fn()),
+    onBackgroundEvent: jest.fn(),
+    createChannelGroup: jest.fn().mockResolvedValue('channel-group-id'),
+    createChannel: jest.fn().mockResolvedValue({}),
+    AndroidImportance: {
+      NONE: 0,
+      MIN: 1,
+      LOW: 2,
+      DEFAULT: 3,
+      HIGH: 4,
+    },
+  }
+
+  return {
+    ...jest.requireActual('@notifee/react-native/dist/types/Notification'),
+    __esModule: true,
+    default: notifee,
+  }
+})
+
 jest.mock('@gorhom/bottom-sheet', () => {
   const reactNative = jest.requireActual('react-native')
   const { useState, forwardRef, useImperativeHandle } = jest.requireActual('react')
