@@ -10,7 +10,7 @@ import SidebarNavigation from '@/components/sidebar/SidebarNavigation'
 
 import ChainIndicator from '@/components/common/ChainIndicator'
 import MyAccounts from '@/features/myAccounts'
-import useIsSafenetEnabled from '@/hooks/useIsSafenetEnabled'
+import useIsSafenetEnabled from '@/features/safenet/hooks/useIsSafenetEnabled'
 import { OVERVIEW_EVENTS, trackEvent } from '@/services/analytics'
 import css from './styles.module.css'
 

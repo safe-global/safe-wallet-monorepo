@@ -1,8 +1,8 @@
-import { useHasSafenetFeature } from '@/features/safenet'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useGetSafenetConfigQuery } from '@/store/safenet'
 import { sameAddress } from '@/utils/addresses'
 import { skipToken } from '@reduxjs/toolkit/query/react'
+import { useHasSafenetFeature } from './useHasSafenetFeature'
 
 const useIsSafenetEnabled = () => {
   const { safe } = useSafeInfo()

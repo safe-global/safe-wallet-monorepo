@@ -11,7 +11,6 @@ import SignForm from './SignForm'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import ErrorMessage from '../ErrorMessage'
 import TxChecks from './TxChecks'
-import SafenetTxChecks from './SafenetTxChecks'
 import TxCard from '@/components/tx-flow/common/TxCard'
 import ConfirmationTitle, { ConfirmationTitleTypes } from '@/components/tx/SignOrExecuteForm/ConfirmationTitle'
 import { useAppSelector } from '@/store'
@@ -35,7 +34,10 @@ import { SignerForm } from './SignerForm'
 import { useSigner } from '@/hooks/wallets/useWallet'
 import { trackTxEvents } from './tracking'
 import { TxNoteForm, encodeTxNote } from '@/features/tx-notes'
-import useIsSafenetEnabled from '@/hooks/useIsSafenetEnabled'
+import useIsSafenetEnabled from '@/features/safenet/hooks/useIsSafenetEnabled'
+import dynamic from 'next/dynamic'
+
+const SafenetTxChecks = dynamic(() => import('@/features/safenet/components/SafenetTxChecks'))
 
 export type SubmitCallback = (txId: string, isExecuted?: boolean) => void
 
@@ -200,6 +202,7 @@ export const SignOrExecuteForm = ({
       <TxNoteForm isCreation={isCreation ?? false} onSubmit={onNoteSubmit} txDetails={props.txDetails} />
 
       <SignerForm willExecute={willExecute} />
+
       {isSafenetEnabled && safeTx && <SafenetTxChecks safeTx={safeTx} />}
 
       <TxCard>

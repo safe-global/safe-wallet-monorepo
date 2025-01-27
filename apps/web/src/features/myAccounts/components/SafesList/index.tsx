@@ -3,7 +3,7 @@ import MultiAccountItem from '@/features/myAccounts/components/AccountItems/Mult
 import SingleAccountItem from '@/features/myAccounts/components/AccountItems/SingleAccountItem'
 import type { SafeItem } from '@/features/myAccounts/hooks/useAllSafes'
 import type { MultiChainSafeItem } from '@/features/myAccounts/hooks/useAllSafesGrouped'
-import { useHasSafenetFeature } from '@/features/safenet'
+import { useHasSafenetFeature } from '@/features/safenet/hooks/useHasSafenetFeature'
 import { Collapse } from '@mui/material'
 import { TransitionGroup } from 'react-transition-group'
 

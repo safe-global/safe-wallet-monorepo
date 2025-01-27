@@ -1,5 +1,6 @@
 import { POLLING_INTERVAL } from '@/config/constants'
 import { getCounterfactualBalance } from '@/features/counterfactual/utils'
+import useIsSafenetEnabled from '@/features/safenet/hooks/useIsSafenetEnabled'
 import { useWeb3 } from '@/hooks/wallets/web3'
 import { Errors, logError } from '@/services/exceptions'
 import { useAppSelector } from '@/store'
@@ -13,7 +14,6 @@ import { useEffect, useMemo } from 'react'
 import useAsync, { type AsyncResult } from '../useAsync'
 import { useCurrentChain } from '../useChains'
 import useIntervalCounter from '../useIntervalCounter'
-import useIsSafenetEnabled from '../useIsSafenetEnabled'
 import useSafeInfo from '../useSafeInfo'
 
 export const useTokenListSetting = (): boolean | undefined => {
