@@ -6,10 +6,12 @@ import { useAppSelector } from '@/store'
 import { selectCurrency, selectUndeployedSafes, useGetMultipleSafeOverviewsQuery } from '@/store/slices'
 import { useAllSafesGrouped } from '@/features/myAccounts/hooks/useAllSafesGrouped'
 import { sameAddress } from '@/utils/addresses'
-import { useMemo } from 'react'
+import { useContext, useMemo } from 'react'
 import { getDeviatingSetups, getSafeSetups } from '@/features/multichain/utils/utils'
-import { Box, Typography } from '@mui/material'
+import { Box, Button, Stack, Typography } from '@mui/material'
 import ChainIndicator from '@/components/common/ChainIndicator'
+import { TxModalContext } from '@/components/tx-flow'
+import { SynchronizeSetupsFlow } from '../SynchronizeSignersFlow'
 
 const ChainIndicatorList = ({ chainIds }: { chainIds: string[] }) => {
   const { configs } = useChains()
@@ -54,20 +56,39 @@ export const InconsistentSignerSetupWarning = () => {
     () => getSafeSetups(multiChainGroupSafes, safeOverviews ?? [], undeployedSafes),
     [multiChainGroupSafes, safeOverviews, undeployedSafes],
   )
-  const deviatingSetups = getDeviatingSetups(safeSetups, currentChain?.chainId)
-  const deviatingChainIds = deviatingSetups.map((setup) => setup?.chainId)
+
+  const deviatingSetups = useMemo(
+    () => getDeviatingSetups(safeSetups, currentChain?.chainId),
+    [currentChain?.chainId, safeSetups],
+  )
+  const deviatingChainIds = useMemo(() => {
+    return deviatingSetups.map((setup) => setup?.chainId)
+  }, [deviatingSetups])
+
+  const { setTxFlow } = useContext(TxModalContext)
+
+  const onClick = () => {
+    setTxFlow(<SynchronizeSetupsFlow deviatingSetups={deviatingSetups} />)
+  }
 
   if (!isMultichainSafe || !deviatingChainIds.length) return
 
   return (
     <ErrorMessage level="warning" title="Signers are not consistent">
-      <Typography display="inline" mr={1}>
-        Signers are different on these networks of this account:
-      </Typography>
-      <ChainIndicatorList chainIds={deviatingChainIds} />
-      <Typography display="inline">
-        To manage your account easier and to prevent lose of funds, we recommend keeping the same signers.
-      </Typography>
+      <Stack direction="row" alignItems="center" spacing={1}>
+        <Box>
+          <Typography display="inline" mr={1}>
+            Signers are different on these networks of this account:
+          </Typography>
+          <ChainIndicatorList chainIds={deviatingChainIds} />
+          <Typography display="inline">
+            To manage your account easier and to prevent lose of funds, we recommend keeping the same signers.
+          </Typography>
+        </Box>
+        <Button sx={{ mt: 1 }} variant="contained" onClick={onClick}>
+          Synchronize
+        </Button>
+      </Stack>
     </ErrorMessage>
   )
 }
