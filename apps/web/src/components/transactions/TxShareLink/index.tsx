@@ -2,7 +2,7 @@ import type { ReactElement } from 'react'
 import { AppRoutes } from '@/config/routes'
 import { useRouter } from 'next/router'
 import Track from '@/components/common/Track'
-import type { AnalyticsEvent } from '@/services/analytics'
+import { TX_LIST_EVENTS } from '@/services/analytics'
 import React from 'react'
 import CopyTooltip from '@/components/common/CopyTooltip'
 import useOrigin from '@/hooks/useOrigin'
@@ -10,11 +10,11 @@ import useOrigin from '@/hooks/useOrigin'
 const TxShareLink = ({
   id,
   children,
-  event,
+  eventLabel,
 }: {
   id: string
   children: ReactElement
-  event: AnalyticsEvent
+  eventLabel: 'button' | 'share-block'
 }): ReactElement => {
   const router = useRouter()
   const { safe = '' } = router.query
@@ -22,7 +22,7 @@ const TxShareLink = ({
   const txUrl = useOrigin() + href
 
   return (
-    <Track {...event}>
+    <Track {...TX_LIST_EVENTS.COPY_DEEPLINK} label={eventLabel}>
       <CopyTooltip text={txUrl} initialToolTipText="Copy the transaction URL">
         {children}
       </CopyTooltip>

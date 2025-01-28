@@ -27,7 +27,7 @@ export function TxShareBlock({ txId }: { txId: string }): ReactElement | null {
         </AccordionDetails>
       </Accordion>
       <div className={css.copy}>
-        <TxShareLink id={txId} event={TX_LIST_EVENTS.COPY_SHARE_LINK}>
+        <TxShareLink id={txId} eventLabel="share-block">
           <Button
             variant="outlined"
             size="compact"
