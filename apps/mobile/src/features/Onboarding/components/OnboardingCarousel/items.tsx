@@ -102,16 +102,4 @@ export const items: CarouselItem[] = [
     description:
       'Sign and execute transactions securely from your mobile device. Ensuring your assets are protected, even on the move.',
   },
-  {
-    name: 'enable-notifications',
-    imagePosition: 'bottom',
-    title: (
-      <>
-        <H1 style={styles.textContainer} fontWeight={600}>
-          Stay in the loop with account activity
-        </H1>
-      </>
-    ),
-    description: 'Get notified when you receive assets, and when transactions require your action.',
-  },
 ]
