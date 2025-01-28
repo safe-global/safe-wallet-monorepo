@@ -50,9 +50,6 @@ export const AdvancedTxDetails = ({
 
   const isCustom = isCustomTxInfo(txDetails.txInfo)
 
-  console.log('txDetails', txDetails)
-  console.log('txData', txData)
-
   return (
     txData && (
       <>
@@ -82,23 +79,21 @@ export const AdvancedTxDetails = ({
 
             <Paper sx={{ backgroundColor: 'background.main', padding: 2 }}>
               <Stack spacing={0.5}>
-                <Grid container spacing={0.5}>
-                  <Grid color="primary.light" size={3} hidden={view === View.Raw}>
-                    Name
-                  </Grid>
-                  <Grid color="primary.light" size={view === View.Raw ? 12 : 9}>
-                    <Stack direction="row" justifyContent="space-between">
-                      <Stack direction="row" spacing={0.5}>
-                        <Typography variant="body1">Data</Typography>
-                        {txData.hexData && view === View.Raw && <CopyButton text={txData.hexData} />}
-                      </Stack>
-                      <ViewToggleButtonGroup value={view} onChange={changeView} />
-                    </Stack>
-                  </Grid>
-                </Grid>
-
                 {view === View.Decoded && (
                   <>
+                    <Grid container spacing={0.5}>
+                      <Grid color="primary.light" size={3}>
+                        Name
+                      </Grid>
+
+                      <Grid size={9}>
+                        <Stack direction="row" justifyContent="space-between">
+                          <Typography color="primary.light">Data</Typography>
+                          <ViewToggleButtonGroup value={view} onChange={changeView} />
+                        </Stack>
+                      </Grid>
+                    </Grid>
+
                     <AdvancedDetailsDataRow datatestid="tx-operation" title="Operation">
                       {`${txData.operation} (${Operation[txData.operation].toLowerCase()})`}
                     </AdvancedDetailsDataRow>
@@ -144,21 +139,32 @@ export const AdvancedTxDetails = ({
                 )}
 
                 {view === View.Raw && txData.hexData && (
-                  <Typography
-                    variant="body2"
-                    color="primary.light"
-                    fontFamily="monospace"
-                    sx={{
-                      overflowWrap: 'break-word',
-                      overflow: 'hidden',
-                      display: '-webkit-box',
-                      WebkitLineClamp: 5,
-                      lineClamp: 5,
-                      WebkitBoxOrient: 'vertical',
-                    }}
-                  >
-                    {txData.hexData}
-                  </Typography>
+                  <>
+                    <Stack direction="row" justifyContent="space-between">
+                      <Stack direction="row" spacing={0.5} alignItems="center" height="fit-content">
+                        <Typography color="primary.light">Data</Typography>
+                        <CopyButton text={txData.hexData} />
+                      </Stack>
+
+                      <ViewToggleButtonGroup value={view} onChange={changeView} />
+                    </Stack>
+
+                    <Typography
+                      variant="body2"
+                      color="primary.light"
+                      fontFamily="monospace"
+                      sx={{
+                        overflowWrap: 'break-word',
+                        overflow: 'hidden',
+                        display: '-webkit-box',
+                        WebkitLineClamp: 5,
+                        lineClamp: 5,
+                        WebkitBoxOrient: 'vertical',
+                      }}
+                    >
+                      {txData.hexData}
+                    </Typography>
+                  </>
                 )}
               </Stack>
             </Paper>
