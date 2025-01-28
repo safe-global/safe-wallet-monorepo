@@ -1,6 +1,7 @@
 import { createTamagui } from 'tamagui'
 import { createDmSansFont } from '@tamagui/font-dm-sans'
 import { badgeTheme } from '@/src/components/Badge/theme'
+import { badgeTheme as NetworkBadgeTheme } from '@/src/components/NetworkBadge/theme'
 import { tokens } from '@/src/theme/tokens'
 import { createAnimations } from '@tamagui/animations-moti'
 import { inputTheme } from '../components/SafeInput/theme'
@@ -16,10 +17,12 @@ export const config = createTamagui({
   fonts: {
     body: DmSansFont,
     heading: DmSansFont,
+    button: DmSansFont,
   },
   themes: {
     light: {
       background: tokens.color.backgroundMainLight,
+      backgroundSecondary: tokens.color.backgroundSecondaryLight,
       backgroundPaper: tokens.color.backgroundPaperLight,
       backgroundHover: tokens.color.backgroundLightLight,
       backgroundPress: tokens.color.primaryLightLight,
@@ -33,7 +36,11 @@ export const config = createTamagui({
       colorSecondary: tokens.color.textSecondaryLight,
       borderLight: tokens.color.borderLightLight,
       error: tokens.color.errorMainLight,
+      success: tokens.color.successMainLight,
       errorDark: tokens.color.errorDarkDark,
+      errorLight: tokens.color.errorLightLight,
+      errorBackground: tokens.color.errorBackgroundLight,
+      contrast: tokens.color.textContrastLight,
     },
     light_label: {
       color: tokens.color.textSecondaryLight,
@@ -51,6 +58,7 @@ export const config = createTamagui({
     },
     ...badgeTheme,
     ...inputTheme,
+    ...NetworkBadgeTheme,
     light_success: {
       background: tokens.color.successBackgroundLight,
       color: tokens.color.successMainLight,
@@ -96,6 +104,7 @@ export const config = createTamagui({
     },
     dark: {
       background: tokens.color.backgroundDefaultDark,
+      backgroundSecondary: tokens.color.backgroundSecondaryDark,
       backgroundPaper: tokens.color.backgroundPaperDark,
       backgroundHover: tokens.color.backgroundLightDark,
       backgroundPress: tokens.color.primaryLightDark,
@@ -110,6 +119,10 @@ export const config = createTamagui({
       colorSecondary: tokens.color.textSecondaryDark,
       error: tokens.color.errorMainDark,
       errorDark: tokens.color.errorDarkDark,
+      errorLight: tokens.color.errorLightDark,
+      errorBackground: tokens.color.errorBackgroundDark,
+      success: tokens.color.successMainLight,
+      contrast: tokens.color.textContrastDark,
     },
   },
   tokens,

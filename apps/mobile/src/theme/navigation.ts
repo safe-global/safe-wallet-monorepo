@@ -19,7 +19,7 @@ export const NavLightTheme: Theme = {
   dark: false,
   colors: {
     primary: getTokenValue('$color.primaryMainLight'),
-    background: getTokenValue('$color.backgroundMainLight'),
+    background: getTokenValue('$color.backgroundDefaultLight'),
     card: getTokenValue('$color.backgroundMainLight'),
     text: getTokenValue('$color.textPrimaryLight'),
     border: getTokenValue('$color.backgroundMainLight'),
