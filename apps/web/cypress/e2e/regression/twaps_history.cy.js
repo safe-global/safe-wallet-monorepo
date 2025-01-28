@@ -20,8 +20,7 @@ describe('Twaps history tests', { defaultCommandTimeout: 30000 }, () => {
     staticSafes = await getSafes(CATEGORIES.static)
   })
 
-  // Blocked by bug on UI
-  it.skip('Verify order deails', () => {
+  it('Verify order deails', { defaultCommandTimeout: 30000 }, () => {
     cy.visit(constants.swapUrl + staticSafes.SEP_STATIC_SAFE_27)
     main.waitForHistoryCallToComplete()
     wallet.connectSigner(signer)

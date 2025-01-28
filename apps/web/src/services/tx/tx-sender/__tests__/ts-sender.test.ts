@@ -22,7 +22,6 @@ import {
   type JsonRpcProvider,
   type JsonRpcSigner,
 } from 'ethers'
-import { faker } from '@faker-js/faker'
 import * as safeContracts from '@/services/contracts/safeContracts'
 
 import * as web3 from '@/hooks/wallets/web3'
@@ -516,13 +515,6 @@ describe('txSender', () => {
 
   describe('dispatchBatchExecutionRelay', () => {
     it('should relay a batch execution', async () => {
-      const gasLimit = faker.number.bigInt()
-      jest.spyOn(web3, 'getWeb3ReadOnly').mockImplementation(() => {
-        return {
-          estimateGas: jest.fn(() => Promise.resolve(gasLimit)),
-        } as unknown as JsonRpcProvider
-      })
-
       const mockMultisendAddress = zeroPadValue('0x1234', 20)
       const safeAddress = toBeHex('0x567', 20)
 

@@ -12,7 +12,7 @@ export const SurplusFee = ({
   const bps = getOrderFeeBps(order)
   const { executedFee, executedFeeToken } = order
 
-  if (executedFee === null || executedFee === '0') {
+  if (!executedFee || executedFee === '0') {
     return null
   }
 

@@ -154,6 +154,8 @@ export const mockSwapTransfer: SwapTransferTransactionInfo = {
   buyAmount: '50000000000000000',
   executedSellAmount: '50000000000000000',
   executedBuyAmount: '50000000000000000',
+  executedFee: '1000000000000000',
+  executedFeeToken: fakeToken,
   sellToken: fakeToken2,
   buyToken: fakeToken,
   explorerUrl: 'http://google.com',
