@@ -12,6 +12,8 @@ import useSafeInfo from '../useSafeInfo'
 import type { ExtendedSafeInfo } from '@/store/safeInfoSlice'
 import { POLLING_INTERVAL } from '@/config/constants'
 
+const DEFAULT_BALANCES = { items: [], fiatTotal: '' }
+
 export const useTokenListSetting = (): boolean | undefined => {
   const chain = useCurrentChain()
   const settings = useAppSelector(selectSettings)
@@ -42,7 +44,7 @@ export const useRtkBalances = () => {
   const currency = useAppSelector(selectCurrency)
   const isTrustedTokenList = useTokenListSetting()
   const { safe, safeAddress, safeLoaded } = useSafeInfo()
-  const isReady = safeLoaded && isTrustedTokenList !== undefined
+  const isReady = safeLoaded && safe.deployed && isTrustedTokenList !== undefined
 
   const { data, isLoading, error } = useBalancesGetBalancesV1Query(
     {
@@ -62,7 +64,7 @@ export const useRtkBalances = () => {
 
   return useMemo(
     () => ({
-      balances: data || cfData || { items: [], fiatTotal: '' },
+      balances: data || cfData || DEFAULT_BALANCES,
       error: error ? new Error('message' in error ? error.message : 'Failed to load balances') : undefined,
       loading: isLoading,
     }),
