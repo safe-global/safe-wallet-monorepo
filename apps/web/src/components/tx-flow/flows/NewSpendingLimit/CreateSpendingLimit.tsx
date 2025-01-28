@@ -18,7 +18,7 @@ import { validateAmount, validateDecimalLength } from '@/utils/validation'
 export const _validateSpendingLimit = (val: string, decimals?: number | null) => {
   // Allowance amount is uint96 https://github.com/safe-global/safe-modules/blob/master/allowances/contracts/AlowanceModule.sol#L52
   try {
-    const amount = parseUnits(val, decimals ?? 0)
+    const amount = parseUnits(val, decimals ?? 'Gwei')
     AbiCoder.defaultAbiCoder().encode(['int96'], [amount])
   } catch (e) {
     return Number(val) > 1 ? 'Amount is too big' : 'Amount is too small'

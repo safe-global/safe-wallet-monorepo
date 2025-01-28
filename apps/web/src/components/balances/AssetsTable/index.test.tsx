@@ -8,6 +8,7 @@ import { toBeHex } from 'ethers'
 import { useState } from 'react'
 import AssetsTable from '.'
 import { COLLAPSE_TIMEOUT_MS } from './useHideAssets'
+import * as balancesQueries from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 
 const getParentRow = (element: HTMLElement | null) => {
   while (element !== null) {
@@ -48,44 +49,43 @@ describe('AssetsTable', () => {
       '5': [toBeHex('0x2', 20), toBeHex('0x3', 20)],
     }
     const mockBalances = {
-      data: {
-        fiatTotal: '300',
-        items: [
-          {
-            balance: safeParseUnits('100', 18)!.toString(),
-            fiatBalance: '100',
-            fiatConversion: '1',
-            tokenInfo: {
-              address: toBeHex('0x2', 20),
-              decimals: 18,
-              logoUri: '',
-              name: 'DAI',
-              symbol: 'DAI',
-              type: TokenType.ERC20,
-            },
+      fiatTotal: '300',
+      items: [
+        {
+          balance: safeParseUnits('100', 18)!.toString(),
+          fiatBalance: '100',
+          fiatConversion: '1',
+          tokenInfo: {
+            address: toBeHex('0x2', 20),
+            decimals: 18,
+            logoUri: '',
+            name: 'DAI',
+            symbol: 'DAI',
+            type: TokenType.ERC20,
           },
-          {
-            balance: safeParseUnits('200', 18)!.toString(),
-            fiatBalance: '200',
-            fiatConversion: '1',
-            tokenInfo: {
-              address: toBeHex('0x3', 20),
-              decimals: 18,
-              logoUri: '',
-              name: 'SPAM',
-              symbol: 'SPM',
-              type: TokenType.ERC20,
-            },
+        },
+        {
+          balance: safeParseUnits('200', 18)!.toString(),
+          fiatBalance: '200',
+          fiatConversion: '1',
+          tokenInfo: {
+            address: toBeHex('0x3', 20),
+            decimals: 18,
+            logoUri: '',
+            name: 'SPAM',
+            symbol: 'SPM',
+            type: TokenType.ERC20,
           },
-        ],
-      },
-      loading: false,
-      error: undefined,
+        },
+      ],
     }
+
+    jest
+      .spyOn(balancesQueries, 'useBalancesGetBalancesV1Query')
+      .mockImplementation(() => ({ data: mockBalances, isLoading: false, error: undefined, refetch: jest.fn() }))
 
     const result = render(<TestComponent />, {
       initialReduxState: {
-        balances: mockBalances,
         settings: {
           currency: 'usd',
           hiddenTokens: mockHiddenAssets,
@@ -154,44 +154,39 @@ describe('AssetsTable', () => {
       '5': [toBeHex('0x2', 20), toBeHex('0x3', 20), toBeHex('0xdead', 20)],
     }
     const mockBalances = {
-      data: {
-        fiatTotal: '300',
-        items: [
-          {
-            balance: safeParseUnits('100', 18)!.toString(),
-            fiatBalance: '100',
-            fiatConversion: '1',
-            tokenInfo: {
-              address: toBeHex('0x2', 20),
-              decimals: 18,
-              logoUri: '',
-              name: 'DAI',
-              symbol: 'DAI',
-              type: TokenType.ERC20,
-            },
+      fiatTotal: '300',
+      items: [
+        {
+          balance: safeParseUnits('100', 18)!.toString(),
+          fiatBalance: '100',
+          fiatConversion: '1',
+          tokenInfo: {
+            address: toBeHex('0x2', 20),
+            decimals: 18,
+            logoUri: '',
+            name: 'DAI',
+            symbol: 'DAI',
+            type: TokenType.ERC20,
           },
-          {
-            balance: safeParseUnits('200', 18)!.toString(),
-            fiatBalance: '200',
-            fiatConversion: '1',
-            tokenInfo: {
-              address: toBeHex('0x3', 20),
-              decimals: 18,
-              logoUri: '',
-              name: 'SPAM',
-              symbol: 'SPM',
-              type: TokenType.ERC20,
-            },
+        },
+        {
+          balance: safeParseUnits('200', 18)!.toString(),
+          fiatBalance: '200',
+          fiatConversion: '1',
+          tokenInfo: {
+            address: toBeHex('0x3', 20),
+            decimals: 18,
+            logoUri: '',
+            name: 'SPAM',
+            symbol: 'SPM',
+            type: TokenType.ERC20,
           },
-        ],
-      },
-      loading: false,
-      error: undefined,
+        },
+      ],
     }
 
     const result = render(<TestComponent />, {
       initialReduxState: {
-        balances: mockBalances,
         settings: {
           currency: 'usd',
           hiddenTokens: mockHiddenAssets,
@@ -218,6 +213,10 @@ describe('AssetsTable', () => {
         },
       },
     })
+
+    jest
+      .spyOn(balancesQueries, 'useBalancesGetBalancesV1Query')
+      .mockImplementation(() => ({ data: mockBalances, isLoading: false, error: undefined, refetch: jest.fn() }))
 
     const toggleHiddenButton = result.getByTestId('showHidden')
 
@@ -256,44 +255,39 @@ describe('AssetsTable', () => {
       '5': [],
     }
     const mockBalances = {
-      data: {
-        fiatTotal: '300',
-        items: [
-          {
-            balance: safeParseUnits('100', 18)!.toString(),
-            fiatBalance: '100',
-            fiatConversion: '1',
-            tokenInfo: {
-              address: toBeHex('0x2', 20),
-              decimals: 18,
-              logoUri: '',
-              name: 'DAI',
-              symbol: 'DAI',
-              type: TokenType.ERC20,
-            },
+      fiatTotal: '300',
+      items: [
+        {
+          balance: safeParseUnits('100', 18)!.toString(),
+          fiatBalance: '100',
+          fiatConversion: '1',
+          tokenInfo: {
+            address: toBeHex('0x2', 20),
+            decimals: 18,
+            logoUri: '',
+            name: 'DAI',
+            symbol: 'DAI',
+            type: TokenType.ERC20,
           },
-          {
-            balance: safeParseUnits('200', 18)!.toString(),
-            fiatBalance: '200',
-            fiatConversion: '1',
-            tokenInfo: {
-              address: toBeHex('0x3', 20),
-              decimals: 18,
-              logoUri: '',
-              name: 'SPAM',
-              symbol: 'SPM',
-              type: TokenType.ERC20,
-            },
+        },
+        {
+          balance: safeParseUnits('200', 18)!.toString(),
+          fiatBalance: '200',
+          fiatConversion: '1',
+          tokenInfo: {
+            address: toBeHex('0x3', 20),
+            decimals: 18,
+            logoUri: '',
+            name: 'SPAM',
+            symbol: 'SPM',
+            type: TokenType.ERC20,
           },
-        ],
-      },
-      loading: false,
-      error: undefined,
+        },
+      ],
     }
 
     const result = render(<TestComponent />, {
       initialReduxState: {
-        balances: mockBalances,
         settings: {
           currency: 'usd',
           hiddenTokens: mockHiddenAssets,
@@ -320,6 +314,10 @@ describe('AssetsTable', () => {
         },
       },
     })
+
+    jest
+      .spyOn(balancesQueries, 'useBalancesGetBalancesV1Query')
+      .mockImplementation(() => ({ data: mockBalances, isLoading: false, error: undefined, refetch: jest.fn() }))
 
     // Initially we see all tokens
     expect(result.queryByText('100 DAI')).not.toBeNull()
@@ -355,44 +353,39 @@ describe('AssetsTable', () => {
       '5': [],
     }
     const mockBalances = {
-      data: {
-        fiatTotal: '300',
-        items: [
-          {
-            balance: safeParseUnits('100', 18)!.toString(),
-            fiatBalance: '100',
-            fiatConversion: '1',
-            tokenInfo: {
-              address: toBeHex('0x2', 20),
-              decimals: 18,
-              logoUri: '',
-              name: 'DAI',
-              symbol: 'DAI',
-              type: TokenType.ERC20,
-            },
+      fiatTotal: '300',
+      items: [
+        {
+          balance: safeParseUnits('100', 18)!.toString(),
+          fiatBalance: '100',
+          fiatConversion: '1',
+          tokenInfo: {
+            address: toBeHex('0x2', 20),
+            decimals: 18,
+            logoUri: '',
+            name: 'DAI',
+            symbol: 'DAI',
+            type: TokenType.ERC20,
           },
-          {
-            balance: safeParseUnits('200', 18)!.toString(),
-            fiatBalance: '200',
-            fiatConversion: '1',
-            tokenInfo: {
-              address: toBeHex('0x3', 20),
-              decimals: 18,
-              logoUri: '',
-              name: 'SPAM',
-              symbol: 'SPM',
-              type: TokenType.ERC20,
-            },
+        },
+        {
+          balance: safeParseUnits('200', 18)!.toString(),
+          fiatBalance: '200',
+          fiatConversion: '1',
+          tokenInfo: {
+            address: toBeHex('0x3', 20),
+            decimals: 18,
+            logoUri: '',
+            name: 'SPAM',
+            symbol: 'SPM',
+            type: TokenType.ERC20,
           },
-        ],
-      },
-      loading: false,
-      error: undefined,
+        },
+      ],
     }
 
     const result = render(<TestComponent />, {
       initialReduxState: {
-        balances: mockBalances,
         settings: {
           currency: 'usd',
           hiddenTokens: mockHiddenAssets,
@@ -419,6 +412,10 @@ describe('AssetsTable', () => {
         },
       },
     })
+
+    jest
+      .spyOn(balancesQueries, 'useBalancesGetBalancesV1Query')
+      .mockImplementation(() => ({ data: mockBalances, isLoading: false, error: undefined, refetch: jest.fn() }))
 
     const toggleHiddenButton = result.getByTestId('showHidden')
 
