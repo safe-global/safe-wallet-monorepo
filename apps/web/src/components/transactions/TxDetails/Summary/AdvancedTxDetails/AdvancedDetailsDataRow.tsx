@@ -16,7 +16,9 @@ export const AdvancedDetailsDataRow = ({
 
   return (
     <Grid data-testid={datatestid} container spacing={0.5}>
-      <Grid size={3}>{title}</Grid>
+      <Grid size={3} overflow="hidden" textOverflow="ellipsis" whiteSpace="nowrap">
+        {title}
+      </Grid>
       <Grid size={9}>{children}</Grid>
     </Grid>
   )
