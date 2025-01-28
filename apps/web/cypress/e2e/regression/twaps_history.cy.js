@@ -14,30 +14,41 @@ let staticSafes = []
 let iframeSelector
 
 const swapsHistory = swaps_data.type.history
+const swapOrder = swaps_data.type.orderDetails
 
 describe('Twaps history tests', { defaultCommandTimeout: 30000 }, () => {
   before(async () => {
     staticSafes = await getSafes(CATEGORIES.static)
   })
 
-  it('Verify order deails', { defaultCommandTimeout: 30000 }, () => {
+  it('Verify order deails', { defaultCommandTimeout: 60000 }, () => {
+    const limitPrice = swaps.createRegex(swapOrder.DAIeqCOW, 'COW')
+    const widgetFee = swaps.getWidgetFee()
+    const slippage = swaps.getWidgetFee()
+
     cy.visit(constants.swapUrl + staticSafes.SEP_STATIC_SAFE_27)
     main.waitForHistoryCallToComplete()
     wallet.connectSigner(signer)
     iframeSelector = `iframe[src*="${constants.swapWidget}"]`
     swaps.acceptLegalDisclaimer()
-    cy.wait(4000)
     main.getIframeBody(iframeSelector).within(() => {
       swaps.switchToTwap()
       swaps.selectInputCurrency(swaps.swapTokens.cow)
       swaps.setInputValue(500)
-      cy.wait(5000)
       swaps.selectOutputCurrency(swaps.swapTokens.dai)
-      cy.wait(5000)
+      swaps.verifyReviewTwapBtnIsVisible()
       swaps.getTwapInitialData().then((formData) => {
+        cy.wrap(formData).as('twapFormData')
         swaps.clickOnReviewTwapBtn()
-        swaps.checkTwapValuesInReviewScreen(formData)
+        swaps.placeTwapOrder()
       })
+    })
+
+    cy.get('@twapFormData').then((formData) => {
+      swaps.checkTwapValuesInReviewScreen(formData)
+      cy.get('p').contains(swapsHistory.slippage).parent().next().contains(slippage)
+      cy.get('p').contains(swapsHistory.widget_fee).parent().next().contains(widgetFee)
+      cy.get('p').contains(swapsHistory.limitPrice).parent().next().contains(limitPrice)
     })
   })
 
