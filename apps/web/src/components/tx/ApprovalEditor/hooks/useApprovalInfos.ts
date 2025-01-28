@@ -74,7 +74,7 @@ export const useApprovalInfos = (payload: {
           const amountFormatted =
             UNLIMITED_APPROVAL_AMOUNT == approval.amount || UNLIMITED_PERMIT2_AMOUNT == approval.amount
               ? PSEUDO_APPROVAL_VALUES.UNLIMITED
-              : formatUnits(approval.amount, tokenInfo?.decimals)
+              : formatUnits(approval.amount, tokenInfo?.decimals ?? 0)
 
           return { ...approval, tokenInfo, amountFormatted }
         }),

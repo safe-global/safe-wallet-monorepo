@@ -26,7 +26,7 @@ export const createNewSpendingLimitTx = async (
   chainId: string,
   chain: ChainInfo | undefined,
   deployed: boolean,
-  tokenDecimals?: number,
+  tokenDecimals?: number | null,
   existingSpendingLimit?: SpendingLimitState,
 ) => {
   const sdk = getSafeSDK()
@@ -78,7 +78,7 @@ export const createNewSpendingLimitTx = async (
   const tx = createSetAllowanceTx(
     data.beneficiary,
     data.tokenAddress,
-    parseUnits(data.amount, tokenDecimals).toString(),
+    parseUnits(data.amount, tokenDecimals ?? undefined).toString(),
     parseInt(data.resetTime),
     data.resetTime !== '0' ? currentMinutes() - 30 : 0,
     spendingLimitAddress,

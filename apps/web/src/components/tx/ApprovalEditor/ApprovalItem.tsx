@@ -51,7 +51,7 @@ const ApprovalItem = ({
         ) : (
           <Typography data-testid="token-amount">
             {tokenInfo.type === TokenType.ERC20
-              ? formatAmountPrecise(amount, tokenInfo.decimals)
+              ? formatAmountPrecise(amount, tokenInfo.decimals ?? 0)
               : `#${rawAmount.toString()}`}
           </Typography>
         )}
