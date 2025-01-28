@@ -17,7 +17,7 @@ export function TxShareBlock({ txId }: { txId: string }): ReactElement | null {
 
   return (
     <Paper className={css.wrapper}>
-      <Accordion className={css.accordion} onClick={onExpand}>
+      <Accordion className={css.accordion} onChange={onExpand}>
         <AccordionSummary expandIcon={<ExpandMoreIcon />} className={css.summary}>
           <Typography className={css.header}>Share link with other signers</Typography>
         </AccordionSummary>
