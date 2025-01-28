@@ -146,17 +146,6 @@ const injectedRtkApi = api
         }),
         providesTags: ['transactions'],
       }),
-      transactionsViewGetTransactionConfirmationViewV1: build.mutation<
-        TransactionsViewGetTransactionConfirmationViewV1ApiResponse,
-        TransactionsViewGetTransactionConfirmationViewV1ApiArg
-      >({
-        query: (queryArg) => ({
-          url: `/v1/chains/${queryArg.chainId}/safes/${queryArg.safeAddress}/views/transaction-confirmation`,
-          method: 'POST',
-          body: queryArg.transactionDataDto,
-        }),
-        invalidatesTags: ['transactions'],
-      }),
     }),
     overrideExisting: false,
   })
@@ -245,105 +234,10 @@ export type TransactionsGetCreationTransactionV1ApiArg = {
   chainId: string
   safeAddress: string
 }
-export type TransactionsViewGetTransactionConfirmationViewV1ApiResponse =
-  /** status 200  */
-  | BaselineConfirmationView
-  | CowSwapConfirmationView
-  | CowSwapTwapConfirmationView
-  | NativeStakingDepositConfirmationView
-  | NativeStakingValidatorsExitConfirmationView
-  | NativeStakingWithdrawConfirmationView
-export type TransactionsViewGetTransactionConfirmationViewV1ApiArg = {
-  chainId: string
-  safeAddress: string
-  transactionDataDto: TransactionDataDto
-}
-export type TransactionInfo = {
-  type:
-    | 'Creation'
-    | 'Custom'
-    | 'SettingsChange'
-    | 'Transfer'
-    | 'SwapOrder'
-    | 'SwapTransfer'
-    | 'TwapOrder'
-    | 'NativeStakingDeposit'
-    | 'NativeStakingValidatorsExit'
-    | 'NativeStakingWithdraw'
-  humanDescription?: string | null
-}
-export type DataDecodedParameter = {
-  name: string
-  type: string
-  value: object
-  valueDecoded?: ((object | null) | (object[] | null)) | null
-}
-export type DataDecoded = {
-  method: string
-  parameters?: DataDecodedParameter[] | null
-}
 export type AddressInfo = {
   value: string
   name?: string | null
   logoUri?: string | null
-}
-export type TransactionData = {
-  hexData?: string | null
-  dataDecoded?: DataDecoded | null
-  to: AddressInfo
-  value?: string | null
-  operation: number
-  trustedDelegateCallTarget?: boolean | null
-  addressInfoIndex?: object | null
-}
-export type Token = {
-  address: string
-  decimals?: number | null
-  logoUri: string
-  name: string
-  symbol: string
-  type: 'ERC721' | 'ERC20' | 'NATIVE_TOKEN' | 'UNKNOWN'
-}
-export type MultisigExecutionDetails = {
-  type: 'MULTISIG'
-  submittedAt: number
-  nonce: number
-  safeTxGas: string
-  baseGas: string
-  gasPrice: string
-  gasToken: string
-  refundReceiver: AddressInfo
-  safeTxHash: string
-  executor?: AddressInfo | null
-  signers: string[]
-  confirmationsRequired: number
-  confirmations: string[]
-  rejectors: AddressInfo[]
-  gasTokenInfo?: Token | null
-  trusted: boolean
-  proposer?: AddressInfo | null
-  proposedByDelegate?: AddressInfo | null
-}
-export type ModuleExecutionDetails = {
-  type: 'MODULE'
-  address: AddressInfo
-}
-export type SafeAppInfo = {
-  name: string
-  url: string
-  logoUri?: string | null
-}
-export type TransactionDetails = {
-  safeAddress: string
-  txId: string
-  executedAt?: number | null
-  txStatus: 'SUCCESS' | 'FAILED' | 'CANCELLED' | 'AWAITING_CONFIRMATIONS' | 'AWAITING_EXECUTION'
-  txInfo: TransactionInfo | null
-  txData?: TransactionData | null
-  detailedExecutionInfo?: (MultisigExecutionDetails | ModuleExecutionDetails) | null
-  txHash?: string | null
-  safeAppInfo?: SafeAppInfo | null
-  note?: string | null
 }
 export type CreationTransactionInfo = {
   type: 'Creation'
@@ -364,6 +258,16 @@ export type CustomTransactionInfo = {
   methodName?: string | null
   actionCount?: number | null
 }
+export type DataDecodedParameter = {
+  name: string
+  type: string
+  value: object
+  valueDecoded?: ((object | null) | (object[] | null)) | null
+}
+export type DataDecoded = {
+  method: string
+  parameters?: DataDecodedParameter[] | null
+}
 export type SettingsChange = {
   type:
     | 'ADD_OWNER'
@@ -382,6 +286,38 @@ export type SettingsChangeTransaction = {
   humanDescription?: string | null
   dataDecoded: DataDecoded
   settingsInfo?: SettingsChange | null
+}
+export type Erc20Transfer = {
+  type: 'ERC20'
+  tokenAddress: string
+  value: string
+  tokenName?: string | null
+  tokenSymbol?: string | null
+  logoUri?: string | null
+  decimals?: number | null
+  trusted?: boolean | null
+  imitation: boolean
+}
+export type Erc721Transfer = {
+  type: 'ERC721'
+  tokenAddress: string
+  tokenId: string
+  tokenName?: string | null
+  tokenSymbol?: string | null
+  logoUri?: string | null
+  trusted?: boolean | null
+}
+export type NativeCoinTransfer = {
+  type: 'NATIVE_COIN'
+  value?: string | null
+}
+export type TransferTransactionInfo = {
+  type: 'Transfer'
+  humanDescription?: string | null
+  sender: AddressInfo
+  recipient: AddressInfo
+  direction: 'INCOMING' | 'OUTGOING' | 'UNKNOWN'
+  transferInfo: Erc20Transfer | Erc721Transfer | NativeCoinTransfer
 }
 export type TokenInfo = {
   /** The token address */
@@ -422,36 +358,16 @@ export type SwapOrderTransactionInfo = {
   /** The URL to the explorer page of the order */
   explorerUrl: string
   /** The amount of fees paid for this order. */
-  executedSurplusFee?: string | null
+  executedSurplusFee: string
+  /** The amount of fees paid for this order. */
+  executedFee: string
+  /** The token in which the fee was paid, expressed by SURPLUS tokens (BUY tokens for SELL orders and SELL tokens for BUY orders). */
+  executedFeeToken: string
   /** The (optional) address to receive the proceeds of the trade */
   receiver?: string | null
   owner: string
   /** The App Data for this order */
   fullAppData?: object | null
-}
-export type Erc20Transfer = {
-  type: 'ERC20'
-  tokenAddress: string
-  value: string
-  tokenName?: string | null
-  tokenSymbol?: string | null
-  logoUri?: string | null
-  decimals?: number | null
-  trusted?: boolean | null
-  imitation: boolean
-}
-export type Erc721Transfer = {
-  type: 'ERC721'
-  tokenAddress: string
-  tokenId: string
-  tokenName?: string | null
-  tokenSymbol?: string | null
-  logoUri?: string | null
-  trusted?: boolean | null
-}
-export type NativeCoinTransfer = {
-  type: 'NATIVE_COIN'
-  value?: string | null
 }
 export type SwapTransferTransactionInfo = {
   type: 'SwapTransfer'
@@ -482,7 +398,11 @@ export type SwapTransferTransactionInfo = {
   /** The URL to the explorer page of the order */
   explorerUrl: string
   /** The amount of fees paid for this order. */
-  executedSurplusFee?: string | null
+  executedSurplusFee: string
+  /** The amount of fees paid for this order. */
+  executedFee: string
+  /** The token in which the fee was paid, expressed by SURPLUS tokens (BUY tokens for SELL orders and SELL tokens for BUY orders). */
+  executedFeeToken: TokenInfo
   /** The (optional) address to receive the proceeds of the trade */
   receiver?: string | null
   owner: string
@@ -510,6 +430,10 @@ export type TwapOrderTransactionInfo = {
   executedBuyAmount?: string | null
   /** The executed surplus fee raw amount (no decimals), or null if there are too many parts */
   executedSurplusFee?: string | null
+  /** The executed surplus fee raw amount (no decimals), or null if there are too many parts */
+  executedFee?: string | null
+  /** The token in which the fee was paid, expressed by SURPLUS tokens (BUY tokens for SELL orders and SELL tokens for BUY orders). */
+  executedFeeToken: string
   /** The sell token of the TWAP */
   sellToken: TokenInfo
   /** The buy token of the TWAP */
@@ -531,14 +455,6 @@ export type TwapOrderTransactionInfo = {
   durationOfPart: object
   /** The start time of the TWAP */
   startTime: object
-}
-export type TransferTransactionInfo = {
-  type: 'Transfer'
-  humanDescription?: string | null
-  sender: AddressInfo
-  recipient: AddressInfo
-  direction: 'INCOMING' | 'OUTGOING' | 'UNKNOWN'
-  transferInfo: Erc20Transfer | Erc721Transfer | NativeCoinTransfer
 }
 export type NativeStakingDepositTransactionInfo = {
   type: 'NativeStakingDeposit'
@@ -594,6 +510,74 @@ export type NativeStakingWithdrawTransactionInfo = {
   tokenInfo: TokenInfo
   validators: string[]
 }
+export type TransactionData = {
+  hexData?: string | null
+  dataDecoded?: DataDecoded | null
+  to: AddressInfo
+  value?: string | null
+  operation: number
+  trustedDelegateCallTarget?: boolean | null
+  addressInfoIndex?: object | null
+}
+export type Token = {
+  address: string
+  decimals?: number
+  logoUri: string
+  name: string
+  symbol: string
+  type: 'ERC721' | 'ERC20' | 'NATIVE_TOKEN' | 'UNKNOWN'
+}
+export type MultisigExecutionDetails = {
+  type: 'MULTISIG'
+  submittedAt: number
+  nonce: number
+  safeTxGas: string
+  baseGas: string
+  gasPrice: string
+  gasToken: string
+  refundReceiver: AddressInfo
+  safeTxHash: string
+  executor?: AddressInfo | null
+  signers: string[]
+  confirmationsRequired: number
+  confirmations: string[]
+  rejectors: AddressInfo[]
+  gasTokenInfo?: Token | null
+  trusted: boolean
+  proposer?: AddressInfo | null
+  proposedByDelegate?: AddressInfo | null
+}
+export type ModuleExecutionDetails = {
+  type: 'MODULE'
+  address: AddressInfo
+}
+export type SafeAppInfo = {
+  name: string
+  url: string
+  logoUri?: string | null
+}
+export type TransactionDetails = {
+  txInfo:
+    | CreationTransactionInfo
+    | CustomTransactionInfo
+    | SettingsChangeTransaction
+    | TransferTransactionInfo
+    | SwapOrderTransactionInfo
+    | SwapTransferTransactionInfo
+    | TwapOrderTransactionInfo
+    | NativeStakingDepositTransactionInfo
+    | NativeStakingValidatorsExitTransactionInfo
+    | NativeStakingWithdrawTransactionInfo
+  safeAddress: string
+  txId: string
+  executedAt?: number | null
+  txStatus: 'SUCCESS' | 'FAILED' | 'CANCELLED' | 'AWAITING_CONFIRMATIONS' | 'AWAITING_EXECUTION'
+  txData?: TransactionData | null
+  detailedExecutionInfo?: (MultisigExecutionDetails | ModuleExecutionDetails) | null
+  txHash?: string | null
+  safeAppInfo?: SafeAppInfo | null
+  note?: string | null
+}
 export type MultisigExecutionInfo = {
   type: 'MULTISIG'
   nonce: number
@@ -606,21 +590,21 @@ export type ModuleExecutionInfo = {
   address: AddressInfo
 }
 export type Transaction = {
-  id: string
-  txHash?: string | null
-  timestamp: number
-  txStatus: 'SUCCESS' | 'FAILED' | 'CANCELLED' | 'AWAITING_CONFIRMATIONS' | 'AWAITING_EXECUTION'
   txInfo:
     | CreationTransactionInfo
     | CustomTransactionInfo
     | SettingsChangeTransaction
+    | TransferTransactionInfo
     | SwapOrderTransactionInfo
     | SwapTransferTransactionInfo
     | TwapOrderTransactionInfo
-    | TransferTransactionInfo
     | NativeStakingDepositTransactionInfo
     | NativeStakingValidatorsExitTransactionInfo
     | NativeStakingWithdrawTransactionInfo
+  id: string
+  txHash?: string | null
+  timestamp: number
+  txStatus: 'SUCCESS' | 'FAILED' | 'CANCELLED' | 'AWAITING_CONFIRMATIONS' | 'AWAITING_EXECUTION'
   executionInfo?: (MultisigExecutionInfo | ModuleExecutionInfo) | null
   safeAppInfo?: SafeAppInfo | null
 }
@@ -670,6 +654,7 @@ export type TransactionPreview = {
     | SettingsChangeTransaction
     | TransferTransactionInfo
     | SwapOrderTransactionInfo
+    | SwapTransferTransactionInfo
     | TwapOrderTransactionInfo
     | NativeStakingDepositTransactionInfo
     | NativeStakingValidatorsExitTransactionInfo
@@ -742,151 +727,6 @@ export type CreationTransaction = {
   saltNonce?: string | null
   dataDecoded?: DataDecoded | null
 }
-export type BaselineConfirmationView = {
-  type: 'GENERIC'
-  method: string
-  parameters?: DataDecodedParameter[] | null
-}
-export type CowSwapConfirmationView = {
-  type: 'COW_SWAP_ORDER'
-  method: string
-  parameters?: DataDecodedParameter[] | null
-  /** The order UID */
-  uid: string
-  status: 'presignaturePending' | 'open' | 'fulfilled' | 'cancelled' | 'expired' | 'unknown'
-  kind: 'buy' | 'sell' | 'unknown'
-  orderClass: 'market' | 'limit' | 'liquidity' | 'unknown'
-  /** The timestamp when the order expires */
-  validUntil: number
-  /** The sell token raw amount (no decimals) */
-  sellAmount: string
-  /** The buy token raw amount (no decimals) */
-  buyAmount: string
-  /** The executed sell token raw amount (no decimals) */
-  executedSellAmount: string
-  /** The executed buy token raw amount (no decimals) */
-  executedBuyAmount: string
-  /** The URL to the explorer page of the order */
-  explorerUrl: string
-  /** The amount of fees paid for this order. */
-  executedSurplusFee?: string | null
-  /** The (optional) address to receive the proceeds of the trade */
-  receiver?: string | null
-  owner: string
-  /** The App Data for this order */
-  fullAppData?: object | null
-  /** The sell token of the order */
-  sellToken: TokenInfo
-  /** The buy token of the order */
-  buyToken: TokenInfo
-}
-export type CowSwapTwapConfirmationView = {
-  type: 'COW_SWAP_TWAP_ORDER'
-  method: string
-  parameters?: DataDecodedParameter[] | null
-  /** The TWAP status */
-  status: 'presignaturePending' | 'open' | 'fulfilled' | 'cancelled' | 'expired' | 'unknown'
-  kind: 'buy' | 'sell' | 'unknown'
-  class: 'market' | 'limit' | 'liquidity' | 'unknown'
-  /** The order UID of the active order, null as it is not an active order */
-  activeOrderUid: null
-  /** The timestamp when the TWAP expires */
-  validUntil: number
-  /** The sell token raw amount (no decimals) */
-  sellAmount: string
-  /** The buy token raw amount (no decimals) */
-  buyAmount: string
-  /** The executed sell token raw amount (no decimals), or null if there are too many parts */
-  executedSellAmount?: string | null
-  /** The executed surplus fee raw amount (no decimals), or null if there are too many parts */
-  executedSurplusFee?: string | null
-  /** The executed buy token raw amount (no decimals), or null if there are too many parts */
-  executedBuyAmount?: string | null
-  /** The sell token of the TWAP */
-  sellToken: TokenInfo
-  /** The buy token of the TWAP */
-  buyToken: TokenInfo
-  /** The address to receive the proceeds of the trade */
-  receiver: string
-  owner: string
-  /** The App Data for this TWAP */
-  fullAppData?: object | null
-  /** The number of parts in the TWAP */
-  numberOfParts: string
-  /** The amount of sellToken to sell in each part */
-  partSellAmount: string
-  /** The amount of buyToken that must be bought in each part */
-  minPartLimit: string
-  /** The duration of the TWAP interval */
-  timeBetweenParts: number
-  /** Whether the TWAP is valid for the entire interval or not */
-  durationOfPart: object
-  /** The start time of the TWAP */
-  startTime: object
-}
-export type NativeStakingDepositConfirmationView = {
-  type: 'KILN_NATIVE_STAKING_DEPOSIT'
-  status:
-    | 'NOT_STAKED'
-    | 'ACTIVATING'
-    | 'DEPOSIT_IN_PROGRESS'
-    | 'ACTIVE'
-    | 'EXIT_REQUESTED'
-    | 'EXITING'
-    | 'EXITED'
-    | 'SLASHED'
-  method: string
-  parameters?: DataDecodedParameter[] | null
-  estimatedEntryTime: number
-  estimatedExitTime: number
-  estimatedWithdrawalTime: number
-  fee: number
-  monthlyNrr: number
-  annualNrr: number
-  value: string
-  numValidators: number
-  expectedAnnualReward: string
-  expectedMonthlyReward: string
-  expectedFiatAnnualReward: number
-  expectedFiatMonthlyReward: number
-  tokenInfo: TokenInfo
-}
-export type NativeStakingValidatorsExitConfirmationView = {
-  type: 'KILN_NATIVE_STAKING_VALIDATORS_EXIT'
-  status:
-    | 'NOT_STAKED'
-    | 'ACTIVATING'
-    | 'DEPOSIT_IN_PROGRESS'
-    | 'ACTIVE'
-    | 'EXIT_REQUESTED'
-    | 'EXITING'
-    | 'EXITED'
-    | 'SLASHED'
-  method: string
-  parameters?: DataDecodedParameter[] | null
-  estimatedExitTime: number
-  estimatedWithdrawalTime: number
-  value: string
-  numValidators: number
-  tokenInfo: TokenInfo
-  validators: string[]
-}
-export type NativeStakingWithdrawConfirmationView = {
-  type: 'KILN_NATIVE_STAKING_WITHDRAW'
-  method: string
-  parameters?: DataDecodedParameter[] | null
-  value: string
-  tokenInfo: TokenInfo
-  validators: string[]
-}
-export type TransactionDataDto = {
-  /** Hexadecimal value */
-  data: string
-  /** The target Ethereum address */
-  to?: string
-  /** The wei amount being sent to a payable function */
-  value?: string
-}
 export const {
   useTransactionsGetTransactionByIdV1Query,
   useTransactionsGetMultisigTransactionsV1Query,
@@ -899,5 +739,4 @@ export const {
   useTransactionsGetTransactionsHistoryV1Query,
   useTransactionsProposeTransactionV1Mutation,
   useTransactionsGetCreationTransactionV1Query,
-  useTransactionsViewGetTransactionConfirmationViewV1Mutation,
 } = injectedRtkApi

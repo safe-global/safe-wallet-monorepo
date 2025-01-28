@@ -1,5 +1,6 @@
 import { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { SafeInfo } from '../types/address'
+import { FirebaseMessagingTypes } from '@react-native-firebase/messaging'
 
 export const mockedActiveAccount: SafeInfo = {
   address: '0xA77DE01e157f9f57C7c4A326eeE9C4874D0598b6',
@@ -322,3 +323,12 @@ export const mapStorageTypeToIds = (id: STORAGE_IDS): STORAGE_TYPES => {
       return STORAGE_TYPES.STRING
   }
 }
+
+export type HandleNotificationCallback = (data: FirebaseMessagingTypes.RemoteMessage['data'] | undefined) => void
+
+export enum PressActionId {
+  OPEN_NOTIFICATIONS_VIEW = 'open-notifications-view-press-action-id',
+  OPEN_TRANSACTION_VIEW = 'open-transactions-view-press-action-id',
+}
+
+export const LAUNCH_ACTIVITY = 'global.safe.mobileapp.ui.MainActivity'

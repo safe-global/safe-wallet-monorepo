@@ -19,6 +19,9 @@
       "developmentClient": true,
       "env": {
         "APP_VARIANT": "development"
+      },
+      "android": {
+        "image": "ubuntu-18.04-jdk-11-ndk-r19c"
       }
     },
     "preview-ios-simulator": {
@@ -42,6 +45,16 @@
       "extends": "base",
       "environment": "production",
       "autoIncrement": true,
+      "ios": {
+        "env": {
+          "GOOGLE_SERVICES_FILE": "./GoogleService-Info.plist"
+        }
+      },
+      "android": {
+        "env": {
+          "GOOGLE_SERVICES_FILE": "./google-services.json"
+        }
+      },
       "env": {
         "APP_VARIANT": "production"
       }
