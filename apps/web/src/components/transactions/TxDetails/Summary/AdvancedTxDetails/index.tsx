@@ -12,6 +12,7 @@ import DecodedData from '../../TxData/DecodedData'
 import { View, ViewToggleButtonGroup } from './ViewToggleButtonGroup'
 import CopyButton from '@/components/common/CopyButton'
 import { AdvancedDetailsDataRow } from './AdvancedDetailsDataRow'
+import EthHashInfo from '@/components/common/EthHashInfo'
 
 interface AdvancedTxDetailsProps {
   txDetails: TransactionDetails
@@ -87,7 +88,7 @@ export const AdvancedTxDetails = ({
                   </Grid>
                   <Grid color="primary.light" size={view === View.Raw ? 12 : 9}>
                     <Stack direction="row" justifyContent="space-between">
-                      <Stack direction="row">
+                      <Stack direction="row" spacing={0.5}>
                         <Typography variant="body1">Data</Typography>
                         {txData.hexData && view === View.Raw && <CopyButton text={txData.hexData} />}
                       </Stack>
@@ -114,13 +115,17 @@ export const AdvancedTxDetails = ({
                       {gasPrice}
                     </AdvancedDetailsDataRow>
 
-                    <AdvancedDetailsDataRow datatestid="tx-gas-token" title="gasToken">
-                      {generateDataRowValue(gasToken, 'hash', true)}
-                    </AdvancedDetailsDataRow>
+                    {gasToken && (
+                      <AdvancedDetailsDataRow datatestid="tx-gas-token" title="gasToken">
+                        <EthHashInfo address={gasToken} avatarSize={24} hasExplorer showCopyButton />
+                      </AdvancedDetailsDataRow>
+                    )}
 
-                    <AdvancedDetailsDataRow datatestid="tx-refund-receiver" title="refundReceiver">
-                      {generateDataRowValue(refundReceiver, 'hash', true)}
-                    </AdvancedDetailsDataRow>
+                    {refundReceiver && (
+                      <AdvancedDetailsDataRow datatestid="tx-refund-receiver" title="refundReceiver">
+                        <EthHashInfo address={refundReceiver} avatarSize={24} hasExplorer showCopyButton />
+                      </AdvancedDetailsDataRow>
+                    )}
 
                     {confirmations?.map(({ signature }, index) => (
                       <AdvancedDetailsDataRow
