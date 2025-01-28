@@ -13,10 +13,10 @@ export function TxShareBlock({ txId }: { txId: string }): ReactElement | null {
     <Paper className={css.wrapper}>
       <Accordion className={css.accordion}>
         <AccordionSummary expandIcon={<ExpandMoreIcon />} className={css.summary}>
-          <Typography className={css.header}>Share link with other owners</Typography>
+          <Typography className={css.header}>Share link with other signers</Typography>
         </AccordionSummary>
         <AccordionDetails className={css.details}>
-          If owners have previously subscribed to notifications, they will be notified about signing this transaction.
+          If signers have previously subscribed to notifications, they will be notified about signing this transaction.
           You can also share the link with them to speed up the process.
         </AccordionDetails>
       </Accordion>
