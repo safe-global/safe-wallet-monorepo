@@ -3,16 +3,6 @@ import { OnboardingCarousel } from './OnboardingCarousel'
 import { Text } from 'tamagui'
 import { render } from '@/src/tests/test-utils'
 
-jest.mock('@notifee/react-native', () => ({
-  AndroidImportance: {
-    NONE: 0,
-    MIN: 1,
-    LOW: 2,
-    DEFAULT: 3,
-    HIGH: 4,
-  },
-}))
-
 describe('OnboardingCarousel', () => {
   const items = [
     { name: 'Item1', title: <Text>Item1 Title</Text> },

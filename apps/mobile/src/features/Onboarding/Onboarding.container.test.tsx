@@ -4,16 +4,6 @@ import { fireEvent, render } from '@/src/tests/test-utils'
 
 const mockNavigate = jest.fn()
 
-jest.mock('@notifee/react-native', () => ({
-  AndroidImportance: {
-    NONE: 0,
-    MIN: 1,
-    LOW: 2,
-    DEFAULT: 3,
-    HIGH: 4,
-  },
-}))
-
 jest.mock('expo-router', () => ({
   useRouter: () => ({
     navigate: mockNavigate,
