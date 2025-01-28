@@ -41,7 +41,7 @@ export const ReviewSpendingLimit = ({ params }: { params: NewSpendingLimitFlowPr
   }, [spendingLimits, params])
 
   useEffect(() => {
-    if (!chain || !safe.modules?.length) return
+    if (!chain) return
 
     createNewSpendingLimitTx(
       params,
