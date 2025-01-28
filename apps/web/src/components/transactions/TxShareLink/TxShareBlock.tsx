@@ -3,15 +3,21 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import type { ReactElement } from 'react'
 
 import ShareIcon from '@/public/images/messages/link.svg'
-import { TX_LIST_EVENTS } from '@/services/analytics'
+import { trackEvent, TX_LIST_EVENTS } from '@/services/analytics'
 import TxShareLink from '.'
 
 import css from './styles.module.css'
 
 export function TxShareBlock({ txId }: { txId: string }): ReactElement | null {
+  const onExpand = (_: React.SyntheticEvent, expanded: boolean) => {
+    if (expanded) {
+      trackEvent(TX_LIST_EVENTS.OPEN_SHARE_BLOCK)
+    }
+  }
+
   return (
     <Paper className={css.wrapper}>
-      <Accordion className={css.accordion}>
+      <Accordion className={css.accordion} onClick={onExpand}>
         <AccordionSummary expandIcon={<ExpandMoreIcon />} className={css.summary}>
           <Typography className={css.header}>Share link with other signers</Typography>
         </AccordionSummary>
