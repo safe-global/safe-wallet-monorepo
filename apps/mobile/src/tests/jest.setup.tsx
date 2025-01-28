@@ -114,6 +114,12 @@ jest.mock('@notifee/react-native', () => {
     onBackgroundEvent: jest.fn(),
     createChannelGroup: jest.fn().mockResolvedValue('channel-group-id'),
     createChannel: jest.fn().mockResolvedValue({}),
+  }
+
+  return {
+    ...jest.requireActual('@notifee/react-native/dist/types/Notification'),
+    __esModule: true,
+    default: notifee,
     AndroidImportance: {
       NONE: 0,
       MIN: 1,
@@ -121,12 +127,6 @@ jest.mock('@notifee/react-native', () => {
       DEFAULT: 3,
       HIGH: 4,
     },
-  }
-
-  return {
-    ...jest.requireActual('@notifee/react-native/dist/types/Notification'),
-    __esModule: true,
-    default: notifee,
   }
 })
 
