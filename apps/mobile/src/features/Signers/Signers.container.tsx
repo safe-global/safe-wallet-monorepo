@@ -35,7 +35,7 @@ export const SignersContainer = () => {
       </View>
 
       <View paddingHorizontal={'$3'}>
-        <SafeButton onPress={onImportSigner} label="Import signer" />
+        <SafeButton onPress={onImportSigner}>Import signer</SafeButton>
       </View>
     </View>
   )

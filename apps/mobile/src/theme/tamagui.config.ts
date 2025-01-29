@@ -21,7 +21,7 @@ export const config = createTamagui({
   },
   themes: {
     light: {
-      background: tokens.color.backgroundMainLight,
+      background: tokens.color.backgroundDefaultLight,
       backgroundSecondary: tokens.color.backgroundSecondaryLight,
       backgroundPaper: tokens.color.backgroundPaperLight,
       backgroundHover: tokens.color.backgroundLightLight,
@@ -94,10 +94,19 @@ export const config = createTamagui({
       background: tokens.color.logoBackgroundDark,
     },
     light_container: {
-      background: tokens.color.backgroundPaperLight,
+      background: tokens.color.backgroundDefaultLight,
+    },
+    dark_container: {
+      background: tokens.color.backgroundPaperDark,
+    },
+    light_settings: {
+      background: tokens.color.backgroundDefaultLight,
+    },
+    dark_settings: {
+      background: tokens.color.backgroundPaperDark,
     },
     light_safe_list: {
-      background: tokens.color.backgroundDefaultLight,
+      background: tokens.color.backgroundPaperLight,
     },
     dark_safe_list: {
       background: tokens.color.backgroundDefaultDark,

@@ -16,10 +16,6 @@ type Story = StoryObj<typeof OnboardingCarousel>
 
 export const Default: Story = {
   render: function Render(args) {
-    return (
-      <OnboardingCarousel {...args} items={items}>
-        <SafeButton onPress={action('onPress')}>Get started</SafeButton>
-      </OnboardingCarousel>
-    )
+    return <OnboardingCarousel {...args} items={items} />
   },
 }
