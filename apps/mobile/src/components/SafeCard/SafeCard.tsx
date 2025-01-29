@@ -30,6 +30,7 @@ export function SafeCard({ title, description, image, icon, children }: SafeCard
       {image && (
         <View alignItems="center">
           <Image
+            testID="safe-card-image"
             maxWidth={300}
             width={'100%'}
             borderRadius={'$4'}
