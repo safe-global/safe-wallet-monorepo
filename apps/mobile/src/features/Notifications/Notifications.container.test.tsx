@@ -1,6 +1,6 @@
 import React from 'react'
 import { NotificationsContainer } from './Notifications.container'
-import { act, fireEvent, render } from '@/src/tests/test-utils'
+import { act, fireEvent, render, waitFor } from '@/src/tests/test-utils'
 import { SwitchChangeEvent } from 'react-native'
 
 const mockDispatch = jest.fn()
@@ -24,13 +24,14 @@ describe('Notifications Component', () => {
   it('triggers notification action on switch change', async () => {
     const { getByTestId } = render(<NotificationsContainer />)
     const switcher = getByTestId('toggle-app-notifications')
-
     expect(switcher).toBeTruthy()
 
     act(() => {
       fireEvent(switcher, 'onChange', { nativeEvent: { value: true } } as SwitchChangeEvent)
     })
 
-    expect(mockDispatch).toHaveBeenCalled()
+    await waitFor(() => {
+      expect(mockDispatch).toHaveBeenCalled()
+    })
   })
 })
