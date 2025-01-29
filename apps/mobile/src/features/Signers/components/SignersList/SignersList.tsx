@@ -27,7 +27,7 @@ interface SignersListProps {
 
 export function SignersList({ signersGroup, isFetching, hasLocalSingers }: SignersListProps) {
   const { handleScroll } = useScrollableHeader({
-    children: <NavBarTitle paddingRight={5}>Signers</NavBarTitle>,
+    children: <NavBarTitle>Signers</NavBarTitle>,
   })
 
   const renderItem = useCallback(

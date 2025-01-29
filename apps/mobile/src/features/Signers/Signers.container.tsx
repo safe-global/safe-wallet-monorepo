@@ -25,7 +25,7 @@ export const SignersContainer = () => {
   }, [group])
 
   return (
-    <View paddingTop="$6" gap="$6">
+    <View gap="$6">
       <View height={Dimensions.get('window').height - 230}>
         <SignersList
           isFetching={isFetching}
