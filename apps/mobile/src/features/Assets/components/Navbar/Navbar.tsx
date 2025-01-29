@@ -14,6 +14,7 @@ import { selectMyAccountsMode, toggleMode } from '@/src/store/myAccountsSlice'
 import { MyAccountsContainer, MyAccountsFooter } from '../MyAccounts'
 import { useMyAccountsSortable } from '../MyAccounts/hooks/useMyAccountsSortable'
 import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
+import { router } from 'expo-router'
 
 const dropdownLabelProps = {
   fontSize: '$5',
@@ -53,10 +54,14 @@ export const Navbar = () => {
               )
             }
           />
-
-          <TouchableOpacity>
-            <SafeFontIcon name="apps" />
-          </TouchableOpacity>
+          <View style={styles.rightButtonContainer}>
+            <TouchableOpacity onPress={() => router.navigate('/notifications-opt-in')}>
+              <SafeFontIcon name="lightbulb" />
+            </TouchableOpacity>
+            <TouchableOpacity>
+              <SafeFontIcon name="apps" />
+            </TouchableOpacity>
+          </View>
         </SafeAreaView>
       </BlurredIdenticonBackground>
     </View>
@@ -71,5 +76,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 16,
     paddingBottom: 0,
+  },
+  rightButtonContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 12,
   },
 })
