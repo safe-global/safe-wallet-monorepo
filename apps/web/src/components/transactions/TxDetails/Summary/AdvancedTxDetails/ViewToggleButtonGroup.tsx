@@ -35,9 +35,18 @@ export enum View {
 interface ViewToggleButtonGroupProps {
   value: View
   onChange?: (newView: View) => void
+  hasRawData?: boolean
 }
 
-export const ViewToggleButtonGroup = ({ value, onChange = () => {} }: ViewToggleButtonGroupProps): ReactElement => {
+export const ViewToggleButtonGroup = ({
+  value,
+  onChange = () => {},
+  hasRawData = true,
+}: ViewToggleButtonGroupProps): ReactElement | null => {
+  if (!hasRawData) {
+    return null
+  }
+
   const changeView = (_: React.MouseEvent, newView: View) => {
     if (newView) {
       onChange(newView)

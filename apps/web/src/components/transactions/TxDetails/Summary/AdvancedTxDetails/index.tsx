@@ -92,7 +92,7 @@ export const AdvancedTxDetails = ({
                     <Grid size={9}>
                       <Stack direction="row" justifyContent="space-between">
                         <Typography color="primary.light">Data</Typography>
-                        <ViewToggleButtonGroup value={view} onChange={changeView} />
+                        <ViewToggleButtonGroup value={view} onChange={changeView} hasRawData={!!txData.hexData} />
                       </Stack>
                     </Grid>
                   </Grid>
@@ -149,7 +149,7 @@ export const AdvancedTxDetails = ({
                       <CopyButton text={txData.hexData} />
                     </Stack>
 
-                    <ViewToggleButtonGroup value={view} onChange={changeView} />
+                    <ViewToggleButtonGroup value={view} onChange={changeView} hasRawData={!!txData.hexData} />
                   </Stack>
 
                   <Typography
