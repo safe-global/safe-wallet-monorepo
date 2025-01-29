@@ -1,14 +1,15 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { SafeCard } from './SafeCard'
-import { SafeFontIcon } from '@/src/components/SafeFontIcon'
-import { Image } from 'tamagui'
+import { SafeCard } from '@/src/components/SafeCard'
+import { SafeFontIcon } from '../SafeFontIcon'
+import Seed from '@/assets/images/seed.png'
+import { Text } from 'tamagui'
 
 const meta: Meta<typeof SafeCard> = {
   title: 'SafeCard',
   component: SafeCard,
   args: {
     title: 'Welcome to Safe',
-    description: 'The most trusted decentralized custody protocol and collective asset management platform',
+    description: 'Add a new owner to your Safe',
   },
 }
 
@@ -16,30 +17,26 @@ export default meta
 
 type Story = StoryObj<typeof SafeCard>
 
-export const Default: Story = {}
-
-export const WithIcon: Story = {
+export const Default: Story = {
   args: {
+    title: 'Welcome to Safe',
+    description: 'Add a new owner to your Safe',
     icon: <SafeFontIcon name="safe" size={24} />,
+    image: Seed,
   },
 }
 
-export const WithImage: Story = {
+export const OnlyText: Story = {
   args: {
-    image: require('@/assets/welcome.png'),
+    title: 'Welcome to Safe',
+    description: 'Add a new owner to your Safe',
   },
 }
 
-export const WithChildren: Story = {
+export const withChildren: Story = {
   args: {
-    children: <Image source={require('@/assets/logo.png')} width={100} height={100} marginTop="$4" />,
-  },
-}
-
-export const Complete: Story = {
-  args: {
-    icon: <SafeFontIcon name="safe" size={24} />,
-    image: require('@/assets/welcome.png'),
-    children: <Image source={require('@/assets/logo.png')} width={100} height={100} marginTop="$4" />,
+    title: 'Welcome to Safe',
+    description: 'Add a new owner to your Safe',
+    children: <Text marginTop={'$4'}>Hello from children</Text>,
   },
 }
