@@ -8,6 +8,7 @@ exports[`SignOrExecute should display a confirmation screen 1`] = `
   >
     <div
       class="MuiCardContent-root cardContent css-1lt5qva-MuiCardContent-root"
+      data-testid="card-content"
     >
       <div
         class="MuiStack-root css-1sazv7p-MuiStack-root"
@@ -172,6 +173,7 @@ exports[`SignOrExecute should display a confirmation screen 1`] = `
   >
     <div
       class="MuiCardContent-root cardContent css-1lt5qva-MuiCardContent-root"
+      data-testid="card-content"
     >
       <div
         class="wrapper"
@@ -279,6 +281,7 @@ exports[`SignOrExecute should display a loading component 1`] = `
   >
     <div
       class="MuiCardContent-root cardContent css-1lt5qva-MuiCardContent-root"
+      data-testid="card-content"
     >
       <div
         class="MuiBox-root css-17luq05"
@@ -343,6 +346,7 @@ exports[`SignOrExecute should display an error screen 1`] = `
   >
     <div
       class="MuiCardContent-root cardContent css-1lt5qva-MuiCardContent-root"
+      data-testid="card-content"
     >
       <div
         class="MuiStack-root css-1sazv7p-MuiStack-root"
@@ -507,6 +511,7 @@ exports[`SignOrExecute should display an error screen 1`] = `
   >
     <div
       class="MuiCardContent-root cardContent css-1lt5qva-MuiCardContent-root"
+      data-testid="card-content"
     >
       <div
         class="wrapper"
