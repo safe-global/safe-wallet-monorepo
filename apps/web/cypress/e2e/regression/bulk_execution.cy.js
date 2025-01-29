@@ -56,7 +56,7 @@ describe('Bulk execution', () => {
       cy.visit(constants.transactionsHistoryUrl + fundsSafes.SEP_FUNDS_SAFE_14)
       wallet.connectSigner(signer)
       main.acceptCookies()
-      create_tx.verifyBulkTxHistoryBlock(tx, actions)
+      create_tx.verifyBulkTxHistoryBlock(create_tx.bulkTxs, tx, actions)
     },
   )
 
@@ -70,7 +70,7 @@ describe('Bulk execution', () => {
       cy.visit(constants.transactionsHistoryUrl + staticSafes.SEP_STATIC_SAFE_1)
       main.acceptCookies()
       create_tx.toggleUntrustedTxs()
-      create_tx.verifyBulkTxHistoryBlock(tx, data)
+      create_tx.verifyBulkTxHistoryBlock(create_tx.swapOrder, tx, data)
     },
   )
 

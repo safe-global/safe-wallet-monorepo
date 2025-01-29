@@ -53,6 +53,7 @@ const buyperPartStr = 'Buy per part'
 const priceProtectionStr = 'Price protection'
 const orderSplit = 'Order will be split in'
 const orderDetailsStr = 'Order details'
+const unlockTwapOrdersStrBtn = 'Unlock TWAP orders'
 
 const getInsufficientBalanceStr = (token) => `Insufficient ${token} balance`
 const sellAmountIsSmallStr = 'Sell amount too small'
@@ -386,11 +387,26 @@ export function verifyRecipientAlertIsDisplayed() {
   main.verifyElementsIsVisible([recipientAlert])
 }
 
+export function closeIntroTwapModal() {
+  cy.get('button')
+    .contains(unlockTwapOrdersStrBtn)
+    .should(() => {})
+    .then(($button) => {
+      if (!$button.length) {
+        return
+      }
+      cy.wrap($button).click()
+      cy.contains(unlockTwapOrdersStrBtn).should('not.exist')
+      cy.wait(500)
+    })
+}
+
 export function switchToTwap() {
   cy.get('a').contains(swapStrBtn).click()
   cy.wait(1000)
   cy.get('a').contains(twapStrBtn).click()
   cy.wait(1000)
+  closeIntroTwapModal()
 }
 
 export function checkTokenBalanceAndValue(tokenDirection, balance, value) {

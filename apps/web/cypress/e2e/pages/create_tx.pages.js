@@ -86,7 +86,8 @@ const enabledBulkExecuteBtnTooltip = 'All highlighted transactions will be inclu
 const bulkExecuteBtnStr = 'Bulk execute'
 
 const batchModalTitle = 'Batch'
-const swapOrder = 'Swap order settlement'
+export const swapOrder = 'Swap order settlement'
+export const bulkTxs = 'Bulk transactions'
 
 export const filterTypes = {
   incoming: 'Incoming',
@@ -633,8 +634,8 @@ export function verifyBulkConfirmationScreen(tx, actions) {
   })
 }
 
-export function verifyBulkTxHistoryBlock(tx, actions) {
-  cy.contains(swapOrder)
+export function verifyBulkTxHistoryBlock(order, tx, actions) {
+  cy.contains(order)
     .parent('div')
     .parent()
     .eq(0)
