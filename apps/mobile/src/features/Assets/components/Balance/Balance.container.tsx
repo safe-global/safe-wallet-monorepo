@@ -1,5 +1,4 @@
 import { useDispatch } from 'react-redux'
-import { useSafesGetSafeOverviewV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { selectActiveSafe, switchActiveChain } from '@/src/store/activeSafeSlice'
 import { SafeOverviewResult } from '@safe-global/store/gateway/types'
 import { POLLING_INTERVAL } from '@/src/config/constants'
@@ -9,6 +8,8 @@ import { makeSafeId } from '@/src/utils/formatters'
 import { RootState } from '@/src/store'
 import { selectSafeInfo } from '@/src/store/safesSlice'
 import { useAppSelector } from '@/src/store/hooks'
+import { useSafesGetOverviewForManyQuery } from '@safe-global/store/gateway/safes'
+import React from 'react'
 
 export function BalanceContainer() {
   const chains = useAppSelector(selectAllChains)
@@ -16,9 +17,9 @@ export function BalanceContainer() {
   const dispatch = useDispatch()
   const activeSafeInfo = useAppSelector((state: RootState) => selectSafeInfo(state, activeSafe.address))
   const activeSafeChains = useAppSelector((state: RootState) => getChainsByIds(state, activeSafeInfo.chains))
-  const { data, isLoading } = useSafesGetSafeOverviewV1Query<SafeOverviewResult>(
+  const { data, isLoading } = useSafesGetOverviewForManyQuery<SafeOverviewResult>(
     {
-      safes: chains.map((chain) => makeSafeId(chain.chainId, activeSafe.address)).join(','),
+      safes: chains.map((chain) => makeSafeId(chain.chainId, activeSafe.address)),
       currency: 'usd',
       trusted: true,
       excludeSpam: true,

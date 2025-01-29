@@ -60,7 +60,7 @@ export function ImportPrivateKey() {
         </ScrollView>
 
         <View paddingHorizontal={'$3'}>
-          <SafeButton onPress={handleImport} label="Import signer" />
+          <SafeButton onPress={handleImport}>Import signer</SafeButton>
         </View>
       </View>
     </SafeAreaView>

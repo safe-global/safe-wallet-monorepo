@@ -2,8 +2,6 @@ import type { Meta, StoryObj } from '@storybook/react'
 import React from 'react'
 import { OnboardingCarousel } from './OnboardingCarousel'
 import { items } from './items'
-import { SafeButton } from '@/src/components/SafeButton'
-import { action } from '@storybook/addon-actions'
 
 const meta: Meta<typeof OnboardingCarousel> = {
   title: 'Carousel',

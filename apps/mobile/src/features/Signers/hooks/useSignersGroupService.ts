@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 
-import { useSafesGetSafeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
+import { AddressInfo, useSafesGetSafeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { useAppSelector } from '@/src/store/hooks'
 import { selectActiveSafe } from '@/src/store/activeSafeSlice'
 
@@ -15,23 +15,23 @@ export const useSignersGroupService = () => {
     chainId: activeSafe.chainId,
   })
 
-  const group = useMemo(() => {
-    const sections =
-      data?.owners?.reduce<typeof groupedSigners>(
-        (acc, owner) => {
-          if (appSigners[owner.value]) {
-            acc.imported.data.push(owner)
-          } else {
-            acc.notImported.data.push(owner)
-          }
-
-          return acc
-        },
-        JSON.parse(JSON.stringify(groupedSigners)),
-      ) || {}
-
-    return sections
-  }, [data?.owners, appSigners])
+  const group = useMemo(() => groupSigners(data?.owners, appSigners), [data?.owners, appSigners])
 
   return { group, isFetching }
+}
+
+export const groupSigners = (owners: AddressInfo[] | undefined, appSigners: Record<string, AddressInfo>) => {
+  return (
+    owners?.reduce<typeof groupedSigners>(
+      (acc, owner) => {
+        if (appSigners[owner.value]) {
+          acc.imported.data.push(owner)
+        } else {
+          acc.notImported.data.push(owner)
+        }
+        return acc
+      },
+      JSON.parse(JSON.stringify(groupedSigners)),
+    ) || {}
+  )
 }

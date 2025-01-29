@@ -31,8 +31,8 @@ export function MyAccountsFooter({ animatedFooterPosition }: CustomFooterProps) 
     <BottomSheetFooter animatedFooterPosition={animatedFooterPosition}>
       <MyAccountsFooterContainer>
         <TouchableOpacity onPress={onAddAccountClick}>
-          <MyAccountsButton testID="add-existing-account">
-            <Link href={'/(import-accounts)'}>
+          <Link href={'/(import-accounts)'} asChild>
+            <MyAccountsButton testID="add-existing-account">
               <Badge
                 themeName="badge_background"
                 circleSize="$10"
@@ -42,8 +42,8 @@ export function MyAccountsFooter({ animatedFooterPosition }: CustomFooterProps) 
               <Text fontSize="$4" fontWeight={600}>
                 Add Existing Account
               </Text>
-            </Link>
-          </MyAccountsButton>
+            </MyAccountsButton>
+          </Link>
         </TouchableOpacity>
 
         <TouchableOpacity onPress={onJoinAccountClick}>

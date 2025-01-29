@@ -5,6 +5,7 @@
     "paths": {
       "@/*": ["./*"],
       "@safe-global/store/*": ["../../packages/store/src/*"],
+      "@safe-global/utils/*": ["../../packages/utils/src/*"],
       "@safe-global/test/*": ["../../config/test/*"]
     },
     "types": ["jest", "node"]

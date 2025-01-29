@@ -34,6 +34,14 @@ const activeSafeSlice = createSlice({
   name: 'safes',
   initialState,
   reducers: {
+    addSafe: (state, action: PayloadAction<SafesSliceItem>) => {
+      const address = action.payload.SafeInfo.address.value
+      state = {
+        ...state,
+        [address]: action.payload,
+      }
+      return state
+    },
     updateSafeInfo: (state, action: PayloadAction<{ address: Address; item: SafesSliceItem }>) => {
       state[action.payload.address] = action.payload.item
       return state
@@ -50,7 +58,7 @@ const activeSafeSlice = createSlice({
   },
 })
 
-export const { updateSafeInfo, setSafes, removeSafe } = activeSafeSlice.actions
+export const { updateSafeInfo, setSafes, removeSafe, addSafe } = activeSafeSlice.actions
 
 export const selectAllSafes = (state: RootState) => state.safes
 export const selectSafeInfo = createSelector(

@@ -57,6 +57,7 @@ function RootLayout() {
                         }}
                       />
                       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                      <Stack.Screen name="(import-accounts)" options={{ headerShown: false, presentation: 'modal' }} />
                       <Stack.Screen name="pending-transactions" options={{ headerShown: true, title: '' }} />
                       <Stack.Screen name="notifications" options={{ headerShown: true, title: '' }} />
 

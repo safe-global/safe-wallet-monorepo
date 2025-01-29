@@ -17,7 +17,7 @@ export const useSignersActions = () => {
         imageColor: Platform.select({ ios: color, android: '#000' }),
       },
       {
-        id: 'share',
+        id: 'import',
         title: 'Import signer',
         image: Platform.select({
           ios: 'square.and.arrow.up.on.square',

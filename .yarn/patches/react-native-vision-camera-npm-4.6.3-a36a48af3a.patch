@@ -1,0 +1,13 @@
+diff --git a/android/src/main/java/com/mrousavy/camera/core/CameraSession.kt b/android/src/main/java/com/mrousavy/camera/core/CameraSession.kt
+index 862c03a14680566280adfb48dd14b02781844d8d..9307389f00e442b5fc59e05ca087c864e942222f 100644
+--- a/android/src/main/java/com/mrousavy/camera/core/CameraSession.kt
++++ b/android/src/main/java/com/mrousavy/camera/core/CameraSession.kt
+@@ -90,7 +90,7 @@ class CameraSession(internal val context: Context, internal val callback: Callba
+     }
+   }
+
+-  override fun getLifecycle(): Lifecycle = lifecycleRegistry
++  override val lifecycle: Lifecycle get() = lifecycleRegistry
+
+   /**
+    * Configures the [CameraSession] with new values in one batch.

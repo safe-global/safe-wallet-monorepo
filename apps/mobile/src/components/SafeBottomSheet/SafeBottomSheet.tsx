@@ -15,7 +15,7 @@ interface SafeBottomSheetProps<T> {
   snapPoints?: BottomSheetModalProps['snapPoints']
   actions?: React.ReactNode
   footerComponent?: React.FC<BottomSheetFooterProps>
-  renderItem?: React.FC<{ item: T; isDragging?: boolean; drag?: () => void }>
+  renderItem?: React.FC<{ item: T; isDragging?: boolean; drag?: () => void; onClose: () => void }>
   keyExtractor?: ({ item, index }: { item: T; index: number }) => string
 }
 
@@ -35,11 +35,15 @@ export function SafeBottomSheet<T>({
   const hasCustomItems = items && Render
   const isSortable = items && sortable
 
+  const onClose = useCallback(() => {
+    router.back()
+  }, [])
+
   const renderItem = useCallback(
     ({ item, drag, isActive }: RenderItemParams<T>) => {
       return (
         <ScaleDecorator activeScale={1.05}>
-          {Render && <Render drag={drag} isDragging={isActive} item={item} />}
+          {Render && <Render drag={drag} isDragging={isActive} item={item} onClose={onClose} />}
         </ScaleDecorator>
       )
     },
@@ -97,7 +101,11 @@ export function SafeBottomSheet<T>({
               <View alignItems="flex-start" paddingBottom="$4" width="100%">
                 {hasCustomItems
                   ? items.map((item, index) => (
-                      <Render key={keyExtractor ? keyExtractor({ item, index }) : index} item={item} />
+                      <Render
+                        key={keyExtractor ? keyExtractor({ item, index }) : index}
+                        item={item}
+                        onClose={onClose}
+                      />
                     ))
                   : children}
               </View>

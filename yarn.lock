@@ -8256,10 +8256,11 @@ __metadata:
     react-native-pager-view: "npm:^6.5.1"
     react-native-progress: "npm:^5.0.1"
     react-native-quick-crypto: "npm:^0.7.11"
-    react-native-reanimated: "npm:^3.16.7"
-    react-native-safe-area-context: "npm:4.12.0"
-    react-native-screens: "npm:^4.0.0"
+    react-native-reanimated: "npm:~3.16.7"
+    react-native-safe-area-context: "npm:~5.1.0"
+    react-native-screens: "npm:~4.5.0"
     react-native-svg: "npm:15.8.0"
+    react-native-vision-camera: "patch:react-native-vision-camera@npm%3A4.6.3#~/.yarn/patches/react-native-vision-camera-npm-4.6.3-a36a48af3a.patch"
     react-native-web: "npm:^0.19.13"
     react-redux: "npm:^9.1.2"
     redux: "npm:^5.0.1"
@@ -29020,7 +29021,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-reanimated@npm:^3.16.7":
+"react-native-reanimated@npm:~3.16.7":
   version: 3.16.7
   resolution: "react-native-reanimated@npm:3.16.7"
   dependencies:
@@ -29043,26 +29044,26 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-safe-area-context@npm:4.12.0":
-  version: 4.12.0
-  resolution: "react-native-safe-area-context@npm:4.12.0"
+"react-native-safe-area-context@npm:~5.1.0":
+  version: 5.1.0
+  resolution: "react-native-safe-area-context@npm:5.1.0"
   peerDependencies:
     react: "*"
     react-native: "*"
-  checksum: 10/1db86f38c20c8b22ea274ea895b3cedbb1f8d8260d7f726ab4ee315f5e1e611ba3dde89c43dcb3ccccf97dfc3e7d8b11b79ffe4a6369697b6fed3bd80eaaf7c5
+  checksum: 10/7ff5fd17733b73d3c9fc5f7afa81c9c45389e5bc13ec2101135bdded9d8f435465582e0874de3f517bfb2c4f3fc7300dfdbc51176bc0ca84240184b2a888d74b
   languageName: node
   linkType: hard
 
-"react-native-screens@npm:^4.0.0":
-  version: 4.3.0
-  resolution: "react-native-screens@npm:4.3.0"
+"react-native-screens@npm:~4.5.0":
+  version: 4.5.0
+  resolution: "react-native-screens@npm:4.5.0"
   dependencies:
     react-freeze: "npm:^1.0.0"
     warn-once: "npm:^0.1.0"
   peerDependencies:
     react: "*"
     react-native: "*"
-  checksum: 10/3c33d282712f1b7274a88a1bfcaa8de1f012b0a1afd0b3de04714579ec37d803bc22f5bc78b72c0a6f6743e349d77744f7201f6f94f3ab1a6e82aa149e495b9a
+  checksum: 10/e9f56b52989aab7e58ed6a3930632d00c5ab94365e5a591cfc0187ffa742870b3eadb1d1832ff4cc6a7a3b8b77fce0a022ab781a72866539e830dc43b380ac60
   languageName: node
   linkType: hard
 
@@ -29108,6 +29109,46 @@ __metadata:
   peerDependencies:
     react-native: "*"
   checksum: 10/6a8d605eeb1b0ee9b0f47f1866acc2edfa2131a4a8fb1ea3839ceb507e225b894ed66f49a3bd826fc964f2c8005b3678c9d3b65d07eb0a3b979be830cb618686
+  languageName: node
+  linkType: hard
+
+"react-native-vision-camera@npm:4.6.3":
+  version: 4.6.3
+  resolution: "react-native-vision-camera@npm:4.6.3"
+  peerDependencies:
+    "@shopify/react-native-skia": "*"
+    react: "*"
+    react-native: "*"
+    react-native-reanimated: "*"
+    react-native-worklets-core: "*"
+  peerDependenciesMeta:
+    "@shopify/react-native-skia":
+      optional: true
+    react-native-reanimated:
+      optional: true
+    react-native-worklets-core:
+      optional: true
+  checksum: 10/ff56e8126df423ba5d4c9f8d2b15a1b9b48e8669445464b2f301fa47946ce1759e6e4119c443cb8f02a44f8ab5fd6c52a8d534cfc385fc9d647e857ee46f82e6
+  languageName: node
+  linkType: hard
+
+"react-native-vision-camera@patch:react-native-vision-camera@npm%3A4.6.3#~/.yarn/patches/react-native-vision-camera-npm-4.6.3-a36a48af3a.patch":
+  version: 4.6.3
+  resolution: "react-native-vision-camera@patch:react-native-vision-camera@npm%3A4.6.3#~/.yarn/patches/react-native-vision-camera-npm-4.6.3-a36a48af3a.patch::version=4.6.3&hash=24cdb2"
+  peerDependencies:
+    "@shopify/react-native-skia": "*"
+    react: "*"
+    react-native: "*"
+    react-native-reanimated: "*"
+    react-native-worklets-core: "*"
+  peerDependenciesMeta:
+    "@shopify/react-native-skia":
+      optional: true
+    react-native-reanimated:
+      optional: true
+    react-native-worklets-core:
+      optional: true
+  checksum: 10/fb461f4da8e035c0afab03cc320c98c006060c79116c0b858dafa1c609b86f2942547541ea3ac6951955f3e7e8897e792f8e13aeb6c5f81c9699b5fdda450422
   languageName: node
   linkType: hard
 

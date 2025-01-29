@@ -10,6 +10,7 @@ export const StyledInputContainer = styled(View, {
   alignItems: 'center',
   justifyContent: 'center',
   marginBottom: '$3',
+  backgroundColor: '$containerBackgroundColor',
 
   variants: {
     error: {
@@ -23,5 +24,6 @@ export const StyledInputContainer = styled(View, {
 export const StyledInput = styled(Input, {
   color: '$inputTextColor',
   placeholderTextColor: '$placeholderColor',
+  backgroundColor: '$inputBackgroundColor',
   borderWidth: 0,
 })

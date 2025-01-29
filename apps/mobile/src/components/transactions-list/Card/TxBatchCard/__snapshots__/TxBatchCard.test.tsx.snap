@@ -6,7 +6,7 @@ exports[`TxBatchCard should render the default markup 1`] = `
     style={
       {
         "alignItems": "center",
-        "backgroundColor": "#F4F4F4",
+        "backgroundColor": "#FFFFFF",
         "borderBottomLeftRadius": 7,
         "borderBottomRightRadius": 7,
         "borderTopLeftRadius": 7,

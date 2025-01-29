@@ -68,6 +68,13 @@ export default {
           },
         },
       ],
+      [
+        'react-native-vision-camera',
+        {
+          cameraPermissionText: 'Safe{Wallet} needs access to your Camera to scan QR Codes.',
+          enableCodeScanner: true,
+        },
+      ],
       ['./expo-plugins/withDrawableAssets.js', './assets/android/drawable'],
       [
         'expo-build-properties',
