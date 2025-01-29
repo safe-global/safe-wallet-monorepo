@@ -1,14 +1,12 @@
-import { Badge } from '@/src/components/Badge'
-import { Container } from '@/src/components/Container'
 import { SectionTitle } from '@/src/components/Title'
 import React from 'react'
 import { ScrollView } from 'react-native-gesture-handler'
-import { H5, Image, Text, View } from 'tamagui'
 import Seed from '@/assets/images/seed.png'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { useScrollableHeader } from '@/src/navigation/useScrollableHeader'
 import { NavBarTitle } from '@/src/components/Title'
 import { SafeAreaView } from 'react-native-safe-area-context'
+import { SafeCard } from '@/src/components/SafeCard'
 
 /**
  * TODO: Add the images for each items
@@ -52,27 +50,13 @@ function ImportSignersPage() {
         />
 
         {items.map((item, index) => (
-          <Container key={`${item.name}-${index}`} position="relative" marginHorizontal={'$3'} marginTop={'$6'}>
-            <Badge circular content={item.icon} themeName="badge_background" />
-            <H5 fontWeight={600} marginBottom="$1" marginTop="$4">
-              {item.title}
-            </H5>
-            <Text fontSize={'$4'} color="$colorSecondary">
-              {item.description}
-            </Text>
-
-            <View alignItems="center">
-              <Image
-                maxWidth={300}
-                width={'100%'}
-                borderRadius={'$4'}
-                marginBottom="-16"
-                marginTop="$4"
-                height={100}
-                source={item.Image}
-              />
-            </View>
-          </Container>
+          <SafeCard
+            key={`${item.name}-${index}`}
+            title={item.title}
+            description={item.description}
+            icon={item.icon}
+            image={item.Image}
+          />
         ))}
       </ScrollView>
     </SafeAreaView>
