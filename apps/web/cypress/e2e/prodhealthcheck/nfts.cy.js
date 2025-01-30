@@ -4,9 +4,8 @@ import * as createTx from '../pages/create_tx.pages'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as wallet from '../../support/utils/wallet.js'
 import { getMockAddress } from '../../support/utils/ethers.js'
-import * as navigation from '../pages/navigation.page.js'
-import { waitForConnectionStatus } from '../pages/owners.pages'
 import { acceptCookies2 } from '../pages/main.page.js'
+import { suspendOutreachModal } from '../pages/modals.page.js'
 
 const multipleNFT = ['multiSend']
 const multipleNFTAction = 'safeTransferFrom'
@@ -35,6 +34,7 @@ describe('[PROD] NFTs tests', () => {
     wallet.connectSigner(signer)
     acceptCookies2()
     nfts.waitForNftItems(2)
+    suspendOutreachModal()
   })
 
   it('Verify multipls NFTs can be selected and reviewed', () => {
@@ -61,16 +61,20 @@ describe('[PROD] NFTs tests', () => {
   })
 
   it('Verify Send button is disabled for non-owner', () => {
-    cy.visit(constants.balanceNftsUrl + nftsSafes.SEP_NFT_SAFE_2)
+    cy.visit(constants.prodbaseUrl + constants.balanceNftsUrl + nftsSafes.SEP_NFT_SAFE_2)
     nfts.verifyInitialNFTData()
+    acceptCookies2()
+    suspendOutreachModal()
     nfts.selectNFTs(1)
     nfts.verifySendNFTBtnDisabled()
   })
 
   it('Verify Send NFT transaction has been created', () => {
-    cy.visit(constants.balanceNftsUrl + nftsSafes.SEP_NFT_SAFE_1)
+    cy.visit(constants.prodbaseUrl + constants.balanceNftsUrl + nftsSafes.SEP_NFT_SAFE_1)
     wallet.connectSigner(signer)
     nfts.verifyInitialNFTData()
+    acceptCookies2()
+    suspendOutreachModal()
     nfts.selectNFTs(1)
     nfts.sendNFT()
     nfts.typeRecipientAddress(staticSafes.SEP_STATIC_SAFE_1)

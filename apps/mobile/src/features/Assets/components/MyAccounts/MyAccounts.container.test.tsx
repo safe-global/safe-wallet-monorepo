@@ -46,7 +46,7 @@ describe('MyAccountsContainer', () => {
 
   beforeEach(() => {
     server.use(
-      http.get(`${GATEWAY_URL}//v1/safes`, () => {
+      http.get(`${GATEWAY_URL}/v1/safes`, () => {
         return HttpResponse.json([
           {
             address: { value: '0x123', name: 'Test Safe' },

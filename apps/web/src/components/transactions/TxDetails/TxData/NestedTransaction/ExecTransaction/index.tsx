@@ -58,7 +58,7 @@ export const ExecTransaction = ({
   const [txPreview, error] = useTxPreview(
     childSafeTx
       ? {
-          operation: childSafeTx.data.operation,
+          operation: Number(childSafeTx.data.operation),
           data: childSafeTx.data.data,
           to: childSafeTx.data.to,
           value: childSafeTx.data.value.toString(),

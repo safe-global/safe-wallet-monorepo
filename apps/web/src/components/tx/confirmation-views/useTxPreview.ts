@@ -13,17 +13,18 @@ const useTxPreview = (
   customSafeAddress?: string,
   txId?: string,
 ) => {
+  const skip = !!txId || !safeTxData
   const {
     safe: { chainId },
     safeAddress,
   } = useSafeInfo()
   const address = customSafeAddress ?? safeAddress
+  const { operation = Operation.CALL, data = '', to, value } = safeTxData ?? {}
 
   return useAsync(() => {
-    if (txId || !safeTxData?.data) return
-    const { operation = Operation.CALL, data = '', to, value } = safeTxData || {}
+    if (skip) return
     return getTxPreview(chainId, address, operation, data, to, value)
-  }, [txId, chainId, address, safeTxData])
+  }, [skip, chainId, address, operation, data, to, value])
 }
 
 export default useTxPreview

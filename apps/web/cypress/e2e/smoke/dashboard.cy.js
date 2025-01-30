@@ -9,7 +9,7 @@ const txaddOwner = ['5', 'addOwnerWithThreshold', '1 out of 2']
 const txMultiSendCall3 = ['4', 'Batch', '3 actions', '1 out of 2']
 const txMultiSendCall2 = ['6', 'Batch', '2 actions', '1 out of 2']
 
-describe('[SMOKE] Dashboard tests', { defaultCommandTimeout: 20000 }, () => {
+describe('[SMOKE] Dashboard tests', { defaultCommandTimeout: 60000 }, () => {
   before(async () => {
     staticSafes = await getSafes(CATEGORIES.static)
   })

@@ -2,6 +2,8 @@ import * as constants from '../../support/constants.js'
 import * as main from '../pages/main.page.js'
 import * as create_tx from '../pages/create_tx.pages.js'
 import * as table from '../pages/tables.page.js'
+import * as modals from '../pages/modals.page.js'
+import * as swaps_data from '../../fixtures/swaps_data.json'
 
 export const inputCurrencyInput = '[id="input-currency-input"]'
 export const outputCurrencyInput = '[id="output-currency-input"]'
@@ -27,12 +29,15 @@ const recipientAlert = '[data-testid="recipient-alert"]'
 const groupedItems = '[data-testid="grouped-items"]'
 const inputCurrencyPreview = '[id="input-currency-preview"]'
 const outputCurrencyPreview = '[id="output-currency-preview"]'
+const outputCurrencyTitle = (title) => `span[title*='${title}']`
 const reviewTwapBtn = '[id="do-trade-button"]'
+const placeTwapOrderStrBtn = 'Place TWAP order'
 export const unlockOrdersBtn = '[id="unlock-advanced-orders-btn"]'
 
 const swapStrBtn = 'Swap'
 const twapStrBtn = 'TWAP'
 const confirmSwapStr = 'Confirm Swap'
+const swapAnywayStrBtn = 'Swap anyway'
 const maxStrBtn = 'Max'
 const numberOfPartsStr = /No\.? of parts/
 const sellAmountStr = 'Sell amount'
@@ -42,10 +47,13 @@ const partDuration = 'Part duration'
 const totalDurationStr = 'Total duration'
 const oneHr = '1 Hour'
 const halfHr = '30m'
-const sellperPartStr = /Sell( amount)? per part/
-const buyperPartStr = /Buy( amount)? per part/
+const sellperPartStr = 'Sell per part'
+const sellperPartStr2 = 'Sell amount'
+const buyperPartStr = 'Buy per part'
 const priceProtectionStr = 'Price protection'
-const orderSplit = 'TWAP order split in'
+const orderSplit = 'Order will be split in'
+const orderDetailsStr = 'Order details'
+const unlockTwapOrdersStrBtn = 'Unlock TWAP orders'
 
 const getInsufficientBalanceStr = (token) => `Insufficient ${token} balance`
 const sellAmountIsSmallStr = 'Sell amount too small'
@@ -60,6 +68,8 @@ export const blockedAddressStr = 'Blocked address'
 
 const swapStr = 'Swap'
 const limitStr = 'Limit'
+
+const swapsHistory = swaps_data.type.history
 
 export const swapTokens = {
   cow: 'COW',
@@ -186,8 +196,25 @@ export function clickOnSwapBtn() {
   cy.get('@swapBtn').should('exist').click({ force: true })
 }
 
+export function verifyReviewTwapBtnIsVisible() {
+  return cy.get(reviewTwapBtn).should('be.visible')
+}
+
 export function clickOnReviewTwapBtn() {
+  cy.get('button')
+    .contains(swapAnywayStrBtn)
+    .should(() => {})
+    .then(($button) => {
+      if (!$button.length) {
+        return
+      }
+      cy.wrap($button).click()
+    })
   cy.get(reviewTwapBtn).click()
+}
+
+export function placeTwapOrder() {
+  cy.contains(placeTwapOrderStrBtn).click()
 }
 
 export function checkSwapBtnIsVisible() {
@@ -360,11 +387,26 @@ export function verifyRecipientAlertIsDisplayed() {
   main.verifyElementsIsVisible([recipientAlert])
 }
 
+export function closeIntroTwapModal() {
+  cy.get('button')
+    .contains(unlockTwapOrdersStrBtn)
+    .should(() => {})
+    .then(($button) => {
+      if (!$button.length) {
+        return
+      }
+      cy.wrap($button).click()
+      cy.contains(unlockTwapOrdersStrBtn).should('not.exist')
+      cy.wait(500)
+    })
+}
+
 export function switchToTwap() {
   cy.get('a').contains(swapStrBtn).click()
   cy.wait(1000)
   cy.get('a').contains(twapStrBtn).click()
   cy.wait(1000)
+  closeIntroTwapModal()
 }
 
 export function checkTokenBalanceAndValue(tokenDirection, balance, value) {
@@ -478,16 +520,26 @@ export function getTwapInitialData() {
     .wrap(null)
     .then(() => {
       cy.get(inputCurrencyInput).within(() => {
-        cy.get('input')
+        cy.get('input', { timeout: 10000 })
+          .should(($input) => {
+            const value = parseFloat($input.val())
+            expect(value).to.be.greaterThan(0)
+          })
           .invoke('val')
+          .should('not.be.empty')
           .then((value) => {
             formData.inputToken = value
           })
       })
 
       cy.get(outputCurrencyInput).within(() => {
-        cy.get('input')
+        cy.get('input', { timeout: 10000 })
+          .should(($input) => {
+            const value = parseFloat($input.val())
+            expect(value).to.be.greaterThan(0)
+          })
           .invoke('val')
+          .should('not.be.empty')
           .then((value) => {
             formData.outputToken = value
           })
@@ -498,6 +550,7 @@ export function getTwapInitialData() {
           .find('span')
           .filter((index, button) => Cypress.$(button).text().trim().length > 0)
           .invoke('text')
+          .should('not.be.empty')
           .then((text) => {
             formData.inputTokenName = text
           })
@@ -507,6 +560,7 @@ export function getTwapInitialData() {
         cy.get('button')
           .filter((index, button) => Cypress.$(button).text().trim().length > 0)
           .invoke('text')
+          .should('not.be.empty')
           .then((text) => {
             formData.outputTokenName = text
           })
@@ -516,6 +570,7 @@ export function getTwapInitialData() {
         .contains(totalDurationStr)
         .next()
         .invoke('text')
+        .should('not.be.empty')
         .then((value) => {
           formData.totalDuration = value
             .toLowerCase()
@@ -527,6 +582,7 @@ export function getTwapInitialData() {
         .contains(partDuration)
         .next()
         .invoke('text')
+        .should('not.be.empty')
         .then((value) => {
           formData.partDuration = value
             .toLowerCase()
@@ -534,20 +590,26 @@ export function getTwapInitialData() {
             .trim()
         })
 
+      cy.get(outputCurrencyInput).within(() => {
+        cy.get('input', { timeout: 10000 })
+          .should(($input) => {
+            const value = parseFloat($input.val())
+            expect(value).to.be.greaterThan(0)
+          })
+          .invoke('val')
+          .should('not.be.empty')
+          .then((value) => {
+            formData.outputToken = value
+          })
+      })
+
       cy.get('span')
         .contains(sellperPartStr)
         .next()
         .invoke('text')
+        .should('not.be.empty')
         .then((value) => {
           formData.sellPart = value
-        })
-
-      cy.get('span')
-        .contains(buyperPartStr)
-        .next()
-        .invoke('text')
-        .then((value) => {
-          formData.buyPart = value
         })
 
       cy.get('span')
@@ -555,6 +617,7 @@ export function getTwapInitialData() {
         .next()
         .find('input')
         .invoke('val')
+        .should('not.be.empty')
         .then((value) => {
           formData.numberOfParts = value
         })
@@ -566,12 +629,20 @@ export function getTwapInitialData() {
 }
 
 export function checkTwapValuesInReviewScreen(formData) {
-  cy.get(inputCurrencyPreview).should('contain', formData.inputToken)
-  cy.get(inputCurrencyPreview).should('contain', formData.inputTokenName)
-  cy.get(outputCurrencyPreview).should('contain', formData.outputToken)
-  cy.get(outputCurrencyPreview).should('contain', formData.outputTokenName)
+  main.verifyValuesExist(modals.cardContent, [
+    orderDetailsStr,
+    formData.inputToken,
+    formData.inputTokenName,
+    formData.outputTokenName,
+    formData.sellPart,
+    swapsHistory.interactWith,
+    swapsHistory.widget_fee,
+    swapsHistory.slippage,
+    swapsHistory.expiry,
+    swapsHistory.limitPrice,
+  ])
 
-  cy.get('span')
+  cy.get(create_tx.txRowTitle)
     .contains(totalDurationStr)
     .parent()
     .next()
@@ -584,7 +655,7 @@ export function checkTwapValuesInReviewScreen(formData) {
       expect(normalizedDisplayedValue).to.eq(formData.totalDuration)
     })
 
-  cy.get('span')
+  cy.get(create_tx.txRowTitle)
     .contains(partDuration)
     .parent()
     .next()
@@ -597,23 +668,10 @@ export function checkTwapValuesInReviewScreen(formData) {
       expect(normalizedDisplayedValue).to.eq(formData.partDuration)
     })
 
-  cy.get('span').contains(sellperPartStr).parent().next().should('contain', formData.sellPart)
+  cy.get(create_tx.txRowTitle).contains(sellperPartStr2).parent().next().should('contain', formData.sellPart)
 
-  const buyPartValue = formData.buyPart
-  let [number, tokenName] = buyPartValue.split(' ')
-
-  cy.get('span')
-    .contains(buyperPartStr)
-    .parent()
-    .next()
-    .invoke('text')
-    .then((text) => {
-      const numericValue = text.match(/\d+(\.\d+)?/)[0]
-      expect(text).to.include(`${numericValue} ${tokenName}`)
-    })
-
-  cy.contains(orderSplit)
-    .next()
+  cy.get('p')
+    .contains(orderSplit)
     .invoke('text')
     .then((text) => {
       expect(text).to.include(formData.numberOfParts)

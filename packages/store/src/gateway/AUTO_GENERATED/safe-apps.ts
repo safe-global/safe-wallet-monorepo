@@ -35,7 +35,7 @@ export type SafeAppAccessControl = {
   value?: string[] | null
 }
 export type SafeAppSocialProfile = {
-  platform: 'DISCORD' | 'GITHUB' | 'TWITTER' | 'UNKNOWN'
+  platform: 'DISCORD' | 'GITHUB' | 'TWITTER' | 'TELEGRAM' | 'UNKNOWN'
   url: string
 }
 export type SafeApp = {

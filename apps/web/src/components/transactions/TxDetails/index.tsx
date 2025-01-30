@@ -21,7 +21,7 @@ import { InfoDetails } from '@/components/transactions/InfoDetails'
 import NamedAddressInfo from '@/components/common/NamedAddressInfo'
 import css from './styles.module.css'
 import ErrorMessage from '@/components/tx/ErrorMessage'
-import TxShareLink from '../TxShareLink'
+import { TxShareButton } from '../TxShareLink/TxShareButton'
 import { ErrorBoundary } from '@sentry/react'
 import ExecuteTxButton from '@/components/transactions/ExecuteTxButton'
 import SignTxButton from '@/components/transactions/SignTxButton'
@@ -37,6 +37,7 @@ import { useGetTransactionDetailsQuery } from '@/store/api/gateway'
 import { asError } from '@/services/exceptions/utils'
 import { POLLING_INTERVAL } from '@/config/constants'
 import { TxNote } from '@/features/tx-notes'
+import { TxShareBlock } from '../TxShareLink/TxShareBlock'
 
 export const NOT_AVAILABLE = 'n/a'
 
@@ -88,7 +89,7 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
         </div>
 
         <div className={css.shareLink}>
-          <TxShareLink id={txSummary.id} />
+          <TxShareButton txId={txSummary.id} />
         </div>
 
         <div className={css.txData}>
@@ -141,6 +142,8 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
             isTxFromProposer={isTxFromProposer}
             proposer={proposedByDelegate}
           />
+
+          {isQueue && <TxShareBlock txId={txDetails.txId} />}
 
           {isQueue && (
             <Box className={css.buttons}>
