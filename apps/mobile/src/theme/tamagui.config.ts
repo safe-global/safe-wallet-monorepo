@@ -3,6 +3,7 @@ import { createDmSansFont } from '@tamagui/font-dm-sans'
 import { badgeTheme } from '@/src/components/Badge/theme'
 import { tokens } from '@/src/theme/tokens'
 import { createAnimations } from '@tamagui/animations-moti'
+import { inputTheme } from '../components/SafeInput/theme'
 
 const DmSansFont = createDmSansFont({
   face: {
@@ -49,6 +50,7 @@ export const config = createTamagui({
       color: tokens.color.infoMainDark,
     },
     ...badgeTheme,
+    ...inputTheme,
     light_success: {
       background: tokens.color.successBackgroundLight,
       color: tokens.color.successMainLight,

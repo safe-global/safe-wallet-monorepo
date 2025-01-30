@@ -4,7 +4,7 @@ import { StyledInput, StyledInputContainer } from './styled'
 import { getInputThemeName } from './utils'
 import { SafeFontIcon } from '../SafeFontIcon'
 
-interface SafeInputProps {
+export interface SafeInputProps {
   error?: React.ReactNode | string
   placeholder?: string
   height?: number
@@ -31,7 +31,7 @@ export function SafeInput({
   error,
   success,
   placeholder,
-  height,
+  height = 52,
   left,
   right,
   ...props
