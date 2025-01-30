@@ -2,11 +2,17 @@ import React from 'react'
 import { useColorScheme } from 'react-native'
 import { OptIn } from '@/src/components/OptIn'
 import useNotifications from '@/src/hooks/useNotifications'
-import { router } from 'expo-router'
+import { router, useFocusEffect } from 'expo-router'
 
 function NotificationsOptIn() {
-  const { enableNotifications, isAppNotificationEnabled } = useNotifications(true)
+  const { enableNotifications, isAppNotificationEnabled } = useNotifications()
   const colorScheme = useColorScheme()
+
+  useFocusEffect(() => {
+    if (isAppNotificationEnabled) {
+      router.replace('/(tabs)')
+    }
+  })
 
   const image =
     colorScheme === 'dark'
@@ -19,13 +25,13 @@ function NotificationsOptIn() {
       title="Stay in the loop with account activity"
       description="Get notified when you receive assets, and when transactions require your action."
       image={image}
-      isVisible={!isAppNotificationEnabled}
+      isVisible
       ctaButton={{
         onPress: enableNotifications,
         label: 'Enable notifications',
       }}
       secondaryButton={{
-        onPress: () => router.replace('/(tabs)'),
+        onPress: () => router.back(),
         label: 'Maybe later',
       }}
     />

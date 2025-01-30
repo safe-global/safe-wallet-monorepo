@@ -15,6 +15,7 @@ import { MyAccountsContainer, MyAccountsFooter } from '../MyAccounts'
 import { useMyAccountsSortable } from '../MyAccounts/hooks/useMyAccountsSortable'
 import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
 import { router } from 'expo-router'
+import { selectAppNotificationStatus } from '@/src/store/notificationsSlice'
 
 const dropdownLabelProps = {
   fontSize: '$5',
@@ -25,7 +26,15 @@ export const Navbar = () => {
   const dispatch = useAppDispatch()
   const isEdit = useAppSelector(selectMyAccountsMode)
   const activeSafe = useAppSelector(selectActiveSafe)
+  const isAppNotificationEnabled = useAppSelector(selectAppNotificationStatus)
   const { safes, onDragEnd } = useMyAccountsSortable()
+
+  const handleNotificationAccess = () => {
+    if (!isAppNotificationEnabled) {
+      router.navigate('/notifications-opt-in')
+    }
+    // TODO: navigate to notifications list when notifications are enabled
+  }
 
   const toggleEditMode = () => {
     dispatch(toggleMode())
@@ -55,7 +64,7 @@ export const Navbar = () => {
             }
           />
           <View style={styles.rightButtonContainer}>
-            <TouchableOpacity onPress={() => router.navigate('/notifications-opt-in')}>
+            <TouchableOpacity onPress={handleNotificationAccess}>
               <SafeFontIcon name="lightbulb" />
             </TouchableOpacity>
             <TouchableOpacity>

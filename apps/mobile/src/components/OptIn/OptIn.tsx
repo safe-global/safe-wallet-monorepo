@@ -1,7 +1,6 @@
 import React from 'react'
 import { ImageSourcePropType, StyleSheet } from 'react-native'
 import { View, Image, Text } from 'tamagui'
-import { useRouter } from 'expo-router'
 import { SafeButton } from '@/src/components/SafeButton'
 import { WINDOW_HEIGHT } from '@/src/store/constants'
 import { FloatingContainer } from '../FloatingContainer'
@@ -25,10 +24,8 @@ interface OptInProps {
 
 export const OptIn: React.FC<OptInProps> = React.memo(
   ({ testID, kicker, title, description, image, ctaButton, secondaryButton, isVisible }: OptInProps) => {
-    const router = useRouter()
-
     if (!isVisible) {
-      router.push('/(tabs)')
+      return
     }
 
     return (
