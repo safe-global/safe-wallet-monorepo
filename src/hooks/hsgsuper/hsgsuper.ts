@@ -299,3 +299,8 @@ export const useNow = (refreshRate: number = 5000) => {
   })
   return now
 }
+
+// helper to determine whether the transaction should be scheduled based on timelock status
+export const shouldSchedule = (timelockTx: TimelockTx): boolean => {
+  return timelockTx.status === TimelockStatus.NONE || timelockTx.status === TimelockStatus.CANCELLED
+}

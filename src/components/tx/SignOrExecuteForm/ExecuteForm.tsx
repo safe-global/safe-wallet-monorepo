@@ -14,7 +14,6 @@ import { useIsExecutionLoop, useTxActions } from './hooks'
 import { useRelaysBySafe } from '@/hooks/useRemainingRelays'
 import useWalletCanRelay from '@/hooks/useWalletCanRelay'
 import { ExecutionMethod } from '../ExecutionMethodSelector'
-import { ExecutionType, ExecutionTypeSelector } from '../ExecutionTypeSelector'
 import { hasRemainingRelays } from '@/utils/relaying'
 import type { SignOrExecuteProps } from '.'
 import type { SafeTransaction } from '@safe-global/safe-core-sdk-types'
@@ -29,6 +28,7 @@ import commonCss from '@/components/tx-flow/common/styles.module.css'
 import { TxSecurityContext } from '../security/shared/TxSecurityContext'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import NonOwnerError from '@/components/tx/SignOrExecuteForm/NonOwnerError'
+import { useConfirmTx } from '@/components/tx-flow/flows/ConfirmTx'
 
 export const ExecuteForm = ({
   safeTx,
@@ -54,6 +54,7 @@ export const ExecuteForm = ({
   // Form state
   const [isSubmittable, setIsSubmittable] = useState<boolean>(true)
   const [submitError, setSubmitError] = useState<Error | undefined>()
+  const { shouldSchedule } = useConfirmTx()
 
   // Hooks
   const currentChain = useCurrentChain()
@@ -65,7 +66,7 @@ export const ExecuteForm = ({
   const [executionMethod, setExecutionMethod] = useState(ExecutionMethod.RELAY)
 
   // For hsgsupermod, sets either to schedule or execute
-  const [executionType, setExecutionType] = useState(ExecutionType.SCHEDULE)
+  // const [executionType, setExecutionType] = useState(ExecutionType.SCHEDULE)
 
   // SC wallets can relay fully signed transactions
   const [walletCanRelay] = useWalletCanRelay(safeTx)
@@ -75,10 +76,10 @@ export const ExecuteForm = ({
   const willRelay = canRelay && executionMethod === ExecutionMethod.RELAY
 
   // Scheduling vs executing
-  const isScheduled = executionType === ExecutionType.EXECUTE
+  // const isScheduled = executionType === ExecutionType.EXECUTE
 
   // Estimate gas limit
-  const { gasLimit, gasLimitError } = useHsgGasLimit({ safeTx, isScheduling: executionType === ExecutionType.SCHEDULE })
+  const { gasLimit, gasLimitError } = useHsgGasLimit({ safeTx, isScheduling: shouldSchedule })
   const [advancedParams, setAdvancedParams] = useAdvancedParams(gasLimit)
 
   // Check if transaction will fail
@@ -100,7 +101,7 @@ export const ExecuteForm = ({
 
     let executedTxId: string
     try {
-      executedTxId = await executeTx(txOptions, isScheduled, safeTx, txId, origin, false) // hardcodes relay option to false
+      executedTxId = await executeTx(txOptions, !shouldSchedule, safeTx, txId, origin, false) // hardcodes relay option to false
     } catch (_err) {
       const err = asError(_err)
       trackError(Errors._804, err)
@@ -141,13 +142,13 @@ export const ExecuteForm = ({
             gasLimitError={gasLimitError}
             willRelay={willRelay}
           />
-          <div className={css.noTopBorder}>
+          {/* <div className={css.noTopBorder}>
             <ExecutionTypeSelector
               executionType={executionType}
               setExecutionType={setExecutionType}
               relays={relays[0]}
             />
-          </div>
+          </div> */}
         </div>
 
         {/* Error messages */}
@@ -181,7 +182,7 @@ export const ExecuteForm = ({
           <CheckWallet allowNonOwner={onlyExecute}>
             {(isOk) => (
               <Button variant="contained" type="submit" disabled={!isOk || submitDisabled} sx={{ minWidth: '112px' }}>
-                {!isSubmittable ? <CircularProgress size={20} /> : isScheduled ? 'Execute' : 'Schedule'}
+                {!isSubmittable ? <CircularProgress size={20} /> : shouldSchedule ? 'Schedule' : 'Execute'}
               </Button>
             )}
           </CheckWallet>

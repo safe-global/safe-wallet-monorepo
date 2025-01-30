@@ -19,9 +19,11 @@ import { ConfirmTxFlow } from '@/components/tx-flow/flows'
 
 const ExecuteTxButton = ({
   txSummary,
+  shouldSchedule,
   compact = false,
 }: {
   txSummary: TransactionSummary
+  shouldSchedule: boolean
   compact?: boolean
 }): ReactElement => {
   const { setTxFlow } = useContext(TxModalContext)
@@ -39,7 +41,7 @@ const ExecuteTxButton = ({
   const onClick = (e: SyntheticEvent) => {
     e.stopPropagation()
     e.preventDefault()
-    setTxFlow(<ConfirmTxFlow txSummary={txSummary} />, undefined, false)
+    setTxFlow(<ConfirmTxFlow txSummary={txSummary} shouldSchedule={shouldSchedule} />, undefined, false)
   }
 
   const onMouseEnter = () => {
@@ -79,7 +81,7 @@ const ExecuteTxButton = ({
                 disabled={!isOk || isDisabled}
                 size="stretched"
               >
-                Execute
+                {shouldSchedule ? 'Schedule' : 'Execute'}
               </Button>
             )}
           </Track>

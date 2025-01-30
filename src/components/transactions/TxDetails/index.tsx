@@ -29,6 +29,7 @@ import Multisend from '@/components/transactions/TxDetails/TxData/DecodedData/Mu
 import useIsPending from '@/hooks/useIsPending'
 import { isTrustedTx } from '@/utils/transactions'
 import type { TimelockTx } from '@/hooks/hsgsuper/hsgsuper'
+import { shouldSchedule as shouldScheduleHelper } from '@/hooks/hsgsuper/hsgsuper'
 import { TimelockStatus } from '@/hooks/hsgsuper/hsgsuper'
 
 export const NOT_AVAILABLE = 'n/a'
@@ -44,6 +45,7 @@ const TxDetailsBlock = ({ txSummary, txDetails, timelockTx }: TxDetailsProps): R
   const isQueue = isTxQueued(txSummary.txStatus)
   const awaitingExecution = isAwaitingExecution(txSummary.txStatus)
   const isScheduled = !!timelockTx && timelockTx.status === TimelockStatus.SCHEDULED
+  const shouldSchedule = !!timelockTx && shouldScheduleHelper(timelockTx)
   const isUnsigned =
     isMultisigExecutionInfo(txSummary.executionInfo) && txSummary.executionInfo.confirmationsSubmitted === 0
 
@@ -108,7 +110,11 @@ const TxDetailsBlock = ({ txSummary, txDetails, timelockTx }: TxDetailsProps): R
 
           {isQueue && !isScheduled && (
             <Box display="flex" alignItems="center" justifyContent="center" gap={1} mt={2}>
-              {awaitingExecution ? <ExecuteTxButton txSummary={txSummary} /> : <SignTxButton txSummary={txSummary} />}
+              {awaitingExecution ? (
+                <ExecuteTxButton txSummary={txSummary} shouldSchedule={shouldSchedule} />
+              ) : (
+                <SignTxButton txSummary={txSummary} />
+              )}
               <RejectTxButton txSummary={txSummary} />
             </Box>
           )}

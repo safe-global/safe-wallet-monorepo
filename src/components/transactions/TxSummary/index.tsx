@@ -19,7 +19,7 @@ import classNames from 'classnames'
 import { isTrustedTx } from '@/utils/transactions'
 import UntrustedTxWarning from '../UntrustedTxWarning'
 import type { TimelockTx } from '@/hooks/hsgsuper/hsgsuper'
-import { TimelockStatus, useNow } from '@/hooks/hsgsuper/hsgsuper'
+import { TimelockStatus, shouldSchedule as shouldScheduleHelper } from '@/hooks/hsgsuper/hsgsuper'
 
 const getStatusColor = (value: TransactionStatus, palette: Palette | Record<string, Record<string, string>>) => {
   switch (value) {
@@ -49,9 +49,9 @@ const TxSummary = ({ item, isGrouped, timelockTx }: TxSummaryProps): ReactElemen
   const tx = item.transaction
   const wallet = useWallet()
   const txStatusLabel = useTransactionStatus(tx, timelockTx)
-  const now = useNow()
 
   const isScheduled = !!timelockTx && timelockTx.status === TimelockStatus.SCHEDULED
+  const shouldSchedule = !!timelockTx && shouldScheduleHelper(timelockTx)
 
   const isPending = useIsPending(tx.id)
   const isQueue = isTxQueued(tx.txStatus)
@@ -132,7 +132,7 @@ const TxSummary = ({ item, isGrouped, timelockTx }: TxSummaryProps): ReactElemen
           className={classNames({ [css.untrusted]: !isTrusted })}
         >
           {awaitingExecution ? (
-            <ExecuteTxButton txSummary={item.transaction} compact />
+            <ExecuteTxButton txSummary={item.transaction} shouldSchedule={shouldSchedule} compact />
           ) : (
             <SignTxButton txSummary={item.transaction} compact />
           )}

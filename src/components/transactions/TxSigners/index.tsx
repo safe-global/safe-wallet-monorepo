@@ -31,7 +31,7 @@ import CheckIcon from '@/public/images/common/circle-check.svg'
 import CancelIcon from '@/public/images/common/cancel.svg'
 import useTransactionStatus from '@/hooks/useTransactionStatus'
 import type { TimelockTx } from '@/hooks/hsgsuper/hsgsuper'
-import { TimelockStatus } from '@/hooks/hsgsuper/hsgsuper'
+import { TimelockStatus, shouldSchedule as shouldScheduleHelper } from '@/hooks/hsgsuper/hsgsuper'
 
 // Icons
 const Created = () => (
@@ -114,10 +114,14 @@ export const TxSigners = ({ txDetails, txSummary, timelockTx }: TxSignersProps):
   const { detailedExecutionInfo, txInfo, txId } = txDetails
   const [hideConfirmations, setHideConfirmations] = useState<boolean>(shouldHideConfirmations(detailedExecutionInfo))
   const isPending = useIsPending(txId)
+  console.log('Timelock Tx: ', timelockTx)
   const isScheduled = !!timelockTx && timelockTx.status === TimelockStatus.SCHEDULED
+  const shouldSchedule = !!timelockTx && shouldScheduleHelper(timelockTx)
   const txStatus = useTransactionStatus(txSummary, timelockTx)
   const wallet = useWallet()
   const { safe } = useSafeInfo()
+  console.log('isPending:', isPending)
+  console.log('isScheduled:', isScheduled)
 
   const toggleHide = () => {
     setHideConfirmations((prev) => !prev)
@@ -195,7 +199,7 @@ export const TxSigners = ({ txDetails, txSummary, timelockTx }: TxSignersProps):
             {executor ? <Check /> : <MissingConfirmation />}
           </StyledListItemIcon>
           <ListItemText data-testid="tx-action-status" primaryTypographyProps={{ fontWeight: 700 }}>
-            {executor ? 'Executed' : isPending || isScheduled ? txStatus : 'Can be executed'}
+            {executor ? 'Executed' : isPending || shouldSchedule ? txStatus : 'Can be executed'}
           </ListItemText>
         </ListItem>
       </List>

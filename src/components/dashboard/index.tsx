@@ -1,7 +1,6 @@
 import type { ReactElement } from 'react'
 import dynamic from 'next/dynamic'
 import { Grid } from '@mui/material'
-import PendingTxsList from '@/components/dashboard/PendingTxs/PendingTxsList'
 import Overview from '@/components/dashboard/Overview/Overview'
 import { FeaturedApps } from '@/components/dashboard/FeaturedApps/FeaturedApps'
 import SafeAppsDashboardSection from '@/components/dashboard/SafeAppsDashboardSection/SafeAppsDashboardSection'
@@ -32,9 +31,10 @@ const Dashboard = (): ReactElement => {
           <Overview />
         </Grid>
 
+        {/* Note @chase: commenting this out since these txs are constructed differently than what's required to get timelock data
         <Grid item xs={12} lg={6}>
           <PendingTxsList />
-        </Grid>
+        </Grid> */}
 
         <Grid item xs={12} lg={showRecoveryWidget ? 6 : undefined}>
           <FeaturedApps stackedLayout={!!showRecoveryWidget} />
