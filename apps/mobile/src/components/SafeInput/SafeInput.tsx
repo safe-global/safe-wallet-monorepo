@@ -40,7 +40,7 @@ export function SafeInput({
 
   return (
     <Theme name={`input_${getInputThemeName(hasError, success)}`}>
-      <StyledInputContainer minHeight={height}>
+      <StyledInputContainer minHeight={height} testID="safe-input">
         {left}
 
         <StyledInput
