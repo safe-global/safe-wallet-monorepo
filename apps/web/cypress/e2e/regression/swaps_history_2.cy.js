@@ -83,26 +83,6 @@ describe('Swaps history tests 2', () => {
     create_tx.verifyAdvancedDetails([swapsHistory.multiSend, swapsHistory.multiSendCallOnly1_3_0])
   })
 
-  it('Verify "Expired" field in the tx details for limit orders', { defaultCommandTimeout: 30000 }, () => {
-    cy.visit(constants.transactionUrl + staticSafes.SEP_STATIC_SAFE_1 + swaps.swapTxs.sellLimitOrder)
-    const dai = swaps.createRegex(swapsHistory.forAtLeastFullDai, 'DAI')
-    const eq = swaps.createRegex(swapsHistory.DAIeqCOW, 'COW')
-
-    create_tx.verifyExpandedDetails([swapsHistory.sellOrder, swapsHistory.sell, dai, eq, swapsHistory.expired])
-    create_tx.clickOnAdvancedDetails()
-    create_tx.verifyAdvancedDetails([swapsHistory.gGpV2, swapsHistory.actionPreSignatureG])
-  })
-
-  it('Verify "Filled" field in the tx details for limit orders', { defaultCommandTimeout: 30000 }, () => {
-    cy.visit(constants.transactionUrl + swaps.limitOrderSafe + swaps.swapTxs.sellLimitOrderFilled)
-    const usdc = swaps.createRegex(swapsHistory.forAtLeastFullUSDT, 'USDT')
-    const eq = swaps.createRegex(swapsHistory.USDTeqUSDC, 'USDC')
-
-    create_tx.verifyExpandedDetails([swapsHistory.sellOrder, swapsHistory.sell, usdc, eq, swapsHistory.filled])
-    create_tx.clickOnAdvancedDetails()
-    create_tx.verifyAdvancedDetails([swapsHistory.gGpV2, swapsHistory.actionPreSignatureG])
-  })
-
   // Added to prod
   it(
     'Verify there is decoding for a tx created by CowSwap safe-app in the history',

@@ -288,6 +288,10 @@ export function verifyExpandedDetails(data, warning) {
   if (warning) cy.get(warning).should('be.visible')
 }
 
+export function verifyTxHeaderDetails(data) {
+  main.checkTextsExistWithinElement(transactionItem, data)
+}
+
 export function verifyAdvancedDetails(data) {
   main.checkTextsExistWithinElement(accordionDetails, data)
 }

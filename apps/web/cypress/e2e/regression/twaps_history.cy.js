@@ -21,7 +21,7 @@ describe('Twaps history tests', { defaultCommandTimeout: 30000 }, () => {
     staticSafes = await getSafes(CATEGORIES.static)
   })
 
-  it('Verify order deails', { defaultCommandTimeout: 60000 }, () => {
+  it('Verify order details', { defaultCommandTimeout: 60000 }, () => {
     const limitPrice = swaps.createRegex(swapOrder.DAIeqCOW, 'COW')
     const widgetFee = swaps.getWidgetFee()
     const slippage = swaps.getWidgetFee()
@@ -36,10 +36,10 @@ describe('Twaps history tests', { defaultCommandTimeout: 30000 }, () => {
       swaps.selectInputCurrency(swaps.swapTokens.cow)
       swaps.setInputValue(500)
       swaps.selectOutputCurrency(swaps.swapTokens.dai)
-      swaps.verifyReviewTwapBtnIsVisible()
+      swaps.verifyReviewOrderBtnIsVisible()
       swaps.getTwapInitialData().then((formData) => {
         cy.wrap(formData).as('twapFormData')
-        swaps.clickOnReviewTwapBtn()
+        swaps.clickOnReviewOrderBtn()
         swaps.placeTwapOrder()
       })
     })
