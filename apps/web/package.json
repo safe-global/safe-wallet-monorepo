@@ -55,6 +55,7 @@
     "@safe-global/protocol-kit": "^4.1.4",
     "@safe-global/safe-apps-sdk": "^9.1.0",
     "@safe-global/safe-client-gateway-sdk": "v1.60.1",
+    "@safe-global/safe-deployments": "^1.37.26",
     "@safe-global/safe-gateway-typescript-sdk": "3.22.7",
     "@safe-global/safe-modules-deployments": "^2.2.5",
     "@safe-global/store": "workspace:^",
