@@ -24,6 +24,7 @@ export const Container = (
   props: YStackProps & { bordered?: boolean; spaced?: boolean; transparent?: boolean; themeName?: ThemeName },
 ) => {
   const { children, bordered, themeName = 'container', spaced = true, ...rest } = props
+
   return (
     <Theme name={themeName}>
       <StyledYStack
