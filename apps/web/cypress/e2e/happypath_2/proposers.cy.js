@@ -20,8 +20,7 @@ describe('Happy path Proposers tests', () => {
     staticSafes = await getSafes(CATEGORIES.static)
   })
 
-  //TODO: Flaky due to UI retrieval issue - wip
-  it.skip('Verify that editing a proposer is only possible for the proposer created by the creator', () => {
+  it('Verify that editing a proposer is only possible for the proposer created by the creator', () => {
     cy.visit(constants.setupUrl + staticSafes.SEP_STATIC_SAFE_31)
     wallet.connectSigner(signer3)
     cy.contains(owner.safeAccountNonceStr, { timeout: 10000 })
@@ -30,11 +29,13 @@ describe('Happy path Proposers tests', () => {
     proposer.clickOnEditProposerBtn(proposerAddress2)
     proposer.enterProposerName(changedProposerName)
     proposer.clickOnSubmitProposerBtn()
+    cy.reload()
     proposer.checkProposerData([changedProposerName])
 
     proposer.clickOnEditProposerBtn(proposerAddress2)
     proposer.enterProposerName(proposerName2)
     proposer.clickOnSubmitProposerBtn()
+    cy.reload()
     proposer.checkProposerData([proposerName2])
   })
 
@@ -47,5 +48,7 @@ describe('Happy path Proposers tests', () => {
     proposer.enterProposerData(addedProposer, proposerName)
     proposer.clickOnSubmitProposerBtn()
     proposer.verifyProposerSuccessMsgDisplayed()
+    cy.reload()
+    proposer.checkProposerData([proposerName])
   })
 })
