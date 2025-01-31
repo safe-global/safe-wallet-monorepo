@@ -35,7 +35,7 @@ function SignersListItem({ item, index, signersGroup }: SignersListItemProps) {
         borderBottomLeftRadius={isLastItem ? '$4' : undefined}
       >
         <SignersCard
-          name={item.name ?? shortenAddress(item.value)}
+          name={item.name as string}
           address={item.value as `0x${string}`}
           rightNode={
             <MenuView onPressAction={console.log} actions={actions}>
