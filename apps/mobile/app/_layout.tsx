@@ -42,6 +42,7 @@ function RootLayout() {
                         headerLeft: (props) => (
                           <HeaderBackButton
                             {...props}
+                            tintColor="$color"
                             testID={'go-back'}
                             onPress={navigation.goBack}
                             displayMode={'minimal'}
@@ -61,6 +62,31 @@ function RootLayout() {
                       <Stack.Screen name="notifications" options={{ headerShown: true, title: '' }} />
                       <Stack.Screen name="signers/[address]" options={{ headerShown: true, title: '' }} />
                       <Stack.Screen name="import-signers" options={{ headerShown: true, title: '' }} />
+                      <Stack.Screen
+                        name="import-signers/import-private-key"
+                        options={{ headerShown: true, title: '' }}
+                      />
+                      <Stack.Screen
+                        name="import-signers/import-private-key-success"
+                        options={{
+                          presentation: 'modal',
+                          headerShown: false,
+                        }}
+                      />
+                      <Stack.Screen
+                        name="import-signers/loading-import"
+                        options={{
+                          presentation: 'modal',
+                          headerShown: false,
+                        }}
+                      />
+                      <Stack.Screen
+                        name="import-signers/import-private-key-error"
+                        options={{
+                          presentation: 'modal',
+                          headerShown: false,
+                        }}
+                      />
                       <Stack.Screen name="app-settings" options={{ headerShown: true, title: 'Settings' }} />
                       <Stack.Screen name="notifications-opt-in" options={{ headerShown: true, title: '' }} />
                       <Stack.Screen name="+not-found" />
