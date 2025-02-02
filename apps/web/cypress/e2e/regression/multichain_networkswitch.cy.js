@@ -14,8 +14,7 @@ const signer = walletCredentials.OWNER_4_PRIVATE_KEY
 // DO NOT use OWNER_2_PRIVATE_KEY for safe creation. Used for CF safes.
 const signer2 = walletCredentials.OWNER_2_PRIVATE_KEY
 
-// Skip due to issues with Polygon
-describe.skip('Multichain header network switch tests', { defaultCommandTimeout: 30000 }, () => {
+describe('Multichain header network switch tests', { defaultCommandTimeout: 60000 }, () => {
   before(async () => {
     staticSafes = await getSafes(CATEGORIES.static)
   })
@@ -60,7 +59,7 @@ describe.skip('Multichain header network switch tests', { defaultCommandTimeout:
     create_wallet.openNetworkSelector()
     sideBar.clickOnShowAllNetworksBtn()
     sideBar.checkNetworkPresence([constants.networks.gnosis, constants.networks.ethereum], sideBar.addNetworkOption)
-    main.verifyElementsCount(sideBar.addNetworkOption, 2)
+    main.verifyElementsCount(sideBar.addNetworkOption, 4)
   })
 
   it('Verify that test networks and main networks are splitted', () => {

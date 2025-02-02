@@ -5,6 +5,7 @@ import * as constants from '../../support/constants'
 
 const welcomeLoginScreen = '[data-testid="welcome-login"]'
 const expandMoreIcon = 'svg[data-testid="ExpandMoreIcon"]'
+const newtworkSelectorDiv = 'div[class*="networkSelector"]'
 const nameInput = 'input[name="name"]'
 const ownerInput = 'input[name^="owners"][name$="name"]'
 const ownerAddress = 'input[name^="owners"][name$="address"]'
@@ -209,7 +210,7 @@ export function clearWalletName() {
 }
 
 export function openNetworkSelector() {
-  cy.get('header').find(expandMoreIcon).parent().click()
+  cy.get(newtworkSelectorDiv).find(expandMoreIcon).parent().click()
 }
 export function selectNetwork(network) {
   cy.wait(1000)
