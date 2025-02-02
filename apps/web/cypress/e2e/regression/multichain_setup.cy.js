@@ -8,6 +8,8 @@ import * as navigation from '../pages/navigation.page.js'
 import * as create_wallet from '../pages/create_wallet.pages.js'
 import * as owner from '../pages/owners.pages.js'
 
+import { suspendOutreachModal } from '../pages/modals.page.js'
+
 let staticSafes = []
 
 const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
@@ -71,6 +73,8 @@ describe('Multichain setup tests', { defaultCommandTimeout: 60000 }, () => {
     cy.visit(constants.setupUrl + safe)
 
     owner.waitForConnectionStatus()
+    navigation.verifyTxBtnStatus(constants.enabledStates.enabled)
+    suspendOutreachModal()
     owner.openRemoveOwnerWindow(1)
     cy.wait(1000)
     create_wallet.clickOnNextBtn()
@@ -81,6 +85,8 @@ describe('Multichain setup tests', { defaultCommandTimeout: 60000 }, () => {
     let safe = main.changeSafeChainName(staticSafes.MATIC_STATIC_SAFE_28, 'sep')
     cy.visit(constants.setupUrl + safe)
     owner.waitForConnectionStatus()
+    navigation.verifyTxBtnStatus(constants.enabledStates.enabled)
+    suspendOutreachModal()
     owner.clickOnChangeThresholdBtn()
     create_wallet.updateThreshold(2)
     owner.clickOnThresholdNextBtn()
@@ -91,6 +97,8 @@ describe('Multichain setup tests', { defaultCommandTimeout: 60000 }, () => {
     let safe = main.changeSafeChainName(staticSafes.MATIC_STATIC_SAFE_28, 'sep')
     cy.visit(constants.setupUrl + safe)
     owner.waitForConnectionStatus()
+    navigation.verifyTxBtnStatus(constants.enabledStates.enabled)
+    suspendOutreachModal()
     owner.openReplaceOwnerWindow(1)
     owner.typeOwnerAddress(constants.SEPOLIA_OWNER_2)
     cy.wait(2000)
