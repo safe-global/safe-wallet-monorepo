@@ -32,25 +32,25 @@ const useSafeInfo = (): {
 
   useEffect(() => {
     if (data) {
-
-
-      const callEndpoint = async () => {
+      const prefetchBadges = async () => {
         try {
-
+          console.log('Prefetching badges')
           await queryClient.ensureQueryData({
             queryKey: ['badges', result.safeAddress, result.safeLoaded],
             queryFn: () => badgesService.getBadges(result.safeAddress as `0x${string}`),
           })
 
+
+
         } catch (error) {
-          console.error('Ocurrió un error al llamar al endpoint:', error)
+          console.error('Error during call:', error)
         }
       }
       if (data.address.value !== lastAddress && lastStatus != result.safeLoaded) {
         lastAddress = data.address.value;
         lastStatus = result.safeLoaded;
         if (lastAddress && lastAddress != '')
-          callEndpoint()
+          prefetchBadges()
       }
 
     }
