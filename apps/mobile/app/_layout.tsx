@@ -58,32 +58,11 @@ function RootLayout() {
                       />
                       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
                       <Stack.Screen name="pending-transactions" options={{ headerShown: true, title: '' }} />
-                      <Stack.Screen name="signers" options={{ headerShown: true, title: 'Signers' }} />
                       <Stack.Screen name="notifications" options={{ headerShown: true, title: '' }} />
-                      <Stack.Screen name="signers/[address]" options={{ headerShown: true, title: '' }} />
-                      <Stack.Screen name="import-signers" options={{ headerShown: true, title: '' }} />
-                      <Stack.Screen name="import-signers/private-key" options={{ headerShown: true, title: '' }} />
-                      <Stack.Screen
-                        name="import-signers/private-key-success"
-                        options={{
-                          presentation: 'modal',
-                          headerShown: false,
-                        }}
-                      />
-                      <Stack.Screen
-                        name="import-signers/loading"
-                        options={{
-                          presentation: 'modal',
-                          headerShown: false,
-                        }}
-                      />
-                      <Stack.Screen
-                        name="import-signers/private-key-error"
-                        options={{
-                          presentation: 'modal',
-                          headerShown: false,
-                        }}
-                      />
+
+                      <Stack.Screen name="signers" options={{ headerShown: false }} />
+                      <Stack.Screen name="import-signers" options={{ headerShown: false }} />
+
                       <Stack.Screen name="app-settings" options={{ headerShown: true, title: 'Settings' }} />
                       <Stack.Screen name="notifications-opt-in" options={{ headerShown: true, title: '' }} />
                       <Stack.Screen name="+not-found" />
