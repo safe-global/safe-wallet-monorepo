@@ -13,7 +13,7 @@ import commonCss from '@/components/tx-flow/common/styles.module.css'
 import TokenAmountInput from '@/components/common/TokenAmountInput'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { useHasPermission } from '@/permissions/hooks/useHasPermission'
-import { Permission } from '@/permissions/types'
+import { Permission } from '@/permissions/config'
 
 export const AutocompleteItem = (item: { tokenInfo: TokenInfo; balance: string }): ReactElement => (
   <Grid

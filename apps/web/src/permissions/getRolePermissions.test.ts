@@ -1,23 +1,27 @@
 import type { SpendingLimitState } from '@/store/spendingLimitsSlice'
 import { getRolePermissions } from './getRolePermissions'
-import { Role } from './types'
+import { Role } from './config'
 
 jest.mock('./config', () => ({
-  Owner: () => ({
-    CreateTransaction: true,
-    ProposeTransaction: true,
-    SignTransaction: true,
-    ExecuteTransaction: () => true,
-  }),
-  Proposer: () => ({
-    CreateTransaction: true,
-    ProposeTransaction: true,
-    ExecuteTransaction: () => true,
-  }),
-  SpendingLimitBeneficiary: ({ spendingLimits }: { spendingLimits: number[] }) => ({
-    CreateTransaction: spendingLimits.includes(1),
-    ProposeTransaction: spendingLimits.includes(5),
-  }),
+  ...jest.requireActual('./config'),
+  __esModule: true,
+  default: {
+    Owner: () => ({
+      CreateTransaction: true,
+      ProposeTransaction: true,
+      SignTransaction: true,
+      ExecuteTransaction: () => true,
+    }),
+    Proposer: () => ({
+      CreateTransaction: true,
+      ProposeTransaction: true,
+      ExecuteTransaction: () => true,
+    }),
+    SpendingLimitBeneficiary: ({ spendingLimits }: { spendingLimits: number[] }) => ({
+      CreateTransaction: spendingLimits.includes(1),
+      ProposeTransaction: spendingLimits.includes(5),
+    }),
+  },
 }))
 
 describe('getRolePermissions', () => {

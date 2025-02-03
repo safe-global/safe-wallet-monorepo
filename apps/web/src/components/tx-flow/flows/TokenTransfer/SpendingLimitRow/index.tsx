@@ -13,7 +13,7 @@ import { TokenAmountFields } from '@/components/common/TokenAmountInput'
 import { useContext, useEffect } from 'react'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { useHasPermission } from '@/permissions/hooks/useHasPermission'
-import { Permission } from '@/permissions/types'
+import { Permission } from '@/permissions/config'
 
 const SpendingLimitRow = ({
   availableAmount,

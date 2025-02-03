@@ -9,7 +9,7 @@ import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import type Safe from '@safe-global/protocol-kit'
 import * as useHasPermission from '@/permissions/hooks/useHasPermission'
-import { Permission } from '@/permissions/types'
+import { Permission } from '@/permissions/config'
 
 const mockWalletAddress = faker.finance.ethereumAddress()
 // mock useWallet

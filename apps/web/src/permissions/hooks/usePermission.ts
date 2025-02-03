@@ -1,8 +1,8 @@
 import { useMemo } from 'react'
-import type { Permission, PermissionProps, Role } from '../types'
 import { useRoles } from './useRoles'
 import { useRoleProps } from './useRoleProps'
 import { getRolePermissions } from '../getRolePermissions'
+import type { Permission, Role, PermissionProps } from '../config'
 
 /**
  * Hook to get the result of a permission check for the current user based on the Safe and the connected wallet.
@@ -25,7 +25,7 @@ export const usePermission = <P extends Permission>(
     return Object.entries(userPermissions).reduce((acc, [role, permissions]) => {
       const permissionValue = permissions?.[permission]
 
-      if (!permissionValue) {
+      if (permissionValue === undefined) {
         // No permission defined for the role
         return acc
       }

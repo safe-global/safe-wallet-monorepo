@@ -5,7 +5,7 @@ import CheckWalletWithPermission from '@/components/common/CheckWalletWithPermis
 import { useNotificationsRenewal } from '@/components/settings/PushNotifications/hooks/useNotificationsRenewal'
 import { useIsNotificationsRenewalEnabled } from '@/components/settings/PushNotifications/hooks/useNotificationsTokenVersion'
 import { RENEWAL_MESSAGE } from '@/components/settings/PushNotifications/constants'
-import { Permission } from '@/permissions/types'
+import { Permission } from '@/permissions/config'
 
 const NotificationRenewal = (): ReactElement => {
   const { safe } = useSafeInfo()

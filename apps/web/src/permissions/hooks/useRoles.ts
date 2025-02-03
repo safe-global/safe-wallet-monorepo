@@ -4,7 +4,7 @@ import { useIsWalletProposer } from '@/hooks/useProposers'
 import { useIsRecoverer } from '@/features/recovery/hooks/useIsRecoverer'
 import { useIsSpendingLimitBeneficiary } from '@/hooks/useIsOnlySpendingLimitBeneficiary'
 import useWallet from '@/hooks/wallets/useWallet'
-import { Role } from '../types'
+import { Role } from '../config'
 import { useIsNestedSafeOwner } from '@/hooks/useIsNestedSafeOwner'
 
 /**

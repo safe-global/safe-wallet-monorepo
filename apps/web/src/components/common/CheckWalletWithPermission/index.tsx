@@ -5,7 +5,7 @@ import useConnectWallet from '../ConnectWallet/useConnectWallet'
 import useIsWrongChain from '@/hooks/useIsWrongChain'
 import { Tooltip } from '@mui/material'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import type { Permission, PermissionProps } from '@/permissions/types'
+import type { Permission, PermissionProps } from '@/permissions/config'
 import { useHasPermission } from '@/permissions/hooks/useHasPermission'
 
 type CheckWalletWithPermissionProps<

@@ -1,6 +1,6 @@
 import { renderHook } from '@/tests/test-utils'
 import { useRoles } from './useRoles'
-import { Role } from '../types'
+import { Role } from '../config'
 import * as useWallet from '@/hooks/wallets/useWallet'
 import * as useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import * as useIsNestedSafeOwner from '@/hooks/useIsNestedSafeOwner'

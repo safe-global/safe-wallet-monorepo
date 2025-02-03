@@ -1,10 +1,10 @@
 import { renderHook } from '@/tests/test-utils'
 import { usePermission } from './usePermission'
-import { Permission, Role } from '../types'
 import * as useRoles from './useRoles'
 import * as useRoleProps from './useRoleProps'
 import type { SpendingLimitState } from '@/store/spendingLimitsSlice'
 import * as getRolePermissions from '../getRolePermissions'
+import { Permission, Role } from '../config'
 
 describe('usePermission', () => {
   const useRolesSpy = jest.spyOn(useRoles, 'useRoles')

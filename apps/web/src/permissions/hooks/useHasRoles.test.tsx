@@ -1,7 +1,7 @@
 import { renderHook } from '@/tests/test-utils'
 import { useHasRoles } from './useHasRoles'
 import * as useRoles from './useRoles'
-import { Role } from '../types'
+import { Role } from '../config'
 
 describe('useHasRoles', () => {
   const useRolesSpy = jest.spyOn(useRoles, 'useRoles')

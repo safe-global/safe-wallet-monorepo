@@ -1,7 +1,6 @@
 import { useSelector } from 'react-redux'
 import { selectSpendingLimits } from '@/store/spendingLimitsSlice'
-import type { RolePropsMap } from '../types'
-import { Role } from '../types'
+import { type RolePropsMap, Role } from '../config'
 
 /**
  * Hook to get the props for each role based on the current state of the application.

@@ -1,43 +1,96 @@
-import type { RolePermissionsConfig } from './types'
-import { Permission, Role } from './types'
+import type { SpendingLimitState } from '@/store/spendingLimitsSlice'
+import type { SafeTransaction } from '@safe-global/safe-core-sdk-types'
+import type { TokenInfo } from '@safe-global/safe-gateway-typescript-sdk'
 
-const {
-  CreateTransaction,
-  ProposeTransaction,
-  SignTransaction,
-  ExecuteTransaction,
-  EnablePushNotifications,
-  CreateSpendingLimitTransaction,
-} = Permission
+export enum Role {
+  Owner = 'Owner',
+  NestedOwner = 'NestedOwner',
+  Proposer = 'Proposer',
+  Executioner = 'Executioner',
+  ModuleRole = 'ModuleRole',
+  Recoverer = 'Recoverer',
+  SpendingLimitBeneficiary = 'SpendingLimitBeneficiary',
+  NoWalletConnected = 'NoWalletConnected',
+}
+
+export enum Permission {
+  CreateTransaction = 'CreateTransaction',
+  ProposeTransaction = 'ProposeTransaction',
+  SignTransaction = 'SignTransaction',
+  ExecuteTransaction = 'ExecuteTransaction',
+  CreateSpendingLimitTransaction = 'CreateSpendingLimitTransaction',
+  EnablePushNotifications = 'EnablePushNotifications',
+}
+
+/**
+ * RolePropsMap defines property types for specific roles.
+ * The props are used to specify conditional permission values for the respective role.
+ */
+export type RolePropsMap = {
+  [Role.SpendingLimitBeneficiary]: {
+    spendingLimits: SpendingLimitState[]
+  }
+}
+
+// Extract the props for a specific role from RolePropsMap
+export type RoleProps<R extends Role> = R extends keyof RolePropsMap ? RolePropsMap[R] : undefined
+
+/**
+ * PermissionPropsMap defines property types for specific permissions.
+ * The props are used as inputs to evaluate permission functions.
+ */
+export type PermissionPropsMap = {
+  [Permission.ExecuteTransaction]: { safeTx: SafeTransaction }
+  [Permission.CreateSpendingLimitTransaction]: { token?: TokenInfo } | undefined
+}
+
+// Extract the props for a specific permission from PermissionPropsMap
+export type PermissionProps<P extends Permission> = P extends keyof PermissionPropsMap
+  ? PermissionPropsMap[P]
+  : undefined
+
+// Define the type for a permission function that evaluates to a boolean
+type PermissionFn<P extends Permission> =
+  PermissionProps<P> extends undefined ? undefined : (args: PermissionProps<P>) => boolean
+
+// Define the type for a permission set that maps permissions to their values
+export type PermissionSet = {
+  [P in Permission]?: PermissionFn<P> extends undefined ? boolean : PermissionFn<P>
+}
+
+export type RolePermissionsFn<R extends Role> =
+  RoleProps<R> extends undefined ? () => PermissionSet : (props: RoleProps<R>) => PermissionSet
+
+type RolePermissionsConfig = {
+  [R in Role]?: RolePermissionsFn<R>
+}
 
 /**
  * Defines the permissions for each role.
  */
 export default <RolePermissionsConfig>{
   [Role.Owner]: () => ({
-    [CreateTransaction]: true,
-    [ProposeTransaction]: true,
-    [SignTransaction]: true,
-    [ExecuteTransaction]: () => true,
-    [EnablePushNotifications]: true,
+    [Permission.CreateTransaction]: true,
+    [Permission.ProposeTransaction]: true,
+    [Permission.SignTransaction]: true,
+    [Permission.ExecuteTransaction]: () => true,
+    [Permission.EnablePushNotifications]: true,
   }),
   [Role.Proposer]: () => ({
-    [CreateTransaction]: true,
-    [ProposeTransaction]: true,
-    [ExecuteTransaction]: () => true,
-    [EnablePushNotifications]: true,
+    [Permission.CreateTransaction]: true,
+    [Permission.ProposeTransaction]: true,
+    [Permission.ExecuteTransaction]: () => true,
+    [Permission.EnablePushNotifications]: true,
   }),
   [Role.Executioner]: () => ({
-    [ExecuteTransaction]: () => true,
-    [EnablePushNotifications]: true,
+    [Permission.ExecuteTransaction]: () => true,
+    [Permission.EnablePushNotifications]: true,
   }),
   [Role.SpendingLimitBeneficiary]: ({ spendingLimits }) => ({
-    [ExecuteTransaction]: () => true,
-    [EnablePushNotifications]: true,
-    [CreateSpendingLimitTransaction]: ({ token } = {}) => {
-      if (!token) {
-        return true
-      }
+    [Permission.ExecuteTransaction]: () => true,
+    [Permission.EnablePushNotifications]: true,
+    [Permission.CreateSpendingLimitTransaction]: ({ token } = {}) => {
+      if (!token) return false
 
       const spendingLimit = spendingLimits.find((sl) => sl.token.address === token.address)
 
@@ -49,6 +102,6 @@ export default <RolePermissionsConfig>{
     },
   }),
   [Role.NoWalletConnected]: () => ({
-    [EnablePushNotifications]: false,
+    [Permission.EnablePushNotifications]: false,
   }),
 }

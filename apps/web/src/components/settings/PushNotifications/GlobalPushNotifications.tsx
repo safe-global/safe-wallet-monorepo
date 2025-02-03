@@ -34,7 +34,7 @@ import { requestNotificationPermission } from './logic'
 import type { NotifiableSafes } from './logic'
 import type { PushNotificationPreferences } from '@/services/push-notifications/preferences'
 import CheckWalletWithPermission from '@/components/common/CheckWalletWithPermission'
-import { Permission } from '@/permissions/types'
+import { Permission } from '@/permissions/config'
 
 import css from './styles.module.css'
 import useAllOwnedSafes from '@/features/myAccounts/hooks/useAllOwnedSafes'

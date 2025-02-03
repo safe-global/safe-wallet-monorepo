@@ -1,7 +1,7 @@
 import { renderHook } from '@/tests/test-utils'
 import * as reactRedux from 'react-redux'
 import { useRoleProps } from './useRoleProps'
-import { Role } from '../types'
+import { Role } from '../config'
 import * as spendingLimitsSlice from '@/store/spendingLimitsSlice'
 
 describe('useRoleProps', () => {
