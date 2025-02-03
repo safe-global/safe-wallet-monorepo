@@ -9,6 +9,7 @@ import { asError } from '@/services/exceptions/utils'
 import useIsSafenetEnabled from '@/features/safenet/hooks/useIsSafenetEnabled'
 import { useLazySimulateSafenetTransactionQuery } from '@/store/safenet'
 import { calculateSafeTransactionHash } from '@safe-global/protocol-kit/dist/src/utils'
+import { LATEST_SAFE_VERSION } from '@/config/constants'
 
 export type UseSimulationReturn =
   | {
@@ -63,7 +64,7 @@ export const useSimulation = (): UseSimulationReturn => {
           const safeTxHash = calculateSafeTransactionHash(
             params.safe.address.value,
             params.transactions.data,
-            params.safe.version ?? '1.4.1',
+            params.safe.version ?? LATEST_SAFE_VERSION,
             BigInt(params.safe.chainId),
           )
 
