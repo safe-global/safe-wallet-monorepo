@@ -16,6 +16,12 @@ jest.mock('expo-font', () => ({
   isLoaded: () => true,
 }))
 
+jest.mock('@/src/navigation/useScrollableHeader', () => ({
+  useScrollableHeader: () => ({
+    handleScroll: jest.fn(),
+  }),
+}))
+
 jest.mock('react-native-mmkv', () => ({
   MMKV: function () {
     // @ts-ignore

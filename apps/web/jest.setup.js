@@ -10,12 +10,6 @@ jest.mock('@web3-onboard/trezor', () => jest.fn())
 jest.mock('@web3-onboard/walletconnect', () => jest.fn())
 jest.mock('@safe-global/safe-client-gateway-sdk')
 
-jest.mock('@/src/navigation/useScrollableHeader', () => ({
-  useScrollableHeader: () => ({
-    handleScroll: jest.fn(),
-  }),
-}))
-
 const mockOnboardState = {
   chains: [],
   walletModules: [],
