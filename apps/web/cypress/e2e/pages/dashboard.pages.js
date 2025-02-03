@@ -19,8 +19,8 @@ const exploreAppsBtn = '[data-testid="explore-apps-btn"]'
 const viewAllLink = '[data-testid="view-all-link"][href^="/transactions/queue"]'
 const noTxIcon = '[data-testid="no-tx-icon"]'
 const noTxText = '[data-testid="no-tx-text"]'
-const pendingTxWidget = '[data-testid="pending-tx-widget"]'
-const pendingTxItem = '[data-testid="tx-pending-item"]'
+export const pendingTxWidget = '[data-testid="pending-tx-widget"]'
+export const pendingTxItem = '[data-testid="tx-pending-item"]'
 const singleTxDetailsHeader = '[data-testid="tx-details"]'
 
 export function clickOnTxByIndex(index) {

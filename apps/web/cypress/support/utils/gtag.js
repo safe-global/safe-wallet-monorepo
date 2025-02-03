@@ -1,6 +1,11 @@
 export function getEvents() {
   cy.window().then((win) => {
-    cy.wrap(win.dataLayer).as('dataLayer')
+    cy.wrap(win.dataLayer)
+      .as('dataLayer')
+      .then((dataLayer) => {
+        console.log('DataLayer:', dataLayer)
+        cy.task('log', JSON.stringify(dataLayer, null, 2))
+      })
   })
 }
 
@@ -68,5 +73,17 @@ export const events = {
     eventLabel: 'https://safe-apps.dev.5afe.dev/tx-builder',
     eventType: 'tx_confirmed',
     event: 'tx_confirmed',
+  },
+
+  txOpenShareBlock: {
+    action: 'Open share block',
+    event: 'customClick',
+    category: 'tx-list',
+  },
+
+  txCopyShareBlockLink: {
+    action: 'Copy deeplink',
+    event: 'customClick',
+    category: 'tx-list',
   },
 }

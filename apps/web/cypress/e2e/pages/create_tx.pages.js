@@ -53,6 +53,9 @@ const signBtn = '[data-testid="sign-btn"]'
 export const altImgDai = 'img[alt="DAI"]'
 export const altImgCow = 'img[alt="COW"]'
 export const altImgSwaps = 'svg[alt="Swap order"]'
+export const txShareBlock = '[data-testid="share-block"]'
+export const txShareBlockDetails = '[data-testid="share-block-details"]'
+const copyLinkBtn = '[data-testid="copy-link-btn"]'
 
 const viewTransactionBtn = 'View transaction'
 const transactionDetailsTitle = 'Transaction details'
@@ -93,6 +96,26 @@ export const filterTypes = {
   incoming: 'Incoming',
   outgoing: 'Outgoing',
   module: 'Module-based',
+}
+export function clickOnCopyLinkBtn() {
+  cy.get(copyLinkBtn).click()
+}
+
+export function verifyCopiedURL() {
+  cy.window().then((win) => {
+    cy.stub(win.navigator.clipboard, 'writeText').as('clipboardWrite')
+  })
+
+  cy.url().then((currentUrl) => {
+    clickOnCopyLinkBtn()
+
+    cy.get('@clipboardWrite').should('have.been.calledWith', currentUrl)
+  })
+}
+
+export function expandTxShareBlock() {
+  cy.get(txShareBlock).click()
+  cy.get(txShareBlockDetails).should('be.visible')
 }
 
 function clickOnRejectBtn() {
