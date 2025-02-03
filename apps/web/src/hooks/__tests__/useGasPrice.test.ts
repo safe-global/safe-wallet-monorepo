@@ -63,8 +63,8 @@ describe('useGasPrice', () => {
           json: () =>
             Promise.resolve({
               data: {
-                FastGasPrice: '47',
-                suggestBaseFee: '44',
+                FastGasPrice: '47.543',
+                suggestBaseFee: '44.435',
               },
             }),
         }),
@@ -104,8 +104,8 @@ describe('useGasPrice', () => {
           json: () =>
             Promise.resolve({
               data: {
-                FastGasPrice: '30',
-                suggestBaseFee: '10',
+                FastGasPrice: '30.45435',
+                suggestBaseFee: '10.5435435',
               },
             }),
         }),
@@ -270,8 +270,8 @@ describe('useGasPrice', () => {
             json: () =>
               Promise.resolve({
                 data: {
-                  FastGasPrice: '21',
-                  suggestBaseFee: '19',
+                  FastGasPrice: '21.5435435',
+                  suggestBaseFee: '19.5435',
                 },
               }),
           }),
@@ -282,8 +282,8 @@ describe('useGasPrice', () => {
             json: () =>
               Promise.resolve({
                 data: {
-                  FastGasPrice: '22',
-                  suggestBaseFee: '19',
+                  FastGasPrice: '22.89879',
+                  suggestBaseFee: '19.1243',
                 },
               }),
           }),

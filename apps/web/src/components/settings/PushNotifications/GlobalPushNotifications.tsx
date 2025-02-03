@@ -33,7 +33,8 @@ import { PUSH_NOTIFICATION_EVENTS } from '@/services/analytics/events/push-notif
 import { requestNotificationPermission } from './logic'
 import type { NotifiableSafes } from './logic'
 import type { PushNotificationPreferences } from '@/services/push-notifications/preferences'
-import CheckWallet from '@/components/common/CheckWallet'
+import CheckWalletWithPermission from '@/components/common/CheckWalletWithPermission'
+import { Permission } from '@/permissions/types'
 
 import css from './styles.module.css'
 import useAllOwnedSafes from '@/features/myAccounts/hooks/useAllOwnedSafes'
@@ -403,13 +404,13 @@ export const GlobalPushNotifications = (): ReactElement | null => {
             </Typography>
           )}
 
-          <CheckWallet allowNonOwner>
+          <CheckWalletWithPermission permission={Permission.EnablePushNotifications}>
             {(isOk) => (
               <Button variant="contained" disabled={!canSave || !isOk || isLoading} onClick={onSave}>
                 {isLoading ? <CircularProgress size={20} /> : 'Save'}
               </Button>
             )}
-          </CheckWallet>
+          </CheckWalletWithPermission>
         </Box>
       </Grid>
 

@@ -431,13 +431,14 @@ export const dispatchSpendingLimitTxExecution = async (
   provider: Eip1193Provider,
   chainId: SafeInfo['chainId'],
   safeAddress: string,
+  safeModules: SafeInfo['modules'],
 ) => {
   const id = JSON.stringify(txParams)
 
   let result: ContractTransactionResponse | undefined
   try {
     const signer = await getUncheckedSigner(provider)
-    const contract = getSpendingLimitContract(chainId, signer)
+    const contract = getSpendingLimitContract(chainId, safeModules, signer)
 
     result = await contract.executeAllowanceTransfer(
       txParams.safeAddress,

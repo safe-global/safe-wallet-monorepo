@@ -27,9 +27,10 @@ import { HelpCenterArticle, IS_DEV } from '@/config/constants'
 import { trackEvent } from '@/services/analytics'
 import { PUSH_NOTIFICATION_EVENTS } from '@/services/analytics/events/push-notifications'
 import { AppRoutes } from '@/config/routes'
-import CheckWallet from '@/components/common/CheckWallet'
+import CheckWalletWithPermission from '@/components/common/CheckWalletWithPermission'
 import { useIsMac } from '@/hooks/useIsMac'
 import ExternalLink from '@/components/common/ExternalLink'
+import { Permission } from '@/permissions/types'
 
 import css from './styles.module.css'
 import NetworkWarning from '@/components/new-safe/create/NetworkWarning'
@@ -148,7 +149,10 @@ export const PushNotifications = (): ReactElement => {
                       showName={true}
                       hasExplorer
                     />
-                    <CheckWallet allowNonOwner checkNetwork={!isRegistering && safe.deployed}>
+                    <CheckWalletWithPermission
+                      permission={Permission.EnablePushNotifications}
+                      checkNetwork={!isRegistering && safe.deployed}
+                    >
                       {(isOk) => (
                         <FormControlLabel
                           data-testid="notifications-switch"
@@ -157,7 +161,7 @@ export const PushNotifications = (): ReactElement => {
                           disabled={!isOk || isRegistering || !safe.deployed}
                         />
                       )}
-                    </CheckWallet>
+                    </CheckWalletWithPermission>
                   </div>
 
                   <Paper className={css.globalInfo} variant="outlined">

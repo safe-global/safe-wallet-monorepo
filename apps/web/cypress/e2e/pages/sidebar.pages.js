@@ -398,7 +398,7 @@ export function checkAddNetworkBtnPosition(index) {
     })
 }
 export function clickOnAddNetworkBtn() {
-  cy.get(addNetworkBtn).click()
+  cy.get(addNetworkBtn).eq(0).click()
   cy.get(addChainDialog).should('be.visible')
 }
 

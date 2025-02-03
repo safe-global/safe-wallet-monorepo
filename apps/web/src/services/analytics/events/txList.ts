@@ -20,6 +20,10 @@ export const TX_LIST_EVENTS = {
     action: 'Copy deeplink',
     category: TX_LIST_CATEGORY,
   },
+  OPEN_SHARE_BLOCK: {
+    action: 'Open share block',
+    category: TX_LIST_CATEGORY,
+  },
   CONFIRM: {
     action: 'Confirm transaction',
     category: TX_LIST_CATEGORY,

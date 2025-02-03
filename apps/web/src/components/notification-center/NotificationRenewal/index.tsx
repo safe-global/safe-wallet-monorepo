@@ -1,10 +1,11 @@
 import { useState, type ReactElement } from 'react'
 import { Alert, Box, Button, Typography } from '@mui/material'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import CheckWallet from '@/components/common/CheckWallet'
+import CheckWalletWithPermission from '@/components/common/CheckWalletWithPermission'
 import { useNotificationsRenewal } from '@/components/settings/PushNotifications/hooks/useNotificationsRenewal'
 import { useIsNotificationsRenewalEnabled } from '@/components/settings/PushNotifications/hooks/useNotificationsTokenVersion'
 import { RENEWAL_MESSAGE } from '@/components/settings/PushNotifications/constants'
+import { Permission } from '@/permissions/types'
 
 const NotificationRenewal = (): ReactElement => {
   const { safe } = useSafeInfo()
@@ -32,7 +33,10 @@ const NotificationRenewal = (): ReactElement => {
         <Typography variant="body2">{RENEWAL_MESSAGE}</Typography>
       </Alert>
       <Box>
-        <CheckWallet allowNonOwner checkNetwork={!isRegistering && safe.deployed}>
+        <CheckWalletWithPermission
+          permission={Permission.EnablePushNotifications}
+          checkNetwork={!isRegistering && safe.deployed}
+        >
           {(isOk) => (
             <Button
               variant="contained"
@@ -44,7 +48,7 @@ const NotificationRenewal = (): ReactElement => {
               Sign now
             </Button>
           )}
-        </CheckWallet>
+        </CheckWalletWithPermission>
       </Box>
     </>
   )

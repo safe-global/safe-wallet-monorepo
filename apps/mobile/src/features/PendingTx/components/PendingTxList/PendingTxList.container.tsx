@@ -40,7 +40,7 @@ export function PendingTxListContainer({
   })
 
   const LargeHeader = (
-    <View flexDirection={'row'} alignItems={'center'} paddingTop={'$3'} paddingHorizontal={'$3'}>
+    <View flexDirection={'row'} alignItems={'center'} paddingTop={'$3'}>
       <LargeHeaderTitle marginRight={5}>Pending Transactions</LargeHeaderTitle>
       {isLoading ? (
         <Spinner size="large" color="$warning1ContrastTextDark" />

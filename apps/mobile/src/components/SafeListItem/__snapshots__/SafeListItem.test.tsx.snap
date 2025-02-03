@@ -28,6 +28,7 @@ exports[`SafeListItem should render a list item with a custom label template 1`]
           "alignItems": "center",
           "flexDirection": "row",
           "gap": 12,
+          "maxWidth": "100%",
         }
       }
     >

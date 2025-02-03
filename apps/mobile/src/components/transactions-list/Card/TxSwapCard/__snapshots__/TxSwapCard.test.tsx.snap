@@ -28,6 +28,7 @@ exports[`TxSwapCard should render the default markup 1`] = `
           "alignItems": "center",
           "flexDirection": "row",
           "gap": 12,
+          "maxWidth": "55%",
         }
       }
     >

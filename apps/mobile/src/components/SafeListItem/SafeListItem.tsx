@@ -48,7 +48,7 @@ export function SafeListItem({
       flexDirection="row"
       justifyContent="space-between"
     >
-      <View flexDirection="row" alignItems="center" gap={12}>
+      <View flexDirection="row" maxWidth={rightNode ? '55%' : '100%'} alignItems="center" gap={12}>
         {leftNode}
 
         <View>
@@ -63,7 +63,7 @@ export function SafeListItem({
 
           {typeof label === 'string' ? (
             <Text fontSize="$4" fontWeight={600}>
-              {ellipsis(label, rightNode ? 23 : 30)}
+              {ellipsis(label, rightNode ? 21 : 30)}
             </Text>
           ) : (
             label
@@ -105,7 +105,7 @@ export function SafeListItem({
 SafeListItem.Header = function Header({ title }: { title: string }) {
   return (
     <Theme name="safe_list">
-      <View paddingVertical="$4" paddingHorizontal="$3" backgroundColor="$background">
+      <View paddingVertical="$4" backgroundColor="$background">
         <Text fontWeight={500} color="$colorSecondary">
           {title}
         </Text>

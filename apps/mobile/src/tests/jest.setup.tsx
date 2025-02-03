@@ -16,6 +16,12 @@ jest.mock('expo-font', () => ({
   isLoaded: () => true,
 }))
 
+jest.mock('@/src/navigation/useScrollableHeader', () => ({
+  useScrollableHeader: () => ({
+    handleScroll: jest.fn(),
+  }),
+}))
+
 jest.mock('react-native-mmkv', () => ({
   MMKV: function () {
     // @ts-ignore
@@ -58,6 +64,12 @@ jest.mock('react-native-keychain', () => {
       password = null
       Promise.resolve(null)
     }),
+    ACCESS_CONTROL: {
+      BIOMETRY_CURRENT_SET_OR_DEVICE_PASSCODE: 'BIOMETRY_CURRENT_SET_OR_DEVICE_PASSCODE',
+    },
+    ACCESSIBLE: {
+      WHEN_UNLOCKED_THIS_DEVICE_ONLY: 'WHEN_UNLOCKED_THIS_DEVICE_ONLY',
+    },
   }
 })
 
@@ -77,6 +89,59 @@ jest.mock('redux-persist', () => {
 jest.mock('redux-devtools-expo-dev-plugin', () => ({
   default: () => jest.fn(),
 }))
+
+jest.mock('@react-native-firebase/messaging', () => {
+  const module = () => {
+    return {
+      getToken: jest.fn(() => Promise.resolve('fcmToken')),
+      deleteToken: jest.fn(() => Promise.resolve()),
+      subscribeToTopic: jest.fn(),
+      unsubscribeFromTopic: jest.fn(),
+      hasPermission: jest.fn(() => Promise.resolve(module.AuthorizationStatus.AUTHORIZED)),
+      requestPermission: jest.fn(() => Promise.resolve(module.AuthorizationStatus.AUTHORIZED)),
+      setBackgroundMessageHandler: jest.fn(() => Promise.resolve()),
+      isDeviceRegisteredForRemoteMessages: jest.fn(() => Promise.resolve(false)),
+      registerDeviceForRemoteMessages: jest.fn(() => Promise.resolve('registered')),
+      unregisterDeviceForRemoteMessages: jest.fn(() => Promise.resolve('unregistered')),
+      onMessage: jest.fn(),
+      onTokenRefresh: jest.fn(),
+    }
+  }
+
+  module.AuthorizationStatus = {
+    NOT_DETERMINED: -1,
+    DENIED: 0,
+    AUTHORIZED: 1,
+    PROVISIONAL: 2,
+  }
+
+  return module
+})
+
+jest.mock('@notifee/react-native', () => {
+  const notifee = {
+    getInitialNotification: jest.fn().mockResolvedValue(null),
+    displayNotification: jest.fn().mockResolvedValue({}),
+    onForegroundEvent: jest.fn().mockReturnValue(jest.fn()),
+    onBackgroundEvent: jest.fn(),
+    createChannelGroup: jest.fn().mockResolvedValue('channel-group-id'),
+    createChannel: jest.fn().mockResolvedValue({}),
+  }
+
+  return {
+    ...jest.requireActual('@notifee/react-native/dist/types/Notification'),
+    __esModule: true,
+    default: notifee,
+    AndroidImportance: {
+      NONE: 0,
+      MIN: 1,
+      LOW: 2,
+      DEFAULT: 3,
+      HIGH: 4,
+    },
+  }
+})
+
 jest.mock('@gorhom/bottom-sheet', () => {
   const reactNative = jest.requireActual('react-native')
   const { useState, forwardRef, useImperativeHandle } = jest.requireActual('react')
@@ -129,6 +194,11 @@ jest.mock('@gorhom/bottom-sheet', () => {
     }),
   }
 })
+
+jest.mock('@react-native-clipboard/clipboard', () => ({
+  setString: jest.fn(),
+  getString: jest.fn(),
+}))
 
 beforeAll(() => server.listen())
 afterEach(() => server.resetHandlers())
