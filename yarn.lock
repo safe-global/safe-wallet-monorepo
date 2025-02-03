@@ -8229,7 +8229,7 @@ __metadata:
     expo-dev-client: "npm:~5.0.5"
     expo-font: "npm:~13.0.3"
     expo-image: "npm:~2.0.3"
-    expo-linear-gradient: "npm:^14.0.1"
+    expo-linear-gradient: "npm:^14.0.2"
     expo-linking: "npm:~7.0.3"
     expo-router: "npm:~4.0.15"
     expo-splash-screen: "npm:^0.29.16"
@@ -8379,7 +8379,6 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@safe-global/safe-wallet@workspace:."
   dependencies:
-    expo-linear-gradient: "npm:~14.0.2"
     husky: "npm:^9.1.6"
     lint-staged: "npm:^15.2.10"
     msw: "npm:^2.7.0"
@@ -20131,18 +20130,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"expo-linear-gradient@npm:^14.0.1":
-  version: 14.0.1
-  resolution: "expo-linear-gradient@npm:14.0.1"
-  peerDependencies:
-    expo: "*"
-    react: "*"
-    react-native: "*"
-  checksum: 10/d0ff7b10e20b35c09ab7d3f8e8ba205b4274813160bf3eec81c5d4b601985831cf87cb403081c5ed30cf20264245494d29576f8ea7879340f5241b58358136f3
-  languageName: node
-  linkType: hard
-
-"expo-linear-gradient@npm:~14.0.2":
+"expo-linear-gradient@npm:^14.0.2":
   version: 14.0.2
   resolution: "expo-linear-gradient@npm:14.0.2"
   peerDependencies:

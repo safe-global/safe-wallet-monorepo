@@ -72,7 +72,7 @@
     "expo-dev-client": "~5.0.5",
     "expo-font": "~13.0.3",
     "expo-image": "~2.0.3",
-    "expo-linear-gradient": "^14.0.1",
+    "expo-linear-gradient": "^14.0.2",
     "expo-linking": "~7.0.3",
     "expo-router": "~4.0.15",
     "expo-splash-screen": "^0.29.16",
