@@ -91,9 +91,10 @@ export const CreateTokenTransfer = ({
   const selectedToken = balancesItems.find((item) => item.tokenInfo.address === tokenAddress)
   const { totalAmount, spendingLimitAmount } = useTokenAmount(selectedToken)
 
-  const canCreateSpendingLimitTxWithToken = useHasPermission(Permission.CreateSpendingLimitTransaction, {
-    token: selectedToken?.tokenInfo,
-  })
+  const canCreateSpendingLimitTxWithToken =
+    useHasPermission(Permission.CreateSpendingLimitTransaction, {
+      token: selectedToken?.tokenInfo,
+    }) && selectedToken
 
   const isSpendingLimitType = type === TokenTransferType.spendingLimit
 
