@@ -21,6 +21,7 @@ function Badges() {
   }>({
     queryKey: ['badges', safeAddress, safeLoaded],
     queryFn: async () => await badgesService.getBadges(safeAddress as `0x${string}`),
+    refetchInterval: 5000,
     enabled: !!safeLoaded,
   })
   const isClaimable = useMemo(() => data?.currentBadges.some((badge) => badge.claimable), [data?.currentBadges])
