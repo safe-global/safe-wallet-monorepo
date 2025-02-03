@@ -25,7 +25,7 @@ export const usePermission = <P extends Permission>(
     return Object.entries(userPermissions).reduce((acc, [role, permissions]) => {
       const permissionValue = permissions?.[permission]
 
-      if (!permissionValue) {
+      if (permissionValue === undefined) {
         // No permission defined for the role
         return acc
       }

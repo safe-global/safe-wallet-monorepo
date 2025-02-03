@@ -35,9 +35,7 @@ export default <RolePermissionsConfig>{
     [ExecuteTransaction]: () => true,
     [EnablePushNotifications]: true,
     [CreateSpendingLimitTransaction]: ({ token } = {}) => {
-      if (!token) {
-        return true
-      }
+      if (!token) return false
 
       const spendingLimit = spendingLimits.find((sl) => sl.token.address === token.address)
 
