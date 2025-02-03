@@ -5,6 +5,7 @@ import * as useHasPermission from '@/permissions/hooks/useHasPermission'
 import { Permission } from '@/permissions/types'
 import { render } from '@/tests/test-utils'
 import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
+import { TokenType } from '@safe-global/safe-gateway-typescript-sdk'
 
 describe('CreateTokenTransfer', () => {
   const mockParams = {
@@ -38,7 +39,33 @@ describe('CreateTokenTransfer', () => {
       .spyOn(tokenUtils, 'useTokenAmount')
       .mockReturnValue({ totalAmount: BigInt(1000), spendingLimitAmount: BigInt(500) })
 
-    const { getByText } = render(<CreateTokenTransfer params={mockParams} onSubmit={jest.fn()} />)
+    const tokenAddress = ZERO_ADDRESS
+
+    const { getByText } = render(<CreateTokenTransfer params={mockParams} onSubmit={jest.fn()} />, {
+      initialReduxState: {
+        balances: {
+          loading: false,
+          data: {
+            fiatTotal: '0',
+            items: [
+              {
+                balance: '10',
+                tokenInfo: {
+                  address: tokenAddress,
+                  decimals: 18,
+                  logoUri: 'someurl',
+                  name: 'Test token',
+                  symbol: 'TST',
+                  type: TokenType.ERC20,
+                },
+                fiatBalance: '10',
+                fiatConversion: '1',
+              },
+            ],
+          },
+        },
+      },
+    })
 
     expect(getByText('Send as')).toBeInTheDocument()
 
