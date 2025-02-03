@@ -1,7 +1,12 @@
-import { useMemo } from 'react'
+import { useMemo, useEffect } from 'react'
 import isEqual from 'lodash/isEqual'
-import { useAppSelector } from '@/store'
+import { useAppSelector, useAppDispatch } from '@/store'
 import { defaultSafeInfo, type ExtendedSafeInfo, selectSafeInfo } from '@/store/safeInfoSlice'
+import { useQueryClient } from '@tanstack/react-query'
+import badgesService from '@/features/superChain/services/badges.service'
+
+
+
 
 const useSafeInfo = (): {
   safe: ExtendedSafeInfo
@@ -10,9 +15,11 @@ const useSafeInfo = (): {
   safeLoading: boolean
   safeError?: string
 } => {
+  const dispatch = useAppDispatch()
   const { data, error, loading } = useAppSelector(selectSafeInfo, isEqual)
+  const queryClient = useQueryClient()
 
-  return useMemo(
+  const result = useMemo(
     () => ({
       safe: data || defaultSafeInfo,
       safeAddress: data?.address.value || '',
@@ -22,6 +29,35 @@ const useSafeInfo = (): {
     }),
     [data, error, loading],
   )
-}
 
+  useEffect(() => {
+    if (data) {
+
+
+      const callEndpoint = async () => {
+        try {
+
+          await queryClient.ensureQueryData({
+            queryKey: ['badges', result.safeAddress, result.safeLoaded],
+            queryFn: () => badgesService.getBadges(result.safeAddress as `0x${string}`),
+          })
+
+        } catch (error) {
+          console.error('Ocurrió un error al llamar al endpoint:', error)
+        }
+      }
+      if (data.address.value !== lastAddress && lastStatus != result.safeLoaded) {
+        lastAddress = data.address.value;
+        lastStatus = result.safeLoaded;
+        if (lastAddress && lastAddress != '')
+          callEndpoint()
+      }
+
+    }
+  }, [data, dispatch])
+
+  return result
+}
+var lastAddress: String | undefined = undefined;
+var lastStatus: boolean | undefined = undefined;
 export default useSafeInfo
