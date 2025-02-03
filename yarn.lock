@@ -8225,7 +8225,7 @@ __metadata:
     expo: "npm:~52.0.14"
     expo-blur: "npm:~14.0.1"
     expo-build-properties: "npm:^0.13.2"
-    expo-constants: "npm:~17.0.4"
+    expo-constants: "npm:~17.0.5"
     expo-dev-client: "npm:~5.0.5"
     expo-font: "npm:~13.0.3"
     expo-image: "npm:~2.0.3"
@@ -20000,16 +20000,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"expo-constants@npm:~17.0.4":
-  version: 17.0.4
-  resolution: "expo-constants@npm:17.0.4"
+"expo-constants@npm:~17.0.5":
+  version: 17.0.5
+  resolution: "expo-constants@npm:17.0.5"
   dependencies:
     "@expo/config": "npm:~10.0.8"
     "@expo/env": "npm:~0.4.1"
   peerDependencies:
     expo: "*"
     react-native: "*"
-  checksum: 10/fcaa389f82cfcaecb847edae3e3f4f9c6c7cc2a14ed16b7c16b279af4a996fca7f8475afa825076c480a2b8edd574c953dd1c20967e5e5be4d8f580ae50e3893
+  checksum: 10/02cbc49b10c85704804d1861c5c6b155a1b85a413232d51f4f36f5f8b4604f07f6aa371b9c7f69d39b4920fc68e823cc4c821248f4624d1b6c60fe3cf475fc4e
   languageName: node
   linkType: hard
 
