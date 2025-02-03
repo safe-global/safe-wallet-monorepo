@@ -7,7 +7,7 @@ on:
     types: [closed]
     paths:
       - apps/web/**
-      - packages/store/**
+      - packages/**
 
 jobs:
   tag-release:

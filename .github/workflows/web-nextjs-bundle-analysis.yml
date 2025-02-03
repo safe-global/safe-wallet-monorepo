@@ -12,7 +12,7 @@ on:
       - dev
     paths:
       - apps/web/**
-      - packages/store/**
+      - packages/**
 permissions:
   contents: read # for checkout repository
   actions: read # for fetching base branch bundle stats
