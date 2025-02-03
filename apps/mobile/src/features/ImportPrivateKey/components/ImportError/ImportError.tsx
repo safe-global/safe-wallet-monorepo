@@ -24,8 +24,7 @@ export function ImportError() {
               </Text>
 
               <Badge
-                circleProps={{ backgroundColor: '#2F2527' }}
-                themeName="badge_success"
+                themeName="badge_error"
                 circleSize={64}
                 content={<SafeFontIcon size={32} color="$error" name="close-filled" />}
               />
