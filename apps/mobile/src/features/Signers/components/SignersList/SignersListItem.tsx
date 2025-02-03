@@ -1,5 +1,4 @@
 import React from 'react'
-import { shortenAddress } from '@/src/utils/formatters'
 import { MenuView } from '@react-native-menu/menu'
 import { useSignersActions } from './hooks/useSignersActions'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
