@@ -62,26 +62,23 @@ function RootLayout() {
                       <Stack.Screen name="notifications" options={{ headerShown: true, title: '' }} />
                       <Stack.Screen name="signers/[address]" options={{ headerShown: true, title: '' }} />
                       <Stack.Screen name="import-signers" options={{ headerShown: true, title: '' }} />
+                      <Stack.Screen name="import-signers/private-key" options={{ headerShown: true, title: '' }} />
                       <Stack.Screen
-                        name="import-signers/import-private-key"
-                        options={{ headerShown: true, title: '' }}
-                      />
-                      <Stack.Screen
-                        name="import-signers/import-private-key-success"
+                        name="import-signers/private-key-success"
                         options={{
                           presentation: 'modal',
                           headerShown: false,
                         }}
                       />
                       <Stack.Screen
-                        name="import-signers/loading-import"
+                        name="import-signers/loading"
                         options={{
                           presentation: 'modal',
                           headerShown: false,
                         }}
                       />
                       <Stack.Screen
-                        name="import-signers/import-private-key-error"
+                        name="import-signers/private-key-error"
                         options={{
                           presentation: 'modal',
                           headerShown: false,

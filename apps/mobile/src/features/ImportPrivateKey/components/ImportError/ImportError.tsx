@@ -3,18 +3,21 @@ import { Identicon } from '@/src/components/Identicon'
 import { SafeButton } from '@/src/components/SafeButton/SafeButton'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { LargeHeaderTitle } from '@/src/components/Title/LargeHeaderTitle'
+import { useLocalSearchParams } from 'expo-router'
 import React from 'react'
 import { ScrollView } from 'react-native'
 import { Text, View } from 'tamagui'
 
 export function ImportError() {
+  const { address } = useLocalSearchParams<{ address: `0x${string}` }>()
+
   return (
     <View flex={1} paddingBottom={80} justifyContent="space-between">
       <View flex={1}>
         <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
           <View flex={1} flexGrow={1} alignItems="center" justifyContent="center" paddingHorizontal="$3">
             <View flexDirection="row" alignItems="center" gap="$3">
-              <Identicon address="0x0000000000000000000000000000000000000000" size={64} />
+              <Identicon address={address} size={64} />
 
               <Text fontSize="$4" color="$error">
                 . . . .

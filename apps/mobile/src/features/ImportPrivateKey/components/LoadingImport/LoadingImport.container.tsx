@@ -1,7 +1,7 @@
 import { selectActiveSafe } from '@/src/store/activeSafeSlice'
 import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
 import { useSafesGetSafeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
-import { useEffect } from 'react'
+import { useCallback, useEffect } from 'react'
 import { LoadingImportComponent } from './LoadingImport'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { addSigner } from '@/src/store/signersSlice'
@@ -12,25 +12,27 @@ export function LoadingImport() {
   const router = useRouter()
 
   const activeSafe = useAppSelector(selectActiveSafe)
-  const { data } = useSafesGetSafeV1Query({
+  const { data, error } = useSafesGetSafeV1Query({
     safeAddress: activeSafe.address,
     chainId: activeSafe.chainId,
   })
 
-  useEffect(() => {
-    const redirectToError = () => {
-      router.replace({
-        pathname: '/import-signers/import-private-key-error',
-        params: {
-          address,
-        },
-      })
-    }
+  const redirectToError = useCallback(() => {
+    router.replace({
+      pathname: '/import-signers/private-key-error',
+      params: {
+        address,
+      },
+    })
+  }, [router])
 
-    if (!address) {
+  useEffect(() => {
+    if (!address || error) {
       redirectToError()
     }
+  }, [address, error, redirectToError])
 
+  useEffect(() => {
     if (!data) {
       return
     }
@@ -41,7 +43,7 @@ export function LoadingImport() {
       dispatch(addSigner(owner))
 
       router.replace({
-        pathname: '/import-signers/import-private-key-success',
+        pathname: '/import-signers/private-key-success',
         params: {
           name: owner.name,
           address: owner.value,
@@ -50,7 +52,7 @@ export function LoadingImport() {
     } else {
       redirectToError()
     }
-  }, [address, data])
+  }, [data, redirectToError])
 
   return <LoadingImportComponent />
 }

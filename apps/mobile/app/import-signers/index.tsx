@@ -19,7 +19,7 @@ const items = [
     icon: <SafeFontIcon name="wallet" size={16} />,
     Image: Seed,
     imageProps: { marginBottom: -31 },
-    onPress: () => router.push(`/import-signers/import-private-key`),
+    onPress: () => router.push(`/import-signers/private-key`),
   },
   {
     name: 'connectSigner',
