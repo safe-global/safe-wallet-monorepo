@@ -16,6 +16,7 @@ import SafeTxGasForm from '../SafeTxGasForm'
 import DecodedData from '../TxData/DecodedData'
 import { SafeTxHashDataRow } from './SafeTxHashDataRow'
 import css from './styles.module.css'
+import SafenetTransactionDetails from '@/features/safenet/components/SafenetTransactionDetails'
 
 const GradientBoxSafenet = dynamic(() => import('@/features/safenet/components/GradientBoxSafenet'))
 const SafenetTxSimulation = dynamic(() => import('@/features/safenet/components/SafenetTxSimulation'))
@@ -79,6 +80,8 @@ const Summary = ({ txDetails, defaultExpanded = false, hideDecodedData = false }
           {dateString(executedAt)}
         </TxDataRow>
       )}
+
+      {safeTxHash && <SafenetTransactionDetails safeTxHash={safeTxHash} />}
 
       {isSafenetEnabled && (
         <Box mt={1}>

@@ -2,6 +2,7 @@ import { getWeb3ReadOnly } from '@/hooks/wallets/web3'
 import { ERC20__factory, ERC721__factory } from '@/types/contracts'
 import { parseBytes32String } from '@ethersproject/strings'
 import { type TokenInfo, TokenType } from '@safe-global/safe-gateway-typescript-sdk'
+import { type JsonRpcProvider } from 'ethers'
 
 export const UNLIMITED_APPROVAL_AMOUNT = 2n ** 256n - 1n
 export const UNLIMITED_PERMIT2_AMOUNT = 2n ** 160n - 1n
@@ -15,8 +16,13 @@ export const ERC721_IDENTIFIER = '0x80ac58cd'
  */
 export const getERC20TokenInfoOnChain = async (
   address: string,
+  provider?: JsonRpcProvider,
 ): Promise<Omit<TokenInfo, 'name' | 'logoUri'> | undefined> => {
-  const web3 = getWeb3ReadOnly()
+  let web3 = provider
+
+  if (!web3) {
+    web3 = getWeb3ReadOnly()
+  }
   if (!web3) return
 
   const erc20 = ERC20__factory.connect(address, web3)

@@ -50,6 +50,33 @@ export type SafenetSimulationResponse = {
   results: SafenetSimulationResult[]
 }
 
+export type SafenetDebit = {
+  status: 'PENDING' | 'READY' | 'INITIATED' | 'CHALLENGED' | 'EXECUTED' | 'FAILED'
+  token: string
+  amount: string
+  chainId: number
+  feeBeneficiary: string
+  feeAmount: string
+  safe: string
+  initTxHash?: string
+  initAt?: string
+  executionTxHash?: string
+  executedAt?: string
+}
+
+export type SafenetSpend = {
+  token: string
+  amount: string
+}
+
+export type SafenetTransactionDetails = {
+  status: 'SUBMITTED' | 'EXECUTED' | 'FAILED'
+  fulfillmentTxHash?: string
+  fulfilledAt?: string
+  debits: SafenetDebit[]
+  spends: SafenetSpend[]
+}
+
 export const getSafenetBalances = async (safeAddress: string): Promise<SafenetBalanceEntity> => {
   const response = await fetch(`${SAFENET_API_URL}/api/v1/balances/${safeAddress}`)
   const data = await response.json()
@@ -103,7 +130,18 @@ export const safenetApi = createApi({
       }),
       providesTags: (_, __, arg) => [{ type: 'SafenetSimulation', id: arg.tx.safeTxHash }],
     }),
+    getSafenetTransactionDetails: builder.query<SafenetTransactionDetails, { chainId: string; safeTxHash: string }>({
+      query: ({ chainId, safeTxHash }) => ({
+        url: `/tx/details/${chainId}/${safeTxHash}`,
+        method: 'GET',
+      }),
+    }),
   }),
 })
 
-export const { useGetSafenetConfigQuery, useLazyGetSafenetBalanceQuery, useLazySimulateSafenetTxQuery } = safenetApi
+export const {
+  useGetSafenetConfigQuery,
+  useLazyGetSafenetBalanceQuery,
+  useLazySimulateSafenetTxQuery,
+  useGetSafenetTransactionDetailsQuery,
+} = safenetApi
