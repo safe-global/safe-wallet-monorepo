@@ -2,12 +2,6 @@ import React from 'react'
 import { render, screen, fireEvent, act, waitFor } from '@/src/tests/test-utils'
 import { ImportPrivateKey } from './ImportPrivateKey.container'
 
-jest.mock('@/src/navigation/useScrollableHeader', () => ({
-  useScrollableHeader: () => ({
-    handleScroll: jest.fn(),
-  }),
-}))
-
 describe('ImportPrivateKey', () => {
   it('renders the import private key screen', () => {
     render(<ImportPrivateKey />)
