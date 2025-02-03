@@ -1,12 +1,9 @@
-import { useMemo, useEffect } from 'react'
+import { useMemo } from 'react'
 import isEqual from 'lodash/isEqual'
-import { useAppSelector, useAppDispatch } from '@/store'
+import { useAppSelector } from '@/store'
 import { defaultSafeInfo, type ExtendedSafeInfo, selectSafeInfo } from '@/store/safeInfoSlice'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import badgesService from '@/features/superChain/services/badges.service'
-
-
-
 
 const useSafeInfo = (): {
   safe: ExtendedSafeInfo
@@ -15,9 +12,7 @@ const useSafeInfo = (): {
   safeLoading: boolean
   safeError?: string
 } => {
-  const dispatch = useAppDispatch()
   const { data, error, loading } = useAppSelector(selectSafeInfo, isEqual)
-  const queryClient = useQueryClient()
 
   const result = useMemo(
     () => ({
@@ -28,12 +23,10 @@ const useSafeInfo = (): {
       safeLoading: loading,
     }),
     [data, error, loading],
-
   )
 
-
   useQuery({
-    queryKey: ['safeInfo', result.safeAddress, result.safeLoaded],
+    queryKey: ['badges', result.safeAddress, result.safeLoaded],
     queryFn: () => badgesService.getBadges(result.safeAddress as `0x${string}`),
     enabled: !!result.safeAddress && !!result.safeLoaded,
   })
