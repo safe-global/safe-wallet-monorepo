@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react'
-import { Alert, SvgIcon, Tooltip } from '@mui/material'
+import { Alert, SvgIcon, Tooltip, Typography } from '@mui/material'
 import type { AlertColor } from '@mui/material'
 
 import InfoOutlinedIcon from '@/public/images/notifications/info.svg'
@@ -7,6 +7,8 @@ import css from './styles.module.css'
 import ExternalLink from '@/components/common/ExternalLink'
 import { HelpCenterArticle } from '@/config/constants'
 import { maybePlural } from '@/utils/formatters'
+import { useIsOfficialFallbackHandler } from '@/hooks/useIsOfficialFallbackHandler'
+import { useIsTWAPFallbackHandler } from '@/features/swap/hooks/useIsTWAPFallbackHandler'
 
 const Warning = ({
   datatestid,
@@ -51,6 +53,34 @@ export const DelegateCallWarning = ({ showWarning }: { showWarning: boolean }): 
       }
       severity={severity}
       text={showWarning ? 'Unexpected delegate call' : 'Delegate call'}
+    />
+  )
+}
+
+export const UntrustedFallbackHandlerWarning = ({ fallbackHandler }: { fallbackHandler: string }): ReactElement => {
+  const isOfficial = useIsOfficialFallbackHandler(fallbackHandler)
+  const isTWAPFallbackHandler = useIsTWAPFallbackHandler(fallbackHandler)
+
+  if (isOfficial || isTWAPFallbackHandler) {
+    return <></>
+  }
+
+  return (
+    <Warning
+      datatestid="untrusted-fallback-handler-warning"
+      title={
+        <>
+          <Typography component="p">
+            This transaction sets an <b>unofficial</b> fallback handler.
+          </Typography>
+          <Typography component="p">
+            <strong>Proceed with caution:</strong> Ensure the fallback handler address is trusted and secure. If unsure,
+            do not proceed.
+          </Typography>
+        </>
+      }
+      severity="warning"
+      text="Untrusted fallback handler"
     />
   )
 }
