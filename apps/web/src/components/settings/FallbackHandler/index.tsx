@@ -1,9 +1,6 @@
-import { TWAP_FALLBACK_HANDLER, TWAP_FALLBACK_HANDLER_NETWORKS } from '@/features/swap/helpers/utils'
-import { getCompatibilityFallbackHandlerDeployments } from '@safe-global/safe-deployments'
 import NextLink from 'next/link'
 import { Typography, Box, Grid, Paper, Link } from '@mui/material'
 import semverSatisfies from 'semver/functions/satisfies'
-import { useMemo } from 'react'
 import type { ReactElement } from 'react'
 import classnames from 'classnames'
 
@@ -12,7 +9,9 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import { BRAND_NAME, HelpCenterArticle } from '@/config/constants'
 import ExternalLink from '@/components/common/ExternalLink'
 import { useTxBuilderApp } from '@/hooks/safe-apps/useTxBuilderApp'
-import { useCurrentChain } from '@/hooks/useChains'
+import { useCompatibilityFallbackHandlerDeployments } from '@/hooks/useCompatibilityFallbackHandlerDeployments'
+import { useIsOfficialFallbackHandler } from '@/hooks/useIsOfficialFallbackHandler'
+import { useIsTWAPFallbackHandler } from '@/features/swap/hooks/useIsTWAPFallbackHandler'
 import css from '../TransactionGuards/styles.module.css'
 
 const FALLBACK_HANDLER_VERSION = '>=1.1.1'
@@ -20,28 +19,17 @@ const FALLBACK_HANDLER_VERSION = '>=1.1.1'
 export const FallbackHandler = (): ReactElement | null => {
   const { safe } = useSafeInfo()
   const txBuilder = useTxBuilderApp()
-  const chain = useCurrentChain()
+  const fallbackHandlerDeployments = useCompatibilityFallbackHandlerDeployments()
+  const isOfficial = useIsOfficialFallbackHandler()
+  const isTWAPFallbackHandler = useIsTWAPFallbackHandler()
 
   const supportsFallbackHandler = !!safe.version && semverSatisfies(safe.version, FALLBACK_HANDLER_VERSION)
-
-  const fallbackHandlerDeployments = useMemo(() => {
-    if (!chain || !safe.version) {
-      return undefined
-    }
-
-    return getCompatibilityFallbackHandlerDeployments({ network: chain?.chainId, version: safe.version })
-  }, [safe.version, chain])
 
   if (!supportsFallbackHandler) {
     return null
   }
 
   const hasFallbackHandler = !!safe.fallbackHandler
-  const isOfficial =
-    safe.fallbackHandler &&
-    fallbackHandlerDeployments?.networkAddresses[safe.chainId].includes(safe.fallbackHandler.value)
-  const isTWAPFallbackHandler =
-    safe.fallbackHandler?.value === TWAP_FALLBACK_HANDLER && TWAP_FALLBACK_HANDLER_NETWORKS.includes(safe.chainId)
 
   const warning = !hasFallbackHandler ? (
     <>
