@@ -202,21 +202,53 @@ const SafenetStatusLabel = ({ details }: { details: SafenetTransactionDetails })
   )
 }
 
+const LoadingTxDetails = () => {
+  return (
+    <Stack direction="row" spacing={1} alignItems="center">
+      <Typography variant="caption" fontWeight="bold">
+        Loading
+      </Typography>
+      <CircularProgress />
+    </Stack>
+  )
+}
+
 const SafenetTransactionDetails = ({ safeTxHash }: { safeTxHash: string }) => {
   const chainId = useChainId()
-  const { data } = useGetSafenetTransactionDetailsQuery({ chainId, safeTxHash })
+  const { data, isLoading } = useGetSafenetTransactionDetailsQuery(
+    { chainId, safeTxHash },
+    {
+      pollingInterval: 5000,
+    },
+  )
 
   return (
     <GradientBoxSafenet>
-      {data !== undefined && (
+      {isLoading ? (
+        <LoadingTxDetails />
+      ) : (
         <Stack>
           <TxDataRow title="Status">
-            <SafenetStatusLabel details={data} />
+            {data ? (
+              <SafenetStatusLabel details={data} />
+            ) : (
+              <Typography
+                variant="caption"
+                fontWeight="bold"
+                display="flex"
+                alignItems="center"
+                gap={1}
+                data-testid="safenet-status-label"
+              >
+                <CircularProgress size={14} color="inherit" />
+                Submitting
+              </Typography>
+            )}
           </TxDataRow>
 
-          {data.spends.length > 0 && (
-            <TxDataRow title="Spends">
-              <Box className={css.debitContainer}>
+          <TxDataRow title="Spends">
+            <Box className={css.debitContainer}>
+              {data ? (
                 <Accordion>
                   <AccordionSummary>
                     <Typography fontWeight={700} variant="overline">
@@ -229,12 +261,15 @@ const SafenetTransactionDetails = ({ safeTxHash }: { safeTxHash: string }) => {
                     ))}
                   </AccordionDetails>
                 </Accordion>
-              </Box>
-            </TxDataRow>
-          )}
-          {data.debits.length > 0 && (
-            <TxDataRow title="Debits">
-              <Box className={css.debitContainer}>
+              ) : (
+                '-'
+              )}
+            </Box>
+          </TxDataRow>
+
+          <TxDataRow title="Debits">
+            <Box className={css.debitContainer}>
+              {data ? (
                 <Accordion>
                   <AccordionSummary>
                     <Typography fontWeight={700} variant="overline">
@@ -247,9 +282,11 @@ const SafenetTransactionDetails = ({ safeTxHash }: { safeTxHash: string }) => {
                     ))}
                   </AccordionDetails>
                 </Accordion>
-              </Box>
-            </TxDataRow>
-          )}
+              ) : (
+                '-'
+              )}
+            </Box>
+          </TxDataRow>
         </Stack>
       )}
     </GradientBoxSafenet>
