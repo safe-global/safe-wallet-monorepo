@@ -118,7 +118,7 @@ const usePendingSafeStatus = (): void => {
   useEffect(() => {
     const unsubFns = Object.entries(safeCreationPendingStatuses).map(([event, status]) =>
       safeCreationSubscribe(event as SafeCreationEvent, async (detail) => {
-        const creationChainId = 'chainId' in detail ? detail.chainId : chainId
+        const creationChainId = 'chainId' in detail ? (detail.chainId ?? chainId) : chainId
 
         if (event === SafeCreationEvent.SUCCESS) {
           gtmSetSafeAddress(detail.safeAddress)

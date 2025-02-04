@@ -1,4 +1,5 @@
 import type { NewSafeFormData } from '@/components/new-safe/create'
+import { updateAddressBook } from '@/components/new-safe/create/logic/address-book'
 import { AppRoutes } from '@/config/routes'
 import { PayMethod } from '@/features/counterfactual/PayNowPayLater'
 import { SafeCreationEvent, safeCreationDispatch } from '@/features/counterfactual/services/safeCreationEvents'
@@ -14,7 +15,6 @@ import { EMPTY_DATA, ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/uti
 import { useRouter } from 'next/router'
 import type { Dispatch, SetStateAction } from 'react'
 import { useEffect } from 'react'
-import { updateAddressBook } from '../../../../../components/new-safe/create/logic/address-book'
 import css from './styles.module.css'
 
 export type UseSubmitSafenetReviewHandlerProps = {
@@ -63,26 +63,27 @@ export const useSubmitSafenetReviewHandler = ({
       safeVersion: deploymentData.safeVersion,
     }
 
-    //data.networks.map((chain) => {
-    gtmSetChainId(data.networks[0].chainId)
+    data.networks.map((chain) => {
+      gtmSetChainId(chain.chainId)
 
-    replayCounterfactualSafeDeployment(
-      data.networks[0].chainId,
-      deploymentData.safeAddress,
-      replayedSafeWithNonce,
-      data.name,
-      dispatch,
-      PayMethod.PayNow,
-    )
+      replayCounterfactualSafeDeployment(
+        chain.chainId,
+        deploymentData.safeAddress,
+        replayedSafeWithNonce,
+        data.name,
+        dispatch,
+        PayMethod.PayNow,
+      )
+      
+      safeCreationDispatch(SafeCreationEvent.RELAYING, {
+        groupKey: CF_TX_GROUP_KEY,
+        safeAddress: deploymentData.safeAddress,
+        chainId: chain.chainId,
+      })
 
-    safeCreationDispatch(SafeCreationEvent.RELAYING, {
-      groupKey: CF_TX_GROUP_KEY,
-      safeAddress: deploymentData.safeAddress,
+      //trackEvent({ ...OVERVIEW_EVENTS.PROCEED_WITH_TX, label: 'deployment', category: CREATE_SAFE_CATEGORY })
+      //trackEvent(CREATE_SAFE_EVENTS.SUBMIT_CREATE_SAFE)
     })
-
-    //trackEvent({ ...OVERVIEW_EVENTS.PROCEED_WITH_TX, label: 'deployment', category: CREATE_SAFE_CATEGORY })
-    //trackEvent(CREATE_SAFE_EVENTS.SUBMIT_CREATE_SAFE)
-    //})
 
     onSubmit(data)
 

@@ -1,6 +1,7 @@
 import type { StepRenderProps } from '@/components/new-safe/CardStepper/useCardStepper'
 import type { NewSafeFormData } from '@/components/new-safe/create'
 import { AppRoutes } from '@/config/routes'
+import SafenetNetworkSelector from '@/features/safenet/components/SafenetNetworkSelector'
 import CircleIcon from '@/public/images/safenet/circle.svg'
 import GasTankIcon from '@/public/images/safenet/gas-tank.svg'
 import RayIcon from '@/public/images/safenet/ray.svg'
@@ -8,7 +9,6 @@ import CheckIcon from '@mui/icons-material/Check'
 import { Box, Button, Divider, Typography } from '@mui/material'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import SafenetNetworkSelector from '../../SafenetNetworkSelector'
 import css from './styles.module.css'
 
 function DiscoverSafenetStep({ onSetFlow, onSubmit }: StepRenderProps<NewSafeFormData>) {
