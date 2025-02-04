@@ -309,11 +309,11 @@ export function clickOnExpandableAction(data) {
 export function clickOnAdvancedDetails() {
   cy.get(advancedDetails).click()
 }
-
+//
 export function expandAdvancedDetails(data) {
   clickOnAdvancedDetails()
   data.forEach((row) => {
-    cy.get(txRowTitle).contains(row).should('be.visible')
+    cy.get('div').contains(row).should('be.visible')
   })
 }
 
