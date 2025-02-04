@@ -1,0 +1,43 @@
+.row {
+  width: 100%;
+  padding: var(--space-4) var(--space-7);
+}
+
+.box {
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--space-1);
+  padding: var(--space-2);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.message {
+  display: flex;
+  gap: var(--space-1);
+}
+
+.tag {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 6px 8px;
+  border: 1px solid transparent;
+  border-radius: 20px;
+  background-image:
+    radial-gradient(var(--color-secondary-background) 0%, var(--color-secondary-background) 100%),
+    radial-gradient(119.01% 132.63% at 119.01% -14.15%, #FF5F00 0%, #FFD200 50%, #12FF80 100%);
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+}
+
+.tag > svg > path {
+  fill: black;
+}
+
+@media (max-width: 599.95px) {
+  .row {
+    padding: var(--space-2);
+  }
+}
