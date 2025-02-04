@@ -11,15 +11,19 @@ import {
   selectUndeployedSafes,
   updateUndeployedSafeStatus,
 } from '@/features/counterfactual/store/undeployedSafesSlice'
-import { checkSafeActionViaRelay, checkSafeActivation } from '@/features/counterfactual/utils'
+import {
+  checkSafeActionViaGelatoRelay,
+  checkSafeActionViaSafenetRelay,
+  checkSafeActivation,
+} from '@/features/counterfactual/utils'
 import useChainId from '@/hooks/useChainId'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
 import { CREATE_SAFE_EVENTS, trackEvent } from '@/services/analytics'
-import { useAppDispatch, useAppSelector } from '@/store'
-import { useEffect, useRef } from 'react'
-import { isSmartContract } from '@/utils/wallets'
 import { gtmSetSafeAddress } from '@/services/analytics/gtm'
+import { useAppDispatch, useAppSelector } from '@/store'
+import { isSmartContract } from '@/utils/wallets'
+import { useEffect, useRef } from 'react'
 
 export const safeCreationPendingStatuses: Partial<Record<SafeCreationEvent, PendingSafeStatus | null>> = {
   [SafeCreationEvent.AWAITING_EXECUTION]: PendingSafeStatus.AWAITING_EXECUTION,
@@ -57,7 +61,7 @@ const usePendingSafeMonitor = (): void => {
           } = undeployedSafe
 
           const isProcessing = status === PendingSafeStatus.PROCESSING && txHash !== undefined
-          const isRelaying = status === PendingSafeStatus.RELAYING && taskId !== undefined
+          const isRelaying = status === PendingSafeStatus.RELAYING
           const isMonitored = monitoredSafes.current[safeAddress]
 
           if ((!isProcessing && !isRelaying) || isMonitored) return
@@ -69,7 +73,11 @@ const usePendingSafeMonitor = (): void => {
           }
 
           if (isRelaying) {
-            checkSafeActionViaRelay(taskId, safeAddress, type, chainId)
+            if (taskId !== undefined) {
+              checkSafeActionViaGelatoRelay(taskId, safeAddress, type, chainId)
+            } else {
+              checkSafeActionViaSafenetRelay(safeAddress, chainId)
+            }
           }
         }
 

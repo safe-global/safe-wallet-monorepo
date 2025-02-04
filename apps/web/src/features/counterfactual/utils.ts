@@ -1,13 +1,12 @@
-import { getLatestSafeVersion } from '@/utils/chains'
 import { POLLING_INTERVAL } from '@/config/constants'
-import type { PayMethod } from '@/features/counterfactual/PayNowPayLater'
+import { PayMethod } from '@/features/counterfactual/PayNowPayLater'
 import { safeCreationDispatch, SafeCreationEvent } from '@/features/counterfactual/services/safeCreationEvents'
 import {
   addUndeployedSafe,
-  type UndeployedSafeProps,
+  PendingSafeStatus,
   type ReplayedSafeProps,
   type UndeployedSafe,
-  PendingSafeStatus,
+  type UndeployedSafeProps,
 } from '@/features/counterfactual/store/undeployedSafesSlice'
 import { type ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import { getWeb3ReadOnly } from '@/hooks/wallets/web3'
@@ -17,22 +16,24 @@ import { getSafeSDKWithSigner, getUncheckedSigner, tryOffChainTxSigning } from '
 import { getRelayTxStatus, TaskState } from '@/services/tx/txMonitor'
 import type { AppDispatch } from '@/store'
 import { defaultSafeInfo } from '@/store/safeInfoSlice'
+import { sameAddress } from '@/utils/addresses'
+import { getLatestSafeVersion } from '@/utils/chains'
 import { didRevert, type EthersError } from '@/utils/ethers-utils'
 import { assertProvider, assertTx, assertWallet } from '@/utils/helpers'
 import { type DeploySafeProps, type PredictedSafeProps } from '@safe-global/protocol-kit'
 import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
 import type { SafeTransaction, SafeVersion, TransactionOptions } from '@safe-global/safe-core-sdk-types'
+import { getSafeL2SingletonDeployments, getSafeSingletonDeployments } from '@safe-global/safe-deployments'
 import {
-  type ChainInfo,
   ImplementationVersionState,
-  type SafeBalanceResponse,
   TokenType,
+  type ChainInfo,
+  type SafeBalanceResponse,
 } from '@safe-global/safe-gateway-typescript-sdk'
 import type { BrowserProvider, ContractTransactionResponse, Eip1193Provider, Provider } from 'ethers'
-import { getSafeL2SingletonDeployments, getSafeSingletonDeployments } from '@safe-global/safe-deployments'
-import { sameAddress } from '@/utils/addresses'
 
 import { encodeSafeCreationTx } from '@/components/new-safe/create/logic'
+import { isSmartContract } from '@/utils/wallets'
 
 export const getUndeployedSafeInfo = (undeployedSafe: UndeployedSafe, address: string, chain: ChainInfo) => {
   const safeSetup = extractCounterfactualSafeSetup(undeployedSafe, chain.chainId)
@@ -262,7 +263,12 @@ export const checkSafeActivation = async (
   }
 }
 
-export const checkSafeActionViaRelay = (taskId: string, safeAddress: string, type: PayMethod, chainId: string) => {
+export const checkSafeActionViaGelatoRelay = (
+  taskId: string,
+  safeAddress: string,
+  type: PayMethod,
+  chainId: string,
+) => {
   const TIMEOUT_TIME = 2 * 60 * 1000 // 2 minutes
 
   let intervalId: NodeJS.Timeout
@@ -297,6 +303,39 @@ export const checkSafeActionViaRelay = (taskId: string, safeAddress: string, typ
         // Don't clear interval as we're still waiting for the tx to be relayed
         return
     }
+
+    clearTimeout(failAfterTimeoutId)
+    clearInterval(intervalId)
+  }, POLLING_INTERVAL)
+
+  failAfterTimeoutId = setTimeout(() => {
+    safeCreationDispatch(SafeCreationEvent.FAILED, {
+      groupKey: CF_TX_GROUP_KEY,
+      error: new Error('Transaction failed'),
+      safeAddress,
+    })
+
+    clearInterval(intervalId)
+  }, TIMEOUT_TIME)
+}
+
+export const checkSafeActionViaSafenetRelay = (safeAddress: string, chainId: string) => {
+  const TIMEOUT_TIME = 2 * 60 * 1000 // 2 minutes
+
+  let intervalId: NodeJS.Timeout
+  let failAfterTimeoutId: NodeJS.Timeout
+
+  intervalId = setInterval(async () => {
+    const isDeployed = await isSmartContract(safeAddress)
+
+    if (!isDeployed) return
+
+    safeCreationDispatch(SafeCreationEvent.SUCCESS, {
+      groupKey: CF_TX_GROUP_KEY,
+      safeAddress,
+      type: PayMethod.PayNow,
+      chainId,
+    })
 
     clearTimeout(failAfterTimeoutId)
     clearInterval(intervalId)
