@@ -1,6 +1,7 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 
 import { SAFENET_API_URL } from '@/config/constants'
+import type { SafeVersion } from '@safe-global/safe-core-sdk-types'
 
 export type SafenetSafeEntity = {
   safe: string
@@ -50,6 +51,24 @@ export type SafenetSimulationResponse = {
   results: SafenetSimulationResult[]
 }
 
+export type DeploySafenetAccountResponse = {
+  safeAddress: string
+  safeAccountConfig: {
+    owners: string[]
+    threshold: number
+    to?: string
+    data?: string
+    fallbackHandler?: string
+    paymentToken?: string
+    payment?: number
+    paymentReceiver?: string
+  }
+  saltNonce: string
+  factoryAddress: string
+  masterCopy: string
+  safeVersion: SafeVersion
+}
+
 export const getSafenetBalances = async (safeAddress: string): Promise<SafenetBalanceEntity> => {
   const response = await fetch(`${SAFENET_API_URL}/api/v1/balances/${safeAddress}`)
   const data = await response.json()
@@ -59,7 +78,7 @@ export const getSafenetBalances = async (safeAddress: string): Promise<SafenetBa
 export const safenetApi = createApi({
   reducerPath: 'safenetApi',
   baseQuery: fetchBaseQuery({ baseUrl: `${SAFENET_API_URL}/api/v1` }),
-  tagTypes: ['SafenetConfig', 'SafenetOffchainStatus', 'SafenetBalance', 'SafenetSimulation'],
+  tagTypes: ['SafenetConfig', 'SafenetOffchainStatus', 'SafenetBalance', 'SafenetSimulation', 'DeploySafenetAccount'],
   endpoints: (builder) => ({
     getSafenetConfig: builder.query<SafenetConfigEntity, void>({
       query: () => ({
@@ -103,7 +122,29 @@ export const safenetApi = createApi({
       }),
       providesTags: (_, __, arg) => [{ type: 'SafenetSimulation', id: arg.tx.safeTxHash }],
     }),
+    deploySafenetAccount: builder.query<
+      DeploySafenetAccountResponse,
+      {
+        account: {
+          owners: string[]
+          threshold: number
+        }
+        saltNonce: string
+      }
+    >({
+      query: ({ account: { owners, threshold }, saltNonce }) => ({
+        url: `/account/deploy`,
+        method: 'POST',
+        body: { account: { owners, threshold }, saltNonce },
+      }),
+      providesTags: ['DeploySafenetAccount'],
+    }),
   }),
 })
 
-export const { useGetSafenetConfigQuery, useLazyGetSafenetBalanceQuery, useLazySimulateSafenetTxQuery } = safenetApi
+export const {
+  useGetSafenetConfigQuery,
+  useLazyGetSafenetBalanceQuery,
+  useLazySimulateSafenetTxQuery,
+  useLazyDeploySafenetAccountQuery,
+} = safenetApi
