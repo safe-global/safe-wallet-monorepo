@@ -4,7 +4,7 @@
 
 .safenetHeader {
   align-items: center;
-  background: radial-gradient(166.24% 938.01% at 166.24% 78.95%, #FF5F00 0%, #FFD200 77.32%, #12FF80 100%);
+  background: radial-gradient(166.24% 938.01% at 166.24% 78.95%, #ff5f00 0%, #ffd200 77.32%, #12ff80 100%);
   display: flex;
   flex-direction: row;
   gap: var(--space-1);

@@ -21,13 +21,13 @@
   top: -10px;
   left: -6px;
   position: absolute;
-  background: radial-gradient(100.81% 103.11% at 96.36% 3.87%, #000000 0%, #003F54 100%);
+  background: radial-gradient(100.81% 103.11% at 96.36% 3.87%, #000000 0%, #003f54 100%);
   border-radius: 4px;
   padding: 0 var(--space-1);
 }
 
 .newTag > p {
-  background: radial-gradient(119.01% 132.63% at 119.01% -14.15%, #FF5F00 0%, #FFD200 50%, #12FF80 100%);
+  background: radial-gradient(119.01% 132.63% at 119.01% -14.15%, #ff5f00 0%, #ffd200 50%, #12ff80 100%);
   background-clip: text;
   -webkit-text-fill-color: transparent;
 }

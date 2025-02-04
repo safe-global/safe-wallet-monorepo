@@ -12,13 +12,12 @@
 }
 
 .lightBanner {
-  background-image: radial-gradient(108.2% 108.2% at 99.88% 11.3%, #003F54 0%, #000000 100%);
+  background-image: radial-gradient(108.2% 108.2% at 99.88% 11.3%, #003f54 0%, #000000 100%);
 }
 
 .darkBanner {
-  background-image:
-    radial-gradient(108.2% 108.2% at 99.88% 11.3%, #003F54 0%, #000000 100%),
-    radial-gradient(119.01% 132.63% at 119.01% -14.15%, #FF5F00 0%, #FFD200 50%, #12FF80 100%);
+  background-image: radial-gradient(108.2% 108.2% at 99.88% 11.3%, #003f54 0%, #000000 100%),
+    radial-gradient(119.01% 132.63% at 119.01% -14.15%, #ff5f00 0%, #ffd200 50%, #12ff80 100%);
   background-origin: border-box;
   background-clip: padding-box, border-box;
 }
@@ -51,13 +50,13 @@
   padding: 2px var(--space-1);
 }
 .newTag > p {
-  background: radial-gradient(119.01% 132.63% at 119.01% -14.15%, #FF5F00 0%, #FFD200 50%, #12FF80 100%);
+  background: radial-gradient(119.01% 132.63% at 119.01% -14.15%, #ff5f00 0%, #ffd200 50%, #12ff80 100%);
   background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
 .bannerButton {
-  background: radial-gradient(119.01% 132.63% at 119.01% -14.15%, #FF5F00 0%, #FFD200 50%, #12FF80 100%);
+  background: radial-gradient(119.01% 132.63% at 119.01% -14.15%, #ff5f00 0%, #ffd200 50%, #12ff80 100%);
 }
 
 @media (max-width: 450px) {
