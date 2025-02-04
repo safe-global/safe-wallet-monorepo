@@ -1,7 +1,7 @@
 import { useIsTWAPFallbackHandler } from '@/features/swap/hooks/useIsTWAPFallbackHandler'
 import { renderHook } from '@/tests/test-utils'
 import * as useSafeInfo from '@/hooks/useSafeInfo'
-import { ExtendedSafeInfo } from '@/store/safeInfoSlice'
+import type { ExtendedSafeInfo } from '@/store/safeInfoSlice'
 import { TWAP_FALLBACK_HANDLER, TWAP_FALLBACK_HANDLER_NETWORKS } from '../../helpers/utils'
 
 describe('useIsTWAPFallbackHandler', () => {
