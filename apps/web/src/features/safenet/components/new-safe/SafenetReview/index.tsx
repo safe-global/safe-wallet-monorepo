@@ -121,7 +121,7 @@ export const useSubmitSafenetReviewHandler = ({
   }
 }
 
-export function SafenetReview() {
+function SafenetReview() {
   return (
     <Box
       className={css.row}
@@ -147,3 +147,5 @@ export function SafenetReview() {
     </Box>
   )
 }
+
+export default SafenetReview

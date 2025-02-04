@@ -1,3 +1,4 @@
+import DiscoverSafenetStep from ''
 import ExternalLink from '@/components/common/ExternalLink'
 import { CardStepper } from '@/components/new-safe/CardStepper'
 import type { TxStepperProps } from '@/components/new-safe/CardStepper/useCardStepper'
@@ -11,7 +12,6 @@ import { CreateSafeStatus } from '@/components/new-safe/create/steps/StatusStep'
 import type { NamedAddress } from '@/components/new-safe/create/types'
 import { HelpCenterArticle } from '@/config/constants'
 import { AppRoutes } from '@/config/routes'
-import DiscoverSafenetStep from '@/features/safenet/components/new-safe/DiscoverSafenetStep'
 import { useCurrentChain } from '@/hooks/useChains'
 import useWallet from '@/hooks/wallets/useWallet'
 import SafenetLogo from '@/public/images/safenet/logo-safenet.svg'
@@ -21,9 +21,12 @@ import type { AlertColor } from '@mui/material'
 import { Box, Container, Grid, Typography } from '@mui/material'
 import { type SafeVersion } from '@safe-global/safe-core-sdk-types'
 import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import dynamic from 'next/dynamic'
 import { useRouter } from 'next/router'
 import { useEffect, useMemo, useState, type ReactElement } from 'react'
 import css from './styles.module.css'
+
+const DiscoverSafenetStep = dynamic(() => import('@/features/safenet/components/new-safe/DiscoverSafenetStep'))
 
 export type NewSafeFormData = {
   name: string

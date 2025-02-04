@@ -6,7 +6,7 @@ import { useRouter } from 'next/router'
 import { useState } from 'react'
 import css from './styles.module.css'
 
-function SafenetCard() {
+function SafenetInfoCard() {
   const router = useRouter()
   const [displayBanner, setDisplayBanner] = useState<boolean>(true)
 
@@ -45,4 +45,4 @@ function SafenetCard() {
   )
 }
 
-export default SafenetCard
+export default SafenetInfoCard

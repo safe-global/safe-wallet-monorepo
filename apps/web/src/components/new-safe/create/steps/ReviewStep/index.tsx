@@ -9,17 +9,20 @@ import type { NamedAddress } from '@/components/new-safe/create/types'
 import useSyncSafeCreationStep from '@/components/new-safe/create/useSyncSafeCreationStep'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import NetworkLogosList from '@/features/multichain/components/NetworkLogosList'
-import SafenetNetworkSelector from '@/features/safenet/components/SafenetNetworkSelector'
 import type { SafenetReviewType } from '@/features/safenet/components/new-safe/SafenetReview'
-import { SafenetReview, useSubmitSafenetReviewHandler } from '@/features/safenet/components/new-safe/SafenetReview'
+import { useSubmitSafenetReviewHandler } from '@/features/safenet/components/new-safe/SafenetReview'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import { Box, Button, CircularProgress, Divider, Grid, Tooltip, Typography } from '@mui/material'
 import { type ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import classnames from 'classnames'
+import dynamic from 'next/dynamic'
 import type { Dispatch, SetStateAction } from 'react'
 import { useState } from 'react'
 import type { ReviewType } from './Review'
 import { Review, useSubmitReviewHandler } from './Review'
+
+const SafenetReview = dynamic(() => import('@/features/safenet/components/new-safe/SafenetReview'))
+const SafenetNetworkSelector = dynamic(() => import('@/features/safenet/components/SafenetNetworkSelector'))
 
 export const NetworkFee = ({
   totalFee,
