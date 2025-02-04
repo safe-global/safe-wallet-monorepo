@@ -1,0 +1,50 @@
+.row {
+  width: 100%;
+  padding: var(--space-4) var(--space-7);
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-5);
+}
+
+.cards {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.card {
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--space-1);
+  padding: var(--space-2);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  flex: 1;
+}
+
+.checkIcon {
+  height: 16px;
+  width: 16px;
+  color: var(--color-success-main);
+  background: var(--color-secondary-background);
+  border-radius: var(--space-2);
+  padding: 2px;
+  align-self: flex-end;
+}
+
+.networks {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+@media (max-width: 599.95px) {
+  .row {
+    padding: var(--space-2);
+  }
+}

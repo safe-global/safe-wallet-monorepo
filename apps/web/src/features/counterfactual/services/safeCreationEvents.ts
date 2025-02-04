@@ -25,8 +25,9 @@ export interface SafeCreationEvents {
   }
   [SafeCreationEvent.RELAYING]: {
     groupKey: string
-    taskId: string
+    taskId?: string
     safeAddress: string
+    chainId?: string
   }
   [SafeCreationEvent.SUCCESS]: {
     groupKey: string

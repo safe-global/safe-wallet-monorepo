@@ -1,5 +1,5 @@
+import SafenetIcon from '@/public/images/safenet/safenet.svg'
 import { Box, SvgIcon, Typography } from '@mui/material'
-import SafenetIcon from '@/public/images/safenet.svg'
 import { type CSSProperties, type ReactNode } from 'react'
 
 const GradientBoxSafenet = ({

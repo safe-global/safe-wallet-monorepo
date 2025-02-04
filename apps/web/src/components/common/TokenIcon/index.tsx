@@ -37,7 +37,7 @@ const TokenIcon = ({
       />
       {safenet && (
         <div className={css.safenetContainer}>
-          <Image src="/images/safenet-bright.svg" alt="Safenet Logo" width={16} height={16} />
+          <Image src="/images/safenet/safenet-bright.svg" alt="Safenet Logo" width={16} height={16} />
         </div>
       )}
     </div>

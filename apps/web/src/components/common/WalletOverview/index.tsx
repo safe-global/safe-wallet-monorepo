@@ -1,14 +1,14 @@
 import Identicon from '@/components/common/Identicon'
 import { Box, Typography } from '@mui/material'
-import { Suspense } from 'react'
 import type { ReactElement } from 'react'
+import { Suspense } from 'react'
 
 import EthHashInfo from '@/components/common/EthHashInfo'
+import WalletBalance from '@/components/common/WalletBalance'
 import WalletIcon from '@/components/common/WalletIcon'
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import { useAppSelector } from '@/store'
 import { selectChainById } from '@/store/chainsSlice'
-import WalletBalance from '@/components/common/WalletBalance'
 
 import css from './styles.module.css'
 
@@ -29,13 +29,15 @@ const WalletOverview = ({
   wallet,
   balance,
   showBalance,
+  isSafenet,
 }: {
   wallet: ConnectedWallet
   balance?: string
   showBalance?: boolean
+  isSafenet?: boolean
 }): ReactElement => {
   const walletChain = useAppSelector((state) => selectChainById(state, wallet.chainId))
-  const prefix = walletChain?.shortName
+  const prefix = !isSafenet ? walletChain?.shortName : ''
 
   return (
     <Box className={css.container}>
