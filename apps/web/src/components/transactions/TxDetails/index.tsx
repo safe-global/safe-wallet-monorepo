@@ -37,7 +37,6 @@ import { useGetTransactionDetailsQuery } from '@/store/api/gateway'
 import { asError } from '@/services/exceptions/utils'
 import { POLLING_INTERVAL } from '@/config/constants'
 import { TxNote } from '@/features/tx-notes'
-import SafenetTransactionDetails from '@/features/safenet/components/SafenetTransactionDetails'
 
 export const NOT_AVAILABLE = 'n/a'
 

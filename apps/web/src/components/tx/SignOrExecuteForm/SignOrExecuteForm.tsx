@@ -35,9 +35,6 @@ import { useSigner } from '@/hooks/wallets/useWallet'
 import { trackTxEvents } from './tracking'
 import { TxNoteForm, encodeTxNote } from '@/features/tx-notes'
 import useIsSafenetEnabled from '@/features/safenet/hooks/useIsSafenetEnabled'
-import dynamic from 'next/dynamic'
-
-const SafenetTxChecks = dynamic(() => import('@/features/safenet/components/SafenetTxChecks'))
 
 export type SubmitCallback = (txId: string, isExecuted?: boolean) => void
 
@@ -202,8 +199,6 @@ export const SignOrExecuteForm = ({
       <TxNoteForm isCreation={isCreation ?? false} onSubmit={onNoteSubmit} txDetails={props.txDetails} />
 
       <SignerForm willExecute={willExecute} />
-
-      {isSafenetEnabled && safeTx && <SafenetTxChecks safeTx={safeTx} />}
 
       <TxCard>
         <ConfirmationTitle
