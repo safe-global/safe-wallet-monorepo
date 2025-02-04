@@ -1,0 +1,48 @@
+import { AppRoutes } from '@/config/routes'
+import BellIcon from '@/public/images/safenet/bell.svg'
+import CloseIcon from '@mui/icons-material/Close'
+import { Box, Button, IconButton, Typography } from '@mui/material'
+import { useRouter } from 'next/router'
+import { useState } from 'react'
+import css from './styles.module.css'
+
+function SafenetCard() {
+  const router = useRouter()
+  const [displayBanner, setDisplayBanner] = useState<boolean>(true)
+
+  const onClick = () => {
+    router.push(
+      {
+        pathname: AppRoutes.newSafe.create,
+        query: { safenet: true },
+      },
+      AppRoutes.newSafe.create,
+    )
+  }
+
+  return (
+    displayBanner && (
+      <Box className={css.card}>
+        <IconButton className={css.close} onClick={() => setDisplayBanner(false)} size="small">
+          <CloseIcon fontSize="medium" />
+        </IconButton>
+        <Box className={css.images}>
+          <BellIcon />
+          <Box className={css.newTag}>
+            <Typography fontSize={12}>New</Typography>
+          </Box>
+        </Box>
+        <Box className={css.description}>
+          <Typography variant="body2">
+            Create a new account with Safenet to unlock a unified and secure experience across networks.
+          </Typography>
+          <Button onClick={onClick} variant="outlined" size="small">
+            Learn more
+          </Button>
+        </Box>
+      </Box>
+    )
+  )
+}
+
+export default SafenetCard
