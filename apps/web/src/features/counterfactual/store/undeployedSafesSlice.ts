@@ -33,7 +33,7 @@ export type ReplayedSafeProps = {
     data: string
     paymentToken?: string
     payment?: number
-    paymentReceiver?: string
+    paymentReceiver: string
   }
   saltNonce: string
   safeVersion: SafeVersion

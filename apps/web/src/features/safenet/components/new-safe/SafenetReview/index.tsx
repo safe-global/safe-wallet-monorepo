@@ -57,7 +57,7 @@ export const useSubmitSafenetReviewHandler = ({
         to: deploymentData.safeAccountConfig.to || ZERO_ADDRESS,
         data: deploymentData.safeAccountConfig.data || EMPTY_DATA,
         fallbackHandler: deploymentData.safeAccountConfig.fallbackHandler || ZERO_ADDRESS,
-        //paymentReceiver: data.paymentReceiver ?? ECOSYSTEM_ID_ADDRESS,
+        paymentReceiver: ZERO_ADDRESS, // data.paymentReceiver ?? ECOSYSTEM_ID_ADDRESS,
       },
       saltNonce: deploymentData.saltNonce,
       safeVersion: deploymentData.safeVersion,
