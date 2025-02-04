@@ -1,0 +1,70 @@
+.lightBanner,
+.darkBanner {
+  align-items: flex-start;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+  padding: var(--space-3);
+  position: relative;
+}
+
+.lightBanner {
+  background-image: radial-gradient(108.2% 108.2% at 99.88% 11.3%, #003F54 0%, #000000 100%);
+}
+
+.darkBanner {
+  background-image:
+    radial-gradient(108.2% 108.2% at 99.88% 11.3%, #003F54 0%, #000000 100%),
+    radial-gradient(119.01% 132.63% at 119.01% -14.15%, #FF5F00 0%, #FFD200 50%, #12FF80 100%);
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+}
+
+.backgroundLogo {
+  position: absolute;
+  right: var(--space-3);
+  bottom: -36px;
+}
+
+.dismiss {
+  cursor: pointer;
+  font-size: 12px;
+  position: absolute;
+  margin: var(--space-3);
+  right: 0;
+  top: 0;
+}
+
+.title {
+  align-items: center;
+  display: flex;
+  flex-direction: row;
+  gap: var(--space-1);
+}
+
+.newTag {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  padding: 2px var(--space-1);
+}
+.newTag > p {
+  background: radial-gradient(119.01% 132.63% at 119.01% -14.15%, #FF5F00 0%, #FFD200 50%, #12FF80 100%);
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.bannerButton {
+  background: radial-gradient(119.01% 132.63% at 119.01% -14.15%, #FF5F00 0%, #FFD200 50%, #12FF80 100%);
+}
+
+@media (max-width: 450px) {
+  .dismiss {
+    position: relative;
+    width: 100%;
+    margin: 0;
+    text-align: right;
+  }
+}
