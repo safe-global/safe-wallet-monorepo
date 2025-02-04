@@ -15,7 +15,7 @@ export const storePrivateKey = async (userId: string, privateKey: string) => {
       invalidateOnNewBiometry: true,
     })
 
-    const encryptyedPrivateKey = await DeviceCrypto.encrypt(userId, privateKey, {
+    const encryptedPrivateKey = await DeviceCrypto.encrypt(userId, privateKey, {
       biometryTitle: 'Authenticate',
       biometrySubTitle: 'Saving key',
       biometryDescription: 'Please authenticate yourself',
@@ -24,8 +24,8 @@ export const storePrivateKey = async (userId: string, privateKey: string) => {
     await Keychain.setGenericPassword(
       'signer_address',
       JSON.stringify({
-        encryptyedPassword: encryptyedPrivateKey.encryptedText,
-        iv: encryptyedPrivateKey.iv,
+        encryptedPassword: encryptedPrivateKey.encryptedText,
+        iv: encryptedPrivateKey.iv,
       }),
       {
         accessControl: Keychain.ACCESS_CONTROL.BIOMETRY_CURRENT_SET_OR_DEVICE_PASSCODE,
@@ -56,8 +56,8 @@ export const getPrivateKey = async (userId: string) => {
       throw 'user password not found'
     }
 
-    const { encryptyedPassword, iv } = JSON.parse(user.password)
-    const decryptedKey = await DeviceCrypto.decrypt(userId, encryptyedPassword, iv, {
+    const { encryptedPassword, iv } = JSON.parse(user.password)
+    const decryptedKey = await DeviceCrypto.decrypt(userId, encryptedPassword, iv, {
       biometryTitle: 'Authenticate',
       biometrySubTitle: 'Signing',
       biometryDescription: 'Authenticate yourself to sign the text',

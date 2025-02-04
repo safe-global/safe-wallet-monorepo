@@ -3,16 +3,16 @@ import React, { useEffect } from 'react'
 import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
 import { selectSettings } from '@/src/store/settingsSlice'
 import { selectActiveSafe } from '@/src/store/activeSafeSlice'
-import useNotifications from '@/src/hooks/useNotifications'
-import { updatePromptAttempts } from '@/src/store/notificationsSlice'
+import { selectAppNotificationStatus, updatePromptAttempts, selectPromptAttempts } from '@/src/store/notificationsSlice'
 import { ONBOARDING_VERSION } from '@/src/config/constants'
 
 let navigated = false
 
 function useInitialNavigationScreen() {
   const onboardingVersionSeen = useAppSelector((state) => selectSettings(state, 'onboardingVersionSeen'))
+  const isAppNotificationEnabled = useAppSelector(selectAppNotificationStatus)
   const activeSafe = useAppSelector(selectActiveSafe)
-  const { isAppNotificationEnabled, promptAttempts } = useNotifications()
+  const promptAttempts = useAppSelector(selectPromptAttempts)
   const dispatch = useAppDispatch()
   const router = useRouter()
   const segments = useSegments()

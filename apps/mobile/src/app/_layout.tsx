@@ -1,4 +1,6 @@
+import '../../shim'
 import '@/src/config/polyfills'
+import '../../shim'
 import { Stack } from 'expo-router'
 import 'react-native-reanimated'
 import { SafeThemeProvider } from '@/src/theme/provider/safeTheme'
@@ -14,13 +16,13 @@ import { NotificationsProvider } from '@/src/context/NotificationsContext'
 import { SafeToastProvider } from '@/src/theme/provider/toastProvider'
 import { configureReanimatedLogger, ReanimatedLogLevel } from 'react-native-reanimated'
 import { OnboardingHeader } from '@/src/features/Onboarding/components/OnboardingHeader'
-import { install } from 'react-native-quick-crypto'
 import { getDefaultScreenOptions } from '@/src/navigation/hooks/utils'
 import { NavigationGuardHOC } from '@/src/navigation/NavigationGuardHOC'
 import { StatusBar } from 'expo-status-bar'
 import { TestCtrls } from '@/src/tests/e2e-maestro/components/TestCtrls'
+import Logger, { LogLevel } from '@/src/utils/logger'
 
-install()
+Logger.setLevel(__DEV__ ? LogLevel.TRACE : LogLevel.ERROR)
 
 configureReanimatedLogger({
   level: ReanimatedLogLevel.warn,

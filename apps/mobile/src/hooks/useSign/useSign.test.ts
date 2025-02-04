@@ -23,7 +23,7 @@ describe('useSign', () => {
     })
     expect(spy).toHaveBeenCalledWith(
       'signer_address',
-      JSON.stringify({ encryptyedPassword: 'encryptedText', iv: `${privateKey}000` }),
+      JSON.stringify({ encryptedPassword: 'encryptedText', iv: `${privateKey}000` }),
       {
         accessControl: 'BIOMETRY_CURRENT_SET_OR_DEVICE_PASSCODE',
         accessible: 'WHEN_UNLOCKED_THIS_DEVICE_ONLY',
@@ -48,7 +48,7 @@ describe('useSign', () => {
 
     expect(spy).toHaveBeenCalledWith(
       'signer_address',
-      JSON.stringify({ encryptyedPassword: 'encryptedText', iv: `${privateKey}000` }),
+      JSON.stringify({ encryptedPassword: 'encryptedText', iv: `${privateKey}000` }),
       {
         accessControl: 'BIOMETRY_CURRENT_SET_OR_DEVICE_PASSCODE',
         accessible: 'WHEN_UNLOCKED_THIS_DEVICE_ONLY',
