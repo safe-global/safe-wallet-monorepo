@@ -1,8 +1,8 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 
+import { type RequiredTenderlySimulation } from '@/components/tx/security/tenderly/types'
 import { SAFENET_API_URL } from '@/config/constants'
 import type { SafeVersion } from '@safe-global/safe-core-sdk-types'
-import { type RequiredTenderlySimulation } from '@/components/tx/security/tenderly/types'
 
 export type SafenetSafeEntity = {
   safe: string
@@ -44,8 +44,7 @@ export type DeploySafenetAccountResponse = {
   saltNonce: string
   factoryAddress: string
   masterCopy: string
-  safeVersion: 
-  
+  safeVersion: SafeVersion
 }
 
 export const getSafenetBalances = async (safeAddress: string): Promise<SafenetBalanceEntity> => {
