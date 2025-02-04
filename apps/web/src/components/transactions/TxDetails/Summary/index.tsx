@@ -1,5 +1,4 @@
 import { TxDataRow, generateDataRowValue } from '@/components/transactions/TxDetails/Summary/TxDataRow'
-import useIsSafenetEnabled from '@/features/safenet/hooks/useIsSafenetEnabled'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { Errors, logError } from '@/services/exceptions'
 import { dateString } from '@/utils/formatters'
@@ -9,16 +8,12 @@ import { calculateSafeTransactionHash } from '@safe-global/protocol-kit/dist/src
 import type { SafeTransaction, SafeTransactionData, SafeVersion } from '@safe-global/safe-core-sdk-types'
 import type { TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
 import { Operation } from '@safe-global/safe-gateway-typescript-sdk'
-import dynamic from 'next/dynamic'
 import type { ReactElement } from 'react'
 import { useMemo, useState } from 'react'
 import SafeTxGasForm from '../SafeTxGasForm'
 import DecodedData from '../TxData/DecodedData'
 import { SafeTxHashDataRow } from './SafeTxHashDataRow'
 import css from './styles.module.css'
-
-const GradientBoxSafenet = dynamic(() => import('@/features/safenet/components/GradientBoxSafenet'))
-const SafenetTxSimulation = dynamic(() => import('@/features/safenet/components/SafenetTxSimulation'))
 
 interface Props {
   txDetails: TransactionDetails
@@ -28,7 +23,6 @@ interface Props {
 
 const Summary = ({ txDetails, defaultExpanded = false, hideDecodedData = false }: Props): ReactElement => {
   const { safe } = useSafeInfo()
-  const isSafenetEnabled = useIsSafenetEnabled()
   const [expanded, setExpanded] = useState<boolean>(defaultExpanded)
 
   const toggleExpanded = () => {
@@ -78,26 +72,6 @@ const Summary = ({ txDetails, defaultExpanded = false, hideDecodedData = false }
         <TxDataRow datatestid="tx-executed-at" title="Executed:">
           {dateString(executedAt)}
         </TxDataRow>
-      )}
-
-      {isSafenetEnabled && (
-        <Box mt={1}>
-          <TxDataRow title="Safenet checks:">
-            <GradientBoxSafenet className={css.safenetGradientRow}>
-              <SafenetTxSimulation
-                safe={safe.address.value}
-                chainId={safe.chainId}
-                safeTx={{
-                  data: safeTxData!,
-                  signatures: new Map(),
-                  getSignature: () => undefined,
-                  addSignature: () => {},
-                  encodedSignatures: () => '',
-                }}
-              />
-            </GradientBoxSafenet>
-          </TxDataRow>
-        </Box>
       )}
 
       {/* Advanced TxData */}

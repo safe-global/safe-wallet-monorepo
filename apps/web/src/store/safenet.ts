@@ -2,6 +2,7 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 
 import { SAFENET_API_URL } from '@/config/constants'
 import type { SafeVersion } from '@safe-global/safe-core-sdk-types'
+import { type RequiredTenderlySimulation } from '@/components/tx/security/tenderly/types'
 
 export type SafenetSafeEntity = {
   safe: string
@@ -21,35 +22,12 @@ export type SafenetBalanceEntity = {
   [tokenSymbol: string]: string
 }
 
-export type SafenetSimulateTx = {
+export type SafenetSimulateTransactionRequest = {
   safe: string
   safeTxHash: string
-  to: string
-  value: string
-  data: string
-  operation: number
-  safeTxGas: string
-  baseGas: string
-  gasPrice: string
-  gasToken: string
-  refundReceiver: string
-  confirmations: []
-  dataDecoded: unknown
 }
 
-export type SafenetSimulationResult = {
-  guarantee: string
-  status: 'success' | 'failure' | 'skipped' | 'pending'
-  metadata?: {
-    link?: string
-  }
-}
-
-export type SafenetSimulationResponse = {
-  hasError: boolean
-  hasPending: boolean
-  results: SafenetSimulationResult[]
-}
+export type SafenetSimulationResponse = RequiredTenderlySimulation
 
 export type DeploySafenetAccountResponse = {
   safeAddress: string
@@ -66,7 +44,8 @@ export type DeploySafenetAccountResponse = {
   saltNonce: string
   factoryAddress: string
   masterCopy: string
-  safeVersion: SafeVersion
+  safeVersion: 
+  
 }
 
 export const getSafenetBalances = async (safeAddress: string): Promise<SafenetBalanceEntity> => {
@@ -108,11 +87,11 @@ export const safenetApi = createApi({
       query: ({ safeAddress }) => `/balances/${safeAddress}`,
       providesTags: (_, __, arg) => [{ type: 'SafenetBalance', id: arg.safeAddress }],
     }),
-    simulateSafenetTx: builder.query<
+    simulateSafenetTransaction: builder.query<
       SafenetSimulationResponse,
       {
         chainId: string
-        tx: SafenetSimulateTx
+        tx: SafenetSimulateTransactionRequest
       }
     >({
       query: ({ chainId, tx }) => ({
@@ -145,6 +124,6 @@ export const safenetApi = createApi({
 export const {
   useGetSafenetConfigQuery,
   useLazyGetSafenetBalanceQuery,
-  useLazySimulateSafenetTxQuery,
+  useLazySimulateSafenetTransactionQuery,
   useLazyDeploySafenetAccountQuery,
 } = safenetApi

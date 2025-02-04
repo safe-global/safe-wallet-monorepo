@@ -490,7 +490,7 @@ exports[`ConfirmationView should display a confirmation screen for a SETTINGS_CH
                       class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true css-1vd824g-MuiGrid-root"
                       data-testid="tx-data-row"
                     >
-                      [object Object]
+                      0
                     </div>
                   </div>
                   <div
@@ -1001,7 +1001,7 @@ exports[`ConfirmationView should display a confirmation with method call when th
                       class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true css-1vd824g-MuiGrid-root"
                       data-testid="tx-data-row"
                     >
-                      [object Object]
+                      0
                     </div>
                   </div>
                   <div

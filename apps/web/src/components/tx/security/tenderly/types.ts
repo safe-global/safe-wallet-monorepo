@@ -66,6 +66,11 @@ export interface TenderlySimulation {
   generated_access_list: GeneratedAccessList[]
 }
 
+export type RequiredTenderlySimulation = {
+  simulation: Pick<TenderlySimulation['simulation'], 'id' | 'status'>
+  transaction: Pick<TenderlySimulation['transaction'], 'error_message' | 'error_info' | 'call_trace'>
+}
+
 interface TenderlyContract {
   id: string
   contract_id: string
