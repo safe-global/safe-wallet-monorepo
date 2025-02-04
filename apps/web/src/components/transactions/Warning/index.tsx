@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react'
-import { Alert, SvgIcon, Tooltip, Typography } from '@mui/material'
+import { Alert, SvgIcon, Tooltip } from '@mui/material'
 import type { AlertColor } from '@mui/material'
 
 import InfoOutlinedIcon from '@/public/images/notifications/info.svg'
@@ -70,13 +70,10 @@ export const UntrustedFallbackHandlerWarning = ({ fallbackHandler }: { fallbackH
       datatestid="untrusted-fallback-handler-warning"
       title={
         <>
-          <Typography component="p">
-            This transaction sets an <b>unofficial</b> fallback handler.
-          </Typography>
-          <Typography component="p">
-            <strong>Proceed with caution:</strong> Ensure the fallback handler address is trusted and secure. If unsure,
-            do not proceed.
-          </Typography>
+          This transaction sets an <b>unofficial</b> fallback handler.
+          <br />
+          <b>Proceed with caution:</b> Ensure the fallback handler address is trusted and secure. If unsure, do not
+          proceed.
         </>
       }
       severity="warning"
