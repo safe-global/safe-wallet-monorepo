@@ -62,12 +62,10 @@ export const SpeedUpModal = ({
   const dispatch = useAppDispatch()
   const [trigger] = useLazyGetTransactionDetailsQuery()
   const isDisabled = waitingForConfirmation || !wallet || !speedUpFee || !onboard
-  const [safeTx] = useAsync(async () => {
-    if (!chainInfo?.chainId || !safeAddress) {
-      return null
-    }
-    return createExistingTx(chainInfo.chainId, safeAddress, txId)
-  }, [txId, chainInfo?.chainId, safeAddress])
+  const [safeTx] = useAsync(() => {
+    if (!chainInfo?.chainId) return
+    return createExistingTx(chainInfo.chainId, txId)
+  }, [txId, chainInfo?.chainId])
 
   const safeTxHasSignatures = !!safeTx?.signatures?.size ? true : false
 

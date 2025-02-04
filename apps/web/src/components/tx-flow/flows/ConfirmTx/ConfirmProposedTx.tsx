@@ -19,7 +19,7 @@ const SIGN_EXECUTE_TEXT = 'Sign or immediately execute this transaction.'
 
 const ConfirmProposedTx = ({ txSummary }: ConfirmProposedTxProps): ReactElement => {
   const signer = useSigner()
-  const { safe, safeAddress } = useSafeInfo()
+  const { safe } = useSafeInfo()
   const chainId = useChainId()
   const { setSafeTx, setSafeTxError, setNonce } = useContext(SafeTxContext)
 
@@ -33,8 +33,8 @@ const ConfirmProposedTx = ({ txSummary }: ConfirmProposedTxProps): ReactElement 
   }, [setNonce, txNonce])
 
   useEffect(() => {
-    createExistingTx(chainId, safeAddress, txId).then(setSafeTx).catch(setSafeTxError)
-  }, [txId, safeAddress, chainId, setSafeTx, setSafeTxError])
+    createExistingTx(chainId, txId).then(setSafeTx).catch(setSafeTxError)
+  }, [txId, chainId, setSafeTx, setSafeTxError])
 
   const text = canSign ? (canExecute ? SIGN_EXECUTE_TEXT : SIGN_TEXT) : EXECUTE_TEXT
 
