@@ -4,6 +4,7 @@ import { SettingsInfoType } from '@safe-global/safe-gateway-typescript-sdk'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import { InfoDetails } from '@/components/transactions/InfoDetails'
 import { ThresholdWarning } from '@/components/transactions/Warning'
+import { UntrustedFallbackHandlerWarning } from '@/components/transactions/Warning'
 
 type SettingsChangeTxInfoProps = {
   settingsInfo: SettingsChange['settingsInfo']
@@ -23,14 +24,17 @@ export const SettingsChangeTxInfo = ({ settingsInfo }: SettingsChangeTxInfoProps
   switch (settingsInfo.type) {
     case SettingsInfoType.SET_FALLBACK_HANDLER: {
       return (
-        <InfoDetails title="Set fallback handler:">
-          <EthHashInfo
-            address={settingsInfo.handler.value}
-            name={settingsInfo.handler?.name}
-            customAvatar={settingsInfo.handler?.logoUri}
-            {...addressInfoProps}
-          />
-        </InfoDetails>
+        <>
+          <InfoDetails title="Set fallback handler:">
+            <EthHashInfo
+              address={settingsInfo.handler.value}
+              name={settingsInfo.handler?.name}
+              customAvatar={settingsInfo.handler?.logoUri}
+              {...addressInfoProps}
+            />
+          </InfoDetails>
+          <UntrustedFallbackHandlerWarning fallbackHandler={settingsInfo.handler.value} />
+        </>
       )
     }
     case SettingsInfoType.ADD_OWNER:
