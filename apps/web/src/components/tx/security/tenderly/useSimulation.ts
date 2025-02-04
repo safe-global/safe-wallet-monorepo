@@ -68,7 +68,7 @@ export const useSimulation = (): UseSimulationReturn => {
             BigInt(params.safe.chainId),
           )
 
-          const { data: safeNetSimulation } = await simulateSafenet({
+          const { data: safenetSimulation } = await simulateSafenet({
             chainId: params.safe.chainId,
             tx: {
               safe: params.safe.address.value,
@@ -76,8 +76,8 @@ export const useSimulation = (): UseSimulationReturn => {
             },
           })
 
-          if (safeNetSimulation) {
-            data = safeNetSimulation
+          if (safenetSimulation) {
+            data = safenetSimulation
           }
         }
 
