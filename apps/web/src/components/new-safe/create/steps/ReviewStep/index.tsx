@@ -148,7 +148,7 @@ const ReviewStep = ({
   onBack,
   setStep,
   isSafenetFlow = false,
-}: StepRenderProps<NewSafeFormData> & { isSafenetFlow: boolean }) => {
+}: StepRenderProps<NewSafeFormData> & { isSafenetFlow?: boolean }) => {
   useSyncSafeCreationStep(setStep, data.networks)
   const [isCreating, setIsCreating] = useState<boolean>(false)
   const [submitError, setSubmitError] = useState<string>()

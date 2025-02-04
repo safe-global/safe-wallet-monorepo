@@ -1,4 +1,3 @@
-import DiscoverSafenetStep from ''
 import ExternalLink from '@/components/common/ExternalLink'
 import { CardStepper } from '@/components/new-safe/CardStepper'
 import type { TxStepperProps } from '@/components/new-safe/CardStepper/useCardStepper'
