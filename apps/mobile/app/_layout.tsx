@@ -73,6 +73,14 @@ function RootLayout() {
                           animation: 'fade',
                         }}
                       />
+                      <Stack.Screen
+                        name="networks-sheet"
+                        options={{
+                          headerShown: false,
+                          presentation: 'transparentModal',
+                          animation: 'fade',
+                        }}
+                      />
                       <Stack.Screen name="notifications-opt-in" options={{ headerShown: true, title: '' }} />
                       <Stack.Screen name="+not-found" />
                     </Stack>
