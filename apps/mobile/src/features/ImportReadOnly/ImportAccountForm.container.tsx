@@ -3,7 +3,7 @@ import { useLocalSearchParams } from 'expo-router'
 import { LargeHeaderTitle } from '@/src/components/Title/LargeHeaderTitle'
 import { useScrollableHeader } from '@/src/navigation/useScrollableHeader'
 import { NavBarTitle } from '@/src/components/Title'
-import React, { useState } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { XStack, YStack } from 'tamagui'
 import { SafeButton } from '@/src/components/SafeButton'
 import { KeyboardAvoidingView, StyleSheet } from 'react-native'
@@ -54,28 +54,36 @@ export const ImportAccountFormContainer = () => {
   const safeExists = result.data && result.data?.length > 0
   const insets = useSafeAreaInsets()
 
-  const onChangeText = (text: string) => {
-    const { address } = parsePrefixedAddress(text)
-    const shouldContinue = isValidAddress(address)
-    const isValid = isValidAddress(address)
-    if (isValid) {
-      trigger({
-        safes: chainIds.map((chainId: string) => makeSafeId(chainId, address)),
-        currency: 'usd',
-        trusted: true,
-        excludeSpam: true,
-      })
-    }
+  const onChangeText = useCallback(
+    (text: string) => {
+      const { address } = parsePrefixedAddress(text)
+      const shouldContinue = isValidAddress(address)
+      const isValid = isValidAddress(address)
+      if (isValid) {
+        trigger({
+          safes: chainIds.map((chainId: string) => makeSafeId(chainId, address)),
+          currency: 'usd',
+          trusted: true,
+          excludeSpam: true,
+        })
+      }
 
-    setEnteredAddressValid(isValid)
-    setError(shouldContinue ? undefined : 'Invalid address format')
-    setSafeAddress(text)
-    setAddressWithoutPrefix(address)
-  }
+      setEnteredAddressValid(isValid)
+      setError(shouldContinue ? undefined : 'Invalid address format')
+      setSafeAddress(text)
+      setAddressWithoutPrefix(address)
+    },
+    [chainIds, trigger],
+  )
+
+  useEffect(() => {
+    if (params.safeAddress) {
+      onChangeText(params.safeAddress)
+    }
+  }, [params.safeAddress, onChangeText])
 
   const canContinue = isEnteredAddressValid && safeExists && !error
 
-  console.log('chainid', result.data?.[0].chainId)
   return (
     <SafeAreaView style={[styles.container, { paddingBottom: insets.bottom + insets.top }]}>
       <KeyboardAvoidingView
