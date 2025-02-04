@@ -10,14 +10,17 @@ import useSyncSafeCreationStep from '@/components/new-safe/create/useSyncSafeCre
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import NetworkLogosList from '@/features/multichain/components/NetworkLogosList'
 import SafenetNetworkSelector from '@/features/safenet/components/SafenetNetworkSelector'
+import type { SafenetReviewType } from '@/features/safenet/components/new-safe/SafenetReview'
+import {
+  SafenetReview,
+  useSubmitSafenetReviewHandler,
+} from '@/features/safenet/components/new-safe/SafenetReview'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import { Box, Button, CircularProgress, Divider, Grid, Tooltip, Typography } from '@mui/material'
 import { type ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import classnames from 'classnames'
 import type { Dispatch, SetStateAction } from 'react'
 import { useState } from 'react'
-import type { SafenetReviewType } from '../../../../../features/safenet/components/new-safe/SafenetReview'
-import { SafenetReview, useSubmitSafenetReviewHandler } from '../../../../../features/safenet/components/new-safe/SafenetReview'
 import type { ReviewType } from './Review'
 import { Review, useSubmitReviewHandler } from './Review'
 
@@ -134,7 +137,9 @@ type UseSubmitHandlerProps = {
 }
 
 const useSubmitHandler = (props: UseSubmitHandlerProps): ReviewType | SafenetReviewType => {
-  return props.isSafenetFlow ? useSubmitSafenetReviewHandler(props) : useSubmitReviewHandler(props)
+  const safeProps = useSubmitReviewHandler(props)
+  const safenetProps = useSubmitSafenetReviewHandler(props)
+  return props.isSafenetFlow ? safenetProps : safeProps
 }
 
 const ReviewStep = ({
