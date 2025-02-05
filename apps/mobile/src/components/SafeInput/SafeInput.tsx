@@ -47,7 +47,7 @@ export function SafeInput({
           {...props}
           size="$5"
           flex={1}
-          maxHeight={height}
+          // maxHeight={height}
           autoCapitalize="none"
           autoCorrect={false}
           placeholder={placeholder}

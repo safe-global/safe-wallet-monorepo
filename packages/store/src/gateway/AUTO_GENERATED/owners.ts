@@ -42,6 +42,8 @@ export type SafeList = {
 }
 export const {
   useOwnersGetSafesByOwnerV1Query,
-  useOwnersGetAllSafesByOwnerV1Query,
   useOwnersGetAllSafesByOwnerV2Query,
+  useLazyOwnersGetSafesByOwnerV1Query,
+  useOwnersGetAllSafesByOwnerV1Query,
+  useLazyOwnersGetAllSafesByOwnerV1Query,
 } = injectedRtkApi

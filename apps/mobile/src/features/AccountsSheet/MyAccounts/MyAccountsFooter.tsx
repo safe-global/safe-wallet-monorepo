@@ -4,6 +4,7 @@ import { BottomSheetFooter, BottomSheetFooterProps } from '@gorhom/bottom-sheet'
 import React from 'react'
 import { TouchableOpacity } from 'react-native'
 import { styled, Text, View } from 'tamagui'
+import { Link } from 'expo-router'
 
 const MyAccountsFooterContainer = styled(View, {
   borderTopWidth: 1,
@@ -30,17 +31,19 @@ export function MyAccountsFooter({ animatedFooterPosition }: CustomFooterProps) 
     <BottomSheetFooter animatedFooterPosition={animatedFooterPosition}>
       <MyAccountsFooterContainer>
         <TouchableOpacity onPress={onAddAccountClick}>
-          <MyAccountsButton testID="add-existing-account">
-            <Badge
-              themeName="badge_background"
-              circleSize="$10"
-              content={<SafeFontIcon size={20} name="plus-filled" />}
-            />
+          <Link href={'/(import-accounts)'} asChild>
+            <MyAccountsButton testID="add-existing-account">
+              <Badge
+                themeName="badge_background"
+                circleSize="$10"
+                content={<SafeFontIcon size={20} name="plus-filled" />}
+              />
 
-            <Text fontSize="$4" fontWeight={600}>
-              Add Existing Account
-            </Text>
-          </MyAccountsButton>
+              <Text fontSize="$4" fontWeight={600}>
+                Add Existing Account
+              </Text>
+            </MyAccountsButton>
+          </Link>
         </TouchableOpacity>
 
         <TouchableOpacity onPress={onJoinAccountClick}>

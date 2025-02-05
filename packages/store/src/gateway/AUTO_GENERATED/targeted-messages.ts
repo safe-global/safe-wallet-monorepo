@@ -54,5 +54,8 @@ export type Submission = {
 export type CreateSubmissionDto = {
   completed: boolean
 }
-export const { useTargetedMessagingGetSubmissionV1Query, useTargetedMessagingCreateSubmissionV1Mutation } =
-  injectedRtkApi
+export const {
+  useTargetedMessagingGetSubmissionV1Query,
+  useLazyTargetedMessagingGetSubmissionV1Query,
+  useTargetedMessagingCreateSubmissionV1Mutation,
+} = injectedRtkApi

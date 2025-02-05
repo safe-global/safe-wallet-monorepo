@@ -52,6 +52,7 @@
     "@react-navigation/native": "^7.0.14",
     "@reduxjs/toolkit": "^2.4.0",
     "@safe-global/store": "workspace:^",
+    "@safe-global/utils": "workspace:^",
     "@storybook/addon-react-native-web": "^0.0.26",
     "@storybook/addon-webpack5-compiler-babel": "^3.0.3",
     "@tamagui/animations-moti": "^1.117.1",
@@ -94,9 +95,10 @@
     "react-native-pager-view": "^6.5.1",
     "react-native-progress": "^5.0.1",
     "react-native-quick-crypto": "^0.7.11",
-    "react-native-reanimated": "^3.16.7",
-    "react-native-safe-area-context": "4.12.0",
-    "react-native-screens": "^4.0.0",
+    "react-native-reanimated": "~3.16.7",
+    "react-native-safe-area-context": "~5.1.0",
+    "react-native-screens": "~4.5.0",
+    "react-native-vision-camera": "patch:react-native-vision-camera@npm%3A4.6.3#~/.yarn/patches/react-native-vision-camera-npm-4.6.3-a36a48af3a.patch",
     "react-native-web": "^0.19.13",
     "react-redux": "^9.1.2",
     "redux": "^5.0.1",
@@ -138,6 +140,7 @@
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.2.1",
     "eslint-plugin-react": "^7.37.1",
+    "glob": "^11.0.1",
     "globals": "^15.14.0",
     "jest": "^29.7.0",
     "jest-expo": "~52.0.2",
@@ -146,7 +149,8 @@
     "storybook": "^8.4.6",
     "ts-node": "^10.9.2",
     "typescript": "~5.3.3",
-    "typescript-eslint": "^8.22.0"
+    "typescript-eslint": "^8.22.0",
+    "webpack": "^5.97.1"
   },
   "private": true
 }

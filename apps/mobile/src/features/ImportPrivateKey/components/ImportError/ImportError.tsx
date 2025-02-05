@@ -3,7 +3,7 @@ import { Identicon } from '@/src/components/Identicon'
 import { SafeButton } from '@/src/components/SafeButton/SafeButton'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { LargeHeaderTitle } from '@/src/components/Title/LargeHeaderTitle'
-import { useLocalSearchParams } from 'expo-router'
+import { Link, useLocalSearchParams } from 'expo-router'
 import React from 'react'
 import { ScrollView } from 'react-native'
 import { Text, View } from 'tamagui'
@@ -50,7 +50,9 @@ export function ImportError() {
           </Text>
         </View>
 
-        <SafeButton label="Import again" onPress={console.log} />
+        <Link href={'../'} asChild>
+          <SafeButton>Import again</SafeButton>
+        </Link>
       </View>
     </View>
   )

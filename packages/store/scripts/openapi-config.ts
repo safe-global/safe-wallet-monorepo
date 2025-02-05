@@ -6,7 +6,7 @@ const config: ConfigFile = {
   apiFile: '../src/gateway/cgwClient.ts',
   apiImport: 'cgwClient',
   exportName: 'cgwApi',
-  hooks: true,
+  hooks: { queries: true, lazyQueries: true, mutations: true },
   filterEndpoints: [/^(?!.*delegates).*/],
   tag: true,
   outputFiles: {

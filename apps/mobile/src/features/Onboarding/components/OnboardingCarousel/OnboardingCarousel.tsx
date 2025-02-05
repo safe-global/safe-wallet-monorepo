@@ -6,6 +6,7 @@ import { Tabs } from 'react-native-collapsible-tab-view'
 import { CarouselFeedback } from './CarouselFeedback'
 
 import { useRouter } from 'expo-router'
+
 interface OnboardingCarouselProps {
   items: CarouselItem[]
 }
@@ -39,7 +40,7 @@ export function OnboardingCarousel({ items }: OnboardingCarouselProps) {
           ))}
         </View>
         <View style={{ flexDirection: 'column', justifyContent: 'space-between' }}>
-          <SafeButton onPress={onGetStartedPress} label="Get started" />
+          <SafeButton onPress={onGetStartedPress}>Get started</SafeButton>
         </View>
       </View>
     </View>

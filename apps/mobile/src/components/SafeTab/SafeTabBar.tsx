@@ -20,7 +20,7 @@ export const SafeTabBar = ({
   const activeButtonStyle = {
     paddingBottom: 8,
     borderBottomColor: theme.color?.get(),
-    borderBottomWidth: 2,
+    borderBottomWidth: 1,
   }
 
   const handleTabPressed = (name: string) => () => {
@@ -33,10 +33,18 @@ export const SafeTabBar = ({
   }
 
   return (
-    <View backgroundColor="$background" marginBottom="$4" gap="$6" paddingHorizontal="$2" flexDirection="row">
+    <View
+      backgroundColor="transparent"
+      marginBottom="$4"
+      gap="$6"
+      paddingHorizontal="$2"
+      flexDirection="row"
+      borderBottomColor={'$borderLight'}
+      borderBottomWidth={1}
+    >
       {tabNames.map((name) => (
         <TouchableOpacity style={isActiveTab(name) && activeButtonStyle} onPress={handleTabPressed(name)} key={name}>
-          <Text color={isActiveTab(name) ? '$color' : '$colorSecondary'} fontSize="$5" fontWeight={600}>
+          <Text color={isActiveTab(name) ? '$color' : '$colorSecondary'} fontSize="$4" fontWeight={600}>
             {name}
           </Text>
         </TouchableOpacity>

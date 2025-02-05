@@ -222,12 +222,20 @@ export type LockingEventPage = {
 }
 export const {
   useCommunityGetCampaignsV1Query,
+  useLazyCommunityGetCampaignsV1Query,
   useCommunityGetCampaignByIdV1Query,
+  useLazyCommunityGetCampaignByIdV1Query,
   useCommunityGetCampaignActivitiesV1Query,
+  useLazyCommunityGetCampaignActivitiesV1Query,
   useCommunityGetCampaignLeaderboardV1Query,
+  useLazyCommunityGetCampaignLeaderboardV1Query,
   useCommunityGetCampaignRankV1Query,
+  useLazyCommunityGetCampaignRankV1Query,
   useCommunityCheckEligibilityV1Mutation,
   useCommunityGetLeaderboardV1Query,
+  useLazyCommunityGetLeaderboardV1Query,
   useCommunityGetLockingRankV1Query,
+  useLazyCommunityGetLockingRankV1Query,
   useCommunityGetLockingHistoryV1Query,
+  useLazyCommunityGetLockingHistoryV1Query,
 } = injectedRtkApi

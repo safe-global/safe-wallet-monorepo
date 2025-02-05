@@ -3,18 +3,19 @@ import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
 import { useSafesGetSafeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { useCallback, useEffect } from 'react'
 import { LoadingImportComponent } from './LoadingImport'
-import { useLocalSearchParams, useRouter } from 'expo-router'
+import { useGlobalSearchParams, useLocalSearchParams, useRouter } from 'expo-router'
 import { addSigner } from '@/src/store/signersSlice'
 
 export function LoadingImport() {
   const { address } = useLocalSearchParams()
   const dispatch = useAppDispatch()
   const router = useRouter()
-
+  const glob = useGlobalSearchParams<{ safeAddress?: string; chainId?: string }>()
   const activeSafe = useAppSelector(selectActiveSafe)
+
   const { data, error } = useSafesGetSafeV1Query({
-    safeAddress: activeSafe.address,
-    chainId: activeSafe.chainId,
+    safeAddress: glob.safeAddress || activeSafe.address,
+    chainId: glob.chainId || activeSafe.chainId,
   })
 
   const redirectToError = useCallback(() => {

@@ -23,11 +23,13 @@ interface SignersListProps {
   signersGroup: SignerSection[]
   isFetching: boolean
   hasLocalSingers: boolean
+  navbarTitle?: string
 }
 
-export function SignersList({ signersGroup, isFetching, hasLocalSingers }: SignersListProps) {
+export function SignersList({ signersGroup, isFetching, hasLocalSingers, navbarTitle }: SignersListProps) {
+  const title = navbarTitle || 'Signers'
   const { handleScroll } = useScrollableHeader({
-    children: <NavBarTitle>Signers</NavBarTitle>,
+    children: <NavBarTitle>{title}</NavBarTitle>,
   })
 
   const renderItem = useCallback(
@@ -37,7 +39,10 @@ export function SignersList({ signersGroup, isFetching, hasLocalSingers }: Signe
     [signersGroup],
   )
 
-  const ListHeaderComponent = useCallback(() => <SignersListHeader withAlert={!hasLocalSingers} />, [hasLocalSingers])
+  const ListHeaderComponent = useCallback(
+    () => <SignersListHeader sectionTitle={title} withAlert={!hasLocalSingers} />,
+    [hasLocalSingers],
+  )
   const contentContainerStyle = useMemo(
     () => ({
       paddingHorizontal: getTokenValue('$3'),
