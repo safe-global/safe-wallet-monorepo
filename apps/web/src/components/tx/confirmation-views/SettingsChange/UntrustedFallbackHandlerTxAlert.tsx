@@ -1,4 +1,4 @@
-import { ReactElement } from 'react'
+import type { ReactElement } from 'react'
 import { Alert, SvgIcon } from '@mui/material'
 import InfoOutlinedIcon from '@/public/images/notifications/info.svg'
 import { useIsOfficialFallbackHandler } from '@/hooks/useIsOfficialFallbackHandler'
