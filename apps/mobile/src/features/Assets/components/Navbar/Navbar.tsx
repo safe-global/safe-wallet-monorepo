@@ -1,4 +1,3 @@
-import { selectActiveSafe } from '@/src/store/activeSafeSlice'
 import { View } from 'tamagui'
 import { BlurredIdenticonBackground } from '@/src/components/BlurredIdenticonBackground'
 import { SafeAreaView } from 'react-native-safe-area-context'
@@ -11,6 +10,8 @@ import { Address } from '@/src/types/address'
 import { useAppSelector } from '@/src/store/hooks'
 import { useRouter } from 'expo-router'
 import { DropdownLabel } from '@/src/components/Dropdown/DropdownLabel'
+import { selectAppNotificationStatus } from '@/src/store/notificationsSlice'
+import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 
 const dropdownLabelProps = {
   fontSize: '$5',
@@ -19,7 +20,14 @@ const dropdownLabelProps = {
 
 export const Navbar = () => {
   const router = useRouter()
-  const activeSafe = useAppSelector(selectActiveSafe)
+  const activeSafe = useDefinedActiveSafe()
+  const isAppNotificationEnabled = useAppSelector(selectAppNotificationStatus)
+  const handleNotificationAccess = () => {
+    if (!isAppNotificationEnabled) {
+      router.navigate('/notifications-opt-in')
+    }
+    // TODO: navigate to notifications list when notifications are enabled
+  }
 
   return (
     <View>
@@ -33,9 +41,14 @@ export const Navbar = () => {
               router.push('/accounts-sheet')
             }}
           />
-          <TouchableOpacity>
-            <SafeFontIcon name="apps" />
-          </TouchableOpacity>
+          <View style={styles.rightButtonContainer}>
+            <TouchableOpacity onPress={handleNotificationAccess}>
+              <SafeFontIcon name="lightbulb" />
+            </TouchableOpacity>
+            <TouchableOpacity>
+              <SafeFontIcon name="apps" />
+            </TouchableOpacity>
+          </View>
         </SafeAreaView>
       </BlurredIdenticonBackground>
     </View>
