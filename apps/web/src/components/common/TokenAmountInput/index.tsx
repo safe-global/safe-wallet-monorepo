@@ -47,7 +47,7 @@ const TokenAmountInput = ({
   const onMaxAmountClick = useCallback(() => {
     if (!selectedToken || maxAmount === undefined) return
 
-    setValue(TokenAmountFields.amount, safeFormatUnits(maxAmount.toString(), selectedToken.tokenInfo.decimals), {
+    setValue(TokenAmountFields.amount, safeFormatUnits(maxAmount.toString(), selectedToken.tokenInfo.decimals ?? 0), {
       shouldValidate: true,
     })
   }, [maxAmount, selectedToken, setValue])

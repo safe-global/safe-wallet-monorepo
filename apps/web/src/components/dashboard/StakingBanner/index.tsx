@@ -37,7 +37,8 @@ const StakingBanner = ({
 
   const hasSufficientFunds =
     nativeTokenBalance != null &&
-    Number(formatUnits(nativeTokenBalance.balance, nativeTokenBalance.tokenInfo.decimals)) >= MIN_NATIVE_TOKEN_BALANCE
+    Number(formatUnits(nativeTokenBalance.balance, nativeTokenBalance.tokenInfo.decimals ?? 0)) >=
+      MIN_NATIVE_TOKEN_BALANCE
 
   const [widgetHidden = false, setWidgetHidden] = useLocalStorage<boolean>(hideLocalStorageKey)
 

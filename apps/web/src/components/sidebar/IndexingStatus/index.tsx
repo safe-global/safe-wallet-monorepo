@@ -16,6 +16,7 @@ const useIndexingStatus = () => {
 
   return useAsync(
     () => {
+      if (count === undefined) return
       return getIndexingStatus(chainId)
     },
     [chainId, count],

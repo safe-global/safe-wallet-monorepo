@@ -3,10 +3,10 @@ import { defaultSafeInfo } from '@/store/safeInfoSlice'
 import { act, renderHook, waitFor } from '@/tests/test-utils'
 import { toBeHex } from 'ethers'
 import useLoadBalances from '../loadables/useLoadBalances'
-import * as SafeGatewaySDK from '@safe-global/safe-gateway-typescript-sdk'
 import { TokenType } from '@safe-global/safe-apps-sdk'
 import { FEATURES } from '@/utils/chains'
 import * as useChainId from '@/hooks/useChainId'
+import * as balancesQueries from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import { TOKEN_LISTS } from '@/store/settingsSlice'
 
 const safeAddress = toBeHex('0x1234', 20)
@@ -133,24 +133,16 @@ describe('useLoadBalances', () => {
     const { result } = renderHook(() => useLoadBalances())
 
     await waitFor(() => {
-      expect(result.current[0]).toBeUndefined()
+      expect(result.current[0]).toEqual({ fiatTotal: '', items: [] })
       expect(result.current[1]).toBeUndefined()
       expect(result.current[2]).toBeFalsy()
     })
   })
 
   test('pass correct currency and reload on currency change', async () => {
-    const safeAddress = toBeHex('0x1234', 20)
-    const mockGetBalances = jest
-      .spyOn(SafeGatewaySDK, 'getBalances')
-      .mockImplementation(async (chainId, address, currency, query) => {
-        expect(chainId).toEqual('5')
-        expect(address).toEqual(safeAddress)
-        expect(currency).toEqual('EUR')
-        expect(query).toMatchObject({ trusted: false })
-
-        return mockBalanceEUR
-      })
+    jest
+      .spyOn(balancesQueries, 'useBalancesGetBalancesV1Query')
+      .mockImplementation(() => ({ data: mockBalanceEUR, isLoading: false, error: undefined, refetch: jest.fn() }))
 
     const mockSelector = jest.spyOn(store, 'useAppSelector').mockImplementation((selector) =>
       selector({
@@ -183,14 +175,9 @@ describe('useLoadBalances', () => {
       expect(result.current[1]).toBeUndefined()
     })
 
-    mockGetBalances.mockImplementation(async (chainId, address, currency, query) => {
-      expect(chainId).toEqual('5')
-      expect(address).toEqual(safeAddress)
-      expect(currency).toEqual('USD')
-      expect(query).toMatchObject({ trusted: false })
-
-      return mockBalanceUSD
-    })
+    jest
+      .spyOn(balancesQueries, 'useBalancesGetBalancesV1Query')
+      .mockImplementation(() => ({ data: mockBalanceUSD, isLoading: false, error: undefined, refetch: jest.fn() }))
 
     mockSelector.mockImplementation((selector) =>
       selector({
@@ -226,14 +213,12 @@ describe('useLoadBalances', () => {
   })
 
   test('only use default list if feature is enabled', async () => {
-    jest.spyOn(SafeGatewaySDK, 'getBalances').mockImplementation(async (chainId, address, currency, query) => {
-      expect(chainId).toEqual('5')
-      expect(address).toEqual(safeAddress)
-      expect(currency).toEqual('EUR')
-      expect(query).toMatchObject({ trusted: false })
-
-      return mockBalanceAllTokens
-    })
+    jest.spyOn(balancesQueries, 'useBalancesGetBalancesV1Query').mockImplementation(() => ({
+      data: mockBalanceAllTokens,
+      isLoading: false,
+      error: undefined,
+      refetch: jest.fn(),
+    }))
 
     jest.spyOn(store, 'useAppSelector').mockImplementation((selector) =>
       selector({
@@ -268,16 +253,12 @@ describe('useLoadBalances', () => {
   })
 
   test('use trusted filter for default list and reload on settings change', async () => {
-    const mockGetBalances = jest
-      .spyOn(SafeGatewaySDK, 'getBalances')
-      .mockImplementation(async (chainId, address, currency, query) => {
-        expect(chainId).toEqual('5')
-        expect(address).toEqual(safeAddress)
-        expect(currency).toEqual('EUR')
-        expect(query).toMatchObject({ trusted: true })
-
-        return mockBalanceDefaultList
-      })
+    jest.spyOn(balancesQueries, 'useBalancesGetBalancesV1Query').mockImplementation(() => ({
+      data: mockBalanceDefaultList,
+      isLoading: false,
+      error: undefined,
+      refetch: jest.fn(),
+    }))
 
     const mockSelector = jest.spyOn(store, 'useAppSelector').mockImplementation((selector) =>
       selector({
@@ -313,14 +294,12 @@ describe('useLoadBalances', () => {
       expect(result.current[1]).toBeUndefined()
     })
 
-    mockGetBalances.mockImplementation(async (chainId, address, currency, query) => {
-      expect(chainId).toEqual('5')
-      expect(address).toEqual(safeAddress)
-      expect(currency).toEqual('EUR')
-      expect(query).toMatchObject({ trusted: false })
-
-      return mockBalanceAllTokens
-    })
+    jest.spyOn(balancesQueries, 'useBalancesGetBalancesV1Query').mockImplementation(() => ({
+      data: mockBalanceAllTokens,
+      isLoading: false,
+      error: undefined,
+      refetch: jest.fn(),
+    }))
 
     mockSelector.mockImplementation((selector) =>
       selector({

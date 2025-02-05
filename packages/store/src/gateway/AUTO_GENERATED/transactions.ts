@@ -521,7 +521,7 @@ export type TransactionData = {
 }
 export type Token = {
   address: string
-  decimals?: number
+  decimals?: number | null
   logoUri: string
   name: string
   symbol: string
