@@ -10,6 +10,9 @@ export const AppSettingsContainer = () => {
   const [safeAddress, setSafeAddress] = useState('')
 
   const handleSubmit = () => {
+    if (!activeSafe) {
+      return
+    }
     dispatch(
       setActiveSafe({
         chainId: activeSafe.chainId,

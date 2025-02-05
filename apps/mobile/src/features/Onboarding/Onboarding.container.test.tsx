@@ -21,6 +21,6 @@ describe('Onboarding Component', () => {
     const button = getByText('Get started')
 
     fireEvent.press(button)
-    expect(mockNavigate).toHaveBeenCalledWith('/(tabs)')
+    expect(mockNavigate).toHaveBeenCalledWith('/get-started')
   })
 })

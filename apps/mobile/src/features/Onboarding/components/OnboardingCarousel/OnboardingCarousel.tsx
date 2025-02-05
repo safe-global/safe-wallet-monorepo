@@ -6,6 +6,9 @@ import { Tabs } from 'react-native-collapsible-tab-view'
 import { CarouselFeedback } from './CarouselFeedback'
 
 import { useRouter } from 'expo-router'
+import { useAppDispatch } from '@/src/store/hooks'
+import { updateSettings } from '@/src/store/settingsSlice'
+import { ONBOARDING_VERSION } from '@/src/config/constants'
 
 interface OnboardingCarouselProps {
   items: CarouselItem[]
@@ -13,10 +16,12 @@ interface OnboardingCarouselProps {
 
 export function OnboardingCarousel({ items }: OnboardingCarouselProps) {
   const [activeTab, setActiveTab] = useState(items[0].name)
+  const dispatch = useAppDispatch()
   const router = useRouter()
 
   const onGetStartedPress = () => {
-    router.navigate('/(tabs)')
+    dispatch(updateSettings({ onboardingVersionSeen: ONBOARDING_VERSION }))
+    router.navigate('/get-started')
   }
 
   return (

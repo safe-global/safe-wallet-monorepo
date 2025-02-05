@@ -13,7 +13,7 @@ export const useEditAccountItem = () => {
 
   const onSafeDeleted = useCallback(
     (address: Address) => () => {
-      if (activeSafe.address === address) {
+      if (activeSafe && activeSafe.address === address) {
         const safe = Object.values(safes).find((item) => item.SafeInfo.address.value !== address)
 
         if (safe) {

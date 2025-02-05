@@ -19,6 +19,9 @@ export const selectAllChainsIds = createSelector([selectAllChains], (chains: Cha
 export const selectActiveChainCurrency = createSelector(
   [selectActiveSafe, (state: RootState) => state],
   (activeSafe, state) => {
+    if (!activeSafe) {
+      return null
+    }
     const chain = selectChainById(state, activeSafe.chainId)
     return chain?.nativeCurrency
   },

@@ -1,8 +1,13 @@
-import { Onboarding } from '@/src/features/Onboarding'
 import React from 'react'
+import { View } from 'tamagui'
+import { ActivityIndicator } from 'react-native'
 
-function OnboardingPage() {
-  return <Onboarding />
+function IndexScreen() {
+  return (
+    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+      <ActivityIndicator />
+    </View>
+  )
 }
 
-export default OnboardingPage
+export default IndexScreen

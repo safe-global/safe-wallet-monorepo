@@ -4,10 +4,11 @@ import { AccountItem } from '../AccountItem'
 import { SafesSliceItem } from '@/src/store/safesSlice'
 import { Address } from '@/src/types/address'
 import { useDispatch, useSelector } from 'react-redux'
-import { selectActiveSafe, setActiveSafe } from '@/src/store/activeSafeSlice'
+import { setActiveSafe } from '@/src/store/activeSafeSlice'
 import { getChainsByIds } from '@/src/store/chains'
 import { RootState } from '@/src/store'
 import { useMyAccounts } from './hooks/useMyAccounts'
+import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 
 interface MyAccountsContainerProps {
   item: SafesSliceItem
@@ -20,7 +21,7 @@ export function MyAccountsContainer({ item, isDragging, drag, onClose }: MyAccou
   useMyAccounts(item)
 
   const dispatch = useDispatch()
-  const activeSafe = useSelector(selectActiveSafe)
+  const activeSafe = useDefinedActiveSafe()
   const filteredChains = useSelector((state: RootState) => getChainsByIds(state, item.chains))
 
   const handleAccountSelected = () => {

@@ -2,13 +2,13 @@ import { useMemo } from 'react'
 
 import { AddressInfo, useSafesGetSafeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { useAppSelector } from '@/src/store/hooks'
-import { selectActiveSafe } from '@/src/store/activeSafeSlice'
 
 import { groupedSigners } from '../constants'
 import { selectSigners } from '@/src/store/signersSlice'
+import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 
 export const useSignersGroupService = () => {
-  const activeSafe = useAppSelector(selectActiveSafe)
+  const activeSafe = useDefinedActiveSafe()
   const appSigners = useAppSelector(selectSigners)
   const { data, isFetching } = useSafesGetSafeV1Query({
     safeAddress: activeSafe.address,

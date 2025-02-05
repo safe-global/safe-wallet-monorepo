@@ -1,28 +1,27 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { RootState } from '.'
-import { mockedActiveAccount } from './constants'
 import { SafeInfo } from '../types/address'
 
-const initialState: SafeInfo = {
-  address: mockedActiveAccount.address,
-  chainId: mockedActiveAccount.chainId,
-}
+const initialState = null as SafeInfo | null
 
 const activeSafeSlice = createSlice({
   name: 'activeSafe',
   initialState,
   reducers: {
-    setActiveSafe: (state, action: PayloadAction<SafeInfo>) => {
+    setActiveSafe: (state, action: PayloadAction<SafeInfo | null>) => {
       return action.payload
     },
     clearActiveSafe: () => {
       return initialState
     },
     switchActiveChain: (state, action: PayloadAction<{ chainId: string }>) => {
-      return {
-        ...state,
-        chainId: action.payload.chainId,
+      if (state !== null) {
+        return {
+          ...state,
+          chainId: action.payload.chainId,
+        }
       }
+      return state
     },
   },
 })

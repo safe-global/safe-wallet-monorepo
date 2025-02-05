@@ -3,17 +3,18 @@ import React from 'react'
 import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
 import { RootState } from '@/src/store'
 import { selectAllChains, selectChainById } from '@/src/store/chains'
-import { selectActiveSafe, switchActiveChain } from '@/src/store/activeSafeSlice'
+import { switchActiveChain } from '@/src/store/activeSafeSlice'
 import { ChainItems } from '../Assets/components/Balance/ChainItems'
 import { useSafesGetOverviewForManyQuery } from '@safe-global/store/gateway/safes'
 import { SafeOverviewResult } from '@safe-global/store/gateway/types'
 import { makeSafeId } from '@/src/utils/formatters'
 import { POLLING_INTERVAL } from '@/src/config/constants'
+import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 
 export const NetworksSheetContainer = () => {
   const dispatch = useAppDispatch()
   const chains = useAppSelector(selectAllChains)
-  const activeSafe = useAppSelector(selectActiveSafe)
+  const activeSafe = useDefinedActiveSafe()
   const activeChain = useAppSelector((state: RootState) => selectChainById(state, activeSafe.chainId))
   const { data } = useSafesGetOverviewForManyQuery<SafeOverviewResult>(
     {

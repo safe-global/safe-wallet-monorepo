@@ -1,4 +1,3 @@
-import { selectActiveSafe } from '@/src/store/activeSafeSlice'
 import { SafeOverviewResult } from '@safe-global/store/gateway/types'
 import { POLLING_INTERVAL } from '@/src/config/constants'
 import { getChainsByIds, selectAllChains, selectChainById } from '@/src/store/chains'
@@ -10,10 +9,11 @@ import { useAppSelector } from '@/src/store/hooks'
 import { useSafesGetOverviewForManyQuery } from '@safe-global/store/gateway/safes'
 import React from 'react'
 import { useSelector } from 'react-redux'
+import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 
 export function BalanceContainer() {
   const chains = useAppSelector(selectAllChains)
-  const activeSafe = useAppSelector(selectActiveSafe)
+  const activeSafe = useDefinedActiveSafe()
   const activeSafeInfo = useAppSelector((state: RootState) => selectSafeInfo(state, activeSafe.address))
   const activeSafeChains = useAppSelector((state: RootState) => getChainsByIds(state, activeSafeInfo.chains))
   const { data, isLoading } = useSafesGetOverviewForManyQuery<SafeOverviewResult>(

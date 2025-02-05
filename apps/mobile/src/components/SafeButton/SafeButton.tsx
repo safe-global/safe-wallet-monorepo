@@ -45,6 +45,15 @@ export const SafeButton = styled(Button, {
       },
     },
 
+    outlined: {
+      true: {
+        backgroundColor: 'transparent',
+        borderWidth: 2,
+        borderColor: '$color',
+        color: '$color',
+      },
+    },
+
     text: {
       true: {
         backgroundColor: 'transparent',

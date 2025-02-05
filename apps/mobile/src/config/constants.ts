@@ -13,3 +13,9 @@ export const GATEWAY_URL_PRODUCTION =
   process.env.NEXT_PUBLIC_GATEWAY_URL_PRODUCTION || 'https://safe-client.safe.global'
 export const GATEWAY_URL_STAGING = process.env.NEXT_PUBLIC_GATEWAY_URL_STAGING || 'https://safe-client.staging.5afe.dev'
 export const GATEWAY_URL = isProduction ? GATEWAY_URL_PRODUCTION : GATEWAY_URL_STAGING
+
+/**
+ * The version of the onboarding flow.
+ * If we change it and need all users to see it again, we can bump the version here.
+ */
+export const ONBOARDING_VERSION = 'v1'

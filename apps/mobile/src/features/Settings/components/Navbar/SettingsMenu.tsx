@@ -6,17 +6,17 @@ import React from 'react'
 import { getExplorerLink } from '@/src/utils/gateway'
 import { useCopyAndDispatchToast } from '@/src/hooks/useCopyAndDispatchToast'
 import { useToastController } from '@tamagui/toast'
-import { selectActiveSafe } from '@/src/store/activeSafeSlice'
 import { selectChainById } from '@/src/store/chains'
 import { RootState } from '@/src/store'
 import { useAppSelector } from '@/src/store/hooks'
+import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 
 type Props = {
   safeAddress: string | undefined
 }
 export const SettingsMenu = ({ safeAddress }: Props) => {
   const toast = useToastController()
-  const activeSafe = useAppSelector(selectActiveSafe)
+  const activeSafe = useDefinedActiveSafe()
   const activeChain = useAppSelector((state: RootState) => selectChainById(state, activeSafe.chainId))
   const copyAndDispatchToast = useCopyAndDispatchToast()
   const theme = useTheme()
