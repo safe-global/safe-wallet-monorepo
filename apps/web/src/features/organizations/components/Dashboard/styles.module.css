@@ -1,0 +1,28 @@
+.title {
+  font-weight: 700;
+  margin-bottom: var(--space-2);
+}
+
+.content {
+  min-height: 60vh;
+  background-color: var(--color-background-paper);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loggedOut {
+  text-align: center;
+  padding: var(--space-3);
+}
+
+.heading {
+  font-weight: 700;
+  margin-bottom: var(--space-1);
+}
+
+.description {
+  margin-bottom: var(--space-2);
+  color: var(--color-primary-light);
+}
