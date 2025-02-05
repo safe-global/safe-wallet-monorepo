@@ -26,6 +26,7 @@ import { createWeb3ReadOnly } from '@/hooks/wallets/web3'
 import { useChain } from '@/hooks/useChains'
 import ArrowOutwardIcon from '@/public/images/transactions/outgoing.svg'
 import ArrowDownwardIcon from '@/public/images/transactions/incoming.svg'
+import { SafenetSettlementLink } from './SafenetSettlementLink'
 
 enum SafenetStatus {
   PROCESSING = 'Processing',
@@ -118,6 +119,9 @@ const DebitRow = ({ debit }: { debit: SafenetTransactionDetails['debits'][number
       </Typography>
       <Box>
         <EthHashInfo address={debit.safe} chainId={debit.chainId.toString()} avatarSize={24} onlyName />
+      </Box>
+      <Box>
+        <SafenetSettlementLink debit={debit} />
       </Box>
     </Stack>
   )
