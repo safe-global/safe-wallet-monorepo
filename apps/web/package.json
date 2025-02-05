@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "next dev",
     "start": "next dev",
-    "build": "yarn fetch-chains && next build",
+    "build": "next build",
     "lint": "tsc && next lint",
     "lint:fix": "next lint --fix",
     "prettier": "prettier -w \"{src,cypress,mocks,scripts}/**/*.{ts,tsx,css,js}\"",
@@ -19,7 +19,6 @@
     "routes": "node scripts/generate-routes.js > src/config/routes.ts && prettier -w src/config/routes.ts && cat src/config/routes.ts",
     "css-vars": "npx -y tsx ./scripts/css-vars.ts > ./src/styles/vars.css && prettier -w src/styles/vars.css",
     "generate-types": "typechain --target ethers-v6 --out-dir src/types/contracts ../../node_modules/@safe-global/safe-deployments/dist/assets/**/*.json ../../node_modules/@safe-global/safe-modules-deployments/dist/assets/**/*.json ../../node_modules/@openzeppelin/contracts/build/contracts/ERC20.json ../../node_modules/@openzeppelin/contracts/build/contracts/ERC721.json",
-    "fetch-chains": "npx -y tsx scripts/fetch-chains.js > src/config/cgw-chains.json",
     "after-install": "yarn generate-types",
     "postinstall": "yarn after-install",
     "analyze": "cross-env ANALYZE=true yarn build",
