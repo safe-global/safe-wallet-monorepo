@@ -13,12 +13,13 @@ import { POLLING_INTERVAL } from '@/config/constants'
 import { useCurrentChain } from '../useChains'
 
 export const useLoadSafeInfo = (): AsyncResult<SafeInfo> => {
-  const address = useSafeAddress()
+  const address = useSafeAddress(true)
   const chainId = useChainId()
   const chain = useCurrentChain()
   const [pollCount, resetPolling] = useIntervalCounter(POLLING_INTERVAL)
   const { safe } = useSafeInfo()
   const isStoredSafeValid = safe.chainId === chainId && safe.address.value === address
+  const cache = isStoredSafeValid ? safe : undefined
   const undeployedSafe = useAppSelector((state) => selectUndeployedSafe(state, chainId, address))
 
   const [undeployedData, undeployedError] = useAsync<SafeInfo | undefined>(async () => {
@@ -49,7 +50,7 @@ export const useLoadSafeInfo = (): AsyncResult<SafeInfo> => {
   }, [cgwError])
 
   // Return stored SafeInfo between polls
-  const safeData = cgwData ?? undeployedData ?? (isStoredSafeValid ? safe : undefined)
+  const safeData = cgwData ?? undeployedData ?? cache
   const error = cgwError ?? undeployedError
   const loading = cgwLoading
 
