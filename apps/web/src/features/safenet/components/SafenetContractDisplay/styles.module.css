@@ -1,0 +1,36 @@
+.safenetDisplay {
+  border: 1px solid transparent;
+  background-image:
+    radial-gradient(var(--color-secondary-background) 0%, var(--color-secondary-background) 100%),
+    radial-gradient(119.01% 132.63% at 119.01% -14.15%, #FF5F00 0%, #FFD200 50%, #12FF80 100%);
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+  padding: 8px;
+  border-radius: 4px;
+  margin-top: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-width: 0;
+}
+
+.tags {
+  display: flex;
+  padding-left: var(--space-3);
+  gap: var(--space-1);
+  justify-content: flex-end;
+}
+
+.tag {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 6px 8px;
+  border: 1px solid transparent;
+  border-radius: 20px;
+  background-image: radial-gradient(var(--color-secondary-background) 0%, var(--color-secondary-background) 100%),
+    radial-gradient(119.01% 132.63% at 119.01% -14.15%, #ff5f00 0%, #ffd200 50%, #12ff80 100%);
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+}
