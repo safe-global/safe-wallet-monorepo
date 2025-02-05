@@ -16,9 +16,32 @@ import css from '../TransactionGuards/styles.module.css'
 
 const FALLBACK_HANDLER_VERSION = '>=1.1.1'
 
+export const FallbackHandlerWarning = ({
+  message,
+  txBuilderLinkPrefix = 'It can be altered via the',
+}: {
+  message: ReactElement | string
+  txBuilderLinkPrefix?: string
+}) => {
+  const txBuilder = useTxBuilderApp()
+  return (
+    <>
+      {message}
+      {!!txBuilder && !!txBuilderLinkPrefix && (
+        <>
+          {` ${txBuilderLinkPrefix} `}
+          <NextLink href={txBuilder.link} passHref legacyBehavior>
+            <Link>Transaction Builder</Link>
+          </NextLink>
+          .
+        </>
+      )}
+    </>
+  )
+}
+
 export const FallbackHandler = (): ReactElement | null => {
   const { safe } = useSafeInfo()
-  const txBuilder = useTxBuilderApp()
   const fallbackHandlerDeployments = useCompatibilityFallbackHandlerDeployments()
   const isOfficial = useIsOfficialFallbackHandler()
   const isTWAPFallbackHandler = useIsTWAPFallbackHandler()
@@ -32,35 +55,20 @@ export const FallbackHandler = (): ReactElement | null => {
   const hasFallbackHandler = !!safe.fallbackHandler
 
   const warning = !hasFallbackHandler ? (
-    <>
-      The {BRAND_NAME} may not work correctly as no fallback handler is currently set.
-      {txBuilder && (
-        <>
-          {' '}
-          It can be set via the{' '}
-          <NextLink href={txBuilder.link} passHref legacyBehavior>
-            <Link>Transaction Builder</Link>
-          </NextLink>
-          .
-        </>
-      )}
-    </>
+    <FallbackHandlerWarning
+      message={`The ${BRAND_NAME} may not work correctly as no fallback handler is currently set.`}
+      txBuilderLinkPrefix="It can be set via the"
+    />
   ) : isTWAPFallbackHandler ? (
     <>This is CoW&apos;s fallback handler. It is needed for this Safe to be able to use the TWAP feature for Swaps.</>
   ) : !isOfficial ? (
-    <>
-      An <b>unofficial</b> fallback handler is currently set.
-      {txBuilder && (
+    <FallbackHandlerWarning
+      message={
         <>
-          {' '}
-          It can be altered via the{' '}
-          <NextLink href={txBuilder.link} passHref legacyBehavior>
-            <Link>Transaction Builder</Link>
-          </NextLink>
-          .
+          An <b>unofficial</b> fallback handler is currently set.
         </>
-      )}
-    </>
+      }
+    />
   ) : undefined
 
   return (
