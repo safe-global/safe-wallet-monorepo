@@ -1,5 +1,6 @@
-import { Box, Typography, Button } from '@mui/material'
+import { Box, Typography } from '@mui/material'
 import css from './styles.module.css'
+import SignInButton from '../SignInButton'
 
 const OrganizationsDashboard = () => {
   return (
@@ -18,9 +19,7 @@ const OrganizationsDashboard = () => {
             Description
           </Typography>
 
-          <Button variant="contained" className={css.signInButton}>
-            Sign in
-          </Button>
+          <SignInButton />
         </Box>
       </Box>
     </Box>
