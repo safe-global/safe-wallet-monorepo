@@ -8,6 +8,7 @@ import { UntrustedFallbackHandlerWarning } from '@/components/transactions/Warni
 
 type SettingsChangeTxInfoProps = {
   settingsInfo: SettingsChange['settingsInfo']
+  isTxExecuted?: boolean
 }
 
 const addressInfoProps: Pick<ComponentProps<typeof EthHashInfo>, 'shortAddress' | 'showCopyButton' | 'hasExplorer'> = {
@@ -16,7 +17,10 @@ const addressInfoProps: Pick<ComponentProps<typeof EthHashInfo>, 'shortAddress' 
   hasExplorer: true,
 }
 
-export const SettingsChangeTxInfo = ({ settingsInfo }: SettingsChangeTxInfoProps): ReactElement | null => {
+export const SettingsChangeTxInfo = ({
+  settingsInfo,
+  isTxExecuted = false,
+}: SettingsChangeTxInfoProps): ReactElement | null => {
   if (!settingsInfo) {
     return null
   }
@@ -33,7 +37,7 @@ export const SettingsChangeTxInfo = ({ settingsInfo }: SettingsChangeTxInfoProps
               {...addressInfoProps}
             />
           </InfoDetails>
-          <UntrustedFallbackHandlerWarning fallbackHandler={settingsInfo.handler.value} />
+          <UntrustedFallbackHandlerWarning fallbackHandler={settingsInfo.handler.value} isTxExecuted={isTxExecuted} />
         </>
       )
     }

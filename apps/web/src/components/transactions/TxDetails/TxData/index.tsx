@@ -78,7 +78,7 @@ const TxData = ({
   }
 
   if (isSettingsChangeTxInfo(txInfo)) {
-    return <SettingsChangeTxInfo settingsInfo={txInfo.settingsInfo} />
+    return <SettingsChangeTxInfo settingsInfo={txInfo.settingsInfo} isTxExecuted={!!txDetails?.executedAt} />
   }
 
   if (txDetails && isCancellationTxInfo(txInfo) && isMultisigDetailedExecutionInfo(txDetails.detailedExecutionInfo)) {
