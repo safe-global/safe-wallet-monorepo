@@ -1,9 +1,6 @@
-import { TWAP_FALLBACK_HANDLER, TWAP_FALLBACK_HANDLER_NETWORKS } from '@/features/swap/helpers/utils'
-import { getCompatibilityFallbackHandlerDeployments } from '@safe-global/safe-deployments'
 import NextLink from 'next/link'
 import { Typography, Box, Grid, Paper, Link, Alert } from '@mui/material'
 import semverSatisfies from 'semver/functions/satisfies'
-import { useMemo } from 'react'
 import type { ReactElement } from 'react'
 
 import EthHashInfo from '@/components/common/EthHashInfo'
@@ -11,66 +8,65 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import { BRAND_NAME, HelpCenterArticle } from '@/config/constants'
 import ExternalLink from '@/components/common/ExternalLink'
 import { useTxBuilderApp } from '@/hooks/safe-apps/useTxBuilderApp'
-import { useCurrentChain } from '@/hooks/useChains'
+import { useCompatibilityFallbackHandlerDeployments } from '@/hooks/useCompatibilityFallbackHandlerDeployments'
+import { useIsOfficialFallbackHandler } from '@/hooks/useIsOfficialFallbackHandler'
+import { useIsTWAPFallbackHandler } from '@/features/swap/hooks/useIsTWAPFallbackHandler'
 
 const FALLBACK_HANDLER_VERSION = '>=1.1.1'
 
+export const FallbackHandlerWarning = ({
+  message,
+  txBuilderLinkPrefix = 'It can be altered via the',
+}: {
+  message: ReactElement | string
+  txBuilderLinkPrefix?: string
+}) => {
+  const txBuilder = useTxBuilderApp()
+  return (
+    <>
+      {message}
+      {!!txBuilder && !!txBuilderLinkPrefix && (
+        <>
+          {` ${txBuilderLinkPrefix} `}
+          <NextLink href={txBuilder.link} passHref legacyBehavior>
+            <Link>Transaction Builder</Link>
+          </NextLink>
+          .
+        </>
+      )}
+    </>
+  )
+}
+
 export const FallbackHandler = (): ReactElement | null => {
   const { safe } = useSafeInfo()
-  const txBuilder = useTxBuilderApp()
-  const chain = useCurrentChain()
+  const fallbackHandlerDeployments = useCompatibilityFallbackHandlerDeployments()
+  const isOfficial = useIsOfficialFallbackHandler()
+  const isTWAPFallbackHandler = useIsTWAPFallbackHandler()
 
   const supportsFallbackHandler = !!safe.version && semverSatisfies(safe.version, FALLBACK_HANDLER_VERSION)
-
-  const fallbackHandlerDeployments = useMemo(() => {
-    if (!chain || !safe.version) {
-      return undefined
-    }
-
-    return getCompatibilityFallbackHandlerDeployments({ network: chain?.chainId, version: safe.version })
-  }, [safe.version, chain])
 
   if (!supportsFallbackHandler) {
     return null
   }
 
   const hasFallbackHandler = !!safe.fallbackHandler
-  const isOfficial =
-    safe.fallbackHandler &&
-    fallbackHandlerDeployments?.networkAddresses[safe.chainId].includes(safe.fallbackHandler.value)
-  const isTWAPFallbackHandler =
-    safe.fallbackHandler?.value === TWAP_FALLBACK_HANDLER && TWAP_FALLBACK_HANDLER_NETWORKS.includes(safe.chainId)
 
   const warning = !hasFallbackHandler ? (
-    <>
-      The {BRAND_NAME} may not work correctly as no fallback handler is currently set.
-      {txBuilder && (
-        <>
-          {' '}
-          It can be set via the{' '}
-          <NextLink href={txBuilder.link} passHref legacyBehavior>
-            <Link>Transaction Builder</Link>
-          </NextLink>
-          .
-        </>
-      )}
-    </>
+    <FallbackHandlerWarning
+      message={`The ${BRAND_NAME} may not work correctly as no fallback handler is currently set.`}
+      txBuilderLinkPrefix="It can be set via the"
+    />
   ) : isTWAPFallbackHandler ? (
     <>This is CoW&apos;s fallback handler. It is needed for this Safe to be able to use the TWAP feature for Swaps.</>
   ) : !isOfficial ? (
-    <>
-      An <b>unofficial</b> fallback handler is currently set.
-      {txBuilder && (
+    <FallbackHandlerWarning
+      message={
         <>
-          {' '}
-          It can be altered via the{' '}
-          <NextLink href={txBuilder.link} passHref legacyBehavior>
-            <Link>Transaction Builder</Link>
-          </NextLink>
-          .
+          An <b>unofficial</b> fallback handler is currently set.
         </>
-      )}
-    </>
+      }
+    />
   ) : undefined
 
   return (
