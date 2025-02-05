@@ -112,7 +112,7 @@ export const getMultiSendTxs = async (
     .map((tx) => {
       if (!isMultisigDetailedExecutionInfo(tx.detailedExecutionInfo)) return
 
-      const args = extractTxInfo(tx, safeAddress)
+      const args = extractTxInfo(tx)
       const sigs = getSignatures(args.signatures)
 
       // @ts-ignore
