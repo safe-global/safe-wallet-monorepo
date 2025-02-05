@@ -1,18 +1,22 @@
 import EthHashInfo from '@/components/common/EthHashInfo'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { Paper, Grid, Typography, Box, IconButton, SvgIcon } from '@mui/material'
+import { Box, Grid, IconButton, Paper, SvgIcon, Typography } from '@mui/material'
 
-import ExternalLink from '@/components/common/ExternalLink'
-import { RemoveModuleFlow } from '@/components/tx-flow/flows'
-import DeleteIcon from '@/public/images/common/delete.svg'
 import CheckWallet from '@/components/common/CheckWallet'
-import { useContext } from 'react'
+import ExternalLink from '@/components/common/ExternalLink'
 import { TxModalContext } from '@/components/tx-flow'
-import { selectDelayModifierByAddress } from '@/features/recovery/services/selectors'
-import { RemoveRecoveryFlow } from '@/components/tx-flow/flows'
+import { RemoveModuleFlow, RemoveRecoveryFlow } from '@/components/tx-flow/flows'
 import useRecovery from '@/features/recovery/hooks/useRecovery'
-
+import { selectDelayModifierByAddress } from '@/features/recovery/services/selectors'
+import useIsSafenetEnabled from '@/features/safenet/hooks/useIsSafenetEnabled'
+import DeleteIcon from '@/public/images/common/delete.svg'
+import dynamic from 'next/dynamic'
+import { useContext } from 'react'
 import css from '../TransactionGuards/styles.module.css'
+
+const SafenetModuleDisplay = dynamic(() =>
+  import('@/features/safenet/components/SafenetContractDisplay').then((module) => module.SafenetModuleDisplay),
+)
 
 const NoModules = () => {
   return (
@@ -66,9 +70,10 @@ const ModuleDisplay = ({ moduleAddress, chainId, name }: { moduleAddress: string
 const SafeModules = () => {
   const { safe } = useSafeInfo()
   const safeModules = safe.modules || []
+  const isSafenetEnabled = useIsSafenetEnabled()
 
   return (
-    <Paper sx={{ padding: 4 }}>
+    <Paper sx={{ padding: 4, mb: 2 }}>
       <Grid container direction="row" justifyContent="space-between" spacing={3}>
         <Grid item lg={4} xs={12}>
           <Typography variant="h4" fontWeight={700}>
@@ -85,6 +90,13 @@ const SafeModules = () => {
             </Typography>
             {safeModules.length === 0 ? (
               <NoModules />
+            ) : isSafenetEnabled ? (
+              <SafenetModuleDisplay
+                name={safeModules[0].name}
+                address={safeModules[0].value}
+                chainId={safe.chainId}
+                showTooltip
+              />
             ) : (
               safeModules.map((module) => (
                 <ModuleDisplay
