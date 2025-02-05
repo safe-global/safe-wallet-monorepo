@@ -30,7 +30,7 @@ export const getChainsByIds = createSelector(
     (state: RootState) => state,
     (_state: RootState, chainIds: string[]) => chainIds,
   ],
-  (state, chainIds) => chainIds.map((chainId) => selectById(state, chainId)),
+  (state, chainIds) => chainIds.map((chainId) => selectById(state, chainId)).filter(Boolean),
 )
 
 export const { useGetChainsConfigQuery } = apiSliceWithChainsConfig
