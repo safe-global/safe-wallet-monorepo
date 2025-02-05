@@ -19,7 +19,6 @@ import './commands'
 import './safe-apps-commands'
 import * as constants from './constants'
 import * as ls from './localstorage_data'
-import { acceptCookies2 } from '../e2e/pages/main.page'
 
 // Alternatively you can use CommonJS syntax:
 // require('./commands')
@@ -77,6 +76,7 @@ beforeEach(() => {
     const beamerKey1 = `_BEAMER_FIRST_VISIT_${productID}`
     const beamerKey2 = `_BEAMER_BOOSTED_ANNOUNCEMENT_DATE_${productID}`
     const cookiesKey = 'SAFE_v2__cookies_terms'
+    const outreachWindowKey = 'SAFE_v2__outreachPopup_session_v2'
     window.localStorage.setItem(beamerKey1, getDate())
     window.localStorage.setItem(beamerKey2, getDate())
     window.localStorage.setItem(cookiesKey, ls.cookies.acceptedCookies)
@@ -84,8 +84,7 @@ beforeEach(() => {
       constants.localStorageKeys.SAFE_v2__SafeApps__infoModal,
       ls.appPermissions(constants.safeTestAppurl).infoModalAccepted,
     )
+    window.sessionStorage.setItem(outreachWindowKey, Date.now())
     cy.wrap(window.localStorage).invoke('getItem', cookiesKey).should('equal', ls.cookies.acceptedCookies)
   })
-  cy.visit(constants.setupUrl + 'sep:0xBb26E3717172d5000F87DeFd391994f789D80aEB')
-  acceptCookies2()
 })
