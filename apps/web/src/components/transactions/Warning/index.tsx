@@ -9,6 +9,7 @@ import { HelpCenterArticle } from '@/config/constants'
 import { maybePlural } from '@/utils/formatters'
 import { useIsOfficialFallbackHandler } from '@/hooks/useIsOfficialFallbackHandler'
 import { useIsTWAPFallbackHandler } from '@/features/swap/hooks/useIsTWAPFallbackHandler'
+import { UntrustedFallbackHandlerTxText } from '@/components/tx/confirmation-views/SettingsChange/UntrustedFallbackHandlerTxAlert'
 
 const Warning = ({
   datatestid,
@@ -57,25 +58,24 @@ export const DelegateCallWarning = ({ showWarning }: { showWarning: boolean }): 
   )
 }
 
-export const UntrustedFallbackHandlerWarning = ({ fallbackHandler }: { fallbackHandler: string }): ReactElement => {
+export const UntrustedFallbackHandlerWarning = ({
+  fallbackHandler,
+  isTxExecuted = false,
+}: {
+  fallbackHandler: string
+  isTxExecuted?: boolean
+}): ReactElement | null => {
   const isOfficial = useIsOfficialFallbackHandler(fallbackHandler)
   const isTWAPFallbackHandler = useIsTWAPFallbackHandler(fallbackHandler)
 
   if (isOfficial || isTWAPFallbackHandler) {
-    return <></>
+    return null
   }
 
   return (
     <Warning
       datatestid="untrusted-fallback-handler-warning"
-      title={
-        <>
-          This transaction sets an <b>unofficial</b> fallback handler.
-          <br />
-          <b>Proceed with caution:</b> Ensure the fallback handler address is trusted and secure. If unsure, do not
-          proceed.
-        </>
-      }
+      title={<UntrustedFallbackHandlerTxText isTxExecuted={isTxExecuted} />}
       severity="warning"
       text="Untrusted fallback handler"
     />
