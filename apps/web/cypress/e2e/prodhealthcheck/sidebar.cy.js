@@ -21,6 +21,7 @@ describe('[PROD] Sidebar tests', () => {
   })
 
   it('Verify current safe details', () => {
+    wallet.connectSigner(signer)
     sideBar.verifySafeHeaderDetails(sideBar.testSafeHeaderDetails)
   })
 

@@ -56,6 +56,11 @@ export const altImgSwaps = 'svg[alt="Swap order"]'
 export const txShareBlock = '[data-testid="share-block"]'
 export const txShareBlockDetails = '[data-testid="share-block-details"]'
 const copyLinkBtn = '[data-testid="copy-link-btn"]'
+export const noteTextField = '[data-testid="tx-note-textfield"]'
+const noteAlert = "[data-testid='tx-note-alert']"
+const recoredTxNote = '[data-testid="tx-note"]'
+const txNoteTooltip = '[data-testid="tx-note-tooltip"]'
+const noteCreator = '[data-testid="note-creator"]'
 
 const viewTransactionBtn = 'View transaction'
 const transactionDetailsTitle = 'Transaction details'
@@ -92,11 +97,43 @@ const batchModalTitle = 'Batch'
 export const swapOrder = 'Swap order settlement'
 export const bulkTxs = 'Bulk transactions'
 
+export const txNoteWarningMessage = 'The notes are publicly visible, do not share any private or sensitive details'
+export const recordedTxNote = 'Tx note one'
+
 export const filterTypes = {
   incoming: 'Incoming',
   outgoing: 'Outgoing',
   module: 'Module-based',
 }
+
+export function typeNoteText(text) {
+  cy.get(noteTextField).find('input').clear().type(text)
+}
+
+export function checkMaxNoteLength() {
+  typeNoteText(main.generateRandomString(61))
+  cy.get(noteTextField).contains('60/60').should('be.visible')
+}
+
+export function checkNoteWarningMsg() {
+  cy.get(noteAlert).invoke('text').should('include', txNoteWarningMessage)
+}
+
+export function checkNoteRecordedNote(note) {
+  cy.get(recoredTxNote).should('be.visible').invoke('text').should('include', note)
+}
+
+export function checkNoteCreator(creator) {
+  cy.get(txNoteTooltip).trigger('mouseover', { force: true })
+  cy.get(noteCreator).should('be.visible').invoke('text').should('include', creator)
+}
+
+export function checkNoteRecordedNoteReadOnly() {
+  cy.get(recoredTxNote).then(($p) => {
+    expect($p.prop('tagName')).to.equal('P')
+  })
+}
+
 export function clickOnCopyLinkBtn() {
   cy.get(copyLinkBtn).click()
 }
@@ -332,11 +369,11 @@ export function clickOnExpandableAction(data) {
 export function clickOnAdvancedDetails() {
   cy.get(advancedDetails).click()
 }
-//
+
 export function expandAdvancedDetails(data) {
   clickOnAdvancedDetails()
   data.forEach((row) => {
-    cy.get('div').contains(row).should('be.visible')
+    cy.get(txRowTitle).contains(row).should('be.visible')
   })
 }
 

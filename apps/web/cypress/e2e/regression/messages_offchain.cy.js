@@ -6,7 +6,6 @@ import * as msg_confirmation_modal from '../pages/modals/message_confirmation.pa
 import * as wallet from '../../support/utils/wallet.js'
 
 let staticSafes = []
-const offchainMessage = 'Test message 2 off-chain'
 
 const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
 const signer2 = walletCredentials.OWNER_1_PRIVATE_KEY
@@ -16,16 +15,12 @@ describe('Offchain Messages tests', () => {
     staticSafes = await getSafes(CATEGORIES.static)
   })
 
-  beforeEach(() => {
-    cy.visit(constants.transactionsMessagesUrl + staticSafes.SEP_STATIC_SAFE_10)
-  })
-
   it('Verify confirmation window is displayed for unsigned message', () => {
     cy.visit(constants.transactionsMessagesUrl + staticSafes.SEP_STATIC_SAFE_26)
     wallet.connectSigner(signer2)
     messages.clickOnMessageSignBtn(0)
     msg_confirmation_modal.verifyConfirmationWindowTitle(modal.modalTitiles.confirmMsg)
-    msg_confirmation_modal.verifyMessagePresent(offchainMessage)
+    msg_confirmation_modal.verifyMessagePresent(messages.offchainMessage)
     msg_confirmation_modal.clickOnMessageDetails()
     msg_confirmation_modal.verifyOffchainMessageHash(0)
     msg_confirmation_modal.verifyOffchainMessageHash(1)

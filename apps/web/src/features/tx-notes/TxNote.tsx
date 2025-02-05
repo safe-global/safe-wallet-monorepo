@@ -16,8 +16,9 @@ export function TxNote({ txDetails }: { txDetails: TransactionDetails | undefine
       <Typography variant="h5" display="flex" alignItems="center" justifyItems="center">
         Note
         <Tooltip
+          data-testid="tx-note-tooltip"
           title={
-            <Stack direction="row" gap={1}>
+            <Stack data-testid="note-creator" direction="row" gap={1}>
               <span>By </span>
               {creator ? (
                 <EthHashInfo avatarSize={20} address={creator.value} showName onlyName />
@@ -34,7 +35,7 @@ export function TxNote({ txDetails }: { txDetails: TransactionDetails | undefine
         </Tooltip>
       </Typography>
 
-      <Typography p={2} mt={1} borderRadius={1} bgcolor="background.main">
+      <Typography data-testid="tx-note" p={2} mt={1} borderRadius={1} bgcolor="background.main">
         {note}
       </Typography>
     </div>
