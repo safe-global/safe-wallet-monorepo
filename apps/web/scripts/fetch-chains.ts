@@ -9,7 +9,8 @@ async function fetchChains() {
   if (!response.ok) {
     throw new Error('Failed to fetch chains')
   }
-  return response.json()
+  const data = await response.json()
+  return data.results
 }
 
 function logChains(json: any) {
