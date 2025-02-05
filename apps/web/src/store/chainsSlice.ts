@@ -2,8 +2,9 @@ import { type ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import { createSelector } from '@reduxjs/toolkit'
 import type { RootState } from '.'
 import { makeLoadableSlice } from './common'
+import buildTimeChains from '@/config/cgw-chains.json'
 
-const initialState: ChainInfo[] = []
+const initialState: ChainInfo[] = buildTimeChains.results as ChainInfo[]
 
 const { slice, selector } = makeLoadableSlice('chains', initialState)
 
