@@ -6,7 +6,7 @@ import type { NavItem } from '@/components/sidebar/SidebarNavigation/config'
 
 export const navItems: NavItem[] = [
   {
-    label: 'All Organizations',
+    label: 'All organizations',
     icon: <SvgIcon component={HomeIcon} inheritViewBox />,
     href: AppRoutes.organizations.dashboard,
   },
