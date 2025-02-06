@@ -10,18 +10,13 @@ import {
 } from '@/components/sidebar/SidebarList'
 import { navItems } from './config'
 
-const getSubdirectory = (pathname: string): string => {
-  return pathname.split('/').slice(1).join('/')
-}
-
 const Navigation = (): ReactElement => {
   const router = useRouter()
-  const currentSubdirectory = getSubdirectory(router.pathname)
 
   return (
     <SidebarList>
       {navItems.map((item) => {
-        const isSelected = currentSubdirectory === getSubdirectory(item.href)
+        const isSelected = router.pathname === item.href
 
         return (
           <div key={item.href}>
