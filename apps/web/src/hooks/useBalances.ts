@@ -1,25 +1,13 @@
-import { useMemo } from 'react'
-import isEqual from 'lodash/isEqual'
-import { type SafeBalanceResponse } from '@safe-global/safe-gateway-typescript-sdk'
-import { useAppSelector } from '@/store'
-import { initialBalancesState, selectBalances } from '@/store/balancesSlice'
+import type { Balances } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
+import { useRtkBalances } from './loadables/useLoadBalances'
 
 const useBalances = (): {
-  balances: SafeBalanceResponse
+  balances: Balances
   loading: boolean
   error?: string
 } => {
-  const state = useAppSelector(selectBalances, isEqual)
-  const { data, error, loading } = state
-
-  return useMemo(
-    () => ({
-      balances: data,
-      error,
-      loading: loading || initialBalancesState === data,
-    }),
-    [data, error, loading],
-  )
+  const { balances, error, loading } = useRtkBalances()
+  return { balances, error: error?.message, loading }
 }
 
 export default useBalances

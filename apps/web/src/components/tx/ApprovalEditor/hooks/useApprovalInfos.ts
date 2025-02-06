@@ -11,9 +11,9 @@ import {
 } from '@/utils/tokens'
 import { type SafeTransaction } from '@safe-global/safe-core-sdk-types'
 import { type EIP712TypedData, type TokenInfo, TokenType } from '@safe-global/safe-gateway-typescript-sdk'
-import { formatUnits } from 'ethers'
 import { useMemo } from 'react'
 import { PSEUDO_APPROVAL_VALUES } from '../utils/approvals'
+import { safeFormatUnits } from '@/utils/formatters'
 
 export type ApprovalInfo = {
   tokenInfo: (Omit<TokenInfo, 'logoUri' | 'name'> & { logoUri?: string }) | undefined
@@ -25,6 +25,8 @@ export type ApprovalInfo = {
   /** Index of approval transaction within (batch) transaction */
   transactionIndex: number
 }
+
+const DEFAULT_DECIMALS = 18
 
 const ApprovalModuleInstance = new ApprovalModule()
 
@@ -74,7 +76,7 @@ export const useApprovalInfos = (payload: {
           const amountFormatted =
             UNLIMITED_APPROVAL_AMOUNT == approval.amount || UNLIMITED_PERMIT2_AMOUNT == approval.amount
               ? PSEUDO_APPROVAL_VALUES.UNLIMITED
-              : formatUnits(approval.amount, tokenInfo?.decimals)
+              : safeFormatUnits(approval.amount, tokenInfo?.decimals ?? DEFAULT_DECIMALS)
 
           return { ...approval, tokenInfo, amountFormatted }
         }),

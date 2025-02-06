@@ -7,7 +7,7 @@ export type InfoBlock = {
   value: string
   label: string
   tokenInfo?: {
-    decimals: number
+    decimals?: number | null
     symbol: string
     logoUri?: string | null
   }

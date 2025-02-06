@@ -8338,19 +8338,28 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@safe-global/safe-deployments@npm:^1.37.22, @safe-global/safe-deployments@npm:^1.37.26":
-  version: 1.37.26
-  resolution: "@safe-global/safe-deployments@npm:1.37.26"
+"@safe-global/safe-deployments@npm:^1.37.22":
+  version: 1.37.22
+  resolution: "@safe-global/safe-deployments@npm:1.37.22"
   dependencies:
     semver: "npm:^7.6.2"
-  checksum: 10/992e1982966af2299e1023eebab7a216da1b4629acc330d82e71020626fd3f0cc83a95db511dd820bad37f27b62fce7c348ef194870b72393cd9ebcbcbb20978
+  checksum: 10/722553e71ed8bfc0a228ea0157badc6dde71ca31a2950ba77676464e281e0f5c220bf6e8e6865ffd3c67ee9520c192aafadb5f835f7d80c43e75418651d12d35
   languageName: node
   linkType: hard
 
-"@safe-global/safe-gateway-typescript-sdk@npm:3.22.7":
-  version: 3.22.7
-  resolution: "@safe-global/safe-gateway-typescript-sdk@npm:3.22.7"
-  checksum: 10/0b16b943be3f268ceb17b962053b152046f0c9126c764fcbc7ddf3b34974396e75d3c29d2515b993c35cec9d583282b28b20d8f065582de425350d73d1f7e237
+"@safe-global/safe-deployments@npm:^1.37.26":
+  version: 1.37.27
+  resolution: "@safe-global/safe-deployments@npm:1.37.27"
+  dependencies:
+    semver: "npm:^7.6.2"
+  checksum: 10/7a02bff379a88b4935f8604715246685e01fb0962ea3e4b3cd5744147f19b85cbf6ec538a050dfaabf7be054d63060f63dc41192bb407ea358006fd1d39ebca8
+  languageName: node
+  linkType: hard
+
+"@safe-global/safe-gateway-typescript-sdk@npm:3.22.9":
+  version: 3.22.9
+  resolution: "@safe-global/safe-gateway-typescript-sdk@npm:3.22.9"
+  checksum: 10/139a046ed4216bf0ed9da1852bcb8bf24241609e24e802b66dd5ba3708588c205155bf9c8d24d90a6f7e86dc73c814193746efb56644e0b1c0102dca87f4fb58
   languageName: node
   linkType: hard
 
@@ -8457,7 +8466,7 @@ __metadata:
     "@safe-global/safe-client-gateway-sdk": "npm:v1.60.1"
     "@safe-global/safe-core-sdk-types": "npm:^5.0.1"
     "@safe-global/safe-deployments": "npm:^1.37.26"
-    "@safe-global/safe-gateway-typescript-sdk": "npm:3.22.7"
+    "@safe-global/safe-gateway-typescript-sdk": "npm:3.22.9"
     "@safe-global/safe-modules-deployments": "npm:^2.2.5"
     "@safe-global/store": "workspace:^"
     "@safe-global/test": "workspace:^"

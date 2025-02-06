@@ -11,6 +11,7 @@ import { ERC20__factory, Multi_send__factory } from '@/types/contracts'
 import { getAndValidateSafeSDK } from '@/services/tx/tx-sender/sdk'
 import { parseUnits } from 'ethers'
 import { checksumAddress } from '@/utils/addresses'
+import * as balancesQueries from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 
 jest.mock('@/services/tx/tx-sender/sdk', () => ({
   getAndValidateSafeSDK: jest.fn().mockReturnValue({
@@ -164,31 +165,30 @@ describe('ApprovalEditor', () => {
       operation: OperationType.DelegateCall,
     })
 
-    const result = render(<ApprovalEditor safeTransaction={mockSafeTx} />, {
-      initialReduxState: {
-        balances: {
-          loading: false,
-          data: {
-            fiatTotal: '0',
-            items: [
-              {
-                balance: '10',
-                tokenInfo: {
-                  address: tokenAddress,
-                  decimals: 18,
-                  logoUri: 'someurl',
-                  name: 'Test token',
-                  symbol: 'TST',
-                  type: TokenType.ERC20,
-                },
-                fiatBalance: '10',
-                fiatConversion: '1',
-              },
-            ],
+    const mockBalances = {
+      fiatTotal: '0',
+      items: [
+        {
+          balance: '10',
+          tokenInfo: {
+            address: tokenAddress,
+            decimals: 18,
+            logoUri: 'someurl',
+            name: 'Test token',
+            symbol: 'TST',
+            type: TokenType.ERC20,
           },
+          fiatBalance: '10',
+          fiatConversion: '1',
         },
-      },
-    })
+      ],
+    }
+
+    jest
+      .spyOn(balancesQueries, 'useBalancesGetBalancesV1Query')
+      .mockImplementation(() => ({ data: mockBalances, isLoading: false, error: undefined, refetch: jest.fn() }))
+
+    const result = render(<ApprovalEditor safeTransaction={mockSafeTx} />)
 
     await waitFor(() => {
       const amountInput1 = result.container.querySelector('input[name="approvals.0"]') as HTMLInputElement
@@ -272,31 +272,30 @@ describe('ApprovalEditor', () => {
       operation: OperationType.DelegateCall,
     })
 
-    const result = render(<ApprovalEditor safeTransaction={mockSafeTx} />, {
-      initialReduxState: {
-        balances: {
-          loading: false,
-          data: {
-            fiatTotal: '0',
-            items: [
-              {
-                balance: '10',
-                tokenInfo: {
-                  address: tokenAddress,
-                  decimals: 18,
-                  logoUri: 'someurl',
-                  name: 'Test token',
-                  symbol: 'TST',
-                  type: TokenType.ERC20,
-                },
-                fiatBalance: '10',
-                fiatConversion: '1',
-              },
-            ],
+    const mockBalances = {
+      fiatTotal: '0',
+      items: [
+        {
+          balance: '10',
+          tokenInfo: {
+            address: tokenAddress,
+            decimals: 18,
+            logoUri: 'someurl',
+            name: 'Test token',
+            symbol: 'TST',
+            type: TokenType.ERC20,
           },
+          fiatBalance: '10',
+          fiatConversion: '1',
         },
-      },
-    })
+      ],
+    }
+
+    jest
+      .spyOn(balancesQueries, 'useBalancesGetBalancesV1Query')
+      .mockImplementation(() => ({ data: mockBalances, isLoading: false, error: undefined, refetch: jest.fn() }))
+
+    const result = render(<ApprovalEditor safeTransaction={mockSafeTx} />)
 
     await waitFor(() => {
       const amountInput1 = result.container.querySelector('input[name="approvals.0"]') as HTMLInputElement

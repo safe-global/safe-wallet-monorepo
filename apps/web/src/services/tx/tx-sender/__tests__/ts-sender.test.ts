@@ -163,7 +163,7 @@ describe('txSender', () => {
 
   describe('createExistingTx', () => {
     it('should create a tx from an existing proposal', async () => {
-      const tx = await createExistingTx('4', '0x123', '0x345')
+      const tx = await createExistingTx('4', '0x345')
 
       expect(getTransactionDetails).toHaveBeenCalledWith('4', '0x345')
       expect(extractTxInfo).toHaveBeenCalled()

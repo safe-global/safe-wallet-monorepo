@@ -198,7 +198,7 @@ export const dispatchSafeTxSpeedUp = async (
   // Execute the tx
   let result: TransactionResult | undefined
   try {
-    const safeTx = await createExistingTx(chainId, safeAddress, txId)
+    const safeTx = await createExistingTx(chainId, txId)
 
     // TODO: This is a workaround until there is a fix for unchecked transactions in the protocol-kit
     if (isSmartAccount) {

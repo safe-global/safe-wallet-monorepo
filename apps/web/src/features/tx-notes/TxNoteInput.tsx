@@ -26,11 +26,12 @@ export const TxNoteInput = ({ onChange }: { onChange: (note: string) => void }) 
         </Typography>
       </Stack>
 
-      <Alert severity="info">
+      <Alert data-testid="tx-note-alert" severity="info">
         The notes are <b>publicly visible</b>, do not share any private or sensitive details.
       </Alert>
 
       <TextField
+        data-testid="tx-note-textfield"
         name="note"
         label="Note"
         fullWidth

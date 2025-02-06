@@ -16,7 +16,7 @@ describe('Spending limits non-owner tests', () => {
   })
 
   it('Verify that where there are no spending limits setup, information images are displayed', () => {
-    spendinglimit.verifySpendingLimitsIcons
+    spendinglimit.verifySpendingLimitsIcons()
   })
 
   it('Verify "New spending limit" button only available for owners', () => {
