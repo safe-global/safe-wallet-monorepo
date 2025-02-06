@@ -51,7 +51,7 @@ export const useLoadSafeInfo = (): AsyncResult<SafeInfo> => {
 
   // Return stored SafeInfo between polls
   const safeData = cgwData ?? undeployedData ?? cache
-  const error = cgwError ?? undeployedError
+  const error = cgwError ?? (undeployedSafe ? undeployedError : undefined)
   const loading = cgwLoading
 
   return useMemo(() => [safeData, error, loading], [safeData, error, loading])
