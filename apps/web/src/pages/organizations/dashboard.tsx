@@ -7,7 +7,7 @@ const OrganizationDashboard: NextPage = () => {
   return (
     <>
       <Head>
-        <title>{`${BRAND_NAME} – Organization Dashboard`}</title>
+        <title>{`${BRAND_NAME} – Organization dashboard`}</title>
       </Head>
 
       <main>
