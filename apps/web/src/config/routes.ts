@@ -59,8 +59,8 @@ export const AppRoutes = {
     index: '/welcome',
     accounts: '/welcome/accounts',
   },
-  organisations: {
-    members: '/organisations/members',
-    dashboard: '/organisations/dashboard',
+  organizations: {
+    members: '/organizations/members',
+    dashboard: '/organizations/dashboard',
   },
 }
