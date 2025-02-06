@@ -40,6 +40,10 @@ export function getActivationTimeRegex() {
   return new RegExp('^\\d+\\s+hour(s)?\\s+\\d+\\s+minute(s)?$')
 }
 
+export function checkActivationTimeNonEmpty() {
+  return new RegExp('.+')
+}
+
 export function checkTxHeaderData(data) {
   main.verifyValuesExist(create_tx.transactionItem, data)
 }

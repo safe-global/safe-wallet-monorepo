@@ -119,7 +119,8 @@ describe('[PROD] Tx history tests 1', () => {
     ])
   })
 
-  it('Verify advanced details displayed in exapanded details for allowance deletion', () => {
+  // Unskip when advanced details PR is merged to main
+  it.skip('Verify advanced details displayed in exapanded details for allowance deletion', () => {
     createTx.clickOnTransactionItemByName(typeDeleteAllowance.title, typeDeleteAllowance.summaryTxInfo)
     createTx.expandAdvancedDetails([typeDeleteAllowance.baseGas])
     createTx.collapseAdvancedDetails([typeDeleteAllowance.baseGas])

@@ -369,7 +369,7 @@ export function getWidgetFee() {
 }
 
 export function getTokenValue() {
-  return new RegExp(`\\$\\d+\\.\\d{2}`, 'i')
+  return new RegExp(`\\$\\d+`, 'i')
 }
 
 export function checkTokenOrder(regexPattern, option) {

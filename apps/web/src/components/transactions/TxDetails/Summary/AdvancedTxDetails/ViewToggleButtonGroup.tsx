@@ -55,10 +55,10 @@ export const ViewToggleButtonGroup = ({
 
   return (
     <StyledToggleButtonGroup size="small" value={value} exclusive onChange={changeView} aria-label="text alignment">
-      <ToggleButton value={View.Decoded} aria-label="decoded">
+      <ToggleButton data-testid="grid-view-btn" value={View.Decoded} aria-label="decoded">
         <GridViewRoundedIcon />
       </ToggleButton>
-      <ToggleButton value={View.Raw} aria-label="raw">
+      <ToggleButton data-testid="table-view-btn" value={View.Raw} aria-label="raw">
         <TableRowsRoundedIcon />
       </ToggleButton>
     </StyledToggleButtonGroup>

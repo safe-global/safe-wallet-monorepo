@@ -144,7 +144,13 @@ export const AdvancedTxDetails = ({
               {view === View.Raw && txData.hexData && (
                 <>
                   <Stack direction="row" justifyContent="space-between">
-                    <Stack direction="row" spacing={0.5} alignItems="center" height="fit-content">
+                    <Stack
+                      data-testid="tx-stack"
+                      direction="row"
+                      spacing={0.5}
+                      alignItems="center"
+                      height="fit-content"
+                    >
                       <Typography color="primary.light">Data</Typography>
                       <CopyButton text={txData.hexData} />
                     </Stack>
@@ -153,6 +159,7 @@ export const AdvancedTxDetails = ({
                   </Stack>
 
                   <Typography
+                    data-testid="tx-hex-data"
                     variant="body2"
                     color="primary.light"
                     fontFamily="monospace"

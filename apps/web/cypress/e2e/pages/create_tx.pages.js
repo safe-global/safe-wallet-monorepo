@@ -61,6 +61,11 @@ const noteAlert = "[data-testid='tx-note-alert']"
 const recoredTxNote = '[data-testid="tx-note"]'
 const txNoteTooltip = '[data-testid="tx-note-tooltip"]'
 const noteCreator = '[data-testid="note-creator"]'
+const tableViewBtn = '[data-testid="table-view-btn"]'
+const gridViewBtn = '[data-testid="grid-view-btn"]'
+const txHexData = '[data-testid="tx-hex-data"]'
+const txStack = '[data-testid="tx-stack"]'
+const txOperation = '[data-testid="tx-operation"]'
 
 const viewTransactionBtn = 'View transaction'
 const transactionDetailsTitle = 'Transaction details'
@@ -104,6 +109,11 @@ export const filterTypes = {
   incoming: 'Incoming',
   outgoing: 'Outgoing',
   module: 'Module-based',
+}
+
+export const advancedDetailsViewOptions = {
+  table: 'table',
+  grid: 'grid',
 }
 
 export function typeNoteText(text) {
@@ -373,8 +383,30 @@ export function clickOnAdvancedDetails() {
 export function expandAdvancedDetails(data) {
   clickOnAdvancedDetails()
   data.forEach((row) => {
-    cy.get(txRowTitle).contains(row).should('be.visible')
+    cy.get('div').contains(row).should('be.visible')
   })
+}
+
+export function switchView(view) {
+  if (view === advancedDetailsViewOptions.table) {
+    cy.get(tableViewBtn).click()
+    cy.get(txHexData).should('be.visible')
+  } else {
+    cy.get(gridViewBtn).click()
+    cy.get(txOperation).should('be.visible')
+  }
+}
+
+export function clickOnCopyDataBtn(expectedData) {
+  cy.get(txStack).find('button').click()
+  cy.wait(2000)
+  cy.window().then((win) => {
+    cy.wrap(win.navigator.clipboard.readText()).should('eq', expectedData)
+  })
+}
+
+export function switchToGridView() {
+  cy.get(gridViewBtn).click()
 }
 
 export function collapseAdvancedDetails() {
