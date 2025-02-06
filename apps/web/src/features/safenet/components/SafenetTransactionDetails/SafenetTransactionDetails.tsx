@@ -8,6 +8,7 @@ import {
   AccordionSummary,
   Box,
   CircularProgress,
+  Grid,
   type Palette,
   Skeleton,
   Stack,
@@ -105,41 +106,51 @@ const DebitRow = ({ debit }: { debit: SafenetTransactionDetails['debits'][number
   }
 
   return (
-    <Stack direction="row" spacing={2} alignItems="center" justifyContent="space-between">
-      <ChainIndicator chainId={debit.chainId.toString()} />
-      <Stack direction="row">
-        <ArrowOutwardIcon />
+    <Grid container direction="row" spacing={2} alignItems="center">
+      <Grid item xs={12} lg={2}>
+        <ChainIndicator chainId={debit.chainId.toString()} />
+      </Grid>
+      <Grid item xs={12} lg={2}>
+        <Stack direction="row">
+          <ArrowOutwardIcon />
 
-        <TokenAmount
-          value={debit.amount}
-          decimals={tokenInfo?.decimals}
-          direction={TransferDirection.OUTGOING}
-          tokenSymbol={tokenInfo?.symbol}
-        />
-      </Stack>
-      <Typography
-        variant="caption"
-        fontWeight="bold"
-        display="flex"
-        alignItems="center"
-        textTransform="capitalize"
-        gap={1}
-        sx={{ color: ({ palette }) => getDebitStatusColor(debit.status, palette) }}
-        data-testid="debit-status-label"
-      >
-        {mapDebitStatus[debit.status]}
-      </Typography>
-      <Box>
-        <EthHashInfo address={debit.safe} chainId={debit.chainId.toString()} avatarSize={24} onlyName />
-      </Box>
-      <Box>
-        {debit.executionTxHash ? (
-          <SafenetSettlementLink debit={debit} />
-        ) : debit.initAt ? (
-          <Typography>~ {formatTimeInWords(new Date(debit.initAt).getTime() + CHALLENGE_PERIOD)}</Typography>
-        ) : null}
-      </Box>
-    </Stack>
+          <TokenAmount
+            value={debit.amount}
+            decimals={tokenInfo?.decimals}
+            direction={TransferDirection.OUTGOING}
+            tokenSymbol={tokenInfo?.symbol}
+          />
+        </Stack>
+      </Grid>
+      <Grid item xs={12} lg={2}>
+        <Typography
+          variant="caption"
+          fontWeight="bold"
+          display="flex"
+          alignItems="center"
+          textTransform="capitalize"
+          gap={1}
+          sx={{ color: ({ palette }) => getDebitStatusColor(debit.status, palette) }}
+          data-testid="debit-status-label"
+        >
+          {mapDebitStatus[debit.status]}
+        </Typography>
+      </Grid>
+      <Grid item xs={12} lg={2}>
+        <Box>
+          <EthHashInfo address={debit.safe} chainId={debit.chainId.toString()} avatarSize={24} onlyName shortAddress />
+        </Box>
+      </Grid>
+      <Grid item>
+        <Box>
+          {debit.executionTxHash ? (
+            <SafenetSettlementLink debit={debit} />
+          ) : debit.initAt ? (
+            <Typography>~ {formatTimeInWords(new Date(debit.initAt).getTime() + CHALLENGE_PERIOD)}</Typography>
+          ) : null}
+        </Box>
+      </Grid>
+    </Grid>
   )
 }
 
@@ -297,9 +308,11 @@ const SafenetTransactionDetails = ({ safeTxHash }: { safeTxHash: string }) => {
                     </Typography>
                   </AccordionSummary>
                   <AccordionDetails>
-                    {data.debits.map((debit, idx) => (
-                      <DebitRow debit={debit} key={idx} />
-                    ))}
+                    <Stack spacing={1}>
+                      {data.debits.map((debit, idx) => (
+                        <DebitRow debit={debit} key={idx} />
+                      ))}
+                    </Stack>
                   </AccordionDetails>
                 </Accordion>
               ) : (
