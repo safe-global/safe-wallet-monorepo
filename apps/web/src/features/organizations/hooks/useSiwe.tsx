@@ -11,7 +11,6 @@ export const useSiwe = () => {
     const message = {
       domain: window.location.host,
       address,
-      // Results in special signing window in MetaMask
       statement:
         'By signing, you are agreeing to store this data on the Safe Cloud. This does not initiate a transaction or cost any fees.',
       uri: window.location.origin,
@@ -45,7 +44,6 @@ Issued At: ${message.issuedAt.toISOString()}`
 
     const signature = await signer.signMessage(signableMessage)
 
-    // todo: is it possible to remove the dto wrapper?
     return verifyAuthMutation({ siweDto: { message: signableMessage, signature } })
   }, [fetchNonce, provider, verifyAuthMutation])
 
