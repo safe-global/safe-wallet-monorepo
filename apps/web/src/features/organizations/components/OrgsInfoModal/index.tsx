@@ -44,7 +44,7 @@ const OrgsInfoModal = ({ onClose }: { onClose: () => void }) => {
             <List>
               <ListItem>
                 <ListIcon />
-                Invite anyone into your organisation. Even if they are not a signer.
+                Invite anyone into your organization. Even if they are not a signer.
               </ListItem>
 
               <ListItem>

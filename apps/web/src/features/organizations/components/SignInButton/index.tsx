@@ -1,6 +1,6 @@
 import { Button } from '@mui/material'
 import { useWeb3 } from '@/hooks/wallets/web3'
-import { useSiwe } from '@/features/organisations/hooks/useSiwe'
+import { useSiwe } from '@/features/organizations/hooks/useSiwe'
 
 const SignInButton = () => {
   const provider = useWeb3()

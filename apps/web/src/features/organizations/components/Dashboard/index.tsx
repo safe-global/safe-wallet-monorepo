@@ -12,7 +12,7 @@ const OrganizationsDashboard = () => {
       <Box className={css.content}>
         <Box className={css.loggedOut}>
           <Typography variant="h2" className={css.heading}>
-            Sign in to see your organisations
+            Sign in to see your organizations
           </Typography>
 
           <Typography variant="body2" className={css.description}>
