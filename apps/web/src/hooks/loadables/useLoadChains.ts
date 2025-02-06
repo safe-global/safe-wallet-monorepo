@@ -1,20 +1,22 @@
 import { useEffect } from 'react'
-import { type ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
-import useAsync, { type AsyncResult } from '../useAsync'
+import { useChainsGetChainsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { Errors, logError } from '@/services/exceptions'
-import { getConfigs } from '@/hooks/loadables/helpers/config'
+import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import type { AsyncResult } from '../useAsync'
 
-export const useLoadChains = (): AsyncResult<ChainInfo[]> => {
-  const [data, error, loading] = useAsync<ChainInfo[]>(getConfigs, [])
+const MAX_CHAINS = 40
+
+export const useLoadChains = () => {
+  const { data, isLoading, error } = useChainsGetChainsV1Query({ cursor: `limit=${MAX_CHAINS}` })
 
   // Log errors
   useEffect(() => {
     if (error) {
-      logError(Errors._620, error.message)
+      logError(Errors._620, error.toString())
     }
   }, [error])
 
-  return [data, error, loading]
+  return [data?.results, error, isLoading] as AsyncResult<ChainInfo[]>
 }
 
 export default useLoadChains
