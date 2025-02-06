@@ -32,7 +32,7 @@ export const SafenetSettlementLink = ({ debit }: { debit: SafenetTransactionDeta
       }}
       legacyBehavior
     >
-      <ExplorerButton title="Settlement" />
+      <ExplorerButton isCompact={false} label="View settlement" />
     </Link>
   )
 }

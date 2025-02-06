@@ -27,6 +27,9 @@ import { useChain } from '@/hooks/useChains'
 import ArrowOutwardIcon from '@/public/images/transactions/outgoing.svg'
 import ArrowDownwardIcon from '@/public/images/transactions/incoming.svg'
 import { SafenetSettlementLink } from './SafenetSettlementLink'
+import { formatTimeInWords } from '@/utils/date'
+
+const CHALLENGE_PERIOD = (60 * 10 + 15) * 1000 // 10mins + 15s delay for indexing / execution
 
 enum SafenetStatus {
   PROCESSING = 'Processing',
@@ -72,6 +75,15 @@ const getDebitStatusColor = (status: SafenetTransactionDetails['debits'][number]
   }
 }
 
+const mapDebitStatus: Record<SafenetTransactionDetails['debits'][number]['status'], string> = {
+  CHALLENGED: 'Challenged',
+  EXECUTED: 'Settled',
+  FAILED: 'Failed',
+  INITIATED: 'Initiated',
+  PENDING: 'Pending',
+  READY: 'Inititating',
+}
+
 const useDebitChainTokenInfo = (chainId: string, token: string) => {
   const debitChainConfig = useChain(chainId)
 
@@ -115,13 +127,17 @@ const DebitRow = ({ debit }: { debit: SafenetTransactionDetails['debits'][number
         sx={{ color: ({ palette }) => getDebitStatusColor(debit.status, palette) }}
         data-testid="debit-status-label"
       >
-        {debit.status.toLowerCase()}
+        {mapDebitStatus[debit.status]}
       </Typography>
       <Box>
         <EthHashInfo address={debit.safe} chainId={debit.chainId.toString()} avatarSize={24} onlyName />
       </Box>
       <Box>
-        <SafenetSettlementLink debit={debit} />
+        {debit.executionTxHash ? (
+          <SafenetSettlementLink debit={debit} />
+        ) : debit.initAt ? (
+          <Typography>~ {formatTimeInWords(new Date(debit.initAt).getTime() + CHALLENGE_PERIOD)}</Typography>
+        ) : null}
       </Box>
     </Stack>
   )

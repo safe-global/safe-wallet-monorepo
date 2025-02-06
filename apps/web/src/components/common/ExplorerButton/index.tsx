@@ -10,12 +10,14 @@ export type ExplorerButtonProps = {
   icon?: ComponentType
   onClick?: (e: SyntheticEvent) => void
   isCompact?: boolean
+  label?: string
 }
 
 const ExplorerButton = ({
   title = '',
   href = '',
   icon = LinkIcon,
+  label = 'View on explorer',
   className,
   onClick,
   isCompact = true,
@@ -48,7 +50,7 @@ const ExplorerButton = ({
     >
       <Box display="flex" alignItems="center">
         <Typography fontWeight={700} fontSize="small" mr="var(--space-1)" noWrap>
-          View on explorer
+          {label}
         </Typography>
 
         <SvgIcon component={icon} inheritViewBox fontSize="small" />
