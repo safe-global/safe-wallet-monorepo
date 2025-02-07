@@ -82,6 +82,9 @@ export default {
           ios: {
             useFrameworks: 'static',
           },
+          android: {
+            extraMavenRepos: ['../../../../node_modules/@notifee/react-native/android/libs'],
+          },
         },
       ],
       '@react-native-firebase/app',
