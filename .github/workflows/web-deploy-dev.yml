@@ -1,15 +1,10 @@
 name: Web Deploy to dev/staging
 
 on:
-  pull_request:
-
-  push:
-    branches:
-      - dev
-      - main
-    paths:
-      - apps/web/**
-      - packages/**
+  workflow_run:
+    workflows: ['Web Lint']
+    types:
+      - completed
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

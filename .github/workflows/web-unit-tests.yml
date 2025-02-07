@@ -1,15 +1,11 @@
 name: Web Unit tests
-on:
-  pull_request:
-    paths:
-      - apps/web/**
 
-  push:
-    branches:
-      - main
-    paths:
-      - apps/web/**
-      - packages/**
+on:
+  workflow_run:
+    workflows: ['Web Lint']
+    types:
+      - completed
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
