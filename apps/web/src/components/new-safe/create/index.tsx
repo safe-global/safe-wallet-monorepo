@@ -124,7 +124,6 @@ const CreateSafe = () => {
           onSubmit={onSubmit}
           onBack={onBack}
           setStep={setStep}
-          isSafenetFlow={false}
         />
       ),
     },
