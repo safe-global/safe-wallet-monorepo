@@ -8224,7 +8224,7 @@ __metadata:
     eslint-plugin-react: "npm:^7.37.1"
     ethers: "npm:^6.13.4"
     expo: "npm:~52.0.14"
-    expo-blur: "npm:~14.0.1"
+    expo-blur: "npm:^14.0.3"
     expo-build-properties: "npm:^0.13.2"
     expo-constants: "npm:~17.0.5"
     expo-dev-client: "npm:~5.0.5"
@@ -19972,14 +19972,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"expo-blur@npm:~14.0.1":
-  version: 14.0.1
-  resolution: "expo-blur@npm:14.0.1"
+"expo-blur@npm:^14.0.3":
+  version: 14.0.3
+  resolution: "expo-blur@npm:14.0.3"
   peerDependencies:
     expo: "*"
     react: "*"
     react-native: "*"
-  checksum: 10/263fe270941b8d05792f266ac1101de34f89cd1cf69e54802bc97daf798a89d2c3bf9f72780840fd5ed0519a209f71845f4758b49757be0fdc67942fab7da477
+  checksum: 10/c69dfb542530dae4ca66caf341b8e72f1555ef0cf700c94603e487a31d53f31885a03f3aadd208e9d531969dbcd558856f4475ccb9b77a37580fc6062dee4cda
   languageName: node
   linkType: hard
 
