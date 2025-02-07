@@ -1,18 +1,13 @@
-import { getCounterfactualBalance } from '@/features/counterfactual/utils'
-import { useWeb3 } from '@/hooks/wallets/web3'
 import { useMemo } from 'react'
-import { type SafeBalanceResponse } from '@safe-global/safe-gateway-typescript-sdk'
 import { type Balances, useBalancesGetBalancesV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import { useAppSelector } from '@/store'
-import useAsync, { type AsyncResult } from '../useAsync'
+import { type AsyncResult } from '../useAsync'
 import { selectCurrency, selectSettings, TOKEN_LISTS } from '@/store/settingsSlice'
 import { useCurrentChain } from '../useChains'
 import { FEATURES, hasFeature } from '@/utils/chains'
 import useSafeInfo from '../useSafeInfo'
-import type { ExtendedSafeInfo } from '@/store/safeInfoSlice'
 import { POLLING_INTERVAL } from '@/config/constants'
-
-const DEFAULT_BALANCES = { items: [], fiatTotal: '' }
+import { useCounterfactualBalances } from '@/features/counterfactual/useCounterfactualBalances'
 
 export const useTokenListSetting = (): boolean | undefined => {
   const chain = useCurrentChain()
@@ -26,27 +21,18 @@ export const useTokenListSetting = (): boolean | undefined => {
   return isTrustedTokenList
 }
 
-const useCounterfactualBalances = (safe: ExtendedSafeInfo) => {
-  const web3 = useWeb3()
-  const chain = useCurrentChain()
-  const safeAddress = safe.address.value
-  const isCounterfactual = !safe.deployed
-
-  const [data] = useAsync<SafeBalanceResponse | undefined>(() => {
-    if (!chain || !web3 || !isCounterfactual) return
-    return getCounterfactualBalance(safeAddress, web3, chain)
-  }, [chain, safeAddress, web3, isCounterfactual])
-
-  return data as unknown as Balances
-}
-
-export const useRtkBalances = () => {
+const useLoadBalances = () => {
   const currency = useAppSelector(selectCurrency)
   const isTrustedTokenList = useTokenListSetting()
-  const { safe, safeAddress, safeLoaded } = useSafeInfo()
-  const isReady = safeLoaded && safe.deployed && isTrustedTokenList !== undefined
+  const { safe, safeAddress } = useSafeInfo()
+  const isReady = safeAddress && safe.deployed && isTrustedTokenList !== undefined
+  const isCounterfactual = !safe.deployed
 
-  const { data, isLoading, error } = useBalancesGetBalancesV1Query(
+  let {
+    data: balances,
+    isLoading: loading,
+    error: errorStr,
+  } = useBalancesGetBalancesV1Query(
     {
       chainId: safe.chainId,
       safeAddress,
@@ -60,22 +46,17 @@ export const useRtkBalances = () => {
   )
 
   // Counterfactual balances
-  const cfData = useCounterfactualBalances(safe)
+  const [cfData, cfError, cfLoading] = useCounterfactualBalances(safe)
 
-  return useMemo(
-    () => ({
-      balances: data || cfData || DEFAULT_BALANCES,
-      error: error ? new Error('message' in error ? error.message : 'Failed to load balances') : undefined,
-      loading: isLoading,
-    }),
-    [data, cfData, error, isLoading],
-  )
-}
+  let error = useMemo(() => (errorStr ? new Error(errorStr.toString()) : undefined), [errorStr])
 
-export const useLoadBalances = (): AsyncResult<Balances> => {
-  const { balances, error, loading } = useRtkBalances()
+  if (isCounterfactual) {
+    balances = cfData as unknown as Balances
+    loading = cfLoading
+    error = cfError
+  }
 
-  return [balances, error, loading]
+  return useMemo(() => [balances, error, loading], [balances, error, loading]) as AsyncResult<Balances>
 }
 
 export default useLoadBalances

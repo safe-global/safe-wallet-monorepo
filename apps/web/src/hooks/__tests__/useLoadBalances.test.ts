@@ -133,7 +133,7 @@ describe('useLoadBalances', () => {
     const { result } = renderHook(() => useLoadBalances())
 
     await waitFor(() => {
-      expect(result.current[0]).toEqual({ fiatTotal: '', items: [] })
+      expect(result.current[0]).toBeUndefined()
       expect(result.current[1]).toBeUndefined()
       expect(result.current[2]).toBeFalsy()
     })
