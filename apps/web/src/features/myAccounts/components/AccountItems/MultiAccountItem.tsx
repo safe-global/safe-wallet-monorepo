@@ -257,6 +257,7 @@ const MultiAccountItem = ({ onLinkClick, multiSafeAccountItem }: MultiAccountIte
             '& .MuiAccordionSummary-content': { m: '0 !important', alignItems: 'center' },
             '&.Mui-expanded': { backgroundColor: 'transparent !important' },
           }}
+          component="div"
         >
           <Box className={classnames(css.multiSafeLink, css.safeLink)} width="100%">
             <Box sx={{ pr: 2.5 }} data-testid="group-safe-icon">

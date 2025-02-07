@@ -57,6 +57,7 @@ export const ExpandableTransactionItem = ({
             padding: '12px 0',
           },
         }}
+        component="div"
       >
         <TxSummary item={item} isConflictGroup={isConflictGroup} isBulkGroup={isBulkGroup} />
       </AccordionSummary>
