@@ -13,7 +13,11 @@ const useIsSafenetEnabled = () => {
     return false
   }
 
-  return sameAddress(safe.guard?.value, safenetConfig?.guards[safe.chainId])
+  return (
+    sameAddress(safe.guard?.value, safenetConfig?.guards[safe.chainId]) &&
+    safe.modules?.length === 1 &&
+    sameAddress(safe.modules?.[0].value, safenetConfig?.settlementEngines[safe.chainId])
+  )
 }
 
 export default useIsSafenetEnabled
