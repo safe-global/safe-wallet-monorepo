@@ -1,9 +1,11 @@
 name: Web Lint
+
 on:
   pull_request:
     paths:
       - apps/web/**
       - packages/**
+      - .github/workflows/web-*
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
