@@ -15,13 +15,9 @@ const SafenetBanner = () => {
   const [displayBanner, setDisplayBanner] = useState<boolean>(true)
 
   const onClick = () => {
-    router.push(
-      {
-        pathname: AppRoutes.newSafe.create,
-        query: { safenet: true },
-      },
-      AppRoutes.newSafe.create,
-    )
+    router.push({
+      pathname: AppRoutes.newSafe.safenetCreate,
+    })
   }
 
   return (
