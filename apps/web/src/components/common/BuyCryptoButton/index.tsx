@@ -15,7 +15,7 @@ import css from './styles.module.css'
 import ChevronRightRoundedIcon from '@mui/icons-material/ChevronRightRounded'
 
 const useOnrampAppUrl = (): string | undefined => {
-  const [onrampApps] = useRemoteSafeApps(SafeAppsTag.ONRAMP)
+  const [onrampApps] = useRemoteSafeApps({ tag: SafeAppsTag.ONRAMP })
   return onrampApps?.[0]?.url
 }
 
