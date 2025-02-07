@@ -110,7 +110,7 @@ function RootLayout() {
 let AppEntryPoint = RootLayout
 
 if (isStorybookEnv) {
-  AppEntryPoint = require('../.storybook').default
+  AppEntryPoint = require('../../.storybook').default
 }
 
 export default AppEntryPoint
