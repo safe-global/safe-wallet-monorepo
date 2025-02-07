@@ -53,6 +53,9 @@ export type SafenetTransactionDetails = {
   fulfilledAt?: string
   debits: SafenetDebit[]
   spends: SafenetSpend[]
+  safe: string
+  chainId: number
+  safeTxHash: string
 }
 
 export const getSafenetBalances = async (safeAddress: string): Promise<SafenetBalanceEntity> => {
@@ -114,6 +117,15 @@ export const safenetApi = createApi({
         method: 'GET',
       }),
     }),
+    getSafenetTransactionDetailsBySettlement: builder.query<
+      SafenetTransactionDetails,
+      { chainId: string; settlementTxHash: string }
+    >({
+      query: ({ chainId, settlementTxHash }) => ({
+        url: `/tx/settlement/${chainId}/${settlementTxHash}/details`,
+        method: 'GET',
+      }),
+    }),
   }),
 })
 
@@ -122,4 +134,5 @@ export const {
   useLazyGetSafenetBalanceQuery,
   useLazySimulateSafenetTransactionQuery,
   useGetSafenetTransactionDetailsQuery,
+  useGetSafenetTransactionDetailsBySettlementQuery,
 } = safenetApi

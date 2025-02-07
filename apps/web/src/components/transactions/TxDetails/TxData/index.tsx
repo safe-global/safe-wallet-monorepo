@@ -20,7 +20,7 @@ import {
   isTransferTxInfo,
 } from '@/utils/transaction-guards'
 import { SpendingLimits } from '@/components/transactions/TxDetails/TxData/SpendingLimits'
-import type { TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
+import { DetailedExecutionInfoType, type TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
 import { type ReactElement } from 'react'
 import RejectionTxInfo from '@/components/transactions/TxDetails/TxData/Rejection'
 import DecodedData from '@/components/transactions/TxDetails/TxData/DecodedData'
@@ -34,6 +34,11 @@ import StakingTxWithdrawDetails from '@/features/stake/components/StakingTxWithd
 import { OnChainConfirmation } from './NestedTransaction/OnChainConfirmation'
 import { ExecTransaction } from './NestedTransaction/ExecTransaction'
 import SafeUpdate from './SafeUpdate'
+import useIsSafenetEnabled from '@/features/safenet/hooks/useIsSafenetEnabled'
+import { useGetSafenetConfigQuery } from '@/store/safenet'
+import { skipToken } from '@reduxjs/toolkit/query'
+import { sameAddress } from '@/utils/addresses'
+import { SafenetSettlement } from '@/features/safenet/components/SafenetSettlement'
 
 const TxData = ({
   txDetails,
@@ -45,9 +50,23 @@ const TxData = ({
   imitation: boolean
 }): ReactElement => {
   const chainId = useChainId()
+  const isSafenetEnabled = useIsSafenetEnabled()
+
   const txInfo = txDetails.txInfo
   const toInfo = isCustomTxInfo(txDetails.txInfo) ? txDetails.txInfo.to : undefined
 
+  const moduleAddress =
+    txDetails.detailedExecutionInfo?.type === DetailedExecutionInfoType.MODULE
+      ? txDetails.detailedExecutionInfo.address.value
+      : undefined
+
+  const { data: safenetConfig } = useGetSafenetConfigQuery(isSafenetEnabled && moduleAddress ? undefined : skipToken)
+  const isSafenetSettlement = sameAddress(safenetConfig?.settlementEngines[chainId], moduleAddress)
+
+  console.log('isSAfenetSettlement?', isSafenetSettlement, isSafenetEnabled, moduleAddress)
+  if (isSafenetSettlement) {
+    return <SafenetSettlement data={txDetails} />
+  }
   if (isOrderTxInfo(txDetails.txInfo)) {
     return <SwapOrder txData={txDetails.txData} txInfo={txDetails.txInfo} />
   }
