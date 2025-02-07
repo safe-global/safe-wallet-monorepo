@@ -76,7 +76,7 @@ export const useSubmitSafenetReviewHandler = ({
         PayMethod.PayNow,
       )
 
-      safeCreationDispatch(SafeCreationEvent.RELAYING, {
+      safeCreationDispatch(SafeCreationEvent.SAFENET_RELAYING, {
         groupKey: CF_TX_GROUP_KEY,
         safeAddress: deploymentData.safeAddress,
         chainId: chain.chainId,

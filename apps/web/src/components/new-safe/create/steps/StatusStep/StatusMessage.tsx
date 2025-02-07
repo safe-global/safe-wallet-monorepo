@@ -3,9 +3,9 @@ import LoadingSpinner, { SpinnerStatus } from '@/components/new-safe/create/step
 import { SafeCreationEvent } from '@/features/counterfactual/services/safeCreationEvents'
 import type { UndeployedSafe } from '@/features/counterfactual/store/undeployedSafesSlice'
 import { useCurrentChain } from '@/hooks/useChains'
+import FailedIcon from '@/public/images/common/tx-failed.svg'
 import { getBlockExplorerLink } from '@/utils/chains'
 import { Box, Typography } from '@mui/material'
-import FailedIcon from '@/public/images/common/tx-failed.svg'
 
 const getStep = (status: SafeCreationEvent) => {
   switch (status) {
@@ -16,6 +16,7 @@ const getStep = (status: SafeCreationEvent) => {
       }
     case SafeCreationEvent.PROCESSING:
     case SafeCreationEvent.RELAYING:
+    case SafeCreationEvent.SAFENET_RELAYING:
       return {
         description: 'We are activating your account',
         instruction: 'It can take some minutes to create your account, but you can check the progress below.',

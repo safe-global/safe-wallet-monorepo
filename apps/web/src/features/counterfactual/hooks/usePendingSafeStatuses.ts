@@ -29,6 +29,7 @@ export const safeCreationPendingStatuses: Partial<Record<SafeCreationEvent, Pend
   [SafeCreationEvent.AWAITING_EXECUTION]: PendingSafeStatus.AWAITING_EXECUTION,
   [SafeCreationEvent.PROCESSING]: PendingSafeStatus.PROCESSING,
   [SafeCreationEvent.RELAYING]: PendingSafeStatus.RELAYING,
+  [SafeCreationEvent.SAFENET_RELAYING]: PendingSafeStatus.SAFENET_RELAYING,
   [SafeCreationEvent.SUCCESS]: null,
   [SafeCreationEvent.INDEXED]: null,
   [SafeCreationEvent.FAILED]: null,
@@ -61,10 +62,11 @@ const usePendingSafeMonitor = (): void => {
           } = undeployedSafe
 
           const isProcessing = status === PendingSafeStatus.PROCESSING && txHash !== undefined
-          const isRelaying = status === PendingSafeStatus.RELAYING
+          const isRelaying = status === PendingSafeStatus.RELAYING && taskId !== undefined
+          const isSafenetRelaying = status === PendingSafeStatus.SAFENET_RELAYING
           const isMonitored = monitoredSafes.current[safeAddress]
 
-          if ((!isProcessing && !isRelaying) || isMonitored) return
+          if ((!isProcessing && !isRelaying && !isSafenetRelaying) || isMonitored) return
 
           monitoredSafes.current[safeAddress] = true
 
@@ -73,11 +75,11 @@ const usePendingSafeMonitor = (): void => {
           }
 
           if (isRelaying) {
-            if (taskId !== undefined) {
-              checkSafeActionViaGelatoRelay(taskId, safeAddress, type, chainId)
-            } else {
-              checkSafeActionViaSafenetRelay(safeAddress, chainId)
-            }
+            checkSafeActionViaGelatoRelay(taskId, safeAddress, type, chainId)
+          }
+
+          if (isSafenetRelaying) {
+            checkSafeActionViaSafenetRelay(safeAddress, chainId)
           }
         }
 

@@ -9,6 +9,7 @@ export enum PendingSafeStatus {
   AWAITING_EXECUTION = 'AWAITING_EXECUTION',
   PROCESSING = 'PROCESSING',
   RELAYING = 'RELAYING',
+  SAFENET_RELAYING = 'SAFENET_RELAYING',
 }
 
 type UndeployedSafeStatus = {
