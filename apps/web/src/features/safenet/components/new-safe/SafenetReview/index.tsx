@@ -14,7 +14,6 @@ import { Box, Typography } from '@mui/material'
 import { EMPTY_DATA, ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
 import { useRouter } from 'next/router'
 import type { Dispatch, SetStateAction } from 'react'
-import { useEffect } from 'react'
 import css from './styles.module.css'
 
 export type UseSubmitSafenetReviewHandlerProps = {
@@ -36,16 +35,18 @@ export const useSubmitSafenetReviewHandler = ({
 }: UseSubmitSafenetReviewHandlerProps): SafenetReviewType => {
   const router = useRouter()
   const dispatch = useAppDispatch()
-  const [deploy, { data: deploymentData, error }] = useLazyDeploySafenetAccountQuery()
+  const [deploy] = useLazyDeploySafenetAccountQuery()
 
-  useEffect(() => {
-    if (!error) return
-    console.error(error)
-    setSubmitError('Error creating the Safe Account. Please try again later.')
-    setIsCreating(false)
-  }, [error, setSubmitError, setIsCreating])
-
-  useEffect(() => {
+  const onDeployment = (
+    deploymentResult: Awaited<ReturnType<ReturnType<typeof useLazyDeploySafenetAccountQuery>[0]>>,
+  ) => {
+    const { data: deploymentData, error } = deploymentResult
+    if (error) {
+      console.error(error)
+      setSubmitError('Error creating the Safe Account. Please try again later.')
+      setIsCreating(false)
+      return
+    }
     if (!deploymentData || !data) return
 
     const replayedSafeWithNonce: ReplayedSafeProps = {
@@ -102,18 +103,20 @@ export const useSubmitSafenetReviewHandler = ({
       pathname: AppRoutes.home,
       query: { safe: `${data.networks[0].shortName}:${deploymentData.safeAddress}` },
     })
-  }, [data, deploymentData, dispatch, onSubmit, router])
+  }
 
   const handleCreateSafeClick = async () => {
     setIsCreating(true)
 
-    deploy({
+    const deploymentResult = await deploy({
       account: {
         owners: data.owners.map((owner) => owner.address),
         threshold: data.threshold,
       },
       saltNonce: Date.now().toString(),
     })
+
+    onDeployment(deploymentResult)
   }
 
   return {
