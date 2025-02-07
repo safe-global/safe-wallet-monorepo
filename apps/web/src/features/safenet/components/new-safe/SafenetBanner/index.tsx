@@ -3,16 +3,16 @@ import lightPalette from '@/components/theme/lightPalette'
 import { AppRoutes } from '@/config/routes'
 import SafeLogoNoText from '@/public/images/logo-no-text-transparent.svg'
 import SafenetLogo from '@/public/images/safenet/logo-safenet.svg'
+import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import { Box, Button, Grid, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { useRouter } from 'next/router'
-import { useState } from 'react'
 import css from './styles.module.css'
 
 const SafenetBanner = () => {
   const router = useRouter()
   const { palette } = useTheme()
-  const [displayBanner, setDisplayBanner] = useState<boolean>(true)
+  const [displayBanner = true, setDisplayBanner] = useLocalStorage<boolean>('showSafenetBanner')
 
   const onClick = () => {
     router.push({
