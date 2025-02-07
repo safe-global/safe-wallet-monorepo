@@ -98,7 +98,7 @@
     "react-native-reanimated": "~3.16.7",
     "react-native-safe-area-context": "~5.1.0",
     "react-native-screens": "~4.5.0",
-    "react-native-vision-camera": "patch:react-native-vision-camera@npm%3A4.6.3#~/.yarn/patches/react-native-vision-camera-npm-4.6.3-a36a48af3a.patch",
+    "react-native-vision-camera": "^4.6.3",
     "react-native-web": "^0.19.13",
     "react-redux": "^9.1.2",
     "redux": "^5.0.1",
