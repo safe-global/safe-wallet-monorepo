@@ -229,8 +229,12 @@ const CreateSafenetAccount = () => {
             steps={CreateSafeSteps}
             eventCategory={CREATE_SAFE_CATEGORY}
             setWidgetStep={setActiveStep}
-            discoverSafenet={true}
-            isSafenetFlow={true}
+            customProgressBar={
+              <Box className={css.safenetHeader}>
+                <Typography fontSize={14}>Powered by</Typography>
+                <SafenetLogo height="14" />
+              </Box>
+            }
           />
         </Grid>
         <Grid

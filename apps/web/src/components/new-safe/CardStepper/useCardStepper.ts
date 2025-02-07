@@ -9,7 +9,6 @@ export type StepRenderProps<TData> = {
   setStep: (step: number) => void
   setProgressColor?: Dispatch<SetStateAction<string>>
   setStepData?: Dispatch<SetStateAction<TData>>
-  onSetFlow?: Dispatch<SetStateAction<boolean>>
 }
 
 type Step<TData> = {
@@ -17,7 +16,6 @@ type Step<TData> = {
   subtitle: string
   render: ({
     data,
-    onSetFlow,
     onSubmit,
     onBack,
     setStep,
@@ -30,7 +28,6 @@ type Step<TData> = {
     setStep: StepRenderProps<TData>['setStep']
     setProgressColor: StepRenderProps<TData>['setProgressColor']
     setStepData: StepRenderProps<TData>['setStepData']
-    onSetFlow?: StepRenderProps<TData>['onSetFlow']
   }) => ReactElement
 }
 
@@ -39,10 +36,9 @@ export type TxStepperProps<TData> = {
   initialData: TData
   initialStep?: number
   eventCategory?: string
+  customProgressBar?: ReactElement
   setWidgetStep?: (step: number | SetStateAction<number>) => void
   onClose: () => void
-  discoverSafenet?: boolean
-  isSafenetFlow?: boolean
 }
 
 export const useCardStepper = <TData>({

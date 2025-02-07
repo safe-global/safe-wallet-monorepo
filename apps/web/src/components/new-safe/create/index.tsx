@@ -216,8 +216,6 @@ const CreateSafe = () => {
             steps={CreateSafeSteps}
             eventCategory={CREATE_SAFE_CATEGORY}
             setWidgetStep={setActiveStep}
-            discoverSafenet={false}
-            isSafenetFlow={false}
           />
         </Grid>
         <Grid

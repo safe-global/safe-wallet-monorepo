@@ -11,7 +11,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import css from './styles.module.css'
 
-function DiscoverSafenetStep({ onSetFlow, onSubmit }: StepRenderProps<NewSafeFormData>) {
+function DiscoverSafenetStep({ onSubmit }: StepRenderProps<NewSafeFormData>) {
   const router = useRouter()
 
   const onCancel = () => {
@@ -19,7 +19,6 @@ function DiscoverSafenetStep({ onSetFlow, onSubmit }: StepRenderProps<NewSafeFor
   }
 
   const onContinueWithSafenet = () => {
-    onSetFlow && onSetFlow(true)
     onSubmit({})
   }
 
