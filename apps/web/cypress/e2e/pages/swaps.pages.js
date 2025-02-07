@@ -161,7 +161,7 @@ export function setExpiry(value) {
 }
 
 export function setLimitExpiry(value) {
-  cy.get('div').contains('Expiry').parent().find('button').click()
+  cy.get('div').contains('Order expires in').parent().find('button').click()
   cy.get(limitOrderExpiryItem(value)).dblclick()
 }
 
@@ -328,7 +328,9 @@ export function enableCustomRecipient(option) {
 }
 
 export function enableTwapCustomRecipient() {
-  cy.get(twapsAddressToggle).click()
+  if (cy.get(twapsAddressToggle).length > 1) {
+    cy.get(twapsAddressToggle).eq(0).click()
+  }
 }
 
 export function disableCustomRecipient(option) {

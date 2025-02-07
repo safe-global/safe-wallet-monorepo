@@ -398,11 +398,12 @@ export function switchView(view) {
 }
 
 export function clickOnCopyDataBtn(expectedData) {
-  cy.get(txStack).find('button').click()
-  cy.wait(2000)
   cy.window().then((win) => {
-    cy.wrap(win.navigator.clipboard.readText()).should('eq', expectedData)
+    cy.stub(win.navigator.clipboard, 'writeText').as('clipboardWrite')
   })
+
+  cy.get(txStack).find('button').click()
+  cy.get('@clipboardWrite').should('have.been.calledWith', expectedData)
 }
 
 export function switchToGridView() {
