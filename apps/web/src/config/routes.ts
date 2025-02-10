@@ -60,7 +60,6 @@ export const AppRoutes = {
     accounts: '/welcome/accounts',
   },
   organizations: {
-    members: '/organizations/members',
-    dashboard: '/organizations/dashboard',
+    index: '/organizations',
   },
 }

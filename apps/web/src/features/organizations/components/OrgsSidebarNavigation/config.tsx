@@ -8,11 +8,11 @@ export const navItems: NavItem[] = [
   {
     label: 'All organizations',
     icon: <SvgIcon component={HomeIcon} inheritViewBox />,
-    href: AppRoutes.organizations.dashboard,
+    href: AppRoutes.organizations.index,
   },
   {
     label: 'Members',
     icon: <SvgIcon component={HomeIcon} inheritViewBox />,
-    href: AppRoutes.organizations.members,
+    href: AppRoutes.organizations.index,
   },
 ]

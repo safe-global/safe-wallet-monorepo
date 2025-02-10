@@ -15,7 +15,7 @@ import { FEATURES } from '@/utils/chains'
 import css from './styles.module.css'
 import { InconsistentSignerSetupWarning } from '@/features/multichain/components/SignerSetupWarning/InconsistentSignerSetupWarning'
 import useIsStakingBannerEnabled from '@/features/stake/hooks/useIsStakingBannerEnabled'
-import OrgsDashboardWidget from '@/features/organisations/components/OrgsDashboardWidget'
+import OrgsDashboardWidget from '@/features/organizations/components/OrgsDashboardWidget'
 
 const RecoveryHeader = dynamic(() => import('@/features/recovery/components/RecoveryHeader'))
 
