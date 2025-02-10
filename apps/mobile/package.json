@@ -133,7 +133,7 @@
     "@types/eslint__js": "^8.42.3",
     "@types/jest": "^29.5.12",
     "@types/lodash": "^4.17.13",
-    "@types/node": "^22.9.1",
+    "@types/node": "^22.13.1",
     "@types/react": "~18.3.12",
     "babel-loader": "^8.4.1",
     "eslint": "^9.19.0",

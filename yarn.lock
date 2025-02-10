@@ -8210,7 +8210,7 @@ __metadata:
     "@types/eslint__js": "npm:^8.42.3"
     "@types/jest": "npm:^29.5.12"
     "@types/lodash": "npm:^4.17.13"
-    "@types/node": "npm:^22.9.1"
+    "@types/node": "npm:^22.13.1"
     "@types/react": "npm:~18.3.12"
     babel-loader: "npm:^8.4.1"
     babel-plugin-react-native-web: "npm:^0.19.13"
@@ -8508,7 +8508,7 @@ __metadata:
     "@types/js-cookie": "npm:^3.0.6"
     "@types/lodash": "npm:^4.14.182"
     "@types/mdx": "npm:^2.0.13"
-    "@types/node": "npm:18.11.18"
+    "@types/node": "npm:22.13.1"
     "@types/qrcode": "npm:^1.5.5"
     "@types/react": "npm:^19.0.0"
     "@types/react-dom": "npm:^19.0.0"
@@ -13052,7 +13052,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:*, @types/node@npm:>=13.7.0, @types/node@npm:^22.0.0, @types/node@npm:^22.9.1":
+"@types/node@npm:*, @types/node@npm:>=13.7.0, @types/node@npm:^22.0.0":
   version: 22.10.1
   resolution: "@types/node@npm:22.10.1"
   dependencies:
@@ -13061,10 +13061,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:18.11.18":
-  version: 18.11.18
-  resolution: "@types/node@npm:18.11.18"
-  checksum: 10/da05cf3a0036ef05cd695ac4cb265948593acbe723ba818f0ca0ce466b13ba99e1aac3a363086d6b8c7ea8f30c9233478e0293ac878a6f4b1d5515b10c392257
+"@types/node@npm:22.13.1, @types/node@npm:^22.13.1":
+  version: 22.13.1
+  resolution: "@types/node@npm:22.13.1"
+  dependencies:
+    undici-types: "npm:~6.20.0"
+  checksum: 10/d8ba7068b0445643c0fa6e4917cdb7a90e8756a9daff8c8a332689cd5b2eaa01e4cd07de42e3cd7e6a6f465eeda803d5a1363d00b5ab3f6cea7950350a159497
   languageName: node
   linkType: hard
 
