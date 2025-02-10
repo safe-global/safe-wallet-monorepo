@@ -1,7 +1,6 @@
 import { Box, Button, Stack, Typography } from '@mui/material'
 import Link from 'next/link'
 import Track from '@/components/common/Track'
-import { AppRoutes } from '@/config/routes'
 
 const gradientBg = {
   background: 'linear-gradient(225deg, rgba(95, 221, 255, 0.15) 12.5%, rgba(18, 255, 128, 0.15) 88.07%)',
@@ -31,7 +30,7 @@ const OrgsDashboardWidget = () => {
         </Track>
 
         <Track action="" category="" label="dashboard">
-          <Link href={AppRoutes.organizations.dashboard} passHref>
+          <Link href="" passHref>
             <Button variant="contained">Try now</Button>
           </Link>
         </Track>

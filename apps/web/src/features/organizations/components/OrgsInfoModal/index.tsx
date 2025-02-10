@@ -12,7 +12,6 @@ import {
 import CheckIcon from '@/public/images/common/circle-check.svg'
 import CloseIcon from '@mui/icons-material/Close'
 import NoEntriesIcon from '@/public/images/address-book/no-entries.svg'
-import { AppRoutes } from '@/config/routes'
 import Link from 'next/link'
 
 const ListIcon = () => (
@@ -66,8 +65,8 @@ const OrgsInfoModal = ({ onClose }: { onClose: () => void }) => {
             </List>
 
             <Stack gap={2} mt={8}>
-              <Link href={AppRoutes.organizations.dashboard} passHref>
-                <Button variant="contained" color="primary" href={AppRoutes.organizations.dashboard}>
+              <Link href="" passHref>
+                <Button variant="contained" color="primary">
                   Create an organization
                 </Button>
               </Link>
