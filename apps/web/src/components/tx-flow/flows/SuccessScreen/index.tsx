@@ -141,7 +141,7 @@ const SuccessScreen = ({ txId, txHash }: Props) => {
                   onClick={onClose}
                   disabled={!isSuccess}
                 >
-                  Go to nested Safe
+                  Go to Nested Safe
                 </Button>
               </Link>
             </Track>

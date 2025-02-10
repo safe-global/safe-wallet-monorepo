@@ -11,7 +11,7 @@ export function NestedSafeInfo(): ReactElement {
     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', pt: 1 }}>
       <NestedSafes />
       <Box sx={{ display: 'flex', gap: 1, py: 2 }}>
-        <Typography fontWeight={700}>No nested Safes yet</Typography>
+        <Typography fontWeight={700}>No Nested Safes yet</Typography>
         <Tooltip
           title="Nested Safes are separate wallets owned by your main Account, perfect for organizing different funds and projects."
           placement="top"

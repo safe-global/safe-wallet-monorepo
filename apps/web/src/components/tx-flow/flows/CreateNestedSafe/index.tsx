@@ -20,8 +20,8 @@ export function CreateNestedSafe(): ReactElement {
 
   return (
     <TxLayout
-      title={step === 0 ? 'Set up nested Safe' : 'Confirm nested Safe'}
-      subtitle="Create a nested Safe"
+      title={step === 0 ? 'Set up Nested Safe' : 'Confirm Nested Safe'}
+      subtitle="Create a Nested Safe"
       icon={NestedSafeIcon}
       step={step}
       onBack={prevStep}

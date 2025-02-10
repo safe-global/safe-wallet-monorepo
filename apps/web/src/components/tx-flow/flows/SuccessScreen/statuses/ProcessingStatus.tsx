@@ -31,7 +31,7 @@ export const ProcessingStatus = ({ txId, pendingTx, willDeploySafe: isCreatingSa
         mb: 3,
       }}
     >
-      {!isCreatingSafe ? 'The transaction' : 'Your nested Safe'} was confirmed and is now being processed.
+      {!isCreatingSafe ? 'The transaction' : 'Your Nested Safe'} was confirmed and is now being processed.
     </Typography>
     <Box>
       {pendingTx.status === PendingStatus.PROCESSING && (
