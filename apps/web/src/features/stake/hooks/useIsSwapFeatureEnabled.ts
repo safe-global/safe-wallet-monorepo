@@ -5,7 +5,7 @@ import { useContext } from 'react'
 
 const useIsStakingFeatureEnabled = () => {
   const isBlockedCountry = useContext(GeoblockingContext)
-  return useHasFeature(FEATURES.STAKING) && !isBlockedCountry
+  return (useHasFeature(FEATURES.STAKING) && !isBlockedCountry) || true
 }
 
 export default useIsStakingFeatureEnabled
