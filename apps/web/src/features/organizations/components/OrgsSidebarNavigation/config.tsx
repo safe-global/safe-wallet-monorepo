@@ -25,7 +25,7 @@ export const navItems: DynamicNavItem[] = [
   {
     label: 'Members',
     icon: <SvgIcon component={HomeIcon} inheritViewBox />,
-    href: AppRoutes.organizations.members,
+    href: AppRoutes.organizations.index,
   },
   {
     label: 'Settings',
