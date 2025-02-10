@@ -238,8 +238,8 @@ const SingleAccountItem = ({ onLinkClick, safeItem, isMultiChainItem = false }: 
             name={name}
             address={address}
             chainId={chainId}
-            addNetwork={isReplayable}
-            rename
+            addNetwork={!undeployedSafe}
+            rename={!undeployedSafe}
             undeployedSafe={!!undeployedSafe}
           />
         </>

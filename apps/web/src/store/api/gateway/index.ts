@@ -1,16 +1,15 @@
 import { proposerEndpoints } from '@/store/api/gateway/proposers'
 import { createApi, fakeBaseQuery } from '@reduxjs/toolkit/query/react'
+
 import {
   type AllOwnedSafes,
   getAllOwnedSafes,
   getTransactionDetails,
   type TransactionDetails,
-  type OwnedSafes,
-  getOwnedSafes,
 } from '@safe-global/safe-gateway-typescript-sdk'
 import { asError } from '@/services/exceptions/utils'
 import { safeOverviewEndpoints } from './safeOverviews'
-import { createSubmission, getSubmission } from '@safe-global/safe-client-gateway-sdk'
+import { createSubmission, getSafesByOwner, getSubmission } from '@safe-global/safe-client-gateway-sdk'
 
 export async function buildQueryFn<T>(fn: () => Promise<T>) {
   try {
@@ -20,10 +19,14 @@ export async function buildQueryFn<T>(fn: () => Promise<T>) {
   }
 }
 
+export function makeSafeTag(chainId: string, address: string): `${number}:0x${string}` {
+  return `${chainId}:${address}` as `${number}:0x${string}`
+}
+
 export const gatewayApi = createApi({
   reducerPath: 'gatewayApi',
   baseQuery: fakeBaseQuery<Error>(),
-  tagTypes: ['Submissions'],
+  tagTypes: ['OwnedSafes', 'Submissions'],
   endpoints: (builder) => ({
     getTransactionDetails: builder.query<TransactionDetails, { chainId: string; txId: string }>({
       queryFn({ chainId, txId }) {
@@ -40,9 +43,12 @@ export const gatewayApi = createApi({
         return buildQueryFn(() => getAllOwnedSafes(walletAddress))
       },
     }),
-    getOwnedSafes: builder.query<OwnedSafes, { chainId: string; walletAddress: string }>({
-      queryFn({ chainId, walletAddress }) {
-        return buildQueryFn(() => getOwnedSafes(chainId, walletAddress))
+    getOwnedSafes: builder.query<getSafesByOwner, { chainId: string; ownerAddress: string }>({
+      queryFn({ chainId, ownerAddress }) {
+        return buildQueryFn(() => getSafesByOwner({ params: { path: { chainId, ownerAddress } } }))
+      },
+      providesTags: (_res, _err, { chainId, ownerAddress }) => {
+        return [{ type: 'OwnedSafes', id: makeSafeTag(chainId, ownerAddress) }]
       },
     }),
     getSubmission: builder.query<
