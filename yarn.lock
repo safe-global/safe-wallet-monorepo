@@ -6078,23 +6078,25 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ledgerhq/device-management-kit@npm:^0.5.1":
-  version: 0.5.1
-  resolution: "@ledgerhq/device-management-kit@npm:0.5.1"
+"@ledgerhq/device-management-kit@npm:^0.6.0":
+  version: 0.6.0
+  resolution: "@ledgerhq/device-management-kit@npm:0.6.0"
   dependencies:
-    "@ledgerhq/device-transport-kit-mock-client": "npm:1.1.0"
     "@sentry/minimal": "npm:^6.19.7"
     "@statelyai/inspect": "npm:^0.4.0"
-    axios: "npm:^1.7.7"
-    inversify: "npm:^6.0.3"
+    axios: "npm:^1.7.9"
+    inversify: "npm:^6.2.1"
     inversify-logger-middleware: "npm:^3.1.0"
+    isomorphic-ws: "npm:^5.0.0"
     purify-ts: "npm:^2.1.0"
     reflect-metadata: "npm:^0.2.2"
-    rxjs: "npm:^7.8.1"
     semver: "npm:^7.6.3"
-    uuid: "npm:^10.0.0"
-    xstate: "npm:^5.18.2"
-  checksum: 10/7cfc836d4ac60991d0237abdc7137e06e5b331b06ea488e00d70c54a15788de6b325154ef22ff25a9a4664447f1f87bf320638a622ed02855a41b7e683494224
+    uuid: "npm:^11.0.3"
+    ws: "npm:^8.18.0"
+    xstate: "npm:^5.19.2"
+  peerDependencies:
+    rxjs: ^7.8.1
+  checksum: 10/75145390580d862c6f70363b7a7a74c2c469753db21734c58c632a8370be2db90a6cdd13d5edde14ff161db820d7a49f40e5b5914e6882be601fb78d97b2dc48
   languageName: node
   linkType: hard
 
@@ -6115,13 +6117,6 @@ __metadata:
     "@ledgerhq/context-module": ^1.0.0
     "@ledgerhq/device-management-kit": ^0.5.1
   checksum: 10/4db96dd727a0cece2e2014c38adbcee6624d6115da2133847e989022a2b282accf49ff80cb9a48f68a43d187a9300f61db85c57a1d1f454d82c1128387a8da15
-  languageName: node
-  linkType: hard
-
-"@ledgerhq/device-transport-kit-mock-client@npm:1.1.0":
-  version: 1.1.0
-  resolution: "@ledgerhq/device-transport-kit-mock-client@npm:1.1.0"
-  checksum: 10/92fe49953b8f21e6164b28a29db9ecee808c05009f3e9ae21c2ce5b8d26b17a277755eb6653f20989cb19decda06894c39031232595615d3180b42537244cc5f
   languageName: node
   linkType: hard
 
@@ -8463,7 +8458,7 @@ __metadata:
     "@faker-js/faker": "npm:^9.0.3"
     "@gnosis.pm/zodiac": "npm:^4.0.3"
     "@ledgerhq/context-module": "npm:^1.1.0"
-    "@ledgerhq/device-management-kit": "npm:^0.5.1"
+    "@ledgerhq/device-management-kit": "npm:^0.6.0"
     "@ledgerhq/device-signer-kit-ethereum": "npm:^1.1.0"
     "@mdx-js/loader": "npm:^3.0.1"
     "@mdx-js/react": "npm:^3.0.1"
@@ -15165,7 +15160,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"axios@npm:^1.7.7, axios@npm:^1.7.9":
+"axios@npm:^1.7.9":
   version: 1.7.9
   resolution: "axios@npm:1.7.9"
   dependencies:
@@ -22356,7 +22351,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"inversify@npm:^6.0.3, inversify@npm:^6.1.6":
+"inversify@npm:^6.1.6":
   version: 6.2.0
   resolution: "inversify@npm:6.2.0"
   dependencies:
@@ -22365,6 +22360,18 @@ __metadata:
   peerDependencies:
     reflect-metadata: ~0.2.2
   checksum: 10/6e5433eace91578dceba0d1c1f16790ea29681abc54aec1716a03bec5dd76d534554a1b79ca1fb9c8d24159bdf1c4e6f8197030b3657526d9a1e4f834ac2c26f
+  languageName: node
+  linkType: hard
+
+"inversify@npm:^6.2.1":
+  version: 6.2.2
+  resolution: "inversify@npm:6.2.2"
+  dependencies:
+    "@inversifyjs/common": "npm:1.4.0"
+    "@inversifyjs/core": "npm:1.3.5"
+  peerDependencies:
+    reflect-metadata: ~0.2.2
+  checksum: 10/25a1f823550c3765b7f4a11b505d76c70cab6e3f9a08414f76891823c68819ed5067b917ccf61bbfa24c7be6bc26080bdc7fe02c3c9dd5da7cb5b01708b843d3
   languageName: node
   linkType: hard
 
@@ -33925,12 +33932,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"uuid@npm:^10.0.0":
-  version: 10.0.0
-  resolution: "uuid@npm:10.0.0"
+"uuid@npm:^11.0.3":
+  version: 11.0.5
+  resolution: "uuid@npm:11.0.5"
   bin:
-    uuid: dist/bin/uuid
-  checksum: 10/35aa60614811a201ff90f8ca5e9ecb7076a75c3821e17f0f5ff72d44e36c2d35fcbc2ceee9c4ac7317f4cc41895da30e74f3885e30313bee48fda6338f250538
+    uuid: dist/esm/bin/uuid
+  checksum: 10/0594ecdff3051e15d4a2c614b4c72e73af373bde0a5d156512353c01156975295d024ae8d7151846d7bd4d22ccd251b16ed51b4318fa71505fb20ad984102dc1
   languageName: node
   linkType: hard
 
@@ -35047,10 +35054,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"xstate@npm:^5.18.2, xstate@npm:^5.19.0":
+"xstate@npm:^5.19.0":
   version: 5.19.0
   resolution: "xstate@npm:5.19.0"
   checksum: 10/8139ed434f2c3fe82d96ce2f30096290dd0aa19ecab647f8f5b03327968e61423358be5aa023868697a77b5ac669c2dd60a866310fe2fafff3d8002b9c5ecabc
+  languageName: node
+  linkType: hard
+
+"xstate@npm:^5.19.2":
+  version: 5.19.2
+  resolution: "xstate@npm:5.19.2"
+  checksum: 10/e482600e8df96d29df92e4a9498359a03450612a503ac33c6fa1e56f966ee6985ac8f455771f6c5b65e3e4bae06fea0e762c3ca0ba86eec8419c1f7c01a0f102
   languageName: node
   linkType: hard
 
