@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react'
 
-import NestedSafeIcon from '@/public/images/sidebar/nested-safe-icon.svg'
+import NestedSafeIcon from '@/public/images/sidebar/nested-safes-icon.svg'
 import TxLayout from '@/components/tx-flow/common/TxLayout'
 import useTxStepper from '@/components/tx-flow/useTxStepper'
 import { ReviewNestedSafe } from '@/components/tx-flow/flows/CreateNestedSafe/ReviewNestedSafe'
