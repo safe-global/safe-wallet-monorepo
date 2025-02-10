@@ -9,7 +9,7 @@ import { BRAND_NAME } from '@/config/constants'
 const LazyStakePage = dynamic(() => import('@/features/stake/components/StakePage'), { ssr: false })
 
 const StakePage: NextPage = () => {
-  const isFeatureEnabled = useHasFeature(FEATURES.STAKING)
+  const isFeatureEnabled = useHasFeature(FEATURES.STAKING) || true
 
   return (
     <>

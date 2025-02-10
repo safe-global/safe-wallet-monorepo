@@ -1,4 +1,4 @@
-import React, { useContext, useMemo, type ReactElement } from 'react'
+import React, { useMemo, type ReactElement } from 'react'
 import { useRouter } from 'next/router'
 import { ListItemButton } from '@mui/material'
 import { ImplementationVersionState } from '@safe-global/safe-gateway-typescript-sdk'
@@ -18,7 +18,6 @@ import { useCurrentChain } from '@/hooks/useChains'
 import { isRouteEnabled } from '@/utils/chains'
 import { trackEvent } from '@/services/analytics'
 import { SWAP_EVENTS, SWAP_LABELS } from '@/services/analytics/events/swaps'
-import { GeoblockingContext } from '@/components/common/GeoblockingProvider'
 import { STAKE_EVENTS, STAKE_LABELS } from '@/services/analytics/events/stake'
 import { Tooltip } from '@mui/material'
 import { BRIDGE_EVENTS, BRIDGE_LABELS } from '@/services/analytics/events/bridge'
@@ -26,8 +25,6 @@ import { BRIDGE_EVENTS, BRIDGE_LABELS } from '@/services/analytics/events/bridge
 const getSubdirectory = (pathname: string): string => {
   return pathname.split('/')[1]
 }
-
-const geoBlockedRoutes = [AppRoutes.bridge, AppRoutes.swap, AppRoutes.stake]
 
 const undeployedSafeBlockedRoutes = [AppRoutes.bridge, AppRoutes.swap, AppRoutes.stake, AppRoutes.apps.index]
 
@@ -43,17 +40,12 @@ const Navigation = (): ReactElement => {
   const { safe } = useSafeInfo()
   const currentSubdirectory = getSubdirectory(router.pathname)
   const queueSize = useQueuedTxsLength()
-  const isBlockedCountry = useContext(GeoblockingContext)
 
   const visibleNavItems = useMemo(() => {
     return navItems.filter((item) => {
-      if (isBlockedCountry && geoBlockedRoutes.includes(item.href)) {
-        return false
-      }
-
       return isRouteEnabled(item.href, chain)
     })
-  }, [chain, isBlockedCountry])
+  }, [chain])
 
   const enabledNavItems = useMemo(() => {
     return safe.deployed

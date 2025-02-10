@@ -3,4 +3,5 @@ import { localItem } from '@/services/local-storage/local'
 
 export const LS_KEY = 'debugProdCgw'
 export const cgwDebugStorage = localItem<boolean>(LS_KEY)
+cgwDebugStorage.set(true)
 export const GATEWAY_URL = IS_PRODUCTION || cgwDebugStorage.get() ? GATEWAY_URL_PRODUCTION : GATEWAY_URL_STAGING
