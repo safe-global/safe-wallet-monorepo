@@ -12,6 +12,7 @@ import {
 import CheckIcon from '@/public/images/common/circle-check.svg'
 import CloseIcon from '@mui/icons-material/Close'
 import NoEntriesIcon from '@/public/images/address-book/no-entries.svg'
+import Link from 'next/link'
 
 const ListIcon = () => (
   <ListItemIcon
@@ -44,7 +45,7 @@ const OrgsInfoModal = ({ onClose }: { onClose: () => void }) => {
             <List>
               <ListItem>
                 <ListIcon />
-                Invite anyone into your organisation. Even if they are not a signer.
+                Invite anyone into your organization. Even if they are not a signer.
               </ListItem>
 
               <ListItem>
@@ -64,9 +65,11 @@ const OrgsInfoModal = ({ onClose }: { onClose: () => void }) => {
             </List>
 
             <Stack gap={2} mt={8}>
-              <Button variant="contained" color="primary">
-                Create an organization
-              </Button>
+              <Link href="" passHref>
+                <Button variant="contained" color="primary">
+                  Create an organization
+                </Button>
+              </Link>
 
               <Button variant="text" color="primary">
                 Maybe later

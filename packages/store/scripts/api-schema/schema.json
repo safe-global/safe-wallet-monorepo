@@ -3092,6 +3092,137 @@
         },
         "tags": ["transactions"]
       }
+    },
+    "/v1/users": {
+      "get": {
+        "operationId": "usersGetWithWalletsV1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserWithWallets"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Signer address not provided"
+          },
+          "404": {
+            "description": "Wallet not found"
+          }
+        },
+        "tags": ["users"]
+      },
+      "delete": {
+        "operationId": "usersDeleteV1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "User deleted"
+          },
+          "401": {
+            "description": "Signer address not provided"
+          },
+          "404": {
+            "description": "Wallet not found"
+          }
+        },
+        "tags": ["users"]
+      }
+    },
+    "/v1/users/wallet": {
+      "post": {
+        "operationId": "usersCreateWithWalletV1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreatedUserWithWallet"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Signer address not provided"
+          },
+          "409": {
+            "description": "Wallet already exists"
+          }
+        },
+        "tags": ["users"]
+      }
+    },
+    "/v1/users/wallet/{walletAddress}": {
+      "post": {
+        "operationId": "usersAddWalletToUserV1",
+        "parameters": [
+          {
+            "name": "walletAddress",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WalletAddedToUser"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Signer address not provided"
+          },
+          "404": {
+            "description": "User not found"
+          },
+          "409": {
+            "description": "Wallet already exists"
+          }
+        },
+        "tags": ["users"]
+      },
+      "delete": {
+        "operationId": "usersDeleteWalletFromUserV1",
+        "parameters": [
+          {
+            "name": "walletAddress",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Wallet removed from user and deleted"
+          },
+          "401": {
+            "description": "Signer address not provided"
+          },
+          "404": {
+            "description": "User OR provided wallet not found"
+          },
+          "409": {
+            "description": "Cannot remove the current wallet"
+          }
+        },
+        "tags": ["users"]
+      }
     }
   },
   "info": {
@@ -6755,6 +6886,55 @@
           }
         },
         "required": ["created", "creator", "transactionHash", "factoryAddress"]
+      },
+      "UserWallet": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "address": {
+            "type": "string"
+          }
+        },
+        "required": ["id", "address"]
+      },
+      "UserWithWallets": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "status": {
+            "type": "number",
+            "enum": [0, 1]
+          },
+          "wallets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserWallet"
+            }
+          }
+        },
+        "required": ["id", "status", "wallets"]
+      },
+      "CreatedUserWithWallet": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          }
+        },
+        "required": ["id"]
+      },
+      "WalletAddedToUser": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          }
+        },
+        "required": ["id"]
       }
     }
   }

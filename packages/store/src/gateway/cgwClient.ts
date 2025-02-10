@@ -11,6 +11,12 @@ export const getBaseUrl = () => {
 }
 export const rawBaseQuery = fetchBaseQuery({
   baseUrl: '/',
+  credentials: 'include',
+  headers: {
+    'Content-Type': 'application/json',
+    Accept: 'application/json',
+    'Set-Cookie': 'HttpOnly;Secure;SameSite=None',
+  },
 })
 
 export const dynamicBaseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> = async (

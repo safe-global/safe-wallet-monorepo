@@ -1,0 +1,8 @@
+.content {
+  min-height: 60vh;
+  background-color: var(--color-background-paper);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
