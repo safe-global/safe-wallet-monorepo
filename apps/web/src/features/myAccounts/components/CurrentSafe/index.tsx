@@ -9,10 +9,12 @@ import SingleAccountItem from '../AccountItems/SingleAccountItem'
 function CurrentSafeList({
   safeAddress,
   chainId,
+  isReadOnly,
   onLinkClick,
 }: {
   safeAddress: string
   chainId: string
+  isReadOnly: boolean
   onLinkClick?: () => void
 }) {
   const addressBook = useAddressBook()
@@ -22,25 +24,13 @@ function CurrentSafeList({
     () => ({
       chainId,
       address: safeAddress,
-      isReadOnly: true,
+      isReadOnly,
       isPinned: false,
       lastVisited: -1,
       name: safeName,
     }),
-    [chainId, safeAddress, safeName],
+    [chainId, safeAddress, isReadOnly, safeName],
   )
-
-  return <SingleAccountItem onLinkClick={onLinkClick} safeItem={safeItem} />
-}
-
-function CurrentSafe({ allSafes, onLinkClick }: { allSafes: AllSafeItems; onLinkClick?: () => void }) {
-  const { safe, safeAddress } = useSafeInfo()
-
-  const isPinned = useMemo(
-    () => safeAddress && allSafes?.some((s) => s.isPinned && sameAddress(s.address, safeAddress)),
-    [allSafes, safeAddress],
-  )
-  if (!safeAddress || isPinned) return null
 
   return (
     <Box mb={3}>
@@ -48,8 +38,27 @@ function CurrentSafe({ allSafes, onLinkClick }: { allSafes: AllSafeItems; onLink
         Current Safe Account
       </Typography>
 
-      <CurrentSafeList onLinkClick={onLinkClick} safeAddress={safeAddress} chainId={safe.chainId} />
+      <SingleAccountItem onLinkClick={onLinkClick} safeItem={safeItem} />
     </Box>
+  )
+}
+
+function CurrentSafe({ allSafes, onLinkClick }: { allSafes: AllSafeItems; onLinkClick?: () => void }) {
+  const { safe, safeAddress } = useSafeInfo()
+
+  const safeInList = useMemo(
+    () => (safeAddress ? allSafes?.find((s) => sameAddress(s.address, safeAddress)) : undefined),
+    [allSafes, safeAddress],
+  )
+  if (!safeAddress || safeInList?.isPinned) return null
+
+  return (
+    <CurrentSafeList
+      onLinkClick={onLinkClick}
+      safeAddress={safeAddress}
+      chainId={safe.chainId}
+      isReadOnly={!safeInList}
+    />
   )
 }
 
