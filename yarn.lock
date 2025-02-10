@@ -8487,7 +8487,7 @@ __metadata:
     "@safe-global/test": "workspace:^"
     "@sentry/react": "npm:^7.91.0"
     "@sentry/types": "npm:^7.74.0"
-    "@spindl-xyz/attribution-lite": "npm:^1.4.0"
+    "@spindl-xyz/attribution-lite": "npm:^1.8.1"
     "@storybook/addon-designs": "npm:^8.0.3"
     "@storybook/addon-essentials": "npm:^8.0.6"
     "@storybook/addon-interactions": "npm:^8.0.6"
@@ -9392,10 +9392,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@spindl-xyz/attribution-lite@npm:^1.4.0":
-  version: 1.8.0
-  resolution: "@spindl-xyz/attribution-lite@npm:1.8.0"
-  checksum: 10/da2cfdde056cd9249a8949ac879f73e2da7a2103675cd2352ee0ad4d42a9edcf30610d1e1105ca8b274a5c35133e690c025d0ff221577904d9dd384fbc733bb2
+"@spindl-xyz/attribution-lite@npm:^1.8.1":
+  version: 1.8.1
+  resolution: "@spindl-xyz/attribution-lite@npm:1.8.1"
+  checksum: 10/f747394048d0d3a89f8853eea16f11f22c6dd77fe9880347a69c961d52fc60583166643f80cd2c1d90e4a5ba55bf1c0e525d20df548de7c9fecdebea63bb8570
   languageName: node
   linkType: hard
 
