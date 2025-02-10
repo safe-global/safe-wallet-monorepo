@@ -1,5 +1,5 @@
+import { useSiwe } from '@/services/siwe/useSiwe'
 import { Button } from '@mui/material'
-import { useSiwe } from '@/features/organizations/hooks/useSiwe'
 
 const SignInButton = () => {
   const { signIn } = useSiwe()
