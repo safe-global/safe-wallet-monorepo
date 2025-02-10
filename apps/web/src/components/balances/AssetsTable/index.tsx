@@ -21,7 +21,7 @@ import SwapButton from '@/features/swap/components/SwapButton'
 import { SWAP_LABELS } from '@/services/analytics/events/swaps'
 import SendButton from './SendButton'
 import useIsSwapFeatureEnabled from '@/features/swap/hooks/useIsSwapFeatureEnabled'
-import useIsStakingFeatureEnabled from '@/features/stake/hooks/useIsSwapFeatureEnabled'
+import useIsStakingFeatureEnabled from '@/features/stake/hooks/useIsStakingFeatureEnabled'
 import { STAKE_LABELS } from '@/services/analytics/events/stake'
 import StakeButton from '@/features/stake/components/StakeButton'
 
