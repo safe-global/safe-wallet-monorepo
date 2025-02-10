@@ -1,48 +1,52 @@
 import { Box, Typography } from '@mui/material'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { sameAddress } from '@/utils/addresses'
-import { AllSafeItems } from '../../hooks/useAllSafesGrouped'
+import type { AllSafeItems } from '../../hooks/useAllSafesGrouped'
 import { useMemo } from 'react'
 import useAddressBook from '@/hooks/useAddressBook'
 import SafesList from '../SafesList'
-import css from '@/features/myAccounts/styles.module.css'
+import type { SafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
 
-function CurrentSafeList({ onLinkClick }: { onLinkClick?: () => void }) {
-  const { safe, safeAddress } = useSafeInfo()
+function CurrentSafeList({ safe, onLinkClick }: { safe: SafeInfo; onLinkClick?: () => void }) {
+  const {
+    chainId,
+    address: { value: safeAddress },
+  } = safe
   const addressBook = useAddressBook()
   const safeName = addressBook[safeAddress]
 
   const safeItems = useMemo(
     () => [
       {
-        chainId: safe.chainId,
+        chainId,
         address: safeAddress,
         isReadOnly: true,
         isPinned: false,
         lastVisited: -1,
-        name: addressBook[safeAddress],
+        name: safeName,
       },
     ],
-    [safe.chainId, safeAddress, safeName],
+    [chainId, safeAddress, safeName],
   )
 
   return <SafesList safes={safeItems} onLinkClick={onLinkClick} />
 }
 
 function CurrentSafe({ allSafes, onLinkClick }: { allSafes: AllSafeItems; onLinkClick?: () => void }) {
-  const { safeAddress } = useSafeInfo()
-  const isInList = safeAddress && allSafes.some((s) => sameAddress(s.address, safeAddress))
-  if (!safeAddress || isInList) return null
+  const { safe, safeAddress } = useSafeInfo()
+  const isPinned = useMemo(
+    () => safeAddress && allSafes?.some((s) => s.isPinned && sameAddress(s.address, safeAddress)),
+    [allSafes, safeAddress],
+  )
+  if (!safeAddress || isPinned) return null
 
   return (
     <Box mb={2}>
-      <div className={css.listHeader}>
-        <Typography variant="h5" fontWeight={700} mb={2}>
-          Current Safe Account
-        </Typography>
-      </div>
+      <Typography variant="h5" fontWeight={700} mb={2}>
+        Current Safe Account
+      </Typography>
 
-      <CurrentSafeList onLinkClick={onLinkClick} />
+      <CurrentSafeList onLinkClick={onLinkClick} safe={safe} />
     </Box>
   )
 }
