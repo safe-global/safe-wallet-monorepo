@@ -1,16 +1,17 @@
-import type { DecodedDataResponse } from '@safe-global/safe-gateway-typescript-sdk'
+import type { DecodedDataResponse, ChainInfo, SafeOverview } from '@safe-global/safe-gateway-typescript-sdk'
+import semverSatisfies from 'semver/functions/satisfies'
+import memoize from 'lodash/memoize'
+import { keccak256, ethers, solidityPacked, getCreate2Address, type Provider } from 'ethers'
 
-import { type ChainInfo, type SafeOverview } from '@safe-global/safe-gateway-typescript-sdk'
 import { type UndeployedSafesState, type ReplayedSafeProps } from '@/store/slices'
 import { sameAddress } from '@/utils/addresses'
 import { Safe_proxy_factory__factory } from '@/types/contracts'
-import { keccak256, ethers, solidityPacked, getCreate2Address, type Provider } from 'ethers'
 import { extractCounterfactualSafeSetup } from '@/features/counterfactual/utils'
 import { encodeSafeSetupCall } from '@/components/new-safe/create/logic'
-import { memoize } from 'lodash'
 import { FEATURES, hasFeature } from '@/utils/chains'
 import { type SafeItem } from '@/features/myAccounts/hooks/useAllSafes'
 import { type MultiChainSafeItem } from '@/features/myAccounts/hooks/useAllSafesGrouped'
+import { LATEST_SAFE_VERSION } from '@/config/constants'
 
 type SafeSetup = {
   owners: string[]
@@ -130,15 +131,16 @@ export const predictAddressBasedOnReplayData = async (safeCreationData: Replayed
   )
 }
 
+const canMultichain = (chain: ChainInfo) => {
+  const MIN_SAFE_VERSION = '1.4.1'
+  return hasFeature(chain, FEATURES.COUNTERFACTUAL) && semverSatisfies(LATEST_SAFE_VERSION, `>=${MIN_SAFE_VERSION}`)
+}
+
 export const hasMultiChainCreationFeatures = (chain: ChainInfo): boolean => {
-  return (
-    hasFeature(chain, FEATURES.MULTI_CHAIN_SAFE_CREATION) &&
-    hasFeature(chain, FEATURES.COUNTERFACTUAL) &&
-    hasFeature(chain, FEATURES.SAFE_141)
-  )
+  return hasFeature(chain, FEATURES.MULTI_CHAIN_SAFE_CREATION) && canMultichain(chain)
 }
 
 export const hasMultiChainAddNetworkFeature = (chain: ChainInfo | undefined): boolean => {
   if (!chain) return false
-  return hasFeature(chain, FEATURES.MULTI_CHAIN_SAFE_ADD_NETWORK) && hasFeature(chain, FEATURES.COUNTERFACTUAL)
+  return hasFeature(chain, FEATURES.MULTI_CHAIN_SAFE_ADD_NETWORK) && canMultichain(chain)
 }
