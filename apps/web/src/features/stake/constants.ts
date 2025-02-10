@@ -1,7 +1,7 @@
 export const STAKE_TITLE = 'Stake'
 
-export const WIDGET_PRODUCTION_URL = 'https://safe.widget.kiln.fi/overview'
-export const WIDGET_TESTNET_URL = 'https://safe.widget.testnet.kiln.fi/overview'
+export const WIDGET_PRODUCTION_URL = 'https://safe.widget.testnet.kiln.fi'
+export const WIDGET_TESTNET_URL = 'https://safe.widget.testnet.kiln.fi'
 
 export const widgetAppData = {
   url: WIDGET_PRODUCTION_URL,
