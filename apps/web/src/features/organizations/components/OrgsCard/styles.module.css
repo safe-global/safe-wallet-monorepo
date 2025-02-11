@@ -1,0 +1,30 @@
+.card {
+  padding: var(--space-2);
+  position: relative;
+}
+
+.orgLogo {
+  width: 48px;
+  height: 48px;
+  border-radius: 6px;
+  text-transform: uppercase;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 20px;
+}
+
+.dot {
+  width: 2px;
+  height: 2px;
+  background-color: var(--color-border-main);
+  border-radius: 50%;
+}
+
+.orgActions {
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-2);
+}
