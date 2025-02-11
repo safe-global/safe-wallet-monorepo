@@ -1,6 +1,7 @@
 import ConnectWalletButton from '@/components/common/ConnectWallet/ConnectWalletButton'
 import Track from '@/components/common/Track'
 import { AppRoutes } from '@/config/routes'
+import AccountsNavigation from '@/features/myAccounts/components/AccountsNavigation'
 import CreateButton from '@/features/myAccounts/components/CreateButton'
 import css from '@/features/myAccounts/styles.module.css'
 import useWallet from '@/hooks/wallets/useWallet'
@@ -37,9 +38,13 @@ const AccountsHeader = ({ isSidebar, onLinkClick }: { isSidebar: boolean; onLink
 
   return (
     <Box className={classNames(css.header, { [css.sidebarHeader]: isSidebar })}>
-      <Typography variant="h1" fontWeight={700} className={css.title}>
-        My accounts
-      </Typography>
+      {isSidebar ? (
+        <Typography variant="h1" fontWeight={700} className={css.title}>
+          Accounts
+        </Typography>
+      ) : (
+        <AccountsNavigation />
+      )}
 
       <Box className={css.headerButtons}>
         <AddSafeButton trackingLabel={trackingLabel} onLinkClick={onLinkClick} />
