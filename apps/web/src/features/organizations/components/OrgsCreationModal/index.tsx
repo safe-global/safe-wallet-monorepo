@@ -3,7 +3,7 @@ import { Box, Button, DialogActions, DialogContent, Typography } from '@mui/mate
 import { FormProvider, useForm } from 'react-hook-form'
 import MUILink from '@mui/material/Link'
 import Link from 'next/link'
-
+import AccountBalanceIcon from '@mui/icons-material/AccountBalance'
 import ModalDialog from '@/components/common/ModalDialog'
 import NameInput from '@/components/common/NameInput'
 import { AppRoutes } from '@/config/routes'
@@ -22,7 +22,17 @@ function OrgsCreationModal({ handleClose }: { handleClose: () => void }): ReactE
   }
 
   return (
-    <ModalDialog open onClose={handleClose} dialogTitle="Create organization" hideChainIndicator>
+    <ModalDialog
+      open
+      onClose={handleClose}
+      dialogTitle={
+        <>
+          <AccountBalanceIcon sx={{ mr: 1 }} />
+          Create organization
+        </>
+      }
+      hideChainIndicator
+    >
       <FormProvider {...methods}>
         <form onSubmit={onSubmit}>
           <DialogContent sx={{ py: 2 }}>
