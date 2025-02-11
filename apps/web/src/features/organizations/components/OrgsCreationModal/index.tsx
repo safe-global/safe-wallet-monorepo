@@ -8,7 +8,7 @@ import ModalDialog from '@/components/common/ModalDialog'
 import NameInput from '@/components/common/NameInput'
 import { AppRoutes } from '@/config/routes'
 
-function OrgsCreationModal({ handleClose }: { handleClose: () => void }): ReactElement {
+function OrgsCreationModal({ onClose }: { onClose: () => void }): ReactElement {
   const methods = useForm<{ name: string }>({ mode: 'onChange' })
   const { handleSubmit, formState } = methods
 
@@ -17,14 +17,14 @@ function OrgsCreationModal({ handleClose }: { handleClose: () => void }): ReactE
     handleSubmit((data) => {
       console.log(data)
       // TODO: create the organization
-      handleClose()
+      onClose()
     })
   }
 
   return (
     <ModalDialog
       open
-      onClose={handleClose}
+      onClose={onClose}
       dialogTitle={
         <>
           <AccountBalanceIcon sx={{ mr: 1 }} />
@@ -48,7 +48,7 @@ function OrgsCreationModal({ handleClose }: { handleClose: () => void }): ReactE
           </DialogContent>
 
           <DialogActions>
-            <Button data-testid="cancel-btn" onClick={handleClose}>
+            <Button data-testid="cancel-btn" onClick={onClose}>
               Cancel
             </Button>
             <Button type="submit" variant="contained" disabled={!formState.isValid} disableElevation>
