@@ -38,11 +38,9 @@ export function NestedSafesList({
           <Typography
             variant="caption"
             color="text.secondary"
-            sx={{
-              textTransform: 'uppercase',
-              fontWeight: 700,
-              cursor: 'pointer',
-            }}
+            textTransform="uppercase"
+            fontWeight={700}
+            sx={{ cursor: 'pointer' }}
             onClick={onShowAll}
           >
             Show all Nested Safes

@@ -9,28 +9,11 @@ type Props = {
   willDeploySafe: boolean
 }
 export const ProcessingStatus = ({ txId, pendingTx, willDeploySafe: isCreatingSafe }: Props) => (
-  <Box
-    sx={{
-      paddingX: 3,
-      mt: 3,
-    }}
-  >
-    <Typography
-      data-testid="transaction-status"
-      variant="h6"
-      sx={{
-        marginTop: 2,
-        fontWeight: 700,
-      }}
-    >
+  <Box px={3} mt={3}>
+    <Typography data-testid="transaction-status" variant="h6" mt={2} fontWeight={700}>
       {!isCreatingSafe ? 'Transaction is now processing' : 'Nested Safe is now being created'}
     </Typography>
-    <Typography
-      variant="body2"
-      sx={{
-        mb: 3,
-      }}
-    >
+    <Typography variant="body2" mb={3}>
       {!isCreatingSafe ? 'The transaction' : 'Your Nested Safe'} was confirmed and is now being processed.
     </Typography>
     <Box>

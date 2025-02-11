@@ -8,9 +8,9 @@ import InfoIcon from '@/public/images/notifications/info.svg'
 
 export function NestedSafeInfo(): ReactElement {
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', pt: 1 }}>
+    <Box display="flex" flexDirection="column" alignItems="center" pt={1}>
       <NestedSafes />
-      <Box sx={{ display: 'flex', gap: 1, py: 2 }}>
+      <Box display="flex" gap={1} py={2}>
         <Typography fontWeight={700}>No Nested Safes yet</Typography>
         <Tooltip
           title="Nested Safes are separate wallets owned by your main Account, perfect for organizing different funds and projects."
@@ -29,7 +29,7 @@ export function NestedSafeInfo(): ReactElement {
           </span>
         </Tooltip>
       </Box>
-      <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', pt: 1, pb: 4 }}>
+      <Box display="flex" gap={2} alignItems="center" pt={1} pb={4}>
         <Avatar sx={{ padding: '20px', backgroundColor: 'success.background' }}>
           <SvgIcon component={NestedSafesIcon} inheritViewBox color="primary" sx={{ fontSize: 20 }} />
         </Avatar>

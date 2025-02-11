@@ -28,6 +28,8 @@ import SwapOrder from './SwapOrder'
 import StakingTx from './StakingTx'
 import UpdateSafe from './UpdateSafe'
 import { MigrateToL2Information } from './MigrateToL2Information'
+import { NestedSafeCreation } from './NestedSafeCreation'
+import { isNestedSafeCreation } from '@/utils/nested-safes'
 
 type ConfirmationViewProps = {
   txDetails?: TransactionDetails
@@ -64,6 +66,10 @@ const getConfirmationViewComponent = ({
 
   if (isCustomTxInfo(txInfo) && isSafeToL2MigrationTxData(txData)) {
     return <MigrateToL2Information variant="queue" txData={txData} />
+  }
+
+  if (isCustomTxInfo(txInfo) && txData && isNestedSafeCreation(txData)) {
+    return <NestedSafeCreation txData={txData} />
   }
 
   return null

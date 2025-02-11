@@ -12,20 +12,8 @@ type Props = {
   willDeploySafe: boolean
 }
 export const DefaultStatus = ({ error, willDeploySafe: isCreatingSafe }: Props) => (
-  <Box
-    sx={{
-      paddingX: 3,
-      mt: 3,
-    }}
-  >
-    <Typography
-      data-testid="transaction-status"
-      variant="h6"
-      sx={{
-        marginTop: 2,
-        fontWeight: 700,
-      }}
-    >
+  <Box px={3} mt={3}>
+    <Typography data-testid="transaction-status" variant="h6" mt={2} fontWeight={700}>
       {error ? TRANSACTION_FAILED : !isCreatingSafe ? TRANSACTION_SUCCESSFUL : NESTED_SAFE_SUCCESSFUL}
     </Typography>
     {error && (

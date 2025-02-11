@@ -1,4 +1,4 @@
-import { Paper, Grid, Typography, Button, SvgIcon, Tooltip, IconButton } from '@mui/material'
+import { Paper, Grid2, Typography, Button, SvgIcon, Tooltip, IconButton } from '@mui/material'
 import { skipToken } from '@reduxjs/toolkit/query'
 import { useContext, useMemo, useState } from 'react'
 import type { ReactElement } from 'react'
@@ -67,15 +67,15 @@ export function NestedSafesList(): ReactElement | null {
   return (
     <>
       <Paper sx={{ padding: 4, mt: 2 }}>
-        <Grid container direction="row" justifyContent="space-between" spacing={3} mb={2}>
-          <Grid item lg={4} xs={12}>
+        <Grid2 container direction="row" justifyContent="space-between" spacing={3} mb={2}>
+          <Grid2 size={{ lg: 4, xs: 12 }}>
             <Typography variant="h4" fontWeight={700}>
               Nested Safes
             </Typography>
-          </Grid>
+          </Grid2>
 
-          <Grid item xs>
-            <Typography sx={{ mb: 3 }}>
+          <Grid2 size="grow">
+            <Typography mb={3}>
               Nested Safes are separate wallets owned by your main Account, perfect for organizing different funds and
               projects.{' '}
               <ExternalLink
@@ -87,7 +87,7 @@ export function NestedSafesList(): ReactElement | null {
             </Typography>
 
             {nestedSafes?.safes.length === 0 && (
-              <Typography sx={{ mb: 3 }}>
+              <Typography mb={3}>
                 You don&apos;t have any Nested Safes yet. Set one up now to better organize your assets
               </Typography>
             )}
@@ -107,8 +107,8 @@ export function NestedSafesList(): ReactElement | null {
             </CheckWallet>
 
             {rows && rows.length > 0 && <EnhancedTable rows={rows} headCells={[]} />}
-          </Grid>
-        </Grid>
+          </Grid2>
+        </Grid2>
       </Paper>
 
       {addressToRename && (

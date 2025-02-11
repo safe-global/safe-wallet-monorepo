@@ -78,7 +78,7 @@ export function SetUpNestedSafe({
     <TxCard>
       <FormProvider {...formMethods}>
         <form onSubmit={formMethods.handleSubmit(onFormSubmit)}>
-          <Typography variant="body2" sx={{ mt: 1 }}>
+          <Typography variant="body2" mt={1}>
             Name your Nested Safe and select which assets to fund it with. All selected assets will be transferred when
             deployed.
           </Typography>

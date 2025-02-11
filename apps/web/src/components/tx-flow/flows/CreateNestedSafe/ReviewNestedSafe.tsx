@@ -1,5 +1,4 @@
 import { skipToken } from '@reduxjs/toolkit/query'
-import { Grid, Typography } from '@mui/material'
 import { useContext, useEffect, useMemo } from 'react'
 import type { ReactElement } from 'react'
 import type { MetaTransactionData, SafeTransaction } from '@safe-global/safe-core-sdk-types'
@@ -19,7 +18,6 @@ import { predictAddressBasedOnReplayData } from '@/features/multichain/utils/uti
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
 import { createTokenTransferParams } from '@/services/tx/tokenTransferParams'
 import { createMultiSendCallOnlyTx, createTx } from '@/services/tx/tx-sender'
-import EthHashInfo from '@/components/common/EthHashInfo'
 import { SetupNestedSafeFormAssetFields } from '@/components/tx-flow/flows/CreateNestedSafe/SetupNestedSafe'
 import type { SetupNestedSafeForm } from '@/components/tx-flow/flows/CreateNestedSafe/SetupNestedSafe'
 
@@ -113,38 +111,5 @@ export function ReviewNestedSafe({ params }: { params: SetupNestedSafeForm }): R
     )
   }
 
-  return (
-    <SignOrExecuteForm onSubmit={onSubmit}>
-      {predictedSafeAddress && (
-        <Grid
-          container
-          sx={{
-            gap: 1,
-          }}
-        >
-          <Grid item md>
-            <Typography
-              variant="body2"
-              sx={{
-                color: 'text.secondary',
-              }}
-            >
-              Nested Safe
-            </Typography>
-          </Grid>
-
-          <Grid data-testid="beneficiary-address" item md={10}>
-            <EthHashInfo
-              name={params.name}
-              address={predictedSafeAddress}
-              shortAddress={false}
-              hasExplorer
-              showCopyButton
-              showAvatar={false}
-            />
-          </Grid>
-        </Grid>
-      )}
-    </SignOrExecuteForm>
-  )
+  return <SignOrExecuteForm onSubmit={onSubmit} />
 }

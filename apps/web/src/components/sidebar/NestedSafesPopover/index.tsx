@@ -1,4 +1,4 @@
-import { SvgIcon, Popover, Button, Box } from '@mui/material'
+import { SvgIcon, Popover, Button, Box, Stack } from '@mui/material'
 import { useContext } from 'react'
 import type { ReactElement } from 'react'
 
@@ -49,15 +49,7 @@ export function NestedSafesPopover({
       >
         Nested Safes
       </ModalDialogTitle>
-      <Box
-        sx={{
-          p: 3,
-          pt: 2,
-          display: 'flex',
-          flexDirection: 'column',
-          maxHeight: '590px',
-        }}
-      >
+      <Stack p={3} pt={2} display="flex" flexDirection="column" maxHeight="590px">
         {nestedSafes.length === 0 ? (
           <NestedSafeInfo />
         ) : (
@@ -71,7 +63,7 @@ export function NestedSafesPopover({
             Add Nested Safe
           </Button>
         </Track>
-      </Box>
+      </Stack>
     </Popover>
   )
 }
