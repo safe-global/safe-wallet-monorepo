@@ -1,25 +1,26 @@
-import { Box, Card, Stack, Typography } from '@mui/material'
+import { Box, Card, hslToRgb, Stack, Typography } from '@mui/material'
 import MoreVertIcon from '@mui/icons-material/MoreVert'
 import IconButton from '@mui/material/IconButton'
 
 import css from './styles.module.css'
 
 /**
- * Deterministically returns a color from a set of colors
- * based on a seed e.g. the first two letters of a word
- * @param seed
+ * Returns a deterministic "random" color (in Hex format) based on a string.
+ * The color is constrained so it won't be too dark or too light or too saturated.
  */
-const getRandomColor = (seed: string) => {
-  const colors = ['#8247E5', '#28a0f0'] // TODO: Add more colors
-  const sum = [...seed].reduce((acc, char) => acc + char.charCodeAt(0), 0)
-  const index = sum % colors.length
+export function getDeterministicColor(str: string): string {
+  const sum = [...str].reduce((acc, char) => acc + char.charCodeAt(0), 0)
 
-  return colors[index]
+  const hue = sum % 360
+  const saturation = 40 + (sum % 31)
+  const lightness = 40 + (sum % 31)
+
+  return hslToRgb(`hsl(${hue}, ${saturation}, ${lightness})`)
 }
 
 const OrgLogo = ({ orgName }: { orgName: string }) => {
   const logoLetters = orgName.slice(0, 2)
-  const logoColor = getRandomColor(logoLetters)
+  const logoColor = getDeterministicColor(orgName)
 
   return (
     <Box className={css.orgLogo} bgcolor={logoColor}>
