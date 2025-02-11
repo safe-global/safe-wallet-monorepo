@@ -1,5 +1,5 @@
 import { useWeb3 } from '@/hooks/wallets/web3'
-import { useAuthGetNonceV1Query, useAuthVerifyV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/auth'
+import { useAuthVerifyV1Mutation, useLazyAuthGetNonceV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/auth'
 import { useCallback } from 'react'
 import { getSignableMessage } from './utils'
 import { logError } from '../exceptions'
@@ -7,7 +7,7 @@ import ErrorCodes from '../exceptions/ErrorCodes'
 
 export const useSiwe = () => {
   const provider = useWeb3()
-  const { refetch: fetchNonce } = useAuthGetNonceV1Query()
+  const [fetchNonce] = useLazyAuthGetNonceV1Query()
   const [verifyAuthMutation] = useAuthVerifyV1Mutation()
 
   const signIn = useCallback(async () => {

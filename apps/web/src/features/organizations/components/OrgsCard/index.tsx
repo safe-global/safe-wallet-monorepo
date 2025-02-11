@@ -29,10 +29,16 @@ const OrgLogo = ({ orgName }: { orgName: string }) => {
   )
 }
 
-const OrgsCard = () => {
-  const orgName = 'Safe DAO'
-  const numberOfAccounts = 12
-  const numberOfMembers = 13
+type Organization = {
+  name: string
+  members: Array<object>
+  safes: Array<object>
+}
+
+const OrgsCard = ({ org }: { org: Organization }) => {
+  const orgName = org.name
+  const numberOfAccounts = org.safes.length
+  const numberOfMembers = org.members.length
 
   return (
     <Card className={css.card}>
