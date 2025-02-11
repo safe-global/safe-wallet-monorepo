@@ -19,7 +19,7 @@ export const useTxBuilderApp = (): { app?: SafeAppData; link: UrlObject } | unde
     app,
     link: {
       pathname: AppRoutes.apps.open,
-      query: { safe: router.query.safe, parent: router.query.parent, appUrl: app?.url },
+      query: { safe: router.query.safe, appUrl: app?.url },
     },
   }
 }

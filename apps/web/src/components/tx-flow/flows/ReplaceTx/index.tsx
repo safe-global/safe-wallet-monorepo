@@ -30,7 +30,7 @@ const goToQueue = (router: NextRouter) => {
   if (router.pathname === AppRoutes.transactions.tx) {
     router.push({
       pathname: AppRoutes.transactions.queue,
-      query: { safe: router.query.safe, parent: router.query.parent },
+      query: { safe: router.query.safe },
     })
   }
 }

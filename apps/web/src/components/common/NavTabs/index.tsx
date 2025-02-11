@@ -8,7 +8,7 @@ import css from './styles.module.css'
 const NavTabs = ({ tabs }: { tabs: NavItem[] }) => {
   const router = useRouter()
   const activeTab = Math.max(0, tabs.map((tab) => tab.href).indexOf(router.pathname))
-  const query = router.query.safe ? { safe: router.query.safe, parent: router.query.parent } : undefined
+  const query = router.query.safe ? { safe: router.query.safe } : undefined
 
   return (
     <Tabs value={activeTab} variant="scrollable" allowScrollButtonsMobile className={css.tabs}>

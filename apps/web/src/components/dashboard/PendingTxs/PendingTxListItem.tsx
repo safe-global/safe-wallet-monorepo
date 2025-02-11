@@ -26,7 +26,6 @@ const PendingTx = ({ transaction }: PendingTxType): ReactElement => {
       query: {
         id,
         safe: router.query.safe,
-        parent: router.query.parent,
       },
     }),
     [router, id],

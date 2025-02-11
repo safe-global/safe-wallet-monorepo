@@ -9,7 +9,7 @@ import {
 } from '@safe-global/safe-gateway-typescript-sdk'
 import { asError } from '@/services/exceptions/utils'
 import { safeOverviewEndpoints } from './safeOverviews'
-import { createSubmission, getSafesByOwner, getSubmission } from '@safe-global/safe-client-gateway-sdk'
+import { createSubmission, getSafe, getSafesByOwner, getSubmission } from '@safe-global/safe-client-gateway-sdk'
 
 export async function buildQueryFn<T>(fn: () => Promise<T>) {
   try {
@@ -37,6 +37,12 @@ export const gatewayApi = createApi({
       queryFn({ chainId, txIds }) {
         return buildQueryFn(() => Promise.all(txIds.map((txId) => getTransactionDetails(chainId, txId))))
       },
+    }),
+    getSafe: builder.query<getSafe, { chainId: string; safeAddress: string }>({
+      queryFn({ chainId, safeAddress }) {
+        return buildQueryFn(() => getSafe({ params: { path: { chainId, safeAddress } } }))
+      },
+      keepUnusedDataFor: Infinity,
     }),
     getAllOwnedSafes: builder.query<AllOwnedSafes, { walletAddress: string }>({
       queryFn({ walletAddress }) {
@@ -92,6 +98,7 @@ export const {
   useAddProposerMutation,
   useGetSubmissionQuery,
   useCreateSubmissionMutation,
+  useGetSafeQuery,
   useGetSafeOverviewQuery,
   useGetMultipleSafeOverviewsQuery,
   useGetAllOwnedSafesQuery,

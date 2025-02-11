@@ -48,11 +48,7 @@ export const SendNFTsButton = () => {
 
   return (
     <Track {...MODALS_EVENTS.SEND_COLLECTIBLE}>
-      <Link
-        href={{ pathname: AppRoutes.balances.nfts, query: { safe: router.query.safe, parent: router.query.parent } }}
-        passHref
-        legacyBehavior
-      >
+      <Link href={{ pathname: AppRoutes.balances.nfts, query: { safe: router.query.safe } }} passHref legacyBehavior>
         <Button variant="contained" sx={buttonSx} fullWidth onClick={onClick}>
           Send NFTs
         </Button>
@@ -99,11 +95,7 @@ export const MakeASwapButton = () => {
 
   return (
     <Track {...MODALS_EVENTS.SWAP}>
-      <Link
-        href={{ pathname: AppRoutes.swap, query: { safe: router.query.safe, parent: router.query.parent } }}
-        passHref
-        legacyBehavior
-      >
+      <Link href={{ pathname: AppRoutes.swap, query: { safe: router.query.safe } }} passHref legacyBehavior>
         <Button variant="contained" sx={buttonSx} fullWidth onClick={onClick} startIcon={<SwapIcon width={20} />}>
           Swap tokens
         </Button>

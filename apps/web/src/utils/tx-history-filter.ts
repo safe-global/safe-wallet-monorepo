@@ -107,7 +107,6 @@ export const useTxFilter = (): [TxFilter | null, (filter: TxFilter | null) => vo
       pathname: router.pathname,
       query: {
         safe: router.query.safe,
-        parent: router.query.parent,
         ...(filter && txFilter.formatUrlQuery(filter)),
       },
     })

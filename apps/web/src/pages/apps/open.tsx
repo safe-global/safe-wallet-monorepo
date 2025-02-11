@@ -48,7 +48,7 @@ const SafeApps: NextPage = () => {
   const goToList = useCallback(() => {
     router.push({
       pathname: AppRoutes.apps.index,
-      query: { safe: router.query.safe, parent: router.query.parent },
+      query: { safe: router.query.safe },
     })
   }, [router])
 

@@ -191,7 +191,7 @@ const BlindSigningWarning = ({
   isBlindSigningPayload: boolean
 }) => {
   const router = useRouter()
-  const query = router.query.safe ? { safe: router.query.safe, parent: router.query.parent } : undefined
+  const query = router.query.safe ? { safe: router.query.safe } : undefined
 
   if (!isBlindSigningPayload) {
     return null

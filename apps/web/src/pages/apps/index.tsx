@@ -44,7 +44,7 @@ const SafeApps: NextPage = () => {
     if (appUrl) {
       router.push({
         pathname: AppRoutes.apps.open,
-        query: { safe: router.query.safe, parent: router.query.parent, appUrl },
+        query: { safe: router.query.safe, appUrl },
       })
     }
   }, [router])

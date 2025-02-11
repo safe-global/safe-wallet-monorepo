@@ -6,27 +6,29 @@ import type { UrlObject } from 'url'
 
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useAddressBook from '@/hooks/useAddressBook'
-import { parsePrefixedAddress } from '@/utils/addresses'
 import Identicon from '../Identicon'
 
 import css from './styles.module.css'
+import { useParentSafe } from '@/hooks/useParentSafe'
 
 export function NestedSafeBreadcrumbs(): ReactElement | null {
-  const { safeAddress: nestedSafeAddress } = useSafeInfo()
-  const { query, pathname } = useRouter()
-  const parent = Array.isArray(query.parent) ? query.parent[0] : query.parent
+  const { pathname } = useRouter()
+  const { safeAddress } = useSafeInfo()
+  const parentSafe = useParentSafe()
 
-  if (!parent) {
+  if (!parentSafe) {
     return null
   }
 
-  const { address: parentSafeAddress } = parsePrefixedAddress(parent)
-
   return (
     <div className={css.container}>
-      <BreadcrumbItem title="Parent Safe" address={parentSafeAddress} href={{ pathname, query: { safe: parent } }} />
+      <BreadcrumbItem
+        title="Parent Safe"
+        address={parentSafe.address.value}
+        href={{ pathname, query: { safe: parentSafe.address.value } }}
+      />
       <Typography variant="body2">/</Typography>
-      <BreadcrumbItem title="Nested Safe" address={nestedSafeAddress} />
+      <BreadcrumbItem title="Nested Safe" address={safeAddress} />
     </div>
   )
 }

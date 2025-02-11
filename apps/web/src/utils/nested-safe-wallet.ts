@@ -120,7 +120,6 @@ export const getNestedWallet = (
         pathname: AppRoutes.transactions.tx,
         query: {
           safe: router.query.safe,
-          parent: router.query.parent,
           id: safeTxHash,
         },
       })
