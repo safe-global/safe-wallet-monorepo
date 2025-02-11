@@ -12,7 +12,6 @@ import {
 import CheckIcon from '@/public/images/common/circle-check.svg'
 import CloseIcon from '@mui/icons-material/Close'
 import NoEntriesIcon from '@/public/images/address-book/no-entries.svg'
-import Link from 'next/link'
 
 const ListIcon = () => (
   <ListItemIcon
@@ -28,7 +27,12 @@ const ListIcon = () => (
   </ListItemIcon>
 )
 
-const OrgsInfoModal = ({ onClose }: { onClose: () => void }) => {
+const OrgsInfoModal = ({ onClose, onCreate }: { onClose: () => void; onCreate: () => void }) => {
+  const handleCreate = () => {
+    onClose()
+    onCreate()
+  }
+
   return (
     <Dialog open PaperProps={{ style: { width: '800px', maxWidth: '98%' } }} onClose={onClose}>
       <DialogContent dividers sx={{ py: 3, px: 4 }}>
@@ -65,13 +69,11 @@ const OrgsInfoModal = ({ onClose }: { onClose: () => void }) => {
             </List>
 
             <Stack gap={2} mt={8}>
-              <Link href="" passHref>
-                <Button variant="contained" color="primary">
-                  Create an organization
-                </Button>
-              </Link>
+              <Button variant="contained" color="primary" onClick={handleCreate}>
+                Create an organization
+              </Button>
 
-              <Button variant="text" color="primary">
+              <Button variant="text" color="primary" onClick={onClose}>
                 Maybe later
               </Button>
             </Stack>
