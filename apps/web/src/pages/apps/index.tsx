@@ -42,10 +42,7 @@ const SafeApps: NextPage = () => {
   useEffect(() => {
     const appUrl = router.query.appUrl as string
     if (appUrl) {
-      router.push({
-        pathname: AppRoutes.apps.open,
-        query: { safe: router.query.safe, appUrl },
-      })
+      router.push({ pathname: AppRoutes.apps.open, query: { safe: router.query.safe, appUrl } })
     }
   }, [router])
 

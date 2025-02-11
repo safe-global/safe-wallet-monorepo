@@ -16,11 +16,6 @@ export function useParentSafe(): getSafe | undefined {
           safeAddress: maybeParent,
         }
       : skipToken,
-    {
-      refetchOnFocus: false,
-      refetchOnReconnect: false,
-      pollingInterval: 0,
-    },
   )
 
   if (parentSafe?.address.value === maybeParent) {

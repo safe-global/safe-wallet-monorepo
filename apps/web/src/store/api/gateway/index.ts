@@ -42,7 +42,6 @@ export const gatewayApi = createApi({
       queryFn({ chainId, safeAddress }) {
         return buildQueryFn(() => getSafe({ params: { path: { chainId, safeAddress } } }))
       },
-      keepUnusedDataFor: Infinity,
     }),
     getAllOwnedSafes: builder.query<AllOwnedSafes, { walletAddress: string }>({
       queryFn({ walletAddress }) {
