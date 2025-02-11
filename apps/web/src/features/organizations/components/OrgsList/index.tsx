@@ -20,11 +20,19 @@ const AddOrgButton = ({ onClick, disabled }: { onClick?: () => void; disabled: b
   )
 }
 
-const EmptyState = () => {
+const InfoModal = () => {
   const openInfoModal = () => {
     // TODO: implement
   }
 
+  return (
+    <Link onClick={openInfoModal} href="#">
+      What are organizations?
+    </Link>
+  )
+}
+
+const EmptyState = () => {
   return (
     <Card sx={{ p: 5, textAlign: 'center' }}>
       <OrgsIcon />
@@ -32,12 +40,24 @@ const EmptyState = () => {
       <Typography color="text.secondary" mb={2}>
         To view your organization or create one, sign in with your connected wallet.
         <br />
-        <Link onClick={openInfoModal} href="#">
-          What are organizations?
-        </Link>
+        <InfoModal />
       </Typography>
 
       <SignInButton />
+    </Card>
+  )
+}
+
+const NoOrgsState = () => {
+  return (
+    <Card sx={{ p: 5, textAlign: 'center', width: 1 }}>
+      <OrgsIcon />
+
+      <Typography color="text.secondary" mb={2}>
+        No organizations found.
+        <br />
+        <InfoModal />
+      </Typography>
     </Card>
   )
 }
@@ -68,9 +88,7 @@ const OrgsList = () => {
 
         {isUserSignedIn ? (
           <Stack direction="row" spacing={2}>
-            {ORGS.map((org) => (
-              <OrgsCard org={org} key={org.name} />
-            ))}
+            {ORGS.length > 0 ? ORGS.map((org) => <OrgsCard org={org} key={org.name} />) : <NoOrgsState />}
           </Stack>
         ) : (
           <EmptyState />
