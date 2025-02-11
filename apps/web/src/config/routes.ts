@@ -30,6 +30,12 @@ export const AppRoutes = {
     create: '/new-safe/create',
     advancedCreate: '/new-safe/advanced-create',
   },
+  organizations: {
+    members: '/organizations/members',
+    '[orgId]': {
+      index: '/organizations/[orgId]',
+    },
+  },
   settings: {
     setup: '/settings/setup',
     security: '/settings/security',
@@ -56,10 +62,8 @@ export const AppRoutes = {
     history: '/transactions/history',
   },
   welcome: {
+    organizations: '/welcome/organizations',
     index: '/welcome',
     accounts: '/welcome/accounts',
-  },
-  organizations: {
-    index: '/organizations',
   },
 }
