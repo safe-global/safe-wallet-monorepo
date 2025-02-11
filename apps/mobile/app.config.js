@@ -32,7 +32,7 @@ export default {
       entitlements: {
         'aps-environment': 'production',
       },
-      googleServicesFile: process.env.GOOGLE_SERVICES_PLIST,
+      googleServicesFile: IS_DEV ? process.env.GOOGLE_SERVICES_PLIST_DEV : process.env.GOOGLE_SERVICES_PLIST,
     },
     android: {
       adaptiveIcon: {
@@ -42,6 +42,7 @@ export default {
       },
       package: IS_DEV ? 'global.safe.mobileapp.dev' : 'global.safe.mobileapp',
       googleServicesFile: process.env.GOOGLE_SERVICES_JSON,
+      permissions: ['android.permission.CAMERA'],
     },
     web: {
       bundler: 'metro',
