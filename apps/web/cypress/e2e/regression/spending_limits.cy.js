@@ -69,7 +69,7 @@ describe('Spending limits tests', () => {
   })
 
   // Added to prod
-  it.only('Verify Spending limit option is available when selecting the corresponding token', () => {
+  it('Verify Spending limit option is available when selecting the corresponding token', () => {
     wallet.connectSigner(signer)
     navigation.clickOnNewTxBtn()
     tx.clickOnSendTokensBtn()
