@@ -13,14 +13,14 @@ export const NetworkBadge = ({ network }: Props) => {
         flexDirection="row"
         alignItems="center"
         justifyContent="center"
-        backgroundColor="$backgroundPaper"
+        backgroundColor="$background"
         borderRadius="$10"
         paddingLeft="$1"
         paddingRight="$3"
         paddingVertical="$1"
       >
         <Logo size={'$6'} logoUri={network.chainLogoUri} />
-        <Text marginLeft={'$1'}>{network.chainName}</Text>
+        <Text marginLeft={'$2'}>{network.chainName}</Text>
       </View>
     </Theme>
   )
