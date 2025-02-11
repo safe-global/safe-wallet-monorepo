@@ -97,9 +97,9 @@ const PendingTxsList = (): ReactElement | null => {
   const queueUrl = useMemo(
     () => ({
       pathname: AppRoutes.transactions.queue,
-      query: { safe: router.query.safe },
+      query: { safe: router.query.safe, parent: router.query.parent },
     }),
-    [router.query.safe],
+    [router.query.safe, router.query.parent],
   )
 
   return (

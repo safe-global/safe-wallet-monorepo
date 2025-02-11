@@ -102,7 +102,7 @@ const useSafeNotifications = (): void => {
           : {
               href: {
                 pathname: AppRoutes.settings.setup,
-                query: { safe: query.safe },
+                query: { safe: query.safe, parent: query.parent },
               },
               title: 'Update Safe Account',
             },
@@ -119,6 +119,7 @@ const useSafeNotifications = (): void => {
     implementationVersionState,
     version,
     query.safe,
+    query.parent,
     isOwner,
     safeAddress,
     urlSafeAddress,

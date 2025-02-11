@@ -156,7 +156,12 @@ const StakingBanner = ({
             >
               <Grid item xs={12} md="auto">
                 <NextLink
-                  href={AppRoutes.stake && { pathname: AppRoutes.stake, query: { safe: router.query.safe } }}
+                  href={
+                    AppRoutes.stake && {
+                      pathname: AppRoutes.stake,
+                      query: { safe: router.query.safe, parent: router.query.parent },
+                    }
+                  }
                   passHref
                   rel="noreferrer"
                   onClick={onClick}
@@ -237,7 +242,12 @@ const StakingBanner = ({
               </Button>
             </Box>
             <NextLink
-              href={AppRoutes.stake && { pathname: AppRoutes.stake, query: { safe: router.query.safe } }}
+              href={
+                AppRoutes.stake && {
+                  pathname: AppRoutes.stake,
+                  query: { safe: router.query.safe, parent: router.query.parent },
+                }
+              }
               passHref
               rel="noreferrer"
               onClick={onClick}

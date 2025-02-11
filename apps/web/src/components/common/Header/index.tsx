@@ -37,7 +37,7 @@ function getLogoLink(router: ReturnType<typeof useRouter>): Url {
     ? router.pathname === AppRoutes.welcome.accounts
       ? AppRoutes.welcome.index
       : AppRoutes.welcome.accounts
-    : { pathname: AppRoutes.home, query: { safe: router.query.safe } }
+    : { pathname: AppRoutes.home, query: { safe: router.query.safe, parent: router.query.parent } }
 }
 
 const Header = ({ onMenuToggle, onBatchToggle }: HeaderProps): ReactElement => {

@@ -53,7 +53,11 @@ const NativeSwapsCard = () => {
           }}
         >
           <Track {...SWAP_EVENTS.OPEN_SWAPS} label={SWAP_LABELS.safeAppsPromoWidget}>
-            <Link href={{ pathname: AppRoutes.swap, query: { safe: router.query.safe } }} passHref legacyBehavior>
+            <Link
+              href={{ pathname: AppRoutes.swap, query: { safe: router.query.safe, parent: router.query.parent } }}
+              passHref
+              legacyBehavior
+            >
               <Button variant="contained" size="small">
                 Try now
               </Button>

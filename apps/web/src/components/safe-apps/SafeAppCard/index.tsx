@@ -58,7 +58,7 @@ export default SafeAppCard
 export const getSafeAppUrl = (router: NextRouter, safeAppUrl: string) => {
   const shareUrlObj: UrlObject = {
     pathname: AppRoutes.apps.open,
-    query: { safe: router.query.safe, appUrl: safeAppUrl },
+    query: { safe: router.query.safe, parent: router.query.parent, appUrl: safeAppUrl },
   }
 
   return resolveHref(router, shareUrlObj)

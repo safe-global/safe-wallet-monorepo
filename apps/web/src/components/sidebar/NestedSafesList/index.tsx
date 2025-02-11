@@ -11,6 +11,7 @@ import useAddressBook from '@/hooks/useAddressBook'
 import { trackEvent } from '@/services/analytics'
 import { AppRoutes } from '@/config/routes'
 import { useCurrentChain } from '@/hooks/useChains'
+import useSafeInfo from '@/hooks/useSafeInfo'
 
 const MAX_NESTED_SAFES = 5
 
@@ -56,6 +57,7 @@ export function NestedSafesList({
 
 function NestedSafeListItem({ onClose, nestedSafe }: { onClose: () => void; nestedSafe: string }): ReactElement {
   const chain = useCurrentChain()
+  const { safeAddress } = useSafeInfo()
   const addressBook = useAddressBook()
   const name = addressBook[nestedSafe]
 
@@ -79,6 +81,7 @@ function NestedSafeListItem({ onClose, nestedSafe }: { onClose: () => void; nest
           pathname: AppRoutes.home,
           query: {
             safe: `${chain?.shortName}:${nestedSafe}`,
+            parent: `${chain?.shortName}:${safeAddress}`,
           },
         }}
         passHref

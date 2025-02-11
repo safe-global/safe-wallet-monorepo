@@ -112,7 +112,12 @@ const Navigation = (): ReactElement => {
               >
                 <SidebarListItemButton
                   selected={isSelected}
-                  href={item.href && { pathname: getRoute(item.href), query: { safe: router.query.safe } }}
+                  href={
+                    item.href && {
+                      pathname: getRoute(item.href),
+                      query: { safe: router.query.safe, parent: router.query.parent },
+                    }
+                  }
                   disabled={isDisabled}
                 >
                   {item.icon && <SidebarListItemIcon badge={getBadge(item)}>{item.icon}</SidebarListItemIcon>}

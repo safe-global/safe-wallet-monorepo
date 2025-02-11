@@ -187,6 +187,7 @@ export const useTxFlowApi = (chainId: string, safeAddress: string): WalletSDK | 
           pathname: AppRoutes.transactions.tx,
           query: {
             safe: router.query.safe,
+            parent: router.query.parent,
             id: safeTxHash,
           },
         })
