@@ -1,46 +1,53 @@
-import { selectUndeployedSafe } from '@/features/counterfactual/store/undeployedSafesSlice'
-import { type SafeOverview } from '@safe-global/safe-gateway-typescript-sdk'
-import { useMemo, useRef } from 'react'
-import { ListItemButton, Box, Typography, IconButton, SvgIcon, Skeleton, useTheme, useMediaQuery } from '@mui/material'
-import Link from 'next/link'
-import Track from '@/components/common/Track'
-import { OVERVIEW_EVENTS, OVERVIEW_LABELS, PIN_SAFE_LABELS, trackEvent } from '@/services/analytics'
-import { AppRoutes } from '@/config/routes'
-import { useAppDispatch, useAppSelector } from '@/store'
-import { selectChainById } from '@/store/chainsSlice'
 import ChainIndicator from '@/components/common/ChainIndicator'
-import css from './styles.module.css'
-import { selectAllAddressBooks } from '@/store/addressBookSlice'
-import { shortenAddress } from '@/utils/formatters'
+import FiatValue from '@/components/common/FiatValue'
+import SafeIcon from '@/components/common/SafeIcon'
+import Track from '@/components/common/Track'
 import SafeListContextMenu from '@/components/sidebar/SafeListContextMenu'
-import useSafeAddress from '@/hooks/useSafeAddress'
-import useChainId from '@/hooks/useChainId'
-import { sameAddress } from '@/utils/addresses'
-import classnames from 'classnames'
-import { useRouter } from 'next/router'
+import { AppRoutes } from '@/config/routes'
+import { selectUndeployedSafe } from '@/features/counterfactual/store/undeployedSafesSlice'
+import { extractCounterfactualSafeSetup, isPredictedSafeProps } from '@/features/counterfactual/utils'
+import { hasMultiChainAddNetworkFeature } from '@/features/multichain/utils/utils'
 import type { SafeItem } from '@/features/myAccounts/hooks/useAllSafes'
 import { useGetHref } from '@/features/myAccounts/hooks/useGetHref'
-import { extractCounterfactualSafeSetup, isPredictedSafeProps } from '@/features/counterfactual/utils'
+import SafenetTag from '@/features/safenet/components/SafenetTag'
+import useChainId from '@/hooks/useChainId'
+import useOnceVisible from '@/hooks/useOnceVisible'
+import useSafeAddress from '@/hooks/useSafeAddress'
 import useWallet from '@/hooks/wallets/useWallet'
-import { hasMultiChainAddNetworkFeature } from '@/features/multichain/utils/utils'
 import BookmarkIcon from '@/public/images/apps/bookmark.svg'
 import BookmarkedIcon from '@/public/images/apps/bookmarked.svg'
+import { OVERVIEW_EVENTS, OVERVIEW_LABELS, PIN_SAFE_LABELS, trackEvent } from '@/services/analytics'
+import { useAppDispatch, useAppSelector } from '@/store'
 import { addOrUpdateSafe, unpinSafe } from '@/store/addedSafesSlice'
-import SafeIcon from '@/components/common/SafeIcon'
-import useOnceVisible from '@/hooks/useOnceVisible'
-import { skipToken } from '@reduxjs/toolkit/query'
+import { selectAllAddressBooks } from '@/store/addressBookSlice'
+import { selectChainById } from '@/store/chainsSlice'
 import { defaultSafeInfo, showNotification, useGetSafeOverviewQuery } from '@/store/slices'
-import FiatValue from '@/components/common/FiatValue'
+import { sameAddress } from '@/utils/addresses'
+import { shortenAddress } from '@/utils/formatters'
+import { Box, IconButton, ListItemButton, Skeleton, SvgIcon, Typography, useMediaQuery, useTheme } from '@mui/material'
+import { skipToken } from '@reduxjs/toolkit/query'
+import { type SafeOverview } from '@safe-global/safe-gateway-typescript-sdk'
+import classnames from 'classnames'
+import Link from 'next/link'
+import { useRouter } from 'next/router'
+import { useMemo, useRef } from 'react'
 import { AccountInfoChips } from '../AccountInfoChips'
+import css from './styles.module.css'
 
 type AccountItemProps = {
   safeItem: SafeItem
   safeOverview?: SafeOverview
   onLinkClick?: () => void
   isMultiChainItem?: boolean
+  isSafenetItem?: boolean
 }
 
-const SingleAccountItem = ({ onLinkClick, safeItem, isMultiChainItem = false }: AccountItemProps) => {
+const SingleAccountItem = ({
+  onLinkClick,
+  safeItem,
+  isMultiChainItem = false,
+  isSafenetItem = false,
+}: AccountItemProps) => {
   const { chainId, address, isReadOnly, isPinned } = safeItem
   const chain = useAppSelector((state) => selectChainById(state, chainId))
   const undeployedSafe = useAppSelector((state) => selectUndeployedSafe(state, chainId, address))
@@ -207,6 +214,8 @@ const SingleAccountItem = ({ onLinkClick, safeItem, isMultiChainItem = false }: 
           </Typography>
 
           {!isMultiChainItem && <ChainIndicator chainId={chainId} responsive onlyLogo className={css.chainIndicator} />}
+
+          {isSafenetItem && <SafenetTag />}
 
           <Typography variant="body2" sx={{ fontWeight: 'bold', textAlign: 'right', pl: 2 }}>
             {undeployedSafe ? null : safeOverview ? (
