@@ -35,7 +35,9 @@ const Sidebar = (): ReactElement => {
           <Box className={css.safenetHeader}>
             <SafenetLogo height="14" />
           </Box>
-        ) : <ChainIndicator showLogo={false} />}
+        ) : (
+          <ChainIndicator showLogo={false} />
+        )}
 
         {/* Open the safes list */}
         <button data-testid="open-safes-icon" className={css.drawerButton} onClick={onDrawerToggle}>
