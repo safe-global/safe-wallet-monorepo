@@ -4,18 +4,26 @@ import { type RequiredTenderlySimulation } from '@/components/tx/security/tender
 import { SAFENET_API_URL } from '@/config/constants'
 import type { SafeVersion } from '@safe-global/safe-core-sdk-types'
 
-export type SafenetSafeEntity = {
-  safe: string
-  chainId: number
-  guard: string
-}
-
 export type SafenetConfigEntity = {
   chains: number[]
   guards: Record<string, string>
   settlementEngines: Record<string, string>
   tokens: Record<string, Record<string, string>>
   processors: Record<string, string>
+}
+
+export type SafenetAccountEntity = {
+  guarantees: {
+    guarantee: string
+    inactiveAfter: string
+    activeAfter: string
+  }[]
+  handle: string
+  safes: {
+    address: string
+    chainId: number
+    guard: string
+  }[]
 }
 
 export type SafenetBalanceEntity = {
@@ -56,7 +64,7 @@ export const getSafenetBalances = async (safeAddress: string): Promise<SafenetBa
 export const safenetApi = createApi({
   reducerPath: 'safenetApi',
   baseQuery: fetchBaseQuery({ baseUrl: `${SAFENET_API_URL}/api/v1` }),
-  tagTypes: ['SafenetConfig', 'SafenetOffchainStatus', 'SafenetBalance', 'SafenetSimulation', 'DeploySafenetAccount'],
+  tagTypes: ['SafenetConfig', 'SafenetAccount', 'SafenetBalance', 'SafenetSimulation', 'DeploySafenetAccount'],
   endpoints: (builder) => ({
     getSafenetConfig: builder.query<SafenetConfigEntity, void>({
       query: () => ({
@@ -67,9 +75,9 @@ export const safenetApi = createApi({
       }),
       providesTags: ['SafenetConfig'],
     }),
-    getSafenetOffchainStatus: builder.query<SafenetSafeEntity, { chainId: string; safeAddress: string }>({
-      query: ({ chainId, safeAddress }) => `/account/${chainId}/${safeAddress}`,
-      providesTags: (_, __, arg) => [{ type: 'SafenetOffchainStatus', id: arg.safeAddress }],
+    getSafenetAccount: builder.query<SafenetAccountEntity, { safeAddress: string }>({
+      query: ({ safeAddress }) => `/account/${safeAddress}`,
+      providesTags: (_, __, arg) => [{ type: 'SafenetAccount', id: arg.safeAddress }],
     }),
     registerSafenet: builder.mutation<boolean, { chainId: string; safeAddress: string }>({
       query: ({ chainId, safeAddress }) => ({
@@ -80,7 +88,7 @@ export const safenetApi = createApi({
           safe: safeAddress,
         },
       }),
-      invalidatesTags: (_, __, arg) => [{ type: 'SafenetOffchainStatus', id: arg.safeAddress }],
+      invalidatesTags: (_, __, arg) => [{ type: 'SafenetAccount', id: arg.safeAddress }],
     }),
     getSafenetBalance: builder.query<SafenetBalanceEntity, { safeAddress: string }>({
       query: ({ safeAddress }) => `/balances/${safeAddress}`,
@@ -122,6 +130,7 @@ export const safenetApi = createApi({
 
 export const {
   useGetSafenetConfigQuery,
+  useGetSafenetAccountQuery,
   useLazyGetSafenetBalanceQuery,
   useLazySimulateSafenetTransactionQuery,
   useLazyDeploySafenetAccountQuery,
