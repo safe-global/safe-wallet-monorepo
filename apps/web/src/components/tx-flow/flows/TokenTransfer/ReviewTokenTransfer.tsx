@@ -1,16 +1,14 @@
 import { useContext, useEffect } from 'react'
 import useBalances from '@/hooks/useBalances'
 import SignOrExecuteForm from '@/components/tx/SignOrExecuteForm'
-import SendAmountBlock from '@/components/tx-flow/flows/TokenTransfer/SendAmountBlock'
-import SendToBlock from '@/components/tx/SendToBlock'
 import { createTokenTransferParams } from '@/services/tx/tokenTransferParams'
 import { createMultiSendCallOnlyTx } from '@/services/tx/tx-sender'
 import type { MultiTokenTransferParams } from '.'
 import { SafeTxContext } from '../../SafeTxProvider'
-import { safeParseUnits } from '@/utils/formatters'
 import type { SubmitCallback } from '@/components/tx/SignOrExecuteForm/SignOrExecuteForm'
 import type { MetaTransactionData } from '@safe-global/safe-core-sdk-types'
 import { Divider, Stack } from '@mui/material'
+import ReviewRecipientRow from './ReviewRecipientRow'
 
 const ReviewTokenTransfer = ({
   params,
@@ -49,20 +47,15 @@ const ReviewTokenTransfer = ({
 
   return (
     <SignOrExecuteForm onSubmit={onSubmit}>
-      {params.recipients.map((recipient, index) => {
-        const token = balances.items.find((item) => item.tokenInfo.address === recipient.tokenAddress)
-        const amountInWei = safeParseUnits(recipient.amount, token?.tokenInfo.decimals)?.toString() || '0'
-
-        return (
-          <>
-            {index > 0 && <Divider sx={{ mb: 3 }} />}
-            <Stack gap={2} key={`${recipient.recipient}_${token?.tokenInfo.address}`}>
-              {token && <SendAmountBlock amountInWei={amountInWei} tokenInfo={token.tokenInfo} />}
-              <SendToBlock address={recipient.recipient} name={`Recipient ${index + 1}`} avatarSize={32} />
-            </Stack>
-          </>
-        )
-      })}
+      <Stack divider={<Divider />} gap={2}>
+        {params.recipients.map((recipient, index) => (
+          <ReviewRecipientRow
+            params={recipient}
+            key={`${recipient.recipient}_${index}`}
+            name={`Recipient ${index + 1}`}
+          />
+        ))}
+      </Stack>
     </SignOrExecuteForm>
   )
 }
