@@ -25,14 +25,9 @@
 }
 
 .safenetIndicator {
-  background: radial-gradient(119.01% 132.63% at 119.01% -14.15%, #FF5F00 0%, #FFD200 50%, #12FF80 100%);
   margin-left: -5px;
   width: 24px;
   height: 24px;
   border-radius: 50%;
   outline: 2px solid var(--color-background-paper);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 14px;
 }

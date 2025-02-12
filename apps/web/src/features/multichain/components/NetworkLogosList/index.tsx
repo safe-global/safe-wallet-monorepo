@@ -1,5 +1,5 @@
 import ChainIndicator from '@/components/common/ChainIndicator'
-import SafeLogo from '@/public/images/logo-no-text.svg'
+import SafenetIcon from '@/public/images/safenet/safenet-icon.svg'
 import { Box } from '@mui/material'
 import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import css from './styles.module.css'
@@ -23,7 +23,7 @@ const NetworkLogosList = ({
       ))}
       {showHasSafenet && (
         <Box className={css.safenetIndicator}>
-          <SafeLogo height="14" />
+          <SafenetIcon height="24" />
         </Box>
       )}
       {showHasMore && networks.length > MAX_NUM_VISIBLE_CHAINS && (
