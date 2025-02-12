@@ -28,6 +28,10 @@
   background-color: var(--color-background-paper);
 }
 
+.listItem {
+  background-color: var(--color-background-paper);
+}
+
 .listItem.subItem {
   margin-bottom: 8px;
 }
