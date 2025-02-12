@@ -65,11 +65,13 @@ const NoOrgsState = () => {
 const ORGS = [
   {
     name: 'Safe DAO',
+    id: 1,
     members: [{ id: 1 }, { id: 2 }, { id: 3 }],
     safes: [{ id: 1 }, { id: 4 }, { id: 2 }],
   },
   {
     name: 'Optimism Foundation',
+    id: 2,
     members: [{ id: 2 }, { id: 3 }, { id: 4 }, { id: 5 }, { id: 6 }],
     safes: [{ id: 1 }, { id: 4 }, { id: 7 }, { id: 8 }, { id: 9 }, { id: 10 }],
   },

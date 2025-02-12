@@ -12,16 +12,18 @@ import { navItems } from './config'
 
 const Navigation = (): ReactElement => {
   const router = useRouter()
+  const orgId = Array.isArray(router.query.orgId) ? router.query.orgId[0] : router.query.orgId || ''
 
   return (
     <SidebarList>
       {navItems.map((item) => {
-        const isSelected = router.pathname === item.href
+        const itemPath = item.href(orgId)
+        const isSelected = router.pathname === itemPath
 
         return (
-          <div key={item.href}>
-            <ListItemButton sx={{ padding: 0 }} selected={isSelected} key={item.href}>
-              <SidebarListItemButton selected={isSelected} href={item.href}>
+          <div key={itemPath}>
+            <ListItemButton sx={{ padding: 0 }} selected={isSelected} key={itemPath}>
+              <SidebarListItemButton selected={isSelected} href={itemPath}>
                 {item.icon && <SidebarListItemIcon>{item.icon}</SidebarListItemIcon>}
 
                 <SidebarListItemText data-testid="sidebar-list-item" bold>

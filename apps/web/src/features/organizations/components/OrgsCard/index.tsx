@@ -1,6 +1,8 @@
+import { AppRoutes } from '@/config/routes'
 import { Box, Card, hslToRgb, Stack, Typography } from '@mui/material'
 import MoreVertIcon from '@mui/icons-material/MoreVert'
 import IconButton from '@mui/material/IconButton'
+import Link from 'next/link'
 
 import css from './styles.module.css'
 
@@ -30,22 +32,25 @@ const OrgLogo = ({ orgName }: { orgName: string }) => {
 }
 
 type Organization = {
+  id: number
   name: string
   members: Array<object>
   safes: Array<object>
 }
 
 const OrgsCard = ({ org }: { org: Organization }) => {
-  const orgName = org.name
-  const numberOfAccounts = org.safes.length
-  const numberOfMembers = org.members.length
+  const { id, safes, name, members } = org
+  const numberOfAccounts = safes.length
+  const numberOfMembers = members.length
 
   return (
     <Card className={css.card}>
-      <OrgLogo orgName={orgName} />
+      <Link className={css.cardLink} href={AppRoutes.organizations.index(id.toString())} />
+
+      <OrgLogo orgName={name} />
 
       <Typography mt={2} variant="body2" fontWeight="bold">
-        {orgName}
+        {name}
       </Typography>
 
       <Stack direction="row" spacing={1} alignItems="center" mt={0.5}>

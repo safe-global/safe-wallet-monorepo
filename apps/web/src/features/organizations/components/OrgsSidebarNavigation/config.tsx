@@ -1,18 +1,35 @@
-import React from 'react'
+import React, { type ReactElement } from 'react'
 import { AppRoutes } from '@/config/routes'
 import HomeIcon from '@/public/images/sidebar/home.svg'
 import { SvgIcon } from '@mui/material'
-import type { NavItem } from '@/components/sidebar/SidebarNavigation/config'
 
-export const navItems: NavItem[] = [
+export type DynamicNavItem = {
+  label: string
+  icon?: ReactElement
+  href: (pathParam: string) => string
+  tag?: ReactElement
+  disabled?: boolean
+}
+
+export const navItems: DynamicNavItem[] = [
   {
-    label: 'All organizations',
+    label: 'Home',
     icon: <SvgIcon component={HomeIcon} inheritViewBox />,
-    href: AppRoutes.organizations.members, // Placeholder
+    href: AppRoutes.organizations.index,
+  },
+  {
+    label: 'Safe Accounts',
+    icon: <SvgIcon component={HomeIcon} inheritViewBox />,
+    href: AppRoutes.organizations.safeAccounts,
   },
   {
     label: 'Members',
     icon: <SvgIcon component={HomeIcon} inheritViewBox />,
     href: AppRoutes.organizations.members,
+  },
+  {
+    label: 'Settings',
+    icon: <SvgIcon component={HomeIcon} inheritViewBox />,
+    href: AppRoutes.organizations.settings,
   },
 ]

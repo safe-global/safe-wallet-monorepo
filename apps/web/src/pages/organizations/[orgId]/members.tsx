@@ -9,7 +9,7 @@ const OrganizationDashboard: NextPage = () => {
         <title>{`${BRAND_NAME} – Organization members`}</title>
       </Head>
 
-      <main></main>
+      <main>Members</main>
     </>
   )
 }
