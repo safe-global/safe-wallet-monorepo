@@ -9,7 +9,7 @@ const SafeAccounts: NextPage = () => {
         <title>{`${BRAND_NAME} – Organization Safe Accounts`}</title>
       </Head>
 
-      <main>Safe accounts</main>
+      <main>Safe Accounts</main>
     </>
   )
 }
