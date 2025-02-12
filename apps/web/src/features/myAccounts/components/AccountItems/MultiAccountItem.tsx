@@ -16,7 +16,6 @@ import useSafeAddress from '@/hooks/useSafeAddress'
 import useWallet from '@/hooks/wallets/useWallet'
 import BookmarkIcon from '@/public/images/apps/bookmark.svg'
 import BookmarkedIcon from '@/public/images/apps/bookmarked.svg'
-import SafenetLogo from '@/public/images/safenet/logo-safenet.svg'
 import { OVERVIEW_EVENTS, OVERVIEW_LABELS, PIN_SAFE_LABELS, trackEvent } from '@/services/analytics'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { addOrUpdateSafe, pinSafe, selectAllAddedSafes, unpinSafe } from '@/store/addedSafesSlice'
@@ -44,10 +43,14 @@ import {
 } from '@mui/material'
 import type { SafeOverview } from '@safe-global/safe-gateway-typescript-sdk'
 import classnames from 'classnames'
+import dynamic from 'next/dynamic'
 import { useRouter } from 'next/router'
 import { useCallback, useMemo, useState } from 'react'
 import { AddNetworkButton } from '../AddNetworkButton'
 import css from './styles.module.css'
+
+const SafenetMultichainIndicator = dynamic(() => import('@/features/safenet/components/SafenetMultichainIndicator'))
+const SafenetAccountList = dynamic(() => import('@/features/safenet/components/SafenetAccountList'))
 
 type MultiAccountItemProps = {
   multiSafeAccountItem: MultiChainSafeItem
@@ -56,27 +59,26 @@ type MultiAccountItemProps = {
   hasSafenetFeature?: boolean
 }
 
-const MultichainIndicator = ({ safes, showHasSafenet = false }: { safes: SafeItem[]; showHasSafenet?: boolean }) => {
-  return (
-    <Tooltip
-      title={
-        <Box data-testid="multichain-tooltip">
-          <Typography fontSize="14px">Multichain account on:</Typography>
-          {safes.map((safeItem) => (
-            <Box key={safeItem.chainId} sx={{ p: '4px 0px' }}>
-              <ChainIndicator chainId={safeItem.chainId} />
-            </Box>
-          ))}
-        </Box>
-      }
-      arrow
-    >
-      <Box className={css.multiChains}>
-        <NetworkLogosList networks={safes} showHasMore showHasSafenet={showHasSafenet} />
+const MultichainIndicator = ({ safes, safenetSafes }: { safes: SafeItem[]; safenetSafes?: SafeItem[] }) => (
+  <Tooltip
+    title={
+      <Box data-testid="multichain-tooltip">
+        <Typography fontSize="14px">Multichain account on:</Typography>
+        {safes.map((safeItem) => (
+          <Box key={safeItem.chainId} sx={{ p: '4px 0px' }}>
+            <ChainIndicator chainId={safeItem.chainId} />
+          </Box>
+        ))}
+        {safenetSafes && <SafenetMultichainIndicator safenetSafes={safenetSafes} />}
       </Box>
-    </Tooltip>
-  )
-}
+    }
+    arrow
+  >
+    <Box className={css.multiChains}>
+      <NetworkLogosList networks={safes} showHasMore showHasSafenet={safenetSafes && safenetSafes.length > 0} />
+    </Box>
+  </Tooltip>
+)
 
 function useMultiAccountItemData(multiSafeAccountItem: MultiChainSafeItem) {
   const { address, safes, isPinned, name } = multiSafeAccountItem
@@ -130,17 +132,17 @@ function useMultiAccountItemData(multiSafeAccountItem: MultiChainSafeItem) {
   const hasSafenetFeature = useHasSafenetFeature()
   const { data: safenetConfig } = useGetSafenetAccountQuery({ safeAddress: address }, { skip: !hasSafenetFeature })
 
-  const usedSafenetChainIds = useMemo(
+  const deployedSafenetChainIds = useMemo(
     () => (safenetConfig ? safenetConfig.safes.map((safe) => safe.chainId.toString()) : []),
     [safenetConfig],
   )
-  const safenetSafes = useMemo(
-    () => (safenetConfig ? sortedSafes.filter((safe) => usedSafenetChainIds.includes(safe.chainId)) : []),
-    [safenetConfig, sortedSafes, usedSafenetChainIds],
-  )
   const nonSafenetSafes = useMemo(
-    () => (safenetConfig ? sortedSafes.filter((safe) => !usedSafenetChainIds.includes(safe.chainId)) : []),
-    [safenetConfig, sortedSafes, usedSafenetChainIds],
+    () => (safenetConfig ? sortedSafes.filter((safe) => !deployedSafenetChainIds.includes(safe.chainId)) : []),
+    [safenetConfig, sortedSafes, deployedSafenetChainIds],
+  )
+  const safenetSafes = useMemo(
+    () => (safenetConfig ? sortedSafes.filter((safe) => deployedSafenetChainIds.includes(safe.chainId)) : undefined),
+    [safenetConfig, sortedSafes, deployedSafenetChainIds],
   )
 
   return {
@@ -301,7 +303,7 @@ const MultiAccountItem = ({ onLinkClick, multiSafeAccountItem }: MultiAccountIte
                 {shortenAddress(address)}
               </Typography>
             </Typography>
-            <MultichainIndicator safes={sortedSafes} showHasSafenet={safenetSafes.length > 0} />
+            <MultichainIndicator safes={sortedSafes} safenetSafes={safenetSafes} />
             <Typography
               data-testid="group-balance"
               variant="body2"
@@ -343,22 +345,7 @@ const MultiAccountItem = ({ onLinkClick, multiSafeAccountItem }: MultiAccountIte
           />
         </AccordionSummary>
         <AccordionDetails sx={{ padding: '0px 12px' }}>
-          {safenetSafes.length > 0 && (
-            <Box className={css.safenetList} data-testid="safenet-subacounts-container">
-              <Box className={css.safenetListHeader}>
-                <SafenetLogo height="12" />
-              </Box>
-              {safenetSafes.map((safeItem) => (
-                <SingleAccountItem
-                  onLinkClick={onLinkClick}
-                  safeItem={safeItem}
-                  key={`${safeItem.chainId}:${safeItem.address}`}
-                  isMultiChainItem
-                  isSafenetItem
-                />
-              ))}
-            </Box>
-          )}
+          {safenetSafes && <SafenetAccountList safenetSafes={safenetSafes} onLinkClick={onLinkClick} />}
           <Box data-testid="subacounts-container">
             {sortedSafes.map((safeItem) => (
               <SingleAccountItem

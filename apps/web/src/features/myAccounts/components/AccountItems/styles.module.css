@@ -141,28 +141,3 @@
     justify-content: flex-start;
   }
 }
-
-.safenetList {
-  border: 1px solid var(--color-border-light);
-  border-radius: var(--space-1);
-  margin-bottom: 12px;
-  flex-wrap: wrap;
-  overflow: hidden;
-}
-
-.safenetListHeader {
-  background: var(--color-border-light);
-  padding: 4px var(--space-1);
-}
-
-.safenetListHeader > svg > path {
-  fill: black;
-}
-
-.safenetList > .listItem {
-  border: none;
-  border-top: 1px solid var(--color-border-light);
-  border-radius: 0;
-  margin-bottom: 0;
-  flex-wrap: wrap;
-}
