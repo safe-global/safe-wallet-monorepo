@@ -2,7 +2,6 @@ import ChevronRight from '@mui/icons-material/ChevronRight'
 import { Box, Divider, Drawer } from '@mui/material'
 import { useCallback, useState, type ReactElement } from 'react'
 
-import ChainIndicatorSafenet from '@/components/common/ChainIndicator/ChainIndicatorSafenet'
 import IndexingStatus from '@/components/sidebar/IndexingStatus'
 import SidebarFooter from '@/components/sidebar/SidebarFooter'
 import SidebarHeader from '@/components/sidebar/SidebarHeader'
@@ -11,6 +10,7 @@ import SidebarNavigation from '@/components/sidebar/SidebarNavigation'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import MyAccounts from '@/features/myAccounts'
 import useIsSafenetEnabled from '@/features/safenet/hooks/useIsSafenetEnabled'
+import SafenetLogo from '@/public/images/safenet/logo-safenet.svg'
 import { OVERVIEW_EVENTS, trackEvent } from '@/services/analytics'
 import css from './styles.module.css'
 
@@ -31,7 +31,11 @@ const Sidebar = (): ReactElement => {
   return (
     <div data-testid="sidebar-container" className={css.container}>
       <div className={css.scroll}>
-        {isSafenetEnabled ? <ChainIndicatorSafenet /> : <ChainIndicator showLogo={false} />}
+        {isSafenetEnabled ? (
+          <Box className={css.safenetHeader}>
+            <SafenetLogo height="14" />
+          </Box>
+        ) : <ChainIndicator showLogo={false} />}
 
         {/* Open the safes list */}
         <button data-testid="open-safes-icon" className={css.drawerButton} onClick={onDrawerToggle}>

@@ -65,6 +65,20 @@
   background-color: var(--color-secondary-background);
 }
 
+.safenetHeader {
+  background: linear-gradient(269.61deg, #FF5F00 -34.26%, #FFD200 32.94%, #12FF80 92.29%);
+  border-radius: 0 0 var(--space-1) var(--space-1);
+  padding: var(--space-1);
+}
+
+.safenetHeader > svg {
+  display: block;
+}
+
+.safenetHeader > svg > path {
+  fill: black;
+}
+
 @media (max-width: 899.95px) {
   .container {
     padding-top: var(--header-height);

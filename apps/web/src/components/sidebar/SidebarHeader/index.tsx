@@ -21,7 +21,6 @@ import ExplorerButton from '@/components/common/ExplorerButton'
 import FiatValue from '@/components/common/FiatValue'
 import Track from '@/components/common/Track'
 import EnvHintButton from '@/components/settings/EnvironmentVariables/EnvHintButton'
-import useIsSafenetEnabled from '@/features/safenet/hooks/useIsSafenetEnabled'
 import { useAddressResolver } from '@/hooks/useAddressResolver'
 import { useCurrentChain } from '@/hooks/useChains'
 import useSafeAddress from '@/hooks/useSafeAddress'
@@ -30,13 +29,9 @@ import { OVERVIEW_EVENTS } from '@/services/analytics/events/overview'
 import { selectSettings } from '@/store/settingsSlice'
 import { getBlockExplorerLink } from '@/utils/chains'
 import { SvgIcon } from '@mui/material'
-import dynamic from 'next/dynamic'
 import QrCodeButton from '../QrCodeButton'
 
-const GradientBoxSafenet = dynamic(() => import('@/features/safenet/components/GradientBoxSafenet'))
-
 const SafeHeader = (): ReactElement => {
-  const isSafenetEnabled = useIsSafenetEnabled()
   const { balances } = useVisibleBalances()
   const safeAddress = useSafeAddress()
   const { safe } = useSafeInfo()
@@ -49,7 +44,7 @@ const SafeHeader = (): ReactElement => {
 
   const blockExplorerLink = chain ? getBlockExplorerLink(chain, safeAddress) : undefined
 
-  const header = (
+  return (
     <div className={css.container}>
       <div className={css.info}>
         <div data-testid="safe-header-info" className={css.safe}>
@@ -121,7 +116,6 @@ const SafeHeader = (): ReactElement => {
       <NewTxButton />
     </div>
   )
-  return isSafenetEnabled ? <GradientBoxSafenet variant="bottom">{header}</GradientBoxSafenet> : header
 }
 
 export default SafeHeader
