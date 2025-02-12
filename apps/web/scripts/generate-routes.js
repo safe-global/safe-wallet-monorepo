@@ -3,8 +3,14 @@ import path from 'path'
 
 const isFile = (item) => item.endsWith`.tsx`
 
+// For checking if an entire folder name is [param]
+const DYNAMIC_FOLDER_REGEX = /^\[(.+)\]$/
+
+// For finding all [param] segments in a route string
+const BRACKETED_SEGMENTS_REGEX = /\[(.+?)\]/g
+
 function makeKeyFromName(name) {
-  const dynamicMatch = name.match(/^\[(.+)\]$/)
+  const dynamicMatch = name.match(DYNAMIC_FOLDER_REGEX)
   if (dynamicMatch) {
     name = dynamicMatch[1]
   }
@@ -25,7 +31,7 @@ const iterate = (folderName, parentRoute, root) => {
 
       // A folder, continue iterating
       if (!isFile(item)) {
-        const isDynamic = /^\[.+\]$/.test(item)
+        const isDynamic = DYNAMIC_FOLDER_REGEX.test(item)
 
         if (isDynamic) {
           const dynamicSegment = item.slice(1, -1)
@@ -51,7 +57,7 @@ const iterate = (folderName, parentRoute, root) => {
       const routePath = name === 'index' ? parentRoute : `${parentRoute}/${name}`
       const key = makeKeyFromName(name)
 
-      const dynamicMatches = [...routePath.matchAll(/\[(.+?)\]/g)]
+      const dynamicMatches = [...routePath.matchAll(BRACKETED_SEGMENTS_REGEX)]
       if (dynamicMatches.length === 0) {
         root[key] = routePath || '/'
       } else {
@@ -77,7 +83,7 @@ function generateRoutesCode(obj, indent = 2) {
   if (obj && typeof obj === 'object' && '__dynamicFn' in obj) {
     const { paramNames, routeTemplate } = obj.__dynamicFn
 
-    let fnBody = routeTemplate.replace(/\[(.+?)\]/g, (_, p1) => `\${${p1}}`)
+    let fnBody = routeTemplate.replace(BRACKETED_SEGMENTS_REGEX, (_, p1) => `\${${p1}}`)
 
     const signature = paramNames.map((p) => `${p}: string`).join(', ')
     return `(${signature}) => \`${fnBody}\``
