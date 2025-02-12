@@ -1,29 +1,33 @@
+import NumberField from '@/components/common/NumberField'
+import { AutocompleteItem } from '@/components/tx-flow/flows/TokenTransfer/CreateTokenTransfer'
 import { safeFormatUnits } from '@/utils/formatters'
+import { validateDecimalLength, validateLimitedAmount } from '@/utils/validation'
 import { Button, Divider, FormControl, InputLabel, MenuItem, TextField } from '@mui/material'
 import { type SafeBalanceResponse } from '@safe-global/safe-gateway-typescript-sdk'
-import css from './styles.module.css'
-import NumberField from '@/components/common/NumberField'
-import { validateDecimalLength, validateLimitedAmount } from '@/utils/validation'
-import { AutocompleteItem } from '@/components/tx-flow/flows/TokenTransfer/CreateTokenTransfer'
-import { useFormContext } from 'react-hook-form'
 import classNames from 'classnames'
 import { useCallback } from 'react'
+import { get, useFormContext } from 'react-hook-form'
+import css from './styles.module.css'
 
 export enum TokenAmountFields {
   tokenAddress = 'tokenAddress',
   amount = 'amount',
 }
 
+const getFieldName = (field: TokenAmountFields, groupName?: string) => (groupName ? `${groupName}.${field}` : field)
+
 const TokenAmountInput = ({
   balances,
   selectedToken,
   maxAmount,
   validate,
+  groupName,
 }: {
   balances: SafeBalanceResponse['items']
   selectedToken: SafeBalanceResponse['items'][number] | undefined
   maxAmount?: bigint
   validate?: (value: string) => string | undefined
+  groupName?: string
 }) => {
   const {
     formState: { errors },
@@ -31,10 +35,14 @@ const TokenAmountInput = ({
     resetField,
     watch,
     setValue,
-  } = useFormContext<{ [TokenAmountFields.tokenAddress]: string; [TokenAmountFields.amount]: string }>()
+  } = useFormContext()
 
-  const tokenAddress = watch(TokenAmountFields.tokenAddress)
-  const isAmountError = !!errors[TokenAmountFields.tokenAddress] || !!errors[TokenAmountFields.amount]
+  const tokenAddressField = getFieldName(TokenAmountFields.tokenAddress, groupName)
+  const amountField = getFieldName(TokenAmountFields.amount, groupName)
+
+  const tokenAddress = watch(tokenAddressField)
+
+  const isAmountError = !!get(errors, tokenAddressField) || !!get(errors, amountField)
 
   const validateAmount = useCallback(
     (value: string) => {
@@ -47,10 +55,10 @@ const TokenAmountInput = ({
   const onMaxAmountClick = useCallback(() => {
     if (!selectedToken || maxAmount === undefined) return
 
-    setValue(TokenAmountFields.amount, safeFormatUnits(maxAmount.toString(), selectedToken.tokenInfo.decimals ?? 0), {
+    setValue(amountField, safeFormatUnits(maxAmount.toString(), selectedToken.tokenInfo.decimals), {
       shouldValidate: true,
     })
-  }, [maxAmount, selectedToken, setValue])
+  }, [maxAmount, selectedToken, setValue, amountField])
 
   return (
     <FormControl
@@ -59,7 +67,9 @@ const TokenAmountInput = ({
       fullWidth
     >
       <InputLabel shrink required className={css.label}>
-        {errors[TokenAmountFields.tokenAddress]?.message || errors[TokenAmountFields.amount]?.message || 'Amount'}
+        {get(errors, tokenAddressField)?.message?.toString() ||
+          get(errors, amountField)?.message?.toString() ||
+          'Amount'}
       </InputLabel>
       <div className={css.inputs}>
         <NumberField
@@ -76,7 +86,7 @@ const TokenAmountInput = ({
           className={css.amount}
           required
           placeholder="0"
-          {...register(TokenAmountFields.amount, {
+          {...register(amountField, {
             required: true,
             validate: validate ?? validateAmount,
           })}
@@ -90,11 +100,9 @@ const TokenAmountInput = ({
             disableUnderline: true,
           }}
           className={css.select}
-          {...register(TokenAmountFields.tokenAddress, {
+          {...register(tokenAddressField, {
             required: true,
-            onChange: () => {
-              resetField(TokenAmountFields.amount, { defaultValue: '' })
-            },
+            onChange: () => resetField(amountField, { defaultValue: '' }),
           })}
           value={tokenAddress}
           required

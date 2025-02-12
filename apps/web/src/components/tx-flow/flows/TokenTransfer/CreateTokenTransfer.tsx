@@ -1,19 +1,35 @@
 import { useTokenAmount, useVisibleTokens } from '@/components/tx-flow/flows/TokenTransfer/utils'
-import { type ReactElement, useContext, useEffect } from 'react'
+import { type ReactElement, useContext, useEffect, useMemo, useState } from 'react'
 import { type TokenInfo } from '@safe-global/safe-gateway-typescript-sdk'
-import { FormProvider, useForm } from 'react-hook-form'
-import { Button, CardActions, Divider, FormControl, Grid, Typography } from '@mui/material'
+import { FormProvider, useFieldArray, useForm } from 'react-hook-form'
+import {
+  Alert,
+  Box,
+  Button,
+  CardActions,
+  Divider,
+  FormControl,
+  Grid,
+  Link,
+  Stack,
+  SvgIcon,
+  Typography,
+} from '@mui/material'
 import TokenIcon from '@/components/common/TokenIcon'
-import AddressBookInput from '@/components/common/AddressBookInput'
-import SpendingLimitRow from '@/components/tx-flow/flows/TokenTransfer/SpendingLimitRow'
-import { TokenTransferFields, type TokenTransferParams, TokenTransferType } from '.'
+import AddIcon from '@/public/images/common/add.svg'
+import { type MultiTokenTransferParams, TokenTransferFields, MultiTokenTransferFields, TokenTransferType } from '.'
 import TxCard from '../../common/TxCard'
 import { formatVisualAmount } from '@/utils/formatters'
 import commonCss from '@/components/tx-flow/common/styles.module.css'
-import TokenAmountInput from '@/components/common/TokenAmountInput'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { useHasPermission } from '@/permissions/hooks/useHasPermission'
 import { Permission } from '@/permissions/config'
+import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
+import RecipientRow from './RecipientRow'
+import { SafeAppsName } from '@/config/constants'
+import { useRemoteSafeApps } from '@/hooks/safe-apps/useRemoteSafeApps'
+import CSVAirdropAppModal from './CSVAirdropAppModal'
+import SpendingLimitRow from './SpendingLimitRow'
 
 export const AutocompleteItem = (item: { tokenInfo: TokenInfo; balance: string }): ReactElement => (
   <Grid
@@ -42,20 +58,25 @@ export const AutocompleteItem = (item: { tokenInfo: TokenInfo; balance: string }
   </Grid>
 )
 
+const MAX_RECIPIENTS = 5
+
 export const CreateTokenTransfer = ({
   params,
   onSubmit,
   txNonce,
 }: {
-  params: TokenTransferParams
-  onSubmit: (data: TokenTransferParams) => void
+  params: MultiTokenTransferParams
+  onSubmit: (data: MultiTokenTransferParams) => void
   txNonce?: number
 }): ReactElement => {
   const disableSpendingLimit = txNonce !== undefined
+  const [csvAirdropModalOpen, setCsvAirdropModalOpen] = useState<boolean>(false)
+  const [maxRecipientsInfo, setMaxRecipientsInfo] = useState<boolean>(false)
   const canCreateStandardTx = useHasPermission(Permission.CreateTransaction)
   const canCreateSpendingLimitTx = useHasPermission(Permission.CreateSpendingLimitTransaction)
   const balancesItems = useVisibleTokens()
-  const { setNonce, setNonceNeeded } = useContext(SafeTxContext)
+  const { setNonce } = useContext(SafeTxContext)
+  const [safeApps] = useRemoteSafeApps({ name: SafeAppsName.CSV })
 
   useEffect(() => {
     if (txNonce !== undefined) {
@@ -63,7 +84,7 @@ export const CreateTokenTransfer = ({
     }
   }, [setNonce, txNonce])
 
-  const formMethods = useForm<TokenTransferParams>({
+  const formMethods = useForm<MultiTokenTransferParams>({
     defaultValues: {
       ...params,
       [TokenTransferFields.type]: disableSpendingLimit
@@ -71,65 +92,139 @@ export const CreateTokenTransfer = ({
         : canCreateSpendingLimitTx && !canCreateStandardTx
           ? TokenTransferType.spendingLimit
           : params.type,
-      [TokenTransferFields.tokenAddress]:
-        canCreateSpendingLimitTx && !canCreateStandardTx ? balancesItems[0]?.tokenInfo.address : params.tokenAddress,
+      recipients: params.recipients.map(({ tokenAddress, ...rest }) => ({
+        ...rest,
+        [TokenTransferFields.tokenAddress]:
+          canCreateSpendingLimitTx && !canCreateStandardTx ? balancesItems[0]?.tokenInfo.address : tokenAddress,
+      })),
     },
     mode: 'onChange',
     delayError: 500,
   })
 
+  const { handleSubmit, control } = formMethods
+
   const {
-    handleSubmit,
-    watch,
-    formState: { errors },
-  } = formMethods
+    fields: recipientFields,
+    append,
+    remove: removeRecipient,
+  } = useFieldArray({ control, name: MultiTokenTransferFields.recipients })
 
-  const recipient = watch(TokenTransferFields.recipient)
-  const tokenAddress = watch(TokenTransferFields.tokenAddress)
-  const type = watch(TokenTransferFields.type)
+  const canAddMoreRecipients = useMemo(() => recipientFields.length < MAX_RECIPIENTS, [recipientFields])
 
-  const selectedToken = balancesItems.find((item) => item.tokenInfo.address === tokenAddress)
-  const { totalAmount, spendingLimitAmount } = useTokenAmount(selectedToken)
+  const addRecipient = (): void => {
+    if (!canAddMoreRecipients) {
+      setCsvAirdropModalOpen(true)
+      return
+    }
+
+    if (recipientFields.length === 1) {
+      setMaxRecipientsInfo(true)
+    }
+
+    append({
+      recipient: '',
+      tokenAddress: ZERO_ADDRESS,
+      amount: '',
+    })
+  }
+
+  const selectedToken = useMemo(
+    () => balancesItems.find((item) => item.tokenInfo.address === params.recipients[0].tokenAddress),
+    [balancesItems, params.recipients],
+  )
+
+  const { spendingLimitAmount } = useTokenAmount(selectedToken)
 
   const canCreateSpendingLimitTxWithToken = useHasPermission(Permission.CreateSpendingLimitTransaction, {
     token: selectedToken?.tokenInfo,
   })
 
-  const isSpendingLimitType = type === TokenTransferType.spendingLimit
-
-  const maxAmount = isSpendingLimitType && totalAmount > spendingLimitAmount ? spendingLimitAmount : totalAmount
-
-  const isAddressValid = !!recipient && !errors[TokenTransferFields.recipient]
-
-  useEffect(() => {
-    setNonceNeeded(!isSpendingLimitType || spendingLimitAmount === 0n)
-  }, [setNonceNeeded, isSpendingLimitType, spendingLimitAmount])
+  const CsvAirdropLink = () => (
+    <Link sx={{ cursor: 'pointer' }} onClick={() => setCsvAirdropModalOpen(true)}>
+      CSV Airdrop
+    </Link>
+  )
 
   return (
     <TxCard>
       <FormProvider {...formMethods}>
         <form onSubmit={handleSubmit(onSubmit)} className={commonCss.form}>
-          <FormControl fullWidth sx={{ mt: 1 }}>
-            <AddressBookInput name={TokenTransferFields.recipient} canAdd={isAddressValid} />
-          </FormControl>
+          <Stack spacing={3}>
+            <Stack spacing={6}>
+              {recipientFields.map((field, i) => (
+                <>
+                  <RecipientRow
+                    key={field.id}
+                    index={i}
+                    removable={recipientFields.length > 1}
+                    groupName={MultiTokenTransferFields.recipients}
+                    remove={removeRecipient}
+                    disableSpendingLimit={disableSpendingLimit}
+                  />
+                  {i === 0 && !disableSpendingLimit && canCreateSpendingLimitTxWithToken && (
+                    <FormControl fullWidth>
+                      <SpendingLimitRow
+                        availableAmount={spendingLimitAmount}
+                        selectedToken={selectedToken?.tokenInfo}
+                      />
+                    </FormControl>
+                  )}
+                </>
+              ))}
+            </Stack>
 
-          <TokenAmountInput balances={balancesItems} selectedToken={selectedToken} maxAmount={maxAmount} />
+            {canAddMoreRecipients && maxRecipientsInfo && (
+              <Alert severity="info" onClose={() => setMaxRecipientsInfo(false)}>
+                <Typography variant="body2">
+                  If you want to add more than {MAX_RECIPIENTS} recipients, use <CsvAirdropLink />
+                </Typography>
+              </Alert>
+            )}
 
-          {!disableSpendingLimit && canCreateSpendingLimitTxWithToken && (
-            <FormControl fullWidth sx={{ mt: 3 }}>
-              <SpendingLimitRow availableAmount={spendingLimitAmount} selectedToken={selectedToken?.tokenInfo} />
-            </FormControl>
-          )}
+            <Stack direction="row" alignItems="center" justifyContent="space-between" mb={4}>
+              <Button
+                data-testid="add-recipient-btn"
+                variant="text"
+                onClick={addRecipient}
+                disabled={!canAddMoreRecipients}
+                startIcon={<SvgIcon component={AddIcon} inheritViewBox fontSize="small" />}
+                size="large"
+              >
+                Add Recipient
+              </Button>
+              <Typography
+                variant="body2"
+                color={canAddMoreRecipients ? 'primary' : 'error.main'}
+              >{`${recipientFields.length}/${MAX_RECIPIENTS}`}</Typography>
+            </Stack>
 
-          <Divider className={commonCss.nestedDivider} />
+            {!canAddMoreRecipients && (
+              <Alert severity="warning">
+                <Typography variant="body2">
+                  No more recipients can be added.
+                  <br />
+                  Please use <CsvAirdropLink />
+                </Typography>
+              </Alert>
+            )}
 
-          <CardActions>
-            <Button variant="contained" type="submit">
-              Next
-            </Button>
-          </CardActions>
+            <Box>
+              <Divider className={commonCss.nestedDivider} />
+
+              <CardActions>
+                <Button variant="contained" type="submit">
+                  Next
+                </Button>
+              </CardActions>
+            </Box>
+          </Stack>
         </form>
       </FormProvider>
+
+      {csvAirdropModalOpen && (
+        <CSVAirdropAppModal onClose={() => setCsvAirdropModalOpen(false)} appUrl={safeApps?.[0]?.url} />
+      )}
     </TxCard>
   )
 }

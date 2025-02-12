@@ -14,7 +14,7 @@ const SendButton = ({ tokenInfo, isOutlined }: { tokenInfo: TokenInfo; isOutline
   const { setTxFlow } = useContext(TxModalContext)
 
   const onSendClick = () => {
-    setTxFlow(<TokenTransferFlow tokenAddress={tokenInfo.address} />)
+    setTxFlow(<TokenTransferFlow recipients={[{ tokenAddress: tokenInfo.address }]} />)
   }
 
   return (
