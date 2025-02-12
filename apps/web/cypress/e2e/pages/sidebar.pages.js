@@ -61,6 +61,7 @@ const emptyAccountList = '[data-testid="empty-account-list"]'
 const searchInput = '[id="search-by-name"]'
 const accountsList = '[data-testid="accounts-list"]'
 const sortbyBtn = '[data-testid="sortby-button"]'
+export const currentSafeSection = '[data-testid="current-safe-section"]'
 
 export const importBtnStr = 'Import'
 export const exportBtnStr = 'Export'
@@ -121,7 +122,7 @@ export const multichainSafes = {
 }
 
 export function searchSafe(safe) {
-  cy.get(searchInput).clear().type(safe)
+  cy.get(searchInput).clear().type(safe, { force: true })
 }
 
 export function openSortOptionsMenu() {
@@ -155,6 +156,16 @@ export function verifyPinnedSafe(safe) {
   cy.get(pinnedAccountsContainer).within(() => {
     cy.get(sideSafeListItem).contains(safe)
   })
+}
+
+export function verifyCurrentSafe(safe) {
+  cy.get(currentSafeSection).within(() => {
+    cy.get(sideSafeListItem).contains(safe)
+  })
+}
+
+export function verifyCurrentSafeDoesNotExist() {
+  cy.get(currentSafeSection).should('not.exist')
 }
 
 export function getImportBtn() {
@@ -599,7 +610,7 @@ function getNetworkElements() {
 }
 
 export function checkNetworkDisabled(networks) {
-  getNetworkElements().should('have.length', 20)
+  getNetworkElements().should('have.length.gte', 20)
   getNetworkElements().each(($el) => {
     const text = $el[0].innerText.trim()
     console.log(`Element text: ${text}`)

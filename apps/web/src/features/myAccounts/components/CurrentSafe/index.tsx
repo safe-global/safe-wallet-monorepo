@@ -33,7 +33,7 @@ function CurrentSafeList({
   )
 
   return (
-    <Box mb={3}>
+    <Box data-testid="current-safe-section" mb={3}>
       <Typography variant="h5" fontWeight={700} mb={2}>
         Current Safe Account
       </Typography>

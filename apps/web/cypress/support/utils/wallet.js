@@ -42,8 +42,8 @@ export function connectSigner(signer) {
             $input.val(signer)
             cy.wrap($input).trigger('input').trigger('change')
           })
-
         cy.get(pkConnectBtn).click()
+        cy.wait(2000)
       }
     })
   }

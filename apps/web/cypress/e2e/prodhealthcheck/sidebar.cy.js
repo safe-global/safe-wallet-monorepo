@@ -37,6 +37,6 @@ describe('[PROD] Sidebar tests', () => {
   })
 
   it('Verify New Transaction button disabled for non-owners', () => {
-    main.verifyElementsCount(navigation.newTxBtn, 0)
+    sideBar.verifyNewTxBtnStatus(constants.enabledStates.disabled)
   })
 })
