@@ -1,7 +1,13 @@
 import { Box, Typography } from '@mui/material'
 import SignInButton from '@/features/organizations/components/SignInButton'
 import OrgAccountsList from '@/features/organizations/components/AccountsList'
+import MembersList from '../MembersList'
+import Grid from '@mui/material/Grid2'
 import css from './styles.module.css'
+
+const isSignedIn = true
+const hasAccounts = false
+const hasMembers = false
 
 const SignedOutState = () => {
   return (
@@ -24,16 +30,30 @@ const SignedOutState = () => {
 const OrganizationsDashboard = ({ organizationId }: { organizationId: string }) => {
   // TODO: use the organizationId to fetch the organization data
   console.log('organizationId', organizationId)
-  const isSignedIn = true
-  const hasSafes = false
+
+  if (!isSignedIn) {
+    return <SignedOutState />
+  }
 
   return (
     <>
       <Typography variant="h1" fontWeight={700} mb={4}>
-        {hasSafes ? 'Your Organization' : 'Getting started'}
+        Getting started
       </Typography>
 
-      <Box>{!isSignedIn ? <SignedOutState /> : <OrgAccountsList />}</Box>
+      <Grid container spacing={3}>
+        <Grid size={{ xs: 12, md: hasAccounts ? 8 : 12 }}>
+          <OrgAccountsList hasAccounts={hasAccounts} />
+        </Grid>
+        <Grid size={{ xs: 12, md: 4 }}>
+          {hasMembers && (
+            <Typography variant="h5" fontWeight={700} mb={2}>
+              Members
+            </Typography>
+          )}
+          <MembersList />
+        </Grid>
+      </Grid>
     </>
   )
 }
