@@ -2,12 +2,19 @@ import * as constants from '../../support/constants.js'
 import * as sideBar from '../pages/sidebar.pages.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as wallet from '../../support/utils/wallet.js'
+import * as main from '../pages/main.page.js'
+import * as ls from '../../support/localstorage_data.js'
+import * as owner from '../pages/owners.pages.js'
+import * as navigation from '../pages/navigation.page.js'
 
 let staticSafes = []
 const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
 const signer = walletCredentials.OWNER_4_PRIVATE_KEY
+const signer2 = walletCredentials.OWNER_3_PRIVATE_KEY
+const signer3 = walletCredentials.OWNER_1_PRIVATE_KEY
 
 const currentSafe = '0x9870...fec0'
+const currentSafe2 = '0x5912...fFdb'
 const multiChainSafe = 'matic:0xC96e...ee3B'
 
 describe('Sidebar tests 8', () => {
@@ -36,5 +43,35 @@ describe('Sidebar tests 8', () => {
     sideBar.openSidebar()
     sideBar.clickOnBookmarkBtn(currentSafe)
     sideBar.verifyCurrentSafeDoesNotExist()
+  })
+
+  it('Verify the "Not activated" tag for Counterfactual safes', () => {
+    cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_9)
+    cy.intercept('GET', constants.safeListEndpoint, { 1: [], 100: [], 137: [], 11155111: [] })
+    main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__undeployedSafes, ls.undeployedSafe.safe1)
+    wallet.connectSigner(signer)
+    sideBar.openSidebar()
+    sideBar.verifyAccountListSafeData([sideBar.notActivatedStr])
+  })
+
+  it('Verify the "Add another network" shows only for owners of a safe', () => {
+    cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_7)
+    wallet.connectSigner(signer2)
+    sideBar.openSidebar()
+    sideBar.clickOnSafeItemOptionsBtn(currentSafe2)
+    sideBar.checkAddChainDialogDisplayed()
+    owner.clickOnWalletExpandMoreIcon()
+    navigation.clickOnDisconnectBtn()
+  })
+
+  it('Verify the "Add another network" is not displated for non-owners', () => {
+    cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_7)
+    wallet.connectSigner(signer3)
+    cy.intercept('GET', constants.safeListEndpoint, { 1: [], 100: [], 137: [], 11155111: [] })
+    sideBar.openSidebar()
+    sideBar.clickOnSafeItemOptionsBtn(currentSafe2)
+    main.verifyElementsCount(sideBar.safeItemOptionsAddChainBtn, 0)
+    owner.clickOnWalletExpandMoreIcon()
+    navigation.clickOnDisconnectBtn()
   })
 })

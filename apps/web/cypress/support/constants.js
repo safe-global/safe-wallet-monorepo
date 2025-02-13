@@ -93,6 +93,7 @@ export const proposeEndpoint = '/**/propose'
 export const appsEndpoint = '/**/safe-apps'
 export const transactionHistoryEndpoint = '**/history*'
 export const safeListEndpoint = '**/safes'
+export const queuedEndpoint = '**/queued'
 
 export const VALID_QR_CODE_PATH = '../fixtures/sepolia_test_safe_QR.png'
 export const INVALID_QR_CODE_PATH = '../fixtures/invalid_image_QR_test.png'

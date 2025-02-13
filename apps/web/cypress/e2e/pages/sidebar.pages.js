@@ -66,7 +66,7 @@ export const currentSafeSection = '[data-testid="current-safe-section"]'
 export const importBtnStr = 'Import'
 export const exportBtnStr = 'Export'
 export const undeployedSafe = 'Undeployed Sepolia'
-const notActivatedStr = 'Not activated'
+export const notActivatedStr = 'Not activated'
 export const addingNetworkNotPossibleStr = 'Adding another network is not possible for this Safe.'
 export const createSafeMsg = (network) => `Successfully added your account on ${network}`
 const signersNotConsistentMsg = 'Signers are not consistent'
@@ -274,6 +274,12 @@ export function verifySafeCount(count) {
 export function verifyAccountListSafeCount(count) {
   cy.get(accountsList).within(() => {
     cy.get(sideSafeListItem).should('have.length', count)
+  })
+}
+
+export function verifyAccountListSafeData(data) {
+  cy.get(accountsList).within(() => {
+    main.verifyValuesExist(sideSafeListItem, [data])
   })
 }
 
@@ -544,8 +550,12 @@ export function checkBalanceExists() {
   const element = cy.get(chainLogo).prev().contains(balance)
 }
 
-export function checkAddChainDialogDisplayed() {
+export function clickOnAddOptionsBtn() {
   cy.get(safeItemOptionsAddChainBtn).click()
+}
+
+export function checkAddChainDialogDisplayed() {
+  clickOnAddOptionsBtn()
   cy.get(addChainDialog).should('be.visible')
 }
 

@@ -192,7 +192,7 @@ export function verifyNameLengthErrorMessage() {
 }
 
 export function inputAddress(address) {
-  cy.get(addressInput).clear().type(address)
+  cy.get(addressInput).should('be.visible').clear().should('exist').type(address, { delay: 50 })
 }
 
 export function verifyAddressInputValue(safeAddress) {
