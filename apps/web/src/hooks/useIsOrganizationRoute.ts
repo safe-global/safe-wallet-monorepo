@@ -5,5 +5,5 @@ export const useIsOrganizationRoute = (pathname: string): boolean => {
   const clientPathname = usePathname()
   const route = pathname || clientPathname || ''
 
-  return route.startsWith(AppRoutes.organizations['[orgId]'].index)
+  return route.startsWith(AppRoutes.organizations.index('')) // This will check against /organizations/
 }

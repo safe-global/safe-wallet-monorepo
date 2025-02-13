@@ -14,7 +14,7 @@ export const AppRoutes = {
   bridge: '/bridge',
   addressBook: '/address-book',
   addOwner: '/addOwner',
-  _offline: '/_offline',
+  Offline: '/_offline',
   apps: {
     open: '/apps/open',
     index: '/apps',
@@ -31,10 +31,10 @@ export const AppRoutes = {
     advancedCreate: '/new-safe/advanced-create',
   },
   organizations: {
-    members: '/organizations/members',
-    '[orgId]': {
-      index: '/organizations/[orgId]',
-    },
+    settings: (orgId: string) => `/organizations/${orgId}/settings`,
+    safeAccounts: (orgId: string) => `/organizations/${orgId}/safeAccounts`,
+    members: (orgId: string) => `/organizations/${orgId}/members`,
+    index: (orgId: string) => `/organizations/${orgId}`,
   },
   settings: {
     setup: '/settings/setup',
