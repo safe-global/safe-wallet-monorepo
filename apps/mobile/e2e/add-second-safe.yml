@@ -36,7 +36,8 @@ appId: global.safe.mobileapp
 - tapOn:
     id: 'safe-input'
 - assertVisible: 'Continue'
-- inputText: 'Hello World'
+- inputText: '0xF2CeA96575d6b10f51d9aF3b10e3e4E5738aa6bd'
+- assertVisible: 'No Safe deployment found for this this address'
 - 'eraseText'
 - inputText: '0x1230B3D59858296A31053C1b8562ECF89A2f888B'
 - assertVisible: 'Invalid address format'
