@@ -1,17 +1,17 @@
 import darkPalette from '@/components/theme/darkPalette'
 import lightPalette from '@/components/theme/lightPalette'
 import { AppRoutes } from '@/config/routes'
+import { useDarkMode } from '@/hooks/useDarkMode'
 import SafeLogoNoText from '@/public/images/logo-no-text-transparent.svg'
 import SafenetLogo from '@/public/images/safenet/logo-safenet.svg'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import { Box, Button, Grid, Typography } from '@mui/material'
-import { useTheme } from '@mui/material/styles'
 import { useRouter } from 'next/router'
 import css from './styles.module.css'
 
 const SafenetBanner = () => {
   const router = useRouter()
-  const { palette } = useTheme()
+  const isDarkMode = useDarkMode()
   const [displayBanner = true, setDisplayBanner] = useLocalStorage<boolean>('showSafenetBanner')
 
   const onClick = () => {
@@ -22,11 +22,11 @@ const SafenetBanner = () => {
 
   return (
     displayBanner && (
-      <Grid className={palette.mode === 'dark' ? css.darkBanner : css.lightBanner}>
+      <Grid className={isDarkMode ? css.darkBanner : css.lightBanner}>
         <SafeLogoNoText className={css.backgroundLogo} />
         <Typography
           variant="body2"
-          color={lightPalette.text.secondary}
+          color={isDarkMode ? lightPalette.text.primary : lightPalette.text.secondary}
           className={css.dismiss}
           onClick={() => setDisplayBanner(false)}
         >
@@ -35,28 +35,24 @@ const SafenetBanner = () => {
         <Box className={css.title}>
           <Typography
             variant="h1"
-            sx={{
-              fontSize: 28,
-              color: darkPalette.text.primary,
-            }}
+            fontSize={28}
+            color={isDarkMode ? lightPalette.text.primary : darkPalette.text.primary}
           >
-            Enter
+            Unlock
           </Typography>
-          <SafenetLogo height="24" />
+          <SafenetLogo height="24" className={css.safenetLogo} />
           <div className={css.newTag}>
             <Typography fontSize={12}>New</Typography>
           </div>
         </Box>
-        <Typography color={darkPalette.text.primary} fontSize={14}>
+        <Typography
+          maxWidth={500}
+          color={isDarkMode ? lightPalette.text.primary : darkPalette.text.primary}
+          fontSize={14}
+        >
           Create a new account with Safenet to unlock a unified and secured experience across networks.
         </Typography>
-        <Button
-          onClick={onClick}
-          className={css.bannerButton}
-          sx={{
-            color: lightPalette.text.primary,
-          }}
-        >
+        <Button size="small" onClick={onClick} className={css.bannerButton}>
           Learn more
         </Button>
       </Grid>
