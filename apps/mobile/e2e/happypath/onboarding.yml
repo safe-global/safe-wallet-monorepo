@@ -1,27 +1,7 @@
 appId: 'global.safe.mobileapp'
 ---
-- launchApp:
-    appId: 'global.safe.mobileapp'
-    clearState: true
-    clearKeychain: true
 - runFlow:
-    when:
-      visible:
-        text: 'http.*'
-    commands:
-      - tapOn: 'http.*'
-- runFlow:
-    when:
-      visible: 'Continue'
-    commands:
-      - tapOn: 'Continue'
-- runFlow:
-    when:
-      visible: 'Reload'
-    commands:
-      - tapOn: 'Reload'
-- tapOn:
-    id: 'e2eTestOnboarding'
+    file: ../shared/clean-app-start.yml
 - assertVisible:
     id: 'carousel-item-0'
 - swipe:
