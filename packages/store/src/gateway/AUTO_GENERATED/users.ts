@@ -53,7 +53,7 @@ export type UserWallet = {
 }
 export type UserWithWallets = {
   id: number
-  status: 0 | 1
+  status: 1
   wallets: UserWallet[]
 }
 export type CreatedUserWithWallet = {
@@ -64,6 +64,7 @@ export type WalletAddedToUser = {
 }
 export const {
   useUsersGetWithWalletsV1Query,
+  useLazyUsersGetWithWalletsV1Query,
   useUsersDeleteV1Mutation,
   useUsersCreateWithWalletV1Mutation,
   useUsersAddWalletToUserV1Mutation,

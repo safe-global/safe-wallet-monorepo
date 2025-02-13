@@ -1,4 +1,6 @@
-import type { ReactElement, BaseSyntheticEvent } from 'react'
+import { useOrganizationsCreateWithUserV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
+import { useRouter } from 'next/router'
+import type { ReactElement } from 'react'
 import { Box, Button, DialogActions, DialogContent, Typography } from '@mui/material'
 import { FormProvider, useForm } from 'react-hook-form'
 import MUILink from '@mui/material/Link'
@@ -9,17 +11,28 @@ import NameInput from '@/components/common/NameInput'
 import { AppRoutes } from '@/config/routes'
 
 function OrgsCreationModal({ onClose }: { onClose: () => void }): ReactElement {
+  const router = useRouter()
   const methods = useForm<{ name: string }>({ mode: 'onChange' })
+  const [createOrgWithUser] = useOrganizationsCreateWithUserV1Mutation()
   const { handleSubmit, formState } = methods
 
-  const onSubmit = (e: BaseSyntheticEvent) => {
-    e.stopPropagation()
-    handleSubmit((data) => {
-      console.log(data)
-      // TODO: create the organization
-      onClose()
-    })
-  }
+  const onSubmit = handleSubmit(async (data) => {
+    try {
+      const response = await createOrgWithUser({ createOrganizationDto: { name: data.name } })
+
+      if (response.data) {
+        router.push({ pathname: AppRoutes.organizations.index(response.data.id.toString()) })
+      }
+
+      if (response.error) {
+        // TODO: Handle error
+      }
+    } catch (e) {
+      // TODO: handle error
+      console.log(e)
+    }
+    onClose()
+  })
 
   return (
     <ModalDialog

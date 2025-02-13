@@ -1,22 +1,29 @@
 import AccountsNavigation from '@/features/myAccounts/components/AccountsNavigation'
 import OrgsCard from '@/features/organizations/components/OrgsCard'
+import OrgsCreationModal from '@/features/organizations/components/OrgsCreationModal'
 import SignInButton from '@/features/organizations/components/SignInButton'
 import OrgsIcon from '@/public/images/orgs/orgs.svg'
 import { Box, Button, Card, Link, Stack, Typography } from '@mui/material'
+import { useState } from 'react'
 import css from './styles.module.css'
 
-const AddOrgButton = ({ onClick, disabled }: { onClick?: () => void; disabled: boolean }) => {
+const AddOrgButton = ({ disabled }: { disabled: boolean }) => {
+  const [open, setOpen] = useState(false)
+
   return (
-    <Button
-      disableElevation
-      variant="contained"
-      size="small"
-      onClick={onClick}
-      sx={{ height: '36px', px: 2 }}
-      disabled={disabled}
-    >
-      <Box mt="1px">Create organization</Box>
-    </Button>
+    <>
+      <Button
+        disableElevation
+        variant="contained"
+        size="small"
+        onClick={() => setOpen(true)}
+        sx={{ height: '36px', px: 2 }}
+        disabled={disabled}
+      >
+        <Box mt="1px">Create organization</Box>
+      </Button>
+      {open && <OrgsCreationModal onClose={() => setOpen(false)} />}
+    </>
   )
 }
 

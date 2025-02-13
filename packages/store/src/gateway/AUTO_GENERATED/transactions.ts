@@ -358,8 +358,6 @@ export type SwapOrderTransactionInfo = {
   /** The URL to the explorer page of the order */
   explorerUrl: string
   /** The amount of fees paid for this order. */
-  executedSurplusFee: string
-  /** The amount of fees paid for this order. */
   executedFee: string
   /** The token in which the fee was paid, expressed by SURPLUS tokens (BUY tokens for SELL orders and SELL tokens for BUY orders). */
   executedFeeToken: string
@@ -398,8 +396,6 @@ export type SwapTransferTransactionInfo = {
   /** The URL to the explorer page of the order */
   explorerUrl: string
   /** The amount of fees paid for this order. */
-  executedSurplusFee: string
-  /** The amount of fees paid for this order. */
   executedFee: string
   /** The token in which the fee was paid, expressed by SURPLUS tokens (BUY tokens for SELL orders and SELL tokens for BUY orders). */
   executedFeeToken: TokenInfo
@@ -428,8 +424,6 @@ export type TwapOrderTransactionInfo = {
   executedSellAmount?: string | null
   /** The executed buy token raw amount (no decimals), or null if there are too many parts */
   executedBuyAmount?: string | null
-  /** The executed surplus fee raw amount (no decimals), or null if there are too many parts */
-  executedSurplusFee?: string | null
   /** The executed surplus fee raw amount (no decimals), or null if there are too many parts */
   executedFee?: string | null
   /** The token in which the fee was paid, expressed by SURPLUS tokens (BUY tokens for SELL orders and SELL tokens for BUY orders). */
@@ -521,7 +515,7 @@ export type TransactionData = {
 }
 export type Token = {
   address: string
-  decimals?: number
+  decimals?: number | null
   logoUri: string
   name: string
   symbol: string
@@ -729,14 +723,21 @@ export type CreationTransaction = {
 }
 export const {
   useTransactionsGetTransactionByIdV1Query,
+  useLazyTransactionsGetTransactionByIdV1Query,
   useTransactionsGetMultisigTransactionsV1Query,
+  useLazyTransactionsGetMultisigTransactionsV1Query,
   useTransactionsDeleteTransactionV1Mutation,
   useTransactionsGetModuleTransactionsV1Query,
+  useLazyTransactionsGetModuleTransactionsV1Query,
   useTransactionsAddConfirmationV1Mutation,
   useTransactionsGetIncomingTransfersV1Query,
+  useLazyTransactionsGetIncomingTransfersV1Query,
   useTransactionsPreviewTransactionV1Mutation,
   useTransactionsGetTransactionQueueV1Query,
+  useLazyTransactionsGetTransactionQueueV1Query,
   useTransactionsGetTransactionsHistoryV1Query,
+  useLazyTransactionsGetTransactionsHistoryV1Query,
   useTransactionsProposeTransactionV1Mutation,
   useTransactionsGetCreationTransactionV1Query,
+  useLazyTransactionsGetCreationTransactionV1Query,
 } = injectedRtkApi
