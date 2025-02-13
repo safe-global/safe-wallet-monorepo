@@ -1,7 +1,12 @@
 import { BackdropComponent, BackgroundComponent } from '@/src/components/Dropdown/sheetComponents'
-import { H5, ScrollView, View } from 'tamagui'
+import { getTokenValue, H5, View } from 'tamagui'
 import React, { useCallback } from 'react'
-import BottomSheet, { BottomSheetFooterProps, BottomSheetModalProps, BottomSheetView } from '@gorhom/bottom-sheet'
+import BottomSheet, {
+  BottomSheetFooterProps,
+  BottomSheetModalProps,
+  BottomSheetView,
+  BottomSheetScrollView,
+} from '@gorhom/bottom-sheet'
 import DraggableFlatList, { DragEndParams, RenderItemParams, ScaleDecorator } from 'react-native-draggable-flatlist'
 import { StyleSheet } from 'react-native'
 import { useRouter } from 'expo-router'
@@ -85,18 +90,18 @@ export function SafeBottomSheet<T>({
       footerComponent={footerComponent}
     >
       {!isSortable && !!title && <TitleHeader />}
-      <BottomSheetView style={[styles.contentContainer, !isSortable ? { flex: 1, paddingHorizontal: 20 } : undefined]}>
+      <BottomSheetView style={[styles.contentContainer, !isSortable ? { flex: 1 } : undefined]}>
         {isSortable ? (
           <DraggableFlatList<T>
             data={items}
-            containerStyle={{ height: '100%' }}
+            containerStyle={{ height: '90%' }}
             ListHeaderComponent={title ? <TitleHeader /> : undefined}
             onDragEnd={onDragEnd}
             keyExtractor={(item, index) => (keyExtractor ? keyExtractor({ item, index }) : index.toString())}
             renderItem={renderItem}
           />
         ) : (
-          <ScrollView>
+          <BottomSheetScrollView contentContainerStyle={styles.scrollInnerContainer}>
             <View minHeight={200} alignItems="center" paddingVertical="$3">
               <View alignItems="flex-start" paddingBottom="$4" width="100%">
                 {hasCustomItems
@@ -110,7 +115,7 @@ export function SafeBottomSheet<T>({
                   : children}
               </View>
             </View>
-          </ScrollView>
+          </BottomSheetScrollView>
         )}
       </BottomSheetView>
     </BottomSheet>
@@ -121,4 +126,5 @@ const styles = StyleSheet.create({
   contentContainer: {
     justifyContent: 'space-around',
   },
+  scrollInnerContainer: { paddingHorizontal: getTokenValue('$3'), paddingBottom: getTokenValue('$5') },
 })
