@@ -11,7 +11,3 @@
   background-origin: border-box;
   background-clip: padding-box, border-box;
 }
-
-.tag > svg > path {
-  fill: black;
-}
