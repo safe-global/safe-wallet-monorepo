@@ -53,7 +53,7 @@ export type UserWallet = {
 }
 export type UserWithWallets = {
   id: number
-  status: 1
+  status: 0 | 1
   wallets: UserWallet[]
 }
 export type CreatedUserWithWallet = {
