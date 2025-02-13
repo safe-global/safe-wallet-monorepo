@@ -64,6 +64,7 @@ export type WalletAddedToUser = {
 }
 export const {
   useUsersGetWithWalletsV1Query,
+  useLazyUsersGetWithWalletsV1Query,
   useUsersDeleteV1Mutation,
   useUsersCreateWithWalletV1Mutation,
   useUsersAddWalletToUserV1Mutation,

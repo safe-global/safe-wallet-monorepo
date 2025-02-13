@@ -1,5 +1,7 @@
-import type { ReactElement, BaseSyntheticEvent } from 'react'
-import { Box, Button, DialogActions, DialogContent, Typography } from '@mui/material'
+import { useOrganizationsCreateWithUserV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
+import { useRouter } from 'next/router'
+import { type ReactElement, useState } from 'react'
+import { Alert, Box, Button, CircularProgress, DialogActions, DialogContent, Typography } from '@mui/material'
 import { FormProvider, useForm } from 'react-hook-form'
 import MUILink from '@mui/material/Link'
 import Link from 'next/link'
@@ -9,17 +11,35 @@ import NameInput from '@/components/common/NameInput'
 import { AppRoutes } from '@/config/routes'
 
 function OrgsCreationModal({ onClose }: { onClose: () => void }): ReactElement {
+  const [error, setError] = useState<string>()
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const router = useRouter()
   const methods = useForm<{ name: string }>({ mode: 'onChange' })
+  const [createOrgWithUser] = useOrganizationsCreateWithUserV1Mutation()
   const { handleSubmit, formState } = methods
 
-  const onSubmit = (e: BaseSyntheticEvent) => {
-    e.stopPropagation()
-    handleSubmit((data) => {
-      console.log(data)
-      // TODO: create the organization
-      onClose()
-    })
-  }
+  const onSubmit = handleSubmit(async (data) => {
+    setError(undefined)
+
+    try {
+      setIsSubmitting(true)
+      const response = await createOrgWithUser({ createOrganizationDto: { name: data.name } })
+
+      if (response.data) {
+        router.push({ pathname: AppRoutes.organizations.index(response.data.id.toString()) })
+        onClose()
+      }
+
+      if (response.error) {
+        setError('Failed creating the organization. Please try again.')
+      }
+    } catch (e) {
+      // TODO: Handle this error case
+      console.log(e)
+    } finally {
+      setIsSubmitting(false)
+    }
+  })
 
   return (
     <ModalDialog
@@ -45,6 +65,12 @@ function OrgsCreationModal({ onClose }: { onClose: () => void }): ReactElement {
                 <MUILink>privacy policy</MUILink>
               </Link>
             </Typography>
+
+            {error && (
+              <Alert severity="error" sx={{ mt: 2 }}>
+                {error}
+              </Alert>
+            )}
           </DialogContent>
 
           <DialogActions>
@@ -52,7 +78,7 @@ function OrgsCreationModal({ onClose }: { onClose: () => void }): ReactElement {
               Cancel
             </Button>
             <Button type="submit" variant="contained" disabled={!formState.isValid} disableElevation>
-              Create organization
+              {isSubmitting ? <CircularProgress size={20} /> : 'Create organization'}
             </Button>
           </DialogActions>
         </form>
