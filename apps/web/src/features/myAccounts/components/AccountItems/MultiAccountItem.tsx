@@ -132,23 +132,25 @@ function useMultiAccountItemData(multiSafeAccountItem: MultiChainSafeItem) {
   const hasSafenetFeature = useHasSafenetFeature()
   const { data: safenetConfig } = useGetSafenetAccountQuery({ safeAddress: address }, { skip: !hasSafenetFeature })
 
-  const deployedSafenetChainIds = useMemo(
-    () => (safenetConfig ? safenetConfig.safes.map((safe) => safe.chainId.toString()) : []),
-    [safenetConfig],
-  )
-  const nonSafenetSafes = useMemo(
-    () => (safenetConfig ? sortedSafes.filter((safe) => !deployedSafenetChainIds.includes(safe.chainId)) : []),
-    [safenetConfig, sortedSafes, deployedSafenetChainIds],
-  )
-  const safenetSafes = useMemo(
-    () => (safenetConfig ? sortedSafes.filter((safe) => deployedSafenetChainIds.includes(safe.chainId)) : undefined),
-    [safenetConfig, sortedSafes, deployedSafenetChainIds],
-  )
+  const nonSafenetSafes = useMemo(() => {
+    if (safenetConfig) {
+      const deployedSafenetChainIds = safenetConfig.safes.map((safe) => safe.chainId.toString())
+      return sortedSafes.filter((safe) => !deployedSafenetChainIds.includes(safe.chainId))
+    }
+    return sortedSafes
+  }, [safenetConfig, sortedSafes])
+
+  const safenetSafes = useMemo(() => {
+    if (safenetConfig) {
+      const deployedSafenetChainIds = safenetConfig.safes.map((safe) => safe.chainId.toString())
+      return sortedSafes.filter((safe) => deployedSafenetChainIds.includes(safe.chainId))
+    }
+  }, [safenetConfig, sortedSafes])
 
   return {
     address,
     name,
-    sortedSafes: safenetConfig ? nonSafenetSafes : sortedSafes,
+    sortedSafes,
     safeOverviews,
     sharedSetup,
     totalFiatValue,
@@ -159,6 +161,7 @@ function useMultiAccountItemData(multiSafeAccountItem: MultiChainSafeItem) {
     isWelcomePage,
     deployedChainIds,
     safenetSafes,
+    nonSafenetSafes,
   }
 }
 
@@ -251,6 +254,7 @@ const MultiAccountItem = ({ onLinkClick, multiSafeAccountItem }: MultiAccountIte
     isWelcomePage,
     deployedChainIds,
     safenetSafes,
+    nonSafenetSafes,
   } = useMultiAccountItemData(multiSafeAccountItem)
   const { addToPinnedList, removeFromPinnedList } = usePinActions(address, name, sortedSafes, safeOverviews)
 
@@ -303,7 +307,7 @@ const MultiAccountItem = ({ onLinkClick, multiSafeAccountItem }: MultiAccountIte
                 {shortenAddress(address)}
               </Typography>
             </Typography>
-            <MultichainIndicator safes={sortedSafes} safenetSafes={safenetSafes} />
+            <MultichainIndicator safes={nonSafenetSafes} safenetSafes={safenetSafes} />
             <Typography
               data-testid="group-balance"
               variant="body2"
@@ -347,7 +351,7 @@ const MultiAccountItem = ({ onLinkClick, multiSafeAccountItem }: MultiAccountIte
         <AccordionDetails sx={{ padding: '0px 12px' }}>
           {safenetSafes && <SafenetAccountList safenetSafes={safenetSafes} onLinkClick={onLinkClick} />}
           <Box data-testid="subacounts-container">
-            {sortedSafes.map((safeItem) => (
+            {nonSafenetSafes.map((safeItem) => (
               <SingleAccountItem
                 onLinkClick={onLinkClick}
                 safeItem={safeItem}
