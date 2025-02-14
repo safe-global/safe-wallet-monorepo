@@ -6,7 +6,8 @@ import { setActiveSafe } from '@/src/store/activeSafeSlice'
 import { useRouter } from 'expo-router'
 import { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { SafeInfo } from '@/src/types/address'
-
+import { updateSettings } from '@/src/store/settingsSlice'
+import { updatePromptAttempts } from '@/src/store/notificationsSlice'
 LogBox.ignoreAllLogs()
 
 const mockedActiveAccount: SafeInfo = {
@@ -26,7 +27,23 @@ const mockedActiveSafeInfo: SafeOverview = {
   queued: 1,
   threshold: 1,
 }
-
+const mockedActiveAccount1: SafeInfo = {
+  address: '0x9BFCA75a05175503580D593F4330b5505c594596',
+  chainId: '11155111',
+}
+const mockedActiveSafeInfo1: SafeOverview = {
+  address: { value: '0x9BFCA75a05175503580D593F4330b5505c594596', name: null, logoUri: null },
+  awaitingConfirmation: null,
+  chainId: mockedActiveAccount1.chainId,
+  fiatTotal: '0',
+  owners: [
+    { value: '0x65F8236309e5A99Ff0d129d04E486EBCE20DC7B0', name: null, logoUri: null },
+    { value: '0x0D65139Da4B36a8A39BF1b63e950038D42231b2e', name: null, logoUri: null },
+    { value: '0x8aEf2f5c3F17261F6F1C4dA058D022BE92776af8', name: null, logoUri: null },
+  ],
+  queued: 1,
+  threshold: 1,
+}
 /**
  * This utility component is only included in the test simulator
  * build. It gives some quick triggers which help improve the pace
@@ -43,6 +60,14 @@ export function TestCtrls() {
     dispatch(setActiveSafe(mockedActiveAccount))
     router.replace('/(tabs)')
   }
+  const onPressE2eHistory = async () => {
+    dispatch(updateSettings({ onboardingVersionSeen: 'v1' }))
+    dispatch(updatePromptAttempts(1))
+    dispatch(addSafe({ SafeInfo: mockedActiveSafeInfo1, chains: [mockedActiveSafeInfo1.chainId] }))
+    dispatch(setActiveSafe(mockedActiveAccount1))
+    
+    router.replace('/(tabs)')
+  }
   const onPressTestOnboarding = async () => {
     router.replace('/onboarding')
   }
@@ -52,6 +77,12 @@ export function TestCtrls() {
       <Pressable
         testID="e2eOnboardedAccount"
         onPress={onPressOnboardedAccount}
+        accessibilityRole="button"
+        style={BTN}
+      />
+      <Pressable
+        testID="e2eHistory"
+        onPress={onPressE2eHistory}
         accessibilityRole="button"
         style={BTN}
       />

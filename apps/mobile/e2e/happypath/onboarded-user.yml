@@ -5,7 +5,7 @@ appId: global.safe.mobileapp
 - tapOn:
     id: 'e2eOnboardedAccount'
 - tapOn:
-    id: 'opt-in-secondary-button'
+    id: 'opt-in-secondary-button'  
 - assertVisible:
     id: 'home-tab'
 - tapOn:
