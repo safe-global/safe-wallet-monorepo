@@ -37,7 +37,7 @@ function ExplorerLink({ txHash }: { txHash: string }) {
 
   return (
     <Button variant="text" size="compact" className={css.button}>
-      <ExplorerButton {...explorerLiknk} isCompact={false} />
+      <ExplorerButton {...explorerLiknk} isCompact={false} fontSize="14px" />
     </Button>
   )
 }
@@ -53,7 +53,7 @@ export function TxShareBlock({ txId, txHash }: { txId: string; txHash?: string }
             data-testid="copy-link-btn"
             variant="outlined"
             size="compact"
-            startIcon={<SvgIcon component={ShareIcon} inheritViewBox fontSize="small" className={css.icon} />}
+            startIcon={<SvgIcon component={ShareIcon} inheritViewBox fontSize="small" />}
             className={css.button}
           >
             Copy link

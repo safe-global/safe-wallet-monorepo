@@ -27,10 +27,6 @@
   padding-bottom: 12px;
 }
 
-.icon {
-  margin-right: 4px;
-}
-
 .button {
   padding: var(--space-2);
   padding-top: 4px;
