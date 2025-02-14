@@ -53,7 +53,7 @@ const SafenetBanner = () => {
           Create a new account with Safenet to unlock a unified and secured experience across networks.
         </Typography>
         <Button size="small" onClick={onClick} className={css.bannerButton}>
-          Learn more
+          Get started
         </Button>
       </Grid>
     )
