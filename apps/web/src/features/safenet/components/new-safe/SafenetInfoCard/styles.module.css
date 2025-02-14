@@ -1,12 +1,20 @@
-.card {
+.lightCard,
+.darkCard {
   position: relative;
   margin-top: var(--space-3);
-  background: var(--color-background-default);
   padding: var(--space-3) var(--space-4);
   padding-right: var(--space-6);
   gap: var(--space-1);
   border-radius: var(--space-1);
   display: flex;
+}
+
+.lightCard {
+  background: var(--color-background-default);
+}
+
+.darkCard {
+  background: var(--color-border-light);
 }
 
 .images {
@@ -17,13 +25,24 @@
   justify-content: center;
 }
 
+.darkCard .bellIcon > path {
+  fill: var(--color-primary-main);
+}
+
 .newTag {
   top: -10px;
   left: -6px;
   position: absolute;
-  background: radial-gradient(100.81% 103.11% at 96.36% 3.87%, #000000 0%, #003f54 100%);
   border-radius: 4px;
   padding: 0 var(--space-1);
+}
+
+.lightCard .newTag {
+  background: radial-gradient(100.81% 103.11% at 96.36% 3.87%, #000000 0%, #003f54 100%);
+}
+
+.darkCard .newTag {
+  background: #494949;
 }
 
 .newTag > p {
@@ -44,4 +63,8 @@
   top: var(--space-1);
   right: var(--space-1);
   color: var(--color-text-primary);
+}
+
+.darkCard .close {
+  color: var(--color-primary-light);
 }

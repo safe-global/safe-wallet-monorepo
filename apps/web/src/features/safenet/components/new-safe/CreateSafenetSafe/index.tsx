@@ -256,7 +256,9 @@ const CreateSafenetAccount = () => {
             {wallet?.address && <CreateSafeInfos staticHint={safenetStaticHint} dynamicHint={dynamicHint} />}
             {activeStep < 3 && (
               <Box padding={3}>
-                <ExternalLink href="https://docs.safe.global/safenet/overview" color="textPrimary">Read more about Safenet</ExternalLink>
+                <ExternalLink href="https://docs.safe.global/safenet/overview" color="textPrimary">
+                  Read more about Safenet
+                </ExternalLink>
               </Box>
             )}
           </Grid>
