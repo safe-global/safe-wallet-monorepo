@@ -5,12 +5,13 @@
   gap: var(--space-1);
 }
 
-.title > svg {
+.logo,
+.darkLogo {
   margin-bottom: var(--space-2);
 }
 
-.title > svg > path {
-  fill: black;
+.darkLogo > path {
+  fill: var(--color-static-main);
 }
 
 .row {
@@ -32,8 +33,5 @@
   gap: var(--space-1);
   justify-content: flex-end;
   padding: var(--space-1) var(--space-2);
-}
-
-.safenetHeader > svg > path {
-  fill: black;
+  color: var(--color-static-main);
 }
