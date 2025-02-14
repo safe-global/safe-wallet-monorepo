@@ -48,7 +48,7 @@ export function TxShareBlock({ txId, txHash }: { txId: string; txHash?: string }
       <TxShareAccordion noExpand={!!txHash} />
 
       <Box p={2} pt={0.5} display="flex" alignItems="center" gap={1}>
-        <TxShareLink id={txId} eventLabel="share-block">
+        <TxShareLink id={txId}>
           <Button
             data-testid="copy-link-btn"
             variant="outlined"

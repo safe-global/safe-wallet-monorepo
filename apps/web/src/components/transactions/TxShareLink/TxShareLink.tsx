@@ -7,22 +7,14 @@ import React from 'react'
 import CopyTooltip from '@/components/common/CopyTooltip'
 import useOrigin from '@/hooks/useOrigin'
 
-const TxShareLink = ({
-  id,
-  children,
-  eventLabel,
-}: {
-  id: string
-  children: ReactElement
-  eventLabel: 'share-block'
-}): ReactElement => {
+const TxShareLink = ({ id, children }: { id: string; children: ReactElement }): ReactElement => {
   const router = useRouter()
   const { safe = '' } = router.query
   const href = `${AppRoutes.transactions.tx}?safe=${safe}&id=${id}`
   const txUrl = useOrigin() + href
 
   return (
-    <Track {...TX_LIST_EVENTS.COPY_DEEPLINK} label={eventLabel}>
+    <Track {...TX_LIST_EVENTS.COPY_DEEPLINK}>
       <CopyTooltip text={txUrl} initialToolTipText="Copy the transaction URL">
         {children}
       </CopyTooltip>

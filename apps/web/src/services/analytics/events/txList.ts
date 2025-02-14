@@ -19,6 +19,7 @@ export const TX_LIST_EVENTS = {
   COPY_DEEPLINK: {
     action: 'Copy deeplink',
     category: TX_LIST_CATEGORY,
+    label: 'share-block',
   },
   OPEN_SHARE_BLOCK: {
     action: 'Open share block',
