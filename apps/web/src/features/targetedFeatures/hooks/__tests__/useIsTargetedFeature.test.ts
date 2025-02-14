@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker'
 
-import * as useOutreachSafeHook from '@/features/targetedOutreach/hooks/useIsOutreachSafe'
+import * as useOutreachSafeHook from '@/features/targetedFeatures/hooks/useIsOutreachSafe'
 import * as useChainsHook from '@/hooks/useChains'
 import * as useLocalStorageHook from '@/services/local-storage/useLocalStorage'
 import { renderHook, waitFor } from '@/tests/test-utils'

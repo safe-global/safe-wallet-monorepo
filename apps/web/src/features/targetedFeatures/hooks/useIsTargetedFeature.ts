@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 
-import { useIsOutreachSafe } from '@/features/targetedOutreach/hooks/useIsOutreachSafe'
+import { useIsOutreachSafe } from '@/features/targetedFeatures/hooks/useIsOutreachSafe'
 import { useHasFeature } from '@/hooks/useChains'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import { TARGETED_FEATURES } from '../constants'
