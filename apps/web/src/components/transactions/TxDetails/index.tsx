@@ -37,6 +37,7 @@ import { asError } from '@/services/exceptions/utils'
 import { POLLING_INTERVAL } from '@/config/constants'
 import { TxNote } from '@/features/tx-notes'
 import { TxShareBlock } from '../TxShareLink'
+import { TxShareButton } from '../TxShareLink/TxShareButton'
 
 export const NOT_AVAILABLE = 'n/a'
 
@@ -85,6 +86,10 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
       <div className={`${css.details} ${isUnsigned ? css.noSigners : ''}`}>
         <div className={css.txNote}>
           <TxNote txDetails={txDetails} />
+        </div>
+
+        <div className={css.shareLink}>
+          <TxShareButton txId={txSummary.id} />
         </div>
 
         <div className={css.txData}>

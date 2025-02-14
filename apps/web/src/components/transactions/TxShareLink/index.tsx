@@ -2,7 +2,7 @@ import { Accordion, AccordionDetails, AccordionSummary, Box, Button, Paper, SvgI
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 
 import ShareIcon from '@/public/images/messages/link.svg'
-import { trackEvent, TX_LIST_EVENTS } from '@/services/analytics'
+import { CopyDeeplinkLabels, trackEvent, TX_LIST_EVENTS } from '@/services/analytics'
 import TxShareLink from './TxShareLink'
 
 import css from './styles.module.css'
@@ -48,7 +48,7 @@ export function TxShareBlock({ txId, txHash }: { txId: string; txHash?: string }
       <TxShareAccordion noExpand={!!txHash} />
 
       <Box p={2} pt={0.5} display="flex" alignItems="center" gap={1}>
-        <TxShareLink id={txId}>
+        <TxShareLink id={txId} eventLabel={CopyDeeplinkLabels.shareBlock}>
           <Button
             data-testid="copy-link-btn"
             variant="outlined"

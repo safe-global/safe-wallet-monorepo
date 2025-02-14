@@ -11,6 +11,13 @@
   position: relative;
 }
 
+.shareLink {
+  display: flex;
+  justify-content: flex-end;
+  margin: var(--space-1);
+  margin-bottom: -40px;
+}
+
 .txNote {
   margin: var(--space-1) 0;
   padding: 0 var(--space-2) var(--space-2);
