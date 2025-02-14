@@ -15,10 +15,10 @@ const MyAccountsFooterContainer = styled(View, {
 })
 
 const MyAccountsButton = styled(View, {
-  columnGap: '$3',
+  columnGap: '$2',
   alignItems: 'center',
   flexDirection: 'row',
-  marginBottom: '$7',
+  marginBottom: '$4',
 })
 
 interface CustomFooterProps extends BottomSheetFooterProps {}

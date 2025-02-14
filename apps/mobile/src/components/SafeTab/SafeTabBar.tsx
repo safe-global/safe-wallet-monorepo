@@ -20,7 +20,7 @@ export const SafeTabBar = ({
   const activeButtonStyle = {
     paddingBottom: 8,
     borderBottomColor: theme.color?.get(),
-    borderBottomWidth: 1,
+    borderBottomWidth: 2,
   }
 
   const handleTabPressed = (name: string) => () => {
@@ -34,8 +34,7 @@ export const SafeTabBar = ({
 
   return (
     <View
-      backgroundColor="transparent"
-      marginBottom="$4"
+      backgroundColor="$background"
       gap="$6"
       paddingHorizontal="$4"
       flexDirection="row"

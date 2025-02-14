@@ -1,4 +1,4 @@
-import { XStack } from 'tamagui'
+import { Theme, XStack, getTokenValue } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Identicon } from '@/src/components/Identicon'
 import { shortenAddress } from '@/src/utils/formatters'
@@ -29,29 +29,32 @@ export const Navbar = () => {
   }
 
   return (
-    <XStack
-      paddingTop={insets.top}
-      justifyContent={'space-between'}
-      paddingHorizontal={16}
-      alignItems={'center'}
-      paddingBottom={'$2'}
-    >
-      <DropdownLabel
-        label={shortenAddress(activeSafe.address)}
-        labelProps={dropdownLabelProps}
-        leftNode={<Identicon address={activeSafe.address} rounded={true} size={30} />}
-        onPress={() => {
-          router.push('/accounts-sheet')
-        }}
-      />
-      <XStack alignItems={'center'} justifyContent={'center'} gap={12}>
-        <TouchableOpacity onPress={handleNotificationAccess}>
-          <SafeFontIcon name="lightbulb" />
-        </TouchableOpacity>
-        <TouchableOpacity>
-          <SafeFontIcon name="apps" />
-        </TouchableOpacity>
+    <Theme name="navbar">
+      <XStack
+        paddingTop={getTokenValue('$2') + insets.top}
+        justifyContent={'space-between'}
+        paddingHorizontal={16}
+        alignItems={'center'}
+        paddingBottom={'$2'}
+        backgroundColor={'$background'}
+      >
+        <DropdownLabel
+          label={shortenAddress(activeSafe.address)}
+          labelProps={dropdownLabelProps}
+          leftNode={<Identicon address={activeSafe.address} rounded={true} size={30} />}
+          onPress={() => {
+            router.push('/accounts-sheet')
+          }}
+        />
+        <XStack alignItems={'center'} justifyContent={'center'} gap={12}>
+          <TouchableOpacity onPress={handleNotificationAccess}>
+            <SafeFontIcon name="lightbulb" />
+          </TouchableOpacity>
+          <TouchableOpacity>
+            <SafeFontIcon name="apps" />
+          </TouchableOpacity>
+        </XStack>
       </XStack>
-    </XStack>
+    </Theme>
   )
 }

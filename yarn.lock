@@ -8273,7 +8273,7 @@ __metadata:
     react-native-gesture-handler: "npm:~2.20.2"
     react-native-keychain: "npm:^9.2.2"
     react-native-mmkv: "npm:^3.1.0"
-    react-native-pager-view: "npm:^6.5.1"
+    react-native-pager-view: "npm:^6.7.0"
     react-native-progress: "npm:^5.0.1"
     react-native-quick-crypto: "npm:^0.7.11"
     react-native-reanimated: "npm:~3.16.7"
@@ -28990,13 +28990,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-pager-view@npm:^6.5.1":
-  version: 6.6.1
-  resolution: "react-native-pager-view@npm:6.6.1"
+"react-native-pager-view@npm:^6.7.0":
+  version: 6.7.0
+  resolution: "react-native-pager-view@npm:6.7.0"
   peerDependencies:
     react: "*"
     react-native: "*"
-  checksum: 10/f56c3598a0e88fc66bdea806abacb0dd366bbd16a0c371a9a0c4dc21b2e53b020321bb896e1ae0f07c75caea16aaed292ae66c1a7546ade9c6d2a14aee8b9d63
+  checksum: 10/01257ced1f51e798423c9af6c891dfa0ab3bac22c4e67fa5995dc0f25f36013beed92e1e8b509d57af85f934f316dad017dc05db7142cd063849c1acbff3f7ed
   languageName: node
   linkType: hard
 

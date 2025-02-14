@@ -2,9 +2,11 @@ import { createTamagui } from 'tamagui'
 import { createDmSansFont } from '@tamagui/font-dm-sans'
 import { badgeTheme } from '@/src/components/Badge/theme'
 import { badgeTheme as NetworkBadgeTheme } from '@/src/components/NetworkBadge/theme'
+import { navbarTheme } from '@/src/features/Assets/components/Navbar/theme'
 import { tokens } from '@/src/theme/tokens'
 import { createAnimations } from '@tamagui/animations-moti'
 import { inputTheme } from '../components/SafeInput/theme'
+import { safeTabTheme } from '@/src/components/SafeTab/theme'
 
 const DmSansFont = createDmSansFont({
   face: {
@@ -59,6 +61,8 @@ export const config = createTamagui({
     ...badgeTheme,
     ...inputTheme,
     ...NetworkBadgeTheme,
+    ...navbarTheme,
+    ...safeTabTheme,
     light_success: {
       background: tokens.color.successBackgroundLight,
       color: tokens.color.successMainLight,
