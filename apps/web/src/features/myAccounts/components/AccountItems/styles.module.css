@@ -141,13 +141,3 @@
     justify-content: flex-start;
   }
 }
-
-.safenetListItem {
-  margin-bottom: 12px;
-}
-
-.safenetListItem .listItem {
-  border: none;
-  border-radius-left-top: 0;
-  border-radius-right-top: 0;
-}

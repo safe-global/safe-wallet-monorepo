@@ -1,82 +1,84 @@
+import ChainIndicator from '@/components/common/ChainIndicator'
+import FiatValue from '@/components/common/FiatValue'
+import SafeIcon from '@/components/common/SafeIcon'
+import MultiAccountContextMenu from '@/components/sidebar/SafeListContextMenu/MultiAccountContextMenu'
+import { AppRoutes } from '@/config/routes'
 import { selectUndeployedSafes } from '@/features/counterfactual/store/undeployedSafesSlice'
+import { isPredictedSafeProps } from '@/features/counterfactual/utils'
 import NetworkLogosList from '@/features/multichain/components/NetworkLogosList'
-import { showNotification } from '@/store/notificationsSlice'
+import { getSafeSetups, getSharedSetup, hasMultiChainAddNetworkFeature } from '@/features/multichain/utils/utils'
 import SingleAccountItem from '@/features/myAccounts/components/AccountItems/SingleAccountItem'
-import type { SafeOverview } from '@safe-global/safe-gateway-typescript-sdk'
-import { useCallback, useMemo, useState } from 'react'
+import { type SafeItem } from '@/features/myAccounts/hooks/useAllSafes'
+import { type MultiChainSafeItem } from '@/features/myAccounts/hooks/useAllSafesGrouped'
+import { getComparator } from '@/features/myAccounts/utils/utils'
+import useHasSafenetFeature from '@/features/safenet/hooks/useHasSafenetFeature'
+import useSafeAddress from '@/hooks/useSafeAddress'
+import useWallet from '@/hooks/wallets/useWallet'
+import BookmarkIcon from '@/public/images/apps/bookmark.svg'
+import BookmarkedIcon from '@/public/images/apps/bookmarked.svg'
+import { OVERVIEW_EVENTS, OVERVIEW_LABELS, PIN_SAFE_LABELS, trackEvent } from '@/services/analytics'
+import { useAppDispatch, useAppSelector } from '@/store'
+import { addOrUpdateSafe, pinSafe, selectAllAddedSafes, unpinSafe } from '@/store/addedSafesSlice'
+import { useGetMultipleSafeOverviewsQuery } from '@/store/api/gateway'
+import { selectChains } from '@/store/chainsSlice'
+import { showNotification } from '@/store/notificationsSlice'
+import { selectOrderByPreference } from '@/store/orderByPreferenceSlice'
+import { defaultSafeInfo } from '@/store/safeInfoSlice'
+import { useGetSafenetAccountQuery } from '@/store/safenet'
+import { selectCurrency } from '@/store/settingsSlice'
+import { sameAddress } from '@/utils/addresses'
+import { shortenAddress } from '@/utils/formatters'
 import {
-  ListItemButton,
-  Box,
-  Typography,
-  Skeleton,
   Accordion,
   AccordionDetails,
   AccordionSummary,
+  Box,
   Divider,
-  Tooltip,
-  SvgIcon,
   IconButton,
+  ListItemButton,
+  Skeleton,
+  SvgIcon,
+  Tooltip,
+  Typography,
 } from '@mui/material'
-import SafeIcon from '@/components/common/SafeIcon'
-import { OVERVIEW_EVENTS, OVERVIEW_LABELS, PIN_SAFE_LABELS, trackEvent } from '@/services/analytics'
-import { AppRoutes } from '@/config/routes'
-import { useAppDispatch, useAppSelector } from '@/store'
-import css from './styles.module.css'
-import useSafeAddress from '@/hooks/useSafeAddress'
-import { sameAddress } from '@/utils/addresses'
+import type { SafeOverview } from '@safe-global/safe-gateway-typescript-sdk'
 import classnames from 'classnames'
-import { useRouter } from 'next/router'
-import FiatValue from '@/components/common/FiatValue'
-import { type MultiChainSafeItem } from '@/features/myAccounts/hooks/useAllSafesGrouped'
-import { shortenAddress } from '@/utils/formatters'
-import { type SafeItem } from '@/features/myAccounts/hooks/useAllSafes'
-import { getSafeSetups, getSharedSetup, hasMultiChainAddNetworkFeature } from '@/features/multichain/utils/utils'
-import { AddNetworkButton } from '../AddNetworkButton'
-import { isPredictedSafeProps } from '@/features/counterfactual/utils'
-import ChainIndicator from '@/components/common/ChainIndicator'
-import MultiAccountContextMenu from '@/components/sidebar/SafeListContextMenu/MultiAccountContextMenu'
-import { useGetMultipleSafeOverviewsQuery } from '@/store/api/gateway'
-import useWallet from '@/hooks/wallets/useWallet'
-import { selectCurrency } from '@/store/settingsSlice'
-import { selectChains } from '@/store/chainsSlice'
-import BookmarkIcon from '@/public/images/apps/bookmark.svg'
-import BookmarkedIcon from '@/public/images/apps/bookmarked.svg'
-import { addOrUpdateSafe, pinSafe, selectAllAddedSafes, unpinSafe } from '@/store/addedSafesSlice'
-import { defaultSafeInfo } from '@/store/safeInfoSlice'
-import { selectOrderByPreference } from '@/store/orderByPreferenceSlice'
-import { getComparator } from '@/features/myAccounts/utils/utils'
 import dynamic from 'next/dynamic'
+import { useRouter } from 'next/router'
+import { useCallback, useMemo, useState } from 'react'
+import { AddNetworkButton } from '../AddNetworkButton'
+import css from './styles.module.css'
 
-const GradientBoxSafenet = dynamic(() => import('@/features/safenet/components/GradientBoxSafenet'))
+const SafenetMultichainIndicator = dynamic(() => import('@/features/safenet/components/SafenetMultichainIndicator'))
+const SafenetAccountList = dynamic(() => import('@/features/safenet/components/SafenetAccountList'))
 
 type MultiAccountItemProps = {
   multiSafeAccountItem: MultiChainSafeItem
   safeOverviews?: SafeOverview[]
   onLinkClick?: () => void
-  isSafenetEnabled?: boolean
+  hasSafenetFeature?: boolean
 }
 
-const MultichainIndicator = ({ safes }: { safes: SafeItem[] }) => {
-  return (
-    <Tooltip
-      title={
-        <Box data-testid="multichain-tooltip">
-          <Typography fontSize="14px">Multichain account on:</Typography>
-          {safes.map((safeItem) => (
-            <Box key={safeItem.chainId} sx={{ p: '4px 0px' }}>
-              <ChainIndicator chainId={safeItem.chainId} />
-            </Box>
-          ))}
-        </Box>
-      }
-      arrow
-    >
-      <Box className={css.multiChains}>
-        <NetworkLogosList networks={safes} showHasMore />
+const MultichainIndicator = ({ safes, safenetSafes }: { safes: SafeItem[]; safenetSafes?: SafeItem[] }) => (
+  <Tooltip
+    title={
+      <Box data-testid="multichain-tooltip">
+        <Typography fontSize="14px">Multichain account on:</Typography>
+        {safes.map((safeItem) => (
+          <Box key={safeItem.chainId} sx={{ p: '4px 0px' }}>
+            <ChainIndicator chainId={safeItem.chainId} />
+          </Box>
+        ))}
+        {safenetSafes && <SafenetMultichainIndicator safenetSafes={safenetSafes} />}
       </Box>
-    </Tooltip>
-  )
-}
+    }
+    arrow
+  >
+    <Box className={css.multiChains}>
+      <NetworkLogosList networks={safes} showHasMore showHasSafenet={safenetSafes && safenetSafes.length > 0} />
+    </Box>
+  </Tooltip>
+)
 
 function useMultiAccountItemData(multiSafeAccountItem: MultiChainSafeItem) {
   const { address, safes, isPinned, name } = multiSafeAccountItem
@@ -127,6 +129,24 @@ function useMultiAccountItemData(multiSafeAccountItem: MultiChainSafeItem) {
 
   const deployedChainIds = useMemo(() => sortedSafes.map((safe) => safe.chainId), [sortedSafes])
 
+  const hasSafenetFeature = useHasSafenetFeature()
+  const { data: safenetConfig } = useGetSafenetAccountQuery({ safeAddress: address }, { skip: !hasSafenetFeature })
+
+  const nonSafenetSafes = useMemo(() => {
+    if (safenetConfig) {
+      const deployedSafenetChainIds = safenetConfig.safes.map((safe) => safe.chainId.toString())
+      return sortedSafes.filter((safe) => !deployedSafenetChainIds.includes(safe.chainId))
+    }
+    return sortedSafes
+  }, [safenetConfig, sortedSafes])
+
+  const safenetSafes = useMemo(() => {
+    if (safenetConfig) {
+      const deployedSafenetChainIds = safenetConfig.safes.map((safe) => safe.chainId.toString())
+      return sortedSafes.filter((safe) => deployedSafenetChainIds.includes(safe.chainId))
+    }
+  }, [safenetConfig, sortedSafes])
+
   return {
     address,
     name,
@@ -140,6 +160,8 @@ function useMultiAccountItemData(multiSafeAccountItem: MultiChainSafeItem) {
     isReadOnly,
     isWelcomePage,
     deployedChainIds,
+    safenetSafes,
+    nonSafenetSafes,
   }
 }
 
@@ -217,7 +239,7 @@ function usePinActions(
   return { addToPinnedList, removeFromPinnedList }
 }
 
-const MultiAccountItem = ({ onLinkClick, multiSafeAccountItem, isSafenetEnabled }: MultiAccountItemProps) => {
+const MultiAccountItem = ({ onLinkClick, multiSafeAccountItem }: MultiAccountItemProps) => {
   const {
     address,
     name,
@@ -231,6 +253,8 @@ const MultiAccountItem = ({ onLinkClick, multiSafeAccountItem, isSafenetEnabled 
     isReadOnly,
     isWelcomePage,
     deployedChainIds,
+    safenetSafes,
+    nonSafenetSafes,
   } = useMultiAccountItemData(multiSafeAccountItem)
   const { addToPinnedList, removeFromPinnedList } = usePinActions(address, name, sortedSafes, safeOverviews)
 
@@ -246,7 +270,7 @@ const MultiAccountItem = ({ onLinkClick, multiSafeAccountItem, isSafenetEnabled 
     })
   }
 
-  const listItem = (
+  return (
     <ListItemButton
       data-testid="safe-list-item"
       selected={isCurrentSafe}
@@ -283,7 +307,7 @@ const MultiAccountItem = ({ onLinkClick, multiSafeAccountItem, isSafenetEnabled 
                 {shortenAddress(address)}
               </Typography>
             </Typography>
-            <MultichainIndicator safes={sortedSafes} />
+            <MultichainIndicator safes={nonSafenetSafes} safenetSafes={safenetSafes} />
             <Typography
               data-testid="group-balance"
               variant="body2"
@@ -325,8 +349,9 @@ const MultiAccountItem = ({ onLinkClick, multiSafeAccountItem, isSafenetEnabled 
           />
         </AccordionSummary>
         <AccordionDetails sx={{ padding: '0px 12px' }}>
+          {safenetSafes && <SafenetAccountList safenetSafes={safenetSafes} onLinkClick={onLinkClick} />}
           <Box data-testid="subacounts-container">
-            {sortedSafes.map((safeItem) => (
+            {nonSafenetSafes.map((safeItem) => (
               <SingleAccountItem
                 onLinkClick={onLinkClick}
                 safeItem={safeItem}
@@ -358,11 +383,6 @@ const MultiAccountItem = ({ onLinkClick, multiSafeAccountItem, isSafenetEnabled 
         </AccordionDetails>
       </Accordion>
     </ListItemButton>
-  )
-  return isSafenetEnabled ? (
-    <GradientBoxSafenet className={css.safenetListItem}>{listItem}</GradientBoxSafenet>
-  ) : (
-    listItem
   )
 }
 
