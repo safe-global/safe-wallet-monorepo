@@ -205,19 +205,5 @@ describe('Targeted Safe', () => {
         expect(setLocalStorageMock).toHaveBeenCalledWith([feature])
       })
     })
-
-    it('removes disabled features from cache', () => {
-      const feature = faker.helpers.arrayElement(targetedFeatures)
-      const setLocalStorageMock = jest.fn()
-      jest.spyOn(useChainsHook, 'useHasFeature').mockReturnValue(false)
-      jest.spyOn(useIsTargetedSafeHook, 'useIsTargetedSafe').mockReturnValue(true)
-      jest.spyOn(useLocalStorageHook, 'default').mockReturnValue([[feature], jest.fn()])
-
-      renderHook(() => useIsTargetedFeature(feature))
-
-      waitFor(() => {
-        expect(setLocalStorageMock).toHaveBeenCalledWith([])
-      })
-    })
   })
 })

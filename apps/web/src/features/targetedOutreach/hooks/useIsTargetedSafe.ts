@@ -38,8 +38,6 @@ export function useIsTargetedFeature(feature: TargetedFeatures): boolean {
   useEffect(() => {
     if (hasFeature && isTargeted && !isUnlocked) {
       setUnlockedFeatures([...unlockedFeatures, feature])
-    } else {
-      setUnlockedFeatures(unlockedFeatures.filter((f) => f !== feature))
     }
   }, [feature, hasFeature, isTargeted, isUnlocked, setUnlockedFeatures, unlockedFeatures])
 
