@@ -3,6 +3,8 @@ import OrgsCard from '@/features/organizations/components/OrgsCard'
 import OrgsCreationModal from '@/features/organizations/components/OrgsCreationModal'
 import SignInButton from '@/features/organizations/components/SignInButton'
 import OrgsIcon from '@/public/images/orgs/orgs.svg'
+import { useAppSelector } from '@/store'
+import { isAuthenticated } from '@/store/authSlice'
 import { Box, Button, Card, Link, Stack, Typography } from '@mui/material'
 import { useState } from 'react'
 import css from './styles.module.css'
@@ -85,7 +87,7 @@ const ORGS = [
 ]
 
 const OrgsList = () => {
-  const isUserSignedIn = true // TODO: Implement logged in state once endpoint is ready
+  const isUserSignedIn = useAppSelector(isAuthenticated) // TODO: Implement logged in state once endpoint is ready
 
   return (
     <Box className={css.container}>
