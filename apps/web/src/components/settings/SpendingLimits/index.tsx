@@ -1,22 +1,24 @@
-import { useContext } from 'react'
-import { Paper, Grid, Typography, Box, Button } from '@mui/material'
-import { NoSpendingLimits } from '@/components/settings/SpendingLimits/NoSpendingLimits'
-import { SpendingLimitsTable } from '@/components/settings/SpendingLimits/SpendingLimitsTable'
-import { useSelector } from 'react-redux'
-import { selectSpendingLimits, selectSpendingLimitsLoading } from '@/store/spendingLimitsSlice'
-import { FEATURES } from '@/utils/chains'
-import { useHasFeature } from '@/hooks/useChains'
-import { NewSpendingLimitFlow } from '@/components/tx-flow/flows'
-import { SETTINGS_EVENTS } from '@/services/analytics'
 import CheckWallet from '@/components/common/CheckWallet'
 import Track from '@/components/common/Track'
+import { NoSpendingLimits } from '@/components/settings/SpendingLimits/NoSpendingLimits'
+import { SpendingLimitsTable } from '@/components/settings/SpendingLimits/SpendingLimitsTable'
 import { TxModalContext } from '@/components/tx-flow'
+import { NewSpendingLimitFlow } from '@/components/tx-flow/flows'
+import useIsSafenetEnabled from '@/features/safenet/hooks/useIsSafenetEnabled'
+import { useHasFeature } from '@/hooks/useChains'
+import { SETTINGS_EVENTS } from '@/services/analytics'
+import { selectSpendingLimits, selectSpendingLimitsLoading } from '@/store/spendingLimitsSlice'
+import { FEATURES } from '@/utils/chains'
+import { Box, Button, Grid, Paper, Typography } from '@mui/material'
+import { useContext } from 'react'
+import { useSelector } from 'react-redux'
 
 const SpendingLimits = () => {
   const { setTxFlow } = useContext(TxModalContext)
   const spendingLimits = useSelector(selectSpendingLimits)
   const spendingLimitsLoading = useSelector(selectSpendingLimitsLoading)
   const isEnabled = useHasFeature(FEATURES.SPENDING_LIMIT)
+  const isSafenetEnabled = useIsSafenetEnabled()
 
   return (
     <Paper data-testid="spending-limit-section" sx={{ padding: 4 }}>
@@ -41,7 +43,11 @@ const SpendingLimits = () => {
         </Grid>
 
         <Grid item xs>
-          {isEnabled ? (
+          {!isEnabled ? (
+            <Typography>The spending limit module is not yet available on this chain.</Typography>
+          ) : isSafenetEnabled ? (
+            <Typography>To add a spending limit, you must first disable the Safenet Guard and Module.</Typography>
+          ) : (
             <Box>
               <Typography>
                 You can set rules for specific beneficiaries to access funds from this Safe Account without having to
@@ -67,8 +73,6 @@ const SpendingLimits = () => {
 
               {!spendingLimits.length && !spendingLimitsLoading && <NoSpendingLimits />}
             </Box>
-          ) : (
-            <Typography>The spending limit module is not yet available on this chain.</Typography>
           )}
         </Grid>
       </Grid>
