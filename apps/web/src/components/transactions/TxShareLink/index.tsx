@@ -10,7 +10,7 @@ import { getBlockExplorerLink } from '@/utils/chains'
 import { useCurrentChain } from '@/hooks/useChains'
 import ExplorerButton from '@/components/common/ExplorerButton'
 
-function TxShareAccordion({ noExpand = false }) {
+function TxShareAccordion({ noExpand = false }: { noExpand: boolean }) {
   const onExpand = (_: React.SyntheticEvent, expanded: boolean) => {
     if (expanded) {
       trackEvent(TX_LIST_EVENTS.OPEN_SHARE_BLOCK)
