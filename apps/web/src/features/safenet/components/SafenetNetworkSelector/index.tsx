@@ -1,6 +1,8 @@
 import NetworkLogosList from '@/features/multichain/components/NetworkLogosList'
 import useChains from '@/hooks/useChains'
+import { useDarkMode } from '@/hooks/useDarkMode'
 import { default as CaretDownIcon, default as CaretUpIcon } from '@/public/images/common/caret-down.svg'
+import SafenetDarkLogo from '@/public/images/safenet/logo-safenet-dark-gradient.svg'
 import SafenetLogo from '@/public/images/safenet/logo-safenet.svg'
 import { useGetSafenetConfigQuery } from '@/store/safenet'
 import { Box, SvgIcon, Typography } from '@mui/material'
@@ -13,6 +15,7 @@ type SafenetNetworkSelectorProps = {
 }
 
 function SafenetNetworkSelector({ expandable = false, displayLogo = true }: SafenetNetworkSelectorProps) {
+  const isDarkMode = useDarkMode()
   const { data } = useGetSafenetConfigQuery()
   const { configs } = useChains()
   const [open, setOpen] = useState<boolean>(false)
@@ -40,7 +43,7 @@ function SafenetNetworkSelector({ expandable = false, displayLogo = true }: Safe
         <Box className={css.multiChains}>
           <NetworkLogosList networks={safenetChains} showHasMore />
         </Box>
-        {displayLogo && <SafenetLogo className={css.logo} />}
+        {displayLogo && (isDarkMode ? <SafenetLogo className={css.logo} /> : <SafenetDarkLogo className={css.logo} />)}
         {expandable && (
           <SvgIcon
             component={open ? CaretUpIcon : CaretDownIcon}
