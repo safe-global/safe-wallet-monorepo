@@ -20,52 +20,71 @@ export function getDeterministicColor(str: string): string {
   return hslToRgb(`hsl(${hue}, ${saturation}, ${lightness})`)
 }
 
-const OrgLogo = ({ orgName }: { orgName: string }) => {
+export const OrgLogo = ({ orgName, size = 'large' }: { orgName: string; size?: 'small' | 'medium' | 'large' }) => {
   const logoLetters = orgName.slice(0, 2)
   const logoColor = getDeterministicColor(orgName)
 
+  const dimensions = {
+    small: { width: 24, height: 24, fontSize: '12px !important' },
+    medium: { width: 32, height: 32, fontSize: '16px !important' },
+    large: { width: 48, height: 48, fontSize: '20px !important' },
+  }
+
+  const { width, height, fontSize } = dimensions[size]
+
   return (
-    <Box className={css.orgLogo} bgcolor={logoColor}>
+    <Box className={css.orgLogo} bgcolor={logoColor} width={width} height={height} fontSize={fontSize}>
       {logoLetters}
     </Box>
   )
 }
 
-type Organization = {
+export type Organization = {
   id: number
   name: string
   members: Array<object>
   safes: Array<object>
 }
 
-const OrgsCard = ({ org }: { org: Organization }) => {
+const OrgsCard = ({ org, isCompact = false }: { org: Organization; isCompact?: boolean }) => {
   const { id, safes, name, members } = org
   const numberOfAccounts = safes.length
   const numberOfMembers = members.length
 
   return (
-    <Card className={css.card}>
+    <Card className={css.card} sx={{ px: 2, py: isCompact ? 1 : 2 }}>
       <Link className={css.cardLink} href={AppRoutes.organizations.index(id.toString())} />
 
-      <OrgLogo orgName={name} />
+      <Stack
+        alignItems={isCompact ? 'center' : 'left'}
+        direction={isCompact ? 'row' : 'column'}
+        spacing={isCompact ? 1 : 0}
+      >
+        <OrgLogo orgName={name} size={isCompact ? 'medium' : 'large'} />
 
-      <Typography mt={2} variant="body2" fontWeight="bold">
-        {name}
-      </Typography>
+        <Box>
+          <Typography mt={isCompact ? 0 : 2} variant="body2" fontWeight="bold">
+            {name}
+          </Typography>
 
-      <Stack direction="row" spacing={1} alignItems="center" mt={0.5}>
-        <Typography variant="caption" color="text.secondary">
-          {numberOfAccounts} Accounts
-        </Typography>
+          <Stack direction="row" spacing={1} alignItems="center" mt={isCompact ? 0 : 0.5}>
+            <Typography variant="caption" color="text.secondary">
+              {numberOfAccounts} Accounts
+            </Typography>
 
-        <div className={css.dot} />
+            <div className={css.dot} />
 
-        <Typography variant="caption" color="text.secondary">
-          {numberOfMembers} Members
-        </Typography>
+            <Typography variant="caption" color="text.secondary">
+              {numberOfMembers} Members
+            </Typography>
+          </Stack>
+        </Box>
       </Stack>
-
-      <IconButton className={css.orgActions} size="small" onClick={() => {}}>
+      <IconButton
+        sx={{ position: 'absolute', top: isCompact ? 8 : 16, right: isCompact ? 8 : 16 }}
+        size="small"
+        onClick={() => {}}
+      >
         <MoreVertIcon sx={({ palette }) => ({ color: palette.border.main })} />
       </IconButton>
     </Card>
