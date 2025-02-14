@@ -2,6 +2,7 @@ import { AppRoutes } from '@/config/routes'
 import { Box, Card, hslToRgb, Stack, Typography } from '@mui/material'
 import MoreVertIcon from '@mui/icons-material/MoreVert'
 import IconButton from '@mui/material/IconButton'
+import type { GetOrganizationResponse } from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
 import Link from 'next/link'
 
 import css from './styles.module.css'
@@ -31,15 +32,9 @@ const OrgLogo = ({ orgName }: { orgName: string }) => {
   )
 }
 
-type Organization = {
-  id: number
-  name: string
-  members: Array<object>
-  safes: Array<object>
-}
-
-const OrgsCard = ({ org }: { org: Organization }) => {
-  const { id, safes, name, members } = org
+const OrgsCard = ({ org }: { org: GetOrganizationResponse }) => {
+  const { id, name, userOrganizations: members } = org
+  const safes = []
   const numberOfAccounts = safes.length
   const numberOfMembers = members.length
 

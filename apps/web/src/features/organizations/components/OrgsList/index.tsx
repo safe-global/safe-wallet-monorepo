@@ -5,7 +5,8 @@ import SignInButton from '@/features/organizations/components/SignInButton'
 import OrgsIcon from '@/public/images/orgs/orgs.svg'
 import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
-import { Box, Button, Card, Link, Stack, Typography } from '@mui/material'
+import { Box, Button, Card, Grid2, Link, Typography } from '@mui/material'
+import { useOrganizationsGetV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
 import { useState } from 'react'
 import css from './styles.module.css'
 
@@ -71,23 +72,9 @@ const NoOrgsState = () => {
   )
 }
 
-const ORGS = [
-  {
-    name: 'Safe DAO',
-    id: 1,
-    members: [{ id: 1 }, { id: 2 }, { id: 3 }],
-    safes: [{ id: 1 }, { id: 4 }, { id: 2 }],
-  },
-  {
-    name: 'Optimism Foundation',
-    id: 2,
-    members: [{ id: 2 }, { id: 3 }, { id: 4 }, { id: 5 }, { id: 6 }],
-    safes: [{ id: 1 }, { id: 4 }, { id: 7 }, { id: 8 }, { id: 9 }, { id: 10 }],
-  },
-]
-
 const OrgsList = () => {
   const isUserSignedIn = useAppSelector(isAuthenticated) // TODO: Implement logged in state once endpoint is ready
+  const { data: organizations } = useOrganizationsGetV1Query(undefined, { skip: !isUserSignedIn })
 
   return (
     <Box className={css.container}>
@@ -97,10 +84,18 @@ const OrgsList = () => {
           <AddOrgButton disabled={!isUserSignedIn} />
         </Box>
 
-        {isUserSignedIn ? (
-          <Stack direction="row" spacing={2}>
-            {ORGS.length > 0 ? ORGS.map((org) => <OrgsCard org={org} key={org.name} />) : <NoOrgsState />}
-          </Stack>
+        {isUserSignedIn && organizations ? (
+          <Grid2 container spacing={2} flexWrap="wrap">
+            {organizations.length > 0 ? (
+              organizations.map((org) => (
+                <Grid2 size={6} key={org.name}>
+                  <OrgsCard org={org} />
+                </Grid2>
+              ))
+            ) : (
+              <NoOrgsState />
+            )}
+          </Grid2>
         ) : (
           <EmptyState />
         )}

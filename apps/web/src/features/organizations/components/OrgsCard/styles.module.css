@@ -1,7 +1,6 @@
 .card {
   padding: var(--space-2);
   position: relative;
-  flex-basis: 50%;
 }
 
 .orgLogo {
