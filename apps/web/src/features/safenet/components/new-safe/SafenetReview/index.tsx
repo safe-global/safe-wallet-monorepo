@@ -4,7 +4,6 @@ import { AppRoutes } from '@/config/routes'
 import { PayMethod } from '@/features/counterfactual/PayNowPayLater'
 import { SafeCreationEvent, safeCreationDispatch } from '@/features/counterfactual/services/safeCreationEvents'
 import { CF_TX_GROUP_KEY, replayCounterfactualSafeDeployment } from '@/features/counterfactual/utils'
-import SafenetLogo from '@/public/images/safenet/logo-safenet.svg'
 import { gtmSetChainId } from '@/services/analytics/gtm'
 import { useAppDispatch } from '@/store'
 import { useLazyDeploySafenetAccountQuery } from '@/store/safenet'
@@ -14,6 +13,7 @@ import { Box, Typography } from '@mui/material'
 import { EMPTY_DATA, ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
 import { useRouter } from 'next/router'
 import type { Dispatch, SetStateAction } from 'react'
+import SafenetTag from '../../SafenetTag'
 import css from './styles.module.css'
 
 export type UseSubmitSafenetReviewHandlerProps = {
@@ -142,10 +142,7 @@ function SafenetReview() {
           </Typography>
           <CheckIcon color="success" fontSize="small" />
         </Box>
-        <Box className={css.tag}>
-          <Typography variant="body2">Sponsored by</Typography>
-          <SafenetLogo height="14" />
-        </Box>
+        <SafenetTag sponsored />
       </Box>
     </Box>
   )
