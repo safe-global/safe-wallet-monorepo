@@ -1,13 +1,8 @@
-import { useRouter } from 'next/router'
 import Head from 'next/head'
 import { BRAND_NAME } from '@/config/constants'
+import type { NextPage } from 'next'
 
-export default function OrganizationPage() {
-  const router = useRouter()
-  const { orgId } = router.query
-
-  if (!router.isReady || !orgId || typeof orgId !== 'string') return null
-
+const OrganizationDashboard: NextPage = () => {
   return (
     <>
       <Head>
@@ -18,3 +13,5 @@ export default function OrganizationPage() {
     </>
   )
 }
+
+export default OrganizationDashboard

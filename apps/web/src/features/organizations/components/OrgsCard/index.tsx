@@ -46,14 +46,22 @@ export type Organization = {
   safes: Array<object>
 }
 
-const OrgsCard = ({ org, isCompact = false }: { org: Organization; isCompact?: boolean }) => {
+const OrgsCard = ({
+  org,
+  isCompact = false,
+  isLink = true,
+}: {
+  org: Organization
+  isCompact?: boolean
+  isLink?: boolean
+}) => {
   const { id, safes, name, members } = org
   const numberOfAccounts = safes.length
   const numberOfMembers = members.length
 
   return (
     <Card className={css.card} sx={{ px: 2, py: isCompact ? 1 : 2 }}>
-      <Link className={css.cardLink} href={AppRoutes.organizations.index(id.toString())} />
+      {isLink && <Link className={css.cardLink} href={AppRoutes.organizations.index(id.toString())} />}
 
       <Stack
         alignItems={isCompact ? 'center' : 'left'}

@@ -73,7 +73,7 @@ const OrgsSidebarSelector = () => {
           onClose={handleClose}
           sx={{ '& .MuiPaper-root': { minWidth: '260px !important' } }}
         >
-          <OrgsCard org={selectedOrg} isCompact />
+          <OrgsCard org={selectedOrg} isCompact isLink={false} />
           <Divider sx={{ mb: 1 }} />
           {ORGS.map((org) => (
             <MenuItem
