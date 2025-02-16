@@ -88,7 +88,7 @@ const OrgsSidebarSelector = () => {
             >
               <Box display="flex" alignItems="center" gap={1}>
                 <OrgLogo orgName={org.name} size="small" />
-                {org.name}
+                <Typography variant="body2">{org.name}</Typography>
               </Box>
               {org.id === selectedOrg.id && <CheckIcon fontSize="small" color="primary" />}
             </MenuItem>

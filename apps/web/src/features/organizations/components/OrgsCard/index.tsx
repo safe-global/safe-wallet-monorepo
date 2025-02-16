@@ -3,6 +3,7 @@ import { Box, Card, hslToRgb, Stack, Typography } from '@mui/material'
 import MoreVertIcon from '@mui/icons-material/MoreVert'
 import IconButton from '@mui/material/IconButton'
 import Link from 'next/link'
+import classNames from 'classnames'
 
 import css from './styles.module.css'
 
@@ -60,39 +61,32 @@ const OrgsCard = ({
   const numberOfMembers = members.length
 
   return (
-    <Card className={css.card} sx={{ px: 2, py: isCompact ? 1 : 2 }}>
+    <Card className={classNames(css.card, { [css.compact]: isCompact })}>
       {isLink && <Link className={css.cardLink} href={AppRoutes.organizations.index(id.toString())} />}
 
-      <Stack
-        alignItems={isCompact ? 'center' : 'left'}
-        direction={isCompact ? 'row' : 'column'}
-        spacing={isCompact ? 1 : 0}
-      >
+      <Box className={css.orgLogo}>
         <OrgLogo orgName={name} size={isCompact ? 'medium' : 'large'} />
+      </Box>
 
-        <Box>
-          <Typography mt={isCompact ? 0 : 2} variant="body2" fontWeight="bold">
-            {name}
+      <Box className={css.orgInfo}>
+        <Typography variant="body2" fontWeight="bold">
+          {name}
+        </Typography>
+
+        <Stack direction="row" spacing={1} alignItems="center" mt={isCompact ? 0 : 0.5}>
+          <Typography variant="caption" color="text.secondary">
+            {numberOfAccounts} Accounts
           </Typography>
 
-          <Stack direction="row" spacing={1} alignItems="center" mt={isCompact ? 0 : 0.5}>
-            <Typography variant="caption" color="text.secondary">
-              {numberOfAccounts} Accounts
-            </Typography>
+          <div className={css.dot} />
 
-            <div className={css.dot} />
+          <Typography variant="caption" color="text.secondary">
+            {numberOfMembers} Members
+          </Typography>
+        </Stack>
+      </Box>
 
-            <Typography variant="caption" color="text.secondary">
-              {numberOfMembers} Members
-            </Typography>
-          </Stack>
-        </Box>
-      </Stack>
-      <IconButton
-        sx={{ position: 'absolute', top: isCompact ? 8 : 16, right: isCompact ? 8 : 16 }}
-        size="small"
-        onClick={() => {}}
-      >
+      <IconButton className={css.orgActions} size="small" onClick={() => {}}>
         <MoreVertIcon sx={({ palette }) => ({ color: palette.border.main })} />
       </IconButton>
     </Card>
