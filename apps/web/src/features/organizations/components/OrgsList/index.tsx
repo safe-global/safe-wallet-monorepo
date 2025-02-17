@@ -1,4 +1,5 @@
 import AccountsNavigation from '@/features/myAccounts/components/AccountsNavigation'
+import type { Organization } from '@/features/organizations/components/OrgsCard'
 import OrgsCard from '@/features/organizations/components/OrgsCard'
 import OrgsCreationModal from '@/features/organizations/components/OrgsCreationModal'
 import SignInButton from '@/features/organizations/components/SignInButton'
@@ -69,7 +70,7 @@ const NoOrgsState = () => {
   )
 }
 
-const ORGS = [
+export const ORGS: Organization[] = [
   {
     name: 'Safe DAO',
     id: 1,
