@@ -1,19 +1,20 @@
+import { determineMasterCopyVersion, isPredictedSafeProps } from '@/features/counterfactual/utils'
 import useAsync, { type AsyncResult } from '@/hooks/useAsync'
 import { createWeb3ReadOnly } from '@/hooks/wallets/web3'
-import { type UndeployedSafe, selectRpc, type ReplayedSafeProps, selectUndeployedSafes } from '@/store/slices'
-import { Safe__factory, Safe_proxy_factory__factory } from '@/types/contracts'
-import { sameAddress } from '@/utils/addresses'
-import { getCreationTransaction } from '@safe-global/safe-client-gateway-sdk'
-import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
-import { useAppSelector } from '@/store'
-import { determineMasterCopyVersion, isPredictedSafeProps } from '@/features/counterfactual/utils'
 import { logError } from '@/services/exceptions'
 import ErrorCodes from '@/services/exceptions/ErrorCodes'
 import { asError } from '@/services/exceptions/utils'
-import semverSatisfies from 'semver/functions/satisfies'
-import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
-import { getSafeToL2SetupDeployment } from '@safe-global/safe-deployments'
+import { useAppSelector } from '@/store'
+import { selectRpc, selectUndeployedSafes, type ReplayedSafeProps, type UndeployedSafe } from '@/store/slices'
+import { Safe__factory, Safe_proxy_factory__factory } from '@/types/contracts'
+import { sameAddress } from '@/utils/addresses'
 import { type SafeAccountConfig } from '@safe-global/protocol-kit'
+import { decodeMultiSendData } from '@safe-global/protocol-kit/dist/src/utils'
+import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
+import { getCreationTransaction } from '@safe-global/safe-client-gateway-sdk'
+import { getMultiSendDeployment, getSafeToL2SetupDeployment } from '@safe-global/safe-deployments'
+import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import semverSatisfies from 'semver/functions/satisfies'
 
 export const SAFE_CREATION_DATA_ERRORS = {
   TX_NOT_FOUND: 'The Safe creation transaction could not be found. Please retry later.',
@@ -61,8 +62,30 @@ const validateAccountConfig = (safeAccountConfig: SafeAccountConfig) => {
     throw new Error(SAFE_CREATION_DATA_ERRORS.PAYMENT_SAFE)
   }
 
+  // No use of setupModules
+  if (safeAccountConfig.to === ZERO_ADDRESS) return
+
+  // setupModules used to call the SafeToL2Setup contract
   const setupToL2Address = getSafeToL2SetupDeployment({ version: '1.4.1' })?.defaultAddress
-  if (safeAccountConfig.to !== ZERO_ADDRESS && !sameAddress(safeAccountConfig.to, setupToL2Address)) {
+  const isSetupToL2 = safeAccountConfig.to !== ZERO_ADDRESS && sameAddress(safeAccountConfig.to, setupToL2Address)
+  if (isSetupToL2) return
+
+  // setupModules used to opt in into Safenet
+  if (safeAccountConfig.data) {
+    const safeSetupAddress = '0x18261ff68cC8D05EE046EDF5F4049B2077624a1d' // TODO: getSafeSetupDeployment({ version: '1.4.1' })?.defaultAddress
+    const multiSendAddress = getMultiSendDeployment({ version: '1.4.1' })?.defaultAddress
+
+    const decodedData = decodeMultiSendData(safeAccountConfig.data)
+
+    const isSafenetSetup =
+      sameAddress(safeAccountConfig.to, multiSendAddress) &&
+      decodedData.length === 2 &&
+      sameAddress(decodedData[0].to, setupToL2Address) &&
+      sameAddress(decodedData[1].to, safeSetupAddress)
+    if (isSafenetSetup) return
+  }
+
+  if (safeAccountConfig.to !== ZERO_ADDRESS) {
     // Unknown setupModules calls cannot be replayed as the target contract is likely not deployed across chains
     throw new Error(SAFE_CREATION_DATA_ERRORS.UNKNOWN_SETUP_MODULES)
   }
