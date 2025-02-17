@@ -34,6 +34,7 @@ export const dynamicBaseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBas
   const urlEnd = typeof args === 'string' ? args : args.url
   const adjustedUrl = `${resolvedBaseUrl}${urlEnd}`
   const shouldIncludeCredentials = CREDENTIAL_ROUTES.some((route) => urlEnd.startsWith(route))
+  console.log(urlEnd, adjustedUrl, shouldIncludeCredentials)
   const adjustedArgs = {
     ...(typeof args === 'string' ? { method: 'GET' } : args),
     url: adjustedUrl,
