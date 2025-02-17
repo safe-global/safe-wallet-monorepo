@@ -9,9 +9,13 @@ const SignInButton = () => {
 
   const handleSignIn = async () => {
     try {
-      await signIn()
-      const oneDayInMs = 24 * 60 * 60 * 1000
-      dispatch(setAuthenticated({ sessionExpiresAt: Date.now() + oneDayInMs }))
+      const result = await signIn()
+
+      // Sign in succeeded
+      if (result) {
+        const oneDayInMs = 24 * 60 * 60 * 1000
+        dispatch(setAuthenticated({ sessionExpiresAt: Date.now() + oneDayInMs }))
+      }
     } catch (error) {
       // TODO: handle error
       console.log(error)

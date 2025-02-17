@@ -4,6 +4,7 @@ import MoreVertIcon from '@mui/icons-material/MoreVert'
 import IconButton from '@mui/material/IconButton'
 import type { GetOrganizationResponse } from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
 import Link from 'next/link'
+import classNames from 'classnames'
 
 import css from './styles.module.css'
 
@@ -21,44 +22,64 @@ export function getDeterministicColor(str: string): string {
   return hslToRgb(`hsl(${hue}, ${saturation}, ${lightness})`)
 }
 
-const OrgLogo = ({ orgName }: { orgName: string }) => {
+export const OrgLogo = ({ orgName, size = 'large' }: { orgName: string; size?: 'small' | 'medium' | 'large' }) => {
   const logoLetters = orgName.slice(0, 2)
   const logoColor = getDeterministicColor(orgName)
 
+  const dimensions = {
+    small: { width: 24, height: 24, fontSize: '12px !important' },
+    medium: { width: 32, height: 32, fontSize: '16px !important' },
+    large: { width: 48, height: 48, fontSize: '20px !important' },
+  }
+
+  const { width, height, fontSize } = dimensions[size]
+
   return (
-    <Box className={css.orgLogo} bgcolor={logoColor}>
+    <Box className={css.orgLogo} bgcolor={logoColor} width={width} height={height} fontSize={fontSize}>
       {logoLetters}
     </Box>
   )
 }
 
-const OrgsCard = ({ org }: { org: GetOrganizationResponse }) => {
+const OrgsCard = ({
+  org,
+  isCompact = false,
+  isLink = true,
+}: {
+  org: GetOrganizationResponse
+  isCompact?: boolean
+  isLink?: boolean
+}) => {
   const { id, name, userOrganizations: members } = org
   const safes = []
   const numberOfAccounts = safes.length
   const numberOfMembers = members.length
 
   return (
-    <Card className={css.card}>
-      <Link className={css.cardLink} href={AppRoutes.organizations.index(id.toString())} />
+    <Card className={classNames(css.card, { [css.compact]: isCompact })}>
+      {isLink && <Link className={css.cardLink} href={AppRoutes.organizations.index(id.toString())} />}
 
-      <OrgLogo orgName={name} />
+      <Box className={css.orgLogo}>
+        <OrgLogo orgName={name} size={isCompact ? 'medium' : 'large'} />
+      </Box>
 
-      <Typography mt={2} variant="body2" fontWeight="bold">
-        {name}
-      </Typography>
-
-      <Stack direction="row" spacing={1} alignItems="center" mt={0.5}>
-        <Typography variant="caption" color="text.secondary">
-          {numberOfAccounts} Accounts
+      <Box className={css.orgInfo}>
+        <Typography variant="body2" fontWeight="bold">
+          {name}
         </Typography>
 
-        <div className={css.dot} />
+        <Stack direction="row" spacing={1} alignItems="center" mt={isCompact ? 0 : 0.5}>
+          <Typography variant="caption" color="text.secondary">
+            {numberOfAccounts} Accounts
+          </Typography>
 
-        <Typography variant="caption" color="text.secondary">
-          {numberOfMembers} Members
-        </Typography>
-      </Stack>
+          <div className={css.dot} />
+
+          <Typography variant="caption" color="text.secondary">
+            {numberOfMembers} Members
+          </Typography>
+        </Stack>
+      </Box>
 
       <IconButton className={css.orgActions} size="small" onClick={() => {}}>
         <MoreVertIcon sx={({ palette }) => ({ color: palette.border.main })} />
