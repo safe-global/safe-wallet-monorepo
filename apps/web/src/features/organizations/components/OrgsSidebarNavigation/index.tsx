@@ -18,7 +18,7 @@ const Navigation = (): ReactElement => {
     <SidebarList>
       {navItems.map((item) => {
         const itemPath = item.href(orgId)
-        const isSelected = router.pathname === itemPath
+        const isSelected = router.asPath === itemPath
 
         return (
           <div key={itemPath}>
