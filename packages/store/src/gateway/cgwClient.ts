@@ -1,7 +1,7 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 import type { BaseQueryFn, FetchArgs, FetchBaseQueryError } from '@reduxjs/toolkit/query/react'
 
-const CREDENTIAL_ROUTES = ['/v1/organizations', '/v1/users']
+const CREDENTIAL_ROUTES = ['/v1/organizations', '/v1/auth/verify', '/v1/users']
 
 let baseUrl: null | string = null
 export const setBaseUrl = (url: string) => {
