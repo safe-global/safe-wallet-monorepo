@@ -8,7 +8,7 @@ import classNames from 'classnames'
 import { useCallback } from 'react'
 import { get, useFormContext } from 'react-hook-form'
 import css from './styles.module.css'
-import { MultiTokenTransferFields, MultiTokenTransferParams } from '@/components/tx-flow/flows/TokenTransfer'
+import { MultiTokenTransferFields, type MultiTokenTransferParams } from '@/components/tx-flow/flows/TokenTransfer'
 
 export enum TokenAmountFields {
   tokenAddress = 'tokenAddress',
@@ -71,7 +71,7 @@ const TokenAmountInput = ({
 
       return validateLimitedAmount(sumAmount.toString(), decimals, maxAmountString, InsufficientFundsValidationError)
     },
-    [maxAmount, selectedToken?.tokenInfo.decimals],
+    [maxAmount, selectedToken?.tokenInfo.decimals, getValues, tokenAddress],
   )
 
   const onMaxAmountClick = useCallback(() => {
