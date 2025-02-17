@@ -44,7 +44,7 @@
     "@emotion/styled": "^11.13.5",
     "@gnosis.pm/zodiac": "^4.0.3",
     "@ledgerhq/context-module": "^1.1.0",
-    "@ledgerhq/device-management-kit": "^0.5.1",
+    "@ledgerhq/device-management-kit": "^0.6.0",
     "@ledgerhq/device-signer-kit-ethereum": "^1.1.0",
     "@mui/icons-material": "^6.1.6",
     "@mui/material": "^6.3.0",
