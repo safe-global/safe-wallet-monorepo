@@ -181,7 +181,7 @@ export const TxSimulationMessage = () => {
             An unexpected error occurred during simulation: <b>{requestError}</b>.
           </Typography>
         ) : (
-          <Typography variant='body2'>
+          <Typography variant="body2">
             {isCallTraceError ? (
               <>The transaction failed during the simulation.</>
             ) : (
