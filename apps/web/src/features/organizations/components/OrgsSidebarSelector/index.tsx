@@ -1,8 +1,8 @@
 import { Box, Button, Divider, Menu, MenuItem, Typography } from '@mui/material'
+import type { GetOrganizationResponse } from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
 import { useState } from 'react'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import CheckIcon from '@mui/icons-material/Check'
-import type { Organization } from '../OrgsCard'
 import OrgsCard, { OrgLogo } from '../OrgsCard'
 import css from './styles.module.css'
 import { useRouter } from 'next/router'
@@ -25,7 +25,7 @@ const OrgsSidebarSelector = () => {
     setAnchorEl(null)
   }
 
-  const handleSelectOrg = (org: Organization) => {
+  const handleSelectOrg = (org: GetOrganizationResponse) => {
     const currentPath = router.asPath
     const newPath = currentPath.replace(/\/organizations\/\d+/, `/organizations/${org.id}`)
     if (newPath !== currentPath) {

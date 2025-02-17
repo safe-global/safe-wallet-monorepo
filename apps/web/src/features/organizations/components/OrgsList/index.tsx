@@ -1,12 +1,15 @@
 import AccountsNavigation from '@/features/myAccounts/components/AccountsNavigation'
-import type { Organization } from '@/features/organizations/components/OrgsCard'
 import OrgsCard from '@/features/organizations/components/OrgsCard'
 import OrgsCreationModal from '@/features/organizations/components/OrgsCreationModal'
 import SignInButton from '@/features/organizations/components/SignInButton'
 import OrgsIcon from '@/public/images/orgs/orgs.svg'
 import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
-import { Box, Button, Card, Link, Stack, Typography } from '@mui/material'
+import { Box, Button, Card, Grid2, Link, Typography } from '@mui/material'
+import {
+  type GetOrganizationResponse,
+  useOrganizationsGetV1Query,
+} from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
 import { useState } from 'react'
 import css from './styles.module.css'
 
@@ -72,23 +75,24 @@ const NoOrgsState = () => {
   )
 }
 
-export const ORGS: Organization[] = [
+export const ORGS: GetOrganizationResponse[] = [
   {
     name: 'Safe DAO',
+    status: 1,
     id: 1,
-    members: [{ id: 1 }, { id: 2 }, { id: 3 }],
-    safes: [{ id: 1 }, { id: 4 }, { id: 2 }],
+    userOrganizations: ['1', '2', '3'],
   },
   {
     name: 'Optimism Foundation',
+    status: 1,
     id: 2,
-    members: [{ id: 2 }, { id: 3 }, { id: 4 }, { id: 5 }, { id: 6 }],
-    safes: [{ id: 1 }, { id: 4 }, { id: 7 }, { id: 8 }, { id: 9 }, { id: 10 }],
+    userOrganizations: ['1', '2', '3', '4', '5', '6'],
   },
 ]
 
 const OrgsList = () => {
   const isUserSignedIn = useAppSelector(isAuthenticated)
+  const { data: organizations } = useOrganizationsGetV1Query(undefined, { skip: !isUserSignedIn })
 
   return (
     <Box className={css.container}>
@@ -98,10 +102,18 @@ const OrgsList = () => {
           <AddOrgButton disabled={!isUserSignedIn} />
         </Box>
 
-        {isUserSignedIn ? (
-          <Stack direction="row" spacing={2}>
-            {ORGS.length > 0 ? ORGS.map((org) => <OrgsCard org={org} key={org.name} />) : <NoOrgsState />}
-          </Stack>
+        {isUserSignedIn && organizations ? (
+          <Grid2 container spacing={2} flexWrap="wrap">
+            {organizations.length > 0 ? (
+              organizations.map((org) => (
+                <Grid2 size={6} key={org.name}>
+                  <OrgsCard org={org} />
+                </Grid2>
+              ))
+            ) : (
+              <NoOrgsState />
+            )}
+          </Grid2>
         ) : (
           <EmptyState />
         )}
