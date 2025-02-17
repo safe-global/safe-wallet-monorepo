@@ -87,7 +87,7 @@ const ORGS = [
 ]
 
 const OrgsList = () => {
-  const isUserSignedIn = useAppSelector(isAuthenticated) // TODO: Implement logged in state once endpoint is ready
+  const isUserSignedIn = useAppSelector(isAuthenticated)
 
   return (
     <Box className={css.container}>
