@@ -6,14 +6,27 @@ import type { ReactElement } from 'react'
 import NestedSafesIcon from '@/public/images/sidebar/nested-safes-icon.svg'
 import { NestedSafesPopover } from '@/components/sidebar/NestedSafesPopover'
 import { useGetOwnedSafesQuery } from '@/store/slices'
+import { useIsTargetedFeature } from '@/features/targetedFeatures/hooks/useIsTargetedFeature'
+import { FEATURES } from '@/utils/chains'
 
 import headerCss from '@/components/sidebar/SidebarHeader/styles.module.css'
 import css from './styles.module.css'
 
-export function NestedSafesButton({ chainId, safeAddress }: { chainId: string; safeAddress: string }): ReactElement {
+export function NestedSafesButton({
+  chainId,
+  safeAddress,
+}: {
+  chainId: string
+  safeAddress: string
+}): ReactElement | null {
+  const isEnabled = useIsTargetedFeature(FEATURES.TARGETED_NESTED_SAFES)
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null)
-  const { data } = useGetOwnedSafesQuery(safeAddress ? { chainId, ownerAddress: safeAddress } : skipToken)
+  const { data } = useGetOwnedSafesQuery(isEnabled && safeAddress ? { chainId, ownerAddress: safeAddress } : skipToken)
   const nestedSafes = data?.safes ?? []
+
+  if (!isEnabled) {
+    return null
+  }
 
   const onClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget)

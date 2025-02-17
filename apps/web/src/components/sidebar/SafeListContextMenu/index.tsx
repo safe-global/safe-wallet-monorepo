@@ -23,6 +23,8 @@ import { CreateSafeOnNewChain } from '@/features/multichain/components/CreateSaf
 import { useGetOwnedSafesQuery } from '@/store/slices'
 import { NestedSafesPopover } from '../NestedSafesPopover'
 import { NESTED_SAFE_EVENTS, NESTED_SAFE_LABELS } from '@/services/analytics/events/nested-safes'
+import { useIsTargetedFeature } from '@/features/targetedFeatures/hooks/useIsTargetedFeature'
+import { FEATURES } from '@/utils/chains'
 
 enum ModalType {
   NESTED_SAFES = 'nested_safes',
@@ -53,7 +55,10 @@ const SafeListContextMenu = ({
   rename: boolean
   undeployedSafe: boolean
 }): ReactElement => {
-  const { data: nestedSafes } = useGetOwnedSafesQuery(address ? { chainId, ownerAddress: address } : skipToken)
+  const isNestedSafesEnabled = useIsTargetedFeature(FEATURES.TARGETED_NESTED_SAFES)
+  const { data: nestedSafes } = useGetOwnedSafesQuery(
+    isNestedSafesEnabled && address ? { chainId, ownerAddress: address } : skipToken,
+  )
   const addressBook = useAddressBook()
   const hasName = address in addressBook
 
@@ -90,7 +95,7 @@ const SafeListContextMenu = ({
         <MoreVertIcon sx={({ palette }) => ({ color: palette.border.main })} />
       </IconButton>
       <ContextMenu anchorEl={anchorEl} open={!!anchorEl} onClose={handleCloseContextMenu}>
-        {!undeployedSafe && nestedSafes?.safes && nestedSafes.safes.length > 0 && (
+        {isNestedSafesEnabled && !undeployedSafe && nestedSafes?.safes && nestedSafes.safes.length > 0 && (
           <MenuItem
             onClick={handleOpenModal(ModalType.NESTED_SAFES, {
               ...NESTED_SAFE_EVENTS.OPEN_LIST,

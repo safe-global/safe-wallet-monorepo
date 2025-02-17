@@ -16,16 +16,19 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import { useGetOwnedSafesQuery } from '@/store/slices'
 import { NESTED_SAFE_EVENTS } from '@/services/analytics/events/nested-safes'
 import Track from '@/components/common/Track'
+import { useIsTargetedFeature } from '@/features/targetedFeatures/hooks/useIsTargetedFeature'
+import { FEATURES } from '@/utils/chains'
 
 import tableCss from '@/components/common/EnhancedTable/styles.module.css'
 
 export function NestedSafesList(): ReactElement | null {
+  const isEnabled = useIsTargetedFeature(FEATURES.TARGETED_NESTED_SAFES)
   const { setTxFlow } = useContext(TxModalContext)
   const [addressToRename, setAddressToRename] = useState<string | null>(null)
 
   const { safe, safeLoaded, safeAddress } = useSafeInfo()
   const { data: nestedSafes } = useGetOwnedSafesQuery(
-    safeLoaded ? { chainId: safe.chainId, ownerAddress: safeAddress } : skipToken,
+    isEnabled && safeLoaded ? { chainId: safe.chainId, ownerAddress: safeAddress } : skipToken,
   )
 
   const rows = useMemo(() => {
@@ -63,6 +66,10 @@ export function NestedSafesList(): ReactElement | null {
       }
     })
   }, [nestedSafes?.safes])
+
+  if (!isEnabled) {
+    return null
+  }
 
   return (
     <>
