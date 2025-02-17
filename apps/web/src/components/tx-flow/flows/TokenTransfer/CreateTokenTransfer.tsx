@@ -1,14 +1,14 @@
-import { useTokenAmount, useVisibleTokens } from '@/components/tx-flow/flows/TokenTransfer/utils'
+import { useVisibleTokens } from '@/components/tx-flow/flows/TokenTransfer/utils'
 import { type ReactElement, useContext, useEffect, useMemo, useState } from 'react'
 import { type TokenInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import { FormProvider, useFieldArray, useForm } from 'react-hook-form'
 import {
   Alert,
+  AlertTitle,
   Box,
   Button,
   CardActions,
   Divider,
-  FormControl,
   Grid,
   Link,
   Stack,
@@ -17,7 +17,13 @@ import {
 } from '@mui/material'
 import TokenIcon from '@/components/common/TokenIcon'
 import AddIcon from '@/public/images/common/add.svg'
-import { type MultiTokenTransferParams, TokenTransferFields, MultiTokenTransferFields, TokenTransferType } from '.'
+import {
+  type MultiTokenTransferParams,
+  TokenTransferFields,
+  MultiTokenTransferFields,
+  TokenTransferType,
+  MultiTransfersFields,
+} from '.'
 import TxCard from '../../common/TxCard'
 import { formatVisualAmount } from '@/utils/formatters'
 import commonCss from '@/components/tx-flow/common/styles.module.css'
@@ -29,7 +35,7 @@ import RecipientRow from './RecipientRow'
 import { SafeAppsName } from '@/config/constants'
 import { useRemoteSafeApps } from '@/hooks/safe-apps/useRemoteSafeApps'
 import CSVAirdropAppModal from './CSVAirdropAppModal'
-import SpendingLimitRow from './SpendingLimitRow'
+import { InsufficientFundsValidationError } from '@/components/common/TokenAmountInput'
 
 export const AutocompleteItem = (item: { tokenInfo: TokenInfo; balance: string }): ReactElement => (
   <Grid
@@ -87,7 +93,7 @@ export const CreateTokenTransfer = ({
   const formMethods = useForm<MultiTokenTransferParams>({
     defaultValues: {
       ...params,
-      [TokenTransferFields.type]: disableSpendingLimit
+      [MultiTransfersFields.type]: disableSpendingLimit
         ? TokenTransferType.multiSig
         : canCreateSpendingLimitTx && !canCreateStandardTx
           ? TokenTransferType.spendingLimit
@@ -102,12 +108,21 @@ export const CreateTokenTransfer = ({
     delayError: 500,
   })
 
-  const { handleSubmit, control } = formMethods
+  const { handleSubmit, control, watch, formState, trigger } = formMethods
+
+  const hasInsufficientFunds = useMemo(() => {
+    if (!formState.errors.recipients) {
+      return false
+    }
+    return formState.errors.recipients?.some?.((item) => item?.amount?.message === InsufficientFundsValidationError)
+  }, [formState])
+
+  const type = watch(MultiTransfersFields.type)
 
   const {
     fields: recipientFields,
     append,
-    remove: removeRecipient,
+    remove,
   } = useFieldArray({ control, name: MultiTokenTransferFields.recipients })
 
   const canAddMoreRecipients = useMemo(() => recipientFields.length < MAX_RECIPIENTS, [recipientFields])
@@ -129,16 +144,16 @@ export const CreateTokenTransfer = ({
     })
   }
 
-  const selectedToken = useMemo(
-    () => balancesItems.find((item) => item.tokenInfo.address === params.recipients[0].tokenAddress),
-    [balancesItems, params.recipients],
-  )
+  const removeRecipient = (index: number): void => {
+    if (recipientFields.length <= 1) {
+      return
+    }
 
-  const { spendingLimitAmount } = useTokenAmount(selectedToken)
+    remove(index)
 
-  const canCreateSpendingLimitTxWithToken = useHasPermission(Permission.CreateSpendingLimitTransaction, {
-    token: selectedToken?.tokenInfo,
-  })
+    // Trigger validation after removing a recipient, to update the total amount validation
+    trigger()
+  }
 
   const CsvAirdropLink = () => (
     <Link sx={{ cursor: 'pointer' }} onClick={() => setCsvAirdropModalOpen(true)}>
@@ -146,67 +161,73 @@ export const CreateTokenTransfer = ({
     </Link>
   )
 
+  const canBatch = type === TokenTransferType.multiSig
+
   return (
     <TxCard>
       <FormProvider {...formMethods}>
         <form onSubmit={handleSubmit(onSubmit)} className={commonCss.form}>
           <Stack spacing={3}>
-            <Stack spacing={6}>
+            <Stack spacing={8}>
               {recipientFields.map((field, i) => (
-                <>
-                  <RecipientRow
-                    key={field.id}
-                    index={i}
-                    removable={recipientFields.length > 1}
-                    groupName={MultiTokenTransferFields.recipients}
-                    remove={removeRecipient}
-                    disableSpendingLimit={disableSpendingLimit}
-                  />
-                  {i === 0 && !disableSpendingLimit && canCreateSpendingLimitTxWithToken && (
-                    <FormControl fullWidth>
-                      <SpendingLimitRow
-                        availableAmount={spendingLimitAmount}
-                        selectedToken={selectedToken?.tokenInfo}
-                      />
-                    </FormControl>
-                  )}
-                </>
+                <RecipientRow
+                  key={field.id}
+                  index={i}
+                  removable={recipientFields.length > 1}
+                  groupName={MultiTokenTransferFields.recipients}
+                  remove={removeRecipient}
+                  disableSpendingLimit={disableSpendingLimit || recipientFields.length > 1}
+                />
               ))}
             </Stack>
 
-            {canAddMoreRecipients && maxRecipientsInfo && (
-              <Alert severity="info" onClose={() => setMaxRecipientsInfo(false)}>
-                <Typography variant="body2">
-                  If you want to add more than {MAX_RECIPIENTS} recipients, use <CsvAirdropLink />
-                </Typography>
-              </Alert>
-            )}
+            {canBatch && (
+              <>
+                <Stack direction="row" alignItems="center" justifyContent="space-between" mb={4}>
+                  <Button
+                    data-testid="add-recipient-btn"
+                    variant="text"
+                    onClick={addRecipient}
+                    disabled={!canAddMoreRecipients}
+                    startIcon={<SvgIcon component={AddIcon} inheritViewBox fontSize="small" />}
+                    size="large"
+                  >
+                    Add Recipient
+                  </Button>
+                  <Typography
+                    variant="body2"
+                    color={canAddMoreRecipients ? 'primary' : 'error.main'}
+                  >{`${recipientFields.length}/${MAX_RECIPIENTS}`}</Typography>
+                </Stack>
 
-            <Stack direction="row" alignItems="center" justifyContent="space-between" mb={4}>
-              <Button
-                data-testid="add-recipient-btn"
-                variant="text"
-                onClick={addRecipient}
-                disabled={!canAddMoreRecipients}
-                startIcon={<SvgIcon component={AddIcon} inheritViewBox fontSize="small" />}
-                size="large"
-              >
-                Add Recipient
-              </Button>
-              <Typography
-                variant="body2"
-                color={canAddMoreRecipients ? 'primary' : 'error.main'}
-              >{`${recipientFields.length}/${MAX_RECIPIENTS}`}</Typography>
-            </Stack>
+                {hasInsufficientFunds && (
+                  <Alert severity="error">
+                    <AlertTitle>Insufficient balance</AlertTitle>
+                    <Typography variant="body2">
+                      The total amount assigned to all recipients exceeds your available balance. Adjust the amounts you
+                      want to send.
+                    </Typography>
+                  </Alert>
+                )}
 
-            {!canAddMoreRecipients && (
-              <Alert severity="warning">
-                <Typography variant="body2">
-                  No more recipients can be added.
-                  <br />
-                  Please use <CsvAirdropLink />
-                </Typography>
-              </Alert>
+                {canAddMoreRecipients && maxRecipientsInfo && (
+                  <Alert severity="info" onClose={() => setMaxRecipientsInfo(false)}>
+                    <Typography variant="body2">
+                      If you want to add more than {MAX_RECIPIENTS} recipients, use <CsvAirdropLink />
+                    </Typography>
+                  </Alert>
+                )}
+
+                {!canAddMoreRecipients && (
+                  <Alert severity="warning">
+                    <Typography variant="body2">
+                      No more recipients can be added.
+                      <br />
+                      Please use <CsvAirdropLink />
+                    </Typography>
+                  </Alert>
+                )}
+              </>
             )}
 
             <Box>

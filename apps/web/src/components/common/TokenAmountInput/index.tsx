@@ -8,11 +8,14 @@ import classNames from 'classnames'
 import { useCallback } from 'react'
 import { get, useFormContext } from 'react-hook-form'
 import css from './styles.module.css'
+import { MultiTokenTransferFields, MultiTokenTransferParams } from '@/components/tx-flow/flows/TokenTransfer'
 
 export enum TokenAmountFields {
   tokenAddress = 'tokenAddress',
   amount = 'amount',
 }
+
+export const InsufficientFundsValidationError = 'Insufficient funds'
 
 const getFieldName = (field: TokenAmountFields, groupName?: string) => (groupName ? `${groupName}.${field}` : field)
 
@@ -22,12 +25,14 @@ const TokenAmountInput = ({
   maxAmount,
   validate,
   groupName,
+  onChangeAmount = () => {},
 }: {
   balances: SafeBalanceResponse['items']
   selectedToken: SafeBalanceResponse['items'][number] | undefined
   maxAmount?: bigint
   validate?: (value: string) => string | undefined
   groupName?: string
+  onChangeAmount?: (value: string) => void
 }) => {
   const {
     formState: { errors },
@@ -35,6 +40,7 @@ const TokenAmountInput = ({
     resetField,
     watch,
     setValue,
+    getValues,
   } = useFormContext()
 
   const tokenAddressField = getFieldName(TokenAmountFields.tokenAddress, groupName)
@@ -47,7 +53,23 @@ const TokenAmountInput = ({
   const validateAmount = useCallback(
     (value: string) => {
       const decimals = selectedToken?.tokenInfo.decimals
-      return validateLimitedAmount(value, decimals, maxAmount?.toString()) || validateDecimalLength(value, decimals)
+      const maxAmountString = maxAmount?.toString()
+
+      const valueValidationError =
+        validateLimitedAmount(value, decimals, maxAmountString) || validateDecimalLength(value, decimals)
+
+      if (valueValidationError) {
+        return valueValidationError
+      }
+
+      // Validate the total amount of the selected token in the multi transfer
+      const recipients = getValues(MultiTokenTransferFields.recipients) as MultiTokenTransferParams['recipients']
+      const sumAmount = recipients.reduce<number>(
+        (acc, item) => acc + (item.tokenAddress === tokenAddress ? Number(item.amount) : 0),
+        0,
+      )
+
+      return validateLimitedAmount(sumAmount.toString(), decimals, maxAmountString, InsufficientFundsValidationError)
     },
     [maxAmount, selectedToken?.tokenInfo.decimals],
   )
@@ -58,7 +80,14 @@ const TokenAmountInput = ({
     setValue(amountField, safeFormatUnits(maxAmount.toString(), selectedToken.tokenInfo.decimals), {
       shouldValidate: true,
     })
-  }, [maxAmount, selectedToken, setValue, amountField])
+
+    onChangeAmount(maxAmount.toString())
+  }, [maxAmount, selectedToken, setValue, amountField, onChangeAmount])
+
+  const onChangeToken = useCallback(() => {
+    resetField(amountField, { defaultValue: '' })
+    onChangeAmount('')
+  }, [resetField, amountField, onChangeAmount])
 
   return (
     <FormControl
@@ -89,6 +118,7 @@ const TokenAmountInput = ({
           {...register(amountField, {
             required: true,
             validate: validate ?? validateAmount,
+            onChange: (e) => onChangeAmount(e.target.value),
           })}
         />
         <Divider orientation="vertical" flexItem />
@@ -102,7 +132,7 @@ const TokenAmountInput = ({
           className={css.select}
           {...register(tokenAddressField, {
             required: true,
-            onChange: () => resetField(amountField, { defaultValue: '' }),
+            onChange: onChangeToken,
           })}
           value={tokenAddress}
           required

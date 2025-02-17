@@ -63,7 +63,7 @@ export const validateAmount = (amount?: string, includingZero: boolean = false) 
   }
 }
 
-export const validateLimitedAmount = (amount: string, decimals?: number | null, max?: string) => {
+export const validateLimitedAmount = (amount: string, decimals?: number | null, max?: string, errorMsg?: string) => {
   if (decimals == null || !max) return
 
   const numberError = validateAmount(amount)
@@ -74,7 +74,7 @@ export const validateLimitedAmount = (amount: string, decimals?: number | null, 
   const value = safeParseUnits(amount, decimals)
 
   if (value !== undefined && value > BigInt(max)) {
-    return `Maximum value is ${safeFormatUnits(max, decimals)}`
+    return errorMsg || `Maximum value is ${safeFormatUnits(max, decimals)}`
   }
 }
 

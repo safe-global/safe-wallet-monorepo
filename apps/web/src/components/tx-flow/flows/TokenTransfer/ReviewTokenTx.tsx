@@ -14,7 +14,7 @@ const ReviewTokenTx = ({
 }): ReactElement => {
   const isSpendingLimitTx = params.type === TokenTransferType.spendingLimit
 
-  return isSpendingLimitTx ? (
+  return isSpendingLimitTx && params.recipients.length === 1 ? (
     // TODO: Allow batched spending limit txs
     <ReviewSpendingLimitTx params={params.recipients[0]} onSubmit={onSubmit} />
   ) : (

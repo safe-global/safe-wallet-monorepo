@@ -13,7 +13,6 @@ export enum TokenTransferType {
 
 enum Fields {
   recipient = 'recipient',
-  type = 'type',
 }
 
 export const TokenTransferFields = { ...Fields, ...TokenAmountFields }
@@ -24,7 +23,7 @@ export type TokenTransferParams = {
   [TokenTransferFields.amount]: string
 }
 
-enum MultiTransfersFields {
+export enum MultiTransfersFields {
   recipients = 'recipients',
   type = 'type',
 }
@@ -33,7 +32,7 @@ export const MultiTokenTransferFields = { ...MultiTransfersFields }
 
 export type MultiTokenTransferParams = {
   recipients: TokenTransferParams[]
-  [TokenTransferFields.type]: TokenTransferType
+  [MultiTransfersFields.type]: TokenTransferType
 }
 
 type MultiTokenTransferFlowProps = {
@@ -69,7 +68,6 @@ const TokenTransferFlow = ({ txNonce, ...params }: MultiTokenTransferFlowProps) 
       params={data}
       txNonce={txNonce}
       onSubmit={(formData) => {
-        console.log('🚀 ~ TokenTransferFlow ~ formData:', formData)
         nextStep({ ...data, ...formData })
       }}
     />,

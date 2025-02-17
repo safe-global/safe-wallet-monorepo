@@ -1,5 +1,5 @@
 import AddressBookInput from '@/components/common/AddressBookInput'
-import TokenAmountInput from '@/components/common/TokenAmountInput'
+import TokenAmountInput, { TokenAmountFields } from '@/components/common/TokenAmountInput'
 import { useVisibleBalances } from '@/hooks/useVisibleBalances'
 import DeleteIcon from '@/public/images/common/delete.svg'
 import { Box, Button, FormControl, Stack, SvgIcon } from '@mui/material'
@@ -35,6 +35,7 @@ export const RecipientRow = ({
   const {
     watch,
     formState: { errors },
+    trigger,
   } = useFormContext<MultiTokenTransferParams>()
 
   const { setNonceNeeded } = useContext(SafeTxContext)
@@ -64,6 +65,12 @@ export const RecipientRow = ({
 
   const maxAmount = isSpendingLimitType && totalAmount > spendingLimitAmount ? spendingLimitAmount : totalAmount
 
+  const triggerAmountValidation = () => {
+    trigger(
+      recipients.map((_, i) => `${MultiTokenTransferFields.recipients}.${i}.${TokenAmountFields.amount}` as const),
+    )
+  }
+
   useEffect(() => {
     setNonceNeeded(!isSpendingLimitType || spendingLimitAmount === 0n)
   }, [setNonceNeeded, isSpendingLimitType, spendingLimitAmount])
@@ -82,6 +89,7 @@ export const RecipientRow = ({
               balances={isSpendingLimitType ? spendingLimitBalances : balances.items}
               selectedToken={selectedToken}
               maxAmount={maxAmount}
+              onChangeAmount={triggerAmountValidation}
             />
           </FormControl>
 
