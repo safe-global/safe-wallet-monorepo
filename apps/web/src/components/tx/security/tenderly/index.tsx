@@ -177,7 +177,7 @@ export const TxSimulationMessage = () => {
           Simulation failed
         </Typography>
         {requestError ? (
-          <Typography color="error" variant='body2'>
+          <Typography color="error" variant="body2">
             An unexpected error occurred during simulation: <b>{requestError}</b>.
           </Typography>
         ) : (
