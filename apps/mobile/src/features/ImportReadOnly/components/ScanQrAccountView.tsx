@@ -28,7 +28,12 @@ export const QrCameraView = ({ permission, isCameraActive, onScan, onEnterManual
               : 'Scan the QR code of the account you want to import. You can find it under Receive or in the sidebar.'}
           </Text>
           <View alignItems="center" marginTop="$5">
-            <SafeButton secondary icon={<SafeFontIcon name="copy" />} onPress={onEnterManuallyPress}>
+            <SafeButton
+              secondary
+              icon={<SafeFontIcon name="copy" />}
+              onPress={onEnterManuallyPress}
+              testID={'enter-manually'}
+            >
               Enter manually
             </SafeButton>
           </View>

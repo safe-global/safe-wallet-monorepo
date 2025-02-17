@@ -3,5 +3,5 @@ import { getVariable } from 'tamagui'
 
 export const useSafeAreaPaddingBottom = (): number => {
   const insets = useSafeAreaInsets()
-  return insets.bottom + insets.top + Number(getVariable('$6'))
+  return insets.bottom + insets.top + Number(getVariable('$4'))
 }

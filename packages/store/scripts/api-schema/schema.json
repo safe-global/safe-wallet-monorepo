@@ -2011,6 +2011,508 @@
         "tags": ["notifications"]
       }
     },
+    "/v1/users": {
+      "get": {
+        "operationId": "usersGetWithWalletsV1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserWithWallets"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Signer address not provided"
+          },
+          "404": {
+            "description": "User (wallet) not found"
+          }
+        },
+        "tags": ["users"]
+      },
+      "delete": {
+        "operationId": "usersDeleteV1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "User deleted"
+          },
+          "401": {
+            "description": "Signer address not provided"
+          },
+          "404": {
+            "description": "User (wallet) not found"
+          }
+        },
+        "tags": ["users"]
+      }
+    },
+    "/v1/users/wallet": {
+      "post": {
+        "operationId": "usersCreateWithWalletV1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreatedUserWithWallet"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Signer address not provided"
+          },
+          "409": {
+            "description": "Wallet already exists"
+          }
+        },
+        "tags": ["users"]
+      }
+    },
+    "/v1/users/wallet/{walletAddress}": {
+      "post": {
+        "operationId": "usersAddWalletToUserV1",
+        "parameters": [
+          {
+            "name": "walletAddress",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WalletAddedToUser"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Signer address not provided"
+          },
+          "404": {
+            "description": "User not found"
+          },
+          "409": {
+            "description": "Wallet already exists"
+          }
+        },
+        "tags": ["users"]
+      },
+      "delete": {
+        "operationId": "usersDeleteWalletFromUserV1",
+        "parameters": [
+          {
+            "name": "walletAddress",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Wallet removed from user and deleted"
+          },
+          "401": {
+            "description": "Signer address not provided"
+          },
+          "404": {
+            "description": "User OR provided wallet not found"
+          },
+          "409": {
+            "description": "Cannot remove the current wallet"
+          }
+        },
+        "tags": ["users"]
+      }
+    },
+    "/v1/organizations": {
+      "post": {
+        "operationId": "organizationsCreateV1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateOrganizationDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Organizations created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateOrganizationResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Signer address not provided"
+          },
+          "403": {
+            "description": "Forbidden resource"
+          },
+          "404": {
+            "description": "User not found."
+          }
+        },
+        "tags": ["organizations"]
+      },
+      "get": {
+        "operationId": "organizationsGetV1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Organizations found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GetOrganizationResponse"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Signer address not provided"
+          },
+          "403": {
+            "description": "Forbidden resource"
+          },
+          "404": {
+            "description": "User not found."
+          }
+        },
+        "tags": ["organizations"]
+      }
+    },
+    "/v1/organizations/create-with-user": {
+      "post": {
+        "operationId": "organizationsCreateWithUserV1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateOrganizationDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Organizations created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateOrganizationResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Signer address not provided"
+          },
+          "403": {
+            "description": "Forbidden resource"
+          }
+        },
+        "tags": ["organizations"]
+      }
+    },
+    "/v1/organizations/{id}": {
+      "get": {
+        "operationId": "organizationsGetOneV1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Organization found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetOrganizationResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Signer address not provided"
+          },
+          "403": {
+            "description": "Forbidden resource"
+          },
+          "404": {
+            "description": "Organization not found. OR User not found."
+          }
+        },
+        "tags": ["organizations"]
+      },
+      "patch": {
+        "operationId": "organizationsUpdateV1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateOrganizationDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Organization updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateOrganizationResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Signer address not provided OR User is unauthorized"
+          },
+          "403": {
+            "description": "Forbidden resource"
+          },
+          "404": {
+            "description": "User not found."
+          }
+        },
+        "tags": ["organizations"]
+      },
+      "delete": {
+        "operationId": "organizationsDeleteV1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Organization deleted"
+          },
+          "401": {
+            "description": "Signer address not provided OR User is unauthorized"
+          },
+          "403": {
+            "description": "Forbidden resource"
+          },
+          "404": {
+            "description": "User not found."
+          }
+        },
+        "tags": ["organizations"]
+      }
+    },
+    "/v1/organizations/{orgId}/members/invite": {
+      "post": {
+        "operationId": "userOrganizationsInviteUserV1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Users invited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Invitation"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "User not admin OR signer address not provided OR member is not active"
+          },
+          "403": {
+            "description": "User not authorized"
+          },
+          "409": {
+            "description": "Too many invites"
+          }
+        },
+        "tags": ["organizations"]
+      }
+    },
+    "/v1/organizations/{orgId}/members/accept": {
+      "post": {
+        "operationId": "userOrganizationsAcceptInviteV1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Invite accepted"
+          },
+          "403": {
+            "description": "Signer not authorized"
+          },
+          "404": {
+            "description": "Signer, organization or membership not found"
+          },
+          "409": {
+            "description": "User invite not pending"
+          }
+        },
+        "tags": ["organizations"]
+      }
+    },
+    "/v1/organizations/{orgId}/members/decline": {
+      "post": {
+        "operationId": "userOrganizationsDeclineInviteV1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Invite declined"
+          },
+          "403": {
+            "description": "Signer not authorized"
+          },
+          "404": {
+            "description": "Signer, organization or membership not found"
+          },
+          "409": {
+            "description": "User invite not pending"
+          }
+        },
+        "tags": ["organizations"]
+      }
+    },
+    "/v1/organizations/{orgId}/members": {
+      "get": {
+        "operationId": "userOrganizationsGetUsersV1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Organization and members list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserOrganizationsDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Signer not authorized"
+          },
+          "404": {
+            "description": "Signer or organization not found"
+          }
+        },
+        "tags": ["organizations"]
+      }
+    },
+    "/v1/organizations/{orgId}/members/{userId}/role": {
+      "patch": {
+        "operationId": "userOrganizationsUpdateRoleV1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Role updated"
+          },
+          "401": {
+            "description": "Signer not active or admin"
+          },
+          "403": {
+            "description": "Signer not authorized"
+          },
+          "404": {
+            "description": "Signer, organization or signer/user-to-update membership not found"
+          },
+          "409": {
+            "description": "Cannot remove last admin"
+          }
+        },
+        "tags": ["organizations"]
+      }
+    },
+    "/v1/organizations/{orgId}/members/{userId}": {
+      "delete": {
+        "operationId": "userOrganizationsRemoveUserV1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Membership deleted"
+          },
+          "401": {
+            "description": "Signer not active or admin"
+          },
+          "403": {
+            "description": "Signer not authorized"
+          },
+          "404": {
+            "description": "Signer or organization not found"
+          },
+          "409": {
+            "description": "Cannot remove last admin"
+          }
+        },
+        "tags": ["organizations"]
+      }
+    },
     "/v1/chains/{chainId}/owners/{ownerAddress}/safes": {
       "get": {
         "operationId": "ownersGetSafesByOwnerV1",
@@ -2349,6 +2851,53 @@
           }
         },
         "tags": ["safes"]
+      }
+    },
+    "/v1/targeted-messaging/outreaches/{outreachId}/chains/{chainId}/safes/{safeAddress}": {
+      "get": {
+        "operationId": "targetedMessagingGetTargetedSafeV1",
+        "parameters": [
+          {
+            "name": "outreachId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "chainId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "safeAddress",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TargetedSafe"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Safe not targeted."
+          }
+        },
+        "tags": ["targeted-messaging"]
       }
     },
     "/v1/targeted-messaging/outreaches/{outreachId}/chains/{chainId}/safes/{safeAddress}/signers/{signerAddress}/submissions": {
@@ -4754,6 +5303,192 @@
         },
         "required": ["cloudMessagingToken", "buildNumber", "bundle", "deviceType", "version", "safeRegistrations"]
       },
+      "UserWallet": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "address": {
+            "type": "string"
+          }
+        },
+        "required": ["id", "address"]
+      },
+      "UserWithWallets": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "status": {
+            "type": "number",
+            "enum": [0, 1]
+          },
+          "wallets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserWallet"
+            }
+          }
+        },
+        "required": ["id", "status", "wallets"]
+      },
+      "CreatedUserWithWallet": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          }
+        },
+        "required": ["id"]
+      },
+      "WalletAddedToUser": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          }
+        },
+        "required": ["id"]
+      },
+      "CreateOrganizationDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": ["name"]
+      },
+      "CreateOrganizationResponse": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "id": {
+            "type": "number"
+          }
+        },
+        "required": ["name", "id"]
+      },
+      "GetOrganizationResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "number",
+            "enum": [1]
+          },
+          "userOrganizations": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": ["id", "name", "status", "userOrganizations"]
+      },
+      "UpdateOrganizationDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "number",
+            "enum": [1]
+          }
+        }
+      },
+      "UpdateOrganizationResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          }
+        },
+        "required": ["id"]
+      },
+      "Invitation": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "number"
+          },
+          "orgId": {
+            "type": "number"
+          },
+          "role": {
+            "type": "string",
+            "enum": ["1", "2", "ADMIN", "MEMBER"]
+          },
+          "status": {
+            "type": "string",
+            "enum": ["0", "1", "2", "INVITED", "ACTIVE", "DECLINED"]
+          }
+        },
+        "required": ["userId", "orgId", "role", "status"]
+      },
+      "UserOrganizationUser": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["0", "1", "PENDING", "ACTIVE"]
+          }
+        },
+        "required": ["id", "status"]
+      },
+      "UserOrganization": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "role": {
+            "type": "string",
+            "enum": ["1", "2", "ADMIN", "MEMBER"]
+          },
+          "status": {
+            "type": "string",
+            "enum": ["0", "1", "2", "INVITED", "ACTIVE", "DECLINED"]
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "user": {
+            "$ref": "#/components/schemas/UserOrganizationUser"
+          }
+        },
+        "required": ["id", "role", "status", "createdAt", "updatedAt", "user"]
+      },
+      "UserOrganizationsDto": {
+        "type": "object",
+        "properties": {
+          "members": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserOrganization"
+            }
+          }
+        },
+        "required": ["members"]
+      },
       "SafeList": {
         "type": "object",
         "properties": {
@@ -5026,6 +5761,18 @@
           }
         },
         "required": ["address", "chainId", "threshold", "owners", "fiatTotal", "queued"]
+      },
+      "TargetedSafe": {
+        "type": "object",
+        "properties": {
+          "outreachId": {
+            "type": "number"
+          },
+          "address": {
+            "type": "string"
+          }
+        },
+        "required": ["outreachId", "address"]
       },
       "Submission": {
         "type": "object",
@@ -5432,11 +6179,6 @@
             "type": "string",
             "description": "The URL to the explorer page of the order"
           },
-          "executedSurplusFee": {
-            "type": "string",
-            "description": "The amount of fees paid for this order.",
-            "deprecated": true
-          },
           "executedFee": {
             "type": "string",
             "description": "The amount of fees paid for this order."
@@ -5473,7 +6215,6 @@
           "sellToken",
           "buyToken",
           "explorerUrl",
-          "executedSurplusFee",
           "executedFee",
           "executedFeeToken",
           "owner"
@@ -5573,11 +6314,6 @@
             "type": "string",
             "description": "The URL to the explorer page of the order"
           },
-          "executedSurplusFee": {
-            "type": "string",
-            "description": "The amount of fees paid for this order.",
-            "deprecated": true
-          },
           "executedFee": {
             "type": "string",
             "description": "The amount of fees paid for this order."
@@ -5622,7 +6358,6 @@
           "sellToken",
           "buyToken",
           "explorerUrl",
-          "executedSurplusFee",
           "executedFee",
           "executedFeeToken",
           "owner"
@@ -5678,12 +6413,6 @@
             "type": "string",
             "nullable": true,
             "description": "The executed buy token raw amount (no decimals), or null if there are too many parts"
-          },
-          "executedSurplusFee": {
-            "type": "string",
-            "nullable": true,
-            "description": "The executed surplus fee raw amount (no decimals), or null if there are too many parts",
-            "deprecated": true
           },
           "executedFee": {
             "type": "string",

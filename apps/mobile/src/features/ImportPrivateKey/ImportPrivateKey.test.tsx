@@ -9,9 +9,7 @@ describe('ImportPrivateKey', () => {
 
     expect(screen.getByText('Import a private key')).toBeTruthy()
     expect(
-      screen.getByText(
-        'Enter your seed phrase or a private key below. Make sure to do so in a safe and private place.',
-      ),
+      screen.getByText('Enter your private key below. Make sure to do so in a safe and private place.'),
     ).toBeTruthy()
   })
 

@@ -16,7 +16,7 @@ export const assetsSwapBtn = '[data-testid="swap-btn"]'
 export const dashboardSwapBtn = '[data-testid="overview-swap-btn"]'
 export const customRecipient = 'div[id="recipient"]'
 const recipientToggle = 'button[id="toggle-recipient-mode-button"]'
-const twapsAddressToggle = '[class*="Toggle__Wrapper"]'
+const twapsAddressToggle = 'button[class*="Toggle__Wrapper"]'
 const orderTypeMenuItem = 'div[class*="MenuItem"]'
 const explorerBtn = '[data-testid="explorer-btn"]'
 const limitPriceFld = '[data-testid="limit-price"]'
@@ -57,6 +57,8 @@ const priceProtectionStr = 'Price protection'
 const orderSplit = 'Order will be split in'
 const orderDetailsStr = 'Order details'
 const unlockTwapOrdersStrBtn = 'Unlock TWAP orders'
+const settingsModalTitle = 'Advanced Order Settings'
+const customRecipientStr = 'Custom Recipient'
 
 const getInsufficientBalanceStr = (token) => `Insufficient ${token} balance`
 const sellAmountIsSmallStr = 'Sell amount too small'
@@ -327,10 +329,9 @@ export function enableCustomRecipient(option) {
   if (!option) cy.get(recipientToggle).click()
 }
 
-export function enableTwapCustomRecipient() {
-  if (cy.get(twapsAddressToggle).length > 1) {
-    cy.get(twapsAddressToggle).eq(0).click()
-  }
+export function enableTwapCustomRecipient(option) {
+  main.verifyMinimumElementsCount(twapsAddressToggle, 1)
+  if (!option) cy.get(twapsAddressToggle).eq(0).click()
 }
 
 export function disableCustomRecipient(option) {

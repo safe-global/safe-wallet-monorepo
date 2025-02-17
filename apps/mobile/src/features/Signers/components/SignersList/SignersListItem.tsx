@@ -37,7 +37,7 @@ function SignersListItem({ item, index, signersGroup }: SignersListItemProps) {
   }
 
   return (
-    <TouchableOpacity onPress={onPress}>
+    <TouchableOpacity onPress={onPress} testID={`signer-${item.value}`}>
       <View
         backgroundColor={'$backgroundPaper'}
         borderTopRightRadius={index === 0 ? '$4' : undefined}

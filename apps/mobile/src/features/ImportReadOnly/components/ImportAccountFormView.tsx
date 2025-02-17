@@ -74,7 +74,7 @@ export const ImportAccountFormView: React.FC<ImportAccountFormViewProps> = ({
             }
             right={
               result?.data?.length && !error ? (
-                <SafeFontIcon name={'check-filled'} size={20} color={'$success'} />
+                <SafeFontIcon name={'check-filled'} size={20} color={'$success'} testID={'success-icon'} />
               ) : (
                 <View width={20} />
               )
@@ -87,7 +87,12 @@ export const ImportAccountFormView: React.FC<ImportAccountFormViewProps> = ({
             isEnteredAddressValid={isEnteredAddressValid}
           />
         </ScrollView>
-        <SafeButton primary onPress={onContinue} disabled={!isEnteredAddressValid || !safeExists}>
+        <SafeButton
+          primary
+          onPress={onContinue}
+          disabled={!isEnteredAddressValid || !safeExists}
+          testID={'continue-button'}
+        >
           Continue
         </SafeButton>
       </KeyboardAvoidingView>

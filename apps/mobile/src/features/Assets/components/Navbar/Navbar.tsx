@@ -1,12 +1,10 @@
-import { View } from 'tamagui'
-import { BlurredIdenticonBackground } from '@/src/components/BlurredIdenticonBackground'
-import { SafeAreaView } from 'react-native-safe-area-context'
+import { XStack } from 'tamagui'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Identicon } from '@/src/components/Identicon'
 import { shortenAddress } from '@/src/utils/formatters'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
-import { StyleSheet, TouchableOpacity } from 'react-native'
+import { TouchableOpacity } from 'react-native'
 import React from 'react'
-import { Address } from '@/src/types/address'
 import { useAppSelector } from '@/src/store/hooks'
 import { useRouter } from 'expo-router'
 import { DropdownLabel } from '@/src/components/Dropdown/DropdownLabel'
@@ -19,6 +17,7 @@ const dropdownLabelProps = {
 } as const
 
 export const Navbar = () => {
+  const insets = useSafeAreaInsets()
   const router = useRouter()
   const activeSafe = useDefinedActiveSafe()
   const isAppNotificationEnabled = useAppSelector(selectAppNotificationStatus)
@@ -30,44 +29,29 @@ export const Navbar = () => {
   }
 
   return (
-    <View>
-      <BlurredIdenticonBackground address={activeSafe.address as Address}>
-        <SafeAreaView style={[styles.headerContainer]}>
-          <DropdownLabel
-            label={shortenAddress(activeSafe.address)}
-            labelProps={dropdownLabelProps}
-            leftNode={<Identicon address={activeSafe.address} rounded={true} size={30} />}
-            onPress={() => {
-              router.push('/accounts-sheet')
-            }}
-          />
-          <View style={styles.rightButtonContainer}>
-            <TouchableOpacity onPress={handleNotificationAccess}>
-              <SafeFontIcon name="lightbulb" />
-            </TouchableOpacity>
-            <TouchableOpacity>
-              <SafeFontIcon name="apps" />
-            </TouchableOpacity>
-          </View>
-        </SafeAreaView>
-      </BlurredIdenticonBackground>
-    </View>
+    <XStack
+      paddingTop={insets.top}
+      justifyContent={'space-between'}
+      paddingHorizontal={16}
+      alignItems={'center'}
+      paddingBottom={'$2'}
+    >
+      <DropdownLabel
+        label={shortenAddress(activeSafe.address)}
+        labelProps={dropdownLabelProps}
+        leftNode={<Identicon address={activeSafe.address} rounded={true} size={30} />}
+        onPress={() => {
+          router.push('/accounts-sheet')
+        }}
+      />
+      <XStack alignItems={'center'} justifyContent={'center'} gap={12}>
+        <TouchableOpacity onPress={handleNotificationAccess}>
+          <SafeFontIcon name="lightbulb" />
+        </TouchableOpacity>
+        <TouchableOpacity>
+          <SafeFontIcon name="apps" />
+        </TouchableOpacity>
+      </XStack>
+    </XStack>
   )
 }
-
-const styles = StyleSheet.create({
-  headerContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 10,
-    paddingVertical: 16,
-    paddingBottom: 0,
-  },
-  rightButtonContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 12,
-  },
-})

@@ -21,7 +21,7 @@ export const AddSignersFormView = ({
   const paddingBottom = useSafeAreaPaddingBottom()
 
   return (
-    <View flex={1} paddingBottom={paddingBottom} paddingHorizontal={'$4'}>
+    <View flex={1} paddingBottom={paddingBottom} paddingHorizontal={'$4'} testID={'add-signers-form-screen'}>
       <SignersList
         navbarTitle={'Import your signers to unlock account'}
         isFetching={isFetching}
@@ -30,7 +30,9 @@ export const AddSignersFormView = ({
       />
 
       <View paddingHorizontal={16}>
-        <SafeButton onPress={onPress}>Continue</SafeButton>
+        <SafeButton onPress={onPress} testID={'continue-button'}>
+          Continue
+        </SafeButton>
       </View>
     </View>
   )

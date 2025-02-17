@@ -12,11 +12,12 @@ interface SafeCardProps {
   children?: React.ReactNode
   onPress?: () => void
   imageProps?: ImageProps
+  testID?: string
 }
 
-export function SafeCard({ title, description, imageProps, image, icon, children, onPress }: SafeCardProps) {
+export function SafeCard({ title, description, imageProps, image, icon, children, onPress, testID }: SafeCardProps) {
   return (
-    <Container position="relative" marginHorizontal={'$3'} marginTop={'$6'} onPress={onPress}>
+    <Container position="relative" marginHorizontal={'$3'} marginTop={'$6'} onPress={onPress} testID={testID}>
       {icon && <Badge circular content={icon} themeName="badge_background" />}
 
       <H5 fontWeight={600} marginBottom="$1" marginTop="$4">

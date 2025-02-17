@@ -27,7 +27,8 @@ describe('[PROD] Sidebar tests 3', () => {
     sideBar.checkAccountsCounter('2')
   })
 
-  it('Verify pending signature is displayed in sidebar for unsigned tx', () => {
+  // Re-enabled once it is merged to prod
+  it.skip('Verify pending signature is displayed in sidebar for unsigned tx', () => {
     cy.visit(constants.prodbaseUrl + constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_7)
     wallet.connectSigner(signer)
     acceptCookies2()
@@ -43,7 +44,7 @@ describe('[PROD] Sidebar tests 3', () => {
     })
     wallet.connectSigner(signer2)
     sideBar.verifyAddedSafesExist([sideBar.sideBarSafesPendingActions.safe1short])
-    sideBar.checkTxToConfirm(1)
+    sideBar.checkTxToConfirm(2)
   })
 
   it('Verify balance exists in a tx in sidebar', () => {

@@ -18,14 +18,7 @@ const defaultLabelProps = {
 
 export const DropdownLabel = ({ label, leftNode, onPress, labelProps = defaultLabelProps }: DropdownLabelProps) => {
   return (
-    <View
-      alignItems="center"
-      testID="dropdown-label-view"
-      onPress={onPress}
-      flexDirection="row"
-      marginBottom="$3"
-      columnGap="$2"
-    >
+    <View alignItems="center" testID="dropdown-label-view" onPress={onPress} flexDirection="row" columnGap="$2">
       {leftNode}
 
       <Text fontSize={labelProps.fontSize} fontWeight={labelProps.fontWeight}>

@@ -33,7 +33,7 @@ export function OnboardingCarousel({ items }: OnboardingCarouselProps) {
       >
         {items.map((item, index) => (
           <Tabs.Tab name={item.name} key={`${item.name}-${index}`}>
-            <CarouselItem key={index} item={item} />
+            <CarouselItem key={index} item={item} testID={'carousel-item-' + index} />
           </Tabs.Tab>
         ))}
       </Tabs.Container>
@@ -45,7 +45,9 @@ export function OnboardingCarousel({ items }: OnboardingCarouselProps) {
           ))}
         </View>
         <View style={{ flexDirection: 'column', justifyContent: 'space-between' }}>
-          <SafeButton onPress={onGetStartedPress}>Get started</SafeButton>
+          <SafeButton onPress={onGetStartedPress} testID={'get-started'}>
+            Get started
+          </SafeButton>
         </View>
       </View>
     </View>

@@ -25,7 +25,7 @@ export const SignersContainer = () => {
   }, [group])
 
   return (
-    <View gap="$6">
+    <View gap="$6" testID={'signers-screen'}>
       <View height={Dimensions.get('window').height - 230}>
         <SignersList
           isFetching={isFetching}
@@ -35,7 +35,9 @@ export const SignersContainer = () => {
       </View>
 
       <View paddingHorizontal={'$3'}>
-        <SafeButton onPress={onImportSigner}>Import signer</SafeButton>
+        <SafeButton onPress={onImportSigner} testID={'import-signer-button'}>
+          Import signer
+        </SafeButton>
       </View>
     </View>
   )

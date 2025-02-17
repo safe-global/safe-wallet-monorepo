@@ -26,7 +26,7 @@
 ### Exporting Components
 
 - **Always prefer named exports over default exports.**
-    - Named exports make it easier to refactor and identify exports in a codebase.
+  - Named exports make it easier to refactor and identify exports in a codebase.
 
 ### Features and Screens
 
@@ -59,11 +59,11 @@ For a feature called **Assets**, the file structure might look like this:
 
 - **Presentation Components**:
 
-    - Responsible only for rendering the UI.
-    - Receive data and callbacks via props.
-    - Avoid direct manipulation of business logic.
-    - Simple business logic can be included but should generally be extracted into hooks.
+  - Responsible only for rendering the UI.
+  - Receive data and callbacks via props.
+  - Avoid direct manipulation of business logic.
+  - Simple business logic can be included but should generally be extracted into hooks.
 
 - **Container Components**:
-    - Handle business logic (e.g., state management, API calls, etc.).
-    - Pass necessary data and callbacks to the corresponding Presentation component.
+  - Handle business logic (e.g., state management, API calls, etc.).
+  - Pass necessary data and callbacks to the corresponding Presentation component.

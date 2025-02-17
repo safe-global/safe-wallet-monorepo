@@ -59,7 +59,7 @@ describe('Multichain header network switch tests', { defaultCommandTimeout: 6000
     create_wallet.openNetworkSelector()
     sideBar.clickOnShowAllNetworksBtn()
     sideBar.checkNetworkPresence([constants.networks.gnosis, constants.networks.ethereum], sideBar.addNetworkOption)
-    main.verifyElementsCount(sideBar.addNetworkOption, 4)
+    main.verifyElementsCount(sideBar.addNetworkOption, 5)
   })
 
   it('Verify that test networks and main networks are splitted', () => {

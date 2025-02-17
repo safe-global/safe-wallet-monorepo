@@ -64,7 +64,7 @@ const IndexingStatus = () => {
 
   return (
     <Tooltip title={`Last synced with the blockchain ${time}`} placement="right" arrow>
-      <Stack direction="row" spacing={2} alignItems="center" px={3} py={1.5}>
+      <Stack data-testid="index-status" direction="row" spacing={2} alignItems="center" px={3} py={1.5}>
         <Box width={10} height={10} borderRadius="50%" border={`2px solid var(--color-${status.color}-main)`} />
 
         <ExternalLink href={STATUS_PAGE} noIcon flex={1}>

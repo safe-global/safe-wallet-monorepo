@@ -23,7 +23,7 @@ export function ImportSuccess() {
   }
 
   return (
-    <View flex={1} paddingBottom={insets.bottom + insets.top} justifyContent="space-between">
+    <View flex={1} paddingBottom={insets.bottom + insets.top} justifyContent="space-between" testID={'import-success'}>
       <View flex={1}>
         <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
           <View flex={1} flexGrow={1} alignItems="center" justifyContent="center" paddingHorizontal="$3">
@@ -71,7 +71,9 @@ export function ImportSuccess() {
       </View>
 
       <View paddingHorizontal="$3">
-        <SafeButton onPress={handleContinuePress}>Continue</SafeButton>
+        <SafeButton onPress={handleContinuePress} testID={'import-success-continue'}>
+          Continue
+        </SafeButton>
       </View>
     </View>
   )

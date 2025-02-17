@@ -24,6 +24,7 @@ export default function TransactionsLayout() {
   return (
     <MaterialTopTabs
       screenOptions={{
+        tabBarButtonTestID: 'tab-bar-buttons',
         tabBarStyle: {
           backgroundColor: 'transparent',
           shadowColor: 'transparent',

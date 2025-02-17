@@ -8,7 +8,7 @@ import { StyleSheet } from 'react-native'
 
 function Messages() {
   return (
-    <SafeAreaView style={styles.wrapper}>
+    <SafeAreaView style={styles.wrapper} testID={'messages-tab-content'}>
       <ScrollView>
         <View paddingHorizontal="$3">
           <SafeListItem.Header title={formatWithSchema(Date.now(), 'MMM d, yyyy')} />

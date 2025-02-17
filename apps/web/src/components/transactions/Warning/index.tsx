@@ -7,6 +7,9 @@ import css from './styles.module.css'
 import ExternalLink from '@/components/common/ExternalLink'
 import { HelpCenterArticle } from '@/config/constants'
 import { maybePlural } from '@/utils/formatters'
+import { useIsOfficialFallbackHandler } from '@/hooks/useIsOfficialFallbackHandler'
+import { useIsTWAPFallbackHandler } from '@/features/swap/hooks/useIsTWAPFallbackHandler'
+import { UntrustedFallbackHandlerTxText } from '@/components/tx/confirmation-views/SettingsChange/UntrustedFallbackHandlerTxAlert'
 
 const Warning = ({
   datatestid,
@@ -51,6 +54,30 @@ export const DelegateCallWarning = ({ showWarning }: { showWarning: boolean }): 
       }
       severity={severity}
       text={showWarning ? 'Unexpected delegate call' : 'Delegate call'}
+    />
+  )
+}
+
+export const UntrustedFallbackHandlerWarning = ({
+  fallbackHandler,
+  isTxExecuted = false,
+}: {
+  fallbackHandler: string
+  isTxExecuted?: boolean
+}): ReactElement | null => {
+  const isOfficial = useIsOfficialFallbackHandler(fallbackHandler)
+  const isTWAPFallbackHandler = useIsTWAPFallbackHandler(fallbackHandler)
+
+  if (isOfficial || isTWAPFallbackHandler) {
+    return null
+  }
+
+  return (
+    <Warning
+      datatestid="untrusted-fallback-handler-warning"
+      title={<UntrustedFallbackHandlerTxText isTxExecuted={isTxExecuted} />}
+      severity="warning"
+      text="Untrusted fallback handler"
     />
   )
 }

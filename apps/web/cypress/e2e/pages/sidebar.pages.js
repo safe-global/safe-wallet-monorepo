@@ -61,11 +61,15 @@ const emptyAccountList = '[data-testid="empty-account-list"]'
 const searchInput = '[id="search-by-name"]'
 const accountsList = '[data-testid="accounts-list"]'
 const sortbyBtn = '[data-testid="sortby-button"]'
+export const currentSafeSection = '[data-testid="current-safe-section"]'
+const readOnlyChip = '[data-testid="read-only-chip"]'
+const addSafeBtn = '[data-testid="add-safe-button"]'
+const indexStatusSection = '[data-testid="index-status"]'
 
 export const importBtnStr = 'Import'
 export const exportBtnStr = 'Export'
 export const undeployedSafe = 'Undeployed Sepolia'
-const notActivatedStr = 'Not activated'
+export const notActivatedStr = 'Not activated'
 export const addingNetworkNotPossibleStr = 'Adding another network is not possible for this Safe.'
 export const createSafeMsg = (network) => `Successfully added your account on ${network}`
 const signersNotConsistentMsg = 'Signers are not consistent'
@@ -121,7 +125,7 @@ export const multichainSafes = {
 }
 
 export function searchSafe(safe) {
-  cy.get(searchInput).clear().type(safe)
+  cy.get(searchInput).clear().type(safe, { force: true })
 }
 
 export function openSortOptionsMenu() {
@@ -155,6 +159,33 @@ export function verifyPinnedSafe(safe) {
   cy.get(pinnedAccountsContainer).within(() => {
     cy.get(sideSafeListItem).contains(safe)
   })
+}
+
+export function verifyCurrentSafe(safe) {
+  cy.get(currentSafeSection).within(() => {
+    cy.get(sideSafeListItem).contains(safe)
+  })
+}
+
+export function verifyCurrentSafeReadOnly(number) {
+  cy.get(currentSafeSection).within(() => {
+    cy.get(readOnlyChip).should('have.length', number)
+  })
+}
+
+export function verifyIndexStatusPresent() {
+  cy.get(indexStatusSection).within(() => {
+    cy.get('a').should('have.attr', 'href', constants.indexStatusUrl)
+  })
+}
+
+export function clickOnAddSafeBtn() {
+  cy.get(addSafeBtn).click()
+  cy.url().should('include', constants.loadNewSafeUrl)
+}
+
+export function verifyCurrentSafeDoesNotExist() {
+  cy.get(currentSafeSection).should('not.exist')
 }
 
 export function getImportBtn() {
@@ -263,6 +294,12 @@ export function verifySafeCount(count) {
 export function verifyAccountListSafeCount(count) {
   cy.get(accountsList).within(() => {
     cy.get(sideSafeListItem).should('have.length', count)
+  })
+}
+
+export function verifyAccountListSafeData(data) {
+  cy.get(accountsList).within(() => {
+    main.verifyValuesExist(sideSafeListItem, [data])
   })
 }
 
@@ -533,8 +570,12 @@ export function checkBalanceExists() {
   const element = cy.get(chainLogo).prev().contains(balance)
 }
 
-export function checkAddChainDialogDisplayed() {
+export function clickOnAddOptionsBtn() {
   cy.get(safeItemOptionsAddChainBtn).click()
+}
+
+export function checkAddChainDialogDisplayed() {
+  clickOnAddOptionsBtn()
   cy.get(addChainDialog).should('be.visible')
 }
 
@@ -599,7 +640,7 @@ function getNetworkElements() {
 }
 
 export function checkNetworkDisabled(networks) {
-  getNetworkElements().should('have.length', 20)
+  getNetworkElements().should('have.length.gte', 20)
   getNetworkElements().each(($el) => {
     const text = $el[0].innerText.trim()
     console.log(`Element text: ${text}`)

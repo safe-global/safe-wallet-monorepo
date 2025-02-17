@@ -21,7 +21,7 @@ function NotificationsOptIn() {
 
   return (
     <OptIn
-      testID="notifications-opt-in"
+      testID="notifications-opt-in-screen"
       title="Stay in the loop with account activity"
       description="Get notified when you receive assets, and when transactions require your action."
       image={image}
