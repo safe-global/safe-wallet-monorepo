@@ -1,7 +1,7 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 import type { BaseQueryFn, FetchArgs, FetchBaseQueryError } from '@reduxjs/toolkit/query/react'
 
-const CREDENTIAL_ROUTES = ['/v1/organizations', '/v1/auth', '/v1/users']
+const CREDENTIAL_ROUTES = ['/v1/organizations', '/v1/users']
 
 let baseUrl: null | string = null
 export const setBaseUrl = (url: string) => {
@@ -34,7 +34,6 @@ export const dynamicBaseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBas
   const urlEnd = typeof args === 'string' ? args : args.url
   const adjustedUrl = `${resolvedBaseUrl}${urlEnd}`
   const shouldIncludeCredentials = CREDENTIAL_ROUTES.some((route) => urlEnd.startsWith(route))
-  console.log(urlEnd, adjustedUrl, shouldIncludeCredentials)
   const adjustedArgs = {
     ...(typeof args === 'string' ? { method: 'GET' } : args),
     url: adjustedUrl,
