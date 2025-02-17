@@ -1,12 +1,27 @@
 .card {
-  padding: var(--space-2);
   position: relative;
   flex-basis: 50%;
+  display: grid;
+  grid-template-areas:
+    'logo logo actions'
+    'info info actions';
+  grid-template-columns: auto 1fr auto;
+  gap: 8px;
+  padding: var(--space-2);
+}
+
+.card.compact {
+  grid-template-areas:
+    'logo info actions'
+    'logo info actions';
+  grid-template-columns: auto 1fr auto;
+  padding: var(--space-1);
+  padding-left: 12px;
+  border: 0;
 }
 
 .orgLogo {
-  width: 48px;
-  height: 48px;
+  grid-area: logo;
   border-radius: 6px;
   text-transform: uppercase;
   font-weight: bold;
@@ -14,7 +29,11 @@
   align-items: center;
   justify-content: center;
   color: white;
-  font-size: 20px;
+  justify-self: start;
+}
+
+.orgInfo {
+  grid-area: info;
 }
 
 .dot {
@@ -25,9 +44,8 @@
 }
 
 .orgActions {
-  position: absolute;
-  top: var(--space-2);
-  right: var(--space-2);
+  grid-area: actions;
+  align-self: start;
 }
 
 .cardLink {
