@@ -1,6 +1,7 @@
+import OrganizationMembers from '@/features/organizations/components/Members'
+import type { NextPage } from 'next'
 import Head from 'next/head'
 import { BRAND_NAME } from '@/config/constants'
-import type { NextPage } from 'next'
 
 const OrganizationDashboard: NextPage = () => {
   return (
@@ -9,7 +10,9 @@ const OrganizationDashboard: NextPage = () => {
         <title>{`${BRAND_NAME} – Organization members`}</title>
       </Head>
 
-      <main>Members</main>
+      <main>
+        <OrganizationMembers />
+      </main>
     </>
   )
 }
