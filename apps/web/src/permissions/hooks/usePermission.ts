@@ -23,7 +23,7 @@ export const usePermission = <P extends Permission>(
 
   const userPermissions = useMemo(() => {
     return getRolePermissions(userRoles, { safe, wallet }, roleProps)
-  }, [userRoles, roleProps])
+  }, [userRoles, roleProps, safe, wallet])
 
   const permissionPerRole = useMemo(() => {
     return Object.entries(userPermissions).reduce((acc, [role, permissions]) => {
