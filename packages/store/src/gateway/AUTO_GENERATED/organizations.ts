@@ -76,26 +76,11 @@ export type CreateOrganizationResponse = {
 export type CreateOrganizationDto = {
   name: string
 }
-export type UserOrganizationUser = {
-  id: number
-  status: '0' | '1' | 'PENDING' | 'ACTIVE'
-}
-export type UserOrganization = {
-  id: number
-  role: '1' | '2' | 'ADMIN' | 'MEMBER'
-  status: '0' | '1' | '2' | 'INVITED' | 'ACTIVE' | 'DECLINED'
-  createdAt: string
-  updatedAt: string
-  user: UserOrganizationUser
-}
-export type UserOrganizationsDto = {
-  members: UserOrganization[]
-}
 export type GetOrganizationResponse = {
   id: number
   name: string
   status: 1
-  userOrganizations: UserOrganizationsDto[]
+  userOrganizations: string[]
 }
 export type UpdateOrganizationResponse = {
   id: number

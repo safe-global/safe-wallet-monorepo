@@ -2030,7 +2030,7 @@
             "description": "Signer address not provided"
           },
           "404": {
-            "description": "User (wallet) not found"
+            "description": "Wallet not found"
           }
         },
         "tags": ["users"]
@@ -2046,7 +2046,7 @@
             "description": "Signer address not provided"
           },
           "404": {
-            "description": "User (wallet) not found"
+            "description": "Wallet not found"
           }
         },
         "tags": ["users"]
@@ -2857,14 +2857,6 @@
       "get": {
         "operationId": "targetedMessagingGetTargetedSafeV1",
         "parameters": [
-          {
-            "name": "outreachId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "number"
-            }
-          },
           {
             "name": "chainId",
             "required": true,
@@ -5373,31 +5365,6 @@
         },
         "required": ["name", "id"]
       },
-      "UserDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "number"
-          },
-          "status": {
-            "type": "number",
-            "enum": [0, 1]
-          }
-        },
-        "required": ["id", "status"]
-      },
-      "UserOrganizationsDto": {
-        "type": "object",
-        "properties": {
-          "members": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/UserOrganization"
-            }
-          }
-        },
-        "required": ["members"]
-      },
       "GetOrganizationResponse": {
         "type": "object",
         "properties": {
@@ -5414,7 +5381,7 @@
           "userOrganizations": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/UserOrganizationsDto"
+              "type": "string"
             }
           }
         },
@@ -5501,6 +5468,18 @@
           }
         },
         "required": ["id", "role", "status", "createdAt", "updatedAt", "user"]
+      },
+      "UserOrganizationsDto": {
+        "type": "object",
+        "properties": {
+          "members": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserOrganization"
+            }
+          }
+        },
+        "required": ["members"]
       },
       "SafeList": {
         "type": "object",
