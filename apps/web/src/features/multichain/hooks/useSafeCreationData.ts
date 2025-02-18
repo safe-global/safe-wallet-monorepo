@@ -72,17 +72,19 @@ const validateAccountConfig = (safeAccountConfig: SafeAccountConfig) => {
 
   // setupModules used to opt in into Safenet
   if (safeAccountConfig.data) {
-    const safeSetupAddress = '0x18261ff68cC8D05EE046EDF5F4049B2077624a1d' // TODO: getSafeSetupDeployment({ version: '1.4.1' })?.defaultAddress
-    const multiSendAddress = getMultiSendDeployment({ version: '1.4.1' })?.defaultAddress
+    try {
+      const safeSetupAddress = '0x18261ff68cC8D05EE046EDF5F4049B2077624a1d' // TODO: getSafeSetupDeployment({ version: '1.4.1' })?.defaultAddress
+      const multiSendAddress = getMultiSendDeployment({ version: '1.4.1' })?.defaultAddress
 
-    const decodedData = decodeMultiSendData(safeAccountConfig.data)
+      const decodedData = decodeMultiSendData(safeAccountConfig.data)
 
-    const isSafenetSetup =
-      sameAddress(safeAccountConfig.to, multiSendAddress) &&
-      decodedData.length === 2 &&
-      sameAddress(decodedData[0].to, setupToL2Address) &&
-      sameAddress(decodedData[1].to, safeSetupAddress)
-    if (isSafenetSetup) return
+      const isSafenetSetup =
+        sameAddress(safeAccountConfig.to, multiSendAddress) &&
+        decodedData.length === 2 &&
+        sameAddress(decodedData[0].to, setupToL2Address) &&
+        sameAddress(decodedData[1].to, safeSetupAddress)
+      if (isSafenetSetup) return
+    } catch {}
   }
 
   if (safeAccountConfig.to !== ZERO_ADDRESS) {
