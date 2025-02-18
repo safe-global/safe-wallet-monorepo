@@ -27,6 +27,7 @@ const mockedActiveSafeInfo: SafeOverview = {
   queued: 1,
   threshold: 1,
 }
+
 const mockedActiveAccount1: SafeInfo = {
   address: '0x9BFCA75a05175503580D593F4330b5505c594596',
   chainId: '11155111',
@@ -65,7 +66,7 @@ export function TestCtrls() {
     dispatch(updatePromptAttempts(1))
     dispatch(addSafe({ SafeInfo: mockedActiveSafeInfo1, chains: [mockedActiveSafeInfo1.chainId] }))
     dispatch(setActiveSafe(mockedActiveAccount1))
-    
+
     router.replace('/(tabs)')
   }
   const onPressTestOnboarding = async () => {
@@ -80,12 +81,7 @@ export function TestCtrls() {
         accessibilityRole="button"
         style={BTN}
       />
-      <Pressable
-        testID="e2eHistory"
-        onPress={onPressE2eHistory}
-        accessibilityRole="button"
-        style={BTN}
-      />
+      <Pressable testID="e2eHistory" onPress={onPressE2eHistory} accessibilityRole="button" style={BTN} />
       <Pressable testID="e2eTestOnboarding" onPress={onPressTestOnboarding} accessibilityRole="button" style={BTN} />
     </View>
   )
