@@ -1,3 +1,4 @@
+import OrgsSettings from '@/features/organizations/components/OrgsSettings'
 import type { NextPage } from 'next'
 import Head from 'next/head'
 import { BRAND_NAME } from '@/config/constants'
@@ -9,7 +10,9 @@ const OrgSettings: NextPage = () => {
         <title>{`${BRAND_NAME} – Organization settings`}</title>
       </Head>
 
-      <main>Org settings</main>
+      <main>
+        <OrgsSettings />
+      </main>
     </>
   )
 }
