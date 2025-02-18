@@ -12,7 +12,7 @@ describe('RolePermissionsConfig', () => {
   const mockSafeTx = { data: { nonce: 1 } } as SafeTransaction
 
   const mockSafe = extendedSafeInfoBuilder()
-    .with({ address: { value: safeAddress } })
+    .with({ address: { value: safeAddress }, owners: [{ value: walletAddress }] })
     .with({ deployed: true })
     .build()
 
