@@ -1,3 +1,4 @@
+import OrganizationSafeAccounts from '@/features/organizations/components/SafeAccounts'
 import type { NextPage } from 'next'
 import Head from 'next/head'
 import { BRAND_NAME } from '@/config/constants'
@@ -9,7 +10,9 @@ const SafeAccounts: NextPage = () => {
         <title>{`${BRAND_NAME} – Organization Safe Accounts`}</title>
       </Head>
 
-      <main>Safe Accounts</main>
+      <main>
+        <OrganizationSafeAccounts />
+      </main>
     </>
   )
 }
