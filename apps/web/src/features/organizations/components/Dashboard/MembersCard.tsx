@@ -1,28 +1,17 @@
+import css from '@/features/organizations/components/Dashboard/styles.module.css'
 import MemberIcon from '@/public/images/orgs/member.svg'
 import { Typography, Paper, Box, Button, SvgIcon } from '@mui/material'
 
-const MembersList = () => {
+const MembersCard = () => {
   const handleInviteClick = () => {
     // TODO: Implement invite functionality
     console.log('Invite clicked')
   }
 
   return (
-    <Paper sx={{ p: 3 }}>
+    <Paper sx={{ p: 3, borderRadius: '12px' }}>
       <Box position="relative" width={1}>
-        <Box
-          sx={{
-            width: 40,
-            height: 40,
-            backgroundColor: 'background.main',
-            borderRadius: '50%',
-            mb: 2,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            position: 'relative',
-          }}
-        >
+        <Box className={css.iconBG}>
           <SvgIcon gridArea="icon" component={MemberIcon} inheritViewBox />
         </Box>
 
@@ -53,4 +42,4 @@ const MembersList = () => {
   )
 }
 
-export default MembersList
+export default MembersCard

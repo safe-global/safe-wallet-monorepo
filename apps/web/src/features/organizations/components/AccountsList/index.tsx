@@ -1,41 +1,34 @@
-import { Typography, Paper, Box, Button } from '@mui/material'
+import { useMemo } from 'react'
+import Image from 'next/image'
+import { Typography, Paper, Box, Button, Stack } from '@mui/material'
 import type { AllSafeItems } from '@/features/myAccounts/hooks/useAllSafesGrouped'
 import { useAllSafesGrouped } from '@/features/myAccounts/hooks/useAllSafesGrouped'
 import SafesList from '@/features/myAccounts/components/SafesList'
-import { useMemo } from 'react'
+import EmptyDashboard from '@/public/images/orgs/empty_dashboard.png'
 
 const EmptyAccountsList = () => {
   return (
     <Paper sx={{ p: 3, display: 'flex', gap: 3 }}>
-      <Box sx={{ flex: 2 }}>
-        <Typography variant="h4" fontWeight={700} mb={2}>
-          Link your Safe Accounts
-        </Typography>
+      <Stack direction={{ xs: 'column-reverse', md: 'row' }} alignItems="center" spacing={3}>
+        <Box sx={{ flex: 2 }}>
+          <Typography variant="h4" fontWeight={700} mb={2}>
+            Add your Safe Accounts
+          </Typography>
 
-        <Typography variant="body1" color="text.secondary" mb={3} fontSize="small">
-          To set up your organisation you need to add existing Safe Accounts. Any accounts that are associated with your
-          connected wallet can be added to the organisation space.
-        </Typography>
+          <Typography variant="body1" color="text.secondary" mb={2}>
+            Start by adding Safe Accounts to your organization. Any accounts that are linked to your connected wallet
+            can be added to the organisation space.
+          </Typography>
 
-        <Button variant="contained" onClick={() => {}}>
-          Add existing account
-        </Button>
-      </Box>
+          <Button variant="contained" onClick={() => {}}>
+            Add accounts
+          </Button>
+        </Box>
 
-      <Box
-        sx={{
-          flex: 1,
-          backgroundColor: '#f5f5f5',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          borderRadius: 1,
-        }}
-      >
-        <Typography variant="body2" color="text.secondary">
-          Image Placeholder
-        </Typography>
-      </Box>
+        <Box sx={{}}>
+          <Image src={EmptyDashboard} alt="Illustration of two safes with their thresholds" width={375} height={200} />
+        </Box>
+      </Stack>
     </Paper>
   )
 }

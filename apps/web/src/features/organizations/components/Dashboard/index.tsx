@@ -1,7 +1,9 @@
-import { Box, Typography } from '@mui/material'
+import MembersCard from '@/features/organizations/components/Dashboard/MembersCard'
+import NewFeaturesCard from '@/features/organizations/components/Dashboard/NewFeaturesCard'
+import OrgsCTACard from '@/features/organizations/components/Dashboard/OrgsCard'
+import { Box, Grid2, Typography } from '@mui/material'
 import SignInButton from '@/features/organizations/components/SignInButton'
 import OrgAccountsList from '@/features/organizations/components/AccountsList'
-import MembersList from '../MembersList'
 import Grid from '@mui/material/Grid2'
 import css from './styles.module.css'
 
@@ -51,8 +53,16 @@ const OrganizationsDashboard = ({ organizationId }: { organizationId: string }) 
               Members
             </Typography>
           )}
-          <MembersList />
+          <MembersCard />
         </Grid>
+
+        <Grid2 size={{ xs: 12, md: 4 }}>
+          <OrgsCTACard />
+        </Grid2>
+
+        <Grid2 size={{ xs: 12, md: 4 }}>
+          <NewFeaturesCard />
+        </Grid2>
       </Grid>
     </>
   )
