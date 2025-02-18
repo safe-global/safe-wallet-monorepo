@@ -1,7 +1,8 @@
 {
   "type": {
     "general": {
-      "statusOk": "Success"
+      "statusOk": "Success",
+      "statusExpired": "Expired"
     },
     "sideActions": {
       "created": "Created",
