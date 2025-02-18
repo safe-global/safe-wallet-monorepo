@@ -6,10 +6,7 @@ import OrgsIcon from '@/public/images/orgs/orgs.svg'
 import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
 import { Box, Button, Card, Grid2, Link, Typography } from '@mui/material'
-import {
-  type GetOrganizationResponse,
-  useOrganizationsGetV1Query,
-} from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
+import { useOrganizationsGetV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
 import { useState } from 'react'
 import css from './styles.module.css'
 
@@ -74,21 +71,6 @@ const NoOrgsState = () => {
     </Card>
   )
 }
-
-export const ORGS: GetOrganizationResponse[] = [
-  {
-    name: 'Safe DAO',
-    status: 1,
-    id: 1,
-    userOrganizations: ['1', '2', '3'],
-  },
-  {
-    name: 'Optimism Foundation',
-    status: 1,
-    id: 2,
-    userOrganizations: ['1', '2', '3', '4', '5', '6'],
-  },
-]
 
 const OrgsList = () => {
   const isUserSignedIn = useAppSelector(isAuthenticated)
