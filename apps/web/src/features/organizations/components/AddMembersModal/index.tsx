@@ -13,7 +13,7 @@ import {
   SvgIcon,
   Typography,
 } from '@mui/material'
-import { FormProvider, useFieldArray, useForm, useFormContext } from 'react-hook-form'
+import { FormProvider, useFieldArray, useForm, useFormContext, Controller } from 'react-hook-form'
 import ModalDialog from '@/components/common/ModalDialog'
 import memberIcon from '@/public/images/orgs/member.svg'
 import adminIcon from '@/public/images/orgs/admin.svg'
@@ -21,6 +21,8 @@ import AddIcon from '@/public/images/common/add.svg'
 import DeleteIcon from '@/public/images/common/delete.svg'
 import { sameAddress } from '@/utils/addresses'
 import AddressInput from '@/components/common/AddressInput'
+import CheckIcon from '@mui/icons-material/Check'
+import css from './styles.module.css'
 
 enum Role {
   ADMIN = 'admin',
@@ -30,6 +32,41 @@ enum Role {
 type MemberField = {
   address: string
   role: Role
+}
+
+const RoleMenuItem = ({
+  role,
+  hasDescription = false,
+  selected = false,
+}: {
+  role: Role
+  hasDescription?: boolean
+  selected?: boolean
+}): ReactElement => {
+  const isAdmin = role === Role.ADMIN
+
+  return (
+    <Box width="100%" alignItems="center" className={css.roleMenuItem}>
+      <SvgIcon mr={1} gridArea="icon" component={isAdmin ? adminIcon : memberIcon} inheritViewBox fontSize="small" />
+      <Typography gridArea="title" fontWeight="bold">
+        {isAdmin ? 'Admin' : 'Member'}
+      </Typography>
+      {hasDescription && (
+        <>
+          <Box gridArea="description">
+            <Typography variant="body2" sx={{ maxWidth: '300px', whiteSpace: 'normal', wordWrap: 'break-word' }}>
+              {isAdmin
+                ? 'Admins can create and delete organizations, invite members and more.'
+                : 'Can view the organization data.'}
+            </Typography>
+          </Box>
+          <Box gridArea="checkIcon" sx={{ visibility: selected ? 'visible' : 'hidden', mx: 1 }}>
+            <CheckIcon fontSize="small" sx={{ color: 'text.primary' }} />
+          </Box>
+        </>
+      )}
+    </Box>
+  )
 }
 
 export type AddMembersFormFields = {
@@ -45,7 +82,7 @@ const MemberRow = ({
   onRemove: () => void
   showRemoveButton: boolean
 }): ReactElement => {
-  const { getValues } = useFormContext()
+  const { getValues, control } = useFormContext()
 
   const validateMemberAddress = useCallback(
     async (address: string) => {
@@ -62,20 +99,28 @@ const MemberRow = ({
       <Box my={2} sx={{ flex: 1, minWidth: 0 }}>
         <AddressInput validate={validateMemberAddress} name={`members.${index}.address`} label="Address" required />
       </Box>
-      <Select name={`members.${index}.role`} defaultValue={Role.MEMBER} required sx={{ minWidth: '150px' }}>
-        <MenuItem value={Role.ADMIN}>
-          <Stack direction="row" alignItems="center" spacing={1} padding={0.5}>
-            <SvgIcon component={adminIcon} inheritViewBox fontSize="small" />
-            <Typography>Admin</Typography>
-          </Stack>
-        </MenuItem>
-        <MenuItem value={Role.MEMBER}>
-          <Stack direction="row" alignItems="center" spacing={1} padding={0.5}>
-            <SvgIcon component={memberIcon} inheritViewBox fontSize="small" />
-            <Typography>Member</Typography>
-          </Stack>
-        </MenuItem>
-      </Select>
+      <Controller
+        control={control}
+        name={`members.${index}.role`}
+        defaultValue={Role.MEMBER}
+        render={({ field: { value, onChange, ...field } }) => (
+          <Select
+            {...field}
+            value={value}
+            onChange={onChange}
+            required
+            sx={{ minWidth: '150px', py: 0.5 }}
+            renderValue={(val) => <RoleMenuItem role={val as Role} />}
+          >
+            <MenuItem value={Role.ADMIN}>
+              <RoleMenuItem role={Role.ADMIN} hasDescription selected={value === Role.ADMIN} />
+            </MenuItem>
+            <MenuItem value={Role.MEMBER}>
+              <RoleMenuItem role={Role.MEMBER} hasDescription selected={value === Role.MEMBER} />
+            </MenuItem>
+          </Select>
+        )}
+      />
       <Box sx={{ visibility: showRemoveButton ? 'visible' : 'hidden' }}>
         <IconButton onClick={onRemove} aria-label="Remove member" sx={{ p: 0, color: 'error.main' }}>
           <SvgIcon component={DeleteIcon} inheritViewBox />
