@@ -1,5 +1,8 @@
 import { Box, Button, Divider, Menu, MenuItem, Typography } from '@mui/material'
-import type { GetOrganizationResponse } from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
+import {
+  type GetOrganizationResponse,
+  useOrganizationsGetV1Query,
+} from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
 import { useState } from 'react'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import CheckIcon from '@mui/icons-material/Check'
@@ -8,14 +11,15 @@ import css from './styles.module.css'
 import { useRouter } from 'next/router'
 import { AppRoutes } from '@/config/routes'
 import OrgsCreationModal from '../OrgsCreationModal'
-import { ORGS } from '../OrgsList'
 
 const OrgsSidebarSelector = () => {
-  const [selectedOrg, setSelectedOrg] = useState(ORGS[0])
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
-  const open = Boolean(anchorEl)
-  const router = useRouter()
   const [isCreationModalOpen, setIsCreationModalOpen] = useState(false)
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
+  const router = useRouter()
+  const open = Boolean(anchorEl)
+  const orgId = Array.isArray(router.query.orgId) ? router.query.orgId[0] : router.query.orgId
+  const { data: orgs } = useOrganizationsGetV1Query()
+  const selectedOrg = orgs?.find((org) => org.id === Number(orgId))
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget)
@@ -32,9 +36,10 @@ const OrgsSidebarSelector = () => {
       router.push(newPath)
     }
 
-    setSelectedOrg(org)
     handleClose()
   }
+
+  if (!selectedOrg) return null
 
   return (
     <>
@@ -66,6 +71,7 @@ const OrgsSidebarSelector = () => {
             </Typography>
           </Box>
         </Button>
+
         <Menu
           id="org-selector-menu"
           anchorEl={anchorEl}
@@ -74,8 +80,10 @@ const OrgsSidebarSelector = () => {
           sx={{ '& .MuiPaper-root': { minWidth: '260px !important' } }}
         >
           <OrgsCard org={selectedOrg} isCompact isLink={false} />
+
           <Divider sx={{ mb: 1 }} />
-          {ORGS.map((org) => (
+
+          {orgs?.map((org) => (
             <MenuItem
               key={org.id}
               onClick={() => handleSelectOrg(org)}
@@ -93,7 +101,9 @@ const OrgsSidebarSelector = () => {
               {org.id === selectedOrg.id && <CheckIcon fontSize="small" color="primary" />}
             </MenuItem>
           ))}
+
           <Divider />
+
           <MenuItem
             onClick={() => {
               handleClose()
@@ -103,6 +113,7 @@ const OrgsSidebarSelector = () => {
           >
             Create organization
           </MenuItem>
+
           <MenuItem
             onClick={() => {
               handleClose()
@@ -114,6 +125,7 @@ const OrgsSidebarSelector = () => {
           </MenuItem>
         </Menu>
       </Box>
+
       {isCreationModalOpen && <OrgsCreationModal onClose={() => setIsCreationModalOpen(false)} />}
     </>
   )
