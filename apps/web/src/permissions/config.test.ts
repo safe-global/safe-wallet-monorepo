@@ -64,10 +64,12 @@ describe('RolePermissionsConfig', () => {
   })
 
   describe('SpendingLimitBeneficiary', () => {
-    const mockSpendingLimits = [
-      { token: { address: '0xToken1' }, beneficiary: faker.finance.ethereumAddress(), amount: '1000', spent: '0' },
-      { token: { address: '0xToken2' }, beneficiary: faker.finance.ethereumAddress(), amount: '2000', spent: '0' },
-    ] as SpendingLimitState[]
+    const mockSpendingLimits = new Array(3).fill(null).map(() => ({
+      token: { address: faker.finance.ethereumAddress() },
+      beneficiary: faker.finance.ethereumAddress(),
+      amount: faker.finance.amount({ min: 1000, max: 5000, dec: 0 }),
+      spent: faker.finance.amount({ min: 0, max: 1000, dec: 0 }),
+    })) as SpendingLimitState[]
 
     it('should return correct permissions', () => {
       const permissions = rolePermissionsConfig[Role.SpendingLimitBeneficiary]!(mockCommonProps, {
@@ -84,7 +86,7 @@ describe('RolePermissionsConfig', () => {
     })
 
     describe('CreateSpendingLimitTransaction', () => {
-      const mockTokenAddress = '0xToken1'
+      const tokenAddress = mockSpendingLimits[0].token.address
 
       it('should return `false` if no wallet connected', () => {
         const permissions = rolePermissionsConfig[Role.SpendingLimitBeneficiary]!(
@@ -92,7 +94,7 @@ describe('RolePermissionsConfig', () => {
           { spendingLimits: mockSpendingLimits },
         )
 
-        expect(permissions[Permission.CreateSpendingLimitTransaction]!({ tokenAddress: mockTokenAddress })).toBe(false)
+        expect(permissions[Permission.CreateSpendingLimitTransaction]!({ tokenAddress })).toBe(false)
       })
 
       describe('without tokenAddress', () => {
@@ -100,7 +102,12 @@ describe('RolePermissionsConfig', () => {
           const permissions = rolePermissionsConfig[Role.SpendingLimitBeneficiary]!(mockCommonProps, {
             spendingLimits: [
               ...mockSpendingLimits,
-              { token: { address: '0xToken3' }, beneficiary: walletAddress, amount: '3000', spent: '0' },
+              {
+                token: { address: faker.finance.ethereumAddress() },
+                beneficiary: walletAddress,
+                amount: faker.finance.amount({ min: 1000, max: 5000, dec: 0 }),
+                spent: faker.finance.amount({ min: 0, max: 1000, dec: 0 }),
+              },
             ] as SpendingLimitState[],
           })
 
@@ -121,11 +128,16 @@ describe('RolePermissionsConfig', () => {
           const permissions = rolePermissionsConfig[Role.SpendingLimitBeneficiary]!(mockCommonProps, {
             spendingLimits: [
               ...mockSpendingLimits,
-              { token: { address: mockTokenAddress }, beneficiary: walletAddress, amount: '3000', spent: '0' },
+              {
+                token: { address: tokenAddress },
+                beneficiary: walletAddress,
+                amount: faker.finance.amount({ min: 1000, max: 5000, dec: 0 }),
+                spent: faker.finance.amount({ min: 0, max: 1000, dec: 0 }),
+              },
             ] as SpendingLimitState[],
           })
 
-          expect(permissions[Permission.CreateSpendingLimitTransaction]!({ tokenAddress: mockTokenAddress })).toBe(true)
+          expect(permissions[Permission.CreateSpendingLimitTransaction]!({ tokenAddress })).toBe(true)
         })
 
         it('should return `false` if no spending limit defined for token and connected wallet address', () => {
@@ -133,22 +145,20 @@ describe('RolePermissionsConfig', () => {
             spendingLimits: mockSpendingLimits,
           })
 
-          expect(permissions[Permission.CreateSpendingLimitTransaction]!({ tokenAddress: mockTokenAddress })).toBe(
-            false,
-          )
+          expect(permissions[Permission.CreateSpendingLimitTransaction]!({ tokenAddress })).toBe(false)
         })
 
         it('should return `false` if the spending limit defined is reached', () => {
+          const mockAmount = faker.finance.amount({ min: 1000, max: 5000, dec: 0 })
+
           const permissions = rolePermissionsConfig[Role.SpendingLimitBeneficiary]!(mockCommonProps, {
             spendingLimits: [
               ...mockSpendingLimits,
-              { token: { address: mockTokenAddress }, beneficiary: walletAddress, amount: '3000', spent: '3000' },
+              { token: { address: tokenAddress }, beneficiary: walletAddress, amount: mockAmount, spent: mockAmount },
             ] as SpendingLimitState[],
           })
 
-          expect(permissions[Permission.CreateSpendingLimitTransaction]!({ tokenAddress: mockTokenAddress })).toBe(
-            false,
-          )
+          expect(permissions[Permission.CreateSpendingLimitTransaction]!({ tokenAddress })).toBe(false)
         })
       })
     })
