@@ -46,7 +46,7 @@ export function ImportError() {
           <SafeFontIcon color="$backgroundPress" name="shield" />
 
           <Text color="$backgroundPress" fontSize="$4">
-            Safe doesn’t store your seed phrase.
+            Safe doesn’t store your private key.
           </Text>
         </View>
 

@@ -5,6 +5,7 @@ import * as create_tx from '../pages/create_tx.pages.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as wallet from '../../support/utils/wallet.js'
 import * as swaps_data from '../../fixtures/swaps_data.json'
+import * as data from '../../fixtures/txhistory_data_data.json'
 
 const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
 const signer = walletCredentials.OWNER_4_PRIVATE_KEY
@@ -15,6 +16,7 @@ let iframeSelector
 
 const swapsHistory = swaps_data.type.history
 const swapOrder = swaps_data.type.orderDetails
+const typeGeneral = data.type.general
 
 describe('Twaps history tests', { defaultCommandTimeout: 30000 }, () => {
   before(async () => {
@@ -92,6 +94,8 @@ describe('Twaps history tests', { defaultCommandTimeout: 30000 }, () => {
     const buyAmount = swaps.getTokenPrice('DAI')
     const tokenSoldPrice = swaps.getTokenPrice('WETH')
 
+    create_tx.verifySummaryByName(swapsHistory.twaporder_title, null, [typeGeneral.statusOk])
+    main.verifyElementsExist([create_tx.altImgDai, create_tx.altImgWeth], create_tx.altImgTwapOrder)
     create_tx.verifyExpandedDetails([swapsHistory.sell, weth, eq, swapsHistory.dai, swapsHistory.filled])
     swaps.checkNumberOfParts(2)
     swaps.checkSellAmount(sellAmount)

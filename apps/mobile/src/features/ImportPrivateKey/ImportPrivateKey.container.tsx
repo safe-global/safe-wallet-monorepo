@@ -29,7 +29,7 @@ export function ImportPrivateKey() {
           <View marginTop="$2">
             <SectionTitle
               title="Import a private key"
-              description="Enter your seed phrase or a private key below. Make sure to do so in a safe and private place."
+              description="Enter your private key below. Make sure to do so in a safe and private place."
             />
           </View>
 

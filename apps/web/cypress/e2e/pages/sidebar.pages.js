@@ -62,6 +62,9 @@ const searchInput = '[id="search-by-name"]'
 const accountsList = '[data-testid="accounts-list"]'
 const sortbyBtn = '[data-testid="sortby-button"]'
 export const currentSafeSection = '[data-testid="current-safe-section"]'
+const readOnlyChip = '[data-testid="read-only-chip"]'
+const addSafeBtn = '[data-testid="add-safe-button"]'
+const indexStatusSection = '[data-testid="index-status"]'
 
 export const importBtnStr = 'Import'
 export const exportBtnStr = 'Export'
@@ -162,6 +165,23 @@ export function verifyCurrentSafe(safe) {
   cy.get(currentSafeSection).within(() => {
     cy.get(sideSafeListItem).contains(safe)
   })
+}
+
+export function verifyCurrentSafeReadOnly(number) {
+  cy.get(currentSafeSection).within(() => {
+    cy.get(readOnlyChip).should('have.length', number)
+  })
+}
+
+export function verifyIndexStatusPresent() {
+  cy.get(indexStatusSection).within(() => {
+    cy.get('a').should('have.attr', 'href', constants.indexStatusUrl)
+  })
+}
+
+export function clickOnAddSafeBtn() {
+  cy.get(addSafeBtn).click()
+  cy.url().should('include', constants.loadNewSafeUrl)
 }
 
 export function verifyCurrentSafeDoesNotExist() {
