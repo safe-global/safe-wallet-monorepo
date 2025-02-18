@@ -48,7 +48,7 @@ const OrgsInfoModal = ({ onClose, onCreate }: { onClose: () => void; onCreate: (
 
   return (
     <Dialog open PaperProps={{ style: { width: '870px', maxWidth: '98%', borderRadius: '16px' } }} onClose={onClose}>
-      <DialogContent dividers sx={{ py: 3, px: 4 }}>
+      <DialogContent dividers sx={{ p: 0, border: 0 }}>
         <Grid2 container>
           <Grid2 size={6} p={5} display="flex" flexDirection="column">
             <Typography component="div" variant="h1" mb={1} position="relative">
