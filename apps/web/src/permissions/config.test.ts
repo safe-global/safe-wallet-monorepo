@@ -1,9 +1,9 @@
 import { faker } from '@faker-js/faker'
 import rolePermissionsConfig, { Permission, Role } from './config'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
-import useWallet from '@/hooks/wallets/useWallet'
-import { SafeTransaction } from '@safe-global/safe-core-sdk-types'
-import { SpendingLimitState } from '@/store/spendingLimitsSlice'
+import type useWallet from '@/hooks/wallets/useWallet'
+import type { SafeTransaction } from '@safe-global/safe-core-sdk-types'
+import type { SpendingLimitState } from '@/store/spendingLimitsSlice'
 
 describe('RolePermissionsConfig', () => {
   const safeAddress = faker.finance.ethereumAddress()
