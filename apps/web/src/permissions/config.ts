@@ -1,6 +1,7 @@
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import type { ExtendedSafeInfo } from '@/store/safeInfoSlice'
 import type { SpendingLimitState } from '@/store/spendingLimitsSlice'
+import { sameAddress } from '@/utils/addresses'
 import type { SafeTransaction } from '@safe-global/safe-core-sdk-types'
 
 export enum Role {
@@ -102,12 +103,12 @@ export default <RolePermissionsConfig>{
 
       if (!tokenAddress) {
         // Check if the connected wallet has a spending limit for any token
-        return spendingLimits.some((sl) => sl.beneficiary === wallet.address)
+        return spendingLimits.some((sl) => sameAddress(sl.beneficiary, wallet.address))
       }
 
       // Check if the connected wallet has a spending limit for the given token
       const spendingLimit = spendingLimits.find(
-        (sl) => sl.token.address === tokenAddress && sl.beneficiary === wallet.address,
+        (sl) => sameAddress(sl.token.address, tokenAddress) && sameAddress(sl.beneficiary, wallet.address),
       )
 
       if (spendingLimit) {
