@@ -22,12 +22,13 @@ const Navigation = (): ReactElement => {
 
         return (
           <div key={itemPath}>
-            <ListItemButton sx={{ padding: 0 }} selected={isSelected} key={itemPath}>
+            <ListItemButton disabled={item.disabled} sx={{ padding: 0 }} selected={isSelected} key={itemPath}>
               <SidebarListItemButton selected={isSelected} href={itemPath}>
                 {item.icon && <SidebarListItemIcon>{item.icon}</SidebarListItemIcon>}
 
                 <SidebarListItemText data-testid="sidebar-list-item" bold>
                   {item.label}
+                  {item.tag}
                 </SidebarListItemText>
               </SidebarListItemButton>
             </ListItemButton>
