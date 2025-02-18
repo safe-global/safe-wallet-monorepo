@@ -10,7 +10,9 @@ import { CreateSafeStatus } from '@/components/new-safe/create/steps/StatusStep'
 import type { NamedAddress } from '@/components/new-safe/create/types'
 import { AppRoutes } from '@/config/routes'
 import { useCurrentChain } from '@/hooks/useChains'
+import { useDarkMode } from '@/hooks/useDarkMode'
 import useWallet from '@/hooks/wallets/useWallet'
+import SafenetDarkLogo from '@/public/images/safenet/logo-safenet-dark-gradient.svg'
 import SafenetLogo from '@/public/images/safenet/logo-safenet.svg'
 import { CREATE_SAFE_CATEGORY } from '@/services/analytics'
 import { getLatestSafeVersion } from '@/utils/chains'
@@ -21,8 +23,8 @@ import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import dynamic from 'next/dynamic'
 import { useRouter } from 'next/router'
 import { useMemo, useState, type ReactElement } from 'react'
-import css from './styles.module.css'
 import SafenetNameStep from '../SafenetNameStep'
+import css from './styles.module.css'
 
 const DiscoverSafenetStep = dynamic(() => import('@/features/safenet/components/new-safe/DiscoverSafenetStep'))
 
@@ -96,6 +98,7 @@ const CreateSafenetAccount = () => {
   const router = useRouter()
   const wallet = useWallet()
   const chain = useCurrentChain()
+  const isDarkMode = useDarkMode()
 
   const [safeName, setSafeName] = useState('')
   const [overviewNetworks, setOverviewNetworks] = useState<ChainInfo[]>()
@@ -201,7 +204,7 @@ const CreateSafenetAccount = () => {
               >
                 Discover
               </Typography>
-              <SafenetLogo height="24" />
+              <SafenetLogo height="24" className={isDarkMode ? css.logo : css.darkLogo} />
             </Box>
           ) : (
             <Typography
@@ -232,7 +235,7 @@ const CreateSafenetAccount = () => {
             customProgressBar={
               <Box className={css.safenetHeader}>
                 <Typography fontSize={14}>Powered by</Typography>
-                <SafenetLogo height="14" />
+                <SafenetDarkLogo height="14" />
               </Box>
             }
           />
@@ -253,7 +256,9 @@ const CreateSafenetAccount = () => {
             {wallet?.address && <CreateSafeInfos staticHint={safenetStaticHint} dynamicHint={dynamicHint} />}
             {activeStep < 3 && (
               <Box padding={3}>
-                <ExternalLink href="https://docs.safe.global/safenet/overview">Read more about Safenet</ExternalLink>
+                <ExternalLink href="https://docs.safe.global/safenet/overview" color="textPrimary">
+                  Read more about Safenet
+                </ExternalLink>
               </Box>
             )}
           </Grid>

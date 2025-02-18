@@ -1,7 +1,6 @@
 .lightBanner,
 .darkBanner {
   align-items: flex-start;
-  border: 1px solid transparent;
   border-radius: 8px;
   display: flex;
   flex-direction: column;
@@ -9,6 +8,7 @@
   margin-bottom: var(--space-3);
   padding: var(--space-3);
   position: relative;
+  overflow: hidden;
 }
 
 .lightBanner {
@@ -16,25 +16,25 @@
 }
 
 .darkBanner {
-  background-image: radial-gradient(108.2% 108.2% at 99.88% 11.3%, #003f54 0%, #000000 100%),
-    radial-gradient(119.01% 132.63% at 119.01% -14.15%, #ff5f00 0%, #ffd200 50%, #12ff80 100%);
-  background-origin: border-box;
-  background-clip: padding-box, border-box;
+  background-image: radial-gradient(119.01% 132.63% at 119.01% -14.15%, #FF5F00 0%, #FFD200 50%, #12FF80 100%);
 }
 
 .backgroundLogo {
   position: absolute;
-  right: var(--space-3);
-  bottom: -36px;
+  right: var(--space-5);
+  bottom: 0;
 }
 
-.dismiss {
-  cursor: pointer;
-  font-size: 12px;
-  position: absolute;
-  margin: var(--space-3);
-  right: 0;
-  top: 0;
+.darkBanner .backgroundLogo > g {
+  opacity: 0.2;
+}
+
+.darkBanner .backgroundLogo > g > path {
+  fill: var(--color-static-main);
+}
+
+.darkBanner .safenetLogo > path {
+  fill: var(--color-static-main);
 }
 
 .title {
@@ -44,11 +44,18 @@
   gap: var(--space-1);
 }
 
-.newTag {
+.lightBanner .newTag {
   background: rgba(255, 255, 255, 0.2);
   border-radius: 4px;
   padding: 2px var(--space-1);
 }
+
+.darkBanner .newTag {
+  border-radius: 4px;
+  padding: 2px var(--space-1);
+  background: radial-gradient(100.81% 103.11% at 96.36% 3.87%, #000000 0%, #003F54 100%);
+}
+
 .newTag > p {
   background: radial-gradient(119.01% 132.63% at 119.01% -14.15%, #ff5f00 0%, #ffd200 50%, #12ff80 100%);
   background-clip: text;
@@ -56,7 +63,24 @@
 }
 
 .bannerButton {
+  color: var(--color-text-primary);
+}
+
+.lightBanner .bannerButton {
   background: radial-gradient(119.01% 132.63% at 119.01% -14.15%, #ff5f00 0%, #ffd200 50%, #12ff80 100%);
+}
+
+.darkBanner .bannerButton {
+  background: radial-gradient(100.81% 103.11% at 96.36% 3.87%, #000000 0%, #003F54 100%);
+}
+
+.dismiss {
+  cursor: pointer;
+  font-size: 12px;
+  position: absolute;
+  margin: var(--space-3);
+  right: 0;
+  top: 0;
 }
 
 @media (max-width: 450px) {

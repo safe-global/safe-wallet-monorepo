@@ -1,4 +1,5 @@
 import { AppRoutes } from '@/config/routes'
+import { useDarkMode } from '@/hooks/useDarkMode'
 import BellIcon from '@/public/images/safenet/bell.svg'
 import CloseIcon from '@mui/icons-material/Close'
 import { Box, Button, IconButton, Typography } from '@mui/material'
@@ -7,6 +8,7 @@ import { useState } from 'react'
 import css from './styles.module.css'
 
 function SafenetInfoCard() {
+  const isDarkMode = useDarkMode()
   const router = useRouter()
   const [displayBanner, setDisplayBanner] = useState<boolean>(true)
 
@@ -18,12 +20,12 @@ function SafenetInfoCard() {
 
   return (
     displayBanner && (
-      <Box className={css.card}>
+      <Box className={isDarkMode ? css.darkCard : css.lightCard}>
         <IconButton className={css.close} onClick={() => setDisplayBanner(false)} size="small">
           <CloseIcon fontSize="medium" />
         </IconButton>
         <Box className={css.images}>
-          <BellIcon />
+          <BellIcon height="32" className={css.bellIcon} />
           <Box className={css.newTag}>
             <Typography fontSize={12}>New</Typography>
           </Box>
