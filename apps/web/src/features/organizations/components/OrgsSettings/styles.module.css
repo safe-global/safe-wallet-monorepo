@@ -1,0 +1,45 @@
+.success {
+  align-self: flex-start;
+  min-width: 20px;
+  margin-right: 16px;
+  margin-top: 0;
+  color: var(--color-success-main);
+  background-color: var(--color-success-light);
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  align-items: center;
+  justify-content: center;
+}
+
+.success path:last-child {
+  fill: var(--color-success-main);
+}
+
+.success svg {
+  width: 12px;
+  height: 12px;
+}
+
+.danger {
+  align-self: flex-start;
+  min-width: 20px;
+  margin-right: 16px;
+  margin-top: 0;
+  color: var(--color-error-main);
+  background-color: var(--color-error-light);
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  align-items: center;
+  justify-content: center;
+}
+
+.danger path:last-child {
+  fill: var(--color-error-main);
+}
+
+.danger svg {
+  width: 10px;
+  height: 10px;
+}
