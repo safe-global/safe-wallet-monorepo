@@ -9,12 +9,9 @@ import SideDrawer from './SideDrawer'
 import { useIsSidebarRoute } from '@/hooks/useIsSidebarRoute'
 import { TxModalContext } from '@/components/tx-flow'
 import BatchSidebar from '@/components/batch/BatchSidebar'
-import { useIsOrganizationRoute } from '@/hooks/useIsOrganizationRoute'
-import OrganizationSidebar from '@/features/organizations/components/OrgsSidebar'
 
 const PageLayout = ({ pathname, children }: { pathname: string; children: ReactElement }): ReactElement => {
   const [isSidebarRoute, isAnimated] = useIsSidebarRoute(pathname)
-  const isOrganizationRoute = useIsOrganizationRoute(pathname)
   const [isSidebarOpen, setSidebarOpen] = useState<boolean>(true)
   const [isBatchOpen, setBatchOpen] = useState<boolean>(false)
   const { setFullWidth } = useContext(TxModalContext)
@@ -29,15 +26,11 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
         <Header onMenuToggle={isSidebarRoute ? setSidebarOpen : undefined} onBatchToggle={setBatchOpen} />
       </header>
 
-      {isSidebarRoute ? (
-        <SideDrawer isOpen={isSidebarOpen} onToggle={setSidebarOpen} />
-      ) : isOrganizationRoute ? (
-        <OrganizationSidebar />
-      ) : null}
+      {isSidebarRoute ? <SideDrawer isOpen={isSidebarOpen} onToggle={setSidebarOpen} /> : null}
 
       <div
         className={classnames(css.main, {
-          [css.mainNoSidebar]: (!isSidebarOpen || !isSidebarRoute) && !isOrganizationRoute,
+          [css.mainNoSidebar]: !isSidebarOpen || !isSidebarRoute,
           [css.mainAnimated]: isSidebarRoute && isAnimated,
         })}
       >
