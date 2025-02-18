@@ -1,8 +1,7 @@
-import { ConnectedWallet } from '@/hooks/wallets/useOnboard'
-import { ExtendedSafeInfo } from '@/store/safeInfoSlice'
+import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
+import type { ExtendedSafeInfo } from '@/store/safeInfoSlice'
 import type { SpendingLimitState } from '@/store/spendingLimitsSlice'
 import type { SafeTransaction } from '@safe-global/safe-core-sdk-types'
-import type { TokenInfo } from '@safe-global/safe-gateway-typescript-sdk'
 
 export enum Role {
   Owner = 'Owner',
@@ -43,7 +42,7 @@ export type RoleProps<R extends Role> = R extends keyof RolePropsMap ? RoleProps
  */
 export type PermissionPropsMap = {
   [Permission.ExecuteTransaction]: { safeTx: SafeTransaction }
-  [Permission.CreateSpendingLimitTransaction]: { token?: TokenInfo } | undefined
+  [Permission.CreateSpendingLimitTransaction]: { tokenAddress?: string } | undefined
 }
 
 // Extract the props for a specific permission from PermissionPropsMap
@@ -98,12 +97,21 @@ export default <RolePermissionsConfig>{
   [Role.SpendingLimitBeneficiary]: ({ wallet }, { spendingLimits }) => ({
     [Permission.ExecuteTransaction]: () => true,
     [Permission.EnablePushNotifications]: true,
-    [Permission.CreateSpendingLimitTransaction]: ({ token } = {}) => {
-      if (!token) return false
+    [Permission.CreateSpendingLimitTransaction]: ({ tokenAddress } = {}) => {
+      if (!wallet) return false
 
-      const spendingLimit = spendingLimits.find((sl) => sl.token.address === token.address)
+      if (!tokenAddress) {
+        // Check if the connected wallet has a spending limit for any token
+        return spendingLimits.some((sl) => sl.beneficiary === wallet.address)
+      }
+
+      // Check if the connected wallet has a spending limit for the given token
+      const spendingLimit = spendingLimits.find(
+        (sl) => sl.token.address === tokenAddress && sl.beneficiary === wallet.address,
+      )
 
       if (spendingLimit) {
+        // Check if the spending limit has not been reached
         return BigInt(spendingLimit.amount) - BigInt(spendingLimit.spent) > 0
       }
 
