@@ -158,6 +158,8 @@ export const CreateTokenTransfer = ({
     trigger()
   }
 
+  const csvAirdropAppUrl = safeApps?.[0]?.url
+
   const CsvAirdropLink = () => (
     <Link sx={{ cursor: 'pointer' }} onClick={() => setCsvAirdropModalOpen(true)}>
       CSV Airdrop
@@ -213,7 +215,7 @@ export const CreateTokenTransfer = ({
                   </Alert>
                 )}
 
-                {canAddMoreRecipients && maxRecipientsInfo && (
+                {canAddMoreRecipients && maxRecipientsInfo && !!csvAirdropAppUrl && (
                   <Alert severity="info" onClose={() => setMaxRecipientsInfo(false)}>
                     <Typography variant="body2">
                       If you want to add more than {MAX_RECIPIENTS} recipients, use <CsvAirdropLink />
@@ -225,10 +227,18 @@ export const CreateTokenTransfer = ({
                   <Alert severity="warning">
                     <Typography variant="body2">
                       No more recipients can be added.
-                      <br />
-                      Please use <CsvAirdropLink />
+                      {!!csvAirdropAppUrl && (
+                        <>
+                          <br />
+                          Please use <CsvAirdropLink />
+                        </>
+                      )}
                     </Typography>
                   </Alert>
+                )}
+
+                {csvAirdropModalOpen && (
+                  <CSVAirdropAppModal onClose={() => setCsvAirdropModalOpen(false)} appUrl={csvAirdropAppUrl} />
                 )}
               </>
             )}
@@ -245,10 +255,6 @@ export const CreateTokenTransfer = ({
           </Stack>
         </form>
       </FormProvider>
-
-      {csvAirdropModalOpen && (
-        <CSVAirdropAppModal onClose={() => setCsvAirdropModalOpen(false)} appUrl={safeApps?.[0]?.url} />
-      )}
     </TxCard>
   )
 }
