@@ -40,7 +40,7 @@ describe('getRolePermissions', () => {
       {
         wallet: connectedWalletBuilder().with({ address: walletAddress }).build(),
         safe: extendedSafeInfoBuilder()
-          .with({ address: { value: safeAddress } })
+          .with({ address: { value: safeAddress }, owners: [{ value: walletAddress }] })
           .with({ deployed: false })
           .build(),
       },
@@ -68,7 +68,7 @@ describe('getRolePermissions', () => {
       {
         wallet: connectedWalletBuilder().with({ address: walletAddress }).build(),
         safe: extendedSafeInfoBuilder()
-          .with({ address: { value: safeAddress } })
+          .with({ address: { value: safeAddress }, owners: [{ value: walletAddress }] })
           .with({ deployed: false })
           .build(),
       },
@@ -91,7 +91,7 @@ describe('getRolePermissions', () => {
       {
         wallet: connectedWalletBuilder().with({ address: walletAddress }).build(),
         safe: extendedSafeInfoBuilder()
-          .with({ address: { value: safeAddress } })
+          .with({ address: { value: safeAddress }, owners: [{ value: walletAddress }] })
           .with({ deployed: false })
           .build(),
       },
@@ -114,7 +114,7 @@ describe('getRolePermissions', () => {
       {
         wallet: connectedWalletBuilder().with({ address: walletAddress }).build(),
         safe: extendedSafeInfoBuilder()
-          .with({ address: { value: safeAddress } })
+          .with({ address: { value: safeAddress }, owners: [{ value: walletAddress }] })
           .with({ deployed: false })
           .build(),
       },
@@ -129,7 +129,7 @@ describe('getRolePermissions', () => {
       {
         wallet: connectedWalletBuilder().with({ address: walletAddress }).build(),
         safe: extendedSafeInfoBuilder()
-          .with({ address: { value: safeAddress } })
+          .with({ address: { value: safeAddress }, owners: [{ value: walletAddress }] })
           .with({ deployed: false })
           .build(),
       },
