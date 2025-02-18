@@ -36,6 +36,8 @@ import { SafeAppsName } from '@/config/constants'
 import { useRemoteSafeApps } from '@/hooks/safe-apps/useRemoteSafeApps'
 import CSVAirdropAppModal from './CSVAirdropAppModal'
 import { InsufficientFundsValidationError } from '@/components/common/TokenAmountInput'
+import { useIsTargetedFeature } from '@/features/targetedFeatures/hooks/useIsTargetedFeature'
+import { FEATURES } from '@/utils/chains'
 
 export const AutocompleteItem = (item: { tokenInfo: TokenInfo; balance: string }): ReactElement => (
   <Grid
@@ -83,6 +85,7 @@ export const CreateTokenTransfer = ({
   const balancesItems = useVisibleTokens()
   const { setNonce } = useContext(SafeTxContext)
   const [safeApps] = useRemoteSafeApps({ name: SafeAppsName.CSV })
+  const isMassPayoutsEnabled = useIsTargetedFeature(FEATURES.TARGETED_MASS_PAYOUTS)
 
   useEffect(() => {
     if (txNonce !== undefined) {
@@ -161,7 +164,7 @@ export const CreateTokenTransfer = ({
     </Link>
   )
 
-  const canBatch = type === TokenTransferType.multiSig
+  const canBatch = isMassPayoutsEnabled && type === TokenTransferType.multiSig
 
   return (
     <TxCard>
