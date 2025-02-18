@@ -3,6 +3,8 @@ import { useRoles } from './useRoles'
 import { useRoleProps } from './useRoleProps'
 import { getRolePermissions } from '../getRolePermissions'
 import type { Permission, Role, PermissionProps } from '../config'
+import useSafeInfo from '@/hooks/useSafeInfo'
+import useWallet from '@/hooks/wallets/useWallet'
 
 /**
  * Hook to get the result of a permission check for the current user based on the Safe and the connected wallet.
@@ -16,9 +18,11 @@ export const usePermission = <P extends Permission>(
 ): { [_R in Role]?: boolean } => {
   const userRoles = useRoles()
   const roleProps = useRoleProps()
+  const { safe } = useSafeInfo()
+  const wallet = useWallet()
 
   const userPermissions = useMemo(() => {
-    return getRolePermissions(userRoles, roleProps)
+    return getRolePermissions(userRoles, { safe, wallet }, roleProps)
   }, [userRoles, roleProps])
 
   const permissionPerRole = useMemo(() => {

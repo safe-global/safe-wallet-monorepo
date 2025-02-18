@@ -1,3 +1,5 @@
+import { ConnectedWallet } from '@/hooks/wallets/useOnboard'
+import { ExtendedSafeInfo } from '@/store/safeInfoSlice'
 import type { SpendingLimitState } from '@/store/spendingLimitsSlice'
 import type { SafeTransaction } from '@safe-global/safe-core-sdk-types'
 import type { TokenInfo } from '@safe-global/safe-gateway-typescript-sdk'
@@ -58,8 +60,15 @@ export type PermissionSet = {
   [P in Permission]?: PermissionFn<P> extends undefined ? boolean : PermissionFn<P>
 }
 
+export type CommonProps = {
+  safe: ExtendedSafeInfo
+  wallet: ConnectedWallet | null
+}
+
 export type RolePermissionsFn<R extends Role> =
-  RoleProps<R> extends undefined ? () => PermissionSet : (props: RoleProps<R>) => PermissionSet
+  RoleProps<R> extends undefined
+    ? (props: CommonProps) => PermissionSet
+    : (props: CommonProps, roleProps: RoleProps<R>) => PermissionSet
 
 type RolePermissionsConfig = {
   [R in Role]?: RolePermissionsFn<R>
@@ -86,7 +95,7 @@ export default <RolePermissionsConfig>{
     [Permission.ExecuteTransaction]: () => true,
     [Permission.EnablePushNotifications]: true,
   }),
-  [Role.SpendingLimitBeneficiary]: ({ spendingLimits }) => ({
+  [Role.SpendingLimitBeneficiary]: ({ wallet }, { spendingLimits }) => ({
     [Permission.ExecuteTransaction]: () => true,
     [Permission.EnablePushNotifications]: true,
     [Permission.CreateSpendingLimitTransaction]: ({ token } = {}) => {
