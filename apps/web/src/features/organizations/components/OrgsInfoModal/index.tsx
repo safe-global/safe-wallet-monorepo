@@ -61,28 +61,28 @@ const OrgsInfoModal = ({ onClose, onCreate }: { onClose: () => void; onCreate: (
             </Typography>
 
             <Typography mt={2} mb={3}>
-              Collaborate efficiently with your team members and simplify treasury management.
+              Collaborate seamlessly with your team and keep your treasury organized.
             </Typography>
 
             <List sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
               <ListItem disablePadding>
                 <ListIcon />
-                Invite anyone into your organization and share data with ease.
+                Bring all your Safe Accounts into one shared space.
               </ListItem>
 
               <ListItem disablePadding>
                 <ListIcon />
-                Organize your account under one roof.
+                Invite team members with shared access—whether they’re signers or just viewers.
               </ListItem>
 
               <ListItem disablePadding>
                 <ListIcon />
-                Aggregated balance, easier access to actions.
+                Everyone sees the same account names, team members, and data.
               </ListItem>
 
               <ListItem disablePadding>
                 <ListIcon />
-                Your data is securely stored in an encrypted database.
+                Aggregated balances and actions across multiple accounts are coming soon!
               </ListItem>
             </List>
 
