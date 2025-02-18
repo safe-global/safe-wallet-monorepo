@@ -21,7 +21,7 @@ export const AccountsSheetContainer = () => {
       title="My accounts"
       items={safes}
       keyExtractor={({ item }) => item.SafeInfo.address.value}
-      footerComponent={MyAccountsFooter}
+      FooterComponent={MyAccountsFooter}
       renderItem={MyAccountsContainer}
       sortable={isEdit}
       onDragEnd={onDragEnd}

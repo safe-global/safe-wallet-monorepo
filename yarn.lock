@@ -5345,9 +5345,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@gorhom/bottom-sheet@npm:^5.0.6":
-  version: 5.0.6
-  resolution: "@gorhom/bottom-sheet@npm:5.0.6"
+"@gorhom/bottom-sheet@npm:^5.1.1":
+  version: 5.1.1
+  resolution: "@gorhom/bottom-sheet@npm:5.1.1"
   dependencies:
     "@gorhom/portal": "npm:1.0.14"
     invariant: "npm:^2.2.4"
@@ -5363,7 +5363,7 @@ __metadata:
       optional: true
     "@types/react-native":
       optional: true
-  checksum: 10/b8beb6bb4d80828deed5c74c8b19926cbb4887d530d07c19eaaa1d8faae6c79f942f83baad076c84d065f357f6666cbc257799fe8fc58cb375e6cbebf52b6227
+  checksum: 10/6da29c3927f6a0b6d2a459e2a1cae48ce7c0fce41663b46b0aba98490af15199e31248f83ca18753eeb439faf2c1dd957f26e4eacc9796b4962df44170b1a2d3
   languageName: node
   linkType: hard
 
@@ -8190,7 +8190,7 @@ __metadata:
     "@ethersproject/shims": "npm:^5.7.0"
     "@expo/config-plugins": "npm:^9.0.10"
     "@expo/vector-icons": "npm:^14.0.2"
-    "@gorhom/bottom-sheet": "npm:^5.0.6"
+    "@gorhom/bottom-sheet": "npm:^5.1.1"
     "@notifee/react-native": "npm:^9.1.8"
     "@react-native-async-storage/async-storage": "npm:1.23.1"
     "@react-native-clipboard/clipboard": "npm:^1.15.0"

@@ -1,15 +1,17 @@
 import { BackdropComponent, BackgroundComponent } from '@/src/components/Dropdown/sheetComponents'
 import { getTokenValue, H5, View } from 'tamagui'
-import React, { useCallback } from 'react'
+import React, { useCallback, useEffect, useRef } from 'react'
 import BottomSheet, {
   BottomSheetFooterProps,
   BottomSheetModalProps,
   BottomSheetView,
   BottomSheetScrollView,
+  BottomSheetFooter,
 } from '@gorhom/bottom-sheet'
 import DraggableFlatList, { DragEndParams, RenderItemParams, ScaleDecorator } from 'react-native-draggable-flatlist'
 import { StyleSheet } from 'react-native'
 import { useRouter } from 'expo-router'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 interface SafeBottomSheetProps<T> {
   children?: React.ReactNode
@@ -19,7 +21,7 @@ interface SafeBottomSheetProps<T> {
   items?: T[]
   snapPoints?: BottomSheetModalProps['snapPoints']
   actions?: React.ReactNode
-  footerComponent?: React.FC<BottomSheetFooterProps>
+  FooterComponent?: React.FC
   renderItem?: React.FC<{ item: T; isDragging?: boolean; drag?: () => void; onClose: () => void }>
   keyExtractor?: ({ item, index }: { item: T; index: number }) => string
 }
@@ -29,14 +31,17 @@ export function SafeBottomSheet<T>({
   title,
   sortable,
   items,
-  snapPoints = [600, '90%'],
+  snapPoints = [600, '100%'],
   keyExtractor,
   actions,
   renderItem: Render,
-  footerComponent,
+  FooterComponent,
   onDragEnd,
 }: SafeBottomSheetProps<T>) {
+  const ref = useRef<BottomSheet>(null)
   const router = useRouter()
+  const insets = useSafeAreaInsets()
+  const [footerHeight, setFooterHeight] = React.useState(0)
   const hasCustomItems = items && Render
   const isSortable = items && sortable
 
@@ -77,8 +82,34 @@ export function SafeBottomSheet<T>({
     }
   }, [])
 
+  // Auto-expand when sorting is enabled
+  useEffect(() => {
+    if (sortable && ref.current) {
+      ref.current.expand()
+    }
+  }, [sortable])
+
+  // Wrapping the footer component with a function to get the height of the footer
+  const renderFooter: React.FC<BottomSheetFooterProps> = useCallback(
+    (props) => {
+      return (
+        <BottomSheetFooter animatedFooterPosition={props.animatedFooterPosition}>
+          <View
+            onLayout={(e) => {
+              setFooterHeight(e.nativeEvent.layout.height)
+            }}
+          >
+            {FooterComponent && <FooterComponent />}
+          </View>
+        </BottomSheetFooter>
+      )
+    },
+    [FooterComponent, setFooterHeight],
+  )
+
   return (
     <BottomSheet
+      ref={ref}
       enableOverDrag={false}
       snapPoints={snapPoints}
       enableDynamicSizing={true}
@@ -87,21 +118,35 @@ export function SafeBottomSheet<T>({
       overDragResistanceFactor={10}
       backgroundComponent={BackgroundComponent}
       backdropComponent={BackdropComponent}
-      footerComponent={footerComponent}
+      footerComponent={isSortable ? undefined : renderFooter}
+      topInset={insets.top}
     >
-      {!isSortable && !!title && <TitleHeader />}
-      <BottomSheetView style={[styles.contentContainer, !isSortable ? { flex: 1 } : undefined]}>
+      <BottomSheetView
+        style={[
+          styles.contentContainer,
+          {
+            paddingBottom: insets.bottom,
+          },
+        ]}
+      >
+        <TitleHeader />
         {isSortable ? (
           <DraggableFlatList<T>
             data={items}
-            containerStyle={{ height: '90%' }}
-            ListHeaderComponent={title ? <TitleHeader /> : undefined}
+            style={{ marginBottom: insets.bottom }}
+            containerStyle={{ height: '100%' }}
+            contentContainerStyle={{ paddingBottom: 50 }}
             onDragEnd={onDragEnd}
             keyExtractor={(item, index) => (keyExtractor ? keyExtractor({ item, index }) : index.toString())}
             renderItem={renderItem}
           />
         ) : (
-          <BottomSheetScrollView contentContainerStyle={styles.scrollInnerContainer}>
+          <BottomSheetScrollView
+            style={{
+              marginBottom: (!sortable && FooterComponent ? footerHeight : 0) + 12,
+            }}
+            contentContainerStyle={[styles.scrollInnerContainer]}
+          >
             <View minHeight={200} alignItems="center" paddingVertical="$3">
               <View alignItems="flex-start" paddingBottom="$4" width="100%">
                 {hasCustomItems
@@ -126,5 +171,7 @@ const styles = StyleSheet.create({
   contentContainer: {
     justifyContent: 'space-around',
   },
-  scrollInnerContainer: { paddingHorizontal: getTokenValue('$3'), paddingBottom: getTokenValue('$5') },
+  scrollInnerContainer: {
+    paddingHorizontal: getTokenValue('$3'),
+  },
 })
