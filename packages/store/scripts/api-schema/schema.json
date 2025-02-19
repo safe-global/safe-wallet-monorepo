@@ -2357,7 +2357,16 @@
     "/v1/organizations/{orgId}/members/invite": {
       "post": {
         "operationId": "userOrganizationsInviteUserV1",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "orgId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -2401,7 +2410,16 @@
     "/v1/organizations/{orgId}/members/accept": {
       "post": {
         "operationId": "userOrganizationsAcceptInviteV1",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "orgId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Invite accepted"
@@ -2422,7 +2440,16 @@
     "/v1/organizations/{orgId}/members/decline": {
       "post": {
         "operationId": "userOrganizationsDeclineInviteV1",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "orgId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Invite declined"
@@ -2443,7 +2470,16 @@
     "/v1/organizations/{orgId}/members": {
       "get": {
         "operationId": "userOrganizationsGetUsersV1",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "orgId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Organization and members list",
@@ -2468,7 +2504,24 @@
     "/v1/organizations/{orgId}/members/{userId}/role": {
       "patch": {
         "operationId": "userOrganizationsUpdateRoleV1",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "orgId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Role updated"
@@ -2492,7 +2545,24 @@
     "/v1/organizations/{orgId}/members/{userId}": {
       "delete": {
         "operationId": "userOrganizationsRemoveUserV1",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "orgId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Membership deleted"
@@ -5373,6 +5443,31 @@
         },
         "required": ["name", "id"]
       },
+      "UserDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["PENDING", "ACTIVE"]
+          }
+        },
+        "required": ["id", "status"]
+      },
+      "UserOrganizationsDto": {
+        "type": "object",
+        "properties": {
+          "members": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserOrganization"
+            }
+          }
+        },
+        "required": ["members"]
+      },
       "GetOrganizationResponse": {
         "type": "object",
         "properties": {
@@ -5383,13 +5478,13 @@
             "type": "string"
           },
           "status": {
-            "type": "number",
-            "enum": [1]
+            "type": "string",
+            "enum": ["ACTIVE"]
           },
           "userOrganizations": {
             "type": "array",
             "items": {
-              "type": "string"
+              "$ref": "#/components/schemas/UserOrganizationsDto"
             }
           }
         },
@@ -5402,8 +5497,8 @@
             "type": "string"
           },
           "status": {
-            "type": "number",
-            "enum": [1]
+            "type": "string",
+            "enum": ["ACTIVE"]
           }
         }
       },
@@ -5427,11 +5522,11 @@
           },
           "role": {
             "type": "string",
-            "enum": ["1", "2", "ADMIN", "MEMBER"]
+            "enum": ["ADMIN", "MEMBER"]
           },
           "status": {
             "type": "string",
-            "enum": ["0", "1", "2", "INVITED", "ACTIVE", "DECLINED"]
+            "enum": ["INVITED", "ACTIVE", "DECLINED"]
           }
         },
         "required": ["userId", "orgId", "role", "status"]
@@ -5444,7 +5539,7 @@
           },
           "status": {
             "type": "string",
-            "enum": ["0", "1", "PENDING", "ACTIVE"]
+            "enum": ["PENDING", "ACTIVE"]
           }
         },
         "required": ["id", "status"]
@@ -5457,11 +5552,11 @@
           },
           "role": {
             "type": "string",
-            "enum": ["1", "2", "ADMIN", "MEMBER"]
+            "enum": ["ADMIN", "MEMBER"]
           },
           "status": {
             "type": "string",
-            "enum": ["0", "1", "2", "INVITED", "ACTIVE", "DECLINED"]
+            "enum": ["INVITED", "ACTIVE", "DECLINED"]
           },
           "createdAt": {
             "format": "date-time",
@@ -5476,18 +5571,6 @@
           }
         },
         "required": ["id", "role", "status", "createdAt", "updatedAt", "user"]
-      },
-      "UserOrganizationsDto": {
-        "type": "object",
-        "properties": {
-          "members": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/UserOrganization"
-            }
-          }
-        },
-        "required": ["members"]
       },
       "SafeList": {
         "type": "object",
@@ -6705,6 +6788,22 @@
         },
         "required": ["to", "operation"]
       },
+      "MultisigConfirmationDetails": {
+        "type": "object",
+        "properties": {
+          "signer": {
+            "$ref": "#/components/schemas/AddressInfo"
+          },
+          "signature": {
+            "type": "string",
+            "nullable": true
+          },
+          "submittedAt": {
+            "type": "number"
+          }
+        },
+        "required": ["signer", "submittedAt"]
+      },
       "MultisigExecutionDetails": {
         "type": "object",
         "properties": {
@@ -6747,7 +6846,7 @@
           "signers": {
             "type": "array",
             "items": {
-              "type": "string"
+              "$ref": "#/components/schemas/AddressInfo"
             }
           },
           "confirmationsRequired": {
@@ -6756,7 +6855,7 @@
           "confirmations": {
             "type": "array",
             "items": {
-              "type": "string"
+              "$ref": "#/components/schemas/MultisigConfirmationDetails"
             }
           },
           "rejectors": {
