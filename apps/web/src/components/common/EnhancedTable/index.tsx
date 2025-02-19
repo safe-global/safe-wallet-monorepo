@@ -1,6 +1,6 @@
-import type { ChangeEvent, ReactNode } from 'react'
-import React, { useState } from 'react'
+import type { SafenetBalance } from '@/utils/safenet'
 import Box from '@mui/material/Box'
+import Paper from '@mui/material/Paper'
 import Table from '@mui/material/Table'
 import TableBody from '@mui/material/TableBody'
 import type { SortDirection } from '@mui/material/TableCell'
@@ -10,12 +10,15 @@ import TableHead from '@mui/material/TableHead'
 import TablePagination from '@mui/material/TablePagination'
 import TableRow from '@mui/material/TableRow'
 import TableSortLabel from '@mui/material/TableSortLabel'
-import Paper from '@mui/material/Paper'
 import { visuallyHidden } from '@mui/utils'
 import classNames from 'classnames'
-
+import dynamic from 'next/dynamic'
+import type { ChangeEvent, ReactNode } from 'react'
+import { useState } from 'react'
+import AssetsRow from './AssetsRow'
 import css from './styles.module.css'
-import { Collapse } from '@mui/material'
+
+const SafenetAssetsRow = dynamic(() => import('@/features/safenet/components/SafenetAssetsRow'))
 
 type EnhancedCell = {
   content: ReactNode
@@ -23,11 +26,12 @@ type EnhancedCell = {
   sticky?: boolean
 }
 
-type EnhancedRow = {
+export type EnhancedRow = {
   selected?: boolean
   collapsed?: boolean
   key?: string
   cells: Record<string, EnhancedCell>
+  safenetBalance?: SafenetBalance[]
 }
 
 type EnhancedHeadCell = {
@@ -145,29 +149,13 @@ function EnhancedTable({ rows, headCells, mobileVariant }: EnhancedTableProps) {
           <EnhancedTableHead headCells={headCells} order={order} orderBy={orderBy} onRequestSort={handleRequestSort} />
           <TableBody>
             {pagedRows.length > 0 ? (
-              pagedRows.map((row, index) => (
-                <TableRow
-                  data-testid="table-row"
-                  tabIndex={-1}
-                  key={row.key ?? index}
-                  selected={row.selected}
-                  className={row.collapsed ? css.collapsedRow : undefined}
-                >
-                  {Object.entries(row.cells).map(([key, cell]) => (
-                    <TableCell
-                      key={key}
-                      className={classNames({
-                        sticky: cell.sticky,
-                        [css.collapsedCell]: row.collapsed,
-                      })}
-                    >
-                      <Collapse key={index} in={!row.collapsed} enter={false}>
-                        {cell.content}
-                      </Collapse>
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
+              pagedRows.map((row, index) =>
+                !!row.safenetBalance ? (
+                  <SafenetAssetsRow key={row.key ?? index} row={row} index={index} />
+                ) : (
+                  <AssetsRow key={row.key ?? index} row={row} index={index} />
+                ),
+              )
             ) : (
               // Prevent no `tbody` rows hydration error
               <TableRow>
