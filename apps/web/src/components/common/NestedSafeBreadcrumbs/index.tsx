@@ -1,12 +1,13 @@
 import { useRouter } from 'next/router'
 import Link from 'next/link'
-import { Tooltip, Typography } from '@mui/material'
+import { Tooltip, Typography, useMediaQuery, useTheme } from '@mui/material'
 import type { ReactElement } from 'react'
 import type { UrlObject } from 'url'
 
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useAddressBook from '@/hooks/useAddressBook'
 import Identicon from '../Identicon'
+import { shortenAddress } from '@/utils/formatters'
 
 import css from './styles.module.css'
 import { useParentSafe } from '@/hooks/useParentSafe'
@@ -34,8 +35,10 @@ export function NestedSafeBreadcrumbs(): ReactElement | null {
 }
 
 const BreadcrumbItem = ({ title, address, href }: { title: string; address: string; href?: UrlObject }) => {
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
   const addressBook = useAddressBook()
-  const name = addressBook[address] ?? address
+  const name = addressBook[address] ?? (isMobile ? shortenAddress(address) : address)
 
   return (
     <Tooltip title={title}>
