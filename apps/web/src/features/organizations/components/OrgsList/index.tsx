@@ -6,9 +6,11 @@ import OrgsIcon from '@/public/images/orgs/orgs.svg'
 import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
 import { Box, Button, Card, Grid2, Link, Typography } from '@mui/material'
+import type { GetOrganizationResponse } from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
 import { useOrganizationsGetV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
 import { useState } from 'react'
 import css from './styles.module.css'
+import OrgListInvite from '../Dashboard/DashboardInvite'
 
 const AddOrgButton = ({ disabled }: { disabled: boolean }) => {
   const [open, setOpen] = useState(false)
@@ -72,6 +74,16 @@ const NoOrgsState = () => {
   )
 }
 
+// todo: replace with real data
+const invites: GetOrganizationResponse[] = [
+  {
+    id: 123,
+    name: 'Bidget',
+    status: 1,
+    userOrganizations: [],
+  },
+]
+
 const OrgsList = () => {
   const isUserSignedIn = useAppSelector(isAuthenticated)
   const { data: organizations } = useOrganizationsGetV1Query(undefined, { skip: !isUserSignedIn })
@@ -83,6 +95,12 @@ const OrgsList = () => {
           <AccountsNavigation />
           <AddOrgButton disabled={!isUserSignedIn} />
         </Box>
+
+        {isUserSignedIn &&
+          invites.length > 0 &&
+          invites.map((invitingOrg: GetOrganizationResponse) => (
+            <OrgListInvite key={invitingOrg.id} org={invitingOrg} />
+          ))}
 
         {isUserSignedIn && organizations ? (
           <Grid2 container spacing={2} flexWrap="wrap">
