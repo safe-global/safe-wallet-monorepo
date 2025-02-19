@@ -79,6 +79,7 @@ export function SafeBottomSheet<T>({
 
   return (
     <BottomSheet
+      accessible={false}
       enableOverDrag={false}
       snapPoints={snapPoints}
       enableDynamicSizing={true}
@@ -90,11 +91,14 @@ export function SafeBottomSheet<T>({
       footerComponent={footerComponent}
     >
       {!isSortable && !!title && <TitleHeader />}
-      <BottomSheetView style={[styles.contentContainer, !isSortable ? { flex: 1 } : undefined]}>
+      <BottomSheetView
+        style={[styles.contentContainer, !isSortable ? { flex: 1, paddingHorizontal: 20 } : undefined]}
+        accessible={true}
+      >
         {isSortable ? (
           <DraggableFlatList<T>
             data={items}
-            containerStyle={{ height: '90%' }}
+            containerStyle={{ height: '100%' }}
             ListHeaderComponent={title ? <TitleHeader /> : undefined}
             onDragEnd={onDragEnd}
             keyExtractor={(item, index) => (keyExtractor ? keyExtractor({ item, index }) : index.toString())}

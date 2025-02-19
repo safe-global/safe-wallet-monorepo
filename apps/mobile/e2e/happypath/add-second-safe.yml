@@ -1,0 +1,49 @@
+appId: global.safe.mobileapp
+---
+- launchApp:
+    appId: 'global.safe.mobileapp'
+    clearState: true
+    clearKeychain: true
+- runFlow:
+    file: ../shared/clean-app-start.yml
+- tapOn:
+    id: 'e2eOnboardedAccount'
+- tapOn:
+    id: 'opt-in-secondary-button'
+- tapOn:
+    id: 'dropdown-label-view'
+    index: 0
+- tapOn:
+    id: 'add-existing-account'
+- tapOn:
+    id: 'enter-manually'
+- assertVisible:
+    id: 'safe-input'
+- tapOn:
+    id: 'safe-input'
+- assertVisible: 'Continue'
+- inputText: '0xF2CeA96575d6b10f51d9aF3b10e3e4E5738aa6bd'
+- assertVisible: 'No Safe deployment found for this this address'
+- 'eraseText'
+- inputText: '0x1230B3D59858296A31053C1b8562ECF89A2f888B'
+- assertVisible: 'Invalid address format'
+- 'eraseText'
+- inputText: 'sep:0x9BFCA75a05175503580D593F4330b5505c594596'
+- assertVisible: 'Sepolia'
+- assertVisible:
+    id: 'success-icon'
+- tapOn:
+    id: 'continue-button'
+- assertVisible: 'Import your signers to unlock account'
+- assertVisible: " Before you import signers... Make sure to import signers from\
+    \ this list only. Others will not be imported."
+- assertVisible:
+    id: 'signer-0x65F8236309e5A99Ff0d129d04E486EBCE20DC7B0'
+- assertVisible:
+    id: 'signer-0x0D65139Da4B36a8A39BF1b63e950038D42231b2e'
+- assertVisible:
+    id: 'signer-0x8aEf2f5c3F17261F6F1C4dA058D022BE92776af8'
+- tapOn:
+    id: 'continue-button'
+- assertVisible: '0x9BFC...4596'
+- assertVisible: 'Sepolia'
