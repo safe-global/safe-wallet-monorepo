@@ -41,7 +41,7 @@ export function NestedSafeInfo(): ReactElement {
         {[
           'rebuild your organizational structure onchain',
           'explore new DeFi opportunities without exposing your main Account',
-          'deploy specialized modules and enable easier access through passkeys and other signers',
+          'deploy specialized modules and extend Safe functionality',
         ].map((item) => {
           return (
             <ListItem key={item} sx={{ p: 0, pl: 1.5, alignItems: 'unset' }}>
