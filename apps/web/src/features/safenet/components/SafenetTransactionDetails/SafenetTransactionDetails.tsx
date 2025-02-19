@@ -1,89 +1,21 @@
 import useChainId from '@/hooks/useChainId'
-import css from './styles.module.css'
 import { useGetSafenetTransactionDetailsQuery, type SafenetTransactionDetails } from '@/store/safenet'
-import GradientBoxSafenet from '../GradientBoxSafenet'
-import {
-  Accordion,
-  AccordionDetails,
-  AccordionSummary,
-  Box,
-  CircularProgress,
-  Grid,
-  type Palette,
-  Skeleton,
-  Stack,
-  Typography,
-} from '@mui/material'
-import { TxDataRow } from '@/components/transactions/TxDetails/Summary/TxDataRow'
-import { groupBy } from 'lodash'
+import { Box, CircularProgress, Skeleton, Stack, Typography } from '@mui/material'
 import { useMemo } from 'react'
 import TokenAmount from '@/components/common/TokenAmount'
 import { getERC20TokenInfoOnChain } from '@/utils/tokens'
 import useAsync from '@/hooks/useAsync'
-import { TransferDirection } from '@safe-global/safe-gateway-typescript-sdk'
 import ChainIndicator from '@/components/common/ChainIndicator'
-import EthHashInfo from '@/components/common/EthHashInfo'
 import { createWeb3ReadOnly } from '@/hooks/wallets/web3'
 import { useChain } from '@/hooks/useChains'
-import ArrowOutwardIcon from '@/public/images/transactions/outgoing.svg'
-import ArrowDownwardIcon from '@/public/images/transactions/incoming.svg'
 import { SafenetSettlementLink } from './SafenetSettlementLink'
 import { formatTimeInWords } from '@/utils/date'
+import SafenetIcon from '@/public/images/safenet-token.svg'
+import EnhancedTable, { type EnhancedTableProps } from '@/components/common/EnhancedTable'
+import css from './styles.module.css'
+import { Divider } from '@/components/tx/DecodedTx'
 
 const CHALLENGE_PERIOD = (60 * 10 + 15) * 1000 // 10mins + 15s delay for indexing / execution
-
-enum SafenetStatus {
-  PROCESSING = 'Processing',
-  FAILED = 'Failed',
-  CHALLENGED = 'Challenged',
-  SETTLED = 'Settled',
-  PARTIALLY_SETTLED = 'Partially settled',
-  AWAITING_SETTLEMENT = 'Awaiting settlement',
-}
-
-const PENDING_SAFENET_STATUS = [
-  SafenetStatus.PROCESSING,
-  SafenetStatus.AWAITING_SETTLEMENT,
-  SafenetStatus.PARTIALLY_SETTLED,
-  SafenetStatus.CHALLENGED,
-]
-
-const getSafenetTransactionStatusColor = (status: SafenetStatus, palette: Palette) => {
-  switch (status) {
-    case SafenetStatus.SETTLED:
-      return palette.success.main
-    case SafenetStatus.FAILED:
-      return palette.error.main
-    case SafenetStatus.CHALLENGED:
-    case SafenetStatus.AWAITING_SETTLEMENT:
-      return palette.warning.main
-    default:
-      return palette.primary.main
-  }
-}
-
-const getDebitStatusColor = (status: SafenetTransactionDetails['debits'][number]['status'], palette: Palette) => {
-  switch (status) {
-    case 'EXECUTED':
-      return palette.success.main
-    case 'FAILED':
-      return palette.error.main
-    case 'CHALLENGED':
-      return palette.warning.main
-    case 'INITIATED':
-    case 'READY':
-      return palette.primary.main
-  }
-}
-
-const mapDebitStatus: Record<SafenetTransactionDetails['debits'][number]['status'], string> = {
-  CHALLENGED: 'Challenged',
-  EXECUTED: 'Settled',
-  FAILED: 'Failed',
-  INITIATED: 'Initiated',
-  PENDING: 'Pending',
-  READY: 'Inititating',
-}
 
 const useDebitChainTokenInfo = (chainId: string, token: string) => {
   const debitChainConfig = useChain(chainId)
@@ -98,31 +30,22 @@ const useDebitChainTokenInfo = (chainId: string, token: string) => {
   return useAsync(() => getERC20TokenInfoOnChain(token, web3Provider), [token, web3Provider])
 }
 
-const DebitRow = ({ debit }: { debit: SafenetTransactionDetails['debits'][number] }) => {
+const DebitTokenAmount = ({ debit }: { debit: SafenetTransactionDetails['debits'][number] }) => {
   // We need to fetch the token info on the debit chain
   const [tokenInfo, , isLoading] = useDebitChainTokenInfo(debit.chainId.toString(), debit.token)
   if (isLoading) {
     return <Skeleton />
   }
 
-  return (
-    <Grid container direction="row" spacing={2} alignItems="center">
-      <Grid item xs={12} lg={2}>
-        <ChainIndicator chainId={debit.chainId.toString()} />
-      </Grid>
-      <Grid item xs={12} lg={2}>
-        <Stack direction="row">
-          <ArrowOutwardIcon />
+  return <TokenAmount value={debit.amount} decimals={tokenInfo?.decimals} tokenSymbol={tokenInfo?.symbol} />
+}
 
-          <TokenAmount
-            value={debit.amount}
-            decimals={tokenInfo?.decimals}
-            direction={TransferDirection.OUTGOING}
-            tokenSymbol={tokenInfo?.symbol}
-          />
-        </Stack>
-      </Grid>
-      <Grid item xs={12} lg={2}>
+const DebitDetails = ({ debit }: { debit: SafenetTransactionDetails['debits'][number] }) => {
+  return (
+    <Box>
+      {debit.executionTxHash ? (
+        <SafenetSettlementLink debit={debit} />
+      ) : debit.initAt ? (
         <Typography
           variant="caption"
           fontWeight="bold"
@@ -130,119 +53,33 @@ const DebitRow = ({ debit }: { debit: SafenetTransactionDetails['debits'][number
           alignItems="center"
           textTransform="capitalize"
           gap={1}
-          sx={{ color: ({ palette }) => getDebitStatusColor(debit.status, palette) }}
+          sx={{ color: ({ palette }) => palette.info.main }}
           data-testid="debit-status-label"
         >
-          {mapDebitStatus[debit.status]}
+          Settlement in ~{formatTimeInWords(new Date(debit.initAt).getTime() + CHALLENGE_PERIOD)}
         </Typography>
-      </Grid>
-      <Grid item xs={12} lg={2}>
-        <Box>
-          <EthHashInfo address={debit.safe} chainId={debit.chainId.toString()} avatarSize={24} onlyName shortAddress />
-        </Box>
-      </Grid>
-      <Grid item>
-        <Box>
-          {debit.executionTxHash ? (
-            <SafenetSettlementLink debit={debit} />
-          ) : debit.initAt ? (
-            <Typography>~ {formatTimeInWords(new Date(debit.initAt).getTime() + CHALLENGE_PERIOD)}</Typography>
-          ) : null}
-        </Box>
-      </Grid>
-    </Grid>
+      ) : (
+        <Typography
+          variant="caption"
+          fontWeight="bold"
+          display="flex"
+          alignItems="center"
+          textTransform="capitalize"
+          gap={1}
+          data-testid="debit-status-label"
+        >
+          Awaiting settlement
+        </Typography>
+      )}
+    </Box>
   )
 }
 
-const SpendRow = ({ spend }: { spend: SafenetTransactionDetails['spends'][number] }) => {
-  // Spends use the token address on the Safe's chain
-  const [tokenInfo, , isLoading] = useAsync(() => getERC20TokenInfoOnChain(spend.token), [spend.token])
-  if (isLoading) {
-    return <Skeleton />
-  }
-
-  return (
-    <Stack direction="row" spacing={2} alignItems="center">
-      <ArrowDownwardIcon />
-      <TokenAmount
-        value={spend.amount}
-        decimals={tokenInfo?.decimals}
-        direction={TransferDirection.INCOMING}
-        tokenSymbol={tokenInfo?.symbol}
-      />
-    </Stack>
-  )
-}
-
-/**
- * To simplify following a Safenet action this function boils down the tx details to one status label
- *
- * Options are:
- * - Processing (tx is not executed yet)
- * - Failed (tx failed)
- * - Settled (all debits are executed)
- * - Partially settled (some debits are executed)
- * - Challenged (any debit got challenged)
- * - Awaiting settlement (Ready or initiated)
- *
- * @param details
- * @returns
- */
-const useSafenetStatus = (details: SafenetTransactionDetails) => {
-  const groupedDebits = useMemo(() => groupBy(details.debits, (debit) => debit.status), [details.debits])
-  if (details.status === 'SUBMITTED') {
-    return SafenetStatus.PROCESSING
-  }
-  if (details.status === 'FAILED') {
-    return SafenetStatus.FAILED
-  }
-  // Check settlements
-  const totalDebits = details.debits.length
-
-  if (groupedDebits['CHALLENGED']?.length > 0) {
-    return SafenetStatus.CHALLENGED
-  }
-
-  if (groupedDebits['EXECUTED']?.length === totalDebits) {
-    return SafenetStatus.SETTLED
-  }
-
-  if (groupedDebits['EXECUTED']?.length > 0) {
-    return SafenetStatus.PARTIALLY_SETTLED
-  }
-
-  return SafenetStatus.AWAITING_SETTLEMENT
-}
-
-const SafenetStatusLabel = ({ details }: { details: SafenetTransactionDetails }) => {
-  const status = useSafenetStatus(details)
-
-  return (
-    <Typography
-      variant="caption"
-      fontWeight="bold"
-      display="flex"
-      alignItems="center"
-      gap={1}
-      sx={{ color: ({ palette }) => getSafenetTransactionStatusColor(status, palette) }}
-      data-testid="safenet-status-label"
-    >
-      {PENDING_SAFENET_STATUS.includes(status) && <CircularProgress size={14} color="inherit" />}
-      {status}
-    </Typography>
-  )
-}
-
-const LoadingTxDetails = () => {
-  return (
-    <Stack direction="row" spacing={1} alignItems="center">
-      <Typography variant="caption" fontWeight="bold">
-        Loading
-      </Typography>
-      <CircularProgress />
-    </Stack>
-  )
-}
+const debitHeaderCells = [
+  { id: 'chainId', label: 'Debits' },
+  { id: 'amount', label: '' },
+  { id: 'details', label: '' },
+]
 
 const SafenetTransactionDetails = ({ safeTxHash }: { safeTxHash: string }) => {
   const chainId = useChainId()
@@ -253,76 +90,43 @@ const SafenetTransactionDetails = ({ safeTxHash }: { safeTxHash: string }) => {
     },
   )
 
+  const rows: EnhancedTableProps['rows'] = useMemo(() => {
+    return (data?.debits ?? []).map((debit) => ({
+      cells: {
+        chainId: { rawValue: debit.chainId, content: <ChainIndicator chainId={debit.chainId.toString()} /> },
+        amount: {
+          rawValue: debit.amount,
+          content: <DebitTokenAmount debit={debit} />,
+        },
+        details: { rawValue: '', content: <DebitDetails debit={debit} /> },
+      },
+    }))
+  }, [data?.debits])
+
+  if (isLoading) {
+    return <CircularProgress />
+  }
+
+  if (!data) {
+    return null
+  }
+
   return (
-    <GradientBoxSafenet>
-      {isLoading ? (
-        <LoadingTxDetails />
-      ) : (
-        <Stack>
-          <TxDataRow title="Status">
-            {data ? (
-              <SafenetStatusLabel details={data} />
-            ) : (
-              <Typography
-                variant="caption"
-                fontWeight="bold"
-                display="flex"
-                alignItems="center"
-                gap={1}
-                data-testid="safenet-status-label"
-              >
-                <CircularProgress size={14} color="inherit" />
-                Submitting
-              </Typography>
-            )}
-          </TxDataRow>
-
-          <TxDataRow title="Spends">
-            <Box className={css.debitContainer}>
-              {data ? (
-                <Accordion>
-                  <AccordionSummary>
-                    <Typography fontWeight={700} variant="overline">
-                      {data.spends.length} spend{data.spends.length > 1 ? 's' : ''}
-                    </Typography>
-                  </AccordionSummary>
-                  <AccordionDetails>
-                    {data.spends.map((spend, idx) => (
-                      <SpendRow spend={spend} key={idx} />
-                    ))}
-                  </AccordionDetails>
-                </Accordion>
-              ) : (
-                '-'
-              )}
-            </Box>
-          </TxDataRow>
-
-          <TxDataRow title="Debits">
-            <Box className={css.debitContainer}>
-              {data ? (
-                <Accordion>
-                  <AccordionSummary>
-                    <Typography fontWeight={700} variant="overline">
-                      {data.debits.length} debit{data.debits.length > 1 ? 's' : ''}
-                    </Typography>
-                  </AccordionSummary>
-                  <AccordionDetails>
-                    <Stack spacing={1}>
-                      {data.debits.map((debit, idx) => (
-                        <DebitRow debit={debit} key={idx} />
-                      ))}
-                    </Stack>
-                  </AccordionDetails>
-                </Accordion>
-              ) : (
-                '-'
-              )}
-            </Box>
-          </TxDataRow>
-        </Stack>
-      )}
-    </GradientBoxSafenet>
+    <Box>
+      <Stack direction="row" alignItems="center" spacing={1}>
+        <SafenetIcon />
+        <Typography variant="subtitle1" fontWeight={700}>
+          Safenet
+        </Typography>
+      </Stack>
+      <EnhancedTable
+        rows={rows}
+        headCells={debitHeaderCells}
+        headerClassName={css.debitTableHead}
+        tableClassName={css.debitTable}
+      />
+      <Divider />
+    </Box>
   )
 }
 export default SafenetTransactionDetails

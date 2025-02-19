@@ -11,6 +11,7 @@ export type ExplorerButtonProps = {
   onClick?: (e: SyntheticEvent) => void
   isCompact?: boolean
   label?: string
+  align?: 'center' | 'start' | 'end'
 }
 
 const ExplorerButton = ({
@@ -19,6 +20,7 @@ const ExplorerButton = ({
   icon = LinkIcon,
   label = 'View on explorer',
   className,
+  align,
   onClick,
   isCompact = true,
 }: ExplorerButtonProps): ReactElement | null => {
@@ -48,7 +50,7 @@ const ExplorerButton = ({
       href={href}
       onClick={onClick}
     >
-      <Box display="flex" alignItems="center">
+      <Box display="flex" alignItems="center" justifyContent={align}>
         <Typography fontWeight={700} fontSize="small" mr="var(--space-1)" noWrap>
           {label}
         </Typography>

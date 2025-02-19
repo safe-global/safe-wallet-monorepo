@@ -1,14 +1,16 @@
 import ExplorerButton from '@/components/common/ExplorerButton'
-import TransferTxInfo from '@/components/transactions/TxDetails/TxData/Transfer'
+import { TransferTx } from '@/components/transactions/TxInfo'
 import { AppRoutes } from '@/config/routes'
 import useChainId from '@/hooks/useChainId'
 import useChains from '@/hooks/useChains'
 import { useGetSafenetTransactionDetailsBySettlementQuery } from '@/store/safenet'
-import { Box, Typography } from '@mui/material'
+import { Box, Stack, Typography } from '@mui/material'
 import { skipToken } from '@reduxjs/toolkit/query'
 import { TransactionInfoType, type TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
 import Link from 'next/link'
-import GradientBoxSafenet from '../GradientBoxSafenet'
+import css from './styles.module.css'
+
+import SafenetToken from '@/public/images/safenet-token.svg'
 
 const SafenetTransactionLink = ({ data }: { data: TransactionDetails }) => {
   const chainId = useChainId()
@@ -17,43 +19,45 @@ const SafenetTransactionLink = ({ data }: { data: TransactionDetails }) => {
   const { data: safenetTransaction } = useGetSafenetTransactionDetailsBySettlementQuery(
     data.txHash ? { chainId, settlementTxHash: data.txHash } : skipToken,
   )
-  const shortName = safenetTransaction
+  const chainInfo = safenetTransaction
     ? configs.find((config) => config.chainId === safenetTransaction.chainId.toString())
     : undefined
 
-  if (!safenetTransaction || !shortName) {
+  if (!safenetTransaction || !chainInfo) {
     return null
   }
 
   return (
-    <Link
-      passHref
-      legacyBehavior
-      href={{
-        pathname: AppRoutes.transactions.tx,
-        query: {
-          safe: `${shortName}:${safenetTransaction.safe}`,
-          id: `multisig_${safenetTransaction.safe}_${safenetTransaction.safeTxHash}`,
-        },
-      }}
-    >
-      <ExplorerButton label="View Safenet action" isCompact={false} />
-    </Link>
+    <Box className={css.linkWrapper}>
+      <SafenetToken />
+      <Link
+        passHref
+        legacyBehavior
+        href={{
+          pathname: AppRoutes.transactions.tx,
+          query: {
+            safe: `${chainInfo.shortName}:${safenetTransaction.safe}`,
+            id: `multisig_${safenetTransaction.safe}_${safenetTransaction.safeTxHash}`,
+          },
+        }}
+      >
+        <ExplorerButton label="Safenet transaction" isCompact={false} align="start" />
+      </Link>
+    </Box>
   )
 }
 
 export const SafenetSettlement = ({ data }: { data: TransactionDetails }) => {
   return (
-    <Box mt={2}>
-      <GradientBoxSafenet heading="Settlement transaction">
-        <Box p={1}>
-          <Typography variant="h5"></Typography>
-          {data.txInfo.type === TransactionInfoType.TRANSFER && (
-            <TransferTxInfo txInfo={data.txInfo} txStatus={data.txStatus} trusted={true} imitation={false} />
-          )}
-          <SafenetTransactionLink data={data} />
-        </Box>
-      </GradientBoxSafenet>
+    <Box>
+      <Stack direction="row" spacing={1} alignItems="center">
+        <Typography>Debited</Typography>
+        {data.txInfo.type === TransactionInfoType.TRANSFER && (
+          <TransferTx info={data.txInfo} omitSign withLogo={false} />
+        )}
+        <Typography>for</Typography>
+        <SafenetTransactionLink data={data} />
+      </Stack>
     </Box>
   )
 }

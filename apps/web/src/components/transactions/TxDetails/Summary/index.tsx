@@ -59,6 +59,8 @@ const Summary = ({ txDetails, defaultExpanded = false, hideDecodedData = false }
 
   return (
     <>
+      {isSafenetEnabled && safeTxHash && <SafenetTransactionDetails safeTxHash={safeTxHash} />}
+
       {txHash && (
         <TxDataRow datatestid="tx-hash" title="Transaction hash:">
           {generateDataRowValue(txHash, 'hash', true)}{' '}
@@ -76,7 +78,6 @@ const Summary = ({ txDetails, defaultExpanded = false, hideDecodedData = false }
           {dateString(executedAt)}
         </TxDataRow>
       )}
-      {isSafenetEnabled && safeTxHash && <SafenetTransactionDetails safeTxHash={safeTxHash} />}
 
       {/* Advanced TxData */}
       {txData && (

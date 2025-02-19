@@ -19,7 +19,7 @@ export const SafenetSettlementLink = ({ debit }: { debit: SafenetTransactionDeta
   if (!chainConfig || !moduleTxs || moduleTxs.results.length === 0) {
     return null
   }
-  const firstTx = moduleTxs.results[moduleTxs.results.length - 1]
+  const firstTx = moduleTxs.results[0]
   return (
     <Link
       passHref
@@ -32,7 +32,7 @@ export const SafenetSettlementLink = ({ debit }: { debit: SafenetTransactionDeta
       }}
       legacyBehavior
     >
-      <ExplorerButton isCompact={false} label="View settlement" />
+      <ExplorerButton align="end" isCompact={false} label="View settlement" />
     </Link>
   )
 }

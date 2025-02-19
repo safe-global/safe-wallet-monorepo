@@ -1,4 +1,4 @@
-import { useState, type ReactElement } from 'react'
+import { type ReactNode, useState, type ReactElement } from 'react'
 import {
   Box,
   Link,
@@ -10,6 +10,7 @@ import {
   SvgIcon,
   Typography,
   type ListItemIconProps,
+  type ListItemTextProps,
 } from '@mui/material'
 import type {
   AddressEx,
@@ -31,6 +32,7 @@ import CircleIcon from '@/public/images/common/circle.svg'
 import CheckIcon from '@/public/images/common/circle-check.svg'
 import CancelIcon from '@/public/images/common/cancel.svg'
 import useTransactionStatus from '@/hooks/useTransactionStatus'
+import { SafenetTxStatusSteps } from '@/features/safenet/components/SafenetTxStatusSteps'
 
 // Icons
 const Created = () => (
@@ -57,7 +59,7 @@ const Check = () => (
 const Cancel = () => <SvgIcon component={CancelIcon} inheritViewBox className={css.icon} />
 const Dot = () => <SvgIcon component={DotIcon} inheritViewBox className={css.dot} />
 
-enum StepState {
+export enum StepState {
   CONFIRMED = 'CONFIRMED',
   ACTIVE = 'ACTIVE',
   DISABLED = 'DISABLED',
@@ -90,6 +92,25 @@ const StyledListItemIcon = ({
     {...rest}
   />
 )
+
+export const TxSignerStep = ({
+  state,
+  icon,
+  children,
+  textProps,
+}: {
+  icon: ReactElement
+  state: StepState
+  children: ReactNode | string
+  textProps?: ListItemTextProps & { ['data-testid']?: string }
+}) => {
+  return (
+    <ListItem>
+      <StyledListItemIcon $state={state}>{icon}</StyledListItemIcon>
+      <ListItemText {...textProps}>{children}</ListItemText>
+    </ListItem>
+  )
+}
 
 const shouldHideConfirmations = (detailedExecutionInfo?: DetailedExecutionInfo): boolean => {
   if (!detailedExecutionInfo || !isMultisigDetailedExecutionInfo(detailedExecutionInfo)) {
@@ -131,7 +152,7 @@ export const TxSigners = ({
     return null
   }
 
-  const { confirmations, confirmationsRequired, executor } = detailedExecutionInfo
+  const { confirmations, confirmationsRequired, executor, safeTxHash } = detailedExecutionInfo
 
   // TODO: Refactor to use `isConfirmableBy`
   const confirmationsCount = confirmations.length
@@ -142,78 +163,70 @@ export const TxSigners = ({
   return (
     <>
       <List data-testid="transaction-actions-list" className={css.signers}>
-        <ListItem>
-          {isCancellationTxInfo(txInfo) ? (
-            <>
-              <StyledListItemIcon $state={StepState.ERROR}>
-                <Cancel />
-              </StyledListItemIcon>
-              <ListItemText primaryTypographyProps={{ fontWeight: 700 }}>On-chain rejection created</ListItemText>
-            </>
-          ) : (
-            <>
-              <StyledListItemIcon $state={StepState.CONFIRMED}>
-                <Created />
-              </StyledListItemIcon>
-              <ListItemText data-testid="create-action" primaryTypographyProps={{ fontWeight: 700 }}>
-                Created
-              </ListItemText>
-            </>
-          )}
-        </ListItem>
+        {isCancellationTxInfo(txInfo) ? (
+          <TxSignerStep
+            icon={<Cancel />}
+            textProps={{ primaryTypographyProps: { fontWeight: 700 } }}
+            state={StepState.ERROR}
+          >
+            On-chain rejection created
+          </TxSignerStep>
+        ) : (
+          <TxSignerStep
+            icon={<Created />}
+            textProps={{ primaryTypographyProps: { fontWeight: 700 }, ['data-testid']: 'create-action' }}
+            state={StepState.CONFIRMED}
+          >
+            Created
+          </TxSignerStep>
+        )}
 
         {proposer && (
-          <ListItem key={proposer.value} sx={{ py: 0 }}>
-            <StyledListItemIcon $state={StepState.CONFIRMED}>
-              <Dot />
-            </StyledListItemIcon>
-            <ListItemText data-testid="signer">
-              <EthHashInfo address={proposer.value} hasExplorer showCopyButton />
-            </ListItemText>
-          </ListItem>
+          <TxSignerStep
+            key={proposer.value}
+            icon={<Dot />}
+            textProps={{ ['data-testid']: 'signer' }}
+            state={StepState.CONFIRMED}
+          >
+            <EthHashInfo address={proposer.value} hasExplorer showCopyButton />
+          </TxSignerStep>
         )}
 
         {confirmations.length > 0 && (
-          <ListItem>
-            <StyledListItemIcon $state={isConfirmed ? StepState.CONFIRMED : StepState.ACTIVE}>
-              {isConfirmed ? <Check /> : <MissingConfirmation />}
-            </StyledListItemIcon>
-            <ListItemText data-testid="confirmation-action" primaryTypographyProps={{ fontWeight: 700 }}>
-              Confirmations{' '}
-              <Box className={css.confirmationsTotal}>({`${confirmationsCount} of ${confirmationsRequired}`})</Box>
-            </ListItemText>
-          </ListItem>
+          <TxSignerStep
+            icon={isConfirmed ? <Check /> : <MissingConfirmation />}
+            textProps={{ primaryTypographyProps: { fontWeight: 700 }, ['data-testid']: 'confirmation-action' }}
+            state={isConfirmed ? StepState.CONFIRMED : StepState.ACTIVE}
+          >
+            Confirmations{' '}
+            <Box className={css.confirmationsTotal}>({`${confirmationsCount} of ${confirmationsRequired}`})</Box>
+          </TxSignerStep>
         )}
 
         {!hideConfirmations &&
           confirmations.map(({ signer }) => (
-            <ListItem key={signer.value} sx={{ py: 0 }}>
-              <StyledListItemIcon $state={StepState.CONFIRMED}>
-                <Dot />
-              </StyledListItemIcon>
-              <ListItemText data-testid="signer">
-                <EthHashInfo address={signer.value} name={signer.name} hasExplorer showCopyButton />
-              </ListItemText>
-            </ListItem>
+            <TxSignerStep
+              key={signer.value}
+              icon={<Dot />}
+              textProps={{ ['data-testid']: 'signer' }}
+              state={StepState.CONFIRMED}
+            >
+              <EthHashInfo address={signer.value} name={signer.name} hasExplorer showCopyButton />
+            </TxSignerStep>
           ))}
         {confirmations.length > 0 && (
-          <ListItem>
-            <StyledListItemIcon $state={StepState.CONFIRMED}>
-              <Dot />
-            </StyledListItemIcon>
-            <ListItemText>
-              <Link
-                data-testid="confirmation-visibility-btn"
-                component="button"
-                onClick={toggleHide}
-                sx={{
-                  fontSize: 'medium',
-                }}
-              >
-                {hideConfirmations ? 'Show all' : 'Hide all'}
-              </Link>
-            </ListItemText>
-          </ListItem>
+          <TxSignerStep icon={<Dot />} state={StepState.CONFIRMED}>
+            <Link
+              data-testid="confirmation-visibility-btn"
+              component="button"
+              onClick={toggleHide}
+              sx={{
+                fontSize: 'medium',
+              }}
+            >
+              {hideConfirmations ? 'Show all' : 'Hide all'}
+            </Link>
+          </TxSignerStep>
         )}
         <ListItem sx={{ alignItems: 'flex-start' }}>
           <StyledListItemIcon $state={executor ? StepState.CONFIRMED : StepState.DISABLED}>
@@ -233,26 +246,31 @@ export const TxSigners = ({
             secondaryTypographyProps={{ mt: 1 }}
           />
         </ListItem>
+        {executor ? (
+          <TxSignerStep icon={<Dot />} state={StepState.CONFIRMED}>
+            <Box data-testid="executor">
+              <EthHashInfo
+                address={executor.value}
+                name={executor.name}
+                customAvatar={executor.logoUri}
+                hasExplorer
+                showCopyButton
+              />
+            </Box>
+          </TxSignerStep>
+        ) : (
+          !isConfirmed && (
+            <TxSignerStep icon={<Dot />} state={StepState.CONFIRMED}>
+              <Box>
+                <Typography sx={({ palette }) => ({ color: palette.border.main })}>
+                  Can be executed once the threshold is reached
+                </Typography>
+              </Box>
+            </TxSignerStep>
+          )
+        )}
+        <SafenetTxStatusSteps safeTxHash={safeTxHash} />
       </List>
-      {executor ? (
-        <Box data-testid="executor" className={css.listFooter}>
-          <EthHashInfo
-            address={executor.value}
-            name={executor.name}
-            customAvatar={executor.logoUri}
-            hasExplorer
-            showCopyButton
-          />
-        </Box>
-      ) : (
-        !isConfirmed && (
-          <Box className={css.listFooter}>
-            <Typography sx={({ palette }) => ({ color: palette.border.main })}>
-              Can be executed once the threshold is reached
-            </Typography>
-          </Box>
-        )
-      )}
     </>
   )
 }

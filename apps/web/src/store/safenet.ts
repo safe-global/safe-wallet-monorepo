@@ -18,7 +18,7 @@ export type SafenetConfigEntity = {
 }
 
 export type SafenetBalanceEntity = {
-  [tokenSymbol: string]: string
+  [tokenSymbol: string]: { total: string }
 }
 
 export type SafenetSimulateTransactionRequest = {

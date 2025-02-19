@@ -59,16 +59,17 @@ type EnhancedTableHeadProps = {
   onRequestSort: (property: string) => void
   order: 'asc' | 'desc'
   orderBy: string
+  className?: string
 }
 
 function EnhancedTableHead(props: EnhancedTableHeadProps) {
-  const { headCells, order, orderBy, onRequestSort } = props
+  const { headCells, order, orderBy, onRequestSort, className } = props
   const createSortHandler = (property: string) => () => {
     onRequestSort(property)
   }
 
   return (
-    <TableHead>
+    <TableHead className={className}>
       <TableRow>
         {headCells.map((headCell) => (
           <TableCell
@@ -110,11 +111,21 @@ export type EnhancedTableProps = {
   rows: EnhancedRow[]
   headCells: EnhancedHeadCell[]
   mobileVariant?: boolean
+  headerClassName?: string
+  rowClassName?: string
+  tableClassName?: string
 }
 
 const pageSizes = [10, 25, 100]
 
-function EnhancedTable({ rows, headCells, mobileVariant }: EnhancedTableProps) {
+function EnhancedTable({
+  rows,
+  headCells,
+  mobileVariant,
+  headerClassName,
+  rowClassName,
+  tableClassName,
+}: EnhancedTableProps) {
   const [order, setOrder] = useState<'asc' | 'desc'>('asc')
   const [orderBy, setOrderBy] = useState<string>('')
   const [page, setPage] = useState<number>(0)
@@ -141,8 +152,17 @@ function EnhancedTable({ rows, headCells, mobileVariant }: EnhancedTableProps) {
   return (
     <Box sx={{ width: '100%' }}>
       <TableContainer data-testid="table-container" component={Paper} sx={{ width: '100%', mb: 2 }}>
-        <Table aria-labelledby="tableTitle" className={mobileVariant ? css.mobileColumn : undefined}>
-          <EnhancedTableHead headCells={headCells} order={order} orderBy={orderBy} onRequestSort={handleRequestSort} />
+        <Table
+          aria-labelledby="tableTitle"
+          className={classNames({ [css.mobileColumn]: mobileVariant }, tableClassName)}
+        >
+          <EnhancedTableHead
+            headCells={headCells}
+            order={order}
+            orderBy={orderBy}
+            onRequestSort={handleRequestSort}
+            className={headerClassName}
+          />
           <TableBody>
             {pagedRows.length > 0 ? (
               pagedRows.map((row, index) => (
@@ -151,7 +171,7 @@ function EnhancedTable({ rows, headCells, mobileVariant }: EnhancedTableProps) {
                   tabIndex={-1}
                   key={row.key ?? index}
                   selected={row.selected}
-                  className={row.collapsed ? css.collapsedRow : undefined}
+                  className={classNames({ [css.collapsedRow]: row.collapsed, rowClassName })}
                 >
                   {Object.entries(row.cells).map(([key, cell]) => (
                     <TableCell
