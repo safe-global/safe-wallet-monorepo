@@ -47,6 +47,7 @@ const SafeListContextMenu = ({
   addNetwork,
   rename,
   undeployedSafe,
+  onClose,
 }: {
   name: string
   address: string
@@ -54,6 +55,7 @@ const SafeListContextMenu = ({
   addNetwork: boolean
   rename: boolean
   undeployedSafe: boolean
+  onClose?: () => void
 }): ReactElement => {
   const isNestedSafesEnabled = useIsTargetedFeature(FEATURES.TARGETED_NESTED_SAFES)
   const { data: nestedSafes } = useGetOwnedSafesQuery(
@@ -140,7 +142,10 @@ const SafeListContextMenu = ({
       {open[ModalType.NESTED_SAFES] && (
         <NestedSafesPopover
           anchorEl={anchorEl}
-          onClose={handleCloseModal}
+          onClose={() => {
+            handleCloseModal()
+            onClose?.()
+          }}
           nestedSafes={nestedSafes?.safes ?? []}
           hideCreationButton
         />
