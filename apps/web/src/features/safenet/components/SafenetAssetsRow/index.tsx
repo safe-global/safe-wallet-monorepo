@@ -40,9 +40,12 @@ const SafenetBalanceBreakdown = ({ row }: { row: EnhancedRow }) => (
   </Box>
 )
 
-const SafenetAssetsRow = ({ row, index }: { row: EnhancedRow; index: number }) => {
+const SafenetAssetsRow = ({ row, index, numRows }: { row: EnhancedRow; index: number; numRows: number }) => {
   const [open, setOpen] = useState(false)
 
+  const isLastToken = index > 0 && index === numRows - 1
+
+  console.log(index, numRows, isLastToken)
   return (
     <>
       <TableRow
@@ -51,7 +54,10 @@ const SafenetAssetsRow = ({ row, index }: { row: EnhancedRow; index: number }) =
         selected={row.selected}
         className={row.collapsed ? css.collapsedRow : undefined}
         onClick={() => setOpen(!open)}
-        sx={{ cursor: 'pointer' }}
+        sx={{
+          cursor: 'pointer',
+          borderBottom: !isLastToken || (isLastToken && open) ? '1px solid var(--color-border-light)' : 'none !important'
+        }}
       >
         {Object.entries(row.cells).map(([key, cell]) => (
           <TableCell
@@ -67,7 +73,7 @@ const SafenetAssetsRow = ({ row, index }: { row: EnhancedRow; index: number }) =
           </TableCell>
         ))}
       </TableRow>
-      <TableRow style={{ borderBottom: open ? '1px solid var(--color-border-light)' : 'none' }}>
+      <TableRow style={{ borderBottom: open && !isLastToken ? '1px solid var(--color-border-light)' : 'none' }}>
         <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={4}>
           <Collapse in={open}>
             <SafenetBalanceBreakdown row={row} />

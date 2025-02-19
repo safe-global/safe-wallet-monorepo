@@ -151,7 +151,7 @@ function EnhancedTable({ rows, headCells, mobileVariant }: EnhancedTableProps) {
             {pagedRows.length > 0 ? (
               pagedRows.map((row, index) =>
                 !!row.safenetBalance ? (
-                  <SafenetAssetsRow key={row.key ?? index} row={row} index={index} />
+                  <SafenetAssetsRow key={row.key ?? index} row={row} index={index} numRows={pagedRows.length} />
                 ) : (
                   <AssetsRow key={row.key ?? index} row={row} index={index} />
                 ),
