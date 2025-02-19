@@ -24,7 +24,6 @@ export const useModalStyle = () => {
           flex: 1,
         }
 
-  console.log('bottom', bottom)
   return {
     ...modalStyle,
     paddingBottom: bottom + getTokenValue('$4'),

@@ -60,6 +60,7 @@ const lightPalette = {
     light: '#EFFFF4',
     secondary: '#DDDEE0',
     skeleton: 'rgba(255, 255, 255, 0.04)',
+    disabled: '#7878801F',
   },
   backdrop: {
     main: '#636669',

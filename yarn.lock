@@ -3953,12 +3953,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@expo/metro-runtime@npm:4.0.0":
-  version: 4.0.0
-  resolution: "@expo/metro-runtime@npm:4.0.0"
+"@expo/metro-runtime@npm:4.0.1":
+  version: 4.0.1
+  resolution: "@expo/metro-runtime@npm:4.0.1"
   peerDependencies:
     react-native: "*"
-  checksum: 10/2f5bd81e4d0735dc9b99ac4f35169969eb9dc303669ddc3158f670a3c36115f87d479a6fda11c1d5acab551f1015a32271c83001e8874493f0ec58c02f8ddbf3
+  checksum: 10/3e4bbb52a5c57ec1b86731e1ff5bc5de7d2fa616d66785c025b3dbb54b6d2bdf5c070749ed5b8661f51577312e0ebe45c71f4be6748d18d2a28fb8a7eb81307c
   languageName: node
   linkType: hard
 
@@ -4055,15 +4055,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@expo/server@npm:^0.5.0":
-  version: 0.5.0
-  resolution: "@expo/server@npm:0.5.0"
+"@expo/server@npm:^0.5.1":
+  version: 0.5.1
+  resolution: "@expo/server@npm:0.5.1"
   dependencies:
     "@remix-run/node": "npm:^2.12.0"
     abort-controller: "npm:^3.0.0"
     debug: "npm:^4.3.4"
     source-map-support: "npm:~0.5.21"
-  checksum: 10/aec839bcd8e72dd366e7a02721a364644e84d0db4a34b402f676f3f95c1ed49770f8909108f6cb8a1ba1285e9acae3ed2ee2563f18620efdacb1b812eb5fe838
+  checksum: 10/0bef91d59088f7ff9778275e9e4fe320dd5fe109610733e1b39c598b976524ae67807b3790b0b2b36b89a02698221532156a580e6ed7e50c02516d36f5b6a97b
   languageName: node
   linkType: hard
 
@@ -8252,7 +8252,7 @@ __metadata:
     expo-image: "npm:~2.0.3"
     expo-linear-gradient: "npm:^14.0.2"
     expo-linking: "npm:~7.0.3"
-    expo-router: "npm:~4.0.15"
+    expo-router: "npm:^4.0.17"
     expo-splash-screen: "npm:^0.29.16"
     expo-status-bar: "npm:~2.0.0"
     expo-system-ui: "npm:~4.0.6"
@@ -8277,8 +8277,8 @@ __metadata:
     react-native-progress: "npm:^5.0.1"
     react-native-quick-crypto: "npm:^0.7.11"
     react-native-reanimated: "npm:~3.16.7"
-    react-native-safe-area-context: "npm:~5.1.0"
-    react-native-screens: "npm:~4.5.0"
+    react-native-safe-area-context: "npm:^5.2.0"
+    react-native-screens: "npm:^4.8.0"
     react-native-svg: "npm:15.8.0"
     react-native-vision-camera: "npm:^4.6.3"
     react-native-web: "npm:^0.19.13"
@@ -20207,12 +20207,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"expo-router@npm:~4.0.15":
-  version: 4.0.15
-  resolution: "expo-router@npm:4.0.15"
+"expo-router@npm:^4.0.17":
+  version: 4.0.17
+  resolution: "expo-router@npm:4.0.17"
   dependencies:
-    "@expo/metro-runtime": "npm:4.0.0"
-    "@expo/server": "npm:^0.5.0"
+    "@expo/metro-runtime": "npm:4.0.1"
+    "@expo/server": "npm:^0.5.1"
     "@radix-ui/react-slot": "npm:1.0.1"
     "@react-navigation/bottom-tabs": "npm:^7.2.0"
     "@react-navigation/native": "npm:^7.0.14"
@@ -20239,7 +20239,7 @@ __metadata:
       optional: true
     react-native-reanimated:
       optional: true
-  checksum: 10/8979a61e09099ea01fc0f8335856bcb0b6a04bbb3d611745b6ca3ce17e7821df30ff44b22cd3b050876eceb85619779d8313bca48f039a8b59f456cb1b4b9d62
+  checksum: 10/05410767bdc724619bedae67306146fd52b6da755793530f83699b8aba10529dbcc9c44eaf433445ee2b9c48f1fa6163eb0ecf137b3b7b7274a0c70313596d64
   languageName: node
   linkType: hard
 
@@ -29059,26 +29059,26 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-safe-area-context@npm:~5.1.0":
-  version: 5.1.0
-  resolution: "react-native-safe-area-context@npm:5.1.0"
+"react-native-safe-area-context@npm:^5.2.0":
+  version: 5.2.0
+  resolution: "react-native-safe-area-context@npm:5.2.0"
   peerDependencies:
     react: "*"
     react-native: "*"
-  checksum: 10/7ff5fd17733b73d3c9fc5f7afa81c9c45389e5bc13ec2101135bdded9d8f435465582e0874de3f517bfb2c4f3fc7300dfdbc51176bc0ca84240184b2a888d74b
+  checksum: 10/0972d6f1e2485b71c148aeabaf9f1bfbc533549c66de7d0ea617f92df0024646324c38dc9062ea0392761b72b0f7b6e605a784c09addce61e105e6737bbde7b0
   languageName: node
   linkType: hard
 
-"react-native-screens@npm:~4.5.0":
-  version: 4.5.0
-  resolution: "react-native-screens@npm:4.5.0"
+"react-native-screens@npm:^4.8.0":
+  version: 4.8.0
+  resolution: "react-native-screens@npm:4.8.0"
   dependencies:
     react-freeze: "npm:^1.0.0"
     warn-once: "npm:^0.1.0"
   peerDependencies:
     react: "*"
     react-native: "*"
-  checksum: 10/e9f56b52989aab7e58ed6a3930632d00c5ab94365e5a591cfc0187ffa742870b3eadb1d1832ff4cc6a7a3b8b77fce0a022ab781a72866539e830dc43b380ac60
+  checksum: 10/95c7ea97f82ae88532e06635cb01b779604b70ebf08ad0d09df78f35c3d886f735cba3cb7bef6648e3942161ea941120e1d95515ba1fbfbe3a0a7abc5bf112f9
   languageName: node
   linkType: hard
 

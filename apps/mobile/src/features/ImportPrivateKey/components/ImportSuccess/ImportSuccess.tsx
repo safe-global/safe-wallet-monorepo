@@ -8,12 +8,10 @@ import { useLocalSearchParams, useRouter } from 'expo-router'
 import React from 'react'
 import { ScrollView } from 'react-native'
 import { Button, Text, View } from 'tamagui'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 export function ImportSuccess() {
   const { address, name } = useLocalSearchParams<{ address: `0x${string}`; name: string }>()
   const router = useRouter()
-  const insets = useSafeAreaInsets()
 
   const handleContinuePress = () => {
     // Go to top of the navigator stack
@@ -23,7 +21,7 @@ export function ImportSuccess() {
   }
 
   return (
-    <View flex={1} paddingBottom={insets.bottom + insets.top} justifyContent="space-between" testID={'import-success'}>
+    <View flex={1} justifyContent="space-between" testID={'import-success'}>
       <View flex={1}>
         <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
           <View flex={1} flexGrow={1} alignItems="center" justifyContent="center" paddingHorizontal="$3">

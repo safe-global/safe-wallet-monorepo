@@ -4,7 +4,6 @@ import { useTheme } from 'tamagui'
 
 export default function ImportSignersLayout() {
   const theme = useTheme()
-
   return (
     <Stack
       screenOptions={({ navigation }) => ({
