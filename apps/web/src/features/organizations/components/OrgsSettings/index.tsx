@@ -2,6 +2,8 @@ import ModalDialog from '@/components/common/ModalDialog'
 import { AppRoutes } from '@/config/routes'
 import CheckIcon from '@/public/images/common/check.svg'
 import CloseIcon from '@/public/images/common/close.svg'
+import { useAppDispatch } from '@/store'
+import { showNotification } from '@/store/notificationsSlice'
 import {
   Button,
   Card,
@@ -42,6 +44,7 @@ type OrganizationFormData = {
 const OrgsSettings = () => {
   const [deleteOrgOpen, setDeleteOrgOpen] = useState(false)
   const router = useRouter()
+  const dispatch = useAppDispatch()
   const orgId = Array.isArray(router.query.orgId) ? router.query.orgId[0] : router.query.orgId
   const { data: org } = useOrganizationsGetOneV1Query({ id: Number(orgId) })
   const [updateOrg] = useOrganizationsUpdateV1Mutation()
@@ -54,10 +57,25 @@ const OrgsSettings = () => {
     },
   })
 
-  const { register, handleSubmit } = formMethods
+  const { register, handleSubmit, watch } = formMethods
 
-  const onSubmit = handleSubmit((data) => {
-    updateOrg({ id: Number(orgId), updateOrganizationDto: { name: data.name } })
+  const formName = watch('name')
+  const isNameChanged = formName !== org?.name
+
+  const onSubmit = handleSubmit(async (data) => {
+    try {
+      await updateOrg({ id: Number(orgId), updateOrganizationDto: { name: data.name } })
+
+      dispatch(
+        showNotification({
+          variant: 'success',
+          message: 'Successfully updated organization name',
+          groupKey: 'org-update-name',
+        }),
+      )
+    } catch (e) {
+      console.log(e)
+    }
   })
 
   const onDelete = async () => {
@@ -96,7 +114,7 @@ const OrgsSettings = () => {
                   slotProps={{ inputLabel: { shrink: true } }}
                 />
 
-                <Button variant="contained" type="submit" sx={{ mt: 2 }}>
+                <Button variant="contained" type="submit" sx={{ mt: 2 }} disabled={!isNameChanged}>
                   Save
                 </Button>
               </form>
