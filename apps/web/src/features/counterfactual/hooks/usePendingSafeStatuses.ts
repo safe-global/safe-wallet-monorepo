@@ -11,20 +11,25 @@ import {
   selectUndeployedSafes,
   updateUndeployedSafeStatus,
 } from '@/features/counterfactual/store/undeployedSafesSlice'
-import { checkSafeActionViaRelay, checkSafeActivation } from '@/features/counterfactual/utils'
+import {
+  checkSafeActionViaGelatoRelay,
+  checkSafeActionViaSafenetRelay,
+  checkSafeActivation,
+} from '@/features/counterfactual/utils'
 import useChainId from '@/hooks/useChainId'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
 import { CREATE_SAFE_EVENTS, trackEvent } from '@/services/analytics'
-import { useAppDispatch, useAppSelector } from '@/store'
-import { useEffect, useRef } from 'react'
-import { isSmartContract } from '@/utils/wallets'
 import { gtmSetSafeAddress } from '@/services/analytics/gtm'
+import { useAppDispatch, useAppSelector } from '@/store'
+import { isSmartContract } from '@/utils/wallets'
+import { useEffect, useRef } from 'react'
 
 export const safeCreationPendingStatuses: Partial<Record<SafeCreationEvent, PendingSafeStatus | null>> = {
   [SafeCreationEvent.AWAITING_EXECUTION]: PendingSafeStatus.AWAITING_EXECUTION,
   [SafeCreationEvent.PROCESSING]: PendingSafeStatus.PROCESSING,
   [SafeCreationEvent.RELAYING]: PendingSafeStatus.RELAYING,
+  [SafeCreationEvent.SAFENET_RELAYING]: PendingSafeStatus.SAFENET_RELAYING,
   [SafeCreationEvent.SUCCESS]: null,
   [SafeCreationEvent.INDEXED]: null,
   [SafeCreationEvent.FAILED]: null,
@@ -58,9 +63,10 @@ const usePendingSafeMonitor = (): void => {
 
           const isProcessing = status === PendingSafeStatus.PROCESSING && txHash !== undefined
           const isRelaying = status === PendingSafeStatus.RELAYING && taskId !== undefined
+          const isSafenetRelaying = status === PendingSafeStatus.SAFENET_RELAYING
           const isMonitored = monitoredSafes.current[safeAddress]
 
-          if ((!isProcessing && !isRelaying) || isMonitored) return
+          if ((!isProcessing && !isRelaying && !isSafenetRelaying) || isMonitored) return
 
           monitoredSafes.current[safeAddress] = true
 
@@ -69,7 +75,11 @@ const usePendingSafeMonitor = (): void => {
           }
 
           if (isRelaying) {
-            checkSafeActionViaRelay(taskId, safeAddress, type, chainId)
+            checkSafeActionViaGelatoRelay(taskId, safeAddress, type, chainId)
+          }
+
+          if (isSafenetRelaying) {
+            checkSafeActionViaSafenetRelay(safeAddress, chainId)
           }
         }
 
@@ -110,7 +120,7 @@ const usePendingSafeStatus = (): void => {
   useEffect(() => {
     const unsubFns = Object.entries(safeCreationPendingStatuses).map(([event, status]) =>
       safeCreationSubscribe(event as SafeCreationEvent, async (detail) => {
-        const creationChainId = 'chainId' in detail ? detail.chainId : chainId
+        const creationChainId = 'chainId' in detail ? (detail.chainId ?? chainId) : chainId
 
         if (event === SafeCreationEvent.SUCCESS) {
           gtmSetSafeAddress(detail.safeAddress)

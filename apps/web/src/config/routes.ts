@@ -26,6 +26,7 @@ export const AppRoutes = {
     index: '/balances',
   },
   newSafe: {
+    safenetCreate: '/new-safe/safenet-create',
     load: '/new-safe/load',
     create: '/new-safe/create',
     advancedCreate: '/new-safe/advanced-create',
@@ -33,6 +34,7 @@ export const AppRoutes = {
   settings: {
     setup: '/settings/setup',
     security: '/settings/security',
+    safenet: '/settings/safenet',
     notifications: '/settings/notifications',
     modules: '/settings/modules',
     index: '/settings',
@@ -43,7 +45,6 @@ export const AppRoutes = {
     safeApps: {
       index: '/settings/safe-apps',
     },
-    safenet: '/settings/safenet',
   },
   share: {
     safeApp: '/share/safe-app',

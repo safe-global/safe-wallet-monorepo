@@ -1,19 +1,20 @@
 import { SafeCreationEvent, safeCreationSubscribe } from '@/features/counterfactual/services/safeCreationEvents'
-import useWallet from '@/hooks/wallets/useWallet'
-import { useGetAllOwnedSafesQuery } from '@/store/api/gateway'
-import { getBlockExplorerLink } from '@/utils/chains'
-import { skipToken } from '@reduxjs/toolkit/query'
-import { useEffect } from 'react'
-import { formatError } from '@/utils/formatters'
-import { showNotification } from '@/store/notificationsSlice'
-import { useAppDispatch } from '@/store'
 import { useCurrentChain } from '@/hooks/useChains'
 import useSafeAddress from '@/hooks/useSafeAddress'
+import useWallet from '@/hooks/wallets/useWallet'
+import { useAppDispatch } from '@/store'
+import { useGetAllOwnedSafesQuery } from '@/store/api/gateway'
+import { showNotification } from '@/store/notificationsSlice'
+import { getBlockExplorerLink } from '@/utils/chains'
+import { formatError } from '@/utils/formatters'
 import { isWalletRejection } from '@/utils/wallets'
+import { skipToken } from '@reduxjs/toolkit/query'
+import { useEffect } from 'react'
 
 const SafeCreationNotifications = {
   [SafeCreationEvent.PROCESSING]: 'Validating...',
   [SafeCreationEvent.RELAYING]: 'Validating...',
+  [SafeCreationEvent.SAFENET_RELAYING]: 'Validating...',
   [SafeCreationEvent.INDEXED]: 'Successfully executed.',
   [SafeCreationEvent.FAILED]: 'Failed.',
   [SafeCreationEvent.REVERTED]: 'Reverted. Please check your gas settings.',

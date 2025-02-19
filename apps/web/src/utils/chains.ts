@@ -51,7 +51,6 @@ export const FeatureRoutes = {
   [AppRoutes.balances.nfts]: FEATURES.ERC721,
   [AppRoutes.settings.notifications]: FEATURES.PUSH_NOTIFICATIONS,
   [AppRoutes.bridge]: FEATURES.BRIDGE,
-  [AppRoutes.settings.safenet]: FEATURES.SAFENET,
 }
 
 export const hasFeature = (chain: ChainInfo, feature: FEATURES): boolean => {

@@ -1,13 +1,8 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 
-import { SAFENET_API_URL } from '@/config/constants'
 import { type RequiredTenderlySimulation } from '@/components/tx/security/tenderly/types'
-
-export type SafenetSafeEntity = {
-  safe: string
-  chainId: number
-  guard: string
-}
+import { SAFENET_API_URL } from '@/config/constants'
+import type { SafeVersion } from '@safe-global/safe-core-sdk-types'
 
 export type SafenetConfigEntity = {
   chains: number[]
@@ -15,6 +10,20 @@ export type SafenetConfigEntity = {
   settlementEngines: Record<string, string>
   tokens: Record<string, Record<string, string>>
   processors: Record<string, string>
+}
+
+export type SafenetAccountEntity = {
+  guarantees: {
+    guarantee: string
+    inactiveAfter: string
+    activeAfter: string
+  }[]
+  handle: string
+  safes: {
+    address: string
+    chainId: number
+    guard: string
+  }[]
 }
 
 export type SafenetBalanceEntity = {
@@ -57,6 +66,23 @@ export type SafenetTransactionDetails = {
   chainId: number
   safeTxHash: string
 }
+export type DeploySafenetAccountResponse = {
+  safeAddress: string
+  safeAccountConfig: {
+    owners: string[]
+    threshold: number
+    to?: string
+    data?: string
+    fallbackHandler?: string
+    paymentToken?: string
+    payment?: number
+    paymentReceiver?: string
+  }
+  saltNonce: string
+  factoryAddress: string
+  masterCopy: string
+  safeVersion: SafeVersion
+}
 
 export const getSafenetBalances = async (safeAddress: string): Promise<SafenetBalanceEntity> => {
   const response = await fetch(`${SAFENET_API_URL}/api/v1/balances/${safeAddress}`)
@@ -67,7 +93,7 @@ export const getSafenetBalances = async (safeAddress: string): Promise<SafenetBa
 export const safenetApi = createApi({
   reducerPath: 'safenetApi',
   baseQuery: fetchBaseQuery({ baseUrl: `${SAFENET_API_URL}/api/v1` }),
-  tagTypes: ['SafenetConfig', 'SafenetOffchainStatus', 'SafenetBalance', 'SafenetSimulation'],
+  tagTypes: ['SafenetConfig', 'SafenetAccount', 'SafenetBalance', 'SafenetSimulation', 'DeploySafenetAccount'],
   endpoints: (builder) => ({
     getSafenetConfig: builder.query<SafenetConfigEntity, void>({
       query: () => ({
@@ -78,9 +104,9 @@ export const safenetApi = createApi({
       }),
       providesTags: ['SafenetConfig'],
     }),
-    getSafenetOffchainStatus: builder.query<SafenetSafeEntity, { chainId: string; safeAddress: string }>({
-      query: ({ chainId, safeAddress }) => `/account/${chainId}/${safeAddress}`,
-      providesTags: (_, __, arg) => [{ type: 'SafenetOffchainStatus', id: arg.safeAddress }],
+    getSafenetAccount: builder.query<SafenetAccountEntity, { safeAddress: string }>({
+      query: ({ safeAddress }) => `/account/${safeAddress}`,
+      providesTags: (_, __, arg) => [{ type: 'SafenetAccount', id: arg.safeAddress }],
     }),
     registerSafenet: builder.mutation<boolean, { chainId: string; safeAddress: string }>({
       query: ({ chainId, safeAddress }) => ({
@@ -91,7 +117,7 @@ export const safenetApi = createApi({
           safe: safeAddress,
         },
       }),
-      invalidatesTags: (_, __, arg) => [{ type: 'SafenetOffchainStatus', id: arg.safeAddress }],
+      invalidatesTags: (_, __, arg) => [{ type: 'SafenetAccount', id: arg.safeAddress }],
     }),
     getSafenetBalance: builder.query<SafenetBalanceEntity, { safeAddress: string }>({
       query: ({ safeAddress }) => `/balances/${safeAddress}`,
@@ -126,6 +152,23 @@ export const safenetApi = createApi({
         method: 'GET',
       }),
     }),
+    deploySafenetAccount: builder.query<
+      DeploySafenetAccountResponse,
+      {
+        account: {
+          owners: string[]
+          threshold: number
+        }
+        saltNonce: string
+      }
+    >({
+      query: ({ account: { owners, threshold }, saltNonce }) => ({
+        url: `/account/deploy`,
+        method: 'POST',
+        body: { account: { owners, threshold }, saltNonce },
+      }),
+      providesTags: ['DeploySafenetAccount'],
+    }),
   }),
 })
 
@@ -135,4 +178,6 @@ export const {
   useLazySimulateSafenetTransactionQuery,
   useGetSafenetTransactionDetailsQuery,
   useGetSafenetTransactionDetailsBySettlementQuery,
+  useGetSafenetAccountQuery,
+  useLazyDeploySafenetAccountQuery,
 } = safenetApi

@@ -1,29 +1,31 @@
-import { InputAdornment, Tooltip, SvgIcon, Typography, Box, Divider, Button, Grid } from '@mui/material'
-import { FormProvider, useForm, useWatch } from 'react-hook-form'
-import { useMnemonicSafeName } from '@/hooks/useMnemonicName'
-import InfoIcon from '@/public/images/notifications/info.svg'
+import NameInput from '@/components/common/NameInput'
+import NetworkMultiSelector from '@/components/common/NetworkSelector/NetworkMultiSelector'
 import type { StepRenderProps } from '@/components/new-safe/CardStepper/useCardStepper'
 import type { NewSafeFormData } from '@/components/new-safe/create'
-
 import layoutCss from '@/components/new-safe/create/styles.module.css'
-import NameInput from '@/components/common/NameInput'
-import { CREATE_SAFE_EVENTS, trackEvent } from '@/services/analytics'
 import { AppRoutes } from '@/config/routes'
-import MUILink from '@mui/material/Link'
-import Link from 'next/link'
-import { useRouter } from 'next/router'
-import NoWalletConnectedWarning from '../../NoWalletConnectedWarning'
-import { type SafeVersion } from '@safe-global/safe-core-sdk-types'
 import { useCurrentChain } from '@/hooks/useChains'
-import { useEffect } from 'react'
-import { getLatestSafeVersion } from '@/utils/chains'
-import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
-import { useSafeSetupHints } from '../OwnerPolicyStep/useSafeSetupHints'
-import type { CreateSafeInfoItem } from '../../CreateSafeInfos'
-import NetworkMultiSelector from '@/components/common/NetworkSelector/NetworkMultiSelector'
+import { useMnemonicSafeName } from '@/hooks/useMnemonicName'
+import useWallet from '@/hooks/wallets/useWallet'
+import InfoIcon from '@/public/images/notifications/info.svg'
+import { CREATE_SAFE_EVENTS, trackEvent } from '@/services/analytics'
 import { useAppSelector } from '@/store'
 import { selectChainById } from '@/store/chainsSlice'
-import useWallet from '@/hooks/wallets/useWallet'
+import { getLatestSafeVersion } from '@/utils/chains'
+import { Box, Button, Divider, Grid, InputAdornment, SvgIcon, Tooltip, Typography } from '@mui/material'
+import MUILink from '@mui/material/Link'
+import { type SafeVersion } from '@safe-global/safe-core-sdk-types'
+import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import dynamic from 'next/dynamic'
+import Link from 'next/link'
+import { useRouter } from 'next/router'
+import { useEffect } from 'react'
+import { FormProvider, useForm, useWatch } from 'react-hook-form'
+import type { CreateSafeInfoItem } from '../../CreateSafeInfos'
+import NoWalletConnectedWarning from '../../NoWalletConnectedWarning'
+import { useSafeSetupHints } from '../OwnerPolicyStep/useSafeSetupHints'
+
+const SafenetInfoCard = dynamic(() => import('@/features/safenet/components/new-safe/SafenetInfoCard'))
 
 type SetNameStepForm = {
   name: string
@@ -138,8 +140,10 @@ function SetNameStep({
               </Typography>
               <NetworkMultiSelector isAdvancedFlow={isAdvancedFlow} name={SetNameStepFields.networks} />
             </Grid>
+            <SafenetInfoCard />
           </Grid>
-          <Typography variant="body2" mt={2}>
+
+          <Typography variant="body2" mt={3}>
             By continuing, you agree to our{' '}
             <Link href={AppRoutes.terms} passHref legacyBehavior>
               <MUILink>terms of use</MUILink>

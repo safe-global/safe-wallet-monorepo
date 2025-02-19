@@ -4,7 +4,7 @@ import * as relay from '@/utils/relaying'
 import { type ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
 
 import { render } from '@/tests/test-utils'
-import ReviewStep, { NetworkFee } from '@/components/new-safe/create/steps/ReviewStep/index'
+import BaseReviewStep, { NetworkFee } from '@/components/new-safe/create/steps/ReviewStep/index'
 import * as useWallet from '@/hooks/wallets/useWallet'
 import { type ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import { act, fireEvent, screen } from '@testing-library/react'
@@ -47,7 +47,7 @@ describe('ReviewStep', () => {
     jest.spyOn(useChains, 'useHasFeature').mockReturnValue(true)
 
     const { getByText } = render(
-      <ReviewStep data={mockData} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />,
+      <BaseReviewStep data={mockData} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />,
     )
 
     expect(getByText('Pay now')).toBeInTheDocument()
@@ -64,7 +64,7 @@ describe('ReviewStep', () => {
     }
     jest.spyOn(useChains, 'useHasFeature').mockReturnValue(true)
 
-    render(<ReviewStep data={mockData} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />)
+    render(<BaseReviewStep data={mockData} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />)
 
     const payLaterOption = screen.getByRole('radio', { name: /Pay later/i })
     expect(payLaterOption).toBeChecked()
@@ -82,7 +82,7 @@ describe('ReviewStep', () => {
     jest.spyOn(useChains, 'useHasFeature').mockReturnValue(true)
 
     const { queryByText } = render(
-      <ReviewStep data={mockData} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />,
+      <BaseReviewStep data={mockData} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />,
     )
 
     expect(queryByText('You will have to confirm a transaction and pay an estimated fee')).not.toBeInTheDocument()
@@ -100,7 +100,7 @@ describe('ReviewStep', () => {
     jest.spyOn(useChains, 'useHasFeature').mockReturnValue(true)
 
     const { queryByText } = render(
-      <ReviewStep data={mockData} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />,
+      <BaseReviewStep data={mockData} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />,
     )
 
     expect(queryByText('Who will pay gas fees:')).not.toBeInTheDocument()
@@ -118,7 +118,7 @@ describe('ReviewStep', () => {
     jest.spyOn(useChains, 'useHasFeature').mockReturnValue(true)
 
     const { getByText } = render(
-      <ReviewStep data={mockData} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />,
+      <BaseReviewStep data={mockData} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />,
     )
 
     const payNow = getByText('Pay now')
@@ -143,7 +143,7 @@ describe('ReviewStep', () => {
     jest.spyOn(relay, 'hasRemainingRelays').mockReturnValue(true)
 
     const { getByText } = render(
-      <ReviewStep data={mockData} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />,
+      <BaseReviewStep data={mockData} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />,
     )
 
     const payNow = getByText('Pay now')
@@ -186,7 +186,7 @@ describe('ReviewStep', () => {
     jest.spyOn(relay, 'hasRemainingRelays').mockReturnValue(true)
 
     const { getByText } = render(
-      <ReviewStep data={mockData} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />,
+      <BaseReviewStep data={mockData} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />,
     )
 
     expect(getByText(/activate your account/)).toBeInTheDocument()

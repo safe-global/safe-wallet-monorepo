@@ -6,6 +6,7 @@ export enum SafeCreationEvent {
   AWAITING_EXECUTION = 'AWAITING_EXECUTION',
   PROCESSING = 'PROCESSING',
   RELAYING = 'RELAYING',
+  SAFENET_RELAYING = 'SAFENET_RELAYING',
   SUCCESS = 'SUCCESS',
   FAILED = 'FAILED',
   REVERTED = 'REVERTED',
@@ -27,6 +28,11 @@ export interface SafeCreationEvents {
     groupKey: string
     taskId: string
     safeAddress: string
+  }
+  [SafeCreationEvent.SAFENET_RELAYING]: {
+    groupKey: string
+    safeAddress: string
+    chainId: string
   }
   [SafeCreationEvent.SUCCESS]: {
     groupKey: string

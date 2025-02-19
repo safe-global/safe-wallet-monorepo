@@ -1,0 +1,63 @@
+.content {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  float: left;
+}
+
+.chip {
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--space-3);
+  display: flex;
+  padding: 4px;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.openChip {
+  border: 1px solid var(--color-border-light);
+  background: var(--color-background-default);
+  border-radius: 6px 6px 0 0;
+  display: flex;
+  padding: 4px;
+  align-items: center;
+  cursor: pointer;
+  gap: var(--space-1);
+}
+
+.multiChains {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.multiChains > span {
+  margin-left: -5px;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  outline: 2px solid var(--color-background-paper);
+}
+
+.logo {
+  background: var(--color-background-default);
+  border-radius: 20px;
+  padding: 6px 8px;
+  height: 24px;
+}
+
+.list {
+  background: var(--color-background-paper);
+  width: 100%;
+  border: 1px solid var(--color-border-light);
+  border-top: none;
+  border-radius: 0 0 6px 6px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-1);
+}
+
+.networkItem {
+  display: flex;
+  gap: var(--space-1);
+}

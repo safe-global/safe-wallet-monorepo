@@ -1,21 +1,27 @@
-import type { NextPage } from 'next'
-import Head from 'next/head'
-import { Grid, Paper, Skeleton, SvgIcon, Tooltip, Typography } from '@mui/material'
-import InfoIcon from '@/public/images/notifications/info.svg'
 import { ContractVersion } from '@/components/settings/ContractVersion'
-import { OwnerList } from '@/components/settings/owner/OwnerList'
 import { RequiredConfirmation } from '@/components/settings/RequiredConfirmations'
-import useSafeInfo from '@/hooks/useSafeInfo'
 import SettingsHeader from '@/components/settings/SettingsHeader'
-import ProposersList from 'src/components/settings/ProposersList'
 import SpendingLimits from '@/components/settings/SpendingLimits'
+import { OwnerList } from '@/components/settings/owner/OwnerList'
 import { BRAND_NAME } from '@/config/constants'
+import useIsSafenetEnabled from '@/features/safenet/hooks/useIsSafenetEnabled'
+import useSafeInfo from '@/hooks/useSafeInfo'
+import InfoIcon from '@/public/images/notifications/info.svg'
+import { Grid, Paper, Skeleton, SvgIcon, Tooltip, Typography } from '@mui/material'
+import type { NextPage } from 'next'
+import dynamic from 'next/dynamic'
+import Head from 'next/head'
+import ProposersList from 'src/components/settings/ProposersList'
+
+const SafenetSettings = dynamic(() => import('@/features/safenet/components/SafenetSettings'))
 
 const Setup: NextPage = () => {
   const { safe, safeLoaded } = useSafeInfo()
   const nonce = safe.nonce
   const ownerLength = safe.owners.length
   const threshold = safe.threshold
+
+  const isSafenetEnabled = useIsSafenetEnabled()
 
   return (
     <>
@@ -66,6 +72,8 @@ const Setup: NextPage = () => {
 
           <RequiredConfirmation threshold={threshold} owners={ownerLength} />
         </Paper>
+
+        {isSafenetEnabled && <SafenetSettings />}
 
         <SpendingLimits />
       </main>
