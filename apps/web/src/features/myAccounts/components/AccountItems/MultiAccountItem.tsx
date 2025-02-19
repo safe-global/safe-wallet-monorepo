@@ -52,7 +52,7 @@ type MultiAccountItemProps = {
   onLinkClick?: () => void
 }
 
-const MultichainIndicator = ({ safes }: { safes: SafeItem[] }) => {
+export const MultichainIndicator = ({ safes }: { safes: SafeItem[] }) => {
   return (
     <Tooltip
       title={
