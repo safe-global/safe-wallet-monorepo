@@ -12,7 +12,7 @@ const OrgsCTACard = () => {
     <Paper sx={{ p: 3, borderRadius: '12px', height: '100%' }}>
       <Box position="relative" width={1}>
         <Box className={css.iconBG}>
-          <SvgIcon gridArea="icon" component={LightbulbIcon} inheritViewBox />
+          <SvgIcon component={LightbulbIcon} inheritViewBox />
         </Box>
 
         <Button

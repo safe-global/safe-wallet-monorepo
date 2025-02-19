@@ -7,7 +7,7 @@ const NewFeaturesCard = () => {
     <Paper sx={{ p: 3, borderRadius: '12px' }}>
       <Box position="relative" width={1}>
         <Box className={css.iconBG}>
-          <SvgIcon gridArea="icon" component={WhatsNewIcon} inheritViewBox />
+          <SvgIcon component={WhatsNewIcon} inheritViewBox />
         </Box>
 
         <Chip label="Coming soon" size="small" sx={{ position: 'absolute', top: 0, right: 0, fontWeight: 'bold' }} />

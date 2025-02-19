@@ -1,6 +1,6 @@
 import MembersCard from '@/features/organizations/components/Dashboard/MembersCard'
 import NewFeaturesCard from '@/features/organizations/components/Dashboard/NewFeaturesCard'
-import OrgsCTACard from '@/features/organizations/components/Dashboard/OrgsCard'
+import OrgsCTACard from '@/features/organizations/components/Dashboard/OrgsCTACard'
 import { Box, Grid2, Typography } from '@mui/material'
 import SignInButton from '@/features/organizations/components/SignInButton'
 import OrgAccountsList from '@/features/organizations/components/AccountsList'

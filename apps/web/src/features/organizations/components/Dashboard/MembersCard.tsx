@@ -12,7 +12,7 @@ const MembersCard = () => {
     <Paper sx={{ p: 3, borderRadius: '12px' }}>
       <Box position="relative" width={1}>
         <Box className={css.iconBG}>
-          <SvgIcon gridArea="icon" component={MemberIcon} inheritViewBox />
+          <SvgIcon component={MemberIcon} inheritViewBox />
         </Box>
 
         <Button
