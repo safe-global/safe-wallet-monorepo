@@ -1,3 +1,6 @@
+import { Chip } from '@/components/common/Chip'
+import ABIcon from '@/public/images/sidebar/address-book.svg'
+import TransactionIcon from '@/public/images/sidebar/transactions.svg'
 import React, { type ReactElement } from 'react'
 import { AppRoutes } from '@/config/routes'
 import HomeIcon from '@/public/images/sidebar/home.svg'
@@ -26,9 +29,23 @@ export const navItems: DynamicNavItem[] = [
     href: AppRoutes.organizations.safeAccounts,
   },
   {
+    label: 'Transactions',
+    icon: <SvgIcon component={TransactionIcon} inheritViewBox />,
+    href: (_) => _, // TODO: Replace with empty page
+    disabled: true,
+    tag: <Chip label="Soon" sx={{ backgroundColor: 'background.main', color: 'static.main' }} />,
+  },
+  {
     label: 'Members',
     icon: <SvgIcon component={MembersIcon} inheritViewBox />,
     href: AppRoutes.organizations.members,
+  },
+  {
+    label: 'Address book',
+    icon: <SvgIcon component={ABIcon} inheritViewBox />,
+    href: (_) => _, // TODO: Replace with empty page
+    disabled: true,
+    tag: <Chip label="Soon" sx={{ backgroundColor: 'background.main', color: 'static.main' }} />,
   },
   {
     label: 'Settings',
