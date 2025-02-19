@@ -11,6 +11,9 @@ const appModal = '[data-testid="app-info-modal"]'
 export const safeAppsList = '[data-testid="apps-list"]'
 const openSafeAppBtn = '[data-testid="open-safe-app-btn"]'
 const appMessageInput = 'input[placeholder="Message"]'
+const txBuilderUntrustedFallbackAlert = '[data-testid="untrusted-fallback-handler-alert"]'
+export const handlerInput = 'input[id="contract-field-handler"]'
+const decodedTxSummary = '[data-testid="decoded-tx-summary"]'
 
 const addBtnStr = /add/i
 const noAppsStr = /no Safe Apps found/i
@@ -139,6 +142,18 @@ export const permissionCheckboxNames = {
   microphone: 'Microphone',
   geolocation: 'Geolocation',
   fullscreen: 'Fullscreen',
+}
+
+export function verifyUntrustedHandllerWarningVisible() {
+  cy.get(txBuilderUntrustedFallbackAlert).should('be.visible')
+}
+
+export function verifyUntrustedHandllerWarningDoesNotExist() {
+  cy.get(txBuilderUntrustedFallbackAlert).should('not.exist')
+}
+
+export function clickOnAdvancedDetails() {
+  cy.get(decodedTxSummary).click()
 }
 
 export function triggetOffChainTx() {

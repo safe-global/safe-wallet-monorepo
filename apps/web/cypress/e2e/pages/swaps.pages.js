@@ -42,6 +42,7 @@ const swapStrBtn = 'Swap'
 const twapStrBtn = 'TWAP'
 const confirmSwapStr = 'Confirm Swap'
 const swapAnywayStrBtn = 'Swap anyway'
+const acceptStrBtn = 'Accept'
 const maxStrBtn = 'Max'
 const numberOfPartsStr = /No\.? of parts/
 const sellAmountStr = 'Sell amount'
@@ -60,6 +61,7 @@ const orderDetailsStr = 'Order details'
 const unlockTwapOrdersStrBtn = 'Unlock TWAP orders'
 const settingsModalTitle = 'Advanced Order Settings'
 const customRecipientStr = 'Custom Recipient'
+
 
 const getInsufficientBalanceStr = (token) => `Insufficient ${token} balance`
 const sellAmountIsSmallStr = 'Sell amount too small'
@@ -257,6 +259,16 @@ export function clickOnReviewOrderBtn() {
 }
 
 export function placeTwapOrder() {
+  cy.wait(3000)
+  cy.get('button')
+    .contains(acceptStrBtn)
+    .should(() => { })
+    .then(($button) => {
+      if (!$button.length) {
+        return
+      }
+      cy.wrap($button).click()
+    })
   cy.contains(placeTwapOrderStrBtn).click()
 }
 

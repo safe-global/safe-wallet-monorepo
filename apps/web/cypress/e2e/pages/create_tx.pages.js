@@ -77,6 +77,7 @@ const txStack = '[data-testid="tx-stack"]'
 const txOperation = '[data-testid="tx-operation"]'
 const nonceFld = '[data-testid="nonce-fld"]'
 
+
 const viewTransactionBtn = 'View transaction'
 const transactionDetailsTitle = 'Transaction details'
 const QueueLabel = 'needs to be executed first'
@@ -115,10 +116,17 @@ export const bulkTxs = 'Bulk transactions'
 export const txNoteWarningMessage = 'The notes are publicly visible, do not share any private or sensitive details'
 export const recordedTxNote = 'Tx note one'
 
+export const tx_status = {
+  execution_needed: "Execution needed",
+}
 export const filterTypes = {
   incoming: 'Incoming',
   outgoing: 'Outgoing',
   module: 'Module-based',
+}
+
+export const txActions = {
+  setFallbackHandler: 'setFallbackHandler',
 }
 
 export const advancedDetailsViewOptions = {
