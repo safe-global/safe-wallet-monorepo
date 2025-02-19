@@ -15,10 +15,12 @@ export function NestedSafesPopover({
   anchorEl,
   onClose,
   nestedSafes,
+  hideCreationButton = false,
 }: {
   anchorEl: HTMLElement | null
   onClose: () => void
   nestedSafes: Array<string>
+  hideCreationButton?: boolean
 }): ReactElement {
   const { setTxFlow } = useContext(TxModalContext)
 
@@ -57,12 +59,14 @@ export function NestedSafesPopover({
             <NestedSafesList onClose={onClose} nestedSafes={nestedSafes} />
           </Box>
         )}
-        <Track {...NESTED_SAFE_EVENTS.ADD}>
-          <Button variant="contained" sx={{ width: '100%', mt: 3 }} onClick={onAdd}>
-            <SvgIcon component={AddIcon} inheritViewBox fontSize="small" />
-            Add Nested Safe
-          </Button>
-        </Track>
+        {!hideCreationButton && (
+          <Track {...NESTED_SAFE_EVENTS.ADD}>
+            <Button variant="contained" sx={{ width: '100%', mt: 3 }} onClick={onAdd}>
+              <SvgIcon component={AddIcon} inheritViewBox fontSize="small" />
+              Add Nested Safe
+            </Button>
+          </Track>
+        )}
       </Stack>
     </Popover>
   )

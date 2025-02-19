@@ -138,7 +138,12 @@ const SafeListContextMenu = ({
       </ContextMenu>
 
       {open[ModalType.NESTED_SAFES] && (
-        <NestedSafesPopover anchorEl={anchorEl} onClose={handleCloseModal} nestedSafes={nestedSafes?.safes ?? []} />
+        <NestedSafesPopover
+          anchorEl={anchorEl}
+          onClose={handleCloseModal}
+          nestedSafes={nestedSafes?.safes ?? []}
+          hideCreationButton
+        />
       )}
 
       {open[ModalType.RENAME] && (
