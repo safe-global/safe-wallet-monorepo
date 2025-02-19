@@ -56,7 +56,8 @@ const SafenetAssetsRow = ({ row, index, numRows }: { row: EnhancedRow; index: nu
         onClick={() => setOpen(!open)}
         sx={{
           cursor: 'pointer',
-          borderBottom: !isLastToken || (isLastToken && open) ? '1px solid var(--color-border-light)' : 'none !important'
+          borderBottom:
+            !isLastToken || (isLastToken && open) ? '1px solid var(--color-border-light)' : 'none !important',
         }}
       >
         {Object.entries(row.cells).map(([key, cell]) => (
