@@ -11,6 +11,8 @@ import { useChain } from '@/hooks/useChains'
 import { SafenetSettlementLink } from './SafenetSettlementLink'
 import { formatTimeInWords } from '@/utils/date'
 import SafenetIcon from '@/public/images/safenet-token.svg'
+import SandclockIcon from '@/public/images/common/sandclock.svg'
+import ClockIcon from '@/public/images/common/clock.svg'
 import EnhancedTable, { type EnhancedTableProps } from '@/components/common/EnhancedTable'
 import css from './styles.module.css'
 import { Divider } from '@/components/tx/DecodedTx'
@@ -46,30 +48,33 @@ const DebitDetails = ({ debit }: { debit: SafenetTransactionDetails['debits'][nu
       {debit.executionTxHash ? (
         <SafenetSettlementLink debit={debit} />
       ) : debit.initAt ? (
-        <Typography
-          variant="caption"
-          fontWeight="bold"
-          display="flex"
-          alignItems="center"
-          textTransform="capitalize"
-          gap={1}
-          sx={{ color: ({ palette }) => palette.info.main }}
-          data-testid="debit-status-label"
-        >
-          Settlement in ~{formatTimeInWords(new Date(debit.initAt).getTime() + CHALLENGE_PERIOD)}
-        </Typography>
+        <Box className={css.expectedSettlementPill}>
+          <Typography
+            variant="caption"
+            display="flex"
+            alignItems="center"
+            gap={1}
+            sx={{ color: ({ palette }) => palette.info.main }}
+            data-testid="debit-status-label"
+          >
+            <ClockIcon />
+            Settlement {formatTimeInWords(new Date(debit.initAt).getTime() + CHALLENGE_PERIOD)}
+          </Typography>
+        </Box>
       ) : (
-        <Typography
-          variant="caption"
-          fontWeight="bold"
-          display="flex"
-          alignItems="center"
-          textTransform="capitalize"
-          gap={1}
-          data-testid="debit-status-label"
-        >
-          Awaiting settlement
-        </Typography>
+        <Box className={css.awaitingSettlementPill}>
+          <Typography
+            color="text.secondary"
+            variant="caption"
+            display="flex"
+            alignItems="center"
+            gap={1}
+            data-testid="debit-status-label"
+          >
+            <SandclockIcon />
+            Awaiting settlement
+          </Typography>
+        </Box>
       )}
     </Box>
   )

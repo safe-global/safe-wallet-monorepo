@@ -43,10 +43,10 @@ export const SafenetTxStatusSteps = ({ safeTxHash }: { safeTxHash: string }) => 
     <>
       <TxSignerStep icon={<Dot />} state={isFullySettled ? StepState.CONFIRMED : StepState.ACTIVE}>
         <Box>
-          <Typography variant="body2">You have been debited</Typography>
+          <Typography variant="body2">{isFullySettled ? 'You have been debited' : 'You are being debited'}</Typography>
           <Stack direction="row" alignItems="center" spacing={1}>
             <Typography variant="caption">
-              {isFullySettled ? 'Debited' : 'Debiting'} on {totalDebits} networks.{' '}
+              {isFullySettled ? 'Debited' : 'Debiting'} on {totalDebits} network{totalDebits > 1 ? 's' : ''}.{' '}
               {totalDebits > 1 && `(${settledDebits} of ${totalDebits})`}
             </Typography>
             {totalDebits > 1 && (

@@ -3,7 +3,6 @@
   border-collapse: separate;
   border: 1px solid var(--color-border-light);
   border-radius: 6px;
-  border-spacing: 1px;
 }
 
 .debitTable tbody > tr:last-child {
@@ -29,4 +28,18 @@
 
 .debitTableHead > tr > th {
   padding: 4px 8px 4px 24px;
+}
+
+.expectedSettlementPill {
+  background-color: var(--color-info-background);
+  border-radius: 100px;
+  padding: 4px;
+  justify-self: end;
+}
+
+.awaitingSettlementPill {
+  background-color: var(--color-background-main);
+  border-radius: 100px;
+  padding: 4px;
+  justify-self: end;
 }
