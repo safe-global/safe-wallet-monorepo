@@ -1,4 +1,5 @@
 import { determineMasterCopyVersion, isPredictedSafeProps } from '@/features/counterfactual/utils'
+import { SafenetSetupAddress } from '@/features/safenet/config/constants'
 import useAsync, { type AsyncResult } from '@/hooks/useAsync'
 import { createWeb3ReadOnly } from '@/hooks/wallets/web3'
 import { logError } from '@/services/exceptions'
@@ -73,7 +74,6 @@ const validateAccountConfig = (safeAccountConfig: SafeAccountConfig) => {
   // setupModules used to opt in into Safenet
   if (safeAccountConfig.data) {
     try {
-      const safeSetupAddress = '0x18261ff68cC8D05EE046EDF5F4049B2077624a1d' // TODO: getSafeSetupDeployment({ version: '1.4.1' })?.defaultAddress
       const multiSendAddress = getMultiSendDeployment({ version: '1.4.1' })?.defaultAddress
 
       const decodedData = decodeMultiSendData(safeAccountConfig.data)
@@ -82,7 +82,7 @@ const validateAccountConfig = (safeAccountConfig: SafeAccountConfig) => {
         sameAddress(safeAccountConfig.to, multiSendAddress) &&
         decodedData.length === 2 &&
         sameAddress(decodedData[0].to, setupToL2Address) &&
-        sameAddress(decodedData[1].to, safeSetupAddress)
+        sameAddress(decodedData[1].to, SafenetSetupAddress)
       if (isSafenetSetup) return
     } catch {}
   }

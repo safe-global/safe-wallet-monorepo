@@ -1,4 +1,5 @@
 import { PayMethod } from '@/features/counterfactual/PayNowPayLater'
+import { SafenetSetupAddress } from '@/features/safenet/config/constants'
 import * as web3 from '@/hooks/wallets/web3'
 import * as sdk from '@/services/tx/tx-sender/sdk'
 import { PendingSafeStatus, type UndeployedSafe } from '@/store/slices'
@@ -21,7 +22,6 @@ import { SAFE_CREATION_DATA_ERRORS, useSafeCreationData } from '../useSafeCreati
 
 const setupToL2Address = getSafeToL2SetupDeployment({ version: '1.4.1' })?.defaultAddress!
 const multiSendAddress = getMultiSendDeployment({ version: '1.4.1' })?.defaultAddress!
-const safeSetupAddress = '0x18261ff68cC8D05EE046EDF5F4049B2077624a1d' // TODO: getSafeSetupDeployment({ version: '1.4.1' })?.defaultAddress
 
 describe('useSafeCreationData', () => {
   beforeAll(() => {
@@ -824,7 +824,7 @@ describe('useSafeCreationData', () => {
       operation: 0,
     }
     const safeSetupTx = {
-      to: safeSetupAddress,
+      to: SafenetSetupAddress,
       value: '0',
       data: faker.string.hexadecimal({ length: 64 }),
       operation: 0,
