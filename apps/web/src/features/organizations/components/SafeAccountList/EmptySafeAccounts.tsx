@@ -1,5 +1,6 @@
+import AddAccounts from '@/features/organizations/components/AddAccounts'
 import { useState } from 'react'
-import { Button, Card, Stack, SvgIcon, TextField, Typography } from '@mui/material'
+import { Card, Stack, SvgIcon, TextField, Typography } from '@mui/material'
 import InputAdornment from '@mui/material/InputAdornment'
 import SearchIcon from '@/public/images/common/search.svg'
 import SafeAccountsIcon from '@/public/images/orgs/safe-accounts.svg'
@@ -29,9 +30,7 @@ const EmptySafeAccounts = () => {
           size="small"
         />
 
-        <Button size="compact" variant="contained" onClick={() => {}}>
-          Add Safe Account
-        </Button>
+        <AddAccounts />
       </Stack>
       <Card sx={{ p: 5, textAlign: 'center' }}>
         <SafeAccountsIcon />

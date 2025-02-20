@@ -1,6 +1,7 @@
+import AddAccounts from '@/features/organizations/components/AddAccounts'
 import { useMemo } from 'react'
 import Image from 'next/image'
-import { Typography, Paper, Box, Button, Stack } from '@mui/material'
+import { Typography, Paper, Box, Stack } from '@mui/material'
 import type { AllSafeItems } from '@/features/myAccounts/hooks/useAllSafesGrouped'
 import { useAllSafesGrouped } from '@/features/myAccounts/hooks/useAllSafesGrouped'
 import SafesList from '@/features/myAccounts/components/SafesList'
@@ -20,9 +21,7 @@ const EmptyAccountsList = () => {
             can be added to the organisation space.
           </Typography>
 
-          <Button variant="contained" onClick={() => {}}>
-            Add accounts
-          </Button>
+          <AddAccounts />
         </Box>
 
         <Box sx={{}}>
