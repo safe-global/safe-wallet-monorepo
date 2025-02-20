@@ -1,16 +1,30 @@
 import { Card, Box, Stack, Button, Typography } from '@mui/material'
 import type { GetOrganizationResponse } from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
 import { OrgLogo, OrgSummary } from '../OrgsCard'
+import {
+  useUserOrganizationsAcceptInviteV1Mutation,
+  useUserOrganizationsDeclineInviteV1Mutation,
+} from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
 
 type OrgListInvite = {
   org: GetOrganizationResponse
 }
 
 const OrgListInvite = ({ org }: OrgListInvite) => {
+  const [acceptInvite] = useUserOrganizationsAcceptInviteV1Mutation()
+  const [declineInvite] = useUserOrganizationsDeclineInviteV1Mutation()
   const { name, userOrganizations: members } = org
   const safes = [] // TODO: Replace with actual safes data when available
   const numberOfAccounts = safes.length
   const numberOfMembers = members.length
+
+  const handleAcceptInvite = () => {
+    acceptInvite({ orgId: org.id })
+  }
+
+  const handleDeclineInvite = () => {
+    declineInvite({ orgId: org.id })
+  }
 
   return (
     <Card sx={{ p: 2, mb: 2 }}>
@@ -32,10 +46,10 @@ const OrgListInvite = ({ org }: OrgListInvite) => {
           </Box>
 
           <Stack direction="row" spacing={1}>
-            <Button variant="contained" onClick={() => {}} size="small">
+            <Button variant="contained" onClick={handleAcceptInvite} size="small">
               Accept
             </Button>
-            <Button variant="outlined" onClick={() => {}} size="small">
+            <Button variant="outlined" onClick={handleDeclineInvite} size="small">
               Decline
             </Button>
           </Stack>
