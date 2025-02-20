@@ -8,13 +8,22 @@ import InvitesList from './InvitesList'
 import { useUserOrganizationsGetUsersV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
 import { useCurrentOrgId } from '../../hooks/useCurrentOrgId'
 
+export enum MemberStatus {
+  INVITED = 'INVITED',
+  ACTIVE = 'ACTIVE',
+  DECLINED = 'DECLINED',
+}
+
 const OrganizationMembers = () => {
   const orgId = useCurrentOrgId()
   const { data } = useUserOrganizationsGetUsersV1Query({ orgId: Number(orgId) })
   const [openAddMembersModal, setOpenAddMembersModal] = useState(false)
 
   const members = []
-  const invited = data?.members.filter((member) => member.status === 'INVITED') || []
+  const invited =
+    data?.members.filter(
+      (member) => member.status === MemberStatus.INVITED || member.status === MemberStatus.DECLINED,
+    ) || []
 
   // TODO: Render members list
   return (
