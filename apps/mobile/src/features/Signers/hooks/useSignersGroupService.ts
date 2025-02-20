@@ -6,6 +6,7 @@ import { useAppSelector } from '@/src/store/hooks'
 import { groupedSigners } from '../constants'
 import { selectSigners } from '@/src/store/signersSlice'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
+import { extractSignersFromSafes } from '../../ImportReadOnly/helpers/safes'
 
 export const useSignersGroupService = () => {
   const activeSafe = useDefinedActiveSafe()
@@ -15,7 +16,8 @@ export const useSignersGroupService = () => {
     chainId: activeSafe.chainId,
   })
 
-  const group = useMemo(() => groupSigners(data?.owners, appSigners), [data?.owners, appSigners])
+  const signers = extractSignersFromSafes(data ? [data] : [])
+  const group = useMemo(() => groupSigners(Object.values(signers), appSigners), [signers, appSigners])
 
   return { group, isFetching }
 }

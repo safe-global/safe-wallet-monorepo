@@ -1,4 +1,4 @@
-import { TransactionQueuedItem } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { TransactionQueuedItem, TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import {
   getBulkGroupTxHash,
   getTxHash,
@@ -13,8 +13,22 @@ import { TxGroupedCard } from '@/src/components/transactions-list/Card/TxGrouped
 import { TxConflictingCard } from '@/src/components/transactions-list/Card/TxConflictingCard'
 import { SafeListItem } from '@/src/components/SafeListItem'
 import { TxInfo } from '@/src/components/TxInfo'
-import React from 'react'
+import React, { useCallback } from 'react'
 import { GroupedPendingTxsWithTitle } from './components/PendingTxList/PendingTxList.container'
+import { TTxCardPress } from '@/src/components/TxInfo/types'
+import { useRouter } from 'expo-router'
+import { useAppSelector } from '@/src/store/hooks'
+import { selectActiveSafe } from '@/src/store/activeSafeSlice'
+import { ethers, JsonRpcProvider } from 'ethers'
+import { RpcUri, RPC_AUTHENTICATION, ChainInfo, getTransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
+import { INFURA_TOKEN } from '@/src/config/constants'
+import Safe, { buildSignatureBytes, EthSafeSignature, SigningMethod } from '@safe-global/protocol-kit'
+import SafeApiKit from '@safe-global/api-kit'
+
+import { selectChainById } from '@/src/store/chains'
+import { RootState } from '@/src/store'
+import extractTxInfo from '@/src/services/tx/extractTx'
+// import { selectSigners } from '@/src/store/signersSlice'
 
 type GroupedTxs = (PendingTransactionItems | TransactionQueuedItem[])[]
 
@@ -86,6 +100,22 @@ export const renderItem = ({
   item: PendingTransactionItems | TransactionQueuedItem[]
   index: number
 }) => {
+  const activeSafe = useAppSelector(selectActiveSafe)
+  const router = useRouter()
+
+  const onPress = useCallback(
+    async (transaction: TTxCardPress) => {
+      console.log('onPress', transaction.tx.id)
+      router.push({
+        pathname: '/confirm-transaction',
+        params: {
+          txId: transaction.tx.id,
+        },
+      })
+    },
+    [router, activeSafe],
+  )
+
   if (Array.isArray(item)) {
     // Handle bulk transactions
     return (
@@ -110,7 +140,7 @@ export const renderItem = ({
   if (isTransactionListItem(item)) {
     return (
       <View marginTop={index && '$4'}>
-        <TxInfo inQueue tx={item.transaction} />
+        <TxInfo onPress={onPress} inQueue tx={item.transaction} />
       </View>
     )
   }

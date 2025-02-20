@@ -19,17 +19,29 @@ import { TxRejectionCard } from '@/src/components/transactions-list/Card/TxRejec
 import { TxContractInteractionCard } from '@/src/components/transactions-list/Card/TxContractInteractionCard'
 import { TxSwapCard } from '@/src/components/transactions-list/Card/TxSwapCard'
 import { TxCreationCard } from '@/src/components/transactions-list/Card/TxCreationCard'
+import { TTxCardPress } from './types'
 
 interface TxInfoProps {
   tx: Transaction
   bordered?: boolean
   inQueue?: boolean
+  onPress?: (tx: TTxCardPress) => void
 }
 
-function TxInfoComponent({ tx, bordered, inQueue }: TxInfoProps) {
+function TxInfoComponent({ tx, bordered, inQueue, onPress }: TxInfoProps) {
   const txType = useTransactionType(tx)
-
   const txInfo = tx.txInfo
+
+  const onCardPress = () => {
+    // console.log('onCardPress', txType, tx)
+    if (onPress) {
+      onPress({
+        tx,
+        type: txType,
+      })
+    }
+  }
+
   if (isTransferTxInfo(txInfo)) {
     return (
       <TxTokenCard
@@ -38,12 +50,21 @@ function TxInfoComponent({ tx, bordered, inQueue }: TxInfoProps) {
         bordered={bordered}
         txInfo={txInfo}
         txStatus={tx.txStatus}
+        onPress={onCardPress}
       />
     )
   }
 
   if (isSettingsChangeTxInfo(txInfo)) {
-    return <TxSettingsCard executionInfo={tx.executionInfo} inQueue={inQueue} bordered={bordered} txInfo={txInfo} />
+    return (
+      <TxSettingsCard
+        onPress={onCardPress}
+        executionInfo={tx.executionInfo}
+        inQueue={inQueue}
+        bordered={bordered}
+        txInfo={txInfo}
+      />
+    )
   }
 
   if (isMultiSendTxInfo(txInfo) && tx.txInfo.type === TransactionInfoType.CUSTOM) {
@@ -52,6 +73,7 @@ function TxInfoComponent({ tx, bordered, inQueue }: TxInfoProps) {
         executionInfo={tx.executionInfo}
         inQueue={inQueue}
         label={txType.text}
+        onPress={onCardPress}
         bordered={bordered}
         txInfo={txInfo}
       />
@@ -63,6 +85,7 @@ function TxInfoComponent({ tx, bordered, inQueue }: TxInfoProps) {
       <TxSafeAppCard
         executionInfo={tx.executionInfo}
         inQueue={inQueue}
+        onPress={onCardPress}
         bordered={bordered}
         txInfo={txInfo}
         safeAppInfo={tx.safeAppInfo}
@@ -71,16 +94,9 @@ function TxInfoComponent({ tx, bordered, inQueue }: TxInfoProps) {
   }
 
   if (isCreationTxInfo(txInfo)) {
-    return <TxCreationCard executionInfo={tx.executionInfo} inQueue={inQueue} bordered={bordered} txInfo={txInfo} />
-  }
-
-  if (isCancellationTxInfo(txInfo)) {
-    return <TxRejectionCard executionInfo={tx.executionInfo} inQueue={inQueue} bordered={bordered} txInfo={txInfo} />
-  }
-
-  if (isMultiSendTxInfo(txInfo) || isCustomTxInfo(txInfo)) {
     return (
-      <TxContractInteractionCard
+      <TxCreationCard
+        onPress={onCardPress}
         executionInfo={tx.executionInfo}
         inQueue={inQueue}
         bordered={bordered}
@@ -89,8 +105,40 @@ function TxInfoComponent({ tx, bordered, inQueue }: TxInfoProps) {
     )
   }
 
+  if (isCancellationTxInfo(txInfo)) {
+    return (
+      <TxRejectionCard
+        onPress={onCardPress}
+        executionInfo={tx.executionInfo}
+        inQueue={inQueue}
+        bordered={bordered}
+        txInfo={txInfo}
+      />
+    )
+  }
+
+  if (isMultiSendTxInfo(txInfo) || isCustomTxInfo(txInfo)) {
+    return (
+      <TxContractInteractionCard
+        executionInfo={tx.executionInfo}
+        onPress={onCardPress}
+        inQueue={inQueue}
+        bordered={bordered}
+        txInfo={txInfo}
+      />
+    )
+  }
+
   if (isSwapOrderTxInfo(txInfo)) {
-    return <TxSwapCard executionInfo={tx.executionInfo} inQueue={inQueue} txInfo={txInfo} />
+    return (
+      <TxSwapCard
+        bordered={bordered}
+        onPress={onCardPress}
+        executionInfo={tx.executionInfo}
+        inQueue={inQueue}
+        txInfo={txInfo}
+      />
+    )
   }
 
   return <></>

@@ -89,11 +89,33 @@ function RootLayout() {
                           }}
                         />
                         <Stack.Screen
+                          name="confirmations-sheet"
+                          options={{
+                            headerShown: false,
+                            presentation: 'transparentModal',
+                            animation: 'fade',
+                          }}
+                        />
+                        <Stack.Screen
+                          name="change-signer-sheet"
+                          options={{
+                            headerShown: false,
+                            presentation: 'transparentModal',
+                            animation: 'fade',
+                          }}
+                        />
+                        <Stack.Screen
                           name="notifications-opt-in"
                           options={{
                             headerShown: false,
                             presentation: 'modal',
                             title: '',
+                          }}
+                        />
+                        <Stack.Screen
+                          name="confirm-transaction"
+                          options={{
+                            title: 'Confirm transaction',
                           }}
                         />
                         <Stack.Screen name="+not-found" />
