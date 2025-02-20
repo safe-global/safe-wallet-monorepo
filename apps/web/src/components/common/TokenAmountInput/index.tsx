@@ -25,7 +25,7 @@ const TokenAmountInput = ({
   maxAmount,
   validate,
   groupName,
-  onChangeAmount = () => {},
+  onChangeAmount,
 }: {
   balances: SafeBalanceResponse['items']
   selectedToken: SafeBalanceResponse['items'][number] | undefined
@@ -81,12 +81,12 @@ const TokenAmountInput = ({
       shouldValidate: true,
     })
 
-    onChangeAmount(maxAmount.toString())
+    onChangeAmount?.(maxAmount.toString())
   }, [maxAmount, selectedToken, setValue, amountField, onChangeAmount])
 
   const onChangeToken = useCallback(() => {
     resetField(amountField, { defaultValue: '' })
-    onChangeAmount('')
+    onChangeAmount?.('')
   }, [resetField, amountField, onChangeAmount])
 
   return (
@@ -118,7 +118,7 @@ const TokenAmountInput = ({
           {...register(amountField, {
             required: true,
             validate: validate ?? validateAmount,
-            onChange: (e) => onChangeAmount(e.target.value),
+            onChange: (e) => onChangeAmount?.(e.target.value),
           })}
         />
         <Divider orientation="vertical" flexItem />
