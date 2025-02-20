@@ -3,10 +3,19 @@ import PlusIcon from '@/public/images/common/plus.svg'
 import { Button, Stack, Typography } from '@mui/material'
 import AddMembersModal from '@/features/organizations/components/AddMembersModal'
 import { useState } from 'react'
+import MembersList from '../MembersList'
+import InvitesList from './InvitesList'
+import { useUserOrganizationsGetUsersV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
+import { useCurrentOrgId } from '../../hooks/useCurrentOrgId'
 
 const OrganizationMembers = () => {
-  const members = [] // TODO: Fetch from backend
+  const orgId = useCurrentOrgId()
+  const { data } = useUserOrganizationsGetUsersV1Query({ orgId: Number(orgId) })
   const [openAddMembersModal, setOpenAddMembersModal] = useState(false)
+
+  const members = []
+  const invited = data?.members.filter((member) => member.status === 'INVITED') || []
+
   // TODO: Render members list
   return (
     <>
@@ -18,7 +27,8 @@ const OrganizationMembers = () => {
           Add member
         </Button>
       </Stack>
-      {members.length === 0 ? <EmptyMembers /> : <></>}
+      {invited.length > 0 && <InvitesList invitedMembers={invited} />}
+      {members.length === 0 ? <EmptyMembers /> : <MembersList />}
       {openAddMembersModal && <AddMembersModal onClose={() => setOpenAddMembersModal(false)} />}
     </>
   )

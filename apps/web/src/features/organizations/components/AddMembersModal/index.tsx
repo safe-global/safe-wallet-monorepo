@@ -23,10 +23,12 @@ import { sameAddress } from '@/utils/addresses'
 import AddressInput from '@/components/common/AddressInput'
 import CheckIcon from '@mui/icons-material/Check'
 import css from './styles.module.css'
+import { useUserOrganizationsInviteUserV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
+import { useCurrentOrgId } from '../../hooks/useCurrentOrgId'
 
 enum Role {
-  ADMIN = 'admin',
-  MEMBER = 'member',
+  ADMIN = 'ADMIN',
+  MEMBER = 'MEMBER',
 }
 
 type MemberField = {
@@ -131,17 +133,14 @@ const MemberRow = ({
 }
 
 const AddMembersModal = ({ onClose }: { onClose: () => void }): ReactElement => {
+  const orgId = useCurrentOrgId()
   const [error, setError] = useState<string>()
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [inviteMembers] = useUserOrganizationsInviteUserV1Mutation()
   const methods = useForm<AddMembersFormFields>({
     mode: 'onChange',
     defaultValues: {
-      members: [
-        {
-          address: '',
-          role: Role.MEMBER,
-        },
-      ],
+      members: [{ address: '', role: Role.MEMBER }],
     },
   })
   const { handleSubmit, formState, control } = methods
@@ -157,11 +156,25 @@ const AddMembersModal = ({ onClose }: { onClose: () => void }): ReactElement => 
 
   const onSubmit = handleSubmit(async (data) => {
     setError(undefined)
+    if (!orgId) {
+      setError('Something went wrong. Please try again.')
+      return
+    }
 
     try {
-      // TODO: handle sending member invites
       setIsSubmitting(true)
-      console.log(data)
+
+      const response = await inviteMembers({
+        orgId: Number(orgId),
+        body: data.members.map((member) => ({ address: member.address, role: member.role })),
+      })
+      if (response.data) {
+        onClose()
+      }
+
+      if (response.error) {
+        setError('Invite failed. Please try again.')
+      }
     } catch (e) {
       console.error(e)
       setError('Something went wrong. Please try again.')

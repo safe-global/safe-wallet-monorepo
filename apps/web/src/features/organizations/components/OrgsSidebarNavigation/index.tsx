@@ -9,15 +9,16 @@ import {
   SidebarListItemText,
 } from '@/components/sidebar/SidebarList'
 import { navItems } from './config'
+import { useCurrentOrgId } from '../../hooks/useCurrentOrgId'
 
 const Navigation = (): ReactElement => {
   const router = useRouter()
-  const orgId = Array.isArray(router.query.orgId) ? router.query.orgId[0] : router.query.orgId || ''
+  const orgId = useCurrentOrgId()
 
   return (
     <SidebarList>
       {navItems.map((item) => {
-        const itemPath = item.href(orgId)
+        const itemPath = item.href(orgId || '')
         const isSelected = router.asPath === itemPath
 
         return (

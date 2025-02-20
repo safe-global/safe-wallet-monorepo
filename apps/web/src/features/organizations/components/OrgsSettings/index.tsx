@@ -26,6 +26,7 @@ import { useRouter } from 'next/router'
 import { useState } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 import css from './styles.module.css'
+import { useCurrentOrgId } from '../../hooks/useCurrentOrgId'
 
 const ListIcon = ({ variant }: { variant: 'success' | 'danger' }) => {
   const Icon = variant === 'success' ? CheckIcon : CloseIcon
@@ -45,7 +46,7 @@ const OrgsSettings = () => {
   const [deleteOrgOpen, setDeleteOrgOpen] = useState(false)
   const router = useRouter()
   const dispatch = useAppDispatch()
-  const orgId = Array.isArray(router.query.orgId) ? router.query.orgId[0] : router.query.orgId
+  const orgId = useCurrentOrgId()
   const { data: org } = useOrganizationsGetOneV1Query({ id: Number(orgId) })
   const [updateOrg] = useOrganizationsUpdateV1Mutation()
   const [deleteOrg] = useOrganizationsDeleteV1Mutation()
