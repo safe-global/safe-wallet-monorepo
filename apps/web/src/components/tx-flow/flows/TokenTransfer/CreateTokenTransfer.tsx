@@ -209,8 +209,8 @@ export const CreateTokenTransfer = ({
                   <Alert severity="error">
                     <AlertTitle>Insufficient balance</AlertTitle>
                     <Typography variant="body2">
-                      The total amount assigned to all recipients exceeds your available balance. Adjust the amounts you
-                      want to send.
+                      The total amount assigned to all recipients exceeds your available balance. Please adjust the
+                      amounts you want to send.
                     </Typography>
                   </Alert>
                 )}
