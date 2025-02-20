@@ -1,7 +1,9 @@
 import ModalDialog from '@/components/common/ModalDialog'
+import type { SafeItem, SafeItems } from '@/features/myAccounts/hooks/useAllSafes'
 import { useSafesSearch } from '@/features/myAccounts/hooks/useSafesSearch'
+import AddManually, { type AddManuallyFormValues } from '@/features/organizations/components/AddAccounts/AddManually'
 import FilteredSafesList from '@/features/organizations/components/AddAccounts/FilteredSafesList'
-import SafesList from '@/features/organizations/components/AddAccounts/SafesList'
+import SafesList, { getSafeId } from '@/features/organizations/components/AddAccounts/SafesList'
 import SearchIcon from '@/public/images/common/search.svg'
 import debounce from 'lodash/debounce'
 import css from './styles.module.css'
@@ -21,7 +23,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material'
-import { useCallback, useMemo, useState } from 'react'
+import React, { useCallback, useMemo, useState } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 
 export type AddAccountsFormValues = {
@@ -31,14 +33,15 @@ export type AddAccountsFormValues = {
 const AddAccounts = () => {
   const [open, setOpen] = useState<boolean>(false)
   const [searchQuery, setSearchQuery] = useState('')
+  const [manualSafes, setManualSafes] = useState<SafeItems>([])
 
   const { orderBy } = useAppSelector(selectOrderByPreference)
   const safes = useAllSafesGrouped()
   const sortComparator = getComparator(orderBy)
 
   const allSafes = useMemo<AllSafeItems>(
-    () => [...(safes.allMultiChainSafes ?? []), ...(safes.allSingleSafes ?? [])].sort(sortComparator),
-    [safes.allMultiChainSafes, safes.allSingleSafes, sortComparator],
+    () => [...manualSafes, ...(safes.allMultiChainSafes ?? []), ...(safes.allSingleSafes ?? [])].sort(sortComparator),
+    [manualSafes, safes.allMultiChainSafes, safes.allSingleSafes, sortComparator],
   )
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -52,7 +55,7 @@ const AddAccounts = () => {
     },
   })
 
-  const { handleSubmit, watch } = formMethods
+  const { handleSubmit, watch, setValue } = formMethods
 
   const selectedSafes = watch(`selectedSafes`)
   const selectedSafesLength = Object.values(selectedSafes).filter(Boolean).length
@@ -61,6 +64,23 @@ const AddAccounts = () => {
     // TODO: Submit data to safe list endpoint
     console.log(data)
   })
+
+  const handleAddSafe = (data: AddManuallyFormValues) => {
+    const alreadyExists = manualSafes.some((safe) => safe.address === data.address && safe.chainId === data.chainId)
+    if (alreadyExists) return
+
+    const newSafeItem: SafeItem = {
+      ...data,
+      isReadOnly: false,
+      isPinned: false,
+      lastVisited: 0,
+      name: '',
+    }
+    setManualSafes((prev) => [newSafeItem, ...prev])
+
+    const safeId = getSafeId(newSafeItem)
+    setValue(`selectedSafes.${safeId}`, true, { shouldValidate: true })
+  }
 
   return (
     <>
@@ -115,7 +135,7 @@ const AddAccounts = () => {
                   {searchQuery ? <FilteredSafesList filteredSafes={filteredSafes} /> : <SafesList safes={allSafes} />}
 
                   <Box p={2}>
-                    <Button size="compact">+ Add manually</Button>
+                    <AddManually handleAddSafe={handleAddSafe} />
                   </Box>
                 </form>
               </FormProvider>

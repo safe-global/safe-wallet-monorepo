@@ -46,7 +46,7 @@ const ChainItem = ({ chainId }: { chainId: string }) => {
   )
 }
 
-const getSafeId = (safeItem: SafeItem) => {
+export const getSafeId = (safeItem: SafeItem) => {
   return `${safeItem.chainId}:${safeItem.address}`
 }
 
