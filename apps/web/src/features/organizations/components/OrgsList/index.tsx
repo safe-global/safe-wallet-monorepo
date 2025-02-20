@@ -79,7 +79,7 @@ const invites: GetOrganizationResponse[] = [
   {
     id: 123,
     name: 'Bidget',
-    status: 1,
+    status: 'ACTIVE',
     userOrganizations: [],
   },
 ]
