@@ -5,6 +5,7 @@ import type { UserOrganization } from '@safe-global/store/gateway/AUTO_GENERATED
 import tableCss from '@/components/common/EnhancedTable/styles.module.css'
 import DeleteIcon from '@/public/images/common/delete.svg'
 import { MemberStatus } from '.'
+import { MemberRole } from '../AddMembersModal'
 
 const headCells = [
   {
@@ -48,7 +49,7 @@ const InvitesList = ({ invitedMembers }: { invitedMembers: UserOrganization[] })
           content: (
             <Chip
               size="small"
-              label={member.role}
+              label={member.role === MemberRole.ADMIN ? 'Admin' : 'Member'}
               sx={{ backgroundColor: 'background.lightgrey', borderRadius: 0.5 }}
             />
           ),

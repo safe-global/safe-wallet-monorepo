@@ -26,14 +26,14 @@ import css from './styles.module.css'
 import { useUserOrganizationsInviteUserV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
 import { useCurrentOrgId } from '../../hooks/useCurrentOrgId'
 
-enum Role {
+export enum MemberRole {
   ADMIN = 'ADMIN',
   MEMBER = 'MEMBER',
 }
 
 type MemberField = {
   address: string
-  role: Role
+  role: MemberRole
 }
 
 const RoleMenuItem = ({
@@ -41,11 +41,11 @@ const RoleMenuItem = ({
   hasDescription = false,
   selected = false,
 }: {
-  role: Role
+  role: MemberRole
   hasDescription?: boolean
   selected?: boolean
 }): ReactElement => {
-  const isAdmin = role === Role.ADMIN
+  const isAdmin = role === MemberRole.ADMIN
 
   return (
     <Box width="100%" alignItems="center" className={css.roleMenuItem}>
@@ -104,7 +104,7 @@ const MemberRow = ({
       <Controller
         control={control}
         name={`members.${index}.role`}
-        defaultValue={Role.MEMBER}
+        defaultValue={MemberRole.MEMBER}
         render={({ field: { value, onChange, ...field } }) => (
           <Select
             {...field}
@@ -112,13 +112,13 @@ const MemberRow = ({
             onChange={onChange}
             required
             sx={{ minWidth: '150px', py: 0.5 }}
-            renderValue={(val) => <RoleMenuItem role={val as Role} />}
+            renderValue={(val) => <RoleMenuItem role={val as MemberRole} />}
           >
-            <MenuItem value={Role.ADMIN}>
-              <RoleMenuItem role={Role.ADMIN} hasDescription selected={value === Role.ADMIN} />
+            <MenuItem value={MemberRole.ADMIN}>
+              <RoleMenuItem role={MemberRole.ADMIN} hasDescription selected={value === MemberRole.ADMIN} />
             </MenuItem>
-            <MenuItem value={Role.MEMBER}>
-              <RoleMenuItem role={Role.MEMBER} hasDescription selected={value === Role.MEMBER} />
+            <MenuItem value={MemberRole.MEMBER}>
+              <RoleMenuItem role={MemberRole.MEMBER} hasDescription selected={value === MemberRole.MEMBER} />
             </MenuItem>
           </Select>
         )}
@@ -140,7 +140,7 @@ const AddMembersModal = ({ onClose }: { onClose: () => void }): ReactElement => 
   const methods = useForm<AddMembersFormFields>({
     mode: 'onChange',
     defaultValues: {
-      members: [{ address: '', role: Role.MEMBER }],
+      members: [{ address: '', role: MemberRole.MEMBER }],
     },
   })
   const { handleSubmit, formState, control } = methods
@@ -151,7 +151,7 @@ const AddMembersModal = ({ onClose }: { onClose: () => void }): ReactElement => 
   })
 
   const handleAddMember = () => {
-    append({ address: '', role: Role.MEMBER })
+    append({ address: '', role: MemberRole.MEMBER })
   }
 
   const onSubmit = handleSubmit(async (data) => {
