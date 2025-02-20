@@ -91,7 +91,7 @@ export function SafeListItem({
             }
           />
 
-          <SafeFontIcon name="arrow-right" />
+          <SafeFontIcon name="chevron-right" />
         </View>
       ) : (
         rightNode

@@ -127,7 +127,7 @@ export const config = createTamagui({
       backgroundStrong: tokens.color.primaryDarkDark,
       backgroundTransparent: 'transparent',
       backgroundDisabled: tokens.color.backgroundDisabledDark,
-      backgroundSkeleton: tokens.color.backgroundSkeletonLight,
+      backgroundSkeleton: tokens.color.backgroundSkeletonDark,
       color: tokens.color.textPrimaryDark,
       colorLight: tokens.color.primaryLightDark,
       primary: tokens.color.primaryMainDark,
