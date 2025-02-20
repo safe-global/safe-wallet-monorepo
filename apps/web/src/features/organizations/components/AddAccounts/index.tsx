@@ -131,7 +131,12 @@ const AddAccounts = () => {
 
                         return (
                           <Accordion key={index} disableGutters sx={{ flexShrink: '0' }}>
-                            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                            <AccordionSummary
+                              expandIcon={<ExpandMoreIcon />}
+                              sx={{
+                                '& .MuiAccordionSummary-expandIconWrapper': { position: 'absolute', right: '16px' },
+                              }}
+                            >
                               <Checkbox
                                 checked={Boolean(allChecked)}
                                 indeterminate={someChecked}
@@ -142,7 +147,9 @@ const AddAccounts = () => {
                               />
                               <Box className={css.safeRow}>
                                 <EthHashInfo address={safe.address} copyAddress={false} />
-                                <MultichainIndicator safes={safe.safes} />
+                                <Box sx={{ justifySelf: 'flex-start' }}>
+                                  <MultichainIndicator safes={safe.safes} />
+                                </Box>
                               </Box>
                             </AccordionSummary>
 
