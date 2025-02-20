@@ -1,12 +1,5 @@
 import type { ConfigFile } from '@rtk-query/codegen-openapi'
 
-const pathMatcher = (pattern: RegExp) => {
-  return (_, operationDefinition) => {
-    console.log(operationDefinition.path, operationName, pattern.test(operationDefinition.path))
-    return pattern.test(operationDefinition.path)
-  }
-}
-
 const config: ConfigFile = {
   schemaFile: './api-schema/schema.json',
   prettierConfigFile: '../../../.prettierrc',
