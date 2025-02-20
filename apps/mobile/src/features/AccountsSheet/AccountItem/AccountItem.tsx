@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react'
-import { StyleSheet, TouchableOpacity } from 'react-native'
+import { StyleSheet, TouchableOpacity, Alert } from 'react-native'
 import { View } from 'tamagui'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { AccountCard } from '@/src/components/transactions-list/Card/AccountCard'
@@ -28,13 +28,14 @@ const getRightNodeLayout = (isEdit: boolean, isActive: boolean) => {
 }
 
 export function AccountItem({ account, drag, chains, isDragging, activeAccount, onSelect }: AccountItemProps) {
-  const { isEdit, onSafeDeleted } = useEditAccountItem()
+  const { isEdit, deleteSafe } = useEditAccountItem()
   const isActive = activeAccount === account.address.value
 
   const handleChainSelect = () => {
     onSelect(account.address.value)
   }
 
+  console.log('is edit', isEdit)
   const rightNode = useMemo(() => getRightNodeLayout(isEdit, isActive), [isEdit, isActive])
 
   return (
@@ -52,7 +53,23 @@ export function AccountItem({ account, drag, chains, isDragging, activeAccount, 
         <AccountCard
           leftNode={
             isEdit && (
-              <TouchableOpacity onPress={onSafeDeleted(account.address.value as Address)}>
+              <TouchableOpacity
+                onPress={() => {
+                  Alert.alert('Delete Safe', 'Are you sure you want to delete this safe?', [
+                    {
+                      text: 'Cancel',
+                      style: 'cancel',
+                    },
+                    {
+                      text: 'Delete',
+                      style: 'destructive',
+                      onPress: () => {
+                        deleteSafe(account.address.value as Address)
+                      },
+                    },
+                  ])
+                }}
+              >
                 <SafeFontIcon name="close-filled" color="$error" />
               </TouchableOpacity>
             )

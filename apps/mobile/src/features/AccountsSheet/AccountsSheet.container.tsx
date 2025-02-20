@@ -26,11 +26,9 @@ export const AccountsSheetContainer = () => {
       sortable={isEdit}
       onDragEnd={onDragEnd}
       actions={
-        safes.length > 1 && (
-          <TouchableOpacity onPress={toggleEditMode}>
-            <H6 fontWeight={600}>{isEdit ? 'Done' : 'Edit'}</H6>
-          </TouchableOpacity>
-        )
+        <TouchableOpacity onPress={toggleEditMode}>
+          <H6 fontWeight={600}>{isEdit ? 'Done' : 'Edit'}</H6>
+        </TouchableOpacity>
       }
     />
   )
