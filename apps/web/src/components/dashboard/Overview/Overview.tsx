@@ -15,7 +15,7 @@ import ArrowIconNW from '@/public/images/common/arrow-top-right.svg'
 import SwapIcon from '@/public/images/common/swap.svg'
 import { OVERVIEW_EVENTS, trackEvent } from '@/services/analytics'
 import { SWAP_EVENTS, SWAP_LABELS } from '@/services/analytics/events/swaps'
-import { Button, Grid, Skeleton, Typography, useMediaQuery } from '@mui/material'
+import { Button, Grid, Skeleton, Stack, Typography, useMediaQuery } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
@@ -95,7 +95,7 @@ const Overview = (): ReactElement => {
                 justifyContent: 'space-between',
               }}
             >
-              <Grid item sx={{ display: 'flex', gap: 1, flexDirection: 'column' }}>
+              <Stack spacing={1}>
                 <Typography
                   sx={{
                     color: 'primary.light',
@@ -123,7 +123,7 @@ const Overview = (): ReactElement => {
                   )}
                 </Typography>
                 {isSafenetEnabled && <SafenetBalanceOverview />}
-              </Grid>
+              </Stack>
 
               {safe.deployed && (
                 <Grid
