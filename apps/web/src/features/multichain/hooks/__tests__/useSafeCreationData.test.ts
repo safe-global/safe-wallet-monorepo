@@ -10,7 +10,11 @@ import { faker } from '@faker-js/faker'
 import { encodeMultiSendData, type SafeProvider } from '@safe-global/protocol-kit'
 import { EMPTY_DATA, ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
 import * as cgwSdk from '@safe-global/safe-client-gateway-sdk'
-import { getMultiSendDeployment, getSafeSingletonDeployment, getSafeToL2SetupDeployment } from '@safe-global/safe-deployments'
+import {
+  getMultiSendDeployment,
+  getSafeSingletonDeployment,
+  getSafeToL2SetupDeployment,
+} from '@safe-global/safe-deployments'
 import { type ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import { type JsonRpcProvider } from 'ethers'
 import { SAFE_CREATION_DATA_ERRORS, useSafeCreationData } from '../useSafeCreationData'
