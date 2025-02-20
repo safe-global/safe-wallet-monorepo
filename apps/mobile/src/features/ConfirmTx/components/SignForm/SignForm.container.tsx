@@ -1,118 +1,74 @@
 import { Address } from '@/src/types/address'
 import { SignForm } from './SignForm'
 import React from 'react'
+import { createExistingTx } from '@/src/services/tx/tx-sender'
+import SafeApiKit from '@safe-global/api-kit'
+import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
+import { useAppSelector } from '@/src/store/hooks'
+import { selectChainById } from '@/src/store/chains'
+import { RootState } from '@/src/store'
+import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import { useSign } from '@/src/hooks/useSign'
+import { createConnectedWallet } from '@/src/services/web3'
+import { signTx } from '@/src/services/tx/tx-sender/sign'
 
 export interface SignFormContainerProps {
   address: Address
   name?: string
-  txId?: string
+  txId: string
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 // Move to the another file. Something to manage wallet and rpc connections
 // ---------------------------------------------------------------------------------------------------------------------
 
-const temporary = async (transaction: TTxCardPress) => {
-  const PRIVATE_KEY = 'PRIVATE_KEY'
-  const wallet = new ethers.Wallet(PRIVATE_KEY)
-  const provider = createWeb3ReadOnly(activeChain as ChainInfo)
-
-  if (!provider) {
-    return
-  }
-
-  const connectedWallet = wallet.connect(provider)
-  const RPC_URL = provider._getConnection().url
-
-  let protocolKit = await Safe.init({
-    provider: RPC_URL,
-    signer: PRIVATE_KEY,
-    safeAddress: activeSafe.address,
-  })
-
-  protocolKit = await protocolKit.connect({
-    provider: RPC_URL,
-    signer: PRIVATE_KEY,
-  })
-
-  // const safeTransactionData = {
-  //   to: '0x90F8bf6A479f320ead074411a4B0e7944Ea8c9C1',
-  //   value: '300000000000000000', // 0.01 ETH
-  //   data: '0x',
-  // }
-  console.log('passou aqui')
-  // let safeTransaction = await protocolKit.createTransaction({
-  //   transactions: [safeTransactionData],
-  // })
-
-  // safeTransaction = await protocolKit.signTransaction(safeTransaction, SigningMethod.ETH_SIGN)
-
-  // Get the signature from OWNER_1_ADDRESS
-  // const signatureOwner1 = safeTransaction.getSignature(wallet.address) as EthSafeSignature
-
-  // // Get the transaction hash of the safeTransaction
-  // const safeTransactionHash = await protocolKit.getTransactionHash(safeTransaction)
-
-  // Instantiate the API Kit
-  // Use the chainId where you have the Safe account deployed
-  const apiKit = new SafeApiKit({ chainId: BigInt(activeSafe.chainId) })
-
-  // Get the tx details from the backend if not provided
-
-  // Propose the transaction
-  // const resp = await apiKit
-  //   .proposeTransaction({
-  //     safeAddress: activeSafe.address,
-  //     safeTransactionData: safeTransaction.data,
-  //     safeTxHash: safeTransactionHash,
-  //     senderAddress: wallet.address,
-  //     senderSignature: buildSignatureBytes([signatureOwner1]),
-  //   })
-  //   .catch(console.log)
-
-  // const resp = await createExistingTx(activeSafe.chainId, activeSafe.address, tx.tx.id)
-
-  // Convert them to the Core SDK tx params
-  console.log('passou aqui 2')
-  const txDetails = await getTransactionDetails(activeSafe.chainId, transaction.tx.id)
-  const { txParams, signatures } = extractTxInfo(txDetails, activeSafe.address)
-  console.log({ transactions: [txParams] })
-  let safeTx = await protocolKit.createTransaction({ transactions: [txParams] }).catch(console.log)
-  console.log({ safeTx })
-
-  if (!safeTx) {
-    return
-  }
-
-  safeTx = await protocolKit.signTransaction(safeTx, SigningMethod.ETH_SIGN)
-  console.log({ safeTx })
-
-  Object.entries(signatures).forEach(([signer, data]) => {
-    safeTx.addSignature({
-      signer,
-      data,
-      staticPart: () => data,
-      dynamicPart: () => '',
-      isContractSignature: false,
-    })
-  })
-  const safeTransactionHash = await protocolKit.getTransactionHash(safeTx)
-
-  const signature = safeTx.getSignature(wallet.address) as EthSafeSignature
-
-  const resp = await apiKit.confirmTransaction(safeTransactionHash, buildSignatureBytes([signature])).catch((err) => {
-    console.log('deu merda')
-    console.log(err)
-  })
-
-  console.log(resp, 'resonse da transaction confirmada')
-
-  const signedTransaction = await apiKit.getTransaction(safeTransactionHash).catch((err) => {
-    console.log(err)
-  })
-  console.log(signedTransaction, 'signed transaction')
-}
-
 export function SignFormContainer({ address, name, txId }: SignFormContainerProps) {
-  return <SignForm address={address} name={name} txId={txId} />
+  const activeSafe = useDefinedActiveSafe()
+  const activeChain = useAppSelector((state: RootState) => selectChainById(state, activeSafe.chainId))
+  const { getPrivateKey } = useSign()
+
+  const onSignPress = async () => {
+    try {
+      if (!activeChain) {
+        throw new Error('Active chain not found')
+      }
+
+      const privateKey = await getPrivateKey(address)
+
+      if (!privateKey) {
+        throw new Error('Private key not found')
+      }
+      console.log('privateKey', privateKey)
+      const { protocolKit, wallet } = await createConnectedWallet(privateKey, activeSafe, activeChain as ChainInfo)
+      const { safeTx, signatures } = await createExistingTx({
+        activeSafe,
+        txId: txId,
+        chain: activeChain as ChainInfo,
+        privateKey,
+      })
+
+      const apiKit = new SafeApiKit({ chainId: BigInt(activeSafe.chainId) })
+
+      if (!safeTx) {
+        return
+      }
+
+      const safeTransactionHash = await signTx({
+        safeTx,
+        signatures,
+        protocolKit,
+        wallet,
+        apiKit,
+      })
+
+      const signedTransaction = await apiKit.getTransaction(safeTransactionHash)
+
+      console.log(signedTransaction, 'signed transaction')
+    } catch (err) {
+      console.log('deu pau pai')
+      console.log(err)
+    }
+  }
+
+  return <SignForm address={address} name={name} txId={txId} onSignPress={onSignPress} />
 }

@@ -1,42 +1,27 @@
-import type { TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
+import type { ChainInfo, TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
+
 import { getTransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
-import type { SafeTransaction, SafeTransactionDataPartial } from '@safe-global/safe-core-sdk-types'
-import extractTxInfo from '../extractTx'
+import extractTxInfo from '@/src/services/tx/extractTx'
+import { createConnectedWallet } from '../../web3'
+import { SafeInfo } from '@/src/types/address'
 
-/**
- * Create a transaction from raw params
-//  */
-// export const createTx = async (txParams: SafeTransactionDataPartial, nonce?: number): Promise<SafeTransaction> => {
-//   if (nonce !== undefined) {
-//     txParams = { ...txParams, nonce }
-//   }
-//   const safeSDK = getAndValidateSafeSDK()
-//   return safeSDK.createTransaction({ transactions: [txParams] })
-// }
+interface CreateTxParams {
+  activeSafe: SafeInfo
+  txId: string
+  privateKey: string
+  txDetails?: TransactionDetails
+  chain: ChainInfo
+}
 
-// export const createExistingTx = async (
-//   chainId: string,
-//   safeAddress: string,
-//   txId: string,
-//   txDetails?: TransactionDetails,
-// ): Promise<SafeTransaction> => {
-//   // Get the tx details from the backend if not provided
-//   txDetails = txDetails || (await getTransactionDetails(chainId, txId))
+export const createExistingTx = async ({ activeSafe, txId, privateKey, txDetails, chain }: CreateTxParams) => {
+  // Get the tx details from the backend if not provided
+  txDetails = txDetails || (await getTransactionDetails(activeSafe.chainId, txId))
 
-//   // Convert them to the Core SDK tx params
-//   const { txParams, signatures } = extractTxInfo(txDetails, safeAddress)
+  const { txParams, signatures } = extractTxInfo(txDetails, activeSafe.address)
 
-//   // Create a tx and add pre-approved signatures
-//   const safeTx = await createTx(txParams, txParams.nonce)
-//   Object.entries(signatures).forEach(([signer, data]) => {
-//     safeTx.addSignature({
-//       signer,
-//       data,
-//       staticPart: () => data,
-//       dynamicPart: () => '',
-//       isContractSignature: false,
-//     })
-//   })
+  const { protocolKit } = await createConnectedWallet(privateKey, activeSafe, chain)
 
-//   return safeTx
-// }
+  const safeTx = await protocolKit.createTransaction({ transactions: [txParams] }).catch(console.log)
+
+  return { safeTx, signatures }
+}

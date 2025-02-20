@@ -12,9 +12,10 @@ export interface SignFormProps {
   address: Address
   name?: string
   txId?: string
+  onSignPress: () => void
 }
 
-export function SignForm({ address, name, txId }: SignFormProps) {
+export function SignForm({ address, name, txId, onSignPress }: SignFormProps) {
   return (
     <YStack gap="$6">
       <View
@@ -36,7 +37,7 @@ export function SignForm({ address, name, txId }: SignFormProps) {
         <SafeButton flex={1} height="100%" danger onPress={() => null}>
           Reject
         </SafeButton>
-        <SafeButton flex={1} height="100%" onPress={() => null}>
+        <SafeButton flex={1} height="100%" onPress={onSignPress}>
           Confirm
         </SafeButton>
       </View>
