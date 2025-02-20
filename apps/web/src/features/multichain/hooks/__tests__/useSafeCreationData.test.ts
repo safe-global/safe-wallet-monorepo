@@ -1,21 +1,23 @@
-import { fakerChecksummedAddress, renderHook, waitFor } from '@/tests/test-utils'
-import { SAFE_CREATION_DATA_ERRORS, useSafeCreationData } from '../useSafeCreationData'
-import { faker } from '@faker-js/faker'
-import { PendingSafeStatus, type UndeployedSafe } from '@/store/slices'
 import { PayMethod } from '@/features/counterfactual/PayNowPayLater'
-import { chainBuilder } from '@/tests/builders/chains'
-import * as sdk from '@/services/tx/tx-sender/sdk'
-import * as cgwSdk from '@safe-global/safe-client-gateway-sdk'
 import * as web3 from '@/hooks/wallets/web3'
-import { encodeMultiSendData, type SafeProvider } from '@safe-global/protocol-kit'
+import * as sdk from '@/services/tx/tx-sender/sdk'
+import { PendingSafeStatus, type UndeployedSafe } from '@/store/slices'
+import { chainBuilder } from '@/tests/builders/chains'
+import { fakerChecksummedAddress, renderHook, waitFor } from '@/tests/test-utils'
 import { Safe__factory, Safe_proxy_factory__factory } from '@/types/contracts'
-import { type JsonRpcProvider } from 'ethers'
 import { Multi_send__factory } from '@/types/contracts/factories/@safe-global/safe-deployments/dist/assets/v1.3.0'
-import { type ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import { faker } from '@faker-js/faker'
+import { encodeMultiSendData, type SafeProvider } from '@safe-global/protocol-kit'
 import { EMPTY_DATA, ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
-import { getSafeSingletonDeployment, getSafeToL2SetupDeployment } from '@safe-global/safe-deployments'
+import * as cgwSdk from '@safe-global/safe-client-gateway-sdk'
+import { getMultiSendDeployment, getSafeSingletonDeployment, getSafeToL2SetupDeployment } from '@safe-global/safe-deployments'
+import { type ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import { type JsonRpcProvider } from 'ethers'
+import { SAFE_CREATION_DATA_ERRORS, useSafeCreationData } from '../useSafeCreationData'
 
 const setupToL2Address = getSafeToL2SetupDeployment({ version: '1.4.1' })?.defaultAddress!
+const multiSendAddress = getMultiSendDeployment({ version: '1.4.1' })?.defaultAddress!
+const safeSetupAddress = '0x18261ff68cC8D05EE046EDF5F4049B2077624a1d' // TODO: getSafeSetupDeployment({ version: '1.4.1' })?.defaultAddress
 
 describe('useSafeCreationData', () => {
   beforeAll(() => {
@@ -803,6 +805,92 @@ describe('useSafeCreationData', () => {
           safeAccountConfig: safeProps,
           safeVersion: '1.4.1',
           saltNonce: '69',
+        },
+        undefined,
+        false,
+      ])
+    })
+  })
+
+  it('should return transaction data for Safenet creation txs', async () => {
+    const setupToL2Tx = {
+      to: setupToL2Address,
+      data: faker.string.hexadecimal({ length: 64 }),
+      value: '0',
+      operation: 0,
+    }
+    const safeSetupTx = {
+      to: safeSetupAddress,
+      value: '0',
+      data: faker.string.hexadecimal({ length: 64 }),
+      operation: 0,
+    }
+    const multiSendData = encodeMultiSendData([setupToL2Tx, safeSetupTx])
+
+    const safeProps = {
+      owners: [fakerChecksummedAddress(), fakerChecksummedAddress()],
+      threshold: 1,
+      to: multiSendAddress,
+      data: Multi_send__factory.createInterface().encodeFunctionData('multiSend', [multiSendData]),
+      fallbackHandler: fakerChecksummedAddress(),
+      paymentToken: ZERO_ADDRESS,
+      payment: 0,
+      paymentReceiver: fakerChecksummedAddress(),
+    }
+    const setupData = Safe__factory.createInterface().encodeFunctionData('setup', [
+      safeProps.owners,
+      safeProps.threshold,
+      safeProps.to,
+      safeProps.data,
+      safeProps.fallbackHandler,
+      safeProps.paymentToken,
+      safeProps.payment,
+      safeProps.paymentReceiver,
+    ])
+
+    const mockTxHash = faker.string.hexadecimal({ length: 64 })
+    const mockFactoryAddress = fakerChecksummedAddress()
+    const mockMasterCopyAddress = getSafeSingletonDeployment({ version: '1.4.1' })?.defaultAddress!
+    jest.spyOn(cgwSdk, 'getCreationTransaction').mockResolvedValue({
+      created: new Date(Date.now()).toISOString(),
+      creator: fakerChecksummedAddress(),
+      factoryAddress: mockFactoryAddress,
+      transactionHash: mockTxHash,
+      masterCopy: mockMasterCopyAddress,
+      setupData,
+      saltNonce: faker.string.hexadecimal({ length: 64 }),
+    })
+
+    jest.spyOn(web3, 'createWeb3ReadOnly').mockReturnValue({
+      getTransaction: (txHash: string) => {
+        if (mockTxHash === txHash) {
+          return Promise.resolve({
+            to: mockFactoryAddress,
+            data: Safe_proxy_factory__factory.createInterface().encodeFunctionData('createProxyWithNonce', [
+              mockMasterCopyAddress,
+              setupData,
+              69,
+            ]),
+          })
+        }
+        return Promise.resolve(null)
+      },
+    } as JsonRpcProvider)
+
+    const safeAddress = faker.finance.ethereumAddress()
+    const chainInfos = [chainBuilder().with({ chainId: '1', l2: false }).build()]
+
+    // Run hook
+    const { result } = renderHook(() => useSafeCreationData(safeAddress, chainInfos))
+
+    await waitFor(() => {
+      expect(result.current).toEqual([
+        {
+          factoryAddress: mockFactoryAddress,
+          masterCopy: mockMasterCopyAddress,
+          safeAccountConfig: safeProps,
+          saltNonce: '69',
+          safeVersion: '1.4.1',
         },
         undefined,
         false,
