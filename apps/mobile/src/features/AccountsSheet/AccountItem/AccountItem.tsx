@@ -35,7 +35,6 @@ export function AccountItem({ account, drag, chains, isDragging, activeAccount, 
     onSelect(account.address.value)
   }
 
-  console.log('is edit', isEdit)
   const rightNode = useMemo(() => getRightNodeLayout(isEdit, isActive), [isEdit, isActive])
 
   return (
