@@ -19,11 +19,13 @@ const OrganizationMembers = () => {
   const { data } = useUserOrganizationsGetUsersV1Query({ orgId: Number(orgId) })
   const [openAddMembersModal, setOpenAddMembersModal] = useState(false)
 
-  const members = []
   const invited =
     data?.members.filter(
       (member) => member.status === MemberStatus.INVITED || member.status === MemberStatus.DECLINED,
     ) || []
+  const activeMembers =
+    data?.members.filter((member) => member.status === MemberStatus.INVITED || member.status === MemberStatus.ACTIVE) ||
+    []
 
   // TODO: Render members list
   return (
@@ -37,12 +39,13 @@ const OrganizationMembers = () => {
         </Button>
       </Stack>
       {/* Show the empty state placeholder if if the org creator is the only member */}
-      {members.length === 1 && invited.length === 0 ? (
+      {activeMembers.length === 0 && invited.length === 0 ? (
+        // {members.length === 0 && invited.length === 0 ? (
         <EmptyMembers />
       ) : (
         <>
           {invited.length > 0 && <InvitesList invitedMembers={invited} />}
-          {members.length === 0 ? <EmptyMembers /> : <MembersList />}
+          {activeMembers.length === 0 ? <EmptyMembers /> : <MembersList members={activeMembers} />}
         </>
       )}
       {openAddMembersModal && <AddMembersModal onClose={() => setOpenAddMembersModal(false)} />}
