@@ -46,10 +46,10 @@ const OrgListInvite = ({ org }: OrgListInvite) => {
           </Box>
 
           <Stack direction="row" spacing={1}>
-            <Button variant="contained" onClick={handleAcceptInvite} size="small">
+            <Button variant="contained" onClick={handleAcceptInvite} size="small" sx={{ px: 2, py: 0.5 }}>
               Accept
             </Button>
-            <Button variant="outlined" onClick={handleDeclineInvite} size="small">
+            <Button variant="outlined" onClick={handleDeclineInvite} size="small" sx={{ px: 2, py: 0.5 }}>
               Decline
             </Button>
           </Stack>
