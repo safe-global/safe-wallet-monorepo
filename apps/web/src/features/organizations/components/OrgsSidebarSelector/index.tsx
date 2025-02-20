@@ -11,13 +11,14 @@ import css from './styles.module.css'
 import { useRouter } from 'next/router'
 import { AppRoutes } from '@/config/routes'
 import OrgsCreationModal from '../OrgsCreationModal'
+import { useCurrentOrgId } from '../../hooks/useCurrentOrgId'
 
 const OrgsSidebarSelector = () => {
   const [isCreationModalOpen, setIsCreationModalOpen] = useState(false)
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const router = useRouter()
   const open = Boolean(anchorEl)
-  const orgId = Array.isArray(router.query.orgId) ? router.query.orgId[0] : router.query.orgId
+  const orgId = useCurrentOrgId()
   const { data: orgs } = useOrganizationsGetV1Query()
   const selectedOrg = orgs?.find((org) => org.id === Number(orgId))
 

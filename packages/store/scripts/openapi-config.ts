@@ -71,7 +71,7 @@ const config: ConfigFile = {
       filterEndpoints: [/^users/],
     },
     '../src/gateway/AUTO_GENERATED/organizations.ts': {
-      filterEndpoints: [/^organizations/],
+      filterEndpoints: [/^(organizations|userOrganizations)/],
     },
   },
 }
