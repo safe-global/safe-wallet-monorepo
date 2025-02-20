@@ -36,7 +36,7 @@ const TokenAmountInput = ({
   onChangeAmount?: (value: string) => void
 }) => {
   const {
-    formState: { errors },
+    formState: { errors, defaultValues },
     register,
     resetField,
     watch,
@@ -86,7 +86,7 @@ const TokenAmountInput = ({
   }, [maxAmount, selectedToken, setValue, amountField, onChangeAmount])
 
   const onChangeToken = useCallback(() => {
-    resetField(amountField, { defaultValue: '' })
+    resetField(amountField, { defaultValue: defaultValues?.[amountField] })
     onChangeAmount?.('')
   }, [resetField, amountField, onChangeAmount])
 
