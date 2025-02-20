@@ -76,6 +76,7 @@ describe('Transaction details create tests', { defaultCommandTimeout: 30000 }, (
       getBody().findByText(safeapps.createBatchStr).click()
       getBody().findByText(safeapps.sendBatchStr).click()
     })
+    cy.wait(2000)
     safeapps.clickOnAdvancedDetails()
     safeapps.verifyUntrustedHandllerWarningDoesNotExist()
   })

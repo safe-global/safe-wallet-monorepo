@@ -142,8 +142,12 @@ export const swapTxs = {
 export const tokenBlockLabels = {
   sell: 'Sell',
   buy: 'Buy exactly',
-
 }
+
+export function verifySwapBtnIsVisible() {
+  cy.get(assetsSwapBtn).should('be.visible')
+}
+
 export function checkInputCurrencyPreviewValue(value) {
   cy.get(inputCurrencyPreview).should('contain.text', value)
 }
