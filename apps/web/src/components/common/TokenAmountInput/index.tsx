@@ -9,6 +9,7 @@ import { useCallback } from 'react'
 import { get, useFormContext } from 'react-hook-form'
 import css from './styles.module.css'
 import { MultiTokenTransferFields, type MultiTokenTransferParams } from '@/components/tx-flow/flows/TokenTransfer'
+import { sameAddress } from '@/utils/addresses'
 
 export enum TokenAmountFields {
   tokenAddress = 'tokenAddress',
@@ -65,7 +66,7 @@ const TokenAmountInput = ({
       // Validate the total amount of the selected token in the multi transfer
       const recipients = getValues(MultiTokenTransferFields.recipients) as MultiTokenTransferParams['recipients']
       const sumAmount = recipients.reduce<number>(
-        (acc, item) => acc + (item.tokenAddress === tokenAddress ? Number(item.amount) : 0),
+        (acc, item) => acc + (sameAddress(item.tokenAddress, tokenAddress) ? Number(item.amount) : 0),
         0,
       )
 

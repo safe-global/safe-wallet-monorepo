@@ -9,6 +9,7 @@ import type { SubmitCallback } from '@/components/tx/SignOrExecuteForm/SignOrExe
 import type { MetaTransactionData } from '@safe-global/safe-core-sdk-types'
 import { Divider, Stack } from '@mui/material'
 import ReviewRecipientRow from './ReviewRecipientRow'
+import { sameAddress } from '@/utils/addresses'
 
 const ReviewTokenTransfer = ({
   params,
@@ -29,7 +30,7 @@ const ReviewTokenTransfer = ({
 
     const calls = params.recipients
       .map((recipient) => {
-        const token = balances.items.find((item) => item.tokenInfo.address === recipient.tokenAddress)
+        const token = balances.items.find((item) => sameAddress(item.tokenInfo.address, recipient.tokenAddress))
 
         if (!token) return
 

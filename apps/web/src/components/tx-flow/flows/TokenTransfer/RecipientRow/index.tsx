@@ -14,6 +14,7 @@ import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import SpendingLimitRow from '../SpendingLimitRow'
 import { useSelector } from 'react-redux'
 import { selectSpendingLimits } from '@/store/spendingLimitsSlice'
+import { sameAddress } from '@/utils/addresses'
 
 export const RecipientRow = ({
   index,
@@ -46,7 +47,7 @@ export const RecipientRow = ({
   const recipient = recipients?.[index]?.recipient
   const tokenAddress = recipients?.[index]?.tokenAddress
 
-  const selectedToken = balances.items.find((item) => item.tokenInfo.address === tokenAddress)
+  const selectedToken = balances.items.find((item) => sameAddress(item.tokenInfo.address, tokenAddress))
 
   const { totalAmount, spendingLimitAmount } = useTokenAmount(selectedToken)
 
@@ -59,7 +60,10 @@ export const RecipientRow = ({
   const isSpendingLimitType = type === TokenTransferType.spendingLimit
 
   const spendingLimitBalances = useMemo(
-    () => balances.items.filter(({ tokenInfo }) => spendingLimits.find((sl) => sl.token.address === tokenInfo.address)),
+    () =>
+      balances.items.filter(({ tokenInfo }) =>
+        spendingLimits.find((sl) => sameAddress(sl.token.address, tokenInfo.address)),
+      ),
     [balances.items, spendingLimits],
   )
 
