@@ -1,5 +1,5 @@
 import { cgwClient as api } from '../cgwClient'
-export const addTagTypes = ['organizations'] as const
+export const addTagTypes = ['organizations', 'organizations-safe'] as const
 const injectedRtkApi = api
   .enhanceEndpoints({
     addTagTypes,
@@ -41,6 +41,26 @@ const injectedRtkApi = api
         query: (queryArg) => ({ url: `/v1/organizations/${queryArg.id}`, method: 'DELETE' }),
         invalidatesTags: ['organizations'],
       }),
+      organizationSafesCreateV1: build.mutation<OrganizationSafesCreateV1ApiResponse, OrganizationSafesCreateV1ApiArg>({
+        query: (queryArg) => ({
+          url: `/v1/organizations/${queryArg.organizationId}/safes`,
+          method: 'POST',
+          body: queryArg.body,
+        }),
+        invalidatesTags: ['organizations-safe'],
+      }),
+      organizationSafesGetV1: build.query<OrganizationSafesGetV1ApiResponse, OrganizationSafesGetV1ApiArg>({
+        query: (queryArg) => ({ url: `/v1/organizations/${queryArg.organizationId}/safes` }),
+        providesTags: ['organizations-safe'],
+      }),
+      organizationSafesDeleteV1: build.mutation<OrganizationSafesDeleteV1ApiResponse, OrganizationSafesDeleteV1ApiArg>({
+        query: (queryArg) => ({
+          url: `/v1/organizations/${queryArg.organizationId}/safes`,
+          method: 'DELETE',
+          body: queryArg.body,
+        }),
+        invalidatesTags: ['organizations-safe'],
+      }),
       userOrganizationsInviteUserV1: build.mutation<
         UserOrganizationsInviteUserV1ApiResponse,
         UserOrganizationsInviteUserV1ApiArg
@@ -48,7 +68,7 @@ const injectedRtkApi = api
         query: (queryArg) => ({
           url: `/v1/organizations/${queryArg.orgId}/members/invite`,
           method: 'POST',
-          body: queryArg.body,
+          body: queryArg.inviteUsersDto,
         }),
         invalidatesTags: ['organizations'],
       }),
@@ -80,6 +100,7 @@ const injectedRtkApi = api
         query: (queryArg) => ({
           url: `/v1/organizations/${queryArg.orgId}/members/${queryArg.userId}/role`,
           method: 'PATCH',
+          body: queryArg.updateRoleDto,
         }),
         invalidatesTags: ['organizations'],
       }),
@@ -121,10 +142,24 @@ export type OrganizationsDeleteV1ApiResponse = unknown
 export type OrganizationsDeleteV1ApiArg = {
   id: number
 }
+export type OrganizationSafesCreateV1ApiResponse = unknown
+export type OrganizationSafesCreateV1ApiArg = {
+  organizationId: number
+  body: CreateOrganizationSafeDto[]
+}
+export type OrganizationSafesGetV1ApiResponse = /** status 200 Safes fetched successfully */ GetOrganizationSafeResponse
+export type OrganizationSafesGetV1ApiArg = {
+  organizationId: number
+}
+export type OrganizationSafesDeleteV1ApiResponse = unknown
+export type OrganizationSafesDeleteV1ApiArg = {
+  organizationId: number
+  body: string[]
+}
 export type UserOrganizationsInviteUserV1ApiResponse = /** status 200 Users invited */ Invitation[]
 export type UserOrganizationsInviteUserV1ApiArg = {
   orgId: number
-  body: string[]
+  inviteUsersDto: InviteUsersDto
 }
 export type UserOrganizationsAcceptInviteV1ApiResponse = unknown
 export type UserOrganizationsAcceptInviteV1ApiArg = {
@@ -143,6 +178,7 @@ export type UserOrganizationsUpdateRoleV1ApiResponse = unknown
 export type UserOrganizationsUpdateRoleV1ApiArg = {
   orgId: number
   userId: number
+  updateRoleDto: UpdateRoleDto
 }
 export type UserOrganizationsRemoveUserV1ApiResponse = unknown
 export type UserOrganizationsRemoveUserV1ApiArg = {
@@ -155,6 +191,52 @@ export type CreateOrganizationResponse = {
 }
 export type CreateOrganizationDto = {
   name: string
+}
+export type UserDto = {
+  id: number
+  status: 'PENDING' | 'ACTIVE'
+}
+export type UserOrganizationDto = {
+  id: number
+  role: 'ADMIN' | 'MEMBER'
+  status: 'INVITED' | 'ACTIVE' | 'DECLINED'
+  createdAt: string
+  updatedAt: string
+  user: UserDto
+}
+export type GetOrganizationResponse = {
+  id: number
+  name: string
+  status: 'ACTIVE'
+  userOrganizations: UserOrganizationDto[]
+}
+export type UpdateOrganizationResponse = {
+  id: number
+}
+export type UpdateOrganizationDto = {
+  name?: string
+  status?: 'ACTIVE'
+}
+export type CreateOrganizationSafeDto = {
+  chainId: string
+  address: string
+}
+export type GetOrganizationSafes = {}
+export type GetOrganizationSafeResponse = {
+  safes: GetOrganizationSafes[]
+}
+export type Invitation = {
+  userId: number
+  orgId: number
+  role: 'ADMIN' | 'MEMBER'
+  status: 'INVITED' | 'ACTIVE' | 'DECLINED'
+}
+export type InviteUserDto = {
+  address: string
+  role: 'ADMIN' | 'MEMBER'
+}
+export type InviteUsersDto = {
+  users: InviteUserDto[]
 }
 export type UserOrganizationUser = {
   id: number
@@ -171,24 +253,8 @@ export type UserOrganization = {
 export type UserOrganizationsDto = {
   members: UserOrganization[]
 }
-export type GetOrganizationResponse = {
-  id: number
-  name: string
-  status: 'ACTIVE'
-  userOrganizations: UserOrganizationsDto[]
-}
-export type UpdateOrganizationResponse = {
-  id: number
-}
-export type UpdateOrganizationDto = {
-  name?: string
-  status?: 'ACTIVE'
-}
-export type Invitation = {
-  userId: number
-  orgId: number
+export type UpdateRoleDto = {
   role: 'ADMIN' | 'MEMBER'
-  status: 'INVITED' | 'ACTIVE' | 'DECLINED'
 }
 export const {
   useOrganizationsCreateV1Mutation,
@@ -199,6 +265,10 @@ export const {
   useLazyOrganizationsGetOneV1Query,
   useOrganizationsUpdateV1Mutation,
   useOrganizationsDeleteV1Mutation,
+  useOrganizationSafesCreateV1Mutation,
+  useOrganizationSafesGetV1Query,
+  useLazyOrganizationSafesGetV1Query,
+  useOrganizationSafesDeleteV1Mutation,
   useUserOrganizationsInviteUserV1Mutation,
   useUserOrganizationsAcceptInviteV1Mutation,
   useUserOrganizationsDeclineInviteV1Mutation,
