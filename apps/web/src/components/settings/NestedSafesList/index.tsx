@@ -7,7 +7,6 @@ import AddIcon from '@/public/images/common/add.svg'
 import EditIcon from '@/public/images/common/edit.svg'
 import CheckWallet from '@/components/common/CheckWallet'
 import EthHashInfo from '@/components/common/EthHashInfo'
-import ExternalLink from '@/components/common/ExternalLink'
 import { CreateNestedSafe } from '@/components/tx-flow/flows/CreateNestedSafe'
 import EntryDialog from '@/components/address-book/EntryDialog'
 import { TxModalContext } from '@/components/tx-flow'
@@ -84,13 +83,7 @@ export function NestedSafesList(): ReactElement | null {
           <Grid2 size="grow">
             <Typography mb={3}>
               Nested Safes are separate wallets owned by your main Account, perfect for organizing different funds and
-              projects.{' '}
-              <ExternalLink
-                // TODO: Add link
-                href="#"
-              >
-                Learn more
-              </ExternalLink>
+              projects.
             </Typography>
 
             {nestedSafes?.safes.length === 0 && (
