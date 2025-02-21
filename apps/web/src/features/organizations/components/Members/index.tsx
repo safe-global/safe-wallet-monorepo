@@ -23,9 +23,7 @@ const OrganizationMembers = () => {
     data?.members.filter(
       (member) => member.status === MemberStatus.INVITED || member.status === MemberStatus.DECLINED,
     ) || []
-  const activeMembers =
-    data?.members.filter((member) => member.status === MemberStatus.INVITED || member.status === MemberStatus.ACTIVE) ||
-    []
+  const activeMembers = data?.members.filter((member) => member.status === MemberStatus.ACTIVE) || []
 
   // TODO: Render members list
   return (
