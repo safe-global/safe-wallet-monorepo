@@ -45,7 +45,6 @@ const SafenetAssetsRow = ({ row, index, numRows }: { row: EnhancedRow; index: nu
 
   const isLastToken = index > 0 && index === numRows - 1
 
-  console.log(index, numRows, isLastToken)
   return (
     <>
       <TableRow
