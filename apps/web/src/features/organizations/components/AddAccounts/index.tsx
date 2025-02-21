@@ -140,7 +140,9 @@ const AddAccounts = () => {
               </FormProvider>
               <DialogActions>
                 <Button onClick={() => setOpen(false)}>Cancel</Button>
-                <Button variant="contained">Add Accounts ({selectedSafesLength})</Button>
+                <Button variant="contained" disabled={selectedSafesLength === 0}>
+                  Add Accounts ({selectedSafesLength})
+                </Button>
               </DialogActions>
             </Card>
           </Container>

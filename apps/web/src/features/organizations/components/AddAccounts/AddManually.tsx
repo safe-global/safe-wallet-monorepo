@@ -2,6 +2,7 @@ import AddressInput from '@/components/common/AddressInput'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import ModalDialog from '@/components/common/ModalDialog'
 import networkSelectorCss from '@/components/common/NetworkSelector/styles.module.css'
+import chains from '@/config/chains'
 import css from './styles.module.css'
 import useChains from '@/hooks/useChains'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
@@ -23,7 +24,7 @@ const AddManually = ({ handleAddSafe }: { handleAddSafe: (data: AddManuallyFormV
     mode: 'onChange',
     defaultValues: {
       address: '',
-      chainId: '1',
+      chainId: chains.eth,
     },
   })
 
@@ -76,7 +77,7 @@ const AddManually = ({ handleAddSafe }: { handleAddSafe: (data: AddManuallyFormV
       <Button size="compact" onClick={() => setAddManuallyOpen(true)}>
         + Add manually
       </Button>
-      <ModalDialog open={addManuallyOpen} dialogTitle="Add safe account" hideChainIndicator>
+      <ModalDialog open={addManuallyOpen} dialogTitle="Add safe account" onClose={onCancel} hideChainIndicator>
         <FormProvider {...formMethods}>
           <form onSubmit={onSubmit}>
             <DialogContent>
