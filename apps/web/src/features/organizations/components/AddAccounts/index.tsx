@@ -2,7 +2,6 @@ import ModalDialog from '@/components/common/ModalDialog'
 import type { SafeItem, SafeItems } from '@/features/myAccounts/hooks/useAllSafes'
 import { useSafesSearch } from '@/features/myAccounts/hooks/useSafesSearch'
 import AddManually, { type AddManuallyFormValues } from '@/features/organizations/components/AddAccounts/AddManually'
-import FilteredSafesList from '@/features/organizations/components/AddAccounts/FilteredSafesList'
 import SafesList, { getSafeId } from '@/features/organizations/components/AddAccounts/SafesList'
 import SearchIcon from '@/public/images/common/search.svg'
 import debounce from 'lodash/debounce'
@@ -132,7 +131,7 @@ const AddAccounts = () => {
                     />
                   </Box>
 
-                  {searchQuery ? <FilteredSafesList filteredSafes={filteredSafes} /> : <SafesList safes={allSafes} />}
+                  {searchQuery ? <SafesList safes={filteredSafes} /> : <SafesList safes={allSafes} />}
 
                   <Box p={2}>
                     <AddManually handleAddSafe={handleAddSafe} />
