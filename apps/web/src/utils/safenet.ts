@@ -19,7 +19,7 @@ const convertSafenetBalanceToSafeClientGatewayBalance = (
   chainId: number,
 ): SafeBalanceResponseWithSafenet => {
   const balances: SafeBalanceResponseWithSafenet = {
-    fiatTotal: safenetBalance.fiatTotal,
+    fiatTotal: safenetBalance['USDC'].total,
     items: [],
   }
 
@@ -40,8 +40,8 @@ const convertSafenetBalanceToSafeClientGatewayBalance = (
         name: tokenName,
         logoUri: `https://assets.smold.app/api/token/${chainId}/${tokenAddress}/logo-128.png`,
       },
-      balance,
-      fiatBalance: ((parseInt(balance) * 1) / 10 ** decimals).toString(),
+      balance: balance.total,
+      fiatBalance: ((parseInt(balance.total) * 1) / 10 ** decimals).toString(),
       fiatConversion: '1.00',
       safenetAssetFlag: true,
     })
