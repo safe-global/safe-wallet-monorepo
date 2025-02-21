@@ -22,8 +22,8 @@ const Navigation = (): ReactElement => {
         const isSelected = router.asPath === itemPath
 
         return (
-          <div key={itemPath}>
-            <ListItemButton disabled={item.disabled} sx={{ padding: 0 }} selected={isSelected} key={itemPath}>
+          <div key={item.label}>
+            <ListItemButton disabled={item.disabled} sx={{ padding: 0 }} selected={isSelected}>
               <SidebarListItemButton selected={isSelected} href={itemPath}>
                 {item.icon && <SidebarListItemIcon>{item.icon}</SidebarListItemIcon>}
 
