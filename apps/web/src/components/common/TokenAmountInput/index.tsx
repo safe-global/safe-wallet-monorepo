@@ -7,6 +7,7 @@ import { type SafeBalanceResponse } from '@safe-global/safe-gateway-typescript-s
 import classNames from 'classnames'
 import { useCallback } from 'react'
 import { get, useFormContext } from 'react-hook-form'
+import type { FieldArrayPath, FieldValues } from 'react-hook-form'
 import css from './styles.module.css'
 import { MultiTokenTransferFields, type MultiTokenTransferParams } from '@/components/tx-flow/flows/TokenTransfer'
 import { sameAddress } from '@/utils/addresses'
@@ -18,23 +19,26 @@ export enum TokenAmountFields {
 
 export const InsufficientFundsValidationError = 'Insufficient funds'
 
-const getFieldName = (field: TokenAmountFields, groupName?: string) => (groupName ? `${groupName}.${field}` : field)
+const getFieldName = (field: TokenAmountFields, fieldArray?: TokenAmountInputProps['fieldArray']) =>
+  fieldArray ? `${fieldArray.name}.${fieldArray.index}.${field}` : field
+
+type TokenAmountInputProps = {
+  balances: SafeBalanceResponse['items']
+  selectedToken: SafeBalanceResponse['items'][number] | undefined
+  maxAmount?: bigint
+  validate?: (value: string) => string | undefined
+  fieldArray?: { name: FieldArrayPath<FieldValues>; index: number }
+  deps?: string[]
+}
 
 const TokenAmountInput = ({
   balances,
   selectedToken,
   maxAmount,
   validate,
-  groupName,
-  onChangeAmount,
-}: {
-  balances: SafeBalanceResponse['items']
-  selectedToken: SafeBalanceResponse['items'][number] | undefined
-  maxAmount?: bigint
-  validate?: (value: string) => string | undefined
-  groupName?: string
-  onChangeAmount?: (value: string) => void
-}) => {
+  fieldArray,
+  deps,
+}: TokenAmountInputProps) => {
   const {
     formState: { errors, defaultValues },
     register,
@@ -42,10 +46,11 @@ const TokenAmountInput = ({
     watch,
     setValue,
     getValues,
+    trigger,
   } = useFormContext()
 
-  const tokenAddressField = getFieldName(TokenAmountFields.tokenAddress, groupName)
-  const amountField = getFieldName(TokenAmountFields.amount, groupName)
+  const tokenAddressField = getFieldName(TokenAmountFields.tokenAddress, fieldArray)
+  const amountField = getFieldName(TokenAmountFields.amount, fieldArray)
 
   const tokenAddress = watch(tokenAddressField)
 
@@ -66,10 +71,9 @@ const TokenAmountInput = ({
       // Validate the total amount of the selected token in the multi transfer
       const recipients = getValues(MultiTokenTransferFields.recipients) as MultiTokenTransferParams['recipients']
       const sumAmount = recipients.reduce<number>(
-        (acc, item) => acc + (sameAddress(item.tokenAddress, tokenAddress) ? Number(item.amount) : 0),
+        (acc, item) => acc + (sameAddress(item.tokenAddress, tokenAddress) && !!item.amount ? Number(item.amount) : 0),
         0,
       )
-
       return validateLimitedAmount(sumAmount.toString(), decimals, maxAmountString, InsufficientFundsValidationError)
     },
     [maxAmount, selectedToken?.tokenInfo.decimals, getValues, tokenAddress],
@@ -82,13 +86,19 @@ const TokenAmountInput = ({
       shouldValidate: true,
     })
 
-    onChangeAmount?.(maxAmount.toString())
-  }, [maxAmount, selectedToken, setValue, amountField, onChangeAmount])
+    trigger(deps)
+  }, [maxAmount, selectedToken, setValue, amountField, trigger, deps])
 
   const onChangeToken = useCallback(() => {
-    resetField(amountField, { defaultValue: defaultValues?.[amountField] })
-    onChangeAmount?.('')
-  }, [resetField, amountField, onChangeAmount])
+    const amountDefaultValue = get(
+      defaultValues,
+      getFieldName(TokenAmountFields.amount, fieldArray ? { ...fieldArray, index: 0 } : undefined),
+    )
+
+    resetField(amountField, amountDefaultValue)
+
+    trigger(deps)
+  }, [resetField, amountField, trigger, deps, defaultValues, fieldArray])
 
   return (
     <FormControl
@@ -119,7 +129,7 @@ const TokenAmountInput = ({
           {...register(amountField, {
             required: true,
             validate: validate ?? validateAmount,
-            onChange: (e) => onChangeAmount?.(e.target.value),
+            deps,
           })}
         />
         <Divider orientation="vertical" flexItem />

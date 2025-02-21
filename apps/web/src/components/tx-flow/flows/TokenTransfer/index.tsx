@@ -31,7 +31,7 @@ export enum MultiTransfersFields {
 export const MultiTokenTransferFields = { ...MultiTransfersFields }
 
 export type MultiTokenTransferParams = {
-  recipients: TokenTransferParams[]
+  [MultiTransfersFields.recipients]: TokenTransferParams[]
   [MultiTransfersFields.type]: TokenTransferType
 }
 

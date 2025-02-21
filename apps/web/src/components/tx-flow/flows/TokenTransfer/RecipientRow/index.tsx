@@ -1,57 +1,58 @@
 import AddressBookInput from '@/components/common/AddressBookInput'
-import TokenAmountInput, { TokenAmountFields } from '@/components/common/TokenAmountInput'
+import TokenAmountInput from '@/components/common/TokenAmountInput'
 import { useVisibleBalances } from '@/hooks/useVisibleBalances'
 import DeleteIcon from '@/public/images/common/delete.svg'
 import { Box, Button, FormControl, Stack, SvgIcon } from '@mui/material'
-import { useFormContext } from 'react-hook-form'
-import type { MultiTokenTransferParams } from '..'
-import { MultiTokenTransferFields, TokenTransferType } from '..'
+import { get, useFormContext } from 'react-hook-form'
+import type { FieldArrayPath, FieldPath } from 'react-hook-form'
+import type { MultiTokenTransferParams, TokenTransferParams } from '..'
+import { MultiTokenTransferFields, TokenTransferFields, TokenTransferType } from '..'
 import { useTokenAmount } from '../utils'
 import { useHasPermission } from '@/permissions/hooks/useHasPermission'
 import { Permission } from '@/permissions/config'
-import { useContext, useEffect, useMemo } from 'react'
+import { useCallback, useContext, useEffect, useMemo } from 'react'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import SpendingLimitRow from '../SpendingLimitRow'
 import { useSelector } from 'react-redux'
 import { selectSpendingLimits } from '@/store/spendingLimitsSlice'
 import { sameAddress } from '@/utils/addresses'
 
-export const RecipientRow = ({
-  index,
-  groupName,
-  removable = true,
-  remove,
-  disableSpendingLimit,
-}: {
-  index: number
-  removable?: boolean
-  groupName: string
-  remove?: (index: number) => void
+const getFieldName = (
+  field: keyof TokenTransferParams,
+  { name, index }: RecipientRowProps['fieldArray'],
+): FieldPath<MultiTokenTransferParams> => `${name}.${index}.${field}`
+
+type RecipientRowProps = {
   disableSpendingLimit: boolean
-}) => {
+  fieldArray: { name: FieldArrayPath<MultiTokenTransferParams>; index: number }
+  removable?: boolean
+  remove?: (index: number) => void
+}
+
+export const RecipientRow = ({ fieldArray, removable = true, remove, disableSpendingLimit }: RecipientRowProps) => {
   const { balances } = useVisibleBalances()
   const spendingLimits = useSelector(selectSpendingLimits)
 
-  const fieldName = `${groupName}.${index}`
   const {
-    watch,
     formState: { errors },
     trigger,
+    watch,
   } = useFormContext<MultiTokenTransferParams>()
 
   const { setNonceNeeded } = useContext(SafeTxContext)
 
+  const recipientFieldName = getFieldName(TokenTransferFields.recipient, fieldArray)
+
   const recipients = watch(MultiTokenTransferFields.recipients)
   const type = watch(MultiTokenTransferFields.type)
-
-  const recipient = recipients?.[index]?.recipient
-  const tokenAddress = recipients?.[index]?.tokenAddress
+  const recipient = watch(recipientFieldName)
+  const tokenAddress = watch(getFieldName(TokenTransferFields.tokenAddress, fieldArray))
 
   const selectedToken = balances.items.find((item) => sameAddress(item.tokenInfo.address, tokenAddress))
 
   const { totalAmount, spendingLimitAmount } = useTokenAmount(selectedToken)
 
-  const isAddressValid = !!recipient && !errors[MultiTokenTransferFields.recipients]?.[index]?.recipient
+  const isAddressValid = !!recipient && !get(errors, recipientFieldName)
 
   const canCreateSpendingLimitTxWithToken = useHasPermission(Permission.CreateSpendingLimitTransaction, {
     token: selectedToken?.tokenInfo,
@@ -69,11 +70,18 @@ export const RecipientRow = ({
 
   const maxAmount = isSpendingLimitType && totalAmount > spendingLimitAmount ? spendingLimitAmount : totalAmount
 
-  const triggerAmountValidation = () => {
-    trigger(
-      recipients.map((_, i) => `${MultiTokenTransferFields.recipients}.${i}.${TokenAmountFields.amount}` as const),
-    )
-  }
+  const deps = useMemo(
+    () =>
+      recipients.map((_, index) =>
+        getFieldName(TokenTransferFields.amount, { name: MultiTokenTransferFields.recipients, index }),
+      ),
+    [recipients],
+  )
+
+  const onRemove = useCallback(() => {
+    remove?.(fieldArray.index)
+    trigger(deps)
+  }, [remove, fieldArray.index, trigger, deps])
 
   useEffect(() => {
     setNonceNeeded(!isSpendingLimitType || spendingLimitAmount === 0n)
@@ -84,16 +92,16 @@ export const RecipientRow = ({
       <Stack spacing={1}>
         <Stack spacing={2}>
           <FormControl fullWidth>
-            <AddressBookInput name={`${fieldName}.recipient`} canAdd={isAddressValid} />
+            <AddressBookInput name={recipientFieldName} canAdd={isAddressValid} />
           </FormControl>
 
           <FormControl fullWidth>
             <TokenAmountInput
-              groupName={fieldName}
+              fieldArray={fieldArray}
               balances={isSpendingLimitType ? spendingLimitBalances : balances.items}
               selectedToken={selectedToken}
               maxAmount={maxAmount}
-              onChangeAmount={triggerAmountValidation}
+              deps={deps}
             />
           </FormControl>
 
@@ -108,7 +116,7 @@ export const RecipientRow = ({
           <Box>
             <Button
               data-testid="remove-recipient-btn"
-              onClick={() => remove?.(index)}
+              onClick={onRemove}
               aria-label="Remove recipient"
               variant="text"
               startIcon={<SvgIcon component={DeleteIcon} inheritViewBox fontSize="small" />}

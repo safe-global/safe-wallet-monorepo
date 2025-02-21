@@ -111,14 +111,14 @@ export const CreateTokenTransfer = ({
     delayError: 500,
   })
 
-  const { handleSubmit, control, watch, formState, trigger } = formMethods
+  const { handleSubmit, control, watch, formState } = formMethods
 
-  const hasInsufficientFunds = useMemo(() => {
-    if (!formState.errors.recipients) {
-      return false
-    }
-    return formState.errors.recipients?.some?.((item) => item?.amount?.message === InsufficientFundsValidationError)
-  }, [formState])
+  const hasInsufficientFunds = useMemo(
+    () =>
+      !!formState.errors.recipients &&
+      formState.errors.recipients.some?.((item) => item?.amount?.message === InsufficientFundsValidationError),
+    [formState],
+  )
 
   const type = watch(MultiTransfersFields.type)
 
@@ -148,14 +148,9 @@ export const CreateTokenTransfer = ({
   }
 
   const removeRecipient = (index: number): void => {
-    if (recipientFields.length <= 1) {
-      return
+    if (recipientFields.length > 1) {
+      remove(index)
     }
-
-    remove(index)
-
-    // Trigger validation after removing a recipient, to update the total amount validation
-    trigger()
   }
 
   const csvAirdropAppUrl = safeApps?.[0]?.url
@@ -174,12 +169,11 @@ export const CreateTokenTransfer = ({
         <form onSubmit={handleSubmit(onSubmit)} className={commonCss.form}>
           <Stack spacing={3}>
             <Stack spacing={8}>
-              {recipientFields.map((field, i) => (
+              {recipientFields.map((field, index) => (
                 <RecipientRow
                   key={field.id}
-                  index={i}
                   removable={recipientFields.length > 1}
-                  groupName={MultiTokenTransferFields.recipients}
+                  fieldArray={{ name: MultiTokenTransferFields.recipients, index }}
                   remove={removeRecipient}
                   disableSpendingLimit={disableSpendingLimit || recipientFields.length > 1}
                 />
