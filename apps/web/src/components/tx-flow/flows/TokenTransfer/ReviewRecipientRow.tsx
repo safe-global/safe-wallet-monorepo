@@ -5,12 +5,13 @@ import SendToBlock from '@/components/tx/SendToBlock'
 import type { TokenTransferParams } from '.'
 import { safeParseUnits } from '@/utils/formatters'
 import { Stack } from '@mui/material'
+import { sameAddress } from '@/utils/addresses'
 
 const ReviewRecipientRow = ({ params, name }: { params: TokenTransferParams; name: string }) => {
   const { balances } = useBalances()
 
   const token = useMemo(
-    () => balances.items.find((item) => item.tokenInfo.address === params.tokenAddress),
+    () => balances.items.find(({ tokenInfo }) => sameAddress(tokenInfo.address, params.tokenAddress)),
     [balances.items, params.tokenAddress],
   )
 
