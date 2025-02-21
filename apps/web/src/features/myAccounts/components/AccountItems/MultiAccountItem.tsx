@@ -344,7 +344,7 @@ const MultiAccountItem = ({ onLinkClick, multiSafeAccountItem, isOrgSafe = false
               />
             ))}
           </Box>
-          {!isReadOnly && hasReplayableSafe && (
+          {!isReadOnly && hasReplayableSafe && !isOrgSafe && (
             <>
               <Divider sx={{ ml: '-12px', mr: '-12px' }} />
               <Box

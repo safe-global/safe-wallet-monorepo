@@ -3,7 +3,17 @@ import type { SafeListProps } from '@/features/myAccounts/components/SafesList'
 import OrgSafeContextMenu from '@/features/organizations/components/SafeAccounts/OrgSafeContextMenu'
 import { type SafeOverview } from '@safe-global/safe-gateway-typescript-sdk'
 import { useMemo, useRef } from 'react'
-import { ListItemButton, Box, Typography, IconButton, SvgIcon, Skeleton, useTheme, useMediaQuery } from '@mui/material'
+import {
+  ListItemButton,
+  Box,
+  Typography,
+  IconButton,
+  SvgIcon,
+  Skeleton,
+  useTheme,
+  useMediaQuery,
+  ListItem,
+} from '@mui/material'
 import Link from 'next/link'
 import Track from '@/components/common/Track'
 import { OVERVIEW_EVENTS, OVERVIEW_LABELS, PIN_SAFE_LABELS, trackEvent } from '@/services/analytics'
@@ -272,16 +282,10 @@ const SingleAccountItem = ({
   )
 
   return isOrgSafe ? (
-    <ListItemButton
-      ref={elementRef}
-      data-testid="safe-list-item"
-      selected={isCurrentSafe}
-      className={classnames(css.listItem, { [css.currentListItem]: isCurrentSafe })}
-      disableRipple
-    >
+    <ListItem className={css.listItem}>
       <Box className={css.safeLink}>{content}</Box>
       {actions}
-    </ListItemButton>
+    </ListItem>
   ) : (
     <ListItemButton
       ref={elementRef}

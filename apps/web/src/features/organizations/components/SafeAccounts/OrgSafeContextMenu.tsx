@@ -35,12 +35,6 @@ const OrgSafeContextMenu = () => {
     setOpen((prev) => ({ ...prev, [type]: true }))
   }
 
-  /*
-  const handleCloseModal = () => {
-    setOpen(defaultOpen)
-  }
-  */
-
   const hasName = false
 
   return (
