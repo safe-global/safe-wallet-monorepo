@@ -2,10 +2,12 @@ import EnhancedTable from '@/components/common/EnhancedTable'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import { Box, Button, Chip, IconButton, Stack, SvgIcon, Typography } from '@mui/material'
 import type { UserOrganization } from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
+import { useUserOrganizationsRemoveUserV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
 import tableCss from '@/components/common/EnhancedTable/styles.module.css'
 import DeleteIcon from '@/public/images/common/delete.svg'
 import { MemberStatus } from '.'
 import { MemberRole } from '../AddMembersModal'
+import { useCurrentOrgId } from '../../hooks/useCurrentOrgId'
 
 const headCells = [
   {
@@ -27,6 +29,13 @@ const headCells = [
 ]
 
 const InvitesList = ({ invitedMembers }: { invitedMembers: UserOrganization[] }) => {
+  const [deleteInvite] = useUserOrganizationsRemoveUserV1Mutation()
+  const currentOrgId = useCurrentOrgId()
+
+  const handleDeleteInvite = (invitedId: number) => {
+    deleteInvite({ orgId: Number(currentOrgId), userId: invitedId })
+  }
+
   const rows = invitedMembers.map((member) => {
     const isDeclined = member.status === MemberStatus.DECLINED
     return {
@@ -64,7 +73,7 @@ const InvitesList = ({ invitedMembers }: { invitedMembers: UserOrganization[] })
                   Resend
                 </Button>
               )}
-              <IconButton onClick={() => {}} size="small">
+              <IconButton onClick={() => handleDeleteInvite(member.user.id)} size="small">
                 <SvgIcon component={DeleteIcon} inheritViewBox color="error" fontSize="small" />
               </IconButton>
             </div>
