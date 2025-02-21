@@ -128,6 +128,13 @@ function RootLayout() {
                             title: 'Confirm transaction',
                           }}
                         />
+                        <Stack.Screen
+                          name="share"
+                          options={{
+                            headerShown: false,
+                            presentation: 'modal',
+                          }}
+                        />
                         <Stack.Screen name="+not-found" />
                       </Stack>
                       <StatusBar />
