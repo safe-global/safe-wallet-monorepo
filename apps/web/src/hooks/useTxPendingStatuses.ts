@@ -17,6 +17,7 @@ import { isTransactionListItem } from '@/utils/transaction-guards'
 import useSafeInfo from './useSafeInfo'
 import { SimpleTxWatcher } from '@/utils/SimpleTxWatcher'
 import useIsSafenetEnabled from '@/features/safenet/hooks/useIsSafenetEnabled'
+import { waitForSafenetTx } from '@/features/safenet/utils/safenetTxMonitor'
 
 const FINAL_PENDING_STATUSES = [TxEvent.SIGNATURE_INDEXED, TxEvent.SUCCESS, TxEvent.REVERTED, TxEvent.FAILED]
 
@@ -66,7 +67,8 @@ export const useTxMonitor = (): void => {
       }
 
       if (isSubmitting && pendingTx.isSafenet) {
-        // TODO: new function to poll safenet tx details from processor API and dispatch tx status to processing once it returns a txHash
+        const safeTxHash = txId.slice(-66)
+        waitForSafenetTx(txId, safeTxHash, pendingTx.chainId, pendingTx.nonce, pendingTx.safeAddress)
       }
     }
     // `provider` is updated when switching chains, re-running this effect
