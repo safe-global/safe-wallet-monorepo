@@ -81,3 +81,5 @@ apps/web/node_modules/*
 apps/web/public/fallback-development.js
 apps/web/.env
 apps/web/src/types/contracts/*
+
+.history

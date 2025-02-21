@@ -1,0 +1,111 @@
+name: Deploy to Cloudfront's bucket
+
+on:
+  push:
+    branches:
+      [
+        'dev',
+        'main',
+        'feature/ewf-changes'
+      ]
+jobs:
+  cancel-previous:
+    name: 'Cancel Previous Runs'
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: styfle/cancel-workflow-action@0.8.0
+        with:
+          access_token: ${{ github.token }}
+  env_name:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get GHA environment name
+        id: env_name 
+        run: |
+          echo "Running on branch ${{ github.ref }}"
+          if [ "${{ github.ref }}" = "refs/heads/dev" ]; then
+            echo "::set-output name=env_name::dev"
+            echo "::set-output name=build_script::'yarn build && yarn export'"
+          elif [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            echo "::set-output name=env_name::prod"
+            echo "::set-output name=build_script::yarn build && yarn export"
+          fi
+      - name: Use specified environment secrets from previous step
+        run: |
+          echo "Environment secrets set name ${{ steps.env_name.outputs.env_name }}"
+          echo "Environment build script ${{ steps.env_name.outputs.build_script }}"
+    outputs:
+      env_name: ${{ steps.env_name.outputs.env_name }}
+      env_file: ${{ steps.env_name.outputs.env_file }}
+      build_script: ${{ steps.env_name.outputs.build_script }}
+  deploy:
+    environment:
+      name: ${{ needs.env_name.outputs.env_name }}
+    needs: [cancel-previous, env_name]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v2-beta
+        with:
+          node-version: '16.13.0'
+          registry-url: https://registry.npmjs.org/
+      - name: Yarn cache
+        uses: actions/cache@v3
+        with:
+          path: '**/node_modules'
+          key: web-core-modules-${{ hashFiles('**/yarn.lock') }}
+    
+      - name: Yarn install
+        shell: bash
+        run: yarn
+
+      - name: Build branch
+        env:
+          # Latest supported safe version, used for upgrade prompts
+          NEXT_PUBLIC_SAFE_VERSION: 1.3.0
+          NEXT_PUBLIC_GATEWAY_URL_PRODUCTION: https://gsafe-svc.energyweb.org/cgw
+          # Flag to switch to the production environment (redirect urls, gateway url, etc)
+          NEXT_PUBLIC_IS_PRODUCTION: true
+          NEXT_PUBLIC_INFURA_TOKEN:
+          # infura token used by Safe Apps
+          NEXT_PUBLIC_SAFE_APPS_INFURA_TOKEN:
+          # Transaction simulation
+          NEXT_PUBLIC_TENDERLY_SIMULATE_ENDPOINT_URL:
+          NEXT_PUBLIC_TENDERLY_PROJECT_NAME:
+          NEXT_PUBLIC_TENDERLY_ORG_NAME:
+          ### Optional variables ###
+          # These variables are required only if you require a certain feature in the interface (e.g. Portis wallet)
+          # Or overwrite the fallback values (set a different WalletConnect bridge)
+          # Access keys
+          NEXT_PUBLIC_SENTRY_DSN:
+          NEXT_PUBLIC_BEAMER_ID:
+          # Wallet specific variables
+          NEXT_PUBLIC_WC_BRIDGE:
+          NEXT_PUBLIC_FORTMATIC_KEY:
+          NEXT_PUBLIC_PORTIS_KEY:
+          NEXT_PUBLIC_CYPRESS_MNEMONIC:
+        shell: bash
+        run: yarn build && yarn export
+        
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+      - name: Clear bucket
+        run: |
+          aws s3 rm s3://${{ secrets.BUCKET_NAME }} --recursive
+      - name: Upload to bucket
+        run: |
+          aws s3 cp out s3://${{ secrets.BUCKET_NAME }} --recursive
+          # Upload all HTML files again but w/o an extention so that URLs like /welcome open the right page
+          for file in $(find . -name '*.html' | sed 's|^\./||'); do
+              aws s3 cp ${file%} s3://${{ secrets.BUCKET_NAME }}/${file%.*} --content-type 'text/html'
+          done          
+      - name: Invalidate CloudFront # cloudfront caches s3 content so after each deployment, it needs to be cleared.
+        run: |
+          aws cloudfront create-invalidation --distribution-id ${{ secrets.CLOUDFRONT_ID }} --paths "/*"

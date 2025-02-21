@@ -14,10 +14,6 @@ import { useIsOfficialHost } from '@/hooks/useIsOfficialHost'
 const footerPages = [
   AppRoutes.welcome.index,
   AppRoutes.settings.index,
-  AppRoutes.imprint,
-  AppRoutes.privacy,
-  AppRoutes.cookie,
-  AppRoutes.terms,
   AppRoutes.licenses,
 ]
 
@@ -52,22 +48,7 @@ const Footer = (): ReactElement | null => {
               <Typography variant="caption">&copy;2022–{new Date().getFullYear()} Core Contributors GmbH</Typography>
             </li>
             <li>
-              <FooterLink href={getHref(AppRoutes.terms)}>Terms</FooterLink>
-            </li>
-            <li>
-              <FooterLink href={getHref(AppRoutes.privacy)}>Privacy</FooterLink>
-            </li>
-            <li>
               <FooterLink href={getHref(AppRoutes.licenses)}>Licenses</FooterLink>
-            </li>
-            <li>
-              <FooterLink href={getHref(AppRoutes.imprint)}>Imprint</FooterLink>
-            </li>
-            <li>
-              <FooterLink href={getHref(AppRoutes.cookie)}>Cookie policy</FooterLink>
-            </li>
-            <li>
-              <FooterLink href={getHref(AppRoutes.settings.index)}>Preferences</FooterLink>
             </li>
             <li>
               <ExternalLink href={HELP_CENTER_URL} noIcon sx={{ span: { textDecoration: 'underline' } }}>
@@ -76,7 +57,7 @@ const Footer = (): ReactElement | null => {
             </li>
           </>
         ) : (
-          <li>This is an unofficial distribution of the app</li>
+          <li>{'This is an unofficial distribution of Safe{Wallet}'}</li>
         )}
 
         <li>

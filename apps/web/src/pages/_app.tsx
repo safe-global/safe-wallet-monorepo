@@ -24,7 +24,6 @@ import useSafeNotifications from '@/hooks/useSafeNotifications'
 import useTxPendingStatuses from '@/hooks/useTxPendingStatuses'
 import { useInitSession } from '@/hooks/useInitSession'
 import Notifications from '@/components/common/Notifications'
-import CookieAndTermBanner from 'src/components/common/CookieAndTermBanner'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import { useTxTracking } from '@/hooks/useTxTracking'
 import { useSafeMsgTracking } from '@/hooks/messages/useSafeMsgTracking'
@@ -127,8 +126,6 @@ const WebCoreApp = ({
           <PageLayout pathname={router.pathname}>
             <Component {...pageProps} key={safeKey} />
           </PageLayout>
-
-          <CookieAndTermBanner />
 
           <OutreachPopup />
 

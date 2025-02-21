@@ -10,7 +10,6 @@ import {
   InputAdornment,
   SvgIcon,
   Tooltip,
-  Typography,
 } from '@mui/material'
 import layoutCss from '@/components/new-safe/create/styles.module.css'
 import NameInput from '@/components/common/NameInput'
@@ -27,9 +26,6 @@ import useChainId from '@/hooks/useChainId'
 import { useAppSelector } from '@/store'
 import { selectAddedSafes } from '@/store/addedSafesSlice'
 import { LOAD_SAFE_EVENTS, trackEvent } from '@/services/analytics'
-import { AppRoutes } from '@/config/routes'
-import MUILink from '@mui/material/Link'
-import Link from 'next/link'
 
 enum Field {
   name = 'name',
@@ -152,22 +148,6 @@ const SetAddressStep = ({ data, onSubmit, onBack }: StepRenderProps<LoadSafeForm
             validate={validateSafeAddress}
             name={Field.address}
           />
-
-          <Typography
-            sx={{
-              mt: 4,
-            }}
-          >
-            By continuing you consent to the{' '}
-            <Link href={AppRoutes.terms} passHref legacyBehavior>
-              <MUILink>terms of use</MUILink>
-            </Link>{' '}
-            and{' '}
-            <Link href={AppRoutes.privacy} passHref legacyBehavior>
-              <MUILink>privacy policy</MUILink>
-            </Link>
-            .
-          </Typography>
         </Box>
 
         <Divider />

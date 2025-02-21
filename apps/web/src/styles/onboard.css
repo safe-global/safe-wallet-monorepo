@@ -62,7 +62,9 @@
   --onboard-wallet-app-icon-background-light-gray: rgba(255, 255, 255, 0.5);
 
   --onboard-wallet-button-border-radius: var(--w3o-border-radius);
-  --onboard-wallet-button-background-hover: var(--color-background-light);
+  --onboard-wallet-button-box-shadow-hover: 0 0 2px rgba(187, 117, 203, 1);
+  --onboard-wallet-button-background-hover: rgba(187, 117, 203, 0.5);
+  --onboard-wallet-button-background-active: rgba(187, 117, 203, 0.5);
 
   /* Account select (modal) */
 

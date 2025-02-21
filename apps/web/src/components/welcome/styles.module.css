@@ -74,7 +74,7 @@
 }
 
 .content {
-  background: linear-gradient(-90deg, #10ff84, #5fddff);
+  background: rgba(164, 102, 255, 1);
   background-size: 200% 200%;
   animation: gradient 15s ease infinite;
   border-radius: 6px;

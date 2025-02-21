@@ -200,10 +200,6 @@ const CookieBannerPopup = (): ReactElement | null => {
     }
   }, [dispatch, shouldOpen])
 
-  return cookiePopup.open ? (
-    <div className={css.popup}>
-      <CookieAndTermBanner warningKey={cookiePopup.warningKey} inverted />
-    </div>
-  ) : null
+  return null
 }
 export default CookieBannerPopup
