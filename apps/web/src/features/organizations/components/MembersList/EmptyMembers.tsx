@@ -19,7 +19,7 @@ const EmptyMembers = () => {
       <OrgsIcon />
 
       <Typography color="text.secondary" mb={2}>
-        Your organisation has no team members yet.
+        Your haven&apos;t invited any team members yet.
         <br />
         <InfoModal />
       </Typography>

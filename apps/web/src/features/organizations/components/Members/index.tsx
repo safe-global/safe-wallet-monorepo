@@ -38,16 +38,10 @@ const OrganizationMembers = () => {
           Add member
         </Button>
       </Stack>
-      {/* Show the empty state placeholder if if the org creator is the only member */}
-      {activeMembers.length === 0 && invited.length === 0 ? (
-        // {members.length === 0 && invited.length === 0 ? (
-        <EmptyMembers />
-      ) : (
-        <>
-          {invited.length > 0 && <InvitesList invitedMembers={invited} />}
-          {activeMembers.length === 0 ? <EmptyMembers /> : <MembersList members={activeMembers} />}
-        </>
-      )}
+      {invited.length > 0 && <InvitesList invitedMembers={invited} />}
+      <MembersList members={activeMembers} />
+      {invited.length === 0 && activeMembers.length === 1 && <EmptyMembers />}
+
       {openAddMembersModal && <AddMembersModal onClose={() => setOpenAddMembersModal(false)} />}
     </>
   )
