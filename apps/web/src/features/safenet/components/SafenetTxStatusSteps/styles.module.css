@@ -7,3 +7,11 @@
   height: 16px;
   width: 16px;
 }
+
+.safenetLogo {
+  border-radius: 100px;
+  background-color: var(--color-background-main);
+  width: fit-content;
+  padding: 4px 8px;
+  margin-left: 32px;
+}

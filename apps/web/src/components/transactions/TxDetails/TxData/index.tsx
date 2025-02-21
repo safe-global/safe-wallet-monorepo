@@ -34,11 +34,11 @@ import StakingTxWithdrawDetails from '@/features/stake/components/StakingTxWithd
 import { OnChainConfirmation } from './NestedTransaction/OnChainConfirmation'
 import { ExecTransaction } from './NestedTransaction/ExecTransaction'
 import SafeUpdate from './SafeUpdate'
-import useIsSafenetEnabled from '@/features/safenet/hooks/useIsSafenetEnabled'
 import { useGetSafenetConfigQuery } from '@/store/safenet'
 import { skipToken } from '@reduxjs/toolkit/query'
 import { sameAddress } from '@/utils/addresses'
-import { SafenetSettlement } from '@/features/safenet/components/SafenetSettlement'
+import SafenetSettlement from '@/features/safenet/components/SafenetSettlement'
+import useHasSafenetFeature from '@/features/safenet/hooks/useHasSafenetFeature'
 
 const TxData = ({
   txDetails,
@@ -50,7 +50,7 @@ const TxData = ({
   imitation: boolean
 }): ReactElement => {
   const chainId = useChainId()
-  const isSafenetEnabled = useIsSafenetEnabled()
+  const isSafenetEnabled = useHasSafenetFeature()
 
   const txInfo = txDetails.txInfo
   const toInfo = isCustomTxInfo(txDetails.txInfo) ? txDetails.txInfo.to : undefined
@@ -63,7 +63,6 @@ const TxData = ({
   const { data: safenetConfig } = useGetSafenetConfigQuery(isSafenetEnabled && moduleAddress ? undefined : skipToken)
   const isSafenetSettlement = sameAddress(safenetConfig?.settlementEngines[chainId], moduleAddress)
 
-  console.log('isSAfenetSettlement?', isSafenetSettlement, isSafenetEnabled, moduleAddress)
   if (isSafenetSettlement) {
     return <SafenetSettlement data={txDetails} />
   }

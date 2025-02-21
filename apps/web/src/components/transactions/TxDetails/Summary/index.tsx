@@ -15,7 +15,7 @@ import DecodedData from '../TxData/DecodedData'
 import { SafeTxHashDataRow } from './SafeTxHashDataRow'
 import css from './styles.module.css'
 import SafenetTransactionDetails from '@/features/safenet/components/SafenetTransactionDetails'
-import useIsSafenetEnabled from '@/features/safenet/hooks/useIsSafenetEnabled'
+import useHasSafenetFeature from '@/features/safenet/hooks/useHasSafenetFeature'
 
 interface Props {
   txDetails: TransactionDetails
@@ -25,7 +25,7 @@ interface Props {
 
 const Summary = ({ txDetails, defaultExpanded = false, hideDecodedData = false }: Props): ReactElement => {
   const { safe } = useSafeInfo()
-  const isSafenetEnabled = useIsSafenetEnabled()
+  const isSafenetEnabled = useHasSafenetFeature()
   const [expanded, setExpanded] = useState<boolean>(defaultExpanded)
 
   const toggleExpanded = () => {

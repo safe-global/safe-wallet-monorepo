@@ -32,7 +32,7 @@ import CircleIcon from '@/public/images/common/circle.svg'
 import CheckIcon from '@/public/images/common/circle-check.svg'
 import CancelIcon from '@/public/images/common/cancel.svg'
 import useTransactionStatus from '@/hooks/useTransactionStatus'
-import { SafenetTxStatusSteps } from '@/features/safenet/components/SafenetTxStatusSteps'
+import SafenetTxStatusSteps from '@/features/safenet/components/SafenetTxStatusSteps'
 
 // Icons
 const Created = () => (
