@@ -1,5 +1,6 @@
-import { Chip, IconButton, Stack, SvgIcon, Typography } from '@mui/material'
+import { Chip, IconButton, Stack, SvgIcon, Tooltip, Typography } from '@mui/material'
 import type { UserOrganization } from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
+import EditIcon from '@/public/images/common/edit.svg'
 import { MemberRole } from '../AddMembersModal'
 import DeleteIcon from '@/public/images/common/delete.svg'
 import EnhancedTable from '@/components/common/EnhancedTable'
@@ -51,6 +52,11 @@ const MembersList = ({ members }: { members: UserOrganization[] }) => {
           sticky: true,
           content: (
             <div className={tableCss.actions}>
+              <Tooltip title="Edit entry" placement="top">
+                <IconButton onClick={() => {}} size="small">
+                  <SvgIcon component={EditIcon} inheritViewBox color="border" fontSize="small" />
+                </IconButton>
+              </Tooltip>
               <IconButton onClick={() => {}} size="small">
                 <SvgIcon component={DeleteIcon} inheritViewBox color="error" fontSize="small" />
               </IconButton>
