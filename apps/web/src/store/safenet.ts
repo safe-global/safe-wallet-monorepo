@@ -33,7 +33,6 @@ export type SafenetBalanceEntity = {
         address: string
         allowances: string
         balance: string
-        pendingSettlements: string
         total: string
       }
     }
@@ -48,6 +47,35 @@ export type SafenetSimulateTransactionRequest = {
 
 export type SafenetSimulationResponse = RequiredTenderlySimulation
 
+export type SafenetDebit = {
+  status: 'PENDING' | 'READY' | 'INITIATED' | 'CHALLENGED' | 'EXECUTED' | 'FAILED'
+  token: string
+  amount: string
+  chainId: number
+  feeBeneficiary: string
+  feeAmount: string
+  safe: string
+  initTxHash?: string
+  initAt?: string
+  executionTxHash?: string
+  executedAt?: string
+}
+
+export type SafenetSpend = {
+  token: string
+  amount: string
+}
+
+export type SafenetTransactionDetails = {
+  status: 'SUBMITTED' | 'EXECUTED' | 'FAILED'
+  fulfillmentTxHash?: string
+  fulfilledAt?: string
+  debits: SafenetDebit[]
+  spends: SafenetSpend[]
+  safe: string
+  chainId: number
+  safeTxHash: string
+}
 export type DeploySafenetAccountResponse = {
   safeAddress: string
   safeAccountConfig: {
@@ -119,6 +147,21 @@ export const safenetApi = createApi({
       }),
       providesTags: (_, __, arg) => [{ type: 'SafenetSimulation', id: arg.tx.safeTxHash }],
     }),
+    getSafenetTransactionDetails: builder.query<SafenetTransactionDetails, { chainId: string; safeTxHash: string }>({
+      query: ({ chainId, safeTxHash }) => ({
+        url: `/tx/details/${chainId}/${safeTxHash}`,
+        method: 'GET',
+      }),
+    }),
+    getSafenetTransactionDetailsBySettlement: builder.query<
+      SafenetTransactionDetails,
+      { chainId: string; settlementTxHash: string }
+    >({
+      query: ({ chainId, settlementTxHash }) => ({
+        url: `/tx/settlement/${chainId}/${settlementTxHash}/details`,
+        method: 'GET',
+      }),
+    }),
     deploySafenetAccount: builder.query<
       DeploySafenetAccountResponse,
       {
@@ -141,8 +184,10 @@ export const safenetApi = createApi({
 
 export const {
   useGetSafenetConfigQuery,
-  useGetSafenetAccountQuery,
   useLazyGetSafenetBalanceQuery,
   useLazySimulateSafenetTransactionQuery,
+  useGetSafenetTransactionDetailsQuery,
+  useGetSafenetTransactionDetailsBySettlementQuery,
+  useGetSafenetAccountQuery,
   useLazyDeploySafenetAccountQuery,
 } = safenetApi

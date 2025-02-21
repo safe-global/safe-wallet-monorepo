@@ -10,7 +10,6 @@ import { CreateSafeStatus } from '@/components/new-safe/create/steps/StatusStep'
 import type { NamedAddress } from '@/components/new-safe/create/types'
 import { AppRoutes } from '@/config/routes'
 import { useCurrentChain } from '@/hooks/useChains'
-import { useDarkMode } from '@/hooks/useDarkMode'
 import useWallet from '@/hooks/wallets/useWallet'
 import SafenetDarkLogo from '@/public/images/safenet/logo-safenet-dark-gradient.svg'
 import SafenetLogo from '@/public/images/safenet/logo-safenet.svg'
@@ -98,7 +97,6 @@ const CreateSafenetAccount = () => {
   const router = useRouter()
   const wallet = useWallet()
   const chain = useCurrentChain()
-  const isDarkMode = useDarkMode()
 
   const [safeName, setSafeName] = useState('')
   const [overviewNetworks, setOverviewNetworks] = useState<ChainInfo[]>()
@@ -204,7 +202,7 @@ const CreateSafenetAccount = () => {
               >
                 Discover
               </Typography>
-              <SafenetLogo height="24" className={isDarkMode ? css.logo : css.darkLogo} />
+              <SafenetLogo height="24" className={css.logo} />
             </Box>
           ) : (
             <Typography

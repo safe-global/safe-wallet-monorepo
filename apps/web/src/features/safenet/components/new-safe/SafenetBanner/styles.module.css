@@ -16,7 +16,7 @@
 }
 
 .darkBanner {
-  background-image: radial-gradient(119.01% 132.63% at 119.01% -14.15%, #FF5F00 0%, #FFD200 50%, #12FF80 100%);
+  background-image: radial-gradient(119.01% 132.63% at 119.01% -14.15%, #ff5f00 0%, #ffd200 50%, #12ff80 100%);
 }
 
 .backgroundLogo {
@@ -53,7 +53,7 @@
 .darkBanner .newTag {
   border-radius: 4px;
   padding: 2px var(--space-1);
-  background: radial-gradient(100.81% 103.11% at 96.36% 3.87%, #000000 0%, #003F54 100%);
+  background: radial-gradient(100.81% 103.11% at 96.36% 3.87%, #000000 0%, #003f54 100%);
 }
 
 .newTag > p {
@@ -71,7 +71,7 @@
 }
 
 .darkBanner .bannerButton {
-  background: radial-gradient(100.81% 103.11% at 96.36% 3.87%, #000000 0%, #003F54 100%);
+  background: radial-gradient(100.81% 103.11% at 96.36% 3.87%, #000000 0%, #003f54 100%);
 }
 
 .dismiss {

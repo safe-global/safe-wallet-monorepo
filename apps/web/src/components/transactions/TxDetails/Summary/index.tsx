@@ -14,6 +14,8 @@ import SafeTxGasForm from '../SafeTxGasForm'
 import DecodedData from '../TxData/DecodedData'
 import { SafeTxHashDataRow } from './SafeTxHashDataRow'
 import css from './styles.module.css'
+import SafenetTransactionDetails from '@/features/safenet/components/SafenetTransactionDetails'
+import useHasSafenetFeature from '@/features/safenet/hooks/useHasSafenetFeature'
 
 interface Props {
   txDetails: TransactionDetails
@@ -23,6 +25,7 @@ interface Props {
 
 const Summary = ({ txDetails, defaultExpanded = false, hideDecodedData = false }: Props): ReactElement => {
   const { safe } = useSafeInfo()
+  const isSafenetEnabled = useHasSafenetFeature()
   const [expanded, setExpanded] = useState<boolean>(defaultExpanded)
 
   const toggleExpanded = () => {
@@ -56,6 +59,8 @@ const Summary = ({ txDetails, defaultExpanded = false, hideDecodedData = false }
 
   return (
     <>
+      {isSafenetEnabled && safeTxHash && <SafenetTransactionDetails safeTxHash={safeTxHash} />}
+
       {txHash && (
         <TxDataRow datatestid="tx-hash" title="Transaction hash:">
           {generateDataRowValue(txHash, 'hash', true)}{' '}

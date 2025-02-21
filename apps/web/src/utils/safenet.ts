@@ -28,7 +28,7 @@ const convertSafenetBalanceToSafeClientGatewayBalance = (
   currency: string,
 ): SafeBalanceResponseWithSafenet => {
   const balances: SafeBalanceResponseWithSafenet = {
-    fiatTotal: '0',
+    fiatTotal: safenetBalance['USDC'].total,
     items: [],
   }
 
