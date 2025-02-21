@@ -12,6 +12,7 @@ import { useAppSelector } from '@/src/store/hooks'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { useEditAccountItem } from '@/src/features/AccountsSheet/AccountItem/hooks/useEditAccountItem'
 import { type Address } from '@/src/types/address'
+import { useRouter } from 'expo-router'
 
 type Props = {
   safeAddress: string | undefined
@@ -24,6 +25,7 @@ export const SettingsMenu = ({ safeAddress }: Props) => {
   const copyAndDispatchToast = useCopyAndDispatchToast()
   const theme = useTheme()
   const color = theme.color?.get()
+  const router = useRouter()
   const colorError = 'red'
 
   const toBeImplemented = () => {
@@ -55,7 +57,6 @@ export const SettingsMenu = ({ safeAddress }: Props) => {
         }
 
         if (nativeEvent.event === 'copy') {
-          console.log('copy')
           copyAndDispatchToast(safeAddress)
         }
 
@@ -81,8 +82,7 @@ export const SettingsMenu = ({ safeAddress }: Props) => {
         }
 
         if (nativeEvent.event === 'share') {
-          console.log('share')
-          toBeImplemented()
+          router.push('/share')
         }
       }}
       color={color}
