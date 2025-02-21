@@ -5,13 +5,8 @@
   gap: var(--space-1);
 }
 
-.logo,
-.darkLogo {
+.logo {
   margin-bottom: var(--space-2);
-}
-
-.darkLogo > path {
-  fill: var(--color-static-main);
 }
 
 .row {

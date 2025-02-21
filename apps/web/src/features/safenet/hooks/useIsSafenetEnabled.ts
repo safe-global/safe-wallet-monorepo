@@ -4,6 +4,10 @@ import { sameAddress } from '@/utils/addresses'
 import { skipToken } from '@reduxjs/toolkit/query/react'
 import useHasSafenetFeature from './useHasSafenetFeature'
 
+/**
+ * Checks that the Safenet feature flag is active and the user's Safe is enabled for Safenet
+ * @returns {boolean} Whether the Safenet feature is enabled for the user's Safe
+ */
 const useIsSafenetEnabled = () => {
   const { safe } = useSafeInfo()
   const hasSafenetFeature = useHasSafenetFeature()
