@@ -1,12 +1,3 @@
-.collapsedCell {
-  padding: 0px !important;
-  transition: padding 300ms ease-in-out;
-}
-
-.collapsedRow {
-  border-bottom: none !important;
-}
-
 .balanceBreakdown {
   margin: var(--space-2) 0;
   margin-left: var(--space-4);

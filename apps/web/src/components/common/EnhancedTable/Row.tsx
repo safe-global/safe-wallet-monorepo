@@ -3,13 +3,14 @@ import classNames from 'classnames'
 import type { EnhancedRow } from '.'
 import css from './styles.module.css'
 
-const AssetsRow = ({ row, index }: { row: EnhancedRow; index: number }) => {
+const Row = ({ row, index, rowClassName }: { row: EnhancedRow; index: number; rowClassName?: string }) => {
   return (
     <TableRow
       data-testid="table-row"
       tabIndex={-1}
+      key={row.key ?? index}
       selected={row.selected}
-      className={row.collapsed ? css.collapsedRow : undefined}
+      className={classNames({ [css.collapsedRow]: row.collapsed, rowClassName })}
     >
       {Object.entries(row.cells).map(([key, cell]) => (
         <TableCell
@@ -28,4 +29,4 @@ const AssetsRow = ({ row, index }: { row: EnhancedRow; index: number }) => {
   )
 }
 
-export default AssetsRow
+export default Row

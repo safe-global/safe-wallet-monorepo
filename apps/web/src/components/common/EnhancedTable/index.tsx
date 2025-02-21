@@ -1,4 +1,3 @@
-import type { SafenetBalance } from '@/utils/safenet'
 import Box from '@mui/material/Box'
 import Paper from '@mui/material/Paper'
 import Table from '@mui/material/Table'
@@ -12,13 +11,11 @@ import TableRow from '@mui/material/TableRow'
 import TableSortLabel from '@mui/material/TableSortLabel'
 import { visuallyHidden } from '@mui/utils'
 import classNames from 'classnames'
-import dynamic from 'next/dynamic'
-import type { ChangeEvent, ReactNode } from 'react'
+import type { ChangeEvent, ReactElement, ReactNode } from 'react'
 import { useState } from 'react'
-import AssetsRow from './AssetsRow'
+import ExpandableRow from './ExpandableRow'
+import Row from './Row'
 import css from './styles.module.css'
-
-const SafenetAssetsRow = dynamic(() => import('@/features/safenet/components/SafenetAssetsRow'))
 
 type EnhancedCell = {
   content: ReactNode
@@ -31,7 +28,7 @@ export type EnhancedRow = {
   collapsed?: boolean
   key?: string
   cells: Record<string, EnhancedCell>
-  safenetBalance?: SafenetBalance[]
+  expandableRow?: ReactElement
 }
 
 type EnhancedHeadCell = {
@@ -170,10 +167,16 @@ function EnhancedTable({
           <TableBody>
             {pagedRows.length > 0 ? (
               pagedRows.map((row, index) =>
-                !!row.safenetBalance ? (
-                  <SafenetAssetsRow key={row.key ?? index} row={row} index={index} numRows={pagedRows.length} />
+                !!row.expandableRow ? (
+                  <ExpandableRow
+                    key={row.key ?? index}
+                    row={row}
+                    index={index}
+                    numRows={pagedRows.length}
+                    rowClassName={rowClassName}
+                  />
                 ) : (
-                  <AssetsRow key={row.key ?? index} row={row} index={index} />
+                  <Row key={row.key ?? index} row={row} index={index} rowClassName={rowClassName} />
                 ),
               )
             ) : (

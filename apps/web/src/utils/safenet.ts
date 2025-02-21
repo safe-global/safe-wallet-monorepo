@@ -10,15 +10,17 @@ export type SafenetBalance = {
   fiatBalance: string
 }
 
+export type SafenetToken = {
+  tokenInfo: TokenInfo
+  balance: string
+  fiatBalance: string
+  fiatConversion: string
+  safenetBalance?: SafenetBalance[]
+}
+
 export type SafeBalanceResponseWithSafenet = {
   fiatTotal: string
-  items: Array<{
-    tokenInfo: TokenInfo
-    balance: string
-    fiatBalance: string
-    fiatConversion: string
-    safenetBalance?: SafenetBalance[]
-  }>
+  items: SafenetToken[]
 }
 
 const convertSafenetBalanceToSafeClientGatewayBalance = (
@@ -47,7 +49,7 @@ const convertSafenetBalanceToSafeClientGatewayBalance = (
         symbol: tokenName,
         decimals,
         balance: breakdown.balance,
-        fiatBalance:  currency === 'usd' ? ((parseInt(breakdown.balance) * 1) / 10 ** decimals).toString() : '0',
+        fiatBalance: currency === 'usd' ? ((parseInt(breakdown.balance) * 1) / 10 ** decimals).toString() : '0',
       })
     }
 

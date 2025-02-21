@@ -6,6 +6,7 @@ import TokenExplorerLink from '@/components/common/TokenExplorerLink'
 import TokenIcon from '@/components/common/TokenIcon'
 import Track from '@/components/common/Track'
 import CheckBalance from '@/features/counterfactual/CheckBalance'
+import SafenetBalanceBreakdown from '@/features/safenet/components/SafenetBalanceBreakdown'
 import StakeButton from '@/features/stake/components/StakeButton'
 import useIsStakingFeatureEnabled from '@/features/stake/hooks/useIsSwapFeatureEnabled'
 import SwapButton from '@/features/swap/components/SwapButton'
@@ -16,7 +17,6 @@ import { ASSETS_EVENTS } from '@/services/analytics/events/assets'
 import { STAKE_LABELS } from '@/services/analytics/events/stake'
 import { SWAP_LABELS } from '@/services/analytics/events/swaps'
 import { VisibilityOutlined } from '@mui/icons-material'
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import { Box, Checkbox, IconButton, Skeleton, SvgIcon, Tooltip, Typography } from '@mui/material'
 import type { TokenInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import { TokenType } from '@safe-global/safe-gateway-typescript-sdk'
@@ -120,12 +120,13 @@ const AssetsTable = ({
         const rawFiatValue = parseFloat(item.fiatBalance)
         const isNative = isNativeToken(item.tokenInfo)
         const isSelected = isAssetSelected(item.tokenInfo.address)
+        const isExpandableRow = !!item.safenetBalance && parseFloat(item.balance) > 0
 
         return {
           key: item.tokenInfo.address,
           selected: isSelected,
           collapsed: item.tokenInfo.address === hidingAsset,
-          safenetBalance: item.safenetBalance,
+          expandableRow: isExpandableRow ? <SafenetBalanceBreakdown asset={item.safenetBalance!} /> : undefined,
           cells: {
             asset: {
               rawValue: item.tokenInfo.name,
@@ -214,8 +215,6 @@ const AssetsTable = ({
                         </Tooltip>
                       </Track>
                     )}
-
-                    {!!item.safenetBalance && <ExpandMoreIcon color="border" />}
                   </>
                 </Box>
               ),
