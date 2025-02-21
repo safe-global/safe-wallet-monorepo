@@ -538,6 +538,18 @@
         "tags": ["auth"]
       }
     },
+    "/v1/auth/logout": {
+      "post": {
+        "operationId": "authLogoutV1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Empty response body. Cookie value is removed and set to expire."
+          }
+        },
+        "tags": ["auth"]
+      }
+    },
     "/v1/chains/{chainId}/safes/{safeAddress}/balances/{fiatCode}": {
       "get": {
         "operationId": "balancesGetBalancesV1",
@@ -2077,19 +2089,20 @@
         "tags": ["users"]
       }
     },
-    "/v1/users/wallet/{walletAddress}": {
+    "/v1/users/wallet/add": {
       "post": {
         "operationId": "usersAddWalletToUserV1",
-        "parameters": [
-          {
-            "name": "walletAddress",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Function"
+              }
             }
           }
-        ],
+        },
         "responses": {
           "200": {
             "description": "",
@@ -2102,7 +2115,7 @@
             }
           },
           "401": {
-            "description": "Signer address not provided"
+            "description": "Signer address not provided OR invalid message/signature"
           },
           "404": {
             "description": "User not found"
@@ -2112,7 +2125,9 @@
           }
         },
         "tags": ["users"]
-      },
+      }
+    },
+    "/v1/users/wallet/{walletAddress}": {
       "delete": {
         "operationId": "usersDeleteWalletFromUserV1",
         "parameters": [
@@ -2482,10 +2497,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "array",
-                "items": {
-                  "type": "string"
-                }
+                "$ref": "#/components/schemas/InviteUsersDto"
               }
             }
           }
@@ -2632,6 +2644,16 @@
             }
           }
         ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateRoleDto"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "Role updated"
@@ -5523,6 +5545,10 @@
         },
         "required": ["id"]
       },
+      "Function": {
+        "type": "object",
+        "properties": {}
+      },
       "WalletAddedToUser": {
         "type": "object",
         "properties": {
@@ -5566,17 +5592,33 @@
         },
         "required": ["id", "status"]
       },
-      "UserOrganizationsDto": {
+      "UserOrganizationDto": {
         "type": "object",
         "properties": {
-          "members": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/UserOrganization"
-            }
+          "id": {
+            "type": "number"
+          },
+          "role": {
+            "type": "string",
+            "enum": ["ADMIN", "MEMBER"]
+          },
+          "status": {
+            "type": "string",
+            "enum": ["INVITED", "ACTIVE", "DECLINED"]
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "user": {
+            "$ref": "#/components/schemas/UserDto"
           }
         },
-        "required": ["members"]
+        "required": ["id", "role", "status", "createdAt", "updatedAt", "user"]
       },
       "GetOrganizationResponse": {
         "type": "object",
@@ -5594,7 +5636,7 @@
           "userOrganizations": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/UserOrganizationsDto"
+              "$ref": "#/components/schemas/UserOrganizationDto"
             }
           }
         },
@@ -5648,6 +5690,31 @@
           }
         },
         "required": ["safes"]
+      },
+      "InviteUserDto": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string",
+            "enum": ["ADMIN", "MEMBER"]
+          }
+        },
+        "required": ["address", "role"]
+      },
+      "InviteUsersDto": {
+        "type": "object",
+        "properties": {
+          "users": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InviteUserDto"
+            }
+          }
+        },
+        "required": ["users"]
       },
       "Invitation": {
         "type": "object",
@@ -5709,6 +5776,28 @@
           }
         },
         "required": ["id", "role", "status", "createdAt", "updatedAt", "user"]
+      },
+      "UserOrganizationsDto": {
+        "type": "object",
+        "properties": {
+          "members": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserOrganization"
+            }
+          }
+        },
+        "required": ["members"]
+      },
+      "UpdateRoleDto": {
+        "type": "object",
+        "properties": {
+          "role": {
+            "type": "string",
+            "enum": ["ADMIN", "MEMBER"]
+          }
+        },
+        "required": ["role"]
       },
       "SafeList": {
         "type": "object",

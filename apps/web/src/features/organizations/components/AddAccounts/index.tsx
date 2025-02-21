@@ -3,7 +3,9 @@ import type { SafeItem, SafeItems } from '@/features/myAccounts/hooks/useAllSafe
 import { useSafesSearch } from '@/features/myAccounts/hooks/useSafesSearch'
 import AddManually, { type AddManuallyFormValues } from '@/features/organizations/components/AddAccounts/AddManually'
 import SafesList, { getSafeId } from '@/features/organizations/components/AddAccounts/SafesList'
+import { useCurrentOrgId } from '@/features/organizations/hooks/useCurrentOrgId'
 import SearchIcon from '@/public/images/common/search.svg'
+import { useOrganizationSafesCreateV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
 import debounce from 'lodash/debounce'
 import css from './styles.module.css'
 import { type AllSafeItems, useAllSafesGrouped } from '@/features/myAccounts/hooks/useAllSafesGrouped'
@@ -37,6 +39,8 @@ const AddAccounts = () => {
   const { orderBy } = useAppSelector(selectOrderByPreference)
   const safes = useAllSafesGrouped()
   const sortComparator = getComparator(orderBy)
+  const [addSafesToOrg] = useOrganizationSafesCreateV1Mutation()
+  const orgId = useCurrentOrgId()
 
   const allSafes = useMemo<AllSafeItems>(
     () => [...manualSafes, ...(safes.allMultiChainSafes ?? []), ...(safes.allSingleSafes ?? [])].sort(sortComparator),
@@ -59,9 +63,25 @@ const AddAccounts = () => {
   const selectedSafes = watch(`selectedSafes`)
   const selectedSafesLength = Object.values(selectedSafes).filter(Boolean).length
 
-  const onSubmit = handleSubmit((data) => {
-    // TODO: Submit data to safe list endpoint
-    console.log(data)
+  const onSubmit = handleSubmit(async (data) => {
+    const safesToAdd = Object.entries(data.selectedSafes)
+      .filter(([address, isSelected]) => isSelected && !address.startsWith('multichain_'))
+      .map(([key]) => {
+        const [chainId, address] = key.split(':')
+        return { chainId, address }
+      })
+
+    try {
+      const result = await addSafesToOrg({ organizationId: Number(orgId), body: safesToAdd })
+
+      if (result.error) {
+        // TODO: Handle error message
+      }
+    } catch (e) {
+      console.log(e)
+    } finally {
+      setOpen(false)
+    }
   })
 
   const handleAddSafe = (data: AddManuallyFormValues) => {
@@ -136,14 +156,14 @@ const AddAccounts = () => {
                   <Box p={2}>
                     <AddManually handleAddSafe={handleAddSafe} />
                   </Box>
+                  <DialogActions>
+                    <Button onClick={() => setOpen(false)}>Cancel</Button>
+                    <Button variant="contained" disabled={selectedSafesLength === 0} type="submit">
+                      Add Accounts ({selectedSafesLength})
+                    </Button>
+                  </DialogActions>
                 </form>
               </FormProvider>
-              <DialogActions>
-                <Button onClick={() => setOpen(false)}>Cancel</Button>
-                <Button variant="contained" disabled={selectedSafesLength === 0}>
-                  Add Accounts ({selectedSafesLength})
-                </Button>
-              </DialogActions>
             </Card>
           </Container>
         </DialogContent>
