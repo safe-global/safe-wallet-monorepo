@@ -8,7 +8,6 @@ import type {
 } from '@ledgerhq/device-signer-kit-ethereum'
 import type { Chain, WalletInit, WalletInterface } from '@web3-onboard/common'
 import type { Account, Asset, BasePath, DerivationPath, ScanAccountsOptions } from '@web3-onboard/hw-common'
-import type { Transaction } from 'ethers-v6'
 
 const LEDGER_LIVE_PATH: DerivationPath = "44'/60'"
 const LEDGER_DEFAULT_PATH: DerivationPath = "44'/60'/0'"
@@ -45,10 +44,11 @@ export function ledgerModuleV2(): WalletInit {
       getInterface: async ({ chains, EventEmitter }): Promise<WalletInterface> => {
         const DEFAULT_CHAIN = chains[0]
 
+        const { BigNumber } = await import('@ethersproject/bignumber')
+        const { hexaStringToBuffer } = await import('@ledgerhq/device-management-kit')
         const { createEIP1193Provider, ProviderRpcError, ProviderRpcErrorCode } = await import('@web3-onboard/common')
         const { accountSelect, getHardwareWalletProvider } = await import('@web3-onboard/hw-common')
-        const { BigNumber } = await import('ethers-v5')
-        const { getBytes, Signature, Transaction, JsonRpcProvider } = await import('ethers-v6')
+        const { getBytes, Signature, Transaction, JsonRpcProvider } = await import('ethers')
 
         const eventEmitter = new EventEmitter()
         const ledgerSdk = await getLedgerSdk()
@@ -151,7 +151,10 @@ export function ledgerModuleV2(): WalletInit {
                 value: txParams.value ? BigInt(txParams.value) : null,
               })
 
-              transaction.signature = await ledgerSdk.signTransaction(getAssertedDerivationPath(), transaction)
+              transaction.signature = await ledgerSdk.signTransaction(
+                getAssertedDerivationPath(),
+                hexaStringToBuffer(transaction.unsignedSerialized)!,
+              )
 
               return transaction.serialized
             },
@@ -312,18 +315,16 @@ export function ledgerModuleV2(): WalletInit {
 
 // Promisified Ledger SDK
 async function getLedgerSdk() {
-  const { BuiltinTransports, DeviceActionStatus, DeviceManagementKitBuilder } = await import(
-    '@ledgerhq/device-management-kit'
-  )
+  const { DeviceActionStatus, DeviceManagementKitBuilder } = await import('@ledgerhq/device-management-kit')
+  const { webHidIdentifier, webHidTransportFactory } = await import('@ledgerhq/device-transport-kit-web-hid')
   const { SignerEthBuilder } = await import('@ledgerhq/device-signer-kit-ethereum')
-  const { makeError } = await import('ethers-v6')
+  const { makeError } = await import('ethers')
   const { default: get } = await import('lodash/get')
   const { lastValueFrom } = await import('rxjs')
 
   // Get connected device and create signer
-  const transport = BuiltinTransports.USB
-  const dmk = new DeviceManagementKitBuilder().addTransport(transport).build()
-  const device = await lastValueFrom(dmk.startDiscovering({ transport }))
+  const dmk = new DeviceManagementKitBuilder().addTransport(webHidTransportFactory).build()
+  const device = await lastValueFrom(dmk.startDiscovering({ transport: webHidIdentifier }))
   const sessionId = await dmk.connect({ device })
 
   // TODO: Create a Safe-specific ContextModule for clear signing
@@ -367,7 +368,7 @@ async function getLedgerSdk() {
       const actionState = await lastValueFrom(signer.signMessage(derivationPath, message).observable)
       return mapOutput(actionState)
     },
-    signTransaction: async (derivationPath: string, transaction: Transaction): Promise<SignTransactionDAOutput> => {
+    signTransaction: async (derivationPath: string, transaction: Uint8Array): Promise<SignTransactionDAOutput> => {
       const actionState = await lastValueFrom(signer.signTransaction(derivationPath, transaction).observable)
       return mapOutput(actionState)
     },
