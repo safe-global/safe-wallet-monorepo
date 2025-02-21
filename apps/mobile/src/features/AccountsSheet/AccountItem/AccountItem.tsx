@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+import React, { useCallback, useMemo } from 'react'
 import { StyleSheet, TouchableOpacity, Alert } from 'react-native'
 import { View } from 'tamagui'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
@@ -37,6 +37,22 @@ export function AccountItem({ account, drag, chains, isDragging, activeAccount, 
 
   const rightNode = useMemo(() => getRightNodeLayout(isEdit, isActive), [isEdit, isActive])
 
+  const onDeleteSafePress = useCallback(() => {
+    Alert.alert('Delete Safe', 'Are you sure you want to delete this safe?', [
+      {
+        text: 'Cancel',
+        style: 'cancel',
+      },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: () => {
+          deleteSafe(account.address.value as Address)
+        },
+      },
+    ])
+  }, [account.address.value, deleteSafe])
+
   return (
     <TouchableOpacity
       style={styles.container}
@@ -52,23 +68,7 @@ export function AccountItem({ account, drag, chains, isDragging, activeAccount, 
         <AccountCard
           leftNode={
             isEdit && (
-              <TouchableOpacity
-                onPress={() => {
-                  Alert.alert('Delete Safe', 'Are you sure you want to delete this safe?', [
-                    {
-                      text: 'Cancel',
-                      style: 'cancel',
-                    },
-                    {
-                      text: 'Delete',
-                      style: 'destructive',
-                      onPress: () => {
-                        deleteSafe(account.address.value as Address)
-                      },
-                    },
-                  ])
-                }}
-              >
+              <TouchableOpacity onPress={onDeleteSafePress}>
                 <SafeFontIcon name="close-filled" color="$error" />
               </TouchableOpacity>
             )
