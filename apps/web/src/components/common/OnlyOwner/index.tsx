@@ -3,6 +3,7 @@ import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import useWallet from '@/hooks/wallets/useWallet'
 import useConnectWallet from '../ConnectWallet/useConnectWallet'
 import { Tooltip } from '@mui/material'
+import { DisableWrapper } from '@/components/wrappers/DisableWrapper'
 
 type CheckWalletProps = {
   children: (ok: boolean) => ReactElement
@@ -28,12 +29,16 @@ const OnlyOwner = ({ children }: CheckWalletProps): ReactElement => {
     }
   }, [isSafeOwner, wallet])
 
-  if (!message) return children(true)
+  if (!message) {
+    return <DisableWrapper>{children(true)}</DisableWrapper>
+  }
 
   return (
-    <Tooltip title={message}>
-      <span onClick={wallet ? undefined : connectWallet}>{children(false)}</span>
-    </Tooltip>
+    <DisableWrapper>
+      <Tooltip title={message}>
+        <span onClick={wallet ? undefined : connectWallet}>{children(false)}</span>
+      </Tooltip>
+    </DisableWrapper>
   )
 }
 

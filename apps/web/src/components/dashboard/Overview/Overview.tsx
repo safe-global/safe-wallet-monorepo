@@ -20,6 +20,7 @@ import { WidgetBody, WidgetContainer } from '../styled'
 import { useTheme } from '@mui/material/styles'
 import { SWAP_EVENTS, SWAP_LABELS } from '@/services/analytics/events/swaps'
 import useIsSwapFeatureEnabled from '@/features/swap/hooks/useIsSwapFeatureEnabled'
+import { DisableWrapper } from '@/components/wrappers/DisableWrapper'
 
 const SkeletonOverview = (
   <>
@@ -136,52 +137,57 @@ const Overview = (): ReactElement => {
                     <BuyCryptoButton />
                   </Grid>
 
-                  <Grid item xs={buttonWidth} sm="auto">
-                    <Button
-                      onClick={handleOnSend}
-                      size={isSmallScreen ? 'medium' : 'small'}
-                      variant="outlined"
-                      color="primary"
-                      startIcon={<ArrowIconNW />}
-                      fullWidth
-                    >
-                      Send
-                    </Button>
-                  </Grid>
-                  <Grid item xs={buttonWidth} sm="auto">
-                    <Track {...OVERVIEW_EVENTS.SHOW_QR} label="dashboard">
-                      <QrCodeButton>
-                        <Button
-                          size={isSmallScreen ? 'medium' : 'small'}
-                          variant="outlined"
-                          color="primary"
-                          startIcon={<ArrowIconSE />}
-                          fullWidth
-                        >
-                          Receive
-                        </Button>
-                      </QrCodeButton>
-                    </Track>
-                  </Grid>
-
-                  {isSwapFeatureEnabled && (
+                  {/** temporary disabled */}
+                  <DisableWrapper>
                     <Grid item xs={buttonWidth} sm="auto">
-                      <Track {...SWAP_EVENTS.OPEN_SWAPS} label={SWAP_LABELS.dashboard}>
-                        <Link href={{ pathname: AppRoutes.swap, query: router.query }} passHref type="button">
+                      <Button
+                        onClick={handleOnSend}
+                        size={isSmallScreen ? 'medium' : 'small'}
+                        variant="outlined"
+                        color="primary"
+                        startIcon={<ArrowIconNW />}
+                        fullWidth
+                      >
+                        Send
+                      </Button>
+                    </Grid>
+                    <Grid item xs={buttonWidth} sm="auto">
+                      <Track {...OVERVIEW_EVENTS.SHOW_QR} label="dashboard">
+                        <QrCodeButton>
                           <Button
-                            data-testid="overview-swap-btn"
                             size={isSmallScreen ? 'medium' : 'small'}
                             variant="outlined"
                             color="primary"
-                            startIcon={<SwapIcon />}
+                            startIcon={<ArrowIconSE />}
                             fullWidth
                           >
-                            Swap
+                            Receive
                           </Button>
-                        </Link>
+                        </QrCodeButton>
                       </Track>
                     </Grid>
-                  )}
+                  </DisableWrapper>
+
+                  <DisableWrapper>
+                    {isSwapFeatureEnabled && (
+                      <Grid item xs={buttonWidth} sm="auto">
+                        <Track {...SWAP_EVENTS.OPEN_SWAPS} label={SWAP_LABELS.dashboard}>
+                          <Link href={{ pathname: AppRoutes.swap, query: router.query }} passHref type="button">
+                            <Button
+                              data-testid="overview-swap-btn"
+                              size={isSmallScreen ? 'medium' : 'small'}
+                              variant="outlined"
+                              color="primary"
+                              startIcon={<SwapIcon />}
+                              fullWidth
+                            >
+                              Swap
+                            </Button>
+                          </Link>
+                        </Track>
+                      </Grid>
+                    )}
+                  </DisableWrapper>
                 </Grid>
               )}
             </Grid>

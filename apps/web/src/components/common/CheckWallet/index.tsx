@@ -9,6 +9,7 @@ import useIsWrongChain from '@/hooks/useIsWrongChain'
 import { Tooltip } from '@mui/material'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useIsNestedSafeOwner } from '@/hooks/useIsNestedSafeOwner'
+import { DisableWrapper } from '@/components/wrappers/DisableWrapper'
 
 type CheckWalletProps = {
   children: (ok: boolean) => ReactElement
@@ -90,14 +91,22 @@ const CheckWallet = ({
     safeLoaded,
   ])
 
-  if (checkNetwork && isWrongChain) return children(false)
-  if (!message) return children(true)
-  if (noTooltip) return children(false)
+  if (checkNetwork && isWrongChain) {
+    return <DisableWrapper>{children(false)}</DisableWrapper>
+  }
+  if (!message) {
+    return <DisableWrapper>{children(true)}</DisableWrapper>
+  }
+  if (noTooltip) {
+    return <DisableWrapper>{children(false)}</DisableWrapper>
+  }
 
   return (
-    <Tooltip title={message}>
-      <span onClick={wallet ? undefined : connectWallet}>{children(false)}</span>
-    </Tooltip>
+    <DisableWrapper>
+      <Tooltip title={message}>
+        <span onClick={wallet ? undefined : connectWallet}>{children(false)}</span>
+      </Tooltip>
+    </DisableWrapper>
   )
 }
 

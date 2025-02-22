@@ -85,6 +85,7 @@ export const HelpCenterArticle = {
   PROPOSERS: `${HELP_CENTER_URL}/en/articles/235770-proposers`,
   PUSH_NOTIFICATIONS: `${HELP_CENTER_URL}/en/articles/99197-how-to-start-receiving-web-push-notifications-in-the-web-wallet`,
   SWAP_WIDGET_FEES: `${HELP_CENTER_URL}/en/articles/178530-how-does-the-widget-fee-work-for-native-swaps`,
+  SAFE_CLI: `https://docs.safe.global/advanced/cli-overview`,
 } as const
 export const HelperCenterArticleTitles = {
   RECOVERY: 'Learn more about the Account recovery process',
@@ -95,7 +96,7 @@ export const RECOVERY_FEEDBACK_FORM =
 
 // Social
 export const DISCORD_URL = 'https://chat.safe.global'
-export const TWITTER_URL = 'https://twitter.com/safe'
+export const X_URL = 'https://x.com/safe'
 
 // Legal
 export const IS_OFFICIAL_HOST = process.env.NEXT_PUBLIC_IS_OFFICIAL_HOST === 'true'
@@ -114,3 +115,5 @@ export const SAFE_PASS_URL = 'community.safe.global'
 export const ECOSYSTEM_ID_ADDRESS =
   process.env.NEXT_PUBLIC_ECOSYSTEM_ID_ADDRESS || '0x0000000000000000000000000000000000000000'
 export const MULTICHAIN_HELP_ARTICLE = `${HELP_CENTER_URL}/en/articles/222612-multi-chain-safe`
+
+export const DISABLE_BLOCKCHAIN_INTERACTION = true

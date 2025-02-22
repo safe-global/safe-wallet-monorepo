@@ -9,23 +9,27 @@ import { OVERVIEW_EVENTS, OVERVIEW_LABELS } from '@/services/analytics'
 import { Box, Button, Link, SvgIcon, Typography } from '@mui/material'
 import classNames from 'classnames'
 import { useRouter } from 'next/router'
+import { DisableWrapper } from '@/components/wrappers/DisableWrapper'
 
 const AddSafeButton = ({ trackingLabel, onLinkClick }: { trackingLabel: string; onLinkClick?: () => void }) => {
   return (
-    <Track {...OVERVIEW_EVENTS.ADD_TO_WATCHLIST} label={trackingLabel}>
-      <Link href={AppRoutes.newSafe.load}>
-        <Button
-          disableElevation
-          variant="outlined"
-          size="small"
-          onClick={onLinkClick}
-          startIcon={<SvgIcon component={AddIcon} inheritViewBox fontSize="small" />}
-          sx={{ height: '36px', width: '100%', px: 2 }}
-        >
-          <Box mt="1px">Add</Box>
-        </Button>
-      </Link>
-    </Track>
+    <DisableWrapper>
+      <Track {...OVERVIEW_EVENTS.ADD_TO_WATCHLIST} label={trackingLabel}>
+        <Link href={AppRoutes.newSafe.load}>
+          <Button
+            data-testid="add-safe-button"
+            disableElevation
+            variant="outlined"
+            size="small"
+            onClick={onLinkClick}
+            startIcon={<SvgIcon component={AddIcon} inheritViewBox fontSize="small" />}
+            sx={{ height: '36px', width: '100%', px: 2 }}
+          >
+            <Box mt="1px">Add</Box>
+          </Button>
+        </Link>
+      </Track>
+    </DisableWrapper>
   )
 }
 

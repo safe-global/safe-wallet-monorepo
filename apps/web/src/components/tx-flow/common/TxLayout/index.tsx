@@ -15,6 +15,7 @@ import SafeLogo from '@/public/images/logo-no-text.svg'
 import { TxSecurityProvider } from '@/components/tx/security/shared/TxSecurityContext'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import SecurityWarnings from '@/components/tx/security/SecurityWarnings'
+import { DisableWrapper } from '@/components/wrappers/DisableWrapper'
 
 const TxLayoutHeader = ({
   hideNonce,
@@ -106,99 +107,107 @@ const TxLayout = ({
   }
 
   return (
-    <SafeTxProvider>
-      <TxInfoProvider>
-        <TxSecurityProvider>
-          <>
-            {/* Header status button */}
-            {!isReplacement && (
-              <IconButton
-                className={css.statusButton}
-                aria-label="Transaction status"
-                size="large"
-                onClick={toggleStatus}
-              >
-                <SafeLogo width={16} height={16} />
-              </IconButton>
-            )}
+    <DisableWrapper
+      message={
+        <Container>
+          <Typography variant="h1">This functionality is temporarily disabled</Typography>
+        </Container>
+      }
+    >
+      <SafeTxProvider>
+        <TxInfoProvider>
+          <TxSecurityProvider>
+            <>
+              {/* Header status button */}
+              {!isReplacement && (
+                <IconButton
+                  className={css.statusButton}
+                  aria-label="Transaction status"
+                  size="large"
+                  onClick={toggleStatus}
+                >
+                  <SafeLogo width={16} height={16} />
+                </IconButton>
+              )}
 
-            <Container className={css.container}>
-              <Grid
-                container
-                sx={{
-                  gap: 3,
-                  justifyContent: 'center',
-                }}
-              >
-                {/* Main content */}
-                <Grid item xs={12} md={7}>
-                  <div className={css.titleWrapper}>
-                    <Typography
-                      data-testid="modal-title"
-                      variant="h3"
-                      component="div"
-                      className={css.title}
-                      sx={{
-                        fontWeight: '700',
-                      }}
-                    >
-                      {title}
-                    </Typography>
-
-                    <ChainIndicator inline />
-                  </div>
-
-                  <Paper data-testid="modal-header" className={css.header}>
-                    {!hideProgress && (
-                      <Box className={css.progressBar}>
-                        <ProgressBar value={progress} />
-                      </Box>
-                    )}
-
-                    <TxLayoutHeader subtitle={subtitle} icon={icon} hideNonce={hideNonce} />
-                  </Paper>
-
-                  <div className={css.step}>
-                    {steps[step]}
-
-                    {onBack && step > 0 && (
-                      <Button
-                        data-testid="modal-back-btn"
-                        variant={isDesktop ? 'text' : 'outlined'}
-                        onClick={onBack}
-                        className={css.backButton}
-                        startIcon={<ArrowBackIcon fontSize="small" />}
+              <Container className={css.container}>
+                <Grid
+                  container
+                  sx={{
+                    gap: 3,
+                    justifyContent: 'center',
+                  }}
+                >
+                  {/* Main content */}
+                  <Grid item xs={12} md={7}>
+                    <div className={css.titleWrapper}>
+                      <Typography
+                        data-testid="modal-title"
+                        variant="h3"
+                        component="div"
+                        className={css.title}
+                        sx={{
+                          fontWeight: '700',
+                        }}
                       >
-                        Back
-                      </Button>
-                    )}
-                  </div>
-                </Grid>
+                        {title}
+                      </Typography>
 
-                {/* Sidebar */}
-                {!isReplacement && (
-                  <Grid item xs={12} md={4} className={classnames(css.widget, { [css.active]: statusVisible })}>
-                    {statusVisible && (
-                      <TxStatusWidget
-                        step={step}
-                        txSummary={txSummary}
-                        handleClose={() => setStatusVisible(false)}
-                        isBatch={isBatch}
-                        isMessage={isMessage}
-                      />
-                    )}
+                      <ChainIndicator inline />
+                    </div>
 
-                    <Box className={css.sticky}>
-                      <SecurityWarnings />
-                    </Box>
+                    <Paper data-testid="modal-header" className={css.header}>
+                      {!hideProgress && (
+                        <Box className={css.progressBar}>
+                          <ProgressBar value={progress} />
+                        </Box>
+                      )}
+
+                      <TxLayoutHeader subtitle={subtitle} icon={icon} hideNonce={hideNonce} />
+                    </Paper>
+
+                    <div className={css.step}>
+                      {steps[step]}
+
+                      {onBack && step > 0 && (
+                        <Button
+                          data-testid="modal-back-btn"
+                          variant={isDesktop ? 'text' : 'outlined'}
+                          onClick={onBack}
+                          className={css.backButton}
+                          startIcon={<ArrowBackIcon fontSize="small" />}
+                        >
+                          Back
+                        </Button>
+                      )}
+                    </div>
                   </Grid>
-                )}
-              </Grid>
-            </Container>
-          </>
-        </TxSecurityProvider>
-      </TxInfoProvider>
-    </SafeTxProvider>
+
+                  {/* Sidebar */}
+                  {!isReplacement && (
+                    <Grid item xs={12} md={4} className={classnames(css.widget, { [css.active]: statusVisible })}>
+                      {statusVisible && (
+                        <TxStatusWidget
+                          step={step}
+                          txSummary={txSummary}
+                          handleClose={() => setStatusVisible(false)}
+                          isBatch={isBatch}
+                          isMessage={isMessage}
+                        />
+                      )}
+
+                      <Box className={css.sticky}>
+                        <SecurityWarnings />
+                      </Box>
+                    </Grid>
+                  )}
+                </Grid>
+              </Container>
+            </>
+          </TxSecurityProvider>
+        </TxInfoProvider>
+      </SafeTxProvider>
+    </DisableWrapper>
   )
 }
 
