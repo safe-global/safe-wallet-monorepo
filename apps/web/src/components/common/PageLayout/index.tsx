@@ -12,7 +12,6 @@ import BatchSidebar from '@/components/batch/BatchSidebar'
 import { Alert, AlertTitle, Typography } from '@mui/material'
 import { DisableWrapper } from '@/components/wrappers/DisableWrapper'
 import MUILink from '@mui/material/Link'
-import Link from 'next/link'
 import { OpenInNew } from '@mui/icons-material'
 import { HelpCenterArticle, X_URL } from '@/config/constants'
 
@@ -49,9 +48,9 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
                 </AlertTitle>
                 Safe{'{'}Wallet{'}'} is working on a phased system restoration. Users now have access to Safe Accounts
                 in read-only. You can use the{' '}
-                <Link href={HelpCenterArticle.SAFE_CLI} target="_blank">
-                  <MUILink>Safe CLI</MUILink>
-                </Link>{' '}
+                <MUILink href={HelpCenterArticle.SAFE_CLI} target="_blank">
+                  Safe CLI
+                </MUILink>{' '}
                 to transact with your Safe Account onchain. <br />
                 <MUILink href={X_URL} target="_blank" style={{ display: 'flex', alignItems: 'center' }}>
                   Check X for updates <OpenInNew fontSize="small" color="primary" />
