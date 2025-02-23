@@ -139,6 +139,12 @@ export function ledgerModuleV2(): WalletInit {
               const txParams = args.params[0]
 
               const gasLimit = txParams.gas ?? txParams.gasLimit
+              const nonce =
+                txParams.nonce ??
+                ((await eip1193Provider.request({
+                  method: 'eth_getTransactionCount',
+                  params: [currentAccount!.address, 'latest'],
+                })) as string)
               const transaction = Transaction.from({
                 chainId: BigInt(currentChain.id),
                 data: txParams.data,
@@ -146,7 +152,7 @@ export function ledgerModuleV2(): WalletInit {
                 gasPrice: txParams.gasPrice ? BigInt(txParams.gasPrice) : null,
                 maxFeePerGas: txParams.maxFeePerGas ? BigInt(txParams.maxFeePerGas) : null,
                 maxPriorityFeePerGas: txParams.maxPriorityFeePerGas ? BigInt(txParams.maxPriorityFeePerGas) : null,
-                nonce: txParams.nonce ? parseInt(txParams.nonce, 16) : null,
+                nonce: parseInt(nonce, 16),
                 to: txParams.to,
                 value: txParams.value ? BigInt(txParams.value) : null,
               })
