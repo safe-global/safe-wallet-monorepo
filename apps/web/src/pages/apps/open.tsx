@@ -1,7 +1,7 @@
 import type { NextPage } from 'next'
 import { useRouter } from 'next/router'
 import { useCallback } from 'react'
-import { Box, CircularProgress } from '@mui/material'
+import { Box, CircularProgress, Typography } from '@mui/material'
 
 import { useSafeAppUrl } from '@/hooks/safe-apps/useSafeAppUrl'
 import { useSafeApps } from '@/hooks/safe-apps/useSafeApps'
@@ -83,6 +83,32 @@ const SafeApps: NextPage = () => {
   if (isLoading) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" height="100%">
+        <CircularProgress />
+      </Box>
+    )
+  }
+
+  if (!remoteSafeAppsLoading && !isLoading && safeApp.chainIds.length === 0) {
+    setTimeout(() => {
+      router.push({
+        pathname: AppRoutes.apps.index,
+        query: { safe: router.query.safe },
+      })
+    }, 3000)
+    return (
+      <Box
+        display="flex"
+        flexDirection="column"
+        alignItems="center"
+        justifyContent="center"
+        height="100%"
+        textAlign="center"
+        p={2}
+      >
+        <Typography variant="body1" gutterBottom>
+          Chain {chainId} is not supported in this app. <br />
+          Redirecting to home page
+        </Typography>
         <CircularProgress />
       </Box>
     )
