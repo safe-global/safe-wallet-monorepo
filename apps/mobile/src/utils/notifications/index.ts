@@ -1,4 +1,5 @@
 import { AndroidChannel, AndroidImportance } from '@notifee/react-native'
+import { HDNodeWallet, Wallet } from 'ethers'
 
 export enum ChannelId {
   DEFAULT_NOTIFICATION_CHANNEL_ID = 'DEFAULT_NOTIFICATION_CHANNEL_ID',
@@ -35,4 +36,13 @@ export const notificationChannels = [
 export function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
   const timeout = new Promise<never>((_, reject) => setTimeout(() => reject(new Error('Timeout')), ms))
   return Promise.race([promise, timeout])
+}
+
+export function getSigner(
+  safeOwnerPK: string | undefined,
+  randomDelegatedAccount: HDNodeWallet,
+): Wallet | HDNodeWallet {
+  const signerAccount = safeOwnerPK ? new Wallet(safeOwnerPK) : randomDelegatedAccount
+
+  return signerAccount
 }

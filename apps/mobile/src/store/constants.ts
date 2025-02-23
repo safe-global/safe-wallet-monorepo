@@ -343,3 +343,10 @@ export enum PressActionId {
 }
 
 export const LAUNCH_ACTIVITY = 'global.safe.mobileapp.ui.MainActivity'
+
+export const ERROR_MSG = 'useDelegateKey: Something went wrong'
+
+export enum DELEGATED_ACCOUNT_TYPE {
+  REGULAR = 'REGULAR',
+  OWNER = 'OWNER',
+}

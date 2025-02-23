@@ -1,7 +1,9 @@
+//@ts-ignore
+globalThis.RNFB_SILENCE_MODULAR_DEPRECATION_WARNINGS = true
 import messaging, { FirebaseMessagingTypes } from '@react-native-firebase/messaging'
 import Logger from '@/src/utils/logger'
 import NotificationsService from './NotificationService'
-import { ChannelId } from '@/src/utils/notifications'
+import { ChannelId, withTimeout } from '@/src/utils/notifications'
 import { store } from '@/src/store'
 import { savePushToken } from '@/src/store/notificationsSlice'
 
@@ -11,6 +13,7 @@ class FCMService {
   async getFCMToken(): Promise<string | undefined> {
     const { fcmToken } = store.getState().notifications
     const token = fcmToken || undefined
+
     if (!token) {
       Logger.info('getFCMToken: No FCM token found')
     }
@@ -19,7 +22,10 @@ class FCMService {
 
   async saveFCMToken(): Promise<void> {
     try {
-      const fcmToken = await messaging().getToken()
+      // Register the app with FCM forcefully to get the token since it has not been reliably saved otherwise
+      await messaging().registerDeviceForRemoteMessages()
+      const fcmToken = await withTimeout(messaging().getToken(), 10000)
+      Logger.info('FCMService :: fcmToken', fcmToken)
       if (fcmToken) {
         store.dispatch(savePushToken(fcmToken))
       }
@@ -52,16 +58,14 @@ class FCMService {
   }
 
   async registerAppWithFCM(): Promise<void> {
-    if (!messaging().registerDeviceForRemoteMessages) {
-      await messaging()
-        .registerDeviceForRemoteMessages()
-        .then((status: unknown) => {
-          Logger.info('registerDeviceForRemoteMessages status', status)
-        })
-        .catch((error) => {
-          Logger.error('registerAppWithFCM: Something went wrong', error)
-        })
-    }
+    await messaging()
+      .registerDeviceForRemoteMessages()
+      .then((status: unknown) => {
+        Logger.info('registerDeviceForRemoteMessages status', status)
+      })
+      .catch((error) => {
+        Logger.error('registerAppWithFCM: Something went wrong', error)
+      })
   }
 }
 export default new FCMService()
