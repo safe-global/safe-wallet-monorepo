@@ -19,6 +19,7 @@ import { asError } from '@/services/exceptions/utils'
 import { isWalletRejection } from '@/utils/wallets'
 import { useSigner } from '@/hooks/wallets/useWallet'
 import { NestedTxSuccessScreenFlow } from '@/components/tx-flow/flows'
+import { useValidateTxData } from '@/hooks/useValidateTxData'
 
 export const SignForm = ({
   safeTx,
@@ -44,6 +45,8 @@ export const SignForm = ({
   const [submitError, setSubmitError] = useState<Error | undefined>()
   const [isRejectedByUser, setIsRejectedByUser] = useState<Boolean>(false)
 
+  const [validationError, , validationLoading] = useValidateTxData(txId)
+
   // Hooks
   const { signTx, addToBatch } = txActions
   const { setTxFlow } = useContext(TxModalContext)
@@ -60,7 +63,7 @@ export const SignForm = ({
       return
     }
 
-    if (!safeTx) return
+    if (!safeTx || validationError) return
 
     setIsSubmittable(false)
     setSubmitError(undefined)
@@ -99,7 +102,13 @@ export const SignForm = ({
 
   const cannotPropose = !isOwner
   const submitDisabled =
-    !safeTx || !isSubmittable || disableSubmit || cannotPropose || (needsRiskConfirmation && !isRiskConfirmed)
+    !safeTx ||
+    !isSubmittable ||
+    disableSubmit ||
+    cannotPropose ||
+    (needsRiskConfirmation && !isRiskConfirmed) ||
+    validationError !== undefined ||
+    validationLoading
 
   return (
     <form onSubmit={handleSubmit}>
@@ -117,6 +126,10 @@ export const SignForm = ({
         <Box mt={1}>
           <WalletRejectionError />
         </Box>
+      )}
+
+      {validationError !== undefined && (
+        <ErrorMessage error={new Error(validationError)}>Error validation transaction data</ErrorMessage>
       )}
 
       <Divider className={commonCss.nestedDivider} sx={{ pt: 3 }} />

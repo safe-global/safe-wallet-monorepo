@@ -30,6 +30,7 @@ import { TxSecurityContext } from '../security/shared/TxSecurityContext'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import NonOwnerError from '@/components/tx/SignOrExecuteForm/NonOwnerError'
 import WalletRejectionError from '@/components/tx/SignOrExecuteForm/WalletRejectionError'
+import { useValidateTxData } from '@/hooks/useValidateTxData'
 
 export const ExecuteForm = ({
   safeTx,
@@ -55,6 +56,8 @@ export const ExecuteForm = ({
   const [isSubmittable, setIsSubmittable] = useState<boolean>(true)
   const [submitError, setSubmitError] = useState<Error | undefined>()
   const [isRejectedByUser, setIsRejectedByUser] = useState<Boolean>(false)
+
+  const [validationError, , validationLoading] = useValidateTxData(txId)
 
   // Hooks
   const currentChain = useCurrentChain()
@@ -129,7 +132,9 @@ export const ExecuteForm = ({
     disableSubmit ||
     isExecutionLoop ||
     cannotPropose ||
-    (needsRiskConfirmation && !isRiskConfirmed)
+    (needsRiskConfirmation && !isRiskConfirmed) ||
+    validationError !== undefined ||
+    validationLoading
 
   return (
     <>
@@ -185,6 +190,10 @@ export const ExecuteForm = ({
           <Box mt={1}>
             <WalletRejectionError />
           </Box>
+        )}
+
+        {validationError !== undefined && (
+          <ErrorMessage error={new Error(validationError)}>Error validation transaction data</ErrorMessage>
         )}
 
         <Divider className={commonCss.nestedDivider} sx={{ pt: 3 }} />
