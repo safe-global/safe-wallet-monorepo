@@ -1,11 +1,12 @@
-import { DISABLE_BLOCKCHAIN_INTERACTION } from '@/config/constants'
+import { isBlockChainInteractionDisabled } from '@/utils/utils'
 
 type Props = {
   children: React.ReactNode
   message?: React.ReactNode
 }
+
 export const DisableWrapper = ({ children, message }: Props) => {
-  if (DISABLE_BLOCKCHAIN_INTERACTION) {
+  if (isBlockChainInteractionDisabled()) {
     if (message) {
       return message
     }

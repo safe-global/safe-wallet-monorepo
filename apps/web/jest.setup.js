@@ -10,6 +10,12 @@ jest.mock('@web3-onboard/trezor', () => jest.fn())
 jest.mock('@web3-onboard/walletconnect', () => jest.fn())
 jest.mock('@safe-global/safe-client-gateway-sdk')
 
+// For now set this to false in all tests
+jest.mock('@/utils/utils', () => ({
+  ...jest.requireActual('@/utils/utils'),
+  isBlockChainInteractionDisabled: jest.fn(() => false),
+}))
+
 const mockOnboardState = {
   chains: [],
   walletModules: [],
