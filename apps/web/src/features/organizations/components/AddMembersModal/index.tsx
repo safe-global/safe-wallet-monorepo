@@ -98,9 +98,7 @@ const AddMembersModal = ({ onClose }: { onClose: () => void }): ReactElement => 
 
       const response = await inviteMembers({
         orgId: Number(orgId),
-        // TODO: update type from CGW
-        // @ts-ignore
-        body: { users: [{ address: data.address, role: data.role }] },
+        inviteUsersDto: { users: [{ address: data.address, role: data.role }] },
       })
       if (response.data) {
         onClose()
