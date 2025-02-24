@@ -122,7 +122,7 @@ export const RecipientRow = ({ fieldArray, removable = true, remove, disableSpen
               startIcon={<SvgIcon component={DeleteIcon} inheritViewBox fontSize="small" />}
               size="compact"
             >
-              Remove Recipient
+              Remove recipient
             </Button>
           </Box>
         )}

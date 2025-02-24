@@ -191,7 +191,7 @@ export const CreateTokenTransfer = ({
                     startIcon={<SvgIcon component={AddIcon} inheritViewBox fontSize="small" />}
                     size="large"
                   >
-                    Add Recipient
+                    Add recipient
                   </Button>
                   <Typography
                     variant="body2"
