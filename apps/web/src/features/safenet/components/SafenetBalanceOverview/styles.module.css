@@ -5,6 +5,10 @@
   color: var(--color-text-secondary);
 }
 
+.container span {
+  color: var(--color-text-secondary);
+}
+
 .title {
   display: flex;
   gap: var(--space-1);
@@ -21,6 +25,18 @@
   display: flex;
   gap: var(--space-5);
   justify-content: space-between;
+}
+
+.row > span {
+  color: var(--color-text-secondary);
+}
+
+.lightTotal > span{
+  color: var(--color-background-paper);
+}
+
+.darkTotal > span {
+  color: var(--color-static-main);
 }
 
 .divider {
