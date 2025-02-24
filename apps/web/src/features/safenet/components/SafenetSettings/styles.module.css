@@ -8,6 +8,16 @@
   align-self: flex-end;
 }
 
+.closeIcon {
+  height: 24px;
+  width: 24px;
+  color: var(--color-error-main);
+  background: var(--color-error-background);
+  border-radius: var(--space-2);
+  padding: 4px;
+  align-self: flex-end;
+}
+
 .chainIndicator {
   min-width: 0;
   margin-left: var(--space-1);

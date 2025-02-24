@@ -5,16 +5,16 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import SafenetLogo from '@/public/images/logo-safenet.svg'
 import CheckIcon from '@mui/icons-material/Check'
 import { Button, Grid, Paper, Stack, Typography } from '@mui/material'
+import { useState } from 'react'
 import useIsSafenetEnabled from '../../hooks/useIsSafenetEnabled'
+import DisableSafenetModal from './DisableSafenetModal'
 import css from './styles.module.css'
 
 const SafenetEnabled = () => {
   const { safe } = useSafeInfo()
   const { chainId, guard, modules } = safe
 
-  const disableSafenet = () => {
-    // TODO: Handle Safenet opt out
-  }
+  const [openSafenetModal, setOpenSafenetModal] = useState<boolean>(false)
 
   // This condition should never be met
   if (!guard || !modules) return
@@ -32,10 +32,16 @@ const SafenetEnabled = () => {
         <SafenetModuleDisplay key={module.value} name={module.name} address={module.value} chainId={chainId} />
       ))}
       <SafenetGuardDisplay name={guard.name} address={guard.value} chainId={chainId} />
-      <Button onClick={disableSafenet} variant="outlined" size="small" sx={{ alignSelf: 'flex-start' }}>
+      <Button
+        onClick={() => setOpenSafenetModal(true)}
+        variant="outlined"
+        size="small"
+        sx={{ alignSelf: 'flex-start' }}
+      >
         Disable Safenet on
         <ChainIndicator chainId={chainId} className={css.chainIndicator} />
       </Button>
+      {openSafenetModal && <DisableSafenetModal onClose={() => setOpenSafenetModal(false)} />}
     </Stack>
   )
 }
