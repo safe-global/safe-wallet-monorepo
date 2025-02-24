@@ -30,7 +30,6 @@ const OrganizationMembers = () => {
 
   const filteredMembers = useMembersSearch(activeMembers, searchQuery)
 
-  // TODO: Render members list
   return (
     <>
       <Typography variant="h1" mb={3}>
