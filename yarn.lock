@@ -8572,7 +8572,7 @@ __metadata:
     remark-gfm: "npm:^4.0.0"
     remark-heading-id: "npm:^1.0.1"
     remark-mdx-frontmatter: "npm:^5.0.0"
-    semver: "npm:^7.6.3"
+    semver: "npm:^7.7.1"
     storybook: "npm:^8.3.4"
     ts-prune: "npm:^0.10.3"
     typechain: "npm:^8.3.2"
@@ -30620,6 +30620,15 @@ __metadata:
   bin:
     semver: bin/semver.js
   checksum: 10/1ef3a85bd02a760c6ef76a45b8c1ce18226de40831e02a00bad78485390b98b6ccaa31046245fc63bba4a47a6a592b6c7eedc65cc47126e60489f9cc1ce3ed7e
+  languageName: node
+  linkType: hard
+
+"semver@npm:^7.7.1":
+  version: 7.7.1
+  resolution: "semver@npm:7.7.1"
+  bin:
+    semver: bin/semver.js
+  checksum: 10/4cfa1eb91ef3751e20fc52e47a935a0118d56d6f15a837ab814da0c150778ba2ca4f1a4d9068b33070ea4273629e615066664c2cfcd7c272caf7a8a0f6518b2c
   languageName: node
   linkType: hard
 
