@@ -24,7 +24,7 @@ interface AdvancedTxDetailsProps {
 export const AdvancedTxDetails = ({
   txDetails,
   defaultExpanded = false,
-  defaultView = View.Decoded,
+  defaultView = View.Raw,
   hideDecodedData = false,
 }: AdvancedTxDetailsProps): ReactElement | undefined => {
   const [expanded, setExpanded] = useState<boolean>(defaultExpanded)
