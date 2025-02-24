@@ -45,9 +45,10 @@ const TokenAmountInput = ({
     resetField,
     watch,
     setValue,
-    getValues,
     trigger,
   } = useFormContext()
+
+  const { getValues } = useFormContext<MultiTokenTransferParams>()
 
   const tokenAddressField = getFieldName(TokenAmountFields.tokenAddress, fieldArray)
   const amountField = getFieldName(TokenAmountFields.amount, fieldArray)
@@ -69,7 +70,7 @@ const TokenAmountInput = ({
       }
 
       // Validate the total amount of the selected token in the multi transfer
-      const recipients = getValues(MultiTokenTransferFields.recipients) as MultiTokenTransferParams['recipients']
+      const recipients = getValues(MultiTokenTransferFields.recipients)
       const sumAmount = recipients.reduce<number>(
         (acc, item) => acc + (sameAddress(item.tokenAddress, tokenAddress) && !!item.amount ? Number(item.amount) : 0),
         0,
