@@ -27,7 +27,17 @@ export type SafenetAccountEntity = {
 }
 
 export type SafenetBalanceEntity = {
-  [tokenSymbol: string]: { total: string }
+  [tokenSymbol: string]: {
+    breakdown: {
+      [chainId: string]: {
+        address: string
+        allowances: string
+        balance: string
+        total: string
+      }
+    }
+    total: string
+  }
 }
 
 export type SafenetSimulateTransactionRequest = {

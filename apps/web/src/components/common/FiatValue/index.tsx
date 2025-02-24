@@ -1,28 +1,14 @@
-import type { CSSProperties, ReactElement } from 'react'
-import { useMemo } from 'react'
-import { Tooltip, Typography } from '@mui/material'
 import { useAppSelector } from '@/store'
 import { selectCurrency } from '@/store/settingsSlice'
 import { formatCurrency, formatCurrencyPrecise } from '@/utils/formatNumber'
-
-const style = { whiteSpace: 'nowrap' } as CSSProperties
-
-const getStyle = (safenet: boolean) => ({
-  ...style,
-  ...(safenet
-    ? {
-        borderRadius: '40px',
-        background: 'rgba(238, 213, 9, 0.15)',
-        padding: 'calc(var(--space-1) / 2) var(--space-1)',
-      }
-    : {}),
-})
+import { Tooltip, Typography } from '@mui/material'
+import type { ReactElement } from 'react'
+import { useMemo } from 'react'
 
 const FiatValue = ({
   value,
   maxLength,
   precise,
-  safenet = false,
 }: {
   value: string | number
   maxLength?: number
@@ -46,7 +32,7 @@ const FiatValue = ({
 
   return (
     <Tooltip title={precise ? undefined : preciseFiat}>
-      <span suppressHydrationWarning style={getStyle(safenet)}>
+      <span suppressHydrationWarning>
         {precise ? (
           <>
             {whole}

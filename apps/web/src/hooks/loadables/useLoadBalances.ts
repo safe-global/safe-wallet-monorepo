@@ -80,7 +80,12 @@ export const useLoadBalances = (): AsyncResult<SafeBalanceResponse> => {
         balanceQueries.push(
           getSafenetBalances(safeAddress)
             .then((safenetBalances) =>
-              convertSafenetBalanceToSafeClientGatewayBalance(safenetBalances, safenetConfig, Number(chainId)),
+              convertSafenetBalanceToSafeClientGatewayBalance(
+                safenetBalances,
+                safenetConfig,
+                Number(chainId),
+                currency,
+              ),
             )
             .catch(() => ({
               fiatTotal: '0',

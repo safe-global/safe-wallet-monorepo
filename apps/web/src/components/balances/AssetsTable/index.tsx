@@ -1,29 +1,30 @@
-import CheckBalance from '@/features/counterfactual/CheckBalance'
-import { type ReactElement } from 'react'
-import { Box, IconButton, Checkbox, Skeleton, SvgIcon, Tooltip, Typography } from '@mui/material'
-import type { TokenInfo } from '@safe-global/safe-gateway-typescript-sdk'
-import { TokenType } from '@safe-global/safe-gateway-typescript-sdk'
-import css from './styles.module.css'
+import AddFundsCTA from '@/components/common/AddFunds'
+import EnhancedTable, { type EnhancedTableProps } from '@/components/common/EnhancedTable'
 import FiatValue from '@/components/common/FiatValue'
 import TokenAmount from '@/components/common/TokenAmount'
-import TokenIcon from '@/components/common/TokenIcon'
-import EnhancedTable, { type EnhancedTableProps } from '@/components/common/EnhancedTable'
 import TokenExplorerLink from '@/components/common/TokenExplorerLink'
+import TokenIcon from '@/components/common/TokenIcon'
 import Track from '@/components/common/Track'
-import { ASSETS_EVENTS } from '@/services/analytics/events/assets'
-import InfoIcon from '@/public/images/notifications/info.svg'
-import { VisibilityOutlined } from '@mui/icons-material'
-import TokenMenu from '../TokenMenu'
-import useBalances from '@/hooks/useBalances'
-import { useHideAssets, useVisibleAssets } from './useHideAssets'
-import AddFundsCTA from '@/components/common/AddFunds'
-import SwapButton from '@/features/swap/components/SwapButton'
-import { SWAP_LABELS } from '@/services/analytics/events/swaps'
-import SendButton from './SendButton'
-import useIsSwapFeatureEnabled from '@/features/swap/hooks/useIsSwapFeatureEnabled'
-import useIsStakingFeatureEnabled from '@/features/stake/hooks/useIsSwapFeatureEnabled'
-import { STAKE_LABELS } from '@/services/analytics/events/stake'
+import CheckBalance from '@/features/counterfactual/CheckBalance'
+import SafenetBalanceBreakdown from '@/features/safenet/components/SafenetBalanceBreakdown'
 import StakeButton from '@/features/stake/components/StakeButton'
+import useIsStakingFeatureEnabled from '@/features/stake/hooks/useIsSwapFeatureEnabled'
+import SwapButton from '@/features/swap/components/SwapButton'
+import useIsSwapFeatureEnabled from '@/features/swap/hooks/useIsSwapFeatureEnabled'
+import useBalances from '@/hooks/useBalances'
+import InfoIcon from '@/public/images/notifications/info.svg'
+import { ASSETS_EVENTS } from '@/services/analytics/events/assets'
+import { STAKE_LABELS } from '@/services/analytics/events/stake'
+import { SWAP_LABELS } from '@/services/analytics/events/swaps'
+import { VisibilityOutlined } from '@mui/icons-material'
+import { Box, Checkbox, IconButton, Skeleton, SvgIcon, Tooltip, Typography } from '@mui/material'
+import type { TokenInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import { TokenType } from '@safe-global/safe-gateway-typescript-sdk'
+import { type ReactElement } from 'react'
+import TokenMenu from '../TokenMenu'
+import SendButton from './SendButton'
+import css from './styles.module.css'
+import { useHideAssets, useVisibleAssets } from './useHideAssets'
 
 const skeletonCells: EnhancedTableProps['rows'][0]['cells'] = {
   asset: {
@@ -119,11 +120,13 @@ const AssetsTable = ({
         const rawFiatValue = parseFloat(item.fiatBalance)
         const isNative = isNativeToken(item.tokenInfo)
         const isSelected = isAssetSelected(item.tokenInfo.address)
+        const isExpandableRow = !!item.safenetBalance && parseFloat(item.balance) > 0
 
         return {
           key: item.tokenInfo.address,
           selected: isSelected,
           collapsed: item.tokenInfo.address === hidingAsset,
+          expandableRow: isExpandableRow ? <SafenetBalanceBreakdown asset={item.safenetBalance!} /> : undefined,
           cells: {
             asset: {
               rawValue: item.tokenInfo.name,
@@ -133,7 +136,7 @@ const AssetsTable = ({
                   <TokenIcon
                     logoUri={item.tokenInfo.logoUri}
                     tokenSymbol={item.tokenInfo.symbol}
-                    safenet={item.safenetAssetFlag}
+                    safenet={!!item.safenetBalance}
                   />
 
                   <Typography>{item.tokenInfo.name}</Typography>
