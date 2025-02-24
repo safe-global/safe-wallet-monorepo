@@ -1,4 +1,4 @@
-import { type ReactElement, useCallback, useState } from 'react'
+import { type ReactElement, useState } from 'react'
 import {
   Alert,
   Box,
@@ -6,25 +6,22 @@ import {
   CircularProgress,
   DialogActions,
   DialogContent,
-  IconButton,
   MenuItem,
   Select,
   Stack,
   SvgIcon,
   Typography,
 } from '@mui/material'
-import { FormProvider, useFieldArray, useForm, useFormContext, Controller } from 'react-hook-form'
+import { FormProvider, useForm, Controller } from 'react-hook-form'
 import ModalDialog from '@/components/common/ModalDialog'
 import memberIcon from '@/public/images/orgs/member.svg'
 import adminIcon from '@/public/images/orgs/admin.svg'
-import AddIcon from '@/public/images/common/add.svg'
-import DeleteIcon from '@/public/images/common/delete.svg'
-import { sameAddress } from '@/utils/addresses'
 import AddressInput from '@/components/common/AddressInput'
 import CheckIcon from '@mui/icons-material/Check'
 import css from './styles.module.css'
 import { useUserOrganizationsInviteUserV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
 import { useCurrentOrgId } from '../../hooks/useCurrentOrgId'
+import NameInput from '@/components/common/NameInput'
 
 export enum MemberRole {
   ADMIN = 'ADMIN',
@@ -32,6 +29,7 @@ export enum MemberRole {
 }
 
 type MemberField = {
+  name: string
   address: string
   role: MemberRole
 }
@@ -50,7 +48,7 @@ const RoleMenuItem = ({
   return (
     <Box width="100%" alignItems="center" className={css.roleMenuItem}>
       <SvgIcon mr={1} gridArea="icon" component={isAdmin ? adminIcon : memberIcon} inheritViewBox fontSize="small" />
-      <Typography gridArea="title" fontWeight="bold">
+      <Typography gridArea="title" fontWeight={hasDescription ? 'bold' : undefined}>
         {isAdmin ? 'Admin' : 'Member'}
       </Typography>
       {hasDescription && (
@@ -58,7 +56,7 @@ const RoleMenuItem = ({
           <Box gridArea="description">
             <Typography variant="body2" sx={{ maxWidth: '300px', whiteSpace: 'normal', wordWrap: 'break-word' }}>
               {isAdmin
-                ? 'Admins can create and delete organizations, invite members and more.'
+                ? 'Admins can create and delete organizations, invite members, and more.'
                 : 'Can view the organization data.'}
             </Typography>
           </Box>
@@ -71,88 +69,22 @@ const RoleMenuItem = ({
   )
 }
 
-export type AddMembersFormFields = {
-  members: MemberField[]
-}
-
-const MemberRow = ({
-  index,
-  onRemove,
-  showRemoveButton,
-}: {
-  index: number
-  onRemove: () => void
-  showRemoveButton: boolean
-}): ReactElement => {
-  const { getValues, control } = useFormContext()
-
-  const validateMemberAddress = useCallback(
-    async (address: string) => {
-      const members = getValues('members')
-      if (members.filter((member: MemberField) => sameAddress(member.address, address)).length > 1) {
-        return 'Address is already added'
-      }
-    },
-    [getValues],
-  )
-
-  return (
-    <Stack direction="row" spacing={2} alignItems="center" mt={3}>
-      <Box my={2} sx={{ flex: 1, minWidth: 0 }}>
-        <AddressInput validate={validateMemberAddress} name={`members.${index}.address`} label="Address" required />
-      </Box>
-      <Controller
-        control={control}
-        name={`members.${index}.role`}
-        defaultValue={MemberRole.MEMBER}
-        render={({ field: { value, onChange, ...field } }) => (
-          <Select
-            {...field}
-            value={value}
-            onChange={onChange}
-            required
-            sx={{ minWidth: '150px', py: 0.5 }}
-            renderValue={(val) => <RoleMenuItem role={val as MemberRole} />}
-          >
-            <MenuItem value={MemberRole.ADMIN}>
-              <RoleMenuItem role={MemberRole.ADMIN} hasDescription selected={value === MemberRole.ADMIN} />
-            </MenuItem>
-            <MenuItem value={MemberRole.MEMBER}>
-              <RoleMenuItem role={MemberRole.MEMBER} hasDescription selected={value === MemberRole.MEMBER} />
-            </MenuItem>
-          </Select>
-        )}
-      />
-      <Box sx={{ visibility: showRemoveButton ? 'visible' : 'hidden' }}>
-        <IconButton onClick={onRemove} aria-label="Remove member" sx={{ p: 0, color: 'error.main' }}>
-          <SvgIcon component={DeleteIcon} inheritViewBox />
-        </IconButton>
-      </Box>
-    </Stack>
-  )
-}
-
 const AddMembersModal = ({ onClose }: { onClose: () => void }): ReactElement => {
   const orgId = useCurrentOrgId()
   const [error, setError] = useState<string>()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [inviteMembers] = useUserOrganizationsInviteUserV1Mutation()
-  const methods = useForm<AddMembersFormFields>({
+
+  const methods = useForm<MemberField>({
     mode: 'onChange',
     defaultValues: {
-      members: [{ address: '', role: MemberRole.MEMBER }],
+      name: '',
+      address: '',
+      role: MemberRole.MEMBER,
     },
   })
+
   const { handleSubmit, formState, control } = methods
-
-  const { fields, append, remove } = useFieldArray({
-    control,
-    name: 'members',
-  })
-
-  const handleAddMember = () => {
-    append({ address: '', role: MemberRole.MEMBER })
-  }
 
   const onSubmit = handleSubmit(async (data) => {
     setError(undefined)
@@ -166,14 +98,11 @@ const AddMembersModal = ({ onClose }: { onClose: () => void }): ReactElement => 
 
       const response = await inviteMembers({
         orgId: Number(orgId),
-        // TODO: update type from CGW
-        // @ts-ignore
-        body: { users: data.members.map((member) => ({ address: member.address, role: member.role })) },
+        inviteUsersDto: { users: [{ address: data.address, role: data.role }] },
       })
       if (response.data) {
         onClose()
       }
-
       if (response.error) {
         setError('Invite failed. Please try again.')
       }
@@ -186,32 +115,45 @@ const AddMembersModal = ({ onClose }: { onClose: () => void }): ReactElement => 
   })
 
   return (
-    <ModalDialog open onClose={onClose} dialogTitle="Add members" hideChainIndicator>
+    <ModalDialog open onClose={onClose} dialogTitle="Add member" hideChainIndicator>
       <FormProvider {...methods}>
         <form onSubmit={onSubmit}>
           <DialogContent sx={{ py: 2 }}>
-            <Typography mb={4}>
-              You can invite signers of the Safe Accounts in your organization, or any other wallet addresses.
+            <Typography mb={2}>
+              Invite a signer of the Safe Accounts, or any other wallet address. Anyone in the organization can see
+              their name.
             </Typography>
 
-            {fields.map((field, index) => (
-              <MemberRow
-                key={field.id}
-                index={index}
-                onRemove={() => remove(index)}
-                showRemoveButton={fields.length > 1}
-              />
-            ))}
+            <Stack spacing={3}>
+              <Stack direction="row" spacing={2} alignItems="center">
+                <NameInput name="name" label="Name" required />
 
-            <Button
-              sx={{ mt: 3, px: 1 }}
-              variant="text"
-              onClick={handleAddMember}
-              startIcon={<SvgIcon component={AddIcon} inheritViewBox fontSize="small" />}
-              size="small"
-            >
-              Add member
-            </Button>
+                <Controller
+                  control={control}
+                  name="role"
+                  defaultValue={MemberRole.MEMBER}
+                  render={({ field: { value, onChange, ...field } }) => (
+                    <Select
+                      {...field}
+                      value={value}
+                      onChange={onChange}
+                      required
+                      sx={{ minWidth: '150px', py: 0.5 }}
+                      renderValue={(role) => <RoleMenuItem role={role as MemberRole} />}
+                    >
+                      <MenuItem value={MemberRole.ADMIN}>
+                        <RoleMenuItem role={MemberRole.ADMIN} hasDescription selected={value === MemberRole.ADMIN} />
+                      </MenuItem>
+                      <MenuItem value={MemberRole.MEMBER}>
+                        <RoleMenuItem role={MemberRole.MEMBER} hasDescription selected={value === MemberRole.MEMBER} />
+                      </MenuItem>
+                    </Select>
+                  )}
+                />
+              </Stack>
+
+              <AddressInput name="address" label="Address" required />
+            </Stack>
 
             {error && (
               <Alert severity="error" sx={{ mt: 2 }}>
@@ -225,7 +167,7 @@ const AddMembersModal = ({ onClose }: { onClose: () => void }): ReactElement => 
               Cancel
             </Button>
             <Button type="submit" variant="contained" disabled={!formState.isValid} disableElevation>
-              {isSubmitting ? <CircularProgress size={20} /> : 'Add members'}
+              {isSubmitting ? <CircularProgress size={20} /> : 'Add member'}
             </Button>
           </DialogActions>
         </form>
