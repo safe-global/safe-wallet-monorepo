@@ -64,6 +64,11 @@ const AddressInput = ({
   const isDomainLookupEnabled = !!currentChain && hasFeature(currentChain, FEATURES.DOMAIN_LOOKUP)
   const { address, resolverError, resolving } = useNameResolver(isDomainLookupEnabled ? watchedValue : '')
 
+  // Re-validate when chainId changes
+  useEffect(() => {
+    trigger(address)
+  }, [currentChain?.chainId, trigger, address])
+
   // errors[name] doesn't work with nested field names like 'safe.address', need to use the lodash get
   const fieldError = resolverError || get(errors, name)
 
