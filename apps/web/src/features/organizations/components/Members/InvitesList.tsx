@@ -32,8 +32,12 @@ const InvitesList = ({ invitedMembers }: { invitedMembers: UserOrganization[] })
   const [deleteInvite] = useUserOrganizationsRemoveUserV1Mutation()
   const currentOrgId = useCurrentOrgId()
 
-  const handleDeleteInvite = (invitedId: number) => {
-    deleteInvite({ orgId: Number(currentOrgId), userId: invitedId })
+  const handleDeleteInvite = async (invitedId: number) => {
+    try {
+      await deleteInvite({ orgId: Number(currentOrgId), userId: invitedId })
+    } catch (error) {
+      // TODO: handle error
+    }
   }
 
   const rows = invitedMembers.map((member) => {
