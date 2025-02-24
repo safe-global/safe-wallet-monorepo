@@ -1,6 +1,8 @@
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { useSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
 import useAsync from '@/hooks/useAsync'
+import { logError } from '@/services/exceptions'
+import ErrorCodes from '@/services/exceptions/ErrorCodes'
 import { ethers } from 'ethers'
 import { useContext } from 'react'
 
@@ -41,7 +43,7 @@ export const useValidateTxData = (txId?: string) => {
             return `The signature for the signer ${signature.signer} is invalid`
           }
         } catch (e) {
-          console.error(e)
+          logError(ErrorCodes._818, e)
           return `The signature for the signer ${signature.signer} could not be validated`
         }
       }
@@ -54,7 +56,7 @@ export const useValidateTxData = (txId?: string) => {
             return `The signature for the signer ${signature.signer} is invalid`
           }
         } catch (e) {
-          console.error(e)
+          logError(ErrorCodes._818, e)
           return `The signature for the signer ${signature.signer} could not be validated`
         }
       }

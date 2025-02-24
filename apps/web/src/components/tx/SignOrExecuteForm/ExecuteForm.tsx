@@ -1,6 +1,6 @@
 import useWalletCanPay from '@/hooks/useWalletCanPay'
 import madProps from '@/utils/mad-props'
-import { type ReactElement, type SyntheticEvent, useContext, useState } from 'react'
+import { type ReactElement, type SyntheticEvent, useContext, useMemo, useState } from 'react'
 import { CircularProgress, Box, Button, CardActions, Divider } from '@mui/material'
 import classNames from 'classnames'
 
@@ -57,8 +57,11 @@ export const ExecuteForm = ({
   const [submitError, setSubmitError] = useState<Error | undefined>()
   const [isRejectedByUser, setIsRejectedByUser] = useState<Boolean>(false)
 
-  const [validationError, , validationLoading] = useValidateTxData(txId)
-
+  const [validationResult, , validationLoading] = useValidateTxData(txId)
+  const validationError = useMemo(
+    () => (validationResult !== undefined ? new Error(validationResult) : undefined),
+    [validationResult],
+  )
   // Hooks
   const currentChain = useCurrentChain()
   const { executeTx } = txActions
@@ -193,7 +196,7 @@ export const ExecuteForm = ({
         )}
 
         {validationError !== undefined && (
-          <ErrorMessage error={new Error(validationError)}>Error validation transaction data</ErrorMessage>
+          <ErrorMessage error={validationError}>Error validating transaction data</ErrorMessage>
         )}
 
         <Divider className={commonCss.nestedDivider} sx={{ pt: 3 }} />
