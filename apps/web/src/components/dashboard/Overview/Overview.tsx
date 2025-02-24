@@ -6,6 +6,7 @@ import QrCodeButton from '@/components/sidebar/QrCodeButton'
 import { TxModalContext } from '@/components/tx-flow'
 import { NewTxFlow } from '@/components/tx-flow/flows'
 import { AppRoutes } from '@/config/routes'
+import SafenetBalanceOverview from '@/features/safenet/components/SafenetBalanceOverview'
 import useIsSafenetEnabled from '@/features/safenet/hooks/useIsSafenetEnabled'
 import useIsSwapFeatureEnabled from '@/features/swap/hooks/useIsSwapFeatureEnabled'
 import useSafeInfo from '@/hooks/useSafeInfo'
@@ -17,13 +18,10 @@ import { OVERVIEW_EVENTS, trackEvent } from '@/services/analytics'
 import { SWAP_EVENTS, SWAP_LABELS } from '@/services/analytics/events/swaps'
 import { Button, Grid, Skeleton, Stack, Typography, useMediaQuery } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useContext, type ReactElement } from 'react'
 import { WidgetBody, WidgetContainer } from '../styled'
-
-const SafenetBalanceOverview = dynamic(() => import('@/features/safenet/components/SafenetBalanceOverview'))
 
 const SkeletonOverview = (
   <>
