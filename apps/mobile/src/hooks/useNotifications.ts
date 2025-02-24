@@ -58,7 +58,7 @@ const useNotifications = (): NotificationsProps => {
 
   const enableNotifications = useCallback(async () => {
     try {
-      // Firebase Cloud Messaging
+      // // Firebase Cloud Messaging
       await FCMService.registerAppWithFCM()
       await FCMService.saveFCMToken()
       FCMService.listenForMessagesBackground()

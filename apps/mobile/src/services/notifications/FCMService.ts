@@ -1,5 +1,3 @@
-//@ts-ignore
-globalThis.RNFB_SILENCE_MODULAR_DEPRECATION_WARNINGS = true
 import messaging, { FirebaseMessagingTypes } from '@react-native-firebase/messaging'
 import Logger from '@/src/utils/logger'
 import NotificationsService from './NotificationService'
@@ -24,7 +22,9 @@ class FCMService {
     try {
       // Register the app with FCM forcefully to get the token since it has not been reliably saved otherwise
       await messaging().registerDeviceForRemoteMessages()
+
       const fcmToken = await withTimeout(messaging().getToken(), 10000)
+
       Logger.info('FCMService :: fcmToken', fcmToken)
       if (fcmToken) {
         store.dispatch(savePushToken(fcmToken))

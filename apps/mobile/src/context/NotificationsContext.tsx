@@ -1,7 +1,8 @@
-import React, { createContext, useContext, ReactNode } from 'react'
+import React, { createContext, useContext, ReactNode, useEffect } from 'react'
 
 import useNotifications from '@/src/hooks/useNotifications'
 import { FirebaseMessagingTypes } from '@react-native-firebase/messaging'
+import FCMService from '../services/notifications/FCMService'
 
 interface NotificationContextType {
   isAppNotificationEnabled: boolean
@@ -24,9 +25,15 @@ interface NotificationProviderProps {
 }
 
 export const NotificationsProvider: React.FC<NotificationProviderProps> = ({ children }) => {
-  /**
-   * Enables notifications for the app if the user has enabled them
-   */
+  useEffect(() => {
+    // Firebase Cloud Messaging
+    // TODO: Need to check if this is the right place to call these functions since this will be triggered despite the user's notification settings
+    FCMService.registerAppWithFCM()
+    FCMService.saveFCMToken()
+    FCMService.getFCMToken()
+    FCMService.listenForMessagesBackground()
+  }, [])
+
   const { isAppNotificationEnabled, fcmToken, remoteMessages } = useNotifications()
 
   return (

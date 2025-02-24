@@ -60,7 +60,7 @@ export function useGTW() {
               message,
               signature,
             },
-          })
+          }).unwrap()
         } else {
           delegatesPostDelegateV2({
             chainId,
@@ -71,7 +71,7 @@ export function useGTW() {
               signature,
               label: DELEGATED_ACCOUNT_TYPE.OWNER,
             },
-          })
+          }).unwrap()
         }
 
         const NOTIFICATIONS_GRANTED =
