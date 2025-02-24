@@ -150,7 +150,7 @@
     "storybook": "^8.4.6",
     "ts-node": "^10.9.2",
     "typescript": "~5.3.3",
-    "typescript-eslint": "^8.22.0",
+    "typescript-eslint": "^8.24.1",
     "webpack": "^5.97.1"
   },
   "private": true
