@@ -1,4 +1,6 @@
 import './shim'
+//@ts-ignore
+globalThis.RNFB_SILENCE_MODULAR_DEPRECATION_WARNINGS = true
 import { registerRootComponent } from 'expo'
 
 import App from './App'
