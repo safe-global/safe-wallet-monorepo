@@ -1,6 +1,6 @@
 import EthHashInfo from '@/components/common/EthHashInfo'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { Box, Grid, IconButton, Paper, SvgIcon, Typography } from '@mui/material'
+import { Box, Grid, IconButton, Paper, Stack, SvgIcon, Typography } from '@mui/material'
 
 import CheckWallet from '@/components/common/CheckWallet'
 import ExternalLink from '@/components/common/ExternalLink'
@@ -69,7 +69,7 @@ const TransactionGuards = () => {
         </Grid>
 
         <Grid item xs>
-          <Box>
+          <Stack spacing={2}>
             <Typography>
               Transaction guards impose additional constraints that are checked prior to executing a Safe transaction.
               Transaction guards are potentially risky, so make sure to only use transaction guards from trusted
@@ -88,7 +88,7 @@ const TransactionGuards = () => {
             ) : (
               <GuardDisplay guardAddress={safe.guard.value} chainId={safe.chainId} />
             )}
-          </Box>
+          </Stack>
         </Grid>
       </Grid>
     </Paper>
