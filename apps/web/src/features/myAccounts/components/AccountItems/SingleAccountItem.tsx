@@ -1,7 +1,19 @@
 import { selectUndeployedSafe } from '@/features/counterfactual/store/undeployedSafesSlice'
+import type { SafeListProps } from '@/features/myAccounts/components/SafesList'
+import OrgSafeContextMenu from '@/features/organizations/components/SafeAccounts/OrgSafeContextMenu'
 import { type SafeOverview } from '@safe-global/safe-gateway-typescript-sdk'
 import { useMemo, useRef } from 'react'
-import { ListItemButton, Box, Typography, IconButton, SvgIcon, Skeleton, useTheme, useMediaQuery } from '@mui/material'
+import {
+  ListItemButton,
+  Box,
+  Typography,
+  IconButton,
+  SvgIcon,
+  Skeleton,
+  useTheme,
+  useMediaQuery,
+  ListItem,
+} from '@mui/material'
 import Link from 'next/link'
 import Track from '@/components/common/Track'
 import { OVERVIEW_EVENTS, OVERVIEW_LABELS, PIN_SAFE_LABELS, trackEvent } from '@/services/analytics'
@@ -36,11 +48,17 @@ import { AccountInfoChips } from '../AccountInfoChips'
 type AccountItemProps = {
   safeItem: SafeItem
   safeOverview?: SafeOverview
-  onLinkClick?: () => void
+  onLinkClick?: SafeListProps['onLinkClick']
   isMultiChainItem?: boolean
+  isOrgSafe?: boolean
 }
 
-const SingleAccountItem = ({ onLinkClick, safeItem, isMultiChainItem = false }: AccountItemProps) => {
+const SingleAccountItem = ({
+  onLinkClick,
+  safeItem,
+  isMultiChainItem = false,
+  isOrgSafe = false,
+}: AccountItemProps) => {
   const { chainId, address, isReadOnly, isPinned } = safeItem
   const chain = useAppSelector((state) => selectChainById(state, chainId))
   const undeployedSafe = useAppSelector((state) => selectUndeployedSafe(state, chainId, address))
@@ -131,117 +149,119 @@ const SingleAccountItem = ({ onLinkClick, safeItem, isMultiChainItem = false }: 
     trackEvent({ ...OVERVIEW_EVENTS.PIN_SAFE, label: PIN_SAFE_LABELS.unpin })
   }
 
-  return (
-    <ListItemButton
-      ref={elementRef}
-      data-testid="safe-list-item"
-      selected={isCurrentSafe}
-      className={classnames(css.listItem, { [css.currentListItem]: isCurrentSafe })}
-    >
-      <Track {...OVERVIEW_EVENTS.OPEN_SAFE} label={trackingLabel}>
-        <Link onClick={onLinkClick} href={href} className={css.safeLink}>
-          <Box
+  const content = (
+    <>
+      <Box
+        sx={{
+          pr: 2.5,
+        }}
+      >
+        <SafeIcon
+          address={address}
+          owners={safeOwners.length > 0 ? safeOwners.length : undefined}
+          threshold={safeThreshold > 0 ? safeThreshold : undefined}
+          isMultiChainItem={isMultiChainItem}
+          chainId={chainId}
+        />
+      </Box>
+
+      <Typography variant="body2" component="div" className={css.safeAddress}>
+        {name && (
+          <Typography
+            variant="subtitle2"
+            component="p"
+            className={css.safeName}
             sx={{
-              pr: 2.5,
+              fontWeight: 'bold',
             }}
           >
-            <SafeIcon
-              address={address}
-              owners={safeOwners.length > 0 ? safeOwners.length : undefined}
-              threshold={safeThreshold > 0 ? safeThreshold : undefined}
-              isMultiChainItem={isMultiChainItem}
-              chainId={chainId}
-            />
-          </Box>
-
-          <Typography variant="body2" component="div" className={css.safeAddress}>
-            {name && (
-              <Typography
-                variant="subtitle2"
-                component="p"
-                className={css.safeName}
-                sx={{
-                  fontWeight: 'bold',
-                }}
-              >
-                {name}
-              </Typography>
-            )}
-            {isMultiChainItem ? (
-              <Typography
-                component="span"
-                sx={{
-                  color: 'var(--color-primary-light)',
-                  fontSize: 'inherit',
-                }}
-              >
-                {chain?.chainName}
-              </Typography>
-            ) : (
-              <>
-                {chain?.shortName}:
-                <Typography
-                  component="span"
-                  sx={{
-                    color: 'var(--color-primary-light)',
-                    fontSize: 'inherit',
-                  }}
-                >
-                  {shortenAddress(address)}
-                </Typography>
-              </>
-            )}
-            {!isMobile && (
-              <AccountInfoChips
-                isActivating={isActivating}
-                isReadOnly={isReadOnly}
-                undeployedSafe={!!undeployedSafe}
-                isVisible={isVisible}
-                safeOverview={safeOverview ?? null}
-                chain={chain}
-                href={href}
-                onLinkClick={onLinkClick}
-                trackingLabel={trackingLabel}
-              />
-            )}
+            {name}
           </Typography>
-
-          {!isMultiChainItem && <ChainIndicator chainId={chainId} responsive onlyLogo className={css.chainIndicator} />}
-
-          <Typography variant="body2" sx={{ fontWeight: 'bold', textAlign: 'right', pl: 2 }}>
-            {undeployedSafe ? null : safeOverview ? (
-              <FiatValue value={safeOverview.fiatTotal} />
-            ) : (
-              <Skeleton variant="text" sx={{ ml: 'auto' }} />
-            )}
+        )}
+        {isMultiChainItem ? (
+          <Typography
+            component="span"
+            sx={{
+              color: 'var(--color-primary-light)',
+              fontSize: 'inherit',
+            }}
+          >
+            {chain?.chainName}
           </Typography>
-        </Link>
-      </Track>
+        ) : (
+          <>
+            {chain?.shortName}:
+            <Typography
+              component="span"
+              sx={{
+                color: 'var(--color-primary-light)',
+                fontSize: 'inherit',
+              }}
+            >
+              {shortenAddress(address)}
+            </Typography>
+          </>
+        )}
+        {!isMobile && (
+          <AccountInfoChips
+            isActivating={isActivating}
+            isReadOnly={isReadOnly}
+            undeployedSafe={!!undeployedSafe}
+            isVisible={isVisible}
+            safeOverview={safeOverview ?? null}
+            chain={chain}
+            href={href}
+            onLinkClick={onLinkClick}
+            trackingLabel={trackingLabel}
+          />
+        )}
+      </Typography>
+
+      {!isMultiChainItem && <ChainIndicator chainId={chainId} responsive onlyLogo className={css.chainIndicator} />}
+
+      <Typography variant="body2" sx={{ fontWeight: 'bold', textAlign: 'right', pl: 2 }}>
+        {undeployedSafe ? null : safeOverview ? (
+          <FiatValue value={safeOverview.fiatTotal} />
+        ) : (
+          <Skeleton variant="text" sx={{ ml: 'auto' }} />
+        )}
+      </Typography>
+    </>
+  )
+
+  const actions = (
+    <>
       {!isMultiChainItem && (
         <>
-          <IconButton
-            data-testid="bookmark-icon"
-            edge="end"
-            size="medium"
-            sx={{ mx: 1 }}
-            onClick={isPinned ? removeFromPinnedList : addToPinnedList}
-          >
-            <SvgIcon
-              component={isPinned ? BookmarkedIcon : BookmarkIcon}
-              inheritViewBox
-              color={isPinned ? 'primary' : undefined}
-              fontSize="small"
-            />
-          </IconButton>
+          {!isOrgSafe && (
+            <IconButton
+              data-testid="bookmark-icon"
+              edge="end"
+              size="medium"
+              sx={{ mx: 1 }}
+              onClick={isPinned ? removeFromPinnedList : addToPinnedList}
+            >
+              <SvgIcon
+                component={isPinned ? BookmarkedIcon : BookmarkIcon}
+                inheritViewBox
+                color={isPinned ? 'primary' : undefined}
+                fontSize="small"
+              />
+            </IconButton>
+          )}
 
-          <SafeListContextMenu
-            name={name}
-            address={address}
-            chainId={chainId}
-            addNetwork={isReplayable}
-            rename
-            undeployedSafe={!!undeployedSafe}
-          />
+          {isOrgSafe ? (
+            <OrgSafeContextMenu />
+          ) : (
+            <SafeListContextMenu
+              name={name}
+              address={address}
+              chainId={chainId}
+              addNetwork={isReplayable}
+              rename
+              undeployedSafe={!!undeployedSafe}
+            />
+          )}
         </>
       )}
 
@@ -258,6 +278,28 @@ const SingleAccountItem = ({ onLinkClick, safeItem, isMultiChainItem = false }: 
           trackingLabel={trackingLabel}
         />
       )}
+    </>
+  )
+
+  return isOrgSafe ? (
+    <ListItem className={css.listItem}>
+      <Box className={css.safeLink}>{content}</Box>
+      {actions}
+    </ListItem>
+  ) : (
+    <ListItemButton
+      ref={elementRef}
+      data-testid="safe-list-item"
+      selected={isCurrentSafe}
+      className={classnames(css.listItem, { [css.currentListItem]: isCurrentSafe })}
+    >
+      <Track {...OVERVIEW_EVENTS.OPEN_SAFE} label={trackingLabel}>
+        <Link onClick={onLinkClick} href={href} className={css.safeLink}>
+          {content}
+        </Link>
+      </Track>
+
+      {actions}
     </ListItemButton>
   )
 }

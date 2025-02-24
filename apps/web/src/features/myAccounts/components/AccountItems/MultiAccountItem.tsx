@@ -1,5 +1,7 @@
 import { selectUndeployedSafes } from '@/features/counterfactual/store/undeployedSafesSlice'
 import NetworkLogosList from '@/features/multichain/components/NetworkLogosList'
+import type { SafeListProps } from '@/features/myAccounts/components/SafesList'
+import OrgSafeContextMenu from '@/features/organizations/components/SafeAccounts/OrgSafeContextMenu'
 import { showNotification } from '@/store/notificationsSlice'
 import SingleAccountItem from '@/features/myAccounts/components/AccountItems/SingleAccountItem'
 import type { SafeOverview } from '@safe-global/safe-gateway-typescript-sdk'
@@ -45,12 +47,6 @@ import { addOrUpdateSafe, pinSafe, selectAllAddedSafes, unpinSafe } from '@/stor
 import { defaultSafeInfo } from '@/store/safeInfoSlice'
 import { selectOrderByPreference } from '@/store/orderByPreferenceSlice'
 import { getComparator } from '@/features/myAccounts/utils/utils'
-
-type MultiAccountItemProps = {
-  multiSafeAccountItem: MultiChainSafeItem
-  safeOverviews?: SafeOverview[]
-  onLinkClick?: () => void
-}
 
 export const MultichainIndicator = ({ safes }: { safes: SafeItem[] }) => {
   return (
@@ -213,7 +209,14 @@ function usePinActions(
   return { addToPinnedList, removeFromPinnedList }
 }
 
-const MultiAccountItem = ({ onLinkClick, multiSafeAccountItem }: MultiAccountItemProps) => {
+type MultiAccountItemProps = {
+  multiSafeAccountItem: MultiChainSafeItem
+  safeOverviews?: SafeOverview[]
+  onLinkClick?: SafeListProps['onLinkClick']
+  isOrgSafe?: boolean
+}
+
+const MultiAccountItem = ({ onLinkClick, multiSafeAccountItem, isOrgSafe = false }: MultiAccountItemProps) => {
   const {
     address,
     name,
@@ -297,29 +300,37 @@ const MultiAccountItem = ({ onLinkClick, multiSafeAccountItem }: MultiAccountIte
               )}
             </Typography>
           </Box>
-          <IconButton
-            data-testid="bookmark-icon"
-            edge="end"
-            size="medium"
-            sx={{ mx: 1 }}
-            onClick={(event) => {
-              event.stopPropagation()
-              isPinned ? removeFromPinnedList() : addToPinnedList()
-            }}
-          >
-            <SvgIcon
-              component={isPinned ? BookmarkedIcon : BookmarkIcon}
-              inheritViewBox
-              color={isPinned ? 'primary' : undefined}
-              fontSize="small"
+
+          {!isOrgSafe && (
+            <IconButton
+              data-testid="bookmark-icon"
+              edge="end"
+              size="medium"
+              sx={{ mx: 1 }}
+              onClick={(event) => {
+                event.stopPropagation()
+                isPinned ? removeFromPinnedList() : addToPinnedList()
+              }}
+            >
+              <SvgIcon
+                component={isPinned ? BookmarkedIcon : BookmarkIcon}
+                inheritViewBox
+                color={isPinned ? 'primary' : undefined}
+                fontSize="small"
+              />
+            </IconButton>
+          )}
+
+          {isOrgSafe ? (
+            <OrgSafeContextMenu />
+          ) : (
+            <MultiAccountContextMenu
+              name={multiSafeAccountItem.name ?? ''}
+              address={address}
+              chainIds={deployedChainIds}
+              addNetwork={hasReplayableSafe}
             />
-          </IconButton>
-          <MultiAccountContextMenu
-            name={multiSafeAccountItem.name ?? ''}
-            address={address}
-            chainIds={deployedChainIds}
-            addNetwork={hasReplayableSafe}
-          />
+          )}
         </AccordionSummary>
         <AccordionDetails sx={{ padding: '0px 12px' }}>
           <Box data-testid="subacounts-container">
@@ -329,10 +340,11 @@ const MultiAccountItem = ({ onLinkClick, multiSafeAccountItem }: MultiAccountIte
                 safeItem={safeItem}
                 key={`${safeItem.chainId}:${safeItem.address}`}
                 isMultiChainItem
+                isOrgSafe={isOrgSafe}
               />
             ))}
           </Box>
-          {!isReadOnly && hasReplayableSafe && (
+          {!isReadOnly && hasReplayableSafe && !isOrgSafe && (
             <>
               <Divider sx={{ ml: '-12px', mr: '-12px' }} />
               <Box
