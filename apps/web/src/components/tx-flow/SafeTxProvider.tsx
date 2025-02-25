@@ -29,6 +29,9 @@ export type SafeTxContextParams = {
   setSafeTxGas: Dispatch<SetStateAction<string | undefined>>
 
   recommendedNonce?: number
+
+  txOrigin?: string
+  setTxOrigin: Dispatch<SetStateAction<string | undefined>>
 }
 
 export const SafeTxContext = createContext<SafeTxContextParams>({
@@ -38,6 +41,7 @@ export const SafeTxContext = createContext<SafeTxContextParams>({
   setNonce: () => {},
   setNonceNeeded: () => {},
   setSafeTxGas: () => {},
+  setTxOrigin: () => {},
 })
 
 const SafeTxProvider = ({ children }: { children: ReactNode }): ReactElement => {
@@ -47,6 +51,7 @@ const SafeTxProvider = ({ children }: { children: ReactNode }): ReactElement => 
   const [nonce, setNonce] = useState<number>()
   const [nonceNeeded, setNonceNeeded] = useState<boolean>(true)
   const [safeTxGas, setSafeTxGas] = useState<string>()
+  const [txOrigin, setTxOrigin] = useState<string>()
 
   const { safe } = useSafeInfo()
   const chain = useCurrentChain()
@@ -119,6 +124,8 @@ const SafeTxProvider = ({ children }: { children: ReactNode }): ReactElement => 
         safeTxGas: finalSafeTxGas,
         setSafeTxGas,
         recommendedNonce,
+        txOrigin,
+        setTxOrigin,
       }}
     >
       {children}

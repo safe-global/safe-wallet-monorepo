@@ -2,6 +2,9 @@ import * as main from './main.page'
 import * as addressbook from '../pages/address_book.page'
 import * as createTx from '../pages/create_tx.pages'
 import { tableRow } from '../pages/address_book.page'
+import { assetsSwapBtn } from '../pages/swaps.pages'
+import { nftsRow } from '../pages/nfts.pages'
+
 
 let etherscanLinkSepolia = 'a[aria-label="View on sepolia.etherscan.io"]'
 export const balanceSingleRow = '[aria-labelledby="tableTitle"] > tbody tr'
@@ -15,6 +18,7 @@ const paginationPageList = 'ul[role="listbox"]'
 const currencyDropDown = 'div[id="currency"]'
 export const tokenListTable = 'table[aria-labelledby="tableTitle"]'
 const tokenListDropdown = 'div[id="tokenlist-select"]'
+export const tablePaginationContainer = '[data-testid="table-pagination"]'
 
 const hiddenTokenSaveBtn = 'span[data-track="assets: Save hide dialog"]'
 const hiddenTokenCancelBtn = 'span[data-track="assets: Cancel hide dialog"]'
@@ -25,6 +29,7 @@ const currencyItem = '[data-testid="currency-item"]'
 const tokenAmountFld = '[data-testid="token-amount-field"]'
 const tokenBalance = '[data-testid="token-balance"]'
 const tokenItem = '[data-testid="token-item"]'
+const sendBtn = '[data-testid="send-button"]'
 
 const hideTokenDefaultString = 'Hide tokens'
 const assetNameSortBtnStr = 'Asset'
@@ -110,6 +115,41 @@ export const currentcyGnosisFormat = '< 0.00001 GNO'
 export const currencyOx = /^0x$/
 export const currentcyOxFormat = '1.003 ZRX'
 
+export function checkNftAddressFormat() {
+  cy.get(nftsRow).each(($el) => {
+    cy.wrap($el)
+      .invoke('text')
+      .should('match', /0x[a-fA-F0-9]{4}\.\.\.[a-fA-F0-9]{4}/);
+  });
+}
+
+export function checkNftCopyIconAndLink() {
+  cy.get(nftsRow).each(($el) => {
+    cy.wrap($el)
+      .within(() => {
+        cy.get(createTx.copyIcon, { timeout: 5000 })
+          .should('exist');
+      });
+    cy.wrap($el)
+      .within(() => {
+        cy.get(createTx.explorerBtn, { timeout: 5000 })
+          .should('exist');
+      });
+  });
+}
+
+export function showSendBtn() {
+  return cy.get(sendBtn)
+    .invoke('css', 'opacity', '1')
+    .should('have.css', 'opacity', '1');
+}
+
+export function showSwapBtn() {
+  return cy.get(assetsSwapBtn)
+    .invoke('css', 'opacity', '1')
+    .should('have.css', 'opacity', '1');
+}
+
 export function enterAmount(amount) {
   cy.get(tokenAmountFld).find('input').clear().type(amount)
 }
@@ -166,13 +206,6 @@ export function clickOnExecuteBtn(index) {
     })
 }
 
-export function showSendBtn(index) {
-  cy.get('button')
-    .contains(sendBtnStr)
-    .then((elements) => {
-      cy.wrap(elements[index]).invoke('css', 'opacity', 100).trigger('mouseover', { force: true })
-    })
-}
 
 export function VerifySendButtonIsDisabled() {
   cy.get('button').contains(sendBtnStr).should('be.disabled')
@@ -227,6 +260,14 @@ export function cancelSaveHiddenTokenSelection() {
 }
 
 export function checkTokenCounter(value) {
+  cy.get(hiddenTokenIcon)
+    .parent()
+    .within(() => {
+      cy.get('p').should('include.text', value)
+    })
+}
+
+export function checkNFTCounter(value) {
   cy.get(hiddenTokenIcon)
     .parent()
     .within(() => {

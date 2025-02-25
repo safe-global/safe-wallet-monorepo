@@ -1,6 +1,6 @@
 import useWalletCanPay from '@/hooks/useWalletCanPay'
 import madProps from '@/utils/mad-props'
-import { type ReactElement, type SyntheticEvent, useContext, useState } from 'react'
+import { type ReactElement, type SyntheticEvent, useContext, useMemo, useState } from 'react'
 import { CircularProgress, Box, Button, CardActions, Divider } from '@mui/material'
 import classNames from 'classnames'
 
@@ -30,6 +30,7 @@ import { TxSecurityContext } from '../security/shared/TxSecurityContext'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import NonOwnerError from '@/components/tx/SignOrExecuteForm/NonOwnerError'
 import WalletRejectionError from '@/components/tx/SignOrExecuteForm/WalletRejectionError'
+import { useValidateTxData } from '@/hooks/useValidateTxData'
 
 export const ExecuteForm = ({
   safeTx,
@@ -56,6 +57,11 @@ export const ExecuteForm = ({
   const [submitError, setSubmitError] = useState<Error | undefined>()
   const [isRejectedByUser, setIsRejectedByUser] = useState<Boolean>(false)
 
+  const [validationResult, , validationLoading] = useValidateTxData(txId)
+  const validationError = useMemo(
+    () => (validationResult !== undefined ? new Error(validationResult) : undefined),
+    [validationResult],
+  )
   // Hooks
   const currentChain = useCurrentChain()
   const { executeTx } = txActions
@@ -129,7 +135,9 @@ export const ExecuteForm = ({
     disableSubmit ||
     isExecutionLoop ||
     cannotPropose ||
-    (needsRiskConfirmation && !isRiskConfirmed)
+    (needsRiskConfirmation && !isRiskConfirmed) ||
+    validationError !== undefined ||
+    validationLoading
 
   return (
     <>
@@ -185,6 +193,10 @@ export const ExecuteForm = ({
           <Box mt={1}>
             <WalletRejectionError />
           </Box>
+        )}
+
+        {validationError !== undefined && (
+          <ErrorMessage error={validationError}>Error validating transaction data</ErrorMessage>
         )}
 
         <Divider className={commonCss.nestedDivider} sx={{ pt: 3 }} />

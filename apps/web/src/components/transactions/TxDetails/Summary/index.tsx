@@ -94,18 +94,21 @@ export const PartialSummary = ({ safeTx }: { safeTx: SafeTransaction }) => {
       {safeTxHash && (
         <SafeTxHashDataRow safeTxHash={safeTxHash} safeTxData={safeTx.data} safeVersion={safe.version as SafeVersion} />
       )}
-      <TxDataRow datatestid="tx-executed-at" title="safeTxGas:">
+      <TxDataRow datatestid="tx-safe-gas" title="safeTxGas:">
         <SafeTxGasForm />
       </TxDataRow>
-      <TxDataRow datatestid="tx-executed-at" title="baseGas:">
+      <TxDataRow datatestid="tx-base-gas" title="baseGas:">
         {txData.baseGas}
       </TxDataRow>
-      <TxDataRow datatestid="tx-executed-at" title="refundReceiver:">
+      <TxDataRow datatestid="tx-refund-receiver" title="refundReceiver:">
         {generateDataRowValue(txData.refundReceiver, 'hash', true)}
       </TxDataRow>
-      <TxDataRow datatestid="tx-executed-at" title="Raw data:">
-        {generateDataRowValue(txData.data, 'rawData')}
-      </TxDataRow>
+
+      <Box mt={1}>
+        <TxDataRow datatestid="tx-raw-data" title="Raw data:">
+          {generateDataRowValue(txData.data, 'rawData')}
+        </TxDataRow>
+      </Box>
     </>
   )
 }

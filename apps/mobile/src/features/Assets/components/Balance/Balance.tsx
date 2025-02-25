@@ -22,15 +22,17 @@ export function Balance({ activeChainId, chains, isLoading, balanceAmount, chain
 
   return (
     <View>
-      <View marginBottom="$8">
+      <View marginBottom="$4">
         {activeChainId && (
-          <DropdownLabel
-            label={chainName}
-            leftNode={<ChainsDisplay activeChainId={activeChainId} chains={chains} max={1} />}
-            onPress={() => {
-              router.push('/networks-sheet')
-            }}
-          />
+          <View paddingBottom={'$4'}>
+            <DropdownLabel
+              label={chainName}
+              leftNode={<ChainsDisplay activeChainId={activeChainId} chains={chains} max={1} />}
+              onPress={() => {
+                router.push('/networks-sheet')
+              }}
+            />
+          </View>
         )}
 
         {isLoading ? (
