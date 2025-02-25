@@ -7,6 +7,7 @@ import { useAppSelector } from '@/store'
 import { selectOrderByPreference } from '@/store/orderByPreferenceSlice'
 import { useOrganizationSafesGetV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
 import { useMemo } from 'react'
+import EmptySafeAccounts from './EmptySafeAccounts'
 
 function _buildSafeItems(safes: Record<string, string[]>): SafeItem[] {
   const result: SafeItem[] = []
@@ -44,7 +45,7 @@ const SafeAccountList = () => {
     [safes.allMultiChainSafes, safes.allSingleSafes, sortComparator],
   )
 
-  return <SafesList safes={allSafes} isOrgSafe />
+  return allSafes.length === 0 ? <EmptySafeAccounts /> : <SafesList safes={allSafes} isOrgSafe />
 }
 
 export default SafeAccountList
