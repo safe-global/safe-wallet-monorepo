@@ -22,10 +22,17 @@ export function getDeterministicColor(str: string): string {
   return hslToRgb(`hsl(${hue}, ${saturation}, ${lightness})`)
 }
 
-export const OrgLogo = ({ orgName, size = 'large' }: { orgName: string; size?: 'small' | 'medium' | 'large' }) => {
+export const OrgLogo = ({
+  orgName,
+  size = 'large',
+  rounded = false,
+}: {
+  orgName: string
+  size?: 'small' | 'medium' | 'large'
+  rounded?: boolean
+}) => {
   const logoLetters = orgName.slice(0, 2)
   const logoColor = getDeterministicColor(orgName)
-
   const dimensions = {
     small: { width: 24, height: 24, fontSize: '12px !important' },
     medium: { width: 32, height: 32, fontSize: '16px !important' },
@@ -35,7 +42,14 @@ export const OrgLogo = ({ orgName, size = 'large' }: { orgName: string; size?: '
   const { width, height, fontSize } = dimensions[size]
 
   return (
-    <Box className={css.orgLogo} bgcolor={logoColor} width={width} height={height} fontSize={fontSize}>
+    <Box
+      className={css.orgLogo}
+      bgcolor={logoColor}
+      width={width}
+      height={height}
+      fontSize={fontSize}
+      borderRadius={rounded ? '50%' : '6px'}
+    >
       {logoLetters}
     </Box>
   )

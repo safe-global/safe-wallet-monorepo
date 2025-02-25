@@ -22,7 +22,6 @@
 
 .orgLogo {
   grid-area: logo;
-  border-radius: 6px;
   text-transform: uppercase;
   font-weight: bold;
   display: flex;
