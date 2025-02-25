@@ -18,6 +18,11 @@ export const useTxSigner = (detailedExecutionInfo?: MultisigExecutionDetails) =>
     () => appSigners.find((signer) => signer.value === activeSigner?.value),
     [appSigners, activeSigner],
   )
+  const hasSigned = useMemo(() => {
+    return detailedExecutionInfo?.confirmations?.some(
+      (confirmation) => confirmation.signer.value === activeSigner?.value,
+    )
+  }, [detailedExecutionInfo, activeSigner])
 
   // Changes the active signer if there are app signers and the active signer is not in the app signers
   // because it can be a signer of that safe but in a different chain
@@ -27,5 +32,5 @@ export const useTxSigner = (detailedExecutionInfo?: MultisigExecutionDetails) =>
     }
   }, [activeTxSigner, appSigners])
 
-  return activeSigner
+  return { activeSigner, hasSigned }
 }

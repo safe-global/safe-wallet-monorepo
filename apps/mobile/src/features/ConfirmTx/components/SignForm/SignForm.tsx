@@ -11,11 +11,14 @@ import { router } from 'expo-router'
 export interface SignFormProps {
   address: Address
   name?: string
-  txId?: string
-  onSignPress: () => void
+  txId: string
 }
 
-export function SignForm({ address, name, txId, onSignPress }: SignFormProps) {
+export function SignForm({ address, name, txId }: SignFormProps) {
+  const onSignPress = () => {
+    router.push({ pathname: '/sign-transaction', params: { txId, signerAddress: address } })
+  }
+
   return (
     <YStack gap="$6">
       <View
@@ -34,9 +37,9 @@ export function SignForm({ address, name, txId, onSignPress }: SignFormProps) {
         <SafeFontIcon name="arrow-right" />
       </View>
       <View paddingHorizontal={'$3'} height={48} gap="$2" flexDirection="row">
-        <SafeButton flex={1} height="100%" danger onPress={() => null}>
+        {/* <SafeButton flex={1} height="100%" danger onPress={() => null}>
           Reject
-        </SafeButton>
+        </SafeButton> */}
         <SafeButton flex={1} height="100%" onPress={onSignPress}>
           Confirm
         </SafeButton>

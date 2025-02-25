@@ -24,17 +24,17 @@ function ConfirmTxContainer() {
     alwaysVisible: true,
   })
 
-  const { data, isLoading, isError } = useTransactionsGetTransactionByIdV1Query({
+  const { data, isFetching, isError } = useTransactionsGetTransactionByIdV1Query({
     chainId: activeSafe.chainId,
     id: txId,
   })
 
   const detailedExecutionInfo = data?.detailedExecutionInfo as MultisigExecutionDetails
-  const activeSigner = useTxSigner(detailedExecutionInfo)
+  const { activeSigner, hasSigned } = useTxSigner(detailedExecutionInfo)
   const hasEnoughConfirmations =
     detailedExecutionInfo?.confirmationsRequired === detailedExecutionInfo?.confirmations?.length
 
-  if (isLoading || !data) {
+  if (isFetching || !data) {
     return <LoadingTx />
   }
 
@@ -57,12 +57,15 @@ function ConfirmTxContainer() {
         <TransactionInfo txId={txId} detailedExecutionInfo={detailedExecutionInfo} />
       </ScrollView>
 
-      <ConfirmTxForm
-        hasEnoughConfirmations={hasEnoughConfirmations}
-        activeSigner={activeSigner}
-        isExpired={isExpired}
-        txId={txId}
-      />
+      <View paddingTop="$1" backgroundColor="$background">
+        <ConfirmTxForm
+          hasSigned={Boolean(hasSigned)}
+          hasEnoughConfirmations={hasEnoughConfirmations}
+          activeSigner={activeSigner}
+          isExpired={isExpired}
+          txId={txId}
+        />
+      </View>
     </View>
   )
 }

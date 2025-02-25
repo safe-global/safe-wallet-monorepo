@@ -14,7 +14,7 @@ export function ExecuteForm({ safeAddress, chainId }: ExecuteFormProps) {
   const chain = useAppSelector((state) => selectChainById(state, chainId))
 
   return (
-    <YStack flex={1} justifyContent="center" gap="$4" alignItems="center" paddingHorizontal={'$4'}>
+    <YStack justifyContent="center" gap="$4" alignItems="center" paddingHorizontal={'$4'}>
       <Text fontSize="$4" fontWeight={400} width="70%" textAlign="center" color="$textSecondaryLight">
         The transaction can be executed in the web app only.
       </Text>

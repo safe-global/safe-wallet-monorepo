@@ -1,1 +1,1 @@
-export { SignFormContainer } from './SignForm.container'
+export { SignForm } from './SignForm'

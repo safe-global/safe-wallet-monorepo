@@ -15,12 +15,12 @@ interface SwapOrderHeaderProps {
 }
 
 export function SwapOrderHeader({ txInfo, executionInfo }: SwapOrderHeaderProps) {
-  const { sellToken, buyToken, sellAmount, executedBuyAmount, executedSellAmount, buyAmount } = txInfo
+  const { sellToken, buyToken, sellAmount, buyAmount } = txInfo
   const date = formatWithSchema(executionInfo.submittedAt, 'MMM d yyyy')
   const time = formatWithSchema(executionInfo.submittedAt, 'hh:mm a')
 
-  const sellTokenValue = formatValue(executedSellAmount || sellAmount, sellToken.decimals)
-  const buyTokenValue = formatValue(executedBuyAmount || buyAmount, buyToken.decimals)
+  const sellTokenValue = formatValue(sellAmount, sellToken.decimals)
+  const buyTokenValue = formatValue(buyAmount, buyToken.decimals)
 
   return (
     <>

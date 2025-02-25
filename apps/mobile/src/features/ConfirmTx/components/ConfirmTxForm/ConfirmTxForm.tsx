@@ -1,19 +1,30 @@
 import { Address, SignerInfo } from '@/src/types/address'
-import { SignFormContainer } from '../SignForm'
+import { SignForm } from '../SignForm'
 import React from 'react'
 import { ExecuteForm } from '../ExecuteForm'
 import { shortenAddress } from '@/src/utils/formatters'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
-
+import { AlreadySigned } from '../confirmation-views/AlreadySigned'
 interface ConfirmTxFormProps {
   hasEnoughConfirmations: boolean
   activeSigner?: SignerInfo | undefined
   isExpired: boolean
   txId: string
+  hasSigned: boolean
 }
 
-export function ConfirmTxForm({ hasEnoughConfirmations, activeSigner, isExpired, txId }: ConfirmTxFormProps) {
+export function ConfirmTxForm({
+  hasEnoughConfirmations,
+  activeSigner,
+  isExpired,
+  txId,
+  hasSigned,
+}: ConfirmTxFormProps) {
   const activeSafe = useDefinedActiveSafe()
+
+  if (hasSigned) {
+    return <AlreadySigned />
+  }
 
   if (hasEnoughConfirmations) {
     return <ExecuteForm safeAddress={activeSafe.address} chainId={activeSafe.chainId} />
@@ -21,7 +32,7 @@ export function ConfirmTxForm({ hasEnoughConfirmations, activeSigner, isExpired,
 
   if (activeSigner && !isExpired) {
     return (
-      <SignFormContainer
+      <SignForm
         txId={txId}
         name={activeSigner?.name || shortenAddress(activeSigner?.value)}
         address={activeSigner?.value as Address}

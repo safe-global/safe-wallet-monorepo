@@ -5,7 +5,6 @@ import {
   useLazySafesGetSafeV1Query,
 } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { useCallback, useEffect } from 'react'
-import { LoadingImportComponent } from './LoadingImport'
 import { useGlobalSearchParams, useLocalSearchParams, useRouter } from 'expo-router'
 import { addSignerWithEffects } from '@/src/store/signersSlice'
 import { selectActiveSafe } from '@/src/store/activeSafeSlice'
@@ -15,6 +14,7 @@ import { makeSafeId } from '@/src/utils/formatters'
 import { extractSignersFromSafes } from '@/src/features/ImportReadOnly/helpers/safes'
 import { FetchBaseQueryError } from '@reduxjs/toolkit/query'
 import { SerializedError } from '@reduxjs/toolkit'
+import { LoadingScreen } from '@/src/components/LoadingScreen'
 
 const getData = (
   manySafes: SafesGetSafeOverviewV1ApiResponse | undefined,
@@ -128,5 +128,5 @@ export function LoadingImport() {
     }
   }, [data, redirectToError])
 
-  return <LoadingImportComponent />
+  return <LoadingScreen title="Creating your signer..." description="Verifying address..." />
 }
