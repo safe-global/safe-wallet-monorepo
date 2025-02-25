@@ -22,7 +22,7 @@ export function getDeterministicColor(str: string): string {
   return hslToRgb(`hsl(${hue}, ${saturation}, ${lightness})`)
 }
 
-export const OrgLogo = ({
+export const InitialsAvatar = ({
   orgName,
   size = 'large',
   rounded = false,
@@ -43,7 +43,7 @@ export const OrgLogo = ({
 
   return (
     <Box
-      className={css.orgLogo}
+      className={css.initialsAvatar}
       bgcolor={logoColor}
       width={width}
       height={height}
@@ -105,9 +105,7 @@ const OrgsCard = ({
     <Card className={classNames(css.card, { [css.compact]: isCompact })}>
       {isLink && <Link className={css.cardLink} href={AppRoutes.organizations.index(id.toString())} />}
 
-      <Box className={css.orgLogo}>
-        <OrgLogo orgName={name} size={isCompact ? 'medium' : 'large'} />
-      </Box>
+      <InitialsAvatar orgName={name} size={isCompact ? 'medium' : 'large'} />
 
       <OrgSummary
         name={name}

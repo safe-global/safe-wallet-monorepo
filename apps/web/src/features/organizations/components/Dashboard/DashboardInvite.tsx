@@ -1,6 +1,6 @@
 import { Card, Box, Stack, Button, Typography } from '@mui/material'
 import type { GetOrganizationResponse } from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
-import { OrgLogo, OrgSummary } from '../OrgsCard'
+import { InitialsAvatar, OrgSummary } from '../OrgsCard'
 import {
   useUserOrganizationsAcceptInviteV1Mutation,
   useUserOrganizationsDeclineInviteV1Mutation,
@@ -38,7 +38,7 @@ const OrgListInvite = ({ org }: OrgListInvite) => {
       <Card sx={{ p: 2, backgroundColor: 'background.main' }}>
         <Stack direction="row" spacing={2} alignItems="center">
           <Box>
-            <OrgLogo orgName={name} size="large" />
+            <InitialsAvatar orgName={name} size="large" />
           </Box>
 
           <Box flexGrow={1}>

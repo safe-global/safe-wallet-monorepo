@@ -20,7 +20,7 @@
   border: 0;
 }
 
-.orgLogo {
+.initialsAvatar {
   grid-area: logo;
   text-transform: uppercase;
   font-weight: bold;
