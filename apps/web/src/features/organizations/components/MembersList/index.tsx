@@ -33,7 +33,7 @@ const MembersList = ({ members }: { members: UserOrganization[] }) => {
           rawValue: member.id,
           content: (
             <Stack direction="row" alignItems="center" justifyContent="left" gap={1}>
-              User id: {member.id}
+              User id: {member.user.id}
             </Stack>
           ),
         },
