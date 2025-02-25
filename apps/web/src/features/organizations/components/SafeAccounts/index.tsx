@@ -1,13 +1,15 @@
 import AddAccounts from '@/features/organizations/components/AddAccounts'
-import SafeAccountList from '@/features/organizations/components/SafeAccountList'
-import EmptySafeAccounts from '@/features/organizations/components/SafeAccountList/EmptySafeAccounts'
+import EmptySafeAccounts from '@/features/organizations/components/SafeAccounts/EmptySafeAccounts'
 import SearchIcon from '@/public/images/common/search.svg'
 import { Stack, SvgIcon, TextField, Typography } from '@mui/material'
 import InputAdornment from '@mui/material/InputAdornment'
 import { useState } from 'react'
+import SafesList from '@/features/myAccounts/components/SafesList'
+import { useOrgSafes } from '@/features/organizations/hooks/useOrgSafes'
 
 const OrganizationSafeAccounts = () => {
   const [searchQuery, setSearchQuery] = useState('')
+  const safes = useOrgSafes()
 
   const safeAccounts = [] // TODO: Fetch from backend
 
@@ -40,7 +42,7 @@ const OrganizationSafeAccounts = () => {
       </Stack>
 
       {/* TODO: Fix the condition once data is ready */}
-      {safeAccounts.length !== 0 ? <EmptySafeAccounts /> : <SafeAccountList />}
+      {safeAccounts.length !== 0 ? <EmptySafeAccounts /> : <SafesList safes={safes} isOrgSafe />}
     </>
   )
 }

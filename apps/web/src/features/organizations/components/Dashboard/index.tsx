@@ -1,15 +1,20 @@
 import MembersCard from '@/features/organizations/components/Dashboard/MembersCard'
 import NewFeaturesCard from '@/features/organizations/components/Dashboard/NewFeaturesCard'
 import OrgsCTACard from '@/features/organizations/components/Dashboard/OrgsCTACard'
-import { Box, Grid2, Typography } from '@mui/material'
+import { Box, Grid2, Stack, Typography } from '@mui/material'
 import SignInButton from '@/features/organizations/components/SignInButton'
-import OrgAccountsList from '@/features/organizations/components/AccountsList'
 import Grid from '@mui/material/Grid2'
 import css from './styles.module.css'
-
-const isSignedIn = true
-const hasAccounts = false
-const hasMembers = false
+import { useOrgSafes } from '@/features/organizations/hooks/useOrgSafes'
+import SafesList from '@/features/myAccounts/components/SafesList'
+import { useAppSelector } from '@/store'
+import { isAuthenticated } from '@/store/authSlice'
+import AddAccountsCard from './AddAccountsCard'
+import { AppRoutes } from '@/config/routes'
+import { useCurrentOrgId } from '../../hooks/useCurrentOrgId'
+import NextLink from 'next/link'
+import { Link } from '@mui/material'
+import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 
 const SignedOutState = () => {
   return (
@@ -29,41 +34,83 @@ const SignedOutState = () => {
   )
 }
 
-const OrganizationsDashboard = ({ organizationId }: { organizationId: string }) => {
-  // TODO: use the organizationId to fetch the organization data
-  console.log('organizationId', organizationId)
+const ViewAllLink = ({ url }: { url: string }) => {
+  return (
+    <NextLink href={url} passHref legacyBehavior>
+      <Link
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 1,
+          textDecoration: 'none',
+          fontSize: '14px',
+          color: 'primary.main',
+        }}
+      >
+        View all <ChevronRightIcon fontSize="small" />
+      </Link>
+    </NextLink>
+  )
+}
 
-  if (!isSignedIn) {
+const OrganizationsDashboard = () => {
+  const safes = useOrgSafes()
+  const isUserSignedIn = useAppSelector(isAuthenticated)
+  const orgId = useCurrentOrgId()
+
+  if (!isUserSignedIn) {
     return <SignedOutState />
   }
 
   return (
     <>
-      <Typography variant="h1" fontWeight={700} mb={4}>
-        Getting started
-      </Typography>
+      {safes.length > 0 ? (
+        <>
+          <Typography variant="h1" fontWeight={700} mb={4}>
+            Dashboard
+          </Typography>
 
-      <Grid container spacing={3}>
-        <Grid size={{ xs: 12, md: hasAccounts ? 8 : 12 }}>
-          <OrgAccountsList hasAccounts={hasAccounts} />
-        </Grid>
-        <Grid size={{ xs: 12, md: 4 }}>
-          {hasMembers && (
-            <Typography variant="h5" fontWeight={700} mb={2}>
-              Members
-            </Typography>
-          )}
-          <MembersCard />
-        </Grid>
+          <Grid container spacing={3}>
+            <Grid size={{ xs: 12, md: 8 }}>
+              <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
+                <Typography variant="h5">Safe Accounts ({safes.length})</Typography>
+                {orgId && <ViewAllLink url={AppRoutes.organizations.safeAccounts(orgId)} />}
+              </Stack>
+              {/* TODO: Set a max length for dashboard safes. */}
+              <SafesList safes={safes} isOrgSafe />
+            </Grid>
+            <Grid size={{ xs: 12, md: 4 }}>
+              <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
+                <Typography variant="h5">Members</Typography>
+                {orgId && <ViewAllLink url={AppRoutes.organizations.members(orgId)} />}
+              </Stack>
+            </Grid>
+          </Grid>
+        </>
+      ) : (
+        <>
+          <Typography variant="h1" fontWeight={700} mb={4}>
+            Getting started
+          </Typography>
 
-        <Grid2 size={{ xs: 12, md: 4 }}>
-          <OrgsCTACard />
-        </Grid2>
+          <Grid container spacing={3}>
+            <Grid size={12}>
+              <AddAccountsCard />
+            </Grid>
+            <Grid size={{ xs: 12, md: 4 }}>
+              <MembersCard />
+            </Grid>
 
-        <Grid2 size={{ xs: 12, md: 4 }}>
-          <NewFeaturesCard />
-        </Grid2>
-      </Grid>
+            <Grid2 size={{ xs: 12, md: 4 }}>
+              <OrgsCTACard />
+            </Grid2>
+
+            <Grid2 size={{ xs: 12, md: 4 }}>
+              <NewFeaturesCard />
+            </Grid2>
+          </Grid>
+        </>
+      )}
     </>
   )
 }
