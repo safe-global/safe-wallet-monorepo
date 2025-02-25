@@ -1,3 +1,6 @@
+import type { SafeItem } from '@/features/myAccounts/hooks/useAllSafes'
+import type { MultiChainSafeItem } from '@/features/myAccounts/hooks/useAllSafesGrouped'
+import RemoveSafeDialog from '@/features/organizations/components/SafeAccounts/RemoveSafeDialog'
 import { type MouseEvent, useState } from 'react'
 import MoreVertIcon from '@mui/icons-material/MoreVert'
 import { SvgIcon } from '@mui/material'
@@ -16,7 +19,7 @@ enum ModalType {
 
 const defaultOpen = { [ModalType.RENAME]: false, [ModalType.REMOVE]: false }
 
-const OrgSafeContextMenu = () => {
+const OrgSafeContextMenu = ({ safeItem }: { safeItem: SafeItem | MultiChainSafeItem }) => {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | undefined>()
   const [open, setOpen] = useState<typeof defaultOpen>(defaultOpen)
 
@@ -30,12 +33,17 @@ const OrgSafeContextMenu = () => {
     setAnchorEl(undefined)
   }
 
-  const handleOpenModal = (type: keyof typeof open) => () => {
+  const handleOpenModal = (e: MouseEvent, type: keyof typeof open) => {
+    e.stopPropagation()
     setAnchorEl(undefined)
     setOpen((prev) => ({ ...prev, [type]: true }))
   }
 
   const hasName = false
+
+  const handleCloseModal = () => {
+    setOpen(defaultOpen)
+  }
 
   return (
     <>
@@ -43,14 +51,14 @@ const OrgSafeContextMenu = () => {
         <MoreVertIcon sx={({ palette }) => ({ color: palette.border.main })} />
       </IconButton>
       <ContextMenu anchorEl={anchorEl} open={!!anchorEl} onClose={handleCloseContextMenu}>
-        <MenuItem onClick={handleOpenModal(ModalType.RENAME)}>
+        <MenuItem onClick={(e) => handleOpenModal(e, ModalType.RENAME)}>
           <ListItemIcon>
             <SvgIcon component={EditIcon} inheritViewBox fontSize="small" color="success" />
           </ListItemIcon>
           <ListItemText data-testid="rename-btn">{hasName ? 'Rename' : 'Give name'}</ListItemText>
         </MenuItem>
 
-        <MenuItem onClick={handleOpenModal(ModalType.REMOVE)}>
+        <MenuItem onClick={(e) => handleOpenModal(e, ModalType.REMOVE)}>
           <ListItemIcon>
             <SvgIcon component={DeleteIcon} inheritViewBox fontSize="small" color="error" />
           </ListItemIcon>
@@ -60,7 +68,7 @@ const OrgSafeContextMenu = () => {
 
       {open[ModalType.RENAME] && <>{/* TODO: Render rename safe account modal */}</>}
 
-      {open[ModalType.REMOVE] && <>{/* TODO: Render Remove safe account modal */}</>}
+      {open[ModalType.REMOVE] && <RemoveSafeDialog safeItem={safeItem} handleClose={handleCloseModal} />}
     </>
   )
 }

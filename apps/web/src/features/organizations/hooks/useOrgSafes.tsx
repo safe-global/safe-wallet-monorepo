@@ -13,7 +13,6 @@ function _buildSafeItems(safes: Record<string, string[]>): SafeItem[] {
 
   for (const chainId in safes) {
     const addresses = safes[chainId]
-    console.log(addresses)
 
     addresses.forEach((address) => {
       result.push({

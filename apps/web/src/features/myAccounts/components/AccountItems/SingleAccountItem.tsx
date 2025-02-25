@@ -251,7 +251,7 @@ const SingleAccountItem = ({
           )}
 
           {isOrgSafe ? (
-            <OrgSafeContextMenu />
+            <OrgSafeContextMenu safeItem={safeItem} />
           ) : (
             <SafeListContextMenu
               name={name}
