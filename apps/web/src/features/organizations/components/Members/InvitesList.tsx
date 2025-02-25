@@ -90,7 +90,7 @@ const InvitesList = ({ invitedMembers }: { invitedMembers: UserOrganization[] })
   return (
     <>
       <Typography variant="h5" fontWeight={700} mb={2}>
-        Pending Invitations
+        Pending Invitations ({invitedMembers.length})
       </Typography>
       <EnhancedTable rows={rows} headCells={headCells} />
     </>

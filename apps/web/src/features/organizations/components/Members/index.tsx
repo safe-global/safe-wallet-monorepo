@@ -1,12 +1,14 @@
-import EmptyMembers from '@/features/organizations/components/MembersList/EmptyMembers'
 import PlusIcon from '@/public/images/common/plus.svg'
-import { Button, Stack, Typography } from '@mui/material'
+import { Button, InputAdornment, Stack, SvgIcon, TextField, Typography } from '@mui/material'
 import AddMembersModal from '@/features/organizations/components/AddMembersModal'
 import { useState } from 'react'
 import MembersList from '../MembersList'
 import InvitesList from './InvitesList'
 import { useUserOrganizationsGetUsersV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
 import { useCurrentOrgId } from '../../hooks/useCurrentOrgId'
+import SearchIcon from '@/public/images/common/search.svg'
+import { useMembersSearch } from '../../hooks/useMembersSearch'
+import { maybePlural } from '@/utils/formatters'
 
 export enum MemberStatus {
   INVITED = 'INVITED',
@@ -18,6 +20,7 @@ const OrganizationMembers = () => {
   const orgId = useCurrentOrgId()
   const { data } = useUserOrganizationsGetUsersV1Query({ orgId: Number(orgId) })
   const [openAddMembersModal, setOpenAddMembersModal] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
 
   const invited =
     data?.members.filter(
@@ -25,20 +28,49 @@ const OrganizationMembers = () => {
     ) || []
   const activeMembers = data?.members.filter((member) => member.status === MemberStatus.ACTIVE) || []
 
-  // TODO: Render members list
+  const filteredMembers = useMembersSearch(activeMembers, searchQuery)
+
   return (
     <>
+      <Typography variant="h1" mb={3}>
+        Members
+      </Typography>
       <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
-        <Typography variant="h1" fontWeight={700}>
-          Members
-        </Typography>
-        <Button size="small" variant="contained" startIcon={<PlusIcon />} onClick={() => setOpenAddMembersModal(true)}>
+        <TextField
+          placeholder="Search"
+          variant="filled"
+          hiddenLabel
+          value={searchQuery}
+          onChange={(e) => {
+            setSearchQuery(e.target.value)
+          }}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <SvgIcon component={SearchIcon} inheritViewBox color="border" fontSize="small" />
+              </InputAdornment>
+            ),
+            disableUnderline: true,
+          }}
+          size="small"
+        />
+        <Button variant="contained" startIcon={<PlusIcon />} onClick={() => setOpenAddMembersModal(true)}>
           Add member
         </Button>
       </Stack>
-      {invited.length > 0 && <InvitesList invitedMembers={invited} />}
-      <MembersList members={activeMembers} />
-      {invited.length === 0 && activeMembers.length === 1 && <EmptyMembers />}
+      {invited.length > 0 && !searchQuery && <InvitesList invitedMembers={invited} />}
+      <>
+        {searchQuery ? (
+          <Typography variant="h5" fontWeight="normal" mb={2} color="primary.light">
+            Found {filteredMembers.length} result{maybePlural(filteredMembers)}
+          </Typography>
+        ) : (
+          <Typography variant="h5" fontWeight={700} mb={2} mt={1}>
+            All Members ({filteredMembers.length})
+          </Typography>
+        )}
+        <MembersList members={filteredMembers} />
+      </>
 
       {openAddMembersModal && <AddMembersModal onClose={() => setOpenAddMembersModal(false)} />}
     </>
