@@ -36,12 +36,16 @@ export const WalletInfo = ({ wallet, balance, currentChainId, onboard, addressBo
     }
   }
 
-  const handleDisconnect = () => {
+  const handleDisconnect = async () => {
     onboard?.disconnectWallet({
       label: wallet.label,
     })
-    authLogout()
-    dispatch(setUnauthenticated())
+    try {
+      await authLogout()
+      dispatch(setUnauthenticated())
+    } catch (error) {
+      // TODO: handle error
+    }
 
     handleClose()
   }
