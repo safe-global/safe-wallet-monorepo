@@ -1,12 +1,12 @@
-import SafesList from '@/features/myAccounts/components/SafesList'
-import type { SafeItem } from '@/features/myAccounts/hooks/useAllSafes'
-import { type AllSafeItems, useAllSafesGrouped } from '@/features/myAccounts/hooks/useAllSafesGrouped'
-import { getComparator } from '@/features/myAccounts/utils/utils'
-import { useCurrentOrgId } from '@/features/organizations/hooks/useCurrentOrgId'
+import { useOrganizationSafesGetV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
+import { useCurrentOrgId } from '../hooks/useCurrentOrgId'
+import type { AllSafeItems } from '@/features/myAccounts/hooks/useAllSafesGrouped'
+import { useAllSafesGrouped } from '@/features/myAccounts/hooks/useAllSafesGrouped'
 import { useAppSelector } from '@/store'
 import { selectOrderByPreference } from '@/store/orderByPreferenceSlice'
-import { useOrganizationSafesGetV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
+import { getComparator } from '@/features/myAccounts/utils/utils'
 import { useMemo } from 'react'
+import type { SafeItem } from '@/features/myAccounts/hooks/useAllSafes'
 
 function _buildSafeItems(safes: Record<string, string[]>): SafeItem[] {
   const result: SafeItem[] = []
@@ -29,7 +29,7 @@ function _buildSafeItems(safes: Record<string, string[]>): SafeItem[] {
   return result
 }
 
-const SafeAccountList = () => {
+export const useOrgSafes = () => {
   const orgId = useCurrentOrgId()
   const { data } = useOrganizationSafesGetV1Query({ organizationId: Number(orgId) })
   // @ts-ignore TODO: Fix type issue
@@ -43,7 +43,5 @@ const SafeAccountList = () => {
     [safes.allMultiChainSafes, safes.allSingleSafes, sortComparator],
   )
 
-  return <SafesList safes={allSafes} isOrgSafe />
+  return allSafes
 }
-
-export default SafeAccountList

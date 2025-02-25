@@ -72,7 +72,8 @@ const AddAccounts = () => {
       })
 
     try {
-      const result = await addSafesToOrg({ organizationId: Number(orgId), body: safesToAdd })
+      // @ts-ignore TODO: Fix type issue
+      const result = await addSafesToOrg({ organizationId: Number(orgId), body: { safes: safesToAdd } })
 
       if (result.error) {
         // TODO: Handle error message

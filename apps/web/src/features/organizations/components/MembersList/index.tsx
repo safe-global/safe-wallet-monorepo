@@ -1,4 +1,4 @@
-import { Chip, IconButton, Stack, SvgIcon, Tooltip, Typography } from '@mui/material'
+import { Chip, IconButton, Stack, SvgIcon, Tooltip } from '@mui/material'
 import type { UserOrganization } from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
 import EditIcon from '@/public/images/common/edit.svg'
 import { MemberRole } from '../AddMembersModal'
@@ -66,15 +66,11 @@ const MembersList = ({ members }: { members: UserOrganization[] }) => {
       },
     }
   })
+  if (!rows.length) {
+    return null
+  }
 
-  return (
-    <>
-      <Typography variant="h5" fontWeight={700} mb={2} mt={1}>
-        All Members ({members.length})
-      </Typography>
-      <EnhancedTable rows={rows} headCells={headCells} />
-    </>
-  )
+  return <EnhancedTable rows={rows} headCells={headCells} />
 }
 
 export default MembersList
