@@ -45,7 +45,7 @@ const RemoveSafeDialog = ({
   }
 
   return (
-    <ModalDialog open onClose={handleClose} dialogTitle="Delete entry" hideChainIndicator>
+    <ModalDialog open onClose={handleClose} dialogTitle="Remove Safe Account" hideChainIndicator>
       <DialogContent sx={{ p: '24px !important' }}>
         <Typography>
           Are you sure you want to remove <b>{address}</b> from this organization?
@@ -57,7 +57,7 @@ const RemoveSafeDialog = ({
           Cancel
         </Button>
         <Button data-testid="delete-btn" onClick={handleConfirm} variant="danger" disableElevation>
-          Delete
+          Remove
         </Button>
       </DialogActions>
     </ModalDialog>
