@@ -91,6 +91,7 @@ export const ImportAccountFormView: React.FC<ImportAccountFormViewProps> = ({
         onPress={onContinue}
         disabled={!isEnteredAddressValid || !safeExists}
         testID={'continue-button'}
+        marginBottom={70}
       >
         Continue
       </SafeButton>
