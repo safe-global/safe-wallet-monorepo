@@ -1,7 +1,7 @@
 import MembersCard from '@/features/organizations/components/Dashboard/MembersCard'
 import NewFeaturesCard from '@/features/organizations/components/Dashboard/NewFeaturesCard'
 import OrgsCTACard from '@/features/organizations/components/Dashboard/OrgsCTACard'
-import { Box, Grid2, Typography } from '@mui/material'
+import { Box, Grid2, Stack, Typography } from '@mui/material'
 import SignInButton from '@/features/organizations/components/SignInButton'
 import Grid from '@mui/material/Grid2'
 import css from './styles.module.css'
@@ -10,6 +10,12 @@ import SafesList from '@/features/myAccounts/components/SafesList'
 import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
 import AddAccountsCard from './AddAccountsCard'
+import { ViewAllLink } from '@/components/dashboard/styled'
+import { AppRoutes } from '@/config/routes'
+import { useCurrentOrgId } from '../../hooks/useCurrentOrgId'
+import NextLink from 'next/link'
+import { Link } from '@mui/material'
+import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 
 const SignedOutState = () => {
   return (
@@ -29,9 +35,29 @@ const SignedOutState = () => {
   )
 }
 
+const ViewAllLink = ({ url }: { url: string }) => {
+  return (
+    <NextLink href={url} passHref legacyBehavior>
+      <Link
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 1,
+          textDecoration: 'none',
+          fontSize: '14px',
+          color: 'primary.main',
+        }}
+      >
+        View all <ChevronRightIcon fontSize="small" />
+      </Link>
+    </NextLink>
+  )
+}
+
 const OrganizationsDashboard = () => {
   const safes = useOrgSafes()
   const isUserSignedIn = useAppSelector(isAuthenticated)
+  const orgId = useCurrentOrgId()
 
   if (!isUserSignedIn) {
     return <SignedOutState />
@@ -47,15 +73,18 @@ const OrganizationsDashboard = () => {
 
           <Grid container spacing={3}>
             <Grid size={{ xs: 12, md: 8 }}>
-              <Typography variant="h5" mb={3}>
-                Safe Accounts ({safes.length})
-              </Typography>
+              <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
+                <Typography variant="h5">Safe Accounts ({safes.length})</Typography>
+                {orgId && <ViewAllLink url={AppRoutes.organizations.safeAccounts(orgId)} />}
+              </Stack>
+
               <SafesList safes={safes} isOrgSafe />
             </Grid>
             <Grid size={{ xs: 12, md: 4 }}>
-              <Typography variant="h5" mb={3}>
-                Members
-              </Typography>
+              <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
+                <Typography variant="h5">Members</Typography>
+                {orgId && <ViewAllLink url={AppRoutes.organizations.members(orgId)} />}
+              </Stack>
               <></>
             </Grid>
           </Grid>
