@@ -45,7 +45,7 @@ export const useChainId = (): string => {
   const urlChainId = useUrlChainId()
   const walletChainId = useWalletChainId()
 
-  return urlChainId || session.lastChainId || walletChainId || DEFAULT_CHAIN_ID
+  return urlChainId || session.lastChainId || walletChainId || String(DEFAULT_CHAIN_ID)
 }
 
 export default useChainId
