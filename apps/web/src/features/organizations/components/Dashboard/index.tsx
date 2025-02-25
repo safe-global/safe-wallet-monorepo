@@ -3,13 +3,13 @@ import NewFeaturesCard from '@/features/organizations/components/Dashboard/NewFe
 import OrgsCTACard from '@/features/organizations/components/Dashboard/OrgsCTACard'
 import { Box, Grid2, Typography } from '@mui/material'
 import SignInButton from '@/features/organizations/components/SignInButton'
-import OrgAccountsList from '@/features/organizations/components/AccountsList'
 import Grid from '@mui/material/Grid2'
 import css from './styles.module.css'
-
-const isSignedIn = true
-const hasAccounts = false
-const hasMembers = false
+import { useOrgSafes } from '@/features/organizations/hooks/useOrgSafes'
+import SafesList from '@/features/myAccounts/components/SafesList'
+import { useAppSelector } from '@/store'
+import { isAuthenticated } from '@/store/authSlice'
+import AddAccountsCard from './AddAccountsCard'
 
 const SignedOutState = () => {
   return (
@@ -29,41 +29,61 @@ const SignedOutState = () => {
   )
 }
 
-const OrganizationsDashboard = ({ organizationId }: { organizationId: string }) => {
-  // TODO: use the organizationId to fetch the organization data
-  console.log('organizationId', organizationId)
+const OrganizationsDashboard = () => {
+  const safes = useOrgSafes()
+  const isUserSignedIn = useAppSelector(isAuthenticated)
 
-  if (!isSignedIn) {
+  if (!isUserSignedIn) {
     return <SignedOutState />
   }
 
   return (
     <>
-      <Typography variant="h1" fontWeight={700} mb={4}>
-        Getting started
-      </Typography>
+      {safes.length > 0 ? (
+        <>
+          <Typography variant="h1" fontWeight={700} mb={4}>
+            Dashboard
+          </Typography>
 
-      <Grid container spacing={3}>
-        <Grid size={{ xs: 12, md: hasAccounts ? 8 : 12 }}>
-          <OrgAccountsList hasAccounts={hasAccounts} />
-        </Grid>
-        <Grid size={{ xs: 12, md: 4 }}>
-          {hasMembers && (
-            <Typography variant="h5" fontWeight={700} mb={2}>
-              Members
-            </Typography>
-          )}
-          <MembersCard />
-        </Grid>
+          <Grid container spacing={3}>
+            <Grid size={{ xs: 12, md: 8 }}>
+              <Typography variant="h5" mb={3}>
+                Safe Accounts ({safes.length})
+              </Typography>
+              <SafesList safes={safes} isOrgSafe />
+            </Grid>
+            <Grid size={{ xs: 12, md: 4 }}>
+              <Typography variant="h5" mb={3}>
+                Members
+              </Typography>
+              <></>
+            </Grid>
+          </Grid>
+        </>
+      ) : (
+        <>
+          <Typography variant="h1" fontWeight={700} mb={4}>
+            Getting started
+          </Typography>
 
-        <Grid2 size={{ xs: 12, md: 4 }}>
-          <OrgsCTACard />
-        </Grid2>
+          <Grid container spacing={3}>
+            <Grid size={12}>
+              <AddAccountsCard />
+            </Grid>
+            <Grid size={{ xs: 12, md: 4 }}>
+              <MembersCard />
+            </Grid>
 
-        <Grid2 size={{ xs: 12, md: 4 }}>
-          <NewFeaturesCard />
-        </Grid2>
-      </Grid>
+            <Grid2 size={{ xs: 12, md: 4 }}>
+              <OrgsCTACard />
+            </Grid2>
+
+            <Grid2 size={{ xs: 12, md: 4 }}>
+              <NewFeaturesCard />
+            </Grid2>
+          </Grid>
+        </>
+      )}
     </>
   )
 }
