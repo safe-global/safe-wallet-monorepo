@@ -76,7 +76,7 @@ const OrganizationsDashboard = () => {
                 <Typography variant="h5">Safe Accounts ({safes.length})</Typography>
                 {orgId && <ViewAllLink url={AppRoutes.organizations.safeAccounts(orgId)} />}
               </Stack>
-
+              {/* TODO: Set a max length for dashboard safes. */}
               <SafesList safes={safes} isOrgSafe />
             </Grid>
             <Grid size={{ xs: 12, md: 4 }}>
@@ -84,7 +84,6 @@ const OrganizationsDashboard = () => {
                 <Typography variant="h5">Members</Typography>
                 {orgId && <ViewAllLink url={AppRoutes.organizations.members(orgId)} />}
               </Stack>
-              <></>
             </Grid>
           </Grid>
         </>
