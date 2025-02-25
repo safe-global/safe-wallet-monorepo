@@ -13,7 +13,7 @@ import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_G
 import OrgListInvite from '../Dashboard/DashboardInvite'
 import { useState } from 'react'
 import css from './styles.module.css'
-import { MemberStatus } from '../../hooks/useOrgMembers'
+import { MemberStatus } from '@/features/organizations/hooks/useOrgMembers'
 
 const AddOrgButton = ({ disabled }: { disabled: boolean }) => {
   const [open, setOpen] = useState(false)

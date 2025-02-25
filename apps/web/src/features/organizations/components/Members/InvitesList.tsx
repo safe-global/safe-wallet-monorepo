@@ -6,8 +6,8 @@ import { useUserOrganizationsRemoveUserV1Mutation } from '@safe-global/store/gat
 import tableCss from '@/components/common/EnhancedTable/styles.module.css'
 import DeleteIcon from '@/public/images/common/delete.svg'
 import { MemberRole } from '../AddMembersModal'
-import { useCurrentOrgId } from '../../hooks/useCurrentOrgId'
-import { MemberStatus } from '../../hooks/useOrgMembers'
+import { useCurrentOrgId } from '@/features/organizations/hooks/useCurrentOrgId'
+import { MemberStatus } from '@/features/organizations/hooks/useOrgMembers'
 
 const headCells = [
   {
