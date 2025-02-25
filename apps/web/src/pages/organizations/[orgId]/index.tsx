@@ -16,7 +16,7 @@ export default function OrganizationPage() {
       </Head>
 
       <main>
-        <OrganizationsDashboard organizationId={orgId} />
+        <OrganizationsDashboard />
       </main>
     </>
   )
