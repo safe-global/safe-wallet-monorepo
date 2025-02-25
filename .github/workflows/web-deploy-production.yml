@@ -58,21 +58,15 @@ jobs:
           VERSION_TAG: ${{ github.event.release.tag_name }}
 
       - name: Upload archive as release asset
-        run: |
-          echo "Uploading asset to release..."
-          curl -X POST \
-            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-            -H "Content-Type: application/octet-stream" \
-            --data-binary @"./${{ env.ARCHIVE_NAME }}.tar.gz" \
-            "${{ github.event.release.upload_url }}?name=${{ env.ARCHIVE_NAME }}.tar.gz"
+        uses: shogo82148/actions-upload-release-asset@v1
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ${{ env.ARCHIVE_NAME }}.tar.gz
         working-directory: apps/web
 
-      - name: Upload checksum as release asset (checksum)
-        run: |
-          echo "Uploading asset to release..."
-          curl -X POST \
-            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-            -H "Content-Type: application/octet-stream" \
-            --data-binary @"./${{ env.ARCHIVE_NAME }}-sha256-checksum.txt" \
-            "${{ github.event.release.upload_url }}?name=${{ env.ARCHIVE_NAME }}-sha256-checksum.txt"
+      - name: Upload archive as release asset
+        uses: shogo82148/actions-upload-release-asset@v1
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ${{ env.ARCHIVE_NAME }}-sha256-checksum.txt
         working-directory: apps/web
