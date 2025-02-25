@@ -33,7 +33,8 @@ const OrgSafeContextMenu = ({ safeItem }: { safeItem: SafeItem | MultiChainSafeI
     setAnchorEl(undefined)
   }
 
-  const handleOpenModal = (type: keyof typeof open) => () => {
+  const handleOpenModal = (e: MouseEvent, type: keyof typeof open) => {
+    e.stopPropagation()
     setAnchorEl(undefined)
     setOpen((prev) => ({ ...prev, [type]: true }))
   }
@@ -50,14 +51,14 @@ const OrgSafeContextMenu = ({ safeItem }: { safeItem: SafeItem | MultiChainSafeI
         <MoreVertIcon sx={({ palette }) => ({ color: palette.border.main })} />
       </IconButton>
       <ContextMenu anchorEl={anchorEl} open={!!anchorEl} onClose={handleCloseContextMenu}>
-        <MenuItem onClick={handleOpenModal(ModalType.RENAME)}>
+        <MenuItem onClick={(e) => handleOpenModal(e, ModalType.RENAME)}>
           <ListItemIcon>
             <SvgIcon component={EditIcon} inheritViewBox fontSize="small" color="success" />
           </ListItemIcon>
           <ListItemText data-testid="rename-btn">{hasName ? 'Rename' : 'Give name'}</ListItemText>
         </MenuItem>
 
-        <MenuItem onClick={handleOpenModal(ModalType.REMOVE)}>
+        <MenuItem onClick={(e) => handleOpenModal(e, ModalType.REMOVE)}>
           <ListItemIcon>
             <SvgIcon component={DeleteIcon} inheritViewBox fontSize="small" color="error" />
           </ListItemIcon>
