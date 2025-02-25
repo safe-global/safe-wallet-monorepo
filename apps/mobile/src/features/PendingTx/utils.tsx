@@ -15,7 +15,7 @@ import { SafeListItem } from '@/src/components/SafeListItem'
 import { TxInfo } from '@/src/components/TxInfo'
 import React, { useCallback } from 'react'
 import { GroupedPendingTxsWithTitle } from './components/PendingTxList/PendingTxList.container'
-import { TTxCardPress } from '@/src/components/TxInfo/types'
+import { TxCardPress, TxConflictCardPress } from '@/src/components/TxInfo/types'
 import { useRouter } from 'expo-router'
 import { useAppSelector } from '@/src/store/hooks'
 import { selectActiveSafe } from '@/src/store/activeSafeSlice'
@@ -94,13 +94,19 @@ export const renderItem = ({
   const router = useRouter()
 
   const onPress = useCallback(
-    async (transaction: TTxCardPress) => {
-      router.push({
-        pathname: '/confirm-transaction',
-        params: {
-          txId: transaction.tx.id,
-        },
-      })
+    async (transaction: TxCardPress | TxConflictCardPress, isConflictTx?: boolean) => {
+      if (isConflictTx) {
+        router.push({
+          pathname: '/conflict-transaction-sheet',
+        })
+      } else {
+        router.push({
+          pathname: '/confirm-transaction',
+          params: {
+            txId: (transaction as TxCardPress).tx.id,
+          },
+        })
+      }
     },
     [router, activeSafe],
   )
@@ -112,7 +118,7 @@ export const renderItem = ({
         {getBulkGroupTxHash(item) ? (
           <TxGroupedCard transactions={item} inQueue />
         ) : (
-          <TxConflictingCard inQueue transactions={item} />
+          <TxConflictingCard inQueue transactions={item} onPress={onPress} />
         )}
       </View>
     )

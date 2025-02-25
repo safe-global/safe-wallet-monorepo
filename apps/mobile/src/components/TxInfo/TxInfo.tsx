@@ -19,13 +19,13 @@ import { TxRejectionCard } from '@/src/components/transactions-list/Card/TxRejec
 import { TxContractInteractionCard } from '@/src/components/transactions-list/Card/TxContractInteractionCard'
 import { TxSwapCard } from '@/src/components/transactions-list/Card/TxSwapCard'
 import { TxCreationCard } from '@/src/components/transactions-list/Card/TxCreationCard'
-import { TTxCardPress } from './types'
+import { TxCardPress } from './types'
 
 interface TxInfoProps {
   tx: Transaction
   bordered?: boolean
   inQueue?: boolean
-  onPress?: (tx: TTxCardPress) => void
+  onPress?: (tx: TxCardPress) => void
 }
 
 function TxInfoComponent({ tx, bordered, inQueue, onPress }: TxInfoProps) {
@@ -33,7 +33,6 @@ function TxInfoComponent({ tx, bordered, inQueue, onPress }: TxInfoProps) {
   const txInfo = tx.txInfo
 
   const onCardPress = () => {
-    // console.log('onCardPress', txType, tx)
     if (onPress) {
       onPress({
         tx,

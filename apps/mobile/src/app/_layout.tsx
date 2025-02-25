@@ -74,6 +74,14 @@ function RootLayout() {
 
                         <Stack.Screen name="app-settings" options={{ headerShown: true, title: 'Settings' }} />
                         <Stack.Screen
+                          name="conflict-transaction-sheet"
+                          options={{
+                            headerShown: false,
+                            presentation: 'transparentModal',
+                            animation: 'fade',
+                          }}
+                        />
+                        <Stack.Screen
                           name="accounts-sheet"
                           options={{
                             headerShown: false,
