@@ -30,7 +30,7 @@ const MembersList = ({ members }: { members: UserOrganization[] }) => {
     return {
       cells: {
         name: {
-          rawValue: member.id,
+          rawValue: member.user.id,
           content: (
             <Stack direction="row" alignItems="center" justifyContent="left" gap={1}>
               User id: {member.user.id}

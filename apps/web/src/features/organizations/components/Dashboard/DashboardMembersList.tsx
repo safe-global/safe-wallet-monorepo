@@ -15,9 +15,7 @@ const DashboardMembersList = ({ members, displayLimit }: { members: UserOrganiza
         {membersToDisplay.map((member) => (
           <Stack direction="row" spacing={1} mb={2} alignItems="center" key={member.id}>
             <InitialsAvatar size="medium" orgName={member.user.id.toString()} rounded />
-            <Typography fontSize="14px" key={member.id}>
-              User Id: {member.user.id}
-            </Typography>
+            <Typography fontSize="14px">User Id: {member.user.id}</Typography>
           </Stack>
         ))}
         <Box display="flex" justifyContent="center">
