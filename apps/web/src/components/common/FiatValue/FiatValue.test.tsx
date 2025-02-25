@@ -34,4 +34,22 @@ describe('FiatValue', () => {
     expect(getByText((content) => normalizer(content) === '$ 100', { normalizer })).toBeInTheDocument()
     expect(getByText('.35')).toBeInTheDocument()
   })
+
+  it('should render fiat value with maxLength=3', () => {
+    const FiatValue = require('.').default
+    const { getByText } = render(<FiatValue value={100.35} maxLength={3} />)
+    expect(getByText((content) => normalizer(content) === '$ 100', { normalizer })).toBeInTheDocument()
+  })
+
+  it('should render fiat value with maxLength=3 and precise=true', () => {
+    const FiatValue = require('.').default
+    const { getByText } = render(<FiatValue value={100.35} maxLength={3} precise />)
+    expect(getByText((content) => normalizer(content) === '$ 100', { normalizer })).toBeInTheDocument()
+  })
+
+  it('should render `--` if passed value is null', () => {
+    const FiatValue = require('.').default
+    const { getByText } = render(<FiatValue value={null} />)
+    expect(getByText('--')).toBeInTheDocument()
+  })
 })

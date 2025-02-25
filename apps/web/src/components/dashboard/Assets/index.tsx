@@ -43,30 +43,34 @@ const NoAssets = () => (
   </Paper>
 )
 
-const AssetRow = ({ item, showSwap }: { item: SafeBalanceResponse['items'][number]; showSwap?: boolean }) => (
-  <Box className={css.container} key={item.tokenInfo.address}>
-    <Box flex={1}>
-      <TokenAmount
-        value={item.balance}
-        decimals={item.tokenInfo.decimals}
-        tokenSymbol={item.tokenInfo.symbol}
-        logoUri={item.tokenInfo.logoUri}
-      />
-    </Box>
+const AssetRow = ({ item, showSwap }: { item: SafeBalanceResponse['items'][number]; showSwap?: boolean }) => {
+  const isMissingFiatConversion = item.fiatConversion === '0' && item.fiatBalance === '0'
 
-    <Box flex={1} display={['none', 'block']} textAlign="right" pr={4}>
-      <FiatValue value={item.fiatBalance} />
-    </Box>
+  return (
+    <Box className={css.container} key={item.tokenInfo.address}>
+      <Box flex={1}>
+        <TokenAmount
+          value={item.balance}
+          decimals={item.tokenInfo.decimals}
+          tokenSymbol={item.tokenInfo.symbol}
+          logoUri={item.tokenInfo.logoUri}
+        />
+      </Box>
 
-    <Box my={-0.7}>
-      {showSwap ? (
-        <SwapButton tokenInfo={item.tokenInfo} amount="0" trackingLabel={SWAP_LABELS.dashboard_assets} />
-      ) : (
-        <SendButton tokenInfo={item.tokenInfo} isOutlined />
-      )}
+      <Box flex={1} display={['none', 'block']} textAlign="right" pr={4}>
+        <FiatValue value={isMissingFiatConversion ? null : item.fiatBalance} />
+      </Box>
+
+      <Box my={-0.7}>
+        {showSwap ? (
+          <SwapButton tokenInfo={item.tokenInfo} amount="0" trackingLabel={SWAP_LABELS.dashboard_assets} />
+        ) : (
+          <SendButton tokenInfo={item.tokenInfo} isOutlined />
+        )}
+      </Box>
     </Box>
-  </Box>
-)
+  )
+}
 
 const AssetList = ({ items }: { items: SafeBalanceResponse['items'] }) => {
   const isSwapFeatureEnabled = useIsSwapFeatureEnabled()

@@ -116,6 +116,7 @@ const AssetsTable = ({
   const rows = loading
     ? skeletonRows
     : (visibleAssets || []).map((item) => {
+        const isMissingFiatConversion = item.fiatConversion === '0' && item.fiatBalance === '0'
         const rawFiatValue = parseFloat(item.fiatBalance)
         const isNative = isNativeToken(item.tokenInfo)
         const isSelected = isAssetSelected(item.tokenInfo.address)
@@ -158,9 +159,9 @@ const AssetsTable = ({
               collapsed: item.tokenInfo.address === hidingAsset,
               content: (
                 <Typography textAlign="right">
-                  <FiatValue value={item.fiatBalance} />
+                  <FiatValue value={isMissingFiatConversion ? null : item.fiatBalance} />
 
-                  {rawFiatValue === 0 && (
+                  {isMissingFiatConversion && (
                     <Tooltip
                       title="Provided values are indicative and we are unable to accommodate pricing requests for individual assets"
                       placement="top"
