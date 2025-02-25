@@ -1,3 +1,6 @@
+import type { SafeItem } from '@/features/myAccounts/hooks/useAllSafes'
+import type { MultiChainSafeItem } from '@/features/myAccounts/hooks/useAllSafesGrouped'
+import RemoveSafeDialog from '@/features/organizations/components/SafeAccounts/RemoveSafeDialog'
 import { type MouseEvent, useState } from 'react'
 import MoreVertIcon from '@mui/icons-material/MoreVert'
 import { SvgIcon } from '@mui/material'
@@ -16,7 +19,7 @@ enum ModalType {
 
 const defaultOpen = { [ModalType.RENAME]: false, [ModalType.REMOVE]: false }
 
-const OrgSafeContextMenu = () => {
+const OrgSafeContextMenu = ({ safeItem }: { safeItem: SafeItem | MultiChainSafeItem }) => {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | undefined>()
   const [open, setOpen] = useState<typeof defaultOpen>(defaultOpen)
 
@@ -36,6 +39,10 @@ const OrgSafeContextMenu = () => {
   }
 
   const hasName = false
+
+  const handleCloseModal = () => {
+    setOpen(defaultOpen)
+  }
 
   return (
     <>
@@ -60,7 +67,7 @@ const OrgSafeContextMenu = () => {
 
       {open[ModalType.RENAME] && <>{/* TODO: Render rename safe account modal */}</>}
 
-      {open[ModalType.REMOVE] && <>{/* TODO: Render Remove safe account modal */}</>}
+      {open[ModalType.REMOVE] && <RemoveSafeDialog safeItem={safeItem} handleClose={handleCloseModal} />}
     </>
   )
 }
