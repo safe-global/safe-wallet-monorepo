@@ -42,6 +42,7 @@ const swapStrBtn = 'Swap'
 const twapStrBtn = 'TWAP'
 const confirmSwapStr = 'Confirm Swap'
 const swapAnywayStrBtn = 'Swap anyway'
+const acceptStrBtn = 'Accept'
 const maxStrBtn = 'Max'
 const numberOfPartsStr = /No\.? of parts/
 const sellAmountStr = 'Sell amount'
@@ -134,14 +135,18 @@ export const swapTxs = {
   wrapSwap:
     '&id=multisig_0xF184a243925Bf7fb1D64487339FF4F177Fb75644_0x06d7e5920bb59a38cf46436b146c33e7307d690875f7d64bca32a0b0c3394deb',
   swapQueue:
-    '&id=multisig_0xD8b85a669413b25a8BE7D7698f88b7bFA20889d2_0xc2a59a93e1cbaeab5fde7a5d4cc63938e1b1e4597c7e203146a6e6e07b43a92f'
+    '&id=multisig_0xD8b85a669413b25a8BE7D7698f88b7bFA20889d2_0xc2a59a93e1cbaeab5fde7a5d4cc63938e1b1e4597c7e203146a6e6e07b43a92f',
 }
 
 export const tokenBlockLabels = {
   sell: 'Sell',
   buy: 'Buy exactly',
-
 }
+
+export function verifySwapBtnIsVisible() {
+  cy.get(assetsSwapBtn).should('be.visible')
+}
+
 export function checkInputCurrencyPreviewValue(value) {
   cy.get(inputCurrencyPreview).should('contain.text', value)
 }
@@ -153,7 +158,6 @@ export function checkOutputCurrencyPreviewValue(value) {
 export function checkTokenBlockValue(index, value) {
   cy.get(tokenBlock).eq(index).should('contain.text', value)
 }
-
 
 export function unlockTwapOrders(iframeSelector) {
   main.getIframeBody(iframeSelector).then(($iframeBody) => {
@@ -224,7 +228,7 @@ export function clickOnConfirmSwapBtn() {
 export function clickOnExceeFeeChkbox() {
   cy.wait(1000)
   cy.get(exceedFeesChkbox)
-    .should(() => { })
+    .should(() => {})
     .then(($button) => {
       if (!$button.length) {
         return
@@ -246,7 +250,7 @@ export function verifyReviewOrderBtnIsVisible() {
 export function clickOnReviewOrderBtn() {
   cy.get('button')
     .contains(swapAnywayStrBtn)
-    .should(() => { })
+    .should(() => {})
     .then(($button) => {
       if (!$button.length) {
         return
@@ -257,6 +261,16 @@ export function clickOnReviewOrderBtn() {
 }
 
 export function placeTwapOrder() {
+  cy.wait(3000)
+  cy.get('button')
+    .contains(acceptStrBtn)
+    .should(() => {})
+    .then(($button) => {
+      if (!$button.length) {
+        return
+      }
+      cy.wrap($button).click()
+    })
   cy.contains(placeTwapOrderStrBtn).click()
 }
 
@@ -438,7 +452,7 @@ export function verifyRecipientAlertIsDisplayed() {
 export function closeIntroTwapModal() {
   cy.get('button')
     .contains(unlockTwapOrdersStrBtn)
-    .should(() => { })
+    .should(() => {})
     .then(($button) => {
       if (!$button.length) {
         return

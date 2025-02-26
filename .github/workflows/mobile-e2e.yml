@@ -1,17 +1,17 @@
-name: EAS Build
+name: EAS Mobile E2E tests
+
 on:
-  push:
-    branches:
-      - dev
-    paths:
-      - apps/mobile/**
-      - packages/**
+  workflow_dispatch:
+  schedule:
+    - cron: '0 6 * * *'
   pull_request:
     paths:
       - apps/mobile/**
       - packages/**
+
 jobs:
   build:
+    if: github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'mobile-e2e-test')
     name: Install and build
     runs-on: ubuntu-latest
     steps:

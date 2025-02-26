@@ -516,51 +516,53 @@ exports[`ConfirmationView should display a confirmation screen for a SETTINGS_CH
                     </div>
                   </div>
                   <div
-                    class="MuiGrid-root MuiGrid-container css-86qz5o-MuiGrid-root"
+                    class="MuiBox-root css-164r41r"
                   >
                     <div
-                      class="MuiGrid-root MuiGrid-item css-1wehkfy-MuiGrid-root"
-                      data-testid="tx-row-title"
-                      style="word-break: break-word;"
-                    >
-                      <p
-                        class="MuiTypography-root MuiTypography-body1 css-shf88x-MuiTypography-root"
-                      >
-                        Raw data:
-                      </p>
-                    </div>
-                    <div
-                      class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true css-1vd824g-MuiGrid-root"
-                      data-testid="tx-data-row"
+                      class="MuiGrid-root MuiGrid-container css-86qz5o-MuiGrid-root"
                     >
                       <div
-                        class="MuiBox-root css-70qvj9"
+                        class="MuiGrid-root MuiGrid-item css-1wehkfy-MuiGrid-root"
+                        data-testid="tx-row-title"
+                        style="word-break: break-word;"
+                      >
+                        <p
+                          class="MuiTypography-root MuiTypography-body1 css-shf88x-MuiTypography-root"
+                        >
+                          Raw data:
+                        </p>
+                      </div>
+                      <div
+                        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true css-1vd824g-MuiGrid-root"
                         data-testid="tx-data-row"
                       >
-                        <div>
-                          0
-                           bytes
-                        </div>
-                        <span
-                          aria-label="Copy to clipboard"
-                          class=""
-                          data-mui-internal-clone-element="true"
-                          style="cursor: pointer;"
+                        <div
+                          class="encodedData MuiBox-root css-0"
+                          data-testid="tx-hexData"
                         >
-                          <button
+                          <span
                             aria-label="Copy to clipboard"
-                            class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-xyrzjn-MuiButtonBase-root-MuiIconButton-root"
-                            tabindex="0"
-                            type="button"
+                            class=""
+                            data-mui-internal-clone-element="true"
+                            style="cursor: pointer;"
                           >
-                            <mock-icon
-                              aria-hidden=""
-                              class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeSmall css-gvpe62-MuiSvgIcon-root"
-                              data-testid="copy-btn-icon"
-                              focusable="false"
-                            />
-                          </button>
-                        </span>
+                            <button
+                              aria-label="Copy to clipboard"
+                              class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-xyrzjn-MuiButtonBase-root-MuiIconButton-root"
+                              tabindex="0"
+                              type="button"
+                            >
+                              <mock-icon
+                                aria-hidden=""
+                                class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeSmall css-gvpe62-MuiSvgIcon-root"
+                                data-testid="copy-btn-icon"
+                                focusable="false"
+                              />
+                            </button>
+                          </span>
+                          0x
+                           
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -980,51 +982,53 @@ exports[`ConfirmationView should display a confirmation with method call when th
                     </div>
                   </div>
                   <div
-                    class="MuiGrid-root MuiGrid-container css-86qz5o-MuiGrid-root"
+                    class="MuiBox-root css-164r41r"
                   >
                     <div
-                      class="MuiGrid-root MuiGrid-item css-1wehkfy-MuiGrid-root"
-                      data-testid="tx-row-title"
-                      style="word-break: break-word;"
-                    >
-                      <p
-                        class="MuiTypography-root MuiTypography-body1 css-shf88x-MuiTypography-root"
-                      >
-                        Raw data:
-                      </p>
-                    </div>
-                    <div
-                      class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true css-1vd824g-MuiGrid-root"
-                      data-testid="tx-data-row"
+                      class="MuiGrid-root MuiGrid-container css-86qz5o-MuiGrid-root"
                     >
                       <div
-                        class="MuiBox-root css-70qvj9"
+                        class="MuiGrid-root MuiGrid-item css-1wehkfy-MuiGrid-root"
+                        data-testid="tx-row-title"
+                        style="word-break: break-word;"
+                      >
+                        <p
+                          class="MuiTypography-root MuiTypography-body1 css-shf88x-MuiTypography-root"
+                        >
+                          Raw data:
+                        </p>
+                      </div>
+                      <div
+                        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true css-1vd824g-MuiGrid-root"
                         data-testid="tx-data-row"
                       >
-                        <div>
-                          0
-                           bytes
-                        </div>
-                        <span
-                          aria-label="Copy to clipboard"
-                          class=""
-                          data-mui-internal-clone-element="true"
-                          style="cursor: pointer;"
+                        <div
+                          class="encodedData MuiBox-root css-0"
+                          data-testid="tx-hexData"
                         >
-                          <button
+                          <span
                             aria-label="Copy to clipboard"
-                            class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-xyrzjn-MuiButtonBase-root-MuiIconButton-root"
-                            tabindex="0"
-                            type="button"
+                            class=""
+                            data-mui-internal-clone-element="true"
+                            style="cursor: pointer;"
                           >
-                            <mock-icon
-                              aria-hidden=""
-                              class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeSmall css-gvpe62-MuiSvgIcon-root"
-                              data-testid="copy-btn-icon"
-                              focusable="false"
-                            />
-                          </button>
-                        </span>
+                            <button
+                              aria-label="Copy to clipboard"
+                              class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-xyrzjn-MuiButtonBase-root-MuiIconButton-root"
+                              tabindex="0"
+                              type="button"
+                            >
+                              <mock-icon
+                                aria-hidden=""
+                                class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeSmall css-gvpe62-MuiSvgIcon-root"
+                                data-testid="copy-btn-icon"
+                                focusable="false"
+                              />
+                            </button>
+                          </span>
+                          0x
+                           
+                        </div>
                       </div>
                     </div>
                   </div>

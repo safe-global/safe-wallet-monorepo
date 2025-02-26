@@ -100,7 +100,7 @@ export const getTransactionType = (tx: Transaction): TxType => {
       if (isMultiSendTxInfo(tx.txInfo) && !tx.safeAppInfo) {
         return {
           image: <SafeFontIcon name={'safe'} />,
-          icon: <SafeFontIcon name={'transaction-Batch'} />,
+          icon: <SafeFontIcon name={'transaction-batch'} />,
           text: 'Batch',
         }
       }

@@ -23,6 +23,7 @@ export type BlockaidModuleRequest = {
   walletAddress: string
   data: SafeTransaction | EIP712TypedData
   threshold: number
+  origin?: string
 }
 
 export type BlockaidModuleResponse = {
@@ -40,9 +41,13 @@ export type BlockaidModuleResponse = {
 type BlockaidPayload = {
   chain: string
   account_address: string
-  metadata: {
-    domain: string
-  }
+  metadata:
+    | {
+        domain: string
+      }
+    | {
+        non_dapp: true
+      }
   data: {
     method: 'eth_signTypedData_v4'
     params: [string, string]
@@ -88,10 +93,13 @@ export class BlockaidModule implements SecurityModule<BlockaidModuleRequest, Blo
         params: [safeAddress, message],
       },
       options: ['simulation', 'validation'],
-      metadata: {
-        // TODO: Pass domain from safe app or wallet connect connection if the tx originates from there
-        domain: window.location.host,
-      },
+      metadata: request.origin
+        ? {
+            domain: request.origin,
+          }
+        : {
+            non_dapp: true,
+          },
     }
     const res = await fetch(`${BLOCKAID_API}/v0/evm/json-rpc/scan`, {
       method: 'POST',
