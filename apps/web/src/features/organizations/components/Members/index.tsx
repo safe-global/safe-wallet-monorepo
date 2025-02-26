@@ -6,7 +6,6 @@ import MembersList from '../MembersList'
 import InvitesList from './InvitesList'
 import SearchIcon from '@/public/images/common/search.svg'
 import { useMembersSearch } from '../../hooks/useMembersSearch'
-import { maybePlural } from '@/utils/formatters'
 import { useOrgMembers } from '../../hooks/useOrgMembers'
 
 const OrganizationMembers = () => {
@@ -15,6 +14,7 @@ const OrganizationMembers = () => {
   const { activeMembers, invitedMembers } = useOrgMembers()
 
   const filteredMembers = useMembersSearch(activeMembers, searchQuery)
+  const filteredInvites = useMembersSearch(invitedMembers, searchQuery)
 
   return (
     <>
@@ -44,18 +44,28 @@ const OrganizationMembers = () => {
           Add member
         </Button>
       </Stack>
-      {invitedMembers.length > 0 && !searchQuery && <InvitesList invitedMembers={invitedMembers} />}
       <>
-        {searchQuery ? (
+        {searchQuery && !filteredMembers.length && !filteredInvites.length && (
           <Typography variant="h5" fontWeight="normal" mb={2} color="primary.light">
-            Found {filteredMembers.length} result{maybePlural(filteredMembers)}
-          </Typography>
-        ) : (
-          <Typography variant="h5" fontWeight={700} mb={2} mt={1}>
-            All Members ({filteredMembers.length})
+            Found 0 results
           </Typography>
         )}
-        <MembersList members={filteredMembers} />
+        {filteredInvites.length > 0 && (
+          <>
+            <Typography variant="h5" fontWeight={700} mb={2}>
+              Pending Invitations ({filteredInvites.length})
+            </Typography>
+            <InvitesList invitedMembers={filteredInvites} />
+          </>
+        )}
+        {filteredMembers.length > 0 && (
+          <>
+            <Typography variant="h5" fontWeight={700} mb={2} mt={1}>
+              All Members ({filteredMembers.length})
+            </Typography>
+            <MembersList members={filteredMembers} />
+          </>
+        )}
       </>
 
       {openAddMembersModal && <AddMembersModal onClose={() => setOpenAddMembersModal(false)} />}

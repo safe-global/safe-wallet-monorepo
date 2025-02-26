@@ -1,6 +1,5 @@
 import EnhancedTable from '@/components/common/EnhancedTable'
-import EthHashInfo from '@/components/common/EthHashInfo'
-import { Box, Button, Chip, IconButton, Stack, SvgIcon, Typography } from '@mui/material'
+import { Button, Chip, IconButton, Stack, SvgIcon } from '@mui/material'
 import type { UserOrganization } from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
 import { useUserOrganizationsRemoveUserV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
 import tableCss from '@/components/common/EnhancedTable/styles.module.css'
@@ -8,6 +7,7 @@ import DeleteIcon from '@/public/images/common/delete.svg'
 import { MemberRole } from '../AddMembersModal'
 import { useCurrentOrgId } from '@/features/organizations/hooks/useCurrentOrgId'
 import { MemberStatus } from '@/features/organizations/hooks/useOrgMembers'
+import MemberName from '../MembersList/MemberName'
 
 const headCells = [
   {
@@ -48,9 +48,7 @@ const InvitesList = ({ invitedMembers }: { invitedMembers: UserOrganization[] })
           rawValue: member.user.id,
           content: (
             <Stack direction="row" alignItems="center" justifyContent="left" gap={1}>
-              <Box>
-                <EthHashInfo address="0x0000000000000000000000000000000000000000" showCopyButton hasExplorer />
-              </Box>
+              <MemberName member={member} />
               {isDeclined && (
                 <Chip label="Declined" size="small" sx={{ backgroundColor: 'error.light', borderRadius: 0.5 }} />
               )}
@@ -89,9 +87,6 @@ const InvitesList = ({ invitedMembers }: { invitedMembers: UserOrganization[] })
 
   return (
     <>
-      <Typography variant="h5" fontWeight={700} mb={2}>
-        Pending Invitations ({invitedMembers.length})
-      </Typography>
       <EnhancedTable rows={rows} headCells={headCells} />
     </>
   )
