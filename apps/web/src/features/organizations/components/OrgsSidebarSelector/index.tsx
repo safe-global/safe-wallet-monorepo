@@ -6,7 +6,7 @@ import {
 import { useState } from 'react'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import CheckIcon from '@mui/icons-material/Check'
-import OrgsCard, { OrgLogo } from '../OrgsCard'
+import OrgsCard, { InitialsAvatar } from '../OrgsCard'
 import css from './styles.module.css'
 import { useRouter } from 'next/router'
 import { AppRoutes } from '@/config/routes'
@@ -61,7 +61,7 @@ const OrgsSidebarSelector = () => {
           className={css.orgSelectorButton}
         >
           <Box display="flex" alignItems="center" gap={1}>
-            <OrgLogo orgName={selectedOrg.name} size="small" />
+            <InitialsAvatar orgName={selectedOrg.name} size="small" />
             <Typography
               variant="body2"
               fontWeight="bold"
@@ -96,7 +96,7 @@ const OrgsSidebarSelector = () => {
               }}
             >
               <Box display="flex" alignItems="center" gap={1}>
-                <OrgLogo orgName={org.name} size="small" />
+                <InitialsAvatar orgName={org.name} size="small" />
                 <Typography variant="body2">{org.name}</Typography>
               </Box>
               {org.id === selectedOrg.id && <CheckIcon fontSize="small" color="primary" />}

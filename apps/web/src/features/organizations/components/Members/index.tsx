@@ -4,29 +4,15 @@ import AddMembersModal from '@/features/organizations/components/AddMembersModal
 import { useState } from 'react'
 import MembersList from '../MembersList'
 import InvitesList from './InvitesList'
-import { useUserOrganizationsGetUsersV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
-import { useCurrentOrgId } from '../../hooks/useCurrentOrgId'
 import SearchIcon from '@/public/images/common/search.svg'
 import { useMembersSearch } from '../../hooks/useMembersSearch'
 import { maybePlural } from '@/utils/formatters'
-
-export enum MemberStatus {
-  INVITED = 'INVITED',
-  ACTIVE = 'ACTIVE',
-  DECLINED = 'DECLINED',
-}
+import { useOrgMembers } from '../../hooks/useOrgMembers'
 
 const OrganizationMembers = () => {
-  const orgId = useCurrentOrgId()
-  const { data } = useUserOrganizationsGetUsersV1Query({ orgId: Number(orgId) })
   const [openAddMembersModal, setOpenAddMembersModal] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
-
-  const invited =
-    data?.members.filter(
-      (member) => member.status === MemberStatus.INVITED || member.status === MemberStatus.DECLINED,
-    ) || []
-  const activeMembers = data?.members.filter((member) => member.status === MemberStatus.ACTIVE) || []
+  const { activeMembers, invitedMembers } = useOrgMembers()
 
   const filteredMembers = useMembersSearch(activeMembers, searchQuery)
 
@@ -58,7 +44,7 @@ const OrganizationMembers = () => {
           Add member
         </Button>
       </Stack>
-      {invited.length > 0 && !searchQuery && <InvitesList invitedMembers={invited} />}
+      {invitedMembers.length > 0 && !searchQuery && <InvitesList invitedMembers={invitedMembers} />}
       <>
         {searchQuery ? (
           <Typography variant="h5" fontWeight="normal" mb={2} color="primary.light">

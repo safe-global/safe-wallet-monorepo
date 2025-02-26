@@ -5,9 +5,9 @@ import type { UserOrganization } from '@safe-global/store/gateway/AUTO_GENERATED
 import { useUserOrganizationsRemoveUserV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
 import tableCss from '@/components/common/EnhancedTable/styles.module.css'
 import DeleteIcon from '@/public/images/common/delete.svg'
-import { MemberStatus } from '.'
 import { MemberRole } from '../AddMembersModal'
-import { useCurrentOrgId } from '../../hooks/useCurrentOrgId'
+import { useCurrentOrgId } from '@/features/organizations/hooks/useCurrentOrgId'
+import { MemberStatus } from '@/features/organizations/hooks/useOrgMembers'
 
 const headCells = [
   {

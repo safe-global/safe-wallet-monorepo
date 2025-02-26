@@ -4,17 +4,19 @@ import OrgsCTACard from '@/features/organizations/components/Dashboard/OrgsCTACa
 import { Box, Grid2, Stack, Typography } from '@mui/material'
 import SignInButton from '@/features/organizations/components/SignInButton'
 import Grid from '@mui/material/Grid2'
-import css from './styles.module.css'
 import { useOrgSafes } from '@/features/organizations/hooks/useOrgSafes'
 import SafesList from '@/features/myAccounts/components/SafesList'
 import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
 import AddAccountsCard from './AddAccountsCard'
 import { AppRoutes } from '@/config/routes'
-import { useCurrentOrgId } from '../../hooks/useCurrentOrgId'
+import { useCurrentOrgId } from '@/features/organizations/hooks/useCurrentOrgId'
 import NextLink from 'next/link'
 import { Link } from '@mui/material'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
+import DashboardMembersList from '@/features/organizations/components/Dashboard/DashboardMembersList'
+import { useOrgMembers } from '@/features/organizations/hooks/useOrgMembers'
+import css from './styles.module.css'
 
 const SignedOutState = () => {
   return (
@@ -57,6 +59,7 @@ const OrganizationsDashboard = () => {
   const safes = useOrgSafes()
   const isUserSignedIn = useAppSelector(isAuthenticated)
   const orgId = useCurrentOrgId()
+  const { activeMembers } = useOrgMembers()
 
   if (!isUserSignedIn) {
     return <SignedOutState />
@@ -72,7 +75,7 @@ const OrganizationsDashboard = () => {
 
           <Grid container spacing={3}>
             <Grid size={{ xs: 12, md: 8 }}>
-              <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
+              <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
                 <Typography variant="h5">Safe Accounts ({safes.length})</Typography>
                 {orgId && <ViewAllLink url={AppRoutes.organizations.safeAccounts(orgId)} />}
               </Stack>
@@ -80,10 +83,11 @@ const OrganizationsDashboard = () => {
               <SafesList safes={safes} isOrgSafe />
             </Grid>
             <Grid size={{ xs: 12, md: 4 }}>
-              <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
-                <Typography variant="h5">Members</Typography>
+              <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
+                <Typography variant="h5">Members ({activeMembers.length})</Typography>
                 {orgId && <ViewAllLink url={AppRoutes.organizations.members(orgId)} />}
               </Stack>
+              <DashboardMembersList members={activeMembers} displayLimit={5} />
             </Grid>
           </Grid>
         </>
