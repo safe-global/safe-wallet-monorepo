@@ -27,10 +27,6 @@ const headCells = [
 ]
 
 const MembersList = ({ members }: { members: UserOrganization[] }) => {
-  if (!members.length) {
-    return null
-  }
-
   const rows = members.map((member) => {
     return {
       cells: {
