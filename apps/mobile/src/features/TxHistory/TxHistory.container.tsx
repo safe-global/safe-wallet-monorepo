@@ -10,6 +10,7 @@ export function TxHistoryContainer() {
   const [pageUrl, setPageUrl] = useState<string>()
   const [list, setList] = useState<TransactionItemPage['results']>([])
   const activeSafe = useDefinedActiveSafe()
+
   const { data, refetch, isFetching, isUninitialized } = useGetTxsHistoryQuery({
     chainId: activeSafe.chainId,
     safeAddress: activeSafe.address,

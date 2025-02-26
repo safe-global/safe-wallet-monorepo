@@ -7,6 +7,8 @@ import { View } from 'tamagui'
 import { TxGroupedCard } from '@/src/components/transactions-list/Card/TxGroupedCard'
 import { TxInfo } from '@/src/components/TxInfo'
 import React from 'react'
+import { useNavigation } from '@react-navigation/native'
+import { useRouter } from 'expo-router'
 
 export type GroupedTxs<T> = (T | T[])[]
 
@@ -55,9 +57,18 @@ export const getTxHash = (item: HistoryTransactionItems): string => {
   return item.transaction.txHash as unknown as string
 }
 export const renderItem = ({ item, index }: { item: TransactionItem | TransactionItem[]; index: number }) => {
+  const router = useRouter()
+  const onPress = (transaction) => {
+    router.push({
+      pathname: '/confirm-transaction',
+      params: {
+        txId: transaction.tx.id,
+      },
+    })
+  }
   return (
     <View marginTop={index && '$4'}>
-      {Array.isArray(item) ? <TxGroupedCard transactions={item} /> : <TxInfo tx={item.transaction} />}
+      {Array.isArray(item) ? <TxGroupedCard transactions={item} /> : <TxInfo onPress={onPress} tx={item.transaction} />}
     </View>
   )
 }

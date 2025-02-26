@@ -9,7 +9,7 @@ import { useScrollableHeader } from '@/src/navigation/useScrollableHeader'
 import { NavBarTitle } from '@/src/components/Title'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { SafeCard } from '@/src/components/SafeCard'
-import { router } from 'expo-router'
+import { router, useGlobalSearchParams } from 'expo-router'
 
 const items = [
   {
@@ -41,9 +41,12 @@ const items = [
 const title = 'Import a signer'
 
 function ImportSignersPage() {
+  const glob = useGlobalSearchParams<{ safeAddress: string }>()
   const { handleScroll } = useScrollableHeader({
     children: <NavBarTitle paddingRight={5}>{title}</NavBarTitle>,
   })
+
+  console.log(glob)
 
   return (
     <SafeAreaView edges={['bottom']}>

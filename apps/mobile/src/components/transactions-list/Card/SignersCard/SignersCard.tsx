@@ -9,6 +9,7 @@ type SignersCardProps = {
   address: `0x${string}`
   rightNode?: React.ReactNode
   transparent?: boolean
+  onPress?: () => void
 }
 
 const descriptionStyle: Partial<TextProps> = {
@@ -22,13 +23,14 @@ const titleStyle: Partial<TextProps> = {
   fontWeight: 600,
 }
 
-export function SignersCard({ name, transparent = true, address, rightNode }: SignersCardProps) {
+export function SignersCard({ onPress, name, transparent = true, address, rightNode }: SignersCardProps) {
   const textProps = useMemo(() => {
     return name ? descriptionStyle : titleStyle
   }, [name])
 
   return (
     <SafeListItem
+      onPress={onPress}
       transparent={transparent}
       label={
         <View>
