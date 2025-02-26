@@ -25,18 +25,6 @@ jobs:
     name: Deploy to dev/staging
 
     steps:
-      # Post a PR comment before deploying
-      - name: Post a comment while building
-        if: github.event.number
-        uses: mshick/add-pr-comment@v2
-        with:
-          message-id: praul
-          message: |
-            ## Branch preview
-            ⏳ Deploying a preview site...
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          repo-token-user-login: 'github-actions[bot]'
-
       - uses: actions/checkout@v4
 
       - uses: ./.github/actions/yarn
@@ -46,63 +34,15 @@ jobs:
           secrets: ${{ toJSON(secrets) }}
           # if: startsWith(github.ref, 'refs/heads/main')
 
-      #- uses: ./.github/workflows/build-storybook
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
+      # Script to upload to IPFS
+      - name: Upload to IPFS
+        uses: aquiladev/ipfs-action@v0.2.1
         with:
-          role-to-assume: ${{ secrets.AWS_ROLE }}
-          aws-region: ${{ secrets.AWS_REGION }}
-
-      # Staging
-      - name: Deploy to the staging S3
-        if: startsWith(github.ref, 'refs/heads/main')
-        env:
-          BUCKET: s3://${{ secrets.AWS_STAGING_BUCKET_NAME }}/current
-        working-directory: apps/web
-        run: bash  ./scripts/github/s3_upload.sh
-
-      # Dev
-      - name: Deploy to the dev S3
-        if: startsWith(github.ref, 'refs/heads/dev')
-        env:
-          BUCKET: s3://${{ secrets.AWS_DEVELOPMENT_BUCKET_NAME }}
-        working-directory: apps/web
-        run: bash  ./scripts/github/s3_upload.sh
-
-      ### PRs ###
-
-      # Extract branch name
-      - name: Extract branch name
-        shell: bash
-        ## Cut off "refs/heads/", only allow alphanumeric characters and convert to lower case,
-        ## e.g. "refs/heads/features/hello-1.2.0" -> "features_hello_1_2_0"
-        run: echo "branch=$(echo $GITHUB_HEAD_REF | sed 's/refs\/heads\///' | sed 's/[^a-z0-9]/_/ig' | sed 's/[A-Z]/\L&/g')" >> $GITHUB_OUTPUT
-        id: extract_branch
-
-      # Deploy to S3
-      - name: Deploy PR branch
-        if: github.event.number
-        env:
-          BUCKET: s3://${{ secrets.AWS_REVIEW_BUCKET_NAME }}/walletweb/${{ steps.extract_branch.outputs.branch }}
-        working-directory: apps/web
-        run: bash  ./scripts/github/s3_upload.sh
-
-      # Comment
-      - name: Post a deployment link in the PR
-        if: always() && github.event.number
-        uses: mshick/add-pr-comment@v2
-        with:
-          message-id: praul
-          message: |
-            ## Branch preview
-            ✅  Deploy successful!
-
-            **Website:**
-            https://${{ steps.extract_branch.outputs.branch }}--walletweb.review.5afe.dev/home?safe=eth:0xA77DE01e157f9f57C7c4A326eeE9C4874D0598b6
-
-            **Storybook:**
-            https://${{ steps.extract_branch.outputs.branch }}--walletweb.review.5afe.dev/storybook/
-          message-failure: |
-            ## Branch preview
-            ❌  Deploy failed!
+          path: apps/web
+          service: pinata
+          pinataKey: ${{ secrets.PINATA_API_KEY }}
+          pinataSecret: ${{ secrets.PINATA_SECRET_KEY }}
+      - name: Output IPFS CID
+        run: |
+          echo "Deployed to IPFS: ${{ steps.upload.outputs.Hash }}"
+          echo "Gateway link: https://ipfs.io/ipfs/${{ steps.upload.outputs.Hash }}"
