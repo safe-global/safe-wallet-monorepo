@@ -3,19 +3,19 @@ import React, { useCallback, useMemo } from 'react'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon/SafeFontIcon'
 import { Identicon } from '@/src/components/Identicon'
 import { FlashList } from '@shopify/flash-list'
-import { GestureResponderEvent, Pressable } from 'react-native'
+import { Pressable } from 'react-native'
 import { SafeListItem } from '@/src/components/SafeListItem'
 import { Text, View, type TextProps } from 'tamagui'
 import { EthAddress } from '@/src/components/EthAddress'
 
-interface ContactListProps {
+interface AddressBookListProps {
   contacts: AddressInfo[]
-  onSelectContact: (contact: AddressInfo) => void
+  onSelectContact: () => void
 }
 
-interface ContactItemProps {
+interface AddressBookContactItemProps {
   contact: AddressInfo
-  onPress: (event: GestureResponderEvent) => void
+  onPress: () => void
 }
 
 const descriptionStyle: Partial<TextProps> = {
@@ -29,7 +29,7 @@ const titleStyle: Partial<TextProps> = {
   fontWeight: 600,
 }
 
-const ContactItem: React.FC<ContactItemProps> = ({ contact, onPress }) => {
+const ContactItem: React.FC<AddressBookContactItemProps> = ({ contact, onPress }) => {
   const textProps = useMemo(() => {
     return contact.name ? descriptionStyle : titleStyle
   }, [contact.name])
@@ -64,7 +64,7 @@ const ContactItem: React.FC<ContactItemProps> = ({ contact, onPress }) => {
   )
 }
 
-const ContactList: React.FC<ContactListProps> = ({ contacts, onSelectContact }) => {
+export const AddressBookList: React.FC<AddressBookListProps> = ({ contacts, onSelectContact }) => {
   const renderContact = useCallback(
     ({ item }: { item: AddressInfo }) => <ContactItem contact={item} onPress={onSelectContact} />,
     [onSelectContact],
@@ -74,5 +74,3 @@ const ContactList: React.FC<ContactListProps> = ({ contacts, onSelectContact }) 
 
   return <FlashList data={contacts} renderItem={renderContact} estimatedItemSize={200} keyExtractor={keyExtractor} />
 }
-
-export default ContactList
