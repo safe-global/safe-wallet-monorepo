@@ -7892,6 +7892,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@safe-global/safe-deployments@npm:^1.37.26":
+  version: 1.37.30
+  resolution: "@safe-global/safe-deployments@npm:1.37.30"
+  dependencies:
+    semver: "npm:^7.6.2"
+  checksum: 10/623c455649881d8f3597cb96dd5dffc02c4c6812012bac57909bb8310c497972bc368a56c2950ec1b77000ff192f25de2ad8d49f31ae611c41f27529c2c219be
+  languageName: node
+  linkType: hard
+
 "@safe-global/safe-gateway-typescript-sdk@npm:3.22.9":
   version: 3.22.9
   resolution: "@safe-global/safe-gateway-typescript-sdk@npm:3.22.9"
@@ -7910,6 +7919,13 @@ __metadata:
   version: 2.2.6
   resolution: "@safe-global/safe-modules-deployments@npm:2.2.6"
   checksum: 10/2788918cf955784e19723d7be4097b0485a85eaf326596ba0fdbcc3aff82a34848f5e537b0493fdeadb30292e2878703c55b8271b8e1fe487957b8d0645eeb75
+  languageName: node
+  linkType: hard
+
+"@safe-global/safe-modules-deployments@npm:^2.2.5":
+  version: 2.2.7
+  resolution: "@safe-global/safe-modules-deployments@npm:2.2.7"
+  checksum: 10/3dfce979b2879d72828365a36cebd59ff76b4781e26033724ba858293f38c9a4cf90ce423767e1f5fa23cccd6d5a151e10a7db9d8ea4340c610ee7c615c22797
   languageName: node
   linkType: hard
 

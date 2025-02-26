@@ -132,7 +132,7 @@ export function SafeBottomSheet<T>({
           },
         ]}
       >
-        <TitleHeader />
+        {title && <TitleHeader />}
         {isSortable ? (
           <DraggableFlatList<T>
             data={items}
