@@ -5,7 +5,7 @@ import { NoContacts } from './List/NoContacts'
 import { AddressBookListHeader } from './List/AddressBookListHeader'
 import { View } from 'tamagui'
 import SafeSearchBar from '@/src/components/SafeSearchBar/SafeSearchBar'
-import ContactList from './List/AddressBookList'
+import { AddressBookList } from './List/AddressBookList'
 
 type Props = {
   contacts: AddressInfo[]
@@ -37,7 +37,10 @@ export const AddressBookView = ({ contacts }: Props) => {
       <AddressBookListHeader />
       <SafeSearchBar placeholder="Name, address" onSearch={handleSearch} throttleTime={300} />
       {contacts.length === 0 && <NoContacts />}
-      <ContactList contacts={filteredContacts} onSelectContact={() => console.log('search')} />
+      <AddressBookList
+        contacts={filteredContacts}
+        onSelectContact={() => console.log('waiting on details page to implement route to it')}
+      />
     </View>
   )
 }
