@@ -47,7 +47,9 @@ const RoleMenuItem = ({
 
   return (
     <Box width="100%" alignItems="center" className={css.roleMenuItem}>
-      <SvgIcon mr={1} gridArea="icon" component={isAdmin ? adminIcon : memberIcon} inheritViewBox fontSize="small" />
+      <Box sx={{ gridArea: 'icon', display: 'flex', alignItems: 'center' }}>
+        <SvgIcon mr={1} component={isAdmin ? adminIcon : memberIcon} inheritViewBox fontSize="small" />
+      </Box>
       <Typography gridArea="title" fontWeight={hasDescription ? 'bold' : undefined}>
         {isAdmin ? 'Admin' : 'Member'}
       </Typography>
