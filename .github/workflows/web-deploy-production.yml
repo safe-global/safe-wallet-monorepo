@@ -32,8 +32,20 @@ jobs:
         working-directory: apps/web
 
       - name: Create checksum
-        run: sha256sum "$ARCHIVE_NAME".tar.gz > ${{ env.ARCHIVE_NAME }}-sha256-checksum.txt
+        run: sha256sum "$ARCHIVE_NAME".tar.gz > "$ARCHIVE_NAME-sha256-checksum.txt"
         working-directory: apps/web
+
+      - name: Upload archive as release asset
+        uses: shogo82148/actions-upload-release-asset@v1
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: apps/web/${{ env.ARCHIVE_NAME }}.tar.gz
+
+      - name: Upload archive as release asset
+        uses: shogo82148/actions-upload-release-asset@v1
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: apps/web/${{ env.ARCHIVE_NAME }}-sha256-checksum.txt
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -57,17 +69,3 @@ jobs:
           PROD_DEPLOYMENT_HOOK_TOKEN: ${{ secrets.PROD_DEPLOYMENT_HOOK_TOKEN }}
           PROD_DEPLOYMENT_HOOK_URL: ${{ secrets.PROD_DEPLOYMENT_HOOK_URL }}
           VERSION_TAG: ${{ github.event.release.tag_name }}
-
-      - name: Upload archive as release asset
-        uses: shogo82148/actions-upload-release-asset@v1
-        with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ${{ env.ARCHIVE_NAME }}.tar.gz
-        working-directory: apps/web
-
-      - name: Upload archive as release asset
-        uses: shogo82148/actions-upload-release-asset@v1
-        with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ${{ env.ARCHIVE_NAME }}-sha256-checksum.txt
-        working-directory: apps/web
