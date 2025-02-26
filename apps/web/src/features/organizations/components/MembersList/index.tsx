@@ -1,10 +1,11 @@
-import { Chip, IconButton, Stack, SvgIcon, Tooltip } from '@mui/material'
+import { Chip, IconButton, SvgIcon, Tooltip } from '@mui/material'
 import type { UserOrganization } from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
 import EditIcon from '@/public/images/common/edit.svg'
 import { MemberRole } from '../AddMembersModal'
 import DeleteIcon from '@/public/images/common/delete.svg'
 import EnhancedTable from '@/components/common/EnhancedTable'
 import tableCss from '@/components/common/EnhancedTable/styles.module.css'
+import MemberName from './MemberName'
 
 const headCells = [
   {
@@ -26,16 +27,16 @@ const headCells = [
 ]
 
 const MembersList = ({ members }: { members: UserOrganization[] }) => {
+  if (!members.length) {
+    return null
+  }
+
   const rows = members.map((member) => {
     return {
       cells: {
         name: {
           rawValue: member.user.id,
-          content: (
-            <Stack direction="row" alignItems="center" justifyContent="left" gap={1}>
-              User id: {member.user.id}
-            </Stack>
-          ),
+          content: <MemberName member={member} />,
         },
         role: {
           rawValue: member.role,
