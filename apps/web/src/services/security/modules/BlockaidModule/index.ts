@@ -41,9 +41,13 @@ export type BlockaidModuleResponse = {
 type BlockaidPayload = {
   chain: string
   account_address: string
-  metadata: {
-    domain: string
-  }
+  metadata:
+    | {
+        domain: string
+      }
+    | {
+        non_dapp: true
+      }
   data: {
     method: 'eth_signTypedData_v4'
     params: [string, string]
@@ -89,9 +93,13 @@ export class BlockaidModule implements SecurityModule<BlockaidModuleRequest, Blo
         params: [safeAddress, message],
       },
       options: ['simulation', 'validation'],
-      metadata: {
-        domain: request.origin ?? 'non_dapp',
-      },
+      metadata: request.origin
+        ? {
+            domain: request.origin,
+          }
+        : {
+            non_dapp: true,
+          },
     }
     const res = await fetch(`${BLOCKAID_API}/v0/evm/json-rpc/scan`, {
       method: 'POST',
