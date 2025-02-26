@@ -7,6 +7,7 @@ on:
 jobs:
   release:
     permissions:
+      attestations: write
       contents: write
       id-token: write
 
@@ -30,6 +31,11 @@ jobs:
       - name: Create archive
         run: tar -czf "$ARCHIVE_NAME".tar.gz out
         working-directory: apps/web
+
+      - name: Generate artifact attestation
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: ${{ env.ARCHIVE_NAME }}.tar.gz
 
       - name: Create checksum
         run: sha256sum "$ARCHIVE_NAME".tar.gz > ${{ env.ARCHIVE_NAME }}-sha256-checksum.txt
