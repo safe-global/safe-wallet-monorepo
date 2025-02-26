@@ -30,7 +30,7 @@ const SignInButton = () => {
     }
   }
 
-  return <WalletLogin onLogin={handleLogin} onContinue={handleSignIn} />
+  return <WalletLogin onLogin={handleLogin} onContinue={handleSignIn} buttonText="Sign in with" />
 }
 
 export default SignInButton
