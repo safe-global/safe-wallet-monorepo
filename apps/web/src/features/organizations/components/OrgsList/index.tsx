@@ -14,6 +14,7 @@ import OrgListInvite from '../Dashboard/DashboardInvite'
 import { useState } from 'react'
 import css from './styles.module.css'
 import { MemberStatus } from '@/features/organizations/hooks/useOrgMembers'
+import useWallet from '@/hooks/wallets/useWallet'
 
 const AddOrgButton = ({ disabled }: { disabled: boolean }) => {
   const [open, setOpen] = useState(false)
@@ -48,12 +49,15 @@ const InfoModal = () => {
 }
 
 const EmptyState = () => {
+  const wallet = useWallet()
+
   return (
     <Card sx={{ p: 5, textAlign: 'center' }}>
       <OrgsIcon />
 
       <Typography color="text.secondary" mb={2}>
-        To view your organization or create one, sign in with your connected wallet.
+        To view your organization or create one,{' '}
+        {!!wallet ? 'sign in with your connected wallet.' : 'connect your wallet.'}
         <br />
         <InfoModal />
       </Typography>
