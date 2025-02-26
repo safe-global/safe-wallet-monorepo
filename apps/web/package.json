@@ -60,7 +60,7 @@
     "@spindl-xyz/attribution-lite": "^1.4.0",
     "@walletconnect/core": "^2.17.2",
     "@walletconnect/utils": "^2.17.3",
-    "@web3-onboard/coinbase": "^2.4.1",
+    "@web3-onboard/coinbase": "^2.4.2",
     "@web3-onboard/core": "2.21.4",
     "@web3-onboard/injected-wallets": "^2.11.2",
     "@web3-onboard/walletconnect": "^2.6.1",
