@@ -1,0 +1,32 @@
+.container {
+  display: flex;
+  justify-content: center;
+}
+
+.userSettings {
+  width: 100vw;
+  max-width: 750px;
+  margin: var(--space-3);
+}
+
+.linkIcon {
+  width: 24px;
+  height: 24px;
+}
+
+.step {
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+}
+
+.stepNumber {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #d7f6ff;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  font-size: 12px;
+}
