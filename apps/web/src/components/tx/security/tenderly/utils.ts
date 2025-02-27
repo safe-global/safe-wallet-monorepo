@@ -8,7 +8,12 @@ import {
   getReadOnlyMultiSendCallOnlyContract,
   getReadOnlyCurrentGnosisSafeContract,
 } from '@/services/contracts/safeContracts'
-import { TENDERLY_SIMULATE_ENDPOINT_URL, TENDERLY_ORG_NAME, TENDERLY_PROJECT_NAME } from '@/config/constants'
+import {
+  TENDERLY_SIMULATE_ENDPOINT_URL,
+  TENDERLY_ORG_NAME,
+  TENDERLY_PROJECT_NAME,
+  TENDERLY_TOKEN,
+} from '@/config/constants'
 import { FEATURES, hasFeature } from '@/utils/chains'
 import type { StateObject, TenderlySimulatePayload, TenderlySimulation } from '@/components/tx/security/tenderly/types'
 import { getWeb3ReadOnly } from '@/hooks/wallets/web3'
@@ -35,10 +40,10 @@ export const getSimulation = async (
     body: JSON.stringify(tx),
   }
 
-  if (customTenderly?.accessToken) {
+  if (customTenderly?.accessToken || TENDERLY_TOKEN) {
     requestObject.headers = {
       'content-type': 'application/JSON',
-      'X-Access-Key': customTenderly.accessToken,
+      'X-Access-Key': customTenderly?.accessToken || TENDERLY_TOKEN,
     }
   }
 
