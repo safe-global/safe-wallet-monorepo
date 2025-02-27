@@ -4,9 +4,8 @@
 }
 
 .userSettings {
-  width: 100vw;
   max-width: 750px;
-  margin: var(--space-3);
+  margin-top: var(--space-3);
 }
 
 .linkIcon {
@@ -16,11 +15,10 @@
 
 .step {
   font-size: 14px;
-  display: flex;
-  align-items: center;
 }
 
 .stepNumber {
+  margin-top: 2px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -29,4 +27,10 @@
   width: 16px;
   height: 16px;
   font-size: 12px;
+}
+
+@media (max-width: 599.95px) {
+  .userSettings {
+    margin: var(--space-2) 0 0 0;
+  }
 }

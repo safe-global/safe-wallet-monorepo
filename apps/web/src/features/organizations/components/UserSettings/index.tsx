@@ -48,7 +48,7 @@ const UserSettings = () => {
                   alignItems="center"
                   justifyContent="space-between"
                 >
-                  <EthHashInfo address={wallet.address} showCopyButton hasExplorer />
+                  <EthHashInfo shortAddress={false} address={wallet.address} showCopyButton hasExplorer />
                   <IconButton onClick={() => {}} size="small">
                     <SvgIcon component={DeleteIcon} inheritViewBox color="error" fontSize="small" sx={{ m: 1 }} />
                   </IconButton>
@@ -74,7 +74,9 @@ const UserSettings = () => {
                       'Your wallet now shares the same profile data!',
                     ].map((stepText, index) => (
                       <Typography key={index} className={css.step} variant="body1" display="flex" gap={1}>
-                        <Box className={css.stepNumber}>{index + 1}</Box>
+                        <Box component="span" className={css.stepNumber}>
+                          {index + 1}
+                        </Box>
                         {stepText}
                       </Typography>
                     ))}
