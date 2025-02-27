@@ -1,17 +1,15 @@
 import CheckBalance from '@/features/counterfactual/CheckBalance'
 import { type ReactElement } from 'react'
-import { Box, IconButton, Checkbox, Skeleton, SvgIcon, Tooltip, Typography } from '@mui/material'
+import { Box, IconButton, Checkbox, Skeleton, Tooltip, Typography } from '@mui/material'
 import type { TokenInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import { TokenType } from '@safe-global/safe-gateway-typescript-sdk'
 import css from './styles.module.css'
-import FiatValue from '@/components/common/FiatValue'
 import TokenAmount from '@/components/common/TokenAmount'
 import TokenIcon from '@/components/common/TokenIcon'
 import EnhancedTable, { type EnhancedTableProps } from '@/components/common/EnhancedTable'
 import TokenExplorerLink from '@/components/common/TokenExplorerLink'
 import Track from '@/components/common/Track'
 import { ASSETS_EVENTS } from '@/services/analytics/events/assets'
-import InfoIcon from '@/public/images/notifications/info.svg'
 import { VisibilityOutlined } from '@mui/icons-material'
 import TokenMenu from '../TokenMenu'
 import useBalances from '@/hooks/useBalances'
@@ -24,6 +22,7 @@ import useIsSwapFeatureEnabled from '@/features/swap/hooks/useIsSwapFeatureEnabl
 import useIsStakingFeatureEnabled from '@/features/stake/hooks/useIsStakingFeatureEnabled'
 import { STAKE_LABELS } from '@/services/analytics/events/stake'
 import StakeButton from '@/features/stake/components/StakeButton'
+import { FiatBalance } from './FiatBalance'
 
 const skeletonCells: EnhancedTableProps['rows'][0]['cells'] = {
   asset: {
@@ -116,7 +115,6 @@ const AssetsTable = ({
   const rows = loading
     ? skeletonRows
     : (visibleAssets || []).map((item) => {
-        const isMissingFiatConversion = item.fiatConversion === '0' && item.fiatBalance === '0'
         const rawFiatValue = parseFloat(item.fiatBalance)
         const isNative = isNativeToken(item.tokenInfo)
         const isSelected = isAssetSelected(item.tokenInfo.address)
@@ -157,29 +155,7 @@ const AssetsTable = ({
             value: {
               rawValue: rawFiatValue,
               collapsed: item.tokenInfo.address === hidingAsset,
-              content: (
-                <Typography textAlign="right">
-                  <FiatValue value={isMissingFiatConversion ? null : item.fiatBalance} />
-
-                  {isMissingFiatConversion && (
-                    <Tooltip
-                      title="Provided values are indicative and we are unable to accommodate pricing requests for individual assets"
-                      placement="top"
-                      arrow
-                    >
-                      <span>
-                        <SvgIcon
-                          component={InfoIcon}
-                          inheritViewBox
-                          color="error"
-                          fontSize="small"
-                          sx={{ verticalAlign: 'middle', ml: 0.5, mr: [0, '-20px'], mt: '-2px' }}
-                        />
-                      </span>
-                    </Tooltip>
-                  )}
-                </Typography>
-              ),
+              content: <FiatBalance balanceItem={item} />,
             },
             actions: {
               rawValue: '',

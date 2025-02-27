@@ -2,7 +2,6 @@ import { useMemo } from 'react'
 import { Box, Skeleton, Typography, Paper } from '@mui/material'
 import type { SafeBalanceResponse } from '@safe-global/safe-gateway-typescript-sdk'
 import useBalances from '@/hooks/useBalances'
-import FiatValue from '@/components/common/FiatValue'
 import TokenAmount from '@/components/common/TokenAmount'
 import SwapButton from '@/features/swap/components/SwapButton'
 import { AppRoutes } from '@/config/routes'
@@ -14,6 +13,7 @@ import { useVisibleAssets } from '@/components/balances/AssetsTable/useHideAsset
 import BuyCryptoButton from '@/components/common/BuyCryptoButton'
 import SendButton from '@/components/balances/AssetsTable/SendButton'
 import useIsSwapFeatureEnabled from '@/features/swap/hooks/useIsSwapFeatureEnabled'
+import { FiatBalance } from '@/components/balances/AssetsTable/FiatBalance'
 
 const MAX_ASSETS = 5
 
@@ -43,34 +43,30 @@ const NoAssets = () => (
   </Paper>
 )
 
-const AssetRow = ({ item, showSwap }: { item: SafeBalanceResponse['items'][number]; showSwap?: boolean }) => {
-  const isMissingFiatConversion = item.fiatConversion === '0' && item.fiatBalance === '0'
-
-  return (
-    <Box className={css.container} key={item.tokenInfo.address}>
-      <Box flex={1}>
-        <TokenAmount
-          value={item.balance}
-          decimals={item.tokenInfo.decimals}
-          tokenSymbol={item.tokenInfo.symbol}
-          logoUri={item.tokenInfo.logoUri}
-        />
-      </Box>
-
-      <Box flex={1} display={['none', 'block']} textAlign="right" pr={4}>
-        <FiatValue value={isMissingFiatConversion ? null : item.fiatBalance} />
-      </Box>
-
-      <Box my={-0.7}>
-        {showSwap ? (
-          <SwapButton tokenInfo={item.tokenInfo} amount="0" trackingLabel={SWAP_LABELS.dashboard_assets} />
-        ) : (
-          <SendButton tokenInfo={item.tokenInfo} isOutlined />
-        )}
-      </Box>
+const AssetRow = ({ item, showSwap }: { item: SafeBalanceResponse['items'][number]; showSwap?: boolean }) => (
+  <Box className={css.container} key={item.tokenInfo.address}>
+    <Box flex={1}>
+      <TokenAmount
+        value={item.balance}
+        decimals={item.tokenInfo.decimals}
+        tokenSymbol={item.tokenInfo.symbol}
+        logoUri={item.tokenInfo.logoUri}
+      />
     </Box>
-  )
-}
+
+    <Box display={['none', 'block']} pr={4}>
+      <FiatBalance balanceItem={item} />
+    </Box>
+
+    <Box my={-0.7}>
+      {showSwap ? (
+        <SwapButton tokenInfo={item.tokenInfo} amount="0" trackingLabel={SWAP_LABELS.dashboard_assets} />
+      ) : (
+        <SendButton tokenInfo={item.tokenInfo} isOutlined />
+      )}
+    </Box>
+  </Box>
+)
 
 const AssetList = ({ items }: { items: SafeBalanceResponse['items'] }) => {
   const isSwapFeatureEnabled = useIsSwapFeatureEnabled()
