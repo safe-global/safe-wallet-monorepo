@@ -94,4 +94,4 @@ describe('Happy path Swaps tests', () => {
       checkDataLayerEvents(tx_confirmed)
     },
   )
-})
+}) 
