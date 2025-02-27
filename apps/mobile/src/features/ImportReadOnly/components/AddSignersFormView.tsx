@@ -27,7 +27,7 @@ export const AddSignersFormView = ({
       />
 
       <View paddingHorizontal={16}>
-        <SafeButton onPress={onPress} testID={'continue-button'}>
+        <SafeButton onPress={onPress} testID={'continue-button'} marginBottom={70}>
           Continue
         </SafeButton>
       </View>
