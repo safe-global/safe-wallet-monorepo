@@ -10,7 +10,7 @@ export const SafeIcon = createIconSetFromIcoMoon(
   'safe-icons.ttf',
 )
 
-export interface IconProps {
+export interface IconProps extends Omit<React.ComponentProps<typeof SafeIcon>, 'name' | 'size' | 'color'> {
   name: IconName
   size?: number
   color?: string

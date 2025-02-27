@@ -96,6 +96,13 @@ function RootLayout() {
                             title: '',
                           }}
                         />
+                        <Stack.Screen
+                          name="share"
+                          options={{
+                            headerShown: false,
+                            presentation: 'modal',
+                          }}
+                        />
                         <Stack.Screen name="+not-found" />
                       </Stack>
                       <StatusBar />
