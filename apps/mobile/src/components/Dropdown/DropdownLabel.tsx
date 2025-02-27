@@ -18,14 +18,18 @@ const defaultLabelProps = {
 
 export const DropdownLabel = ({ label, leftNode, onPress, labelProps = defaultLabelProps }: DropdownLabelProps) => {
   return (
-    <View alignItems="center" testID="dropdown-label-view" onPress={onPress} flexDirection="row" columnGap="$2">
+    <View testID="dropdown-label-view" onPress={onPress} flexDirection="row" columnGap="$2">
       {leftNode}
 
-      <Text fontSize={labelProps.fontSize} fontWeight={labelProps.fontWeight}>
-        {label}
-      </Text>
+      <View justifyContent={'center'}>
+        <Text fontSize={labelProps.fontSize} fontWeight={labelProps.fontWeight}>
+          {label}
+        </Text>
+      </View>
 
-      <SafeFontIcon testID="dropdown-arrow" name="arrow-down" />
+      <View paddingTop={'$1'}>
+        <SafeFontIcon testID="dropdown-arrow" name="chevron-down" size={16} />
+      </View>
     </View>
   )
 }

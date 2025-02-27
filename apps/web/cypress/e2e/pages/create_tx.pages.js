@@ -18,14 +18,15 @@ export const relayExecMethod = '[data-testid="relay-execution-method"]'
 export const payNowExecMethod = '[data-testid="pay-now-execution-method"]'
 export const addToBatchBtn = '[data-track="batching: Add to batch"]'
 const accordionDetails = '[data-testid="accordion-details"]'
-const copyIcon = '[data-testid="copy-btn-icon"]'
+export const copyIcon = '[data-testid="copy-btn-icon"]'
+export const explorerBtn = '[data-testid="explorer-btn"]'
 const transactionSideList = '[data-testid="transaction-actions-list"]'
 const confirmationVisibilityBtn = '[data-testid="confirmation-visibility-btn"]'
 const expandAllBtn = '[data-testid="expande-all-btn"]'
 const collapseAllBtn = '[data-testid="collapse-all-btn"]'
 export const txRowTitle = '[data-testid="tx-row-title"]'
 const advancedDetails = '[data-testid="tx-advanced-details"]'
-const baseGas = '[data-testid="tx-bas-gas"]'
+const baseGas = '[data-testid="tx-base-gas"]'
 const requiredConfirmation = '[data-testid="required-confirmations"]'
 export const txDate = '[data-testid="tx-date"]'
 export const proposalStatus = '[data-testid="proposal-status"]'
@@ -115,10 +116,17 @@ export const bulkTxs = 'Bulk transactions'
 export const txNoteWarningMessage = 'The notes are publicly visible, do not share any private or sensitive details'
 export const recordedTxNote = 'Tx note one'
 
+export const tx_status = {
+  execution_needed: 'Execution needed',
+}
 export const filterTypes = {
   incoming: 'Incoming',
   outgoing: 'Outgoing',
   module: 'Module-based',
+}
+
+export const txActions = {
+  setFallbackHandler: 'setFallbackHandler',
 }
 
 export const advancedDetailsViewOptions = {

@@ -2,8 +2,6 @@ import { useParams } from 'next/navigation'
 import { parse, type ParsedUrlQuery } from 'querystring'
 import { IS_PRODUCTION } from '@/config/constants'
 import chains from '@/config/chains'
-import { useAppSelector } from '@/store'
-import { selectSession } from '@/store/sessionSlice'
 import { parsePrefixedAddress } from '@/utils/addresses'
 import useWallet from './wallets/useWallet'
 import useChains from './useChains'
@@ -43,11 +41,10 @@ const useWalletChainId = (): string | undefined => {
 }
 
 export const useChainId = (): string => {
-  const session = useAppSelector(selectSession)
   const urlChainId = useUrlChainId()
   const walletChainId = useWalletChainId()
 
-  return urlChainId || session.lastChainId || walletChainId || defaultChainId
+  return urlChainId || walletChainId || defaultChainId
 }
 
 export default useChainId

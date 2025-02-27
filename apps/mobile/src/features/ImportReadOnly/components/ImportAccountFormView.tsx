@@ -49,53 +49,51 @@ export const ImportAccountFormView: React.FC<ImportAccountFormViewProps> = ({
   })
 
   return (
-    <View flex={1} paddingBottom={paddingBottom} paddingHorizontal={'$6'}>
-      <KeyboardAvoidingView
-        behavior="padding"
-        style={{ flex: 1 }}
-        keyboardVerticalOffset={paddingBottom + ADJUSTMENT_FOR_KEYBOARD}
-      >
-        <ScrollView paddingBottom={'$4'} onScroll={handleScroll} flex={1}>
-          <LargeHeaderTitle marginBottom={'$4'}>Import Safe account</LargeHeaderTitle>
-          <Text marginBottom={'$4'}>Paste the address of an account you want to import.</Text>
-          <SafeInput
-            value={safeAddress}
-            onChangeText={onChangeText}
-            multiline={true}
-            placeholder="Paste address..."
-            error={error && error.length > 0 ? error : undefined}
-            success={canContinue}
-            left={
-              addressWithoutPrefix ? (
-                <Identicon address={addressWithoutPrefix as `0x${string}`} size={32} />
-              ) : (
-                <View width={32} />
-              )
-            }
-            right={
-              result?.data?.length && !error ? (
-                <SafeFontIcon name={'check-filled'} size={20} color={'$success'} testID={'success-icon'} />
-              ) : (
-                <View width={20} />
-              )
-            }
-          />
+    <KeyboardAvoidingView
+      behavior="padding"
+      style={{ flex: 1 }}
+      keyboardVerticalOffset={paddingBottom + ADJUSTMENT_FOR_KEYBOARD}
+    >
+      <ScrollView paddingBottom={'$4'} onScroll={handleScroll} flex={1}>
+        <LargeHeaderTitle marginBottom={'$4'}>Import Safe account</LargeHeaderTitle>
+        <Text marginBottom={'$4'}>Paste the address of an account you want to import.</Text>
+        <SafeInput
+          value={safeAddress}
+          onChangeText={onChangeText}
+          multiline={true}
+          placeholder="Paste address..."
+          error={error && error.length > 0 ? error : undefined}
+          success={canContinue}
+          left={
+            addressWithoutPrefix ? (
+              <Identicon address={addressWithoutPrefix as `0x${string}`} size={32} />
+            ) : (
+              <View width={32} />
+            )
+          }
+          right={
+            result?.data?.length && !error ? (
+              <SafeFontIcon name={'check-filled'} size={20} color={'$success'} testID={'success-icon'} />
+            ) : (
+              <View width={20} />
+            )
+          }
+        />
 
-          <VerificationStatus
-            isLoading={result.isLoading}
-            data={result.data}
-            isEnteredAddressValid={isEnteredAddressValid}
-          />
-        </ScrollView>
-        <SafeButton
-          primary
-          onPress={onContinue}
-          disabled={!isEnteredAddressValid || !safeExists}
-          testID={'continue-button'}
-        >
-          Continue
-        </SafeButton>
-      </KeyboardAvoidingView>
-    </View>
+        <VerificationStatus
+          isLoading={result.isLoading}
+          data={result.data}
+          isEnteredAddressValid={isEnteredAddressValid}
+        />
+      </ScrollView>
+      <SafeButton
+        primary
+        onPress={onContinue}
+        disabled={!isEnteredAddressValid || !safeExists}
+        testID={'continue-button'}
+      >
+        Continue
+      </SafeButton>
+    </KeyboardAvoidingView>
   )
 }

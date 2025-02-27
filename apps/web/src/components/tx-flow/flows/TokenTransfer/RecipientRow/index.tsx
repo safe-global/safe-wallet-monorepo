@@ -55,7 +55,7 @@ export const RecipientRow = ({ fieldArray, removable = true, remove, disableSpen
   const isAddressValid = !!recipient && !get(errors, recipientFieldName)
 
   const canCreateSpendingLimitTxWithToken = useHasPermission(Permission.CreateSpendingLimitTransaction, {
-    token: selectedToken?.tokenInfo,
+    tokenAddress,
   })
 
   const isSpendingLimitType = type === TokenTransferType.spendingLimit

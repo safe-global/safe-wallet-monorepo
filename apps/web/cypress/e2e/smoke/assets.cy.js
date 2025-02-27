@@ -25,7 +25,7 @@ describe('[SMOKE] Assets tests', () => {
     assets.verifyTokensTabIsSelected('true')
   })
 
-  it('[SMOKE] Verify that Token list dropdown down options show/hide spam tokens', () => {
+  it('[SMOKE] Verify that Token list dropdown shows options "Default tokens" and "All tokens"', () => {
     let spamTokens = [
       assets.currencyAave,
       assets.currencyTestTokenA,
@@ -35,14 +35,12 @@ describe('[SMOKE] Assets tests', () => {
       assets.currencyDaiCap,
     ]
 
-    cy.wrap(null)
-      .then(() => main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__settings, ls.safeSettings.slimitSettings))
-      .then(() => {
-        cy.reload()
-        main.verifyValuesDoNotExist(assets.tokenListTable, spamTokens)
-        assets.selectTokenList(assets.tokenListOptions.allTokens)
-        spamTokens.push(constants.tokenNames.sepoliaEther)
-        main.verifyValuesExist(assets.tokenListTable, spamTokens)
-      })
+    assets.selectTokenList(assets.tokenListOptions.default)
+    main.verifyValuesExist(assets.tokenListTable, [constants.tokenNames.sepoliaEther])
+    main.verifyValuesDoNotExist(assets.tokenListTable, spamTokens)
+
+    assets.selectTokenList(assets.tokenListOptions.allTokens)
+    spamTokens.push(constants.tokenNames.sepoliaEther)
+    main.verifyValuesExist(assets.tokenListTable, spamTokens)
   })
 })

@@ -12,7 +12,7 @@ export function ImportError() {
   const { address } = useLocalSearchParams<{ address: `0x${string}` }>()
 
   return (
-    <View flex={1} paddingBottom={80} justifyContent="space-between">
+    <View flex={1} justifyContent="space-between">
       <View flex={1}>
         <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
           <View flex={1} flexGrow={1} alignItems="center" justifyContent="center" paddingHorizontal="$3">
@@ -31,10 +31,15 @@ export function ImportError() {
             </View>
 
             <View margin="$10" width="100%" alignItems="center" gap="$4">
-              <LargeHeaderTitle textAlign="center">This address is not a signer of the Safe account</LargeHeaderTitle>
+              <LargeHeaderTitle textAlign="center">Private key couldn't be imported</LargeHeaderTitle>
 
               <Text textAlign="center" fontSize="$4">
-                Only signers of this account can be imported. Double-check the address and try to import again.
+                This private key does not belong to any signer of this Safe Account. Double-check the address and try to
+                import again.
+              </Text>
+
+              <Text textAlign="center" fontSize="$4">
+                Don’t worry, your private key was not stored!
               </Text>
             </View>
           </View>
@@ -42,14 +47,6 @@ export function ImportError() {
       </View>
 
       <View paddingHorizontal="$3" gap="$6">
-        <View alignItems="center" flexDirection="row" gap="$3" justifyContent="center">
-          <SafeFontIcon color="$backgroundPress" name="shield" />
-
-          <Text color="$backgroundPress" fontSize="$4">
-            Safe doesn’t store your private key.
-          </Text>
-        </View>
-
         <Link href={'../'} asChild>
           <SafeButton>Import again</SafeButton>
         </Link>

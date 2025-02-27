@@ -57,7 +57,7 @@ export const SafeButton = styled(Button, {
     text: {
       true: {
         backgroundColor: 'transparent',
-        color: '$color',
+        color: '$primary',
       },
     },
 
@@ -66,8 +66,8 @@ export const SafeButton = styled(Button, {
         // @ts-expect-error
         const isText = allProps.props?.text === true
         return {
-          backgroundColor: isText ? 'transparent' : '$backgroundPaper',
-          color: '$colorSecondary',
+          backgroundColor: isText ? 'transparent' : '$backgroundDisabled',
+          color: '$colorLight',
         }
       },
     },
