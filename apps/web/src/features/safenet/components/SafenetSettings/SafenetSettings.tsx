@@ -1,11 +1,15 @@
 import ChainIndicator from '@/components/common/ChainIndicator'
+import NetworkLogosList from '@/features/multichain/components/NetworkLogosList'
 import { SafenetGuardDisplay, SafenetModuleDisplay } from '@/features/safenet/components/SafenetContractDisplay'
-import useChainId from '@/hooks/useChainId'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import SafenetLogo from '@/public/images/logo-safenet.svg'
+import InfoIcon from '@/public/images/notifications/info.svg'
+import { useGetSafenetAccountQuery } from '@/store/safenet'
 import CheckIcon from '@mui/icons-material/Check'
-import { Button, Grid, Paper, Stack, Typography } from '@mui/material'
-import { useState } from 'react'
+import { Alert, Box, Button, Grid, Paper, Stack, SvgIcon, Tooltip, Typography } from '@mui/material'
+import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import { useMemo, useState } from 'react'
+import useHasSafenetFeature from '../../hooks/useHasSafenetFeature'
 import useIsSafenetEnabled from '../../hooks/useIsSafenetEnabled'
 import DisableSafenetModal from './DisableSafenetModal'
 import css from './styles.module.css'
@@ -38,16 +42,57 @@ const SafenetEnabled = () => {
         size="small"
         sx={{ alignSelf: 'flex-start' }}
       >
-        Disable Safenet on
-        <ChainIndicator chainId={chainId} className={css.chainIndicator} />
+        <Stack direction="row" gap={1} alignItems="center">
+          Disable Safenet on
+          <ChainIndicator chainId={chainId} className={css.chainIndicator} />
+        </Stack>
       </Button>
+      <Stack direction="row" spacing={1}>
+        <SvgIcon fontSize="small" component={InfoIcon} inheritViewBox />
+        <Typography variant="body2">
+          To disable Safenet on other networks, you need to switch to each network individually and disable it
+          separately.
+        </Typography>
+      </Stack>
       {openSafenetModal && <DisableSafenetModal onClose={() => setOpenSafenetModal(false)} />}
     </Stack>
   )
 }
 
+const MultichainIndicator = ({ chains }: { chains: Pick<ChainInfo, 'chainId'>[] }) => (
+  <Tooltip
+    title={
+      <Box>
+        {chains.map((safeItem) => (
+          <Box key={safeItem.chainId} sx={{ p: '4px 0px' }}>
+            <ChainIndicator chainId={safeItem.chainId} />
+          </Box>
+        ))}
+      </Box>
+    }
+    arrow
+  >
+    <Box className={css.multiChains}>
+      <NetworkLogosList networks={chains} showHasMore />
+    </Box>
+  </Tooltip>
+)
+
 const SafenetDisabled = () => {
-  const chainId = useChainId()
+  const { safe } = useSafeInfo()
+  const { chainId, address } = safe
+  const hasSafenetFeature = useHasSafenetFeature()
+  const isSafenetEnabled = useIsSafenetEnabled()
+
+  const { data: safenetConfig } = useGetSafenetAccountQuery(
+    { safeAddress: address.value },
+    { skip: !hasSafenetFeature },
+  )
+
+  const safenetChains = useMemo(
+    () => (safenetConfig ? safenetConfig.safes.map((safe) => ({ chainId: safe.chainId.toString() })) : []),
+    [safenetConfig],
+  )
 
   const enableSafenet = () => {
     // TODO: Handle Safenet opt in
@@ -55,6 +100,22 @@ const SafenetDisabled = () => {
 
   return (
     <Stack spacing={2}>
+      {hasSafenetFeature && !isSafenetEnabled && (
+        <Alert icon={<SvgIcon component={InfoIcon} inheritViewBox color="primary" />} className={css.alert}>
+          <Stack flexDirection="row" alignItems="center" gap={1}>
+            <Typography fontWeight={700}>Safenet is disabled on</Typography>
+            <Box className={css.chainChip}>
+              <ChainIndicator chainId={chainId} className={css.chainIndicator} />
+            </Box>
+            {safenetChains.length > 0 && (
+              <>
+                <Typography>but enabled on {safenetChains.length}</Typography>
+                <MultichainIndicator chains={safenetChains} />
+              </>
+            )}
+          </Stack>
+        </Alert>
+      )}
       <Typography>
         Safenet unlocks a unified and secure experience across networks, so you no longer need to worry about bridging.
       </Typography>
@@ -72,8 +133,10 @@ const SafenetDisabled = () => {
         <Typography>Sponsored transactions on Ethereum</Typography>
       </Stack>
       <Button onClick={enableSafenet} variant="contained" size="small" sx={{ alignSelf: 'flex-start' }}>
-        Enable Safenet on
-        <ChainIndicator chainId={chainId} className={css.chainIndicator} />
+        <Stack direction="row" gap={1} alignItems="center">
+          Enable Safenet on
+          <ChainIndicator chainId={chainId} className={css.chainIndicator} />
+        </Stack>
       </Button>
     </Stack>
   )
