@@ -7,15 +7,9 @@
  * This service should NOT be used directly by components. Use the `analytics` service instead.
  */
 
-import type { TagManagerArgs } from './TagManager'
-import TagManager from './TagManager'
-import {
-  IS_PRODUCTION,
-  GOOGLE_TAG_MANAGER_ID,
-  GOOGLE_TAG_MANAGER_AUTH_LIVE,
-  GOOGLE_TAG_MANAGER_AUTH_LATEST,
-  GOOGLE_TAG_MANAGER_DEVELOPMENT_AUTH,
-} from '@/config/constants'
+import { sendGAEvent } from '@next/third-parties/google'
+import Cookies from 'js-cookie'
+import { SAFE_APPS_GA_TRACKING_ID, GA_TRACKING_ID, IS_PRODUCTION } from '@/config/constants'
 import type { AnalyticsEvent, EventLabel, SafeAppSDKEvent } from './types'
 import { EventType, DeviceType } from './types'
 import { SAFE_APPS_SDK_CATEGORY } from './events'
@@ -23,24 +17,6 @@ import { getAbTest } from '../tracking/abTesting'
 import type { AbTest } from '../tracking/abTesting'
 import { AppRoutes } from '@/config/routes'
 import packageJson from '../../../package.json'
-
-type GTMEnvironment = 'LIVE' | 'LATEST' | 'DEVELOPMENT'
-type GTMEnvironmentArgs = Required<Pick<TagManagerArgs, 'auth' | 'preview'>>
-
-const GTM_ENV_AUTH: Record<GTMEnvironment, GTMEnvironmentArgs> = {
-  LIVE: {
-    auth: GOOGLE_TAG_MANAGER_AUTH_LIVE,
-    preview: 'env-1',
-  },
-  LATEST: {
-    auth: GOOGLE_TAG_MANAGER_AUTH_LATEST,
-    preview: 'env-2',
-  },
-  DEVELOPMENT: {
-    auth: GOOGLE_TAG_MANAGER_DEVELOPMENT_AUTH,
-    preview: 'env-3',
-  },
-}
 
 const commonEventParams = {
   appVersion: packageJson.version,
@@ -61,23 +37,42 @@ export const gtmSetSafeAddress = (safeAddress: string): void => {
   commonEventParams.safeAddress = safeAddress.slice(2) // Remove 0x prefix
 }
 
-export const gtmInit = (): void => {
-  const GTM_ENVIRONMENT = IS_PRODUCTION ? GTM_ENV_AUTH.LIVE : GTM_ENV_AUTH.DEVELOPMENT
-
-  if (!GOOGLE_TAG_MANAGER_ID || !GTM_ENVIRONMENT.auth) {
-    console.warn('[GTM] - Unable to initialize Google Tag Manager. `id` or `gtm_auth` missing.')
-    return
-  }
-
-  TagManager.initialize({
-    gtmId: GOOGLE_TAG_MANAGER_ID,
-    ...GTM_ENVIRONMENT,
+export const gtmEnableCookies = () => {
+  window.gtag?.('consent', 'update', {
+    analytics_storage: 'granted',
   })
 }
 
-export const gtmEnableCookies = TagManager.enableCookies
-export const gtmDisableCookies = TagManager.disableCookies
-export const gtmSetUserProperty = TagManager.setUserProperty
+export const gtmDisableCookies = () => {
+  window.gtag?.('consent', 'update', {
+    analytics_storage: 'denied',
+  })
+
+  const GA_COOKIE_LIST = ['_ga', '_gat', '_gid']
+  const GA_PREFIX = '_ga_'
+  const allCookies = document.cookie.split(';').map((cookie) => cookie.split('=')[0].trim())
+  const gaCookies = allCookies.filter((cookie) => cookie.startsWith(GA_PREFIX))
+
+  GA_COOKIE_LIST.concat(gaCookies).forEach((cookie) => {
+    Cookies.remove(cookie, {
+      path: '/',
+      domain: `.${location.host.split('.').slice(-2).join('.')}`,
+    })
+  })
+
+  // Injected script will remain in memory until new session
+  location.reload()
+}
+
+export const gtmSetUserProperty = (name: string, value: string) => {
+  window.gtag?.('set', 'user_properties', {
+    [name]: value,
+  })
+
+  if (!IS_PRODUCTION) {
+    console.info('[GTM] -', 'set user_properties', name, '=', value)
+  }
+}
 
 type GtmEvent = {
   event: EventType
@@ -89,13 +84,15 @@ type GtmEvent = {
 type ActionGtmEvent = GtmEvent & {
   eventCategory: string
   eventAction: string
+  send_to: string
   eventLabel?: EventLabel
   eventType?: string
 }
 
 type PageviewGtmEvent = GtmEvent & {
-  pageLocation: string
-  pagePath: string
+  page_location: string
+  page_path: string
+  send_to: string
 }
 
 type SafeAppGtmEvent = ActionGtmEvent & {
@@ -103,9 +100,8 @@ type SafeAppGtmEvent = ActionGtmEvent & {
   safeAppMethod?: string
   safeAppEthMethod?: string
   safeAppSDKVersion?: string
+  send_to: string
 }
-
-const gtmSend = TagManager.dataLayer
 
 export const gtmTrack = (eventData: AnalyticsEvent): void => {
   const gtmEvent: ActionGtmEvent = {
@@ -114,6 +110,7 @@ export const gtmTrack = (eventData: AnalyticsEvent): void => {
     eventCategory: eventData.category,
     eventAction: eventData.action,
     chainId: eventData.chainId || commonEventParams.chainId,
+    send_to: GA_TRACKING_ID,
   }
 
   if (eventData.event) {
@@ -135,18 +132,19 @@ export const gtmTrack = (eventData: AnalyticsEvent): void => {
     gtmEvent.abTest = abTest
   }
 
-  gtmSend(gtmEvent)
+  sendGAEvent('event', gtmEvent.event, gtmEvent)
 }
 
 export const gtmTrackPageview = (pagePath: string, pathWithQuery: string): void => {
   const gtmEvent: PageviewGtmEvent = {
     ...commonEventParams,
     event: EventType.PAGEVIEW,
-    pageLocation: `${location.origin}${pathWithQuery}`,
-    pagePath,
+    page_location: `${location.origin}${pathWithQuery}`,
+    page_path: pagePath,
+    send_to: GA_TRACKING_ID,
   }
 
-  gtmSend(gtmEvent)
+  sendGAEvent('event', 'page_view', gtmEvent)
 }
 
 export const normalizeAppName = (appName?: string): string => {
@@ -172,6 +170,7 @@ export const gtmTrackSafeApp = (eventData: AnalyticsEvent, appName?: string, sdk
     safeAppEthMethod: '',
     safeAppMethod: '',
     safeAppSDKVersion: '',
+    send_to: SAFE_APPS_GA_TRACKING_ID,
   }
 
   if (eventData.category === SAFE_APPS_SDK_CATEGORY) {
@@ -184,5 +183,5 @@ export const gtmTrackSafeApp = (eventData: AnalyticsEvent, appName?: string, sdk
     safeAppGtmEvent.eventLabel = eventData.label
   }
 
-  gtmSend(safeAppGtmEvent)
+  sendGAEvent('event', 'safeAppEvent', safeAppGtmEvent)
 }
