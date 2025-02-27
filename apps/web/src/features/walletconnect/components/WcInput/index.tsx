@@ -78,6 +78,7 @@ const WcInput = ({ uri }: { uri: string }) => {
 
   return (
     <TextField
+      data-testid="wc-input"
       value={value}
       onChange={(e) => onInput(e.target.value)}
       fullWidth
