@@ -13,7 +13,7 @@ import { type SafeItem } from '@/features/myAccounts/hooks/useAllSafes'
 import { type MultiChainSafeItem } from '@/features/myAccounts/hooks/useAllSafesGrouped'
 import { LATEST_SAFE_VERSION } from '@/config/constants'
 
-type SafeSetup = {
+export type SafeSetup = {
   owners: string[]
   threshold: number
   chainId: string
