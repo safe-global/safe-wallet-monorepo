@@ -26,7 +26,7 @@ describe('gtm', () => {
 
       expect(GA.sendGAEvent).toHaveBeenCalledWith(
         'event',
-        'testAction',
+        'customClick',
         expect.objectContaining({
           event: mockEventData.event,
           eventCategory: mockEventData.category,
@@ -54,7 +54,7 @@ describe('gtm', () => {
 
       expect(GA.sendGAEvent).toHaveBeenCalledWith(
         'event',
-        'testAction',
+        'customClick',
         expect.objectContaining({
           event: mockEventData.event,
           eventCategory: mockEventData.category,
