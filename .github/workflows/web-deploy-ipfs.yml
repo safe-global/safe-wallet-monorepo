@@ -1,0 +1,61 @@
+name: Web Deploy to IPFS
+
+on:
+  pull_request:
+    branches:
+      - ipfs-deploy
+    paths:
+      - apps/web/**
+      - packages/**
+      - .github/workflows/web-deploy-ipfs.yml
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      id-token: write
+
+    name: Deploy to IPFS
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/yarn
+
+      - uses: ./.github/actions/build
+        with:
+          secrets: ${{ toJSON(secrets) }}
+          # if: startsWith(github.ref, 'refs/heads/main')
+
+      - name: Set unique output directory name
+        run: echo "OUT_DIR=out-$(date +'%Y%m%d-%H%M%S')" >> $GITHUB_ENV
+
+      - name: Rename out directory with timestamp
+        run: mv ./apps/web/out ./apps/web/$OUT_DIR
+
+      - name: Remove .html extension from all files
+        run: |
+          for file in $(find ./apps/web/$OUT_DIR -name '*.html' | sed 's|^\./||'); do
+            cp ${file%} ${file%.*}
+          done
+
+      # Script to upload to IPFS
+      - name: Upload to IPFS
+        id: ipfs_upload
+        uses: aquiladev/ipfs-action@v0.2.1
+        with:
+          path: apps/web/${{ env.OUT_DIR }}
+          pinName: ${{ env.OUT_DIR }}
+          service: pinata
+          pinataKey: ${{ secrets.PINATA_API_KEY }}
+          pinataSecret: ${{ secrets.PINATA_SECRET_KEY }}
+
+      - name: Output IPFS CID
+        run: |
+          echo "Deployed IPFS CID: ${{ steps.ipfs_upload.outputs.Hash }}"
+          echo "Gateway link: https://ipfs.io/ipfs/${{ steps.ipfs_upload.outputs.Hash }}"
