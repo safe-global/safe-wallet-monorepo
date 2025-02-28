@@ -1,4 +1,5 @@
-import { SentryErrorBoundary } from '@/services/sentry' // needs to be imported first
+import Analytics from '@/services/analytics/Analytics'
+import { SentryErrorBoundary } from '@/services/sentry'
 import type { ReactNode } from 'react'
 import { type ReactElement } from 'react'
 import { type AppProps } from 'next/app'
@@ -137,6 +138,8 @@ const WebCoreApp = ({
           <Recovery />
 
           <CounterfactualHooks />
+
+          <Analytics />
 
           <PkModulePopup />
         </AppProviders>

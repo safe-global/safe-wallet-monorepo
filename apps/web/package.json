@@ -46,6 +46,7 @@
     "@mui/icons-material": "^6.1.6",
     "@mui/material": "^6.3.0",
     "@mui/x-date-pickers": "^7.23.3",
+    "@next/third-parties": "^15.2.0",
     "@reduxjs/toolkit": "^2.5.0",
     "@reown/walletkit": "^1.1.1",
     "@safe-global/api-kit": "^2.4.6",
