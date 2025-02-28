@@ -100,7 +100,7 @@ const MiniAppFrame = ({ app, title }: { app: SafeAppData; title: string }) => {
 
 // Entire section for the governance widgets
 const GovernanceSection = () => {
-  const [matchingApps, errorFetchingGovernanceSafeApp] = useRemoteSafeApps(SafeAppsTag.SAFE_GOVERNANCE_APP)
+  const [matchingApps, errorFetchingGovernanceSafeApp] = useRemoteSafeApps({ tag: SafeAppsTag.SAFE_GOVERNANCE_APP })
   const governanceApp = matchingApps?.[0]
   const fetchingSafeGovernanceApp = !governanceApp && !errorFetchingGovernanceSafeApp
   const { safeLoading } = useSafeInfo()

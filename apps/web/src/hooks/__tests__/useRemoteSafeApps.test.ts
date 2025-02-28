@@ -47,7 +47,7 @@ describe('useRemoteSafeApps', () => {
     ])
   })
   it('should alphabetically return the remote safe apps filtered by tag', async () => {
-    const { result } = renderHook(() => useRemoteSafeApps('test' as SafeAppsTag))
+    const { result } = renderHook(() => useRemoteSafeApps({ tag: 'test' as SafeAppsTag }))
 
     var [data, error, loading] = result.current
 
