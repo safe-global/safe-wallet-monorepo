@@ -19,7 +19,7 @@ jobs:
       pull-requests: write
       id-token: write
 
-    name: Deploy to dev/staging
+    name: Deploy to IPFS
 
     steps:
       - uses: actions/checkout@v4
