@@ -4,16 +4,16 @@ import { useAppSelector } from '@/store'
 import { useEffect } from 'react'
 import { getSafeInfo, type SafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import useAsync, { type AsyncResult } from '../useAsync'
-import useSafeAddress from '../useSafeAddress'
 import { useChainId } from '../useChainId'
 import useIntervalCounter from '../useIntervalCounter'
 import useSafeInfo from '../useSafeInfo'
 import { Errors, logError } from '@/services/exceptions'
 import { POLLING_INTERVAL } from '@/config/constants'
 import { useCurrentChain } from '../useChains'
+import { useSafeAddressFromUrl } from '../useSafeAddressFromUrl'
 
 export const useLoadSafeInfo = (): AsyncResult<SafeInfo> => {
-  const address = useSafeAddress()
+  const address = useSafeAddressFromUrl()
   const chainId = useChainId()
   const chain = useCurrentChain()
   const [pollCount, resetPolling] = useIntervalCounter(POLLING_INTERVAL)
