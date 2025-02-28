@@ -132,7 +132,7 @@ export const gtmTrack = (eventData: AnalyticsEvent): void => {
     gtmEvent.abTest = abTest
   }
 
-  sendGAEvent('event', gtmEvent.event, gtmEvent)
+  sendEvent(gtmEvent.event, gtmEvent)
 }
 
 export const gtmTrackPageview = (pagePath: string, pathWithQuery: string): void => {
@@ -144,7 +144,7 @@ export const gtmTrackPageview = (pagePath: string, pathWithQuery: string): void 
     send_to: GA_TRACKING_ID,
   }
 
-  sendGAEvent('event', 'page_view', gtmEvent)
+  sendEvent('page_view', gtmEvent)
 }
 
 export const normalizeAppName = (appName?: string): string => {
@@ -183,5 +183,13 @@ export const gtmTrackSafeApp = (eventData: AnalyticsEvent, appName?: string, sdk
     safeAppGtmEvent.eventLabel = eventData.label
   }
 
-  sendGAEvent('event', 'safeAppEvent', safeAppGtmEvent)
+  sendEvent('safeAppEvent', safeAppGtmEvent)
+}
+
+const sendEvent = (eventName: string, data: object) => {
+  sendGAEvent('event', eventName, data)
+
+  if (!IS_PRODUCTION) {
+    console.info('[GA] -', data)
+  }
 }
