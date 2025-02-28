@@ -208,7 +208,7 @@ exports[`SignOrExecute should display a confirmation screen 1`] = `
           We recommend analyzing your transaction with a third-party tool like
            
           <span
-            data-track="modals: Open OpenZeppelin Safe Utils"
+            data-track="modals: Open Safe Utils"
           >
             <a
               class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways css-r9pq5a-MuiTypography-root-MuiLink-root"
@@ -219,7 +219,7 @@ exports[`SignOrExecute should display a confirmation screen 1`] = `
               <span
                 class="MuiBox-root css-1vqf8mi"
               >
-                OpenZeppelin Safe Utils
+                Safe Utils
                 <svg
                   aria-hidden="true"
                   class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-tqxw8e-MuiSvgIcon-root"
@@ -618,7 +618,7 @@ exports[`SignOrExecute should display an error screen 1`] = `
           We recommend analyzing your transaction with a third-party tool like
            
           <span
-            data-track="modals: Open OpenZeppelin Safe Utils"
+            data-track="modals: Open Safe Utils"
           >
             <a
               class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways css-r9pq5a-MuiTypography-root-MuiLink-root"
@@ -629,7 +629,7 @@ exports[`SignOrExecute should display an error screen 1`] = `
               <span
                 class="MuiBox-root css-1vqf8mi"
               >
-                OpenZeppelin Safe Utils
+                Safe Utils
                 <svg
                   aria-hidden="true"
                   class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-tqxw8e-MuiSvgIcon-root"
