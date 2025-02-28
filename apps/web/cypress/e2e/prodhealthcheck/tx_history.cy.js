@@ -3,7 +3,7 @@ import * as main from '../pages/main.page'
 import * as createTx from '../pages/create_tx.pages'
 import * as data from '../../fixtures/txhistory_data_data.json'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
-import { acceptCookies2 } from '../pages/main.page.js'
+import { acceptCookies2, closeSecurityNotice } from '../pages/main.page.js'
 
 let staticSafes = []
 
@@ -23,8 +23,7 @@ describe('[PROD] Tx history tests 1', () => {
   beforeEach(() => {
     cy.intercept(
       'GET',
-      `**${constants.stagingCGWChains}${constants.networkKeys.sepolia}/${
-        constants.stagingCGWSafes
+      `**${constants.stagingCGWChains}${constants.networkKeys.sepolia}/${constants.stagingCGWSafes
       }${staticSafes.SEP_STATIC_SAFE_7.substring(4)}/transactions/history**`,
       (req) => {
         req.url = `https://safe-client.safe.global/v1/chains/11155111/safes/0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb/transactions/history?timezone=Europe/Berlin&trusted=false&cursor=limit=100&offset=1`
@@ -34,6 +33,8 @@ describe('[PROD] Tx history tests 1', () => {
 
     cy.visit(constants.prodbaseUrl + constants.transactionsHistoryUrl + staticSafes.SEP_STATIC_SAFE_7)
     cy.wait('@allTransactions')
+    cy.contains(createTx.txStr, { timeout: 10000 })
+    closeSecurityNotice()
     acceptCookies2()
   })
 
