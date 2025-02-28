@@ -178,11 +178,7 @@ export function verifyCurrentSafe(safe) {
   })
 }
 
-export function verifyCurrentSafe(safe) {
-  cy.get(currentSafeSection).within(() => {
-    cy.get(sideSafeListItem).contains(safe)
-  })
-}
+
 
 export function verifyCurrentSafeReadOnly(number) {
   cy.get(currentSafeSection).within(() => {
@@ -230,12 +226,6 @@ export function showAllSafes() {
       cy.get(expandSafesList).click()
       cy.wait(500)
     }
-  })
-}
-
-export function verifyAccountListSafeData(data) {
-  cy.get(accountsList).within(() => {
-    main.verifyValuesExist(sideSafeListItem, [data])
   })
 }
 
