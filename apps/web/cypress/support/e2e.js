@@ -19,7 +19,6 @@ import './commands'
 import './safe-apps-commands'
 import * as constants from './constants'
 import * as ls from './localstorage_data'
-import { closeSecurityNotice } from './../e2e/pages/main.page'
 
 // Alternatively you can use CommonJS syntax:
 // require('./commands')
@@ -88,5 +87,4 @@ beforeEach(() => {
     window.sessionStorage.setItem(outreachWindowKey, Date.now())
     cy.wrap(window.localStorage).invoke('getItem', cookiesKey).should('equal', ls.cookies.acceptedCookies)
   })
-  closeSecurityNotice()
 }) 

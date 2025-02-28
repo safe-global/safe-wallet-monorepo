@@ -4,7 +4,8 @@ import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as wallet from '../../support/utils/wallet.js'
 import * as navigation from '../pages/navigation.page.js'
 import * as owner from '../pages/owners.pages.js'
-import { acceptCookies2 } from '../pages/main.page.js'
+import { acceptCookies2, closeSecurityNotice } from '../pages/main.page.js'
+import * as createTx from '../pages/create_tx.pages.js'
 
 let staticSafes = []
 const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
@@ -18,6 +19,8 @@ describe('[PROD] Sidebar tests 3', () => {
 
   it('Verify the "Accounts" counter at the top is counting all safes the user owns', () => {
     cy.visit(constants.prodbaseUrl + constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_9)
+    cy.contains(createTx.assetsStr, { timeout: 10000 })
+    closeSecurityNotice()
     cy.intercept('GET', constants.safeListEndpoint, {
       11155111: [sideBar.sideBarSafes.safe1, sideBar.sideBarSafes.safe2],
     })
@@ -30,6 +33,8 @@ describe('[PROD] Sidebar tests 3', () => {
   // Re-enabled once it is merged to prod
   it.skip('Verify pending signature is displayed in sidebar for unsigned tx', () => {
     cy.visit(constants.prodbaseUrl + constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_7)
+    cy.contains(createTx.assetsStr, { timeout: 10000 })
+    closeSecurityNotice()
     wallet.connectSigner(signer)
     acceptCookies2()
     cy.intercept('GET', constants.safeListEndpoint, {
@@ -49,6 +54,8 @@ describe('[PROD] Sidebar tests 3', () => {
 
   it('Verify balance exists in a tx in sidebar', () => {
     cy.visit(constants.prodbaseUrl + constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_7)
+    cy.contains(createTx.assetsStr, { timeout: 10000 })
+    closeSecurityNotice()
     wallet.connectSigner(signer)
     acceptCookies2()
     owner.clickOnWalletExpandMoreIcon()

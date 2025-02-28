@@ -2,6 +2,8 @@ import * as constants from '../../support/constants.js'
 import * as main from '../pages/main.page.js'
 import * as recovery from '../pages/recovery.pages.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
+import { closeSecurityNotice } from '../pages/main.page.js'
+import * as createTx from '../pages/create_tx.pages.js'
 
 let recoverySafes,
   staticSafes = []
@@ -29,6 +31,8 @@ describe('[PROD] Production recovery health check tests', { defaultCommandTimeou
 
     safes.forEach((safe) => {
       cy.visit(constants.prodbaseUrl + constants.securityUrl + safe)
+      cy.contains(createTx.settingsStr, { timeout: 10000 })
+      closeSecurityNotice()
       recovery.getSetupRecoveryBtn()
     })
   })
@@ -44,6 +48,8 @@ describe('[PROD] Production recovery health check tests', { defaultCommandTimeou
 
     safes.forEach((safe) => {
       cy.visit(constants.prodbaseUrl + constants.securityUrl + safe)
+      cy.contains(createTx.settingsStr, { timeout: 10000 })
+      closeSecurityNotice()
       main.verifyElementsCount(recovery.setupRecoveryBtn, 0)
     })
   })
