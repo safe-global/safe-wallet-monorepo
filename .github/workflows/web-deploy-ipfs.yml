@@ -41,7 +41,7 @@ jobs:
       - name: Remove .html extension from all files
         run: |
           for file in $(find ./apps/web/$OUT_DIR -name '*.html' | sed 's|^\./||'); do
-            mv ${file%} ${file%.*}
+            cp ${file%} ${file%.*}
           done
 
       # Script to upload to IPFS
