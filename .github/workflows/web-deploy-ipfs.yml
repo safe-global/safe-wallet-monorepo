@@ -1,4 +1,4 @@
-name: Web Deploy to dev/staging
+name: Web Deploy to IPFS
 
 on:
   pull_request:
