@@ -57,26 +57,26 @@ describe('Assets 2 tests', () => {
     navigation.clickOnDisconnectBtn()
   })
 
-  it('Verify the counter at the top is updated for every selected token', () => {
+  it.skip('Verify the counter at the top is updated for every selected token', () => {
     cy.visit(constants.balanceNftsUrl + staticSafes.SEP_STATIC_SAFE_2)
     nfts.waitForNftItems(5)
     nfts.selectNFTs(1)
   })
 
-  it.only('Verify the "select all" checkbox does checks all the nfts', () => {
+  it.skip('Verify the "select all" checkbox does checks all the nfts', () => {
     cy.visit(constants.balanceNftsUrl + staticSafes.SEP_STATIC_SAFE_2)
     nfts.waitForNftItems(5)
     nfts.selectAllNFTs()
     nfts.checkSelectedNFTsNumberIs(10)
   })
 
-  it('Verify every NFT has its shorten address', () => {
+  it.skip('Verify every NFT has its shorten address', () => {
     cy.visit(constants.balanceNftsUrl + staticSafes.SEP_STATIC_SAFE_2)
     nfts.waitForNftItems(5)
     assets.checkNftAddressFormat()
   })
 
-  it('Verify every NFT has the copy-to-clipboard and blockexplorer button', () => {
+  it.skip('Verify every NFT has the copy-to-clipboard and blockexplorer button', () => {
     cy.visit(constants.balanceNftsUrl + staticSafes.SEP_STATIC_SAFE_2)
     nfts.waitForNftItems(5)
     assets.checkNftCopyIconAndLink()

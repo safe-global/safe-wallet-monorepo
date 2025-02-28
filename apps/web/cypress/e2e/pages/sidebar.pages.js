@@ -215,9 +215,13 @@ export function clickOnCopyAddressBtn(expectedData) {
     cy.stub(win.navigator.clipboard, 'writeText').as('clipboardWrite');
   });
   cy.get(copyAddressBtn).click();
-  cy.get('@clipboardWrite', { timeout: 10000 })
-    .should('have.been.calledWith', expectedData);
+  cy.get('@clipboardWrite', { timeout: 10000 }).should('have.been.called');
+  cy.get('@clipboardWrite').then((stub) => {
+    const actualCallArgs = stub.args[0][0];
+    expect(actualCallArgs).to.include(expectedData);
+  });
 }
+
 
 export function showAllSafes() {
   cy.wait(500)

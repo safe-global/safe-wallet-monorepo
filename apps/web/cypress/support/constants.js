@@ -139,6 +139,7 @@ export const networks = {
   sepolia: 'Sepolia',
   polygon: 'Polygon',
   gnosis: 'Gnosis',
+  berachain: 'Berachain',
   zkSync: 'zkSync Era',
   base: 'Base',
   optimism: 'Optimism',
