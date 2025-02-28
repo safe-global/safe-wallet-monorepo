@@ -34,7 +34,7 @@ const TxChecks = ({
       <Alert severity="info">
         We recommend analyzing your transaction with a third-party tool like{' '}
         <Track {...MODALS_EVENTS.OPEN_SAFE_UTILS}>
-          <ExternalLink href={SAFE_UTILS_URL}>OpenZeppelin Safe Utils</ExternalLink>
+          <ExternalLink href={SAFE_UTILS_URL}>Safe Utils</ExternalLink>
         </Track>
         . Third-party terms & disclaimers may apply.
       </Alert>
