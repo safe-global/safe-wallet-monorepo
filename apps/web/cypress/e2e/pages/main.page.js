@@ -185,7 +185,7 @@ export function acceptCookies(index = 0) {
 
   cy.get('button')
     .contains(acceptSelection)
-    .should(() => {})
+    .should(() => { })
     .then(($button) => {
       if (!$button.length) {
         return
@@ -211,6 +211,17 @@ export function closeOutreachPopup() {
   cy.get('body').then(($body) => {
     if ($body.find(closeOutreachPopupBtn).length > 0) {
       cy.get(closeOutreachPopupBtn).click()
+      cy.wait(500)
+    }
+  })
+}
+
+export function closeSecurityNotice() {
+  const value = 'I understand'
+  cy.wait(2000)
+  cy.get('body').then(($body) => {
+    if ($body.find('button:contains(' + value + ')').length > 0) {
+      cy.contains('button', value).click()
       cy.wait(500)
     }
   })
