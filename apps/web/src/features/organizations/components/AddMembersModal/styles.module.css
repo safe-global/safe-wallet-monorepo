@@ -1,0 +1,8 @@
+.roleMenuItem {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  grid-template-areas:
+    'icon      title       checkIcon'
+    '.         description checkIcon';
+  column-gap: var(--space-1);
+}

@@ -1,0 +1,19 @@
+.content {
+  min-height: 60vh;
+  background-color: var(--color-background-paper);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.iconBG {
+  width: 40px;
+  height: 40px;
+  background-color: var(--color-background-main);
+  border-radius: 50%;
+  margin-bottom: var(--space-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

@@ -1,0 +1,23 @@
+.safeRow {
+  display: grid;
+  grid-template-columns: 8fr 3fr;
+  align-items: center;
+  width: 100%;
+}
+
+.safeItem {
+  border: 1px solid var(--color-border-light);
+  border-radius: 6px;
+}
+
+.search :global .MuiInputBase-root {
+  border: 1px solid transparent !important;
+}
+
+.selectWrapper {
+  display: flex;
+  align-items: center;
+  border-radius: 8px;
+  border: 1px solid var(--color-border-light);
+  height: 66px;
+}

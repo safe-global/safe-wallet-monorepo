@@ -29,7 +29,7 @@ const lightPalette = {
   success: {
     dark: '#028D4C',
     main: '#00B460',
-    light: '#72F5B8',
+    light: '#D3F2E4',
     background: '#EFFAF1',
   },
   info: {

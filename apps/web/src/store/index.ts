@@ -58,6 +58,7 @@ const rootReducer = combineReducers({
   [safePassApi.reducerPath]: safePassApi.reducer,
   [slices.gatewayApi.reducerPath]: slices.gatewayApi.reducer,
   [cgwClient.reducerPath]: cgwClient.reducer,
+  [slices.authSlice.reducerPath]: slices.authSlice.reducer,
 })
 
 const persistedSlices: (keyof Partial<RootState>)[] = [
@@ -75,6 +76,7 @@ const persistedSlices: (keyof Partial<RootState>)[] = [
   slices.swapOrderSlice.name,
   slices.visitedSafesSlice.name,
   slices.orderByPreferenceSlice.name,
+  slices.authSlice.name,
 ]
 
 export const getPersistedState = () => {
