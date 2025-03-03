@@ -480,7 +480,32 @@ export interface TransactionSimulation {
    * spenders
    */
   total_usd_exposure: Record<string, Record<string, string>>
+
+  /**
+   * dictionary describes contract management changes as a result of this transaction
+   * for every involved address
+   */
+  contract_management?: Record<string, Array<ContractManagementChange>>
 }
+interface ProxyUpgrade {
+  type: 'PROXY_UPGRADE'
+  before: { address: string }
+  after: { address: string }
+}
+
+interface OwnershipChange {
+  type: 'OWNERSHIP_CHANGE'
+  before: { owners: string[] }
+  after: { owners: string[] }
+}
+
+interface ModulesChange {
+  type: 'MODULE_CHANGE'
+  before: { modules: string[] }
+  after: { modules: string[] }
+}
+
+export type ContractManagementChange = ProxyUpgrade | OwnershipChange | ModulesChange
 
 export namespace TransactionSimulation {
   /**
