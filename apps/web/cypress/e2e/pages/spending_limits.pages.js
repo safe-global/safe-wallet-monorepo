@@ -172,7 +172,7 @@ export function checkTimeDropdownOptions() {
 }
 
 export function verifyDefaultTimeIsSet() {
-  cy.get(timePeriodSection).find('div').contains(timePeriodOptions.oneTime).should('be.visible')
+  cy.get(timePeriodSection).scrollIntoView().find('div').contains(timePeriodOptions.oneTime).should('be.visible')
 }
 
 export function clickOnNewSpendingLimitBtn() {

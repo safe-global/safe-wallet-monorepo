@@ -1,6 +1,9 @@
 import * as constants from '../../support/constants.js'
 import * as sideBar from '../pages/sidebar.pages.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
+import * as swaps from '../pages/swaps.pages.js'
+import * as main from '../pages/main.page.js'
+import { exchangeStr, clickOnBridgeOption } from '../pages/bridge.pages.js'
 
 let staticSafes = []
 
@@ -47,6 +50,20 @@ describe('Sidebar UI tests', () => {
     it(`Verify that Need Help button contains help link in view: ${link}`, () => {
       cy.visit(link + staticSafes.SEP_STATIC_SAFE_4)
       sideBar.checkNeedHelpBtnLink()
+    })
+  })
+
+  views.forEach((link) => {
+    it.only(`Verify that clicking on Bridge opens exchange modal in view: ${link}`, () => {
+      let iframeSelector = `iframe[src*="${constants.bridgeWidget}"]`
+      cy.visit(link + staticSafes.SEP_STATIC_SAFE_4)
+      clickOnBridgeOption()
+      swaps.acceptLegalDisclaimer()
+      main
+        .getIframeBody(iframeSelector)
+        .within(() => {
+          cy.contains(exchangeStr).should('be.visible')
+        })
     })
   })
 })

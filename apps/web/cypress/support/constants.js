@@ -39,6 +39,7 @@ export const goerliToken = /G(ö|oe)rli Ether/
 
 export const prodbaseUrl = 'https://app.safe.global'
 export const swapWidget = 'https://swap.cow.fi/#/11155111/widget/swap/'
+export const bridgeWidget = 'https://iframe.jumper.exchange/?theme=light'
 export const safeTestAppurl = 'https://safe-apps-test-app.pages.dev'
 export const TX_Builder_url = 'https://safe-apps.dev.5afe.dev/tx-builder'
 export const drainAccount_url = 'https://safe-apps.dev.5afe.dev/drain-safe'
