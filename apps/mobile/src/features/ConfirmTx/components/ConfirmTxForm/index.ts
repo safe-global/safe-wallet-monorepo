@@ -1,0 +1,1 @@
+export { ConfirmTxForm } from './ConfirmTxForm'

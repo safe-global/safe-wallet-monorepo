@@ -12,6 +12,7 @@ interface AssetsCardProps {
   accessibilityLabel?: string
   imageBackground?: string
   transparent?: boolean
+  onPress?: () => void
 }
 
 export function AssetsCard({
@@ -22,9 +23,11 @@ export function AssetsCard({
   accessibilityLabel,
   rightNode,
   transparent = true,
+  onPress,
 }: AssetsCardProps) {
   return (
     <SafeListItem
+      onPress={onPress}
       label={
         <View>
           <Text fontSize="$4" fontWeight={600}>

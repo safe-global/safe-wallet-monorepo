@@ -20,6 +20,7 @@ interface SafeListItemProps {
   inQueue?: boolean
   executionInfo?: Transaction['executionInfo']
   themeName?: ThemeName
+  onPress?: () => void
 }
 
 export function SafeListItem({
@@ -35,12 +36,14 @@ export function SafeListItem({
   inQueue,
   executionInfo,
   themeName,
+  onPress,
 }: SafeListItemProps) {
   return (
     <Container
       spaced={spaced}
       bordered={bordered}
       gap={12}
+      onPress={onPress}
       transparent={transparent}
       themeName={themeName}
       alignItems={'center'}
@@ -63,7 +66,7 @@ export function SafeListItem({
 
           {typeof label === 'string' ? (
             <Text fontSize="$4" fontWeight={600}>
-              {ellipsis(label, rightNode ? 21 : 30)}
+              {ellipsis(label, rightNode || inQueue ? 21 : 30)}
             </Text>
           ) : (
             label

@@ -11,13 +11,15 @@ interface TxSafeAppCardProps {
   bordered?: boolean
   inQueue?: boolean
   executionInfo?: Transaction['executionInfo']
+  onPress: () => void
 }
 
-export function TxSafeAppCard({ safeAppInfo, executionInfo, txInfo, inQueue, bordered }: TxSafeAppCardProps) {
+export function TxSafeAppCard({ onPress, safeAppInfo, executionInfo, txInfo, inQueue, bordered }: TxSafeAppCardProps) {
   return (
     <SafeListItem
       label={safeAppInfo.name}
       inQueue={inQueue}
+      onPress={onPress}
       icon="transaction-contract"
       type="Safe app"
       bordered={bordered}
