@@ -1,7 +1,7 @@
-import { ChangeSignerSheetContainer } from '@/src/features/ChangeSignerSheet'
+import { ConflictTxSheetContainer } from '../features/ConflictTxSheet'
 
-export const ChangeSignerSheetScreen = () => {
-  return <ChangeSignerSheetContainer />
+export const ConflictTxSheet = () => {
+  return <ConflictTxSheetContainer />
 }
 
-export default ChangeSignerSheetScreen
+export default ConflictTxSheet

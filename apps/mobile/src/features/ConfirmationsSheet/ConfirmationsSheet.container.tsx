@@ -24,7 +24,7 @@ export const ConfirmationsSheetContainer = () => {
   const { confirmations, signers } = data?.detailedExecutionInfo as MultisigExecutionDetails
   const confirmationsMapper = useMemo(() => {
     const mapper = confirmations.reduce((acc, confirmation) => {
-      acc.set(confirmation.signer.value, true)
+      acc.set(confirmation.signer.value as Address, true)
 
       return acc
     }, new Map<Address, boolean>())

@@ -1,34 +1,91 @@
-import { Badge } from '@/src/components/Badge'
 import { SafeBottomSheet } from '@/src/components/SafeBottomSheet'
-import { SafeFontIcon } from '@/src/components/SafeFontIcon'
-import { H3, H6, Text, View } from 'tamagui'
+import React, { useMemo } from 'react'
+import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
+import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
+import { RootState } from '@/src/store'
+import { SignersCard } from '@/src/components/transactions-list/Card/SignersCard'
+import { Text, View } from 'tamagui'
+import { shortenAddress } from '@safe-global/utils/formatters'
+import { Address } from 'blo'
+import { SignerInfo } from '@/src/types/address'
+import { selectActiveSigner, setActiveSigner } from '@/src/store/activeSignerSlice'
+import { selectSigners } from '@/src/store/signersSlice'
+import { useGetBalancesQuery } from '@/src/store/signersBalance'
+import { selectChainById } from '@/src/store/chains'
+import { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import { MultisigExecutionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { formatValue } from '@/src/utils/formatters'
+import { useTransactionsGetTransactionByIdV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { RouteProp, useRoute } from '@react-navigation/native'
+import { extractAppSigners } from '../ConfirmTx/utils'
 
 export const ChangeSignerSheetContainer = () => {
+  const dispatch = useAppDispatch()
+  const activeSafe = useDefinedActiveSafe()
+  const signers = useAppSelector(selectSigners)
+  const activeChain = useAppSelector((state: RootState) => selectChainById(state, activeSafe.chainId))
+  const activeSigner = useAppSelector((state: RootState) => selectActiveSigner(state, activeSafe.address))
+
+  const txId = useRoute<RouteProp<{ params: { txId: string } }>>().params.txId
+  const { data: txDetails, isLoading: isLoadingTxDetails } = useTransactionsGetTransactionByIdV1Query({
+    chainId: activeSafe.chainId,
+    id: txId,
+  })
+
+  const storedSigners = useMemo(
+    () => extractAppSigners(signers, txDetails?.detailedExecutionInfo as MultisigExecutionDetails),
+    [txDetails, signers],
+  )
+
+  const { data, isLoading } = useGetBalancesQuery({
+    addresses: storedSigners?.map((item) => item.value) || [],
+    chain: activeChain as ChainInfo,
+  })
+
+  const items = useMemo(() => {
+    if (!data) {
+      return []
+    }
+
+    return storedSigners?.map((item) => ({
+      ...item,
+      balance: data[item.value],
+    }))
+  }, [data, storedSigners])
+
+  const onSignerPress = (signer: SignerInfo, onClose: () => void) => () => {
+    if (activeSigner.value !== signer.value) {
+      dispatch(setActiveSigner({ safeAddress: activeSafe.address, signer }))
+    }
+
+    onClose()
+  }
+
   return (
-    <SafeBottomSheet>
-      <View flex={1} justifyContent="center" alignItems="center">
-        <Badge
-          themeName="badge_error"
-          circleSize={40}
-          content={<SafeFontIcon size={20} color="$error" name="alert" />}
-        />
-
-        <H3 fontWeight={600} marginTop="$6" marginBottom="$4">
-          Conflicting transactions
-        </H3>
-
-        <H6 textAlign="center" fontWeight={300}>
-          Marked transactions have the same nonce (order in the queue). Executing one of them will automatically replace
-          the other(s).
-        </H6>
-
-        <View marginTop="$4" flexDirection="row" alignItems="center" gap="$2">
-          <SafeFontIcon color="$textSecondaryLight" name="info" size={16} />
-          <Text fontWeight={600} color="$textSecondaryLight">
-            Why did it happen?
-          </Text>
+    <SafeBottomSheet
+      title="Select signer"
+      items={items}
+      loading={isLoading || isLoadingTxDetails}
+      keyExtractor={({ item }) => item.value}
+      renderItem={({ item, onClose }) => (
+        <View
+          width="100%"
+          borderRadius={'$4'}
+          backgroundColor={activeSigner?.value === item.value ? '$backgroundSecondary' : 'transparent'}
+        >
+          <SignersCard
+            transparent
+            onPress={onSignerPress(item, onClose)}
+            name={item.name || shortenAddress(item.value)}
+            address={item.value as Address}
+            rightNode={
+              <Text>
+                {formatValue(item.balance, activeChain.nativeCurrency.decimals)} {activeChain.nativeCurrency.symbol}
+              </Text>
+            }
+          />
         </View>
-      </View>
-    </SafeBottomSheet>
+      )}
+    />
   )
 }

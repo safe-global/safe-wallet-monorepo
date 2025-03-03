@@ -1,4 +1,4 @@
-import { ChangeSignerSheetContainer } from '@/src/features/ChangeSignerSheet'
+import { ChangeSignerSheetContainer } from '../features/ChangeSignerSheet'
 
 export const ChangeSignerSheetScreen = () => {
   return <ChangeSignerSheetContainer />

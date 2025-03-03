@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useCallback } from 'react'
 import { Theme, View } from 'tamagui'
 import { SafeListItem } from '@/src/components/SafeListItem'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon/SafeFontIcon'
@@ -17,6 +17,10 @@ export function TxSettingsCard({ txInfo, bordered, executionInfo, inQueue, onPre
   const isDeleteGuard = txInfo.settingsInfo?.type === SettingsInfoType.DELETE_GUARD
   const label = isDeleteGuard ? 'deleteGuard' : txInfo.dataDecoded.method
 
+  const handleOnPress = useCallback(() => {
+    onPress({ txInfo } as Transaction)
+  }, [onPress, txInfo])
+
   return (
     <SafeListItem
       label={label}
@@ -24,7 +28,7 @@ export function TxSettingsCard({ txInfo, bordered, executionInfo, inQueue, onPre
       executionInfo={executionInfo}
       bordered={bordered}
       type="Settings change"
-      onPress={onPress}
+      onPress={handleOnPress}
       leftNode={
         <Theme name="logo">
           <View backgroundColor="$background" padding="$2" borderRadius={100}>
