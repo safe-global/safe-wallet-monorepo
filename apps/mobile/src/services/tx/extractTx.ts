@@ -86,19 +86,15 @@ const extractTxInfo = (
         }
       case 'SwapOrder':
       case 'TwapOrder':
-        const orderTo = txDetails.txData?.to.value
-        if (!orderTo) {
-          throw new Error('Order tx data does not have a `to` field')
-        }
-        return orderTo
       case 'NativeStakingDeposit':
       case 'NativeStakingValidatorsExit':
-      case 'NativeStakingWithdraw':
-        const stakingTo = txDetails.txData?.to.value
-        if (!stakingTo) {
-          throw new Error('Staking tx data does not have a `to` field')
+      case 'NativeStakingWithdraw': {
+        const toValue = txDetails.txData?.to.value
+        if (!toValue) {
+          throw new Error('Tx data does not have a `to` field')
         }
-        return stakingTo
+        return toValue
+      }
       case 'Custom':
         return txDetails.txInfo.to.value
       case 'Creation':

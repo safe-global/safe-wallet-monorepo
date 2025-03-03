@@ -9,6 +9,7 @@ import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { shortenAddress } from '@safe-global/utils/formatters'
 import { Address } from '@/src/types/address'
 import {
+  AddressInfo,
   MultisigExecutionDetails,
   useTransactionsGetTransactionByIdV1Query,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
@@ -33,8 +34,8 @@ export const ConfirmationsSheetContainer = () => {
   }, [confirmations])
 
   const renderItem = useCallback(
-    ({ item }: { item: { name: string; value: Address } }) => {
-      const hasSigned = confirmationsMapper.has(item.value)
+    ({ item }: { item: AddressInfo }) => {
+      const hasSigned = confirmationsMapper.has(item.value as Address)
 
       return (
         <View width="100%">

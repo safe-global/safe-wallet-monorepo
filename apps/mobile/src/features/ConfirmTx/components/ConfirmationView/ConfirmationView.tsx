@@ -17,6 +17,7 @@ import { SwapOrder } from '../confirmation-views/SwapOrder'
 import { OrderTransactionInfo } from '@safe-global/store/gateway/types'
 import { RemoveSigner } from '../confirmation-views/RemoveSigner'
 import { GenericView } from '../confirmation-views/GenericView'
+import { NormalizedSettingsChangeTransaction } from './types'
 interface ConfirmationViewProps {
   txDetails: TransactionDetails
 }
@@ -44,14 +45,14 @@ export function ConfirmationView({ txDetails }: ConfirmationViewProps) {
       return (
         <AddSigner
           executionInfo={txDetails.detailedExecutionInfo as MultisigExecutionDetails}
-          txInfo={txDetails.txInfo as SettingsChangeTransaction}
+          txInfo={txDetails.txInfo as NormalizedSettingsChangeTransaction}
         />
       )
     case ETxType.REMOVE_SIGNER:
       return (
         <RemoveSigner
           executionInfo={txDetails.detailedExecutionInfo as MultisigExecutionDetails}
-          txInfo={txDetails.txInfo as SettingsChangeTransaction}
+          txInfo={txDetails.txInfo as NormalizedSettingsChangeTransaction}
         />
       )
     case ETxType.SWAP_ORDER:

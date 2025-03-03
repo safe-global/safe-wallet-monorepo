@@ -2,12 +2,13 @@ import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { Logo } from '@/src/components/Logo'
 import { Text, View } from 'tamagui'
 
-import { SettingsChangeTransaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { Identicon } from '@/src/components/Identicon'
 import { getSignerName } from '../AddSigner/utils'
 
-export const formatRemoveSignerItems = (txInfo: SettingsChangeTransaction, chain: Chain) => {
+import { NormalizedSettingsChangeTransaction } from '../../ConfirmationView/types'
+
+export const formatRemoveSignerItems = (txInfo: NormalizedSettingsChangeTransaction, chain: Chain) => {
   const newSignerRemoveress = getSignerName(txInfo)
 
   return [

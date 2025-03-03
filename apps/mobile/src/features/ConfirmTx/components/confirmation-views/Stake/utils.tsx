@@ -7,7 +7,7 @@ import { Text, View } from 'tamagui'
 const MOCKED_LOGO = 'https://safe-transaction-assets.safe.global/chains/1/chain_logo.png'
 
 // TODO: this function will be replaced for the staking item
-export const formatStakingItems = (_tx: unknown) => {
+export const formatStakingItems = () => {
   return [
     {
       label: 'Rewards rate',

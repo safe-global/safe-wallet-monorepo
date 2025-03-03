@@ -3,15 +3,13 @@ import { Logo } from '@/src/components/Logo'
 import { ellipsis } from '@/src/utils/formatters'
 import { Text, View } from 'tamagui'
 
-import {
-  MultisigExecutionDetails,
-  SettingsChangeTransaction,
-} from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { MultisigExecutionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { shortenAddress } from '@safe-global/utils/formatters'
 import { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { Identicon } from '@/src/components/Identicon'
+import { NormalizedSettingsChangeTransaction } from '../../ConfirmationView/types'
 
-export const getSignerName = (txInfo: SettingsChangeTransaction) => {
+export const getSignerName = (txInfo: NormalizedSettingsChangeTransaction) => {
   if (!txInfo.settingsInfo) {
     return ''
   }
@@ -26,7 +24,7 @@ export const getSignerName = (txInfo: SettingsChangeTransaction) => {
 }
 
 export const formatAddSignerItems = (
-  txInfo: SettingsChangeTransaction,
+  txInfo: NormalizedSettingsChangeTransaction,
   chain: Chain,
   executionInfo: MultisigExecutionDetails,
 ) => {

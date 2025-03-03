@@ -3,17 +3,14 @@ import { YStack } from 'tamagui'
 import { TransactionHeader } from '../../TransactionHeader'
 import { ListTable } from '../../ListTable'
 import { formatAddSignerItems, getSignerName } from './utils'
-import {
-  MultisigExecutionDetails,
-  SettingsChangeTransaction,
-} from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { MultisigExecutionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { useAppSelector } from '@/src/store/hooks'
 import { RootState } from '@/src/store'
 import { selectChainById } from '@/src/store/chains'
-
+import { NormalizedSettingsChangeTransaction } from '../../ConfirmationView/types'
 interface AddSignerProps {
-  txInfo: SettingsChangeTransaction
+  txInfo: NormalizedSettingsChangeTransaction
   executionInfo: MultisigExecutionDetails
 }
 
