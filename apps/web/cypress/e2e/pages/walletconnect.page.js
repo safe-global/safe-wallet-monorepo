@@ -12,4 +12,3 @@ export function checkLogoAndTitleAreVisible() {
 export function clickOnWCBtn() {
   cy.get(wcButton).click()
 }
-

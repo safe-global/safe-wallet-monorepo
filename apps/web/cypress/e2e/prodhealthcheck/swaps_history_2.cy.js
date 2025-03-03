@@ -46,9 +46,9 @@ describe('[PROD] Swaps history tests 2', () => {
     () => {
       cy.visit(
         constants.prodbaseUrl +
-        constants.transactionUrl +
-        staticSafes.SEP_STATIC_SAFE_1 +
-        swaps.swapTxs.safeAppSwapOrder,
+          constants.transactionUrl +
+          staticSafes.SEP_STATIC_SAFE_1 +
+          swaps.swapTxs.safeAppSwapOrder,
       )
       const dai = swaps.createRegex(swapsHistory.forAtLeastFullDai, 'DAI')
       const eq = swaps.createRegex(swapsHistory.DAIeqCOW, 'COW')

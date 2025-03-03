@@ -11,19 +11,26 @@ describe('Sidebar UI tests', () => {
 
   const views = [
     constants.appsUrlGeneral,
-    constants.homeUrl, constants.appsCustomUrl,
-    constants.securityUrl, constants.transactionUrl, constants.transactionQueueUrl,
-    constants.transactionsMessagesUrl, constants.transactionsHistoryUrl,
-    constants.swapUrl, constants.setupUrl, constants.notificationsUrl,
-    constants.modulesUrl, constants.dataSettingsUrl, constants.appearanceSettingsUrl,
-    constants.balanceNftsUrl, constants.BALANCE_URL,
+    constants.homeUrl,
+    constants.appsCustomUrl,
+    constants.securityUrl,
+    constants.transactionUrl,
+    constants.transactionQueueUrl,
+    constants.transactionsMessagesUrl,
+    constants.transactionsHistoryUrl,
+    constants.swapUrl,
+    constants.setupUrl,
+    constants.notificationsUrl,
+    constants.modulesUrl,
+    constants.dataSettingsUrl,
+    constants.appearanceSettingsUrl,
+    constants.balanceNftsUrl,
+    constants.BALANCE_URL,
   ]
   views.forEach((link) => {
     it(`Verify sidebar copy address button copies address in view: ${link}`, () => {
       cy.visit(link + staticSafes.SEP_STATIC_SAFE_4)
-      cy.get(sideBar.copyAddressBtn)
-        .should('be.visible')
-        .should('be.enabled');
+      cy.get(sideBar.copyAddressBtn).should('be.visible').should('be.enabled')
       cy.wait(2000)
       sideBar.clickOnCopyAddressBtn(staticSafes.SEP_STATIC_SAFE_4.substring(4))
     })

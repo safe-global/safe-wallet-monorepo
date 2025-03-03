@@ -185,7 +185,7 @@ export function acceptCookies(index = 0) {
 
   cy.get('button')
     .contains(acceptSelection)
-    .should(() => { })
+    .should(() => {})
     .then(($button) => {
       if (!$button.length) {
         return

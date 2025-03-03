@@ -177,6 +177,76 @@ exports[`SignOrExecute should display a confirmation screen 1`] = `
       class="MuiCardContent-root cardContent css-1lt5qva-MuiCardContent-root"
       data-testid="card-content"
     >
+      <h5
+        class="MuiTypography-root MuiTypography-h5 css-1whrnku-MuiTypography-root"
+      >
+        Transaction checks
+      </h5>
+      <div
+        class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiAlert-root MuiAlert-colorInfo MuiAlert-standardInfo MuiAlert-standard css-c7us71-MuiPaper-root-MuiAlert-root"
+        role="alert"
+        style="--Paper-shadow: none;"
+      >
+        <div
+          class="MuiAlert-icon css-vab54s-MuiAlert-icon"
+        >
+          <svg
+            aria-hidden="true"
+            class="MuiSvgIcon-root MuiSvgIcon-fontSizeInherit css-zysrwz-MuiSvgIcon-root"
+            data-testid="InfoOutlinedIcon"
+            focusable="false"
+            viewBox="0 0 24 24"
+          >
+            <path
+              d="M11,9H13V7H11M12,20C7.59,20 4,16.41 4,12C4,7.59 7.59,4 12,4C16.41,4 20,7.59 20, 12C20,16.41 16.41,20 12,20M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10, 10 0 0,0 12,2M11,17H13V11H11V17Z"
+            />
+          </svg>
+        </div>
+        <div
+          class="MuiAlert-message css-zioonp-MuiAlert-message"
+        >
+          We recommend analyzing your transaction with a third-party tool like
+           
+          <span
+            data-track="modals: Open OpenZeppelin Safe Utils"
+          >
+            <a
+              class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways css-r9pq5a-MuiTypography-root-MuiLink-root"
+              href="https://safeutils.openzeppelin.com/"
+              rel="noreferrer noopener"
+              target="_blank"
+            >
+              <span
+                class="MuiBox-root css-1vqf8mi"
+              >
+                OpenZeppelin Safe Utils
+                <svg
+                  aria-hidden="true"
+                  class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-tqxw8e-MuiSvgIcon-root"
+                  data-testid="OpenInNewRoundedIcon"
+                  focusable="false"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M18 19H6c-.55 0-1-.45-1-1V6c0-.55.45-1 1-1h5c.55 0 1-.45 1-1s-.45-1-1-1H5c-1.11 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-6c0-.55-.45-1-1-1s-1 .45-1 1v5c0 .55-.45 1-1 1M14 4c0 .55.45 1 1 1h2.59l-9.13 9.13c-.39.39-.39 1.02 0 1.41s1.02.39 1.41 0L19 6.41V9c0 .55.45 1 1 1s1-.45 1-1V4c0-.55-.45-1-1-1h-5c-.55 0-1 .45-1 1"
+                  />
+                </svg>
+              </span>
+            </a>
+          </span>
+          . Third-party terms & disclaimers may apply.
+        </div>
+      </div>
+    </div>
+  </div>
+  <div
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root css-1w4z6qv-MuiPaper-root-MuiCard-root"
+    style="--Paper-shadow: none;"
+  >
+    <div
+      class="MuiCardContent-root cardContent css-1lt5qva-MuiCardContent-root"
+      data-testid="card-content"
+    >
       <div
         class="wrapper"
       >
@@ -505,6 +575,76 @@ exports[`SignOrExecute should display an error screen 1`] = `
               </div>
             </div>
           </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root css-1w4z6qv-MuiPaper-root-MuiCard-root"
+    style="--Paper-shadow: none;"
+  >
+    <div
+      class="MuiCardContent-root cardContent css-1lt5qva-MuiCardContent-root"
+      data-testid="card-content"
+    >
+      <h5
+        class="MuiTypography-root MuiTypography-h5 css-1whrnku-MuiTypography-root"
+      >
+        Transaction checks
+      </h5>
+      <div
+        class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiAlert-root MuiAlert-colorInfo MuiAlert-standardInfo MuiAlert-standard css-c7us71-MuiPaper-root-MuiAlert-root"
+        role="alert"
+        style="--Paper-shadow: none;"
+      >
+        <div
+          class="MuiAlert-icon css-vab54s-MuiAlert-icon"
+        >
+          <svg
+            aria-hidden="true"
+            class="MuiSvgIcon-root MuiSvgIcon-fontSizeInherit css-zysrwz-MuiSvgIcon-root"
+            data-testid="InfoOutlinedIcon"
+            focusable="false"
+            viewBox="0 0 24 24"
+          >
+            <path
+              d="M11,9H13V7H11M12,20C7.59,20 4,16.41 4,12C4,7.59 7.59,4 12,4C16.41,4 20,7.59 20, 12C20,16.41 16.41,20 12,20M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10, 10 0 0,0 12,2M11,17H13V11H11V17Z"
+            />
+          </svg>
+        </div>
+        <div
+          class="MuiAlert-message css-zioonp-MuiAlert-message"
+        >
+          We recommend analyzing your transaction with a third-party tool like
+           
+          <span
+            data-track="modals: Open OpenZeppelin Safe Utils"
+          >
+            <a
+              class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways css-r9pq5a-MuiTypography-root-MuiLink-root"
+              href="https://safeutils.openzeppelin.com/"
+              rel="noreferrer noopener"
+              target="_blank"
+            >
+              <span
+                class="MuiBox-root css-1vqf8mi"
+              >
+                OpenZeppelin Safe Utils
+                <svg
+                  aria-hidden="true"
+                  class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-tqxw8e-MuiSvgIcon-root"
+                  data-testid="OpenInNewRoundedIcon"
+                  focusable="false"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M18 19H6c-.55 0-1-.45-1-1V6c0-.55.45-1 1-1h5c.55 0 1-.45 1-1s-.45-1-1-1H5c-1.11 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-6c0-.55-.45-1-1-1s-1 .45-1 1v5c0 .55-.45 1-1 1M14 4c0 .55.45 1 1 1h2.59l-9.13 9.13c-.39.39-.39 1.02 0 1.41s1.02.39 1.41 0L19 6.41V9c0 .55.45 1 1 1s1-.45 1-1V4c0-.55-.45-1-1-1h-5c-.55 0-1 .45-1 1"
+                  />
+                </svg>
+              </span>
+            </a>
+          </span>
+          . Third-party terms & disclaimers may apply.
         </div>
       </div>
     </div>

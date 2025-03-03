@@ -87,4 +87,4 @@ beforeEach(() => {
     window.sessionStorage.setItem(outreachWindowKey, Date.now())
     cy.wrap(window.localStorage).invoke('getItem', cookiesKey).should('equal', ls.cookies.acceptedCookies)
   })
-}) 
+})

@@ -36,6 +36,10 @@ export const MODALS_EVENTS = {
     action: 'Use spending limit',
     category: MODALS_CATEGORY,
   },
+  OPEN_SAFE_UTILS: {
+    action: 'Open OpenZeppelin Safe Utils',
+    category: MODALS_CATEGORY,
+  },
   SIMULATE_TX: {
     action: 'Simulate transaction',
     category: MODALS_CATEGORY,

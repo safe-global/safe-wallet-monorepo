@@ -136,7 +136,7 @@ export function RecoverAccountFlowReview({ params }: { params: RecoverAccountFlo
         <BlockaidBalanceChanges />
       </TxCard>
 
-      <TxChecks executionOwner={safe.owners[0].value} />
+      {safeTx && <TxChecks transaction={safeTx} executionOwner={safe.owners[0].value} />}
 
       <TxCard>
         <>

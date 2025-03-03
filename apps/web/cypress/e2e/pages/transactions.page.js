@@ -14,7 +14,8 @@ export const relayRemainingAttemptsStr = 'free transactions left today'
 const confirmTx = 'Confirm transaction'
 
 export const fallbackhandlerTx = {
-  illegalContract: '&id=multisig_0xc36A530ccD728d36a654ccedEB7994473474C018_0xceccff6539d75da107014e1a4ae9ccb864a6a4bf10b4e0dd38431ac80148f2f5'
+  illegalContract:
+    '&id=multisig_0xc36A530ccD728d36a654ccedEB7994473474C018_0xceccff6539d75da107014e1a4ae9ccb864a6a4bf10b4e0dd38431ac80148f2f5',
 }
 
 export function verifyUntrustedHandllerWarningVisible() {

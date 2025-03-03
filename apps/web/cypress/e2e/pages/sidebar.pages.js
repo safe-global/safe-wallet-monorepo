@@ -178,8 +178,6 @@ export function verifyCurrentSafe(safe) {
   })
 }
 
-
-
 export function verifyCurrentSafeReadOnly(number) {
   cy.get(currentSafeSection).within(() => {
     cy.get(readOnlyChip).should('have.length', number)
@@ -212,16 +210,15 @@ export function clickOnSidebarImportBtn() {
 
 export function clickOnCopyAddressBtn(expectedData) {
   cy.window().then((win) => {
-    cy.stub(win.navigator.clipboard, 'writeText').as('clipboardWrite');
-  });
-  cy.get(copyAddressBtn).click();
-  cy.get('@clipboardWrite', { timeout: 10000 }).should('have.been.called');
+    cy.stub(win.navigator.clipboard, 'writeText').as('clipboardWrite')
+  })
+  cy.get(copyAddressBtn).click()
+  cy.get('@clipboardWrite', { timeout: 10000 }).should('have.been.called')
   cy.get('@clipboardWrite').then((stub) => {
-    const actualCallArgs = stub.args[0][0];
-    expect(actualCallArgs).to.include(expectedData);
-  });
+    const actualCallArgs = stub.args[0][0]
+    expect(actualCallArgs).to.include(expectedData)
+  })
 }
-
 
 export function showAllSafes() {
   cy.wait(500)
@@ -596,7 +593,6 @@ export function checkBalanceExists() {
   const element = cy.get(chainLogo).prev().contains(balance)
 }
 
-
 export function clickOnAddOptionsBtn() {
   cy.get(safeItemOptionsAddChainBtn).click()
 }
@@ -642,7 +638,7 @@ export function checkNetworksInRange(expectedString, expectedCount, direction = 
 
   return cy
     .get(startSelector)
-  [traversalMethod](endSelector, 'li')
+    [traversalMethod](endSelector, 'li')
     .then((liElements) => {
       expect(liElements.length).to.equal(expectedCount)
       const optionTexts = [...liElements].map((li) => li.innerText)

@@ -1,6 +1,6 @@
 import { useRouter } from 'next/router'
 import { renderHook } from '@/tests/test-utils'
-import useSafeAddress from '@/hooks/useSafeAddress'
+import { useSafeAddressFromUrl } from '@/hooks/useSafeAddressFromUrl'
 
 // Mock useRouter
 jest.mock('next/router', () => ({
@@ -15,7 +15,7 @@ jest.mock('next/router', () => ({
 // Tests for the useSafeAddress hook
 describe('useSafeAddress hook', () => {
   it('should return the safe address', () => {
-    const { result } = renderHook(() => useSafeAddress())
+    const { result } = renderHook(() => useSafeAddressFromUrl())
     expect(result.current).toBe('0x0000000000000000000000000000000000000001')
   })
 
@@ -27,7 +27,7 @@ describe('useSafeAddress hook', () => {
       },
     }))
 
-    const { result } = renderHook(() => useSafeAddress())
+    const { result } = renderHook(() => useSafeAddressFromUrl())
     expect(result.current).toBe('')
   })
 
@@ -39,7 +39,7 @@ describe('useSafeAddress hook', () => {
       },
     }))
 
-    const { result } = renderHook(() => useSafeAddress())
+    const { result } = renderHook(() => useSafeAddressFromUrl())
     expect(result.current).toBe('0x220866B1A2219f40e72f5c628B65D54268cA3A9D')
   })
 
@@ -49,7 +49,7 @@ describe('useSafeAddress hook', () => {
       query: {},
     }))
 
-    const { result } = renderHook(() => useSafeAddress())
+    const { result } = renderHook(() => useSafeAddressFromUrl())
     expect(result.current).toBe('')
   })
 })
