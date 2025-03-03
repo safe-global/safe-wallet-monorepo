@@ -8,10 +8,8 @@ import WalletOverview from 'src/components/common/WalletOverview'
 import ConnectWalletButton from '@/components/common/ConnectWallet/ConnectWalletButton'
 import css from '@/components/new-safe/create/OverviewWidget/styles.module.css'
 import NetworkLogosList from '@/features/multichain/components/NetworkLogosList'
+import SafenetNetworkSelector from '@/features/safenet/components/SafenetNetworkSelector'
 import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
-import dynamic from 'next/dynamic'
-
-const SafenetNetworkSelector = dynamic(() => import('@/features/safenet/components/SafenetNetworkSelector'))
 
 const LOGO_DIMENSIONS = '22px'
 

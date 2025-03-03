@@ -9,12 +9,10 @@ import SidebarNavigation from '@/components/sidebar/SidebarNavigation'
 
 import ChainIndicator from '@/components/common/ChainIndicator'
 import MyAccounts from '@/features/myAccounts'
+import SafenetSidebarHeader from '@/features/safenet/components/SafenetSidebarHeader'
 import useIsSafenetEnabled from '@/features/safenet/hooks/useIsSafenetEnabled'
 import { OVERVIEW_EVENTS, trackEvent } from '@/services/analytics'
-import dynamic from 'next/dynamic'
 import css from './styles.module.css'
-
-const SafenetSidebarHeader = dynamic(() => import('@/features/safenet/components/SafenetSidebarHeader'))
 
 const Sidebar = (): ReactElement => {
   const isSafenetEnabled = useIsSafenetEnabled()

@@ -1,17 +1,5 @@
-import TxLayout from '@/components/tx-flow/common/TxLayout'
-import ReviewEnableSafenet from './ReviewEnableSafenet'
+import dynamic from 'next/dynamic'
 
-export type EnableSafenetFlowProps = {
-  guardAddress: string
-  moduleAddress: string
-}
-
-const EnableSafenetFlow = ({ guardAddress, moduleAddress }: EnableSafenetFlowProps) => {
-  return (
-    <TxLayout title="Confirm transaction" subtitle="Enable Safenet">
-      <ReviewEnableSafenet params={{ guardAddress, moduleAddress }} />
-    </TxLayout>
-  )
-}
+const EnableSafenetFlow = dynamic(() => import('./EnableSafenetFlow'), { ssr: false })
 
 export default EnableSafenetFlow

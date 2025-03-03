@@ -6,7 +6,7 @@ import { createEnableGuardTx, createEnableModuleTx, createMultiSendCallOnlyTx } 
 import { Typography } from '@mui/material'
 import type { MetaTransactionData, SafeTransaction } from '@safe-global/safe-core-sdk-types'
 import { useContext, useEffect } from 'react'
-import { type EnableSafenetFlowProps } from '.'
+import { type EnableSafenetFlowProps } from './EnableSafenetFlow'
 
 const ReviewEnableSafenet = ({ params }: { params: EnableSafenetFlowProps }) => {
   const { setSafeTx, safeTxError, setSafeTxError } = useContext(SafeTxContext)

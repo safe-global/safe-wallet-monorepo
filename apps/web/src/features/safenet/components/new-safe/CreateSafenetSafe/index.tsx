@@ -19,13 +19,11 @@ import type { AlertColor } from '@mui/material'
 import { Box, Container, Grid, Typography } from '@mui/material'
 import { type SafeVersion } from '@safe-global/safe-core-sdk-types'
 import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
-import dynamic from 'next/dynamic'
 import { useRouter } from 'next/router'
 import { useMemo, useState, type ReactElement } from 'react'
+import DiscoverSafenetStep from '../DiscoverSafenetStep'
 import SafenetNameStep from '../SafenetNameStep'
 import css from './styles.module.css'
-
-const DiscoverSafenetStep = dynamic(() => import('@/features/safenet/components/new-safe/DiscoverSafenetStep'))
 
 export type SafenetCreationFormData = {
   name: string
