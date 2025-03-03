@@ -19,3 +19,4 @@ export const GATEWAY_URL = isProduction ? GATEWAY_URL_PRODUCTION : GATEWAY_URL_S
  * If we change it and need all users to see it again, we can bump the version here.
  */
 export const ONBOARDING_VERSION = 'v1'
+export const INFURA_TOKEN = process.env.INFURA_TOKEN || ''

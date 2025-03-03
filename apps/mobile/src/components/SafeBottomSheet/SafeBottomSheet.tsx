@@ -12,6 +12,7 @@ import DraggableFlatList, { DragEndParams, RenderItemParams, ScaleDecorator } fr
 import { StyleSheet } from 'react-native'
 import { useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { LoadingTx } from '@/src/features/ConfirmTx/components/LoadingTx'
 
 interface SafeBottomSheetProps<T> {
   children?: React.ReactNode
@@ -24,6 +25,7 @@ interface SafeBottomSheetProps<T> {
   FooterComponent?: React.FC
   renderItem?: React.FC<{ item: T; isDragging?: boolean; drag?: () => void; onClose: () => void }>
   keyExtractor?: ({ item, index }: { item: T; index: number }) => string
+  loading?: boolean
 }
 
 export function SafeBottomSheet<T>({
@@ -31,6 +33,7 @@ export function SafeBottomSheet<T>({
   title,
   sortable,
   items,
+  loading,
   snapPoints = [600, '100%'],
   keyExtractor,
   actions,
@@ -42,8 +45,8 @@ export function SafeBottomSheet<T>({
   const router = useRouter()
   const insets = useSafeAreaInsets()
   const [footerHeight, setFooterHeight] = React.useState(0)
-  const hasCustomItems = items && Render
-  const isSortable = items && sortable
+  const hasCustomItems = items?.length && Render
+  const isSortable = items?.length && sortable
 
   const onClose = useCallback(() => {
     router.back()
@@ -129,7 +132,7 @@ export function SafeBottomSheet<T>({
           },
         ]}
       >
-        <TitleHeader />
+        {title && <TitleHeader />}
         {isSortable ? (
           <DraggableFlatList<T>
             data={items}
@@ -149,15 +152,15 @@ export function SafeBottomSheet<T>({
           >
             <View minHeight={200} alignItems="center" paddingVertical="$3">
               <View alignItems="flex-start" paddingBottom="$4" width="100%">
-                {hasCustomItems
-                  ? items.map((item, index) => (
-                      <Render
-                        key={keyExtractor ? keyExtractor({ item, index }) : index}
-                        item={item}
-                        onClose={onClose}
-                      />
-                    ))
-                  : children}
+                {loading ? (
+                  <LoadingTx />
+                ) : hasCustomItems ? (
+                  items.map((item, index) => (
+                    <Render key={keyExtractor ? keyExtractor({ item, index }) : index} item={item} onClose={onClose} />
+                  ))
+                ) : (
+                  children
+                )}
               </View>
             </View>
           </BottomSheetScrollView>
