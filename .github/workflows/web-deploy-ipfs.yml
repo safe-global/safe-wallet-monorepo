@@ -3,7 +3,7 @@ name: Web Deploy to IPFS
 on:
   pull_request:
     branches:
-      - ipfs-deploy
+      - dev
     paths:
       - apps/web/**
       - packages/**
