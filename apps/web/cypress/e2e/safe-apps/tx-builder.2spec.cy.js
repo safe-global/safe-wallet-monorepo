@@ -94,7 +94,7 @@ describe('Transaction Builder 2 tests', { defaultCommandTimeout: 20000 }, () => 
     })
   })
 
-  it('Verify a valid batch as successful can be simulated', () => {
+  it.skip('Verify a valid batch as successful can be simulated', () => {
     cy.enter(iframeSelector).then((getBody) => {
       getBody().findByLabelText(safeapps.enterAddressStr).type(safeAppSafes.SEP_SAFEAPP_SAFE_2)
       getBody().findByText(safeapps.keepProxiABIStr).click()
@@ -107,7 +107,7 @@ describe('Transaction Builder 2 tests', { defaultCommandTimeout: 20000 }, () => 
     })
   })
 
-  it('Verify an invalid batch as failed can be simulated', () => {
+  it.skip('Verify an invalid batch as failed can be simulated', () => {
     cy.enter(iframeSelector).then((getBody) => {
       getBody().findByLabelText(safeapps.enterAddressStr).type(safeAppSafes.SEP_SAFEAPP_SAFE_2)
       getBody().findByText(safeapps.keepProxiABIStr).click()

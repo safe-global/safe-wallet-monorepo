@@ -1736,17 +1736,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@coinbase/wallet-sdk@npm:4.0.3":
-  version: 4.0.3
-  resolution: "@coinbase/wallet-sdk@npm:4.0.3"
+"@coinbase/wallet-sdk@npm:4.3.0":
+  version: 4.3.0
+  resolution: "@coinbase/wallet-sdk@npm:4.3.0"
   dependencies:
-    buffer: "npm:^6.0.3"
+    "@noble/hashes": "npm:^1.4.0"
     clsx: "npm:^1.2.1"
     eventemitter3: "npm:^5.0.1"
-    keccak: "npm:^3.0.3"
-    preact: "npm:^10.16.0"
-    sha.js: "npm:^2.4.11"
-  checksum: 10/fcea81c315726d648d3453ff7930d5175db641d05a7840f343d48ff6861215f2d531df5a1e5d4fa34addc10401b1033d7bc7b7b6c2c0eac2e9e4d08325f94a50
+    preact: "npm:^10.24.2"
+  checksum: 10/56d24aaf5170d05fafe4cdafa06a000e259f3f9f3eae7879bcb5e1c316e5e3d85754639f31d3e366ed208f1667cb7d10d3c7bcae8e40cb5f46bea7c291d7c2bf
   languageName: node
   linkType: hard
 
@@ -6370,6 +6368,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@next/third-parties@npm:^15.2.0":
+  version: 15.2.0
+  resolution: "@next/third-parties@npm:15.2.0"
+  dependencies:
+    third-party-capital: "npm:1.0.20"
+  peerDependencies:
+    next: ^13.0.0 || ^14.0.0 || ^15.0.0
+    react: ^18.2.0 || 19.0.0-rc-de68d2f4-20241204 || ^19.0.0
+  checksum: 10/7713a5d6e51bcbbfb7f499f905770a4cfe25638a39e99fcdaefafaa343e71ae0596802584df776c5029c4879c73adc9a04be511e920f8618e793f0fb9f726b7f
+  languageName: node
+  linkType: hard
+
 "@noble/ciphers@npm:1.2.1":
   version: 1.2.1
   resolution: "@noble/ciphers@npm:1.2.1"
@@ -7972,6 +7982,7 @@ __metadata:
     "@mui/x-date-pickers": "npm:^7.23.3"
     "@next/bundle-analyzer": "npm:^15.0.4"
     "@next/mdx": "npm:^15.0.4"
+    "@next/third-parties": "npm:^15.2.0"
     "@openzeppelin/contracts": "npm:^4.9.6"
     "@reduxjs/toolkit": "npm:^2.5.0"
     "@reown/walletkit": "npm:^1.1.1"
@@ -8018,7 +8029,7 @@ __metadata:
     "@typescript-eslint/parser": "npm:^8.18.1"
     "@walletconnect/core": "npm:^2.17.2"
     "@walletconnect/utils": "npm:^2.17.3"
-    "@web3-onboard/coinbase": "npm:^2.4.1"
+    "@web3-onboard/coinbase": "npm:^2.4.2"
     "@web3-onboard/core": "npm:2.21.4"
     "@web3-onboard/injected-wallets": "npm:^2.11.2"
     "@web3-onboard/walletconnect": "npm:^2.6.1"
@@ -12803,13 +12814,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@web3-onboard/coinbase@npm:^2.4.1":
-  version: 2.4.1
-  resolution: "@web3-onboard/coinbase@npm:2.4.1"
+"@web3-onboard/coinbase@npm:^2.4.2":
+  version: 2.4.2
+  resolution: "@web3-onboard/coinbase@npm:2.4.2"
   dependencies:
-    "@coinbase/wallet-sdk": "npm:4.0.3"
+    "@coinbase/wallet-sdk": "npm:4.3.0"
     "@web3-onboard/common": "npm:^2.4.1"
-  checksum: 10/405f3fcb12c8ed5c56cb225cbddb8d1695fb972214b3c58fe710cba87d61469fcc1741e300f2bf5fa50918233161f5d37db3bf6f65ea198a442e2126debb9822
+  checksum: 10/d0815040fe3b13d0e6a2f7b3cddfb7af0e46c0c545adab2b76dbc48d146af89914e43920b21ef5d246ac396b28e03d4bc079cc439c98ad4b8e7481f617d9dade
   languageName: node
   linkType: hard
 
@@ -22381,7 +22392,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"keccak@npm:^3.0.0, keccak@npm:^3.0.3":
+"keccak@npm:^3.0.0":
   version: 3.0.4
   resolution: "keccak@npm:3.0.4"
   dependencies:
@@ -26329,10 +26340,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"preact@npm:^10.16.0":
-  version: 10.25.2
-  resolution: "preact@npm:10.25.2"
-  checksum: 10/4910dbb6ba7112a418b75ebe87d72b5f6a201c275d6618b8d749bd8b273df6bee1811bc6d26047039d7c59c5a905f5ec6083549301d51dea1a6fcabb5caf9916
+"preact@npm:^10.24.2":
+  version: 10.26.2
+  resolution: "preact@npm:10.26.2"
+  checksum: 10/3bcb7bb5018b6098c2f02e39537b9fa60fe47cd606ed1ad11a32560751121a54ed3a3d68638c4845f84cb633133467496cbf198fdf3d7238a41d2c92929b9d63
   languageName: node
   linkType: hard
 
@@ -28785,7 +28796,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"sha.js@npm:^2.4.0, sha.js@npm:^2.4.11, sha.js@npm:^2.4.8":
+"sha.js@npm:^2.4.0, sha.js@npm:^2.4.8":
   version: 2.4.11
   resolution: "sha.js@npm:2.4.11"
   dependencies:
@@ -30417,6 +30428,13 @@ __metadata:
   dependencies:
     any-promise: "npm:^1.0.0"
   checksum: 10/486e1283a867440a904e36741ff1a177faa827cf94d69506f7e3ae4187b9afdf9ec368b3d8da225c192bfe2eb943f3f0080594156bf39f21b57cd1411e2e7f6d
+  languageName: node
+  linkType: hard
+
+"third-party-capital@npm:1.0.20":
+  version: 1.0.20
+  resolution: "third-party-capital@npm:1.0.20"
+  checksum: 10/40e2531b428a21f05531fc62ef82859c0071211eff09588baf75d4b525096bbdb4f93e17e2d538849db8d4fc3cceb074933d7be59fddc26f86718fbbe852a97f
   languageName: node
   linkType: hard
 

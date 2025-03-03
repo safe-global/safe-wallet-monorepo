@@ -60,7 +60,7 @@ const SidebarFooter = (): ReactElement => {
       </Track>
 
       <Track {...OVERVIEW_EVENTS.HELP_CENTER}>
-        <ListItem disablePadding>
+        <ListItem data-testid="need-help-btn" disablePadding>
           <a target="_blank" rel="noopener noreferrer" href={HELP_CENTER_URL} style={{ width: '100%' }}>
             <SidebarListItemButton>
               <SidebarListItemIcon color="primary">

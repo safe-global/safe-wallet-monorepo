@@ -13,7 +13,7 @@ const signer = walletCredentials.OWNER_4_PRIVATE_KEY
 
 const contracts = {
   illegal: '0xF184a243925Bf7fb1D64487339FF4F177Fb75644',
-  '1_4_1': '0xfd0732dc9e303f09fcef3a7388ad10a83459ec99'
+  '1_4_1': '0xfd0732dc9e303f09fcef3a7388ad10a83459ec99',
 }
 const appUrl = constants.TX_Builder_url
 const iframeSelector = `iframe[id="iframe-${appUrl}"]`
@@ -29,7 +29,7 @@ describe('Transaction details create tests', { defaultCommandTimeout: 30000 }, (
       getBody().findByLabelText(safeapps.enterAddressStr).type(staticSafes.SEP_STATIC_SAFE_36)
       getBody().findByRole('button', { name: safeapps.useImplementationABI }).click()
       getBody().find(safeapps.contractMethodIndex).parent().click()
-      getBody().findByRole('option', { name: 'setFallbackHandler' }).click();
+      getBody().findByRole('option', { name: 'setFallbackHandler' }).click()
       getBody().find(safeapps.handlerInput).type(contracts.illegal)
       getBody().findByText(safeapps.addTransactionStr).click()
       getBody().findByText(safeapps.createBatchStr).click()
@@ -38,8 +38,8 @@ describe('Transaction details create tests', { defaultCommandTimeout: 30000 }, (
     safeapps.verifyUntrustedHandllerWarningVisible()
   })
 
-
-  it('Verify that no error for the COWSwap fallbackhandler on confirm tx screen',
+  it(
+    'Verify that no error for the COWSwap fallbackhandler on confirm tx screen',
     { defaultCommandTimeout: 30000 },
     () => {
       cy.visit(constants.swapUrl + staticSafes.SEP_STATIC_SAFE_27)
@@ -70,7 +70,7 @@ describe('Transaction details create tests', { defaultCommandTimeout: 30000 }, (
       getBody().findByLabelText(safeapps.enterAddressStr).type(staticSafes.SEP_STATIC_SAFE_36)
       getBody().findByRole('button', { name: safeapps.useImplementationABI }).click()
       getBody().find(safeapps.contractMethodIndex).parent().click()
-      getBody().findByRole('option', { name: 'setFallbackHandler' }).click();
+      getBody().findByRole('option', { name: 'setFallbackHandler' }).click()
       getBody().find(safeapps.handlerInput).type(contracts['1_4_1'])
       getBody().findByText(safeapps.addTransactionStr).click()
       getBody().findByText(safeapps.createBatchStr).click()
