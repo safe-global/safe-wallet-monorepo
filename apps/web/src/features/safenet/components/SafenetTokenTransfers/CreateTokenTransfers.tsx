@@ -12,9 +12,9 @@ import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants
 import { type TokenInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import { useContext, useEffect, useState, type ReactElement } from 'react'
 import { FormProvider, useFieldArray, useForm } from 'react-hook-form'
-import { TokenTransfersFields, type TokenTransfersParams } from '.'
 import CSVAirdropAppModal from './CSVAirdropAppModal'
 import RecipientRow from './RecipientRow'
+import { TokenTransfersFields, type TokenTransfersParams } from './SafenetTokenTransfers'
 
 export const AutocompleteItem = (item: { tokenInfo: TokenInfo; balance: string }): ReactElement => (
   <Grid
