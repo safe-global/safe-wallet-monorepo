@@ -45,7 +45,7 @@
     "@notifee/react-native": "^9.1.8",
     "@react-native-clipboard/clipboard": "^1.15.0",
     "@react-native-community/blur": "^4.4.1",
-    "@react-native-firebase/app": "^21.7.1",
+    "@react-native-firebase/app": "^21.11.0",
     "@react-native-firebase/messaging": "^21.7.1",
     "@react-native-menu/menu": "^1.1.6",
     "@react-native/babel-preset": "^0.76.2",
