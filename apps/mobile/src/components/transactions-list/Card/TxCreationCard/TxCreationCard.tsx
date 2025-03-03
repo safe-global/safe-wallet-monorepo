@@ -10,9 +10,10 @@ interface TxCreationCardProps {
   bordered?: boolean
   inQueue?: boolean
   executionInfo?: Transaction['executionInfo']
+  onPress: () => void
 }
 
-export function TxCreationCard({ txInfo, executionInfo, bordered, inQueue }: TxCreationCardProps) {
+export function TxCreationCard({ txInfo, executionInfo, bordered, inQueue, onPress }: TxCreationCardProps) {
   return (
     <SafeListItem
       inQueue={inQueue}
@@ -27,6 +28,7 @@ export function TxCreationCard({ txInfo, executionInfo, bordered, inQueue }: TxC
           </View>
         </Theme>
       }
+      onPress={onPress}
     />
   )
 }

@@ -10,9 +10,10 @@ interface TxSettingsCardProps {
   bordered?: boolean
   inQueue?: boolean
   executionInfo?: Transaction['executionInfo']
+  onPress: (tx: Transaction) => void
 }
 
-export function TxSettingsCard({ txInfo, bordered, executionInfo, inQueue }: TxSettingsCardProps) {
+export function TxSettingsCard({ txInfo, bordered, executionInfo, inQueue, onPress }: TxSettingsCardProps) {
   const isDeleteGuard = txInfo.settingsInfo?.type === SettingsInfoType.DELETE_GUARD
   const label = isDeleteGuard ? 'deleteGuard' : txInfo.dataDecoded.method
 
@@ -23,6 +24,7 @@ export function TxSettingsCard({ txInfo, bordered, executionInfo, inQueue }: TxS
       executionInfo={executionInfo}
       bordered={bordered}
       type="Settings change"
+      onPress={onPress}
       leftNode={
         <Theme name="logo">
           <View backgroundColor="$background" padding="$2" borderRadius={100}>
