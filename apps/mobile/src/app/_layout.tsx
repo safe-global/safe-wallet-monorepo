@@ -65,6 +65,7 @@ function RootLayout() {
                           name="(import-accounts)"
                           options={{ headerShown: false, presentation: 'modal' }}
                         />
+                        <Stack.Screen name="sign-transaction" options={{ headerShown: false }} />
                         <Stack.Screen name="pending-transactions" options={{ headerShown: true, title: '' }} />
                         <Stack.Screen name="notifications" options={{ headerShown: true, title: '' }} />
 
@@ -72,6 +73,14 @@ function RootLayout() {
                         <Stack.Screen name="import-signers" options={{ headerShown: false }} />
 
                         <Stack.Screen name="app-settings" options={{ headerShown: true, title: 'Settings' }} />
+                        <Stack.Screen
+                          name="conflict-transaction-sheet"
+                          options={{
+                            headerShown: false,
+                            presentation: 'transparentModal',
+                            animation: 'fade',
+                          }}
+                        />
                         <Stack.Screen
                           name="accounts-sheet"
                           options={{
@@ -89,11 +98,33 @@ function RootLayout() {
                           }}
                         />
                         <Stack.Screen
+                          name="confirmations-sheet"
+                          options={{
+                            headerShown: false,
+                            presentation: 'transparentModal',
+                            animation: 'fade',
+                          }}
+                        />
+                        <Stack.Screen
+                          name="change-signer-sheet"
+                          options={{
+                            headerShown: false,
+                            presentation: 'transparentModal',
+                            animation: 'fade',
+                          }}
+                        />
+                        <Stack.Screen
                           name="notifications-opt-in"
                           options={{
                             headerShown: false,
                             presentation: 'modal',
                             title: '',
+                          }}
+                        />
+                        <Stack.Screen
+                          name="confirm-transaction"
+                          options={{
+                            title: 'Confirm transaction',
                           }}
                         />
                         <Stack.Screen name="+not-found" />
