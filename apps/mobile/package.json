@@ -85,7 +85,7 @@
     "moti": "^0.29.0",
     "react": "18.3.1",
     "react-dom": "^18.3.1",
-    "react-native": "0.76.3",
+    "react-native": "0.78.0",
     "react-native-collapsible-tab-view": "^8.0.0",
     "react-native-device-crypto": "^0.1.7",
     "react-native-device-info": "^14.0.1",
