@@ -43,7 +43,7 @@ describe('useSign', () => {
     })
 
     await act(async () => {
-      returnedKey = getPrivateKey('userId')
+      returnedKey = await getPrivateKey('userId')
     })
 
     expect(spy).toHaveBeenCalledWith(
