@@ -16,7 +16,7 @@ export function ExecuteForm({ safeAddress, chainId }: ExecuteFormProps) {
   return (
     <YStack justifyContent="center" gap="$4" alignItems="center" paddingHorizontal={'$4'}>
       <Text fontSize="$4" fontWeight={400} width="70%" textAlign="center" color="$textSecondaryLight">
-        The transaction can be executed in the web app only.
+        Transactions can be executed only in the web app at the moment.
       </Text>
 
       <View display="flex" flexDirection="row" alignItems="center" justifyContent="center" gap="$2">
