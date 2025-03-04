@@ -23,8 +23,12 @@ function processHtmlFile(htmlFilePath) {
 
   $('script[src]').each((_, scriptEl) => {
     const scriptSrc = $(scriptEl).attr('src')
-    // Skip external or protocol-based (http/https) scripts:
+    /**
+     * Skip external or protocol-based (http/https) scripts. Currently, no external scripts
+     * are loaded but if that is the case we should fetch those scripts here e.g. via curl
+     */
     if (!scriptSrc || scriptSrc.startsWith('http')) {
+      console.log('Skipping external script', scriptSrc)
       return
     }
 
