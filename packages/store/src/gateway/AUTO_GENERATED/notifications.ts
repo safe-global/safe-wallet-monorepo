@@ -151,6 +151,7 @@ export type RegisterDeviceDto = {
 export const {
   useNotificationsUpsertSubscriptionsV2Mutation,
   useNotificationsGetSafeSubscriptionV2Query,
+  useLazyNotificationsGetSafeSubscriptionV2Query,
   useNotificationsDeleteSubscriptionV2Mutation,
   useNotificationsDeleteDeviceV2Mutation,
   useNotificationsRegisterDeviceV1Mutation,

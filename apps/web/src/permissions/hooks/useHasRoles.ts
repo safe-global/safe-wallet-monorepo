@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
-import type { Role } from '../types'
 import { useRoles } from './useRoles'
 import { intersection, uniq } from 'lodash'
+import type { Role } from '../config'
 
 /**
  * Hook to check if the current user has the given roles.

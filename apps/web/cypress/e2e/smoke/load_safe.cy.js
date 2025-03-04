@@ -9,7 +9,7 @@ let staticSafes = []
 
 const testSafeName = 'Test safe name'
 
-describe('[SMOKE] Load Safe tests', () => {
+describe('[SMOKE] Load Safe tests', { defaultCommandTimeout: 30000 }, () => {
   before(async () => {
     staticSafes = await getSafes(CATEGORIES.static)
   })
@@ -31,6 +31,8 @@ describe('[SMOKE] Load Safe tests', () => {
   })
 
   it('[SMOKE] Verify names cannot have more than 50 characters', () => {
+    // Wait due to re-render issues of the element
+    cy.wait(5000)
     safe.inputName(main.generateRandomString(51))
     safe.verifyNameLengthErrorMessage()
   })

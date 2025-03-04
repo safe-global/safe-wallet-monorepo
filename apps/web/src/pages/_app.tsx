@@ -100,16 +100,16 @@ export const AppProviders = ({ children }: { children: ReactNode | ReactNode[] }
   )
 }
 
-interface WebCoreAppProps extends AppProps {
+interface SafeWalletAppProps extends AppProps {
   emotionCache?: EmotionCache
 }
 
-const WebCoreApp = ({
+const SafeWalletApp = ({
   Component,
   pageProps,
   router,
   emotionCache = clientSideEmotionCache,
-}: WebCoreAppProps): ReactElement => {
+}: SafeWalletAppProps): ReactElement => {
   const safeKey = useChangedValue(router.query.safe?.toString())
 
   return (
@@ -148,4 +148,4 @@ const WebCoreApp = ({
   )
 }
 
-export default WebCoreApp
+export default SafeWalletApp

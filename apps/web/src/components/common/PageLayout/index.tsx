@@ -12,6 +12,7 @@ import { TxModalContext } from '@/components/tx-flow'
 import BatchSidebar from '@/components/batch/BatchSidebar'
 import { TemporaryDialog } from '@/components/common/TemporaryDialog'
 import ExternalLink from '../ExternalLink'
+import { IS_PRODUCTION } from '@/config/constants'
 
 const StickyBanner = () => (
   <Alert severity="warning">
@@ -48,9 +49,11 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
         })}
       >
         <div className={css.content}>
-          <div className={css.sticky}>
-            <StickyBanner />
-          </div>
+          {IS_PRODUCTION && (
+            <div className={css.sticky}>
+              <StickyBanner />
+            </div>
+          )}
 
           <SafeLoadingError>{children}</SafeLoadingError>
         </div>
@@ -59,7 +62,7 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
 
         <Footer />
 
-        <TemporaryDialog />
+        {IS_PRODUCTION && <TemporaryDialog />}
       </div>
     </>
   )

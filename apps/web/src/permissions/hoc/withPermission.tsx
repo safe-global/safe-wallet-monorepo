@@ -1,4 +1,4 @@
-import type { Permission, PermissionProps } from '../types'
+import type { Permission, PermissionProps } from '../config'
 import { useHasPermission } from '../hooks/useHasPermission'
 
 type WrappingComponentProps<

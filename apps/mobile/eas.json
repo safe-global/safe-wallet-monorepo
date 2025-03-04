@@ -16,12 +16,12 @@
     "development": {
       "extends": "base",
       "environment": "development",
-      "developmentClient": true,
+      "autoIncrement": true,
       "env": {
         "APP_VARIANT": "development"
       },
       "android": {
-        "image": "ubuntu-18.04-jdk-11-ndk-r19c"
+        "image": "sdk-52"
       }
     },
     "preview-ios-simulator": {
@@ -61,6 +61,9 @@
     },
     "build-and-maestro-test": {
       "withoutCredentials": true,
+      "env": {
+        "RN_SRC_EXT": "e2e.ts,e2e.tsx"
+      },
       "config": "build-and-maestro-test.yml",
       "android": {
         "buildType": "apk",
@@ -68,11 +71,21 @@
       },
       "ios": {
         "simulator": true,
-        "image": "latest"
+        "image": "latest",
+        "resourceClass": "large"
       }
     }
   },
   "submit": {
+    "development": {
+      "ios": {
+        "ascAppId": "6741803832"
+      },
+      "android": {
+        "applicationId": "global.safe.mobileapp.dev",
+        "releaseStatus": "draft"
+      }
+    },
     "production": {
       "ios": {
         "ascAppId": "6738784305"

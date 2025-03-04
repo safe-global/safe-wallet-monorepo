@@ -81,7 +81,6 @@ describe('Transaction queue tests', { defaultCommandTimeout: 30000 }, () => {
       swapsHistory.sellOrder,
       swapsHistory.sell,
       swapsHistory.executionNeeded,
-      orderDetails.expiry12Months,
       dai,
       eq,
     ])

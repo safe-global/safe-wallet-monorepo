@@ -30,7 +30,7 @@ describe('Assets tests', () => {
     assets.clickOnSendBtn(0)
   })
 
-  it('[SMOKE] Verify that Token list dropdown down options show/hide spam tokens', () => {
+  it('Verify that Token list dropdown shows options "Default tokens" and "All tokens"', () => {
     let spamTokens = [
       assets.currencyAave,
       assets.currencyTestTokenA,
@@ -40,7 +40,10 @@ describe('Assets tests', () => {
       assets.currencyDaiCap,
     ]
 
+    assets.selectTokenList(assets.tokenListOptions.default)
+    main.verifyValuesExist(assets.tokenListTable, [constants.tokenNames.sepoliaEther])
     main.verifyValuesDoNotExist(assets.tokenListTable, spamTokens)
+
     assets.selectTokenList(assets.tokenListOptions.allTokens)
     spamTokens.push(constants.tokenNames.sepoliaEther)
     main.verifyValuesExist(assets.tokenListTable, spamTokens)

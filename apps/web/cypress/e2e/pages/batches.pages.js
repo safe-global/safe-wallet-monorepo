@@ -68,6 +68,10 @@ function addToBatchButton() {
   cy.get('button').contains(addToBatchBtn).click()
 }
 
+export function checkAddToBatchBtnDisabled() {
+  cy.get('button').contains(addToBatchBtn).should('be.disabled')
+}
+
 export function openBatchtransactionsModal() {
   cy.get(batchTxTopBar).should('be.visible').click()
   cy.contains(batchedTransactionsStr).should('be.visible')

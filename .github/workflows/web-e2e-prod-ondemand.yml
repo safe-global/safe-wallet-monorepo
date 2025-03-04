@@ -3,7 +3,7 @@ name: Web Production health check tests
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 4 * * 1-5'
+    - cron: '30 5 * * 1-5'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

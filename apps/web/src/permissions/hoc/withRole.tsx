@@ -1,4 +1,4 @@
-import type { Role } from '../types'
+import type { Role } from '../config'
 import { useHasRoles } from '../hooks/useHasRoles'
 
 type WrappingComponentProps<C extends React.ComponentType<any>> = React.ComponentProps<C> & {

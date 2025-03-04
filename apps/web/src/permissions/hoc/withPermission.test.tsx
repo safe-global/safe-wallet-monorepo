@@ -2,7 +2,7 @@ import React from 'react'
 import { render } from '@/tests/test-utils'
 import { withPermission } from './withPermission'
 import * as useHasPermission from '../hooks/useHasPermission'
-import { Permission } from '../types'
+import { Permission } from '../config'
 
 describe('withPermission', () => {
   const useHasPermissionSpy = jest.spyOn(useHasPermission, 'useHasPermission')

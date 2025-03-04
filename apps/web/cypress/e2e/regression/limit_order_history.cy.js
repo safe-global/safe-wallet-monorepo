@@ -3,18 +3,13 @@ import * as main from '../pages/main.page.js'
 import * as swaps from '../pages/swaps.pages.js'
 import * as create_tx from '../pages/create_tx.pages.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
-import * as wallet from '../../support/utils/wallet.js'
 import * as swaps_data from '../../fixtures/swaps_data.json'
-
-const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
-const signer = walletCredentials.OWNER_4_PRIVATE_KEY
+import * as data from '../../fixtures/txhistory_data_data.json'
 
 let staticSafes = []
 
-let iframeSelector
-
 const swapsHistory = swaps_data.type.history
-const swapOrder = swaps_data.type.orderDetails
+const typeGeneral = data.type.general
 
 describe('Limit order history tests', { defaultCommandTimeout: 30000 }, () => {
   before(async () => {
@@ -40,4 +35,20 @@ describe('Limit order history tests', { defaultCommandTimeout: 30000 }, () => {
     create_tx.clickOnAdvancedDetails()
     create_tx.verifyAdvancedDetails([swapsHistory.gGpV2, swapsHistory.actionPreSignatureG])
   })
+
+  it(
+    'Verify that limit order tx created via CowSwap safe app has decoding in the history',
+    { defaultCommandTimeout: 30000 },
+    () => {
+      cy.visit(constants.transactionUrl + swaps.limitOrderSafe + swaps.swapTxs.sellLimitOrderFilled)
+      const usdc = swaps.createRegex(swapsHistory.forAtLeastFullUSDT, 'USDT')
+      const eq = swaps.createRegex(swapsHistory.USDTeqUSDC, 'USDC')
+
+      create_tx.verifySummaryByName(swapsHistory.limitorder_title, null, [typeGeneral.statusOk])
+      main.verifyElementsExist([create_tx.altImgUsdc, create_tx.altImgUsdt], create_tx.altImgLimitOrder)
+      create_tx.verifyExpandedDetails([swapsHistory.sellOrder, swapsHistory.sell, usdc, eq, swapsHistory.filled])
+      create_tx.clickOnAdvancedDetails()
+      create_tx.verifyAdvancedDetails([swapsHistory.gGpV2, swapsHistory.actionPreSignatureG])
+    },
+  )
 })

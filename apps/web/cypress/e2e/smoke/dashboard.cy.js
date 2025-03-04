@@ -1,5 +1,6 @@
 import * as constants from '../../support/constants'
 import * as dashboard from '../pages/dashboard.pages'
+import * as main from '../pages/main.page.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 
 let staticSafes = []
@@ -40,6 +41,8 @@ describe('[SMOKE] Dashboard tests', { defaultCommandTimeout: 60000 }, () => {
   })
 
   it('[SMOKE] Verify that the last created tx in conflicting tx is showed in the widget', () => {
+    cy.get(dashboard.pendingTxWidget, { timeout: 30000 }).should('be.visible')
+    main.verifyElementsCount(dashboard.pendingTxItem, 1)
     dashboard.verifyDataInPendingTx(txData)
   })
 

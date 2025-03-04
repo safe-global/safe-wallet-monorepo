@@ -1,7 +1,8 @@
 import NextLink from 'next/link'
-import { Typography, Box, Grid, Paper, Link, Alert } from '@mui/material'
+import { Typography, Box, Grid, Paper, Link } from '@mui/material'
 import semverSatisfies from 'semver/functions/satisfies'
 import type { ReactElement } from 'react'
+import classnames from 'classnames'
 
 import EthHashInfo from '@/components/common/EthHashInfo'
 import useSafeInfo from '@/hooks/useSafeInfo'
@@ -11,6 +12,7 @@ import { useTxBuilderApp } from '@/hooks/safe-apps/useTxBuilderApp'
 import { useCompatibilityFallbackHandlerDeployments } from '@/hooks/useCompatibilityFallbackHandlerDeployments'
 import { useIsOfficialFallbackHandler } from '@/hooks/useIsOfficialFallbackHandler'
 import { useIsTWAPFallbackHandler } from '@/features/swap/hooks/useIsTWAPFallbackHandler'
+import css from '../TransactionGuards/styles.module.css'
 
 const FALLBACK_HANDLER_VERSION = '>=1.1.1'
 
@@ -98,18 +100,15 @@ export const FallbackHandler = (): ReactElement | null => {
               <ExternalLink href={HelpCenterArticle.FALLBACK_HANDLER}>here</ExternalLink>
             </Typography>
 
-            <Alert
-              severity={!hasFallbackHandler ? 'warning' : isOfficial || isTWAPFallbackHandler ? 'success' : 'info'}
-              icon={false}
-              sx={{ mt: 2 }}
+            <Box
+              className={classnames(css.guardDisplay, {
+                [css.warning]: !hasFallbackHandler,
+                [css.info]: hasFallbackHandler && !isOfficial,
+              })}
+              sx={{ display: 'block !important' }}
             >
               {warning && (
-                <Typography
-                  variant="body2"
-                  sx={{
-                    mb: hasFallbackHandler ? 1 : 0,
-                  }}
-                >
+                <Typography variant="body2" width="100%" mb={hasFallbackHandler ? 1 : 0}>
                   {warning}
                 </Typography>
               )}
@@ -124,7 +123,7 @@ export const FallbackHandler = (): ReactElement | null => {
                   hasExplorer
                 />
               )}
-            </Alert>
+            </Box>
           </Box>
         </Grid>
       </Grid>

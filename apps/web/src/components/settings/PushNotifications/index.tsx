@@ -30,7 +30,7 @@ import { AppRoutes } from '@/config/routes'
 import CheckWalletWithPermission from '@/components/common/CheckWalletWithPermission'
 import { useIsMac } from '@/hooks/useIsMac'
 import ExternalLink from '@/components/common/ExternalLink'
-import { Permission } from '@/permissions/types'
+import { Permission } from '@/permissions/config'
 
 import css from './styles.module.css'
 import NetworkWarning from '@/components/new-safe/create/NetworkWarning'

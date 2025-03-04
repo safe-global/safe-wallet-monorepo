@@ -1,5 +1,5 @@
 import { act, renderHook } from '@/src/tests/test-utils'
-import { asymmetricKey, keychainGenericPassword, useSign } from './useSign'
+import { useSign } from './useSign'
 import { HDNodeWallet, Wallet } from 'ethers'
 import * as Keychain from 'react-native-keychain'
 import DeviceCrypto from 'react-native-device-crypto'
@@ -13,18 +13,23 @@ describe('useSign', () => {
     const encryptSpy = jest.spyOn(DeviceCrypto, 'encrypt')
 
     await act(async () => {
-      await result.current.storePrivateKey(privateKey)
+      await result.current.storePrivateKey('userId', privateKey)
     })
 
-    expect(asymmetricKeySpy).toHaveBeenCalledWith(asymmetricKey, { accessLevel: 2, invalidateOnNewBiometry: true })
-    expect(encryptSpy).toHaveBeenCalledWith(asymmetricKey, privateKey, {
+    expect(asymmetricKeySpy).toHaveBeenCalledWith('userId', { accessLevel: 2, invalidateOnNewBiometry: true })
+    expect(encryptSpy).toHaveBeenCalledWith('userId', privateKey, {
       biometryTitle: 'Authenticate',
       biometrySubTitle: 'Saving key',
       biometryDescription: 'Please authenticate yourself',
     })
     expect(spy).toHaveBeenCalledWith(
-      keychainGenericPassword,
+      'signer_address',
       JSON.stringify({ encryptyedPassword: 'encryptedText', iv: `${privateKey}000` }),
+      {
+        accessControl: 'BIOMETRY_CURRENT_SET_OR_DEVICE_PASSCODE',
+        accessible: 'WHEN_UNLOCKED_THIS_DEVICE_ONLY',
+        service: 'signer_address_userId',
+      },
     )
   })
 
@@ -36,16 +41,21 @@ describe('useSign', () => {
 
     // To generate the iv and wait till the hook re-renders
     await act(async () => {
-      await result.current.storePrivateKey(privateKey)
+      await result.current.storePrivateKey('userId', privateKey)
     })
 
     await act(async () => {
-      returnedKey = await result.current.getPrivateKey()
+      returnedKey = await result.current.getPrivateKey('userId')
     })
 
     expect(spy).toHaveBeenCalledWith(
-      'safeuser',
+      'signer_address',
       JSON.stringify({ encryptyedPassword: 'encryptedText', iv: `${privateKey}000` }),
+      {
+        accessControl: 'BIOMETRY_CURRENT_SET_OR_DEVICE_PASSCODE',
+        accessible: 'WHEN_UNLOCKED_THIS_DEVICE_ONLY',
+        service: 'signer_address_userId',
+      },
     )
     expect(returnedKey).toBe(privateKey)
   })

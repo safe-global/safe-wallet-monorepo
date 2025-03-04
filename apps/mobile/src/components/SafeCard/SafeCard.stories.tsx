@@ -21,9 +21,8 @@ export const Default: Story = {
   args: {
     title: 'Welcome to Safe',
     description: 'Add a new owner to your Safe',
-    icon: <SafeFontIcon name="safe" size={24} />,
-    image: Seed,
   },
+  render: (args) => <SafeCard {...args} icon={<SafeFontIcon name="safe" size={24} />} image={Seed} />,
 }
 
 export const OnlyText: Story = {
@@ -37,6 +36,10 @@ export const withChildren: Story = {
   args: {
     title: 'Welcome to Safe',
     description: 'Add a new owner to your Safe',
-    children: <Text marginTop={'$4'}>Hello from children</Text>,
   },
+  render: (args) => (
+    <SafeCard {...args}>
+      <Text marginTop={'$4'}>Hello from children</Text>
+    </SafeCard>
+  ),
 }

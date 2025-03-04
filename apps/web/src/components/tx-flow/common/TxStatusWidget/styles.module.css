@@ -39,6 +39,10 @@
   background-color: var(--color-background-paper);
 }
 
+[data-theme='light'] .status :global .MuiListItemIcon-root {
+  color: var(--color-secondary-dark);
+}
+
 .incomplete > * {
   color: var(--color-text-secondary) !important;
 }

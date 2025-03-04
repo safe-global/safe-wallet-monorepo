@@ -53,9 +53,13 @@ export const OptIn: React.FC<OptInProps> = React.memo(
         {image && <Image style={styles.image} source={image} />}
 
         <FloatingContainer sticky testID="notifications-opt-in-cta-buttons">
-          <SafeButton onPress={ctaButton.onPress} label={ctaButton.label} />
+          <SafeButton onPress={ctaButton.onPress} marginBottom={'$3'} testID={'opt-in-primary-button'}>
+            {ctaButton.label}
+          </SafeButton>
           {secondaryButton && (
-            <SafeButton variant="secondary" onPress={secondaryButton.onPress} label={secondaryButton.label} />
+            <SafeButton text onPress={secondaryButton.onPress} testID={'opt-in-secondary-button'}>
+              {secondaryButton.label}
+            </SafeButton>
           )}
         </FloatingContainer>
       </View>

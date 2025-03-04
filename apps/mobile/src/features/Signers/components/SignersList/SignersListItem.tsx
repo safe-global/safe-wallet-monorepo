@@ -1,6 +1,5 @@
 import React from 'react'
-import { shortenAddress } from '@/src/utils/formatters'
-import { MenuView } from '@react-native-menu/menu'
+import { MenuView, NativeActionEvent } from '@react-native-menu/menu'
 import { useSignersActions } from './hooks/useSignersActions'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { SignersCard } from '@/src/components/transactions-list/Card/SignersCard'
@@ -8,7 +7,7 @@ import { AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transacti
 import { SignerSection } from './SignersList'
 import { View } from 'tamagui'
 import { TouchableOpacity } from 'react-native-gesture-handler'
-import { useRouter } from 'expo-router'
+import { useLocalSearchParams, useRouter } from 'expo-router'
 
 interface SignersListItemProps {
   item: AddressInfo
@@ -18,6 +17,8 @@ interface SignersListItemProps {
 
 function SignersListItem({ item, index, signersGroup }: SignersListItemProps) {
   const router = useRouter()
+  const local = useLocalSearchParams<{ safeAddress: string; chainId: string }>()
+
   const actions = useSignersActions()
   const isLastItem = signersGroup.some((section) => section.data.length === index + 1)
 
@@ -25,8 +26,18 @@ function SignersListItem({ item, index, signersGroup }: SignersListItemProps) {
     router.push(`/signers/${item.value}`)
   }
 
+  const onPressMenuAction = ({ nativeEvent }: NativeActionEvent) => {
+    if (nativeEvent.event === 'import') {
+      let url = '/import-signers'
+      if (local.safeAddress && local.chainId) {
+        url = `/import-signers?safeAddress=${local.safeAddress}&chainId=${local.chainId}`
+      }
+      router.push(url as '/import-signers')
+    }
+  }
+
   return (
-    <TouchableOpacity onPress={onPress}>
+    <TouchableOpacity onPress={onPress} testID={`signer-${item.value}`}>
       <View
         backgroundColor={'$backgroundPaper'}
         borderTopRightRadius={index === 0 ? '$4' : undefined}
@@ -35,10 +46,10 @@ function SignersListItem({ item, index, signersGroup }: SignersListItemProps) {
         borderBottomLeftRadius={isLastItem ? '$4' : undefined}
       >
         <SignersCard
-          name={item.name ?? shortenAddress(item.value)}
+          name={item.name as string}
           address={item.value as `0x${string}`}
           rightNode={
-            <MenuView onPressAction={console.log} actions={actions}>
+            <MenuView onPressAction={onPressMenuAction} actions={actions}>
               <SafeFontIcon name="options-horizontal" />
             </MenuView>
           }

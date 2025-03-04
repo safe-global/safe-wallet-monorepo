@@ -1,10 +1,9 @@
 import type { Preview } from '@storybook/react'
 import { NavigationIndependentTree } from '@react-navigation/native'
 import { SafeThemeProvider } from '@/src/theme/provider/safeTheme'
-import { View } from 'react-native'
 import { SafeToastProvider } from '@/src/theme/provider/toastProvider'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
-import { PortalProvider } from 'tamagui'
+import { PortalProvider, View } from 'tamagui'
 
 const preview: Preview = {
   parameters: {
@@ -24,7 +23,7 @@ const preview: Preview = {
             <SafeAreaProvider>
               <SafeThemeProvider>
                 <SafeToastProvider>
-                  <View style={{ padding: 16, flex: 1 }}>
+                  <View style={{ padding: 16, flex: 1 }} backgroundColor={'$background'}>
                     <Story />
                   </View>
                 </SafeToastProvider>

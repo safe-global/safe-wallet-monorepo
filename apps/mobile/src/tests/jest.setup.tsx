@@ -2,6 +2,7 @@ import React from 'react'
 
 import '@testing-library/react-native/extend-expect'
 import mockRNDeviceInfo from 'react-native-device-info/jest/react-native-device-info-mock'
+import mockSafeAreaContext from 'react-native-safe-area-context/jest/mock'
 
 import { server } from './server'
 
@@ -14,6 +15,12 @@ jest.useFakeTimers()
 jest.mock('expo-font', () => ({
   useFonts: () => [true],
   isLoaded: () => true,
+}))
+
+jest.mock('@/src/navigation/useScrollableHeader', () => ({
+  useScrollableHeader: () => ({
+    handleScroll: jest.fn(),
+  }),
 }))
 
 jest.mock('react-native-mmkv', () => ({
@@ -58,6 +65,12 @@ jest.mock('react-native-keychain', () => {
       password = null
       Promise.resolve(null)
     }),
+    ACCESS_CONTROL: {
+      BIOMETRY_CURRENT_SET_OR_DEVICE_PASSCODE: 'BIOMETRY_CURRENT_SET_OR_DEVICE_PASSCODE',
+    },
+    ACCESSIBLE: {
+      WHEN_UNLOCKED_THIS_DEVICE_ONLY: 'WHEN_UNLOCKED_THIS_DEVICE_ONLY',
+    },
   }
 })
 
@@ -187,6 +200,8 @@ jest.mock('@react-native-clipboard/clipboard', () => ({
   setString: jest.fn(),
   getString: jest.fn(),
 }))
+
+jest.mock('react-native-safe-area-context', () => mockSafeAreaContext)
 
 beforeAll(() => server.listen())
 afterEach(() => server.resetHandlers())

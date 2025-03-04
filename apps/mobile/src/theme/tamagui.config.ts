@@ -1,9 +1,12 @@
 import { createTamagui } from 'tamagui'
 import { createDmSansFont } from '@tamagui/font-dm-sans'
 import { badgeTheme } from '@/src/components/Badge/theme'
+import { badgeTheme as NetworkBadgeTheme } from '@/src/components/NetworkBadge/theme'
+import { navbarTheme } from '@/src/features/Assets/components/Navbar/theme'
 import { tokens } from '@/src/theme/tokens'
 import { createAnimations } from '@tamagui/animations-moti'
 import { inputTheme } from '../components/SafeInput/theme'
+import { safeTabTheme } from '@/src/components/SafeTab/theme'
 
 const DmSansFont = createDmSansFont({
   face: {
@@ -16,24 +19,32 @@ export const config = createTamagui({
   fonts: {
     body: DmSansFont,
     heading: DmSansFont,
+    button: DmSansFont,
   },
   themes: {
     light: {
-      background: tokens.color.backgroundMainLight,
+      background: tokens.color.backgroundDefaultLight,
+      backgroundSecondary: tokens.color.backgroundSecondaryLight,
       backgroundPaper: tokens.color.backgroundPaperLight,
       backgroundHover: tokens.color.backgroundLightLight,
       backgroundPress: tokens.color.primaryLightLight,
       backgroundFocus: tokens.color.backgroundMainLight,
       backgroundStrong: tokens.color.primaryDarkLight,
+      backgroundDisabled: tokens.color.backgroundDisabledLight,
       backgroundTransparent: 'transparent',
       backgroundSkeleton: tokens.color.backgroundSkeletonLight,
       color: tokens.color.textPrimaryLight,
       primary: tokens.color.primaryMainLight,
       colorHover: tokens.color.textSecondaryLight,
       colorSecondary: tokens.color.textSecondaryLight,
+      colorLight: tokens.color.primaryLightLight,
       borderLight: tokens.color.borderLightLight,
       error: tokens.color.errorMainLight,
+      success: tokens.color.successMainLight,
       errorDark: tokens.color.errorDarkDark,
+      errorLight: tokens.color.errorLightLight,
+      errorBackground: tokens.color.errorBackgroundLight,
+      contrast: tokens.color.textContrastLight,
     },
     light_label: {
       color: tokens.color.textSecondaryLight,
@@ -51,6 +62,9 @@ export const config = createTamagui({
     },
     ...badgeTheme,
     ...inputTheme,
+    ...NetworkBadgeTheme,
+    ...navbarTheme,
+    ...safeTabTheme,
     light_success: {
       background: tokens.color.successBackgroundLight,
       color: tokens.color.successMainLight,
@@ -86,30 +100,46 @@ export const config = createTamagui({
       background: tokens.color.logoBackgroundDark,
     },
     light_container: {
-      background: tokens.color.backgroundPaperLight,
+      background: tokens.color.backgroundDefaultLight,
+    },
+    dark_container: {
+      background: tokens.color.backgroundPaperDark,
+    },
+    light_settings: {
+      background: tokens.color.backgroundDefaultLight,
+    },
+    dark_settings: {
+      background: tokens.color.backgroundPaperDark,
     },
     light_safe_list: {
-      background: tokens.color.backgroundDefaultLight,
+      background: tokens.color.backgroundPaperLight,
     },
     dark_safe_list: {
       background: tokens.color.backgroundDefaultDark,
     },
     dark: {
       background: tokens.color.backgroundDefaultDark,
+      backgroundSecondary: tokens.color.backgroundSecondaryDark,
       backgroundPaper: tokens.color.backgroundPaperDark,
       backgroundHover: tokens.color.backgroundLightDark,
       backgroundPress: tokens.color.primaryLightDark,
       backgroundFocus: tokens.color.backgroundMainDark,
       backgroundStrong: tokens.color.primaryDarkDark,
       backgroundTransparent: 'transparent',
-      backgroundSkeleton: tokens.color.backgroundSkeletonLight,
+      backgroundDisabled: tokens.color.backgroundDisabledDark,
+      backgroundSkeleton: tokens.color.backgroundSkeletonDark,
       color: tokens.color.textPrimaryDark,
+      colorLight: tokens.color.primaryLightDark,
       primary: tokens.color.primaryMainDark,
       borderLight: tokens.color.borderLightDark,
       colorHover: tokens.color.textSecondaryDark,
       colorSecondary: tokens.color.textSecondaryDark,
       error: tokens.color.errorMainDark,
       errorDark: tokens.color.errorDarkDark,
+      errorLight: tokens.color.errorLightDark,
+      errorBackground: tokens.color.errorBackgroundDark,
+      success: tokens.color.successMainLight,
+      contrast: tokens.color.textContrastDark,
     },
   },
   tokens,

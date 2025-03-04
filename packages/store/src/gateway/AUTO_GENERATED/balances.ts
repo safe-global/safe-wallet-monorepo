@@ -39,7 +39,7 @@ export type BalancesGetSupportedFiatCodesV1ApiResponse = /** status 200  */ stri
 export type BalancesGetSupportedFiatCodesV1ApiArg = void
 export type Token = {
   address: string
-  decimals?: number
+  decimals?: number | null
   logoUri: string
   name: string
   symbol: string
@@ -55,4 +55,9 @@ export type Balances = {
   fiatTotal: string
   items: Balance[]
 }
-export const { useBalancesGetBalancesV1Query, useBalancesGetSupportedFiatCodesV1Query } = injectedRtkApi
+export const {
+  useBalancesGetBalancesV1Query,
+  useLazyBalancesGetBalancesV1Query,
+  useBalancesGetSupportedFiatCodesV1Query,
+  useLazyBalancesGetSupportedFiatCodesV1Query,
+} = injectedRtkApi

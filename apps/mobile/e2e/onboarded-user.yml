@@ -1,0 +1,59 @@
+appId: global.safe.mobileapp
+---
+- launchApp:
+    appId: 'global.safe.mobileapp'
+    clearState: true
+    clearKeychain: true
+- runFlow:
+    when:
+      visible:
+        text: 'http.*'
+    commands:
+      - tapOn: 'http.*'
+- runFlow:
+    when:
+      visible: 'Continue'
+    commands:
+      - tapOn: 'Continue'
+- runFlow:
+    when:
+      visible: 'Reload'
+    commands:
+      - tapOn: 'Reload'
+- tapOn:
+    id: 'e2eOnboardedAccount'
+- tapOn:
+    id: 'opt-in-secondary-button'
+- assertVisible:
+    id: 'home-tab'
+- tapOn:
+    id: 'transactions-tab'
+- assertVisible:
+    id: 'tx-history-list'
+- tapOn: 'Messages'
+- assertVisible:
+    id: 'messages-tab-content'
+- tapOn: 'Settings, tab, 3 of 3'
+- assertVisible: '0x2f3e...Fbb6'
+- tapOn: ' Signers 3 '
+- assertVisible: 'Signers'
+- tapOn:
+    id: 'import-signer-button'
+- assertVisible: 'Import a signer'
+- tapOn:
+    id: 'seed'
+- tapOn: 'Paste here or type...'
+- inputText: 'ffc4b004b8746a7ce547ffa644686ca660efcf7a5a39910c714f922d7ad9bcc8'
+- tapOn:
+    point: '50%,51%'
+- assertVisible:
+    id: 'import-signer-button'
+- tapOn:
+    id: 'import-signer-button'
+- assertVisible:
+    id: 'import-success'
+- tapOn:
+    id: 'import-success-continue'
+- assertVisible:
+    id: 'signers-screen'
+- assertVisible: 'Imported signers'

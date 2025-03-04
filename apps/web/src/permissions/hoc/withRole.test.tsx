@@ -2,7 +2,7 @@ import React from 'react'
 import { render } from '@/tests/test-utils'
 import { withRole } from './withRole'
 import * as useHasRoles from '../hooks/useHasRoles'
-import { Role } from '../types'
+import { Role } from '../config'
 
 describe('withRole', () => {
   const useHasRolesSpy = jest.spyOn(useHasRoles, 'useHasRoles')

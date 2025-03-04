@@ -1,6 +1,5 @@
 import type { DataDecoded, TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
 import { Box } from '@mui/material'
-import useSafeInfo from '@/hooks/useSafeInfo'
 import extractTxInfo from '@/services/tx/extractTxInfo'
 import { isCustomTxInfo, isNativeTokenTransfer, isTransferTxInfo } from '@/utils/transaction-guards'
 import SingleTxDecoded from '@/components/transactions/TxDetails/TxData/DecodedData/SingleTxDecoded'
@@ -11,7 +10,6 @@ import { type AccordionProps } from '@mui/material/Accordion/Accordion'
 
 const DecodedTxs = ({ txs }: { txs: TransactionDetails[] | undefined }) => {
   const [openMap, setOpenMap] = useState<Record<number, boolean>>()
-  const { safeAddress } = useSafeInfo()
 
   if (!txs) return null
 
@@ -30,7 +28,7 @@ const DecodedTxs = ({ txs }: { txs: TransactionDetails[] | undefined }) => {
             }))
           }
 
-          const { txParams } = extractTxInfo(transaction, safeAddress)
+          const { txParams } = extractTxInfo(transaction)
 
           let decodedDataParams: DataDecoded = {
             method: '',

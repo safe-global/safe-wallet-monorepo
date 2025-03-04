@@ -1,7 +1,8 @@
 {
   "type": {
     "general": {
-      "statusOk": "Success"
+      "statusOk": "Success",
+      "statusExpired": "Expired"
     },
     "sideActions": {
       "created": "Created",
@@ -163,7 +164,9 @@
       "token": "Token",
       "tokenName": "ETH",
       "tokenAlt": "ETH",
-      "baseGas": "baseGas"
+      "baseGas": "baseGas",
+      "operation": "Operation",
+      "zero_call": "0 (call)"
     },
     "spendingLimits": {
       "title": "Batch",

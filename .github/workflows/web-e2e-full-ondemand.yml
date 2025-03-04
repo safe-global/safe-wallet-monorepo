@@ -3,7 +3,7 @@ name: Web Full Regression on demand tests
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 4 * * 1-5'
+    - cron: '0 6 * * 1-5'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

@@ -119,7 +119,6 @@ export const createRejectTx = async (nonce: number): Promise<SafeTransaction> =>
  */
 export const createExistingTx = async (
   chainId: string,
-  safeAddress: string,
   txId: string,
   txDetails?: TransactionDetails,
 ): Promise<SafeTransaction> => {
@@ -127,7 +126,7 @@ export const createExistingTx = async (
   txDetails = txDetails || (await getTransactionDetails(chainId, txId))
 
   // Convert them to the Core SDK tx params
-  const { txParams, signatures } = extractTxInfo(txDetails, safeAddress)
+  const { txParams, signatures } = extractTxInfo(txDetails)
 
   // Create a tx and add pre-approved signatures
   const safeTx = await createTx(txParams, txParams.nonce)

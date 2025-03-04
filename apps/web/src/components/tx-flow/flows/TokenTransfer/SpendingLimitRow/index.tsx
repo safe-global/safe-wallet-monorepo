@@ -13,7 +13,7 @@ import { TokenAmountFields } from '@/components/common/TokenAmountInput'
 import { useContext, useEffect } from 'react'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { useHasPermission } from '@/permissions/hooks/useHasPermission'
-import { Permission } from '@/permissions/types'
+import { Permission } from '@/permissions/config'
 
 const SpendingLimitRow = ({
   availableAmount,
@@ -24,7 +24,9 @@ const SpendingLimitRow = ({
 }) => {
   const { control, trigger, resetField } = useFormContext()
   const canCreateStandardTx = useHasPermission(Permission.CreateTransaction)
-  const canCreateSpendingLimitTx = useHasPermission(Permission.CreateSpendingLimitTransaction, { token: selectedToken })
+  const canCreateSpendingLimitTx = useHasPermission(Permission.CreateSpendingLimitTransaction, {
+    tokenAddress: selectedToken?.address,
+  })
   const { setNonceNeeded } = useContext(SafeTxContext)
 
   const formattedAmount = safeFormatUnits(availableAmount, selectedToken?.decimals)

@@ -16,12 +16,12 @@ export function TxShareBlock({ txId }: { txId: string }): ReactElement | null {
   }
 
   return (
-    <Paper className={css.wrapper}>
+    <Paper data-testid="share-block" className={css.wrapper}>
       <Accordion className={css.accordion} onChange={onExpand}>
         <AccordionSummary expandIcon={<ExpandMoreIcon />} className={css.summary}>
           <Typography className={css.header}>Share link with other signers</Typography>
         </AccordionSummary>
-        <AccordionDetails className={css.details}>
+        <AccordionDetails data-testid="share-block-details" className={css.details}>
           If signers have previously subscribed to notifications, they will be notified about signing this transaction.
           You can also share the link with them to speed up the process.
         </AccordionDetails>
@@ -29,6 +29,7 @@ export function TxShareBlock({ txId }: { txId: string }): ReactElement | null {
       <div className={css.copy}>
         <TxShareLink id={txId} eventLabel="share-block">
           <Button
+            data-testid="copy-link-btn"
             variant="outlined"
             size="compact"
             startIcon={<SvgIcon component={ShareIcon} inheritViewBox fontSize="small" className={css.icon} />}

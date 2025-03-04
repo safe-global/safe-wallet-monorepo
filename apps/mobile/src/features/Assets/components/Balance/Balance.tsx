@@ -2,59 +2,43 @@ import React from 'react'
 import { Spinner, View } from 'tamagui'
 
 import { Alert } from '@/src/components/Alert'
-import { Dropdown } from '@/src/components/Dropdown'
+import { DropdownLabel } from '@/src/components/Dropdown'
 import { Fiat } from '@/src/components/Fiat'
-import { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 
-import { ChainItems } from './ChainItems'
 import { ChainsDisplay } from '@/src/components/ChainsDisplay'
-import { selectChainById } from '@/src/store/chains'
-import { useSelector } from 'react-redux'
-import { RootState } from '@/src/store'
+import { useRouter } from 'expo-router'
 
 interface BalanceProps {
   activeChainId: string
-  data: SafeOverview[]
   isLoading: boolean
   chains: Chain[]
-  onChainChange: (chainId: string) => void
+  balanceAmount: string
+  chainName: string
 }
 
-export function Balance({ activeChainId, data, chains, isLoading, onChainChange }: BalanceProps) {
-  const balance = data?.find((chain) => chain.chainId === activeChainId)
-  const activeChain = useSelector((state: RootState) => selectChainById(state, activeChainId))
+export function Balance({ activeChainId, chains, isLoading, balanceAmount, chainName }: BalanceProps) {
+  const router = useRouter()
 
   return (
     <View>
-      <View marginBottom="$8">
+      <View marginBottom="$4">
         {activeChainId && (
-          <Dropdown<SafeOverview>
-            label={activeChain?.chainName}
-            dropdownTitle="Select network:"
-            leftNode={<ChainsDisplay activeChainId={activeChainId} chains={chains} max={1} />}
-            items={data}
-            keyExtractor={({ item }) => item.chainId}
-            renderItem={({ item, onClose }) => (
-              <ChainItems
-                onSelect={(chainId: string) => {
-                  onChainChange(chainId)
-                  onClose()
-                }}
-                activeChain={activeChain}
-                fiatTotal={item.fiatTotal}
-                chains={chains}
-                chainId={item.chainId}
-                key={item.chainId}
-              />
-            )}
-          />
+          <View paddingBottom={'$4'}>
+            <DropdownLabel
+              label={chainName}
+              leftNode={<ChainsDisplay activeChainId={activeChainId} chains={chains} max={1} />}
+              onPress={() => {
+                router.push('/networks-sheet')
+              }}
+            />
+          </View>
         )}
 
         {isLoading ? (
           <Spinner />
-        ) : balance ? (
-          <Fiat baseAmount={balance.fiatTotal} />
+        ) : balanceAmount ? (
+          <Fiat baseAmount={balanceAmount} />
         ) : (
           <Alert type="error" message="error while getting the balance of your wallet" />
         )}

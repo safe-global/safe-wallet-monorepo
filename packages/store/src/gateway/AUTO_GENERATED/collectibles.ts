@@ -50,4 +50,4 @@ export type CollectiblePage = {
   previous?: string | null
   results: Collectible[]
 }
-export const { useCollectiblesGetCollectiblesV2Query } = injectedRtkApi
+export const { useCollectiblesGetCollectiblesV2Query, useLazyCollectiblesGetCollectiblesV2Query } = injectedRtkApi

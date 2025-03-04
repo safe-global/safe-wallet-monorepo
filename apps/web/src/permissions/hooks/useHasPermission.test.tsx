@@ -1,7 +1,7 @@
 import { renderHook } from '@/tests/test-utils'
 import { useHasPermission } from './useHasPermission'
 import * as usePermission from './usePermission'
-import { Permission, Role } from '../types'
+import { Permission, Role } from '../config'
 
 jest.mock('./usePermission')
 

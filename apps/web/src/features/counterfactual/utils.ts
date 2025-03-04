@@ -12,7 +12,6 @@ import {
 import { type ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import { getWeb3ReadOnly } from '@/hooks/wallets/web3'
 import { asError } from '@/services/exceptions/utils'
-import ExternalStore from '@/services/ExternalStore'
 import { getSafeSDKWithSigner, getUncheckedSigner, tryOffChainTxSigning } from '@/services/tx/tx-sender/sdk'
 import { getRelayTxStatus, TaskState } from '@/services/tx/txMonitor'
 import type { AppDispatch } from '@/store'
@@ -103,14 +102,7 @@ export const deploySafeAndExecuteTx = async (
   return dispatchTxExecutionAndDeploySafe(safeTx, txOptions, provider, safeAddress)
 }
 
-export const { getStore: getNativeBalance, setStore: setNativeBalance } = new ExternalStore<bigint>(0n)
-
-export const getCounterfactualBalance = async (
-  safeAddress: string,
-  provider?: BrowserProvider,
-  chain?: ChainInfo,
-  ignoreCache?: boolean,
-) => {
+export const getCounterfactualBalance = async (safeAddress: string, provider?: BrowserProvider, chain?: ChainInfo) => {
   let balance: bigint | undefined
 
   if (!chain) return undefined
@@ -120,10 +112,7 @@ export const getCounterfactualBalance = async (
   if (provider) {
     balance = await provider.getBalance(safeAddress)
   } else {
-    const cachedBalance = getNativeBalance()
-    const useCache = cachedBalance !== undefined && cachedBalance > 0n && !ignoreCache
-    balance = useCache ? cachedBalance : ((await getWeb3ReadOnly()?.getBalance(safeAddress)) ?? 0n)
-    setNativeBalance(balance)
+    balance = (await getWeb3ReadOnly()?.getBalance(safeAddress)) ?? 0n
   }
 
   return <SafeBalanceResponse>{

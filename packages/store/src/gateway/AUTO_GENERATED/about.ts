@@ -21,4 +21,4 @@ export type About = {
   version?: string | null
   buildNumber?: string | null
 }
-export const { useAboutGetAboutQuery } = injectedRtkApi
+export const { useAboutGetAboutQuery, useLazyAboutGetAboutQuery } = injectedRtkApi

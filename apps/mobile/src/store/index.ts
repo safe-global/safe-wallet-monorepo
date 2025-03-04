@@ -6,6 +6,7 @@ import activeSafe from './activeSafeSlice'
 import signers from './signersSlice'
 import myAccounts from './myAccountsSlice'
 import notifications from './notificationsSlice'
+import settings from './settingsSlice'
 import safes from './safesSlice'
 import { cgwClient, setBaseUrl } from '@safe-global/store/gateway/cgwClient'
 import devToolsEnhancer from 'redux-devtools-expo-dev-plugin'
@@ -25,6 +26,7 @@ export const rootReducer = combineReducers({
   notifications,
   myAccounts,
   signers,
+  settings,
   [cgwClient.reducerPath]: cgwClient.reducer,
 })
 

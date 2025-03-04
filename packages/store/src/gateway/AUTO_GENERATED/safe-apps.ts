@@ -53,4 +53,4 @@ export type SafeApp = {
   socialProfiles: SafeAppSocialProfile[]
   featured: boolean
 }
-export const { useSafeAppsGetSafeAppsV1Query } = injectedRtkApi
+export const { useSafeAppsGetSafeAppsV1Query, useLazySafeAppsGetSafeAppsV1Query } = injectedRtkApi

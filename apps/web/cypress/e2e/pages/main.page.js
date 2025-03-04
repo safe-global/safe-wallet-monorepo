@@ -216,6 +216,17 @@ export function closeOutreachPopup() {
   })
 }
 
+export function closeSecurityNotice() {
+  const value = 'I understand'
+  cy.wait(2000)
+  cy.get('body').then(($body) => {
+    if ($body.find('button:contains(' + value + ')').length > 0) {
+      cy.contains('button', value).click()
+      cy.wait(500)
+    }
+  })
+}
+
 export function verifyOwnerConnected(prefix = 'sep:') {
   cy.get(connectedOwnerBlock).should('contain', prefix)
 }

@@ -34,6 +34,7 @@ const AllSafes = ({
           padding: 0,
           '& .MuiAccordionSummary-content': { margin: '0 !important', mb: 1, flexGrow: 0 },
         }}
+        component="div"
       >
         <div className={css.listHeader}>
           <Typography variant="h5" fontWeight={700}>

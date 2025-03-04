@@ -68,10 +68,10 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
 
   let proposer, safeTxHash, proposedByDelegate
   if (isMultisigDetailedExecutionInfo(txDetails.detailedExecutionInfo)) {
-    proposer = txDetails.detailedExecutionInfo.proposer?.value
     safeTxHash = txDetails.detailedExecutionInfo.safeTxHash
     // @ts-expect-error TODO: Need to update the types from the new SDK
     proposedByDelegate = txDetails.detailedExecutionInfo.proposedByDelegate
+    proposer = proposedByDelegate?.value ?? txDetails.detailedExecutionInfo.proposer?.value
   }
 
   const expiredSwap = useIsExpiredSwap(txSummary.txInfo)

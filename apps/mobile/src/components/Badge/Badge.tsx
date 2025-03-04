@@ -1,5 +1,5 @@
 import React from 'react'
-import { Circle, CircleProps, Text, TextProps, Theme, View } from 'tamagui'
+import { Circle, CircleProps, SizeTokens, Text, TextProps, Theme, View } from 'tamagui'
 import { badgeTheme } from '@/src/components/Badge/theme'
 
 type BadgeThemeKeys = keyof typeof badgeTheme
@@ -10,7 +10,7 @@ type BadgeThemeTypes = ExtractAfterUnderscore<BadgeThemeKeys>
 interface BadgeProps {
   content: string | React.ReactElement
   themeName?: BadgeThemeTypes
-  circleSize?: string
+  circleSize?: string | SizeTokens
   fontSize?: TextProps['fontSize']
   circleProps?: Partial<CircleProps>
   textContentProps?: Partial<TextProps>

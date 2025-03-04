@@ -13,8 +13,8 @@ interface AssetsHeaderProps {
 
 export function AssetsHeader({ amount, isLoading, onPendingTransactionsPress, hasMore }: AssetsHeaderProps) {
   return (
-    <StyledAssetsHeader backgroundColor="$background">
-      <View marginBottom="$10" marginTop="0">
+    <StyledAssetsHeader>
+      <View marginBottom="$8" marginTop="$4">
         {amount > 0 && (
           <PendingTransactions
             isLoading={isLoading}

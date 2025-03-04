@@ -64,7 +64,6 @@ export function swapOrderBuilder(): IBuilder<SwapOrder> {
     buyToken: orderTokenBuilder().build(),
     explorerUrl:
       'https://explorer.cow.fi/orders/0x03a5d561ad2452d719a0d075573f4bed68217c696b52f151122c30e3e4426f1b05e6b5eb1d0e6aabab082057d5bb91f2ee6d11be66223d88',
-    executedSurplusFee: executedFee,
     executedFee,
     executedFeeToken: sellToken,
     fullAppData: appDataBuilder().build(),
@@ -86,7 +85,6 @@ export function twapOrderBuilder(): IBuilder<TwapOrder> {
     executedBuyAmount: faker.string.numeric(),
     sellToken: orderTokenBuilder().build(),
     buyToken: orderTokenBuilder().build(),
-    executedSurplusFee: executedFee,
     executedFee,
     executedFeeToken: sellToken,
     fullAppData: appDataBuilder().build(),

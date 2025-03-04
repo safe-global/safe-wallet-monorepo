@@ -17,9 +17,7 @@
             }
           }
         },
-        "tags": [
-          "about"
-        ]
+        "tags": ["about"]
       }
     },
     "/v1/accounts": {
@@ -48,9 +46,7 @@
             }
           }
         },
-        "tags": [
-          "accounts"
-        ]
+        "tags": ["accounts"]
       }
     },
     "/v1/accounts/data-types": {
@@ -72,9 +68,7 @@
             }
           }
         },
-        "tags": [
-          "accounts"
-        ]
+        "tags": ["accounts"]
       }
     },
     "/v1/accounts/{address}/data-settings": {
@@ -105,9 +99,7 @@
             }
           }
         },
-        "tags": [
-          "accounts"
-        ]
+        "tags": ["accounts"]
       },
       "put": {
         "operationId": "accountsUpsertAccountDataSettingsV1",
@@ -146,9 +138,7 @@
             }
           }
         },
-        "tags": [
-          "accounts"
-        ]
+        "tags": ["accounts"]
       }
     },
     "/v1/accounts/{address}": {
@@ -176,9 +166,7 @@
             }
           }
         },
-        "tags": [
-          "accounts"
-        ]
+        "tags": ["accounts"]
       },
       "delete": {
         "operationId": "accountsDeleteAccountV1",
@@ -197,9 +185,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "accounts"
-        ]
+        "tags": ["accounts"]
       }
     },
     "/v1/accounts/{address}/address-books/{chainId}": {
@@ -235,9 +221,7 @@
             }
           }
         },
-        "tags": [
-          "accounts"
-        ]
+        "tags": ["accounts"]
       },
       "post": {
         "operationId": "addressBooksCreateAddressBookItemV1",
@@ -281,9 +265,7 @@
             }
           }
         },
-        "tags": [
-          "accounts"
-        ]
+        "tags": ["accounts"]
       },
       "delete": {
         "operationId": "addressBooksDeleteAddressBookV1",
@@ -310,9 +292,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "accounts"
-        ]
+        "tags": ["accounts"]
       }
     },
     "/v1/accounts/{address}/address-books/{chainId}/{addressBookItemId}": {
@@ -349,9 +329,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "accounts"
-        ]
+        "tags": ["accounts"]
       }
     },
     "/v1/accounts/{address}/counterfactual-safes/{chainId}/{predictedAddress}": {
@@ -395,9 +373,7 @@
             }
           }
         },
-        "tags": [
-          "accounts"
-        ]
+        "tags": ["accounts"]
       },
       "delete": {
         "operationId": "counterfactualSafesDeleteCounterfactualSafeV1",
@@ -432,9 +408,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "accounts"
-        ]
+        "tags": ["accounts"]
       }
     },
     "/v1/accounts/{address}/counterfactual-safes": {
@@ -465,9 +439,7 @@
             }
           }
         },
-        "tags": [
-          "accounts"
-        ]
+        "tags": ["accounts"]
       },
       "put": {
         "operationId": "counterfactualSafesCreateCounterfactualSafeV1",
@@ -503,9 +475,7 @@
             }
           }
         },
-        "tags": [
-          "accounts"
-        ]
+        "tags": ["accounts"]
       },
       "delete": {
         "operationId": "counterfactualSafesDeleteCounterfactualSafesV1",
@@ -524,9 +494,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "accounts"
-        ]
+        "tags": ["accounts"]
       }
     },
     "/v1/auth/nonce": {
@@ -545,9 +513,7 @@
             }
           }
         },
-        "tags": [
-          "auth"
-        ]
+        "tags": ["auth"]
       }
     },
     "/v1/auth/verify": {
@@ -569,9 +535,7 @@
             "description": "Empty response body. JWT token is set as response cookie."
           }
         },
-        "tags": [
-          "auth"
-        ]
+        "tags": ["auth"]
       }
     },
     "/v1/chains/{chainId}/safes/{safeAddress}/balances/{fiatCode}": {
@@ -631,9 +595,7 @@
             }
           }
         },
-        "tags": [
-          "balances"
-        ]
+        "tags": ["balances"]
       }
     },
     "/v1/balances/supported-fiat-codes": {
@@ -655,9 +617,7 @@
             }
           }
         },
-        "tags": [
-          "balances"
-        ]
+        "tags": ["balances"]
       }
     },
     "/v1/chains": {
@@ -685,9 +645,7 @@
             }
           }
         },
-        "tags": [
-          "chains"
-        ]
+        "tags": ["chains"]
       }
     },
     "/v1/chains/{chainId}": {
@@ -715,9 +673,7 @@
             }
           }
         },
-        "tags": [
-          "chains"
-        ]
+        "tags": ["chains"]
       }
     },
     "/v1/chains/{chainId}/about": {
@@ -745,9 +701,7 @@
             }
           }
         },
-        "tags": [
-          "chains"
-        ]
+        "tags": ["chains"]
       }
     },
     "/v1/chains/{chainId}/about/backbone": {
@@ -775,9 +729,7 @@
             }
           }
         },
-        "tags": [
-          "chains"
-        ]
+        "tags": ["chains"]
       }
     },
     "/v1/chains/{chainId}/about/master-copies": {
@@ -808,9 +760,7 @@
             }
           }
         },
-        "tags": [
-          "chains"
-        ]
+        "tags": ["chains"]
       }
     },
     "/v1/chains/{chainId}/about/indexing": {
@@ -838,9 +788,7 @@
             }
           }
         },
-        "tags": [
-          "chains"
-        ]
+        "tags": ["chains"]
       }
     },
     "/v2/chains/{chainId}/safes/{safeAddress}/collectibles": {
@@ -900,9 +848,7 @@
             }
           }
         },
-        "tags": [
-          "collectibles"
-        ]
+        "tags": ["collectibles"]
       }
     },
     "/v1/community/campaigns": {
@@ -930,9 +876,7 @@
             }
           }
         },
-        "tags": [
-          "community"
-        ]
+        "tags": ["community"]
       }
     },
     "/v1/community/campaigns/{resourceId}": {
@@ -960,9 +904,7 @@
             }
           }
         },
-        "tags": [
-          "community"
-        ]
+        "tags": ["community"]
       }
     },
     "/v1/community/campaigns/{resourceId}/activities": {
@@ -999,9 +941,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "community"
-        ]
+        "tags": ["community"]
       }
     },
     "/v1/community/campaigns/{resourceId}/leaderboard": {
@@ -1037,9 +977,7 @@
             }
           }
         },
-        "tags": [
-          "community"
-        ]
+        "tags": ["community"]
       }
     },
     "/v1/community/campaigns/{resourceId}/leaderboard/{safeAddress}": {
@@ -1075,9 +1013,7 @@
             }
           }
         },
-        "tags": [
-          "community"
-        ]
+        "tags": ["community"]
       }
     },
     "/v1/community/eligibility": {
@@ -1106,9 +1042,7 @@
             }
           }
         },
-        "tags": [
-          "community"
-        ]
+        "tags": ["community"]
       }
     },
     "/v1/community/locking/leaderboard": {
@@ -1136,9 +1070,7 @@
             }
           }
         },
-        "tags": [
-          "community"
-        ]
+        "tags": ["community"]
       }
     },
     "/v1/community/locking/{safeAddress}/rank": {
@@ -1166,9 +1098,7 @@
             }
           }
         },
-        "tags": [
-          "community"
-        ]
+        "tags": ["community"]
       }
     },
     "/v1/community/locking/{safeAddress}/history": {
@@ -1204,9 +1134,7 @@
             }
           }
         },
-        "tags": [
-          "community"
-        ]
+        "tags": ["community"]
       }
     },
     "/v1/chains/{chainId}/contracts/{contractAddress}": {
@@ -1242,9 +1170,7 @@
             }
           }
         },
-        "tags": [
-          "contracts"
-        ]
+        "tags": ["contracts"]
       }
     },
     "/v1/chains/{chainId}/data-decoder": {
@@ -1282,9 +1208,7 @@
             }
           }
         },
-        "tags": [
-          "data-decoded"
-        ]
+        "tags": ["data-decoded"]
       }
     },
     "/v1/chains/{chainId}/delegates": {
@@ -1354,9 +1278,7 @@
           }
         },
         "summary": "",
-        "tags": [
-          "delegates"
-        ]
+        "tags": ["delegates"]
       },
       "post": {
         "deprecated": true,
@@ -1387,9 +1309,7 @@
           }
         },
         "summary": "",
-        "tags": [
-          "delegates"
-        ]
+        "tags": ["delegates"]
       }
     },
     "/v1/chains/{chainId}/delegates/{delegateAddress}": {
@@ -1430,9 +1350,7 @@
           }
         },
         "summary": "",
-        "tags": [
-          "delegates"
-        ]
+        "tags": ["delegates"]
       }
     },
     "/v1/chains/{chainId}/safes/{safeAddress}/delegates/{delegateAddress}": {
@@ -1465,9 +1383,7 @@
           }
         },
         "summary": "",
-        "tags": [
-          "delegates"
-        ]
+        "tags": ["delegates"]
       }
     },
     "/v2/chains/{chainId}/delegates": {
@@ -1535,9 +1451,7 @@
             }
           }
         },
-        "tags": [
-          "delegates"
-        ]
+        "tags": ["delegates"]
       },
       "post": {
         "operationId": "delegatesPostDelegateV2",
@@ -1566,9 +1480,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "delegates"
-        ]
+        "tags": ["delegates"]
       }
     },
     "/v2/chains/{chainId}/delegates/{delegateAddress}": {
@@ -1607,9 +1519,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "delegates"
-        ]
+        "tags": ["delegates"]
       }
     },
     "/v1/chains/{chainId}/safes/{safeAddress}/recovery": {
@@ -1648,9 +1558,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "recovery"
-        ]
+        "tags": ["recovery"]
       }
     },
     "/v1/chains/{chainId}/safes/{safeAddress}/recovery/{moduleAddress}": {
@@ -1687,9 +1595,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "recovery"
-        ]
+        "tags": ["recovery"]
       }
     },
     "/v2/chains/{chainId}/safes/{address}/multisig-transactions/estimations": {
@@ -1735,9 +1641,7 @@
             }
           }
         },
-        "tags": [
-          "estimations"
-        ]
+        "tags": ["estimations"]
       }
     },
     "/v2/register/notifications": {
@@ -1759,9 +1663,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "notifications"
-        ]
+        "tags": ["notifications"]
       }
     },
     "/v2/chains/{chainId}/notifications/devices/{deviceUuid}/safes/{safeAddress}": {
@@ -1798,9 +1700,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "notifications"
-        ]
+        "tags": ["notifications"]
       },
       "delete": {
         "operationId": "notificationsDeleteSubscriptionV2",
@@ -1835,9 +1735,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "notifications"
-        ]
+        "tags": ["notifications"]
       }
     },
     "/v2/chains/{chainId}/notifications/devices/{deviceUuid}": {
@@ -1866,9 +1764,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "notifications"
-        ]
+        "tags": ["notifications"]
       }
     },
     "/v1/chains/{chainId}/messages/{messageHash}": {
@@ -1904,9 +1800,7 @@
             }
           }
         },
-        "tags": [
-          "messages"
-        ]
+        "tags": ["messages"]
       }
     },
     "/v1/chains/{chainId}/safes/{safeAddress}/messages": {
@@ -1950,9 +1844,7 @@
             }
           }
         },
-        "tags": [
-          "messages"
-        ]
+        "tags": ["messages"]
       },
       "post": {
         "operationId": "messagesCreateMessageV1",
@@ -1989,9 +1881,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "messages"
-        ]
+        "tags": ["messages"]
       }
     },
     "/v1/chains/{chainId}/messages/{messageHash}/signatures": {
@@ -2030,9 +1920,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "messages"
-        ]
+        "tags": ["messages"]
       }
     },
     "/v1/register/notifications": {
@@ -2054,9 +1942,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "notifications"
-        ]
+        "tags": ["notifications"]
       }
     },
     "/v1/chains/{chainId}/notifications/devices/{uuid}": {
@@ -2085,9 +1971,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "notifications"
-        ]
+        "tags": ["notifications"]
       }
     },
     "/v1/chains/{chainId}/notifications/devices/{uuid}/safes/{safeAddress}": {
@@ -2124,9 +2008,579 @@
             "description": ""
           }
         },
-        "tags": [
-          "notifications"
-        ]
+        "tags": ["notifications"]
+      }
+    },
+    "/v1/users": {
+      "get": {
+        "operationId": "usersGetWithWalletsV1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserWithWallets"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Signer address not provided"
+          },
+          "404": {
+            "description": "User (wallet) not found"
+          }
+        },
+        "tags": ["users"]
+      },
+      "delete": {
+        "operationId": "usersDeleteV1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "User deleted"
+          },
+          "401": {
+            "description": "Signer address not provided"
+          },
+          "404": {
+            "description": "User (wallet) not found"
+          }
+        },
+        "tags": ["users"]
+      }
+    },
+    "/v1/users/wallet": {
+      "post": {
+        "operationId": "usersCreateWithWalletV1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreatedUserWithWallet"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Signer address not provided"
+          },
+          "409": {
+            "description": "Wallet already exists"
+          }
+        },
+        "tags": ["users"]
+      }
+    },
+    "/v1/users/wallet/{walletAddress}": {
+      "post": {
+        "operationId": "usersAddWalletToUserV1",
+        "parameters": [
+          {
+            "name": "walletAddress",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WalletAddedToUser"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Signer address not provided"
+          },
+          "404": {
+            "description": "User not found"
+          },
+          "409": {
+            "description": "Wallet already exists"
+          }
+        },
+        "tags": ["users"]
+      },
+      "delete": {
+        "operationId": "usersDeleteWalletFromUserV1",
+        "parameters": [
+          {
+            "name": "walletAddress",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Wallet removed from user and deleted"
+          },
+          "401": {
+            "description": "Signer address not provided"
+          },
+          "404": {
+            "description": "User OR provided wallet not found"
+          },
+          "409": {
+            "description": "Cannot remove the current wallet"
+          }
+        },
+        "tags": ["users"]
+      }
+    },
+    "/v1/organizations": {
+      "post": {
+        "operationId": "organizationsCreateV1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateOrganizationDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Organizations created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateOrganizationResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Signer address not provided"
+          },
+          "403": {
+            "description": "Forbidden resource"
+          },
+          "404": {
+            "description": "User not found."
+          }
+        },
+        "tags": ["organizations"]
+      },
+      "get": {
+        "operationId": "organizationsGetV1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Organizations found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GetOrganizationResponse"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Signer address not provided"
+          },
+          "403": {
+            "description": "Forbidden resource"
+          },
+          "404": {
+            "description": "User not found."
+          }
+        },
+        "tags": ["organizations"]
+      }
+    },
+    "/v1/organizations/create-with-user": {
+      "post": {
+        "operationId": "organizationsCreateWithUserV1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateOrganizationDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Organizations created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateOrganizationResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Signer address not provided"
+          },
+          "403": {
+            "description": "Forbidden resource"
+          }
+        },
+        "tags": ["organizations"]
+      }
+    },
+    "/v1/organizations/{id}": {
+      "get": {
+        "operationId": "organizationsGetOneV1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Organization found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetOrganizationResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Signer address not provided"
+          },
+          "403": {
+            "description": "Forbidden resource"
+          },
+          "404": {
+            "description": "Organization not found. OR User not found."
+          }
+        },
+        "tags": ["organizations"]
+      },
+      "patch": {
+        "operationId": "organizationsUpdateV1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateOrganizationDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Organization updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateOrganizationResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Signer address not provided OR User is unauthorized"
+          },
+          "403": {
+            "description": "Forbidden resource"
+          },
+          "404": {
+            "description": "User not found."
+          }
+        },
+        "tags": ["organizations"]
+      },
+      "delete": {
+        "operationId": "organizationsDeleteV1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Organization deleted"
+          },
+          "401": {
+            "description": "Signer address not provided OR User is unauthorized"
+          },
+          "403": {
+            "description": "Forbidden resource"
+          },
+          "404": {
+            "description": "User not found."
+          }
+        },
+        "tags": ["organizations"]
+      }
+    },
+    "/v1/organizations/{orgId}/members/invite": {
+      "post": {
+        "operationId": "userOrganizationsInviteUserV1",
+        "parameters": [
+          {
+            "name": "orgId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Users invited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Invitation"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "User not admin OR signer address not provided OR member is not active"
+          },
+          "403": {
+            "description": "User not authorized"
+          },
+          "409": {
+            "description": "Too many invites"
+          }
+        },
+        "tags": ["organizations"]
+      }
+    },
+    "/v1/organizations/{orgId}/members/accept": {
+      "post": {
+        "operationId": "userOrganizationsAcceptInviteV1",
+        "parameters": [
+          {
+            "name": "orgId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Invite accepted"
+          },
+          "403": {
+            "description": "Signer not authorized"
+          },
+          "404": {
+            "description": "Signer, organization or membership not found"
+          },
+          "409": {
+            "description": "User invite not pending"
+          }
+        },
+        "tags": ["organizations"]
+      }
+    },
+    "/v1/organizations/{orgId}/members/decline": {
+      "post": {
+        "operationId": "userOrganizationsDeclineInviteV1",
+        "parameters": [
+          {
+            "name": "orgId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Invite declined"
+          },
+          "403": {
+            "description": "Signer not authorized"
+          },
+          "404": {
+            "description": "Signer, organization or membership not found"
+          },
+          "409": {
+            "description": "User invite not pending"
+          }
+        },
+        "tags": ["organizations"]
+      }
+    },
+    "/v1/organizations/{orgId}/members": {
+      "get": {
+        "operationId": "userOrganizationsGetUsersV1",
+        "parameters": [
+          {
+            "name": "orgId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Organization and members list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserOrganizationsDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Signer not authorized"
+          },
+          "404": {
+            "description": "Signer or organization not found"
+          }
+        },
+        "tags": ["organizations"]
+      }
+    },
+    "/v1/organizations/{orgId}/members/{userId}/role": {
+      "patch": {
+        "operationId": "userOrganizationsUpdateRoleV1",
+        "parameters": [
+          {
+            "name": "orgId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Role updated"
+          },
+          "401": {
+            "description": "Signer not active or admin"
+          },
+          "403": {
+            "description": "Signer not authorized"
+          },
+          "404": {
+            "description": "Signer, organization or signer/user-to-update membership not found"
+          },
+          "409": {
+            "description": "Cannot remove last admin"
+          }
+        },
+        "tags": ["organizations"]
+      }
+    },
+    "/v1/organizations/{orgId}/members/{userId}": {
+      "delete": {
+        "operationId": "userOrganizationsRemoveUserV1",
+        "parameters": [
+          {
+            "name": "orgId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Membership deleted"
+          },
+          "401": {
+            "description": "Signer not active or admin"
+          },
+          "403": {
+            "description": "Signer not authorized"
+          },
+          "404": {
+            "description": "Signer or organization not found"
+          },
+          "409": {
+            "description": "Cannot remove last admin"
+          }
+        },
+        "tags": ["organizations"]
       }
     },
     "/v1/chains/{chainId}/owners/{ownerAddress}/safes": {
@@ -2162,9 +2616,7 @@
             }
           }
         },
-        "tags": [
-          "owners"
-        ]
+        "tags": ["owners"]
       }
     },
     "/v1/owners/{ownerAddress}/safes": {
@@ -2192,9 +2644,7 @@
             }
           }
         },
-        "tags": [
-          "owners"
-        ]
+        "tags": ["owners"]
       }
     },
     "/v2/owners/{ownerAddress}/safes": {
@@ -2228,9 +2678,7 @@
             }
           }
         },
-        "tags": [
-          "owners"
-        ]
+        "tags": ["owners"]
       }
     },
     "/v1/chains/{chainId}/relay": {
@@ -2261,9 +2709,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "relay"
-        ]
+        "tags": ["relay"]
       }
     },
     "/v1/chains/{chainId}/relay/{safeAddress}": {
@@ -2292,9 +2738,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "relay"
-        ]
+        "tags": ["relay"]
       }
     },
     "/v1/chains/{chainId}/safe-apps": {
@@ -2341,9 +2785,7 @@
             }
           }
         },
-        "tags": [
-          "safe-apps"
-        ]
+        "tags": ["safe-apps"]
       }
     },
     "/v1/chains/{chainId}/safes/{safeAddress}": {
@@ -2379,9 +2821,7 @@
             }
           }
         },
-        "tags": [
-          "safes"
-        ]
+        "tags": ["safes"]
       }
     },
     "/v1/chains/{chainId}/safes/{safeAddress}/nonces": {
@@ -2417,9 +2857,7 @@
             }
           }
         },
-        "tags": [
-          "safes"
-        ]
+        "tags": ["safes"]
       }
     },
     "/v1/safes": {
@@ -2482,9 +2920,54 @@
             }
           }
         },
-        "tags": [
-          "safes"
-        ]
+        "tags": ["safes"]
+      }
+    },
+    "/v1/targeted-messaging/outreaches/{outreachId}/chains/{chainId}/safes/{safeAddress}": {
+      "get": {
+        "operationId": "targetedMessagingGetTargetedSafeV1",
+        "parameters": [
+          {
+            "name": "outreachId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "chainId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "safeAddress",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TargetedSafe"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Safe not targeted."
+          }
+        },
+        "tags": ["targeted-messaging"]
       }
     },
     "/v1/targeted-messaging/outreaches/{outreachId}/chains/{chainId}/safes/{safeAddress}/signers/{signerAddress}/submissions": {
@@ -2536,9 +3019,7 @@
             }
           }
         },
-        "tags": [
-          "targeted-messaging"
-        ]
+        "tags": ["targeted-messaging"]
       },
       "post": {
         "operationId": "targetedMessagingCreateSubmissionV1",
@@ -2598,9 +3079,7 @@
             }
           }
         },
-        "tags": [
-          "targeted-messaging"
-        ]
+        "tags": ["targeted-messaging"]
       }
     },
     "/v1/chains/{chainId}/transactions/{id}": {
@@ -2636,9 +3115,7 @@
             }
           }
         },
-        "tags": [
-          "transactions"
-        ]
+        "tags": ["transactions"]
       }
     },
     "/v1/chains/{chainId}/safes/{safeAddress}/multisig-transactions": {
@@ -2730,9 +3207,7 @@
             }
           }
         },
-        "tags": [
-          "transactions"
-        ]
+        "tags": ["transactions"]
       }
     },
     "/v1/chains/{chainId}/transactions/{safeTxHash}": {
@@ -2771,9 +3246,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "transactions"
-        ]
+        "tags": ["transactions"]
       }
     },
     "/v1/chains/{chainId}/safes/{safeAddress}/module-transactions": {
@@ -2841,9 +3314,7 @@
             }
           }
         },
-        "tags": [
-          "transactions"
-        ]
+        "tags": ["transactions"]
       }
     },
     "/v1/chains/{chainId}/transactions/{safeTxHash}/confirmations": {
@@ -2889,9 +3360,7 @@
             }
           }
         },
-        "tags": [
-          "transactions"
-        ]
+        "tags": ["transactions"]
       }
     },
     "/v1/chains/{chainId}/safes/{safeAddress}/incoming-transfers": {
@@ -2983,9 +3452,7 @@
             }
           }
         },
-        "tags": [
-          "transactions"
-        ]
+        "tags": ["transactions"]
       }
     },
     "/v1/chains/{chainId}/transactions/{safeAddress}/preview": {
@@ -3031,9 +3498,7 @@
             }
           }
         },
-        "tags": [
-          "transactions"
-        ]
+        "tags": ["transactions"]
       }
     },
     "/v1/chains/{chainId}/safes/{safeAddress}/transactions/queued": {
@@ -3085,9 +3550,7 @@
             }
           }
         },
-        "tags": [
-          "transactions"
-        ]
+        "tags": ["transactions"]
       }
     },
     "/v1/chains/{chainId}/safes/{safeAddress}/transactions/history": {
@@ -3164,9 +3627,7 @@
             }
           }
         },
-        "tags": [
-          "transactions"
-        ]
+        "tags": ["transactions"]
       }
     },
     "/v1/chains/{chainId}/transactions/{safeAddress}/propose": {
@@ -3212,9 +3673,7 @@
             }
           }
         },
-        "tags": [
-          "transactions"
-        ]
+        "tags": ["transactions"]
       }
     },
     "/v1/chains/{chainId}/safes/{safeAddress}/transactions/creation": {
@@ -3250,9 +3709,7 @@
             }
           }
         },
-        "tags": [
-          "transactions"
-        ]
+        "tags": ["transactions"]
       }
     }
   },
@@ -3281,9 +3738,7 @@
             "nullable": true
           }
         },
-        "required": [
-          "name"
-        ]
+        "required": ["name"]
       },
       "CreateAccountDto": {
         "type": "object",
@@ -3295,10 +3750,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "address",
-          "name"
-        ]
+        "required": ["address", "name"]
       },
       "Account": {
         "type": "object",
@@ -3317,11 +3769,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "id",
-          "address",
-          "name"
-        ]
+        "required": ["id", "address", "name"]
       },
       "AccountDataType": {
         "type": "object",
@@ -3340,11 +3788,7 @@
             "type": "boolean"
           }
         },
-        "required": [
-          "id",
-          "name",
-          "isActive"
-        ]
+        "required": ["id", "name", "isActive"]
       },
       "AccountDataSetting": {
         "type": "object",
@@ -3356,10 +3800,7 @@
             "type": "boolean"
           }
         },
-        "required": [
-          "dataTypeId",
-          "enabled"
-        ]
+        "required": ["dataTypeId", "enabled"]
       },
       "UpsertAccountDataSettingDto": {
         "type": "object",
@@ -3371,10 +3812,7 @@
             "type": "boolean"
           }
         },
-        "required": [
-          "dataTypeId",
-          "enabled"
-        ]
+        "required": ["dataTypeId", "enabled"]
       },
       "UpsertAccountDataSettingsDto": {
         "type": "object",
@@ -3386,9 +3824,7 @@
             }
           }
         },
-        "required": [
-          "accountDataSettings"
-        ]
+        "required": ["accountDataSettings"]
       },
       "AddressBookItem": {
         "type": "object",
@@ -3403,11 +3839,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "id",
-          "name",
-          "address"
-        ]
+        "required": ["id", "name", "address"]
       },
       "AddressBook": {
         "type": "object",
@@ -3428,12 +3860,7 @@
             }
           }
         },
-        "required": [
-          "id",
-          "accountId",
-          "chainId",
-          "data"
-        ]
+        "required": ["id", "accountId", "chainId", "data"]
       },
       "CreateAddressBookItemDto": {
         "type": "object",
@@ -3445,10 +3872,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "name",
-          "address"
-        ]
+        "required": ["name", "address"]
       },
       "CounterfactualSafe": {
         "type": "object",
@@ -3537,9 +3961,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "nonce"
-        ]
+        "required": ["nonce"]
       },
       "SiweDto": {
         "type": "object",
@@ -3551,10 +3973,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "message",
-          "signature"
-        ]
+        "required": ["message", "signature"]
       },
       "Token": {
         "type": "object",
@@ -3563,7 +3982,8 @@
             "type": "string"
           },
           "decimals": {
-            "type": "number"
+            "type": "number",
+            "nullable": true
           },
           "logoUri": {
             "type": "string"
@@ -3576,21 +3996,10 @@
           },
           "type": {
             "type": "string",
-            "enum": [
-              "ERC721",
-              "ERC20",
-              "NATIVE_TOKEN",
-              "UNKNOWN"
-            ]
+            "enum": ["ERC721", "ERC20", "NATIVE_TOKEN", "UNKNOWN"]
           }
         },
-        "required": [
-          "address",
-          "logoUri",
-          "name",
-          "symbol",
-          "type"
-        ]
+        "required": ["address", "logoUri", "name", "symbol", "type"]
       },
       "Balance": {
         "type": "object",
@@ -3608,12 +4017,7 @@
             "$ref": "#/components/schemas/Token"
           }
         },
-        "required": [
-          "balance",
-          "fiatBalance",
-          "fiatConversion",
-          "tokenInfo"
-        ]
+        "required": ["balance", "fiatBalance", "fiatConversion", "tokenInfo"]
       },
       "Balances": {
         "type": "object",
@@ -3632,10 +4036,7 @@
             }
           }
         },
-        "required": [
-          "fiatTotal",
-          "items"
-        ]
+        "required": ["fiatTotal", "items"]
       },
       "GasPriceOracle": {
         "type": "object",
@@ -3653,12 +4054,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "type",
-          "gasParameter",
-          "gweiFactor",
-          "uri"
-        ]
+        "required": ["type", "gasParameter", "gweiFactor", "uri"]
       },
       "GasPriceFixed": {
         "type": "object",
@@ -3670,10 +4066,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "type",
-          "weiValue"
-        ]
+        "required": ["type", "weiValue"]
       },
       "GasPriceFixedEIP1559": {
         "type": "object",
@@ -3688,11 +4081,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "type",
-          "maxFeePerGas",
-          "maxPriorityFeePerGas"
-        ]
+        "required": ["type", "maxFeePerGas", "maxPriorityFeePerGas"]
       },
       "NativeCurrency": {
         "type": "object",
@@ -3710,12 +4099,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "decimals",
-          "logoUri",
-          "name",
-          "symbol"
-        ]
+        "required": ["decimals", "logoUri", "name", "symbol"]
       },
       "BlockExplorerUriTemplate": {
         "type": "object",
@@ -3730,11 +4114,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "address",
-          "api",
-          "txHash"
-        ]
+        "required": ["address", "api", "txHash"]
       },
       "BalancesProvider": {
         "type": "object",
@@ -3747,9 +4127,7 @@
             "type": "boolean"
           }
         },
-        "required": [
-          "enabled"
-        ]
+        "required": ["enabled"]
       },
       "ContractAddresses": {
         "type": "object",
@@ -3797,20 +4175,13 @@
         "properties": {
           "authentication": {
             "type": "string",
-            "enum": [
-              "API_KEY_PATH",
-              "NO_AUTHENTICATION",
-              "UNKNOWN"
-            ]
+            "enum": ["API_KEY_PATH", "NO_AUTHENTICATION", "UNKNOWN"]
           },
           "value": {
             "type": "string"
           }
         },
-        "required": [
-          "authentication",
-          "value"
-        ]
+        "required": ["authentication", "value"]
       },
       "Theme": {
         "type": "object",
@@ -3822,10 +4193,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "backgroundColor",
-          "textColor"
-        ]
+        "required": ["backgroundColor", "textColor"]
       },
       "Chain": {
         "type": "object",
@@ -3963,9 +4331,7 @@
             }
           }
         },
-        "required": [
-          "results"
-        ]
+        "required": ["results"]
       },
       "AboutChain": {
         "type": "object",
@@ -3983,12 +4349,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "transactionServiceBaseUri",
-          "name",
-          "version",
-          "buildNumber"
-        ]
+        "required": ["transactionServiceBaseUri", "name", "version", "buildNumber"]
       },
       "Backbone": {
         "type": "object",
@@ -4017,14 +4378,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "api_version",
-          "host",
-          "name",
-          "secure",
-          "settings",
-          "version"
-        ]
+        "required": ["api_version", "host", "name", "secure", "settings", "version"]
       },
       "MasterCopy": {
         "type": "object",
@@ -4036,10 +4390,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "address",
-          "version"
-        ]
+        "required": ["address", "version"]
       },
       "IndexingStatus": {
         "type": "object",
@@ -4051,10 +4402,7 @@
             "type": "boolean"
           }
         },
-        "required": [
-          "lastSync",
-          "synced"
-        ]
+        "required": ["lastSync", "synced"]
       },
       "Collectible": {
         "type": "object",
@@ -4095,13 +4443,7 @@
             "nullable": true
           }
         },
-        "required": [
-          "address",
-          "tokenName",
-          "tokenSymbol",
-          "logoUri",
-          "id"
-        ]
+        "required": ["address", "tokenName", "tokenSymbol", "logoUri", "id"]
       },
       "CollectiblePage": {
         "type": "object",
@@ -4125,9 +4467,7 @@
             }
           }
         },
-        "required": [
-          "results"
-        ]
+        "required": ["results"]
       },
       "ActivityMetadata": {
         "type": "object",
@@ -4142,11 +4482,7 @@
             "type": "number"
           }
         },
-        "required": [
-          "name",
-          "description",
-          "maxPoints"
-        ]
+        "required": ["name", "description", "maxPoints"]
       },
       "Campaign": {
         "type": "object",
@@ -4201,14 +4537,7 @@
             "type": "boolean"
           }
         },
-        "required": [
-          "resourceId",
-          "name",
-          "description",
-          "startDate",
-          "endDate",
-          "isPromoted"
-        ]
+        "required": ["resourceId", "name", "description", "startDate", "endDate", "isPromoted"]
       },
       "CampaignPage": {
         "type": "object",
@@ -4232,9 +4561,7 @@
             }
           }
         },
-        "required": [
-          "results"
-        ]
+        "required": ["results"]
       },
       "CampaignRank": {
         "type": "object",
@@ -4255,13 +4582,7 @@
             "type": "number"
           }
         },
-        "required": [
-          "holder",
-          "position",
-          "boost",
-          "totalPoints",
-          "totalBoostedPoints"
-        ]
+        "required": ["holder", "position", "boost", "totalPoints", "totalBoostedPoints"]
       },
       "CampaignRankPage": {
         "type": "object",
@@ -4285,9 +4606,7 @@
             }
           }
         },
-        "required": [
-          "results"
-        ]
+        "required": ["results"]
       },
       "EligibilityRequest": {
         "type": "object",
@@ -4299,10 +4618,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "requestId",
-          "sealedData"
-        ]
+        "required": ["requestId", "sealedData"]
       },
       "Eligibility": {
         "type": "object",
@@ -4317,11 +4633,7 @@
             "type": "boolean"
           }
         },
-        "required": [
-          "requestId",
-          "isAllowed",
-          "isVpn"
-        ]
+        "required": ["requestId", "isAllowed", "isVpn"]
       },
       "LockingRank": {
         "type": "object",
@@ -4342,13 +4654,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "holder",
-          "position",
-          "lockedAmount",
-          "unlockedAmount",
-          "withdrawnAmount"
-        ]
+        "required": ["holder", "position", "lockedAmount", "unlockedAmount", "withdrawnAmount"]
       },
       "LockingRankPage": {
         "type": "object",
@@ -4372,18 +4678,14 @@
             }
           }
         },
-        "required": [
-          "results"
-        ]
+        "required": ["results"]
       },
       "LockEventItem": {
         "type": "object",
         "properties": {
           "eventType": {
             "type": "string",
-            "enum": [
-              "LOCKED"
-            ]
+            "enum": ["LOCKED"]
           },
           "executionDate": {
             "type": "string"
@@ -4401,23 +4703,14 @@
             "type": "string"
           }
         },
-        "required": [
-          "eventType",
-          "executionDate",
-          "transactionHash",
-          "holder",
-          "amount",
-          "logIndex"
-        ]
+        "required": ["eventType", "executionDate", "transactionHash", "holder", "amount", "logIndex"]
       },
       "UnlockEventItem": {
         "type": "object",
         "properties": {
           "eventType": {
             "type": "string",
-            "enum": [
-              "UNLOCKED"
-            ]
+            "enum": ["UNLOCKED"]
           },
           "executionDate": {
             "type": "string"
@@ -4438,24 +4731,14 @@
             "type": "string"
           }
         },
-        "required": [
-          "eventType",
-          "executionDate",
-          "transactionHash",
-          "holder",
-          "amount",
-          "logIndex",
-          "unlockIndex"
-        ]
+        "required": ["eventType", "executionDate", "transactionHash", "holder", "amount", "logIndex", "unlockIndex"]
       },
       "WithdrawEventItem": {
         "type": "object",
         "properties": {
           "eventType": {
             "type": "string",
-            "enum": [
-              "WITHDRAWN"
-            ]
+            "enum": ["WITHDRAWN"]
           },
           "executionDate": {
             "type": "string"
@@ -4476,15 +4759,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "eventType",
-          "executionDate",
-          "transactionHash",
-          "holder",
-          "amount",
-          "logIndex",
-          "unlockIndex"
-        ]
+        "required": ["eventType", "executionDate", "transactionHash", "holder", "amount", "logIndex", "unlockIndex"]
       },
       "LockingEventPage": {
         "type": "object",
@@ -4518,9 +4793,7 @@
             }
           }
         },
-        "required": [
-          "results"
-        ]
+        "required": ["results"]
       },
       "Contract": {
         "type": "object",
@@ -4545,13 +4818,7 @@
             "type": "boolean"
           }
         },
-        "required": [
-          "address",
-          "name",
-          "displayName",
-          "logoUri",
-          "trustedForDelegateCall"
-        ]
+        "required": ["address", "name", "displayName", "logoUri", "trustedForDelegateCall"]
       },
       "TransactionDataDto": {
         "type": "object",
@@ -4569,9 +4836,7 @@
             "description": "The wei amount being sent to a payable function"
           }
         },
-        "required": [
-          "data"
-        ]
+        "required": ["data"]
       },
       "DataDecodedParameter": {
         "type": "object",
@@ -4600,11 +4865,7 @@
             "nullable": true
           }
         },
-        "required": [
-          "name",
-          "type",
-          "value"
-        ]
+        "required": ["name", "type", "value"]
       },
       "DataDecoded": {
         "type": "object",
@@ -4620,9 +4881,7 @@
             }
           }
         },
-        "required": [
-          "method"
-        ]
+        "required": ["method"]
       },
       "Delegate": {
         "type": "object",
@@ -4641,11 +4900,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "delegate",
-          "delegator",
-          "label"
-        ]
+        "required": ["delegate", "delegator", "label"]
       },
       "DelegatePage": {
         "type": "object",
@@ -4669,9 +4924,7 @@
             }
           }
         },
-        "required": [
-          "results"
-        ]
+        "required": ["results"]
       },
       "CreateDelegateDto": {
         "type": "object",
@@ -4693,12 +4946,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "delegate",
-          "delegator",
-          "signature",
-          "label"
-        ]
+        "required": ["delegate", "delegator", "signature", "label"]
       },
       "DeleteDelegateDto": {
         "type": "object",
@@ -4713,11 +4961,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "delegate",
-          "delegator",
-          "signature"
-        ]
+        "required": ["delegate", "delegator", "signature"]
       },
       "DeleteSafeDelegateDto": {
         "type": "object",
@@ -4732,11 +4976,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "delegate",
-          "safe",
-          "signature"
-        ]
+        "required": ["delegate", "safe", "signature"]
       },
       "DeleteDelegateV2Dto": {
         "type": "object",
@@ -4753,9 +4993,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "signature"
-        ]
+        "required": ["signature"]
       },
       "AddRecoveryModuleDto": {
         "type": "object",
@@ -4764,9 +5002,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "moduleAddress"
-        ]
+        "required": ["moduleAddress"]
       },
       "GetEstimationDto": {
         "type": "object",
@@ -4785,11 +5021,7 @@
             "type": "number"
           }
         },
-        "required": [
-          "to",
-          "value",
-          "operation"
-        ]
+        "required": ["to", "value", "operation"]
       },
       "EstimationResponse": {
         "type": "object",
@@ -4804,11 +5036,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "currentNonce",
-          "recommendedNonce",
-          "safeTxGas"
-        ]
+        "required": ["currentNonce", "recommendedNonce", "safeTxGas"]
       },
       "NotificationType": {
         "type": "string",
@@ -4838,19 +5066,11 @@
             }
           }
         },
-        "required": [
-          "chainId",
-          "address",
-          "notificationTypes"
-        ]
+        "required": ["chainId", "address", "notificationTypes"]
       },
       "DeviceType": {
         "type": "string",
-        "enum": [
-          "ANDROID",
-          "IOS",
-          "WEB"
-        ]
+        "enum": ["ANDROID", "IOS", "WEB"]
       },
       "UpsertSubscriptionsDto": {
         "type": "object",
@@ -4876,11 +5096,7 @@
             "nullable": true
           }
         },
-        "required": [
-          "cloudMessagingToken",
-          "safes",
-          "deviceType"
-        ]
+        "required": ["cloudMessagingToken", "safes", "deviceType"]
       },
       "AddressInfo": {
         "type": "object",
@@ -4897,9 +5113,7 @@
             "nullable": true
           }
         },
-        "required": [
-          "value"
-        ]
+        "required": ["value"]
       },
       "Message": {
         "type": "object",
@@ -5034,18 +5248,13 @@
         "properties": {
           "type": {
             "type": "string",
-            "enum": [
-              "DATE_LABEL"
-            ]
+            "enum": ["DATE_LABEL"]
           },
           "timestamp": {
             "type": "number"
           }
         },
-        "required": [
-          "type",
-          "timestamp"
-        ]
+        "required": ["type", "timestamp"]
       },
       "MessagePage": {
         "type": "object",
@@ -5076,9 +5285,7 @@
             }
           }
         },
-        "required": [
-          "results"
-        ]
+        "required": ["results"]
       },
       "CreateMessageDto": {
         "type": "object",
@@ -5099,10 +5306,7 @@
             "nullable": true
           }
         },
-        "required": [
-          "message",
-          "signature"
-        ]
+        "required": ["message", "signature"]
       },
       "UpdateMessageSignatureDto": {
         "type": "object",
@@ -5111,9 +5315,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "signature"
-        ]
+        "required": ["signature"]
       },
       "SafeRegistration": {
         "type": "object",
@@ -5134,11 +5336,7 @@
             }
           }
         },
-        "required": [
-          "chainId",
-          "safes",
-          "signatures"
-        ]
+        "required": ["chainId", "safes", "signatures"]
       },
       "RegisterDeviceDto": {
         "type": "object",
@@ -5173,14 +5371,206 @@
             }
           }
         },
-        "required": [
-          "cloudMessagingToken",
-          "buildNumber",
-          "bundle",
-          "deviceType",
-          "version",
-          "safeRegistrations"
-        ]
+        "required": ["cloudMessagingToken", "buildNumber", "bundle", "deviceType", "version", "safeRegistrations"]
+      },
+      "UserWallet": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "address": {
+            "type": "string"
+          }
+        },
+        "required": ["id", "address"]
+      },
+      "UserWithWallets": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "status": {
+            "type": "number",
+            "enum": [0, 1]
+          },
+          "wallets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserWallet"
+            }
+          }
+        },
+        "required": ["id", "status", "wallets"]
+      },
+      "CreatedUserWithWallet": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          }
+        },
+        "required": ["id"]
+      },
+      "WalletAddedToUser": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          }
+        },
+        "required": ["id"]
+      },
+      "CreateOrganizationDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": ["name"]
+      },
+      "CreateOrganizationResponse": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "id": {
+            "type": "number"
+          }
+        },
+        "required": ["name", "id"]
+      },
+      "UserDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["PENDING", "ACTIVE"]
+          }
+        },
+        "required": ["id", "status"]
+      },
+      "UserOrganizationsDto": {
+        "type": "object",
+        "properties": {
+          "members": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserOrganization"
+            }
+          }
+        },
+        "required": ["members"]
+      },
+      "GetOrganizationResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["ACTIVE"]
+          },
+          "userOrganizations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserOrganizationsDto"
+            }
+          }
+        },
+        "required": ["id", "name", "status", "userOrganizations"]
+      },
+      "UpdateOrganizationDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["ACTIVE"]
+          }
+        }
+      },
+      "UpdateOrganizationResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          }
+        },
+        "required": ["id"]
+      },
+      "Invitation": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "number"
+          },
+          "orgId": {
+            "type": "number"
+          },
+          "role": {
+            "type": "string",
+            "enum": ["ADMIN", "MEMBER"]
+          },
+          "status": {
+            "type": "string",
+            "enum": ["INVITED", "ACTIVE", "DECLINED"]
+          }
+        },
+        "required": ["userId", "orgId", "role", "status"]
+      },
+      "UserOrganizationUser": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["PENDING", "ACTIVE"]
+          }
+        },
+        "required": ["id", "status"]
+      },
+      "UserOrganization": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "role": {
+            "type": "string",
+            "enum": ["ADMIN", "MEMBER"]
+          },
+          "status": {
+            "type": "string",
+            "enum": ["INVITED", "ACTIVE", "DECLINED"]
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "user": {
+            "$ref": "#/components/schemas/UserOrganizationUser"
+          }
+        },
+        "required": ["id", "role", "status", "createdAt", "updatedAt", "user"]
       },
       "SafeList": {
         "type": "object",
@@ -5192,9 +5582,7 @@
             }
           }
         },
-        "required": [
-          "safes"
-        ]
+        "required": ["safes"]
       },
       "RelayDto": {
         "type": "object",
@@ -5214,11 +5602,7 @@
             "description": "If specified, a gas buffer of 150k will be added on top of the expected gas usage for the transaction.\n      This is for the <a href=\"https://docs.gelato.network/developer-services/relay/quick-start/optional-parameters\" target=\"_blank\">\n      Gelato Relay execution overhead</a>, reducing the chance of the task cancelling before it is executed on-chain."
           }
         },
-        "required": [
-          "version",
-          "to",
-          "data"
-        ]
+        "required": ["version", "to", "data"]
       },
       "SafeAppProvider": {
         "type": "object",
@@ -5230,10 +5614,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "url",
-          "name"
-        ]
+        "required": ["url", "name"]
       },
       "SafeAppAccessControl": {
         "type": "object",
@@ -5249,31 +5630,20 @@
             }
           }
         },
-        "required": [
-          "type"
-        ]
+        "required": ["type"]
       },
       "SafeAppSocialProfile": {
         "type": "object",
         "properties": {
           "platform": {
             "type": "string",
-            "enum": [
-              "DISCORD",
-              "GITHUB",
-              "TWITTER",
-              "TELEGRAM",
-              "UNKNOWN"
-            ]
+            "enum": ["DISCORD", "GITHUB", "TWITTER", "TELEGRAM", "UNKNOWN"]
           },
           "url": {
             "type": "string"
           }
         },
-        "required": [
-          "platform",
-          "url"
-        ]
+        "required": ["platform", "url"]
       },
       "SafeApp": {
         "type": "object",
@@ -5403,11 +5773,7 @@
           },
           "implementationVersionState": {
             "type": "string",
-            "enum": [
-              "UP_TO_DATE",
-              "OUTDATED",
-              "UNKNOWN"
-            ]
+            "enum": ["UP_TO_DATE", "OUTDATED", "UNKNOWN"]
           },
           "collectiblesTag": {
             "type": "string",
@@ -5446,10 +5812,7 @@
             "type": "number"
           }
         },
-        "required": [
-          "currentNonce",
-          "recommendedNonce"
-        ]
+        "required": ["currentNonce", "recommendedNonce"]
       },
       "SafeOverview": {
         "type": "object",
@@ -5480,14 +5843,19 @@
             "nullable": true
           }
         },
-        "required": [
-          "address",
-          "chainId",
-          "threshold",
-          "owners",
-          "fiatTotal",
-          "queued"
-        ]
+        "required": ["address", "chainId", "threshold", "owners", "fiatTotal", "queued"]
+      },
+      "TargetedSafe": {
+        "type": "object",
+        "properties": {
+          "outreachId": {
+            "type": "number"
+          },
+          "address": {
+            "type": "string"
+          }
+        },
+        "required": ["outreachId", "address"]
       },
       "Submission": {
         "type": "object",
@@ -5507,11 +5875,7 @@
             "nullable": true
           }
         },
-        "required": [
-          "outreachId",
-          "targetedSafeId",
-          "signerAddress"
-        ]
+        "required": ["outreachId", "targetedSafeId", "signerAddress"]
       },
       "CreateSubmissionDto": {
         "type": "object",
@@ -5520,9 +5884,7 @@
             "type": "boolean"
           }
         },
-        "required": [
-          "completed"
-        ]
+        "required": ["completed"]
       },
       "TransactionInfo": {
         "type": "object",
@@ -5547,18 +5909,14 @@
             "nullable": true
           }
         },
-        "required": [
-          "type"
-        ]
+        "required": ["type"]
       },
       "CreationTransactionInfo": {
         "type": "object",
         "properties": {
           "type": {
             "type": "string",
-            "enum": [
-              "Creation"
-            ]
+            "enum": ["Creation"]
           },
           "humanDescription": {
             "type": "string",
@@ -5586,20 +5944,14 @@
             "nullable": true
           }
         },
-        "required": [
-          "type",
-          "creator",
-          "transactionHash"
-        ]
+        "required": ["type", "creator", "transactionHash"]
       },
       "CustomTransactionInfo": {
         "type": "object",
         "properties": {
           "type": {
             "type": "string",
-            "enum": [
-              "Custom"
-            ]
+            "enum": ["Custom"]
           },
           "humanDescription": {
             "type": "string",
@@ -5627,12 +5979,7 @@
             "nullable": true
           }
         },
-        "required": [
-          "type",
-          "to",
-          "dataSize",
-          "isCancellation"
-        ]
+        "required": ["type", "to", "dataSize", "isCancellation"]
       },
       "SettingsChange": {
         "type": "object",
@@ -5653,18 +6000,14 @@
             ]
           }
         },
-        "required": [
-          "type"
-        ]
+        "required": ["type"]
       },
       "SettingsChangeTransaction": {
         "type": "object",
         "properties": {
           "type": {
             "type": "string",
-            "enum": [
-              "SettingsChange"
-            ]
+            "enum": ["SettingsChange"]
           },
           "humanDescription": {
             "type": "string",
@@ -5682,19 +6025,14 @@
             ]
           }
         },
-        "required": [
-          "type",
-          "dataDecoded"
-        ]
+        "required": ["type", "dataDecoded"]
       },
       "Erc20Transfer": {
         "type": "object",
         "properties": {
           "type": {
             "type": "string",
-            "enum": [
-              "ERC20"
-            ]
+            "enum": ["ERC20"]
           },
           "tokenAddress": {
             "type": "string"
@@ -5726,21 +6064,14 @@
             "type": "boolean"
           }
         },
-        "required": [
-          "type",
-          "tokenAddress",
-          "value",
-          "imitation"
-        ]
+        "required": ["type", "tokenAddress", "value", "imitation"]
       },
       "Erc721Transfer": {
         "type": "object",
         "properties": {
           "type": {
             "type": "string",
-            "enum": [
-              "ERC721"
-            ]
+            "enum": ["ERC721"]
           },
           "tokenAddress": {
             "type": "string"
@@ -5765,54 +6096,38 @@
             "nullable": true
           }
         },
-        "required": [
-          "type",
-          "tokenAddress",
-          "tokenId"
-        ]
+        "required": ["type", "tokenAddress", "tokenId"]
       },
       "NativeCoinTransfer": {
         "type": "object",
         "properties": {
           "type": {
             "type": "string",
-            "enum": [
-              "NATIVE_COIN"
-            ]
+            "enum": ["NATIVE_COIN"]
           },
           "value": {
             "type": "string",
             "nullable": true
           }
         },
-        "required": [
-          "type"
-        ]
+        "required": ["type"]
       },
       "Transfer": {
         "type": "object",
         "properties": {
           "type": {
             "type": "string",
-            "enum": [
-              "NATIVE_COIN",
-              "ERC20",
-              "ERC721"
-            ]
+            "enum": ["NATIVE_COIN", "ERC20", "ERC721"]
           }
         },
-        "required": [
-          "type"
-        ]
+        "required": ["type"]
       },
       "TransferTransactionInfo": {
         "type": "object",
         "properties": {
           "type": {
             "type": "string",
-            "enum": [
-              "Transfer"
-            ]
+            "enum": ["Transfer"]
           },
           "humanDescription": {
             "type": "string",
@@ -5826,11 +6141,7 @@
           },
           "direction": {
             "type": "string",
-            "enum": [
-              "INCOMING",
-              "OUTGOING",
-              "UNKNOWN"
-            ]
+            "enum": ["INCOMING", "OUTGOING", "UNKNOWN"]
           },
           "transferInfo": {
             "oneOf": [
@@ -5851,13 +6162,7 @@
             ]
           }
         },
-        "required": [
-          "type",
-          "sender",
-          "recipient",
-          "direction",
-          "transferInfo"
-        ]
+        "required": ["type", "sender", "recipient", "direction", "transferInfo"]
       },
       "TokenInfo": {
         "type": "object",
@@ -5888,22 +6193,14 @@
             "description": "The token trusted status"
           }
         },
-        "required": [
-          "address",
-          "decimals",
-          "name",
-          "symbol",
-          "trusted"
-        ]
+        "required": ["address", "decimals", "name", "symbol", "trusted"]
       },
       "SwapOrderTransactionInfo": {
         "type": "object",
         "properties": {
           "type": {
             "type": "string",
-            "enum": [
-              "SwapOrder"
-            ]
+            "enum": ["SwapOrder"]
           },
           "humanDescription": {
             "type": "string",
@@ -5915,31 +6212,15 @@
           },
           "status": {
             "type": "string",
-            "enum": [
-              "presignaturePending",
-              "open",
-              "fulfilled",
-              "cancelled",
-              "expired",
-              "unknown"
-            ]
+            "enum": ["presignaturePending", "open", "fulfilled", "cancelled", "expired", "unknown"]
           },
           "kind": {
             "type": "string",
-            "enum": [
-              "buy",
-              "sell",
-              "unknown"
-            ]
+            "enum": ["buy", "sell", "unknown"]
           },
           "orderClass": {
             "type": "string",
-            "enum": [
-              "market",
-              "limit",
-              "liquidity",
-              "unknown"
-            ]
+            "enum": ["market", "limit", "liquidity", "unknown"]
           },
           "validUntil": {
             "type": "number",
@@ -5980,11 +6261,6 @@
           "explorerUrl": {
             "type": "string",
             "description": "The URL to the explorer page of the order"
-          },
-          "executedSurplusFee": {
-            "type": "string",
-            "description": "The amount of fees paid for this order.",
-            "deprecated": true
           },
           "executedFee": {
             "type": "string",
@@ -6022,7 +6298,6 @@
           "sellToken",
           "buyToken",
           "explorerUrl",
-          "executedSurplusFee",
           "executedFee",
           "executedFeeToken",
           "owner"
@@ -6033,9 +6308,7 @@
         "properties": {
           "type": {
             "type": "string",
-            "enum": [
-              "SwapTransfer"
-            ]
+            "enum": ["SwapTransfer"]
           },
           "humanDescription": {
             "type": "string",
@@ -6074,31 +6347,15 @@
           },
           "status": {
             "type": "string",
-            "enum": [
-              "presignaturePending",
-              "open",
-              "fulfilled",
-              "cancelled",
-              "expired",
-              "unknown"
-            ]
+            "enum": ["presignaturePending", "open", "fulfilled", "cancelled", "expired", "unknown"]
           },
           "kind": {
             "type": "string",
-            "enum": [
-              "buy",
-              "sell",
-              "unknown"
-            ]
+            "enum": ["buy", "sell", "unknown"]
           },
           "orderClass": {
             "type": "string",
-            "enum": [
-              "market",
-              "limit",
-              "liquidity",
-              "unknown"
-            ]
+            "enum": ["market", "limit", "liquidity", "unknown"]
           },
           "validUntil": {
             "type": "number",
@@ -6139,11 +6396,6 @@
           "explorerUrl": {
             "type": "string",
             "description": "The URL to the explorer page of the order"
-          },
-          "executedSurplusFee": {
-            "type": "string",
-            "description": "The amount of fees paid for this order.",
-            "deprecated": true
           },
           "executedFee": {
             "type": "string",
@@ -6189,7 +6441,6 @@
           "sellToken",
           "buyToken",
           "explorerUrl",
-          "executedSurplusFee",
           "executedFee",
           "executedFeeToken",
           "owner"
@@ -6200,9 +6451,7 @@
         "properties": {
           "type": {
             "type": "string",
-            "enum": [
-              "TwapOrder"
-            ]
+            "enum": ["TwapOrder"]
           },
           "humanDescription": {
             "type": "string",
@@ -6211,31 +6460,15 @@
           "status": {
             "type": "string",
             "description": "The TWAP status",
-            "enum": [
-              "presignaturePending",
-              "open",
-              "fulfilled",
-              "cancelled",
-              "expired",
-              "unknown"
-            ]
+            "enum": ["presignaturePending", "open", "fulfilled", "cancelled", "expired", "unknown"]
           },
           "kind": {
             "type": "string",
-            "enum": [
-              "buy",
-              "sell",
-              "unknown"
-            ]
+            "enum": ["buy", "sell", "unknown"]
           },
           "class": {
             "type": "string",
-            "enum": [
-              "market",
-              "limit",
-              "liquidity",
-              "unknown"
-            ]
+            "enum": ["market", "limit", "liquidity", "unknown"]
           },
           "activeOrderUid": {
             "type": "string",
@@ -6263,12 +6496,6 @@
             "type": "string",
             "nullable": true,
             "description": "The executed buy token raw amount (no decimals), or null if there are too many parts"
-          },
-          "executedSurplusFee": {
-            "type": "string",
-            "nullable": true,
-            "description": "The executed surplus fee raw amount (no decimals), or null if there are too many parts",
-            "deprecated": true
           },
           "executedFee": {
             "type": "string",
@@ -6357,9 +6584,7 @@
         "properties": {
           "type": {
             "type": "string",
-            "enum": [
-              "NativeStakingDeposit"
-            ]
+            "enum": ["NativeStakingDeposit"]
           },
           "humanDescription": {
             "type": "string",
@@ -6449,9 +6674,7 @@
         "properties": {
           "type": {
             "type": "string",
-            "enum": [
-              "NativeStakingValidatorsExit"
-            ]
+            "enum": ["NativeStakingValidatorsExit"]
           },
           "humanDescription": {
             "type": "string",
@@ -6508,9 +6731,7 @@
         "properties": {
           "type": {
             "type": "string",
-            "enum": [
-              "NativeStakingWithdraw"
-            ]
+            "enum": ["NativeStakingWithdraw"]
           },
           "humanDescription": {
             "type": "string",
@@ -6529,12 +6750,7 @@
             }
           }
         },
-        "required": [
-          "type",
-          "value",
-          "tokenInfo",
-          "validators"
-        ]
+        "required": ["type", "value", "tokenInfo", "validators"]
       },
       "TransactionData": {
         "type": "object",
@@ -6570,19 +6786,30 @@
             "nullable": true
           }
         },
-        "required": [
-          "to",
-          "operation"
-        ]
+        "required": ["to", "operation"]
+      },
+      "MultisigConfirmationDetails": {
+        "type": "object",
+        "properties": {
+          "signer": {
+            "$ref": "#/components/schemas/AddressInfo"
+          },
+          "signature": {
+            "type": "string",
+            "nullable": true
+          },
+          "submittedAt": {
+            "type": "number"
+          }
+        },
+        "required": ["signer", "submittedAt"]
       },
       "MultisigExecutionDetails": {
         "type": "object",
         "properties": {
           "type": {
             "type": "string",
-            "enum": [
-              "MULTISIG"
-            ]
+            "enum": ["MULTISIG"]
           },
           "submittedAt": {
             "type": "number"
@@ -6619,7 +6846,7 @@
           "signers": {
             "type": "array",
             "items": {
-              "type": "string"
+              "$ref": "#/components/schemas/AddressInfo"
             }
           },
           "confirmationsRequired": {
@@ -6628,7 +6855,7 @@
           "confirmations": {
             "type": "array",
             "items": {
-              "type": "string"
+              "$ref": "#/components/schemas/MultisigConfirmationDetails"
             }
           },
           "rejectors": {
@@ -6687,18 +6914,13 @@
         "properties": {
           "type": {
             "type": "string",
-            "enum": [
-              "MODULE"
-            ]
+            "enum": ["MODULE"]
           },
           "address": {
             "$ref": "#/components/schemas/AddressInfo"
           }
         },
-        "required": [
-          "type",
-          "address"
-        ]
+        "required": ["type", "address"]
       },
       "SafeAppInfo": {
         "type": "object",
@@ -6714,10 +6936,7 @@
             "nullable": true
           }
         },
-        "required": [
-          "name",
-          "url"
-        ]
+        "required": ["name", "url"]
       },
       "TransactionDetails": {
         "type": "object",
@@ -6773,13 +6992,7 @@
           },
           "txStatus": {
             "type": "string",
-            "enum": [
-              "SUCCESS",
-              "FAILED",
-              "CANCELLED",
-              "AWAITING_CONFIRMATIONS",
-              "AWAITING_EXECUTION"
-            ]
+            "enum": ["SUCCESS", "FAILED", "CANCELLED", "AWAITING_CONFIRMATIONS", "AWAITING_EXECUTION"]
           },
           "txData": {
             "nullable": true,
@@ -6817,39 +7030,27 @@
             "nullable": true
           }
         },
-        "required": [
-          "txInfo",
-          "safeAddress",
-          "txId",
-          "txStatus"
-        ]
+        "required": ["txInfo", "safeAddress", "txId", "txStatus"]
       },
       "ModuleExecutionInfo": {
         "type": "object",
         "properties": {
           "type": {
             "type": "string",
-            "enum": [
-              "MODULE"
-            ]
+            "enum": ["MODULE"]
           },
           "address": {
             "$ref": "#/components/schemas/AddressInfo"
           }
         },
-        "required": [
-          "type",
-          "address"
-        ]
+        "required": ["type", "address"]
       },
       "MultisigExecutionInfo": {
         "type": "object",
         "properties": {
           "type": {
             "type": "string",
-            "enum": [
-              "MULTISIG"
-            ]
+            "enum": ["MULTISIG"]
           },
           "nonce": {
             "type": "number"
@@ -6868,12 +7069,7 @@
             }
           }
         },
-        "required": [
-          "type",
-          "nonce",
-          "confirmationsRequired",
-          "confirmationsSubmitted"
-        ]
+        "required": ["type", "nonce", "confirmationsRequired", "confirmationsSubmitted"]
       },
       "Transaction": {
         "type": "object",
@@ -6929,13 +7125,7 @@
           },
           "txStatus": {
             "type": "string",
-            "enum": [
-              "SUCCESS",
-              "FAILED",
-              "CANCELLED",
-              "AWAITING_CONFIRMATIONS",
-              "AWAITING_EXECUTION"
-            ]
+            "enum": ["SUCCESS", "FAILED", "CANCELLED", "AWAITING_CONFIRMATIONS", "AWAITING_EXECUTION"]
           },
           "executionInfo": {
             "oneOf": [
@@ -6957,39 +7147,24 @@
             ]
           }
         },
-        "required": [
-          "txInfo",
-          "id",
-          "timestamp",
-          "txStatus"
-        ]
+        "required": ["txInfo", "id", "timestamp", "txStatus"]
       },
       "MultisigTransaction": {
         "type": "object",
         "properties": {
           "type": {
             "type": "string",
-            "enum": [
-              "TRANSACTION"
-            ]
+            "enum": ["TRANSACTION"]
           },
           "transaction": {
             "$ref": "#/components/schemas/Transaction"
           },
           "conflictType": {
             "type": "string",
-            "enum": [
-              "None",
-              "HasNext",
-              "End"
-            ]
+            "enum": ["None", "HasNext", "End"]
           }
         },
-        "required": [
-          "type",
-          "transaction",
-          "conflictType"
-        ]
+        "required": ["type", "transaction", "conflictType"]
       },
       "MultisigTransactionPage": {
         "type": "object",
@@ -7013,9 +7188,7 @@
             }
           }
         },
-        "required": [
-          "results"
-        ]
+        "required": ["results"]
       },
       "DeleteTransactionDto": {
         "type": "object",
@@ -7024,34 +7197,24 @@
             "type": "string"
           }
         },
-        "required": [
-          "signature"
-        ]
+        "required": ["signature"]
       },
       "ModuleTransaction": {
         "type": "object",
         "properties": {
           "type": {
             "type": "string",
-            "enum": [
-              "TRANSACTION"
-            ]
+            "enum": ["TRANSACTION"]
           },
           "transaction": {
             "$ref": "#/components/schemas/Transaction"
           },
           "conflictType": {
             "type": "string",
-            "enum": [
-              "None"
-            ]
+            "enum": ["None"]
           }
         },
-        "required": [
-          "type",
-          "transaction",
-          "conflictType"
-        ]
+        "required": ["type", "transaction", "conflictType"]
       },
       "ModuleTransactionPage": {
         "type": "object",
@@ -7075,9 +7238,7 @@
             }
           }
         },
-        "required": [
-          "results"
-        ]
+        "required": ["results"]
       },
       "AddConfirmationDto": {
         "type": "object",
@@ -7086,34 +7247,24 @@
             "type": "string"
           }
         },
-        "required": [
-          "signedSafeTxHash"
-        ]
+        "required": ["signedSafeTxHash"]
       },
       "IncomingTransfer": {
         "type": "object",
         "properties": {
           "type": {
             "type": "string",
-            "enum": [
-              "TRANSACTION"
-            ]
+            "enum": ["TRANSACTION"]
           },
           "transaction": {
             "$ref": "#/components/schemas/Transaction"
           },
           "conflictType": {
             "type": "string",
-            "enum": [
-              "None"
-            ]
+            "enum": ["None"]
           }
         },
-        "required": [
-          "type",
-          "transaction",
-          "conflictType"
-        ]
+        "required": ["type", "transaction", "conflictType"]
       },
       "IncomingTransferPage": {
         "type": "object",
@@ -7137,9 +7288,7 @@
             }
           }
         },
-        "required": [
-          "results"
-        ]
+        "required": ["results"]
       },
       "PreviewTransactionDto": {
         "type": "object",
@@ -7158,11 +7307,7 @@
             "type": "number"
           }
         },
-        "required": [
-          "to",
-          "value",
-          "operation"
-        ]
+        "required": ["to", "value", "operation"]
       },
       "TransactionPreview": {
         "type": "object",
@@ -7210,73 +7355,50 @@
             "$ref": "#/components/schemas/TransactionData"
           }
         },
-        "required": [
-          "txInfo",
-          "txData"
-        ]
+        "required": ["txInfo", "txData"]
       },
       "ConflictHeaderQueuedItem": {
         "type": "object",
         "properties": {
           "type": {
             "type": "string",
-            "enum": [
-              "CONFLICT_HEADER"
-            ]
+            "enum": ["CONFLICT_HEADER"]
           },
           "nonce": {
             "type": "number"
           }
         },
-        "required": [
-          "type",
-          "nonce"
-        ]
+        "required": ["type", "nonce"]
       },
       "LabelQueuedItem": {
         "type": "object",
         "properties": {
           "type": {
             "type": "string",
-            "enum": [
-              "LABEL"
-            ]
+            "enum": ["LABEL"]
           },
           "label": {
             "type": "string"
           }
         },
-        "required": [
-          "type",
-          "label"
-        ]
+        "required": ["type", "label"]
       },
       "TransactionQueuedItem": {
         "type": "object",
         "properties": {
           "type": {
             "type": "string",
-            "enum": [
-              "TRANSACTION"
-            ]
+            "enum": ["TRANSACTION"]
           },
           "transaction": {
             "$ref": "#/components/schemas/Transaction"
           },
           "conflictType": {
             "type": "string",
-            "enum": [
-              "None",
-              "HasNext",
-              "End"
-            ]
+            "enum": ["None", "HasNext", "End"]
           }
         },
-        "required": [
-          "type",
-          "transaction",
-          "conflictType"
-        ]
+        "required": ["type", "transaction", "conflictType"]
       },
       "QueuedItemPage": {
         "type": "object",
@@ -7310,34 +7432,24 @@
             }
           }
         },
-        "required": [
-          "results"
-        ]
+        "required": ["results"]
       },
       "TransactionItem": {
         "type": "object",
         "properties": {
           "type": {
             "type": "string",
-            "enum": [
-              "TRANSACTION"
-            ]
+            "enum": ["TRANSACTION"]
           },
           "transaction": {
             "$ref": "#/components/schemas/Transaction"
           },
           "conflictType": {
             "type": "string",
-            "enum": [
-              "None"
-            ]
+            "enum": ["None"]
           }
         },
-        "required": [
-          "type",
-          "transaction",
-          "conflictType"
-        ]
+        "required": ["type", "transaction", "conflictType"]
       },
       "TransactionItemPage": {
         "type": "object",
@@ -7368,9 +7480,7 @@
             }
           }
         },
-        "required": [
-          "results"
-        ]
+        "required": ["results"]
       },
       "ProposeTransactionDto": {
         "type": "object",
@@ -7472,12 +7582,7 @@
             ]
           }
         },
-        "required": [
-          "created",
-          "creator",
-          "transactionHash",
-          "factoryAddress"
-        ]
+        "required": ["created", "creator", "transactionHash", "factoryAddress"]
       }
     }
   }
