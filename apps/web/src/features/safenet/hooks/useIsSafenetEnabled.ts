@@ -10,18 +10,20 @@ import useHasSafenetFeature from './useHasSafenetFeature'
  */
 const useIsSafenetEnabled = () => {
   const { safe } = useSafeInfo()
+  const chainId = safe.chainId
+
   const hasSafenetFeature = useHasSafenetFeature()
   const { data: safenetConfig } = useGetSafenetConfigQuery(!hasSafenetFeature ? skipToken : undefined)
+
+  const chainSupportedBySafenet = safenetConfig && safenetConfig.chains.includes(Number(chainId))
+  const hasSafenetGuard = sameAddress(safe.guard?.value, safenetConfig?.guards[safe.chainId])
+  const hasSafenetModule = safe.modules?.length === 1 && sameAddress(safe.modules?.[0].value, safenetConfig?.settlementEngines[safe.chainId])
 
   if (!hasSafenetFeature) {
     return false
   }
 
-  return (
-    sameAddress(safe.guard?.value, safenetConfig?.guards[safe.chainId]) &&
-    safe.modules?.length === 1 &&
-    sameAddress(safe.modules?.[0].value, safenetConfig?.settlementEngines[safe.chainId])
-  )
+  return chainSupportedBySafenet && hasSafenetGuard && hasSafenetModule
 }
 
 export default useIsSafenetEnabled
