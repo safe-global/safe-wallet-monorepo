@@ -40,7 +40,17 @@ const githubSocialProfileMock = {
   url: 'http://tx-builder-github',
 }
 
-const socialProfilesMock = [discordSocialProfileMock, twitterSocialProfileMock, githubSocialProfileMock]
+const telegramSocialProfileMock = {
+  platform: SafeAppSocialPlatforms.TELEGRAM,
+  url: 'http://tx-builder-telegram',
+}
+
+const socialProfilesMock = [
+  discordSocialProfileMock,
+  twitterSocialProfileMock,
+  githubSocialProfileMock,
+  telegramSocialProfileMock,
+]
 
 describe('SafeAppSocialLinksCard', () => {
   it('renders nothing if no social link is present in the safe app data', async () => {
@@ -76,6 +86,7 @@ describe('SafeAppSocialLinksCard', () => {
       expect(screen.getByLabelText('Discord link')).toBeInTheDocument()
       expect(screen.getByLabelText('Twitter link')).toBeInTheDocument()
       expect(screen.getByLabelText('Github link')).toBeInTheDocument()
+      expect(screen.getByLabelText('Telegram link')).toBeInTheDocument()
     })
   })
 
@@ -93,6 +104,7 @@ describe('SafeAppSocialLinksCard', () => {
       expect(screen.getByLabelText('Discord link')).toBeInTheDocument()
       expect(screen.getByLabelText('Twitter link')).toBeInTheDocument()
       expect(screen.getByLabelText('Github link')).toBeInTheDocument()
+      expect(screen.getByLabelText('Telegram link')).toBeInTheDocument()
     })
   })
 
@@ -109,6 +121,7 @@ describe('SafeAppSocialLinksCard', () => {
       expect(screen.queryByLabelText('Discord link')).toBeInTheDocument()
       expect(screen.queryByLabelText('Twitter link')).not.toBeInTheDocument()
       expect(screen.queryByLabelText('Github link')).not.toBeInTheDocument()
+      expect(screen.queryByLabelText('Telegram link')).not.toBeInTheDocument()
     })
   })
 })

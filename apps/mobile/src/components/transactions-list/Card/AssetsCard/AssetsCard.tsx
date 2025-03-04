@@ -11,6 +11,7 @@ interface AssetsCardProps {
   rightNode?: string | React.ReactNode
   accessibilityLabel?: string
   imageBackground?: string
+  transparent?: boolean
 }
 
 export function AssetsCard({
@@ -20,6 +21,7 @@ export function AssetsCard({
   logoUri,
   accessibilityLabel,
   rightNode,
+  transparent = true,
 }: AssetsCardProps) {
   return (
     <SafeListItem
@@ -33,7 +35,7 @@ export function AssetsCard({
           </Text>
         </View>
       }
-      transparent
+      transparent={transparent}
       leftNode={<Logo imageBackground={imageBackground} logoUri={logoUri} accessibilityLabel={accessibilityLabel} />}
       rightNode={
         typeof rightNode === 'string' ? (

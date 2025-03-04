@@ -1,22 +1,25 @@
 import { Button, useTheme } from 'tamagui'
 import { MenuView, NativeActionEvent } from '@react-native-menu/menu'
-import { Linking, Platform } from 'react-native'
+import { Linking, Platform, Alert } from 'react-native'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon/SafeFontIcon'
 import React from 'react'
 import { getExplorerLink } from '@/src/utils/gateway'
 import { useCopyAndDispatchToast } from '@/src/hooks/useCopyAndDispatchToast'
 import { useToastController } from '@tamagui/toast'
-import { selectActiveSafe } from '@/src/store/activeSafeSlice'
 import { selectChainById } from '@/src/store/chains'
 import { RootState } from '@/src/store'
 import { useAppSelector } from '@/src/store/hooks'
+import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
+import { useEditAccountItem } from '@/src/features/AccountsSheet/AccountItem/hooks/useEditAccountItem'
+import { type Address } from '@/src/types/address'
 
 type Props = {
   safeAddress: string | undefined
 }
 export const SettingsMenu = ({ safeAddress }: Props) => {
   const toast = useToastController()
-  const activeSafe = useAppSelector(selectActiveSafe)
+  const activeSafe = useDefinedActiveSafe()
+  const { deleteSafe } = useEditAccountItem()
   const activeChain = useAppSelector((state: RootState) => selectChainById(state, activeSafe.chainId))
   const copyAndDispatchToast = useCopyAndDispatchToast()
   const theme = useTheme()
@@ -57,8 +60,24 @@ export const SettingsMenu = ({ safeAddress }: Props) => {
         }
 
         if (nativeEvent.event === 'remove') {
-          console.log('remove')
-          toBeImplemented()
+          Alert.alert('Remove account', 'Are you sure you want to remove this account?', [
+            {
+              text: 'Cancel',
+              style: 'cancel',
+            },
+            {
+              text: 'Remove',
+              onPress: () => {
+                deleteSafe(safeAddress as Address)
+
+                toast.show(`The safe with address ${safeAddress} was deleted.`, {
+                  native: true,
+                  duration: 2000,
+                })
+              },
+              style: 'destructive',
+            },
+          ])
         }
 
         if (nativeEvent.event === 'share') {

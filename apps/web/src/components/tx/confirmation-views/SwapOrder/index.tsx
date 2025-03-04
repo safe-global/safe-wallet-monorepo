@@ -6,12 +6,12 @@ interface SwapOrderProps extends NarrowConfirmationViewProps {
   txInfo: Order
 }
 
-function SwapOrder({ txDetails, txInfo }: SwapOrderProps) {
+function SwapOrder({ txInfo, txData }: SwapOrderProps) {
   return (
     <SwapOrderConfirmation
       order={txInfo}
-      decodedData={txDetails?.txData?.dataDecoded}
-      settlementContract={txDetails?.txData?.to?.value ?? ''}
+      decodedData={txData?.dataDecoded}
+      settlementContract={txData?.to?.value ?? ''}
     />
   )
 }

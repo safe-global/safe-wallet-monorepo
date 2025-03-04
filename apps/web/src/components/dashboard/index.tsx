@@ -29,7 +29,7 @@ const Dashboard = (): ReactElement => {
       <Grid container spacing={3}>
         {supportsRecovery && <RecoveryHeader />}
 
-        <Grid item xs={12}>
+        <Grid item xs={12} className={css.hideIfEmpty}>
           <InconsistentSignerSetupWarning />
         </Grid>
 

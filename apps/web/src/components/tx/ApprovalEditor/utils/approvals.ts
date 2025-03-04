@@ -98,7 +98,7 @@ export const updateApprovalTxs = (
         return tx
       }
       const decimals = approvalInfo.tokenInfo.decimals
-      const newAmountWei = parseApprovalAmount(newApproval, decimals)
+      const newAmountWei = parseApprovalAmount(newApproval, decimals ?? 0)
       if (tx.data.startsWith(APPROVAL_SIGNATURE_HASH)) {
         return {
           to: approvalInfo.tokenAddress,

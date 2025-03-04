@@ -1,7 +1,7 @@
 ---
 name: Bug report
 about: Create an issue to fix a bug
-labels: ['bug']
+type: 'bug'
 ---
 
 <!--

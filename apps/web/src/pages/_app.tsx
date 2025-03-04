@@ -1,4 +1,5 @@
-import { SentryErrorBoundary } from '@/services/sentry' // needs to be imported first
+import Analytics from '@/services/analytics/Analytics'
+import { SentryErrorBoundary } from '@/services/sentry'
 import type { ReactNode } from 'react'
 import { type ReactElement } from 'react'
 import { type AppProps } from 'next/app'
@@ -12,7 +13,7 @@ import { setBaseUrl as setNewGatewayBaseUrl } from '@safe-global/safe-client-gat
 import { CacheProvider, type EmotionCache } from '@emotion/react'
 import SafeThemeProvider from '@/components/theme/SafeThemeProvider'
 import '@/styles/globals.css'
-import { IS_PRODUCTION, GATEWAY_URL_STAGING, GATEWAY_URL_PRODUCTION, BRAND_NAME } from '@/config/constants'
+import { BRAND_NAME } from '@/config/constants'
 import { makeStore, useHydrateStore } from '@/store'
 import PageLayout from '@/components/common/PageLayout'
 import useLoadableStores from '@/hooks/useLoadableStores'
@@ -26,7 +27,6 @@ import { useInitSession } from '@/hooks/useInitSession'
 import Notifications from '@/components/common/Notifications'
 import CookieAndTermBanner from 'src/components/common/CookieAndTermBanner'
 import { useDarkMode } from '@/hooks/useDarkMode'
-import { cgwDebugStorage } from '@/components/sidebar/DebugToggle'
 import { useTxTracking } from '@/hooks/useTxTracking'
 import { useSafeMsgTracking } from '@/hooks/messages/useSafeMsgTracking'
 import useGtm from '@/services/analytics/useGtm'
@@ -47,8 +47,7 @@ import PkModulePopup from '@/services/private-key-module/PkModulePopup'
 import GeoblockingProvider from '@/components/common/GeoblockingProvider'
 import { useVisitedSafes } from '@/features/myAccounts/hooks/useVisitedSafes'
 import OutreachPopup from '@/features/targetedOutreach/components/OutreachPopup'
-
-export const GATEWAY_URL = IS_PRODUCTION || cgwDebugStorage.get() ? GATEWAY_URL_PRODUCTION : GATEWAY_URL_STAGING
+import { GATEWAY_URL } from '@/config/gateway'
 
 const reduxStore = makeStore()
 
@@ -101,16 +100,16 @@ export const AppProviders = ({ children }: { children: ReactNode | ReactNode[] }
   )
 }
 
-interface WebCoreAppProps extends AppProps {
+interface SafeWalletAppProps extends AppProps {
   emotionCache?: EmotionCache
 }
 
-const WebCoreApp = ({
+const SafeWalletApp = ({
   Component,
   pageProps,
   router,
   emotionCache = clientSideEmotionCache,
-}: WebCoreAppProps): ReactElement => {
+}: SafeWalletAppProps): ReactElement => {
   const safeKey = useChangedValue(router.query.safe?.toString())
 
   return (
@@ -140,6 +139,8 @@ const WebCoreApp = ({
 
           <CounterfactualHooks />
 
+          <Analytics />
+
           <PkModulePopup />
         </AppProviders>
       </CacheProvider>
@@ -147,4 +148,4 @@ const WebCoreApp = ({
   )
 }
 
-export default WebCoreApp
+export default SafeWalletApp

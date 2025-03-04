@@ -1,7 +1,6 @@
 import DecodedTx from '@/components/tx/DecodedTx'
 import useAsync from '@/hooks/useAsync'
 import { useCurrentChain } from '@/hooks/useChains'
-import useDecodeTx from '@/hooks/useDecodeTx'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
 import { getMultiSendContractDeployment } from '@/services/contracts/deployments'
@@ -14,6 +13,7 @@ import { useSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
 import { MigrateToL2Information } from '@/components/tx/confirmation-views/MigrateToL2Information'
 import { Box } from '@mui/material'
 import { isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
+import useTxPreview from '@/components/tx/confirmation-views/useTxPreview'
 
 export const MigrationToL2TxData = ({ txDetails }: { txDetails: TransactionDetails }) => {
   const readOnlyProvider = useWeb3ReadOnly()
@@ -66,9 +66,8 @@ export const MigrationToL2TxData = ({ txDetails }: { txDetails: TransactionDetai
     }
   }, [txDetails.txHash, txDetails.detailedExecutionInfo, chain, sdk, readOnlyProvider, safe.version])
 
-  const [decodedRealTx, decodedRealTxError] = useDecodeTx(realSafeTx)
-
   const decodedDataUnavailable = !realSafeTx && !realSafeTxLoading
+  const [txPreview, txPreviewError] = useTxPreview(realSafeTx?.data)
 
   return (
     <Box>
@@ -76,12 +75,12 @@ export const MigrationToL2TxData = ({ txDetails }: { txDetails: TransactionDetai
 
       {realSafeTxError ? (
         <ErrorMessage>{realSafeTxError.message}</ErrorMessage>
-      ) : decodedRealTxError ? (
-        <ErrorMessage>{decodedRealTxError.message}</ErrorMessage>
+      ) : txPreviewError ? (
+        <ErrorMessage>{txPreviewError.message}</ErrorMessage>
       ) : decodedDataUnavailable ? (
         <DecodedData txData={txDetails.txData} />
       ) : (
-        <DecodedTx decodedData={decodedRealTx} tx={realSafeTx} />
+        txPreview && <DecodedTx {...txPreview} tx={realSafeTx} />
       )}
     </Box>
   )

@@ -1,33 +1,35 @@
+import { IS_PRODUCTION } from '@/config/constants'
+import { GATEWAY_URL } from '@/config/gateway'
+import { version as termsVersion } from '@/markdown/terms/version'
+import { ofacApi } from '@/store/api/ofac'
 import {
-  configureStore,
   combineReducers,
+  configureStore,
   createListenerMiddleware,
-  type ThunkAction,
   type Action,
-  type Middleware,
   type EnhancedStore,
+  type Middleware,
+  type ThunkAction,
   type ThunkDispatch,
 } from '@reduxjs/toolkit'
-import { useDispatch, useSelector, type TypedUseSelectorHook } from 'react-redux'
+import { cgwClient, setBaseUrl } from '@safe-global/store/gateway/cgwClient'
 import merge from 'lodash/merge'
-import { IS_PRODUCTION } from '@/config/constants'
-import { getPreloadedState, persistState } from './persistStore'
+import { useDispatch, useSelector, type TypedUseSelectorHook } from 'react-redux'
+import { safePassApi } from './api/safePass'
 import { broadcastState, listenToBroadcast } from './broadcast'
+import { getPreloadedState, persistState } from './persistStore'
+import { safenetApi } from './safenet'
+import * as slices from './slices'
 import {
-  cookiesAndTermsSlice,
   cookiesAndTermsInitialState,
+  cookiesAndTermsSlice,
   safeMessagesListener,
   swapOrderListener,
   swapOrderStatusListener,
   txHistoryListener,
   txQueueListener,
 } from './slices'
-import * as slices from './slices'
 import * as hydrate from './useHydrateStore'
-import { ofacApi } from '@/store/api/ofac'
-import { safePassApi } from './api/safePass'
-import { version as termsVersion } from '@/markdown/terms/version'
-import { safenetApi } from './safenet'
 
 const rootReducer = combineReducers({
   [slices.chainsSlice.name]: slices.chainsSlice.reducer,
@@ -57,6 +59,7 @@ const rootReducer = combineReducers({
   [safePassApi.reducerPath]: safePassApi.reducer,
   [slices.gatewayApi.reducerPath]: slices.gatewayApi.reducer,
   [safenetApi.reducerPath]: safenetApi.reducer,
+  [cgwClient.reducerPath]: cgwClient.reducer,
 })
 
 const persistedSlices: (keyof Partial<RootState>)[] = [
@@ -91,6 +94,7 @@ const middleware: Middleware<{}, RootState>[] = [
   slices.gatewayApi.middleware,
   safenetApi.middleware,
 ]
+
 const listeners = [safeMessagesListener, txHistoryListener, txQueueListener, swapOrderListener, swapOrderStatusListener]
 
 export const _hydrationReducer: typeof rootReducer = (state, action) => {
@@ -118,18 +122,28 @@ export const _hydrationReducer: typeof rootReducer = (state, action) => {
   return rootReducer(state, action) as RootState
 }
 
-export const makeStore = (initialState?: Partial<RootState>): EnhancedStore<RootState, Action> => {
+type MakeStoreOptions = {
+  skipBroadcast?: boolean
+}
+export const makeStore = (
+  initialState?: Partial<RootState>,
+  options?: MakeStoreOptions,
+): EnhancedStore<RootState, Action> => {
+  setBaseUrl(GATEWAY_URL)
+
   const store = configureStore({
     reducer: _hydrationReducer,
     middleware: (getDefaultMiddleware) => {
       listeners.forEach((listener) => listener(listenerMiddlewareInstance))
-      return getDefaultMiddleware({ serializableCheck: false }).concat(middleware)
+      return getDefaultMiddleware({ serializableCheck: false }).concat(cgwClient.middleware).concat(middleware)
     },
     devTools: !IS_PRODUCTION,
     preloadedState: initialState,
   })
 
-  listenToBroadcast(store)
+  if (!options?.skipBroadcast) {
+    listenToBroadcast(store)
+  }
 
   return store
 }

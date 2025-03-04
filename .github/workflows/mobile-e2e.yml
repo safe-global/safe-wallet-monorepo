@@ -1,0 +1,42 @@
+name: EAS Mobile E2E tests
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 6 * * *'
+  pull_request:
+    paths:
+      - apps/mobile/**
+      - packages/**
+
+jobs:
+  build:
+    if: github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'mobile-e2e-test')
+    name: Install and build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      # Set up Node.js
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.11.0' # jod
+          cache: 'yarn'
+
+      # Install dependencies
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Setup Expo and EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Build on EAS
+        working-directory: apps/mobile
+        run: eas build --profile build-and-maestro-test --non-interactive --no-wait --platform ios

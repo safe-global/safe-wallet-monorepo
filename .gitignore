@@ -70,9 +70,7 @@ thumbs.db
 # web
 apps/web/.next/*
 apps/web/out/*
-apps/web/public/sw.js
-apps/web/public/workbox-*.js
-apps/web/public/worker-development.js
+apps/web/public/*.js
 apps/web/src/types/
 apps/web/tsconfig.tsbuildinfo
 node_modules/*

@@ -19,6 +19,9 @@ export const selectAllChainsIds = createSelector([selectAllChains], (chains: Cha
 export const selectActiveChainCurrency = createSelector(
   [selectActiveSafe, (state: RootState) => state],
   (activeSafe, state) => {
+    if (!activeSafe) {
+      return null
+    }
     const chain = selectChainById(state, activeSafe.chainId)
     return chain?.nativeCurrency
   },
@@ -30,7 +33,7 @@ export const getChainsByIds = createSelector(
     (state: RootState) => state,
     (_state: RootState, chainIds: string[]) => chainIds,
   ],
-  (state, chainIds) => chainIds.map((chainId) => selectById(state, chainId)),
+  (state, chainIds) => chainIds.map((chainId) => selectById(state, chainId)).filter(Boolean),
 )
 
 export const { useGetChainsConfigQuery } = apiSliceWithChainsConfig

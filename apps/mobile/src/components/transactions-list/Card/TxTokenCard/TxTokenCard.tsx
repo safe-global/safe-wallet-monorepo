@@ -36,7 +36,7 @@ const getTokenDetails = (txInfo: TransferTransactionInfo): tokenDetails => {
   const unnamedToken = 'Unnamed token'
   const nativeCurrency = useAppSelector(selectActiveChainCurrency)
 
-  if (isNativeTokenTransfer(transfer)) {
+  if (isNativeTokenTransfer(transfer) && nativeCurrency) {
     return {
       value: formatValue(transfer.value || '0', nativeCurrency.decimals),
       // take it from the native currency slice

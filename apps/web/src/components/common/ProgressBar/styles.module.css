@@ -21,6 +21,10 @@
   background: linear-gradient(90deg, #32f970 0%, #eed509 100%);
 }
 
+[data-theme="light"] .progressBar :global .MuiLinearProgress-bar {
+  background: var(--color-secondary-main);
+}
+
 @media (max-width: 599.95px) {
   .progressBar,
   .safenetProgressBar {

@@ -1,14 +1,9 @@
+import GA from '@next/third-parties/google'
 import * as gtm from '../gtm'
-import TagManager from '../TagManager'
 import { EventType, DeviceType } from '../types'
 
-// Mock dependencies
-jest.mock('../TagManager', () => ({
-  initialize: jest.fn(),
-  dataLayer: jest.fn(),
-  enableCookies: jest.fn(),
-  disableCookies: jest.fn(),
-  setUserProperty: jest.fn(),
+jest.mock('@next/third-parties/google', () => ({
+  sendGAEvent: jest.fn(),
 }))
 
 describe('gtm', () => {
@@ -29,7 +24,9 @@ describe('gtm', () => {
 
       gtm.gtmTrack(mockEventData)
 
-      expect(TagManager.dataLayer).toHaveBeenCalledWith(
+      expect(GA.sendGAEvent).toHaveBeenCalledWith(
+        'event',
+        'customClick',
         expect.objectContaining({
           event: mockEventData.event,
           eventCategory: mockEventData.category,
@@ -55,7 +52,9 @@ describe('gtm', () => {
 
       gtm.gtmTrack(mockEventData)
 
-      expect(TagManager.dataLayer).toHaveBeenCalledWith(
+      expect(GA.sendGAEvent).toHaveBeenCalledWith(
+        'event',
+        'customClick',
         expect.objectContaining({
           event: mockEventData.event,
           eventCategory: mockEventData.category,
@@ -95,7 +94,9 @@ describe('gtm', () => {
 
       gtm.gtmTrackSafeApp(mockEventData, mockAppName, mockSdkEventData)
 
-      expect(TagManager.dataLayer).toHaveBeenCalledWith(
+      expect(GA.sendGAEvent).toHaveBeenCalledWith(
+        'event',
+        'safeAppEvent',
         expect.objectContaining({
           appVersion: expect.any(String),
           chainId: expect.any(String),

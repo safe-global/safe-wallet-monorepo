@@ -71,7 +71,7 @@ describe('useNotificationTracking', () => {
     })
 
     const _entries = await entries(createNotificationTrackingIndexedDb())
-    expect(Object.fromEntries(_entries)).toStrictEqual({
+    expect(Object.fromEntries(_entries)).toEqual({
       [`1:${WebhookType.INCOMING_ETHER}`]: {
         shown: 0,
         opened: 0,

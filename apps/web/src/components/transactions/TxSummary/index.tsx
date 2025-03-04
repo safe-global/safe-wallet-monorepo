@@ -50,57 +50,31 @@ const TxSummary = ({ item, isConflictGroup, isBulkGroup }: TxSummaryProps): Reac
       id={tx.id}
     >
       {nonce !== undefined && !isConflictGroup && !isBulkGroup && (
-        <Box
-          data-testid="nonce"
-          className={css.nonce}
-          sx={{
-            gridArea: 'nonce',
-          }}
-        >
+        <Box data-testid="nonce" className={css.nonce} gridArea="nonce">
           {nonce}
         </Box>
       )}
+
       {(isImitationTransaction || !isTrusted) && (
-        <Box
-          data-testid="warning"
-          sx={{
-            gridArea: 'nonce',
-          }}
-        >
+        <Box data-testid="warning" gridArea="nonce">
           <MaliciousTxWarning withTooltip={!isImitationTransaction} />
         </Box>
       )}
-      <Box
-        data-testid="tx-type"
-        sx={{
-          gridArea: 'type',
-        }}
-      >
+
+      <Box data-testid="tx-type" gridArea="type">
         <TxType tx={tx} />
       </Box>
-      <Box
-        data-testid="tx-info"
-        sx={{
-          gridArea: 'info',
-        }}
-      >
+
+      <Box data-testid="tx-info" gridArea="info">
         <TxInfo info={tx.txInfo} />
       </Box>
-      <Box
-        data-testid="tx-date"
-        className={css.date}
-        sx={{
-          gridArea: 'date',
-        }}
-      >
+
+      <Box data-testid="tx-date" className={css.date} gridArea="date">
         <DateTime value={tx.timestamp} />
       </Box>
+
       {isQueue && executionInfo && (
-        <Box
-          sx={{
-            gridArea: 'confirmations',
-          }}
-        >
+        <Box gridArea="confirmations">
           {executionInfo.confirmationsSubmitted > 0 || isPending ? (
             <TxConfirmations
               submittedConfirmations={executionInfo.confirmationsSubmitted}
@@ -111,37 +85,15 @@ const TxSummary = ({ item, isConflictGroup, isBulkGroup }: TxSummaryProps): Reac
           )}
         </Box>
       )}
-      {isQueue && expiredSwap ? (
-        <Box
-          className={css.status}
-          sx={{
-            gridArea: 'status',
-            justifyContent: 'flex-end',
-            display: 'flex',
-          }}
-        >
-          <StatusLabel status="expired" />
+
+      {(!isQueue || expiredSwap || isPending) && (
+        <Box className={css.status} gridArea="status">
+          {isQueue && expiredSwap ? <StatusLabel status="expired" /> : <TxStatusLabel tx={tx} />}
         </Box>
-      ) : !isQueue || isPending ? (
-        <Box
-          className={css.status}
-          sx={{
-            gridArea: 'status',
-            justifyContent: 'flex-end',
-            display: 'flex',
-          }}
-        >
-          <TxStatusLabel tx={tx} />
-        </Box>
-      ) : (
-        ''
       )}
+
       {isQueue && !expiredSwap && (
-        <Box
-          sx={{
-            gridArea: 'actions',
-          }}
-        >
+        <Box gridArea="actions">
           <QueueActions tx={tx} />
         </Box>
       )}

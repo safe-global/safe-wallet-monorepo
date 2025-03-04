@@ -6,9 +6,8 @@ import type { SpendingLimitState } from '@/store/spendingLimitsSlice'
 import useChainId from '@/hooks/useChainId'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
 import type { JsonRpcProvider } from 'ethers'
-import { getSpendingLimitContract, getSpendingLimitModuleAddress } from '@/services/contracts/spendingLimitContracts'
+import { getSpendingLimitContract } from '@/services/contracts/spendingLimitContracts'
 import type { AddressEx, TokenInfo } from '@safe-global/safe-gateway-typescript-sdk'
-import { sameAddress } from '@/utils/addresses'
 import { type AllowanceModule } from '@/types/contracts'
 import { getERC20TokenInfoOnChain } from '@/utils/tokens'
 
@@ -20,10 +19,6 @@ import isEqual from 'lodash/isEqual'
 const DEFAULT_TOKEN_INFO = {
   decimals: 18,
   symbol: '',
-}
-
-const isModuleEnabled = (modules: string[], moduleAddress: string): boolean => {
-  return modules?.some((module) => sameAddress(module, moduleAddress)) ?? false
 }
 
 const discardZeroAllowance = (spendingLimit: SpendingLimitState): boolean =>
@@ -75,16 +70,12 @@ export const getSpendingLimits = async (
   chainId: string,
   tokenInfoFromBalances: TokenInfo[],
 ): Promise<SpendingLimitState[] | undefined> => {
-  const spendingLimitModuleAddress = getSpendingLimitModuleAddress(chainId)
-  if (!spendingLimitModuleAddress) return
-
-  const isSpendingLimitEnabled = isModuleEnabled(
-    safeModules.map((module) => module.value),
-    spendingLimitModuleAddress,
-  )
-  if (!isSpendingLimitEnabled) return
-
-  const contract = getSpendingLimitContract(chainId, provider)
+  let contract: ReturnType<typeof getSpendingLimitContract>
+  try {
+    contract = getSpendingLimitContract(chainId, safeModules, provider)
+  } catch {
+    return
+  }
   const delegates = await contract.getDelegates(safeAddress, 0, 100)
 
   const spendingLimits = await Promise.all(

@@ -3,7 +3,7 @@ import * as main from '../pages/main.page'
 import * as createTx from '../pages/create_tx.pages'
 import * as data from '../../fixtures/txhistory_data_data.json'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
-import { acceptCookies2 } from '../pages/main.page.js'
+import { acceptCookies2, closeSecurityNotice } from '../pages/main.page.js'
 
 let staticSafes = []
 
@@ -34,6 +34,8 @@ describe('[PROD] Tx history tests 1', () => {
 
     cy.visit(constants.prodbaseUrl + constants.transactionsHistoryUrl + staticSafes.SEP_STATIC_SAFE_7)
     cy.wait('@allTransactions')
+    cy.contains(createTx.txStr, { timeout: 10000 })
+    closeSecurityNotice()
     acceptCookies2()
   })
 
@@ -119,7 +121,8 @@ describe('[PROD] Tx history tests 1', () => {
     ])
   })
 
-  it('Verify advanced details displayed in exapanded details for allowance deletion', () => {
+  // Unskip when advanced details PR is merged to main
+  it.skip('Verify advanced details displayed in exapanded details for allowance deletion', () => {
     createTx.clickOnTransactionItemByName(typeDeleteAllowance.title, typeDeleteAllowance.summaryTxInfo)
     createTx.expandAdvancedDetails([typeDeleteAllowance.baseGas])
     createTx.collapseAdvancedDetails([typeDeleteAllowance.baseGas])

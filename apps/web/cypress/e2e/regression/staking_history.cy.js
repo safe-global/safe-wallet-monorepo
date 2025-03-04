@@ -33,7 +33,7 @@ describe('Staking history tests', { defaultCommandTimeout: 30000 }, () => {
     staking.checkDataFields(staking.dataFields.netMonthlyRewards, staking.getRewardRegex())
     staking.checkDataFields(staking.dataFields.fee, staking.getPercentageRegex())
     staking.checkDataFields(staking.dataFields.validators, '1')
-    staking.checkDataFields(staking.dataFields.activationTime, staking.getActivationTimeRegex())
+    staking.checkDataFields(staking.dataFields.activationTime, staking.checkActivationTimeNonEmpty())
     staking.checkDataFields(staking.dataFields.rewards, historyData.rewardsValue)
   })
 })

@@ -1,6 +1,5 @@
 import { useGetPendingTxsQuery } from '@safe-global/store/gateway'
 import { useMemo, useState } from 'react'
-import { useSelector } from 'react-redux'
 import {
   ConflictHeaderQueuedItem,
   LabelQueuedItem,
@@ -8,12 +7,12 @@ import {
   TransactionQueuedItem,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { groupPendingTxs } from '@/src/features/PendingTx/utils'
-import { selectActiveSafe } from '@/src/store/activeSafeSlice'
 import { safelyDecodeURIComponent } from 'expo-router/build/fork/getStateFromPath-forks'
 import { useInfiniteScroll } from '../useInfiniteScroll'
+import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 
 const usePendingTxs = () => {
-  const activeSafe = useSelector(selectActiveSafe)
+  const activeSafe = useDefinedActiveSafe()
   const [pageUrl, setPageUrl] = useState<string>()
 
   const { data, isLoading, isFetching, refetch, isUninitialized } = useGetPendingTxsQuery(

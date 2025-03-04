@@ -11,7 +11,6 @@ import {
 import type {
   ModuleExecutionInfo,
   TransactionDetails,
-  TransactionInfo,
   SwapTransferTransactionInfo,
   TwapOrderTransactionInfo,
   ConflictHeaderQueuedItem,
@@ -31,6 +30,8 @@ import type {
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
 import { HistoryTransactionItems, PendingTransactionItems } from '@safe-global/store/gateway/types'
+
+type TransactionInfo = Transaction['txInfo']
 
 const TransactionStatus = {
   AWAITING_CONFIRMATIONS: 'AWAITING_CONFIRMATIONS',
