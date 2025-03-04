@@ -428,9 +428,9 @@ const SafeLicenses = () => (
               </TableCell>
             </TableRow>
             <TableRow>
-              <TableCell>ethereum-blockies-base64</TableCell>
+              <TableCell>blo</TableCell>
               <TableCell>
-                <ExternalLink href="https://github.com/MyCryptoHQ/ethereum-blockies-base64" />
+                <ExternalLink href="https://github.com/bpierre/blo" />
               </TableCell>
             </TableRow>
             <TableRow>
