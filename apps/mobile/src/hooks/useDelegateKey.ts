@@ -74,7 +74,7 @@ export function useDelegateKey(safeOwner?: AddressInfo) {
         address: signerAccount.address,
         chainId: Number(activeSafe.chainId),
         nonce,
-        statement: 'SafeWallet wants you to sign in with your Ethereum account',
+        statement: 'Safe Wallet wants you to sign in with your Ethereum account',
       })
 
       // Step 4 - Triggers the backend to create the delegate
