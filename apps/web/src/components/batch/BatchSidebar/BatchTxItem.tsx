@@ -83,7 +83,13 @@ const BatchTxItem = ({ id, count, timestamp, txDetails, onDelete }: BatchTxItemP
 
         <AccordionDetails>
           <div className={css.details}>
-            <TxData txDetails={txDetails} trusted imitation={false} />
+            <TxData
+              txInfo={txDetails.txInfo}
+              txData={txDetails.txData}
+              txDetails={txDetails}
+              trusted
+              imitation={false}
+            />
 
             <TxDataRow title="Created:">{timestamp ? dateString(timestamp) : null}</TxDataRow>
 

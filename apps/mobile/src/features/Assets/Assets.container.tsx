@@ -12,7 +12,7 @@ const tabItems = [
     Component: TokensContainer,
   },
   {
-    label: `NFT's`,
+    label: `NFTs`,
     Component: NFTsContainer,
   },
 ]

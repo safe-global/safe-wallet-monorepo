@@ -1,14 +1,10 @@
 import { type ChangeEvent, type ReactElement } from 'react'
 import { Box, FormControlLabel, Switch } from '@mui/material'
-import { localItem } from '@/services/local-storage/local'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import { setDarkMode } from '@/store/settingsSlice'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import { useAppDispatch } from '@/store'
-
-const LS_KEY = 'debugProdCgw'
-
-export const cgwDebugStorage = localItem<boolean>(LS_KEY)
+import { LS_KEY } from '@/config/gateway'
 
 const DebugToggle = (): ReactElement => {
   const dispatch = useAppDispatch()

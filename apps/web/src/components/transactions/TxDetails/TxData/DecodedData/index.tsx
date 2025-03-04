@@ -28,7 +28,7 @@ export const DecodedData = ({ txData, toInfo }: Props): ReactElement | null => {
 
     return (
       <SendToBlock
-        title="Interact with"
+        title="Interact with:"
         address={toInfo.value}
         name={toInfo.name}
         customAvatar={toInfo.logoUri}

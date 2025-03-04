@@ -151,10 +151,24 @@ describe('Tx history tests 1', () => {
     ])
   })
 
-  // Added to prod
+  // Added to prod (skipped)
   it('Verify advanced details displayed in exapanded details for allowance deletion', () => {
     createTx.clickOnTransactionItemByName(typeDeleteAllowance.title, typeDeleteAllowance.summaryTxInfo)
-    createTx.expandAdvancedDetails([typeDeleteAllowance.baseGas])
+    createTx.expandAdvancedDetails([
+      typeDeleteAllowance.baseGas,
+      typeDeleteAllowance.operation,
+      typeDeleteAllowance.zero_call,
+    ])
+    createTx.switchView(createTx.advancedDetailsViewOptions.table)
     createTx.collapseAdvancedDetails([typeDeleteAllowance.baseGas])
+  })
+
+  it('Verify address can be copied in advanced details', () => {
+    const data =
+      '0x885133e3000000000000000000000000c16db0251654c0a72e91b190d81ead367d2c6fed0000000000000000000000000000000000000000000000000000000000000000'
+    createTx.clickOnTransactionItemByName(typeDeleteAllowance.title, typeDeleteAllowance.summaryTxInfo)
+    createTx.expandAdvancedDetails([typeDeleteAllowance.baseGas])
+    createTx.switchView(createTx.advancedDetailsViewOptions.table)
+    createTx.clickOnCopyDataBtn(data)
   })
 })

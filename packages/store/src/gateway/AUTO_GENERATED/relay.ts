@@ -37,4 +37,5 @@ export type RelayDto = {
           Gelato Relay execution overhead</a>, reducing the chance of the task cancelling before it is executed on-chain. */
   gasLimit?: string | null
 }
-export const { useRelayRelayV1Mutation, useRelayGetRelaysRemainingV1Query } = injectedRtkApi
+export const { useRelayRelayV1Mutation, useRelayGetRelaysRemainingV1Query, useLazyRelayGetRelaysRemainingV1Query } =
+  injectedRtkApi

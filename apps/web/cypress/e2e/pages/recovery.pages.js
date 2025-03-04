@@ -197,6 +197,7 @@ export function verifyRecoveryModalDisplayed() {
 
 export function deleteRecoveryModule() {
   cy.get(moduleRemoveIcon).click()
+  main.acceptCookies()
   clickOnNextBtn()
   tx.executeFlow_1()
 }

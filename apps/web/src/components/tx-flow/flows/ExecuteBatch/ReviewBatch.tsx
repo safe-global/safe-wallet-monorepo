@@ -11,7 +11,7 @@ import type { SyntheticEvent } from 'react'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import { ExecutionMethod, ExecutionMethodSelector } from '@/components/tx/ExecutionMethodSelector'
 import DecodedTxs from '@/components/tx-flow/flows/ExecuteBatch/DecodedTxs'
-import { TxSimulation } from '@/components/tx/security/tenderly'
+import TxChecks from '@/components/tx/SignOrExecuteForm/TxChecks'
 import { useRelaysBySafe } from '@/hooks/useRemainingRelays'
 import useOnboard from '@/hooks/wallets/useOnboard'
 import { logError, Errors } from '@/services/exceptions'
@@ -180,13 +180,7 @@ export const ReviewBatch = ({ params }: { params: ExecuteBatchFlowProps }) => {
         </div>
       </TxCard>
 
-      {multiSendTxs && (
-        <TxCard>
-          <Typography variant="h5">Transaction checks</Typography>
-
-          <TxSimulation transactions={multiSendTxs} disabled={submitDisabled} />
-        </TxCard>
-      )}
+      {multiSendTxs && <TxChecks disabled={submitDisabled} transaction={multiSendTxs} />}
 
       <TxCard>
         <ConfirmationTitle variant={ConfirmationTitleTypes.execute} />

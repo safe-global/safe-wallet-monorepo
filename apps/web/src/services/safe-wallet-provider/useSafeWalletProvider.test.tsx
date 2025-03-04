@@ -96,7 +96,7 @@ describe('useSafeWalletProvider', () => {
       const { result } = renderHook(() => useTxFlowApi('1', '0x1234567890000000000000000000000000000000'), {
         // TODO: Improve render/renderHook to allow custom wrappers within the "defaults"
         wrapper: ({ children }) => (
-          <Provider store={makeStore()}>
+          <Provider store={makeStore(undefined, { skipBroadcast: true })}>
             <TxModalContext.Provider value={{ setTxFlow: mockSetTxFlow } as any}>{children}</TxModalContext.Provider>
           </Provider>
         ),
@@ -126,14 +126,17 @@ describe('useSafeWalletProvider', () => {
 
       const mockSetTxFlow = jest.fn()
 
-      const testStore = makeStore({
-        settings: {
-          signing: {
-            onChainSigning: false,
-            blindSigning: false,
+      const testStore = makeStore(
+        {
+          settings: {
+            signing: {
+              onChainSigning: false,
+              blindSigning: false,
+            },
           },
-        },
-      } as Partial<RootState>)
+        } as Partial<RootState>,
+        { skipBroadcast: true },
+      )
 
       const { result } = renderHook(() => useTxFlowApi('1', '0x1234567890000000000000000000000000000000'), {
         // TODO: Improve render/renderHook to allow custom wrappers within the "defaults"
@@ -178,7 +181,7 @@ describe('useSafeWalletProvider', () => {
       const { result } = renderHook(() => useTxFlowApi('1', '0x1234567890000000000000000000000000000000'), {
         // TODO: Improve render/renderHook to allow custom wrappers within the "defaults"
         wrapper: ({ children }) => (
-          <Provider store={makeStore()}>
+          <Provider store={makeStore(undefined, { skipBroadcast: true })}>
             <TxModalContext.Provider value={{ setTxFlow: mockSetTxFlow } as any}>{children}</TxModalContext.Provider>
           </Provider>
         ),
@@ -248,7 +251,7 @@ describe('useSafeWalletProvider', () => {
       const { result } = renderHook(() => useTxFlowApi('1', '0x1234567890000000000000000000000000000000'), {
         // TODO: Improve render/renderHook to allow custom wrappers within the "defaults"
         wrapper: ({ children }) => (
-          <Provider store={makeStore()}>
+          <Provider store={makeStore(undefined, { skipBroadcast: true })}>
             <TxModalContext.Provider value={{ setTxFlow: mockSetTxFlow } as any}>{children}</TxModalContext.Provider>
           </Provider>
         ),

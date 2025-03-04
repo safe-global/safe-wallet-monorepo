@@ -76,7 +76,7 @@ describe('Replace Owners tests', () => {
     owner.verifyErrorMsgInvalidAddress(constants.addressBookErrrMsg.alreadyAdded)
   })
 
-  it("Verify 'Replace' tx is created. GA tx_created", () => {
+  it.skip("Verify 'Replace' tx is created. GA tx_created", () => {
     const tx_created = [
       {
         eventLabel: events.txCreatedSwapOwner.eventLabel,

@@ -1,6 +1,7 @@
 import { Dimensions, StyleSheet } from 'react-native'
 import { H1, Image, View } from 'tamagui'
 import Signing from '@/assets/images/illustration.png'
+
 import TrackAnywhere from '@/assets/images/anywhere.png'
 import { CarouselItem } from './CarouselItem'
 import { ParticlesLogo } from '../ParticlesLogo'
@@ -16,6 +17,9 @@ const styles = StyleSheet.create({
   },
   signing: {
     height: Math.abs(windowHeight * 0.3),
+  },
+  notifications: {
+    height: Math.abs(windowHeight * 0.32),
   },
   textContainer: {
     textAlign: 'center',

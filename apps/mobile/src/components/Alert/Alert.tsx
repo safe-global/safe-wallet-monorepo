@@ -9,6 +9,7 @@ export type AlertType = 'error' | 'warning' | 'info' | 'success'
 interface AlertProps {
   type: AlertType
   message: string
+  info?: string
   iconName?: IconName
   displayIcon?: boolean
   fullWidth?: boolean
@@ -43,6 +44,7 @@ export const Alert = ({
   displayIcon = true,
   onPress,
   testID,
+  info,
 }: AlertProps) => {
   const Icon = getAlertIcon(type, iconName, displayIcon)
   return (
@@ -56,15 +58,23 @@ export const Alert = ({
             flexDirection="row"
             justifyContent="center"
             backgroundColor="$background"
-            paddingHorizontal="$2"
+            paddingHorizontal="$7"
             paddingVertical="$3"
             borderRadius={'$2'}
           >
             {startIcon ? <View testID="alert-start-icon">{startIcon}</View> : Icon}
 
-            <Text fontSize={'$4'} fontWeight={'600'} fontFamily={'$body'}>
-              {message}
-            </Text>
+            <View gap={'$1'}>
+              <Text fontSize={'$4'} fontWeight={'600'} fontFamily={'$body'}>
+                {message}
+              </Text>
+
+              {info && (
+                <Text fontSize={'$3'} fontFamily={'$body'}>
+                  {info}
+                </Text>
+              )}
+            </View>
 
             {endIcon && <View testID="alert-end-icon">{endIcon}</View>}
           </View>

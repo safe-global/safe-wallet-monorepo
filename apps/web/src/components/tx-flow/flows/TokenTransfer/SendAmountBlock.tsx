@@ -43,7 +43,7 @@ const SendAmountBlock = ({
         {children}
 
         <Typography data-testid="token-amount">
-          {formatVisualAmount(amountInWei, tokenInfo.decimals, tokenInfo.decimals)}
+          {formatVisualAmount(amountInWei, tokenInfo.decimals, tokenInfo.decimals ?? 0)}
         </Typography>
       </Box>
     </FieldsGrid>

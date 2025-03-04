@@ -5,6 +5,7 @@ import * as create_tx from '../pages/create_tx.pages.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as wallet from '../../support/utils/wallet.js'
 import * as swaps_data from '../../fixtures/swaps_data.json'
+import * as data from '../../fixtures/txhistory_data_data.json'
 
 const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
 const signer = walletCredentials.OWNER_4_PRIVATE_KEY
@@ -14,31 +15,42 @@ let staticSafes = []
 let iframeSelector
 
 const swapsHistory = swaps_data.type.history
+const swapOrder = swaps_data.type.orderDetails
+const typeGeneral = data.type.general
 
 describe('Twaps history tests', { defaultCommandTimeout: 30000 }, () => {
   before(async () => {
     staticSafes = await getSafes(CATEGORIES.static)
   })
 
-  // Blocked by bug on UI
-  it.skip('Verify order deails', () => {
+  it('Verify order details', { defaultCommandTimeout: 60000 }, () => {
+    const limitPrice = swaps.createRegex(swapOrder.DAIeqCOW, 'COW')
+    const widgetFee = swaps.getWidgetFee()
+    const slippage = swaps.getWidgetFee()
+
     cy.visit(constants.swapUrl + staticSafes.SEP_STATIC_SAFE_27)
     main.waitForHistoryCallToComplete()
     wallet.connectSigner(signer)
     iframeSelector = `iframe[src*="${constants.swapWidget}"]`
     swaps.acceptLegalDisclaimer()
-    cy.wait(4000)
     main.getIframeBody(iframeSelector).within(() => {
       swaps.switchToTwap()
       swaps.selectInputCurrency(swaps.swapTokens.cow)
       swaps.setInputValue(500)
-      cy.wait(5000)
       swaps.selectOutputCurrency(swaps.swapTokens.dai)
-      cy.wait(5000)
+      swaps.verifyReviewOrderBtnIsVisible()
       swaps.getTwapInitialData().then((formData) => {
-        swaps.clickOnReviewTwapBtn()
-        swaps.checkTwapValuesInReviewScreen(formData)
+        cy.wrap(formData).as('twapFormData')
+        swaps.clickOnReviewOrderBtn()
+        swaps.placeTwapOrder()
       })
+    })
+
+    cy.get('@twapFormData').then((formData) => {
+      swaps.checkTwapValuesInReviewScreen(formData)
+      cy.get('p').contains(swapsHistory.slippage).parent().next().contains(slippage)
+      cy.get('p').contains(swapsHistory.widget_fee).parent().next().contains(widgetFee)
+      cy.get('p').contains(swapsHistory.limitPrice).parent().next().contains(limitPrice)
     })
   })
 
@@ -82,6 +94,8 @@ describe('Twaps history tests', { defaultCommandTimeout: 30000 }, () => {
     const buyAmount = swaps.getTokenPrice('DAI')
     const tokenSoldPrice = swaps.getTokenPrice('WETH')
 
+    create_tx.verifySummaryByName(swapsHistory.twaporder_title, null, [typeGeneral.statusOk])
+    main.verifyElementsExist([create_tx.altImgDai, create_tx.altImgWeth], create_tx.altImgTwapOrder)
     create_tx.verifyExpandedDetails([swapsHistory.sell, weth, eq, swapsHistory.dai, swapsHistory.filled])
     swaps.checkNumberOfParts(2)
     swaps.checkSellAmount(sellAmount)

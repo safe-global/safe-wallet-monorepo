@@ -10,4 +10,4 @@ to be copied to the `assets/fonts/safe-icons` folder.
 There is a lint-staged hook that will run the `generate:icons` script whenever it detects that the `selection.json` file
 has been changed. The script will then regenerate the possible icon names.
 
-You can also manually run the script with `npm run generate:icons`.
+You can also manually run the script with `yarn workspace @safe-global/mobile generate:icons`.

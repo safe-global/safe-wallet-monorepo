@@ -1,4 +1,4 @@
-const preset = require('../../config/jest-presets/presets/jest-preset')
+const preset = require('../../config/test/presets/jest-preset')
 
 module.exports = {
   ...preset,
@@ -18,7 +18,7 @@ module.exports = {
       '<rootDir>/__mocks__/fileMock.js',
   },
   transformIgnorePatterns: [
-    'node_modules/(?!((jest-)?react-native|@react-native(-community)?)|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@sentry/react-native|native-base|react-native-svg|react-redux|moti/.*)',
+    'node_modules/(?!((jest-)?react-native|@react-native(-community)?)|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@sentry/react-native|native-base|react-native-svg|@notifee/react-native|react-redux|moti/.*)',
   ],
   testPathIgnorePatterns: ['/node_modules/', '/e2e/'],
 }

@@ -59,8 +59,8 @@ exports[`PendingTransactions should render the pending transactions in fullWidth
             "gap": 12,
             "justifyContent": "center",
             "paddingBottom": 12,
-            "paddingLeft": 8,
-            "paddingRight": 8,
+            "paddingLeft": 28,
+            "paddingRight": 28,
             "paddingTop": 12,
             "width": "100%",
           }
@@ -106,18 +106,26 @@ exports[`PendingTransactions should render the pending transactions in fullWidth
             </Text>
           </View>
         </View>
-        <Text
+        <View
           style={
             {
-              "color": "#FF8C00",
-              "fontFamily": "DMSans-SemiBold",
-              "fontSize": 16,
+              "gap": 4,
             }
           }
-          suppressHighlighting={true}
         >
-          Pending Transactions
-        </Text>
+          <Text
+            style={
+              {
+                "color": "#FF8C00",
+                "fontFamily": "DMSans-SemiBold",
+                "fontSize": 16,
+              }
+            }
+            suppressHighlighting={true}
+          >
+            Pending Transactions
+          </Text>
+        </View>
         <View
           testID="alert-end-icon"
         >

@@ -23,15 +23,10 @@ const setupFetchStub = (data: any) => () => {
   })
 }
 
+const originalGlobalFetch = global.fetch
 describe('useSimulation()', () => {
-  afterEach(() => {
-    //@ts-ignore
-    global.fetch?.mockClear?.()
-  })
-
   afterAll(() => {
-    // @ts-ignore
-    delete global.fetch
+    global.fetch = originalGlobalFetch
   })
 
   beforeEach(() => {

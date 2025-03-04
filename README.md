@@ -39,7 +39,7 @@ yarn
 
 This will install the required version of yarn and resolve all dependencies.
 
-> [!INFO]
+> [!NOTE]
 >
 > Corepack is a tool to help with managing versions of your package managers. It exposes binary proxies for each supported package manager that, when called, will identify whatever package manager is
 > configured for the current project, download it if needed, and finally run it.

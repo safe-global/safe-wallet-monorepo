@@ -219,3 +219,33 @@ Cypress.Commands.add('setupInterceptors', () => {
     req.continue()
   }).as('headers')
 })
+
+Cypress.Commands.overwrite('visit', (originalFn, url, options = {}) => {
+  const maxRetries = 3
+  let attempt = 0
+
+  function attemptVisit(resolve, reject) {
+    originalFn(url, options)
+      .then((response) => {
+        if (response && response.status === 429) {
+          if (attempt < maxRetries) {
+            attempt++
+            const waitTime = 6000
+            console.warn(
+              `Rate limit (429) detected! Retrying in ${waitTime / 1000} seconds... Attempt ${attempt}/${maxRetries}`,
+            )
+            cy.wait(waitTime).then(() => attemptVisit(resolve, reject))
+          } else {
+            reject(new Error(`cy.visit failed after ${maxRetries + 1} attempts due to 429 rate limit.`))
+          }
+        } else {
+          resolve(response)
+        }
+      })
+      .catch(reject)
+  }
+
+  return new Cypress.Promise((resolve, reject) => {
+    attemptVisit(resolve, reject)
+  })
+})

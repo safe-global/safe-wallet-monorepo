@@ -8,6 +8,8 @@ import * as navigation from '../pages/navigation.page.js'
 import * as create_wallet from '../pages/create_wallet.pages.js'
 import * as owner from '../pages/owners.pages.js'
 
+import { suspendOutreachModal } from '../pages/modals.page.js'
+
 let staticSafes = []
 
 const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
@@ -15,8 +17,7 @@ const signer = walletCredentials.OWNER_4_PRIVATE_KEY
 // DO NOT use OWNER_2_PRIVATE_KEY for safe creation. Used for CF safes.
 const signer2 = walletCredentials.OWNER_2_PRIVATE_KEY
 
-// Skip due to issues with Polygon
-describe.skip('Multichain setup tests', { defaultCommandTimeout: 30000 }, () => {
+describe('Multichain setup tests', { defaultCommandTimeout: 60000 }, () => {
   before(async () => {
     staticSafes = await getSafes(CATEGORIES.static)
   })
@@ -72,6 +73,8 @@ describe.skip('Multichain setup tests', { defaultCommandTimeout: 30000 }, () => 
     cy.visit(constants.setupUrl + safe)
 
     owner.waitForConnectionStatus()
+    navigation.verifyTxBtnStatus(constants.enabledStates.enabled)
+    suspendOutreachModal()
     owner.openRemoveOwnerWindow(1)
     cy.wait(1000)
     create_wallet.clickOnNextBtn()
@@ -82,6 +85,8 @@ describe.skip('Multichain setup tests', { defaultCommandTimeout: 30000 }, () => 
     let safe = main.changeSafeChainName(staticSafes.MATIC_STATIC_SAFE_28, 'sep')
     cy.visit(constants.setupUrl + safe)
     owner.waitForConnectionStatus()
+    navigation.verifyTxBtnStatus(constants.enabledStates.enabled)
+    suspendOutreachModal()
     owner.clickOnChangeThresholdBtn()
     create_wallet.updateThreshold(2)
     owner.clickOnThresholdNextBtn()
@@ -92,6 +97,8 @@ describe.skip('Multichain setup tests', { defaultCommandTimeout: 30000 }, () => 
     let safe = main.changeSafeChainName(staticSafes.MATIC_STATIC_SAFE_28, 'sep')
     cy.visit(constants.setupUrl + safe)
     owner.waitForConnectionStatus()
+    navigation.verifyTxBtnStatus(constants.enabledStates.enabled)
+    suspendOutreachModal()
     owner.openReplaceOwnerWindow(1)
     owner.typeOwnerAddress(constants.SEPOLIA_OWNER_2)
     cy.wait(2000)

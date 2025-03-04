@@ -4,16 +4,24 @@ import { getIndexingStatus } from '@safe-global/safe-gateway-typescript-sdk'
 import useAsync from '@/hooks/useAsync'
 import useChainId from '@/hooks/useChainId'
 import ExternalLink from '@/components/common/ExternalLink'
+import useIntervalCounter from '@/hooks/useIntervalCounter'
 
 const STATUS_PAGE = 'https://status.safe.global'
 const MAX_SYNC_DELAY = 1000 * 60 * 5 // 5 minutes
+const POLL_INTERVAL = 1000 * 60 // 1 minute
 
 const useIndexingStatus = () => {
   const chainId = useChainId()
+  const [count] = useIntervalCounter(POLL_INTERVAL)
 
-  return useAsync(() => {
-    return getIndexingStatus(chainId)
-  }, [chainId])
+  return useAsync(
+    () => {
+      if (count === undefined) return
+      return getIndexingStatus(chainId)
+    },
+    [chainId, count],
+    false,
+  )
 }
 
 const STATUSES = {
@@ -56,7 +64,7 @@ const IndexingStatus = () => {
 
   return (
     <Tooltip title={`Last synced with the blockchain ${time}`} placement="right" arrow>
-      <Stack direction="row" spacing={2} alignItems="center" px={3} py={1.5}>
+      <Stack data-testid="index-status" direction="row" spacing={2} alignItems="center" px={3} py={1.5}>
         <Box width={10} height={10} borderRadius="50%" border={`2px solid var(--color-${status.color}-main)`} />
 
         <ExternalLink href={STATUS_PAGE} noIcon flex={1}>

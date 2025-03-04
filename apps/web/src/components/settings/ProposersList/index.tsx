@@ -1,7 +1,7 @@
-import CheckWallet from '@/components/common/CheckWallet'
 import { Chip } from '@/components/common/Chip'
 import EnhancedTable from '@/components/common/EnhancedTable'
 import tableCss from '@/components/common/EnhancedTable/styles.module.css'
+import OnlyOwner from '@/components/common/OnlyOwner'
 import Track from '@/components/common/Track'
 import UpsertProposer from '@/features/proposers/components/UpsertProposer'
 import DeleteProposerDialog from '@/features/proposers/components/DeleteProposerDialog'
@@ -100,7 +100,7 @@ const ProposersList = () => {
 
             {isEnabled && (
               <Box mb={2}>
-                <CheckWallet allowProposer={false}>
+                <OnlyOwner>
                   {(isOk) => (
                     <Track {...SETTINGS_EVENTS.PROPOSERS.ADD_PROPOSER}>
                       <Button
@@ -115,7 +115,7 @@ const ProposersList = () => {
                       </Button>
                     </Track>
                   )}
-                </CheckWallet>
+                </OnlyOwner>
               </Box>
             )}
 

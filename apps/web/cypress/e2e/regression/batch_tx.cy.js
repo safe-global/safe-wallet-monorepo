@@ -88,4 +88,27 @@ describe('Batch transaction tests', { defaultCommandTimeout: 30000 }, () => {
       cy.get(batch.batchTxTopBar).should('not.exist')
     })
   })
+
+  it('Verify a transaction can be added to the batch', () => {
+    wallet.connectSigner(signer)
+    batch.addNewTransactionToBatch(constants.EOA, currentNonce, funds_first_tx)
+    batch.verifyBatchIconCount(1)
+    batch.clickOnBatchCounter()
+    batch.verifyAmountTransactionsInBatch(1)
+  })
+
+  it('Verify a transaction can be removed from the batch', () => {
+    cy.wrap(null)
+      .then(() => main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__batch, ls.batchData.entry0))
+      .then(() => main.isItemInLocalstorage(constants.localStorageKeys.SAFE_v2__batch, ls.batchData.entry0))
+      .then(() => {
+        cy.reload()
+        wallet.connectSigner(signer)
+        batch.clickOnBatchCounter()
+        cy.contains(batch.batchedTransactionsStr).should('be.visible').parents('aside').find('ul > li').as('BatchList')
+        cy.get('@BatchList').find(batch.deleteTransactionbtn).eq(0).click()
+        cy.get('@BatchList').should('have.length', 1)
+        cy.get('@BatchList').contains(funds_first_tx).should('not.exist')
+      })
+  })
 })

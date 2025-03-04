@@ -15,7 +15,7 @@ interface Props {
 
 export const PendingTransactions = ({ number, isLoading, fullWidth, onPress }: Props) => {
   const startIcon = isLoading ? <Spinner size="small" color="$warning1ContrastTextDark" /> : <Badge content={number} />
-  const endIcon = <SafeFontIcon name="arrow-right" size={20} />
+  const endIcon = <SafeFontIcon name="chevron-right" size={20} />
 
   return (
     <Alert

@@ -97,8 +97,11 @@ export type UpsertAccountDataSettingsDto = {
 export const {
   useAccountsCreateAccountV1Mutation,
   useAccountsGetDataTypesV1Query,
+  useLazyAccountsGetDataTypesV1Query,
   useAccountsGetAccountDataSettingsV1Query,
+  useLazyAccountsGetAccountDataSettingsV1Query,
   useAccountsUpsertAccountDataSettingsV1Mutation,
   useAccountsGetAccountV1Query,
+  useLazyAccountsGetAccountV1Query,
   useAccountsDeleteAccountV1Mutation,
 } = injectedRtkApi
