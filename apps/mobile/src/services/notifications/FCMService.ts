@@ -24,7 +24,6 @@ class FCMService {
       await messaging().registerDeviceForRemoteMessages()
 
       const fcmToken = await withTimeout(messaging().getToken(), 10000)
-
       Logger.info('FCMService :: fcmToken', fcmToken)
       if (fcmToken) {
         store.dispatch(savePushToken(fcmToken))

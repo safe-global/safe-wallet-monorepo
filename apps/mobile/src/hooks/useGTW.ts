@@ -75,7 +75,7 @@ export function useGTW() {
         }
 
         const NOTIFICATIONS_GRANTED =
-          delegatedAccountType === DELEGATED_ACCOUNT_TYPE.REGULAR ? REGULAR_NOTIFICATIONS : OWNER_NOTIFICATIONS
+          delegatedAccountType !== DELEGATED_ACCOUNT_TYPE.REGULAR ? REGULAR_NOTIFICATIONS : OWNER_NOTIFICATIONS
 
         await notificationsUpsertSubscriptionsV2({
           upsertSubscriptionsDto: {
