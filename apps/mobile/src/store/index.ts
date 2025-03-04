@@ -6,6 +6,7 @@ import activeSafe from './activeSafeSlice'
 import signers from './signersSlice'
 import myAccounts from './myAccountsSlice'
 import notifications from './notificationsSlice'
+import addressBook from './addressBookSlice'
 import settings from './settingsSlice'
 import safes from './safesSlice'
 import { cgwClient, setBaseUrl } from '@safe-global/store/gateway/cgwClient'
@@ -24,6 +25,7 @@ export const rootReducer = combineReducers({
   safes,
   activeSafe,
   notifications,
+  addressBook,
   myAccounts,
   signers,
   settings,
