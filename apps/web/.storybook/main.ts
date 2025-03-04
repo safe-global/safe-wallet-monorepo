@@ -1,4 +1,5 @@
 import type { StorybookConfig } from '@storybook/nextjs'
+import path from 'path'
 
 const config: StorybookConfig = {
   stories: ['../src/**/*.mdx', '../src/**/*.stories.@(js|jsx|mjs|ts|tsx)'],
@@ -11,10 +12,14 @@ const config: StorybookConfig = {
     '@storybook/addon-themes',
     '@storybook/addon-designs',
   ],
-  framework: {
-    name: '@storybook/nextjs',
-    options: {},
-  },
+  /**
+   * In our monorepo setup, if we just specify the name,
+   * we end up with the wrong path to webpack5 preset. We need to
+   * resolve the path:
+   *
+   * https://github.com/storybookjs/storybook/issues/21216#issuecomment-2187481646
+   */
+  framework: path.resolve(require.resolve('@storybook/nextjs/preset'), '..'),
   webpackFinal: async (config) => {
     config.module = config.module || {}
     config.module.rules = config.module.rules || []

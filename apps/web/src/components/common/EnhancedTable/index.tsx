@@ -191,6 +191,7 @@ function EnhancedTable({
 
       {rows.length > pagedRows.length && (
         <TablePagination
+          data-testid="table-pagination"
           rowsPerPageOptions={pageSizes}
           component="div"
           count={rows.length}

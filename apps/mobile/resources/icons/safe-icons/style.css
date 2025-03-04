@@ -1,9 +1,9 @@
 @font-face {
   font-family: 'safe-icons';
   src:
-    url('fonts/safe-icons.ttf?oqz473') format('truetype'),
-    url('fonts/safe-icons.woff?oqz473') format('woff'),
-    url('fonts/safe-icons.svg?oqz473#safe-icons') format('svg');
+    url('fonts/safe-icons.ttf?jkgn01') format('truetype'),
+    url('fonts/safe-icons.woff?jkgn01') format('woff'),
+    url('fonts/safe-icons.svg?jkgn01#safe-icons') format('svg');
   font-weight: normal;
   font-style: normal;
   font-display: block;
@@ -24,350 +24,330 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-.icon-block:before {
+.icon-add-owner:before {
   content: "\e900";
-  color: #ff5f72;
+}
+.icon-address-book:before {
+  content: "\e901";
 }
 .icon-alert-triangle:before {
-  content: "\e901";
-  color: #ff5f72;
-}
-.icon-alert:before {
   content: "\e902";
   color: #ff5f72;
 }
-.icon-info:before {
+.icon-alert:before {
   content: "\e903";
+  color: #ff5f72;
 }
-.icon-question:before {
+.icon-appearance:before {
   content: "\e904";
 }
-.icon-points:before {
+.icon-apps:before {
   content: "\e905";
 }
-.icon-code-blocks:before {
+.icon-arrow-down:before {
   content: "\e906";
 }
-.icon-hardware:before {
+.icon-arrow-left:before {
   content: "\e907";
 }
-.icon-keystone:before {
+.icon-arrow-sort:before {
   content: "\e908";
 }
-.icon-ledger:before {
+.icon-arrow-up:before {
   content: "\e909";
 }
-.icon-seed:before {
+.icon-arrrow-right:before {
   content: "\e90a";
 }
-.icon-key:before {
+.icon-batch:before {
   content: "\e90b";
 }
-.icon-dapp-logo:before {
+.icon-bell:before {
   content: "\e90c";
 }
-.icon-double-arrow:before {
+.icon-block:before {
   content: "\e90d";
+  color: #ff5f72;
 }
-.icon-arrow-sort:before {
+.icon-blocks-1:before {
   content: "\e90e";
 }
-.icon-dropdown-arrow-small:before {
+.icon-blocks:before {
   content: "\e90f";
 }
-.icon-options-vertical:before {
+.icon-bookmark-filled:before {
   content: "\e910";
 }
-.icon-options-horizontal:before {
+.icon-bookmark:before {
   content: "\e911";
 }
-.icon-check-oulined:before {
+.icon-camera:before {
   content: "\e912";
 }
-.icon-check:before {
+.icon-chat:before {
   content: "\e913";
 }
 .icon-check-filled:before {
   content: "\e914";
 }
-.icon-arrow-down-1:before {
+.icon-check-oulined:before {
   content: "\e915";
 }
-.icon-arrow-down:before {
+.icon-check:before {
   content: "\e916";
 }
-.icon-arrow-up:before {
+.icon-chevron-down:before {
   content: "\e917";
 }
-.icon-arrow-left:before {
+.icon-chevron-left:before {
   content: "\e918";
 }
-.icon-arrow-right:before {
+.icon-chevron-right:before {
   content: "\e919";
 }
-.icon-tag:before {
+.icon-chevron-up:before {
   content: "\e91a";
 }
-.icon-camera:before {
+.icon-clock:before {
   content: "\e91b";
 }
-.icon-element-drag:before {
+.icon-close-filled:before {
   content: "\e91c";
 }
-.icon-transaction-partial-fill:before {
+.icon-close-outlined:before {
   content: "\e91d";
 }
-.icon-rows-2 .path1:before {
+.icon-close:before {
   content: "\e91e";
-  color: rgb(0, 0, 0);
 }
-.icon-rows-2 .path2:before {
+.icon-code-blocks:before {
   content: "\e91f";
-  margin-left: -1em;
-  color: rgb(0, 0, 0);
 }
-.icon-rows-2 .path3:before {
+.icon-copy:before {
   content: "\e920";
-  margin-left: -1em;
-  color: rgb(0, 0, 0);
 }
-.icon-rows-2 .path4:before {
+.icon-dapp-logo:before {
   content: "\e921";
-  margin-left: -1em;
-  color: rgb(18, 19, 18);
 }
-.icon-rows-2 .path5:before {
+.icon-delete:before {
   content: "\e922";
-  margin-left: -1em;
-  color: rgb(18, 19, 18);
 }
-.icon-rows-2 .path6:before {
+.icon-desktop:before {
   content: "\e923";
-  margin-left: -1em;
-  color: rgb(18, 19, 18);
 }
-.icon-check-notifications:before {
+.icon-document:before {
   content: "\e924";
 }
-.icon-qr-code-1:before {
+.icon-double-arrow:before {
   content: "\e925";
 }
-.icon-scan-1:before {
+.icon-download:before {
   content: "\e926";
 }
-.icon-shield-crossed:before {
+.icon-dropdown-arrow-small:before {
   content: "\e927";
 }
-.icon-shield:before {
+.icon-edit-owner:before {
   content: "\e928";
 }
-.icon-clock:before {
+.icon-edit:before {
   content: "\e929";
 }
-.icon-update:before {
+.icon-element-drag:before {
   content: "\e92a";
 }
-.icon-repeat:before {
+.icon-experimental:before {
   content: "\e92b";
 }
-.icon-download:before {
+.icon-export:before {
   content: "\e92c";
 }
-.icon-upload:before {
+.icon-external-link:before {
   content: "\e92d";
 }
-.icon-qr-code:before {
+.icon-eye-n:before {
   content: "\e92e";
 }
-.icon-scan:before {
+.icon-eye-off:before {
   content: "\e92f";
 }
-.icon-eye-n:before {
+.icon-file:before {
   content: "\e930";
 }
-.icon-eye-off:before {
+.icon-filter:before {
   content: "\e931";
 }
-.icon-unlock:before {
+.icon-hardware:before {
   content: "\e932";
 }
-.icon-lock:before {
+.icon-home:before {
   content: "\e933";
 }
-.icon-replace-owner:before {
+.icon-info:before {
   content: "\e934";
 }
-.icon-edit-owner:before {
+.icon-key:before {
   content: "\e935";
 }
-.icon-add-owner:before {
+.icon-keystone:before {
   content: "\e936";
 }
-.icon-send-to:before {
+.icon-ledger:before {
   content: "\e937";
 }
-.icon-owners:before {
+.icon-lightbulb:before {
   content: "\e938";
 }
 .icon-link:before {
   content: "\e939";
 }
-.icon-share:before {
+.icon-lock:before {
   content: "\e93a";
 }
-.icon-external-link:before {
+.icon-mobile:before {
   content: "\e93b";
 }
-.icon-export:before {
+.icon-nft:before {
   content: "\e93c";
 }
-.icon-paste:before {
+.icon-options-horizontal:before {
   content: "\e93d";
 }
-.icon-copy:before {
+.icon-options-vertical:before {
   content: "\e93e";
 }
-.icon-sign:before {
+.icon-owners:before {
   content: "\e93f";
 }
-.icon-document:before {
+.icon-paste:before {
   content: "\e940";
 }
-.icon-file:before {
+.icon-plus-filled:before {
   content: "\e941";
 }
-.icon-search:before {
+.icon-plus-outlined:before {
   content: "\e942";
 }
-.icon-edit:before {
+.icon-plus:before {
   content: "\e943";
 }
-.icon-delete:before {
+.icon-points:before {
   content: "\e944";
 }
-.icon-close-outlined:before {
+.icon-qr-code-1:before {
   content: "\e945";
 }
-.icon-close-filled:before {
+.icon-qr-code:before {
   content: "\e946";
 }
-.icon-close:before {
+.icon-question:before {
   content: "\e947";
 }
-.icon-plus-outlined:before {
+.icon-repeat:before {
   content: "\e948";
 }
-.icon-plus-filled:before {
+.icon-replace-owner:before {
   content: "\e949";
 }
-.icon-plus:before {
+.icon-rows-1:before {
   content: "\e94a";
 }
-.icon-transaction-batch .path1:before {
+.icon-rows-2:before {
   content: "\e94b";
+}
+.icon-rows:before {
+  content: "\e94c";
+}
+.icon-safe:before {
+  content: "\e94d";
+}
+.icon-scan-1:before {
+  content: "\e94e";
+}
+.icon-scan:before {
+  content: "\e94f";
+}
+.icon-search:before {
+  content: "\e950";
+}
+.icon-seed:before {
+  content: "\e951";
+}
+.icon-send-to:before {
+  content: "\e952";
+}
+.icon-settings:before {
+  content: "\e953";
+}
+.icon-share:before {
+  content: "\e954";
+}
+.icon-shield-crossed:before {
+  content: "\e955";
+}
+.icon-shield:before {
+  content: "\e956";
+}
+.icon-sign:before {
+  content: "\e957";
+}
+.icon-tag:before {
+  content: "\e958";
+}
+.icon-token:before {
+  content: "\e959";
+}
+.icon-transaction-batch .path1:before {
+  content: "\e95a";
   color: rgb(255, 214, 0);
 }
 .icon-transaction-batch .path2:before {
-  content: "\e94c";
+  content: "\e95b";
   margin-left: -1em;
   color: rgb(0, 0, 0);
 }
-.icon-blocks-1:before {
-  content: "\e94d";
-}
-.icon-rows-1:before {
-  content: "\e94e";
-}
-.icon-batch:before {
-  content: "\e94f";
-}
-.icon-filter:before {
-  content: "\e950";
-}
-.icon-bookmark-filled:before {
-  content: "\e951";
-}
-.icon-bookmark:before {
-  content: "\e952";
-}
-.icon-transaction-recovery:before {
-  content: "\e953";
-}
 .icon-transaction-change-settings:before {
-  content: "\e954";
-}
-.icon-transaction-contract:before {
-  content: "\e955";
-}
-.icon-transaction-execute:before {
-  content: "\e956";
-}
-.icon-transaction-stake:before {
-  content: "\e957";
-}
-.icon-transaction-swap:before {
-  content: "\e958";
-}
-.icon-transaction-outgoing:before {
-  content: "\e959";
-}
-.icon-transaction-incoming:before {
-  content: "\e95a";
-}
-.icon-mobile:before {
-  content: "\e95b";
-}
-.icon-wallet:before {
   content: "\e95c";
 }
-.icon-appearance:before {
+.icon-transaction-contract:before {
   content: "\e95d";
 }
-.icon-experimental:before {
+.icon-transaction-execute:before {
   content: "\e95e";
 }
-.icon-desktop:before {
+.icon-transaction-incoming:before {
   content: "\e95f";
 }
-.icon-safe:before {
+.icon-transaction-outgoing:before {
   content: "\e960";
 }
-.icon-bell:before {
+.icon-transaction-partial-fill:before {
   content: "\e961";
 }
-.icon-lightbulb:before {
+.icon-transaction-recovery:before {
   content: "\e962";
 }
-.icon-what-is-new:before {
+.icon-transaction-stake:before {
   content: "\e963";
 }
-.icon-blocks:before {
+.icon-transaction-swap:before {
   content: "\e964";
 }
-.icon-rows:before {
+.icon-transactions:before {
   content: "\e965";
 }
-.icon-apps:before {
+.icon-unlock:before {
   content: "\e966";
 }
-.icon-address-book:before {
+.icon-update:before {
   content: "\e967";
 }
-.icon-chat:before {
+.icon-upload:before {
   content: "\e968";
 }
-.icon-settings:before {
+.icon-wallet:before {
   content: "\e969";
 }
-.icon-transactions:before {
+.icon-what-is-new:before {
   content: "\e96a";
-}
-.icon-nft:before {
-  content: "\e96b";
-}
-.icon-token:before {
-  content: "\e96c";
-}
-.icon-home:before {
-  content: "\e96d";
 }

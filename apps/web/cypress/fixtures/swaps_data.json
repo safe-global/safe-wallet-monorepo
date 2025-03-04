@@ -4,10 +4,13 @@
       "contractName": "GPv2Settlement",
       "action": "setPreSignature",
       "oneOfOne": "1 out of 1",
+      "oneOfTwo": "1 out of 2",
       "title": "Swap order"
     },
     "orderDetails": {
       "expiry2Mins": "in 2 minutes",
+      "expiry5Mins": "in 5 minutes",
+      "expiry12Months": "in 12 months",
       "interactWith": "GPv2Settlement",
       "DAIeqCOW": "1 DAI = COW"
     },
@@ -20,6 +23,7 @@
       "forAtMostCow": "For at most COW",
       "cow": "COW",
       "expired": "Expired",
+      "executionNeeded": "Execution needed",
       "cancelled": "Cancelled",
       "actionApprove": "CoW Protocol Token: approve",
       "actionPreSignature": "GPv2Settlement: setPreSignature",
@@ -38,15 +42,19 @@
       "oderId": "Order ID",
       "status": "Status",
       "sellFull": "Sell 1 COW",
+      "sell10Cow": "Sell 10 COW",
+      "sell100Cow": "Sell 100 COW",
       "sell": "Sell",
       "oneCOW": "1 COW",
       "forAtLeast": "for at least",
+      "forAtLeastFullCow": "for at least COW",
       "forAtLeastFullDai": "for at least DAI",
       "forAtLeastFullUni": "for at least UNI",
       "forAtLeastFullUSDT": "for at least USDT",
       "forAtLeastFullWETH": "for at least WETH",
       "daiSold": "DAI sold",
       "WETHeqDAI": "1 WETH = 1.32K DAI",
+      "COWeqWETH": "1 COW = 0.003 WETH",
       "DAIeqCOW": "1 DAI = COW",
       "UNIeqCOW": "1 UNI = K COW",
       "DAIeqWETH": "1 DAI = WETH",
@@ -57,9 +65,16 @@
       "gGpV2": "GPv2Settlement",
       "createWithContext": "createWithContext",
       "safeAppTitile": "CowSwap",
+      "slippage": "Slippage",
+      "widget_fee": "Widget fee",
+      "interactWith": "Interact with",
       "title": "Swap order",
+      "limitorder_title": "Limit order",
+      "twaporder_title": "TWAP order",
       "multiSend": "multiSend",
-      "multiSendCallOnly1_3_0": "Safe: MultiSendCallOnly 1.3.0"
+      "multiSendCallOnly1_3_0": "Safe: MultiSendCallOnly 1.3.0",
+      "multiSendCallOnly1_4_1": "Safe: MultiSendCallOnly 1.4.1",
+      "altImage": "Swap order"
     }
   }
 }

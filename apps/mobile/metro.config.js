@@ -24,6 +24,10 @@ config.resolver.resolveRequest = (context, moduleName, platform) => {
   return defaultResolveResult
 }
 
+if (process.env.RN_SRC_EXT) {
+  config.resolver.sourceExts = [...process.env.RN_SRC_EXT.split(','), ...config.resolver.sourceExts]
+}
+
 module.exports = withStorybook(config, {
   // Set to false to remove storybook specific options
   enabled: true,

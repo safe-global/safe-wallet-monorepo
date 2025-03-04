@@ -25,9 +25,14 @@ const ReviewSafeAppsTx = ({
 }: ReviewSafeAppsTxProps): ReactElement => {
   const onboard = useOnboard()
   const wallet = useWallet()
-  const { safeTx, setSafeTx, safeTxError, setSafeTxError } = useContext(SafeTxContext)
+  const { safeTx, setSafeTx, safeTxError, setSafeTxError, setTxOrigin } = useContext(SafeTxContext)
 
   useHighlightHiddenTab()
+
+  useEffect(() => {
+    setTxOrigin(app?.url)
+    return () => setTxOrigin(undefined)
+  }, [setTxOrigin, app?.url])
 
   useEffect(() => {
     const createSafeTx = async (): Promise<SafeTransaction> => {

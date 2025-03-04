@@ -1,11 +1,10 @@
 import { useGetSafeQuery } from '@safe-global/store/gateway'
 import { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
-import { useSelector } from 'react-redux'
-import { selectActiveSafe } from '@/src/store/activeSafeSlice'
 import { Settings } from './Settings'
+import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 
 export const SettingsContainer = () => {
-  const { chainId, address } = useSelector(selectActiveSafe)
+  const { chainId, address } = useDefinedActiveSafe()
   const { data = {} as SafeState } = useGetSafeQuery({
     chainId: chainId,
     safeAddress: address,

@@ -5,17 +5,21 @@ export type CarouselItem = {
   name: string
   description?: string
   image?: React.ReactNode
+  imagePosition?: 'top' | 'bottom'
 }
 
 interface CarouselItemProps {
   item: CarouselItem
+  testID?: string
 }
 
-export const CarouselItem = ({ item: { title, description, image } }: CarouselItemProps) => {
+export const CarouselItem = ({
+  item: { title, description, image, imagePosition = 'top' },
+  testID,
+}: CarouselItemProps) => {
   return (
-    <View gap="$8" alignItems="center" justifyContent="center">
-      {image}
-
+    <View gap="$8" alignItems="center" justifyContent="center" testID={testID}>
+      {imagePosition === 'top' && image}
       <YStack gap="$8" paddingHorizontal="$5">
         <YStack>{title}</YStack>
 
@@ -23,6 +27,7 @@ export const CarouselItem = ({ item: { title, description, image } }: CarouselIt
           {description}
         </Text>
       </YStack>
+      {imagePosition === 'bottom' && image}
     </View>
   )
 }

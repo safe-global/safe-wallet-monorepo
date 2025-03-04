@@ -292,6 +292,9 @@ export const addressBookData = {
   proposers: {
     11155111: { '0xC16Db0251654C0a72E91B190d81eAD367d2C6fED': 'AD Proposer1' },
   },
+  addedSafesImport: {
+    11155111: { '0x6d0b6F96f665Bb4490f9ddb2e450Da2f7e546dC1': 'imported-safe' },
+  },
   sepoliaAddress1: {
     11155111: { '0x6a5602335a878ADDCa4BF63a050E34946B56B5bC': 'Owner1' },
   },

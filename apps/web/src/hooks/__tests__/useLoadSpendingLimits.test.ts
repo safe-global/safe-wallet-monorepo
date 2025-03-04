@@ -24,7 +24,7 @@ describe('getSpendingLimits', () => {
   })
 
   it('should return undefined if no spending limit module address was found', async () => {
-    jest.spyOn(spendingLimit, 'getSpendingLimitModuleAddress').mockReturnValue(undefined)
+    jest.spyOn(spendingLimit, 'getDeployedSpendingLimitModuleAddress').mockReturnValue(undefined)
 
     const result = await getSpendingLimits(mockProvider, [], ZERO_ADDRESS, '4', [])
 
@@ -32,7 +32,7 @@ describe('getSpendingLimits', () => {
   })
 
   it('should return undefined if the safe has no spending limit module', async () => {
-    jest.spyOn(spendingLimit, 'getSpendingLimitModuleAddress').mockReturnValue('0x1')
+    jest.spyOn(spendingLimit, 'getDeployedSpendingLimitModuleAddress').mockReturnValue('0x1')
 
     const result = await getSpendingLimits(mockProvider, [], ZERO_ADDRESS, '4', [])
 
@@ -41,7 +41,7 @@ describe('getSpendingLimits', () => {
 
   it('should fetch a list of delegates', async () => {
     const getDelegatesMock = jest.fn(() => ({ results: [] }))
-    jest.spyOn(spendingLimit, 'getSpendingLimitModuleAddress').mockReturnValue('0x1')
+    jest.spyOn(spendingLimit, 'getDeployedSpendingLimitModuleAddress').mockReturnValue('0x1')
     jest.spyOn(spendingLimit, 'getSpendingLimitContract').mockImplementation(
       jest.fn(() => {
         return {
@@ -64,7 +64,7 @@ describe('getSpendingLimits', () => {
     const getTokensMock = jest.fn(() => ['0x10', '0x11'])
     const getTokenAllowanceMock = jest.fn(() => [BigInt(1), BigInt(0), BigInt(0), BigInt(0), BigInt(0)])
 
-    jest.spyOn(spendingLimit, 'getSpendingLimitModuleAddress').mockReturnValue('0x1')
+    jest.spyOn(spendingLimit, 'getDeployedSpendingLimitModuleAddress').mockReturnValue('0x1')
     jest.spyOn(spendingLimit, 'getSpendingLimitContract').mockImplementation(
       jest.fn(() => {
         return {
@@ -85,7 +85,7 @@ describe('getSpendingLimits', () => {
     const getTokensMock = jest.fn(() => ['0x10', '0x11'])
     const getTokenAllowanceMock = jest.fn(() => [BigInt(0), BigInt(0), BigInt(0), BigInt(0), BigInt(0)])
 
-    jest.spyOn(spendingLimit, 'getSpendingLimitModuleAddress').mockReturnValue('0x1')
+    jest.spyOn(spendingLimit, 'getDeployedSpendingLimitModuleAddress').mockReturnValue('0x1')
     jest.spyOn(spendingLimit, 'getSpendingLimitContract').mockImplementation(
       jest.fn(() => {
         return {

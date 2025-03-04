@@ -12,7 +12,7 @@ const signer = walletCredentials.OWNER_4_PRIVATE_KEY
 
 let iframeSelector = `iframe[src*="${constants.swapWidget}"]`
 
-describe('[SMOKE] Swaps token tests', () => {
+describe('Swaps token tests', () => {
   before(async () => {
     staticSafes = await getSafes(CATEGORIES.static)
   })

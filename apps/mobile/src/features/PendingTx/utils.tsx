@@ -89,7 +89,7 @@ export const renderItem = ({
   if (Array.isArray(item)) {
     // Handle bulk transactions
     return (
-      <View marginTop={index && '$4'} paddingHorizontal="$3">
+      <View marginTop={index && '$4'}>
         {getBulkGroupTxHash(item) ? (
           <TxGroupedCard transactions={item} inQueue />
         ) : (
@@ -101,7 +101,7 @@ export const renderItem = ({
 
   if (isLabelListItem(item)) {
     return (
-      <View marginTop={index && '$4'} paddingHorizontal="$3">
+      <View marginTop={index && '$4'}>
         <SafeListItem.Header title={item.label} />
       </View>
     )
@@ -109,7 +109,7 @@ export const renderItem = ({
 
   if (isTransactionListItem(item)) {
     return (
-      <View marginTop={index && '$4'} paddingHorizontal="$3">
+      <View marginTop={index && '$4'}>
         <TxInfo inQueue tx={item.transaction} />
       </View>
     )

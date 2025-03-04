@@ -84,4 +84,11 @@ export type SafeOverview = {
   queued: number
   awaitingConfirmation?: number | null
 }
-export const { useSafesGetSafeV1Query, useSafesGetNoncesV1Query, useSafesGetSafeOverviewV1Query } = injectedRtkApi
+export const {
+  useSafesGetSafeV1Query,
+  useLazySafesGetSafeV1Query,
+  useSafesGetNoncesV1Query,
+  useLazySafesGetNoncesV1Query,
+  useSafesGetSafeOverviewV1Query,
+  useLazySafesGetSafeOverviewV1Query,
+} = injectedRtkApi

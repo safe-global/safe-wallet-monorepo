@@ -9,6 +9,7 @@ import * as useIsValidExecution from '@/hooks/useIsValidExecution'
 import * as useWalletCanRelay from '@/hooks/useWalletCanRelay'
 import * as relayUtils from '@/utils/relaying'
 import * as walletCanPay from '@/hooks/useWalletCanPay'
+import * as useValidateTxData from '@/hooks/useValidateTxData'
 import { render } from '@/tests/test-utils'
 import { fireEvent, waitFor } from '@testing-library/react'
 import type { RelayCountResponse } from '@safe-global/safe-gateway-typescript-sdk'
@@ -46,6 +47,8 @@ describe('ExecuteForm', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
+
+    jest.spyOn(useValidateTxData, 'useValidateTxData').mockReturnValue([undefined, undefined, false])
   })
 
   it('shows estimated fees', () => {

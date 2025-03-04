@@ -1,7 +1,7 @@
 import useWallet from '@/hooks/wallets/useWallet'
 import type { ReactElement, SyntheticEvent } from 'react'
 import { useContext, useMemo, useState } from 'react'
-import { type BigNumberish, type BytesLike, parseUnits } from 'ethers'
+import { type BigNumberish, type BytesLike } from 'ethers'
 import { Button, CardActions, Typography } from '@mui/material'
 import SendToBlock from '@/components/tx/SendToBlock'
 import { type TokenTransferParams } from '@/components/tx-flow/flows/TokenTransfer/index'
@@ -70,20 +70,13 @@ const ReviewSpendingLimitTx = ({
       safeAddress,
       token: spendingLimit?.token.address || ZERO_ADDRESS,
       to: params.recipient,
-      amount: parseUnits(params.amount, token?.tokenInfo.decimals).toString(),
+      amount: amountInWei,
       paymentToken: ZERO_ADDRESS,
       payment: 0,
       delegate: spendingLimit?.beneficiary || ZERO_ADDRESS,
       signature: EMPTY_DATA,
     }),
-    [
-      params.amount,
-      params.recipient,
-      safeAddress,
-      spendingLimit?.beneficiary,
-      spendingLimit?.token,
-      token?.tokenInfo.decimals,
-    ],
+    [amountInWei, params.recipient, safeAddress, spendingLimit?.beneficiary, spendingLimit?.token],
   )
 
   const { gasLimit, gasLimitLoading } = useSpendingLimitGas(txParams)
@@ -103,7 +96,14 @@ const ReviewSpendingLimitTx = ({
     const txOptions = getTxOptions(advancedParams, currentChain)
 
     try {
-      await dispatchSpendingLimitTxExecution(txParams, txOptions, wallet.provider, safe.chainId, safeAddress)
+      await dispatchSpendingLimitTxExecution(
+        txParams,
+        txOptions,
+        wallet.provider,
+        safe.chainId,
+        safeAddress,
+        safe.modules,
+      )
       onSubmit('', true)
       setTxFlow(undefined)
     } catch (_err) {
@@ -155,7 +155,7 @@ const ReviewSpendingLimitTx = ({
           <CheckWallet allowNonOwner checkNetwork={!submitDisabled}>
             {(isOk) => (
               <Button variant="contained" type="submit" disabled={!isOk || submitDisabled}>
-                Submit
+                Execute
               </Button>
             )}
           </CheckWallet>

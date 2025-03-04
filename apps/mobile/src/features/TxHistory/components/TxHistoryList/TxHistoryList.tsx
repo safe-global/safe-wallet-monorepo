@@ -28,6 +28,7 @@ export function TxHistoryList({ transactions, onEndReached, isLoading }: TxHisto
       keyExtractor={(item, index) => (Array.isArray(item) ? getTxHash(item[0]) + index : getTxHash(item) + index)}
       renderItem={renderItem}
       onEndReached={onEndReached}
+      contentContainerStyle={{ paddingHorizontal: 16 }}
       ListFooterComponent={isLoading ? <Spinner size="small" color="$color" /> : undefined}
       renderSectionHeader={({ section: { title } }) => <SafeListItem.Header title={title} />}
     />

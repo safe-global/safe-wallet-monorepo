@@ -56,7 +56,7 @@ export const getTxHash = (item: HistoryTransactionItems): string => {
 }
 export const renderItem = ({ item, index }: { item: TransactionItem | TransactionItem[]; index: number }) => {
   return (
-    <View marginTop={index && '$4'} paddingHorizontal="$3">
+    <View marginTop={index && '$4'}>
       {Array.isArray(item) ? <TxGroupedCard transactions={item} /> : <TxInfo tx={item.transaction} />}
     </View>
   )

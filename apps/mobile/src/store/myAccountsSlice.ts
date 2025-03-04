@@ -1,4 +1,4 @@
-import { createSlice } from '@reduxjs/toolkit'
+import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { RootState } from '.'
 
 const initialState = {
@@ -12,10 +12,13 @@ const myAccountsSlice = createSlice({
     toggleMode: (state) => {
       state.isEdit = !state.isEdit
     },
+    setEditMode: (state, action: PayloadAction<boolean>) => {
+      state.isEdit = action.payload
+    },
   },
 })
 
-export const { toggleMode } = myAccountsSlice.actions
+export const { toggleMode, setEditMode } = myAccountsSlice.actions
 
 export const selectMyAccountsMode = (state: RootState) => state.myAccounts.isEdit
 
