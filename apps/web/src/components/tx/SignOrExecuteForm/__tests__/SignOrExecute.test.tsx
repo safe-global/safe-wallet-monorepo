@@ -67,7 +67,7 @@ describe('SignOrExecute', () => {
       .spyOn(useTxPreviewHooks, 'default')
       .mockReturnValue([undefined, new Error('This is a mock error message'), false])
 
-    const { container } = render(
+    const { container, getByTestId } = render(
       <SafeTxContext.Provider
         value={
           {
@@ -78,8 +78,7 @@ describe('SignOrExecute', () => {
         <SignOrExecute onSubmit={jest.fn()} isExecutable={true} />
       </SafeTxContext.Provider>,
     )
-
-    expect(container.querySelector('sign-btn')).not.toBeInTheDocument()
+    expect(getByTestId('sign-btn')).toBeInTheDocument()
     expect(container).toMatchSnapshot()
   })
 })

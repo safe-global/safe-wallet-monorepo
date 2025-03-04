@@ -24,7 +24,7 @@ type SignOrExecuteExtendedProps = SignOrExecuteProps & {
 const SignOrExecute = (props: SignOrExecuteExtendedProps) => {
   const { safeTx, safeTxError } = useContext(SafeTxContext)
   const [txDetails, , txDetailsLoading] = useTxDetails(props.txId)
-  const [txPreview, , txPreviewLoading] = useTxPreview(safeTx?.data, undefined, props.txId)
+  const [txPreview, txPreviewError, txPreviewLoading] = useTxPreview(safeTx?.data, undefined, props.txId)
 
   if ((!safeTx && !safeTxError) || txDetailsLoading || txPreviewLoading) {
     return <SignOrExecuteSkeleton />
@@ -37,6 +37,7 @@ const SignOrExecute = (props: SignOrExecuteExtendedProps) => {
       txId={props.txId}
       txDetails={txDetails}
       txPreview={txPreview}
+      txPreviewError={txPreviewError}
     >
       {props.children}
     </SignOrExecuteForm>

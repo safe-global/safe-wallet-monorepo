@@ -421,6 +421,32 @@ exports[`SignOrExecute should display an error screen 1`] = `
       data-testid="card-content"
     >
       <div
+        class="container error errorMessage"
+        data-testid="error-message"
+      >
+        <div
+          class="message"
+        >
+          <mock-icon
+            aria-hidden=""
+            class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-1vcpomi-MuiSvgIcon-root"
+            focusable="false"
+          />
+          <div>
+            <span
+              class="MuiTypography-root MuiTypography-body2 css-17vdyq3-MuiTypography-root"
+            >
+              Error decoding the transaction
+              <button
+                class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways MuiLink-button css-1oa03op-MuiTypography-root-MuiLink-root"
+              >
+                Details
+              </button>
+            </span>
+          </div>
+        </div>
+      </div>
+      <div
         class="MuiStack-root css-1sazv7p-MuiStack-root"
       >
         <div
