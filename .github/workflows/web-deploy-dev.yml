@@ -48,6 +48,10 @@ jobs:
 
       #- uses: ./.github/workflows/build-storybook
 
+      - name: Add SRI to scripts
+        run: node ./scripts/integrity-hashes.cjs
+        working-directory: apps/web
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
