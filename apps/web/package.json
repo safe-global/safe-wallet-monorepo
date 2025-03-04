@@ -155,8 +155,7 @@
     "ts-prune": "^0.10.3",
     "typechain": "^8.3.2",
     "typescript": "^5.4.5",
-    "typescript-plugin-css-modules": "^4.2.2",
-    "webpack": "^5.97.1"
+    "typescript-plugin-css-modules": "^4.2.2"
   },
   "nextBundleAnalysis": {
     "budget": null,

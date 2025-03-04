@@ -8080,7 +8080,6 @@ __metadata:
     typechain: "npm:^8.3.2"
     typescript: "npm:^5.4.5"
     typescript-plugin-css-modules: "npm:^4.2.2"
-    webpack: "npm:^5.97.1"
     zodiac-roles-deployments: "npm:^2.3.4"
   languageName: unknown
   linkType: soft
