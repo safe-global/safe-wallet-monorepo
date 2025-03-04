@@ -48,6 +48,10 @@ jobs:
 
       #- uses: ./.github/workflows/build-storybook
 
+      - name: Add SRI to scripts
+        run: node ./scripts/integrity-hashes.cjs
+        working-directory: apps/web
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -79,10 +83,6 @@ jobs:
         ## e.g. "refs/heads/features/hello-1.2.0" -> "features_hello_1_2_0"
         run: echo "branch=$(echo $GITHUB_HEAD_REF | sed 's/refs\/heads\///' | sed 's/[^a-z0-9]/_/ig' | sed 's/[A-Z]/\L&/g')" >> $GITHUB_OUTPUT
         id: extract_branch
-
-      - name: Add SRI to scripts
-        run: node ./scripts/integrity-hashes.cjs
-        working-directory: apps/web
 
       # Deploy to S3
       - name: Deploy PR branch
