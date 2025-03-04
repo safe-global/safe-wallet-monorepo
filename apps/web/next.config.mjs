@@ -39,6 +39,9 @@ const nextConfig = {
     dirs: ['src', 'cypress'],
   },
   experimental: {
+    sri: {
+      algorithm: 'sha256',
+    },
     optimizePackageImports: [
       '@mui/material',
       '@mui/icons-material',
