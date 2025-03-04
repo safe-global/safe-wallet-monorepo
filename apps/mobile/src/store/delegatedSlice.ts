@@ -15,21 +15,18 @@ const delegatedSlice = createSlice({
   name: 'delegated',
   initialState,
   reducers: {
-    addDelegatedAddress: (state, action: PayloadAction<{ delegatedAddress: Address; safes: SafeInfo[] }>) => {
+    addOrUpdateDelegatedAddress: (state, action: PayloadAction<{ delegatedAddress: Address; safes: SafeInfo[] }>) => {
       const { delegatedAddress, safes } = action.payload
-      state[delegatedAddress] = { safes }
-    },
-    updateDelegatedAddress: (state, action: PayloadAction<{ delegatedAddress: Address; safes: SafeInfo[] }>) => {
-      const { delegatedAddress, safes } = action.payload
-
-      state[delegatedAddress] = { ...safes, safes }
-
-      return state
+      if (!state[delegatedAddress]) {
+        state[delegatedAddress] = { safes }
+      } else {
+        state[delegatedAddress].safes = safes
+      }
     },
   },
 })
 
-export const { addDelegatedAddress, updateDelegatedAddress } = delegatedSlice.actions
+export const { addOrUpdateDelegatedAddress } = delegatedSlice.actions
 
 export const selectDelegatedAddresses = (state: RootState) => state.delegatedAddresses
 
