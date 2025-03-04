@@ -28,5 +28,10 @@
     "msw": "^2.7.0",
     "prettier": "^3.4.2"
   },
+  "dependenciesMeta": {
+    "cypress": {
+      "built": true
+    }
+  },
   "packageManager": "yarn@4.6.0"
 }
