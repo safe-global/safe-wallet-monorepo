@@ -17,6 +17,7 @@ jobs:
 
     env:
       ARCHIVE_NAME: ${{ github.event.repository.name }}-${{ github.event.release.tag_name }}
+      SBOM_FILE_NAME: sbom
 
     steps:
       - uses: actions/checkout@v4
@@ -36,6 +37,37 @@ jobs:
         uses: actions/attest-build-provenance@v2
         with:
           subject-path: apps/web/${{ env.ARCHIVE_NAME }}.tar.gz
+
+      - name: Generate SBOM for build
+        run: |
+          yarn dlx -q @cyclonedx/yarn-plugin-cyclonedx --output-file ${{ env.SBOM_FILE_NAME }}.json
+          tar -czf ${{ env.SBOM_FILE_NAME }}.tar.gz ${{ env.SBOM_FILE_NAME }}.json
+        working-directory: apps/web
+
+      # Generate SBOM attestation
+      # The SBOM is embedded in the attestation
+      # when the attestation is downloaded one can extract the SBOM
+      # and verify the SBOM against the build
+      #
+      # 1) Extract the DSSE payload (base64).
+      # jq -r '.dsseEnvelope.payload' attestation.json > payload.b64
+      #
+      # 2) Decode it to JSON.
+      #  base64 -d payload.b64 > statement.json
+      #
+      # 3) Inspect or extract the SBOM portion.
+      # jq '.predicate' statement.json
+      - uses: actions/attest-sbom@v2
+        with:
+          subject-path: ${{ env.ARCHIVE_NAME }}.tar.gz
+          sbom-path: './apps/web/${{ env.SBOM_FILE_NAME }}.json'
+
+      # Upload the SBOM as a release asset for easier access
+      - name: Upload archive as release asset
+        uses: shogo82148/actions-upload-release-asset@v1
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: apps/web/${{ env.SBOM_FILE_NAME }}.tar.gz
 
       - name: Create checksum
         run: sha256sum "$ARCHIVE_NAME".tar.gz > "$ARCHIVE_NAME-sha256-checksum.txt"
