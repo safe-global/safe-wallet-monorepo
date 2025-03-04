@@ -8023,7 +8023,6 @@ __metadata:
     "@types/qrcode": "npm:^1.5.5"
     "@types/react": "npm:^19.0.0"
     "@types/react-dom": "npm:^19.0.0"
-    "@types/react-gtm-module": "npm:^2.0.3"
     "@types/semver": "npm:^7.3.10"
     "@typescript-eslint/eslint-plugin": "npm:^7.6.0"
     "@typescript-eslint/parser": "npm:^8.18.1"
@@ -8069,7 +8068,6 @@ __metadata:
     react: "npm:^19.0.0"
     react-dom: "npm:^19.0.0"
     react-dropzone: "npm:^14.2.3"
-    react-gtm-module: "npm:^2.0.11"
     react-hook-form: "npm:7.41.1"
     react-papaparse: "npm:^4.0.2"
     react-redux: "npm:^9.1.2"
@@ -11816,13 +11814,6 @@ __metadata:
   peerDependencies:
     "@types/react": ^19.0.0
   checksum: 10/d2ae81ec0b8eee7a4bf31918796fdaa34e8db68f69682163bc212d759de76783e6ffcc02c02722dcf508429067148841e6da81414cc730ca2a28c9c2b350c880
-  languageName: node
-  linkType: hard
-
-"@types/react-gtm-module@npm:^2.0.3":
-  version: 2.0.4
-  resolution: "@types/react-gtm-module@npm:2.0.4"
-  checksum: 10/635699a2d85f958ba92126cda851f9a1b46df75d3846bdc89ce2345524f73d889a266110d00492f6c23e9e42e70ec2246449a93c9cc2c6367bd643a7d2f0e88a
   languageName: node
   linkType: hard
 
@@ -26919,13 +26910,6 @@ __metadata:
   peerDependencies:
     react: ">=17.0.0"
   checksum: 10/1dc433319341ec3dca84513c4197ef4f4c8232604d35f83546a8abfb41d9591f934b66aaaa4dc3dc8b1b65f488705a2a48ae6c1d9792660119a9cdedeab4ca8f
-  languageName: node
-  linkType: hard
-
-"react-gtm-module@npm:^2.0.11":
-  version: 2.0.11
-  resolution: "react-gtm-module@npm:2.0.11"
-  checksum: 10/231dbe4b7c5fbb2577d5bcb7f90ab369a2b55359815633223a03d361775ad52d0eda23d0dbf35f357424d5c4b76f32320fa41ad538e6017a64e258b437d10795
   languageName: node
   linkType: hard
 
