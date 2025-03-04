@@ -24,7 +24,7 @@ export function ExecuteForm({ safeAddress, chainId }: ExecuteFormProps) {
           href={`https://app.safe.global/home?safe=${formatPrefixedAddress(safeAddress, chain?.shortName)}`}
           target={'_blank'}
         >
-          Go to Web App
+          Go to web app
         </Anchor>
 
         <SafeFontIcon name="external-link" size={14} />
