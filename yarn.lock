@@ -7909,6 +7909,9 @@ __metadata:
     lint-staged: "npm:^15.2.10"
     msw: "npm:^2.7.0"
     prettier: "npm:^3.4.2"
+  dependenciesMeta:
+    cypress:
+      built: true
   languageName: unknown
   linkType: soft
 
