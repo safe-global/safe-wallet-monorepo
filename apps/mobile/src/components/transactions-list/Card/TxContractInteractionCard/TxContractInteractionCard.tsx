@@ -10,6 +10,7 @@ interface TxContractInteractionCardProps {
   txInfo: CustomTransactionInfo | MultiSend
   inQueue?: boolean
   executionInfo?: Transaction['executionInfo']
+  onPress: () => void
 }
 
 export function TxContractInteractionCard({
@@ -17,6 +18,7 @@ export function TxContractInteractionCard({
   executionInfo,
   txInfo,
   inQueue,
+  onPress,
 }: TxContractInteractionCardProps) {
   const logoUri = txInfo.to.logoUri
   const label = txInfo.to.name || 'Contract interaction'
@@ -42,6 +44,7 @@ export function TxContractInteractionCard({
         </Avatar>
       }
       rightNode={<Text>{txInfo.methodName}</Text>}
+      onPress={onPress}
     />
   )
 }

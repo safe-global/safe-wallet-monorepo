@@ -1,6 +1,6 @@
-import { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
+import { AddressInfo, SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 
-export const extractSignersFromSafes = (safes: SafeOverview[]) => {
+export const extractSignersFromSafes = (safes: { owners: AddressInfo[] }[]): Record<string, AddressInfo> => {
   return safes.reduce((acc, safe) => {
     const owners = safe.owners
       .map((owner) => owner)

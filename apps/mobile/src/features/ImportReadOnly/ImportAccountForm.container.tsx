@@ -52,7 +52,9 @@ export const ImportAccountFormContainer = () => {
   const canContinue = isEnteredAddressValid && safeExists && !error
 
   const handleContinue = useCallback(() => {
-    router.push(`/(import-accounts)/signers?safeAddress=${addressWithoutPrefix}&chainId=${result.data?.[0].chainId}`)
+    router.push(
+      `/(import-accounts)/signers?safeAddress=${addressWithoutPrefix}&chainId=${result.data?.[0].chainId}&import_safe=true`,
+    )
   }, [addressWithoutPrefix, result.data, router])
 
   return (

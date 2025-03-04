@@ -7,6 +7,7 @@ describe('TxSafeAppCard', () => {
   it('should render the default markup', () => {
     const { getByText } = render(
       <TxSafeAppCard
+        onPress={() => null}
         safeAppInfo={{
           name: 'Transaction Builder',
           url: 'http://something.com',
@@ -23,6 +24,7 @@ describe('TxSafeAppCard', () => {
   it('should render a fallback if no image url is provided', () => {
     const { getByText, getByTestId, queryByTestId } = render(
       <TxSafeAppCard
+        onPress={() => null}
         safeAppInfo={{
           name: 'Transaction Builder',
           url: 'http://something.com',
