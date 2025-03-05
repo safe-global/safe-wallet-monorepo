@@ -31,6 +31,9 @@
   "dependenciesMeta": {
     "cypress": {
       "built": true
+    },
+    "next": {
+      "built": true
     }
   },
   "packageManager": "yarn@4.6.0"
