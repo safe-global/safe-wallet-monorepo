@@ -159,7 +159,7 @@ describe('DecodedTx', () => {
 
     await waitFor(() => {
       expect(result.queryAllByText('safeTxGas:').length).toBeGreaterThan(0)
-      expect(result.queryAllByText('Raw data:').length).toBeGreaterThan(0)
+      expect(result.queryAllByText('data:').length).toBeGreaterThan(0)
     })
   })
 
@@ -197,14 +197,14 @@ describe('DecodedTx', () => {
 
     await waitFor(() => {
       expect(result.queryByText('Interacted with:')).toBeInTheDocument()
-      expect(result.queryByText('Data (hex-encoded)')).toBeInTheDocument()
+      expect(result.queryByText('Data:')).toBeInTheDocument()
     })
 
     fireEvent.click(result.getByText('Advanced details'))
 
     await waitFor(() => {
       expect(result.queryByText('safeTxGas:')).toBeInTheDocument()
-      expect(result.queryByText('Raw data:')).toBeInTheDocument()
+      expect(result.queryByText('data:')).toBeInTheDocument()
     })
   })
 
@@ -257,10 +257,9 @@ describe('DecodedTx', () => {
 
     await waitFor(() => {
       expect(result.queryByText('transfer')).toBeInTheDocument()
-      expect(result.queryAllByText('Parameters').length).toBeGreaterThan(0)
       expect(result.queryByText('to')).toBeInTheDocument()
       expect(result.queryAllByText('address').length).toBeGreaterThan(0)
-      expect(result.queryByText('0x474e...78C8')).toBeInTheDocument()
+      expect(result.queryByText('0x474e5Ded6b5D078163BFB8F6dBa355C3aA5478C8')).toBeInTheDocument()
       expect(result.queryByText('value')).toBeInTheDocument()
       expect(result.queryAllByText('uint256').length).toBeGreaterThan(0)
       expect(result.queryByText('16745726664999765048')).toBeInTheDocument()

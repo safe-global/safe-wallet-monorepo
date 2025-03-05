@@ -18,7 +18,7 @@ export const SafeTxHashDataRow = ({
   const chainId = useChainId()
   const safeVersion = safe.version as SafeVersion
 
-  const computedHash = useMemo(() => {
+  const computedSafeTxHash = useMemo(() => {
     if (safeTxHash) return safeTxHash
     if (!safe.version) return
     try {
@@ -28,13 +28,26 @@ export const SafeTxHashDataRow = ({
     }
   }, [safe.chainId, safe.version, safeAddress, safeTxData, safeTxHash])
 
-  const domainHash = getDomainHash({ chainId, safeAddress, safeVersion })
-  const messageHash = getSafeTxMessageHash({ safeVersion, safeTxData })
+  const domainHash = useMemo(() => {
+    try {
+      return getDomainHash({ chainId, safeAddress, safeVersion })
+    } catch {
+      return ''
+    }
+  }, [chainId, safeAddress, safeVersion])
+
+  const messageHash = useMemo(() => {
+    try {
+      return getSafeTxMessageHash({ safeVersion, safeTxData })
+    } catch {
+      return ''
+    }
+  }, [safeTxData, safeVersion])
 
   return (
     <Stack gap={1}>
       <TxDataRow datatestid="tx-safe-hash" title="safeTxHash:">
-        {generateDataRowValue(computedHash, 'rawData')}
+        {generateDataRowValue(computedSafeTxHash, 'rawData')}
       </TxDataRow>
       <TxDataRow datatestid="tx-domain-hash" title="Domain hash:">
         {generateDataRowValue(domainHash, 'rawData')}

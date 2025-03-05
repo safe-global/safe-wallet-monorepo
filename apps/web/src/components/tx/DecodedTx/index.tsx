@@ -57,6 +57,7 @@ const DecodedTx = ({
 
   const decodedDataBlock = <DecodedData txData={txData} toInfo={toInfo} />
   const showDecodedData = isMethodCallInAdvanced && decodedData?.method
+  const hideDecodedDataInAdvanced = !showDecodedData || (isMethodCallInAdvanced && !!decodedData?.method)
 
   return (
     <Stack spacing={2}>
@@ -88,15 +89,14 @@ const DecodedTx = ({
             <AccordionDetails data-testid="decoded-tx-details">
               {showDecodedData && decodedDataBlock}
 
-              {showDecodedData && <Divider />}
+              {showDecodedData && hideDecodedDataInAdvanced && <Divider />}
 
               <Summary
                 safeTxData={tx?.data}
                 txData={txData}
                 txInfo={txInfo}
                 txDetails={txDetails}
-                defaultExpanded
-                hideDecodedData={!showDecodedData || (isMethodCallInAdvanced && !!decodedData?.method)}
+                hideDecodedData={hideDecodedDataInAdvanced}
               />
             </AccordionDetails>
           </Accordion>

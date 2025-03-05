@@ -18,7 +18,7 @@ interface Props {
   txData: TransactionDetails['txData']
   txInfo?: TransactionDetails['txInfo']
   txDetails?: TransactionDetails
-  defaultExpanded?: boolean
+  isTxDetailsPreview?: boolean
   hideDecodedData?: boolean
 }
 
@@ -27,10 +27,10 @@ const Summary = ({
   txData,
   txInfo,
   txDetails,
-  defaultExpanded = false,
+  isTxDetailsPreview = false,
   hideDecodedData = false,
 }: Props): ReactElement => {
-  const [expanded, setExpanded] = useState<boolean>(defaultExpanded)
+  const [expanded, setExpanded] = useState<boolean>(!isTxDetailsPreview)
   const toggleExpanded = () => setExpanded((val) => !val)
   const { txHash, executedAt } = txDetails ?? {}
   const isCustom = txInfo && isCustomTxInfo(txInfo)
@@ -73,7 +73,7 @@ const Summary = ({
       )}
 
       {/* Advanced TxData */}
-      {!defaultExpanded && (
+      {isTxDetailsPreview && (
         <Link
           data-testid="tx-advanced-details"
           className={css.buttonExpand}
@@ -86,8 +86,13 @@ const Summary = ({
       )}
 
       {expanded && (
-        <Box mt={2}>
-          {!isCustom && !hideDecodedData && <DecodedData txData={txData} toInfo={txData?.to} />}
+        <Box mt={isTxDetailsPreview ? 2 : 0}>
+          {!isCustom && !hideDecodedData && (
+            <>
+              <DecodedData txData={txData} toInfo={txData?.to} />
+              <Divider />
+            </>
+          )}
 
           <Typography fontWeight="bold" pb={1}>
             Transaction data
