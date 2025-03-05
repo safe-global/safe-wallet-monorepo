@@ -34,7 +34,7 @@ export const generateDataRowValue = (
       )
     case 'rawData':
     case 'bytes':
-      return <HexEncodedData highlightFirstBytes={false} limit={60} hexData={value} />
+      return <HexEncodedData highlightFirstBytes={false} limit={66} hexData={value} />
     default:
       return <Typography sx={{ wordBreak: 'break-all' }}>{value}</Typography>
   }

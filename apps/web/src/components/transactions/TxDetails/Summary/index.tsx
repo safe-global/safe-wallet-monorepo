@@ -5,7 +5,7 @@ import { generateDataRowValue, TxDataRow } from '@/components/transactions/TxDet
 import { isCustomTxInfo, isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
 import type { TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
 import { Operation } from '@safe-global/safe-gateway-typescript-sdk'
-import { type SafeTransactionData } from '@safe-global/safe-core-sdk-types'
+import type { SafeTransactionData } from '@safe-global/safe-core-sdk-types'
 import { dateString } from '@/utils/formatters'
 import css from './styles.module.css'
 import DecodedData from '../TxData/DecodedData'
@@ -14,6 +14,7 @@ import { Divider } from '@/components/tx/DecodedTx'
 import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
 
 interface Props {
+  safeTxData?: SafeTransactionData
   txData: TransactionDetails['txData']
   txInfo?: TransactionDetails['txInfo']
   txDetails?: TransactionDetails
@@ -22,6 +23,7 @@ interface Props {
 }
 
 const Summary = ({
+  safeTxData,
   txData,
   txInfo,
   txDetails,
@@ -39,7 +41,7 @@ const Summary = ({
     refundReceiver = txDetails.detailedExecutionInfo.refundReceiver?.value
   }
 
-  const safeTxData: SafeTransactionData = {
+  safeTxData = safeTxData ?? {
     to: txData?.to.value ?? ZERO_ADDRESS,
     data: txData?.hexData ?? '0x',
     value: txData?.value ?? BigInt(0).toString(),
@@ -113,25 +115,35 @@ const Summary = ({
 
               <Box pt={2} />
 
-              <TxDataRow datatestid="tx-operation" title="Operation:">
+              <TxDataRow datatestid="tx-operation" title="operation:">
                 {`${txData.operation} (${Operation[txData.operation].toLowerCase()})`}
+              </TxDataRow>
+
+              <TxDataRow datatestid="tx-nonce" title="nonce:">
+                {safeTxData.nonce}
               </TxDataRow>
 
               <TxDataRow datatestid="tx-safe-gas" title="safeTxGas:">
                 {safeTxData.safeTxGas}
               </TxDataRow>
+
               <TxDataRow datatestid="tx-base-gas" title="baseGas:">
                 {safeTxData.baseGas}
               </TxDataRow>
+
               <TxDataRow datatestid="tx-gas-price" title="gasPrice:">
                 {safeTxData.gasPrice}
               </TxDataRow>
+
               <TxDataRow datatestid="tx-gas-token" title="gasToken:">
                 {generateDataRowValue(safeTxData.gasToken, 'hash', true)}
               </TxDataRow>
+
               <TxDataRow datatestid="tx-refund-receiver" title="refundReceiver:">
                 {generateDataRowValue(safeTxData.refundReceiver, 'hash', true)}
               </TxDataRow>
+
+              {!!confirmations && <Box pt={2} />}
 
               {confirmations?.map(({ signature }, index) => (
                 <TxDataRow datatestid="tx-signature" title={`Signature ${index + 1}:`} key={`signature-${index}:`}>

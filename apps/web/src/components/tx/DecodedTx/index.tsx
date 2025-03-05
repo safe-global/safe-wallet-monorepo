@@ -86,14 +86,10 @@ const DecodedTx = ({
             </AccordionSummary>
 
             <AccordionDetails data-testid="decoded-tx-details">
-              {showDecodedData && (
-                <>
-                  {decodedDataBlock}
-                  <Divider />
-                </>
-              )}
+              {showDecodedData && decodedDataBlock}
 
               <Summary
+                safeTxData={tx?.data}
                 txData={txData}
                 txInfo={txInfo}
                 txDetails={txDetails}
