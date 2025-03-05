@@ -143,7 +143,7 @@ export const networks = {
   berachain: 'Berachain',
   zkSync: 'zkSync Era',
   base: 'Base',
-  optimism: 'Optimism',
+  optimism: 'OP Mainnet',
   gnosisChiado: 'Gnosis Chiado',
 }
 
