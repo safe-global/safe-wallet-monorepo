@@ -11,7 +11,7 @@ import { shortenAddress } from '@safe-global/utils/formatters'
 export const formatSendNFTItems = (txInfo: TransferTransactionInfo, chain: Chain) => {
   return [
     {
-      label: 'New Signer',
+      label: 'New signer',
       render: () => (
         <View flexDirection="row" alignItems="center" gap="$2">
           <Identicon address={txInfo.recipient.value as Address} size={24} />
