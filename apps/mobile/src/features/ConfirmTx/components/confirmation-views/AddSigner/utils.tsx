@@ -32,7 +32,7 @@ export const formatAddSignerItems = (
 
   return [
     {
-      label: 'New Signer',
+      label: 'New signer',
       render: () => (
         <View flexDirection="row" alignItems="center" gap="$2">
           <Identicon address={txInfo.settingsInfo?.owner?.value} size={24} />
