@@ -116,10 +116,6 @@ const Summary = ({
             {`${safeTxData.operation} (${Operation[safeTxData.operation].toLowerCase()})`}
           </TxDataRow>
 
-          <TxDataRow datatestid="tx-nonce" title="nonce:">
-            {safeTxData.nonce}
-          </TxDataRow>
-
           <TxDataRow datatestid="tx-safe-gas" title="safeTxGas:">
             {safeTxData.safeTxGas}
           </TxDataRow>
@@ -138,6 +134,10 @@ const Summary = ({
 
           <TxDataRow datatestid="tx-refund-receiver" title="refundReceiver:">
             {generateDataRowValue(safeTxData.refundReceiver, 'hash', true)}
+          </TxDataRow>
+
+          <TxDataRow datatestid="tx-nonce" title="nonce:">
+            {safeTxData.nonce}
           </TxDataRow>
 
           {!!confirmations && <Box pt={2} />}
