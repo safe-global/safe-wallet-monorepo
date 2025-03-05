@@ -5,6 +5,15 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import { sameAddress } from '@/utils/addresses'
 import { Interface } from 'ethers'
 
+export const InvalidPreviewErrorName = 'InvalidPreviewError'
+class InvalidPreviewError extends Error {
+  constructor(message: string) {
+    super(message)
+
+    this.name = InvalidPreviewErrorName
+  }
+}
+
 const useTxPreview = (
   safeTxData?: {
     operation: SafeTransaction['data']['operation']
@@ -36,7 +45,7 @@ const useTxPreview = (
       (txPreview.txData.hexData ?? '0x') === safeTxData.data
 
     if (!matchesSafeTxData) {
-      throw new Error("SafeTx data does not match the preview result's transaction data")
+      throw new InvalidPreviewError("SafeTx data does not match the preview result's transaction data")
     }
 
     // validate the decodedData
@@ -51,7 +60,7 @@ const useTxPreview = (
       )
 
       if (rawDataFromDecodedData !== safeTxData.data) {
-        throw new Error('Decoded data does not match raw data')
+        throw new InvalidPreviewError('Decoded data does not match raw data')
       }
     }
 

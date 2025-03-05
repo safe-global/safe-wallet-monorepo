@@ -20,6 +20,7 @@ import { isWalletRejection } from '@/utils/wallets'
 import { useSigner } from '@/hooks/wallets/useWallet'
 import { NestedTxSuccessScreenFlow } from '@/components/tx-flow/flows'
 import { useValidateTxData } from '@/hooks/useValidateTxData'
+import { InvalidPreviewErrorName } from '../confirmation-views/useTxPreview'
 
 export const SignForm = ({
   safeTx,
@@ -33,12 +34,14 @@ export const SignForm = ({
   isOwner,
   txActions,
   txSecurity,
+  txPreviewError,
 }: SignOrExecuteProps & {
   isOwner: ReturnType<typeof useIsSafeOwner>
   txActions: ReturnType<typeof useTxActions>
   txSecurity: ReturnType<typeof useTxSecurityContext>
   isCreation?: boolean
   safeTx?: SafeTransaction
+  txPreviewError?: Error
 }): ReactElement => {
   // Form state
   const [isSubmittable, setIsSubmittable] = useState<boolean>(true)
@@ -50,6 +53,8 @@ export const SignForm = ({
     () => (validationResult !== undefined ? new Error(validationResult) : undefined),
     [validationResult],
   )
+
+  const isInvalidPreview = txPreviewError?.name === InvalidPreviewErrorName
 
   // Hooks
   const { signTx, addToBatch } = txActions
@@ -112,7 +117,8 @@ export const SignForm = ({
     cannotPropose ||
     (needsRiskConfirmation && !isRiskConfirmed) ||
     validationError !== undefined ||
-    validationLoading
+    validationLoading ||
+    isInvalidPreview
 
   return (
     <form onSubmit={handleSubmit}>
