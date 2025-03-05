@@ -8064,8 +8064,9 @@ __metadata:
     lodash: "npm:^4.17.21"
     mockdate: "npm:^3.0.5"
     msw: "npm:^2.7.0"
-    next: "npm:^15.1.2"
+    next: "npm:15.1.2"
     papaparse: "npm:^5.3.2"
+    patch-package: "npm:^8.0.0"
     prettier: "npm:^3.3.3"
     qrcode.react: "npm:^3.1.0"
     react: "npm:^19.0.0"
@@ -13057,6 +13058,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@yarnpkg/lockfile@npm:^1.1.0":
+  version: 1.1.0
+  resolution: "@yarnpkg/lockfile@npm:1.1.0"
+  checksum: 10/cd19e1114aaf10a05126aeea8833ef4ca8af8a46e88e12884f8359d19333fd19711036dbc2698dbe937f81f037070cf9a8da45c2e8c6ca19cafd7d15659094ed
+  languageName: node
+  linkType: hard
+
 "@zxing/text-encoding@npm:0.9.0":
   version: 0.9.0
   resolution: "@zxing/text-encoding@npm:0.9.0"
@@ -15011,7 +15019,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ci-info@npm:^3.2.0, ci-info@npm:^3.3.0":
+"ci-info@npm:^3.2.0, ci-info@npm:^3.3.0, ci-info@npm:^3.7.0":
   version: 3.9.0
   resolution: "ci-info@npm:3.9.0"
   checksum: 10/75bc67902b4d1c7b435497adeb91598f6d52a3389398e44294f6601b20cfef32cf2176f7be0eb961d9e085bb333a8a5cae121cb22f81cf238ae7f58eb80e9397
@@ -19087,6 +19095,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"find-yarn-workspace-root@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "find-yarn-workspace-root@npm:2.0.0"
+  dependencies:
+    micromatch: "npm:^4.0.2"
+  checksum: 10/7fa7942849eef4d5385ee96a0a9a5a9afe885836fd72ed6a4280312a38690afea275e7d09b343fe97daf0412d833f8ac4b78c17fc756386d9ebebf0759d707a7
+  languageName: node
+  linkType: hard
+
 "firebase@npm:10.13.2":
   version: 10.13.2
   resolution: "firebase@npm:10.13.2"
@@ -22333,6 +22350,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"json-stable-stringify@npm:^1.0.2":
+  version: 1.2.1
+  resolution: "json-stable-stringify@npm:1.2.1"
+  dependencies:
+    call-bind: "npm:^1.0.8"
+    call-bound: "npm:^1.0.3"
+    isarray: "npm:^2.0.5"
+    jsonify: "npm:^0.0.1"
+    object-keys: "npm:^1.1.1"
+  checksum: 10/f4600d34605e1da81a615ddf7dc62f021a5a5c822aee38b3c878e9a703bbd72623402944dbd7848140602c9ec54bfa2df65dfe75cc40afcfd79f3f072ca5307b
+  languageName: node
+  linkType: hard
+
 "json-stringify-deterministic@npm:^1.0.8":
   version: 1.0.12
   resolution: "json-stringify-deterministic@npm:1.0.12"
@@ -22389,6 +22419,13 @@ __metadata:
     graceful-fs:
       optional: true
   checksum: 10/03014769e7dc77d4cf05fa0b534907270b60890085dd5e4d60a382ff09328580651da0b8b4cdf44d91e4c8ae64d91791d965f05707beff000ed494a38b6fec85
+  languageName: node
+  linkType: hard
+
+"jsonify@npm:^0.0.1":
+  version: 0.0.1
+  resolution: "jsonify@npm:0.0.1"
+  checksum: 10/7b86b6f4518582ff1d8b7624ed6c6277affd5246445e864615dbdef843a4057ac58587684faf129ea111eeb80e01c15f0a4d9d03820eb3f3985fa67e81b12398
   languageName: node
   linkType: hard
 
@@ -22455,6 +22492,15 @@ __metadata:
   version: 6.0.3
   resolution: "kind-of@npm:6.0.3"
   checksum: 10/5873d303fb36aad875b7538798867da2ae5c9e328d67194b0162a3659a627d22f742fc9c4ae95cd1704132a24b00cae5041fc00c0f6ef937dc17080dc4dbb962
+  languageName: node
+  linkType: hard
+
+"klaw-sync@npm:^6.0.0":
+  version: 6.0.0
+  resolution: "klaw-sync@npm:6.0.0"
+  dependencies:
+    graceful-fs: "npm:^4.1.11"
+  checksum: 10/0da397f8961313c3ef8f79fb63af9002cde5a8fb2aeb1a37351feff0dd6006129c790400c3f5c3b4e757bedcabb13d21ec0a5eaef5a593d59515d4f2c291e475
   languageName: node
   linkType: hard
 
@@ -24887,7 +24933,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"next@npm:*, next@npm:^15.1.2":
+"next@npm:*, next@npm:15.1.2":
   version: 15.1.2
   resolution: "next@npm:15.1.2"
   dependencies:
@@ -25527,7 +25573,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"open@npm:^7.0.3":
+"open@npm:^7.0.3, open@npm:^7.4.2":
   version: 7.4.2
   resolution: "open@npm:7.4.2"
   dependencies:
@@ -25901,6 +25947,31 @@ __metadata:
     ansi-escapes: "npm:^4.3.2"
     cross-spawn: "npm:^7.0.3"
   checksum: 10/1cf7001e66868b2ed7a03e036bc2f1dd45eb6dc8fee7e3e2056370057c484be25e7468fee00a1378e1ee8eca77ba79f48bee5ce15dcb464413987ace63c68b35
+  languageName: node
+  linkType: hard
+
+"patch-package@npm:^8.0.0":
+  version: 8.0.0
+  resolution: "patch-package@npm:8.0.0"
+  dependencies:
+    "@yarnpkg/lockfile": "npm:^1.1.0"
+    chalk: "npm:^4.1.2"
+    ci-info: "npm:^3.7.0"
+    cross-spawn: "npm:^7.0.3"
+    find-yarn-workspace-root: "npm:^2.0.0"
+    fs-extra: "npm:^9.0.0"
+    json-stable-stringify: "npm:^1.0.2"
+    klaw-sync: "npm:^6.0.0"
+    minimist: "npm:^1.2.6"
+    open: "npm:^7.4.2"
+    rimraf: "npm:^2.6.3"
+    semver: "npm:^7.5.3"
+    slash: "npm:^2.0.0"
+    tmp: "npm:^0.0.33"
+    yaml: "npm:^2.2.2"
+  bin:
+    patch-package: index.js
+  checksum: 10/8714322c35b29266e71c82d58443ce5322400a546a3327f1b8907b8eeb7e366dff33c4fdfbd25e3f0b3a9927189c26e9ac60636ca1e4140d6dbc11cca10f9b5d
   languageName: node
   linkType: hard
 
@@ -28316,6 +28387,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"rimraf@npm:^2.6.3":
+  version: 2.7.1
+  resolution: "rimraf@npm:2.7.1"
+  dependencies:
+    glob: "npm:^7.1.3"
+  bin:
+    rimraf: ./bin.js
+  checksum: 10/4586c296c736483e297da7cffd19475e4a3e41d07b1ae124aad5d687c79e4ffa716bdac8732ed1db942caf65271cee9dd39f8b639611de161a2753e2112ffe1d
+  languageName: node
+  linkType: hard
+
 "rimraf@npm:^3.0.2":
   version: 3.0.2
   resolution: "rimraf@npm:3.0.2"
@@ -29118,6 +29200,13 @@ __metadata:
   version: 1.0.5
   resolution: "sisteransi@npm:1.0.5"
   checksum: 10/aba6438f46d2bfcef94cf112c835ab395172c75f67453fe05c340c770d3c402363018ae1ab4172a1026a90c47eaccf3af7b6ff6fa749a680c2929bd7fa2b37a4
+  languageName: node
+  linkType: hard
+
+"slash@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "slash@npm:2.0.0"
+  checksum: 10/512d4350735375bd11647233cb0e2f93beca6f53441015eea241fe784d8068281c3987fbaa93e7ef1c38df68d9c60013045c92837423c69115297d6169aa85e6
   languageName: node
   linkType: hard
 
@@ -33044,6 +33133,15 @@ __metadata:
   bin:
     yaml: bin.mjs
   checksum: 10/cf412f03a33886db0a3aac70bb4165588f4c5b3c6f8fc91520b71491e5537800b6c2c73ed52015617f6e191eb4644c73c92973960a1999779c62a200ee4c231d
+  languageName: node
+  linkType: hard
+
+"yaml@npm:^2.2.2":
+  version: 2.7.0
+  resolution: "yaml@npm:2.7.0"
+  bin:
+    yaml: bin.mjs
+  checksum: 10/c8c314c62fbd49244a6a51b06482f6d495b37ab10fa685fcafa1bbaae7841b7233ee7d12cab087bcca5a0b28adc92868b6e437322276430c28d00f1c1732eeec
   languageName: node
   linkType: hard
 
