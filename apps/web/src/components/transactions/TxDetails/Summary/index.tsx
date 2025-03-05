@@ -102,7 +102,7 @@ const Summary = ({
             {generateDataRowValue(safeTxData.to, 'address', true)}
           </TxDataRow>
 
-          <TxDataRow datatestid="tx-to" title="value:">
+          <TxDataRow datatestid="tx-value" title="value:">
             {generateDataRowValue(safeTxData.value)}
           </TxDataRow>
 
