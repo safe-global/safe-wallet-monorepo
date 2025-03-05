@@ -28,6 +28,8 @@ export const generateDataRowValue = (
           showAvatar={!!customAvatar}
           hasExplorer={hasExplorer}
           showCopyButton
+          shortAddress={type !== 'address'}
+          showPrefix={false}
         />
       )
     case 'rawData':

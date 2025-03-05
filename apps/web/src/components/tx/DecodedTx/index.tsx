@@ -1,10 +1,9 @@
 import { type SyntheticEvent, type ReactElement, memo } from 'react'
-import { ErrorBoundary } from '@sentry/react'
 import { isCustomTxInfo, isNativeTokenTransfer, isTransferTxInfo } from '@/utils/transaction-guards'
 import { Accordion, AccordionDetails, AccordionSummary, Box, Stack } from '@mui/material'
 import { type SafeTransaction } from '@safe-global/safe-core-sdk-types'
 import type { TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
-import Summary, { PartialSummary } from '@/components/transactions/TxDetails/Summary'
+import Summary from '@/components/transactions/TxDetails/Summary'
 import { trackEvent, MODALS_EVENTS } from '@/services/analytics'
 import Multisend from '@/components/transactions/TxDetails/TxData/DecodedData/Multisend'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
@@ -94,19 +93,13 @@ const DecodedTx = ({
                 </>
               )}
 
-              {txDetails && !showDecodedData ? (
-                <Summary
-                  txDetails={txDetails}
-                  defaultExpanded
-                  hideDecodedData={isMethodCallInAdvanced && !!decodedData?.method}
-                />
-              ) : (
-                tx && (
-                  <ErrorBoundary>
-                    <PartialSummary safeTx={tx} />
-                  </ErrorBoundary>
-                )
-              )}
+              <Summary
+                txData={txData}
+                txInfo={txInfo}
+                txDetails={txDetails}
+                defaultExpanded
+                hideDecodedData={isMethodCallInAdvanced && !!decodedData?.method}
+              />
             </AccordionDetails>
           </Accordion>
         </Box>
