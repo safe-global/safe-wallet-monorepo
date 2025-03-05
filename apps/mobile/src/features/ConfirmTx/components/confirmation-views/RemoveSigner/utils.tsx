@@ -13,7 +13,7 @@ export const formatRemoveSignerItems = (txInfo: NormalizedSettingsChangeTransact
 
   return [
     {
-      label: 'Removed Signer',
+      label: 'Removed signer',
       render: () => (
         <View flexDirection="row" alignItems="center" gap="$2">
           <Identicon address={txInfo.settingsInfo?.owner?.value} size={24} />
