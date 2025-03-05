@@ -73,93 +73,83 @@ const Summary = ({
       )}
 
       {/* Advanced TxData */}
-      {txData && (
-        <>
-          {!defaultExpanded && (
-            <Link
-              data-testid="tx-advanced-details"
-              className={css.buttonExpand}
-              onClick={toggleExpanded}
-              component="button"
-              variant="body1"
-            >
-              Advanced details
-            </Link>
-          )}
+      {!defaultExpanded && (
+        <Link
+          data-testid="tx-advanced-details"
+          className={css.buttonExpand}
+          onClick={toggleExpanded}
+          component="button"
+          variant="body1"
+        >
+          Advanced details
+        </Link>
+      )}
 
-          {expanded && (
-            <Box mt={1}>
-              {!isCustom && !hideDecodedData && (
-                <>
-                  <Divider />
-                  <DecodedData txData={txData} toInfo={txData?.to} />
-                  <Divider />
-                </>
-              )}
+      {expanded && (
+        <Box mt={2}>
+          {!isCustom && !hideDecodedData && <DecodedData txData={txData} toInfo={txData?.to} />}
 
-              <Typography fontWeight="bold" pb={1}>
-                Transaction data
-              </Typography>
+          <Typography fontWeight="bold" pb={1}>
+            Transaction data
+          </Typography>
 
-              <TxDataRow datatestid="tx-to" title="to:">
-                {generateDataRowValue(txData.to.value, 'address', true)}
-              </TxDataRow>
+          <TxDataRow datatestid="tx-to" title="to:">
+            {generateDataRowValue(safeTxData.to, 'address', true)}
+          </TxDataRow>
 
-              <TxDataRow datatestid="tx-to" title="value:">
-                {generateDataRowValue(txData.value)}
-              </TxDataRow>
+          <TxDataRow datatestid="tx-to" title="value:">
+            {generateDataRowValue(safeTxData.value)}
+          </TxDataRow>
 
-              <TxDataRow datatestid="tx-raw-data" title="data:">
-                {generateDataRowValue(txData.hexData, 'rawData')}
-              </TxDataRow>
+          <TxDataRow datatestid="tx-raw-data" title="data:">
+            {generateDataRowValue(safeTxData.data, 'rawData')}
+          </TxDataRow>
 
-              <Box pt={2} />
+          <Box pt={2} />
 
-              <TxDataRow datatestid="tx-operation" title="operation:">
-                {`${txData.operation} (${Operation[txData.operation].toLowerCase()})`}
-              </TxDataRow>
+          <TxDataRow datatestid="tx-operation" title="operation:">
+            {`${safeTxData.operation} (${Operation[safeTxData.operation].toLowerCase()})`}
+          </TxDataRow>
 
-              <TxDataRow datatestid="tx-nonce" title="nonce:">
-                {safeTxData.nonce}
-              </TxDataRow>
+          <TxDataRow datatestid="tx-nonce" title="nonce:">
+            {safeTxData.nonce}
+          </TxDataRow>
 
-              <TxDataRow datatestid="tx-safe-gas" title="safeTxGas:">
-                {safeTxData.safeTxGas}
-              </TxDataRow>
+          <TxDataRow datatestid="tx-safe-gas" title="safeTxGas:">
+            {safeTxData.safeTxGas}
+          </TxDataRow>
 
-              <TxDataRow datatestid="tx-base-gas" title="baseGas:">
-                {safeTxData.baseGas}
-              </TxDataRow>
+          <TxDataRow datatestid="tx-base-gas" title="baseGas:">
+            {safeTxData.baseGas}
+          </TxDataRow>
 
-              <TxDataRow datatestid="tx-gas-price" title="gasPrice:">
-                {safeTxData.gasPrice}
-              </TxDataRow>
+          <TxDataRow datatestid="tx-gas-price" title="gasPrice:">
+            {safeTxData.gasPrice}
+          </TxDataRow>
 
-              <TxDataRow datatestid="tx-gas-token" title="gasToken:">
-                {generateDataRowValue(safeTxData.gasToken, 'hash', true)}
-              </TxDataRow>
+          <TxDataRow datatestid="tx-gas-token" title="gasToken:">
+            {generateDataRowValue(safeTxData.gasToken, 'hash', true)}
+          </TxDataRow>
 
-              <TxDataRow datatestid="tx-refund-receiver" title="refundReceiver:">
-                {generateDataRowValue(safeTxData.refundReceiver, 'hash', true)}
-              </TxDataRow>
+          <TxDataRow datatestid="tx-refund-receiver" title="refundReceiver:">
+            {generateDataRowValue(safeTxData.refundReceiver, 'hash', true)}
+          </TxDataRow>
 
-              {!!confirmations && <Box pt={2} />}
+          {!!confirmations && <Box pt={2} />}
 
-              {confirmations?.map(({ signature }, index) => (
-                <TxDataRow datatestid="tx-signature" title={`Signature ${index + 1}:`} key={`signature-${index}:`}>
-                  {generateDataRowValue(signature, 'rawData')}
-                </TxDataRow>
-              ))}
+          {confirmations?.map(({ signature }, index) => (
+            <TxDataRow datatestid="tx-signature" title={`Signature ${index + 1}:`} key={`signature-${index}:`}>
+              {generateDataRowValue(signature, 'rawData')}
+            </TxDataRow>
+          ))}
 
-              <Divider />
+          <Divider />
 
-              <Typography fontWeight="bold" pb={1}>
-                Transaction hashes
-              </Typography>
-              {txData && <SafeTxHashDataRow safeTxData={safeTxData} />}
-            </Box>
-          )}
-        </>
+          <Typography fontWeight="bold" pb={1}>
+            Transaction hashes
+          </Typography>
+          <SafeTxHashDataRow safeTxData={safeTxData} />
+        </Box>
       )}
     </>
   )

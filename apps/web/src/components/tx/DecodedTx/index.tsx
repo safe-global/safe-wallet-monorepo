@@ -88,13 +88,15 @@ const DecodedTx = ({
             <AccordionDetails data-testid="decoded-tx-details">
               {showDecodedData && decodedDataBlock}
 
+              {showDecodedData && <Divider />}
+
               <Summary
                 safeTxData={tx?.data}
                 txData={txData}
                 txInfo={txInfo}
                 txDetails={txDetails}
                 defaultExpanded
-                hideDecodedData={isMethodCallInAdvanced && !!decodedData?.method}
+                hideDecodedData={!showDecodedData || (isMethodCallInAdvanced && !!decodedData?.method)}
               />
             </AccordionDetails>
           </Accordion>
