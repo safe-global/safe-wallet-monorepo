@@ -356,7 +356,7 @@ export function setInputValue(value) {
       .should('be.visible')
       .clear()
       .type('{selectall}{backspace}')
-      .should(($input) => {
+      .then(($input) => {
         if ($input.val() !== '') {
           cy.wrap($input).clear().type('{selectall}{backspace}');
         }
