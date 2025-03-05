@@ -54,7 +54,7 @@ describe('Sidebar UI tests', () => {
   })
 
   views.forEach((link) => {
-    it.only(`Verify that clicking on Bridge opens exchange modal in view: ${link}`, () => {
+    it(`Verify that clicking on Bridge opens exchange modal in view: ${link}`, () => {
       let iframeSelector = `iframe[src*="${constants.bridgeWidget}"]`
       cy.visit(link + staticSafes.SEP_STATIC_SAFE_4)
       clickOnBridgeOption()

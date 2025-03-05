@@ -133,6 +133,8 @@ export function getAddressToBeRemoved() {
 }
 
 export function openReplaceOwnerWindow(index) {
+  const minimumCount = index === 0 ? 1 : index
+  main.verifyMinimumElementsCount(replaceOwnerBtn, minimumCount)
   cy.get(replaceOwnerBtn).eq(index).click({ force: true })
   cy.get(newOwnerName).should('be.visible')
   cy.get(newOwnerAddress).should('be.visible')

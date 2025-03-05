@@ -30,7 +30,8 @@
     "static-serve": "yarn build && yarn serve",
     "prepare": "husky",
     "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build --quiet"
+    "build-storybook": "storybook build --quiet",
+    "integrity": "node scripts/integrity-hashes.cjs"
   },
   "engines": {
     "node": ">=18"
@@ -128,6 +129,7 @@
     "@types/semver": "^7.3.10",
     "@typescript-eslint/eslint-plugin": "^7.6.0",
     "@typescript-eslint/parser": "^8.18.1",
+    "cheerio": "^1.0.0",
     "cross-env": "^7.0.3",
     "cypress": "^13.15.2",
     "cypress-file-upload": "^5.0.8",
