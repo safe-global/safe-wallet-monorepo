@@ -55,17 +55,20 @@ export const ExecTransaction = ({
     [data?.hexData],
   )
 
-  const [txPreview, error] = useTxPreview(
-    childSafeTx
-      ? {
-          operation: Number(childSafeTx.data.operation),
-          data: childSafeTx.data.data,
-          to: childSafeTx.data.to,
-          value: childSafeTx.data.value.toString(),
-        }
-      : undefined,
-    data?.to.value,
+  const txData = useMemo(
+    () =>
+      childSafeTx
+        ? {
+            operation: Number(childSafeTx.data.operation),
+            data: childSafeTx.data.data,
+            to: childSafeTx.data.to,
+            value: childSafeTx.data.value.toString(),
+          }
+        : undefined,
+    [childSafeTx],
   )
+
+  const [txPreview, error] = useTxPreview(txData, data?.to.value)
 
   const decodedNestedTxDataBlock = txPreview ? (
     <DecodedTx {...txPreview} tx={childSafeTx} showMethodCall showAdvancedDetails={false} />

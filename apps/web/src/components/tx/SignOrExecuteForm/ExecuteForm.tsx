@@ -31,6 +31,7 @@ import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import NonOwnerError from '@/components/tx/SignOrExecuteForm/NonOwnerError'
 import WalletRejectionError from '@/components/tx/SignOrExecuteForm/WalletRejectionError'
 import { useValidateTxData } from '@/hooks/useValidateTxData'
+import { InvalidPreviewErrorName } from '../confirmation-views/useTxPreview'
 
 export const ExecuteForm = ({
   safeTx,
@@ -44,6 +45,7 @@ export const ExecuteForm = ({
   isExecutionLoop,
   txActions,
   txSecurity,
+  txPreviewError,
 }: SignOrExecuteProps & {
   isOwner: ReturnType<typeof useIsSafeOwner>
   isExecutionLoop: ReturnType<typeof useIsExecutionLoop>
@@ -51,6 +53,7 @@ export const ExecuteForm = ({
   txSecurity: ReturnType<typeof useTxSecurityContext>
   isCreation?: boolean
   safeTx?: SafeTransaction
+  txPreviewError?: Error
 }): ReactElement => {
   // Form state
   const [isSubmittable, setIsSubmittable] = useState<boolean>(true)
@@ -62,6 +65,8 @@ export const ExecuteForm = ({
     () => (validationResult !== undefined ? new Error(validationResult) : undefined),
     [validationResult],
   )
+  const isInvalidPreview = txPreviewError?.name === InvalidPreviewErrorName
+
   // Hooks
   const currentChain = useCurrentChain()
   const { executeTx } = txActions
@@ -137,7 +142,8 @@ export const ExecuteForm = ({
     cannotPropose ||
     (needsRiskConfirmation && !isRiskConfirmed) ||
     validationError !== undefined ||
-    validationLoading
+    validationLoading ||
+    isInvalidPreview
 
   return (
     <>
