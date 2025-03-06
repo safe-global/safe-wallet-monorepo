@@ -89,12 +89,12 @@ export class BlockaidModule implements SecurityModule<BlockaidModuleRequest, Blo
       throw new Error('Security check CLIENT_ID not configured')
     }
 
-    const { chainId, safeAddress } = request
+    const { chainId, safeAddress, walletAddress } = request
     const message = BlockaidModule.prepareMessage(request)
 
     const payload: BlockaidPayload = {
       chain: numberToHex(chainId),
-      account_address: safeAddress,
+      account_address: walletAddress,
       data: {
         method: 'eth_signTypedData_v4',
         params: [safeAddress, message],
