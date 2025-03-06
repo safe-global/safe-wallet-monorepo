@@ -20,7 +20,8 @@ import { isWalletRejection } from '@/utils/wallets'
 import { useSigner } from '@/hooks/wallets/useWallet'
 import { NestedTxSuccessScreenFlow } from '@/components/tx-flow/flows'
 import { useValidateTxData } from '@/hooks/useValidateTxData'
-import { InvalidPreviewErrorName } from '../confirmation-views/useTxPreview'
+import { useValidateTxPreview } from '@/hooks/useValidateTxPreview'
+import { type TransactionPreview } from '@safe-global/safe-gateway-typescript-sdk'
 
 export const SignForm = ({
   safeTx,
@@ -34,14 +35,14 @@ export const SignForm = ({
   isOwner,
   txActions,
   txSecurity,
-  txPreviewError,
+  txPreview,
 }: SignOrExecuteProps & {
   isOwner: ReturnType<typeof useIsSafeOwner>
   txActions: ReturnType<typeof useTxActions>
   txSecurity: ReturnType<typeof useTxSecurityContext>
   isCreation?: boolean
   safeTx?: SafeTransaction
-  txPreviewError?: Error
+  txPreview?: TransactionPreview
 }): ReactElement => {
   // Form state
   const [isSubmittable, setIsSubmittable] = useState<boolean>(true)
@@ -53,8 +54,8 @@ export const SignForm = ({
     () => (validationResult !== undefined ? new Error(validationResult) : undefined),
     [validationResult],
   )
-
-  const isInvalidPreview = txPreviewError?.name === InvalidPreviewErrorName
+  const validatePreviewError = useValidateTxPreview(txPreview, safeTx?.data)
+  const isInvalidPreview = Boolean(validatePreviewError)
 
   // Hooks
   const { signTx, addToBatch } = txActions
@@ -138,8 +139,12 @@ export const SignForm = ({
         </Box>
       )}
 
-      {validationError !== undefined && (
+      {validationError !== undefined ? (
         <ErrorMessage error={validationError}>Error validating transaction data</ErrorMessage>
+      ) : (
+        validatePreviewError !== undefined && (
+          <ErrorMessage error={validatePreviewError}>Error validating transaction preview</ErrorMessage>
+        )
       )}
 
       <Divider className={commonCss.nestedDivider} sx={{ pt: 3 }} />

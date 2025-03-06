@@ -1,6 +1,6 @@
 import SignOrExecute from '../index'
 import { render } from '@/tests/test-utils'
-import type { TransactionPreview } from '@safe-global/safe-gateway-typescript-sdk'
+import type { TransactionInfo, TransactionPreview } from '@safe-global/safe-gateway-typescript-sdk'
 import type { SafeTxContextParams } from '@/components/tx-flow/SafeTxProvider'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { createSafeTx } from '@/tests/builders/safeTx'
@@ -37,10 +37,17 @@ describe('SignOrExecute', () => {
   })
 
   it('should display a confirmation screen', async () => {
+    const safeTx = createSafeTx()
     jest.spyOn(useTxPreviewHooks, 'default').mockReturnValue([
       {
-        txInfo: {},
-        txData: {},
+        txInfo: {} as unknown as TransactionInfo,
+        txData: {
+          operation: safeTx.data.operation as number,
+          to: { value: safeTx.data.to },
+          hexData: safeTx.data.data,
+          value: safeTx.data.value,
+          trustedDelegateCallTarget: true,
+        },
       } as TransactionPreview,
       undefined,
       false,
@@ -50,7 +57,7 @@ describe('SignOrExecute', () => {
       <SafeTxContext.Provider
         value={
           {
-            safeTx: createSafeTx(),
+            safeTx,
           } as SafeTxContextParams
         }
       >
