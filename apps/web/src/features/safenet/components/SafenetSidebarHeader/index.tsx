@@ -1,12 +1,5 @@
-import SafenetDarkLogo from '@/public/images/safenet/logo-safenet-dark-gradient.svg'
-import { Box } from '@mui/material'
-import type { ReactElement } from 'react'
-import css from './styles.module.css'
+import dynamic from 'next/dynamic'
 
-const SafenetSidebarHeader = (): ReactElement => (
-  <Box className={css.safenetHeader}>
-    <SafenetDarkLogo height="14" />
-  </Box>
-)
+const SafenetSidebarHeader = dynamic(() => import('./SafenetSidebarHeader'), { ssr: false })
 
 export default SafenetSidebarHeader

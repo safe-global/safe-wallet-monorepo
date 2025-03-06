@@ -1,3 +1,5 @@
+import EnableSafenet from '@/features/safenet/components/EnableSafenet'
+import SafenetTokenTransfers from '@/features/safenet/components/SafenetTokenTransfers'
 import dynamic from 'next/dynamic'
 
 export const AddOwnerFlow = dynamic(() => import('./AddOwner'))
@@ -5,7 +7,7 @@ export const CancelRecoveryFlow = dynamic(() => import('./CancelRecovery'))
 export const ChangeThresholdFlow = dynamic(() => import('./ChangeThreshold'))
 export const ConfirmBatchFlow = dynamic(() => import('./ConfirmBatch'))
 export const ConfirmTxFlow = dynamic(() => import('./ConfirmTx'))
-export const EnableSafenetFlow = dynamic(() => import('@/features/safenet/components/EnableSafenet'))
+export { EnableSafenet as EnableSafenetFlow }
 export const ExecuteBatchFlow = dynamic(() => import('./ExecuteBatch'))
 export const NewSpendingLimitFlow = dynamic(() => import('./NewSpendingLimit'))
 export const NewTxFlow = dynamic(() => import('./NewTx'))
@@ -25,7 +27,7 @@ export const SignMessageOnChainFlow = dynamic(() => import('./SignMessageOnChain
 export const SuccessScreenFlow = dynamic(() => import('./SuccessScreen'))
 export const NestedTxSuccessScreenFlow = dynamic(() => import('./NestedTxSuccessScreen'))
 export const TokenTransferFlow = dynamic(() => import('./TokenTransfer'))
-export const SafenetTokenTransfersFlow = dynamic(() => import('@/features/safenet/components/SafenetTokenTransfers'))
+export { SafenetTokenTransfers as SafenetTokenTransfersFlow }
 export const UpdateSafeFlow = dynamic(() => import('./UpdateSafe'))
 export const UpsertRecoveryFlow = dynamic(() => import('./UpsertRecovery'))
 export const RecoveryAttemptFlow = dynamic(() => import('./RecoveryAttempt'))

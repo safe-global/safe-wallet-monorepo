@@ -10,7 +10,7 @@ import { safeParseUnits } from '@/utils/formatters'
 import { Divider, Grid } from '@mui/material'
 import type { MetaTransactionData } from '@safe-global/safe-core-sdk-types'
 import { useContext, useEffect } from 'react'
-import type { TokenTransfersParams } from '.'
+import type { TokenTransfersParams } from './SafenetTokenTransfers'
 
 const ReviewTokenTransfers = ({
   params,
