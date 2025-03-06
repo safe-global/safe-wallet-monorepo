@@ -205,9 +205,6 @@ const BlockaidWarning = () => {
             {blockaidResponse?.contractManagement.map((contractChange) => (
               <ContractChangeWarning key={contractChange.type} contractChange={contractChange} />
             ))}
-            {blockaidResponse?.contractManagement.map((contractChange) => (
-              <ContractChangeWarning key={contractChange.type} contractChange={contractChange} />
-            ))}
           </Stack>
           <PoweredByBlockaid />
         </>
