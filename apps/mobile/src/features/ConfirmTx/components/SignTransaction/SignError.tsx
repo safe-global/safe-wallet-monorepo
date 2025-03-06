@@ -2,16 +2,17 @@ import { StyleSheet } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 import React from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { ScrollView, Text, View } from 'tamagui'
+import { ScrollView, Text, useTheme, View } from 'tamagui'
 import { Badge } from '@/src/components/Badge'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { LargeHeaderTitle } from '@/src/components/Title'
 import { SafeButton } from '@/src/components/SafeButton'
 import { router } from 'expo-router'
 
-const colors: [string, string] = ['#221818', 'transparent']
-
 export default function SignError({ onRetryPress }: { onRetryPress: () => void }) {
+  const theme = useTheme()
+  const colors: [string, string] = [theme.errorDark.get(), 'transparent']
+
   return (
     <SafeAreaView edges={['bottom']} style={{ flex: 1 }}>
       <LinearGradient colors={colors} style={styles.background} />

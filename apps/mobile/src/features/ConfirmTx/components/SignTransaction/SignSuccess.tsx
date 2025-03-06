@@ -2,7 +2,7 @@ import { StyleSheet } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 import React from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { ScrollView, Text, View } from 'tamagui'
+import { ScrollView, Text, useTheme, View } from 'tamagui'
 import { Badge } from '@/src/components/Badge'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { LargeHeaderTitle } from '@/src/components/Title'
@@ -12,10 +12,10 @@ import { cgwApi } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { router } from 'expo-router'
 import { useDispatch } from 'react-redux'
 
-const colors: [string, string] = ['#0b301c', 'transparent']
-
 export default function SignSuccess() {
   const dispatch = useDispatch()
+  const theme = useTheme()
+  const colors: [string, string] = [theme.success.get(), 'transparent']
 
   const handleDonePress = () => {
     dispatch(cgwApi.util.invalidateTags(['transactions']))
