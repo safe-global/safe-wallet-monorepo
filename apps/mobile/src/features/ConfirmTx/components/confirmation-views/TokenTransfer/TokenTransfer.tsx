@@ -17,13 +17,13 @@ import { RootState } from '@/src/store'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { Address } from '@/src/types/address'
 
-interface QueueSummaryProps {
+interface TokenTransferProps {
   txInfo: TransferTransactionInfo
   executionInfo: MultisigExecutionDetails
   executedAt: number
 }
 
-export function QueueSummary({ txInfo, executionInfo, executedAt }: QueueSummaryProps) {
+export function TokenTransfer({ txInfo, executionInfo, executedAt }: TokenTransferProps) {
   const activeSafe = useDefinedActiveSafe()
   const activeChain = useAppSelector((state: RootState) => selectChainById(state, activeSafe.chainId))
   const { value, tokenSymbol, logoUri } = useTokenDetails(txInfo)

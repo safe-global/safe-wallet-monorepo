@@ -7,7 +7,7 @@ import {
   TransactionDetails,
   TransferTransactionInfo,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { QueueSummary } from '../confirmation-views/QueueSummary'
+import { TokenTransfer } from '../confirmation-views/TokenTransfer'
 import { AddSigner } from '../confirmation-views/AddSigner'
 import { ETxType } from '@/src/types/txType'
 import { getTransactionType } from '@/src/utils/transactions'
@@ -28,7 +28,7 @@ export function ConfirmationView({ txDetails }: ConfirmationViewProps) {
   switch (confirmationViewType) {
     case ETxType.TOKEN_TRANSFER:
       return (
-        <QueueSummary
+        <TokenTransfer
           executedAt={txDetails.executedAt || 0}
           executionInfo={txDetails.detailedExecutionInfo as MultisigExecutionDetails}
           txInfo={txDetails.txInfo as TransferTransactionInfo}
