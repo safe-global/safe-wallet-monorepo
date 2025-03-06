@@ -13,7 +13,6 @@ const FiatValue = ({
   value: string | number
   maxLength?: number
   precise?: boolean
-  safenet?: boolean
 }): ReactElement => {
   const currency = useAppSelector(selectCurrency)
 

@@ -14,6 +14,25 @@ import useIsSafenetEnabled from '../../hooks/useIsSafenetEnabled'
 import DisableSafenetModal from './DisableSafenetModal'
 import css from './styles.module.css'
 
+const MultichainIndicator = ({ chains }: { chains: Pick<ChainInfo, 'chainId'>[] }) => (
+  <Tooltip
+    title={
+      <Box>
+        {chains.map((safeItem) => (
+          <Box key={safeItem.chainId} sx={{ p: '4px 0px' }}>
+            <ChainIndicator chainId={safeItem.chainId} />
+          </Box>
+        ))}
+      </Box>
+    }
+    arrow
+  >
+    <Box className={css.multiChains}>
+      <NetworkLogosList networks={chains} showHasMore />
+    </Box>
+  </Tooltip>
+)
+
 const SafenetEnabled = () => {
   const { safe } = useSafeInfo()
   const { chainId, guard, modules } = safe
@@ -58,25 +77,6 @@ const SafenetEnabled = () => {
     </Stack>
   )
 }
-
-const MultichainIndicator = ({ chains }: { chains: Pick<ChainInfo, 'chainId'>[] }) => (
-  <Tooltip
-    title={
-      <Box>
-        {chains.map((safeItem) => (
-          <Box key={safeItem.chainId} sx={{ p: '4px 0px' }}>
-            <ChainIndicator chainId={safeItem.chainId} />
-          </Box>
-        ))}
-      </Box>
-    }
-    arrow
-  >
-    <Box className={css.multiChains}>
-      <NetworkLogosList networks={chains} showHasMore />
-    </Box>
-  </Tooltip>
-)
 
 const SafenetDisabled = () => {
   const { safe } = useSafeInfo()
