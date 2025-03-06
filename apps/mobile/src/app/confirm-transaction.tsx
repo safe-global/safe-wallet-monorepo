@@ -1,12 +1,15 @@
 import React from 'react'
-import { SafeAreaView } from 'react-native-safe-area-context'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { ConfirmTxContainer } from '@/src/features/ConfirmTx'
+import { View } from 'tamagui'
 
 function ConfirmTransactionPage() {
+  const insets = useSafeAreaInsets()
+
   return (
-    <SafeAreaView style={{ flex: 1 }} edges={['bottom']}>
+    <View flex={1} paddingBottom={insets.bottom}>
       <ConfirmTxContainer />
-    </SafeAreaView>
+    </View>
   )
 }
 
