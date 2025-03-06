@@ -55,12 +55,11 @@ function buildSriManifest() {
 
 /**
  * Write the manifest file in `out/_next/static/`.
+ * The script sets the global window.__CHUNK_SRI_MANIFEST
  */
 function writeExternalManifest(manifestObj) {
-  // We'll store it in out/_next/static/chunks-sri-manifest.js or somewhere similar
   const manifestJson = JSON.stringify(manifestObj, null, 2)
 
-  // The script sets the global window.__CHUNK_SRI_MANIFEST
   const fileContents = `
 /**
  * Auto-generated chunk SRI manifest.
@@ -68,12 +67,9 @@ function writeExternalManifest(manifestObj) {
  */
 window.__CHUNK_SRI_MANIFEST = ${manifestJson};
 `
-
-  // Place it in out/_next/static/ for a consistent path
   const manifestJsPath = path.join(OUT_DIR, '_next', 'static', MANIFEST_JS_FILENAME)
   fs.writeFileSync(manifestJsPath, fileContents, 'utf8')
 
-  // Return the public path so we can insert <script src="..."> references
   return `/_next/static/${MANIFEST_JS_FILENAME}`
 }
 
@@ -83,23 +79,20 @@ window.__CHUNK_SRI_MANIFEST = ${manifestJson};
 function insertManifestScriptIntoHtml(manifestScriptPath) {
   function processDir(dir) {
     const entries = fs.readdirSync(dir, { withFileTypes: true })
+
     for (const entry of entries) {
       const entryPath = path.join(dir, entry.name)
+
       if (entry.isDirectory()) {
         processDir(entryPath)
       } else if (entry.isFile() && entry.name.endsWith('.html')) {
-        // Load the HTML, inject one <script src="..." >
         const html = fs.readFileSync(entryPath, 'utf8')
         const $ = cheerio.load(html)
 
         // Ideally, put it in <head> so it loads early
         // so the manifest is available by the time Next tries dynamic chunks
-        if ($('head').length) {
-          $('head').append(`\n<script src="${manifestScriptPath}"></script>\n`)
-        } else {
-          // Fallback: if no <head>, put it at start of <body>
-          $('body').prepend(`\n<script src="${manifestScriptPath}"></script>\n`)
-        }
+        const container = $('head').length ? $('head') : $('body')
+        container.append(`\n<script src="${manifestScriptPath}"></script>\n`)
 
         fs.writeFileSync(entryPath, $.html(), 'utf8')
       }
