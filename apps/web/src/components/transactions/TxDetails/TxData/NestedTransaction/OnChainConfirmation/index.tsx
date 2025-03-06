@@ -19,7 +19,7 @@ import Multisend from '../../DecodedData/Multisend'
 import { MODALS_EVENTS } from '@/services/analytics'
 import Track from '@/components/common/Track'
 import { TxSimulation, TxSimulationMessage } from '@/components/tx/security/tenderly'
-import { SafeTransaction } from '@safe-global/safe-core-sdk-types'
+import type { SafeTransaction } from '@safe-global/safe-core-sdk-types'
 import extractTxInfo from '@/services/tx/extractTxInfo'
 
 const safeInterface = Safe__factory.createInterface()
