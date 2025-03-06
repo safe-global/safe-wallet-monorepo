@@ -16,9 +16,17 @@ import Logger from '@/src/utils/logger'
 import { HDNodeWallet, Wallet } from 'ethers'
 import { DELEGATED_ACCOUNT_TYPE } from '../store/constants'
 
-const REGULAR_NOTIFICATIONS = ['MESSAGE_CONFIRMATION_REQUEST', 'CONFIRMATION_REQUEST']
-const OWNER_NOTIFICATIONS = [
-  ...REGULAR_NOTIFICATIONS,
+const REGULAR_NOTIFICATIONS: NotificationType[] = [
+  'DELETED_MULTISIG_TRANSACTION',
+  'INCOMING_ETHER',
+  'INCOMING_TOKEN',
+  'MODULE_TRANSACTION',
+  'EXECUTED_MULTISIG_TRANSACTION',
+]
+const OWNER_NOTIFICATIONS: NotificationType[] = [
+  'MESSAGE_CONFIRMATION_REQUEST',
+  'DELETED_MULTISIG_TRANSACTION',
+  'CONFIRMATION_REQUEST',
   'INCOMING_ETHER',
   'INCOMING_TOKEN',
   'MODULE_TRANSACTION',
@@ -54,14 +62,12 @@ export function useGTW() {
         const signature = await signMessage({ signer, message })
         const deviceUuid = await DeviceInfo.getUniqueId()
 
-        if (delegatedAccountType === DELEGATED_ACCOUNT_TYPE.REGULAR) {
-          await authVerifyV1({
-            siweDto: {
-              message,
-              signature,
-            },
-          }).unwrap()
-        } else {
+        authVerifyV1({
+          siweDto: {
+            message,
+            signature,
+          },
+        }).then(() => {
           delegatesPostDelegateV2({
             chainId,
             createDelegateDto: {
@@ -71,8 +77,8 @@ export function useGTW() {
               signature,
               label: DELEGATED_ACCOUNT_TYPE.OWNER,
             },
-          }).unwrap()
-        }
+          })
+        })
 
         const NOTIFICATIONS_GRANTED =
           delegatedAccountType !== DELEGATED_ACCOUNT_TYPE.REGULAR ? REGULAR_NOTIFICATIONS : OWNER_NOTIFICATIONS
@@ -99,22 +105,43 @@ export function useGTW() {
     [],
   )
 
-  const deleteDelegatedKeyOnBackEnd = useCallback(async (activeSafe: SafeInfo | null) => {
-    try {
-      if (!activeSafe) {
-        throw new Error('DeleteDelegateFailed :: No active safe')
-      }
+  const deleteDelegatedKeyOnBackEnd = useCallback(
+    async ({
+      signer,
+      message,
+      activeSafe,
+    }: {
+      signer: Wallet | HDNodeWallet
+      message: string
+      activeSafe: SafeInfo | null
+    }) => {
+      try {
+        if (!activeSafe) {
+          throw new Error('DeleteDelegateFailed :: No active safe')
+        }
 
-      await notificationsDeleteSubscriptionsV2({
-        deviceUuid: await DeviceInfo.getUniqueId(),
-        chainId: activeSafe.chainId,
-        safeAddress: activeSafe.address,
-      })
-    } catch (err) {
-      Logger.error('DeleteDelegateFailed', err)
-      return
-    }
-  }, [])
+        const signature = await signMessage({ signer, message })
+        const deviceUuid = await DeviceInfo.getUniqueId()
+
+        authVerifyV1({
+          siweDto: {
+            message,
+            signature,
+          },
+        }).then(() => {
+          notificationsDeleteSubscriptionsV2({
+            deviceUuid,
+            chainId: activeSafe.chainId,
+            safeAddress: activeSafe.address,
+          })
+        })
+      } catch (err) {
+        Logger.error('DeleteDelegateFailed', err)
+        return
+      }
+    },
+    [],
+  )
 
   return { createDelegatedKeyOnBackEnd, deleteDelegatedKeyOnBackEnd }
 }

@@ -12,7 +12,7 @@ import { useSign } from './useSign'
 import { useGTW } from './useGTW'
 
 import { selectFCMToken } from '../store/notificationsSlice'
-import { addDelegatedAddress } from '../store/delegatedSlice'
+import { addOrUpdateDelegatedAddress } from '../store/delegatedSlice'
 import { useSiwe } from './useSiwe'
 import { getSigner } from '../utils/notifications'
 import { DELEGATED_ACCOUNT_TYPE, ERROR_MSG } from '../store/constants'
@@ -60,7 +60,10 @@ export function useDelegateKey(safeOwner?: AddressInfo) {
 
       // Step 2.1 - Store the delegated account in the redux store
       dispatch(
-        addDelegatedAddress({ delegatedAddress: randomDelegatedAccount.address as Address, safes: [activeSafe] }),
+        addOrUpdateDelegatedAddress({
+          delegatedAddress: randomDelegatedAccount.address as Address,
+          safes: [activeSafe],
+        }),
       )
 
       // Step 2.2 - Store it in the keychain
@@ -68,6 +71,10 @@ export function useDelegateKey(safeOwner?: AddressInfo) {
 
       // Step 2.3 - Define the signer account
       const signerAccount = getSigner(safeOwnerPK, randomDelegatedAccount)
+
+      if (!signerAccount) {
+        throw Logger.error('useDelegateKey: Signer account not found')
+      }
 
       // Step 3 - Create a message following the SIWE standard
       const siweMessage = createSiweMessage({
@@ -96,11 +103,36 @@ export function useDelegateKey(safeOwner?: AddressInfo) {
     }
   }, [])
 
-  const deleteDelegate = useCallback(async () => {
+  const deleteDelegate = useCallback(async (data: AuthNonce | undefined) => {
     setLoading(true)
     setError(null)
+
+    const nonce = data?.nonce
+    if (!activeSafe || !nonce) {
+      throw Logger.info(ERROR_MSG)
+    }
+
+    const safeOwnerPK = safeOwner && (await getPrivateKey(safeOwner.value))
+
+    const signerAccount = getSigner(safeOwnerPK)
+
+    if (!signerAccount) {
+      throw Logger.error('useDelegateKey: Signer account not found')
+    }
+
+    const siweMessage = createSiweMessage({
+      address: signerAccount.address,
+      chainId: Number(activeSafe.chainId),
+      nonce,
+      statement: 'Safe Wallet wants you to sign in with your Ethereum account',
+    })
+
     try {
-      await deleteDelegatedKeyOnBackEnd(activeSafe)
+      await deleteDelegatedKeyOnBackEnd({
+        signer: signerAccount,
+        message: siweMessage,
+        activeSafe,
+      })
     } catch (err) {
       Logger.error('useDelegateKey: Something went wrong', err)
       setError(err)
