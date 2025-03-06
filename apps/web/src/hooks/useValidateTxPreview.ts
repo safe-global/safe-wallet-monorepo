@@ -35,6 +35,10 @@ export const useValidateTxPreview = (
   const dataDecoded = txPreview.txData.dataDecoded
 
   if (dataDecoded) {
+    // Fallback functions are special as they are called for all data that does not match any other function
+    if (dataDecoded.method === 'fallback') {
+      return
+    }
     const abiString = `function ${dataDecoded.method}(${dataDecoded.parameters?.map((param) => param.type).join(',')})`
     const abiInterface = new Interface([abiString])
     const rawDataFromDecodedData = abiInterface.encodeFunctionData(

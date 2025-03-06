@@ -56,6 +56,46 @@ describe('useValidateTxPreview', () => {
     expect(useValidateTxPreview(mockTxPreview, mockSafeTxData)).toBeUndefined()
   })
 
+  it('should validate fallback function calls successfully', () => {
+    const randomTxData = faker.string.hexadecimal({ length: 8 })
+    const mockFallbackTxPreview: TransactionPreview = {
+      txData: {
+        to: { value: toAddress },
+        operation: 0,
+        value: '420',
+        hexData: randomTxData,
+        dataDecoded: {
+          method: 'fallback',
+          parameters: [],
+        },
+        trustedDelegateCallTarget: true,
+      },
+      txInfo: {
+        type: TransactionInfoType.CUSTOM,
+        to: { value: toAddress },
+        dataSize: '68',
+        isCancellation: false,
+        value: '0',
+        actionCount: 0,
+      },
+    }
+
+    const mockFallbackSafeTxData: SafeTransaction['data'] = {
+      to: toAddress,
+      value: '420',
+      data: randomTxData,
+      operation: 0,
+      safeTxGas: '0',
+      baseGas: '0',
+      gasPrice: '0',
+      gasToken: ZeroAddress,
+      nonce: 0,
+      refundReceiver: ZeroAddress,
+    }
+
+    expect(useValidateTxPreview(mockFallbackTxPreview, mockFallbackSafeTxData)).toBeUndefined()
+  })
+
   it('should throw InvalidPreviewError if top level data does not match', () => {
     expect(
       useValidateTxPreview({ ...mockTxPreview, txData: { ...mockTxPreview.txData, operation: 1 } }, mockSafeTxData)
