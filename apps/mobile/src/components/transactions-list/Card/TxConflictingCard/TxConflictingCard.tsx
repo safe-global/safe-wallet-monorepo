@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useCallback } from 'react'
 import { Theme, View } from 'tamagui'
 import { TxInfo } from '@/src/components/TxInfo'
 import { Alert } from '@/src/components/Alert'
@@ -11,14 +11,14 @@ interface TxConflictingCard {
 }
 
 function TxConflictingComponent({ transactions, inQueue, onPress }: TxConflictingCard) {
-  const handleConflictTxPress = () => {
+  const handleConflictTxPress = useCallback(() => {
     onPress(
       {
         transactions,
       },
       true,
     )
-  }
+  }, [onPress, transactions])
 
   return (
     <View onPress={handleConflictTxPress}>

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useCallback } from 'react'
 import { TransactionInfoType } from '@safe-global/store/gateway/types'
 import { type Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { useTransactionType } from '@/src/hooks/useTransactionType'
@@ -32,14 +32,14 @@ function TxInfoComponent({ tx, bordered, inQueue, onPress }: TxInfoProps) {
   const txType = useTransactionType(tx)
   const txInfo = tx.txInfo
 
-  const onCardPress = () => {
+  const onCardPress = useCallback(() => {
     if (onPress) {
       onPress({
         tx,
         type: txType,
       })
     }
-  }
+  }, [onPress, tx, txType])
 
   if (isTransferTxInfo(txInfo)) {
     return (
