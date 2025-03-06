@@ -1,0 +1,44 @@
+.container {
+  display: flex;
+  gap: var(--space-1);
+  align-items: center;
+  color: var(--color-text-secondary);
+}
+
+.container span {
+  color: var(--color-text-secondary);
+}
+
+.title {
+  display: flex;
+  gap: var(--space-1);
+}
+
+.chains {
+  display: flex;
+  gap: var(--space-1);
+  flex-direction: column;
+  padding: var(--space-1);
+}
+
+.row {
+  display: flex;
+  gap: var(--space-5);
+  justify-content: space-between;
+}
+
+.row > span {
+  color: var(--color-text-secondary);
+}
+
+.lightTotal > span{
+  color: var(--color-background-paper);
+}
+
+.darkTotal > span {
+  color: var(--color-static-main);
+}
+
+.divider {
+  border-color: var(--color-border-main);
+}
