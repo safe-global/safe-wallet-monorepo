@@ -50,15 +50,15 @@ export const Warning = ({
   severityProps,
   needsRiskConfirmation = false,
   isRiskConfirmed = true,
-  isTransaction,
+  isTransaction = true,
   toggleConfirmation,
 }: {
   title: ReactNode
-  content?: ReactNode
-  severityProps?: SecurityWarningProps
+  content: ReactNode
+  severityProps: SecurityWarningProps
   needsRiskConfirmation?: boolean
   isRiskConfirmed?: boolean
-  isTransaction: boolean
+  isTransaction?: boolean
   toggleConfirmation?: () => void
 }) => {
   return (
@@ -179,9 +179,9 @@ const BlockaidWarning = () => {
   }
 
   return (
-    <Box>
-      {!!blockaidResponse.severity ? (
-        <>
+    <>
+      {!!severityProps ? (
+        <Box>
           <Warning
             isRiskConfirmed={isRiskConfirmed}
             isTransaction={isTransaction}
@@ -198,18 +198,18 @@ const BlockaidWarning = () => {
             severityProps={severityProps}
           />
           <PoweredByBlockaid />
-        </>
+        </Box>
       ) : blockaidResponse?.contractManagement && blockaidResponse.contractManagement.length > 0 ? (
-        <>
+        <Box>
           <Stack direction="column" spacing={1}>
             {blockaidResponse?.contractManagement.map((contractChange) => (
               <ContractChangeWarning key={contractChange.type} contractChange={contractChange} />
             ))}
           </Stack>
           <PoweredByBlockaid />
-        </>
+        </Box>
       ) : null}
-    </Box>
+    </>
   )
 }
 

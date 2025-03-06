@@ -107,7 +107,7 @@ export const FallbackHandler = (): ReactElement | null => {
               })}
               sx={{ display: 'block !important' }}
             >
-              {true && (
+              {warning && (
                 <Typography variant="body2" width="100%" mb={hasFallbackHandler ? 1 : 0}>
                   {warning}
                 </Typography>
