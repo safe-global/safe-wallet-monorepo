@@ -1,7 +1,7 @@
-diff --git a/node_modules/next/dist/client/route-loader.js b/node_modules/next/dist/client/route-loader.js
+diff --git a/dist/client/route-loader.js b/dist/client/route-loader.js
 index 5b9774a..cb9e8af 100644
---- a/node_modules/next/dist/client/route-loader.js
-+++ b/node_modules/next/dist/client/route-loader.js
+--- a/dist/client/route-loader.js
++++ b/dist/client/route-loader.js
 @@ -116,6 +116,12 @@ function appendScript(src, script) {
          // 3. Finally, set the source and inject into the DOM in case the child
          //    must be appended for fetching to start.
