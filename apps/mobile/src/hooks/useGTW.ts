@@ -14,24 +14,9 @@ import { Address, SafeInfo } from '../types/address'
 import { useSiwe } from './useSiwe'
 import Logger from '@/src/utils/logger'
 import { HDNodeWallet, Wallet } from 'ethers'
-import { DELEGATED_ACCOUNT_TYPE } from '../store/constants'
+import { NOTIFICATION_ACCOUNT_TYPE } from '../store/constants'
+import { OWNER_NOTIFICATIONS, REGULAR_NOTIFICATIONS } from '../utils/notifications'
 
-const REGULAR_NOTIFICATIONS: NotificationType[] = [
-  'DELETED_MULTISIG_TRANSACTION',
-  'INCOMING_ETHER',
-  'INCOMING_TOKEN',
-  'MODULE_TRANSACTION',
-  'EXECUTED_MULTISIG_TRANSACTION',
-]
-const OWNER_NOTIFICATIONS: NotificationType[] = [
-  'MESSAGE_CONFIRMATION_REQUEST',
-  'DELETED_MULTISIG_TRANSACTION',
-  'CONFIRMATION_REQUEST',
-  'INCOMING_ETHER',
-  'INCOMING_TOKEN',
-  'MODULE_TRANSACTION',
-  'EXECUTED_MULTISIG_TRANSACTION',
-]
 export function useGTW() {
   // Queries
   const [authVerifyV1] = useAuthVerifyV1Mutation()
@@ -40,7 +25,7 @@ export function useGTW() {
   const [delegatesPostDelegateV2] = useDelegatesPostDelegateV2Mutation()
   const { signMessage } = useSiwe()
 
-  const createDelegatedKeyOnBackEnd = useCallback(
+  const registerForNotificationsOnBackEnd = useCallback(
     async ({
       safeAddress,
       signer,
@@ -48,7 +33,7 @@ export function useGTW() {
       chainId,
       fcmToken,
       delegatedAccount,
-      delegatedAccountType,
+      notificationAccountType,
     }: {
       safeAddress: Address
       signer: Wallet | HDNodeWallet
@@ -56,7 +41,7 @@ export function useGTW() {
       chainId: string
       fcmToken: string
       delegatedAccount: Wallet | HDNodeWallet
-      delegatedAccountType?: DELEGATED_ACCOUNT_TYPE
+      notificationAccountType?: NOTIFICATION_ACCOUNT_TYPE
     }) => {
       try {
         const signature = await signMessage({ signer, message })
@@ -75,13 +60,13 @@ export function useGTW() {
               delegator: signer.address,
               delegate: delegatedAccount.address,
               signature,
-              label: DELEGATED_ACCOUNT_TYPE.OWNER,
+              label: NOTIFICATION_ACCOUNT_TYPE.OWNER,
             },
           })
         })
 
         const NOTIFICATIONS_GRANTED =
-          delegatedAccountType !== DELEGATED_ACCOUNT_TYPE.REGULAR ? REGULAR_NOTIFICATIONS : OWNER_NOTIFICATIONS
+          notificationAccountType === NOTIFICATION_ACCOUNT_TYPE.REGULAR ? REGULAR_NOTIFICATIONS : OWNER_NOTIFICATIONS
 
         await notificationsUpsertSubscriptionsV2({
           upsertSubscriptionsDto: {
@@ -97,6 +82,10 @@ export function useGTW() {
             deviceUuid,
           },
         })
+          .unwrap()
+          .then((res) => {
+            console.log('registerForNotificationsOnBackEnd', { res })
+          })
       } catch (err) {
         Logger.error('CreateDelegateFailed', err)
         return
@@ -105,7 +94,7 @@ export function useGTW() {
     [],
   )
 
-  const deleteDelegatedKeyOnBackEnd = useCallback(
+  const unregisterForNotificationsOnBackEnd = useCallback(
     async ({
       signer,
       message,
@@ -143,5 +132,5 @@ export function useGTW() {
     [],
   )
 
-  return { createDelegatedKeyOnBackEnd, deleteDelegatedKeyOnBackEnd }
+  return { registerForNotificationsOnBackEnd, unregisterForNotificationsOnBackEnd }
 }

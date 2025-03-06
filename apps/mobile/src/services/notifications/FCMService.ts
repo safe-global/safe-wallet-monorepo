@@ -11,7 +11,6 @@ class FCMService {
   async getFCMToken(): Promise<string | undefined> {
     const { fcmToken } = store.getState().notifications
     const token = fcmToken || undefined
-
     if (!token) {
       Logger.info('getFCMToken: No FCM token found')
     }

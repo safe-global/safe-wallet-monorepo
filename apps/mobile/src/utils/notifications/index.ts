@@ -1,4 +1,5 @@
 import { AndroidChannel, AndroidImportance } from '@notifee/react-native'
+import { NotificationType } from '@safe-global/store/gateway/AUTO_GENERATED/notifications'
 import { HDNodeWallet, Wallet } from 'ethers'
 
 export enum ChannelId {
@@ -50,3 +51,16 @@ export function getSigner(
 
   return signerAccount
 }
+
+export const REGULAR_NOTIFICATIONS: NotificationType[] = [
+  'DELETED_MULTISIG_TRANSACTION',
+  'INCOMING_ETHER',
+  'INCOMING_TOKEN',
+  'MODULE_TRANSACTION',
+  'EXECUTED_MULTISIG_TRANSACTION',
+]
+export const OWNER_NOTIFICATIONS: NotificationType[] = [
+  ...REGULAR_NOTIFICATIONS,
+  'MESSAGE_CONFIRMATION_REQUEST',
+  'CONFIRMATION_REQUEST',
+]

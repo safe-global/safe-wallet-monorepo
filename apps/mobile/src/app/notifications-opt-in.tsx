@@ -3,9 +3,13 @@ import { useColorScheme } from 'react-native'
 import { OptIn } from '@/src/components/OptIn'
 import { router } from 'expo-router'
 import { useNotificationManager } from '@/src/hooks/useNotificationManager'
-
+import { selectSigners } from '../store/signersSlice'
+import { useAppDispatch, useAppSelector } from '../store/hooks'
+import { updatePromptAttempts } from '@/src/store/notificationsSlice'
 function NotificationsOptIn() {
-  const { isAppNotificationEnabled, enableNotificationsWithDelegate } = useNotificationManager()
+  const appSigners = useAppSelector(selectSigners)
+  const dispatch = useAppDispatch()
+  const { isAppNotificationEnabled, enableNotification } = useNotificationManager(appSigners)
   const colorScheme = useColorScheme()
 
   useEffect(() => {
@@ -13,6 +17,11 @@ function NotificationsOptIn() {
       router.replace('/(tabs)')
     }
   }, [isAppNotificationEnabled])
+
+  const handleReject = () => {
+    dispatch(updatePromptAttempts(1))
+    router.back()
+  }
 
   const image =
     colorScheme === 'dark'
@@ -27,11 +36,11 @@ function NotificationsOptIn() {
       image={image}
       isVisible
       ctaButton={{
-        onPress: enableNotificationsWithDelegate,
+        onPress: enableNotification,
         label: 'Enable notifications',
       }}
       secondaryButton={{
-        onPress: () => router.back(),
+        onPress: handleReject,
         label: 'Maybe later',
       }}
     />

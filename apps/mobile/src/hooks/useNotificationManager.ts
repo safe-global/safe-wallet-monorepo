@@ -1,28 +1,31 @@
 // src/hooks/useNotificationManager.ts
 import { useCallback, useEffect, useRef } from 'react'
 import { AppState } from 'react-native'
-import { useAppDispatch } from '@/src/store/hooks'
 import NotificationsService from '@/src/services/notifications/NotificationService'
-import { toggleAppNotifications } from '@/src/store/notificationsSlice'
-import { useDelegateKey } from '@/src/hooks/useDelegateKey'
-import useNotifications from '@/src/hooks/useNotifications'
-import { useAuthGetNonceV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/auth'
+import useRegisterForNotifications from '@/src/hooks/useRegisterForNotifications'
 import Logger from '@/src/utils/logger'
+import { useAppSelector } from '../store/hooks'
+import { selectAppNotificationStatus } from '../store/notificationsSlice'
+import { AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 
-export const useNotificationManager = () => {
-  const dispatch = useAppDispatch()
-  const { enableNotifications, isAppNotificationEnabled } = useNotifications()
-  const { data: nonceData } = useAuthGetNonceV1Query()
-  const { createDelegate, deleteDelegate, error } = useDelegateKey()
+export const useNotificationManager = (appSigners: Record<string, AddressInfo>) => {
+  const isAppNotificationEnabled = useAppSelector(selectAppNotificationStatus)
+  const { registerForNotifications, unregisterForNotifications } = useRegisterForNotifications({ appSigners })
+
   const appState = useRef(AppState.currentState)
 
-  const enableNotificationsWithDelegate = useCallback(async () => {
+  const enableNotification = useCallback(async () => {
     try {
+      // Check if device notifications are enabled
       const deviceNotificationStatus = await NotificationsService.isDeviceNotificationEnabled()
+
       if (deviceNotificationStatus) {
-        enableNotifications()
-        await createDelegate(nonceData)
-        return true
+        // Register for notifications
+        const { loading, error } = await registerForNotifications()
+
+        if (!loading && !error) {
+          return true
+        }
       } else {
         await NotificationsService.getAllPermissions(true)
         return false
@@ -31,13 +34,12 @@ export const useNotificationManager = () => {
       Logger.error('Error enabling push notifications', error)
       return false
     }
-  }, [nonceData, enableNotifications, createDelegate])
+  }, [registerForNotifications])
 
-  const disableNotifications = useCallback(async () => {
+  const disableNotification = useCallback(async () => {
     try {
-      await deleteDelegate()
-      if (!error) {
-        dispatch(toggleAppNotifications(false))
+      const { loading, error } = await unregisterForNotifications()
+      if (!loading && !error) {
         return true
       }
       return false
@@ -45,7 +47,7 @@ export const useNotificationManager = () => {
       Logger.error('Error disabling push notifications', error)
       return false
     }
-  }, [deleteDelegate, error, dispatch])
+  }, [unregisterForNotifications])
 
   const toggleNotificationState = useCallback(async () => {
     try {
@@ -54,22 +56,21 @@ export const useNotificationManager = () => {
       if (!deviceNotificationStatus && !isAppNotificationEnabled) {
         await NotificationsService.requestPushNotificationsPermission()
       } else if (deviceNotificationStatus && !isAppNotificationEnabled) {
-        await enableNotificationsWithDelegate()
+        await registerForNotifications()
       } else {
-        await disableNotifications()
+        await unregisterForNotifications()
       }
     } catch (error) {
       Logger.error('Error toggling notifications', error)
     }
-  }, [isAppNotificationEnabled, enableNotificationsWithDelegate, disableNotifications])
+  }, [isAppNotificationEnabled, registerForNotifications, unregisterForNotifications])
 
   useEffect(() => {
     const subscription = AppState.addEventListener('change', async (nextAppState) => {
       if (appState.current.match(/inactive|background/) && nextAppState === 'active') {
         const deviceNotificationStatus = await NotificationsService.isDeviceNotificationEnabled()
         if (deviceNotificationStatus && !isAppNotificationEnabled) {
-          enableNotifications()
-          await createDelegate(nonceData)
+          await registerForNotifications()
         }
       }
 
@@ -79,12 +80,12 @@ export const useNotificationManager = () => {
     return () => {
       subscription.remove()
     }
-  }, [isAppNotificationEnabled, nonceData, enableNotifications, createDelegate])
+  }, [isAppNotificationEnabled, registerForNotifications])
 
   return {
     isAppNotificationEnabled,
-    enableNotificationsWithDelegate,
-    disableNotifications,
+    enableNotification,
+    disableNotification,
     toggleNotificationState,
   }
 }
