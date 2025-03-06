@@ -4,7 +4,13 @@ import { type SafeTransaction } from '@safe-global/safe-core-sdk-types'
 import { generateTypedData } from '@safe-global/protocol-kit/dist/src/utils/eip-712'
 import type { EIP712TypedData } from '@safe-global/safe-gateway-typescript-sdk'
 import { type SecurityResponse, type SecurityModule, SecuritySeverity } from '../types'
-import type { AssetDiff, ContractManagementChange, TransactionScanResponse } from './types'
+import type {
+  AssetDiff,
+  ModulesChangeManagement,
+  OwnershipChangeManagement,
+  ProxyUpgradeManagement,
+  TransactionScanResponse,
+} from './types'
 import { BLOCKAID_API, BLOCKAID_CLIENT_ID } from '@/config/constants'
 import { numberToHex } from '@/utils/hex'
 
@@ -35,7 +41,7 @@ export type BlockaidModuleResponse = {
     description: string
   }[]
   balanceChange: AssetDiff[]
-  contractManagement: ContractManagementChange[]
+  contractManagement: Array<ProxyUpgradeManagement | OwnershipChangeManagement | ModulesChangeManagement>
   error: Error | undefined
 }
 
@@ -82,8 +88,6 @@ export class BlockaidModule implements SecurityModule<BlockaidModuleRequest, Blo
     if (!BLOCKAID_CLIENT_ID) {
       throw new Error('Security check CLIENT_ID not configured')
     }
-
-    // return BENIGN_PAYLOAD
 
     const { chainId, safeAddress } = request
     const message = BlockaidModule.prepareMessage(request)

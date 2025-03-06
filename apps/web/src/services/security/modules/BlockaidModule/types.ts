@@ -485,27 +485,111 @@ export interface TransactionSimulation {
    * dictionary describes contract management changes as a result of this transaction
    * for every involved address
    */
-  contract_management?: Record<string, Array<ContractManagementChange>>
+  // contract_management?: Record<string, Array<ContractManagementChange>>
+  contract_management?: Record<
+    string,
+    Array<ProxyUpgradeManagement | OwnershipChangeManagement | ModulesChangeManagement>
+  >
 }
-interface ProxyUpgrade {
+
+export interface ProxyUpgradeManagement {
+  /**
+   * The state after the transaction
+   */
+  after: ProxyUpgradeManagement.After
+
+  /**
+   * The state before the transaction
+   */
+  before: ProxyUpgradeManagement.Before
+
+  /**
+   * The type of the state change
+   */
   type: 'PROXY_UPGRADE'
-  before: { address: string }
-  after: { address: string }
 }
 
-interface OwnershipChange {
+export namespace ProxyUpgradeManagement {
+  /**
+   * The state after the transaction
+   */
+  export interface After {
+    address: string
+  }
+
+  /**
+   * The state before the transaction
+   */
+  export interface Before {
+    address: string
+  }
+}
+
+export interface OwnershipChangeManagement {
+  /**
+   * The state after the transaction
+   */
+  after: OwnershipChangeManagement.After
+
+  /**
+   * The state before the transaction
+   */
+  before: OwnershipChangeManagement.Before
+
+  /**
+   * The type of the state change
+   */
   type: 'OWNERSHIP_CHANGE'
-  before: { owners: string[] }
-  after: { owners: string[] }
 }
 
-interface ModulesChange {
+export namespace OwnershipChangeManagement {
+  /**
+   * The state after the transaction
+   */
+  export interface After {
+    owners: Array<string>
+  }
+
+  /**
+   * The state before the transaction
+   */
+  export interface Before {
+    owners: Array<string>
+  }
+}
+
+export interface ModulesChangeManagement {
+  /**
+   * The state after the transaction
+   */
+  after: ModulesChangeManagement.After
+
+  /**
+   * The state before the transaction
+   */
+  before: ModulesChangeManagement.Before
+
+  /**
+   * The type of the state change
+   */
   type: 'MODULE_CHANGE'
-  before: { modules: string[] }
-  after: { modules: string[] }
 }
 
-export type ContractManagementChange = ProxyUpgrade | OwnershipChange | ModulesChange
+export namespace ModulesChangeManagement {
+  /**
+   * The state after the transaction
+   */
+  export interface After {
+    modules: Array<string>
+  }
+
+  /**
+   * The state before the transaction
+   */
+  export interface Before {
+    modules: Array<string>
+  }
+}
 
 export namespace TransactionSimulation {
   /**
