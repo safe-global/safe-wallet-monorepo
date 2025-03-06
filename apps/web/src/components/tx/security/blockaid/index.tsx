@@ -55,7 +55,7 @@ export const Warning = ({
 }: {
   title: ReactNode
   content: ReactNode
-  severityProps: SecurityWarningProps
+  severityProps?: SecurityWarningProps
   needsRiskConfirmation?: boolean
   isRiskConfirmed?: boolean
   isTransaction?: boolean
@@ -180,7 +180,7 @@ const BlockaidWarning = () => {
 
   return (
     <>
-      {!!severityProps ? (
+      {!!blockaidResponse.severity ? (
         <Box>
           <Warning
             isRiskConfirmed={isRiskConfirmed}
