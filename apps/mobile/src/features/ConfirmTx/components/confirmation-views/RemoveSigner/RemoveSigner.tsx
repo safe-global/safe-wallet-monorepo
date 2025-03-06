@@ -21,7 +21,7 @@ export function RemoveSigner({ txInfo, executionInfo }: RemoveSignerProps) {
   const activeSafe = useDefinedActiveSafe()
   const activeChain = useAppSelector((state: RootState) => selectChainById(state, activeSafe.chainId))
   const items = useMemo(() => formatRemoveSignerItems(txInfo, activeChain), [txInfo, activeChain])
-  const newSignerRemoveress = getSignerName(txInfo)
+  const newRemovedSigners = getSignerName(txInfo)
 
   return (
     <YStack gap="$4">
@@ -31,7 +31,7 @@ export function RemoveSigner({ txInfo, executionInfo }: RemoveSignerProps) {
         isIdenticon
         badgeIcon="transaction-contract"
         badgeColor="$textSecondaryLight"
-        title={newSignerRemoveress}
+        title={newRemovedSigners}
       />
 
       <ListTable items={items} />
