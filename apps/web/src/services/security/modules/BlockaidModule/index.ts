@@ -133,7 +133,7 @@ export class BlockaidModule implements SecurityModule<BlockaidModuleRequest, Blo
 
     const simulation = result.simulation
     let balanceChange: AssetDiff[] = []
-    let contractManagement: any[] = []
+    let contractManagement: Array<ProxyUpgradeManagement | OwnershipChangeManagement | ModulesChangeManagement> = []
     let error: Error | undefined = undefined
     if (simulation?.status === 'Success') {
       balanceChange = simulation.assets_diffs[safeAddress]
