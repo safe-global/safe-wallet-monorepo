@@ -1,18 +1,16 @@
 import { AppRoutes } from '@/config/routes'
+import useIsWalletSafenetAllowlisted from '@/features/safenet/hooks/useIsWalletSafenetAllowlisted'
 import { useDarkMode } from '@/hooks/useDarkMode'
-import useWallet from '@/hooks/wallets/useWallet'
 import BellIcon from '@/public/images/safenet/bell.svg'
-import { useDeploySafenetAccountQuery } from '@/store/safenet'
 import CloseIcon from '@mui/icons-material/Close'
 import { Box, Button, IconButton, Typography } from '@mui/material'
 import { useRouter } from 'next/router'
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import css from './styles.module.css'
 
 function SafenetInfoCard() {
   const isDarkMode = useDarkMode()
   const router = useRouter()
-  const wallet = useWallet()
   const [displayBanner, setDisplayBanner] = useState<boolean>(true)
 
   const onClick = () => {
@@ -21,24 +19,11 @@ function SafenetInfoCard() {
     })
   }
 
-  const safeDeploymentProps = useMemo(() => {
-    return {
-      account: {
-        owners: wallet?.address ? [wallet.address] : [],
-        threshold: 1,
-      },
-      saltNonce: Date.now().toString(),
-      dryRun: true,
-    }
-  }, [wallet?.address])
-
-  const { status } = useDeploySafenetAccountQuery(safeDeploymentProps, {
-    skip: !displayBanner,
-  })
+  const canDeploySafenetAccount = useIsWalletSafenetAllowlisted()
 
   return (
     displayBanner &&
-    status === 'fulfilled' && (
+    canDeploySafenetAccount && (
       <Box className={isDarkMode ? css.darkCard : css.lightCard}>
         <IconButton className={css.close} onClick={() => setDisplayBanner(false)} size="small">
           <CloseIcon fontSize="medium" />
