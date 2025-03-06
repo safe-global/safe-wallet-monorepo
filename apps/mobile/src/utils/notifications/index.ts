@@ -39,9 +39,13 @@ export function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
 }
 
 export function getSigner(
-  safeOwnerPK: string | undefined,
-  randomDelegatedAccount: HDNodeWallet,
-): Wallet | HDNodeWallet {
+  safeOwnerPK?: string | undefined,
+  randomDelegatedAccount?: HDNodeWallet,
+): Wallet | HDNodeWallet | undefined {
+  if (!safeOwnerPK && !randomDelegatedAccount) {
+    throw new Error('Either safeOwnerPK or randomDelegatedAccount must be provided')
+  }
+
   const signerAccount = safeOwnerPK ? new Wallet(safeOwnerPK) : randomDelegatedAccount
 
   return signerAccount
