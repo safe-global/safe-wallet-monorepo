@@ -8,6 +8,8 @@ import { useQueuedTxsLength } from '@/hooks/useTxQueue'
 import ExternalLink from '@/components/common/ExternalLink'
 import { maybePlural } from '@/utils/formatters'
 import madProps from '@/utils/mad-props'
+import { type SafeInfo, type TransactionData } from '@safe-global/safe-gateway-typescript-sdk'
+import { extractTargetVersionFromUpdateSafeTx } from '@/services/tx/safeUpdateParams'
 
 const QUEUE_WARNING_VERSION = '<1.3.0'
 
@@ -28,29 +30,38 @@ function BgBox({ children, light }: { children: ReactNode; light?: boolean }) {
 }
 
 export function _UpdateSafe({
-  safeVersion,
+  safe,
   queueSize,
   chain,
+  txData,
 }: {
-  safeVersion: string
+  safe: SafeInfo
   queueSize: string
   chain: ReturnType<typeof useCurrentChain>
+  txData: TransactionData | undefined
 }) {
-  const showQueueWarning = queueSize && semverSatisfies(safeVersion, QUEUE_WARNING_VERSION)
+  if (!safe.version) {
+    return null
+  }
+  const showQueueWarning = queueSize && semverSatisfies(safe.version, QUEUE_WARNING_VERSION)
   const latestSafeVersion = chain?.recommendedMasterCopyVersion || LATEST_SAFE_VERSION
+
+  const newVersion = extractTargetVersionFromUpdateSafeTx(txData, safe) ?? latestSafeVersion
 
   return (
     <>
       <Stack direction="row" alignItems="center" spacing={2}>
-        <BgBox>Current version: {safeVersion}</BgBox>
+        <BgBox>Current version: {safe.version}</BgBox>
         <Box fontSize={28}>→</Box>
-        <BgBox light>New version: {latestSafeVersion}</BgBox>
+        <BgBox light>
+          New version: {newVersion} {chain?.l2 ? ' (L2)' : ''}
+        </BgBox>
       </Stack>
 
       <Typography>
         Read about the updates in the new Safe contracts version in the{' '}
-        <ExternalLink href={`https://github.com/safe-global/safe-contracts/releases/tag/v${latestSafeVersion}`}>
-          version {latestSafeVersion} changelog
+        <ExternalLink href={`https://github.com/safe-global/safe-contracts/releases/tag/v${newVersion}`}>
+          version {newVersion} changelog
         </ExternalLink>
       </Typography>
 
@@ -67,14 +78,14 @@ export function _UpdateSafe({
   )
 }
 
-function useSafeVersion() {
+function useSafe() {
   const { safe } = useSafeInfo()
-  return safe?.version || ''
+  return safe
 }
 
 const UpdateSafe = madProps(_UpdateSafe, {
   chain: useCurrentChain,
-  safeVersion: useSafeVersion,
+  safe: useSafe,
   queueSize: useQueuedTxsLength,
 })
 
