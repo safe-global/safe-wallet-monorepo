@@ -1,6 +1,6 @@
 import useChainId from '@/hooks/useChainId'
 import { Safe__factory } from '@safe-global/utils/types/contracts'
-import { Skeleton } from '@mui/material'
+import { Skeleton, Typography } from '@mui/material'
 import { type TransactionData } from '@safe-global/safe-gateway-typescript-sdk'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 
@@ -18,6 +18,9 @@ import { ErrorBoundary } from '@sentry/react'
 import Multisend from '../../DecodedData/Multisend'
 import { MODALS_EVENTS } from '@/services/analytics'
 import Track from '@/components/common/Track'
+import { TxSimulation, TxSimulationMessage } from '@/components/tx/security/tenderly'
+import { SafeTransaction } from '@safe-global/safe-core-sdk-types'
+import extractTxInfo from '@/services/tx/extractTxInfo'
 
 const safeInterface = Safe__factory.createInterface()
 
@@ -46,6 +49,20 @@ export const OnChainConfirmation = ({
           txId: signedHash,
         }
       : skipToken,
+  )
+
+  const nestedTx = useMemo<SafeTransaction | undefined>(
+    () =>
+      nestedTxDetails
+        ? {
+            addSignature: () => {},
+            encodedSignatures: () => '',
+            getSignature: () => undefined,
+            data: extractTxInfo(nestedTxDetails).txParams,
+            signatures: new Map(),
+          }
+        : undefined,
+    [nestedTxDetails],
   )
 
   return (
@@ -83,6 +100,12 @@ export const OnChainConfirmation = ({
               </Link>
             </Track>
           )}
+
+          <Typography variant="h5">Nested transaction checks</Typography>
+
+          <TxSimulation disabled={false} transactions={nestedTx} isNested />
+
+          <TxSimulationMessage isNested />
         </>
       ) : txDetailsError ? (
         <ErrorMessage>Could not load details on hash to approve.</ErrorMessage>

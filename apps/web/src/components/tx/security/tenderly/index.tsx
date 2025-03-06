@@ -29,12 +29,19 @@ export type TxSimulationProps = {
   gasLimit?: number
   disabled: boolean
   executionOwner?: string
+  isNested?: boolean
 }
 
 // TODO: Investigate resetting on gasLimit change as we are not simulating with the gasLimit of the tx
 // otherwise remove all usage of gasLimit in simulation. Note: this was previously being done.
 // TODO: Test this component
-const TxSimulationBlock = ({ transactions, disabled, gasLimit, executionOwner }: TxSimulationProps): ReactElement => {
+const TxSimulationBlock = ({
+  transactions,
+  disabled,
+  gasLimit,
+  executionOwner,
+  isNested = false,
+}: TxSimulationProps): ReactElement => {
   const { safe } = useSafeInfo()
   const signer = useSigner()
   const isSafeOwner = useIsSafeOwner()
@@ -42,22 +49,31 @@ const TxSimulationBlock = ({ transactions, disabled, gasLimit, executionOwner }:
   const { safeTx } = useContext(SafeTxContext)
   const {
     simulation: { simulateTransaction, resetSimulation },
-    status: { isFinished, isError, isSuccess, isCallTraceError, isLoading },
+    status,
+    nestedTx,
   } = useContext(TxInfoContext)
 
   const handleSimulation = async () => {
-    if (!signer) {
+    if (!signer || !transactions) {
       return
     }
 
-    simulateTransaction({
+    const simulationTxParams = {
       safe,
       // fall back to the first owner of the safe in case the transaction is created by a proposer
       executionOwner: (executionOwner ?? isSafeOwner) ? signer.address : safe.owners[0].value,
       transactions,
       gasLimit,
-    } as SimulationTxParams)
+    } as SimulationTxParams
+
+    if (isNested) {
+      nestedTx.simulation.simulateTransaction(simulationTxParams)
+    } else {
+      simulateTransaction(simulationTxParams)
+    }
   }
+
+  const { isFinished, isError, isSuccess, isCallTraceError, isLoading } = isNested ? nestedTx.status : status
 
   // Reset simulation if safeTx changes
   useEffect(() => {
@@ -162,11 +178,11 @@ export const TxSimulation = (props: TxSimulationProps): ReactElement | null => {
 }
 
 // TODO: Test this component
-export const TxSimulationMessage = () => {
-  const {
-    simulation: { simulationLink, simulation, requestError },
-    status: { isError, isSuccess, isCallTraceError, isFinished },
-  } = useContext(TxInfoContext)
+export const TxSimulationMessage = ({ isNested = false }: { isNested?: boolean }) => {
+  const txInfo = useContext(TxInfoContext)
+
+  const { isFinished, isError, isSuccess, isCallTraceError } = isNested ? txInfo.nestedTx.status : txInfo.status
+  const { simulationLink, simulation, requestError } = isNested ? txInfo.nestedTx.simulation : txInfo.simulation
 
   if (!isFinished) {
     return null
