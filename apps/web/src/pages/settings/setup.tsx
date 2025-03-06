@@ -5,7 +5,7 @@ import SpendingLimits from '@/components/settings/SpendingLimits'
 import { OwnerList } from '@/components/settings/owner/OwnerList'
 import { BRAND_NAME } from '@/config/constants'
 import SafenetSettings from '@/features/safenet/components/SafenetSettings'
-import useIsSafenetEnabled from '@/features/safenet/hooks/useIsSafenetEnabled'
+import useHasSafenetFeature from '@/features/safenet/hooks/useHasSafenetFeature'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import { Grid, Paper, Skeleton, SvgIcon, Tooltip, Typography } from '@mui/material'
@@ -19,7 +19,7 @@ const Setup: NextPage = () => {
   const ownerLength = safe.owners.length
   const threshold = safe.threshold
 
-  const isSafenetEnabled = useIsSafenetEnabled()
+  const hasSafenetFeature = useHasSafenetFeature()
 
   return (
     <>
@@ -71,7 +71,7 @@ const Setup: NextPage = () => {
           <RequiredConfirmation threshold={threshold} owners={ownerLength} />
         </Paper>
 
-        {isSafenetEnabled && <SafenetSettings />}
+        {hasSafenetFeature && <SafenetSettings />}
 
         <SpendingLimits />
       </main>

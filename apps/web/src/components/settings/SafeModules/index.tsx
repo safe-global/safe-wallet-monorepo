@@ -1,6 +1,6 @@
 import EthHashInfo from '@/components/common/EthHashInfo'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { Box, Grid, IconButton, Paper, SvgIcon, Typography } from '@mui/material'
+import { Box, Grid, IconButton, Paper, Stack, SvgIcon, Typography } from '@mui/material'
 
 import CheckWallet from '@/components/common/CheckWallet'
 import ExternalLink from '@/components/common/ExternalLink'
@@ -82,7 +82,7 @@ const SafeModules = () => {
         </Grid>
 
         <Grid item xs>
-          <Box>
+          <Stack spacing={2}>
             <Typography>
               Modules allow you to customize the access-control logic of your Safe Account. Modules are potentially
               risky, so make sure to only use modules from trusted sources. Learn more about modules{' '}
@@ -107,7 +107,7 @@ const SafeModules = () => {
                 />
               ))
             )}
-          </Box>
+          </Stack>
         </Grid>
       </Grid>
     </Paper>
