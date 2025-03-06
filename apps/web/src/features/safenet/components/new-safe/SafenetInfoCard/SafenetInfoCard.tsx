@@ -1,4 +1,5 @@
 import { AppRoutes } from '@/config/routes'
+import useIsWalletSafenetAllowlisted from '@/features/safenet/hooks/useIsWalletSafenetAllowlisted'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import BellIcon from '@/public/images/safenet/bell.svg'
 import CloseIcon from '@mui/icons-material/Close'
@@ -18,8 +19,11 @@ function SafenetInfoCard() {
     })
   }
 
+  const canDeploySafenetAccount = useIsWalletSafenetAllowlisted()
+
   return (
-    displayBanner && (
+    displayBanner &&
+    canDeploySafenetAccount && (
       <Box className={isDarkMode ? css.darkCard : css.lightCard}>
         <IconButton className={css.close} onClick={() => setDisplayBanner(false)} size="small">
           <CloseIcon fontSize="medium" />
