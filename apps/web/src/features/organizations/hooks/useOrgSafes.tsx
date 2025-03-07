@@ -1,4 +1,3 @@
-import type { GetOrganizationSafes } from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
 import { useOrganizationSafesGetV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
 import { useCurrentOrgId } from '../hooks/useCurrentOrgId'
 import type { AllSafeItems } from '@/features/myAccounts/hooks/useAllSafesGrouped'
@@ -10,7 +9,7 @@ import { useMemo } from 'react'
 import type { SafeItem } from '@/features/myAccounts/hooks/useAllSafes'
 import { selectAllAddressBooks, type AddressBookState } from '@/store/addressBookSlice'
 
-function _buildSafeItems(safes: GetOrganizationSafes[], allSafeNames: AddressBookState): SafeItem[] {
+function _buildSafeItems(safes: Record<string, string[]>, allSafeNames: AddressBookState): SafeItem[] {
   const result: SafeItem[] = []
 
   for (const chainId in safes) {
