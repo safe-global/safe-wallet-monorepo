@@ -138,7 +138,7 @@ const useSafeNotifications = (): void => {
 
     const message = isMigrationPossible
       ? `This Safe Account was created with an unsupported base contract.
-           It is possible to migrate it to a compatible base contract. This migration will be automatically included with your first transaction.`
+           It is possible to migrate it to a compatible base contract. You can migrate it to a compatible contract on the Home screen.`
       : `This Safe Account was created with an unsupported base contract.
            The web interface might not work correctly.
            We recommend using the command line interface instead.`

@@ -2,8 +2,6 @@ import { renderHook } from '@/tests//test-utils'
 import useSafeNotifications from '../../hooks/useSafeNotifications'
 import useSafeInfo from '../../hooks/useSafeInfo'
 import { showNotification } from '@/store/notificationsSlice'
-import { isMigrationToL2Possible } from '@/services/contracts/safeContracts'
-import { safeInfoBuilder } from '@/tests/builders/safe'
 
 // mock showNotification
 jest.mock('@/store/notificationsSlice', () => {
@@ -40,9 +38,10 @@ describe('useSafeNotifications', () => {
       // mock useSafeInfo to return a SafeInfo with an outdated version
       ;(useSafeInfo as jest.Mock).mockReturnValue({
         safe: {
-          implementation: { value: '0x123' },
+          implementation: { value: '0x234' },
           implementationVersionState: 'OUTDATED',
           version: '1.1.1',
+          address: { value: '0x123' },
         },
         safeAddress: '0x123',
       })
@@ -54,15 +53,16 @@ describe('useSafeNotifications', () => {
       expect(result.current).toBeUndefined()
       expect(showNotification).toHaveBeenCalledWith({
         variant: 'warning',
-        message: `Your Safe version 1.1.1 is out of date. Please update it.`,
+        message: `Your Safe Account version 1.1.1 is out of date. Please update it.`,
         groupKey: 'safe-outdated-version',
         link: {
           href: {
             pathname: '/settings/setup',
             query: { safe: 'eth:0x123' },
           },
-          title: 'Update Safe',
+          title: 'Update Safe Account',
         },
+        onClose: expect.anything(),
       })
     })
 
@@ -70,9 +70,10 @@ describe('useSafeNotifications', () => {
       // mock useSafeInfo to return a SafeInfo with an outdated version
       ;(useSafeInfo as jest.Mock).mockReturnValue({
         safe: {
-          implementation: { value: '0x123' },
+          implementation: { value: '0x234' },
           implementationVersionState: 'OUTDATED',
           version: '0.0.1',
+          address: { value: '0x123' },
         },
         safeAddress: '0x123',
       })
@@ -84,21 +85,23 @@ describe('useSafeNotifications', () => {
       expect(result.current).toBeUndefined()
       expect(showNotification).toHaveBeenCalledWith({
         variant: 'warning',
-        message: `Safe version 0.0.1 is not supported by this web app anymore. You can update your Safe via the CLI.`,
+        message: `Safe Account version 0.0.1 is not supported by this web app anymore. You can update your Safe Account via the CLI.`,
         groupKey: 'safe-outdated-version',
         link: {
           href: 'https://github.com/5afe/safe-cli',
           title: 'Get CLI',
         },
+        onClose: expect.anything(),
       })
     })
 
     it('should not show a notification when the Safe version is up to date', () => {
       ;(useSafeInfo as jest.Mock).mockReturnValue({
         safe: {
-          implementation: { value: '0x123' },
+          implementation: { value: '0x234' },
           implementationVersionState: 'UP_TO_DATE',
           version: '1.3.0',
+          address: { value: '0x123' },
         },
       })
 
@@ -115,9 +118,10 @@ describe('useSafeNotifications', () => {
     it('should show a notification when the mastercopy is invalid', () => {
       ;(useSafeInfo as jest.Mock).mockReturnValue({
         safe: {
-          implementation: { value: '0x123' },
+          implementation: { value: '0x234' },
           implementationVersionState: 'UNKNOWN',
           version: '1.3.0',
+          address: { value: '0x123' },
         },
       })
 
@@ -128,7 +132,7 @@ describe('useSafeNotifications', () => {
       expect(result.current).toBeUndefined()
       expect(showNotification).toHaveBeenCalledWith({
         variant: 'warning',
-        message: `This Safe was created with an unsupported base contract.
+        message: `This Safe Account was created with an unsupported base contract.
            The web interface might not work correctly.
            We recommend using the command line interface instead.`,
         groupKey: 'invalid-mastercopy',
@@ -144,6 +148,7 @@ describe('useSafeNotifications', () => {
           implementation: { value: '0x456' },
           implementationVersionState: 'UP_TO_DATE',
           version: '1.3.0',
+          address: { value: '0x123' },
         },
       })
 
@@ -154,19 +159,33 @@ describe('useSafeNotifications', () => {
       expect(result.current).toBeUndefined()
       expect(showNotification).not.toHaveBeenCalled()
     })
-  })
 
-  describe('isMigrationToL2Possible', () => {
-    it('should not be possible to migrate Safes on chains without migration lib', () => {
-      expect(isMigrationToL2Possible(safeInfoBuilder().with({ nonce: 0, chainId: '69420' }).build())).toBeFalsy()
-    })
+    it('should show a notification when the mastercopy is invalid but can be migrated', () => {
+      ;(useSafeInfo as jest.Mock).mockReturnValue({
+        safe: {
+          implementation: { value: '0x123' },
+          implementationVersionState: 'UNKNOWN',
+          version: '1.3.0',
+          nonce: 0,
+          address: {
+            value: '0x1',
+          },
+          chainId: '10',
+        },
+      })
 
-    it('should not be possible to migrate Safes with nonce > 0', () => {
-      expect(isMigrationToL2Possible(safeInfoBuilder().with({ nonce: 2, chainId: '10' }).build())).toBeFalsy()
-    })
+      // render the hook
+      const { result } = renderHook(() => useSafeNotifications())
 
-    it('should be possible to migrate Safes with nonce 0 on chains with migration lib', () => {
-      expect(isMigrationToL2Possible(safeInfoBuilder().with({ nonce: 0, chainId: '10' }).build())).toBeTruthy()
+      // check that the notification was shown
+      expect(result.current).toBeUndefined()
+      expect(showNotification).toHaveBeenCalledWith({
+        variant: 'info',
+        message: `This Safe Account was created with an unsupported base contract.
+           It is possible to migrate it to a compatible base contract. You can migrate it to a compatible contract on the Home screen.`,
+        groupKey: 'invalid-mastercopy',
+        link: undefined,
+      })
     })
   })
 })
