@@ -3,7 +3,7 @@ import Head from 'next/head'
 import { BRAND_NAME } from '@/config/constants'
 import OrganizationsDashboard from '@/features/organizations/components/Dashboard'
 
-export default function OrganizationsPage() {
+export default function OrganizationPage() {
   const router = useRouter()
   const { orgId } = router.query
 
