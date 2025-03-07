@@ -23,12 +23,8 @@ import { type DeploySafeProps, type PredictedSafeProps } from '@safe-global/prot
 import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
 import type { SafeTransaction, SafeVersion, TransactionOptions } from '@safe-global/safe-core-sdk-types'
 import { getSafeL2SingletonDeployments, getSafeSingletonDeployments } from '@safe-global/safe-deployments'
-import {
-  ImplementationVersionState,
-  TokenType,
-  type ChainInfo,
-  type SafeBalanceResponse,
-} from '@safe-global/safe-gateway-typescript-sdk'
+import { ImplementationVersionState, TokenType, type ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import type { Balances } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import type { BrowserProvider, ContractTransactionResponse, Eip1193Provider, Provider } from 'ethers'
 
 import { encodeSafeCreationTx } from '@/components/new-safe/create/logic'
@@ -116,7 +112,7 @@ export const getCounterfactualBalance = async (safeAddress: string, provider?: B
     balance = (await getWeb3ReadOnly()?.getBalance(safeAddress)) ?? 0n
   }
 
-  return <SafeBalanceResponse>{
+  return <Balances>{
     fiatTotal: '0',
     items: [
       {

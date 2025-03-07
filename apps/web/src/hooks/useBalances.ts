@@ -1,11 +1,11 @@
 import { useAppSelector } from '@/store'
 import { selectBalances } from '@/store/balancesSlice'
-import { type SafeBalanceResponseWithSafenet } from '@/utils/safenet'
+import { type BalancesSafenet } from '@/utils/safenet'
 import isEqual from 'lodash/isEqual'
 import { useMemo } from 'react'
 
 const useBalances = (): {
-  balances: SafeBalanceResponseWithSafenet
+  balances: BalancesSafenet
   loading: boolean
   error?: string
 } => {
@@ -14,7 +14,7 @@ const useBalances = (): {
 
   return useMemo(
     () => ({
-      balances: data as SafeBalanceResponseWithSafenet,
+      balances: data as BalancesSafenet,
       error,
       loading,
     }),

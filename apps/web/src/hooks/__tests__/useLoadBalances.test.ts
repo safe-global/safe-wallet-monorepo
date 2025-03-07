@@ -1,14 +1,15 @@
+import * as useIsSafenetEnabled from '@/features/safenet/hooks/useIsSafenetEnabled'
+import * as useChainId from '@/hooks/useChainId'
 import * as store from '@/store'
-import * as safenetStore from '@/store/safenet'
 import { defaultSafeInfo } from '@/store/safeInfoSlice'
+import * as safenetStore from '@/store/safenet'
+import { TOKEN_LISTS } from '@/store/settingsSlice'
 import { act, renderHook, waitFor } from '@/tests/test-utils'
+import { FEATURES } from '@/utils/chains'
+import { TokenType } from '@safe-global/safe-apps-sdk'
+import * as balancesQueries from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import { toBeHex } from 'ethers'
 import useLoadBalances from '../loadables/useLoadBalances'
-import { TokenType } from '@safe-global/safe-apps-sdk'
-import { FEATURES } from '@/utils/chains'
-import * as useChainId from '@/hooks/useChainId'
-import * as balancesQueries from '@safe-global/store/gateway/AUTO_GENERATED/balances'
-import { TOKEN_LISTS } from '@/store/settingsSlice'
 
 const safeAddress = toBeHex('0x1234', 20)
 
@@ -93,11 +94,31 @@ const mockBalanceAllTokens = {
   ],
 }
 
+const mockSafenetBalance = {
+  USDC: {
+    breakdown: {
+      '11155420': {
+        address: '0x5fd84259d66Cd46123540766Be93DFE6D43130D7',
+        allowances: '0',
+        balance: '1000000', // 1 USDC
+        total: '1000000',
+      },
+      '11155111': {
+        address: '0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238',
+        allowances: '0',
+        balance: '2000000', // 2 USDC
+        total: '2000000',
+      },
+    },
+    total: '3000000', // 3 USDC
+  },
+}
+
 describe('useLoadBalances', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     localStorage.clear()
-    jest.spyOn(useChainId, 'useChainId').mockReturnValue('5')
+    jest.spyOn(useChainId, 'useChainId').mockReturnValue('11155111')
     jest.spyOn(safenetStore, 'useGetSafenetConfigQuery').mockReturnValue({
       data: {
         chains: [84532, 11155420],
@@ -358,6 +379,71 @@ describe('useLoadBalances', () => {
     await waitFor(async () => {
       expect(result.current[0]?.fiatTotal).toEqual(mockBalanceAllTokens.fiatTotal)
       expect(result.current[1]).toBeUndefined()
+    })
+  })
+
+  test('should merge Safenet balances when Safenet is enabled', async () => {
+    jest.spyOn(balancesQueries, 'useBalancesGetBalancesV1Query').mockReturnValue({
+      data: mockBalanceUSD,
+      isLoading: false,
+      error: undefined,
+      refetch: jest.fn(),
+    })
+
+    jest.spyOn(useIsSafenetEnabled, 'useIsSafenetEnabled').mockReturnValue(true)
+
+    jest.spyOn(safenetStore, 'useGetSafenetBalanceQuery').mockReturnValue({
+      data: mockSafenetBalance,
+      isLoading: false,
+      error: undefined,
+      refetch: jest.fn(),
+    })
+
+    jest.spyOn(store, 'useAppSelector').mockImplementation((selector) =>
+      selector({
+        chains: {
+          data: [
+            {
+              chainId: '11155111',
+              features: [FEATURES.DEFAULT_TOKENLIST],
+              chainName: 'Sepolia',
+            } as any,
+          ],
+        },
+        safeInfo: mockSafeInfo,
+        settings: {
+          currency: 'usd',
+          hiddenTokens: {},
+          shortName: {
+            copy: true,
+            qr: true,
+          },
+          theme: {},
+          tokenList: TOKEN_LISTS.ALL,
+        },
+      } as store.RootState),
+    )
+
+    const { result } = renderHook(() => useLoadBalances())
+
+    await waitFor(() => {
+      expect(result.current[0]).toBeDefined()
+      expect(result.current[1]).toBeUndefined()
+
+      const usdcItem = result.current[0]?.items.find((item) => item.tokenInfo.symbol === 'USDC')
+
+      // Safenet USDC total balance
+      expect(Number(usdcItem?.balance)).toBe(
+        Number(mockSafenetBalance.USDC.breakdown['11155111'].total) +
+          Number(mockSafenetBalance.USDC.breakdown['11155420'].total),
+      )
+      // Safenet USDC breakdownb balances
+      expect(usdcItem?.safenetBalance?.filter((balance) => balance.chainId === '11155111')[0].balance).toBe(
+        mockSafenetBalance.USDC.breakdown['11155111'].total,
+      )
+      expect(usdcItem?.safenetBalance?.filter((balance) => balance.chainId === '11155420')[0].balance).toBe(
+        mockSafenetBalance.USDC.breakdown['11155420'].total,
+      )
     })
   })
 })

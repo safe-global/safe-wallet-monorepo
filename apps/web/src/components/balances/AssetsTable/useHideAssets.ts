@@ -1,10 +1,10 @@
-import { useCallback, useMemo, useState } from 'react'
 import useBalances from '@/hooks/useBalances'
 import useChainId from '@/hooks/useChainId'
 import useHiddenTokens from '@/hooks/useHiddenTokens'
 import { useAppDispatch } from '@/store'
 import { setHiddenTokensForChain } from '@/store/settingsSlice'
-import type { SafeBalanceResponseWithSafenet } from '@/utils/safenet'
+import type { BalancesSafenet } from '@/utils/safenet'
+import { useCallback, useMemo, useState } from 'react'
 
 // This is the default for MUI Collapse
 export const COLLAPSE_TIMEOUT_MS = 300
@@ -93,7 +93,7 @@ export const useHideAssets = (closeDialog: () => void) => {
   }
 }
 
-export const useVisibleAssets = (): SafeBalanceResponseWithSafenet['items'] => {
+export const useVisibleAssets = (): BalancesSafenet['items'] => {
   const hiddenAssets = useHiddenTokens()
   const { balances } = useBalances()
   return useMemo(

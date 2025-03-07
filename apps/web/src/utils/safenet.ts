@@ -1,6 +1,6 @@
 import type { SafenetBalanceEntity, SafenetConfigEntity } from '@/store/safenet'
-import type { TokenInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import { TokenType } from '@safe-global/safe-gateway-typescript-sdk'
+import type { Balances, Token } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 
 export type SafenetBalance = {
   chainId: string
@@ -11,25 +11,25 @@ export type SafenetBalance = {
 }
 
 export type SafenetToken = {
-  tokenInfo: TokenInfo
+  tokenInfo: Token
   balance: string
   fiatBalance: string
   fiatConversion: string
   safenetBalance?: SafenetBalance[]
 }
 
-export type SafeBalanceResponseWithSafenet = {
+export type BalancesSafenet = {
   fiatTotal: string
   items: SafenetToken[]
 }
 
-const convertSafenetBalanceToSafeClientGatewayBalance = (
+export const convertSafenetBalanceToSafeClientGatewayBalance = (
   safenetBalance: SafenetBalanceEntity,
   safenetConfig: SafenetConfigEntity,
   chainId: number,
   currency: string,
-): SafeBalanceResponseWithSafenet => {
-  const balances: SafeBalanceResponseWithSafenet = {
+): BalancesSafenet => {
+  const balances: BalancesSafenet = {
     fiatTotal: safenetBalance['USDC'].total,
     items: [],
   }
@@ -72,4 +72,19 @@ const convertSafenetBalanceToSafeClientGatewayBalance = (
   return balances
 }
 
-export { convertSafenetBalanceToSafeClientGatewayBalance }
+export const mergeBalances = (cgw: Balances, safenet: Balances): Balances => {
+  // Create a Map using token addresses as keys
+  const uniqueBalances = new Map(
+    // Process Safenet items last so they take precedence by overwriting the CGW items
+    [...cgw.items, ...safenet.items].map((item) => [item.tokenInfo.address, item]),
+  )
+
+  return {
+    // We do not sum the fiatTotal as Safenet doesn't return it
+    // And if it did, we would have to do something fancy with calculations so balances aren't double counted
+    fiatTotal: Array.from(uniqueBalances.values())
+      .reduce((acc, item) => acc + parseFloat(item.fiatBalance), 0)
+      .toString(),
+    items: Array.from(uniqueBalances.values()),
+  }
+}
