@@ -32,7 +32,7 @@ function ConfirmTxContainer() {
   const detailedExecutionInfo = data?.detailedExecutionInfo as MultisigExecutionDetails
   const { activeSigner, hasSigned } = useTxSigner(detailedExecutionInfo)
   const hasEnoughConfirmations =
-    detailedExecutionInfo?.confirmationsRequired === detailedExecutionInfo?.confirmations?.length
+    detailedExecutionInfo?.confirmationsRequired <= detailedExecutionInfo?.confirmations?.length
 
   if (isFetching || !data) {
     return <LoadingTx />
