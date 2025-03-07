@@ -35,7 +35,7 @@ jobs:
           secrets: ${{ toJSON(secrets) }}
           prod: ${{ true }}
 
-      - name: Remove .html extension from all files^
+      - name: Remove .html extension from all files
         run: |
           for file in $(find ./apps/web/out -name '*.html' | sed 's|^\./||'); do
             if [ -d ${file%.*} ]; then
