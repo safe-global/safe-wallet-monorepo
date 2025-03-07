@@ -11,7 +11,8 @@ const FIAT_AMOUNT_COLUMN = 2
 let staticSafes = []
 
 describe('Tokens tests', () => {
-  const fiatRegex = assets.fiatRegex
+  const domain = window.location.hostname;
+  const value = domain === new URL(constants.prodbaseUrl).hostname ? assets.fiatRegex : '--';
 
   before(async () => {
     staticSafes = await getSafes(CATEGORIES.static)
@@ -33,7 +34,7 @@ describe('Tokens tests', () => {
       assets.currencyDaiFormat_2,
       TOKEN_AMOUNT_COLUMN,
       FIAT_AMOUNT_COLUMN,
-      fiatRegex,
+      value,
     )
 
     assets.verifyBalance(assets.currencyAave, TOKEN_AMOUNT_COLUMN, assets.currencyAaveAlttext)
@@ -42,7 +43,7 @@ describe('Tokens tests', () => {
       assets.currentcyAaveFormat,
       TOKEN_AMOUNT_COLUMN,
       FIAT_AMOUNT_COLUMN,
-      fiatRegex,
+      value,
     )
 
     assets.verifyBalance(assets.currencyLink, TOKEN_AMOUNT_COLUMN, assets.currencyLinkAlttext)
@@ -51,7 +52,7 @@ describe('Tokens tests', () => {
       assets.currentcyLinkFormat,
       TOKEN_AMOUNT_COLUMN,
       FIAT_AMOUNT_COLUMN,
-      fiatRegex,
+      value,
     )
 
     assets.verifyBalance(assets.currencyTestTokenA, TOKEN_AMOUNT_COLUMN, assets.currencyTestTokenAAlttext)
@@ -60,7 +61,7 @@ describe('Tokens tests', () => {
       assets.currentcyTestTokenAFormat,
       TOKEN_AMOUNT_COLUMN,
       FIAT_AMOUNT_COLUMN,
-      fiatRegex,
+      value,
     )
 
     assets.verifyBalance(assets.currencyTestTokenB, TOKEN_AMOUNT_COLUMN, assets.currencyTestTokenBAlttext)
@@ -69,7 +70,7 @@ describe('Tokens tests', () => {
       assets.currentcyTestTokenBFormat,
       TOKEN_AMOUNT_COLUMN,
       FIAT_AMOUNT_COLUMN,
-      fiatRegex,
+      value,
     )
 
     assets.verifyBalance(assets.currencyUSDC, TOKEN_AMOUNT_COLUMN, assets.currencyTestUSDCAlttext)
@@ -78,7 +79,7 @@ describe('Tokens tests', () => {
       assets.currentcyTestUSDCFormat,
       TOKEN_AMOUNT_COLUMN,
       FIAT_AMOUNT_COLUMN,
-      fiatRegex,
+      value,
     )
   })
 

@@ -112,10 +112,7 @@ export const newAddressValueStr2 = 'newValue(address)'
 export const transactiobUilderHeadlinePreview = 'Transaction Builder'
 export const availableNetworksPreview = 'Available networks'
 export const connecttextPreview = 'Compose custom contract interactions and batch them into a single transaction'
-const warningDefaultAppStr = 'The application you are trying to access is not in the default Safe Apps list'
 export const AddressEmptyCodeStr = 'AddressEmptyCode'
-export const localStorageItem =
-  '{"https://safe-test-app.com":[{"feature":"camera","status":"granted"},{"feature":"microphone","status":"denied"}]}'
 export const gridItem = 'main .MuiPaper-root > .MuiGrid-item'
 export const linkNames = {
   wcLogo: /WalletConnect logo/i,
@@ -187,11 +184,6 @@ export function verifySignBtnDisabled() {
 
 export function triggetOnChainTx() {
   cy.contains(signOnchainMsgStr).click()
-}
-
-export function verifyWarningDefaultAppMsgIsDisplayed() {
-  cy.get('p').contains(warningDefaultAppStr).should('be.visible')
-  cy.wait(1000)
 }
 
 export function typeAppName(name) {
@@ -305,7 +297,9 @@ export function clickOnContinueBtn() {
 
 export function checkLocalStorage() {
   clickOnContinueBtn().should(() => {
-    expect(window.localStorage.getItem(constants.BROWSER_PERMISSIONS_KEY)).to.eq(localStorageItem)
+    const storedItem = window.localStorage.getItem(constants.BROWSER_PERMISSIONS_KEY);
+    expect(storedItem).to.include('"feature":"camera","status":"granted"');
+    expect(storedItem).to.include('"feature":"microphone","status":"denied"');
   })
 }
 

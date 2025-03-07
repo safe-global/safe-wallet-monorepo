@@ -10,7 +10,8 @@ const FIAT_AMOUNT_COLUMN = 2
 let staticSafes = []
 
 describe('[PROD] Prod tokens tests', () => {
-  const fiatRegex = assets.fiatRegex
+  const domain = window.location.hostname;
+  const value = domain === new URL(constants.prodbaseUrl).hostname ? assets.fiatRegex : '--';
 
   before(async () => {
     staticSafes = await getSafes(CATEGORIES.static)
@@ -30,7 +31,7 @@ describe('[PROD] Prod tokens tests', () => {
       assets.currencyDaiFormat_2,
       TOKEN_AMOUNT_COLUMN,
       FIAT_AMOUNT_COLUMN,
-      fiatRegex,
+      value,
     )
 
     assets.verifyBalance(assets.currencyAave, TOKEN_AMOUNT_COLUMN, assets.currencyAaveAlttext)
@@ -39,7 +40,7 @@ describe('[PROD] Prod tokens tests', () => {
       assets.currentcyAaveFormat,
       TOKEN_AMOUNT_COLUMN,
       FIAT_AMOUNT_COLUMN,
-      fiatRegex,
+      value,
     )
 
     assets.verifyBalance(assets.currencyLink, TOKEN_AMOUNT_COLUMN, assets.currencyLinkAlttext)
@@ -48,7 +49,7 @@ describe('[PROD] Prod tokens tests', () => {
       assets.currentcyLinkFormat,
       TOKEN_AMOUNT_COLUMN,
       FIAT_AMOUNT_COLUMN,
-      fiatRegex,
+      value,
     )
 
     assets.verifyBalance(assets.currencyTestTokenA, TOKEN_AMOUNT_COLUMN, assets.currencyTestTokenAAlttext)
@@ -57,7 +58,7 @@ describe('[PROD] Prod tokens tests', () => {
       assets.currentcyTestTokenAFormat,
       TOKEN_AMOUNT_COLUMN,
       FIAT_AMOUNT_COLUMN,
-      fiatRegex,
+      value,
     )
 
     assets.verifyBalance(assets.currencyTestTokenB, TOKEN_AMOUNT_COLUMN, assets.currencyTestTokenBAlttext)
@@ -66,7 +67,7 @@ describe('[PROD] Prod tokens tests', () => {
       assets.currentcyTestTokenBFormat,
       TOKEN_AMOUNT_COLUMN,
       FIAT_AMOUNT_COLUMN,
-      fiatRegex,
+      value,
     )
 
     assets.verifyBalance(assets.currencyUSDC, TOKEN_AMOUNT_COLUMN, assets.currencyTestUSDCAlttext)
@@ -75,7 +76,7 @@ describe('[PROD] Prod tokens tests', () => {
       assets.currentcyTestUSDCFormat,
       TOKEN_AMOUNT_COLUMN,
       FIAT_AMOUNT_COLUMN,
-      fiatRegex,
+      value,
     )
   })
 

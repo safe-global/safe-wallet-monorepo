@@ -343,6 +343,7 @@ export function verifyTokenBalanceFormat(currency, formatString, tokenAmountColu
     .parents('tr')
     .within(() => {
       cy.get('td').eq(tokenAmountColumn).contains(formatString)
+      cy.get('td').eq(fiatAmountColumn).contains(fiatRegex)
     })
 }
 
