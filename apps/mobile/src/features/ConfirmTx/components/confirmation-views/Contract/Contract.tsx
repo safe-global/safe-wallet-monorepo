@@ -11,13 +11,15 @@ import { useAppSelector } from '@/src/store/hooks'
 import { SafeListItem } from '@/src/components/SafeListItem'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { Badge } from '@/src/components/Badge'
+import { ParametersButton } from '../../ParametersButton'
 
 interface ContractProps {
   txInfo: CustomTransactionInfo
   executionInfo: MultisigExecutionDetails
+  txId: string
 }
 
-export function Contract({ txInfo, executionInfo }: ContractProps) {
+export function Contract({ txInfo, executionInfo, txId }: ContractProps) {
   const activeSafe = useDefinedActiveSafe()
   const chain = useAppSelector((state: RootState) => selectChainById(state, activeSafe.chainId))
   const items = useMemo(() => formatContractItems(txInfo, chain), [txInfo, chain])
@@ -33,7 +35,9 @@ export function Contract({ txInfo, executionInfo }: ContractProps) {
         submittedAt={executionInfo.submittedAt}
       />
 
-      <ListTable items={items} />
+      <ListTable items={items}>
+        <ParametersButton txId={txId} />
+      </ListTable>
 
       {txInfo.actionCount && (
         <SafeListItem
