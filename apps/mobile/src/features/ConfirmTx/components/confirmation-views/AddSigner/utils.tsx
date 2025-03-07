@@ -8,6 +8,7 @@ import { shortenAddress } from '@safe-global/utils/formatters'
 import { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { Identicon } from '@/src/components/Identicon'
 import { NormalizedSettingsChangeTransaction } from '../../ConfirmationView/types'
+import { CopyButton } from '@/src/components/CopyButton'
 
 export const getSignerName = (txInfo: NormalizedSettingsChangeTransaction) => {
   if (!txInfo.settingsInfo) {
@@ -37,7 +38,8 @@ export const formatAddSignerItems = (
         <View flexDirection="row" alignItems="center" gap="$2">
           <Identicon address={txInfo.settingsInfo?.owner?.value} size={24} />
           <Text fontSize="$4">{newSignerAddress}</Text>
-          <SafeFontIcon name="copy" size={14} color="textSecondaryLight" />
+          <CopyButton value={txInfo.settingsInfo?.owner?.value} color={'$textSecondaryLight'} />
+
           <SafeFontIcon name="external-link" size={14} color="textSecondaryLight" />
         </View>
       ),

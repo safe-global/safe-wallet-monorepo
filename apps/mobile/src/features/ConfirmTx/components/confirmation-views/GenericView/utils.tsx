@@ -13,6 +13,7 @@ import {
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { Identicon } from '@/src/components/Identicon'
 import { Address } from '@/src/types/address'
+import { CopyButton } from '@/src/components/CopyButton'
 
 const mintBadgeProps: CircleProps = { borderRadius: '$2', paddingHorizontal: '$2', paddingVertical: '$1' }
 
@@ -52,7 +53,7 @@ export const formatGenericViewItems = ({
             <Identicon address={txData.to.value as Address} size={24} />
           )}
           <Text fontSize="$4">{genericViewName}</Text>
-          <SafeFontIcon name="copy" size={14} color="textSecondaryLight" />
+          <CopyButton value={txData.to.value} color={'$textSecondaryLight'} />
           <SafeFontIcon name="external-link" size={14} color="textSecondaryLight" />
         </View>
       ),

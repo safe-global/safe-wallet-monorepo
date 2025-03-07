@@ -9,6 +9,7 @@ import { ellipsis, formatValue, getLimitPrice } from '@/src/utils/formatters'
 import { TokenInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { formatAmount } from '@safe-global/utils/formatNumber'
+import { CopyButton } from '@/src/components/CopyButton'
 
 export const formatSwapOrderItems = (txInfo: OrderTransactionInfo, chain: Chain) => {
   const expiresAt = formatWithSchema(txInfo.validUntil * 1000, 'dd/MM/yyyy, HH:mm')
@@ -31,7 +32,7 @@ export const formatSwapOrderItems = (txInfo: OrderTransactionInfo, chain: Chain)
           {'uid' in txInfo && (
             <>
               <Text fontSize="$4">{ellipsis(txInfo.uid, 6)}</Text>
-              <SafeFontIcon name="copy" size={14} color="textSecondaryLight" />
+              <CopyButton value={txInfo.uid} color={'$textSecondaryLight'} />
               <SafeFontIcon name="external-link" size={14} color="textSecondaryLight" />
             </>
           )}
