@@ -1,0 +1,56 @@
+name: Web Deploy to IPFS
+
+on:
+  pull_request:
+    branches:
+      - dev
+    paths:
+      - apps/web/**
+      - packages/**
+      - .github/workflows/web-deploy-ipfs.yml
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read       
+      statuses: write      
+      checks: write        
+      pull-requests: write 
+
+    name: Deploy to IPFS
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/yarn
+
+      - uses: ./.github/actions/build
+        with:
+          secrets: ${{ toJSON(secrets) }}
+          prod: ${{ true }}
+
+      - name: Remove .html extension from all files
+        run: |
+          for file in $(find ./apps/web/out -name '*.html' | sed 's|^\./||'); do
+            if [ -d ${file%.*} ]; then
+              cp ${file%} ${file%.*}/index.html
+            else
+              cp ${file%} ${file%.*}
+            fi
+          done
+
+      - uses: ipfs/ipfs-deploy-action@v1
+        name: Deploy to IPFS
+        id: deploy
+        with:
+          path-to-deploy: ./apps/web/out
+          storacha-key: ${{ secrets.STORACHA_KEY }}
+          storacha-proof: ${{ secrets.STORACHA_PROOF }}
+          pinata-jwt-token: ${{ secrets.PINATA_JWT }} 
+          github-token: ${{ secrets.GITHUB_TOKEN }}
