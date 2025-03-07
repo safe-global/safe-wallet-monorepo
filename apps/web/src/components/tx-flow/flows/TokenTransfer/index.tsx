@@ -13,7 +13,6 @@ export enum TokenTransferType {
 
 enum Fields {
   recipient = 'recipient',
-  type = 'type',
 }
 
 export const TokenTransferFields = { ...Fields, ...TokenAmountFields }
@@ -22,24 +21,45 @@ export type TokenTransferParams = {
   [TokenTransferFields.recipient]: string
   [TokenTransferFields.tokenAddress]: string
   [TokenTransferFields.amount]: string
-  [TokenTransferFields.type]: TokenTransferType
 }
 
-type TokenTransferFlowProps = Partial<TokenTransferParams> & {
+export enum MultiTransfersFields {
+  recipients = 'recipients',
+  type = 'type',
+}
+
+export const MultiTokenTransferFields = { ...MultiTransfersFields }
+
+export type MultiTokenTransferParams = {
+  [MultiTransfersFields.recipients]: TokenTransferParams[]
+  [MultiTransfersFields.type]: TokenTransferType
+}
+
+type MultiTokenTransferFlowProps = {
+  recipients?: Partial<TokenTransferParams>[]
   txNonce?: number
 }
 
-const defaultParams: TokenTransferParams = {
-  recipient: '',
-  tokenAddress: ZERO_ADDRESS,
-  amount: '',
+const defaultParams: MultiTokenTransferParams = {
+  recipients: [
+    {
+      recipient: '',
+      tokenAddress: ZERO_ADDRESS,
+      amount: '',
+    },
+  ],
   type: TokenTransferType.multiSig,
 }
 
-const TokenTransferFlow = ({ txNonce, ...params }: TokenTransferFlowProps) => {
-  const { data, step, nextStep, prevStep } = useTxStepper<TokenTransferParams>({
+const TokenTransferFlow = ({ txNonce, ...params }: MultiTokenTransferFlowProps) => {
+  const { data, step, nextStep, prevStep } = useTxStepper<MultiTokenTransferParams>({
     ...defaultParams,
-    ...params,
+    recipients: params.recipients
+      ? params.recipients.map((recipient) => ({
+          ...defaultParams.recipients[0],
+          ...recipient,
+        }))
+      : defaultParams.recipients,
   })
 
   const steps = [
@@ -47,7 +67,9 @@ const TokenTransferFlow = ({ txNonce, ...params }: TokenTransferFlowProps) => {
       key={0}
       params={data}
       txNonce={txNonce}
-      onSubmit={(formData) => nextStep({ ...data, ...formData })}
+      onSubmit={(formData) => {
+        nextStep({ ...data, ...formData })
+      }}
     />,
 
     <ReviewTokenTx key={1} params={data} txNonce={txNonce} onSubmit={() => null} />,

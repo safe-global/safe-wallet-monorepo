@@ -87,7 +87,7 @@ const TransferActions = ({
               <MenuItem
                 onClick={() => {
                   handleCloseContextMenu()
-                  setTxFlow(<TokenTransferFlow recipient={recipient} tokenAddress={tokenAddress} amount={amount} />)
+                  setTxFlow(<TokenTransferFlow recipients={[{ recipient, tokenAddress, amount }]} />)
                 }}
                 disabled={!isOk}
               >
