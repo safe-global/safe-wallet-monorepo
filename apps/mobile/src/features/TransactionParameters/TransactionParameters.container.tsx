@@ -33,7 +33,7 @@ export function TransactionParametersContainer() {
   }
 
   return (
-    <ScrollView onScroll={handleScroll} contentContainerStyle={{ flex: 1 }}>
+    <ScrollView onScroll={handleScroll}>
       <LargeHeaderTitle paddingHorizontal="$4">Parameters</LargeHeaderTitle>
 
       {isFetching || !data ? <LoadingTx /> : <TxParametersList txDetails={data} />}
