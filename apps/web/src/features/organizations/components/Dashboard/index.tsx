@@ -77,7 +77,7 @@ const OrganizationsDashboard = () => {
             <Grid size={{ xs: 12, md: 8 }}>
               <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
                 <Typography variant="h5">Safe Accounts ({safes.length})</Typography>
-                {orgId && <ViewAllLink url={AppRoutes.organizations.safeAccounts(orgId)} />}
+                {orgId && <ViewAllLink url={AppRoutes.organizations.safeAccounts} />}
               </Stack>
               {/* TODO: Set a max length for dashboard safes. */}
               <SafesList safes={safes} isOrgSafe />
@@ -85,7 +85,7 @@ const OrganizationsDashboard = () => {
             <Grid size={{ xs: 12, md: 4 }}>
               <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
                 <Typography variant="h5">Members ({activeMembers.length})</Typography>
-                {orgId && <ViewAllLink url={AppRoutes.organizations.members(orgId)} />}
+                {orgId && <ViewAllLink url={AppRoutes.organizations.members} />}
               </Stack>
               <DashboardMembersList members={activeMembers} displayLimit={5} />
             </Grid>

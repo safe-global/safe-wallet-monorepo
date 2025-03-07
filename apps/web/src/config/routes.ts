@@ -31,11 +31,17 @@ export const AppRoutes = {
     advancedCreate: '/new-safe/advanced-create',
   },
   organizations: {
-    settings: (orgId: string) => `/organizations/${orgId}/settings`,
-    safeAccounts: (orgId: string) => `/organizations/${orgId}/safeAccounts`,
-    members: (orgId: string) => `/organizations/${orgId}/members`,
-    index: (orgId: string) => `/organizations/${orgId}`,
+    settings: `/organizations/settings`,
+    safeAccounts: `/organizations/safeAccounts`,
+    members: `/organizations/members`,
+    index: `/organizations`,
   },
+  // organizations: {
+  //   settings: (orgId: string) => `/organizations/settings?orgId=${orgId}`,
+  //   safeAccounts: (orgId: string) => `/organizations/safeAccounts?orgId=${orgId}`,
+  //   members: (orgId: string) => `/organizations/members?orgId=${orgId}`,
+  //   index: (orgId: string) => `/organizations?orgId=${orgId}`,
+  // },
   settings: {
     setup: '/settings/setup',
     security: '/settings/security',

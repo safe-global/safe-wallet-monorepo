@@ -103,7 +103,9 @@ const OrgsCard = ({
 
   return (
     <Card className={classNames(css.card, { [css.compact]: isCompact })}>
-      {isLink && <Link className={css.cardLink} href={AppRoutes.organizations.index(id.toString())} />}
+      {isLink && (
+        <Link className={css.cardLink} href={{ pathname: AppRoutes.organizations.index, query: { orgId: id } }} />
+      )}
 
       <InitialsAvatar orgName={name} size={isCompact ? 'medium' : 'large'} />
 
