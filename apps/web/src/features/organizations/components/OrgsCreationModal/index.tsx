@@ -26,7 +26,8 @@ function OrgsCreationModal({ onClose }: { onClose: () => void }): ReactElement {
       const response = await createOrgWithUser({ createOrganizationDto: { name: data.name } })
 
       if (response.data) {
-        router.push({ pathname: AppRoutes.organizations.index(response.data.id.toString()) })
+        const orgId = response.data.id.toString()
+        router.push({ pathname: AppRoutes.organizations.index, query: { orgId } })
         onClose()
       }
 

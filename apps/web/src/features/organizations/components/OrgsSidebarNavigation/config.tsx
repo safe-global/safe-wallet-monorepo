@@ -12,7 +12,7 @@ import { SvgIcon } from '@mui/material'
 export type DynamicNavItem = {
   label: string
   icon?: ReactElement
-  href: (pathParam: string) => string
+  href: string
   tag?: ReactElement
   disabled?: boolean
 }
@@ -31,7 +31,7 @@ export const navItems: DynamicNavItem[] = [
   {
     label: 'Transactions',
     icon: <SvgIcon component={TransactionIcon} inheritViewBox />,
-    href: (_) => _, // TODO: Replace with empty page
+    href: '', // TODO: Replace with empty page
     disabled: true,
     tag: <Chip label="Soon" sx={{ backgroundColor: 'background.main', color: 'static.main' }} />,
   },
@@ -43,7 +43,7 @@ export const navItems: DynamicNavItem[] = [
   {
     label: 'Address book',
     icon: <SvgIcon component={ABIcon} inheritViewBox />,
-    href: (_) => _, // TODO: Replace with empty page
+    href: '', // TODO: Replace with empty page
     disabled: true,
     tag: <Chip label="Soon" sx={{ backgroundColor: 'background.main', color: 'static.main' }} />,
   },

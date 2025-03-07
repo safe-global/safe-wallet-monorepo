@@ -11,6 +11,7 @@ import { isAuthenticated } from '@/store/authSlice'
 import AddAccountsCard from './AddAccountsCard'
 import { AppRoutes } from '@/config/routes'
 import { useCurrentOrgId } from '@/features/organizations/hooks/useCurrentOrgId'
+import type { LinkProps } from 'next/link'
 import NextLink from 'next/link'
 import { Link } from '@mui/material'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
@@ -36,7 +37,7 @@ const SignedOutState = () => {
   )
 }
 
-const ViewAllLink = ({ url }: { url: string }) => {
+const ViewAllLink = ({ url }: { url: LinkProps['href'] }) => {
   return (
     <NextLink href={url} passHref legacyBehavior>
       <Link
@@ -77,7 +78,7 @@ const OrganizationsDashboard = () => {
             <Grid size={{ xs: 12, md: 8 }}>
               <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
                 <Typography variant="h5">Safe Accounts ({safes.length})</Typography>
-                {orgId && <ViewAllLink url={AppRoutes.organizations.safeAccounts(orgId)} />}
+                {orgId && <ViewAllLink url={{ pathname: AppRoutes.organizations.safeAccounts, query: { orgId } }} />}
               </Stack>
               {/* TODO: Set a max length for dashboard safes. */}
               <SafesList safes={safes} isOrgSafe />
@@ -85,7 +86,7 @@ const OrganizationsDashboard = () => {
             <Grid size={{ xs: 12, md: 4 }}>
               <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
                 <Typography variant="h5">Members ({activeMembers.length})</Typography>
-                {orgId && <ViewAllLink url={AppRoutes.organizations.members(orgId)} />}
+                {orgId && <ViewAllLink url={{ pathname: AppRoutes.organizations.members, query: { orgId } }} />}
               </Stack>
               <DashboardMembersList members={activeMembers} displayLimit={5} />
             </Grid>
