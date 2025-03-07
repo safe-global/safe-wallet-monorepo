@@ -1,0 +1,52 @@
+name: EAS Dev Build
+
+on:
+  push:
+    branches:
+      - dev
+    paths:
+      - apps/mobile/**
+      - packages/**
+  pull_request:
+    paths:
+      - apps/mobile/**
+      - packages/**
+
+jobs:
+  build:
+    if: >
+      github.event_name == 'push' ||
+      (github.event_name == 'pull_request' &&
+       contains(github.event.pull_request.labels.*.name, 'mobile-dev-release'))
+    name: Install and build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      # Set up Node.js
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.11.0'
+          cache: 'yarn'
+
+      # Install dependencies
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Setup Expo and EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Build & deploy iOS on EAS
+        working-directory: apps/mobile
+        run: eas build --profile development --non-interactive --no-wait --platform ios --auto-submit-with-profile=development
+
+      - name: Build & deploy Android on EAS
+        working-directory: apps/mobile
+        run: eas build --profile development --non-interactive --no-wait --platform android --auto-submit-with-profile=development

@@ -164,28 +164,30 @@ describe('ApprovalEditor', () => {
       operation: OperationType.DelegateCall,
     })
 
+    const mockBalances = {
+      fiatTotal: '0',
+      items: [
+        {
+          balance: '10',
+          tokenInfo: {
+            address: tokenAddress,
+            decimals: 18,
+            logoUri: 'someurl',
+            name: 'Test token',
+            symbol: 'TST',
+            type: TokenType.ERC20,
+          },
+          fiatBalance: '10',
+          fiatConversion: '1',
+        },
+      ],
+    }
+
     const result = render(<ApprovalEditor safeTransaction={mockSafeTx} />, {
       initialReduxState: {
         balances: {
+          data: mockBalances,
           loading: false,
-          data: {
-            fiatTotal: '0',
-            items: [
-              {
-                balance: '10',
-                tokenInfo: {
-                  address: tokenAddress,
-                  decimals: 18,
-                  logoUri: 'someurl',
-                  name: 'Test token',
-                  symbol: 'TST',
-                  type: TokenType.ERC20,
-                },
-                fiatBalance: '10',
-                fiatConversion: '1',
-              },
-            ],
-          },
         },
       },
     })
@@ -272,28 +274,30 @@ describe('ApprovalEditor', () => {
       operation: OperationType.DelegateCall,
     })
 
+    const mockBalances = {
+      fiatTotal: '0',
+      items: [
+        {
+          balance: '10',
+          tokenInfo: {
+            address: tokenAddress,
+            decimals: 18,
+            logoUri: 'someurl',
+            name: 'Test token',
+            symbol: 'TST',
+            type: TokenType.ERC20,
+          },
+          fiatBalance: '10',
+          fiatConversion: '1',
+        },
+      ],
+    }
+
     const result = render(<ApprovalEditor safeTransaction={mockSafeTx} />, {
       initialReduxState: {
         balances: {
+          data: mockBalances,
           loading: false,
-          data: {
-            fiatTotal: '0',
-            items: [
-              {
-                balance: '10',
-                tokenInfo: {
-                  address: tokenAddress,
-                  decimals: 18,
-                  logoUri: 'someurl',
-                  name: 'Test token',
-                  symbol: 'TST',
-                  type: TokenType.ERC20,
-                },
-                fiatBalance: '10',
-                fiatConversion: '1',
-              },
-            ],
-          },
         },
       },
     })

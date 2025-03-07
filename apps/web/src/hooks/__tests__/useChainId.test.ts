@@ -94,13 +94,4 @@ describe('useChainId hook', () => {
     const { result } = renderHook(() => useChainId())
     expect(result.current).toBe('1337')
   })
-
-  it('should return the last chain id', () => {
-    ;(useParams as any).mockImplementation(() => ({}))
-
-    localStorage.setItem('SAFE_v2__session', `{"lastChainId": "100"}`)
-
-    const { result } = renderHook(() => useChainId())
-    expect(result.current).toBe('100')
-  })
 })

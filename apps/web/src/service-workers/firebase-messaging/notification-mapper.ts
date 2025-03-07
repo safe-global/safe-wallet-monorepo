@@ -54,7 +54,8 @@ const getTokenInfo = async (
   }
 
   const symbol = tokenInfo?.symbol ?? DEFAULT_INFO.symbol
-  const value = tokenValue && tokenInfo ? formatUnits(tokenValue, tokenInfo.decimals).toString() : DEFAULT_INFO.value
+  const value =
+    tokenValue && tokenInfo ? formatUnits(tokenValue, tokenInfo.decimals ?? 0).toString() : DEFAULT_INFO.value
   const name = tokenInfo?.name ?? DEFAULT_INFO.name
 
   return {

@@ -94,12 +94,6 @@ export type DeploySafenetAccountResponse = {
   safeVersion: SafeVersion
 }
 
-export const getSafenetBalances = async (safeAddress: string): Promise<SafenetBalanceEntity> => {
-  const response = await fetch(`${SAFENET_API_URL}/api/v1/balances/${safeAddress}`)
-  const data = await response.json()
-  return data
-}
-
 export const safenetApi = createApi({
   reducerPath: 'safenetApi',
   baseQuery: fetchBaseQuery({ baseUrl: `${SAFENET_API_URL}/api/v1` }),
@@ -184,7 +178,7 @@ export const safenetApi = createApi({
 
 export const {
   useGetSafenetConfigQuery,
-  useLazyGetSafenetBalanceQuery,
+  useGetSafenetBalanceQuery,
   useLazySimulateSafenetTransactionQuery,
   useGetSafenetTransactionDetailsQuery,
   useGetSafenetTransactionDetailsBySettlementQuery,

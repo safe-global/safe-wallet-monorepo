@@ -53,7 +53,7 @@ import {
   TransactionTokenType,
   TransferDirection,
 } from '@safe-global/safe-gateway-typescript-sdk'
-import { getSpendingLimitModuleAddress } from '@/services/contracts/spendingLimitContracts'
+import { getDeployedSpendingLimitModuleAddress } from '@/services/contracts/spendingLimitContracts'
 import { sameAddress } from '@/utils/addresses'
 import type { NamedAddress } from '@/components/new-safe/create/types'
 import type { RecoveryQueueItem } from '@/features/recovery/services/recovery-state'
@@ -388,9 +388,8 @@ export const isSpendingLimitMethod = (method?: string): boolean => {
 
 export const isSupportedSpendingLimitAddress = (txInfo: TransactionInfo, chainId: string): boolean => {
   const toAddress = isCustomTxInfo(txInfo) ? txInfo.to.value : ''
-  const spendingLimitModuleAddress = getSpendingLimitModuleAddress(chainId)
-
-  return sameAddress(spendingLimitModuleAddress, toAddress)
+  const spendingLimitModuleAddress = getDeployedSpendingLimitModuleAddress(chainId, [{ value: toAddress }])
+  return !!spendingLimitModuleAddress
 }
 
 // Method parameter types

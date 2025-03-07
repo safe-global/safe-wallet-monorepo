@@ -1,40 +1,40 @@
+import NetworkWarning from '@/components/new-safe/create/NetworkWarning'
+import TxCard from '@/components/tx-flow/common/TxCard'
+import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
+import ConfirmationTitle, { ConfirmationTitleTypes } from '@/components/tx/SignOrExecuteForm/ConfirmationTitle'
 import ProposerForm from '@/components/tx/SignOrExecuteForm/ProposerForm'
 import CounterfactualForm from '@/features/counterfactual/CounterfactualForm'
+import useIsSafenetEnabled from '@/features/safenet/hooks/useIsSafenetEnabled'
+import { TxNoteForm, encodeTxNote, trackAddNote } from '@/features/tx-notes'
+import useChainId from '@/hooks/useChainId'
+import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import { useIsWalletProposer } from '@/hooks/useProposers'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { type ReactElement, type ReactNode, useState, useContext, useCallback } from 'react'
-import madProps from '@/utils/mad-props'
-import ExecuteCheckbox from '../ExecuteCheckbox'
-import { useImmediatelyExecutable, useValidateNonce } from './hooks'
-import ExecuteForm from './ExecuteForm'
-import SignForm from './SignForm'
-import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
-import ErrorMessage from '../ErrorMessage'
-import TxChecks from './TxChecks'
-import TxCard from '@/components/tx-flow/common/TxCard'
-import ConfirmationTitle, { ConfirmationTitleTypes } from '@/components/tx/SignOrExecuteForm/ConfirmationTitle'
-import { useAppSelector } from '@/store'
-import { selectSettings } from '@/store/settingsSlice'
-import UnknownContractError from './UnknownContractError'
-import { ErrorBoundary } from '@sentry/react'
-import ApprovalEditor from '../ApprovalEditor'
+import { useSigner } from '@/hooks/wallets/useWallet'
 import { isDelegateCall } from '@/services/tx/tx-sender/sdk'
-import useChainId from '@/hooks/useChainId'
+import { useAppSelector } from '@/store'
+import { useLazyGetTransactionDetailsQuery } from '@/store/api/gateway'
+import { selectSettings } from '@/store/settingsSlice'
+import madProps from '@/utils/mad-props'
+import type { TransactionDetails, TransactionPreview } from '@safe-global/safe-gateway-typescript-sdk'
+import { ErrorBoundary } from '@sentry/react'
+import { type ReactElement, type ReactNode, useCallback, useContext, useState } from 'react'
+import ApprovalEditor from '../ApprovalEditor'
+import { useApprovalInfos } from '../ApprovalEditor/hooks/useApprovalInfos'
+import ConfirmationView from '../confirmation-views'
+import ErrorMessage from '../ErrorMessage'
+import ExecuteCheckbox from '../ExecuteCheckbox'
+import { Blockaid } from '../security/blockaid'
+import { BlockaidBalanceChanges } from '../security/blockaid/BlockaidBalanceChange'
+import ExecuteForm from './ExecuteForm'
 import ExecuteThroughRoleForm from './ExecuteThroughRoleForm'
 import { findAllowingRole, findMostLikelyRole, useRoles } from './ExecuteThroughRoleForm/hooks'
-import useIsSafeOwner from '@/hooks/useIsSafeOwner'
-import { BlockaidBalanceChanges } from '../security/blockaid/BlockaidBalanceChange'
-import { Blockaid } from '../security/blockaid'
-import { useLazyGetTransactionDetailsQuery } from '@/store/api/gateway'
-import { useApprovalInfos } from '../ApprovalEditor/hooks/useApprovalInfos'
-import type { TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
-import NetworkWarning from '@/components/new-safe/create/NetworkWarning'
-import ConfirmationView from '../confirmation-views'
+import { useImmediatelyExecutable, useValidateNonce } from './hooks'
 import { SignerForm } from './SignerForm'
-import { useSigner } from '@/hooks/wallets/useWallet'
+import SignForm from './SignForm'
 import { trackTxEvents } from './tracking'
-import { TxNoteForm, encodeTxNote } from '@/features/tx-notes'
-import useIsSafenetEnabled from '@/features/safenet/hooks/useIsSafenetEnabled'
+import TxChecks from './TxChecks'
+import UnknownContractError from './UnknownContractError'
 
 export type SubmitCallback = (txId: string, isExecuted?: boolean) => void
 
@@ -65,6 +65,7 @@ export const SignOrExecuteForm = ({
   safeTxError: ReturnType<typeof useSafeTxError>
   isCreation?: boolean
   txDetails?: TransactionDetails
+  txPreview?: TransactionPreview
 }): ReactElement => {
   const [customOrigin, setCustomOrigin] = useState<string | undefined>(props.origin)
   const { transactionExecution } = useAppSelector(selectSettings)
@@ -114,8 +115,12 @@ export const SignOrExecuteForm = ({
         !!signer?.isSafe,
         customOrigin,
       )
+
+      if (customOrigin !== props.origin) {
+        trackAddNote()
+      }
     },
-    [chainId, isCreation, onSubmit, trigger, signer?.isSafe, customOrigin],
+    [chainId, isCreation, onSubmit, trigger, signer?.isSafe, customOrigin, props.origin],
   )
 
   const onRoleExecutionSubmit = useCallback<typeof onFormSubmit>(
@@ -128,7 +133,7 @@ export const SignOrExecuteForm = ({
     [onFormSubmit],
   )
 
-  const onNoteSubmit = useCallback(
+  const onNoteChange = useCallback(
     (note: string) => {
       setCustomOrigin(encodeTxNote(note, props.origin))
     },
@@ -177,8 +182,10 @@ export const SignOrExecuteForm = ({
         {props.children}
 
         <ConfirmationView
+          txId={props.txId}
           isCreation={isCreation}
           txDetails={props.txDetails}
+          txPreview={props.txPreview}
           safeTx={safeTx}
           isBatch={props.isBatch}
           showMethodCall={props.showMethodCall}
@@ -194,9 +201,9 @@ export const SignOrExecuteForm = ({
         {!isSafenetEnabled && !isCounterfactualSafe && !props.isRejection && <BlockaidBalanceChanges />}
       </TxCard>
 
-      {!isCounterfactualSafe && !props.isRejection && <TxChecks />}
+      {!isCounterfactualSafe && !props.isRejection && safeTx && <TxChecks transaction={safeTx} />}
 
-      <TxNoteForm isCreation={isCreation ?? false} onSubmit={onNoteSubmit} txDetails={props.txDetails} />
+      <TxNoteForm isCreation={isCreation ?? false} onChange={onNoteChange} txDetails={props.txDetails} />
 
       <SignerForm willExecute={willExecute} />
 
@@ -224,7 +231,7 @@ export const SignOrExecuteForm = ({
 
         <NetworkWarning />
 
-        <UnknownContractError txData={props.txDetails?.txData} />
+        <UnknownContractError txData={props.txDetails?.txData ?? props.txPreview?.txData} />
 
         {!isSafenetEnabled && <Blockaid />}
 

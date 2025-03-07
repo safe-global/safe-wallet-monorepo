@@ -8,7 +8,7 @@ import Track from '@/components/common/Track'
 import CheckBalance from '@/features/counterfactual/CheckBalance'
 import SafenetBalanceBreakdown from '@/features/safenet/components/SafenetBalanceBreakdown'
 import StakeButton from '@/features/stake/components/StakeButton'
-import useIsStakingFeatureEnabled from '@/features/stake/hooks/useIsSwapFeatureEnabled'
+import useIsStakingFeatureEnabled from '@/features/stake/hooks/useIsStakingFeatureEnabled'
 import SwapButton from '@/features/swap/components/SwapButton'
 import useIsSwapFeatureEnabled from '@/features/swap/hooks/useIsSwapFeatureEnabled'
 import useBalances from '@/hooks/useBalances'
@@ -150,7 +150,7 @@ const AssetsTable = ({
               ),
             },
             balance: {
-              rawValue: Number(item.balance) / 10 ** item.tokenInfo.decimals,
+              rawValue: Number(item.balance) / 10 ** (item.tokenInfo.decimals ?? 0),
               collapsed: item.tokenInfo.address === hidingAsset,
               content: (
                 <TokenAmount
@@ -179,7 +179,7 @@ const AssetsTable = ({
                           inheritViewBox
                           color="error"
                           fontSize="small"
-                          sx={{ verticalAlign: 'middle', ml: 0.5, mr: [0, '-20px'] }}
+                          sx={{ verticalAlign: 'middle', ml: 0.5, mr: [0, '-20px'], mt: '-2px' }}
                         />
                       </span>
                     </Tooltip>

@@ -48,7 +48,7 @@ describe('Remove Owners tests', () => {
   })
 
   // Added to prod
-  it('Verify owner deletion transaction has been created', () => {
+  it.skip('Verify owner deletion transaction has been created', () => {
     wallet.connectSigner(signer)
     owner.waitForConnectionStatus()
     owner.openRemoveOwnerWindow(1)

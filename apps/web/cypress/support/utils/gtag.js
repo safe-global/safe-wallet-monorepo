@@ -1,6 +1,11 @@
 export function getEvents() {
   cy.window().then((win) => {
-    cy.wrap(win.dataLayer).as('dataLayer')
+    cy.wrap(win.dataLayer)
+      .as('dataLayer')
+      .then((dataLayer) => {
+        console.log('DataLayer:', dataLayer)
+        cy.task('log', JSON.stringify(dataLayer, null, 2))
+      })
   })
 }
 
@@ -9,7 +14,7 @@ export const checkDataLayerEvents = (expectedEvents) => {
     expectedEvents.forEach((expectedEvent) => {
       const eventExists = dataLayer.some((event) => {
         return Object.keys(expectedEvent).every((key) => {
-          return event[key] === expectedEvent[key]
+          return event[2]?.[key] === expectedEvent[key]
         })
       })
       expect(eventExists, `Expected event matching fields: ${JSON.stringify(expectedEvent)} not found`).to.be.true
@@ -68,5 +73,17 @@ export const events = {
     eventLabel: 'https://safe-apps.dev.5afe.dev/tx-builder',
     eventType: 'tx_confirmed',
     event: 'tx_confirmed',
+  },
+
+  txOpenShareBlock: {
+    action: 'Open share block',
+    event: 'customClick',
+    category: 'tx-list',
+  },
+
+  txCopyShareBlockLink: {
+    action: 'Copy deeplink',
+    event: 'customClick',
+    category: 'tx-list',
   },
 }

@@ -17,6 +17,7 @@ const DEFAULT_ERROR_MESSAGE = 'Unavailable'
 
 export const useBlockaid = (
   data: SafeTransaction | EIP712TypedData | undefined,
+  origin?: string,
 ): AsyncResult<SecurityResponse<BlockaidModuleResponse>> => {
   const { safe, safeAddress } = useSafeInfo()
   const signer = useSigner()
@@ -34,9 +35,10 @@ export const useBlockaid = (
         safeAddress,
         walletAddress: signer.address,
         threshold: safe.threshold,
+        origin,
       })
     },
-    [safe.chainId, safe.threshold, safeAddress, data, signer?.address, isFeatureEnabled],
+    [safe.chainId, safe.threshold, safeAddress, data, signer?.address, isFeatureEnabled, origin],
     false,
   )
 

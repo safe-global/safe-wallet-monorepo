@@ -29,6 +29,7 @@ const transactionStr = 'Transactions'
 const qrErrorMsg = 'The QR could not be read'
 const safeAddressError = 'Address given is not a valid Safe Account address'
 const ownerNameLabel = 'Signer name'
+export const addSafeStr = 'Add existing Safe Account'
 
 const mandatoryNetworks = [constants.networks.sepolia, constants.networks.polygon, constants.networks.ethereum]
 
@@ -192,7 +193,7 @@ export function verifyNameLengthErrorMessage() {
 }
 
 export function inputAddress(address) {
-  cy.get(addressInput).clear().type(address)
+  cy.get(addressInput).should('be.visible').clear().should('exist').type(address, { delay: 50 })
 }
 
 export function verifyAddressInputValue(safeAddress) {

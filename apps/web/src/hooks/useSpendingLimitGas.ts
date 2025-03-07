@@ -4,16 +4,18 @@ import { getSpendingLimitContract } from '@/services/contracts/spendingLimitCont
 import useAsync from '@/hooks/useAsync'
 import { type SpendingLimitTxParams } from '@/components/tx-flow/flows/TokenTransfer/ReviewSpendingLimitTx'
 import useChainId from '@/hooks/useChainId'
+import useSafeInfo from './useSafeInfo'
 
 const useSpendingLimitGas = (params: SpendingLimitTxParams) => {
   const chainId = useChainId()
   const provider = useWeb3ReadOnly()
   const wallet = useWallet()
+  const { safe } = useSafeInfo()
 
   const [gasLimit, gasLimitError, gasLimitLoading] = useAsync<bigint | undefined>(async () => {
-    if (!provider || !wallet) return
+    if (!provider || !wallet || !safe.modules?.length) return
 
-    const contract = getSpendingLimitContract(chainId, provider)
+    const contract = getSpendingLimitContract(chainId, safe.modules, provider)
 
     const data = contract.interface.encodeFunctionData('executeAllowanceTransfer', [
       params.safeAddress,
@@ -31,7 +33,7 @@ const useSpendingLimitGas = (params: SpendingLimitTxParams) => {
       from: wallet.address,
       data,
     })
-  }, [provider, wallet, chainId, params])
+  }, [provider, wallet, chainId, params, safe.modules])
 
   return { gasLimit, gasLimitError, gasLimitLoading }
 }

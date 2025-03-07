@@ -21,7 +21,6 @@ import type {
   GetTxBySafeTxHashParams,
   RPCPayload,
   RequestId,
-  SafeBalances,
   SafeInfoExtended,
   SafeSettings,
   SendTransactionRequestParams,
@@ -36,6 +35,7 @@ import type {
   TransactionDetails,
   ChainInfo as WebCoreChainInfo,
 } from '@safe-global/safe-gateway-typescript-sdk'
+import type { Balances } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import { getAddress } from 'ethers'
 import type { MutableRefObject } from 'react'
 import { useEffect, useMemo, useState } from 'react'
@@ -61,7 +61,7 @@ export type UseAppCommunicatorHandlers = {
   ) => void
   onGetTxBySafeTxHash: (transactionId: string) => Promise<TransactionDetails>
   onGetEnvironmentInfo: () => EnvironmentInfo
-  onGetSafeBalances: (currency: string) => Promise<SafeBalances>
+  onGetSafeBalances: (currency: string) => Promise<Balances>
   onGetSafeInfo: () => SafeInfoExtended
   onGetChainInfo: () => ChainInfo | undefined
   onGetPermissions: (origin: string) => Permission[]

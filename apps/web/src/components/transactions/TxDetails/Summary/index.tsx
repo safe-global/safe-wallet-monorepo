@@ -1,21 +1,19 @@
-import { TxDataRow, generateDataRowValue } from '@/components/transactions/TxDetails/Summary/TxDataRow'
+import { generateDataRowValue, TxDataRow } from '@/components/transactions/TxDetails/Summary/TxDataRow'
+import SafenetTransactionDetails from '@/features/safenet/components/SafenetTransactionDetails'
+import useHasSafenetFeature from '@/features/safenet/hooks/useHasSafenetFeature'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { Errors, logError } from '@/services/exceptions'
 import { dateString } from '@/utils/formatters'
-import { isCustomTxInfo, isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
-import { Box, Link } from '@mui/material'
+import { isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
+import { Box, Stack } from '@mui/material'
 import { calculateSafeTransactionHash } from '@safe-global/protocol-kit/dist/src/utils'
 import type { SafeTransaction, SafeTransactionData, SafeVersion } from '@safe-global/safe-core-sdk-types'
 import type { TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
-import { Operation } from '@safe-global/safe-gateway-typescript-sdk'
 import type { ReactElement } from 'react'
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import SafeTxGasForm from '../SafeTxGasForm'
-import DecodedData from '../TxData/DecodedData'
+import { AdvancedTxDetails } from './AdvancedTxDetails'
 import { SafeTxHashDataRow } from './SafeTxHashDataRow'
-import css from './styles.module.css'
-import SafenetTransactionDetails from '@/features/safenet/components/SafenetTransactionDetails'
-import useHasSafenetFeature from '@/features/safenet/hooks/useHasSafenetFeature'
 
 interface Props {
   txDetails: TransactionDetails
@@ -26,18 +24,13 @@ interface Props {
 const Summary = ({ txDetails, defaultExpanded = false, hideDecodedData = false }: Props): ReactElement => {
   const { safe } = useSafeInfo()
   const isSafenetEnabled = useHasSafenetFeature()
-  const [expanded, setExpanded] = useState<boolean>(defaultExpanded)
-
-  const toggleExpanded = () => {
-    setExpanded((val) => !val)
-  }
 
   const { txHash, detailedExecutionInfo, executedAt, txData } = txDetails
 
   let safeTxData: SafeTransactionData | undefined = undefined
-  let submittedAt, confirmations, safeTxHash, baseGas, gasPrice, gasToken, refundReceiver, safeTxGas, nonce
+  let submittedAt, safeTxHash, baseGas, gasPrice, gasToken, refundReceiver, safeTxGas, nonce
   if (isMultisigDetailedExecutionInfo(detailedExecutionInfo)) {
-    ;({ submittedAt, confirmations, safeTxHash, baseGas, gasPrice, gasToken, safeTxGas, nonce } = detailedExecutionInfo)
+    ;({ submittedAt, safeTxHash, baseGas, gasPrice, gasToken, safeTxGas, nonce } = detailedExecutionInfo)
     refundReceiver = detailedExecutionInfo.refundReceiver?.value
     if (txData) {
       safeTxData = {
@@ -55,84 +48,36 @@ const Summary = ({ txDetails, defaultExpanded = false, hideDecodedData = false }
     }
   }
 
-  const isCustom = isCustomTxInfo(txDetails.txInfo)
-
   return (
-    <>
-      {isSafenetEnabled && safeTxHash && <SafenetTransactionDetails safeTxHash={safeTxHash} />}
+    <Stack gap={2}>
+      <Box>
+        {isSafenetEnabled && safeTxHash && <SafenetTransactionDetails safeTxHash={safeTxHash} />}
 
-      {txHash && (
-        <TxDataRow datatestid="tx-hash" title="Transaction hash:">
-          {generateDataRowValue(txHash, 'hash', true)}{' '}
+        {txHash && (
+          <TxDataRow datatestid="tx-hash" title="Transaction hash:">
+            {generateDataRowValue(txHash, 'hash', true)}
+          </TxDataRow>
+        )}
+        {safeTxHash && (
+          <SafeTxHashDataRow
+            safeTxHash={safeTxHash}
+            safeTxData={safeTxData}
+            safeVersion={safe.version as SafeVersion}
+          />
+        )}
+        <TxDataRow datatestid="tx-created-at" title="Created:">
+          {submittedAt ? dateString(submittedAt) : null}
         </TxDataRow>
-      )}
-      {safeTxHash && (
-        <SafeTxHashDataRow safeTxHash={safeTxHash} safeTxData={safeTxData} safeVersion={safe.version as SafeVersion} />
-      )}
-      <TxDataRow datatestid="tx-created-at" title="Created:">
-        {submittedAt ? dateString(submittedAt) : null}
-      </TxDataRow>
 
-      {executedAt && (
-        <TxDataRow datatestid="tx-executed-at" title="Executed:">
-          {dateString(executedAt)}
-        </TxDataRow>
-      )}
+        {executedAt && (
+          <TxDataRow datatestid="tx-executed-at" title="Executed:">
+            {dateString(executedAt)}
+          </TxDataRow>
+        )}
+      </Box>
 
-      {/* Advanced TxData */}
-      {txData && (
-        <>
-          {!defaultExpanded && (
-            <Link
-              data-testid="tx-advanced-details"
-              className={css.buttonExpand}
-              onClick={toggleExpanded}
-              component="button"
-              variant="body1"
-            >
-              Advanced details
-            </Link>
-          )}
-
-          {expanded && (
-            <Box mt={1}>
-              {!isCustom && !hideDecodedData && (
-                <Box borderBottom="1px solid" borderColor="border.light" p={2} mt={1} mb={2} mx={-2}>
-                  <DecodedData txData={txDetails.txData} toInfo={txDetails.txData?.to} />
-                </Box>
-              )}
-
-              <TxDataRow datatestid="tx-operation" title="Operation:">
-                {`${txData.operation} (${Operation[txData.operation].toLowerCase()})`}
-              </TxDataRow>
-              <TxDataRow datatestid="tx-safe-gas" title="safeTxGas:">
-                {safeTxGas}
-              </TxDataRow>
-              <TxDataRow datatestid="tx-bas-gas" title="baseGas:">
-                {baseGas}
-              </TxDataRow>
-              <TxDataRow datatestid="tx-gas-price" title="gasPrice:">
-                {gasPrice}
-              </TxDataRow>
-              <TxDataRow datatestid="tx-gas-token" title="gasToken:">
-                {generateDataRowValue(gasToken, 'hash', true)}
-              </TxDataRow>
-              <TxDataRow datatestid="tx-refund-receiver" title="refundReceiver:">
-                {generateDataRowValue(refundReceiver, 'hash', true)}
-              </TxDataRow>
-              {confirmations?.map(({ signature }, index) => (
-                <TxDataRow datatestid="tx-signature" title={`Signature ${index + 1}:`} key={`signature-${index}:`}>
-                  {generateDataRowValue(signature, 'rawData')}
-                </TxDataRow>
-              ))}
-              <TxDataRow datatestid="tx-raw-data" title="Raw data:">
-                {generateDataRowValue(txData.hexData, 'rawData')}
-              </TxDataRow>
-            </Box>
-          )}
-        </>
-      )}
-    </>
+      <AdvancedTxDetails txDetails={txDetails} defaultExpanded={defaultExpanded} hideDecodedData={hideDecodedData} />
+    </Stack>
   )
 }
 
@@ -154,18 +99,21 @@ export const PartialSummary = ({ safeTx }: { safeTx: SafeTransaction }) => {
       {safeTxHash && (
         <SafeTxHashDataRow safeTxHash={safeTxHash} safeTxData={safeTx.data} safeVersion={safe.version as SafeVersion} />
       )}
-      <TxDataRow datatestid="tx-executed-at" title="safeTxGas:">
+      <TxDataRow datatestid="tx-safe-gas" title="safeTxGas:">
         <SafeTxGasForm />
       </TxDataRow>
-      <TxDataRow datatestid="tx-executed-at" title="baseGas:">
+      <TxDataRow datatestid="tx-base-gas" title="baseGas:">
         {txData.baseGas}
       </TxDataRow>
-      <TxDataRow datatestid="tx-executed-at" title="refundReceiver:">
+      <TxDataRow datatestid="tx-refund-receiver" title="refundReceiver:">
         {generateDataRowValue(txData.refundReceiver, 'hash', true)}
       </TxDataRow>
-      <TxDataRow datatestid="tx-executed-at" title="Raw data:">
-        {generateDataRowValue(txData.data, 'rawData')}
-      </TxDataRow>
+
+      <Box mt={1}>
+        <TxDataRow datatestid="tx-raw-data" title="Raw data:">
+          {generateDataRowValue(txData.data, 'rawData')}
+        </TxDataRow>
+      </Box>
     </>
   )
 }

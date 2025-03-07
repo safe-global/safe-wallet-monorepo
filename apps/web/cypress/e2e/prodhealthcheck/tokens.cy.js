@@ -1,7 +1,8 @@
 import * as constants from '../../support/constants'
 import * as assets from '../pages/assets.pages'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
-import { acceptCookies2 } from '../pages/main.page.js'
+import { acceptCookies2, closeSecurityNotice } from '../pages/main.page.js'
+import * as createTx from '../pages/create_tx.pages.js'
 
 const TOKEN_AMOUNT_COLUMN = 1
 const FIAT_AMOUNT_COLUMN = 2
@@ -16,6 +17,8 @@ describe('[PROD] Prod tokens tests', () => {
   })
   beforeEach(() => {
     cy.visit(constants.prodbaseUrl + constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_2)
+    cy.contains(createTx.assetsStr, { timeout: 10000 })
+    closeSecurityNotice()
     acceptCookies2()
   })
 

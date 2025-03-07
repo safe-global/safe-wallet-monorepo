@@ -5,7 +5,8 @@ import * as ls from '../../support/localstorage_data.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as wallet from '../../support/utils/wallet.js'
 import * as create_wallet from '../pages/create_wallet.pages.js'
-import { acceptCookies2 } from '../pages/main.page.js'
+import { acceptCookies2, closeSecurityNotice } from '../pages/main.page.js'
+import * as createTx from '../pages/create_tx.pages.js'
 
 let staticSafes = []
 
@@ -19,6 +20,8 @@ describe('[PROD] Multichain add network tests', () => {
 
   beforeEach(() => {
     cy.visit(constants.prodbaseUrl + constants.setupUrl + staticSafes.SEP_STATIC_SAFE_4)
+    cy.contains(createTx.settingsStr, { timeout: 10000 })
+    closeSecurityNotice()
     acceptCookies2()
   })
 

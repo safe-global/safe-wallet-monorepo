@@ -114,6 +114,16 @@ const PrivateKeyModule = (chainId: ChainInfo['chainId'], rpcUri: ChainInfo['rpcU
               },
 
               // @ts-ignore
+              eth_signTypedData_v4: async ({ params }) => {
+                const [, typedData] = params
+                return await wallet.signTypedData(
+                  typedData.domain,
+                  { [typedData.primaryType]: typedData.types[typedData.primaryType] },
+                  typedData.message,
+                )
+              },
+
+              // @ts-ignore
               wallet_switchEthereumChain: async ({ params }) => {
                 console.log('[Private key signer] Switching chain', params)
                 updateProvider()

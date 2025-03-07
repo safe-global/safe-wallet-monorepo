@@ -34,6 +34,7 @@ const AccountStatusChip = ({ isActivating }: { isActivating: boolean }) => {
 const ReadOnlyChip = () => {
   return (
     <Chip
+      data-testid="read-only-chip"
       className={css.chip}
       sx={{ color: 'var(--color-primary-light)', borderColor: 'var(--color-border-light)' }}
       variant="outlined"

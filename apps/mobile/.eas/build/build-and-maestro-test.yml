@@ -35,4 +35,5 @@ build:
     - eas/maestro_test:
         inputs:
           flow_path: |
-            e2e/flow.yml
+            e2e/onboarding.yml
+            e2e/onboarded-user.yml

@@ -96,7 +96,7 @@ const Header = ({ onMenuToggle, onBatchToggle }: HeaderProps): ReactElement => {
         </div>
       )}
 
-      <div className={css.element}>
+      <div data-testid="notifications-center" className={css.element}>
         <NotificationCenter />
       </div>
 

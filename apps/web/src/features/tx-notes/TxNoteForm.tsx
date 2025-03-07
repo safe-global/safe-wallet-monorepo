@@ -6,11 +6,13 @@ import { TxNoteInput } from './TxNoteInput'
 export function TxNoteForm({
   isCreation,
   txDetails,
-  onSubmit,
+  onChange,
 }: {
   isCreation: boolean
   txDetails?: TransactionDetails
-  onSubmit: (note: string) => void
+  onChange: (note: string) => void
 }) {
-  return <TxCard>{isCreation ? <TxNoteInput onSubmit={onSubmit} /> : <TxNote txDetails={txDetails} />}</TxCard>
+  if (!isCreation && !txDetails?.note) return null
+
+  return <TxCard>{isCreation ? <TxNoteInput onChange={onChange} /> : <TxNote txDetails={txDetails} />}</TxCard>
 }

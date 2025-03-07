@@ -53,8 +53,8 @@ export type TxSecurityContextProps = {
 export const TxSecurityContext = createContext<TxSecurityContextProps>(defaultSecurityContextValues)
 
 export const TxSecurityProvider = ({ children }: { children: ReactElement }) => {
-  const { safeTx, safeMessage } = useContext(SafeTxContext)
-  const [blockaidResponse, blockaidError, blockaidLoading] = useBlockaid(safeTx ?? safeMessage)
+  const { safeTx, safeMessage, txOrigin } = useContext(SafeTxContext)
+  const [blockaidResponse, blockaidError, blockaidLoading] = useBlockaid(safeTx ?? safeMessage, txOrigin)
 
   const [isRiskConfirmed, setIsRiskConfirmed] = useState(false)
   const [isRiskIgnored, setIsRiskIgnored] = useState(false)
