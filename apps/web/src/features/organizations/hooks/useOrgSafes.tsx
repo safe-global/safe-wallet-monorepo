@@ -1,3 +1,4 @@
+import type { GetOrganizationSafes } from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
 import { useOrganizationSafesGetV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
 import { useCurrentOrgId } from '../hooks/useCurrentOrgId'
 import type { AllSafeItems } from '@/features/myAccounts/hooks/useAllSafesGrouped'
@@ -7,21 +8,24 @@ import { selectOrderByPreference } from '@/store/orderByPreferenceSlice'
 import { getComparator } from '@/features/myAccounts/utils/utils'
 import { useMemo } from 'react'
 import type { SafeItem } from '@/features/myAccounts/hooks/useAllSafes'
+import { selectAllAddressBooks, type AddressBookState } from '@/store/addressBookSlice'
 
-function _buildSafeItems(safes: Record<string, string[]>): SafeItem[] {
+function _buildSafeItems(safes: GetOrganizationSafes[], allSafeNames: AddressBookState): SafeItem[] {
   const result: SafeItem[] = []
 
   for (const chainId in safes) {
     const addresses = safes[chainId]
 
     addresses.forEach((address) => {
+      const name = allSafeNames[chainId]?.[address]
+
       result.push({
         chainId,
         address,
         isReadOnly: false,
         isPinned: false,
         lastVisited: 0,
-        name: undefined,
+        name,
       })
     })
   }
@@ -32,8 +36,9 @@ function _buildSafeItems(safes: Record<string, string[]>): SafeItem[] {
 export const useOrgSafes = () => {
   const orgId = useCurrentOrgId()
   const { data } = useOrganizationSafesGetV1Query({ organizationId: Number(orgId) })
+  const allSafeNames = useAppSelector(selectAllAddressBooks)
   // @ts-ignore TODO: Fix type issue
-  const safeItems = data ? _buildSafeItems(data.safes) : undefined
+  const safeItems = data ? _buildSafeItems(data.safes, allSafeNames) : undefined
   const safes = useAllSafesGrouped(safeItems)
   const { orderBy } = useAppSelector(selectOrderByPreference)
   const sortComparator = getComparator(orderBy)

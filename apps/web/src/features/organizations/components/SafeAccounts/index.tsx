@@ -6,12 +6,14 @@ import InputAdornment from '@mui/material/InputAdornment'
 import { useState } from 'react'
 import SafesList from '@/features/myAccounts/components/SafesList'
 import { useOrgSafes } from '@/features/organizations/hooks/useOrgSafes'
+import { useSafesSearch } from '@/features/myAccounts/hooks/useSafesSearch'
 
 const OrganizationSafeAccounts = () => {
   const [searchQuery, setSearchQuery] = useState('')
-  const safes = useOrgSafes()
+  const allSafes = useOrgSafes()
+  const filteredSafes = useSafesSearch(allSafes, searchQuery)
 
-  const safeAccounts = [] // TODO: Fetch from backend
+  const safes = searchQuery ? filteredSafes : allSafes
 
   return (
     <>
@@ -42,7 +44,7 @@ const OrganizationSafeAccounts = () => {
       </Stack>
 
       {/* TODO: Fix the condition once data is ready */}
-      {safeAccounts.length !== 0 ? <EmptySafeAccounts /> : <SafesList safes={safes} isOrgSafe />}
+      {safes.length === 0 ? <EmptySafeAccounts /> : <SafesList safes={safes} isOrgSafe />}
     </>
   )
 }
