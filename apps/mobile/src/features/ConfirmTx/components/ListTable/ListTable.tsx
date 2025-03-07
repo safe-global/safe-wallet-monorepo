@@ -6,6 +6,8 @@ export type ListTableItem = {
   label: string
   value?: string
   render?: () => React.ReactNode
+  direction?: 'row' | 'column'
+  alignItems?: 'center' | 'flex-start'
 }
 interface ListTableProps {
   items: ListTableItem[]
@@ -16,7 +18,12 @@ export function ListTable({ items, children }: ListTableProps) {
   return (
     <Container padding="$4" gap="$5" borderRadius="$3">
       {items.map((item, index) => (
-        <View key={index} alignItems="center" flexDirection="row" justifyContent="space-between">
+        <View
+          key={index}
+          alignItems={item.alignItems || 'center'}
+          flexDirection={item.direction || 'row'}
+          justifyContent="space-between"
+        >
           <Text color="$textSecondaryLight" fontSize="$4">
             {item.label}
           </Text>

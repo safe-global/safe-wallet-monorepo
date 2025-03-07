@@ -1,68 +1,31 @@
-import { DataDecodedParameter, TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { ListTableItem } from '@/src/features/ConfirmTx/components/ListTable'
 import { isArrayParameter } from '@/src/utils/transaction-guards'
 import { shortenText } from '@safe-global/utils/formatters'
-import { Text, View } from 'tamagui'
+import { CircleProps, Text, View } from 'tamagui'
 import { CopyButton } from '@/src/components/CopyButton'
-import { EthAddress } from '@/src/components/EthAddress'
-import { Address } from '@/src/types/address'
-import { Identicon } from '@/src/components/Identicon'
+import { characterDisplayLimit, formatValueTemplate } from './formatters/singleValue'
+import { formatArrayValue } from './formatters/arrayValue'
+import { Badge } from '@/src/components/Badge'
+
 interface formatParametersProps {
   txData: TransactionDetails['txData']
 }
-
-const textDisplayLimit = 15
-
-const formatValueTemplate = (param: DataDecodedParameter): ListTableItem => {
-  if (param.value == undefined || typeof param.value !== 'string') {
-    return {
-      label: param.name,
-    }
-  }
-
-  switch (param.type) {
-    case 'hash':
-    case 'address':
-      return {
-        label: param.name,
-        render: () => (
-          <View flexDirection="row" alignItems="center" gap="$1">
-            <Identicon address={String(param.value) as Address} size={24} />
-            <EthAddress address={String(param.value) as Address} copy copyProps={{ color: '$textSecondaryLight' }} />
-          </View>
-        ),
-      }
-    case 'rawData':
-    case 'bytes':
-      return {
-        label: param.name,
-        render: () => (
-          <View flexDirection="row" alignItems="center" gap="$1">
-            <Text>{shortenText(String(param.value), textDisplayLimit)}</Text>
-            <CopyButton value={String(param.value)} color={'$textSecondaryLight'} text="Data copied." />
-          </View>
-        ),
-      }
-    default:
-      return {
-        label: param.name,
-        render: () => (
-          <View flexDirection="row" alignItems="center" gap="$1">
-            <Text>{shortenText(String(param.value), textDisplayLimit)}</Text>
-            {String(param.value).length > textDisplayLimit && (
-              <CopyButton value={String(param.value)} color={'$textSecondaryLight'} text="Data copied." />
-            )}
-          </View>
-        ),
-      }
-  }
-}
+const badgeProps: CircleProps = { borderRadius: '$2', paddingHorizontal: '$2', paddingVertical: '$1' }
 
 const formatParameters = ({ txData }: formatParametersProps): ListTableItem[] => {
   const items: ListTableItem[] = [
     {
-      label: txData?.dataDecoded?.method ? 'Method' : 'Interacted with',
-      value: txData?.dataDecoded?.method || txData?.to.value,
+      label: txData?.dataDecoded?.method ? 'Call' : 'Interacted with',
+      render: () => (
+        <Badge
+          circleProps={badgeProps}
+          themeName="badge_background"
+          fontSize={12}
+          circular={false}
+          content={String(txData?.dataDecoded?.method || txData?.to.value)}
+        />
+      ),
     },
   ]
 
@@ -73,6 +36,7 @@ const formatParameters = ({ txData }: formatParametersProps): ListTableItem[] =>
       const isArrayValueParam = isArrayParameter(param.type) || Array.isArray(param.value)
 
       if (isArrayValueParam) {
+        acc.push(formatArrayValue(param))
         return acc
       }
 
@@ -82,12 +46,14 @@ const formatParameters = ({ txData }: formatParametersProps): ListTableItem[] =>
     }, [])
 
     items.push(...formatedParameters)
-  } else if (txData?.hexData) {
+  }
+
+  if (txData?.hexData) {
     items.push({
       label: 'Hex Data:',
       render: () => (
         <View flexDirection="row" alignItems="center" gap="$1">
-          <Text>{shortenText(txData?.hexData || '', textDisplayLimit)}</Text>
+          <Text>{shortenText(txData?.hexData || '', characterDisplayLimit)}</Text>
           <CopyButton value={txData?.hexData || ''} color={'$textSecondaryLight'} text="Data copied." />
         </View>
       ),
