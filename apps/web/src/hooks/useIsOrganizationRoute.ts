@@ -1,16 +1,18 @@
-import { usePathname, useSearchParams } from 'next/navigation'
+import { usePathname } from 'next/navigation'
+import { AppRoutes } from '@/config/routes'
+import { useCurrentOrgId } from '@/features/organizations/hooks/useCurrentOrgId'
+
+const ORGANIZATION_ROUTES = [
+  AppRoutes.organizations.index,
+  AppRoutes.organizations.settings,
+  AppRoutes.organizations.members,
+  AppRoutes.organizations.safeAccounts,
+]
 
 export const useIsOrganizationRoute = (): boolean => {
   const clientPathname = usePathname()
-  const searchParams = useSearchParams()
   const route = clientPathname || ''
-  const orgId = searchParams?.get('orgId')
+  const orgId = useCurrentOrgId()
 
-  return (
-    (route === '/organizations' ||
-      route === '/organizations/settings' ||
-      route === '/organizations/members' ||
-      route === '/organizations/safeAccounts') &&
-    !!orgId
-  )
+  return ORGANIZATION_ROUTES.includes(route) && !!orgId
 }
