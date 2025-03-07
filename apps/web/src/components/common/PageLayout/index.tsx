@@ -40,7 +40,7 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
         <Header onMenuToggle={isSidebarRoute ? setSidebarOpen : undefined} onBatchToggle={setBatchOpen} />
       </header>
 
-      {isSidebarRoute && <SideDrawer isOpen={isSidebarOpen} onToggle={setSidebarOpen} />}
+      {isSidebarRoute ? <SideDrawer isOpen={isSidebarOpen} onToggle={setSidebarOpen} /> : null}
 
       <div
         className={classnames(css.main, {

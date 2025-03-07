@@ -1,5 +1,6 @@
 import AddressInputReadOnly from '@/components/common/AddressInputReadOnly'
 import useAddressBook from '@/hooks/useAddressBook'
+import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import type { ReactElement } from 'react'
 import { useEffect, useCallback, useRef, useMemo } from 'react'
 import {
@@ -33,6 +34,7 @@ export type AddressInputProps = TextFieldProps & {
   validate?: Validate<string>
   deps?: string | string[]
   onAddressBookClick?: () => void
+  chain?: ChainInfo
 }
 
 const AddressInput = ({
@@ -43,6 +45,7 @@ const AddressInput = ({
   isAutocompleteOpen,
   onAddressBookClick,
   deps,
+  chain,
   ...props
 }: AddressInputProps): ReactElement => {
   const {
@@ -56,7 +59,7 @@ const AddressInput = ({
   const currentChain = useCurrentChain()
   const rawValueRef = useRef<string>('')
   const watchedValue = useWatch({ name, control })
-  const currentShortName = currentChain?.shortName || ''
+  const currentShortName = chain?.shortName || currentChain?.shortName || ''
 
   const addressBook = useAddressBook()
 

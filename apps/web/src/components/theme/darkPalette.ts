@@ -27,7 +27,7 @@ const darkPalette = {
     background: '#2F2527',
   },
   success: {
-    dark: '#028D4C',
+    dark: '#388E3C',
     main: '#00B460',
     light: '#81C784',
     background: '#1F2920',

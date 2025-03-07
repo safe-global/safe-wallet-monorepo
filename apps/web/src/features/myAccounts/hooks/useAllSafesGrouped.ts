@@ -42,8 +42,9 @@ export const _getSingleChainAccounts = (safes: SafeItems, allMultiChainSafes: Mu
   return safes.filter((safe) => !allMultiChainSafes.some((multiSafe) => sameAddress(multiSafe.address, safe.address)))
 }
 
-export const useAllSafesGrouped = () => {
-  const allSafes = useAllSafes()
+export const useAllSafesGrouped = (customSafes?: SafeItems) => {
+  const safes = useAllSafes()
+  const allSafes = customSafes ?? safes
 
   return useMemo<AllSafeItemsGrouped>(() => {
     if (!allSafes) {
