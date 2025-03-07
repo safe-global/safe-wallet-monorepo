@@ -3,7 +3,7 @@ name: Web Deploy to IPFS
 on:
   pull_request:
     branches:
-      - ipfs-deploy
+      - dev
     paths:
       - apps/web/**
       - packages/**
@@ -16,9 +16,12 @@ concurrency:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     permissions:
-      pull-requests: write
-      id-token: write
+      contents: read       
+      statuses: write      
+      checks: write        
+      pull-requests: write 
 
     name: Deploy to IPFS
 
@@ -30,32 +33,24 @@ jobs:
       - uses: ./.github/actions/build
         with:
           secrets: ${{ toJSON(secrets) }}
-          # if: startsWith(github.ref, 'refs/heads/main')
+          prod: ${{ true }}
 
-      - name: Set unique output directory name
-        run: echo "OUT_DIR=out-$(date +'%Y%m%d-%H%M%S')" >> $GITHUB_ENV
-
-      - name: Rename out directory with timestamp
-        run: mv ./apps/web/out ./apps/web/$OUT_DIR
-
-      - name: Remove .html extension from all files
+      - name: Remove .html extension from all files^
         run: |
-          for file in $(find ./apps/web/$OUT_DIR -name '*.html' | sed 's|^\./||'); do
-            cp ${file%} ${file%.*}
+          for file in $(find ./apps/web/out -name '*.html' | sed 's|^\./||'); do
+            if [ -d ${file%.*} ]; then
+              cp ${file%} ${file%.*}/index.html
+            else
+              cp ${file%} ${file%.*}
+            fi
           done
 
-      # Script to upload to IPFS
-      - name: Upload to IPFS
-        id: ipfs_upload
-        uses: aquiladev/ipfs-action@v0.2.1
+      - uses: ipfs/ipfs-deploy-action@v1
+        name: Deploy to IPFS
+        id: deploy
         with:
-          path: apps/web/${{ env.OUT_DIR }}
-          pinName: ${{ env.OUT_DIR }}
-          service: pinata
-          pinataKey: ${{ secrets.PINATA_API_KEY }}
-          pinataSecret: ${{ secrets.PINATA_SECRET_KEY }}
-
-      - name: Output IPFS CID
-        run: |
-          echo "Deployed IPFS CID: ${{ steps.ipfs_upload.outputs.Hash }}"
-          echo "Gateway link: https://ipfs.io/ipfs/${{ steps.ipfs_upload.outputs.Hash }}"
+          path-to-deploy: ./apps/web/out
+          storacha-key: ${{ secrets.STORACHA_KEY }}
+          storacha-proof: ${{ secrets.STORACHA_PROOF }}
+          pinata-jwt-token: ${{ secrets.PINATA_JWT }} 
+          github-token: ${{ secrets.GITHUB_TOKEN }}
