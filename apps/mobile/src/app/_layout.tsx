@@ -45,7 +45,6 @@ function RootLayout() {
                           ...getDefaultScreenOptions(navigation.goBack),
                         })}
                       >
-                        {/*<Stack.Screen name="index" />*/}
                         <Stack.Screen
                           name="onboarding"
                           options={{
@@ -68,6 +67,8 @@ function RootLayout() {
                         <Stack.Screen name="sign-transaction" options={{ headerShown: false }} />
                         <Stack.Screen name="pending-transactions" options={{ headerShown: true, title: '' }} />
                         <Stack.Screen name="notifications" options={{ headerShown: true, title: '' }} />
+
+                        <Stack.Screen name="transaction-parameters" options={{ headerShown: true, title: '' }} />
 
                         <Stack.Screen name="signers" options={{ headerShown: false }} />
                         <Stack.Screen name="import-signers" options={{ headerShown: false }} />

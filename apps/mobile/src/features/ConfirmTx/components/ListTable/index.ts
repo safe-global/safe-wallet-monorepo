@@ -1,1 +1,1 @@
-export { ListTable } from './ListTable'
+export { ListTable, type ListTableItem } from './ListTable'
