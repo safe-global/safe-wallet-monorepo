@@ -3,7 +3,7 @@ import { Platform } from 'react-native'
 
 // export const isProduction = process.env.NODE_ENV === 'production'
 // TODO: put it to get from process.env.NODE_ENV once we remove the mocks for the user account.
-export const isProduction = false
+export const isProduction = true
 export const isAndroid = Platform.OS === 'android'
 export const isTestingEnv = process.env.NODE_ENV === 'test'
 export const isStorybookEnv = Constants?.expoConfig?.extra?.storybookEnabled === 'true'

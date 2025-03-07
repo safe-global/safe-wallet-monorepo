@@ -7,6 +7,7 @@ import { CircleProps, Text, View } from 'tamagui'
 import { CustomTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { shortenAddress } from '@safe-global/utils/formatters'
 import { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
+import { CopyButton } from '@/src/components/CopyButton'
 
 const mintBadgeProps: CircleProps = { borderRadius: '$2', paddingHorizontal: '$2', paddingVertical: '$1' }
 
@@ -32,7 +33,7 @@ export const formatContractItems = (txInfo: CustomTransactionInfo, chain: Chain)
         <View flexDirection="row" alignItems="center" gap="$2">
           <Logo logoUri={txInfo.to.logoUri} size="$6" />
           <Text fontSize="$4">{contractName}</Text>
-          <SafeFontIcon name="copy" size={14} color="textSecondaryLight" />
+          <CopyButton value={txInfo.to.value} color={'$textSecondaryLight'} />
           <SafeFontIcon name="external-link" size={14} color="textSecondaryLight" />
         </View>
       ),

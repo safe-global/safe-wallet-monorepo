@@ -65,6 +65,7 @@ export const getBulkGroupTxHash = (group: PendingTransactionItems[]) => {
   return uniq(hashList).length === 1 ? hashList[0] : undefined
 }
 
+export const isArrayParameter = (parameter: string): boolean => /(\[\d*?])+$/.test(parameter)
 export const getTxHash = (item: TransactionQueuedItem): string => item.transaction.txHash as unknown as string
 
 export const isTransferTxInfo = (value: Transaction['txInfo']): value is TransferTransactionInfo => {

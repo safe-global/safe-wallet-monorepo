@@ -1,20 +1,24 @@
 import React, { useMemo } from 'react'
 import { YStack } from 'tamagui'
-import { TransactionHeader } from '../../TransactionHeader'
-import { ListTable } from '../../ListTable'
 import { formatAddSignerItems, getSignerName } from './utils'
 import { MultisigExecutionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { useAppSelector } from '@/src/store/hooks'
 import { RootState } from '@/src/store'
 import { selectChainById } from '@/src/store/chains'
+
+import { ListTable } from '../../ListTable'
+import { TransactionHeader } from '../../TransactionHeader'
+import { ParametersButton } from '../../ParametersButton'
 import { NormalizedSettingsChangeTransaction } from '../../ConfirmationView/types'
+
 interface AddSignerProps {
   txInfo: NormalizedSettingsChangeTransaction
   executionInfo: MultisigExecutionDetails
+  txId: string
 }
 
-export function AddSigner({ txInfo, executionInfo }: AddSignerProps) {
+export function AddSigner({ txInfo, executionInfo, txId }: AddSignerProps) {
   const activeSafe = useDefinedActiveSafe()
   const activeChain = useAppSelector((state: RootState) => selectChainById(state, activeSafe.chainId))
   const items = useMemo(
@@ -34,7 +38,9 @@ export function AddSigner({ txInfo, executionInfo }: AddSignerProps) {
         title={newSignerAddress}
       />
 
-      <ListTable items={items} />
+      <ListTable items={items}>
+        <ParametersButton txId={txId} />
+      </ListTable>
     </YStack>
   )
 }

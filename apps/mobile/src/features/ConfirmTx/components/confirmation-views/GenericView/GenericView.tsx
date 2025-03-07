@@ -1,7 +1,5 @@
 import React, { useMemo } from 'react'
 import { View, YStack } from 'tamagui'
-import { TransactionHeader } from '../../TransactionHeader'
-import { ListTable } from '../../ListTable'
 import { formatGenericViewItems } from './utils'
 import {
   SettingsChangeTransaction,
@@ -16,13 +14,18 @@ import { SafeListItem } from '@/src/components/SafeListItem'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { Badge } from '@/src/components/Badge'
 
+import { ListTable } from '../../ListTable'
+import { TransactionHeader } from '../../TransactionHeader'
+import { ParametersButton } from '../../ParametersButton'
+
 interface GenericViewProps {
   txInfo: SettingsChangeTransaction
   executionInfo: MultisigExecutionDetails
   txData: TransactionData
+  txId: string
 }
 
-export function GenericView({ txInfo, txData, executionInfo }: GenericViewProps) {
+export function GenericView({ txInfo, txData, executionInfo, txId }: GenericViewProps) {
   const activeSafe = useDefinedActiveSafe()
   const chain = useAppSelector((state: RootState) => selectChainById(state, activeSafe.chainId))
   const items = useMemo(
@@ -41,7 +44,9 @@ export function GenericView({ txInfo, txData, executionInfo }: GenericViewProps)
         submittedAt={executionInfo.submittedAt}
       />
 
-      <ListTable items={items} />
+      <ListTable items={items}>
+        <ParametersButton txId={txId} />
+      </ListTable>
 
       {'actionCount' in txInfo && (
         <SafeListItem
