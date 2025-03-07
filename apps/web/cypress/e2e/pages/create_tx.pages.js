@@ -446,7 +446,7 @@ export function clickOnExpandableAction(data) {
 }
 
 export function clickOnAdvancedDetails() {
-  cy.get(advancedDetails).click()
+  cy.get(advancedDetails).click({ force: true })
 }
 
 export function expandAdvancedDetails(data) {

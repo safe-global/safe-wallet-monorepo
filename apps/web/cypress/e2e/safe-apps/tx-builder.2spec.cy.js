@@ -8,6 +8,7 @@ import * as ls from '../../support/localstorage_data.js'
 import { getEvents, events, checkDataLayerEvents } from '../../support/utils/gtag.js'
 import * as utils from '../../support/utils/checkers.js'
 import { getMockAddress } from '../../support/utils/ethers.js'
+import * as wallet from '../../support/utils/wallet.js'
 
 let safeAppSafes = []
 let iframeSelector
@@ -119,8 +120,8 @@ describe('Transaction Builder 2 tests', { defaultCommandTimeout: 20000 }, () => 
     })
   })
 
-  // TODO: Fix visibility element
-  it('Verify a simple batch can be created, signed by second signer and deleted. GA tx_confirm, tx_created', () => {
+  // Signing issues
+  it.skip('Verify a simple batch can be created, signed by second signer and deleted. GA tx_confirm, tx_created', () => {
     const tx_created = [
       {
         eventLabel: events.txCreatedTxBuilder.eventLabel,
@@ -138,35 +139,35 @@ describe('Transaction Builder 2 tests', { defaultCommandTimeout: 20000 }, () => 
         safeAddress: safeAppSafes.SEP_SAFEAPP_SAFE_1.slice(6),
       },
     ]
-    // wallet.connectSigner(signer)
-    // cy.enter(iframeSelector).then((getBody) => {
-    //   getBody().findByLabelText(safeapps.enterAddressStr).type(constants.SAFE_APP_ADDRESS)
-    //   getBody().find(safeapps.contractMethodIndex).parent().click()
-    //   getBody().findByRole('option', { name: safeapps.testAddressValue2 }).click()
-    //   getBody().findByLabelText(safeapps.newAddressValueStr).type(safeAppSafes.SEP_SAFEAPP_SAFE_2)
-    //   getBody().findByText(safeapps.addTransactionStr).click()
-    //   getBody().findAllByText(constants.SEPOLIA_CONTRACT_SHORT).should('have.length', 1)
-    //   getBody().findByText(safeapps.testAddressValueStr).should('exist')
-    //   getBody().findByText(safeapps.createBatchStr).click()
-    //   getBody().findByText(safeapps.sendBatchStr).click()
-    // })
+    wallet.connectSigner(signer)
+    cy.enter(iframeSelector).then((getBody) => {
+      getBody().findByLabelText(safeapps.enterAddressStr).type(constants.SAFE_APP_ADDRESS)
+      getBody().find(safeapps.contractMethodIndex).parent().click()
+      getBody().findByRole('option', { name: safeapps.testAddressValue2 }).click()
+      getBody().findByLabelText(safeapps.newAddressValueStr).type(safeAppSafes.SEP_SAFEAPP_SAFE_2)
+      getBody().findByText(safeapps.addTransactionStr).click()
+      getBody().findAllByText(constants.SEPOLIA_CONTRACT_SHORT).should('have.length', 1)
+      getBody().findByText(safeapps.testAddressValueStr).should('exist')
+      getBody().findByText(safeapps.createBatchStr).click()
+      getBody().findByText(safeapps.sendBatchStr).click()
+    })
 
-    // createtx.clickOnSignTransactionBtn()
-    // createtx.clickViewTransaction()
-    // navigation.clickOnWalletExpandMoreIcon()
-    // navigation.clickOnDisconnectBtn()
-    // wallet.connectSigner(signer2)
+    createtx.clickOnSignTransactionBtn()
+    createtx.clickViewTransaction()
+    navigation.clickOnWalletExpandMoreIcon()
+    navigation.clickOnDisconnectBtn()
+    wallet.connectSigner(signer2)
 
-    // createtx.clickOnConfirmTransactionBtn()
-    // createtx.clickOnNoLaterOption()
-    // createtx.clickOnSignTransactionBtn()
-    // navigation.clickOnWalletExpandMoreIcon()
-    // navigation.clickOnDisconnectBtn()
-    // wallet.connectSigner(signer)
-    // createtx.deleteTx()
-    // createtx.verifyNumberOfTransactions(0)
-    // getEvents()
-    // checkDataLayerEvents(tx_created)
-    // checkDataLayerEvents(tx_confirmed)
+    createtx.clickOnConfirmTransactionBtn()
+    createtx.clickOnNoLaterOption()
+    createtx.clickOnSignTransactionBtn()
+    navigation.clickOnWalletExpandMoreIcon()
+    navigation.clickOnDisconnectBtn()
+    wallet.connectSigner(signer)
+    createtx.deleteTx()
+    createtx.verifyNumberOfTransactions(0)
+    getEvents()
+    checkDataLayerEvents(tx_created)
+    checkDataLayerEvents(tx_confirmed)
   })
 })

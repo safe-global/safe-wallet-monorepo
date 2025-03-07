@@ -113,6 +113,8 @@ export function hoverOverDeleteOwnerBtn(index) {
 }
 
 export function openRemoveOwnerWindow(btn) {
+  const minimumCount = btn === 0 ? 1 : btn
+  main.verifyMinimumElementsCount(removeOwnerBtn, minimumCount)
   cy.get(removeOwnerBtn).eq(btn).click({ force: true })
   cy.get('div').contains(removeOwnerStr).should('exist')
 }

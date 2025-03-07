@@ -228,7 +228,7 @@ export function clickOnConfirmSwapBtn() {
 export function clickOnExceeFeeChkbox() {
   cy.wait(1000)
   cy.get(exceedFeesChkbox)
-    .should(() => {})
+    .should(() => { })
     .then(($button) => {
       if (!$button.length) {
         return
@@ -250,7 +250,7 @@ export function verifyReviewOrderBtnIsVisible() {
 export function clickOnReviewOrderBtn() {
   cy.get('button')
     .contains(swapAnywayStrBtn)
-    .should(() => {})
+    .should(() => { })
     .then(($button) => {
       if (!$button.length) {
         return
@@ -264,7 +264,7 @@ export function placeTwapOrder() {
   cy.wait(3000)
   cy.get('button')
     .contains(acceptStrBtn)
-    .should(() => {})
+    .should(() => { })
     .then(($button) => {
       if (!$button.length) {
         return
@@ -355,16 +355,18 @@ export function setInputValue(value) {
     cy.get('input')
       .should('be.visible')
       .clear()
-      .type('{selectall}{backspace}')
+      .wait(1000)
+      .clear()
       .then(($input) => {
         if ($input.val() !== '') {
-          cy.wrap($input).clear().type('{selectall}{backspace}')
+          cy.wrap($input).clear();
         }
       })
       .should('have.value', '')
       .type(value, { force: true })
-  })
+  });
 }
+
 
 export function setOutputValue(value) {
   cy.get(outputCurrencyInput).within(() => {
@@ -462,7 +464,7 @@ export function verifyRecipientAlertIsDisplayed() {
 export function closeIntroTwapModal() {
   cy.get('button')
     .contains(unlockTwapOrdersStrBtn)
-    .should(() => {})
+    .should(() => { })
     .then(($button) => {
       if (!$button.length) {
         return
