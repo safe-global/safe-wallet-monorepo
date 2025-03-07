@@ -62,7 +62,6 @@ const unlockTwapOrdersStrBtn = 'Unlock TWAP orders'
 const settingsModalTitle = 'Advanced Order Settings'
 const customRecipientStr = 'Custom Recipient'
 
-
 const getInsufficientBalanceStr = (token) => `Insufficient ${token} balance`
 const sellAmountIsSmallStr = 'Sell amount too small'
 
@@ -136,7 +135,7 @@ export const swapTxs = {
   wrapSwap:
     '&id=multisig_0xF184a243925Bf7fb1D64487339FF4F177Fb75644_0x06d7e5920bb59a38cf46436b146c33e7307d690875f7d64bca32a0b0c3394deb',
   swapQueue:
-    '&id=multisig_0xD8b85a669413b25a8BE7D7698f88b7bFA20889d2_0xc2a59a93e1cbaeab5fde7a5d4cc63938e1b1e4597c7e203146a6e6e07b43a92f'
+    '&id=multisig_0xD8b85a669413b25a8BE7D7698f88b7bFA20889d2_0xc2a59a93e1cbaeab5fde7a5d4cc63938e1b1e4597c7e203146a6e6e07b43a92f',
 }
 
 export const tokenBlockLabels = {
@@ -159,7 +158,6 @@ export function checkOutputCurrencyPreviewValue(value) {
 export function checkTokenBlockValue(index, value) {
   cy.get(tokenBlock).eq(index).should('contain.text', value)
 }
-
 
 export function unlockTwapOrders(iframeSelector) {
   main.getIframeBody(iframeSelector).then(($iframeBody) => {
@@ -354,9 +352,20 @@ export function selectOutputCurrency(option) {
 
 export function setInputValue(value) {
   cy.get(inputCurrencyInput).within(() => {
-    cy.get('input').clear().type(value)
-  })
+    cy.get('input')
+      .should('be.visible')
+      .clear()
+      .type('{selectall}{backspace}')
+      .then(($input) => {
+        if ($input.val() !== '') {
+          cy.wrap($input).clear().type('{selectall}{backspace}');
+        }
+      })
+      .should('have.value', '')
+      .type(value, { force: true })
+  });
 }
+
 
 export function setOutputValue(value) {
   cy.get(outputCurrencyInput).within(() => {

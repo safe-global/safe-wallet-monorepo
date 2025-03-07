@@ -5,7 +5,6 @@ import { tableRow } from '../pages/address_book.page'
 import { assetsSwapBtn } from '../pages/swaps.pages'
 import { nftsRow } from '../pages/nfts.pages'
 
-
 let etherscanLinkSepolia = 'a[aria-label="View on sepolia.etherscan.io"]'
 export const balanceSingleRow = '[aria-labelledby="tableTitle"] > tbody tr'
 const currencyDropdown = '[id="currency"]'
@@ -119,35 +118,27 @@ export function checkNftAddressFormat() {
   cy.get(nftsRow).each(($el) => {
     cy.wrap($el)
       .invoke('text')
-      .should('match', /0x[a-fA-F0-9]{4}\.\.\.[a-fA-F0-9]{4}/);
-  });
+      .should('match', /0x[a-fA-F0-9]{4}\.\.\.[a-fA-F0-9]{4}/)
+  })
 }
 
 export function checkNftCopyIconAndLink() {
   cy.get(nftsRow).each(($el) => {
-    cy.wrap($el)
-      .within(() => {
-        cy.get(createTx.copyIcon, { timeout: 5000 })
-          .should('exist');
-      });
-    cy.wrap($el)
-      .within(() => {
-        cy.get(createTx.explorerBtn, { timeout: 5000 })
-          .should('exist');
-      });
-  });
+    cy.wrap($el).within(() => {
+      cy.get(createTx.copyIcon, { timeout: 5000 }).should('exist')
+    })
+    cy.wrap($el).within(() => {
+      cy.get(createTx.explorerBtn, { timeout: 5000 }).should('exist')
+    })
+  })
 }
 
 export function showSendBtn() {
-  return cy.get(sendBtn)
-    .invoke('css', 'opacity', '1')
-    .should('have.css', 'opacity', '1');
+  return cy.get(sendBtn).invoke('css', 'opacity', '1').should('have.css', 'opacity', '1')
 }
 
 export function showSwapBtn() {
-  return cy.get(assetsSwapBtn)
-    .invoke('css', 'opacity', '1')
-    .should('have.css', 'opacity', '1');
+  return cy.get(assetsSwapBtn).invoke('css', 'opacity', '1').should('have.css', 'opacity', '1')
 }
 
 export function enterAmount(amount) {
@@ -205,7 +196,6 @@ export function clickOnExecuteBtn(index) {
         })
     })
 }
-
 
 export function VerifySendButtonIsDisabled() {
   cy.get('button').contains(sendBtnStr).should('be.disabled')

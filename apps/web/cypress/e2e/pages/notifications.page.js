@@ -7,6 +7,3 @@ export const pushNotificationsBtn = '[data-testid="notifications-button"]'
 export function checkCoreElementsVisible() {
   main.verifyElementsIsVisible([notificationsLogo, notificationsTitle, pushNotificationsBtn])
 }
-
-
-

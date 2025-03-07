@@ -29,7 +29,7 @@ const getTxTo = ({ txInfo }: Pick<Transaction, 'txInfo'>): AddressInfo | undefin
   }
 }
 
-interface TxType {
+export interface TxType {
   text: string
   icon?: string | React.ReactElement
   image: string | React.ReactElement

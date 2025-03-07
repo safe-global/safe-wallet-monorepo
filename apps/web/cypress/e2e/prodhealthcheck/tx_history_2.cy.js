@@ -2,7 +2,7 @@ import * as constants from '../../support/constants'
 import * as createTx from '../pages/create_tx.pages'
 import * as data from '../../fixtures/txhistory_data_data.json'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
-import { acceptCookies2 } from '../pages/main.page.js'
+import { acceptCookies2, closeSecurityNotice } from '../pages/main.page.js'
 
 let staticSafes = []
 
@@ -35,6 +35,9 @@ describe('[PROD] Tx history tests 2', () => {
     ).as('allTransactions')
 
     cy.visit(constants.prodbaseUrl + constants.transactionsHistoryUrl + staticSafes.SEP_STATIC_SAFE_7)
+    cy.wait('@allTransactions')
+    cy.contains(createTx.txStr, { timeout: 10000 })
+    closeSecurityNotice()
     acceptCookies2()
   })
 

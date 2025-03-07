@@ -23,8 +23,10 @@ const usePendingTxs = () => {
     },
     {
       skip: !activeSafe.chainId,
+      pollingInterval: 10000,
     },
   )
+
   const { list, onEndReached: fetchMoreTx } = useInfiniteScroll<
     QueuedItemPage,
     ConflictHeaderQueuedItem | LabelQueuedItem | TransactionQueuedItem
