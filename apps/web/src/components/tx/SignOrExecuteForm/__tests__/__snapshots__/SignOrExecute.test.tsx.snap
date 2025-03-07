@@ -84,33 +84,13 @@ exports[`SignOrExecute should display a confirmation screen 1`] = `
                       data-testid="decoded-tx-details"
                     >
                       <div
-                        class="MuiGrid-root MuiGrid-container css-86qz5o-MuiGrid-root"
+                        class="MuiBox-root css-zv7ju9"
                       >
-                        <div
-                          class="MuiGrid-root MuiGrid-item css-1wehkfy-MuiGrid-root"
-                          data-testid="tx-row-title"
-                          style="word-break: break-word;"
+                        <p
+                          class="MuiTypography-root MuiTypography-body1 css-111k8jw-MuiTypography-root"
                         >
-                          <p
-                            class="MuiTypography-root MuiTypography-body1 css-shf88x-MuiTypography-root"
-                          >
-                            safeTxGas:
-                          </p>
-                        </div>
-                        <div
-                          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true css-1vd824g-MuiGrid-root"
-                          data-testid="tx-data-row"
-                        >
-                          <div
-                            class="MuiBox-root css-rurw5h"
-                          >
-                            0
-                          </div>
-                        </div>
-                      </div>
-                      <div
-                        class="MuiBox-root css-164r41r"
-                      >
+                          Transaction data
+                        </p>
                         <div
                           class="MuiGrid-root MuiGrid-container css-86qz5o-MuiGrid-root"
                         >
@@ -122,7 +102,101 @@ exports[`SignOrExecute should display a confirmation screen 1`] = `
                             <p
                               class="MuiTypography-root MuiTypography-body1 css-shf88x-MuiTypography-root"
                             >
-                              Raw data:
+                              to:
+                            </p>
+                          </div>
+                          <div
+                            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true css-1vd824g-MuiGrid-root"
+                            data-testid="tx-data-row"
+                          >
+                            <div
+                              class="container"
+                            >
+                              <div
+                                class="MuiBox-root css-1lchl8k"
+                              >
+                                <div
+                                  class="addressContainer"
+                                >
+                                  <div
+                                    class="MuiBox-root css-b5p5gz"
+                                  >
+                                    <span
+                                      aria-label="Copy to clipboard"
+                                      class=""
+                                      data-mui-internal-clone-element="true"
+                                      style="cursor: pointer;"
+                                    >
+                                      <span>
+                                        0x0000000000000000000000000000000000000000
+                                      </span>
+                                    </span>
+                                  </div>
+                                  <span
+                                    aria-label="Copy to clipboard"
+                                    class=""
+                                    data-mui-internal-clone-element="true"
+                                    style="cursor: pointer;"
+                                  >
+                                    <button
+                                      aria-label="Copy to clipboard"
+                                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-xyrzjn-MuiButtonBase-root-MuiIconButton-root"
+                                      tabindex="0"
+                                      type="button"
+                                    >
+                                      <mock-icon
+                                        aria-hidden=""
+                                        class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeSmall css-gvpe62-MuiSvgIcon-root"
+                                        data-testid="copy-btn-icon"
+                                        focusable="false"
+                                      />
+                                    </button>
+                                  </span>
+                                  <div
+                                    class="MuiBox-root css-yjghm1"
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div
+                          class="MuiGrid-root MuiGrid-container css-86qz5o-MuiGrid-root"
+                        >
+                          <div
+                            class="MuiGrid-root MuiGrid-item css-1wehkfy-MuiGrid-root"
+                            data-testid="tx-row-title"
+                            style="word-break: break-word;"
+                          >
+                            <p
+                              class="MuiTypography-root MuiTypography-body1 css-shf88x-MuiTypography-root"
+                            >
+                              value:
+                            </p>
+                          </div>
+                          <div
+                            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true css-1vd824g-MuiGrid-root"
+                            data-testid="tx-data-row"
+                          >
+                            <p
+                              class="MuiTypography-root MuiTypography-body1 css-mxvcov-MuiTypography-root"
+                            >
+                              0x0
+                            </p>
+                          </div>
+                        </div>
+                        <div
+                          class="MuiGrid-root MuiGrid-container css-86qz5o-MuiGrid-root"
+                        >
+                          <div
+                            class="MuiGrid-root MuiGrid-item css-1wehkfy-MuiGrid-root"
+                            data-testid="tx-row-title"
+                            style="word-break: break-word;"
+                          >
+                            <p
+                              class="MuiTypography-root MuiTypography-body1 css-shf88x-MuiTypography-root"
+                            >
+                              data:
                             </p>
                           </div>
                           <div
@@ -155,6 +229,109 @@ exports[`SignOrExecute should display a confirmation screen 1`] = `
                               </span>
                               0x
                                
+                            </div>
+                          </div>
+                        </div>
+                        <div
+                          class="MuiBox-root css-1v3caum"
+                        />
+                        <div
+                          class="MuiGrid-root MuiGrid-container css-86qz5o-MuiGrid-root"
+                        >
+                          <div
+                            class="MuiGrid-root MuiGrid-item css-1wehkfy-MuiGrid-root"
+                            data-testid="tx-row-title"
+                            style="word-break: break-word;"
+                          >
+                            <p
+                              class="MuiTypography-root MuiTypography-body1 css-shf88x-MuiTypography-root"
+                            >
+                              operation:
+                            </p>
+                          </div>
+                          <div
+                            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true css-1vd824g-MuiGrid-root"
+                            data-testid="tx-data-row"
+                          >
+                            0 (call)
+                          </div>
+                        </div>
+                        <div
+                          class="MuiGrid-root MuiGrid-container css-86qz5o-MuiGrid-root"
+                        >
+                          <div
+                            class="MuiGrid-root MuiGrid-item css-1wehkfy-MuiGrid-root"
+                            data-testid="tx-row-title"
+                            style="word-break: break-word;"
+                          >
+                            <p
+                              class="MuiTypography-root MuiTypography-body1 css-shf88x-MuiTypography-root"
+                            >
+                              nonce:
+                            </p>
+                          </div>
+                          <div
+                            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true css-1vd824g-MuiGrid-root"
+                            data-testid="tx-data-row"
+                          >
+                            100
+                          </div>
+                        </div>
+                        <div
+                          class="MuiBox-root css-kz5wc9"
+                        />
+                        <p
+                          class="MuiTypography-root MuiTypography-body1 css-111k8jw-MuiTypography-root"
+                        >
+                          Transaction hashes
+                        </p>
+                        <div
+                          class="MuiStack-root css-hwnj0i-MuiStack-root"
+                        >
+                          <div
+                            class="MuiGrid-root MuiGrid-container css-86qz5o-MuiGrid-root"
+                          >
+                            <div
+                              class="MuiGrid-root MuiGrid-item css-1wehkfy-MuiGrid-root"
+                              data-testid="tx-row-title"
+                              style="word-break: break-word;"
+                            >
+                              <p
+                                class="MuiTypography-root MuiTypography-body1 css-shf88x-MuiTypography-root"
+                              >
+                                Domain hash:
+                              </p>
+                            </div>
+                            <div
+                              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true css-1vd824g-MuiGrid-root"
+                              data-testid="tx-data-row"
+                            >
+                              <div
+                                class="encodedData MuiBox-root css-0"
+                                data-testid="tx-hexData"
+                              >
+                                <span
+                                  aria-label="Copy to clipboard"
+                                  class=""
+                                  data-mui-internal-clone-element="true"
+                                  style="cursor: pointer;"
+                                >
+                                  <button
+                                    aria-label="Copy to clipboard"
+                                    class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-xyrzjn-MuiButtonBase-root-MuiIconButton-root"
+                                    tabindex="0"
+                                    type="button"
+                                  >
+                                    <mock-icon
+                                      aria-hidden=""
+                                      class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeSmall css-gvpe62-MuiSvgIcon-root"
+                                      data-testid="copy-btn-icon"
+                                      focusable="false"
+                                    />
+                                  </button>
+                                </span>
+                                 
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -494,33 +671,13 @@ exports[`SignOrExecute should display an error screen 1`] = `
                       data-testid="decoded-tx-details"
                     >
                       <div
-                        class="MuiGrid-root MuiGrid-container css-86qz5o-MuiGrid-root"
+                        class="MuiBox-root css-zv7ju9"
                       >
-                        <div
-                          class="MuiGrid-root MuiGrid-item css-1wehkfy-MuiGrid-root"
-                          data-testid="tx-row-title"
-                          style="word-break: break-word;"
+                        <p
+                          class="MuiTypography-root MuiTypography-body1 css-111k8jw-MuiTypography-root"
                         >
-                          <p
-                            class="MuiTypography-root MuiTypography-body1 css-shf88x-MuiTypography-root"
-                          >
-                            safeTxGas:
-                          </p>
-                        </div>
-                        <div
-                          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true css-1vd824g-MuiGrid-root"
-                          data-testid="tx-data-row"
-                        >
-                          <div
-                            class="MuiBox-root css-rurw5h"
-                          >
-                            0
-                          </div>
-                        </div>
-                      </div>
-                      <div
-                        class="MuiBox-root css-164r41r"
-                      >
+                          Transaction data
+                        </p>
                         <div
                           class="MuiGrid-root MuiGrid-container css-86qz5o-MuiGrid-root"
                         >
@@ -532,7 +689,101 @@ exports[`SignOrExecute should display an error screen 1`] = `
                             <p
                               class="MuiTypography-root MuiTypography-body1 css-shf88x-MuiTypography-root"
                             >
-                              Raw data:
+                              to:
+                            </p>
+                          </div>
+                          <div
+                            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true css-1vd824g-MuiGrid-root"
+                            data-testid="tx-data-row"
+                          >
+                            <div
+                              class="container"
+                            >
+                              <div
+                                class="MuiBox-root css-1lchl8k"
+                              >
+                                <div
+                                  class="addressContainer"
+                                >
+                                  <div
+                                    class="MuiBox-root css-b5p5gz"
+                                  >
+                                    <span
+                                      aria-label="Copy to clipboard"
+                                      class=""
+                                      data-mui-internal-clone-element="true"
+                                      style="cursor: pointer;"
+                                    >
+                                      <span>
+                                        0x0000000000000000000000000000000000000000
+                                      </span>
+                                    </span>
+                                  </div>
+                                  <span
+                                    aria-label="Copy to clipboard"
+                                    class=""
+                                    data-mui-internal-clone-element="true"
+                                    style="cursor: pointer;"
+                                  >
+                                    <button
+                                      aria-label="Copy to clipboard"
+                                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-xyrzjn-MuiButtonBase-root-MuiIconButton-root"
+                                      tabindex="0"
+                                      type="button"
+                                    >
+                                      <mock-icon
+                                        aria-hidden=""
+                                        class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeSmall css-gvpe62-MuiSvgIcon-root"
+                                        data-testid="copy-btn-icon"
+                                        focusable="false"
+                                      />
+                                    </button>
+                                  </span>
+                                  <div
+                                    class="MuiBox-root css-yjghm1"
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div
+                          class="MuiGrid-root MuiGrid-container css-86qz5o-MuiGrid-root"
+                        >
+                          <div
+                            class="MuiGrid-root MuiGrid-item css-1wehkfy-MuiGrid-root"
+                            data-testid="tx-row-title"
+                            style="word-break: break-word;"
+                          >
+                            <p
+                              class="MuiTypography-root MuiTypography-body1 css-shf88x-MuiTypography-root"
+                            >
+                              value:
+                            </p>
+                          </div>
+                          <div
+                            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true css-1vd824g-MuiGrid-root"
+                            data-testid="tx-data-row"
+                          >
+                            <p
+                              class="MuiTypography-root MuiTypography-body1 css-mxvcov-MuiTypography-root"
+                            >
+                              0x0
+                            </p>
+                          </div>
+                        </div>
+                        <div
+                          class="MuiGrid-root MuiGrid-container css-86qz5o-MuiGrid-root"
+                        >
+                          <div
+                            class="MuiGrid-root MuiGrid-item css-1wehkfy-MuiGrid-root"
+                            data-testid="tx-row-title"
+                            style="word-break: break-word;"
+                          >
+                            <p
+                              class="MuiTypography-root MuiTypography-body1 css-shf88x-MuiTypography-root"
+                            >
+                              data:
                             </p>
                           </div>
                           <div
@@ -565,6 +816,109 @@ exports[`SignOrExecute should display an error screen 1`] = `
                               </span>
                               0x
                                
+                            </div>
+                          </div>
+                        </div>
+                        <div
+                          class="MuiBox-root css-1v3caum"
+                        />
+                        <div
+                          class="MuiGrid-root MuiGrid-container css-86qz5o-MuiGrid-root"
+                        >
+                          <div
+                            class="MuiGrid-root MuiGrid-item css-1wehkfy-MuiGrid-root"
+                            data-testid="tx-row-title"
+                            style="word-break: break-word;"
+                          >
+                            <p
+                              class="MuiTypography-root MuiTypography-body1 css-shf88x-MuiTypography-root"
+                            >
+                              operation:
+                            </p>
+                          </div>
+                          <div
+                            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true css-1vd824g-MuiGrid-root"
+                            data-testid="tx-data-row"
+                          >
+                            0 (call)
+                          </div>
+                        </div>
+                        <div
+                          class="MuiGrid-root MuiGrid-container css-86qz5o-MuiGrid-root"
+                        >
+                          <div
+                            class="MuiGrid-root MuiGrid-item css-1wehkfy-MuiGrid-root"
+                            data-testid="tx-row-title"
+                            style="word-break: break-word;"
+                          >
+                            <p
+                              class="MuiTypography-root MuiTypography-body1 css-shf88x-MuiTypography-root"
+                            >
+                              nonce:
+                            </p>
+                          </div>
+                          <div
+                            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true css-1vd824g-MuiGrid-root"
+                            data-testid="tx-data-row"
+                          >
+                            100
+                          </div>
+                        </div>
+                        <div
+                          class="MuiBox-root css-kz5wc9"
+                        />
+                        <p
+                          class="MuiTypography-root MuiTypography-body1 css-111k8jw-MuiTypography-root"
+                        >
+                          Transaction hashes
+                        </p>
+                        <div
+                          class="MuiStack-root css-hwnj0i-MuiStack-root"
+                        >
+                          <div
+                            class="MuiGrid-root MuiGrid-container css-86qz5o-MuiGrid-root"
+                          >
+                            <div
+                              class="MuiGrid-root MuiGrid-item css-1wehkfy-MuiGrid-root"
+                              data-testid="tx-row-title"
+                              style="word-break: break-word;"
+                            >
+                              <p
+                                class="MuiTypography-root MuiTypography-body1 css-shf88x-MuiTypography-root"
+                              >
+                                Domain hash:
+                              </p>
+                            </div>
+                            <div
+                              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true css-1vd824g-MuiGrid-root"
+                              data-testid="tx-data-row"
+                            >
+                              <div
+                                class="encodedData MuiBox-root css-0"
+                                data-testid="tx-hexData"
+                              >
+                                <span
+                                  aria-label="Copy to clipboard"
+                                  class=""
+                                  data-mui-internal-clone-element="true"
+                                  style="cursor: pointer;"
+                                >
+                                  <button
+                                    aria-label="Copy to clipboard"
+                                    class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-xyrzjn-MuiButtonBase-root-MuiIconButton-root"
+                                    tabindex="0"
+                                    type="button"
+                                  >
+                                    <mock-icon
+                                      aria-hidden=""
+                                      class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeSmall css-gvpe62-MuiSvgIcon-root"
+                                      data-testid="copy-btn-icon"
+                                      focusable="false"
+                                    />
+                                  </button>
+                                </span>
+                                 
+                              </div>
                             </div>
                           </div>
                         </div>

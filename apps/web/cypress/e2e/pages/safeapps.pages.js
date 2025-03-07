@@ -153,7 +153,7 @@ export function verifyUntrustedHandllerWarningDoesNotExist() {
 }
 
 export function clickOnAdvancedDetails() {
-  cy.get(decodedTxSummary).click()
+  cy.get(decodedTxSummary).click({ force: true })
 }
 
 export function triggetOffChainTx() {
