@@ -18,13 +18,15 @@ const Navigation = (): ReactElement => {
   return (
     <SidebarList>
       {navItems.map((item) => {
-        const itemPath = item.href(orgId || '')
-        const isSelected = router.asPath === itemPath
+        const isSelected = router.pathname === item.href
 
         return (
           <div key={item.label}>
             <ListItemButton disabled={item.disabled} sx={{ padding: 0 }} selected={isSelected}>
-              <SidebarListItemButton selected={isSelected} href={itemPath}>
+              <SidebarListItemButton
+                selected={isSelected}
+                href={item.href ? { pathname: item.href, query: { orgId } } : ''}
+              >
                 {item.icon && <SidebarListItemIcon>{item.icon}</SidebarListItemIcon>}
 
                 <SidebarListItemText data-testid="sidebar-list-item" bold>

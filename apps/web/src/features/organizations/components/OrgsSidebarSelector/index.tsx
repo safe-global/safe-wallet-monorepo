@@ -31,11 +31,10 @@ const OrgsSidebarSelector = () => {
   }
 
   const handleSelectOrg = (org: GetOrganizationResponse) => {
-    const currentPath = router.asPath
-    const newPath = currentPath.replace(/\/organizations\/\d+/, `/organizations/${org.id}`)
-    if (newPath !== currentPath) {
-      router.push(newPath)
-    }
+    router.push({
+      pathname: router.pathname,
+      query: { ...router.query, orgId: org.id.toString() },
+    })
 
     handleClose()
   }
