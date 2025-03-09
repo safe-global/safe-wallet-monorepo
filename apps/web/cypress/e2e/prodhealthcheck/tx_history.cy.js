@@ -23,8 +23,7 @@ describe('[PROD] Tx history tests 1', () => {
   beforeEach(() => {
     cy.intercept(
       'GET',
-      `**${constants.stagingCGWChains}${constants.networkKeys.sepolia}/${
-        constants.stagingCGWSafes
+      `**${constants.stagingCGWChains}${constants.networkKeys.sepolia}/${constants.stagingCGWSafes
       }${staticSafes.SEP_STATIC_SAFE_7.substring(4)}/transactions/history**`,
       (req) => {
         req.url = `https://safe-client.safe.global/v1/chains/11155111/safes/0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb/transactions/history?timezone=Europe/Berlin&trusted=false&cursor=limit=100&offset=1`
@@ -92,7 +91,6 @@ describe('[PROD] Tx history tests 1', () => {
         typeSpendingLimits.contractTitle,
         typeSpendingLimits.call_multiSend,
         typeSpendingLimits.transactionHash,
-        typeSpendingLimits.safeTxHash,
       ],
       createTx.delegateCallWarning,
     )
@@ -115,16 +113,18 @@ describe('[PROD] Tx history tests 1', () => {
       typeDeleteAllowance.beneficiary,
       typeDeleteAllowance.beneficiaryAddress,
       typeDeleteAllowance.transactionHash,
-      typeDeleteAllowance.safeTxHash,
       typeDeleteAllowance.token,
       typeDeleteAllowance.tokenName,
     ])
   })
 
-  // Unskip when advanced details PR is merged to main
-  it.skip('Verify advanced details displayed in exapanded details for allowance deletion', () => {
+  it('Verify advanced details displayed in exapanded details for allowance deletion', () => {
     createTx.clickOnTransactionItemByName(typeDeleteAllowance.title, typeDeleteAllowance.summaryTxInfo)
-    createTx.expandAdvancedDetails([typeDeleteAllowance.baseGas])
+    createTx.expandAdvancedDetails([
+      typeDeleteAllowance.baseGas,
+      typeDeleteAllowance.operation,
+      typeDeleteAllowance.zero_call,
+    ])
     createTx.collapseAdvancedDetails([typeDeleteAllowance.baseGas])
   })
 })

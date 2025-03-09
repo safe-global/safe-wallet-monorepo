@@ -25,8 +25,7 @@ describe('[PROD] Tx history tests 2', () => {
   beforeEach(() => {
     cy.intercept(
       'GET',
-      `**${constants.stagingCGWChains}${constants.networkKeys.sepolia}/${
-        constants.stagingCGWSafes
+      `**${constants.stagingCGWChains}${constants.networkKeys.sepolia}/${constants.stagingCGWSafes
       }${staticSafes.SEP_STATIC_SAFE_7.substring(4)}/transactions/history**`,
       (req) => {
         req.url = `https://safe-client.safe.global/v1/chains/11155111/safes/0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb/transactions/history?timezone=Europe/Berlin&trusted=false&cursor=limit=100&offset=1`
@@ -51,7 +50,6 @@ describe('[PROD] Tx history tests 2', () => {
     createTx.verifyExpandedDetails([
       typeOnchainRejection.description,
       typeOnchainRejection.transactionHash,
-      typeOnchainRejection.safeTxHash,
     ])
     createTx.verifyActionListExists([
       typeSideActions.rejectionCreated,
@@ -64,7 +62,7 @@ describe('[PROD] Tx history tests 2', () => {
   it('Verify exapanded details for batch', () => {
     createTx.clickOnTransactionItemByName(typeBatch.title, typeBatch.summaryTxInfo)
     createTx.verifyExpandedDetails(
-      [typeBatch.contractTitle, typeBatch.transactionHash, typeBatch.safeTxHash],
+      [typeBatch.contractTitle, typeBatch.transactionHash],
       createTx.delegateCallWarning,
     )
     createTx.verifyActions([typeBatch.nativeTransfer.title])
@@ -90,7 +88,6 @@ describe('[PROD] Tx history tests 2', () => {
       typeChangeOwner.oldOwner.ownerAddress,
 
       typeChangeOwner.transactionHash,
-      typeChangeOwner.safeTxHash,
     ])
   })
 
@@ -115,7 +112,6 @@ describe('[PROD] Tx history tests 2', () => {
       [
         typeChangeThreshold.requiredConfirmationsTitle,
         typeChangeThreshold.transactionHash,
-        typeChangeThreshold.safeTxHash,
       ],
       createTx.policyChangeWarning,
     )

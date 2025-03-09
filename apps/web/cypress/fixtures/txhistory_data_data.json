@@ -165,7 +165,7 @@
       "tokenName": "ETH",
       "tokenAlt": "ETH",
       "baseGas": "baseGas",
-      "operation": "Operation",
+      "operation": "operation",
       "zero_call": "0 (call)"
     },
     "spendingLimits": {

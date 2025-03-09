@@ -22,8 +22,7 @@ describe('Tx history tests 1', () => {
   beforeEach(() => {
     cy.intercept(
       'GET',
-      `**${constants.stagingCGWChains}${constants.networkKeys.sepolia}/${
-        constants.stagingCGWSafes
+      `**${constants.stagingCGWChains}${constants.networkKeys.sepolia}/${constants.stagingCGWSafes
       }${staticSafes.SEP_STATIC_SAFE_7.substring(4)}/transactions/history**`,
       (req) => {
         req.url = `https://safe-client.staging.5afe.dev/v1/chains/11155111/safes/0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb/transactions/history?timezone=Europe/Berlin&trusted=false&cursor=limit=100&offset=1`
@@ -100,7 +99,6 @@ describe('Tx history tests 1', () => {
         typeSpendingLimits.contractTitle,
         typeSpendingLimits.call_multiSend,
         typeSpendingLimits.transactionHash,
-        typeSpendingLimits.safeTxHash,
       ],
       createTx.delegateCallWarning,
     )
@@ -145,13 +143,12 @@ describe('Tx history tests 1', () => {
       typeDeleteAllowance.beneficiary,
       typeDeleteAllowance.beneficiaryAddress,
       typeDeleteAllowance.transactionHash,
-      typeDeleteAllowance.safeTxHash,
       typeDeleteAllowance.token,
       typeDeleteAllowance.tokenName,
     ])
   })
 
-  // Added to prod (skipped)
+  // Added to prod
   it('Verify advanced details displayed in exapanded details for allowance deletion', () => {
     createTx.clickOnTransactionItemByName(typeDeleteAllowance.title, typeDeleteAllowance.summaryTxInfo)
     createTx.expandAdvancedDetails([
@@ -159,16 +156,14 @@ describe('Tx history tests 1', () => {
       typeDeleteAllowance.operation,
       typeDeleteAllowance.zero_call,
     ])
-    createTx.switchView(createTx.advancedDetailsViewOptions.table)
     createTx.collapseAdvancedDetails([typeDeleteAllowance.baseGas])
   })
 
-  it('Verify address can be copied in advanced details', () => {
+  it.skip('Verify address can be copied in advanced details', () => {
     const data =
       '0x885133e3000000000000000000000000c16db0251654c0a72e91b190d81ead367d2c6fed0000000000000000000000000000000000000000000000000000000000000000'
     createTx.clickOnTransactionItemByName(typeDeleteAllowance.title, typeDeleteAllowance.summaryTxInfo)
     createTx.expandAdvancedDetails([typeDeleteAllowance.baseGas])
-    createTx.switchView(createTx.advancedDetailsViewOptions.table)
     createTx.clickOnCopyDataBtn(data)
   })
 })

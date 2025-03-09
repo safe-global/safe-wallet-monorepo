@@ -254,11 +254,7 @@ export function verifySafeHeaderDetails(details) {
 }
 
 export function clickOnQRCodeBtn() {
-  cy.get(sidebarContainer)
-    .should('be.visible')
-    .within(() => {
-      cy.get(qrModalBtn).click()
-    })
+  cy.get(qrModalBtn).should('be.visible').click()
 }
 
 export function verifyQRModalDisplayed() {
@@ -638,7 +634,7 @@ export function checkNetworksInRange(expectedString, expectedCount, direction = 
 
   return cy
     .get(startSelector)
-    [traversalMethod](endSelector, 'li')
+  [traversalMethod](endSelector, 'li')
     .then((liElements) => {
       expect(liElements.length).to.equal(expectedCount)
       const optionTexts = [...liElements].map((li) => li.innerText)
