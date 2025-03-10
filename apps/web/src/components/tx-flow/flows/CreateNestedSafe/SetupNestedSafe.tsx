@@ -210,7 +210,7 @@ function AssetInputs({ name }: { name: SetupNestedSafeFormFields.assets }) {
 
                 <Controller
                   name={`${name}.${index}.${SetupNestedSafeFormAssetFields.tokenAddress}`}
-                  rules={{ required: true }}
+                  rules={{ required: true, deps: [`${name}.${index}.${SetupNestedSafeFormAssetFields.amount}`] }}
                   render={({ field }) => {
                     return (
                       <TextField
