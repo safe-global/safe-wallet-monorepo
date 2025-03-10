@@ -33,6 +33,7 @@ export type SafenetBalanceEntity = {
         address: string
         allowances: string
         balance: string
+        pendingSettlements: string
         total: string
       }
     }

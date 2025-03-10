@@ -6,22 +6,34 @@ import { useGetSafenetConfigQuery } from '@/store/safenet'
 import CloseIcon from '@mui/icons-material/Close'
 import { Alert, AlertTitle, Button, DialogActions, DialogContent, Stack, Typography } from '@mui/material'
 import { skipToken } from '@reduxjs/toolkit/query/react'
-import { useContext, useState, type ReactElement } from 'react'
+import { useContext, useMemo, type ReactElement } from 'react'
 import useIsSafenetEnabled from '../../hooks/useIsSafenetEnabled'
 import DisableSafenetFlow from '../tx-flow/DisableSafenet'
 import css from './styles.module.css'
+import useBalances from '@/hooks/useBalances'
+import TokenAmount from '@/components/common/TokenAmount'
 
 const DisableSafenetModal = ({ onClose }: { onClose: () => void }): ReactElement => {
   const { setTxFlow } = useContext(TxModalContext)
   const chainId = useChainId()
-  const [canDisable, setCanDisable] = useState<boolean>(false)
-
   const isSafenetEnabled = useIsSafenetEnabled()
 
   const { data: safenetConfig } = useGetSafenetConfigQuery(!isSafenetEnabled ? skipToken : undefined)
   const safenetModuleAddress = safenetConfig?.settlementEngines[chainId]
 
-  // TODO: Get pending settlements form the Processor API and set `canDisable` accordingly
+  const { balances } = useBalances()
+
+  const pendingSettlements = useMemo(
+    () =>
+      balances.items.filter((item) =>
+        item.safenetBalance?.some(
+          (safenetBalance) => safenetBalance.chainId === chainId && BigInt(safenetBalance.pendingSettlements) > 0n,
+        ),
+      ),
+    [balances, chainId],
+  )
+
+  const hasPendingSettlements = pendingSettlements.length > 0
 
   const handleDisableSafenet = () => {
     if (!safenetModuleAddress) return
@@ -54,16 +66,28 @@ const DisableSafenetModal = ({ onClose }: { onClose: () => void }): ReactElement
             <CloseIcon className={css.closeIcon} />
             <Typography>Sponsored transactions on Ethereum</Typography>
           </Stack>
-          {!canDisable && (
+          {hasPendingSettlements && (
             <Alert severity="warning" sx={{ mt: 5 }}>
               <AlertTitle>
                 <Typography variant="h5" fontWeight={700}>
-                  Pending Transactions Detected
+                  Pending settlements detected
                 </Typography>
               </AlertTitle>
               <Typography variant="body2" textAlign="left">
-                You have pending transactions that must be completed before you can disable Safenet
+                You have pending settlements that must be completed before you can disable Safenet
               </Typography>
+              {pendingSettlements.map((balance) => (
+                <TokenAmount
+                  key={balance.tokenInfo.address}
+                  value={
+                    balance.safenetBalance?.find((safenetBalance) => safenetBalance.chainId === chainId)
+                      ?.pendingSettlements ?? '0'
+                  }
+                  decimals={balance.tokenInfo.decimals}
+                  tokenSymbol={balance.tokenInfo.symbol}
+                  logoUri={balance.tokenInfo.logoUri}
+                />
+              ))}
               {/* Link to view the transactions */}
             </Alert>
           )}
@@ -71,7 +95,7 @@ const DisableSafenetModal = ({ onClose }: { onClose: () => void }): ReactElement
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>Cancel</Button>
-        {canDisable && safenetModuleAddress && (
+        {!hasPendingSettlements && safenetModuleAddress && (
           <Button onClick={handleDisableSafenet} variant="outlined" size="small" sx={{ alignSelf: 'flex-start' }}>
             Disable Safenet on
             <ChainIndicator chainId={chainId} className={css.chainIndicator} />

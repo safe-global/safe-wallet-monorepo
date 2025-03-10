@@ -8,6 +8,7 @@ export type SafenetBalance = {
   decimals: number
   balance: string
   fiatBalance: string
+  pendingSettlements: string
 }
 
 export type SafenetToken = {
@@ -50,6 +51,7 @@ const convertSafenetBalanceToSafeClientGatewayBalance = (
         decimals,
         balance: breakdown.balance,
         fiatBalance: currency === 'usd' ? ((parseInt(breakdown.balance) * 1) / 10 ** decimals).toString() : '0',
+        pendingSettlements: breakdown.pendingSettlements,
       })
     }
 
