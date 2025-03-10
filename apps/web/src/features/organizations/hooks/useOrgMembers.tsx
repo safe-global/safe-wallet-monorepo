@@ -1,5 +1,7 @@
 import { useUserOrganizationsGetUsersV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
 import { useCurrentOrgId } from './useCurrentOrgId'
+import { useAppSelector } from '@/store'
+import { isAuthenticated } from '@/store/authSlice'
 
 export enum MemberStatus {
   INVITED = 'INVITED',
@@ -9,7 +11,8 @@ export enum MemberStatus {
 
 export const useOrgMembers = () => {
   const orgId = useCurrentOrgId()
-  const { data } = useUserOrganizationsGetUsersV1Query({ orgId: Number(orgId) })
+  const isUserSignedIn = useAppSelector(isAuthenticated)
+  const { data } = useUserOrganizationsGetUsersV1Query({ orgId: Number(orgId) }, { skip: !isUserSignedIn })
 
   const invitedMembers =
     data?.members.filter(
