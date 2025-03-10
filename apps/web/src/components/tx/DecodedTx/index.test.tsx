@@ -164,7 +164,9 @@ describe('DecodedTx', () => {
 
       expect(toField).toBeInTheDocument()
       if (toField) {
-        const address = within(toField.parentElement!.parentElement!).queryByText('0x474e5Ded6b5D078163BFB8F6dBa355C3aA5478C8')
+        const address = within(toField.parentElement!.parentElement!).queryByText(
+          '0x474e5Ded6b5D078163BFB8F6dBa355C3aA5478C8',
+        )
         expect(address).toBeInTheDocument()
       }
 
