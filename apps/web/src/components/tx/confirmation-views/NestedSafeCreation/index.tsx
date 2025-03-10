@@ -37,7 +37,7 @@ export function NestedSafeCreation({ txData }: { txData: TransactionData }): Rea
           shortAddress={false}
           hasExplorer
           showCopyButton
-          showAvatar={false}
+          showAvatar
         />
       </div>
     </Box>
