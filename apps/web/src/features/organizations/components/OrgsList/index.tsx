@@ -48,7 +48,7 @@ const InfoModal = () => {
   )
 }
 
-const EmptyState = () => {
+const SignedOutState = () => {
   const wallet = useWallet()
 
   return (
@@ -115,7 +115,7 @@ const OrgsList = () => {
             <OrgListInvite key={invitingOrg.id} org={invitingOrg} />
           ))}
 
-        {isUserSignedIn && organizations ? (
+        {isUserSignedIn ? (
           <Grid2 container spacing={2} flexWrap="wrap">
             {activeOrganizations.length > 0 ? (
               activeOrganizations.map((org) => (
@@ -128,7 +128,7 @@ const OrgsList = () => {
             )}
           </Grid2>
         ) : (
-          <EmptyState />
+          <SignedOutState />
         )}
       </Box>
     </Box>
