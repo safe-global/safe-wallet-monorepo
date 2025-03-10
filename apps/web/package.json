@@ -104,7 +104,7 @@
     "@sentry/types": "^7.74.0",
     "@storybook/addon-designs": "^8.0.3",
     "@storybook/addon-essentials": "^8.0.6",
-    "@storybook/addon-interactions": "^8.0.6",
+    "@storybook/addon-interactions": "^8.6.4",
     "@storybook/addon-links": "^8.3.4",
     "@storybook/addon-onboarding": "^8.0.6",
     "@storybook/addon-themes": "^8.0.6",

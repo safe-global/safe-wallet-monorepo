@@ -121,7 +121,7 @@
     "@rtk-query/codegen-openapi": "^2.0.0",
     "@safe-global/test": "workspace:^",
     "@storybook/addon-essentials": "^8.4.6",
-    "@storybook/addon-interactions": "^8.4.6",
+    "@storybook/addon-interactions": "^8.6.4",
     "@storybook/addon-onboarding": "^8.4.6",
     "@storybook/addon-ondevice-actions": "^8.4.4",
     "@storybook/addon-ondevice-controls": "^8.4.2",
