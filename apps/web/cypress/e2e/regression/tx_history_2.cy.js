@@ -163,4 +163,15 @@ describe('Tx history tests 2', () => {
     createTx.clickOnTransactionItemByName(typeUntrustedToken.summaryTitle, typeUntrustedToken.summaryTxInfo)
     createTx.verifyAddressNotCopied(0, typeUntrustedToken.senderAddress)
   })
+
+  it('Verify tx hashes are grouped in advanced details', () => {
+    createTx.clickOnTransactionItemByName(typeDisableOwner.title)
+    createTx.verifyExpandedDetails([
+      typeDisableOwner.description,
+      typeDisableOwner.address,
+      typeDisableOwner.transactionHash,
+    ])
+    createTx.clickOnAdvancedDetails()
+    createTx.checkHashesExist(3)
+  })
 })

@@ -135,10 +135,9 @@ export function getAddressToBeRemoved() {
 }
 
 export function openReplaceOwnerWindow(index) {
-  cy.wait(3000) // Need to wait for the SDK to be initialized
   const minimumCount = index === 0 ? 1 : index
   main.verifyMinimumElementsCount(replaceOwnerBtn, minimumCount)
-  cy.get(replaceOwnerBtn).eq(index).click({ force: true })
+  cy.get(replaceOwnerBtn).eq(index).should('be.enabled').click({ force: true })
   cy.get(newOwnerName).should('be.visible')
   cy.get(newOwnerAddress).should('be.visible')
 }
