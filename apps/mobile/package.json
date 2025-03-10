@@ -55,7 +55,7 @@
     "@safe-global/protocol-kit": "^5.2.1",
     "@safe-global/store": "workspace:^",
     "@safe-global/utils": "workspace:^",
-    "@storybook/addon-react-native-web": "^0.0.26",
+    "@storybook/addon-react-native-web": "^0.0.27",
     "@storybook/addon-webpack5-compiler-babel": "^3.0.3",
     "@tamagui/animations-moti": "^1.117.1",
     "@tamagui/babel-plugin": "^1.121.12",

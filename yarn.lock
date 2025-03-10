@@ -7723,7 +7723,7 @@ __metadata:
     "@storybook/addon-onboarding": "npm:^8.4.6"
     "@storybook/addon-ondevice-actions": "npm:^8.4.4"
     "@storybook/addon-ondevice-controls": "npm:^8.4.2"
-    "@storybook/addon-react-native-web": "npm:^0.0.26"
+    "@storybook/addon-react-native-web": "npm:^0.0.27"
     "@storybook/addon-webpack5-compiler-babel": "npm:^3.0.3"
     "@storybook/addon-webpack5-compiler-swc": "npm:^1.0.5"
     "@storybook/blocks": "npm:^8.4.6"
@@ -8763,9 +8763,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@storybook/addon-react-native-web@npm:^0.0.26":
-  version: 0.0.26
-  resolution: "@storybook/addon-react-native-web@npm:0.0.26"
+"@storybook/addon-react-native-web@npm:^0.0.27":
+  version: 0.0.27
+  resolution: "@storybook/addon-react-native-web@npm:0.0.27"
   peerDependencies:
     "@babel/preset-react": "*"
     "@react-native/babel-preset": "*"
@@ -8782,7 +8782,7 @@ __metadata:
       optional: true
     react-dom:
       optional: true
-  checksum: 10/35195eb648783dae1cf94dcbade40fbc2cb77e2a7fce37aabf7d5f77694ff6592ea0441da41849d56423d61497dd24348d1970a42a38b8f85a165cf6dd2f8f7e
+  checksum: 10/783cf25d06073f2f0c01fe6f950bb6bd37a5baee3bdb5d411d6f68f446e209116de6a63974028c268b4dd17961fc97c37f64022ab7f073f0ccde3bc94b792156
   languageName: node
   linkType: hard
 
