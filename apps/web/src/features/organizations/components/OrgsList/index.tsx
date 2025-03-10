@@ -117,7 +117,7 @@ const OrgsList = () => {
 
         {isUserSignedIn ? (
           <Grid2 container spacing={2} flexWrap="wrap">
-            {currentUser && activeOrganizations.length > 0 ? (
+            {activeOrganizations.length > 0 ? (
               activeOrganizations.map((org) => (
                 <Grid2 size={6} key={org.name}>
                   <OrgsCard org={org} />
