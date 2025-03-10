@@ -45,7 +45,7 @@ const injectedRtkApi = api
         query: (queryArg) => ({
           url: `/v1/organizations/${queryArg.organizationId}/safes`,
           method: 'POST',
-          body: queryArg.body,
+          body: queryArg.createOrganizationSafesDto,
         }),
         invalidatesTags: ['organizations-safe'],
       }),
@@ -57,7 +57,7 @@ const injectedRtkApi = api
         query: (queryArg) => ({
           url: `/v1/organizations/${queryArg.organizationId}/safes`,
           method: 'DELETE',
-          body: queryArg.body,
+          body: queryArg.deleteOrganizationSafesDto,
         }),
         invalidatesTags: ['organizations-safe'],
       }),
@@ -145,7 +145,7 @@ export type OrganizationsDeleteV1ApiArg = {
 export type OrganizationSafesCreateV1ApiResponse = unknown
 export type OrganizationSafesCreateV1ApiArg = {
   organizationId: number
-  body: CreateOrganizationSafeDto[]
+  createOrganizationSafesDto: CreateOrganizationSafesDto
 }
 export type OrganizationSafesGetV1ApiResponse = /** status 200 Safes fetched successfully */ GetOrganizationSafeResponse
 export type OrganizationSafesGetV1ApiArg = {
@@ -154,7 +154,7 @@ export type OrganizationSafesGetV1ApiArg = {
 export type OrganizationSafesDeleteV1ApiResponse = unknown
 export type OrganizationSafesDeleteV1ApiArg = {
   organizationId: number
-  body: string[]
+  deleteOrganizationSafesDto: DeleteOrganizationSafesDto
 }
 export type UserOrganizationsInviteUserV1ApiResponse = /** status 200 Users invited */ Invitation[]
 export type UserOrganizationsInviteUserV1ApiArg = {
@@ -221,9 +221,19 @@ export type CreateOrganizationSafeDto = {
   chainId: string
   address: string
 }
+export type CreateOrganizationSafesDto = {
+  safes: CreateOrganizationSafeDto[]
+}
 export type GetOrganizationSafes = {}
 export type GetOrganizationSafeResponse = {
   safes: GetOrganizationSafes[]
+}
+export type DeleteOrganizationSafeDto = {
+  chainId: string
+  address: string
+}
+export type DeleteOrganizationSafesDto = {
+  safes: DeleteOrganizationSafeDto[]
 }
 export type Invitation = {
   userId: number
