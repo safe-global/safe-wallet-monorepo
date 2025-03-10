@@ -1,5 +1,6 @@
-import type { RootState } from '@/store/index'
+import type { listenerMiddlewareInstance, RootState } from '@/store/index'
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
+import { cgwClient } from '@safe-global/store/gateway/cgwClient'
 
 type AuthPayload = {
   sessionExpiresAt: number | null
@@ -27,4 +28,13 @@ export const { setAuthenticated, setUnauthenticated } = authSlice.actions
 
 export const isAuthenticated = (state: RootState): boolean => {
   return !!state.auth.sessionExpiresAt && state.auth.sessionExpiresAt > Date.now()
+}
+
+export const authListener = (listenerMiddleware: typeof listenerMiddlewareInstance) => {
+  listenerMiddleware.startListening({
+    actionCreator: authSlice.actions.setUnauthenticated,
+    effect: async (_action, { dispatch }) => {
+      dispatch(cgwClient.util.resetApiState())
+    },
+  })
 }

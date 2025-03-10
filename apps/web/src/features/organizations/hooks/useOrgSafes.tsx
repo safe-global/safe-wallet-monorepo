@@ -8,6 +8,7 @@ import { getComparator } from '@/features/myAccounts/utils/utils'
 import { useMemo } from 'react'
 import type { SafeItem } from '@/features/myAccounts/hooks/useAllSafes'
 import { selectAllAddressBooks, type AddressBookState } from '@/store/addressBookSlice'
+import { isAuthenticated } from '@/store/authSlice'
 
 function _buildSafeItems(safes: Record<string, string[]>, allSafeNames: AddressBookState): SafeItem[] {
   const result: SafeItem[] = []
@@ -34,7 +35,8 @@ function _buildSafeItems(safes: Record<string, string[]>, allSafeNames: AddressB
 
 export const useOrgSafes = () => {
   const orgId = useCurrentOrgId()
-  const { data } = useOrganizationSafesGetV1Query({ organizationId: Number(orgId) })
+  const isUserSignedIn = useAppSelector(isAuthenticated)
+  const { data } = useOrganizationSafesGetV1Query({ organizationId: Number(orgId) }, { skip: !isUserSignedIn })
   const allSafeNames = useAppSelector(selectAllAddressBooks)
   // @ts-ignore TODO: Fix type issue
   const safeItems = data ? _buildSafeItems(data.safes, allSafeNames) : []
