@@ -53,13 +53,19 @@ export const TxDetails = ({ safeTx }: TxDetailsProps) => (
 
               <TxDetailsRow label="To">
                 <Box>
-                  <EthHashInfo address={safeTx.data.to} avatarSize={20} showPrefix={false} hasExplorer />
+                  <EthHashInfo
+                    address={safeTx.data.to}
+                    avatarSize={20}
+                    showPrefix={false}
+                    showName={false}
+                    hasExplorer
+                  />
                 </Box>
               </TxDetailsRow>
 
               <TxDetailsRow label="Value">{safeTx.data.value}</TxDetailsRow>
 
-              <TxDetailsRow label="Data" direction="column">
+              <TxDetailsRow label="Data" direction={safeTx.data.data === '0x' ? 'row' : 'column'}>
                 <Typography variant="body2" sx={{ wordWrap: 'break-word' }}>
                   {safeTx.data.data}
                 </Typography>
@@ -75,13 +81,25 @@ export const TxDetails = ({ safeTx }: TxDetailsProps) => (
 
               <TxDetailsRow label="GasToken">
                 <Box>
-                  <EthHashInfo address={safeTx.data.gasToken} avatarSize={20} showPrefix={false} hasExplorer />
+                  <EthHashInfo
+                    address={safeTx.data.gasToken}
+                    avatarSize={20}
+                    showPrefix={false}
+                    showName={false}
+                    hasExplorer
+                  />
                 </Box>
               </TxDetailsRow>
 
               <TxDetailsRow label="RefundReceiver">
                 <Box>
-                  <EthHashInfo address={safeTx.data.refundReceiver} avatarSize={20} showPrefix={false} hasExplorer />
+                  <EthHashInfo
+                    address={safeTx.data.refundReceiver}
+                    avatarSize={20}
+                    showPrefix={false}
+                    showName={false}
+                    hasExplorer
+                  />
                 </Box>
               </TxDetailsRow>
 
