@@ -95,7 +95,7 @@ const filterOrgsByStatus = (
 // todo: replace with real data
 const OrgsList = () => {
   const isUserSignedIn = useAppSelector(isAuthenticated)
-  const { data: currentUser } = useUsersGetWithWalletsV1Query()
+  const { data: currentUser } = useUsersGetWithWalletsV1Query(undefined, { skip: !isUserSignedIn })
   const { data: organizations } = useOrganizationsGetV1Query(undefined, { skip: !isUserSignedIn })
 
   const pendingInvites = filterOrgsByStatus(currentUser, organizations || [], MemberStatus.INVITED)
