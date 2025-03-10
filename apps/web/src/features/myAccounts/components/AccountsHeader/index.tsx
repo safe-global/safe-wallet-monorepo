@@ -4,9 +4,11 @@ import { AppRoutes } from '@/config/routes'
 import AccountsNavigation from '@/features/myAccounts/components/AccountsNavigation'
 import CreateButton from '@/features/myAccounts/components/CreateButton'
 import css from '@/features/myAccounts/styles.module.css'
+import { useHasFeature } from '@/hooks/useChains'
 import useWallet from '@/hooks/wallets/useWallet'
 import AddIcon from '@/public/images/common/add.svg'
 import { OVERVIEW_EVENTS, OVERVIEW_LABELS } from '@/services/analytics'
+import { FEATURES } from '@/utils/chains'
 import { Box, Button, Link, SvgIcon, Typography } from '@mui/material'
 import classNames from 'classnames'
 import { useRouter } from 'next/router'
@@ -34,12 +36,13 @@ const AddSafeButton = ({ trackingLabel, onLinkClick }: { trackingLabel: string; 
 const AccountsHeader = ({ isSidebar, onLinkClick }: { isSidebar: boolean; onLinkClick?: () => void }) => {
   const wallet = useWallet()
   const router = useRouter()
+  const isOrgsFeatureEnabled = useHasFeature(FEATURES.ORGANIZATIONS)
   const isLoginPage = router.pathname === AppRoutes.welcome.accounts
   const trackingLabel = isLoginPage ? OVERVIEW_LABELS.login_page : OVERVIEW_LABELS.sidebar
 
   return (
     <Box className={classNames(css.header, { [css.sidebarHeader]: isSidebar })}>
-      {isSidebar ? (
+      {isSidebar || !isOrgsFeatureEnabled ? (
         <Typography variant="h1" fontWeight={700} className={css.title}>
           Accounts
         </Typography>
