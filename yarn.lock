@@ -7945,7 +7945,7 @@ __metadata:
   dependencies:
     husky: "npm:^9.1.6"
     lint-staged: "npm:^15.2.10"
-    msw: "npm:^2.7.0"
+    msw: "npm:^2.7.3"
     prettier: "npm:^3.4.2"
   dependenciesMeta:
     cypress:
@@ -8112,7 +8112,7 @@ __metadata:
     js-cookie: "npm:^3.0.1"
     lodash: "npm:^4.17.21"
     mockdate: "npm:^3.0.5"
-    msw: "npm:^2.7.0"
+    msw: "npm:^2.7.3"
     next: "patch:next@15.1.2#../../.yarn/patches/next-npm-15.1.2-24e7411703.patch"
     papaparse: "npm:^5.3.2"
     prettier: "npm:^3.3.3"
@@ -24722,9 +24722,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"msw@npm:^2.7.0":
-  version: 2.7.0
-  resolution: "msw@npm:2.7.0"
+"msw@npm:^2.7.3":
+  version: 2.7.3
+  resolution: "msw@npm:2.7.3"
   dependencies:
     "@bundled-es-modules/cookie": "npm:^2.0.1"
     "@bundled-es-modules/statuses": "npm:^1.0.1"
@@ -24751,7 +24751,7 @@ __metadata:
       optional: true
   bin:
     msw: cli/index.js
-  checksum: 10/165ccf37d90da0d5271fdb8e01f89f48f7a60fb810038ff73d18c0e5e5ddfdb1266002d19cde61b9ae689ef37c39499b10d9d07e0d16662a31630ce9adce1d77
+  checksum: 10/f193329a68fc22e477a6f8504aa44a92bd12847f2eeac1dfbd8ec1cc43ff293112ec067de1c7fe312ba02beecb313fb00aeeebf5817432b57af2d796b2dff2fa
   languageName: node
   linkType: hard
 

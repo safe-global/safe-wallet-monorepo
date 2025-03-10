@@ -25,7 +25,7 @@
   "devDependencies": {
     "husky": "^9.1.6",
     "lint-staged": "^15.2.10",
-    "msw": "^2.7.0",
+    "msw": "^2.7.3",
     "prettier": "^3.4.2"
   },
   "dependenciesMeta": {

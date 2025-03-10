@@ -147,7 +147,7 @@
     "jest-environment-jsdom": "^29.7.0",
     "jest-fixed-jsdom": "^0.0.9",
     "mockdate": "^3.0.5",
-    "msw": "^2.7.0",
+    "msw": "^2.7.3",
     "prettier": "^3.3.3",
     "remark-frontmatter": "^5.0.0",
     "remark-gfm": "^4.0.0",
