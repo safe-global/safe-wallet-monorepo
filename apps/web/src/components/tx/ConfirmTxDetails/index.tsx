@@ -1,15 +1,19 @@
 import TxCard from '@/components/tx-flow/common/TxCard'
-import { Button, Divider, Grid2 as Grid, Stack, StepIcon, Typography } from '@mui/material'
+import { Button, Checkbox, Divider, FormControlLabel, Grid2 as Grid, Stack, StepIcon, Typography } from '@mui/material'
 import { SafeTransaction } from '@safe-global/safe-core-sdk-types'
 import commonCss from '@/components/tx-flow/common/styles.module.css'
 import { TxDetails } from './TxDetails'
 import SignForm from '../SignOrExecuteForm/SignForm'
+import ExternalLink from '@/components/common/ExternalLink'
+import { useState } from 'react'
 
 type ConfirmTxDetailsProps = {
   safeTx: SafeTransaction
 }
 
 export const ConfirmTxDetails = ({ safeTx }: ConfirmTxDetailsProps) => {
+  const [checked, setChecked] = useState(false)
+
   const steps = [
     {
       label: 'Review what you will sign',
@@ -27,6 +31,10 @@ export const ConfirmTxDetails = ({ safeTx }: ConfirmTxDetailsProps) => {
       ),
     },
   ]
+
+  const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setChecked(event.target.checked)
+  }
 
   const onBackClick = () => {
     console.log('Back clicked')
@@ -55,11 +63,30 @@ export const ConfirmTxDetails = ({ safeTx }: ConfirmTxDetailsProps) => {
 
       <Divider className={commonCss.nestedDivider} sx={{ pt: 3 }} />
 
+      <FormControlLabel
+        sx={{ mt: 2 }}
+        control={<Checkbox checked={checked} onChange={handleCheckboxChange} />}
+        label={
+          <>
+            I understand what I will sign and know how to{' '}
+            <ExternalLink href="https://help.safe.global/en/articles/276343-how-to-perform-basic-transactions-checks-on-safe-wallet">
+              perform basic transaction checks.
+            </ExternalLink>
+          </>
+        }
+      />
+
+      <Divider className={commonCss.nestedDivider} sx={{ pt: 2 }} />
+
       <Button variant="outlined" onClick={onBackClick} sx={{ width: ['100%', 'fit-content'] }}>
         Back
       </Button>
 
-      <SignForm safeTx={safeTx} />
+      <SignForm
+        safeTx={safeTx}
+        disableSubmit={!checked}
+        tooltip={!checked ? 'Review details and check the box to enable signing' : undefined}
+      />
     </TxCard>
   )
 }
