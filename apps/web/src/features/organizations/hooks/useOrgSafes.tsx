@@ -37,7 +37,7 @@ export const useOrgSafes = () => {
   const { data } = useOrganizationSafesGetV1Query({ organizationId: Number(orgId) })
   const allSafeNames = useAppSelector(selectAllAddressBooks)
   // @ts-ignore TODO: Fix type issue
-  const safeItems = data ? _buildSafeItems(data.safes, allSafeNames) : undefined
+  const safeItems = data ? _buildSafeItems(data.safes, allSafeNames) : []
   const safes = useAllSafesGrouped(safeItems)
   const { orderBy } = useAppSelector(selectOrderByPreference)
   const sortComparator = getComparator(orderBy)
