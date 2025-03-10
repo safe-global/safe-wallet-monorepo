@@ -12,6 +12,8 @@ import { useRouter } from 'next/router'
 import { AppRoutes } from '@/config/routes'
 import OrgsCreationModal from '../OrgsCreationModal'
 import { useCurrentOrgId } from '../../hooks/useCurrentOrgId'
+import { useAppSelector } from '@/store'
+import { isAuthenticated } from '@/store/authSlice'
 
 const OrgsSidebarSelector = () => {
   const [isCreationModalOpen, setIsCreationModalOpen] = useState(false)
@@ -19,7 +21,8 @@ const OrgsSidebarSelector = () => {
   const router = useRouter()
   const open = Boolean(anchorEl)
   const orgId = useCurrentOrgId()
-  const { data: orgs } = useOrganizationsGetV1Query()
+  const isUserSignedIn = useAppSelector(isAuthenticated)
+  const { data: orgs } = useOrganizationsGetV1Query(undefined, { skip: !isUserSignedIn })
   const selectedOrg = orgs?.find((org) => org.id === Number(orgId))
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
