@@ -34,93 +34,105 @@ const TxDetailsRow = ({
   </Stack>
 )
 
-export const TxDetails = ({ safeTx }: TxDetailsProps) => (
-  <PaperViewToggle>
-    {[
-      {
-        title: (
-          <Typography color="text.secondary" fontWeight="bold">
-            Transaction details
-          </Typography>
-        ),
-        icon: <GridViewRoundedIcon />,
-        content: (
-          <>
-            <Divider sx={{ mb: 1 }} />
+export const TxDetails = ({ safeTx }: TxDetailsProps) => {
+  const ContentWrapper = ({ children }: { children: ReactElement | ReactElement[] }) => (
+    <Box sx={{ maxHeight: '480px', overflowY: 'scroll' }}>{children}</Box>
+  )
 
-            <Stack spacing={1} divider={<Divider />}>
-              <TxDetailsRow label="Primary type">SafeTx</TxDetailsRow>
+  return (
+    <PaperViewToggle>
+      {[
+        {
+          title: (
+            <Typography color="text.secondary" fontWeight="bold">
+              Transaction details
+            </Typography>
+          ),
+          icon: <GridViewRoundedIcon />,
+          content: (
+            <ContentWrapper>
+              <Divider sx={{ mb: 1 }} />
 
-              <TxDetailsRow label="To">
-                <Box>
-                  <EthHashInfo
-                    address={safeTx.data.to}
-                    avatarSize={20}
-                    showPrefix={false}
-                    showName={false}
-                    hasExplorer
-                  />
-                </Box>
-              </TxDetailsRow>
+              <Stack spacing={1} divider={<Divider />}>
+                <TxDetailsRow label="Primary type">SafeTx</TxDetailsRow>
 
-              <TxDetailsRow label="Value">{safeTx.data.value}</TxDetailsRow>
+                <TxDetailsRow label="To">
+                  <Box>
+                    <EthHashInfo
+                      address={safeTx.data.to}
+                      avatarSize={20}
+                      showPrefix={false}
+                      showName={false}
+                      hasExplorer
+                    />
+                  </Box>
+                </TxDetailsRow>
 
-              <TxDetailsRow label="Data" direction={safeTx.data.data === '0x' ? 'row' : 'column'}>
-                <Typography variant="body2" sx={{ wordWrap: 'break-word' }}>
-                  {safeTx.data.data}
+                <TxDetailsRow label="Value">{safeTx.data.value}</TxDetailsRow>
+
+                <TxDetailsRow label="Data" direction={safeTx.data.data === '0x' ? 'row' : 'column'}>
+                  <Typography variant="body2" sx={{ wordWrap: 'break-word' }}>
+                    {safeTx.data.data}
+                  </Typography>
+                </TxDetailsRow>
+
+                <TxDetailsRow label="Operation">{safeTx.data.operation}</TxDetailsRow>
+
+                <TxDetailsRow label="SafeTxGas">{safeTx.data.safeTxGas}</TxDetailsRow>
+
+                <TxDetailsRow label="BaseGas">{safeTx.data.baseGas}</TxDetailsRow>
+
+                <TxDetailsRow label="GasPrice">{safeTx.data.gasPrice}</TxDetailsRow>
+
+                <TxDetailsRow label="GasToken">
+                  <Box>
+                    <EthHashInfo
+                      address={safeTx.data.gasToken}
+                      avatarSize={20}
+                      showPrefix={false}
+                      showName={false}
+                      hasExplorer
+                    />
+                  </Box>
+                </TxDetailsRow>
+
+                <TxDetailsRow label="RefundReceiver">
+                  <Box>
+                    <EthHashInfo
+                      address={safeTx.data.refundReceiver}
+                      avatarSize={20}
+                      showPrefix={false}
+                      showName={false}
+                      hasExplorer
+                    />
+                  </Box>
+                </TxDetailsRow>
+
+                <TxDetailsRow label="Nonce">{safeTx.data.nonce}</TxDetailsRow>
+              </Stack>
+            </ContentWrapper>
+          ),
+        },
+        {
+          title: (
+            <Typography color="text.secondary" fontWeight="bold">
+              Transaction details
+            </Typography>
+          ),
+          icon: <TableRowsRoundedIcon />,
+          content: (
+            <ContentWrapper>
+              <Divider sx={{ mb: 1 }} />
+
+              <TxDetailsRow label="Message" direction="column">
+                <Typography variant="body2" sx={{ wordWrap: 'break-word', whiteSpace: 'pre-wrap' }}>
+                  {JSON.stringify(safeTx.data, null, 2)}
                 </Typography>
               </TxDetailsRow>
-
-              <TxDetailsRow label="Operation">{safeTx.data.operation}</TxDetailsRow>
-
-              <TxDetailsRow label="SafeTxGas">{safeTx.data.safeTxGas}</TxDetailsRow>
-
-              <TxDetailsRow label="BaseGas">{safeTx.data.baseGas}</TxDetailsRow>
-
-              <TxDetailsRow label="GasPrice">{safeTx.data.gasPrice}</TxDetailsRow>
-
-              <TxDetailsRow label="GasToken">
-                <Box>
-                  <EthHashInfo
-                    address={safeTx.data.gasToken}
-                    avatarSize={20}
-                    showPrefix={false}
-                    showName={false}
-                    hasExplorer
-                  />
-                </Box>
-              </TxDetailsRow>
-
-              <TxDetailsRow label="RefundReceiver">
-                <Box>
-                  <EthHashInfo
-                    address={safeTx.data.refundReceiver}
-                    avatarSize={20}
-                    showPrefix={false}
-                    showName={false}
-                    hasExplorer
-                  />
-                </Box>
-              </TxDetailsRow>
-
-              <TxDetailsRow label="Nonce">{safeTx.data.nonce}</TxDetailsRow>
-            </Stack>
-          </>
-        ),
-      },
-      {
-        title: (
-          <Typography color="text.secondary" fontWeight="bold">
-            Raw data
-          </Typography>
-        ),
-        icon: <TableRowsRoundedIcon />,
-        content: (
-          <Typography variant="body2" fontFamily="monospace" sx={{ whiteSpace: 'pre-wrap', wordWrap: 'break-word' }}>
-            {JSON.stringify(safeTx.data, null, 2)}
-          </Typography>
-        ),
-      },
-    ]}
-  </PaperViewToggle>
-)
+            </ContentWrapper>
+          ),
+        },
+      ]}
+    </PaperViewToggle>
+  )
+}
