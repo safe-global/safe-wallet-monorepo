@@ -282,7 +282,7 @@ const SingleAccountItem = ({
   )
 
   return isOrgSafe ? (
-    <ListItem className={css.listItem}>
+    <ListItem component="div" ref={elementRef} className={css.listItem}>
       <Box className={css.safeLink}>{content}</Box>
       {actions}
     </ListItem>
