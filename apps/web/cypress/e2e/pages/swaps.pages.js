@@ -354,17 +354,19 @@ export function setInputValue(value) {
   cy.get(inputCurrencyInput).within(() => {
     cy.get('input')
       .should('be.visible')
+      .should('not.be.disabled')
       .clear()
       .wait(3000)
-      .clear()
+      .invoke('val', '')
+      .trigger('input')
       .then(($input) => {
         if ($input.val() !== '') {
-          cy.wrap($input).clear()
+          cy.wrap($input).clear().invoke('val', '').trigger('input');
         }
       })
       .should('have.value', '')
-      .type(value, { force: true })
-  })
+      .type(value, { force: true });
+  });
 }
 
 export function setOutputValue(value) {
