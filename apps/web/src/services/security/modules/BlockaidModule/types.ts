@@ -572,7 +572,7 @@ export interface ModulesChangeManagement {
   /**
    * The type of the state change
    */
-  type: 'MODULE_CHANGE'
+  type: 'MODULES_CHANGE'
 }
 
 export namespace ModulesChangeManagement {

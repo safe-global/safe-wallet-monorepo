@@ -15,7 +15,7 @@ const CONTRACT_CHANGE_TITLES_MAPPING: Record<
 > = {
   PROXY_UPGRADE: 'This transaction will change the mastercopy of the Safe',
   OWNERSHIP_CHANGE: 'This transaction will change the ownership of the Safe',
-  MODULE_CHANGE: 'This transaction contains a Safe module change',
+  MODULES_CHANGE: 'This transaction contains a Safe modules change',
 }
 
 const ProxyUpgradeSummary = ({ beforeAddress, afterAddress }: { beforeAddress: string; afterAddress: string }) => {
