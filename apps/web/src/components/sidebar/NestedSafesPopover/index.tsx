@@ -42,7 +42,17 @@ export function NestedSafesPopover({
         vertical: 'top',
         horizontal: 'left',
       }}
-      slotProps={{ paper: { sx: { width: '300px' } } }}
+      slotProps={{
+        paper: {
+          sx: {
+            width: '300px',
+            maxHeight: '590px',
+            display: 'flex',
+            flexDirection: 'column',
+            overflow: 'hidden',
+          },
+        },
+      }}
     >
       <ModalDialogTitle
         hideChainIndicator
@@ -51,11 +61,17 @@ export function NestedSafesPopover({
       >
         Nested Safes
       </ModalDialogTitle>
-      <Stack p={3} pt={2} display="flex" flexDirection="column" maxHeight="590px">
+      <Stack p={3} pt={2} display="flex" flexDirection="column" flex={1} overflow="hidden">
         {nestedSafes.length === 0 ? (
           <NestedSafeInfo />
         ) : (
-          <Box sx={{ overflowX: 'hidden' }}>
+          <Box
+            sx={{
+              overflowX: 'hidden',
+              overflowY: 'auto',
+              flex: 1,
+            }}
+          >
             <NestedSafesList onClose={onClose} nestedSafes={nestedSafes} />
           </Box>
         )}
