@@ -31,6 +31,10 @@ export type AddAccountsFormValues = {
   selectedSafes: Record<string, boolean>
 }
 
+function getSelectedSafes(safes: AddAccountsFormValues['selectedSafes']) {
+  return Object.entries(safes).filter(([address, isSelected]) => isSelected && !address.startsWith('multichain_'))
+}
+
 const AddAccounts = () => {
   const [open, setOpen] = useState<boolean>(false)
   const [searchQuery, setSearchQuery] = useState('')
@@ -58,18 +62,16 @@ const AddAccounts = () => {
     },
   })
 
-  const { handleSubmit, watch, setValue } = formMethods
+  const { handleSubmit, watch, setValue, reset } = formMethods
 
   const selectedSafes = watch(`selectedSafes`)
-  const selectedSafesLength = Object.values(selectedSafes).filter(Boolean).length
+  const selectedSafesLength = getSelectedSafes(selectedSafes).length
 
   const onSubmit = handleSubmit(async (data) => {
-    const safesToAdd = Object.entries(data.selectedSafes)
-      .filter(([address, isSelected]) => isSelected && !address.startsWith('multichain_'))
-      .map(([key]) => {
-        const [chainId, address] = key.split(':')
-        return { chainId, address }
-      })
+    const safesToAdd = getSelectedSafes(data.selectedSafes).map(([key]) => {
+      const [chainId, address] = key.split(':')
+      return { chainId, address }
+    })
 
     try {
       const result = await addSafesToOrg({
@@ -83,7 +85,7 @@ const AddAccounts = () => {
     } catch (e) {
       console.log(e)
     } finally {
-      setOpen(false)
+      handleClose()
     }
   })
 
@@ -102,6 +104,12 @@ const AddAccounts = () => {
 
     const safeId = getSafeId(newSafeItem)
     setValue(`selectedSafes.${safeId}`, true, { shouldValidate: true })
+  }
+
+  const handleClose = () => {
+    setSearchQuery('')
+    reset()
+    setOpen(false)
   }
 
   return (
@@ -160,7 +168,7 @@ const AddAccounts = () => {
                     <AddManually handleAddSafe={handleAddSafe} />
                   </Box>
                   <DialogActions>
-                    <Button onClick={() => setOpen(false)}>Cancel</Button>
+                    <Button onClick={handleClose}>Cancel</Button>
                     <Button variant="contained" disabled={selectedSafesLength === 0} type="submit">
                       Add Accounts ({selectedSafesLength})
                     </Button>

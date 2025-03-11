@@ -33,7 +33,7 @@ export const isAuthenticated = (state: RootState): boolean => {
 export const authListener = (listenerMiddleware: typeof listenerMiddlewareInstance) => {
   listenerMiddleware.startListening({
     actionCreator: authSlice.actions.setUnauthenticated,
-    effect: async (_action, { dispatch }) => {
+    effect: (_action, { dispatch }) => {
       dispatch(cgwClient.util.resetApiState())
     },
   })
