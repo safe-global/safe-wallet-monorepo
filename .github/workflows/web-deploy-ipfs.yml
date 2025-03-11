@@ -39,8 +39,7 @@ jobs:
         run: |
           for file in $(find ./apps/web/out -name '*.html' | sed 's|^\./||'); do
             if [ -d ${file%.*} ]; then
-              cp ${file%} ${file%.*}/${file%.*}
-              cp ${file%} ${file%.*}/${file%.*}.html
+              cp ${file%} ${file%.*}/index.html
             else
               cp ${file%} ${file%.*}
             fi
