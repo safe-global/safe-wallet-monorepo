@@ -23,7 +23,7 @@ import { CreateSafeOnNewChain } from '@/features/multichain/components/CreateSaf
 import { useGetOwnedSafesQuery } from '@/store/slices'
 import { NestedSafesPopover } from '../NestedSafesPopover'
 import { NESTED_SAFE_EVENTS, NESTED_SAFE_LABELS } from '@/services/analytics/events/nested-safes'
-import { useIsTargetedFeature } from '@/features/targetedFeatures/hooks/useIsTargetedFeature'
+import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@/utils/chains'
 
 enum ModalType {
@@ -57,7 +57,7 @@ const SafeListContextMenu = ({
   undeployedSafe: boolean
   onClose?: () => void
 }): ReactElement => {
-  const isNestedSafesEnabled = useIsTargetedFeature(FEATURES.TARGETED_NESTED_SAFES)
+  const isNestedSafesEnabled = useHasFeature(FEATURES.NESTED_SAFES)
   const { data: nestedSafes } = useGetOwnedSafesQuery(
     isNestedSafesEnabled && address ? { chainId, ownerAddress: address } : skipToken,
   )
