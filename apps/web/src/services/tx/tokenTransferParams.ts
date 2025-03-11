@@ -25,7 +25,7 @@ const encodeERC721TransferData = (from: string, to: string, tokenId: string): st
 export const createTokenTransferParams = (
   recipient: string,
   amount: string,
-  decimals: number,
+  decimals: number | null | undefined,
   tokenAddress: string,
 ): MetaTransactionData => {
   const isNativeToken = parseInt(tokenAddress, 16) === 0

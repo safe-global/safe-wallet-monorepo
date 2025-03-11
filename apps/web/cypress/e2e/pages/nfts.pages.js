@@ -7,10 +7,11 @@ const nftModal = modal.modal
 
 const nftModalCloseBtn = main.modalDialogCloseBtn
 const recipientInput = 'input[name="recipient"]'
-const nftsRow = '[data-testid^="nfts-table-row"]'
+export const nftsRow = '[data-testid^="nfts-table-row"]'
 const inactiveNftIcon = '[data-testid="nft-icon-border"]'
 const activeNftIcon = '[data-testid="nft-icon-primary"]'
 const nftCheckBox = (index) => `[data-testid="nft-checkbox-${index}"] > input`
+const selectAllNFTsCheckbox = 'span[title="Select all"] > input'
 const activeSendNFTBtn = '[data-testid="nft-send-btn-false"]'
 const disabledSendNFTBtn = '[data-testid="nft-send-btn-true"]'
 const modalTitle = '[data-testid="modal-title"]'
@@ -105,6 +106,14 @@ export function selectNFTs(numberOfNFTs) {
     cy.get(nftCheckBox(i)).click()
     cy.contains(`${i} NFT${i > 1 ? 's' : ''} selected`)
   }
+  checkSelectedNFTsNumberIs(numberOfNFTs)
+}
+
+export function selectAllNFTs() {
+  cy.get(selectAllNFTsCheckbox).click()
+}
+
+export function checkSelectedNFTsNumberIs(numberOfNFTs) {
   cy.contains('button', `Send ${numberOfNFTs} NFT${numberOfNFTs > 1 ? 's' : ''}`)
 }
 

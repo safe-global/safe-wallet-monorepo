@@ -1,0 +1,73 @@
+appId: 'global.safe.mobileapp'
+---
+- launchApp:
+    appId: 'global.safe.mobileapp'
+    clearState: true
+    clearKeychain: true
+- runFlow:
+    when:
+      visible:
+        text: 'http.*'
+    commands:
+      - tapOn: 'http.*'
+- runFlow:
+    when:
+      visible: 'Continue'
+    commands:
+      - tapOn: 'Continue'
+- runFlow:
+    when:
+      visible: 'Reload'
+    commands:
+      - tapOn: 'Reload'
+- tapOn:
+    id: 'e2eTestOnboarding'
+- assertVisible:
+    id: 'carousel-item-0'
+- swipe:
+    direction: 'LEFT'
+- assertVisible:
+    id: 'carousel-item-1'
+- swipe:
+    direction: 'LEFT'
+- tapOn:
+    id: 'carousel-item-2'
+- swipe:
+    direction: 'LEFT'
+- assertVisible:
+    id: 'carousel-item-3'
+- tapOn:
+    id: 'get-started'
+- assertVisible:
+    id: 'get-started-screen'
+- tapOn:
+    id: 'add-account-button'
+- assertVisible: 'Scan a QR code'
+- tapOn:
+    id: 'enter-manually'
+- tapOn: 'Paste address...'
+- inputText: 'celo:0xCB57c3bC317d1905A435Dc75d7e4413E5B4Ecc97'
+- assertVisible:
+    id: 'continue-button'
+- assertVisible:
+    id: 'success-icon'
+- assertVisible: 'Available on networks:'
+- tapOn:
+    point: '50%,35%'
+- tapOn:
+    id: 'continue-button'
+- assertVisible:
+    id: 'add-signers-form-screen'
+- assertVisible: 'Not imported signers'
+- assertVisible:
+    id: 'signer-0x65F8236309e5A99Ff0d129d04E486EBCE20DC7B0'
+- tapOn:
+    id: 'continue-button'
+- tapOn:
+    id: 'notifications-opt-in-screen'
+- assertVisible:
+    id: 'opt-in-primary-button'
+- tapOn:
+    id: 'opt-in-secondary-button'
+- assertVisible:
+    id: 'home-tab'

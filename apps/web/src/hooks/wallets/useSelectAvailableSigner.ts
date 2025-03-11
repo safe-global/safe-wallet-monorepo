@@ -4,21 +4,24 @@ import type { SafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import type { SafeTransaction } from '@safe-global/safe-core-sdk-types'
 import { useNestedSafeOwners } from '../useNestedSafeOwners'
 import { getAvailableSigners } from '@/utils/signers'
+import { sameAddress } from '@/utils/addresses'
 
 /**
  *
  * @returns a function that sets a signer that can sign the given transaction in the given Safe
  */
 export const useSelectAvailableSigner = () => {
-  const { connectedWallet: wallet, setSignerAddress } = useWalletContext() ?? {}
+  const { connectedWallet: wallet, setSignerAddress, signer } = useWalletContext() ?? {}
   const nestedSafeOwners = useNestedSafeOwners()
 
   return useCallback(
     (tx: SafeTransaction | undefined, safe: SafeInfo) => {
       const availableSigners = getAvailableSigners(wallet, nestedSafeOwners, safe, tx)
 
-      setSignerAddress?.(availableSigners[0])
+      if (!signer || !availableSigners.some((available) => sameAddress(available, signer.address))) {
+        setSignerAddress?.(availableSigners[0])
+      }
     },
-    [setSignerAddress, nestedSafeOwners, wallet],
+    [wallet, nestedSafeOwners, signer, setSignerAddress],
   )
 }

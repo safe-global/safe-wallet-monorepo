@@ -18,7 +18,7 @@ const NotificationCenterList = ({ notifications, handleClose }: NotificationCent
   if (!notifications.length) {
     return (
       <div className={css.wrapper}>
-        <NoNotificationsIcon alt="No notifications" />
+        <NoNotificationsIcon data-testid="notifications-icon" alt="No notifications" />
         <Typography
           sx={{
             paddingTop: '8px',

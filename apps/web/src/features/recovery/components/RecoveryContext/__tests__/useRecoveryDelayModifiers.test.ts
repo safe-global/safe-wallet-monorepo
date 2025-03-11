@@ -1,7 +1,6 @@
 import { useHasFeature } from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
-import { getSpendingLimitModuleAddress } from '@/services/contracts/spendingLimitContracts'
 import { getRecoveryDelayModifiers } from '@/features/recovery/services/delay-modifier'
 import { addressExBuilder, safeInfoBuilder } from '@/tests/builders/safe'
 import { act, renderHook } from '@/tests/test-utils'
@@ -100,7 +99,7 @@ describe('useRecoveryDelayModifiers', () => {
     mockUseWeb3ReadOnly.mockReturnValue(provider as any)
     const chainId = '5'
     const safe = safeInfoBuilder()
-      .with({ chainId, modules: [{ value: getSpendingLimitModuleAddress(chainId)! }] })
+      .with({ chainId, modules: [{ value: '0xCFbFaC74C26F8647cBDb8c5caf80BB5b32E43134' }] })
       .build()
     const safeInfo = { safe, safeAddress: safe.address.value }
     mockUseSafeInfo.mockReturnValue(safeInfo as any)

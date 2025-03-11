@@ -188,6 +188,7 @@ export const safenetApi = createApi({
 export const {
   useGetSafenetConfigQuery,
   useLazyGetSafenetBalanceQuery,
+  useGetSafenetBalanceQuery,
   useLazySimulateSafenetTransactionQuery,
   useGetSafenetTransactionDetailsQuery,
   useGetSafenetTransactionDetailsBySettlementQuery,

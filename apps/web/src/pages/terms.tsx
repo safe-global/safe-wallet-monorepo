@@ -7,6 +7,7 @@ import { useIsOfficialHost } from '@/hooks/useIsOfficialHost'
 import { BRAND_NAME } from '@/config/constants'
 
 const overrideComponents: MDXComponents = {
+  // @ts-expect-error
   a: CustomLink,
 }
 

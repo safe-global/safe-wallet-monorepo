@@ -1,5 +1,6 @@
 import { type SafeBalanceResponse, TokenType } from '@safe-global/safe-gateway-typescript-sdk'
 import * as store from '@/store'
+import * as useBalancesHooks from '@/hooks/useBalances'
 import { renderHook } from '@/tests/test-utils'
 import { toBeHex } from 'ethers'
 import { useVisibleBalances } from '../useVisibleBalances'
@@ -13,9 +14,14 @@ describe('useVisibleBalances', () => {
       fiatTotal: '0',
       items: [],
     }
+    jest.spyOn(useBalancesHooks, 'default').mockImplementation(() => ({
+      balances: balance,
+      error: undefined,
+      loading: false,
+    }))
+
     jest.spyOn(store, 'useAppSelector').mockImplementation((selector) =>
       selector({
-        balances: { data: balance, error: undefined, loading: false },
         settings: {
           currency: 'USD',
           shortName: {
@@ -71,9 +77,14 @@ describe('useVisibleBalances', () => {
       ],
     }
 
+    jest.spyOn(useBalancesHooks, 'default').mockImplementation(() => ({
+      balances: balance,
+      error: undefined,
+      loading: false,
+    }))
+
     jest.spyOn(store, 'useAppSelector').mockImplementation((selector) =>
       selector({
-        balances: { data: balance, error: undefined, loading: false },
         settings: {
           currency: 'USD',
           shortName: {
@@ -142,6 +153,12 @@ describe('useVisibleBalances', () => {
       ],
     }
 
+    jest.spyOn(useBalancesHooks, 'default').mockImplementation(() => ({
+      balances: balance,
+      error: undefined,
+      loading: false,
+    }))
+
     jest.spyOn(store, 'useAppSelector').mockImplementation((selector) =>
       selector({
         balances: { data: balance, error: undefined, loading: false },
@@ -201,9 +218,14 @@ describe('useVisibleBalances', () => {
       ],
     }
 
+    jest.spyOn(useBalancesHooks, 'default').mockImplementation(() => ({
+      balances: balance,
+      error: undefined,
+      loading: false,
+    }))
+
     jest.spyOn(store, 'useAppSelector').mockImplementation((selector) =>
       selector({
-        balances: { data: balance, error: undefined, loading: false },
         settings: {
           currency: 'USD',
           shortName: {

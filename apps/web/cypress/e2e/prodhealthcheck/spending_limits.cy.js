@@ -5,7 +5,8 @@ import * as tx from '../pages/create_tx.pages'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as wallet from '../../support/utils/wallet.js'
 import { getMockAddress } from '../../support/utils/ethers.js'
-import { acceptCookies2 } from '../pages/main.page.js'
+import { acceptCookies2, closeSecurityNotice } from '../pages/main.page.js'
+import * as createTx from '../pages/create_tx.pages.js'
 
 let staticSafes = []
 const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
@@ -19,6 +20,8 @@ describe('[PROD] Spending limits tests', () => {
 
   beforeEach(() => {
     cy.visit(constants.prodbaseUrl + constants.setupUrl + staticSafes.SEP_STATIC_SAFE_8)
+    cy.contains(createTx.settingsStr, { timeout: 10000 })
+    closeSecurityNotice()
     cy.get(spendinglimit.spendingLimitsSection).should('be.visible')
     acceptCookies2()
   })

@@ -88,7 +88,7 @@ describe('Swaps tests', () => {
     })
   })
 
-  it('Verify order deails are displayed in swap confirmation', { defaultCommandTimeout: 30000 }, () => {
+  it('Verify order details are displayed in swap confirmation', { defaultCommandTimeout: 30000 }, () => {
     const limitPrice = swaps.createRegex(swapOrder.DAIeqCOW, 'COW')
     const widgetFee = swaps.getWidgetFee()
     const orderID = swaps.getOrderID()

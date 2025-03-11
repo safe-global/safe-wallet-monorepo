@@ -49,6 +49,7 @@ export function enterProposerData(address, name) {
 
 export function clickOnSubmitProposerBtn() {
   cy.get(submitProposerBtn).click()
+  verifyProposerSuccessMsgDisplayed()
 }
 
 export function checkCreatorAddress(data) {

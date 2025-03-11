@@ -1,5 +1,17 @@
 import { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { SafeInfo } from '../types/address'
+import { FirebaseMessagingTypes } from '@react-native-firebase/messaging'
+import { Dimensions } from 'react-native'
+
+export const WINDOW_HEIGHT = Dimensions.get('window').height
+export const WINDOW_WIDTH = Dimensions.get('window').width
+export const Layout = {
+  window: {
+    width: WINDOW_WIDTH,
+    height: WINDOW_HEIGHT,
+  },
+  isSmallDevice: WINDOW_WIDTH < 375,
+}
 
 export const mockedActiveAccount: SafeInfo = {
   address: '0xA77DE01e157f9f57C7c4A326eeE9C4874D0598b6',
@@ -44,6 +56,35 @@ export const mockedAccounts = [
     owners: [{ value: '0x7bF7cF1D8375ad2B25B9050FeF93181ec3E15f08', name: null, logoUri: null }],
     queued: 1,
     threshold: 1,
+  },
+  {
+    address: {
+      value: '0xF7a47Bf5705572B7EB9cb0F7007C66B770Ea120f',
+      name: null,
+      logoUri: null,
+    },
+    chainId: '11155111',
+    threshold: 2,
+    owners: [
+      {
+        value: '0x79964FA459D36EbFfc2a2cA66321B689F6E4aC52',
+        name: null,
+        logoUri: null,
+      },
+      {
+        value: '0xDa5e9FA404881Ff36DDa97b41Da402dF6430EE6b',
+        name: null,
+        logoUri: null,
+      },
+      {
+        value: '0x4cF25c77De50baBAB44c6BcC76D88624DDb3EbBE',
+        name: null,
+        logoUri: null,
+      },
+    ],
+    fiatTotal: '138.558',
+    queued: 0,
+    awaitingConfirmation: 0,
   },
 ]
 
@@ -278,3 +319,56 @@ export const mockedChains = [
     transactionService: 'https://safe-transaction-arbitrum.safe.global',
   },
 ]
+
+export enum STORAGE_IDS {
+  SAFE = 'safe',
+  NOTIFICATIONS = 'notifications',
+  GLOBAL_PUSH_NOTIFICATION_SETTINGS = 'globalNotificationSettings',
+  SAFE_FCM_TOKEN = 'safeFcmToken',
+  PUSH_NOTIFICATIONS_PROMPT_COUNT = 'pushNotificationsPromptCount',
+  PUSH_NOTIFICATIONS_PROMPT_TIME = 'pushNotificationsPromptTime',
+  DEVICE_ID_STORAGE_KEY = 'pns=deviceId',
+  DEFAULT_NOTIFICATION_CHANNEL_ID = 'DEFAULT_NOTIFICATION_CHANNEL_ID',
+  ANNOUNCEMENT_NOTIFICATION_CHANNEL_ID = 'ANNOUNCEMENT_NOTIFICATION_CHANNEL_ID',
+  DEFAULT_PUSH_NOTIFICATION_CHANNEL_PRIORITY = 'high',
+  REQUEST_PERMISSION_ASKED = 'REQUEST_PERMISSION_ASKED',
+  REQUEST_PERMISSION_GRANTED = 'REQUEST_PERMISSION_GRANTED',
+  NOTIFICATION_DATE_FORMAT = 'DD/MM/YYYY HH:mm:ss',
+  NOTIFICATIONS_SETTINGS = 'notifications-settings',
+  PN_USER_STORAGE = 'safePnUserStorage',
+}
+
+export enum STORAGE_TYPES {
+  STRING = 'string',
+  BOOLEAN = 'boolean',
+  NUMBER = 'number',
+  OBJECT = 'object',
+}
+
+// Map all non string storage ids to their respective types
+export const mapStorageTypeToIds = (id: STORAGE_IDS): STORAGE_TYPES => {
+  switch (id) {
+    case STORAGE_IDS.NOTIFICATIONS:
+    case STORAGE_IDS.GLOBAL_PUSH_NOTIFICATION_SETTINGS:
+    case STORAGE_IDS.SAFE_FCM_TOKEN:
+    case STORAGE_IDS.NOTIFICATIONS_SETTINGS:
+    case STORAGE_IDS.PN_USER_STORAGE:
+      return STORAGE_TYPES.OBJECT
+    case STORAGE_IDS.PUSH_NOTIFICATIONS_PROMPT_COUNT:
+      return STORAGE_TYPES.NUMBER
+    case STORAGE_IDS.REQUEST_PERMISSION_ASKED:
+    case STORAGE_IDS.REQUEST_PERMISSION_GRANTED:
+      return STORAGE_TYPES.BOOLEAN
+    default:
+      return STORAGE_TYPES.STRING
+  }
+}
+
+export type HandleNotificationCallback = (data: FirebaseMessagingTypes.RemoteMessage['data'] | undefined) => void
+
+export enum PressActionId {
+  OPEN_NOTIFICATIONS_VIEW = 'open-notifications-view-press-action-id',
+  OPEN_TRANSACTION_VIEW = 'open-transactions-view-press-action-id',
+}
+
+export const LAUNCH_ACTIVITY = 'global.safe.mobileapp.ui.MainActivity'

@@ -63,8 +63,8 @@ export const validateAmount = (amount?: string, includingZero: boolean = false) 
   }
 }
 
-export const validateLimitedAmount = (amount: string, decimals?: number, max?: string) => {
-  if (typeof decimals === 'undefined' || !max) return
+export const validateLimitedAmount = (amount: string, decimals?: number | null, max?: string) => {
+  if (decimals == null || !max) return
 
   const numberError = validateAmount(amount)
   if (numberError) {
@@ -78,8 +78,8 @@ export const validateLimitedAmount = (amount: string, decimals?: number, max?: s
   }
 }
 
-export const validateDecimalLength = (value: string, maxLen?: number, minLen = 1) => {
-  if (typeof maxLen === 'undefined' || !value.includes('.')) {
+export const validateDecimalLength = (value: string, maxLen?: number | null, minLen = 1) => {
+  if (maxLen == null || !value.includes('.')) {
     return
   }
 

@@ -8,6 +8,8 @@ const connectWalletBtn = '[data-testid="connect-wallet-btn"]'
 const privateKeyStr = 'Private key'
 
 export function connectSigner(signer) {
+  let retryCount = 0
+
   const actions = {
     privateKey: () => {
       cy.wait(2000)
@@ -23,6 +25,10 @@ export function connectSigner(signer) {
       })
     },
     retry: () => {
+      retryCount++
+      if (retryCount > 20) {
+        throw new Error('Failed to connect after 20 retries')
+      }
       cy.wait(1000).then(enterPrivateKey)
     },
   }
@@ -36,8 +42,8 @@ export function connectSigner(signer) {
             $input.val(signer)
             cy.wrap($input).trigger('input').trigger('change')
           })
-
         cy.get(pkConnectBtn).click()
+        cy.wait(2000)
       }
     })
   }
@@ -58,7 +64,7 @@ export function connectSigner(signer) {
         cy.get(connectWalletBtn)
           .eq(0)
           .should('be.enabled')
-          .click()
+          .click({ force: true })
           .then(() => {
             const actionKey = $body.find(onboardv2).length > 0 ? 'privateKey' : 'retry'
             actions[actionKey]()

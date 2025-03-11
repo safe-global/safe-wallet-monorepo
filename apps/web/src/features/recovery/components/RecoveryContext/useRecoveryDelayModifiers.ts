@@ -5,12 +5,14 @@ import { getRecoveryDelayModifiers } from '@/features/recovery/services/delay-mo
 import useAsync from '@/hooks/useAsync'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
-import { getSpendingLimitModuleAddress } from '@/services/contracts/spendingLimitContracts'
+import { getDeployedSpendingLimitModuleAddress } from '@/services/contracts/spendingLimitContracts'
 import type { AsyncResult } from '@/hooks/useAsync'
 import { useIsRecoverySupported } from '../../hooks/useIsRecoverySupported'
 
 function isOnlySpendingLimitEnabled(chainId: string, modules: SafeInfo['modules']) {
-  return modules?.length === 1 && modules[0].value === getSpendingLimitModuleAddress(chainId)
+  if (modules && modules.length > 1) return false
+  const spendingLimit = getDeployedSpendingLimitModuleAddress(chainId, modules)
+  return !!spendingLimit
 }
 
 export function useRecoveryDelayModifiers(): AsyncResult<Delay[]> {

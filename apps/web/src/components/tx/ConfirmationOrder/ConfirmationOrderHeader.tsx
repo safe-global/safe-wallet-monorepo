@@ -7,7 +7,7 @@ export type InfoBlock = {
   value: string
   label: string
   tokenInfo?: {
-    decimals: number
+    decimals?: number | null
     symbol: string
     logoUri?: string | null
   }
@@ -37,7 +37,7 @@ const ConfirmationOrderHeader = ({ blocks, showArrow }: { blocks: [InfoBlock, In
             </Box>
           )}
 
-          <Box flex={1}>
+          <Box data-testid="block-label" flex={1}>
             <Typography variant="body2" color="primary.light">
               {block.label}
             </Typography>

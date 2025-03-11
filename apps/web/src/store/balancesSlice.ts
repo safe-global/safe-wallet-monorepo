@@ -1,8 +1,9 @@
-import { type TokenInfo, type SafeBalanceResponse } from '@safe-global/safe-gateway-typescript-sdk'
+import { type TokenInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import { createSelector } from '@reduxjs/toolkit'
 import { makeLoadableSlice } from './common'
+import type { Balances } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 
-export const initialBalancesState: SafeBalanceResponse = {
+export const initialBalancesState: Balances = {
   items: [],
   fiatTotal: '',
 }

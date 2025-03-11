@@ -13,8 +13,12 @@ import { TxGroupedCard } from '@/src/components/transactions-list/Card/TxGrouped
 import { TxConflictingCard } from '@/src/components/transactions-list/Card/TxConflictingCard'
 import { SafeListItem } from '@/src/components/SafeListItem'
 import { TxInfo } from '@/src/components/TxInfo'
-import React from 'react'
+import React, { useCallback } from 'react'
 import { GroupedPendingTxsWithTitle } from './components/PendingTxList/PendingTxList.container'
+import { TxCardPress, TxConflictCardPress } from '@/src/components/TxInfo/types'
+import { useRouter } from 'expo-router'
+import { useAppSelector } from '@/src/store/hooks'
+import { selectActiveSafe } from '@/src/store/activeSafeSlice'
 
 type GroupedTxs = (PendingTransactionItems | TransactionQueuedItem[])[]
 
@@ -86,14 +90,35 @@ export const renderItem = ({
   item: PendingTransactionItems | TransactionQueuedItem[]
   index: number
 }) => {
+  const activeSafe = useAppSelector(selectActiveSafe)
+  const router = useRouter()
+
+  const onPress = useCallback(
+    async (transaction: TxCardPress | TxConflictCardPress, isConflictTx?: boolean) => {
+      if (isConflictTx) {
+        router.push({
+          pathname: '/conflict-transaction-sheet',
+        })
+      } else {
+        router.push({
+          pathname: '/confirm-transaction',
+          params: {
+            txId: (transaction as TxCardPress).tx.id,
+          },
+        })
+      }
+    },
+    [router, activeSafe],
+  )
+
   if (Array.isArray(item)) {
     // Handle bulk transactions
     return (
-      <View marginTop={index && '$4'} paddingHorizontal="$3">
+      <View marginTop={index && '$4'}>
         {getBulkGroupTxHash(item) ? (
           <TxGroupedCard transactions={item} inQueue />
         ) : (
-          <TxConflictingCard inQueue transactions={item} />
+          <TxConflictingCard inQueue transactions={item} onPress={onPress} />
         )}
       </View>
     )
@@ -101,7 +126,7 @@ export const renderItem = ({
 
   if (isLabelListItem(item)) {
     return (
-      <View marginTop={index && '$4'} paddingHorizontal="$3">
+      <View marginTop={index && '$4'}>
         <SafeListItem.Header title={item.label} />
       </View>
     )
@@ -109,8 +134,8 @@ export const renderItem = ({
 
   if (isTransactionListItem(item)) {
     return (
-      <View marginTop={index && '$4'} paddingHorizontal="$3">
-        <TxInfo inQueue tx={item.transaction} />
+      <View marginTop={index && '$4'}>
+        <TxInfo onPress={onPress} inQueue tx={item.transaction} />
       </View>
     )
   }

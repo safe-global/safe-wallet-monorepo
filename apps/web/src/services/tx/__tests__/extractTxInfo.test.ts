@@ -6,6 +6,7 @@ describe('extractTxInfo', () => {
     const txDetails = {
       txData: {
         operation: 'CALL',
+        to: { value: '0x1234567890123456789012345678901234567890' },
         value: '1000000000000000000',
         data: '0x1234567890123456789012345678901234567890',
       },
@@ -36,9 +37,7 @@ describe('extractTxInfo', () => {
       },
     } as unknown as TransactionDetails
 
-    const safeAddress = '0x1234567890123456789012345678901234567890'
-
-    expect(extractTxInfo(txDetails, safeAddress)).toEqual({
+    expect(extractTxInfo(txDetails)).toEqual({
       txParams: {
         data: '0x',
         baseGas: '21000',
@@ -60,6 +59,7 @@ describe('extractTxInfo', () => {
   it('should extract tx info for an ERC20 token transfer', () => {
     const txDetails = {
       txData: {
+        to: { value: '0xa74476443119A942dE498590Fe1f2454d7D4aC0d' },
         operation: 'CALL',
         value: '0x0',
         hexData: '0x546785',
@@ -92,9 +92,7 @@ describe('extractTxInfo', () => {
       },
     } as unknown as TransactionDetails
 
-    const safeAddress = '0x1234567890123456789012345678901234567890'
-
-    expect(extractTxInfo(txDetails, safeAddress)).toEqual({
+    expect(extractTxInfo(txDetails)).toEqual({
       txParams: {
         data: '0x546785',
         baseGas: '21000',
@@ -201,9 +199,7 @@ describe('extractTxInfo', () => {
       },
     } as unknown as TransactionDetails
 
-    const safeAddress = '0xF979f34D16d865f51e2eC7baDEde4f3735DaFb7d'
-
-    expect(extractTxInfo(txDetails, safeAddress)).toEqual({
+    expect(extractTxInfo(txDetails)).toEqual({
       signatures: {
         '0xbbeedB6d8e56e23f5812e59d1b6602F15957271F':
           '0xb10e0605bd27c42af87ff36d690a5594d13a4a7029ea5f080dde917d0781f97901958195d0d99c7805419adb636ccdc579e9aa200ee0443dd10c4f5885f37f081b',
