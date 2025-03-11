@@ -7,6 +7,7 @@ import Link from 'next/link'
 import css from './styles.module.css'
 import type { GetOrganizationResponse } from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
 import classNames from 'classnames'
+import { useOrgSafeCount } from '@/features/organizations/hooks/useOrgSafeCount'
 
 /**
  * Returns a deterministic "random" color (in Hex format) based on a string.
@@ -97,9 +98,8 @@ const OrgsCard = ({
   isLink?: boolean
 }) => {
   const { id, name, userOrganizations: members } = org
-  const safes = []
-  const numberOfAccounts = safes.length
   const numberOfMembers = members.length
+  const numberOfAccounts = useOrgSafeCount(id)
 
   return (
     <Card className={classNames(css.card, { [css.compact]: isCompact })}>

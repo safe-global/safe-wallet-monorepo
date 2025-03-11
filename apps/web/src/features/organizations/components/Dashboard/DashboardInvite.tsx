@@ -5,6 +5,7 @@ import {
   useUserOrganizationsAcceptInviteV1Mutation,
   useUserOrganizationsDeclineInviteV1Mutation,
 } from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
+import { useOrgSafeCount } from '@/features/organizations/hooks/useOrgSafeCount'
 
 type OrgListInvite = {
   org: GetOrganizationResponse
@@ -13,9 +14,8 @@ type OrgListInvite = {
 const OrgListInvite = ({ org }: OrgListInvite) => {
   const [acceptInvite] = useUserOrganizationsAcceptInviteV1Mutation()
   const [declineInvite] = useUserOrganizationsDeclineInviteV1Mutation()
-  const { name, userOrganizations: members } = org
-  const safes = [] // TODO: Replace with actual safes data when available
-  const numberOfAccounts = safes.length
+  const { id, name, userOrganizations: members } = org
+  const numberOfAccounts = useOrgSafeCount(id)
   const numberOfMembers = members.length
 
   const handleAcceptInvite = () => {
