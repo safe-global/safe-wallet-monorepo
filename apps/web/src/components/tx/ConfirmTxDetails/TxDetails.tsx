@@ -36,7 +36,7 @@ const TxDetailsRow = ({
 
 export const TxDetails = ({ safeTx }: TxDetailsProps) => {
   const ContentWrapper = ({ children }: { children: ReactElement | ReactElement[] }) => (
-    <Box sx={{ maxHeight: '480px', overflowY: 'scroll' }}>{children}</Box>
+    <Box sx={{ maxHeight: '500px', overflowY: 'scroll' }}>{children}</Box>
   )
 
   return (
@@ -120,6 +120,7 @@ export const TxDetails = ({ safeTx }: TxDetailsProps) => {
             </Typography>
           ),
           icon: <TableRowsRoundedIcon />,
+          tooltip: 'View .json/raw data',
           content: (
             <ContentWrapper>
               <Divider sx={{ mb: 1 }} />

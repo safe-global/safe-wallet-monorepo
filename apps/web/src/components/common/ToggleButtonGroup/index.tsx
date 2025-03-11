@@ -6,6 +6,7 @@ import {
   toggleButtonGroupClasses,
   styled,
   svgIconClasses,
+  Tooltip,
 } from '@mui/material'
 
 const StyledMuiToggleButtonGroup = styled(MuiToggleButtonGroup)(({ theme }) => ({
@@ -33,7 +34,10 @@ const StyledMuiToggleButtonGroup = styled(MuiToggleButtonGroup)(({ theme }) => (
 
 interface ToggleButtonGroupProps {
   value?: number
-  children: ReactElement[]
+  children: {
+    icon: ReactElement
+    tooltip?: string
+  }[]
   onChange?: (newValue: number) => void
 }
 
@@ -47,8 +51,6 @@ export const ToggleButtonGroup = ({ value = 0, children, onChange }: ToggleButto
     }
   }
 
-  const childrenArray = React.Children.toArray(children).filter(Boolean)
-
   return (
     <StyledMuiToggleButtonGroup
       size="small"
@@ -57,9 +59,11 @@ export const ToggleButtonGroup = ({ value = 0, children, onChange }: ToggleButto
       onChange={changeView}
       aria-label="text alignment"
     >
-      {childrenArray.map((child, index) => (
-        <ToggleButton key={index} value={index}>
-          {child}
+      {children.map(({ tooltip, icon }, index) => (
+        <ToggleButton value={index}>
+          <Tooltip key={index} title={tooltip} placement="top">
+            {icon}
+          </Tooltip>
         </ToggleButton>
       ))}
     </StyledMuiToggleButtonGroup>

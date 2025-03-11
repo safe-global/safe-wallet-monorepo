@@ -6,6 +6,7 @@ import React, { ReactElement, useState } from 'react'
 type PaperViewToggleProps = {
   children: {
     icon: ReactElement
+    tooltip?: string
     content: ReactElement
     title?: string | ReactElement
   }[]
@@ -30,7 +31,7 @@ export const PaperViewToggle = ({ children, activeView = 0 }: PaperViewTogglePro
     <Paper sx={{ backgroundColor: 'background.main', padding: 2 }}>
       <Stack spacing={2}>
         <Stack direction="row-reverse" justifyContent="space-between">
-          <ToggleButtonGroup onChange={onChangeView}>{children.map(({ icon }) => icon)}</ToggleButtonGroup>
+          <ToggleButtonGroup onChange={onChangeView}>{children}</ToggleButtonGroup>
           <Title index={active} />
         </Stack>
 
