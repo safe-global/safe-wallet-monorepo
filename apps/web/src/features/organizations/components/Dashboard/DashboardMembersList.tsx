@@ -5,14 +5,13 @@ import { useState } from 'react'
 import AddMembersModal from '../AddMembersModal'
 import MemberName from '../MembersList/MemberName'
 
-const DashboardMembersList = ({ members, displayLimit }: { members: UserOrganization[]; displayLimit: number }) => {
+const DashboardMembersList = ({ members }: { members: UserOrganization[] }) => {
   const [openAddMembersModal, setOpenAddMembersModal] = useState(false)
-  const membersToDisplay = members.slice(0, displayLimit)
 
   return (
     <>
       <Paper sx={{ p: 2, borderRadius: '8px' }}>
-        {membersToDisplay.map((member) => (
+        {members.map((member) => (
           <Box mb={2} key={member.id}>
             <MemberName key={member.id} member={member} />
           </Box>

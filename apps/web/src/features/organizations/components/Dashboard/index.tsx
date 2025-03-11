@@ -37,11 +37,16 @@ const ViewAllLink = ({ url }: { url: LinkProps['href'] }) => {
   )
 }
 
+const DASHBOARD_LIST_DISPLAY_LIMIT = 5
+
 const OrganizationsDashboard = () => {
   const safes = useOrgSafes()
   const isUserSignedIn = useAppSelector(isAuthenticated)
   const orgId = useCurrentOrgId()
   const { activeMembers } = useOrgMembers()
+
+  const safesToDisplay = safes.slice(0, DASHBOARD_LIST_DISPLAY_LIMIT)
+  const membersToDisplay = activeMembers.slice(0, DASHBOARD_LIST_DISPLAY_LIMIT)
 
   if (!isUserSignedIn) {
     return <SignedOutState />
@@ -61,15 +66,14 @@ const OrganizationsDashboard = () => {
                 <Typography variant="h5">Safe Accounts ({safes.length})</Typography>
                 {orgId && <ViewAllLink url={{ pathname: AppRoutes.organizations.safeAccounts, query: { orgId } }} />}
               </Stack>
-              {/* TODO: Set a max length for dashboard safes. */}
-              <SafesList safes={safes} isOrgSafe />
+              <SafesList safes={safesToDisplay} isOrgSafe />
             </Grid>
             <Grid size={{ xs: 12, md: 4 }}>
               <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
                 <Typography variant="h5">Members ({activeMembers.length})</Typography>
                 {orgId && <ViewAllLink url={{ pathname: AppRoutes.organizations.members, query: { orgId } }} />}
               </Stack>
-              <DashboardMembersList members={activeMembers} displayLimit={5} />
+              <DashboardMembersList members={membersToDisplay} />
             </Grid>
           </Grid>
         </>
