@@ -18,7 +18,7 @@ export const useSelectAvailableSigner = () => {
     (tx: SafeTransaction | undefined, safe: SafeInfo) => {
       const availableSigners = getAvailableSigners(wallet, nestedSafeOwners, safe, tx)
 
-      if (safe.owners.some((owner) => sameAddress(owner.value, wallet?.address))) {
+      if (safe.owners.some((owner) => sameAddress(owner.value, wallet?.address)) && safe.threshold === 1) {
         return
       } else if (!signer || !availableSigners.some((available) => sameAddress(available, signer.address))) {
         setSignerAddress?.(availableSigners[0])
