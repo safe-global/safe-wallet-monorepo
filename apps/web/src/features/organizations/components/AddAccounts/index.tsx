@@ -85,7 +85,7 @@ const AddAccounts = () => {
     } catch (e) {
       console.log(e)
     } finally {
-      setOpen(false)
+      handleClose()
     }
   })
 
@@ -106,7 +106,7 @@ const AddAccounts = () => {
     setValue(`selectedSafes.${safeId}`, true, { shouldValidate: true })
   }
 
-  const handleCancel = () => {
+  const handleClose = () => {
     setSearchQuery('')
     reset()
     setOpen(false)
@@ -168,7 +168,7 @@ const AddAccounts = () => {
                     <AddManually handleAddSafe={handleAddSafe} />
                   </Box>
                   <DialogActions>
-                    <Button onClick={handleCancel}>Cancel</Button>
+                    <Button onClick={handleClose}>Cancel</Button>
                     <Button variant="contained" disabled={selectedSafesLength === 0} type="submit">
                       Add Accounts ({selectedSafesLength})
                     </Button>
