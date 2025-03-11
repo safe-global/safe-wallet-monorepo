@@ -22,6 +22,8 @@ import css from './styles.module.css'
 import { useUserOrganizationsInviteUserV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
 import { useCurrentOrgId } from '../../hooks/useCurrentOrgId'
 import NameInput from '@/components/common/NameInput'
+import { useRouter } from 'next/router'
+import { AppRoutes } from '@/config/routes'
 
 export enum MemberRole {
   ADMIN = 'ADMIN',
@@ -73,6 +75,7 @@ const RoleMenuItem = ({
 
 const AddMembersModal = ({ onClose }: { onClose: () => void }): ReactElement => {
   const orgId = useCurrentOrgId()
+  const router = useRouter()
   const [error, setError] = useState<string>()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [inviteMembers] = useUserOrganizationsInviteUserV1Mutation()
@@ -103,6 +106,9 @@ const AddMembersModal = ({ onClose }: { onClose: () => void }): ReactElement => 
         inviteUsersDto: { users: [{ address: data.address, role: data.role }] },
       })
       if (response.data) {
+        if (router.pathname !== AppRoutes.organizations.members) {
+          router.push({ pathname: AppRoutes.organizations.members, query: { orgId } })
+        }
         onClose()
       }
       if (response.error) {
