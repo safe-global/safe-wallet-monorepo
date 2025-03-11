@@ -21,6 +21,9 @@ const withPWA = withPWAInit({
   customWorkerSrc: SERVICE_WORKERS_PATH,
   // Prefer InjectManifest for Web Push
   swSrc: `${SERVICE_WORKERS_PATH}/index.ts`,
+
+  // Create folders with an index.html file for each route
+  trailingSlash: true,
 })
 
 /** @type {import('next').NextConfig} */

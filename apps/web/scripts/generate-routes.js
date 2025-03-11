@@ -21,7 +21,7 @@ const iterate = (folderName, parentRoute, root) => {
 
       // A file
       const name = item.split('.')[0]
-      const path = name === 'index' ? parentRoute : `${parentRoute}/${name}`
+      const path = `${parentRoute}/${name === 'index' ? '' : name + '/'}`
       const key = name
         .replace(/-\w/g, (match) => match.replace(/-/g, '').toUpperCase()) // spending-limit -> spendingLimit
         .replace(/\W/g, '') // [txId] -> txId
