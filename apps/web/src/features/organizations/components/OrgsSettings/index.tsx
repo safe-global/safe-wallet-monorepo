@@ -2,7 +2,7 @@ import ModalDialog from '@/components/common/ModalDialog'
 import { AppRoutes } from '@/config/routes'
 import CheckIcon from '@/public/images/common/check.svg'
 import CloseIcon from '@/public/images/common/close.svg'
-import { useAppDispatch } from '@/store'
+import { useAppDispatch, useAppSelector } from '@/store'
 import { showNotification } from '@/store/notificationsSlice'
 import {
   Button,
@@ -27,6 +27,8 @@ import { useState } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 import css from './styles.module.css'
 import { useCurrentOrgId } from '../../hooks/useCurrentOrgId'
+import { isAuthenticated } from '@/store/authSlice'
+import SignedOutState from '@/features/organizations/components/SignedOutState'
 
 const ListIcon = ({ variant }: { variant: 'success' | 'danger' }) => {
   const Icon = variant === 'success' ? CheckIcon : CloseIcon
@@ -47,7 +49,8 @@ const OrgsSettings = () => {
   const router = useRouter()
   const dispatch = useAppDispatch()
   const orgId = useCurrentOrgId()
-  const { data: org } = useOrganizationsGetOneV1Query({ id: Number(orgId) })
+  const isUserSignedIn = useAppSelector(isAuthenticated)
+  const { data: org } = useOrganizationsGetOneV1Query({ id: Number(orgId) }, { skip: !isUserSignedIn })
   const [updateOrg] = useOrganizationsUpdateV1Mutation()
   const [deleteOrg] = useOrganizationsDeleteV1Mutation()
 
@@ -89,6 +92,8 @@ const OrgsSettings = () => {
       console.log(e)
     }
   }
+
+  if (!isUserSignedIn) return <SignedOutState />
 
   return (
     <div>

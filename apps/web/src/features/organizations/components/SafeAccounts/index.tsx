@@ -7,13 +7,19 @@ import { useState } from 'react'
 import SafesList from '@/features/myAccounts/components/SafesList'
 import { useOrgSafes } from '@/features/organizations/hooks/useOrgSafes'
 import { useSafesSearch } from '@/features/myAccounts/hooks/useSafesSearch'
+import { useAppSelector } from '@/store'
+import { isAuthenticated } from '@/store/authSlice'
+import SignedOutState from '@/features/organizations/components/SignedOutState'
 
 const OrganizationSafeAccounts = () => {
   const [searchQuery, setSearchQuery] = useState('')
+  const isUserSignedIn = useAppSelector(isAuthenticated)
   const allSafes = useOrgSafes()
   const filteredSafes = useSafesSearch(allSafes, searchQuery)
 
   const safes = searchQuery ? filteredSafes : allSafes
+
+  if (!isUserSignedIn) return <SignedOutState />
 
   return (
     <>
