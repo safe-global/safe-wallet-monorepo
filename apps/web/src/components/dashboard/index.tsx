@@ -22,6 +22,7 @@ const RecoveryHeader = dynamic(() => import('@/features/recovery/components/Reco
 const Dashboard = (): ReactElement => {
   const { safe } = useSafeInfo()
   const showSafeApps = useHasFeature(FEATURES.SAFE_APPS)
+  const isOrgsFeatureEnabled = useHasFeature(FEATURES.ORGANIZATIONS)
   const isStakingBannerEnabled = useIsStakingBannerEnabled()
   const supportsRecovery = useIsRecoverySupported()
 
@@ -34,9 +35,11 @@ const Dashboard = (): ReactElement => {
           <InconsistentSignerSetupWarning />
         </Grid>
 
-        <Grid item xs={12}>
-          <OrgsDashboardWidget />
-        </Grid>
+        {isOrgsFeatureEnabled && (
+          <Grid item xs={12}>
+            <OrgsDashboardWidget />
+          </Grid>
+        )}
 
         <Grid item xs={12}>
           <Overview />
