@@ -60,7 +60,7 @@ describe('useSafeNotifications', () => {
         groupKey: 'safe-outdated-version',
         link: {
           href: {
-            pathname: '/settings/setup',
+            pathname: '/settings/setup/',
             query: { safe: 'eth:0x123' },
           },
           title: 'Update Safe Account',

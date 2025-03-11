@@ -142,12 +142,16 @@ export const advancedDetailsViewOptions = {
 }
 
 export function checkHashesExist(count) {
-  cy.contains(txHashesStr).next().within(() => {
-    main.verifyElementsCount(txHexDataRow, count)
-    cy.get(txHexDataRow).each(($el) => {
-      cy.wrap($el).invoke('text').should('match', /0x[a-fA-F0-9]{64}/)
+  cy.contains(txHashesStr)
+    .next()
+    .within(() => {
+      main.verifyElementsCount(txHexDataRow, count)
+      cy.get(txHexDataRow).each(($el) => {
+        cy.wrap($el)
+          .invoke('text')
+          .should('match', /0x[a-fA-F0-9]{64}/)
+      })
     })
-  })
 }
 export function clickOnReplaceTxOption() {
   cy.get(replaceChoiceBtn).find('button').click()

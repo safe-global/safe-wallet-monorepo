@@ -26,7 +26,7 @@ describe('DateTime', () => {
     date.setDate(date.getDate() - days)
 
     const { queryByText } = render(<DateTime value={date.getTime()} />, {
-      routerProps: { pathname: '/transactions/queue' },
+      routerProps: { pathname: '/transactions/queue/' },
     })
 
     expect(queryByText('3 days ago')).toBeInTheDocument()
@@ -39,7 +39,7 @@ describe('DateTime', () => {
     date.setDate(date.getDate() - days)
 
     const { queryByText } = render(<DateTime value={date.getTime()} />, {
-      routerProps: { pathname: '/transactions/queue' },
+      routerProps: { pathname: '/transactions/queue/' },
     })
 
     const expected = formatDateTime(date.getTime())
@@ -54,7 +54,7 @@ describe('DateTime', () => {
     date.setDate(date.getDate() - days)
 
     const { queryByText } = render(<DateTime value={date.getTime()} />, {
-      routerProps: { pathname: '/transactions/history' },
+      routerProps: { pathname: '/transactions/history/' },
     })
 
     const expected = formatTime(date.getTime())
@@ -71,7 +71,7 @@ describe('DateTime', () => {
     date.setDate(date.getDate() - days)
 
     const { getByText } = render(<DateTime value={date.getTime()} />, {
-      routerProps: { pathname: '/transactions/history' },
+      routerProps: { pathname: '/transactions/history/' },
     })
 
     expect(getByText('3 days ago')).toBeInTheDocument()
@@ -86,7 +86,7 @@ describe('DateTime', () => {
     date.setDate(date.getDate() - days)
 
     const { queryByText } = render(<DateTime value={date.getTime()} />, {
-      routerProps: { pathname: '/transactions/history' },
+      routerProps: { pathname: '/transactions/history/' },
     })
 
     const expected = formatDateTime(date.getTime())

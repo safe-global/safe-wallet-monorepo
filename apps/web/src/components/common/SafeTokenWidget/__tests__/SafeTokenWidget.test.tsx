@@ -3,7 +3,6 @@ import useChainId from '@/hooks/useChainId'
 import { render, waitFor } from '@/tests/test-utils'
 import SafeTokenWidget from '..'
 import { toBeHex } from 'ethers'
-import { AppRoutes } from '@/config/routes'
 import useSafeTokenAllocation, { useSafeVotingPower } from '@/hooks/useSafeTokenAllocation'
 import * as safePass from '@/store/api/safePass'
 import type { CampaignLeaderboardEntry } from '@/store/api/safePass'
@@ -66,7 +65,7 @@ describe('SafeTokenWidget', () => {
     const result = render(<SafeTokenWidget />)
     await waitFor(() => {
       expect(result.baseElement).toContainHTML(
-        `href="${AppRoutes.apps.open}?safe=${fakeSafeAddress}&appUrl=${encodeURIComponent(
+        `href="/apps/open?safe=${fakeSafeAddress}&appUrl=${encodeURIComponent(
           'https://safe-dao-governance.dev.5afe.dev',
         )}`,
       )

@@ -56,7 +56,7 @@ describe('parseWebhookPushNotification', () => {
         expect(notification).toEqual({
           title: 'Transaction executed',
           body: 'Safe 0x0000...0001 on Mainnet executed transaction 0x0000...0004.',
-          link: 'https://app.safe.global/transactions/tx?safe=eth:0x0000000000000000000000000000000000000001&id=0x0000000000000000000000000000000000000000000000000000000000000003',
+          link: 'https://app.safe.global/transactions/tx/?safe=eth:0x0000000000000000000000000000000000000001&id=0x0000000000000000000000000000000000000000000000000000000000000003',
         })
       })
 
@@ -90,7 +90,7 @@ describe('parseWebhookPushNotification', () => {
         expect(notification).toEqual({
           title: 'Transaction failed',
           body: 'Safe 0x0000...0001 on Mainnet failed to execute transaction 0x0000...0004.',
-          link: 'https://app.safe.global/transactions/tx?safe=eth:0x0000000000000000000000000000000000000001&id=0x0000000000000000000000000000000000000000000000000000000000000003',
+          link: 'https://app.safe.global/transactions/tx/?safe=eth:0x0000000000000000000000000000000000000001&id=0x0000000000000000000000000000000000000000000000000000000000000003',
         })
       })
 
@@ -136,7 +136,7 @@ describe('parseWebhookPushNotification', () => {
       expect(notification).toEqual({
         title: 'Matic received',
         body: 'Safe 0x0000...0001 on Polygon received 1.0 MATIC in transaction 0x0000...0003.',
-        link: 'https://app.safe.global/transactions/history?safe=matic:0x0000000000000000000000000000000000000001',
+        link: 'https://app.safe.global/transactions/history/?safe=matic:0x0000000000000000000000000000000000000001',
       })
     })
 
@@ -189,7 +189,7 @@ describe('parseWebhookPushNotification', () => {
       expect(notification).toEqual({
         title: 'Fake received',
         body: 'Safe 0x0000...0001 on Mainnet received some FAKE in transaction 0x0000...0003.',
-        link: 'https://app.safe.global/transactions/history?safe=eth:0x0000000000000000000000000000000000000001',
+        link: 'https://app.safe.global/transactions/history/?safe=eth:0x0000000000000000000000000000000000000001',
       })
 
       getChainsConfigSpy.mockResolvedValue({
@@ -213,7 +213,7 @@ describe('parseWebhookPushNotification', () => {
       expect(erc20Notification).toEqual({
         title: 'Fake received',
         body: 'Safe 0x0000...0001 on Mainnet received 1.0 FAKE in transaction 0x0000...0003.',
-        link: 'https://app.safe.global/transactions/history?safe=eth:0x0000000000000000000000000000000000000001',
+        link: 'https://app.safe.global/transactions/history/?safe=eth:0x0000000000000000000000000000000000000001',
       })
     })
 
@@ -274,7 +274,7 @@ describe('parseWebhookPushNotification', () => {
       expect(notification).toEqual({
         title: 'Token received',
         body: 'Safe 0x0000...0001 on Mainnet received some tokens in transaction 0x0000...0003.',
-        link: 'https://app.safe.global/transactions/history?safe=eth:0x0000000000000000000000000000000000000001',
+        link: 'https://app.safe.global/transactions/history/?safe=eth:0x0000000000000000000000000000000000000001',
       })
 
       getChainsConfigSpy.mockResolvedValue({
@@ -287,7 +287,7 @@ describe('parseWebhookPushNotification', () => {
       expect(erc20Notification).toEqual({
         title: 'Token received',
         body: 'Safe 0x0000...0001 on Mainnet received some tokens in transaction 0x0000...0003.',
-        link: 'https://app.safe.global/transactions/history?safe=eth:0x0000000000000000000000000000000000000001',
+        link: 'https://app.safe.global/transactions/history/?safe=eth:0x0000000000000000000000000000000000000001',
       })
     })
 
@@ -335,7 +335,7 @@ describe('parseWebhookPushNotification', () => {
       expect(notification).toEqual({
         title: 'Module transaction',
         body: 'Safe 0x0000...0001 on Mainnet executed a module transaction 0x0000...0003 from module 0x0000...0002.',
-        link: 'https://app.safe.global/transactions/history?safe=eth:0x0000000000000000000000000000000000000001',
+        link: 'https://app.safe.global/transactions/history/?safe=eth:0x0000000000000000000000000000000000000001',
       })
     })
 
@@ -370,7 +370,7 @@ describe('parseWebhookPushNotification', () => {
       expect(notification).toEqual({
         title: 'Confirmation request',
         body: 'Safe 0x0000...0001 on Mainnet has a new confirmation request for transaction 0x0000...0003.',
-        link: 'https://app.safe.global/transactions/tx?safe=eth:0x0000000000000000000000000000000000000001&id=0x0000000000000000000000000000000000000000000000000000000000000003',
+        link: 'https://app.safe.global/transactions/tx/?safe=eth:0x0000000000000000000000000000000000000001&id=0x0000000000000000000000000000000000000000000000000000000000000003',
       })
     })
 

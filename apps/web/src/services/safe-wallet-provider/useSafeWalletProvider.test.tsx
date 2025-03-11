@@ -378,7 +378,7 @@ describe('useSafeWalletProvider', () => {
     result.current?.showTxStatus('0x123')
 
     expect(routerPush).toHaveBeenCalledWith({
-      pathname: '/transactions/tx',
+      pathname: '/transactions/tx/',
       query: {
         safe: '0x1234567890000000000000000000000000000000',
         id: '0x123',
