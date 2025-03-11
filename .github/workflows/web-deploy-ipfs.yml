@@ -18,10 +18,10 @@ jobs:
     runs-on: ubuntu-latest
 
     permissions:
-      contents: read       
-      statuses: write      
-      checks: write        
-      pull-requests: write 
+      contents: read
+      statuses: write
+      checks: write
+      pull-requests: write
 
     name: Deploy to IPFS
 
@@ -39,7 +39,8 @@ jobs:
         run: |
           for file in $(find ./apps/web/out -name '*.html' | sed 's|^\./||'); do
             if [ -d ${file%.*} ]; then
-              cp ${file%} ${file%.*}/index.html
+              cp ${file%} ${file%.*}/${file%.*}
+              cp ${file%} ${file%.*}/${file%.*}.html
             else
               cp ${file%} ${file%.*}
             fi
@@ -52,5 +53,5 @@ jobs:
           path-to-deploy: ./apps/web/out
           storacha-key: ${{ secrets.STORACHA_KEY }}
           storacha-proof: ${{ secrets.STORACHA_PROOF }}
-          pinata-jwt-token: ${{ secrets.PINATA_JWT }} 
+          pinata-jwt-token: ${{ secrets.PINATA_JWT }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
