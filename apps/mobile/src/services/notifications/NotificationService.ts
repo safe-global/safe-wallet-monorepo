@@ -1,9 +1,14 @@
-import notifee, { Event as NotifeeEvent, EventType, EventDetail, AndroidChannel } from '@notifee/react-native'
+import notifee, {
+  Event as NotifeeEvent,
+  EventType,
+  EventDetail,
+  AndroidChannel,
+  AuthorizationStatus,
+} from '@notifee/react-native'
 import { Linking, Platform, Alert as NativeAlert } from 'react-native'
 import { store } from '@/src/store'
 import { updatePromptAttempts, updateLastTimePromptAttempted } from '@/src/store/notificationsSlice'
 import { toggleAppNotifications, toggleDeviceNotifications } from '@/src/store/notificationsSlice'
-import * as Notifications from 'expo-notifications'
 import { HandleNotificationCallback, LAUNCH_ACTIVITY, PressActionId } from '@/src/store/constants'
 
 import { ChannelId, notificationChannels, withTimeout } from '@/src/utils/notifications'
@@ -19,12 +24,12 @@ interface AlertButton {
 class NotificationsService {
   async getBlockedNotifications(): Promise<Map<ChannelId, boolean>> {
     try {
-      const { status } = await Notifications.getPermissionsAsync()
+      const settings = await notifee.getNotificationSettings()
       const channels = await notifee.getChannels()
 
-      switch (status) {
-        case 'denied':
-        case 'undetermined':
+      switch (settings.authorizationStatus) {
+        case AuthorizationStatus.NOT_DETERMINED:
+        case AuthorizationStatus.DENIED:
           return notificationChannels.reduce((map, next) => {
             map.set(next.id as ChannelId, true)
             return map
@@ -70,10 +75,10 @@ class NotificationsService {
        * so that user can enable DEVICE notifications
        **/
       if (shouldOpenSettings) {
-        const { status } = await Notifications.requestPermissionsAsync()
+        const settings = await notifee.getNotificationSettings()
 
-        if (status !== 'granted') {
-          this.openDeviceSettings()
+        if (settings.authorizationStatus === AuthorizationStatus.NOT_DETERMINED || AuthorizationStatus.DENIED) {
+          await this.openDeviceSettings()
         }
       }
 
@@ -94,9 +99,11 @@ class NotificationsService {
   }
 
   async isDeviceNotificationEnabled() {
-    const { status: permission } = await Notifications.getPermissionsAsync()
+    const settings = await notifee.getNotificationSettings()
 
-    const isAuthorized = permission === 'granted'
+    const isAuthorized =
+      settings.authorizationStatus === AuthorizationStatus.AUTHORIZED ||
+      settings.authorizationStatus === AuthorizationStatus.PROVISIONAL
 
     return isAuthorized
   }
@@ -158,8 +165,15 @@ class NotificationsService {
   }
 
   async checkCurrentPermissions() {
-    const { status: permission } = await Notifications.getPermissionsAsync()
-    return permission
+    const settings = await notifee.getNotificationSettings()
+
+    const isAuthorized =
+      settings.authorizationStatus === AuthorizationStatus.AUTHORIZED ||
+      settings.authorizationStatus === AuthorizationStatus.PROVISIONAL
+        ? 'granted'
+        : 'denied'
+
+    return isAuthorized
   }
 
   onForegroundEvent(observer: (event: NotifeeEvent) => Promise<void>): () => void {
