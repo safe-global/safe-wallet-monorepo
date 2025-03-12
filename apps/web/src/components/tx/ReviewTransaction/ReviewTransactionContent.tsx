@@ -1,6 +1,7 @@
 import { useIsWalletProposer } from '@/hooks/useProposers'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { type ReactElement, type ReactNode, useState, useContext, useCallback, SyntheticEvent } from 'react'
+import type { SyntheticEvent } from 'react'
+import { type ReactElement, type ReactNode, useState, useContext, useCallback } from 'react'
 import madProps from '@/utils/mad-props'
 import ExecuteCheckbox from '../ExecuteCheckbox'
 import { useImmediatelyExecutable, useValidateNonce, useTxActions } from '../SignOrExecuteForm/hooks'
