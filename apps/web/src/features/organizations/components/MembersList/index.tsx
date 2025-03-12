@@ -9,7 +9,6 @@ import MemberName from './MemberName'
 import RemoveMemberDialog from './RemoveMemberModal'
 import { useState } from 'react'
 import { useIsAdmin } from '@/features/organizations/hooks/useIsAdmin'
-import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
 
 const headCells = [
   {
@@ -39,25 +38,8 @@ const EditButton = () => {
     </Tooltip>
   )
 }
-const MenuButtons = ({
-  member,
-  editOnly,
-  disableDelete,
-}: {
-  member: UserOrganization
-  editOnly: boolean
-  disableDelete: boolean
-}) => {
+const MenuButtons = ({ member, disableDelete }: { member: UserOrganization; disableDelete: boolean }) => {
   const [openRemoveMemberDialog, setOpenRemoveMemberDialog] = useState(false)
-
-  if (editOnly) {
-    return (
-      <div className={tableCss.actions}>
-        <EditButton />
-      </div>
-    )
-  }
-
   return (
     <div className={tableCss.actions}>
       <EditButton />
@@ -81,13 +63,11 @@ const MenuButtons = ({
 }
 
 const MembersList = ({ members }: { members: UserOrganization[] }) => {
-  const { data: currentUser } = useUsersGetWithWalletsV1Query()
   const isAdmin = useIsAdmin()
   const adminCount = members.filter((member) => member.role === MemberRole.ADMIN).length
 
   const rows = members.map((member) => {
     const isLastAdmin = adminCount === 1 && member.role === MemberRole.ADMIN
-    const isOwnEntry = member.user.id === currentUser?.id
     return {
       cells: {
         name: {
@@ -107,10 +87,7 @@ const MembersList = ({ members }: { members: UserOrganization[] }) => {
         actions: {
           rawValue: '',
           sticky: true,
-          content:
-            isAdmin || isOwnEntry ? (
-              <MenuButtons member={member} editOnly={!isAdmin && isOwnEntry} disableDelete={isAdmin && isLastAdmin} />
-            ) : null,
+          content: isAdmin ? <MenuButtons member={member} disableDelete={isAdmin && isLastAdmin} /> : null,
         },
       },
     }
