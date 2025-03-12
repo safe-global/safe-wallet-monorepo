@@ -3,18 +3,18 @@ import { Checkbox, Divider, FormControlLabel, Grid2 as Grid, Stack, StepIcon, Ty
 import commonCss from '@/components/tx-flow/common/styles.module.css'
 import { TxDetails } from './TxDetails'
 import ExternalLink from '@/components/common/ExternalLink'
-import type { TransactionData } from '@safe-global/safe-gateway-typescript-sdk'
 import { useContext, useState } from 'react'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import SignOrExecuteForm from '../SignOrExecuteForm/SignOrExecuteFormNew'
+import useTxPreview from '../confirmation-views/useTxPreview'
 
 type ConfirmTxDetailsProps = {
-  txData?: TransactionData
   onSubmit: () => void
 }
 
-export const ConfirmTxDetails = ({ txData, onSubmit }: ConfirmTxDetailsProps) => {
+export const ConfirmTxDetails = ({ onSubmit }: ConfirmTxDetailsProps) => {
   const { safeTx } = useContext(SafeTxContext)
+  const [txPreview] = useTxPreview(safeTx?.data)
   const [checked, setChecked] = useState(false)
 
   const steps = [
@@ -60,7 +60,7 @@ export const ConfirmTxDetails = ({ txData, onSubmit }: ConfirmTxDetailsProps) =>
           </Stack>
         </Grid>
         <Grid size={{ xs: 12, sm: 6 }}>
-          <TxDetails safeTx={safeTx} txData={txData} />
+          <TxDetails safeTx={safeTx} txData={txPreview?.txData} />
         </Grid>
       </Grid>
 
