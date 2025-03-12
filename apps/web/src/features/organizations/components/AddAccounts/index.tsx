@@ -91,7 +91,6 @@ const AddAccounts = () => {
 
   const handleAddSafe = (data: AddManuallyFormValues) => {
     const alreadyExists = manualSafes.some((safe) => safe.address === data.address && safe.chainId === data.chainId)
-    if (alreadyExists) return
 
     const newSafeItem: SafeItem = {
       ...data,
@@ -100,7 +99,10 @@ const AddAccounts = () => {
       lastVisited: 0,
       name: '',
     }
-    setManualSafes((prev) => [newSafeItem, ...prev])
+
+    if (!alreadyExists) {
+      setManualSafes((prev) => [newSafeItem, ...prev])
+    }
 
     const safeId = getSafeId(newSafeItem)
     setValue(`selectedSafes.${safeId}`, true, { shouldValidate: true })
