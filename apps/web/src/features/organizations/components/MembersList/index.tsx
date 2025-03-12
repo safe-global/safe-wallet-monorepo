@@ -6,6 +6,8 @@ import DeleteIcon from '@/public/images/common/delete.svg'
 import EnhancedTable from '@/components/common/EnhancedTable'
 import tableCss from '@/components/common/EnhancedTable/styles.module.css'
 import MemberName from './MemberName'
+import RemoveMemberDialog from './RemoveMemberModal'
+import { useState } from 'react'
 
 const headCells = [
   {
@@ -25,6 +27,30 @@ const headCells = [
     sticky: true,
   },
 ]
+
+const MenuButtons = ({ member }: { member: UserOrganization }) => {
+  const [openRemoveMemberDialog, setOpenRemoveMemberDialog] = useState(false)
+
+  return (
+    <div className={tableCss.actions}>
+      <Tooltip title="Edit entry" placement="top">
+        <IconButton disabled={member.role !== MemberRole.ADMIN} onClick={() => {}} size="small">
+          <SvgIcon component={EditIcon} inheritViewBox color="border" fontSize="small" />
+        </IconButton>
+      </Tooltip>
+      <IconButton
+        disabled={member.role !== MemberRole.ADMIN}
+        onClick={() => setOpenRemoveMemberDialog(true)}
+        size="small"
+      >
+        <SvgIcon component={DeleteIcon} inheritViewBox color="error" fontSize="small" />
+      </IconButton>
+      {openRemoveMemberDialog && (
+        <RemoveMemberDialog member={member.user} handleClose={() => setOpenRemoveMemberDialog(false)} />
+      )}
+    </div>
+  )
+}
 
 const MembersList = ({ members }: { members: UserOrganization[] }) => {
   const rows = members.map((member) => {
@@ -47,22 +73,12 @@ const MembersList = ({ members }: { members: UserOrganization[] }) => {
         actions: {
           rawValue: '',
           sticky: true,
-          content: (
-            <div className={tableCss.actions}>
-              <Tooltip title="Edit entry" placement="top">
-                <IconButton onClick={() => {}} size="small">
-                  <SvgIcon component={EditIcon} inheritViewBox color="border" fontSize="small" />
-                </IconButton>
-              </Tooltip>
-              <IconButton onClick={() => {}} size="small">
-                <SvgIcon component={DeleteIcon} inheritViewBox color="error" fontSize="small" />
-              </IconButton>
-            </div>
-          ),
+          content: <MenuButtons member={member} />,
         },
       },
     }
   })
+
   if (!rows.length) {
     return null
   }
