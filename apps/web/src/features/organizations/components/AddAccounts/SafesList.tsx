@@ -100,7 +100,7 @@ const SafesList = ({ safes }: { safes: AllSafeItems }) => {
                   sx={{ mr: 2 }}
                 />
                 <Box className={css.safeRow}>
-                  <EthHashInfo address={safe.address} copyAddress={false} />
+                  <EthHashInfo address={safe.address} copyAddress={false} showPrefix={false} />
                   <Box sx={{ justifySelf: 'flex-start' }}>
                     <MultichainIndicator safes={safe.safes} />
                   </Box>
