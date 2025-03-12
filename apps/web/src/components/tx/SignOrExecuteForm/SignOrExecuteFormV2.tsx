@@ -2,7 +2,7 @@ import ProposerForm from '@/components/tx/SignOrExecuteForm/ProposerForm'
 import CounterfactualForm from '@/features/counterfactual/CounterfactualForm'
 import { useIsWalletProposer } from '@/hooks/useProposers'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { type ReactElement, type ReactNode, useState, useContext, useCallback } from 'react'
+import { type ReactElement, type ReactNode, useContext, useCallback } from 'react'
 import madProps from '@/utils/mad-props'
 import { useImmediatelyExecutable, useValidateNonce } from './hooks'
 import ExecuteForm from './ExecuteForm'
@@ -59,7 +59,7 @@ export const SignOrExecuteFormV2 = ({
   const isSafeOwner = useIsSafeOwner()
   const signer = useSigner()
   const isProposer = useIsWalletProposer()
-  const isProposing = isProposer && !isSafeOwner && isCreation
+  const isProposing = isProposer && !isSafeOwner && !!isCreation
   const isCounterfactualSafe = !safe.deployed
 
   // Check if a Zodiac Roles mod is enabled and if the user is a member of any role that allows the transaction

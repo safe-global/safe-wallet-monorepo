@@ -10,9 +10,10 @@ import useTxPreview from '../confirmation-views/useTxPreview'
 
 type ConfirmTxDetailsProps = {
   onSubmit: () => void
+  txId?: string
 }
 
-export const ConfirmTxDetails = ({ onSubmit }: ConfirmTxDetailsProps) => {
+export const ConfirmTxDetails = ({ onSubmit, txId }: ConfirmTxDetailsProps) => {
   const { safeTx, txOrigin } = useContext(SafeTxContext)
   const [txPreview] = useTxPreview(safeTx?.data)
   const [checked, setChecked] = useState(false)
@@ -84,6 +85,8 @@ export const ConfirmTxDetails = ({ onSubmit }: ConfirmTxDetailsProps) => {
         disableSubmit={!checked}
         tooltip={!checked ? 'Review details and check the box to enable signing' : undefined}
         origin={txOrigin}
+        txId={txId}
+        isCreation={!txId}
       />
     </TxCard>
   )
