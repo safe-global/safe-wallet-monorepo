@@ -1,4 +1,5 @@
 import TxLayout from '@/components/tx-flow/common/TxLayout'
+import type { TxStep } from '../../common/TxLayout'
 import useTxStepper from '@/components/tx-flow/useTxStepper'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { ReviewOwner } from '../AddOwner/ReviewOwner'
@@ -28,7 +29,7 @@ const ReplaceOwnerFlow = ({ address }: { address: string }) => {
 
   const { data, step, nextStep, prevStep } = useTxStepper<ReplaceOwnerFlowProps>(defaultValues)
 
-  const steps = [
+  const steps: TxStep[] = [
     {
       txLayoutProps: { title: 'New transaction' },
       content: (

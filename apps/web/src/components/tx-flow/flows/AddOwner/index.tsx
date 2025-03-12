@@ -1,4 +1,5 @@
 import TxLayout from '@/components/tx-flow/common/TxLayout'
+import type { TxStep } from '../../common/TxLayout'
 import useTxStepper from '@/components/tx-flow/useTxStepper'
 import { ChooseOwner, ChooseOwnerMode } from '@/components/tx-flow/flows/AddOwner/ChooseOwner'
 import { ReviewOwner } from '@/components/tx-flow/flows/AddOwner/ReviewOwner'
@@ -20,7 +21,7 @@ export type AddOwnerFlowProps = {
 const FlowInner = ({ defaultValues }: { defaultValues: AddOwnerFlowProps }) => {
   const { data, step, nextStep, prevStep } = useTxStepper<AddOwnerFlowProps>(defaultValues)
 
-  const steps = [
+  const steps: TxStep[] = [
     {
       txLayoutProps: { title: 'New transaction' },
       content: (

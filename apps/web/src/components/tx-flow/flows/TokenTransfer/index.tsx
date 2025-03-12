@@ -1,4 +1,5 @@
 import TxLayout from '@/components/tx-flow/common/TxLayout'
+import type { TxStep } from '../../common/TxLayout'
 import useTxStepper from '../../useTxStepper'
 import CreateTokenTransfer from './CreateTokenTransfer'
 import ReviewTokenTx from '@/components/tx-flow/flows/TokenTransfer/ReviewTokenTx'
@@ -43,7 +44,7 @@ const TokenTransferFlow = ({ txNonce, ...params }: TokenTransferFlowProps) => {
     ...params,
   })
 
-  const steps = [
+  const steps: TxStep[] = [
     {
       txLayoutProps: { title: 'New transaction' },
       content: (
