@@ -1,13 +1,13 @@
-import { Box, Chip, Divider, Stack, StackProps, Typography } from '@mui/material'
-import { SafeTransaction } from '@safe-global/safe-core-sdk-types'
+import type { StackProps } from '@mui/material'
+import { Box, Chip, Divider, Stack, Typography } from '@mui/material'
+import type { SafeTransaction } from '@safe-global/safe-core-sdk-types'
 import { PaperViewToggle } from '../../common/PaperViewToggle'
 import TableRowsRoundedIcon from '@mui/icons-material/TableRowsRounded'
 import DataObjectIcon from '@mui/icons-material/DataObject'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import type { ReactElement, ReactNode } from 'react'
 import { isNumber, isString } from 'lodash'
-import type { TransactionData } from '@safe-global/safe-gateway-typescript-sdk/dist/types/transactions'
-import NamedAddressInfo from '@/components/common/NamedAddressInfo'
+import { Operation, type TransactionData } from '@safe-global/safe-gateway-typescript-sdk/dist/types/transactions'
 import { HexEncodedData } from '@/components/transactions/HexEncodedData'
 
 type TxDetailsProps = {
@@ -42,7 +42,7 @@ export const TxDetails = ({ safeTx, txData }: TxDetailsProps) => {
   const toInfo = txData?.addressInfoIndex?.[safeTx.data.to] || txData?.to
 
   const ContentWrapper = ({ children }: { children: ReactElement | ReactElement[] }) => (
-    <Box sx={{ maxHeight: '500px', overflowY: 'scroll' }}>{children}</Box>
+    <Box sx={{ maxHeight: '550px', overflowY: 'scroll' }}>{children}</Box>
   )
 
   return (
@@ -63,19 +63,21 @@ export const TxDetails = ({ safeTx, txData }: TxDetailsProps) => {
                 <TxDetailsRow label="Primary type">SafeTx</TxDetailsRow>
 
                 <TxDetailsRow label="To">
-                  <Chip
-                    sx={{ backgroundColor: 'background.paper', height: 'unset', '& > *': { p: 0.5 } }}
-                    label={
-                      <NamedAddressInfo
-                        address={safeTx.data.to}
-                        name={toInfo?.name}
-                        customAvatar={toInfo?.logoUri}
-                        avatarSize={20}
-                        showAvatar
-                        onlyName
-                      />
-                    }
-                  ></Chip>
+                  {toInfo?.name || toInfo?.logoUri ? (
+                    <Chip
+                      sx={{ backgroundColor: 'background.paper', height: 'unset', '& > *': { p: 0.5 } }}
+                      label={
+                        <EthHashInfo
+                          address={safeTx.data.to}
+                          name={toInfo?.name}
+                          customAvatar={toInfo?.logoUri}
+                          showAvatar={!!toInfo?.logoUri}
+                          avatarSize={20}
+                          onlyName
+                        />
+                      }
+                    ></Chip>
+                  ) : null}
 
                   <Typography
                     variant="body2"
@@ -105,7 +107,9 @@ export const TxDetails = ({ safeTx, txData }: TxDetailsProps) => {
                   </Typography>
                 </TxDetailsRow>
 
-                <TxDetailsRow label="Operation">{safeTx.data.operation}</TxDetailsRow>
+                <TxDetailsRow label="Operation">
+                  {safeTx.data.operation} ({Operation[safeTx.data.operation].toLowerCase()})
+                </TxDetailsRow>
 
                 <TxDetailsRow label="SafeTxGas">{safeTx.data.safeTxGas}</TxDetailsRow>
 

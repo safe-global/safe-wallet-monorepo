@@ -1,6 +1,6 @@
 import TxCard from '@/components/tx-flow/common/TxCard'
 import { Button, Checkbox, Divider, FormControlLabel, Grid2 as Grid, Stack, StepIcon, Typography } from '@mui/material'
-import { SafeTransaction } from '@safe-global/safe-core-sdk-types'
+import type { SafeTransaction } from '@safe-global/safe-core-sdk-types'
 import commonCss from '@/components/tx-flow/common/styles.module.css'
 import { TxDetails } from './TxDetails'
 import SignForm from '../SignOrExecuteForm/SignForm'

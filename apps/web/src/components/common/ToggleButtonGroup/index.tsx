@@ -60,8 +60,8 @@ export const ToggleButtonGroup = ({ value = 0, children, onChange }: ToggleButto
       aria-label="text alignment"
     >
       {children.map(({ tooltip, icon }, index) => (
-        <ToggleButton value={index}>
-          <Tooltip key={index} title={tooltip} placement="top">
+        <ToggleButton key={index} value={index}>
+          <Tooltip title={tooltip} placement="top">
             {icon}
           </Tooltip>
         </ToggleButton>
