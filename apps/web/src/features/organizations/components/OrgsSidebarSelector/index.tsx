@@ -63,7 +63,7 @@ const OrgsSidebarSelector = () => {
           className={css.orgSelectorButton}
         >
           <Box display="flex" alignItems="center" gap={1}>
-            <InitialsAvatar orgName={selectedOrg.name} size="small" />
+            <InitialsAvatar name={selectedOrg.name} size="small" />
             <Typography
               variant="body2"
               fontWeight="bold"
@@ -98,7 +98,7 @@ const OrgsSidebarSelector = () => {
               }}
             >
               <Box display="flex" alignItems="center" gap={1}>
-                <InitialsAvatar orgName={org.name} size="small" />
+                <InitialsAvatar name={org.name} size="small" />
                 <Typography variant="body2">{org.name}</Typography>
               </Box>
               {org.id === selectedOrg.id && <CheckIcon fontSize="small" color="primary" />}

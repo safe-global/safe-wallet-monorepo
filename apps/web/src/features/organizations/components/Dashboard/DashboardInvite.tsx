@@ -37,7 +37,7 @@ const OrgListInvite = ({ org }: OrgListInvite) => {
       <Card sx={{ p: 2, backgroundColor: 'background.main' }}>
         <Stack direction="row" spacing={2} alignItems="center">
           <Box>
-            <InitialsAvatar orgName={name} size="large" />
+            <InitialsAvatar name={name} size="large" />
           </Box>
 
           <Box flexGrow={1}>

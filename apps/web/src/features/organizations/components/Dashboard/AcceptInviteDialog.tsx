@@ -1,5 +1,5 @@
 import {
-  GetOrganizationResponse,
+  type GetOrganizationResponse,
   useUserOrganizationsAcceptInviteV1Mutation,
 } from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
 import { useRouter } from 'next/router'
