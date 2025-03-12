@@ -6,9 +6,11 @@ import { TxDetails } from './TxDetails'
 import SignForm from '../SignOrExecuteForm/SignForm'
 import ExternalLink from '@/components/common/ExternalLink'
 import { useState } from 'react'
+import type { TransactionData } from '@safe-global/safe-gateway-typescript-sdk'
 
 type ConfirmTxDetailsProps = {
   safeTx: SafeTransaction
+  txData?: TransactionData
 }
 
 export const ConfirmTxDetails = ({ safeTx }: ConfirmTxDetailsProps) => {
@@ -57,7 +59,7 @@ export const ConfirmTxDetails = ({ safeTx }: ConfirmTxDetailsProps) => {
           </Stack>
         </Grid>
         <Grid size={{ xs: 12, sm: 6 }}>
-          <TxDetails safeTx={safeTx} />
+          <TxDetails safeTx={safeTx} txData={txData} />
         </Grid>
       </Grid>
 

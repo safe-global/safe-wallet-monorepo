@@ -34,6 +34,7 @@ import { SignerForm } from './SignerForm'
 import { useSigner } from '@/hooks/wallets/useWallet'
 import { trackTxEvents } from './tracking'
 import { TxNoteForm, encodeTxNote, trackAddNote } from '@/features/tx-notes'
+import { ConfirmTxDetails } from '../ConfirmTxDetails'
 
 export type SubmitCallback = (txId: string, isExecuted?: boolean) => void
 
@@ -176,6 +177,8 @@ export const SignOrExecuteForm = ({
 
   return (
     <>
+      {safeTx && <ConfirmTxDetails safeTx={safeTx} txData={props.txDetails?.txData || props.txPreview?.txData} />}
+
       <TxCard>
         {props.children}
 

@@ -6,9 +6,11 @@ import DataObjectIcon from '@mui/icons-material/DataObject'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import { ReactElement } from 'react'
 import { isNumber, isString } from 'lodash'
+import type { TransactionData } from '@safe-global/safe-gateway-typescript-sdk/dist/types/transactions'
 
 type TxDetailsProps = {
   safeTx: SafeTransaction
+  txData?: TransactionData
 }
 
 const TxDetailsRow = ({
@@ -34,7 +36,7 @@ const TxDetailsRow = ({
   </Stack>
 )
 
-export const TxDetails = ({ safeTx }: TxDetailsProps) => {
+export const TxDetails = ({ safeTx, txData }: TxDetailsProps) => {
   const ContentWrapper = ({ children }: { children: ReactElement | ReactElement[] }) => (
     <Box sx={{ maxHeight: '500px', overflowY: 'scroll' }}>{children}</Box>
   )
@@ -57,15 +59,16 @@ export const TxDetails = ({ safeTx }: TxDetailsProps) => {
                 <TxDetailsRow label="Primary type">SafeTx</TxDetailsRow>
 
                 <TxDetailsRow label="To">
-                  <Typography variant="body2">
+                  <Typography variant="body2" width="100%" sx={{ '& *': { whiteSpace: 'normal', wordWrap: "break-word", alignItems: 'flex-start !important' } }}>
                     <EthHashInfo
                       address={safeTx.data.to}
-                      avatarSize={15}
+                      avatarSize={20}
                       showPrefix={false}
                       showName={false}
                       shortAddress={false}
                       hasExplorer
-                      showAvatar={false}
+                      showAvatar
+                      highlight4bytes
                     />
                   </Typography>
                 </TxDetailsRow>
