@@ -2,6 +2,7 @@ import DeviceCrypto from 'react-native-device-crypto'
 import * as Keychain from 'react-native-keychain'
 import DeviceInfo from 'react-native-device-info'
 import { Wallet } from 'ethers'
+import Logger from '@/src/utils/logger'
 
 const getKeychainKey = (userId: string) => `signer_address_${userId}`
 
@@ -41,7 +42,7 @@ export function useSign() {
         service: keychainKey,
       })
     } catch (err) {
-      console.log(err)
+      Logger.error(err as string)
       throw new Error('Failed to store private key')
     }
   }
@@ -66,7 +67,7 @@ export function useSign() {
 
       return decryptedKey
     } catch (err) {
-      console.log(err)
+      Logger.error(err as string)
     }
   }
 
@@ -78,7 +79,7 @@ export function useSign() {
 
       return Wallet.fromPhrase(mnemonic)
     } catch (err) {
-      console.log(err)
+      Logger.error(err as string)
     }
   }
 

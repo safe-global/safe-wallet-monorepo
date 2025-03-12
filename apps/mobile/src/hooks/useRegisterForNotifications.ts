@@ -2,7 +2,7 @@ import { useCallback, useState } from 'react'
 import { Wallet } from 'ethers'
 import { useAuthGetNonceV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/auth'
 import FCMService from '@/src/services/notifications/FCMService'
-import { useAppDispatch } from '@/src/store/hooks'
+import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
 import {
   toggleAppNotifications,
   updateLastTimePromptAttempted,
@@ -12,8 +12,8 @@ import Logger from '@/src/utils/logger'
 
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { useGTW } from './useGTW'
-import { addOrUpdateDelegatedAddress } from '../store/delegatedSlice'
-import { Address } from '../types/address'
+import { addOrUpdateDelegatedAddress, selectDelegatedAddresses } from '../store/delegatedSlice'
+import { Address, SafeInfo } from '../types/address'
 import { useNotificationPayload } from './useNotificationPayload'
 import { ERROR_MSG } from '../store/constants'
 import { useSign } from './useSign'
@@ -41,10 +41,11 @@ const useRegisterForNotifications = ({
   const { data: nonceData } = useAuthGetNonceV1Query()
   const { registerForNotificationsOnBackEnd, unregisterForNotificationsOnBackEnd } = useGTW()
   const { getNotificationRegisterPayload } = useNotificationPayload(appSigners)
-  const { storePrivateKey } = useSign()
+  const { storePrivateKey, getPrivateKey } = useSign()
   // Redux
   const dispatch = useAppDispatch()
   const activeSafe = useDefinedActiveSafe()
+  const delegatedAddresses = useAppSelector(selectDelegatedAddresses)
 
   /*
    * Push notifications can be enabled by an two type of users. The owner of the safe or an observer of the safe
@@ -92,8 +93,10 @@ const useRegisterForNotifications = ({
       storePrivateKey(randomDelegatedAccount.address, randomDelegatedAccount.privateKey)
 
       // Step 5 - Get the payload to register for notifications
-      const { signer, fcmToken, siweMessage, accountType } = await getNotificationRegisterPayload(nonceData?.nonce)
-      console.log('registerForNotifications', { signer, fcmToken, siweMessage, accountType })
+      const { signer, fcmToken, siweMessage, accountType } = await getNotificationRegisterPayload({
+        nonce: nonceData?.nonce,
+        ramdomPK: randomDelegatedAccount.privateKey
+      })
 
       // Step 6 - Triggers the final step on the backend
       registerForNotificationsOnBackEnd({
@@ -125,11 +128,39 @@ const useRegisterForNotifications = ({
   }, [nonceData, activeSafe])
 
   const unregisterForNotifications = useCallback(async () => {
+    // Step 1 - Get the payload to unregister for notifications
     try {
       setLoading(true)
       setError(null)
-      // Step 1 - Get the payload to unregister for notifications
-      const { signer, siweMessage } = await getNotificationRegisterPayload(nonceData?.nonce)
+
+      const delegatedAddress = Object.entries(delegatedAddresses).find(([address, safesSliceItem]) =>
+        safesSliceItem.safes.some((safe: SafeInfo) => safe.address === activeSafe.address)
+      )?.[0] as Address
+
+      if (!delegatedAddress) {
+        setLoading(false)
+        Logger.error('Delegated address not found')
+        setError(ERROR_MSG)
+        return {
+          loading,
+          error,
+        }
+      }
+
+      const delegatedPK = await getPrivateKey(delegatedAddress)
+
+      if (!delegatedPK) {
+        setLoading(false)
+        setError(ERROR_MSG)
+        return {
+          loading,
+          error,
+        }
+      }
+      const { signer, siweMessage } = await getNotificationRegisterPayload({
+        nonce: nonceData?.nonce,
+        ramdomPK: delegatedPK
+      })
 
       // Step 2 - Triggers the final step on the backend
       unregisterForNotificationsOnBackEnd({

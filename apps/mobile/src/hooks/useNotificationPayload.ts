@@ -8,6 +8,7 @@ import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { useAppSelector } from '@/src/store/hooks'
 import { selectSafeInfo } from '@/src/store/safesSlice'
 import { RootState } from '@/src/store'
+import Logger from '@/src/utils/logger'
 import { selectFCMToken } from '@/src/store/notificationsSlice'
 import { AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 
@@ -20,11 +21,18 @@ export function useNotificationPayload(appSigners: Record<string, AddressInfo>) 
   const fcmToken = useAppSelector(selectFCMToken)
 
   const getNotificationRegisterPayload = useCallback(
-    async (nonce: string | undefined) => {
+    async ({
+      nonce,
+      ramdomPK
+    }: {
+      nonce: string | undefined;
+      ramdomPK: string
+    }) => {
       // 2. Construct payload to register for notifications
       // 2.1 - Get the nonce to be included in the SiWe as per
       // https://www.notion.so/safe-global/Authentication-implementation-f26c6040be5148748ac19655da5e4842
-      if (!activeSafe || !fcmToken || !nonce) {
+      if (!activeSafe || !fcmToken || !nonce || !ramdomPK) {
+        Logger.error('registerForNotifications: Missing required data', { activeSafe, fcmToken, nonce, ramdomPK })
         throw new Error(ERROR_MSG)
       }
 
@@ -33,11 +41,11 @@ export function useNotificationPayload(appSigners: Record<string, AddressInfo>) 
       const accountType = ownerFound ? NOTIFICATION_ACCOUNT_TYPE.OWNER : NOTIFICATION_ACCOUNT_TYPE.REGULAR
 
       // 2.2 - Retrieve the private key of the subscriber to be used as signer of the SiWe message
-      const subscriberPK = ownerFound
+      const proposedSignerPK = ownerFound
         ? await getPrivateKey(ownerFound.value)
-        : await getPrivateKey(appSigners[activeSafe.address].value) // Review this logic on non-owner signers
+        : ramdomPK 
 
-      const signer = subscriberPK && getSigner(subscriberPK)
+      const signer = proposedSignerPK && getSigner(proposedSignerPK)
 
       if (!signer) {
         throw new Error('registerForNotifications: Signer account not found')

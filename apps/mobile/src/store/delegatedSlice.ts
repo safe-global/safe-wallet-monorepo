@@ -28,6 +28,6 @@ const delegatedSlice = createSlice({
 
 export const { addOrUpdateDelegatedAddress } = delegatedSlice.actions
 
-export const selectDelegatedAddresses = (state: RootState) => state.delegatedAddresses
+export const selectDelegatedAddresses = (state: RootState): DelegatedSafesSlice => state.delegated
 
 export default delegatedSlice.reducer

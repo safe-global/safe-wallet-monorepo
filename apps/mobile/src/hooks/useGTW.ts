@@ -84,7 +84,7 @@ export function useGTW() {
         })
           .unwrap()
           .then((res) => {
-            console.log('registerForNotificationsOnBackEnd', { res })
+            Logger.info('registerForNotificationsOnBackEnd', { res })
           })
       } catch (err) {
         Logger.error('CreateDelegateFailed', err)

@@ -66,7 +66,7 @@ class NotificationsService {
       )
       // 1 - Creates android's notifications channel
       await Promise.allSettled(promises)
-
+      await notifee.requestPermission()
       // 2 - Verifies blocked notifications
       const blockedNotifications = await withTimeout(this.getBlockedNotifications(), 5000)
 

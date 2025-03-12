@@ -4,7 +4,7 @@ import { reduxStorage } from './storage'
 import txHistory from './txHistorySlice'
 import activeSafe from './activeSafeSlice'
 import signers from './signersSlice'
-import delegatedAddresses from './delegatedSlice'
+import delegated from './delegatedSlice'
 import myAccounts from './myAccountsSlice'
 import notifications from './notificationsSlice'
 import settings from './settingsSlice'
@@ -27,7 +27,7 @@ export const rootReducer = combineReducers({
   notifications,
   myAccounts,
   signers,
-  delegatedAddresses,
+  delegated,
   settings,
   [cgwClient.reducerPath]: cgwClient.reducer,
 })
