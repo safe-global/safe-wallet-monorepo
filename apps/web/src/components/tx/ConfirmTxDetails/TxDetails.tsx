@@ -108,7 +108,8 @@ export const TxDetails = ({ safeTx, txData }: TxDetailsProps) => {
                 </TxDetailsRow>
 
                 <TxDetailsRow label="Operation">
-                  {safeTx.data.operation} ({Operation[safeTx.data.operation].toLowerCase()})
+                  {safeTx.data.operation} (
+                  {(Number(safeTx.data.operation) as Operation) === Operation.CALL ? 'call' : 'delegate call'})
                 </TxDetailsRow>
 
                 <TxDetailsRow label="SafeTxGas">{safeTx.data.safeTxGas}</TxDetailsRow>
