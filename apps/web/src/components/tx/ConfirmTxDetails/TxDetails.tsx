@@ -8,6 +8,7 @@ import type { ReactElement, ReactNode } from 'react'
 import { isNumber, isString } from 'lodash'
 import type { TransactionData } from '@safe-global/safe-gateway-typescript-sdk/dist/types/transactions'
 import NamedAddressInfo from '@/components/common/NamedAddressInfo'
+import { HexEncodedData } from '@/components/transactions/HexEncodedData'
 
 type TxDetailsProps = {
   safeTx: SafeTransaction
@@ -99,8 +100,8 @@ export const TxDetails = ({ safeTx, txData }: TxDetailsProps) => {
                 <TxDetailsRow label="Value">{safeTx.data.value}</TxDetailsRow>
 
                 <TxDetailsRow label="Data" direction={safeTx.data.data === '0x' ? 'row' : 'column'}>
-                  <Typography variant="body2" sx={{ wordWrap: 'break-word' }}>
-                    {safeTx.data.data}
+                  <Typography variant="body2">
+                    <HexEncodedData hexData={safeTx.data.data} limit={66} />
                   </Typography>
                 </TxDetailsRow>
 
