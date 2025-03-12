@@ -5,6 +5,7 @@ import ReviewTokenTx from '@/components/tx-flow/flows/TokenTransfer/ReviewTokenT
 import AssetsIcon from '@/public/images/sidebar/assets.svg'
 import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
 import { TokenAmountFields } from '@/components/common/TokenAmountInput'
+import { ConfirmTxDetails } from '@/components/tx/ConfirmTxDetails'
 
 export enum TokenTransferType {
   multiSig = 'multiSig',
@@ -57,6 +58,10 @@ const TokenTransferFlow = ({ txNonce, ...params }: TokenTransferFlowProps) => {
     {
       txLayoutProps: { title: 'Confirm transaction' },
       content: <ReviewTokenTx key={1} params={data} txNonce={txNonce} onSubmit={() => nextStep(data)} />,
+    },
+    {
+      txLayoutProps: { title: 'Confirm transaction details', fixedNonce: true },
+      content: <ConfirmTxDetails key={2} onSubmit={() => {}} />,
     },
   ]
 
