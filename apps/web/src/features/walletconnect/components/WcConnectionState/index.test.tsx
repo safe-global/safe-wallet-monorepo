@@ -19,7 +19,11 @@ describe('WcConnectionState component tests', () => {
   }
 
   jest.mock('@/components/safe-apps/SafeAppIconCard', () => {
-    return (props: { alt: string }) => <div data-testid="mock-safe-app-icon-card">{`${props.alt} TestdApp Logo`}</div>
+    const MockSafeAppIconCard = (props: { alt: string }) => (
+      <div data-testid="mock-safe-app-icon-card">{`${props.alt} TestdApp Logo`}</div>
+    )
+    MockSafeAppIconCard.displayName = 'MockSafeAppIconCard'
+    return MockSafeAppIconCard
   })
 
   it('Verify successful connection state is rendered correctly', () => {
