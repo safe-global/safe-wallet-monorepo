@@ -43,25 +43,32 @@ const TokenTransferFlow = ({ txNonce, ...params }: TokenTransferFlowProps) => {
   })
 
   const steps = [
-    <CreateTokenTransfer
-      key={0}
-      params={data}
-      txNonce={txNonce}
-      onSubmit={(formData) => nextStep({ ...data, ...formData })}
-    />,
-
-    <ReviewTokenTx key={1} params={data} txNonce={txNonce} onSubmit={() => null} />,
+    {
+      txLayoutProps: { title: 'New transaction' },
+      content: (
+        <CreateTokenTransfer
+          key={0}
+          params={data}
+          txNonce={txNonce}
+          onSubmit={(formData) => nextStep({ ...data, ...formData })}
+        />
+      ),
+    },
+    {
+      txLayoutProps: { title: 'Confirm transaction' },
+      content: <ReviewTokenTx key={1} params={data} txNonce={txNonce} onSubmit={() => nextStep(data)} />,
+    },
   ]
 
   return (
     <TxLayout
-      title={step === 0 ? 'New transaction' : 'Confirm transaction'}
       subtitle="Send tokens"
       icon={AssetsIcon}
       step={step}
       onBack={prevStep}
+      {...(steps?.[step]?.txLayoutProps || {})}
     >
-      {steps}
+      {steps.map(({ content }) => content)}
     </TxLayout>
   )
 }
