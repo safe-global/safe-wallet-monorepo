@@ -1,8 +1,8 @@
 import { Box, Divider, Stack, StackProps, Typography } from '@mui/material'
 import { SafeTransaction } from '@safe-global/safe-core-sdk-types'
 import { PaperViewToggle } from '../../common/PaperViewToggle'
-import GridViewRoundedIcon from '@mui/icons-material/GridViewRounded'
 import TableRowsRoundedIcon from '@mui/icons-material/TableRowsRounded'
+import DataObjectIcon from '@mui/icons-material/DataObject'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import { ReactElement } from 'react'
 import { isNumber, isString } from 'lodash'
@@ -44,11 +44,11 @@ export const TxDetails = ({ safeTx }: TxDetailsProps) => {
       {[
         {
           title: (
-            <Typography color="text.secondary" fontWeight="bold">
+            <Typography color="primary.light" fontWeight="bold">
               Transaction details
             </Typography>
           ),
-          icon: <GridViewRoundedIcon />,
+          icon: <TableRowsRoundedIcon />,
           content: (
             <ContentWrapper>
               <Divider sx={{ mb: 1 }} />
@@ -57,15 +57,17 @@ export const TxDetails = ({ safeTx }: TxDetailsProps) => {
                 <TxDetailsRow label="Primary type">SafeTx</TxDetailsRow>
 
                 <TxDetailsRow label="To">
-                  <Box>
+                  <Typography variant="body2">
                     <EthHashInfo
                       address={safeTx.data.to}
-                      avatarSize={20}
+                      avatarSize={15}
                       showPrefix={false}
                       showName={false}
+                      shortAddress={false}
                       hasExplorer
+                      showAvatar={false}
                     />
-                  </Box>
+                  </Typography>
                 </TxDetailsRow>
 
                 <TxDetailsRow label="Value">{safeTx.data.value}</TxDetailsRow>
@@ -85,7 +87,7 @@ export const TxDetails = ({ safeTx }: TxDetailsProps) => {
                 <TxDetailsRow label="GasPrice">{safeTx.data.gasPrice}</TxDetailsRow>
 
                 <TxDetailsRow label="GasToken">
-                  <Box>
+                  <Typography variant="body2">
                     <EthHashInfo
                       address={safeTx.data.gasToken}
                       avatarSize={20}
@@ -93,11 +95,11 @@ export const TxDetails = ({ safeTx }: TxDetailsProps) => {
                       showName={false}
                       hasExplorer
                     />
-                  </Box>
+                  </Typography>
                 </TxDetailsRow>
 
                 <TxDetailsRow label="RefundReceiver">
-                  <Box>
+                  <Typography variant="body2">
                     <EthHashInfo
                       address={safeTx.data.refundReceiver}
                       avatarSize={20}
@@ -105,7 +107,7 @@ export const TxDetails = ({ safeTx }: TxDetailsProps) => {
                       showName={false}
                       hasExplorer
                     />
-                  </Box>
+                  </Typography>
                 </TxDetailsRow>
 
                 <TxDetailsRow label="Nonce">{safeTx.data.nonce}</TxDetailsRow>
@@ -115,11 +117,11 @@ export const TxDetails = ({ safeTx }: TxDetailsProps) => {
         },
         {
           title: (
-            <Typography color="text.secondary" fontWeight="bold">
+            <Typography color="primary.light" fontWeight="bold">
               Transaction details
             </Typography>
           ),
-          icon: <TableRowsRoundedIcon />,
+          icon: <DataObjectIcon />,
           tooltip: 'View .json/raw data',
           content: (
             <ContentWrapper>
