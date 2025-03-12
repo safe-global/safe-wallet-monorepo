@@ -25,7 +25,6 @@ const slippageFld = '[data-testid="slippage"]'
 const orderIDFld = '[data-testid="order-id"]'
 const widgetFeeFld = '[data-testid="widget-fee"]'
 const interactWithFld = '[data-testid="interact-wth"]'
-const recipientAlert = '[data-testid="recipient-alert"]'
 const groupedItems = '[data-testid="grouped-items"]'
 const inputCurrencyPreview = '[id="input-currency-preview"]'
 const outputCurrencyPreview = '[id="output-currency-preview"]'
@@ -61,6 +60,7 @@ const orderDetailsStr = 'Order details'
 const unlockTwapOrdersStrBtn = 'Unlock TWAP orders'
 const settingsModalTitle = 'Advanced Order Settings'
 const customRecipientStr = 'Custom Recipient'
+const recipientWarningMsg = 'Order recipient address differs from order owner!'
 
 const getInsufficientBalanceStr = (token) => `Insufficient ${token} balance`
 const sellAmountIsSmallStr = 'Sell amount too small'
@@ -459,7 +459,7 @@ export function verifyOrderDetails(limitPrice, expiry, slippage, interactWith, o
 }
 
 export function verifyRecipientAlertIsDisplayed() {
-  main.verifyElementsIsVisible([recipientAlert])
+  cy.contains(recipientWarningMsg)
 }
 
 export function closeIntroTwapModal() {

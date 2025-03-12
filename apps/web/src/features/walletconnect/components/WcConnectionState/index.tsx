@@ -11,11 +11,12 @@ const WcConnectionState = ({ metadata, isDelete }: { metadata?: CoreTypes.Metada
   const icon = metadata?.icons[0] || ''
 
   return (
-    <div className={css.container}>
+    <div data-testid="wc-connection-state" className={css.container}>
       <div>
         <SafeLogo alt="Safe logo" width="28px" height="28px" />
 
         <SvgIcon
+          data-testid="connection-dots"
           component={ConnectionDots}
           inheritViewBox
           sx={{ mx: 2 }}

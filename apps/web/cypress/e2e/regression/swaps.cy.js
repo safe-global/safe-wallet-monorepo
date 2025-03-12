@@ -134,7 +134,7 @@ describe('Swaps tests', () => {
       main.getIframeBody(iframeSelector).then(($frame) => {
         cy.wrap($frame).within(() => {
           swaps.selectInputCurrency(swaps.swapTokens.cow)
-          swaps.setInputValue(200)
+          swaps.setInputValue(1000)
           swaps.selectOutputCurrency(swaps.swapTokens.dai)
           swaps.checkSwapBtnIsVisible()
           swaps.clickOnSettingsBtn()
@@ -152,9 +152,8 @@ describe('Swaps tests', () => {
           swaps.enterRecipient(signer2)
           swaps.clickOnExceeFeeChkbox()
           swaps.clickOnSwapBtn()
-          swaps.clickOnSwapBtn()
+          swaps.verifyRecipientAlertIsDisplayed()
         })
-        swaps.verifyRecipientAlertIsDisplayed()
       })
     },
   )

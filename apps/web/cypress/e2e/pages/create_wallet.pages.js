@@ -210,7 +210,7 @@ export function clearWalletName() {
 }
 
 export function openNetworkSelector() {
-  cy.get(newtworkSelectorDiv).find(expandMoreIcon).parent().click()
+  cy.get(newtworkSelectorDiv).find(expandMoreIcon).parent().click({ force: true })
 }
 export function selectNetwork(network) {
   cy.wait(1000)
