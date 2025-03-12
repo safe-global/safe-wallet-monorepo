@@ -18,6 +18,9 @@ import { getDefaultScreenOptions } from '@/src/navigation/hooks/utils'
 import { NavigationGuardHOC } from '@/src/navigation/NavigationGuardHOC'
 import { StatusBar } from 'expo-status-bar'
 import { TestCtrls } from '@/src/tests/e2e-maestro/components/TestCtrls'
+import Logger, { LogLevel } from '@/src/utils/logger'
+
+Logger.setLevel(__DEV__ ? LogLevel.TRACE : LogLevel.ERROR)
 
 configureReanimatedLogger({
   level: ReanimatedLogLevel.warn,
