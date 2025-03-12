@@ -27,6 +27,9 @@ const withPWA = withPWAInit({
 const nextConfig = {
   output: 'export', // static site export
 
+  // Create folders with an index.html file for each route
+  trailingSlash: true,
+
   transpilePackages: ['@safe-global/store'],
   images: {
     unoptimized: true,

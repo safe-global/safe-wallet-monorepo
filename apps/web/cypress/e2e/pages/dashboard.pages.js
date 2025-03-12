@@ -12,11 +12,11 @@ const receiveStr = 'Receive'
 const viewAllStr = 'View all'
 const safeAppStr = 'Safe Apps'
 const exploreSafeApps = 'Explore Safe Apps'
-export const copiedAppUrl = 'share/safe-app?appUrl'
+export const copiedAppUrl = 'share/safe-app/?appUrl'
 
 const copyShareBtn = '[data-testid="copy-btn-icon"]'
 const exploreAppsBtn = '[data-testid="explore-apps-btn"]'
-const viewAllLink = '[data-testid="view-all-link"][href^="/transactions/queue"]'
+const viewAllLink = '[data-testid="view-all-link"][href^="/transactions/queue/"]'
 const noTxIcon = '[data-testid="no-tx-icon"]'
 const noTxText = '[data-testid="no-tx-text"]'
 export const pendingTxWidget = '[data-testid="pending-tx-widget"]'
@@ -125,7 +125,7 @@ export function verifyTxQueueWidget() {
 
     // Queued txns
     cy.contains(
-      `a[href^="/transactions/tx?id=multisig_0x"]`,
+      `a[href^="/transactions/tx/?id=multisig_0x"]`,
       '14' + 'Send' + `-0.00002 ${constants.tokenAbbreviation.sep}` + '1 out of 1',
     ).should('exist')
 
