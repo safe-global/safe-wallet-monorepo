@@ -7,7 +7,7 @@ import { trackError, Errors } from '@/services/exceptions'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import CheckWallet from '@/components/common/CheckWallet'
 import { useAlreadySigned, useTxActions } from './hooks'
-import type { SignOrExecuteProps } from './SignOrExecuteFormNew'
+import type { SignOrExecuteProps } from './SignOrExecuteFormV2'
 import type { SafeTransaction } from '@safe-global/safe-core-sdk-types'
 import { TxModalContext } from '@/components/tx-flow'
 import commonCss from '@/components/tx-flow/common/styles.module.css'
@@ -20,7 +20,7 @@ import { useSigner } from '@/hooks/wallets/useWallet'
 import { NestedTxSuccessScreenFlow } from '@/components/tx-flow/flows'
 import { useValidateTxData } from '@/hooks/useValidateTxData'
 
-export const SignForm = ({
+export const SignFormV2 = ({
   safeTx,
   txId,
   onSubmit,
@@ -163,7 +163,7 @@ export const SignForm = ({
 
 const useTxSecurityContext = () => useContext(TxSecurityContext)
 
-export default madProps(SignForm, {
+export default madProps(SignFormV2, {
   isOwner: useIsSafeOwner,
   txActions: useTxActions,
   txSecurity: useTxSecurityContext,

@@ -6,7 +6,7 @@ import { type ReactElement, type ReactNode, useState, useContext, useCallback } 
 import madProps from '@/utils/mad-props'
 import { useImmediatelyExecutable, useValidateNonce } from './hooks'
 import ExecuteForm from './ExecuteForm'
-import SignForm from './SignFormNew'
+import SignFormV2 from './SignFormV2'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { useAppSelector } from '@/store'
 import { selectSettings } from '@/store/settingsSlice'
@@ -34,7 +34,7 @@ export type SignOrExecuteProps = {
   tooltip?: string
 }
 
-export const SignOrExecuteForm = ({
+export const SignOrExecuteFormV2 = ({
   chainId,
   safeTx,
   safeTxError,
@@ -125,7 +125,7 @@ export const SignOrExecuteForm = ({
   }
 
   if (!isCounterfactualSafe && !willExecute && !willExecuteThroughRole && !isProposing) {
-    return <SignForm {...commonProps} />
+    return <SignFormV2 {...commonProps} />
   }
 
   if (isProposing) {
@@ -136,7 +136,7 @@ export const SignOrExecuteForm = ({
 const useSafeTx = () => useContext(SafeTxContext).safeTx
 const useSafeTxError = () => useContext(SafeTxContext).safeTxError
 
-export default madProps(SignOrExecuteForm, {
+export default madProps(SignOrExecuteFormV2, {
   chainId: useChainId,
   safeTx: useSafeTx,
   safeTxError: useSafeTxError,
