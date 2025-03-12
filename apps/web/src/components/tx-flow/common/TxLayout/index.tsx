@@ -18,10 +18,12 @@ import SecurityWarnings from '@/components/tx/security/SecurityWarnings'
 
 const TxLayoutHeader = ({
   hideNonce,
+  fixedNonce,
   icon,
   subtitle,
 }: {
   hideNonce: TxLayoutProps['hideNonce']
+  fixedNonce: TxLayoutProps['fixedNonce']
   icon: TxLayoutProps['icon']
   subtitle: TxLayoutProps['subtitle']
 }) => {
@@ -54,7 +56,7 @@ const TxLayoutHeader = ({
           {subtitle}
         </Typography>
       </Box>
-      {!hideNonce && safe.deployed && nonceNeeded && <TxNonce />}
+      {!hideNonce && safe.deployed && nonceNeeded && <TxNonce canEdit={!fixedNonce} />}
     </Box>
   )
 }
@@ -68,6 +70,7 @@ type TxLayoutProps = {
   txSummary?: TransactionSummary
   onBack?: () => void
   hideNonce?: boolean
+  fixedNonce?: boolean
   hideProgress?: boolean
   isBatch?: boolean
   isReplacement?: boolean
@@ -83,6 +86,7 @@ const TxLayout = ({
   txSummary,
   onBack,
   hideNonce = false,
+  fixedNonce = false,
   hideProgress = false,
   isBatch = false,
   isReplacement = false,
@@ -155,7 +159,7 @@ const TxLayout = ({
                       </Box>
                     )}
 
-                    <TxLayoutHeader subtitle={subtitle} icon={icon} hideNonce={hideNonce} />
+                    <TxLayoutHeader subtitle={subtitle} icon={icon} hideNonce={hideNonce} fixedNonce={fixedNonce} />
                   </Paper>
 
                   <div className={css.step}>
