@@ -35,10 +35,10 @@ const AddManually = ({ handleAddSafe }: { handleAddSafe: (data: AddManuallyFormV
 
   const onSubmit = handleSubmit((data) => {
     handleAddSafe(data)
-    setAddManuallyOpen(false)
+    onClose()
   })
 
-  const onCancel = () => {
+  const onClose = () => {
     reset()
     setAddManuallyOpen(false)
   }
@@ -77,9 +77,14 @@ const AddManually = ({ handleAddSafe }: { handleAddSafe: (data: AddManuallyFormV
       <Button size="compact" onClick={() => setAddManuallyOpen(true)}>
         + Add manually
       </Button>
-      <ModalDialog open={addManuallyOpen} dialogTitle="Add safe account" onClose={onCancel} hideChainIndicator>
+      <ModalDialog open={addManuallyOpen} dialogTitle="Add safe account" onClose={onClose} hideChainIndicator>
         <FormProvider {...formMethods}>
-          <form onSubmit={onSubmit}>
+          <form
+            onSubmit={(e) => {
+              e.stopPropagation()
+              return onSubmit(e)
+            }}
+          >
             <DialogContent>
               <Stack direction="row" spacing={2}>
                 <AddressInput
@@ -108,7 +113,7 @@ const AddManually = ({ handleAddSafe }: { handleAddSafe: (data: AddManuallyFormV
               </Stack>
             </DialogContent>
             <DialogActions>
-              <Button onClick={onCancel}>Cancel</Button>
+              <Button onClick={onClose}>Cancel</Button>
               <Button variant="contained" disabled={!formState.isValid} type="submit">
                 Add
               </Button>
