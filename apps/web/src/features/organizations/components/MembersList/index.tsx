@@ -1,4 +1,4 @@
-import { Chip, IconButton, SvgIcon, Tooltip } from '@mui/material'
+import { Box, Chip, IconButton, SvgIcon, Tooltip } from '@mui/material'
 import { type UserOrganization } from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
 import EditIcon from '@/public/images/common/edit.svg'
 import { MemberRole } from '../AddMembersModal'
@@ -30,37 +30,49 @@ const headCells = [
   },
 ]
 
+const EditButton = () => {
+  return (
+    <Tooltip title="Edit member name" placement="top">
+      <IconButton onClick={() => {}} size="small">
+        <SvgIcon component={EditIcon} inheritViewBox color="border" fontSize="small" />
+      </IconButton>
+    </Tooltip>
+  )
+}
 const MenuButtons = ({
   member,
-  showEdit,
-  showDelete,
+  editOnly,
+  disableDelete,
 }: {
   member: UserOrganization
-  showEdit: boolean
-  showDelete: boolean
+  editOnly: boolean
+  disableDelete: boolean
 }) => {
   const [openRemoveMemberDialog, setOpenRemoveMemberDialog] = useState(false)
 
-  if (!showEdit && !showDelete) {
-    return null
+  if (editOnly) {
+    return (
+      <div className={tableCss.actions}>
+        <EditButton />
+      </div>
+    )
   }
 
   return (
     <div className={tableCss.actions}>
-      {showEdit && (
-        <Tooltip title="Edit member name" placement="top">
-          <IconButton onClick={() => {}} size="small">
-            <SvgIcon component={EditIcon} inheritViewBox color="border" fontSize="small" />
+      <EditButton />
+      <Tooltip title={disableDelete ? 'Cannot remove last admin' : 'Remove member'} placement="top">
+        <Box component="span">
+          <IconButton disabled={disableDelete} onClick={() => setOpenRemoveMemberDialog(true)} size="small">
+            <SvgIcon
+              component={DeleteIcon}
+              inheritViewBox
+              color={disableDelete ? 'disabled' : 'error'}
+              fontSize="small"
+            />
           </IconButton>
-        </Tooltip>
-      )}
-      <IconButton
-        onClick={() => setOpenRemoveMemberDialog(true)}
-        size="small"
-        sx={{ visibility: showDelete ? 'visible' : 'hidden' }}
-      >
-        <SvgIcon component={DeleteIcon} inheritViewBox color="error" fontSize="small" />
-      </IconButton>
+        </Box>
+      </Tooltip>
       {openRemoveMemberDialog && (
         <RemoveMemberDialog member={member.user} handleClose={() => setOpenRemoveMemberDialog(false)} />
       )}
@@ -97,7 +109,7 @@ const MembersList = ({ members }: { members: UserOrganization[] }) => {
           sticky: true,
           content:
             isAdmin || isOwnEntry ? (
-              <MenuButtons member={member} showEdit={isAdmin || isOwnEntry} showDelete={isAdmin && !isLastAdmin} />
+              <MenuButtons member={member} editOnly={!isAdmin && isOwnEntry} disableDelete={isAdmin && isLastAdmin} />
             ) : null,
         },
       },
