@@ -13,7 +13,7 @@ type ConfirmTxDetailsProps = {
 }
 
 export const ConfirmTxDetails = ({ onSubmit }: ConfirmTxDetailsProps) => {
-  const { safeTx } = useContext(SafeTxContext)
+  const { safeTx, txOrigin } = useContext(SafeTxContext)
   const [txPreview] = useTxPreview(safeTx?.data)
   const [checked, setChecked] = useState(false)
 
@@ -83,6 +83,7 @@ export const ConfirmTxDetails = ({ onSubmit }: ConfirmTxDetailsProps) => {
         onSubmit={onSubmit}
         disableSubmit={!checked}
         tooltip={!checked ? 'Review details and check the box to enable signing' : undefined}
+        origin={txOrigin}
       />
     </TxCard>
   )

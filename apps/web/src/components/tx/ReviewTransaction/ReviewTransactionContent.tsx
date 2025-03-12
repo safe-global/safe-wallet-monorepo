@@ -14,17 +14,14 @@ import { selectSettings } from '@/store/settingsSlice'
 import { ErrorBoundary } from '@sentry/react'
 import ApprovalEditor from '../ApprovalEditor'
 import { isDelegateCall } from '@/services/tx/tx-sender/sdk'
-import useChainId from '@/hooks/useChainId'
 import { findAllowingRole, findMostLikelyRole, useRoles } from '../SignOrExecuteForm/ExecuteThroughRoleForm/hooks'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import { BlockaidBalanceChanges } from '../security/blockaid/BlockaidBalanceChange'
 import { Blockaid } from '../security/blockaid'
-import { useLazyGetTransactionDetailsQuery } from '@/store/api/gateway'
 import { useApprovalInfos } from '../ApprovalEditor/hooks/useApprovalInfos'
 import type { TransactionDetails, TransactionPreview } from '@safe-global/safe-gateway-typescript-sdk'
 import NetworkWarning from '@/components/new-safe/create/NetworkWarning'
 import ConfirmationView from '../confirmation-views'
-import { useSigner } from '@/hooks/wallets/useWallet'
 import { TxNoteForm, encodeTxNote, trackAddNote } from '@/features/tx-notes'
 import { SignerForm } from '../SignOrExecuteForm/SignerForm'
 import UnknownContractError from '../SignOrExecuteForm/UnknownContractError'
@@ -48,7 +45,6 @@ export type ReviewTransactionContentProps = {
 }
 
 export const ReviewTransactionContent = ({
-  chainId,
   safeTx,
   safeTxError,
   onSubmit,
@@ -58,7 +54,6 @@ export const ReviewTransactionContent = ({
   disableSubmit,
   ...props
 }: ReviewTransactionContentProps & {
-  chainId: ReturnType<typeof useChainId>
   txActions: ReturnType<typeof useTxActions>
   safeTx: ReturnType<typeof useSafeTx>
   safeTxError: ReturnType<typeof useSafeTxError>
@@ -74,15 +69,14 @@ export const ReviewTransactionContent = ({
   const isCorrectNonce = useValidateNonce(safeTx)
   const isBatchable = props.isBatchable !== false && safeTx && !isDelegateCall(safeTx)
   const { setTxFlow } = useContext(TxModalContext)
+  const { setTxOrigin } = useContext(SafeTxContext)
 
   const { addToBatch } = txActions
 
-  const [trigger] = useLazyGetTransactionDetailsQuery()
   const [readableApprovals] = useApprovalInfos({ safeTransaction: safeTx })
   const isApproval = readableApprovals && readableApprovals.length > 0
   const { safe } = useSafeInfo()
   const isSafeOwner = useIsSafeOwner()
-  const signer = useSigner()
   const isProposer = useIsWalletProposer()
   const isProposing = isProposer && !isSafeOwner && isCreation
   const isCounterfactualSafe = !safe.deployed
@@ -107,9 +101,10 @@ export const ReviewTransactionContent = ({
 
       if (customOrigin !== props.origin) {
         trackAddNote()
+        setTxOrigin(customOrigin)
       }
     },
-    [chainId, isCreation, onSubmit, trigger, signer?.isSafe, customOrigin, props.origin],
+    [onSubmit, customOrigin, props.origin, setTxOrigin],
   )
 
   const onNoteChange = useCallback(
@@ -126,9 +121,7 @@ export const ReviewTransactionContent = ({
 
     setIsSubmittable(false)
 
-    let resultTxId: string
-
-    resultTxId = await addToBatch(safeTx, origin)
+    await addToBatch(safeTx, customOrigin)
 
     setIsSubmittable(true)
 
@@ -136,10 +129,6 @@ export const ReviewTransactionContent = ({
   }
 
   const submitDisabled = !safeTx || !isSubmittable || disableSubmit
-  // || cannotPropose ||
-  // (needsRiskConfirmation && !isRiskConfirmed) ||
-  // validationError !== undefined ||
-  // validationLoading
 
   return (
     <>
@@ -239,7 +228,6 @@ const useSafeTx = () => useContext(SafeTxContext).safeTx
 const useSafeTxError = () => useContext(SafeTxContext).safeTxError
 
 export default madProps(ReviewTransactionContent, {
-  chainId: useChainId,
   safeTx: useSafeTx,
   safeTxError: useSafeTxError,
   txActions: useTxActions,

@@ -18,7 +18,6 @@ import { useLazyGetTransactionDetailsQuery } from '@/store/api/gateway'
 import type { TransactionDetails, TransactionPreview } from '@safe-global/safe-gateway-typescript-sdk'
 import { useSigner } from '@/hooks/wallets/useWallet'
 import { trackTxEvents } from './tracking'
-import { trackAddNote } from '@/features/tx-notes'
 
 export type SubmitCallback = (txId: string, isExecuted?: boolean) => void
 
@@ -41,6 +40,7 @@ export const SignOrExecuteForm = ({
   safeTxError,
   onSubmit,
   isCreation,
+  origin,
   ...props
 }: SignOrExecuteProps & {
   chainId: ReturnType<typeof useChainId>
@@ -50,9 +50,7 @@ export const SignOrExecuteForm = ({
   txDetails?: TransactionDetails
   txPreview?: TransactionPreview
 }): ReactElement | undefined => {
-  const [customOrigin, setCustomOrigin] = useState<string | undefined>(props.origin)
-  const { transactionExecution } = useAppSelector(selectSettings)
-  const [shouldExecute, setShouldExecute] = useState<boolean>(transactionExecution)
+  const { transactionExecution: shouldExecute } = useAppSelector(selectSettings)
   const isNewExecutableTx = useImmediatelyExecutable() && isCreation
   const isCorrectNonce = useValidateNonce(safeTx)
 
@@ -85,21 +83,9 @@ export const SignOrExecuteForm = ({
 
       const { data: details } = await trigger({ chainId, txId })
       // Track tx event
-      trackTxEvents(
-        details,
-        !!isCreation,
-        isExecuted,
-        isRoleExecution,
-        isProposerCreation,
-        !!signer?.isSafe,
-        customOrigin,
-      )
-
-      if (customOrigin !== props.origin) {
-        trackAddNote()
-      }
+      trackTxEvents(details, !!isCreation, isExecuted, isRoleExecution, isProposerCreation, !!signer?.isSafe, origin)
     },
-    [chainId, isCreation, onSubmit, trigger, signer?.isSafe, customOrigin, props.origin],
+    [chainId, isCreation, onSubmit, trigger, signer?.isSafe, origin],
   )
 
   const onRoleExecutionSubmit = useCallback<typeof onFormSubmit>(
@@ -116,7 +102,7 @@ export const SignOrExecuteForm = ({
     ...props,
     safeTx,
     isCreation,
-    origin: customOrigin,
+    origin,
     onSubmit: onFormSubmit,
   }
   if (isCounterfactualSafe && !isProposing) {
