@@ -52,8 +52,10 @@ export const ReviewTransactionContent = ({
   isBatch,
   txActions,
   disableSubmit,
+  isOwner,
   ...props
 }: ReviewTransactionContentProps & {
+  isOwner: ReturnType<typeof useIsSafeOwner>
   txActions: ReturnType<typeof useTxActions>
   safeTx: ReturnType<typeof useSafeTx>
   safeTxError: ReturnType<typeof useSafeTxError>
@@ -93,6 +95,8 @@ export const ReviewTransactionContent = ({
   // If checkbox is checked and the transaction is executable, execute it, otherwise sign it
   const canExecute = isCorrectNonce && (props.isExecutable || isNewExecutableTx)
   const willExecute = (props.onlyExecute || shouldExecute) && canExecute && !preferThroughRole
+  const willExecuteThroughRole =
+    (props.onlyExecute || shouldExecute) && canExecuteThroughRole && (!canExecute || preferThroughRole)
 
   const onContinueClick = useCallback(
     async (e: SyntheticEvent) => {
@@ -129,6 +133,15 @@ export const ReviewTransactionContent = ({
   }
 
   const submitDisabled = !safeTx || !isSubmittable || disableSubmit
+
+  const showBatchButton =
+    isOwner &&
+    isCreation &&
+    !isBatch &&
+    !isCounterfactualSafe &&
+    !willExecute &&
+    !willExecuteThroughRole &&
+    !isProposing
 
   return (
     <>
@@ -198,7 +211,7 @@ export const ReviewTransactionContent = ({
             spacing={{ xs: 2, md: 2 }}
           >
             {/* Batch button */}
-            {isCreation && !isBatch && (
+            {showBatchButton && (
               <BatchButton
                 onClick={onBatchClick}
                 disabled={submitDisabled || !isBatchable}
@@ -228,6 +241,7 @@ const useSafeTx = () => useContext(SafeTxContext).safeTx
 const useSafeTxError = () => useContext(SafeTxContext).safeTxError
 
 export default madProps(ReviewTransactionContent, {
+  isOwner: useIsSafeOwner,
   safeTx: useSafeTx,
   safeTxError: useSafeTxError,
   txActions: useTxActions,
