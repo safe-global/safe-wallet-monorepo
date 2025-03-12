@@ -62,12 +62,16 @@ const SrcEthHashInfo = ({
   const identicon = <Identicon address={address} size={avatarSize} />
   const shouldCopyPrefix = shouldPrefix && copyPrefix
 
-  const highlightedAddress = highlight4bytes ? <>
-    {address.slice(0, 2)}
-    <b>{address.slice(2, 6)}</b>
-    {address.slice(6, -4)}
-    <b>{address.slice(-4)}</b>
-  </> : address
+  const highlightedAddress = highlight4bytes ? (
+    <>
+      {address.slice(0, 2)}
+      <b>{address.slice(2, 6)}</b>
+      {address.slice(6, -4)}
+      <b>{address.slice(-4)}</b>
+    </>
+  ) : (
+    address
+  )
 
   const addressElement = (
     <>

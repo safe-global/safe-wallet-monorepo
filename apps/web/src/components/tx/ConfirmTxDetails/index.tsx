@@ -13,7 +13,7 @@ type ConfirmTxDetailsProps = {
   txData?: TransactionData
 }
 
-export const ConfirmTxDetails = ({ safeTx }: ConfirmTxDetailsProps) => {
+export const ConfirmTxDetails = ({ safeTx, txData }: ConfirmTxDetailsProps) => {
   const [checked, setChecked] = useState(false)
 
   const steps = [

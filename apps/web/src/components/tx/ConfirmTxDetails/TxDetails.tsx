@@ -1,12 +1,13 @@
-import { Box, Divider, Stack, StackProps, Typography } from '@mui/material'
+import { Box, Chip, Divider, Stack, StackProps, Typography } from '@mui/material'
 import { SafeTransaction } from '@safe-global/safe-core-sdk-types'
 import { PaperViewToggle } from '../../common/PaperViewToggle'
 import TableRowsRoundedIcon from '@mui/icons-material/TableRowsRounded'
 import DataObjectIcon from '@mui/icons-material/DataObject'
 import EthHashInfo from '@/components/common/EthHashInfo'
-import { ReactElement } from 'react'
+import type { ReactElement, ReactNode } from 'react'
 import { isNumber, isString } from 'lodash'
 import type { TransactionData } from '@safe-global/safe-gateway-typescript-sdk/dist/types/transactions'
+import NamedAddressInfo from '@/components/common/NamedAddressInfo'
 
 type TxDetailsProps = {
   safeTx: SafeTransaction
@@ -19,7 +20,7 @@ const TxDetailsRow = ({
   direction = 'row',
 }: {
   label: string
-  children: string | number | ReactElement
+  children: ReactNode
   direction?: StackProps['direction']
 }) => (
   <Stack
@@ -37,6 +38,8 @@ const TxDetailsRow = ({
 )
 
 export const TxDetails = ({ safeTx, txData }: TxDetailsProps) => {
+  const toInfo = txData?.addressInfoIndex?.[safeTx.data.to] || txData?.to
+
   const ContentWrapper = ({ children }: { children: ReactElement | ReactElement[] }) => (
     <Box sx={{ maxHeight: '500px', overflowY: 'scroll' }}>{children}</Box>
   )
@@ -59,7 +62,27 @@ export const TxDetails = ({ safeTx, txData }: TxDetailsProps) => {
                 <TxDetailsRow label="Primary type">SafeTx</TxDetailsRow>
 
                 <TxDetailsRow label="To">
-                  <Typography variant="body2" width="100%" sx={{ '& *': { whiteSpace: 'normal', wordWrap: "break-word", alignItems: 'flex-start !important' } }}>
+                  <Chip
+                    sx={{ backgroundColor: 'background.paper', height: 'unset', '& > *': { p: 0.5 } }}
+                    label={
+                      <NamedAddressInfo
+                        address={safeTx.data.to}
+                        name={toInfo?.name}
+                        customAvatar={toInfo?.logoUri}
+                        avatarSize={20}
+                        showAvatar
+                        onlyName
+                      />
+                    }
+                  ></Chip>
+
+                  <Typography
+                    variant="body2"
+                    width="100%"
+                    sx={{
+                      '& *': { whiteSpace: 'normal', wordWrap: 'break-word', alignItems: 'flex-start !important' },
+                    }}
+                  >
                     <EthHashInfo
                       address={safeTx.data.to}
                       avatarSize={20}
