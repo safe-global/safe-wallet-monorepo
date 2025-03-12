@@ -1,7 +1,8 @@
 import { ToggleButtonGroup } from '@/components/common/ToggleButtonGroup'
 import { Box, Paper, Stack, Typography } from '@mui/material'
 import { isString } from 'lodash'
-import React, { ReactElement, useState } from 'react'
+import type { ReactElement } from 'react'
+import React, { useState } from 'react'
 
 type PaperViewToggleProps = {
   children: {

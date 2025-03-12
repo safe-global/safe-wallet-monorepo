@@ -1,14 +1,18 @@
-import { Box, Divider, Stack, StackProps, Typography } from '@mui/material'
-import { SafeTransaction } from '@safe-global/safe-core-sdk-types'
+import type { StackProps } from '@mui/material'
+import { Box, Chip, Divider, Stack, Typography } from '@mui/material'
+import type { SafeTransaction } from '@safe-global/safe-core-sdk-types'
 import { PaperViewToggle } from '../../common/PaperViewToggle'
 import TableRowsRoundedIcon from '@mui/icons-material/TableRowsRounded'
 import DataObjectIcon from '@mui/icons-material/DataObject'
 import EthHashInfo from '@/components/common/EthHashInfo'
-import { ReactElement } from 'react'
+import type { ReactElement, ReactNode } from 'react'
 import { isNumber, isString } from 'lodash'
+import { Operation, type TransactionData } from '@safe-global/safe-gateway-typescript-sdk/dist/types/transactions'
+import { HexEncodedData } from '@/components/transactions/HexEncodedData'
 
 type TxDetailsProps = {
   safeTx: SafeTransaction
+  txData?: TransactionData
 }
 
 const TxDetailsRow = ({
@@ -17,7 +21,7 @@ const TxDetailsRow = ({
   direction = 'row',
 }: {
   label: string
-  children: string | number | ReactElement
+  children: ReactNode
   direction?: StackProps['direction']
 }) => (
   <Stack
@@ -34,9 +38,11 @@ const TxDetailsRow = ({
   </Stack>
 )
 
-export const TxDetails = ({ safeTx }: TxDetailsProps) => {
+export const TxDetails = ({ safeTx, txData }: TxDetailsProps) => {
+  const toInfo = txData?.addressInfoIndex?.[safeTx.data.to] || txData?.to
+
   const ContentWrapper = ({ children }: { children: ReactElement | ReactElement[] }) => (
-    <Box sx={{ maxHeight: '500px', overflowY: 'scroll' }}>{children}</Box>
+    <Box sx={{ maxHeight: '550px', overflowY: 'scroll' }}>{children}</Box>
   )
 
   return (
@@ -57,15 +63,38 @@ export const TxDetails = ({ safeTx }: TxDetailsProps) => {
                 <TxDetailsRow label="Primary type">SafeTx</TxDetailsRow>
 
                 <TxDetailsRow label="To">
-                  <Typography variant="body2">
+                  {toInfo?.name || toInfo?.logoUri ? (
+                    <Chip
+                      sx={{ backgroundColor: 'background.paper', height: 'unset', '& > *': { p: 0.5 } }}
+                      label={
+                        <EthHashInfo
+                          address={safeTx.data.to}
+                          name={toInfo?.name}
+                          customAvatar={toInfo?.logoUri}
+                          showAvatar={!!toInfo?.logoUri}
+                          avatarSize={20}
+                          onlyName
+                        />
+                      }
+                    ></Chip>
+                  ) : null}
+
+                  <Typography
+                    variant="body2"
+                    width="100%"
+                    sx={{
+                      '& *': { whiteSpace: 'normal', wordWrap: 'break-word', alignItems: 'flex-start !important' },
+                    }}
+                  >
                     <EthHashInfo
                       address={safeTx.data.to}
-                      avatarSize={15}
+                      avatarSize={20}
                       showPrefix={false}
                       showName={false}
                       shortAddress={false}
                       hasExplorer
-                      showAvatar={false}
+                      showAvatar
+                      highlight4bytes
                     />
                   </Typography>
                 </TxDetailsRow>
@@ -73,12 +102,14 @@ export const TxDetails = ({ safeTx }: TxDetailsProps) => {
                 <TxDetailsRow label="Value">{safeTx.data.value}</TxDetailsRow>
 
                 <TxDetailsRow label="Data" direction={safeTx.data.data === '0x' ? 'row' : 'column'}>
-                  <Typography variant="body2" sx={{ wordWrap: 'break-word' }}>
-                    {safeTx.data.data}
+                  <Typography variant="body2">
+                    <HexEncodedData hexData={safeTx.data.data} limit={66} />
                   </Typography>
                 </TxDetailsRow>
 
-                <TxDetailsRow label="Operation">{safeTx.data.operation}</TxDetailsRow>
+                <TxDetailsRow label="Operation">
+                  {safeTx.data.operation} ({Operation[safeTx.data.operation].toLowerCase()})
+                </TxDetailsRow>
 
                 <TxDetailsRow label="SafeTxGas">{safeTx.data.safeTxGas}</TxDetailsRow>
 
