@@ -25,7 +25,8 @@ describe('[PROD] Tx history tests 2', () => {
   beforeEach(() => {
     cy.intercept(
       'GET',
-      `**${constants.stagingCGWChains}${constants.networkKeys.sepolia}/${constants.stagingCGWSafes
+      `**${constants.stagingCGWChains}${constants.networkKeys.sepolia}/${
+        constants.stagingCGWSafes
       }${staticSafes.SEP_STATIC_SAFE_7.substring(4)}/transactions/history**`,
       (req) => {
         req.url = `https://safe-client.safe.global/v1/chains/11155111/safes/0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb/transactions/history?timezone=Europe/Berlin&trusted=false&cursor=limit=100&offset=1`
@@ -47,10 +48,7 @@ describe('[PROD] Tx history tests 2', () => {
   // On-chain rejection
   it('Verify exapanded details for on-chain rejection', () => {
     createTx.clickOnTransactionItemByName(typeOnchainRejection.title)
-    createTx.verifyExpandedDetails([
-      typeOnchainRejection.description,
-      typeOnchainRejection.transactionHash,
-    ])
+    createTx.verifyExpandedDetails([typeOnchainRejection.description, typeOnchainRejection.transactionHash])
     createTx.verifyActionListExists([
       typeSideActions.rejectionCreated,
       typeSideActions.confirmations,
@@ -61,10 +59,7 @@ describe('[PROD] Tx history tests 2', () => {
   // Batch transaction
   it('Verify exapanded details for batch', () => {
     createTx.clickOnTransactionItemByName(typeBatch.title, typeBatch.summaryTxInfo)
-    createTx.verifyExpandedDetails(
-      [typeBatch.contractTitle, typeBatch.transactionHash],
-      createTx.delegateCallWarning,
-    )
+    createTx.verifyExpandedDetails([typeBatch.contractTitle, typeBatch.transactionHash], createTx.delegateCallWarning)
     createTx.verifyActions([typeBatch.nativeTransfer.title])
   })
 
@@ -109,10 +104,7 @@ describe('[PROD] Tx history tests 2', () => {
   it('Verify exapanded details for changing threshold', () => {
     createTx.clickOnTransactionItemByName(typeChangeThreshold.title)
     createTx.verifyExpandedDetails(
-      [
-        typeChangeThreshold.requiredConfirmationsTitle,
-        typeChangeThreshold.transactionHash,
-      ],
+      [typeChangeThreshold.requiredConfirmationsTitle, typeChangeThreshold.transactionHash],
       createTx.policyChangeWarning,
     )
     createTx.checkRequiredThreshold(2)

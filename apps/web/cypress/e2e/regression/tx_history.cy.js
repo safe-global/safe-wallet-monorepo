@@ -22,7 +22,8 @@ describe('Tx history tests 1', () => {
   beforeEach(() => {
     cy.intercept(
       'GET',
-      `**${constants.stagingCGWChains}${constants.networkKeys.sepolia}/${constants.stagingCGWSafes
+      `**${constants.stagingCGWChains}${constants.networkKeys.sepolia}/${
+        constants.stagingCGWSafes
       }${staticSafes.SEP_STATIC_SAFE_7.substring(4)}/transactions/history**`,
       (req) => {
         req.url = `https://safe-client.staging.5afe.dev/v1/chains/11155111/safes/0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb/transactions/history?timezone=Europe/Berlin&trusted=false&cursor=limit=100&offset=1`
@@ -95,11 +96,7 @@ describe('Tx history tests 1', () => {
   it('Verify exapanded details for initial spending limits setup', () => {
     createTx.clickOnTransactionItemByName(typeSpendingLimits.title, typeSpendingLimits.summaryTxInfo)
     createTx.verifyExpandedDetails(
-      [
-        typeSpendingLimits.contractTitle,
-        typeSpendingLimits.call_multiSend,
-        typeSpendingLimits.transactionHash,
-      ],
+      [typeSpendingLimits.contractTitle, typeSpendingLimits.call_multiSend, typeSpendingLimits.transactionHash],
       createTx.delegateCallWarning,
     )
   })

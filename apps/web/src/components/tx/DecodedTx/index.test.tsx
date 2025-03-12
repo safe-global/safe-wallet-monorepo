@@ -1,4 +1,4 @@
-import { fireEvent, render } from '@/tests/test-utils'
+import { fireEvent, render, within } from '@/tests/test-utils'
 import { type SafeTransaction } from '@safe-global/safe-core-sdk-types'
 import DecodedTx from '.'
 import { waitFor } from '@testing-library/react'
@@ -158,8 +158,30 @@ describe('DecodedTx', () => {
     fireEvent.click(result.getByText('Advanced details'))
 
     await waitFor(() => {
+      const toField = result.queryByText('to:')
+      const dataField = result.queryByText('data:')
+      const valueField = result.queryByText('value:')
+
+      expect(toField).toBeInTheDocument()
+      if (toField) {
+        const address = within(toField.parentElement!.parentElement!).queryByText(
+          '0x474e5Ded6b5D078163BFB8F6dBa355C3aA5478C8',
+        )
+        expect(address).toBeInTheDocument()
+      }
+
+      expect(dataField).toBeInTheDocument()
+      if (dataField) {
+        const value = within(dataField.parentElement!.parentElement!).queryByText('0x')
+        expect(value).toBeInTheDocument()
+      }
+
+      expect(valueField).toBeInTheDocument()
+      if (valueField) {
+        const value = within(valueField.parentElement!.parentElement!).queryByText('40737664983361196')
+        expect(value).toBeInTheDocument()
+      }
       expect(result.queryAllByText('safeTxGas:').length).toBeGreaterThan(0)
-      expect(result.queryAllByText('data:').length).toBeGreaterThan(0)
     })
   })
 
