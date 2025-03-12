@@ -73,7 +73,11 @@ export const ConfirmTxDetails = ({ onSubmit }: { onSubmit: () => void }) => {
         }
       />
 
-      <SignOrExecuteForm onSubmit={onSubmit} />
+      <SignOrExecuteForm
+        onSubmit={onSubmit}
+        disableSubmit={!checked}
+        tooltip={!checked ? 'Review details and check the box to enable signing' : undefined}
+      />
     </TxCard>
   )
 }
