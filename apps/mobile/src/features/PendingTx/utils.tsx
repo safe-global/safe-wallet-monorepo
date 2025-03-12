@@ -4,6 +4,7 @@ import {
   getTxHash,
   isConflictHeaderListItem,
   isLabelListItem,
+  isMultisigExecutionInfo,
   isTransactionListItem,
 } from '@/src/utils/transaction-guards'
 import { groupBulkTxs } from '@/src/utils/transactions'
@@ -150,10 +151,24 @@ export const keyExtractor = (item: PendingTransactionItems | TransactionQueuedIt
       return txGroupHash + index
     }
 
+    if (isTransactionListItem(item[0]) && isMultisigExecutionInfo(item[0].transaction.executionInfo)) {
+      return getTxHash(item[0]) + item[0].transaction.executionInfo.confirmationsSubmitted + index
+    }
+
     if (isTransactionListItem(item[0])) {
       return getTxHash(item[0]) + index
     }
+
     return String(index)
   }
-  return String(index)
+
+  if (isTransactionListItem(item) && isMultisigExecutionInfo(item.transaction.executionInfo)) {
+    return item.transaction.id + item.transaction.executionInfo.confirmationsSubmitted
+  }
+
+  if (isTransactionListItem(item)) {
+    return item.transaction.id
+  }
+
+  return String(item)
 }
