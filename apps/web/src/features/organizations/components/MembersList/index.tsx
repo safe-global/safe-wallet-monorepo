@@ -1,4 +1,4 @@
-import { Box, Chip, IconButton, SvgIcon, Tooltip } from '@mui/material'
+import { Chip, IconButton, SvgIcon, Tooltip } from '@mui/material'
 import { type UserOrganization } from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
 import EditIcon from '@/public/images/common/edit.svg'
 import { MemberRole } from '../AddMembersModal'
@@ -54,13 +54,13 @@ const MenuButtons = ({
           </IconButton>
         </Tooltip>
       )}
-      <Box width={12}>
-        {showDelete && (
-          <IconButton onClick={() => setOpenRemoveMemberDialog(true)} size="small">
-            <SvgIcon component={DeleteIcon} inheritViewBox color="error" fontSize="small" />
-          </IconButton>
-        )}
-      </Box>
+      <IconButton
+        onClick={() => setOpenRemoveMemberDialog(true)}
+        size="small"
+        sx={{ visibility: showDelete ? 'visible' : 'hidden' }}
+      >
+        <SvgIcon component={DeleteIcon} inheritViewBox color="error" fontSize="small" />
+      </IconButton>
       {openRemoveMemberDialog && (
         <RemoveMemberDialog member={member.user} handleClose={() => setOpenRemoveMemberDialog(false)} />
       )}
