@@ -19,7 +19,7 @@ const injectedRtkApi = api
         invalidatesTags: ['users'],
       }),
       usersAddWalletToUserV1: build.mutation<UsersAddWalletToUserV1ApiResponse, UsersAddWalletToUserV1ApiArg>({
-        query: (queryArg) => ({ url: `/v1/users/wallet/add`, method: 'POST', body: queryArg.function }),
+        query: (queryArg) => ({ url: `/v1/users/wallet/add`, method: 'POST', body: queryArg.siweDto }),
         invalidatesTags: ['users'],
       }),
       usersDeleteWalletFromUserV1: build.mutation<
@@ -41,7 +41,7 @@ export type UsersCreateWithWalletV1ApiResponse = /** status 200  */ CreatedUserW
 export type UsersCreateWithWalletV1ApiArg = void
 export type UsersAddWalletToUserV1ApiResponse = /** status 200  */ WalletAddedToUser
 export type UsersAddWalletToUserV1ApiArg = {
-  function: Function
+  siweDto: SiweDto
 }
 export type UsersDeleteWalletFromUserV1ApiResponse = unknown
 export type UsersDeleteWalletFromUserV1ApiArg = {
@@ -62,7 +62,10 @@ export type CreatedUserWithWallet = {
 export type WalletAddedToUser = {
   id: number
 }
-export type Function = {}
+export type SiweDto = {
+  message: string
+  signature: string
+}
 export const {
   useUsersGetWithWalletsV1Query,
   useLazyUsersGetWithWalletsV1Query,

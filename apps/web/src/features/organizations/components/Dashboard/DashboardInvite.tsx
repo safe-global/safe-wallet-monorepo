@@ -1,25 +1,24 @@
 import { Card, Box, Stack, Button, Typography } from '@mui/material'
 import type { GetOrganizationResponse } from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
 import { InitialsAvatar, OrgSummary } from '../OrgsCard'
-import {
-  useUserOrganizationsAcceptInviteV1Mutation,
-  useUserOrganizationsDeclineInviteV1Mutation,
-} from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
+import { useUserOrganizationsDeclineInviteV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
 import { useOrgSafeCount } from '@/features/organizations/hooks/useOrgSafeCount'
+import { useState } from 'react'
+import AcceptInviteDialog from '@/features/organizations/components/Dashboard/AcceptInviteDialog'
 
 type OrgListInvite = {
   org: GetOrganizationResponse
 }
 
 const OrgListInvite = ({ org }: OrgListInvite) => {
-  const [acceptInvite] = useUserOrganizationsAcceptInviteV1Mutation()
+  const [inviteOpen, setInviteOpen] = useState(false)
   const [declineInvite] = useUserOrganizationsDeclineInviteV1Mutation()
   const { id, name, userOrganizations: members } = org
   const numberOfAccounts = useOrgSafeCount(id)
   const numberOfMembers = members.length
 
   const handleAcceptInvite = () => {
-    acceptInvite({ orgId: org.id })
+    setInviteOpen(true)
   }
 
   const handleDeclineInvite = () => {
@@ -38,7 +37,7 @@ const OrgListInvite = ({ org }: OrgListInvite) => {
       <Card sx={{ p: 2, backgroundColor: 'background.main' }}>
         <Stack direction="row" spacing={2} alignItems="center">
           <Box>
-            <InitialsAvatar orgName={name} size="large" />
+            <InitialsAvatar name={name} size="large" />
           </Box>
 
           <Box flexGrow={1}>
@@ -55,6 +54,7 @@ const OrgListInvite = ({ org }: OrgListInvite) => {
           </Stack>
         </Stack>
       </Card>
+      {inviteOpen && <AcceptInviteDialog org={org} onClose={() => setInviteOpen(false)} />}
     </Card>
   )
 }

@@ -613,13 +613,29 @@ export type MultisigConfirmationDetails = {
   signature?: string | null
   submittedAt: number
 }
-export type Token = {
+export type NativeToken = {
   address: string
-  decimals?: number | null
+  decimals: number
   logoUri: string
   name: string
   symbol: string
-  type: 'ERC721' | 'ERC20' | 'NATIVE_TOKEN' | 'UNKNOWN'
+  type: 'NATIVE_TOKEN'
+}
+export type Erc20Token = {
+  address: string
+  decimals: number
+  logoUri: string
+  name: string
+  symbol: string
+  type: 'ERC20'
+}
+export type Erc721Token = {
+  address: string
+  decimals: number
+  logoUri: string
+  name: string
+  symbol: string
+  type: 'ERC721'
 }
 export type MultisigExecutionDetails = {
   type: 'MULTISIG'
@@ -636,7 +652,7 @@ export type MultisigExecutionDetails = {
   confirmationsRequired: number
   confirmations: MultisigConfirmationDetails[]
   rejectors: AddressInfo[]
-  gasTokenInfo?: Token | null
+  gasTokenInfo?: (NativeToken | Erc20Token | Erc721Token) | null
   trusted: boolean
   proposer?: AddressInfo | null
   proposedByDelegate?: AddressInfo | null

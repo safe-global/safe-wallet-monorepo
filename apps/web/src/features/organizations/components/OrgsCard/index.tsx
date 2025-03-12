@@ -24,16 +24,16 @@ export function getDeterministicColor(str: string): string {
 }
 
 export const InitialsAvatar = ({
-  orgName,
+  name,
   size = 'large',
   rounded = false,
 }: {
-  orgName: string
+  name: string
   size?: 'small' | 'medium' | 'large'
   rounded?: boolean
 }) => {
-  const logoLetters = orgName.slice(0, 2)
-  const logoColor = getDeterministicColor(orgName)
+  const logoLetters = name.slice(0, 1)
+  const logoColor = getDeterministicColor(name)
   const dimensions = {
     small: { width: 24, height: 24, fontSize: '12px !important' },
     medium: { width: 32, height: 32, fontSize: '16px !important' },
@@ -107,7 +107,7 @@ const OrgsCard = ({
         <Link className={css.cardLink} href={{ pathname: AppRoutes.organizations.index, query: { orgId: id } }} />
       )}
 
-      <InitialsAvatar orgName={name} size={isCompact ? 'medium' : 'large'} />
+      <InitialsAvatar name={name} size={isCompact ? 'medium' : 'large'} />
 
       <OrgSummary
         name={name}
