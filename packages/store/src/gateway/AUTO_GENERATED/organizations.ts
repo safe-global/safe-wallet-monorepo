@@ -76,7 +76,11 @@ const injectedRtkApi = api
         UserOrganizationsAcceptInviteV1ApiResponse,
         UserOrganizationsAcceptInviteV1ApiArg
       >({
-        query: (queryArg) => ({ url: `/v1/organizations/${queryArg.orgId}/members/accept`, method: 'POST' }),
+        query: (queryArg) => ({
+          url: `/v1/organizations/${queryArg.orgId}/members/accept`,
+          method: 'POST',
+          body: queryArg.acceptInviteDto,
+        }),
         invalidatesTags: ['organizations'],
       }),
       userOrganizationsDeclineInviteV1: build.mutation<
@@ -164,6 +168,7 @@ export type UserOrganizationsInviteUserV1ApiArg = {
 export type UserOrganizationsAcceptInviteV1ApiResponse = unknown
 export type UserOrganizationsAcceptInviteV1ApiArg = {
   orgId: number
+  acceptInviteDto: AcceptInviteDto
 }
 export type UserOrganizationsDeclineInviteV1ApiResponse = unknown
 export type UserOrganizationsDeclineInviteV1ApiArg = {
@@ -199,6 +204,7 @@ export type UserDto = {
 export type UserOrganizationDto = {
   id: number
   role: 'ADMIN' | 'MEMBER'
+  name: string
   status: 'INVITED' | 'ACTIVE' | 'DECLINED'
   createdAt: string
   updatedAt: string
@@ -224,9 +230,10 @@ export type CreateOrganizationSafeDto = {
 export type CreateOrganizationSafesDto = {
   safes: CreateOrganizationSafeDto[]
 }
-export type GetOrganizationSafes = {}
 export type GetOrganizationSafeResponse = {
-  safes: GetOrganizationSafes[]
+  safes: {
+    [key: string]: string[]
+  }
 }
 export type DeleteOrganizationSafeDto = {
   chainId: string
@@ -240,13 +247,18 @@ export type Invitation = {
   orgId: number
   role: 'ADMIN' | 'MEMBER'
   status: 'INVITED' | 'ACTIVE' | 'DECLINED'
+  invitedBy?: string | null
 }
 export type InviteUserDto = {
   address: string
+  name: string
   role: 'ADMIN' | 'MEMBER'
 }
 export type InviteUsersDto = {
   users: InviteUserDto[]
+}
+export type AcceptInviteDto = {
+  name: string
 }
 export type UserOrganizationUser = {
   id: number
@@ -256,6 +268,8 @@ export type UserOrganization = {
   id: number
   role: 'ADMIN' | 'MEMBER'
   status: 'INVITED' | 'ACTIVE' | 'DECLINED'
+  name: string
+  invitedBy?: string | null
   createdAt: string
   updatedAt: string
   user: UserOrganizationUser

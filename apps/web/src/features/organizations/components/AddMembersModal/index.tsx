@@ -103,7 +103,7 @@ const AddMembersModal = ({ onClose }: { onClose: () => void }): ReactElement => 
 
       const response = await inviteMembers({
         orgId: Number(orgId),
-        inviteUsersDto: { users: [{ address: data.address, role: data.role }] },
+        inviteUsersDto: { users: [{ address: data.address, role: data.role, name: data.name }] },
       })
       if (response.data) {
         if (router.pathname !== AppRoutes.organizations.members) {
