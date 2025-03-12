@@ -24,7 +24,9 @@ const SpendingLimitRow = ({
 }) => {
   const { control, trigger, resetField } = useFormContext()
   const canCreateStandardTx = useHasPermission(Permission.CreateTransaction)
-  const canCreateSpendingLimitTx = useHasPermission(Permission.CreateSpendingLimitTransaction, { token: selectedToken })
+  const canCreateSpendingLimitTx = useHasPermission(Permission.CreateSpendingLimitTransaction, {
+    tokenAddress: selectedToken?.address,
+  })
   const { setNonceNeeded } = useContext(SafeTxContext)
 
   const formattedAmount = safeFormatUnits(availableAmount, selectedToken?.decimals)

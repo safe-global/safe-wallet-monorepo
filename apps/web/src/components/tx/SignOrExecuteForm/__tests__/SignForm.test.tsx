@@ -1,6 +1,7 @@
 import { defaultSecurityContextValues } from '@/components/tx/security/shared/TxSecurityContext'
 import { type ReactElement } from 'react'
 import * as hooks from '@/components/tx/SignOrExecuteForm/hooks'
+import * as useValidateTxData from '@/hooks/useValidateTxData'
 import { SignForm } from '@/components/tx/SignOrExecuteForm/SignForm'
 import { render } from '@/tests/test-utils'
 import { createMockSafeTransaction } from '@/tests/transactions'
@@ -38,6 +39,7 @@ describe('SignForm', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
+    jest.spyOn(useValidateTxData, 'useValidateTxData').mockReturnValue([undefined, undefined, false])
   })
 
   it('displays a warning if connected wallet already signed the tx', () => {

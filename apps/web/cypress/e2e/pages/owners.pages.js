@@ -113,6 +113,8 @@ export function hoverOverDeleteOwnerBtn(index) {
 }
 
 export function openRemoveOwnerWindow(btn) {
+  const minimumCount = btn === 0 ? 1 : btn
+  main.verifyMinimumElementsCount(removeOwnerBtn, minimumCount)
   cy.get(removeOwnerBtn).eq(btn).click({ force: true })
   cy.get('div').contains(removeOwnerStr).should('exist')
 }
@@ -133,7 +135,9 @@ export function getAddressToBeRemoved() {
 }
 
 export function openReplaceOwnerWindow(index) {
-  cy.get(replaceOwnerBtn).eq(index).click({ force: true })
+  const minimumCount = index === 0 ? 1 : index
+  main.verifyMinimumElementsCount(replaceOwnerBtn, minimumCount)
+  cy.get(replaceOwnerBtn).eq(index).should('be.enabled').click({ force: true })
   cy.get(newOwnerName).should('be.visible')
   cy.get(newOwnerAddress).should('be.visible')
 }

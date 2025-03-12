@@ -4,7 +4,13 @@ import { type SafeTransaction } from '@safe-global/safe-core-sdk-types'
 import { generateTypedData } from '@safe-global/protocol-kit/dist/src/utils/eip-712'
 import type { EIP712TypedData } from '@safe-global/safe-gateway-typescript-sdk'
 import { type SecurityResponse, type SecurityModule, SecuritySeverity } from '../types'
-import type { AssetDiff, TransactionScanResponse } from './types'
+import type {
+  AssetDiff,
+  ModulesChangeManagement,
+  OwnershipChangeManagement,
+  ProxyUpgradeManagement,
+  TransactionScanResponse,
+} from './types'
 import { BLOCKAID_API, BLOCKAID_CLIENT_ID } from '@/config/constants'
 import { numberToHex } from '@/utils/hex'
 
@@ -23,6 +29,7 @@ export type BlockaidModuleRequest = {
   walletAddress: string
   data: SafeTransaction | EIP712TypedData
   threshold: number
+  origin?: string
 }
 
 export type BlockaidModuleResponse = {
@@ -34,15 +41,20 @@ export type BlockaidModuleResponse = {
     description: string
   }[]
   balanceChange: AssetDiff[]
+  contractManagement: Array<ProxyUpgradeManagement | OwnershipChangeManagement | ModulesChangeManagement>
   error: Error | undefined
 }
 
 type BlockaidPayload = {
   chain: string
   account_address: string
-  metadata: {
-    domain: string
-  }
+  metadata:
+    | {
+        domain: string
+      }
+    | {
+        non_dapp: true
+      }
   data: {
     method: 'eth_signTypedData_v4'
     params: [string, string]
@@ -77,21 +89,24 @@ export class BlockaidModule implements SecurityModule<BlockaidModuleRequest, Blo
       throw new Error('Security check CLIENT_ID not configured')
     }
 
-    const { chainId, safeAddress } = request
+    const { chainId, safeAddress, walletAddress } = request
     const message = BlockaidModule.prepareMessage(request)
 
     const payload: BlockaidPayload = {
       chain: numberToHex(chainId),
-      account_address: safeAddress,
+      account_address: walletAddress,
       data: {
         method: 'eth_signTypedData_v4',
         params: [safeAddress, message],
       },
       options: ['simulation', 'validation'],
-      metadata: {
-        // TODO: Pass domain from safe app or wallet connect connection if the tx originates from there
-        domain: window.location.host,
-      },
+      metadata: request.origin
+        ? {
+            domain: request.origin,
+          }
+        : {
+            non_dapp: true,
+          },
     }
     const res = await fetch(`${BLOCKAID_API}/v0/evm/json-rpc/scan`, {
       method: 'POST',
@@ -118,9 +133,11 @@ export class BlockaidModule implements SecurityModule<BlockaidModuleRequest, Blo
 
     const simulation = result.simulation
     let balanceChange: AssetDiff[] = []
+    let contractManagement: Array<ProxyUpgradeManagement | OwnershipChangeManagement | ModulesChangeManagement> = []
     let error: Error | undefined = undefined
     if (simulation?.status === 'Success') {
       balanceChange = simulation.assets_diffs[safeAddress]
+      contractManagement = simulation.contract_management?.[safeAddress] || []
     } else if (simulation?.status === 'Error') {
       error = new Error('Simulation failed')
     }
@@ -140,6 +157,7 @@ export class BlockaidModule implements SecurityModule<BlockaidModuleRequest, Blo
         reason: result.validation?.reason,
         issues,
         balanceChange,
+        contractManagement,
         error,
       },
     }

@@ -1,212 +1,216 @@
 export type IconName =
-  | 'block'
+  | 'add-owner'
+  | 'address-book'
   | 'alert-triangle'
   | 'alert'
-  | 'info'
-  | 'question'
-  | 'points'
-  | 'code-blocks'
-  | 'hardware'
-  | 'keystone'
-  | 'ledger'
-  | 'seed'
-  | 'key'
-  | 'dapp-logo'
-  | 'double-arrow'
-  | 'arrow-sort'
-  | 'dropdown-arrow-small'
-  | 'options-vertical'
-  | 'options-horizontal'
-  | 'check-oulined'
-  | 'check'
-  | 'check-filled'
-  | 'arrow-down-1'
+  | 'appearance'
+  | 'apps'
   | 'arrow-down'
-  | 'arrow-up'
   | 'arrow-left'
+  | 'arrow-sort'
+  | 'arrow-up'
   | 'arrow-right'
-  | 'tag'
-  | 'camera'
-  | 'element-drag'
-  | 'transaction-partial-fill'
-  | 'rows-2'
-  | 'check-notifications'
-  | 'qr-code-1'
-  | 'scan-1'
-  | 'shield-crossed'
-  | 'shield'
-  | 'clock'
-  | 'update'
-  | 'repeat'
-  | 'download'
-  | 'upload'
-  | 'qr-code'
-  | 'scan'
-  | 'eye-n'
-  | 'eye-off'
-  | 'unlock'
-  | 'lock'
-  | 'replace-owner'
-  | 'edit-owner'
-  | 'add-owner'
-  | 'send-to'
-  | 'owners'
-  | 'link'
-  | 'share'
-  | 'external-link'
-  | 'export'
-  | 'paste'
-  | 'copy'
-  | 'sign'
-  | 'document'
-  | 'file'
-  | 'search'
-  | 'edit'
-  | 'delete'
-  | 'close-outlined'
-  | 'close-filled'
-  | 'close'
-  | 'plus-outlined'
-  | 'plus-filled'
-  | 'plus'
-  | 'transaction-Batch'
-  | 'blocks-1'
-  | 'rows-1'
   | 'batch'
-  | 'filter'
+  | 'bell'
+  | 'block'
+  | 'blocks-1'
+  | 'blocks'
   | 'bookmark-filled'
   | 'bookmark'
-  | 'transaction-recovery'
+  | 'camera'
+  | 'chat'
+  | 'check-filled'
+  | 'check-oulined'
+  | 'check'
+  | 'chevron-down'
+  | 'chevron-left'
+  | 'chevron-right'
+  | 'chevron-up'
+  | 'clock'
+  | 'close-filled'
+  | 'close-outlined'
+  | 'close'
+  | 'code-blocks'
+  | 'copy'
+  | 'dapp-logo'
+  | 'delete'
+  | 'desktop'
+  | 'document'
+  | 'double-arrow'
+  | 'download'
+  | 'dropdown-arrow-small'
+  | 'edit-owner'
+  | 'edit'
+  | 'element-drag'
+  | 'experimental'
+  | 'export'
+  | 'external-link'
+  | 'eye-n'
+  | 'eye-off'
+  | 'file'
+  | 'filter'
+  | 'hardware'
+  | 'home'
+  | 'info'
+  | 'key'
+  | 'keystone'
+  | 'ledger'
+  | 'lightbulb'
+  | 'link'
+  | 'lock'
+  | 'mobile'
+  | 'nft'
+  | 'options-horizontal'
+  | 'options-vertical'
+  | 'owners'
+  | 'paste'
+  | 'plus-filled'
+  | 'plus-outlined'
+  | 'plus'
+  | 'points'
+  | 'qr-code-1'
+  | 'qr-code'
+  | 'question'
+  | 'repeat'
+  | 'replace-owner'
+  | 'rows-1'
+  | 'rows-2'
+  | 'rows'
+  | 'safe'
+  | 'scan-1'
+  | 'scan'
+  | 'search'
+  | 'seed'
+  | 'send-to'
+  | 'settings'
+  | 'share'
+  | 'shield-crossed'
+  | 'shield'
+  | 'sign'
+  | 'tag'
+  | 'token'
+  | 'transaction-batch'
   | 'transaction-change-settings'
   | 'transaction-contract'
   | 'transaction-execute'
+  | 'transaction-incoming'
+  | 'transaction-outgoing'
+  | 'transaction-partial-fill'
+  | 'transaction-recovery'
   | 'transaction-stake'
   | 'transaction-swap'
-  | 'transaction-outgoing'
-  | 'transaction-incoming'
-  | 'mobile'
-  | 'wallet'
-  | 'appearance'
-  | 'experimental'
-  | 'desktop'
-  | 'safe'
-  | 'bell'
-  | 'lightbulb'
-  | 'what-is-new'
-  | 'blocks'
-  | 'rows'
-  | 'apps'
-  | 'address-book'
-  | 'chat'
-  | 'settings'
   | 'transactions'
-  | 'nft'
-  | 'token'
-  | 'home'
+  | 'unlock'
+  | 'update'
+  | 'upload'
+  | 'wallet'
+  | 'what-is-new'
 
 export const iconNames: IconName[] = [
-  'block',
+  'add-owner',
+  'address-book',
   'alert-triangle',
   'alert',
-  'info',
-  'question',
-  'points',
-  'code-blocks',
-  'hardware',
-  'keystone',
-  'ledger',
-  'seed',
-  'key',
-  'dapp-logo',
-  'double-arrow',
-  'arrow-sort',
-  'dropdown-arrow-small',
-  'options-vertical',
-  'options-horizontal',
-  'check-oulined',
-  'check',
-  'check-filled',
-  'arrow-down-1',
+  'appearance',
+  'apps',
   'arrow-down',
-  'arrow-up',
   'arrow-left',
+  'arrow-sort',
+  'arrow-up',
   'arrow-right',
-  'tag',
-  'camera',
-  'element-drag',
-  'transaction-partial-fill',
-  'rows-2',
-  'check-notifications',
-  'qr-code-1',
-  'scan-1',
-  'shield-crossed',
-  'shield',
-  'clock',
-  'update',
-  'repeat',
-  'download',
-  'upload',
-  'qr-code',
-  'scan',
-  'eye-n',
-  'eye-off',
-  'unlock',
-  'lock',
-  'replace-owner',
-  'edit-owner',
-  'add-owner',
-  'send-to',
-  'owners',
-  'link',
-  'share',
-  'external-link',
-  'export',
-  'paste',
-  'copy',
-  'sign',
-  'document',
-  'file',
-  'search',
-  'edit',
-  'delete',
-  'close-outlined',
-  'close-filled',
-  'close',
-  'plus-outlined',
-  'plus-filled',
-  'plus',
-  'transaction-Batch',
-  'blocks-1',
-  'rows-1',
   'batch',
-  'filter',
+  'bell',
+  'block',
+  'blocks-1',
+  'blocks',
   'bookmark-filled',
   'bookmark',
-  'transaction-recovery',
+  'camera',
+  'chat',
+  'check-filled',
+  'check-oulined',
+  'check',
+  'chevron-down',
+  'chevron-left',
+  'chevron-right',
+  'chevron-up',
+  'clock',
+  'close-filled',
+  'close-outlined',
+  'close',
+  'code-blocks',
+  'copy',
+  'dapp-logo',
+  'delete',
+  'desktop',
+  'document',
+  'double-arrow',
+  'download',
+  'dropdown-arrow-small',
+  'edit-owner',
+  'edit',
+  'element-drag',
+  'experimental',
+  'export',
+  'external-link',
+  'eye-n',
+  'eye-off',
+  'file',
+  'filter',
+  'hardware',
+  'home',
+  'info',
+  'key',
+  'keystone',
+  'ledger',
+  'lightbulb',
+  'link',
+  'lock',
+  'mobile',
+  'nft',
+  'options-horizontal',
+  'options-vertical',
+  'owners',
+  'paste',
+  'plus-filled',
+  'plus-outlined',
+  'plus',
+  'points',
+  'qr-code-1',
+  'qr-code',
+  'question',
+  'repeat',
+  'replace-owner',
+  'rows-1',
+  'rows-2',
+  'rows',
+  'safe',
+  'scan-1',
+  'scan',
+  'search',
+  'seed',
+  'send-to',
+  'settings',
+  'share',
+  'shield-crossed',
+  'shield',
+  'sign',
+  'tag',
+  'token',
+  'transaction-batch',
   'transaction-change-settings',
   'transaction-contract',
   'transaction-execute',
+  'transaction-incoming',
+  'transaction-outgoing',
+  'transaction-partial-fill',
+  'transaction-recovery',
   'transaction-stake',
   'transaction-swap',
-  'transaction-outgoing',
-  'transaction-incoming',
-  'mobile',
-  'wallet',
-  'appearance',
-  'experimental',
-  'desktop',
-  'safe',
-  'bell',
-  'lightbulb',
-  'what-is-new',
-  'blocks',
-  'rows',
-  'apps',
-  'address-book',
-  'chat',
-  'settings',
   'transactions',
-  'nft',
-  'token',
-  'home',
+  'unlock',
+  'update',
+  'upload',
+  'wallet',
+  'what-is-new',
 ]

@@ -1,4 +1,5 @@
 name: EAS Dev Build
+
 on:
   push:
     branches:
@@ -10,8 +11,13 @@ on:
     paths:
       - apps/mobile/**
       - packages/**
+
 jobs:
   build:
+    if: >
+      github.event_name == 'push' ||
+      (github.event_name == 'pull_request' &&
+       contains(github.event.pull_request.labels.*.name, 'mobile-dev-release'))
     name: Install and build
     runs-on: ubuntu-latest
     steps:
@@ -24,7 +30,7 @@ jobs:
       # Set up Node.js
       - uses: actions/setup-node@v4
         with:
-          node-version: '22.11.0' # jod
+          node-version: '22.11.0'
           cache: 'yarn'
 
       # Install dependencies

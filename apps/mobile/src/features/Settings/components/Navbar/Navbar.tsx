@@ -1,7 +1,6 @@
 import React from 'react'
 import { View, XStack } from 'tamagui'
 import { SettingsMenu } from '@/src/features/Settings/components/Navbar/SettingsMenu'
-import { SettingsButton } from '@/src/features/Settings/components/Navbar/SettingsButton'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Address } from '@/src/types/address'
 
@@ -18,7 +17,6 @@ export const Navbar = (props: { safeAddress: Address }) => {
       paddingBottom={'$4'}
     >
       <View flexDirection="row" alignItems="center" columnGap="$3">
-        <SettingsButton />
         <SettingsMenu safeAddress={safeAddress} />
       </View>
     </XStack>

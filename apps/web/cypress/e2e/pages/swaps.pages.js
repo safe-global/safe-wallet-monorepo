@@ -35,12 +35,14 @@ const placeTwapOrderStrBtn = 'Place TWAP order'
 const placeLimitOrderStrBtn = 'Place limit order'
 export const unlockOrdersBtn = '[id="unlock-advanced-orders-btn"]'
 const limitOrderExpiryItem = (item) => `div[data-valuetext="${item}"]`
+const tokenBlock = '[data-testid="block-label"]'
 
 const limitStrBtn = 'Limit'
 const swapStrBtn = 'Swap'
 const twapStrBtn = 'TWAP'
 const confirmSwapStr = 'Confirm Swap'
 const swapAnywayStrBtn = 'Swap anyway'
+const acceptStrBtn = 'Accept'
 const maxStrBtn = 'Max'
 const numberOfPartsStr = /No\.? of parts/
 const sellAmountStr = 'Sell amount'
@@ -130,6 +132,31 @@ export const swapTxs = {
     '&id=multisig_0x8f4A19C85b39032A37f7a6dCc65234f966F72551_0xd3d13db9fc438d0674819f81be62fcd9c74a8ed7c101a8249b8895e55ee80d76',
   safeAppSwapOrder:
     '&id=multisig_0x03042B890b99552b60A073F808100517fb148F60_0x5f08e05edb210a8990791e9df2f287a5311a8137815ec85856a2477a36552f1e',
+  wrapSwap:
+    '&id=multisig_0xF184a243925Bf7fb1D64487339FF4F177Fb75644_0x06d7e5920bb59a38cf46436b146c33e7307d690875f7d64bca32a0b0c3394deb',
+  swapQueue:
+    '&id=multisig_0xD8b85a669413b25a8BE7D7698f88b7bFA20889d2_0xc2a59a93e1cbaeab5fde7a5d4cc63938e1b1e4597c7e203146a6e6e07b43a92f',
+}
+
+export const tokenBlockLabels = {
+  sell: 'Sell',
+  buy: 'Buy exactly',
+}
+
+export function verifySwapBtnIsVisible() {
+  cy.get(assetsSwapBtn).should('be.visible')
+}
+
+export function checkInputCurrencyPreviewValue(value) {
+  cy.get(inputCurrencyPreview).should('contain.text', value)
+}
+
+export function checkOutputCurrencyPreviewValue(value) {
+  cy.get(outputCurrencyPreview).should('contain.text', value)
+}
+
+export function checkTokenBlockValue(index, value) {
+  cy.get(tokenBlock).eq(index).should('contain.text', value)
 }
 
 export function unlockTwapOrders(iframeSelector) {
@@ -234,6 +261,16 @@ export function clickOnReviewOrderBtn() {
 }
 
 export function placeTwapOrder() {
+  cy.wait(3000)
+  cy.get('button')
+    .contains(acceptStrBtn)
+    .should(() => {})
+    .then(($button) => {
+      if (!$button.length) {
+        return
+      }
+      cy.wrap($button).click()
+    })
   cy.contains(placeTwapOrderStrBtn).click()
 }
 
@@ -315,7 +352,20 @@ export function selectOutputCurrency(option) {
 
 export function setInputValue(value) {
   cy.get(inputCurrencyInput).within(() => {
-    cy.get('input').clear().type(value)
+    cy.get('input')
+      .should('be.visible')
+      .should('not.be.disabled')
+      .clear()
+      .wait(3000)
+      .invoke('val', '')
+      .trigger('input')
+      .then(($input) => {
+        if ($input.val() !== '') {
+          cy.wrap($input).clear().invoke('val', '').trigger('input')
+        }
+      })
+      .should('have.value', '')
+      .type(value, { force: true })
   })
 }
 

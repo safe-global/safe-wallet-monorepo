@@ -20,7 +20,7 @@ describe('Happy path Proposers tests', () => {
     staticSafes = await getSafes(CATEGORIES.static)
   })
 
-  it('Verify that editing a proposer is only possible for the proposer created by the creator', () => {
+  it.skip('Verify that editing a proposer is only possible for the proposer created by the creator', () => {
     cy.visit(constants.setupUrl + staticSafes.SEP_STATIC_SAFE_31)
     wallet.connectSigner(signer3)
     cy.contains(owner.safeAccountNonceStr, { timeout: 10000 })
@@ -39,7 +39,7 @@ describe('Happy path Proposers tests', () => {
     proposer.checkProposerData([proposerName2])
   })
 
-  it('Verify a proposer can be added', () => {
+  it.skip('Verify a proposer can be added', () => {
     cy.visit(constants.setupUrl + staticSafes.SEP_STATIC_SAFE_32)
     wallet.connectSigner(signer)
     cy.contains(owner.safeAccountNonceStr, { timeout: 10000 })

@@ -2,17 +2,20 @@ import { StyleSheet } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 import { ImportError } from '@/src/features/ImportPrivateKey/components/ImportError'
 import React from 'react'
-import { SafeAreaView } from 'react-native-safe-area-context'
-
-const colors: [string, string] = ['#221818', 'transparent']
+import { useTheme, View } from 'tamagui'
+import { useModalStyle } from '@/src/navigation/hooks/useModalStyle'
 
 export default function App() {
+  const modalStyle = useModalStyle()
+  const theme = useTheme()
+  const colors: [string, string] = [theme.errorDark.get(), 'transparent']
+
   return (
-    <SafeAreaView edges={['bottom']} style={{ flex: 1 }}>
+    <View style={modalStyle}>
       <LinearGradient colors={colors} style={styles.background} />
 
       <ImportError />
-    </SafeAreaView>
+    </View>
   )
 }
 
