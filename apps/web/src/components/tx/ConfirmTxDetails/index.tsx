@@ -1,19 +1,20 @@
 import TxCard from '@/components/tx-flow/common/TxCard'
-import { Button, Checkbox, Divider, FormControlLabel, Grid2 as Grid, Stack, StepIcon, Typography } from '@mui/material'
-import type { SafeTransaction } from '@safe-global/safe-core-sdk-types'
+import { Checkbox, Divider, FormControlLabel, Grid2 as Grid, Stack, StepIcon, Typography } from '@mui/material'
 import commonCss from '@/components/tx-flow/common/styles.module.css'
 import { TxDetails } from './TxDetails'
-import SignForm from '../SignOrExecuteForm/SignForm'
 import ExternalLink from '@/components/common/ExternalLink'
-import { useState } from 'react'
 import type { TransactionData } from '@safe-global/safe-gateway-typescript-sdk'
+import { useContext, useState } from 'react'
+import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
+import SignOrExecuteForm from '../SignOrExecuteForm/SignOrExecuteFormNew'
 
 type ConfirmTxDetailsProps = {
-  safeTx: SafeTransaction
   txData?: TransactionData
+  onSubmit: () => void
 }
 
-export const ConfirmTxDetails = ({ safeTx, txData }: ConfirmTxDetailsProps) => {
+export const ConfirmTxDetails = ({ txData, onSubmit }: ConfirmTxDetailsProps) => {
+  const { safeTx } = useContext(SafeTxContext)
   const [checked, setChecked] = useState(false)
 
   const steps = [
@@ -38,15 +39,15 @@ export const ConfirmTxDetails = ({ safeTx, txData }: ConfirmTxDetailsProps) => {
     setChecked(event.target.checked)
   }
 
-  const onBackClick = () => {
-    console.log('Back clicked')
+  if (!safeTx) {
+    return null
   }
 
   return (
     <TxCard>
       <Grid container spacing={2}>
         <Grid size={{ xs: 12, sm: 6 }}>
-          <Stack spacing={6}>
+          <Stack ml={1} spacing={6}>
             {steps.map(({ label, description }, index) => (
               <Stack key={index} spacing={2} direction="row">
                 <StepIcon icon={index + 1} active />
@@ -78,14 +79,8 @@ export const ConfirmTxDetails = ({ safeTx, txData }: ConfirmTxDetailsProps) => {
         }
       />
 
-      <Divider className={commonCss.nestedDivider} sx={{ pt: 2 }} />
-
-      <Button variant="outlined" onClick={onBackClick} sx={{ width: ['100%', 'fit-content'] }}>
-        Back
-      </Button>
-
-      <SignForm
-        safeTx={safeTx}
+      <SignOrExecuteForm
+        onSubmit={onSubmit}
         disableSubmit={!checked}
         tooltip={!checked ? 'Review details and check the box to enable signing' : undefined}
       />
