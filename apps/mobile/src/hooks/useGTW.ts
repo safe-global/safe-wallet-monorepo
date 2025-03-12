@@ -43,16 +43,20 @@ export function useGTW() {
       delegatedAccount: Wallet | HDNodeWallet
       notificationAccountType?: NOTIFICATION_ACCOUNT_TYPE
     }) => {
+      const isOwner = notificationAccountType === NOTIFICATION_ACCOUNT_TYPE.OWNER
+
       try {
         const signature = await signMessage({ signer, message })
         const deviceUuid = await DeviceInfo.getUniqueId()
 
-        authVerifyV1({
+        await authVerifyV1({
           siweDto: {
             message,
             signature,
           },
-        }).then(() => {
+        })
+
+          if (isOwner) {
           delegatesPostDelegateV2({
             chainId,
             createDelegateDto: {
@@ -63,10 +67,10 @@ export function useGTW() {
               label: NOTIFICATION_ACCOUNT_TYPE.OWNER,
             },
           })
-        })
+        }
 
-        const NOTIFICATIONS_GRANTED =
-          notificationAccountType === NOTIFICATION_ACCOUNT_TYPE.REGULAR ? REGULAR_NOTIFICATIONS : OWNER_NOTIFICATIONS
+        const NOTIFICATIONS_GRANTED = isOwner ? OWNER_NOTIFICATIONS : REGULAR_NOTIFICATIONS
+
 
         await notificationsUpsertSubscriptionsV2({
           upsertSubscriptionsDto: {

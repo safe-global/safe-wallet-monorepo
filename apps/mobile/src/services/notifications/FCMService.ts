@@ -40,7 +40,7 @@ class FCMService {
         body: remoteMessage.notification?.body || '',
         data: remoteMessage.data,
       })
-      Logger.trace('listenForMessagesForeground: listening for messages in Foreground', remoteMessage)
+      Logger.info('listenForMessagesForeground: listening for messages in Foreground', remoteMessage)
     })
 
   listenForMessagesBackground = (): void => {
@@ -51,7 +51,7 @@ class FCMService {
         body: remoteMessage.notification?.body || '',
         data: remoteMessage.data,
       })
-      Logger.trace('listenForMessagesBackground :: listening for messages in background', remoteMessage)
+      Logger.info('listenForMessagesBackground :: listening for messages in background', remoteMessage)
     })
   }
 
