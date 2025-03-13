@@ -6,10 +6,11 @@ import ExternalLink from '@/components/common/ExternalLink'
 import { useContext, useState } from 'react'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import SignOrExecuteFormV2 from '../SignOrExecuteForm/SignOrExecuteFormV2'
+import type { SubmitCallback } from '../SignOrExecuteForm/SignOrExecuteFormV2'
 import useTxPreview from '../confirmation-views/useTxPreview'
 
 type ConfirmTxDetailsProps = {
-  onSubmit: () => void
+  onSubmit: SubmitCallback
   txId?: string
 }
 
