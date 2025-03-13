@@ -1,19 +1,15 @@
-import { selectActiveSafe } from '@/src/store/activeSafeSlice'
-import { View, H6 } from 'tamagui'
-import { BlurredIdenticonBackground } from '@/src/components/BlurredIdenticonBackground'
-import { SafeAreaView } from 'react-native-safe-area-context'
+import { Theme, XStack, getTokenValue } from 'tamagui'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Identicon } from '@/src/components/Identicon'
 import { shortenAddress } from '@/src/utils/formatters'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
-import { StyleSheet, TouchableOpacity } from 'react-native'
+import { TouchableOpacity } from 'react-native'
 import React from 'react'
-import { Address } from '@/src/types/address'
-import { Dropdown } from '@/src/components/Dropdown'
-import { SafesSliceItem } from '@/src/store/safesSlice'
-import { selectMyAccountsMode, toggleMode } from '@/src/store/myAccountsSlice'
-import { MyAccountsContainer, MyAccountsFooter } from '../MyAccounts'
-import { useMyAccountsSortable } from '../MyAccounts/hooks/useMyAccountsSortable'
-import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
+import { useAppSelector } from '@/src/store/hooks'
+import { useRouter } from 'expo-router'
+import { DropdownLabel } from '@/src/components/Dropdown/DropdownLabel'
+import { selectAppNotificationStatus } from '@/src/store/notificationsSlice'
+import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 
 const dropdownLabelProps = {
   fontSize: '$5',
@@ -21,55 +17,44 @@ const dropdownLabelProps = {
 } as const
 
 export const Navbar = () => {
-  const dispatch = useAppDispatch()
-  const isEdit = useAppSelector(selectMyAccountsMode)
-  const activeSafe = useAppSelector(selectActiveSafe)
-  const { safes, onDragEnd } = useMyAccountsSortable()
-
-  const toggleEditMode = () => {
-    dispatch(toggleMode())
+  const insets = useSafeAreaInsets()
+  const router = useRouter()
+  const activeSafe = useDefinedActiveSafe()
+  const isAppNotificationEnabled = useAppSelector(selectAppNotificationStatus)
+  const handleNotificationAccess = () => {
+    if (!isAppNotificationEnabled) {
+      router.navigate('/notifications-opt-in')
+    }
+    // TODO: navigate to notifications list when notifications are enabled
   }
 
   return (
-    <View>
-      <BlurredIdenticonBackground address={activeSafe.address as Address}>
-        <SafeAreaView style={[styles.headerContainer]}>
-          <Dropdown<SafesSliceItem>
-            label={shortenAddress(activeSafe.address)}
-            labelProps={dropdownLabelProps}
-            dropdownTitle="My accounts"
-            leftNode={<Identicon address={activeSafe.address} rounded={true} size={30} />}
-            items={safes}
-            keyExtractor={({ item }) => item.SafeInfo.address.value}
-            footerComponent={MyAccountsFooter}
-            renderItem={MyAccountsContainer}
-            sortable={isEdit}
-            onDragEnd={onDragEnd}
-            actions={
-              safes.length > 1 && (
-                <TouchableOpacity onPress={toggleEditMode}>
-                  <H6 fontWeight={600}>{isEdit ? 'Done' : 'Edit'}</H6>
-                </TouchableOpacity>
-              )
-            }
-          />
-
+    <Theme name="navbar">
+      <XStack
+        paddingTop={getTokenValue('$2') + insets.top}
+        justifyContent={'space-between'}
+        paddingHorizontal={16}
+        alignItems={'center'}
+        paddingBottom={'$2'}
+        backgroundColor={'$background'}
+      >
+        <DropdownLabel
+          label={shortenAddress(activeSafe.address)}
+          labelProps={dropdownLabelProps}
+          leftNode={<Identicon address={activeSafe.address} rounded={true} size={30} />}
+          onPress={() => {
+            router.push('/accounts-sheet')
+          }}
+        />
+        <XStack alignItems={'center'} justifyContent={'center'} gap={12}>
           <TouchableOpacity>
             <SafeFontIcon name="apps" />
           </TouchableOpacity>
-        </SafeAreaView>
-      </BlurredIdenticonBackground>
-    </View>
+          <TouchableOpacity onPress={handleNotificationAccess}>
+            <SafeFontIcon name="bell" />
+          </TouchableOpacity>
+        </XStack>
+      </XStack>
+    </Theme>
   )
 }
-
-const styles = StyleSheet.create({
-  headerContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 10,
-    paddingVertical: 16,
-    paddingBottom: 0,
-  },
-})

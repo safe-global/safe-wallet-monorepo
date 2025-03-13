@@ -1,20 +1,17 @@
-import { POLLING_INTERVAL } from '@/config/constants'
-import { getCounterfactualBalance } from '@/features/counterfactual/utils'
-import useIsSafenetEnabled from '@/features/safenet/hooks/useIsSafenetEnabled'
-import { useWeb3 } from '@/hooks/wallets/web3'
-import { Errors, logError } from '@/services/exceptions'
+import { useMemo } from 'react'
+import { type Balances, useBalancesGetBalancesV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import { useAppSelector } from '@/store'
-import { getSafenetBalances, useGetSafenetConfigQuery } from '@/store/safenet'
-import { TOKEN_LISTS, selectCurrency, selectSettings } from '@/store/settingsSlice'
-import { FEATURES, hasFeature } from '@/utils/chains'
-import { convertSafenetBalanceToSafeClientGatewayBalance } from '@/utils/safenet'
-import { skipToken } from '@reduxjs/toolkit/query/react'
-import { getBalances, type SafeBalanceResponse } from '@safe-global/safe-gateway-typescript-sdk'
-import { useEffect, useMemo } from 'react'
-import useAsync, { type AsyncResult } from '../useAsync'
+import { type AsyncResult } from '../useAsync'
+import { selectCurrency, selectSettings, TOKEN_LISTS } from '@/store/settingsSlice'
 import { useCurrentChain } from '../useChains'
-import useIntervalCounter from '../useIntervalCounter'
+import { FEATURES, hasFeature } from '@/utils/chains'
 import useSafeInfo from '../useSafeInfo'
+import { POLLING_INTERVAL } from '@/config/constants'
+import { useCounterfactualBalances } from '@/features/counterfactual/useCounterfactualBalances'
+import { useGetSafenetBalanceQuery, useGetSafenetConfigQuery } from '@/store/safenet'
+import useIsSafenetEnabled from '@/features/safenet/hooks/useIsSafenetEnabled'
+import { skipToken } from '@reduxjs/toolkit/query'
+import { convertSafenetBalanceToSafeClientGatewayBalance } from '@/utils/safenet'
 
 export const useTokenListSetting = (): boolean | undefined => {
   const chain = useCurrentChain()
@@ -28,11 +25,11 @@ export const useTokenListSetting = (): boolean | undefined => {
   return isTrustedTokenList
 }
 
-const mergeBalances = (cgw: SafeBalanceResponse, sn: SafeBalanceResponse): SafeBalanceResponse => {
+const mergeBalances = (cgw: Balances | undefined, sn: Balances): Balances => {
   // Create a Map using token addresses as keys
   const uniqueBalances = new Map(
     // Process Safenet items last so they take precedence by overwriting the CGW items
-    [...cgw.items, ...sn.items].map((item) => [item.tokenInfo.address, item]),
+    [...(cgw?.items ?? []), ...sn.items].map((item) => [item.tokenInfo.address, item]),
   )
 
   return {
@@ -45,87 +42,60 @@ const mergeBalances = (cgw: SafeBalanceResponse, sn: SafeBalanceResponse): SafeB
   }
 }
 
-export const useLoadBalances = (): AsyncResult<SafeBalanceResponse> => {
-  const [pollCount, resetPolling] = useIntervalCounter(POLLING_INTERVAL)
-  const isSafenetEnabled = useIsSafenetEnabled()
-  const {
-    data: safenetConfig,
-    isSuccess: isSafenetConfigSuccess,
-    isLoading: isSafenetConfigLoading,
-  } = useGetSafenetConfigQuery(!isSafenetEnabled ? skipToken : undefined)
+const useLoadBalances = () => {
   const currency = useAppSelector(selectCurrency)
   const isTrustedTokenList = useTokenListSetting()
   const { safe, safeAddress } = useSafeInfo()
-  const web3 = useWeb3()
-  const chain = useCurrentChain()
-  const chainId = safe.chainId
-  const chainSupportedBySafenet = isSafenetConfigSuccess && safenetConfig.chains.includes(Number(chainId))
+  const isSafenetEnabled = useIsSafenetEnabled()
+  const isReady = safeAddress && safe.deployed && isTrustedTokenList !== undefined
+  const isCounterfactual = !safe.deployed
 
-  // Re-fetch assets when the entire SafeInfo updates
-  const [data, error, loading] = useAsync<SafeBalanceResponse | undefined>(
-    () => {
-      if (!chainId || !safeAddress || isTrustedTokenList === undefined || isSafenetConfigLoading) return
-
-      if (!safe.deployed) {
-        return getCounterfactualBalance(safeAddress, web3, chain)
-      }
-
-      const balanceQueries = [
-        getBalances(chainId, safeAddress, currency, {
-          trusted: isTrustedTokenList,
-        }),
-      ]
-
-      if (isSafenetEnabled && isSafenetConfigSuccess && chainSupportedBySafenet) {
-        balanceQueries.push(
-          getSafenetBalances(safeAddress)
-            .then((safenetBalances) =>
-              convertSafenetBalanceToSafeClientGatewayBalance(
-                safenetBalances,
-                safenetConfig,
-                Number(chainId),
-                currency,
-              ),
-            )
-            .catch(() => ({
-              fiatTotal: '0',
-              items: [],
-            })),
-        )
-      }
-
-      return Promise.all(balanceQueries).then(([cgw, sn]) => (sn ? mergeBalances(cgw, sn) : cgw))
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [
+  let {
+    data: balances,
+    isLoading: loading,
+    error: errorStr,
+  } = useBalancesGetBalancesV1Query(
+    {
+      chainId: safe.chainId,
       safeAddress,
-      chainId,
-      currency,
-      isTrustedTokenList,
-      pollCount,
-      safe.deployed,
-      web3,
-      chain,
-      safenetConfig,
-      isSafenetConfigSuccess,
-      isSafenetConfigLoading,
-      chainSupportedBySafenet,
-    ],
-    false, // don't clear data between polls
+      fiatCode: currency,
+      trusted: isTrustedTokenList,
+    },
+    {
+      skip: !isReady,
+      pollingInterval: POLLING_INTERVAL,
+    },
   )
-  // Reset the counter when safe address/chainId changes
-  useEffect(() => {
-    resetPolling()
-  }, [resetPolling, safeAddress, chainId])
 
-  // Log errors
-  useEffect(() => {
-    if (error) {
-      logError(Errors._601, error.message)
+  // Counterfactual balances
+  const [cfData, cfError, cfLoading] = useCounterfactualBalances(safe)
+  let error = useMemo(() => (errorStr ? new Error(errorStr.toString()) : undefined), [errorStr])
+
+  if (isCounterfactual) {
+    balances = cfData as unknown as Balances
+    loading = cfLoading
+    error = cfError
+  }
+  const { data: safenetBalances } = useGetSafenetBalanceQuery(isSafenetEnabled ? { safeAddress } : skipToken, {
+    pollingInterval: POLLING_INTERVAL,
+  })
+  const { data: safenetConfig } = useGetSafenetConfigQuery(isSafenetEnabled ? undefined : skipToken)
+
+  const mergedBalances = useMemo(() => {
+    if (safenetBalances && safenetConfig) {
+      const convertedBalances = convertSafenetBalanceToSafeClientGatewayBalance(
+        safenetBalances,
+        safenetConfig,
+        Number(safe.chainId),
+        currency,
+      )
+      return mergeBalances(balances, convertedBalances)
+    } else {
+      return balances
     }
-  }, [error])
+  }, [balances, currency, safe.chainId, safenetBalances, safenetConfig])
 
-  return [data, error, loading || isSafenetConfigLoading]
+  return useMemo(() => [mergedBalances, error, loading], [mergedBalances, error, loading]) as AsyncResult<Balances>
 }
 
 export default useLoadBalances

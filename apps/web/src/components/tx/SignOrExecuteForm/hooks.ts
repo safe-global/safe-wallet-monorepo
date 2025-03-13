@@ -16,13 +16,10 @@ import {
 } from '@/services/tx/tx-sender'
 import { useHasPendingTxs } from '@/hooks/usePendingTxs'
 import { getSafeTxGas, getNonces } from '@/services/tx/tx-sender/recommendedNonce'
-import type { AsyncResult } from '@/hooks/useAsync'
 import useAsync from '@/hooks/useAsync'
 import { useUpdateBatch } from '@/hooks/useDraftBatch'
-import { getTransactionDetails, type TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
+import { type TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
 import { useCurrentChain } from '@/hooks/useChains'
-import directProposeTx from '@/services/tx/proposeTransaction'
-import { getAndValidateSafeSDK } from '@/services/tx/tx-sender/sdk'
 
 type TxActions = {
   addToBatch: (safeTx?: SafeTransaction, origin?: string) => Promise<string>
@@ -38,26 +35,6 @@ type TxActions = {
   proposeTx: (safeTx: SafeTransaction, txId?: string, origin?: string) => Promise<TransactionDetails>
 }
 
-type txDetails = AsyncResult<TransactionDetails>
-
-export const useProposeTx = (safeTx?: SafeTransaction, txId?: string, origin?: string): txDetails => {
-  const { safe } = useSafeInfo()
-  const signer = useSigner()
-  const sender = signer?.address || safe.owners?.[0]?.value
-
-  return useAsync(
-    async () => {
-      if (txId) return getTransactionDetails(safe.chainId, txId)
-      if (!safeTx || !sender) return
-      const safeSDK = getAndValidateSafeSDK()
-      const safeTxHash = await safeSDK.getTransactionHash(safeTx)
-      return directProposeTx(safe.chainId, safe.address.value, sender, safeTx, safeTxHash, origin)
-    },
-    [safeTx, txId, origin, safe.chainId, safe.address.value, sender],
-    false,
-  )
-}
-
 export const useTxActions = (): TxActions => {
   const { safe } = useSafeInfo()
   const onboard = useOnboard()
@@ -68,7 +45,7 @@ export const useTxActions = (): TxActions => {
 
   return useMemo<TxActions>(() => {
     const safeAddress = safe.address.value
-    const { chainId, version } = safe
+    const { chainId } = safe
 
     const _propose = async (sender: string, safeTx: SafeTransaction, txId?: string, origin?: string) => {
       return dispatchTxProposal({
@@ -103,7 +80,7 @@ export const useTxActions = (): TxActions => {
       if (await isSmartContractWallet(signer.chainId, signer.address)) {
         throw new Error('Cannot relay an unsigned transaction from a smart contract wallet')
       }
-      return await dispatchTxSigning(safeTx, version, signer.provider, txId)
+      return await dispatchTxSigning(safeTx, signer.provider, txId)
     }
 
     const signTx: TxActions['signTx'] = async (safeTx, txId, origin) => {
@@ -130,7 +107,7 @@ export const useTxActions = (): TxActions => {
       }
 
       // Otherwise, sign off-chain
-      const signedTx = await dispatchTxSigning(safeTx, version, signer.provider, txId)
+      const signedTx = await dispatchTxSigning(safeTx, signer.provider, txId)
       const tx = await _propose(signer.address, signedTx, txId, origin)
       return tx.txId
     }

@@ -5,6 +5,7 @@ import * as recovery from '../pages/recovery.pages'
 import * as tx from '../pages/transactions.page'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as wallet from '../../support/utils/wallet.js'
+import * as createtx from '../pages/create_tx.pages.js'
 
 let recoverySafes = []
 const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
@@ -32,6 +33,7 @@ describe('Recovery happy path tests 1', () => {
     recovery.enterRecovererAddress(constants.SEPOLIA_OWNER_2)
     recovery.agreeToTerms()
     recovery.clickOnNextBtn()
+    main.verifyElementsCount(createtx.noteTextField, 1)
     tx.executeFlow_1()
     recovery.verifyRecovererAdded([constants.SEPOLIA_OWNER_2_SHORT])
     recovery.clearRecoverers()

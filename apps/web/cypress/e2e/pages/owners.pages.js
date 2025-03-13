@@ -113,6 +113,8 @@ export function hoverOverDeleteOwnerBtn(index) {
 }
 
 export function openRemoveOwnerWindow(btn) {
+  const minimumCount = btn === 0 ? 1 : btn
+  main.verifyMinimumElementsCount(removeOwnerBtn, minimumCount)
   cy.get(removeOwnerBtn).eq(btn).click({ force: true })
   cy.get('div').contains(removeOwnerStr).should('exist')
 }
@@ -133,6 +135,9 @@ export function getAddressToBeRemoved() {
 }
 
 export function openReplaceOwnerWindow(index) {
+  cy.wait(3000) // Need to wait for the SDK to be initialized
+  const minimumCount = index === 0 ? 1 : index
+  main.verifyMinimumElementsCount(replaceOwnerBtn, minimumCount)
   cy.get(replaceOwnerBtn).eq(index).click({ force: true })
   cy.get(newOwnerName).should('be.visible')
   cy.get(newOwnerAddress).should('be.visible')
@@ -169,7 +174,7 @@ export function verifyTooltiptext(text) {
 }
 
 export function clickOnWalletExpandMoreIcon() {
-  cy.get(expandMoreIcon).eq(0).click()
+  cy.get(expandMoreIcon).eq(0).click({ force: true })
   cy.get(sentinelStart).next().should('be.visible')
 }
 

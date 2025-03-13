@@ -8,3 +8,13 @@
   align-items: center;
   justify-content: space-between;
 }
+
+.guardDisplay.warning {
+  background-color: var(--color-warning-background);
+  border-color: var(--color-warning-dark);
+}
+
+.guardDisplay.info {
+  background-color: var(--color-info-background);
+  border-color: var(--color-info-dark);
+}

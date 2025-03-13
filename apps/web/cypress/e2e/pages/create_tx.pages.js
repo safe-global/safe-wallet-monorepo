@@ -16,16 +16,17 @@ export const transactionItem = '[data-testid="transaction-item"]'
 export const connectedWalletExecMethod = '[data-testid="connected-wallet-execution-method"]'
 export const relayExecMethod = '[data-testid="relay-execution-method"]'
 export const payNowExecMethod = '[data-testid="pay-now-execution-method"]'
-const addToBatchBtn = '[data-track="batching: Add to batch"]'
+export const addToBatchBtn = '[data-track="batching: Add to batch"]'
 const accordionDetails = '[data-testid="accordion-details"]'
-const copyIcon = '[data-testid="copy-btn-icon"]'
+export const copyIcon = '[data-testid="copy-btn-icon"]'
+export const explorerBtn = '[data-testid="explorer-btn"]'
 const transactionSideList = '[data-testid="transaction-actions-list"]'
 const confirmationVisibilityBtn = '[data-testid="confirmation-visibility-btn"]'
 const expandAllBtn = '[data-testid="expande-all-btn"]'
 const collapseAllBtn = '[data-testid="collapse-all-btn"]'
 export const txRowTitle = '[data-testid="tx-row-title"]'
 const advancedDetails = '[data-testid="tx-advanced-details"]'
-const baseGas = '[data-testid="tx-bas-gas"]'
+const baseGas = '[data-testid="tx-base-gas"]'
 const requiredConfirmation = '[data-testid="required-confirmations"]'
 export const txDate = '[data-testid="tx-date"]'
 export const proposalStatus = '[data-testid="proposal-status"]'
@@ -45,10 +46,37 @@ const filterClearBtn = '[data-testid="clear-btn"]'
 export const addressItem = '[data-testid="address-item"]'
 const radioSelector = 'div[role="radiogroup"]'
 const rejectTxBtn = '[data-testid="reject-btn"]'
+const rejectChoiceBtn = '[data-track="reject-tx: Reject onchain button"]'
+const replaceChoiceBtn = '[data-track="reject-tx: Replace tx button"]'
+export const deleteChoiceBtn = '[data-track="reject-tx: Delete offchain button"]'
 const deleteTxModalBtn = '[data-testid="delete-tx-btn"]'
 const toggleUntrustedBtn = '[data-testid="toggle-untrusted"]'
 const simulateTxBtn = '[data-testid="simulate-btn"]'
 const simulateSuccess = '[data-testid="simulation-success-msg"]'
+const signBtn = '[data-testid="sign-btn"]'
+export const altImgDai = 'img[alt="DAI"]'
+export const altImgCow = 'img[alt="COW"]'
+export const altImgWeth = 'img[alt="WETH"]'
+export const altImgUsdc = 'img[alt="USDC"]'
+export const altImgUsdt = 'img[alt="USDT"]'
+export const altImgSwaps = 'svg[alt="Swap order"]'
+export const altImgLimitOrder = 'svg[alt="Limit order"]'
+export const altImgTwapOrder = 'svg[alt="Twap Order"]'
+
+export const txShareBlock = '[data-testid="share-block"]'
+export const txShareBlockDetails = '[data-testid="share-block-details"]'
+const copyLinkBtn = '[data-testid="copy-link-btn"]'
+export const noteTextField = '[data-testid="tx-note-textfield"]'
+const noteAlert = "[data-testid='tx-note-alert']"
+const recoredTxNote = '[data-testid="tx-note"]'
+const txNoteTooltip = '[data-testid="tx-note-tooltip"]'
+const noteCreator = '[data-testid="note-creator"]'
+const tableViewBtn = '[data-testid="table-view-btn"]'
+const gridViewBtn = '[data-testid="grid-view-btn"]'
+const txHexData = '[data-testid="tx-hex-data"]'
+const txStack = '[data-testid="tx-stack"]'
+const txOperation = '[data-testid="tx-operation"]'
+const nonceFld = '[data-testid="nonce-fld"]'
 
 const viewTransactionBtn = 'View transaction'
 const transactionDetailsTitle = 'Transaction details'
@@ -65,7 +93,6 @@ export const executeStr = 'Execute'
 const editBtnStr = 'Edit'
 const executionParamsStr = 'Execution parameters'
 const noLaterStr = 'No, later'
-const signBtnStr = 'Sign'
 const confirmBtnStr = 'Confirm'
 const expandAllBtnStr = 'Expand all'
 const collapseAllBtnStr = 'Collapse all'
@@ -83,16 +110,132 @@ const enabledBulkExecuteBtnTooltip = 'All highlighted transactions will be inclu
 const bulkExecuteBtnStr = 'Bulk execute'
 
 const batchModalTitle = 'Batch'
-const bulkTxStr = 'Bulk transactions'
+export const swapOrder = 'Swap order settlement'
+export const bulkTxs = 'Bulk transactions'
+export const txStr = 'Transactions'
+export const txDetailsStr = 'Transaction details'
+export const settingsStr = 'Settings'
+export const assetsStr = 'Assets'
+export const topAssetsStr = 'Top assets'
 
+export const txNoteWarningMessage = 'The notes are publicly visible, do not share any private or sensitive details'
+export const recordedTxNote = 'Tx note one'
+
+export const tx_status = {
+  execution_needed: 'Execution needed',
+}
 export const filterTypes = {
   incoming: 'Incoming',
   outgoing: 'Outgoing',
   module: 'Module-based',
 }
 
-function clickOnRejectBtn() {
-  cy.get(rejectTxBtn).click()
+export const txActions = {
+  setFallbackHandler: 'setFallbackHandler',
+}
+
+export const advancedDetailsViewOptions = {
+  table: 'table',
+  grid: 'grid',
+}
+
+export function clickOnReplaceTxOption() {
+  cy.get(replaceChoiceBtn).find('button').click()
+}
+
+export function verifyReplaceChoiceBtnVisible() {
+  cy.get(replaceChoiceBtn).find('button').should('be.visible')
+}
+
+export function getRejectButton() {
+  return cy.get(rejectTxBtn)
+}
+
+export function clickOnRejectBtn() {
+  getRejectButton().click()
+}
+
+export function hoverOverRejectBtnBtn() {
+  getRejectButton().trigger('mouseover', { force: true })
+}
+
+export function verifyRejectBtnDisabled() {
+  getRejectButton().should('be.disabled')
+}
+
+export function verifyTxRejectModalVisible() {
+  main.verifyMinimumElementsCount(wallet.choiceBtn, 2)
+}
+
+export function clickOnRejectionChoiceBtn(choice) {
+  cy.get(wallet.choiceBtn).eq(choice).click()
+}
+
+export function verifyTxNonceDisplayed(nonce) {
+  cy.get(nonceFld).should('include.text', nonce)
+}
+
+export function checkNonceIsReadOnly() {
+  cy.get(nonceFld).then(($el) => {
+    expect($el[0].nodeName).to.equal('DIV')
+  })
+}
+
+export function verifyRejecChoiceBtnStatus(option) {
+  cy.get(rejectChoiceBtn).find('button').should(option)
+}
+
+export function verifyDeleteChoiceBtnStatus(option) {
+  cy.get(deleteChoiceBtn).find('button').should(option)
+}
+
+export function typeNoteText(text) {
+  cy.get(noteTextField).find('input').clear().type(text)
+}
+
+export function checkMaxNoteLength() {
+  typeNoteText(main.generateRandomString(61))
+  cy.get(noteTextField).contains('60/60').should('be.visible')
+}
+
+export function checkNoteWarningMsg() {
+  cy.get(noteAlert).invoke('text').should('include', txNoteWarningMessage)
+}
+
+export function checkNoteRecordedNote(note) {
+  cy.get(recoredTxNote).should('be.visible').invoke('text').should('include', note)
+}
+
+export function checkNoteCreator(creator) {
+  cy.get(txNoteTooltip).trigger('mouseover', { force: true })
+  cy.get(noteCreator).should('be.visible').invoke('text').should('include', creator)
+}
+
+export function checkNoteRecordedNoteReadOnly() {
+  cy.get(recoredTxNote).then(($p) => {
+    expect($p.prop('tagName')).to.equal('P')
+  })
+}
+
+export function clickOnCopyLinkBtn() {
+  cy.get(copyLinkBtn).click()
+}
+
+export function verifyCopiedURL() {
+  cy.window().then((win) => {
+    cy.stub(win.navigator.clipboard, 'writeText').as('clipboardWrite')
+  })
+
+  cy.url().then((currentUrl) => {
+    clickOnCopyLinkBtn()
+
+    cy.get('@clipboardWrite').should('have.been.calledWith', currentUrl)
+  })
+}
+
+export function expandTxShareBlock() {
+  cy.get(txShareBlock).click()
+  cy.get(txShareBlockDetails).should('be.visible')
 }
 
 export function verifyBulkExecuteBtnIsEnabled(txs) {
@@ -284,6 +427,10 @@ export function verifyExpandedDetails(data, warning) {
   if (warning) cy.get(warning).should('be.visible')
 }
 
+export function verifyTxHeaderDetails(data) {
+  main.checkTextsExistWithinElement(transactionItem, data)
+}
+
 export function verifyAdvancedDetails(data) {
   main.checkTextsExistWithinElement(accordionDetails, data)
 }
@@ -299,14 +446,37 @@ export function clickOnExpandableAction(data) {
 }
 
 export function clickOnAdvancedDetails() {
-  cy.get(advancedDetails).click()
+  cy.get(advancedDetails).click({ force: true })
 }
 
 export function expandAdvancedDetails(data) {
   clickOnAdvancedDetails()
   data.forEach((row) => {
-    cy.get(txRowTitle).contains(row).should('be.visible')
+    cy.get('div').contains(row).should('be.visible')
   })
+}
+
+export function switchView(view) {
+  if (view === advancedDetailsViewOptions.table) {
+    cy.get(tableViewBtn).click()
+    cy.get(txHexData).should('be.visible')
+  } else {
+    cy.get(gridViewBtn).click()
+    cy.get(txOperation).should('be.visible')
+  }
+}
+
+export function clickOnCopyDataBtn(expectedData) {
+  cy.window().then((win) => {
+    cy.stub(win.navigator.clipboard, 'writeText').as('clipboardWrite')
+  })
+
+  cy.get(txStack).find('button').click()
+  cy.get('@clipboardWrite').should('have.been.calledWith', expectedData)
+}
+
+export function switchToGridView() {
+  cy.get(gridViewBtn).click()
 }
 
 export function collapseAdvancedDetails() {
@@ -511,6 +681,10 @@ export function changeNonce(value) {
   cy.get(nonceInput).clear().type(value, { force: true })
 }
 
+export function verifyNonceInputValue(value) {
+  cy.get(nonceInput).should('have.value', value)
+}
+
 export function verifyConfirmTransactionData() {
   cy.contains(yesStr).should('exist').click()
   cy.contains(estimatedFeeStr).should('exist')
@@ -545,7 +719,7 @@ export function clickOnNoLaterOption() {
 }
 
 export function clickOnSignTransactionBtn() {
-  cy.get('button').contains(signBtnStr).click()
+  cy.get(signBtn).click()
 }
 
 export function clickOnConfirmTransactionBtn() {
@@ -630,8 +804,8 @@ export function verifyBulkConfirmationScreen(tx, actions) {
   })
 }
 
-export function verifyBulkTxHistoryBlock(tx, actions) {
-  cy.contains(bulkTxStr)
+export function verifyBulkTxHistoryBlock(order, tx, actions) {
+  cy.contains(order)
     .parent('div')
     .parent()
     .eq(0)

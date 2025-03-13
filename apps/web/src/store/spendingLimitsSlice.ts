@@ -6,7 +6,7 @@ export type SpendingLimitState = {
   token: {
     address: string
     symbol: string
-    decimals: number
+    decimals?: number | null
     logoUri?: string
   }
   amount: string

@@ -33,10 +33,6 @@
   text-decoration: underline;
 }
 
-.message svg {
-  margin-top: 4px;
-}
-
 .details {
   margin-top: var(--space-1);
   color: var(--color-primary-light);

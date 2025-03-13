@@ -50,23 +50,4 @@ describe('[SMOKE] Add Owners tests', () => {
     main.waitForHistoryCallToComplete()
     owner.verifyAddOwnerBtnIsDisabled()
   })
-
-  it('[SMOKE] Verify default threshold value. Verify correct threshold calculation', () => {
-    wallet.connectSigner(signer)
-    owner.openAddOwnerWindow()
-    owner.typeOwnerAddress(constants.DEFAULT_OWNER_ADDRESS)
-    owner.verifyThreshold(1, 2)
-  })
-
-  it('[SMOKE] Verify valid Address validation', () => {
-    wallet.connectSigner(signer)
-    owner.openAddOwnerWindow()
-    owner.typeOwnerAddress(constants.SEPOLIA_OWNER_2)
-    owner.clickOnNextBtn()
-    owner.verifyConfirmTransactionWindowDisplayed()
-    owner.clickOnBackBtn()
-    owner.typeOwnerAddress(staticSafes.SEP_STATIC_SAFE_3)
-    owner.clickOnNextBtn()
-    owner.verifyConfirmTransactionWindowDisplayed()
-  })
 })

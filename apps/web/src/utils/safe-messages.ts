@@ -1,11 +1,9 @@
-import { getBytes, hashMessage, type TypedDataDomain, type JsonRpcSigner } from 'ethers'
+import { hashMessage, type TypedDataDomain, type JsonRpcSigner } from 'ethers'
 import { gte } from 'semver'
 import { adjustVInSignature } from '@safe-global/protocol-kit/dist/src/utils/signatures'
 
 import { hashTypedData } from '@/utils/web3'
 import { isValidAddress } from './validation'
-import { isWalletRejection } from '@/utils/wallets'
-import { getSupportedSigningMethods } from '@/services/tx/tx-sender/sdk'
 import {
   type SafeInfo,
   type SafeMessage,
@@ -15,7 +13,7 @@ import {
 import { FEATURES } from '@/utils/chains'
 
 import { hasFeature } from './chains'
-import { asError } from '@/services/exceptions/utils'
+import { SigningMethod } from '@safe-global/protocol-kit'
 
 /*
  * From v1.3.0, EIP-1271 support was moved to the CompatibilityFallbackHandler.
@@ -115,39 +113,9 @@ export const tryOffChainMsgSigning = async (
   safe: SafeInfo,
   message: SafeMessage['message'],
 ): Promise<string> => {
-  const signingMethods = getSupportedSigningMethods(safe.version)
+  const typedData = generateSafeMessageTypedData(safe, message)
+  const signature = await signer.signTypedData(typedData.domain as TypedDataDomain, typedData.types, typedData.message)
 
-  for await (const [i, signingMethod] of signingMethods.entries()) {
-    try {
-      if (signingMethod === 'eth_signTypedData') {
-        const typedData = generateSafeMessageTypedData(safe, message)
-        const signature = await signer.signTypedData(
-          typedData.domain as TypedDataDomain,
-          typedData.types,
-          typedData.message,
-        )
-
-        // V needs adjustment when signing with ledger / trezor through metamask
-        return adjustVInSignature(signingMethod, signature)
-      }
-
-      if (signingMethod === 'eth_sign') {
-        const signerAddress = await signer.getAddress()
-
-        const messageHash = generateSafeMessageHash(safe, message)
-        const signature = await signer.signMessage(getBytes(messageHash))
-
-        return adjustVInSignature(signingMethod, signature, messageHash, signerAddress)
-      }
-    } catch (error) {
-      const isLastSigningMethod = i === signingMethods.length - 1
-
-      if (isWalletRejection(asError(error)) || isLastSigningMethod) {
-        throw error
-      }
-    }
-  }
-
-  // Won't be reached, but TS otherwise complains
-  throw new Error('No supported signing methods')
+  // V needs adjustment when signing with ledger / trezor through metamask
+  return adjustVInSignature(SigningMethod.ETH_SIGN_TYPED_DATA, signature)
 }

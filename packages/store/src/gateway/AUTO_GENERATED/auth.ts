@@ -31,4 +31,4 @@ export type SiweDto = {
   message: string
   signature: string
 }
-export const { useAuthGetNonceV1Query, useAuthVerifyV1Mutation } = injectedRtkApi
+export const { useAuthGetNonceV1Query, useLazyAuthGetNonceV1Query, useAuthVerifyV1Mutation } = injectedRtkApi

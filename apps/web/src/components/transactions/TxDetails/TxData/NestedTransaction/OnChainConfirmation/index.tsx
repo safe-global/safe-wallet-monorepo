@@ -52,7 +52,13 @@ export const OnChainConfirmation = ({
     <NestedTransaction txData={data} isConfirmationView={isConfirmationView}>
       {nestedTxDetails ? (
         <>
-          <TxData txDetails={nestedTxDetails} trusted imitation={false} />
+          <TxData
+            txData={nestedTxDetails.txData}
+            txInfo={nestedTxDetails.txInfo}
+            txDetails={nestedTxDetails}
+            trusted
+            imitation={false}
+          />
 
           {(isMultiSendTxInfo(nestedTxDetails.txInfo) || isOrderTxInfo(nestedTxDetails.txInfo)) && (
             <ErrorBoundary fallback={<div>Error parsing data</div>}>

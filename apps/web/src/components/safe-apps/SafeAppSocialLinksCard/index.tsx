@@ -7,6 +7,7 @@ import Divider from '@mui/material/Divider'
 import { default as MuiLink } from '@mui/material/Link'
 import HelpOutlineRoundedIcon from '@mui/icons-material/HelpOutlineRounded'
 import GitHubIcon from '@mui/icons-material/GitHub'
+import TelegramIcon from '@mui/icons-material/Telegram'
 import TwitterIcon from '@mui/icons-material/Twitter'
 import { SafeAppSocialPlatforms } from '@safe-global/safe-gateway-typescript-sdk'
 import type { SafeAppData, SafeAppSocialProfile } from '@safe-global/safe-gateway-typescript-sdk'
@@ -30,6 +31,7 @@ const SafeAppSocialLinksCard = ({ safeApp }: SafeAppSocialLinksCardProps) => {
   const discordSocialLink = getSocialProfile(socialProfiles, SafeAppSocialPlatforms.DISCORD)
   const twitterSocialLink = getSocialProfile(socialProfiles, SafeAppSocialPlatforms.TWITTER)
   const githubSocialLink = getSocialProfile(socialProfiles, SafeAppSocialPlatforms.GITHUB)
+  const telegramSocialLink = getSocialProfile(socialProfiles, SafeAppSocialPlatforms.TELEGRAM)
 
   return (
     <Card className={css.container}>
@@ -58,13 +60,25 @@ const SafeAppSocialLinksCard = ({ safeApp }: SafeAppSocialLinksCardProps) => {
 
             <Box display="flex" mt={0.2} minHeight="40px">
               {discordSocialLink && (
-                <IconButton aria-label="Discord link" component="a" target="_blank" href={discordSocialLink.url}>
+                <IconButton
+                  aria-label="Discord link"
+                  component="a"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  href={discordSocialLink.url}
+                >
                   <DiscordIcon />
                 </IconButton>
               )}
 
               {twitterSocialLink && (
-                <IconButton aria-label="Twitter link" component="a" target="_blank" href={twitterSocialLink.url}>
+                <IconButton
+                  aria-label="Twitter link"
+                  component="a"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  href={twitterSocialLink.url}
+                >
                   <TwitterIcon color="border" />
                 </IconButton>
               )}
@@ -75,9 +89,23 @@ const SafeAppSocialLinksCard = ({ safeApp }: SafeAppSocialLinksCardProps) => {
                   component="a"
                   href={githubSocialLink.url}
                   target="_blank"
+                  rel="noopener noreferrer"
                   style={{ height: '40px', width: '40px' }}
                 >
                   <GitHubIcon color="border" />
+                </IconButton>
+              )}
+
+              {telegramSocialLink && (
+                <IconButton
+                  aria-label="Telegram link"
+                  component="a"
+                  href={telegramSocialLink.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ height: '40px', width: '40px' }}
+                >
+                  <TelegramIcon color="border" />
                 </IconButton>
               )}
             </Box>

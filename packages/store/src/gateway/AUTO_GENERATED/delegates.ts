@@ -139,9 +139,11 @@ export type DeleteDelegateV2Dto = {
 }
 export const {
   useDelegatesGetDelegatesV1Query,
+  useLazyDelegatesGetDelegatesV1Query,
   useDelegatesPostDelegateV1Mutation,
   useDelegatesDeleteDelegateV1Mutation,
   useDelegatesGetDelegatesV2Query,
+  useLazyDelegatesGetDelegatesV2Query,
   useDelegatesPostDelegateV2Mutation,
   useDelegatesDeleteDelegateV2Mutation,
 } = injectedRtkApi

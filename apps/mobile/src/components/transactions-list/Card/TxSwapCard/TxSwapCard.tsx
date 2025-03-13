@@ -10,9 +10,10 @@ interface TxSwapCardProps {
   bordered?: boolean
   inQueue?: boolean
   executionInfo?: Transaction['executionInfo']
+  onPress: () => void
 }
 
-export function TxSwapCard({ txInfo, bordered, executionInfo, inQueue }: TxSwapCardProps) {
+export function TxSwapCard({ txInfo, bordered, executionInfo, inQueue, onPress }: TxSwapCardProps) {
   return (
     <SafeListItem
       label={`${txInfo.sellToken.symbol} > ${txInfo.buyToken.symbol}`}
@@ -20,6 +21,7 @@ export function TxSwapCard({ txInfo, bordered, executionInfo, inQueue }: TxSwapC
       type="Swap order"
       executionInfo={executionInfo}
       bordered={bordered}
+      onPress={onPress}
       inQueue={inQueue}
       leftNode={
         <Theme name="logo">

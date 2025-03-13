@@ -19,7 +19,7 @@ const TokenAmount = ({
   hasTooltip = true,
 }: {
   value: string
-  decimals?: number
+  decimals?: number | null
   logoUri?: string
   tokenSymbol?: string
   direction?: TransferDirection

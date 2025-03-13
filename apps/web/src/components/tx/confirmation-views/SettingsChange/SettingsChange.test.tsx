@@ -12,7 +12,7 @@ describe('SettingsChange', () => {
   it('should display the SettingsChange component with owner details', () => {
     const { container, getByText } = render(
       <SettingsChangeContext.Provider value={{} as AddOwnerFlowProps | ReplaceOwnerFlowProps}>
-        <SettingsChange txDetails={{} as TransactionDetails} txInfo={txInfo} />
+        <SettingsChange txData={{} as TransactionDetails['txData']} txInfo={txInfo} />
       </SettingsChangeContext.Provider>,
     )
 
@@ -32,7 +32,7 @@ describe('SettingsChange', () => {
     const { container, getByText } = render(
       <SettingsChangeContext.Provider value={contextValue as AddOwnerFlowProps | ReplaceOwnerFlowProps}>
         <SettingsChange
-          txDetails={{} as TransactionDetails}
+          txData={{} as TransactionDetails['txData']}
           txInfo={{
             ...txInfo,
             settingsInfo: {

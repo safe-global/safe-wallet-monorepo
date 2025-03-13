@@ -122,12 +122,13 @@ export function clickOnMaxBtn() {
 }
 
 export function selectSpendingLimitOption() {
-  const input = () => {
-    return cy.get(spendingLimitTxOption).find('input')
-  }
-
   cy.get(spendingLimitTxOption).click()
-  main.checkRadioButtonState(input, constants.checkboxStates.checked)
+  cy.get(spendingLimitTxOption).find('input').should('be.checked')
+}
+
+export function selectStandardOption() {
+  cy.get(standardTx).click()
+  cy.get(standardTx).find('input').should('be.checked')
 }
 
 export function verifyTxOptionExist(options) {
@@ -171,7 +172,7 @@ export function checkTimeDropdownOptions() {
 }
 
 export function verifyDefaultTimeIsSet() {
-  cy.get(timePeriodSection).find('div').contains(timePeriodOptions.oneTime).should('be.visible')
+  cy.get(timePeriodSection).scrollIntoView().find('div').contains(timePeriodOptions.oneTime).should('be.visible')
 }
 
 export function clickOnNewSpendingLimitBtn() {

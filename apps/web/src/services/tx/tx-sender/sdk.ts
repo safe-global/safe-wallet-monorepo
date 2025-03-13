@@ -7,17 +7,14 @@ import {
   sameString,
 } from '@safe-global/protocol-kit/dist/src/utils'
 import type { Eip1193Provider, JsonRpcSigner } from 'ethers'
-import { isWalletRejection, isHardwareWallet, isWalletConnect } from '@/utils/wallets'
+import { isHardwareWallet, isWalletConnect } from '@/utils/wallets'
 import { OperationType, type SafeTransaction } from '@safe-global/safe-core-sdk-types'
-import { getChainConfig, type SafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
-import { SAFE_FEATURES } from '@safe-global/protocol-kit/dist/src/utils/safeVersions'
-import { hasSafeFeature } from '@/utils/safe-versions'
+import { getChainConfig } from '@safe-global/safe-gateway-typescript-sdk'
 import { createWeb3, getWeb3ReadOnly } from '@/hooks/wallets/web3'
 import { toQuantity } from 'ethers'
 import { connectWallet, getConnectedWallet } from '@/hooks/wallets/useOnboard'
 import { type OnboardAPI } from '@web3-onboard/core'
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
-import { asError } from '@/services/exceptions/utils'
 import { UncheckedJsonRpcSigner } from '@/utils/providers/UncheckedJsonRpcSigner'
 import get from 'lodash/get'
 import { maybePlural } from '@/utils/formatters'
@@ -147,35 +144,8 @@ export const getSafeSDKWithSigner = async (provider: Eip1193Provider): Promise<S
   return sdk.connect({ provider })
 }
 
-export const getSupportedSigningMethods = (safeVersion: SafeInfo['version']): SigningMethod[] => {
-  if (!hasSafeFeature(SAFE_FEATURES.ETH_SIGN, safeVersion)) {
-    return [SigningMethod.ETH_SIGN_TYPED_DATA]
-  }
-
-  return [SigningMethod.ETH_SIGN_TYPED_DATA, SigningMethod.ETH_SIGN]
-}
-
-export const tryOffChainTxSigning = async (
-  safeTx: SafeTransaction,
-  safeVersion: SafeInfo['version'],
-  sdk: Safe,
-): Promise<SafeTransaction> => {
-  const signingMethods = getSupportedSigningMethods(safeVersion)
-
-  for await (const [i, signingMethod] of signingMethods.entries()) {
-    try {
-      return await sdk.signTransaction(safeTx, signingMethod)
-    } catch (error) {
-      const isLastSigningMethod = i === signingMethods.length - 1
-
-      if (isWalletRejection(asError(error)) || isLastSigningMethod) {
-        throw error
-      }
-    }
-  }
-
-  // Won't be reached, but TS otherwise complains
-  throw new Error('No supported signing methods')
+export const tryOffChainTxSigning = async (safeTx: SafeTransaction, sdk: Safe): Promise<SafeTransaction> => {
+  return sdk.signTransaction(safeTx, SigningMethod.ETH_SIGN_TYPED_DATA)
 }
 
 export const isDelegateCall = (safeTx: SafeTransaction): boolean => {

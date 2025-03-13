@@ -11,18 +11,21 @@ import { Balance, useBalancesGetBalancesV1Query } from '@safe-global/store/gatew
 import { formatValue } from '@/src/utils/formatters'
 
 import { Fallback } from '../Fallback'
+import { skipToken } from '@reduxjs/toolkit/query'
 
 export function TokensContainer() {
   const activeSafe = useSelector(selectActiveSafe)
 
   const { data, isFetching, error } = useBalancesGetBalancesV1Query(
-    {
-      chainId: activeSafe.chainId,
-      fiatCode: 'USD',
-      safeAddress: activeSafe.address,
-      excludeSpam: false,
-      trusted: true,
-    },
+    !activeSafe
+      ? skipToken
+      : {
+          chainId: activeSafe.chainId,
+          fiatCode: 'USD',
+          safeAddress: activeSafe.address,
+          excludeSpam: false,
+          trusted: true,
+        },
     {
       pollingInterval: POLLING_INTERVAL,
     },

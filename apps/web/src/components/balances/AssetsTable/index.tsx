@@ -1,6 +1,5 @@
 import AddFundsCTA from '@/components/common/AddFunds'
 import EnhancedTable, { type EnhancedTableProps } from '@/components/common/EnhancedTable'
-import FiatValue from '@/components/common/FiatValue'
 import TokenAmount from '@/components/common/TokenAmount'
 import TokenExplorerLink from '@/components/common/TokenExplorerLink'
 import TokenIcon from '@/components/common/TokenIcon'
@@ -8,16 +7,14 @@ import Track from '@/components/common/Track'
 import CheckBalance from '@/features/counterfactual/CheckBalance'
 import SafenetBalanceBreakdown from '@/features/safenet/components/SafenetBalanceBreakdown'
 import StakeButton from '@/features/stake/components/StakeButton'
-import useIsStakingFeatureEnabled from '@/features/stake/hooks/useIsSwapFeatureEnabled'
 import SwapButton from '@/features/swap/components/SwapButton'
 import useIsSwapFeatureEnabled from '@/features/swap/hooks/useIsSwapFeatureEnabled'
 import useBalances from '@/hooks/useBalances'
-import InfoIcon from '@/public/images/notifications/info.svg'
 import { ASSETS_EVENTS } from '@/services/analytics/events/assets'
 import { STAKE_LABELS } from '@/services/analytics/events/stake'
 import { SWAP_LABELS } from '@/services/analytics/events/swaps'
 import { VisibilityOutlined } from '@mui/icons-material'
-import { Box, Checkbox, IconButton, Skeleton, SvgIcon, Tooltip, Typography } from '@mui/material'
+import { Box, Checkbox, IconButton, Skeleton, Tooltip, Typography } from '@mui/material'
 import type { TokenInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import { TokenType } from '@safe-global/safe-gateway-typescript-sdk'
 import { type ReactElement } from 'react'
@@ -25,6 +22,8 @@ import TokenMenu from '../TokenMenu'
 import SendButton from './SendButton'
 import css from './styles.module.css'
 import { useHideAssets, useVisibleAssets } from './useHideAssets'
+import { FiatBalance } from './FiatBalance'
+import useIsStakingFeatureEnabled from '@/features/stake/hooks/useIsStakingFeatureEnabled'
 
 const skeletonCells: EnhancedTableProps['rows'][0]['cells'] = {
   asset: {
@@ -150,7 +149,7 @@ const AssetsTable = ({
               ),
             },
             balance: {
-              rawValue: Number(item.balance) / 10 ** item.tokenInfo.decimals,
+              rawValue: Number(item.balance) / 10 ** (item.tokenInfo.decimals ?? 0),
               collapsed: item.tokenInfo.address === hidingAsset,
               content: (
                 <TokenAmount
@@ -163,29 +162,7 @@ const AssetsTable = ({
             value: {
               rawValue: rawFiatValue,
               collapsed: item.tokenInfo.address === hidingAsset,
-              content: (
-                <Typography textAlign="right">
-                  <FiatValue value={item.fiatBalance} />
-
-                  {rawFiatValue === 0 && (
-                    <Tooltip
-                      title="Provided values are indicative and we are unable to accommodate pricing requests for individual assets"
-                      placement="top"
-                      arrow
-                    >
-                      <span>
-                        <SvgIcon
-                          component={InfoIcon}
-                          inheritViewBox
-                          color="error"
-                          fontSize="small"
-                          sx={{ verticalAlign: 'middle', ml: 0.5, mr: [0, '-20px'] }}
-                        />
-                      </span>
-                    </Tooltip>
-                  )}
-                </Typography>
-              ),
+              content: <FiatBalance balanceItem={item} />,
             },
             actions: {
               rawValue: '',

@@ -160,14 +160,17 @@ export const safenetApi = createApi({
           threshold: number
         }
         saltNonce: string
+        dryRun?: boolean
       }
     >({
-      query: ({ account: { owners, threshold }, saltNonce }) => ({
-        url: `/account/deploy`,
-        method: 'POST',
-        body: { account: { owners, threshold }, saltNonce },
-      }),
-      providesTags: ['DeploySafenetAccount'],
+      query: ({ account: { owners, threshold }, saltNonce, dryRun }) => {
+        const url = `/account/deploy${dryRun ? `?dryRun=true` : ''}`
+        return {
+          url,
+          method: 'POST',
+          body: { account: { owners, threshold }, saltNonce },
+        }
+      },
     }),
   }),
 })
@@ -175,9 +178,11 @@ export const safenetApi = createApi({
 export const {
   useGetSafenetConfigQuery,
   useLazyGetSafenetBalanceQuery,
+  useGetSafenetBalanceQuery,
   useLazySimulateSafenetTransactionQuery,
   useGetSafenetTransactionDetailsQuery,
   useGetSafenetTransactionDetailsBySettlementQuery,
   useGetSafenetAccountQuery,
   useLazyDeploySafenetAccountQuery,
+  useDeploySafenetAccountQuery,
 } = safenetApi

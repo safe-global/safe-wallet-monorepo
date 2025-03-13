@@ -3,6 +3,7 @@ const darkPalette = {
     primary: '#FFFFFF',
     secondary: '#636669',
     disabled: '#636669',
+    contrast: '#000000',
   },
   primary: {
     dark: '#0cb259',
@@ -57,7 +58,9 @@ const darkPalette = {
     main: '#121312',
     paper: '#1C1C1C',
     light: '#1B2A22',
+    secondary: '#303033',
     skeleton: 'rgba(255, 255, 255, 0.04)',
+    disabled: '#7878801F',
   },
   backdrop: {
     main: '#636669',
