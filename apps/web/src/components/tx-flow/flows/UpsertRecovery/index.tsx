@@ -1,7 +1,8 @@
 import { SETUP_RECOVERY_CATEGORY } from '@/services/analytics/events/recovery'
-import type { ReactElement } from 'react'
+import { useMemo, type ReactElement } from 'react'
 
 import TxLayout from '@/components/tx-flow/common/TxLayout'
+import type { TxStep } from '../../common/TxLayout'
 import RecoveryPlus from '@/public/images/common/recovery-plus.svg'
 import useTxStepper from '../../useTxStepper'
 import { UpsertRecoveryFlowReview as UpsertRecoveryFlowReview } from './UpsertRecoveryFlowReview'
@@ -9,8 +10,7 @@ import { UpsertRecoveryFlowSettings as UpsertRecoveryFlowSettings } from './Upse
 import { UpsertRecoveryFlowIntro as UpsertRecoveryFlowIntro } from './UpsertRecoveryFlowIntro'
 import { DAY_IN_SECONDS } from './useRecoveryPeriods'
 import type { RecoveryState } from '@/features/recovery/services/recovery-state'
-
-const Subtitles = ['How does recovery work?', 'Set up recovery settings', 'Set up account recovery']
+import { ConfirmTxDetails } from '@/components/tx/ConfirmTxDetails'
 
 export enum UpsertRecoveryFlowFields {
   recoverer = 'recoverer',
@@ -40,32 +40,55 @@ function UpsertRecoveryFlow({ delayModifier }: { delayModifier?: RecoveryState[n
     SETUP_RECOVERY_CATEGORY,
   )
 
-  const steps = [
-    <UpsertRecoveryFlowIntro key={0} onSubmit={() => nextStep(data)} />,
-    <UpsertRecoveryFlowSettings
-      key={1}
-      params={data}
-      delayModifier={delayModifier}
-      onSubmit={(formData) => nextStep({ ...data, ...formData })}
-    />,
-    <UpsertRecoveryFlowReview key={2} params={data} moduleAddress={delayModifier?.address} />,
-  ]
-
-  const isIntro = step === 0
-
-  const icon = isIntro ? undefined : RecoveryPlus
+  const steps = useMemo<TxStep[]>(
+    () => [
+      {
+        txLayoutProps: {
+          title: 'Account recovery',
+          subtitle: 'How does recovery work?',
+          hideNonce: true,
+          hideProgress: true,
+        },
+        content: <UpsertRecoveryFlowIntro key={0} onSubmit={() => nextStep(data)} />,
+      },
+      {
+        txLayoutProps: { title: 'Account recovery', subtitle: 'Set up recovery settings', icon: RecoveryPlus },
+        content: (
+          <UpsertRecoveryFlowSettings
+            key={1}
+            params={data}
+            delayModifier={delayModifier}
+            onSubmit={(formData) => nextStep({ ...data, ...formData })}
+          />
+        ),
+      },
+      {
+        txLayoutProps: { title: 'Confirm transaction', subtitle: 'Set up account recovery', icon: RecoveryPlus },
+        content: (
+          <UpsertRecoveryFlowReview
+            key={2}
+            params={data}
+            moduleAddress={delayModifier?.address}
+            onSubmit={() => nextStep(data)}
+          />
+        ),
+      },
+      {
+        txLayoutProps: {
+          title: 'Confirm transaction details',
+          subtitle: 'Set up account recovery',
+          icon: RecoveryPlus,
+          fixedNonce: true,
+        },
+        content: <ConfirmTxDetails key={3} onSubmit={() => {}} />,
+      },
+    ],
+    [nextStep, data, delayModifier],
+  )
 
   return (
-    <TxLayout
-      title="Account recovery"
-      subtitle={Subtitles[step]}
-      icon={icon}
-      step={step}
-      onBack={prevStep}
-      hideNonce={isIntro}
-      hideProgress={isIntro}
-    >
-      {steps}
+    <TxLayout step={step} onBack={prevStep} {...(steps?.[step]?.txLayoutProps || {})}>
+      {steps.map(({ content }) => content)}
     </TxLayout>
   )
 }
