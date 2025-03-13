@@ -16,7 +16,7 @@ export const Identicon = ({ address, rounded, size }: Props) => {
   const blockieSvg = bloSvg(address)
 
   return (
-    <View style={{ borderRadius: rounded ? '50%' : 0, overflow: 'hidden' }}>
+    <View style={{ borderRadius: rounded ? '50%' : 0, overflow: 'hidden' }} testID={'identicon-image-container'}>
       <SvgXml testID={'identicon-image'} xml={blockieSvg} width={size} height={size} />
     </View>
   )
