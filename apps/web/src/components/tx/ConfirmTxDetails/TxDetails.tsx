@@ -42,7 +42,7 @@ export const TxDetails = ({ safeTx, txData }: TxDetailsProps) => {
   const toInfo = txData?.addressInfoIndex?.[safeTx.data.to] || txData?.to
 
   const ContentWrapper = ({ children }: { children: ReactElement | ReactElement[] }) => (
-    <Box sx={{ maxHeight: '550px', overflowY: 'scroll' }}>{children}</Box>
+    <Box sx={{ maxHeight: '550px', overflowY: 'auto', px: 2 }}>{children}</Box>
   )
 
   return (
