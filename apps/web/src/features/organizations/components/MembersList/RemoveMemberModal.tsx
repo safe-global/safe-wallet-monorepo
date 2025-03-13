@@ -25,9 +25,8 @@ const RemoveMemberDialog = ({
 
       if (error) {
         throw error
-      } else {
-        handleClose()
       }
+      handleClose()
     } catch (e) {
       setErrorMessage('An unexpected error occurred while removing the member.')
     }
