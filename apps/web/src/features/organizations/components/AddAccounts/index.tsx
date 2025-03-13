@@ -62,7 +62,7 @@ const AddAccounts = () => {
     },
   })
 
-  const { handleSubmit, watch, setValue, reset } = formMethods
+  const { handleSubmit, watch, setValue } = formMethods
 
   const selectedSafes = watch(`selectedSafes`)
   const selectedSafesLength = getSelectedSafes(selectedSafes).length
@@ -110,7 +110,7 @@ const AddAccounts = () => {
 
   const handleClose = () => {
     setSearchQuery('')
-    reset()
+    setValue('selectedSafes', {}) // Reset doesn't seem to work consistently with an object
     setOpen(false)
   }
 

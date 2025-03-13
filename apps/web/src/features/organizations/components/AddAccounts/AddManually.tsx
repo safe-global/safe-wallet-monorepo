@@ -105,6 +105,7 @@ const AddManually = ({ handleAddSafe }: { handleAddSafe: (data: AddManuallyFormV
                     renderValue={(value) => renderMenuItem(value, true)}
                     MenuProps={{
                       transitionDuration: 0,
+                      slotProps: { paper: { sx: { overflow: 'auto' } } },
                     }}
                   >
                     {configs.map((chain) => renderMenuItem(chain.chainId, false))}
