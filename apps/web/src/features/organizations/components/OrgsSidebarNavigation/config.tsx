@@ -6,7 +6,7 @@ import { AppRoutes } from '@/config/routes'
 import HomeIcon from '@/public/images/sidebar/home.svg'
 import SettingsIcon from '@/public/images/sidebar/settings.svg'
 import MembersIcon from '@/public/images/sidebar/members.svg'
-import AccountsIcon from '@/public/images/sidebar/bank.svg'
+import AccountsIcon from '@/public/images/sidebar/wallet.svg'
 import { SvgIcon } from '@mui/material'
 
 export type DynamicNavItem = {
@@ -25,7 +25,7 @@ export const navItems: DynamicNavItem[] = [
   },
   {
     label: 'Safe Accounts',
-    icon: <SvgIcon component={AccountsIcon} inheritViewBox sx={{ '& path': { fill: 'none !important' } }} />,
+    icon: <SvgIcon component={AccountsIcon} inheritViewBox />,
     href: AppRoutes.organizations.safeAccounts,
   },
   {
