@@ -1,7 +1,11 @@
 import { Text, View } from 'tamagui'
 import { SafeListItem } from '@/src/components/SafeListItem'
+import { SafeFontIcon } from '@/src/components/SafeFontIcon/SafeFontIcon'
 import { Switch } from 'react-native'
 import React from 'react'
+import { Container } from '@/src/components/Container'
+import { NOTIFICATION_ACCOUNT_TYPE } from '@/src/store/constants'
+import { NotificationPermissions } from './NotificationPermissions'
 
 type Props = {
   onChange: () => void
@@ -27,6 +31,10 @@ export const NotificationView = ({ onChange, value }: Props) => {
           />
         }
       />
+
+      <NotificationPermissions accountType={NOTIFICATION_ACCOUNT_TYPE.OWNER} isNotificationEnabled={value} />
     </View>
   )
 }
+
+// TODO: Check best way to handle accountType

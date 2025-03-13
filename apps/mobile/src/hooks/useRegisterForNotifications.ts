@@ -85,7 +85,6 @@ const useRegisterForNotifications = ({
         }
       }
 
-      // Step 3 - Store the delegated account in the redux store
       dispatch(
         addOrUpdateDelegatedAddress({
           delegatedAddress: randomDelegatedAccount.address as Address,
@@ -93,12 +92,12 @@ const useRegisterForNotifications = ({
         }),
       )
 
-      storePrivateKey(randomDelegatedAccount.address, randomDelegatedAccount.privateKey)
+      await storePrivateKey(randomDelegatedAccount.address, randomDelegatedAccount.privateKey)
 
       const ownerFound = activeSafeInfo.SafeInfo.owners.find((owner) => appSigners[owner.value]) ?? null
       const accountType = ownerFound ? NOTIFICATION_ACCOUNT_TYPE.OWNER : NOTIFICATION_ACCOUNT_TYPE.REGULAR
 
-      const proposedSignerPK = ownerFound ? await getPrivateKey(ownerFound.value) : randomDelegatedAccount.privateKey 
+      const proposedSignerPK = ownerFound ? await getPrivateKey(ownerFound.value) : randomDelegatedAccount.privateKey
 
       if (!proposedSignerPK) {
         setLoading(false)
