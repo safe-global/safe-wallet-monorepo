@@ -2,11 +2,11 @@ import ProposerForm from '@/components/tx/SignOrExecuteForm/ProposerForm'
 import CounterfactualForm from '@/features/counterfactual/CounterfactualForm'
 import { useIsWalletProposer } from '@/hooks/useProposers'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { type ReactElement, type ReactNode, useState, useContext, useCallback } from 'react'
+import { type ReactElement, type ReactNode, useContext, useCallback } from 'react'
 import madProps from '@/utils/mad-props'
 import { useImmediatelyExecutable, useValidateNonce } from './hooks'
 import ExecuteForm from './ExecuteForm'
-import SignForm from './SignFormNew'
+import SignFormV2 from './SignFormV2'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { useAppSelector } from '@/store'
 import { selectSettings } from '@/store/settingsSlice'
@@ -18,7 +18,6 @@ import { useLazyGetTransactionDetailsQuery } from '@/store/api/gateway'
 import type { TransactionDetails, TransactionPreview } from '@safe-global/safe-gateway-typescript-sdk'
 import { useSigner } from '@/hooks/wallets/useWallet'
 import { trackTxEvents } from './tracking'
-import { trackAddNote } from '@/features/tx-notes'
 
 export type SubmitCallback = (txId: string, isExecuted?: boolean) => void
 
@@ -35,12 +34,13 @@ export type SignOrExecuteProps = {
   tooltip?: string
 }
 
-export const SignOrExecuteForm = ({
+export const SignOrExecuteFormV2 = ({
   chainId,
   safeTx,
   safeTxError,
   onSubmit,
   isCreation,
+  origin,
   ...props
 }: SignOrExecuteProps & {
   chainId: ReturnType<typeof useChainId>
@@ -50,9 +50,7 @@ export const SignOrExecuteForm = ({
   txDetails?: TransactionDetails
   txPreview?: TransactionPreview
 }): ReactElement | undefined => {
-  const [customOrigin, setCustomOrigin] = useState<string | undefined>(props.origin)
-  const { transactionExecution } = useAppSelector(selectSettings)
-  const [shouldExecute, setShouldExecute] = useState<boolean>(transactionExecution)
+  const { transactionExecution: shouldExecute } = useAppSelector(selectSettings)
   const isNewExecutableTx = useImmediatelyExecutable() && isCreation
   const isCorrectNonce = useValidateNonce(safeTx)
 
@@ -61,7 +59,7 @@ export const SignOrExecuteForm = ({
   const isSafeOwner = useIsSafeOwner()
   const signer = useSigner()
   const isProposer = useIsWalletProposer()
-  const isProposing = isProposer && !isSafeOwner && isCreation
+  const isProposing = isProposer && !isSafeOwner && !!isCreation
   const isCounterfactualSafe = !safe.deployed
 
   // Check if a Zodiac Roles mod is enabled and if the user is a member of any role that allows the transaction
@@ -85,21 +83,9 @@ export const SignOrExecuteForm = ({
 
       const { data: details } = await trigger({ chainId, txId })
       // Track tx event
-      trackTxEvents(
-        details,
-        !!isCreation,
-        isExecuted,
-        isRoleExecution,
-        isProposerCreation,
-        !!signer?.isSafe,
-        customOrigin,
-      )
-
-      if (customOrigin !== props.origin) {
-        trackAddNote()
-      }
+      trackTxEvents(details, !!isCreation, isExecuted, isRoleExecution, isProposerCreation, !!signer?.isSafe, origin)
     },
-    [chainId, isCreation, onSubmit, trigger, signer?.isSafe, customOrigin, props.origin],
+    [chainId, isCreation, onSubmit, trigger, signer?.isSafe, origin],
   )
 
   const onRoleExecutionSubmit = useCallback<typeof onFormSubmit>(
@@ -116,7 +102,7 @@ export const SignOrExecuteForm = ({
     ...props,
     safeTx,
     isCreation,
-    origin: customOrigin,
+    origin,
     onSubmit: onFormSubmit,
   }
   if (isCounterfactualSafe && !isProposing) {
@@ -139,7 +125,7 @@ export const SignOrExecuteForm = ({
   }
 
   if (!isCounterfactualSafe && !willExecute && !willExecuteThroughRole && !isProposing) {
-    return <SignForm {...commonProps} />
+    return <SignFormV2 {...commonProps} />
   }
 
   if (isProposing) {
@@ -150,7 +136,7 @@ export const SignOrExecuteForm = ({
 const useSafeTx = () => useContext(SafeTxContext).safeTx
 const useSafeTxError = () => useContext(SafeTxContext).safeTxError
 
-export default madProps(SignOrExecuteForm, {
+export default madProps(SignOrExecuteFormV2, {
   chainId: useChainId,
   safeTx: useSafeTx,
   safeTxError: useSafeTxError,

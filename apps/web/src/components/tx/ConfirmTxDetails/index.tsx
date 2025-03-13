@@ -5,15 +5,16 @@ import { TxDetails } from './TxDetails'
 import ExternalLink from '@/components/common/ExternalLink'
 import { useContext, useState } from 'react'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
-import SignOrExecuteForm from '../SignOrExecuteForm/SignOrExecuteFormNew'
+import SignOrExecuteFormV2 from '../SignOrExecuteForm/SignOrExecuteFormV2'
 import useTxPreview from '../confirmation-views/useTxPreview'
 
 type ConfirmTxDetailsProps = {
   onSubmit: () => void
+  txId?: string
 }
 
-export const ConfirmTxDetails = ({ onSubmit }: ConfirmTxDetailsProps) => {
-  const { safeTx } = useContext(SafeTxContext)
+export const ConfirmTxDetails = ({ onSubmit, txId }: ConfirmTxDetailsProps) => {
+  const { safeTx, txOrigin } = useContext(SafeTxContext)
   const [txPreview] = useTxPreview(safeTx?.data)
   const [checked, setChecked] = useState(false)
 
@@ -79,10 +80,13 @@ export const ConfirmTxDetails = ({ onSubmit }: ConfirmTxDetailsProps) => {
         }
       />
 
-      <SignOrExecuteForm
+      <SignOrExecuteFormV2
         onSubmit={onSubmit}
         disableSubmit={!checked}
         tooltip={!checked ? 'Review details and check the box to enable signing' : undefined}
+        origin={txOrigin}
+        txId={txId}
+        isCreation={!txId}
       />
     </TxCard>
   )
