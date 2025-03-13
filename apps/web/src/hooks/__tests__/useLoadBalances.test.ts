@@ -402,6 +402,7 @@ describe('useLoadBalances', () => {
               balance: '3000',
               allowances: '0',
               total: '3000',
+              pendingSettlements: '0',
             },
           },
         },
