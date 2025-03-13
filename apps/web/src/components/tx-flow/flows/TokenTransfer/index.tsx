@@ -7,6 +7,7 @@ import AssetsIcon from '@/public/images/sidebar/assets.svg'
 import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
 import { TokenAmountFields } from '@/components/common/TokenAmountInput'
 import { ConfirmTxDetails } from '@/components/tx/ConfirmTxDetails'
+import { useMemo } from 'react'
 
 export enum TokenTransferType {
   multiSig = 'multiSig',
@@ -44,27 +45,30 @@ const TokenTransferFlow = ({ txNonce, ...params }: TokenTransferFlowProps) => {
     ...params,
   })
 
-  const steps: TxStep[] = [
-    {
-      txLayoutProps: { title: 'New transaction' },
-      content: (
-        <CreateTokenTransfer
-          key={0}
-          params={data}
-          txNonce={txNonce}
-          onSubmit={(formData) => nextStep({ ...data, ...formData })}
-        />
-      ),
-    },
-    {
-      txLayoutProps: { title: 'Confirm transaction' },
-      content: <ReviewTokenTx key={1} params={data} txNonce={txNonce} onSubmit={() => nextStep(data)} />,
-    },
-    {
-      txLayoutProps: { title: 'Confirm transaction details', fixedNonce: true },
-      content: <ConfirmTxDetails key={2} onSubmit={() => {}} />,
-    },
-  ]
+  const steps = useMemo<TxStep[]>(
+    () => [
+      {
+        txLayoutProps: { title: 'New transaction' },
+        content: (
+          <CreateTokenTransfer
+            key={0}
+            params={data}
+            txNonce={txNonce}
+            onSubmit={(formData) => nextStep({ ...data, ...formData })}
+          />
+        ),
+      },
+      {
+        txLayoutProps: { title: 'Confirm transaction' },
+        content: <ReviewTokenTx key={1} params={data} txNonce={txNonce} onSubmit={() => nextStep(data)} />,
+      },
+      {
+        txLayoutProps: { title: 'Confirm transaction details', fixedNonce: true },
+        content: <ConfirmTxDetails key={2} onSubmit={() => {}} />,
+      },
+    ],
+    [nextStep, data, txNonce],
+  )
 
   return (
     <TxLayout

@@ -1,5 +1,5 @@
 import { CANCEL_RECOVERY_CATEGORY } from '@/services/analytics/events/recovery'
-import type { ReactElement } from 'react'
+import { useMemo, type ReactElement } from 'react'
 
 import TxLayout from '../../common/TxLayout'
 import type { TxStep } from '../../common/TxLayout'
@@ -14,20 +14,23 @@ const TITLE = 'Cancel Account recovery'
 function CancelRecoveryFlow({ recovery }: { recovery: RecoveryQueueItem }): ReactElement {
   const { step, nextStep, prevStep } = useTxStepper<undefined>(undefined, CANCEL_RECOVERY_CATEGORY)
 
-  const steps: TxStep[] = [
-    {
-      txLayoutProps: { title: TITLE, hideNonce: true },
-      content: <CancelRecoveryOverview key={0} onSubmit={() => nextStep(undefined)} />,
-    },
-    {
-      txLayoutProps: { title: 'Confirm transaction', subtitle: TITLE },
-      content: <CancelRecoveryFlowReview key={1} recovery={recovery} onSubmit={() => nextStep(undefined)} />,
-    },
-    {
-      txLayoutProps: { title: 'Confirm transaction details', subtitle: TITLE, fixedNonce: true },
-      content: <ConfirmTxDetails key={2} onSubmit={() => {}} />,
-    },
-  ]
+  const steps = useMemo<TxStep[]>(
+    () => [
+      {
+        txLayoutProps: { title: TITLE, hideNonce: true },
+        content: <CancelRecoveryOverview key={0} onSubmit={() => nextStep(undefined)} />,
+      },
+      {
+        txLayoutProps: { title: 'Confirm transaction', subtitle: TITLE },
+        content: <CancelRecoveryFlowReview key={1} recovery={recovery} onSubmit={() => nextStep(undefined)} />,
+      },
+      {
+        txLayoutProps: { title: 'Confirm transaction details', subtitle: TITLE, fixedNonce: true },
+        content: <ConfirmTxDetails key={2} onSubmit={() => {}} />,
+      },
+    ],
+    [nextStep],
+  )
 
   return (
     <TxLayout step={step} onBack={prevStep} {...(steps?.[step]?.txLayoutProps || {})}>
