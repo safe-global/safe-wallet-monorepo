@@ -36,7 +36,7 @@ type MemberField = {
   role: MemberRole
 }
 
-const RoleMenuItem = ({
+export const RoleMenuItem = ({
   role,
   hasDescription = false,
   selected = false,

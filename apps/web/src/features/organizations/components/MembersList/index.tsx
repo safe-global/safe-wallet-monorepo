@@ -9,6 +9,7 @@ import MemberName from './MemberName'
 import RemoveMemberDialog from './RemoveMemberModal'
 import { useState } from 'react'
 import { useIsAdmin } from '@/features/organizations/hooks/useIsAdmin'
+import EditMemberDialog from '@/features/organizations/components/MembersList/EditMemberDialog'
 
 const headCells = [
   {
@@ -29,20 +30,27 @@ const headCells = [
   },
 ]
 
-const EditButton = () => {
+const EditButton = ({ member }: { member: UserOrganization }) => {
+  const [open, setOpen] = useState(false)
+
   return (
-    <Tooltip title="Edit member name" placement="top">
-      <IconButton onClick={() => {}} size="small">
-        <SvgIcon component={EditIcon} inheritViewBox color="border" fontSize="small" />
-      </IconButton>
-    </Tooltip>
+    <>
+      <Tooltip title="Edit member" placement="top">
+        <IconButton onClick={() => setOpen(true)} size="small">
+          <SvgIcon component={EditIcon} inheritViewBox color="border" fontSize="small" />
+        </IconButton>
+      </Tooltip>
+      {open && <EditMemberDialog member={member} handleClose={() => setOpen(false)} />}
+    </>
   )
 }
+
 const MenuButtons = ({ member, disableDelete }: { member: UserOrganization; disableDelete: boolean }) => {
   const [openRemoveMemberDialog, setOpenRemoveMemberDialog] = useState(false)
+
   return (
     <div className={tableCss.actions}>
-      <EditButton />
+      <EditButton member={member} />
       <Tooltip title={disableDelete ? 'Cannot remove last admin' : 'Remove member'} placement="top">
         <Box component="span">
           <IconButton disabled={disableDelete} onClick={() => setOpenRemoveMemberDialog(true)} size="small">
