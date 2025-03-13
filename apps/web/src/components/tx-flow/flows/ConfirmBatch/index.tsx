@@ -46,11 +46,11 @@ const ConfirmBatchFlow = (props: ConfirmBatchProps) => {
     () => [
       {
         txLayoutProps: { title: 'Confirm batch' },
-        content: <ConfirmBatch key={0} {...props} onSubmit={() => nextStep(data)} />,
+        content: <ConfirmBatch key={0} onSubmit={() => nextStep(data)} />,
       },
       {
         txLayoutProps: { title: 'Confirm transaction details', fixedNonce: true },
-        content: <ConfirmTxDetails key={1} onSubmit={() => {}} />,
+        content: <ConfirmTxDetails key={1} {...props} />,
       },
     ],
     [nextStep, data, props],
