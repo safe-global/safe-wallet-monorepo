@@ -29,9 +29,9 @@ export const PaperViewToggle = ({ children, activeView = 0 }: PaperViewTogglePro
   const Content = ({ index }: { index: number }) => children?.[index]?.content || null
 
   return (
-    <Paper sx={{ backgroundColor: 'background.main', padding: 2 }}>
+    <Paper sx={{ backgroundColor: 'background.main', py: 2 }}>
       <Stack spacing={2}>
-        <Stack direction="row-reverse" justifyContent="space-between">
+        <Stack direction="row-reverse" justifyContent="space-between" px={2}>
           <ToggleButtonGroup onChange={onChangeView}>{children}</ToggleButtonGroup>
           <Title index={active} />
         </Stack>
