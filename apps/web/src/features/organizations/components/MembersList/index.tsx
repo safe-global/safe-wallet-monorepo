@@ -1,11 +1,14 @@
-import { Chip, IconButton, SvgIcon, Tooltip } from '@mui/material'
-import type { UserOrganization } from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
+import { Box, Chip, IconButton, SvgIcon, Tooltip } from '@mui/material'
+import { type UserOrganization } from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
 import EditIcon from '@/public/images/common/edit.svg'
 import { MemberRole } from '../AddMembersModal'
 import DeleteIcon from '@/public/images/common/delete.svg'
 import EnhancedTable from '@/components/common/EnhancedTable'
 import tableCss from '@/components/common/EnhancedTable/styles.module.css'
 import MemberName from './MemberName'
+import RemoveMemberDialog from './RemoveMemberModal'
+import { useState } from 'react'
+import { useIsAdmin } from '@/features/organizations/hooks/useIsAdmin'
 
 const headCells = [
   {
@@ -26,8 +29,49 @@ const headCells = [
   },
 ]
 
+const EditButton = () => {
+  return (
+    <Tooltip title="Edit member name" placement="top">
+      <IconButton onClick={() => {}} size="small">
+        <SvgIcon component={EditIcon} inheritViewBox color="border" fontSize="small" />
+      </IconButton>
+    </Tooltip>
+  )
+}
+const MenuButtons = ({ member, disableDelete }: { member: UserOrganization; disableDelete: boolean }) => {
+  const [openRemoveMemberDialog, setOpenRemoveMemberDialog] = useState(false)
+  return (
+    <div className={tableCss.actions}>
+      <EditButton />
+      <Tooltip title={disableDelete ? 'Cannot remove last admin' : 'Remove member'} placement="top">
+        <Box component="span">
+          <IconButton disabled={disableDelete} onClick={() => setOpenRemoveMemberDialog(true)} size="small">
+            <SvgIcon
+              component={DeleteIcon}
+              inheritViewBox
+              color={disableDelete ? 'disabled' : 'error'}
+              fontSize="small"
+            />
+          </IconButton>
+        </Box>
+      </Tooltip>
+      {openRemoveMemberDialog && (
+        <RemoveMemberDialog
+          userId={member.user.id}
+          memberName={member.name}
+          handleClose={() => setOpenRemoveMemberDialog(false)}
+        />
+      )}
+    </div>
+  )
+}
+
 const MembersList = ({ members }: { members: UserOrganization[] }) => {
+  const isAdmin = useIsAdmin()
+  const adminCount = members.filter((member) => member.role === MemberRole.ADMIN).length
+
   const rows = members.map((member) => {
+    const isLastAdmin = adminCount === 1 && member.role === MemberRole.ADMIN
     return {
       cells: {
         name: {
@@ -47,22 +91,12 @@ const MembersList = ({ members }: { members: UserOrganization[] }) => {
         actions: {
           rawValue: '',
           sticky: true,
-          content: (
-            <div className={tableCss.actions}>
-              <Tooltip title="Edit entry" placement="top">
-                <IconButton onClick={() => {}} size="small">
-                  <SvgIcon component={EditIcon} inheritViewBox color="border" fontSize="small" />
-                </IconButton>
-              </Tooltip>
-              <IconButton onClick={() => {}} size="small">
-                <SvgIcon component={DeleteIcon} inheritViewBox color="error" fontSize="small" />
-              </IconButton>
-            </div>
-          ),
+          content: isAdmin ? <MenuButtons member={member} disableDelete={isAdmin && isLastAdmin} /> : null,
         },
       },
     }
   })
+
   if (!rows.length) {
     return null
   }
