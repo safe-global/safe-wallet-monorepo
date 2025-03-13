@@ -1,7 +1,7 @@
 import { SigningMethod } from '@safe-global/protocol-kit'
 import { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import { createConnectedWallet } from '@/src/services/web3'
-import { createExistingTx } from '@/src/services/tx/tx-sender'
+import { proposeTx } from '@/src/services/tx/tx-sender'
 import { SafeInfo } from '@/src/types/address'
 
 export type signTxParams = {
@@ -28,7 +28,7 @@ export const signTx = async ({
   }
 
   const { protocolKit, wallet } = await createConnectedWallet(privateKey, activeSafe, chain)
-  const { safeTx } = await createExistingTx({
+  const { safeTx } = await proposeTx({
     activeSafe,
     txId,
     chain,

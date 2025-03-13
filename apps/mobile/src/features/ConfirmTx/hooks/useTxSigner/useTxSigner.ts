@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useMemo } from 'react'
+import { useLayoutEffect, useMemo } from 'react'
 import { MultisigExecutionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { selectActiveSigner, setActiveSigner } from '@/src/store/activeSignerSlice'
 import { useAppSelector, useAppDispatch } from '@/src/store/hooks'
