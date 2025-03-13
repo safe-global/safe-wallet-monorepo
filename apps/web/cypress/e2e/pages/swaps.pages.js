@@ -35,6 +35,8 @@ const placeLimitOrderStrBtn = 'Place limit order'
 export const unlockOrdersBtn = '[id="unlock-advanced-orders-btn"]'
 const limitOrderExpiryItem = (item) => `div[data-valuetext="${item}"]`
 const tokenBlock = '[data-testid="block-label"]'
+const confirmPriceImpactInput = '[id="confirm-modal-input"]'
+const confirmPriceImpactBtn = '[id="confirm-modal-button"]'
 
 const limitStrBtn = 'Limit'
 const swapStrBtn = 'Swap'
@@ -152,10 +154,11 @@ export function checkInputCurrencyPreviewValue(value) {
 }
 
 export function checkOutputCurrencyPreviewValue(value) {
-  cy.get(outputCurrencyPreview).should('contain.text', value)
+  cy.get(outputCurrencyPreview).contains(value)
 }
-
+//
 export function checkTokenBlockValue(index, value) {
+  // cy.get(tokenBlock).eq(index).contains(value)
   cy.get(tokenBlock).eq(index).should('contain.text', value)
 }
 
@@ -272,6 +275,19 @@ export function placeTwapOrder() {
       cy.wrap($button).click()
     })
   cy.contains(placeTwapOrderStrBtn).click()
+}
+
+export function confirmPriceImpact() {
+  cy.wait(3000)
+  cy.get(confirmPriceImpactInput)
+    .should(() => {})
+    .then(($input) => {
+      if (!$input.length) {
+        return
+      }
+      cy.wrap($input).type('confirm')
+    })
+  cy.get(confirmPriceImpactBtn).should('be.enabled').click()
 }
 
 export function placeLimitOrder() {

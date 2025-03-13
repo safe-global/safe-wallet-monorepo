@@ -390,6 +390,7 @@ const NetworkSelector = ({
 
       return (
         <MenuItem
+          data-testid="network-selector-item"
           key={chainId}
           value={chainId}
           sx={{ '&:hover': { backgroundColor: isSelected ? 'transparent' : 'inherit' } }}

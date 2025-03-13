@@ -52,6 +52,7 @@ export const cfSafeCreationSuccessMsg = '[data-testid="account-success-message"]
 export const cfSafeActivationMsg = '[data-testid="safe-activation-message"]'
 export const cfSafeInfo = '[data-testid="safe-info"]'
 const connectWalletBtn = '[data-testid="connect-wallet-btn"]'
+const networkSelectorItem = '[data-testid="network-selector-item"]'
 
 const sponsorStr = 'Your account is sponsored by Goerli'
 const safeCreationProcessing = 'Transaction is being executed'
@@ -210,7 +211,7 @@ export function clearWalletName() {
 }
 
 export function openNetworkSelector() {
-  cy.get(newtworkSelectorDiv).find(expandMoreIcon).parent().click({ force: true })
+  cy.get(networkSelectorItem).should('be.visible').click({ force: true })
 }
 export function selectNetwork(network) {
   cy.wait(1000)

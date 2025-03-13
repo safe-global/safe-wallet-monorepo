@@ -47,25 +47,25 @@ describe('Swaps 2 tests', () => {
     'Verify Setting the bottom token first in a swap creates a "Buy order" tx',
     { defaultCommandTimeout: 30000 },
     () => {
-      const value = '200 DAI'
+      const value = swaps.getTokenValue()
+      const tokenValue = '600'
       swaps.acceptLegalDisclaimer()
       cy.wait(4000)
       main.getIframeBody(iframeSelector).within(() => {
         swaps.selectOutputCurrency(swaps.swapTokens.dai)
-        swaps.setOutputValue(200)
-
+        swaps.setOutputValue(tokenValue)
         swaps.selectInputCurrency(swaps.swapTokens.cow)
-
         swaps.checkSwapBtnIsVisible()
         swaps.isInputGreaterZero(swaps.outputCurrencyInput).then((isGreaterThanZero) => {
           cy.wrap(isGreaterThanZero).should('be.true')
         })
-        swaps.clickOnExceeFeeChkbox()
+
         swaps.clickOnSwapBtn()
         swaps.checkOutputCurrencyPreviewValue(value)
         swaps.clickOnSwapBtn()
+        swaps.confirmPriceImpact()
       })
-      swaps.checkTokenBlockValue(1, value)
+      swaps.checkTokenBlockValue(1, tokenValue)
     },
   )
 })
