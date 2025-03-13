@@ -49,8 +49,15 @@ const OrganizationSafeAccounts = () => {
         <AddAccounts />
       </Stack>
 
-      {/* TODO: Fix the condition once data is ready */}
-      {safes.length === 0 ? <EmptySafeAccounts /> : <SafesList safes={safes} isOrgSafe />}
+      {searchQuery && !filteredSafes.length ? (
+        <Typography variant="h5" fontWeight="normal" mb={2} color="primary.light">
+          Found 0 results
+        </Typography>
+      ) : safes.length === 0 ? (
+        <EmptySafeAccounts />
+      ) : (
+        <SafesList safes={safes} isOrgSafe />
+      )}
     </>
   )
 }
