@@ -140,7 +140,7 @@ export const SignFormV2 = ({
           {/* Submit button */}
           <CheckWallet checkNetwork={!submitDisabled}>
             {(isOk) => (
-              <Tooltip title={tooltip} placement="top">
+              <Tooltip title={isOk ? tooltip : undefined} placement="top">
                 <span>
                   <Button
                     data-testid="sign-btn"
