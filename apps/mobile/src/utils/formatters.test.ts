@@ -1,4 +1,4 @@
-import { customIntl, parseFormattedNumber } from './formatters' // Adjust import path as needed
+import { customIntl, parseFormattedNumber } from './formatters'
 
 describe('customIntl', () => {
   it('should format number with default parameters', () => {
