@@ -5,9 +5,9 @@ import { MemberRole } from '@/features/organizations/components/AddMembersModal'
 
 export const useIsAdmin = () => {
   const orgId = useCurrentOrgId()
-  const { data: user } = useUsersGetWithWalletsV1Query()
-  const { data } = useUserOrganizationsGetUsersV1Query({ orgId: Number(orgId) })
-  const currentMembership = data?.members.find((member) => member.user.id === user?.id)
+  const { currentData: user } = useUsersGetWithWalletsV1Query()
+  const { currentData } = useUserOrganizationsGetUsersV1Query({ orgId: Number(orgId) })
+  const currentMembership = currentData?.members.find((member) => member.user.id === user?.id)
 
   return currentMembership?.role === MemberRole.ADMIN
 }

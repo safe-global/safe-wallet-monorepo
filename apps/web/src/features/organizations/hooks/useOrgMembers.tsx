@@ -12,13 +12,13 @@ export enum MemberStatus {
 export const useOrgMembers = () => {
   const orgId = useCurrentOrgId()
   const isUserSignedIn = useAppSelector(isAuthenticated)
-  const { data } = useUserOrganizationsGetUsersV1Query({ orgId: Number(orgId) }, { skip: !isUserSignedIn })
+  const { currentData } = useUserOrganizationsGetUsersV1Query({ orgId: Number(orgId) }, { skip: !isUserSignedIn })
 
   const invitedMembers =
-    data?.members.filter(
+    currentData?.members.filter(
       (member) => member.status === MemberStatus.INVITED || member.status === MemberStatus.DECLINED,
     ) || []
-  const activeMembers = data?.members.filter((member) => member.status === MemberStatus.ACTIVE) || []
+  const activeMembers = currentData?.members.filter((member) => member.status === MemberStatus.ACTIVE) || []
 
   return { activeMembers, invitedMembers }
 }

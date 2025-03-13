@@ -22,7 +22,7 @@ const OrgsSidebarSelector = () => {
   const open = Boolean(anchorEl)
   const orgId = useCurrentOrgId()
   const isUserSignedIn = useAppSelector(isAuthenticated)
-  const { data: orgs } = useOrganizationsGetV1Query(undefined, { skip: !isUserSignedIn })
+  const { currentData: orgs } = useOrganizationsGetV1Query(undefined, { skip: !isUserSignedIn })
   const selectedOrg = orgs?.find((org) => org.id === Number(orgId))
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
