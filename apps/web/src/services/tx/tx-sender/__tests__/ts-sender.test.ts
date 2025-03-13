@@ -192,7 +192,13 @@ describe('txSender', () => {
         data: '0x0',
       })
 
-      const proposedTx = await dispatchTxProposal({ chainId: '4', safeAddress: '0x123', sender: '0x456', safeTx: tx })
+      const proposedTx = await dispatchTxProposal({
+        chainId: '4',
+        safeAddress: '0x123',
+        sender: '0x456',
+        safeTx: tx,
+        threshold: 1,
+      })
 
       expect(proposeTx).toHaveBeenCalledWith('4', '0x123', '0x456', tx, '0x1234567890', undefined)
       expect(proposedTx).toEqual({ txId: '123' })
@@ -207,7 +213,13 @@ describe('txSender', () => {
       })
       tx.addSignature(generatePreValidatedSignature('0x1234567890123456789012345678901234567890'))
 
-      const proposedTx = await dispatchTxProposal({ chainId: '4', safeAddress: '0x123', sender: '0x456', safeTx: tx })
+      const proposedTx = await dispatchTxProposal({
+        chainId: '4',
+        safeAddress: '0x123',
+        sender: '0x456',
+        safeTx: tx,
+        threshold: 2,
+      })
 
       expect(proposeTx).toHaveBeenCalledWith('4', '0x123', '0x456', tx, '0x1234567890', undefined)
       expect(proposedTx).toEqual({ txId: '123' })
@@ -228,6 +240,7 @@ describe('txSender', () => {
         sender: '0x456',
         safeTx: tx,
         txId: '345',
+        threshold: 2,
       })
 
       expect(proposeTx).toHaveBeenCalledWith('4', '0x123', '0x456', tx, '0x1234567890', undefined)
@@ -236,6 +249,37 @@ describe('txSender', () => {
       expect(txEvents.txDispatch).toHaveBeenCalledWith('SIGNATURE_PROPOSED', {
         txId: '123',
         signerAddress: '0x456',
+        nonce: 0,
+      })
+    })
+
+    it('should dispatch a SIGNATURE_PROPOSED and FULLY_SIGNED event if tx has last signature', async () => {
+      const tx = createMockSafeTransaction({
+        to: '0x123',
+        data: '0x0',
+      })
+      tx.addSignature(generatePreValidatedSignature('0x1234567890123456789012345678901234567890'))
+
+      const proposedTx = await dispatchTxProposal({
+        chainId: '4',
+        safeAddress: '0x123',
+        sender: '0x456',
+        safeTx: tx,
+        txId: '345',
+        threshold: 1,
+      })
+
+      expect(proposeTx).toHaveBeenCalledWith('4', '0x123', '0x456', tx, '0x1234567890', undefined)
+      expect(proposedTx).toEqual({ txId: '123' })
+
+      expect(txEvents.txDispatch).toHaveBeenCalledWith('SIGNATURE_PROPOSED', {
+        txId: '123',
+        signerAddress: '0x456',
+        nonce: 0,
+      })
+
+      expect(txEvents.txDispatch).toHaveBeenCalledWith('FULLY_SIGNED', {
+        txId: '123',
         nonce: 0,
       })
     })
@@ -250,7 +294,14 @@ describe('txSender', () => {
       })
 
       await expect(
-        dispatchTxProposal({ chainId: '4', safeAddress: '0x123', sender: '0x456', safeTx: tx, txId: '345' }),
+        dispatchTxProposal({
+          chainId: '4',
+          safeAddress: '0x123',
+          sender: '0x456',
+          safeTx: tx,
+          txId: '345',
+          threshold: 1,
+        }),
       ).rejects.toThrow('error')
 
       expect(txEvents.txDispatch).toHaveBeenCalledWith('SIGNATURE_PROPOSE_FAILED', {
@@ -269,7 +320,7 @@ describe('txSender', () => {
       })
 
       await expect(
-        dispatchTxProposal({ chainId: '4', safeAddress: '0x123', sender: '0x456', safeTx: tx }),
+        dispatchTxProposal({ chainId: '4', safeAddress: '0x123', sender: '0x456', safeTx: tx, threshold: 1 }),
       ).rejects.toThrow('error')
 
       expect(txEvents.txDispatch).toHaveBeenCalledWith('PROPOSE_FAILED', {

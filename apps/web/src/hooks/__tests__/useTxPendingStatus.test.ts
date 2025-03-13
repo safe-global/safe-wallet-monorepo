@@ -1,5 +1,6 @@
 import * as useChainIdHook from '@/hooks/useChainId'
 import * as useSafeInfoHook from '@/hooks/useSafeInfo'
+import * as useIsSafenetEnabled from '@/features/safenet/hooks/useIsSafenetEnabled'
 import useTxPendingStatuses, { useTxMonitor } from '@/hooks/useTxPendingStatuses'
 import * as web3 from '@/hooks/wallets/web3'
 import { txDispatch, TxEvent } from '@/services/tx/txEvents'
@@ -115,6 +116,7 @@ describe('useTxPendingStatuses', () => {
       safeLoaded: true,
       safeLoading: false,
     })
+    jest.spyOn(useIsSafenetEnabled, 'default').mockReturnValue(false)
   })
 
   it('should update pending tx when SIGNATURE_PROPOSED', () => {
@@ -326,5 +328,27 @@ describe('useTxPendingStatuses', () => {
 
     expect(setPendingTx).not.toHaveBeenCalled()
     expect(clearPendingTx).toHaveBeenCalled()
+  })
+
+  it('should set pending tx on FULLY_SIGNED for safenet accounts', () => {
+    jest.spyOn(useIsSafenetEnabled, 'default').mockReturnValue(true)
+
+    renderHook(() => useTxPendingStatuses())
+
+    const mockTxId = '123'
+
+    txDispatch(TxEvent.FULLY_SIGNED, {
+      txId: mockTxId,
+      nonce: 1,
+    })
+
+    expect(setPendingTx).toHaveBeenCalledWith({
+      status: PendingStatus.SUBMITTING,
+      txId: mockTxId,
+      nonce: 1,
+      chainId: expect.anything(),
+      safeAddress: expect.anything(),
+      isSafenet: true,
+    })
   })
 })
