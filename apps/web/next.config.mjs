@@ -1,4 +1,5 @@
-import path from 'path'
+// @ts-check
+import path from 'node:path'
 import withBundleAnalyzer from '@next/bundle-analyzer'
 import withPWAInit from '@ducanh2912/next-pwa'
 import remarkGfm from 'remark-gfm'
@@ -17,12 +18,13 @@ const withPWA = withPWAInit({
   reloadOnOnline: false,
   /* Do not precache anything */
   publicExcludes: ['**/*'],
-  buildExcludes: [/./],
+ // buildExcludes: [/./],
   customWorkerSrc: SERVICE_WORKERS_PATH,
   // Prefer InjectManifest for Web Push
+  // @ts-ignore
   swSrc: `${SERVICE_WORKERS_PATH}/index.ts`,
+  disable: false
 })
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'export', // static site export
@@ -33,7 +35,8 @@ const nextConfig = {
   },
 
   pageExtensions: ['js', 'jsx', 'md', 'mdx', 'ts', 'tsx'],
-  reactStrictMode: false,
+  reactStrictMode: true,
+  poweredByHeader: false,
   productionBrowserSourceMaps: true,
   eslint: {
     dirs: ['src', 'cypress'],
@@ -47,7 +50,17 @@ const nextConfig = {
       '@sentry/react',
       '@gnosis.pm/zodiac',
     ],
+    sri: {
+      algorithm: 'sha384',
+    },
+
   },
+  deploymentId: 'web',
+  bundlePagesRouterDependencies: true,
+//  generateBuildId: async () => {
+    // This could be anything, using the latest git hash
+  //  return process.env.GIT_HASH
+ // },
   webpack(config, { dev }) {
     config.module.rules.push({
       test: /\.svg$/i,
@@ -103,13 +116,11 @@ const nextConfig = {
 }
 const withMDX = createMDX({
   extension: /\.(md|mdx)?$/,
-  jsx: true,
   options: {
     remarkPlugins: [remarkFrontmatter, [remarkMdxFrontmatter, { name: 'metadata' }], remarkHeadingId, remarkGfm],
     rehypePlugins: [],
   },
 })
-
 export default withBundleAnalyzer({
   enabled: process.env.ANALYZE === 'true',
 })(withPWA(withMDX(nextConfig)))
