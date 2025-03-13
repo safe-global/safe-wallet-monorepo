@@ -76,7 +76,9 @@ const useLoadBalances = () => {
     loading = cfLoading
     error = cfError
   }
-  const { data: safenetBalances } = useGetSafenetBalanceQuery(isSafenetEnabled ? { safeAddress } : skipToken)
+  const { data: safenetBalances } = useGetSafenetBalanceQuery(isSafenetEnabled ? { safeAddress } : skipToken, {
+    pollingInterval: POLLING_INTERVAL,
+  })
   const { data: safenetConfig } = useGetSafenetConfigQuery(isSafenetEnabled ? undefined : skipToken)
 
   const mergedBalances = useMemo(() => {
