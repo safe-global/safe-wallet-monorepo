@@ -3,7 +3,7 @@ import { Fiat } from '.'
 
 describe('Fiat', () => {
   it('should render the default markup', () => {
-    const { getByText } = render(<Fiat baseAmount="215,531.65" />)
+    const { getByText } = render(<Fiat value="215,531.65" currency="usd" />)
 
     expect(getByText('$')).toBeTruthy()
     expect(getByText('215,531')).toBeTruthy()
