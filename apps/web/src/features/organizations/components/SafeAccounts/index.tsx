@@ -49,7 +49,7 @@ const OrganizationSafeAccounts = () => {
         <AddAccounts />
       </Stack>
 
-      {searchQuery && !filteredSafes.length ? (
+      {searchQuery && filteredSafes.length === 0 ? (
         <Typography variant="h5" fontWeight="normal" mb={2} color="primary.light">
           Found 0 results
         </Typography>
