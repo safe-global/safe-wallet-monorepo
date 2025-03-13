@@ -36,7 +36,6 @@ const RemoveMemberDialog = ({
   return (
     <ModalDialog open onClose={handleClose} dialogTitle="Remove member" hideChainIndicator>
       <DialogContent sx={{ p: '24px !important' }}>
-        {/* TODO: use name here instead of ID as soon as it's available */}
         <Typography>
           Are you sure you want to remove <b>{`${memberName}`}</b> from this organization?
         </Typography>
