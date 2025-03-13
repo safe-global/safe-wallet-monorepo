@@ -7,17 +7,18 @@ import { useSigner } from '@/hooks/wallets/useWallet'
 import { isExecutable, isMultisigExecutionInfo, isSignableBy } from '@/utils/transaction-guards'
 import { createExistingTx } from '@/services/tx/tx-sender'
 import { SafeTxContext } from '../../SafeTxProvider'
-import SignOrExecuteForm from '@/components/tx/SignOrExecuteForm'
+import ReviewTransaction from '@/components/tx/ReviewTransaction'
 
 type ConfirmProposedTxProps = {
   txSummary: TransactionSummary
+  onSubmit: () => void
 }
 
 const SIGN_TEXT = 'Sign this transaction.'
 const EXECUTE_TEXT = 'Submit the form to execute this transaction.'
 const SIGN_EXECUTE_TEXT = 'Sign or immediately execute this transaction.'
 
-const ConfirmProposedTx = ({ txSummary }: ConfirmProposedTxProps): ReactElement => {
+const ConfirmProposedTx = ({ txSummary, onSubmit }: ConfirmProposedTxProps): ReactElement => {
   const signer = useSigner()
   const { safe } = useSafeInfo()
   const chainId = useChainId()
@@ -39,9 +40,9 @@ const ConfirmProposedTx = ({ txSummary }: ConfirmProposedTxProps): ReactElement 
   const text = canSign ? (canExecute ? SIGN_EXECUTE_TEXT : SIGN_TEXT) : EXECUTE_TEXT
 
   return (
-    <SignOrExecuteForm txId={txId} isExecutable={canExecute} onlyExecute={!canSign} showMethodCall>
+    <ReviewTransaction onSubmit={onSubmit} txId={txId} isExecutable={canExecute} onlyExecute={!canSign} showMethodCall>
       <Typography mb={1}>{text}</Typography>
-    </SignOrExecuteForm>
+    </ReviewTransaction>
   )
 }
 
