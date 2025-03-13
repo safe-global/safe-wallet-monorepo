@@ -50,7 +50,7 @@ const OrgsSettings = () => {
   const dispatch = useAppDispatch()
   const orgId = useCurrentOrgId()
   const isUserSignedIn = useAppSelector(isAuthenticated)
-  const { data: org } = useOrganizationsGetOneV1Query({ id: Number(orgId) }, { skip: !isUserSignedIn })
+  const { currentData: org } = useOrganizationsGetOneV1Query({ id: Number(orgId) }, { skip: !isUserSignedIn })
   const [updateOrg] = useOrganizationsUpdateV1Mutation()
   const [deleteOrg] = useOrganizationsDeleteV1Mutation()
 
