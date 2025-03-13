@@ -32,8 +32,10 @@ const RemoveSafeDialog = ({
     const safeAccounts = getToBeDeletedSafeAccounts(safeItem)
 
     try {
-      // @ts-ignore TODO: Fix type
-      const result = await removeSafeAccounts({ organizationId: Number(orgId), body: { safes: safeAccounts } })
+      const result = await removeSafeAccounts({
+        organizationId: Number(orgId),
+        deleteOrganizationSafesDto: { safes: safeAccounts },
+      })
 
       if (result.error) {
         // TODO: Handle error
