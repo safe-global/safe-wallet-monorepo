@@ -133,7 +133,7 @@ const ReviewSignMessageOnChain = ({ message, method, requestId }: SignMessageOnC
 
       {safeTx && (
         <Box pb={1}>
-          <HexEncodedData title="Data (hex-encoded)" hexData={safeTx.data.data} />
+          <HexEncodedData title="Data:" hexData={safeTx.data.data} />
         </Box>
       )}
 

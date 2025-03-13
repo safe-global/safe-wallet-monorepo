@@ -25,7 +25,7 @@ const ExternalLink = ({
         cursor: 'pointer',
       }}
     >
-      {children}
+      {children ?? href}
       {!noIcon && <OpenInNewRounded fontSize="small" />}
     </Box>
   )

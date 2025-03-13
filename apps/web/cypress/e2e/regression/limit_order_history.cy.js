@@ -36,19 +36,19 @@ describe('Limit order history tests', { defaultCommandTimeout: 30000 }, () => {
     create_tx.verifyAdvancedDetails([swapsHistory.gGpV2, swapsHistory.actionPreSignatureG])
   })
 
-  it('Verify that limit order tx created via CowSwap safe app has decoding in the history', { defaultCommandTimeout: 30000 }, () => {
-    cy.visit(constants.transactionUrl + swaps.limitOrderSafe + swaps.swapTxs.sellLimitOrderFilled)
-    const usdc = swaps.createRegex(swapsHistory.forAtLeastFullUSDT, 'USDT')
-    const eq = swaps.createRegex(swapsHistory.USDTeqUSDC, 'USDC')
+  it(
+    'Verify that limit order tx created via CowSwap safe app has decoding in the history',
+    { defaultCommandTimeout: 30000 },
+    () => {
+      cy.visit(constants.transactionUrl + swaps.limitOrderSafe + swaps.swapTxs.sellLimitOrderFilled)
+      const usdc = swaps.createRegex(swapsHistory.forAtLeastFullUSDT, 'USDT')
+      const eq = swaps.createRegex(swapsHistory.USDTeqUSDC, 'USDC')
 
-    create_tx.verifySummaryByName(
-      swapsHistory.limitorder_title,
-      null,
-      [typeGeneral.statusOk],
-    )
-    main.verifyElementsExist([create_tx.altImgUsdc, create_tx.altImgUsdt], create_tx.altImgLimitOrder)
-    create_tx.verifyExpandedDetails([swapsHistory.sellOrder, swapsHistory.sell, usdc, eq, swapsHistory.filled])
-    create_tx.clickOnAdvancedDetails()
-    create_tx.verifyAdvancedDetails([swapsHistory.gGpV2, swapsHistory.actionPreSignatureG])
-  })
+      create_tx.verifySummaryByName(swapsHistory.limitorder_title, null, [typeGeneral.statusOk])
+      main.verifyElementsExist([create_tx.altImgUsdc, create_tx.altImgUsdt], create_tx.altImgLimitOrder)
+      create_tx.verifyExpandedDetails([swapsHistory.sellOrder, swapsHistory.sell, usdc, eq, swapsHistory.filled])
+      create_tx.clickOnAdvancedDetails()
+      create_tx.verifyAdvancedDetails([swapsHistory.gGpV2, swapsHistory.actionPreSignatureG])
+    },
+  )
 })

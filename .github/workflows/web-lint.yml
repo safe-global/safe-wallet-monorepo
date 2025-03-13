@@ -22,7 +22,7 @@ jobs:
 
       - uses: ./.github/actions/yarn
 
-      - uses: CatChen/eslint-suggestion-action@v4.1.10
+      - uses: CatChen/eslint-suggestion-action@v4.1.11
         with:
           request-changes: true # optional
           fail-check: true # optional

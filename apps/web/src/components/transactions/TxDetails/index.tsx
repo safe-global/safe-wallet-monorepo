@@ -122,7 +122,8 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
 
         <div className={css.txSummary}>
           {isUntrusted && !isPending && <UnsignedWarning />}
-          <Summary txDetails={txDetails} />
+
+          <Summary txDetails={txDetails} txData={txDetails.txData} txInfo={txDetails.txInfo} isTxDetailsPreview />
         </div>
 
         {(isMultiSendTxInfo(txDetails.txInfo) || isOrderTxInfo(txDetails.txInfo)) && (

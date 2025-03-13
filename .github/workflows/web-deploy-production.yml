@@ -28,6 +28,10 @@ jobs:
           secrets: ${{ toJSON(secrets) }}
           prod: ${{ true }}
 
+      - name: Add SRI to scripts
+        run: node ./scripts/integrity-hashes.cjs
+        working-directory: apps/web
+
       - name: Create archive
         run: tar -czf "$ARCHIVE_NAME".tar.gz out
         working-directory: apps/web

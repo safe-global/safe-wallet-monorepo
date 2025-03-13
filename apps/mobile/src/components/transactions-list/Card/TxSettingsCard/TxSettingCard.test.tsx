@@ -8,6 +8,7 @@ describe('TxSettingCard', () => {
   it('should render the default markup', () => {
     const container = render(
       <TxSettingsCard
+        onPress={() => null}
         txInfo={
           mockTransferWithInfo({
             type: TransactionInfoType.SETTINGS_CHANGE,

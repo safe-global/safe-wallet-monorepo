@@ -92,7 +92,7 @@ export const CreateTokenTransfer = ({
   const { totalAmount, spendingLimitAmount } = useTokenAmount(selectedToken)
 
   const canCreateSpendingLimitTxWithToken = useHasPermission(Permission.CreateSpendingLimitTransaction, {
-    token: selectedToken?.tokenInfo,
+    tokenAddress,
   })
 
   const isSpendingLimitType = type === TokenTransferType.spendingLimit

@@ -1,10 +1,9 @@
 import { type SyntheticEvent, type ReactElement, memo } from 'react'
-import { ErrorBoundary } from '@sentry/react'
 import { isCustomTxInfo, isNativeTokenTransfer, isTransferTxInfo } from '@/utils/transaction-guards'
 import { Accordion, AccordionDetails, AccordionSummary, Box, Stack } from '@mui/material'
 import { type SafeTransaction } from '@safe-global/safe-core-sdk-types'
 import type { TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
-import Summary, { PartialSummary } from '@/components/transactions/TxDetails/Summary'
+import Summary from '@/components/transactions/TxDetails/Summary'
 import { trackEvent, MODALS_EVENTS } from '@/services/analytics'
 import Multisend from '@/components/transactions/TxDetails/TxData/DecodedData/Multisend'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
@@ -58,6 +57,7 @@ const DecodedTx = ({
 
   const decodedDataBlock = <DecodedData txData={txData} toInfo={toInfo} />
   const showDecodedData = isMethodCallInAdvanced && decodedData?.method
+  const hideDecodedDataInAdvanced = !showDecodedData || (isMethodCallInAdvanced && !!decodedData?.method)
 
   return (
     <Stack spacing={2}>
@@ -87,26 +87,17 @@ const DecodedTx = ({
             </AccordionSummary>
 
             <AccordionDetails data-testid="decoded-tx-details">
-              {showDecodedData && (
-                <>
-                  {decodedDataBlock}
-                  <Divider />
-                </>
-              )}
+              {showDecodedData && decodedDataBlock}
 
-              {txDetails && !showDecodedData ? (
-                <Summary
-                  txDetails={txDetails}
-                  defaultExpanded
-                  hideDecodedData={isMethodCallInAdvanced && !!decodedData?.method}
-                />
-              ) : (
-                tx && (
-                  <ErrorBoundary>
-                    <PartialSummary safeTx={tx} />
-                  </ErrorBoundary>
-                )
-              )}
+              {showDecodedData && hideDecodedDataInAdvanced && <Divider />}
+
+              <Summary
+                safeTxData={tx?.data}
+                txData={txData}
+                txInfo={txInfo}
+                txDetails={txDetails}
+                hideDecodedData={hideDecodedDataInAdvanced}
+              />
             </AccordionDetails>
           </Accordion>
         </Box>

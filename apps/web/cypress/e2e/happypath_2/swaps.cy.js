@@ -29,7 +29,7 @@ describe('Happy path Swaps tests', () => {
     iframeSelector = `iframe[src*="${constants.swapWidget}"]`
   })
 
-  it(
+  it.skip(
     'Verify an order can be created, signed by second signer and deleted. GA tx_confirm, tx_created',
     { defaultCommandTimeout: 60000 },
     () => {

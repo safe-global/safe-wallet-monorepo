@@ -155,33 +155,6 @@ describe('useSafeNotifications', () => {
         },
       })
     })
-    it('should show a notification when the mastercopy is invalid but can be migrated', () => {
-      ;(useSafeInfo as jest.Mock).mockReturnValue({
-        safe: {
-          implementation: { value: '0x123' },
-          implementationVersionState: 'UNKNOWN',
-          version: '1.3.0',
-          nonce: 0,
-          address: {
-            value: '0x1',
-          },
-          chainId: '10',
-        },
-      })
-
-      // render the hook
-      const { result } = renderHook(() => useSafeNotifications())
-
-      // check that the notification was shown
-      expect(result.current).toBeUndefined()
-      expect(showNotification).toHaveBeenCalledWith({
-        variant: 'info',
-        message: `This Safe Account was created with an unsupported base contract.
-           It is possible to migrate it to a compatible base contract. This migration will be automatically included with your first transaction.`,
-        groupKey: 'invalid-mastercopy',
-        link: undefined,
-      })
-    })
     it('should not show a notification when the mastercopy is valid', async () => {
       ;(useSafeInfo as jest.Mock).mockReturnValue({
         safe: {

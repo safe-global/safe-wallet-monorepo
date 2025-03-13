@@ -4,7 +4,6 @@
 import { useEffect, useState } from 'react'
 import { useTheme } from '@mui/material/styles'
 import {
-  gtmInit,
   gtmTrackPageview,
   gtmSetChainId,
   gtmEnableCookies,
@@ -41,7 +40,6 @@ const useGtm = () => {
 
   // Initialize GTM and Spindl
   useEffect(() => {
-    gtmInit()
     spindlInit()
   }, [])
 

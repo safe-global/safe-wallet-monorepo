@@ -172,7 +172,7 @@ export function checkTimeDropdownOptions() {
 }
 
 export function verifyDefaultTimeIsSet() {
-  cy.get(timePeriodSection).find('div').contains(timePeriodOptions.oneTime).should('be.visible')
+  cy.get(timePeriodSection).scrollIntoView().find('div').contains(timePeriodOptions.oneTime).should('be.visible')
 }
 
 export function clickOnNewSpendingLimitBtn() {
@@ -185,7 +185,7 @@ export function enterSpendingLimitAmount(amount) {
 }
 
 export function enterBeneficiaryAddress(address) {
-  getBeneficiaryInput().clear().type(address)
+  getBeneficiaryInput().clear({ force: true }).type(address, { force: true })
 }
 
 export function checkBeneficiaryInputValue(value) {

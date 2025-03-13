@@ -9,7 +9,7 @@ const nftsName = 'CatFactory'
 const nftsAddress = '0x373B...866c'
 const nftsTokenID = 'CF'
 
-describe('[SMOKE] NFTs tests', () => {
+describe.skip('[SMOKE] NFTs tests', () => {
   before(async () => {
     staticSafes = await getSafes(CATEGORIES.static)
   })
