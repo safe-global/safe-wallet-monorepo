@@ -1,8 +1,12 @@
 const MAX_ORIGIN_LENGTH = 200
 
-const stringifyOrigin = (origin: Record<string, string>): string => JSON.stringify(origin, null, 0)
+// Simply strip out any HTML tags from the input in addition to backend sanitization
+function sanitizeInput(input: string): string {
+  return input.replace(/<\/?[^>]+(>|$)/g, '')
+}
 
 export function encodeTxNote(note: string, origin = ''): string {
+  note = sanitizeInput(note)
   let originalOrigin = {}
 
   if (origin) {
@@ -13,13 +17,13 @@ export function encodeTxNote(note: string, origin = ''): string {
     }
   }
 
-  let result = stringifyOrigin({
+  let result = JSON.stringify({
     ...originalOrigin,
     note,
   })
 
   if (result.length > MAX_ORIGIN_LENGTH) {
-    result = stringifyOrigin({
+    result = JSON.stringify({
       ...originalOrigin,
       note: note.slice(0, MAX_ORIGIN_LENGTH - origin.length),
     })

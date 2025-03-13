@@ -27,4 +27,4 @@ export type Contract = {
   contractAbi?: object | null
   trustedForDelegateCall: boolean
 }
-export const { useContractsGetContractV1Query } = injectedRtkApi
+export const { useContractsGetContractV1Query, useLazyContractsGetContractV1Query } = injectedRtkApi

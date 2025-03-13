@@ -4,6 +4,7 @@ import type { StepRenderProps } from '@/components/new-safe/CardStepper/useCardS
 import type { NewSafeFormData } from '@/components/new-safe/create'
 import layoutCss from '@/components/new-safe/create/styles.module.css'
 import { AppRoutes } from '@/config/routes'
+import SafenetInfoCard from '@/features/safenet/components/new-safe/SafenetInfoCard'
 import { useCurrentChain } from '@/hooks/useChains'
 import { useMnemonicSafeName } from '@/hooks/useMnemonicName'
 import useWallet from '@/hooks/wallets/useWallet'
@@ -16,7 +17,6 @@ import { Box, Button, Divider, Grid, InputAdornment, SvgIcon, Tooltip, Typograph
 import MUILink from '@mui/material/Link'
 import { type SafeVersion } from '@safe-global/safe-core-sdk-types'
 import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
-import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useEffect } from 'react'
@@ -24,9 +24,6 @@ import { FormProvider, useForm, useWatch } from 'react-hook-form'
 import type { CreateSafeInfoItem } from '../../CreateSafeInfos'
 import NoWalletConnectedWarning from '../../NoWalletConnectedWarning'
 import { useSafeSetupHints } from '../OwnerPolicyStep/useSafeSetupHints'
-
-const SafenetInfoCard = dynamic(() => import('@/features/safenet/components/new-safe/SafenetInfoCard'))
-
 type SetNameStepForm = {
   name: string
   networks: ChainInfo[]

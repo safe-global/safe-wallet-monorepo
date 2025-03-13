@@ -12,6 +12,7 @@ import { id } from 'ethers'
 import { Provider } from 'react-redux'
 import { checksumAddress } from '@/utils/addresses'
 import { faker } from '@faker-js/faker'
+import { userEvent } from '@testing-library/user-event'
 
 const mockRouter = (props: Partial<NextRouter> = {}): NextRouter => ({
   asPath: '/',
@@ -46,7 +47,7 @@ const getProviders: (options: {
   initialReduxState?: Partial<RootState>
 }) => React.JSXElementConstructor<{ children: React.ReactNode }> = ({ routerProps, initialReduxState }) =>
   function ProviderComponent({ children }) {
-    const store = makeStore(initialReduxState)
+    const store = makeStore(initialReduxState, { skipBroadcast: true })
 
     useHydrateStore(store)
 
@@ -137,6 +138,20 @@ const mockWeb3Provider = (
 }
 
 export const fakerChecksummedAddress = () => checksumAddress(faker.finance.ethereumAddress())
+
+// https://testing-library.com/docs/user-event/intro#writing-tests-with-userevent
+export const renderWithUserEvent = (
+  ui: React.ReactElement,
+  options?: {
+    routerProps?: Partial<NextRouter>
+    initialReduxState?: Partial<RootState>
+  },
+) => {
+  return {
+    user: userEvent.setup(),
+    ...customRender(ui, options),
+  }
+}
 
 // re-export everything
 export * from '@testing-library/react'

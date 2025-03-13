@@ -2,7 +2,6 @@ import type { NewSpendingLimitFlowProps } from '@/components/tx-flow/flows/NewSp
 import { chainBuilder } from '@/tests/builders/chains'
 import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
 import * as safeCoreSDK from '@/hooks/coreSDK/safeCoreSDK'
-import * as spendingLimit from '@/services/contracts/spendingLimitContracts'
 import * as txSender from '@/services/tx/tx-sender/create'
 import * as spendingLimitParams from '@/services/tx/spendingLimitParams'
 import type Safe from '@safe-global/protocol-kit'
@@ -17,6 +16,8 @@ const mockData: NewSpendingLimitFlowProps = {
 }
 
 const mockChain = chainBuilder().build()
+
+const mockModules = [{ value: '0xCFbFaC74C26F8647cBDb8c5caf80BB5b32E43134' }]
 
 describe('createNewSpendingLimitTx', () => {
   let mockCreateEnableModuleTx: any
@@ -40,33 +41,31 @@ describe('createNewSpendingLimitTx', () => {
 
     jest.spyOn(txSender, 'createMultiSendCallOnlyTx').mockImplementation(jest.fn())
     jest.spyOn(safeCoreSDK, 'getSafeSDK').mockReturnValue(mockSDK)
-    jest.spyOn(spendingLimit, 'getSpendingLimitModuleAddress').mockReturnValue(ZERO_ADDRESS)
   })
 
   it('returns undefined if there is no sdk instance', async () => {
     jest.spyOn(safeCoreSDK, 'getSafeSDK').mockReturnValue(undefined)
-    const result = await createNewSpendingLimitTx(mockData, [], '4', mockChain, true, 18)
+    const result = await createNewSpendingLimitTx(mockData, [], '4', mockChain, mockModules, true, 18)
 
     expect(result).toBeUndefined()
   })
 
   it('returns undefined if there is no contract address', async () => {
     jest.spyOn(safeCoreSDK, 'getSafeSDK').mockReturnValue(mockSDK)
-    jest.spyOn(spendingLimit, 'getSpendingLimitModuleAddress').mockReturnValue(undefined)
-    const result = await createNewSpendingLimitTx(mockData, [], '4', mockChain, true, 18)
+    const result = await createNewSpendingLimitTx(mockData, [], '4', mockChain, mockModules, true, 18)
 
     expect(result).toBeUndefined()
   })
 
   it('creates a tx to enable the spending limit module if its not registered yet', async () => {
-    await createNewSpendingLimitTx(mockData, [], '4', mockChain, true, 18)
+    await createNewSpendingLimitTx(mockData, [], '4', mockChain, [], true, 18)
 
     expect(mockCreateEnableModuleTx).toHaveBeenCalledTimes(1)
   })
 
   it('creates a tx to add a delegate if beneficiary is not a delegate yet', async () => {
     const spy = jest.spyOn(spendingLimitParams, 'createAddDelegateTx')
-    await createNewSpendingLimitTx(mockData, [], '4', mockChain, true, 18)
+    await createNewSpendingLimitTx(mockData, [], '4', mockChain, mockModules, true, 18)
 
     expect(spy).toHaveBeenCalledTimes(1)
   })
@@ -85,7 +84,7 @@ describe('createNewSpendingLimitTx', () => {
     ]
 
     const spy = jest.spyOn(spendingLimitParams, 'createAddDelegateTx')
-    await createNewSpendingLimitTx(mockData, mockSpendingLimits, '4', mockChain, true, 18)
+    await createNewSpendingLimitTx(mockData, mockSpendingLimits, '4', mockChain, mockModules, true, 18)
 
     expect(spy).not.toHaveBeenCalled()
   })
@@ -102,7 +101,7 @@ describe('createNewSpendingLimitTx', () => {
     }
 
     const spy = jest.spyOn(spendingLimitParams, 'createResetAllowanceTx')
-    await createNewSpendingLimitTx(mockData, [], '4', mockChain, true, 18, existingSpendingLimitMock)
+    await createNewSpendingLimitTx(mockData, [], '4', mockChain, mockModules, true, 18, existingSpendingLimitMock)
 
     expect(spy).toHaveBeenCalledTimes(1)
   })
@@ -119,20 +118,20 @@ describe('createNewSpendingLimitTx', () => {
     }
 
     const spy = jest.spyOn(spendingLimitParams, 'createResetAllowanceTx')
-    await createNewSpendingLimitTx(mockData, [], '4', mockChain, true, 18, existingSpendingLimitMock)
+    await createNewSpendingLimitTx(mockData, [], '4', mockChain, mockModules, true, 18, existingSpendingLimitMock)
 
     expect(spy).not.toHaveBeenCalled()
   })
 
   it('creates a tx to set the allowance', async () => {
     const spy = jest.spyOn(spendingLimitParams, 'createSetAllowanceTx')
-    await createNewSpendingLimitTx(mockData, [], '4', mockChain, true, 18)
+    await createNewSpendingLimitTx(mockData, [], '4', mockChain, mockModules, true, 18)
 
     expect(spy).toHaveBeenCalled()
   })
   it('encodes all txs as a single multiSend tx', async () => {
     const spy = jest.spyOn(txSender, 'createMultiSendCallOnlyTx')
-    await createNewSpendingLimitTx(mockData, [], '4', mockChain, true, 18)
+    await createNewSpendingLimitTx(mockData, [], '4', mockChain, mockModules, true, 18)
 
     expect(spy).toHaveBeenCalled()
   })

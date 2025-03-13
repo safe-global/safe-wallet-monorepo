@@ -1,0 +1,12 @@
+.balanceBreakdown {
+  margin: var(--space-2) 0;
+  margin-left: var(--space-4);
+}
+
+.title {
+  padding-bottom: var(--space-2);
+}
+
+.row > td span{
+  font-size: 14px !important;
+}

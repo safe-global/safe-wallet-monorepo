@@ -1,52 +1,45 @@
-import type { CSSProperties, ReactElement } from 'react'
-import { useMemo } from 'react'
-import { Tooltip, Typography } from '@mui/material'
 import { useAppSelector } from '@/store'
 import { selectCurrency } from '@/store/settingsSlice'
 import { formatCurrency, formatCurrencyPrecise } from '@/utils/formatNumber'
-
-const style = { whiteSpace: 'nowrap' } as CSSProperties
-
-const getStyle = (safenet: boolean) => ({
-  ...style,
-  ...(safenet
-    ? {
-        borderRadius: '40px',
-        background: 'rgba(238, 213, 9, 0.15)',
-        padding: 'calc(var(--space-1) / 2) var(--space-1)',
-      }
-    : {}),
-})
+import { Tooltip, Typography } from '@mui/material'
+import type { ReactElement } from 'react'
+import { useMemo } from 'react'
 
 const FiatValue = ({
   value,
   maxLength,
   precise,
-  safenet = false,
 }: {
-  value: string | number
+  value: string | number | null
   maxLength?: number
   precise?: boolean
-  safenet?: boolean
 }): ReactElement => {
   const currency = useAppSelector(selectCurrency)
 
   const fiat = useMemo(() => {
-    return formatCurrency(value, currency, maxLength)
+    return value != null ? formatCurrency(value, currency, maxLength) : null
   }, [value, currency, maxLength])
 
   const preciseFiat = useMemo(() => {
-    return formatCurrencyPrecise(value, currency)
+    return value != null ? formatCurrencyPrecise(value, currency) : null
   }, [value, currency])
 
   const [whole, decimals, endCurrency] = useMemo(() => {
-    const match = preciseFiat.match(/(.+)(\D\d+)(\D+)?$/)
+    const match = (preciseFiat ?? '').match(/(.+)(\D\d+)(\D+)?$/)
     return match ? match.slice(1) : ['', preciseFiat, '', '']
   }, [preciseFiat])
 
+  if (fiat == null) {
+    return (
+      <Typography component="span" color="text.secondary">
+        --
+      </Typography>
+    )
+  }
+
   return (
     <Tooltip title={precise ? undefined : preciseFiat}>
-      <span suppressHydrationWarning style={getStyle(safenet)}>
+      <span suppressHydrationWarning>
         {precise ? (
           <>
             {whole}

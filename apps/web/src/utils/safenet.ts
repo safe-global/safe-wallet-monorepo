@@ -2,21 +2,32 @@ import type { SafenetBalanceEntity, SafenetConfigEntity } from '@/store/safenet'
 import type { TokenInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import { TokenType } from '@safe-global/safe-gateway-typescript-sdk'
 
+export type SafenetBalance = {
+  chainId: string
+  symbol: string
+  decimals: number
+  balance: string
+  fiatBalance: string
+}
+
+export type SafenetToken = {
+  tokenInfo: TokenInfo
+  balance: string
+  fiatBalance: string
+  fiatConversion: string
+  safenetBalance?: SafenetBalance[]
+}
+
 export type SafeBalanceResponseWithSafenet = {
   fiatTotal: string
-  items: Array<{
-    tokenInfo: TokenInfo
-    balance: string
-    fiatBalance: string
-    fiatConversion: string
-    safenetAssetFlag?: boolean
-  }>
+  items: SafenetToken[]
 }
 
 const convertSafenetBalanceToSafeClientGatewayBalance = (
   safenetBalance: SafenetBalanceEntity,
   safenetConfig: SafenetConfigEntity,
   chainId: number,
+  currency: string,
 ): SafeBalanceResponseWithSafenet => {
   const balances: SafeBalanceResponseWithSafenet = {
     fiatTotal: safenetBalance['USDC'].total,
@@ -31,6 +42,17 @@ const convertSafenetBalanceToSafeClientGatewayBalance = (
 
     const decimals = tokenName === 'USDC' || tokenName === 'USDT' ? 6 : 18
 
+    let balanceBreakdown: SafenetBalance[] = []
+    for (const [chainId, breakdown] of Object.entries(balance.breakdown)) {
+      balanceBreakdown.push({
+        chainId,
+        symbol: tokenName,
+        decimals,
+        balance: breakdown.balance,
+        fiatBalance: currency === 'usd' ? ((parseInt(breakdown.balance) * 1) / 10 ** decimals).toString() : '0',
+      })
+    }
+
     balances.items.push({
       tokenInfo: {
         type: TokenType.ERC20,
@@ -41,9 +63,9 @@ const convertSafenetBalanceToSafeClientGatewayBalance = (
         logoUri: `https://assets.smold.app/api/token/${chainId}/${tokenAddress}/logo-128.png`,
       },
       balance: balance.total,
-      fiatBalance: ((parseInt(balance.total) * 1) / 10 ** decimals).toString(),
-      fiatConversion: '1.00',
-      safenetAssetFlag: true,
+      fiatBalance: currency === 'usd' ? ((parseInt(balance.total) * 1) / 10 ** decimals).toString() : '0',
+      fiatConversion: currency === 'usd' ? '1' : '0',
+      safenetBalance: balanceBreakdown,
     })
   }
 

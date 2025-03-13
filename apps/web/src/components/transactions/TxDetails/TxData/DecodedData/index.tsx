@@ -28,7 +28,7 @@ export const DecodedData = ({ txData, toInfo }: Props): ReactElement | null => {
 
     return (
       <SendToBlock
-        title="Interact with"
+        title="Interact with:"
         address={toInfo.value}
         name={toInfo.name}
         customAvatar={toInfo.logoUri}
@@ -54,7 +54,7 @@ export const DecodedData = ({ txData, toInfo }: Props): ReactElement | null => {
     )
   } else if (txData.hexData) {
     // When no decoded data, display raw hex data
-    decodedData = <HexEncodedData title="Data (hex-encoded)" hexData={txData.hexData} />
+    decodedData = <HexEncodedData title="Data:" hexData={txData.hexData} />
   }
 
   return (

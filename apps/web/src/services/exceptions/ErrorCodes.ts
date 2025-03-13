@@ -71,6 +71,7 @@ enum ErrorCodes {
   _815 = '815: Error executing a transaction through a role',
   _816 = '816: Error computing replay Safe creation data',
   _817 = '817: Error sending a transaction through nested Safe provider',
+  _818 = '818: Error validating transaction data',
 
   _900 = '900: Error loading Safe App',
   _901 = '901: Error processing Safe Apps SDK request',

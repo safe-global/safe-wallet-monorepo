@@ -1,6 +1,5 @@
-import type { ChangeEvent, ReactNode } from 'react'
-import React, { useState } from 'react'
 import Box from '@mui/material/Box'
+import Paper from '@mui/material/Paper'
 import Table from '@mui/material/Table'
 import TableBody from '@mui/material/TableBody'
 import type { SortDirection } from '@mui/material/TableCell'
@@ -10,12 +9,13 @@ import TableHead from '@mui/material/TableHead'
 import TablePagination from '@mui/material/TablePagination'
 import TableRow from '@mui/material/TableRow'
 import TableSortLabel from '@mui/material/TableSortLabel'
-import Paper from '@mui/material/Paper'
 import { visuallyHidden } from '@mui/utils'
 import classNames from 'classnames'
-
+import type { ChangeEvent, ReactElement, ReactNode } from 'react'
+import { useState } from 'react'
+import ExpandableRow from './ExpandableRow'
+import Row from './Row'
 import css from './styles.module.css'
-import { Collapse } from '@mui/material'
 
 type EnhancedCell = {
   content: ReactNode
@@ -23,11 +23,12 @@ type EnhancedCell = {
   sticky?: boolean
 }
 
-type EnhancedRow = {
+export type EnhancedRow = {
   selected?: boolean
   collapsed?: boolean
   key?: string
   cells: Record<string, EnhancedCell>
+  expandableRow?: ReactElement
 }
 
 type EnhancedHeadCell = {
@@ -165,29 +166,19 @@ function EnhancedTable({
           />
           <TableBody>
             {pagedRows.length > 0 ? (
-              pagedRows.map((row, index) => (
-                <TableRow
-                  data-testid="table-row"
-                  tabIndex={-1}
-                  key={row.key ?? index}
-                  selected={row.selected}
-                  className={classNames({ [css.collapsedRow]: row.collapsed, rowClassName })}
-                >
-                  {Object.entries(row.cells).map(([key, cell]) => (
-                    <TableCell
-                      key={key}
-                      className={classNames({
-                        sticky: cell.sticky,
-                        [css.collapsedCell]: row.collapsed,
-                      })}
-                    >
-                      <Collapse key={index} in={!row.collapsed} enter={false}>
-                        {cell.content}
-                      </Collapse>
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
+              pagedRows.map((row, index) =>
+                !!row.expandableRow ? (
+                  <ExpandableRow
+                    key={row.key ?? index}
+                    row={row}
+                    index={index}
+                    numRows={pagedRows.length}
+                    rowClassName={rowClassName}
+                  />
+                ) : (
+                  <Row key={row.key ?? index} row={row} index={index} rowClassName={rowClassName} />
+                ),
+              )
             ) : (
               // Prevent no `tbody` rows hydration error
               <TableRow>
@@ -200,6 +191,7 @@ function EnhancedTable({
 
       {rows.length > pagedRows.length && (
         <TablePagination
+          data-testid="table-pagination"
           rowsPerPageOptions={pageSizes}
           component="div"
           count={rows.length}

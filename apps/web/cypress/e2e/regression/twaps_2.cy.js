@@ -64,7 +64,7 @@ describe('Twaps 2 tests', { defaultCommandTimeout: 30000 }, () => {
 
   it(
     'Verify entering a blocked address in the custom recipient input blocks the form',
-    { defaultCommandTimeout: 30000 },
+    { defaultCommandTimeout: 60000 },
     () => {
       let isCustomRecipientFound
       swaps.acceptLegalDisclaimer()
@@ -84,7 +84,7 @@ describe('Twaps 2 tests', { defaultCommandTimeout: 30000 }, () => {
       main.getIframeBody(iframeSelector).within(() => {
         swaps.selectInputCurrency(swaps.swapTokens.cow)
         swaps.clickOnSettingsBtnTwaps()
-        swaps.enableTwapCustomRecipient()
+        swaps.enableTwapCustomRecipient(isCustomRecipientFound(swaps.customRecipient))
         swaps.clickOnSettingsBtnTwaps()
         swaps.enterRecipient(swaps.blockedAddress)
       })

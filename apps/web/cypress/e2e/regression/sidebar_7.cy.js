@@ -73,7 +73,7 @@ describe('Sidebar tests 7', () => {
     })
     wallet.connectSigner(signer2)
     sideBar.verifyAddedSafesExist([sideBar.sideBarSafesPendingActions.safe1short])
-    sideBar.checkTxToConfirm(1)
+    sideBar.checkTxToConfirm(2)
   })
 
   // Added to prod

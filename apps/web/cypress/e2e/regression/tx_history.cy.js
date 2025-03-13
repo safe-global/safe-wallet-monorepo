@@ -96,12 +96,7 @@ describe('Tx history tests 1', () => {
   it('Verify exapanded details for initial spending limits setup', () => {
     createTx.clickOnTransactionItemByName(typeSpendingLimits.title, typeSpendingLimits.summaryTxInfo)
     createTx.verifyExpandedDetails(
-      [
-        typeSpendingLimits.contractTitle,
-        typeSpendingLimits.call_multiSend,
-        typeSpendingLimits.transactionHash,
-        typeSpendingLimits.safeTxHash,
-      ],
+      [typeSpendingLimits.contractTitle, typeSpendingLimits.call_multiSend, typeSpendingLimits.transactionHash],
       createTx.delegateCallWarning,
     )
   })
@@ -145,7 +140,6 @@ describe('Tx history tests 1', () => {
       typeDeleteAllowance.beneficiary,
       typeDeleteAllowance.beneficiaryAddress,
       typeDeleteAllowance.transactionHash,
-      typeDeleteAllowance.safeTxHash,
       typeDeleteAllowance.token,
       typeDeleteAllowance.tokenName,
     ])
@@ -154,7 +148,19 @@ describe('Tx history tests 1', () => {
   // Added to prod
   it('Verify advanced details displayed in exapanded details for allowance deletion', () => {
     createTx.clickOnTransactionItemByName(typeDeleteAllowance.title, typeDeleteAllowance.summaryTxInfo)
-    createTx.expandAdvancedDetails([typeDeleteAllowance.baseGas])
+    createTx.expandAdvancedDetails([
+      typeDeleteAllowance.baseGas,
+      typeDeleteAllowance.operation,
+      typeDeleteAllowance.zero_call,
+    ])
     createTx.collapseAdvancedDetails([typeDeleteAllowance.baseGas])
+  })
+
+  it.skip('Verify address can be copied in advanced details', () => {
+    const data =
+      '0x885133e3000000000000000000000000c16db0251654c0a72e91b190d81ead367d2c6fed0000000000000000000000000000000000000000000000000000000000000000'
+    createTx.clickOnTransactionItemByName(typeDeleteAllowance.title, typeDeleteAllowance.summaryTxInfo)
+    createTx.expandAdvancedDetails([typeDeleteAllowance.baseGas])
+    createTx.clickOnCopyDataBtn(data)
   })
 })

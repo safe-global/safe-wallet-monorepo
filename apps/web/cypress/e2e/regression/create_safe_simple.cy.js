@@ -122,11 +122,13 @@ describe('Safe creation tests', () => {
         main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__addressBook, ls.addressBookData.sameOwnerName),
       )
       .then(() => {
+        cy.reload()
         createwallet.waitForConnectionMsgDisappear()
         createwallet.selectMultiNetwork(1, constants.networks.sepolia.toLowerCase())
         createwallet.clickOnNextBtn()
         createwallet.clickOnAddNewOwnerBtn()
         createwallet.clickOnSignerAddressInput(1)
+        main.verifyMinimumElementsCount(createwallet.addressAutocompleteOptions, 2)
         createwallet.selectSignerOnAutocomplete(2)
         owner.verifyErrorMsgInvalidAddress(constants.addressBookErrrMsg.ownerAdded)
       })

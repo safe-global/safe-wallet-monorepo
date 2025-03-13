@@ -11,7 +11,7 @@ describe('DecodedData', () => {
   it('shows an Interact with block if there is no txData but toInfo', () => {
     const { getByText } = render(<DecodedData txData={undefined} toInfo={{ value: '0x123' }} />)
 
-    expect(getByText('Interact with')).toBeInTheDocument()
+    expect(getByText('Interact with:')).toBeInTheDocument()
   })
 
   it('shows Hex encoded data if there are no parameters', () => {
@@ -33,7 +33,7 @@ describe('DecodedData', () => {
     const { getByText } = render(<DecodedData txData={mockTxData} toInfo={{ value: '0x123' }} />)
 
     expect(getByText('No parameters')).toBeInTheDocument()
-    expect(getByText('Data (hex-encoded)')).toBeInTheDocument()
+    expect(getByText('Data:')).toBeInTheDocument()
   })
 
   it('does not show Hex encoded data if there is none', () => {
@@ -54,7 +54,7 @@ describe('DecodedData', () => {
     const { getByText, queryByText } = render(<DecodedData txData={mockTxData} toInfo={{ value: '0x123' }} />)
 
     expect(getByText('No parameters')).toBeInTheDocument()
-    expect(queryByText('Data (hex-encoded)')).not.toBeInTheDocument()
+    expect(queryByText('Data:')).not.toBeInTheDocument()
   })
 
   it('only shows Hex encoded data if no decodedData exists', () => {
@@ -72,6 +72,6 @@ describe('DecodedData', () => {
     const { getByText, queryByText } = render(<DecodedData txData={mockTxData} toInfo={{ value: '0x123' }} />)
 
     expect(queryByText('No parameters')).not.toBeInTheDocument()
-    expect(getByText('Data (hex-encoded)')).toBeInTheDocument()
+    expect(getByText('Data:')).toBeInTheDocument()
   })
 })

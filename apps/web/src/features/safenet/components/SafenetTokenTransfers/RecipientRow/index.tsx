@@ -4,8 +4,8 @@ import { useVisibleBalances } from '@/hooks/useVisibleBalances'
 import DeleteIcon from '@/public/images/common/delete.svg'
 import { FormControl, Grid, IconButton, SvgIcon, Typography } from '@mui/material'
 import { useFormContext } from 'react-hook-form'
-import type { TokenTransfersParams } from '..'
-import { TokenTransfersFields } from '..'
+import type { TokenTransfersParams } from '../SafenetTokenTransfers'
+import { TokenTransfersFields } from '../SafenetTokenTransfers'
 import { useTokenAmount } from '../utils'
 
 export const RecipientRow = ({

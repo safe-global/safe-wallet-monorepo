@@ -2,8 +2,12 @@ import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import { isMultisigExecutionInfo } from '@/utils/transaction-guards'
 import { isHardwareWallet, isSmartContractWallet } from '@/utils/wallets'
 import type { MultiSendCallOnlyContractImplementationType } from '@safe-global/protocol-kit'
-import { type ChainInfo, type SafeInfo, type TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
-import { relayTransaction } from '@/services/tx/relaying'
+import {
+  type ChainInfo,
+  relayTransaction,
+  type SafeInfo,
+  type TransactionDetails,
+} from '@safe-global/safe-gateway-typescript-sdk'
 import type {
   SafeSignature,
   SafeTransaction,
@@ -92,7 +96,6 @@ export const dispatchTxProposal = async ({
  */
 export const dispatchTxSigning = async (
   safeTx: SafeTransaction,
-  safeVersion: SafeInfo['version'],
   provider: Eip1193Provider,
   txId?: string,
 ): Promise<SafeTransaction> => {
@@ -100,7 +103,7 @@ export const dispatchTxSigning = async (
 
   let signedTx: SafeTransaction | undefined
   try {
-    signedTx = await tryOffChainTxSigning(safeTx, safeVersion, sdk)
+    signedTx = await tryOffChainTxSigning(safeTx, sdk)
   } catch (error) {
     txDispatch(TxEvent.SIGN_FAILED, {
       txId,
@@ -200,7 +203,7 @@ export const dispatchSafeTxSpeedUp = async (
   // Execute the tx
   let result: TransactionResult | undefined
   try {
-    const safeTx = await createExistingTx(chainId, safeAddress, txId)
+    const safeTx = await createExistingTx(chainId, txId)
 
     // TODO: This is a workaround until there is a fix for unchecked transactions in the protocol-kit
     if (isSmartAccount) {
@@ -242,7 +245,6 @@ export const dispatchCustomTxSpeedUp = async (
   data: string,
   provider: Eip1193Provider,
   signerAddress: string,
-  safeAddress: string,
   nonce: number,
 ) => {
   const eventParams = { txId, nonce }
@@ -434,13 +436,14 @@ export const dispatchSpendingLimitTxExecution = async (
   provider: Eip1193Provider,
   chainId: SafeInfo['chainId'],
   safeAddress: string,
+  safeModules: SafeInfo['modules'],
 ) => {
   const id = JSON.stringify(txParams)
 
   let result: ContractTransactionResponse | undefined
   try {
     const signer = await getUncheckedSigner(provider)
-    const contract = getSpendingLimitContract(chainId, signer)
+    const contract = getSpendingLimitContract(chainId, safeModules, signer)
 
     result = await contract.executeAllowanceTransfer(
       txParams.safeAddress,
@@ -561,8 +564,6 @@ export const dispatchBatchExecutionRelay = async (
       to,
       data,
       version: safeVersion,
-      // We have no estimation in place
-      gasLimit: undefined,
     })
   } catch (error) {
     txs.forEach(({ txId }) => {

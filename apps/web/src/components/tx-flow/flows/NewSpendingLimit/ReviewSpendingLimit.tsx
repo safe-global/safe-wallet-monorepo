@@ -41,7 +41,18 @@ export const ReviewSpendingLimit = ({ params }: { params: NewSpendingLimitFlowPr
   }, [spendingLimits, params])
 
   useEffect(() => {
-    createNewSpendingLimitTx(params, spendingLimits, chainId, chain, safe.deployed, decimals, existingSpendingLimit)
+    if (!chain) return
+
+    createNewSpendingLimitTx(
+      params,
+      spendingLimits,
+      chainId,
+      chain,
+      safe.modules,
+      safe.deployed,
+      decimals,
+      existingSpendingLimit,
+    )
       .then(setSafeTx)
       .catch(setSafeTxError)
   }, [
@@ -50,6 +61,7 @@ export const ReviewSpendingLimit = ({ params }: { params: NewSpendingLimitFlowPr
     decimals,
     existingSpendingLimit,
     params,
+    safe.modules,
     safe.deployed,
     setSafeTx,
     setSafeTxError,

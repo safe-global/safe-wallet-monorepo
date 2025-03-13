@@ -125,7 +125,9 @@ export type UpdateMessageSignatureDto = {
 }
 export const {
   useMessagesGetMessageByHashV1Query,
+  useLazyMessagesGetMessageByHashV1Query,
   useMessagesGetMessagesBySafeV1Query,
+  useLazyMessagesGetMessagesBySafeV1Query,
   useMessagesCreateMessageV1Mutation,
   useMessagesUpdateMessageSignatureV1Mutation,
 } = injectedRtkApi

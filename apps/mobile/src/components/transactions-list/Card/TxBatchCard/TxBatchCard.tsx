@@ -11,15 +11,17 @@ interface TxBatchCardProps {
   label?: string
   inQueue?: boolean
   executionInfo?: Transaction['executionInfo']
+  onPress: () => void
 }
 
-export function TxBatchCard({ txInfo, bordered, executionInfo, inQueue, label }: TxBatchCardProps) {
+export function TxBatchCard({ txInfo, bordered, executionInfo, inQueue, label, onPress }: TxBatchCardProps) {
   const logoUri = txInfo.to.logoUri
 
   return (
     <SafeListItem
       label={label || `${txInfo.actionCount} actions`}
       icon="batch"
+      onPress={onPress}
       inQueue={inQueue}
       executionInfo={executionInfo}
       type={'Batch'}

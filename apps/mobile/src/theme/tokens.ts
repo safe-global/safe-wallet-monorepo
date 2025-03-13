@@ -35,6 +35,8 @@ export const tokens = createTokens({
     $8: 32,
     $9: 36,
     $10: 40,
+    $md: 14,
+    $sm: 14,
   },
   zIndex,
   radius,

@@ -11,6 +11,8 @@ import SingleAccountItem from '@/features/myAccounts/components/AccountItems/Sin
 import { type SafeItem } from '@/features/myAccounts/hooks/useAllSafes'
 import { type MultiChainSafeItem } from '@/features/myAccounts/hooks/useAllSafesGrouped'
 import { getComparator } from '@/features/myAccounts/utils/utils'
+import SafenetAccountList from '@/features/safenet/components/SafenetAccountList'
+import SafenetMultichainIndicator from '@/features/safenet/components/SafenetMultichainIndicator'
 import useHasSafenetFeature from '@/features/safenet/hooks/useHasSafenetFeature'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import useWallet from '@/hooks/wallets/useWallet'
@@ -43,15 +45,10 @@ import {
 } from '@mui/material'
 import type { SafeOverview } from '@safe-global/safe-gateway-typescript-sdk'
 import classnames from 'classnames'
-import dynamic from 'next/dynamic'
 import { useRouter } from 'next/router'
 import { useCallback, useMemo, useState } from 'react'
 import { AddNetworkButton } from '../AddNetworkButton'
 import css from './styles.module.css'
-
-const SafenetMultichainIndicator = dynamic(() => import('@/features/safenet/components/SafenetMultichainIndicator'))
-const SafenetAccountList = dynamic(() => import('@/features/safenet/components/SafenetAccountList'))
-
 type MultiAccountItemProps = {
   multiSafeAccountItem: MultiChainSafeItem
   safeOverviews?: SafeOverview[]
@@ -285,6 +282,7 @@ const MultiAccountItem = ({ onLinkClick, multiSafeAccountItem }: MultiAccountIte
             '& .MuiAccordionSummary-content': { m: '0 !important', alignItems: 'center' },
             '&.Mui-expanded': { backgroundColor: 'transparent !important' },
           }}
+          component="div"
         >
           <Box className={classnames(css.multiSafeLink, css.safeLink)} width="100%">
             <Box sx={{ pr: 2.5 }} data-testid="group-safe-icon">
