@@ -1,5 +1,5 @@
 import { SwapOrderTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { formatUnits } from 'ethers'
+import { ethers, BigNumber, formatUnits } from 'ethers'
 
 type Quantity = {
   amount: string | number | bigint
