@@ -29,7 +29,7 @@ function CancelRecoveryFlow({ recovery }: { recovery: RecoveryQueueItem }): Reac
         content: <ConfirmTxDetails key={2} onSubmit={() => {}} />,
       },
     ],
-    [nextStep],
+    [nextStep, recovery],
   )
 
   return (
