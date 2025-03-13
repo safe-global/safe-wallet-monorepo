@@ -19,7 +19,7 @@ export const Fiat = ({ value, currency }: FiatProps) => {
   }, [fiat])
 
   return (
-    <View flexDirection="row" alignItems="center">
+    <View flexDirection="row" alignItems="center" testID="fiat-balance-display">
       <H3 fontWeight="600">{symbol}</H3>
       <H1 fontWeight="600">
         {integerPart}
