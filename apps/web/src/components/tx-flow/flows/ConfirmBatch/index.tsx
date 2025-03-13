@@ -1,14 +1,17 @@
-import { type ReactElement, useContext, useEffect } from 'react'
+import { type ReactElement, useContext, useEffect, useMemo } from 'react'
 import { type TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
-import SignOrExecuteForm from '@/components/tx/SignOrExecuteForm'
 import { createMultiSendCallOnlyTx } from '@/services/tx/tx-sender'
 import { SafeTxContext } from '../../SafeTxProvider'
 import type { MetaTransactionData } from '@safe-global/safe-core-sdk-types'
 import { OperationType } from '@safe-global/safe-core-sdk-types'
 import TxLayout from '../../common/TxLayout'
+import type { TxStep } from '../../common/TxLayout'
 import BatchIcon from '@/public/images/common/batch.svg'
 import { useDraftBatch } from '@/hooks/useDraftBatch'
 import { maybePlural } from '@/utils/formatters'
+import { ConfirmTxDetails } from '@/components/tx/ConfirmTxDetails'
+import useTxStepper from '../../useTxStepper'
+import ReviewTransaction from '@/components/tx/ReviewTransaction'
 
 type ConfirmBatchProps = {
   onSubmit: () => void
@@ -32,20 +35,37 @@ const ConfirmBatch = ({ onSubmit }: ConfirmBatchProps): ReactElement => {
     createMultiSendCallOnlyTx(calls).then(setSafeTx).catch(setSafeTxError)
   }, [batchTxs, setSafeTx, setSafeTxError])
 
-  return <SignOrExecuteForm onSubmit={onSubmit} isBatch />
+  return <ReviewTransaction onSubmit={onSubmit} isBatch />
 }
 
 const ConfirmBatchFlow = (props: ConfirmBatchProps) => {
   const { length } = useDraftBatch()
+  const { data, step, nextStep, prevStep } = useTxStepper({})
+
+  const steps = useMemo<TxStep[]>(
+    () => [
+      {
+        txLayoutProps: { title: 'Confirm batch' },
+        content: <ConfirmBatch key={0} {...props} onSubmit={() => nextStep(data)} />,
+      },
+      {
+        txLayoutProps: { title: 'Confirm transaction details', fixedNonce: true },
+        content: <ConfirmTxDetails key={1} onSubmit={() => {}} />,
+      },
+    ],
+    [nextStep, data, props],
+  )
+
   return (
     <TxLayout
-      title="Confirm batch"
       subtitle={`This batch contains ${length} transaction${maybePlural(length)}`}
       icon={BatchIcon}
-      step={0}
+      step={step}
+      onBack={prevStep}
       isBatch
+      {...(steps?.[step]?.txLayoutProps || {})}
     >
-      <ConfirmBatch {...props} />
+      {steps.map(({ content }) => content)}
     </TxLayout>
   )
 }
