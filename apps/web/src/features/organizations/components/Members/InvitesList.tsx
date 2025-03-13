@@ -1,5 +1,5 @@
 import EnhancedTable from '@/components/common/EnhancedTable'
-import { Button, Chip, IconButton, Stack, SvgIcon } from '@mui/material'
+import { Chip, IconButton, Stack, SvgIcon } from '@mui/material'
 import type { UserOrganization } from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
 import { useUserOrganizationsRemoveUserV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
 import tableCss from '@/components/common/EnhancedTable/styles.module.css'
@@ -8,6 +8,7 @@ import { MemberRole } from '../AddMembersModal'
 import { useCurrentOrgId } from '@/features/organizations/hooks/useCurrentOrgId'
 import { MemberStatus } from '@/features/organizations/hooks/useOrgMembers'
 import MemberName from '../MembersList/MemberName'
+import { useIsAdmin } from '@/features/organizations/hooks/useIsAdmin'
 
 const headCells = [
   {
@@ -31,7 +32,7 @@ const headCells = [
 const InvitesList = ({ invitedMembers }: { invitedMembers: UserOrganization[] }) => {
   const [deleteInvite] = useUserOrganizationsRemoveUserV1Mutation()
   const currentOrgId = useCurrentOrgId()
-
+  const isAdmin = useIsAdmin()
   const handleDeleteInvite = async (invitedId: number) => {
     try {
       await deleteInvite({ orgId: Number(currentOrgId), userId: invitedId })
@@ -69,16 +70,15 @@ const InvitesList = ({ invitedMembers }: { invitedMembers: UserOrganization[] })
           rawValue: '',
           sticky: true,
           content: (
-            <div className={tableCss.actions}>
-              {isDeclined && (
-                <Button variant="outlined" size="small" sx={{ px: 2, py: 0.5, mr: 1 }} onClick={() => {}}>
-                  Resend
-                </Button>
+            <>
+              {isAdmin && (
+                <div className={tableCss.actions}>
+                  <IconButton onClick={() => handleDeleteInvite(member.user.id)} size="small">
+                    <SvgIcon component={DeleteIcon} inheritViewBox color="error" fontSize="small" />
+                  </IconButton>
+                </div>
               )}
-              <IconButton onClick={() => handleDeleteInvite(member.user.id)} size="small">
-                <SvgIcon component={DeleteIcon} inheritViewBox color="error" fontSize="small" />
-              </IconButton>
-            </div>
+            </>
           ),
         },
       },

@@ -10,12 +10,14 @@ import { useSafesSearch } from '@/features/myAccounts/hooks/useSafesSearch'
 import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
 import SignedOutState from '@/features/organizations/components/SignedOutState'
+import { useIsAdmin } from '@/features/organizations/hooks/useIsAdmin'
 
 const OrganizationSafeAccounts = () => {
   const [searchQuery, setSearchQuery] = useState('')
   const isUserSignedIn = useAppSelector(isAuthenticated)
   const allSafes = useOrgSafes()
   const filteredSafes = useSafesSearch(allSafes, searchQuery)
+  const isAdmin = useIsAdmin()
 
   const safes = searchQuery ? filteredSafes : allSafes
 
@@ -46,7 +48,7 @@ const OrganizationSafeAccounts = () => {
           size="small"
         />
 
-        <AddAccounts />
+        {isAdmin && <AddAccounts />}
       </Stack>
 
       {/* TODO: Fix the condition once data is ready */}
