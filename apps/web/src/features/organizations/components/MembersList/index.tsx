@@ -56,7 +56,11 @@ const MenuButtons = ({ member, disableDelete }: { member: UserOrganization; disa
         </Box>
       </Tooltip>
       {openRemoveMemberDialog && (
-        <RemoveMemberDialog member={member.user} handleClose={() => setOpenRemoveMemberDialog(false)} />
+        <RemoveMemberDialog
+          userId={member.user.id}
+          memberName={member.name}
+          handleClose={() => setOpenRemoveMemberDialog(false)}
+        />
       )}
     </div>
   )
