@@ -47,7 +47,7 @@ export function useSign() {
     }
   }
 
-  const getPrivateKey = async (userId: string, useBiometrics: boolean = true) => {
+  const getPrivateKey = async (userId: string) => {
     try {
       const keychainKey = getKeychainKey(userId)
       const user = await Keychain.getGenericPassword({
@@ -59,16 +59,11 @@ export function useSign() {
       }
 
       const { encryptedPassword, iv } = JSON.parse(user.password)
-      const decryptOptions = useBiometrics
-        ? {
+      const decryptOptions =
+         {
           biometryTitle: 'Authenticate',
           biometrySubTitle: 'Signing',
           biometryDescription: 'Authenticate yourself to sign the text',
-        }
-        : {
-          biometryTitle: '',
-          biometrySubTitle: '',
-          biometryDescription: '',
         }
 
       const decryptedKey = await DeviceCrypto.decrypt(userId, encryptedPassword, iv, decryptOptions)

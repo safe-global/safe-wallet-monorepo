@@ -99,7 +99,6 @@ const useRegisterForNotifications = ({
         type: accountType,
       }
 
-      Logger.info('Step 5 - Store the random delegated account in the Redux store')
       // Step 5 - Store the random delegated account in the Redux store
       dispatch(
         addOrUpdateDelegatedAccount({
@@ -107,25 +106,12 @@ const useRegisterForNotifications = ({
           safes: [activeSafe],
         }),
       )
-      Logger.info('ownerFound')
-      const proposedSignerPK = ownerFound ? await getPrivateKey(ownerFound.value, false) : randomDelegatedAccount.privateKey
 
-      if (!proposedSignerPK) {
-        setLoading(false)
-        setError(ERROR_MSG)
-        return {
-          loading,
-          error,
-        }
-      }
-
-      const signer = getSigner(proposedSignerPK)
-      Logger.info('signer')
+      const signer = getSigner(randomDelegatedAccount.privateKey)
       const { siweMessage } = await getNotificationRegisterPayload({
         nonce: nonceData?.nonce,
         signer,
       })
-      Logger.info(siweMessage)
       if (!fcmToken) {
         setLoading(false)
         setError(ERROR_MSG)
@@ -142,6 +128,7 @@ const useRegisterForNotifications = ({
         message: siweMessage,
         chainId: activeSafe.chainId,
         fcmToken,
+        delegatorAddress: ownerFound?.value,
         delegatedAccount: randomDelegatedAccount,
         notificationAccountType: accountType,
       }).then(() => {

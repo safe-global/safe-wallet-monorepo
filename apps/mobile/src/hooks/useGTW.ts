@@ -34,6 +34,7 @@ export function useGTW() {
       fcmToken,
       delegatedAccount,
       notificationAccountType,
+      delegatorAddress,
     }: {
       safeAddress: Address
       signer: Wallet | HDNodeWallet
@@ -42,6 +43,8 @@ export function useGTW() {
       fcmToken: string
       delegatedAccount: Wallet | HDNodeWallet
       notificationAccountType?: NOTIFICATION_ACCOUNT_TYPE
+      delegatorAddress?: string
+
     }) => {
       const isOwner = notificationAccountType === NOTIFICATION_ACCOUNT_TYPE.OWNER
 
@@ -56,12 +59,12 @@ export function useGTW() {
           },
         })
 
-        if (isOwner) {
+        if (isOwner && delegatorAddress) {
           delegatesPostDelegateV2({
             chainId,
             createDelegateDto: {
               safe: safeAddress,
-              delegator: signer.address,
+              delegator: delegatorAddress,
               delegate: delegatedAccount.address,
               signature,
               label: NOTIFICATION_ACCOUNT_TYPE.OWNER,
