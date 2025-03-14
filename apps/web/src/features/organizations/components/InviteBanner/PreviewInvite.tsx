@@ -15,7 +15,7 @@ const PreviewInvite = () => {
   if (!org) return null
 
   return (
-    <Paper sx={{ p: 2, mb: 4, backgroundColor: '#d7f6ff' }}>
+    <Paper sx={{ p: 2, mb: 4, backgroundColor: 'info.light' }}>
       <Box className={css.previewInviteContent}>
         <InitialsAvatar name={org.name} size="medium" />
         <Typography variant="body1" color="text.primary" flexGrow={1}>
