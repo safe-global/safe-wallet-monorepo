@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
 import TxLayout from '@/components/tx-flow/common/TxLayout'
+import type { TxStep } from '@/components/tx-flow/common/TxLayout'
 import { UpdateSafeReview } from './UpdateSafeReview'
 import SettingsIcon from '@/public/images/sidebar/settings.svg'
 import { ConfirmTxDetails } from '@/components/tx/ConfirmTxDetails'
@@ -8,7 +9,7 @@ import useTxStepper from '../../useTxStepper'
 const UpdateSafeFlow = () => {
   const { data, step, nextStep, prevStep } = useTxStepper({})
 
-  const steps = useMemo(
+  const steps = useMemo<TxStep[]>(
     () => [
       {
         txLayoutProps: { title: 'Review transaction' },
@@ -19,7 +20,7 @@ const UpdateSafeFlow = () => {
         content: <ConfirmTxDetails key={2} onSubmit={() => {}} />,
       },
     ],
-    [nextStep],
+    [nextStep, data],
   )
 
   return (
