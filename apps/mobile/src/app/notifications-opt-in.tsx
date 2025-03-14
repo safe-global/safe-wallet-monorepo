@@ -6,10 +6,11 @@ import { useNotificationManager } from '@/src/hooks/useNotificationManager'
 import { selectSigners } from '../store/signersSlice'
 import { useAppDispatch, useAppSelector } from '../store/hooks'
 import { updatePromptAttempts } from '@/src/store/notificationsSlice'
+
 function NotificationsOptIn() {
   const appSigners = useAppSelector(selectSigners)
   const dispatch = useAppDispatch()
-  const { isAppNotificationEnabled, enableNotification } = useNotificationManager(appSigners)
+  const { isAppNotificationEnabled, enableNotification, isLoading } = useNotificationManager(appSigners)
   const colorScheme = useColorScheme()
 
   useEffect(() => {
@@ -35,6 +36,7 @@ function NotificationsOptIn() {
       description="Get notified when you receive assets, and when transactions require your action."
       image={image}
       isVisible
+      isLoading={isLoading}
       ctaButton={{
         onPress: enableNotification,
         label: 'Enable notifications',
