@@ -10,7 +10,7 @@ import { useAppSelector } from '@/store'
 const PreviewInvite = () => {
   const isUserSignedIn = useAppSelector(isAuthenticated)
   const orgId = useCurrentOrgId()
-  const { data: org } = useOrganizationsGetOneV1Query({ id: Number(orgId) }, { skip: !isUserSignedIn })
+  const { currentData: org } = useOrganizationsGetOneV1Query({ id: Number(orgId) }, { skip: !isUserSignedIn })
 
   if (!org) return null
 

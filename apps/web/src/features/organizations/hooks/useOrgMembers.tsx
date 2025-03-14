@@ -18,8 +18,8 @@ export enum MemberRole {
 const useAllMembers = () => {
   const orgId = useCurrentOrgId()
   const isUserSignedIn = useAppSelector(isAuthenticated)
-  const { data } = useUserOrganizationsGetUsersV1Query({ orgId: Number(orgId) }, { skip: !isUserSignedIn })
-  return data?.members || []
+  const { data: currentData } = useUserOrganizationsGetUsersV1Query({ orgId: Number(orgId) }, { skip: !isUserSignedIn })
+  return currentData?.members || []
 }
 
 export const useOrgMembersByStatus = () => {
@@ -35,7 +35,7 @@ export const useOrgMembersByStatus = () => {
 
 const useCurrentMembership = () => {
   const allMembers = useAllMembers()
-  const { data: user } = useUsersGetWithWalletsV1Query()
+  const { currentData: user } = useUsersGetWithWalletsV1Query()
   return allMembers.find((member) => member.user.id === user?.id)
 }
 
