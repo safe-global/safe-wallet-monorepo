@@ -1,14 +1,13 @@
 import { Box, Chip, IconButton, SvgIcon, Tooltip } from '@mui/material'
 import { type UserOrganization } from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
 import EditIcon from '@/public/images/common/edit.svg'
-import { MemberRole } from '../AddMembersModal'
 import DeleteIcon from '@/public/images/common/delete.svg'
 import EnhancedTable from '@/components/common/EnhancedTable'
 import tableCss from '@/components/common/EnhancedTable/styles.module.css'
 import MemberName from './MemberName'
 import RemoveMemberDialog from './RemoveMemberModal'
 import { useState } from 'react'
-import { useIsAdmin } from '@/features/organizations/hooks/useIsAdmin'
+import { MemberRole, useIsAdmin } from '@/features/organizations/hooks/useOrgMembers'
 import EditMemberDialog from '@/features/organizations/components/MembersList/EditMemberDialog'
 
 const headCells = [

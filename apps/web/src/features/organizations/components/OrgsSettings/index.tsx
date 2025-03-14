@@ -25,10 +25,12 @@ import {
 import { useRouter } from 'next/router'
 import { useState } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
-import css from './styles.module.css'
-import { useCurrentOrgId } from '../../hooks/useCurrentOrgId'
+import { useCurrentOrgId } from '@/features/organizations/hooks/useCurrentOrgId'
 import { isAuthenticated } from '@/store/authSlice'
 import SignedOutState from '@/features/organizations/components/SignedOutState'
+import { useIsInvited } from '@/features/organizations/hooks/useOrgMembers'
+import PreviewInvite from '@/features/organizations/components/InviteBanner/PreviewInvite'
+import css from './styles.module.css'
 
 const ListIcon = ({ variant }: { variant: 'success' | 'danger' }) => {
   const Icon = variant === 'success' ? CheckIcon : CloseIcon
@@ -53,7 +55,7 @@ const OrgsSettings = () => {
   const { data: org } = useOrganizationsGetOneV1Query({ id: Number(orgId) }, { skip: !isUserSignedIn })
   const [updateOrg] = useOrganizationsUpdateV1Mutation()
   const [deleteOrg] = useOrganizationsDeleteV1Mutation()
-
+  const isInvited = useIsInvited()
   const formMethods = useForm<OrganizationFormData>({
     mode: 'onChange',
     values: {
@@ -97,6 +99,7 @@ const OrgsSettings = () => {
 
   return (
     <div>
+      {isInvited && <PreviewInvite />}
       <Typography variant="h2" mb={3}>
         Settings
       </Typography>
