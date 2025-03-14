@@ -6,6 +6,14 @@ import { server } from '@/src/tests/server'
 import { http, HttpResponse } from 'msw'
 import { GATEWAY_URL } from '@/src/config/constants'
 
+jest.mock('expo-router', () => ({
+  useNavigation: () => ({
+    navigate: jest.fn(),
+    dispatch: jest.fn(),
+  }),
+  useSegments: () => ['test'], // if you use useSegments anywhere
+}))
+
 // Mock the safe item data
 const mockSafeItem = {
   SafeInfo: {

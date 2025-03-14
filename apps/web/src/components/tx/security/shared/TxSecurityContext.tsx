@@ -20,6 +20,7 @@ export const defaultSecurityContextValues = {
     reason: undefined,
     balanceChange: undefined,
     severity: SecuritySeverity.NONE,
+    contractManagement: undefined,
     isLoading: false,
     error: undefined,
   },
@@ -39,6 +40,7 @@ export type TxSecurityContextProps = {
         warnings: NonNullable<BlockaidModuleResponse['issues']>
         balanceChange: BlockaidModuleResponse['balanceChange'] | undefined
         severity: SecuritySeverity | undefined
+        contractManagement: BlockaidModuleResponse['contractManagement'] | undefined
         isLoading: boolean
         error: Error | undefined
       }
@@ -53,8 +55,8 @@ export type TxSecurityContextProps = {
 export const TxSecurityContext = createContext<TxSecurityContextProps>(defaultSecurityContextValues)
 
 export const TxSecurityProvider = ({ children }: { children: ReactElement }) => {
-  const { safeTx, safeMessage } = useContext(SafeTxContext)
-  const [blockaidResponse, blockaidError, blockaidLoading] = useBlockaid(safeTx ?? safeMessage)
+  const { safeTx, safeMessage, txOrigin } = useContext(SafeTxContext)
+  const [blockaidResponse, blockaidError, blockaidLoading] = useBlockaid(safeTx ?? safeMessage, txOrigin)
 
   const [isRiskConfirmed, setIsRiskConfirmed] = useState(false)
   const [isRiskIgnored, setIsRiskIgnored] = useState(false)
@@ -68,6 +70,7 @@ export const TxSecurityProvider = ({ children }: { children: ReactElement }) => 
         severity: blockaidResponse?.severity,
         warnings: blockaidResponse?.payload?.issues || [],
         balanceChange: blockaidResponse?.payload?.balanceChange,
+        contractManagement: blockaidResponse?.payload?.contractManagement,
         error: blockaidError,
         isLoading: blockaidLoading,
       },

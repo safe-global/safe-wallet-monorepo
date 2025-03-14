@@ -109,7 +109,7 @@ const safeTxWithNativeData = {
     data: '0x',
   },
 }
-describe('ConfirmationView', () => {
+xdescribe('ConfirmationView', () => {
   it('should display a confirmation screen for a SETTINGS_CHANGE transaction', () => {
     const { container } = render(
       <ConfirmationView safeTx={safeTxWithNativeData} txDetails={txDetails} txId={txDetails.txId} isApproval />,

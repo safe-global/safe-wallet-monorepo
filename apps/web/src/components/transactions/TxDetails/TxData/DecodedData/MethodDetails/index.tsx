@@ -18,29 +18,15 @@ export const MethodDetails = ({ data, hexData, addressInfoIndex }: MethodDetails
   if (!data.parameters?.length) {
     return (
       <>
-        <Typography
-          sx={{
-            color: 'text.secondary',
-          }}
-        >
-          No parameters
-        </Typography>
+        <Typography color="text.secondary">No parameters</Typography>
 
-        {hexData && <HexEncodedData title="Data (hex-encoded)" hexData={hexData} />}
+        {hexData && <HexEncodedData title="Data:" hexData={hexData} />}
       </>
     )
   }
 
   return (
     <Box>
-      <Typography
-        sx={{
-          fontWeight: 'bold',
-          pb: 1,
-        }}
-      >
-        Parameters
-      </Typography>
       {data.parameters?.map((param, index) => {
         const isArrayValueParam = isArrayParameter(param.type) || Array.isArray(param.value)
         const inlineType = isAddress(param.type) ? 'address' : isByte(param.type) ? 'bytes' : undefined
@@ -49,12 +35,7 @@ export const MethodDetails = ({ data, hexData, addressInfoIndex }: MethodDetails
         const title = (
           <>
             <Typography component="span">{param.name}</Typography>{' '}
-            <Typography
-              component="span"
-              sx={{
-                color: 'text.secondary',
-              }}
-            >
+            <Typography component="span" color="text.secondary">
               {param.type}
             </Typography>
           </>

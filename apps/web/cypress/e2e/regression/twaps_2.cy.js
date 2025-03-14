@@ -87,6 +87,7 @@ describe('Twaps 2 tests', { defaultCommandTimeout: 30000 }, () => {
         swaps.enableTwapCustomRecipient(isCustomRecipientFound(swaps.customRecipient))
         swaps.clickOnSettingsBtnTwaps()
         swaps.enterRecipient(swaps.blockedAddress)
+        swaps.selectOutputCurrency(swaps.swapTokens.dai)
       })
       cy.contains(swaps.blockedAddressStr)
     },

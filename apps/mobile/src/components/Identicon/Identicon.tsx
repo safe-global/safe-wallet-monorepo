@@ -1,7 +1,7 @@
-import { blo } from 'blo'
-import { Image } from 'expo-image'
+import { bloSvg } from 'blo'
 import { type Address } from '@/src/types/address'
 import { View } from 'tamagui'
+import { SvgXml } from 'react-native-svg'
 
 type Props = {
   address: Address
@@ -11,17 +11,13 @@ type Props = {
 
 const DEFAULT_SIZE = 56
 export const Identicon = ({ address, rounded, size }: Props) => {
-  const style = {
-    borderRadius: rounded ? '50%' : 0,
-    width: size ? size : DEFAULT_SIZE,
-    height: size ? size : DEFAULT_SIZE,
-  }
+  size = size ? size : DEFAULT_SIZE
 
-  const blockie = blo(address)
+  const blockieSvg = bloSvg(address)
 
   return (
-    <View style={{ borderRadius: '50%', overflow: 'hidden' }}>
-      <Image testID={'identicon-image'} source={{ uri: blockie }} style={style} />
+    <View style={{ borderRadius: rounded ? '50%' : 0, overflow: 'hidden' }} testID={'identicon-image-container'}>
+      <SvgXml testID={'identicon-image'} xml={blockieSvg} width={size} height={size} />
     </View>
   )
 }

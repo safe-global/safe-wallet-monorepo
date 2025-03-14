@@ -19,6 +19,11 @@ jest.mock('@/services/tx/proposeTransaction', () => ({
   default: jest.fn(() => Promise.resolve({ txId: '123' })),
 }))
 
+jest.mock('@/hooks/useValidateTxData', () => ({
+  __esModule: true,
+  useValidateTxData: jest.fn().mockReturnValue([undefined, undefined, false]),
+}))
+
 describe('SignOrExecute', () => {
   beforeEach(() => {
     isSafeOwner = true

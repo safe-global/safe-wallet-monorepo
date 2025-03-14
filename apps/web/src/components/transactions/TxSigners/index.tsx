@@ -140,7 +140,7 @@ export const TxSigners = ({
   const isConfirmed = confirmationsNeeded <= 0 || canExecute
 
   return (
-    <>
+    <Box mb={2}>
       <List data-testid="transaction-actions-list" className={css.signers}>
         <ListItem>
           {isCancellationTxInfo(txInfo) ? (
@@ -253,7 +253,7 @@ export const TxSigners = ({
           </Box>
         )
       )}
-    </>
+    </Box>
   )
 }
 

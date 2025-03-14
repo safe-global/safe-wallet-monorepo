@@ -19,7 +19,8 @@ describe('Sidebar sorting tests', () => {
     staticSafes = await getSafes(CATEGORIES.static)
   })
 
-  it('Verify the same safe of the different networks is ordered by most recent', () => {
+  // Unskip when chains are available
+  it.skip('Verify the same safe of the different networks is ordered by most recent', () => {
     let safe_eth = main.changeSafeChainName(staticSafes.MATIC_STATIC_SAFE_28, 'eth')
     let safe_gno = main.changeSafeChainName(staticSafes.MATIC_STATIC_SAFE_28, 'gno')
     cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_9)
@@ -37,7 +38,8 @@ describe('Sidebar sorting tests', () => {
     sideBar.verifyAddedSafesExistByIndex(2, constants.networks.ethereum)
   })
 
-  it('Verify the same safe of the different networks is ordered by name', () => {
+  // Unskip when chains are available
+  it.skip('Verify the same safe of the different networks is ordered by name', () => {
     main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__addressBook, ls.addressBookData.undeployedSet)
     main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__undeployedSafes, ls.undeployedSafe.safes2)
     cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_9)
@@ -46,7 +48,7 @@ describe('Sidebar sorting tests', () => {
 
     sideBar.clickOnOpenSidebarBtn()
     sideBar.searchSafe('96')
-    sideBar.verifySafeCount(3)
+    sideBar.verifySafeCount(1)
     sideBar.expandGroupSafes(0)
     sideBar.openSortOptionsMenu()
     sideBar.selectSortOption(sideBar.sortOptions.name)

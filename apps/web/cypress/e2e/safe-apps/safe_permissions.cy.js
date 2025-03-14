@@ -15,7 +15,8 @@ describe('Safe permissions system tests', () => {
     })
   })
 
-  it('Verify that requesting permissions with wallet_requestPermissions shows the permissions prompt and return the permissions on accept', () => {
+  // Skipped due to test app availability
+  it.skip('Verify that requesting permissions with wallet_requestPermissions shows the permissions prompt and return the permissions on accept', () => {
     cy.visitSafeApp(constants.testAppUrl + constants.requestPermissionsUrl)
     safeapps.verifyPermissionsRequestExists()
     safeapps.verifyAccessToAddressBookExists()
@@ -33,7 +34,8 @@ describe('Safe permissions system tests', () => {
     })
   })
 
-  it('Verify that trying to get the current permissions with wallet_getPermissions returns the current permissions', () => {
+  // Skipped due to test app availability
+  it.skip('Verify that trying to get the current permissions with wallet_getPermissions returns the current permissions', () => {
     cy.on('window:before:load', (window) => {
       window.localStorage.setItem(
         constants.SAFE_PERMISSIONS_KEY,

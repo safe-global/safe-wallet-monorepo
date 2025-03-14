@@ -54,6 +54,8 @@ runs:
         config: baseUrl=http://localhost:8080
         install: false
         start: yarn workspace @safe-global/web serve
+        wait-on: 'http://localhost:8080'
+        wait-on-timeout: 120
         working-directory: apps/web
       env:
         CYPRESS_RECORD_KEY: ${{ inputs.record_key || fromJSON(inputs.secrets).CYPRESS_RECORD_KEY }}

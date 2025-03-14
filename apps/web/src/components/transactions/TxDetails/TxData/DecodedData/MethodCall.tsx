@@ -1,5 +1,4 @@
 import NamedAddressInfo from '@/components/common/NamedAddressInfo'
-import { Divider } from '@/components/tx/DecodedTx'
 import { Typography } from '@mui/material'
 
 const MethodCall = ({
@@ -50,8 +49,6 @@ const MethodCall = ({
           avatarSize={24}
         />
       </Typography>
-
-      <Divider />
     </>
   )
 }

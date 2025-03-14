@@ -73,7 +73,7 @@ exports[`SafeListItem should render a list item with a custom label template 1`]
             }
             testID="safe-list-add-owner-icon"
           >
-            
+            
           </Text>
           <Text
             style={

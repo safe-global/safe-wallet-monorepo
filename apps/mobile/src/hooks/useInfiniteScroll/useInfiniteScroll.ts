@@ -2,7 +2,7 @@ import { selectActiveSafe } from '@/src/store/activeSafeSlice'
 import { useCallback, useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 
-type TUseInfiniteScrollData<J> = { results: J[]; next?: string | null }
+type TUseInfiniteScrollData<J> = { results: J[]; previous?: string | null; next?: string | null }
 
 type TUseInfiniteScrollConfig<T, J> = {
   refetch: () => void
@@ -12,10 +12,10 @@ type TUseInfiniteScrollConfig<T, J> = {
 
 export const useInfiniteScroll = <T, J>({ refetch, setPageUrl, data }: TUseInfiniteScrollConfig<T, J>) => {
   const activeSafe = useSelector(selectActiveSafe)
-  const [list, setList] = useState<J[]>([])
+  const [list, setList] = useState<T & TUseInfiniteScrollData<J>>()
 
   useEffect(() => {
-    setList([])
+    setList(undefined)
   }, [activeSafe])
 
   useEffect(() => {
@@ -23,7 +23,16 @@ export const useInfiniteScroll = <T, J>({ refetch, setPageUrl, data }: TUseInfin
       return
     }
 
-    setList((prev) => (prev ? [...prev, ...data.results] : data.results))
+    setList((prev) => {
+      if (prev?.previous === data.previous) {
+        return data
+      }
+
+      return {
+        ...data,
+        results: [...(prev?.results || []), ...data.results],
+      }
+    })
   }, [data])
 
   const onEndReached = useCallback(() => {

@@ -29,7 +29,7 @@ export function clickOnNewTxBtnS() {
 }
 
 export function clickOnWalletExpandMoreIcon() {
-  cy.get(expandMoreIcon).eq(0).click()
+  cy.get(expandMoreIcon).eq(0).click({ force: true })
   cy.get(sentinelStart).next().should('exist')
 }
 

@@ -18,14 +18,15 @@ export const relayExecMethod = '[data-testid="relay-execution-method"]'
 export const payNowExecMethod = '[data-testid="pay-now-execution-method"]'
 export const addToBatchBtn = '[data-track="batching: Add to batch"]'
 const accordionDetails = '[data-testid="accordion-details"]'
-const copyIcon = '[data-testid="copy-btn-icon"]'
+export const copyIcon = '[data-testid="copy-btn-icon"]'
+export const explorerBtn = '[data-testid="explorer-btn"]'
 const transactionSideList = '[data-testid="transaction-actions-list"]'
 const confirmationVisibilityBtn = '[data-testid="confirmation-visibility-btn"]'
 const expandAllBtn = '[data-testid="expande-all-btn"]'
 const collapseAllBtn = '[data-testid="collapse-all-btn"]'
 export const txRowTitle = '[data-testid="tx-row-title"]'
 const advancedDetails = '[data-testid="tx-advanced-details"]'
-const baseGas = '[data-testid="tx-bas-gas"]'
+const baseGas = '[data-testid="tx-base-gas"]'
 const requiredConfirmation = '[data-testid="required-confirmations"]'
 export const txDate = '[data-testid="tx-date"]'
 export const proposalStatus = '[data-testid="proposal-status"]'
@@ -76,12 +77,14 @@ const txHexData = '[data-testid="tx-hex-data"]'
 const txStack = '[data-testid="tx-stack"]'
 const txOperation = '[data-testid="tx-operation"]'
 const nonceFld = '[data-testid="nonce-fld"]'
+const txHexDataRow = '[data-testid="tx-hexData"]'
 
 const viewTransactionBtn = 'View transaction'
 const transactionDetailsTitle = 'Transaction details'
 const QueueLabel = 'needs to be executed first'
 const TransactionSummary = 'Send '
 const transactionsPerHrStr = 'free transactions left today'
+const txHashesStr = 'Transaction hashes'
 
 const maxAmountBtnStr = 'Max'
 const nextBtnStr = 'Next'
@@ -111,14 +114,27 @@ const bulkExecuteBtnStr = 'Bulk execute'
 const batchModalTitle = 'Batch'
 export const swapOrder = 'Swap order settlement'
 export const bulkTxs = 'Bulk transactions'
+export const txStr = 'Transactions'
+export const txDetailsStr = 'Transaction details'
+export const settingsStr = 'Settings'
+export const assetsStr = 'Assets'
+export const topAssetsStr = 'Top assets'
+export const getStartedStr = 'Get started'
 
 export const txNoteWarningMessage = 'The notes are publicly visible, do not share any private or sensitive details'
 export const recordedTxNote = 'Tx note one'
 
+export const tx_status = {
+  execution_needed: 'Execution needed',
+}
 export const filterTypes = {
   incoming: 'Incoming',
   outgoing: 'Outgoing',
   module: 'Module-based',
+}
+
+export const txActions = {
+  setFallbackHandler: 'setFallbackHandler',
 }
 
 export const advancedDetailsViewOptions = {
@@ -126,6 +142,18 @@ export const advancedDetailsViewOptions = {
   grid: 'grid',
 }
 
+export function checkHashesExist(count) {
+  cy.contains(txHashesStr)
+    .next()
+    .within(() => {
+      main.verifyElementsCount(txHexDataRow, count)
+      cy.get(txHexDataRow).each(($el) => {
+        cy.wrap($el)
+          .invoke('text')
+          .should('match', /0x[a-fA-F0-9]{64}/)
+      })
+    })
+}
 export function clickOnReplaceTxOption() {
   cy.get(replaceChoiceBtn).find('button').click()
 }
@@ -433,7 +461,7 @@ export function clickOnExpandableAction(data) {
 }
 
 export function clickOnAdvancedDetails() {
-  cy.get(advancedDetails).click()
+  cy.get(advancedDetails).click({ force: true })
 }
 
 export function expandAdvancedDetails(data) {

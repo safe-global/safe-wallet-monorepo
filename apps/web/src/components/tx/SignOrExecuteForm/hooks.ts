@@ -45,7 +45,7 @@ export const useTxActions = (): TxActions => {
 
   return useMemo<TxActions>(() => {
     const safeAddress = safe.address.value
-    const { chainId, version } = safe
+    const { chainId } = safe
 
     const _propose = async (sender: string, safeTx: SafeTransaction, txId?: string, origin?: string) => {
       return dispatchTxProposal({
@@ -80,7 +80,7 @@ export const useTxActions = (): TxActions => {
       if (await isSmartContractWallet(signer.chainId, signer.address)) {
         throw new Error('Cannot relay an unsigned transaction from a smart contract wallet')
       }
-      return await dispatchTxSigning(safeTx, version, signer.provider, txId)
+      return await dispatchTxSigning(safeTx, signer.provider, txId)
     }
 
     const signTx: TxActions['signTx'] = async (safeTx, txId, origin) => {
@@ -107,7 +107,7 @@ export const useTxActions = (): TxActions => {
       }
 
       // Otherwise, sign off-chain
-      const signedTx = await dispatchTxSigning(safeTx, version, signer.provider, txId)
+      const signedTx = await dispatchTxSigning(safeTx, signer.provider, txId)
       const tx = await _propose(signer.address, signedTx, txId, origin)
       return tx.txId
     }

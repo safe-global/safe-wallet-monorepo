@@ -60,6 +60,7 @@ const darkPalette = {
     light: '#1B2A22',
     secondary: '#303033',
     skeleton: 'rgba(255, 255, 255, 0.04)',
+    disabled: '#7878801F',
   },
   backdrop: {
     main: '#636669',

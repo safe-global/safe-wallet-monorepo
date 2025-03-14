@@ -31,7 +31,7 @@ const BackdropComponent = React.memo(() => {
       width="100%"
       height="100%"
     >
-      <BlurView style={styles.absolute} intensity={100} experimentalBlurMethod={'dimezisBlurView'} tint={'dark'} />
+      <BlurView style={styles.absolute} intensity={100} tint={'dark'} />
     </View>
   )
 })

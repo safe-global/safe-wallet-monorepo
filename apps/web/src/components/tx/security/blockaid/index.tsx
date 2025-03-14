@@ -1,5 +1,6 @@
+import type { ReactNode } from 'react'
 import { useContext } from 'react'
-import { TxSecurityContext, type TxSecurityContextProps } from '@/components/tx/security/shared/TxSecurityContext'
+import { TxSecurityContext } from '@/components/tx/security/shared/TxSecurityContext'
 import groupBy from 'lodash/groupBy'
 import { Alert, AlertTitle, Box, Checkbox, FormControlLabel, Stack, Typography } from '@mui/material'
 import { FEATURES } from '@/utils/chains'
@@ -14,7 +15,7 @@ import BlockaidIcon from '@/public/images/transactions/blockaid-icon.svg'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { type SecurityWarningProps, mapSecuritySeverity } from '../utils'
 import { BlockaidHint } from './BlockaidHint'
-import { SecuritySeverity } from '@/services/security/modules/types'
+import { ContractChangeWarning } from './ContractChangeWarning'
 
 export const REASON_MAPPING: Record<string, string> = {
   raw_ether_transfer: 'transfers native currency',
@@ -43,84 +44,48 @@ export const CLASSIFICATION_MAPPING: Record<string, string> = {
   other: 'resulting in a malicious outcome',
 }
 
-const BlockaidResultWarning = ({
-  blockaidResponse,
+export const Warning = ({
+  title,
+  content,
   severityProps,
-  needsRiskConfirmation,
-  isRiskConfirmed,
-  isTransaction,
+  needsRiskConfirmation = false,
+  isRiskConfirmed = true,
+  isTransaction = true,
   toggleConfirmation,
 }: {
-  blockaidResponse?: TxSecurityContextProps['blockaidResponse']
+  title: ReactNode
+  content: ReactNode
   severityProps?: SecurityWarningProps
-  needsRiskConfirmation: boolean
-  isRiskConfirmed: boolean
-  isTransaction: boolean
-  toggleConfirmation: () => void
+  needsRiskConfirmation?: boolean
+  isRiskConfirmed?: boolean
+  isTransaction?: boolean
+  toggleConfirmation?: () => void
 }) => {
   return (
     <Box>
-      {blockaidResponse && blockaidResponse.severity !== SecuritySeverity.NONE && (
-        <>
-          <Alert
-            severity={severityProps?.color}
-            className={css.customAlert}
-            sx={
-              needsRiskConfirmation
-                ? {
-                    borderBottomLeftRadius: '0px',
-                    borderBottomRightRadius: '0px',
-                  }
-                : undefined
-            }
-          >
-            <AlertTitle fontWeight="700 !important" mb={1}>
-              <ResultDescription
-                classification={blockaidResponse.classification}
-                reason={blockaidResponse.reason}
-                description={blockaidResponse.description}
-              />
-            </AlertTitle>
-            <BlockaidMessage />
-          </Alert>
-          {needsRiskConfirmation && (
-            <Box
-              className={css.riskConfirmationBlock}
-              sx={{
-                pl: 2,
-              }}
-            >
-              <Track {...MODALS_EVENTS.ACCEPT_RISK}>
-                <FormControlLabel
-                  label={
-                    <Typography variant="body2" color="static.main">
-                      I understand the risks and would like to sign this {isTransaction ? 'transaction' : 'message'}
-                    </Typography>
-                  }
-                  control={<Checkbox checked={isRiskConfirmed} onChange={toggleConfirmation} color="primary" />}
-                />
-              </Track>
-            </Box>
-          )}
-          <Stack
-            direction="row"
-            spacing={0.5}
-            sx={{
-              alignItems: 'center',
-              mt: 1,
-            }}
-          >
-            <Typography
-              variant="caption"
-              sx={{
-                color: 'text.secondary',
-              }}
-            >
-              Powered by
-            </Typography>
-            <BlockaidIcon />
-          </Stack>
-        </>
+      <Alert
+        severity={severityProps?.color}
+        className={css.customAlert}
+        sx={needsRiskConfirmation ? { borderBottomLeftRadius: '0px', borderBottomRightRadius: '0px' } : undefined}
+      >
+        <AlertTitle fontWeight="700 !important" mb={1}>
+          {title}
+        </AlertTitle>
+        {content}
+      </Alert>
+      {needsRiskConfirmation && (
+        <Box className={css.riskConfirmationBlock} sx={{ pl: 2 }}>
+          <Track {...MODALS_EVENTS.ACCEPT_RISK}>
+            <FormControlLabel
+              label={
+                <Typography variant="body2" color="static.main">
+                  I understand the risks and would like to sign this {isTransaction ? 'transaction' : 'message'}
+                </Typography>
+              }
+              control={<Checkbox checked={isRiskConfirmed} onChange={toggleConfirmation} color="primary" />}
+            />
+          </Track>
+        </Box>
       )}
     </Box>
   )
@@ -209,21 +174,53 @@ const BlockaidWarning = () => {
     return <BlockaidError />
   }
 
-  if (isLoading || !blockaidResponse || !blockaidResponse.severity) {
+  if (isLoading || !blockaidResponse) {
     return null
   }
 
   return (
-    <BlockaidResultWarning
-      isRiskConfirmed={isRiskConfirmed}
-      isTransaction={isTransaction}
-      needsRiskConfirmation={needsRiskConfirmation}
-      toggleConfirmation={toggleConfirmation}
-      blockaidResponse={blockaidResponse}
-      severityProps={severityProps}
-    />
+    <>
+      {!!blockaidResponse.severity ? (
+        <Box>
+          <Warning
+            isRiskConfirmed={isRiskConfirmed}
+            isTransaction={isTransaction}
+            needsRiskConfirmation={needsRiskConfirmation}
+            toggleConfirmation={toggleConfirmation}
+            title={
+              <ResultDescription
+                classification={blockaidResponse.classification}
+                reason={blockaidResponse.reason}
+                description={blockaidResponse.description}
+              />
+            }
+            content={<BlockaidMessage />}
+            severityProps={severityProps}
+          />
+          <PoweredByBlockaid />
+        </Box>
+      ) : blockaidResponse?.contractManagement && blockaidResponse.contractManagement.length > 0 ? (
+        <Box>
+          <Stack direction="column" spacing={1}>
+            {blockaidResponse?.contractManagement.map((contractChange) => (
+              <ContractChangeWarning key={contractChange.type} contractChange={contractChange} />
+            ))}
+          </Stack>
+          <PoweredByBlockaid />
+        </Box>
+      ) : null}
+    </>
   )
 }
+
+const PoweredByBlockaid = () => (
+  <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center', mt: 1 }}>
+    <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+      Powered by
+    </Typography>
+    <BlockaidIcon />
+  </Stack>
+)
 
 export const BlockaidMessage = () => {
   const { blockaidResponse } = useContext(TxSecurityContext)

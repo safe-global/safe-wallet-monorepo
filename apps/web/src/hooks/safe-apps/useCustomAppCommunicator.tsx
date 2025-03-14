@@ -25,7 +25,7 @@ import { selectOnChainSigning, selectTokenList, TOKEN_LISTS } from '@/store/sett
 import { useAppSelector } from '@/store'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { selectSafeMessages } from '@/store/safeMessagesSlice'
-import { trackSafeAppEvent, SAFE_APPS_EVENTS, trackEvent } from '@/services/analytics'
+import { trackSafeAppEvent, SAFE_APPS_EVENTS } from '@/services/analytics'
 import { safeMsgSubscribe, SafeMsgEvent } from '@/services/safe-messages/safeMsgEvents'
 import { txSubscribe, TxEvent } from '@/services/tx/txEvents'
 import type { ChainInfo as WebCoreChainInfo } from '@safe-global/safe-gateway-typescript-sdk/dist/types/chains'
@@ -72,7 +72,7 @@ export const useCustomAppCommunicator = (
       }
 
       setCurrentRequestId(requestId)
-      trackEvent({ ...SAFE_APPS_EVENTS.OPEN_TRANSACTION_MODAL, label: appData.name })
+      trackSafeAppEvent({ ...SAFE_APPS_EVENTS.OPEN_TRANSACTION_MODAL, label: appData.name })
       setTxFlow(<SafeAppsTxFlow data={data} />, onTxFlowClose)
     },
     onSignMessage: (

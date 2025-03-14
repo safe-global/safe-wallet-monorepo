@@ -22,6 +22,7 @@ import NumberField from '@/components/common/NumberField'
 
 import css from './styles.module.css'
 import inputCss from '@/styles/inputs.module.css'
+import AddressInput from '@/components/common/AddressInput'
 
 enum TxFilterFormFieldNames {
   FILTER_TYPE = 'type',
@@ -172,13 +173,14 @@ const TxFilterForm = ({ toggleFilter }: { toggleFilter: () => void }): ReactElem
                           }}
                         />
                       </Grid>
+
                       <Grid item xs={12} md={6}>
                         <Controller
                           name={TxFilterFormFieldNames.AMOUNT}
                           control={control}
                           rules={{
                             validate: (val: TxFilterFormState[TxFilterFormFieldNames.AMOUNT]) => {
-                              if (val.length > 0) {
+                              if (val?.length > 0) {
                                 return validateAmount(val)
                               }
                             },
@@ -189,7 +191,9 @@ const TxFilterForm = ({ toggleFilter }: { toggleFilter: () => void }): ReactElem
                               className={inputCss.input}
                               label={
                                 fieldState.error?.message ||
-                                `Amount${isMultisigFilter && chain ? ` (only ${chain.nativeCurrency.symbol})` : ''}`
+                                (isIncomingFilter
+                                  ? 'Amount (with decimals)'
+                                  : `Amount (only ${chain?.nativeCurrency.symbol || 'ETH'})`)
                               }
                               error={!!fieldState.error}
                               {...field}
@@ -203,9 +207,9 @@ const TxFilterForm = ({ toggleFilter }: { toggleFilter: () => void }): ReactElem
 
                   {isIncomingFilter && (
                     <Grid item xs={12} md={6}>
-                      <AddressBookInput
+                      <AddressInput
                         data-testid="token-input"
-                        label="Token"
+                        label="Token address"
                         name={TxFilterFormFieldNames.TOKEN_ADDRESS}
                         required={false}
                         fullWidth
@@ -229,7 +233,7 @@ const TxFilterForm = ({ toggleFilter }: { toggleFilter: () => void }): ReactElem
                           control={control}
                           rules={{
                             validate: (val: TxFilterFormState[TxFilterFormFieldNames.NONCE]) => {
-                              if (val.length > 0) {
+                              if (val?.length > 0) {
                                 return validateAmount(val)
                               }
                             },

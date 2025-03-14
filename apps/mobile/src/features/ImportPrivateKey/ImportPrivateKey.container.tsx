@@ -19,58 +19,56 @@ export function ImportPrivateKey() {
   })
 
   return (
-    <View flex={1} paddingBottom={insets.bottom + getTokenValue('$4')}>
-      <KeyboardAvoidingView
-        behavior="padding"
-        style={styles.flex1}
-        keyboardVerticalOffset={insets.bottom + insets.top + getTokenValue('$4')}
-      >
-        <ScrollView onScroll={handleScroll} flex={1}>
-          <View marginTop="$2">
-            <SectionTitle
-              title="Import a private key"
-              description="Enter your private key below. Make sure to do so in a safe and private place."
+    <KeyboardAvoidingView
+      behavior="padding"
+      style={styles.flex1}
+      keyboardVerticalOffset={insets.bottom + insets.top + getTokenValue('$4')}
+    >
+      <ScrollView onScroll={handleScroll} flex={1}>
+        <View marginTop="$2">
+          <SectionTitle
+            title="Import a private key"
+            description="Enter your private key below. Make sure to do so in a safe and private place."
+          />
+        </View>
+
+        <YStack marginHorizontal="$3" gap="$4" marginTop="$6" paddingVertical="$1" paddingHorizontal="$1">
+          <View>
+            <SafeInput
+              height={114}
+              value={privateKey}
+              onChangeText={handlePrivateKeyChange}
+              placeholder="Paste here or type..."
+              multiline
+              success={!!wallet}
+              textAlign="center"
+              error={error}
             />
           </View>
 
-          <YStack marginHorizontal="$3" gap="$4" marginTop="$6" paddingVertical="$1" paddingHorizontal="$1">
-            <View>
-              <SafeInput
-                height={114}
-                value={privateKey}
-                onChangeText={handlePrivateKeyChange}
-                placeholder="Paste here or type..."
-                multiline
-                success={!!wallet}
-                textAlign="center"
-                error={error}
-              />
-            </View>
+          <View alignItems="center">
+            <Button
+              height="$10"
+              paddingHorizontal="$2"
+              borderRadius="$3"
+              backgroundColor="$borderLight"
+              icon={<SafeFontIcon name="paste" />}
+              fontWeight="500"
+              size="$5"
+              onPress={onPrivateKeyPaste}
+            >
+              Paste
+            </Button>
+          </View>
+        </YStack>
+      </ScrollView>
 
-            <View alignItems="center">
-              <Button
-                height="$10"
-                paddingHorizontal="$2"
-                borderRadius="$3"
-                backgroundColor="$borderLight"
-                icon={<SafeFontIcon name="paste" />}
-                fontWeight="500"
-                size="$5"
-                onPress={onPrivateKeyPaste}
-              >
-                Paste
-              </Button>
-            </View>
-          </YStack>
-        </ScrollView>
-
-        <View paddingHorizontal={'$3'}>
-          <SafeButton onPress={handleImport} testID={'import-signer-button'}>
-            Import signer
-          </SafeButton>
-        </View>
-      </KeyboardAvoidingView>
-    </View>
+      <View paddingHorizontal={'$3'}>
+        <SafeButton onPress={handleImport} testID={'import-signer-button'}>
+          Import signer
+        </SafeButton>
+      </View>
+    </KeyboardAvoidingView>
   )
 }
 

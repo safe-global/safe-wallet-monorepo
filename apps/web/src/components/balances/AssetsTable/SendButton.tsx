@@ -22,6 +22,7 @@ const SendButton = ({ tokenInfo, isOutlined }: { tokenInfo: TokenInfo; isOutline
       {(isOk) => (
         <Track {...ASSETS_EVENTS.SEND}>
           <Button
+            data-testid="send-button"
             variant={isOutlined ? 'outlined' : 'contained'}
             color="primary"
             size="small"

@@ -71,7 +71,9 @@ const IndexingStatus = () => {
           <Typography variant="body2">{status.text}</Typography>
         </ExternalLink>
 
-        <ExternalLink href={STATUS_PAGE} sx={{ color: 'text.secondary', transform: 'translateY(3px)' }} />
+        <ExternalLink href={STATUS_PAGE} sx={{ color: 'text.secondary', transform: 'translateY(3px)' }}>
+          {' '}
+        </ExternalLink>
       </Stack>
     </Tooltip>
   )

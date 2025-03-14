@@ -58,7 +58,7 @@ export const OptIn: React.FC<OptInProps> = React.memo(
             {!isLoading ? ctaButton.label : (<Spinner size="small" color="$successLightDark" />)}
           </SafeButton>
           {secondaryButton && (
-            <SafeButton secondary onPress={secondaryButton.onPress} testID={'opt-in-secondary-button'}>
+            <SafeButton text onPress={secondaryButton.onPress} testID={'opt-in-secondary-button'}>
               {secondaryButton.label}
             </SafeButton>
           )}

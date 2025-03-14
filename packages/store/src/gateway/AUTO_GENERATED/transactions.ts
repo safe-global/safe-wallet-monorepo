@@ -513,6 +513,11 @@ export type TransactionData = {
   trustedDelegateCallTarget?: boolean | null
   addressInfoIndex?: object | null
 }
+export type MultisigConfirmationDetails = {
+  signer: AddressInfo
+  signature?: string | null
+  submittedAt: number
+}
 export type Token = {
   address: string
   decimals?: number | null
@@ -532,9 +537,9 @@ export type MultisigExecutionDetails = {
   refundReceiver: AddressInfo
   safeTxHash: string
   executor?: AddressInfo | null
-  signers: string[]
+  signers: AddressInfo[]
   confirmationsRequired: number
-  confirmations: string[]
+  confirmations: MultisigConfirmationDetails[]
   rejectors: AddressInfo[]
   gasTokenInfo?: Token | null
   trusted: boolean

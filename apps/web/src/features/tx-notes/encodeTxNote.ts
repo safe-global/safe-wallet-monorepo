@@ -1,6 +1,12 @@
 const MAX_ORIGIN_LENGTH = 200
 
+// Simply strip out any HTML tags from the input in addition to backend sanitization
+function sanitizeInput(input: string): string {
+  return input.replace(/<\/?[^>]+(>|$)/g, '')
+}
+
 export function encodeTxNote(note: string, origin = ''): string {
+  note = sanitizeInput(note)
   let originalOrigin = {}
 
   if (origin) {

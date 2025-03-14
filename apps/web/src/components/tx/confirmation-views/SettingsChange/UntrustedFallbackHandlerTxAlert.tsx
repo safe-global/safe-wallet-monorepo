@@ -41,6 +41,7 @@ export const UntrustedFallbackHandlerTxAlert = ({
 
   return (
     <Alert
+      data-testid="untrusted-fallback-handler-alert"
       severity="warning"
       icon={<SvgIcon component={InfoOutlinedIcon} inheritViewBox color="error" />}
       sx={{ mb: 1 }}

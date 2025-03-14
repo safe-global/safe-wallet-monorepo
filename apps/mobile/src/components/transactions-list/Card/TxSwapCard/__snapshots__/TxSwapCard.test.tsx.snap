@@ -3,6 +3,15 @@
 exports[`TxSwapCard should render the default markup 1`] = `
 <View>
   <View
+    onBlur={[Function]}
+    onClick={[Function]}
+    onFocus={[Function]}
+    onResponderGrant={[Function]}
+    onResponderMove={[Function]}
+    onResponderRelease={[Function]}
+    onResponderTerminate={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
     style={
       {
         "alignItems": "center",
@@ -221,7 +230,7 @@ exports[`TxSwapCard should render the default markup 1`] = `
             }
             testID="safe-list-transaction-swap-icon"
           >
-            
+            
           </Text>
           <Text
             style={

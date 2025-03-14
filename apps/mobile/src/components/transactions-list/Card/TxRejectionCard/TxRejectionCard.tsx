@@ -10,9 +10,10 @@ interface TxRejectionCardProps {
   txInfo: Cancellation
   inQueue?: boolean
   executionInfo?: Transaction['executionInfo']
+  onPress: () => void
 }
 
-export function TxRejectionCard({ bordered, executionInfo, txInfo, inQueue }: TxRejectionCardProps) {
+export function TxRejectionCard({ bordered, executionInfo, txInfo, inQueue, onPress }: TxRejectionCardProps) {
   return (
     <SafeListItem
       type="Rejected"
@@ -25,6 +26,7 @@ export function TxRejectionCard({ bordered, executionInfo, txInfo, inQueue }: Tx
           <SafeFontIcon color="$error" name="close-outlined" />
         </View>
       }
+      onPress={onPress}
     />
   )
 }

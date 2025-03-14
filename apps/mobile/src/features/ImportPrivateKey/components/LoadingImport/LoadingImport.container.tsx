@@ -1,17 +1,50 @@
 import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
-import { useSafesGetSafeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
+import {
+  SafesGetSafeV1ApiResponse,
+  SafesGetSafeOverviewV1ApiResponse,
+  useLazySafesGetSafeV1Query,
+} from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { useCallback, useEffect } from 'react'
-import { LoadingImportComponent } from './LoadingImport'
 import { useGlobalSearchParams, useLocalSearchParams, useRouter } from 'expo-router'
-import { addSigner } from '@/src/store/signersSlice'
+import { addSignerWithEffects } from '@/src/store/signersSlice'
 import { selectActiveSafe } from '@/src/store/activeSafeSlice'
-import { skipToken } from '@reduxjs/toolkit/query'
+import { useLazySafesGetOverviewForManyQuery } from '@safe-global/store/gateway/safes'
+import { selectAllChainsIds } from '@/src/store/chains'
+import { makeSafeId } from '@/src/utils/formatters'
+import { extractSignersFromSafes } from '@/src/features/ImportReadOnly/helpers/safes'
+import { FetchBaseQueryError } from '@reduxjs/toolkit/query'
+import { SerializedError } from '@reduxjs/toolkit'
+import { LoadingScreen } from '@/src/components/LoadingScreen'
+
+const getData = (
+  manySafes: SafesGetSafeOverviewV1ApiResponse | undefined,
+  singleSafe: SafesGetSafeV1ApiResponse | undefined,
+  isImporting: string | undefined,
+) => {
+  if (isImporting) {
+    return manySafes || []
+  }
+
+  return singleSafe ? [singleSafe] : []
+}
+
+const getError = (
+  singleSafeError: FetchBaseQueryError | SerializedError | undefined,
+  manySafesError: FetchBaseQueryError | SerializedError | undefined,
+  isImporting: string | undefined,
+) => {
+  if (isImporting) {
+    return manySafesError
+  }
+  return singleSafeError
+}
 
 export function LoadingImport() {
   const { address } = useLocalSearchParams()
+  const chainIds = useAppSelector(selectAllChainsIds)
   const dispatch = useAppDispatch()
   const router = useRouter()
-  const glob = useGlobalSearchParams<{ safeAddress?: string; chainId?: string }>()
+  const glob = useGlobalSearchParams<{ safeAddress?: string; chainId?: string; import_safe?: string }>()
   // we use this screen on the "getting started" and there we don't have an active safe
   const activeSafe = useAppSelector(selectActiveSafe)
 
@@ -27,14 +60,11 @@ export function LoadingImport() {
     }
   }
 
-  const { data, error } = useSafesGetSafeV1Query(
-    safeAddress && chainId
-      ? {
-          safeAddress,
-          chainId,
-        }
-      : skipToken,
-  )
+  const [singleSafeTrigger, { data: singleSafeData, error: singleSafeError }] = useLazySafesGetSafeV1Query({})
+  const [manySafesTrigger, { data: manySafesData, error: manySafesError }] = useLazySafesGetOverviewForManyQuery()
+
+  const data = getData(manySafesData, singleSafeData, glob.import_safe)
+  const error = getError(singleSafeError, manySafesError, glob.import_safe)
 
   const redirectToError = useCallback(() => {
     router.replace({
@@ -46,20 +76,44 @@ export function LoadingImport() {
   }, [router])
 
   useEffect(() => {
+    if (glob.import_safe) {
+      manySafesTrigger(
+        {
+          safes: chainIds.map((chainId: string) => makeSafeId(chainId, safeAddress as string)),
+          currency: 'usd',
+          trusted: true,
+          excludeSpam: true,
+        },
+        true,
+      )
+    } else {
+      if (safeAddress && chainId) {
+        singleSafeTrigger(
+          {
+            safeAddress,
+            chainId,
+          },
+          true,
+        )
+      }
+    }
+  }, [glob.import_safe, safeAddress, chainId, manySafesTrigger, singleSafeTrigger])
+
+  useEffect(() => {
     if (!address || error) {
       redirectToError()
     }
   }, [address, error, redirectToError])
 
   useEffect(() => {
-    if (!data) {
+    if (!data?.length) {
       return
     }
 
-    const owner = data.owners.find((owner) => owner.value === address)
+    const owner = Object.values(extractSignersFromSafes(data)).find((owner) => owner.value === address)
 
     if (owner) {
-      dispatch(addSigner(owner))
+      dispatch(addSignerWithEffects(owner))
 
       router.replace({
         pathname: '/import-signers/private-key-success',
@@ -73,5 +127,5 @@ export function LoadingImport() {
     }
   }, [data, redirectToError])
 
-  return <LoadingImportComponent />
+  return <LoadingScreen title="Creating your signer..." description="Verifying address..." />
 }

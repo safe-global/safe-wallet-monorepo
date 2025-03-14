@@ -8,6 +8,7 @@ describe('TxCreationCard', () => {
   it('should render the default markup', () => {
     const { getByText } = render(
       <TxCreationCard
+        onPress={() => null}
         txInfo={
           mockTransferWithInfo({
             type: TransactionInfoType.CREATION,

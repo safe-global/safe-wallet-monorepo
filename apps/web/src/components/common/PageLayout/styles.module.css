@@ -17,6 +17,12 @@
   flex-direction: column;
 }
 
+.sticky {
+  position: sticky;
+  top: calc(var(--header-height) + env(safe-area-inset-top));
+  z-index: 1200;
+}
+
 .mainAnimated {
   transition: padding 225ms cubic-bezier(0, 0, 0.2, 1) 0ms;
 }
