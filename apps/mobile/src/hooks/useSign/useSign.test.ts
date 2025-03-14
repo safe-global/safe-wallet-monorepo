@@ -1,19 +1,18 @@
-import { act, renderHook } from '@/src/tests/test-utils'
-import { useSign } from './useSign'
+import { act } from '@/src/tests/test-utils'
+import { createMnemonicAccount, getPrivateKey, storePrivateKey } from './useSign'
 import { HDNodeWallet, Wallet } from 'ethers'
 import * as Keychain from 'react-native-keychain'
 import DeviceCrypto from 'react-native-device-crypto'
 
 describe('useSign', () => {
   it('should store the private key given a private key', async () => {
-    const { result } = renderHook(() => useSign())
     const { privateKey } = Wallet.createRandom()
     const spy = jest.spyOn(Keychain, 'setGenericPassword')
     const asymmetricKeySpy = jest.spyOn(DeviceCrypto, 'getOrCreateAsymmetricKey')
     const encryptSpy = jest.spyOn(DeviceCrypto, 'encrypt')
 
     await act(async () => {
-      await result.current.storePrivateKey('userId', privateKey)
+      await storePrivateKey('userId', privateKey)
     })
 
     expect(asymmetricKeySpy).toHaveBeenCalledWith('userId', { accessLevel: 2, invalidateOnNewBiometry: true })
@@ -34,18 +33,17 @@ describe('useSign', () => {
   })
 
   it('should decrypt and get the stored private key after it is encrypted', async () => {
-    const { result } = renderHook(() => useSign())
     const { privateKey } = Wallet.createRandom()
     const spy = jest.spyOn(Keychain, 'setGenericPassword')
     let returnedKey = null
 
     // To generate the iv and wait till the hook re-renders
     await act(async () => {
-      await result.current.storePrivateKey('userId', privateKey)
+      await storePrivateKey('userId', privateKey)
     })
 
     await act(async () => {
-      returnedKey = await result.current.getPrivateKey('userId')
+      returnedKey = await getPrivateKey('userId')
     })
 
     expect(spy).toHaveBeenCalledWith(
@@ -61,12 +59,11 @@ describe('useSign', () => {
   })
 
   it('should import a wallet when given a mnemonic phrase', async () => {
-    const { result } = renderHook(() => useSign())
     const { mnemonic, privateKey } = Wallet.createRandom()
 
     // To generate the iv and wait till the hook re-renders
     await act(async () => {
-      const wallet = await result.current.createMnemonicAccount(mnemonic?.phrase as string)
+      const wallet = await createMnemonicAccount(mnemonic?.phrase as string)
 
       expect(wallet).toBeInstanceOf(HDNodeWallet)
       expect(wallet?.privateKey).toBe(privateKey)

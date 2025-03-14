@@ -29,6 +29,7 @@ const transactionStr = 'Transactions'
 const qrErrorMsg = 'The QR could not be read'
 const safeAddressError = 'Address given is not a valid Safe Account address'
 const ownerNameLabel = 'Signer name'
+export const addSafeStr = 'Add existing Safe Account'
 
 const mandatoryNetworks = [constants.networks.sepolia, constants.networks.polygon, constants.networks.ethereum]
 

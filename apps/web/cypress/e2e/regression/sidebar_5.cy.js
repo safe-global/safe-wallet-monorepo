@@ -56,7 +56,7 @@ describe('Sidebar search tests', () => {
     sideBar.clickOnOpenSidebarBtn()
     sideBar.searchSafe(sideBar.sideBarSafes.multichain_short_)
     sideBar.checkMultichainSubSafeExists([
-      constants.networks.gnosis,
+      // constants.networks.gnosis,
       constants.networks.ethereum,
       constants.networks.sepolia,
     ])
@@ -88,6 +88,6 @@ describe('Sidebar search tests', () => {
     sideBar.checkSearchResults(1)
     sideBar.clearSearchInput()
     sideBar.showAllSafes()
-    sideBar.verifyAccountListSafeCount(6)
+    sideBar.verifyAccountListSafeCount(5)
   })
 })

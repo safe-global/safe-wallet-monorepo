@@ -358,8 +358,6 @@ export type SwapOrderTransactionInfo = {
   /** The URL to the explorer page of the order */
   explorerUrl: string
   /** The amount of fees paid for this order. */
-  executedSurplusFee: string
-  /** The amount of fees paid for this order. */
   executedFee: string
   /** The token in which the fee was paid, expressed by SURPLUS tokens (BUY tokens for SELL orders and SELL tokens for BUY orders). */
   executedFeeToken: string
@@ -398,8 +396,6 @@ export type SwapTransferTransactionInfo = {
   /** The URL to the explorer page of the order */
   explorerUrl: string
   /** The amount of fees paid for this order. */
-  executedSurplusFee: string
-  /** The amount of fees paid for this order. */
   executedFee: string
   /** The token in which the fee was paid, expressed by SURPLUS tokens (BUY tokens for SELL orders and SELL tokens for BUY orders). */
   executedFeeToken: TokenInfo
@@ -428,8 +424,6 @@ export type TwapOrderTransactionInfo = {
   executedSellAmount?: string | null
   /** The executed buy token raw amount (no decimals), or null if there are too many parts */
   executedBuyAmount?: string | null
-  /** The executed surplus fee raw amount (no decimals), or null if there are too many parts */
-  executedSurplusFee?: string | null
   /** The executed surplus fee raw amount (no decimals), or null if there are too many parts */
   executedFee?: string | null
   /** The token in which the fee was paid, expressed by SURPLUS tokens (BUY tokens for SELL orders and SELL tokens for BUY orders). */
@@ -519,6 +513,11 @@ export type TransactionData = {
   trustedDelegateCallTarget?: boolean | null
   addressInfoIndex?: object | null
 }
+export type MultisigConfirmationDetails = {
+  signer: AddressInfo
+  signature?: string | null
+  submittedAt: number
+}
 export type Token = {
   address: string
   decimals?: number | null
@@ -538,9 +537,9 @@ export type MultisigExecutionDetails = {
   refundReceiver: AddressInfo
   safeTxHash: string
   executor?: AddressInfo | null
-  signers: string[]
+  signers: AddressInfo[]
   confirmationsRequired: number
-  confirmations: string[]
+  confirmations: MultisigConfirmationDetails[]
   rejectors: AddressInfo[]
   gasTokenInfo?: Token | null
   trusted: boolean

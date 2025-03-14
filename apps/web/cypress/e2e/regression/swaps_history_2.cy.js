@@ -11,6 +11,8 @@ let staticSafes = []
 const swapsHistory = swaps_data.type.history
 const typeGeneral = data.type.general
 
+const safe = 'sep:0xF184a243925Bf7fb1D64487339FF4F177Fb75644'
+
 describe('Swaps history tests 2', () => {
   before(async () => {
     staticSafes = await getSafes(CATEGORIES.static)
@@ -40,6 +42,26 @@ describe('Swaps history tests 2', () => {
       swapsHistory.cow,
       swapsHistory.expired,
       swapsHistory.actionApprove,
+      swapsHistory.actionPreSignature,
+    ])
+    create_tx.clickOnAdvancedDetails()
+    create_tx.verifyAdvancedDetails([swapsHistory.multiSend, swapsHistory.multiSendCallOnly1_3_0])
+  })
+
+  it('Verify swap operation with 2 actions: wrap & swap', { defaultCommandTimeout: 30000 }, () => {
+    cy.visit(constants.transactionUrl + safe + swaps.swapTxs.wrapSwap)
+    const eq = swaps.createRegex(swapsHistory.COWeqWETH, 'COW')
+    const atLeast = swaps.createRegex(swapsHistory.forAtLeastFullCow, 'COW')
+
+    create_tx.verifyExpandedDetails([
+      swapsHistory.sellOrder,
+      swapsHistory.sell,
+      eq,
+      atLeast,
+      swapsHistory.cow,
+      swapsHistory.filled,
+      swapsHistory.actionDepositEth,
+      swapsHistory.actionApproveEth,
       swapsHistory.actionPreSignature,
     ])
     create_tx.clickOnAdvancedDetails()

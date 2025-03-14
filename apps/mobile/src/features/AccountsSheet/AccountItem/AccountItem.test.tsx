@@ -3,6 +3,14 @@ import { render, screen, fireEvent } from '@/src/tests/test-utils'
 import { AccountItem } from './AccountItem'
 import { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 
+jest.mock('expo-router', () => ({
+  useNavigation: () => ({
+    navigate: jest.fn(),
+    dispatch: jest.fn(),
+  }),
+  useSegments: () => ['test'], // if you use useSegments anywhere
+}))
+
 const mockAccount = {
   address: { value: '0x123' as `0x${string}`, name: 'Test Account' },
   threshold: 1,

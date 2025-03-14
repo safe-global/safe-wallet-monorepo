@@ -74,4 +74,44 @@ describe('Sidebar tests 8', () => {
     owner.clickOnWalletExpandMoreIcon()
     navigation.clickOnDisconnectBtn()
   })
+
+  it('Verify New Transaction button is enabled for proposers', () => {
+    cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_31)
+    wallet.connectSigner(signer3)
+    navigation.verifyTxBtnStatus(constants.enabledStates.enabled)
+    owner.clickOnWalletExpandMoreIcon()
+    navigation.clickOnDisconnectBtn()
+  })
+
+  it('Verify "Add read-only" button replaces the "New transaction" button for disconnected users', () => {
+    cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_7)
+    navigation.verifyTxBtnStatus(constants.enabledStates.disabled)
+    cy.intercept('GET', constants.safeListEndpoint, { 1: [], 100: [], 137: [], 11155111: [] })
+    sideBar.openSidebar()
+    sideBar.verifyCurrentSafeReadOnly(1)
+  })
+
+  it('Verify "Add read-only" button replaces the "New transaction" button for connected non-owners', () => {
+    cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_7)
+    wallet.connectSigner(signer3)
+    navigation.verifyTxBtnStatus(constants.enabledStates.disabled)
+    cy.intercept('GET', constants.safeListEndpoint, { 1: [], 100: [], 137: [], 11155111: [] })
+    sideBar.openSidebar()
+    sideBar.verifyCurrentSafeReadOnly(1)
+    owner.clickOnWalletExpandMoreIcon()
+    navigation.clickOnDisconnectBtn()
+  })
+
+  it('Verify Add safe button takes the user to the "Safe load" flow', () => {
+    cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_7)
+    navigation.verifyTxBtnStatus(constants.enabledStates.disabled)
+    cy.intercept('GET', constants.safeListEndpoint, { 1: [], 100: [], 137: [], 11155111: [] })
+    sideBar.openSidebar()
+    sideBar.clickOnAddSafeBtn()
+  })
+
+  it('Verify "blockchain sync" status is shown at the bottom pointing to the network statuses', () => {
+    cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_7)
+    sideBar.verifyIndexStatusPresent()
+  })
 })

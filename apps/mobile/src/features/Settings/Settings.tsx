@@ -123,7 +123,7 @@ export const Settings = ({ address, data }: SettingsProps) => {
                             </Text>
                           </Skeleton>
                           <View>
-                            <Icon name={'arrow-right'} />
+                            <Icon name={'chevron-right'} />
                           </View>
                         </View>
                       }
@@ -142,8 +142,8 @@ export const Settings = ({ address, data }: SettingsProps) => {
                     >
                       <SafeListItem
                         label={'Notifications'}
-                        leftNode={<Icon name={'bell'} />}
-                        rightNode={<Icon name={'arrow-right'} />}
+                        leftNode={<Icon name={'bell'} color={'$colorSecondary'} />}
+                        rightNode={<Icon name={'chevron-right'} />}
                       />
                     </Pressable>
                   </View>

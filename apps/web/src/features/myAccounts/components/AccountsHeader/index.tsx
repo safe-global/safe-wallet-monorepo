@@ -15,6 +15,7 @@ const AddSafeButton = ({ trackingLabel, onLinkClick }: { trackingLabel: string; 
     <Track {...OVERVIEW_EVENTS.ADD_TO_WATCHLIST} label={trackingLabel}>
       <Link href={AppRoutes.newSafe.load}>
         <Button
+          data-testid="add-safe-button"
           disableElevation
           variant="outlined"
           size="small"

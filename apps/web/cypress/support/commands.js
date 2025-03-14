@@ -230,7 +230,7 @@ Cypress.Commands.overwrite('visit', (originalFn, url, options = {}) => {
         if (response && response.status === 429) {
           if (attempt < maxRetries) {
             attempt++
-            const waitTime = 3000
+            const waitTime = 6000
             console.warn(
               `Rate limit (429) detected! Retrying in ${waitTime / 1000} seconds... Attempt ${attempt}/${maxRetries}`,
             )

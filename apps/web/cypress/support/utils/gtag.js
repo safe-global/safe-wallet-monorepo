@@ -14,7 +14,7 @@ export const checkDataLayerEvents = (expectedEvents) => {
     expectedEvents.forEach((expectedEvent) => {
       const eventExists = dataLayer.some((event) => {
         return Object.keys(expectedEvent).every((key) => {
-          return event[key] === expectedEvent[key]
+          return event[2]?.[key] === expectedEvent[key]
         })
       })
       expect(eventExists, `Expected event matching fields: ${JSON.stringify(expectedEvent)} not found`).to.be.true

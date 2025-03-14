@@ -1,37 +1,62 @@
+import { useMemo } from 'react'
+import { Stack } from '@mui/material'
 import { TxDataRow, generateDataRowValue } from '../TxDataRow'
 import { type SafeTransactionData, type SafeVersion } from '@safe-global/safe-core-sdk-types'
-import useSafeAddress from '@/hooks/useSafeAddress'
+import { calculateSafeTransactionHash } from '@safe-global/protocol-kit/dist/src/utils'
+import useSafeInfo from '@/hooks/useSafeInfo'
 import useChainId from '@/hooks/useChainId'
 import { getDomainHash, getSafeTxMessageHash } from '@/utils/safe-hashes'
 
 export const SafeTxHashDataRow = ({
-  safeTxHash,
   safeTxData,
-  safeVersion,
+  safeTxHash,
 }: {
-  safeTxHash: string
-  safeTxData?: SafeTransactionData
-  safeVersion: SafeVersion
+  safeTxData: SafeTransactionData
+  safeTxHash?: string
 }) => {
+  const { safe, safeAddress } = useSafeInfo()
   const chainId = useChainId()
-  const safeAddress = useSafeAddress()
+  const safeVersion = safe.version as SafeVersion
 
-  const domainHash = getDomainHash({ chainId, safeAddress, safeVersion })
-  const messageHash = safeTxData ? getSafeTxMessageHash({ safeVersion, safeTxData }) : undefined
+  const computedSafeTxHash = useMemo(() => {
+    if (safeTxHash) return safeTxHash
+    if (!safe.version) return
+    try {
+      return calculateSafeTransactionHash(safeAddress, safeTxData, safe.version, BigInt(safe.chainId))
+    } catch {
+      return
+    }
+  }, [safe.chainId, safe.version, safeAddress, safeTxData, safeTxHash])
+
+  const domainHash = useMemo(() => {
+    try {
+      return getDomainHash({ chainId, safeAddress, safeVersion })
+    } catch {
+      return ''
+    }
+  }, [chainId, safeAddress, safeVersion])
+
+  const messageHash = useMemo(() => {
+    try {
+      return getSafeTxMessageHash({ safeVersion, safeTxData })
+    } catch {
+      return ''
+    }
+  }, [safeTxData, safeVersion])
 
   return (
-    <>
+    <Stack gap={1}>
       <TxDataRow datatestid="tx-safe-hash" title="safeTxHash:">
-        {generateDataRowValue(safeTxHash, 'hash')}
+        {generateDataRowValue(computedSafeTxHash, 'rawData')}
       </TxDataRow>
       <TxDataRow datatestid="tx-domain-hash" title="Domain hash:">
-        {generateDataRowValue(domainHash, 'hash')}
+        {generateDataRowValue(domainHash, 'rawData')}
       </TxDataRow>
       {messageHash && (
         <TxDataRow datatestid="tx-message-hash" title="Message hash:">
-          {generateDataRowValue(messageHash, 'hash')}
+          {generateDataRowValue(messageHash, 'rawData')}
         </TxDataRow>
       )}
-    </>
+    </Stack>
   )
 }

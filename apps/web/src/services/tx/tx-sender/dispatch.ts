@@ -90,7 +90,6 @@ export const dispatchTxProposal = async ({
  */
 export const dispatchTxSigning = async (
   safeTx: SafeTransaction,
-  safeVersion: SafeInfo['version'],
   provider: Eip1193Provider,
   txId?: string,
 ): Promise<SafeTransaction> => {
@@ -98,7 +97,7 @@ export const dispatchTxSigning = async (
 
   let signedTx: SafeTransaction | undefined
   try {
-    signedTx = await tryOffChainTxSigning(safeTx, safeVersion, sdk)
+    signedTx = await tryOffChainTxSigning(safeTx, sdk)
   } catch (error) {
     txDispatch(TxEvent.SIGN_FAILED, {
       txId,

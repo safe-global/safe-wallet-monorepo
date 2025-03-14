@@ -17,8 +17,7 @@ interface SignersListItemProps {
 
 function SignersListItem({ item, index, signersGroup }: SignersListItemProps) {
   const router = useRouter()
-  const local = useLocalSearchParams<{ safeAddress: string; chainId: string }>()
-
+  const local = useLocalSearchParams<{ safeAddress: string; chainId: string; import_safe: string }>()
   const actions = useSignersActions()
   const isLastItem = signersGroup.some((section) => section.data.length === index + 1)
 
@@ -28,11 +27,14 @@ function SignersListItem({ item, index, signersGroup }: SignersListItemProps) {
 
   const onPressMenuAction = ({ nativeEvent }: NativeActionEvent) => {
     if (nativeEvent.event === 'import') {
-      let url = '/import-signers'
-      if (local.safeAddress && local.chainId) {
-        url = `/import-signers?safeAddress=${local.safeAddress}&chainId=${local.chainId}`
-      }
-      router.push(url as '/import-signers')
+      router.push({
+        pathname: '/import-signers',
+        params: {
+          safeAddress: local.safeAddress,
+          chainId: local.chainId,
+          import_safe: local.import_safe,
+        },
+      })
     }
   }
 
