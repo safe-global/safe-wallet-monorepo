@@ -4,11 +4,11 @@ import { InitialsAvatar, OrgSummary } from '../OrgsCard'
 import { useUserOrganizationsDeclineInviteV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
 import { useOrgSafeCount } from '@/features/organizations/hooks/useOrgSafeCount'
 import { useState } from 'react'
-import AcceptInviteDialog from '@/features/organizations/components/Dashboard/AcceptInviteDialog'
 import Link from 'next/link'
 import { AppRoutes } from '@/config/routes'
 import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
 import EthHashInfo from '@/components/common/EthHashInfo'
+import AcceptInviteDialog from '@/features/organizations/components/InviteBanner/AcceptInviteDialog'
 
 type OrgListInvite = {
   org: GetOrganizationResponse

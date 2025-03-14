@@ -6,19 +6,23 @@ import MembersList from '@/features/organizations/components/MembersList'
 import InvitesList from './InvitesList'
 import SearchIcon from '@/public/images/common/search.svg'
 import { useMembersSearch } from '@/features/organizations/hooks/useMembersSearch'
-import { useOrgMembers } from '@/features/organizations/hooks/useOrgMembers'
-import { useIsAdmin } from '@/features/organizations/hooks/useIsAdmin'
+import { useIsInvited, useOrgMembersByStatus } from '@/features/organizations/hooks/useOrgMembers'
+import { useIsAdmin } from '@/features/organizations/hooks/useOrgMembers'
+import PreviewInvite from '../InviteBanner/PreviewInvite'
 
 const OrganizationMembers = () => {
   const [openAddMembersModal, setOpenAddMembersModal] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
-  const { activeMembers, invitedMembers } = useOrgMembers()
+  const { activeMembers, invitedMembers } = useOrgMembersByStatus()
   const isAdmin = useIsAdmin()
+  const isInvited = useIsInvited()
+
   const filteredMembers = useMembersSearch(activeMembers, searchQuery)
   const filteredInvites = useMembersSearch(invitedMembers, searchQuery)
 
   return (
     <>
+      {isInvited && <PreviewInvite />}
       <Typography variant="h1" mb={3}>
         Members
       </Typography>

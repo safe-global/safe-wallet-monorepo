@@ -13,7 +13,9 @@ import NextLink from 'next/link'
 import { Link } from '@mui/material'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import DashboardMembersList from '@/features/organizations/components/Dashboard/DashboardMembersList'
-import { useOrgMembers } from '@/features/organizations/hooks/useOrgMembers'
+import { useOrgMembersByStatus } from '@/features/organizations/hooks/useOrgMembers'
+import { useIsInvited } from '@/features/organizations/hooks/useOrgMembers'
+import PreviewInvite from '../InviteBanner/PreviewInvite'
 
 const ViewAllLink = ({ url }: { url: LinkProps['href'] }) => {
   return (
@@ -39,13 +41,15 @@ const DASHBOARD_LIST_DISPLAY_LIMIT = 5
 const OrganizationsDashboard = () => {
   const safes = useOrgSafes()
   const orgId = useCurrentOrgId()
-  const { activeMembers } = useOrgMembers()
+  const { activeMembers } = useOrgMembersByStatus()
+  const isInvited = useIsInvited()
 
   const safesToDisplay = safes.slice(0, DASHBOARD_LIST_DISPLAY_LIMIT)
   const membersToDisplay = activeMembers.slice(0, DASHBOARD_LIST_DISPLAY_LIMIT)
 
   return (
     <>
+      {isInvited && <PreviewInvite />}
       {safes.length > 0 ? (
         <>
           <Typography variant="h1" fontWeight={700} mb={4}>

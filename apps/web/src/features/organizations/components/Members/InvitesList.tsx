@@ -4,11 +4,10 @@ import type { UserOrganization } from '@safe-global/store/gateway/AUTO_GENERATED
 import { useUserOrganizationsRemoveUserV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
 import tableCss from '@/components/common/EnhancedTable/styles.module.css'
 import DeleteIcon from '@/public/images/common/delete.svg'
-import { MemberRole } from '../AddMembersModal'
+import { MemberRole, useIsAdmin } from '@/features/organizations/hooks/useOrgMembers'
 import { useCurrentOrgId } from '@/features/organizations/hooks/useCurrentOrgId'
 import { MemberStatus } from '@/features/organizations/hooks/useOrgMembers'
 import MemberName from '../MembersList/MemberName'
-import { useIsAdmin } from '@/features/organizations/hooks/useIsAdmin'
 
 const headCells = [
   {

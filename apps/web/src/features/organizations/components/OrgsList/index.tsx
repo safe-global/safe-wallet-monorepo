@@ -10,7 +10,7 @@ import type { GetOrganizationResponse } from '@safe-global/store/gateway/AUTO_GE
 import { useOrganizationsGetV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
 import type { UserWithWallets } from '@safe-global/store/gateway/AUTO_GENERATED/users'
 import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
-import OrgListInvite from '../Dashboard/DashboardInvite'
+import OrgListInvite from '../InviteBanner'
 import { useState } from 'react'
 import css from './styles.module.css'
 import { MemberStatus } from '@/features/organizations/hooks/useOrgMembers'
