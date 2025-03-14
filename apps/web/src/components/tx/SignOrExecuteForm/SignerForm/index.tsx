@@ -12,7 +12,7 @@ import {
 import { useNestedSafeOwners } from '@/hooks/useNestedSafeOwners'
 import { useWalletContext } from '@/hooks/wallets/useWallet'
 import EthHashInfo from '@/components/common/EthHashInfo'
-import { useCallback, useContext, useMemo } from 'react'
+import { useCallback, useContext, useEffect, useMemo } from 'react'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import TxCard from '@/components/tx-flow/common/TxCard'
 import InfoIcon from '@/public/images/notifications/info.svg'
@@ -57,17 +57,36 @@ export const SignerForm = ({ willExecute }: { willExecute?: boolean }) => {
     if (!wallet) {
       return []
     }
-    const owners = new Set(nestedSafeOwners ?? [])
     const isFullySigned = safeTx ? safeTx.signatures.size >= safe.threshold : false
 
-    if ((willExecute && isFullySigned) || safe.owners.some((owner) => sameAddress(owner.value, wallet.address))) {
+    // No nested execution for fully signed transactions
+    if (isFullySigned && willExecute) {
+      return [wallet.address]
+    }
+
+    const owners = new Set(nestedSafeOwners ?? [])
+
+    if (safe.owners.some((owner) => sameAddress(owner.value, wallet.address))) {
       owners.add(wallet.address)
     }
 
     return Array.from(owners)
   }, [nestedSafeOwners, safe.owners, safe.threshold, safeTx, wallet, willExecute])
 
-  if (!wallet || !isNestedOwner) {
+  // Select first option if no signer is selected and the connected wallet cannot sign
+  useEffect(() => {
+    const isValidSigner = signerAddress && options.includes(signerAddress) && isOptionEnabled(signerAddress)
+    if (isValidSigner || !setSignerAddress || !wallet) {
+      return
+    }
+
+    const enabledOptions = options.filter(isOptionEnabled)
+    if (enabledOptions.length > 0 && !enabledOptions.includes(wallet.address)) {
+      setSignerAddress(enabledOptions[0])
+    }
+  }, [isOptionEnabled, options, setSignerAddress, signerAddress, wallet])
+
+  if (!wallet || !isNestedOwner || (options.length === 1 && options[0] === wallet.address)) {
     return null
   }
 
@@ -96,7 +115,7 @@ export const SignerForm = ({ willExecute }: { willExecute?: boolean }) => {
             label="Signer account"
             fullWidth
             onChange={onChange}
-            value={signerAddress ?? options.filter(isOptionEnabled)[0]}
+            value={signerAddress}
           >
             {options?.map((owner) => (
               <MenuItem key={owner} value={owner} disabled={!isOptionEnabled(owner)}>
