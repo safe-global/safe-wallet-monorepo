@@ -7,25 +7,15 @@ import { useState } from 'react'
 import SafesList from '@/features/myAccounts/components/SafesList'
 import { useOrgSafes } from '@/features/organizations/hooks/useOrgSafes'
 import { useSafesSearch } from '@/features/myAccounts/hooks/useSafesSearch'
-import { useAppSelector } from '@/store'
-import { isAuthenticated } from '@/store/authSlice'
-import SignedOutState from '@/features/organizations/components/SignedOutState'
 import { useIsAdmin } from '@/features/organizations/hooks/useIsAdmin'
-import { isUnauthorized } from '@/features/organizations/utils'
-import UnauthorizedState from '@/features/organizations/components/UnauthorizedState'
 
 const OrganizationSafeAccounts = () => {
   const [searchQuery, setSearchQuery] = useState('')
-  const isUserSignedIn = useAppSelector(isAuthenticated)
-  const { allSafes, error } = useOrgSafes()
+  const allSafes = useOrgSafes()
   const filteredSafes = useSafesSearch(allSafes, searchQuery)
   const isAdmin = useIsAdmin()
 
   const safes = searchQuery ? filteredSafes : allSafes
-
-  if (!isUserSignedIn) return <SignedOutState />
-
-  if (isUnauthorized(error)) return <UnauthorizedState />
 
   return (
     <>

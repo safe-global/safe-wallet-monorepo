@@ -36,10 +36,7 @@ function _buildSafeItems(safes: Record<string, string[]>, allSafeNames: AddressB
 export const useOrgSafes = () => {
   const orgId = useCurrentOrgId()
   const isUserSignedIn = useAppSelector(isAuthenticated)
-  const { currentData, error } = useOrganizationSafesGetV1Query(
-    { organizationId: Number(orgId) },
-    { skip: !isUserSignedIn },
-  )
+  const { currentData } = useOrganizationSafesGetV1Query({ organizationId: Number(orgId) }, { skip: !isUserSignedIn })
   const allSafeNames = useAppSelector(selectAllAddressBooks)
   const safeItems = currentData ? _buildSafeItems(currentData.safes, allSafeNames) : []
   const safes = useAllSafesGrouped(safeItems)
@@ -51,5 +48,5 @@ export const useOrgSafes = () => {
     [safes.allMultiChainSafes, safes.allSingleSafes, sortComparator],
   )
 
-  return { allSafes, error }
+  return allSafes
 }

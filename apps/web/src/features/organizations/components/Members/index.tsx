@@ -17,15 +17,10 @@ import UnauthorizedState from '@/features/organizations/components/UnauthorizedS
 const OrganizationMembers = () => {
   const [openAddMembersModal, setOpenAddMembersModal] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
-  const isUserSignedIn = useAppSelector(isAuthenticated)
-  const { activeMembers, invitedMembers, error } = useOrgMembers()
+  const { activeMembers, invitedMembers } = useOrgMembers()
   const isAdmin = useIsAdmin()
   const filteredMembers = useMembersSearch(activeMembers, searchQuery)
   const filteredInvites = useMembersSearch(invitedMembers, searchQuery)
-
-  if (!isUserSignedIn) return <SignedOutState />
-
-  if (isUnauthorized(error)) return <UnauthorizedState />
 
   return (
     <>

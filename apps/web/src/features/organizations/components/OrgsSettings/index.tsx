@@ -28,9 +28,6 @@ import { FormProvider, useForm } from 'react-hook-form'
 import css from './styles.module.css'
 import { useCurrentOrgId } from '../../hooks/useCurrentOrgId'
 import { isAuthenticated } from '@/store/authSlice'
-import SignedOutState from '@/features/organizations/components/SignedOutState'
-import { isUnauthorized } from '@/features/organizations/utils'
-import UnauthorizedState from '@/features/organizations/components/UnauthorizedState'
 
 const ListIcon = ({ variant }: { variant: 'success' | 'danger' }) => {
   const Icon = variant === 'success' ? CheckIcon : CloseIcon
@@ -52,7 +49,7 @@ const OrgsSettings = () => {
   const dispatch = useAppDispatch()
   const orgId = useCurrentOrgId()
   const isUserSignedIn = useAppSelector(isAuthenticated)
-  const { currentData: org, error } = useOrganizationsGetOneV1Query({ id: Number(orgId) }, { skip: !isUserSignedIn })
+  const { currentData: org } = useOrganizationsGetOneV1Query({ id: Number(orgId) }, { skip: !isUserSignedIn })
   const [updateOrg] = useOrganizationsUpdateV1Mutation()
   const [deleteOrg] = useOrganizationsDeleteV1Mutation()
 
@@ -94,10 +91,6 @@ const OrgsSettings = () => {
       console.log(e)
     }
   }
-
-  if (!isUserSignedIn) return <SignedOutState />
-
-  if (isUnauthorized(error)) return <UnauthorizedState />
 
   return (
     <div>
