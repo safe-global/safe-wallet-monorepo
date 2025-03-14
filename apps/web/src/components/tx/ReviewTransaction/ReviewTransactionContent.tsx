@@ -101,12 +101,13 @@ export const ReviewTransactionContent = ({
   const onContinueClick = useCallback(
     async (e: SyntheticEvent) => {
       e.preventDefault()
-      onSubmit?.()
 
       if (customOrigin !== props.origin) {
         trackAddNote()
-        setTxOrigin(customOrigin)
       }
+
+      setTxOrigin(customOrigin)
+      onSubmit?.()
     },
     [onSubmit, customOrigin, props.origin, setTxOrigin],
   )

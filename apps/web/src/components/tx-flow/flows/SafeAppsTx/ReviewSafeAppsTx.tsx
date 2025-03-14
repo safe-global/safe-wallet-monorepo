@@ -1,8 +1,7 @@
-import { useContext, useEffect, useMemo } from 'react'
+import { useContext, useEffect } from 'react'
 import type { ReactElement } from 'react'
 import type { SafeTransaction } from '@safe-global/safe-core-sdk-types'
 import type { SafeAppsTxParams } from '.'
-import { getTxOrigin } from '@/utils/transactions'
 import { createMultiSendCallOnlyTx, createTx } from '@/services/tx/tx-sender'
 import useHighlightHiddenTab from '@/hooks/useHighlightHiddenTab'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
@@ -13,17 +12,13 @@ import ReviewTransaction from '@/components/tx/ReviewTransaction'
 type ReviewSafeAppsTxProps = {
   safeAppsTx: SafeAppsTxParams
   onSubmit: () => void
+  origin?: string
 }
 
-const ReviewSafeAppsTx = ({ safeAppsTx: { txs, params, app }, onSubmit }: ReviewSafeAppsTxProps): ReactElement => {
-  const { setSafeTx, safeTxError, setSafeTxError, setTxOrigin } = useContext(SafeTxContext)
+const ReviewSafeAppsTx = ({ safeAppsTx: { txs, params }, onSubmit, origin }: ReviewSafeAppsTxProps): ReactElement => {
+  const { setSafeTx, safeTxError, setSafeTxError } = useContext(SafeTxContext)
 
   useHighlightHiddenTab()
-
-  useEffect(() => {
-    setTxOrigin(app?.url)
-    return () => setTxOrigin(undefined)
-  }, [setTxOrigin, app?.url])
 
   useEffect(() => {
     const createSafeTx = async (): Promise<SafeTransaction> => {
@@ -42,7 +37,6 @@ const ReviewSafeAppsTx = ({ safeAppsTx: { txs, params, app }, onSubmit }: Review
     createSafeTx().then(setSafeTx).catch(setSafeTxError)
   }, [txs, setSafeTx, setSafeTxError, params])
 
-  const origin = useMemo(() => getTxOrigin(app), [app])
   const error = !isTxValid(txs)
 
   return (
