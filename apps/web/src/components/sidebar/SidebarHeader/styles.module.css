@@ -1,5 +1,8 @@
 .container {
   padding: var(--space-2) var(--space-1);
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+  border-top-width: 0;
 }
 
 .info {

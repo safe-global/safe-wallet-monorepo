@@ -1,27 +1,26 @@
-import { Container, Typography, Grid } from '@mui/material'
-import { useRouter } from 'next/router'
-
-import useWallet from '@/hooks/wallets/useWallet'
-import OverviewWidget from '@/components/new-safe/create/OverviewWidget'
-import type { NamedAddress } from '@/components/new-safe/create/types'
-import type { TxStepperProps } from '@/components/new-safe/CardStepper/useCardStepper'
-import SetNameStep from '@/components/new-safe/create/steps/SetNameStep'
-import OwnerPolicyStep from '@/components/new-safe/create/steps/OwnerPolicyStep'
-import ReviewStep from '@/components/new-safe/create/steps/ReviewStep'
-import { CreateSafeStatus } from '@/components/new-safe/create/steps/StatusStep'
+import ExternalLink from '@/components/common/ExternalLink'
 import { CardStepper } from '@/components/new-safe/CardStepper'
-import { AppRoutes } from '@/config/routes'
-import { CREATE_SAFE_CATEGORY } from '@/services/analytics'
-import type { AlertColor } from '@mui/material'
+import type { TxStepperProps } from '@/components/new-safe/CardStepper/useCardStepper'
 import type { CreateSafeInfoItem } from '@/components/new-safe/create/CreateSafeInfos'
 import CreateSafeInfos from '@/components/new-safe/create/CreateSafeInfos'
-import { type ReactElement, useMemo, useState } from 'react'
-import ExternalLink from '@/components/common/ExternalLink'
+import OverviewWidget from '@/components/new-safe/create/OverviewWidget'
+import OwnerPolicyStep from '@/components/new-safe/create/steps/OwnerPolicyStep'
+import ReviewStep from '@/components/new-safe/create/steps/ReviewStep'
+import SetNameStep from '@/components/new-safe/create/steps/SetNameStep'
+import { CreateSafeStatus } from '@/components/new-safe/create/steps/StatusStep'
+import type { NamedAddress } from '@/components/new-safe/create/types'
 import { HelpCenterArticle } from '@/config/constants'
-import { type SafeVersion } from '@safe-global/safe-core-sdk-types'
-import { getLatestSafeVersion } from '@/utils/chains'
+import { AppRoutes } from '@/config/routes'
 import { useCurrentChain } from '@/hooks/useChains'
+import useWallet from '@/hooks/wallets/useWallet'
+import { CREATE_SAFE_CATEGORY } from '@/services/analytics'
+import { getLatestSafeVersion } from '@/utils/chains'
+import type { AlertColor } from '@mui/material'
+import { Container, Grid, Typography } from '@mui/material'
+import { type SafeVersion } from '@safe-global/safe-core-sdk-types'
 import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import { useRouter } from 'next/router'
+import { useMemo, useState, type ReactElement } from 'react'
 
 export type NewSafeFormData = {
   name: string
@@ -110,13 +109,13 @@ const CreateSafe = () => {
   const [overviewNetworks, setOverviewNetworks] = useState<ChainInfo[]>()
 
   const [dynamicHint, setDynamicHint] = useState<CreateSafeInfoItem>()
-  const [activeStep, setActiveStep] = useState(0)
+  const [activeStep, setActiveStep] = useState<number>(0)
 
   const CreateSafeSteps: TxStepperProps<NewSafeFormData>['steps'] = [
     {
       title: 'Set up the basics',
       subtitle: 'Give a name to your account and select which networks to deploy it on.',
-      render: (data, onSubmit, onBack, setStep) => (
+      render: ({ data, onSubmit, onBack, setStep }) => (
         <SetNameStep
           setOverviewNetworks={setOverviewNetworks}
           setDynamicHint={setDynamicHint}
@@ -132,7 +131,7 @@ const CreateSafe = () => {
       title: 'Signers and confirmations',
       subtitle:
         'Set the signer wallets of your Safe Account and how many need to confirm to execute a valid transaction.',
-      render: (data, onSubmit, onBack, setStep) => (
+      render: ({ data, onSubmit, onBack, setStep }) => (
         <OwnerPolicyStep
           setDynamicHint={setDynamicHint}
           data={data}
@@ -145,15 +144,15 @@ const CreateSafe = () => {
     {
       title: 'Review',
       subtitle:
-        "You're about to create a new Safe Account and will have to confirm the transaction with your connected wallet.",
-      render: (data, onSubmit, onBack, setStep) => (
-        <ReviewStep data={data} onSubmit={onSubmit} onBack={onBack} setStep={setStep} />
+        "You're about to create a new Safe and will have to confirm the transaction with your connected wallet.",
+      render: ({ data, onSubmit, onBack, setStep }) => (
+        <ReviewStep data={data} onSubmit={onSubmit} onBack={onBack} setStep={setStep} isSafenetFlow={false} />
       ),
     },
     {
       title: '',
       subtitle: '',
-      render: (data, onSubmit, onBack, setStep, setProgressColor, setStepData) => (
+      render: ({ data, onSubmit, onBack, setStep, setProgressColor, setStepData }) => (
         <CreateSafeStatus
           data={data}
           onSubmit={onSubmit}
@@ -218,7 +217,6 @@ const CreateSafe = () => {
             setWidgetStep={setActiveStep}
           />
         </Grid>
-
         <Grid
           item
           xs={12}
@@ -229,7 +227,9 @@ const CreateSafe = () => {
           }}
         >
           <Grid container spacing={3}>
-            {activeStep < 2 && <OverviewWidget safeName={safeName} networks={overviewNetworks || []} />}
+            {activeStep < 2 && (
+              <OverviewWidget safeName={safeName} networks={overviewNetworks || []} isSafenet={false} />
+            )}
             {wallet?.address && <CreateSafeInfos staticHint={staticHint} dynamicHint={dynamicHint} />}
           </Grid>
         </Grid>

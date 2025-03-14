@@ -1,14 +1,15 @@
 import type { PayMethod } from '@/features/counterfactual/PayNowPayLater'
 import { type RootState } from '@/store'
+import { selectChainIdAndSafeAddress, selectSafeAddress } from '@/store/common'
 import { createSelector, createSlice, type PayloadAction } from '@reduxjs/toolkit'
 import type { PredictedSafeProps } from '@safe-global/protocol-kit'
-import { selectChainIdAndSafeAddress, selectSafeAddress } from '@/store/common'
 import { type SafeVersion } from '@safe-global/safe-core-sdk-types'
 
 export enum PendingSafeStatus {
   AWAITING_EXECUTION = 'AWAITING_EXECUTION',
   PROCESSING = 'PROCESSING',
   RELAYING = 'RELAYING',
+  SAFENET_RELAYING = 'SAFENET_RELAYING',
 }
 
 type UndeployedSafeStatus = {

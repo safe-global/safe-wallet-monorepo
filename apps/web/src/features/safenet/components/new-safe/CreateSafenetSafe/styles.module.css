@@ -1,0 +1,32 @@
+.title {
+  align-items: center;
+  display: flex;
+  flex-direction: row;
+  gap: var(--space-1);
+}
+
+.logo {
+  margin-bottom: var(--space-2);
+}
+
+.row {
+  width: 100%;
+  padding: var(--space-4) var(--space-7);
+}
+
+@media (max-width: 599.95px) {
+  .row {
+    padding: var(--space-2);
+  }
+}
+
+.safenetHeader {
+  align-items: center;
+  background: radial-gradient(166.24% 938.01% at 166.24% 78.95%, #ff5f00 0%, #ffd200 77.32%, #12ff80 100%);
+  display: flex;
+  flex-direction: row;
+  gap: var(--space-1);
+  justify-content: flex-end;
+  padding: var(--space-1) var(--space-2);
+  color: var(--color-static-main);
+}

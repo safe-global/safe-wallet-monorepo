@@ -1,10 +1,10 @@
+import { isMultiChainSafeItem } from '@/features/multichain/utils/utils'
+import MultiAccountItem from '@/features/myAccounts/components/AccountItems/MultiAccountItem'
 import SingleAccountItem from '@/features/myAccounts/components/AccountItems/SingleAccountItem'
 import type { SafeItem } from '@/features/myAccounts/hooks/useAllSafes'
 import type { MultiChainSafeItem } from '@/features/myAccounts/hooks/useAllSafesGrouped'
-import MultiAccountItem from '@/features/myAccounts/components/AccountItems/MultiAccountItem'
-import { isMultiChainSafeItem } from '@/features/multichain/utils/utils'
-import { TransitionGroup } from 'react-transition-group'
 import { Collapse } from '@mui/material'
+import { TransitionGroup } from 'react-transition-group'
 
 type SafeListProps = {
   safes?: (SafeItem | MultiChainSafeItem)[]

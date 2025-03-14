@@ -21,6 +21,10 @@
   width: 20px;
 }
 
+.avatar {
+  margin: 4px;
+}
+
 .content {
   padding: 0 !important;
 }

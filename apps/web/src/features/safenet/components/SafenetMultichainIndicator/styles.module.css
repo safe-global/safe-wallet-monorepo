@@ -1,0 +1,21 @@
+.safenetTooltip {
+  position: relative;
+}
+
+.safenetLogo {
+  position: absolute;
+  top: -6px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.safenetLogo > svg {
+  background: var(--color-text-primary);
+  padding: 0 var(--space-2);
+}
+
+.divider {
+  margin: 16px -8px;
+  border-color: var(--color-border-main);
+}

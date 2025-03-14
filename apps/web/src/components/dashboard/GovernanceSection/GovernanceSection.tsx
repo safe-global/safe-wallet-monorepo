@@ -1,26 +1,26 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
-import { Typography, Card, Box, Link, SvgIcon } from '@mui/material'
-import { WidgetBody } from '@/components/dashboard/styled'
-import css from './styles.module.css'
-import { useBrowserPermissions } from '@/hooks/safe-apps/permissions'
-import { useRemoteSafeApps } from '@/hooks/safe-apps/useRemoteSafeApps'
-import { DISCORD_URL, SafeAppsTag } from '@/config/constants'
-import { useDarkMode } from '@/hooks/useDarkMode'
-import { OpenInNew } from '@mui/icons-material'
-import NetworkError from '@/public/images/common/network-error.svg'
-import useChainId from '@/hooks/useChainId'
+import InfiniteScroll from '@/components/common/InfiniteScroll'
 import { getSafeTokenAddress } from '@/components/common/SafeTokenWidget'
+import { WidgetBody } from '@/components/dashboard/styled'
 import SafeAppIframe from '@/components/safe-apps/AppFrame/SafeAppIframe'
 import type { UseAppCommunicatorHandlers } from '@/components/safe-apps/AppFrame/useAppCommunicator'
 import useAppCommunicator from '@/components/safe-apps/AppFrame/useAppCommunicator'
-import { useCurrentChain } from '@/hooks/useChains'
 import useGetSafeInfo from '@/components/safe-apps/AppFrame/useGetSafeInfo'
-import type { SafeAppData } from '@safe-global/safe-gateway-typescript-sdk'
-import useSafeInfo from '@/hooks/useSafeInfo'
-import { fetchSafeAppFromManifest } from '@/services/safe-apps/manifest'
-import useAsync from '@/hooks/useAsync'
 import { getOrigin } from '@/components/safe-apps/utils'
-import InfiniteScroll from '@/components/common/InfiniteScroll'
+import { DISCORD_URL, SafeAppsTag } from '@/config/constants'
+import { useBrowserPermissions } from '@/hooks/safe-apps/permissions'
+import { useRemoteSafeApps } from '@/hooks/safe-apps/useRemoteSafeApps'
+import useAsync from '@/hooks/useAsync'
+import useChainId from '@/hooks/useChainId'
+import { useCurrentChain } from '@/hooks/useChains'
+import { useDarkMode } from '@/hooks/useDarkMode'
+import useSafeInfo from '@/hooks/useSafeInfo'
+import NetworkError from '@/public/images/common/network-error.svg'
+import { fetchSafeAppFromManifest } from '@/services/safe-apps/manifest'
+import { OpenInNew } from '@mui/icons-material'
+import { Box, Card, Link, SvgIcon, Typography } from '@mui/material'
+import type { SafeAppData } from '@safe-global/safe-gateway-typescript-sdk'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import css from './styles.module.css'
 
 // A fallback component when the Safe App fails to load
 const WidgetLoadErrorFallback = () => (
@@ -100,7 +100,7 @@ const MiniAppFrame = ({ app, title }: { app: SafeAppData; title: string }) => {
 
 // Entire section for the governance widgets
 const GovernanceSection = () => {
-  const [matchingApps, errorFetchingGovernanceSafeApp] = useRemoteSafeApps(SafeAppsTag.SAFE_GOVERNANCE_APP)
+  const [matchingApps, errorFetchingGovernanceSafeApp] = useRemoteSafeApps({ tag: SafeAppsTag.SAFE_GOVERNANCE_APP })
   const governanceApp = matchingApps?.[0]
   const fetchingSafeGovernanceApp = !governanceApp && !errorFetchingGovernanceSafeApp
   const { safeLoading } = useSafeInfo()

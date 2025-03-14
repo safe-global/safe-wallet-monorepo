@@ -71,6 +71,11 @@ export enum SafeAppsTag {
   RECOVERY_SYGNUM = 'recovery-sygnum',
 }
 
+// Safe Apps names
+export enum SafeAppsName {
+  CSV = 'CSV Airdrop',
+}
+
 // Help Center
 export const HELP_CENTER_URL = 'https://help.safe.global'
 export const HelpCenterArticle = {
@@ -121,3 +126,7 @@ export const SAFE_PASS_URL = 'community.safe.global'
 export const ECOSYSTEM_ID_ADDRESS =
   process.env.NEXT_PUBLIC_ECOSYSTEM_ID_ADDRESS || '0x0000000000000000000000000000000000000000'
 export const MULTICHAIN_HELP_ARTICLE = `${HELP_CENTER_URL}/en/articles/222612-multi-chain-safe`
+
+// Safenet
+export const HAS_SAFENET_FEATURE = process.env.NEXT_PUBLIC_HAS_SAFENET_FEATURE === 'true'
+export const SAFENET_API_URL = process.env.NEXT_PUBLIC_SAFENET_API_URL

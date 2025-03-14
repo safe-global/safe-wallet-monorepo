@@ -1,28 +1,29 @@
+import AddFundsCTA from '@/components/common/AddFunds'
+import EnhancedTable, { type EnhancedTableProps } from '@/components/common/EnhancedTable'
+import TokenAmount from '@/components/common/TokenAmount'
+import TokenExplorerLink from '@/components/common/TokenExplorerLink'
+import TokenIcon from '@/components/common/TokenIcon'
+import Track from '@/components/common/Track'
 import CheckBalance from '@/features/counterfactual/CheckBalance'
-import { type ReactElement } from 'react'
-import { Box, IconButton, Checkbox, Skeleton, Tooltip, Typography } from '@mui/material'
+import SafenetBalanceBreakdown from '@/features/safenet/components/SafenetBalanceBreakdown'
+import StakeButton from '@/features/stake/components/StakeButton'
+import SwapButton from '@/features/swap/components/SwapButton'
+import useIsSwapFeatureEnabled from '@/features/swap/hooks/useIsSwapFeatureEnabled'
+import useBalances from '@/hooks/useBalances'
+import { ASSETS_EVENTS } from '@/services/analytics/events/assets'
+import { STAKE_LABELS } from '@/services/analytics/events/stake'
+import { SWAP_LABELS } from '@/services/analytics/events/swaps'
+import { VisibilityOutlined } from '@mui/icons-material'
+import { Box, Checkbox, IconButton, Skeleton, Tooltip, Typography } from '@mui/material'
 import type { TokenInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import { TokenType } from '@safe-global/safe-gateway-typescript-sdk'
-import css from './styles.module.css'
-import TokenAmount from '@/components/common/TokenAmount'
-import TokenIcon from '@/components/common/TokenIcon'
-import EnhancedTable, { type EnhancedTableProps } from '@/components/common/EnhancedTable'
-import TokenExplorerLink from '@/components/common/TokenExplorerLink'
-import Track from '@/components/common/Track'
-import { ASSETS_EVENTS } from '@/services/analytics/events/assets'
-import { VisibilityOutlined } from '@mui/icons-material'
+import { type ReactElement } from 'react'
 import TokenMenu from '../TokenMenu'
-import useBalances from '@/hooks/useBalances'
-import { useHideAssets, useVisibleAssets } from './useHideAssets'
-import AddFundsCTA from '@/components/common/AddFunds'
-import SwapButton from '@/features/swap/components/SwapButton'
-import { SWAP_LABELS } from '@/services/analytics/events/swaps'
 import SendButton from './SendButton'
-import useIsSwapFeatureEnabled from '@/features/swap/hooks/useIsSwapFeatureEnabled'
-import useIsStakingFeatureEnabled from '@/features/stake/hooks/useIsStakingFeatureEnabled'
-import { STAKE_LABELS } from '@/services/analytics/events/stake'
-import StakeButton from '@/features/stake/components/StakeButton'
+import css from './styles.module.css'
+import { useHideAssets, useVisibleAssets } from './useHideAssets'
 import { FiatBalance } from './FiatBalance'
+import useIsStakingFeatureEnabled from '@/features/stake/hooks/useIsStakingFeatureEnabled'
 
 const skeletonCells: EnhancedTableProps['rows'][0]['cells'] = {
   asset: {
@@ -118,18 +119,24 @@ const AssetsTable = ({
         const rawFiatValue = parseFloat(item.fiatBalance)
         const isNative = isNativeToken(item.tokenInfo)
         const isSelected = isAssetSelected(item.tokenInfo.address)
+        const isExpandableRow = !!item.safenetBalance && parseFloat(item.balance) > 0
 
         return {
           key: item.tokenInfo.address,
           selected: isSelected,
           collapsed: item.tokenInfo.address === hidingAsset,
+          expandableRow: isExpandableRow ? <SafenetBalanceBreakdown asset={item.safenetBalance!} /> : undefined,
           cells: {
             asset: {
               rawValue: item.tokenInfo.name,
               collapsed: item.tokenInfo.address === hidingAsset,
               content: (
                 <div className={css.token}>
-                  <TokenIcon logoUri={item.tokenInfo.logoUri} tokenSymbol={item.tokenInfo.symbol} />
+                  <TokenIcon
+                    logoUri={item.tokenInfo.logoUri}
+                    tokenSymbol={item.tokenInfo.symbol}
+                    safenet={!!item.safenetBalance}
+                  />
 
                   <Typography>{item.tokenInfo.name}</Typography>
 

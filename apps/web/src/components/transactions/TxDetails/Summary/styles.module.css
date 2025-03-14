@@ -2,3 +2,9 @@
   margin-top: 8px;
   padding: 0;
 }
+
+.safenetGradientRow > div:last-child > div:first-child {
+  border: none;
+  border-radius-left-top: 0;
+  border-radius-right-top: 0;
+}

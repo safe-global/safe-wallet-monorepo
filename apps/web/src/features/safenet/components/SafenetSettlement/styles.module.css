@@ -1,0 +1,7 @@
+.linkWrapper {
+  background-color: var(--color-background-main);
+  border-radius: 6px;
+  padding: 4px 4px;
+  display: inline-flex;
+  gap: 4px;
+}

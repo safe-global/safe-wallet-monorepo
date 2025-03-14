@@ -2,10 +2,10 @@ import type { ReactElement } from 'react'
 
 import NavTabs from '@/components/common/NavTabs'
 import PageHeader from '@/components/common/PageHeader'
-import { generalSettingsNavItems, settingsNavItems } from '@/components/sidebar/SidebarNavigation/config'
 import css from '@/components/common/PageHeader/styles.module.css'
-import useSafeAddress from '@/hooks/useSafeAddress'
+import { generalSettingsNavItems, settingsNavItems } from '@/components/sidebar/SidebarNavigation/config'
 import { useCurrentChain } from '@/hooks/useChains'
+import useSafeAddress from '@/hooks/useSafeAddress'
 import { isRouteEnabled } from '@/utils/chains'
 import madProps from '@/utils/mad-props'
 

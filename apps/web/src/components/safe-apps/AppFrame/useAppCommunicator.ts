@@ -1,39 +1,44 @@
-import type { MutableRefObject } from 'react'
-import { useEffect, useMemo, useState } from 'react'
-import { getAddress } from 'ethers'
-import type {
-  SafeAppData,
-  ChainInfo as WebCoreChainInfo,
-  TransactionDetails,
-} from '@safe-global/safe-gateway-typescript-sdk'
+import { SAFENET_API_URL } from '@/config/constants'
+import useHasSafenetFeature from '@/features/safenet/hooks/useHasSafenetFeature'
+import type { SafePermissionsRequest } from '@/hooks/safe-apps/permissions'
+import { useDarkMode } from '@/hooks/useDarkMode'
+import { createSafeAppsWeb3Provider } from '@/hooks/wallets/web3'
+import { SAFE_APPS_EVENTS, trackSafeAppEvent } from '@/services/analytics'
+import { Errors, logError } from '@/services/exceptions'
+import AppCommunicator from '@/services/safe-apps/AppCommunicator'
+import { useAppSelector } from '@/store'
+import { useGetSafenetConfigQuery } from '@/store/safenet'
+import { selectRpc } from '@/store/settingsSlice'
+import { QueryStatus } from '@reduxjs/toolkit/query'
+import { skipToken } from '@reduxjs/toolkit/query/react'
 import type {
   AddressBookItem,
   BaseTransaction,
+  ChainInfo,
   EIP712TypedData,
   EnvironmentInfo,
   GetBalanceParams,
   GetTxBySafeTxHashParams,
-  RequestId,
   RPCPayload,
+  RequestId,
+  SafeInfoExtended,
+  SafeSettings,
   SendTransactionRequestParams,
   SendTransactionsParams,
   SignMessageParams,
   SignTypedMessageParams,
-  ChainInfo,
-  SafeInfoExtended,
 } from '@safe-global/safe-apps-sdk'
 import { Methods, RPC_CALLS } from '@safe-global/safe-apps-sdk'
 import type { Permission, PermissionRequest } from '@safe-global/safe-apps-sdk/dist/types/types/permissions'
-import type { SafeSettings } from '@safe-global/safe-apps-sdk'
-import AppCommunicator from '@/services/safe-apps/AppCommunicator'
-import { Errors, logError } from '@/services/exceptions'
-import type { SafePermissionsRequest } from '@/hooks/safe-apps/permissions'
-import { SAFE_APPS_EVENTS, trackSafeAppEvent } from '@/services/analytics'
-import { useAppSelector } from '@/store'
-import { selectRpc } from '@/store/settingsSlice'
-import { createSafeAppsWeb3Provider } from '@/hooks/wallets/web3'
-import { useDarkMode } from '@/hooks/useDarkMode'
-import type { Balances } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
+import type {
+  SafeAppData,
+  TransactionDetails,
+  ChainInfo as WebCoreChainInfo,
+} from '@safe-global/safe-gateway-typescript-sdk'
+import { type Balances } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
+import { getAddress } from 'ethers'
+import type { MutableRefObject } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 export enum CommunicatorMessages {
   REJECT_TRANSACTION_MESSAGE = 'Transaction was rejected',
@@ -74,6 +79,15 @@ const useAppCommunicator = (
 ): AppCommunicator | undefined => {
   const [communicator, setCommunicator] = useState<AppCommunicator | undefined>(undefined)
   const customRpc = useAppSelector(selectRpc)
+  const hasSafenetFeature = useHasSafenetFeature()
+  const { data: safenetConfig, status: safenetConfigStatus } = useGetSafenetConfigQuery(
+    !hasSafenetFeature ? skipToken : undefined,
+  )
+  const shouldUseSafenetRpc =
+    safenetConfigStatus === QueryStatus.fulfilled &&
+    chain &&
+    safenetConfig &&
+    safenetConfig.chains.includes(Number(chain.chainId))
   const isDarkMode = useDarkMode()
 
   const safeAppWeb3Provider = useMemo(() => {
@@ -81,8 +95,12 @@ const useAppCommunicator = (
       return
     }
 
+    if (shouldUseSafenetRpc) {
+      return createSafeAppsWeb3Provider(chain, SAFENET_API_URL + `/jsonrpc/${chain.chainId}/`)
+    }
+
     return createSafeAppsWeb3Provider(chain, customRpc?.[chain.chainId])
-  }, [chain, customRpc])
+  }, [chain, customRpc, shouldUseSafenetRpc])
 
   useEffect(() => {
     let communicatorInstance: AppCommunicator
@@ -228,7 +246,7 @@ const useAppCommunicator = (
         msg.data.id,
       )
     })
-  }, [safeAppWeb3Provider, handlers, chain, communicator, isDarkMode])
+  }, [safeAppWeb3Provider, handlers, chain, communicator, isDarkMode, shouldUseSafenetRpc])
 
   return communicator
 }

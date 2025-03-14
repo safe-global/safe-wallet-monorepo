@@ -23,3 +23,11 @@
   justify-content: center;
   font-size: 14px;
 }
+
+.safenetIndicator {
+  margin-left: -5px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  outline: 2px solid var(--color-background-paper);
+}

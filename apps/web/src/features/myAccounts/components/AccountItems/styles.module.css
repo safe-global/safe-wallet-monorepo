@@ -26,6 +26,7 @@
 
 .listItem :global .MuiAccordion-root.Mui-expanded {
   background-color: var(--color-background-paper);
+  flex-grow: 1;
 }
 
 .listItem.subItem {

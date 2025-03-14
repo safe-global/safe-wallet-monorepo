@@ -1,17 +1,23 @@
 import EthHashInfo from '@/components/common/EthHashInfo'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { Paper, Grid, Typography, Box, IconButton, SvgIcon } from '@mui/material'
+import { Box, Grid, IconButton, Paper, SvgIcon, Typography } from '@mui/material'
 
-import css from './styles.module.css'
-import ExternalLink from '@/components/common/ExternalLink'
-import { SAFE_FEATURES } from '@safe-global/protocol-kit/dist/src/utils/safeVersions'
-import { hasSafeFeature } from '@/utils/safe-versions'
-import { HelpCenterArticle } from '@/config/constants'
-import DeleteIcon from '@/public/images/common/delete.svg'
 import CheckWallet from '@/components/common/CheckWallet'
-import { useContext } from 'react'
+import ExternalLink from '@/components/common/ExternalLink'
 import { TxModalContext } from '@/components/tx-flow'
 import { RemoveGuardFlow } from '@/components/tx-flow/flows'
+import { HelpCenterArticle } from '@/config/constants'
+import useIsSafenetEnabled from '@/features/safenet/hooks/useIsSafenetEnabled'
+import DeleteIcon from '@/public/images/common/delete.svg'
+import { hasSafeFeature } from '@/utils/safe-versions'
+import { SAFE_FEATURES } from '@safe-global/protocol-kit/dist/src/utils/safeVersions'
+import dynamic from 'next/dynamic'
+import { useContext } from 'react'
+import css from './styles.module.css'
+
+const SafenetGuardDisplay = dynamic(() =>
+  import('@/features/safenet/components/SafenetContractDisplay').then((module) => module.SafenetGuardDisplay),
+)
 
 const NoTransactionGuard = () => {
   return (
@@ -45,6 +51,7 @@ const GuardDisplay = ({ guardAddress, chainId }: { guardAddress: string; chainId
 
 const TransactionGuards = () => {
   const { safe, safeLoaded } = useSafeInfo()
+  const isSafenetEnabled = useIsSafenetEnabled()
 
   const isVersionWithGuards = safeLoaded && hasSafeFeature(SAFE_FEATURES.SAFE_TX_GUARDS, safe.version)
 
@@ -53,7 +60,7 @@ const TransactionGuards = () => {
   }
 
   return (
-    <Paper sx={{ padding: 4 }}>
+    <Paper sx={{ padding: 4, mb: 2 }}>
       <Grid container direction="row" justifyContent="space-between" spacing={3}>
         <Grid item lg={4} xs={12}>
           <Typography variant="h4" fontWeight={700}>
@@ -69,10 +76,17 @@ const TransactionGuards = () => {
               sources. Learn more about transaction guards{' '}
               <ExternalLink href={HelpCenterArticle.TRANSACTION_GUARD}>here</ExternalLink>.
             </Typography>
-            {safe.guard ? (
-              <GuardDisplay guardAddress={safe.guard.value} chainId={safe.chainId} />
-            ) : (
+            {!safe.guard ? (
               <NoTransactionGuard />
+            ) : isSafenetEnabled ? (
+              <SafenetGuardDisplay
+                name={safe.guard.name}
+                address={safe.guard.value}
+                chainId={safe.chainId}
+                showTooltip
+              />
+            ) : (
+              <GuardDisplay guardAddress={safe.guard.value} chainId={safe.chainId} />
             )}
           </Box>
         </Grid>

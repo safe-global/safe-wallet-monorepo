@@ -33,6 +33,7 @@ import ConfirmationView from '../confirmation-views'
 import { SignerForm } from './SignerForm'
 import { useSigner } from '@/hooks/wallets/useWallet'
 import { trackTxEvents } from './tracking'
+import useIsSafenetEnabled from '@/features/safenet/hooks/useIsSafenetEnabled'
 import { TxNoteForm, encodeTxNote, trackAddNote } from '@/features/tx-notes'
 
 export type SubmitCallback = (txId: string, isExecuted?: boolean) => void
@@ -77,6 +78,7 @@ export const SignOrExecuteForm = ({
   const [readableApprovals] = useApprovalInfos({ safeTransaction: safeTx })
   const isApproval = readableApprovals && readableApprovals.length > 0
   const { safe } = useSafeInfo()
+  const isSafenetEnabled = useIsSafenetEnabled()
   const isSafeOwner = useIsSafeOwner()
   const signer = useSigner()
   const isProposer = useIsWalletProposer()
@@ -93,7 +95,7 @@ export const SignOrExecuteForm = ({
   const preferThroughRole = canExecuteThroughRole && !isSafeOwner // execute through role if a non-owner role member wallet is connected
 
   // If checkbox is checked and the transaction is executable, execute it, otherwise sign it
-  const canExecute = isCorrectNonce && (props.isExecutable || isNewExecutableTx)
+  const canExecute = !isSafenetEnabled && isCorrectNonce && (props.isExecutable || isNewExecutableTx)
   const willExecute = (props.onlyExecute || shouldExecute) && canExecute && !preferThroughRole
   const willExecuteThroughRole =
     (props.onlyExecute || shouldExecute) && canExecuteThroughRole && (!canExecute || preferThroughRole)
@@ -196,7 +198,7 @@ export const SignOrExecuteForm = ({
           )}
         </ConfirmationView>
 
-        {!isCounterfactualSafe && !props.isRejection && <BlockaidBalanceChanges />}
+        {!isSafenetEnabled && !isCounterfactualSafe && !props.isRejection && <BlockaidBalanceChanges />}
       </TxCard>
 
       {!isCounterfactualSafe && !props.isRejection && safeTx && <TxChecks transaction={safeTx} />}
@@ -231,7 +233,7 @@ export const SignOrExecuteForm = ({
 
         <UnknownContractError txData={props.txDetails?.txData ?? props.txPreview?.txData} />
 
-        <Blockaid />
+        {!isSafenetEnabled && <Blockaid />}
 
         {getForm()}
       </TxCard>

@@ -1,0 +1,21 @@
+.safenetList {
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--space-1);
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+  overflow: hidden;
+}
+
+.safenetList > div {
+  border: none;
+  border-top: 1px solid var(--color-border-light);
+  border-radius: 0;
+  margin-bottom: 0;
+  flex-wrap: wrap;
+}
+
+.safenetList > .safenetListHeader {
+  border: none;
+  background: var(--color-background-main);
+  padding: 4px var(--space-2);
+}

@@ -104,6 +104,7 @@ const safeTxWithNativeData = {
   ...safeTx,
   data: {
     ...safeTx.data,
+    baseGas: '0',
     refundReceiver: '0x79964FA459D36EbFfc2a2cA66321B689F6E4aC52',
     to: '0xDa5e9FA404881Ff36DDa97b41Da402dF6430EE6b',
     data: '0x',

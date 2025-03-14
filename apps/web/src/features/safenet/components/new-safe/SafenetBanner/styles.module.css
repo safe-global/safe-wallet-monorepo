@@ -1,0 +1,93 @@
+.lightBanner,
+.darkBanner {
+  align-items: flex-start;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+  padding: var(--space-3);
+  position: relative;
+  overflow: hidden;
+}
+
+.lightBanner {
+  background-image: radial-gradient(108.2% 108.2% at 99.88% 11.3%, #003f54 0%, #000000 100%);
+}
+
+.darkBanner {
+  background-image: radial-gradient(119.01% 132.63% at 119.01% -14.15%, #ff5f00 0%, #ffd200 50%, #12ff80 100%);
+}
+
+.backgroundLogo {
+  position: absolute;
+  right: var(--space-5);
+  bottom: 0;
+}
+
+.darkBanner .backgroundLogo > g {
+  opacity: 0.2;
+}
+
+.darkBanner .backgroundLogo > g > path {
+  fill: var(--color-static-main);
+}
+
+.darkBanner .safenetLogo > path {
+  fill: var(--color-static-main);
+}
+
+.title {
+  align-items: center;
+  display: flex;
+  flex-direction: row;
+  gap: var(--space-1);
+}
+
+.lightBanner .newTag {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  padding: 2px var(--space-1);
+}
+
+.darkBanner .newTag {
+  border-radius: 4px;
+  padding: 2px var(--space-1);
+  background: radial-gradient(100.81% 103.11% at 96.36% 3.87%, #000000 0%, #003f54 100%);
+}
+
+.newTag > p {
+  background: radial-gradient(119.01% 132.63% at 119.01% -14.15%, #ff5f00 0%, #ffd200 50%, #12ff80 100%);
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.bannerButton {
+  color: var(--color-text-primary);
+}
+
+.lightBanner .bannerButton {
+  background: radial-gradient(119.01% 132.63% at 119.01% -14.15%, #ff5f00 0%, #ffd200 50%, #12ff80 100%);
+}
+
+.darkBanner .bannerButton {
+  background: radial-gradient(100.81% 103.11% at 96.36% 3.87%, #000000 0%, #003f54 100%);
+}
+
+.dismiss {
+  cursor: pointer;
+  font-size: 12px;
+  position: absolute;
+  margin: var(--space-3);
+  right: 0;
+  top: 0;
+}
+
+@media (max-width: 450px) {
+  .dismiss {
+    position: relative;
+    width: 100%;
+    margin: 0;
+    text-align: right;
+  }
+}

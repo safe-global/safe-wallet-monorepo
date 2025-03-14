@@ -1,0 +1,1 @@
+export const SafenetSetupAddress = '0x18261ff68cC8D05EE046EDF5F4049B2077624a1d'

@@ -1,0 +1,45 @@
+.debitTable {
+  margin-top: 16px;
+  border-collapse: separate;
+  border: 1px solid var(--color-border-light);
+  border-radius: 6px;
+}
+
+.debitTable tbody > tr:last-child {
+  border-radius: 0px 0px 6px 6px;
+}
+
+.debitTable tbody > tr:last-child > td {
+  border-bottom: none !important;
+}
+
+.debitTable tbody > tr:first-child > td {
+  border-top: none !important;
+}
+
+.debitTable tbody > tr:not(:first-child) > td {
+  border-bottom: 1px solid var(--color-border-light);
+  border-top: 1px solid var(--color-border-light);
+}
+
+.debitTableHead {
+  background: var(--color-background-main);
+}
+
+.debitTableHead > tr > th {
+  padding: 4px 8px 4px 24px;
+}
+
+.expectedSettlementPill {
+  background-color: var(--color-info-background);
+  border-radius: 100px;
+  padding: 4px;
+  justify-self: end;
+}
+
+.awaitingSettlementPill {
+  background-color: var(--color-background-main);
+  border-radius: 100px;
+  padding: 4px;
+  justify-self: end;
+}

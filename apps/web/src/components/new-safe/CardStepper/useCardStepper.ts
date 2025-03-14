@@ -1,6 +1,6 @@
+import { MODALS_CATEGORY, trackEvent } from '@/services/analytics'
 import type { Dispatch, ReactElement, SetStateAction } from 'react'
 import { useState } from 'react'
-import { trackEvent, MODALS_CATEGORY } from '@/services/analytics'
 
 export type StepRenderProps<TData> = {
   data: TData
@@ -14,14 +14,21 @@ export type StepRenderProps<TData> = {
 type Step<TData> = {
   title: string
   subtitle: string
-  render: (
-    data: StepRenderProps<TData>['data'],
-    onSubmit: StepRenderProps<TData>['onSubmit'],
-    onBack: StepRenderProps<TData>['onBack'],
-    setStep: StepRenderProps<TData>['setStep'],
-    setProgressColor: StepRenderProps<TData>['setProgressColor'],
-    setStepData: StepRenderProps<TData>['setStepData'],
-  ) => ReactElement
+  render: ({
+    data,
+    onSubmit,
+    onBack,
+    setStep,
+    setProgressColor,
+    setStepData,
+  }: {
+    data: StepRenderProps<TData>['data']
+    onSubmit: StepRenderProps<TData>['onSubmit']
+    onBack: StepRenderProps<TData>['onBack']
+    setStep: StepRenderProps<TData>['setStep']
+    setProgressColor: StepRenderProps<TData>['setProgressColor']
+    setStepData: StepRenderProps<TData>['setStepData']
+  }) => ReactElement
 }
 
 export type TxStepperProps<TData> = {
@@ -29,6 +36,7 @@ export type TxStepperProps<TData> = {
   initialData: TData
   initialStep?: number
   eventCategory?: string
+  customProgressBar?: ReactElement
   setWidgetStep?: (step: number | SetStateAction<number>) => void
   onClose: () => void
 }

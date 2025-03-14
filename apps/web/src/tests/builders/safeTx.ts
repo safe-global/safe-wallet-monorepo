@@ -57,13 +57,13 @@ export function safeTxDataBuilder(): IBuilder<SafeTransactionData> {
   return Builder.new<SafeTransactionData>().with({
     to: faker.finance.ethereumAddress(),
     value: '0x0',
-    data: faker.string.hexadecimal({ length: faker.number.int({ max: 500 }) }),
+    data: faker.string.hexadecimal({ length: faker.number.int({ max: 250 }) * 2 }), // The number needs to be even (bytes)
     operation: 0,
     nonce: faker.number.int(),
-    safeTxGas: faker.number.toString(),
-    gasPrice: faker.number.toString(),
+    safeTxGas: faker.number.int().toString(),
+    gasPrice: faker.number.int().toString(),
     gasToken: ZERO_ADDRESS,
-    baseGas: faker.number.toString(),
+    baseGas: faker.number.int().toString(),
     refundReceiver: faker.finance.ethereumAddress(),
   })
 }

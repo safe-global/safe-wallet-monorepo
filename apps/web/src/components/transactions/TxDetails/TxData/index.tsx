@@ -20,7 +20,11 @@ import {
   isTransferTxInfo,
 } from '@/utils/transaction-guards'
 import { SpendingLimits } from '@/components/transactions/TxDetails/TxData/SpendingLimits'
-import { TransactionStatus, type TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
+import {
+  DetailedExecutionInfoType,
+  TransactionStatus,
+  type TransactionDetails,
+} from '@safe-global/safe-gateway-typescript-sdk'
 import { type ReactElement } from 'react'
 import RejectionTxInfo from '@/components/transactions/TxDetails/TxData/Rejection'
 import DecodedData from '@/components/transactions/TxDetails/TxData/DecodedData'
@@ -34,6 +38,11 @@ import StakingTxWithdrawDetails from '@/features/stake/components/StakingTxWithd
 import { OnChainConfirmation } from './NestedTransaction/OnChainConfirmation'
 import { ExecTransaction } from './NestedTransaction/ExecTransaction'
 import SafeUpdate from './SafeUpdate'
+import { useGetSafenetConfigQuery } from '@/store/safenet'
+import { skipToken } from '@reduxjs/toolkit/query'
+import { sameAddress } from '@/utils/addresses'
+import SafenetSettlement from '@/features/safenet/components/SafenetSettlement'
+import useHasSafenetFeature from '@/features/safenet/hooks/useHasSafenetFeature'
 
 const TxData = ({
   txInfo,
@@ -49,7 +58,19 @@ const TxData = ({
   imitation: boolean
 }): ReactElement => {
   const chainId = useChainId()
+  const isSafenetEnabled = useHasSafenetFeature()
 
+  const moduleAddress =
+    txDetails?.detailedExecutionInfo?.type === DetailedExecutionInfoType.MODULE
+      ? txDetails.detailedExecutionInfo.address.value
+      : undefined
+
+  const { data: safenetConfig } = useGetSafenetConfigQuery(isSafenetEnabled && moduleAddress ? undefined : skipToken)
+  const isSafenetSettlement = sameAddress(safenetConfig?.settlementEngines[chainId], moduleAddress)
+
+  if (isSafenetSettlement && txDetails) {
+    return <SafenetSettlement data={txDetails} />
+  }
   if (isOrderTxInfo(txInfo)) {
     return <SwapOrder txData={txData} txInfo={txInfo} />
   }

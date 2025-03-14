@@ -1,25 +1,27 @@
 import BuyCryptoButton from '@/components/common/BuyCryptoButton'
+import FiatValue from '@/components/common/FiatValue'
 import TokenAmount from '@/components/common/TokenAmount'
 import Track from '@/components/common/Track'
 import QrCodeButton from '@/components/sidebar/QrCodeButton'
 import { TxModalContext } from '@/components/tx-flow'
 import { NewTxFlow } from '@/components/tx-flow/flows'
-import SwapIcon from '@/public/images/common/swap.svg'
-import { OVERVIEW_EVENTS, trackEvent } from '@/services/analytics'
-import Link from 'next/link'
+import { AppRoutes } from '@/config/routes'
+import SafenetBalanceOverview from '@/features/safenet/components/SafenetBalanceOverview'
+import useIsSafenetEnabled from '@/features/safenet/hooks/useIsSafenetEnabled'
+import useIsSwapFeatureEnabled from '@/features/swap/hooks/useIsSwapFeatureEnabled'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useVisibleBalances } from '@/hooks/useVisibleBalances'
-import ArrowIconNW from '@/public/images/common/arrow-top-right.svg'
 import ArrowIconSE from '@/public/images/common/arrow-se.svg'
-import FiatValue from '@/components/common/FiatValue'
-import { AppRoutes } from '@/config/routes'
-import { Button, Grid, Skeleton, Typography, useMediaQuery } from '@mui/material'
-import { useRouter } from 'next/router'
-import { type ReactElement, useContext } from 'react'
-import { WidgetBody, WidgetContainer } from '../styled'
-import { useTheme } from '@mui/material/styles'
+import ArrowIconNW from '@/public/images/common/arrow-top-right.svg'
+import SwapIcon from '@/public/images/common/swap.svg'
+import { OVERVIEW_EVENTS, trackEvent } from '@/services/analytics'
 import { SWAP_EVENTS, SWAP_LABELS } from '@/services/analytics/events/swaps'
-import useIsSwapFeatureEnabled from '@/features/swap/hooks/useIsSwapFeatureEnabled'
+import { Button, Grid, Skeleton, Stack, Typography, useMediaQuery } from '@mui/material'
+import { useTheme } from '@mui/material/styles'
+import Link from 'next/link'
+import { useRouter } from 'next/router'
+import { useContext, type ReactElement } from 'react'
+import { WidgetBody, WidgetContainer } from '../styled'
 
 const SkeletonOverview = (
   <>
@@ -62,6 +64,7 @@ const Overview = (): ReactElement => {
   const theme = useTheme()
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'))
   const isSwapFeatureEnabled = useIsSwapFeatureEnabled()
+  const isSafenetEnabled = useIsSafenetEnabled()
 
   const isInitialState = !safeLoaded && !safeLoading
   const isLoading = safeLoading || balancesLoading || isInitialState
@@ -90,12 +93,11 @@ const Overview = (): ReactElement => {
                 justifyContent: 'space-between',
               }}
             >
-              <Grid item>
+              <Stack spacing={1}>
                 <Typography
                   sx={{
                     color: 'primary.light',
                     fontWeight: 'bold',
-                    mb: 1,
                   }}
                 >
                   Total asset value
@@ -118,7 +120,8 @@ const Overview = (): ReactElement => {
                     />
                   )}
                 </Typography>
-              </Grid>
+                {isSafenetEnabled && <SafenetBalanceOverview />}
+              </Stack>
 
               {safe.deployed && (
                 <Grid

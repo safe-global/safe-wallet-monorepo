@@ -3,15 +3,17 @@ import React, { useState } from 'react'
 import { Link, Box, Stack, Typography } from '@mui/material'
 import { generateDataRowValue, TxDataRow } from '@/components/transactions/TxDetails/Summary/TxDataRow'
 import { isCustomTxInfo, isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
+import type { SafeTransactionData } from '@safe-global/safe-core-sdk-types'
 import type { TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
 import { Operation } from '@safe-global/safe-gateway-typescript-sdk'
-import type { SafeTransactionData } from '@safe-global/safe-core-sdk-types'
 import { dateString } from '@/utils/formatters'
 import css from './styles.module.css'
 import DecodedData from '../TxData/DecodedData'
 import { SafeTxHashDataRow } from './SafeTxHashDataRow'
 import { Divider } from '@/components/tx/DecodedTx'
 import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
+import useHasSafenetFeature from '@/features/safenet/hooks/useHasSafenetFeature'
+import SafenetTransactionDetails from '@/features/safenet/components/SafenetTransactionDetails'
 
 interface Props {
   safeTxData?: SafeTransactionData
@@ -34,6 +36,7 @@ const Summary = ({
   const toggleExpanded = () => setExpanded((val) => !val)
   const { txHash, executedAt } = txDetails ?? {}
   const isCustom = txInfo && isCustomTxInfo(txInfo)
+  const isSafenetEnabled = useHasSafenetFeature()
 
   let confirmations, baseGas, gasPrice, gasToken, safeTxGas, refundReceiver, submittedAt, nonce
   if (txDetails && isMultisigDetailedExecutionInfo(txDetails.detailedExecutionInfo)) {
@@ -56,6 +59,10 @@ const Summary = ({
 
   return (
     <>
+      {isSafenetEnabled && isMultisigDetailedExecutionInfo(txDetails?.detailedExecutionInfo) && (
+        <SafenetTransactionDetails safeTxHash={txDetails.detailedExecutionInfo.safeTxHash} />
+      )}
+
       {txHash && (
         <TxDataRow datatestid="tx-hash" title="Transaction hash:">
           {generateDataRowValue(txHash, 'hash', true)}{' '}
