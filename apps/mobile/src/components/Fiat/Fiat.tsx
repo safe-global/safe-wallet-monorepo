@@ -1,23 +1,35 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import { H1, H3, View } from 'tamagui'
+import { customIntl, parseFormattedNumber } from '@/src/utils/formatters'
 
 interface FiatProps {
-  baseAmount: string
+  value: string
+  currency: string
 }
 
-export const Fiat = ({ baseAmount }: FiatProps) => {
-  const amount = baseAmount.split('.')
+export const Fiat = ({ value, currency }: FiatProps) => {
+  const numericValue = parseFloat(value.replace(/,/g, ''))
+
+  const fiat = useMemo(() => {
+    return customIntl(numericValue, 'en-US', currency)
+  }, [numericValue, currency])
+
+  const { symbol, integerPart, decimalPart, suffix } = useMemo(() => {
+    return parseFormattedNumber(fiat)
+  }, [fiat])
 
   return (
-    <View flexDirection="row" alignItems="center">
-      <H3 fontWeight="600">$</H3>
-      <H1 fontWeight="600">{amount[0]}</H1>
-
-      {amount[1] && (
-        <H1 fontWeight={600} color="$textSecondaryDark">
-          .{amount[1].slice(0, 2)}
-        </H1>
-      )}
+    <View flexDirection="row" alignItems="center" testID="fiat-balance-display">
+      <H3 fontWeight="600">{symbol}</H3>
+      <H1 fontWeight="600">
+        {integerPart}
+        {decimalPart && (
+          <H1 fontWeight={600} color="$textSecondaryDark">
+            .{decimalPart}
+          </H1>
+        )}
+        {suffix}
+      </H1>
     </View>
   )
 }
