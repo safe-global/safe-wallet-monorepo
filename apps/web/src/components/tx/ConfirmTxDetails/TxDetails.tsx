@@ -40,6 +40,8 @@ const TxDetailsRow = ({
 
 export const TxDetails = ({ safeTx, txData }: TxDetailsProps) => {
   const toInfo = txData?.addressInfoIndex?.[safeTx.data.to] || txData?.to
+  const toName = toInfo?.name || (toInfo && 'displayName' in toInfo ? String(toInfo.displayName || '') : undefined)
+  const toLogo = toInfo?.logoUri
 
   const ContentWrapper = ({ children }: { children: ReactElement | ReactElement[] }) => (
     <Box sx={{ maxHeight: '550px', overflowY: 'auto', px: 2 }}>{children}</Box>
@@ -63,15 +65,15 @@ export const TxDetails = ({ safeTx, txData }: TxDetailsProps) => {
                 <TxDetailsRow label="Primary type">SafeTx</TxDetailsRow>
 
                 <TxDetailsRow label="To">
-                  {toInfo?.name || toInfo?.logoUri ? (
+                  {toName || toLogo ? (
                     <Chip
                       sx={{ backgroundColor: 'background.paper', height: 'unset', '& > *': { p: 0.5 } }}
                       label={
                         <EthHashInfo
                           address={safeTx.data.to}
-                          name={toInfo?.name}
-                          customAvatar={toInfo?.logoUri}
-                          showAvatar={!!toInfo?.logoUri}
+                          name={toName}
+                          customAvatar={toLogo}
+                          showAvatar={!!toLogo}
                           avatarSize={20}
                           onlyName
                         />
