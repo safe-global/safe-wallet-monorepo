@@ -49,7 +49,7 @@ const convertSafenetBalanceToSafeClientGatewayBalance = (
         chainId,
         symbol: tokenName,
         decimals,
-        balance: breakdown.balance,
+        balance: breakdown.total,
         fiatBalance: currency === 'usd' ? ((parseInt(breakdown.balance) * 1) / 10 ** decimals).toString() : '0',
         pendingSettlements: breakdown.pendingSettlements,
       })

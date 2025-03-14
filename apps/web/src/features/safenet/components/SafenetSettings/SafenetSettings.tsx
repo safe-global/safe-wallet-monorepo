@@ -4,15 +4,18 @@ import { SafenetGuardDisplay, SafenetModuleDisplay } from '@/features/safenet/co
 import useSafeInfo from '@/hooks/useSafeInfo'
 import SafenetLogo from '@/public/images/logo-safenet.svg'
 import InfoIcon from '@/public/images/notifications/info.svg'
-import { useGetSafenetAccountQuery } from '@/store/safenet'
+import { useGetSafenetAccountQuery, useGetSafenetConfigQuery } from '@/store/safenet'
 import CheckIcon from '@mui/icons-material/Check'
 import { Alert, Box, Button, Grid, Paper, Stack, SvgIcon, Tooltip, Typography } from '@mui/material'
 import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
-import { useMemo, useState } from 'react'
+import { useContext, useMemo, useState } from 'react'
 import useHasSafenetFeature from '../../hooks/useHasSafenetFeature'
 import useIsSafenetEnabled from '../../hooks/useIsSafenetEnabled'
 import DisableSafenetModal from './DisableSafenetModal'
 import css from './styles.module.css'
+import { TxModalContext } from '@/components/tx-flow'
+import EnableSafenetFlow from '../tx-flow/EnableSafenet'
+import { skipToken } from '@reduxjs/toolkit/query'
 
 const MultichainIndicator = ({ chains }: { chains: Pick<ChainInfo, 'chainId'>[] }) => (
   <Tooltip
@@ -84,18 +87,30 @@ const SafenetDisabled = () => {
   const hasSafenetFeature = useHasSafenetFeature()
   const isSafenetEnabled = useIsSafenetEnabled()
 
-  const { data: safenetConfig } = useGetSafenetAccountQuery(
+  const { setTxFlow } = useContext(TxModalContext)
+
+  const { data: safenetAccounts } = useGetSafenetAccountQuery(
     { safeAddress: address.value },
     { skip: !hasSafenetFeature },
   )
 
+  const { data: safenetConfig } = useGetSafenetConfigQuery(hasSafenetFeature ? undefined : skipToken)
+
   const safenetChains = useMemo(
-    () => (safenetConfig ? safenetConfig.safes.map((safe) => ({ chainId: safe.chainId.toString() })) : []),
-    [safenetConfig],
+    () => (safenetAccounts ? safenetAccounts.safes.map((safe) => ({ chainId: safe.chainId.toString() })) : []),
+    [safenetAccounts],
   )
 
   const enableSafenet = () => {
-    // TODO: Handle Safenet opt in
+    if (!safenetConfig) {
+      return
+    }
+    setTxFlow(
+      <EnableSafenetFlow
+        guardAddress={safenetConfig.guards[chainId]}
+        moduleAddress={safenetConfig.settlementEngines[chainId]}
+      />,
+    )
   }
 
   return (
@@ -109,7 +124,7 @@ const SafenetDisabled = () => {
             </Box>
             {safenetChains.length > 0 && (
               <>
-                <Typography>but enabled on {safenetChains.length}</Typography>
+                <Typography>but enabled on </Typography>
                 <MultichainIndicator chains={safenetChains} />
               </>
             )}
