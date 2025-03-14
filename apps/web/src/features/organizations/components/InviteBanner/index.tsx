@@ -28,7 +28,6 @@ const OrgListInvite = ({ org }: OrgListInvite) => {
       <Link href={{ pathname: AppRoutes.organizations.index, query: { orgId: id } }} passHref legacyBehavior>
         <MUILink underline="none" sx={{ display: 'block' }}>
           <Card sx={{ p: 2, backgroundColor: 'background.main', '&:hover': { backgroundColor: 'background.light' } }}>
-            {/* <Stack direction="row" spacing={2} alignItems="center"> */}
             <Box className={css.orgsListInviteContent}>
               <Stack direction="row" spacing={2} alignItems="center" flexGrow={1}>
                 <Box>

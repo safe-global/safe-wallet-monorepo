@@ -35,7 +35,7 @@ const lightPalette = {
   info: {
     dark: '#52BFDC',
     main: '#5FDDFF',
-    light: '#B7F0FF',
+    light: '#D7F6FF',
     background: '#EFFCFF',
   },
   warning: {
