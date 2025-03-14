@@ -28,7 +28,6 @@ import { FormProvider, useForm } from 'react-hook-form'
 import css from './styles.module.css'
 import { useCurrentOrgId } from '../../hooks/useCurrentOrgId'
 import { isAuthenticated } from '@/store/authSlice'
-import SignedOutState from '@/features/organizations/components/SignedOutState'
 
 const ListIcon = ({ variant }: { variant: 'success' | 'danger' }) => {
   const Icon = variant === 'success' ? CheckIcon : CloseIcon
@@ -92,8 +91,6 @@ const OrgsSettings = () => {
       console.log(e)
     }
   }
-
-  if (!isUserSignedIn) return <SignedOutState />
 
   return (
     <div>

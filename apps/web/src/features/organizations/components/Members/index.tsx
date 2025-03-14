@@ -7,21 +7,15 @@ import InvitesList from './InvitesList'
 import SearchIcon from '@/public/images/common/search.svg'
 import { useMembersSearch } from '@/features/organizations/hooks/useMembersSearch'
 import { useOrgMembers } from '@/features/organizations/hooks/useOrgMembers'
-import { useAppSelector } from '@/store'
-import { isAuthenticated } from '@/store/authSlice'
-import SignedOutState from '@/features/organizations/components/SignedOutState'
 import { useIsAdmin } from '@/features/organizations/hooks/useIsAdmin'
 
 const OrganizationMembers = () => {
   const [openAddMembersModal, setOpenAddMembersModal] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
-  const isUserSignedIn = useAppSelector(isAuthenticated)
   const { activeMembers, invitedMembers } = useOrgMembers()
   const isAdmin = useIsAdmin()
   const filteredMembers = useMembersSearch(activeMembers, searchQuery)
   const filteredInvites = useMembersSearch(invitedMembers, searchQuery)
-
-  if (!isUserSignedIn) return <SignedOutState />
 
   return (
     <>
