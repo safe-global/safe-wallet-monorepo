@@ -4,10 +4,10 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import { createUpdateSafeTxs } from '@/services/tx/safeUpdateParams'
 import { createMultiSendCallOnlyTx, createTx } from '@/services/tx/tx-sender'
 import { SafeTxContext } from '../../SafeTxProvider'
-import SignOrExecuteForm from '@/components/tx/SignOrExecuteForm'
 import useAsync from '@/hooks/useAsync'
+import ReviewTransaction from '@/components/tx/ReviewTransaction'
 
-export const UpdateSafeReview = () => {
+export const UpdateSafeReview = ({ onSubmit }: { onSubmit: () => void }) => {
   const { safe, safeLoaded } = useSafeInfo()
   const chain = useCurrentChain()
   const { setSafeTx, setSafeTxError } = useContext(SafeTxContext)
@@ -21,5 +21,5 @@ export const UpdateSafeReview = () => {
     safeTxPromise.then(setSafeTx).catch(setSafeTxError)
   }, [safe, safeLoaded, chain, setSafeTx, setSafeTxError])
 
-  return <SignOrExecuteForm />
+  return <ReviewTransaction onSubmit={onSubmit} />
 }

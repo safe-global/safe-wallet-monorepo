@@ -5,19 +5,21 @@ import { useContext } from 'react'
 import type { ReactElement } from 'react'
 
 import { SafeTxContext } from '../../SafeTxProvider'
-import SignOrExecuteForm from '@/components/tx/SignOrExecuteForm'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
 import { getRecoverySkipTransaction } from '@/features/recovery/services/transaction'
 import { createTx } from '@/services/tx/tx-sender'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import type { RecoveryQueueItem } from '@/features/recovery/services/recovery-state'
 import useAsync from '@/hooks/useAsync'
+import ReviewTransaction from '@/components/tx/ReviewTransaction'
 
-const onSubmit = () => {
-  trackEvent({ ...RECOVERY_EVENTS.SUBMIT_RECOVERY_CANCEL })
-}
-
-export function CancelRecoveryFlowReview({ recovery }: { recovery: RecoveryQueueItem }): ReactElement {
+export function CancelRecoveryFlowReview({
+  recovery,
+  onSubmit,
+}: {
+  recovery: RecoveryQueueItem
+  onSubmit: () => void
+}): ReactElement {
   const web3ReadOnly = useWeb3ReadOnly()
   const { setSafeTx, setSafeTxError } = useContext(SafeTxContext)
 
@@ -29,8 +31,13 @@ export function CancelRecoveryFlowReview({ recovery }: { recovery: RecoveryQueue
     createTx(transaction).then(setSafeTx).catch(setSafeTxError)
   }, [setSafeTx, setSafeTxError, recovery, web3ReadOnly])
 
+  const handleSubmit = () => {
+    trackEvent({ ...RECOVERY_EVENTS.SUBMIT_RECOVERY_CANCEL })
+    onSubmit()
+  }
+
   return (
-    <SignOrExecuteForm onSubmit={onSubmit} isBatchable={false}>
+    <ReviewTransaction onSubmit={handleSubmit} isBatchable={false}>
       <Typography mb={1}>
         All actions initiated by the Recoverer will be cancelled. The current signers will remain the signers of the
         Safe Account.
@@ -41,6 +48,6 @@ export function CancelRecoveryFlowReview({ recovery }: { recovery: RecoveryQueue
         {recovery.isMalicious ? 'malicious transaction' : 'recovery proposal'}. It requires other signer signatures in
         order to be executed.
       </ErrorMessage>
-    </SignOrExecuteForm>
+    </ReviewTransaction>
   )
 }

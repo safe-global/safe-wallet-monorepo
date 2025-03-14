@@ -1,8 +1,7 @@
-import { useContext, useEffect } from 'react'
+import { useCallback, useContext, useEffect } from 'react'
 import { Typography, Divider, Box, Paper, SvgIcon } from '@mui/material'
 import type { ReactElement } from 'react'
 
-import SignOrExecuteForm from '@/components/tx/SignOrExecuteForm'
 import useAddressBook from '@/hooks/useAddressBook'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { trackEvent, SETTINGS_EVENTS } from '@/services/analytics'
@@ -15,8 +14,15 @@ import EthHashInfo from '@/components/common/EthHashInfo'
 import commonCss from '@/components/tx-flow/common/styles.module.css'
 import { ChangeSignerSetupWarning } from '@/features/multichain/components/SignerSetupWarning/ChangeSignerSetupWarning'
 import { maybePlural } from '@/utils/formatters'
+import ReviewTransaction from '@/components/tx/ReviewTransaction'
 
-export const ReviewRemoveOwner = ({ params }: { params: RemoveOwnerFlowProps }): ReactElement => {
+export const ReviewRemoveOwner = ({
+  params,
+  onSubmit,
+}: {
+  params: RemoveOwnerFlowProps
+  onSubmit: () => void
+}): ReactElement => {
   const addressBook = useAddressBook()
   const { setSafeTx, setSafeTxError } = useContext(SafeTxContext)
   const { safe } = useSafeInfo()
@@ -28,13 +34,14 @@ export const ReviewRemoveOwner = ({ params }: { params: RemoveOwnerFlowProps }):
 
   const newOwnerLength = safe.owners.length - 1
 
-  const onFormSubmit = () => {
+  const onFormSubmit = useCallback(() => {
     trackEvent({ ...SETTINGS_EVENTS.SETUP.THRESHOLD, label: safe.threshold })
     trackEvent({ ...SETTINGS_EVENTS.SETUP.OWNERS, label: safe.owners.length })
-  }
+    onSubmit()
+  }, [onSubmit, safe.threshold, safe.owners])
 
   return (
-    <SignOrExecuteForm onSubmit={onFormSubmit}>
+    <ReviewTransaction onSubmit={onFormSubmit}>
       <Paper sx={{ backgroundColor: ({ palette }) => palette.warning.background, p: 2 }}>
         <Typography color="text.secondary" mb={2} display="flex" alignItems="center">
           <SvgIcon component={MinusIcon} inheritViewBox fontSize="small" sx={{ mr: 1 }} />
@@ -60,6 +67,6 @@ export const ReviewRemoveOwner = ({ params }: { params: RemoveOwnerFlowProps }):
         </Typography>
       </Box>
       <Divider className={commonCss.nestedDivider} />
-    </SignOrExecuteForm>
+    </ReviewTransaction>
   )
 }

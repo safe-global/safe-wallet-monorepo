@@ -7,29 +7,25 @@ import { trackError, Errors } from '@/services/exceptions'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import CheckWallet from '@/components/common/CheckWallet'
 import { useAlreadySigned, useTxActions } from './hooks'
-import type { SignOrExecuteProps } from './SignOrExecuteForm'
+import type { SignOrExecuteProps } from './SignOrExecuteFormV2'
 import type { SafeTransaction } from '@safe-global/safe-core-sdk-types'
 import { TxModalContext } from '@/components/tx-flow'
 import commonCss from '@/components/tx-flow/common/styles.module.css'
 import { TxSecurityContext } from '../security/shared/TxSecurityContext'
 import NonOwnerError from '@/components/tx/SignOrExecuteForm/NonOwnerError'
 import WalletRejectionError from '@/components/tx/SignOrExecuteForm/WalletRejectionError'
-import BatchButton from './BatchButton'
 import { asError } from '@/services/exceptions/utils'
 import { isWalletRejection } from '@/utils/wallets'
 import { useSigner } from '@/hooks/wallets/useWallet'
 import { NestedTxSuccessScreenFlow } from '@/components/tx-flow/flows'
 import { useValidateTxData } from '@/hooks/useValidateTxData'
 
-export const SignForm = ({
+export const SignFormV2 = ({
   safeTx,
   txId,
   onSubmit,
   disableSubmit = false,
   origin,
-  isBatch,
-  isBatchable,
-  isCreation,
   isOwner,
   txActions,
   txSecurity,
@@ -38,7 +34,6 @@ export const SignForm = ({
   isOwner: ReturnType<typeof useIsSafeOwner>
   txActions: ReturnType<typeof useTxActions>
   txSecurity: ReturnType<typeof useTxSecurityContext>
-  isCreation?: boolean
   safeTx?: SafeTransaction
   tooltip?: string
 }): ReactElement => {
@@ -54,14 +49,14 @@ export const SignForm = ({
   )
 
   // Hooks
-  const { signTx, addToBatch } = txActions
+  const { signTx } = txActions
   const { setTxFlow } = useContext(TxModalContext)
   const { needsRiskConfirmation, isRiskConfirmed, setIsRiskIgnored } = txSecurity
   const hasSigned = useAlreadySigned(safeTx)
   const signer = useSigner()
 
   // On modal submit
-  const handleSubmit = async (e: SyntheticEvent, isAddingToBatch = false) => {
+  const handleSubmit = async (e: SyntheticEvent) => {
     e.preventDefault()
 
     if (needsRiskConfirmation && !isRiskConfirmed) {
@@ -77,7 +72,7 @@ export const SignForm = ({
 
     let resultTxId: string
     try {
-      resultTxId = await (isAddingToBatch ? addToBatch(safeTx, origin) : signTx(safeTx, txId, origin))
+      resultTxId = await signTx(safeTx, txId, origin)
     } catch (_err) {
       const err = asError(_err)
       if (isWalletRejection(err)) {
@@ -91,19 +86,13 @@ export const SignForm = ({
     }
 
     // On successful sign
-    if (!isAddingToBatch) {
-      onSubmit?.(resultTxId)
-    }
+    onSubmit?.(resultTxId)
 
-    if (!isAddingToBatch && signer?.isSafe) {
+    if (signer?.isSafe) {
       setTxFlow(<NestedTxSuccessScreenFlow txId={resultTxId} />, undefined, false)
     } else {
       setTxFlow(undefined)
     }
-  }
-
-  const onBatchClick = (e: SyntheticEvent) => {
-    handleSubmit(e, true)
   }
 
   const cannotPropose = !isOwner
@@ -148,19 +137,10 @@ export const SignForm = ({
           direction={{ xs: 'column-reverse', lg: 'row' }}
           spacing={{ xs: 2, md: 2 }}
         >
-          {/* Batch button */}
-          {isCreation && !isBatch && (
-            <BatchButton
-              onClick={onBatchClick}
-              disabled={submitDisabled || !isBatchable}
-              tooltip={!isBatchable ? `Cannot batch this type of transaction` : undefined}
-            />
-          )}
-
           {/* Submit button */}
           <CheckWallet checkNetwork={!submitDisabled}>
             {(isOk) => (
-              <Tooltip title={tooltip} placement="top">
+              <Tooltip title={isOk ? tooltip : undefined} placement="top">
                 <span>
                   <Button
                     data-testid="sign-btn"
@@ -183,7 +163,7 @@ export const SignForm = ({
 
 const useTxSecurityContext = () => useContext(TxSecurityContext)
 
-export default madProps(SignForm, {
+export default madProps(SignFormV2, {
   isOwner: useIsSafeOwner,
   txActions: useTxActions,
   txSecurity: useTxSecurityContext,

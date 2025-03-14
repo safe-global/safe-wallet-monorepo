@@ -1,9 +1,11 @@
 import TxLayout from '@/components/tx-flow/common/TxLayout'
+import type { TxStep } from '../../common/TxLayout'
 import useTxStepper from '@/components/tx-flow/useTxStepper'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { ReviewOwner } from '../AddOwner/ReviewOwner'
 import { ChooseOwner, ChooseOwnerMode } from '../AddOwner/ChooseOwner'
 import SaveAddressIcon from '@/public/images/common/save-address.svg'
+import { ConfirmTxDetails } from '@/components/tx/ConfirmTxDetails'
 
 type Owner = {
   address: string
@@ -27,25 +29,37 @@ const ReplaceOwnerFlow = ({ address }: { address: string }) => {
 
   const { data, step, nextStep, prevStep } = useTxStepper<ReplaceOwnerFlowProps>(defaultValues)
 
-  const steps = [
-    <ChooseOwner
-      key={0}
-      params={data}
-      onSubmit={(formData) => nextStep({ ...data, ...formData })}
-      mode={ChooseOwnerMode.REPLACE}
-    />,
-    <ReviewOwner key={1} params={data} />,
+  const steps: TxStep[] = [
+    {
+      txLayoutProps: { title: 'New transaction' },
+      content: (
+        <ChooseOwner
+          key={0}
+          params={data}
+          onSubmit={(formData) => nextStep({ ...data, ...formData })}
+          mode={ChooseOwnerMode.REPLACE}
+        />
+      ),
+    },
+    {
+      txLayoutProps: { title: 'Confirm transaction' },
+      content: <ReviewOwner key={1} params={data} onSubmit={() => nextStep(data)} />,
+    },
+    {
+      txLayoutProps: { title: 'Confirm transaction details', fixedNonce: true },
+      content: <ConfirmTxDetails key={2} onSubmit={() => {}} />,
+    },
   ]
 
   return (
     <TxLayout
-      title={step === 0 ? 'New transaction' : 'Confirm transaction'}
       subtitle="Replace signer"
       icon={SaveAddressIcon}
       step={step}
       onBack={prevStep}
+      {...(steps?.[step]?.txLayoutProps || {})}
     >
-      {steps}
+      {steps.map(({ content }) => content)}
     </TxLayout>
   )
 }

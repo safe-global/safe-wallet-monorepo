@@ -6,7 +6,6 @@ import type { ReactElement } from 'react'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import { TxDataRow } from '@/components/transactions/TxDetails/Summary/TxDataRow'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
-import SignOrExecuteForm from '@/components/tx/SignOrExecuteForm'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import { trackEvent } from '@/services/analytics'
@@ -21,6 +20,7 @@ import { TOOLTIP_TITLES } from '../../common/constants'
 import { useRecoveryPeriods } from './useRecoveryPeriods'
 import type { UpsertRecoveryFlowProps } from '.'
 import { isCustomDelaySelected } from './utils'
+import ReviewTransaction from '@/components/tx/ReviewTransaction'
 
 enum AddressType {
   EOA = 'EOA',
@@ -38,25 +38,14 @@ const getAddressType = async (address: string, chainId: string) => {
   return AddressType.Other
 }
 
-const onSubmit = async (
-  isEdit: boolean,
-  params: Omit<UpsertRecoveryFlowProps, 'customDelay' | 'selectedDelay'>,
-  chainId: string,
-) => {
-  const addressType = await getAddressType(params.recoverer, chainId)
-  const creationEvent = isEdit ? RECOVERY_EVENTS.SUBMIT_RECOVERY_EDIT : RECOVERY_EVENTS.SUBMIT_RECOVERY_CREATE
-  const settings = `delay_${params.delay},expiry_${params.expiry},type_${addressType}`
-
-  trackEvent({ ...creationEvent })
-  trackEvent({ ...RECOVERY_EVENTS.RECOVERY_SETTINGS, label: settings })
-}
-
 export function UpsertRecoveryFlowReview({
   params,
   moduleAddress,
+  onSubmit,
 }: {
   params: UpsertRecoveryFlowProps
   moduleAddress?: string
+  onSubmit: () => void
 }): ReactElement {
   const web3ReadOnly = useWeb3ReadOnly()
   const { safe, safeAddress } = useSafeInfo()
@@ -96,10 +85,25 @@ export function UpsertRecoveryFlowReview({
     }
   }, [safeTxError])
 
+  const handleSubmit = async (
+    isEdit: boolean,
+    params: Omit<UpsertRecoveryFlowProps, 'customDelay' | 'selectedDelay'>,
+    chainId: string,
+  ) => {
+    const addressType = await getAddressType(params.recoverer, chainId)
+    const creationEvent = isEdit ? RECOVERY_EVENTS.SUBMIT_RECOVERY_EDIT : RECOVERY_EVENTS.SUBMIT_RECOVERY_CREATE
+    const settings = `delay_${params.delay},expiry_${params.expiry},type_${addressType}`
+
+    trackEvent({ ...creationEvent })
+    trackEvent({ ...RECOVERY_EVENTS.RECOVERY_SETTINGS, label: settings })
+
+    onSubmit()
+  }
+
   const isEdit = !!moduleAddress
 
   return (
-    <SignOrExecuteForm onSubmit={() => onSubmit(isEdit, { recoverer, expiry, delay }, safe.chainId)}>
+    <ReviewTransaction onSubmit={() => handleSubmit(isEdit, { recoverer, expiry, delay }, safe.chainId)}>
       <Typography>
         This transaction will {moduleAddress ? 'update' : 'enable'} the Account recovery feature once executed.
       </Typography>
@@ -151,6 +155,6 @@ export function UpsertRecoveryFlowReview({
           {expiryLabel}
         </TxDataRow>
       )}
-    </SignOrExecuteForm>
+    </ReviewTransaction>
   )
 }

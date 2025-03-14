@@ -1,6 +1,5 @@
 import { useContext, useEffect, useMemo } from 'react'
 import useBalances from '@/hooks/useBalances'
-import SignOrExecuteForm from '@/components/tx/SignOrExecuteForm'
 import SendAmountBlock from '@/components/tx-flow/flows/TokenTransfer/SendAmountBlock'
 import SendToBlock from '@/components/tx/SendToBlock'
 import { createTokenTransferParams } from '@/services/tx/tokenTransferParams'
@@ -8,7 +7,7 @@ import { createTx } from '@/services/tx/tx-sender'
 import type { TokenTransferParams } from '.'
 import { SafeTxContext } from '../../SafeTxProvider'
 import { safeParseUnits } from '@/utils/formatters'
-import type { SubmitCallback } from '@/components/tx/SignOrExecuteForm/SignOrExecuteForm'
+import ReviewTransaction from '@/components/tx/ReviewTransaction'
 
 const ReviewTokenTransfer = ({
   params,
@@ -16,7 +15,7 @@ const ReviewTokenTransfer = ({
   txNonce,
 }: {
   params: TokenTransferParams
-  onSubmit: SubmitCallback
+  onSubmit: () => void
   txNonce?: number
 }) => {
   const { setSafeTx, setSafeTxError, setNonce } = useContext(SafeTxContext)
@@ -46,11 +45,11 @@ const ReviewTokenTransfer = ({
   }, [params, txNonce, token, setNonce, setSafeTx, setSafeTxError])
 
   return (
-    <SignOrExecuteForm onSubmit={onSubmit}>
+    <ReviewTransaction onSubmit={onSubmit}>
       {token && <SendAmountBlock amountInWei={amountInWei} tokenInfo={token.tokenInfo} />}
 
       <SendToBlock address={params.recipient} />
-    </SignOrExecuteForm>
+    </ReviewTransaction>
   )
 }
 
