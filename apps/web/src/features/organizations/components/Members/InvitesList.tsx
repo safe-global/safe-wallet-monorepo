@@ -1,14 +1,14 @@
 import EnhancedTable from '@/components/common/EnhancedTable'
 import { Chip, IconButton, Stack, SvgIcon } from '@mui/material'
 import type { UserOrganization } from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
-import { useUserOrganizationsRemoveUserV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
 import tableCss from '@/components/common/EnhancedTable/styles.module.css'
 import DeleteIcon from '@/public/images/common/delete.svg'
 import { MemberRole } from '../AddMembersModal'
-import { useCurrentOrgId } from '@/features/organizations/hooks/useCurrentOrgId'
 import { MemberStatus } from '@/features/organizations/hooks/useOrgMembers'
 import MemberName from '../MembersList/MemberName'
 import { useIsAdmin } from '@/features/organizations/hooks/useIsAdmin'
+import RemoveMemberDialog from '../MembersList/RemoveMemberModal'
+import { useState } from 'react'
 
 const headCells = [
   {
@@ -30,19 +30,12 @@ const headCells = [
 ]
 
 const InvitesList = ({ invitedMembers }: { invitedMembers: UserOrganization[] }) => {
-  const [deleteInvite] = useUserOrganizationsRemoveUserV1Mutation()
-  const currentOrgId = useCurrentOrgId()
   const isAdmin = useIsAdmin()
-  const handleDeleteInvite = async (invitedId: number) => {
-    try {
-      await deleteInvite({ orgId: Number(currentOrgId), userId: invitedId })
-    } catch (error) {
-      // TODO: handle error
-    }
-  }
+  const [openRemoveMemberDialog, setOpenRemoveMemberDialog] = useState(false)
 
   const rows = invitedMembers.map((member) => {
     const isDeclined = member.status === MemberStatus.DECLINED
+
     return {
       cells: {
         name: {
@@ -73,10 +66,18 @@ const InvitesList = ({ invitedMembers }: { invitedMembers: UserOrganization[] })
             <>
               {isAdmin && (
                 <div className={tableCss.actions}>
-                  <IconButton onClick={() => handleDeleteInvite(member.user.id)} size="small">
+                  <IconButton onClick={() => setOpenRemoveMemberDialog(true)} size="small">
                     <SvgIcon component={DeleteIcon} inheritViewBox color="error" fontSize="small" />
                   </IconButton>
                 </div>
+              )}
+              {openRemoveMemberDialog && (
+                <RemoveMemberDialog
+                  userId={member.user.id}
+                  memberName={member.name}
+                  handleClose={() => setOpenRemoveMemberDialog(false)}
+                  isInvite
+                />
               )}
             </>
           ),

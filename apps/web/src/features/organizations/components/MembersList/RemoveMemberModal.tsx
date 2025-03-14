@@ -9,10 +9,12 @@ const RemoveMemberDialog = ({
   userId,
   memberName,
   handleClose,
+  isInvite = false,
 }: {
   userId: number
   memberName: string
   handleClose: () => void
+  isInvite?: boolean
 }) => {
   const orgId = useCurrentOrgId()
   const [deleteMember] = useUserOrganizationsRemoveUserV1Mutation()
@@ -33,10 +35,17 @@ const RemoveMemberDialog = ({
   }
 
   return (
-    <ModalDialog open onClose={handleClose} dialogTitle="Remove member" hideChainIndicator>
+    <ModalDialog
+      open
+      onClose={handleClose}
+      dialogTitle={isInvite ? 'Remove invite' : 'Remove member'}
+      hideChainIndicator
+    >
       <DialogContent sx={{ p: '24px !important' }}>
         <Typography>
-          Are you sure you want to remove <b>{`${memberName}`}</b> from this organization?
+          {isInvite ? `Are you sure you want to cancel the invitation for ` : `Are you sure you want to remove `}
+          <b>{memberName}</b>
+          {isInvite ? `` : ` from this organization?`}
         </Typography>
         {errorMessage && <ErrorMessage>{errorMessage}</ErrorMessage>}
       </DialogContent>

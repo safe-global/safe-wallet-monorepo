@@ -62,7 +62,7 @@ const OrganizationMembers = () => {
         {filteredInvites.length > 0 && (
           <>
             <Typography variant="h5" fontWeight={700} mb={2}>
-              Pending Invitations ({filteredInvites.length})
+              Pending invitations ({filteredInvites.length})
             </Typography>
             <InvitesList invitedMembers={filteredInvites} />
           </>
@@ -70,7 +70,7 @@ const OrganizationMembers = () => {
         {filteredMembers.length > 0 && (
           <>
             <Typography variant="h5" fontWeight={700} mb={2} mt={1}>
-              All Members ({filteredMembers.length})
+              All members ({filteredMembers.length})
             </Typography>
             <MembersList members={filteredMembers} />
           </>
