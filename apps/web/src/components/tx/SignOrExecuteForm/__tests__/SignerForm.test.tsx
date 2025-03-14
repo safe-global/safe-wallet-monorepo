@@ -1,6 +1,6 @@
 import { useNestedSafeOwners } from '@/hooks/useNestedSafeOwners'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { render } from '@/tests/test-utils'
+import { render, waitFor } from '@/tests/test-utils'
 import { SignerForm } from '../SignerForm'
 import { faker } from '@faker-js/faker'
 import { extendedSafeInfoBuilder, addressExBuilder } from '@/tests/builders/safe'
@@ -12,6 +12,7 @@ import { WalletContext } from '@/components/common/WalletProvider'
 import { SafeTxContext, type SafeTxContextParams } from '@/components/tx-flow/SafeTxProvider'
 import { type SafeSignature, type SafeTransaction } from '@safe-global/safe-core-sdk-types'
 import { safeSignatureBuilder, safeTxBuilder } from '@/tests/builders/safeTx'
+import { shortenAddress } from '@/utils/formatters'
 
 jest.mock('@/hooks/useNestedSafeOwners')
 jest.mock('@/hooks/useSafeInfo')
@@ -181,7 +182,7 @@ describe('SignerForm', () => {
     expect(result.queryByText('Execute with')).toBeNull()
   })
 
-  it('should render if execution and last signer', () => {
+  it('should render if execution and last signer', async () => {
     const mockSignatures = new Map<string, SafeSignature>(
       mockSafeInfo.safe.owners
         .slice(0, 1)
@@ -190,7 +191,7 @@ describe('SignerForm', () => {
             [owner.value, safeSignatureBuilder().with({ signer: owner.value }).build()] as [string, SafeSignature],
         ),
     )
-    mockUseNestedSafeOwners.mockReturnValue([mockOwners[0].value])
+    mockUseNestedSafeOwners.mockReturnValue([mockOwners[1].value])
     const result = render(
       <TestSafeTxProvider
         initialSafeTx={safeTxBuilder()
@@ -212,5 +213,42 @@ describe('SignerForm', () => {
       </TestSafeTxProvider>,
     )
     expect(result.queryByText('Execute with')).toBeVisible()
+    await waitFor(() => expect(result.queryByText(shortenAddress(mockSafeInfo.safe.owners[1].value))).toBeVisible())
+  })
+
+  it('should correctly pre-select the signer if the connected wallet has already signed', async () => {
+    const mockSignatures = new Map<string, SafeSignature>(
+      mockSafeInfo.safe.owners
+        .slice(0, 1)
+        .map(
+          (owner) =>
+            [owner.value, safeSignatureBuilder().with({ signer: owner.value }).build()] as [string, SafeSignature],
+        ),
+    )
+    mockUseNestedSafeOwners.mockReturnValue([mockOwners[1].value])
+    const result = render(
+      <TestSafeTxProvider
+        initialSafeTx={safeTxBuilder()
+          .with({
+            signatures: mockSignatures,
+          })
+          .build()}
+      >
+        <TestWalletContextProvider
+          connectedWallet={{
+            address: mockSafeInfo.safe.owners[0].value,
+            chainId: '1',
+            label: 'MetaMask',
+            provider: {} as Eip1193Provider,
+          }}
+        >
+          <SignerForm />
+        </TestWalletContextProvider>
+      </TestSafeTxProvider>,
+    )
+    expect(result.queryByText('Sign with')).toBeVisible()
+    await waitFor(() => {
+      expect(result.queryByText(shortenAddress(mockSafeInfo.safe.owners[1].value))).toBeVisible()
+    })
   })
 })

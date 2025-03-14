@@ -75,7 +75,8 @@ export const SignerForm = ({ willExecute }: { willExecute?: boolean }) => {
 
   // Select first option if no signer is selected and the connected wallet cannot sign
   useEffect(() => {
-    if (signerAddress || !setSignerAddress || !wallet) {
+    const isValidSigner = signerAddress && options.includes(signerAddress) && isOptionEnabled(signerAddress)
+    if (isValidSigner || !setSignerAddress || !wallet) {
       return
     }
 
