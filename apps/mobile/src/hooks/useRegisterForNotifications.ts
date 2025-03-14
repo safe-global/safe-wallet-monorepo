@@ -12,7 +12,7 @@ import Logger from '@/src/utils/logger'
 
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { useGTW } from './useGTW'
-import { addOrUpdateDelegatedAddress, selectDelegatedAddresses } from '../store/delegatedSlice'
+import { addOrUpdateDelegatedAccount, selectDelegatedAccounts } from '../store/delegatedSlice'
 import { Address, SafeInfo } from '../types/address'
 import { useNotificationPayload } from './useNotificationPayload'
 import { ERROR_MSG, NOTIFICATION_ACCOUNT_TYPE } from '../store/constants'
@@ -30,6 +30,8 @@ type RegisterForNotificationsProps = {
 interface NotificationsProps {
   registerForNotifications: () => Promise<RegisterForNotificationsProps>
   unregisterForNotifications: () => Promise<RegisterForNotificationsProps>
+  isLoading: boolean
+  error: string | null
 }
 
 const useRegisterForNotifications = ({
@@ -44,11 +46,11 @@ const useRegisterForNotifications = ({
   const { data: nonceData } = useAuthGetNonceV1Query()
   const { registerForNotificationsOnBackEnd, unregisterForNotificationsOnBackEnd } = useGTW()
   const { getNotificationRegisterPayload } = useNotificationPayload(appSigners)
-  const { storePrivateKey, getPrivateKey } = useSign()
+  const { getPrivateKey } = useSign()
   // Redux
   const dispatch = useAppDispatch()
   const activeSafe = useDefinedActiveSafe()
-  const delegatedAddresses = useAppSelector(selectDelegatedAddresses)
+  const delegatedAccounts = useAppSelector(selectDelegatedAccounts)
   const activeSafeInfo = useAppSelector((state: RootState) => selectSafeInfo(state, activeSafe.address))
   /*
    * Push notifications can be enabled by an two type of users. The owner of the safe or an observer of the safe
@@ -69,11 +71,17 @@ const useRegisterForNotifications = ({
       const fcmToken = await FCMService.getFCMToken()
       FCMService.listenForMessagesBackground()
 
-      /* Step 2 - Create a new random (delegated) private key to avoid exposing the subscriber's private key
+      /* Step 2 - Check if the imported signers is the owner of the active safe.
+      * Based on the previous step, we determine the account type, which will be used to register for notifications types
+      */
+      const ownerFound = activeSafeInfo.SafeInfo.owners.find((owner) => appSigners[owner.value]) ?? null
+      const accountType = ownerFound ? NOTIFICATION_ACCOUNT_TYPE.OWNER : NOTIFICATION_ACCOUNT_TYPE.REGULAR
+
+      /* Step 3 - Create a new random (delegated) private key to avoid exposing the subscriber's private key
+       *
        * This key will be used to register for notifications on the backend
        * avoiding the prompt to grant notifications permission
        */
-
       const randomDelegatedAccount = Wallet.createRandom()
 
       if (!randomDelegatedAccount) {
@@ -84,20 +92,23 @@ const useRegisterForNotifications = ({
           error,
         }
       }
+ 
+      const accountDetails = {
+        address: randomDelegatedAccount.address,
+        privateKey: randomDelegatedAccount.privateKey, // This is the private key that will be used to sign the message for notification registration only
+        type: accountType,
+      }
 
+      Logger.info('Step 5 - Store the random delegated account in the Redux store')
+      // Step 5 - Store the random delegated account in the Redux store
       dispatch(
-        addOrUpdateDelegatedAddress({
-          delegatedAddress: randomDelegatedAccount.address as Address,
+        addOrUpdateDelegatedAccount({
+          accountDetails,
           safes: [activeSafe],
         }),
       )
-
-      await storePrivateKey(randomDelegatedAccount.address, randomDelegatedAccount.privateKey)
-
-      const ownerFound = activeSafeInfo.SafeInfo.owners.find((owner) => appSigners[owner.value]) ?? null
-      const accountType = ownerFound ? NOTIFICATION_ACCOUNT_TYPE.OWNER : NOTIFICATION_ACCOUNT_TYPE.REGULAR
-
-      const proposedSignerPK = ownerFound ? await getPrivateKey(ownerFound.value) : randomDelegatedAccount.privateKey
+      Logger.info('ownerFound')
+      const proposedSignerPK = ownerFound ? await getPrivateKey(ownerFound.value, false) : randomDelegatedAccount.privateKey
 
       if (!proposedSignerPK) {
         setLoading(false)
@@ -109,12 +120,12 @@ const useRegisterForNotifications = ({
       }
 
       const signer = getSigner(proposedSignerPK)
-
+      Logger.info('signer')
       const { siweMessage } = await getNotificationRegisterPayload({
         nonce: nonceData?.nonce,
         signer,
       })
-
+      Logger.info(siweMessage)
       if (!fcmToken) {
         setLoading(false)
         setError(ERROR_MSG)
@@ -159,7 +170,7 @@ const useRegisterForNotifications = ({
       setLoading(true)
       setError(null)
 
-      const delegatedAddress = Object.entries(delegatedAddresses).find(([address, safesSliceItem]) =>
+      const delegatedAddress = Object.entries(delegatedAccounts).find(([address, safesSliceItem]) =>
         safesSliceItem.safes.some((safe: SafeInfo) => safe.address === activeSafe.address)
       )?.[0] as Address
 
@@ -172,10 +183,10 @@ const useRegisterForNotifications = ({
           error,
         }
       }
+      const delegatedAccount = delegatedAccounts[delegatedAddress]
+      const privateKey = delegatedAccount?.accountDetails.privateKey
 
-      const delegatedPK = await getPrivateKey(delegatedAddress)
-
-      if (!delegatedPK) {
+      if (!privateKey) {
         setLoading(false)
         setError(ERROR_MSG)
         return {
@@ -184,7 +195,7 @@ const useRegisterForNotifications = ({
         }
       }
 
-      const signer = getSigner(delegatedPK)
+      const signer = getSigner(privateKey)
 
       const { siweMessage } = await getNotificationRegisterPayload({
         nonce: nonceData?.nonce,
@@ -217,6 +228,8 @@ const useRegisterForNotifications = ({
   return {
     registerForNotifications,
     unregisterForNotifications,
+    isLoading: loading,
+    error,
   }
 }
 

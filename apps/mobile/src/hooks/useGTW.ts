@@ -56,7 +56,7 @@ export function useGTW() {
           },
         })
 
-          if (isOwner) {
+        if (isOwner) {
           delegatesPostDelegateV2({
             chainId,
             createDelegateDto: {

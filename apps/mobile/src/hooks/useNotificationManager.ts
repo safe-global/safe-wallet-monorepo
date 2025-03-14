@@ -10,7 +10,7 @@ import { AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 
 export const useNotificationManager = (appSigners: Record<string, AddressInfo>) => {
   const isAppNotificationEnabled = useAppSelector(selectAppNotificationStatus)
-  const { registerForNotifications, unregisterForNotifications } = useRegisterForNotifications({ appSigners })
+  const { registerForNotifications, unregisterForNotifications, isLoading } = useRegisterForNotifications({ appSigners })
 
   const appState = useRef(AppState.currentState)
 
@@ -27,7 +27,7 @@ export const useNotificationManager = (appSigners: Record<string, AddressInfo>) 
           return true
         }
       } else {
-        await NotificationsService.getAllPermissions(true)
+        await NotificationsService.getAllPermissions()
         return false
       }
     } catch (error) {
@@ -87,5 +87,6 @@ export const useNotificationManager = (appSigners: Record<string, AddressInfo>) 
     enableNotification,
     disableNotification,
     toggleNotificationState,
+    isLoading
   }
 }
