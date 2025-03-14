@@ -32,7 +32,7 @@ const ConfirmProposedTx = ({ txNonce, ...props }: ConfirmProposedTxProps): React
   const text = !props.onlyExecute ? (props.isExecutable ? SIGN_EXECUTE_TEXT : SIGN_TEXT) : EXECUTE_TEXT
 
   return (
-    <ReviewTransaction {...props} showMethodCall>
+    <ReviewTransaction {...props}>
       <Typography mb={1}>{text}</Typography>
     </ReviewTransaction>
   )
