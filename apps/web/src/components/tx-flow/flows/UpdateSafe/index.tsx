@@ -13,11 +13,11 @@ const UpdateSafeFlow = () => {
     () => [
       {
         txLayoutProps: { title: 'Review transaction' },
-        content: <UpdateSafeReview key={1} onSubmit={() => nextStep(data)} />,
+        content: <UpdateSafeReview key={0} onSubmit={() => nextStep(data)} />,
       },
       {
-        txLayoutProps: { title: 'Confirm transaction', fixedNonce: true },
-        content: <ConfirmTxDetails key={2} onSubmit={() => {}} />,
+        txLayoutProps: { title: 'Confirm transaction details', fixedNonce: true },
+        content: <ConfirmTxDetails key={1} onSubmit={() => {}} />,
       },
     ],
     [nextStep, data],
