@@ -7,6 +7,8 @@ import { useState } from 'react'
 import AcceptInviteDialog from '@/features/organizations/components/Dashboard/AcceptInviteDialog'
 import Link from 'next/link'
 import { AppRoutes } from '@/config/routes'
+import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
+import EthHashInfo from '@/components/common/EthHashInfo'
 
 type OrgListInvite = {
   org: GetOrganizationResponse
@@ -14,10 +16,14 @@ type OrgListInvite = {
 
 const OrgListInvite = ({ org }: OrgListInvite) => {
   const [inviteOpen, setInviteOpen] = useState(false)
+  const { currentData: currentUser } = useUsersGetWithWalletsV1Query()
   const [declineInvite] = useUserOrganizationsDeclineInviteV1Mutation()
   const { id, name, userOrganizations: members } = org
   const numberOfAccounts = useOrgSafeCount(id)
   const numberOfMembers = members.length
+
+  // @ts-ignore TODO: Need to fix the type once available
+  const invitedBy = org.userOrganizations.find((member) => member.user.id === currentUser.id)?.invitedBy
 
   const handleAcceptInvite = (e: React.MouseEvent) => {
     e.stopPropagation()
@@ -38,6 +44,24 @@ const OrgListInvite = ({ org }: OrgListInvite) => {
         <Typography component="span" variant="h4" fontWeight={700} color="primary.main">
           {name}
         </Typography>
+        {invitedBy && (
+          <>
+            {' '}
+            by
+            <Typography
+              component="span"
+              variant="h4"
+              fontWeight={700}
+              color="primary.main"
+              position="relative"
+              top="4px"
+              ml="6px"
+              display="inline-block"
+            >
+              <EthHashInfo address={invitedBy} avatarSize={24} showName={false} showPrefix={false} />
+            </Typography>
+          </>
+        )}
       </Typography>
 
       <Link href={{ pathname: AppRoutes.organizations.index, query: { orgId: id } }} passHref legacyBehavior>
