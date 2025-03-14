@@ -41,7 +41,7 @@ const FlowInner = ({ defaultValues }: { defaultValues: AddOwnerFlowProps }) => {
       },
       {
         txLayoutProps: { title: 'Confirm transaction details', fixedNonce: true },
-        content: <ConfirmTxDetails key={2} onSubmit={() => {}} />,
+        content: <ConfirmTxDetails key={2} onSubmit={() => {}} showMethodCall />,
       },
     ],
     [nextStep, data],
