@@ -14,8 +14,12 @@ export const getRandomAdjective = (): string => {
   return capitalize(getRandomItem<string>(adjectives))
 }
 
-export const useMnemonicSafeName = (multiChain?: boolean): string => {
+export function useMnemonicPrefixedSafeName(prefix?: string): string {
   const currentNetwork = useCurrentChain()?.chainName
   const adjective = useMemo(() => getRandomAdjective(), [])
-  return `${adjective} ${multiChain ? 'Multi-Chain' : currentNetwork} Safe`
+  return `${adjective} ${prefix ?? currentNetwork} Safe`
+}
+
+export const useMnemonicSafeName = (multiChain?: boolean): string => {
+  return useMnemonicPrefixedSafeName(multiChain ? 'Multi-Chain' : undefined)
 }

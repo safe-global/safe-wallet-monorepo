@@ -1,12 +1,19 @@
 import * as txEvents from '@/services/tx/txEvents'
 import { pendingTxBuilder } from '@/tests/builders/pendingTx'
 import { createListenerMiddleware } from '@reduxjs/toolkit'
-import type { ConflictHeader, DateLabel, Label, TransactionListItem } from '@safe-global/safe-gateway-typescript-sdk'
+import type {
+  ConflictHeader,
+  DateLabel,
+  Label,
+  TransactionListItem,
+  TransactionSummary,
+} from '@safe-global/safe-gateway-typescript-sdk'
 import { LabelValue, TransactionListItemType } from '@safe-global/safe-gateway-typescript-sdk'
 import type { RootState } from '..'
 import type { PendingTxsState } from '../pendingTxsSlice'
 import { PendingStatus } from '../pendingTxsSlice'
 import { txHistoryListener, txHistorySlice } from '../txHistorySlice'
+import { faker } from '@faker-js/faker'
 
 describe('txHistorySlice', () => {
   describe('txHistoryListener', () => {
@@ -41,7 +48,10 @@ describe('txHistorySlice', () => {
             type: 'MULTISIG',
             nonce: 1,
           },
-        },
+          txInfo: {
+            type: 'TRANSFER',
+          },
+        } as unknown as TransactionSummary,
       } as TransactionListItem
 
       const action = txHistorySlice.actions.set({
@@ -121,41 +131,10 @@ describe('txHistorySlice', () => {
       expect(txDispatchSpy).not.toHaveBeenCalled()
     })
 
-    it('should not dispatch an event if tx is not pending', () => {
+    it('should not dispatch an event/invalidate owned Safes if tx is not pending', () => {
       const state = {
         pendingTxs: {
           '0x123': pendingTxBuilder().build(),
-        } as PendingTxsState,
-      } as RootState
-
-      const listenerApi = {
-        getState: jest.fn(() => state),
-        dispatch: jest.fn(),
-      }
-
-      const transaction = {
-        type: TransactionListItemType.TRANSACTION,
-        transaction: {
-          id: '0x456',
-        },
-      } as TransactionListItem
-
-      const action = txHistorySlice.actions.set({
-        loading: false,
-        data: {
-          results: [transaction],
-        },
-      })
-
-      listenerMiddlewareInstance.middleware(listenerApi)(jest.fn())(action)
-
-      expect(txDispatchSpy).not.toHaveBeenCalled()
-    })
-
-    it('should clear a replaced pending transaction', () => {
-      const state = {
-        pendingTxs: {
-          '0x123': pendingTxBuilder().with({ nonce: 1, status: PendingStatus.INDEXING }).build(),
         } as PendingTxsState,
       } as RootState
 
@@ -172,7 +151,11 @@ describe('txHistorySlice', () => {
             nonce: 1,
             type: 'MULTISIG',
           },
-        },
+          txInfo: {
+            type: 'Custom',
+            methodName: 'createProxyWithNonce',
+          },
+        } as unknown as TransactionSummary,
       } as TransactionListItem
 
       const action = txHistorySlice.actions.set({
@@ -184,7 +167,63 @@ describe('txHistorySlice', () => {
 
       listenerMiddlewareInstance.middleware(listenerApi)(jest.fn())(action)
 
-      expect(listenerApi.dispatch).toHaveBeenCalledWith({
+      expect(txDispatchSpy).not.toHaveBeenCalled()
+      expect(listenerApi.dispatch).not.toHaveBeenCalled()
+    })
+
+    it('should clear a replaced pending transaction and invalidate owned Safes for Safe creations', () => {
+      const state = {
+        pendingTxs: {
+          '0x123': pendingTxBuilder().with({ nonce: 1, status: PendingStatus.INDEXING }).build(),
+        } as PendingTxsState,
+        safeInfo: {
+          data: {
+            address: { value: faker.finance.ethereumAddress() },
+            chainId: 1,
+          },
+        } as unknown as RootState['safeInfo'],
+      } as RootState
+
+      const listenerApi = {
+        getState: jest.fn(() => state),
+        dispatch: jest.fn(),
+      }
+
+      const transaction = {
+        type: TransactionListItemType.TRANSACTION,
+        transaction: {
+          id: '0x456',
+          executionInfo: {
+            nonce: 1,
+            type: 'MULTISIG',
+          },
+          txInfo: {
+            type: 'Custom',
+            methodName: 'createProxyWithNonce',
+          },
+        } as unknown as TransactionSummary,
+      } as TransactionListItem
+
+      const action = txHistorySlice.actions.set({
+        loading: false,
+        data: {
+          results: [transaction],
+        },
+      })
+
+      listenerMiddlewareInstance.middleware(listenerApi)(jest.fn())(action)
+
+      expect(listenerApi.dispatch).toHaveBeenCalledTimes(2)
+      expect(listenerApi.dispatch).toHaveBeenNthCalledWith(1, {
+        payload: [
+          {
+            id: `${state.safeInfo.data!.chainId}:${state.safeInfo.data!.address.value}`,
+            type: 'OwnedSafes',
+          },
+        ],
+        type: 'gatewayApi/invalidateTags',
+      })
+      expect(listenerApi.dispatch).toHaveBeenNthCalledWith(2, {
         payload: expect.anything(),
         type: 'pendingTxs/clearPendingTx',
       })

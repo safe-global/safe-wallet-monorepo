@@ -13,6 +13,7 @@ import BatchSidebar from '@/components/batch/BatchSidebar'
 import { TemporaryDialog } from '@/components/common/TemporaryDialog'
 import ExternalLink from '../ExternalLink'
 import { IS_PRODUCTION } from '@/config/constants'
+import { NestedSafeBreadcrumbs } from '../NestedSafeBreadcrumbs'
 
 const StickyBanner = () => (
   <Alert severity="warning">
@@ -55,7 +56,10 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
             </div>
           )}
 
-          <SafeLoadingError>{children}</SafeLoadingError>
+          <SafeLoadingError>
+            <NestedSafeBreadcrumbs />
+            {children}
+          </SafeLoadingError>
         </div>
 
         <BatchSidebar isOpen={isBatchOpen} onToggle={setBatchOpen} />
