@@ -69,6 +69,8 @@ function RootLayout() {
                         <Stack.Screen name="notifications" options={{ headerShown: true, title: '' }} />
 
                         <Stack.Screen name="transaction-parameters" options={{ headerShown: true, title: '' }} />
+                        <Stack.Screen name="transaction-actions" options={{ headerShown: true, title: '' }} />
+                        <Stack.Screen name="action-details" options={{ headerShown: true, title: '' }} />
 
                         <Stack.Screen name="signers" options={{ headerShown: false }} />
                         <Stack.Screen name="import-signers" options={{ headerShown: false }} />
