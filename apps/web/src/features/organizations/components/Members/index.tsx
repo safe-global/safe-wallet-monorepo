@@ -7,12 +7,7 @@ import InvitesList from './InvitesList'
 import SearchIcon from '@/public/images/common/search.svg'
 import { useMembersSearch } from '@/features/organizations/hooks/useMembersSearch'
 import { useOrgMembers } from '@/features/organizations/hooks/useOrgMembers'
-import { useAppSelector } from '@/store'
-import { isAuthenticated } from '@/store/authSlice'
-import SignedOutState from '@/features/organizations/components/SignedOutState'
 import { useIsAdmin } from '@/features/organizations/hooks/useIsAdmin'
-import { isUnauthorized } from '@/features/organizations/utils'
-import UnauthorizedState from '@/features/organizations/components/UnauthorizedState'
 
 const OrganizationMembers = () => {
   const [openAddMembersModal, setOpenAddMembersModal] = useState(false)
