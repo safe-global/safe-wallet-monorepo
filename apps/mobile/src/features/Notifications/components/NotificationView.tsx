@@ -1,17 +1,18 @@
+import React from 'react'
+import { Switch } from 'react-native'
 import { Text, View } from 'tamagui'
 import { SafeListItem } from '@/src/components/SafeListItem'
-import { SafeFontIcon } from '@/src/components/SafeFontIcon/SafeFontIcon'
-import { Switch } from 'react-native'
-import React from 'react'
-import { Container } from '@/src/components/Container'
-import { NOTIFICATION_ACCOUNT_TYPE } from '@/src/store/constants'
 import { NotificationPermissions } from './NotificationPermissions'
+import { useNotificationGTWPermissions } from '@/src/hooks/useNotificationGTWPermissions'
 
 type Props = {
   onChange: () => void
   value: boolean
 }
 export const NotificationView = ({ onChange, value }: Props) => {
+
+  const accountType = useNotificationGTWPermissions().getAccountType()
+
   return (
     <View paddingHorizontal="$4" marginTop="$2" style={{ flex: 1 }} testID={'notifications-popup-screen'}>
       <Text fontSize="$8" fontWeight={600} marginBottom="$2">
@@ -32,9 +33,7 @@ export const NotificationView = ({ onChange, value }: Props) => {
         }
       />
 
-      <NotificationPermissions accountType={NOTIFICATION_ACCOUNT_TYPE.OWNER} isNotificationEnabled={value} />
+      <NotificationPermissions accountType={accountType} isNotificationEnabled={value} />
     </View>
   )
 }
-
-// TODO: Check best way to handle accountType
