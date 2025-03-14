@@ -26,11 +26,9 @@ export const AddSignersFormView = ({
         signersGroup={signersSections}
       />
 
-      <View paddingHorizontal={16}>
-        <SafeButton onPress={onPress} testID={'continue-button'}>
-          Continue
-        </SafeButton>
-      </View>
+      <SafeButton onPress={onPress} testID={'continue-button'}>
+        Continue
+      </SafeButton>
     </>
   )
 }
