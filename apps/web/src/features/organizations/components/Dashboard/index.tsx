@@ -5,8 +5,6 @@ import { Grid2, Stack, Typography } from '@mui/material'
 import Grid from '@mui/material/Grid2'
 import { useOrgSafes } from '@/features/organizations/hooks/useOrgSafes'
 import SafesList from '@/features/myAccounts/components/SafesList'
-import { useAppSelector } from '@/store'
-import { isAuthenticated } from '@/store/authSlice'
 import AddAccountsCard from './AddAccountsCard'
 import { AppRoutes } from '@/config/routes'
 import { useCurrentOrgId } from '@/features/organizations/hooks/useCurrentOrgId'
@@ -16,7 +14,6 @@ import { Link } from '@mui/material'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import DashboardMembersList from '@/features/organizations/components/Dashboard/DashboardMembersList'
 import { useOrgMembersByStatus } from '@/features/organizations/hooks/useOrgMembers'
-import SignedOutState from '@/features/organizations/components/SignedOutState'
 import { useIsInvited } from '@/features/organizations/hooks/useOrgMembers'
 import PreviewInvite from '../InviteBanner/PreviewInvite'
 
@@ -43,17 +40,12 @@ const DASHBOARD_LIST_DISPLAY_LIMIT = 5
 
 const OrganizationsDashboard = () => {
   const safes = useOrgSafes()
-  const isUserSignedIn = useAppSelector(isAuthenticated)
   const orgId = useCurrentOrgId()
   const { activeMembers } = useOrgMembersByStatus()
   const isInvited = useIsInvited()
 
   const safesToDisplay = safes.slice(0, DASHBOARD_LIST_DISPLAY_LIMIT)
   const membersToDisplay = activeMembers.slice(0, DASHBOARD_LIST_DISPLAY_LIMIT)
-
-  if (!isUserSignedIn) {
-    return <SignedOutState />
-  }
 
   return (
     <>

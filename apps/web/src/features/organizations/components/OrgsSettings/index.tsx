@@ -27,7 +27,6 @@ import { useState } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 import { useCurrentOrgId } from '@/features/organizations/hooks/useCurrentOrgId'
 import { isAuthenticated } from '@/store/authSlice'
-import SignedOutState from '@/features/organizations/components/SignedOutState'
 import { useIsInvited } from '@/features/organizations/hooks/useOrgMembers'
 import PreviewInvite from '@/features/organizations/components/InviteBanner/PreviewInvite'
 import css from './styles.module.css'
@@ -94,8 +93,6 @@ const OrgsSettings = () => {
       console.log(e)
     }
   }
-
-  if (!isUserSignedIn) return <SignedOutState />
 
   return (
     <div>

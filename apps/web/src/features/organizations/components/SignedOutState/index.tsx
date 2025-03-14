@@ -10,10 +10,6 @@ const SignedOutState = () => {
           Sign in to see your organization
         </Typography>
 
-        <Typography variant="body2" mb={2} color="primary.light">
-          Description
-        </Typography>
-
         <SignInButton />
       </Box>
     </Box>

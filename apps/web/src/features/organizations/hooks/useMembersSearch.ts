@@ -6,7 +6,7 @@ const useMembersSearch = (members: UserOrganization[], query: string): UserOrgan
   const fuse = useMemo(
     () =>
       new Fuse(members, {
-        keys: [{ name: 'user.id' }],
+        keys: [{ name: 'name' }],
         threshold: 0.2,
         findAllMatches: true,
         ignoreLocation: true,
