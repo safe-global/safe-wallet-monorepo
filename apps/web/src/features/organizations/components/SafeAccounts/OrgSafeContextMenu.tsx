@@ -11,6 +11,10 @@ import MenuItem from '@mui/material/MenuItem'
 import ContextMenu from '@/components/common/ContextMenu'
 import DeleteIcon from '@/public/images/common/delete.svg'
 import EditIcon from '@/public/images/common/edit.svg'
+import EntryDialog from '@/components/address-book/EntryDialog'
+import { useAppSelector } from '@/store'
+import { selectAllAddressBooks } from '@/store/addressBookSlice'
+import { isMultiChainSafeItem } from '@/features/multichain/utils/utils'
 
 enum ModalType {
   RENAME = 'rename',
@@ -22,6 +26,11 @@ const defaultOpen = { [ModalType.RENAME]: false, [ModalType.REMOVE]: false }
 const OrgSafeContextMenu = ({ safeItem }: { safeItem: SafeItem | MultiChainSafeItem }) => {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | undefined>()
   const [open, setOpen] = useState<typeof defaultOpen>(defaultOpen)
+
+  const allAddressBooks = useAppSelector(selectAllAddressBooks)
+  const chainIds = isMultiChainSafeItem(safeItem) ? safeItem.safes.map((safe) => safe.chainId) : [safeItem.chainId]
+  const name = isMultiChainSafeItem(safeItem) ? safeItem.name : allAddressBooks[safeItem.chainId]?.[safeItem.address]
+  const hasName = !!name
 
   const handleOpenContextMenu = (e: MouseEvent<HTMLButtonElement, globalThis.MouseEvent>) => {
     e.stopPropagation()
@@ -38,8 +47,6 @@ const OrgSafeContextMenu = ({ safeItem }: { safeItem: SafeItem | MultiChainSafeI
     setAnchorEl(undefined)
     setOpen((prev) => ({ ...prev, [type]: true }))
   }
-
-  const hasName = false
 
   const handleCloseModal = () => {
     setOpen(defaultOpen)
@@ -66,7 +73,14 @@ const OrgSafeContextMenu = ({ safeItem }: { safeItem: SafeItem | MultiChainSafeI
         </MenuItem>
       </ContextMenu>
 
-      {open[ModalType.RENAME] && <>{/* TODO: Render rename safe account modal */}</>}
+      {open[ModalType.RENAME] && (
+        <EntryDialog
+          handleClose={handleCloseModal}
+          defaultValues={{ name: name || '', address: safeItem.address }}
+          chainIds={chainIds}
+          disableAddressInput
+        />
+      )}
 
       {open[ModalType.REMOVE] && <RemoveSafeDialog safeItem={safeItem} handleClose={handleCloseModal} />}
     </>
