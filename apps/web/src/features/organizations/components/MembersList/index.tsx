@@ -83,7 +83,7 @@ const MembersList = ({ members }: { members: UserOrganization[] }) => {
     return {
       cells: {
         name: {
-          rawValue: member.user.id,
+          rawValue: member.name,
           content: <MemberName member={member} />,
         },
         role: {

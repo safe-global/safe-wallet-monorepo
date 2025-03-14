@@ -46,7 +46,7 @@ const InvitesList = ({ invitedMembers }: { invitedMembers: UserOrganization[] })
     return {
       cells: {
         name: {
-          rawValue: member.user.id,
+          rawValue: member.name,
           content: (
             <Stack direction="row" alignItems="center" justifyContent="left" gap={1}>
               <MemberName member={member} />
