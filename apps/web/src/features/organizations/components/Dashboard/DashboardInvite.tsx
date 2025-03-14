@@ -43,20 +43,25 @@ const OrgListInvite = ({ org }: OrgListInvite) => {
         You were invited to join{' '}
         <Typography component="span" variant="h4" fontWeight={700} color="primary.main">
           {name}
-        </Typography>{' '}
-        by
-        <Typography
-          component="span"
-          variant="h4"
-          fontWeight={700}
-          color="primary.main"
-          position="relative"
-          top="4px"
-          ml="6px"
-          display="inline-block"
-        >
-          {invitedBy && <EthHashInfo address={invitedBy} avatarSize={24} showName={false} showPrefix={false} />}
         </Typography>
+        {invitedBy && (
+          <>
+            {' '}
+            by
+            <Typography
+              component="span"
+              variant="h4"
+              fontWeight={700}
+              color="primary.main"
+              position="relative"
+              top="4px"
+              ml="6px"
+              display="inline-block"
+            >
+              <EthHashInfo address={invitedBy} avatarSize={24} showName={false} showPrefix={false} />
+            </Typography>
+          </>
+        )}
       </Typography>
 
       <Link href={{ pathname: AppRoutes.organizations.index, query: { orgId: id } }} passHref legacyBehavior>
