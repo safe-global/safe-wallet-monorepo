@@ -36,10 +36,9 @@ function _buildSafeItems(safes: Record<string, string[]>, allSafeNames: AddressB
 export const useOrgSafes = () => {
   const orgId = useCurrentOrgId()
   const isUserSignedIn = useAppSelector(isAuthenticated)
-  const { data } = useOrganizationSafesGetV1Query({ organizationId: Number(orgId) }, { skip: !isUserSignedIn })
+  const { currentData } = useOrganizationSafesGetV1Query({ organizationId: Number(orgId) }, { skip: !isUserSignedIn })
   const allSafeNames = useAppSelector(selectAllAddressBooks)
-  // @ts-ignore TODO: Fix type issue
-  const safeItems = data ? _buildSafeItems(data.safes, allSafeNames) : []
+  const safeItems = currentData ? _buildSafeItems(currentData.safes, allSafeNames) : []
   const safes = useAllSafesGrouped(safeItems)
   const { orderBy } = useAppSelector(selectOrderByPreference)
   const sortComparator = getComparator(orderBy)
