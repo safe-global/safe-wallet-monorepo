@@ -17,6 +17,8 @@ import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import DashboardMembersList from '@/features/organizations/components/Dashboard/DashboardMembersList'
 import { useOrgMembers } from '@/features/organizations/hooks/useOrgMembers'
 import SignedOutState from '@/features/organizations/components/SignedOutState'
+import { isUnauthorized } from '@/features/organizations/utils'
+import UnauthorizedState from '@/features/organizations/components/UnauthorizedState'
 
 const ViewAllLink = ({ url }: { url: LinkProps['href'] }) => {
   return (
@@ -40,7 +42,7 @@ const ViewAllLink = ({ url }: { url: LinkProps['href'] }) => {
 const DASHBOARD_LIST_DISPLAY_LIMIT = 5
 
 const OrganizationsDashboard = () => {
-  const safes = useOrgSafes()
+  const { allSafes: safes, error } = useOrgSafes()
   const isUserSignedIn = useAppSelector(isAuthenticated)
   const orgId = useCurrentOrgId()
   const { activeMembers } = useOrgMembers()
@@ -48,9 +50,9 @@ const OrganizationsDashboard = () => {
   const safesToDisplay = safes.slice(0, DASHBOARD_LIST_DISPLAY_LIMIT)
   const membersToDisplay = activeMembers.slice(0, DASHBOARD_LIST_DISPLAY_LIMIT)
 
-  if (!isUserSignedIn) {
-    return <SignedOutState />
-  }
+  if (!isUserSignedIn) return <SignedOutState />
+
+  if (isUnauthorized(error)) return <UnauthorizedState />
 
   return (
     <>

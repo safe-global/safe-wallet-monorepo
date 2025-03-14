@@ -12,7 +12,10 @@ export enum MemberStatus {
 export const useOrgMembers = () => {
   const orgId = useCurrentOrgId()
   const isUserSignedIn = useAppSelector(isAuthenticated)
-  const { currentData } = useUserOrganizationsGetUsersV1Query({ orgId: Number(orgId) }, { skip: !isUserSignedIn })
+  const { currentData, error } = useUserOrganizationsGetUsersV1Query(
+    { orgId: Number(orgId) },
+    { skip: !isUserSignedIn },
+  )
 
   const invitedMembers =
     currentData?.members.filter(
@@ -20,5 +23,5 @@ export const useOrgMembers = () => {
     ) || []
   const activeMembers = currentData?.members.filter((member) => member.status === MemberStatus.ACTIVE) || []
 
-  return { activeMembers, invitedMembers }
+  return { activeMembers, invitedMembers, error }
 }

@@ -11,17 +11,21 @@ import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
 import SignedOutState from '@/features/organizations/components/SignedOutState'
 import { useIsAdmin } from '@/features/organizations/hooks/useIsAdmin'
+import { isUnauthorized } from '@/features/organizations/utils'
+import UnauthorizedState from '@/features/organizations/components/UnauthorizedState'
 
 const OrganizationMembers = () => {
   const [openAddMembersModal, setOpenAddMembersModal] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const isUserSignedIn = useAppSelector(isAuthenticated)
-  const { activeMembers, invitedMembers } = useOrgMembers()
+  const { activeMembers, invitedMembers, error } = useOrgMembers()
   const isAdmin = useIsAdmin()
   const filteredMembers = useMembersSearch(activeMembers, searchQuery)
   const filteredInvites = useMembersSearch(invitedMembers, searchQuery)
 
   if (!isUserSignedIn) return <SignedOutState />
+
+  if (isUnauthorized(error)) return <UnauthorizedState />
 
   return (
     <>
