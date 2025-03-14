@@ -1,4 +1,5 @@
 import { usePendingTxIds } from '@/hooks/usePendingTxs'
+import { SETTINGS_EVENTS, trackEvent } from '@/services/analytics'
 import { useAppDispatch } from '@/store'
 import { clearPendingTx } from '@/store/pendingTxsSlice'
 import { Stack, Typography, Box, Button, Alert } from '@mui/material'
@@ -13,6 +14,7 @@ export const ClearPendingTxs = () => {
     pendingTxIds.forEach((txId) => {
       dispatch(clearPendingTx({ txId }))
     })
+    trackEvent(SETTINGS_EVENTS.DATA.CLEAR_PENDING_TXS)
   }, [dispatch, pendingTxIds])
   return (
     <Stack spacing={2}>
