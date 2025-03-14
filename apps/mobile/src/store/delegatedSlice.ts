@@ -2,8 +2,17 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 
 import { RootState } from '.'
 import { Address, SafeInfo } from '../types/address'
+import type { HDNodeWallet } from 'ethers'
+import { NOTIFICATION_ACCOUNT_TYPE } from './constants'
 
+
+type AccountDetails = {
+  address: string
+  privateKey: string
+  type: NOTIFICATION_ACCOUNT_TYPE
+}
 export interface SafesSliceItem {
+  accountDetails: AccountDetails,
   safes: SafeInfo[]
 }
 
@@ -15,19 +24,20 @@ const delegatedSlice = createSlice({
   name: 'delegated',
   initialState,
   reducers: {
-    addOrUpdateDelegatedAddress: (state, action: PayloadAction<{ delegatedAddress: Address; safes: SafeInfo[] }>) => {
-      const { delegatedAddress, safes } = action.payload
-      if (!state[delegatedAddress]) {
-        state[delegatedAddress] = { safes }
+    addOrUpdateDelegatedAccount: (state, action: PayloadAction<{ accountDetails: AccountDetails, safes: SafeInfo[] }>) => {
+      const { accountDetails, safes } = action.payload
+
+      if (!state[accountDetails.address as Address]) {
+        state[accountDetails.address as Address] = { accountDetails, safes }
       } else {
-        state[delegatedAddress].safes = safes
+        state[accountDetails.address as Address].safes = safes
       }
     },
   },
 })
 
-export const { addOrUpdateDelegatedAddress } = delegatedSlice.actions
+export const { addOrUpdateDelegatedAccount } = delegatedSlice.actions
 
-export const selectDelegatedAddresses = (state: RootState): DelegatedSafesSlice => state.delegated
+export const selectDelegatedAccounts = (state: RootState): DelegatedSafesSlice => state.delegated
 
 export default delegatedSlice.reducer

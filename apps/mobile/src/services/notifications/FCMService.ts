@@ -32,8 +32,8 @@ class FCMService {
     }
   }
 
-  listenForMessagesForeground = (): UnsubscribeFunc =>
-    messaging().onMessage(async (remoteMessage: FirebaseMessagingTypes.RemoteMessage) => {
+  listenForMessagesForeground = (): UnsubscribeFunc => {
+    return messaging().onMessage(async (remoteMessage: FirebaseMessagingTypes.RemoteMessage) => {
       NotificationsService.displayNotification({
         channelId: ChannelId.DEFAULT_NOTIFICATION_CHANNEL_ID,
         title: remoteMessage.notification?.title || '',
@@ -42,7 +42,7 @@ class FCMService {
       })
       Logger.info('listenForMessagesForeground: listening for messages in Foreground', remoteMessage)
     })
-
+  }
   listenForMessagesBackground = (): void => {
     messaging().setBackgroundMessageHandler(async (remoteMessage: FirebaseMessagingTypes.RemoteMessage) => {
       NotificationsService.displayNotification({

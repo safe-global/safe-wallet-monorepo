@@ -5,6 +5,7 @@ import notifee, {
   AndroidChannel,
   AuthorizationStatus,
 } from '@notifee/react-native'
+import { FirebaseMessagingTypes } from '@react-native-firebase/messaging'
 import { Linking, Platform, Alert as NativeAlert } from 'react-native'
 import { store } from '@/src/store'
 import { updatePromptAttempts, updateLastTimePromptAttempted } from '@/src/store/notificationsSlice'
@@ -14,7 +15,7 @@ import { HandleNotificationCallback, LAUNCH_ACTIVITY, PressActionId } from '@/sr
 import { ChannelId, notificationChannels, withTimeout } from '@/src/utils/notifications'
 import Logger from '@/src/utils/logger'
 
-import { FirebaseMessagingTypes } from '@react-native-firebase/messaging'
+
 
 interface AlertButton {
   text: string
@@ -109,6 +110,7 @@ class NotificationsService {
   }
 
   async openDeviceSettings() {
+    await notifee.requestPermission()
     try {
       if (Platform.OS === 'ios') {
         Linking.openURL('app-settings:')
@@ -169,7 +171,7 @@ class NotificationsService {
 
     const isAuthorized =
       settings.authorizationStatus === AuthorizationStatus.AUTHORIZED ||
-      settings.authorizationStatus === AuthorizationStatus.PROVISIONAL
+        settings.authorizationStatus === AuthorizationStatus.PROVISIONAL
         ? 'granted'
         : 'denied'
 
