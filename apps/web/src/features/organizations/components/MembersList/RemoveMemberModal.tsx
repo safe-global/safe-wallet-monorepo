@@ -38,12 +38,12 @@ const RemoveMemberDialog = ({
     <ModalDialog
       open
       onClose={handleClose}
-      dialogTitle={isInvite ? 'Cancel invitation' : 'Remove member'}
+      dialogTitle={isInvite ? 'Remove invitation' : 'Remove member'}
       hideChainIndicator
     >
       <DialogContent sx={{ p: '24px !important' }}>
         <Typography>
-          {isInvite ? `Are you sure you want to cancel the invitation for ` : `Are you sure you want to remove `}
+          {isInvite ? `Are you sure you want to remove the invitation for ` : `Are you sure you want to remove `}
           <b>{memberName}</b>
           {isInvite ? `` : ` from this organization?`}
         </Typography>
