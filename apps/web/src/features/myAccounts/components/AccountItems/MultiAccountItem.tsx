@@ -50,23 +50,25 @@ import { getComparator } from '@/features/myAccounts/utils/utils'
 
 export const MultichainIndicator = ({ safes }: { safes: SafeItem[] }) => {
   return (
-    <Tooltip
-      title={
-        <Box data-testid="multichain-tooltip">
-          <Typography fontSize="14px">Multichain account on:</Typography>
-          {safes.map((safeItem) => (
-            <Box key={safeItem.chainId} sx={{ p: '4px 0px' }}>
-              <ChainIndicator chainId={safeItem.chainId} />
-            </Box>
-          ))}
+    <Box className={css.multiChains}>
+      <Tooltip
+        title={
+          <Box data-testid="multichain-tooltip">
+            <Typography fontSize="14px">Multichain account on:</Typography>
+            {safes.map((safeItem) => (
+              <Box key={safeItem.chainId} sx={{ p: '4px 0px' }}>
+                <ChainIndicator chainId={safeItem.chainId} />
+              </Box>
+            ))}
+          </Box>
+        }
+        arrow
+      >
+        <Box>
+          <NetworkLogosList networks={safes} showHasMore />
         </Box>
-      }
-      arrow
-    >
-      <Box className={css.multiChains}>
-        <NetworkLogosList networks={safes} showHasMore />
-      </Box>
-    </Tooltip>
+      </Tooltip>
+    </Box>
   )
 }
 
