@@ -40,7 +40,7 @@ const darkPalette = {
   info: {
     dark: '#52BFDC',
     main: '#5FDDFF',
-    light: '#D7F6FF',
+    light: '#B7F0FF',
     background: '#19252C',
   },
   warning: {
