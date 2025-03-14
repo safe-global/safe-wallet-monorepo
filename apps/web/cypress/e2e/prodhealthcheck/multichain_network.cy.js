@@ -18,13 +18,6 @@ describe('[PROD] Multichain add network tests', () => {
     staticSafes = await getSafes(CATEGORIES.static)
   })
 
-  beforeEach(() => {
-    cy.visit(constants.prodbaseUrl + constants.setupUrl + staticSafes.SEP_STATIC_SAFE_4)
-    cy.contains(createTx.settingsStr, { timeout: 10000 })
-    closeSecurityNotice()
-    acceptCookies2()
-  })
-
   // TODO: Unskip after next release
   it.skip('Verify that zkSync network is not available as add network option for safes from other networks', () => {
     cy.visit(constants.prodbaseUrl + constants.setupUrl + staticSafes.SEP_STATIC_SAFE_4)
@@ -37,17 +30,22 @@ describe('[PROD] Multichain add network tests', () => {
   })
 
   // Limitation: zkSync network does not support private key. Test might be flaky.
-  it('Verify that it is not possible to add networks for the zkSync safes', () => {
-    wallet.connectSigner(signer)
+  // Unskip after networkSelectorItem is released
+  it.skip('Verify that it is not possible to add networks for the zkSync safes', () => {
     cy.visit(constants.prodbaseUrl + constants.setupUrl + staticSafes.ZKSYNC_STATIC_SAFE_29)
+    cy.contains(createTx.settingsStr, { timeout: 10000 })
+    closeSecurityNotice()
+    wallet.connectSigner(signer)
     sideBar.openSidebar()
     create_wallet.openNetworkSelector()
     cy.contains(sideBar.addingNetworkNotPossibleStr)
   })
 
   it('Verify that zkSync network is not available during multichain safe creation', () => {
-    wallet.connectSigner(signer)
     cy.visit(constants.prodbaseUrl + constants.welcomeUrl + '?chain=sep')
+    cy.contains(createTx.getStartedStr, { timeout: 10000 })
+    closeSecurityNotice()
+    wallet.connectSigner(signer)
     create_wallet.clickOnContinueWithWalletBtn()
     create_wallet.clickOnCreateNewSafeBtn()
     create_wallet.selectMultiNetwork(1, constants.networks.polygon.toLowerCase())
@@ -55,8 +53,10 @@ describe('[PROD] Multichain add network tests', () => {
   })
 
   it('Verify that zkSync network is available as part of single safe creation flow ', () => {
-    wallet.connectSigner(signer)
     cy.visit(constants.prodbaseUrl + constants.welcomeUrl + '?chain=sep')
+    cy.contains(createTx.getStartedStr, { timeout: 10000 })
+    closeSecurityNotice()
+    wallet.connectSigner(signer)
     create_wallet.clickOnContinueWithWalletBtn()
     create_wallet.clickOnCreateNewSafeBtn()
     create_wallet.clearNetworkInput(1)
@@ -64,15 +64,19 @@ describe('[PROD] Multichain add network tests', () => {
     cy.contains('li', constants.networks.zkSync).should('not.have.attr', 'aria-disabled', 'true')
   })
 
-  it('Verify list of available networks for the safe deployed on one network with mastercopy 1.3.0', () => {
+  // Unskip after networkSelectorItem is released
+  it.skip('Verify list of available networks for the safe deployed on one network with mastercopy 1.3.0', () => {
     const safe = 'eth:0x55d93DF21332615D48EA0c0144c7b1D176F3e7cb'
     cy.visit(constants.prodbaseUrl + constants.setupUrl + safe)
+    cy.contains(createTx.settingsStr, { timeout: 10000 })
+    closeSecurityNotice()
     create_wallet.openNetworkSelector()
     sideBar.clickOnShowAllNetworksStrBtn()
     sideBar.checkNetworkDisabled([constants.networks.zkSync, constants.networks.gnosisChiado])
   })
 
-  it('Verify list of available networks for the safe deployed on one network with mastercopy 1.4.1', () => {
+  // Unskip after networkSelectorItem is released
+  it.skip('Verify list of available networks for the safe deployed on one network with mastercopy 1.4.1', () => {
     cy.visit(constants.prodbaseUrl + constants.setupUrl + staticSafes.MATIC_STATIC_SAFE_28)
     create_wallet.openNetworkSelector()
     sideBar.clickOnShowAllNetworksStrBtn()

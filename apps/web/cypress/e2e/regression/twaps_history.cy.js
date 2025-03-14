@@ -43,7 +43,11 @@ describe('Twaps history tests', { defaultCommandTimeout: 30000 }, () => {
         cy.wrap(formData).as('twapFormData')
         swaps.clickOnReviewOrderBtn()
         swaps.placeTwapOrder()
-        swaps.confirmPriceImpact()
+        cy.get(swaps.confirmPriceImpact).then(($input) => {
+          if ($input.length) {
+            swaps.confirmPriceImpact()
+          }
+        })
       })
     })
 
