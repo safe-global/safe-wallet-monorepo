@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { IPFS_HOStS, IS_OFFICIAL_HOST, OFFICIAL_HOSTS } from '@/config/constants'
+import { IPFS_HOSTS, IS_OFFICIAL_HOST, OFFICIAL_HOSTS } from '@/config/constants'
 import { version } from '../../../../package.json'
 import useAsync from './useAsync'
 
@@ -21,7 +21,7 @@ async function isOfficialIpfs(): Promise<boolean> {
 }
 
 function isIpfs() {
-  return IPFS_HOStS.test(window.location.host)
+  return IPFS_HOSTS.test(window.location.host)
 }
 
 export const useIsOfficialHost = (): boolean => {
