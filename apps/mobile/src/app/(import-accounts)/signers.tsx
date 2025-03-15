@@ -7,7 +7,7 @@ import { useModalStyle } from '@/src/navigation/hooks/useModalStyle'
 function ImportSignersFormScreen() {
   const modalStyle = useModalStyle()
   return (
-    <View flex={1} paddingHorizontal={'$4'} style={modalStyle} testID={'add-signers-form-screen'}>
+    <View paddingHorizontal={'$4'} style={modalStyle} testID={'add-signers-form-screen'}>
       <AddSignersFormContainer />
     </View>
   )

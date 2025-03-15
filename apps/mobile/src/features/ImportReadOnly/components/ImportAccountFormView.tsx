@@ -10,7 +10,8 @@ import { View, Text, ScrollView } from 'tamagui'
 import { useLazySafesGetOverviewForManyQuery } from '@safe-global/store/gateway/safes'
 import { useScrollableHeader } from '@/src/navigation/useScrollableHeader'
 import { NavBarTitle } from '@/src/components/Title'
-import { useSafeAreaPaddingBottom } from '@/src/theme/hooks/useSafeAreaPaddingBottom'
+import { useModalStyle } from '@/src/navigation/hooks/useModalStyle'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 type LazyQueryResult = ReturnType<typeof useLazySafesGetOverviewForManyQuery>[1]
 
@@ -26,8 +27,6 @@ type ImportAccountFormViewProps = {
   onContinue: () => void
 }
 
-const ADJUSTMENT_FOR_KEYBOARD = 20
-
 export const ImportAccountFormView: React.FC<ImportAccountFormViewProps> = ({
   safeAddress,
   onChangeText,
@@ -39,7 +38,9 @@ export const ImportAccountFormView: React.FC<ImportAccountFormViewProps> = ({
   safeExists,
   onContinue,
 }) => {
-  const paddingBottom = useSafeAreaPaddingBottom()
+  const modalStyle = useModalStyle()
+  const { top } = useSafeAreaInsets()
+
   const { handleScroll } = useScrollableHeader({
     children: (
       <>
@@ -52,7 +53,7 @@ export const ImportAccountFormView: React.FC<ImportAccountFormViewProps> = ({
     <KeyboardAvoidingView
       behavior="padding"
       style={{ flex: 1 }}
-      keyboardVerticalOffset={paddingBottom + ADJUSTMENT_FOR_KEYBOARD}
+      keyboardVerticalOffset={modalStyle.paddingBottom + top}
     >
       <ScrollView paddingBottom={'$4'} onScroll={handleScroll} flex={1}>
         <LargeHeaderTitle marginBottom={'$4'}>Import Safe account</LargeHeaderTitle>

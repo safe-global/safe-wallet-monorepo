@@ -66,7 +66,7 @@ export const ShareView = ({ activeSafe, availableChains }: ShareViewProps) => {
                 />
 
                 <View style={styles.logoContainer}>
-                  <Identicon address={safeAddress} rounded={true} size={56} />
+                  <Identicon address={safeAddress} size={56} />
                 </View>
               </View>
             </View>

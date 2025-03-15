@@ -7,7 +7,7 @@ function SignersScreen() {
   const { bottom } = useSafeAreaInsets()
 
   return (
-    <View style={{ flex: 1, paddingBottom: bottom + getTokenValue('$4') }}>
+    <View style={{ flex: 1, paddingBottom: bottom + getTokenValue('$4'), paddingHorizontal: getTokenValue('$4') }}>
       <SignersContainer />
     </View>
   )

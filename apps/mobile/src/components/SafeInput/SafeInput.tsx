@@ -49,6 +49,7 @@ export function SafeInput({
           flex={1}
           // maxHeight={height}
           autoCapitalize="none"
+          // keyboardType={'ascii-capable'}
           autoCorrect={false}
           placeholder={placeholder}
         />

@@ -9,10 +9,16 @@ describe('Identicon', () => {
     expect(image).toBeTruthy()
   })
 
-  it('applies rounded style when rounded prop is true', () => {
-    const { getByTestId } = render(<Identicon address="0xA77DE01e157f9f57C7c4A326eeE9C4874D0598b6" rounded />)
+  it('applies rounded style by default', () => {
+    const { getByTestId } = render(<Identicon address="0xA77DE01e157f9f57C7c4A326eeE9C4874D0598b6" />)
     const image = getByTestId('identicon-image-container')
     expect(image.props.style.borderRadius).toBe('50%')
+  })
+
+  it('applies not-rounded style when rounded false', () => {
+    const { getByTestId } = render(<Identicon address="0xA77DE01e157f9f57C7c4A326eeE9C4874D0598b6" rounded={false} />)
+    const image = getByTestId('identicon-image-container')
+    expect(image.props.style.borderRadius).toBe(0)
   })
 
   it('applies default size when size prop is not provided', () => {

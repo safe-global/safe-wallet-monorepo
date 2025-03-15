@@ -41,7 +41,7 @@ export const Navbar = () => {
         <DropdownLabel
           label={shortenAddress(activeSafe.address)}
           labelProps={dropdownLabelProps}
-          leftNode={<Identicon address={activeSafe.address} rounded={true} size={30} />}
+          leftNode={<Identicon address={activeSafe.address} size={30} />}
           onPress={() => {
             router.push('/accounts-sheet')
           }}
