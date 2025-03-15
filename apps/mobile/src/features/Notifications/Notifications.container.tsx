@@ -1,16 +1,13 @@
-import React, { useCallback } from 'react'
+import React from 'react'
 
-import { useAppSelector, useAppDispatch } from '@/src/store/hooks'
-import { selectAppNotificationStatus, toggleAppNotifications } from '@/src/store/notificationsSlice'
 import { NotificationView } from '@/src/features/Notifications/components/NotificationView'
+import { useNotificationManager } from '@/src/hooks/useNotificationManager'
+import { useAppSelector } from '@/src/store/hooks'
+import { selectSigners } from '@/src/store/signersSlice'
 
 export const NotificationsContainer = () => {
-  const dispatch = useAppDispatch()
-  const isAppNotificationEnabled = useAppSelector(selectAppNotificationStatus)
+  const appSigners = useAppSelector(selectSigners)
+  const { isAppNotificationEnabled, toggleNotificationState } = useNotificationManager(appSigners)
 
-  const handleToggleAppNotifications = useCallback(() => {
-    dispatch(toggleAppNotifications(!isAppNotificationEnabled))
-  }, [isAppNotificationEnabled])
-
-  return <NotificationView onChange={handleToggleAppNotifications} value={isAppNotificationEnabled} />
+  return <NotificationView onChange={toggleNotificationState} value={isAppNotificationEnabled} />
 }

@@ -5,6 +5,7 @@ import txHistory from './txHistorySlice'
 import activeSafe from './activeSafeSlice'
 import activeSigner from './activeSignerSlice'
 import signers from './signersSlice'
+import delegated from './delegatedSlice'
 import myAccounts from './myAccountsSlice'
 import notifications from './notificationsSlice'
 import settings from './settingsSlice'
@@ -33,6 +34,7 @@ export const rootReducer = combineReducers({
   notifications,
   myAccounts,
   signers,
+  delegated,
   settings,
   [web3API.reducerPath]: web3API.reducer,
   [cgwClient.reducerPath]: cgwClient.reducer,

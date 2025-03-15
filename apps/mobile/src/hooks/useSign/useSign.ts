@@ -2,6 +2,7 @@ import DeviceCrypto from 'react-native-device-crypto'
 import * as Keychain from 'react-native-keychain'
 import DeviceInfo from 'react-native-device-info'
 import { Wallet } from 'ethers'
+import Logger from '@/src/utils/logger'
 
 const getKeychainKey = (userId: string) => `signer_address_${userId}`
 
