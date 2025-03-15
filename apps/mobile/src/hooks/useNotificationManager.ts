@@ -1,4 +1,3 @@
-// src/hooks/useNotificationManager.ts
 import { useCallback, useEffect, useRef } from 'react'
 import { AppState } from 'react-native'
 import NotificationsService from '@/src/services/notifications/NotificationService'
