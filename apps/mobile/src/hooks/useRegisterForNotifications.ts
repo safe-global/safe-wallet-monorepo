@@ -17,9 +17,8 @@ import { Address, SafeInfo } from '../types/address'
 import { useNotificationPayload } from './useNotificationPayload'
 import { ERROR_MSG, NOTIFICATION_ACCOUNT_TYPE } from '../store/constants'
 import { AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
-import { RootState } from '../store'
-import { selectSafeInfo } from '../store/safesSlice'
 import { getSigner } from '../utils/notifications'
+import { useNotificationGTWPermissions } from './useNotificationGTWPermissions'
 
 type RegisterForNotificationsProps = {
   loading: boolean
@@ -49,7 +48,7 @@ const useRegisterForNotifications = ({
   const dispatch = useAppDispatch()
   const activeSafe = useDefinedActiveSafe()
   const delegatedAccounts = useAppSelector(selectDelegatedAccounts)
-  const activeSafeInfo = useAppSelector((state: RootState) => selectSafeInfo(state, activeSafe.address))
+  const { ownerFound, accountType } = useNotificationGTWPermissions().getAccountType()
   /*
    * Push notifications can be enabled by an two type of users. The owner of the safe or an observer of the safe
    * In the first case, the owner can subscribe to ALL NotificationTypes listed in @safe-global/store/gateway/AUTO_GENERATED/notifications
@@ -69,12 +68,6 @@ const useRegisterForNotifications = ({
       const fcmToken = await FCMService.getFCMToken()
       FCMService.listenForMessagesBackground()
 
-      /* Step 2 - Check if the imported signers is the owner of the active safe.
-      * Based on the previous step, we determine the account type, which will be used to register for notifications types
-      */
-      const ownerFound = activeSafeInfo.SafeInfo.owners.find((owner) => appSigners[owner.value]) ?? null
-      const accountType = ownerFound ? NOTIFICATION_ACCOUNT_TYPE.OWNER : NOTIFICATION_ACCOUNT_TYPE.REGULAR
-
       /* Step 3 - Create a new random (delegated) private key to avoid exposing the subscriber's private key
        *
        * This key will be used to register for notifications on the backend
@@ -90,7 +83,7 @@ const useRegisterForNotifications = ({
           error,
         }
       }
- 
+
       const accountDetails = {
         address: randomDelegatedAccount.address,
         privateKey: randomDelegatedAccount.privateKey, // This is the private key that will be used to sign the message for notification registration only

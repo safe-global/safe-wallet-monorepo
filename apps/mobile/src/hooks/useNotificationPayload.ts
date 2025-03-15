@@ -24,14 +24,11 @@ export function useNotificationPayload(appSigners: Record<string, AddressInfo>) 
       nonce: string | undefined;
       signer: Wallet | HDNodeWallet;
     }) => {
-      // 2. Construct payload to register for notifications
-      // 2.1 - Get the nonce to be included in the SiWe as per
-      // https://www.notion.so/safe-global/Authentication-implementation-f26c6040be5148748ac19655da5e4842
       if (!activeSafe || !nonce) {
         Logger.error('registerForNotifications: Missing required data', { activeSafe, nonce })
         throw new Error(ERROR_MSG)
       }
-  
+
       if (!signer) {
         throw new Error('registerForNotifications: Signer account not found')
       }

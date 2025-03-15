@@ -11,7 +11,7 @@ type Props = {
 }
 export const NotificationView = ({ onChange, value }: Props) => {
 
-  const accountType = useNotificationGTWPermissions().getAccountType()
+  const { accountType } = useNotificationGTWPermissions().getAccountType()
 
   return (
     <View paddingHorizontal="$4" marginTop="$2" style={{ flex: 1 }} testID={'notifications-popup-screen'}>
