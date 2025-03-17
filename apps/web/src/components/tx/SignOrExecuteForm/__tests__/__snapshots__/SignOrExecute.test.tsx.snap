@@ -357,7 +357,7 @@ exports[`SignOrExecute should display a confirmation screen 1`] = `
         Transaction checks
       </h5>
       <div
-        class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiAlert-root MuiAlert-colorInfo MuiAlert-standardInfo MuiAlert-standard css-c7us71-MuiPaper-root-MuiAlert-root"
+        class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiAlert-root MuiAlert-colorInfo MuiAlert-standardInfo MuiAlert-standard css-8hu1mc-MuiPaper-root-MuiAlert-root"
         role="alert"
         style="--Paper-shadow: none;"
       >
@@ -690,7 +690,7 @@ exports[`SignOrExecute should display an error screen 1`] = `
         Transaction checks
       </h5>
       <div
-        class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiAlert-root MuiAlert-colorInfo MuiAlert-standardInfo MuiAlert-standard css-c7us71-MuiPaper-root-MuiAlert-root"
+        class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiAlert-root MuiAlert-colorInfo MuiAlert-standardInfo MuiAlert-standard css-8hu1mc-MuiPaper-root-MuiAlert-root"
         role="alert"
         style="--Paper-shadow: none;"
       >
