@@ -7,6 +7,6 @@ describe('Fiat', () => {
     const fiatBalanceDisplay = container.getByTestId('fiat-balance-display')
 
     expect(fiatBalanceDisplay).toBeVisible()
-    expect(fiatBalanceDisplay).toHaveTextContent(/\$215\.53K/i)
+    expect(fiatBalanceDisplay).toHaveTextContent('$ 215.53K')
   })
 })
