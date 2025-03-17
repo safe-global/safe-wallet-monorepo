@@ -1,7 +1,7 @@
 import { useCurrentOrgId } from '@/features/organizations/hooks/useCurrentOrgId'
 import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
 import { useUserOrganizationsGetUsersV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
-import { MemberRole } from '@/features/organizations/components/AddMembersModal'
+import { MemberRole } from './useOrgMembers'
 
 export const useIsAdmin = () => {
   const orgId = useCurrentOrgId()

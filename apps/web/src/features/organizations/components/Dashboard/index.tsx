@@ -5,8 +5,6 @@ import { Grid2, Stack, Typography } from '@mui/material'
 import Grid from '@mui/material/Grid2'
 import { useOrgSafes } from '@/features/organizations/hooks/useOrgSafes'
 import SafesList from '@/features/myAccounts/components/SafesList'
-import { useAppSelector } from '@/store'
-import { isAuthenticated } from '@/store/authSlice'
 import AddAccountsCard from './AddAccountsCard'
 import { AppRoutes } from '@/config/routes'
 import { useCurrentOrgId } from '@/features/organizations/hooks/useCurrentOrgId'
@@ -15,8 +13,9 @@ import NextLink from 'next/link'
 import { Link } from '@mui/material'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import DashboardMembersList from '@/features/organizations/components/Dashboard/DashboardMembersList'
-import { useOrgMembers } from '@/features/organizations/hooks/useOrgMembers'
-import SignedOutState from '@/features/organizations/components/SignedOutState'
+import { useOrgMembersByStatus } from '@/features/organizations/hooks/useOrgMembers'
+import { useIsInvited } from '@/features/organizations/hooks/useOrgMembers'
+import PreviewInvite from '../InviteBanner/PreviewInvite'
 
 const ViewAllLink = ({ url }: { url: LinkProps['href'] }) => {
   return (
@@ -41,19 +40,16 @@ const DASHBOARD_LIST_DISPLAY_LIMIT = 5
 
 const OrganizationsDashboard = () => {
   const safes = useOrgSafes()
-  const isUserSignedIn = useAppSelector(isAuthenticated)
   const orgId = useCurrentOrgId()
-  const { activeMembers } = useOrgMembers()
+  const { activeMembers } = useOrgMembersByStatus()
+  const isInvited = useIsInvited()
 
   const safesToDisplay = safes.slice(0, DASHBOARD_LIST_DISPLAY_LIMIT)
   const membersToDisplay = activeMembers.slice(0, DASHBOARD_LIST_DISPLAY_LIMIT)
 
-  if (!isUserSignedIn) {
-    return <SignedOutState />
-  }
-
   return (
     <>
+      {isInvited && <PreviewInvite />}
       {safes.length > 0 ? (
         <>
           <Typography variant="h1" fontWeight={700} mb={4}>

@@ -7,24 +7,21 @@ import { useState } from 'react'
 import SafesList from '@/features/myAccounts/components/SafesList'
 import { useOrgSafes } from '@/features/organizations/hooks/useOrgSafes'
 import { useSafesSearch } from '@/features/myAccounts/hooks/useSafesSearch'
-import { useAppSelector } from '@/store'
-import { isAuthenticated } from '@/store/authSlice'
-import SignedOutState from '@/features/organizations/components/SignedOutState'
-import { useIsAdmin } from '@/features/organizations/hooks/useIsAdmin'
+import { useIsAdmin, useIsInvited } from '@/features/organizations/hooks/useOrgMembers'
+import PreviewInvite from '../InviteBanner/PreviewInvite'
 
 const OrganizationSafeAccounts = () => {
   const [searchQuery, setSearchQuery] = useState('')
-  const isUserSignedIn = useAppSelector(isAuthenticated)
   const allSafes = useOrgSafes()
   const filteredSafes = useSafesSearch(allSafes, searchQuery)
   const isAdmin = useIsAdmin()
+  const isInvited = useIsInvited()
 
   const safes = searchQuery ? filteredSafes : allSafes
 
-  if (!isUserSignedIn) return <SignedOutState />
-
   return (
     <>
+      {isInvited && <PreviewInvite />}
       <Typography variant="h1" mb={3}>
         Safe Accounts
       </Typography>

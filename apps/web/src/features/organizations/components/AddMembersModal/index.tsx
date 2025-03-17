@@ -24,11 +24,7 @@ import { useCurrentOrgId } from '../../hooks/useCurrentOrgId'
 import NameInput from '@/components/common/NameInput'
 import { useRouter } from 'next/router'
 import { AppRoutes } from '@/config/routes'
-
-export enum MemberRole {
-  ADMIN = 'ADMIN',
-  MEMBER = 'MEMBER',
-}
+import { MemberRole } from '@/features/organizations/hooks/useOrgMembers'
 
 type MemberField = {
   name: string

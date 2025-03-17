@@ -2,6 +2,7 @@ import { useRouter } from 'next/router'
 import Head from 'next/head'
 import { BRAND_NAME } from '@/config/constants'
 import OrganizationsDashboard from '@/features/organizations/components/Dashboard'
+import AuthState from '@/features/organizations/components/AuthState'
 
 export default function OrganizationPage() {
   const router = useRouter()
@@ -16,7 +17,9 @@ export default function OrganizationPage() {
       </Head>
 
       <main>
-        <OrganizationsDashboard />
+        <AuthState orgId={orgId}>
+          <OrganizationsDashboard />
+        </AuthState>
       </main>
     </>
   )

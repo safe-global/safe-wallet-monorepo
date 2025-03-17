@@ -9,7 +9,8 @@ import ErrorMessage from '@/components/tx/ErrorMessage'
 import { useState } from 'react'
 import NameInput from '@/components/common/NameInput'
 import { Controller, FormProvider, useForm } from 'react-hook-form'
-import { MemberRole, RoleMenuItem } from '@/features/organizations/components/AddMembersModal'
+import { RoleMenuItem } from '@/features/organizations/components/AddMembersModal'
+import { MemberRole } from '@/features/organizations/hooks/useOrgMembers'
 
 type MemberField = {
   name: string
