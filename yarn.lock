@@ -31742,7 +31742,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-<<<<<<< HEAD
 "undici@npm:6.19.7":
   version: 6.19.7
   resolution: "undici@npm:6.19.7"
@@ -31751,9 +31750,6 @@ __metadata:
   linkType: hard
 
 "undici@npm:^6.11.1, undici@npm:^6.18.2, undici@npm:^6.19.5":
-=======
-"undici@npm:^6.11.1, undici@npm:^6.18.2":
->>>>>>> c8ae5be06 (chore: update yarn.lock)
   version: 6.21.1
   resolution: "undici@npm:6.21.1"
   checksum: 10/eeccc07e9073ae8e755fdc0dc8cdfaa426c01ec6f815425c3ecedba2e5394cea4993962c040dd168951714a82f0d001a13018c3ae3ad4534f0fa97afe425c08d
