@@ -119,7 +119,7 @@ const OrgsList = () => {
           <Grid2 container spacing={2} flexWrap="wrap">
             {activeOrganizations.length > 0 ? (
               activeOrganizations.map((org) => (
-                <Grid2 size={6} key={org.name}>
+                <Grid2 size={{ xs: 12, md: 6 }} key={org.name}>
                   <OrgsCard org={org} />
                 </Grid2>
               ))

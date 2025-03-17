@@ -12,7 +12,7 @@ const AccountsNavigation = () => {
   }
 
   return (
-    <Stack direction="row" spacing={2}>
+    <Stack direction="row" gap={2} flexWrap="wrap">
       <Typography variant="h1" fontWeight={700} className={css.title}>
         <Link
           href={AppRoutes.welcome.accounts}

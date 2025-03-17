@@ -6,6 +6,8 @@ import Link from 'next/link'
 import { AppRoutes } from '@/config/routes'
 import InviteButtons from './InviteButtons'
 import css from './styles.module.css'
+import EthHashInfo from '@/components/common/EthHashInfo'
+import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
 
 type OrgListInvite = {
   org: GetOrganizationResponse
@@ -13,8 +15,12 @@ type OrgListInvite = {
 
 const OrgListInvite = ({ org }: OrgListInvite) => {
   const { id, name, userOrganizations: members } = org
+  const { currentData: currentUser } = useUsersGetWithWalletsV1Query()
   const numberOfAccounts = useOrgSafeCount(id)
   const numberOfMembers = members.length
+
+  // @ts-ignore TODO: Need to fix the type once available
+  const invitedBy = org.userOrganizations.find((member) => member.user.id === currentUser.id)?.invitedBy
 
   return (
     <Card sx={{ p: 2, mb: 2 }}>
@@ -23,6 +29,25 @@ const OrgListInvite = ({ org }: OrgListInvite) => {
         <Typography component="span" variant="h4" fontWeight={700} color="primary.main">
           {name}
         </Typography>
+        {invitedBy && (
+          <>
+            {' '}
+            by
+            <Typography
+              component="span"
+              variant="h4"
+              fontWeight={700}
+              color="primary.main"
+              position="relative"
+              top="4px"
+              ml="6px"
+              display="inline-block"
+              sx={{ '> div': { gap: '4px' } }}
+            >
+              <EthHashInfo address={invitedBy} avatarSize={24} showName={false} showPrefix={false} />
+            </Typography>
+          </>
+        )}
       </Typography>
 
       <Link href={{ pathname: AppRoutes.organizations.index, query: { orgId: id } }} passHref legacyBehavior>
