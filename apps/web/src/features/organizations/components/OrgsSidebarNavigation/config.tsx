@@ -15,6 +15,7 @@ export type DynamicNavItem = {
   href: string
   tag?: ReactElement
   disabled?: boolean
+  adminOnly?: boolean
 }
 
 export const navItems: DynamicNavItem[] = [
@@ -51,5 +52,6 @@ export const navItems: DynamicNavItem[] = [
     label: 'Settings',
     icon: <SvgIcon component={SettingsIcon} inheritViewBox />,
     href: AppRoutes.organizations.settings,
+    adminOnly: true,
   },
 ]
