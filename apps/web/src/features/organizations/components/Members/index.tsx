@@ -3,7 +3,6 @@ import { Button, InputAdornment, Stack, SvgIcon, TextField, Typography } from '@
 import AddMembersModal from '@/features/organizations/components/AddMembersModal'
 import { useState } from 'react'
 import MembersList from '@/features/organizations/components/MembersList'
-import InvitesList from './InvitesList'
 import SearchIcon from '@/public/images/common/search.svg'
 import { useMembersSearch } from '@/features/organizations/hooks/useMembersSearch'
 import { useOrgMembers } from '@/features/organizations/hooks/useOrgMembers'
@@ -64,7 +63,8 @@ const OrganizationMembers = () => {
             <Typography variant="h5" fontWeight={700} mb={2}>
               Pending invitations ({filteredInvites.length})
             </Typography>
-            <InvitesList invitedMembers={filteredInvites} />
+            {/* <InvitesList invitedMembers={filteredInvites} /> */}
+            <MembersList members={filteredInvites} />
           </>
         )}
         {filteredMembers.length > 0 && (

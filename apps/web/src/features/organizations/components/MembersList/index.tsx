@@ -6,10 +6,11 @@ import DeleteIcon from '@/public/images/common/delete.svg'
 import EnhancedTable from '@/components/common/EnhancedTable'
 import tableCss from '@/components/common/EnhancedTable/styles.module.css'
 import MemberName from './MemberName'
-import RemoveMemberDialog from './RemoveMemberModal'
+import RemoveMemberDialog from './RemoveMemberDialog'
 import { useState } from 'react'
 import { useIsAdmin } from '@/features/organizations/hooks/useIsAdmin'
 import EditMemberDialog from '@/features/organizations/components/MembersList/EditMemberDialog'
+import { MemberStatus } from '../../hooks/useOrgMembers'
 
 const headCells = [
   {
@@ -45,21 +46,26 @@ const EditButton = ({ member }: { member: UserOrganization }) => {
   )
 }
 
-const MenuButtons = ({ member, disableDelete }: { member: UserOrganization; disableDelete: boolean }) => {
+export const RemoveMemberButton = ({
+  member,
+  disabled,
+  isInvite,
+}: {
+  member: UserOrganization
+  disabled: boolean
+  isInvite: boolean
+}) => {
   const [openRemoveMemberDialog, setOpenRemoveMemberDialog] = useState(false)
 
   return (
-    <div className={tableCss.actions}>
-      <EditButton member={member} />
-      <Tooltip title={disableDelete ? 'Cannot remove last admin' : 'Remove member'} placement="top">
+    <>
+      <Tooltip
+        title={disabled ? 'Cannot remove last admin' : `Remove ${isInvite ? 'invitation' : 'member'}`}
+        placement="top"
+      >
         <Box component="span">
-          <IconButton disabled={disableDelete} onClick={() => setOpenRemoveMemberDialog(true)} size="small">
-            <SvgIcon
-              component={DeleteIcon}
-              inheritViewBox
-              color={disableDelete ? 'disabled' : 'error'}
-              fontSize="small"
-            />
+          <IconButton disabled={disabled} onClick={() => setOpenRemoveMemberDialog(true)} size="small">
+            <SvgIcon component={DeleteIcon} inheritViewBox color={disabled ? 'disabled' : 'error'} fontSize="small" />
           </IconButton>
         </Box>
       </Tooltip>
@@ -68,9 +74,10 @@ const MenuButtons = ({ member, disableDelete }: { member: UserOrganization; disa
           userId={member.user.id}
           memberName={member.name}
           handleClose={() => setOpenRemoveMemberDialog(false)}
+          isInvite={isInvite}
         />
       )}
-    </div>
+    </>
   )
 }
 
@@ -80,6 +87,7 @@ const MembersList = ({ members }: { members: UserOrganization[] }) => {
 
   const rows = members.map((member) => {
     const isLastAdmin = adminCount === 1 && member.role === MemberRole.ADMIN
+    const isInvite = member.status === MemberStatus.INVITED || member.status === MemberStatus.DECLINED
     return {
       cells: {
         name: {
@@ -99,7 +107,12 @@ const MembersList = ({ members }: { members: UserOrganization[] }) => {
         actions: {
           rawValue: '',
           sticky: true,
-          content: isAdmin ? <MenuButtons member={member} disableDelete={isAdmin && isLastAdmin} /> : null,
+          content: isAdmin ? (
+            <div className={tableCss.actions}>
+              {!isInvite && <EditButton member={member} />}
+              <RemoveMemberButton member={member} disabled={isAdmin && isLastAdmin} isInvite={isInvite} />
+            </div>
+          ) : null,
         },
       },
     }
