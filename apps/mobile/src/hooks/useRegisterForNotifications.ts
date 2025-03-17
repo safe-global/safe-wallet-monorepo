@@ -143,7 +143,7 @@ const useRegisterForNotifications = (): NotificationsProps => {
       setLoading(true)
       setError(null)
 
-      const delegatedAddress = Object.entries(delegatedAccounts).find(([address, safesSliceItem]) =>
+      const delegatedAddress = Object.entries(delegatedAccounts).find(([, safesSliceItem]) =>
         safesSliceItem.safes.some((safe: SafeInfo) => safe.address === activeSafe.address),
       )?.[0] as Address
 
