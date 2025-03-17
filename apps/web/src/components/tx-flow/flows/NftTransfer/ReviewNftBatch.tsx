@@ -5,9 +5,9 @@ import { createNftTransferParams } from '@/services/tx/tokenTransferParams'
 import type { NftTransferParams } from '.'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import { createMultiSendCallOnlyTx, createTx } from '@/services/tx/tx-sender'
-import SignOrExecuteForm from '@/components/tx/SignOrExecuteForm'
 import { SafeTxContext } from '../../SafeTxProvider'
 import { NftItems } from '@/components/tx-flow/flows/NftTransfer/SendNftBatch'
+import ReviewTransaction from '@/components/tx/ReviewTransaction'
 
 type ReviewNftBatchProps = {
   params: NftTransferParams
@@ -39,7 +39,7 @@ const ReviewNftBatch = ({ params, onSubmit, txNonce }: ReviewNftBatchProps): Rea
   }, [safeAddress, params, setSafeTx, setSafeTxError])
 
   return (
-    <SignOrExecuteForm onSubmit={onSubmit}>
+    <ReviewTransaction onSubmit={onSubmit}>
       <Grid
         container
         sx={{
@@ -63,7 +63,7 @@ const ReviewNftBatch = ({ params, onSubmit, txNonce }: ReviewNftBatchProps): Rea
         </Grid>
       </Grid>
       <SendToBlock address={params.recipient} />
-    </SignOrExecuteForm>
+    </ReviewTransaction>
   )
 }
 
