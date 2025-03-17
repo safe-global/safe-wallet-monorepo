@@ -1,3 +1,4 @@
+import '@/src/config/polyfills'
 import { Stack } from 'expo-router'
 import 'react-native-reanimated'
 import { SafeThemeProvider } from '@/src/theme/provider/safeTheme'
