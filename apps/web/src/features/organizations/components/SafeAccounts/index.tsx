@@ -25,7 +25,15 @@ const OrganizationSafeAccounts = () => {
       <Typography variant="h1" mb={3}>
         Safe Accounts
       </Typography>
-      <Stack direction="row" justifyContent="space-between" alignItems="center" gap={2} mb={3} flexWrap="wrap">
+      <Stack
+        direction="row"
+        justifyContent="space-between"
+        alignItems="flex-start"
+        gap={2}
+        mb={3}
+        flexWrap="wrap"
+        flexDirection={{ xs: 'column-reverse', md: 'row' }}
+      >
         <TextField
           placeholder="Search"
           variant="filled"

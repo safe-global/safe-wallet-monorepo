@@ -101,7 +101,7 @@ const OrgsSettings = () => {
         Settings
       </Typography>
       <Card>
-        <Grid2 container p={4} gap={2}>
+        <Grid2 container p={4} spacing={2}>
           <Grid2 size={{ xs: 12, md: 4 }}>
             <Typography fontWeight="bold">General</Typography>
           </Grid2>
@@ -128,12 +128,12 @@ const OrgsSettings = () => {
           </Grid2>
         </Grid2>
 
-        <Grid2 container p={4} gap={2}>
+        <Grid2 container p={4} spacing={2}>
           <Grid2 size={{ xs: 12, md: 4 }}>
             <Typography fontWeight="bold">Danger Zone</Typography>
           </Grid2>
           <Grid2 size={{ xs: 12, md: 8 }}>
-            <Typography mb={1}>This action cannot be undone.</Typography>
+            <Typography mb={2}>This action cannot be undone.</Typography>
 
             <Button
               variant="danger"
