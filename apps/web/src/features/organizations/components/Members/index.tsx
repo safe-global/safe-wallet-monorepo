@@ -63,7 +63,6 @@ const OrganizationMembers = () => {
             <Typography variant="h5" fontWeight={700} mb={2}>
               Pending invitations ({filteredInvites.length})
             </Typography>
-            {/* <InvitesList invitedMembers={filteredInvites} /> */}
             <MembersList members={filteredInvites} />
           </>
         )}
