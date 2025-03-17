@@ -11,6 +11,7 @@ import {
   IconButton,
   SvgIcon,
   Skeleton,
+  Box,
 } from '@mui/material'
 import { useFormContext, useWatch, type Validate, get } from 'react-hook-form'
 import { validatePrefixedAddress } from '@/utils/validation'
@@ -25,6 +26,7 @@ import classnames from 'classnames'
 import css from './styles.module.css'
 import inputCss from '@/styles/inputs.module.css'
 import Identicon from '../Identicon'
+import { isSmartContract } from '@/utils/wallets'
 
 export type AddressInputProps = TextFieldProps & {
   name: string
@@ -35,6 +37,7 @@ export type AddressInputProps = TextFieldProps & {
   deps?: string | string[]
   onAddressBookClick?: () => void
   chain?: ChainInfo
+  isEOAOnly?: boolean
 }
 
 const AddressInput = ({
@@ -46,6 +49,7 @@ const AddressInput = ({
   onAddressBookClick,
   deps,
   chain,
+  isEOAOnly = false,
   ...props
 }: AddressInputProps): ReactElement => {
   const {
@@ -77,6 +81,21 @@ const AddressInput = ({
 
   // Validation function based on the current chain prefix
   const validatePrefixed = useMemo(() => validatePrefixedAddress(currentShortName), [currentShortName])
+
+  // EOA validation function
+  const validateEOA = useCallback(
+    async (address: string): Promise<string | undefined> => {
+      if (!isEOAOnly) return undefined
+
+      try {
+        const isContract = await isSmartContract(address)
+        return isContract ? 'Address must be an EOA' : undefined
+      } catch (error) {
+        return 'Unable to verify address type'
+      }
+    },
+    [isEOAOnly],
+  )
 
   // Update the input value
   const setAddressValue = useCallback(
@@ -143,14 +162,16 @@ const AddressInput = ({
             <AddressInputReadOnly address={watchedValue} />
           ) : (
             // Display the current short name in the adornment, unless the value contains the same prefix
-            <InputAdornment position="end" sx={{ ml: 0, gap: 1 }}>
-              {watchedValue && !fieldError ? (
-                <Identicon address={watchedValue} size={32} />
-              ) : (
-                <Skeleton variant="circular" width={32} height={32} animation={false} />
-              )}
+            <InputAdornment position="end" sx={{ ml: 0 }}>
+              <Box mr={1}>
+                {watchedValue && !fieldError ? (
+                  <Identicon address={watchedValue} size={32} />
+                ) : (
+                  <Skeleton variant="circular" width={32} height={32} animation={false} />
+                )}
+              </Box>
 
-              {!rawValueRef.current.startsWith(`${currentShortName}:`) && <>{currentShortName}:</>}
+              {!isEOAOnly && !rawValueRef.current.startsWith(`${currentShortName}:`) && <Box>{currentShortName}:</Box>}
             </InputAdornment>
           ),
 
@@ -182,7 +203,10 @@ const AddressInput = ({
           validate: async () => {
             const value = rawValueRef.current
             if (value) {
-              return validatePrefixed(value) || (await validate?.(parsePrefixedAddress(value).address))
+              const address = parsePrefixedAddress(value).address
+              return (
+                validatePrefixed(value) || (isEOAOnly && (await validateEOA(address))) || (await validate?.(address))
+              )
             }
           },
 
