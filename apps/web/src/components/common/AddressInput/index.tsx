@@ -82,7 +82,6 @@ const AddressInput = ({
   // Validation function based on the current chain prefix
   const validatePrefixed = useMemo(() => validatePrefixedAddress(currentShortName), [currentShortName])
 
-  // EOA validation function
   const validateEOA = useCallback(
     async (address: string): Promise<string | undefined> => {
       if (!isEOAOnly) return undefined
