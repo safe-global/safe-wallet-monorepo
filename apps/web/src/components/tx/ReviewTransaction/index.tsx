@@ -6,21 +6,7 @@ import useTxPreview from '../confirmation-views/useTxPreview'
 import type { ReviewTransactionContentProps } from './ReviewTransactionContent'
 import ReviewTransactionContent from './ReviewTransactionContent'
 
-type ReviewTransactionProps = ReviewTransactionContentProps & {
-  txId?: string
-  children?: React.ReactNode
-  isExecutable?: boolean
-  isRejection?: boolean
-  isBatch?: boolean
-  isBatchable?: boolean
-  onlyExecute?: boolean
-  disableSubmit?: boolean
-  origin?: string
-  isCreation?: boolean
-  showMethodCall?: boolean
-}
-
-const ReviewTransaction = (props: ReviewTransactionProps) => {
+const ReviewTransaction = (props: ReviewTransactionContentProps) => {
   const { safeTx, safeTxError } = useContext(SafeTxContext)
   const [txDetails, , txDetailsLoading] = useTxDetails(props.txId)
   const [txPreview, , txPreviewLoading] = useTxPreview(safeTx?.data, undefined, props.txId)
