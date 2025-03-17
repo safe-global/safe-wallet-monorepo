@@ -501,15 +501,20 @@ exports[`SignOrExecute should display a confirmation screen 1`] = `
               class=""
               data-mui-internal-clone-element="true"
             >
-              <button
-                class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary Mui-disabled MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary css-1hp2ejb-MuiButtonBase-root-MuiButton-root"
-                data-testid="sign-btn"
-                disabled=""
-                tabindex="-1"
-                type="submit"
+              <span
+                class=""
+                data-mui-internal-clone-element="true"
               >
-                Sign
-              </button>
+                <button
+                  class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary Mui-disabled MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary css-1hp2ejb-MuiButtonBase-root-MuiButton-root"
+                  data-testid="sign-btn"
+                  disabled=""
+                  tabindex="-1"
+                  type="submit"
+                >
+                  Sign
+                </button>
+              </span>
             </span>
           </div>
         </div>
@@ -834,15 +839,20 @@ exports[`SignOrExecute should display an error screen 1`] = `
               class=""
               data-mui-internal-clone-element="true"
             >
-              <button
-                class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary Mui-disabled MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary css-1hp2ejb-MuiButtonBase-root-MuiButton-root"
-                data-testid="sign-btn"
-                disabled=""
-                tabindex="-1"
-                type="submit"
+              <span
+                class=""
+                data-mui-internal-clone-element="true"
               >
-                Sign
-              </button>
+                <button
+                  class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary Mui-disabled MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary css-1hp2ejb-MuiButtonBase-root-MuiButton-root"
+                  data-testid="sign-btn"
+                  disabled=""
+                  tabindex="-1"
+                  type="submit"
+                >
+                  Sign
+                </button>
+              </span>
             </span>
           </div>
         </div>
