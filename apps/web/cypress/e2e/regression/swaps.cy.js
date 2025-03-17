@@ -54,6 +54,7 @@ describe('Swaps tests', () => {
           swaps.enableCustomRecipient(isCustomRecipientFound(swaps.customRecipient))
           swaps.clickOnSettingsBtn()
           swaps.enterRecipient(swaps.blockedAddress)
+          swaps.selectOutputCurrency(swaps.swapTokens.dai)
         })
       cy.contains(swaps.blockedAddressStr)
     },
@@ -111,6 +112,12 @@ describe('Swaps tests', () => {
       swaps.clickOnExceeFeeChkbox()
       swaps.clickOnSwapBtn()
       swaps.clickOnSwapBtn()
+
+      cy.get(swaps.confirmPriceImpact).then(($input) => {
+        if ($input.length) {
+          swaps.confirmPriceImpact()
+        }
+      })
     })
 
     swaps.verifyOrderDetails(limitPrice, swapOrder.expiry2Mins, slippage, swapOrder.interactWith, orderID, widgetFee)

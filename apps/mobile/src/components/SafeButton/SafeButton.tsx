@@ -86,8 +86,9 @@ export const SafeButton = styled(Button, {
         scaleSpace: 0.3,
       }),
       $sm: () => ({
-        height: 'auto',
+        height: 36,
         paddingVertical: '$2',
+        paddingHorizontal: '$3',
         fontWeight: 600,
         scaleIcon: 0.8,
         lineHeight: 20,

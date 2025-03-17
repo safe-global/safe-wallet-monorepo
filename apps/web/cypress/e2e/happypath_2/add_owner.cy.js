@@ -23,7 +23,7 @@ describe('Happy path Add Owners tests', () => {
     cy.contains(owner.safeAccountNonceStr, { timeout: 10000 })
   })
 
-  it.skip(
+  it(
     'Verify creation, confirmation and deletion of Add owner tx. GA tx_confirm',
     { defaultCommandTimeout: 30000 },
     () => {
