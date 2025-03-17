@@ -8,17 +8,22 @@ import {
   SidebarListItemIcon,
   SidebarListItemText,
 } from '@/components/sidebar/SidebarList'
+import { useCurrentOrgId } from '@/features/organizations/hooks/useCurrentOrgId'
+import { useIsAdmin } from '@/features/organizations/hooks/useOrgMembers'
 import { navItems } from './config'
-import { useCurrentOrgId } from '../../hooks/useCurrentOrgId'
 
 const Navigation = (): ReactElement => {
   const router = useRouter()
   const orgId = useCurrentOrgId()
+  const isAdmin = useIsAdmin()
 
   return (
     <SidebarList>
       {navItems.map((item) => {
+        const hideItem = item.adminOnly && !isAdmin
         const isSelected = router.pathname === item.href
+
+        if (hideItem) return null
 
         return (
           <div key={item.label}>

@@ -27,7 +27,7 @@ import { useState } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 import { useCurrentOrgId } from '@/features/organizations/hooks/useCurrentOrgId'
 import { isAuthenticated } from '@/store/authSlice'
-import { useIsInvited } from '@/features/organizations/hooks/useOrgMembers'
+import { useIsAdmin, useIsInvited } from '@/features/organizations/hooks/useOrgMembers'
 import PreviewInvite from '@/features/organizations/components/InviteBanner/PreviewInvite'
 import css from './styles.module.css'
 
@@ -47,6 +47,7 @@ type OrganizationFormData = {
 
 const OrgsSettings = () => {
   const [deleteOrgOpen, setDeleteOrgOpen] = useState(false)
+  const isAdmin = useIsAdmin()
   const router = useRouter()
   const dispatch = useAppDispatch()
   const orgId = useCurrentOrgId()
@@ -120,7 +121,7 @@ const OrgsSettings = () => {
                   slotProps={{ inputLabel: { shrink: true } }}
                 />
 
-                <Button variant="contained" type="submit" sx={{ mt: 2 }} disabled={!isNameChanged}>
+                <Button variant="contained" type="submit" sx={{ mt: 2 }} disabled={!isNameChanged || !isAdmin}>
                   Save
                 </Button>
               </form>
@@ -140,6 +141,7 @@ const OrgsSettings = () => {
               onClick={() => {
                 setDeleteOrgOpen(true)
               }}
+              disabled={!isAdmin}
             >
               Delete organization
             </Button>
