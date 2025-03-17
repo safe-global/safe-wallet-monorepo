@@ -32,7 +32,7 @@
   .orgsListInviteContent {
     flex-direction: column;
     gap: var(--space-1);
-    align-items: center;
+    align-items: flex-start;
   }
 
   .inviteButtonContainer {

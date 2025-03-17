@@ -2,6 +2,7 @@ import AddAccounts from '@/features/organizations/components/AddAccounts'
 import Image from 'next/image'
 import { Typography, Paper, Box, Stack } from '@mui/material'
 import EmptyDashboard from '@/public/images/orgs/empty_dashboard.png'
+import css from './styles.module.css'
 
 const AddAccountsCard = () => {
   return (
@@ -20,8 +21,14 @@ const AddAccountsCard = () => {
           <AddAccounts />
         </Box>
 
-        <Box sx={{}}>
-          <Image src={EmptyDashboard} alt="Illustration of two safes with their thresholds" width={375} height={200} />
+        <Box>
+          <Image
+            className={css.image}
+            src={EmptyDashboard}
+            alt="Illustration of two safes with their thresholds"
+            width={375}
+            height={200}
+          />
         </Box>
       </Stack>
     </Paper>

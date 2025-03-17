@@ -25,7 +25,7 @@ const OrganizationMembers = () => {
       <Typography variant="h1" mb={3}>
         Members
       </Typography>
-      <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
+      <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3} flexWrap="wrap" gap={2}>
         <TextField
           placeholder="Search"
           variant="filled"

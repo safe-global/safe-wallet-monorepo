@@ -25,7 +25,7 @@ const OrganizationSafeAccounts = () => {
       <Typography variant="h1" mb={3}>
         Safe Accounts
       </Typography>
-      <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={2} mb={3}>
+      <Stack direction="row" justifyContent="space-between" alignItems="center" gap={2} mb={3} flexWrap="wrap">
         <TextField
           placeholder="Search"
           variant="filled"

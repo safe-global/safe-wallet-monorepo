@@ -101,11 +101,11 @@ const OrgsSettings = () => {
         Settings
       </Typography>
       <Card>
-        <Grid2 container p={4}>
-          <Grid2 size={4}>
+        <Grid2 container p={4} gap={2}>
+          <Grid2 size={{ xs: 12, md: 4 }}>
             <Typography fontWeight="bold">General</Typography>
           </Grid2>
-          <Grid2 size={8}>
+          <Grid2 size={{ xs: 12, md: 8 }}>
             <Typography mb={2}>
               The organization name is visible in the sidebar menu, headings to all its members. Usually it’s a name of
               the company or a business. How is this data stored?
@@ -128,11 +128,11 @@ const OrgsSettings = () => {
           </Grid2>
         </Grid2>
 
-        <Grid2 container p={4}>
-          <Grid2 size={4}>
+        <Grid2 container p={4} gap={2}>
+          <Grid2 size={{ xs: 12, md: 4 }}>
             <Typography fontWeight="bold">Danger Zone</Typography>
           </Grid2>
-          <Grid2 size={8}>
+          <Grid2 size={{ xs: 12, md: 8 }}>
             <Typography mb={1}>This action cannot be undone.</Typography>
 
             <Button
