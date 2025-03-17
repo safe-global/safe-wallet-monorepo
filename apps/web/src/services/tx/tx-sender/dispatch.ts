@@ -1,6 +1,6 @@
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import { isMultisigExecutionInfo } from '@/utils/transaction-guards'
-import { isHardwareWallet, isSmartContractWallet } from '@/utils/wallets'
+import { isEthSignWallet, isSmartContractWallet } from '@/utils/wallets'
 import type { MultiSendCallOnlyContractImplementationType } from '@safe-global/protocol-kit'
 import {
   type ChainInfo,
@@ -116,7 +116,7 @@ export const dispatchProposerTxSigning = async (safeTx: SafeTransaction, wallet:
   const sdk = await getSafeSDKWithSigner(wallet.provider)
 
   let signature: SafeSignature
-  if (isHardwareWallet(wallet)) {
+  if (isEthSignWallet(wallet)) {
     const txHash = await sdk.getTransactionHash(safeTx)
     signature = await sdk.signHash(txHash)
   } else {

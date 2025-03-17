@@ -96,26 +96,6 @@ describe('Notifications', () => {
     })
   })
 
-  describe('adjustLegerSignature', () => {
-    it('should return the same signature if not that of a Ledger', () => {
-      const adjustedSignature = logic._adjustLedgerSignatureV(MM_SIGNATURE)
-
-      expect(adjustedSignature).toBe(MM_SIGNATURE)
-    })
-
-    it('should return an adjusted signature if is that of a Ledger and v is 0 or 1', () => {
-      const adjustedSignature = logic._adjustLedgerSignatureV(LEDGER_SIGNATURE)
-
-      expect(adjustedSignature).toBe(ADJUSTED_LEDGER_SIGNATURE)
-    })
-
-    it('should return the same signature if v is 27 or 28', () => {
-      const adjustedSignature = logic._adjustLedgerSignatureV(MM_SIGNATURE)
-
-      expect(adjustedSignature).toBe(MM_SIGNATURE)
-    })
-  })
-
   describe('getRegisterDevicePayload', () => {
     it('should return the payload with signature', async () => {
       const token = crypto.randomUUID()
