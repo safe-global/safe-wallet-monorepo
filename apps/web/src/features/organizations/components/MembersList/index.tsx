@@ -1,4 +1,4 @@
-import { Box, Chip, IconButton, SvgIcon, Tooltip } from '@mui/material'
+import { Box, Chip, IconButton, Stack, SvgIcon, Tooltip } from '@mui/material'
 import { type UserOrganization } from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
 import EditIcon from '@/public/images/common/edit.svg'
 import DeleteIcon from '@/public/images/common/delete.svg'
@@ -87,11 +87,19 @@ const MembersList = ({ members }: { members: UserOrganization[] }) => {
   const rows = members.map((member) => {
     const isLastAdmin = adminCount === 1 && member.role === MemberRole.ADMIN
     const isInvite = member.status === MemberStatus.INVITED || member.status === MemberStatus.DECLINED
+    const isDeclined = member.status === MemberStatus.DECLINED
     return {
       cells: {
         name: {
           rawValue: member.name,
-          content: <MemberName member={member} />,
+          content: (
+            <Stack direction="row" alignItems="center" justifyContent="left" gap={1}>
+              <MemberName member={member} />
+              {isDeclined && (
+                <Chip label="Declined" size="small" sx={{ backgroundColor: 'error.light', borderRadius: 0.5 }} />
+              )}
+            </Stack>
+          ),
         },
         role: {
           rawValue: member.role,
