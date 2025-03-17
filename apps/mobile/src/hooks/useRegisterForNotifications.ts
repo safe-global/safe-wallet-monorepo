@@ -15,9 +15,7 @@ import { useGTW } from './useGTW'
 import { addOrUpdateDelegatedAccount, selectDelegatedAccounts } from '../store/delegatedSlice'
 import { Address, SafeInfo } from '../types/address'
 import { useNotificationPayload } from './useNotificationPayload'
-import { ERROR_MSG, NOTIFICATION_ACCOUNT_TYPE } from '../store/constants'
-import { useSign } from './useSign'
-import { AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
+import { ERROR_MSG } from '../store/constants'
 import { getSigner } from '../utils/notifications'
 import { useNotificationGTWPermissions } from './useNotificationGTWPermissions'
 
@@ -41,8 +39,7 @@ const useRegisterForNotifications = (): NotificationsProps => {
   // Custom hooks
   const { data: nonceData } = useAuthGetNonceV1Query()
   const { registerForNotificationsOnBackEnd, unregisterForNotificationsOnBackEnd } = useGTW()
-  const { getNotificationRegisterPayload } = useNotificationPayload(appSigners)
-  const { getPrivateKey } = useSign()
+  const { getNotificationRegisterPayload } = useNotificationPayload()
   // Redux
   const dispatch = useAppDispatch()
   const activeSafe = useDefinedActiveSafe()
