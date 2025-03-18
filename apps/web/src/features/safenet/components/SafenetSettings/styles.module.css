@@ -1,0 +1,38 @@
+.checkIcon {
+  height: 24px;
+  width: 24px;
+  color: var(--color-success-main);
+  background: var(--color-secondary-background);
+  border-radius: var(--space-2);
+  padding: 4px;
+  align-self: flex-end;
+}
+
+.closeIcon {
+  height: 24px;
+  width: 24px;
+  color: var(--color-error-main);
+  background: var(--color-error-background);
+  border-radius: var(--space-2);
+  padding: 4px;
+  align-self: flex-end;
+}
+
+.chainIndicator {
+  min-width: 0;
+}
+
+.chainChip {
+  padding: 4px;
+  border: 1px solid var(--color-border-light);
+  border-radius: 20px;
+}
+.chainChip > span {
+  min-width: 0 !important;
+  padding-right: var(--space-1);
+}
+
+.alert {
+  background: var(--color-background-main) !important;
+  align-items: center;
+}

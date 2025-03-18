@@ -1,0 +1,13 @@
+.chainChip {
+  padding: 4px;
+  border: 1px solid var(--color-border-light);
+  border-radius: 20px;
+}
+.chainChip > span {
+  min-width: 0 !important;
+  padding-right: var(--space-1);
+}
+
+.alert {
+  background: var(--color-background-main) !important;
+}

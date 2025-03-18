@@ -2,12 +2,11 @@
   border: 1px solid transparent;
   background-image:
     radial-gradient(var(--color-secondary-background) 0%, var(--color-secondary-background) 100%),
-    radial-gradient(119.01% 132.63% at 119.01% -14.15%, #FF5F00 0%, #FFD200 50%, #12FF80 100%);
+    radial-gradient(119.01% 132.63% at 119.01% -14.15%, rgba(255, 95, 0, 0.3) 0%, rgba(255, 210, 0, 0.3) 50%, rgba(18, 255, 128, 0.3));
   background-origin: border-box;
   background-clip: padding-box, border-box;
   padding: 8px;
   border-radius: 4px;
-  margin-top: 16px;
   display: flex;
   align-items: center;
   justify-content: space-between;

@@ -33,6 +33,7 @@ export type SafenetBalanceEntity = {
         address: string
         allowances: string
         balance: string
+        pendingSettlements: string
         total: string
       }
     }
@@ -117,17 +118,6 @@ export const safenetApi = createApi({
     getSafenetAccount: builder.query<SafenetAccountEntity, { safeAddress: string }>({
       query: ({ safeAddress }) => `/account/${safeAddress}`,
       providesTags: (_, __, arg) => [{ type: 'SafenetAccount', id: arg.safeAddress }],
-    }),
-    registerSafenet: builder.mutation<boolean, { chainId: string; safeAddress: string }>({
-      query: ({ chainId, safeAddress }) => ({
-        url: `/account`,
-        method: 'POST',
-        body: {
-          chainId: Number(chainId),
-          safe: safeAddress,
-        },
-      }),
-      invalidatesTags: (_, __, arg) => [{ type: 'SafenetAccount', id: arg.safeAddress }],
     }),
     getSafenetBalance: builder.query<SafenetBalanceEntity, { safeAddress: string }>({
       query: ({ safeAddress }) => `/balances/${safeAddress}`,
