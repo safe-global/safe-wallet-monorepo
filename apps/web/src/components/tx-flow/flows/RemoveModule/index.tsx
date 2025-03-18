@@ -4,26 +4,27 @@ import { ReviewRemoveModule } from './ReviewRemoveModule'
 import { useMemo } from 'react'
 import useTxStepper from '../../useTxStepper'
 import { ConfirmTxDetails } from '@/components/tx/ConfirmTxDetails'
+import { EventCategory } from '@/services/analytics'
 
 export type RemoveModuleFlowProps = {
   address: string
 }
 
 const RemoveModuleFlow = ({ address }: RemoveModuleFlowProps) => {
-  const { data, step, nextStep, prevStep } = useTxStepper(null)
+  const { step, nextStep, prevStep } = useTxStepper(undefined, EventCategory.REMOVE_MODULE)
 
   const steps = useMemo<TxStep[]>(
     () => [
       {
         txLayoutProps: { title: 'Confirm transaction' },
-        content: <ReviewRemoveModule key={0} params={{ address }} onSubmit={() => nextStep(data)} />,
+        content: <ReviewRemoveModule key={0} params={{ address }} onSubmit={() => nextStep(undefined)} />,
       },
       {
         txLayoutProps: { title: 'Confirm transaction details', fixedNonce: true },
         content: <ConfirmTxDetails key={1} onSubmit={() => {}} />,
       },
     ],
-    [nextStep, data, address],
+    [nextStep, address],
   )
 
   return (

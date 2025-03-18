@@ -12,6 +12,7 @@ import { maybePlural } from '@/utils/formatters'
 import { ConfirmTxDetails } from '@/components/tx/ConfirmTxDetails'
 import useTxStepper from '../../useTxStepper'
 import ReviewTransaction from '@/components/tx/ReviewTransaction'
+import { EventCategory } from '@/services/analytics'
 
 type ConfirmBatchProps = {
   onSubmit: () => void
@@ -40,20 +41,20 @@ const ConfirmBatch = ({ onSubmit }: ConfirmBatchProps): ReactElement => {
 
 const ConfirmBatchFlow = (props: ConfirmBatchProps) => {
   const { length } = useDraftBatch()
-  const { data, step, nextStep, prevStep } = useTxStepper({})
+  const { step, nextStep, prevStep } = useTxStepper(undefined, EventCategory.CONFIRM_BATCH)
 
   const steps = useMemo<TxStep[]>(
     () => [
       {
         txLayoutProps: { title: 'Confirm batch' },
-        content: <ConfirmBatch key={0} onSubmit={() => nextStep(data)} />,
+        content: <ConfirmBatch key={0} onSubmit={() => nextStep(undefined)} />,
       },
       {
         txLayoutProps: { title: 'Confirm transaction details', fixedNonce: true },
         content: <ConfirmTxDetails key={1} {...props} />,
       },
     ],
-    [nextStep, data, props],
+    [nextStep, props],
   )
 
   return (

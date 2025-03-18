@@ -4,6 +4,7 @@ import { ReviewRemoveGuard } from '@/components/tx-flow/flows/RemoveGuard/Review
 import useTxStepper from '../../useTxStepper'
 import { useMemo } from 'react'
 import { ConfirmTxDetails } from '@/components/tx/ConfirmTxDetails'
+import { EventCategory } from '@/services/analytics'
 
 // TODO: This can possibly be combined with the remove module type
 export type RemoveGuardFlowProps = {
@@ -11,20 +12,20 @@ export type RemoveGuardFlowProps = {
 }
 
 const RemoveGuardFlow = ({ address }: RemoveGuardFlowProps) => {
-  const { data, step, nextStep, prevStep } = useTxStepper(null)
+  const { step, nextStep, prevStep } = useTxStepper(undefined, EventCategory.REMOVE_GUARD)
 
   const steps = useMemo<TxStep[]>(
     () => [
       {
         txLayoutProps: { title: 'Confirm transaction' },
-        content: <ReviewRemoveGuard key={0} params={{ address }} onSubmit={() => nextStep(data)} />,
+        content: <ReviewRemoveGuard key={0} params={{ address }} onSubmit={() => nextStep(undefined)} />,
       },
       {
         txLayoutProps: { title: 'Confirm transaction details', fixedNonce: true },
         content: <ConfirmTxDetails key={2} onSubmit={() => {}} />,
       },
     ],
-    [nextStep, data, address],
+    [nextStep, address],
   )
 
   return (

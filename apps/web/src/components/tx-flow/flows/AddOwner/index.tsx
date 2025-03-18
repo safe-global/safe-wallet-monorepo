@@ -7,6 +7,7 @@ import SaveAddressIcon from '@/public/images/common/save-address.svg'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { ConfirmTxDetails } from '@/components/tx/ConfirmTxDetails'
 import { useMemo } from 'react'
+import { EventCategory } from '@/services/analytics'
 
 type Owner = {
   address: string
@@ -20,7 +21,7 @@ export type AddOwnerFlowProps = {
 }
 
 const FlowInner = ({ defaultValues }: { defaultValues: AddOwnerFlowProps }) => {
-  const { data, step, nextStep, prevStep } = useTxStepper<AddOwnerFlowProps>(defaultValues)
+  const { data, step, nextStep, prevStep } = useTxStepper<AddOwnerFlowProps>(defaultValues, EventCategory.ADD_OWNER)
 
   const steps = useMemo<TxStep[]>(
     () => [

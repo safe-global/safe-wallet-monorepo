@@ -7,6 +7,7 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import { ChooseThreshold } from '@/components/tx-flow/flows/ChangeThreshold/ChooseThreshold'
 import { ConfirmTxDetails } from '@/components/tx/ConfirmTxDetails'
 import { useMemo } from 'react'
+import { EventCategory } from '@/services/analytics'
 
 export enum ChangeThresholdFlowFieldNames {
   threshold = 'threshold',
@@ -19,9 +20,12 @@ export type ChangeThresholdFlowProps = {
 const ChangeThresholdFlow = () => {
   const { safe } = useSafeInfo()
 
-  const { data, step, nextStep, prevStep } = useTxStepper<ChangeThresholdFlowProps>({
-    [ChangeThresholdFlowFieldNames.threshold]: safe.threshold,
-  })
+  const { data, step, nextStep, prevStep } = useTxStepper<ChangeThresholdFlowProps>(
+    {
+      [ChangeThresholdFlowFieldNames.threshold]: safe.threshold,
+    },
+    EventCategory.CHANGE_THRESHOLD,
+  )
 
   const steps = useMemo<TxStep[]>(
     () => [

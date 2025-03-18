@@ -6,22 +6,23 @@ import SaveAddressIcon from '@/public/images/common/save-address.svg'
 import { useMemo } from 'react'
 import useTxStepper from '../../useTxStepper'
 import { ConfirmTxDetails } from '@/components/tx/ConfirmTxDetails'
+import { EventCategory } from '@/services/analytics'
 
 const RemoveSpendingLimitFlow = ({ spendingLimit }: { spendingLimit: SpendingLimitState }) => {
-  const { data, step, nextStep, prevStep } = useTxStepper(null)
+  const { step, nextStep, prevStep } = useTxStepper(undefined, EventCategory.REMOVE_SPENDING_LIMIT)
 
   const steps = useMemo<TxStep[]>(
     () => [
       {
         txLayoutProps: { title: 'Confirm transaction' },
-        content: <RemoveSpendingLimit params={spendingLimit} key={0} onSubmit={() => nextStep(data)} />,
+        content: <RemoveSpendingLimit params={spendingLimit} key={0} onSubmit={() => nextStep(undefined)} />,
       },
       {
         txLayoutProps: { title: 'Confirm transaction details', fixedNonce: true },
         content: <ConfirmTxDetails key={1} onSubmit={() => {}} />,
       },
     ],
-    [nextStep, data, spendingLimit],
+    [nextStep, spendingLimit],
   )
 
   return (
