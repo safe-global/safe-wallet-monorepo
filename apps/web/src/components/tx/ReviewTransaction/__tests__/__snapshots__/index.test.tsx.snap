@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`SignOrExecute should display a confirmation screen 1`] = `
+exports[`ReviewTransaction should display a confirmation screen 1`] = `
 <div>
   <div
     class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root css-1w4z6qv-MuiPaper-root-MuiCard-root"
@@ -449,82 +449,28 @@ exports[`SignOrExecute should display a confirmation screen 1`] = `
           </p>
         </div>
       </div>
-      <form>
-        <hr
-          class="MuiDivider-root MuiDivider-fullWidth nestedDivider css-1jpvyob-MuiDivider-root"
-        />
+      <div
+        class="MuiCardActions-root MuiCardActions-spacing css-1q4nm6f-MuiCardActions-root"
+      >
         <div
-          class="MuiCardActions-root MuiCardActions-spacing css-1q4nm6f-MuiCardActions-root"
+          class="MuiStack-root css-irtfmw-MuiStack-root"
         >
-          <div
-            class="MuiStack-root css-irtfmw-MuiStack-root"
+          <button
+            class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary css-1hp2ejb-MuiButtonBase-root-MuiButton-root"
+            data-testid="continue-sign-btn"
+            tabindex="0"
+            type="submit"
           >
-            <span
-              class=""
-              data-mui-internal-clone-element="true"
-            >
-              <span
-                data-track="batching: Add to batch"
-              >
-                <button
-                  class="MuiButtonBase-root MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeMedium MuiButton-outlinedSizeMedium MuiButton-colorPrimary MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeMedium MuiButton-outlinedSizeMedium MuiButton-colorPrimary css-16be8yl-MuiButtonBase-root-MuiButton-root"
-                  tabindex="0"
-                  type="button"
-                >
-                  <mock-icon
-                    aria-hidden=""
-                    class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-1hr8a3z-MuiSvgIcon-root"
-                    focusable="false"
-                  />
-                  Add to batch
-                </button>
-              </span>
-            </span>
-            <div
-              class="MuiBox-root css-1aqmpzz"
-            >
-               
-              <div
-                aria-orientation="horizontal"
-                class="MuiDivider-root MuiDivider-fullWidth MuiDivider-withChildren css-1lftdsp-MuiDivider-root"
-                role="separator"
-              >
-                <span
-                  class="MuiDivider-wrapper css-tuok6n-MuiDivider-wrapper"
-                >
-                  or
-                </span>
-              </div>
-            </div>
-            <span
-              aria-label="Please connect your wallet"
-              class=""
-              data-mui-internal-clone-element="true"
-            >
-              <span
-                class=""
-                data-mui-internal-clone-element="true"
-              >
-                <button
-                  class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary Mui-disabled MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary css-1hp2ejb-MuiButtonBase-root-MuiButton-root"
-                  data-testid="sign-btn"
-                  disabled=""
-                  tabindex="-1"
-                  type="submit"
-                >
-                  Sign
-                </button>
-              </span>
-            </span>
-          </div>
+            Continue
+          </button>
         </div>
-      </form>
+      </div>
     </div>
   </div>
 </div>
 `;
 
-exports[`SignOrExecute should display a loading component 1`] = `
+exports[`ReviewTransaction should display a loading component 1`] = `
 <div>
   <div
     class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root css-1w4z6qv-MuiPaper-root-MuiCard-root"
@@ -589,7 +535,7 @@ exports[`SignOrExecute should display a loading component 1`] = `
 </div>
 `;
 
-exports[`SignOrExecute should display an error screen 1`] = `
+exports[`ReviewTransaction should display an error screen 1`] = `
 <div>
   <div
     class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root css-1w4z6qv-MuiPaper-root-MuiCard-root"
@@ -787,76 +733,22 @@ exports[`SignOrExecute should display an error screen 1`] = `
           </p>
         </div>
       </div>
-      <form>
-        <hr
-          class="MuiDivider-root MuiDivider-fullWidth nestedDivider css-1jpvyob-MuiDivider-root"
-        />
+      <div
+        class="MuiCardActions-root MuiCardActions-spacing css-1q4nm6f-MuiCardActions-root"
+      >
         <div
-          class="MuiCardActions-root MuiCardActions-spacing css-1q4nm6f-MuiCardActions-root"
+          class="MuiStack-root css-irtfmw-MuiStack-root"
         >
-          <div
-            class="MuiStack-root css-irtfmw-MuiStack-root"
+          <button
+            class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary css-1hp2ejb-MuiButtonBase-root-MuiButton-root"
+            data-testid="continue-sign-btn"
+            tabindex="0"
+            type="submit"
           >
-            <span
-              class=""
-              data-mui-internal-clone-element="true"
-            >
-              <span
-                data-track="batching: Add to batch"
-              >
-                <button
-                  class="MuiButtonBase-root MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeMedium MuiButton-outlinedSizeMedium MuiButton-colorPrimary MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeMedium MuiButton-outlinedSizeMedium MuiButton-colorPrimary css-16be8yl-MuiButtonBase-root-MuiButton-root"
-                  tabindex="0"
-                  type="button"
-                >
-                  <mock-icon
-                    aria-hidden=""
-                    class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-1hr8a3z-MuiSvgIcon-root"
-                    focusable="false"
-                  />
-                  Add to batch
-                </button>
-              </span>
-            </span>
-            <div
-              class="MuiBox-root css-1aqmpzz"
-            >
-               
-              <div
-                aria-orientation="horizontal"
-                class="MuiDivider-root MuiDivider-fullWidth MuiDivider-withChildren css-1lftdsp-MuiDivider-root"
-                role="separator"
-              >
-                <span
-                  class="MuiDivider-wrapper css-tuok6n-MuiDivider-wrapper"
-                >
-                  or
-                </span>
-              </div>
-            </div>
-            <span
-              aria-label="Please connect your wallet"
-              class=""
-              data-mui-internal-clone-element="true"
-            >
-              <span
-                class=""
-                data-mui-internal-clone-element="true"
-              >
-                <button
-                  class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary Mui-disabled MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary css-1hp2ejb-MuiButtonBase-root-MuiButton-root"
-                  data-testid="sign-btn"
-                  disabled=""
-                  tabindex="-1"
-                  type="submit"
-                >
-                  Sign
-                </button>
-              </span>
-            </span>
-          </div>
+            Continue
+          </button>
         </div>
-      </form>
+      </div>
     </div>
   </div>
 </div>

@@ -5,14 +5,9 @@ import type { SafeAppData } from '@safe-global/safe-gateway-typescript-sdk'
 import ReviewSafeAppsTx from './ReviewSafeAppsTx'
 import { AppTitle } from '@/components/tx-flow/flows/SignMessage'
 import useTxStepper from '../../useTxStepper'
-import { useCallback, useContext, useMemo } from 'react'
-import { ConfirmTxDetails } from '@/components/tx/ConfirmTxDetails'
-import { asError } from '@/services/exceptions/utils'
-import { SafeTxContext } from '../../SafeTxProvider'
-import useWallet from '@/hooks/wallets/useWallet'
-import useOnboard from '@/hooks/wallets/useOnboard'
-import { dispatchSafeAppsTx } from '@/services/tx/tx-sender'
-import { trackSafeAppTxCount } from '@/services/safe-apps/track-app-usage-count'
+import { useMemo } from 'react'
+import { getTxOrigin } from '@/utils/transactions'
+import { ConfirmSafeAppsTxDetails } from './ConfirmSafeAppsTxDetails'
 
 export type SafeAppsTxParams = {
   appId?: string
@@ -29,40 +24,22 @@ const SafeAppsTxFlow = ({
   data: SafeAppsTxParams
   onSubmit?: (txId: string, safeTxHash: string) => void
 }) => {
-  const { safeTx, setSafeTxError } = useContext(SafeTxContext)
-  const onboard = useOnboard()
-  const wallet = useWallet()
   const { step, nextStep, prevStep } = useTxStepper(null)
 
-  const handleSubmit = useCallback(
-    async (txId: string) => {
-      if (!safeTx || !onboard || !wallet?.provider) return
-      trackSafeAppTxCount(Number(data.appId))
-
-      let safeTxHash = ''
-      try {
-        safeTxHash = await dispatchSafeAppsTx(safeTx, data.requestId, wallet.provider, txId)
-      } catch (error) {
-        setSafeTxError(asError(error))
-      }
-
-      onSubmit?.(txId, safeTxHash)
-    },
-    [safeTx, data, onboard, wallet, setSafeTxError, onSubmit],
-  )
+  const origin = useMemo(() => getTxOrigin(data.app), [data.app])
 
   const steps = useMemo<TxStep[]>(
     () => [
       {
         txLayoutProps: { title: 'Confirm transaction' },
-        content: <ReviewSafeAppsTx key={0} safeAppsTx={data} onSubmit={() => nextStep(null)} />,
+        content: <ReviewSafeAppsTx key={0} safeAppsTx={data} origin={origin} onSubmit={() => nextStep(null)} />,
       },
       {
         txLayoutProps: { title: 'Confirm transaction details', fixedNonce: true },
-        content: <ConfirmTxDetails key={1} onSubmit={handleSubmit} />,
+        content: <ConfirmSafeAppsTxDetails key={1} safeAppsTx={data} onSubmit={onSubmit} showMethodCall />,
       },
     ],
-    [nextStep, data, handleSubmit],
+    [nextStep, data, onSubmit, origin],
   )
   return (
     <TxLayout

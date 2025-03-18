@@ -20,7 +20,7 @@ const RejectTxFlow = ({ txNonce }: RejectTxProps): ReactElement => {
       },
       {
         txLayoutProps: { title: 'Confirm transaction details', fixedNonce: true },
-        content: <ConfirmTxDetails key={1} onSubmit={() => {}} />,
+        content: <ConfirmTxDetails key={1} onSubmit={() => {}} isRejection />,
       },
     ],
     [nextStep, data, txNonce],
