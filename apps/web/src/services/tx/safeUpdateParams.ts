@@ -110,12 +110,12 @@ export const extractTargetVersionFromUpdateSafeTx = (
     return determineMasterCopyVersion(decodedData[0], safe.chainId)
   }
 
-  const safeMigrationAddress = getSafeMigrationDeployment({ version: '1.4.1', network: safe.chainId })
+  const safeMigrationAddress = getSafeMigrationDeployment({ version: SAFE_TO_L2_MIGRATION_VERSION, network: safe.chainId })
     ?.networkAddresses[safe.chainId]
 
   // Otherwise it must be a delegate call to the SafeMigration 1.4.1 contract
   if (migrationTxData.operation === 1 && sameAddress(safeMigrationAddress, migrationTxData.to)) {
     // This contract can only migrate to 1.4.1
-    return '1.4.1'
+    return SAFE_TO_L2_MIGRATION_VERSION
   }
 }

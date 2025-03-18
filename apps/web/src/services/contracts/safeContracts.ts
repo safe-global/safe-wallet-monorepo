@@ -148,6 +148,6 @@ export const getReadOnlySignMessageLibContract = async (safeVersion: SafeInfo['v
 export const isMigrationToL2Possible = (safe: SafeInfo): boolean => {
   return (
     safe.nonce === 0 &&
-    Boolean(getSafeMigrationDeployment({ network: safe.chainId, version: '1.4.1' })?.networkAddresses[safe.chainId])
+    Boolean(getSafeMigrationDeployment({ network: safe.chainId, version: SAFE_TO_L2_MIGRATION_VERSION })?.networkAddresses[safe.chainId])
   )
 }
