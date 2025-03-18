@@ -64,5 +64,18 @@ class FCMService {
         Logger.error('registerAppWithFCM: Something went wrong', error)
       })
   }
+
+  async initNotification(): Promise<string | undefined> {
+    try {
+      await this.registerAppWithFCM()
+      await this.saveFCMToken()
+      const fcmToken = await this.getFCMToken()
+      this.listenForMessagesBackground()
+      return fcmToken
+    } catch (error) {
+      Logger.error('initNotification: Something went wrong', error)
+      return undefined
+    }
+  }
 }
 export default new FCMService()
