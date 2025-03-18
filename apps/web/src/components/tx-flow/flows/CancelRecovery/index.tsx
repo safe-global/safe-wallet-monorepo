@@ -1,6 +1,4 @@
-import { CANCEL_RECOVERY_CATEGORY } from '@/services/analytics/events/recovery'
 import { useMemo, type ReactElement } from 'react'
-
 import TxLayout from '../../common/TxLayout'
 import type { TxStep } from '../../common/TxLayout'
 import { CancelRecoveryFlowReview } from './CancelRecoveryFlowReview'
@@ -8,11 +6,12 @@ import { CancelRecoveryOverview } from './CancelRecoveryOverview'
 import useTxStepper from '../../useTxStepper'
 import type { RecoveryQueueItem } from '@/features/recovery/services/recovery-state'
 import { ConfirmTxDetails } from '@/components/tx/ConfirmTxDetails'
+import { EventCategory } from '@/services/analytics'
 
 const TITLE = 'Cancel Account recovery'
 
 function CancelRecoveryFlow({ recovery }: { recovery: RecoveryQueueItem }): ReactElement {
-  const { step, nextStep, prevStep } = useTxStepper<undefined>(undefined, CANCEL_RECOVERY_CATEGORY)
+  const { step, nextStep, prevStep } = useTxStepper<undefined>(undefined, EventCategory.CANCEL_RECOVERY)
 
   const steps = useMemo<TxStep[]>(
     () => [

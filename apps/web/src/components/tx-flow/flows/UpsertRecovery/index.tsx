@@ -1,6 +1,4 @@
-import { SETUP_RECOVERY_CATEGORY } from '@/services/analytics/events/recovery'
 import { useMemo, type ReactElement } from 'react'
-
 import TxLayout from '@/components/tx-flow/common/TxLayout'
 import type { TxStep } from '../../common/TxLayout'
 import RecoveryPlus from '@/public/images/common/recovery-plus.svg'
@@ -11,6 +9,7 @@ import { UpsertRecoveryFlowIntro as UpsertRecoveryFlowIntro } from './UpsertReco
 import { DAY_IN_SECONDS } from './useRecoveryPeriods'
 import type { RecoveryState } from '@/features/recovery/services/recovery-state'
 import { ConfirmTxDetails } from '@/components/tx/ConfirmTxDetails'
+import { EventCategory } from '@/services/analytics'
 
 export enum UpsertRecoveryFlowFields {
   recoverer = 'recoverer',
@@ -37,7 +36,7 @@ function UpsertRecoveryFlow({ delayModifier }: { delayModifier?: RecoveryState[n
       [UpsertRecoveryFlowFields.customDelay]: '',
       [UpsertRecoveryFlowFields.expiry]: delayModifier?.expiry?.toString() ?? '0',
     },
-    SETUP_RECOVERY_CATEGORY,
+    EventCategory.SETUP_RECOVERY,
   )
 
   const steps = useMemo<TxStep[]>(

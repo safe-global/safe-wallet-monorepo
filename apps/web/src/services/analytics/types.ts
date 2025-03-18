@@ -41,3 +41,11 @@ export enum AnalyticsUserProperties {
   WALLET_LABEL = 'walletLabel',
   WALLET_ADDRESS = 'walletAddress',
 }
+
+// These are used for the generic stepper flow events (Next, Back)
+export enum EventCategory {
+  SETUP_RECOVERY = 'setup-recovery',
+  START_RECOVERY = 'propose-recovery',
+  REMOVE_RECOVERY = 'remove-recovery',
+  CANCEL_RECOVERY = 'cancel-recovery',
+}
