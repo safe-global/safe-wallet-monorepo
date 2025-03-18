@@ -11,7 +11,7 @@ import useTxPreview from '../confirmation-views/useTxPreview'
 import Track from '@/components/common/Track'
 import { MODALS_EVENTS } from '@/services/analytics'
 import useWallet from '@/hooks/wallets/useWallet'
-import { isHardwareWallet } from '@/utils/wallets'
+import { isHardwareWallet, isLedgerLive } from '@/utils/wallets'
 
 const InfoSteps = [
   {
@@ -38,10 +38,10 @@ const InfoSteps = [
     ),
   },
   {
-    label: 'Third-party tools',
+    label: 'Verify with external tools',
     description: (
       <Typography>
-        You can additionally cross-verify your transaction data in an external tool like{' '}
+        You can additionally cross-verify your transaction data in a third-party tool like{' '}
         <Track {...MODALS_EVENTS.OPEN_SAFE_UTILS}>
           <ExternalLink href="https://safeutils.openzeppelin.com/">Safe Utils</ExternalLink>
         </Track>
@@ -70,7 +70,7 @@ export const ConfirmTxDetails = (props: SignOrExecuteProps) => {
   const [txPreview] = useTxPreview(safeTx?.data)
   const [checked, setChecked] = useState(false)
   const wallet = useWallet()
-  const showHashes = wallet ? isHardwareWallet(wallet) : false
+  const showHashes = wallet ? isHardwareWallet(wallet) || isLedgerLive(wallet) : false
   const steps = showHashes ? HardwareWalletStep : InfoSteps
 
   const handleCheckboxChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
