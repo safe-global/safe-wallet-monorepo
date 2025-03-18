@@ -16,6 +16,8 @@ import DashboardMembersList from '@/features/organizations/components/Dashboard/
 import { useOrgMembersByStatus } from '@/features/organizations/hooks/useOrgMembers'
 import { useIsInvited } from '@/features/organizations/hooks/useOrgMembers'
 import PreviewInvite from '../InviteBanner/PreviewInvite'
+import { ORG_EVENTS } from '@/services/analytics/events/organizations'
+import Track from '@/components/common/Track'
 
 const ViewAllLink = ({ url }: { url: LinkProps['href'] }) => {
   return (
@@ -60,14 +62,23 @@ const OrganizationsDashboard = () => {
             <Grid size={{ xs: 12, md: 8 }}>
               <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
                 <Typography variant="h5">Safe Accounts ({safes.length})</Typography>
-                {orgId && <ViewAllLink url={{ pathname: AppRoutes.organizations.safeAccounts, query: { orgId } }} />}
+                {orgId && (
+                  <Track {...ORG_EVENTS.VIEW_ALL_ACCOUNTS}>
+                    <ViewAllLink url={{ pathname: AppRoutes.organizations.safeAccounts, query: { orgId } }} />
+                  </Track>
+                )}
               </Stack>
               <SafesList safes={safesToDisplay} isOrgSafe />
             </Grid>
             <Grid size={{ xs: 12, md: 4 }}>
               <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
                 <Typography variant="h5">Members ({activeMembers.length})</Typography>
-                {orgId && <ViewAllLink url={{ pathname: AppRoutes.organizations.members, query: { orgId } }} />}
+
+                {orgId && (
+                  <Track {...ORG_EVENTS.VIEW_ALL_MEMBERS}>
+                    <ViewAllLink url={{ pathname: AppRoutes.organizations.members, query: { orgId } }} />
+                  </Track>
+                )}
               </Stack>
               <DashboardMembersList members={membersToDisplay} />
             </Grid>

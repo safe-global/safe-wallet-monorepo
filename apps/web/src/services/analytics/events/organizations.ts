@@ -65,6 +65,14 @@ export const ORG_EVENTS = {
     action: 'Delete organization',
     category: ORG_CATEGORY,
   },
+  VIEW_ALL_ACCOUNTS: {
+    action: 'View all accounts',
+    category: ORG_CATEGORY,
+  },
+  VIEW_ALL_MEMBERS: {
+    action: 'View all members',
+    category: ORG_CATEGORY,
+  },
 }
 
 export enum ORG_LABELS {
