@@ -10,8 +10,7 @@ import { useState } from 'react'
 import { MemberRole, useIsAdmin } from '@/features/organizations/hooks/useOrgMembers'
 import EditMemberDialog from '@/features/organizations/components/MembersList/EditMemberDialog'
 import { MemberStatus } from '../../hooks/useOrgMembers'
-import { ORG_EVENTS } from '@/services/analytics/events/organizations'
-import { ORG_LABELS } from '@/services/analytics/events/organizations'
+import { ORG_EVENTS, ORG_LABELS } from '@/services/analytics/events/organizations'
 import Track from '@/components/common/Track'
 
 const headCells = [
