@@ -1,0 +1,71 @@
+import { Input, InputProps, styled, View, Text } from 'tamagui'
+import React from 'react'
+
+interface Props {
+  label: string
+  error?: React.ReactNode | string
+  placeholder?: string
+  success?: boolean
+  left?: React.ReactNode
+  right?: React.ReactNode
+  testID?: string
+}
+
+const StyledInputContainer = styled(View, {
+  borderWidth: 2,
+  borderRadius: '$4',
+  borderColor: 'transparent',
+  flex: 1,
+  paddingHorizontal: '$3',
+  alignItems: 'flex-start',
+  justifyContent: 'flex-start',
+  marginBottom: '$3',
+  padding: '$3',
+  backgroundColor: '$backgroundPaperDark',
+
+  variants: {
+    error: {
+      true: {
+        borderWidth: 2,
+      },
+    },
+    success: {
+      true: {
+        // backgroundColor: 'orange',
+        borderWidth: 2,
+        borderColor: '$success',
+      },
+    },
+  },
+})
+
+const StyledInput = styled(Input, {
+  color: '$inputTextColor',
+  placeholderTextColor: '$placeholderColor',
+  borderWidth: 0,
+
+  style: {
+    borderWidth: 0,
+    backgroundColor: '$borderColorHover',
+    paddingLeft: 0,
+  },
+})
+export const SafeInputWithLabel = ({
+  label,
+  testID,
+  error,
+  success,
+  placeholder,
+  left,
+  right,
+  ...props
+}: Props & Omit<InputProps, 'left' | 'right'>) => {
+  return (
+    <StyledInputContainer testID={testID ? testID : 'safe-input-with-label'} success={success} gap={'$1'}>
+      <Text color={'$colorSecondary'}>{label}</Text>
+      <View flex={1} flexDirection="row">
+        <StyledInput size="$5" flex={1} placeholder={placeholder} {...props} />
+      </View>
+    </StyledInputContainer>
+  )
+}

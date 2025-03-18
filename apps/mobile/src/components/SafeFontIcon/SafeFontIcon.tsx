@@ -4,7 +4,7 @@ import { useFonts } from 'expo-font'
 import { IconName } from '@/src/types/iconTypes'
 import { getVariable, useTheme } from 'tamagui'
 
-export const SafeIcon = createIconSetFromIcoMoon(
+const SafeIcon = createIconSetFromIcoMoon(
   require('@/assets/fonts/safe-icons/selection.json'),
   'SafeIcons',
   'safe-icons.ttf',

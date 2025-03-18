@@ -13,17 +13,25 @@ const selectChainsData = createSelector(selectChainsResult, (result) => {
 const { selectAll: selectAllChains, selectById } = chainsAdapter.getSelectors(selectChainsData)
 
 export const selectChainById = (state: RootState, chainId: string) => selectById(state, chainId)
-export const selectAllChainsIds = createSelector([selectAllChains], (chains: Chain[]) =>
-  chains.map((chain) => chain.chainId),
-)
-export const selectActiveChainCurrency = createSelector(
+
+export const selectActiveChain = createSelector(
   [selectActiveSafe, (state: RootState) => state],
   (activeSafe, state) => {
     if (!activeSafe) {
       return null
     }
-    const chain = selectChainById(state, activeSafe.chainId)
-    return chain?.nativeCurrency
+    return selectChainById(state, activeSafe.chainId)
+  },
+)
+
+export const selectAllChainsIds = createSelector([selectAllChains], (chains: Chain[]) =>
+  chains.map((chain) => chain.chainId),
+)
+
+export const selectActiveChainCurrency = createSelector(
+  [selectActiveChain, (state: RootState) => state],
+  (activeChain) => {
+    return activeChain?.nativeCurrency
   },
 )
 

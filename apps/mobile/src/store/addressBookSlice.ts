@@ -3,9 +3,11 @@ import { AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transacti
 
 import { RootState } from '.'
 
+export type Contact = AddressInfo
+
 interface AddressBookState {
-  contacts: Record<string, AddressInfo>
-  selectedContact: AddressInfo | null
+  contacts: Record<string, Contact>
+  selectedContact: Contact | null
 }
 
 const initialState: AddressBookState = {
@@ -17,7 +19,7 @@ export const addressBookSlice = createSlice({
   name: 'addressBook',
   initialState,
   reducers: {
-    addContact: (state, action: PayloadAction<AddressInfo>) => {
+    addContact: (state, action: PayloadAction<Contact>) => {
       const contact = action.payload
       state.contacts[contact.value] = contact
     },
@@ -37,7 +39,7 @@ export const addressBookSlice = createSlice({
       state.selectedContact = addressValue ? state.contacts[addressValue] || null : null
     },
 
-    updateContact: (state, action: PayloadAction<AddressInfo>) => {
+    updateContact: (state, action: PayloadAction<Contact>) => {
       const contact = action.payload
       if (state.contacts[contact.value]) {
         state.contacts[contact.value] = {
@@ -51,7 +53,12 @@ export const addressBookSlice = createSlice({
       }
     },
 
-    addContacts: (state, action: PayloadAction<AddressInfo[]>) => {
+    upsertContact: (state, action: PayloadAction<Contact>) => {
+      const contact = action.payload
+      state.contacts[contact.value] = contact
+    },
+
+    addContacts: (state, action: PayloadAction<Contact[]>) => {
       action.payload.forEach((contact) => {
         state.contacts[contact.value] = contact
       })
@@ -59,7 +66,7 @@ export const addressBookSlice = createSlice({
   },
 })
 
-export const { addContact, removeContact, updateContact, addContacts } = addressBookSlice.actions
+export const { addContact, removeContact, updateContact, addContacts, upsertContact } = addressBookSlice.actions
 
 export const selectAddressBookState = (state: RootState) => state.addressBook
 
@@ -71,6 +78,6 @@ export const selectAllContacts = createSelector(selectAddressBookState, (address
 })
 
 export const selectContactByAddress = (address: string) =>
-  createSelector(selectAddressBookState, (addressBook) => addressBook.contacts[address] || null)
+  createSelector(selectAddressBookState, (addressBook): AddressInfo | null => addressBook.contacts[address] || null)
 
 export default addressBookSlice.reducer

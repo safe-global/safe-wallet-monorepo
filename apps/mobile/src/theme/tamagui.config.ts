@@ -129,7 +129,7 @@ export const config = createTamagui({
       primary: tokens.color.primaryMainDark,
       borderLight: tokens.color.borderLightDark,
       colorHover: tokens.color.textSecondaryDark,
-      colorSecondary: tokens.color.textSecondaryDark,
+      colorSecondary: tokens.color.primaryLightDark,
       error: tokens.color.errorMainDark,
       errorDark: tokens.color.errorDarkDark,
       errorLight: tokens.color.errorLightDark,
