@@ -48,7 +48,7 @@ const SafeCookiePolicy = () => (
     </p>
     <p>
       In this policy, &quot;we&quot;, &quot;us&quot; and &quot;our&quot; refers to Core Contributors GmbH a company
-      incorporated in Germany with its registered address at Gontardstraße 11, 10178 Berlin, Germany. The terms
+      incorporated in Germany with its registered address at c/o WeWork, Dircksenstr. 3, 10179 Berlin, Germany. The terms
       &ldquo;you&rdquo; and &ldquo;your&rdquo; includes our clients, business partners and users of this website.{' '}
     </p>
     <p>
