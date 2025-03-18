@@ -25,8 +25,9 @@ export const Navbar = () => {
   const handleNotificationAccess = () => {
     if (!isAppNotificationEnabled) {
       router.navigate('/notifications-opt-in')
+    } else {
+      router.navigate('/notifications-center')
     }
-    // TODO: navigate to notifications list when notifications are enabled
   }
 
   return (
