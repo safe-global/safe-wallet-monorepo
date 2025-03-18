@@ -6,7 +6,6 @@ import { NOTIFICATION_ACCOUNT_TYPE } from './constants'
 
 type AccountDetails = {
   address: string
-  privateKey: string
   type: NOTIFICATION_ACCOUNT_TYPE
 }
 export interface SafesSliceItem {
