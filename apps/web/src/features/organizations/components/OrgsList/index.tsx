@@ -15,6 +15,9 @@ import { useState } from 'react'
 import css from './styles.module.css'
 import { MemberStatus } from '@/features/organizations/hooks/useOrgMembers'
 import useWallet from '@/hooks/wallets/useWallet'
+import { ORG_EVENTS } from '@/services/analytics/events/organizations'
+import { ORG_LABELS } from '@/services/analytics/events/organizations'
+import Track from '@/components/common/Track'
 
 const AddOrgButton = ({ disabled }: { disabled: boolean }) => {
   const [open, setOpen] = useState(false)
@@ -106,7 +109,9 @@ const OrgsList = () => {
       <Box className={css.myOrgs}>
         <Box className={css.orgsHeader}>
           <AccountsNavigation />
-          <AddOrgButton disabled={!isUserSignedIn} />
+          <Track {...ORG_EVENTS.OPEN_CREATE_ORG_MODAL} label={ORG_LABELS.orgs_list_page}>
+            <AddOrgButton disabled={!isUserSignedIn} />
+          </Track>
         </Box>
 
         {isUserSignedIn &&

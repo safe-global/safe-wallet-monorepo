@@ -81,7 +81,7 @@ function OrgsCreationModal({ onClose }: { onClose: () => void }): ReactElement {
             <Button data-testid="cancel-btn" onClick={onClose}>
               Cancel
             </Button>
-            <Button type="submit" variant="contained" disabled={!formState.isValid} disableElevation>
+            <Button type="submit" variant="contained" disabled={!formState.isValid || isSubmitting} disableElevation>
               {isSubmitting ? <CircularProgress size={20} /> : 'Create organization'}
             </Button>
           </DialogActions>

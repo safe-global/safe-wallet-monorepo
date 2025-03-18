@@ -16,9 +16,10 @@ import CheckIcon from '@/public/images/common/check.svg'
 import CloseIcon from '@mui/icons-material/Close'
 import CreateOrgInfo from '@/public/images/orgs/create_org_info.png'
 import Image from 'next/image'
-import { ORG_EVENTS } from '@/services/analytics/events/organizations'
-import { ORG_LABELS } from '@/services/analytics/events/organizations'
+import { AppRoutes } from '@/config/routes'
+import Link from 'next/link'
 import { trackEvent } from '@/services/analytics'
+import { ORG_EVENTS, ORG_LABELS } from '@/services/analytics/events/organizations'
 
 const ListIcon = () => (
   <ListItemIcon
@@ -43,13 +44,7 @@ const ListIcon = () => (
   </ListItemIcon>
 )
 
-const OrgsInfoModal = ({ onClose, onCreate }: { onClose: () => void; onCreate: () => void }) => {
-  const handleCreate = () => {
-    trackEvent({ ...ORG_EVENTS.OPEN_CREATE_ORG_MODAL, label: ORG_LABELS.info_modal })
-    onClose()
-    onCreate()
-  }
-
+const OrgsInfoModal = ({ onClose }: { onClose: () => void }) => {
   return (
     <Dialog open PaperProps={{ style: { width: '870px', maxWidth: '98%', borderRadius: '16px' } }} onClose={onClose}>
       <DialogContent dividers sx={{ p: 0, border: 0 }}>
@@ -91,9 +86,15 @@ const OrgsInfoModal = ({ onClose, onCreate }: { onClose: () => void; onCreate: (
             </List>
 
             <Stack gap={2} mt="auto">
-              <Button variant="contained" color="primary" onClick={handleCreate}>
-                Create an organization
-              </Button>
+              <Link href={AppRoutes.welcome.organizations} passHref legacyBehavior>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={() => trackEvent({ ...ORG_EVENTS.OPEN_ORGS_LIST_PAGE, label: ORG_LABELS.info_modal })}
+                >
+                  Create an organization
+                </Button>
+              </Link>
 
               <Button variant="text" color="primary" onClick={onClose}>
                 Maybe later
@@ -114,7 +115,7 @@ const OrgsInfoModal = ({ onClose, onCreate }: { onClose: () => void; onCreate: (
             right: 0,
             p: 1,
             m: 1,
-            color: 'background.paper',
+            color: '#ffffff',
           }}
         >
           <CloseIcon />

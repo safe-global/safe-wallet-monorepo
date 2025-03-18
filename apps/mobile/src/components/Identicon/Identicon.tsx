@@ -10,7 +10,7 @@ type Props = {
 }
 
 const DEFAULT_SIZE = 56
-export const Identicon = ({ address, rounded, size }: Props) => {
+export const Identicon = ({ address, rounded = true, size }: Props) => {
   size = size ? size : DEFAULT_SIZE
 
   const blockieSvg = bloSvg(address)

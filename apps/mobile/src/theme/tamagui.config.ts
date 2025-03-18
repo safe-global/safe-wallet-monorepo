@@ -7,6 +7,7 @@ import { tokens } from '@/src/theme/tokens'
 import { createAnimations } from '@tamagui/animations-moti'
 import { inputTheme } from '../components/SafeInput/theme'
 import { safeTabTheme } from '@/src/components/SafeTab/theme'
+import { SafeListItemTheme } from '@/src/components/SafeListItem/theme'
 
 const DmSansFont = createDmSansFont({
   face: {
@@ -111,12 +112,7 @@ export const config = createTamagui({
     dark_settings: {
       background: tokens.color.backgroundPaperDark,
     },
-    light_safe_list: {
-      background: tokens.color.backgroundPaperLight,
-    },
-    dark_safe_list: {
-      background: tokens.color.backgroundDefaultDark,
-    },
+    ...SafeListItemTheme,
     dark: {
       background: tokens.color.backgroundDefaultDark,
       backgroundSecondary: tokens.color.backgroundSecondaryDark,

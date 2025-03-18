@@ -1,9 +1,10 @@
 import { Box, Button, Stack, Typography } from '@mui/material'
 import Track from '@/components/common/Track'
-import OrgsCreationModal from '../OrgsCreationModal'
 import OrgsInfoModal from '../OrgsInfoModal'
 import { useState } from 'react'
 import { ORG_EVENTS, ORG_LABELS } from '@/services/analytics/events/organizations'
+import Link from 'next/link'
+import { AppRoutes } from '@/config/routes'
 
 const gradientBg = {
   background: 'linear-gradient(225deg, rgba(95, 221, 255, 0.15) 12.5%, rgba(18, 255, 128, 0.15) 88.07%)',
@@ -11,7 +12,6 @@ const gradientBg = {
 
 const OrgsDashboardWidget = () => {
   const [isInfoOpen, setIsInfoOpen] = useState<boolean>(false)
-  const [isCreationOpen, setIsCreationOpen] = useState<boolean>(false)
 
   return (
     <>
@@ -36,15 +36,14 @@ const OrgsDashboardWidget = () => {
             </Button>
           </Track>
 
-          <Track {...ORG_EVENTS.OPEN_CREATE_ORG_MODAL} label={ORG_LABELS.safe_dashboard_banner}>
-            <Button variant="contained" onClick={() => setIsCreationOpen(true)}>
-              Try now
-            </Button>
+          <Track {...ORG_EVENTS.OPEN_ORGS_LIST_PAGE} label={ORG_LABELS.safe_dashboard_banner}>
+            <Link href={AppRoutes.welcome.organizations} passHref>
+              <Button variant="contained">Try now</Button>
+            </Link>
           </Track>
         </Stack>
       </Stack>
-      {isInfoOpen && <OrgsInfoModal onCreate={() => setIsCreationOpen(true)} onClose={() => setIsInfoOpen(false)} />}
-      {isCreationOpen && <OrgsCreationModal onClose={() => setIsCreationOpen(false)} />}
+      {isInfoOpen && <OrgsInfoModal onClose={() => setIsInfoOpen(false)} />}
     </>
   )
 }

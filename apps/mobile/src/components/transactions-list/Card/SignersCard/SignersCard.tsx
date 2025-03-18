@@ -45,7 +45,7 @@ export function SignersCard({ onPress, name, transparent = true, address, rightN
       }
       leftNode={
         <View width="$10">
-          <Identicon address={address} rounded size={40} />
+          <Identicon address={address} size={40} />
         </View>
       }
       rightNode={rightNode}
