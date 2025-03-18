@@ -8,7 +8,7 @@ import { assertValidSafeVersion } from '@/hooks/coreSDK/safeCoreSDK'
 import { SAFE_FEATURES } from '@safe-global/protocol-kit/dist/src/utils/safeVersions'
 import { hasSafeFeature } from '@/utils/safe-versions'
 import { getLatestSafeVersion } from '@/utils/chains'
-import { createUpdateMigration } from '@/utils/safe-migrations'
+import { createUpdateMigration, SAFE_TO_L2_MIGRATION_VERSION } from '@/utils/safe-migrations'
 import { isMultiSendCalldata } from '@/utils/transaction-calldata'
 import { decodeMultiSendData } from '@safe-global/protocol-kit/dist/src/utils'
 import { Gnosis_safe__factory } from '@/types/contracts/factories/@safe-global/safe-deployments/dist/assets/v1.1.1'
@@ -110,8 +110,10 @@ export const extractTargetVersionFromUpdateSafeTx = (
     return determineMasterCopyVersion(decodedData[0], safe.chainId)
   }
 
-  const safeMigrationAddress = getSafeMigrationDeployment({ version: SAFE_TO_L2_MIGRATION_VERSION, network: safe.chainId })
-    ?.networkAddresses[safe.chainId]
+  const safeMigrationAddress = getSafeMigrationDeployment({
+    version: SAFE_TO_L2_MIGRATION_VERSION,
+    network: safe.chainId,
+  })?.networkAddresses[safe.chainId]
 
   // Otherwise it must be a delegate call to the SafeMigration 1.4.1 contract
   if (migrationTxData.operation === 1 && sameAddress(safeMigrationAddress, migrationTxData.to)) {
