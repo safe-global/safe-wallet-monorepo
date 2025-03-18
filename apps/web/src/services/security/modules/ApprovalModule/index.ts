@@ -24,7 +24,7 @@ export type Approval = {
   spender: any
   amount: any
   tokenAddress: string
-  method: 'approve' | 'increaseAllowance' | 'Permit2'
+  method: 'approve' | 'increaseAllowance' | 'Permit2' | 'Permit'
   transactionIndex: number
 }
 
@@ -99,6 +99,20 @@ export class ApprovalModule implements SecurityModule<ApprovalModuleRequest, App
             spender,
             transactionIndex: idx,
           })
+        })
+      }
+    } else if (normalizedMessage.primaryType === 'Permit' && normalizedMessage.types['Permit'] !== undefined) {
+      const spender = normalizedMessage.message['spender'] as string
+      const amount = BigInt(normalizedMessage.message['value'] as string)
+      const tokenAddress = normalizedMessage.domain.verifyingContract
+
+      if (tokenAddress) {
+        approvalInfos.push({
+          method: 'Permit',
+          spender,
+          transactionIndex: 0,
+          amount,
+          tokenAddress,
         })
       }
     }
