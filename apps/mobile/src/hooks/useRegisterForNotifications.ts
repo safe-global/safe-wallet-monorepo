@@ -18,6 +18,7 @@ import { useNotificationPayload } from './useNotificationPayload'
 import { ERROR_MSG } from '../store/constants'
 import { getSigner } from '../utils/notifications'
 import { useNotificationGTWPermissions } from './useNotificationGTWPermissions'
+import { useSign } from './useSign/useSign'
 
 type RegisterForNotificationsProps = {
   loading: boolean
@@ -32,6 +33,11 @@ interface NotificationsProps {
   error: string | null
 }
 
+// Helper to create a key ID for the delegate key in keychain
+const getDelegateKeyId = (safeAddress: string, delegateAddress: string): string => {
+  return `delegate_${safeAddress}_${delegateAddress}`
+}
+
 const useRegisterForNotifications = (): NotificationsProps => {
   // Local states
   const [loading, setLoading] = useState(false)
@@ -40,6 +46,7 @@ const useRegisterForNotifications = (): NotificationsProps => {
   const { data: nonceData } = useAuthGetNonceV1Query()
   const { registerForNotificationsOnBackEnd, unregisterForNotificationsOnBackEnd } = useGTW()
   const { getNotificationRegisterPayload } = useNotificationPayload()
+  const { storePrivateKey, getPrivateKey } = useSign()
   // Redux
   const dispatch = useAppDispatch()
   const activeSafe = useDefinedActiveSafe()
@@ -58,13 +65,9 @@ const useRegisterForNotifications = (): NotificationsProps => {
     try {
       setLoading(true)
       setError(null)
-      // Step 1 - Set up Firebase Cloud Messaging steps
-      await FCMService.registerAppWithFCM()
-      await FCMService.saveFCMToken()
-      const fcmToken = await FCMService.getFCMToken()
-      FCMService.listenForMessagesBackground()
+      const fcmToken = await FCMService.initNotification()
 
-      /* Step 3 - Create a new random (delegated) private key to avoid exposing the subscriber's private key
+      /* IMPORTANT - Create a new random (delegated) private key to avoid exposing the subscriber's private key
        *
        * This key will be used to register for notifications on the backend
        * avoiding the prompt to grant notifications permission
@@ -80,13 +83,26 @@ const useRegisterForNotifications = (): NotificationsProps => {
         }
       }
 
+      // Store the private key in the keychain with default protection (no biometrics)
+      const delegateKeyId = getDelegateKeyId(activeSafe.address, randomDelegatedAccount.address)
+      const storeSuccess = await storePrivateKey(delegateKeyId, randomDelegatedAccount.privateKey, {
+        requireAuthentication: false,
+      })
+
+      if (!storeSuccess) {
+        setLoading(false)
+        setError('Failed to securely store delegate key')
+        return {
+          loading,
+          error,
+        }
+      }
+
       const accountDetails = {
         address: randomDelegatedAccount.address,
-        privateKey: randomDelegatedAccount.privateKey, // This is the private key that will be used to sign the message for notification registration only
         type: accountType,
       }
 
-      // Step 5 - Store the random delegated account in the Redux store
       dispatch(
         addOrUpdateDelegatedAccount({
           accountDetails,
@@ -94,11 +110,11 @@ const useRegisterForNotifications = (): NotificationsProps => {
         }),
       )
 
-      const signer = getSigner(randomDelegatedAccount.privateKey)
       const { siweMessage } = await getNotificationRegisterPayload({
         nonce: nonceData?.nonce,
-        signer,
+        signer: randomDelegatedAccount,
       })
+
       if (!fcmToken) {
         setLoading(false)
         setError(ERROR_MSG)
@@ -110,7 +126,7 @@ const useRegisterForNotifications = (): NotificationsProps => {
 
       registerForNotificationsOnBackEnd({
         safeAddress: activeSafe.address,
-        signer: signer,
+        signer: randomDelegatedAccount,
         message: siweMessage,
         chainId: activeSafe.chainId,
         fcmToken,
@@ -135,10 +151,9 @@ const useRegisterForNotifications = (): NotificationsProps => {
       loading,
       error,
     }
-  }, [nonceData, activeSafe])
+  }, [nonceData, activeSafe, storePrivateKey])
 
   const unregisterForNotifications = useCallback(async () => {
-    // Step 1 - Get the payload to unregister for notifications
     try {
       setLoading(true)
       setError(null)
@@ -156,12 +171,14 @@ const useRegisterForNotifications = (): NotificationsProps => {
           error,
         }
       }
-      const delegatedAccount = delegatedAccounts[delegatedAddress]
-      const privateKey = delegatedAccount?.accountDetails.privateKey
+
+      // Retrieve the private key from the keychain
+      const delegateKeyId = getDelegateKeyId(activeSafe.address, delegatedAddress)
+      const privateKey = await getPrivateKey(delegateKeyId, { requireAuthentication: false })
 
       if (!privateKey) {
         setLoading(false)
-        setError(ERROR_MSG)
+        setError('Failed to retrieve delegate key')
         return {
           loading,
           error,
@@ -175,7 +192,7 @@ const useRegisterForNotifications = (): NotificationsProps => {
         signer,
       })
 
-      // Step 2 - Triggers the final step on the backend
+      // Triggers the final step on the backend
       unregisterForNotificationsOnBackEnd({
         signer,
         message: siweMessage,
@@ -196,7 +213,7 @@ const useRegisterForNotifications = (): NotificationsProps => {
       loading,
       error,
     }
-  }, [nonceData])
+  }, [nonceData, activeSafe, getPrivateKey])
 
   const updatePermissionsForNotifications = useCallback(async () => {
     try {
@@ -217,8 +234,10 @@ const useRegisterForNotifications = (): NotificationsProps => {
           error,
         }
       }
-      const delegatedAccount = delegatedAccounts[delegatedAddress]
-      const privateKey = delegatedAccount?.accountDetails.privateKey
+
+      // Retrieve the private key from the keychain
+      const delegateKeyId = getDelegateKeyId(activeSafe.address, delegatedAddress)
+      const privateKey = await getPrivateKey(delegateKeyId, { requireAuthentication: false })
 
       if (!privateKey || !fcmToken) {
         setLoading(false)
@@ -230,6 +249,7 @@ const useRegisterForNotifications = (): NotificationsProps => {
       }
 
       const signer = getSigner(privateKey)
+      const delegatedAccount = delegatedAccounts[delegatedAddress]
 
       const { siweMessage } = await getNotificationRegisterPayload({
         nonce: nonceData?.nonce,
@@ -258,7 +278,7 @@ const useRegisterForNotifications = (): NotificationsProps => {
       loading,
       error,
     }
-  }, [nonceData])
+  }, [nonceData, activeSafe, getPrivateKey])
 
   return {
     registerForNotifications,
