@@ -40,6 +40,10 @@ export const MODALS_EVENTS = {
     action: 'Open Safe Utils',
     category: MODALS_CATEGORY,
   },
+  SIGNING_ARTICLE: {
+    action: 'Open signing article',
+    category: MODALS_CATEGORY,
+  },
   SIMULATE_TX: {
     action: 'Simulate transaction',
     category: MODALS_CATEGORY,

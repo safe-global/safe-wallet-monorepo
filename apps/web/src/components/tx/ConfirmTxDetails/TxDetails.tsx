@@ -9,10 +9,12 @@ import type { ReactElement, ReactNode } from 'react'
 import { isNumber, isString } from 'lodash'
 import { Operation, type TransactionData } from '@safe-global/safe-gateway-typescript-sdk/dist/types/transactions'
 import { HexEncodedData } from '@/components/transactions/HexEncodedData'
+import { SafeTxHashDataRow } from '@/components/transactions/TxDetails/Summary/SafeTxHashDataRow'
 
 type TxDetailsProps = {
   safeTx: SafeTransaction
   txData?: TransactionData
+  showHashes: boolean
 }
 
 const TxDetailsRow = ({
@@ -38,7 +40,7 @@ const TxDetailsRow = ({
   </Stack>
 )
 
-export const TxDetails = ({ safeTx, txData }: TxDetailsProps) => {
+export const TxDetails = ({ safeTx, txData, showHashes }: TxDetailsProps) => {
   const toInfo = txData?.addressInfoIndex?.[safeTx.data.to] || txData?.to
   const toName = toInfo?.name || (toInfo && 'displayName' in toInfo ? String(toInfo.displayName || '') : undefined)
   const toLogo = toInfo?.logoUri
@@ -62,7 +64,17 @@ export const TxDetails = ({ safeTx, txData }: TxDetailsProps) => {
               <Divider sx={{ mb: 1 }} />
 
               <Stack spacing={1} divider={<Divider />}>
-                <TxDetailsRow label="Primary type">SafeTx</TxDetailsRow>
+                {showHashes && (
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      '& p': { color: 'text.secondary', fontSize: '14px' },
+                      '& div': { flexWrap: 'wrap', width: '100%' },
+                    }}
+                  >
+                    <SafeTxHashDataRow safeTxData={safeTx.data} />
+                  </Typography>
+                )}
 
                 <TxDetailsRow label="To">
                   {toName || toLogo ? (

@@ -79,7 +79,7 @@ export const getConnectedWallet = (wallets: WalletState[]): ConnectedWallet | nu
   }
 }
 
-const getWalletConnectLabel = async (wallet: ConnectedWallet): Promise<string | undefined> => {
+export const getWalletConnectLabel = (wallet: ConnectedWallet): string | undefined => {
   const UNKNOWN_PEER = 'Unknown'
   if (!isWalletConnect(wallet)) return
   const { connector } = wallet.provider as unknown as any
@@ -90,16 +90,13 @@ const getWalletConnectLabel = async (wallet: ConnectedWallet): Promise<string | 
 const trackWalletType = (wallet: ConnectedWallet) => {
   trackEvent({ ...WALLET_EVENTS.CONNECT, label: wallet.label })
 
-  getWalletConnectLabel(wallet)
-    .then((wcLabel) => {
-      if (wcLabel) {
-        trackEvent({
-          ...WALLET_EVENTS.WALLET_CONNECT,
-          label: wcLabel,
-        })
-      }
+  const wcLabel = getWalletConnectLabel(wallet)
+  if (wcLabel) {
+    trackEvent({
+      ...WALLET_EVENTS.WALLET_CONNECT,
+      label: wcLabel,
     })
-    .catch(() => null)
+  }
 }
 
 let isConnecting = false
