@@ -612,6 +612,7 @@ export function checkTwapSettlement(index, sentValue, receivedValue) {
 }
 
 export function getTwapInitialData() {
+  cy.wait(1000)
   let formData = {}
 
   return cy
