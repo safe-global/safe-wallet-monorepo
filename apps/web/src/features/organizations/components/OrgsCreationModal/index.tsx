@@ -9,6 +9,8 @@ import AccountBalanceIcon from '@mui/icons-material/AccountBalance'
 import ModalDialog from '@/components/common/ModalDialog'
 import NameInput from '@/components/common/NameInput'
 import { AppRoutes } from '@/config/routes'
+import { trackEvent } from '@/services/analytics'
+import { ORG_EVENTS } from '@/services/analytics/events/organizations'
 
 function OrgsCreationModal({ onClose }: { onClose: () => void }): ReactElement {
   const [error, setError] = useState<string>()
@@ -23,6 +25,7 @@ function OrgsCreationModal({ onClose }: { onClose: () => void }): ReactElement {
 
     try {
       setIsSubmitting(true)
+      trackEvent({ ...ORG_EVENTS.CREATE_ORG })
       const response = await createOrgWithUser({ createOrganizationDto: { name: data.name } })
 
       if (response.data) {

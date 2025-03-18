@@ -4,6 +4,8 @@ import PlusIcon from '@/public/images/common/plus.svg'
 import { useState } from 'react'
 import AddMembersModal from '../AddMembersModal'
 import MemberName from '../MembersList/MemberName'
+import { ORG_EVENTS, ORG_LABELS } from '@/services/analytics/events/organizations'
+import Track from '@/components/common/Track'
 
 const DashboardMembersList = ({ members }: { members: UserOrganization[] }) => {
   const [openAddMembersModal, setOpenAddMembersModal] = useState(false)
@@ -17,9 +19,11 @@ const DashboardMembersList = ({ members }: { members: UserOrganization[] }) => {
           </Box>
         ))}
         <Box display="flex" justifyContent="center">
-          <Button size="small" variant="text" startIcon={<PlusIcon />} onClick={() => setOpenAddMembersModal(true)}>
-            Add member
-          </Button>
+          <Track {...ORG_EVENTS.OPEN_ADD_MEMBER_MODAL} label={ORG_LABELS.org_dashboard}>
+            <Button size="small" variant="text" startIcon={<PlusIcon />} onClick={() => setOpenAddMembersModal(true)}>
+              Add member
+            </Button>
+          </Track>
         </Box>
       </Paper>
       {openAddMembersModal && <AddMembersModal onClose={() => setOpenAddMembersModal(false)} />}

@@ -16,6 +16,9 @@ import CheckIcon from '@/public/images/common/check.svg'
 import CloseIcon from '@mui/icons-material/Close'
 import CreateOrgInfo from '@/public/images/orgs/create_org_info.png'
 import Image from 'next/image'
+import { ORG_EVENTS } from '@/services/analytics/events/organizations'
+import { ORG_LABELS } from '@/services/analytics/events/organizations'
+import { trackEvent } from '@/services/analytics'
 
 const ListIcon = () => (
   <ListItemIcon
@@ -42,6 +45,7 @@ const ListIcon = () => (
 
 const OrgsInfoModal = ({ onClose, onCreate }: { onClose: () => void; onCreate: () => void }) => {
   const handleCreate = () => {
+    trackEvent({ ...ORG_EVENTS.OPEN_CREATE_ORG_MODAL, label: ORG_LABELS.info_modal })
     onClose()
     onCreate()
   }

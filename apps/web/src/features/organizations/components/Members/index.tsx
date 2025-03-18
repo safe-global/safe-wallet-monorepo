@@ -8,6 +8,9 @@ import { useMembersSearch } from '@/features/organizations/hooks/useMembersSearc
 import { useIsInvited, useOrgMembersByStatus } from '@/features/organizations/hooks/useOrgMembers'
 import { useIsAdmin } from '@/features/organizations/hooks/useOrgMembers'
 import PreviewInvite from '../InviteBanner/PreviewInvite'
+import { ORG_LABELS } from '@/services/analytics/events/organizations'
+import Track from '@/components/common/Track'
+import { ORG_EVENTS } from '@/services/analytics/events/organizations'
 
 const OrganizationMembers = () => {
   const [openAddMembersModal, setOpenAddMembersModal] = useState(false)
@@ -53,9 +56,11 @@ const OrganizationMembers = () => {
           size="small"
         />
         {isAdmin && (
-          <Button variant="contained" startIcon={<PlusIcon />} onClick={() => setOpenAddMembersModal(true)}>
-            Add member
-          </Button>
+          <Track {...ORG_EVENTS.OPEN_ADD_MEMBER_MODAL} label={ORG_LABELS.members_page}>
+            <Button variant="contained" startIcon={<PlusIcon />} onClick={() => setOpenAddMembersModal(true)}>
+              Add member
+            </Button>
+          </Track>
         )}
       </Stack>
       <>

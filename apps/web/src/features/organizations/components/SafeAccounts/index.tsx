@@ -9,6 +9,9 @@ import { useOrgSafes } from '@/features/organizations/hooks/useOrgSafes'
 import { useSafesSearch } from '@/features/myAccounts/hooks/useSafesSearch'
 import { useIsAdmin, useIsInvited } from '@/features/organizations/hooks/useOrgMembers'
 import PreviewInvite from '../InviteBanner/PreviewInvite'
+import { ORG_LABELS } from '@/services/analytics/events/organizations'
+import { ORG_EVENTS } from '@/services/analytics/events/organizations'
+import Track from '@/components/common/Track'
 
 const OrganizationSafeAccounts = () => {
   const [searchQuery, setSearchQuery] = useState('')
@@ -53,7 +56,11 @@ const OrganizationSafeAccounts = () => {
           size="small"
         />
 
-        {isAdmin && <AddAccounts />}
+        {isAdmin && (
+          <Track {...ORG_EVENTS.OPEN_ADD_ACCOUNTS_MODAL} label={ORG_LABELS.accounts_page}>
+            <AddAccounts />
+          </Track>
+        )}
       </Stack>
 
       {searchQuery && filteredSafes.length === 0 ? (

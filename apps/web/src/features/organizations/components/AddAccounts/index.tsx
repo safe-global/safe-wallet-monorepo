@@ -26,6 +26,9 @@ import {
 } from '@mui/material'
 import React, { useCallback, useMemo, useState } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
+import { trackEvent } from '@/services/analytics'
+import { ORG_EVENTS } from '@/services/analytics/events/organizations'
+import Track from '@/components/common/Track'
 
 export type AddAccountsFormValues = {
   selectedSafes: Record<string, boolean>
@@ -68,6 +71,7 @@ const AddAccounts = () => {
   const selectedSafesLength = getSelectedSafes(selectedSafes).length
 
   const onSubmit = handleSubmit(async (data) => {
+    trackEvent({ ...ORG_EVENTS.ADD_ACCOUNTS })
     const safesToAdd = getSelectedSafes(data.selectedSafes).map(([key]) => {
       const [chainId, address] = key.split(':')
       return { chainId, address }
@@ -167,7 +171,9 @@ const AddAccounts = () => {
                   {searchQuery ? <SafesList safes={filteredSafes} /> : <SafesList safes={allSafes} />}
 
                   <Box p={2}>
-                    <AddManually handleAddSafe={handleAddSafe} />
+                    <Track {...ORG_EVENTS.ADD_ACCOUNT_MANUALLY}>
+                      <AddManually handleAddSafe={handleAddSafe} />
+                    </Track>
                   </Box>
                   <DialogActions>
                     <Button onClick={handleClose}>Cancel</Button>

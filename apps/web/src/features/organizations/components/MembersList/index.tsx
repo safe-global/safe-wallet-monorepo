@@ -10,6 +10,9 @@ import { useState } from 'react'
 import { MemberRole, useIsAdmin } from '@/features/organizations/hooks/useOrgMembers'
 import EditMemberDialog from '@/features/organizations/components/MembersList/EditMemberDialog'
 import { MemberStatus } from '../../hooks/useOrgMembers'
+import { ORG_EVENTS } from '@/services/analytics/events/organizations'
+import { ORG_LABELS } from '@/services/analytics/events/organizations'
+import Track from '@/components/common/Track'
 
 const headCells = [
   {
@@ -63,9 +66,14 @@ export const RemoveMemberButton = ({
         placement="top"
       >
         <Box component="span">
-          <IconButton disabled={disabled} onClick={() => setOpenRemoveMemberDialog(true)} size="small">
-            <SvgIcon component={DeleteIcon} inheritViewBox color={disabled ? 'disabled' : 'error'} fontSize="small" />
-          </IconButton>
+          <Track
+            {...ORG_EVENTS.OPEN_REMOVE_MEMBER_MODAL}
+            label={isInvite ? ORG_LABELS.invite_list : ORG_LABELS.member_list}
+          >
+            <IconButton disabled={disabled} onClick={() => setOpenRemoveMemberDialog(true)} size="small">
+              <SvgIcon component={DeleteIcon} inheritViewBox color={disabled ? 'disabled' : 'error'} fontSize="small" />
+            </IconButton>
+          </Track>
         </Box>
       </Tooltip>
       {openRemoveMemberDialog && (

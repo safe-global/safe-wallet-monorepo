@@ -3,6 +3,8 @@ import Image from 'next/image'
 import { Typography, Paper, Box, Stack } from '@mui/material'
 import EmptyDashboard from '@/public/images/orgs/empty_dashboard.png'
 import css from './styles.module.css'
+import { ORG_EVENTS, ORG_LABELS } from '@/services/analytics/events/organizations'
+import Track from '@/components/common/Track'
 
 const AddAccountsCard = () => {
   return (
@@ -18,7 +20,9 @@ const AddAccountsCard = () => {
             can be added to the organisation space.
           </Typography>
 
-          <AddAccounts />
+          <Track {...ORG_EVENTS.OPEN_ADD_ACCOUNTS_MODAL} label={ORG_LABELS.org_dashboard_card}>
+            <AddAccounts />
+          </Track>
         </Box>
 
         <Box>

@@ -3,6 +3,7 @@ import Track from '@/components/common/Track'
 import OrgsCreationModal from '../OrgsCreationModal'
 import OrgsInfoModal from '../OrgsInfoModal'
 import { useState } from 'react'
+import { ORG_EVENTS, ORG_LABELS } from '@/services/analytics/events/organizations'
 
 const gradientBg = {
   background: 'linear-gradient(225deg, rgba(95, 221, 255, 0.15) 12.5%, rgba(18, 255, 128, 0.15) 88.07%)',
@@ -29,13 +30,13 @@ const OrgsDashboardWidget = () => {
         </Box>
 
         <Stack direction="row" gap={2} alignItems="center">
-          <Track action="" category="" label="dashboard">
+          <Track {...ORG_EVENTS.INFO_MODAL} label={ORG_LABELS.safe_dashboard_banner}>
             <Button variant="outlined" onClick={() => setIsInfoOpen(true)}>
               Learn more
             </Button>
           </Track>
 
-          <Track action="" category="" label="dashboard">
+          <Track {...ORG_EVENTS.OPEN_CREATE_ORG_MODAL} label={ORG_LABELS.safe_dashboard_banner}>
             <Button variant="contained" onClick={() => setIsCreationOpen(true)}>
               Try now
             </Button>
