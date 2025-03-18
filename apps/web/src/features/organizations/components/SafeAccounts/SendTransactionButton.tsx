@@ -54,9 +54,6 @@ const SendTransactionButton = ({ safe }: { safe: SafeOverview }) => {
   const onNewTxClick = async () => {
     await setActiveSafe()
 
-    // TODO: Otherwise the tx flow immediately closes again (still does sometimes)
-    await sleep(500)
-
     setTxFlow(<TokenTransferFlow />, resetActiveSafe, false)
   }
 
