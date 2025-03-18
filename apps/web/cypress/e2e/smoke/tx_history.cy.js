@@ -47,7 +47,7 @@ describe('[SMOKE] Tx history tests', () => {
     createTx.verifySummaryByName(
       typeSend.title,
       null,
-      [typeSend.summaryTxInfo, typeGeneral.statusOk],
+      [typeSend.summaryTxInfo2, typeGeneral.statusOk],
       typeSend.altImage,
       typeSend.altToken,
     )
