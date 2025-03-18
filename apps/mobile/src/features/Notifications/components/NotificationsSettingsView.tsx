@@ -9,7 +9,7 @@ type Props = {
   onChange: () => void
   value: boolean
 }
-export const NotificationView = ({ onChange, value }: Props) => {
+export const NotificationsSettingsView = ({ onChange, value }: Props) => {
   const { getAccountType } = useNotificationGTWPermissions()
 
   return (

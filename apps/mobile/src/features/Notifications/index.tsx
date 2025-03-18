@@ -1,4 +1,4 @@
-import { NotificationsContainer } from './Notifications.container'
+import { NotificationsSettingsContainer } from './NotificationsSettings.container'
 import { NotificationsCenterContainer } from './NotificationsCenter.container'
 
-export { NotificationsContainer, NotificationsCenterContainer }
+export { NotificationsSettingsContainer, NotificationsCenterContainer }
