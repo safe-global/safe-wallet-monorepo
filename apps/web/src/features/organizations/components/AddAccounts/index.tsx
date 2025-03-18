@@ -13,6 +13,7 @@ import { getComparator } from '@/features/myAccounts/utils/utils'
 import { useAppSelector } from '@/store'
 import { selectOrderByPreference } from '@/store/orderByPreferenceSlice'
 import {
+  Alert,
   Box,
   Button,
   Card,
@@ -38,6 +39,7 @@ function getSelectedSafes(safes: AddAccountsFormValues['selectedSafes']) {
 const AddAccounts = () => {
   const [open, setOpen] = useState<boolean>(false)
   const [searchQuery, setSearchQuery] = useState('')
+  const [error, setError] = useState<string>()
   const [manualSafes, setManualSafes] = useState<SafeItems>([])
 
   const { orderBy } = useAppSelector(selectOrderByPreference)
@@ -80,12 +82,14 @@ const AddAccounts = () => {
       })
 
       if (result.error) {
-        // TODO: Handle error message
+        // TODO: Add error handler and display more specific error
+        setError('Something went wrong adding one or more Safe Accounts')
+        return
       }
+
+      handleClose()
     } catch (e) {
       console.log(e)
-    } finally {
-      handleClose()
     }
   })
 
@@ -169,6 +173,13 @@ const AddAccounts = () => {
                   <Box p={2}>
                     <AddManually handleAddSafe={handleAddSafe} />
                   </Box>
+
+                  {error && (
+                    <Alert severity="error" sx={{ m: 2, mt: 0 }}>
+                      {error}
+                    </Alert>
+                  )}
+
                   <DialogActions>
                     <Button onClick={handleClose}>Cancel</Button>
                     <Button variant="contained" disabled={selectedSafesLength === 0} type="submit">
