@@ -10,6 +10,7 @@ import { SafeOverviewResult } from '@safe-global/store/gateway/types'
 import { makeSafeId } from '@/src/utils/formatters'
 import { POLLING_INTERVAL } from '@/src/config/constants'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
+import { formatCurrency } from '@safe-global/utils/formatNumber'
 
 export const NetworksSheetContainer = () => {
   const dispatch = useAppDispatch()
@@ -45,7 +46,7 @@ export const NetworksSheetContainer = () => {
             onClose()
           }}
           activeChain={activeChain}
-          fiatTotal={item.fiatTotal}
+          fiatTotal={formatCurrency(item.fiatTotal, 'usd')}
           chains={chains}
           chainId={item.chainId}
           key={item.chainId}

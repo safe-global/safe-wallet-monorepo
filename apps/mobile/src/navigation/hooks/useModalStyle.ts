@@ -1,6 +1,7 @@
-import { Dimensions, Platform } from 'react-native'
+import { Platform } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { getTokenValue } from 'tamagui'
+import { useWindowDimensions } from 'react-native'
 
 /**
  * This is a necessary workaround around this bug:
@@ -10,7 +11,7 @@ import { getTokenValue } from 'tamagui'
  * For some reason the height of the View is wrong, when the view is inside a Modal.
  */
 export const useModalStyle = () => {
-  const height = Dimensions.get('screen').height
+  const { height } = useWindowDimensions()
   const { bottom } = useSafeAreaInsets()
 
   const bottomValue = bottom > 0 ? bottom : 16
@@ -26,6 +27,6 @@ export const useModalStyle = () => {
 
   return {
     ...modalStyle,
-    paddingBottom: bottom + getTokenValue('$4'),
+    paddingBottom: bottom * 2 + getTokenValue('$4'),
   }
 }

@@ -6,7 +6,7 @@ Your privacy is important to us. It is our policy to respect your privacy and co
 
 This Privacy Policy describes how we, as a controller, collect, use and share your personal data. It applies to personal data you voluntarily provide to us, or is automatically collected by us.
 
-In this policy, "we", "us" and "our" refers to Core Contributors GmbH a company incorporated in Germany with its registered address at Gontardstraße 11, 10178 Berlin, Germany. Any data protection related questions you might have about how we handle your personal data or if you wish to exercise your data subject rights, please contact us by post or at privacy@cc0x.dev.
+In this policy, "we", "us" and "our" refers to Core Contributors GmbH a company incorporated in Germany with its registered address at c/o WeWork, Dircksenstr. 3, 10179 Berlin, Germany. Any data protection related questions you might have about how we handle your personal data or if you wish to exercise your data subject rights, please contact us by post or at privacy@cc0x.dev.
 
 In this Policy, “personal data” means any information relating to you as an identified or identifiable natural person (“Data Subject”); an identifiable natural person is one who can be identified, directly or indirectly, in particular by reference to an identifier such as a name, an online identifier or to one or more factors specific to your physical, physiological, genetic, mental, economic, cultural or social identity.
 
@@ -614,8 +614,9 @@ We may modify this privacy policy at any time to comply with legal requirements 
 ##### Contact us by post or email at: {#contact-us-by-post-or-email-at:}
 
 Core Contributors GmbH  
-Gontardstraße 11  
-10178 Berlin  
+c/o WeWork
+Dircksenstr. 3
+10179 Berlin
 Germany  
 privacy@cc0x.dev
 

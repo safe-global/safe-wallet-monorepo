@@ -148,6 +148,18 @@ export const Settings = ({ address, data, onImplementationTap, displayDevMenu }:
                         rightNode={<Icon name={'chevron-right'} />}
                       />
                     </Pressable>
+                    <Pressable
+                      style={({ pressed }) => [{ opacity: pressed ? 0.5 : 1.0 }]}
+                      onPress={() => {
+                        router.push('/address-book')
+                      }}
+                    >
+                      <SafeListItem
+                        label={'Address book'}
+                        leftNode={<Icon name={'address-book'} color={'$colorSecondary'} />}
+                        rightNode={<Icon name={'chevron-right'} />}
+                      />
+                    </Pressable>
                   </View>
                 </View>
 
