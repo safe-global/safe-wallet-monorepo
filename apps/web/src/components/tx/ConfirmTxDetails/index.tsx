@@ -57,7 +57,7 @@ const HardwareWalletStep = [
     label: 'For hardware wallets',
     description: (
       <Typography>
-        If you&apos;re using a hardware wallet with "blind" signing, please compare what you see on your device with the
+        If you&apos;re using a hardware wallet with "blind signing", please compare what you see on your device with the
         hashes on the right.
       </Typography>
     ),
