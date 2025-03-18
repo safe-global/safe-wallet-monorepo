@@ -44,6 +44,7 @@ import { skipToken } from '@reduxjs/toolkit/query'
 import { defaultSafeInfo, showNotification, useGetSafeOverviewQuery } from '@/store/slices'
 import FiatValue from '@/components/common/FiatValue'
 import { AccountInfoChips } from '../AccountInfoChips'
+import SendTransactionButton from '@/features/organizations/components/SafeAccounts/SendTransactionButton'
 
 type AccountItemProps = {
   safeItem: SafeItem
@@ -251,7 +252,10 @@ const SingleAccountItem = ({
           )}
 
           {isOrgSafe ? (
-            <OrgSafeContextMenu safeItem={safeItem} />
+            <>
+              {safeOverview && <SendTransactionButton safe={safeOverview} />}
+              <OrgSafeContextMenu safeItem={safeItem} />
+            </>
           ) : (
             <SafeListContextMenu
               name={name}
