@@ -27,7 +27,7 @@ const SendTransactionButton = ({ safe }: { safe: SafeOverview }) => {
 
   const { setTxFlow } = useContext(TxModalContext)
 
-  const onNewTxClick = async () => {
+  const setActiveSafe = async () => {
     const shortname = chains[safe.chainId]
 
     await router.replace({
@@ -38,11 +38,26 @@ const SendTransactionButton = ({ safe }: { safe: SafeOverview }) => {
         chain: shortname,
       },
     })
+  }
 
-    // Otherwise the tx flow immediately closes again
+  const resetActiveSafe = async () => {
+    await router.replace({
+      pathname: router.pathname,
+      query: {
+        ...router.query,
+        safe: undefined,
+        chain: undefined,
+      },
+    })
+  }
+
+  const onNewTxClick = async () => {
+    await setActiveSafe()
+
+    // TODO: Otherwise the tx flow immediately closes again (still does sometimes)
     await sleep(500)
 
-    setTxFlow(<TokenTransferFlow />, undefined, false)
+    setTxFlow(<TokenTransferFlow />, resetActiveSafe, false)
   }
 
   return (
