@@ -103,10 +103,10 @@ export const extractTargetVersionFromUpdateSafeTx = (
   // Below Safe 1.3.0 the call will be to the Safe itself and call changeMasterCopy
   if (
     sameAddress(migrationTxData.to, safe.address.value) &&
-    data.startsWith(SAFE_1_1_1_INTERFACE.getFunction('changeMasterCopy').selector)
+    migrationTxData.data.startsWith(SAFE_1_1_1_INTERFACE.getFunction('changeMasterCopy').selector)
   ) {
     // Decode call and check which Safe version it is
-    const decodedData = SAFE_1_1_1_INTERFACE.decodeFunctionData('changeMasterCopy', data)
+    const decodedData = SAFE_1_1_1_INTERFACE.decodeFunctionData('changeMasterCopy', migrationTxData.data)
     return determineMasterCopyVersion(decodedData[0], safe.chainId)
   }
 

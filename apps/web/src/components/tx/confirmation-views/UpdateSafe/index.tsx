@@ -1,7 +1,6 @@
 import type { ReactNode } from 'react'
 import { Alert, AlertTitle, Box, Divider, Stack, Typography } from '@mui/material'
 import semverSatisfies from 'semver/functions/satisfies'
-import { LATEST_SAFE_VERSION } from '@/config/constants'
 import { useCurrentChain } from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useQueuedTxsLength } from '@/hooks/useTxQueue'
@@ -13,17 +12,10 @@ import { extractTargetVersionFromUpdateSafeTx } from '@/services/tx/safeUpdatePa
 
 const QUEUE_WARNING_VERSION = '<1.3.0'
 
-function BgBox({ children, light }: { children: ReactNode; light?: boolean }) {
+function BgBox({ children, light, warning }: { children: ReactNode; light?: boolean; warning?: boolean }) {
+  const bgcolor = warning ? 'warning.background' : light ? 'background.light' : 'border.background'
   return (
-    <Box
-      flex={1}
-      bgcolor={light ? 'background.light' : 'border.background'}
-      p={2}
-      textAlign="center"
-      fontWeight={700}
-      fontSize={18}
-      borderRadius={1}
-    >
+    <Box flex={1} bgcolor={bgcolor} p={2} textAlign="center" fontWeight={700} fontSize={18} borderRadius={1}>
       {children}
     </Box>
   )
@@ -44,26 +36,35 @@ export function _UpdateSafe({
     return null
   }
   const showQueueWarning = queueSize && semverSatisfies(safe.version, QUEUE_WARNING_VERSION)
-  const latestSafeVersion = chain?.recommendedMasterCopyVersion || LATEST_SAFE_VERSION
-
-  const newVersion = extractTargetVersionFromUpdateSafeTx(txData, safe) ?? latestSafeVersion
+  const newVersion = extractTargetVersionFromUpdateSafeTx(txData, safe)
 
   return (
     <>
       <Stack direction="row" alignItems="center" spacing={2}>
         <BgBox>Current version: {safe.version}</BgBox>
         <Box fontSize={28}>→</Box>
-        <BgBox light>
-          New version: {newVersion} {chain?.l2 ? ' (L2)' : ''}
-        </BgBox>
+        {newVersion !== undefined ? (
+          <BgBox light>
+            New version: {newVersion} {chain?.l2 ? ' (L2)' : ''}
+          </BgBox>
+        ) : (
+          <BgBox warning>Unknown contract</BgBox>
+        )}
       </Stack>
-
-      <Typography>
-        Read about the updates in the new Safe contracts version in the{' '}
-        <ExternalLink href={`https://github.com/safe-global/safe-contracts/releases/tag/v${newVersion}`}>
-          version {newVersion} changelog
-        </ExternalLink>
-      </Typography>
+      {newVersion !== undefined ? (
+        <Typography>
+          Read about the updates in the new Safe contracts version in the{' '}
+          <ExternalLink href={`https://github.com/safe-global/safe-contracts/releases/tag/v${newVersion}`}>
+            version {newVersion} changelog
+          </ExternalLink>
+        </Typography>
+      ) : (
+        <Alert severity="error">
+          <AlertTitle sx={{ fontWeight: 700 }}>Unknown contract</AlertTitle>
+          The target contract for this upgrade is unknown. Verify the transaction data and the target contract address
+          before executing this transaction.
+        </Alert>
+      )}
 
       {showQueueWarning && (
         <Alert severity="warning">
