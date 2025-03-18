@@ -8,7 +8,7 @@ import useTxStepper from '../../useTxStepper'
 import { useMemo } from 'react'
 import { getTxOrigin } from '@/utils/transactions'
 import { ConfirmSafeAppsTxDetails } from './ConfirmSafeAppsTxDetails'
-import { EventCategory } from '@/services/analytics'
+import { TxFlowType } from '@/services/analytics'
 
 export type SafeAppsTxParams = {
   appId?: string
@@ -25,7 +25,7 @@ const SafeAppsTxFlow = ({
   data: SafeAppsTxParams
   onSubmit?: (txId: string, safeTxHash: string) => void
 }) => {
-  const { step, nextStep, prevStep } = useTxStepper(undefined, EventCategory.SAFE_APPS_TX)
+  const { step, nextStep, prevStep } = useTxStepper(undefined, TxFlowType.SAFE_APPS_TX)
 
   const origin = useMemo(() => getTxOrigin(data.app), [data.app])
 

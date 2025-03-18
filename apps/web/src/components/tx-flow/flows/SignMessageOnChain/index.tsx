@@ -7,10 +7,10 @@ import ReviewSignMessageOnChain, {
 import { useMemo } from 'react'
 import useTxStepper from '../../useTxStepper'
 import { ConfirmSignMessageOnChainDetails } from './ConfirmSignMessageOnChainDetails'
-import { EventCategory } from '@/services/analytics'
+import { TxFlowType } from '@/services/analytics'
 
 const SignMessageOnChainFlow = ({ props }: { props: Omit<SignMessageOnChainProps, 'onSubmit'> }) => {
-  const { step, nextStep, prevStep } = useTxStepper(undefined, EventCategory.SIGN_MESSAGE_ON_CHAIN)
+  const { step, nextStep, prevStep } = useTxStepper(undefined, TxFlowType.SIGN_MESSAGE_ON_CHAIN)
 
   const steps = useMemo<TxStep[]>(
     () => [

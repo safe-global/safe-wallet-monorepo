@@ -6,7 +6,7 @@ import { ReviewOwner } from '../AddOwner/ReviewOwner'
 import { ChooseOwner, ChooseOwnerMode } from '../AddOwner/ChooseOwner'
 import SaveAddressIcon from '@/public/images/common/save-address.svg'
 import { ConfirmTxDetails } from '@/components/tx/ConfirmTxDetails'
-import { EventCategory } from '@/services/analytics'
+import { TxFlowType } from '@/services/analytics'
 
 type Owner = {
   address: string
@@ -30,7 +30,7 @@ const ReplaceOwnerFlow = ({ address }: { address: string }) => {
 
   const { data, step, nextStep, prevStep } = useTxStepper<ReplaceOwnerFlowProps>(
     defaultValues,
-    EventCategory.REPLACE_OWNER,
+    TxFlowType.REPLACE_OWNER,
   )
 
   const steps: TxStep[] = [

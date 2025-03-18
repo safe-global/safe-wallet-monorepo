@@ -4,14 +4,14 @@ import { ReviewRemoveModule } from './ReviewRemoveModule'
 import { useMemo } from 'react'
 import useTxStepper from '../../useTxStepper'
 import { ConfirmTxDetails } from '@/components/tx/ConfirmTxDetails'
-import { EventCategory } from '@/services/analytics'
+import { TxFlowType } from '@/services/analytics'
 
 export type RemoveModuleFlowProps = {
   address: string
 }
 
 const RemoveModuleFlow = ({ address }: RemoveModuleFlowProps) => {
-  const { step, nextStep, prevStep } = useTxStepper(undefined, EventCategory.REMOVE_MODULE)
+  const { step, nextStep, prevStep } = useTxStepper(undefined, TxFlowType.REMOVE_MODULE)
 
   const steps = useMemo<TxStep[]>(
     () => [

@@ -7,7 +7,7 @@ import SendNftBatch from './SendNftBatch'
 import ReviewNftBatch from './ReviewNftBatch'
 import { useMemo } from 'react'
 import { ConfirmTxDetails } from '@/components/tx/ConfirmTxDetails'
-import { EventCategory } from '@/services/analytics'
+import { TxFlowType } from '@/services/analytics'
 
 export type NftTransferParams = {
   recipient: string
@@ -29,7 +29,7 @@ const NftTransferFlow = ({ txNonce, ...params }: NftTransferFlowProps) => {
       ...defaultParams,
       ...params,
     },
-    EventCategory.NFT_TRANSFER,
+    TxFlowType.NFT_TRANSFER,
   )
 
   const steps = useMemo<TxStep[]>(

@@ -5,10 +5,10 @@ import { UpdateSafeReview } from './UpdateSafeReview'
 import SettingsIcon from '@/public/images/sidebar/settings.svg'
 import { ConfirmTxDetails } from '@/components/tx/ConfirmTxDetails'
 import useTxStepper from '../../useTxStepper'
-import { EventCategory } from '@/services/analytics'
+import { TxFlowType } from '@/services/analytics'
 
 const UpdateSafeFlow = () => {
-  const { step, nextStep, prevStep } = useTxStepper(undefined, EventCategory.UPDATE_SAFE)
+  const { step, nextStep, prevStep } = useTxStepper(undefined, TxFlowType.UPDATE_SAFE)
 
   const steps = useMemo<TxStep[]>(
     () => [

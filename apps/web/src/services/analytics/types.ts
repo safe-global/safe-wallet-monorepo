@@ -43,7 +43,7 @@ export enum AnalyticsUserProperties {
 }
 
 // These are used for the generic stepper flow events (Next, Back)
-export enum EventCategory {
+export enum TxFlowType {
   ADD_OWNER = 'add-owner',
   CANCEL_RECOVERY = 'cancel-recovery',
   CHANGE_THRESHOLD = 'change-threshold',

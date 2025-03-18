@@ -8,7 +8,7 @@ import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants
 import { TokenAmountFields } from '@/components/common/TokenAmountInput'
 import { ConfirmTxDetails } from '@/components/tx/ConfirmTxDetails'
 import { useMemo } from 'react'
-import { EventCategory } from '@/services/analytics'
+import { TxFlowType } from '@/services/analytics'
 
 export enum TokenTransferType {
   multiSig = 'multiSig',
@@ -46,7 +46,7 @@ const TokenTransferFlow = ({ txNonce, ...params }: TokenTransferFlowProps) => {
       ...defaultParams,
       ...params,
     },
-    EventCategory.TOKEN_TRANSFER,
+    TxFlowType.TOKEN_TRANSFER,
   )
 
   const steps = useMemo<TxStep[]>(

@@ -7,14 +7,14 @@ import { RemoveRecoveryFlowOverview } from './RemoveRecoveryFlowOverview'
 import { RemoveRecoveryFlowReview } from './RemoveRecoveryFlowReview'
 import type { RecoveryStateItem } from '@/features/recovery/services/recovery-state'
 import { ConfirmTxDetails } from '@/components/tx/ConfirmTxDetails'
-import { EventCategory } from '@/services/analytics'
+import { TxFlowType } from '@/services/analytics'
 
 export type RecoveryFlowProps = {
   delayModifier: RecoveryStateItem
 }
 
 function RemoveRecoveryFlow({ delayModifier }: RecoveryFlowProps): ReactElement {
-  const { step, nextStep, prevStep } = useTxStepper<undefined>(undefined, EventCategory.REMOVE_RECOVERY)
+  const { step, nextStep, prevStep } = useTxStepper<undefined>(undefined, TxFlowType.REMOVE_RECOVERY)
 
   const steps = useMemo<TxStep[]>(
     () => [

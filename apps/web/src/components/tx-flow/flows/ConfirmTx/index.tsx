@@ -11,12 +11,12 @@ import { ConfirmTxDetails } from '@/components/tx/ConfirmTxDetails'
 import { isExecutable, isMultisigExecutionInfo, isSignableBy } from '@/utils/transaction-guards'
 import { useSigner } from '@/hooks/wallets/useWallet'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { EventCategory } from '@/services/analytics'
+import { TxFlowType } from '@/services/analytics'
 
 const ConfirmTxFlow = ({ txSummary }: { txSummary: TransactionSummary }) => {
   const { text } = useTransactionType(txSummary)
   const isSwapOrder = isSwapOrderTxInfo(txSummary.txInfo)
-  const { step, nextStep, prevStep } = useTxStepper(undefined, EventCategory.CONFIRM_TX)
+  const { step, nextStep, prevStep } = useTxStepper(undefined, TxFlowType.CONFIRM_TX)
   const signer = useSigner()
   const { safe } = useSafeInfo()
 

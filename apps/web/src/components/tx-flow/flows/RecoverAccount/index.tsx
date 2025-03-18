@@ -5,7 +5,7 @@ import SaveAddressIcon from '@/public/images/common/save-address.svg'
 import useTxStepper from '../../useTxStepper'
 import { RecoverAccountFlowReview } from './RecoverAccountFlowReview'
 import { RecoverAccountFlowSetup } from './RecoverAccountFlowSetup'
-import { EventCategory } from '@/services/analytics'
+import { TxFlowType } from '@/services/analytics'
 
 export enum RecoverAccountFlowFields {
   owners = 'owners',
@@ -24,7 +24,7 @@ function RecoverAccountFlow(): ReactElement {
       [RecoverAccountFlowFields.owners]: [{ value: '' }],
       [RecoverAccountFlowFields.threshold]: '1',
     },
-    EventCategory.START_RECOVERY,
+    TxFlowType.START_RECOVERY,
   )
 
   const steps = [

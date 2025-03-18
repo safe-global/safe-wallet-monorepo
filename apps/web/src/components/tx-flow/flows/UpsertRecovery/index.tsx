@@ -9,7 +9,7 @@ import { UpsertRecoveryFlowIntro as UpsertRecoveryFlowIntro } from './UpsertReco
 import { DAY_IN_SECONDS } from './useRecoveryPeriods'
 import type { RecoveryState } from '@/features/recovery/services/recovery-state'
 import { ConfirmTxDetails } from '@/components/tx/ConfirmTxDetails'
-import { EventCategory } from '@/services/analytics'
+import { TxFlowType } from '@/services/analytics'
 
 export enum UpsertRecoveryFlowFields {
   recoverer = 'recoverer',
@@ -36,7 +36,7 @@ function UpsertRecoveryFlow({ delayModifier }: { delayModifier?: RecoveryState[n
       [UpsertRecoveryFlowFields.customDelay]: '',
       [UpsertRecoveryFlowFields.expiry]: delayModifier?.expiry?.toString() ?? '0',
     },
-    EventCategory.SETUP_RECOVERY,
+    TxFlowType.SETUP_RECOVERY,
   )
 
   const steps = useMemo<TxStep[]>(
