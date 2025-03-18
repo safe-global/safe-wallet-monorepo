@@ -45,7 +45,7 @@ export const useTxActions = (): TxActions => {
 
   return useMemo<TxActions>(() => {
     const safeAddress = safe.address.value
-    const { chainId } = safe
+    const { chainId, threshold } = safe
 
     const _propose = async (sender: string, safeTx: SafeTransaction, txId?: string, origin?: string) => {
       return dispatchTxProposal({
@@ -53,6 +53,7 @@ export const useTxActions = (): TxActions => {
         safeAddress,
         sender,
         safeTx,
+        threshold,
         txId,
         origin,
       })

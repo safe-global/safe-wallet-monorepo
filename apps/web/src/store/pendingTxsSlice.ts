@@ -23,6 +23,7 @@ export type PendingTxCommonProps = {
   safeAddress: string
   nonce: number
   groupKey?: string
+  isSafenet?: boolean
 }
 
 type PendingSigningTx = PendingTxCommonProps & {

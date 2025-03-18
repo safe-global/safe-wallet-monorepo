@@ -47,6 +47,7 @@ export const dispatchTxProposal = async ({
   safeAddress,
   sender,
   safeTx,
+  threshold,
   txId,
   origin,
 }: {
@@ -54,6 +55,7 @@ export const dispatchTxProposal = async ({
   safeAddress: string
   sender: string
   safeTx: SafeTransaction
+  threshold: number
   txId?: string
   origin?: string
 }): Promise<TransactionDetails> => {
@@ -80,6 +82,10 @@ export const dispatchTxProposal = async ({
       signerAddress: txId ? sender : undefined,
       nonce: safeTx.data.nonce,
     })
+  }
+
+  if (safeTx.signatures.size >= threshold) {
+    txDispatch(TxEvent.FULLY_SIGNED, { txId: proposedTx.txId, nonce: safeTx.data.nonce })
   }
 
   return proposedTx

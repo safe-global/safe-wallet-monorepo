@@ -16,6 +16,8 @@ import useTxHistory from './useTxHistory'
 import { isTransactionListItem } from '@/utils/transaction-guards'
 import useSafeInfo from './useSafeInfo'
 import { SimpleTxWatcher } from '@/utils/SimpleTxWatcher'
+import useIsSafenetEnabled from '@/features/safenet/hooks/useIsSafenetEnabled'
+import { waitForSafenetTx } from '@/features/safenet/utils/safenetTxMonitor'
 
 const FINAL_PENDING_STATUSES = [TxEvent.SIGNATURE_INDEXED, TxEvent.SUCCESS, TxEvent.REVERTED, TxEvent.FAILED]
 
@@ -36,10 +38,11 @@ export const useTxMonitor = (): void => {
 
     for (const [txId, pendingTx] of pendingTxEntriesOnChain) {
       const isProcessing = pendingTx.status === PendingStatus.PROCESSING
+      const isSubmitting = pendingTx.status === PendingStatus.SUBMITTING
       const isMonitored = monitoredTxs.current[txId]
       const isRelaying = pendingTx.status === PendingStatus.RELAYING
 
-      if (!(isProcessing || isRelaying) || isMonitored) {
+      if (!(isProcessing || isRelaying || isSubmitting) || isMonitored) {
         continue
       }
 
@@ -62,6 +65,11 @@ export const useTxMonitor = (): void => {
       if (isRelaying) {
         waitForRelayedTx(pendingTx.taskId, [txId], pendingTx.safeAddress, pendingTx.nonce)
       }
+
+      if (isSubmitting && pendingTx.isSafenet) {
+        const safeTxHash = txId.slice(-66)
+        waitForSafenetTx(txId, safeTxHash, pendingTx.chainId, pendingTx.nonce, pendingTx.safeAddress)
+      }
     }
     // `provider` is updated when switching chains, re-running this effect
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -72,6 +80,7 @@ const useTxPendingStatuses = (): void => {
   const dispatch = useAppDispatch()
   const { safe, safeAddress } = useSafeInfo()
   const { chainId } = safe
+  const isSafenetEnabled = useIsSafenetEnabled()
   const txHistory = useTxHistory()
   const historicalTxs = useMemo(() => {
     return txHistory.page?.results?.filter(isTransactionListItem) || []
@@ -275,6 +284,28 @@ const useTxPendingStatuses = (): void => {
       }),
     )
 
+    // For Safenet accounts set the Status to Executing once the tx is fully signed
+    const unsubSignatureIndexed = txSubscribe(TxEvent.FULLY_SIGNED, (detail) => {
+      const txId = detail.txId
+      const nonce = detail.nonce
+
+      if (!txId || nonce === undefined) return
+
+      // We automatically execute for the user
+      if (isSafenetEnabled) {
+        dispatch(
+          setPendingTx({
+            nonce,
+            chainId,
+            safeAddress,
+            txId,
+            status: PendingStatus.SUBMITTING,
+            isSafenet: true,
+          }),
+        )
+      }
+    })
+
     unsubFns.push(
       unsubProcessing,
       unsubSignatureProposing,
@@ -282,12 +313,13 @@ const useTxPendingStatuses = (): void => {
       unsubProcessed,
       unsubRelaying,
       unsubNestedTx,
+      unsubSignatureIndexed,
     )
 
     return () => {
       unsubFns.forEach((unsub) => unsub())
     }
-  }, [dispatch, chainId, safeAddress, historicalTxs])
+  }, [dispatch, chainId, safeAddress, historicalTxs, isSafenetEnabled])
 }
 
 export default useTxPendingStatuses
