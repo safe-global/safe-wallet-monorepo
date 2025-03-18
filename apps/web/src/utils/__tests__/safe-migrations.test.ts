@@ -1,10 +1,9 @@
 import { type ChainInfo, type TransactionData } from '@safe-global/safe-gateway-typescript-sdk'
 import { OperationType } from '@safe-global/safe-core-sdk-types'
-import { isMigrateL2SingletonCall } from '@/features/multichain/utils/extract-migration-data'
 import { Safe_migration__factory } from '@/types/contracts'
 import { faker } from '@faker-js/faker'
 
-import { createUpdateMigration } from '../safe-migrations'
+import { createUpdateMigration, isMigrateL2SingletonCall } from '../safe-migrations'
 import { getSafeMigrationDeployment } from '@safe-global/safe-deployments'
 
 jest.mock('@/services/tx/tx-sender/sdk')

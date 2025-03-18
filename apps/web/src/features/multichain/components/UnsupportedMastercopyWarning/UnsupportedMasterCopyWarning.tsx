@@ -20,7 +20,7 @@ export const UnsupportedMastercopyWarning = () => {
   return (
     <ErrorMessage level="warning" title="Base contract is not supported">
       <Typography display="inline" mr={1}>
-        Your Safe&apos;s base contract is not supported. You should migrate it to a compatible version.
+        Your Safe Account&apos;s base contract is not supported. You should migrate it to a compatible version.
       </Typography>
       <Button variant="contained" onClick={openUpgradeModal}>
         Migrate

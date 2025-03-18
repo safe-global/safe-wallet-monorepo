@@ -4,9 +4,12 @@ import { hasMatchingDeployment } from '@/services/contracts/deployments'
 
 import { getSafeMigrationDeployment } from '@safe-global/safe-deployments'
 import { type MetaTransactionData, OperationType, type SafeVersion } from '@safe-global/safe-core-sdk-types'
-import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import type { ChainInfo, TransactionData } from '@safe-global/safe-gateway-typescript-sdk'
 
 import { LATEST_SAFE_VERSION } from '@/config/constants'
+import { sameAddress } from '@/utils/addresses'
+
+export const SAFE_TO_L2_MIGRATION_VERSION = '1.4.1'
 
 export const createUpdateMigration = (
   chain: ChainInfo,
@@ -54,7 +57,7 @@ export const createUpdateMigration = (
 
 export const createMigrateToL2 = (chain: ChainInfo) => {
   const deployment = getSafeMigrationDeployment({
-    version: '1.4.1', // This is the only version that has this contract deployed
+    version: SAFE_TO_L2_MIGRATION_VERSION, // This is the only version that has this contract deployed
     released: true,
     network: chain.chainId,
   })
@@ -73,4 +76,17 @@ export const createMigrateToL2 = (chain: ChainInfo) => {
   }
 
   return tx
+}
+
+export const isMigrateL2SingletonCall = (txData: TransactionData): boolean => {
+  // We always use the 1.4.1 version for this contract as it is only deployed for 1.4.1 Safes
+  const safeMigrationDeployment = getSafeMigrationDeployment({ version: SAFE_TO_L2_MIGRATION_VERSION })
+  const safeMigrationAddress = safeMigrationDeployment?.defaultAddress
+  const safeMigrationInterface = Safe_migration__factory.createInterface()
+
+  return (
+    txData.hexData !== undefined &&
+    txData.hexData.startsWith(safeMigrationInterface.getFunction('migrateL2Singleton').selector) &&
+    sameAddress(txData.to.value, safeMigrationAddress)
+  )
 }

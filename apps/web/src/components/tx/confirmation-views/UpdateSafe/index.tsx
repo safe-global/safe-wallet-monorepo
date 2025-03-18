@@ -7,7 +7,7 @@ import { useQueuedTxsLength } from '@/hooks/useTxQueue'
 import ExternalLink from '@/components/common/ExternalLink'
 import { maybePlural } from '@/utils/formatters'
 import madProps from '@/utils/mad-props'
-import { type SafeInfo, type TransactionData } from '@safe-global/safe-gateway-typescript-sdk'
+import { type TransactionData } from '@safe-global/safe-gateway-typescript-sdk'
 import { extractTargetVersionFromUpdateSafeTx } from '@/services/tx/safeUpdateParams'
 
 const QUEUE_WARNING_VERSION = '<1.3.0'
@@ -22,16 +22,17 @@ function BgBox({ children, light, warning }: { children: ReactNode; light?: bool
 }
 
 export function _UpdateSafe({
-  safe,
+  safeInfo,
   queueSize,
   chain,
   txData,
 }: {
-  safe: SafeInfo
+  safeInfo: ReturnType<typeof useSafeInfo>
   queueSize: string
   chain: ReturnType<typeof useCurrentChain>
   txData: TransactionData | undefined
 }) {
+  const { safe } = safeInfo
   if (!safe.version) {
     return null
   }
@@ -45,7 +46,7 @@ export function _UpdateSafe({
         <Box fontSize={28}>→</Box>
         {newVersion !== undefined ? (
           <BgBox light>
-            New version: {newVersion} {chain?.l2 ? ' (L2)' : ''}
+            New version: {newVersion} {chain?.l2 ? '+L2' : ''}
           </BgBox>
         ) : (
           <BgBox warning>Unknown contract</BgBox>
@@ -79,14 +80,9 @@ export function _UpdateSafe({
   )
 }
 
-function useSafe() {
-  const { safe } = useSafeInfo()
-  return safe
-}
-
 const UpdateSafe = madProps(_UpdateSafe, {
   chain: useCurrentChain,
-  safe: useSafe,
+  safeInfo: useSafeInfo,
   queueSize: useQueuedTxsLength,
 })
 

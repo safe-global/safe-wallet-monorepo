@@ -1,9 +1,8 @@
-import { useContext } from 'react'
+import { useContext, useEffect } from 'react'
 import { useCurrentChain } from '@/hooks/useChains'
 import { createTx } from '@/services/tx/tx-sender'
 import { SafeTxContext } from '../../SafeTxProvider'
 import SignOrExecuteForm from '@/components/tx/SignOrExecuteForm'
-import useAsync from '@/hooks/useAsync'
 import { createMigrateToL2 } from '@/utils/safe-migrations'
 import { Box, Typography } from '@mui/material'
 import ErrorMessage from '@/components/tx/ErrorMessage'
@@ -12,7 +11,7 @@ export const MigrateSafeL2Review = () => {
   const chain = useCurrentChain()
   const { setSafeTx, setSafeTxError } = useContext(SafeTxContext)
 
-  useAsync(async () => {
+  useEffect(() => {
     if (!chain) return
 
     const txData = createMigrateToL2(chain)
@@ -24,10 +23,10 @@ export const MigrateSafeL2Review = () => {
       <SignOrExecuteForm>
         <ErrorMessage level="warning" title="Migration transaction">
           <Typography>
-            When executing this transaction, it will not get indexed and show up in the history due to the current
-            incompatible base contract. It might also take a few minutes until the new Safe version and nonce are
-            reflected in the interface. After the migration is complete future transactions will get processed and
-            indexed as usual and there will be no further restrictions.
+            When executing this transaction, it will not get indexed and appear in the history due to the current
+            incompatible base contract. It might also take a few minutes until the new Safe Account version and nonce
+            are reflected in the interface. After the migration is complete, future transactions will get processed and
+            indexed as usual, and there will be no further restrictions.
           </Typography>
         </ErrorMessage>
       </SignOrExecuteForm>

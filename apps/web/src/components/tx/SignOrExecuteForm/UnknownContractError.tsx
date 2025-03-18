@@ -7,7 +7,7 @@ import { getExplorerLink } from '@/utils/gateway'
 import ErrorMessage from '../ErrorMessage'
 import { isMigrationToL2Possible, isValidMasterCopy } from '@/services/contracts/safeContracts'
 import { AlertTitle, Typography } from '@mui/material'
-import { isMigrateL2SingletonCall } from '@/features/multichain/utils/extract-migration-data'
+import { isMigrateL2SingletonCall } from '@/utils/safe-migrations'
 
 const UnknownContractError = ({ txData }: { txData: TransactionData | undefined }): ReactElement | null => {
   const { safe, safeAddress } = useSafeInfo()
