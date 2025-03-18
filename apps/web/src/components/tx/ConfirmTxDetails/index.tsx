@@ -54,7 +54,7 @@ const InfoSteps = [
 const HardwareWalletStep = [
   InfoSteps[1],
   {
-    label: 'For hardware wallets',
+    label: 'Compare with your device',
     description: (
       <Typography>
         If you&apos;re using a hardware wallet with "blind signing", please compare what you see on your device with the
