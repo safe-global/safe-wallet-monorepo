@@ -10,8 +10,6 @@ import type { SafeTransaction, MetaTransactionData } from '@safe-global/safe-cor
 
 import css from './styles.module.css'
 
-const SAFE_UTILS_URL = 'https://safeutils.openzeppelin.com/'
-
 const TxChecks = ({
   executionOwner,
   disabled = false,
