@@ -3,14 +3,15 @@ import LightbulbIcon from '@/public/images/common/lightbulb.svg'
 import { Typography, Paper, Box, Button, SvgIcon } from '@mui/material'
 import OrgsInfoModal from '../OrgsInfoModal'
 import { useState } from 'react'
+import { ORG_EVENTS, ORG_LABELS } from '@/services/analytics/events/organizations'
+import { trackEvent } from '@/services/analytics'
 
 const OrgsCTACard = () => {
   const [isInfoOpen, setIsInfoOpen] = useState<boolean>(false)
 
   const handleLearnMore = () => {
+    trackEvent({ ...ORG_EVENTS.INFO_MODAL, label: ORG_LABELS.org_dashboard_card })
     setIsInfoOpen(true)
-    // TODO: Implement invite functionality
-    console.log('Learn more clicked')
   }
 
   return (
