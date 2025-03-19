@@ -143,6 +143,7 @@ const OrgsSettings = () => {
               variant="danger"
               onClick={() => {
                 setDeleteOrgOpen(true)
+                trackEvent({ ...ORG_EVENTS.REMOVE_ORGANIZATION_MODAL })
               }}
               disabled={!isAdmin}
             >

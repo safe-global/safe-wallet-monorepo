@@ -73,8 +73,28 @@ export const ORG_EVENTS = {
     action: 'Add account manually submit',
     category: ORG_CATEGORY,
   },
-  DELETE_ORGANIZATION: {
-    action: 'Delete organization',
+  RENAME_ACCOUNT_MODAL: {
+    action: 'Open rename account modal',
+    category: ORG_CATEGORY,
+  },
+  RENAME_ACCOUNT: {
+    action: 'Submit rename account',
+    category: ORG_CATEGORY,
+  },
+  DELETE_ACCOUNT_MODAL: {
+    action: 'Open delete account modal',
+    category: ORG_CATEGORY,
+  },
+  DELETE_ACCOUNT: {
+    action: 'Submit delete account',
+    category: ORG_CATEGORY,
+  },
+  REMOVE_ORGANIZATION_MODAL: {
+    action: 'Open remove organization modal',
+    category: ORG_CATEGORY,
+  },
+  REMOVE_ORGANIZATION: {
+    action: 'Submit remove organization',
     category: ORG_CATEGORY,
   },
   VIEW_ALL_ACCOUNTS: {
