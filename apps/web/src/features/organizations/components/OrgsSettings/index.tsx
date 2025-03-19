@@ -87,7 +87,7 @@ const OrgsSettings = () => {
   })
 
   const onDelete = async () => {
-    trackEvent({ ...ORG_EVENTS.DELETE_ORGANIZATION })
+    trackEvent({ ...ORG_EVENTS.REMOVE_ORGANIZATION })
     try {
       await deleteOrg({ id: Number(orgId) })
 
