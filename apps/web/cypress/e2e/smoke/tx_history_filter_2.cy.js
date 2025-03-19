@@ -14,7 +14,7 @@ describe('[SMOKE] API Tx history decimals filter tests', () => {
   })
 
   beforeEach(() => {
-    safeAddress = staticSafes.SEP_STATIC_SAFE_37.substring(4)
+    safeAddress = staticSafes.SEP_STATIC_SAFE_38.substring(4)
   })
 
   const chainId = constants.networkKeys.sepolia
