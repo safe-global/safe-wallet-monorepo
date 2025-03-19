@@ -363,6 +363,14 @@ export class SafeWalletProvider {
   // EIP-5792
   // @see https://eips.ethereum.org/EIPS/eip-5792
   async wallet_sendCalls(bundle: SendCallsParams, appInfo: AppInfo): Promise<SendCallsResult> {
+    if (bundle.chainId !== numberToHex(this.safe.chainId)) {
+      throw new Error(`Safe is not on chain ${this.safe.chainId}`)
+    }
+
+    if (bundle.from !== this.safe.safeAddress) {
+      throw Error('Invalid from address')
+    }
+
     const txs = bundle.calls.map((call) => {
       if (!call.to && !call.value && !call.data) {
         throw new RpcError(RpcErrorCode.INVALID_PARAMS, 'Invalid call parameters.')
