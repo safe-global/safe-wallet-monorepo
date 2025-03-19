@@ -8,7 +8,7 @@ import useChains from '@/hooks/useChains'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import { Button, DialogActions, DialogContent, MenuItem, Select, Stack, Box } from '@mui/material'
 import { getSafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 
 export type AddManuallyFormValues = {
@@ -28,9 +28,10 @@ const AddManually = ({ handleAddSafe }: { handleAddSafe: (data: AddManuallyFormV
     },
   })
 
-  const { handleSubmit, watch, register, reset, formState } = formMethods
+  const { handleSubmit, watch, register, reset, formState, trigger } = formMethods
 
   const chainId = watch('chainId')
+  const address = watch('address')
   const selectedChain = configs.find((chain) => chain.chainId === chainId)
 
   const onSubmit = handleSubmit((data) => {
@@ -71,6 +72,13 @@ const AddManually = ({ handleAddSafe }: { handleAddSafe: (data: AddManuallyFormV
   )
 
   const chainIdField = register('chainId')
+
+  // Re-validate when chainId changes
+  useEffect(() => {
+    if (address) {
+      trigger('address')
+    }
+  }, [address, chainId, trigger])
 
   return (
     <>
