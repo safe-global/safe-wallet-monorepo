@@ -60,6 +60,7 @@ const UpdateOrgForm = ({ org }: { org: GetOrganizationResponse | undefined }) =>
           label="Organization name"
           fullWidth
           slotProps={{ inputLabel: { shrink: true } }}
+          onKeyDown={(e) => e.stopPropagation()}
         />
 
         {error && (
