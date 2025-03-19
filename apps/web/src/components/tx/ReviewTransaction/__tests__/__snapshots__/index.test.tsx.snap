@@ -92,10 +92,10 @@ exports[`ReviewTransaction should display a confirmation screen 1`] = `
                           Transaction data
                         </p>
                         <div
-                          class="MuiGrid-root MuiGrid-container css-86qz5o-MuiGrid-root"
+                          class="MuiGrid-root MuiGrid-container css-1m1clne-MuiGrid-root"
                         >
                           <div
-                            class="MuiGrid-root MuiGrid-item css-1wehkfy-MuiGrid-root"
+                            class="MuiGrid-root MuiGrid-item css-p1l0hx-MuiGrid-root"
                             data-testid="tx-row-title"
                             style="word-break: break-word;"
                           >
@@ -161,10 +161,10 @@ exports[`ReviewTransaction should display a confirmation screen 1`] = `
                           </div>
                         </div>
                         <div
-                          class="MuiGrid-root MuiGrid-container css-86qz5o-MuiGrid-root"
+                          class="MuiGrid-root MuiGrid-container css-1m1clne-MuiGrid-root"
                         >
                           <div
-                            class="MuiGrid-root MuiGrid-item css-1wehkfy-MuiGrid-root"
+                            class="MuiGrid-root MuiGrid-item css-p1l0hx-MuiGrid-root"
                             data-testid="tx-row-title"
                             style="word-break: break-word;"
                           >
@@ -186,10 +186,10 @@ exports[`ReviewTransaction should display a confirmation screen 1`] = `
                           </div>
                         </div>
                         <div
-                          class="MuiGrid-root MuiGrid-container css-86qz5o-MuiGrid-root"
+                          class="MuiGrid-root MuiGrid-container css-1m1clne-MuiGrid-root"
                         >
                           <div
-                            class="MuiGrid-root MuiGrid-item css-1wehkfy-MuiGrid-root"
+                            class="MuiGrid-root MuiGrid-item css-p1l0hx-MuiGrid-root"
                             data-testid="tx-row-title"
                             style="word-break: break-word;"
                           >
@@ -233,10 +233,10 @@ exports[`ReviewTransaction should display a confirmation screen 1`] = `
                           </div>
                         </div>
                         <div
-                          class="MuiGrid-root MuiGrid-container css-86qz5o-MuiGrid-root"
+                          class="MuiGrid-root MuiGrid-container css-1m1clne-MuiGrid-root"
                         >
                           <div
-                            class="MuiGrid-root MuiGrid-item css-1wehkfy-MuiGrid-root"
+                            class="MuiGrid-root MuiGrid-item css-p1l0hx-MuiGrid-root"
                             data-testid="tx-row-title"
                             style="word-break: break-word;"
                           >
@@ -254,10 +254,10 @@ exports[`ReviewTransaction should display a confirmation screen 1`] = `
                           </div>
                         </div>
                         <div
-                          class="MuiGrid-root MuiGrid-container css-86qz5o-MuiGrid-root"
+                          class="MuiGrid-root MuiGrid-container css-1m1clne-MuiGrid-root"
                         >
                           <div
-                            class="MuiGrid-root MuiGrid-item css-1wehkfy-MuiGrid-root"
+                            class="MuiGrid-root MuiGrid-item css-p1l0hx-MuiGrid-root"
                             data-testid="tx-row-title"
                             style="word-break: break-word;"
                           >
@@ -286,10 +286,10 @@ exports[`ReviewTransaction should display a confirmation screen 1`] = `
                           class="MuiStack-root css-hwnj0i-MuiStack-root"
                         >
                           <div
-                            class="MuiGrid-root MuiGrid-container css-86qz5o-MuiGrid-root"
+                            class="MuiGrid-root MuiGrid-container css-1m1clne-MuiGrid-root"
                           >
                             <div
-                              class="MuiGrid-root MuiGrid-item css-1wehkfy-MuiGrid-root"
+                              class="MuiGrid-root MuiGrid-item css-p1l0hx-MuiGrid-root"
                               data-testid="tx-row-title"
                               style="word-break: break-word;"
                             >

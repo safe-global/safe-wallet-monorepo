@@ -1,5 +1,4 @@
 import { type ReactElement, useEffect, useContext } from 'react'
-import { Grid, Typography } from '@mui/material'
 import SendToBlock from '@/components/tx/SendToBlock'
 import { createNftTransferParams } from '@/services/tx/tokenTransferParams'
 import type { NftTransferParams } from '.'
@@ -8,6 +7,8 @@ import { createMultiSendCallOnlyTx, createTx } from '@/services/tx/tx-sender'
 import { SafeTxContext } from '../../SafeTxProvider'
 import { NftItems } from '@/components/tx-flow/flows/NftTransfer/SendNftBatch'
 import ReviewTransaction from '@/components/tx/ReviewTransaction'
+import { maybePlural } from '@/utils/formatters'
+import FieldsGrid from '@/components/tx/FieldsGrid'
 
 type ReviewNftBatchProps = {
   params: NftTransferParams
@@ -40,29 +41,11 @@ const ReviewNftBatch = ({ params, onSubmit, txNonce }: ReviewNftBatchProps): Rea
 
   return (
     <ReviewTransaction onSubmit={onSubmit}>
-      <Grid
-        container
-        sx={{
-          gap: 1,
-          mb: 2,
-        }}
-      >
-        <Grid item md>
-          <Typography
-            variant="body2"
-            sx={{
-              color: 'text.secondary',
-            }}
-          >
-            Send
-          </Typography>
-        </Grid>
-
-        <Grid item xs md={10}>
-          <NftItems tokens={tokens} />
-        </Grid>
-      </Grid>
       <SendToBlock address={params.recipient} />
+
+      <FieldsGrid title={`NFT${maybePlural(tokens)}:`}>
+        <NftItems tokens={tokens} />
+      </FieldsGrid>
     </ReviewTransaction>
   )
 }

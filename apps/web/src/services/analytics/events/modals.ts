@@ -7,10 +7,6 @@ export const MODALS_EVENTS = {
     action: 'Send tokens',
     category: MODALS_CATEGORY,
   },
-  SEND_COLLECTIBLE: {
-    action: 'Send NFTs',
-    category: MODALS_CATEGORY,
-  },
   CONTRACT_INTERACTION: {
     action: 'Contract interaction',
     category: MODALS_CATEGORY,
