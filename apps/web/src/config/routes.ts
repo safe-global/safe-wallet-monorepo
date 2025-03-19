@@ -23,6 +23,7 @@ export const AppRoutes = {
   },
   balances: {
     nfts: '/balances/nfts',
+    defi: '/balances/defi',
     index: '/balances',
   },
   newSafe: {

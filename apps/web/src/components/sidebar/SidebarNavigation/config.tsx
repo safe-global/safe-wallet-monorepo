@@ -91,6 +91,10 @@ export const balancesNavItems = [
     href: AppRoutes.balances.index,
   },
   {
+    label: 'DeFi',
+    href: AppRoutes.balances.defi,
+  },
+  {
     label: 'NFTs',
     href: AppRoutes.balances.nfts,
   },
