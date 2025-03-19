@@ -53,7 +53,7 @@ export const useNotificationManager = () => {
       const deviceNotificationStatus = await NotificationsService.isDeviceNotificationEnabled()
 
       if (!deviceNotificationStatus && !isAppNotificationEnabled) {
-        await NotificationsService.requestPushNotificationsPermission()
+        await NotificationsService.getAllPermissions()
       } else if (deviceNotificationStatus && !isAppNotificationEnabled) {
         await registerForNotifications()
       } else {
