@@ -26,7 +26,6 @@ import classnames from 'classnames'
 import css from './styles.module.css'
 import inputCss from '@/styles/inputs.module.css'
 import Identicon from '../Identicon'
-import { isSmartContract } from '@/utils/wallets'
 
 export type AddressInputProps = TextFieldProps & {
   name: string
@@ -37,7 +36,7 @@ export type AddressInputProps = TextFieldProps & {
   deps?: string | string[]
   onAddressBookClick?: () => void
   chain?: ChainInfo
-  isEOAOnly?: boolean
+  showPrefix?: boolean
 }
 
 const AddressInput = ({
@@ -49,7 +48,7 @@ const AddressInput = ({
   onAddressBookClick,
   deps,
   chain,
-  isEOAOnly = false,
+  showPrefix = true,
   ...props
 }: AddressInputProps): ReactElement => {
   const {
@@ -81,20 +80,6 @@ const AddressInput = ({
 
   // Validation function based on the current chain prefix
   const validatePrefixed = useMemo(() => validatePrefixedAddress(currentShortName), [currentShortName])
-
-  const validateEOA = useCallback(
-    async (address: string): Promise<string | undefined> => {
-      if (!isEOAOnly) return undefined
-
-      try {
-        const isContract = await isSmartContract(address)
-        return isContract ? 'Address must be an EOA' : undefined
-      } catch (error) {
-        return 'Unable to verify address type'
-      }
-    },
-    [isEOAOnly],
-  )
 
   // Update the input value
   const setAddressValue = useCallback(
@@ -170,7 +155,7 @@ const AddressInput = ({
                 )}
               </Box>
 
-              {!isEOAOnly && !rawValueRef.current.startsWith(`${currentShortName}:`) && <Box>{currentShortName}:</Box>}
+              {showPrefix && !rawValueRef.current.startsWith(`${currentShortName}:`) && <Box>{currentShortName}:</Box>}
             </InputAdornment>
           ),
 
@@ -202,10 +187,7 @@ const AddressInput = ({
           validate: async () => {
             const value = rawValueRef.current
             if (value) {
-              const address = parsePrefixedAddress(value).address
-              return (
-                validatePrefixed(value) || (isEOAOnly && (await validateEOA(address))) || (await validate?.(address))
-              )
+              return validatePrefixed(value) || (await validate?.(parsePrefixedAddress(value).address))
             }
           },
 
