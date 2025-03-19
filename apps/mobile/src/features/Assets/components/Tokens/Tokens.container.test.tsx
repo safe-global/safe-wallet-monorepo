@@ -48,7 +48,7 @@ describe('TokensContainer', () => {
     // Then check for content
     const ethText = await screen.findByText('Ethereum')
     const ethAmount = await screen.findByText('1 ETH')
-    const ethValue = await screen.findByText('$2000')
+    const ethValue = await screen.findByText('$ 2,000')
 
     expect(ethText).toBeTruthy()
     expect(ethAmount).toBeTruthy()

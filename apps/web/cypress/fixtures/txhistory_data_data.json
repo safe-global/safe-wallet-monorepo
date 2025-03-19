@@ -66,6 +66,7 @@
     "send": {
       "title": "Sent",
       "summaryTxInfo": "-< 0.00001 ETH",
+      "summaryTxInfo2": "-0.0001 ETH",
       "summaryTime": "11:02 AM",
       "sentTo": "Sent 0.000000000001 ETH to:",
       "recipientAddress": "sep:0x06373d5e45AD31BD354CeBfA8dB4eD2c75B8708e",

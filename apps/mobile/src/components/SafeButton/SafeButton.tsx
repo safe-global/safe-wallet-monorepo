@@ -62,7 +62,7 @@ export const SafeButton = styled(Button, {
     },
 
     disabled: {
-      true: (props, allProps) => {
+      true: (_, allProps) => {
         // @ts-expect-error
         const isText = allProps.props?.text === true
         return {

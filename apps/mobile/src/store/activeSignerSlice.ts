@@ -15,7 +15,6 @@ const activeSignerSlice = createSlice({
       return state
     },
     removeActiveSigner: (state, action: PayloadAction<{ safeAddress: Address }>) => {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { [action.payload.safeAddress]: _, ...rest } = state
 
       return rest
