@@ -185,7 +185,7 @@ export function enterSpendingLimitAmount(amount) {
 }
 
 export function enterBeneficiaryAddress(address) {
-  getBeneficiaryInput().clear().type(address)
+  getBeneficiaryInput().clear({ force: true }).type(address, { force: true })
 }
 
 export function checkBeneficiaryInputValue(value) {

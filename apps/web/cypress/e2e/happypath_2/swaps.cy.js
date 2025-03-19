@@ -29,7 +29,7 @@ describe('Happy path Swaps tests', () => {
     iframeSelector = `iframe[src*="${constants.swapWidget}"]`
   })
 
-  it.skip(
+  it(
     'Verify an order can be created, signed by second signer and deleted. GA tx_confirm, tx_created',
     { defaultCommandTimeout: 60000 },
     () => {
@@ -68,6 +68,7 @@ describe('Happy path Swaps tests', () => {
         swaps.clickOnExceeFeeChkbox()
         swaps.clickOnSwapBtn()
         swaps.clickOnSwapBtn()
+        swaps.confirmPriceImpact()
       })
       create_tx.changeNonce(0)
       create_tx.clickOnSignTransactionBtn()

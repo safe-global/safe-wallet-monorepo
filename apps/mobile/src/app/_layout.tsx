@@ -1,3 +1,4 @@
+import '@/src/config/polyfills'
 import { Stack } from 'expo-router'
 import 'react-native-reanimated'
 import { SafeThemeProvider } from '@/src/theme/provider/safeTheme'
@@ -67,9 +68,10 @@ function RootLayout() {
                         <Stack.Screen name="sign-transaction" options={{ headerShown: false }} />
                         <Stack.Screen name="pending-transactions" options={{ headerShown: true, title: '' }} />
                         <Stack.Screen name="notifications" options={{ headerShown: true, title: '' }} />
-
                         <Stack.Screen name="transaction-parameters" options={{ headerShown: true, title: '' }} />
-
+                        <Stack.Screen name="transaction-actions" options={{ headerShown: true, title: '' }} />
+                        <Stack.Screen name="action-details" options={{ headerShown: true, title: '' }} />
+                        <Stack.Screen name="address-book" options={{ headerShown: true, title: '' }} />
                         <Stack.Screen name="signers" options={{ headerShown: false }} />
                         <Stack.Screen name="import-signers" options={{ headerShown: false }} />
 
@@ -126,6 +128,13 @@ function RootLayout() {
                           name="confirm-transaction"
                           options={{
                             title: 'Confirm transaction',
+                          }}
+                        />
+                        <Stack.Screen
+                          name="share"
+                          options={{
+                            headerShown: false,
+                            presentation: 'modal',
                           }}
                         />
                         <Stack.Screen name="+not-found" />

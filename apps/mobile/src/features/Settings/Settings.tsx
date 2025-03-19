@@ -15,9 +15,11 @@ import { Navbar } from '@/src/features/Settings/components/Navbar/Navbar'
 interface SettingsProps {
   data: SafeState
   address: `0x${string}`
+  displayDevMenu: boolean
+  onImplementationTap: () => void
 }
 
-export const Settings = ({ address, data }: SettingsProps) => {
+export const Settings = ({ address, data, onImplementationTap, displayDevMenu }: SettingsProps) => {
   const { owners = [], threshold, implementation } = data
 
   return (
@@ -146,15 +148,49 @@ export const Settings = ({ address, data }: SettingsProps) => {
                         rightNode={<Icon name={'chevron-right'} />}
                       />
                     </Pressable>
+                    <Pressable
+                      style={({ pressed }) => [{ opacity: pressed ? 0.5 : 1.0 }]}
+                      onPress={() => {
+                        router.push('/address-book')
+                      }}
+                    >
+                      <SafeListItem
+                        label={'Address book'}
+                        leftNode={<Icon name={'address-book'} color={'$colorSecondary'} />}
+                        rightNode={<Icon name={'chevron-right'} />}
+                      />
+                    </Pressable>
                   </View>
                 </View>
+
+                {displayDevMenu && (
+                  <View backgroundColor="$backgroundDark" padding="$4" borderRadius="$3" gap={'$2'}>
+                    <Text color="$foreground">Developer stuff</Text>
+                    <View backgroundColor={'$background'} borderRadius={'$3'}>
+                      <Pressable
+                        style={({ pressed }) => [{ opacity: pressed ? 0.5 : 1.0 }]}
+                        onPress={() => {
+                          router.push('/developer')
+                        }}
+                      >
+                        <SafeListItem
+                          label={'Developer'}
+                          leftNode={<Icon name={'alert-triangle'} color={'$colorSecondary'} />}
+                          rightNode={<Icon name={'chevron-right'} />}
+                        />
+                      </Pressable>
+                    </View>
+                  </View>
+                )}
               </YStack>
             </Skeleton.Group>
 
             {/* Footer */}
-            <Text textAlign="center" color="$colorSecondary" marginTop="$8">
-              {implementation?.name}
-            </Text>
+            <Pressable onPress={onImplementationTap}>
+              <Text textAlign="center" color="$colorSecondary" marginTop="$8">
+                {implementation?.name}
+              </Text>
+            </Pressable>
           </YStack>
         </ScrollView>
       </Theme>

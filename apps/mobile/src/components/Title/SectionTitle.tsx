@@ -4,7 +4,7 @@ import { LargeHeaderTitle } from './LargeHeaderTitle'
 
 interface SectionTitleProps {
   title: string
-  description: string
+  description?: string
   paddingHorizontal?: GetThemeValueForKey<'paddingHorizontal'>
 }
 
@@ -15,7 +15,7 @@ export function SectionTitle({ title, description, paddingHorizontal = '$3' }: S
         <LargeHeaderTitle marginRight={5}>{title}</LargeHeaderTitle>
       </View>
 
-      <Text>{description}</Text>
+      {description && <Text>{description}</Text>}
     </View>
   )
 }

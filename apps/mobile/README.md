@@ -32,20 +32,18 @@ yarn install
 
 ## Running the app
 
-There is a .env.development file in the root of the mobile app that contains the following environment variables:
-
-```bash
-APP_VARIANT=production
-GOOGLE_SERVICES_PLIST_DEV=./GoogleService-Info.plist
-GOOGLE_SERVICES_JSON=./google-services.json
-GOOGLE_SERVICES_PLIST=./GoogleService-Info.plist
-```
-
-When any expo command runs it will automatically load the `.env.development` file. If you want to make modifications
-to the environment variables, you can create a `.env.local` file in the root of the mobile app.
+There is a `.env.example` file in the root of the mobile app. Create a `.env.local` file and paste the contents of the `.env.example`
+file into it and set the correct values for the environment variables.
 
 For local development you need to place the `google-services.json` and `GoogleService-Info.plist` files in the root of
 the mobile app.
+
+If you use EAS to manage your environement variables you can issue the 
+```bash
+eas env:pull
+```
+
+command. This will pull the variables from your eas project and place them in the .env.local file.
 
 ### Running on iOS
 

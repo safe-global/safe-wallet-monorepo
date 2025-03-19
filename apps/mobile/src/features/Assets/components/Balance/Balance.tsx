@@ -38,7 +38,7 @@ export function Balance({ activeChainId, chains, isLoading, balanceAmount, chain
         {isLoading ? (
           <Spinner />
         ) : balanceAmount ? (
-          <Fiat baseAmount={balanceAmount} />
+          <Fiat value={balanceAmount} currency="usd" precise={balanceAmount.length < 6} />
         ) : (
           <Alert type="error" message="error while getting the balance of your wallet" />
         )}

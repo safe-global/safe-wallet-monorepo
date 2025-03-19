@@ -41,7 +41,7 @@ export default {
         monochromeImage: './assets/images/monochrome-icon.png',
       },
       package: IS_DEV ? 'global.safe.mobileapp.dev' : 'global.safe.mobileapp',
-      googleServicesFile: process.env.GOOGLE_SERVICES_JSON,
+      googleServicesFile: IS_DEV ? process.env.GOOGLE_SERVICES_JSON_DEV : process.env.GOOGLE_SERVICES_JSON,
       permissions: ['android.permission.CAMERA'],
     },
     web: {
@@ -90,6 +90,14 @@ export default {
       ],
       '@react-native-firebase/app',
       '@react-native-firebase/messaging',
+      [
+        'react-native-share',
+        {
+          ios: ['fb', 'instagram', 'twitter', 'tiktoksharesdk'],
+          android: ['com.facebook.katana', 'com.instagram.android', 'com.twitter.android', 'com.zhiliaoapp.musically'],
+          enableBase64ShareAndroid: true,
+        },
+      ],
     ],
     experiments: {
       typedRoutes: true,

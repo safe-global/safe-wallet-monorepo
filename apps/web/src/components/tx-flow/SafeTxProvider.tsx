@@ -5,9 +5,6 @@ import { createTx } from '@/services/tx/tx-sender'
 import { useRecommendedNonce, useSafeTxGas } from '../tx/SignOrExecuteForm/hooks'
 import { Errors, logError } from '@/services/exceptions'
 import type { EIP712TypedData } from '@safe-global/safe-gateway-typescript-sdk'
-import useSafeInfo from '@/hooks/useSafeInfo'
-
-import { useSelectAvailableSigner } from '@/hooks/wallets/useSelectAvailableSigner'
 
 export type SafeTxContextParams = {
   safeTx?: SafeTransaction
@@ -52,9 +49,6 @@ const SafeTxProvider = ({ children }: { children: ReactNode }): ReactElement => 
   const [safeTxGas, setSafeTxGas] = useState<string>()
   const [txOrigin, setTxOrigin] = useState<string>()
 
-  const { safe } = useSafeInfo()
-  const selectAvailableSigner = useSelectAvailableSigner()
-
   // Signed txs cannot be updated
   const isSigned = safeTx && safeTx.signatures.size > 0
 
@@ -67,10 +61,6 @@ const SafeTxProvider = ({ children }: { children: ReactNode }): ReactElement => 
   const finalSafeTxGas = isSigned
     ? safeTx?.data.safeTxGas
     : (safeTxGas ?? recommendedSafeTxGas ?? safeTx?.data.safeTxGas)
-
-  useEffect(() => {
-    selectAvailableSigner(safeTx, safe)
-  }, [safeTx, safe, selectAvailableSigner])
 
   // Update the tx when the nonce or safeTxGas change
   useEffect(() => {

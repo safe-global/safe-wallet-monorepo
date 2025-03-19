@@ -36,7 +36,7 @@ const usePendingTxs = () => {
     data,
   })
 
-  const pendingTxs = useMemo(() => groupPendingTxs(list || []), [list])
+  const pendingTxs = useMemo(() => groupPendingTxs(list?.results || []), [list])
 
   return {
     hasMore: Boolean(data?.next),
