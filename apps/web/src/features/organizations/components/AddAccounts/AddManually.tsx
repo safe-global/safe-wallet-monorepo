@@ -78,7 +78,7 @@ const AddManually = ({ handleAddSafe }: { handleAddSafe: (data: AddManuallyFormV
     if (address) {
       trigger('address')
     }
-  }, [chainId, trigger, watch])
+  }, [address, chainId, trigger])
 
   return (
     <>
