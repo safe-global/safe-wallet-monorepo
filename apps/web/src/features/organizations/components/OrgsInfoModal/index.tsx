@@ -44,7 +44,7 @@ const ListIcon = () => (
   </ListItemIcon>
 )
 
-const OrgsInfoModal = ({ onClose }: { onClose: () => void }) => {
+const OrgsInfoModal = ({ showButtons = true, onClose }: { showButtons?: boolean; onClose: () => void }) => {
   return (
     <Dialog open PaperProps={{ style: { width: '870px', maxWidth: '98%', borderRadius: '16px' } }} onClose={onClose}>
       <DialogContent dividers sx={{ p: 0, border: 0 }}>
@@ -85,21 +85,23 @@ const OrgsInfoModal = ({ onClose }: { onClose: () => void }) => {
               </ListItem>
             </List>
 
-            <Stack gap={2} mt="auto">
-              <Link href={AppRoutes.welcome.organizations} passHref legacyBehavior>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={() => trackEvent({ ...ORG_EVENTS.OPEN_ORGS_LIST_PAGE, label: ORG_LABELS.info_modal })}
-                >
-                  Create an organization
-                </Button>
-              </Link>
+            {showButtons && (
+              <Stack gap={2} mt="auto">
+                <Link href={AppRoutes.welcome.organizations} passHref legacyBehavior>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={() => trackEvent({ ...ORG_EVENTS.OPEN_ORGS_LIST_PAGE, label: ORG_LABELS.info_modal })}
+                  >
+                    Create an organization
+                  </Button>
+                </Link>
 
-              <Button variant="text" color="primary" onClick={onClose}>
-                Maybe later
-              </Button>
-            </Stack>
+                <Button variant="text" color="primary" onClick={onClose}>
+                  Maybe later
+                </Button>
+              </Stack>
+            )}
           </Grid2>
 
           <Grid2 size={6} justifyContent="center" flex={1} bgcolor="#121312">
