@@ -5,7 +5,7 @@ import { badgeTheme as NetworkBadgeTheme } from '@/src/components/NetworkBadge/t
 import { navbarTheme } from '@/src/features/Assets/components/Navbar/theme'
 import { tokens } from '@/src/theme/tokens'
 import { createAnimations } from '@tamagui/animations-moti'
-import { inputTheme } from '../components/SafeInput/theme'
+import { inputTheme, inputWithLabelTheme } from '../components/SafeInput/theme'
 import { safeTabTheme } from '@/src/components/SafeTab/theme'
 import { SafeListItemTheme } from '@/src/components/SafeListItem/theme'
 
@@ -66,6 +66,7 @@ export const config = createTamagui({
     ...NetworkBadgeTheme,
     ...navbarTheme,
     ...safeTabTheme,
+    ...inputWithLabelTheme,
     light_success: {
       background: tokens.color.successBackgroundLight,
       color: tokens.color.successMainLight,

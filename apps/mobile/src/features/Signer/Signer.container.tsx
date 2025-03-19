@@ -70,6 +70,7 @@ export const SignerContainer = () => {
             onPress: () => {
               clearErrors()
               reset()
+              setEditMode(() => !editMode)
             },
           },
         ])

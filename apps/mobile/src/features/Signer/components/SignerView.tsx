@@ -40,7 +40,7 @@ export const SignerView = ({
         </View>
         <View justifyContent={'center'} alignItems={'center'} marginTop={'$4'}>
           <H2 numberOfLines={1} maxWidth={300} marginTop={'$2'} textAlign={'center'}>
-            {name || 'Unnamed Signer'}
+            {name || 'Unnamed signer'}
           </H2>
         </View>
 
@@ -48,18 +48,21 @@ export const SignerView = ({
           <Controller
             control={control}
             name="name"
-            render={({ field: { onChange, onBlur, value } }) => (
-              <SafeInputWithLabel
-                label={'Name'}
-                value={value}
-                onBlur={onBlur}
-                disabled={!editMode}
-                onChangeText={onChange}
-                placeholder={'Enter signer name'}
-                error={dirtyFields.name && !!errors.name}
-                success={dirtyFields.name && !errors.name}
-              />
-            )}
+            render={({ field: { onChange, onBlur, value } }) => {
+              console.log('value for field', value)
+              return (
+                <SafeInputWithLabel
+                  label={'Name'}
+                  value={editMode ? value : value || (!dirtyFields.name ? 'Unnamed signer' : '')}
+                  onBlur={onBlur}
+                  disabled={!editMode}
+                  onChangeText={onChange}
+                  placeholder={'Enter signer name'}
+                  error={dirtyFields.name && !!errors.name}
+                  success={dirtyFields.name && !errors.name}
+                />
+              )
+            }}
           />
           {errors.name && <Text color={'$error'}>{errors.name.message}</Text>}
         </View>

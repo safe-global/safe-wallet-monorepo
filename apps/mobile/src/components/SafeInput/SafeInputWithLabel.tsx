@@ -1,4 +1,4 @@
-import { Input, InputProps, styled, View, Text } from 'tamagui'
+import { Input, InputProps, styled, View, Text, Theme } from 'tamagui'
 import React from 'react'
 
 interface Props {
@@ -21,7 +21,7 @@ const StyledInputContainer = styled(View, {
   justifyContent: 'flex-start',
   marginBottom: '$3',
   padding: '$3',
-  backgroundColor: '$backgroundPaperDark',
+  backgroundColor: '$background',
 
   variants: {
     error: {
@@ -61,11 +61,18 @@ export const SafeInputWithLabel = ({
   ...props
 }: Props & Omit<InputProps, 'left' | 'right'>) => {
   return (
-    <StyledInputContainer testID={testID ? testID : 'safe-input-with-label'} success={success} error={error} gap={'$1'}>
-      <Text color={'$colorSecondary'}>{label}</Text>
-      <View flex={1} flexDirection="row">
-        <StyledInput size="$5" flex={1} placeholder={placeholder} {...props} />
-      </View>
-    </StyledInputContainer>
+    <Theme name={'input_with_label'}>
+      <StyledInputContainer
+        testID={testID ? testID : 'safe-input-with-label'}
+        success={success}
+        error={error}
+        gap={'$1'}
+      >
+        <Text color={'$colorSecondary'}>{label}</Text>
+        <View flex={1} flexDirection="row">
+          <StyledInput size="$5" flex={1} placeholder={placeholder} {...props} />
+        </View>
+      </StyledInputContainer>
+    </Theme>
   )
 }
