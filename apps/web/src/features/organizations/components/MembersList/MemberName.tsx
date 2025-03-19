@@ -1,4 +1,4 @@
-import { InitialsAvatar } from '../OrgsCard'
+import InitialsAvatar from '../InitialsAvatar'
 import { Stack, Typography } from '@mui/material'
 import type { UserOrganization } from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
 

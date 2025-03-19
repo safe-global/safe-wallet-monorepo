@@ -1,6 +1,7 @@
 import { Card, Box, Typography, Link as MUILink, Stack } from '@mui/material'
 import type { GetOrganizationResponse } from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
-import { InitialsAvatar, OrgSummary } from '../OrgsCard'
+import { OrgSummary } from '../OrgsCard'
+import InitialsAvatar from '../InitialsAvatar'
 import { useOrgSafeCount } from '@/features/organizations/hooks/useOrgSafeCount'
 import Link from 'next/link'
 import { AppRoutes } from '@/config/routes'
