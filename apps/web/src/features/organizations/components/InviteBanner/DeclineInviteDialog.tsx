@@ -5,6 +5,8 @@ import ModalDialog from '@/components/common/ModalDialog'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import type { GetOrganizationResponse } from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
 import { useUserOrganizationsDeclineInviteV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
+import { ORG_EVENTS } from '@/services/analytics/events/organizations'
+import { trackEvent } from '@/services/analytics'
 
 type DeclineInviteDialogProps = {
   org: GetOrganizationResponse
@@ -17,6 +19,7 @@ const DeclineInviteDialog = ({ org, onClose }: DeclineInviteDialogProps) => {
 
   const handleConfirm = async () => {
     setErrorMessage('')
+    trackEvent({ ...ORG_EVENTS.DECLINE_INVITE_SUBMIT })
     try {
       const { error } = await declineInvite({ orgId: org.id })
 

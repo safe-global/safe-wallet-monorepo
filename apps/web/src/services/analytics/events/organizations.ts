@@ -25,8 +25,16 @@ export const ORG_EVENTS = {
     action: 'Open accept invitation dialog',
     category: ORG_CATEGORY,
   },
+  ACCEPT_INVITE_SUBMIT: {
+    action: 'Submit accept invitation',
+    category: ORG_CATEGORY,
+  },
   DECLINE_INVITE: {
     action: 'Open decline invitation dialog',
+    category: ORG_CATEGORY,
+  },
+  DECLINE_INVITE_SUBMIT: {
+    action: 'Submit decline invitation',
     category: ORG_CATEGORY,
   },
   VIEW_INVITING_ORG: {

@@ -52,7 +52,6 @@ const OrganizationMembers = () => {
           placeholder="Search"
           variant="filled"
           hiddenLabel
-          // value={searchQuery}
           onChange={(e) => {
             handleSearch(e.target.value)
           }}

@@ -14,6 +14,8 @@ import { AppRoutes } from '@/config/routes'
 import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
 import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
+import { ORG_EVENTS } from '@/services/analytics/events/organizations'
+import { trackEvent } from '@/services/analytics'
 
 function AcceptInviteDialog({ org, onClose }: { org: GetOrganizationResponse; onClose: () => void }): ReactElement {
   const [error, setError] = useState<string>()
@@ -30,6 +32,7 @@ function AcceptInviteDialog({ org, onClose }: { org: GetOrganizationResponse; on
 
   const onSubmit = handleSubmit(async (data) => {
     setError(undefined)
+    trackEvent({ ...ORG_EVENTS.ACCEPT_INVITE_SUBMIT })
 
     try {
       setIsSubmitting(true)
