@@ -14,7 +14,7 @@ import {
 } from '@mui/material'
 import type { Palette } from '@mui/material'
 import { type SafeTransaction } from '@safe-global/safe-core-sdk-types'
-import type { TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
+import { TransactionInfoType, type TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
 import Summary from '@/components/transactions/TxDetails/Summary'
 import { trackEvent, MODALS_EVENTS } from '@/services/analytics'
 import Multisend from '@/components/transactions/TxDetails/TxData/DecodedData/Multisend'
@@ -26,35 +26,37 @@ import HelpToolTip from './HelpTooltip'
 enum ColorLevel {
   info = 'info',
   warning = 'warning',
-  error = 'error',
+  success = 'success',
 }
 
-const METHOD_LEVELS = {
-  [ColorLevel.error]: ['setFallbackHandler'],
-  [ColorLevel.warning]: [
-    'addOwnerWithThreshold',
-    'changeThreshold',
-    'disableModule',
-    'enableModule',
-    'removeOwner',
-    'setGuard',
-    'swapOwner',
+const TX_INFO_LEVEL = {
+  [ColorLevel.warning]: [TransactionInfoType.SETTINGS_CHANGE],
+  [ColorLevel.success]: [
+    TransactionInfoType.TRANSFER,
+    TransactionInfoType.SWAP_TRANSFER,
+    TransactionInfoType.TWAP_ORDER,
+    TransactionInfoType.NATIVE_STAKING_DEPOSIT,
   ],
 }
 
-const getMethodLevel = (method?: string): ColorLevel => {
-  if (!method) {
+const getMethodLevel = (txInfo?: TransactionInfoType): ColorLevel => {
+  if (!txInfo) {
     return ColorLevel.info
   }
 
-  const methodLevels = Object.keys(METHOD_LEVELS) as (keyof typeof METHOD_LEVELS)[]
-  return (methodLevels.find((key) => METHOD_LEVELS[key].includes(method)) as ColorLevel) || ColorLevel.info
+  const methodLevels = Object.keys(TX_INFO_LEVEL) as (keyof typeof TX_INFO_LEVEL)[]
+  return (methodLevels.find((key) => TX_INFO_LEVEL[key].includes(txInfo)) as ColorLevel) || ColorLevel.info
 }
 
-const getColors = ({ info, warning, error }: Palette): Record<ColorLevel, { main: string; background?: string }> => ({
+const getColors = ({
+  info,
+  warning,
+  primary,
+  background,
+}: Palette): Record<ColorLevel, { main: string; background?: string }> => ({
   info: { main: info.dark, background: info.background },
   warning: { main: warning.main, background: warning.background },
-  error: { main: error.main, background: error.background },
+  success: { main: primary.main, background: background.light },
 })
 
 const StyledAccordion = styled(Accordion)<{ color?: ColorLevel }>(({ theme, color = ColorLevel.info }) => {
@@ -108,8 +110,7 @@ const DecodedTx = ({
   const decodedData = txData?.dataDecoded
   const isMultisend = decodedData?.parameters && !!decodedData?.parameters[0]?.valueDecoded
   const isMethodCallInAdvanced = showAdvancedDetails && (!showMethodCall || (isMultisend && showMultisend))
-  const method = decodedData?.method
-  const level = useMemo(() => getMethodLevel(method), [method])
+  const level = useMemo(() => getMethodLevel(txInfo?.type), [txInfo?.type])
   const colors = getColors(palette)[level]
 
   let toInfo = tx && {
@@ -120,14 +121,14 @@ const DecodedTx = ({
   }
 
   const decodedDataBlock = <DecodedData txData={txData} toInfo={toInfo} />
-  const showDecodedData = isMethodCallInAdvanced && method
-  const hideDecodedDataInAdvanced = !showDecodedData || (isMethodCallInAdvanced && !!method)
+  const showDecodedData = isMethodCallInAdvanced && decodedData?.method
+  const hideDecodedDataInAdvanced = !showDecodedData || (isMethodCallInAdvanced && !!decodedData?.method)
 
   const methodLabel =
     txInfo && isTransferTxInfo(txInfo) && isNativeTokenTransfer(txInfo.transferInfo)
       ? 'native transfer'
       : isMethodCallInAdvanced
-        ? method
+        ? decodedData?.method
         : undefined
 
   return (
