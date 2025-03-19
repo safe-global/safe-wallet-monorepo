@@ -35,11 +35,11 @@ function OrgsCreationModal({ onClose }: { onClose: () => void }): ReactElement {
       }
 
       if (response.error) {
-        setError('Failed creating the organization. Please try again.')
+        throw response.error
       }
     } catch (e) {
-      // TODO: Handle this error case
-      console.log(e)
+      // TODO: Show more specific error message
+      setError('Failed creating the organization. Please try again.')
     } finally {
       setIsSubmitting(false)
     }
@@ -81,7 +81,13 @@ function OrgsCreationModal({ onClose }: { onClose: () => void }): ReactElement {
             <Button data-testid="cancel-btn" onClick={onClose}>
               Cancel
             </Button>
-            <Button type="submit" variant="contained" disabled={!formState.isValid || isSubmitting} disableElevation>
+            <Button
+              type="submit"
+              variant="contained"
+              disabled={!formState.isValid || isSubmitting}
+              disableElevation
+              sx={{ minWidth: '200px' }}
+            >
               {isSubmitting ? <CircularProgress size={20} /> : 'Create organization'}
             </Button>
           </DialogActions>

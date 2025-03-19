@@ -324,7 +324,10 @@ const MultiAccountItem = ({ onLinkClick, multiSafeAccountItem, isOrgSafe = false
           )}
 
           {isOrgSafe ? (
-            <OrgSafeContextMenu safeItem={multiSafeAccountItem} />
+            <>
+              <Box width="40px" /> {/* Spacer for the send button */}
+              <OrgSafeContextMenu safeItem={multiSafeAccountItem} />
+            </>
           ) : (
             <MultiAccountContextMenu
               name={multiSafeAccountItem.name ?? ''}

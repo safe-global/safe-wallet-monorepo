@@ -23,6 +23,7 @@ import {
   InputAdornment,
   SvgIcon,
   TextField,
+  Tooltip,
   Typography,
 } from '@mui/material'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
@@ -30,6 +31,7 @@ import { FormProvider, useForm } from 'react-hook-form'
 import { trackEvent } from '@/services/analytics'
 import { ORG_EVENTS, ORG_LABELS } from '@/services/analytics/events/organizations'
 import Track from '@/components/common/Track'
+import { useIsAdmin } from '@/features/organizations/hooks/useOrgMembers'
 
 export type AddAccountsFormValues = {
   selectedSafes: Record<string, boolean>
@@ -40,6 +42,7 @@ function getSelectedSafes(safes: AddAccountsFormValues['selectedSafes']) {
 }
 
 const AddAccounts = () => {
+  const isAdmin = useIsAdmin()
   const [open, setOpen] = useState<boolean>(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [error, setError] = useState<string>()
@@ -130,9 +133,14 @@ const AddAccounts = () => {
 
   return (
     <>
-      <Button variant="contained" onClick={() => setOpen(true)}>
-        Add accounts
-      </Button>
+      <Tooltip title={!isAdmin ? 'You need to be an Admin to add accounts' : ''} placement="top">
+        <Box component="span">
+          <Button variant="contained" onClick={() => setOpen(true)} disabled={!isAdmin}>
+            Add accounts
+          </Button>
+        </Box>
+      </Tooltip>
+
       <ModalDialog open={open} fullScreen hideChainIndicator PaperProps={{ sx: { backgroundColor: '#f4f4f4' } }}>
         <DialogContent sx={{ display: 'flex', alignItems: 'center' }}>
           <Container fixed maxWidth="sm" disableGutters>
