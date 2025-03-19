@@ -218,7 +218,11 @@ const SingleAccountItem = ({
         )}
       </Typography>
 
-      {!isMultiChainItem && <ChainIndicator chainId={chainId} responsive onlyLogo className={css.chainIndicator} />}
+      {!isMultiChainItem ? (
+        <ChainIndicator chainId={chainId} responsive onlyLogo className={css.chainIndicator} />
+      ) : (
+        <div />
+      )}
 
       <Typography variant="body2" sx={{ fontWeight: 'bold', textAlign: 'right', pl: 2 }}>
         {undeployedSafe ? null : safeOverview ? (
@@ -232,41 +236,39 @@ const SingleAccountItem = ({
 
   const actions = (
     <>
-      {!isMultiChainItem && (
-        <>
-          {!isOrgSafe && (
-            <IconButton
-              data-testid="bookmark-icon"
-              edge="end"
-              size="medium"
-              sx={{ mx: 1 }}
-              onClick={isPinned ? removeFromPinnedList : addToPinnedList}
-            >
-              <SvgIcon
-                component={isPinned ? BookmarkedIcon : BookmarkIcon}
-                inheritViewBox
-                color={isPinned ? 'primary' : undefined}
-                fontSize="small"
-              />
-            </IconButton>
-          )}
+      {!isMultiChainItem && !isOrgSafe && (
+        <IconButton
+          data-testid="bookmark-icon"
+          edge="end"
+          size="medium"
+          sx={{ mx: 1 }}
+          onClick={isPinned ? removeFromPinnedList : addToPinnedList}
+        >
+          <SvgIcon
+            component={isPinned ? BookmarkedIcon : BookmarkIcon}
+            inheritViewBox
+            color={isPinned ? 'primary' : undefined}
+            fontSize="small"
+          />
+        </IconButton>
+      )}
 
-          {isOrgSafe ? (
-            <>
-              {safeOverview && <SendTransactionButton safe={safeOverview} />}
-              <OrgSafeContextMenu safeItem={safeItem} />
-            </>
-          ) : (
-            <SafeListContextMenu
-              name={name}
-              address={address}
-              chainId={chainId}
-              addNetwork={isReplayable}
-              rename
-              undeployedSafe={!!undeployedSafe}
-            />
-          )}
+      {isOrgSafe ? (
+        <>
+          {safeOverview && <SendTransactionButton safe={safeOverview} />}
+          <OrgSafeContextMenu safeItem={safeItem} />
         </>
+      ) : (
+        !isMultiChainItem && (
+          <SafeListContextMenu
+            name={name}
+            address={address}
+            chainId={chainId}
+            addNetwork={isReplayable}
+            rename
+            undeployedSafe={!!undeployedSafe}
+          />
+        )
       )}
 
       {isMobile && (

@@ -2,7 +2,6 @@ import { createContext, type ReactElement, type ReactNode, useState, useEffect, 
 import { usePathname } from 'next/navigation'
 import TxModalDialog from '@/components/common/TxModalDialog'
 import { SuccessScreenFlow, NestedTxSuccessScreenFlow } from './flows'
-import useSafeAddress from '@/hooks/useSafeAddress'
 import useChainId from '@/hooks/useChainId'
 import { useWalletContext } from '@/hooks/wallets/useWallet'
 import { useSafeAddressFromUrl } from '@/hooks/useSafeAddressFromUrl'

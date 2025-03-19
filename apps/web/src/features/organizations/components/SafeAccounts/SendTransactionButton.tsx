@@ -18,8 +18,6 @@ const chains = networks.reduce<Chains>((result, { shortName, chainId }) => {
   return result
 }, {})
 
-const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
-
 const SendTransactionButton = ({ safe }: { safe: SafeOverview }) => {
   const router = useRouter()
   const wallet = useWallet()
