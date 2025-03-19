@@ -15,10 +15,14 @@ export enum MemberRole {
   MEMBER = 'MEMBER',
 }
 
-const useAllMembers = () => {
-  const orgId = useCurrentOrgId()
+const useAllMembers = (orgId?: number) => {
+  const currentOrgId = useCurrentOrgId()
+  const actualOrgId = orgId ?? currentOrgId
   const isUserSignedIn = useAppSelector(isAuthenticated)
-  const { data: currentData } = useUserOrganizationsGetUsersV1Query({ orgId: Number(orgId) }, { skip: !isUserSignedIn })
+  const { data: currentData } = useUserOrganizationsGetUsersV1Query(
+    { orgId: Number(actualOrgId) },
+    { skip: !isUserSignedIn },
+  )
   return currentData?.members || []
 }
 
@@ -33,14 +37,14 @@ export const useOrgMembersByStatus = () => {
   return { activeMembers, invitedMembers }
 }
 
-const useCurrentMembership = () => {
-  const allMembers = useAllMembers()
+const useCurrentMembership = (orgId?: number) => {
+  const allMembers = useAllMembers(orgId)
   const { currentData: user } = useUsersGetWithWalletsV1Query()
   return allMembers.find((member) => member.user.id === user?.id)
 }
 
-export const useIsAdmin = () => {
-  const currentMembership = useCurrentMembership()
+export const useIsAdmin = (orgId?: number) => {
+  const currentMembership = useCurrentMembership(orgId)
   return currentMembership?.role === MemberRole.ADMIN
 }
 

@@ -9,6 +9,8 @@ import type { GetOrganizationResponse } from '@safe-global/store/gateway/AUTO_GE
 import classNames from 'classnames'
 import { useOrgSafeCount } from '@/features/organizations/hooks/useOrgSafeCount'
 import InitialsAvatar from '@/features/organizations/components/InitialsAvatar'
+import OrgContextMenu from '@/features/organizations/components/OrgsCard/OrgContextMenu'
+import { useIsAdmin } from '@/features/organizations/hooks/useOrgMembers'
 
 export const OrgSummary = ({
   name,
@@ -54,6 +56,7 @@ const OrgsCard = ({
   const { id, name, userOrganizations: members } = org
   const numberOfMembers = members.length
   const numberOfAccounts = useOrgSafeCount(id)
+  const isAdmin = useIsAdmin(id)
 
   return (
     <Card className={classNames(css.card, { [css.compact]: isCompact })}>
@@ -70,9 +73,7 @@ const OrgsCard = ({
         isCompact={isCompact}
       />
 
-      <IconButton className={css.orgActions} size="small" onClick={() => {}}>
-        <MoreVertIcon sx={({ palette }) => ({ color: palette.border.main })} />
-      </IconButton>
+      {isAdmin && <OrgContextMenu org={org} />}
     </Card>
   )
 }

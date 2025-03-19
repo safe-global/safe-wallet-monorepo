@@ -6,7 +6,6 @@ import {
   useOrganizationsUpdateV1Mutation,
 } from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
 import { useAppDispatch } from '@/store'
-import { useCurrentOrgId } from '@/features/organizations/hooks/useCurrentOrgId'
 import { useIsAdmin } from '@/features/organizations/hooks/useOrgMembers'
 
 type UpdateOrganizationFormData = {
@@ -16,8 +15,7 @@ type UpdateOrganizationFormData = {
 const UpdateOrgForm = ({ org }: { org: GetOrganizationResponse | undefined }) => {
   const dispatch = useAppDispatch()
   const [updateOrg] = useOrganizationsUpdateV1Mutation()
-  const orgId = useCurrentOrgId()
-  const isAdmin = useIsAdmin()
+  const isAdmin = useIsAdmin(org?.id)
 
   const formMethods = useForm<UpdateOrganizationFormData>({
     mode: 'onChange',
@@ -32,8 +30,10 @@ const UpdateOrgForm = ({ org }: { org: GetOrganizationResponse | undefined }) =>
   const isNameChanged = formName !== org?.name
 
   const onSubmit = handleSubmit(async (data) => {
+    if (!org) return
+
     try {
-      await updateOrg({ id: Number(orgId), updateOrganizationDto: { name: data.name } })
+      await updateOrg({ id: org.id, updateOrganizationDto: { name: data.name } })
 
       dispatch(
         showNotification({
@@ -46,6 +46,7 @@ const UpdateOrgForm = ({ org }: { org: GetOrganizationResponse | undefined }) =>
       console.log(e)
     }
   })
+
   return (
     <FormProvider {...formMethods}>
       <form onSubmit={onSubmit}>

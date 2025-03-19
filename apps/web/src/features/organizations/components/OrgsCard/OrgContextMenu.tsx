@@ -11,6 +11,8 @@ import DeleteIcon from '@/public/images/common/delete.svg'
 import EditIcon from '@/public/images/common/edit.svg'
 import type { GetOrganizationResponse } from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
 import css from '@/features/organizations/components/OrgsCard/styles.module.css'
+import DeleteOrgDialog from '@/features/organizations/components/OrgsSettings/DeleteOrgDialog'
+import UpdateOrgDialog from '@/features/organizations/components/OrgsSettings/UpdateOrgDialog'
 
 enum ModalType {
   RENAME = 'rename',
@@ -22,8 +24,6 @@ const defaultOpen = { [ModalType.RENAME]: false, [ModalType.REMOVE]: false }
 const OrgContextMenu = ({ org }: { org: GetOrganizationResponse }) => {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | undefined>()
   const [open, setOpen] = useState<typeof defaultOpen>(defaultOpen)
-
-  const name = org.name
 
   const handleOpenContextMenu = (e: MouseEvent<HTMLButtonElement, globalThis.MouseEvent>) => {
     e.stopPropagation()
@@ -66,9 +66,9 @@ const OrgContextMenu = ({ org }: { org: GetOrganizationResponse }) => {
         </MenuItem>
       </ContextMenu>
 
-      {open[ModalType.RENAME] && <></>}
+      {open[ModalType.RENAME] && <UpdateOrgDialog org={org} onClose={handleCloseModal} />}
 
-      {open[ModalType.REMOVE] && <></>}
+      {open[ModalType.REMOVE] && <DeleteOrgDialog org={org} onClose={handleCloseModal} />}
     </>
   )
 }
