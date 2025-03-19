@@ -1,6 +1,7 @@
 import React from 'react'
-import { Switch } from 'react-native'
+import { Switch, StyleSheet } from 'react-native'
 import { Text, View } from 'tamagui'
+import { CircleSnail } from 'react-native-progress'
 import { SafeListItem } from '@/src/components/SafeListItem'
 import { NotificationPermissions } from './NotificationPermissions'
 import { useNotificationGTWPermissions } from '@/src/hooks/useNotificationGTWPermissions'
@@ -8,8 +9,39 @@ import { useNotificationGTWPermissions } from '@/src/hooks/useNotificationGTWPer
 type Props = {
   onChange: () => void
   value: boolean
+  isLoading?: boolean
 }
-export const NotificationsSettingsView = ({ onChange, value }: Props) => {
+
+interface LoadableSwitchProps {
+  isLoading?: boolean
+  value: boolean
+  onChange: () => void
+  testID?: string
+  trackColor?: {
+    true: string
+    false?: string
+  }
+}
+
+const LoadableSwitch: React.FC<LoadableSwitchProps> = ({
+  isLoading = false,
+  value,
+  onChange,
+  testID,
+  trackColor = { true: '$primary' },
+}) => {
+  if (isLoading) {
+    return (
+      <View style={styles.loaderContainer}>
+        <CircleSnail size={24} color={value ? trackColor.true : '#ccc'} />
+      </View>
+    )
+  }
+
+  return <Switch testID={testID} onChange={onChange} value={value} trackColor={trackColor} />
+}
+
+export const NotificationsSettingsView = ({ onChange, value, isLoading = false }: Props) => {
   const { getAccountType } = useNotificationGTWPermissions()
 
   return (
@@ -23,10 +55,11 @@ export const NotificationsSettingsView = ({ onChange, value }: Props) => {
       <SafeListItem
         label={'Allow notifications'}
         rightNode={
-          <Switch
+          <LoadableSwitch
             testID="toggle-app-notifications"
             onChange={onChange}
             value={value}
+            isLoading={isLoading}
             trackColor={{ true: '$primary' }}
           />
         }
@@ -36,3 +69,12 @@ export const NotificationsSettingsView = ({ onChange, value }: Props) => {
     </View>
   )
 }
+
+const styles = StyleSheet.create({
+  loaderContainer: {
+    width: 51,
+    height: 31,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+})
