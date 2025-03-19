@@ -7,6 +7,7 @@ import SendNftBatch from './SendNftBatch'
 import ReviewNftBatch from './ReviewNftBatch'
 import { useMemo } from 'react'
 import { ConfirmTxDetails } from '@/components/tx/ConfirmTxDetails'
+import { TxFlowType } from '@/services/analytics'
 
 export type NftTransferParams = {
   recipient: string
@@ -23,10 +24,13 @@ const defaultParams: NftTransferParams = {
 }
 
 const NftTransferFlow = ({ txNonce, ...params }: NftTransferFlowProps) => {
-  const { data, step, nextStep, prevStep } = useTxStepper<NftTransferParams>({
-    ...defaultParams,
-    ...params,
-  })
+  const { data, step, nextStep, prevStep } = useTxStepper<NftTransferParams>(
+    {
+      ...defaultParams,
+      ...params,
+    },
+    TxFlowType.NFT_TRANSFER,
+  )
 
   const steps = useMemo<TxStep[]>(
     () => [

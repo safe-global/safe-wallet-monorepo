@@ -4,26 +4,27 @@ import type { TxStep } from '../../common/TxLayout'
 import RejectTx from './RejectTx'
 import useTxStepper from '../../useTxStepper'
 import { ConfirmTxDetails } from '@/components/tx/ConfirmTxDetails'
+import { TxFlowType } from '@/services/analytics'
 
 type RejectTxProps = {
   txNonce: number
 }
 
 const RejectTxFlow = ({ txNonce }: RejectTxProps): ReactElement => {
-  const { data, step, nextStep, prevStep } = useTxStepper(null)
+  const { step, nextStep, prevStep } = useTxStepper(undefined, TxFlowType.REJECT_TX)
 
   const steps = useMemo<TxStep[]>(
     () => [
       {
         txLayoutProps: { title: 'Confirm transaction' },
-        content: <RejectTx key={0} txNonce={txNonce} onSubmit={() => nextStep(data)} />,
+        content: <RejectTx key={0} txNonce={txNonce} onSubmit={() => nextStep(undefined)} />,
       },
       {
         txLayoutProps: { title: 'Confirm transaction details', fixedNonce: true },
         content: <ConfirmTxDetails key={1} onSubmit={() => {}} isRejection />,
       },
     ],
-    [nextStep, data, txNonce],
+    [nextStep, txNonce],
   )
 
   return (

@@ -11,11 +11,12 @@ import { ConfirmTxDetails } from '@/components/tx/ConfirmTxDetails'
 import { isExecutable, isMultisigExecutionInfo, isSignableBy } from '@/utils/transaction-guards'
 import { useSigner } from '@/hooks/wallets/useWallet'
 import useSafeInfo from '@/hooks/useSafeInfo'
+import { TxFlowType } from '@/services/analytics'
 
 const ConfirmTxFlow = ({ txSummary }: { txSummary: TransactionSummary }) => {
   const { text } = useTransactionType(txSummary)
   const isSwapOrder = isSwapOrderTxInfo(txSummary.txInfo)
-  const { data, step, nextStep, prevStep } = useTxStepper({})
+  const { step, nextStep, prevStep } = useTxStepper(undefined, TxFlowType.CONFIRM_TX)
   const signer = useSigner()
   const { safe } = useSafeInfo()
 
@@ -33,14 +34,14 @@ const ConfirmTxFlow = ({ txSummary }: { txSummary: TransactionSummary }) => {
     () => [
       {
         txLayoutProps: { title: 'Confirm transaction' },
-        content: <ConfirmProposedTx key={0} txNonce={txNonce} onSubmit={() => nextStep(data)} {...commonProps} />,
+        content: <ConfirmProposedTx key={0} txNonce={txNonce} onSubmit={() => nextStep(undefined)} {...commonProps} />,
       },
       {
         txLayoutProps: { title: 'Confirm transaction details', fixedNonce: true },
         content: <ConfirmTxDetails key={1} onSubmit={() => {}} {...commonProps} />,
       },
     ],
-    [nextStep, data, commonProps, txNonce],
+    [nextStep, commonProps, txNonce],
   )
 
   return (
