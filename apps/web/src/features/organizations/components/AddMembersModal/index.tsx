@@ -156,7 +156,7 @@ const AddMembersModal = ({ onClose }: { onClose: () => void }): ReactElement => 
                 />
               </Stack>
 
-              <AddressInput name="address" label="Address" required />
+              <AddressInput name="address" label="Address" required showPrefix={false} />
             </Stack>
 
             {error && (
