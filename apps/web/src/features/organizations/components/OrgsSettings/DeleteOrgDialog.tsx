@@ -1,4 +1,14 @@
-import { Button, DialogActions, DialogContent, List, ListItem, ListItemIcon, SvgIcon, Typography } from '@mui/material'
+import {
+  Alert,
+  Button,
+  DialogActions,
+  DialogContent,
+  List,
+  ListItem,
+  ListItemIcon,
+  SvgIcon,
+  Typography,
+} from '@mui/material'
 import ModalDialog from '@/components/common/ModalDialog'
 import {
   type GetOrganizationResponse,
@@ -10,6 +20,7 @@ import css from '@/features/organizations/components/OrgsSettings/styles.module.
 import { AppRoutes } from '@/config/routes'
 import { useCurrentOrgId } from '@/features/organizations/hooks/useCurrentOrgId'
 import { useRouter } from 'next/router'
+import { useState } from 'react'
 
 const ListIcon = ({ variant }: { variant: 'success' | 'danger' }) => {
   const Icon = variant === 'success' ? CheckIcon : CloseIcon
@@ -22,18 +33,22 @@ const ListIcon = ({ variant }: { variant: 'success' | 'danger' }) => {
 }
 
 const DeleteOrgDialog = ({ org, onClose }: { org: GetOrganizationResponse | undefined; onClose: () => void }) => {
+  const [error, setError] = useState<string>()
   const orgId = useCurrentOrgId()
   const router = useRouter()
   const [deleteOrg] = useOrganizationsDeleteV1Mutation()
 
   const onDelete = async () => {
+    setError(undefined)
+
     try {
       await deleteOrg({ id: Number(orgId) })
 
       onClose()
       router.push({ pathname: AppRoutes.welcome.organizations })
     } catch (e) {
-      console.log(e)
+      console.error(e)
+      setError('Error deleting the organization. Please try again.')
     }
   }
 
@@ -58,6 +73,12 @@ const DeleteOrgDialog = ({ org, onClose }: { org: GetOrganizationResponse | unde
             Will keep access to the Safe Accounts added to this organization. They will not be deleted.
           </ListItem>
         </List>
+
+        {error && (
+          <Alert severity="error" sx={{ mt: 2 }}>
+            {error}
+          </Alert>
+        )}
       </DialogContent>
 
       <DialogActions>

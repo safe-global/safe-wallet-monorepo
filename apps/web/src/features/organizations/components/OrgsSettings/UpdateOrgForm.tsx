@@ -1,4 +1,4 @@
-import { Button, TextField } from '@mui/material'
+import { Alert, Button, TextField } from '@mui/material'
 import { FormProvider, useForm } from 'react-hook-form'
 import { showNotification } from '@/store/notificationsSlice'
 import {
@@ -7,12 +7,14 @@ import {
 } from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
 import { useAppDispatch } from '@/store'
 import { useIsAdmin } from '@/features/organizations/hooks/useOrgMembers'
+import { useState } from 'react'
 
 type UpdateOrganizationFormData = {
   name: string
 }
 
 const UpdateOrgForm = ({ org }: { org: GetOrganizationResponse | undefined }) => {
+  const [error, setError] = useState<string>()
   const dispatch = useAppDispatch()
   const [updateOrg] = useOrganizationsUpdateV1Mutation()
   const isAdmin = useIsAdmin(org?.id)
@@ -30,6 +32,8 @@ const UpdateOrgForm = ({ org }: { org: GetOrganizationResponse | undefined }) =>
   const isNameChanged = formName !== org?.name
 
   const onSubmit = handleSubmit(async (data) => {
+    setError(undefined)
+
     if (!org) return
 
     try {
@@ -43,7 +47,8 @@ const UpdateOrgForm = ({ org }: { org: GetOrganizationResponse | undefined }) =>
         }),
       )
     } catch (e) {
-      console.log(e)
+      console.error(e)
+      setError('Error updating the organization. Please try again.')
     }
   })
 
@@ -56,6 +61,12 @@ const UpdateOrgForm = ({ org }: { org: GetOrganizationResponse | undefined }) =>
           fullWidth
           slotProps={{ inputLabel: { shrink: true } }}
         />
+
+        {error && (
+          <Alert severity="error" sx={{ mt: 2 }}>
+            {error}
+          </Alert>
+        )}
 
         <Button variant="contained" type="submit" sx={{ mt: 2 }} disabled={!isNameChanged || !isAdmin}>
           Save
