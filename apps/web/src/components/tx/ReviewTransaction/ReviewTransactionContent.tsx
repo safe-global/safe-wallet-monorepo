@@ -29,6 +29,7 @@ import TxChecks from '../SignOrExecuteForm/TxChecks'
 import { Button, CardActions, CircularProgress, Stack } from '@mui/material'
 import BatchButton from '../SignOrExecuteForm/BatchButton'
 import { TxModalContext } from '@/components/tx-flow'
+import CheckWallet from '@/components/common/CheckWallet'
 
 export type ReviewTransactionContentProps = {
   txId?: string
@@ -220,17 +221,21 @@ export const ReviewTransactionContent = ({
               />
             )}
 
-            {/* Submit button */}
-            <Button
-              data-testid="continue-sign-btn"
-              variant="contained"
-              type="submit"
-              onClick={onContinueClick}
-              disabled={submitDisabled}
-              sx={{ minWidth: '82px', order: '1', width: ['100%', '100%', '100%', 'auto'] }}
-            >
-              {!isSubmittable ? <CircularProgress size={20} /> : 'Continue'}
-            </Button>
+            {/* Continue button */}
+            <CheckWallet checkNetwork={!submitDisabled}>
+              {(isOk) => (
+                <Button
+                  data-testid="continue-sign-btn"
+                  variant="contained"
+                  type="submit"
+                  onClick={onContinueClick}
+                  disabled={!isOk || submitDisabled}
+                  sx={{ minWidth: '82px', order: '1', width: ['100%', '100%', '100%', 'auto'] }}
+                >
+                  {!isSubmittable ? <CircularProgress size={20} /> : 'Continue'}
+                </Button>
+              )}
+            </CheckWallet>
           </Stack>
         </CardActions>
       </TxCard>
