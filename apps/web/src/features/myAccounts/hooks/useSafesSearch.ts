@@ -1,22 +1,12 @@
-import { useEffect, useMemo } from 'react'
+import { useMemo } from 'react'
 import Fuse from 'fuse.js'
 import type { AllSafeItems } from './useAllSafesGrouped'
 import { selectChains } from '@/store/chainsSlice'
 import { useAppSelector } from '@/store'
 import { isMultiChainSafeItem } from '@/features/multichain/utils/utils'
-import { OVERVIEW_EVENTS, trackEvent } from '@/services/analytics'
 
 const useSafesSearch = (safes: AllSafeItems, query: string): AllSafeItems => {
   const chains = useAppSelector(selectChains)
-
-  useEffect(() => {
-    if (query) {
-      trackEvent({
-        category: OVERVIEW_EVENTS.SEARCH.category,
-        action: OVERVIEW_EVENTS.SEARCH.action,
-      })
-    }
-  }, [query])
 
   // Include chain names in the search
   const safesWithChainNames = useMemo(

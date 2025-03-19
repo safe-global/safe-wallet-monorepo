@@ -25,6 +25,8 @@ import NameInput from '@/components/common/NameInput'
 import { useRouter } from 'next/router'
 import { AppRoutes } from '@/config/routes'
 import { MemberRole } from '@/features/organizations/hooks/useOrgMembers'
+import { trackEvent } from '@/services/analytics'
+import { ORG_EVENTS } from '@/services/analytics/events/organizations'
 
 type MemberField = {
   name: string
@@ -96,7 +98,7 @@ const AddMembersModal = ({ onClose }: { onClose: () => void }): ReactElement => 
 
     try {
       setIsSubmitting(true)
-
+      trackEvent({ ...ORG_EVENTS.ADD_MEMBER })
       const response = await inviteMembers({
         orgId: Number(orgId),
         inviteUsersDto: { users: [{ address: data.address, role: data.role, name: data.name }] },
@@ -156,7 +158,7 @@ const AddMembersModal = ({ onClose }: { onClose: () => void }): ReactElement => 
                 />
               </Stack>
 
-              <AddressInput name="address" label="Address" required />
+              <AddressInput name="address" label="Address" required showPrefix={false} />
             </Stack>
 
             {error && (

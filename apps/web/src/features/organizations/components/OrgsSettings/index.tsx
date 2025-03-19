@@ -8,6 +8,8 @@ import { useIsAdmin, useIsInvited } from '@/features/organizations/hooks/useOrgM
 import PreviewInvite from '@/features/organizations/components/InviteBanner/PreviewInvite'
 import DeleteOrgDialog from '@/features/organizations/components/OrgsSettings/DeleteOrgDialog'
 import UpdateOrgForm from '@/features/organizations/components/OrgsSettings/UpdateOrgForm'
+import { trackEvent } from '@/services/analytics'
+import { ORG_EVENTS } from '@/services/analytics/events/organizations'
 
 const OrgsSettings = () => {
   const [deleteOrgOpen, setDeleteOrgOpen] = useState(false)
@@ -49,6 +51,7 @@ const OrgsSettings = () => {
               variant="danger"
               onClick={() => {
                 setDeleteOrgOpen(true)
+                trackEvent({ ...ORG_EVENTS.REMOVE_ORGANIZATION_MODAL })
               }}
               disabled={!isAdmin}
             >

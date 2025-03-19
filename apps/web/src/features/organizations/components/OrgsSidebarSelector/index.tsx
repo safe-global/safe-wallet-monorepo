@@ -16,6 +16,9 @@ import OrgsCreationModal from '../OrgsCreationModal'
 import { useCurrentOrgId } from '../../hooks/useCurrentOrgId'
 import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
+import { ORG_LABELS } from '@/services/analytics/events/organizations'
+import { trackEvent } from '@/services/analytics'
+import { ORG_EVENTS } from '@/services/analytics/events/organizations'
 
 const OrgsSidebarSelector = () => {
   const [isCreationModalOpen, setIsCreationModalOpen] = useState(false)
@@ -113,6 +116,7 @@ const OrgsSidebarSelector = () => {
             onClick={() => {
               handleClose()
               setIsCreationModalOpen(true)
+              trackEvent({ ...ORG_EVENTS.CREATE_ORG_MODAL, label: ORG_LABELS.org_selector })
             }}
             sx={{ fontWeight: 700 }}
           >
@@ -122,6 +126,7 @@ const OrgsSidebarSelector = () => {
           <MenuItem
             onClick={() => {
               handleClose()
+              trackEvent({ ...ORG_EVENTS.OPEN_ORGS_LIST_PAGE, label: ORG_LABELS.org_selector })
               router.push(AppRoutes.welcome.organizations)
             }}
             sx={{ fontWeight: 700 }}

@@ -15,6 +15,9 @@ import EntryDialog from '@/components/address-book/EntryDialog'
 import { useAppSelector } from '@/store'
 import { selectAllAddressBooks } from '@/store/addressBookSlice'
 import { isMultiChainSafeItem } from '@/features/multichain/utils/utils'
+import { ORG_EVENTS } from '@/services/analytics/events/organizations'
+import { trackEvent } from '@/services/analytics'
+import { useIsAdmin } from '@/features/organizations/hooks/useOrgMembers'
 
 enum ModalType {
   RENAME = 'rename',
@@ -26,6 +29,7 @@ const defaultOpen = { [ModalType.RENAME]: false, [ModalType.REMOVE]: false }
 const OrgSafeContextMenu = ({ safeItem }: { safeItem: SafeItem | MultiChainSafeItem }) => {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | undefined>()
   const [open, setOpen] = useState<typeof defaultOpen>(defaultOpen)
+  const isAdmin = useIsAdmin()
 
   const allAddressBooks = useAppSelector(selectAllAddressBooks)
   const chainIds = isMultiChainSafeItem(safeItem) ? safeItem.safes.map((safe) => safe.chainId) : [safeItem.chainId]
@@ -44,6 +48,7 @@ const OrgSafeContextMenu = ({ safeItem }: { safeItem: SafeItem | MultiChainSafeI
 
   const handleOpenModal = (e: MouseEvent, type: keyof typeof open) => {
     e.stopPropagation()
+    if (type === ModalType.REMOVE) trackEvent({ ...ORG_EVENTS.DELETE_ACCOUNT_MODAL })
     setAnchorEl(undefined)
     setOpen((prev) => ({ ...prev, [type]: true }))
   }
@@ -65,12 +70,14 @@ const OrgSafeContextMenu = ({ safeItem }: { safeItem: SafeItem | MultiChainSafeI
           <ListItemText>{hasName ? 'Rename' : 'Give name'}</ListItemText>
         </MenuItem>
 
-        <MenuItem onClick={(e) => handleOpenModal(e, ModalType.REMOVE)}>
-          <ListItemIcon>
-            <SvgIcon component={DeleteIcon} inheritViewBox fontSize="small" color="error" />
-          </ListItemIcon>
-          <ListItemText>Remove</ListItemText>
-        </MenuItem>
+        {isAdmin && (
+          <MenuItem onClick={(e) => handleOpenModal(e, ModalType.REMOVE)}>
+            <ListItemIcon>
+              <SvgIcon component={DeleteIcon} inheritViewBox fontSize="small" color="error" />
+            </ListItemIcon>
+            <ListItemText>Remove</ListItemText>
+          </MenuItem>
+        )}
       </ContextMenu>
 
       {open[ModalType.RENAME] && (

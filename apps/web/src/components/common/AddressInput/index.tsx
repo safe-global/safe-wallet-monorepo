@@ -11,6 +11,7 @@ import {
   IconButton,
   SvgIcon,
   Skeleton,
+  Box,
 } from '@mui/material'
 import { useFormContext, useWatch, type Validate, get } from 'react-hook-form'
 import { validatePrefixedAddress } from '@/utils/validation'
@@ -35,6 +36,7 @@ export type AddressInputProps = TextFieldProps & {
   deps?: string | string[]
   onAddressBookClick?: () => void
   chain?: ChainInfo
+  showPrefix?: boolean
 }
 
 const AddressInput = ({
@@ -46,6 +48,7 @@ const AddressInput = ({
   onAddressBookClick,
   deps,
   chain,
+  showPrefix = true,
   ...props
 }: AddressInputProps): ReactElement => {
   const {
@@ -143,14 +146,16 @@ const AddressInput = ({
             <AddressInputReadOnly address={watchedValue} />
           ) : (
             // Display the current short name in the adornment, unless the value contains the same prefix
-            <InputAdornment position="end" sx={{ ml: 0, gap: 1 }}>
-              {watchedValue && !fieldError ? (
-                <Identicon address={watchedValue} size={32} />
-              ) : (
-                <Skeleton variant="circular" width={32} height={32} animation={false} />
-              )}
+            <InputAdornment position="end" sx={{ ml: 0 }}>
+              <Box mr={1}>
+                {watchedValue && !fieldError ? (
+                  <Identicon address={watchedValue} size={32} />
+                ) : (
+                  <Skeleton variant="circular" width={32} height={32} animation={false} />
+                )}
+              </Box>
 
-              {!rawValueRef.current.startsWith(`${currentShortName}:`) && <>{currentShortName}:</>}
+              {showPrefix && !rawValueRef.current.startsWith(`${currentShortName}:`) && <Box>{currentShortName}:</Box>}
             </InputAdornment>
           ),
 

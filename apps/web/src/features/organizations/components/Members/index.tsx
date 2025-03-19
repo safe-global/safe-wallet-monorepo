@@ -1,13 +1,18 @@
 import PlusIcon from '@/public/images/common/plus.svg'
 import { Button, InputAdornment, Stack, SvgIcon, TextField, Typography } from '@mui/material'
 import AddMembersModal from '@/features/organizations/components/AddMembersModal'
-import { useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import MembersList from '@/features/organizations/components/MembersList'
 import SearchIcon from '@/public/images/common/search.svg'
 import { useMembersSearch } from '@/features/organizations/hooks/useMembersSearch'
 import { useIsInvited, useOrgMembersByStatus } from '@/features/organizations/hooks/useOrgMembers'
 import { useIsAdmin } from '@/features/organizations/hooks/useOrgMembers'
 import PreviewInvite from '../InviteBanner/PreviewInvite'
+import { ORG_LABELS } from '@/services/analytics/events/organizations'
+import Track from '@/components/common/Track'
+import { ORG_EVENTS } from '@/services/analytics/events/organizations'
+import { debounce } from 'lodash'
+import { trackEvent } from '@/services/analytics'
 
 const OrganizationMembers = () => {
   const [openAddMembersModal, setOpenAddMembersModal] = useState(false)
@@ -18,6 +23,15 @@ const OrganizationMembers = () => {
 
   const filteredMembers = useMembersSearch(activeMembers, searchQuery)
   const filteredInvites = useMembersSearch(invitedMembers, searchQuery)
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const handleSearch = useCallback(debounce(setSearchQuery, 300), [])
+
+  useEffect(() => {
+    if (searchQuery) {
+      trackEvent({ ...ORG_EVENTS.SEARCH_MEMBERS })
+    }
+  }, [searchQuery])
 
   return (
     <>
@@ -38,9 +52,8 @@ const OrganizationMembers = () => {
           placeholder="Search"
           variant="filled"
           hiddenLabel
-          value={searchQuery}
           onChange={(e) => {
-            setSearchQuery(e.target.value)
+            handleSearch(e.target.value)
           }}
           InputProps={{
             startAdornment: (
@@ -53,9 +66,11 @@ const OrganizationMembers = () => {
           size="small"
         />
         {isAdmin && (
-          <Button variant="contained" startIcon={<PlusIcon />} onClick={() => setOpenAddMembersModal(true)}>
-            Add member
-          </Button>
+          <Track {...ORG_EVENTS.ADD_MEMBER_MODAL} label={ORG_LABELS.members_page}>
+            <Button variant="contained" startIcon={<PlusIcon />} onClick={() => setOpenAddMembersModal(true)}>
+              Add member
+            </Button>
+          </Track>
         )}
       </Stack>
       <>
