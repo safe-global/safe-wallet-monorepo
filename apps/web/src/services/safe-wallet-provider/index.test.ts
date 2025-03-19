@@ -656,18 +656,20 @@ describe('SafeWalletProvider', () => {
           id: 1,
           jsonrpc: '2.0',
           result: {
+            id: params[0],
+            chainId: '0x1',
             receipts: [
               {
                 blockHash: receipt.blockHash,
                 blockNumber: receipt.blockNumber,
-                chainId: '0x1',
                 gasUsed: receipt.gasUsed,
                 logs: receipt.logs,
                 status: '0x1',
                 transactionHash: '0x123',
               },
             ],
-            status: 'CONFIRMED',
+            status: 200,
+            version: '1.0',
           },
         })
       })
@@ -708,18 +710,20 @@ describe('SafeWalletProvider', () => {
           id: 1,
           jsonrpc: '2.0',
           result: {
+            chainId: '0x1',
+            id: params[0],
             receipts: [
               {
                 blockHash: numberToHex(Number(receipt.blockHash)),
                 blockNumber: numberToHex(Number(receipt.blockNumber)),
-                chainId: '0x1',
                 gasUsed: numberToHex(receipt.gasUsed),
                 logs: receipt.logs,
                 status: '0x1',
                 transactionHash: '0x123',
               },
             ],
-            status: 'CONFIRMED',
+            status: 200,
+            version: '1.0',
           },
         })
       })
@@ -748,7 +752,10 @@ describe('SafeWalletProvider', () => {
           id: 1,
           jsonrpc: '2.0',
           result: {
-            status: 'PENDING',
+            chainId: '0x1',
+            id: params[0],
+            status: 100,
+            version: '1.0',
           },
         })
       })
@@ -783,7 +790,10 @@ describe('SafeWalletProvider', () => {
           id: 1,
           jsonrpc: '2.0',
           result: {
-            status: 'PENDING',
+            chainId: '0x1',
+            id: params[0],
+            status: 100,
+            version: '1.0',
           },
         })
       })
