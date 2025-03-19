@@ -279,12 +279,23 @@ export function placeTwapOrder() {
 
 export function confirmPriceImpact() {
   cy.wait(3000)
-  cy.get(confirmPriceImpactInput)
+
+  cy.get('span')
+    .contains('Swap anyway')
     .should(() => {})
-    .then(($input) => {
-      if ($input.length) {
-        cy.wrap($input).type('confirm')
+    .then(($checkbox) => {
+      if ($checkbox.length) {
+        cy.wrap($checkbox).type('confirm')
         cy.get(confirmPriceImpactBtn).should('be.enabled').click()
+      } else {
+        cy.get(confirmPriceImpactInput)
+          .should(() => {})
+          .then(($input) => {
+            if ($input.length) {
+              cy.wrap($input).type('confirm')
+              cy.get(confirmPriceImpactBtn).should('be.enabled').click()
+            }
+          })
       }
     })
 }

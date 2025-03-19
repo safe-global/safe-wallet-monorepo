@@ -63,11 +63,7 @@ describe('Swaps 2 tests', () => {
         swaps.clickOnSwapBtn()
         swaps.checkOutputCurrencyPreviewValue(value)
         swaps.clickOnSwapBtn()
-        cy.get(swaps.confirmPriceImpact).then(($input) => {
-          if ($input.length) {
-            swaps.confirmPriceImpact()
-          }
-        })
+        swaps.confirmPriceImpact()
       })
       swaps.checkTokenBlockValue(1, tokenValue)
     },
