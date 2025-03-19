@@ -520,9 +520,9 @@ describe('SafeWalletProvider', () => {
 
         const params = [
           {
-            chainId: 1,
+            chainId: '0x1',
             version: '1.0',
-            from: faker.finance.ethereumAddress(),
+            from: safe.safeAddress,
             calls: [
               { data: '0x123', to: faker.finance.ethereumAddress(), value: '0x123' },
               { data: '0x456', to: faker.finance.ethereumAddress(), value: '0x1' },
@@ -570,7 +570,7 @@ describe('SafeWalletProvider', () => {
 
         const params = [
           {
-            chainId: 1,
+            chainId: '0x1',
             version: '1.0',
             from: safe.safeAddress,
             calls: [
