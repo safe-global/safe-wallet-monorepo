@@ -21,7 +21,7 @@ const MembersCard = () => {
           <Box className={css.iconBG}>
             <SvgIcon component={MemberIcon} inheritViewBox />
           </Box>
-          <Tooltip title={isButtonDisabled ? 'Only admins can add members' : ''} placement="top">
+          <Tooltip title={isButtonDisabled ? 'You need an Admin role to add members' : ''} placement="top">
             <Box component="span" sx={{ position: 'absolute', top: 0, right: 0 }}>
               <Button
                 onClick={handleInviteClick}
