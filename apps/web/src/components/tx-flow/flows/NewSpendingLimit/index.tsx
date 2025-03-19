@@ -8,6 +8,7 @@ import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants
 import { TokenAmountFields } from '@/components/common/TokenAmountInput'
 import { useMemo } from 'react'
 import { ConfirmTxDetails } from '@/components/tx/ConfirmTxDetails'
+import { TxFlowType } from '@/services/analytics'
 
 enum Fields {
   beneficiary = 'beneficiary',
@@ -31,7 +32,10 @@ const defaultValues: NewSpendingLimitFlowProps = {
 }
 
 const NewSpendingLimitFlow = () => {
-  const { data, step, nextStep, prevStep } = useTxStepper<NewSpendingLimitFlowProps>(defaultValues)
+  const { data, step, nextStep, prevStep } = useTxStepper<NewSpendingLimitFlowProps>(
+    defaultValues,
+    TxFlowType.SETUP_SPENDING_LIMIT,
+  )
 
   const steps = useMemo<TxStep[]>(
     () => [

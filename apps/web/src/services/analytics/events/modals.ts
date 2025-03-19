@@ -100,6 +100,11 @@ export const MODALS_EVENTS = {
     category: MODALS_CATEGORY,
     event: EventType.CLICK,
   },
+  CONFIRM_SIGN_CHECKBOX: {
+    action: 'Confirm sign checkbox',
+    category: MODALS_CATEGORY,
+    event: EventType.CLICK,
+  },
 }
 
 export enum MODAL_NAVIGATION {

@@ -8,6 +8,7 @@ import useTxStepper from '../../useTxStepper'
 import { useMemo } from 'react'
 import { getTxOrigin } from '@/utils/transactions'
 import { ConfirmSafeAppsTxDetails } from './ConfirmSafeAppsTxDetails'
+import { TxFlowType } from '@/services/analytics'
 
 export type SafeAppsTxParams = {
   appId?: string
@@ -24,7 +25,7 @@ const SafeAppsTxFlow = ({
   data: SafeAppsTxParams
   onSubmit?: (txId: string, safeTxHash: string) => void
 }) => {
-  const { step, nextStep, prevStep } = useTxStepper(null)
+  const { step, nextStep, prevStep } = useTxStepper(undefined, TxFlowType.SAFE_APPS_TX)
 
   const origin = useMemo(() => getTxOrigin(data.app), [data.app])
 
@@ -32,7 +33,7 @@ const SafeAppsTxFlow = ({
     () => [
       {
         txLayoutProps: { title: 'Confirm transaction' },
-        content: <ReviewSafeAppsTx key={0} safeAppsTx={data} origin={origin} onSubmit={() => nextStep(null)} />,
+        content: <ReviewSafeAppsTx key={0} safeAppsTx={data} origin={origin} onSubmit={() => nextStep(undefined)} />,
       },
       {
         txLayoutProps: { title: 'Confirm transaction details', fixedNonce: true },

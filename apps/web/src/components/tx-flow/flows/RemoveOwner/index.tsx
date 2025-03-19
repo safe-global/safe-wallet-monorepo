@@ -7,6 +7,7 @@ import SaveAddressIcon from '@/public/images/common/save-address.svg'
 import { SetThreshold } from './SetThreshold'
 import { useMemo } from 'react'
 import { ConfirmTxDetails } from '@/components/tx/ConfirmTxDetails'
+import { TxFlowType } from '@/services/analytics'
 
 type Owner = {
   address: string
@@ -26,7 +27,7 @@ const RemoveOwnerFlow = (props: Owner) => {
     threshold: Math.min(safe.threshold, safe.owners.length - 1),
   }
 
-  const { data, step, nextStep, prevStep } = useTxStepper<RemoveOwnerFlowProps>(defaultValues)
+  const { data, step, nextStep, prevStep } = useTxStepper<RemoveOwnerFlowProps>(defaultValues, TxFlowType.REMOVE_OWNER)
 
   const steps = useMemo<TxStep[]>(
     () => [
