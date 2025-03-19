@@ -218,10 +218,10 @@ exports[`BatchTransactions should render a list of batch transactions 1`] = `
                       </div>
                     </div>
                     <div
-                      class="MuiGrid-root MuiGrid-container css-86qz5o-MuiGrid-root"
+                      class="MuiGrid-root MuiGrid-container css-1m1clne-MuiGrid-root"
                     >
                       <div
-                        class="MuiGrid-root MuiGrid-item css-1wehkfy-MuiGrid-root"
+                        class="MuiGrid-root MuiGrid-item css-p1l0hx-MuiGrid-root"
                         data-testid="tx-row-title"
                         style="word-break: break-word;"
                       >
