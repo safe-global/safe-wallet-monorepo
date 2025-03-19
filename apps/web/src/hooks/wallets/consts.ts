@@ -3,8 +3,6 @@ export const enum WALLET_KEYS {
   WALLETCONNECT_V2 = 'WALLETCONNECT_V2',
   COINBASE = 'COINBASE',
   LEDGER = 'LEDGER',
-  // Placeholder to appease CGW_NAMES type - module name is also named Ledger
-  LEDGER_V2 = 'LEDGER_V2',
   TREZOR = 'TREZOR',
   KEYSTONE = 'KEYSTONE',
   PK = 'PK',
@@ -16,7 +14,6 @@ export const CGW_NAMES: { [_key in WALLET_KEYS]: string | undefined } = {
   [WALLET_KEYS.WALLETCONNECT_V2]: 'walletConnect_v2',
   [WALLET_KEYS.COINBASE]: 'coinbase',
   [WALLET_KEYS.LEDGER]: 'ledger',
-  [WALLET_KEYS.LEDGER_V2]: 'ledger_v2',
   [WALLET_KEYS.TREZOR]: 'trezor',
   [WALLET_KEYS.KEYSTONE]: 'keystone',
   [WALLET_KEYS.PK]: 'pk',
