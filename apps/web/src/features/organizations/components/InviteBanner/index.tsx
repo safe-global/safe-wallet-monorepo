@@ -4,10 +4,14 @@ import { InitialsAvatar, OrgSummary } from '../OrgsCard'
 import { useOrgSafeCount } from '@/features/organizations/hooks/useOrgSafeCount'
 import Link from 'next/link'
 import { AppRoutes } from '@/config/routes'
-import InviteButtons from './InviteButtons'
 import css from './styles.module.css'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
+import { ORG_EVENTS, ORG_LABELS } from '@/services/analytics/events/organizations'
+import Track from '@/components/common/Track'
+import AcceptButton from './AcceptButton'
+import DeclineButton from './DeclineButton'
+import { trackEvent } from '@/services/analytics'
 
 type OrgListInvite = {
   org: GetOrganizationResponse
@@ -51,7 +55,11 @@ const OrgListInvite = ({ org }: OrgListInvite) => {
       </Typography>
 
       <Link href={{ pathname: AppRoutes.organizations.index, query: { orgId: id } }} passHref legacyBehavior>
-        <MUILink underline="none" sx={{ display: 'block' }}>
+        <MUILink
+          underline="none"
+          sx={{ display: 'block' }}
+          onClick={() => trackEvent({ ...ORG_EVENTS.VIEW_INVITING_ORG })}
+        >
           <Card sx={{ p: 2, backgroundColor: 'background.main', '&:hover': { backgroundColor: 'background.light' } }}>
             <Box className={css.orgsListInviteContent}>
               <Stack direction="row" spacing={2} alignItems="center" flexGrow={1}>
@@ -64,7 +72,12 @@ const OrgListInvite = ({ org }: OrgListInvite) => {
                 </Box>
               </Stack>
 
-              <InviteButtons org={org} />
+              <Track {...ORG_EVENTS.ACCEPT_INVITE} label={ORG_LABELS.orgs_list_page}>
+                <AcceptButton org={org} />
+              </Track>
+              <Track {...ORG_EVENTS.DECLINE_INVITE} label={ORG_LABELS.orgs_list_page}>
+                <DeclineButton org={org} />
+              </Track>
             </Box>
           </Card>
         </MUILink>

@@ -30,6 +30,8 @@ import { isAuthenticated } from '@/store/authSlice'
 import { useIsAdmin, useIsInvited } from '@/features/organizations/hooks/useOrgMembers'
 import PreviewInvite from '@/features/organizations/components/InviteBanner/PreviewInvite'
 import css from './styles.module.css'
+import { trackEvent } from '@/services/analytics'
+import { ORG_EVENTS } from '@/services/analytics/events/organizations'
 
 const ListIcon = ({ variant }: { variant: 'success' | 'danger' }) => {
   const Icon = variant === 'success' ? CheckIcon : CloseIcon
@@ -85,6 +87,7 @@ const OrgsSettings = () => {
   })
 
   const onDelete = async () => {
+    trackEvent({ ...ORG_EVENTS.REMOVE_ORGANIZATION })
     try {
       await deleteOrg({ id: Number(orgId) })
 
@@ -140,6 +143,7 @@ const OrgsSettings = () => {
               variant="danger"
               onClick={() => {
                 setDeleteOrgOpen(true)
+                trackEvent({ ...ORG_EVENTS.REMOVE_ORGANIZATION_MODAL })
               }}
               disabled={!isAdmin}
             >

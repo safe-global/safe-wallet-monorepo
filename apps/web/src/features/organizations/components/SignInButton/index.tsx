@@ -1,6 +1,6 @@
 import WalletLogin from '@/components/welcome/WelcomeLogin/WalletLogin'
 import { OVERVIEW_EVENTS, OVERVIEW_LABELS, trackEvent } from '@/services/analytics'
-import { ORG_EVENTS, SIGN_IN_BUTTON_LABELS } from '@/services/analytics/events/organizations'
+import { ORG_EVENTS, ORG_LABELS } from '@/services/analytics/events/organizations'
 import { useSiwe } from '@/services/siwe/useSiwe'
 import { useAppDispatch } from '@/store'
 import { setAuthenticated } from '@/store/authSlice'
@@ -14,7 +14,7 @@ const SignInButton = () => {
   }
 
   const handleSignIn = async () => {
-    trackEvent({ ...ORG_EVENTS.SIGN_IN_BUTTON, label: SIGN_IN_BUTTON_LABELS.orgs_list_page })
+    trackEvent({ ...ORG_EVENTS.SIGN_IN_BUTTON, label: ORG_LABELS.orgs_list_page })
 
     try {
       const result = await signIn()

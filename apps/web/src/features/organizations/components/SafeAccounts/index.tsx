@@ -3,21 +3,35 @@ import EmptySafeAccounts from '@/features/organizations/components/SafeAccounts/
 import SearchIcon from '@/public/images/common/search.svg'
 import { Stack, SvgIcon, TextField, Typography } from '@mui/material'
 import InputAdornment from '@mui/material/InputAdornment'
-import { useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import SafesList from '@/features/myAccounts/components/SafesList'
 import { useOrgSafes } from '@/features/organizations/hooks/useOrgSafes'
 import { useSafesSearch } from '@/features/myAccounts/hooks/useSafesSearch'
 import { useIsAdmin, useIsInvited } from '@/features/organizations/hooks/useOrgMembers'
 import PreviewInvite from '../InviteBanner/PreviewInvite'
+import { ORG_LABELS } from '@/services/analytics/events/organizations'
+import { ORG_EVENTS } from '@/services/analytics/events/organizations'
+import Track from '@/components/common/Track'
+import { trackEvent } from '@/services/analytics'
+import debounce from 'lodash/debounce'
 
 const OrganizationSafeAccounts = () => {
   const [searchQuery, setSearchQuery] = useState('')
   const allSafes = useOrgSafes()
-  const filteredSafes = useSafesSearch(allSafes, searchQuery)
+  const filteredSafes = useSafesSearch(allSafes ?? [], searchQuery)
   const isAdmin = useIsAdmin()
   const isInvited = useIsInvited()
 
   const safes = searchQuery ? filteredSafes : allSafes
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const handleSearch = useCallback(debounce(setSearchQuery, 300), [])
+
+  useEffect(() => {
+    if (searchQuery) {
+      trackEvent({ ...ORG_EVENTS.SEARCH_ACCOUNTS, label: ORG_LABELS.accounts_page })
+    }
+  }, [searchQuery])
 
   return (
     <>
@@ -38,9 +52,8 @@ const OrganizationSafeAccounts = () => {
           placeholder="Search"
           variant="filled"
           hiddenLabel
-          value={searchQuery}
           onChange={(e) => {
-            setSearchQuery(e.target.value)
+            handleSearch(e.target.value)
           }}
           InputProps={{
             startAdornment: (
@@ -53,7 +66,11 @@ const OrganizationSafeAccounts = () => {
           size="small"
         />
 
-        {isAdmin && <AddAccounts />}
+        {isAdmin && (
+          <Track {...ORG_EVENTS.ADD_ACCOUNTS_MODAL} label={ORG_LABELS.accounts_page}>
+            <AddAccounts />
+          </Track>
+        )}
       </Stack>
 
       {searchQuery && filteredSafes.length === 0 ? (

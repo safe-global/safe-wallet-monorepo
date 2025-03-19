@@ -4,6 +4,8 @@ import { useUserOrganizationsRemoveUserV1Mutation } from '@safe-global/store/gat
 import { useCurrentOrgId } from '@/features/organizations/hooks/useCurrentOrgId'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import { useState } from 'react'
+import { trackEvent } from '@/services/analytics'
+import { ORG_EVENTS, ORG_LABELS } from '@/services/analytics/events/organizations'
 
 const RemoveMemberDialog = ({
   userId,
@@ -22,6 +24,7 @@ const RemoveMemberDialog = ({
 
   const handleConfirm = async () => {
     setErrorMessage('')
+    trackEvent({ ...ORG_EVENTS.REMOVE_MEMBER, label: isInvite ? ORG_LABELS.invite_list : ORG_LABELS.member_list })
     try {
       const { error } = await deleteMember({ orgId: Number(orgId), userId })
 
