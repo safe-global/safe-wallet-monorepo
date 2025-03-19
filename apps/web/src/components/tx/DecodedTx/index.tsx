@@ -1,4 +1,4 @@
-import { type SyntheticEvent, type ReactElement, memo } from 'react'
+import { type SyntheticEvent, type ReactElement, memo, useMemo } from 'react'
 import { isCustomTxInfo, isNativeTokenTransfer, isTransferTxInfo } from '@/utils/transaction-guards'
 import {
   Accordion,
@@ -29,7 +29,7 @@ enum ColorLevel {
   error = 'error',
 }
 
-const METHOD_LEVELS: { [K in ColorLevel]?: string[] } = {
+const METHOD_LEVELS = {
   [ColorLevel.error]: ['setFallbackHandler'],
   [ColorLevel.warning]: [
     'addOwnerWithThreshold',
@@ -46,10 +46,9 @@ const getMethodLevel = (method?: string): ColorLevel => {
   if (!method) {
     return ColorLevel.info
   }
-  return (
-    (Object.keys(METHOD_LEVELS).find((key) => METHOD_LEVELS[key as ColorLevel]!.includes(method)) as ColorLevel) ||
-    ColorLevel.info
-  )
+
+  const methodLevels = Object.keys(METHOD_LEVELS) as (keyof typeof METHOD_LEVELS)[]
+  return (methodLevels.find((key) => METHOD_LEVELS[key].includes(method)) as ColorLevel) || ColorLevel.info
 }
 
 const getColors = ({ info, warning, error }: Palette): Record<ColorLevel, { main: string; background?: string }> => ({
@@ -66,7 +65,7 @@ const StyledAccordion = styled(Accordion)<{ color?: ColorLevel }>(({ theme, colo
       borderColor: main,
     },
     [`&.${accordionClasses.expanded} .${accordionSummaryClasses.root}`]: {
-      background: background,
+      background,
       backgroundColor: background,
     },
   }
@@ -110,7 +109,7 @@ const DecodedTx = ({
   const isMultisend = decodedData?.parameters && !!decodedData?.parameters[0]?.valueDecoded
   const isMethodCallInAdvanced = showAdvancedDetails && (!showMethodCall || (isMultisend && showMultisend))
   const method = decodedData?.method
-  const level = getMethodLevel(method)
+  const level = useMemo(() => getMethodLevel(method), [method])
   const colors = getColors(palette)[level]
 
   let toInfo = tx && {
