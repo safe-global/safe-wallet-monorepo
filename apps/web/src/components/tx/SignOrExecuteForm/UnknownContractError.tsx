@@ -5,7 +5,7 @@ import { useCurrentChain } from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { getExplorerLink } from '@/utils/gateway'
 import ErrorMessage from '../ErrorMessage'
-import { isMigrationToL2Possible, isValidMasterCopy } from '@/services/contracts/safeContracts'
+import { isValidMasterCopy } from '@/services/contracts/safeContracts'
 import { AlertTitle, Typography } from '@mui/material'
 import { isMigrateL2SingletonCall } from '@/utils/safe-migrations'
 
@@ -22,10 +22,8 @@ const UnknownContractError = ({ txData }: { txData: TransactionData | undefined 
 
   if (!isUnknown || isMigrationTx) return null
 
-  const isMigrationPossible = isMigrationToL2Possible(safe)
-
   return (
-    <ErrorMessage level={isMigrationPossible ? 'info' : 'error'}>
+    <ErrorMessage level="error">
       <AlertTitle>
         <Typography
           variant="subtitle1"
