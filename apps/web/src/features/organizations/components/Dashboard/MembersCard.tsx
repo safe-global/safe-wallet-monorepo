@@ -1,11 +1,14 @@
 import css from '@/features/organizations/components/Dashboard/styles.module.css'
 import MemberIcon from '@/public/images/orgs/member.svg'
-import { Typography, Paper, Box, Button, SvgIcon } from '@mui/material'
+import { Typography, Paper, Box, Button, SvgIcon, Tooltip } from '@mui/material'
 import { useState } from 'react'
+import { useIsAdmin } from '@/features/organizations/hooks/useOrgMembers'
 import AddMembersModal from '../AddMembersModal'
 
 const MembersCard = () => {
   const [openAddMembersModal, setOpenAddMembersModal] = useState(false)
+  const isAdmin = useIsAdmin()
+  const isButtonDisabled = !isAdmin
 
   const handleInviteClick = () => {
     setOpenAddMembersModal(true)
@@ -18,20 +21,19 @@ const MembersCard = () => {
           <Box className={css.iconBG}>
             <SvgIcon component={MemberIcon} inheritViewBox />
           </Box>
-
-          <Button
-            onClick={handleInviteClick}
-            variant="outlined"
-            size="compact"
-            sx={{
-              position: 'absolute',
-              top: 0,
-              right: 0,
-            }}
-            aria-label="Invite team members"
-          >
-            Add members
-          </Button>
+          <Tooltip title={isButtonDisabled ? 'You need to be an Admin to add members' : ''} placement="top">
+            <Box component="span" sx={{ position: 'absolute', top: 0, right: 0 }}>
+              <Button
+                onClick={handleInviteClick}
+                variant={isButtonDisabled ? 'contained' : 'outlined'}
+                size="compact"
+                aria-label="Invite team members"
+                disabled={isButtonDisabled}
+              >
+                Add members
+              </Button>
+            </Box>
+          </Tooltip>
         </Box>
         <Box>
           <Typography variant="body1" color="text.primary" fontWeight={700} mb={1}>
