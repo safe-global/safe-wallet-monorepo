@@ -22,6 +22,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import DecodedData from '@/components/transactions/TxDetails/TxData/DecodedData'
 import accordionCss from '@/styles/accordion.module.css'
 import HelpToolTip from './HelpTooltip'
+import { useDarkMode } from '@/hooks/useDarkMode'
 
 enum ColorLevel {
   info = 'info',
@@ -48,19 +49,18 @@ const getMethodLevel = (txInfo?: TransactionInfoType): ColorLevel => {
   return (methodLevels.find((key) => TX_INFO_LEVEL[key].includes(txInfo)) as ColorLevel) || ColorLevel.info
 }
 
-const getColors = ({
-  info,
-  warning,
-  primary,
-  background,
-}: Palette): Record<ColorLevel, { main: string; background?: string }> => ({
+const getColors = (
+  { info, warning, primary, background, success }: Palette,
+  isDarkMode: boolean,
+): Record<ColorLevel, { main: string; background?: string }> => ({
   info: { main: info.dark, background: info.background },
   warning: { main: warning.main, background: warning.background },
-  success: { main: primary.main, background: background.light },
+  success: { main: isDarkMode ? primary.main : success.main, background: background.light },
 })
 
 const StyledAccordion = styled(Accordion)<{ color?: ColorLevel }>(({ theme, color = ColorLevel.info }) => {
-  const colors = getColors(theme.palette)
+  const isDarkMode = useDarkMode()
+  const colors = getColors(theme.palette, isDarkMode)
   const { main, background } = colors[color] || colors.info
   return {
     [`&.${accordionClasses.expanded}.${accordionClasses.root}, &:hover.${accordionClasses.root}`]: {
@@ -106,12 +106,13 @@ const DecodedTx = ({
   showMethodCall = false,
   showAdvancedDetails = true,
 }: DecodedTxProps): ReactElement => {
+  const isDarkMode = useDarkMode()
   const { palette } = useTheme()
   const decodedData = txData?.dataDecoded
   const isMultisend = decodedData?.parameters && !!decodedData?.parameters[0]?.valueDecoded
   const isMethodCallInAdvanced = showAdvancedDetails && (!showMethodCall || (isMultisend && showMultisend))
   const level = useMemo(() => getMethodLevel(txInfo?.type), [txInfo?.type])
-  const colors = getColors(palette)[level]
+  const colors = getColors(palette, isDarkMode)[level]
 
   let toInfo = tx && {
     value: tx.data.to,
