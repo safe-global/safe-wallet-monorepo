@@ -114,7 +114,7 @@ const OrgsSidebarSelector = () => {
             onClick={() => {
               handleClose()
               setIsCreationModalOpen(true)
-              trackEvent({ ...ORG_EVENTS.OPEN_CREATE_ORG_MODAL, label: ORG_LABELS.org_selector })
+              trackEvent({ ...ORG_EVENTS.CREATE_ORG_MODAL, label: ORG_LABELS.org_selector })
             }}
             sx={{ fontWeight: 700 }}
           >

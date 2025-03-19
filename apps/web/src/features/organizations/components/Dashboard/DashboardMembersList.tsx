@@ -19,7 +19,7 @@ const DashboardMembersList = ({ members }: { members: UserOrganization[] }) => {
           </Box>
         ))}
         <Box display="flex" justifyContent="center">
-          <Track {...ORG_EVENTS.OPEN_ADD_MEMBER_MODAL} label={ORG_LABELS.org_dashboard}>
+          <Track {...ORG_EVENTS.ADD_MEMBER_MODAL} label={ORG_LABELS.org_dashboard}>
             <Button size="small" variant="text" startIcon={<PlusIcon />} onClick={() => setOpenAddMembersModal(true)}>
               Add member
             </Button>

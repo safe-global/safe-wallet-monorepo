@@ -66,7 +66,7 @@ const OrganizationMembers = () => {
           size="small"
         />
         {isAdmin && (
-          <Track {...ORG_EVENTS.OPEN_ADD_MEMBER_MODAL} label={ORG_LABELS.members_page}>
+          <Track {...ORG_EVENTS.ADD_MEMBER_MODAL} label={ORG_LABELS.members_page}>
             <Button variant="contained" startIcon={<PlusIcon />} onClick={() => setOpenAddMembersModal(true)}>
               Add member
             </Button>

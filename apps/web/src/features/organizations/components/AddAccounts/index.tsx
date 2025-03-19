@@ -181,7 +181,7 @@ const AddAccounts = () => {
                   {searchQuery ? <SafesList safes={filteredSafes} /> : <SafesList safes={allSafes} />}
 
                   <Box p={2}>
-                    <Track {...ORG_EVENTS.ADD_ACCOUNT_MANUALLY}>
+                    <Track {...ORG_EVENTS.ADD_ACCOUNT_MANUALLY_MODAL}>
                       <AddManually handleAddSafe={handleAddSafe} />
                     </Track>
                   </Box>

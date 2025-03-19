@@ -22,7 +22,7 @@ const MembersCard = () => {
             <SvgIcon component={MemberIcon} inheritViewBox />
           </Box>
 
-          <Track {...ORG_EVENTS.OPEN_ADD_MEMBER_MODAL} label={ORG_LABELS.org_dashboard_card}>
+          <Track {...ORG_EVENTS.ADD_MEMBER_MODAL} label={ORG_LABELS.org_dashboard_card}>
             <Button
               onClick={handleInviteClick}
               variant="outlined"

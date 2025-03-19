@@ -13,7 +13,7 @@ export const ORG_EVENTS = {
     action: 'Open orgs list page',
     category: ORG_CATEGORY,
   },
-  OPEN_CREATE_ORG_MODAL: {
+  CREATE_ORG_MODAL: {
     action: 'Open create org dialog',
     category: ORG_CATEGORY,
   },
@@ -41,11 +41,11 @@ export const ORG_EVENTS = {
     action: 'View preview of inviting org',
     category: ORG_CATEGORY,
   },
-  OPEN_ADD_MEMBER_MODAL: {
+  ADD_MEMBER_MODAL: {
     action: 'Open add member modal',
     category: ORG_CATEGORY,
   },
-  OPEN_REMOVE_MEMBER_MODAL: {
+  REMOVE_MEMBER_MODAL: {
     action: 'Open remove member modal',
     category: ORG_CATEGORY,
   },
@@ -57,7 +57,7 @@ export const ORG_EVENTS = {
     action: 'Submit add member',
     category: ORG_CATEGORY,
   },
-  OPEN_ADD_ACCOUNTS_MODAL: {
+  ADD_ACCOUNTS_MODAL: {
     action: 'Open add accounts modal',
     category: ORG_CATEGORY,
   },
@@ -65,8 +65,12 @@ export const ORG_EVENTS = {
     action: 'Submit add accounts',
     category: ORG_CATEGORY,
   },
+  ADD_ACCOUNT_MANUALLY_MODAL: {
+    action: 'Open add account manually modal',
+    category: ORG_CATEGORY,
+  },
   ADD_ACCOUNT_MANUALLY: {
-    action: 'Add account address manually',
+    action: 'Add account manually submit',
     category: ORG_CATEGORY,
   },
   DELETE_ORGANIZATION: {

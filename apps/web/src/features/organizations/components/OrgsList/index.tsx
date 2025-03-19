@@ -108,7 +108,7 @@ const OrgsList = () => {
       <Box className={css.myOrgs}>
         <Box className={css.orgsHeader}>
           <AccountsNavigation />
-          <Track {...ORG_EVENTS.OPEN_CREATE_ORG_MODAL} label={ORG_LABELS.orgs_list_page}>
+          <Track {...ORG_EVENTS.CREATE_ORG_MODAL} label={ORG_LABELS.orgs_list_page}>
             <AddOrgButton disabled={!isUserSignedIn} />
           </Track>
         </Box>

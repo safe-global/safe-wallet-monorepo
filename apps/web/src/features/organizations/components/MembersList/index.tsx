@@ -65,10 +65,7 @@ export const RemoveMemberButton = ({
         placement="top"
       >
         <Box component="span">
-          <Track
-            {...ORG_EVENTS.OPEN_REMOVE_MEMBER_MODAL}
-            label={isInvite ? ORG_LABELS.invite_list : ORG_LABELS.member_list}
-          >
+          <Track {...ORG_EVENTS.REMOVE_MEMBER_MODAL} label={isInvite ? ORG_LABELS.invite_list : ORG_LABELS.member_list}>
             <IconButton disabled={disabled} onClick={() => setOpenRemoveMemberDialog(true)} size="small">
               <SvgIcon component={DeleteIcon} inheritViewBox color={disabled ? 'disabled' : 'error'} fontSize="small" />
             </IconButton>

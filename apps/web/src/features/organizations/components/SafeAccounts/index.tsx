@@ -67,7 +67,7 @@ const OrganizationSafeAccounts = () => {
         />
 
         {isAdmin && (
-          <Track {...ORG_EVENTS.OPEN_ADD_ACCOUNTS_MODAL} label={ORG_LABELS.accounts_page}>
+          <Track {...ORG_EVENTS.ADD_ACCOUNTS_MODAL} label={ORG_LABELS.accounts_page}>
             <AddAccounts />
           </Track>
         )}

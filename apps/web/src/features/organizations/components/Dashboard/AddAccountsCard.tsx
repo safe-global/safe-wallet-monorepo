@@ -20,7 +20,7 @@ const AddAccountsCard = () => {
             can be added to the organisation space.
           </Typography>
 
-          <Track {...ORG_EVENTS.OPEN_ADD_ACCOUNTS_MODAL} label={ORG_LABELS.org_dashboard_card}>
+          <Track {...ORG_EVENTS.ADD_ACCOUNTS_MODAL} label={ORG_LABELS.org_dashboard_card}>
             <AddAccounts />
           </Track>
         </Box>
