@@ -1,6 +1,18 @@
 import { type SyntheticEvent, type ReactElement, memo } from 'react'
 import { isCustomTxInfo, isNativeTokenTransfer, isTransferTxInfo } from '@/utils/transaction-guards'
-import { Accordion, AccordionDetails, AccordionSummary, Box, Stack } from '@mui/material'
+import {
+  Accordion,
+  accordionClasses,
+  AccordionDetails,
+  AccordionSummary,
+  accordionSummaryClasses,
+  Box,
+  Stack,
+  styled,
+  Typography,
+  useTheme,
+} from '@mui/material'
+import type { Palette } from '@mui/material'
 import { type SafeTransaction } from '@safe-global/safe-core-sdk-types'
 import type { TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
 import Summary from '@/components/transactions/TxDetails/Summary'
@@ -10,6 +22,55 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import DecodedData from '@/components/transactions/TxDetails/TxData/DecodedData'
 import accordionCss from '@/styles/accordion.module.css'
 import HelpToolTip from './HelpTooltip'
+
+enum ColorLevel {
+  info = 'info',
+  warning = 'warning',
+  error = 'error',
+}
+
+const METHOD_LEVELS: { [K in ColorLevel]?: string[] } = {
+  [ColorLevel.error]: ['setFallbackHandler'],
+  [ColorLevel.warning]: [
+    'addOwnerWithThreshold',
+    'changeThreshold',
+    'disableModule',
+    'enableModule',
+    'removeOwner',
+    'setGuard',
+    'swapOwner',
+  ],
+}
+
+const getMethodLevel = (method?: string): ColorLevel => {
+  if (!method) {
+    return ColorLevel.info
+  }
+  return (
+    (Object.keys(METHOD_LEVELS).find((key) => METHOD_LEVELS[key as ColorLevel]!.includes(method)) as ColorLevel) ||
+    ColorLevel.info
+  )
+}
+
+const getColors = ({ info, warning, error }: Palette): Record<ColorLevel, { main: string; background?: string }> => ({
+  info: { main: info.dark, background: info.background },
+  warning: { main: warning.main, background: warning.background },
+  error: { main: error.main, background: error.background },
+})
+
+const StyledAccordion = styled(Accordion)<{ color?: ColorLevel }>(({ theme, color = ColorLevel.info }) => {
+  const colors = getColors(theme.palette)
+  const { main, background } = colors[color] || colors.info
+  return {
+    [`&.${accordionClasses.expanded}.${accordionClasses.root}, &:hover.${accordionClasses.root}`]: {
+      borderColor: main,
+    },
+    [`&.${accordionClasses.expanded} .${accordionSummaryClasses.root}`]: {
+      background: background,
+      backgroundColor: background,
+    },
+  }
+})
 
 type DecodedTxProps = {
   tx?: SafeTransaction
@@ -44,9 +105,13 @@ const DecodedTx = ({
   showMethodCall = false,
   showAdvancedDetails = true,
 }: DecodedTxProps): ReactElement => {
+  const { palette } = useTheme()
   const decodedData = txData?.dataDecoded
   const isMultisend = decodedData?.parameters && !!decodedData?.parameters[0]?.valueDecoded
   const isMethodCallInAdvanced = showAdvancedDetails && (!showMethodCall || (isMultisend && showMultisend))
+  const method = decodedData?.method
+  const level = getMethodLevel(method)
+  const colors = getColors(palette)[level]
 
   let toInfo = tx && {
     value: tx.data.to,
@@ -56,8 +121,15 @@ const DecodedTx = ({
   }
 
   const decodedDataBlock = <DecodedData txData={txData} toInfo={toInfo} />
-  const showDecodedData = isMethodCallInAdvanced && decodedData?.method
-  const hideDecodedDataInAdvanced = !showDecodedData || (isMethodCallInAdvanced && !!decodedData?.method)
+  const showDecodedData = isMethodCallInAdvanced && method
+  const hideDecodedDataInAdvanced = !showDecodedData || (isMethodCallInAdvanced && !!method)
+
+  const methodLabel =
+    txInfo && isTransferTxInfo(txInfo) && isNativeTokenTransfer(txInfo.transferInfo)
+      ? 'native transfer'
+      : isMethodCallInAdvanced
+        ? method
+        : undefined
 
   return (
     <Stack spacing={2}>
@@ -71,19 +143,37 @@ const DecodedTx = ({
 
       {showAdvancedDetails && (
         <Box>
-          <Accordion elevation={0} onChange={onChangeExpand} sx={!tx ? { pointerEvents: 'none' } : undefined}>
+          <StyledAccordion
+            elevation={0}
+            onChange={onChangeExpand}
+            sx={!tx ? { pointerEvents: 'none' } : undefined}
+            color={level}
+          >
             <AccordionSummary
               data-testid="decoded-tx-summary"
               expandIcon={<ExpandMoreIcon />}
               className={accordionCss.accordion}
             >
-              Advanced details
-              <HelpToolTip />
-              <Box flex={1} />
-              {isMethodCallInAdvanced && decodedData?.method}
-              {txInfo && isTransferTxInfo(txInfo) && isNativeTokenTransfer(txInfo.transferInfo) && (
-                <span>native transfer</span>
-              )}
+              <Stack direction="row" justifyContent="space-between" width="100%">
+                <Box sx={{ alignContent: 'center' }}>
+                  Advanced details
+                  <HelpToolTip />
+                </Box>
+                {methodLabel && (
+                  <Typography
+                    component="span"
+                    variant="body2"
+                    alignContent="center"
+                    color={colors.main}
+                    py={0.5}
+                    px={1}
+                    borderRadius={0.5}
+                    sx={{ background: colors.background }}
+                  >
+                    {methodLabel}
+                  </Typography>
+                )}
+              </Stack>
             </AccordionSummary>
 
             <AccordionDetails data-testid="decoded-tx-details">
@@ -99,7 +189,7 @@ const DecodedTx = ({
                 hideDecodedData={hideDecodedDataInAdvanced}
               />
             </AccordionDetails>
-          </Accordion>
+          </StyledAccordion>
         </Box>
       )}
     </Stack>
