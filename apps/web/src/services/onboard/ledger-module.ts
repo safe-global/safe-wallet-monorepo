@@ -141,7 +141,8 @@ export function ledgerModule(): WalletInit {
                 // Safe creation does not provide nonce
                 ((await eip1193Provider.request({
                   method: 'eth_getTransactionCount',
-                  params: [currentAccount!.address, 'latest'],
+                  // Take pending transactions into account
+                  params: [currentAccount!.address, 'pending'],
                 })) as string)
 
               const transaction = Transaction.from({
