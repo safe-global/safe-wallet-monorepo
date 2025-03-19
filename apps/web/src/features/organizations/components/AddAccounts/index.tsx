@@ -25,10 +25,10 @@ import {
   TextField,
   Typography,
 } from '@mui/material'
-import React, { useCallback, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 import { trackEvent } from '@/services/analytics'
-import { ORG_EVENTS } from '@/services/analytics/events/organizations'
+import { ORG_EVENTS, ORG_LABELS } from '@/services/analytics/events/organizations'
 import Track from '@/components/common/Track'
 
 export type AddAccountsFormValues = {
@@ -121,6 +121,12 @@ const AddAccounts = () => {
     setValue('selectedSafes', {}) // Reset doesn't seem to work consistently with an object
     setOpen(false)
   }
+
+  useEffect(() => {
+    if (searchQuery) {
+      trackEvent({ ...ORG_EVENTS.SEARCH_ACCOUNTS, label: ORG_LABELS.add_accounts_modal })
+    }
+  }, [searchQuery])
 
   return (
     <>

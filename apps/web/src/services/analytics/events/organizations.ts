@@ -73,6 +73,14 @@ export const ORG_EVENTS = {
     action: 'View all members',
     category: ORG_CATEGORY,
   },
+  SEARCH_ACCOUNTS: {
+    action: 'Search accounts',
+    category: ORG_CATEGORY,
+  },
+  SEARCH_MEMBERS: {
+    action: 'Search members',
+    category: ORG_CATEGORY,
+  },
 }
 
 export enum ORG_LABELS {
@@ -87,4 +95,5 @@ export enum ORG_LABELS {
   members_page = 'members_page',
   member_list = 'member_list',
   invite_list = 'invite_list',
+  add_accounts_modal = 'add_accounts_modal',
 }
