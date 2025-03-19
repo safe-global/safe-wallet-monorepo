@@ -68,7 +68,7 @@ const SpendingLimits = () => {
               {!spendingLimits.length && !spendingLimitsLoading && <NoSpendingLimits />}
             </Box>
           ) : (
-            <Typography>The spending limit module is not yet available on this chain.</Typography>
+            <Typography>The spending limit feature is not yet available on this chain.</Typography>
           )}
         </Grid>
       </Grid>

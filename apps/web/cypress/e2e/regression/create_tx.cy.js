@@ -25,7 +25,7 @@ describe('Create transactions tests', () => {
   })
 
   // Added to prod
-  it.skip('Verify submitting a tx and that clicking on notification shows the transaction in queue', () => {
+  it('Verify submitting a tx and that clicking on notification shows the transaction in queue', () => {
     cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_6)
     wallet.connectSigner(signer)
     createtx.clickOnNewtransactionBtn()

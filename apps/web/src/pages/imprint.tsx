@@ -17,9 +17,11 @@ const SafeImprint = () => (
     <Typography mb={2}>
       Core Contributors GmbH
       <br />
-      Gontardstraße 11
+      c/o WeWork
       <br />
-      10178 Berlin, Germany
+      Dircksenstr. 3
+      <br />
+      10179 Berlin, Germany
     </Typography>
     <Typography mb={4}>
       Managing director: Richard Meißner

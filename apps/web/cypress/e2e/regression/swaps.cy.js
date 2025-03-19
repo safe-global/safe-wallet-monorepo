@@ -112,12 +112,7 @@ describe('Swaps tests', () => {
       swaps.clickOnExceeFeeChkbox()
       swaps.clickOnSwapBtn()
       swaps.clickOnSwapBtn()
-
-      cy.get(swaps.confirmPriceImpact).then(($input) => {
-        if ($input.length) {
-          swaps.confirmPriceImpact()
-        }
-      })
+      swaps.confirmPriceImpact()
     })
 
     swaps.verifyOrderDetails(limitPrice, swapOrder.expiry2Mins, slippage, swapOrder.interactWith, orderID, widgetFee)
