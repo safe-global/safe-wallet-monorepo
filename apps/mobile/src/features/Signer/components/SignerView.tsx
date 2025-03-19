@@ -8,16 +8,30 @@ import { SafeFontIcon } from '@/src/components/SafeFontIcon/SafeFontIcon'
 import { Pressable } from 'react-native'
 import { SafeButton } from '@/src/components/SafeButton'
 import { SafeInputWithLabel } from '@/src/components/SafeInput/SafeInputWithLabel'
+import { Controller, FieldNamesMarkedBoolean, type Control, type FieldErrors } from 'react-hook-form'
+import { type FormValues } from '@/src/features/Signer/types'
 
 type Props = {
   signerAddress: string
   onPressExplorer: () => void
-  onChangeName: (value: string) => void
   onPressDelete: () => void
   editMode: boolean
   name: string
+  control: Control<FormValues>
+  errors: FieldErrors<FormValues>
+  dirtyFields: FieldNamesMarkedBoolean<FormValues>
 }
-export const SignerView = ({ signerAddress, onPressDelete, onPressExplorer, editMode, name, onChangeName }: Props) => {
+
+export const SignerView = ({
+  control,
+  errors,
+  dirtyFields,
+  signerAddress,
+  onPressDelete,
+  onPressExplorer,
+  editMode,
+  name,
+}: Props) => {
   return (
     <YStack flex={1}>
       <ScrollView flex={1}>
@@ -29,16 +43,25 @@ export const SignerView = ({ signerAddress, onPressDelete, onPressExplorer, edit
             {name || 'Unnamed Signer'}
           </H2>
         </View>
+
         <View marginTop={'$4'}>
-          <SafeInputWithLabel
-            label={'Name'}
-            value={!name.length && !editMode ? 'Unnamed Signer' : name}
-            disabled={!editMode}
-            onChangeText={onChangeName}
-            autoFocus={true}
-            placeholder={'Enter signer name'}
-            success={editMode && !!name.length}
+          <Controller
+            control={control}
+            name="name"
+            render={({ field: { onChange, onBlur, value } }) => (
+              <SafeInputWithLabel
+                label={'Name'}
+                value={value}
+                onBlur={onBlur}
+                disabled={!editMode}
+                onChangeText={onChange}
+                placeholder={'Enter signer name'}
+                error={dirtyFields.name && !!errors.name}
+                success={dirtyFields.name && !errors.name}
+              />
+            )}
           />
+          {errors.name && <Text color={'$error'}>{errors.name.message}</Text>}
         </View>
 
         <Container marginTop={'$4'} rowGap={'$1'}>

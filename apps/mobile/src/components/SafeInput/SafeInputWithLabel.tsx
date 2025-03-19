@@ -3,7 +3,7 @@ import React from 'react'
 
 interface Props {
   label: string
-  error?: React.ReactNode | string
+  error?: boolean
   placeholder?: string
   success?: boolean
   left?: React.ReactNode
@@ -27,11 +27,11 @@ const StyledInputContainer = styled(View, {
     error: {
       true: {
         borderWidth: 2,
+        borderColor: '$error',
       },
     },
     success: {
       true: {
-        // backgroundColor: 'orange',
         borderWidth: 2,
         borderColor: '$success',
       },
@@ -61,7 +61,7 @@ export const SafeInputWithLabel = ({
   ...props
 }: Props & Omit<InputProps, 'left' | 'right'>) => {
   return (
-    <StyledInputContainer testID={testID ? testID : 'safe-input-with-label'} success={success} gap={'$1'}>
+    <StyledInputContainer testID={testID ? testID : 'safe-input-with-label'} success={success} error={error} gap={'$1'}>
       <Text color={'$colorSecondary'}>{label}</Text>
       <View flex={1} flexDirection="row">
         <StyledInput size="$5" flex={1} placeholder={placeholder} {...props} />
