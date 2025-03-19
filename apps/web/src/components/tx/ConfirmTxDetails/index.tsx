@@ -108,7 +108,7 @@ export const ConfirmTxDetails = (props: SignOrExecuteProps) => {
       <FormControlLabel
         sx={{ mt: 2 }}
         control={<Checkbox checked={checked} onChange={handleCheckboxChange} />}
-        label="I understand what I'm signing and understand that this is an irreversible action."
+        label="I understand what I'm signing and acknowledge that this is an irreversible action."
       />
 
       <SignOrExecuteFormV2
