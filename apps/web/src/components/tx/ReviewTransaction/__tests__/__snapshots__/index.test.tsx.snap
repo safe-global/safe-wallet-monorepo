@@ -17,7 +17,8 @@ exports[`ReviewTransaction should display a confirmation screen 1`] = `
           class="MuiBox-root css-0"
         >
           <div
-            class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiAccordion-root MuiAccordion-rounded MuiAccordion-gutters css-1gdgqta-MuiPaper-root-MuiAccordion-root"
+            class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiAccordion-root MuiAccordion-rounded MuiAccordion-gutters css-1xaf7nu-MuiPaper-root-MuiAccordion-root"
+            color="info"
             style="--Paper-shadow: none;"
           >
             <h3
@@ -33,20 +34,25 @@ exports[`ReviewTransaction should display a confirmation screen 1`] = `
                 <span
                   class="MuiAccordionSummary-content MuiAccordionSummary-contentGutters css-1r0e0ir-MuiAccordionSummary-content"
                 >
-                  Advanced details
-                  <span
-                    class=""
-                    data-mui-internal-clone-element="true"
-                  >
-                    <mock-icon
-                      aria-hidden=""
-                      class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeSmall css-17ibv3e-MuiSvgIcon-root"
-                      focusable="false"
-                    />
-                  </span>
                   <div
-                    class="MuiBox-root css-1rr4qq7"
-                  />
+                    class="MuiStack-root css-ee32gy-MuiStack-root"
+                  >
+                    <div
+                      class="MuiBox-root css-1a5ho4p"
+                    >
+                      Advanced details
+                      <span
+                        class=""
+                        data-mui-internal-clone-element="true"
+                      >
+                        <mock-icon
+                          aria-hidden=""
+                          class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeSmall css-17ibv3e-MuiSvgIcon-root"
+                          focusable="false"
+                        />
+                      </span>
+                    </div>
+                  </div>
                 </span>
                 <span
                   class="MuiAccordionSummary-expandIconWrapper css-1wqf3nl-MuiAccordionSummary-expandIconWrapper"
@@ -504,7 +510,8 @@ exports[`ReviewTransaction should display an error screen 1`] = `
           class="MuiBox-root css-0"
         >
           <div
-            class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiAccordion-root MuiAccordion-rounded MuiAccordion-gutters css-1gdgqta-MuiPaper-root-MuiAccordion-root"
+            class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiAccordion-root MuiAccordion-rounded MuiAccordion-gutters css-1xaf7nu-MuiPaper-root-MuiAccordion-root"
+            color="info"
             style="--Paper-shadow: none;"
           >
             <h3
@@ -520,20 +527,25 @@ exports[`ReviewTransaction should display an error screen 1`] = `
                 <span
                   class="MuiAccordionSummary-content MuiAccordionSummary-contentGutters css-1r0e0ir-MuiAccordionSummary-content"
                 >
-                  Advanced details
-                  <span
-                    class=""
-                    data-mui-internal-clone-element="true"
-                  >
-                    <mock-icon
-                      aria-hidden=""
-                      class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeSmall css-17ibv3e-MuiSvgIcon-root"
-                      focusable="false"
-                    />
-                  </span>
                   <div
-                    class="MuiBox-root css-1rr4qq7"
-                  />
+                    class="MuiStack-root css-ee32gy-MuiStack-root"
+                  >
+                    <div
+                      class="MuiBox-root css-1a5ho4p"
+                    >
+                      Advanced details
+                      <span
+                        class=""
+                        data-mui-internal-clone-element="true"
+                      >
+                        <mock-icon
+                          aria-hidden=""
+                          class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeSmall css-17ibv3e-MuiSvgIcon-root"
+                          focusable="false"
+                        />
+                      </span>
+                    </div>
+                  </div>
                 </span>
                 <span
                   class="MuiAccordionSummary-expandIconWrapper css-1wqf3nl-MuiAccordionSummary-expandIconWrapper"
