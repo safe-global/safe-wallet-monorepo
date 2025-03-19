@@ -1,5 +1,3 @@
-import type { SafeItem } from '@/features/myAccounts/hooks/useAllSafes'
-import type { MultiChainSafeItem } from '@/features/myAccounts/hooks/useAllSafesGrouped'
 import RemoveSafeDialog from '@/features/organizations/components/SafeAccounts/RemoveSafeDialog'
 import { type MouseEvent, useState } from 'react'
 import MoreVertIcon from '@mui/icons-material/MoreVert'
@@ -11,10 +9,8 @@ import MenuItem from '@mui/material/MenuItem'
 import ContextMenu from '@/components/common/ContextMenu'
 import DeleteIcon from '@/public/images/common/delete.svg'
 import EditIcon from '@/public/images/common/edit.svg'
-import EntryDialog from '@/components/address-book/EntryDialog'
-import { useAppSelector } from '@/store'
-import { selectAllAddressBooks } from '@/store/addressBookSlice'
-import { isMultiChainSafeItem } from '@/features/multichain/utils/utils'
+import type { GetOrganizationResponse } from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
+import css from '@/features/organizations/components/OrgsCard/styles.module.css'
 
 enum ModalType {
   RENAME = 'rename',
@@ -23,14 +19,11 @@ enum ModalType {
 
 const defaultOpen = { [ModalType.RENAME]: false, [ModalType.REMOVE]: false }
 
-const OrgSafeContextMenu = ({ safeItem }: { safeItem: SafeItem | MultiChainSafeItem }) => {
+const OrgContextMenu = ({ org }: { org: GetOrganizationResponse }) => {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | undefined>()
   const [open, setOpen] = useState<typeof defaultOpen>(defaultOpen)
 
-  const allAddressBooks = useAppSelector(selectAllAddressBooks)
-  const chainIds = isMultiChainSafeItem(safeItem) ? safeItem.safes.map((safe) => safe.chainId) : [safeItem.chainId]
-  const name = isMultiChainSafeItem(safeItem) ? safeItem.name : allAddressBooks[safeItem.chainId]?.[safeItem.address]
-  const hasName = !!name
+  const name = org.name
 
   const handleOpenContextMenu = (e: MouseEvent<HTMLButtonElement, globalThis.MouseEvent>) => {
     e.stopPropagation()
@@ -54,7 +47,7 @@ const OrgSafeContextMenu = ({ safeItem }: { safeItem: SafeItem | MultiChainSafeI
 
   return (
     <>
-      <IconButton edge="end" size="small" onClick={handleOpenContextMenu}>
+      <IconButton className={css.orgActions} size="small" onClick={handleOpenContextMenu}>
         <MoreVertIcon sx={({ palette }) => ({ color: palette.border.main })} />
       </IconButton>
       <ContextMenu anchorEl={anchorEl} open={!!anchorEl} onClose={handleCloseContextMenu}>
@@ -62,7 +55,7 @@ const OrgSafeContextMenu = ({ safeItem }: { safeItem: SafeItem | MultiChainSafeI
           <ListItemIcon>
             <SvgIcon component={EditIcon} inheritViewBox fontSize="small" color="success" />
           </ListItemIcon>
-          <ListItemText>{hasName ? 'Rename' : 'Give name'}</ListItemText>
+          <ListItemText>Rename</ListItemText>
         </MenuItem>
 
         <MenuItem onClick={(e) => handleOpenModal(e, ModalType.REMOVE)}>
@@ -73,18 +66,11 @@ const OrgSafeContextMenu = ({ safeItem }: { safeItem: SafeItem | MultiChainSafeI
         </MenuItem>
       </ContextMenu>
 
-      {open[ModalType.RENAME] && (
-        <EntryDialog
-          handleClose={handleCloseModal}
-          defaultValues={{ name: name || '', address: safeItem.address }}
-          chainIds={chainIds}
-          disableAddressInput
-        />
-      )}
+      {open[ModalType.RENAME] && <></>}
 
-      {open[ModalType.REMOVE] && <RemoveSafeDialog safeItem={safeItem} handleClose={handleCloseModal} />}
+      {open[ModalType.REMOVE] && <></>}
     </>
   )
 }
 
-export default OrgSafeContextMenu
+export default OrgContextMenu
