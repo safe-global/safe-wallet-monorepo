@@ -123,7 +123,7 @@ const AddAccounts = () => {
 
   return (
     <>
-      <Tooltip title={!isAdmin ? 'You need an Admin role to add accounts' : ''} placement="top">
+      <Tooltip title={!isAdmin ? 'You need to be an Admin to add accounts' : ''} placement="top">
         <Box component="span">
           <Button variant="contained" onClick={() => setOpen(true)} disabled={!isAdmin}>
             Add accounts
