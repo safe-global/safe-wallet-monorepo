@@ -6432,9 +6432,20 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-native-firebase/app@npm:^21.8.0":
-  version: 21.10.1
-  resolution: "@react-native-firebase/app@npm:21.10.1"
+"@react-native-firebase/analytics@npm:^21.12.0":
+  version: 21.12.0
+  resolution: "@react-native-firebase/analytics@npm:21.12.0"
+  dependencies:
+    superstruct: "npm:^2.0.2"
+  peerDependencies:
+    "@react-native-firebase/app": 21.12.0
+  checksum: 10/e60120858773abcfd537b0653bc0b59fbb54a1f5bd0a6c39a40304bc6209edf660a3e613bf2fd4b44ad0a3227fbbfdf413bb9ba100c3141ec9db453cc683c3a2
+  languageName: node
+  linkType: hard
+
+"@react-native-firebase/app@npm:^21.12.0":
+  version: 21.12.0
+  resolution: "@react-native-firebase/app@npm:21.12.0"
   dependencies:
     firebase: "npm:11.3.1"
   peerDependencies:
@@ -6444,20 +6455,35 @@ __metadata:
   peerDependenciesMeta:
     expo:
       optional: true
-  checksum: 10/3d1f1e578497b1bb3a9c101698d0ba40ed97e6bcde906e2bcf59286946420bc7b681fb5f7650adc4f8485c276ea9b4200930ddbd33e88854cf343db0c521e699
+  checksum: 10/e7b2a2e1d1537fc796040dd916d6af2774b0464146a067e3dc2df70dfd0f8ee9f27f00135d753026f7e22819d0e14359d5d43128c9489c23648db8e595196fb3
   languageName: node
   linkType: hard
 
-"@react-native-firebase/messaging@npm:^21.8.0":
-  version: 21.10.1
-  resolution: "@react-native-firebase/messaging@npm:21.10.1"
+"@react-native-firebase/crashlytics@npm:^21.12.0":
+  version: 21.12.0
+  resolution: "@react-native-firebase/crashlytics@npm:21.12.0"
+  dependencies:
+    stacktrace-js: "npm:^2.0.2"
   peerDependencies:
-    "@react-native-firebase/app": 21.10.1
+    "@react-native-firebase/app": 21.12.0
     expo: ">=47.0.0"
   peerDependenciesMeta:
     expo:
       optional: true
-  checksum: 10/5a6d3dcc9f2ad593b6819ba4d0d6a70550d944daecd8e2e8fe0a2a87692a2e43ad849ff01882ebaaba633392cdd1a12123fc69608e1b9e18c7e4661c18faa2df
+  checksum: 10/5eda198f58213d2e305930d5630144151b2d0826c2282cd045d7753c2d3f799020bf1ee472cb10147fef6bb99679ea82c0ab1b53b3eef3c72b03ae1b1c7f2ec6
+  languageName: node
+  linkType: hard
+
+"@react-native-firebase/messaging@npm:^21.12.0":
+  version: 21.12.0
+  resolution: "@react-native-firebase/messaging@npm:21.12.0"
+  peerDependencies:
+    "@react-native-firebase/app": 21.12.0
+    expo: ">=47.0.0"
+  peerDependenciesMeta:
+    expo:
+      optional: true
+  checksum: 10/3295e7e7b0c308d5588f87ddebc6e899e8ea46f6eeb1a83e373403afe68cdaf3a6a9647e954e46cc63710bfe1831ec9b5b4a23831bae6ebe1a15186c09f6e576
   languageName: node
   linkType: hard
 
@@ -7281,8 +7307,10 @@ __metadata:
     "@react-native-community/blur": "npm:^4.4.1"
     "@react-native-community/datetimepicker": "npm:8.2.0"
     "@react-native-community/slider": "npm:4.5.5"
-    "@react-native-firebase/app": "npm:^21.8.0"
-    "@react-native-firebase/messaging": "npm:^21.8.0"
+    "@react-native-firebase/analytics": "npm:^21.12.0"
+    "@react-native-firebase/app": "npm:^21.12.0"
+    "@react-native-firebase/crashlytics": "npm:^21.12.0"
+    "@react-native-firebase/messaging": "npm:^21.12.0"
     "@react-native-menu/menu": "npm:^1.1.6"
     "@react-native/babel-preset": "npm:^0.76.2"
     "@react-navigation/material-top-tabs": "npm:^7.1.0"
@@ -29804,6 +29832,13 @@ __metadata:
   version: 8.2.5
   resolution: "sudo-prompt@npm:8.2.5"
   checksum: 10/5977f72564dc49920a241a08dcae93e110f2e682381ad755b502a6f431548b9aa03169143c9e1a28fe4b430f206c9053128be7993c6d6d2b6d402ed5824ef74a
+  languageName: node
+  linkType: hard
+
+"superstruct@npm:^2.0.2":
+  version: 2.0.2
+  resolution: "superstruct@npm:2.0.2"
+  checksum: 10/10e1944a9da4baee187fbaa6c5d97d7af266b55786dfe50bce67f0f1e7d93f1a5a42dd51e245a2e16404f8336d07c21c67f1c1fbc4ad0a252d3d2601d6c926da
   languageName: node
   linkType: hard
 
