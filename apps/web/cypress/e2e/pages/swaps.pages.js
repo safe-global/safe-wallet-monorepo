@@ -25,7 +25,6 @@ const slippageFld = '[data-testid="slippage"]'
 const orderIDFld = '[data-testid="order-id"]'
 const widgetFeeFld = '[data-testid="widget-fee"]'
 const interactWithFld = '[data-testid="interact-wth"]'
-const recipientAlert = '[data-testid="recipient-alert"]'
 const groupedItems = '[data-testid="grouped-items"]'
 const inputCurrencyPreview = '[id="input-currency-preview"]'
 const outputCurrencyPreview = '[id="output-currency-preview"]'
@@ -36,6 +35,8 @@ const placeLimitOrderStrBtn = 'Place limit order'
 export const unlockOrdersBtn = '[id="unlock-advanced-orders-btn"]'
 const limitOrderExpiryItem = (item) => `div[data-valuetext="${item}"]`
 const tokenBlock = '[data-testid="block-label"]'
+const confirmPriceImpactInput = '[id="confirm-modal-input"]'
+const confirmPriceImpactBtn = '[id="confirm-modal-button"]'
 
 const limitStrBtn = 'Limit'
 const swapStrBtn = 'Swap'
@@ -61,7 +62,7 @@ const orderDetailsStr = 'Order details'
 const unlockTwapOrdersStrBtn = 'Unlock TWAP orders'
 const settingsModalTitle = 'Advanced Order Settings'
 const customRecipientStr = 'Custom Recipient'
-
+const recipientWarningMsg = 'Order recipient address differs from order owner!'
 
 const getInsufficientBalanceStr = (token) => `Insufficient ${token} balance`
 const sellAmountIsSmallStr = 'Sell amount too small'
@@ -136,7 +137,7 @@ export const swapTxs = {
   wrapSwap:
     '&id=multisig_0xF184a243925Bf7fb1D64487339FF4F177Fb75644_0x06d7e5920bb59a38cf46436b146c33e7307d690875f7d64bca32a0b0c3394deb',
   swapQueue:
-    '&id=multisig_0xD8b85a669413b25a8BE7D7698f88b7bFA20889d2_0xc2a59a93e1cbaeab5fde7a5d4cc63938e1b1e4597c7e203146a6e6e07b43a92f'
+    '&id=multisig_0xD8b85a669413b25a8BE7D7698f88b7bFA20889d2_0xc2a59a93e1cbaeab5fde7a5d4cc63938e1b1e4597c7e203146a6e6e07b43a92f',
 }
 
 export const tokenBlockLabels = {
@@ -153,13 +154,13 @@ export function checkInputCurrencyPreviewValue(value) {
 }
 
 export function checkOutputCurrencyPreviewValue(value) {
-  cy.get(outputCurrencyPreview).should('contain.text', value)
+  cy.get(outputCurrencyPreview).contains(value)
 }
-
+//
 export function checkTokenBlockValue(index, value) {
+  // cy.get(tokenBlock).eq(index).contains(value)
   cy.get(tokenBlock).eq(index).should('contain.text', value)
 }
-
 
 export function unlockTwapOrders(iframeSelector) {
   main.getIframeBody(iframeSelector).then(($iframeBody) => {
@@ -230,7 +231,7 @@ export function clickOnConfirmSwapBtn() {
 export function clickOnExceeFeeChkbox() {
   cy.wait(1000)
   cy.get(exceedFeesChkbox)
-    .should(() => { })
+    .should(() => {})
     .then(($button) => {
       if (!$button.length) {
         return
@@ -252,28 +253,51 @@ export function verifyReviewOrderBtnIsVisible() {
 export function clickOnReviewOrderBtn() {
   cy.get('button')
     .contains(swapAnywayStrBtn)
-    .should(() => { })
+    .should(() => {})
     .then(($button) => {
       if (!$button.length) {
         return
       }
       cy.wrap($button).click()
     })
-  cy.get(reviewTwapBtn).click()
+  cy.get(reviewTwapBtn).should('be.enabled').click()
 }
 
 export function placeTwapOrder() {
   cy.wait(3000)
   cy.get('button')
     .contains(acceptStrBtn)
-    .should(() => { })
+    .should(() => {})
     .then(($button) => {
       if (!$button.length) {
         return
       }
       cy.wrap($button).click()
     })
-  cy.contains(placeTwapOrderStrBtn).click()
+  cy.get('button').contains(placeTwapOrderStrBtn).should('be.enabled').click()
+}
+
+export function confirmPriceImpact() {
+  cy.wait(3000)
+
+  cy.get('span')
+    .contains('Swap anyway')
+    .should(() => {})
+    .then(($checkbox) => {
+      if ($checkbox.length) {
+        cy.wrap($checkbox).type('confirm')
+        cy.get(confirmPriceImpactBtn).should('be.enabled').click()
+      } else {
+        cy.get(confirmPriceImpactInput)
+          .should(() => {})
+          .then(($input) => {
+            if ($input.length) {
+              cy.wrap($input).type('confirm')
+              cy.get(confirmPriceImpactBtn).should('be.enabled').click()
+            }
+          })
+      }
+    })
 }
 
 export function placeLimitOrder() {
@@ -354,7 +378,20 @@ export function selectOutputCurrency(option) {
 
 export function setInputValue(value) {
   cy.get(inputCurrencyInput).within(() => {
-    cy.get('input').clear().type(value)
+    cy.get('input')
+      .should('be.visible')
+      .should('not.be.disabled')
+      .clear()
+      .wait(3000)
+      .invoke('val', '')
+      .trigger('input')
+      .then(($input) => {
+        if ($input.val() !== '') {
+          cy.wrap($input).clear().invoke('val', '').trigger('input')
+        }
+      })
+      .should('have.value', '')
+      .type(value, { force: true })
   })
 }
 
@@ -448,13 +485,13 @@ export function verifyOrderDetails(limitPrice, expiry, slippage, interactWith, o
 }
 
 export function verifyRecipientAlertIsDisplayed() {
-  main.verifyElementsIsVisible([recipientAlert])
+  cy.contains(recipientWarningMsg)
 }
 
 export function closeIntroTwapModal() {
   cy.get('button')
     .contains(unlockTwapOrdersStrBtn)
-    .should(() => { })
+    .should(() => {})
     .then(($button) => {
       if (!$button.length) {
         return
@@ -586,6 +623,7 @@ export function checkTwapSettlement(index, sentValue, receivedValue) {
 }
 
 export function getTwapInitialData() {
+  cy.wait(1000)
   let formData = {}
 
   return cy

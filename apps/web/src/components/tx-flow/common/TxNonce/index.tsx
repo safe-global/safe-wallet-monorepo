@@ -275,7 +275,7 @@ const TxNonceForm = ({ nonce, recommendedNonce }: { nonce: string; recommendedNo
 
 const skeletonMinWidth = getFieldMinWidth('')
 
-const TxNonce = () => {
+const TxNonce = ({ canEdit = true }: { canEdit?: boolean } = {}) => {
   const { nonce, recommendedNonce } = useContext(SafeTxContext)
 
   return (
@@ -286,8 +286,12 @@ const TxNonce = () => {
       </Typography>
       {nonce === undefined || recommendedNonce === undefined ? (
         <Skeleton width={skeletonMinWidth} height="38px" />
-      ) : (
+      ) : canEdit ? (
         <TxNonceForm nonce={nonce.toString()} recommendedNonce={recommendedNonce.toString()} />
+      ) : (
+        <Typography ml={-1} fontWeight={700}>
+          {nonce}
+        </Typography>
       )}
     </Box>
   )

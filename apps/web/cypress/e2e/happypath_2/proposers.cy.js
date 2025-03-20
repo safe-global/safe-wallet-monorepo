@@ -15,7 +15,7 @@ const proposerName2 = 'Proposer 2'
 const proposerName = 'Proposer 1'
 const changedProposerName = 'Changed proposer name'
 
-describe('Happy path Proposers tests', () => {
+describe('Happy path Proposers tests', { defaultCommandTimeout: 30000 }, () => {
   before(async () => {
     staticSafes = await getSafes(CATEGORIES.static)
   })

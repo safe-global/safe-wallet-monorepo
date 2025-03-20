@@ -5,7 +5,7 @@ import * as wallet from '../../support/utils/wallet.js'
 import * as main from '../pages/main.page.js'
 import * as navigation from '../pages/navigation.page'
 import * as nfts from '../pages/nfts.pages.js'
-import { clickOnAssetSwapBtn } from "../pages/swaps.pages.js";
+import { clickOnAssetSwapBtn } from '../pages/swaps.pages.js'
 
 let staticSafes = []
 
@@ -17,7 +17,6 @@ describe('Assets 2 tests', () => {
   before(async () => {
     staticSafes = await getSafes(CATEGORIES.static)
   })
-
 
   it('Verify no pagination shows at the bottom if there are less than 25 rows', () => {
     cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_2)
@@ -63,7 +62,7 @@ describe('Assets 2 tests', () => {
     nfts.selectNFTs(1)
   })
 
-  it.only('Verify the "select all" checkbox does checks all the nfts', () => {
+  it('Verify the "select all" checkbox does checks all the nfts', () => {
     cy.visit(constants.balanceNftsUrl + staticSafes.SEP_STATIC_SAFE_2)
     nfts.waitForNftItems(5)
     nfts.selectAllNFTs()

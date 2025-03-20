@@ -13,7 +13,7 @@ const safeIcon = '[data-testid="safe-icon"]'
 const sidebarContainer = '[data-testid="sidebar-container"]'
 const openSafesIcon = '[data-testid="open-safes-icon"]'
 const qrModalBtn = '[data-testid="qr-modal-btn"]'
-const copyAddressBtn = '[data-testid="copy-address-btn"]'
+export const copyAddressBtn = '[data-testid="copy-address-btn"]'
 const explorerBtn = '[data-testid="explorer-btn"]'
 export const sideBarListItem = '[data-testid="sidebar-list-item"]'
 const sideBarListItemWhatsNew = '[data-testid="list-item-whats-new"]'
@@ -65,6 +65,7 @@ export const currentSafeSection = '[data-testid="current-safe-section"]'
 const readOnlyChip = '[data-testid="read-only-chip"]'
 const addSafeBtn = '[data-testid="add-safe-button"]'
 const indexStatusSection = '[data-testid="index-status"]'
+const needHelpBtn = '[data-testid="need-help-btn"]'
 
 export const importBtnStr = 'Import'
 export const exportBtnStr = 'Export'
@@ -110,13 +111,23 @@ const confirmTxStr = (number) => `${number} to confirm`
 const pedningTxStr = (n) => `${n} pending`
 export const confirmGenStr = 'to confirm'
 const searchResults = (number) => `Found ${number} result${number === 1 ? '' : 's'}`
+const needHelpLink = 'https://help.safe.global'
 
 export const sortOptions = {
   lastVisited: '[data-testid="last-visited-option"]',
   name: '[data-testid="name-option"]',
 }
+
+export function whatsNewBtnIsVisible() {
+  cy.get(sideBarListItemWhatsNew).should('be.visible')
+}
+
 export function checkSearchResults(number) {
   cy.contains(searchResults(number)).should('exist')
+}
+
+export function checkNeedHelpBtnLink() {
+  cy.get(needHelpBtn).find('a').should('have.attr', 'href', needHelpLink)
 }
 
 export const multichainSafes = {
@@ -197,6 +208,18 @@ export function clickOnSidebarImportBtn() {
   file.verifyValidImportInputExists()
 }
 
+export function clickOnCopyAddressBtn(expectedData) {
+  cy.window().then((win) => {
+    cy.stub(win.navigator.clipboard, 'writeText').as('clipboardWrite')
+  })
+  cy.get(copyAddressBtn).click()
+  cy.get('@clipboardWrite', { timeout: 10000 }).should('have.been.called')
+  cy.get('@clipboardWrite').then((stub) => {
+    const actualCallArgs = stub.args[0][0]
+    expect(actualCallArgs).to.include(expectedData)
+  })
+}
+
 export function showAllSafes() {
   cy.wait(500)
   cy.get('body').then(($body) => {
@@ -231,11 +254,7 @@ export function verifySafeHeaderDetails(details) {
 }
 
 export function clickOnQRCodeBtn() {
-  cy.get(sidebarContainer)
-    .should('be.visible')
-    .within(() => {
-      cy.get(qrModalBtn).click()
-    })
+  cy.get(qrModalBtn).should('be.visible').click()
 }
 
 export function verifyQRModalDisplayed() {

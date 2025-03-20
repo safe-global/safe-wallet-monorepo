@@ -84,7 +84,7 @@ jest.mock('redux-persist', () => {
   const real = jest.requireActual('redux-persist')
   return {
     ...real,
-    persistReducer: jest.fn().mockImplementation((config, reducers) => reducers),
+    persistReducer: jest.fn().mockImplementation((_, reducers) => reducers),
   }
 })
 jest.mock('redux-devtools-expo-dev-plugin', () => ({

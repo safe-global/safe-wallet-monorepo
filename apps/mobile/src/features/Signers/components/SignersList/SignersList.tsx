@@ -1,7 +1,7 @@
-import React, { useMemo } from 'react'
+import React from 'react'
 
 import { SafeListItem } from '@/src/components/SafeListItem'
-import { getTokenValue, Spinner } from 'tamagui'
+import { Spinner } from 'tamagui'
 
 import { SectionList } from 'react-native'
 import { useCallback } from 'react'
@@ -43,12 +43,6 @@ export function SignersList({ signersGroup, isFetching, hasLocalSingers, navbarT
     () => <SignersListHeader sectionTitle={title} withAlert={!hasLocalSingers} />,
     [hasLocalSingers],
   )
-  const contentContainerStyle = useMemo(
-    () => ({
-      paddingHorizontal: getTokenValue('$3'),
-    }),
-    [],
-  )
 
   return (
     <SectionList<AddressInfo, SignerSection>
@@ -62,7 +56,6 @@ export function SignersList({ signersGroup, isFetching, hasLocalSingers, navbarT
       keyExtractor={keyExtractor}
       renderItem={renderItem}
       scrollEventThrottle={16}
-      contentContainerStyle={contentContainerStyle}
       renderSectionHeader={({ section: { title } }) => <SafeListItem.Header title={title} />}
     />
   )

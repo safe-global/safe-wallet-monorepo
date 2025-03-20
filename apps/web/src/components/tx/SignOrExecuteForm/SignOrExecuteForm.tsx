@@ -199,7 +199,7 @@ export const SignOrExecuteForm = ({
         {!isCounterfactualSafe && !props.isRejection && <BlockaidBalanceChanges />}
       </TxCard>
 
-      {!isCounterfactualSafe && !props.isRejection && <TxChecks />}
+      {!isCounterfactualSafe && !props.isRejection && safeTx && <TxChecks transaction={safeTx} />}
 
       <TxNoteForm isCreation={isCreation ?? false} onChange={onNoteChange} txDetails={props.txDetails} />
 

@@ -7,10 +7,6 @@ export const MODALS_EVENTS = {
     action: 'Send tokens',
     category: MODALS_CATEGORY,
   },
-  SEND_COLLECTIBLE: {
-    action: 'Send NFTs',
-    category: MODALS_CATEGORY,
-  },
   CONTRACT_INTERACTION: {
     action: 'Contract interaction',
     category: MODALS_CATEGORY,
@@ -34,6 +30,14 @@ export const MODALS_EVENTS = {
   USE_SPENDING_LIMIT: {
     event: EventType.META,
     action: 'Use spending limit',
+    category: MODALS_CATEGORY,
+  },
+  OPEN_SAFE_UTILS: {
+    action: 'Open Safe Utils',
+    category: MODALS_CATEGORY,
+  },
+  SIGNING_ARTICLE: {
+    action: 'Open signing article',
     category: MODALS_CATEGORY,
   },
   SIMULATE_TX: {
@@ -89,6 +93,11 @@ export const MODALS_EVENTS = {
   },
   SUBMIT_TX_NOTE: {
     action: 'Submit tx note',
+    category: MODALS_CATEGORY,
+    event: EventType.CLICK,
+  },
+  CONFIRM_SIGN_CHECKBOX: {
+    action: 'Confirm sign checkbox',
     category: MODALS_CATEGORY,
     event: EventType.CLICK,
   },

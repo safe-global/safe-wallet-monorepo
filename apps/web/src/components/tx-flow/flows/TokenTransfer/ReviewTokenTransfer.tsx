@@ -1,15 +1,14 @@
 import { useContext, useEffect } from 'react'
 import useBalances from '@/hooks/useBalances'
-import SignOrExecuteForm from '@/components/tx/SignOrExecuteForm'
 import { createTokenTransferParams } from '@/services/tx/tokenTransferParams'
 import { createMultiSendCallOnlyTx } from '@/services/tx/tx-sender'
 import type { MultiTokenTransferParams } from '.'
 import { SafeTxContext } from '../../SafeTxProvider'
-import type { SubmitCallback } from '@/components/tx/SignOrExecuteForm/SignOrExecuteForm'
 import type { MetaTransactionData } from '@safe-global/safe-core-sdk-types'
 import { Divider, Stack } from '@mui/material'
 import ReviewRecipientRow from './ReviewRecipientRow'
 import { sameAddress } from '@/utils/addresses'
+import ReviewTransaction from '@/components/tx/ReviewTransaction'
 
 const ReviewTokenTransfer = ({
   params,
@@ -17,7 +16,7 @@ const ReviewTokenTransfer = ({
   txNonce,
 }: {
   params: MultiTokenTransferParams
-  onSubmit: SubmitCallback
+  onSubmit: () => void
   txNonce?: number
 }) => {
   const { setSafeTx, setSafeTxError, setNonce } = useContext(SafeTxContext)
@@ -47,7 +46,7 @@ const ReviewTokenTransfer = ({
   }, [params, txNonce, setNonce, balances, setSafeTx, setSafeTxError])
 
   return (
-    <SignOrExecuteForm onSubmit={onSubmit}>
+    <ReviewTransaction onSubmit={onSubmit}>
       <Stack divider={<Divider />} gap={2}>
         {params.recipients.map((recipient, index) => (
           <ReviewRecipientRow
@@ -57,7 +56,7 @@ const ReviewTokenTransfer = ({
           />
         ))}
       </Stack>
-    </SignOrExecuteForm>
+    </ReviewTransaction>
   )
 }
 

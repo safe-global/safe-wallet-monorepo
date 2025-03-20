@@ -68,6 +68,7 @@ describe('Happy path Swaps tests', () => {
         swaps.clickOnExceeFeeChkbox()
         swaps.clickOnSwapBtn()
         swaps.clickOnSwapBtn()
+        swaps.confirmPriceImpact()
       })
       create_tx.changeNonce(0)
       create_tx.clickOnSignTransactionBtn()
@@ -94,4 +95,4 @@ describe('Happy path Swaps tests', () => {
       checkDataLayerEvents(tx_confirmed)
     },
   )
-}) 
+})

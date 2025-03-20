@@ -4,6 +4,7 @@ import {
   getTxHash,
   isConflictHeaderListItem,
   isLabelListItem,
+  isMultisigExecutionInfo,
   isTransactionListItem,
 } from '@/src/utils/transaction-guards'
 import { groupBulkTxs } from '@/src/utils/transactions'
@@ -13,8 +14,10 @@ import { TxGroupedCard } from '@/src/components/transactions-list/Card/TxGrouped
 import { TxConflictingCard } from '@/src/components/transactions-list/Card/TxConflictingCard'
 import { SafeListItem } from '@/src/components/SafeListItem'
 import { TxInfo } from '@/src/components/TxInfo'
-import React from 'react'
+import React, { useCallback } from 'react'
 import { GroupedPendingTxsWithTitle } from './components/PendingTxList/PendingTxList.container'
+import { TxCardPress } from '@/src/components/TxInfo/types'
+import { useRouter } from 'expo-router'
 
 type GroupedTxs = (PendingTransactionItems | TransactionQueuedItem[])[]
 
@@ -86,6 +89,26 @@ export const renderItem = ({
   item: PendingTransactionItems | TransactionQueuedItem[]
   index: number
 }) => {
+  const router = useRouter()
+
+  const onPress = useCallback(
+    async (transaction?: TxCardPress) => {
+      if (transaction) {
+        router.push({
+          pathname: '/confirm-transaction',
+          params: {
+            txId: transaction.tx.id,
+          },
+        })
+      } else {
+        router.push({
+          pathname: '/conflict-transaction-sheet',
+        })
+      }
+    },
+    [router],
+  )
+
   if (Array.isArray(item)) {
     // Handle bulk transactions
     return (
@@ -93,7 +116,7 @@ export const renderItem = ({
         {getBulkGroupTxHash(item) ? (
           <TxGroupedCard transactions={item} inQueue />
         ) : (
-          <TxConflictingCard inQueue transactions={item} />
+          <TxConflictingCard inQueue transactions={item} onPress={onPress} />
         )}
       </View>
     )
@@ -110,7 +133,7 @@ export const renderItem = ({
   if (isTransactionListItem(item)) {
     return (
       <View marginTop={index && '$4'}>
-        <TxInfo inQueue tx={item.transaction} />
+        <TxInfo onPress={onPress} inQueue tx={item.transaction} />
       </View>
     )
   }
@@ -125,10 +148,24 @@ export const keyExtractor = (item: PendingTransactionItems | TransactionQueuedIt
       return txGroupHash + index
     }
 
+    if (isTransactionListItem(item[0]) && isMultisigExecutionInfo(item[0].transaction.executionInfo)) {
+      return getTxHash(item[0]) + item[0].transaction.executionInfo.confirmationsSubmitted + index
+    }
+
     if (isTransactionListItem(item[0])) {
       return getTxHash(item[0]) + index
     }
+
     return String(index)
   }
-  return String(index)
+
+  if (isTransactionListItem(item) && isMultisigExecutionInfo(item.transaction.executionInfo)) {
+    return item.transaction.id + item.transaction.executionInfo.confirmationsSubmitted
+  }
+
+  if (isTransactionListItem(item)) {
+    return item.transaction.id
+  }
+
+  return String(item)
 }

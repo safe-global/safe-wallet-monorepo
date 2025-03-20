@@ -3,7 +3,7 @@ import type { ReactElement } from 'react'
 import { generateDataRowValue, TxDataRow } from '@/components/transactions/TxDetails/Summary/TxDataRow'
 import { isAddress, isArrayParameter, isByte } from '@/utils/transaction-guards'
 import type { AddressEx, DataDecoded } from '@safe-global/safe-gateway-typescript-sdk'
-import { Box, Typography } from '@mui/material'
+import { Box, Stack, Typography } from '@mui/material'
 import { Value } from '@/components/transactions/TxDetails/TxData/DecodedData/ValueArray'
 
 type MethodDetailsProps = {
@@ -18,46 +18,27 @@ export const MethodDetails = ({ data, hexData, addressInfoIndex }: MethodDetails
   if (!data.parameters?.length) {
     return (
       <>
-        <Typography
-          sx={{
-            color: 'text.secondary',
-          }}
-        >
-          No parameters
-        </Typography>
+        <Typography color="text.secondary">No parameters</Typography>
 
-        {hexData && <HexEncodedData title="Data (hex-encoded)" hexData={hexData} />}
+        {hexData && <HexEncodedData title="Data:" hexData={hexData} />}
       </>
     )
   }
 
   return (
-    <Box>
-      <Typography
-        sx={{
-          fontWeight: 'bold',
-          pb: 1,
-        }}
-      >
-        Parameters
-      </Typography>
+    <Stack gap={1}>
       {data.parameters?.map((param, index) => {
         const isArrayValueParam = isArrayParameter(param.type) || Array.isArray(param.value)
         const inlineType = isAddress(param.type) ? 'address' : isByte(param.type) ? 'bytes' : undefined
         const addressEx = typeof param.value === 'string' ? addressInfoIndex?.[param.value] : undefined
 
         const title = (
-          <>
+          <Box mb={-1}>
             <Typography component="span">{param.name}</Typography>{' '}
-            <Typography
-              component="span"
-              sx={{
-                color: 'text.secondary',
-              }}
-            >
-              {param.type}
+            <Typography component="span" color="text.secondary">
+              {param.type}:
             </Typography>
-          </>
+          </Box>
         )
 
         return (
@@ -70,6 +51,6 @@ export const MethodDetails = ({ data, hexData, addressInfoIndex }: MethodDetails
           </TxDataRow>
         )
       })}
-    </Box>
+    </Stack>
   )
 }

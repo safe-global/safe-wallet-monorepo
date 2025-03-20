@@ -2,13 +2,13 @@ import { StyleSheet } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 import { ImportError } from '@/src/features/ImportPrivateKey/components/ImportError'
 import React from 'react'
-import { View } from 'tamagui'
+import { useTheme, View } from 'tamagui'
 import { useModalStyle } from '@/src/navigation/hooks/useModalStyle'
-
-const colors: [string, string] = ['#221818', 'transparent']
 
 export default function App() {
   const modalStyle = useModalStyle()
+  const theme = useTheme()
+  const colors: [string, string] = [theme.errorDark.get(), 'transparent']
 
   return (
     <View style={modalStyle}>

@@ -1,4 +1,10 @@
 .encodedData {
   line-break: anywhere;
   word-break: break-all;
+  line-height: 1.1;
+}
+
+.encodedData button {
+  padding-top: 0;
+  padding-bottom: 0;
 }

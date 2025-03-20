@@ -3,11 +3,13 @@ import {
   type Cancellation,
   type MultiSend,
   ConflictType,
+  DetailedExecutionInfoType,
   TransactionInfoType,
   TransactionListItemType,
   TransactionTokenType,
   TransferDirection,
 } from '@safe-global/store/gateway/types'
+
 import type {
   ModuleExecutionInfo,
   TransactionDetails,
@@ -29,6 +31,8 @@ import type {
   CustomTransactionInfo,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
+import type { DetailedExecutionInfo, MultisigExecutionDetails } from '@safe-global/safe-gateway-typescript-sdk'
+
 import { HistoryTransactionItems, PendingTransactionItems } from '@safe-global/store/gateway/types'
 
 type TransactionInfo = Transaction['txInfo']
@@ -47,6 +51,10 @@ export const isTxQueued = (value: Transaction['txStatus']): boolean => {
   )
 }
 
+export const isMultisigDetailedExecutionInfo = (value?: DetailedExecutionInfo): value is MultisigExecutionDetails => {
+  return value?.type === DetailedExecutionInfoType.MULTISIG
+}
+
 export const getBulkGroupTxHash = (group: PendingTransactionItems[]) => {
   const hashList = group.map((item) => {
     if (isTransactionListItem(item)) {
@@ -57,6 +65,7 @@ export const getBulkGroupTxHash = (group: PendingTransactionItems[]) => {
   return uniq(hashList).length === 1 ? hashList[0] : undefined
 }
 
+export const isArrayParameter = (parameter: string): boolean => /(\[\d*?])+$/.test(parameter)
 export const getTxHash = (item: TransactionQueuedItem): string => item.transaction.txHash as unknown as string
 
 export const isTransferTxInfo = (value: Transaction['txInfo']): value is TransferTransactionInfo => {
@@ -66,6 +75,15 @@ export const isTransferTxInfo = (value: Transaction['txInfo']): value is Transfe
 export const isSettingsChangeTxInfo = (value: Transaction['txInfo']): value is SettingsChangeTransaction => {
   return value.type === TransactionInfoType.SETTINGS_CHANGE
 }
+
+export const isAddSignerTxInfo = (value: Transaction['txInfo']): value is SettingsChangeTransaction => {
+  return isSettingsChangeTxInfo(value) && value.settingsInfo?.type === 'ADD_OWNER'
+}
+
+export const isRemoveSignerTxInfo = (value: Transaction['txInfo']): value is SettingsChangeTransaction => {
+  return isSettingsChangeTxInfo(value) && value.settingsInfo?.type === 'REMOVE_OWNER'
+}
+
 /**
  * A fulfillment transaction for swap, limit or twap order is always a SwapOrder
  * It cannot be a TWAP order
@@ -82,6 +100,10 @@ export const isOutgoingTransfer = (txInfo: Transaction['txInfo']): boolean => {
 
 export const isCustomTxInfo = (value: Transaction['txInfo']): value is CustomTransactionInfo => {
   return value.type === TransactionInfoType.CUSTOM
+}
+
+export const isChangeThresholdTxInfo = (value: Transaction['txInfo']): value is SettingsChangeTransaction => {
+  return value.type === TransactionInfoType.SETTINGS_CHANGE && value.settingsInfo?.type === 'CHANGE_THRESHOLD'
 }
 
 export const isMultiSendTxInfo = (value: Transaction['txInfo']): value is MultiSend => {

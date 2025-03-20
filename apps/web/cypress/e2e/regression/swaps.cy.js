@@ -54,6 +54,7 @@ describe('Swaps tests', () => {
           swaps.enableCustomRecipient(isCustomRecipientFound(swaps.customRecipient))
           swaps.clickOnSettingsBtn()
           swaps.enterRecipient(swaps.blockedAddress)
+          swaps.selectOutputCurrency(swaps.swapTokens.dai)
         })
       cy.contains(swaps.blockedAddressStr)
     },
@@ -111,6 +112,7 @@ describe('Swaps tests', () => {
       swaps.clickOnExceeFeeChkbox()
       swaps.clickOnSwapBtn()
       swaps.clickOnSwapBtn()
+      swaps.confirmPriceImpact()
     })
 
     swaps.verifyOrderDetails(limitPrice, swapOrder.expiry2Mins, slippage, swapOrder.interactWith, orderID, widgetFee)
@@ -134,7 +136,7 @@ describe('Swaps tests', () => {
       main.getIframeBody(iframeSelector).then(($frame) => {
         cy.wrap($frame).within(() => {
           swaps.selectInputCurrency(swaps.swapTokens.cow)
-          swaps.setInputValue(200)
+          swaps.setInputValue(1000)
           swaps.selectOutputCurrency(swaps.swapTokens.dai)
           swaps.checkSwapBtnIsVisible()
           swaps.clickOnSettingsBtn()
@@ -152,9 +154,8 @@ describe('Swaps tests', () => {
           swaps.enterRecipient(signer2)
           swaps.clickOnExceeFeeChkbox()
           swaps.clickOnSwapBtn()
-          swaps.clickOnSwapBtn()
+          swaps.verifyRecipientAlertIsDisplayed()
         })
-        swaps.verifyRecipientAlertIsDisplayed()
       })
     },
   )

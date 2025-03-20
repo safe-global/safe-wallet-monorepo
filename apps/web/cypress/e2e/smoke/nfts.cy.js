@@ -9,7 +9,7 @@ const nftsName = 'CatFactory'
 const nftsAddress = '0x373B...866c'
 const nftsTokenID = 'CF'
 
-describe('[SMOKE] NFTs tests', () => {
+describe.skip('[SMOKE] NFTs tests', () => {
   before(async () => {
     staticSafes = await getSafes(CATEGORIES.static)
   })
@@ -27,7 +27,8 @@ describe('[SMOKE] NFTs tests', () => {
     nfts.verifyDataInTable(nftsName, nftsAddress, nftsTokenID)
   })
 
-  it('[SMOKE] Verify NFT preview window can be opened', () => {
+  // skipped because the NFT metadata fetching is turned off on tx_service
+  it.skip('[SMOKE] Verify NFT preview window can be opened', () => {
     nfts.openActiveNFT(0)
     nfts.verifyNameInNFTModal(nftsTokenID)
     nfts.verifySelectedNetwrokSepolia()

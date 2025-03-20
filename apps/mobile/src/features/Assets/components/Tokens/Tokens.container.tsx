@@ -8,15 +8,15 @@ import { AssetsCard } from '@/src/components/transactions-list/Card/AssetsCard'
 import { POLLING_INTERVAL } from '@/src/config/constants'
 import { selectActiveSafe } from '@/src/store/activeSafeSlice'
 import { Balance, useBalancesGetBalancesV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
-import { formatValue } from '@/src/utils/formatters'
-
 import { Fallback } from '../Fallback'
 import { skipToken } from '@reduxjs/toolkit/query'
+import { formatCurrency } from '@safe-global/utils/formatNumber'
+import { formatVisualAmount } from '@safe-global/utils/formatters'
 
 export function TokensContainer() {
   const activeSafe = useSelector(selectActiveSafe)
 
-  const { data, isFetching, error } = useBalancesGetBalancesV1Query(
+  const { data, isFetching, error, isLoading } = useBalancesGetBalancesV1Query(
     !activeSafe
       ? skipToken
       : {
@@ -36,17 +36,17 @@ export function TokensContainer() {
       <AssetsCard
         name={item.tokenInfo.name}
         logoUri={item.tokenInfo.logoUri}
-        description={`${formatValue(item.balance, item.tokenInfo.decimals as number)} ${item.tokenInfo.symbol}`}
+        description={`${formatVisualAmount(item.balance, item.tokenInfo.decimals as number)} ${item.tokenInfo.symbol}`}
         rightNode={
           <Text fontSize="$4" fontWeight={400} color="$color">
-            ${item.fiatBalance}
+            {formatCurrency(item.fiatBalance, 'usd')}
           </Text>
         }
       />
     )
   }, [])
 
-  if (isFetching || !data?.items.length || error) {
+  if (isLoading || !data?.items.length || error) {
     return <Fallback loading={isFetching} hasError={!!error} />
   }
 

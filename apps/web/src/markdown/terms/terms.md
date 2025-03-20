@@ -66,7 +66,7 @@ Last updated: September, 2024
 
 # 1\. What is the scope of the Terms? {#1.-what-is-the-scope-of-the-terms?}
 
-These Terms and Conditions (“**Terms**”) become part of any contract (“**Agreement**”) between you (“**you**”, “**yours**” or “**User**”) and Core Contributors GmbH (“**CC**”, “**we**”, “**our**” or “**us**”) provided we made these Terms accessible to you prior to entering into the Agreement and you consent to these Terms. We are a limited liability company registered with the commercial register of Berlin Charlottenburg under company number HRB 240421 B, with its registered office at Gontardstraße 11, 10178 Berlin, Germany. You can contact us by writing to info@cc0x.dev.
+These Terms and Conditions (“**Terms**”) become part of any contract (“**Agreement**”) between you (“**you**”, “**yours**” or “**User**”) and Core Contributors GmbH (“**CC**”, “**we**”, “**our**” or “**us**”) provided we made these Terms accessible to you prior to entering into the Agreement and you consent to these Terms. We are a limited liability company registered with the commercial register of Berlin Charlottenburg under company number HRB 240421 B, with its registered office at c/o WeWork, Dircksenstr. 3, 10179 Berlin, Germany. You can contact us by writing to info@cc0x.dev.
 
 The Agreement is concluded by using the Mobile App, Web App and/or Browser Extension subject to these Terms. The use of our Services is only permitted to legal entities, partnerships and natural persons with unlimited legal capacity. In particular, minors are prohibited from using our Services.
 
