@@ -121,7 +121,7 @@ const MembersList = ({ members }: { members: UserOrganization[] }) => {
           content: isAdmin ? (
             <div className={tableCss.actions}>
               {!isInvite && <EditButton member={member} />}
-              <RemoveMemberButton member={member} disabled={isAdmin && isLastAdmin} isInvite={isInvite} />
+              <RemoveMemberButton member={member} disabled={isAdmin && isLastAdmin && !isInvite} isInvite={isInvite} />
             </div>
           ) : null,
         },
