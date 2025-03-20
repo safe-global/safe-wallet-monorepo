@@ -1,12 +1,18 @@
 import InitialsAvatar from '../InitialsAvatar'
 import { Stack, Typography } from '@mui/material'
 import type { UserOrganization } from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
+import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
 
 const MemberName = ({ member }: { member: UserOrganization }) => {
+  const { currentData: user } = useUsersGetWithWalletsV1Query()
+  const isCurrentUser = member.user.id === user?.id
+
   return (
     <Stack direction="row" spacing={1} alignItems="center" key={member.id}>
       <InitialsAvatar size="medium" name={member.name || ''} rounded />
-      <Typography fontSize="14px">{member.name}</Typography>
+      <Typography fontSize="14px">
+        {member.name} {isCurrentUser ? '(you)' : ''}
+      </Typography>
     </Stack>
   )
 }
