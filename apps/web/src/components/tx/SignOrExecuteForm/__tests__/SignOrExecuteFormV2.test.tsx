@@ -7,6 +7,7 @@ import { SignOrExecuteFormV2 } from '../SignOrExecuteFormV2'
 import { encodeBytes32String } from 'ethers'
 import { Status } from 'zodiac-roles-deployments'
 import * as useIsSafeOwner from '@/hooks/useIsSafeOwner'
+import { SafeTxContextParams } from '@/components/tx-flow/SafeTxProvider'
 
 const txDetails = {
   safeAddress: '0xE20CcFf2c38Ef3b64109361D7b7691ff2c7D5f67',
@@ -132,8 +133,14 @@ describe('SignOrExecuteFormV2', () => {
       <SignOrExecuteFormV2
         txDetails={txDetails}
         txId="0x012312"
-        safeTxError={undefined}
-        safeTx={safeTxBuilder().build()}
+        safeTxContext={
+          {
+            safeTx: safeTxBuilder().build(),
+            safeTxError: undefined,
+            isMassPayout: false,
+            setIsMassPayout: jest.fn(),
+          } as unknown as SafeTxContextParams
+        }
         onSubmit={jest.fn()}
         onlyExecute={true}
         isExecutable={false}
@@ -153,8 +160,14 @@ describe('SignOrExecuteFormV2', () => {
       <SignOrExecuteFormV2
         txDetails={txDetails}
         txId="0x012312"
-        safeTxError={undefined}
-        safeTx={safeTxBuilder().build()}
+        safeTxContext={
+          {
+            safeTx: safeTxBuilder().build(),
+            safeTxError: undefined,
+            isMassPayout: false,
+            setIsMassPayout: jest.fn(),
+          } as unknown as SafeTxContextParams
+        }
         onSubmit={jest.fn()}
         onlyExecute={true}
         isExecutable={false}
@@ -174,8 +187,14 @@ describe('SignOrExecuteFormV2', () => {
       <SignOrExecuteFormV2
         txDetails={txDetails}
         txId="0x012312"
-        safeTxError={undefined}
-        safeTx={safeTxBuilder().build()}
+        safeTxContext={
+          {
+            safeTx: safeTxBuilder().build(),
+            safeTxError: undefined,
+            isMassPayout: false,
+            setIsMassPayout: jest.fn(),
+          } as unknown as SafeTxContextParams
+        }
         onSubmit={jest.fn()}
         onlyExecute={true}
         isExecutable={false}
@@ -194,8 +213,14 @@ describe('SignOrExecuteFormV2', () => {
       <SignOrExecuteFormV2
         txDetails={txDetails}
         txId="0x012312"
-        safeTxError={undefined}
-        safeTx={safeTxBuilder().build()}
+        safeTxContext={
+          {
+            safeTx: safeTxBuilder().build(),
+            safeTxError: undefined,
+            isMassPayout: false,
+            setIsMassPayout: jest.fn(),
+          } as unknown as SafeTxContextParams
+        }
         onSubmit={jest.fn()}
         onlyExecute={true}
         isExecutable={true}
