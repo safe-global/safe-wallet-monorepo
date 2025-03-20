@@ -1,7 +1,5 @@
 import { AppRoutes } from '@/config/routes'
 import { Box, Card, Stack, Typography } from '@mui/material'
-import MoreVertIcon from '@mui/icons-material/MoreVert'
-import IconButton from '@mui/material/IconButton'
 import Link from 'next/link'
 
 import css from './styles.module.css'

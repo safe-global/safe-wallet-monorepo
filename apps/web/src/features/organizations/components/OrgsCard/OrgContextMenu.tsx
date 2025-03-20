@@ -1,4 +1,3 @@
-import RemoveSafeDialog from '@/features/organizations/components/SafeAccounts/RemoveSafeDialog'
 import { type MouseEvent, useState } from 'react'
 import MoreVertIcon from '@mui/icons-material/MoreVert'
 import { SvgIcon } from '@mui/material'
