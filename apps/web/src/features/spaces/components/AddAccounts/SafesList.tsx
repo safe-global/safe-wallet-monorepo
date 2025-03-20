@@ -1,7 +1,7 @@
 import ChainIndicator from '@/components/common/ChainIndicator'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import { ChainIcon } from '@/components/common/SafeIcon'
-import { isMultiChainSafeItem } from '@/features/multichain/utils/utils'
+import { isMultiChainSafeItem, isSafeItem } from '@/features/multichain/utils/utils'
 import { MultichainIndicator } from '@/features/myAccounts/components/AccountItems/MultiAccountItem'
 import type { SafeItem } from '@/features/myAccounts/hooks/useAllSafes'
 import type { AllSafeItems, MultiChainSafeItem } from '@/features/myAccounts/hooks/useAllSafesGrouped'
@@ -24,6 +24,8 @@ import ListItemButton from '@mui/material/ListItemButton'
 import ListItemIcon from '@mui/material/ListItemIcon'
 import ListItemText from '@mui/material/ListItemText'
 import { Controller, useFormContext } from 'react-hook-form'
+import { useSpaceSafes } from '@/features/spaces/hooks/useSpaceSafes'
+import isEqual from 'lodash/isEqual'
 
 const ChainItem = ({ chainId }: { chainId: string }) => {
   const chainConfig = useChain(chainId)
@@ -56,6 +58,9 @@ function getMultiChainSafeId(mcSafe: MultiChainSafeItem) {
 
 const SafesList = ({ safes }: { safes: AllSafeItems }) => {
   const { watch, setValue, control } = useFormContext<AddAccountsFormValues>()
+  const spaceSafes = useSpaceSafes()
+  const multiChainSpaceSafes = spaceSafes.filter(isMultiChainSafeItem)
+  const safeItemSpaceSafes = spaceSafes.filter(isSafeItem)
 
   return (
     <List
@@ -74,6 +79,7 @@ const SafesList = ({ safes }: { safes: AllSafeItems }) => {
           const checkedCount = subSafeValues.filter(Boolean).length
           const allChecked = checkedCount === totalSubSafes && totalSubSafes > 0
           const someChecked = checkedCount > 0 && checkedCount < totalSubSafes
+          const alreadyAdded = multiChainSpaceSafes.some((spaceSafe) => isEqual(spaceSafe.safes, safe.safes))
 
           const handleHeaderCheckboxChange = (checked: boolean) => {
             setValue(`selectedSafes.${parentSafeId}`, checked, { shouldValidate: true })
@@ -92,12 +98,13 @@ const SafesList = ({ safes }: { safes: AllSafeItems }) => {
                 }}
               >
                 <Checkbox
-                  checked={Boolean(allChecked)}
+                  checked={Boolean(allChecked) || alreadyAdded}
                   indeterminate={someChecked}
                   onChange={(e) => handleHeaderCheckboxChange(e.target.checked)}
                   onClick={(e) => e.stopPropagation()}
                   onFocus={(e) => e.stopPropagation()}
                   sx={{ mr: 2 }}
+                  disabled={alreadyAdded}
                 />
                 <Box className={css.safeRow}>
                   <EthHashInfo address={safe.address} copyAddress={false} showPrefix={false} />
@@ -111,6 +118,16 @@ const SafesList = ({ safes }: { safes: AllSafeItems }) => {
                 <List disablePadding>
                   {safe.safes.map((subSafe) => {
                     const subSafeId = getSafeId(subSafe)
+                    const alreadyAdded = spaceSafes.some((spaceSafe) => {
+                      if (isMultiChainSafeItem(spaceSafe)) {
+                        return spaceSafe.safes.some(
+                          (subSpaceSafe) =>
+                            subSpaceSafe.chainId === subSafe.chainId && subSpaceSafe.address === subSafe.address,
+                        )
+                      } else {
+                        return spaceSafe.chainId === subSafe.chainId && spaceSafe.address === subSafe.address
+                      }
+                    })
 
                     return (
                       <Controller
@@ -124,10 +141,10 @@ const SafesList = ({ safes }: { safes: AllSafeItems }) => {
 
                           return (
                             <ListItem disablePadding>
-                              <ListItemButton onClick={handleItemClick}>
+                              <ListItemButton onClick={handleItemClick} disabled={alreadyAdded}>
                                 <ListItemIcon onClick={(e) => e.stopPropagation()}>
                                   <Checkbox
-                                    checked={Boolean(field.value)}
+                                    checked={Boolean(field.value) || alreadyAdded}
                                     onClick={(e) => e.stopPropagation()}
                                     onFocus={(e) => e.stopPropagation()}
                                     onChange={(e) => field.onChange(e.target.checked)}
@@ -148,6 +165,9 @@ const SafesList = ({ safes }: { safes: AllSafeItems }) => {
         }
 
         const safeId = getSafeId(safe)
+        const alreadyAdded = safeItemSpaceSafes.some(
+          (spaceSafe) => spaceSafe.address === safe.address && spaceSafe.chainId === safe.chainId,
+        )
 
         return (
           <Controller
@@ -161,10 +181,10 @@ const SafesList = ({ safes }: { safes: AllSafeItems }) => {
 
               return (
                 <ListItem className={css.safeItem} disablePadding>
-                  <ListItemButton onClick={handleItemClick}>
+                  <ListItemButton onClick={handleItemClick} disabled={alreadyAdded}>
                     <ListItemIcon onClick={(e) => e.stopPropagation()}>
                       <Checkbox
-                        checked={Boolean(field.value)}
+                        checked={Boolean(field.value) || alreadyAdded}
                         onChange={(event) => field.onChange(event.target.checked)}
                       />
                     </ListItemIcon>
