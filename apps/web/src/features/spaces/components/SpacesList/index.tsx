@@ -39,21 +39,6 @@ const AddSpaceButton = ({ disabled }: { disabled: boolean }) => {
   )
 }
 
-const InfoModal = () => {
-  const [isInfoOpen, setIsInfoOpen] = useState<boolean>(false)
-  const [openCreationModal, setOpenCreationModal] = useState<boolean>(false)
-
-  return (
-    <>
-      <Link onClick={() => setIsInfoOpen(true)}>What are spaces?</Link>
-      {isInfoOpen && (
-        <SpaceInfoModal onCreateSpace={() => setOpenCreationModal(true)} onClose={() => setIsInfoOpen(false)} />
-      )}
-      {openCreationModal && <SpaceCreationModal onClose={() => setOpenCreationModal(false)} />}
-    </>
-  )
-}
-
 const SignedOutState = () => {
   const wallet = useWallet()
   const [isInfoOpen, setIsInfoOpen] = useState<boolean>(false)
