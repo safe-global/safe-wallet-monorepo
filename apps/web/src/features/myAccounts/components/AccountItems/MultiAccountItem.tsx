@@ -1,7 +1,7 @@
 import { selectUndeployedSafes } from '@/features/counterfactual/store/undeployedSafesSlice'
 import NetworkLogosList from '@/features/multichain/components/NetworkLogosList'
 import type { SafeListProps } from '@/features/myAccounts/components/SafesList'
-import OrgSafeContextMenu from '@/features/organizations/components/SafeAccounts/OrgSafeContextMenu'
+import OrgSafeContextMenu from '@/features/spaces/components/SafeAccounts/OrgSafeContextMenu'
 import { showNotification } from '@/store/notificationsSlice'
 import SingleAccountItem from '@/features/myAccounts/components/AccountItems/SingleAccountItem'
 import type { SafeOverview } from '@safe-global/safe-gateway-typescript-sdk'

@@ -1,0 +1,141 @@
+import AccountsNavigation from '@/features/myAccounts/components/AccountsNavigation'
+import SpaceCard from 'src/features/spaces/components/SpaceCard'
+import SpaceCreationModal from '@/features/spaces/components/SpaceCreationModal'
+import SignInButton from '@/features/spaces/components/SignInButton'
+import SpacesIcon from '@/public/images/spaces/spaces.svg'
+import { useAppSelector } from '@/store'
+import { isAuthenticated } from '@/store/authSlice'
+import { Box, Button, Card, Grid2, Link, Typography } from '@mui/material'
+import type { GetOrganizationResponse } from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
+import { useOrganizationsGetV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
+import type { UserWithWallets } from '@safe-global/store/gateway/AUTO_GENERATED/users'
+import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
+import SpaceListInvite from '../InviteBanner'
+import { useState } from 'react'
+import css from './styles.module.css'
+import { MemberStatus } from '@/features/spaces/hooks/useSpaceMembers'
+import useWallet from '@/hooks/wallets/useWallet'
+import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
+import Track from '@/components/common/Track'
+
+const AddSpaceButton = ({ disabled }: { disabled: boolean }) => {
+  const [open, setOpen] = useState(false)
+
+  return (
+    <>
+      <Button
+        disableElevation
+        variant="contained"
+        size="small"
+        onClick={() => setOpen(true)}
+        sx={{ height: '36px', px: 2 }}
+        disabled={disabled}
+      >
+        <Box mt="1px">Create space</Box>
+      </Button>
+      {open && <SpaceCreationModal onClose={() => setOpen(false)} />}
+    </>
+  )
+}
+
+const InfoModal = () => {
+  const openInfoModal = () => {
+    // TODO: implement
+  }
+
+  return (
+    <Link onClick={openInfoModal} href="#">
+      What are spaces?
+    </Link>
+  )
+}
+
+const SignedOutState = () => {
+  const wallet = useWallet()
+
+  return (
+    <Card sx={{ p: 5, textAlign: 'center' }}>
+      <SpacesIcon />
+
+      <Typography color="text.secondary" mb={2}>
+        To view your space or create one, {!!wallet ? 'sign in with your connected wallet.' : 'connect your wallet.'}
+        <br />
+        <InfoModal />
+      </Typography>
+
+      <SignInButton />
+    </Card>
+  )
+}
+
+const NoSpacesState = () => {
+  return (
+    <Card sx={{ p: 5, textAlign: 'center', width: 1 }}>
+      <SpacesIcon />
+
+      <Typography color="text.secondary" mb={2}>
+        No spaces found.
+        <br />
+        <InfoModal />
+      </Typography>
+    </Card>
+  )
+}
+
+const filterSpacesByStatus = (
+  currentUser: UserWithWallets | undefined,
+  spaces: GetOrganizationResponse[],
+  status: MemberStatus,
+) => {
+  return spaces?.filter((space) => {
+    // @ts-ignore TODO: fix incorrect type from CGW
+    return space.userOrganizations.some((member) => member.user.id === currentUser?.id && member.status === status)
+  })
+}
+
+const SpacesList = () => {
+  const isUserSignedIn = useAppSelector(isAuthenticated)
+  const { currentData: currentUser } = useUsersGetWithWalletsV1Query(undefined, { skip: !isUserSignedIn })
+  const { currentData: spaces } = useOrganizationsGetV1Query(undefined, { skip: !isUserSignedIn })
+
+  const pendingInvites = filterSpacesByStatus(currentUser, spaces || [], MemberStatus.INVITED)
+  const activeSpaces = filterSpacesByStatus(currentUser, spaces || [], MemberStatus.ACTIVE)
+
+  return (
+    <Box className={css.container}>
+      <Box className={css.mySpaces}>
+        <Box className={css.spacesHeader}>
+          <AccountsNavigation />
+
+          <Track {...SPACE_EVENTS.CREATE_SPACE_MODAL} label={SPACE_LABELS.space_list_page}>
+            <AddSpaceButton disabled={!isUserSignedIn} />
+          </Track>
+        </Box>
+
+        {isUserSignedIn &&
+          pendingInvites.length > 0 &&
+          pendingInvites.map((invitingSpace: GetOrganizationResponse) => (
+            <SpaceListInvite key={invitingSpace.id} space={invitingSpace} />
+          ))}
+
+        {isUserSignedIn ? (
+          <Grid2 container spacing={2} flexWrap="wrap">
+            {activeSpaces.length > 0 ? (
+              activeSpaces.map((space) => (
+                <Grid2 size={{ xs: 12, md: 6 }} key={space.name}>
+                  <SpaceCard space={space} />
+                </Grid2>
+              ))
+            ) : (
+              <NoSpacesState />
+            )}
+          </Grid2>
+        ) : (
+          <SignedOutState />
+        )}
+      </Box>
+    </Box>
+  )
+}
+
+export default SpacesList
