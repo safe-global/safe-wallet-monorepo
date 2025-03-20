@@ -19,7 +19,7 @@ const ReviewTokenTransfer = ({
   onSubmit: () => void
   txNonce?: number
 }) => {
-  const { setSafeTx, setSafeTxError, setNonce } = useContext(SafeTxContext)
+  const { setSafeTx, setSafeTxError, setNonce, setIsMassPayout } = useContext(SafeTxContext)
   const { balances } = useBalances()
 
   useEffect(() => {
@@ -43,7 +43,9 @@ const ReviewTokenTransfer = ({
       .filter((transfer): transfer is MetaTransactionData => !!transfer)
 
     createMultiSendCallOnlyTx(calls).then(setSafeTx).catch(setSafeTxError)
-  }, [params, txNonce, setNonce, balances, setSafeTx, setSafeTxError])
+
+    setIsMassPayout(params.recipients.length > 1)
+  }, [params, txNonce, setNonce, balances, setSafeTx, setSafeTxError, setIsMassPayout])
 
   return (
     <ReviewTransaction onSubmit={onSubmit}>

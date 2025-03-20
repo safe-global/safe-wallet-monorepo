@@ -36,16 +36,14 @@ export type SignOrExecuteProps = {
 
 export const SignOrExecuteFormV2 = ({
   chainId,
-  safeTx,
-  safeTxError,
   onSubmit,
   isCreation,
   origin,
+  safeTxContext: { safeTx, safeTxError, isMassPayout, setIsMassPayout },
   ...props
 }: SignOrExecuteProps & {
   chainId: ReturnType<typeof useChainId>
-  safeTx: ReturnType<typeof useSafeTx>
-  safeTxError: ReturnType<typeof useSafeTxError>
+  safeTxContext: ReturnType<typeof useSafeTxContext>
   isCreation?: boolean
   txDetails?: TransactionDetails
   txPreview?: TransactionPreview
@@ -83,7 +81,19 @@ export const SignOrExecuteFormV2 = ({
 
       const { data: details } = await trigger({ chainId, txId })
       // Track tx event
-      trackTxEvents(details, !!isCreation, isExecuted, isRoleExecution, isProposerCreation, !!signer?.isSafe, origin)
+      trackTxEvents(
+        details,
+        !!isCreation,
+        isExecuted,
+        isRoleExecution,
+        isProposerCreation,
+        !!signer?.isSafe,
+        origin,
+        isMassPayout,
+      )
+
+      // Reset mass payout flag
+      setIsMassPayout(false)
     },
     [chainId, isCreation, onSubmit, trigger, signer?.isSafe, origin],
   )
@@ -133,11 +143,9 @@ export const SignOrExecuteFormV2 = ({
   }
 }
 
-const useSafeTx = () => useContext(SafeTxContext).safeTx
-const useSafeTxError = () => useContext(SafeTxContext).safeTxError
+const useSafeTxContext = () => useContext(SafeTxContext)
 
 export default madProps(SignOrExecuteFormV2, {
   chainId: useChainId,
-  safeTx: useSafeTx,
-  safeTxError: useSafeTxError,
+  safeTxContext: useSafeTxContext,
 })
