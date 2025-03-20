@@ -153,9 +153,7 @@ const DecodedTx = ({
               className={accordionCss.accordion}
             >
               <Stack direction="row" justifyContent="space-between" alignItems="center" width="100%">
-                <Box>
-                  Advanced details
-                </Box>
+                <Box>Advanced details</Box>
 
                 {methodLabel && (
                   <Typography
