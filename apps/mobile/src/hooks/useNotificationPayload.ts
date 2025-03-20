@@ -18,7 +18,7 @@ export function useNotificationPayload() {
   const getNotificationRegisterPayload = useCallback(
     async ({ nonce, signer }: { nonce: string | undefined; signer: Wallet | HDNodeWallet }) => {
       if (!activeSafe || !nonce) {
-        Logger.error('registerForNotifications: Missing required data', { activeSafe, nonce })
+        Logger.info('registerForNotifications: Missing required data', { activeSafe, nonce })
         throw new Error(ERROR_MSG)
       }
 
