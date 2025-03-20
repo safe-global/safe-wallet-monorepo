@@ -49,7 +49,6 @@ export const SignerView = ({
             control={control}
             name="name"
             render={({ field: { onChange, onBlur, value } }) => {
-              console.log('value for field', value)
               return (
                 <SafeInputWithLabel
                   label={'Name'}
