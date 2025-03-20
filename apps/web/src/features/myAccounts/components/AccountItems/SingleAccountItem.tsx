@@ -267,6 +267,7 @@ const SingleAccountItem = ({
             addNetwork={isReplayable}
             rename
             undeployedSafe={!!undeployedSafe}
+            onClose={onLinkClick}
           />
         )
       )}

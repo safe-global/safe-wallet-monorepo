@@ -10,6 +10,7 @@ import SettingsHeader from '@/components/settings/SettingsHeader'
 import ProposersList from 'src/components/settings/ProposersList'
 import SpendingLimits from '@/components/settings/SpendingLimits'
 import { BRAND_NAME } from '@/config/constants'
+import { NestedSafesList } from '@/components/settings/NestedSafesList'
 
 const Setup: NextPage = () => {
   const { safe, safeLoaded } = useSafeInfo()
@@ -68,6 +69,8 @@ const Setup: NextPage = () => {
         </Paper>
 
         <SpendingLimits />
+
+        <NestedSafesList />
       </main>
     </>
   )

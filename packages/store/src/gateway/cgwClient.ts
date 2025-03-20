@@ -1,7 +1,17 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 import type { BaseQueryFn, FetchArgs, FetchBaseQueryError } from '@reduxjs/toolkit/query/react'
 
-const CREDENTIAL_ROUTES = ['/v1/organizations', '/v1/auth/verify', '/v1/auth/logout', '/v1/users']
+const CREDENTIAL_ROUTES = [
+  /^\/v1\/users/,
+  /^\/v1\/organizations/,
+  /^\/v1\/auth/,
+  /^\/v2\/register\/notifications$/,
+  /^\/v2\/chains\/[^\/]+\/notifications\/devices/,
+]
+
+export function isCredentialRoute(url: string) {
+  return CREDENTIAL_ROUTES.some((route) => url.match(route))
+}
 
 let baseUrl: null | string = null
 export const setBaseUrl = (url: string) => {
@@ -16,7 +26,6 @@ export const rawBaseQuery = fetchBaseQuery({
   headers: {
     'Content-Type': 'application/json',
     Accept: 'application/json',
-    'Set-Cookie': 'HttpOnly;Secure;SameSite=None',
   },
 })
 
@@ -33,7 +42,7 @@ export const dynamicBaseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBas
 
   const urlEnd = typeof args === 'string' ? args : args.url
   const adjustedUrl = `${resolvedBaseUrl}${urlEnd}`
-  const shouldIncludeCredentials = CREDENTIAL_ROUTES.some((route) => urlEnd.startsWith(route))
+  const shouldIncludeCredentials = isCredentialRoute(urlEnd)
   const adjustedArgs = {
     ...(typeof args === 'string' ? { method: 'GET' } : args),
     url: adjustedUrl,

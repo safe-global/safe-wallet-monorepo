@@ -31,6 +31,8 @@ import ExplorerButton from '@/components/common/ExplorerButton'
 import CopyTooltip from '@/components/common/CopyTooltip'
 import FiatValue from '@/components/common/FiatValue'
 import { useAddressResolver } from '@/hooks/useAddressResolver'
+import { NestedSafesButton } from '@/components/sidebar/NestedSafesButton'
+import { NESTED_SAFE_EVENTS, NESTED_SAFE_LABELS } from '@/services/analytics/events/nested-safes'
 
 const SafeHeader = (): ReactElement => {
   const { balances } = useVisibleBalances()
@@ -106,6 +108,10 @@ const SafeHeader = (): ReactElement => {
 
           <Track {...OVERVIEW_EVENTS.OPEN_EXPLORER}>
             <ExplorerButton {...blockExplorerLink} className={css.iconButton} icon={LinkIconBold} />
+          </Track>
+
+          <Track {...NESTED_SAFE_EVENTS.OPEN_LIST} label={NESTED_SAFE_LABELS.header}>
+            <NestedSafesButton chainId={safe.chainId} safeAddress={safe.address.value} />
           </Track>
 
           <CounterfactualStatusButton />
