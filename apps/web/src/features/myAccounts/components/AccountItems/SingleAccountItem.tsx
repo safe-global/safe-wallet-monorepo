@@ -1,6 +1,6 @@
 import { selectUndeployedSafe } from '@/features/counterfactual/store/undeployedSafesSlice'
 import type { SafeListProps } from '@/features/myAccounts/components/SafesList'
-import OrgSafeContextMenu from '@/features/organizations/components/SafeAccounts/OrgSafeContextMenu'
+import SpaceSafeContextMenu from '@/features/spaces/components/SafeAccounts/SpaceSafeContextMenu'
 import { type SafeOverview } from '@safe-global/safe-gateway-typescript-sdk'
 import { useMemo, useRef } from 'react'
 import {
@@ -44,7 +44,7 @@ import { skipToken } from '@reduxjs/toolkit/query'
 import { defaultSafeInfo, showNotification, useGetSafeOverviewQuery } from '@/store/slices'
 import FiatValue from '@/components/common/FiatValue'
 import { AccountInfoChips } from '../AccountInfoChips'
-import SendTransactionButton from '@/features/organizations/components/SafeAccounts/SendTransactionButton'
+import SendTransactionButton from '@/features/spaces/components/SafeAccounts/SendTransactionButton'
 
 type AccountItemProps = {
   safeItem: SafeItem
@@ -256,7 +256,7 @@ const SingleAccountItem = ({
       {isOrgSafe ? (
         <>
           {safeOverview && <SendTransactionButton safe={safeOverview} />}
-          <OrgSafeContextMenu safeItem={safeItem} />
+          <SpaceSafeContextMenu safeItem={safeItem} />
         </>
       ) : (
         !isMultiChainItem && (

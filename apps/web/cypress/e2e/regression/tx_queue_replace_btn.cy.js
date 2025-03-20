@@ -13,7 +13,7 @@ const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
 const signer2 = walletCredentials.OWNER_4_PRIVATE_KEY
 
 const sendQueueTx =
-  '&id=multisig_0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb_0xcfbe040521dd80d43f408c7fd3ce7d80f21e8916a04a56ff0fe5cd14eb1a508f'
+  '&id=multisig_0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb_0x539c9c2cd63bae1e4f84f71ef9aa7aea1fd8edb82b089c741cffad99843d0884'
 
 describe('Transaction queue Replace button tests', { defaultCommandTimeout: 30000 }, () => {
   before(async () => {

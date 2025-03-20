@@ -2,6 +2,7 @@ export const AppRoutes = {
   '403': '/403',
   '404': '/404',
   wc: '/wc',
+  userSettings: '/user-settings',
   terms: '/terms',
   swap: '/swap',
   stake: '/stake',
@@ -30,12 +31,6 @@ export const AppRoutes = {
     create: '/new-safe/create',
     advancedCreate: '/new-safe/advanced-create',
   },
-  organizations: {
-    settings: '/organizations/settings',
-    safeAccounts: '/organizations/safeAccounts',
-    members: '/organizations/members',
-    index: '/organizations',
-  },
   settings: {
     setup: '/settings/setup',
     security: '/settings/security',
@@ -53,6 +48,12 @@ export const AppRoutes = {
   share: {
     safeApp: '/share/safe-app',
   },
+  spaces: {
+    settings: '/spaces/settings',
+    safeAccounts: '/spaces/safe-accounts',
+    members: '/spaces/members',
+    index: '/spaces',
+  },
   transactions: {
     tx: '/transactions/tx',
     queue: '/transactions/queue',
@@ -62,7 +63,7 @@ export const AppRoutes = {
     history: '/transactions/history',
   },
   welcome: {
-    organizations: '/welcome/organizations',
+    spaces: '/welcome/spaces',
     index: '/welcome',
     accounts: '/welcome/accounts',
   },

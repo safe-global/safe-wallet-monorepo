@@ -8,8 +8,6 @@ import Track from '@/components/common/Track'
 import { MODALS_EVENTS } from '@/services/analytics'
 import { useContext } from 'react'
 import { TxModalContext } from '..'
-import { useHasFeature } from '@/hooks/useChains'
-import { FEATURES } from '@/utils/chains'
 import SwapIcon from '@/public/images/common/swap.svg'
 import AssetsIcon from '@/public/images/sidebar/assets.svg'
 import useIsSwapFeatureEnabled from '@/features/swap/hooks/useIsSwapFeatureEnabled'
@@ -32,27 +30,6 @@ export const SendTokensButton = ({ onClick, sx }: { onClick: () => void; sx?: Bu
       >
         Send tokens
       </Button>
-    </Track>
-  )
-}
-
-export const SendNFTsButton = () => {
-  const router = useRouter()
-  const { setTxFlow } = useContext(TxModalContext)
-  const isEnabled = useHasFeature(FEATURES.ERC721)
-
-  if (!isEnabled) return null
-
-  const isNftPage = router.pathname === AppRoutes.balances.nfts
-  const onClick = isNftPage ? () => setTxFlow(undefined) : undefined
-
-  return (
-    <Track {...MODALS_EVENTS.SEND_COLLECTIBLE}>
-      <Link href={{ pathname: AppRoutes.balances.nfts, query: { safe: router.query.safe } }} passHref legacyBehavior>
-        <Button variant="contained" sx={buttonSx} fullWidth onClick={onClick}>
-          Send NFTs
-        </Button>
-      </Link>
     </Track>
   )
 }

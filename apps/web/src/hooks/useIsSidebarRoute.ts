@@ -1,5 +1,5 @@
 import { AppRoutes } from '@/config/routes'
-import { useIsOrganizationRoute } from '@/hooks/useIsOrganizationRoute'
+import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
 import { usePathname } from 'next/navigation'
 import { useRouter } from 'next/router'
 
@@ -10,7 +10,7 @@ const NO_SIDEBAR_ROUTES = [
   AppRoutes.index,
   AppRoutes.welcome.index,
   AppRoutes.welcome.accounts,
-  AppRoutes.welcome.organizations,
+  AppRoutes.welcome.spaces,
   AppRoutes.imprint,
   AppRoutes.privacy,
   AppRoutes.cookie,
@@ -27,14 +27,14 @@ const TOGGLE_SIDEBAR_ROUTES = [AppRoutes.apps.open]
  */
 export function useIsSidebarRoute(pathname?: string): [boolean, boolean] {
   const clientPathname = usePathname()
-  const isOrganizationRoute = useIsOrganizationRoute()
+  const isSpaceRoute = useIsSpaceRoute()
   const route = pathname || clientPathname || ''
   const noSidebar = NO_SIDEBAR_ROUTES.includes(route)
   const toggledSidebar = TOGGLE_SIDEBAR_ROUTES.includes(route)
   const router = useRouter()
   const hasSafe = !router.isReady || !!router.query.safe
 
-  const displaySidebar = (!noSidebar && hasSafe) || isOrganizationRoute
+  const displaySidebar = (!noSidebar && hasSafe) || isSpaceRoute
 
   return [displaySidebar, toggledSidebar]
 }
