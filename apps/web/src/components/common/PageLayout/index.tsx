@@ -1,6 +1,5 @@
 import { useContext, useEffect, useState, type ReactElement } from 'react'
 import classnames from 'classnames'
-import { Alert } from '@mui/material'
 
 import Header from '@/components/common/Header'
 import css from './styles.module.css'
@@ -10,18 +9,6 @@ import SideDrawer from './SideDrawer'
 import { useIsSidebarRoute } from '@/hooks/useIsSidebarRoute'
 import { TxModalContext } from '@/components/tx-flow'
 import BatchSidebar from '@/components/batch/BatchSidebar'
-import ExternalLink from '../ExternalLink'
-import { IS_PRODUCTION } from '@/config/constants'
-
-const StickyBanner = () => (
-  <Alert severity="warning">
-    ALWAYS{' '}
-    <ExternalLink href="https://help.safe.global/en/articles/276343-how-to-perform-basic-transactions-checks-on-safe-wallet">
-      verify transactions
-    </ExternalLink>{' '}
-    that you are approving on your signer wallet. If you can’t verify it, don’t sign it.
-  </Alert>
-)
 
 const PageLayout = ({ pathname, children }: { pathname: string; children: ReactElement }): ReactElement => {
   const [isSidebarRoute, isAnimated] = useIsSidebarRoute(pathname)
@@ -48,12 +35,6 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
         })}
       >
         <div className={css.content}>
-          {IS_PRODUCTION && (
-            <div className={css.sticky}>
-              <StickyBanner />
-            </div>
-          )}
-
           <SafeLoadingError>{children}</SafeLoadingError>
         </div>
 
