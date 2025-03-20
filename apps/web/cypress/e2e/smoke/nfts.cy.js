@@ -26,8 +26,8 @@ describe.skip('[SMOKE] NFTs tests', () => {
   it('[SMOKE] Verify NFT row contains data', () => {
     nfts.verifyDataInTable(nftsName, nftsAddress, nftsTokenID)
   })
-
-  it('[SMOKE] Verify NFT preview window can be opened', () => {
+// the test is skipped because the NFT metadata fetching was disabled on the tx_service
+  it.skip('[SMOKE] Verify NFT preview window can be opened', () => {
     nfts.openActiveNFT(0)
     nfts.verifyNameInNFTModal(nftsTokenID)
     nfts.verifySelectedNetwrokSepolia()
