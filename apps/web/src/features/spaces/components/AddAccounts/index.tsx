@@ -120,6 +120,7 @@ const AddAccounts = () => {
   }
 
   const handleClose = () => {
+    setError(undefined)
     setSearchQuery('')
     setValue('selectedSafes', {}) // Reset doesn't seem to work consistently with an object
     setOpen(false)
