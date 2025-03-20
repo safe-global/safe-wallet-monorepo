@@ -26,7 +26,7 @@ enum ModalType {
 
 const defaultOpen = { [ModalType.RENAME]: false, [ModalType.REMOVE]: false }
 
-const OrgSafeContextMenu = ({ safeItem }: { safeItem: SafeItem | MultiChainSafeItem }) => {
+const SpaceSafeContextMenu = ({ safeItem }: { safeItem: SafeItem | MultiChainSafeItem }) => {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | undefined>()
   const [open, setOpen] = useState<typeof defaultOpen>(defaultOpen)
   const isAdmin = useIsAdmin()
@@ -94,4 +94,4 @@ const OrgSafeContextMenu = ({ safeItem }: { safeItem: SafeItem | MultiChainSafeI
   )
 }
 
-export default OrgSafeContextMenu
+export default SpaceSafeContextMenu

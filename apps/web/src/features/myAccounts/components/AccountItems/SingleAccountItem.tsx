@@ -1,6 +1,6 @@
 import { selectUndeployedSafe } from '@/features/counterfactual/store/undeployedSafesSlice'
 import type { SafeListProps } from '@/features/myAccounts/components/SafesList'
-import OrgSafeContextMenu from '@/features/spaces/components/SafeAccounts/OrgSafeContextMenu'
+import SpaceSafeContextMenu from '@/features/spaces/components/SafeAccounts/SpaceSafeContextMenu'
 import { type SafeOverview } from '@safe-global/safe-gateway-typescript-sdk'
 import { useMemo, useRef } from 'react'
 import {
@@ -256,7 +256,7 @@ const SingleAccountItem = ({
       {isOrgSafe ? (
         <>
           {safeOverview && <SendTransactionButton safe={safeOverview} />}
-          <OrgSafeContextMenu safeItem={safeItem} />
+          <SpaceSafeContextMenu safeItem={safeItem} />
         </>
       ) : (
         !isMultiChainItem && (
