@@ -8,7 +8,7 @@ import SearchIcon from '@/public/images/common/search.svg'
 import { useOrganizationSafesCreateV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
 import debounce from 'lodash/debounce'
 import css from './styles.module.css'
-import { type AllSafeItems, useAllSafesGrouped } from '@/features/myAccounts/hooks/useAllSafesGrouped'
+import { type AllSafeItems, useOwnedSafesGrouped } from '@/features/myAccounts/hooks/useAllSafesGrouped'
 import { getComparator } from '@/features/myAccounts/utils/utils'
 import { useAppSelector } from '@/store'
 import { selectOrderByPreference } from '@/store/orderByPreferenceSlice'
@@ -32,13 +32,31 @@ import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import Track from '@/components/common/Track'
 import { useIsAdmin } from '@/features/spaces/hooks/useSpaceMembers'
+import { useSpaceSafes } from '@/features/spaces/hooks/useSpaceSafes'
+import { isMultiChainSafeItem } from '@/features/multichain/utils/utils'
 
 export type AddAccountsFormValues = {
   selectedSafes: Record<string, boolean>
 }
 
-function getSelectedSafes(safes: AddAccountsFormValues['selectedSafes']) {
-  return Object.entries(safes).filter(([address, isSelected]) => isSelected && !address.startsWith('multichain_'))
+// TODO: Refactor this and combine logic with whats in SafesList
+function getSelectedSafes(safes: AddAccountsFormValues['selectedSafes'], spaceSafes: AllSafeItems) {
+  return Object.entries(safes).filter(
+    ([key, isSelected]) =>
+      isSelected &&
+      !key.startsWith('multichain_') &&
+      !spaceSafes.some((spaceSafe) => {
+        const [chainId, address] = key.split(':')
+
+        if (isMultiChainSafeItem(spaceSafe)) {
+          return spaceSafe.safes.some(
+            (subSpaceSafe) => subSpaceSafe.address === address && subSpaceSafe.chainId === chainId,
+          )
+        } else {
+          return spaceSafe.address === address && spaceSafe.chainId === chainId
+        }
+      }),
+  )
 }
 
 const AddAccounts = () => {
@@ -49,7 +67,8 @@ const AddAccounts = () => {
   const [manualSafes, setManualSafes] = useState<SafeItems>([])
 
   const { orderBy } = useAppSelector(selectOrderByPreference)
-  const safes = useAllSafesGrouped()
+  const spaceSafes = useSpaceSafes()
+  const safes = useOwnedSafesGrouped()
   const sortComparator = getComparator(orderBy)
   const [addSafesToSpace] = useOrganizationSafesCreateV1Mutation()
   const spaceId = useCurrentSpaceId()
@@ -73,11 +92,11 @@ const AddAccounts = () => {
   const { handleSubmit, watch, setValue } = formMethods
 
   const selectedSafes = watch(`selectedSafes`)
-  const selectedSafesLength = getSelectedSafes(selectedSafes).length
+  const selectedSafesLength = getSelectedSafes(selectedSafes, spaceSafes).length
 
   const onSubmit = handleSubmit(async (data) => {
     trackEvent({ ...SPACE_EVENTS.ADD_ACCOUNTS })
-    const safesToAdd = getSelectedSafes(data.selectedSafes).map(([key]) => {
+    const safesToAdd = getSelectedSafes(data.selectedSafes, spaceSafes).map(([key]) => {
       const [chainId, address] = key.split(':')
       return { chainId, address }
     })
@@ -120,6 +139,7 @@ const AddAccounts = () => {
   }
 
   const handleClose = () => {
+    setError(undefined)
     setSearchQuery('')
     setValue('selectedSafes', {}) // Reset doesn't seem to work consistently with an object
     setOpen(false)

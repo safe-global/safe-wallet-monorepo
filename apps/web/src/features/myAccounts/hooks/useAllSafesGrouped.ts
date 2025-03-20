@@ -2,6 +2,10 @@ import groupBy from 'lodash/groupBy'
 import useAllSafes, { type SafeItem, type SafeItems } from './useAllSafes'
 import { useMemo } from 'react'
 import { sameAddress } from '@/utils/addresses'
+import { type AddressBookState, selectAllAddressBooks } from '@/store/addressBookSlice'
+import useWallet from '@/hooks/wallets/useWallet'
+import useAllOwnedSafes from '@/features/myAccounts/hooks/useAllOwnedSafes'
+import { useAppSelector } from '@/store'
 
 export type MultiChainSafeItem = {
   address: string
@@ -24,6 +28,29 @@ export const _buildMultiChainSafeItem = (address: string, safes: SafeItems): Mul
   const name = safes.find((safe) => safe.name !== undefined)?.name
 
   return { address, safes, isPinned, lastVisited, name }
+}
+
+export function _buildSafeItems(safes: Record<string, string[]>, allSafeNames: AddressBookState): SafeItem[] {
+  const result: SafeItem[] = []
+
+  for (const chainId in safes) {
+    const addresses = safes[chainId]
+
+    addresses.forEach((address) => {
+      const name = allSafeNames[chainId]?.[address]
+
+      result.push({
+        chainId,
+        address,
+        isReadOnly: false,
+        isPinned: false,
+        lastVisited: 0,
+        name,
+      })
+    })
+  }
+
+  return result
 }
 
 export const _getMultiChainAccounts = (safes: SafeItems): MultiChainSafeItem[] => {
@@ -59,4 +86,13 @@ export const useAllSafesGrouped = (customSafes?: SafeItems) => {
       allSingleSafes,
     }
   }, [allSafes])
+}
+
+export const useOwnedSafesGrouped = () => {
+  const { address: walletAddress = '' } = useWallet() || {}
+  const [allOwned = {}] = useAllOwnedSafes(walletAddress)
+  const allSafeNames = useAppSelector(selectAllAddressBooks)
+  const safeItems = _buildSafeItems(allOwned, allSafeNames)
+
+  return useAllSafesGrouped(safeItems)
 }
