@@ -6,7 +6,7 @@ import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { TouchableOpacity } from 'react-native'
 import React from 'react'
 import { useAppSelector } from '@/src/store/hooks'
-import { useRouter } from 'expo-router'
+import { Link, useRouter } from 'expo-router'
 import { DropdownLabel } from '@/src/components/Dropdown/DropdownLabel'
 import { selectAppNotificationStatus } from '@/src/store/notificationsSlice'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
@@ -21,11 +21,13 @@ export const Navbar = () => {
   const router = useRouter()
   const activeSafe = useDefinedActiveSafe()
   const isAppNotificationEnabled = useAppSelector(selectAppNotificationStatus)
+
   const handleNotificationAccess = () => {
     if (!isAppNotificationEnabled) {
       router.navigate('/notifications-opt-in')
+    } else {
+      router.navigate('/notifications-center')
     }
-    // TODO: navigate to notifications list when notifications are enabled
   }
 
   return (
@@ -41,15 +43,17 @@ export const Navbar = () => {
         <DropdownLabel
           label={shortenAddress(activeSafe.address)}
           labelProps={dropdownLabelProps}
-          leftNode={<Identicon address={activeSafe.address} rounded={true} size={30} />}
+          leftNode={<Identicon address={activeSafe.address} size={30} />}
           onPress={() => {
             router.push('/accounts-sheet')
           }}
         />
         <XStack alignItems={'center'} justifyContent={'center'} gap={12}>
-          <TouchableOpacity>
-            <SafeFontIcon name="apps" />
-          </TouchableOpacity>
+          <Link href={'/share'} asChild>
+            <TouchableOpacity>
+              <SafeFontIcon name="apps" />
+            </TouchableOpacity>
+          </Link>
           <TouchableOpacity onPress={handleNotificationAccess}>
             <SafeFontIcon name="bell" />
           </TouchableOpacity>

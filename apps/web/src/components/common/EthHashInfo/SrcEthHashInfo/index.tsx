@@ -31,6 +31,7 @@ export type EthHashInfoProps = {
   trusted?: boolean
   ExplorerButtonProps?: ExplorerButtonProps
   isAddressBookName?: boolean
+  highlight4bytes?: boolean
 }
 
 const stopPropagation = (e: SyntheticEvent) => e.stopPropagation()
@@ -53,6 +54,7 @@ const SrcEthHashInfo = ({
   children,
   trusted = true,
   isAddressBookName = false,
+  highlight4bytes = false,
 }: EthHashInfoProps): ReactElement => {
   const shouldPrefix = isAddress(address)
   const theme = useTheme()
@@ -60,10 +62,21 @@ const SrcEthHashInfo = ({
   const identicon = <Identicon address={address} size={avatarSize} />
   const shouldCopyPrefix = shouldPrefix && copyPrefix
 
+  const highlightedAddress = highlight4bytes ? (
+    <>
+      {address.slice(0, 2)}
+      <b>{address.slice(2, 6)}</b>
+      {address.slice(6, -4)}
+      <b>{address.slice(-4)}</b>
+    </>
+  ) : (
+    address
+  )
+
   const addressElement = (
     <>
       {showPrefix && shouldPrefix && prefix && <b>{prefix}:</b>}
-      <span>{shortAddress || isMobile ? shortenAddress(address) : address}</span>
+      <span>{shortAddress || isMobile ? shortenAddress(address) : highlightedAddress}</span>
     </>
   )
 

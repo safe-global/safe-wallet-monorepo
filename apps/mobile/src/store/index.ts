@@ -5,8 +5,10 @@ import txHistory from './txHistorySlice'
 import activeSafe from './activeSafeSlice'
 import activeSigner from './activeSignerSlice'
 import signers from './signersSlice'
+import delegated from './delegatedSlice'
 import myAccounts from './myAccountsSlice'
 import notifications from './notificationsSlice'
+import addressBook from './addressBookSlice'
 import settings from './settingsSlice'
 import safes from './safesSlice'
 import { cgwClient, setBaseUrl } from '@safe-global/store/gateway/cgwClient'
@@ -31,8 +33,10 @@ export const rootReducer = combineReducers({
   activeSigner,
   activeSafe,
   notifications,
+  addressBook,
   myAccounts,
   signers,
+  delegated,
   settings,
   [web3API.reducerPath]: web3API.reducer,
   [cgwClient.reducerPath]: cgwClient.reducer,

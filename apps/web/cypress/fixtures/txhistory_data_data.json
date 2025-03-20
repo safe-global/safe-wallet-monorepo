@@ -66,6 +66,7 @@
     "send": {
       "title": "Sent",
       "summaryTxInfo": "-< 0.00001 ETH",
+      "summaryTxInfo2": "-0.0001 ETH",
       "summaryTime": "11:02 AM",
       "sentTo": "Sent 0.000000000001 ETH to:",
       "recipientAddress": "sep:0x06373d5e45AD31BD354CeBfA8dB4eD2c75B8708e",
@@ -79,8 +80,9 @@
       "title": "On-chain rejection",
       "summaryTime": "11:17 AM",
       "altImage": "On-chain rejection",
-      "description": "This is an on-chain rejection that didn't send any funds. This on-chain rejection replaced all transactions with nonce 3.",
+      "description": "This is an on-chain rejection that didn't send any funds. This on-chain rejection replaced all transactions with nonce 16.",
       "transactionHash": "0x4fbf...067d",
+      "transactionHash2": "0x636e...0524",
       "safeTxHash": "0x1303...0fe2"
     },
     "batchNativeTransfer": {

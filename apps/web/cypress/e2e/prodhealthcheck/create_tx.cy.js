@@ -31,7 +31,7 @@ describe('[PROD] Create transactions tests', () => {
     createtx.clickOnSendTokensBtn()
   })
 
-  it.skip('Verify submitting a tx and that clicking on notification shows the transaction in queue', () => {
+  it('Verify submitting a tx and that clicking on notification shows the transaction in queue', () => {
     happyPathToStepTwo()
     createtx.verifySubmitBtnIsEnabled()
     createtx.changeNonce(14)

@@ -4,6 +4,7 @@ import {
   getTxHash,
   isConflictHeaderListItem,
   isLabelListItem,
+  isMultisigExecutionInfo,
   isTransactionListItem,
 } from '@/src/utils/transaction-guards'
 import { groupBulkTxs } from '@/src/utils/transactions'
@@ -15,10 +16,8 @@ import { SafeListItem } from '@/src/components/SafeListItem'
 import { TxInfo } from '@/src/components/TxInfo'
 import React, { useCallback } from 'react'
 import { GroupedPendingTxsWithTitle } from './components/PendingTxList/PendingTxList.container'
-import { TxCardPress, TxConflictCardPress } from '@/src/components/TxInfo/types'
+import { TxCardPress } from '@/src/components/TxInfo/types'
 import { useRouter } from 'expo-router'
-import { useAppSelector } from '@/src/store/hooks'
-import { selectActiveSafe } from '@/src/store/activeSafeSlice'
 
 type GroupedTxs = (PendingTransactionItems | TransactionQueuedItem[])[]
 
@@ -90,25 +89,24 @@ export const renderItem = ({
   item: PendingTransactionItems | TransactionQueuedItem[]
   index: number
 }) => {
-  const activeSafe = useAppSelector(selectActiveSafe)
   const router = useRouter()
 
   const onPress = useCallback(
-    async (transaction: TxCardPress | TxConflictCardPress, isConflictTx?: boolean) => {
-      if (isConflictTx) {
-        router.push({
-          pathname: '/conflict-transaction-sheet',
-        })
-      } else {
+    async (transaction?: TxCardPress) => {
+      if (transaction) {
         router.push({
           pathname: '/confirm-transaction',
           params: {
-            txId: (transaction as TxCardPress).tx.id,
+            txId: transaction.tx.id,
           },
+        })
+      } else {
+        router.push({
+          pathname: '/conflict-transaction-sheet',
         })
       }
     },
-    [router, activeSafe],
+    [router],
   )
 
   if (Array.isArray(item)) {
@@ -150,10 +148,24 @@ export const keyExtractor = (item: PendingTransactionItems | TransactionQueuedIt
       return txGroupHash + index
     }
 
+    if (isTransactionListItem(item[0]) && isMultisigExecutionInfo(item[0].transaction.executionInfo)) {
+      return getTxHash(item[0]) + item[0].transaction.executionInfo.confirmationsSubmitted + index
+    }
+
     if (isTransactionListItem(item[0])) {
       return getTxHash(item[0]) + index
     }
+
     return String(index)
   }
-  return String(index)
+
+  if (isTransactionListItem(item) && isMultisigExecutionInfo(item.transaction.executionInfo)) {
+    return item.transaction.id + item.transaction.executionInfo.confirmationsSubmitted
+  }
+
+  if (isTransactionListItem(item)) {
+    return item.transaction.id
+  }
+
+  return String(item)
 }

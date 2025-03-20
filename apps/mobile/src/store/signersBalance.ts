@@ -1,8 +1,6 @@
 import { createApi } from '@reduxjs/toolkit/query/react'
 import { createWeb3ReadOnly } from '../services/web3'
 import { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
-import { signTx, signTxParams } from '@/src/services/tx/tx-sender/sign'
-import { SafeMultisigTransactionResponse } from '@safe-global/types-kit/dist/src/types'
 
 const noopBaseQuery = async () => ({ data: null })
 
@@ -38,27 +36,9 @@ export const web3API = createApi({
         }
       },
     }),
-    signTransaction: builder.query<SafeMultisigTransactionResponse, signTxParams>({
-      async queryFn({ chain, activeSafe, txId, privateKey }) {
-        try {
-          const signedTx = await signTx({
-            chain,
-            activeSafe,
-            txId,
-            privateKey,
-          })
-
-          return { data: signedTx }
-        } catch (error) {
-          return createBadRequestError(
-            `Failed to sign transaction: ${error instanceof Error ? error.message : 'Unknown error'}`,
-          )
-        }
-      },
-    }),
   }),
 })
 
 // Export hooks for usage in functional components, which are
 // auto-generated based on the defined endpoints
-export const { useGetBalancesQuery, useLazySignTransactionQuery } = web3API
+export const { useGetBalancesQuery } = web3API

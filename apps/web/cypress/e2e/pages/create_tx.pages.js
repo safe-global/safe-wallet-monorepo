@@ -119,6 +119,7 @@ export const txDetailsStr = 'Transaction details'
 export const settingsStr = 'Settings'
 export const assetsStr = 'Assets'
 export const topAssetsStr = 'Top assets'
+export const getStartedStr = 'Get started'
 
 export const txNoteWarningMessage = 'The notes are publicly visible, do not share any private or sensitive details'
 export const recordedTxNote = 'Tx note one'

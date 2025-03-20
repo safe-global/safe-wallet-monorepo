@@ -214,7 +214,7 @@ describe('tx-history-filter', () => {
       it('should return incoming filters', () => {
         const result = txFilter.parseFormData({
           execution_date__gte: new Date('1970-01-01'),
-          value: '123',
+          value: '123000000000000000000',
           type: 'Incoming' as TxFilterType,
         } as TxFilterFormState)
 

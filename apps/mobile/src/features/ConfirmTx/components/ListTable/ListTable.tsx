@@ -23,6 +23,8 @@ export function ListTable({ items, children }: ListTableProps) {
           alignItems={item.alignItems || 'center'}
           flexDirection={item.direction || 'row'}
           justifyContent="space-between"
+          gap={'$2'}
+          flexWrap="wrap"
         >
           <Text color="$textSecondaryLight" fontSize="$4">
             {item.label}

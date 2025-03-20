@@ -3,15 +3,12 @@ import InfoIcon from '@/public/images/notifications/info.svg'
 import ExternalLink from '@/components/common/ExternalLink'
 import { HelpCenterArticle } from '@/config/constants'
 
-const HelpToolTip = () => (
+const HelpTooltip = () => (
   <Tooltip
     title={
       <>
-        Learn more about{' '}
-        <ExternalLink href={HelpCenterArticle.ADVANCED_PARAMS} title="Learn more about advanced details">
-          advanced details
-        </ExternalLink>
-        .
+        Always verify transaction details.{' '}
+        <ExternalLink href={HelpCenterArticle.VERIFY_TX_DETAILS}>Learn more</ExternalLink>.
       </>
     }
     arrow
@@ -33,4 +30,4 @@ const HelpToolTip = () => (
   </Tooltip>
 )
 
-export default HelpToolTip
+export default HelpTooltip

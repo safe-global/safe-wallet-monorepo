@@ -11,7 +11,7 @@ import { CYPRESS_MNEMONIC, IS_PRODUCTION } from '@/config/constants'
 export const ContentSecurityPolicy = `
  default-src 'self';
  connect-src 'self' *;
- script-src 'self' https://*.getbeamer.com https://www.googletagmanager.com https://*.ingest.sentry.io https://sentry.io ${
+ script-src 'self' 'unsafe-inline' https://*.getbeamer.com https://www.googletagmanager.com https://*.ingest.sentry.io https://sentry.io ${
    !IS_PRODUCTION || CYPRESS_MNEMONIC
      ? "'unsafe-eval'" // Dev server and cypress need unsafe-eval
      : "'wasm-unsafe-eval'"

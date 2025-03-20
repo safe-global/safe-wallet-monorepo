@@ -1,10 +1,9 @@
-import SignOrExecuteForm from '@/components/tx/SignOrExecuteForm'
 import {
   getSpendingLimitInterface,
   getDeployedSpendingLimitModuleAddress,
 } from '@/services/contracts/spendingLimitContracts'
 import useChainId from '@/hooks/useChainId'
-import { useContext, useEffect } from 'react'
+import { useCallback, useContext, useEffect } from 'react'
 import { SafeTxContext } from '../../SafeTxProvider'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import { Grid, Typography } from '@mui/material'
@@ -16,12 +15,9 @@ import SendAmountBlock from '@/components/tx-flow/flows/TokenTransfer/SendAmount
 import SpendingLimitLabel from '@/components/common/SpendingLimitLabel'
 import { createTx } from '@/services/tx/tx-sender'
 import useSafeInfo from '@/hooks/useSafeInfo'
+import ReviewTransaction from '@/components/tx/ReviewTransaction'
 
-const onFormSubmit = () => {
-  trackEvent(SETTINGS_EVENTS.SPENDING_LIMIT.LIMIT_REMOVED)
-}
-
-export const RemoveSpendingLimit = ({ params }: { params: SpendingLimitState }) => {
+export const RemoveSpendingLimit = ({ params, onSubmit }: { params: SpendingLimitState; onSubmit: () => void }) => {
   const { setSafeTx, setSafeTxError } = useContext(SafeTxContext)
   const chainId = useChainId()
   const { safe } = useSafeInfo()
@@ -51,8 +47,13 @@ export const RemoveSpendingLimit = ({ params }: { params: SpendingLimitState }) 
     createTx(txParams).then(setSafeTx).catch(setSafeTxError)
   }, [chainId, params.beneficiary, params.token, setSafeTx, setSafeTxError, safe.modules])
 
+  const onFormSubmit = useCallback(() => {
+    trackEvent(SETTINGS_EVENTS.SPENDING_LIMIT.LIMIT_REMOVED)
+    onSubmit()
+  }, [onSubmit])
+
   return (
-    <SignOrExecuteForm onSubmit={onFormSubmit}>
+    <ReviewTransaction onSubmit={onFormSubmit}>
       {token && <SendAmountBlock amountInWei={amountInWei} tokenInfo={token.tokenInfo} title="Amount" />}
       <Grid
         container
@@ -105,6 +106,6 @@ export const RemoveSpendingLimit = ({ params }: { params: SpendingLimitState }) 
           />
         </Grid>
       </Grid>
-    </SignOrExecuteForm>
+    </ReviewTransaction>
   )
 }
