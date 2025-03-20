@@ -8,7 +8,7 @@ import { PRIVATE_KEY_MODULE_LABEL } from '@/services/private-key-module'
 import { type JsonRpcProvider } from 'ethers'
 
 const WALLETCONNECT = 'WalletConnect'
-const WC_LEDGER = 'Ledger'
+const WC_LEDGER = 'Ledger Wallet'
 
 const isWCRejection = (err: Error): boolean => {
   return /rejected/.test(err?.message)
