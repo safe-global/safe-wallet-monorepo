@@ -39,6 +39,7 @@ export type AddAccountsFormValues = {
   selectedSafes: Record<string, boolean>
 }
 
+// TODO: Refactor this and combine logic with whats in SafesList
 function getSelectedSafes(safes: AddAccountsFormValues['selectedSafes'], spaceSafes: AllSafeItems) {
   return Object.entries(safes).filter(
     ([key, isSelected]) =>
