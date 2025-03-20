@@ -10,8 +10,13 @@ const MemberName = ({ member }: { member: UserOrganization }) => {
   return (
     <Stack direction="row" spacing={1} alignItems="center" key={member.id}>
       <InitialsAvatar size="medium" name={member.name || ''} rounded />
-      <Typography fontSize="14px">
-        {member.name} {isCurrentUser ? '(you)' : ''}
+      <Typography variant="body2">
+        {member.name}{' '}
+        {isCurrentUser && (
+          <Typography variant="body2" component="span" color="text.secondary" ml={1}>
+            you
+          </Typography>
+        )}
       </Typography>
     </Stack>
   )
