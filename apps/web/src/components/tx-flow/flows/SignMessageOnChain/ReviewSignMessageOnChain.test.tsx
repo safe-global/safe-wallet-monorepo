@@ -105,6 +105,7 @@ describe('ReviewSignMessageOnChain', () => {
               },
             }}
             method={Methods.signTypedMessage}
+            onSubmit={() => {}}
           />
         </SafeTxContext.Provider>,
       )

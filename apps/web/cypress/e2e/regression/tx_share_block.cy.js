@@ -7,7 +7,7 @@ import { getEvents, events, checkDataLayerEvents } from '../../support/utils/gta
 let staticSafes = []
 
 const txs = {
-  tx1: '&id=multisig_0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb_0xcfbe040521dd80d43f408c7fd3ce7d80f21e8916a04a56ff0fe5cd14eb1a508f',
+  tx1: '&id=multisig_0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb_0x539c9c2cd63bae1e4f84f71ef9aa7aea1fd8edb82b089c741cffad99843d0884',
   tx2: '&id=multisig_0xBf30F749FC027a5d79c4710D988F0D3C8e217A4F_0x329f5c9429ec366e99b4f7c981417267b6718e4896182d614fbc86673e0dd39c',
   tx3: '&id=multisig_0x09725D3c2f9bE905F8f9f1b11a771122cf9C9f35_0xd70f2f8b31ae98a7e3064f6cdb437e71d3df083a0709fb82c915fa82767a19eb',
 }

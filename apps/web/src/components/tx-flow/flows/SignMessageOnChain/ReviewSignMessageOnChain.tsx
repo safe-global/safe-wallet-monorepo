@@ -1,4 +1,3 @@
-import useWallet from '@/hooks/wallets/useWallet'
 import type { ReactElement } from 'react'
 import { useContext, useEffect, useState } from 'react'
 import { useMemo } from 'react'
@@ -12,35 +11,32 @@ import { OperationType } from '@safe-global/safe-core-sdk-types'
 import SendFromBlock from '@/components/tx/SendFromBlock'
 import { InfoDetails } from '@/components/transactions/InfoDetails'
 import EthHashInfo from '@/components/common/EthHashInfo'
-import SignOrExecuteForm from '@/components/tx/SignOrExecuteForm'
 import { getReadOnlySignMessageLibContract } from '@/services/contracts/safeContracts'
 import { DecodedMsg } from '@/components/safe-messages/DecodedMsg'
 import CopyButton from '@/components/common/CopyButton'
 import { getDecodedMessage } from '@/components/safe-apps/utils'
-import { createTx, dispatchSafeAppsTx } from '@/services/tx/tx-sender'
-import useOnboard from '@/hooks/wallets/useOnboard'
+import { createTx } from '@/services/tx/tx-sender'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useHighlightHiddenTab from '@/hooks/useHighlightHiddenTab'
 import { type SafeAppData } from '@safe-global/safe-gateway-typescript-sdk'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
-import { asError } from '@/services/exceptions/utils'
 import { isEIP712TypedData } from '@/utils/safe-messages'
 import ApprovalEditor from '@/components/tx/ApprovalEditor'
 import { ErrorBoundary } from '@sentry/react'
 import useAsync from '@/hooks/useAsync'
 import { HexEncodedData } from '@/components/transactions/HexEncodedData'
+import ReviewTransaction from '@/components/tx/ReviewTransaction'
 
 export type SignMessageOnChainProps = {
   app?: SafeAppData
   requestId: RequestId
   message: string | EIP712TypedData
   method: Methods.signMessage | Methods.signTypedMessage
+  onSubmit: () => void
 }
 
-const ReviewSignMessageOnChain = ({ message, method, requestId }: SignMessageOnChainProps): ReactElement => {
+const ReviewSignMessageOnChain = ({ message, method, onSubmit }: SignMessageOnChainProps): ReactElement => {
   const { safe } = useSafeInfo()
-  const onboard = useOnboard()
-  const wallet = useWallet()
   const { safeTx, setSafeTx, setSafeTxError } = useContext(SafeTxContext)
   useHighlightHiddenTab()
 
@@ -107,18 +103,8 @@ const ReviewSignMessageOnChain = ({ message, method, requestId }: SignMessageOnC
     signMessageAddress,
   ])
 
-  const handleSubmit = async () => {
-    if (!safeTx || !onboard || !wallet) return
-
-    try {
-      await dispatchSafeAppsTx(safeTx, requestId, wallet.provider)
-    } catch (error) {
-      setSafeTxError(asError(error))
-    }
-  }
-
   return (
-    <SignOrExecuteForm onSubmit={handleSubmit}>
+    <ReviewTransaction onSubmit={onSubmit}>
       <SendFromBlock />
 
       <InfoDetails title="Interact with SignMessageLib">
@@ -152,7 +138,7 @@ const ReviewSignMessageOnChain = ({ message, method, requestId }: SignMessageOnC
           Signing a message with your Safe Account requires a transaction on the blockchain
         </Typography>
       </Box>
-    </SignOrExecuteForm>
+    </ReviewTransaction>
   )
 }
 

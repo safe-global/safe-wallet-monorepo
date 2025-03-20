@@ -46,9 +46,6 @@ export const SafeTxHashDataRow = ({
 
   return (
     <Stack gap={1}>
-      <TxDataRow datatestid="tx-safe-hash" title="safeTxHash:">
-        {generateDataRowValue(computedSafeTxHash, 'rawData')}
-      </TxDataRow>
       <TxDataRow datatestid="tx-domain-hash" title="Domain hash:">
         {generateDataRowValue(domainHash, 'rawData')}
       </TxDataRow>
@@ -57,6 +54,9 @@ export const SafeTxHashDataRow = ({
           {generateDataRowValue(messageHash, 'rawData')}
         </TxDataRow>
       )}
+      <TxDataRow datatestid="tx-safe-hash" title="safeTxHash:">
+        {generateDataRowValue(computedSafeTxHash, 'rawData')}
+      </TxDataRow>
     </Stack>
   )
 }

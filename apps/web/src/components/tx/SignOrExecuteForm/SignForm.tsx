@@ -1,6 +1,6 @@
 import madProps from '@/utils/mad-props'
 import { type ReactElement, type SyntheticEvent, useContext, useMemo, useState } from 'react'
-import { CircularProgress, Box, Button, CardActions, Divider } from '@mui/material'
+import { CircularProgress, Box, Button, CardActions, Divider, Tooltip } from '@mui/material'
 import Stack from '@mui/system/Stack'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import { trackError, Errors } from '@/services/exceptions'
@@ -33,12 +33,14 @@ export const SignForm = ({
   isOwner,
   txActions,
   txSecurity,
+  tooltip,
 }: SignOrExecuteProps & {
   isOwner: ReturnType<typeof useIsSafeOwner>
   txActions: ReturnType<typeof useTxActions>
   txSecurity: ReturnType<typeof useTxSecurityContext>
   isCreation?: boolean
   safeTx?: SafeTransaction
+  tooltip?: string
 }): ReactElement => {
   // Form state
   const [isSubmittable, setIsSubmittable] = useState<boolean>(true)
@@ -158,15 +160,19 @@ export const SignForm = ({
           {/* Submit button */}
           <CheckWallet checkNetwork={!submitDisabled}>
             {(isOk) => (
-              <Button
-                data-testid="sign-btn"
-                variant="contained"
-                type="submit"
-                disabled={!isOk || submitDisabled}
-                sx={{ minWidth: '82px', order: '1', width: ['100%', '100%', '100%', 'auto'] }}
-              >
-                {!isSubmittable ? <CircularProgress size={20} /> : 'Sign'}
-              </Button>
+              <Tooltip title={tooltip} placement="top">
+                <span>
+                  <Button
+                    data-testid="sign-btn"
+                    variant="contained"
+                    type="submit"
+                    disabled={!isOk || submitDisabled}
+                    sx={{ minWidth: '82px', order: '1', width: ['100%', '100%', '100%', 'auto'] }}
+                  >
+                    {!isSubmittable ? <CircularProgress size={20} /> : 'Sign'}
+                  </Button>
+                </span>
+              </Tooltip>
             )}
           </CheckWallet>
         </Stack>

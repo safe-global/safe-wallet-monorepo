@@ -12,6 +12,8 @@ import {
 } from '@safe-global/safe-gateway-typescript-sdk'
 import type { DecodedDataResponse, TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
 
+jest.mock('@next/third-parties/google')
+
 const txDetails = createMockTransactionDetails({
   txInfo: {
     type: TransactionInfoType.SETTINGS_CHANGE,
@@ -280,10 +282,10 @@ describe('DecodedTx', () => {
     await waitFor(() => {
       expect(result.queryByText('transfer')).toBeInTheDocument()
       expect(result.queryByText('to')).toBeInTheDocument()
-      expect(result.queryAllByText('address').length).toBeGreaterThan(0)
+      expect(result.queryAllByText('address:').length).toBeGreaterThan(0)
       expect(result.queryByText('0x474e5Ded6b5D078163BFB8F6dBa355C3aA5478C8')).toBeInTheDocument()
       expect(result.queryByText('value')).toBeInTheDocument()
-      expect(result.queryAllByText('uint256').length).toBeGreaterThan(0)
+      expect(result.queryAllByText('uint256:').length).toBeGreaterThan(0)
       expect(result.queryByText('16745726664999765048')).toBeInTheDocument()
     })
   })
