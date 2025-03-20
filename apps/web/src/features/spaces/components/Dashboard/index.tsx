@@ -17,7 +17,7 @@ import { useSpaceMembersByStatus, useIsInvited } from '@/features/spaces/hooks/u
 import PreviewInvite from '../InviteBanner/PreviewInvite'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import Track from '@/components/common/Track'
-import { LoadingState } from '../AuthState'
+import LoadingState from '../LoadingState'
 
 const ViewAllLink = ({ url }: { url: LinkProps['href'] }) => {
   return (

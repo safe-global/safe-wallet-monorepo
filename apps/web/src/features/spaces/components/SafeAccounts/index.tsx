@@ -14,7 +14,7 @@ import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import Track from '@/components/common/Track'
 import { trackEvent } from '@/services/analytics'
 import debounce from 'lodash/debounce'
-import { LoadingState } from '../AuthState'
+import LoadingState from '../LoadingState'
 
 const OrganizationSafeAccounts = () => {
   const [searchQuery, setSearchQuery] = useState('')
