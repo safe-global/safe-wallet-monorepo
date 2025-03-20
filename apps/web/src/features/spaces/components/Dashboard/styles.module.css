@@ -1,10 +1,27 @@
 .content {
-  min-height: 60vh;
-  background-color: var(--color-background-paper);
+  min-height: calc(100vh - 100px); /* Header + padding height */
   border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.contentInner {
+  background-color: var(--color-background-paper);
+  max-width: 500px;
+  padding: var(--space-5);
+  border-radius: var(--space-1);
+  position: relative;
+  z-index: 1;
+}
+
+.contentBg {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: -1;
+  pointer-events: none;
 }
 
 .iconBG {
