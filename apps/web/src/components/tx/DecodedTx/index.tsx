@@ -19,6 +19,7 @@ import Multisend from '@/components/transactions/TxDetails/TxData/DecodedData/Mu
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import DecodedData from '@/components/transactions/TxDetails/TxData/DecodedData'
 import accordionCss from '@/styles/accordion.module.css'
+import HelpTooltip from './HelpTooltip'
 import { useDarkMode } from '@/hooks/useDarkMode'
 
 enum ColorLevel {
@@ -153,7 +154,7 @@ const DecodedTx = ({
               className={accordionCss.accordion}
             >
               <Stack direction="row" justifyContent="space-between" alignItems="center" width="100%">
-                <Box>Advanced details</Box>
+                <Box>Advanced details<HelpTooltip /></Box>
 
                 {methodLabel && (
                   <Typography

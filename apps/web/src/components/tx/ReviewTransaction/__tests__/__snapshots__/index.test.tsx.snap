@@ -41,6 +41,16 @@ exports[`ReviewTransaction should display a confirmation screen 1`] = `
                       class="MuiBox-root css-0"
                     >
                       Advanced details
+                      <span
+                        class=""
+                        data-mui-internal-clone-element="true"
+                      >
+                        <mock-icon
+                          aria-hidden=""
+                          class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeSmall css-17ibv3e-MuiSvgIcon-root"
+                          focusable="false"
+                        />
+                      </span>
                     </div>
                   </div>
                 </span>
@@ -524,6 +534,16 @@ exports[`ReviewTransaction should display an error screen 1`] = `
                       class="MuiBox-root css-0"
                     >
                       Advanced details
+                      <span
+                        class=""
+                        data-mui-internal-clone-element="true"
+                      >
+                        <mock-icon
+                          aria-hidden=""
+                          class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeSmall css-17ibv3e-MuiSvgIcon-root"
+                          focusable="false"
+                        />
+                      </span>
                     </div>
                   </div>
                 </span>
