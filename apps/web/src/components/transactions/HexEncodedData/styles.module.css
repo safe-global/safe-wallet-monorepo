@@ -1,4 +1,5 @@
 .encodedData {
   line-break: anywhere;
   word-break: break-all;
+  line-height: 1;
 }

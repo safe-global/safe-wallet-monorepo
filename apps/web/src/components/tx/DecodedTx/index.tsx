@@ -10,9 +10,7 @@ import {
   Stack,
   styled,
   Typography,
-  useTheme,
 } from '@mui/material'
-import type { Palette } from '@mui/material'
 import { type SafeTransaction } from '@safe-global/safe-core-sdk-types'
 import { TransactionInfoType, type TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
 import Summary from '@/components/transactions/TxDetails/Summary'
@@ -21,7 +19,6 @@ import Multisend from '@/components/transactions/TxDetails/TxData/DecodedData/Mu
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import DecodedData from '@/components/transactions/TxDetails/TxData/DecodedData'
 import accordionCss from '@/styles/accordion.module.css'
-import HelpToolTip from './HelpTooltip'
 import { useDarkMode } from '@/hooks/useDarkMode'
 
 enum ColorLevel {
@@ -40,6 +37,17 @@ const TX_INFO_LEVEL = {
   ],
 }
 
+const TxInfoColors: Record<ColorLevel, { main: string; mainDark?: string; background: string; border?: string }> = {
+  [ColorLevel.info]: { main: 'info.dark', background: 'info.background' },
+  [ColorLevel.warning]: { main: 'warning.main', background: 'warning.background', border: 'warning.light' },
+  [ColorLevel.success]: {
+    main: 'success.main',
+    mainDark: 'primary.main',
+    background: 'background.light',
+    border: 'success.light',
+  },
+}
+
 const getMethodLevel = (txInfo?: TransactionInfoType): ColorLevel => {
   if (!txInfo) {
     return ColorLevel.info
@@ -49,26 +57,16 @@ const getMethodLevel = (txInfo?: TransactionInfoType): ColorLevel => {
   return (methodLevels.find((key) => TX_INFO_LEVEL[key].includes(txInfo)) as ColorLevel) || ColorLevel.info
 }
 
-const getColors = (
-  { info, warning, primary, background, success }: Palette,
-  isDarkMode: boolean,
-): Record<ColorLevel, { main: string; background?: string }> => ({
-  info: { main: info.dark, background: info.background },
-  warning: { main: warning.main, background: warning.background },
-  success: { main: isDarkMode ? primary.main : success.main, background: background.light },
-})
+const toCssVar = (color: string) => `var(--color-${color.replace('.', '-')})`
 
-const StyledAccordion = styled(Accordion)<{ color?: ColorLevel }>(({ theme, color = ColorLevel.info }) => {
-  const isDarkMode = useDarkMode()
-  const colors = getColors(theme.palette, isDarkMode)
-  const { main, background } = colors[color] || colors.info
+const StyledAccordion = styled(Accordion)<{ colorLevel?: ColorLevel }>(({ colorLevel = ColorLevel.info }) => {
+  const { main, border, background } = TxInfoColors[colorLevel]
   return {
     [`&.${accordionClasses.expanded}.${accordionClasses.root}, &:hover.${accordionClasses.root}`]: {
-      borderColor: main,
+      borderColor: toCssVar(border || main),
     },
     [`&.${accordionClasses.expanded} .${accordionSummaryClasses.root}`]: {
-      background,
-      backgroundColor: background,
+      backgroundColor: toCssVar(background),
     },
   }
 })
@@ -107,12 +105,11 @@ const DecodedTx = ({
   showAdvancedDetails = true,
 }: DecodedTxProps): ReactElement => {
   const isDarkMode = useDarkMode()
-  const { palette } = useTheme()
   const decodedData = txData?.dataDecoded
   const isMultisend = decodedData?.parameters && !!decodedData?.parameters[0]?.valueDecoded
   const isMethodCallInAdvanced = showAdvancedDetails && (!showMethodCall || (isMultisend && showMultisend))
   const level = useMemo(() => getMethodLevel(txInfo?.type), [txInfo?.type])
-  const colors = getColors(palette, isDarkMode)[level]
+  const colors = TxInfoColors[level]
 
   let toInfo = tx && {
     value: tx.data.to,
@@ -148,28 +145,28 @@ const DecodedTx = ({
             elevation={0}
             onChange={onChangeExpand}
             sx={!tx ? { pointerEvents: 'none' } : undefined}
-            color={level}
+            colorLevel={level}
           >
             <AccordionSummary
               data-testid="decoded-tx-summary"
               expandIcon={<ExpandMoreIcon />}
               className={accordionCss.accordion}
             >
-              <Stack direction="row" justifyContent="space-between" width="100%">
-                <Box sx={{ alignContent: 'center' }}>
+              <Stack direction="row" justifyContent="space-between" alignItems="center" width="100%">
+                <Box>
                   Advanced details
-                  <HelpToolTip />
                 </Box>
+
                 {methodLabel && (
                   <Typography
                     component="span"
                     variant="body2"
                     alignContent="center"
-                    color={colors.main}
+                    color={isDarkMode ? (colors.mainDark ?? colors.main) : colors.main}
                     py={0.5}
                     px={1}
                     borderRadius={0.5}
-                    sx={{ background: colors.background }}
+                    bgcolor={colors.background}
                   >
                     {methodLabel}
                   </Typography>

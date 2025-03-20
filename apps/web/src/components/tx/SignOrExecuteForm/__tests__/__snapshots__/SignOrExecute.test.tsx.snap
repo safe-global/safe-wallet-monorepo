@@ -17,8 +17,8 @@ exports[`SignOrExecute should display a confirmation screen 1`] = `
           class="MuiBox-root css-0"
         >
           <div
-            class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiAccordion-root MuiAccordion-rounded MuiAccordion-gutters css-1xaf7nu-MuiPaper-root-MuiAccordion-root"
-            color="info"
+            class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiAccordion-root MuiAccordion-rounded MuiAccordion-gutters css-1ve84rd-MuiPaper-root-MuiAccordion-root"
+            colorlevel="info"
             style="--Paper-shadow: none;"
           >
             <h3
@@ -35,22 +35,12 @@ exports[`SignOrExecute should display a confirmation screen 1`] = `
                   class="MuiAccordionSummary-content MuiAccordionSummary-contentGutters css-1r0e0ir-MuiAccordionSummary-content"
                 >
                   <div
-                    class="MuiStack-root css-ee32gy-MuiStack-root"
+                    class="MuiStack-root css-1bujbuo-MuiStack-root"
                   >
                     <div
-                      class="MuiBox-root css-1a5ho4p"
+                      class="MuiBox-root css-0"
                     >
                       Advanced details
-                      <span
-                        class=""
-                        data-mui-internal-clone-element="true"
-                      >
-                        <mock-icon
-                          aria-hidden=""
-                          class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeSmall css-17ibv3e-MuiSvgIcon-root"
-                          focusable="false"
-                        />
-                      </span>
                     </div>
                   </div>
                 </span>
@@ -557,8 +547,8 @@ exports[`SignOrExecute should display an error screen 1`] = `
           class="MuiBox-root css-0"
         >
           <div
-            class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiAccordion-root MuiAccordion-rounded MuiAccordion-gutters css-1xaf7nu-MuiPaper-root-MuiAccordion-root"
-            color="info"
+            class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiAccordion-root MuiAccordion-rounded MuiAccordion-gutters css-1ve84rd-MuiPaper-root-MuiAccordion-root"
+            colorlevel="info"
             style="--Paper-shadow: none;"
           >
             <h3
@@ -575,22 +565,12 @@ exports[`SignOrExecute should display an error screen 1`] = `
                   class="MuiAccordionSummary-content MuiAccordionSummary-contentGutters css-1r0e0ir-MuiAccordionSummary-content"
                 >
                   <div
-                    class="MuiStack-root css-ee32gy-MuiStack-root"
+                    class="MuiStack-root css-1bujbuo-MuiStack-root"
                   >
                     <div
-                      class="MuiBox-root css-1a5ho4p"
+                      class="MuiBox-root css-0"
                     >
                       Advanced details
-                      <span
-                        class=""
-                        data-mui-internal-clone-element="true"
-                      >
-                        <mock-icon
-                          aria-hidden=""
-                          class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeSmall css-17ibv3e-MuiSvgIcon-root"
-                          focusable="false"
-                        />
-                      </span>
                     </div>
                   </div>
                 </span>
