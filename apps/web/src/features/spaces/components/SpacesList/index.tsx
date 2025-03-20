@@ -17,9 +17,10 @@ import { MemberStatus } from '@/features/spaces/hooks/useSpaceMembers'
 import useWallet from '@/hooks/wallets/useWallet'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import Track from '@/components/common/Track'
+import SpaceInfoModal from '../SpaceInfoModal'
 
 const AddSpaceButton = ({ disabled }: { disabled: boolean }) => {
-  const [open, setOpen] = useState(false)
+  const [openCreationModal, setOpenCreationModal] = useState<boolean>(false)
 
   return (
     <>
@@ -27,58 +28,66 @@ const AddSpaceButton = ({ disabled }: { disabled: boolean }) => {
         disableElevation
         variant="contained"
         size="small"
-        onClick={() => setOpen(true)}
+        onClick={() => setOpenCreationModal(true)}
         sx={{ height: '36px', px: 2 }}
         disabled={disabled}
       >
         <Box mt="1px">Create space</Box>
       </Button>
-      {open && <SpaceCreationModal onClose={() => setOpen(false)} />}
+      {openCreationModal && <SpaceCreationModal onClose={() => setOpenCreationModal(false)} />}
     </>
-  )
-}
-
-const InfoModal = () => {
-  const openInfoModal = () => {
-    // TODO: implement
-  }
-
-  return (
-    <Link onClick={openInfoModal} href="#">
-      What are spaces?
-    </Link>
   )
 }
 
 const SignedOutState = () => {
   const wallet = useWallet()
+  const [isInfoOpen, setIsInfoOpen] = useState<boolean>(false)
 
   return (
-    <Card sx={{ p: 5, textAlign: 'center' }}>
-      <SpacesIcon />
+    <>
+      <Card sx={{ p: 5, textAlign: 'center' }}>
+        <SpacesIcon />
 
-      <Typography color="text.secondary" mb={2}>
-        To view your space or create one, {!!wallet ? 'sign in with your connected wallet.' : 'connect your wallet.'}
-        <br />
-        <InfoModal />
-      </Typography>
+        <Box mb={2}>
+          <Typography color="text.secondary" mb={1}>
+            To view your space or create one,{' '}
+            {!!wallet ? 'sign in with your connected wallet.' : 'connect your wallet.'}
+            <br />
+          </Typography>
+          <Link onClick={() => setIsInfoOpen(true)} href="#">
+            What are spaces?
+          </Link>
+        </Box>
 
-      <SignInButton />
-    </Card>
+        <SignInButton />
+      </Card>
+      {isInfoOpen && <SpaceInfoModal onClose={() => setIsInfoOpen(false)} showButtons={false} />}
+    </>
   )
 }
 
 const NoSpacesState = () => {
-  return (
-    <Card sx={{ p: 5, textAlign: 'center', width: 1 }}>
-      <SpacesIcon />
+  const [isInfoOpen, setIsInfoOpen] = useState<boolean>(false)
+  const [openCreationModal, setOpenCreationModal] = useState<boolean>(false)
 
-      <Typography color="text.secondary" mb={2}>
-        No spaces found.
-        <br />
-        <InfoModal />
-      </Typography>
-    </Card>
+  return (
+    <>
+      <Card sx={{ p: 5, textAlign: 'center', width: 1 }}>
+        <SpacesIcon />
+
+        <Typography color="text.secondary" mb={1}>
+          No spaces found.
+          <br />
+        </Typography>
+        <Link onClick={() => setIsInfoOpen(true)} href="#">
+          What are spaces?
+        </Link>
+      </Card>
+      {isInfoOpen && (
+        <SpaceInfoModal onCreateSpace={() => setOpenCreationModal(true)} onClose={() => setIsInfoOpen(false)} />
+      )}
+      {openCreationModal && <SpaceCreationModal onClose={() => setOpenCreationModal(false)} />}
+    </>
   )
 }
 
