@@ -1,4 +1,4 @@
-import OrgsIcon from '@/public/images/spaces/spaces.svg'
+import SpacesIcon from '@/public/images/spaces/spaces.svg'
 import { Card, Link, Typography } from '@mui/material'
 
 const InfoModal = () => {
@@ -16,7 +16,7 @@ const InfoModal = () => {
 const EmptyMembers = () => {
   return (
     <Card sx={{ p: 5, textAlign: 'center' }}>
-      <OrgsIcon />
+      <SpacesIcon />
 
       <Typography color="text.secondary" mb={2}>
         Your haven&apos;t invited any team members yet.
