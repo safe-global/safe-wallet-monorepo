@@ -14,10 +14,11 @@ import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import Track from '@/components/common/Track'
 import { trackEvent } from '@/services/analytics'
 import debounce from 'lodash/debounce'
+import { LoadingState } from '../AuthState'
 
 const OrganizationSafeAccounts = () => {
   const [searchQuery, setSearchQuery] = useState('')
-  const allSafes = useSpaceSafes()
+  const { allSafes, isLoading } = useSpaceSafes()
   const filteredSafes = useSafesSearch(allSafes ?? [], searchQuery)
   const isAdmin = useIsAdmin()
   const isInvited = useIsInvited()
@@ -32,6 +33,8 @@ const OrganizationSafeAccounts = () => {
       trackEvent({ ...SPACE_EVENTS.SEARCH_ACCOUNTS, label: SPACE_LABELS.accounts_page })
     }
   }, [searchQuery])
+
+  if (isLoading) return <LoadingState />
 
   return (
     <>

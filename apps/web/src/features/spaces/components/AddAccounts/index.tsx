@@ -67,7 +67,7 @@ const AddAccounts = () => {
   const [manualSafes, setManualSafes] = useState<SafeItems>([])
 
   const { orderBy } = useAppSelector(selectOrderByPreference)
-  const spaceSafes = useSpaceSafes()
+  const { allSafes: spaceSafes } = useSpaceSafes()
   const safes = useOwnedSafesGrouped()
   const sortComparator = getComparator(orderBy)
   const [addSafesToSpace] = useOrganizationSafesCreateV1Mutation()
