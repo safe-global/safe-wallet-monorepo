@@ -7,7 +7,7 @@ import { SignOrExecuteFormV2 } from '../SignOrExecuteFormV2'
 import { encodeBytes32String } from 'ethers'
 import { Status } from 'zodiac-roles-deployments'
 import * as useIsSafeOwner from '@/hooks/useIsSafeOwner'
-import { SafeTxContextParams } from '@/components/tx-flow/SafeTxProvider'
+import type { SafeTxContextParams } from '@/components/tx-flow/SafeTxProvider'
 
 const txDetails = {
   safeAddress: '0xE20CcFf2c38Ef3b64109361D7b7691ff2c7D5f67',
