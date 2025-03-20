@@ -95,7 +95,7 @@ export const SignOrExecuteFormV2 = ({
       // Reset mass payout flag
       setIsMassPayout(false)
     },
-    [chainId, isCreation, onSubmit, trigger, signer?.isSafe, origin],
+    [chainId, isCreation, onSubmit, trigger, signer?.isSafe, origin, isMassPayout, setIsMassPayout],
   )
 
   const onRoleExecutionSubmit = useCallback<typeof onFormSubmit>(
