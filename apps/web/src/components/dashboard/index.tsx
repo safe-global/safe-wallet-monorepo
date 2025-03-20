@@ -15,14 +15,14 @@ import { FEATURES } from '@/utils/chains'
 import css from './styles.module.css'
 import { InconsistentSignerSetupWarning } from '@/features/multichain/components/SignerSetupWarning/InconsistentSignerSetupWarning'
 import useIsStakingBannerEnabled from '@/features/stake/hooks/useIsStakingBannerEnabled'
-import OrgsDashboardWidget from '@/features/organizations/components/OrgsDashboardWidget'
+import SpacesDashboardWidget from 'src/features/spaces/components/SpacesDashboardWidget'
 
 const RecoveryHeader = dynamic(() => import('@/features/recovery/components/RecoveryHeader'))
 
 const Dashboard = (): ReactElement => {
   const { safe } = useSafeInfo()
   const showSafeApps = useHasFeature(FEATURES.SAFE_APPS)
-  const isOrgsFeatureEnabled = useHasFeature(FEATURES.ORGANIZATIONS)
+  const isOrgsFeatureEnabled = useHasFeature(FEATURES.SPACES)
   const isStakingBannerEnabled = useIsStakingBannerEnabled()
   const supportsRecovery = useIsRecoverySupported()
 
@@ -37,7 +37,7 @@ const Dashboard = (): ReactElement => {
 
         {isOrgsFeatureEnabled && (
           <Grid item xs={12}>
-            <OrgsDashboardWidget />
+            <SpacesDashboardWidget />
           </Grid>
         )}
 

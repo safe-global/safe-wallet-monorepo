@@ -36,7 +36,7 @@ const AddSafeButton = ({ trackingLabel, onLinkClick }: { trackingLabel: string; 
 const AccountsHeader = ({ isSidebar, onLinkClick }: { isSidebar: boolean; onLinkClick?: () => void }) => {
   const wallet = useWallet()
   const router = useRouter()
-  const isOrgsFeatureEnabled = useHasFeature(FEATURES.ORGANIZATIONS)
+  const isOrgsFeatureEnabled = useHasFeature(FEATURES.SPACES)
   const isLoginPage = router.pathname === AppRoutes.welcome.accounts
   const trackingLabel = isLoginPage ? OVERVIEW_LABELS.login_page : OVERVIEW_LABELS.sidebar
 

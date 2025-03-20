@@ -1,7 +1,7 @@
 import Track from '@/components/common/Track'
 import { AppRoutes } from '@/config/routes'
 import css from '@/features/myAccounts/styles.module.css'
-import { ORG_EVENTS, ORG_LABELS } from '@/services/analytics/events/organizations'
+import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import { Chip, Link, Stack, Typography } from '@mui/material'
 import classNames from 'classnames'
 import { useRouter } from 'next/router'
@@ -25,12 +25,12 @@ const AccountsNavigation = () => {
       </Typography>
 
       <Typography variant="h1" fontWeight={700} className={css.title}>
-        <Track {...ORG_EVENTS.OPEN_ORGS_LIST_PAGE} label={ORG_LABELS.accounts_page}>
+        <Track {...SPACE_EVENTS.OPEN_SPACE_LIST_PAGE} label={SPACE_LABELS.accounts_page}>
           <Link
-            href={AppRoutes.welcome.organizations}
-            className={classNames(css.link, { [css.active]: isActiveNavigation(AppRoutes.welcome.organizations) })}
+            href={AppRoutes.welcome.spaces}
+            className={classNames(css.link, { [css.active]: isActiveNavigation(AppRoutes.welcome.spaces) })}
           >
-            Organizations
+            Spaces
             <Chip label="Beta" size="small" sx={{ ml: 1, fontWeight: 'normal', borderRadius: '4px' }} />
           </Link>
         </Track>
