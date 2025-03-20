@@ -91,6 +91,7 @@ const AddMembersModal = ({ onClose }: { onClose: () => void }): ReactElement => 
 
   const onSubmit = handleSubmit(async (data) => {
     setError(undefined)
+
     if (!orgId) {
       setError('Something went wrong. Please try again.')
       return

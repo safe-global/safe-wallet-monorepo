@@ -6,7 +6,9 @@ import {
 import { useState } from 'react'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import CheckIcon from '@mui/icons-material/Check'
-import OrgsCard, { InitialsAvatar } from '../OrgsCard'
+import OrgsCard from '../OrgsCard'
+import InitialsAvatar from '../InitialsAvatar'
+
 import css from './styles.module.css'
 import { useRouter } from 'next/router'
 import { AppRoutes } from '@/config/routes'
