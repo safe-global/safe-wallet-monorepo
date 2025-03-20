@@ -8,10 +8,7 @@ const HelpTooltip = () => (
     title={
       <>
         Always verify transaction details.{' '}
-        <ExternalLink href={HelpCenterArticle.VERIFY_TX_DETAILS}>
-          Learn more
-        </ExternalLink>
-        .
+        <ExternalLink href={HelpCenterArticle.VERIFY_TX_DETAILS}>Learn more</ExternalLink>.
       </>
     }
     arrow
