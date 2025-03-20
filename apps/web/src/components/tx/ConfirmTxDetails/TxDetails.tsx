@@ -46,11 +46,14 @@ const TxDetailsRow = ({
 )
 
 const ContentWrapper = ({ children }: { children: ReactElement | ReactElement[] }) => (
-  <Box sx={{ maxHeight: '750px', overflowY: 'auto', px: 2 }}>{children}</Box>
+  <Box sx={{ maxHeight: '550px', overflowY: 'auto', px: 2 }}>{children}</Box>
 )
 
 export const TxDetails = ({ safeTx, txData, showHashes: _showHashes }: TxDetailsProps) => {
   const [showHashes, setShowHashes] = useState(_showHashes)
+  const safeTxHash = useSafeTxHash({ safeTxData: safeTx.data })
+  const domainHash = useDomainHash()
+  const messageHash = useMessageHash({ safeTxData: safeTx.data })
 
   const toInfo = txData?.addressInfoIndex?.[safeTx.data.to] || txData?.to
   const toName = toInfo?.name || (toInfo && 'displayName' in toInfo ? String(toInfo.displayName || '') : undefined)
@@ -160,13 +163,35 @@ export const TxDetails = ({ safeTx, txData, showHashes: _showHashes }: TxDetails
                     display="inline-flex"
                     alignItems="center"
                     color="primary.light"
+                    sx={{ cursor: 'pointer' }}
                   >
-                    Show transaction hashes{' '}
-                    <ExpandMoreIcon sx={{ transform: !showHashes ? 'rotate(180deg)' : undefined }} />
+                    Transaction hashes <ExpandMoreIcon sx={{ transform: !showHashes ? 'rotate(180deg)' : undefined }} />
                   </Typography>
                 </Button>
 
-                {!showHashes && <TxDetailsHashes safeTx={safeTx} />}
+                {showHashes && domainHash && (
+                  <TxDetailsRow label="Domain hash">
+                    <Typography variant="body2" width="100%" sx={{ wordWrap: 'break-word' }}>
+                      <HexEncodedData hexData={domainHash} limit={66} highlightFirstBytes={false} />
+                    </Typography>
+                  </TxDetailsRow>
+                )}
+
+                {showHashes && messageHash && (
+                  <TxDetailsRow label="Message hash">
+                    <Typography variant="body2" width="100%" sx={{ wordWrap: 'break-word' }}>
+                      <HexEncodedData hexData={messageHash} limit={66} highlightFirstBytes={false} />
+                    </Typography>
+                  </TxDetailsRow>
+                )}
+
+                {showHashes && safeTxHash && (
+                  <TxDetailsRow label="safeTxHash">
+                    <Typography variant="body2" width="100%" sx={{ wordWrap: 'break-word' }}>
+                      <HexEncodedData hexData={safeTxHash} limit={66} highlightFirstBytes={false} />
+                    </Typography>
+                  </TxDetailsRow>
+                )}
               </Stack>
             </ContentWrapper>
           ),
@@ -193,29 +218,5 @@ export const TxDetails = ({ safeTx, txData, showHashes: _showHashes }: TxDetails
         },
       ]}
     </PaperViewToggle>
-  )
-}
-
-function TxDetailsHashes({ safeTx }: Pick<TxDetailsProps, 'safeTx'>) {
-  const safeTxHash = useSafeTxHash({ safeTxData: safeTx.data })
-  const domainHash = useDomainHash()
-  const messageHash = useMessageHash({ safeTxData: safeTx.data })
-
-  return (
-    <>
-      {[
-        ['Domain hash', domainHash] as const,
-        ['Message hash', messageHash] as const,
-        ['safeTxHash', safeTxHash] as const,
-      ].map(([label, hash]) => {
-        return (
-          <TxDetailsRow label={label} key={hash}>
-            <Typography variant="body2" width="100%" sx={{ wordWrap: 'break-word' }}>
-              {hash}
-            </Typography>
-          </TxDetailsRow>
-        )
-      })}
-    </>
   )
 }
