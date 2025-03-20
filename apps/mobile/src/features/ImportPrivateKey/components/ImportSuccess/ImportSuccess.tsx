@@ -18,13 +18,6 @@ export function ImportSuccess() {
   const { address, name } = useLocalSearchParams<{ address: `0x${string}`; name: string }>()
   const router = useRouter()
 
-  const handleContinuePress = () => {
-    // Go to top of the navigator stack
-    router.dismissAll()
-    // now close it
-    router.back()
-  }
-
   useEffect(() => {
     const updatePermissions = async () => {
       if (isAppNotificationEnabled) {
@@ -32,7 +25,14 @@ export function ImportSuccess() {
       }
     }
     updatePermissions()
-  }, [isAppNotificationEnabled])
+  }, [isAppNotificationEnabled, updateNotificationPermissions])
+
+  const handleContinuePress = () => {
+    // Go to top of the navigator stack
+    router.dismissAll()
+    // now close it
+    router.back()
+  }
 
   return (
     <View flex={1} justifyContent="space-between" testID={'import-success'}>
