@@ -86,7 +86,7 @@ const SpaceInfoModal = ({ showButtons = true, onClose }: { showButtons?: boolean
             </List>
 
             {showButtons && (
-              <Stack gap={2} mt="auto">
+              <Stack gap={2} mt={{ xs: 3, md: 'auto' }}>
                 <Link href={AppRoutes.welcome.spaces} passHref legacyBehavior>
                   <Button
                     variant="contained"
