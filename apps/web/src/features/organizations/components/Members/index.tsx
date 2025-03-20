@@ -53,7 +53,7 @@ const OrganizationMembers = () => {
           size="small"
         />
         {isAdmin && (
-          <Button variant="contained" startIcon={<PlusIcon />} onClick={() => setOpenAddMembersModal(true)}>
+          <Button data-testid="add-member-button" variant="contained" startIcon={<PlusIcon />} onClick={() => setOpenAddMembersModal(true)}>
             Add member
           </Button>
         )}
@@ -66,7 +66,7 @@ const OrganizationMembers = () => {
         )}
         {filteredInvites.length > 0 && (
           <>
-            <Typography variant="h5" fontWeight={700} mb={2}>
+            <Typography data-testid="pending-invitations-list" variant="h5" fontWeight={700} mb={2}>
               Pending invitations ({filteredInvites.length})
             </Typography>
             <MembersList members={filteredInvites} />

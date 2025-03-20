@@ -57,7 +57,7 @@ const OrganizationsDashboard = () => {
           </Typography>
 
           <Grid container spacing={3}>
-            <Grid size={{ xs: 12, md: 8 }}>
+            <Grid data-testid="dashboard-safe-list" size={{ xs: 12, md: 8 }}>
               <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
                 <Typography variant="h5">Safe Accounts ({safes.length})</Typography>
                 {orgId && <ViewAllLink url={{ pathname: AppRoutes.organizations.safeAccounts, query: { orgId } }} />}

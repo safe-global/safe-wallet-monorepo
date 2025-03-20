@@ -22,6 +22,7 @@ const AddOrgButton = ({ disabled }: { disabled: boolean }) => {
   return (
     <>
       <Button
+        data-testid="create-org-button"
         disableElevation
         variant="contained"
         size="small"
@@ -69,7 +70,7 @@ const SignedOutState = () => {
 
 const NoOrgsState = () => {
   return (
-    <Card sx={{ p: 5, textAlign: 'center', width: 1 }}>
+    <Card data-testid="org-list" sx={{ p: 5, textAlign: 'center', width: 1 }}>
       <OrgsIcon />
 
       <Typography color="text.secondary" mb={2}>

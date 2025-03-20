@@ -185,7 +185,7 @@ export function acceptCookies(index = 0) {
 
   cy.get('button')
     .contains(acceptSelection)
-    .should(() => {})
+    .should(() => { })
     .then(($button) => {
       if (!$button.length) {
         return
@@ -406,4 +406,8 @@ export function getSafeAddressFromUrl(url) {
   const addressPattern = /0x[a-fA-F0-9]{40}/
   const match = url.match(addressPattern)
   return match ? match[0] : null
+}
+
+export function shortenAddress(address) {
+  return `${address.slice(0, 6)}...${address.slice(-4)}`;
 }

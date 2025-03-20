@@ -130,7 +130,7 @@ const AddMembersModal = ({ onClose }: { onClose: () => void }): ReactElement => 
 
             <Stack spacing={3}>
               <Stack direction="row" spacing={2} alignItems="center">
-                <NameInput name="name" label="Name" required />
+                <NameInput data-testid="member-name-input" name="name" label="Name" required />
 
                 <Controller
                   control={control}
@@ -156,7 +156,7 @@ const AddMembersModal = ({ onClose }: { onClose: () => void }): ReactElement => 
                 />
               </Stack>
 
-              <AddressInput name="address" label="Address" required />
+              <AddressInput data-testid="member-address-input" name="address" label="Address" required />
             </Stack>
 
             {error && (
@@ -170,7 +170,7 @@ const AddMembersModal = ({ onClose }: { onClose: () => void }): ReactElement => 
             <Button data-testid="cancel-btn" onClick={onClose}>
               Cancel
             </Button>
-            <Button type="submit" variant="contained" disabled={!formState.isValid} disableElevation>
+            <Button data-testid="add-member-modal-button" type="submit" variant="contained" disabled={!formState.isValid} disableElevation>
               {isSubmitting ? <CircularProgress size={20} /> : 'Add member'}
             </Button>
           </DialogActions>

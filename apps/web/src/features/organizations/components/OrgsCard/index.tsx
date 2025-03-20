@@ -69,7 +69,7 @@ export const OrgSummary = ({
 }) => {
   return (
     <Box className={css.orgInfo}>
-      <Typography variant="body2" fontWeight="bold">
+      <Typography data-testid="org-name" variant="body2" fontWeight="bold">
         {name}
       </Typography>
 
@@ -116,7 +116,7 @@ const OrgsCard = ({
         isCompact={isCompact}
       />
 
-      <IconButton className={css.orgActions} size="small" onClick={() => {}}>
+      <IconButton className={css.orgActions} size="small" onClick={() => { }}>
         <MoreVertIcon sx={({ palette }) => ({ color: palette.border.main })} />
       </IconButton>
     </Card>

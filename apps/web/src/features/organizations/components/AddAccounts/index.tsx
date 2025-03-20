@@ -182,7 +182,7 @@ const AddAccounts = () => {
 
                   <DialogActions>
                     <Button onClick={handleClose}>Cancel</Button>
-                    <Button variant="contained" disabled={selectedSafesLength === 0} type="submit">
+                    <Button data-testid="add-org-account-button" variant="contained" disabled={selectedSafesLength === 0} type="submit">
                       Add Accounts ({selectedSafesLength})
                     </Button>
                   </DialogActions>

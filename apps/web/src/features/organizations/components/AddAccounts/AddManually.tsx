@@ -59,6 +59,7 @@ const AddManually = ({ handleAddSafe }: { handleAddSafe: (data: AddManuallyFormV
 
       return (
         <MenuItem
+          data-testid="network-item"
           key={chainId}
           value={chainId}
           sx={{ '&:hover': { backgroundColor: isSelected ? 'transparent' : 'inherit' } }}
@@ -82,7 +83,7 @@ const AddManually = ({ handleAddSafe }: { handleAddSafe: (data: AddManuallyFormV
 
   return (
     <>
-      <Button size="compact" onClick={() => setAddManuallyOpen(true)}>
+      <Button data-testid="add-manually-button" size="compact" onClick={() => setAddManuallyOpen(true)}>
         + Add manually
       </Button>
       <ModalDialog open={addManuallyOpen} dialogTitle="Add safe account" onClose={onClose} hideChainIndicator>
@@ -96,6 +97,7 @@ const AddManually = ({ handleAddSafe }: { handleAddSafe: (data: AddManuallyFormV
             <DialogContent>
               <Stack direction="row" spacing={2}>
                 <AddressInput
+                  data-testid="org-add-address-input"
                   label="Safe Account"
                   chain={selectedChain}
                   validate={validateSafeAddress}

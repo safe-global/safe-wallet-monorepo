@@ -121,7 +121,7 @@ const OrgsSettings = () => {
                   slotProps={{ inputLabel: { shrink: true } }}
                 />
 
-                <Button variant="contained" type="submit" sx={{ mt: 2 }} disabled={!isNameChanged || !isAdmin}>
+                <Button data-testid="org-save-button" variant="contained" type="submit" sx={{ mt: 2 }} disabled={!isNameChanged || !isAdmin}>
                   Save
                 </Button>
               </form>
@@ -137,6 +137,7 @@ const OrgsSettings = () => {
             <Typography mb={2}>This action cannot be undone.</Typography>
 
             <Button
+              data-testid="org-delete-button"
               variant="danger"
               onClick={() => {
                 setDeleteOrgOpen(true)
@@ -177,7 +178,7 @@ const OrgsSettings = () => {
 
         <DialogActions>
           <Button onClick={() => setDeleteOrgOpen(false)}>No, keep it</Button>
-          <Button variant="danger" onClick={onDelete}>
+          <Button data-testid="org-confirm-delete-button" variant="danger" onClick={onDelete}>
             Permanently delete it
           </Button>
         </DialogActions>
