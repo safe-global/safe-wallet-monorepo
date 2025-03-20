@@ -24,7 +24,6 @@ export const rawBaseQuery = fetchBaseQuery({
   headers: {
     'Content-Type': 'application/json',
     Accept: 'application/json',
-    'Set-Cookie': 'HttpOnly;Secure;SameSite=None',
   },
 })
 
