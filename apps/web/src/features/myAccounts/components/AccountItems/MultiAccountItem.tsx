@@ -1,7 +1,7 @@
 import { selectUndeployedSafes } from '@/features/counterfactual/store/undeployedSafesSlice'
 import NetworkLogosList from '@/features/multichain/components/NetworkLogosList'
 import type { SafeListProps } from '@/features/myAccounts/components/SafesList'
-import OrgSafeContextMenu from '@/features/organizations/components/SafeAccounts/OrgSafeContextMenu'
+import SpaceSafeContextMenu from '@/features/spaces/components/SafeAccounts/SpaceSafeContextMenu'
 import { showNotification } from '@/store/notificationsSlice'
 import SingleAccountItem from '@/features/myAccounts/components/AccountItems/SingleAccountItem'
 import type { SafeOverview } from '@safe-global/safe-gateway-typescript-sdk'
@@ -326,7 +326,7 @@ const MultiAccountItem = ({ onLinkClick, multiSafeAccountItem, isOrgSafe = false
           {isOrgSafe ? (
             <>
               <Box width="40px" /> {/* Spacer for the send button */}
-              <OrgSafeContextMenu safeItem={multiSafeAccountItem} />
+              <SpaceSafeContextMenu safeItem={multiSafeAccountItem} />
             </>
           ) : (
             <MultiAccountContextMenu

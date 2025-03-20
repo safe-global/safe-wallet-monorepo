@@ -1,9 +1,13 @@
 import type { SafeCollectibleResponse } from '@safe-global/safe-gateway-typescript-sdk'
 import NftIcon from '@/public/images/common/nft.svg'
 import TxLayout from '@/components/tx-flow/common/TxLayout'
+import type { TxStep } from '@/components/tx-flow/common/TxLayout'
 import useTxStepper from '../../useTxStepper'
 import SendNftBatch from './SendNftBatch'
 import ReviewNftBatch from './ReviewNftBatch'
+import { useMemo } from 'react'
+import { ConfirmTxDetails } from '@/components/tx/ConfirmTxDetails'
+import { TxFlowType } from '@/services/analytics'
 
 export type NftTransferParams = {
   recipient: string
@@ -20,26 +24,41 @@ const defaultParams: NftTransferParams = {
 }
 
 const NftTransferFlow = ({ txNonce, ...params }: NftTransferFlowProps) => {
-  const { data, step, nextStep, prevStep } = useTxStepper<NftTransferParams>({
-    ...defaultParams,
-    ...params,
-  })
+  const { data, step, nextStep, prevStep } = useTxStepper<NftTransferParams>(
+    {
+      ...defaultParams,
+      ...params,
+    },
+    TxFlowType.NFT_TRANSFER,
+  )
 
-  const steps = [
-    <SendNftBatch key={0} params={data} onSubmit={(formData) => nextStep({ ...data, ...formData })} />,
-
-    <ReviewNftBatch key={1} params={data} txNonce={txNonce} onSubmit={() => null} />,
-  ]
+  const steps = useMemo<TxStep[]>(
+    () => [
+      {
+        txLayoutProps: { title: 'New transaction' },
+        content: <SendNftBatch key={0} params={data} onSubmit={(formData) => nextStep({ ...data, ...formData })} />,
+      },
+      {
+        txLayoutProps: { title: 'Confirm transaction' },
+        content: <ReviewNftBatch key={1} params={data} txNonce={txNonce} onSubmit={() => nextStep(data)} />,
+      },
+      {
+        txLayoutProps: { title: 'Confirm transaction details', fixedNonce: true },
+        content: <ConfirmTxDetails key={2} onSubmit={() => {}} />,
+      },
+    ],
+    [nextStep, data, txNonce],
+  )
 
   return (
     <TxLayout
-      title={step === 0 ? 'New transaction' : 'Confirm transaction'}
       subtitle="Send NFTs"
       icon={NftIcon}
       step={step}
       onBack={prevStep}
+      {...(steps?.[step]?.txLayoutProps || {})}
     >
-      {steps}
+      {steps.map(({ content }) => content)}
     </TxLayout>
   )
 }

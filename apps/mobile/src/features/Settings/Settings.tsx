@@ -139,7 +139,7 @@ export const Settings = ({ address, data, onImplementationTap, displayDevMenu }:
                     <Pressable
                       style={({ pressed }) => [{ opacity: pressed ? 0.5 : 1.0 }]}
                       onPress={() => {
-                        router.push('/notifications')
+                        router.push('/notifications-settings')
                       }}
                     >
                       <SafeListItem

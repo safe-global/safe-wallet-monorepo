@@ -80,8 +80,9 @@
       "title": "On-chain rejection",
       "summaryTime": "11:17 AM",
       "altImage": "On-chain rejection",
-      "description": "This is an on-chain rejection that didn't send any funds. This on-chain rejection replaced all transactions with nonce 3.",
+      "description": "This is an on-chain rejection that didn't send any funds. This on-chain rejection replaced all transactions with nonce 16.",
       "transactionHash": "0x4fbf...067d",
+      "transactionHash2": "0x636e...0524",
       "safeTxHash": "0x1303...0fe2"
     },
     "batchNativeTransfer": {

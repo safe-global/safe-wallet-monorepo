@@ -1,8 +1,8 @@
 import { type ReactNode } from 'react'
 import { Grid, Typography } from '@mui/material'
 
-const width = { xl: '25%', lg: '200px', xs: 'auto' }
-const minWidth = { xl: '25%', lg: '200px' }
+const width = { xl: '25%', lg: '150px', xs: 'auto' }
+const minWidth = { xl: '25%', lg: '150px' }
 const wrap = { flexWrap: { xl: 'nowrap' } }
 
 const FieldsGrid = ({ title, children }: { title: string | ReactNode; children: ReactNode }) => {
@@ -11,7 +11,6 @@ const FieldsGrid = ({ title, children }: { title: string | ReactNode; children: 
       container
       sx={[
         {
-          alignItems: 'center',
           gap: 1,
         },
         ...(Array.isArray(wrap) ? wrap : [wrap]),
@@ -26,13 +25,7 @@ const FieldsGrid = ({ title, children }: { title: string | ReactNode; children: 
           minWidth,
         }}
       >
-        <Typography
-          sx={{
-            color: 'primary.light',
-          }}
-        >
-          {title}
-        </Typography>
+        <Typography color="primary.light">{title}</Typography>
       </Grid>
       <Grid item xs data-testid="tx-data-row">
         {children}

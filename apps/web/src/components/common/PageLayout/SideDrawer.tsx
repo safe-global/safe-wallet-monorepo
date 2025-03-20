@@ -1,5 +1,5 @@
-import OrgsSidebar from '@/features/organizations/components/OrgsSidebar'
-import { useIsOrganizationRoute } from '@/hooks/useIsOrganizationRoute'
+import SpaceSidebar from 'src/features/spaces/components/SpaceSidebar'
+import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
 import { useRouter } from 'next/router'
 import { useEffect, type ReactElement } from 'react'
 import { IconButton, Drawer, useMediaQuery } from '@mui/material'
@@ -22,7 +22,7 @@ const SideDrawer = ({ isOpen, onToggle }: SideDrawerProps): ReactElement => {
   const { breakpoints } = useTheme()
   const isSmallScreen = useMediaQuery(breakpoints.down('md'))
   const [, isSafeAppRoute] = useIsSidebarRoute()
-  const isOrganizationRoute = useIsOrganizationRoute()
+  const isSpaceRoute = useIsSpaceRoute()
 
   const showSidebarToggle = isSafeAppRoute && !isSmallScreen
   // Keep the sidebar hidden on small screens via CSS until we collapse it via JS.
@@ -45,7 +45,7 @@ const SideDrawer = ({ isOpen, onToggle }: SideDrawerProps): ReactElement => {
     }
   }, [onToggle, router, isSmallScreen])
 
-  const SidebarComponent = isOrganizationRoute ? OrgsSidebar : Sidebar
+  const SidebarComponent = isSpaceRoute ? SpaceSidebar : Sidebar
 
   return (
     <>
