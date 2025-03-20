@@ -105,7 +105,7 @@ const SpaceInfoModal = ({ showButtons = true, onClose }: { showButtons?: boolean
           </Grid2>
 
           <Grid2 size={6} display={{ xs: 'none', md: 'flex' }} justifyContent="center" flex={1} bgcolor="#121312">
-            <Image src={CreateSpaceInfo} alt="An illustration of multiple safe accounts" style={{ width: '100%' }} />
+            <Image src={CreateSpaceInfo} style={{ width: '100%' }} alt="An illustration of multiple safe accounts" />
           </Grid2>
         </Grid2>
 
