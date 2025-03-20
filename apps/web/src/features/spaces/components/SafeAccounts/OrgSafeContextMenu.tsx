@@ -59,7 +59,7 @@ const OrgSafeContextMenu = ({ safeItem }: { safeItem: SafeItem | MultiChainSafeI
 
   return (
     <>
-      <IconButton data-testid="safe-options-btn" edge="end" size="small" onClick={handleOpenContextMenu}>
+      <IconButton edge="end" size="small" onClick={handleOpenContextMenu}>
         <MoreVertIcon sx={({ palette }) => ({ color: palette.border.main })} />
       </IconButton>
       <ContextMenu anchorEl={anchorEl} open={!!anchorEl} onClose={handleCloseContextMenu}>
@@ -67,7 +67,7 @@ const OrgSafeContextMenu = ({ safeItem }: { safeItem: SafeItem | MultiChainSafeI
           <ListItemIcon>
             <SvgIcon component={EditIcon} inheritViewBox fontSize="small" color="success" />
           </ListItemIcon>
-          <ListItemText data-testid="rename-btn">{hasName ? 'Rename' : 'Give name'}</ListItemText>
+          <ListItemText>{hasName ? 'Rename' : 'Give name'}</ListItemText>
         </MenuItem>
 
         {isAdmin && (
@@ -75,7 +75,7 @@ const OrgSafeContextMenu = ({ safeItem }: { safeItem: SafeItem | MultiChainSafeI
             <ListItemIcon>
               <SvgIcon component={DeleteIcon} inheritViewBox fontSize="small" color="error" />
             </ListItemIcon>
-            <ListItemText data-testid="remove-btn">Remove</ListItemText>
+            <ListItemText>Remove</ListItemText>
           </MenuItem>
         )}
       </ContextMenu>

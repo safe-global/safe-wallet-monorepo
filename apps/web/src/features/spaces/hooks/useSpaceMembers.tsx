@@ -15,11 +15,12 @@ export enum MemberRole {
   MEMBER = 'MEMBER',
 }
 
-const useAllMembers = () => {
-  const spaceId = useCurrentSpaceId()
+const useAllMembers = (spaceId?: number) => {
+  const currentSpaceId = useCurrentSpaceId()
+  const actualSpaceId = spaceId ?? currentSpaceId
   const isUserSignedIn = useAppSelector(isAuthenticated)
   const { data: currentData } = useUserOrganizationsGetUsersV1Query(
-    { orgId: Number(spaceId) },
+    { orgId: Number(actualSpaceId) },
     { skip: !isUserSignedIn },
   )
   return currentData?.members || []
@@ -36,14 +37,14 @@ export const useSpaceMembersByStatus = () => {
   return { activeMembers, invitedMembers }
 }
 
-const useCurrentMembership = () => {
-  const allMembers = useAllMembers()
+const useCurrentMembership = (spaceId?: number) => {
+  const allMembers = useAllMembers(spaceId)
   const { currentData: user } = useUsersGetWithWalletsV1Query()
   return allMembers.find((member) => member.user.id === user?.id)
 }
 
-export const useIsAdmin = () => {
-  const currentMembership = useCurrentMembership()
+export const useIsAdmin = (spaceId?: number) => {
+  const currentMembership = useCurrentMembership(spaceId)
   return currentMembership?.role === MemberRole.ADMIN
 }
 
