@@ -88,7 +88,13 @@ const AddManually = ({ handleAddSafe }: { handleAddSafe: (data: AddManuallyFormV
       <Button size="compact" onClick={() => setAddManuallyOpen(true)}>
         + Add manually
       </Button>
-      <ModalDialog open={addManuallyOpen} dialogTitle="Add safe account" onClose={onClose} hideChainIndicator>
+      <ModalDialog
+        open={addManuallyOpen}
+        dialogTitle="Add safe account"
+        onClose={onClose}
+        hideChainIndicator
+        PaperProps={{ sx: { maxWidth: '760px' } }}
+      >
         <FormProvider {...formMethods}>
           <form
             onSubmit={(e) => {
@@ -97,7 +103,7 @@ const AddManually = ({ handleAddSafe }: { handleAddSafe: (data: AddManuallyFormV
             }}
           >
             <DialogContent>
-              <Stack direction="row" spacing={2}>
+              <Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
                 <AddressInput
                   label="Safe Account"
                   chain={selectedChain}
@@ -112,6 +118,7 @@ const AddManually = ({ handleAddSafe }: { handleAddSafe: (data: AddManuallyFormV
                     size="small"
                     className={networkSelectorCss.select}
                     variant="standard"
+                    sx={{ width: '100%' }}
                     IconComponent={ExpandMoreIcon}
                     renderValue={(value) => renderMenuItem(value, true)}
                     MenuProps={{
