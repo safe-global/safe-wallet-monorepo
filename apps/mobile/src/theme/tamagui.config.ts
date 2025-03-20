@@ -3,7 +3,7 @@ import { createDmSansFont } from '@tamagui/font-dm-sans'
 import { badgeTheme } from '@/src/components/Badge/theme'
 import { badgeTheme as NetworkBadgeTheme } from '@/src/components/NetworkBadge/theme'
 import { navbarTheme } from '@/src/features/Assets/components/Navbar/theme'
-import { tokens } from '@/src/theme/tokens'
+import { fontSizes, tokens } from '@/src/theme/tokens'
 import { createAnimations } from '@tamagui/animations-moti'
 import { inputTheme } from '../components/SafeInput/theme'
 import { safeTabTheme } from '@/src/components/SafeTab/theme'
@@ -15,6 +15,7 @@ const DmSansFont = createDmSansFont({
     600: { normal: 'DMSans-SemiBold', italic: 'DMSans-SemiBoldItalic' },
     700: { normal: 'DMSans-Bold', italic: 'DMSans-BoldItalic' },
   },
+  size: fontSizes,
 })
 export const config = createTamagui({
   fonts: {
