@@ -49,8 +49,8 @@ const ContentWrapper = ({ children }: { children: ReactElement | ReactElement[] 
   <Box sx={{ maxHeight: '550px', overflowY: 'auto', px: 2 }}>{children}</Box>
 )
 
-export const TxDetails = ({ safeTx, txData, showHashes: _showHashes }: TxDetailsProps) => {
-  const [showHashes, setShowHashes] = useState(_showHashes)
+export const TxDetails = ({ safeTx, txData, showHashes }: TxDetailsProps) => {
+  const [expandHashes, setExpandHashes] = useState(showHashes)
   const safeTxHash = useSafeTxHash({ safeTxData: safeTx.data })
   const domainHash = useDomainHash()
   const messageHash = useMessageHash({ safeTxData: safeTx.data })
@@ -156,7 +156,7 @@ export const TxDetails = ({ safeTx, txData, showHashes: _showHashes }: TxDetails
 
                 <TxDetailsRow label="Nonce">{safeTx.data.nonce}</TxDetailsRow>
 
-                <Button onClick={() => setShowHashes(!showHashes)} sx={{ all: 'unset' }}>
+                <Button onClick={() => setExpandHashes(!expandHashes)} sx={{ all: 'unset' }}>
                   <Typography
                     variant="body2"
                     fontWeight={700}
@@ -165,11 +165,12 @@ export const TxDetails = ({ safeTx, txData, showHashes: _showHashes }: TxDetails
                     color="primary.light"
                     sx={{ cursor: 'pointer' }}
                   >
-                    Transaction hashes <ExpandMoreIcon sx={{ transform: !showHashes ? 'rotate(180deg)' : undefined }} />
+                    Transaction hashes{' '}
+                    <ExpandMoreIcon sx={expandHashes ? { transform: 'rotate(180deg)' } : undefined} />
                   </Typography>
                 </Button>
 
-                {showHashes && domainHash && (
+                {expandHashes && domainHash && (
                   <TxDetailsRow label="Domain hash">
                     <Typography variant="body2" width="100%" sx={{ wordWrap: 'break-word' }}>
                       <HexEncodedData hexData={domainHash} limit={66} highlightFirstBytes={false} />
@@ -177,7 +178,7 @@ export const TxDetails = ({ safeTx, txData, showHashes: _showHashes }: TxDetails
                   </TxDetailsRow>
                 )}
 
-                {showHashes && messageHash && (
+                {expandHashes && messageHash && (
                   <TxDetailsRow label="Message hash">
                     <Typography variant="body2" width="100%" sx={{ wordWrap: 'break-word' }}>
                       <HexEncodedData hexData={messageHash} limit={66} highlightFirstBytes={false} />
@@ -185,7 +186,7 @@ export const TxDetails = ({ safeTx, txData, showHashes: _showHashes }: TxDetails
                   </TxDetailsRow>
                 )}
 
-                {showHashes && safeTxHash && (
+                {expandHashes && safeTxHash && (
                   <TxDetailsRow label="safeTxHash">
                     <Typography variant="body2" width="100%" sx={{ wordWrap: 'break-word' }}>
                       <HexEncodedData hexData={safeTxHash} limit={66} highlightFirstBytes={false} />
