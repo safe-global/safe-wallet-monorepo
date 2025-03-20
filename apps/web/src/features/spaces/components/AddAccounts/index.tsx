@@ -8,7 +8,7 @@ import SearchIcon from '@/public/images/common/search.svg'
 import { useOrganizationSafesCreateV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
 import debounce from 'lodash/debounce'
 import css from './styles.module.css'
-import { type AllSafeItems, useAllSafesGrouped } from '@/features/myAccounts/hooks/useAllSafesGrouped'
+import { type AllSafeItems, useOwnedSafesGrouped } from '@/features/myAccounts/hooks/useAllSafesGrouped'
 import { getComparator } from '@/features/myAccounts/utils/utils'
 import { useAppSelector } from '@/store'
 import { selectOrderByPreference } from '@/store/orderByPreferenceSlice'
@@ -49,7 +49,7 @@ const AddAccounts = () => {
   const [manualSafes, setManualSafes] = useState<SafeItems>([])
 
   const { orderBy } = useAppSelector(selectOrderByPreference)
-  const safes = useAllSafesGrouped()
+  const safes = useOwnedSafesGrouped()
   const sortComparator = getComparator(orderBy)
   const [addSafesToSpace] = useOrganizationSafesCreateV1Mutation()
   const spaceId = useCurrentSpaceId()
