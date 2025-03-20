@@ -57,7 +57,7 @@ const SpaceInfoModal = ({
     <Dialog open PaperProps={{ style: { width: '870px', maxWidth: '98%', borderRadius: '16px' } }} onClose={onClose}>
       <DialogContent dividers sx={{ p: 0, border: 0 }}>
         <Grid2 container>
-          <Grid2 size={6} p={5} display="flex" flexDirection="column">
+          <Grid2 size={{ xs: 12, md: 6 }} p={5} display="flex" flexDirection="column">
             <Typography component="div" variant="h1" mb={1} position="relative">
               Introducing spaces
               <Chip
@@ -94,7 +94,7 @@ const SpaceInfoModal = ({
             </List>
 
             {showButtons && (
-              <Stack gap={2} mt="auto">
+              <Stack gap={2} mt={{ xs: 3, md: 'auto' }}>
                 {onCreateSpace ? (
                   <Button
                     variant="contained"
@@ -128,8 +128,8 @@ const SpaceInfoModal = ({
             )}
           </Grid2>
 
-          <Grid2 size={6} justifyContent="center" flex={1} bgcolor="#121312">
-            <Image src={CreateSpaceInfo} alt="An illustration of multiple safe accounts" />
+          <Grid2 size={6} display={{ xs: 'none', md: 'flex' }} justifyContent="center" flex={1} bgcolor="#121312">
+            <Image src={CreateSpaceInfo} style={{ width: '100%' }} alt="An illustration of multiple safe accounts" />
           </Grid2>
         </Grid2>
 
