@@ -52,7 +52,7 @@ export const AddSignersFormContainer = () => {
     router.dismissAll()
     // closes first screen in stack
     router.back()
-    if (!hasActiveSafe) {
+    if (hasActiveSafe) {
       router.replace('/(tabs)')
     } else {
       // closes the "my accounts" screen modal
