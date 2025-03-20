@@ -5,6 +5,8 @@ import { mockedChains } from '@/src/store/constants'
 import { server } from '@/src/tests/server'
 import { http, HttpResponse } from 'msw'
 import { GATEWAY_URL } from '@/src/config/constants'
+import { faker } from '@faker-js/faker'
+import { shortenAddress } from '@/src/utils/formatters'
 
 jest.mock('expo-router', () => ({
   useNavigation: () => ({
@@ -17,7 +19,7 @@ jest.mock('expo-router', () => ({
 // Mock the safe item data
 const mockSafeItem = {
   SafeInfo: {
-    address: { value: '0x123' as `0x${string}`, name: 'Test Safe' },
+    address: { value: faker.finance.ethereumAddress() as `0x${string}`, name: 'Test Safe' },
     threshold: 1,
     owners: [{ value: '0x456' as `0x${string}` }],
     fiatTotal: '1000',
@@ -28,7 +30,7 @@ const mockSafeItem = {
 }
 
 // Create a constant object for the selector result
-const mockActiveSafe = { address: '0x789' as `0x${string}`, chainId: '1' }
+const mockActiveSafe = { address: faker.finance.ethereumAddress() as `0x${string}`, chainId: '1' }
 const mockChainIds = ['1'] as const
 
 // Mock Redux selectors
@@ -74,8 +76,25 @@ describe('MyAccountsContainer', () => {
     server.resetHandlers()
   })
 
-  it('renders account item with correct data', () => {
+  it('renders account item with correct data but no contact exists in address book', () => {
     render(<MyAccountsContainer item={mockSafeItem} onClose={mockOnClose} />)
+
+    expect(screen.getByText(shortenAddress(mockSafeItem.SafeInfo.address.value))).toBeTruthy()
+    expect(screen.getByText('1/1')).toBeTruthy()
+    expect(screen.getByText('$1000')).toBeTruthy()
+  })
+
+  it('renders account item with correct data when contact for safe exist', () => {
+    render(<MyAccountsContainer item={mockSafeItem} onClose={mockOnClose} />, {
+      initialStore: {
+        addressBook: {
+          contacts: {
+            [mockSafeItem.SafeInfo.address.value]: { name: 'Test Safe', value: mockSafeItem.SafeInfo.address.value },
+          },
+          selectedContact: null,
+        },
+      },
+    })
 
     expect(screen.getByText('Test Safe')).toBeTruthy()
     expect(screen.getByText('1/1')).toBeTruthy()

@@ -10,6 +10,7 @@ import { Link, useRouter } from 'expo-router'
 import { DropdownLabel } from '@/src/components/Dropdown/DropdownLabel'
 import { selectAppNotificationStatus } from '@/src/store/notificationsSlice'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
+import { selectContactByAddress } from '@/src/store/addressBookSlice'
 
 const dropdownLabelProps = {
   fontSize: '$5',
@@ -20,6 +21,7 @@ export const Navbar = () => {
   const insets = useSafeAreaInsets()
   const router = useRouter()
   const activeSafe = useDefinedActiveSafe()
+  const contact = useAppSelector(selectContactByAddress(activeSafe.address))
   const isAppNotificationEnabled = useAppSelector(selectAppNotificationStatus)
 
   const handleNotificationAccess = () => {
@@ -41,7 +43,7 @@ export const Navbar = () => {
         backgroundColor={'$background'}
       >
         <DropdownLabel
-          label={shortenAddress(activeSafe.address)}
+          label={contact ? contact.name : shortenAddress(activeSafe.address)}
           labelProps={dropdownLabelProps}
           leftNode={<Identicon address={activeSafe.address} size={30} />}
           onPress={() => {

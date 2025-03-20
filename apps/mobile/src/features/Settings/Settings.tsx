@@ -11,15 +11,17 @@ import { router } from 'expo-router'
 import { IdenticonWithBadge } from '@/src/features/Settings/components/IdenticonWithBadge'
 
 import { Navbar } from '@/src/features/Settings/components/Navbar/Navbar'
+import { type Contact } from '@/src/store/addressBookSlice'
 
 interface SettingsProps {
   data: SafeState
   address: `0x${string}`
   displayDevMenu: boolean
   onImplementationTap: () => void
+  contact: Contact | null
 }
 
-export const Settings = ({ address, data, onImplementationTap, displayDevMenu }: SettingsProps) => {
+export const Settings = ({ address, data, onImplementationTap, displayDevMenu, contact }: SettingsProps) => {
   const { owners = [], threshold, implementation } = data
 
   return (
@@ -42,8 +44,8 @@ export const Settings = ({ address, data, onImplementationTap, displayDevMenu }:
                   address={address}
                   badgeContent={owners.length ? `${threshold}/${owners.length}` : ''}
                 />
-                <H2 color="$foreground" fontWeight={600}>
-                  My DAO
+                <H2 color="$foreground" fontWeight={600} numberOfLines={1}>
+                  {contact?.name || 'Unnamed Safe'}
                 </H2>
                 <View>
                   <EthAddress
@@ -53,12 +55,6 @@ export const Settings = ({ address, data, onImplementationTap, displayDevMenu }:
                       color: '$colorSecondary',
                     }}
                   />
-                </View>
-
-                <View>
-                  <Skeleton>
-                    <Text color="$primary">saaafe.xyz</Text>
-                  </Skeleton>
                 </View>
               </YStack>
 
@@ -165,7 +161,7 @@ export const Settings = ({ address, data, onImplementationTap, displayDevMenu }:
 
                 {displayDevMenu && (
                   <View backgroundColor="$backgroundDark" padding="$4" borderRadius="$3" gap={'$2'}>
-                    <Text color="$foreground">Developer stuff</Text>
+                    <Text color="$foreground">Developer</Text>
                     <View backgroundColor={'$background'} borderRadius={'$3'}>
                       <Pressable
                         style={({ pressed }) => [{ opacity: pressed ? 0.5 : 1.0 }]}

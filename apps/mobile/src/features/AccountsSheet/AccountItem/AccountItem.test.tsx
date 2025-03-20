@@ -2,6 +2,8 @@ import React from 'react'
 import { render, screen, fireEvent } from '@/src/tests/test-utils'
 import { AccountItem } from './AccountItem'
 import { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
+import { faker } from '@faker-js/faker'
+import { shortenAddress } from '@/src/utils/formatters'
 
 jest.mock('expo-router', () => ({
   useNavigation: () => ({
@@ -12,9 +14,9 @@ jest.mock('expo-router', () => ({
 }))
 
 const mockAccount = {
-  address: { value: '0x123' as `0x${string}`, name: 'Test Account' },
+  address: { value: faker.finance.ethereumAddress() as `0x${string}`, name: 'Test Account' },
   threshold: 1,
-  owners: [{ value: '0x456' as `0x${string}` }],
+  owners: [{ value: faker.finance.ethereumAddress() as `0x${string}` }],
   fiatTotal: '1000',
   chainId: '1',
   queued: 0,
@@ -63,7 +65,32 @@ describe('AccountItem', () => {
       />,
     )
 
-    expect(screen.getByText('Test Account')).toBeTruthy()
+    expect(screen.getByText(shortenAddress(mockAccount.address.value))).toBeTruthy()
+    expect(screen.getByText('1/1')).toBeTruthy()
+    expect(screen.getByText('$1000')).toBeTruthy()
+  })
+
+  it('renders account details correctly when a contact for the address exists', () => {
+    render(
+      <AccountItem
+        account={mockAccount}
+        chains={mockChains as unknown as Chain[]}
+        activeAccount="0x789"
+        onSelect={mockOnSelect}
+      />,
+      {
+        initialStore: {
+          addressBook: {
+            contacts: {
+              [mockAccount.address.value]: { name: 'Test Safe', value: mockAccount.address.value },
+            },
+            selectedContact: null,
+          },
+        },
+      },
+    )
+
+    expect(screen.getByText('Test Safe')).toBeTruthy()
     expect(screen.getByText('1/1')).toBeTruthy()
     expect(screen.getByText('$1000')).toBeTruthy()
   })

@@ -22,7 +22,7 @@ export const DropdownLabel = ({ label, leftNode, onPress, labelProps = defaultLa
       {leftNode}
 
       <View justifyContent={'center'}>
-        <Text fontSize={labelProps.fontSize} fontWeight={labelProps.fontWeight}>
+        <Text fontSize={labelProps.fontSize} fontWeight={labelProps.fontWeight} numberOfLines={1} maxWidth={170}>
           {label}
         </Text>
       </View>
