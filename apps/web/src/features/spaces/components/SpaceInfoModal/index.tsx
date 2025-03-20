@@ -44,7 +44,15 @@ const ListIcon = () => (
   </ListItemIcon>
 )
 
-const SpaceInfoModal = ({ showButtons = true, onClose }: { showButtons?: boolean; onClose: () => void }) => {
+const SpaceInfoModal = ({
+  showButtons = true,
+  onClose,
+  onCreateSpace,
+}: {
+  showButtons?: boolean
+  onClose: () => void
+  onCreateSpace?: () => void
+}) => {
   return (
     <Dialog open PaperProps={{ style: { width: '870px', maxWidth: '98%', borderRadius: '16px' } }} onClose={onClose}>
       <DialogContent dividers sx={{ p: 0, border: 0 }}>
@@ -87,15 +95,31 @@ const SpaceInfoModal = ({ showButtons = true, onClose }: { showButtons?: boolean
 
             {showButtons && (
               <Stack gap={2} mt="auto">
-                <Link href={AppRoutes.welcome.spaces} passHref legacyBehavior>
+                {onCreateSpace ? (
                   <Button
                     variant="contained"
                     color="primary"
-                    onClick={() => trackEvent({ ...SPACE_EVENTS.OPEN_SPACE_LIST_PAGE, label: SPACE_LABELS.info_modal })}
+                    onClick={() => {
+                      trackEvent({ ...SPACE_EVENTS.CREATE_SPACE_MODAL, label: SPACE_LABELS.info_modal })
+                      onClose()
+                      onCreateSpace()
+                    }}
                   >
                     Create a space
                   </Button>
-                </Link>
+                ) : (
+                  <Link href={AppRoutes.welcome.spaces} passHref legacyBehavior>
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={() =>
+                        trackEvent({ ...SPACE_EVENTS.OPEN_SPACE_LIST_PAGE, label: SPACE_LABELS.info_modal })
+                      }
+                    >
+                      Create a space
+                    </Button>
+                  </Link>
+                )}
 
                 <Button variant="text" color="primary" onClick={onClose}>
                   Maybe later
