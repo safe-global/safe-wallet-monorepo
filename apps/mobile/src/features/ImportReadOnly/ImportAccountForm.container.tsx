@@ -1,18 +1,22 @@
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import React, { useCallback, useEffect, useState } from 'react'
 import { makeSafeId } from '@/src/utils/formatters'
-import { useAppSelector } from '@/src/store/hooks'
+import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
 import { selectAllChainsIds } from '@/src/store/chains'
 import { useLazySafesGetOverviewForManyQuery } from '@safe-global/store/gateway/safes'
 import { isValidAddress } from '@safe-global/utils/validation'
 import { parsePrefixedAddress } from '@safe-global/utils/addresses'
 import { ImportAccountFormView } from '@/src/features/ImportReadOnly/components/ImportAccountFormView'
+import { setActiveSafe } from '@/src/store/activeSafeSlice'
+import { Address } from '@/src/types/address'
+import { addSafe } from '@/src/store/safesSlice'
 
 export const ImportAccountFormContainer = () => {
   const params = useLocalSearchParams<{ safeAddress: string }>()
   const [safeAddress, setSafeAddress] = useState(params.safeAddress || '')
   const chainIds = useAppSelector(selectAllChainsIds)
   const router = useRouter()
+  const dispatch = useAppDispatch()
   const [isEnteredAddressValid, setEnteredAddressValid] = useState(false)
   const [error, setError] = useState<string | undefined>(undefined)
   const [addressWithoutPrefix, setAddressWithoutPrefix] = useState<string | undefined>(undefined)
@@ -52,6 +56,17 @@ export const ImportAccountFormContainer = () => {
   const canContinue = isEnteredAddressValid && safeExists && !error
 
   const handleContinue = useCallback(() => {
+    if (!result.data?.[0]) {
+      return
+    }
+    dispatch(addSafe({ SafeInfo: result.data?.[0], chains: [result.data?.[0].chainId as string] }))
+    dispatch(
+      setActiveSafe({
+        address: addressWithoutPrefix as Address,
+        chainId: result.data?.[0].chainId as string,
+      }),
+    )
+
     router.push(
       `/(import-accounts)/signers?safeAddress=${addressWithoutPrefix}&chainId=${result.data?.[0].chainId}&import_safe=true`,
     )
