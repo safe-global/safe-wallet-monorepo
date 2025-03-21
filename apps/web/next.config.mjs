@@ -6,9 +6,15 @@ import remarkHeadingId from 'remark-heading-id'
 import createMDX from '@next/mdx'
 import remarkFrontmatter from 'remark-frontmatter'
 import remarkMdxFrontmatter from 'remark-mdx-frontmatter'
-import { version } from './package.json'
+import { readFile } from 'fs/promises'
+import { fileURLToPath } from 'url'
 
 const SERVICE_WORKERS_PATH = './src/service-workers'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const pkgPath = path.join(__dirname, 'package.json')
+const data = await readFile(pkgPath, 'utf-8')
+const pkg = JSON.parse(data)
 
 const withPWA = withPWAInit({
   dest: 'public',
@@ -36,7 +42,7 @@ const withPWA = withPWAInit({
     },
   ],
 
-  cacheId: version,
+  cacheId: pkg.version,
 })
 
 /** @type {import('next').NextConfig} */
