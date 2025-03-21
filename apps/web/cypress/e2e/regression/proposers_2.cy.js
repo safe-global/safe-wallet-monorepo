@@ -31,9 +31,9 @@ describe('Proposers 2 tests', () => {
     createtx.setSendValue(sendValue)
     createtx.clickOnNextBtn()
     tx.selectExecuteNow()
+    createtx.clickOnContinueSignTransactionBtn()
+    createtx.clickOnAcknowledgement()
     createtx.verifySubmitBtnIsEnabled()
-    tx.selectExecuteLater()
-    tx.verifySignBtnEnabled()
   })
 
   it('Verify a proposers is capable of propose transactions', () => {

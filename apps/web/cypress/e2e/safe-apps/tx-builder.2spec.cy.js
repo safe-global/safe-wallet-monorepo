@@ -151,6 +151,8 @@ describe('Transaction Builder 2 tests', { defaultCommandTimeout: 20000 }, () => 
       getBody().findByText(safeapps.sendBatchStr).click()
     })
 
+    createtx.clickOnContinueSignTransactionBtn()
+    createtx.clickOnAcknowledgement()
     createtx.clickOnSignTransactionBtn()
     createtx.clickViewTransaction()
     navigation.clickOnWalletExpandMoreIcon()
@@ -159,6 +161,9 @@ describe('Transaction Builder 2 tests', { defaultCommandTimeout: 20000 }, () => 
 
     createtx.clickOnConfirmTransactionBtn()
     createtx.clickOnNoLaterOption()
+
+    createtx.clickOnContinueSignTransactionBtn()
+    createtx.clickOnAcknowledgement()
     createtx.clickOnSignTransactionBtn()
     navigation.clickOnWalletExpandMoreIcon()
     navigation.clickOnDisconnectBtn()

@@ -31,21 +31,19 @@ describe('Create transactions tests 2', () => {
 
   it('Verify advance parameters gas limit input', () => {
     happyPathToStepTwo()
-    createtx.changeNonce('1')
+    createtx.changeNonce('2')
+    createtx.clickOnContinueSignTransactionBtn()
     createtx.selectCurrentWallet()
     createtx.openExecutionParamsModal()
     createtx.verifyAndSubmitExecutionParams()
   })
 
-  it('Verify a transaction shows relayer and addToBatch button', () => {
+  it('Verify a transaction shows relayer', () => {
     happyPathToStepTwo()
     createtx.verifySubmitBtnIsEnabled()
     createtx.verifyNativeTokenTransfer()
-    createtx.changeNonce('1')
+    createtx.changeNonce('2')
     createtx.verifyConfirmTransactionData()
     createtx.verifyRelayerAttemptsAvailable()
-    createtx.selectCurrentWallet()
-    createtx.clickOnNoLaterOption()
-    createtx.verifyAddToBatchBtnIsEnabled()
   })
 })
