@@ -32,6 +32,7 @@ export type SignOrExecuteProps = {
   origin?: string
   showMethodCall?: boolean
   tooltip?: string
+  isMassPayout?: boolean
 }
 
 export const SignOrExecuteFormV2 = ({
@@ -39,7 +40,8 @@ export const SignOrExecuteFormV2 = ({
   onSubmit,
   isCreation,
   origin,
-  safeTxContext: { safeTx, safeTxError, isMassPayout, setIsMassPayout },
+  safeTxContext: { safeTx, safeTxError },
+  isMassPayout = false,
   ...props
 }: SignOrExecuteProps & {
   chainId: ReturnType<typeof useChainId>
@@ -91,11 +93,8 @@ export const SignOrExecuteFormV2 = ({
         origin,
         isMassPayout,
       )
-
-      // Reset mass payout flag
-      setIsMassPayout(false)
     },
-    [chainId, isCreation, onSubmit, trigger, signer?.isSafe, origin, isMassPayout, setIsMassPayout],
+    [chainId, isCreation, onSubmit, trigger, signer?.isSafe, origin, isMassPayout],
   )
 
   const onRoleExecutionSubmit = useCallback<typeof onFormSubmit>(

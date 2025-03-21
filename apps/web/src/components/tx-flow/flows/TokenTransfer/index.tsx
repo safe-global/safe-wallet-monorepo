@@ -88,7 +88,7 @@ const TokenTransferFlow = ({ txNonce, ...params }: MultiTokenTransferFlowProps) 
       },
       {
         txLayoutProps: { title: 'Confirm transaction details', fixedNonce: true },
-        content: <ConfirmTxDetails key={2} onSubmit={() => {}} />,
+        content: <ConfirmTxDetails key={2} onSubmit={() => {}} isMassPayout={data.recipients.length > 1} />,
       },
     ],
     [nextStep, data, txNonce],

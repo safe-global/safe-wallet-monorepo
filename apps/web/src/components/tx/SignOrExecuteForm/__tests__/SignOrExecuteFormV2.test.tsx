@@ -137,8 +137,6 @@ describe('SignOrExecuteFormV2', () => {
           {
             safeTx: safeTxBuilder().build(),
             safeTxError: undefined,
-            isMassPayout: false,
-            setIsMassPayout: jest.fn(),
           } as unknown as SafeTxContextParams
         }
         onSubmit={jest.fn()}
@@ -164,8 +162,6 @@ describe('SignOrExecuteFormV2', () => {
           {
             safeTx: safeTxBuilder().build(),
             safeTxError: undefined,
-            isMassPayout: false,
-            setIsMassPayout: jest.fn(),
           } as unknown as SafeTxContextParams
         }
         onSubmit={jest.fn()}
@@ -191,8 +187,6 @@ describe('SignOrExecuteFormV2', () => {
           {
             safeTx: safeTxBuilder().build(),
             safeTxError: undefined,
-            isMassPayout: false,
-            setIsMassPayout: jest.fn(),
           } as unknown as SafeTxContextParams
         }
         onSubmit={jest.fn()}
@@ -217,8 +211,6 @@ describe('SignOrExecuteFormV2', () => {
           {
             safeTx: safeTxBuilder().build(),
             safeTxError: undefined,
-            isMassPayout: false,
-            setIsMassPayout: jest.fn(),
           } as unknown as SafeTxContextParams
         }
         onSubmit={jest.fn()}
