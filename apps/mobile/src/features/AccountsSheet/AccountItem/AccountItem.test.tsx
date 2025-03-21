@@ -67,7 +67,7 @@ describe('AccountItem', () => {
 
     expect(screen.getByText(shortenAddress(mockAccount.address.value))).toBeTruthy()
     expect(screen.getByText('1/1')).toBeTruthy()
-    expect(screen.getByText('$1000')).toBeTruthy()
+    expect(screen.getByText('$ 1,000.00')).toBeTruthy()
   })
 
   it('renders account details correctly when a contact for the address exists', () => {

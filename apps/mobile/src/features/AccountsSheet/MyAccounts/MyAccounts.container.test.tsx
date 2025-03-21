@@ -81,7 +81,7 @@ describe('MyAccountsContainer', () => {
 
     expect(screen.getByText(shortenAddress(mockSafeItem.SafeInfo.address.value))).toBeTruthy()
     expect(screen.getByText('1/1')).toBeTruthy()
-    expect(screen.getByText('$1000')).toBeTruthy()
+    expect(screen.getByText('$ 1,000.00')).toBeTruthy()
   })
 
   it('renders account item with correct data when contact for safe exist', () => {
