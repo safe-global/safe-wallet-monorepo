@@ -34,12 +34,13 @@ function aggregateFiatTotalsByChainId(items: SafeOverview[]): FiatTotalByChain[]
 }
 
 function getTopFiatTotals(chainTotals: FiatTotalByChain[]): FiatTotalByChain[] {
-  if (chainTotals.length <= 5) {
+  const MAX_NETWORKS = 5
+  if (chainTotals.length <= MAX_NETWORKS) {
     return chainTotals
   }
 
-  const topFour = chainTotals.slice(0, 4)
-  const rest = chainTotals.slice(4)
+  const topTotals = chainTotals.slice(0, MAX_NETWORKS - 1)
+  const rest = chainTotals.slice(MAX_NETWORKS - 1)
 
   const otherTotal = rest.reduce((sum, item) => sum + item.total, 0)
 
@@ -48,7 +49,7 @@ function getTopFiatTotals(chainTotals: FiatTotalByChain[]): FiatTotalByChain[] {
     total: otherTotal,
   }
 
-  return [...topFour, otherItem]
+  return [...topTotals, otherItem]
 }
 
 const AggregatedBalanceByChain = ({ fiatTotalByChain }: { fiatTotalByChain: FiatTotalByChain }) => {
