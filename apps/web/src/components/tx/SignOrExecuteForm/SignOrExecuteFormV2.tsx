@@ -37,15 +37,17 @@ export type SignOrExecuteProps = {
 
 export const SignOrExecuteFormV2 = ({
   chainId,
+  safeTx,
+  safeTxError,
   onSubmit,
   isCreation,
   origin,
-  safeTxContext: { safeTx, safeTxError },
   isMassPayout = false,
   ...props
 }: SignOrExecuteProps & {
   chainId: ReturnType<typeof useChainId>
-  safeTxContext: ReturnType<typeof useSafeTxContext>
+  safeTx: ReturnType<typeof useSafeTx>
+  safeTxError: ReturnType<typeof useSafeTxError>
   isCreation?: boolean
   txDetails?: TransactionDetails
   txPreview?: TransactionPreview
@@ -142,9 +144,11 @@ export const SignOrExecuteFormV2 = ({
   }
 }
 
-const useSafeTxContext = () => useContext(SafeTxContext)
+const useSafeTx = () => useContext(SafeTxContext).safeTx
+const useSafeTxError = () => useContext(SafeTxContext).safeTxError
 
 export default madProps(SignOrExecuteFormV2, {
   chainId: useChainId,
-  safeTxContext: useSafeTxContext,
+  safeTx: useSafeTx,
+  safeTxError: useSafeTxError,
 })
