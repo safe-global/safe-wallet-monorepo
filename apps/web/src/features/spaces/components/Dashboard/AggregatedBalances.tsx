@@ -117,7 +117,8 @@ const AggregatedBalanceSkeleton = () => {
   return (
     <Card sx={{ p: 2, mb: 2 }}>
       <Skeleton variant="rounded" width={100} height={20} sx={{ mb: 1 }} />
-      <Skeleton variant="rounded" width={160} height={40} />
+      <Skeleton variant="rounded" width={160} height={40} sx={{ mb: 3 }} />
+      <Skeleton variant="rounded" width={200} height={58} />
     </Card>
   )
 }
