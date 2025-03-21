@@ -134,7 +134,7 @@ export const Settings = ({ address, data, onImplementationTap, displayDevMenu }:
                 </View>
 
                 <View backgroundColor="$backgroundDark" padding="$4" borderRadius="$3" gap={'$2'}>
-                  <Text color="$foreground">General</Text>
+                  <Text color="$colorSecondary">General</Text>
                   <View backgroundColor={'$background'} borderRadius={'$3'}>
                     <Pressable
                       style={({ pressed }) => [{ opacity: pressed ? 0.5 : 1.0 }]}

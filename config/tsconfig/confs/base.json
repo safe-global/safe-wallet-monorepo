@@ -2,7 +2,8 @@
   "$schema": "https://json.schemastore.org/tsconfig",
   "compilerOptions": {
     "paths": {
-      "@safe-global/store/*": ["packages/store/src/*"]
+      "@safe-global/store/*": ["packages/store/src/*"],
+      "@safe-global/utils/*": ["packages/utils/src/*"]
     },
     "importHelpers": true,
     "allowJs": false,

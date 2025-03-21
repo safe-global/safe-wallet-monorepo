@@ -4657,6 +4657,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@hookform/resolvers@npm:^4.1.3":
+  version: 4.1.3
+  resolution: "@hookform/resolvers@npm:4.1.3"
+  dependencies:
+    "@standard-schema/utils": "npm:^0.3.0"
+  peerDependencies:
+    react-hook-form: ^7.0.0
+  checksum: 10/7cd4a872509c79053fd3a377bc2831348453b60f1af41564442b574d4f36b6303f751e715d01c2d9291b484581ae0152045e779aefafdd66802055e24eff7762
+  languageName: node
+  linkType: hard
+
 "@humanfs/core@npm:^0.19.1":
   version: 0.19.1
   resolution: "@humanfs/core@npm:0.19.1"
@@ -6432,9 +6443,20 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-native-firebase/app@npm:^21.8.0":
-  version: 21.10.1
-  resolution: "@react-native-firebase/app@npm:21.10.1"
+"@react-native-firebase/analytics@npm:^21.12.0":
+  version: 21.12.0
+  resolution: "@react-native-firebase/analytics@npm:21.12.0"
+  dependencies:
+    superstruct: "npm:^2.0.2"
+  peerDependencies:
+    "@react-native-firebase/app": 21.12.0
+  checksum: 10/e60120858773abcfd537b0653bc0b59fbb54a1f5bd0a6c39a40304bc6209edf660a3e613bf2fd4b44ad0a3227fbbfdf413bb9ba100c3141ec9db453cc683c3a2
+  languageName: node
+  linkType: hard
+
+"@react-native-firebase/app@npm:^21.12.0":
+  version: 21.12.0
+  resolution: "@react-native-firebase/app@npm:21.12.0"
   dependencies:
     firebase: "npm:11.3.1"
   peerDependencies:
@@ -6444,20 +6466,35 @@ __metadata:
   peerDependenciesMeta:
     expo:
       optional: true
-  checksum: 10/3d1f1e578497b1bb3a9c101698d0ba40ed97e6bcde906e2bcf59286946420bc7b681fb5f7650adc4f8485c276ea9b4200930ddbd33e88854cf343db0c521e699
+  checksum: 10/e7b2a2e1d1537fc796040dd916d6af2774b0464146a067e3dc2df70dfd0f8ee9f27f00135d753026f7e22819d0e14359d5d43128c9489c23648db8e595196fb3
   languageName: node
   linkType: hard
 
-"@react-native-firebase/messaging@npm:^21.8.0":
-  version: 21.10.1
-  resolution: "@react-native-firebase/messaging@npm:21.10.1"
+"@react-native-firebase/crashlytics@npm:^21.12.0":
+  version: 21.12.0
+  resolution: "@react-native-firebase/crashlytics@npm:21.12.0"
+  dependencies:
+    stacktrace-js: "npm:^2.0.2"
   peerDependencies:
-    "@react-native-firebase/app": 21.10.1
+    "@react-native-firebase/app": 21.12.0
     expo: ">=47.0.0"
   peerDependenciesMeta:
     expo:
       optional: true
-  checksum: 10/5a6d3dcc9f2ad593b6819ba4d0d6a70550d944daecd8e2e8fe0a2a87692a2e43ad849ff01882ebaaba633392cdd1a12123fc69608e1b9e18c7e4661c18faa2df
+  checksum: 10/5eda198f58213d2e305930d5630144151b2d0826c2282cd045d7753c2d3f799020bf1ee472cb10147fef6bb99679ea82c0ab1b53b3eef3c72b03ae1b1c7f2ec6
+  languageName: node
+  linkType: hard
+
+"@react-native-firebase/messaging@npm:^21.12.0":
+  version: 21.12.0
+  resolution: "@react-native-firebase/messaging@npm:21.12.0"
+  peerDependencies:
+    "@react-native-firebase/app": 21.12.0
+    expo: ">=47.0.0"
+  peerDependenciesMeta:
+    expo:
+      optional: true
+  checksum: 10/3295e7e7b0c308d5588f87ddebc6e899e8ea46f6eeb1a83e373403afe68cdaf3a6a9647e954e46cc63710bfe1831ec9b5b4a23831bae6ebe1a15186c09f6e576
   languageName: node
   linkType: hard
 
@@ -7275,14 +7312,17 @@ __metadata:
     "@formatjs/intl-numberformat": "npm:^8.15.3"
     "@formatjs/intl-pluralrules": "npm:^5.4.3"
     "@gorhom/bottom-sheet": "npm:^5.1.1"
+    "@hookform/resolvers": "npm:^4.1.3"
     "@notifee/react-native": "npm:^9.1.8"
     "@react-native-async-storage/async-storage": "npm:1.23.1"
     "@react-native-clipboard/clipboard": "npm:^1.15.0"
     "@react-native-community/blur": "npm:^4.4.1"
     "@react-native-community/datetimepicker": "npm:8.2.0"
     "@react-native-community/slider": "npm:4.5.5"
-    "@react-native-firebase/app": "npm:^21.8.0"
-    "@react-native-firebase/messaging": "npm:^21.8.0"
+    "@react-native-firebase/analytics": "npm:^21.12.0"
+    "@react-native-firebase/app": "npm:^21.12.0"
+    "@react-native-firebase/crashlytics": "npm:^21.12.0"
+    "@react-native-firebase/messaging": "npm:^21.12.0"
     "@react-native-menu/menu": "npm:^1.1.6"
     "@react-native/babel-preset": "npm:^0.76.2"
     "@react-navigation/material-top-tabs": "npm:^7.1.0"
@@ -7354,6 +7394,7 @@ __metadata:
     moti: "npm:^0.29.0"
     react: "npm:18.3.1"
     react-dom: "npm:^18.3.1"
+    react-hook-form: "npm:^7.54.2"
     react-native: "npm:0.76.7"
     react-native-collapsible-tab-view: "npm:^8.0.0"
     react-native-device-crypto: "npm:^0.1.7"
@@ -7386,6 +7427,7 @@ __metadata:
     typescript: "npm:~5.3.3"
     typescript-eslint: "npm:^8.24.1"
     webpack: "npm:^5.97.1"
+    zod: "npm:^3.24.2"
   languageName: unknown
   linkType: soft
 
@@ -8146,6 +8188,13 @@ __metadata:
     "@stablelib/random": "npm:^1.0.2"
     "@stablelib/wipe": "npm:^1.0.1"
   checksum: 10/fb5469e390ee2515d926633e3e179038894ac4f5e8c8cd2c2fc912022e34a051112eab0fe80c4dbc6e59129679844182562a036abff89444e5c4a05dd42ed329
+  languageName: node
+  linkType: hard
+
+"@standard-schema/utils@npm:^0.3.0":
+  version: 0.3.0
+  resolution: "@standard-schema/utils@npm:0.3.0"
+  checksum: 10/7084f875d322792f2e0a5904009434c8374b9345b09ba89828b68fd56fa3c2b366d35bf340d9e8c72736ef01793c2f70d350c372ed79845dc3566c58d34b4b51
   languageName: node
   linkType: hard
 
@@ -26684,6 +26733,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-hook-form@npm:^7.54.2":
+  version: 7.54.2
+  resolution: "react-hook-form@npm:7.54.2"
+  peerDependencies:
+    react: ^16.8.0 || ^17 || ^18 || ^19
+  checksum: 10/b156d15b6246c76d0275e5722d9056014693e014d0e3dec06e44bf2672ee549aaba4366de5144d18c4cab29e631f3b2b84269d4fd5727ca17aad9b970fde6960
+  languageName: node
+  linkType: hard
+
 "react-is@npm:^16.12.0 || ^17.0.0 || ^18.0.0, react-is@npm:^18.0.0, react-is@npm:^18.2.0, react-is@npm:^18.3.1":
   version: 18.3.1
   resolution: "react-is@npm:18.3.1"
@@ -29807,6 +29865,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"superstruct@npm:^2.0.2":
+  version: 2.0.2
+  resolution: "superstruct@npm:2.0.2"
+  checksum: 10/10e1944a9da4baee187fbaa6c5d97d7af266b55786dfe50bce67f0f1e7d93f1a5a42dd51e245a2e16404f8336d07c21c67f1c1fbc4ad0a252d3d2601d6c926da
+  languageName: node
+  linkType: hard
+
 "supports-color@npm:^5.3.0":
   version: 5.5.0
   resolution: "supports-color@npm:5.5.0"
@@ -32889,6 +32954,13 @@ __metadata:
   version: 2.1.2
   resolution: "yoctocolors-cjs@npm:2.1.2"
   checksum: 10/d731e3ba776a0ee19021d909787942933a6c2eafb2bbe85541f0c59aa5c7d475ce86fcb860d5803105e32244c3dd5ba875b87c4c6bf2d6f297da416aa54e556f
+  languageName: node
+  linkType: hard
+
+"zod@npm:^3.24.2":
+  version: 3.24.2
+  resolution: "zod@npm:3.24.2"
+  checksum: 10/604c62a8cf8e330d78b106a557f4b44f5d14845d20b1360a423ccc09b58cb8525ccf7e4b40cf1bd4852d22393d2c67774b5817ec5a2fedab25f543b36ed15943
   languageName: node
   linkType: hard
 

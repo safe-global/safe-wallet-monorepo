@@ -90,6 +90,7 @@ export default {
       ],
       '@react-native-firebase/app',
       '@react-native-firebase/messaging',
+      '@react-native-firebase/crashlytics',
       [
         'react-native-share',
         {

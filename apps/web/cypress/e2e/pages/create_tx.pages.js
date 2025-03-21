@@ -54,6 +54,7 @@ const toggleUntrustedBtn = '[data-testid="toggle-untrusted"]'
 const simulateTxBtn = '[data-testid="simulate-btn"]'
 const simulateSuccess = '[data-testid="simulation-success-msg"]'
 const signBtn = '[data-testid="sign-btn"]'
+const continueSignBtn = '[data-testid="continue-sign-btn"]'
 export const altImgDai = 'img[alt="DAI"]'
 export const altImgCow = 'img[alt="COW"]'
 export const altImgWeth = 'img[alt="WETH"]'
@@ -85,6 +86,7 @@ const QueueLabel = 'needs to be executed first'
 const TransactionSummary = 'Send '
 const transactionsPerHrStr = 'free transactions left today'
 const txHashesStr = 'Transaction hashes'
+const txAcknowledgementStr = 'I understand what'
 
 const maxAmountBtnStr = 'Max'
 const nextBtnStr = 'Next'
@@ -700,14 +702,8 @@ export function verifyNonceInputValue(value) {
   cy.get(nonceInput).should('have.value', value)
 }
 
-export function verifyConfirmTransactionData() {
+export function clickOnYesOption() {
   cy.contains(yesStr).should('exist').click()
-  cy.contains(estimatedFeeStr).should('exist')
-
-  // Asserting the sponsored info is present
-  cy.contains(executeStr).scrollIntoView().should('be.visible')
-
-  cy.get('span').contains(estimatedFeeStr)
 }
 
 export function openExecutionParamsModal() {
@@ -736,6 +732,16 @@ export function clickOnNoLaterOption() {
 export function clickOnSignTransactionBtn() {
   cy.get(signBtn).click()
 }
+
+export function clickOnContinueSignTransactionBtn() {
+  cy.get(continueSignBtn).click()
+}
+
+export function clickOnAcknowledgement() {
+  cy.contains(txAcknowledgementStr).click()
+}
+
+txAcknowledgementStr
 
 export function clickOnConfirmTransactionBtn() {
   cy.get('button').contains(confirmBtnStr).click()

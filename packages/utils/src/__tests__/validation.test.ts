@@ -6,7 +6,7 @@ import {
   validateDecimalLength,
   isValidAddress,
   isValidURL,
-} from '@/utils/validation'
+} from '@safe-global/utils/validation'
 
 describe('validation', () => {
   describe('Ethereum address validation', () => {

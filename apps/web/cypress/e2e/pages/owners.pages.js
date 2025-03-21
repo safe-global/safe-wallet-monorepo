@@ -34,6 +34,7 @@ const notConnectedStatus = 'Connect'
 const e2eWalletStr = 'E2E Wallet'
 const max50charsLimitStr = 'Maximum 50 symbols'
 const executeBtnStr = 'Execute'
+const continueBtnStr = 'Continue'
 const backbtnStr = 'Back'
 const removeOwnerStr = 'Remove signer'
 const selectedOwnerStr = 'Selected signer'
@@ -246,7 +247,7 @@ export function clickOnBackBtn() {
 
 export function verifyConfirmTransactionWindowDisplayed() {
   cy.get('div').contains(constants.transactionStatus.confirm).should('exist')
-  cy.get('button').contains(executeBtnStr).should('exist')
+  cy.get('button').contains(continueBtnStr).should('exist')
   cy.get('button').contains(backbtnStr).should('exist')
 }
 

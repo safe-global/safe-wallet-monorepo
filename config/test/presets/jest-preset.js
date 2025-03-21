@@ -6,6 +6,8 @@ module.exports = {
   moduleNameMapper: {
     '.+\\.(css|style|less|sass|scss|png|jpg|ttf|woff|woff2|mp4)$': 'jest-transform-stub',
     // Jest by default doesn't support absolute imports out of the box
+    '^@safe-global/utils/(.*)$': '<rootDir>/../../packages/utils/src/$1',
+    '^@safe-global/store/(.*)$': '<rootDir>/../../packages/store/src/$1',
     '^src/(.*)$': '<rootDir>/src/$1',
   },
   modulePathIgnorePatterns: ['<rootDir>/node_modules'],
