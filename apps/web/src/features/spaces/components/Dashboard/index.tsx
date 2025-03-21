@@ -1,7 +1,7 @@
 import MembersCard from '@/features/spaces/components/Dashboard/MembersCard'
 import NewFeaturesCard from '@/features/spaces/components/Dashboard/NewFeaturesCard'
 import SpacesCTACard from '@/features/spaces/components/Dashboard/SpacesCTACard'
-import { Grid2, Stack, Typography } from '@mui/material'
+import { Card, Grid2, Stack, Typography } from '@mui/material'
 import Grid from '@mui/material/Grid2'
 import { useSpaceSafes } from '@/features/spaces/hooks/useSpaceSafes'
 import SafesList from '@/features/myAccounts/components/SafesList'
@@ -17,6 +17,7 @@ import { useSpaceMembersByStatus, useIsInvited } from '@/features/spaces/hooks/u
 import PreviewInvite from '../InviteBanner/PreviewInvite'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import Track from '@/components/common/Track'
+import AggregatedBalance from '@/features/spaces/components/Dashboard/AggregatedBalances'
 
 const ViewAllLink = ({ url }: { url: LinkProps['href'] }) => {
   return (
@@ -54,33 +55,39 @@ const SpaceDashboard = () => {
 
       {safes.length > 0 ? (
         <>
-          <Typography variant="h1" fontWeight={700} mb={4}>
-            Dashboard
-          </Typography>
+          <Grid container>
+            <Grid size={12}>
+              <AggregatedBalance safes={safes} />
+            </Grid>
+          </Grid>
 
           <Grid container spacing={3}>
             <Grid size={{ xs: 12, md: 8 }}>
-              <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
-                <Typography variant="h5">Safe Accounts ({safes.length})</Typography>
-                {spaceId && (
-                  <Track {...SPACE_EVENTS.VIEW_ALL_ACCOUNTS}>
-                    <ViewAllLink url={{ pathname: AppRoutes.spaces.safeAccounts, query: { spaceId } }} />
-                  </Track>
-                )}
-              </Stack>
-              <SafesList safes={safesToDisplay} isSpaceSafe />
+              <Card sx={{ p: 2 }}>
+                <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
+                  <Typography variant="h5">Safe Accounts ({safes.length})</Typography>
+                  {spaceId && (
+                    <Track {...SPACE_EVENTS.VIEW_ALL_ACCOUNTS}>
+                      <ViewAllLink url={{ pathname: AppRoutes.spaces.safeAccounts, query: { spaceId } }} />
+                    </Track>
+                  )}
+                </Stack>
+                <SafesList safes={safesToDisplay} isSpaceSafe />
+              </Card>
             </Grid>
             <Grid size={{ xs: 12, md: 4 }}>
-              <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
-                <Typography variant="h5">Members ({activeMembers.length})</Typography>
+              <Card sx={{ p: 2 }}>
+                <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
+                  <Typography variant="h5">Members ({activeMembers.length})</Typography>
 
-                {spaceId && (
-                  <Track {...SPACE_EVENTS.VIEW_ALL_MEMBERS}>
-                    <ViewAllLink url={{ pathname: AppRoutes.spaces.members, query: { spaceId } }} />
-                  </Track>
-                )}
-              </Stack>
-              <DashboardMembersList members={membersToDisplay} />
+                  {spaceId && (
+                    <Track {...SPACE_EVENTS.VIEW_ALL_MEMBERS}>
+                      <ViewAllLink url={{ pathname: AppRoutes.spaces.members, query: { spaceId } }} />
+                    </Track>
+                  )}
+                </Stack>
+                <DashboardMembersList members={membersToDisplay} />
+              </Card>
             </Grid>
           </Grid>
         </>
