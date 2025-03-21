@@ -1,9 +1,6 @@
 import ModalDialog from '@/components/common/ModalDialog'
 import { DialogContent, DialogActions, Button, Typography, Select, MenuItem, Stack } from '@mui/material'
-import {
-  type UserOrganization,
-  useUserOrganizationsUpdateRoleV1Mutation,
-} from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
+import { type Member, useMembersUpdateRoleV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import { useState } from 'react'
@@ -14,12 +11,12 @@ import { MemberRole } from '@/features/spaces/hooks/useSpaceMembers'
 
 type MemberField = {
   name: string
-  role: UserOrganization['role']
+  role: Member['role']
 }
 
-const EditMemberDialog = ({ member, handleClose }: { member: UserOrganization; handleClose: () => void }) => {
+const EditMemberDialog = ({ member, handleClose }: { member: Member; handleClose: () => void }) => {
   const spaceId = useCurrentSpaceId()
-  const [editMember] = useUserOrganizationsUpdateRoleV1Mutation()
+  const [editMember] = useMembersUpdateRoleV1Mutation()
   const [error, setError] = useState<string>()
 
   const methods = useForm<MemberField>({
@@ -42,7 +39,7 @@ const EditMemberDialog = ({ member, handleClose }: { member: UserOrganization; h
 
     try {
       const { error } = await editMember({
-        orgId: Number(spaceId),
+        spaceId: Number(spaceId),
         userId: member.user.id,
         updateRoleDto: {
           role: data.role,

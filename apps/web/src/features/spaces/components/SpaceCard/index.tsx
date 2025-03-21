@@ -3,7 +3,7 @@ import { Box, Card, Stack, Typography } from '@mui/material'
 import Link from 'next/link'
 
 import css from './styles.module.css'
-import type { GetOrganizationResponse } from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
+import type { GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import classNames from 'classnames'
 import { useSpaceSafeCount } from '@/features/spaces/hooks/useSpaceSafeCount'
 import InitialsAvatar from '@/features/spaces/components/InitialsAvatar'
@@ -47,11 +47,11 @@ const SpaceCard = ({
   isCompact = false,
   isLink = true,
 }: {
-  space: GetOrganizationResponse
+  space: GetSpaceResponse
   isCompact?: boolean
   isLink?: boolean
 }) => {
-  const { id, name, userOrganizations: members } = space
+  const { id, name, members } = space
   const numberOfMembers = members.length
   const numberOfAccounts = useSpaceSafeCount(id)
   const isAdmin = useIsAdmin(id)

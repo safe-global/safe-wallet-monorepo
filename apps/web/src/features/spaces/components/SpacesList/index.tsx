@@ -6,10 +6,8 @@ import SpacesIcon from '@/public/images/spaces/spaces.svg'
 import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
 import { Box, Button, Card, Grid2, Link, Typography } from '@mui/material'
-import type { GetOrganizationResponse } from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
-import { useOrganizationsGetV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
-import type { UserWithWallets } from '@safe-global/store/gateway/AUTO_GENERATED/users'
-import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
+import { type GetSpaceResponse, useSpacesGetV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { type UserWithWallets, useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
 import SpaceListInvite from '../InviteBanner'
 import { useState } from 'react'
 import css from './styles.module.css'
@@ -93,19 +91,18 @@ const NoSpacesState = () => {
 
 const filterSpacesByStatus = (
   currentUser: UserWithWallets | undefined,
-  spaces: GetOrganizationResponse[],
+  spaces: GetSpaceResponse[],
   status: MemberStatus,
 ) => {
-  return spaces?.filter((space) => {
-    // @ts-ignore TODO: fix incorrect type from CGW
-    return space.userOrganizations.some((member) => member.user.id === currentUser?.id && member.status === status)
+  return spaces.filter((space) => {
+    return space.members.some((member) => member.user.id === currentUser?.id && member.status === status)
   })
 }
 
 const SpacesList = () => {
   const isUserSignedIn = useAppSelector(isAuthenticated)
   const { currentData: currentUser } = useUsersGetWithWalletsV1Query(undefined, { skip: !isUserSignedIn })
-  const { currentData: spaces } = useOrganizationsGetV1Query(undefined, { skip: !isUserSignedIn })
+  const { currentData: spaces } = useSpacesGetV1Query(undefined, { skip: !isUserSignedIn })
 
   const pendingInvites = filterSpacesByStatus(currentUser, spaces || [], MemberStatus.INVITED)
   const activeSpaces = filterSpacesByStatus(currentUser, spaces || [], MemberStatus.ACTIVE)
@@ -123,7 +120,7 @@ const SpacesList = () => {
 
         {isUserSignedIn &&
           pendingInvites.length > 0 &&
-          pendingInvites.map((invitingSpace: GetOrganizationResponse) => (
+          pendingInvites.map((invitingSpace: GetSpaceResponse) => (
             <SpaceListInvite key={invitingSpace.id} space={invitingSpace} />
           ))}
 

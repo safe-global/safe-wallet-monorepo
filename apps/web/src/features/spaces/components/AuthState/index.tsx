@@ -4,11 +4,11 @@ import { isUnauthorized } from '@/features/spaces/utils'
 import UnauthorizedState from '@/features/spaces/components/UnauthorizedState'
 import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
-import { useOrganizationsGetOneV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
+import { useSpacesGetOneV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 
 const AuthState = ({ spaceId, children }: { spaceId: string; children: ReactNode }) => {
   const isUserSignedIn = useAppSelector(isAuthenticated)
-  const { error } = useOrganizationsGetOneV1Query({ id: Number(spaceId) }, { skip: !isUserSignedIn })
+  const { error } = useSpacesGetOneV1Query({ id: Number(spaceId) }, { skip: !isUserSignedIn })
 
   if (!isUserSignedIn) return <SignedOutState />
 

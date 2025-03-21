@@ -10,22 +10,22 @@ export type SafeListProps = {
   safes?: (SafeItem | MultiChainSafeItem)[]
   onLinkClick?: () => void
   useTransitions?: boolean
-  isOrgSafe?: boolean
+  isSpaceSafe?: boolean
 }
 
 const renderSafeItem = (
   item: SafeItem | MultiChainSafeItem,
   onLinkClick?: SafeListProps['onLinkClick'],
-  isOrgSafe = false,
+  isSpaceSafe = false,
 ) => {
   return isMultiChainSafeItem(item) ? (
-    <MultiAccountItem onLinkClick={onLinkClick} multiSafeAccountItem={item} isOrgSafe={isOrgSafe} />
+    <MultiAccountItem onLinkClick={onLinkClick} multiSafeAccountItem={item} isSpaceSafe={isSpaceSafe} />
   ) : (
-    <SingleAccountItem onLinkClick={onLinkClick} safeItem={item} isOrgSafe={isOrgSafe} />
+    <SingleAccountItem onLinkClick={onLinkClick} safeItem={item} isSpaceSafe={isSpaceSafe} />
   )
 }
 
-const SafesList = ({ safes, onLinkClick, useTransitions = true, isOrgSafe = false }: SafeListProps) => {
+const SafesList = ({ safes, onLinkClick, useTransitions = true, isSpaceSafe = false }: SafeListProps) => {
   if (!safes || safes.length === 0) {
     return null
   }
@@ -34,14 +34,14 @@ const SafesList = ({ safes, onLinkClick, useTransitions = true, isOrgSafe = fals
     <TransitionGroup>
       {safes.map((item) => (
         <Collapse key={item.address} timeout="auto">
-          {renderSafeItem(item, onLinkClick, isOrgSafe)}
+          {renderSafeItem(item, onLinkClick, isSpaceSafe)}
         </Collapse>
       ))}
     </TransitionGroup>
   ) : (
     <>
       {safes.map((item) => (
-        <div key={item.address}>{renderSafeItem(item, onLinkClick, isOrgSafe)}</div>
+        <div key={item.address}>{renderSafeItem(item, onLinkClick, isSpaceSafe)}</div>
       ))}
     </>
   )

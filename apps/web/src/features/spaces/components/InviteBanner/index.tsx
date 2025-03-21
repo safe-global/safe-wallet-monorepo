@@ -1,5 +1,5 @@
 import { Card, Box, Typography, Link as MUILink, Stack } from '@mui/material'
-import type { GetOrganizationResponse } from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
+import type { GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { SpaceSummary } from '../SpaceCard'
 import { useSpaceSafeCount } from '@/features/spaces/hooks/useSpaceSafeCount'
 import InitialsAvatar from '../InitialsAvatar'
@@ -15,17 +15,16 @@ import DeclineButton from './DeclineButton'
 import { trackEvent } from '@/services/analytics'
 
 type SpaceListInvite = {
-  space: GetOrganizationResponse
+  space: GetSpaceResponse
 }
 
 const SpaceListInvite = ({ space }: SpaceListInvite) => {
-  const { id, name, userOrganizations: members } = space
+  const { id, name, members } = space
   const { currentData: currentUser } = useUsersGetWithWalletsV1Query()
   const numberOfAccounts = useSpaceSafeCount(id)
   const numberOfMembers = members.length
 
-  // @ts-ignore TODO: Need to fix the type once available
-  const invitedBy = space.userOrganizations.find((member) => member.user.id === currentUser.id)?.invitedBy
+  const invitedBy = space.members.find((member) => member.user.id === currentUser?.id)?.invitedBy
 
   return (
     <Card sx={{ p: 2, mb: 2 }}>

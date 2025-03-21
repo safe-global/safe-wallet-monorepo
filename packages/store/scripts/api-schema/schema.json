@@ -2287,6 +2287,598 @@
         ]
       }
     },
+    "/v1/spaces": {
+      "post": {
+        "operationId": "spacesCreateV1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSpaceDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Space created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateSpaceResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Signer address not provided"
+          },
+          "403": {
+            "description": "Forbidden resource"
+          },
+          "404": {
+            "description": "User not found."
+          }
+        },
+        "tags": [
+          "spaces"
+        ]
+      },
+      "get": {
+        "operationId": "spacesGetV1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Spaces found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GetSpaceResponse"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Signer address not provided"
+          },
+          "403": {
+            "description": "Forbidden resource"
+          },
+          "404": {
+            "description": "User not found."
+          }
+        },
+        "tags": [
+          "spaces"
+        ]
+      }
+    },
+    "/v1/spaces/create-with-user": {
+      "post": {
+        "operationId": "spacesCreateWithUserV1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSpaceDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Space created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateSpaceResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Signer address not provided"
+          },
+          "403": {
+            "description": "Forbidden resource"
+          }
+        },
+        "tags": [
+          "spaces"
+        ]
+      }
+    },
+    "/v1/spaces/{id}": {
+      "get": {
+        "operationId": "spacesGetOneV1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Space found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetSpaceResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Signer address not provided"
+          },
+          "403": {
+            "description": "Forbidden resource"
+          },
+          "404": {
+            "description": "Space not found. OR User not found."
+          }
+        },
+        "tags": [
+          "spaces"
+        ]
+      },
+      "patch": {
+        "operationId": "spacesUpdateV1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateSpaceDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Space updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateSpaceResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Signer address not provided OR User is unauthorized"
+          },
+          "403": {
+            "description": "Forbidden resource"
+          },
+          "404": {
+            "description": "User not found."
+          }
+        },
+        "tags": [
+          "spaces"
+        ]
+      },
+      "delete": {
+        "operationId": "spacesDeleteV1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Spaces deleted"
+          },
+          "401": {
+            "description": "Signer address not provided OR User is unauthorized"
+          },
+          "403": {
+            "description": "Forbidden resource"
+          },
+          "404": {
+            "description": "User not found."
+          }
+        },
+        "tags": [
+          "spaces"
+        ]
+      }
+    },
+    "/v1/spaces/{spaceId}/safes": {
+      "post": {
+        "operationId": "spaceSafesCreateV1",
+        "parameters": [
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSpaceSafesDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Safes created successfully"
+          },
+          "401": {
+            "description": "User unauthorize OR signer address not provided"
+          },
+          "404": {
+            "description": "User not found."
+          }
+        },
+        "tags": [
+          "spaces"
+        ]
+      },
+      "get": {
+        "operationId": "spaceSafesGetV1",
+        "parameters": [
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Safes fetched successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetSpaceSafeResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "User unauthorized OR signer address not provided"
+          },
+          "404": {
+            "description": "User not found."
+          }
+        },
+        "tags": [
+          "spaces"
+        ]
+      },
+      "delete": {
+        "operationId": "spaceSafesDeleteV1",
+        "parameters": [
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeleteSpaceSafesDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Safes deleted successfully"
+          },
+          "401": {
+            "description": "User unauthorized OR signer address not provided"
+          },
+          "404": {
+            "description": "Space has no Safes OR user not found."
+          }
+        },
+        "tags": [
+          "spaces"
+        ]
+      }
+    },
+    "/v1/spaces/{spaceId}/members/invite": {
+      "post": {
+        "operationId": "membersInviteUserV1",
+        "parameters": [
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InviteUsersDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Users invited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Invitation"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "User not admin OR signer address not provided OR member is not active"
+          },
+          "403": {
+            "description": "User not authorized"
+          },
+          "409": {
+            "description": "Too many invites"
+          }
+        },
+        "tags": [
+          "spaces"
+        ]
+      }
+    },
+    "/v1/spaces/{spaceId}/members/accept": {
+      "post": {
+        "operationId": "membersAcceptInviteV1",
+        "parameters": [
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AcceptInviteDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Invite accepted"
+          },
+          "403": {
+            "description": "Signer not authorized"
+          },
+          "404": {
+            "description": "Signer, space or membership not found"
+          },
+          "409": {
+            "description": "User invite not pending"
+          }
+        },
+        "tags": [
+          "spaces"
+        ]
+      }
+    },
+    "/v1/spaces/{spaceId}/members/decline": {
+      "post": {
+        "operationId": "membersDeclineInviteV1",
+        "parameters": [
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Invite declined"
+          },
+          "403": {
+            "description": "Signer not authorized"
+          },
+          "404": {
+            "description": "Signer, space or membership not found"
+          },
+          "409": {
+            "description": "User invite not pending"
+          }
+        },
+        "tags": [
+          "spaces"
+        ]
+      }
+    },
+    "/v1/spaces/{spaceId}/members": {
+      "get": {
+        "operationId": "membersGetUsersV1",
+        "parameters": [
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Space and members list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MembersDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Signer not authorized"
+          },
+          "404": {
+            "description": "Signer or space not found"
+          }
+        },
+        "tags": [
+          "spaces"
+        ]
+      }
+    },
+    "/v1/spaces/{spaceId}/members/{userId}/role": {
+      "patch": {
+        "operationId": "membersUpdateRoleV1",
+        "parameters": [
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateRoleDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Role updated"
+          },
+          "401": {
+            "description": "Signer not active or admin"
+          },
+          "403": {
+            "description": "Signer not authorized"
+          },
+          "404": {
+            "description": "Signer, space or signer/user-to-update membership not found"
+          },
+          "409": {
+            "description": "Cannot remove last admin"
+          }
+        },
+        "tags": [
+          "spaces"
+        ]
+      }
+    },
+    "/v1/spaces/{spaceId}/members/{userId}": {
+      "delete": {
+        "operationId": "membersRemoveUserV1",
+        "parameters": [
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Membership deleted"
+          },
+          "401": {
+            "description": "Signer not active or admin"
+          },
+          "403": {
+            "description": "Signer not authorized"
+          },
+          "404": {
+            "description": "Signer or space not found"
+          },
+          "409": {
+            "description": "Cannot remove last admin"
+          }
+        },
+        "tags": [
+          "spaces"
+        ]
+      }
+    },
     "/v1/organizations": {
       "post": {
         "operationId": "organizationsCreateV1",
@@ -2303,7 +2895,7 @@
         },
         "responses": {
           "200": {
-            "description": "Organizations created",
+            "description": "Organization created",
             "content": {
               "application/json": {
                 "schema": {
@@ -2374,7 +2966,7 @@
         },
         "responses": {
           "200": {
-            "description": "Organizations created",
+            "description": "Organization created",
             "content": {
               "application/json": {
                 "schema": {
@@ -6442,7 +7034,7 @@
           "id"
         ]
       },
-      "CreateOrganizationDto": {
+      "CreateSpaceDto": {
         "type": "object",
         "properties": {
           "name": {
@@ -6453,7 +7045,7 @@
           "name"
         ]
       },
-      "CreateOrganizationResponse": {
+      "CreateSpaceResponse": {
         "type": "object",
         "properties": {
           "name": {
@@ -6487,7 +7079,7 @@
           "status"
         ]
       },
-      "UserOrganizationDto": {
+      "MemberDto": {
         "type": "object",
         "properties": {
           "id": {
@@ -6501,6 +7093,9 @@
             ]
           },
           "name": {
+            "type": "string"
+          },
+          "invitedBy": {
             "type": "string"
           },
           "status": {
@@ -6527,6 +7122,399 @@
           "id",
           "role",
           "name",
+          "invitedBy",
+          "status",
+          "createdAt",
+          "updatedAt",
+          "user"
+        ]
+      },
+      "GetSpaceResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ACTIVE"
+            ]
+          },
+          "members": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MemberDto"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "status",
+          "members"
+        ]
+      },
+      "UpdateSpaceDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ACTIVE"
+            ]
+          }
+        }
+      },
+      "UpdateSpaceResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "CreateSpaceSafeDto": {
+        "type": "object",
+        "properties": {
+          "chainId": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "chainId",
+          "address"
+        ]
+      },
+      "CreateSpaceSafesDto": {
+        "type": "object",
+        "properties": {
+          "safes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CreateSpaceSafeDto"
+            }
+          }
+        },
+        "required": [
+          "safes"
+        ]
+      },
+      "GetSpaceSafeResponse": {
+        "type": "object",
+        "properties": {
+          "safes": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "example": {
+              "{chainId}": [
+                "0x..."
+              ]
+            }
+          }
+        },
+        "required": [
+          "safes"
+        ]
+      },
+      "DeleteSpaceSafeDto": {
+        "type": "object",
+        "properties": {
+          "chainId": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "chainId",
+          "address"
+        ]
+      },
+      "DeleteSpaceSafesDto": {
+        "type": "object",
+        "properties": {
+          "safes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DeleteSpaceSafeDto"
+            }
+          }
+        },
+        "required": [
+          "safes"
+        ]
+      },
+      "InviteUserDto": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "ADMIN",
+              "MEMBER"
+            ]
+          }
+        },
+        "required": [
+          "address",
+          "name",
+          "role"
+        ]
+      },
+      "InviteUsersDto": {
+        "type": "object",
+        "properties": {
+          "users": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InviteUserDto"
+            }
+          }
+        },
+        "required": [
+          "users"
+        ]
+      },
+      "Invitation": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "number"
+          },
+          "orgId": {
+            "type": "number"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "ADMIN",
+              "MEMBER"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "INVITED",
+              "ACTIVE",
+              "DECLINED"
+            ]
+          },
+          "invitedBy": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "userId",
+          "orgId",
+          "role",
+          "status"
+        ]
+      },
+      "AcceptInviteDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "MemberUser": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "ACTIVE"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "status"
+        ]
+      },
+      "Member": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "ADMIN",
+              "MEMBER"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "INVITED",
+              "ACTIVE",
+              "DECLINED"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "invitedBy": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "user": {
+            "$ref": "#/components/schemas/MemberUser"
+          }
+        },
+        "required": [
+          "id",
+          "role",
+          "status",
+          "name",
+          "createdAt",
+          "updatedAt",
+          "user"
+        ]
+      },
+      "MembersDto": {
+        "type": "object",
+        "properties": {
+          "members": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Member"
+            }
+          }
+        },
+        "required": [
+          "members"
+        ]
+      },
+      "UpdateRoleDto": {
+        "type": "object",
+        "properties": {
+          "role": {
+            "type": "string",
+            "enum": [
+              "ADMIN",
+              "MEMBER"
+            ]
+          }
+        },
+        "required": [
+          "role"
+        ]
+      },
+      "CreateOrganizationDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "CreateOrganizationResponse": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "id": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "name",
+          "id"
+        ]
+      },
+      "UserOrganizationDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "ADMIN",
+              "MEMBER"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "invitedBy": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "INVITED",
+              "ACTIVE",
+              "DECLINED"
+            ]
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "user": {
+            "$ref": "#/components/schemas/UserDto"
+          }
+        },
+        "required": [
+          "id",
+          "role",
+          "name",
+          "invitedBy",
           "status",
           "createdAt",
           "updatedAt",
@@ -6667,90 +7655,6 @@
           "safes"
         ]
       },
-      "InviteUserDto": {
-        "type": "object",
-        "properties": {
-          "address": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "role": {
-            "type": "string",
-            "enum": [
-              "ADMIN",
-              "MEMBER"
-            ]
-          }
-        },
-        "required": [
-          "address",
-          "name",
-          "role"
-        ]
-      },
-      "InviteUsersDto": {
-        "type": "object",
-        "properties": {
-          "users": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/InviteUserDto"
-            }
-          }
-        },
-        "required": [
-          "users"
-        ]
-      },
-      "Invitation": {
-        "type": "object",
-        "properties": {
-          "userId": {
-            "type": "number"
-          },
-          "orgId": {
-            "type": "number"
-          },
-          "role": {
-            "type": "string",
-            "enum": [
-              "ADMIN",
-              "MEMBER"
-            ]
-          },
-          "status": {
-            "type": "string",
-            "enum": [
-              "INVITED",
-              "ACTIVE",
-              "DECLINED"
-            ]
-          },
-          "invitedBy": {
-            "type": "string",
-            "nullable": true
-          }
-        },
-        "required": [
-          "userId",
-          "orgId",
-          "role",
-          "status"
-        ]
-      },
-      "AcceptInviteDto": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "name"
-        ]
-      },
       "UserOrganizationUser": {
         "type": "object",
         "properties": {
@@ -6832,21 +7736,6 @@
         },
         "required": [
           "members"
-        ]
-      },
-      "UpdateRoleDto": {
-        "type": "object",
-        "properties": {
-          "role": {
-            "type": "string",
-            "enum": [
-              "ADMIN",
-              "MEMBER"
-            ]
-          }
-        },
-        "required": [
-          "role"
         ]
       },
       "SafeList": {

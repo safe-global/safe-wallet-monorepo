@@ -10,10 +10,7 @@ import {
   Typography,
 } from '@mui/material'
 import ModalDialog from '@/components/common/ModalDialog'
-import {
-  type GetOrganizationResponse,
-  useOrganizationsDeleteV1Mutation,
-} from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
+import { type GetSpaceResponse, useSpacesDeleteV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import CheckIcon from '@/public/images/common/check.svg'
 import CloseIcon from '@/public/images/common/close.svg'
 import css from './styles.module.css'
@@ -32,11 +29,11 @@ const ListIcon = ({ variant }: { variant: 'success' | 'danger' }) => {
   )
 }
 
-const DeleteSpaceDialog = ({ space, onClose }: { space: GetOrganizationResponse | undefined; onClose: () => void }) => {
+const DeleteSpaceDialog = ({ space, onClose }: { space: GetSpaceResponse | undefined; onClose: () => void }) => {
   const [error, setError] = useState<string>()
   const spaceId = useCurrentSpaceId()
   const router = useRouter()
-  const [deleteSpace] = useOrganizationsDeleteV1Mutation()
+  const [deleteSpace] = useSpacesDeleteV1Mutation()
 
   const onDelete = async () => {
     setError(undefined)

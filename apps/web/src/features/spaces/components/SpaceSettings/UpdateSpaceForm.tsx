@@ -1,10 +1,7 @@
 import { Alert, Button, TextField } from '@mui/material'
 import { FormProvider, useForm } from 'react-hook-form'
 import { showNotification } from '@/store/notificationsSlice'
-import {
-  type GetOrganizationResponse,
-  useOrganizationsUpdateV1Mutation,
-} from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
+import { type GetSpaceResponse, useSpacesUpdateV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useAppDispatch } from '@/store'
 import { useIsAdmin } from '@/features/spaces/hooks/useSpaceMembers'
 import { useState } from 'react'
@@ -13,10 +10,10 @@ type UpdateSpaceFormData = {
   name: string
 }
 
-const UpdateSpaceForm = ({ space }: { space: GetOrganizationResponse | undefined }) => {
+const UpdateSpaceForm = ({ space }: { space: GetSpaceResponse | undefined }) => {
   const [error, setError] = useState<string>()
   const dispatch = useAppDispatch()
-  const [updateSpace] = useOrganizationsUpdateV1Mutation()
+  const [updateSpace] = useSpacesUpdateV1Mutation()
   const isAdmin = useIsAdmin(space?.id)
 
   const formMethods = useForm<UpdateSpaceFormData>({
@@ -37,7 +34,7 @@ const UpdateSpaceForm = ({ space }: { space: GetOrganizationResponse | undefined
     if (!space) return
 
     try {
-      await updateSpace({ id: space.id, updateOrganizationDto: { name: data.name } })
+      await updateSpace({ id: space.id, updateSpaceDto: { name: data.name } })
 
       dispatch(
         showNotification({
