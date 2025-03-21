@@ -11,7 +11,6 @@ import type { ParsedUrlQuery } from 'querystring'
 import { startOfDay, endOfDay } from 'date-fns'
 
 import type { TxFilterFormState } from '@/components/transactions/TxFilterForm'
-import { safeFormatUnits, safeParseUnits } from '@/utils/formatters'
 import { getTimezone } from '@/services/transactions'
 
 type IncomingTxFilter = NonNullable<operations['incoming_transfers']['parameters']['query']>
@@ -45,10 +44,6 @@ export const _isModuleFilter = (filter: TxFilter['filter']): filter is ModuleTxF
   return 'module' in filter
 }
 
-const NATIVE_DECIMALS = 18
-const parseNativeValue = (value: string) => safeParseUnits(value, NATIVE_DECIMALS)?.toString()
-const formatNativeValue = (value: string) => safeFormatUnits(value, NATIVE_DECIMALS)
-
 // Spread TxFilter basically
 type TxFilterUrlQuery = {
   type: TxFilter['type']
@@ -65,8 +60,6 @@ export const txFilter = {
   },
 
   parseFormData: ({ type, ...formData }: TxFilterFormState): TxFilter => {
-    const isMultisig = type === TxFilterType.MULTISIG
-
     const filter: TxFilter['filter'] = _omitNullish({
       ...formData,
       execution_date__gte: formData.execution_date__gte
@@ -75,7 +68,7 @@ export const txFilter = {
       execution_date__lte: formData.execution_date__lte
         ? endOfDay(formData.execution_date__lte).toISOString()
         : undefined,
-      value: isMultisig && formData.value ? parseNativeValue(formData.value) : formData.value,
+      value: formData.value,
     })
 
     return {
@@ -93,14 +86,13 @@ export const txFilter = {
 
   formatFormData: ({ type, filter }: TxFilter): Partial<TxFilterFormState> => {
     const isModule = _isModuleFilter(filter)
-    const isMultisig = type === TxFilterType.MULTISIG
 
     return {
       type,
       ...filter,
       execution_date__gte: !isModule && filter.execution_date__gte ? new Date(filter.execution_date__gte) : null,
       execution_date__lte: !isModule && filter.execution_date__lte ? new Date(filter.execution_date__lte) : null,
-      value: isModule ? '' : isMultisig && filter.value ? formatNativeValue(filter.value) : filter.value,
+      value: isModule ? '' : filter.value,
     }
   },
 }
