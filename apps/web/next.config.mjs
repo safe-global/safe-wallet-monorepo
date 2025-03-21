@@ -6,6 +6,7 @@ import remarkHeadingId from 'remark-heading-id'
 import createMDX from '@next/mdx'
 import remarkFrontmatter from 'remark-frontmatter'
 import remarkMdxFrontmatter from 'remark-mdx-frontmatter'
+import { version } from './package.json'
 
 const SERVICE_WORKERS_PATH = './src/service-workers'
 
@@ -15,12 +16,27 @@ const withPWA = withPWAInit({
     mode: 'production',
   },
   reloadOnOnline: false,
-  /* Do not precache anything */
-  publicExcludes: ['**/*'],
+  publicExcludes: [],
   buildExcludes: [/./],
   customWorkerSrc: SERVICE_WORKERS_PATH,
   // Prefer InjectManifest for Web Push
   swSrc: `${SERVICE_WORKERS_PATH}/index.ts`,
+
+  runtimeCaching: [
+    {
+      urlPattern: /^https?.*\.(html|js|css|png|jpg|jpeg|gif|webp|svg|ico|ttf|woff|woff2|eot)$/,
+      handler: 'CacheFirst',
+      options: {
+        cacheName: 'static-assets',
+        expiration: {
+          maxEntries: 1000,
+          maxAgeSeconds: 60 * 60 * 24 * 365, // 1 year
+        },
+      },
+    },
+  ],
+
+  cacheId: version,
 })
 
 /** @type {import('next').NextConfig} */
