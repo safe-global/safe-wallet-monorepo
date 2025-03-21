@@ -175,6 +175,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
   },
   scrollInnerContainer: {
-    paddingHorizontal: getTokenValue('$3'),
+    paddingHorizontal: getTokenValue('$2'),
   },
 })

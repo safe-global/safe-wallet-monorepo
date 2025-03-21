@@ -33,19 +33,19 @@ export function PendingTxListContainer({
   const { handleScroll } = useScrollableHeader({
     children: (
       <>
-        <NavBarTitle paddingRight={5}>Pending Transactions</NavBarTitle>
+        <NavBarTitle paddingRight={5}>Pending transactions</NavBarTitle>
         <Badge content={`${amount}${hasMore ? '+' : ''}`} circleSize={'$6'} fontSize={10} />
       </>
     ),
   })
 
   const LargeHeader = (
-    <View flexDirection={'row'} alignItems={'center'} paddingTop={'$3'}>
-      <LargeHeaderTitle marginRight={5}>Pending Transactions</LargeHeaderTitle>
+    <View flexDirection={'row'} alignItems={'flex-start'} paddingTop={'$3'}>
+      <LargeHeaderTitle marginRight={5}>Pending transactions</LargeHeaderTitle>
       {isLoading ? (
         <Spinner size="large" color="$warning1ContrastTextDark" />
       ) : (
-        <Badge content={`${amount}${hasMore ? '+' : ''}`} />
+        <Badge content={`${amount}${hasMore ? '+' : ''}`} themeName="badge_warning_variant2" />
       )}
     </View>
   )

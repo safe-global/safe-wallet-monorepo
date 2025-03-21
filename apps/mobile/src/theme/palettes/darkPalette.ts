@@ -51,6 +51,7 @@ const darkPalette = {
   },
   warning1: {
     main: '#322211',
+    text: '#fff0e0',
     contrastText: '#FF8C00',
   },
   background: {
