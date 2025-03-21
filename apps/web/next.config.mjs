@@ -6,8 +6,15 @@ import remarkHeadingId from 'remark-heading-id'
 import createMDX from '@next/mdx'
 import remarkFrontmatter from 'remark-frontmatter'
 import remarkMdxFrontmatter from 'remark-mdx-frontmatter'
+import { readFile } from 'fs/promises'
+import { fileURLToPath } from 'url'
 
 const SERVICE_WORKERS_PATH = './src/service-workers'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const pkgPath = path.join(__dirname, 'package.json')
+const data = await readFile(pkgPath, 'utf-8')
+const pkg = JSON.parse(data)
 
 const withPWA = withPWAInit({
   dest: 'public',
@@ -15,12 +22,27 @@ const withPWA = withPWAInit({
     mode: 'production',
   },
   reloadOnOnline: false,
-  /* Do not precache anything */
-  publicExcludes: ['**/*'],
+  publicExcludes: [],
   buildExcludes: [/./],
   customWorkerSrc: SERVICE_WORKERS_PATH,
   // Prefer InjectManifest for Web Push
   swSrc: `${SERVICE_WORKERS_PATH}/index.ts`,
+
+  runtimeCaching: [
+    {
+      urlPattern: /\.(js|css|png|jpg|jpeg|gif|webp|svg|ico|ttf|woff|woff2|eot)$/,
+      handler: 'CacheFirst',
+      options: {
+        cacheName: 'static-assets',
+        expiration: {
+          maxEntries: 1000,
+          maxAgeSeconds: 60 * 60 * 24 * 365, // 1 year
+        },
+      },
+    },
+  ],
+
+  cacheId: pkg.version,
 })
 
 /** @type {import('next').NextConfig} */
