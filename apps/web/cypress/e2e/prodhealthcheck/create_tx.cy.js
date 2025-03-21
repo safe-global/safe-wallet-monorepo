@@ -31,12 +31,15 @@ describe('[PROD] Create transactions tests', () => {
     createtx.clickOnSendTokensBtn()
   })
 
+  // Unskip when sign method is released
   it.skip('Verify submitting a tx and that clicking on notification shows the transaction in queue', () => {
     happyPathToStepTwo()
     createtx.verifySubmitBtnIsEnabled()
-    createtx.changeNonce(2)
+    createtx.changeNonce(3)
     cy.wait(1000)
     createtx.clickOnContinueSignTransactionBtn()
+    createtx.clickOnAcknowledgement()
+    createtx.clickOnSignTransactionBtn()
     createtx.clickViewTransaction()
     createtx.verifySingleTxPage()
     createtx.verifyQueueLabel()
