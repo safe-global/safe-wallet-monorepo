@@ -30,7 +30,7 @@ const withPWA = withPWAInit({
 
   runtimeCaching: [
     {
-      urlPattern: /^https?.*\.(html|js|css|png|jpg|jpeg|gif|webp|svg|ico|ttf|woff|woff2|eot)$/,
+      urlPattern: /\.(js|css|png|jpg|jpeg|gif|webp|svg|ico|ttf|woff|woff2|eot)$/,
       handler: 'CacheFirst',
       options: {
         cacheName: 'static-assets',
