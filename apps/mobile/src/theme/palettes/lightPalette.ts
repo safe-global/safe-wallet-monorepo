@@ -51,6 +51,7 @@ const lightPalette = {
   },
   warning1: {
     main: '#fff0e0',
+    text: '#121312',
     contrastText: '#FF8C00',
   },
   background: {

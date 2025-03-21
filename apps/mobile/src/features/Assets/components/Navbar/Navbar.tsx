@@ -53,11 +53,11 @@ export const Navbar = () => {
         <XStack alignItems={'center'} justifyContent={'center'} gap={12}>
           <Link href={'/share'} asChild>
             <TouchableOpacity>
-              <SafeFontIcon name="apps" />
+              <SafeFontIcon name="qr-code-1" size={16} />
             </TouchableOpacity>
           </Link>
           <TouchableOpacity onPress={handleNotificationAccess}>
-            <SafeFontIcon name="bell" />
+            <SafeFontIcon name="bell" size={20} />
           </TouchableOpacity>
         </XStack>
       </XStack>

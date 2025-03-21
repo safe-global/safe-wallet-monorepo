@@ -14,7 +14,7 @@ describe('PendingTransactions', () => {
 
     expect(getByText('2')).toBeTruthy()
 
-    await user.press(getByText('Pending Transactions'))
+    await user.press(getByText('Pending transactions'))
 
     expect(mockedFn).toHaveBeenCalled()
   })

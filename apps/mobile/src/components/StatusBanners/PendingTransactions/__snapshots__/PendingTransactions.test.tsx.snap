@@ -73,7 +73,7 @@ exports[`PendingTransactions should render the pending transactions in fullWidth
             style={
               {
                 "alignItems": "center",
-                "backgroundColor": "#FFF1E0",
+                "backgroundColor": "#FF8C00",
                 "borderBottomLeftRadius": 100000,
                 "borderBottomRightRadius": 100000,
                 "borderTopLeftRadius": 100000,
@@ -96,7 +96,7 @@ exports[`PendingTransactions should render the pending transactions in fullWidth
             <Text
               style={
                 {
-                  "color": "#fff0e0",
+                  "color": "#121312",
                   "fontSize": 14,
                 }
               }
@@ -116,14 +116,14 @@ exports[`PendingTransactions should render the pending transactions in fullWidth
           <Text
             style={
               {
-                "color": "#FF8C00",
+                "color": "#121312",
                 "fontFamily": "DMSans-SemiBold",
                 "fontSize": 16,
               }
             }
             suppressHighlighting={true}
           >
-            Pending Transactions
+            Pending transactions
           </Text>
         </View>
         <View
@@ -135,7 +135,7 @@ exports[`PendingTransactions should render the pending transactions in fullWidth
             style={
               [
                 {
-                  "color": "#FF8C00",
+                  "color": "#121312",
                   "fontSize": 20,
                 },
                 undefined,

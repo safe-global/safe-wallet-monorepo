@@ -88,11 +88,11 @@ export const config = createTamagui({
     dark_success_light: {},
     light_warning: {
       background: tokens.color.warning1MainLight,
-      color: tokens.color.warning1ContrastTextLight,
+      color: tokens.color.warning1TextLight,
     },
     dark_warning: {
       background: tokens.color.warning1MainDark,
-      color: tokens.color.warning1ContrastTextDark,
+      color: tokens.color.warning1TextDark,
     },
     light_error: {
       background: tokens.color.error1MainLight,
