@@ -1,6 +1,8 @@
 import React, { useMemo } from 'react'
+import { Skeleton } from 'moti/skeleton'
 import { H1, H2, View, XStack } from 'tamagui'
 import { formatCurrency, formatCurrencyPrecise } from '@safe-global/utils/formatNumber'
+import { useColorScheme } from 'react-native'
 
 interface FiatProps {
   value: string
@@ -10,6 +12,8 @@ interface FiatProps {
 }
 
 export const Fiat = ({ value, currency, maxLength, precise }: FiatProps) => {
+  const colorScheme = useColorScheme()
+
   const fiat = useMemo(() => {
     return formatCurrency(value, currency, maxLength)
   }, [value, currency, maxLength])
@@ -23,25 +27,25 @@ export const Fiat = ({ value, currency, maxLength, precise }: FiatProps) => {
     return match ? match.slice(1) : ['', '', preciseFiat, '', '']
   }, [preciseFiat])
 
-  if (fiat == null) {
-    return <H1 fontWeight="600">--</H1>
-  }
-
   return (
     <View flexDirection="row" alignItems="center" testID={'fiat-balance-display'}>
       {precise ? (
-        <XStack>
-          <H2 fontWeight={'600'} alignSelf={'flex-end'} marginBottom={'$2'}>
-            {symbol}
-          </H2>
-          <H1 fontWeight="600">{whole}</H1>
-          {decimals && (
-            <H1 fontWeight={600} color="$textSecondaryDark">
-              {decimals}
-            </H1>
-          )}
-          <H1 fontWeight={600}>{endCurrency}</H1>
-        </XStack>
+        <Skeleton.Group show={!fiat}>
+          <Skeleton colorMode={colorScheme === 'dark' ? 'dark' : 'light'}>
+            <XStack>
+              <H2 fontWeight={'600'} alignSelf={'flex-end'} marginBottom={'$2'}>
+                {symbol}
+              </H2>
+              <H1 fontWeight="600">{whole}</H1>
+              {decimals && (
+                <H1 fontWeight={600} color="$textSecondaryDark">
+                  {decimals}
+                </H1>
+              )}
+              <H1 fontWeight={600}>{endCurrency}</H1>
+            </XStack>
+          </Skeleton>
+        </Skeleton.Group>
       ) : (
         <H1 fontWeight="600">{fiat}</H1>
       )}
