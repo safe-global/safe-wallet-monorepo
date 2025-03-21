@@ -6,6 +6,7 @@ import { type AddressBookState, selectAllAddressBooks } from '@/store/addressBoo
 import useWallet from '@/hooks/wallets/useWallet'
 import useAllOwnedSafes from '@/features/myAccounts/hooks/useAllOwnedSafes'
 import { useAppSelector } from '@/store'
+import { isMultiChainSafeItem } from '@/features/multichain/utils/utils'
 
 export type MultiChainSafeItem = {
   address: string
@@ -51,6 +52,10 @@ export function _buildSafeItems(safes: Record<string, string[]>, allSafeNames: A
   }
 
   return result
+}
+
+export function flattenSafeItems(items: Array<SafeItem | MultiChainSafeItem>): SafeItem[] {
+  return items.flatMap((item) => (isMultiChainSafeItem(item) ? item.safes : [item]))
 }
 
 export const _getMultiChainAccounts = (safes: SafeItems): MultiChainSafeItem[] => {

@@ -1,4 +1,4 @@
-import { Paper, Button, Box, Stack } from '@mui/material'
+import { Button, Box, Stack } from '@mui/material'
 import type { Member } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import PlusIcon from '@/public/images/common/plus.svg'
 import { useState } from 'react'
@@ -14,24 +14,22 @@ const DashboardMembersList = ({ members }: { members: Member[] }) => {
 
   return (
     <>
-      <Paper sx={{ p: 2, borderRadius: '8px' }}>
-        <Stack spacing={2}>
-          {members.map((member) => (
-            <Box key={member.id}>
-              <MemberName key={member.id} member={member} />
-            </Box>
-          ))}
-        </Stack>
-        {isAdmin && (
-          <Box display="flex" justifyContent="center" mt={2}>
-            <Track {...SPACE_EVENTS.ADD_MEMBER_MODAL} label={SPACE_LABELS.space_dashboard}>
-              <Button size="small" variant="text" startIcon={<PlusIcon />} onClick={() => setOpenAddMembersModal(true)}>
-                Add member
-              </Button>
-            </Track>
+      <Stack spacing={2}>
+        {members.map((member) => (
+          <Box key={member.id}>
+            <MemberName key={member.id} member={member} />
           </Box>
-        )}
-      </Paper>
+        ))}
+      </Stack>
+      {isAdmin && (
+        <Box display="flex" justifyContent="center" mt={2}>
+          <Track {...SPACE_EVENTS.ADD_MEMBER_MODAL} label={SPACE_LABELS.space_dashboard}>
+            <Button size="small" variant="text" startIcon={<PlusIcon />} onClick={() => setOpenAddMembersModal(true)}>
+              Add member
+            </Button>
+          </Track>
+        </Box>
+      )}
       {openAddMembersModal && <AddMembersModal onClose={() => setOpenAddMembersModal(false)} />}
     </>
   )
