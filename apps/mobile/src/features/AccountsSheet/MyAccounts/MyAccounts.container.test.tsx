@@ -79,7 +79,7 @@ describe('MyAccountsContainer', () => {
 
     expect(screen.getByText('Test Safe')).toBeTruthy()
     expect(screen.getByText('1/1')).toBeTruthy()
-    expect(screen.getByText('$1000')).toBeTruthy()
+    expect(screen.getByText('$ 1,000.00')).toBeTruthy()
   })
 
   it('calls onClose when account is selected', () => {

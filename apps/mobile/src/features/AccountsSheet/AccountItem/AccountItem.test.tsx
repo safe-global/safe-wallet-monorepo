@@ -65,7 +65,7 @@ describe('AccountItem', () => {
 
     expect(screen.getByText('Test Account')).toBeTruthy()
     expect(screen.getByText('1/1')).toBeTruthy()
-    expect(screen.getByText('$1000')).toBeTruthy()
+    expect(screen.getByText('$ 1,000.00')).toBeTruthy()
   })
 
   it('shows active state when account is selected', () => {

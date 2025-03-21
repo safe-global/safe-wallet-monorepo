@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react'
-import { H1, View } from 'tamagui'
+import { H1, H2, View, XStack } from 'tamagui'
 import { formatCurrency, formatCurrencyPrecise } from '@safe-global/utils/formatNumber'
 
 interface FiatProps {
@@ -18,9 +18,9 @@ export const Fiat = ({ value, currency, maxLength, precise }: FiatProps) => {
     return formatCurrencyPrecise(value, currency)
   }, [value, currency])
 
-  const [whole, decimals, endCurrency] = useMemo(() => {
-    const match = (preciseFiat ?? '').match(/(.+)(\D\d+)(\D+)?$/)
-    return match ? match.slice(1) : ['', preciseFiat, '', '']
+  const [symbol, whole, decimals, endCurrency] = useMemo(() => {
+    const match = (preciseFiat ?? '').match(/(\D+)?(.+)(\D\d+)(\D+)?$/)
+    return match ? match.slice(1) : ['', '', preciseFiat, '', '']
   }, [preciseFiat])
 
   if (fiat == null) {
@@ -30,15 +30,18 @@ export const Fiat = ({ value, currency, maxLength, precise }: FiatProps) => {
   return (
     <View flexDirection="row" alignItems="center" testID={'fiat-balance-display'}>
       {precise ? (
-        <H1 fontWeight="600">
-          {whole}
+        <XStack>
+          <H2 fontWeight={'600'} alignSelf={'flex-end'} marginBottom={'$2'}>
+            {symbol}
+          </H2>
+          <H1 fontWeight="600">{whole}</H1>
           {decimals && (
             <H1 fontWeight={600} color="$textSecondaryDark">
               {decimals}
             </H1>
           )}
-          {endCurrency}
-        </H1>
+          <H1 fontWeight={600}>{endCurrency}</H1>
+        </XStack>
       ) : (
         <H1 fontWeight="600">{fiat}</H1>
       )}

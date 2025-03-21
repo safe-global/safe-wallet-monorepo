@@ -10,8 +10,9 @@ import { selectActiveSafe } from '@/src/store/activeSafeSlice'
 import { Balance, useBalancesGetBalancesV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import { Fallback } from '../Fallback'
 import { skipToken } from '@reduxjs/toolkit/query'
-import { formatCurrency } from '@safe-global/utils/formatNumber'
+import { formatCurrency, formatCurrencyPrecise } from '@safe-global/utils/formatNumber'
 import { formatVisualAmount } from '@safe-global/utils/formatters'
+import { shouldDisplayPreciseBalance } from '@/src/utils/balance'
 
 export function TokensContainer() {
   const activeSafe = useSelector(selectActiveSafe)
@@ -32,6 +33,7 @@ export function TokensContainer() {
   )
 
   const renderItem: ListRenderItem<Balance> = React.useCallback(({ item }) => {
+    const fiatBalance = item.fiatBalance
     return (
       <AssetsCard
         name={item.tokenInfo.name}
@@ -39,7 +41,9 @@ export function TokensContainer() {
         description={`${formatVisualAmount(item.balance, item.tokenInfo.decimals as number)} ${item.tokenInfo.symbol}`}
         rightNode={
           <Text fontSize="$4" fontWeight={400} color="$color">
-            {formatCurrency(item.fiatBalance, 'usd')}
+            {shouldDisplayPreciseBalance(fiatBalance, 7)
+              ? formatCurrencyPrecise(fiatBalance, 'usd')
+              : formatCurrency(fiatBalance, 'usd')}
           </Text>
         }
       />

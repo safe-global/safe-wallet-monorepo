@@ -8,6 +8,7 @@ import { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 
 import { ChainsDisplay } from '@/src/components/ChainsDisplay'
 import { useRouter } from 'expo-router'
+import { shouldDisplayPreciseBalance } from '@/src/utils/balance'
 
 interface BalanceProps {
   activeChainId: string
@@ -38,7 +39,7 @@ export function Balance({ activeChainId, chains, isLoading, balanceAmount, chain
         {isLoading ? (
           <Spinner />
         ) : balanceAmount ? (
-          <Fiat value={balanceAmount} currency="usd" precise={balanceAmount.length < 6} />
+          <Fiat value={balanceAmount} currency="usd" precise={shouldDisplayPreciseBalance(balanceAmount)} />
         ) : (
           <Alert type="error" message="error while getting the balance of your wallet" />
         )}
