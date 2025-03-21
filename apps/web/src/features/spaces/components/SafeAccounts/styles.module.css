@@ -1,0 +1,15 @@
+
+.sendButton {
+    background-color: var(--color-text-disabled);
+    border-radius: 3px;
+    margin: 0 var(--space-1);
+}
+
+.sendButton svg path {
+    fill: var(--color-primary-main);
+}
+
+.sendButton:global(.Mui-disabled) {
+    background-color: var(--color-background-main);
+    opacity: 0.6;
+}

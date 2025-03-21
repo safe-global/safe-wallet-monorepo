@@ -1,5 +1,6 @@
 import AddressInputReadOnly from '@/components/common/AddressInputReadOnly'
 import useAddressBook from '@/hooks/useAddressBook'
+import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import type { ReactElement } from 'react'
 import { useEffect, useCallback, useRef, useMemo } from 'react'
 import {
@@ -10,6 +11,7 @@ import {
   IconButton,
   SvgIcon,
   Skeleton,
+  Box,
 } from '@mui/material'
 import { useFormContext, useWatch, type Validate, get } from 'react-hook-form'
 import { validatePrefixedAddress } from '@/utils/validation'
@@ -33,6 +35,8 @@ export type AddressInputProps = TextFieldProps & {
   validate?: Validate<string>
   deps?: string | string[]
   onAddressBookClick?: () => void
+  chain?: ChainInfo
+  showPrefix?: boolean
 }
 
 const AddressInput = ({
@@ -43,6 +47,8 @@ const AddressInput = ({
   isAutocompleteOpen,
   onAddressBookClick,
   deps,
+  chain,
+  showPrefix = true,
   ...props
 }: AddressInputProps): ReactElement => {
   const {
@@ -56,7 +62,7 @@ const AddressInput = ({
   const currentChain = useCurrentChain()
   const rawValueRef = useRef<string>('')
   const watchedValue = useWatch({ name, control })
-  const currentShortName = currentChain?.shortName || ''
+  const currentShortName = chain?.shortName || currentChain?.shortName || ''
 
   const addressBook = useAddressBook()
 
@@ -140,14 +146,16 @@ const AddressInput = ({
             <AddressInputReadOnly address={watchedValue} />
           ) : (
             // Display the current short name in the adornment, unless the value contains the same prefix
-            <InputAdornment position="end" sx={{ ml: 0, gap: 1 }}>
-              {watchedValue && !fieldError ? (
-                <Identicon address={watchedValue} size={32} />
-              ) : (
-                <Skeleton variant="circular" width={32} height={32} animation={false} />
-              )}
+            <InputAdornment position="end" sx={{ ml: 0 }}>
+              <Box mr={1}>
+                {watchedValue && !fieldError ? (
+                  <Identicon address={watchedValue} size={32} />
+                ) : (
+                  <Skeleton variant="circular" width={32} height={32} animation={false} />
+                )}
+              </Box>
 
-              {!rawValueRef.current.startsWith(`${currentShortName}:`) && <>{currentShortName}:</>}
+              {showPrefix && !rawValueRef.current.startsWith(`${currentShortName}:`) && <Box>{currentShortName}:</Box>}
             </InputAdornment>
           ),
 

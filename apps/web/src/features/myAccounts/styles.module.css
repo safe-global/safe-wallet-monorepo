@@ -59,6 +59,16 @@
   stroke: var(--color-text-primary);
 }
 
+.link {
+  text-decoration: none;
+  color: var(--color-text-secondary);
+}
+
+.active {
+  pointer-events: none;
+  color: var(--color-text-primary);
+}
+
 @media (max-width: 899.95px) {
   .container {
     width: auto;

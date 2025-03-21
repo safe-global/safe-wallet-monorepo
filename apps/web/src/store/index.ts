@@ -21,6 +21,7 @@ import {
   swapOrderStatusListener,
   txHistoryListener,
   txQueueListener,
+  authListener,
 } from './slices'
 import * as slices from './slices'
 import * as hydrate from './useHydrateStore'
@@ -58,6 +59,7 @@ const rootReducer = combineReducers({
   [safePassApi.reducerPath]: safePassApi.reducer,
   [slices.gatewayApi.reducerPath]: slices.gatewayApi.reducer,
   [cgwClient.reducerPath]: cgwClient.reducer,
+  [slices.authSlice.reducerPath]: slices.authSlice.reducer,
 })
 
 const persistedSlices: (keyof Partial<RootState>)[] = [
@@ -75,6 +77,7 @@ const persistedSlices: (keyof Partial<RootState>)[] = [
   slices.swapOrderSlice.name,
   slices.visitedSafesSlice.name,
   slices.orderByPreferenceSlice.name,
+  slices.authSlice.name,
 ]
 
 export const getPersistedState = () => {
@@ -92,7 +95,14 @@ const middleware: Middleware<{}, RootState>[] = [
   slices.gatewayApi.middleware,
 ]
 
-const listeners = [safeMessagesListener, txHistoryListener, txQueueListener, swapOrderListener, swapOrderStatusListener]
+const listeners = [
+  safeMessagesListener,
+  txHistoryListener,
+  txQueueListener,
+  swapOrderListener,
+  swapOrderStatusListener,
+  authListener,
+]
 
 export const _hydrationReducer: typeof rootReducer = (state, action) => {
   if (action.type === hydrate.HYDRATE_ACTION) {

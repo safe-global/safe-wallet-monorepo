@@ -20,11 +20,11 @@
   --color-error-background: #ffe6ea;
   --color-success-dark: #028d4c;
   --color-success-main: #00b460;
-  --color-success-light: #72f5b8;
+  --color-success-light: #d3f2e4;
   --color-success-background: #effaf1;
   --color-info-dark: #52bfdc;
   --color-info-main: #5fddff;
-  --color-info-light: #b7f0ff;
+  --color-info-light: #d7f6ff;
   --color-info-background: #effcff;
   --color-warning-dark: #c04c32;
   --color-warning-main: #ff8061;
@@ -61,7 +61,7 @@
   --color-primary-light: #a1a3a7;
   --color-secondary-dark: #636669;
   --color-secondary-main: #ffffff;
-  --color-secondary-light: #12ff80;
+  --color-secondary-light: #b0ffc9;
   --color-secondary-background: #1b2a22;
   --color-border-main: #636669;
   --color-border-light: #303033;
@@ -70,7 +70,7 @@
   --color-error-main: #ff5f72;
   --color-error-light: #ffb4bd;
   --color-error-background: #2f2527;
-  --color-success-dark: #028d4c;
+  --color-success-dark: #388e3c;
   --color-success-main: #00b460;
   --color-success-light: #81c784;
   --color-success-background: #1f2920;
@@ -103,7 +103,7 @@
     --color-primary-light: #a1a3a7;
     --color-secondary-dark: #636669;
     --color-secondary-main: #ffffff;
-    --color-secondary-light: #12ff80;
+    --color-secondary-light: #b0ffc9;
     --color-secondary-background: #1b2a22;
     --color-border-main: #636669;
     --color-border-light: #303033;
@@ -112,7 +112,7 @@
     --color-error-main: #ff5f72;
     --color-error-light: #ffb4bd;
     --color-error-background: #2f2527;
-    --color-success-dark: #028d4c;
+    --color-success-dark: #388e3c;
     --color-success-main: #00b460;
     --color-success-light: #81c784;
     --color-success-background: #1f2920;
