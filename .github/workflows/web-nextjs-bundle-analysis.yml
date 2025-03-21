@@ -43,13 +43,26 @@ jobs:
           name: bundle
           path: apps/web/.next/analyze/__bundle_analysis.json
 
-      - name: Download base branch bundle stats
-        if: success() && github.event.number
+      - name: List artifacts from default branch
+        id: list_artifacts
         run: |
-          cd apps/web
-          bash ./scripts/github/download_bundle_analyser_artifact.sh
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          artifacts=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            "https://api.github.com/repos/${{ github.repository }}/actions/artifacts")
+  
+          # Find the most recent artifact (adjust filtering as needed)
+          artifact_id=$(echo "$artifacts" | jq '.artifacts[] | select(.expired==false) | .id' | head -n 1)
+  
+          echo "artifact_id=$artifact_id" >> $GITHUB_OUTPUT
+  
+      - name: Download artifact zip
+        run: |
+          curl -L \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            -o artifact.zip \
+            "https://api.github.com/repos/${{ github.repository }}/actions/artifacts/${{ steps.list_artifacts.outputs.artifact_id }}/zip"
+  
+      - name: Unzip artifact
+        run: unzip artifact.zip -d apps/web/.next/analyze/base && mkdir -p apps/web/.next/analyze/base/bundle && mv apps/web/.next/analyze/base/__bundle_analysis.json apps/web/.next/analyze/base/bundle/
 
       - name: Compare with base branch bundle
         if: success() && github.event.number
