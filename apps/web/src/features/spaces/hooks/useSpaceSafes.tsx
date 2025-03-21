@@ -12,10 +12,8 @@ import { isAuthenticated } from '@/store/authSlice'
 export const useSpaceSafes = () => {
   const spaceId = useCurrentSpaceId()
   const isUserSignedIn = useAppSelector(isAuthenticated)
-  const { currentData, isLoading } = useSpaceSafesGetV1Query(
-    { spaceId: Number(spaceId) },
-    { skip: !isUserSignedIn },
-  )
+  const { currentData, isLoading } = useSpaceSafesGetV1Query({ spaceId: Number(spaceId) }, { skip: !isUserSignedIn })
+
   const allSafeNames = useAppSelector(selectAllAddressBooks)
   const safeItems = currentData ? _buildSafeItems(currentData.safes, allSafeNames) : []
   const safes = useAllSafesGrouped(safeItems)
