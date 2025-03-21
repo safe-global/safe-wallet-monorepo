@@ -55,10 +55,6 @@ const useRegisterForNotifications = (): NotificationsProps => {
 
   const glob = useGlobalSearchParams<{ safeAddress?: string; chainId?: string; import_safe?: string }>()
 
-  if (!glob) {
-    throw new Error('useRegisterForNotifications :: glob is undefined')
-  }
-
   if (!glob.safeAddress) {
     glob.safeAddress = activeSafe?.address
   }
