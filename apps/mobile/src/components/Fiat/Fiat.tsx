@@ -31,7 +31,7 @@ export const Fiat = ({ value, currency, maxLength, precise }: FiatProps) => {
     <View flexDirection="row" alignItems="center" testID={'fiat-balance-display'}>
       {precise ? (
         <Skeleton.Group show={!fiat}>
-          <Skeleton colorMode={colorScheme === 'dark' ? 'dark' : 'light'}>
+          <Skeleton colorMode={colorScheme === 'dark' ? 'dark' : 'light'} width={220}>
             <XStack>
               <H2 fontWeight={'600'} alignSelf={'flex-end'} marginBottom={'$2'}>
                 {symbol}
