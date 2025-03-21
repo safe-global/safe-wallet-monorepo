@@ -39,11 +39,12 @@ const mockOnboardState = {
       label: 'Wallet 1',
       icon: '',
       provider: mockProvider,
-      chains: [{ id: '0x5' }],
+      chains: [{ id: '0x5', namespace: 'evm' }],
       accounts: [
         {
           address: '0x1234567890123456789012345678901234567890',
           ens: null,
+          uns: null,
           balance: null,
         },
       ],
