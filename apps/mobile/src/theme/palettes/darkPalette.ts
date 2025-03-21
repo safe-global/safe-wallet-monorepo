@@ -25,7 +25,7 @@ const darkPalette = {
     dark: '#411C20',
     main: '#FF5F72',
     light: '#FFB4BD',
-    background: '#2F2527',
+    background: '#FFF4F6',
   },
   error1: {
     main: '#49191F',
@@ -35,7 +35,7 @@ const darkPalette = {
     dark: '#1D3D28',
     main: '#00B460',
     light: '#81C784',
-    background: '#1F2920',
+    background: '#EFFAF1',
   },
   info: {
     dark: '#52BFDC',
@@ -47,7 +47,7 @@ const darkPalette = {
     dark: '#432F18',
     main: '#FF8061',
     light: '#FFBC9F',
-    background: '#2F2318',
+    background: '#FFF1E0',
   },
   warning1: {
     main: '#322211',
