@@ -31,7 +31,7 @@ describe('Create transactions tests 2', () => {
 
   it('Verify advance parameters gas limit input', () => {
     happyPathToStepTwo()
-    createtx.changeNonce('2')
+    createtx.changeNonce('5')
     createtx.clickOnContinueSignTransactionBtn()
     createtx.selectCurrentWallet()
     createtx.openExecutionParamsModal()
@@ -42,8 +42,9 @@ describe('Create transactions tests 2', () => {
     happyPathToStepTwo()
     createtx.verifySubmitBtnIsEnabled()
     createtx.verifyNativeTokenTransfer()
-    createtx.changeNonce('2')
-    createtx.verifyConfirmTransactionData()
+    createtx.changeNonce('5')
+    createtx.verifyAddToBatchBtnIsEnabled()
+    createtx.clickOnContinueSignTransactionBtn()
     createtx.verifyRelayerAttemptsAvailable()
   })
 })

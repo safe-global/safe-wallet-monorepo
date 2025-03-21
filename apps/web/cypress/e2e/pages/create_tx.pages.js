@@ -702,10 +702,8 @@ export function verifyNonceInputValue(value) {
   cy.get(nonceInput).should('have.value', value)
 }
 
-export function verifyConfirmTransactionData() {
+export function clickOnYesOption() {
   cy.contains(yesStr).should('exist').click()
-  clickOnContinueSignTransactionBtn()
-  cy.contains(estimatedFeeStr).should('exist')
 }
 
 export function openExecutionParamsModal() {
