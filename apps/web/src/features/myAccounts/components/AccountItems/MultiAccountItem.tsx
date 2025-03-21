@@ -215,10 +215,10 @@ type MultiAccountItemProps = {
   multiSafeAccountItem: MultiChainSafeItem
   safeOverviews?: SafeOverview[]
   onLinkClick?: SafeListProps['onLinkClick']
-  isOrgSafe?: boolean
+  isSpaceSafe?: boolean
 }
 
-const MultiAccountItem = ({ onLinkClick, multiSafeAccountItem, isOrgSafe = false }: MultiAccountItemProps) => {
+const MultiAccountItem = ({ onLinkClick, multiSafeAccountItem, isSpaceSafe = false }: MultiAccountItemProps) => {
   const {
     address,
     name,
@@ -303,7 +303,7 @@ const MultiAccountItem = ({ onLinkClick, multiSafeAccountItem, isOrgSafe = false
             </Typography>
           </Box>
 
-          {!isOrgSafe && (
+          {!isSpaceSafe && (
             <IconButton
               data-testid="bookmark-icon"
               edge="end"
@@ -323,7 +323,7 @@ const MultiAccountItem = ({ onLinkClick, multiSafeAccountItem, isOrgSafe = false
             </IconButton>
           )}
 
-          {isOrgSafe ? (
+          {isSpaceSafe ? (
             <>
               <Box width="40px" /> {/* Spacer for the send button */}
               <SpaceSafeContextMenu safeItem={multiSafeAccountItem} />
@@ -345,11 +345,11 @@ const MultiAccountItem = ({ onLinkClick, multiSafeAccountItem, isOrgSafe = false
                 safeItem={safeItem}
                 key={`${safeItem.chainId}:${safeItem.address}`}
                 isMultiChainItem
-                isOrgSafe={isOrgSafe}
+                isSpaceSafe={isSpaceSafe}
               />
             ))}
           </Box>
-          {!isReadOnly && hasReplayableSafe && !isOrgSafe && (
+          {!isReadOnly && hasReplayableSafe && !isSpaceSafe && (
             <>
               <Divider sx={{ ml: '-12px', mr: '-12px' }} />
               <Box

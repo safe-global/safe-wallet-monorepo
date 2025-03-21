@@ -8,7 +8,7 @@ import MenuItem from '@mui/material/MenuItem'
 import ContextMenu from '@/components/common/ContextMenu'
 import DeleteIcon from '@/public/images/common/delete.svg'
 import EditIcon from '@/public/images/common/edit.svg'
-import type { GetOrganizationResponse } from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
+import type { GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import css from './styles.module.css'
 import DeleteSpaceDialog from '@/features/spaces/components/SpaceSettings/DeleteSpaceDialog'
 import UpdateSpaceDialog from '@/features/spaces/components/SpaceSettings/UpdateSpaceDialog'
@@ -20,7 +20,7 @@ enum ModalType {
 
 const defaultOpen = { [ModalType.RENAME]: false, [ModalType.REMOVE]: false }
 
-const SpaceContextMenu = ({ space }: { space: GetOrganizationResponse }) => {
+const SpaceContextMenu = ({ space }: { space: GetSpaceResponse }) => {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | undefined>()
   const [open, setOpen] = useState<typeof defaultOpen>(defaultOpen)
 

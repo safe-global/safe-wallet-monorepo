@@ -51,14 +51,14 @@ type AccountItemProps = {
   safeOverview?: SafeOverview
   onLinkClick?: SafeListProps['onLinkClick']
   isMultiChainItem?: boolean
-  isOrgSafe?: boolean
+  isSpaceSafe?: boolean
 }
 
 const SingleAccountItem = ({
   onLinkClick,
   safeItem,
   isMultiChainItem = false,
-  isOrgSafe = false,
+  isSpaceSafe = false,
 }: AccountItemProps) => {
   const { chainId, address, isReadOnly, isPinned } = safeItem
   const chain = useAppSelector((state) => selectChainById(state, chainId))
@@ -236,7 +236,7 @@ const SingleAccountItem = ({
 
   const actions = (
     <>
-      {!isMultiChainItem && !isOrgSafe && (
+      {!isMultiChainItem && !isSpaceSafe && (
         <IconButton
           data-testid="bookmark-icon"
           edge="end"
@@ -253,7 +253,7 @@ const SingleAccountItem = ({
         </IconButton>
       )}
 
-      {isOrgSafe ? (
+      {isSpaceSafe ? (
         <>
           {safeOverview && <SendTransactionButton safe={safeOverview} />}
           <SpaceSafeContextMenu safeItem={safeItem} />
@@ -288,7 +288,7 @@ const SingleAccountItem = ({
     </>
   )
 
-  return isOrgSafe ? (
+  return isSpaceSafe ? (
     <ListItem component="div" ref={elementRef} className={css.listItem}>
       <Box className={css.safeLink}>{content}</Box>
       {actions}

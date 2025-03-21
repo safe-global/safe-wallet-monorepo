@@ -1,4 +1,4 @@
-const SPACE_CATEGORY = 'organizations'
+const SPACE_CATEGORY = 'spaces'
 
 export const SPACE_EVENTS = {
   SIGN_IN_BUTTON: {

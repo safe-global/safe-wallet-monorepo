@@ -1,6 +1,6 @@
 import ModalDialog from '@/components/common/ModalDialog'
 import { DialogContent, DialogActions, Button, Typography } from '@mui/material'
-import { useUserOrganizationsRemoveUserV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
+import { useMembersRemoveUserV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import { useState } from 'react'
@@ -19,14 +19,14 @@ const RemoveMemberDialog = ({
   isInvite?: boolean
 }) => {
   const spaceId = useCurrentSpaceId()
-  const [deleteMember] = useUserOrganizationsRemoveUserV1Mutation()
+  const [deleteMember] = useMembersRemoveUserV1Mutation()
   const [errorMessage, setErrorMessage] = useState<string>('')
 
   const handleConfirm = async () => {
     setErrorMessage('')
     trackEvent({ ...SPACE_EVENTS.REMOVE_MEMBER, label: isInvite ? SPACE_LABELS.invite_list : SPACE_LABELS.member_list })
     try {
-      const { error } = await deleteMember({ orgId: Number(spaceId), userId })
+      const { error } = await deleteMember({ spaceId: Number(spaceId), userId })
 
       if (error) {
         throw error

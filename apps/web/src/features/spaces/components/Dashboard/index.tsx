@@ -68,7 +68,7 @@ const SpaceDashboard = () => {
                   </Track>
                 )}
               </Stack>
-              <SafesList safes={safesToDisplay} isOrgSafe />
+              <SafesList safes={safesToDisplay} isSpaceSafe />
             </Grid>
             <Grid size={{ xs: 12, md: 4 }}>
               <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>

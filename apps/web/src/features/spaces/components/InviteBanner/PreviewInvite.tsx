@@ -1,5 +1,5 @@
 import { Typography, Paper, Box } from '@mui/material'
-import { useOrganizationsGetOneV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
+import { useSpacesGetOneV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import InitialsAvatar from '../InitialsAvatar'
 import css from './styles.module.css'
 import { useCurrentSpaceId } from 'src/features/spaces/hooks/useCurrentSpaceId'
@@ -14,7 +14,7 @@ import DeclineButton from './DeclineButton'
 const PreviewInvite = () => {
   const isUserSignedIn = useAppSelector(isAuthenticated)
   const spaceId = useCurrentSpaceId()
-  const { currentData: space } = useOrganizationsGetOneV1Query({ id: Number(spaceId) }, { skip: !isUserSignedIn })
+  const { currentData: space } = useSpacesGetOneV1Query({ id: Number(spaceId) }, { skip: !isUserSignedIn })
 
   if (!space) return null
 

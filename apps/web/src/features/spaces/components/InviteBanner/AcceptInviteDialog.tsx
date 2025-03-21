@@ -1,7 +1,7 @@
 import {
-  type GetOrganizationResponse,
-  useUserOrganizationsAcceptInviteV1Mutation,
-} from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
+  type GetSpaceResponse,
+  useMembersAcceptInviteV1Mutation,
+} from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useRouter } from 'next/router'
 import { type ReactElement, useState } from 'react'
 import { Alert, Box, Button, CircularProgress, DialogActions, DialogContent, Typography } from '@mui/material'
@@ -17,15 +17,15 @@ import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_G
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { trackEvent } from '@/services/analytics'
 
-function AcceptInviteDialog({ space, onClose }: { space: GetOrganizationResponse; onClose: () => void }): ReactElement {
+function AcceptInviteDialog({ space, onClose }: { space: GetSpaceResponse; onClose: () => void }): ReactElement {
   const [error, setError] = useState<string>()
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const router = useRouter()
   const isUserSignedIn = useAppSelector(isAuthenticated)
   const { data: currentUser } = useUsersGetWithWalletsV1Query(undefined, { skip: !isUserSignedIn })
-  const [acceptInvite] = useUserOrganizationsAcceptInviteV1Mutation()
-  const memberName = space.userOrganizations.find((member) => member.user.id === currentUser?.id)?.name
+  const [acceptInvite] = useMembersAcceptInviteV1Mutation()
+  const memberName = space.members.find((member) => member.user.id === currentUser?.id)?.name
 
   const methods = useForm<{ name: string }>({ mode: 'onChange', defaultValues: { name: memberName } })
   const { handleSubmit, formState } = methods
@@ -36,7 +36,7 @@ function AcceptInviteDialog({ space, onClose }: { space: GetOrganizationResponse
 
     try {
       setIsSubmitting(true)
-      const response = await acceptInvite({ orgId: space.id, acceptInviteDto: { name: data.name } })
+      const response = await acceptInvite({ spaceId: space.id, acceptInviteDto: { name: data.name } })
 
       if (response.data) {
         router.push({ pathname: AppRoutes.spaces.index, query: { spaceId: space.id } })

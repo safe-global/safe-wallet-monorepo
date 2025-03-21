@@ -1,9 +1,9 @@
 import InitialsAvatar from '../InitialsAvatar'
 import { Stack, Typography } from '@mui/material'
-import type { UserOrganization } from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
+import type { Member } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
 
-const MemberName = ({ member }: { member: UserOrganization }) => {
+const MemberName = ({ member }: { member: Member }) => {
   const { currentData: user } = useUsersGetWithWalletsV1Query()
   const isCurrentUser = member.user.id === user?.id
 

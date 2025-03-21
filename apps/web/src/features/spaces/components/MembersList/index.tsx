@@ -1,5 +1,5 @@
 import { Box, Chip, IconButton, Stack, SvgIcon, Tooltip } from '@mui/material'
-import { type UserOrganization } from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
+import { type Member } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import EditIcon from '@/public/images/common/edit.svg'
 import DeleteIcon from '@/public/images/common/delete.svg'
 import EnhancedTable from '@/components/common/EnhancedTable'
@@ -32,7 +32,7 @@ const headCells = [
   },
 ]
 
-const EditButton = ({ member }: { member: UserOrganization }) => {
+const EditButton = ({ member }: { member: Member }) => {
   const [open, setOpen] = useState(false)
 
   return (
@@ -52,7 +52,7 @@ export const RemoveMemberButton = ({
   disabled,
   isInvite,
 }: {
-  member: UserOrganization
+  member: Member
   disabled: boolean
   isInvite: boolean
 }) => {
@@ -87,7 +87,7 @@ export const RemoveMemberButton = ({
   )
 }
 
-const MembersList = ({ members }: { members: UserOrganization[] }) => {
+const MembersList = ({ members }: { members: Member[] }) => {
   const isAdmin = useIsAdmin()
   const adminCount = members.filter((member) => member.role === MemberRole.ADMIN).length
 

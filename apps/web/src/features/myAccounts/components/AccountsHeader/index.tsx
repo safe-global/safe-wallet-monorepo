@@ -36,13 +36,13 @@ const AddSafeButton = ({ trackingLabel, onLinkClick }: { trackingLabel: string; 
 const AccountsHeader = ({ isSidebar, onLinkClick }: { isSidebar: boolean; onLinkClick?: () => void }) => {
   const wallet = useWallet()
   const router = useRouter()
-  const isOrgsFeatureEnabled = useHasFeature(FEATURES.SPACES)
+  const isSpacesFeatureEnabled = useHasFeature(FEATURES.SPACES)
   const isLoginPage = router.pathname === AppRoutes.welcome.accounts
   const trackingLabel = isLoginPage ? OVERVIEW_LABELS.login_page : OVERVIEW_LABELS.sidebar
 
   return (
     <Box className={classNames(css.header, { [css.sidebarHeader]: isSidebar })}>
-      {isSidebar || !isOrgsFeatureEnabled ? (
+      {isSidebar || !isSpacesFeatureEnabled ? (
         <Typography variant="h1" fontWeight={700} className={css.title}>
           Accounts
         </Typography>
