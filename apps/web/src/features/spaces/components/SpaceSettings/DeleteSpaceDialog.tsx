@@ -15,9 +15,10 @@ import CheckIcon from '@/public/images/common/check.svg'
 import CloseIcon from '@/public/images/common/close.svg'
 import css from './styles.module.css'
 import { AppRoutes } from '@/config/routes'
-import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
+import { showNotification } from '@/store/notificationsSlice'
+import { useAppDispatch } from '@/store'
 
 const ListIcon = ({ variant }: { variant: 'success' | 'danger' }) => {
   const Icon = variant === 'success' ? CheckIcon : CloseIcon
@@ -31,17 +32,28 @@ const ListIcon = ({ variant }: { variant: 'success' | 'danger' }) => {
 
 const DeleteSpaceDialog = ({ space, onClose }: { space: GetSpaceResponse | undefined; onClose: () => void }) => {
   const [error, setError] = useState<string>()
-  const spaceId = useCurrentSpaceId()
   const router = useRouter()
+  const dispatch = useAppDispatch()
   const [deleteSpace] = useSpacesDeleteV1Mutation()
 
   const onDelete = async () => {
+    if (!space) return
+
     setError(undefined)
 
     try {
-      await deleteSpace({ id: Number(spaceId) })
+      await deleteSpace({ id: space.id })
 
       onClose()
+
+      dispatch(
+        showNotification({
+          message: `Successfully deleted space ${space.name}.`,
+          variant: 'success',
+          groupKey: 'delete-space-success',
+        }),
+      )
+
       router.push({ pathname: AppRoutes.welcome.spaces })
     } catch (e) {
       console.error(e)
