@@ -13,6 +13,7 @@ import ExternalLink from '@/components/common/ExternalLink'
 import CheckWallet from '@/components/common/CheckWallet'
 import { getLatestSafeVersion } from '@/utils/chains'
 import { useCurrentChain } from '@/hooks/useChains'
+import { UnsupportedMastercopyWarning } from '@/features/multichain/components/UnsupportedMastercopyWarning/UnsupportedMasterCopyWarning'
 
 export const ContractVersion = () => {
   const { setTxFlow } = useContext(TxModalContext)
@@ -52,7 +53,7 @@ export const ContractVersion = () => {
         )}
       </Typography>
 
-      {safeLoaded && safe.version && showUpdateDialog && (
+      {safeLoaded && safe.version && showUpdateDialog ? (
         <Alert
           sx={{ mt: 2, borderRadius: '2px', borderColor: '#B0FFC9' }}
           icon={<SvgIcon component={InfoIcon} inheritViewBox color="secondary" />}
@@ -75,6 +76,8 @@ export const ContractVersion = () => {
             )}
           </CheckWallet>
         </Alert>
+      ) : (
+        <UnsupportedMastercopyWarning />
       )}
     </>
   )

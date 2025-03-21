@@ -8,7 +8,7 @@ import {
   isExecTxData,
   isOnChainConfirmationTxData,
   isOrderTxInfo,
-  isSafeToL2MigrationTxData,
+  isSafeMigrationTxData,
   isSafeUpdateTxData,
   isSwapOrderTxInfo,
   isTwapOrderTxInfo,
@@ -62,9 +62,9 @@ const getConfirmationViewComponent = ({
 
   if (isAnyStakingTxInfo(txInfo)) return <StakingTx txInfo={txInfo} />
 
-  if (isCustomTxInfo(txInfo) && isSafeUpdateTxData(txData)) return <UpdateSafe />
+  if (isCustomTxInfo(txInfo) && isSafeUpdateTxData(txData)) return <UpdateSafe txData={txData} />
 
-  if (isCustomTxInfo(txInfo) && isSafeToL2MigrationTxData(txData)) {
+  if (isCustomTxInfo(txInfo) && isSafeMigrationTxData(txData)) {
     return <MigrateToL2Information variant="queue" txData={txData} />
   }
 
