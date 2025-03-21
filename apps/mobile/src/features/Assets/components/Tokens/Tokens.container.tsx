@@ -13,6 +13,7 @@ import { skipToken } from '@reduxjs/toolkit/query'
 import { formatCurrency, formatCurrencyPrecise } from '@safe-global/utils/formatNumber'
 import { formatVisualAmount } from '@safe-global/utils/formatters'
 import { shouldDisplayPreciseBalance } from '@/src/utils/balance'
+import { NoFunds } from '@/src/features/Assets/components/NoFunds'
 
 export function TokensContainer() {
   const activeSafe = useSelector(selectActiveSafe)
@@ -51,7 +52,11 @@ export function TokensContainer() {
   }, [])
 
   if (isLoading || !data?.items.length || error) {
-    return <Fallback loading={isFetching} hasError={!!error} />
+    return (
+      <Fallback loading={isFetching} hasError={!!error}>
+        <NoFunds fundsType={'token'} />
+      </Fallback>
+    )
   }
 
   return (
