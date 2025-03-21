@@ -3,7 +3,7 @@ import type { BaseQueryFn, FetchArgs, FetchBaseQueryError } from '@reduxjs/toolk
 
 const CREDENTIAL_ROUTES = [
   /^\/v1\/users/,
-  /^\/v1\/organizations/,
+  /^\/v1\/spaces/,
   /^\/v1\/auth/,
   /^\/v2\/register\/notifications$/,
   /^\/v2\/chains\/[^\/]+\/notifications\/devices/,
