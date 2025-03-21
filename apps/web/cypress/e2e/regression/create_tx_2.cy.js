@@ -38,7 +38,7 @@ describe('Create transactions tests 2', () => {
     createtx.verifyAndSubmitExecutionParams()
   })
 
-  it('Verify a transaction shows relayer', () => {
+  it('Verify a transaction shows relayer and addToBatch button', () => {
     happyPathToStepTwo()
     createtx.verifySubmitBtnIsEnabled()
     createtx.verifyNativeTokenTransfer()
