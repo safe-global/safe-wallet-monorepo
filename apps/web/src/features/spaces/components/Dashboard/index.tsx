@@ -40,7 +40,7 @@ const ViewAllLink = ({ url }: { url: LinkProps['href'] }) => {
 const DASHBOARD_LIST_DISPLAY_LIMIT = 5
 
 const SpaceDashboard = () => {
-  const safes = useSpaceSafes()
+  const { allSafes: safes } = useSpaceSafes()
   const spaceId = useCurrentSpaceId()
   const { activeMembers } = useSpaceMembersByStatus()
   const isInvited = useIsInvited()

@@ -58,7 +58,7 @@ function getMultiChainSafeId(mcSafe: MultiChainSafeItem) {
 
 const SafesList = ({ safes }: { safes: AllSafeItems }) => {
   const { watch, setValue, control } = useFormContext<AddAccountsFormValues>()
-  const spaceSafes = useSpaceSafes()
+  const { allSafes: spaceSafes } = useSpaceSafes()
   const multiChainSpaceSafes = spaceSafes.filter(isMultiChainSafeItem)
   const safeItemSpaceSafes = spaceSafes.filter(isSafeItem)
 

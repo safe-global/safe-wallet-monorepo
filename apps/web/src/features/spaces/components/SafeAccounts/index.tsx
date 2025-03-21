@@ -17,7 +17,7 @@ import debounce from 'lodash/debounce'
 
 const SpaceSafeAccounts = () => {
   const [searchQuery, setSearchQuery] = useState('')
-  const allSafes = useSpaceSafes()
+  const { allSafes } = useSpaceSafes()
   const filteredSafes = useSafesSearch(allSafes ?? [], searchQuery)
   const isAdmin = useIsAdmin()
   const isInvited = useIsInvited()
