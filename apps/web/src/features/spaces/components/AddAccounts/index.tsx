@@ -120,7 +120,7 @@ const AddAccounts = () => {
   })
 
   const handleAddSafe = (data: AddManuallyFormValues) => {
-    const alreadyExists = manualSafes.some((safe) => safe.address === data.address && safe.chainId === data.chainId)
+    const alreadyExists = allSafes.some((safe) => safe.address === data.address)
 
     const newSafeItem: SafeItem = {
       ...data,
