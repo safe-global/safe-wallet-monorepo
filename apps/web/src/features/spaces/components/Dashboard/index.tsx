@@ -17,7 +17,6 @@ import { useSpaceMembersByStatus, useIsInvited } from '@/features/spaces/hooks/u
 import PreviewInvite from '../InviteBanner/PreviewInvite'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import Track from '@/components/common/Track'
-import LoadingState from '../LoadingState'
 
 const ViewAllLink = ({ url }: { url: LinkProps['href'] }) => {
   return (
@@ -41,15 +40,13 @@ const ViewAllLink = ({ url }: { url: LinkProps['href'] }) => {
 const DASHBOARD_LIST_DISPLAY_LIMIT = 5
 
 const SpaceDashboard = () => {
-  const { allSafes: safes, isLoading } = useSpaceSafes()
+  const { allSafes: safes } = useSpaceSafes()
   const spaceId = useCurrentSpaceId()
   const { activeMembers } = useSpaceMembersByStatus()
   const isInvited = useIsInvited()
 
   const safesToDisplay = safes.slice(0, DASHBOARD_LIST_DISPLAY_LIMIT)
   const membersToDisplay = activeMembers.slice(0, DASHBOARD_LIST_DISPLAY_LIMIT)
-
-  if (isLoading) return <LoadingState />
 
   return (
     <>
