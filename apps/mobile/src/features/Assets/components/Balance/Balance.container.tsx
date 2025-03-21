@@ -16,7 +16,7 @@ export function BalanceContainer() {
   const chains = useAppSelector(selectAllChains)
   const activeSafe = useDefinedActiveSafe()
   const activeSafeInfo = useAppSelector((state: RootState) => selectSafeInfo(state, activeSafe.address))
-  const activeSafeChains = useAppSelector((state: RootState) => getChainsByIds(state, activeSafeInfo.chains))
+  const activeSafeChains = useAppSelector((state: RootState) => getChainsByIds(state, activeSafeInfo?.chains || []))
   const copy = useCopyAndDispatchToast()
   const { data, isLoading } = useSafesGetOverviewForManyQuery<SafeOverviewResult>(
     {
