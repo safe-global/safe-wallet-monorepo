@@ -1,3 +1,3 @@
-import { FEATURES } from '@/utils/chains'
+import type { FEATURES } from '@/utils/chains'
 
-export const TARGETED_FEATURES = [{ id: 4, feature: FEATURES.TARGETED_MASS_PAYOUTS }] as const
+export const TARGETED_FEATURES: { id: number; feature: FEATURES }[] = []

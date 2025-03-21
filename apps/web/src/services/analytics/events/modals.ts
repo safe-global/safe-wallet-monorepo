@@ -101,6 +101,16 @@ export const MODALS_EVENTS = {
     category: MODALS_CATEGORY,
     event: EventType.CLICK,
   },
+  ADD_RECIPIENT: {
+    action: 'Add recipient',
+    category: MODALS_CATEGORY,
+    event: EventType.CLICK,
+  },
+  REMOVE_RECIPIENT: {
+    action: 'Remove recipient',
+    category: MODALS_CATEGORY,
+    event: EventType.CLICK,
+  },
 }
 
 export enum MODAL_NAVIGATION {

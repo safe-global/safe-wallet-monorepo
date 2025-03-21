@@ -48,6 +48,7 @@ export function trackTxEvents(
   isProposerCreation: boolean,
   isParentSigner: boolean,
   origin?: string,
+  isMassPayout: boolean = false,
 ) {
   const isNestedConfirmation = !!details && isNestedConfirmationTxInfo(details.txInfo)
 
@@ -65,7 +66,7 @@ export function trackTxEvents(
     return confirmationEvent
   })()
 
-  const txType = getTransactionTrackingType(details, origin)
+  const txType = getTransactionTrackingType(details, origin, isMassPayout)
   trackEvent({ ...event, label: txType })
 
   // Immediate execution on creation
