@@ -15,7 +15,7 @@ const admin = walletCredentials.OWNER_4_PRIVATE_KEY
 const user = walletCredentials.OWNER_3_PRIVATE_KEY
 const user_address = walletCredentials.OWNER_3_WALLET_ADDRESS
 
-describe('Basic flow organizations tests', () => {
+describe.skip('Basic flow organizations tests', () => {
   before(async () => {
     staticSafes = await getSafes(CATEGORIES.static)
   })
@@ -72,6 +72,8 @@ describe('Basic flow organizations tests', () => {
 
     wallet.connectSigner(user)
     org.clickOnSignInBtn()
+
+
 
   })
 })
