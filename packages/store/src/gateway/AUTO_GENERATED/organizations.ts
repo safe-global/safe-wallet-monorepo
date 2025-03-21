@@ -122,14 +122,13 @@ const injectedRtkApi = api
     overrideExisting: false,
   })
 export { injectedRtkApi as cgwApi }
-export type OrganizationsCreateV1ApiResponse = /** status 200 Organizations created */ CreateOrganizationResponse
+export type OrganizationsCreateV1ApiResponse = /** status 200 Organization created */ CreateOrganizationResponse
 export type OrganizationsCreateV1ApiArg = {
   createOrganizationDto: CreateOrganizationDto
 }
 export type OrganizationsGetV1ApiResponse = /** status 200 Organizations found */ GetOrganizationResponse[]
 export type OrganizationsGetV1ApiArg = void
-export type OrganizationsCreateWithUserV1ApiResponse =
-  /** status 200 Organizations created */ CreateOrganizationResponse
+export type OrganizationsCreateWithUserV1ApiResponse = /** status 200 Organization created */ CreateOrganizationResponse
 export type OrganizationsCreateWithUserV1ApiArg = {
   createOrganizationDto: CreateOrganizationDto
 }
@@ -205,6 +204,7 @@ export type UserOrganizationDto = {
   id: number
   role: 'ADMIN' | 'MEMBER'
   name: string
+  invitedBy: string
   status: 'INVITED' | 'ACTIVE' | 'DECLINED'
   createdAt: string
   updatedAt: string

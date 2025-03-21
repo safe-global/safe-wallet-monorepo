@@ -19,7 +19,7 @@ import adminIcon from '@/public/images/spaces/admin.svg'
 import AddressInput from '@/components/common/AddressInput'
 import CheckIcon from '@mui/icons-material/Check'
 import css from './styles.module.css'
-import { useUserOrganizationsInviteUserV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
+import { useMembersInviteUserV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useCurrentSpaceId } from 'src/features/spaces/hooks/useCurrentSpaceId'
 import NameInput from '@/components/common/NameInput'
 import { useRouter } from 'next/router'
@@ -74,7 +74,7 @@ const AddMembersModal = ({ onClose }: { onClose: () => void }): ReactElement => 
   const router = useRouter()
   const [error, setError] = useState<string>()
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [inviteMembers] = useUserOrganizationsInviteUserV1Mutation()
+  const [inviteMembers] = useMembersInviteUserV1Mutation()
 
   const methods = useForm<MemberField>({
     mode: 'onChange',
@@ -99,7 +99,7 @@ const AddMembersModal = ({ onClose }: { onClose: () => void }): ReactElement => 
       setIsSubmitting(true)
       trackEvent({ ...SPACE_EVENTS.ADD_MEMBER })
       const response = await inviteMembers({
-        orgId: Number(spaceId),
+        spaceId: Number(spaceId),
         inviteUsersDto: { users: [{ address: data.address, role: data.role, name: data.name }] },
       })
       if (response.data) {

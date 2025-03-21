@@ -1,4 +1,4 @@
-import { useOrganizationsCreateWithUserV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
+import { useSpacesCreateWithUserV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useRouter } from 'next/router'
 import { type ReactElement, useState } from 'react'
 import { Alert, Box, Button, CircularProgress, DialogActions, DialogContent, Typography } from '@mui/material'
@@ -17,7 +17,7 @@ function SpaceCreationModal({ onClose }: { onClose: () => void }): ReactElement 
   const [isSubmitting, setIsSubmitting] = useState(false)
   const router = useRouter()
   const methods = useForm<{ name: string }>({ mode: 'onChange' })
-  const [createSpaceWithUser] = useOrganizationsCreateWithUserV1Mutation()
+  const [createSpaceWithUser] = useSpacesCreateWithUserV1Mutation()
   const { handleSubmit, formState } = methods
 
   const onSubmit = handleSubmit(async (data) => {
@@ -26,7 +26,7 @@ function SpaceCreationModal({ onClose }: { onClose: () => void }): ReactElement 
     try {
       setIsSubmitting(true)
       trackEvent({ ...SPACE_EVENTS.CREATE_SPACE })
-      const response = await createSpaceWithUser({ createOrganizationDto: { name: data.name } })
+      const response = await createSpaceWithUser({ createSpaceDto: { name: data.name } })
 
       if (response.data) {
         const spaceId = response.data.id.toString()

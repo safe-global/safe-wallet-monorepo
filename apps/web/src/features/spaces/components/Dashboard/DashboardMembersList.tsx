@@ -1,5 +1,5 @@
 import { Paper, Button, Box, Stack } from '@mui/material'
-import type { UserOrganization } from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
+import type { Member } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import PlusIcon from '@/public/images/common/plus.svg'
 import { useState } from 'react'
 import AddMembersModal from '../AddMembersModal'
@@ -8,7 +8,7 @@ import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import Track from '@/components/common/Track'
 import { useIsAdmin } from '@/features/spaces/hooks/useSpaceMembers'
 
-const DashboardMembersList = ({ members }: { members: UserOrganization[] }) => {
+const DashboardMembersList = ({ members }: { members: Member[] }) => {
   const [openAddMembersModal, setOpenAddMembersModal] = useState(false)
   const isAdmin = useIsAdmin()
 

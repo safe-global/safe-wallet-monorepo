@@ -15,7 +15,7 @@ import Track from '@/components/common/Track'
 import { trackEvent } from '@/services/analytics'
 import debounce from 'lodash/debounce'
 
-const OrganizationSafeAccounts = () => {
+const SpaceSafeAccounts = () => {
   const [searchQuery, setSearchQuery] = useState('')
   const { allSafes } = useSpaceSafes()
   const filteredSafes = useSafesSearch(allSafes ?? [], searchQuery)
@@ -80,10 +80,10 @@ const OrganizationSafeAccounts = () => {
       ) : safes.length === 0 ? (
         <EmptySafeAccounts />
       ) : (
-        <SafesList safes={safes} isOrgSafe />
+        <SafesList safes={safes} isSpaceSafe />
       )}
     </>
   )
 }
 
-export default OrganizationSafeAccounts
+export default SpaceSafeAccounts

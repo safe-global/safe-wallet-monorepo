@@ -5,7 +5,8 @@ import AddManually, { type AddManuallyFormValues } from '@/features/spaces/compo
 import SafesList, { getSafeId } from '@/features/spaces/components/AddAccounts/SafesList'
 import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
 import SearchIcon from '@/public/images/common/search.svg'
-import { useOrganizationSafesCreateV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
+import { useSpaceSafesCreateV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+
 import debounce from 'lodash/debounce'
 import css from './styles.module.css'
 import { type AllSafeItems, useOwnedSafesGrouped } from '@/features/myAccounts/hooks/useAllSafesGrouped'
@@ -70,7 +71,7 @@ const AddAccounts = () => {
   const { allSafes: spaceSafes } = useSpaceSafes()
   const safes = useOwnedSafesGrouped()
   const sortComparator = getComparator(orderBy)
-  const [addSafesToSpace] = useOrganizationSafesCreateV1Mutation()
+  const [addSafesToSpace] = useSpaceSafesCreateV1Mutation()
   const spaceId = useCurrentSpaceId()
 
   const allSafes = useMemo<AllSafeItems>(
@@ -103,8 +104,8 @@ const AddAccounts = () => {
 
     try {
       const result = await addSafesToSpace({
-        organizationId: Number(spaceId),
-        createOrganizationSafesDto: { safes: safesToAdd },
+        spaceId: Number(spaceId),
+        createSpaceSafesDto: { safes: safesToAdd },
       })
 
       if (result.error) {
@@ -120,7 +121,7 @@ const AddAccounts = () => {
   })
 
   const handleAddSafe = (data: AddManuallyFormValues) => {
-    const alreadyExists = manualSafes.some((safe) => safe.address === data.address && safe.chainId === data.chainId)
+    const alreadyExists = allSafes.some((safe) => safe.address === data.address)
 
     const newSafeItem: SafeItem = {
       ...data,

@@ -1,4 +1,4 @@
-import { useOrganizationSafesGetV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
+import { useSpaceSafesGetV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useCurrentSpaceId } from 'src/features/spaces/hooks/useCurrentSpaceId'
 import { _buildSafeItems, type AllSafeItems } from '@/features/myAccounts/hooks/useAllSafesGrouped'
 import { useAllSafesGrouped } from '@/features/myAccounts/hooks/useAllSafesGrouped'
@@ -12,8 +12,8 @@ import { isAuthenticated } from '@/store/authSlice'
 export const useSpaceSafes = () => {
   const spaceId = useCurrentSpaceId()
   const isUserSignedIn = useAppSelector(isAuthenticated)
-  const { currentData, isLoading } = useOrganizationSafesGetV1Query(
-    { organizationId: Number(spaceId) },
+  const { currentData, isLoading } = useSpaceSafesGetV1Query(
+    { spaceId: Number(spaceId) },
     { skip: !isUserSignedIn },
   )
   const allSafeNames = useAppSelector(selectAllAddressBooks)

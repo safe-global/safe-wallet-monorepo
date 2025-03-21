@@ -2,7 +2,7 @@ import { usePathname } from 'next/navigation'
 import { AppRoutes } from '@/config/routes'
 import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
 
-const ORGANIZATION_ROUTES = [
+const SPACES_ROUTES = [
   AppRoutes.spaces.index,
   AppRoutes.spaces.settings,
   AppRoutes.spaces.members,
@@ -14,5 +14,5 @@ export const useIsSpaceRoute = (): boolean => {
   const route = clientPathname || ''
   const spaceId = useCurrentSpaceId()
 
-  return ORGANIZATION_ROUTES.includes(route) && !!spaceId
+  return SPACES_ROUTES.includes(route) && !!spaceId
 }

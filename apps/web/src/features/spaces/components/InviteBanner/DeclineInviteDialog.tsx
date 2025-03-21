@@ -3,25 +3,25 @@ import { Typography } from '@mui/material'
 import { DialogContent, DialogActions, Button } from '@mui/material'
 import ModalDialog from '@/components/common/ModalDialog'
 import ErrorMessage from '@/components/tx/ErrorMessage'
-import type { GetOrganizationResponse } from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
-import { useUserOrganizationsDeclineInviteV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
+import type { GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { useMembersDeclineInviteV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { trackEvent } from '@/services/analytics'
 
 type DeclineInviteDialogProps = {
-  space: GetOrganizationResponse
+  space: GetSpaceResponse
   onClose: () => void
 }
 
 const DeclineInviteDialog = ({ space, onClose }: DeclineInviteDialogProps) => {
   const [errorMessage, setErrorMessage] = useState<string>('')
-  const [declineInvite] = useUserOrganizationsDeclineInviteV1Mutation()
+  const [declineInvite] = useMembersDeclineInviteV1Mutation()
 
   const handleConfirm = async () => {
     setErrorMessage('')
     trackEvent({ ...SPACE_EVENTS.DECLINE_INVITE_SUBMIT })
     try {
-      const { error } = await declineInvite({ orgId: space.id })
+      const { error } = await declineInvite({ spaceId: space.id })
 
       if (error) {
         throw error

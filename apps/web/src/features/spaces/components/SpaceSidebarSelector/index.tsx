@@ -1,8 +1,5 @@
 import { Box, Button, Divider, Menu, MenuItem, Typography } from '@mui/material'
-import {
-  type GetOrganizationResponse,
-  useOrganizationsGetV1Query,
-} from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
+import { type GetSpaceResponse, useSpacesGetV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useState } from 'react'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import CheckIcon from '@mui/icons-material/Check'
@@ -27,7 +24,7 @@ const SpaceSidebarSelector = () => {
   const open = Boolean(anchorEl)
   const spaceId = useCurrentSpaceId()
   const isUserSignedIn = useAppSelector(isAuthenticated)
-  const { currentData: spaces } = useOrganizationsGetV1Query(undefined, { skip: !isUserSignedIn })
+  const { currentData: spaces } = useSpacesGetV1Query(undefined, { skip: !isUserSignedIn })
   const selectedSpace = spaces?.find((space) => space.id === Number(spaceId))
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -38,7 +35,7 @@ const SpaceSidebarSelector = () => {
     setAnchorEl(null)
   }
 
-  const handleSelectSpace = (space: GetOrganizationResponse) => {
+  const handleSelectSpace = (space: GetSpaceResponse) => {
     router.push({
       pathname: router.pathname,
       query: { ...router.query, spaceId: space.id.toString() },

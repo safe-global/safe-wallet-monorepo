@@ -1,7 +1,7 @@
 import { useRouter } from 'next/router'
 import Head from 'next/head'
 import { BRAND_NAME } from '@/config/constants'
-import OrganizationSafeAccounts from '@/features/spaces/components/SafeAccounts'
+import SpaceSafeAccounts from '@/features/spaces/components/SafeAccounts'
 import AuthState from '@/features/spaces/components/AuthState'
 
 export default function SpaceAccountsPage() {
@@ -18,7 +18,7 @@ export default function SpaceAccountsPage() {
 
       <main>
         <AuthState spaceId={spaceId}>
-          <OrganizationSafeAccounts />
+          <SpaceSafeAccounts />
         </AuthState>
       </main>
     </>

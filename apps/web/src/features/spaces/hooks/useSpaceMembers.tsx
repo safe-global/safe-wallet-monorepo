@@ -1,4 +1,4 @@
-import { useUserOrganizationsGetUsersV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
+import { useMembersGetUsersV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useCurrentSpaceId } from 'src/features/spaces/hooks/useCurrentSpaceId'
 import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
@@ -19,10 +19,7 @@ const useAllMembers = (spaceId?: number) => {
   const currentSpaceId = useCurrentSpaceId()
   const actualSpaceId = spaceId ?? currentSpaceId
   const isUserSignedIn = useAppSelector(isAuthenticated)
-  const { data: currentData } = useUserOrganizationsGetUsersV1Query(
-    { orgId: Number(actualSpaceId) },
-    { skip: !isUserSignedIn },
-  )
+  const { data: currentData } = useMembersGetUsersV1Query({ spaceId: Number(actualSpaceId) }, { skip: !isUserSignedIn })
   return currentData?.members || []
 }
 

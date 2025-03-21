@@ -1,8 +1,8 @@
 import { useMemo } from 'react'
 import Fuse from 'fuse.js'
-import type { UserOrganization } from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
+import type { Member } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 
-const useMembersSearch = (members: UserOrganization[], query: string): UserOrganization[] => {
+const useMembersSearch = (members: Member[], query: string): Member[] => {
   const fuse = useMemo(
     () =>
       new Fuse(members, {

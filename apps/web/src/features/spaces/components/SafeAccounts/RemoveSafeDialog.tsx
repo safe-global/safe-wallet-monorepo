@@ -10,7 +10,7 @@ import Button from '@mui/material/Button'
 import DialogActions from '@mui/material/DialogActions'
 import DialogContent from '@mui/material/DialogContent'
 import Typography from '@mui/material/Typography'
-import { useOrganizationSafesDeleteV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
+import { useSpaceSafesDeleteV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useState } from 'react'
 
 function getToBeDeletedSafeAccounts(safeItem: SafeItem | MultiChainSafeItem) {
@@ -30,7 +30,7 @@ const RemoveSafeDialog = ({
 }) => {
   const { address } = safeItem
   const spaceId = useCurrentSpaceId()
-  const [removeSafeAccounts] = useOrganizationSafesDeleteV1Mutation()
+  const [removeSafeAccounts] = useSpaceSafesDeleteV1Mutation()
   const [error, setError] = useState('')
 
   const handleConfirm = async () => {
@@ -39,8 +39,8 @@ const RemoveSafeDialog = ({
 
     try {
       const result = await removeSafeAccounts({
-        organizationId: Number(spaceId),
-        deleteOrganizationSafesDto: { safes: safeAccounts },
+        spaceId: Number(spaceId),
+        deleteSpaceSafesDto: { safes: safeAccounts },
       })
 
       if (result.error) {

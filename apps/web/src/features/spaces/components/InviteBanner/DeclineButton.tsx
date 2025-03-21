@@ -1,11 +1,11 @@
 import { useState } from 'react'
 import { Button } from '@mui/material'
-import type { GetOrganizationResponse } from '@safe-global/store/gateway/AUTO_GENERATED/organizations'
+import type { GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import DeclineInviteDialog from './DeclineInviteDialog'
 import css from './styles.module.css'
 
 type DeclineButtonProps = {
-  space: GetOrganizationResponse
+  space: GetSpaceResponse
 }
 
 const DeclineButton = ({ space }: DeclineButtonProps) => {
