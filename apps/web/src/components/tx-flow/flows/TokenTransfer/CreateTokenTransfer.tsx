@@ -38,6 +38,8 @@ import CSVAirdropAppModal from './CSVAirdropAppModal'
 import { InsufficientFundsValidationError } from '@/components/common/TokenAmountInput'
 import { FEATURES } from '@/utils/chains'
 import { useHasFeature } from '@/hooks/useChains'
+import Track from '@/components/common/Track'
+import { MODALS_EVENTS } from '@/services/analytics'
 
 export const AutocompleteItem = (item: { tokenInfo: TokenInfo; balance: string }): ReactElement => (
   <Grid
@@ -183,16 +185,18 @@ export const CreateTokenTransfer = ({
             {canBatch && (
               <>
                 <Stack direction="row" alignItems="center" justifyContent="space-between" mb={4}>
-                  <Button
-                    data-testid="add-recipient-btn"
-                    variant="text"
-                    onClick={addRecipient}
-                    disabled={!canAddMoreRecipients}
-                    startIcon={<SvgIcon component={AddIcon} inheritViewBox fontSize="small" />}
-                    size="large"
-                  >
-                    Add recipient
-                  </Button>
+                  <Track {...MODALS_EVENTS.ADD_RECIPIENT}>
+                    <Button
+                      data-testid="add-recipient-btn"
+                      variant="text"
+                      onClick={addRecipient}
+                      disabled={!canAddMoreRecipients}
+                      startIcon={<SvgIcon component={AddIcon} inheritViewBox fontSize="small" />}
+                      size="large"
+                    >
+                      Add recipient
+                    </Button>
+                  </Track>
                   <Typography
                     variant="body2"
                     color={canAddMoreRecipients ? 'primary' : 'error.main'}
