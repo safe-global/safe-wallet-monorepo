@@ -9,6 +9,7 @@ type DropdownLabelProps = {
     fontSize?: '$4' | '$5' | GetThemeValueForKey<'fontSize'>
     fontWeight: 400 | 500 | 600
   }
+  displayDropDownIcon?: boolean
   onPress?: () => void
 }
 const defaultLabelProps = {
@@ -16,7 +17,13 @@ const defaultLabelProps = {
   fontWeight: 400,
 } as const
 
-export const DropdownLabel = ({ label, leftNode, onPress, labelProps = defaultLabelProps }: DropdownLabelProps) => {
+export const DropdownLabel = ({
+  label,
+  displayDropDownIcon = true,
+  leftNode,
+  onPress,
+  labelProps = defaultLabelProps,
+}: DropdownLabelProps) => {
   return (
     <View testID="dropdown-label-view" onPress={onPress} flexDirection="row" columnGap="$2">
       {leftNode}
@@ -27,9 +34,11 @@ export const DropdownLabel = ({ label, leftNode, onPress, labelProps = defaultLa
         </Text>
       </View>
 
-      <View paddingTop={'$1'}>
-        <SafeFontIcon testID="dropdown-arrow" name="chevron-down" size={16} />
-      </View>
+      {displayDropDownIcon && (
+        <View paddingTop={'$1'}>
+          <SafeFontIcon testID="dropdown-arrow" name="chevron-down" size={16} />
+        </View>
+      )}
     </View>
   )
 }
