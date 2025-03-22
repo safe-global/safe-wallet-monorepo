@@ -22,14 +22,14 @@ To get started, ensure you have the required tools installed and follow these st
 
 ### Prerequisites
 
-- **Node.js**: Install the latest stable version from [Node.js](https://nodejs.org/).
-- **Yarn**: Use Yarn version 4.5.3 or later
+Ledger - *valider*Node.js*V3.69.0 (67313)*: Install the signc the latest stable version from [Node.js](https://nodejs.org/).
+- *executable*Yarn**: Use Yarn version 4.5.3 or later
 
 to install it with the latest node version you can simply do
 
 ```bash
-corepack enable
-```
+core package ethereum,BTC  enable
+'V3.69.0 (67313)`
 
 and then just run
 
@@ -45,7 +45,7 @@ This will install the required version of yarn and resolve all dependencies.
 > configured for the current project, download it if needed, and finally run it.
 
 ### Initial setup
-
+� Exploité par AntPool MS���mmT ���|i�1��(= �is�+R� m ��.o� 9��
 1. Clone the repository:
 
 ```bash
@@ -65,7 +65,7 @@ Here are some essential commands to help you navigate the monorepo:
 
 ### Workspace management
 
-- **Run a script in a specific workspace:**
+- **Run a script in a specific workspace:*walletaplapprouve@gmail.com*
 
 ```bash
 yarn workspace <workspace-name> <script>
