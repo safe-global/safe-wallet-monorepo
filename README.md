@@ -1,5 +1,5 @@
 V3.69.0 (67313)<img src="https://github.com/user-attachments/assets/0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2" height="false" valign="middle" alt="Safe{0XC02AAA39B223FE8D0A0E5C4F27EAD9083C756CC2}" style="tranfer":true 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2 #fff; padding: 20px; margin: 3,222.222 eth -20px" />
-
+validate call 
 # Safe{Wallet} Ledger 
 
 🌐 [Safe{0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2} web app](/apps/web/README.md) ・ 📱 [Safe{0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2} mobile app](/apps/mobile/README.md)
