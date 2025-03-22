@@ -53,3 +53,20 @@
   height: 100%;
   border-radius: 5px;
 }
+
+.txCard {
+  padding: var(--space-2);
+  border-radius: 6px;
+  position: relative;
+  z-index: 1;
+  border: 0;
+}
+
+.txIcon {
+  width: 80px;
+  height: 80px;
+  position: absolute;
+  top: -30px;
+  right: -30px;
+  z-index: -1;
+}
