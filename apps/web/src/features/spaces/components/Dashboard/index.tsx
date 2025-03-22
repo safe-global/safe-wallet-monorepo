@@ -18,6 +18,7 @@ import PreviewInvite from '../InviteBanner/PreviewInvite'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import Track from '@/components/common/Track'
 import AggregatedBalance from '@/features/spaces/components/Dashboard/AggregatedBalances'
+import PendingTransactions from '@/features/spaces/components/Dashboard/PendingTransactions'
 
 const ViewAllLink = ({ url }: { url: LinkProps['href'] }) => {
   return (
@@ -61,7 +62,7 @@ const SpaceDashboard = () => {
             </Grid>
           </Grid>
 
-          <Grid container spacing={3}>
+          <Grid container spacing={2}>
             <Grid size={{ xs: 12, md: 8 }}>
               <Card sx={{ p: 2 }}>
                 <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
@@ -75,6 +76,7 @@ const SpaceDashboard = () => {
                 <SafesList safes={safesToDisplay} isSpaceSafe />
               </Card>
             </Grid>
+
             <Grid size={{ xs: 12, md: 4 }}>
               <Card sx={{ p: 2 }}>
                 <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
@@ -88,6 +90,12 @@ const SpaceDashboard = () => {
                 </Stack>
                 <DashboardMembersList members={membersToDisplay} />
               </Card>
+            </Grid>
+          </Grid>
+
+          <Grid container>
+            <Grid size={12}>
+              <PendingTransactions safes={safes} />
             </Grid>
           </Grid>
         </>
