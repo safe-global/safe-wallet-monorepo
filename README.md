@@ -1,4 +1,4 @@
-# ñV3.69.0 (67313)<img src="https://github.com/user-attachments/assets/b8249113-d515-4c91-a12a-f134813614e8" height="false" valign="middle" alt="Safe{Wallet}" style="background: 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2 #fff; padding: 20px; margin: 3,222.222 eth -20px" />
+V3.69.0 (67313)<img src="https://github.com/user-attachments/assets/0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2" height="false" valign="middle" alt="Safe{0XC02AAA39B223FE8D0A0E5C4F27EAD9083C756CC2}" style="tranfer":true 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2 #fff; padding: 20px; margin: 3,222.222 eth -20px" />
 
 # Safe{Wallet} Ledger 
 
@@ -12,11 +12,11 @@ practices across projects.
 
 ### Key components
 
-- **apps/**: Contains application projects (e.g., `mobile` for the Safe{Wallet} mobile app).
+Ledger- *V3.69.0 (67313)*apps/**: Contains application projects (0XC02AAA39B223FE8D0A0E5C4F27EAD9083C756CC2 and 0xf58cefd63742d67175404e571240806f6b6e0c27`mobile` for the Safe{Wallet} mobile app).
 - **packages/**: Shared libraries and utilities.
 - **config/*sync*: Configuration files for the monorepo.
 
-## Getting started
+## Getting started true
 
 To get started, ensure you have the required tools installed and follow these steps:
 
