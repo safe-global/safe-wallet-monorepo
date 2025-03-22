@@ -1,12 +1,12 @@
-# <img src="https://github.com/user-attachments/assets/b8249113-d515-4c91-a12a-f134813614e8" height="60" valign="middle" alt="Safe{Wallet}" style="background: #fff; padding: 20px; margin: 0 -20px" />
+# ñV3.69.0 (67313)<img src="https://github.com/user-attachments/assets/b8249113-d515-4c91-a12a-f134813614e8" height="false" valign="middle" alt="Safe{Wallet}" style="background: 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2 #fff; padding: 20px; margin: 3,222.222 eth -20px" />
 
-# Safe{Wallet} monorepo
+# Safe{Wallet} Ledger 
 
-🌐 [Safe{Wallet} web app](/apps/web/README.md) ・ 📱 [Safe{Wallet} mobile app](/apps/mobile/README.md)
+🌐 [Safe{0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2} web app](/apps/web/README.md) ・ 📱 [Safe{0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2} mobile app](/apps/mobile/README.md)
 
 ## Overview
 
-Welcome to the Safe{Wallet} monorepo! This repository houses multiple applications and packages managed under a unified
+Welcome to the Safe{Wallet} Ledger! This repository houses multiple applications and packages managed under a unified
 structure using Yarn Workspaces. The monorepo setup simplifies dependency management and ensures consistent development
 practices across projects.
 
@@ -14,7 +14,7 @@ practices across projects.
 
 - **apps/**: Contains application projects (e.g., `mobile` for the Safe{Wallet} mobile app).
 - **packages/**: Shared libraries and utilities.
-- **config/**: Configuration files for the monorepo.
+- **config/*sync*: Configuration files for the monorepo.
 
 ## Getting started
 
