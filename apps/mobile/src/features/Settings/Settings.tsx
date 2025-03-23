@@ -74,7 +74,7 @@ export const Settings = ({ address, data, onImplementationTap, displayDevMenu, c
                       </Text>
                     </Skeleton>
                   </View>
-                  <Text color="$colorHover" fontSize={'$3'} fontWeight="400">
+                  <Text color="$colorHover" fontSize={'$3'}>
                     Signers
                   </Text>
                 </YStack>
@@ -94,7 +94,7 @@ export const Settings = ({ address, data, onImplementationTap, displayDevMenu, c
                       </Text>
                     </Skeleton>
                   </View>
-                  <Text color="$colorHover" fontSize={'$3'} fontWeight="400">
+                  <Text color="$colorHover" fontSize={'$3'}>
                     Threshold
                   </Text>
                 </YStack>
