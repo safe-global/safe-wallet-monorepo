@@ -116,10 +116,26 @@ const PrivateKeyModule = (chainId: ChainInfo['chainId'], rpcUri: ChainInfo['rpcU
               // @ts-ignore
               eth_signTypedData_v4: async ({ params }) => {
                 const [, typedData] = params
+
+                let parsedTypedData
+                try {
+                  parsedTypedData = JSON.parse(typedData)
+                } catch (error: unknown) {
+                  if (error instanceof Error) {
+                    throw new Error('Failed to parse typedData: ' + error.message)
+                  } else {
+                    throw new Error('Failed to parse typedData: Unknown error')
+                  }
+                }
+
+                if (!parsedTypedData || !parsedTypedData.domain || !parsedTypedData.types || !parsedTypedData.message) {
+                  throw new Error('Invalid parameters for eth_signTypedData_v4')
+                }
+
                 return await wallet.signTypedData(
-                  typedData.domain,
-                  { [typedData.primaryType]: typedData.types[typedData.primaryType] },
-                  typedData.message,
+                  parsedTypedData.domain,
+                  { [parsedTypedData.primaryType]: parsedTypedData.types[parsedTypedData.primaryType] },
+                  parsedTypedData.message,
                 )
               },
 

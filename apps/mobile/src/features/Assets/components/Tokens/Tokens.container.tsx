@@ -8,15 +8,17 @@ import { AssetsCard } from '@/src/components/transactions-list/Card/AssetsCard'
 import { POLLING_INTERVAL } from '@/src/config/constants'
 import { selectActiveSafe } from '@/src/store/activeSafeSlice'
 import { Balance, useBalancesGetBalancesV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
-import { formatValue } from '@/src/utils/formatters'
-
 import { Fallback } from '../Fallback'
 import { skipToken } from '@reduxjs/toolkit/query'
+import { formatCurrency, formatCurrencyPrecise } from '@safe-global/utils/formatNumber'
+import { formatVisualAmount } from '@safe-global/utils/formatters'
+import { shouldDisplayPreciseBalance } from '@/src/utils/balance'
+import { NoFunds } from '@/src/features/Assets/components/NoFunds'
 
 export function TokensContainer() {
   const activeSafe = useSelector(selectActiveSafe)
 
-  const { data, isFetching, error } = useBalancesGetBalancesV1Query(
+  const { data, isFetching, error, isLoading } = useBalancesGetBalancesV1Query(
     !activeSafe
       ? skipToken
       : {
@@ -32,22 +34,29 @@ export function TokensContainer() {
   )
 
   const renderItem: ListRenderItem<Balance> = React.useCallback(({ item }) => {
+    const fiatBalance = item.fiatBalance
     return (
       <AssetsCard
         name={item.tokenInfo.name}
         logoUri={item.tokenInfo.logoUri}
-        description={`${formatValue(item.balance, item.tokenInfo.decimals as number)} ${item.tokenInfo.symbol}`}
+        description={`${formatVisualAmount(item.balance, item.tokenInfo.decimals as number)} ${item.tokenInfo.symbol}`}
         rightNode={
           <Text fontSize="$4" fontWeight={400} color="$color">
-            ${item.fiatBalance}
+            {shouldDisplayPreciseBalance(fiatBalance, 7)
+              ? formatCurrencyPrecise(fiatBalance, 'usd')
+              : formatCurrency(fiatBalance, 'usd')}
           </Text>
         }
       />
     )
   }, [])
 
-  if (isFetching || !data?.items.length || error) {
-    return <Fallback loading={isFetching} hasError={!!error} />
+  if (isLoading || !data?.items.length || error) {
+    return (
+      <Fallback loading={isFetching} hasError={!!error}>
+        <NoFunds fundsType={'token'} />
+      </Fallback>
+    )
   }
 
   return (

@@ -15,7 +15,7 @@ const nextTxToBeExecuted =
   '&id=multisig_0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb_0x539c9c2cd63bae1e4f84f71ef9aa7aea1fd8edb82b089c741cffad99843d0884'
 
 const previousTx =
-  '&id=multisig_0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb_0x9b4ee6ef9271fa2f2a4e97c3b5165dc7844a124accbf02cddaf91393ef2687da'
+  '&id=multisig_0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb_0x539c9c2cd63bae1e4f84f71ef9aa7aea1fd8edb82b089c741cffad99843d0884'
 
 describe('Transaction queue Delete button tests', { defaultCommandTimeout: 30000 }, () => {
   before(async () => {

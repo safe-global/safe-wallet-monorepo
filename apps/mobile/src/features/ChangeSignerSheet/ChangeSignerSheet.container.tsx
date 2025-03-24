@@ -32,10 +32,9 @@ export const ChangeSignerSheetContainer = () => {
     id: txId,
   })
 
-  const storedSigners = useMemo(
-    () => extractAppSigners(signers, txDetails?.detailedExecutionInfo as MultisigExecutionDetails),
-    [txDetails, signers],
-  )
+  const detailedExecutionInfo = txDetails?.detailedExecutionInfo as MultisigExecutionDetails
+
+  const storedSigners = useMemo(() => extractAppSigners(signers, detailedExecutionInfo), [txDetails, signers])
 
   const { data, isLoading } = useGetBalancesQuery({
     addresses: storedSigners?.map((item) => item.value) || [],
@@ -47,11 +46,15 @@ export const ChangeSignerSheetContainer = () => {
       return []
     }
 
-    return storedSigners?.map((item) => ({
+    const availableSigners = storedSigners.filter((signer) => {
+      return !detailedExecutionInfo?.confirmations?.some((confirmation) => confirmation.signer.value === signer.value)
+    })
+
+    return availableSigners?.map((item) => ({
       ...item,
       balance: data[item.value],
     }))
-  }, [data, storedSigners])
+  }, [data, storedSigners, detailedExecutionInfo])
 
   const onSignerPress = (signer: SignerInfo, onClose: () => void) => () => {
     if (activeSigner.value !== signer.value) {

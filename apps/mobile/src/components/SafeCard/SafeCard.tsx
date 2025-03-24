@@ -1,4 +1,4 @@
-import { H5, Image, ImageProps, Text, View } from 'tamagui'
+import { H5, Image, ImageProps, Text, View, XStack } from 'tamagui'
 import { Badge } from '../Badge'
 import { Container } from '../Container'
 import { ImageSourcePropType } from 'react-native'
@@ -9,16 +9,30 @@ interface SafeCardProps {
   description: string
   image?: ImageSourcePropType
   icon?: ReactElement
+  tag?: ReactElement
   children?: React.ReactNode
   onPress?: () => void
   imageProps?: ImageProps
   testID?: string
 }
 
-export function SafeCard({ title, description, imageProps, image, icon, children, onPress, testID }: SafeCardProps) {
+export function SafeCard({
+  title,
+  description,
+  imageProps,
+  image,
+  icon,
+  children,
+  onPress,
+  testID,
+  tag,
+}: SafeCardProps) {
   return (
     <Container position="relative" marginHorizontal={'$3'} marginTop={'$6'} onPress={onPress} testID={testID}>
-      {icon && <Badge circular content={icon} themeName="badge_background" />}
+      <XStack justifyContent={'space-between'}>
+        {icon && <Badge circular content={icon} themeName="badge_background" />}
+        {tag}
+      </XStack>
 
       <H5 fontWeight={600} marginBottom="$1" marginTop="$4">
         {title}

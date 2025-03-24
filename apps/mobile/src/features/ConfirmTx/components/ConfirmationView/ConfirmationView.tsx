@@ -44,6 +44,7 @@ export function ConfirmationView({ txDetails }: ConfirmationViewProps) {
     case ETxType.ADD_SIGNER:
       return (
         <AddSigner
+          txId={txDetails.txId}
           executionInfo={txDetails.detailedExecutionInfo as MultisigExecutionDetails}
           txInfo={txDetails.txInfo as NormalizedSettingsChangeTransaction}
         />
@@ -51,6 +52,7 @@ export function ConfirmationView({ txDetails }: ConfirmationViewProps) {
     case ETxType.REMOVE_SIGNER:
       return (
         <RemoveSigner
+          txId={txDetails.txId}
           executionInfo={txDetails.detailedExecutionInfo as MultisigExecutionDetails}
           txInfo={txDetails.txInfo as NormalizedSettingsChangeTransaction}
         />
@@ -65,6 +67,7 @@ export function ConfirmationView({ txDetails }: ConfirmationViewProps) {
     case ETxType.CONTRACT_INTERACTION:
       return (
         <Contract
+          txId={txDetails.txId}
           executionInfo={txDetails.detailedExecutionInfo as MultisigExecutionDetails}
           txInfo={txDetails.txInfo as CustomTransactionInfo}
         />
@@ -73,6 +76,7 @@ export function ConfirmationView({ txDetails }: ConfirmationViewProps) {
       return (
         <GenericView
           executionInfo={txDetails.detailedExecutionInfo as MultisigExecutionDetails}
+          txId={txDetails.txId}
           txInfo={txDetails.txInfo as SettingsChangeTransaction}
           txData={txDetails.txData as TransactionData}
         />

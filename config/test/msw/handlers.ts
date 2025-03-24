@@ -5,6 +5,15 @@ import { CollectiblePage } from '@safe-global/store/src/gateway/AUTO_GENERATED/c
 
 const iso4217Currencies = ['USD', 'EUR', 'GBP']
 export const handlers = (GATEWAY_URL: string) => [
+  
+  http.get(`${GATEWAY_URL}/v1/auth/nonce`, () => {
+    return HttpResponse.json({
+      nonce: 'mock-nonce-for-testing-12345',
+      timestamp: new Date().toISOString(),
+      expirationTime: new Date(Date.now() + 300000).toISOString(),
+    })
+  }),
+  
   http.get<never, never, Balances>(`${GATEWAY_URL}/v1/chains/1/safes/0x123/balances/USD`, () => {
     return HttpResponse.json({
       items: [

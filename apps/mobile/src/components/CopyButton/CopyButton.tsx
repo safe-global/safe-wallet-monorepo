@@ -6,10 +6,11 @@ interface CopyButtonProps {
   value: string
   color: TextProps['color']
   size?: number
+  text?: string
 }
 
-export const CopyButton = ({ value, color, size = 13 }: CopyButtonProps) => {
-  const copyAndDispatchToast = useCopyAndDispatchToast()
+export const CopyButton = ({ value, color, size = 13, text }: CopyButtonProps) => {
+  const copyAndDispatchToast = useCopyAndDispatchToast(text)
   return (
     <Button
       onPress={() => {

@@ -10,7 +10,15 @@ const WcLogoHeader = ({ errorMessage }: { errorMessage?: string }): ReactElement
     <>
       <div>
         <SvgIcon data-testid="wc-icon" component={WalletConnect} inheritViewBox className={css.icon} />
-        {errorMessage && <SvgIcon component={Alert} inheritViewBox className={css.errorBadge} fontSize="small" />}
+        {errorMessage && (
+          <SvgIcon
+            data-testid="wc-alert"
+            component={Alert}
+            inheritViewBox
+            className={css.errorBadge}
+            fontSize="small"
+          />
+        )}
       </div>
 
       <Typography data-testid="wc-title" variant="h5" mt={2} mb={0.5} className={css.title}>

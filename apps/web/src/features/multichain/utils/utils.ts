@@ -101,24 +101,34 @@ const memoizedGetProxyCreationCode = memoize(
   async (factoryAddress, provider) => `${factoryAddress}${(await provider.getNetwork()).chainId}`,
 )
 
-export const predictAddressBasedOnReplayData = async (safeCreationData: ReplayedSafeProps, provider: Provider) => {
-  const setupData = encodeSafeSetupCall(safeCreationData.safeAccountConfig)
-
+export const predictSafeAddress = async (
+  setupData: { initializer: string; saltNonce: string; singleton: string },
+  factoryAddress: string,
+  provider: Provider,
+) => {
   // Step 1: Hash the initializer
-  const initializerHash = keccak256(setupData)
+  const initializerHash = keccak256(setupData.initializer)
 
   // Step 2: Encode the initializerHash and saltNonce using abi.encodePacked equivalent
-  const encoded = ethers.concat([initializerHash, solidityPacked(['uint256'], [safeCreationData.saltNonce])])
+  const encoded = ethers.concat([initializerHash, solidityPacked(['uint256'], [setupData.saltNonce])])
 
   // Step 3: Hash the encoded value to get the final salt
   const salt = keccak256(encoded)
 
   // Get Proxy creation code
-  const proxyCreationCode = await memoizedGetProxyCreationCode(safeCreationData.factoryAddress, provider)
+  const proxyCreationCode = await memoizedGetProxyCreationCode(factoryAddress, provider)
 
-  const constructorData = safeCreationData.masterCopy
-  const initCode = proxyCreationCode + solidityPacked(['uint256'], [constructorData]).slice(2)
-  return getCreate2Address(safeCreationData.factoryAddress, salt, keccak256(initCode))
+  const initCode = proxyCreationCode + solidityPacked(['uint256'], [setupData.singleton]).slice(2)
+  return getCreate2Address(factoryAddress, salt, keccak256(initCode))
+}
+
+export const predictAddressBasedOnReplayData = async (safeCreationData: ReplayedSafeProps, provider: Provider) => {
+  const initializer = encodeSafeSetupCall(safeCreationData.safeAccountConfig)
+  return predictSafeAddress(
+    { initializer, saltNonce: safeCreationData.saltNonce, singleton: safeCreationData.masterCopy },
+    safeCreationData.factoryAddress,
+    provider,
+  )
 }
 
 const canMultichain = (chain: ChainInfo) => {

@@ -54,6 +54,7 @@ const toggleUntrustedBtn = '[data-testid="toggle-untrusted"]'
 const simulateTxBtn = '[data-testid="simulate-btn"]'
 const simulateSuccess = '[data-testid="simulation-success-msg"]'
 const signBtn = '[data-testid="sign-btn"]'
+const continueSignBtn = '[data-testid="continue-sign-btn"]'
 export const altImgDai = 'img[alt="DAI"]'
 export const altImgCow = 'img[alt="COW"]'
 export const altImgWeth = 'img[alt="WETH"]'
@@ -77,12 +78,15 @@ const txHexData = '[data-testid="tx-hex-data"]'
 const txStack = '[data-testid="tx-stack"]'
 const txOperation = '[data-testid="tx-operation"]'
 const nonceFld = '[data-testid="nonce-fld"]'
+const txHexDataRow = '[data-testid="tx-hexData"]'
 
 const viewTransactionBtn = 'View transaction'
 const transactionDetailsTitle = 'Transaction details'
 const QueueLabel = 'needs to be executed first'
 const TransactionSummary = 'Send '
 const transactionsPerHrStr = 'free transactions left today'
+const txHashesStr = 'Transaction hashes'
+const txAcknowledgementStr = 'I understand what'
 
 const maxAmountBtnStr = 'Max'
 const nextBtnStr = 'Next'
@@ -117,6 +121,7 @@ export const txDetailsStr = 'Transaction details'
 export const settingsStr = 'Settings'
 export const assetsStr = 'Assets'
 export const topAssetsStr = 'Top assets'
+export const getStartedStr = 'Get started'
 
 export const txNoteWarningMessage = 'The notes are publicly visible, do not share any private or sensitive details'
 export const recordedTxNote = 'Tx note one'
@@ -139,6 +144,18 @@ export const advancedDetailsViewOptions = {
   grid: 'grid',
 }
 
+export function checkHashesExist(count) {
+  cy.contains(txHashesStr)
+    .next()
+    .within(() => {
+      main.verifyElementsCount(txHexDataRow, count)
+      cy.get(txHexDataRow).each(($el) => {
+        cy.wrap($el)
+          .invoke('text')
+          .should('match', /0x[a-fA-F0-9]{64}/)
+      })
+    })
+}
 export function clickOnReplaceTxOption() {
   cy.get(replaceChoiceBtn).find('button').click()
 }
@@ -685,14 +702,8 @@ export function verifyNonceInputValue(value) {
   cy.get(nonceInput).should('have.value', value)
 }
 
-export function verifyConfirmTransactionData() {
+export function clickOnYesOption() {
   cy.contains(yesStr).should('exist').click()
-  cy.contains(estimatedFeeStr).should('exist')
-
-  // Asserting the sponsored info is present
-  cy.contains(executeStr).scrollIntoView().should('be.visible')
-
-  cy.get('span').contains(estimatedFeeStr)
 }
 
 export function openExecutionParamsModal() {
@@ -721,6 +732,16 @@ export function clickOnNoLaterOption() {
 export function clickOnSignTransactionBtn() {
   cy.get(signBtn).click()
 }
+
+export function clickOnContinueSignTransactionBtn() {
+  cy.get(continueSignBtn).click()
+}
+
+export function clickOnAcknowledgement() {
+  cy.contains(txAcknowledgementStr).click()
+}
+
+txAcknowledgementStr
 
 export function clickOnConfirmTransactionBtn() {
   cy.get('button').contains(confirmBtnStr).click()

@@ -10,6 +10,7 @@ import { NavBarTitle } from '@/src/components/Title'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { SafeCard } from '@/src/components/SafeCard'
 import { router } from 'expo-router'
+import { Tag } from '@/src/components/Tag'
 
 const items = [
   {
@@ -26,12 +27,14 @@ const items = [
     title: 'Connect signer',
     description: 'Connect any signer via one of your installed wallet apps.',
     icon: <SafeFontIcon name="add-owner" size={16} />,
+    tag: <Tag>Coming soon</Tag>,
     Image: Metamask,
     imageProps: { marginBottom: -48 },
   },
   {
     name: 'hardwareSigner',
     title: 'Import hardware signer',
+    tag: <Tag>Coming soon</Tag>,
     description: 'Use your Ledger or Keystone device.',
     icon: <SafeFontIcon name="hardware" size={16} />,
     Image: Wallet,
@@ -60,6 +63,7 @@ function ImportSignersPage() {
             key={`${item.name}-${index}`}
             title={item.title}
             description={item.description}
+            tag={item.tag}
             icon={item.icon}
             image={item.Image}
             imageProps={item.imageProps}

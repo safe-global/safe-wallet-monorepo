@@ -1,12 +1,11 @@
 import { Input, styled, View } from 'tamagui'
 
 export const StyledInputContainer = styled(View, {
-  borderWidth: 2,
+  borderWidth: 1,
   borderRadius: '$4',
   borderColor: '$borderColor',
   flex: 1,
   flexDirection: 'row',
-  paddingHorizontal: '$3',
   alignItems: 'center',
   justifyContent: 'center',
   marginBottom: '$3',
@@ -15,7 +14,7 @@ export const StyledInputContainer = styled(View, {
   variants: {
     error: {
       true: {
-        borderWidth: 2,
+        borderWidth: 1,
       },
     },
   },
@@ -26,4 +25,8 @@ export const StyledInput = styled(Input, {
   placeholderTextColor: '$placeholderColor',
   backgroundColor: '$inputBackgroundColor',
   borderWidth: 0,
+
+  style: {
+    padding: 0,
+  },
 })

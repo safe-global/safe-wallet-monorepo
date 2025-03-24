@@ -34,6 +34,7 @@ const notConnectedStatus = 'Connect'
 const e2eWalletStr = 'E2E Wallet'
 const max50charsLimitStr = 'Maximum 50 symbols'
 const executeBtnStr = 'Execute'
+const continueBtnStr = 'Continue'
 const backbtnStr = 'Back'
 const removeOwnerStr = 'Remove signer'
 const selectedOwnerStr = 'Selected signer'
@@ -115,7 +116,7 @@ export function hoverOverDeleteOwnerBtn(index) {
 export function openRemoveOwnerWindow(btn) {
   const minimumCount = btn === 0 ? 1 : btn
   main.verifyMinimumElementsCount(removeOwnerBtn, minimumCount)
-  cy.get(removeOwnerBtn).eq(btn).click({ force: true })
+  cy.get(removeOwnerBtn).eq(btn).should('be.enabled').click({ force: true })
   cy.get('div').contains(removeOwnerStr).should('exist')
 }
 
@@ -135,10 +136,9 @@ export function getAddressToBeRemoved() {
 }
 
 export function openReplaceOwnerWindow(index) {
-  cy.wait(3000) // Need to wait for the SDK to be initialized
   const minimumCount = index === 0 ? 1 : index
   main.verifyMinimumElementsCount(replaceOwnerBtn, minimumCount)
-  cy.get(replaceOwnerBtn).eq(index).click({ force: true })
+  cy.get(replaceOwnerBtn).eq(index).should('be.enabled').click({ force: true })
   cy.get(newOwnerName).should('be.visible')
   cy.get(newOwnerAddress).should('be.visible')
 }
@@ -247,7 +247,7 @@ export function clickOnBackBtn() {
 
 export function verifyConfirmTransactionWindowDisplayed() {
   cy.get('div').contains(constants.transactionStatus.confirm).should('exist')
-  cy.get('button').contains(executeBtnStr).should('exist')
+  cy.get('button').contains(continueBtnStr).should('exist')
   cy.get('button').contains(backbtnStr).should('exist')
 }
 

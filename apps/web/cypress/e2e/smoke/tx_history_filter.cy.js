@@ -183,7 +183,8 @@ describe('[SMOKE] API Tx history filter tests', () => {
   it('Verify that when the outgoing date range filter is set to only one day with no transactions, it returns no results', () => {
     const params = {
       transactionType: txType_outgoing,
-      startDate: '2024-07-16T23:00:00.000Z',
+      startDate: '2024-07-16T00:00:00.000Z',
+      endDate: '2024-07-16T23:00:00.000Z',
       token_address: constants.RECIPIENT_ADDRESS,
     }
     const url = buildQueryUrl({ chainId, safeAddress, ...params })

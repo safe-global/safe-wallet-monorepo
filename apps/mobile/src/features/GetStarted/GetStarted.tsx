@@ -1,14 +1,30 @@
-import React from 'react'
+import React, { useCallback } from 'react'
 import { Link, useRouter } from 'expo-router'
 import { View, Text, YStack } from 'tamagui'
 import { SafeButton } from '@/src/components/SafeButton'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { BlurView } from 'expo-blur'
+import crashlytics from '@react-native-firebase/crashlytics'
+import { Alert } from 'react-native'
 
 export const GetStarted = () => {
   const router = useRouter()
   const insets = useSafeAreaInsets()
+
+  const enableCrashlytics = async () => {
+    await crashlytics().setCrashlyticsCollectionEnabled(true)
+  }
+
+  const onPressAddAccount = useCallback(async () => {
+    await enableCrashlytics()
+    router.navigate('/(import-accounts)')
+  }, [])
+
+  const onPressJoinAccount = useCallback(() => {
+    Alert.alert('Coming soon', 'This feature is not yet available.')
+  }, [])
+
   return (
     <YStack justifyContent={'flex-end'} flex={1} testID={'get-started-screen'}>
       <BlurView intensity={100} style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
@@ -38,14 +54,22 @@ export const GetStarted = () => {
         >
           How would you like to continue?
         </Text>
-        <SafeButton outlined icon={<SafeFontIcon name={'add-owner'} />}>
+        <SafeButton
+          outlined
+          icon={<SafeFontIcon name={'add-owner'} />}
+          onPress={onPressJoinAccount}
+          testID={'join-account-button'}
+        >
           Join Account
         </SafeButton>
-        <Link href={'/(import-accounts)'} asChild>
-          <SafeButton outlined icon={<SafeFontIcon name={'plus-outlined'} />} testID={'add-account-button'}>
-            Add account
-          </SafeButton>
-        </Link>
+        <SafeButton
+          outlined
+          icon={<SafeFontIcon name={'plus-outlined'} />}
+          testID={'add-account-button'}
+          onPress={onPressAddAccount}
+        >
+          Add account
+        </SafeButton>
         <Text paddingHorizontal={'$10'} marginTop={'$2'} textAlign={'center'} fontSize={'$3'} color={'$colorSecondary'}>
           By continuing, you agree to our{' '}
           <Link href={'https://app.safe.global/terms'} target={'_blank'}>

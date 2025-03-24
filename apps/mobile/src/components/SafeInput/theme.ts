@@ -50,3 +50,12 @@ export const inputTheme = {
     containerBackgroundColor: tokens.color.backgroundPaperDark,
   },
 }
+
+export const inputWithLabelTheme = {
+  light_input_with_label: {
+    background: tokens.color.backgroundDefaultLight,
+  },
+  dark_input_with_label: {
+    background: tokens.color.backgroundPaperDark,
+  },
+}

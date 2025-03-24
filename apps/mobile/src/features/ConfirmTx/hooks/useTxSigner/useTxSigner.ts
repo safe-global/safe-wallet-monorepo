@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react'
+import { useLayoutEffect, useMemo } from 'react'
 import { MultisigExecutionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { selectActiveSigner, setActiveSigner } from '@/src/store/activeSignerSlice'
 import { useAppSelector, useAppDispatch } from '@/src/store/hooks'
@@ -18,19 +18,37 @@ export const useTxSigner = (detailedExecutionInfo?: MultisigExecutionDetails) =>
     () => appSigners.find((signer) => signer.value === activeSigner?.value),
     [appSigners, activeSigner],
   )
+
   const hasSigned = useMemo(() => {
     return detailedExecutionInfo?.confirmations?.some(
       (confirmation) => confirmation.signer.value === activeSigner?.value,
     )
   }, [detailedExecutionInfo, activeSigner])
 
-  // Changes the active signer if there are app signers and the active signer is not in the app signers
-  // because it can be a signer of that safe but in a different chain
-  useEffect(() => {
+  const proposedSigner = useMemo(() => {
+    const signers = appSigners.filter((signer) => {
+      return !detailedExecutionInfo?.confirmations?.some((confirmation) => confirmation.signer.value === signer?.value)
+    })
+
+    return signers?.find((signer) =>
+      detailedExecutionInfo?.signers?.some((executionSigner) => executionSigner.value === signer?.value),
+    )
+  }, [appSigners, activeSigner, detailedExecutionInfo])
+
+  useLayoutEffect(() => {
+    if (proposedSigner && activeTxSigner?.value !== proposedSigner.value && hasSigned) {
+      dispatch(setActiveSigner({ safeAddress: activeSafe.address, signer: proposedSigner }))
+      return
+    }
+  }, [proposedSigner, activeTxSigner, hasSigned])
+
+  useLayoutEffect(() => {
+    // Changes the active signer if there are app signers and the active signer is not in the app signers
+    // because it can be a signer of that safe but in a different chain
     if (appSigners.length > 0 && !activeTxSigner) {
       dispatch(setActiveSigner({ safeAddress: activeSafe.address, signer: appSigners[0] }))
     }
-  }, [activeTxSigner, appSigners])
+  }, [activeTxSigner, appSigners, proposedSigner])
 
   return { activeSigner, hasSigned }
 }

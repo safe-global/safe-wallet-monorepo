@@ -13,7 +13,7 @@ interface CreateTxParams {
   chain: ChainInfo
 }
 
-export const createExistingTx = async ({ activeSafe, txId, privateKey, txDetails, chain }: CreateTxParams) => {
+export const proposeTx = async ({ activeSafe, txId, privateKey, txDetails, chain }: CreateTxParams) => {
   // Get the tx details from the backend if not provided
   txDetails = txDetails || (await getTransactionDetails(activeSafe.chainId, txId))
 
