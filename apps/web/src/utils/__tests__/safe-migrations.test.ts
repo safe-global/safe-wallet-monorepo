@@ -38,6 +38,15 @@ describe('isMigrateL2SingletonCall', () => {
       } as TransactionData),
     ).toBeTruthy()
   })
+
+  it('should return false for null data', () => {
+    expect(
+      isMigrateL2SingletonCall({
+        hexData: null,
+        to: { value: safeMigrationAddress },
+      } as TransactionData),
+    ).toBeFalsy()
+  })
 })
 
 describe('createUpdateMigration', () => {

@@ -86,6 +86,7 @@ export const isMigrateL2SingletonCall = (txData: TransactionData): boolean => {
 
   return (
     txData.hexData !== undefined &&
+    txData.hexData !== null &&
     txData.hexData.startsWith(safeMigrationInterface.getFunction('migrateL2Singleton').selector) &&
     sameAddress(txData.to.value, safeMigrationAddress)
   )
