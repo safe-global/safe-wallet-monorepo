@@ -12,6 +12,7 @@
     "jest": "^29.7.0"
   },
   "dependencies": {
+    "@cowprotocol/app-data": "^2.5.1",
     "ts-node": "^10.9.2"
   }
 }
