@@ -4,7 +4,7 @@ import { Logo } from '@/src/components/Logo'
 import { Badge } from '@/src/components/Badge'
 import { ellipsis } from '@/src/utils/formatters'
 import { CircleProps, Text, View } from 'tamagui'
-import { shortenAddress } from '@safe-global/utils/formatters'
+import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import {
   MultisigExecutionDetails,

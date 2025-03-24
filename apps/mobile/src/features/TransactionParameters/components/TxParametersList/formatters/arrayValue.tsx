@@ -2,7 +2,7 @@ import { ListTableItem } from '@/src/features/ConfirmTx/components/ListTable'
 import { DataDecodedParameter } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { ReactElement } from 'react'
 import { Text, View } from 'tamagui'
-import { shortenText } from '@safe-global/utils/formatters'
+import { shortenText } from '@safe-global/utils/utils/formatters'
 import { CopyButton } from '@/src/components/CopyButton'
 
 const renderArrayValue = (value: object, index?: number): ReactElement => {

@@ -8,7 +8,7 @@ import { formatWithSchema } from '@/src/utils/date'
 import { ellipsis, formatValue, getLimitPrice } from '@/src/utils/formatters'
 import { TokenInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
-import { formatAmount } from '@safe-global/utils/formatNumber'
+import { formatAmount } from '@safe-global/utils/utils/formatNumber'
 import { CopyButton } from '@/src/components/CopyButton'
 
 export const formatSwapOrderItems = (txInfo: OrderTransactionInfo, chain: Chain) => {

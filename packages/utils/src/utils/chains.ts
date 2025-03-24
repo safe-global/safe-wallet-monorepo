@@ -1,5 +1,5 @@
 import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
-import { getExplorerLink } from '@safe-global/utils/gateway'
+import { getExplorerLink } from '@safe-global/utils/utils/gateway'
 
 export enum FEATURES {
   ERC721 = 'ERC721',
