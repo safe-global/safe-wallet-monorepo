@@ -5,7 +5,7 @@ import { useCurrentChain } from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { getExplorerLink } from '@/utils/gateway'
 import ErrorMessage from '../ErrorMessage'
-import { isValidMasterCopy } from '@/services/contracts/safeContracts'
+import { isMigrationToL2Possible, isValidMasterCopy } from '@/services/contracts/safeContracts'
 import { AlertTitle, Typography } from '@mui/material'
 import { isMigrateL2SingletonCall } from '@/utils/safe-migrations'
 
@@ -19,6 +19,7 @@ const UnknownContractError = ({ txData }: { txData: TransactionData | undefined 
 
   // Unsupported base contract
   const isUnknown = !isValidMasterCopy(safe.implementationVersionState)
+  const isMigrationPossible = isMigrationToL2Possible(safe)
 
   if (!isUnknown || isMigrationTx) return null
 
@@ -34,12 +35,23 @@ const UnknownContractError = ({ txData }: { txData: TransactionData | undefined 
           This Safe Account was created with an unsupported base contract.
         </Typography>
       </AlertTitle>
-      It should <b>ONLY</b> be used for fund recovery. Transactions will execute but the transaction list may not
-      update. Transaction success can be verified on the{' '}
-      <ExternalLink href={currentChain ? getExplorerLink(safeAddress, currentChain.blockExplorerUriTemplate).href : ''}>
-        {currentChain?.chainName} explorer
-      </ExternalLink>
-      .
+      {isMigrationPossible ? (
+        <>
+          The Safe Account can be migrated to use the supported base contract. We advise to do that in the Safe&apos;s
+          settings before executing other transactions.
+        </>
+      ) : (
+        <>
+          It should <b>ONLY</b> be used for fund recovery. Transactions will execute but the transaction list may not
+          update. Transaction success can be verified on the{' '}
+          <ExternalLink
+            href={currentChain ? getExplorerLink(safeAddress, currentChain.blockExplorerUriTemplate).href : ''}
+          >
+            {currentChain?.chainName} explorer
+          </ExternalLink>
+          .
+        </>
+      )}
     </ErrorMessage>
   )
 }
