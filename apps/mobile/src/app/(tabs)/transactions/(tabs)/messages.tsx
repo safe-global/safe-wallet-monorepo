@@ -1,45 +1,21 @@
-import { SafeFontIcon } from '@/src/components/SafeFontIcon/SafeFontIcon'
-import { SafeListItem } from '@/src/components/SafeListItem'
-import { formatWithSchema } from '@/src/utils/date'
 import React from 'react'
-import { ScrollView, Text, View } from 'tamagui'
-import { SafeAreaView } from 'react-native-safe-area-context'
-import { StyleSheet } from 'react-native'
+import { H5, Text, View } from 'tamagui'
 
 /*
- * Since the messages are not implemented yet, we mocking the data
+ * Since the messages are not implemented yet, we showing a Comming Soon message
  * The messages will be implemented in a future PR
  */
 function Messages() {
   return (
-    <SafeAreaView style={styles.wrapper} testID={'messages-tab-content'}>
-      <ScrollView>
-        <View paddingHorizontal="$3">
-          <SafeListItem.Header title={formatWithSchema(Date.now(), 'MMM d, yyyy')} />
-          <SafeListItem
-            label={'Hello Web3Modal Eth'}
-            leftNode={
-              <View backgroundColor="$borderLightDark" padding="$2" borderRadius={100}>
-                <SafeFontIcon name="sign" color="$colorSecondary" />
-              </View>
-            }
-            rightNode={
-              <View backgroundColor="#1D3D28" paddingHorizontal={'$3'} paddingVertical={'$1'} borderRadius={25}>
-                <Text color={'#00B460'}>Success</Text>
-              </View>
-            }
-          />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+    <View flex={1} alignItems="center" gap="$2" justifyContent="center">
+      <H5 color="$colorPrimary" fontWeight={600}>
+        The view isn’t ready yet
+      </H5>
+      <Text color="$colorSecondary" textAlign="center">
+        We’re working on this transaction view. Details aren’t available just yet—but they will be soon.
+      </Text>
+    </View>
   )
 }
-
-const styles = StyleSheet.create({
-  wrapper: {
-    flex: 1,
-    flexDirection: 'column',
-  },
-})
 
 export default Messages
