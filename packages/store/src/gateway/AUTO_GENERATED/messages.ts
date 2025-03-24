@@ -68,6 +68,25 @@ export type MessagesUpdateMessageSignatureV1ApiArg = {
   messageHash: string
   updateMessageSignatureDto: UpdateMessageSignatureDto
 }
+export type TypedDataDomain = {
+  chainId?: number
+  name?: string
+  salt?: string
+  verifyingContract?: string
+  version?: string
+}
+export type TypedDataParameter = {
+  name: string
+  type: string
+}
+export type TypedData = {
+  domain: TypedDataDomain
+  primaryType: string
+  types: {
+    [key: string]: TypedDataParameter[]
+  }
+  message: object
+}
 export type AddressInfo = {
   value: string
   name?: string | null
@@ -78,7 +97,7 @@ export type Message = {
   status: string
   logoUri?: string | null
   name?: string | null
-  message: object
+  message: string | TypedData
   creationTimestamp: number
   modifiedTimestamp: number
   confirmationsSubmitted: number
@@ -93,7 +112,7 @@ export type MessageItem = {
   status: string
   logoUri?: string | null
   name?: string | null
-  message: object
+  message: string | TypedData
   creationTimestamp: number
   modifiedTimestamp: number
   confirmationsSubmitted: number
@@ -115,7 +134,7 @@ export type MessagePage = {
   results: (MessageItem | DateLabel)[]
 }
 export type CreateMessageDto = {
-  message: object
+  message: string | TypedData
   safeAppId?: number | null
   signature: string
   origin?: string | null
