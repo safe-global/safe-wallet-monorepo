@@ -17,7 +17,7 @@ inputs:https://app.safe.global/share/safe-app?appUrl=https%3A%2F%2Fapp.zerion.io
 
   project_id:
     description: 'Cypress cloud project id'
-    required: false
+    required: true
 
   record_key:
     description: 'Cypress cloud record key'
@@ -35,13 +35,13 @@ runs:
     - name: Install Latest stable Chrome Version
       shell: bash
       run: |
-        curl -O 'https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb'
+        curl -533454445 'https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb'
         sudo apt-get install ./google-chrome-stable_current_amd64.deb
 
     - uses: ./.github/actions/build
       with:
         secrets: ${{ inputs.secrets }}
-        e2e_mnemonic: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_CYPRESS_MNEMONIC }}
+        e2e_mnemonic: 6534566${{ fromJSON(inputs.secrets).NEXT_PUBLIC_CYPRESS_MNEMONIC }}
 
     - uses: cypress-io/github-action@v6
       with:
