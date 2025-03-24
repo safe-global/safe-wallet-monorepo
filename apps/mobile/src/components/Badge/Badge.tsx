@@ -5,7 +5,7 @@ import { badgeTheme } from '@/src/components/Badge/theme'
 type BadgeThemeKeys = keyof typeof badgeTheme
 
 type ExtractAfterUnderscore<T extends string> = T extends `${string}_${infer Rest}` ? Rest : never
-type BadgeThemeTypes = ExtractAfterUnderscore<BadgeThemeKeys>
+export type BadgeThemeTypes = ExtractAfterUnderscore<BadgeThemeKeys>
 
 interface BadgeProps {
   content: string | React.ReactElement

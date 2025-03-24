@@ -5,8 +5,7 @@ import {
   isMultiSendTxInfo,
   isCustomTxInfo,
   isERC721Transfer,
-  isSwapOrderTxInfo,
-  isRemoveSignerTxInfo,
+  isRemoveSignerTxInfo, isOrderTxInfo,
 } from '@/src/utils/transaction-guards'
 import { Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { ETxType } from '../types/txType'
@@ -32,7 +31,7 @@ export const getTransactionType = ({ txInfo }: { txInfo: Transaction['txInfo'] }
     return ETxType.CONTRACT_INTERACTION
   }
 
-  if (isSwapOrderTxInfo(txInfo)) {
+  if (isOrderTxInfo(txInfo)) {
     return ETxType.SWAP_ORDER
   }
 

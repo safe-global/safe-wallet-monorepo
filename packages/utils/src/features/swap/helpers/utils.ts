@@ -210,6 +210,7 @@ export const isSettingTwapFallbackHandler = (decodedData: DataDecoded) => {
           (decoded) =>
             decoded.dataDecoded?.method === 'setFallbackHandler' &&
             decoded.dataDecoded.parameters?.some(
+              // @ts-ignore
               (parameter) => parameter.name === 'handler' && parameter.value === TWAP_FALLBACK_HANDLER,
             ),
         ),
