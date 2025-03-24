@@ -6,6 +6,10 @@ import { ScrollView, Text, View } from 'tamagui'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { StyleSheet } from 'react-native'
 
+/*
+ * Since the messages are not implemented yet, we mocking the data
+ * The messages will be implemented in a future PR
+ */
 function Messages() {
   return (
     <SafeAreaView style={styles.wrapper} testID={'messages-tab-content'}>
@@ -21,7 +25,7 @@ function Messages() {
             }
             rightNode={
               <View backgroundColor="#1D3D28" paddingHorizontal={'$3'} paddingVertical={'$1'} borderRadius={25}>
-                <Text color={'$primary'}>Success</Text>
+                <Text color={'#00B460'}>Success</Text>
               </View>
             }
           />
