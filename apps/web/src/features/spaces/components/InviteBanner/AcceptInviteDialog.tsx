@@ -11,16 +11,18 @@ import Link from 'next/link'
 import ModalDialog from '@/components/common/ModalDialog'
 import NameInput from '@/components/common/NameInput'
 import { AppRoutes } from '@/config/routes'
-import { useAppSelector } from '@/store'
+import { useAppDispatch, useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
 import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { trackEvent } from '@/services/analytics'
+import { showNotification } from '@/store/notificationsSlice'
 
 function AcceptInviteDialog({ space, onClose }: { space: GetSpaceResponse; onClose: () => void }): ReactElement {
   const [error, setError] = useState<string>()
   const [isSubmitting, setIsSubmitting] = useState(false)
 
+  const dispatch = useAppDispatch()
   const router = useRouter()
   const isUserSignedIn = useAppSelector(isAuthenticated)
   const { data: currentUser } = useUsersGetWithWalletsV1Query(undefined, { skip: !isUserSignedIn })
@@ -41,6 +43,14 @@ function AcceptInviteDialog({ space, onClose }: { space: GetSpaceResponse; onClo
       if (response.data) {
         router.push({ pathname: AppRoutes.spaces.index, query: { spaceId: space.id } })
         onClose()
+
+        dispatch(
+          showNotification({
+            message: `Accepted invite to ${space.name}`,
+            variant: 'success',
+            groupKey: 'accept-invite-success',
+          }),
+        )
       }
 
       if (response.error) {

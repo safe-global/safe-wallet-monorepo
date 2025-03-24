@@ -7,6 +7,8 @@ import type { GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED
 import { useMembersDeclineInviteV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { trackEvent } from '@/services/analytics'
+import { showNotification } from '@/store/notificationsSlice'
+import { useAppDispatch } from '@/store'
 
 type DeclineInviteDialogProps = {
   space: GetSpaceResponse
@@ -16,6 +18,7 @@ type DeclineInviteDialogProps = {
 const DeclineInviteDialog = ({ space, onClose }: DeclineInviteDialogProps) => {
   const [errorMessage, setErrorMessage] = useState<string>('')
   const [declineInvite] = useMembersDeclineInviteV1Mutation()
+  const dispatch = useAppDispatch()
 
   const handleConfirm = async () => {
     setErrorMessage('')
@@ -26,7 +29,16 @@ const DeclineInviteDialog = ({ space, onClose }: DeclineInviteDialogProps) => {
       if (error) {
         throw error
       }
+
       onClose()
+
+      dispatch(
+        showNotification({
+          message: `Declined invite to ${space.name}`,
+          variant: 'success',
+          groupKey: 'decline-invite-success',
+        }),
+      )
     } catch (e) {
       setErrorMessage('An unexpected error occurred while declining the invitation.')
     }

@@ -48,7 +48,7 @@ const SpaceListInvite = ({ space }: SpaceListInvite) => {
               display="inline-block"
               sx={{ '> div': { gap: '4px' } }}
             >
-              <EthHashInfo address={invitedBy} avatarSize={24} showName={false} showPrefix={false} />
+              <EthHashInfo address={invitedBy} avatarSize={24} showName={false} showPrefix={false} copyPrefix={false} />
             </Typography>
           </>
         )}
@@ -72,12 +72,14 @@ const SpaceListInvite = ({ space }: SpaceListInvite) => {
                 </Box>
               </Stack>
 
-              <Track {...SPACE_EVENTS.ACCEPT_INVITE} label={SPACE_LABELS.space_list_page}>
-                <AcceptButton space={space} />
-              </Track>
-              <Track {...SPACE_EVENTS.DECLINE_INVITE} label={SPACE_LABELS.space_list_page}>
-                <DeclineButton space={space} />
-              </Track>
+              <Stack direction="row" spacing={1}>
+                <Track {...SPACE_EVENTS.ACCEPT_INVITE} label={SPACE_LABELS.space_list_page}>
+                  <AcceptButton space={space} />
+                </Track>
+                <Track {...SPACE_EVENTS.DECLINE_INVITE} label={SPACE_LABELS.space_list_page}>
+                  <DeclineButton space={space} />
+                </Track>
+              </Stack>
             </Box>
           </Card>
         </MUILink>
