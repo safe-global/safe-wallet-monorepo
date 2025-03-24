@@ -34,7 +34,7 @@ export const navItems: DynamicNavItem[] = [
     icon: <SvgIcon component={TransactionIcon} inheritViewBox />,
     href: '', // TODO: Replace with empty page
     disabled: true,
-    tag: <Chip label="Soon" sx={{ backgroundColor: 'background.main', color: 'static.main' }} />,
+    tag: <Chip label="Soon" sx={{ backgroundColor: 'background.main', color: 'primary.main' }} />,
   },
   {
     label: 'Members',
@@ -46,7 +46,7 @@ export const navItems: DynamicNavItem[] = [
     icon: <SvgIcon component={ABIcon} inheritViewBox />,
     href: '', // TODO: Replace with empty page
     disabled: true,
-    tag: <Chip label="Soon" sx={{ backgroundColor: 'background.main', color: 'static.main' }} />,
+    tag: <Chip label="Soon" sx={{ backgroundColor: 'background.main', color: 'primary.main' }} />,
   },
   {
     label: 'Settings',

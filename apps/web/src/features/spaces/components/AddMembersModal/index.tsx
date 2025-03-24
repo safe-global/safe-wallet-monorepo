@@ -109,7 +109,9 @@ const AddMembersModal = ({ onClose }: { onClose: () => void }): ReactElement => 
         onClose()
       }
       if (response.error) {
-        setError('Invite failed. Please try again.')
+        // @ts-ignore
+        const errorMessage = response.error?.data?.message || 'Invite failed. Please try again.'
+        setError(errorMessage)
       }
     } catch (e) {
       console.error(e)

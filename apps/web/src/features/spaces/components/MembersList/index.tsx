@@ -32,15 +32,17 @@ const headCells = [
   },
 ]
 
-const EditButton = ({ member }: { member: Member }) => {
+const EditButton = ({ member, disabled }: { member: Member; disabled: boolean }) => {
   const [open, setOpen] = useState(false)
 
   return (
     <>
-      <Tooltip title="Edit member" placement="top">
-        <IconButton onClick={() => setOpen(true)} size="small">
-          <SvgIcon component={EditIcon} inheritViewBox color="border" fontSize="small" />
-        </IconButton>
+      <Tooltip title={disabled ? 'Cannot edit role of last admin' : 'Edit member'} placement="top">
+        <Box component="span">
+          <IconButton onClick={() => setOpen(true)} size="small" disabled={disabled}>
+            <SvgIcon component={EditIcon} inheritViewBox color="border" fontSize="small" />
+          </IconButton>
+        </Box>
       </Tooltip>
       {open && <EditMemberDialog member={member} handleClose={() => setOpen(false)} />}
     </>
@@ -95,6 +97,8 @@ const MembersList = ({ members }: { members: Member[] }) => {
     const isLastAdmin = adminCount === 1 && member.role === MemberRole.ADMIN
     const isInvite = member.status === MemberStatus.INVITED || member.status === MemberStatus.DECLINED
     const isDeclined = member.status === MemberStatus.DECLINED
+    const isDisabled = isAdmin && isLastAdmin && !isInvite
+
     return {
       cells: {
         name: {
@@ -123,8 +127,8 @@ const MembersList = ({ members }: { members: Member[] }) => {
           sticky: true,
           content: isAdmin ? (
             <div className={tableCss.actions}>
-              {!isInvite && <EditButton member={member} />}
-              <RemoveMemberButton member={member} disabled={isAdmin && isLastAdmin && !isInvite} isInvite={isInvite} />
+              {!isInvite && <EditButton member={member} disabled={isDisabled} />}
+              <RemoveMemberButton member={member} disabled={isDisabled} isInvite={isInvite} />
             </div>
           ) : null,
         },
