@@ -28,7 +28,7 @@ describe('Happy path Multichain safe creation tests', { defaultCommandTimeout: 6
     createwallet.clickOnContinueWithWalletBtn()
     createwallet.clickOnCreateNewSafeBtn()
     createwallet.clickOnNetwrokRemoveIcon()
-    createwallet.selectMultiNetwork(1, constants.networks.ethereum.toLowerCase())
+    createwallet.selectMultiNetwork(1, constants.networks.berachain.toLowerCase())
     createwallet.selectMultiNetwork(1, constants.networks.sepolia.toLowerCase())
     createwallet.selectMultiNetwork(1, constants.networks.polygon.toLowerCase())
     createwallet.clickOnNextBtn()
