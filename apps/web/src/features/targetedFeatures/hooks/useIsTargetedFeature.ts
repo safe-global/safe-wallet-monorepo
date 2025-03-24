@@ -7,12 +7,12 @@ import { TARGETED_FEATURES } from '../constants'
 
 const UNLOCKED_FEATURES_LS_KEY = 'unlockedFeatures'
 
-type TargetedFeatures = (typeof TARGETED_FEATURES)[number]['feature']
+export type TargetedFeatures = (typeof TARGETED_FEATURES)[number]['feature']
 
 export function useIsTargetedFeature(feature: TargetedFeatures): boolean {
   const hasFeature = useHasFeature(feature)
 
-  const outreachId = TARGETED_FEATURES.find((f) => f.feature === feature)!.id
+  const outreachId = TARGETED_FEATURES.find((f) => f && f['feature'] === feature)!['id']
   const isTargeted = useIsOutreachSafe(outreachId)
 
   // Should a targeted Safe have been opened, we "unlock" the feature across the app
