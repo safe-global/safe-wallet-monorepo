@@ -33,8 +33,8 @@ export const IdenticonWithBadge = ({
                 fontSize,
                 fontWeight: 500,
               }}
-              themeName={'badge_success'}
-              circleProps={{ bordered: true }}
+              themeName={'badge_success_variant2'}
+              circleProps={{ bordered: true, borderColor: '$colorContrast' }}
             />
           )}
         </Skeleton>

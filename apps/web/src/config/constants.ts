@@ -71,6 +71,11 @@ export enum SafeAppsTag {
   RECOVERY_SYGNUM = 'recovery-sygnum',
 }
 
+// Safe Apps names
+export enum SafeAppsName {
+  CSV = 'CSV Airdrop',
+}
+
 // Help Center
 export const HELP_CENTER_URL = 'https://help.safe.global'
 export const HelpCenterArticle = {

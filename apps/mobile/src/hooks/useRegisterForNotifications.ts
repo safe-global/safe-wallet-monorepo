@@ -10,7 +10,6 @@ import {
 } from '@/src/store/notificationsSlice'
 import Logger from '@/src/utils/logger'
 
-import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { useGTW } from './useGTW'
 import { addOrUpdateDelegatedAccount, selectDelegatedAccounts } from '../store/delegatedSlice'
 import { Address, SafeInfo } from '../types/address'
@@ -19,6 +18,8 @@ import { ERROR_MSG } from '../store/constants'
 import { getSigner } from '../utils/notifications'
 import { useNotificationGTWPermissions } from './useNotificationGTWPermissions'
 import { useSign } from './useSign/useSign'
+import { selectActiveSafe } from '../store/activeSafeSlice'
+import { useGlobalSearchParams } from 'expo-router'
 
 type RegisterForNotificationsProps = {
   loading: boolean
@@ -49,9 +50,23 @@ const useRegisterForNotifications = (): NotificationsProps => {
   const { storePrivateKey, getPrivateKey } = useSign()
   // Redux
   const dispatch = useAppDispatch()
-  const activeSafe = useDefinedActiveSafe()
+  const activeSafe = useAppSelector(selectActiveSafe)
   const delegatedAccounts = useAppSelector(selectDelegatedAccounts)
-  const { ownerFound, accountType } = useNotificationGTWPermissions().getAccountType()
+
+  const glob = useGlobalSearchParams<{ safeAddress?: string; chainId?: string; import_safe?: string }>()
+
+  if (!glob.safeAddress) {
+    glob.safeAddress = activeSafe?.address
+  }
+  if (!glob.chainId) {
+    glob.chainId = activeSafe?.chainId
+  }
+
+  const safeAddress = glob.safeAddress
+  const chainId = glob.chainId
+
+  const { ownerFound, accountType } = useNotificationGTWPermissions(safeAddress as `0x${string}`).getAccountType()
+
   /*
    * Push notifications can be enabled by an two type of users. The owner of the safe or an observer of the safe
    * In the first case, the owner can subscribe to ALL NotificationTypes listed in @safe-global/store/gateway/AUTO_GENERATED/notifications
@@ -65,6 +80,15 @@ const useRegisterForNotifications = (): NotificationsProps => {
     try {
       setLoading(true)
       setError(null)
+
+      if (!activeSafe) {
+        setLoading(false)
+        setError(ERROR_MSG)
+        return {
+          loading,
+          error,
+        }
+      }
       const fcmToken = await FCMService.initNotification()
 
       /* IMPORTANT - Create a new random (delegated) private key to avoid exposing the subscriber's private key
@@ -113,6 +137,7 @@ const useRegisterForNotifications = (): NotificationsProps => {
       const { siweMessage } = await getNotificationRegisterPayload({
         nonce: nonceData?.nonce,
         signer: randomDelegatedAccount,
+        chainId: chainId as string,
       })
 
       if (!fcmToken) {
@@ -125,10 +150,10 @@ const useRegisterForNotifications = (): NotificationsProps => {
       }
 
       registerForNotificationsOnBackEnd({
-        safeAddress: activeSafe.address,
+        safeAddress: safeAddress as `0x${string}`,
         signer: randomDelegatedAccount,
         message: siweMessage,
-        chainId: activeSafe.chainId,
+        chainId: chainId as string,
         fcmToken,
         delegatorAddress: ownerFound?.value,
         delegatedAccountAddress: randomDelegatedAccount.address,
@@ -151,12 +176,21 @@ const useRegisterForNotifications = (): NotificationsProps => {
       loading,
       error,
     }
-  }, [nonceData, activeSafe, storePrivateKey])
+  }, [nonceData, activeSafe, storePrivateKey, safeAddress, chainId])
 
   const unregisterForNotifications = useCallback(async () => {
     try {
       setLoading(true)
       setError(null)
+
+      if (!activeSafe) {
+        setLoading(false)
+        setError(ERROR_MSG)
+        return {
+          loading,
+          error,
+        }
+      }
 
       const delegatedAddress = Object.entries(delegatedAccounts).find(([, safesSliceItem]) =>
         safesSliceItem.safes.some((safe: SafeInfo) => safe.address === activeSafe.address),
@@ -190,6 +224,7 @@ const useRegisterForNotifications = (): NotificationsProps => {
       const { siweMessage } = await getNotificationRegisterPayload({
         nonce: nonceData?.nonce,
         signer,
+        chainId: activeSafe.chainId,
       })
 
       // Triggers the final step on the backend
@@ -213,12 +248,22 @@ const useRegisterForNotifications = (): NotificationsProps => {
       loading,
       error,
     }
-  }, [nonceData, activeSafe, getPrivateKey])
+  }, [nonceData, activeSafe, getPrivateKey, safeAddress, chainId])
 
   const updatePermissionsForNotifications = useCallback(async () => {
     try {
       setLoading(true)
       setError(null)
+
+      if (!activeSafe) {
+        setLoading(false)
+        setError(ERROR_MSG)
+        return {
+          loading,
+          error,
+        }
+      }
+
       const fcmToken = await FCMService.getFCMToken()
 
       const delegatedAddress = Object.entries(delegatedAccounts).find(([, safesSliceItem]) =>
@@ -254,6 +299,7 @@ const useRegisterForNotifications = (): NotificationsProps => {
       const { siweMessage } = await getNotificationRegisterPayload({
         nonce: nonceData?.nonce,
         signer,
+        chainId: activeSafe.chainId,
       })
 
       registerForNotificationsOnBackEnd({
@@ -278,7 +324,7 @@ const useRegisterForNotifications = (): NotificationsProps => {
       loading,
       error,
     }
-  }, [nonceData, activeSafe, getPrivateKey])
+  }, [nonceData, activeSafe, getPrivateKey, safeAddress, chainId])
 
   return {
     registerForNotifications,

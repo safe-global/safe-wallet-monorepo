@@ -1,0 +1,52 @@
+import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import { getExplorerLink } from '@safe-global/utils/gateway'
+
+export enum FEATURES {
+  ERC721 = 'ERC721',
+  SAFE_APPS = 'SAFE_APPS',
+  DOMAIN_LOOKUP = 'DOMAIN_LOOKUP',
+  SPENDING_LIMIT = 'SPENDING_LIMIT',
+  EIP1559 = 'EIP1559',
+  SAFE_TX_GAS_OPTIONAL = 'SAFE_TX_GAS_OPTIONAL',
+  TX_SIMULATION = 'TX_SIMULATION',
+  DEFAULT_TOKENLIST = 'DEFAULT_TOKENLIST',
+  RELAYING = 'RELAYING',
+  EIP1271 = 'EIP1271',
+  RISK_MITIGATION = 'RISK_MITIGATION',
+  PUSH_NOTIFICATIONS = 'PUSH_NOTIFICATIONS',
+  NATIVE_WALLETCONNECT = 'NATIVE_WALLETCONNECT',
+  RECOVERY = 'RECOVERY',
+  COUNTERFACTUAL = 'COUNTERFACTUAL',
+  DELETE_TX = 'DELETE_TX',
+  SPEED_UP_TX = 'SPEED_UP_TX',
+  SAP_BANNER = 'SAP_BANNER',
+  NATIVE_SWAPS = 'NATIVE_SWAPS',
+  NATIVE_SWAPS_USE_COW_STAGING_SERVER = 'NATIVE_SWAPS_USE_COW_STAGING_SERVER',
+  NATIVE_SWAPS_FEE_ENABLED = 'NATIVE_SWAPS_FEE_ENABLED',
+  ZODIAC_ROLES = 'ZODIAC_ROLES',
+  STAKING = 'STAKING',
+  STAKING_BANNER = 'STAKING_BANNER',
+  MULTI_CHAIN_SAFE_CREATION = 'MULTI_CHAIN_SAFE_CREATION',
+  MULTI_CHAIN_SAFE_ADD_NETWORK = 'MULTI_CHAIN_SAFE_ADD_NETWORK',
+  PROPOSERS = 'PROPOSERS',
+  TARGETED_SURVEY = 'TARGETED_SURVEY',
+  BRIDGE = 'BRIDGE',
+  RENEW_NOTIFICATIONS_TOKEN = 'RENEW_NOTIFICATIONS_TOKEN',
+  TX_NOTES = 'TX_NOTES',
+  TARGETED_NESTED_SAFES = 'TARGETED_NESTED_SAFES',
+  TARGETED_MASS_PAYOUTS = 'TARGETED_MASS_PAYOUTS',
+}
+
+
+export const hasFeature = (chain: ChainInfo, feature: FEATURES): boolean => {
+  return (chain.features as string[]).includes(feature)
+}
+
+export const getBlockExplorerLink = (
+  chain: ChainInfo,
+  address: string,
+): { href: string; title: string } | undefined => {
+  if (chain.blockExplorerUriTemplate) {
+    return getExplorerLink(address, chain.blockExplorerUriTemplate)
+  }
+}

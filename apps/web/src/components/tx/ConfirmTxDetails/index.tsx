@@ -106,9 +106,9 @@ export const ConfirmTxDetails = (props: SignOrExecuteProps) => {
       <Divider className={commonCss.nestedDivider} sx={{ pt: 3 }} />
 
       <FormControlLabel
-        sx={{ mt: 2 }}
+        sx={{ mt: 2, mb: -1.3 }}
         control={<Checkbox checked={checked} onChange={handleCheckboxChange} />}
-        label="I understand what I'm signing and acknowledge that this is an irreversible action."
+        label="I understand what I'm signing and that this is an irreversible action."
       />
 
       <SignOrExecuteFormV2

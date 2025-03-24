@@ -53,8 +53,8 @@ type Fields = {
 export function ChooseRecoveryMethodModal({ open, onClose }: { open: boolean; onClose: () => void }): ReactElement {
   const { setTxFlow } = useContext(TxModalContext)
   const [openZkEmailModal, setOpenZkEmailModal] = useState(false)
-  const querySafe = useSearchParams()?.get('safe')
-  const [matchingApps] = useRemoteSafeApps(SafeAppsTag.RECOVERY_SYGNUM)
+  const querySafe = useSearchParams().get('safe')
+  const [matchingApps] = useRemoteSafeApps({ tag: SafeAppsTag.RECOVERY_SYGNUM })
   const hasSygnumApp = Boolean(matchingApps?.length)
 
   const methods = useForm<Fields>({

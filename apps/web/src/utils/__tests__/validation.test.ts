@@ -89,6 +89,11 @@ describe('validation', () => {
       const result2 = validateLimitedAmount('101', 18, '100000000000000000000')
       expect(result2).toBe('Maximum value is 100')
     })
+
+    it('returns a custom error message if provided', () => {
+      const result = validateLimitedAmount('101', 18, '100', 'Custom error message')
+      expect(result).toBe('Custom error message')
+    })
   })
 
   describe('Decimal length validation', () => {

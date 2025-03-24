@@ -34,7 +34,11 @@ describe('useNotificationPayload', () => {
   it('throws an error if signer is missing', async () => {
     const { result } = renderHook(() => useNotificationPayload())
     await expect(
-      result.current.getNotificationRegisterPayload({ nonce: 'mock-nonce', signer: null as unknown as Wallet }),
+      result.current.getNotificationRegisterPayload({
+        nonce: 'mock-nonce',
+        signer: null as unknown as Wallet,
+        chainId: '1',
+      }),
     ).rejects.toThrow('registerForNotifications: Signer account not found')
   })
 
@@ -46,6 +50,7 @@ describe('useNotificationPayload', () => {
     const payload = await result.current.getNotificationRegisterPayload({
       nonce: 'mock-nonce-for-testing-12345',
       signer: mockSigner,
+      chainId: '1',
     })
 
     expect(payload).toEqual({

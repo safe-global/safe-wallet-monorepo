@@ -41,7 +41,7 @@ export function SignForm({ address, name, txId }: SignFormProps) {
           Reject
         </SafeButton> */}
         <SafeButton flex={1} height="100%" onPress={onSignPress}>
-          Confirm
+          Confirm and sign
         </SafeButton>
       </View>
     </YStack>

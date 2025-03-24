@@ -2,6 +2,7 @@ import React from 'react'
 import { SafeButton } from '@/src/components/SafeButton'
 import { SignersList } from '@/src/features/Signers/components/SignersList'
 import { type SignerSection } from '@/src/features/Signers/components/SignersList/SignersList'
+import { ToastViewport } from '@tamagui/toast'
 
 type AddSignersFormViewProps = {
   isFetching: boolean
@@ -28,6 +29,8 @@ export const AddSignersFormView = ({
       <SafeButton onPress={onPress} testID={'continue-button'}>
         Continue
       </SafeButton>
+
+      <ToastViewport multipleToasts={false} left={0} right={0} />
     </>
   )
 }

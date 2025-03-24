@@ -5,6 +5,8 @@ import { CircleSnail } from 'react-native-progress'
 import { SafeListItem } from '@/src/components/SafeListItem'
 import { NotificationPermissions } from './NotificationPermissions'
 import { useNotificationGTWPermissions } from '@/src/hooks/useNotificationGTWPermissions'
+import { selectActiveSafe } from '@/src/store/activeSafeSlice'
+import { useAppSelector } from '@/src/store/hooks'
 
 type Props = {
   onChange: () => void
@@ -42,7 +44,8 @@ const LoadableSwitch: React.FC<LoadableSwitchProps> = ({
 }
 
 export const NotificationsSettingsView = ({ onChange, value, isLoading = false }: Props) => {
-  const { getAccountType } = useNotificationGTWPermissions()
+  const activeSafe = useAppSelector(selectActiveSafe)
+  const { getAccountType } = useNotificationGTWPermissions(activeSafe?.address as `0x${string}`)
 
   return (
     <View paddingHorizontal="$4" marginTop="$2" style={{ flex: 1 }} testID={'notifications-popup-screen'}>

@@ -9,7 +9,7 @@ describe('CarouselFeedback', () => {
 
     const carouselFeedback = getByTestId('carousel-feedback')
 
-    expect(carouselFeedback.props.style.backgroundColor).toBe(darkPalette.background.default)
+    expect(carouselFeedback.props.style.backgroundColor).toBe(darkPalette.text.contrast)
   })
 
   it('renders with inactive state', () => {

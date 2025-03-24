@@ -14,6 +14,7 @@ import { NFTItem } from './NFTItem'
 import { useInfiniteScroll } from '@/src/hooks/useInfiniteScroll'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { Spinner } from 'tamagui'
+import { NoFunds } from '@/src/features/Assets/components/NoFunds'
 
 export function NFTsContainer() {
   const activeSafe = useDefinedActiveSafe()
@@ -36,7 +37,11 @@ export function NFTsContainer() {
   })
 
   if (!list?.results.length || error) {
-    return <Fallback loading={isFetching || !list} hasError={!!error} />
+    return (
+      <Fallback loading={isFetching || !list} hasError={!!error}>
+        <NoFunds fundsType={'nft'} />
+      </Fallback>
+    )
   }
 
   return (

@@ -15,6 +15,8 @@ import type { SafeVersion } from '@safe-global/safe-core-sdk-types'
 import { assertValidSafeVersion, getSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
 import semver from 'semver'
 import { getLatestSafeVersion } from '@/utils/chains'
+import { getSafeMigrationDeployment } from '@safe-global/safe-deployments'
+import { SAFE_TO_L2_MIGRATION_VERSION } from '@/utils/safe-migrations'
 
 // `UNKNOWN` is returned if the mastercopy does not match supported ones
 // @see https://github.com/safe-global/safe-client-gateway/blob/main/src/routes/safes/handlers/safes.rs#L28-L31
@@ -142,4 +144,15 @@ export const getReadOnlySignMessageLibContract = async (safeVersion: SafeInfo['v
   const safeProvider = safeSDK.getSafeProvider()
 
   return getSignMessageLibContractInstance(_getValidatedGetContractProps(safeVersion).safeVersion, safeProvider)
+}
+
+export const isMigrationToL2Possible = (safe: SafeInfo): boolean => {
+  return (
+    safe.nonce === 0 &&
+    Boolean(
+      getSafeMigrationDeployment({ network: safe.chainId, version: SAFE_TO_L2_MIGRATION_VERSION })?.networkAddresses[
+        safe.chainId
+      ],
+    )
+  )
 }
