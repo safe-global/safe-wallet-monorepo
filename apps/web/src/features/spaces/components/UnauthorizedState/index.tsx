@@ -9,21 +9,23 @@ import SkeletonBG from '@/public/images/spaces/skeleton_bg.png'
 const UnauthorizedState = () => {
   return (
     <Box className={css.content}>
-      <Box textAlign="center" className={css.contentInner}>
+      <Box textAlign="center" className={css.contentWrapper}>
+        <Box className={css.contentInner}>
+          <Typography fontWeight={700} mb={2}>
+            You don’t have permissions to this page
+          </Typography>
+
+          <Typography color="text.secondary" mb={2}>
+            Sorry, you don’t have permissions to view this page, as your wallet is not a member of the space. Try to
+            sign in with a different wallet or go back to the overview.
+          </Typography>
+
+          <Link href={AppRoutes.welcome.spaces} passHref>
+            <Button variant="outlined">Back to overview</Button>
+          </Link>
+        </Box>
+
         <Image src={SkeletonBG} alt="" className={css.contentBg} />
-
-        <Typography fontWeight={700} mb={2}>
-          You don’t have permissions to this page
-        </Typography>
-
-        <Typography color="text.secondary" mb={2}>
-          Sorry, you don’t have permissions to view this page, as your wallet is not a member of the space. Try to sign
-          in with a different wallet or go back to the overview.
-        </Typography>
-
-        <Link href={AppRoutes.welcome.spaces} passHref>
-          <Button variant="outlined">Back to overview</Button>
-        </Link>
       </Box>
     </Box>
   )
