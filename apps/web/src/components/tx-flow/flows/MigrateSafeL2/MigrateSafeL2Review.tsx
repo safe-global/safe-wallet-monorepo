@@ -2,12 +2,12 @@ import { useContext, useEffect } from 'react'
 import { useCurrentChain } from '@/hooks/useChains'
 import { createTx } from '@/services/tx/tx-sender'
 import { SafeTxContext } from '../../SafeTxProvider'
-import SignOrExecuteForm from '@/components/tx/SignOrExecuteForm'
 import { createMigrateToL2 } from '@/utils/safe-migrations'
 import { Box, Typography } from '@mui/material'
 import ErrorMessage from '@/components/tx/ErrorMessage'
+import ReviewTransaction from '@/components/tx/ReviewTransaction'
 
-export const MigrateSafeL2Review = () => {
+export const MigrateSafeL2Review = ({ onSubmit }: { onSubmit: () => void }) => {
   const chain = useCurrentChain()
   const { setSafeTx, setSafeTxError } = useContext(SafeTxContext)
 
@@ -20,7 +20,7 @@ export const MigrateSafeL2Review = () => {
 
   return (
     <Box>
-      <SignOrExecuteForm>
+      <ReviewTransaction onSubmit={onSubmit}>
         <ErrorMessage level="warning" title="Migration transaction">
           <Typography>
             When executing this transaction, it will not get indexed and appear in the history due to the current
@@ -29,7 +29,7 @@ export const MigrateSafeL2Review = () => {
             indexed as usual, and there will be no further restrictions.
           </Typography>
         </ErrorMessage>
-      </SignOrExecuteForm>
+      </ReviewTransaction>
     </Box>
   )
 }
