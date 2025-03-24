@@ -10,6 +10,7 @@ import { NestedSafesList } from '@/components/sidebar/NestedSafesList'
 import { NestedSafeInfo } from '@/components/sidebar/NestedSafeInfo'
 import Track from '@/components/common/Track'
 import { NESTED_SAFE_EVENTS } from '@/services/analytics/events/nested-safes'
+import useSafeInfo from '@/hooks/useSafeInfo'
 
 export function NestedSafesPopover({
   anchorEl,
@@ -22,6 +23,7 @@ export function NestedSafesPopover({
   nestedSafes: Array<string>
   hideCreationButton?: boolean
 }): ReactElement {
+  const { safe } = useSafeInfo()
   const { setTxFlow } = useContext(TxModalContext)
 
   const onAdd = () => {
@@ -75,7 +77,7 @@ export function NestedSafesPopover({
             <NestedSafesList onClose={onClose} nestedSafes={nestedSafes} />
           </Box>
         )}
-        {!hideCreationButton && (
+        {safe.deployed && !hideCreationButton && (
           <Track {...NESTED_SAFE_EVENTS.ADD}>
             <Button variant="contained" sx={{ width: '100%', mt: 3 }} onClick={onAdd}>
               <SvgIcon component={AddIcon} inheritViewBox fontSize="small" />
