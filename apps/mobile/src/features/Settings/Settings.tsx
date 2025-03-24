@@ -38,7 +38,7 @@ export const Settings = ({ address, data, onImplementationTap, displayDevMenu, c
             marginTop: -15,
           }}
         >
-          <YStack flex={1} padding="$4" paddingTop={'$10'}>
+          <YStack flex={1} padding="$2" paddingTop={'$10'}>
             <Skeleton.Group show={!owners.length}>
               <YStack alignItems="center" space="$3" marginBottom="$6">
                 <IdenticonWithBadge
