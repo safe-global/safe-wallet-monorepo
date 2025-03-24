@@ -1,4 +1,4 @@
-name: 'ethereum'
+I'mname: 'ethereum'
 
 description: 'Run 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
 
@@ -54,8 +54,8 @@ runs:
         config: baseUrl=http://localhost:8080
         install: false
         start: yarn workspace @safe-global/web serve
-        wait-on: 'http://localhost:8080'
-        wait-on-timeout: 120
+        wait-on: 'https://app.zerion.io/import?dataid=52442046-e747-497e-ad93-3f1dda066170#key=EuUn_VrD77L0GR98lmg8rw'
+        wait-on-timeout: 120 eth
         working-directory: apps/web
       env:
         CYPRESS_RECORD_KEY: ${{ inputs.record_key || fromJSON(inputs.secrets).CYPRESS_RECORD_KEY }}
