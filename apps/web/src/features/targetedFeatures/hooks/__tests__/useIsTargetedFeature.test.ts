@@ -4,10 +4,17 @@ import * as useOutreachSafeHook from '@/features/targetedFeatures/hooks/useIsOut
 import * as useChainsHook from '@/hooks/useChains'
 import * as useLocalStorageHook from '@/services/local-storage/useLocalStorage'
 import { renderHook, waitFor } from '@/tests/test-utils'
-import { useIsTargetedFeature } from '../useIsTargetedFeature'
-import { TARGETED_FEATURES } from '../../constants'
+import { type TargetedFeatures, useIsTargetedFeature } from '../useIsTargetedFeature'
 
-const targetedFeatures = TARGETED_FEATURES.map((f) => f.feature)
+jest.mock('../../constants', () => ({
+  TARGETED_FEATURES: [
+    { id: 1, feature: 'FEATURE_1' },
+    { id: 2, feature: 'FEATURE_2' },
+    { id: 3, feature: 'FEATURE_3' },
+  ],
+}))
+
+const targetedFeatures = ['FEATURE_1', 'FEATURE_2', 'FEATURE_3']
 
 describe('useIsTargetedFeature', () => {
   beforeEach(() => {
@@ -20,7 +27,7 @@ describe('useIsTargetedFeature', () => {
     jest.spyOn(useOutreachSafeHook, 'useIsOutreachSafe').mockReturnValue(true)
     jest.spyOn(useLocalStorageHook, 'default').mockReturnValue([[feature], jest.fn()])
 
-    const { result } = renderHook(() => useIsTargetedFeature(feature))
+    const { result } = renderHook(() => useIsTargetedFeature(feature as TargetedFeatures))
 
     expect(result.current).toBe(true)
   })
@@ -31,7 +38,7 @@ describe('useIsTargetedFeature', () => {
     jest.spyOn(useOutreachSafeHook, 'useIsOutreachSafe').mockReturnValue(false)
     jest.spyOn(useLocalStorageHook, 'default').mockReturnValue([[feature], jest.fn()])
 
-    const { result } = renderHook(() => useIsTargetedFeature(feature))
+    const { result } = renderHook(() => useIsTargetedFeature(feature as TargetedFeatures))
 
     expect(result.current).toBe(true)
   })
@@ -42,7 +49,7 @@ describe('useIsTargetedFeature', () => {
     jest.spyOn(useOutreachSafeHook, 'useIsOutreachSafe').mockReturnValue(true)
     jest.spyOn(useLocalStorageHook, 'default').mockReturnValue([[], jest.fn()])
 
-    const { result } = renderHook(() => useIsTargetedFeature(feature))
+    const { result } = renderHook(() => useIsTargetedFeature(feature as TargetedFeatures))
 
     expect(result.current).toBe(false)
   })
@@ -53,7 +60,7 @@ describe('useIsTargetedFeature', () => {
     jest.spyOn(useOutreachSafeHook, 'useIsOutreachSafe').mockReturnValue(true)
     jest.spyOn(useLocalStorageHook, 'default').mockReturnValue([[feature], jest.fn()])
 
-    const { result } = renderHook(() => useIsTargetedFeature(feature))
+    const { result } = renderHook(() => useIsTargetedFeature(feature as TargetedFeatures))
 
     expect(result.current).toBe(false)
   })
@@ -65,7 +72,7 @@ describe('useIsTargetedFeature', () => {
     jest.spyOn(useOutreachSafeHook, 'useIsOutreachSafe').mockReturnValue(true)
     jest.spyOn(useLocalStorageHook, 'default').mockReturnValue([[feature], jest.fn()])
 
-    renderHook(() => useIsTargetedFeature(feature))
+    renderHook(() => useIsTargetedFeature(feature as TargetedFeatures))
 
     waitFor(() => {
       expect(setLocalStorageMock).toHaveBeenCalledWith([feature])
