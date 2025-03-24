@@ -17,6 +17,14 @@ export const badgeTheme = {
     background: tokens.color.successDarkDark,
     color: tokens.color.successMainLight,
   },
+  light_badge_success_variant2: {
+    background: tokens.color.secondaryLightLight,
+    color: tokens.color.primaryMainLight,
+  },
+  dark_badge_success_variant2: {
+    background: tokens.color.secondaryMainLight,
+    color: tokens.color.primaryMainLight,
+  },
   light_badge_warning: {
     color: tokens.color.warning1MainLight,
     background: tokens.color.warningBackgroundLight,

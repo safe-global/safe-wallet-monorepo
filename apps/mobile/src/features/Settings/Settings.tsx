@@ -62,7 +62,7 @@ export const Settings = ({ address, data, onImplementationTap, displayDevMenu, c
                 <YStack
                   alignItems="center"
                   backgroundColor={'$background'}
-                  padding={'$2'}
+                  padding={'$4'}
                   borderRadius={'$6'}
                   width={80}
                   marginRight={'$2'}
@@ -82,7 +82,8 @@ export const Settings = ({ address, data, onImplementationTap, displayDevMenu, c
                 <YStack
                   alignItems="center"
                   backgroundColor={'$background'}
-                  padding={'$2'}
+                  paddingTop={'$4'}
+                  paddingBottom={'$2'}
                   borderRadius={'$6'}
                   width={80}
                 >

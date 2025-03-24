@@ -23,10 +23,6 @@ export const Fiat = ({ value, currency, maxLength, precise }: FiatProps) => {
     return match ? match.slice(1) : ['', '', preciseFiat, '', '']
   }, [preciseFiat])
 
-  if (fiat == null) {
-    return <H1 fontWeight="600">--</H1>
-  }
-
   return (
     <View flexDirection="row" alignItems="center" testID={'fiat-balance-display'}>
       {precise ? (

@@ -1,7 +1,6 @@
 import React from 'react'
-import { Spinner, View, XStack, Text } from 'tamagui'
+import { View, XStack, Text } from 'tamagui'
 
-import { Alert } from '@/src/components/Alert'
 import { DropdownLabel } from '@/src/components/Dropdown'
 import { Fiat } from '@/src/components/Fiat'
 import { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
@@ -10,8 +9,9 @@ import { ChainsDisplay } from '@/src/components/ChainsDisplay'
 import { useRouter } from 'expo-router'
 import { shouldDisplayPreciseBalance } from '@/src/utils/balance'
 import { shortenAddress } from '@safe-global/utils/formatters'
-import { TouchableOpacity } from 'react-native'
+import { TouchableOpacity, useColorScheme } from 'react-native'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
+import { Skeleton } from 'moti/skeleton'
 
 interface BalanceProps {
   activeChainId: string
@@ -33,6 +33,9 @@ export function Balance({
   onPressAddressCopy,
 }: BalanceProps) {
   const router = useRouter()
+  const colorScheme = useColorScheme()
+
+  const showSkeleton = isLoading || !balanceAmount
 
   return (
     <View>
@@ -58,14 +61,11 @@ export function Balance({
             </TouchableOpacity>
           </XStack>
         )}
-
-        {isLoading ? (
-          <Spinner />
-        ) : balanceAmount ? (
-          <Fiat value={balanceAmount} currency="usd" precise={shouldDisplayPreciseBalance(balanceAmount)} />
-        ) : (
-          <Alert type="error" message="error while getting the balance of your wallet" />
-        )}
+        <Skeleton.Group show={showSkeleton}>
+          <Skeleton colorMode={colorScheme === 'dark' ? 'dark' : 'light'} width={220}>
+            <Fiat value={balanceAmount} currency="usd" precise={shouldDisplayPreciseBalance(balanceAmount)} />
+          </Skeleton>
+        </Skeleton.Group>
       </View>
     </View>
   )
