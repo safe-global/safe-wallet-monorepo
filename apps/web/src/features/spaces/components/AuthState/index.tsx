@@ -6,16 +6,23 @@ import LoadingState from '@/features/spaces/components/LoadingState'
 import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
 import { useSpacesGetOneV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
+import { MemberStatus } from '@/features/spaces/hooks/useSpaceMembers'
 
 const AuthState = ({ spaceId, children }: { spaceId: string; children: ReactNode }) => {
   const isUserSignedIn = useAppSelector(isAuthenticated)
-  const { error, isLoading } = useSpacesGetOneV1Query({ id: Number(spaceId) }, { skip: !isUserSignedIn })
+  const { currentData: currentUser } = useUsersGetWithWalletsV1Query(undefined, { skip: !isUserSignedIn })
+  const { currentData, error, isLoading } = useSpacesGetOneV1Query({ id: Number(spaceId) }, { skip: !isUserSignedIn })
+
+  const isCurrentUserDeclined = currentData?.members.some(
+    (member) => member.user.id === currentUser?.id && member.status === MemberStatus.DECLINED,
+  )
 
   if (isLoading) return <LoadingState />
 
   if (!isUserSignedIn) return <SignedOutState />
 
-  if (isUnauthorized(error)) return <UnauthorizedState />
+  if (isUnauthorized(error) || isCurrentUserDeclined) return <UnauthorizedState />
 
   return children
 }

@@ -7,7 +7,7 @@ import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
 import { Box, Button, Card, Grid2, Link, Typography } from '@mui/material'
 import { type GetSpaceResponse, useSpacesGetV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { type UserWithWallets, useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
+import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
 import SpaceListInvite from '../InviteBanner'
 import { useState } from 'react'
 import css from './styles.module.css'
@@ -16,6 +16,7 @@ import useWallet from '@/hooks/wallets/useWallet'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import Track from '@/components/common/Track'
 import SpaceInfoModal from '../SpaceInfoModal'
+import { filterSpacesByStatus } from '@/features/spaces/utils'
 
 const AddSpaceButton = ({ disabled }: { disabled: boolean }) => {
   const [openCreationModal, setOpenCreationModal] = useState<boolean>(false)
@@ -87,16 +88,6 @@ const NoSpacesState = () => {
       {openCreationModal && <SpaceCreationModal onClose={() => setOpenCreationModal(false)} />}
     </>
   )
-}
-
-const filterSpacesByStatus = (
-  currentUser: UserWithWallets | undefined,
-  spaces: GetSpaceResponse[],
-  status: MemberStatus,
-) => {
-  return spaces.filter((space) => {
-    return space.members.some((member) => member.user.id === currentUser?.id && member.status === status)
-  })
 }
 
 const SpacesList = () => {

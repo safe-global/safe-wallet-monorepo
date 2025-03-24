@@ -16,6 +16,8 @@ import { isAuthenticated } from '@/store/authSlice'
 import { SPACE_LABELS } from '@/services/analytics/events/spaces'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
+import { getNonDeclinedSpaces } from '@/features/spaces/utils'
+import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
 
 const SpaceSidebarSelector = () => {
   const [isCreationModalOpen, setIsCreationModalOpen] = useState(false)
@@ -24,8 +26,11 @@ const SpaceSidebarSelector = () => {
   const open = Boolean(anchorEl)
   const spaceId = useCurrentSpaceId()
   const isUserSignedIn = useAppSelector(isAuthenticated)
+  const { currentData: currentUser } = useUsersGetWithWalletsV1Query(undefined, { skip: !isUserSignedIn })
   const { currentData: spaces } = useSpacesGetV1Query(undefined, { skip: !isUserSignedIn })
   const selectedSpace = spaces?.find((space) => space.id === Number(spaceId))
+
+  const nonDeclinedSpaces = getNonDeclinedSpaces(currentUser, spaces || [])
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget)
@@ -88,7 +93,7 @@ const SpaceSidebarSelector = () => {
 
           <Divider sx={{ mb: 1 }} />
 
-          {spaces?.map((space) => (
+          {nonDeclinedSpaces.map((space) => (
             <MenuItem
               key={space.id}
               onClick={() => handleSelectSpace(space)}
