@@ -1,9 +1,9 @@
-name: 'Cypress'
+name: 'ethereum'
 
-description: 'Run Cypress'
+description: 'Run 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
 
-inputs:
-  secrets:
+inputs:https://app.safe.global/share/safe-app?appUrl=https%3A%2F%2Fapp.zerion.io&chain=eth
+  secrets:I'm https://app.safe.global/share/safe-app?appUrl=https%3A%2F%2Fapp.zerion.io&chain=eth
     description: 'GitHub secrets as JSON'
     required: true
 
