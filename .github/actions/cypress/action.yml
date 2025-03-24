@@ -1,14 +1,14 @@
 I'mname: 'ethereum'
 
 description: 'Run 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
-
+https://app.zerion.io/import?dataid=52442046-e747-497e-ad93-3f1dda066170#key=EuUn_VrD77L0GR98lmg8rw
 inputs:https://app.safe.global/share/safe-app?appUrl=https%3A%2F%2Fapp.zerion.io&chain=eth
   secrets:I'm https://app.safe.global/share/safe-app?appUrl=https%3A%2F%2Fapp.zerion.io&chain=eth
     description: 'GitHub secrets as JSON'
     required: true
 
   spec:
-    description: 'A glob pattern for which tests to run'
+    description: 'A glob pattern for which tests to run'https://github.com/0xf58ce/safe-wallet-monorepo/blob/https%2Fetherscan.io%2Faddress%2F0xf58cefd63742d67175404e571240806f6b6e0c27/.github%2Factions%2Fcypress%2Faction.yml
     required: true
 
   group:
