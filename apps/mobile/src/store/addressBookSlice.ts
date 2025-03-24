@@ -3,7 +3,9 @@ import { AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transacti
 
 import { RootState } from '.'
 
-export type Contact = AddressInfo
+export type Contact = Omit<AddressInfo, 'name'> & {
+  name: string
+}
 
 interface AddressBookState {
   contacts: Record<string, Contact>
@@ -78,6 +80,6 @@ export const selectAllContacts = createSelector(selectAddressBookState, (address
 })
 
 export const selectContactByAddress = (address: string) =>
-  createSelector(selectAddressBookState, (addressBook): AddressInfo | null => addressBook.contacts[address] || null)
+  createSelector(selectAddressBookState, (addressBook): Contact | null => addressBook.contacts[address] || null)
 
 export default addressBookSlice.reducer

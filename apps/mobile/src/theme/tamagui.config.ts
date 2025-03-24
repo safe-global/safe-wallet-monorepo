@@ -3,7 +3,7 @@ import { createDmSansFont } from '@tamagui/font-dm-sans'
 import { badgeTheme } from '@/src/components/Badge/theme'
 import { badgeTheme as NetworkBadgeTheme } from '@/src/components/NetworkBadge/theme'
 import { navbarTheme } from '@/src/features/Assets/components/Navbar/theme'
-import { tokens } from '@/src/theme/tokens'
+import { fontSizes, tokens } from '@/src/theme/tokens'
 import { createAnimations } from '@tamagui/animations-moti'
 import { inputTheme, inputWithLabelTheme } from '../components/SafeInput/theme'
 import { safeTabTheme } from '@/src/components/SafeTab/theme'
@@ -15,6 +15,7 @@ const DmSansFont = createDmSansFont({
     600: { normal: 'DMSans-SemiBold', italic: 'DMSans-SemiBoldItalic' },
     700: { normal: 'DMSans-Bold', italic: 'DMSans-BoldItalic' },
   },
+  size: fontSizes,
 })
 export const config = createTamagui({
   fonts: {
@@ -32,6 +33,9 @@ export const config = createTamagui({
       backgroundFocus: tokens.color.backgroundMainLight,
       backgroundStrong: tokens.color.primaryDarkLight,
       backgroundDisabled: tokens.color.backgroundDisabledLight,
+      backgroundSuccess: tokens.color.successBackgroundLight,
+      backgroundWarning: tokens.color.warningBackgroundLight,
+      backgroundError: tokens.color.errorBackgroundLight,
       backgroundTransparent: 'transparent',
       backgroundSkeleton: tokens.color.backgroundSkeletonLight,
       color: tokens.color.textPrimaryLight,
@@ -39,9 +43,12 @@ export const config = createTamagui({
       colorHover: tokens.color.textSecondaryLight,
       colorSecondary: tokens.color.textSecondaryLight,
       colorLight: tokens.color.primaryLightLight,
+      colorContrast: tokens.color.textContrastLight,
+      colorOutline: tokens.color.textSecondaryLight,
       borderLight: tokens.color.borderLightLight,
       error: tokens.color.errorMainLight,
       success: tokens.color.successMainLight,
+      warning: tokens.color.warningMainLight,
       errorDark: tokens.color.errorDarkDark,
       errorLight: tokens.color.errorLightLight,
       errorBackground: tokens.color.errorBackgroundLight,
@@ -81,11 +88,11 @@ export const config = createTamagui({
     dark_success_light: {},
     light_warning: {
       background: tokens.color.warning1MainLight,
-      color: tokens.color.warning1ContrastTextLight,
+      color: tokens.color.warning1TextLight,
     },
     dark_warning: {
       background: tokens.color.warning1MainDark,
-      color: tokens.color.warning1ContrastTextDark,
+      color: tokens.color.warning1TextDark,
     },
     light_error: {
       background: tokens.color.error1MainLight,
@@ -125,8 +132,12 @@ export const config = createTamagui({
       backgroundTransparent: 'transparent',
       backgroundDisabled: tokens.color.backgroundDisabledDark,
       backgroundSkeleton: tokens.color.backgroundSkeletonDark,
+      backgroundSuccess: tokens.color.successBackgroundDark,
+      backgroundWarning: tokens.color.warningBackgroundDark,
+      backgroundError: tokens.color.errorBackgroundDark,
       color: tokens.color.textPrimaryDark,
       colorLight: tokens.color.primaryLightDark,
+      colorOutline: tokens.color.primaryLightDark,
       primary: tokens.color.primaryMainDark,
       borderLight: tokens.color.borderLightDark,
       colorHover: tokens.color.textSecondaryDark,
@@ -136,6 +147,7 @@ export const config = createTamagui({
       errorLight: tokens.color.errorLightDark,
       errorBackground: tokens.color.errorBackgroundDark,
       success: tokens.color.successMainLight,
+      warning: tokens.color.warningMainDark,
       contrast: tokens.color.textContrastDark,
     },
   },

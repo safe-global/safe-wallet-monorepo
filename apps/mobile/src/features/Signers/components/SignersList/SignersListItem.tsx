@@ -11,6 +11,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router'
 import { Alert, useColorScheme } from 'react-native'
 import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
 import { selectContactByAddress, upsertContact } from '@/src/store/addressBookSlice'
+import { useCopyAndDispatchToast } from '@/src/hooks/useCopyAndDispatchToast'
 
 interface SignersListItemProps {
   item: AddressInfo
@@ -26,6 +27,7 @@ function SignersListItem({ item, index, signersGroup }: SignersListItemProps) {
   const actions = useSignersActions()
   const isLastItem = signersGroup.some((section) => section.data.length === index + 1)
   const dispatch = useAppDispatch()
+  const copy = useCopyAndDispatchToast()
   const onPress = () => {
     router.push(`/signers/${item.value}`)
   }
@@ -37,6 +39,10 @@ function SignersListItem({ item, index, signersGroup }: SignersListItemProps) {
           dispatch(upsertContact({ ...contact, value: item.value, name: newName }))
         }
       })
+    }
+
+    if (nativeEvent.event === 'copy') {
+      copy(item.value as string)
     }
 
     if (nativeEvent.event === 'import') {

@@ -6,6 +6,8 @@ import { IdenticonWithBadge } from '@/src/features/Settings/components/Identicon
 import { Address } from '@/src/types/address'
 import { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { ChainsDisplay } from '@/src/components/ChainsDisplay'
+import { shouldDisplayPreciseBalance } from '@/src/utils/balance'
+import { formatCurrency, formatCurrencyPrecise } from '@safe-global/utils/formatNumber'
 
 interface AccountCardProps {
   name: string | Address
@@ -30,6 +32,10 @@ export function AccountCard({
   threshold,
   rightNode,
 }: AccountCardProps) {
+  const formattedBalance = shouldDisplayPreciseBalance(balance, 8)
+    ? formatCurrencyPrecise(balance, 'usd')
+    : formatCurrency(balance, 'usd')
+
   return (
     <SafeListItem
       spaced={spaced}
@@ -39,7 +45,7 @@ export function AccountCard({
             {ellipsis(name, 18)}
           </Text>
           <Text fontSize="$4" color="$colorSecondary" fontWeight={400}>
-            ${ellipsis(balance, 14)}
+            {ellipsis(formattedBalance, 14)}
           </Text>
         </View>
       }

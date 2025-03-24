@@ -7307,6 +7307,7 @@ __metadata:
     "@ethersproject/shims": "npm:^5.7.0"
     "@expo/config-plugins": "npm:^9.0.10"
     "@expo/vector-icons": "npm:^14.0.2"
+    "@faker-js/faker": "npm:^9.0.3"
     "@formatjs/intl-getcanonicallocales": "npm:^2.5.4"
     "@formatjs/intl-locale": "npm:^4.2.10"
     "@formatjs/intl-numberformat": "npm:^8.15.3"

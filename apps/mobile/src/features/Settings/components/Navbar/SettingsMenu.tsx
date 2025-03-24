@@ -8,11 +8,12 @@ import { useCopyAndDispatchToast } from '@/src/hooks/useCopyAndDispatchToast'
 import { useToastController } from '@tamagui/toast'
 import { selectChainById } from '@/src/store/chains'
 import { RootState } from '@/src/store'
-import { useAppSelector } from '@/src/store/hooks'
+import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { useEditAccountItem } from '@/src/features/AccountsSheet/AccountItem/hooks/useEditAccountItem'
 import { type Address } from '@/src/types/address'
 import { useRouter } from 'expo-router'
+import { selectContactByAddress, upsertContact } from '@/src/store/addressBookSlice'
 
 type Props = {
   safeAddress: string | undefined
@@ -21,22 +22,15 @@ export const SettingsMenu = ({ safeAddress }: Props) => {
   const toast = useToastController()
   const activeSafe = useDefinedActiveSafe()
   const { deleteSafe } = useEditAccountItem()
+  const dispatch = useAppDispatch()
   const activeChain = useAppSelector((state: RootState) => selectChainById(state, activeSafe.chainId))
   const copyAndDispatchToast = useCopyAndDispatchToast()
+  const contact = useAppSelector(selectContactByAddress(activeSafe.address))
   const theme = useTheme()
   const color = theme.color?.get()
   const router = useRouter()
   const colorError = 'red'
 
-  const toBeImplemented = () => {
-    toast.show('This feature is not implemented yet.', {
-      native: true,
-      duration: 2000,
-      burntOptions: {
-        preset: 'error',
-      },
-    })
-  }
   if (!safeAddress) {
     return null
   }
@@ -44,11 +38,12 @@ export const SettingsMenu = ({ safeAddress }: Props) => {
   return (
     <Menu
       onPressAction={({ nativeEvent }) => {
-        console.warn(JSON.stringify(nativeEvent))
-
         if (nativeEvent.event === 'rename') {
-          console.log('rename')
-          toBeImplemented()
+          Alert.prompt('Rename safe', 'Enter a new name for the safe', (newName) => {
+            if (newName) {
+              dispatch(upsertContact({ ...contact, value: safeAddress, name: newName }))
+            }
+          })
         }
 
         if (nativeEvent.event === 'explorer') {

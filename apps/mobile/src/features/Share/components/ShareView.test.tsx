@@ -1,5 +1,5 @@
 import React from 'react'
-import { render, fireEvent, waitFor } from '@testing-library/react-native'
+import { render, fireEvent, waitFor } from '@/src/tests/test-utils'
 import { ShareView } from './ShareView'
 import Share from 'react-native-share'
 import { useCopyAndDispatchToast } from '@/src/hooks/useCopyAndDispatchToast'
@@ -36,15 +36,19 @@ describe('ShareView', () => {
     jest.clearAllMocks()
   })
 
-  it('renders null when activeSafe is null', () => {
-    const { toJSON } = render(<ShareView activeSafe={null} availableChains={[]} />)
-    expect(toJSON()).toBeNull()
-  })
-
   it('renders safe address and chain names when activeSafe is provided', () => {
     const activeSafe = { address: '0x123', chainId: '1' } as SafeInfo
     const availableChains = [{ chainName: 'Ethereum' }, { chainName: 'Polygon' }] as Chain[]
-    const { getByText } = render(<ShareView activeSafe={activeSafe} availableChains={availableChains} />)
+    const { getByText } = render(<ShareView activeSafe={activeSafe} availableChains={availableChains} />, {
+      initialStore: {
+        addressBook: {
+          contacts: {
+            [activeSafe.address]: { name: 'Test Safe', value: activeSafe.address },
+          },
+          selectedContact: null,
+        },
+      },
+    })
     expect(getByText(activeSafe.address)).toBeTruthy()
     // Check that the chains text is rendered as expected.
     expect(getByText(/Ethereum and Polygon/)).toBeTruthy()

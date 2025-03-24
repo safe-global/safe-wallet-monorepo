@@ -17,6 +17,15 @@ export const useSignersActions = () => {
         imageColor: Platform.select({ ios: color, android: '#000' }),
       },
       {
+        id: 'copy',
+        title: 'Copy address',
+        image: Platform.select({
+          ios: 'doc.on.doc',
+          android: 'baseline_content_copy_24',
+        }),
+        imageColor: Platform.select({ ios: color, android: '#000' }),
+      },
+      {
         id: 'import',
         title: 'Import signer',
         image: Platform.select({

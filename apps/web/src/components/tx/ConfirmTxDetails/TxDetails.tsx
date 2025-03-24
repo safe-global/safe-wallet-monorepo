@@ -1,15 +1,20 @@
 import type { StackProps } from '@mui/material'
-import { Box, Chip, Divider, Stack, Typography } from '@mui/material'
+import { Box, Button, Chip, Divider, Stack, Typography } from '@mui/material'
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import type { SafeTransaction } from '@safe-global/safe-core-sdk-types'
 import { PaperViewToggle } from '../../common/PaperViewToggle'
 import TableRowsRoundedIcon from '@mui/icons-material/TableRowsRounded'
 import DataObjectIcon from '@mui/icons-material/DataObject'
 import EthHashInfo from '@/components/common/EthHashInfo'
-import type { ReactElement, ReactNode } from 'react'
+import { useState, type ReactElement, type ReactNode } from 'react'
 import { isNumber, isString } from 'lodash'
 import { Operation, type TransactionData } from '@safe-global/safe-gateway-typescript-sdk/dist/types/transactions'
 import { HexEncodedData } from '@/components/transactions/HexEncodedData'
-import { SafeTxHashDataRow } from '@/components/transactions/TxDetails/Summary/SafeTxHashDataRow'
+import {
+  useDomainHash,
+  useMessageHash,
+  useSafeTxHash,
+} from '@/components/transactions/TxDetails/Summary/SafeTxHashDataRow'
 
 type TxDetailsProps = {
   safeTx: SafeTransaction
@@ -40,14 +45,19 @@ const TxDetailsRow = ({
   </Stack>
 )
 
+const ContentWrapper = ({ children }: { children: ReactElement | ReactElement[] }) => (
+  <Box sx={{ maxHeight: '550px', overflowY: 'auto', px: 2 }}>{children}</Box>
+)
+
 export const TxDetails = ({ safeTx, txData, showHashes }: TxDetailsProps) => {
+  const [expandHashes, setExpandHashes] = useState(showHashes)
+  const safeTxHash = useSafeTxHash({ safeTxData: safeTx.data })
+  const domainHash = useDomainHash()
+  const messageHash = useMessageHash({ safeTxData: safeTx.data })
+
   const toInfo = txData?.addressInfoIndex?.[safeTx.data.to] || txData?.to
   const toName = toInfo?.name || (toInfo && 'displayName' in toInfo ? String(toInfo.displayName || '') : undefined)
   const toLogo = toInfo?.logoUri
-
-  const ContentWrapper = ({ children }: { children: ReactElement | ReactElement[] }) => (
-    <Box sx={{ maxHeight: '550px', overflowY: 'auto', px: 2 }}>{children}</Box>
-  )
 
   return (
     <PaperViewToggle>
@@ -64,18 +74,6 @@ export const TxDetails = ({ safeTx, txData, showHashes }: TxDetailsProps) => {
               <Divider sx={{ mb: 1 }} />
 
               <Stack spacing={1} divider={<Divider />}>
-                {showHashes && (
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      '& p': { color: 'text.secondary', fontSize: '14px' },
-                      '& div': { flexWrap: 'wrap', width: '100%' },
-                    }}
-                  >
-                    <SafeTxHashDataRow safeTxData={safeTx.data} />
-                  </Typography>
-                )}
-
                 <TxDetailsRow label="To">
                   {toName || toLogo ? (
                     <Chip
@@ -157,6 +155,44 @@ export const TxDetails = ({ safeTx, txData, showHashes }: TxDetailsProps) => {
                 </TxDetailsRow>
 
                 <TxDetailsRow label="Nonce">{safeTx.data.nonce}</TxDetailsRow>
+
+                <Button onClick={() => setExpandHashes(!expandHashes)} sx={{ all: 'unset' }}>
+                  <Typography
+                    variant="body2"
+                    fontWeight={700}
+                    display="inline-flex"
+                    alignItems="center"
+                    color="primary.light"
+                    sx={{ cursor: 'pointer' }}
+                  >
+                    Transaction hashes{' '}
+                    <ExpandMoreIcon sx={expandHashes ? { transform: 'rotate(180deg)' } : undefined} />
+                  </Typography>
+                </Button>
+
+                {expandHashes && domainHash && (
+                  <TxDetailsRow label="Domain hash">
+                    <Typography variant="body2" width="100%" sx={{ wordWrap: 'break-word' }}>
+                      <HexEncodedData hexData={domainHash} limit={66} highlightFirstBytes={false} />
+                    </Typography>
+                  </TxDetailsRow>
+                )}
+
+                {expandHashes && messageHash && (
+                  <TxDetailsRow label="Message hash">
+                    <Typography variant="body2" width="100%" sx={{ wordWrap: 'break-word' }}>
+                      <HexEncodedData hexData={messageHash} limit={66} highlightFirstBytes={false} />
+                    </Typography>
+                  </TxDetailsRow>
+                )}
+
+                {expandHashes && safeTxHash && (
+                  <TxDetailsRow label="safeTxHash">
+                    <Typography variant="body2" width="100%" sx={{ wordWrap: 'break-word' }}>
+                      <HexEncodedData hexData={safeTxHash} limit={66} highlightFirstBytes={false} />
+                    </Typography>
+                  </TxDetailsRow>
+                )}
               </Stack>
             </ContentWrapper>
           ),

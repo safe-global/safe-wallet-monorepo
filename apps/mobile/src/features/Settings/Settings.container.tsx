@@ -3,6 +3,8 @@ import { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { Settings } from './Settings'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { useCallback, useState } from 'react'
+import { useAppSelector } from '@/src/store/hooks'
+import { selectContactByAddress } from '@/src/store/addressBookSlice'
 
 export const SettingsContainer = () => {
   const { chainId, address } = useDefinedActiveSafe()
@@ -10,6 +12,7 @@ export const SettingsContainer = () => {
     chainId: chainId,
     safeAddress: address,
   })
+  const contact = useAppSelector(selectContactByAddress(address))
   const [displayDevMenu, setDisplayDevMenu] = useState(false)
   const [tappedCount, setTappedCount] = useState(0)
   const onImplementationTap = useCallback(() => {
@@ -20,6 +23,12 @@ export const SettingsContainer = () => {
   }, [tappedCount, setTappedCount, setDisplayDevMenu])
 
   return (
-    <Settings address={address} data={data} displayDevMenu={displayDevMenu} onImplementationTap={onImplementationTap} />
+    <Settings
+      address={address}
+      data={data}
+      displayDevMenu={displayDevMenu}
+      onImplementationTap={onImplementationTap}
+      contact={contact}
+    />
   )
 }

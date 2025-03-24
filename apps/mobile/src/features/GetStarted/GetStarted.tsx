@@ -6,6 +6,7 @@ import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { BlurView } from 'expo-blur'
 import crashlytics from '@react-native-firebase/crashlytics'
+import { Alert } from 'react-native'
 
 export const GetStarted = () => {
   const router = useRouter()
@@ -19,6 +20,11 @@ export const GetStarted = () => {
     await enableCrashlytics()
     router.navigate('/(import-accounts)')
   }, [])
+
+  const onPressJoinAccount = useCallback(() => {
+    Alert.alert('Coming soon', 'This feature is not yet available.')
+  }, [])
+
   return (
     <YStack justifyContent={'flex-end'} flex={1} testID={'get-started-screen'}>
       <BlurView intensity={100} style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
@@ -48,7 +54,12 @@ export const GetStarted = () => {
         >
           How would you like to continue?
         </Text>
-        <SafeButton outlined icon={<SafeFontIcon name={'add-owner'} />}>
+        <SafeButton
+          outlined
+          icon={<SafeFontIcon name={'add-owner'} />}
+          onPress={onPressJoinAccount}
+          testID={'join-account-button'}
+        >
           Join Account
         </SafeButton>
         <SafeButton
