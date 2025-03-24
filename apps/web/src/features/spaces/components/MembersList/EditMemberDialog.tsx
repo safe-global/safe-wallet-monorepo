@@ -8,6 +8,8 @@ import NameInput from '@/components/common/NameInput'
 import { Controller, FormProvider, useForm } from 'react-hook-form'
 import { RoleMenuItem } from '@/features/spaces/components/AddMembersModal'
 import { MemberRole } from '@/features/spaces/hooks/useSpaceMembers'
+import { showNotification } from '@/store/notificationsSlice'
+import { useAppDispatch } from '@/store'
 
 type MemberField = {
   name: string
@@ -16,6 +18,7 @@ type MemberField = {
 
 const EditMemberDialog = ({ member, handleClose }: { member: Member; handleClose: () => void }) => {
   const spaceId = useCurrentSpaceId()
+  const dispatch = useAppDispatch()
   const [editMember] = useMembersUpdateRoleV1Mutation()
   const [error, setError] = useState<string>()
 
@@ -49,6 +52,15 @@ const EditMemberDialog = ({ member, handleClose }: { member: Member; handleClose
       if (error) {
         throw error
       }
+
+      dispatch(
+        showNotification({
+          message: `Updated role of ${data.name} to ${data.role}`,
+          variant: 'success',
+          groupKey: 'update-member-success',
+        }),
+      )
+
       handleClose()
     } catch (e) {
       setError('An unexpected error occurred while editing the member.')

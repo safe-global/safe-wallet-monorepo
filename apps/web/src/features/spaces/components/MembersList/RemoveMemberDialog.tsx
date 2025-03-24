@@ -6,6 +6,8 @@ import ErrorMessage from '@/components/tx/ErrorMessage'
 import { useState } from 'react'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
+import { showNotification } from '@/store/notificationsSlice'
+import { useAppDispatch } from '@/store'
 
 const RemoveMemberDialog = ({
   userId,
@@ -19,6 +21,7 @@ const RemoveMemberDialog = ({
   isInvite?: boolean
 }) => {
   const spaceId = useCurrentSpaceId()
+  const dispatch = useAppDispatch()
   const [deleteMember] = useMembersRemoveUserV1Mutation()
   const [errorMessage, setErrorMessage] = useState<string>('')
 
@@ -31,6 +34,15 @@ const RemoveMemberDialog = ({
       if (error) {
         throw error
       }
+
+      dispatch(
+        showNotification({
+          message: `Removed ${memberName} from space`,
+          variant: 'success',
+          groupKey: 'remove-member-success',
+        }),
+      )
+
       handleClose()
     } catch (e) {
       setErrorMessage('An unexpected error occurred while removing the member.')

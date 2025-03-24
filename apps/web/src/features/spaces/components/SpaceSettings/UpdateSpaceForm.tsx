@@ -39,7 +39,7 @@ const UpdateSpaceForm = ({ space }: { space: GetSpaceResponse | undefined }) => 
       dispatch(
         showNotification({
           variant: 'success',
-          message: 'Successfully updated space name',
+          message: 'Updated space name',
           groupKey: 'space-update-name',
         }),
       )

@@ -11,7 +11,7 @@ import debounce from 'lodash/debounce'
 import css from './styles.module.css'
 import { type AllSafeItems, useOwnedSafesGrouped } from '@/features/myAccounts/hooks/useAllSafesGrouped'
 import { getComparator } from '@/features/myAccounts/utils/utils'
-import { useAppSelector } from '@/store'
+import { useAppDispatch, useAppSelector } from '@/store'
 import { selectOrderByPreference } from '@/store/orderByPreferenceSlice'
 import {
   Alert,
@@ -35,6 +35,7 @@ import Track from '@/components/common/Track'
 import { useIsAdmin } from '@/features/spaces/hooks/useSpaceMembers'
 import { useSpaceSafes } from '@/features/spaces/hooks/useSpaceSafes'
 import { isMultiChainSafeItem } from '@/features/multichain/utils/utils'
+import { showNotification } from '@/store/notificationsSlice'
 
 export type AddAccountsFormValues = {
   selectedSafes: Record<string, boolean>
@@ -68,6 +69,7 @@ const AddAccounts = () => {
   const [manualSafes, setManualSafes] = useState<SafeItems>([])
 
   const { orderBy } = useAppSelector(selectOrderByPreference)
+  const dispatch = useAppDispatch()
   const { allSafes: spaceSafes } = useSpaceSafes()
   const safes = useOwnedSafesGrouped()
   const sortComparator = getComparator(orderBy)
@@ -113,6 +115,14 @@ const AddAccounts = () => {
         setError('Something went wrong adding one or more Safe Accounts')
         return
       }
+
+      dispatch(
+        showNotification({
+          message: `Added safe account(s) to space`,
+          variant: 'success',
+          groupKey: 'add-safe-account-success',
+        }),
+      )
 
       handleClose()
     } catch (e) {

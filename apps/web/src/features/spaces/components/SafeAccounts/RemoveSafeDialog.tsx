@@ -12,6 +12,8 @@ import DialogContent from '@mui/material/DialogContent'
 import Typography from '@mui/material/Typography'
 import { useSpaceSafesDeleteV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useState } from 'react'
+import { showNotification } from '@/store/notificationsSlice'
+import { useAppDispatch } from '@/store'
 
 function getToBeDeletedSafeAccounts(safeItem: SafeItem | MultiChainSafeItem) {
   if (isMultiChainSafeItem(safeItem)) {
@@ -30,6 +32,7 @@ const RemoveSafeDialog = ({
 }) => {
   const { address } = safeItem
   const spaceId = useCurrentSpaceId()
+  const dispatch = useAppDispatch()
   const [removeSafeAccounts] = useSpaceSafesDeleteV1Mutation()
   const [error, setError] = useState('')
 
@@ -46,6 +49,14 @@ const RemoveSafeDialog = ({
       if (result.error) {
         throw result.error
       }
+
+      dispatch(
+        showNotification({
+          message: `Removed safe account from space`,
+          variant: 'success',
+          groupKey: 'remove-safe-account-success',
+        }),
+      )
     } catch (e) {
       setError('Error removing safe account.')
     }
