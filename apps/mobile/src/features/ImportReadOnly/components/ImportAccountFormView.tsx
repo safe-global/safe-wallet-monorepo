@@ -14,7 +14,7 @@ import { useModalStyle } from '@/src/navigation/hooks/useModalStyle'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { type Control, Controller, type FieldErrors, FieldNamesMarkedBoolean } from 'react-hook-form'
 import type { FormValues } from '@/src/features/ImportReadOnly/types'
-import { parsePrefixedAddress } from '@safe-global/utils/addresses'
+import { parsePrefixedAddress } from '@safe-global/utils/utils/addresses'
 
 type LazyQueryResult = ReturnType<typeof useLazySafesGetOverviewForManyQuery>[1]
 

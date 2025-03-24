@@ -9,7 +9,7 @@ import { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { ChainsDisplay } from '@/src/components/ChainsDisplay'
 import { useRouter } from 'expo-router'
 import { shouldDisplayPreciseBalance } from '@/src/utils/balance'
-import { shortenAddress } from '@safe-global/utils/formatters'
+import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { TouchableOpacity } from 'react-native'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 

@@ -1,5 +1,5 @@
-import { isValidAddress } from '@safe-global/utils/validation'
-import { parsePrefixedAddress } from '@safe-global/utils/addresses'
+import { isValidAddress } from '@safe-global/utils/utils/validation'
+import { parsePrefixedAddress } from '@safe-global/utils/utils/addresses'
 import { z } from 'zod'
 
 export const formSchema = z.object({
