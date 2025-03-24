@@ -27,6 +27,8 @@ import { AppRoutes } from '@/config/routes'
 import { MemberRole } from '@/features/spaces/hooks/useSpaceMembers'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
+import { useAppDispatch } from '@/store'
+import { showNotification } from '@/store/notificationsSlice'
 
 type MemberField = {
   name: string
@@ -72,6 +74,7 @@ export const RoleMenuItem = ({
 const AddMembersModal = ({ onClose }: { onClose: () => void }): ReactElement => {
   const spaceId = useCurrentSpaceId()
   const router = useRouter()
+  const dispatch = useAppDispatch()
   const [error, setError] = useState<string>()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [inviteMembers] = useMembersInviteUserV1Mutation()
@@ -102,10 +105,20 @@ const AddMembersModal = ({ onClose }: { onClose: () => void }): ReactElement => 
         spaceId: Number(spaceId),
         inviteUsersDto: { users: [{ address: data.address, role: data.role, name: data.name }] },
       })
+
       if (response.data) {
         if (router.pathname !== AppRoutes.spaces.members) {
           router.push({ pathname: AppRoutes.spaces.members, query: { spaceId } })
         }
+
+        dispatch(
+          showNotification({
+            message: `Added ${data.name} to space`,
+            variant: 'success',
+            groupKey: 'add-member-success',
+          }),
+        )
+
         onClose()
       }
       if (response.error) {

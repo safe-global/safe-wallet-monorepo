@@ -48,7 +48,7 @@ const DeleteSpaceDialog = ({ space, onClose }: { space: GetSpaceResponse | undef
 
       dispatch(
         showNotification({
-          message: `Successfully deleted space ${space.name}.`,
+          message: `Deleted space ${space.name}.`,
           variant: 'success',
           groupKey: 'delete-space-success',
         }),

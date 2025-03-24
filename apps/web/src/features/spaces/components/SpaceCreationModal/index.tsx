@@ -11,11 +11,14 @@ import NameInput from '@/components/common/NameInput'
 import { AppRoutes } from '@/config/routes'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
+import { showNotification } from '@/store/notificationsSlice'
+import { useAppDispatch } from '@/store'
 
 function SpaceCreationModal({ onClose }: { onClose: () => void }): ReactElement {
   const [error, setError] = useState<string>()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const router = useRouter()
+  const dispatch = useAppDispatch()
   const methods = useForm<{ name: string }>({ mode: 'onChange' })
   const [createSpaceWithUser] = useSpacesCreateWithUserV1Mutation()
   const { handleSubmit, formState } = methods
@@ -32,6 +35,14 @@ function SpaceCreationModal({ onClose }: { onClose: () => void }): ReactElement 
         const spaceId = response.data.id.toString()
         router.push({ pathname: AppRoutes.spaces.index, query: { spaceId } })
         onClose()
+
+        dispatch(
+          showNotification({
+            message: `Created space with name ${data.name}.`,
+            variant: 'success',
+            groupKey: 'create-space-success',
+          }),
+        )
       }
 
       if (response.error) {
