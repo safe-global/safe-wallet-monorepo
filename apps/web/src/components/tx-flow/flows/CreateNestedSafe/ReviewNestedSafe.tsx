@@ -1,15 +1,12 @@
 import { skipToken } from '@reduxjs/toolkit/query'
-import { useContext, useEffect, useMemo } from 'react'
+import { useCallback, useContext, useEffect, useMemo } from 'react'
 import type { ReactElement } from 'react'
 import type { MetaTransactionData, SafeTransaction } from '@safe-global/safe-core-sdk-types'
 
-import SignOrExecuteForm from '@/components/tx/SignOrExecuteForm'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useBalances from '@/hooks/useBalances'
 import { useCurrentChain } from '@/hooks/useChains'
-import { useAppDispatch } from '@/store'
-import { upsertAddressBookEntries } from '@/store/addressBookSlice'
 import { getLatestSafeVersion } from '@/utils/chains'
 import useAsync from '@/hooks/useAsync'
 import { createNewUndeployedSafeWithoutSalt, encodeSafeCreationTx } from '@/components/new-safe/create/logic'
@@ -20,9 +17,15 @@ import { createTokenTransferParams } from '@/services/tx/tokenTransferParams'
 import { createMultiSendCallOnlyTx, createTx } from '@/services/tx/tx-sender'
 import { SetupNestedSafeFormAssetFields } from '@/components/tx-flow/flows/CreateNestedSafe/SetupNestedSafe'
 import type { SetupNestedSafeForm } from '@/components/tx-flow/flows/CreateNestedSafe/SetupNestedSafe'
+import ReviewTransaction from '@/components/tx/ReviewTransaction'
 
-export function ReviewNestedSafe({ params }: { params: SetupNestedSafeForm }): ReactElement {
-  const dispatch = useAppDispatch()
+export function ReviewNestedSafe({
+  params,
+  onSubmit,
+}: {
+  params: SetupNestedSafeForm
+  onSubmit: (predictedSafeAddress?: string) => void
+}): ReactElement {
   const { safeAddress, safe, safeLoaded } = useSafeInfo()
   const chain = useCurrentChain()
   const { setSafeTx, setSafeTxError } = useContext(SafeTxContext)
@@ -98,18 +101,9 @@ export function ReviewNestedSafe({ params }: { params: SetupNestedSafeForm }): R
     createSafeTx().then(setSafeTx).catch(setSafeTxError)
   }, [chain, params.assets, safeAccountConfig, predictedSafeAddress, balances.items, setSafeTx, setSafeTxError])
 
-  const onSubmit = () => {
-    if (!predictedSafeAddress) {
-      return
-    }
-    dispatch(
-      upsertAddressBookEntries({
-        chainIds: [safe.chainId],
-        address: predictedSafeAddress,
-        name: params.name,
-      }),
-    )
-  }
+  const handleSubmit = useCallback(() => {
+    onSubmit(predictedSafeAddress)
+  }, [onSubmit, predictedSafeAddress])
 
-  return <SignOrExecuteForm onSubmit={onSubmit} />
+  return <ReviewTransaction onSubmit={handleSubmit} />
 }
