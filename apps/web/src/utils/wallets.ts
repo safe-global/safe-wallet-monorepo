@@ -61,7 +61,7 @@ export const isSmartContractWallet = memoize(
 
 /* Check if the wallet is unlocked. */
 export const isWalletUnlocked = async (walletName: string): Promise<boolean | undefined> => {
-  if (walletName === PRIVATE_KEY_MODULE_LABEL) return true
+  if ([PRIVATE_KEY_MODULE_LABEL, WALLETCONNECT].includes(walletName)) return true
 
   const METAMASK_LIKE = ['MetaMask', 'Rabby Wallet', 'Zerion']
 
