@@ -17,7 +17,7 @@ import { TxBatchCard } from '@/src/components/transactions-list/Card/TxBatchCard
 import { TxSafeAppCard } from '@/src/components/transactions-list/Card/TxSafeAppCard'
 import { TxRejectionCard } from '@/src/components/transactions-list/Card/TxRejectionCard'
 import { TxContractInteractionCard } from '@/src/components/transactions-list/Card/TxContractInteractionCard'
-import { TxOrderCard } from '../transactions-list/Card/TxOrderCard'
+import { TxOrderCard } from '@/src/components/transactions-list/Card/TxOrderCard'
 import { TxCreationCard } from '@/src/components/transactions-list/Card/TxCreationCard'
 import { TxCardPress } from './types'
 
