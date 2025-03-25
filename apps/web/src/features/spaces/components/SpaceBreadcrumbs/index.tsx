@@ -1,9 +1,9 @@
 import { useRouter } from 'next/router'
 import css from './styles.module.css'
-import { IconButton, Typography } from '@mui/material'
+import { IconButton, SvgIcon, Typography } from '@mui/material'
 import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
-import AccountBalanceIcon from '@mui/icons-material/AccountBalance'
+import SpaceIcon from '@/public/images/spaces/space.svg'
 import Link from 'next/link'
 import { AppRoutes } from '@/config/routes'
 import { useSpacesGetOneV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
@@ -29,7 +29,7 @@ const SpaceBreadcrumbs = () => {
     <>
       <Link href={{ pathname: AppRoutes.welcome.spaces }} passHref>
         <IconButton size="small">
-          <AccountBalanceIcon fontSize="small" color="primary" />
+          <SvgIcon component={SpaceIcon} inheritViewBox sx={{ fill: 'none' }} fontSize="small" color="primary" />
         </IconButton>
       </Link>
 

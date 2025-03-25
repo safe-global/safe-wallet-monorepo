@@ -1,11 +1,11 @@
 import { useSpacesCreateWithUserV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useRouter } from 'next/router'
 import { type ReactElement, useState } from 'react'
-import { Alert, Box, Button, CircularProgress, DialogActions, DialogContent, Typography } from '@mui/material'
+import { Alert, Box, Button, CircularProgress, DialogActions, DialogContent, SvgIcon, Typography } from '@mui/material'
 import { FormProvider, useForm } from 'react-hook-form'
 import MUILink from '@mui/material/Link'
 import Link from 'next/link'
-import AccountBalanceIcon from '@mui/icons-material/AccountBalance'
+import SpaceIcon from '@/public/images/spaces/space.svg'
 import ModalDialog from '@/components/common/ModalDialog'
 import NameInput from '@/components/common/NameInput'
 import { AppRoutes } from '@/config/routes'
@@ -62,7 +62,7 @@ function SpaceCreationModal({ onClose }: { onClose: () => void }): ReactElement 
       onClose={onClose}
       dialogTitle={
         <>
-          <AccountBalanceIcon sx={{ mr: 1 }} />
+          <SvgIcon component={SpaceIcon} inheritViewBox sx={{ fill: 'none', mr: 1 }} />
           Create space
         </>
       }
