@@ -14,6 +14,10 @@ const injectedRtkApi = api
         query: (queryArg) => ({ url: `/v1/auth/verify`, method: 'POST', body: queryArg.siweDto }),
         invalidatesTags: ['auth'],
       }),
+      authLogoutV1: build.mutation<AuthLogoutV1ApiResponse, AuthLogoutV1ApiArg>({
+        query: () => ({ url: `/v1/auth/logout`, method: 'POST' }),
+        invalidatesTags: ['auth'],
+      }),
     }),
     overrideExisting: false,
   })
@@ -24,6 +28,8 @@ export type AuthVerifyV1ApiResponse = unknown
 export type AuthVerifyV1ApiArg = {
   siweDto: SiweDto
 }
+export type AuthLogoutV1ApiResponse = unknown
+export type AuthLogoutV1ApiArg = void
 export type AuthNonce = {
   nonce: string
 }
@@ -31,4 +37,5 @@ export type SiweDto = {
   message: string
   signature: string
 }
-export const { useAuthGetNonceV1Query, useLazyAuthGetNonceV1Query, useAuthVerifyV1Mutation } = injectedRtkApi
+export const { useAuthGetNonceV1Query, useLazyAuthGetNonceV1Query, useAuthVerifyV1Mutation, useAuthLogoutV1Mutation } =
+  injectedRtkApi
