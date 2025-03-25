@@ -60,8 +60,8 @@ const getMethodLevel = (txInfo?: TransactionInfoType): ColorLevel => {
 
 const toCssVar = (color: string) => `var(--color-${color.replace('.', '-')})`
 
-const StyledAccordion = styled(Accordion)<{ colorLevel?: ColorLevel }>(({ colorLevel = ColorLevel.info }) => {
-  const { main, border, background } = TxInfoColors[colorLevel]
+const StyledAccordion = styled(Accordion)<{ color?: ColorLevel }>(({ color = ColorLevel.info }) => {
+  const { main, border, background } = TxInfoColors[color]
   return {
     [`&.${accordionClasses.expanded}.${accordionClasses.root}, &:hover.${accordionClasses.root}`]: {
       borderColor: toCssVar(border || main),
@@ -146,7 +146,7 @@ const DecodedTx = ({
             elevation={0}
             onChange={onChangeExpand}
             sx={!tx ? { pointerEvents: 'none' } : undefined}
-            colorLevel={level}
+            color={level}
           >
             <AccordionSummary
               data-testid="decoded-tx-summary"

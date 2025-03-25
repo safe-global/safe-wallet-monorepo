@@ -45,6 +45,18 @@ const TxDetailsRow = ({
   </Stack>
 )
 
+const HashWrapper = ({ children }: { children: ReactElement | ReactElement[] }) => (
+  <Typography variant="body2" width="100%" sx={{ wordWrap: 'break-word' }} component="div">
+    {children}
+  </Typography>
+)
+
+const TextWrapper = ({ children }: { children: ReactElement | ReactElement[] }) => (
+  <Typography variant="body2" width="100%" component="div">
+    {children}
+  </Typography>
+)
+
 const ContentWrapper = ({ children }: { children: ReactElement | ReactElement[] }) => (
   <Box sx={{ maxHeight: '550px', overflowY: 'auto', px: 2 }}>{children}</Box>
 )
@@ -94,6 +106,7 @@ export const TxDetails = ({ safeTx, txData, showHashes }: TxDetailsProps) => {
                   <Typography
                     variant="body2"
                     width="100%"
+                    component="div"
                     sx={{
                       '& *': { whiteSpace: 'normal', wordWrap: 'break-word', alignItems: 'flex-start !important' },
                     }}
@@ -114,9 +127,9 @@ export const TxDetails = ({ safeTx, txData, showHashes }: TxDetailsProps) => {
                 <TxDetailsRow label="Value">{safeTx.data.value}</TxDetailsRow>
 
                 <TxDetailsRow label="Data" direction={safeTx.data.data === '0x' ? 'row' : 'column'}>
-                  <Typography variant="body2">
+                  <TextWrapper>
                     <HexEncodedData hexData={safeTx.data.data} limit={66} />
-                  </Typography>
+                  </TextWrapper>
                 </TxDetailsRow>
 
                 <TxDetailsRow label="Operation">
@@ -131,7 +144,7 @@ export const TxDetails = ({ safeTx, txData, showHashes }: TxDetailsProps) => {
                 <TxDetailsRow label="GasPrice">{safeTx.data.gasPrice}</TxDetailsRow>
 
                 <TxDetailsRow label="GasToken">
-                  <Typography variant="body2">
+                  <TextWrapper>
                     <EthHashInfo
                       address={safeTx.data.gasToken}
                       avatarSize={20}
@@ -139,11 +152,11 @@ export const TxDetails = ({ safeTx, txData, showHashes }: TxDetailsProps) => {
                       showName={false}
                       hasExplorer
                     />
-                  </Typography>
+                  </TextWrapper>
                 </TxDetailsRow>
 
                 <TxDetailsRow label="RefundReceiver">
-                  <Typography variant="body2">
+                  <TextWrapper>
                     <EthHashInfo
                       address={safeTx.data.refundReceiver}
                       avatarSize={20}
@@ -151,7 +164,7 @@ export const TxDetails = ({ safeTx, txData, showHashes }: TxDetailsProps) => {
                       showName={false}
                       hasExplorer
                     />
-                  </Typography>
+                  </TextWrapper>
                 </TxDetailsRow>
 
                 <TxDetailsRow label="Nonce">{safeTx.data.nonce}</TxDetailsRow>
@@ -164,6 +177,7 @@ export const TxDetails = ({ safeTx, txData, showHashes }: TxDetailsProps) => {
                     alignItems="center"
                     color="primary.light"
                     sx={{ cursor: 'pointer' }}
+                    component="div"
                   >
                     Transaction hashes{' '}
                     <ExpandMoreIcon sx={expandHashes ? { transform: 'rotate(180deg)' } : undefined} />
@@ -172,25 +186,25 @@ export const TxDetails = ({ safeTx, txData, showHashes }: TxDetailsProps) => {
 
                 {expandHashes && domainHash && (
                   <TxDetailsRow label="Domain hash">
-                    <Typography variant="body2" width="100%" sx={{ wordWrap: 'break-word' }}>
+                    <HashWrapper>
                       <HexEncodedData hexData={domainHash} limit={66} highlightFirstBytes={false} />
-                    </Typography>
+                    </HashWrapper>
                   </TxDetailsRow>
                 )}
 
                 {expandHashes && messageHash && (
                   <TxDetailsRow label="Message hash">
-                    <Typography variant="body2" width="100%" sx={{ wordWrap: 'break-word' }}>
+                    <HashWrapper>
                       <HexEncodedData hexData={messageHash} limit={66} highlightFirstBytes={false} />
-                    </Typography>
+                    </HashWrapper>
                   </TxDetailsRow>
                 )}
 
                 {expandHashes && safeTxHash && (
                   <TxDetailsRow label="safeTxHash">
-                    <Typography variant="body2" width="100%" sx={{ wordWrap: 'break-word' }}>
+                    <HashWrapper>
                       <HexEncodedData hexData={safeTxHash} limit={66} highlightFirstBytes={false} />
-                    </Typography>
+                    </HashWrapper>
                   </TxDetailsRow>
                 )}
               </Stack>

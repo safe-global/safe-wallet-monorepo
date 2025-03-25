@@ -12,6 +12,7 @@ import Track from '@/components/common/Track'
 import { MODALS_EVENTS, trackEvent } from '@/services/analytics'
 import useWallet from '@/hooks/wallets/useWallet'
 import { isHardwareWallet, isLedgerLive } from '@/utils/wallets'
+import useLocalStorage from '@/services/local-storage/useLocalStorage'
 
 const InfoSteps = [
   {
@@ -65,18 +66,24 @@ const HardwareWalletStep = [
   InfoSteps[2],
 ]
 
+const LS_RECEIPT_CHECKBOX = 'tx_receipt_checkbox_accepted'
+
 export const ConfirmTxDetails = (props: SignOrExecuteProps) => {
   const { safeTx, txOrigin } = useContext(SafeTxContext)
   const [txPreview] = useTxPreview(safeTx?.data)
-  const [checked, setChecked] = useState(false)
+  const [checkboxAccepted = false, setCheckboxAccepted] = useLocalStorage<boolean>(LS_RECEIPT_CHECKBOX)
+  const [checkboxAcceptedNow, setCheckboxAcceptedNow] = useState<boolean>(false)
+  const showCheckbox = !checkboxAccepted || checkboxAcceptedNow
+
   const wallet = useWallet()
   const showHashes = wallet ? isHardwareWallet(wallet) || isLedgerLive(wallet) : false
   const steps = showHashes ? HardwareWalletStep : InfoSteps
 
   const handleCheckboxChange = useCallback(({ target: { checked } }: React.ChangeEvent<HTMLInputElement>) => {
     trackEvent({ ...MODALS_EVENTS.CONFIRM_SIGN_CHECKBOX, label: checked })
-    setChecked(checked)
-  }, [])
+    setCheckboxAccepted(checked)
+    setCheckboxAcceptedNow(true)
+  }, [setCheckboxAccepted])
 
   if (!safeTx) {
     return null
@@ -103,17 +110,21 @@ export const ConfirmTxDetails = (props: SignOrExecuteProps) => {
         </Grid>
       </Grid>
 
-      <Divider className={commonCss.nestedDivider} sx={{ pt: 3 }} />
+      {showCheckbox && (
+        <>
+          <Divider className={commonCss.nestedDivider} sx={{ pt: 3 }} />
 
-      <FormControlLabel
-        sx={{ mt: 2, mb: -1.3 }}
-        control={<Checkbox checked={checked} onChange={handleCheckboxChange} />}
-        label="I understand what I'm signing and that this is an irreversible action."
-      />
+          <FormControlLabel
+            sx={{ mt: 2, mb: -1.3 }}
+            control={<Checkbox checked={checkboxAccepted} onChange={handleCheckboxChange} />}
+            label="I understand what I'm signing and that this is an irreversible action."
+          />
+        </>
+      )}
 
       <SignOrExecuteFormV2
-        disableSubmit={!checked}
-        tooltip={!checked ? 'Review details and check the box to enable signing' : undefined}
+        disableSubmit={!checkboxAccepted}
+        tooltip={!checkboxAccepted ? 'Review details and check the box to enable signing' : undefined}
         origin={txOrigin}
         isCreation={!props.txId}
         {...props}
