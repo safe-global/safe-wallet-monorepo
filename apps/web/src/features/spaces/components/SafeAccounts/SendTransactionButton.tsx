@@ -10,6 +10,9 @@ import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/saf
 import useWallet from '@/hooks/wallets/useWallet'
 import { isOwner } from '@/utils/transaction-guards'
 import type { AddressEx } from '@safe-global/safe-gateway-typescript-sdk'
+import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
+import { trackEvent } from '@/services/analytics'
+import { gtmSetSafeAddress } from '@/services/analytics/gtm'
 
 type Chains = Record<string, string>
 
@@ -51,6 +54,9 @@ const SendTransactionButton = ({ safe }: { safe: SafeOverview }) => {
 
   const onNewTxClick = async () => {
     await setActiveSafe()
+    // We have to set it explicitly otherwise its missing in the trackEvent below
+    gtmSetSafeAddress(safe.address.value)
+    trackEvent(SPACE_EVENTS.CREATE_SPACE_TX)
 
     setTxFlow(<TokenTransferFlow />, resetActiveSafe, false)
   }

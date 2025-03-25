@@ -1,3 +1,5 @@
+import { EventType } from '@/services/analytics'
+
 const SPACE_CATEGORY = 'spaces'
 
 export const SPACE_EVENTS = {
@@ -112,6 +114,20 @@ export const SPACE_EVENTS = {
   SEARCH_MEMBERS: {
     action: 'Search members',
     category: SPACE_CATEGORY,
+  },
+  CREATE_SPACE_TX: {
+    action: 'Open send tokens flow in space',
+    category: SPACE_CATEGORY,
+  },
+  TOTAL_SAFE_ACCOUNTS: {
+    action: 'Total safes added to space',
+    category: SPACE_CATEGORY,
+    event: EventType.META,
+  },
+  TOTAL_ACTIVE_MEMBERS: {
+    action: 'Total active members in space',
+    category: SPACE_CATEGORY,
+    event: EventType.META,
   },
 }
 

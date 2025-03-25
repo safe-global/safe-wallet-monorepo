@@ -18,6 +18,7 @@ import PreviewInvite from '../InviteBanner/PreviewInvite'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import Track from '@/components/common/Track'
 import AggregatedBalance from '@/features/spaces/components/Dashboard/AggregatedBalances'
+import useTrackSpace from '@/features/spaces/hooks/useTrackSpace'
 
 const ViewAllLink = ({ url }: { url: LinkProps['href'] }) => {
   return (
@@ -45,6 +46,7 @@ const SpaceDashboard = () => {
   const spaceId = useCurrentSpaceId()
   const { activeMembers } = useSpaceMembersByStatus()
   const isInvited = useIsInvited()
+  useTrackSpace(safes, activeMembers)
 
   const safesToDisplay = safes.slice(0, DASHBOARD_LIST_DISPLAY_LIMIT)
   const membersToDisplay = activeMembers.slice(0, DASHBOARD_LIST_DISPLAY_LIMIT)
