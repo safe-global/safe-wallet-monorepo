@@ -48,7 +48,7 @@ const QueueActions = ({
       e.preventDefault()
       router.push({
         pathname: AppRoutes.transactions.queue,
-        query: { safe: `${chainShortName}:${safeAddress}` },
+        query: { ...router.query, safe: `${chainShortName}:${safeAddress}` },
       })
     },
     [chainShortName, router, safeAddress],

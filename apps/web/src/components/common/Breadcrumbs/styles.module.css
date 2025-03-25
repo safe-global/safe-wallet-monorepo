@@ -8,6 +8,10 @@
   gap: var(--space-1);
 }
 
+.container:empty {
+  display: none;
+}
+
 .breadcrumb {
   display: flex;
   align-items: center;
