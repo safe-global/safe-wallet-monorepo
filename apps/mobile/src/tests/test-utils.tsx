@@ -5,6 +5,9 @@ import { makeStore, rootReducer } from '../store'
 import { PortalProvider } from 'tamagui'
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet'
 import { configureStore } from '@reduxjs/toolkit'
+import { FLUSH, PAUSE, PERSIST, PURGE, REGISTER, REHYDRATE } from 'redux-persist'
+import { cgwClient } from '@safe-global/store/gateway/cgwClient'
+import { web3API } from '@/src/store/signersBalance'
 
 export type RootState = ReturnType<typeof rootReducer>
 type getProvidersArgs = (initialStoreState?: Partial<RootState>) => React.FC<{ children: React.ReactNode }>
@@ -14,6 +17,12 @@ const getProviders: getProvidersArgs = (initialStoreState) =>
     const store = initialStoreState
       ? configureStore({
           reducer: rootReducer,
+          middleware: (getDefaultMiddleware) =>
+            getDefaultMiddleware({
+              serializableCheck: {
+                ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
+              },
+            }).concat(cgwClient.middleware, web3API.middleware),
           preloadedState: initialStoreState,
         })
       : makeStore()

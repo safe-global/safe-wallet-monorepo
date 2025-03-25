@@ -568,7 +568,7 @@ export function checkPercentageFilled(percentage, str) {
 export function clickOnTokenSelctor(direction) {
   let selector = inputCurrencyInput
   if (direction === 'output') selector = outputCurrencyInput
-  cy.get(selector).find('button').click()
+  cy.get(selector).find('button').eq(0).click()
 }
 
 export function checkTokenList(tokens) {

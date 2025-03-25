@@ -32,6 +32,7 @@ export type SignOrExecuteProps = {
   origin?: string
   showMethodCall?: boolean
   tooltip?: string
+  isMassPayout?: boolean
 }
 
 export const SignOrExecuteFormV2 = ({
@@ -41,6 +42,7 @@ export const SignOrExecuteFormV2 = ({
   onSubmit,
   isCreation,
   origin,
+  isMassPayout = false,
   ...props
 }: SignOrExecuteProps & {
   chainId: ReturnType<typeof useChainId>
@@ -83,9 +85,18 @@ export const SignOrExecuteFormV2 = ({
 
       const { data: details } = await trigger({ chainId, txId })
       // Track tx event
-      trackTxEvents(details, !!isCreation, isExecuted, isRoleExecution, isProposerCreation, !!signer?.isSafe, origin)
+      trackTxEvents(
+        details,
+        !!isCreation,
+        isExecuted,
+        isRoleExecution,
+        isProposerCreation,
+        !!signer?.isSafe,
+        origin,
+        isMassPayout,
+      )
     },
-    [chainId, isCreation, onSubmit, trigger, signer?.isSafe, origin],
+    [chainId, isCreation, onSubmit, trigger, signer?.isSafe, origin, isMassPayout],
   )
 
   const onRoleExecutionSubmit = useCallback<typeof onFormSubmit>(

@@ -38,6 +38,7 @@ describe('Twaps history tests', { defaultCommandTimeout: 30000 }, () => {
       swaps.selectInputCurrency(swaps.swapTokens.cow)
       swaps.setInputValue(500)
       swaps.selectOutputCurrency(swaps.swapTokens.dai)
+      swaps.confirmPriceImpact()
       swaps.verifyReviewOrderBtnIsVisible()
       swaps.getTwapInitialData().then((formData) => {
         cy.wrap(formData).as('twapFormData')

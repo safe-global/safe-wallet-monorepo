@@ -9,9 +9,13 @@ import { TokenType } from '@safe-global/safe-gateway-typescript-sdk'
 
 describe('CreateTokenTransfer', () => {
   const mockParams = {
-    recipient: '',
-    tokenAddress: ZERO_ADDRESS,
-    amount: '',
+    recipients: [
+      {
+        recipient: '',
+        tokenAddress: ZERO_ADDRESS,
+        amount: '',
+      },
+    ],
     type: TokenTransferType.multiSig,
   }
 

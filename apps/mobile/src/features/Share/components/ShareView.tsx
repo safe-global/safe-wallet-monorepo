@@ -13,17 +13,17 @@ import { ToastViewport } from '@tamagui/toast'
 import { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { ChainsDisplay } from '@/src/components/ChainsDisplay'
 import { getAvailableChainsNames } from '@/src/utils/chains'
+import { useAppSelector } from '@/src/store/hooks'
+import { selectContactByAddress } from '@/src/store/addressBookSlice'
 
 type ShareViewProps = {
-  activeSafe: SafeInfo | null
+  activeSafe: SafeInfo
   availableChains: Chain[]
 }
 
 export const ShareView = ({ activeSafe, availableChains }: ShareViewProps) => {
   const copyAndDispatchToast = useCopyAndDispatchToast()
-  if (!activeSafe) {
-    return null
-  }
+  const contact = useAppSelector(selectContactByAddress(activeSafe.address))
 
   const safeAddress = activeSafe.address
 
@@ -45,7 +45,7 @@ export const ShareView = ({ activeSafe, availableChains }: ShareViewProps) => {
     <>
       <YStack flex={1}>
         <YStack flex={1} justifyContent={'flex-end'} alignItems={'center'} marginBottom={'$6'}>
-          <H3 fontWeight={600}>Safe title</H3>
+          <H3 fontWeight={600}>{contact ? contact.name : 'Unnamed safe'}</H3>
         </YStack>
         <YStack flex={3} alignItems={'center'}>
           <Container marginHorizontal={'$10'}>

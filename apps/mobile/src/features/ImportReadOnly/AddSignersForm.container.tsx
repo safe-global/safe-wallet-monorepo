@@ -12,9 +12,10 @@ import { selectSigners } from '@/src/store/signersSlice'
 import { SignerSection } from '@/src/features/Signers/components/SignersList/SignersList'
 import { extractChainsFromSafes, extractSignersFromSafes } from '@/src/features/ImportReadOnly/helpers/safes'
 import { AddSignersFormView } from '@/src/features/ImportReadOnly/components/AddSignersFormView'
+import { upsertContact } from '@/src/store/addressBookSlice'
 
 export const AddSignersFormContainer = () => {
-  const params = useLocalSearchParams<{ safeAddress: string }>()
+  const params = useLocalSearchParams<{ safeAddress: string; safeName: string }>()
   const dispatch = useAppDispatch()
   const chainIds = useAppSelector(selectAllChainsIds)
   const appSigners = useAppSelector(selectSigners)
@@ -41,6 +42,7 @@ export const AddSignersFormContainer = () => {
       return
     }
     const hasActiveSafe = !!activeSafe
+    dispatch(upsertContact({ value: params.safeAddress, name: params.safeName }))
     dispatch(addSafe({ SafeInfo: currentData[0], chains: safeAvailableOnChains }))
     dispatch(
       setActiveSafe({

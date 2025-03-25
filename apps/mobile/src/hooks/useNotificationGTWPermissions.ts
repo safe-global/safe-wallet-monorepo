@@ -1,15 +1,21 @@
 import { useCallback } from 'react'
 import { useAppSelector } from '../store/hooks'
-import { useDefinedActiveSafe } from '../store/hooks/activeSafe'
 import { RootState } from '../store'
 import { selectSigners } from '../store/signersSlice'
 import { NOTIFICATION_ACCOUNT_TYPE } from '../store/constants'
 import { selectSafeInfo } from '../store/safesSlice'
 
-export function useNotificationGTWPermissions() {
+export function useNotificationGTWPermissions(safeAddress: string) {
   const appSigners = useAppSelector(selectSigners)
-  const activeSafe = useDefinedActiveSafe()
-  const activeSafeInfo = useAppSelector((state: RootState) => selectSafeInfo(state, activeSafe.address))
+
+  const activeSafeInfo = useAppSelector((state: RootState) => selectSafeInfo(state, safeAddress as `0x${string}`))
+
+  if (!activeSafeInfo) {
+    return {
+      getAccountType: () => ({ ownerFound: null, accountType: NOTIFICATION_ACCOUNT_TYPE.REGULAR }),
+    }
+  }
+
   const owners = activeSafeInfo.SafeInfo.owners
 
   const getAccountType = useCallback(() => {

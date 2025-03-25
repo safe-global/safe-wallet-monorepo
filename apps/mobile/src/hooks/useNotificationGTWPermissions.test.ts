@@ -45,7 +45,7 @@ describe('useNotificationGTWPermissions', () => {
   })
 
   it('returns the correct account type for an owner', () => {
-    const { result } = renderHook(() => useNotificationGTWPermissions())
+    const { result } = renderHook(() => useNotificationGTWPermissions('0x123'))
     const { ownerFound, accountType } = result.current.getAccountType()
     expect(ownerFound).toEqual({ value: '0x456' })
     expect(accountType).toBe('OWNER')
@@ -64,7 +64,7 @@ describe('useNotificationGTWPermissions', () => {
       }
     })
 
-    const { result } = renderHook(() => useNotificationGTWPermissions())
+    const { result } = renderHook(() => useNotificationGTWPermissions('0x123'))
     const { ownerFound, accountType } = result.current.getAccountType()
     expect(ownerFound).toBeNull()
     expect(accountType).toBe('REGULAR')

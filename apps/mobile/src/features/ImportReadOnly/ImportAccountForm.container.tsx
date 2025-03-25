@@ -1,5 +1,5 @@
 import { useLocalSearchParams, useRouter } from 'expo-router'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect } from 'react'
 import { makeSafeId } from '@/src/utils/formatters'
 import { useAppSelector } from '@/src/store/hooks'
 import { selectAllChainsIds } from '@/src/store/chains'
@@ -7,24 +7,40 @@ import { useLazySafesGetOverviewForManyQuery } from '@safe-global/store/gateway/
 import { isValidAddress } from '@safe-global/utils/validation'
 import { parsePrefixedAddress } from '@safe-global/utils/addresses'
 import { ImportAccountFormView } from '@/src/features/ImportReadOnly/components/ImportAccountFormView'
+import { useForm } from 'react-hook-form'
+import { FormValues } from '@/src/features/ImportReadOnly/types'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { formSchema } from '@/src/features/ImportReadOnly/schema'
 
 export const ImportAccountFormContainer = () => {
   const params = useLocalSearchParams<{ safeAddress: string }>()
-  const [safeAddress, setSafeAddress] = useState(params.safeAddress || '')
   const chainIds = useAppSelector(selectAllChainsIds)
   const router = useRouter()
-  const [isEnteredAddressValid, setEnteredAddressValid] = useState(false)
-  const [error, setError] = useState<string | undefined>(undefined)
-  const [addressWithoutPrefix, setAddressWithoutPrefix] = useState<string | undefined>(undefined)
+
+  const {
+    control,
+    getValues,
+    getFieldState,
+    formState: { errors, dirtyFields, isValid },
+  } = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    mode: 'onChange',
+    defaultValues: {
+      name: '',
+      safeAddress: params.safeAddress || '',
+    },
+  })
+
+  const addressState = getFieldState('safeAddress')
 
   const [trigger, result] = useLazySafesGetOverviewForManyQuery()
 
   const safeExists = (result.data && result.data.length > 0) || false
 
-  const onChangeText = useCallback(
-    (text: string) => {
-      const { address } = parsePrefixedAddress(text)
-      const shouldContinue = isValidAddress(address)
+  useEffect(() => {
+    if (!addressState.invalid) {
+      const inputAddress = getValues('safeAddress')
+      const { address } = parsePrefixedAddress(inputAddress)
       const isValid = isValidAddress(address)
       if (isValid) {
         trigger({
@@ -34,40 +50,29 @@ export const ImportAccountFormContainer = () => {
           excludeSpam: true,
         })
       }
-
-      setEnteredAddressValid(isValid)
-      setError(shouldContinue ? undefined : 'Invalid address format')
-      setSafeAddress(text)
-      setAddressWithoutPrefix(address)
-    },
-    [chainIds, trigger],
-  )
-
-  useEffect(() => {
-    if (params.safeAddress) {
-      onChangeText(params.safeAddress)
     }
-  }, [params.safeAddress, onChangeText])
+  }, [chainIds, trigger, addressState.isDirty, addressState.invalid])
 
-  const canContinue = isEnteredAddressValid && safeExists && !error
+  const canContinue = isValid && safeExists
 
   const handleContinue = useCallback(() => {
+    const inputAddress = getValues('safeAddress')
+    const { address } = parsePrefixedAddress(inputAddress)
     router.push(
-      `/(import-accounts)/signers?safeAddress=${addressWithoutPrefix}&chainId=${result.data?.[0].chainId}&import_safe=true`,
+      `/(import-accounts)/signers?safeAddress=${address}&chainId=${result.data?.[0].chainId}&import_safe=true&safeName=${getValues('name')}`,
     )
-  }, [addressWithoutPrefix, result.data, router])
+  }, [result.data, router])
 
   return (
     <ImportAccountFormView
-      safeAddress={safeAddress}
-      onChangeText={onChangeText}
-      error={error}
       canContinue={canContinue}
-      addressWithoutPrefix={addressWithoutPrefix}
       result={result}
-      isEnteredAddressValid={isEnteredAddressValid}
-      safeExists={safeExists}
+      isEnteredAddressValid={addressState.isTouched && !addressState.invalid}
       onContinue={handleContinue}
+      control={control}
+      errors={errors}
+      dirtyFields={dirtyFields}
+      isFormValid={isValid}
     />
   )
 }

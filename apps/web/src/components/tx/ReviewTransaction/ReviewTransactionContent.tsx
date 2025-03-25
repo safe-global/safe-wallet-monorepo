@@ -222,7 +222,7 @@ export const ReviewTransactionContent = ({
             )}
 
             {/* Continue button */}
-            <CheckWallet checkNetwork={!submitDisabled}>
+            <CheckWallet allowNonOwner={props.onlyExecute} checkNetwork={!submitDisabled}>
               {(isOk) => (
                 <Button
                   data-testid="continue-sign-btn"

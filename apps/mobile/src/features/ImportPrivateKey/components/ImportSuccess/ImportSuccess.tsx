@@ -5,34 +5,35 @@ import { LargeHeaderTitle } from '@/src/components/Title'
 import { SignersCard } from '@/src/components/transactions-list/Card/SignersCard'
 import { useAppSelector } from '@/src/store/hooks'
 import { selectAppNotificationStatus } from '@/src/store/notificationsSlice'
-import Clipboard from '@react-native-clipboard/clipboard'
 import { useLocalSearchParams, useRouter } from 'expo-router'
-import React, { useEffect } from 'react'
+import React from 'react'
 import { ScrollView } from 'react-native'
 import { Button, Text, View } from 'tamagui'
 import { useNotificationManager } from '@/src/hooks/useNotificationManager'
+import { ToastViewport } from '@tamagui/toast'
+import { useCopyAndDispatchToast } from '@/src/hooks/useCopyAndDispatchToast'
 
 export function ImportSuccess() {
-  const { updateNotificationPermissions } = useNotificationManager()
   const isAppNotificationEnabled = useAppSelector(selectAppNotificationStatus)
   const { address, name } = useLocalSearchParams<{ address: `0x${string}`; name: string }>()
   const router = useRouter()
+  const copy = useCopyAndDispatchToast()
 
-  const handleContinuePress = () => {
+  const { updateNotificationPermissions } = useNotificationManager()
+
+  const updatePermissions = async () => {
+    if (isAppNotificationEnabled) {
+      await updateNotificationPermissions()
+    }
+  }
+
+  const handleContinuePress = async () => {
+    await updatePermissions()
     // Go to top of the navigator stack
     router.dismissAll()
     // now close it
     router.back()
   }
-
-  useEffect(() => {
-    const updatePermissions = async () => {
-      if (isAppNotificationEnabled) {
-        await updateNotificationPermissions()
-      }
-    }
-    updatePermissions()
-  }, [isAppNotificationEnabled])
 
   return (
     <View flex={1} justifyContent="space-between" testID={'import-success'}>
@@ -67,7 +68,7 @@ export function ImportSuccess() {
                     fontWeight="500"
                     size="$5"
                     onPress={() => {
-                      Clipboard.setString(address)
+                      copy(address)
                     }}
                     icon={<SafeFontIcon name="copy" />}
                   >
@@ -80,6 +81,7 @@ export function ImportSuccess() {
             />
           </View>
         </ScrollView>
+        <ToastViewport multipleToasts={false} left={0} right={0} />
       </View>
 
       <View paddingHorizontal="$3">

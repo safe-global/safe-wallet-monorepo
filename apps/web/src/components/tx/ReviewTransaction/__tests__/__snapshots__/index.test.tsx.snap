@@ -337,6 +337,52 @@ exports[`ReviewTransaction should display a confirmation screen 1`] = `
                               </div>
                             </div>
                           </div>
+                          <div
+                            class="MuiGrid-root MuiGrid-container css-1m1clne-MuiGrid-root"
+                          >
+                            <div
+                              class="MuiGrid-root MuiGrid-item css-p1l0hx-MuiGrid-root"
+                              data-testid="tx-row-title"
+                              style="word-break: break-word;"
+                            >
+                              <p
+                                class="MuiTypography-root MuiTypography-body1 css-shf88x-MuiTypography-root"
+                              >
+                                safeTxHash:
+                              </p>
+                            </div>
+                            <div
+                              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true css-1vd824g-MuiGrid-root"
+                              data-testid="tx-data-row"
+                            >
+                              <div
+                                class="encodedData MuiBox-root css-0"
+                                data-testid="tx-hexData"
+                              >
+                                <span
+                                  aria-label="Copy to clipboard"
+                                  class=""
+                                  data-mui-internal-clone-element="true"
+                                  style="cursor: pointer;"
+                                >
+                                  <button
+                                    aria-label="Copy to clipboard"
+                                    class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-xyrzjn-MuiButtonBase-root-MuiIconButton-root"
+                                    tabindex="0"
+                                    type="button"
+                                  >
+                                    <mock-icon
+                                      aria-hidden=""
+                                      class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeSmall css-gvpe62-MuiSvgIcon-root"
+                                      data-testid="copy-btn-icon"
+                                      focusable="false"
+                                    />
+                                  </button>
+                                </span>
+                                 
+                              </div>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>

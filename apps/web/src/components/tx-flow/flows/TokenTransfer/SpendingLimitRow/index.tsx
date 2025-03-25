@@ -3,7 +3,7 @@ import { Controller, useFormContext } from 'react-hook-form'
 import classNames from 'classnames'
 import { safeFormatUnits } from '@/utils/formatters'
 import type { TokenInfo } from '@safe-global/safe-gateway-typescript-sdk'
-import { TokenTransferFields, TokenTransferType } from '@/components/tx-flow/flows/TokenTransfer'
+import { MultiTransfersFields, TokenTransferType } from '@/components/tx-flow/flows/TokenTransfer'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import ExternalLink from '@/components/common/ExternalLink'
 import { HelpCenterArticle } from '@/config/constants'
@@ -34,7 +34,7 @@ const SpendingLimitRow = ({
   useEffect(() => {
     return () => {
       // reset the field value to default when the component is unmounted
-      resetField(TokenTransferFields.type)
+      resetField(MultiTransfersFields.type)
     }
   }, [resetField])
 
@@ -46,7 +46,7 @@ const SpendingLimitRow = ({
       <Controller
         rules={{ required: true }}
         control={control}
-        name={TokenTransferFields.type}
+        name={MultiTransfersFields.type}
         render={({ field: { onChange, ...field } }) => (
           <RadioGroup
             row
