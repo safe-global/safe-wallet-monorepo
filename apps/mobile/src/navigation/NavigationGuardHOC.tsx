@@ -44,7 +44,9 @@ function useInitialNavigationScreen() {
 
       if (hasShownNotifications && !isNotificationsScreenInStack && !hasBiometricsShown) {
         setHasBiometricsShown(true)
-        router.navigate('/biometrics-opt-in')
+        setTimeout(() => {
+          router.navigate('/biometrics-opt-in')
+        }, 500)
       }
     })
 

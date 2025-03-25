@@ -60,7 +60,9 @@ export function useBiometrics() {
       const isSupported = await checkBiometricsSupport()
 
       if (!isSupported) {
-        throw new Error('Biometrics not supported on this device')
+        dispatch(setBiometricsType('NONE'))
+        dispatch(setBiometricsSupported(false))
+        return false
       }
 
       await Keychain.setGenericPassword(BIOMETRICS_KEY, 'biometrics-enabled', {
