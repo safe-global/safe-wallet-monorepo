@@ -57,14 +57,13 @@ const SafeListContextMenu = ({
   undeployedSafe: boolean
   onClose?: () => void
 }): ReactElement => {
+  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
   const isNestedSafesEnabled = useHasFeature(FEATURES.NESTED_SAFES)
   const { data: nestedSafes } = useGetOwnedSafesQuery(
-    isNestedSafesEnabled && address ? { chainId, ownerAddress: address } : skipToken,
+    isNestedSafesEnabled && address && anchorEl ? { chainId, ownerAddress: address } : skipToken,
   )
   const addressBook = useAddressBook()
   const hasName = address in addressBook
-
-  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
   const [open, setOpen] = useState<typeof defaultOpen>(defaultOpen)
 
   const trackingLabel =
