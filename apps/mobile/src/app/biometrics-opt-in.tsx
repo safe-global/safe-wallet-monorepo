@@ -38,6 +38,7 @@ function BiometricsOptIn() {
       image={image}
       isVisible
       isLoading={isLoading}
+      colorScheme={colorScheme}
       ctaButton={{
         onPress: enableBiometrics,
         label: getBiometricsButtonLabel(),
