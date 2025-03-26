@@ -3,8 +3,6 @@ import css from '@/features/spaces/components/Dashboard/styles.module.css'
 import Button from '@mui/material/Button'
 import Link from 'next/link'
 import { AppRoutes } from '@/config/routes'
-import Image from 'next/image'
-import SkeletonBG from '@/public/images/spaces/skeleton_bg.png'
 
 const UnauthorizedState = () => {
   return (
@@ -24,8 +22,6 @@ const UnauthorizedState = () => {
             <Button variant="outlined">Back to overview</Button>
           </Link>
         </Box>
-
-        <Image src={SkeletonBG} alt="" className={css.contentBg} />
       </Box>
     </Box>
   )

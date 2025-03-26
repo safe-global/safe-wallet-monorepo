@@ -1,8 +1,6 @@
 import { Box, Typography } from '@mui/material'
 import css from '@/features/spaces/components/Dashboard/styles.module.css'
 import SignInButton from '@/features/spaces/components/SignInButton'
-import SkeletonBG from '@/public/images/spaces/skeleton_bg.png'
-import Image from 'next/image'
 
 const SignedOutState = () => {
   return (
@@ -20,8 +18,6 @@ const SignedOutState = () => {
 
           <SignInButton />
         </Box>
-
-        <Image src={SkeletonBG} alt="" className={css.contentBg} />
       </Box>
     </Box>
   )
