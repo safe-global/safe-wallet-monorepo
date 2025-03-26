@@ -20,3 +20,6 @@ export const GATEWAY_URL = isProduction ? GATEWAY_URL_PRODUCTION : GATEWAY_URL_S
  */
 export const ONBOARDING_VERSION = 'v1'
 export const INFURA_TOKEN = process.env.EXPO_PUBLIC_INFURA_TOKEN || ''
+
+export const SAFE_WEB_URL = 'https://app.safe.global'
+export const SAFE_WEB_TRANSACTIONS_URL = `${SAFE_WEB_URL}/transactions/tx?safe=:safeAddressWithChainPrefix&id=:txId`
