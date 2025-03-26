@@ -12,6 +12,7 @@ import { SubmitHandler, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { FormValues } from '@/src/features/Signer/types'
 import { formSchema } from '@/src/features/Signer/schema'
+import { COMING_SOON_MESSAGE, COMING_SOON_TITLE } from '@/src/config/constants'
 
 export const SignerContainer = () => {
   const navigation = useNavigation()
@@ -31,7 +32,7 @@ export const SignerContainer = () => {
   }, [address, activeChain])
 
   const onPressDelete = useCallback(() => {
-    Alert.alert('Coming soon', 'This feature is not available yet')
+    Alert.alert(COMING_SOON_TITLE, COMING_SOON_MESSAGE)
   }, [])
 
   // Initialize the form with React Hook Form and Zod schema resolver
