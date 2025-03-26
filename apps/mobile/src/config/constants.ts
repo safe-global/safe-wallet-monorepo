@@ -9,6 +9,9 @@ export const isTestingEnv = process.env.NODE_ENV === 'test'
 export const isStorybookEnv = Constants?.expoConfig?.extra?.storybookEnabled === 'true'
 export const POLLING_INTERVAL = 15_000
 
+export const COMING_SOON_MESSAGE = 'This feature is coming soon.'
+export const COMING_SOON_TITLE = 'Coming soon'
+
 export const GATEWAY_URL_PRODUCTION =
   process.env.EXPO_PUBLIC_GATEWAY_URL_PRODUCTION || 'https://safe-client.safe.global'
 export const GATEWAY_URL_STAGING = process.env.EXPO_PUBLIC_GATEWAY_URL_STAGING || 'https://safe-client.staging.5afe.dev'
