@@ -12,8 +12,10 @@ import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import DeclineButton from './DeclineButton'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
+import { useDarkMode } from '@/hooks/useDarkMode'
 
 const PreviewInvite = () => {
+  const isDarkMode = useDarkMode()
   const isUserSignedIn = useAppSelector(isAuthenticated)
   const spaceId = useCurrentSpaceId()
   const { currentData: currentUser } = useUsersGetWithWalletsV1Query()
@@ -23,7 +25,7 @@ const PreviewInvite = () => {
   if (!space) return null
 
   return (
-    <Paper sx={{ p: 2, mb: 4, backgroundColor: 'info.light' }}>
+    <Paper sx={{ p: 2, mb: 4, backgroundColor: isDarkMode ? 'info.background' : 'info.light' }}>
       <Box className={css.previewInviteContent}>
         <InitialsAvatar name={space.name} size="medium" />
         <Typography variant="body1" color="text.primary" flexGrow={1}>
