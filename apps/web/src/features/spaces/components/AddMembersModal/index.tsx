@@ -113,9 +113,9 @@ const AddMembersModal = ({ onClose }: { onClose: () => void }): ReactElement => 
 
         dispatch(
           showNotification({
-            message: `Added ${data.name} to space`,
+            message: `Invited ${data.name} to space`,
             variant: 'success',
-            groupKey: 'add-member-success',
+            groupKey: 'invite-member-success',
           }),
         )
 
