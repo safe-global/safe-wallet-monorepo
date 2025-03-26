@@ -1,6 +1,6 @@
 import React from 'react'
 import { H2, ScrollView, Text, Theme, View, XStack, YStack } from 'tamagui'
-import { SafeFontIcon as Icon } from '@/src/components/SafeFontIcon/SafeFontIcon'
+import { SafeFontIcon as Icon, SafeFontIcon } from '@/src/components/SafeFontIcon/SafeFontIcon'
 import { SafeListItem } from '@/src/components/SafeListItem'
 import { Skeleton } from 'moti/skeleton'
 import { Pressable } from 'react-native'
@@ -145,18 +145,6 @@ export const Settings = ({ address, data, onImplementationTap, displayDevMenu, c
                         rightNode={<Icon name={'chevron-right'} />}
                       />
                     </Pressable>
-                    <Pressable
-                      style={({ pressed }) => [{ opacity: pressed ? 0.5 : 1.0 }]}
-                      onPress={() => {
-                        router.push('/address-book')
-                      }}
-                    >
-                      <SafeListItem
-                        label={'Address book'}
-                        leftNode={<Icon name={'address-book'} color={'$colorSecondary'} />}
-                        rightNode={<Icon name={'chevron-right'} />}
-                      />
-                    </Pressable>
                   </View>
                 </View>
 
@@ -183,8 +171,18 @@ export const Settings = ({ address, data, onImplementationTap, displayDevMenu, c
             </Skeleton.Group>
 
             {/* Footer */}
-            <Pressable onPress={onImplementationTap}>
-              <Text textAlign="center" color="$colorSecondary" marginTop="$8">
+            <Pressable
+              onPress={onImplementationTap}
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '$2',
+                marginTop: 14,
+              }}
+            >
+              <SafeFontIcon name={'check-filled'} color={'$success'} />
+              <Text marginLeft={'$2'} textAlign="center" color="$colorSecondary">
                 {implementation?.name}
               </Text>
             </Pressable>
