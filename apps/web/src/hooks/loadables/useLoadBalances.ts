@@ -43,6 +43,7 @@ const useLoadBalances = () => {
       skip: !isReady,
       pollingInterval: POLLING_INTERVAL,
       skipPollingIfUnfocused: true,
+      refetchOnFocus: true,
     },
   )
 
