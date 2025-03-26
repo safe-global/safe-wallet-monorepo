@@ -1,8 +1,9 @@
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback } from 'react'
 import * as Keychain from 'react-native-keychain'
 import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
 import { setBiometricsEnabled, setBiometricsSupported, setBiometricsType } from '@/src/store/biometricsSlice'
 import Logger from '@/src/utils/logger'
+
 const BIOMETRICS_KEY = 'SAFE_WALLET_BIOMETRICS'
 
 export function useBiometrics() {
@@ -43,22 +44,25 @@ export function useBiometrics() {
     }
   }, [dispatch])
 
-  // Only check if biometrics is enabled without triggering the prompt
-  const checkBiometricsStatus = useCallback(async () => {
+  const disableBiometrics = useCallback(async () => {
+    setIsLoading(true)
     try {
-      const credentials = await Keychain.getInternetCredentials(BIOMETRICS_KEY)
-      return credentials !== false
+      await Keychain.resetGenericPassword()
+
+      dispatch(setBiometricsEnabled(false))
+      return true
     } catch (error) {
-      Logger.error('Error checking biometrics status:', error)
+      Logger.error('Error disabling biometrics:', error)
       return false
+    } finally {
+      setIsLoading(false)
     }
-  }, [])
+  }, [dispatch])
 
   const enableBiometrics = useCallback(async () => {
     setIsLoading(true)
     try {
       const isSupported = await checkBiometricsSupport()
-
       if (!isSupported) {
         dispatch(setBiometricsType('NONE'))
         dispatch(setBiometricsSupported(false))
@@ -74,7 +78,7 @@ export function useBiometrics() {
         accessControl: Keychain.ACCESS_CONTROL.BIOMETRY_ANY,
       })
 
-      if (result) {
+      if (result && result.username === BIOMETRICS_KEY) {
         dispatch(setBiometricsEnabled(true))
         return true
       }
@@ -87,6 +91,17 @@ export function useBiometrics() {
     }
   }, [dispatch, checkBiometricsSupport])
 
+  const toggleBiometrics = useCallback(
+    async (newValue: boolean) => {
+      if (newValue) {
+        return enableBiometrics()
+      } else {
+        return disableBiometrics()
+      }
+    },
+    [enableBiometrics, disableBiometrics],
+  )
+
   const getBiometricsButtonLabel = useCallback(() => {
     switch (biometricsType) {
       case 'FACE_ID':
@@ -98,20 +113,10 @@ export function useBiometrics() {
       default:
         return 'Enable Biometrics'
     }
-  }, [biometricsType])
-
-  useEffect(() => {
-    const init = async () => {
-      await checkBiometricsSupport()
-      const isEnabled = await checkBiometricsStatus()
-      dispatch(setBiometricsEnabled(isEnabled))
-    }
-
-    init()
-  }, [dispatch, checkBiometricsStatus])
+  }, [biometricsType, isEnabled])
 
   return {
-    enableBiometrics,
+    toggleBiometrics,
     isBiometricsEnabled: isEnabled,
     biometricsType,
     isLoading,

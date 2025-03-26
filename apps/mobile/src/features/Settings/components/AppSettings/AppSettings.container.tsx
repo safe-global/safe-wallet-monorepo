@@ -11,7 +11,7 @@ import { capitalize } from '@/src/utils/formatters'
 import { Linking } from 'react-native'
 
 export const AppSettingsContainer = () => {
-  const { enableBiometrics, isBiometricsEnabled, isLoading } = useBiometrics()
+  const { toggleBiometrics, isBiometricsEnabled, isLoading } = useBiometrics()
   const { themePreference, setThemePreference } = useTheme()
   const settingsSections = [
     {
@@ -68,7 +68,7 @@ export const AppSettingsContainer = () => {
           rightNode: (
             <LoadableSwitch
               testID="toggle-app-biometrics"
-              onChange={enableBiometrics}
+              onChange={() => toggleBiometrics(!isBiometricsEnabled)}
               value={isBiometricsEnabled}
               isLoading={isLoading}
               trackColor={{ true: '$primary' }}

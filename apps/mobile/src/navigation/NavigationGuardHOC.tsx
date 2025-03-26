@@ -1,7 +1,6 @@
 import { useRouter, useSegments } from 'expo-router'
 import React, { useEffect, useState } from 'react'
 import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
-import { useNavigation } from '@react-navigation/native'
 import { selectSettings } from '@/src/store/settingsSlice'
 import { selectActiveSafe } from '@/src/store/activeSafeSlice'
 import { selectAppNotificationStatus, updatePromptAttempts, selectPromptAttempts } from '@/src/store/notificationsSlice'
@@ -14,7 +13,6 @@ function useInitialNavigationScreen() {
   const activeSafe = useAppSelector(selectActiveSafe)
   const promptAttempts = useAppSelector(selectPromptAttempts)
   const dispatch = useAppDispatch()
-  const navigation = useNavigation()
   const router = useRouter()
   const segments = useSegments()
 
@@ -23,7 +21,6 @@ function useInitialNavigationScreen() {
    * show him the opt-in screen, but only if he is in a navigator that has (tabs) as the first screen
    * */
   const [hasShownNotifications, setHasShownNotifications] = useState(false)
-  const [hasBiometricsShown, setHasBiometricsShown] = useState(false)
   const shouldShowOptIn = !isAppNotificationEnabled && !promptAttempts && segments[0] === '(tabs)'
 
   useEffect(() => {
@@ -35,25 +32,6 @@ function useInitialNavigationScreen() {
       }, 500)
     }
   }, [shouldShowOptIn, hasShownNotifications, dispatch])
-
-  useEffect(() => {
-    const unsubscribe = navigation.addListener('state', () => {
-      const state = navigation.getState()
-      const isNotificationsScreenInStack =
-        state?.routes?.some((route) => route.name === 'notifications-opt-in') ?? false
-
-      if (hasShownNotifications && !isNotificationsScreenInStack && !hasBiometricsShown) {
-        setHasBiometricsShown(true)
-        setTimeout(() => {
-          router.navigate('/biometrics-opt-in')
-        }, 500)
-      }
-    })
-
-    return () => {
-      unsubscribe()
-    }
-  }, [hasShownNotifications, hasBiometricsShown, navigation])
 
   React.useEffect(() => {
     // We will navigate only on startup. Any other navigation should not happen here
