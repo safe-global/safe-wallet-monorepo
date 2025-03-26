@@ -79,11 +79,14 @@ export const ConfirmTxDetails = (props: SignOrExecuteProps) => {
   const showHashes = wallet ? isHardwareWallet(wallet) || isLedgerLive(wallet) : false
   const steps = showHashes ? HardwareWalletStep : InfoSteps
 
-  const handleCheckboxChange = useCallback(({ target: { checked } }: React.ChangeEvent<HTMLInputElement>) => {
-    trackEvent({ ...MODALS_EVENTS.CONFIRM_SIGN_CHECKBOX, label: checked })
-    setCheckboxAccepted(checked)
-    setCheckboxAcceptedNow(true)
-  }, [setCheckboxAccepted])
+  const handleCheckboxChange = useCallback(
+    ({ target: { checked } }: React.ChangeEvent<HTMLInputElement>) => {
+      trackEvent({ ...MODALS_EVENTS.CONFIRM_SIGN_CHECKBOX, label: checked })
+      setCheckboxAccepted(checked)
+      setCheckboxAcceptedNow(true)
+    },
+    [setCheckboxAccepted],
+  )
 
   if (!safeTx) {
     return null
