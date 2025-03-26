@@ -172,7 +172,12 @@ const AddAccounts = () => {
         </Box>
       </Tooltip>
 
-      <ModalDialog open={open} fullScreen hideChainIndicator PaperProps={{ sx: { backgroundColor: '#f4f4f4' } }}>
+      <ModalDialog
+        open={open}
+        fullScreen
+        hideChainIndicator
+        PaperProps={{ sx: { backgroundColor: 'border.background' } }}
+      >
         <DialogContent sx={{ display: 'flex', alignItems: 'center' }}>
           <Container fixed maxWidth="sm" disableGutters>
             <Typography component="div" variant="h1" mb={1}>
