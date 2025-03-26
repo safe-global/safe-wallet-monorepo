@@ -1,13 +1,15 @@
-import { useMemo } from 'react'
-import { type Balances, useBalancesGetBalancesV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
+import { useEffect, useMemo } from 'react'
+import { type Balances } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
+import { getBalances } from '@safe-global/safe-gateway-typescript-sdk'
 import { useAppSelector } from '@/store'
-import { type AsyncResult } from '../useAsync'
+import useAsync, { type AsyncResult } from '../useAsync'
 import { selectCurrency, selectSettings, TOKEN_LISTS } from '@/store/settingsSlice'
 import { useCurrentChain } from '../useChains'
 import { FEATURES, hasFeature } from '@/utils/chains'
 import useSafeInfo from '../useSafeInfo'
 import { POLLING_INTERVAL } from '@/config/constants'
 import { useCounterfactualBalances } from '@/features/counterfactual/useCounterfactualBalances'
+import useIntervalCounter from '../useIntervalCounter'
 
 export const useTokenListSetting = (): boolean | undefined => {
   const chain = useCurrentChain()
@@ -25,38 +27,36 @@ const useLoadBalances = () => {
   const currency = useAppSelector(selectCurrency)
   const isTrustedTokenList = useTokenListSetting()
   const { safe, safeAddress } = useSafeInfo()
+  const { chainId } = safe
   const isReady = safeAddress && safe.deployed && isTrustedTokenList !== undefined
   const isCounterfactual = !safe.deployed
+  const [count, resetPolling] = useIntervalCounter(POLLING_INTERVAL)
 
-  let {
-    data: balances,
-    isLoading: loading,
-    error: errorStr,
-  } = useBalancesGetBalancesV1Query(
-    {
-      chainId: safe.chainId,
-      safeAddress,
-      fiatCode: currency,
-      trusted: isTrustedTokenList,
+  let [data, error, loading] = useAsync<Balances>(
+    () => {
+      if (!isReady) return
+      return getBalances(chainId, safeAddress, currency, { trusted: isTrustedTokenList }) as Promise<Balances>
     },
-    {
-      skip: !isReady,
-      pollingInterval: POLLING_INTERVAL,
-    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [safeAddress, chainId, currency, isTrustedTokenList, isReady, count],
+    false, // don't clear data between polls
   )
+
+  // Reset the counter when safe address/chainId changes
+  useEffect(() => {
+    resetPolling()
+  }, [resetPolling, safeAddress, chainId])
 
   // Counterfactual balances
   const [cfData, cfError, cfLoading] = useCounterfactualBalances(safe)
 
-  let error = useMemo(() => (errorStr ? new Error(errorStr.toString()) : undefined), [errorStr])
-
   if (isCounterfactual) {
-    balances = cfData as unknown as Balances
+    data = cfData as unknown as Balances
     loading = cfLoading
     error = cfError
   }
 
-  return useMemo(() => [balances, error, loading], [balances, error, loading]) as AsyncResult<Balances>
+  return useMemo(() => [data, error, loading], [data, error, loading]) as AsyncResult<Balances>
 }
 
 export default useLoadBalances
