@@ -184,6 +184,7 @@ const TxDetails = ({
     { chainId, txId: txSummary.id },
     {
       pollingInterval: isOpenSwapOrder(txSummary.txInfo) ? POLLING_INTERVAL : undefined,
+      skipPollingIfUnfocused: true,
     },
   )
 
