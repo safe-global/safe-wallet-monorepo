@@ -5,6 +5,7 @@ import { Pressable } from 'react-native'
 import { Skeleton } from 'moti/skeleton'
 import { type SettingsSection } from './AppSettings.types'
 import { IconName } from '@/src/types/iconTypes'
+import { ScreenHeader } from '@/src/components/ScreenHeader'
 
 interface AppSettingsProps {
   sections: SettingsSection[]
@@ -13,16 +14,16 @@ interface AppSettingsProps {
 export const AppSettings = ({ sections }: AppSettingsProps) => {
   return (
     <Theme name={'settings'}>
+      <ScreenHeader paddingHorizontal={'$4'} sectionTitle="Settings" />
       <ScrollView
         style={{
-          marginTop: -20,
           paddingTop: 0,
         }}
         contentContainerStyle={{
-          marginTop: -15,
+          marginTop: 10,
         }}
       >
-        <YStack flex={1} padding="$2" paddingTop={'$10'}>
+        <YStack flex={1} paddingHorizontal="$3">
           <Skeleton.Group show={false}>
             <YStack space="$4">
               {sections.map((section, sectionIndex) => (

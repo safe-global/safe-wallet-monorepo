@@ -1,28 +1,40 @@
 import React from 'react'
+import { Text, View } from 'tamagui'
 import { AppSettings } from './AppSettings'
+import { useTheme } from '@/src/theme/provider/safeTheme'
 import { SafeFontIcon as Icon } from '@/src/components/SafeFontIcon/SafeFontIcon'
 import { router } from 'expo-router'
 import { FloatingMenu } from '../FloatingMenu'
+import { LoadableSwitch } from '@/src/components/LoadableSwitch'
+import { useBiometrics } from '@/src/hooks/useBiometrics'
+import { capitalize } from '@/src/utils/formatters'
+import { Linking } from 'react-native'
 
 export const AppSettingsContainer = () => {
+  const { enableBiometrics, isBiometricsEnabled, isLoading } = useBiometrics()
+  const { themePreference, setThemePreference } = useTheme()
   const settingsSections = [
     {
       sectionName: 'Preferences',
       items: [
         {
           label: 'Currency',
-          leftIcon: 'bell',
-          onPress: () => router.push('/currency-selector'),
+          leftIcon: 'token',
+          onPress: () => console.log('currency'),
           disabled: true,
         },
         {
           label: 'Appearance',
-          leftIcon: 'address-book',
-          onPress: () => router.push('/address-book'),
-          disabled: true,
+          leftIcon: 'appearance',
+          onPress: () => console.log('appearance'),
+          disabled: false,
           rightNode: (
             <FloatingMenu
-              onPressAction={() => {}}
+              themeVariant={themePreference}
+              onPressAction={({ nativeEvent }) => {
+                const mode = nativeEvent.event as 'auto' | 'dark' | 'light'
+                setThemePreference(mode)
+              }}
               actions={[
                 {
                   id: 'auto',
@@ -38,7 +50,10 @@ export const AppSettingsContainer = () => {
                 },
               ]}
             >
-              <Icon name={'chevron-right'} />
+              <View flexDirection="row" alignItems="center" gap={4}>
+                <Text color="$colorSecondary">{capitalize(themePreference)}</Text>
+                <Icon name={'chevron-right'} />
+              </View>
             </FloatingMenu>
           ),
         },
@@ -49,14 +64,23 @@ export const AppSettingsContainer = () => {
       items: [
         {
           label: 'Face ID',
-          leftIcon: 'bell',
-          onPress: () => router.push('/notifications-settings'),
-          disabled: true,
+          leftIcon: 'appearance',
+          rightNode: (
+            <LoadableSwitch
+              testID="toggle-app-biometrics"
+              onChange={enableBiometrics}
+              value={isBiometricsEnabled}
+              isLoading={isLoading}
+              trackColor={{ true: '$primary' }}
+            />
+          ),
+          disabled: false,
         },
         {
           label: 'Change passcode',
-          leftIcon: 'address-book',
-          onPress: () => router.push('/address-book'),
+          leftIcon: 'lock',
+
+          onPress: () => console.log('change passcode'),
           disabled: true,
         },
       ],
@@ -68,7 +92,7 @@ export const AppSettingsContainer = () => {
           label: 'Address book',
           leftIcon: 'address-book',
           onPress: () => router.push('/address-book'),
-          disabled: true,
+          disabled: false,
         },
       ],
     },
@@ -77,27 +101,27 @@ export const AppSettingsContainer = () => {
       items: [
         {
           label: 'Rate us',
-          leftIcon: 'star',
-          onPress: () => router.push('/rate-us'),
-          disabled: true,
+          leftIcon: 'token',
+          onPress: () => console.log('rate us'),
+          disabled: false,
         },
         {
           label: 'Follow us on X',
-          leftIcon: 'star',
-          onPress: () => router.push('/rate-us'),
-          disabled: true,
+          leftIcon: 'sign',
+          onPress: () => Linking.openURL('https://x.com/safe?s=21'),
+          disabled: false,
         },
         {
           label: 'Leave feedback',
-          leftIcon: 'star',
-          onPress: () => router.push('/follow-us'),
-          disabled: true,
+          leftIcon: 'chat',
+          onPress: () => console.log('leave feedback'),
+          disabled: false,
         },
         {
           label: 'Help center',
-          leftIcon: 'share',
-          onPress: () => router.push('/leave-feedback'),
-          disabled: true,
+          leftIcon: 'question',
+          onPress: () => Linking.openURL('https://help.safe.global/en/'),
+          disabled: false,
         },
       ],
     },

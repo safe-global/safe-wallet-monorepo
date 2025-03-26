@@ -4,7 +4,7 @@ export interface SettingsItem {
   label: string
   leftIcon: string
   rightNode?: ReactNode
-  onPress: () => void
+  onPress?: () => void
   disabled?: boolean
 }
 
