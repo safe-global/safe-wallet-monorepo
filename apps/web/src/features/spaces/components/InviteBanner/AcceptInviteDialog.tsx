@@ -39,22 +39,23 @@ function AcceptInviteDialog({ space, onClose }: { space: GetSpaceResponse; onClo
       setIsSubmitting(true)
       const response = await acceptInvite({ spaceId: space.id, acceptInviteDto: { name: data.name } })
 
-      if (response.data) {
-        router.push({ pathname: AppRoutes.spaces.index, query: { spaceId: space.id } })
-        onClose()
-
-        dispatch(
-          showNotification({
-            message: `Accepted invite to ${space.name}`,
-            variant: 'success',
-            groupKey: 'accept-invite-success',
-          }),
-        )
-      }
-
       if (response.error) {
-        setError('Failed accepting the invite. Please try again.')
+        throw response.error
       }
+
+      if (router.pathname === AppRoutes.welcome.spaces) {
+        router.push({ pathname: AppRoutes.spaces.index, query: { spaceId: space.id } })
+      }
+
+      onClose()
+
+      dispatch(
+        showNotification({
+          message: `Accepted invite to ${space.name}`,
+          variant: 'success',
+          groupKey: 'accept-invite-success',
+        }),
+      )
     } catch (e) {
       setError('Failed accepting the invite. Please try again.')
     } finally {
