@@ -2,7 +2,7 @@ import { Button, Box, Stack } from '@mui/material'
 import type { Member } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import PlusIcon from '@/public/images/common/plus.svg'
 import { useState } from 'react'
-import AddMembersModal from '../AddMembersModal'
+import AddMemberModal from '../AddMemberModal'
 import MemberName from '../MembersList/MemberName'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import Track from '@/components/common/Track'
@@ -30,7 +30,7 @@ const DashboardMembersList = ({ members }: { members: Member[] }) => {
           </Track>
         </Box>
       )}
-      {openAddMembersModal && <AddMembersModal onClose={() => setOpenAddMembersModal(false)} />}
+      {openAddMembersModal && <AddMemberModal onClose={() => setOpenAddMembersModal(false)} />}
     </>
   )
 }

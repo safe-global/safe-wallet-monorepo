@@ -3,8 +3,6 @@ import { useRouter } from 'next/router'
 import { type ReactElement, useState } from 'react'
 import { Alert, Box, Button, CircularProgress, DialogActions, DialogContent, SvgIcon, Typography } from '@mui/material'
 import { FormProvider, useForm } from 'react-hook-form'
-import MUILink from '@mui/material/Link'
-import Link from 'next/link'
 import SpaceIcon from '@/public/images/spaces/space.svg'
 import ModalDialog from '@/components/common/ModalDialog'
 import NameInput from '@/components/common/NameInput'
@@ -13,6 +11,7 @@ import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { showNotification } from '@/store/notificationsSlice'
 import { useAppDispatch } from '@/store'
+import ExternalLink from '@/components/common/ExternalLink'
 
 function SpaceCreationModal({ onClose }: { onClose: () => void }): ReactElement {
   const [error, setError] = useState<string>()
@@ -75,10 +74,7 @@ function SpaceCreationModal({ onClose }: { onClose: () => void }): ReactElement 
               <NameInput data-testid="name-input" label="Name" autoFocus name="name" required />
             </Box>
             <Typography variant="body2" color="text.secondary">
-              How is my data processed? Read our{' '}
-              <Link href={AppRoutes.privacy} passHref legacyBehavior>
-                <MUILink>privacy policy</MUILink>
-              </Link>
+              How is my data processed? Read our <ExternalLink href={AppRoutes.privacy}>privacy policy</ExternalLink>
             </Typography>
 
             {error && (

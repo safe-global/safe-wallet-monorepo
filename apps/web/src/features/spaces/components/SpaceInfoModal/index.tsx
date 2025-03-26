@@ -20,6 +20,7 @@ import { AppRoutes } from '@/config/routes'
 import Link from 'next/link'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
+import ExternalLink from '@/components/common/ExternalLink'
 
 const ListIcon = () => (
   <ListItemIcon
@@ -43,6 +44,8 @@ const ListIcon = () => (
     <SvgIcon component={CheckIcon} inheritViewBox fontSize="small" sx={{ width: '12px', height: '12px' }} />
   </ListItemIcon>
 )
+
+const SPACE_HELP_ARTICLE_LINK = 'https://help.safe.global/en/articles/285386-spaces'
 
 const SpaceInfoModal = ({
   showButtons = true,
@@ -92,6 +95,10 @@ const SpaceInfoModal = ({
                 Aggregated balances and actions across multiple accounts are coming soon!
               </ListItem>
             </List>
+
+            <Typography mt={1}>
+              Read the <ExternalLink href={SPACE_HELP_ARTICLE_LINK}>Spaces help article</ExternalLink>
+            </Typography>
 
             {showButtons && (
               <Stack gap={2} mt={{ xs: 3, md: 'auto' }}>

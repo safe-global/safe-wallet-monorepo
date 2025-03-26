@@ -17,7 +17,7 @@ const NewFeaturesCard = () => {
           New exciting features
         </Typography>
         <Typography variant="body2" color="text.secondary">
-          Aggregated balances, viewing transactions across accounts and more is coming soon. Stay tuned for updates!
+          Address book sharing, viewing transactions across accounts and more is coming soon. Stay tuned for updates!
         </Typography>
       </Box>
     </Paper>

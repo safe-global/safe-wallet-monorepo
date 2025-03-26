@@ -1,6 +1,6 @@
 import PlusIcon from '@/public/images/common/plus.svg'
 import { Button, InputAdornment, Stack, SvgIcon, TextField, Typography } from '@mui/material'
-import AddMembersModal from '@/features/spaces/components/AddMembersModal'
+import AddMemberModal from 'src/features/spaces/components/AddMemberModal'
 import { useCallback, useEffect, useState } from 'react'
 import MembersList from '@/features/spaces/components/MembersList'
 import SearchIcon from '@/public/images/common/search.svg'
@@ -96,7 +96,7 @@ const SpaceMembers = () => {
         )}
       </>
 
-      {openAddMembersModal && <AddMembersModal onClose={() => setOpenAddMembersModal(false)} />}
+      {openAddMembersModal && <AddMemberModal onClose={() => setOpenAddMembersModal(false)} />}
     </>
   )
 }

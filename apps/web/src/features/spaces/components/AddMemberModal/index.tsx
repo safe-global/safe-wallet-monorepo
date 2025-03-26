@@ -6,13 +6,11 @@ import {
   CircularProgress,
   DialogActions,
   DialogContent,
-  MenuItem,
-  Select,
   Stack,
   SvgIcon,
   Typography,
 } from '@mui/material'
-import { FormProvider, useForm, Controller } from 'react-hook-form'
+import { FormProvider, useForm } from 'react-hook-form'
 import ModalDialog from '@/components/common/ModalDialog'
 import memberIcon from '@/public/images/spaces/member.svg'
 import adminIcon from '@/public/images/spaces/admin.svg'
@@ -21,7 +19,6 @@ import CheckIcon from '@mui/icons-material/Check'
 import css from './styles.module.css'
 import { useMembersInviteUserV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useCurrentSpaceId } from 'src/features/spaces/hooks/useCurrentSpaceId'
-import NameInput from '@/components/common/NameInput'
 import { useRouter } from 'next/router'
 import { AppRoutes } from '@/config/routes'
 import { MemberRole } from '@/features/spaces/hooks/useSpaceMembers'
@@ -29,6 +26,7 @@ import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { useAppDispatch } from '@/store'
 import { showNotification } from '@/store/notificationsSlice'
+import MemberInfoForm from '@/features/spaces/components/AddMemberModal/MemberInfoForm'
 
 type MemberField = {
   name: string
@@ -71,7 +69,7 @@ export const RoleMenuItem = ({
   )
 }
 
-const AddMembersModal = ({ onClose }: { onClose: () => void }): ReactElement => {
+const AddMemberModal = ({ onClose }: { onClose: () => void }): ReactElement => {
   const spaceId = useCurrentSpaceId()
   const router = useRouter()
   const dispatch = useAppDispatch()
@@ -88,7 +86,7 @@ const AddMembersModal = ({ onClose }: { onClose: () => void }): ReactElement => 
     },
   })
 
-  const { handleSubmit, formState, control } = methods
+  const { handleSubmit, formState } = methods
 
   const onSubmit = handleSubmit(async (data) => {
     setError(undefined)
@@ -144,32 +142,7 @@ const AddMembersModal = ({ onClose }: { onClose: () => void }): ReactElement => 
             </Typography>
 
             <Stack spacing={3}>
-              <Stack direction="row" spacing={2} alignItems="center">
-                <NameInput name="name" label="Name" required />
-
-                <Controller
-                  control={control}
-                  name="role"
-                  defaultValue={MemberRole.MEMBER}
-                  render={({ field: { value, onChange, ...field } }) => (
-                    <Select
-                      {...field}
-                      value={value}
-                      onChange={onChange}
-                      required
-                      sx={{ minWidth: '150px', py: 0.5 }}
-                      renderValue={(role) => <RoleMenuItem role={role as MemberRole} />}
-                    >
-                      <MenuItem value={MemberRole.ADMIN}>
-                        <RoleMenuItem role={MemberRole.ADMIN} hasDescription selected={value === MemberRole.ADMIN} />
-                      </MenuItem>
-                      <MenuItem value={MemberRole.MEMBER}>
-                        <RoleMenuItem role={MemberRole.MEMBER} hasDescription selected={value === MemberRole.MEMBER} />
-                      </MenuItem>
-                    </Select>
-                  )}
-                />
-              </Stack>
+              <MemberInfoForm />
 
               <AddressInput name="address" label="Address" required showPrefix={false} />
             </Stack>
@@ -195,4 +168,4 @@ const AddMembersModal = ({ onClose }: { onClose: () => void }): ReactElement => 
   )
 }
 
-export default AddMembersModal
+export default AddMemberModal

@@ -2,11 +2,16 @@ import AddAccounts from '@/features/spaces/components/AddAccounts'
 import Image from 'next/image'
 import { Typography, Paper, Box, Stack } from '@mui/material'
 import EmptyDashboard from '@/public/images/spaces/empty_dashboard.png'
+import EmptyDashboardDark from '@/public/images/spaces/empty_dashboard_dark.png'
+
 import css from './styles.module.css'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import Track from '@/components/common/Track'
+import { useDarkMode } from '@/hooks/useDarkMode'
 
 const AddAccountsCard = () => {
+  const isDarkMode = useDarkMode()
+
   return (
     <Paper sx={{ p: 3, display: 'flex', gap: 3 }}>
       <Stack direction={{ xs: 'column-reverse', md: 'row' }} alignItems="center" spacing={3}>
@@ -28,7 +33,7 @@ const AddAccountsCard = () => {
         <Box>
           <Image
             className={css.image}
-            src={EmptyDashboard}
+            src={isDarkMode ? EmptyDashboardDark : EmptyDashboard}
             alt="Illustration of two safes with their thresholds"
             width={375}
             height={200}

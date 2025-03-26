@@ -1,10 +1,14 @@
 import ChainIndicator from '@/components/common/ChainIndicator'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import { ChainIcon } from '@/components/common/SafeIcon'
-import { isMultiChainSafeItem, isSafeItem } from '@/features/multichain/utils/utils'
+import { isMultiChainSafeItem } from '@/features/multichain/utils/utils'
 import { MultichainIndicator } from '@/features/myAccounts/components/AccountItems/MultiAccountItem'
 import type { SafeItem } from '@/features/myAccounts/hooks/useAllSafes'
-import type { AllSafeItems, MultiChainSafeItem } from '@/features/myAccounts/hooks/useAllSafesGrouped'
+import {
+  type AllSafeItems,
+  flattenSafeItems,
+  type MultiChainSafeItem,
+} from '@/features/myAccounts/hooks/useAllSafesGrouped'
 import type { AddAccountsFormValues } from '@/features/spaces/components/AddAccounts/index'
 import css from '@/features/spaces/components/AddAccounts/styles.module.css'
 import { useChain } from '@/hooks/useChains'
@@ -59,8 +63,8 @@ function getMultiChainSafeId(mcSafe: MultiChainSafeItem) {
 const SafesList = ({ safes }: { safes: AllSafeItems }) => {
   const { watch, setValue, control } = useFormContext<AddAccountsFormValues>()
   const { allSafes: spaceSafes } = useSpaceSafes()
+  const flatSafeItems = flattenSafeItems(spaceSafes)
   const multiChainSpaceSafes = spaceSafes.filter(isMultiChainSafeItem)
-  const safeItemSpaceSafes = spaceSafes.filter(isSafeItem)
 
   return (
     <List
@@ -118,15 +122,8 @@ const SafesList = ({ safes }: { safes: AllSafeItems }) => {
                 <List disablePadding>
                   {safe.safes.map((subSafe) => {
                     const subSafeId = getSafeId(subSafe)
-                    const alreadyAdded = spaceSafes.some((spaceSafe) => {
-                      if (isMultiChainSafeItem(spaceSafe)) {
-                        return spaceSafe.safes.some(
-                          (subSpaceSafe) =>
-                            subSpaceSafe.chainId === subSafe.chainId && subSpaceSafe.address === subSafe.address,
-                        )
-                      } else {
-                        return spaceSafe.chainId === subSafe.chainId && spaceSafe.address === subSafe.address
-                      }
+                    const alreadyAdded = flatSafeItems.some((spaceSafe) => {
+                      return spaceSafe.chainId === subSafe.chainId && spaceSafe.address === subSafe.address
                     })
 
                     return (
@@ -165,7 +162,7 @@ const SafesList = ({ safes }: { safes: AllSafeItems }) => {
         }
 
         const safeId = getSafeId(safe)
-        const alreadyAdded = safeItemSpaceSafes.some(
+        const alreadyAdded = flatSafeItems.some(
           (spaceSafe) => spaceSafe.address === safe.address && spaceSafe.chainId === safe.chainId,
         )
 

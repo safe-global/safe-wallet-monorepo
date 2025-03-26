@@ -9,6 +9,7 @@ import { useSpaceSafeCount } from '@/features/spaces/hooks/useSpaceSafeCount'
 import InitialsAvatar from '@/features/spaces/components/InitialsAvatar'
 import SpaceContextMenu from '@/features/spaces/components/SpaceCard/SpaceContextMenu'
 import { useIsAdmin } from '@/features/spaces/hooks/useSpaceMembers'
+import { maybePlural } from '@/utils/formatters'
 
 export const SpaceSummary = ({
   name,
@@ -29,13 +30,13 @@ export const SpaceSummary = ({
 
       <Stack direction="row" spacing={1} alignItems="center" mt={isCompact ? 0 : 0.5}>
         <Typography variant="caption" color="text.secondary">
-          {numberOfAccounts} Accounts
+          {numberOfAccounts} Account{maybePlural(numberOfAccounts)}
         </Typography>
 
         <div className={css.dot} />
 
         <Typography variant="caption" color="text.secondary">
-          {numberOfMembers} Members
+          {numberOfMembers} Member{maybePlural(numberOfMembers)}
         </Typography>
       </Stack>
     </Box>

@@ -6,8 +6,6 @@ import { useRouter } from 'next/router'
 import { type ReactElement, useState } from 'react'
 import { Alert, Box, Button, CircularProgress, DialogActions, DialogContent, Typography } from '@mui/material'
 import { FormProvider, useForm } from 'react-hook-form'
-import MUILink from '@mui/material/Link'
-import Link from 'next/link'
 import ModalDialog from '@/components/common/ModalDialog'
 import NameInput from '@/components/common/NameInput'
 import { AppRoutes } from '@/config/routes'
@@ -17,6 +15,7 @@ import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_G
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { trackEvent } from '@/services/analytics'
 import { showNotification } from '@/store/notificationsSlice'
+import ExternalLink from '@/components/common/ExternalLink'
 
 function AcceptInviteDialog({ space, onClose }: { space: GetSpaceResponse; onClose: () => void }): ReactElement {
   const [error, setError] = useState<string>()
@@ -57,8 +56,7 @@ function AcceptInviteDialog({ space, onClose }: { space: GetSpaceResponse; onClo
         setError('Failed accepting the invite. Please try again.')
       }
     } catch (e) {
-      // TODO: Handle this error case
-      console.log(e)
+      setError('Failed accepting the invite. Please try again.')
     } finally {
       setIsSubmitting(false)
     }
@@ -73,10 +71,7 @@ function AcceptInviteDialog({ space, onClose }: { space: GetSpaceResponse; onClo
               <NameInput data-testid="name-input" label="Name" autoFocus name="name" required />
             </Box>
             <Typography variant="body2" color="text.secondary">
-              How is my data processed? Read our{' '}
-              <Link href={AppRoutes.privacy} passHref legacyBehavior>
-                <MUILink>privacy policy</MUILink>
-              </Link>
+              How is my data processed? Read our <ExternalLink href={AppRoutes.privacy}>privacy policy</ExternalLink>
             </Typography>
 
             {error && (

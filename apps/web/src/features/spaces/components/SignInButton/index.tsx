@@ -4,6 +4,9 @@ import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import { useSiwe } from '@/services/siwe/useSiwe'
 import { useAppDispatch } from '@/store'
 import { setAuthenticated } from '@/store/authSlice'
+import { showNotification } from '@/store/notificationsSlice'
+import { logError } from '@/services/exceptions'
+import ErrorCodes from '@/services/exceptions/ErrorCodes'
 
 const SignInButton = () => {
   const dispatch = useAppDispatch()
@@ -19,14 +22,22 @@ const SignInButton = () => {
     try {
       const result = await signIn()
 
-      // Sign in succeeded
-      if (result) {
-        const oneDayInMs = 24 * 60 * 60 * 1000
-        dispatch(setAuthenticated({ sessionExpiresAt: Date.now() + oneDayInMs }))
+      if (result && result.error) {
+        throw result.error
       }
+
+      const oneDayInMs = 24 * 60 * 60 * 1000
+      dispatch(setAuthenticated({ sessionExpiresAt: Date.now() + oneDayInMs }))
     } catch (error) {
-      // TODO: handle error
-      console.log(error)
+      logError(ErrorCodes._640)
+
+      dispatch(
+        showNotification({
+          message: `Something went wrong while trying to sign in`,
+          variant: 'error',
+          groupKey: 'sign-in-failed',
+        }),
+      )
     }
   }
 

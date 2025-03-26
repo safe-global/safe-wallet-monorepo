@@ -9,7 +9,11 @@ import { useSpaceSafesCreateV1Mutation } from '@safe-global/store/gateway/AUTO_G
 
 import debounce from 'lodash/debounce'
 import css from './styles.module.css'
-import { type AllSafeItems, useOwnedSafesGrouped } from '@/features/myAccounts/hooks/useAllSafesGrouped'
+import {
+  type AllSafeItems,
+  flattenSafeItems,
+  useOwnedSafesGrouped,
+} from '@/features/myAccounts/hooks/useAllSafesGrouped'
 import { getComparator } from '@/features/myAccounts/utils/utils'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { selectOrderByPreference } from '@/store/orderByPreferenceSlice'
@@ -34,29 +38,22 @@ import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import Track from '@/components/common/Track'
 import { useIsAdmin } from '@/features/spaces/hooks/useSpaceMembers'
 import { useSpaceSafes } from '@/features/spaces/hooks/useSpaceSafes'
-import { isMultiChainSafeItem } from '@/features/multichain/utils/utils'
 import { showNotification } from '@/store/notificationsSlice'
 
 export type AddAccountsFormValues = {
   selectedSafes: Record<string, boolean>
 }
 
-// TODO: Refactor this and combine logic with whats in SafesList
 function getSelectedSafes(safes: AddAccountsFormValues['selectedSafes'], spaceSafes: AllSafeItems) {
+  const flatSafeItems = flattenSafeItems(spaceSafes)
+
   return Object.entries(safes).filter(
     ([key, isSelected]) =>
       isSelected &&
       !key.startsWith('multichain_') &&
-      !spaceSafes.some((spaceSafe) => {
+      !flatSafeItems.some((spaceSafe) => {
         const [chainId, address] = key.split(':')
-
-        if (isMultiChainSafeItem(spaceSafe)) {
-          return spaceSafe.safes.some(
-            (subSpaceSafe) => subSpaceSafe.address === address && subSpaceSafe.chainId === chainId,
-          )
-        } else {
-          return spaceSafe.address === address && spaceSafe.chainId === chainId
-        }
+        return spaceSafe.address === address && spaceSafe.chainId === chainId
       }),
   )
 }

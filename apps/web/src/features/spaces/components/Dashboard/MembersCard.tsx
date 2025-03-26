@@ -3,7 +3,7 @@ import MemberIcon from '@/public/images/spaces/member.svg'
 import { Typography, Paper, Box, Button, SvgIcon, Tooltip } from '@mui/material'
 import { useState } from 'react'
 import { useIsAdmin } from '@/features/spaces/hooks/useSpaceMembers'
-import AddMembersModal from '../AddMembersModal'
+import AddMemberModal from '../AddMemberModal'
 import { SPACE_LABELS } from '@/services/analytics/events/spaces'
 import Track from '@/components/common/Track'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
@@ -50,7 +50,7 @@ const MembersCard = () => {
           </Typography>
         </Box>
       </Paper>
-      {openAddMembersModal && <AddMembersModal onClose={() => setOpenAddMembersModal(false)} />}
+      {openAddMembersModal && <AddMemberModal onClose={() => setOpenAddMembersModal(false)} />}
     </>
   )
 }
