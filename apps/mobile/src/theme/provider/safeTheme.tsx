@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useState, useCallback, useEffect } from 'react'
-import { StatusBar, useColorScheme, Appearance } from 'react-native'
+import React, { createContext, useContext, useState, useMemo } from 'react'
+import { StatusBar, useColorScheme } from 'react-native'
 import { ThemeProvider } from '@react-navigation/native'
 import { TamaguiProvider } from '@tamagui/core'
 
@@ -35,45 +35,36 @@ export const SafeThemeProvider = ({ children }: SafeThemeProviderProps) => {
   const systemColorScheme = useColorScheme()
   const [themePreference, setThemePreference] = useState<ThemePreference>('auto')
 
-  useEffect(() => {
-    if (themePreference === 'auto') {
-      const subscription = Appearance.addChangeListener(({ colorScheme }) => {
-        if (colorScheme) {
-          setThemePreference('auto')
-        }
-      })
+  // Use useMemo to compute the current theme instead of state
+  const currentTheme = useMemo(() => {
+    return themePreference === 'auto' ? systemColorScheme || 'dark' : themePreference
+  }, [themePreference, systemColorScheme])
 
-      return () => {
-        subscription.remove()
-      }
-    }
-  }, [themePreference])
+  // Memoize the theme provider to prevent unnecessary re-renders
+  const themeProvider = useMemo(() => {
+    return isStorybookEnv ? (
+      <View
+        backgroundColor={currentTheme === 'dark' ? NavDarkTheme.colors.background : NavLightTheme.colors.background}
+        style={{ flex: 1 }}
+      >
+        {children}
+      </View>
+    ) : (
+      <ThemeProvider value={currentTheme === 'dark' ? NavDarkTheme : NavLightTheme}>{children}</ThemeProvider>
+    )
+  }, [currentTheme, children])
 
-  const currentTheme = themePreference === 'auto' ? systemColorScheme || 'dark' : themePreference
-
-  const handleThemeChange = useCallback((newTheme: ThemePreference) => {
-    setThemePreference(newTheme)
-  }, [])
-
-  const themeProvider = isStorybookEnv ? (
-    <View
-      backgroundColor={currentTheme === 'dark' ? NavDarkTheme.colors.background : NavLightTheme.colors.background}
-      style={{ flex: 1 }}
-    >
-      {children}
-    </View>
-  ) : (
-    <ThemeProvider value={currentTheme === 'dark' ? NavDarkTheme : NavLightTheme}>{children}</ThemeProvider>
+  const contextValue = useMemo(
+    () => ({
+      themePreference,
+      setThemePreference,
+      currentTheme,
+    }),
+    [themePreference, currentTheme],
   )
 
   return (
-    <ThemeContext.Provider
-      value={{
-        themePreference,
-        setThemePreference: handleThemeChange,
-        currentTheme,
-      }}
-    >
+    <ThemeContext.Provider value={contextValue}>
       <FontProvider>
         <StatusBar
           animated={true}
