@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { KeyboardAvoidingView, StyleSheet } from 'react-native'
 import { Button, View, YStack, ScrollView } from 'tamagui'
 import { useScrollableHeader } from '@/src/navigation/useScrollableHeader'
@@ -6,6 +6,8 @@ import { NavBarTitle } from '@/src/components/Title'
 import { SectionTitle } from '@/src/components/Title'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { SafeButton } from '@/src/components/SafeButton'
+import { router } from 'expo-router'
+import { useBiometrics } from '@/src/hooks/useBiometrics'
 
 import { SafeInput } from '@/src/components/SafeInput'
 import { useImportPrivateKey } from './hooks/useImportPrivateKey'
@@ -19,6 +21,15 @@ export function ImportPrivateKey() {
   const { handleScroll } = useScrollableHeader({
     children: <NavBarTitle paddingRight={5}>Import a private key</NavBarTitle>,
   })
+  const { isBiometricsEnabled } = useBiometrics()
+
+  useEffect(() => {
+    return () => {
+      if (isBiometricsEnabled) {
+        router.replace('/import-signers')
+      }
+    }
+  }, [isBiometricsEnabled])
 
   return (
     <KeyboardAvoidingView behavior="padding" style={styles.flex1} keyboardVerticalOffset={top + CUSTOM_VERTICAL_OFFSET}>
