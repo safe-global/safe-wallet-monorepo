@@ -8,7 +8,6 @@ type Props = {
   textProps?: Partial<TextProps>
 }
 export const ContactName = ({ name, address, textProps }: Props) => {
-  console.log('name', name, textProps)
   return name ? (
     <View>
       <Text fontWeight={500} {...textProps}>
