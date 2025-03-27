@@ -26,7 +26,6 @@ export const AppSettingsContainer = () => {
         {
           label: 'Appearance',
           leftIcon: 'appearance',
-          onPress: () => console.log('appearance'),
           disabled: false,
           rightNode: (
             <FloatingMenu
