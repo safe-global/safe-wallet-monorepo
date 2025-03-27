@@ -17,7 +17,7 @@ type SafeOverviewQueueItem = {
 }
 
 const _BATCH_SIZE = 10
-const _FETCH_TIMEOUT = 50
+const _FETCH_TIMEOUT = 300
 
 class SafeOverviewFetcher {
   private requestQueue: SafeOverviewQueueItem[] = []
