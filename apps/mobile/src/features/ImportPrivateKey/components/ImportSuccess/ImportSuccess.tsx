@@ -29,10 +29,7 @@ export function ImportSuccess() {
 
   const handleContinuePress = async () => {
     await updatePermissions()
-    // Go to top of the navigator stack
     router.dismissAll()
-    // now close it
-    router.back()
   }
 
   return (
