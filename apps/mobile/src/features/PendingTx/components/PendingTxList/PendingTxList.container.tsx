@@ -34,7 +34,12 @@ export function PendingTxListContainer({
     children: (
       <>
         <NavBarTitle paddingRight={5}>Pending transactions</NavBarTitle>
-        <Badge content={`${amount}${hasMore ? '+' : ''}`} circleSize={'$6'} fontSize={10} />
+        <Badge
+          content={`${amount}${hasMore ? '+' : ''}`}
+          circleSize={'$6'}
+          fontSize={10}
+          themeName="badge_warning_variant2"
+        />
       </>
     ),
   })
