@@ -57,6 +57,7 @@ describe('Transaction details create tests', { defaultCommandTimeout: 30000 }, (
         swaps.selectInputCurrency(swaps.swapTokens.cow)
         swaps.setInputValue(600)
         swaps.selectOutputCurrency(swaps.swapTokens.dai)
+        swaps.confirmPriceImpact()
         swaps.clickOnReviewOrderBtn()
         swaps.placeTwapOrder()
       })

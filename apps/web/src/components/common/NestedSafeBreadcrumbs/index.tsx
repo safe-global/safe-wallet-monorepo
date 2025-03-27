@@ -22,7 +22,7 @@ export function NestedSafeBreadcrumbs(): ReactElement | null {
   }
 
   return (
-    <div className={css.container}>
+    <div className={css.container} data-testid="safe-breadcrumb-container">
       <BreadcrumbItem
         title="Parent Safe"
         address={parentSafe.address.value}

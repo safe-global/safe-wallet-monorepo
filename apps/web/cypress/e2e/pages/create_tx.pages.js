@@ -79,7 +79,6 @@ const txStack = '[data-testid="tx-stack"]'
 const txOperation = '[data-testid="tx-operation"]'
 const nonceFld = '[data-testid="nonce-fld"]'
 const txHexDataRow = '[data-testid="tx-hexData"]'
-
 const viewTransactionBtn = 'View transaction'
 const transactionDetailsTitle = 'Transaction details'
 const QueueLabel = 'needs to be executed first'
@@ -128,6 +127,7 @@ export const recordedTxNote = 'Tx note one'
 
 export const tx_status = {
   execution_needed: 'Execution needed',
+  execute: 'Execute',
 }
 export const filterTypes = {
   incoming: 'Incoming',
@@ -740,8 +740,6 @@ export function clickOnContinueSignTransactionBtn() {
 export function clickOnAcknowledgement() {
   cy.contains(txAcknowledgementStr).click()
 }
-
-txAcknowledgementStr
 
 export function clickOnConfirmTransactionBtn() {
   cy.get('button').contains(confirmBtnStr).click()
