@@ -18,6 +18,7 @@ const setupFetchStub = (data: any) => () => {
     json: () => Promise.resolve(data),
     status: 200,
     ok: true,
+    headers: new Headers(),
   })
 }
 

@@ -62,7 +62,7 @@ export const useBlockaidReportScan = (requestId?: string) => {
   return useCallback(
     (isAccepted: boolean) => {
       if (!requestId) return
-      BlockaidModuleInstance.reportScanStatus(requestId, isAccepted)
+      return BlockaidModuleInstance.reportScanStatus(requestId, isAccepted)
     },
     [requestId],
   )
