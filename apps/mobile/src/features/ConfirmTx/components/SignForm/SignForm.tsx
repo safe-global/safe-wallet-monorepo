@@ -4,17 +4,16 @@ import { Text, View, YStack } from 'tamagui'
 import { SafeButton } from '@/src/components/SafeButton'
 import { Identicon } from '@/src/components/Identicon'
 import { Address } from '@/src/types/address'
-import { EthAddress } from '@/src/components/EthAddress'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { router } from 'expo-router'
+import { Contact } from '@/src/features/AddressBook'
 
 export interface SignFormProps {
   address: Address
-  name?: string
   txId: string
 }
 
-export function SignForm({ address, name, txId }: SignFormProps) {
+export function SignForm({ address, txId }: SignFormProps) {
   const onSignPress = () => {
     router.push({ pathname: '/sign-transaction', params: { txId, signerAddress: address } })
   }
@@ -32,7 +31,7 @@ export function SignForm({ address, name, txId }: SignFormProps) {
 
         <Identicon address={address} size={24} />
 
-        {name ? <Text fontWeight={500}>{name}</Text> : <EthAddress address={address} />}
+        <Contact address={address} />
 
         <SafeFontIcon name="chevron-right" />
       </View>
