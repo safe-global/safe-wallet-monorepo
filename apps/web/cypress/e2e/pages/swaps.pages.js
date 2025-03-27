@@ -37,6 +37,8 @@ const limitOrderExpiryItem = (item) => `div[data-valuetext="${item}"]`
 const tokenBlock = '[data-testid="block-label"]'
 const confirmPriceImpactInput = '[id="confirm-modal-input"]'
 const confirmPriceImpactBtn = '[id="confirm-modal-button"]'
+const tokenBalance = 'div[class*="TokenMetadata"]'
+const tokenItem = 'div[class*="TokenItem"]'
 
 const limitStrBtn = 'Limit'
 const swapStrBtn = 'Swap'
@@ -574,8 +576,8 @@ export function clickOnTokenSelctor(direction) {
 export function checkTokenList(tokens) {
   cy.get(tokenList).within(() => {
     tokens.forEach(({ name, balance }) => {
-      cy.get('span').contains(name).should('exist')
-      cy.get('span').contains(balance).should('exist')
+      cy.get(tokenItem).contains(name).should('exist')
+      cy.get(tokenBalance).contains(balance).should('exist')
     })
   })
 }
