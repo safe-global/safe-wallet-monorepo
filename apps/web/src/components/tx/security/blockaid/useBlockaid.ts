@@ -6,7 +6,7 @@ import { MODALS_EVENTS, trackEvent } from '@/services/analytics'
 import type { SecurityResponse } from '@/services/security/modules/types'
 import { FEATURES } from '@/utils/chains'
 import type { SafeTransaction } from '@safe-global/safe-core-sdk-types'
-import { useEffect, useMemo } from 'react'
+import { useCallback, useEffect, useMemo } from 'react'
 
 import type { EIP712TypedData } from '@safe-global/safe-gateway-typescript-sdk'
 import { BlockaidModule, type BlockaidModuleResponse } from '@/services/security/modules/BlockaidModule'
@@ -56,4 +56,14 @@ export const useBlockaid = (
     [blockaidErrors, blockaidPayload],
   )
   return [blockaidPayload, errorMsg, loading]
+}
+
+export const useBlockaidReportScan = (requestId?: string) => {
+  return useCallback(
+    (isAccepted: boolean) => {
+      if (!requestId) return
+      BlockaidModuleInstance.reportScanStatus(requestId, isAccepted)
+    },
+    [requestId],
+  )
 }

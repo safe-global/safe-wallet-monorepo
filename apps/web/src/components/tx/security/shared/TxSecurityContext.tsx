@@ -8,9 +8,10 @@ import {
   useMemo,
   useState,
   type ReactElement,
+  useEffect,
 } from 'react'
 import type { BlockaidModuleResponse } from '@/services/security/modules/BlockaidModule'
-import { useBlockaid } from '../blockaid/useBlockaid'
+import { useBlockaid, useBlockaidReportScan } from '../blockaid/useBlockaid'
 
 export const defaultSecurityContextValues = {
   blockaidResponse: {
@@ -57,9 +58,23 @@ export const TxSecurityContext = createContext<TxSecurityContextProps>(defaultSe
 export const TxSecurityProvider = ({ children }: { children: ReactElement }) => {
   const { safeTx, safeMessage, txOrigin } = useContext(SafeTxContext)
   const [blockaidResponse, blockaidError, blockaidLoading] = useBlockaid(safeTx ?? safeMessage, txOrigin)
+  const reportScan = useBlockaidReportScan(blockaidResponse?.payload?.requestId)
+  const needsRiskConfirmation = !!blockaidResponse && blockaidResponse.severity >= SecuritySeverity.HIGH
 
   const [isRiskConfirmed, setIsRiskConfirmed] = useState(false)
   const [isRiskIgnored, setIsRiskIgnored] = useState(false)
+
+  // Report scan status when risk is confirmed or ignored
+  useEffect(() => {
+    // Risk is accepted, meaning the user rejected the warning
+    if (needsRiskConfirmation && isRiskConfirmed) reportScan(false)
+
+    // The context is unmounted = the user closed the tx
+    return () => {
+      // Tx abandoned likely due to warning
+      if (needsRiskConfirmation && !isRiskConfirmed) reportScan(true)
+    }
+  }, [isRiskConfirmed, needsRiskConfirmation, reportScan])
 
   const providedValue = useMemo(
     () => ({

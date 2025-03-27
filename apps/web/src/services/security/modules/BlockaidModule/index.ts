@@ -43,6 +43,7 @@ export type BlockaidModuleResponse = {
   balanceChange: AssetDiff[]
   contractManagement: Array<ProxyUpgradeManagement | OwnershipChangeManagement | ModulesChangeManagement>
   error: Error | undefined
+  requestId: string
 }
 
 type BlockaidPayload = {
@@ -60,6 +61,22 @@ type BlockaidPayload = {
     params: [string, string]
   }
   options: ['simulation', 'validation']
+}
+
+const postJson = async <T>(url: string, payload: T) => {
+  if (!BLOCKAID_CLIENT_ID) {
+    throw new Error('Security check CLIENT_ID not configured')
+  }
+
+  return fetch(`${BLOCKAID_API}${url}`, {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      accept: 'application/json',
+      'X-CLIENT-ID': BLOCKAID_CLIENT_ID,
+    },
+    body: JSON.stringify(payload),
+  })
 }
 
 export class BlockaidModule implements SecurityModule<BlockaidModuleRequest, BlockaidModuleResponse> {
@@ -85,10 +102,6 @@ export class BlockaidModule implements SecurityModule<BlockaidModuleRequest, Blo
     }
   }
   async scanTransaction(request: BlockaidModuleRequest): Promise<SecurityResponse<BlockaidModuleResponse>> {
-    if (!BLOCKAID_CLIENT_ID) {
-      throw new Error('Security check CLIENT_ID not configured')
-    }
-
     const { chainId, safeAddress, walletAddress } = request
     const message = BlockaidModule.prepareMessage(request)
 
@@ -108,15 +121,7 @@ export class BlockaidModule implements SecurityModule<BlockaidModuleRequest, Blo
             non_dapp: true,
           },
     }
-    const res = await fetch(`${BLOCKAID_API}/v0/evm/json-rpc/scan`, {
-      method: 'POST',
-      headers: {
-        'content-type': 'application/json',
-        accept: 'application/json',
-        'X-CLIENT-ID': BLOCKAID_CLIENT_ID,
-      },
-      body: JSON.stringify(payload),
-    })
+    const res = await postJson(`/v0/evm/json-rpc/scan`, payload)
 
     if (!res.ok) {
       throw new Error('Blockaid scan failed', await res.json())
@@ -159,7 +164,19 @@ export class BlockaidModule implements SecurityModule<BlockaidModuleRequest, Blo
         balanceChange,
         contractManagement,
         error,
+        requestId: res.headers.get('x-request-id') ?? '',
       },
     }
+  }
+
+  async reportScanStatus(requestId: string, isAccepted: boolean) {
+    const res = await postJson('/v0/scan/status/', {
+      status: isAccepted ? 'accepted' : 'rejected',
+      request_id: requestId,
+    })
+    if (!res.ok) {
+      throw new Error('Blockaid report failed', await res.json())
+    }
+    return res.json()
   }
 }
