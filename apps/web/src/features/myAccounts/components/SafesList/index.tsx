@@ -1,15 +1,12 @@
 import SingleAccountItem from '@/features/myAccounts/components/AccountItems/SingleAccountItem'
 import type { SafeItem } from '@/features/myAccounts/hooks/useAllSafes'
-import type { MultiChainSafeItem } from '@/features/myAccounts/hooks/useAllSafesGrouped'
+import type { AllSafeItems, MultiChainSafeItem } from '@/features/myAccounts/hooks/useAllSafesGrouped'
 import MultiAccountItem from '@/features/myAccounts/components/AccountItems/MultiAccountItem'
 import { isMultiChainSafeItem } from '@/features/multichain/utils/utils'
-import { TransitionGroup } from 'react-transition-group'
-import { Collapse } from '@mui/material'
 
 type SafeListProps = {
-  safes?: (SafeItem | MultiChainSafeItem)[]
+  safes?: AllSafeItems
   onLinkClick?: () => void
-  useTransitions?: boolean
 }
 
 const renderSafeItem = (item: SafeItem | MultiChainSafeItem, onLinkClick?: () => void) => {
@@ -20,26 +17,12 @@ const renderSafeItem = (item: SafeItem | MultiChainSafeItem, onLinkClick?: () =>
   )
 }
 
-const SafesList = ({ safes, onLinkClick, useTransitions = true }: SafeListProps) => {
+const SafesList = ({ safes, onLinkClick }: SafeListProps) => {
   if (!safes || safes.length === 0) {
     return null
   }
 
-  return useTransitions ? (
-    <TransitionGroup>
-      {safes.map((item) => (
-        <Collapse key={item.address} timeout="auto">
-          {renderSafeItem(item, onLinkClick)}
-        </Collapse>
-      ))}
-    </TransitionGroup>
-  ) : (
-    <>
-      {safes.map((item) => (
-        <div key={item.address}>{renderSafeItem(item, onLinkClick)}</div>
-      ))}
-    </>
-  )
+  return safes.map((item) => <div key={item.address}>{renderSafeItem(item, onLinkClick)}</div>)
 }
 
 export default SafesList
