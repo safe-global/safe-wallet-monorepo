@@ -5,17 +5,21 @@ import { router } from 'expo-router'
 import { useBiometrics } from '@/src/hooks/useBiometrics'
 
 function BiometricsOptIn() {
-  const { enableBiometrics, getBiometricsButtonLabel, isBiometricsEnabled, isLoading } = useBiometrics()
+  const { toggleBiometrics, getBiometricsButtonLabel, isBiometricsEnabled, isLoading } = useBiometrics()
   const colorScheme = useColorScheme()
 
   useEffect(() => {
     if (isBiometricsEnabled) {
-      router.replace('/(tabs)')
+      router.replace('/import-signers/private-key')
     }
   }, [isBiometricsEnabled])
 
   const handleReject = () => {
     router.back()
+  }
+
+  const handleAccept = () => {
+    toggleBiometrics(true)
   }
 
   const darkImage =
@@ -40,7 +44,7 @@ function BiometricsOptIn() {
       isLoading={isLoading}
       colorScheme={colorScheme}
       ctaButton={{
-        onPress: enableBiometrics,
+        onPress: handleAccept,
         label: getBiometricsButtonLabel(),
       }}
       secondaryButton={{

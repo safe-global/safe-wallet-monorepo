@@ -11,6 +11,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { SafeCard } from '@/src/components/SafeCard'
 import { router } from 'expo-router'
 import { Tag } from '@/src/components/Tag'
+import { useBiometrics } from '@/src/hooks/useBiometrics'
 
 const items = [
   {
@@ -44,8 +45,15 @@ const items = [
 const title = 'Import a signer'
 
 function ImportSignersPage() {
+  const { isBiometricsEnabled } = useBiometrics()
   const { handleScroll } = useScrollableHeader({
     children: <NavBarTitle paddingRight={5}>{title}</NavBarTitle>,
+  })
+
+  items.forEach((item) => {
+    if (!isBiometricsEnabled && item.name === 'seed') {
+      item.onPress = () => router.push('/biometrics-opt-in')
+    }
   })
 
   return (
