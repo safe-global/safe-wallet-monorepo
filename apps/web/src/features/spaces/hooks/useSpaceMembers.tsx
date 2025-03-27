@@ -42,7 +42,7 @@ const useCurrentMembership = (spaceId?: number) => {
 
 export const useIsAdmin = (spaceId?: number) => {
   const currentMembership = useCurrentMembership(spaceId)
-  return currentMembership?.role === MemberRole.ADMIN
+  return currentMembership?.role === MemberRole.ADMIN && currentMembership?.status === MemberStatus.ACTIVE
 }
 
 export const useIsInvited = () => {
