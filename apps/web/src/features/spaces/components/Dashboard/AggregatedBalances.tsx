@@ -7,6 +7,7 @@ import { useAppSelector } from '@/store'
 import { selectCurrency } from '@/store/settingsSlice'
 import { useGetMultipleSafeOverviewsQuery } from '@/store/api/gateway'
 import type { SafeOverview } from '@safe-global/safe-gateway-typescript-sdk'
+import { SafeItem } from '@/features/myAccounts/hooks/useAllSafes'
 
 type FiatTotalByChain = {
   chainId: string
@@ -72,9 +73,8 @@ const AggregatedBalanceByChain = ({ fiatTotalByChain }: { fiatTotalByChain: Fiat
   )
 }
 
-const AggregatedBalance = ({ safes }: { safes: AllSafeItems }) => {
+const AggregatedBalance = ({ safeItems }: { safeItems: SafeItem[] }) => {
   const currency = useAppSelector(selectCurrency)
-  const safeItems = flattenSafeItems(safes)
 
   const { data: safeOverviews, isLoading } = useGetMultipleSafeOverviewsQuery({ safes: safeItems, currency })
   const aggregatedBalance = safeOverviews ? safeOverviews.reduce((prev, next) => prev + Number(next.fiatTotal), 0) : 0

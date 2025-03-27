@@ -19,6 +19,7 @@ import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import Track from '@/components/common/Track'
 import AggregatedBalance from '@/features/spaces/components/Dashboard/AggregatedBalances'
 import useTrackSpace from '@/features/spaces/hooks/useTrackSpace'
+import { flattenSafeItems } from '@/features/myAccounts/hooks/useAllSafesGrouped'
 
 const ViewAllLink = ({ url }: { url: LinkProps['href'] }) => {
   return (
@@ -43,6 +44,7 @@ const DASHBOARD_LIST_DISPLAY_LIMIT = 5
 
 const SpaceDashboard = () => {
   const { allSafes: safes } = useSpaceSafes()
+  const safeItems = flattenSafeItems(safes)
   const spaceId = useCurrentSpaceId()
   const { activeMembers } = useSpaceMembersByStatus()
   const isInvited = useIsInvited()
@@ -55,11 +57,11 @@ const SpaceDashboard = () => {
     <>
       {isInvited && <PreviewInvite />}
 
-      {safes.length > 0 ? (
+      {safeItems.length > 0 ? (
         <>
           <Grid container>
             <Grid size={12}>
-              <AggregatedBalance safes={safes} />
+              <AggregatedBalance safeItems={safeItems} />
             </Grid>
           </Grid>
 
@@ -67,7 +69,7 @@ const SpaceDashboard = () => {
             <Grid size={{ xs: 12, md: 8 }}>
               <Card sx={{ p: 2 }}>
                 <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
-                  <Typography variant="h5">Safe Accounts ({safes.length})</Typography>
+                  <Typography variant="h5">Safe Accounts ({safeItems.length})</Typography>
                   {spaceId && (
                     <Track {...SPACE_EVENTS.VIEW_ALL_ACCOUNTS}>
                       <ViewAllLink url={{ pathname: AppRoutes.spaces.safeAccounts, query: { spaceId } }} />
