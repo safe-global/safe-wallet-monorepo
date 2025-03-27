@@ -107,7 +107,11 @@ const MembersList = ({ members }: { members: Member[] }) => {
             <Stack direction="row" alignItems="center" justifyContent="left" gap={1}>
               <MemberName member={member} />
               {isDeclined && (
-                <Chip label="Declined" size="small" sx={{ backgroundColor: 'error.light', borderRadius: 0.5 }} />
+                <Chip
+                  label="Declined"
+                  size="small"
+                  sx={{ backgroundColor: 'error.light', color: 'static.main', borderRadius: 0.5 }}
+                />
               )}
             </Stack>
           ),
