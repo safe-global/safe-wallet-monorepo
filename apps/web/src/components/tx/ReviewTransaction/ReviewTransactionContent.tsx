@@ -30,6 +30,8 @@ import { Button, CardActions, CircularProgress, Stack } from '@mui/material'
 import BatchButton from '../SignOrExecuteForm/BatchButton'
 import { TxModalContext } from '@/components/tx-flow'
 import CheckWallet from '@/components/common/CheckWallet'
+import TxPolicies from '@/features/policies/components/TxPolicies'
+import useIsPoliciesEnabled from '@/features/policies/hooks/useIsPoliciesEnabled'
 
 export type ReviewTransactionContentProps = {
   txId?: string
@@ -83,6 +85,7 @@ export const ReviewTransactionContent = ({
   const isProposer = useIsWalletProposer()
   const isProposing = isProposer && !isSafeOwner && isCreation
   const isCounterfactualSafe = !safe.deployed
+  const isPoliciesEnabled = useIsPoliciesEnabled()
 
   // Check if a Zodiac Roles mod is enabled and if the user is a member of any role that allows the transaction
   const roles = useRoles(
@@ -169,6 +172,8 @@ export const ReviewTransactionContent = ({
 
         {!isCounterfactualSafe && !props.isRejection && <BlockaidBalanceChanges />}
       </TxCard>
+
+      {isPoliciesEnabled && safeTx && <TxPolicies transaction={safeTx} />}
 
       {!isCounterfactualSafe && !props.isRejection && safeTx && <TxChecks transaction={safeTx} />}
 
