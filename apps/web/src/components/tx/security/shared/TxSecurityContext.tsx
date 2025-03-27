@@ -12,6 +12,7 @@ import {
 } from 'react'
 import type { BlockaidModuleResponse } from '@/services/security/modules/BlockaidModule'
 import { useBlockaid, useBlockaidReportScan } from '../blockaid/useBlockaid'
+import useDebounce from '@/hooks/useDebounce'
 
 export const defaultSecurityContextValues = {
   blockaidResponse: {
@@ -57,7 +58,8 @@ export const TxSecurityContext = createContext<TxSecurityContextProps>(defaultSe
 
 export const TxSecurityProvider = ({ children }: { children: ReactElement }) => {
   const { safeTx, safeMessage, txOrigin } = useContext(SafeTxContext)
-  const [blockaidResponse, blockaidError, blockaidLoading] = useBlockaid(safeTx ?? safeMessage, txOrigin)
+  const txData = useDebounce(safeTx ?? safeMessage, 300)
+  const [blockaidResponse, blockaidError, blockaidLoading] = useBlockaid(txData, txOrigin)
   const reportScan = useBlockaidReportScan(blockaidResponse?.payload?.requestId)
   const needsRiskConfirmation = !!blockaidResponse && blockaidResponse.severity >= SecuritySeverity.HIGH
 

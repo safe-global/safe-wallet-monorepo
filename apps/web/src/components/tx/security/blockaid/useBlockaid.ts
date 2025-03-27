@@ -22,23 +22,29 @@ export const useBlockaid = (
   const { safe, safeAddress } = useSafeInfo()
   const signer = useSigner()
   const isFeatureEnabled = useHasFeature(FEATURES.RISK_MITIGATION)
+  const jsonData = data && JSON.stringify(data)
 
   const [blockaidPayload, blockaidErrors, blockaidLoading] = useAsync<SecurityResponse<BlockaidModuleResponse>>(
     () => {
-      if (!isFeatureEnabled || !data || !signer?.address) {
+      if (!isFeatureEnabled || !jsonData || !signer?.address) {
         return
       }
 
+      let requestData
+      try {
+        requestData = JSON.parse(jsonData)
+      } catch {}
+
       return BlockaidModuleInstance.scanTransaction({
         chainId: Number(safe.chainId),
-        data,
+        data: requestData,
         safeAddress,
         walletAddress: signer.address,
         threshold: safe.threshold,
         origin,
       })
     },
-    [safe.chainId, safe.threshold, safeAddress, data, signer?.address, isFeatureEnabled, origin],
+    [safe.chainId, safe.threshold, safeAddress, jsonData, signer?.address, isFeatureEnabled, origin],
     false,
   )
 
