@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react'
 import { H1, H2, View, XStack } from 'tamagui'
-import { formatCurrency, formatCurrencyPrecise } from '@safe-global/utils/formatNumber'
+import { formatCurrency, formatCurrencyPrecise } from '@safe-global/utils/utils/formatNumber'
 
 interface FiatProps {
   value: string

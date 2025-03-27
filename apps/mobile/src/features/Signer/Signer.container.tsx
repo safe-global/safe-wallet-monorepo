@@ -5,7 +5,7 @@ import { selectContactByAddress, upsertContact } from '@/src/store/addressBookSl
 import React, { useCallback, useEffect, useState } from 'react'
 import { Alert, Linking, TouchableOpacity } from 'react-native'
 import { selectActiveChain } from '@/src/store/chains'
-import { getHashedExplorerUrl } from '@safe-global/utils/gateway'
+import { getHashedExplorerUrl } from '@safe-global/utils/utils/gateway'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { usePreventLeaveScreen } from '@/src/hooks/usePreventLeaveScreen'
 import { SubmitHandler, useForm } from 'react-hook-form'

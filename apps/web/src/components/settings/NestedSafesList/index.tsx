@@ -92,19 +92,21 @@ export function NestedSafesList(): ReactElement | null {
               </Typography>
             )}
 
-            <CheckWallet>
-              {(isOk) => (
-                <Button
-                  onClick={() => setTxFlow(<CreateNestedSafe />)}
-                  variant="text"
-                  startIcon={<SvgIcon component={AddIcon} inheritViewBox fontSize="small" />}
-                  disabled={!isOk}
-                  sx={{ mb: 3 }}
-                >
-                  Add nested Safe
-                </Button>
-              )}
-            </CheckWallet>
+            {safe.deployed && (
+              <CheckWallet>
+                {(isOk) => (
+                  <Button
+                    onClick={() => setTxFlow(<CreateNestedSafe />)}
+                    variant="text"
+                    startIcon={<SvgIcon component={AddIcon} inheritViewBox fontSize="small" />}
+                    disabled={!isOk}
+                    sx={{ mb: 3 }}
+                  >
+                    Add nested Safe
+                  </Button>
+                )}
+              </CheckWallet>
+            )}
 
             {rows && rows.length > 0 && <EnhancedTable rows={rows} headCells={[]} />}
           </Grid2>

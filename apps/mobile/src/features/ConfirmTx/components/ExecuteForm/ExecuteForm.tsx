@@ -2,7 +2,7 @@ import { SafeButton } from '@/src/components/SafeButton'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { selectChainById } from '@/src/store/chains'
 import { useAppSelector } from '@/src/store/hooks'
-import { formatPrefixedAddress } from '@safe-global/utils/addresses'
+import { formatPrefixedAddress } from '@safe-global/utils/utils/addresses'
 import React from 'react'
 import { Anchor, Text, View, YStack } from 'tamagui'
 interface ExecuteFormProps {

@@ -1,11 +1,11 @@
 import { useRouter, useSegments } from 'expo-router'
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
+import { useNavigation } from '@react-navigation/native'
 import { selectSettings } from '@/src/store/settingsSlice'
 import { selectActiveSafe } from '@/src/store/activeSafeSlice'
 import { selectAppNotificationStatus, updatePromptAttempts, selectPromptAttempts } from '@/src/store/notificationsSlice'
 import { ONBOARDING_VERSION } from '@/src/config/constants'
-
 let navigated = false
 
 function useInitialNavigationScreen() {
@@ -14,6 +14,7 @@ function useInitialNavigationScreen() {
   const activeSafe = useAppSelector(selectActiveSafe)
   const promptAttempts = useAppSelector(selectPromptAttempts)
   const dispatch = useAppDispatch()
+  const navigation = useNavigation()
   const router = useRouter()
   const segments = useSegments()
 
@@ -21,18 +22,38 @@ function useInitialNavigationScreen() {
    * If the user has not enabled notifications and has not been prompted to enable them,
    * show him the opt-in screen, but only if he is in a navigator that has (tabs) as the first screen
    * */
+  const [hasShownNotifications, setHasShownNotifications] = useState(false)
+  const [hasBiometricsShown, setHasBiometricsShown] = useState(false)
   const shouldShowOptIn = !isAppNotificationEnabled && !promptAttempts && segments[0] === '(tabs)'
 
   useEffect(() => {
-    if (shouldShowOptIn) {
+    if (shouldShowOptIn && !hasShownNotifications) {
       dispatch(updatePromptAttempts(1))
-      // The user most probably just navigated to the (tabs) screen
-      // wait a bit before showing the popup
+      setHasShownNotifications(true)
       setTimeout(() => {
         router.navigate('/notifications-opt-in')
       }, 500)
     }
-  }, [shouldShowOptIn])
+  }, [shouldShowOptIn, hasShownNotifications, dispatch])
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('state', () => {
+      const state = navigation.getState()
+      const isNotificationsScreenInStack =
+        state?.routes?.some((route) => route.name === 'notifications-opt-in') ?? false
+
+      if (hasShownNotifications && !isNotificationsScreenInStack && !hasBiometricsShown) {
+        setHasBiometricsShown(true)
+        setTimeout(() => {
+          router.navigate('/biometrics-opt-in')
+        }, 500)
+      }
+    })
+
+    return () => {
+      unsubscribe()
+    }
+  }, [hasShownNotifications, hasBiometricsShown, navigation])
 
   React.useEffect(() => {
     // We will navigate only on startup. Any other navigation should not happen here

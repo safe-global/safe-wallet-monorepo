@@ -7,7 +7,7 @@ import { Text, View } from 'tamagui'
 import { Address } from '@/src/types/address'
 import { Identicon } from '@/src/components/Identicon'
 import { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
-import { shortenAddress } from '@safe-global/utils/formatters'
+import { shortenAddress } from '@safe-global/utils/utils/formatters'
 export const formatSendNFTItems = (txInfo: TransferTransactionInfo, chain: Chain) => {
   return [
     {

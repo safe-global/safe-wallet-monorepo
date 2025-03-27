@@ -1,24 +1,23 @@
-import React from 'react'
-import { Avatar, Text, Theme, View } from 'tamagui'
+import { Transaction, TwapOrderTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { SafeListItem } from '@/src/components/SafeListItem'
+import { Avatar, Text, Theme, View } from 'tamagui'
 import { formatValue } from '@/src/utils/formatters'
-import { OrderTransactionInfo } from '@safe-global/store/gateway/types'
-import { Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import React from 'react'
 
-interface TxSwapCardProps {
-  txInfo: OrderTransactionInfo
+interface TxTwappOrderCardProps {
+  order: TwapOrderTransactionInfo
   bordered?: boolean
   inQueue?: boolean
   executionInfo?: Transaction['executionInfo']
   onPress: () => void
 }
 
-export function TxSwapCard({ txInfo, bordered, executionInfo, inQueue, onPress }: TxSwapCardProps) {
+export const TwapOrder = ({ order, bordered, executionInfo, inQueue, onPress }: TxTwappOrderCardProps) => {
   return (
     <SafeListItem
-      label={`${txInfo.sellToken.symbol} > ${txInfo.buyToken.symbol}`}
+      label={`${order.sellToken.symbol} > ${order.buyToken.symbol}`}
       icon="transaction-swap"
-      type="Swap order"
+      type="Twap order"
       executionInfo={executionInfo}
       bordered={bordered}
       onPress={onPress}
@@ -27,22 +26,22 @@ export function TxSwapCard({ txInfo, bordered, executionInfo, inQueue, onPress }
         <Theme name="logo">
           <View position="relative" width="$10" height="$10">
             <Avatar circular size="$7" position="absolute" top={0}>
-              {txInfo.sellToken.logoUri && (
+              {order.sellToken.logoUri && (
                 <Avatar.Image
                   backgroundColor="$background"
-                  accessibilityLabel={txInfo.sellToken.name}
-                  src={txInfo.sellToken.logoUri}
+                  accessibilityLabel={order.sellToken.name}
+                  src={order.sellToken.logoUri}
                 />
               )}
               <Avatar.Fallback backgroundColor="$background" />
             </Avatar>
 
             <Avatar circular size="$7" position="absolute" bottom={0} right={0} backgroundColor="$color">
-              {txInfo.buyToken.logoUri && (
+              {order.buyToken.logoUri && (
                 <Avatar.Image
-                  accessibilityLabel={txInfo.buyToken.name}
+                  accessibilityLabel={order.buyToken.name}
                   backgroundColor="$background"
-                  src={txInfo.buyToken.logoUri}
+                  src={order.buyToken.logoUri}
                 />
               )}
               <Avatar.Fallback backgroundColor="$background" />
@@ -53,10 +52,10 @@ export function TxSwapCard({ txInfo, bordered, executionInfo, inQueue, onPress }
       rightNode={
         <View alignItems="flex-end">
           <Text color="$primary">
-            +{formatValue(txInfo.buyAmount, txInfo.buyToken.decimals)} {txInfo.buyToken.symbol}
+            +{formatValue(order.buyAmount, order.buyToken.decimals)} {order.buyToken.symbol}
           </Text>
           <Text fontSize="$3">
-            −{formatValue(txInfo.sellAmount, txInfo.sellToken.decimals)} {txInfo.sellToken.symbol}
+            −{formatValue(order.sellAmount, order.sellToken.decimals)} {order.sellToken.symbol}
           </Text>
         </View>
       }

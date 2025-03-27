@@ -3,7 +3,7 @@ import { useAppSelector } from '@/src/store/hooks'
 import { formatValue } from '@/src/utils/formatters'
 import { isERC20Transfer, isERC721Transfer, isNativeTokenTransfer } from '@/src/utils/transaction-guards'
 import { TransferTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { ellipsis } from '@safe-global/utils/formatters'
+import { ellipsis } from '@safe-global/utils/utils/formatters'
 
 interface tokenDetails {
   value: string

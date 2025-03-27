@@ -1,6 +1,6 @@
 import NumberField from '@/components/common/NumberField'
 import { AutocompleteItem } from '@/components/tx-flow/flows/TokenTransfer/CreateTokenTransfer'
-import { safeFormatUnits } from '@/utils/formatters'
+import { safeFormatUnits, safeParseUnits } from '@/utils/formatters'
 import { validateDecimalLength, validateLimitedAmount } from '@/utils/validation'
 import { Button, Divider, FormControl, InputLabel, MenuItem, TextField } from '@mui/material'
 import { type SafeBalanceResponse } from '@safe-global/safe-gateway-typescript-sdk'
@@ -71,11 +71,12 @@ const TokenAmountInput = ({
 
       // Validate the total amount of the selected token in the multi transfer
       const recipients = getValues(MultiTokenTransferFields.recipients)
-      const sumAmount = recipients.reduce<number>(
-        (acc, item) => acc + (sameAddress(item.tokenAddress, tokenAddress) && !!item.amount ? Number(item.amount) : 0),
-        0,
-      )
-      return validateLimitedAmount(sumAmount.toString(), decimals, maxAmountString, InsufficientFundsValidationError)
+      const sumAmount = recipients.reduce<bigint>((acc, item) => {
+        const value = safeParseUnits(item.amount || '0', decimals) || 0n
+        return acc + (sameAddress(item.tokenAddress, tokenAddress) ? value : 0n)
+      }, 0n)
+
+      return validateLimitedAmount(sumAmount.toString(), 0, maxAmountString, InsufficientFundsValidationError)
     },
     [maxAmount, selectedToken?.tokenInfo.decimals, getValues, tokenAddress],
   )

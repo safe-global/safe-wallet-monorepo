@@ -10,7 +10,7 @@ import { SafeOverviewResult } from '@safe-global/store/gateway/types'
 import { makeSafeId } from '@/src/utils/formatters'
 import { POLLING_INTERVAL } from '@/src/config/constants'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
-import { formatCurrency, formatCurrencyPrecise } from '@safe-global/utils/formatNumber'
+import { formatCurrency, formatCurrencyPrecise } from '@safe-global/utils/utils/formatNumber'
 import { shouldDisplayPreciseBalance } from '@/src/utils/balance'
 
 export const NetworksSheetContainer = () => {
