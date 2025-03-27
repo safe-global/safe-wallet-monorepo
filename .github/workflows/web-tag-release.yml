@@ -39,9 +39,9 @@ jobs:
           name: ${{ steps.version.outputs.version }}
           tag_name: ${{ steps.version.outputs.version }}
           body: |
+            ${{ github.event.pull_request.body }}
+
             [🔗 IPFS release](
             https://github.com/5afe/safe-wallet-ipfs/releases/tag/${{ steps.version.outputs.version }})
-
-            ${{ github.event.pull_request.body }}
         env:
           GITHUB_TOKEN: ${{ github.token }}
