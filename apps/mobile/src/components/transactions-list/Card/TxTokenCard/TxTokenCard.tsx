@@ -7,7 +7,7 @@ import { TransferDirection } from '@safe-global/store/gateway/types'
 import { TransferTransactionInfo, Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { Logo } from '@/src/components/Logo'
 import { useTokenDetails } from '@/src/hooks/useTokenDetails'
-
+import { TokenAmount } from '@/src/components/TokenAmount'
 interface TxTokenCardProps {
   bordered?: boolean
   txStatus: Transaction['txStatus']
@@ -21,15 +21,16 @@ export function TxTokenCard({ bordered, inQueue, txStatus, executionInfo, txInfo
   const isSendTx = isOutgoingTransfer(txInfo)
   const icon = isSendTx ? 'transaction-outgoing' : 'transaction-incoming'
   const type = isSendTx ? (isTxQueued(txStatus) ? 'Send' : 'Sent') : 'Received'
-  const { logoUri, name, value, tokenSymbol } = useTokenDetails(txInfo)
+  const { logoUri, name, value, tokenSymbol, decimals } = useTokenDetails(txInfo)
   const isERC721 = isERC721Transfer(txInfo.transferInfo)
   const isOutgoing = txInfo.direction === TransferDirection.OUTGOING
 
+  console.log('is send tx', isSendTx, value, decimals)
   return (
     <SafeListItem
       inQueue={inQueue}
       executionInfo={executionInfo}
-      label={name}
+      label={inQueue ? <TokenAmount value={value} decimals={decimals} tokenSymbol={tokenSymbol} preciseAmount /> : name}
       icon={icon}
       type={type}
       onPress={onPress}
