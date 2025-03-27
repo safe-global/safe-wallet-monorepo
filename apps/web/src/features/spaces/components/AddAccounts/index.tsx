@@ -58,6 +58,8 @@ function getSelectedSafes(safes: AddAccountsFormValues['selectedSafes'], spaceSa
   )
 }
 
+const SAFE_ACCOUNTS_LIMIT = 10
+
 const AddAccounts = () => {
   const isAdmin = useIsAdmin()
   const [open, setOpen] = useState<boolean>(false)
@@ -108,8 +110,8 @@ const AddAccounts = () => {
       })
 
       if (result.error) {
-        // TODO: Add error handler and display more specific error
-        setError('Something went wrong adding one or more Safe Accounts')
+        // @ts-ignore
+        setError(result.error?.data?.message || 'Something went wrong adding one or more Safe Accounts.')
         return
       }
 
@@ -181,7 +183,8 @@ const AddAccounts = () => {
               Add Safe Accounts
             </Typography>
             <Typography mb={2}>
-              You can add Safe Account which you are a signer of, or add any read-only account.
+              You can add Safe Account which you are a signer of, or add any read-only account. This is currently
+              limited to {SAFE_ACCOUNTS_LIMIT} Accounts.
             </Typography>
             <Card>
               <FormProvider {...formMethods}>

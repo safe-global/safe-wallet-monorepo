@@ -2,12 +2,11 @@ import { useChain } from '@/hooks/useChains'
 import { Card, Grid2, Skeleton, Stack, Typography } from '@mui/material'
 import css from '@/features/spaces/components/Dashboard/styles.module.css'
 import FiatValue from '@/components/common/FiatValue'
-import { type AllSafeItems, flattenSafeItems } from '@/features/myAccounts/hooks/useAllSafesGrouped'
 import { useAppSelector } from '@/store'
 import { selectCurrency } from '@/store/settingsSlice'
 import { useGetMultipleSafeOverviewsQuery } from '@/store/api/gateway'
 import type { SafeOverview } from '@safe-global/safe-gateway-typescript-sdk'
-import { SafeItem } from '@/features/myAccounts/hooks/useAllSafes'
+import type { SafeItem } from '@/features/myAccounts/hooks/useAllSafes'
 
 type FiatTotalByChain = {
   chainId: string
