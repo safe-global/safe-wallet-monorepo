@@ -2,7 +2,6 @@ import React from 'react'
 import { Text, View } from 'tamagui'
 import { SafeListItem } from '@/src/components/SafeListItem'
 import { isERC721Transfer, isOutgoingTransfer, isTxQueued } from '@/src/utils/transaction-guards'
-import { ellipsis } from '@/src/utils/formatters'
 import { TransferDirection } from '@safe-global/store/gateway/types'
 import { TransferTransactionInfo, Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { Logo } from '@/src/components/Logo'
@@ -25,7 +24,6 @@ export function TxTokenCard({ bordered, inQueue, txStatus, executionInfo, txInfo
   const isERC721 = isERC721Transfer(txInfo.transferInfo)
   const isOutgoing = txInfo.direction === TransferDirection.OUTGOING
 
-  console.log('is send tx', isSendTx, value, decimals)
   return (
     <SafeListItem
       inQueue={inQueue}
@@ -38,8 +36,16 @@ export function TxTokenCard({ bordered, inQueue, txStatus, executionInfo, txInfo
       leftNode={<Logo logoUri={logoUri} accessibilityLabel={name} />}
       rightNode={
         <View maxWidth="34%">
-          <Text color={isOutgoing ? '$color' : '$primary'} textAlign="right">
-            {isOutgoing ? '-' : '+'} {ellipsis(value, 8)} {!isERC721 && tokenSymbol}
+          <Text>
+            <TokenAmount
+              value={value}
+              decimals={decimals}
+              tokenSymbol={!isERC721 ? tokenSymbol : ''}
+              direction={txInfo.direction}
+              preciseAmount
+              displayPositiveSign
+              textProps={{ color: isOutgoing ? '$color' : '$primary', textAlign: 'right', fontWeight: 400 }}
+            />
           </Text>
         </View>
       }
