@@ -85,6 +85,7 @@ const SpaceSafeContextMenu = ({ safeItem }: { safeItem: SafeItem | MultiChainSaf
           handleClose={handleCloseModal}
           defaultValues={{ name: name || '', address: safeItem.address }}
           chainIds={chainIds}
+          currentChainId={isMultiChainSafeItem(safeItem) ? undefined : chainIds[0]}
           disableAddressInput
         />
       )}

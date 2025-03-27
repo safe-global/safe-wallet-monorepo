@@ -11,12 +11,13 @@ import InitialsAvatar from '@/features/spaces/components/InitialsAvatar'
 import { BreadcrumbItem } from '@/components/common/Breadcrumbs/BreadcrumbItem'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useParentSafe } from '@/hooks/useParentSafe'
+import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
 
 const SpaceBreadcrumbs = () => {
-  const { query, pathname } = useRouter()
-  const spaceId = Array.isArray(query.spaceId) ? query.spaceId[0] : query.spaceId
+  const { pathname } = useRouter()
+  const spaceId = useCurrentSpaceId()
   const isUserSignedIn = useAppSelector(isAuthenticated)
-  const { currentData: space } = useSpacesGetOneV1Query({ id: Number(spaceId) }, { skip: !isUserSignedIn })
+  const { currentData: space } = useSpacesGetOneV1Query({ id: Number(spaceId) }, { skip: !isUserSignedIn || !spaceId })
   const { safeAddress } = useSafeInfo()
   const parentSafe = useParentSafe()
   const isSpaceRoute = pathname.startsWith(AppRoutes.spaces.index)

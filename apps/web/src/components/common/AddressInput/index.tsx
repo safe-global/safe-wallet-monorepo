@@ -143,7 +143,7 @@ const AddressInput = ({
           className: addressBook[watchedValue] ? css.readOnly : undefined,
 
           startAdornment: addressBook[watchedValue] ? (
-            <AddressInputReadOnly address={watchedValue} />
+            <AddressInputReadOnly address={watchedValue} showPrefix={showPrefix} chainId={chain?.chainId} />
           ) : (
             // Display the current short name in the adornment, unless the value contains the same prefix
             <InputAdornment position="end" sx={{ ml: 0 }}>

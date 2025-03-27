@@ -6,7 +6,7 @@
 }
 
 .sendButton svg path {
-    fill: var(--color-primary-main);
+    fill: var(--color-text-primary);
 }
 
 .sendButton:global(.Mui-disabled) {

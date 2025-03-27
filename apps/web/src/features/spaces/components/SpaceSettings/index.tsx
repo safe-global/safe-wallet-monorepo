@@ -18,7 +18,7 @@ const SpaceSettings = () => {
   const isAdmin = useIsAdmin()
   const spaceId = useCurrentSpaceId()
   const isUserSignedIn = useAppSelector(isAuthenticated)
-  const { currentData: space } = useSpacesGetOneV1Query({ id: Number(spaceId) }, { skip: !isUserSignedIn })
+  const { currentData: space } = useSpacesGetOneV1Query({ id: Number(spaceId) }, { skip: !isUserSignedIn || !spaceId })
   const isInvited = useIsInvited()
 
   return (
