@@ -10,6 +10,7 @@ import { useCallback, useEffect, useMemo } from 'react'
 
 import type { EIP712TypedData } from '@safe-global/safe-gateway-typescript-sdk'
 import { BlockaidModule, type BlockaidModuleResponse } from '@/services/security/modules/BlockaidModule'
+import { Errors, logError } from '@/services/exceptions'
 
 const BlockaidModuleInstance = new BlockaidModule()
 
@@ -33,16 +34,21 @@ export const useBlockaid = (
       let requestData
       try {
         requestData = JSON.parse(jsonData)
-      } catch {}
+      } catch { }
 
-      return BlockaidModuleInstance.scanTransaction({
-        chainId: Number(safe.chainId),
-        data: requestData,
-        safeAddress,
-        walletAddress: signer.address,
-        threshold: safe.threshold,
-        origin,
-      })
+      try {
+        return BlockaidModuleInstance.scanTransaction({
+          chainId: Number(safe.chainId),
+          data: requestData,
+          safeAddress,
+          walletAddress: signer.address,
+          threshold: safe.threshold,
+          origin,
+        })
+      } catch (e) {
+        logError(Errors._819, e)
+        throw e
+      }
     },
     [safe.chainId, safe.threshold, safeAddress, jsonData, signer?.address, isFeatureEnabled, origin],
     false,
@@ -68,7 +74,11 @@ export const useBlockaidReportScan = (requestId?: string) => {
   return useCallback(
     (isAccepted: boolean) => {
       if (!requestId) return
-      return BlockaidModuleInstance.reportScanStatus(requestId, isAccepted)
+      try {
+        return BlockaidModuleInstance.reportScanStatus(requestId, isAccepted)
+      } catch (e) {
+        logError(Errors._820, e)
+      }
     },
     [requestId],
   )
