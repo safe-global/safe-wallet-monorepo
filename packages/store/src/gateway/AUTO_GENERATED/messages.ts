@@ -68,41 +68,66 @@ export type MessagesUpdateMessageSignatureV1ApiArg = {
   messageHash: string
   updateMessageSignatureDto: UpdateMessageSignatureDto
 }
+export type TypedDataDomain = {
+  chainId?: number
+  name?: string
+  salt?: string
+  verifyingContract?: string
+  version?: string
+}
+export type TypedDataParameter = {
+  name: string
+  type: string
+}
+export type TypedData = {
+  domain: TypedDataDomain
+  primaryType: string
+  types: {
+    [key: string]: TypedDataParameter[]
+  }
+  message: {
+    [key: string]: any
+  }
+}
 export type AddressInfo = {
   value: string
   name?: string | null
   logoUri?: string | null
 }
+export type MessageConfirmation = {
+  owner: AddressInfo
+  signature: string
+}
 export type Message = {
   messageHash: string
-  status: string
+  status: 'NEEDS_CONFIRMATION' | 'CONFIRMED'
   logoUri?: string | null
   name?: string | null
-  message: object
+  message: string | TypedData
   creationTimestamp: number
   modifiedTimestamp: number
   confirmationsSubmitted: number
   confirmationsRequired: number
   proposedBy: AddressInfo
-  confirmations: string[]
+  confirmations: MessageConfirmation[]
   preparedSignature?: string | null
   origin?: string | null
 }
 export type MessageItem = {
   messageHash: string
-  status: string
+  status: 'NEEDS_CONFIRMATION' | 'CONFIRMED'
   logoUri?: string | null
   name?: string | null
-  message: object
+  message: string | TypedData
   creationTimestamp: number
   modifiedTimestamp: number
   confirmationsSubmitted: number
   confirmationsRequired: number
   proposedBy: AddressInfo
-  confirmations: string[]
+  confirmations: MessageConfirmation[]
   preparedSignature?: string | null
   origin?: string | null
-  type: string
+  type: 'MESSAGE'
 }
 export type DateLabel = {
   type: 'DATE_LABEL'
@@ -115,7 +140,7 @@ export type MessagePage = {
   results: (MessageItem | DateLabel)[]
 }
 export type CreateMessageDto = {
-  message: object
+  message: string | TypedData
   safeAppId?: number | null
   signature: string
   origin?: string | null

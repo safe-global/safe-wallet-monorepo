@@ -363,24 +363,63 @@ export type DataDecoded = {
   method: string
   parameters?: DataDecodedParameter[] | null
 }
-export type SettingsChange = {
-  type:
-    | 'ADD_OWNER'
-    | 'CHANGE_MASTER_COPY'
-    | 'CHANGE_THRESHOLD'
-    | 'DELETE_GUARD'
-    | 'DISABLE_MODULE'
-    | 'ENABLE_MODULE'
-    | 'REMOVE_OWNER'
-    | 'SET_FALLBACK_HANDLER'
-    | 'SET_GUARD'
-    | 'SWAP_OWNER'
+export type AddOwner = {
+  type: 'ADD_OWNER'
+  owner: AddressInfo
+  threshold: number
+}
+export type ChangeMasterCopy = {
+  type: 'CHANGE_MASTER_COPY'
+  implementation: AddressInfo
+}
+export type ChangeThreshold = {
+  type: 'CHANGE_THRESHOLD'
+  threshold: number
+}
+export type DeleteGuard = {
+  type: 'DELETE_GUARD'
+}
+export type DisableModule = {
+  type: 'DISABLE_MODULE'
+  module: AddressInfo
+}
+export type EnableModule = {
+  type: 'ENABLE_MODULE'
+  module: AddressInfo
+}
+export type RemoveOwner = {
+  type: 'REMOVE_OWNER'
+  owner: AddressInfo
+  threshold: number
+}
+export type SetFallbackHandler = {
+  type: 'SET_FALLBACK_HANDLER'
+  handler: AddressInfo
+}
+export type SetGuard = {
+  type: 'SET_GUARD'
+  guard: AddressInfo
+}
+export type SwapOwner = {
+  type: 'SWAP_OWNER'
+  oldOwner: AddressInfo
+  newOwner: AddressInfo
 }
 export type SettingsChangeTransaction = {
   type: 'SettingsChange'
   humanDescription?: string | null
   dataDecoded: DataDecoded
-  settingsInfo?: SettingsChange | null
+  settingsInfo:
+    | AddOwner
+    | ChangeMasterCopy
+    | ChangeThreshold
+    | DeleteGuard
+    | DisableModule
+    | EnableModule
+    | RemoveOwner
+    | SetFallbackHandler
+    | SetGuard
+    | SwapOwner
 }
 export type Erc20Transfer = {
   type: 'ERC20'
@@ -500,6 +539,20 @@ export type SwapTransferTransactionInfo = {
   /** The App Data for this order */
   fullAppData?: object | null
 }
+export type DurationAuto = {
+  durationType: 'AUTO'
+}
+export type DurationLimit = {
+  durationType: 'LIMIT_DURATION'
+  duration: string
+}
+export type StartTimeAtMining = {
+  startType: 'AT_MINING_TIME'
+}
+export type StartTimeAtEpoch = {
+  startType: 'AT_EPOCH'
+  epoch: number
+}
 export type TwapOrderTransactionInfo = {
   type: 'TwapOrder'
   humanDescription?: string | null
@@ -541,9 +594,9 @@ export type TwapOrderTransactionInfo = {
   /** The duration of the TWAP interval */
   timeBetweenParts: number
   /** Whether the TWAP is valid for the entire interval or not */
-  durationOfPart: object
+  durationOfPart: DurationAuto | DurationLimit
   /** The start time of the TWAP */
-  startTime: object
+  startTime: StartTimeAtMining | StartTimeAtEpoch
 }
 export type NativeStakingDepositTransactionInfo = {
   type: 'NativeStakingDeposit'
@@ -613,13 +666,29 @@ export type MultisigConfirmationDetails = {
   signature?: string | null
   submittedAt: number
 }
-export type Token = {
+export type NativeToken = {
   address: string
-  decimals?: number | null
+  decimals: number
   logoUri: string
   name: string
   symbol: string
-  type: 'ERC721' | 'ERC20' | 'NATIVE_TOKEN' | 'UNKNOWN'
+  type: 'NATIVE_TOKEN'
+}
+export type Erc20Token = {
+  address: string
+  decimals: number
+  logoUri: string
+  name: string
+  symbol: string
+  type: 'ERC20'
+}
+export type Erc721Token = {
+  address: string
+  decimals: number
+  logoUri: string
+  name: string
+  symbol: string
+  type: 'ERC721'
 }
 export type MultisigExecutionDetails = {
   type: 'MULTISIG'
@@ -636,7 +705,7 @@ export type MultisigExecutionDetails = {
   confirmationsRequired: number
   confirmations: MultisigConfirmationDetails[]
   rejectors: AddressInfo[]
-  gasTokenInfo?: Token | null
+  gasTokenInfo?: (NativeToken | Erc20Token | Erc721Token) | null
   trusted: boolean
   proposer?: AddressInfo | null
   proposedByDelegate?: AddressInfo | null

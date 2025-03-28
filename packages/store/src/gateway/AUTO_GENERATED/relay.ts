@@ -18,15 +18,18 @@ const injectedRtkApi = api
     overrideExisting: false,
   })
 export { injectedRtkApi as cgwApi }
-export type RelayRelayV1ApiResponse = unknown
+export type RelayRelayV1ApiResponse = /** status 200  */ Relay
 export type RelayRelayV1ApiArg = {
   chainId: string
   relayDto: RelayDto
 }
-export type RelayGetRelaysRemainingV1ApiResponse = unknown
+export type RelayGetRelaysRemainingV1ApiResponse = /** status 200  */ RelaysRemaining
 export type RelayGetRelaysRemainingV1ApiArg = {
   chainId: string
   safeAddress: string
+}
+export type Relay = {
+  taskId: string
 }
 export type RelayDto = {
   version: string
@@ -36,6 +39,10 @@ export type RelayDto = {
           This is for the <a href="https://docs.gelato.network/developer-services/relay/quick-start/optional-parameters" target="_blank">
           Gelato Relay execution overhead</a>, reducing the chance of the task cancelling before it is executed on-chain. */
   gasLimit?: string | null
+}
+export type RelaysRemaining = {
+  remaining: number
+  limit: number
 }
 export const { useRelayRelayV1Mutation, useRelayGetRelaysRemainingV1Query, useLazyRelayGetRelaysRemainingV1Query } =
   injectedRtkApi
