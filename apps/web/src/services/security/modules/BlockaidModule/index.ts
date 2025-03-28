@@ -1,8 +1,8 @@
+import type { TypedData } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import { isEIP712TypedData } from '@/utils/safe-messages'
 import { normalizeTypedData } from '@/utils/web3'
 import { type SafeTransaction } from '@safe-global/safe-core-sdk-types'
 import { generateTypedData } from '@safe-global/protocol-kit/dist/src/utils/eip-712'
-import type { EIP712TypedData } from '@safe-global/safe-gateway-typescript-sdk'
 import { type SecurityResponse, type SecurityModule, SecuritySeverity } from '../types'
 import type {
   AssetDiff,
@@ -27,7 +27,7 @@ export type BlockaidModuleRequest = {
   chainId: number
   safeAddress: string
   walletAddress: string
-  data: SafeTransaction | EIP712TypedData
+  data: SafeTransaction | TypedData
   threshold: number
   origin?: string
 }

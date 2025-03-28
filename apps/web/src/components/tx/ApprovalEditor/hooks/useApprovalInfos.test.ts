@@ -1,3 +1,4 @@
+import type { TypedData } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import { renderHook } from '@/tests/test-utils'
 import { zeroPadValue, Interface } from 'ethers'
 import { type ApprovalInfo, useApprovalInfos } from '@/components/tx/ApprovalEditor/hooks/useApprovalInfos'
@@ -6,7 +7,7 @@ import { createMockSafeTransaction } from '@/tests/transactions'
 import { OperationType } from '@safe-global/safe-core-sdk-types'
 import { ERC20__factory, Multi_send__factory } from '@/types/contracts'
 import * as balances from '@/hooks/useBalances'
-import { type EIP712TypedData, TokenType } from '@safe-global/safe-gateway-typescript-sdk'
+import { TokenType } from '@safe-global/safe-gateway-typescript-sdk'
 import * as getTokenInfo from '@/utils/tokens'
 import { faker } from '@faker-js/faker'
 import { PSEUDO_APPROVAL_VALUES } from '../utils/approvals'
@@ -236,7 +237,8 @@ describe('useApprovalInfos', () => {
 
   it('returns an ApprovalInfo for Permit2 PermitSingle message', async () => {
     const spenderAddress = faker.finance.ethereumAddress()
-    const mockMessage: EIP712TypedData = {
+    const mockMessage: TypedData = {
+      primaryType: 'PermitSingle',
       types: {
         EIP712Domain: [
           {
@@ -324,7 +326,8 @@ describe('useApprovalInfos', () => {
     const token1 = faker.finance.ethereumAddress()
     const token2 = faker.finance.ethereumAddress()
 
-    const mockMessage: EIP712TypedData = {
+    const mockMessage: TypedData = {
+      primaryType: 'PermitBatch',
       types: {
         EIP712Domain: [
           {

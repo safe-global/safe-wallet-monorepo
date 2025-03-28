@@ -1,9 +1,10 @@
+import type { MessageItem } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import { generateDataRowValue, TxDataRow } from '@/components/transactions/TxDetails/Summary/TxDataRow'
 import { Value } from '@/components/transactions/TxDetails/TxData/DecodedData/ValueArray'
 import { isByte } from '@/utils/transaction-guards'
-import { type EIP712Normalized, normalizeTypedData } from '@/utils/web3'
+import { normalizeTypedData } from '@/utils/web3'
+import { type TypedData } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import { Box, Typography } from '@mui/material'
-import type { SafeMessage } from '@safe-global/safe-gateway-typescript-sdk'
 import { ErrorBoundary } from '@sentry/react'
 import classNames from 'classnames'
 import { isAddress } from 'ethers'
@@ -14,7 +15,7 @@ import { logError, Errors } from '@/services/exceptions'
 
 const EIP712_DOMAIN_TYPE = 'EIP712Domain'
 
-const DecodedTypedObject = ({ displayedType, eip712Msg }: { displayedType: string; eip712Msg: EIP712Normalized }) => {
+const DecodedTypedObject = ({ displayedType, eip712Msg }: { displayedType: string; eip712Msg: TypedData }) => {
   const { types, message: msg, domain } = eip712Msg
   const findType = (paramName: string) => types[displayedType].find((paramType) => paramType.name === paramName)?.type
   return (
@@ -63,7 +64,7 @@ export const DecodedMsg = ({
   message,
   isInModal = false,
 }: {
-  message: SafeMessage['message'] | undefined
+  message: MessageItem['message'] | undefined
   isInModal?: boolean
 }): ReactElement | null => {
   const isTextMessage = typeof message === 'string'
@@ -76,12 +77,12 @@ export const DecodedMsg = ({
   }
 
   // Normalize message such that we know the primaryType
-  let normalizedMsg: EIP712Normalized
+  let normalizedMsg: TypedData
   try {
     normalizedMsg = normalizeTypedData(message)
   } catch (error) {
     logError(Errors._809, error)
-    normalizedMsg = message as EIP712Normalized
+    normalizedMsg = message
   }
 
   return (

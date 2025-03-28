@@ -20,6 +20,7 @@ describe('web3', () => {
           EIP712Domain: [],
         },
         message: {},
+        primaryType: 'EIP712Domain',
       }
       const result = await signTypedData(signer as unknown as JsonRpcSigner, typedData)
       expect(result).toBe(mockSignature)
@@ -39,6 +40,7 @@ describe('web3', () => {
           EIP712Domain: [],
         },
         message: {},
+        primaryType: 'EIP712Domain',
       }
       await expect(signTypedData(signer as unknown as JsonRpcSigner, typedData)).rejects.toThrow('error')
     })
@@ -71,6 +73,7 @@ describe('web3', () => {
           safeTxHash: '0x1234567890123456789012345678901234567890123456789012345678901234',
           totp: Math.floor(Date.now() / 3600e3),
         },
+        primaryType: 'DeleteRequest',
       }
       const result = await signTypedData(signer as unknown as JsonRpcSigner, typedData)
       expect(result).toBe(mockSignature)

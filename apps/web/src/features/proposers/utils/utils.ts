@@ -9,7 +9,7 @@ const getProposerDataV2 = (chainId: string, proposerAddress: string) => {
   const domain = {
     name: 'Safe Transaction Service',
     version: '1.0',
-    chainId,
+    chainId: Number(chainId),
   }
 
   const types = {
@@ -28,6 +28,7 @@ const getProposerDataV2 = (chainId: string, proposerAddress: string) => {
     domain,
     types,
     message,
+    primaryType: 'Delegate',
   }
 }
 

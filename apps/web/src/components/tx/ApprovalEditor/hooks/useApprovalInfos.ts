@@ -1,3 +1,4 @@
+import type { TypedData } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import useAsync from '@/hooks/useAsync'
 import useBalances from '@/hooks/useBalances'
 import { type Approval, ApprovalModule } from '@/services/security/modules/ApprovalModule'
@@ -10,7 +11,7 @@ import {
   UNLIMITED_PERMIT2_AMOUNT,
 } from '@/utils/tokens'
 import { type SafeTransaction } from '@safe-global/safe-core-sdk-types'
-import { type EIP712TypedData, type TokenInfo, TokenType } from '@safe-global/safe-gateway-typescript-sdk'
+import { type TokenInfo, TokenType } from '@safe-global/safe-gateway-typescript-sdk'
 import { useMemo } from 'react'
 import { PSEUDO_APPROVAL_VALUES } from '../utils/approvals'
 import { safeFormatUnits } from '@safe-global/utils/utils/formatters'
@@ -32,7 +33,7 @@ const ApprovalModuleInstance = new ApprovalModule()
 
 export const useApprovalInfos = (payload: {
   safeTransaction?: SafeTransaction
-  safeMessage?: EIP712TypedData
+  safeMessage?: TypedData
 }): [ApprovalInfo[] | undefined, Error | undefined, boolean] => {
   const { safeTransaction, safeMessage } = payload
   const { balances } = useBalances()
