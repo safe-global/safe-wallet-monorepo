@@ -1,15 +1,11 @@
+import type { MessageItem, TypedData } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import { hashMessage, type TypedDataDomain, type JsonRpcSigner } from 'ethers'
 import { gte } from 'semver'
 import { adjustVInSignature } from '@safe-global/protocol-kit/dist/src/utils/signatures'
 
 import { hashTypedData } from '@/utils/web3'
 import { isValidAddress } from '@safe-global/utils/utils/validation'
-import {
-  type SafeInfo,
-  type SafeMessage,
-  type EIP712TypedData,
-  type ChainInfo,
-} from '@safe-global/safe-gateway-typescript-sdk'
+import { type SafeInfo, type ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import { FEATURES } from '@/utils/chains'
 
 import { hasFeature } from './chains'
@@ -31,13 +27,13 @@ const isHash = (payload: string) => /^0x[a-f0-9]+$/i.test(payload)
  * Typeguard for EIP712TypedData
  *
  */
-export const isEIP712TypedData = (obj: any): obj is EIP712TypedData => {
+export const isEIP712TypedData = (obj: any): obj is TypedData => {
   return typeof obj === 'object' && obj != null && 'domain' in obj && 'types' in obj && 'message' in obj
 }
 
-export const isBlindSigningPayload = (obj: EIP712TypedData | string): boolean => !isEIP712TypedData(obj) && isHash(obj)
+export const isBlindSigningPayload = (obj: TypedData | string): boolean => !isEIP712TypedData(obj) && isHash(obj)
 
-export const generateSafeMessageMessage = (message: SafeMessage['message']): string => {
+export const generateSafeMessageMessage = (message: MessageItem['message']): string => {
   return typeof message === 'string' ? hashMessage(message) : hashTypedData(message)
 }
 
@@ -50,8 +46,8 @@ export const generateSafeMessageMessage = (message: SafeMessage['message']): str
  */
 export const generateSafeMessageTypedData = (
   { version, chainId, address }: SafeInfo,
-  message: SafeMessage['message'],
-): EIP712TypedData => {
+  message: MessageItem['message'],
+): TypedData => {
   if (!version) {
     throw Error('Cannot create SafeMessage without version information')
   }
@@ -60,7 +56,7 @@ export const generateSafeMessageTypedData = (
   return {
     domain: isHandledByFallbackHandler
       ? {
-          chainId,
+          chainId: Number(chainId),
           verifyingContract: address.value,
         }
       : { verifyingContract: address.value },
@@ -70,10 +66,11 @@ export const generateSafeMessageTypedData = (
     message: {
       message: generateSafeMessageMessage(message),
     },
+    primaryType: 'SafeMessage',
   }
 }
 
-export const generateSafeMessageHash = (safe: SafeInfo, message: SafeMessage['message']): string => {
+export const generateSafeMessageHash = (safe: SafeInfo, message: MessageItem['message']): string => {
   const typedData = generateSafeMessageTypedData(safe, message)
   return hashTypedData(typedData)
 }
@@ -111,7 +108,7 @@ export const isOffchainEIP1271Supported = (
 export const tryOffChainMsgSigning = async (
   signer: JsonRpcSigner,
   safe: SafeInfo,
-  message: SafeMessage['message'],
+  message: MessageItem['message'],
 ): Promise<string> => {
   const typedData = generateSafeMessageTypedData(safe, message)
   const signature = await signer.signTypedData(typedData.domain as TypedDataDomain, typedData.types, typedData.message)

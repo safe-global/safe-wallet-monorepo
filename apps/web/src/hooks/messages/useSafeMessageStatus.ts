@@ -1,22 +1,28 @@
-import { SafeMessageStatus } from '@safe-global/safe-gateway-typescript-sdk'
-import type { SafeMessage } from '@safe-global/safe-gateway-typescript-sdk'
+import type { MessageItem } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
+import type { SafeMessageStatus } from '@safe-global/store/gateway/types'
 
 import useIsSafeMessagePending from './useIsSafeMessagePending'
 import useWallet from '../wallets/useWallet'
 
 const ConfirmingStatus = 'CONFIRMING'
 const AwaitingConfirmationsStatus = 'AWAITING_CONFIRMATIONS'
-
-type SafeMessageLocalStatus = SafeMessageStatus | typeof ConfirmingStatus | typeof AwaitingConfirmationsStatus
+const ConfirmedStatus = 'CONFIRMED'
+const NeedsConfirmationStatus = 'NEEDS_CONFIRMATION'
+type SafeMessageLocalStatus =
+  | SafeMessageStatus
+  | typeof ConfirmingStatus
+  | typeof AwaitingConfirmationsStatus
+  | typeof ConfirmedStatus
+  | typeof NeedsConfirmationStatus
 
 const STATUS_LABELS: { [_key in SafeMessageLocalStatus]: string } = {
   [ConfirmingStatus]: 'Confirming',
   [AwaitingConfirmationsStatus]: 'Awaiting confirmations',
-  [SafeMessageStatus.CONFIRMED]: 'Confirmed',
-  [SafeMessageStatus.NEEDS_CONFIRMATION]: 'Needs confirmation',
+  [ConfirmedStatus]: 'Confirmed',
+  [NeedsConfirmationStatus]: 'Needs confirmation',
 }
 
-const useSafeMessageStatus = (msg: SafeMessage) => {
+const useSafeMessageStatus = (msg: MessageItem) => {
   const isPending = useIsSafeMessagePending(msg.messageHash)
   const wallet = useWallet()
 
@@ -25,7 +31,7 @@ const useSafeMessageStatus = (msg: SafeMessage) => {
   }
 
   const hasWalletSigned = wallet && msg.confirmations.some(({ owner }) => owner.value === wallet.address)
-  const isConfirmed = msg.status === SafeMessageStatus.CONFIRMED
+  const isConfirmed = msg.status === ConfirmedStatus
   if (hasWalletSigned && !isConfirmed) {
     return STATUS_LABELS[AwaitingConfirmationsStatus]
   }

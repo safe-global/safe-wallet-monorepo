@@ -31,6 +31,7 @@ describe('safe-messages', () => {
         types: {
           SafeMessage: [{ name: 'message', type: 'bytes' }],
         },
+        primaryType: 'SafeMessage',
         message: {
           message: '0xaa05af77f274774b8bdc7b61d98bc40da523dc2821fdea555f4d6aa413199bcc',
         },
@@ -57,6 +58,7 @@ describe('safe-messages', () => {
         types: {
           SafeMessage: [{ name: 'message', type: 'bytes' }],
         },
+        primaryType: 'SafeMessage',
         message: {
           message: '0xaa05af77f274774b8bdc7b61d98bc40da523dc2821fdea555f4d6aa413199bcc',
         },
@@ -147,6 +149,7 @@ describe('safe-messages', () => {
         types: {
           SafeMessage: [{ name: 'message', type: 'bytes' }],
         },
+        primaryType: 'SafeMessage',
         message: {
           message: '0xbe609aee343fb3c4b28e1df9e632fca64fcfaede20f02e86244efddf30957bd2',
         },
@@ -236,6 +239,7 @@ describe('safe-messages', () => {
         types: {
           SafeMessage: [{ name: 'message', type: 'bytes' }],
         },
+        primaryType: 'SafeMessage',
         message: {
           message: '0xbe609aee343fb3c4b28e1df9e632fca64fcfaede20f02e86244efddf30957bd2',
         },

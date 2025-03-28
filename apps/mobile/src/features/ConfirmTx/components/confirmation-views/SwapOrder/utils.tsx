@@ -97,13 +97,10 @@ export const formatSwapOrderItems = (txInfo: Order, chain: Chain): ListTableItem
 export const formatTwapOrderItems = (order: TwapOrderTransactionInfo) => {
   const { timeBetweenParts } = order
   let startTime = ''
-  // @ts-expect-error - @safe-global/store typings are incomplete should work after we get this through https://github.com/safe-global/safe-wallet-monorepo/pull/5500
   if (order.startTime.startType === StartTimeValue.AT_MINING_TIME) {
     startTime = 'Now'
   }
-  // @ts-expect-error - @safe-global/store typings are incomplete should work after we get this through https://github.com/safe-global/safe-wallet-monorepo/pull/5500
   if (order.startTime.startType === StartTimeValue.AT_EPOCH) {
-    // @ts-expect-error - @safe-global/store typings are incomplete should work after we get this through https://github.com/safe-global/safe-wallet-monorepo/pull/5500
     startTime = `At block number: ${order.startTime.epoch}`
   }
 

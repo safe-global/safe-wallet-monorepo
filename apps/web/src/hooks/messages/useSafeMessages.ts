@@ -1,5 +1,5 @@
+import type { MessagePage } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import { getSafeMessages } from '@safe-global/safe-gateway-typescript-sdk'
-import type { SafeMessageListPage } from '@safe-global/safe-gateway-typescript-sdk'
 
 import { useAppSelector } from '@/store'
 import useAsync from '@/hooks/useAsync'
@@ -9,19 +9,19 @@ import { selectSafeMessages } from '@/store/safeMessagesSlice'
 const useSafeMessages = (
   pageUrl?: string,
 ): {
-  page?: SafeMessageListPage
+  page?: MessagePage
   error?: string
   loading: boolean
 } => {
   const { safe, safeAddress, safeLoaded } = useSafeInfo()
 
   // If pageUrl is passed, load a new messages page from the API
-  const [page, error, loading] = useAsync<SafeMessageListPage>(
+  const [page, error, loading] = useAsync<MessagePage>(
     () => {
       if (!safeLoaded || !pageUrl) {
         return
       }
-      return getSafeMessages(safe.chainId, safeAddress, pageUrl)
+      return getSafeMessages(safe.chainId, safeAddress, pageUrl) as Promise<MessagePage>
     },
     [safe.chainId, safeAddress, safeLoaded, pageUrl],
     false,

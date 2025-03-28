@@ -1,7 +1,7 @@
+import type { MessageItem } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import { Accordion, AccordionDetails, AccordionSummary, Box } from '@mui/material'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import type { ReactElement } from 'react'
-import type { SafeMessage } from '@safe-global/safe-gateway-typescript-sdk'
 import { ErrorBoundary } from '@sentry/react'
 
 import MsgDetails from '@/components/safe-messages/MsgDetails'
@@ -9,7 +9,7 @@ import MsgSummary from '@/components/safe-messages/MsgSummary'
 
 import txListItemCss from '@/components/transactions/TxListItem/styles.module.css'
 
-const ExpandableMsgItem = ({ msg, expanded = false }: { msg: SafeMessage; expanded?: boolean }): ReactElement => {
+const ExpandableMsgItem = ({ msg, expanded = false }: { msg: MessageItem; expanded?: boolean }): ReactElement => {
   return (
     <Accordion
       defaultExpanded={expanded}

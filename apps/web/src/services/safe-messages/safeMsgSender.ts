@@ -1,5 +1,6 @@
+import type { MessageItem } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import { proposeSafeMessage, confirmSafeMessage } from '@safe-global/safe-gateway-typescript-sdk'
-import type { SafeInfo, SafeMessage } from '@safe-global/safe-gateway-typescript-sdk'
+import type { SafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import type { Eip1193Provider } from 'ethers'
 
 import { safeMsgDispatch, SafeMsgEvent } from './safeMsgEvents'
@@ -16,7 +17,7 @@ export const dispatchSafeMsgProposal = async ({
 }: {
   provider: Eip1193Provider
   safe: SafeInfo
-  message: SafeMessage['message']
+  message: MessageItem['message']
   origin: string | undefined
 }): Promise<void> => {
   const messageHash = generateSafeMessageHash(safe, message)
@@ -56,7 +57,7 @@ export const dispatchSafeMsgConfirmation = async ({
 }: {
   provider: Eip1193Provider
   safe: SafeInfo
-  message: SafeMessage['message']
+  message: MessageItem['message']
 }): Promise<void> => {
   const messageHash = generateSafeMessageHash(safe, message)
 
