@@ -47,7 +47,7 @@ export function TxShareBlock({ txId, txHash }: { txId: string; txHash?: string }
     <Paper data-testid="share-block" className={css.wrapper}>
       <TxShareAccordion noExpand={!!txHash} />
 
-      <Box p={2} pt={0.5} display="flex" alignItems="center" gap={1}>
+      <Box p={2} pt={0.5} display="flex" flexWrap="wrap" alignItems="center" gap={1}>
         <TxShareLink id={txId} eventLabel={CopyDeeplinkLabels.shareBlock}>
           <Button
             data-testid="copy-link-btn"

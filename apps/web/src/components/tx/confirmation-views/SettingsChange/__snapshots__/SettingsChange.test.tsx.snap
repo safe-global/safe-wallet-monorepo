@@ -51,7 +51,7 @@ exports[`SettingsChange should display the SettingsChange component with newOwne
               aria-label="Copy to clipboard"
               class=""
               data-mui-internal-clone-element="true"
-              style="cursor: pointer;"
+              style="cursor: pointer; white-space: nowrap;"
             >
               <span>
                 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045
@@ -62,7 +62,7 @@ exports[`SettingsChange should display the SettingsChange component with newOwne
             aria-label="Copy to clipboard"
             class=""
             data-mui-internal-clone-element="true"
-            style="cursor: pointer;"
+            style="cursor: pointer; white-space: nowrap;"
           >
             <button
               aria-label="Copy to clipboard"
@@ -134,7 +134,7 @@ exports[`SettingsChange should display the SettingsChange component with newOwne
               aria-label="Copy to clipboard"
               class=""
               data-mui-internal-clone-element="true"
-              style="cursor: pointer;"
+              style="cursor: pointer; white-space: nowrap;"
             >
               <span>
                 0x0000000000000000
@@ -145,7 +145,7 @@ exports[`SettingsChange should display the SettingsChange component with newOwne
             aria-label="Copy to clipboard"
             class=""
             data-mui-internal-clone-element="true"
-            style="cursor: pointer;"
+            style="cursor: pointer; white-space: nowrap;"
           >
             <button
               aria-label="Copy to clipboard"
@@ -225,7 +225,7 @@ exports[`SettingsChange should display the SettingsChange component with owner d
               aria-label="Copy to clipboard"
               class=""
               data-mui-internal-clone-element="true"
-              style="cursor: pointer;"
+              style="cursor: pointer; white-space: nowrap;"
             >
               <span>
                 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045
@@ -236,7 +236,7 @@ exports[`SettingsChange should display the SettingsChange component with owner d
             aria-label="Copy to clipboard"
             class=""
             data-mui-internal-clone-element="true"
-            style="cursor: pointer;"
+            style="cursor: pointer; white-space: nowrap;"
           >
             <button
               aria-label="Copy to clipboard"

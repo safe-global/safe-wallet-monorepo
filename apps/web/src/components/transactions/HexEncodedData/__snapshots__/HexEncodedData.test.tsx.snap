@@ -28,7 +28,7 @@ exports[`HexEncodedData should not cut the text in case the limit option is high
           aria-label="Copy to clipboard"
           class=""
           data-mui-internal-clone-element="true"
-          style="cursor: pointer;"
+          style="cursor: pointer; white-space: nowrap;"
         >
           <button
             aria-label="Copy to clipboard"
@@ -87,7 +87,7 @@ exports[`HexEncodedData should not highlight the data if highlight option is fal
           aria-label="Copy to clipboard"
           class=""
           data-mui-internal-clone-element="true"
-          style="cursor: pointer;"
+          style="cursor: pointer; white-space: nowrap;"
         >
           <button
             aria-label="Copy to clipboard"
@@ -147,7 +147,7 @@ exports[`HexEncodedData should render the default component markup 1`] = `
           aria-label="Copy to clipboard"
           class=""
           data-mui-internal-clone-element="true"
-          style="cursor: pointer;"
+          style="cursor: pointer; white-space: nowrap;"
         >
           <button
             aria-label="Copy to clipboard"
