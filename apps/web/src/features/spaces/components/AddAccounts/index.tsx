@@ -183,8 +183,8 @@ const AddAccounts = () => {
               Add Safe Accounts
             </Typography>
             <Typography mb={2}>
-              You can add Safe Account which you are a signer of, or add any read-only account. This is currently
-              limited to {SAFE_ACCOUNTS_LIMIT} Accounts.
+              You can add any Safe Account to your Space. This is currently limited to {SAFE_ACCOUNTS_LIMIT} Safe
+              Accounts.
             </Typography>
             <Card>
               <FormProvider {...formMethods}>
