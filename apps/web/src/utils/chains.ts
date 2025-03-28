@@ -43,6 +43,7 @@ export enum FEATURES {
   TX_NOTES = 'TX_NOTES',
   NESTED_SAFES = 'NESTED_SAFES',
   MASS_PAYOUTS = 'MASS_PAYOUTS',
+  SPACES = 'SPACES',
 }
 
 export const FeatureRoutes = {

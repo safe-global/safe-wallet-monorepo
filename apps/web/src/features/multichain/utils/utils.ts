@@ -30,6 +30,10 @@ export const isMultiChainSafeItem = (safe: SafeItem | MultiChainSafeItem): safe 
   return false
 }
 
+export const isSafeItem = (safe: SafeItem | MultiChainSafeItem): safe is SafeItem => {
+  return !isMultiChainSafeItem(safe)
+}
+
 const areOwnersMatching = (owners1: string[], owners2: string[]) =>
   owners1.length === owners2.length && owners1.every((owner) => owners2.some((owner2) => sameAddress(owner, owner2)))
 

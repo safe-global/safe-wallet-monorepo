@@ -2,6 +2,7 @@ export const AppRoutes = {
   '403': '/403',
   '404': '/404',
   wc: '/wc',
+  userSettings: '/user-settings',
   terms: '/terms',
   swap: '/swap',
   stake: '/stake',
@@ -47,6 +48,12 @@ export const AppRoutes = {
   share: {
     safeApp: '/share/safe-app',
   },
+  spaces: {
+    settings: '/spaces/settings',
+    safeAccounts: '/spaces/safe-accounts',
+    members: '/spaces/members',
+    index: '/spaces',
+  },
   transactions: {
     tx: '/transactions/tx',
     queue: '/transactions/queue',
@@ -56,6 +63,7 @@ export const AppRoutes = {
     history: '/transactions/history',
   },
   welcome: {
+    spaces: '/welcome/spaces',
     index: '/welcome',
     accounts: '/welcome/accounts',
   },

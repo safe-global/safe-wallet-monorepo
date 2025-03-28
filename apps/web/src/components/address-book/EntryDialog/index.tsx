@@ -7,8 +7,8 @@ import ModalDialog from '@/components/common/ModalDialog'
 import NameInput from '@/components/common/NameInput'
 import useChainId from '@/hooks/useChainId'
 import { useAppDispatch } from '@/store'
-import madProps from '@/utils/mad-props'
 import { upsertAddressBookEntries } from '@/store/addressBookSlice'
+import { useChain } from '@/hooks/useChains'
 
 export type AddressEntry = {
   name: string
@@ -29,8 +29,11 @@ function EntryDialog({
   defaultValues?: AddressEntry
   disableAddressInput?: boolean
   chainIds?: string[]
-  currentChainId: string
+  currentChainId?: string
 }): ReactElement {
+  const chainId = useChainId()
+  const actualChainId = currentChainId ?? chainId
+  const currentChain = useChain(actualChainId)
   const dispatch = useAppDispatch()
 
   const methods = useForm<AddressEntry>({
@@ -41,7 +44,7 @@ function EntryDialog({
   const { handleSubmit, formState } = methods
 
   const submitCallback = handleSubmit((data: AddressEntry) => {
-    dispatch(upsertAddressBookEntries({ ...data, chainIds: chainIds ?? [currentChainId] }))
+    dispatch(upsertAddressBookEntries({ ...data, chainIds: chainIds ?? [actualChainId] }))
     handleClose()
   })
 
@@ -74,6 +77,8 @@ function EntryDialog({
                 fullWidth
                 required
                 disabled={disableAddressInput}
+                chain={currentChain}
+                showPrefix={!!currentChainId}
               />
             </Box>
           </DialogContent>
@@ -98,6 +103,4 @@ function EntryDialog({
   )
 }
 
-export default madProps(EntryDialog, {
-  currentChainId: useChainId,
-})
+export default EntryDialog

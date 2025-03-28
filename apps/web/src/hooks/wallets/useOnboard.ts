@@ -7,11 +7,12 @@ import useChains, { useCurrentChain } from '@/hooks/useChains'
 import ExternalStore from '@/services/ExternalStore'
 import { logError, Errors } from '@/services/exceptions'
 import { trackEvent, WALLET_EVENTS } from '@/services/analytics'
-import { useAppSelector } from '@/store'
+import { useAppSelector, useAppDispatch } from '@/store'
 import { type EnvState, selectRpc } from '@/store/settingsSlice'
 import { formatAmount } from '@safe-global/utils/utils/formatNumber'
 import { localItem } from '@/services/local-storage/local'
 import { isWalletConnect, isWalletUnlocked } from '@/utils/wallets'
+import { setUnauthenticated } from '@/store/authSlice'
 
 export type ConnectedWallet = {
   label: string
@@ -157,6 +158,7 @@ export const useInitOnboard = () => {
   const chain = useCurrentChain()
   const onboard = useStore()
   const customRpc = useAppSelector(selectRpc)
+  const dispatch = useAppDispatch()
 
   useEffect(() => {
     if (configs.length > 0 && chain) {
@@ -196,13 +198,14 @@ export const useInitOnboard = () => {
       } else if (lastConnectedWallet) {
         lastConnectedWallet = ''
         saveLastWallet(lastConnectedWallet)
+        dispatch(setUnauthenticated())
       }
     })
 
     return () => {
       walletSubscription.unsubscribe()
     }
-  }, [onboard])
+  }, [onboard, dispatch])
 }
 
 export default useStore

@@ -1,0 +1,20 @@
+.container {
+  container-type: inline-size;
+  container-name: my-spaces-container;
+  display: flex;
+  justify-content: center;
+}
+
+.mySpaces {
+  width: 100vw;
+  max-width: 750px;
+  margin: var(--space-2);
+}
+
+.spacesHeader {
+  display: flex;
+  justify-content: space-between;
+  padding: var(--space-3) 0;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
