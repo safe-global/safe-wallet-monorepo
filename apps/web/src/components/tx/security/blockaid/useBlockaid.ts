@@ -6,10 +6,11 @@ import { MODALS_EVENTS, trackEvent } from '@/services/analytics'
 import type { SecurityResponse } from '@/services/security/modules/types'
 import { FEATURES } from '@/utils/chains'
 import type { SafeTransaction } from '@safe-global/safe-core-sdk-types'
-import { useEffect, useMemo } from 'react'
+import { useCallback, useEffect, useMemo } from 'react'
 
 import type { EIP712TypedData } from '@safe-global/safe-gateway-typescript-sdk'
 import { BlockaidModule, type BlockaidModuleResponse } from '@/services/security/modules/BlockaidModule'
+import { Errors, logError } from '@/services/exceptions'
 
 const BlockaidModuleInstance = new BlockaidModule()
 
@@ -22,23 +23,34 @@ export const useBlockaid = (
   const { safe, safeAddress } = useSafeInfo()
   const signer = useSigner()
   const isFeatureEnabled = useHasFeature(FEATURES.RISK_MITIGATION)
+  const jsonData = data && JSON.stringify(data)
 
   const [blockaidPayload, blockaidErrors, blockaidLoading] = useAsync<SecurityResponse<BlockaidModuleResponse>>(
     () => {
-      if (!isFeatureEnabled || !data || !signer?.address) {
+      if (!isFeatureEnabled || !jsonData || !signer?.address) {
         return
       }
 
-      return BlockaidModuleInstance.scanTransaction({
-        chainId: Number(safe.chainId),
-        data,
-        safeAddress,
-        walletAddress: signer.address,
-        threshold: safe.threshold,
-        origin,
-      })
+      let requestData
+      try {
+        requestData = JSON.parse(jsonData)
+      } catch {}
+
+      try {
+        return BlockaidModuleInstance.scanTransaction({
+          chainId: Number(safe.chainId),
+          data: requestData,
+          safeAddress,
+          walletAddress: signer.address,
+          threshold: safe.threshold,
+          origin,
+        })
+      } catch (e) {
+        logError(Errors._819, e)
+        throw e
+      }
     },
-    [safe.chainId, safe.threshold, safeAddress, data, signer?.address, isFeatureEnabled, origin],
+    [safe.chainId, safe.threshold, safeAddress, jsonData, signer?.address, isFeatureEnabled, origin],
     false,
   )
 
@@ -56,4 +68,18 @@ export const useBlockaid = (
     [blockaidErrors, blockaidPayload],
   )
   return [blockaidPayload, errorMsg, loading]
+}
+
+export const useBlockaidReportScan = (requestId?: string) => {
+  return useCallback(
+    (isAccepted: boolean) => {
+      if (!requestId) return
+      try {
+        return BlockaidModuleInstance.reportScanStatus(requestId, isAccepted)
+      } catch (e) {
+        logError(Errors._820, e)
+      }
+    },
+    [requestId],
+  )
 }

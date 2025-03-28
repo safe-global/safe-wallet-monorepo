@@ -72,6 +72,8 @@ enum ErrorCodes {
   _816 = '816: Error computing replay Safe creation data',
   _817 = '817: Error sending a transaction through nested Safe provider',
   _818 = '818: Error validating transaction data',
+  _819 = '819: Blockaid transaction scan failed',
+  _820 = '820: Blockaid report failed',
 
   _900 = '900: Error loading Safe App',
   _901 = '901: Error processing Safe Apps SDK request',
