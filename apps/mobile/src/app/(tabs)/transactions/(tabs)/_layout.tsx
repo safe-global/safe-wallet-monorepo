@@ -35,10 +35,12 @@ export default function TransactionsLayout() {
           width: 100,
           alignSelf: 'center',
           borderBottomWidth: 0,
+          left: -6,
         },
         tabBarIndicatorStyle: {
           backgroundColor: theme?.color?.get(),
-          width: 100,
+          width: 78,
+          marginLeft: 6,
           alignItems: 'center',
         },
         tabBarLabelStyle: {
