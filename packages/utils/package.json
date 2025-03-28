@@ -4,7 +4,8 @@
   "description": "A collection of utility functions used across the Safe apps",
   "version": "1.0.0",
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "test:coverage": "jest --coverage"
   },
   "devDependencies": {
     "@types/jest": "^29.5.14",

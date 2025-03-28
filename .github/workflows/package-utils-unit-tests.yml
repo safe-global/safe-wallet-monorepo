@@ -26,12 +26,15 @@ jobs:
 
       - uses: ./.github/actions/yarn
 
-      - name: Annotations and coverage report
-        uses: ArtiomTr/jest-coverage-report-action@v2.3.1
+      # Run tests with coverage
+      - name: Run Jest tests with coverage
+        run: |
+          yarn workspace @safe-global/utils test:coverage --coverageReporters=text --coverageReporters=json-summary | tee ./coverage.txt && exit ${PIPESTATUS[0]}
+
+      - name: Jest Coverage Comment
+        uses: MishaKav/jest-coverage-comment@v1
         with:
-          skip-step: install
-          annotations: failed-tests
-          package-manager: yarn
-          test-script: yarn test
-          working-directory: packages/utils
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          title: Package @safe-global/utils coverage
+          coverage-summary-path: ./coverage/coverage-summary.json
+          coverage-title: Coverage
+          coverage-path: ./coverage.txt
