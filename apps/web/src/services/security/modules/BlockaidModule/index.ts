@@ -124,7 +124,7 @@ export class BlockaidModule implements SecurityModule<BlockaidModuleRequest, Blo
     const res = await postJson(`/v0/evm/json-rpc/scan`, payload)
 
     if (!res.ok) {
-      throw new Error('Blockaid scan failed', await res.json())
+      throw new Error('Blockaid scan failed')
     }
 
     const result = (await res.json()) as TransactionScanResponse
@@ -175,7 +175,7 @@ export class BlockaidModule implements SecurityModule<BlockaidModuleRequest, Blo
       request_id: requestId,
     })
     if (!res.ok) {
-      throw new Error('Blockaid report failed', await res.json())
+      throw new Error('Blockaid report failed')
     }
     return res.json()
   }
