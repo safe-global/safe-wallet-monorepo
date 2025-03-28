@@ -1,5 +1,5 @@
 import { BackdropComponent, BackgroundComponent } from '@/src/components/Dropdown/sheetComponents'
-import { getTokenValue, H5, View } from 'tamagui'
+import { getTokenValue, getVariable, H5, useTheme, View } from 'tamagui'
 import React, { useCallback, useEffect, useRef } from 'react'
 import BottomSheet, {
   BottomSheetFooterProps,
@@ -47,6 +47,7 @@ export function SafeBottomSheet<T>({
   const [footerHeight, setFooterHeight] = React.useState(0)
   const hasCustomItems = items?.length && Render
   const isSortable = items?.length && sortable
+  const theme = useTheme()
 
   const onClose = useCallback(() => {
     router.back()
@@ -123,6 +124,7 @@ export function SafeBottomSheet<T>({
       backdropComponent={BackdropComponent}
       footerComponent={isSortable ? undefined : renderFooter}
       topInset={insets.top}
+      handleIndicatorStyle={{ backgroundColor: getVariable(theme.borderMain) }}
     >
       <BottomSheetView
         style={[

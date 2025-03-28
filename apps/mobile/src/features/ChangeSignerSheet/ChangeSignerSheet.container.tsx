@@ -5,7 +5,6 @@ import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { RootState } from '@/src/store'
 import { SignersCard } from '@/src/components/transactions-list/Card/SignersCard'
 import { Text, View } from 'tamagui'
-import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { Address } from 'blo'
 import { SignerInfo } from '@/src/types/address'
 import { selectActiveSigner, setActiveSigner } from '@/src/store/activeSignerSlice'
@@ -18,6 +17,7 @@ import { formatValue } from '@/src/utils/formatters'
 import { useTransactionsGetTransactionByIdV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { RouteProp, useRoute } from '@react-navigation/native'
 import { extractAppSigners } from '../ConfirmTx/utils'
+import { ContactContainer } from '../AddressBook/Contact.container'
 
 export const ChangeSignerSheetContainer = () => {
   const dispatch = useAppDispatch()
@@ -79,7 +79,7 @@ export const ChangeSignerSheetContainer = () => {
           <SignersCard
             transparent
             onPress={onSignerPress(item, onClose)}
-            name={item.name || shortenAddress(item.value)}
+            name={<ContactContainer address={item.value as Address} />}
             address={item.value as Address}
             rightNode={
               <Text>

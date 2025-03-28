@@ -6,7 +6,7 @@ import { EthAddress } from '@/src/components/EthAddress'
 import { Address } from '@/src/types/address'
 
 type SignersCardProps = {
-  name?: string
+  name?: string | React.ReactNode
   address: `0x${string}`
   rightNode?: React.ReactNode
   transparent?: boolean
@@ -38,9 +38,17 @@ export function SignersCard({ onPress, name, transparent = true, address, rightN
         <View>
           {name && (
             <View flexDirection="row" alignItems="center" gap="$2">
-              <Text fontSize="$4" fontWeight={600}>
-                {name}
-              </Text>
+              {typeof name === 'string' ? (
+                <Text fontSize="$4" fontWeight={600} {...titleStyle}>
+                  {name}
+                </Text>
+              ) : React.isValidElement(name) ? (
+                React.cloneElement(name as React.ReactElement<{ textProps?: Partial<TextProps> }>, {
+                  textProps: titleStyle,
+                })
+              ) : (
+                name
+              )}
               {getSignerTag?.(address) && (
                 <View
                   backgroundColor="$transparent"
