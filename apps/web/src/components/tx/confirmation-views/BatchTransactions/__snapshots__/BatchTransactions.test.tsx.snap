@@ -165,7 +165,7 @@ exports[`BatchTransactions should render a list of batch transactions 1`] = `
                                   aria-label="Copy to clipboard"
                                   class=""
                                   data-mui-internal-clone-element="true"
-                                  style="cursor: pointer;"
+                                  style="cursor: pointer; white-space: nowrap;"
                                 >
                                   <span>
                                     0xA77DE01e157f9f57C7c4A326eeE9C4874D0598b6
@@ -176,7 +176,7 @@ exports[`BatchTransactions should render a list of batch transactions 1`] = `
                                 aria-label="Copy to clipboard"
                                 class=""
                                 data-mui-internal-clone-element="true"
-                                style="cursor: pointer;"
+                                style="cursor: pointer; white-space: nowrap;"
                               >
                                 <button
                                   aria-label="Copy to clipboard"

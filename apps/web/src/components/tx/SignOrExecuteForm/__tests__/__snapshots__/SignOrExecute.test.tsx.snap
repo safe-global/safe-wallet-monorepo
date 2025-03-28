@@ -131,7 +131,7 @@ exports[`SignOrExecute should display a confirmation screen 1`] = `
                                       aria-label="Copy to clipboard"
                                       class=""
                                       data-mui-internal-clone-element="true"
-                                      style="cursor: pointer;"
+                                      style="cursor: pointer; white-space: nowrap;"
                                     >
                                       <span>
                                         0x0000000000000000000000000000000000000000
@@ -142,7 +142,7 @@ exports[`SignOrExecute should display a confirmation screen 1`] = `
                                     aria-label="Copy to clipboard"
                                     class=""
                                     data-mui-internal-clone-element="true"
-                                    style="cursor: pointer;"
+                                    style="cursor: pointer; white-space: nowrap;"
                                   >
                                     <button
                                       aria-label="Copy to clipboard"
@@ -217,7 +217,7 @@ exports[`SignOrExecute should display a confirmation screen 1`] = `
                                 aria-label="Copy to clipboard"
                                 class=""
                                 data-mui-internal-clone-element="true"
-                                style="cursor: pointer;"
+                                style="cursor: pointer; white-space: nowrap;"
                               >
                                 <button
                                   aria-label="Copy to clipboard"
@@ -317,7 +317,7 @@ exports[`SignOrExecute should display a confirmation screen 1`] = `
                                   aria-label="Copy to clipboard"
                                   class=""
                                   data-mui-internal-clone-element="true"
-                                  style="cursor: pointer;"
+                                  style="cursor: pointer; white-space: nowrap;"
                                 >
                                   <button
                                     aria-label="Copy to clipboard"
@@ -363,7 +363,7 @@ exports[`SignOrExecute should display a confirmation screen 1`] = `
                                   aria-label="Copy to clipboard"
                                   class=""
                                   data-mui-internal-clone-element="true"
-                                  style="cursor: pointer;"
+                                  style="cursor: pointer; white-space: nowrap;"
                                 >
                                   <button
                                     aria-label="Copy to clipboard"
