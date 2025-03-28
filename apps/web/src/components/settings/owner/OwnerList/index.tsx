@@ -1,14 +1,14 @@
 import { jsonToCSV } from 'react-papaparse'
 import type { SafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import EthHashInfo from '@/components/common/EthHashInfo'
-import { AddOwnerFlow, ReplaceOwnerFlow, RemoveOwnerFlow } from '@/components/tx-flow/flows'
+import { ReplaceOwnerFlow, RemoveOwnerFlow } from '@/components/tx-flow/flows'
 import useAddressBook from '@/hooks/useAddressBook'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { Box, Grid, Typography, Button, SvgIcon, Tooltip, IconButton } from '@mui/material'
 import { useContext, useMemo } from 'react'
 import { EditOwnerDialog } from '../EditOwnerDialog'
 import EnhancedTable from '@/components/common/EnhancedTable'
-import AddIcon from '@/public/images/common/add.svg'
+import { ChangeOwnerStructureFlow } from '@/components/tx-flow/flows/ChangeOwnerStructure'
 import Track from '@/components/common/Track'
 import { SETTINGS_EVENTS } from '@/services/analytics/events/settings'
 import CheckWallet from '@/components/common/CheckWallet'
@@ -135,13 +135,12 @@ export const OwnerList = () => {
                 <Track {...SETTINGS_EVENTS.SETUP.ADD_OWNER}>
                   <Button
                     data-testid="add-owner-btn"
-                    onClick={() => setTxFlow(<AddOwnerFlow />)}
+                    onClick={() => setTxFlow(<ChangeOwnerStructureFlow />)}
                     variant="text"
-                    startIcon={<SvgIcon component={AddIcon} inheritViewBox fontSize="small" />}
                     disabled={!isOk}
                     size="compact"
                   >
-                    Add signer
+                    Change structure
                   </Button>
                 </Track>
               )}
