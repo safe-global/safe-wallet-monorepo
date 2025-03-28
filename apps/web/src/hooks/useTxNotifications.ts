@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef } from 'react'
-import { formatError } from '@/utils/formatters'
+import { formatError } from '@safe-global/utils/utils/formatters'
 import { selectNotifications, showNotification } from '@/store/notificationsSlice'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { TxEvent, txSubscribe } from '@/services/tx/txEvents'
@@ -11,10 +11,10 @@ import { selectPendingTxs } from '@/store/pendingTxsSlice'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import useWallet from './wallets/useWallet'
 import useSafeAddress from './useSafeAddress'
-import { getExplorerLink } from '@/utils/gateway'
 import { isWalletRejection } from '@/utils/wallets'
 import { getTxLink } from '@/utils/tx-link'
 import { useLazyGetTransactionDetailsQuery } from '@/store/api/gateway'
+import { getExplorerLink } from '@safe-global/utils/utils/gateway'
 
 const TxNotifications = {
   [TxEvent.SIGN_FAILED]: 'Failed to sign. Please try again.',

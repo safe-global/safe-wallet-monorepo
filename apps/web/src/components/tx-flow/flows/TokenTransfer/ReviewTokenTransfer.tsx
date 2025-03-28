@@ -7,7 +7,7 @@ import { SafeTxContext } from '../../SafeTxProvider'
 import type { MetaTransactionData } from '@safe-global/safe-core-sdk-types'
 import { Divider, Stack } from '@mui/material'
 import ReviewRecipientRow from './ReviewRecipientRow'
-import { sameAddress } from '@/utils/addresses'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 import ReviewTransaction from '@/components/tx/ReviewTransaction'
 
 const ReviewTokenTransfer = ({

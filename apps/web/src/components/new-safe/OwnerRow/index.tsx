@@ -9,7 +9,7 @@ import { useAddressResolver } from '@/hooks/useAddressResolver'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import type { NamedAddress } from '@/components/new-safe/create/types'
 import useWallet from '@/hooks/wallets/useWallet'
-import { sameAddress } from '@/utils/addresses'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 import css from './styles.module.css'
 import classNames from 'classnames'
 

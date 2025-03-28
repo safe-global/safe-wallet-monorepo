@@ -3,7 +3,7 @@ import InfoIcon from '@/public/images/notifications/info.svg'
 import { MAX_DAY_RELAYS } from '@/hooks/useRemainingRelays'
 import css from '../BalanceInfo/styles.module.css'
 import type { RelayCountResponse } from '@safe-global/safe-gateway-typescript-sdk'
-import { maybePlural } from '@/utils/formatters'
+import { maybePlural } from '@safe-global/utils/utils/formatters'
 
 const RemainingRelays = ({ relays, tooltip }: { relays?: RelayCountResponse; tooltip?: string }) => {
   if (!tooltip) {

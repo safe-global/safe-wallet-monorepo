@@ -28,8 +28,8 @@ import tokenInputCss from '@/components/common/TokenAmountInput/styles.module.cs
 import NumberField from '@/components/common/NumberField'
 import { useVisibleBalances } from '@/hooks/useVisibleBalances'
 import { AutocompleteItem } from '@/components/tx-flow/flows/TokenTransfer/CreateTokenTransfer'
-import { validateDecimalLength, validateLimitedAmount } from '@/utils/validation'
-import { safeFormatUnits } from '@/utils/formatters'
+import { validateDecimalLength, validateLimitedAmount } from '@safe-global/utils/utils/validation'
+import { safeFormatUnits } from '@safe-global/utils/utils/formatters'
 import { useMnemonicPrefixedSafeName } from '@/hooks/useMnemonicName'
 
 import css from '@/components/tx-flow/flows/CreateNestedSafe/styles.module.css'

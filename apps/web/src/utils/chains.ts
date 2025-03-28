@@ -1,10 +1,10 @@
 import { AppRoutes } from '@/config/routes'
 import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
-import { getExplorerLink } from './gateway'
 import { type SafeVersion } from '@safe-global/safe-core-sdk-types'
 import { getSafeSingletonDeployment } from '@safe-global/safe-deployments'
 import semverSatisfies from 'semver/functions/satisfies'
 import { LATEST_SAFE_VERSION } from '@/config/constants'
+import { getExplorerLink } from '@safe-global/utils/utils/gateway'
 
 /** This version is used if a network does not have the LATEST_SAFE_VERSION deployed yet */
 const FALLBACK_SAFE_VERSION = '1.3.0' as const

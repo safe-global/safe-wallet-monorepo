@@ -8,7 +8,7 @@ let safeAddress
 
 const txType_incoming = 'incoming'
 
-describe('[SMOKE] API Tx history decimals filter tests', () => {
+describe('API Tx history decimals filter tests', () => {
   before(async () => {
     staticSafes = await getSafes(CATEGORIES.static)
   })

@@ -12,7 +12,7 @@ import { createUpdateMigration, SAFE_TO_L2_MIGRATION_VERSION } from '@/utils/saf
 import { isMultiSendCalldata } from '@/utils/transaction-calldata'
 import { decodeMultiSendData } from '@safe-global/protocol-kit/dist/src/utils'
 import { Gnosis_safe__factory } from '@/types/contracts/factories/@safe-global/safe-deployments/dist/assets/v1.1.1'
-import { sameAddress } from '@/utils/addresses'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { determineMasterCopyVersion } from '@/features/counterfactual/utils'
 import { getSafeMigrationDeployment } from '@safe-global/safe-deployments'
 

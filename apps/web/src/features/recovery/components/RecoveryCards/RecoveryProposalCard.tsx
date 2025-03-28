@@ -16,7 +16,7 @@ import type { TxModalContextType } from '@/components/tx-flow'
 import type { SafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
 
 import css from './styles.module.css'
-import { maybePlural } from '@/utils/formatters'
+import { maybePlural } from '@safe-global/utils/utils/formatters'
 
 type Props =
   | {

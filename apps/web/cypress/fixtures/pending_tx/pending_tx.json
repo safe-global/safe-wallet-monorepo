@@ -1,0 +1,100 @@
+{
+  "count": 4,
+  "next": null,
+  "previous": null,
+  "results": [
+    {
+      "type": "LABEL",
+      "label": "Next"
+    },
+    {
+      "type": "CONFLICT_HEADER",
+      "nonce": 14
+    },
+    {
+      "type": "TRANSACTION",
+      "transaction": {
+        "txInfo": {
+          "type": "SettingsChange",
+          "humanDescription": "Add new owner 0x0D65...1b2e with threshold 1",
+          "dataDecoded": {
+            "method": "addOwnerWithThreshold",
+            "parameters": [
+              {
+                "name": "owner",
+                "type": "address",
+                "value": "0x0D65139Da4B36a8A39BF1b63e950038D42231b2e",
+                "valueDecoded": null
+              },
+              {
+                "name": "_threshold",
+                "type": "uint256",
+                "value": "1",
+                "valueDecoded": null
+              }
+            ]
+          },
+          "settingsInfo": {
+            "type": "ADD_OWNER",
+            "owner": {
+              "value": "0x0D65139Da4B36a8A39BF1b63e950038D42231b2e",
+              "name": null,
+              "logoUri": null
+            },
+            "threshold": 1
+          }
+        },
+        "id": "multisig_0xBd69b0a9DC90eB6F9bAc3E4a5875f437348b6415_0xedb578c125c7872f817e38500f19ef5bf7f3c0ba75cde9ae86b56d4986e842fb",
+        "timestamp": 1698618050333,
+        "txStatus": "AWAITING_EXECUTION",
+        "executionInfo": {
+          "type": "MULTISIG",
+          "nonce": 14,
+          "confirmationsRequired": 1,
+          "confirmationsSubmitted": 1,
+          "missingSigners": null
+        },
+        "safeAppInfo": null,
+        "txHash": null
+      },
+      "conflictType": "HasNext"
+    },
+    {
+      "type": "TRANSACTION",
+      "transaction": {
+        "txInfo": {
+          "type": "Transfer",
+          "humanDescription": null,
+          "sender": {
+            "value": "0xBd69b0a9DC90eB6F9bAc3E4a5875f437348b6415",
+            "name": null,
+            "logoUri": null
+          },
+          "recipient": {
+            "value": "0x0D65139Da4B36a8A39BF1b63e950038D42231b2e",
+            "name": "MetaMultiSigWallet",
+            "logoUri": null
+          },
+          "direction": "OUTGOING",
+          "transferInfo": {
+            "type": "NATIVE_COIN",
+            "value": "20000000000000"
+          }
+        },
+        "id": "multisig_0xBd69b0a9DC90eB6F9bAc3E4a5875f437348b6415_0xad3609798810096b53b4515e1e68b93265ab1db76632c73f1fd36278e77f1e5e",
+        "timestamp": 1700820219720,
+        "txStatus": "AWAITING_EXECUTION",
+        "executionInfo": {
+          "type": "MULTISIG",
+          "nonce": 14,
+          "confirmationsRequired": 1,
+          "confirmationsSubmitted": 1,
+          "missingSigners": null
+        },
+        "safeAppInfo": null,
+        "txHash": null
+      },
+      "conflictType": "End"
+    }
+  ]
+}

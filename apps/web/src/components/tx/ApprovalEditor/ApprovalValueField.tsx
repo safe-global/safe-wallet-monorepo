@@ -1,5 +1,5 @@
 import NumberField from '@/components/common/NumberField'
-import { validateAmount, validateDecimalLength } from '@/utils/validation'
+import { validateAmount, validateDecimalLength } from '@safe-global/utils/utils/validation'
 import { Autocomplete, type MenuItemProps, MenuItem } from '@mui/material'
 import { useController, useFormContext } from 'react-hook-form'
 import type { ApprovalInfo } from './hooks/useApprovalInfos'

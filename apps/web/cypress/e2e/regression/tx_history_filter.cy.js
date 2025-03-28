@@ -9,7 +9,7 @@ const success = constants.transactionStatus.success.toUpperCase()
 const txType_outgoing = 'multisig'
 const txType_incoming = 'incoming'
 
-describe('[SMOKE] API Tx history filter tests', () => {
+describe('API Tx history filter tests', () => {
   before(async () => {
     staticSafes = await getSafes(CATEGORIES.static)
   })

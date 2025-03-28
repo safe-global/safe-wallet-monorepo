@@ -3,11 +3,11 @@ import type { TransactionData } from '@safe-global/safe-gateway-typescript-sdk'
 import ExternalLink from '@/components/common/ExternalLink'
 import { useCurrentChain } from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { getExplorerLink } from '@/utils/gateway'
 import ErrorMessage from '../ErrorMessage'
 import { isMigrationToL2Possible, isValidMasterCopy } from '@/services/contracts/safeContracts'
 import { AlertTitle, Typography } from '@mui/material'
 import { isMigrateL2SingletonCall } from '@/utils/safe-migrations'
+import { getExplorerLink } from '@safe-global/utils/utils/gateway'
 
 const UnknownContractError = ({ txData }: { txData: TransactionData | undefined }): ReactElement | null => {
   const { safe, safeAddress } = useSafeInfo()

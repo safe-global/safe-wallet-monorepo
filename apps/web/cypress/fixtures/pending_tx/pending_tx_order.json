@@ -1,0 +1,112 @@
+{
+  "count": 5,
+  "next": null,
+  "previous": null,
+  "results": [
+    { "type": "LABEL", "label": "Next" },
+    {
+      "type": "TRANSACTION",
+      "transaction": {
+        "txInfo": {
+          "type": "Custom",
+          "humanDescription": null,
+          "to": {
+            "value": "0xA1dabEF33b3B82c7814B6D82A79e50F4AC44102B",
+            "name": "Safe: MultiSendCallOnly 1.3.0",
+            "logoUri": "https://safe-transaction-assets.staging.5afe.dev/contracts/logos/0xA1dabEF33b3B82c7814B6D82A79e50F4AC44102B.png"
+          },
+          "dataSize": "580",
+          "value": "0",
+          "methodName": "multiSend",
+          "actionCount": 3,
+          "isCancellation": false
+        },
+        "id": "multisig_0xFFfaC243A24EecE6553f0Da278322aCF1Fb6CeF1_0xdd83250c3ba9add601062d9750504f37a89ef27b134cc185cdc044ec70213075",
+        "timestamp": 1707916165884,
+        "txStatus": "AWAITING_CONFIRMATIONS",
+        "executionInfo": {
+          "type": "MULTISIG",
+          "nonce": 4,
+          "confirmationsRequired": 2,
+          "confirmationsSubmitted": 1,
+          "missingSigners": [{ "value": "0xC16Db0251654C0a72E91B190d81eAD367d2C6fED", "name": null, "logoUri": null }]
+        },
+        "safeAppInfo": null,
+        "txHash": null
+      },
+      "conflictType": "None"
+    },
+    { "type": "LABEL", "label": "Queued" },
+    {
+      "type": "TRANSACTION",
+      "transaction": {
+        "txInfo": {
+          "type": "SettingsChange",
+          "humanDescription": "Add new owner 0x4c8b...5F4a with threshold 2",
+          "dataDecoded": {
+            "method": "addOwnerWithThreshold",
+            "parameters": [
+              {
+                "name": "owner",
+                "type": "address",
+                "value": "0x4c8bF5541D21288836F5B7AdE01E102F074c5F4a",
+                "valueDecoded": null
+              },
+              { "name": "_threshold", "type": "uint256", "value": "2", "valueDecoded": null }
+            ]
+          },
+          "settingsInfo": {
+            "type": "ADD_OWNER",
+            "owner": { "value": "0x4c8bF5541D21288836F5B7AdE01E102F074c5F4a", "name": null, "logoUri": null },
+            "threshold": 2
+          }
+        },
+        "id": "multisig_0xFFfaC243A24EecE6553f0Da278322aCF1Fb6CeF1_0xdffd24c0107e9c10e2542ca14b7f6aca35363d442f7af3609cd99b79fb4d045b",
+        "timestamp": 1707916293395,
+        "txStatus": "AWAITING_CONFIRMATIONS",
+        "executionInfo": {
+          "type": "MULTISIG",
+          "nonce": 5,
+          "confirmationsRequired": 2,
+          "confirmationsSubmitted": 1,
+          "missingSigners": [{ "value": "0xC16Db0251654C0a72E91B190d81eAD367d2C6fED", "name": null, "logoUri": null }]
+        },
+        "safeAppInfo": null,
+        "txHash": null
+      },
+      "conflictType": "None"
+    },
+    {
+      "type": "TRANSACTION",
+      "transaction": {
+        "txInfo": {
+          "type": "Custom",
+          "humanDescription": null,
+          "to": {
+            "value": "0xA1dabEF33b3B82c7814B6D82A79e50F4AC44102B",
+            "name": "Safe: MultiSendCallOnly 1.3.0",
+            "logoUri": "https://safe-transaction-assets.staging.5afe.dev/contracts/logos/0xA1dabEF33b3B82c7814B6D82A79e50F4AC44102B.png"
+          },
+          "dataSize": "388",
+          "value": "0",
+          "methodName": "multiSend",
+          "actionCount": 2,
+          "isCancellation": false
+        },
+        "id": "multisig_0xFFfaC243A24EecE6553f0Da278322aCF1Fb6CeF1_0x03e5f606fe1d1015eb621ba1a80f7ab24819290edb4a9cbd20c14b2783ee7243",
+        "timestamp": 1707916363084,
+        "txStatus": "AWAITING_CONFIRMATIONS",
+        "executionInfo": {
+          "type": "MULTISIG",
+          "nonce": 6,
+          "confirmationsRequired": 2,
+          "confirmationsSubmitted": 1,
+          "missingSigners": [{ "value": "0xC16Db0251654C0a72E91B190d81eAD367d2C6fED", "name": null, "logoUri": null }]
+        },
+        "safeAppInfo": null,
+        "txHash": null
+      },
+      "conflictType": "None"
+    }
+  ]
+}

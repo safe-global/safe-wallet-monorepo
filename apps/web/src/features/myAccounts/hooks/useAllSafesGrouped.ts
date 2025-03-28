@@ -1,7 +1,7 @@
 import groupBy from 'lodash/groupBy'
 import useAllSafes, { type SafeItem, type SafeItems } from './useAllSafes'
 import { useMemo } from 'react'
-import { sameAddress } from '@/utils/addresses'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { type AddressBookState, selectAllAddressBooks } from '@/store/addressBookSlice'
 import useWallet from '@/hooks/wallets/useWallet'
 import useAllOwnedSafes from '@/features/myAccounts/hooks/useAllOwnedSafes'

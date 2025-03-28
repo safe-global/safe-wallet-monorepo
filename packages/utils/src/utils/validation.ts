@@ -1,5 +1,5 @@
-import { parsePrefixedAddress, sameAddress, isChecksummedAddress } from './addresses'
-import { safeFormatUnits, safeParseUnits } from './formatters'
+import { parsePrefixedAddress, sameAddress, isChecksummedAddress } from '@safe-global/utils/utils/addresses'
+import { safeFormatUnits, safeParseUnits } from '@safe-global/utils/utils/formatters'
 
 export const validateAddress = (address: string) => {
   const ADDRESS_RE = /^0x[0-9a-f]{40}$/i
@@ -63,8 +63,8 @@ export const validateAmount = (amount?: string, includingZero: boolean = false) 
   }
 }
 
-export const validateLimitedAmount = (amount: string, decimals?: number, max?: string) => {
-  if (typeof decimals === 'undefined' || !max) return
+export const validateLimitedAmount = (amount: string, decimals?: number | null, max?: string, errorMsg?: string) => {
+  if (decimals == null || !max) return
 
   const numberError = validateAmount(amount)
   if (numberError) {
@@ -74,12 +74,12 @@ export const validateLimitedAmount = (amount: string, decimals?: number, max?: s
   const value = safeParseUnits(amount, decimals)
 
   if (value !== undefined && value > BigInt(max)) {
-    return `Maximum value is ${safeFormatUnits(max, decimals)}`
+    return errorMsg || `Maximum value is ${safeFormatUnits(max, decimals)}`
   }
 }
 
-export const validateDecimalLength = (value: string, maxLen?: number, minLen = 1) => {
-  if (typeof maxLen === 'undefined' || !value.includes('.')) {
+export const validateDecimalLength = (value: string, maxLen?: number | null, minLen = 1) => {
+  if (maxLen == null || !value.includes('.')) {
     return
   }
 

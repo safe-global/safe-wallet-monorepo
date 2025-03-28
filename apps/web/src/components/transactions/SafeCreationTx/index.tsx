@@ -5,7 +5,7 @@ import css from './styles.module.css'
 import { InfoDetails } from '@/components/transactions/InfoDetails'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import { generateDataRowValue, TxDataRow } from '@/components/transactions/TxDetails/Summary/TxDataRow'
-import { dateString } from '@/utils/formatters'
+import { dateString } from '@safe-global/utils/utils/formatters'
 import { isCreationTxInfo } from '@/utils/transaction-guards'
 import { NOT_AVAILABLE } from '@/components/transactions/TxDetails'
 

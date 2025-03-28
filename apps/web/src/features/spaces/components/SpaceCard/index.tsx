@@ -9,7 +9,7 @@ import { useSpaceSafeCount } from '@/features/spaces/hooks/useSpaceSafeCount'
 import InitialsAvatar from '@/features/spaces/components/InitialsAvatar'
 import SpaceContextMenu from '@/features/spaces/components/SpaceCard/SpaceContextMenu'
 import { useIsAdmin } from '@/features/spaces/hooks/useSpaceMembers'
-import { maybePlural } from '@/utils/formatters'
+import { maybePlural } from '@safe-global/utils/utils/formatters'
 
 export const SpaceSummary = ({
   name,

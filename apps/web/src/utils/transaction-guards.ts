@@ -54,7 +54,7 @@ import {
   TransferDirection,
 } from '@safe-global/safe-gateway-typescript-sdk'
 import { getDeployedSpendingLimitModuleAddress } from '@/services/contracts/spendingLimitContracts'
-import { sameAddress } from '@/utils/addresses'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 import type { NamedAddress } from '@/components/new-safe/create/types'
 import type { RecoveryQueueItem } from '@/features/recovery/services/recovery-state'
 import { ethers } from 'ethers'

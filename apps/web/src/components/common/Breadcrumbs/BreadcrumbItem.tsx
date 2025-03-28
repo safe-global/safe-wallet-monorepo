@@ -2,7 +2,7 @@ import Link from 'next/link'
 import type { UrlObject } from 'url'
 import { Tooltip, Typography, useMediaQuery, useTheme } from '@mui/material'
 import useAddressBook from '@/hooks/useAddressBook'
-import { shortenAddress } from '@/utils/formatters'
+import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import css from './styles.module.css'
 import Identicon from '@/components/common/Identicon'
 

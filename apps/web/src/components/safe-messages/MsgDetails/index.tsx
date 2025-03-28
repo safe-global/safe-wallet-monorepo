@@ -6,7 +6,7 @@ import classNames from 'classnames'
 import { SafeMessageStatus, type SafeMessage } from '@safe-global/safe-gateway-typescript-sdk'
 import { ErrorBoundary } from '@sentry/react'
 
-import { formatDateTime } from '@/utils/date'
+import { formatDateTime } from '@safe-global/utils/utils/date'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import { InfoDetails } from '@/components/transactions/InfoDetails'
 import { generateDataRowValue, TxDataRow } from '@/components/transactions/TxDetails/Summary/TxDataRow'

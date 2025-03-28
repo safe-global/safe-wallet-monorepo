@@ -1,4 +1,4 @@
-import { formatVisualAmount } from '@/utils/formatters'
+import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
 import { type FeeData } from 'ethers'
 import type {
   ChainInfo,

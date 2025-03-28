@@ -4,7 +4,7 @@ import ArrowIcon from '@/public/images/common/arrow-nw.svg'
 import type { SafeCollectibleResponse } from '@safe-global/safe-gateway-typescript-sdk'
 import { Sticky } from '@/components/common/Sticky'
 import CheckWallet from '@/components/common/CheckWallet'
-import { maybePlural } from '@/utils/formatters'
+import { maybePlural } from '@safe-global/utils/utils/formatters'
 
 type NftSendFormProps = {
   selectedNfts: SafeCollectibleResponse[]

@@ -1,7 +1,7 @@
 import { FormControl, FormControlLabel, InputLabel, Radio, RadioGroup, SvgIcon, Tooltip } from '@mui/material'
 import { Controller, useFormContext } from 'react-hook-form'
 import classNames from 'classnames'
-import { safeFormatUnits } from '@/utils/formatters'
+import { safeFormatUnits } from '@safe-global/utils/utils/formatters'
 import type { TokenInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import { MultiTransfersFields, TokenTransferType } from '@/components/tx-flow/flows/TokenTransfer'
 import InfoIcon from '@/public/images/notifications/info.svg'

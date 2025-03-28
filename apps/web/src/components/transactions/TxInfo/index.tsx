@@ -24,7 +24,7 @@ import {
   isStakingTxExitInfo,
   isStakingTxWithdrawInfo,
 } from '@/utils/transaction-guards'
-import { ellipsis, maybePlural, shortenAddress } from '@/utils/formatters'
+import { ellipsis, maybePlural, shortenAddress } from '@safe-global/utils/utils/formatters'
 import { useCurrentChain } from '@/hooks/useChains'
 import { SwapTx } from '@/features/swap/components/SwapTxInfo/SwapTx'
 import StakingTxExitInfo from '@/features/stake/components/StakingTxExitInfo'

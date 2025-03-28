@@ -1,7 +1,7 @@
 import { type EndpointBuilder } from '@reduxjs/toolkit/query/react'
 
 import { type SafeOverview, getSafeOverviews } from '@safe-global/safe-gateway-typescript-sdk'
-import { sameAddress } from '@/utils/addresses'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 import type { RootState } from '../..'
 import { selectCurrency } from '../../settingsSlice'
 import { type SafeItem } from '@/features/myAccounts/hooks/useAllSafes'

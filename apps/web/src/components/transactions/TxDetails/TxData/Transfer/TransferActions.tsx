@@ -13,7 +13,7 @@ import type { Transfer } from '@safe-global/safe-gateway-typescript-sdk'
 import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
 import { isERC20Transfer, isNativeTokenTransfer, isOutgoingTransfer } from '@/utils/transaction-guards'
 import { trackEvent, TX_LIST_EVENTS } from '@/services/analytics'
-import { safeFormatUnits } from '@/utils/formatters'
+import { safeFormatUnits } from '@safe-global/utils/utils/formatters'
 import CheckWallet from '@/components/common/CheckWallet'
 import { TxModalContext } from '@/components/tx-flow'
 

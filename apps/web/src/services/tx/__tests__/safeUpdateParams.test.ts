@@ -1,5 +1,5 @@
 import * as sdkHelpers from '@/services/tx/tx-sender/sdk'
-import { sameAddress } from '@/utils/addresses'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 import type { SafeProvider } from '@safe-global/protocol-kit'
 import {
   getFallbackHandlerDeployment,

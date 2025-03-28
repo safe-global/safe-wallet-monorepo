@@ -10,7 +10,7 @@ import type { SafeVersion } from '@safe-global/safe-core-sdk-types'
 import type { SafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import semverSatisfies from 'semver/functions/satisfies'
 import { isValidMasterCopy } from '@/services/contracts/safeContracts'
-import { sameAddress } from '@/utils/addresses'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { isPredictedSafeProps, isReplayedSafeProps } from '@/features/counterfactual/utils'
 
 export const isLegacyVersion = (safeVersion: string): boolean => {

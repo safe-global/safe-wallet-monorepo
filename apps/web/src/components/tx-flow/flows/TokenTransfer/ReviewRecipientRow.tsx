@@ -3,9 +3,9 @@ import useBalances from '@/hooks/useBalances'
 import SendAmountBlock from '@/components/tx-flow/flows/TokenTransfer/SendAmountBlock'
 import SendToBlock from '@/components/tx/SendToBlock'
 import type { TokenTransferParams } from '.'
-import { safeParseUnits } from '@/utils/formatters'
+import { safeParseUnits } from '@safe-global/utils/utils/formatters'
 import { Stack } from '@mui/material'
-import { sameAddress } from '@/utils/addresses'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 
 const ReviewRecipientRow = ({ params, name }: { params: TokenTransferParams; name: string }) => {
   const { balances } = useBalances()

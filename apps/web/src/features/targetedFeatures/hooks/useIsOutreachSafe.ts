@@ -1,7 +1,7 @@
 import { useTargetedMessagingGetTargetedSafeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/targeted-messages'
 
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { sameAddress } from '@/utils/addresses'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 
 export function useIsOutreachSafe(outreachId: number): boolean {
   const { safe } = useSafeInfo()

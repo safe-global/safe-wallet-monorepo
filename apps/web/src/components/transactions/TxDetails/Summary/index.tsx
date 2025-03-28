@@ -6,7 +6,7 @@ import { isCustomTxInfo, isMultisigDetailedExecutionInfo } from '@/utils/transac
 import type { TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
 import { Operation } from '@safe-global/safe-gateway-typescript-sdk'
 import type { SafeTransactionData } from '@safe-global/safe-core-sdk-types'
-import { dateString } from '@/utils/formatters'
+import { dateString } from '@safe-global/utils/utils/formatters'
 import css from './styles.module.css'
 import DecodedData from '../TxData/DecodedData'
 import { SafeTxHashDataRow } from './SafeTxHashDataRow'

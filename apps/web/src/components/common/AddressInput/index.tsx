@@ -14,11 +14,11 @@ import {
   Box,
 } from '@mui/material'
 import { useFormContext, useWatch, type Validate, get } from 'react-hook-form'
-import { validatePrefixedAddress } from '@/utils/validation'
+import { validatePrefixedAddress } from '@safe-global/utils/utils/validation'
 import { useCurrentChain } from '@/hooks/useChains'
 import useNameResolver from './useNameResolver'
 import { FEATURES, hasFeature } from '@/utils/chains'
-import { cleanInputValue, parsePrefixedAddress } from '@/utils/addresses'
+import { cleanInputValue, parsePrefixedAddress } from '@safe-global/utils/utils/addresses'
 import useDebounce from '@/hooks/useDebounce'
 import CaretDownIcon from '@/public/images/common/caret-down.svg'
 import SaveAddressIcon from '@/public/images/common/save-address.svg'

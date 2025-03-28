@@ -1,4 +1,4 @@
-import { type ReactNode, useEffect } from 'react'
+import { type ReactNode } from 'react'
 import SignedOutState from '@/features/spaces/components/SignedOutState'
 import { isUnauthorized } from '@/features/spaces/utils'
 import UnauthorizedState from '@/features/spaces/components/UnauthorizedState'

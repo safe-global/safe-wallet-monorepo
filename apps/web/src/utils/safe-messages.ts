@@ -3,7 +3,7 @@ import { gte } from 'semver'
 import { adjustVInSignature } from '@safe-global/protocol-kit/dist/src/utils/signatures'
 
 import { hashTypedData } from '@/utils/web3'
-import { isValidAddress } from './validation'
+import { isValidAddress } from '@safe-global/utils/utils/validation'
 import {
   type SafeInfo,
   type SafeMessage,

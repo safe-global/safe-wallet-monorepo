@@ -1,6 +1,5 @@
 import { selectActiveChainCurrency } from '@/src/store/chains'
 import { useAppSelector } from '@/src/store/hooks'
-import { formatValue } from '@/src/utils/formatters'
 import { isERC20Transfer, isERC721Transfer, isNativeTokenTransfer } from '@/src/utils/transaction-guards'
 import { TransferTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { ellipsis } from '@safe-global/utils/utils/formatters'
@@ -20,7 +19,7 @@ export const useTokenDetails = (txInfo: TransferTransactionInfo): tokenDetails =
 
   if (isNativeTokenTransfer(transfer) && nativeCurrency) {
     return {
-      value: formatValue(transfer.value || '0', nativeCurrency.decimals),
+      value: transfer.value || '0',
       // take it from the native currency slice
       decimals: nativeCurrency.decimals,
       tokenSymbol: nativeCurrency.symbol,
@@ -31,7 +30,7 @@ export const useTokenDetails = (txInfo: TransferTransactionInfo): tokenDetails =
 
   if (isERC20Transfer(transfer)) {
     return {
-      value: formatValue(transfer.value, transfer.decimals || 18),
+      value: transfer.value || '0',
       decimals: transfer.decimals || undefined,
       logoUri: transfer.logoUri || undefined,
       tokenSymbol: ellipsis((transfer.tokenSymbol || 'Unknown Token').trim(), 6),
