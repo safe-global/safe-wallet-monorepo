@@ -1,5 +1,6 @@
-import * as constants from '../../support/constants'
-import * as createTx from '../pages/create_tx.pages'
+import * as constants from '../../support/constants.js'
+import * as main from '../pages/main.page.js'
+import * as createTx from '../pages/create_tx.pages.js'
 import * as data from '../../fixtures/txhistory_data_data.json'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 
@@ -13,22 +14,17 @@ const typeDeleteAllowance = data.type.deleteSpendingLimit
 const typeGeneral = data.type.general
 const typeUntrustedToken = data.type.untrustedReceivedToken
 
-describe('[SMOKE] Tx history tests', () => {
+describe('Tx history tests 6', () => {
   before(async () => {
     staticSafes = await getSafes(CATEGORIES.static)
   })
 
   beforeEach(() => {
-    cy.visit(constants.transactionsHistoryUrl + staticSafes.SEP_STATIC_SAFE_23)
-    cy.fixture('history/history_tx_1.json').then((mockData) => {
-      cy.intercept('GET', constants.transactionHistoryEndpoint, mockData).as('getHistory')
-    })
-    cy.wait('@getHistory')
+    cy.visit(constants.transactionsHistoryUrl + staticSafes.SEP_STATIC_SAFE_7)
   })
 
-  // mock
   // Token receipt
-  it('[SMOKE] Verify summary for token receipt', () => {
+  it('Verify summary for token receipt', () => {
     createTx.verifySummaryByName(
       typeReceive.summaryTitle,
       typeReceive.summaryTxInfo,
@@ -37,8 +33,7 @@ describe('[SMOKE] Tx history tests', () => {
     )
   })
 
-  // mock
-  it('[SMOKE] Verify exapanded details for token receipt', () => {
+  it('Verify exapanded details for token receipt', () => {
     createTx.clickOnTransactionItemByName(typeReceive.summaryTitle, typeReceive.summaryTxInfo)
     createTx.verifyExpandedDetails([
       typeReceive.title,
@@ -48,8 +43,7 @@ describe('[SMOKE] Tx history tests', () => {
     ])
   })
 
-  // mock
-  it('[SMOKE] Verify summary for token send', () => {
+  it('Verify summary for token send', () => {
     createTx.verifySummaryByName(
       typeSend.title,
       null,
@@ -59,8 +53,7 @@ describe('[SMOKE] Tx history tests', () => {
     )
   })
 
-  // mock
-  it('[SMOKE] Verify summary for on-chain rejection', () => {
+  it('Verify summary for on-chain rejection', () => {
     createTx.verifySummaryByName(
       typeOnchainRejection.title,
       null,
@@ -69,16 +62,14 @@ describe('[SMOKE] Tx history tests', () => {
     )
   })
 
-  // mock
-  it('[SMOKE] Verify summary for batch', () => {
+  it('Verify summary for batch', () => {
     createTx.verifySummaryByName(typeBatch.title, typeBatch.summaryTxInfo, [
       typeBatch.summaryTxInfo,
       typeGeneral.statusOk,
     ])
   })
 
-  // mock
-  it('[SMOKE] Verify summary for allowance deletion', () => {
+  it('Verify summary for allowance deletion', () => {
     createTx.verifySummaryByName(
       typeDeleteAllowance.title,
       typeDeleteAllowance.summaryTxInfo,
@@ -87,8 +78,7 @@ describe('[SMOKE] Tx history tests', () => {
     )
   })
 
-  // mock
-  it('[SMOKE] Verify summary for untrusted token', () => {
+  it('Verify summary for untrusted token', () => {
     createTx.toggleUntrustedTxs()
     createTx.verifySummaryByName(
       typeUntrustedToken.summaryTitle,
