@@ -18,6 +18,7 @@ import { selectAllVisitedSafes, visitedSafesSlice } from '@/store/visitedSafesSl
 import css from './styles.module.css'
 import Track from '@/components/common/Track'
 import { OVERVIEW_EVENTS, OVERVIEW_LABELS } from '@/services/analytics'
+import { ClearPendingTxs } from '../ClearPendingTxs'
 
 const getExportFileName = () => {
   const today = new Date().toISOString().slice(0, 10)
@@ -111,7 +112,7 @@ const DataManagement = () => {
         </Grid>
       </Paper>
 
-      <Paper sx={{ p: 4 }}>
+      <Paper sx={{ p: 4, mb: 2 }}>
         <Grid container spacing={3}>
           <Grid item sm={4} xs={12}>
             <Typography variant="h4" fontWeight={700}>
@@ -131,6 +132,20 @@ const DataManagement = () => {
               setFileName={setImportFileName}
             />
           )}
+        </Grid>
+      </Paper>
+
+      <Paper sx={{ p: 4 }}>
+        <Grid container spacing={3}>
+          <Grid item sm={4} xs={12}>
+            <Typography variant="h4" fontWeight={700}>
+              Pending transactions
+            </Typography>
+          </Grid>
+
+          <Grid data-testid="clear-pending-tx-section" item container xs>
+            <ClearPendingTxs />
+          </Grid>
         </Grid>
       </Paper>
     </>
