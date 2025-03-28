@@ -30,6 +30,7 @@ import { safePassApi } from './api/safePass'
 import { version as termsVersion } from '@/markdown/terms/version'
 import { cgwClient, setBaseUrl } from '@safe-global/store/gateway/cgwClient'
 import { GATEWAY_URL } from '@/config/gateway'
+import { setupListeners } from '@reduxjs/toolkit/query'
 
 const rootReducer = combineReducers({
   [slices.chainsSlice.name]: slices.chainsSlice.reducer,
@@ -151,6 +152,8 @@ export const makeStore = (
   if (!options?.skipBroadcast) {
     listenToBroadcast(store)
   }
+
+  setupListeners(store.dispatch)
 
   return store
 }

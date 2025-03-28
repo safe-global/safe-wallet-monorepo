@@ -1,7 +1,7 @@
 import { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { ListTableItem } from '@/src/features/ConfirmTx/components/ListTable'
 import { isArrayParameter } from '@/src/utils/transaction-guards'
-import { shortenText } from '@safe-global/utils/formatters'
+import { shortenText } from '@safe-global/utils/utils/formatters'
 import { CircleProps, Text, View } from 'tamagui'
 import { CopyButton } from '@/src/components/CopyButton'
 import { characterDisplayLimit, formatValueTemplate } from './formatters/singleValue'

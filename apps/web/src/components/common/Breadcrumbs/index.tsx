@@ -4,7 +4,7 @@ import { NestedSafeBreadcrumbs } from '@/components/common/NestedSafeBreadcrumbs
 
 const Breadcrumbs = () => {
   return (
-    <div className={css.container}>
+    <div className={css.container} data-testid="safe-breadcrumb-container">
       <SpaceBreadcrumbs />
       <NestedSafeBreadcrumbs />
     </div>

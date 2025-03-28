@@ -2,8 +2,8 @@ import { Camera, Code, useCameraPermission } from 'react-native-vision-camera'
 import React, { useCallback, useEffect, useState } from 'react'
 import { useFocusEffect, useRouter } from 'expo-router'
 
-import { parsePrefixedAddress } from '@safe-global/utils/addresses'
-import { isValidAddress } from '@safe-global/utils/validation'
+import { parsePrefixedAddress } from '@safe-global/utils/utils/addresses'
+import { isValidAddress } from '@safe-global/utils/utils/validation'
 import { useToastController } from '@tamagui/toast'
 import { QrCameraView } from '@/src/features/ImportReadOnly/components/ScanQrAccountView'
 

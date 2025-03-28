@@ -242,7 +242,7 @@ describe('tx-history-filter', () => {
           filter: {
             to: '0x1234567890123456789012345678901234567890',
             execution_date__gte: '1969-12-31T23:00:00.000Z',
-            value: '123000000000000000000',
+            value: '123',
             nonce: '123',
           },
         })
@@ -293,7 +293,7 @@ describe('tx-history-filter', () => {
           type: 'Outgoing' as TxFilterType,
           filter: {
             execution_date__gte: '1970-01-01T00:00:00.000Z',
-            value: '123000000000000000000',
+            value: '123',
             nonce: '123',
           },
         })

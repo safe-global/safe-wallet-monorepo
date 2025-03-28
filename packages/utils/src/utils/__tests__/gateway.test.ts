@@ -1,4 +1,4 @@
-import { getExplorerLink, getHashedExplorerUrl, _replaceTemplate } from '@safe-global/utils/gateway'
+import { getExplorerLink, getHashedExplorerUrl, _replaceTemplate } from '@safe-global/utils/utils/gateway'
 
 describe('gateway', () => {
   describe('replaceTemplate', () => {

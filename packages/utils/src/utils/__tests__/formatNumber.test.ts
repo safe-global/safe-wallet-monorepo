@@ -1,4 +1,4 @@
-import { formatAmountPrecise, formatAmount, formatCurrency, formatCurrencyPrecise } from '@safe-global/utils/formatNumber'
+import { formatAmountPrecise, formatAmount, formatCurrency, formatCurrencyPrecise } from '@safe-global/utils/utils/formatNumber'
 
 describe('formatNumber', () => {
   describe('formatAmountPrecise', () => {

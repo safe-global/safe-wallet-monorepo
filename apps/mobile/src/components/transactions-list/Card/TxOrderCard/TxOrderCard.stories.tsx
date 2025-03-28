@@ -1,11 +1,11 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { TxSwapCard } from '@/src/components/transactions-list/Card/TxSwapCard'
+import { TxOrderCard } from './TxOrderCard'
 import { mockSwapTransfer } from '@/src/tests/mocks'
 import { OrderTransactionInfo } from '@safe-global/store/gateway/types'
 
-const meta: Meta<typeof TxSwapCard> = {
+const meta: Meta<typeof TxOrderCard> = {
   title: 'TransactionsList/TxSwapCard',
-  component: TxSwapCard,
+  component: TxOrderCard,
   args: {
     txInfo: mockSwapTransfer as OrderTransactionInfo,
   },
@@ -13,6 +13,6 @@ const meta: Meta<typeof TxSwapCard> = {
 
 export default meta
 
-type Story = StoryObj<typeof TxSwapCard>
+type Story = StoryObj<typeof TxOrderCard>
 
 export const Default: Story = {}

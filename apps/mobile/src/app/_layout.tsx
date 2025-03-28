@@ -127,6 +127,14 @@ function RootLayout() {
                           }}
                         />
                         <Stack.Screen
+                          name="biometrics-opt-in"
+                          options={{
+                            headerShown: false,
+                            presentation: 'modal',
+                            title: '',
+                          }}
+                        />
+                        <Stack.Screen
                           name="confirm-transaction"
                           options={{
                             title: 'Confirm transaction',

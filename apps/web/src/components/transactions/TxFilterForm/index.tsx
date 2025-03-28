@@ -191,9 +191,7 @@ const TxFilterForm = ({ toggleFilter }: { toggleFilter: () => void }): ReactElem
                               className={inputCss.input}
                               label={
                                 fieldState.error?.message ||
-                                (isIncomingFilter
-                                  ? 'Amount (with decimals)'
-                                  : `Amount (only ${chain?.nativeCurrency.symbol || 'ETH'})`)
+                                (isIncomingFilter ? 'Amount' : `Amount (only ${chain?.nativeCurrency.symbol || 'ETH'})`)
                               }
                               error={!!fieldState.error}
                               {...field}

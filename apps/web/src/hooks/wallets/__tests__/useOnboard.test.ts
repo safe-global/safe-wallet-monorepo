@@ -15,13 +15,14 @@ describe('useOnboard', () => {
           label: 'Wallet 1',
           icon: 'wallet1.svg',
           provider: null as unknown as EIP1193Provider,
-          chains: [{ id: '0x4' }],
+          chains: [{ id: '0x4', namespace: 'evm' }],
           accounts: [
             {
               address: '0x1234567890123456789012345678901234567890',
               ens: {
                 name: 'test.eth',
               },
+              uns: null,
               balance: {
                 ETH: '0.002346456767547',
               },
@@ -32,16 +33,17 @@ describe('useOnboard', () => {
           label: 'Wallet 2',
           icon: 'wallet2.svg',
           provider: null as unknown as EIP1193Provider,
-          chains: [{ id: '0x100' }],
+          chains: [{ id: '0x100', namespace: 'evm' }],
           accounts: [
             {
               address: '0x2',
               ens: null,
+              uns: null,
               balance: null,
             },
           ],
         },
-      ] as WalletState[]
+      ] as unknown as WalletState[]
 
       expect(getConnectedWallet(wallets)).toEqual({
         label: 'Wallet 1',
@@ -61,16 +63,17 @@ describe('useOnboard', () => {
           label: 'Wallet 1',
           icon: 'wallet1.svg',
           provider: null as unknown as EIP1193Provider,
-          chains: [{ id: '0x4' }],
+          chains: [{ id: '0x4', namespace: 'evm' }],
           accounts: [
             {
               address: '0xinvalid',
               ens: null,
+              uns: null,
               balance: null,
             },
           ],
         },
-      ] as WalletState[]
+      ] as unknown as WalletState[]
 
       expect(getConnectedWallet(wallets)).toBeNull()
     })

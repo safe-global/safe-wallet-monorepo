@@ -7,7 +7,7 @@ import { Address } from '@/src/types/address'
 import { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { ChainsDisplay } from '@/src/components/ChainsDisplay'
 import { shouldDisplayPreciseBalance } from '@/src/utils/balance'
-import { formatCurrency, formatCurrencyPrecise } from '@safe-global/utils/formatNumber'
+import { formatCurrency, formatCurrencyPrecise } from '@safe-global/utils/utils/formatNumber'
 
 interface AccountCardProps {
   name: string | Address

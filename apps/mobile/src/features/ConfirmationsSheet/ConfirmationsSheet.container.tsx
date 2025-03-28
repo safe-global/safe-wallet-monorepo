@@ -6,7 +6,7 @@ import { SignersCard } from '@/src/components/transactions-list/Card/SignersCard
 import { Badge } from '@/src/components/Badge'
 import { Text, View } from 'tamagui'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
-import { shortenAddress } from '@safe-global/utils/formatters'
+import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { Address } from '@/src/types/address'
 import {
   AddressInfo,

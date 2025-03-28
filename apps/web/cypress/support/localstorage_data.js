@@ -292,6 +292,13 @@ export const addressBookData = {
   proposers: {
     11155111: { '0xC16Db0251654C0a72E91B190d81eAD367d2C6fED': 'AD Proposer1' },
   },
+  nestedsafes: {
+    11155111: {
+      '0xAD5e4a366cc840120701384fca4Ec9b8bEb47cAD': 'Main nested safe',
+      '0x22e5093F4A75c2E99A8EcabfBF8c5c7fDcaDCf9d': 'Nested safe1',
+      '0xE5577b9E75F94C4a900E74F63F79A7968e812208': 'Nested safe2',
+    },
+  },
   addedSafesImport: {
     11155111: { '0x6d0b6F96f665Bb4490f9ddb2e450Da2f7e546dC1': 'imported-safe' },
   },
