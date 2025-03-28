@@ -34,7 +34,7 @@ export const useBlockaid = (
       let requestData
       try {
         requestData = JSON.parse(jsonData)
-      } catch { }
+      } catch {}
 
       try {
         return BlockaidModuleInstance.scanTransaction({
