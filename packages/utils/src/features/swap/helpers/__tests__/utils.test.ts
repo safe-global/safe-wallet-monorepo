@@ -8,8 +8,11 @@ import {
   isSettingTwapFallbackHandler,
   TWAP_FALLBACK_HANDLER,
 } from '../utils'
-import type { DataDecoded, TwapOrder } from '@safe-global/safe-gateway-typescript-sdk'
-import { type SwapOrder } from '@safe-global/safe-gateway-typescript-sdk'
+import type {
+  DataDecoded,
+  TwapOrderTransactionInfo as TwapOrder,
+  SwapOrderTransactionInfo as SwapOrder,
+} from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
 describe('Swap helpers', () => {
   test('sellAmount bigger than buyAmount', () => {
