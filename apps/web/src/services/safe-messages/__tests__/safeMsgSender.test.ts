@@ -74,7 +74,7 @@ describe('safeMsgSender', () => {
         types: { [type: string]: { name: string; type: string }[] }
         domain: any
         message: any
-        primaryType?: string
+        primaryType: string
       } = {
         types: {
           Test: [{ name: 'test', type: 'string' }],
@@ -87,6 +87,7 @@ describe('safeMsgSender', () => {
         message: {
           test: 'Hello World!',
         },
+        primaryType: 'Test',
       }
       const origin = 'http://example.com'
 

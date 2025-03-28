@@ -1,12 +1,12 @@
+import type { MessageItem } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import { Builder, type IBuilder } from '@/tests/Builder'
 import { faker } from '@faker-js/faker'
-import { SafeMessageListItemType, SafeMessageStatus, type SafeMessage } from '@safe-global/safe-gateway-typescript-sdk'
 
-export function safeMsgBuilder(): IBuilder<SafeMessage> {
-  return Builder.new<SafeMessage>().with({
-    type: SafeMessageListItemType.MESSAGE,
+export function safeMsgBuilder(): IBuilder<MessageItem> {
+  return Builder.new<MessageItem>().with({
+    type: 'MESSAGE',
     messageHash: faker.string.hexadecimal(),
-    status: SafeMessageStatus.NEEDS_CONFIRMATION,
+    status: 'NEEDS_CONFIRMATION',
     logoUri: null,
     name: null,
     message: 'Message text',

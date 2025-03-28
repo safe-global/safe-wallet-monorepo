@@ -32,6 +32,7 @@ import type { ChainInfo as WebCoreChainInfo } from '@safe-global/safe-gateway-ty
 import useChainId from '@/hooks/useChainId'
 import type AppCommunicator from '@/services/safe-apps/AppCommunicator'
 import useBalances from '@/hooks/useBalances'
+import type { TypedData } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 
 export const useCustomAppCommunicator = (
   iframeRef: MutableRefObject<HTMLIFrameElement | null>,
@@ -91,7 +92,7 @@ export const useCustomAppCommunicator = (
           <SignMessageFlow
             logoUri={appData?.iconUrl || ''}
             name={appData?.name || ''}
-            message={message}
+            message={message as string | TypedData}
             origin={appData?.url}
             requestId={requestId}
           />,
@@ -157,14 +158,14 @@ export const useCustomAppCommunicator = (
         ?.find((item) => item.messageHash === messageHash)
 
       if (safeMessage) {
-        return safeMessage.preparedSignature
+        return safeMessage.preparedSignature || undefined
       }
 
       try {
         const { preparedSignature } = await getSafeMessage(chainId, messageHash)
-        return preparedSignature
+        return preparedSignature || undefined
       } catch {
-        return ''
+        return undefined
       }
     },
     ...overrideHandlers,
