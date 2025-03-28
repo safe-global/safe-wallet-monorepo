@@ -12,8 +12,11 @@ import { BreadcrumbItem } from '@/components/common/Breadcrumbs/BreadcrumbItem'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useParentSafe } from '@/hooks/useParentSafe'
 import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
+import { useHasFeature } from '@/hooks/useChains'
+import { FEATURES } from '@/utils/chains'
 
 const SpaceBreadcrumbs = () => {
+  const isSpacesFeatureEnabled = useHasFeature(FEATURES.SPACES)
   const { pathname } = useRouter()
   const spaceId = useCurrentSpaceId()
   const isUserSignedIn = useAppSelector(isAuthenticated)
@@ -22,7 +25,7 @@ const SpaceBreadcrumbs = () => {
   const parentSafe = useParentSafe()
   const isSpaceRoute = pathname.startsWith(AppRoutes.spaces.index)
 
-  if (!isUserSignedIn || !spaceId || isSpaceRoute || !space) {
+  if (!isUserSignedIn || !spaceId || isSpaceRoute || !space || !isSpacesFeatureEnabled) {
     return null
   }
 

@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import { type ReactNode, useEffect } from 'react'
 import SignedOutState from '@/features/spaces/components/SignedOutState'
 import { isUnauthorized } from '@/features/spaces/utils'
 import UnauthorizedState from '@/features/spaces/components/UnauthorizedState'
@@ -8,15 +8,29 @@ import { isAuthenticated } from '@/store/authSlice'
 import { useSpacesGetOneV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
 import { MemberStatus } from '@/features/spaces/hooks/useSpaceMembers'
+import { useRouter } from 'next/router'
+import { useHasFeature } from '@/hooks/useChains'
+import { FEATURES } from '@/utils/chains'
+import { AppRoutes } from '@/config/routes'
 
 const AuthState = ({ spaceId, children }: { spaceId: string; children: ReactNode }) => {
   const isUserSignedIn = useAppSelector(isAuthenticated)
   const { currentData: currentUser } = useUsersGetWithWalletsV1Query(undefined, { skip: !isUserSignedIn })
   const { currentData, error, isLoading } = useSpacesGetOneV1Query({ id: Number(spaceId) }, { skip: !isUserSignedIn })
+  const router = useRouter()
+  const isSpacesFeatureEnabled = useHasFeature(FEATURES.SPACES)
 
   const isCurrentUserDeclined = currentData?.members.some(
     (member) => member.user.id === currentUser?.id && member.status === MemberStatus.DECLINED,
   )
+
+  useEffect(() => {
+    if (!isSpacesFeatureEnabled) {
+      router.push({ pathname: AppRoutes.welcome.accounts })
+    }
+  }, [isSpacesFeatureEnabled, router])
+
+  if (!isSpacesFeatureEnabled) return null
 
   if (isLoading) return <LoadingState />
 
