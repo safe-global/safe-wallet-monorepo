@@ -61,7 +61,15 @@ export function NestedSafesPopover({
       >
         Nested Safes
       </ModalDialogTitle>
-      <Stack p={3} pt={2} display="flex" flexDirection="column" flex={1} overflow="hidden">
+      <Stack
+        data-testid="nested-safe-list"
+        p={3}
+        pt={2}
+        display="flex"
+        flexDirection="column"
+        flex={1}
+        overflow="hidden"
+      >
         {nestedSafes.length === 0 ? (
           <NestedSafeInfo />
         ) : (
@@ -77,7 +85,12 @@ export function NestedSafesPopover({
         )}
         {!hideCreationButton && (
           <Track {...NESTED_SAFE_EVENTS.ADD}>
-            <Button variant="contained" sx={{ width: '100%', mt: 3 }} onClick={onAdd}>
+            <Button
+              data-testid="add-nested-safe-button"
+              variant="contained"
+              sx={{ width: '100%', mt: 3 }}
+              onClick={onAdd}
+            >
               <SvgIcon component={AddIcon} inheritViewBox fontSize="small" />
               Add Nested Safe
             </Button>

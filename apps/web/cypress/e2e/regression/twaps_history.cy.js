@@ -42,6 +42,7 @@ describe('Twaps history tests', { defaultCommandTimeout: 30000 }, () => {
       swaps.verifyReviewOrderBtnIsVisible()
       swaps.getTwapInitialData().then((formData) => {
         cy.wrap(formData).as('twapFormData')
+        cy.wait(5000)
         swaps.clickOnReviewOrderBtn()
         swaps.placeTwapOrder()
         swaps.confirmPriceImpact()

@@ -85,6 +85,7 @@ export function SetUpNestedSafe({
 
           <FormControl fullWidth sx={{ mt: 3 }}>
             <NameInput
+              data-testid="nested-safe-name-input"
               name={SetupNestedSafeFormFields.name}
               label="Name"
               placeholder={fallbackName}
@@ -110,7 +111,7 @@ export function SetUpNestedSafe({
           <Divider className={commonCss.nestedDivider} />
 
           <CardActions>
-            <Button variant="contained" type="submit">
+            <Button data-testid="next-button" variant="contained" type="submit">
               Next
             </Button>
           </CardActions>

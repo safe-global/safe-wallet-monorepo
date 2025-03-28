@@ -21,7 +21,7 @@ const FilteredSafes = ({
         Found {filteredSafes.length} result{maybePlural(filteredSafes)}
       </Typography>
       <Box mt={1}>
-        <SafesList safes={filteredSafes} onLinkClick={onLinkClick} useTransitions={false} />
+        <SafesList safes={filteredSafes} onLinkClick={onLinkClick} />
       </Box>
     </>
   )

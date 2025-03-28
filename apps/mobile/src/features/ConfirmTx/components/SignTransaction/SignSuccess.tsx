@@ -2,10 +2,9 @@ import { StyleSheet } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 import React from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { ScrollView, Text, useTheme, View } from 'tamagui'
+import { H3, ScrollView, useTheme, View } from 'tamagui'
 import { Badge } from '@/src/components/Badge'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
-import { LargeHeaderTitle } from '@/src/components/Title'
 import { SafeButton } from '@/src/components/SafeButton'
 import { cgwApi } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
@@ -37,12 +36,10 @@ export default function SignSuccess() {
                 content={<SafeFontIcon size={32} color="$primary" name="check-filled" />}
               />
 
-              <View margin="$4" width="100%" alignItems="center" gap="$4">
-                <LargeHeaderTitle textAlign="center">Transaction confirmed!</LargeHeaderTitle>
-
-                <Text textAlign="center" fontSize="$4" width="80%">
-                  You have successfully signed this transaction.
-                </Text>
+              <View margin="$4" width="100%" alignItems="center" gap="$4" padding="$4">
+                <H3 textAlign="center" fontWeight={'600'} lineHeight={32}>
+                  You successfully signed this transaction.
+                </H3>
               </View>
             </View>
           </ScrollView>
