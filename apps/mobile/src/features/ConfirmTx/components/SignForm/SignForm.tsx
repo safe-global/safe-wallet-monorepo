@@ -1,11 +1,12 @@
 import React from 'react'
-import { Text, View, YStack } from 'tamagui'
+import { Text, View, YStack, Image } from 'tamagui'
 
 import { SafeButton } from '@/src/components/SafeButton'
 import { Identicon } from '@/src/components/Identicon'
 import { Address } from '@/src/types/address'
 import { EthAddress } from '@/src/components/EthAddress'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
+import Signature from '@/assets/images/signature.png'
 import { router } from 'expo-router'
 
 export interface SignFormProps {
@@ -28,6 +29,7 @@ export function SignForm({ address, name, txId }: SignFormProps) {
         alignItems="center"
         gap={'$2'}
       >
+        <Image testID="signature-button-image" width={16} height={16} source={Signature} />
         <Text fontWeight={700}>Sign with</Text>
 
         <Identicon address={address} size={24} />

@@ -8,6 +8,7 @@ const ERROR_MESSAGE = 'Invalid private key.'
 export const useImportPrivateKey = () => {
   const [privateKey, setPrivateKey] = useState('')
   const [wallet, setWallet] = useState<ethers.Wallet>()
+
   const [error, setError] = useState<string>()
   const router = useRouter()
 

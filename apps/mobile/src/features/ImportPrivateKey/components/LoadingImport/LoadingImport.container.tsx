@@ -40,11 +40,11 @@ const getError = (
 }
 
 export function LoadingImport() {
+  const glob = useGlobalSearchParams<{ safeAddress?: string; chainId?: string; import_safe?: string }>()
   const { address } = useLocalSearchParams()
   const chainIds = useAppSelector(selectAllChainsIds)
   const dispatch = useAppDispatch()
   const router = useRouter()
-  const glob = useGlobalSearchParams<{ safeAddress?: string; chainId?: string; import_safe?: string }>()
   // we use this screen on the "getting started" and there we don't have an active safe
   const activeSafe = useAppSelector(selectActiveSafe)
 

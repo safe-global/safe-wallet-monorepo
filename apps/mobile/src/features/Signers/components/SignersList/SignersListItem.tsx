@@ -12,6 +12,7 @@ import { Alert, useColorScheme } from 'react-native'
 import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
 import { selectContactByAddress, upsertContact } from '@/src/store/addressBookSlice'
 import { useCopyAndDispatchToast } from '@/src/hooks/useCopyAndDispatchToast'
+import { useBiometrics } from '@/src/hooks/useBiometrics'
 
 interface SignersListItemProps {
   item: AddressInfo
@@ -20,6 +21,7 @@ interface SignersListItemProps {
 }
 
 function SignersListItem({ item, index, signersGroup }: SignersListItemProps) {
+  const { isBiometricsEnabled } = useBiometrics()
   const router = useRouter()
   const colorScheme = useColorScheme()
   const contact = useAppSelector(selectContactByAddress(item.value))
@@ -47,7 +49,7 @@ function SignersListItem({ item, index, signersGroup }: SignersListItemProps) {
 
     if (nativeEvent.event === 'import') {
       router.push({
-        pathname: '/import-signers',
+        pathname: isBiometricsEnabled ? '/import-signers' : '/biometrics-opt-in',
         params: {
           safeAddress: local.safeAddress,
           chainId: local.chainId,
