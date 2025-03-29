@@ -16,6 +16,7 @@ const customJestConfig = {
     '^.+\\.(svg)$': '<rootDir>/mocks/svg.js',
     '^.+/markdown/terms/terms\\.md$': '<rootDir>/mocks/terms.md.js',
     isows: '<rootDir>/node_modules/isows/_cjs/index.js',
+    '^@safe-global/utils/(.*)$': '<rootDir>/../../packages/utils/src/$1',
   },
   // https://github.com/mswjs/jest-fixed-jsdom
   // without this environment it is basically impossible to run tests with msw

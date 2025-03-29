@@ -1,5 +1,5 @@
 import { getWeb3ReadOnly } from '@/hooks/wallets/web3'
-import { ERC20__factory, ERC721__factory } from '@/types/contracts'
+import { ERC20__factory, ERC721__factory } from '@safe-global/utils/types/contracts'
 import { parseBytes32String } from '@ethersproject/strings'
 import { type TokenInfo, TokenType } from '@safe-global/safe-gateway-typescript-sdk'
 

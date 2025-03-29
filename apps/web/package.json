@@ -18,7 +18,7 @@
     "cmp": "./scripts/cmp.sh",
     "routes": "node scripts/generate-routes.js > src/config/routes.ts && prettier -w src/config/routes.ts && cat src/config/routes.ts",
     "css-vars": "npx -y tsx ./scripts/css-vars.ts > ./src/styles/vars.css && prettier -w src/styles/vars.css",
-    "generate-types": "typechain --target ethers-v6 --out-dir src/types/contracts ../../node_modules/@safe-global/safe-deployments/dist/assets/**/*.json ../../node_modules/@safe-global/safe-modules-deployments/dist/assets/**/*.json ../../node_modules/@openzeppelin/contracts/build/contracts/ERC20.json ../../node_modules/@openzeppelin/contracts/build/contracts/ERC721.json",
+    "generate-types": "typechain --target ethers-v6 --out-dir ../../packages/utils/src/types/contracts ../../node_modules/@safe-global/safe-deployments/dist/assets/**/*.json ../../node_modules/@safe-global/safe-modules-deployments/dist/assets/**/*.json ../../node_modules/@openzeppelin/contracts/build/contracts/ERC20.json ../../node_modules/@openzeppelin/contracts/build/contracts/ERC721.json",
     "after-install": "yarn generate-types",
     "postinstall": "yarn after-install",
     "analyze": "cross-env ANALYZE=true yarn build",

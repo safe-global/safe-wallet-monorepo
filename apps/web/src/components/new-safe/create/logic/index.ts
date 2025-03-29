@@ -24,7 +24,11 @@ import { ECOSYSTEM_ID_ADDRESS } from '@/config/constants'
 import type { ReplayedSafeProps, UndeployedSafeProps } from '@/store/slices'
 import { activateReplayedSafe, isPredictedSafeProps } from '@/features/counterfactual/utils'
 import { getSafeContractDeployment } from '@safe-global/utils/services/contracts/deployments'
-import { Safe__factory, Safe_proxy_factory__factory, Safe_to_l2_setup__factory } from '@/types/contracts'
+import {
+  Safe__factory,
+  Safe_proxy_factory__factory,
+  Safe_to_l2_setup__factory,
+} from '@safe-global/utils/types/contracts'
 import { createWeb3 } from '@/hooks/wallets/web3'
 import { hasMultiChainCreationFeatures } from '@/features/multichain/utils/utils'
 import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'

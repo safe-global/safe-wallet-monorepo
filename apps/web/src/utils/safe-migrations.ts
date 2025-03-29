@@ -1,4 +1,4 @@
-import { Safe_migration__factory } from '@/types/contracts'
+import { Safe_migration__factory } from '@safe-global/utils/types/contracts'
 import { getCompatibilityFallbackHandlerDeployments } from '@safe-global/safe-deployments'
 import { hasMatchingDeployment } from '@safe-global/utils/services/contracts/deployments'
 

@@ -6,7 +6,7 @@ import { type ReplayedSafeProps } from '@/store/slices'
 import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
 import * as web3Hooks from '@/hooks/wallets/web3'
 import { type JsonRpcProvider, id } from 'ethers'
-import { Safe_proxy_factory__factory } from '@/types/contracts'
+import { Safe_proxy_factory__factory } from '@safe-global/utils/types/contracts'
 import { predictAddressBasedOnReplayData } from '@/features/multichain/utils/utils'
 
 // Proxy Factory 1.3.0 creation code
