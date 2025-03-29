@@ -11,7 +11,7 @@ import { encodeSafeSetupCall } from '@/components/new-safe/create/logic'
 import { FEATURES, hasFeature } from '@/utils/chains'
 import { type SafeItem } from '@/features/myAccounts/hooks/useAllSafes'
 import { type MultiChainSafeItem } from '@/features/myAccounts/hooks/useAllSafesGrouped'
-import { LATEST_SAFE_VERSION } from '@/config/constants'
+import { LATEST_SAFE_VERSION } from '@safe-global/utils/config/constants'
 
 type SafeSetup = {
   owners: string[]

@@ -10,9 +10,9 @@ import { useRouter } from 'next/router'
 import { getNetworkLink } from '.'
 import { SetNameStepFields } from '@/components/new-safe/create/steps/SetNameStep'
 import { getSafeSingletonDeployments, getSafeToL2SetupDeployments } from '@safe-global/safe-deployments'
-import { getLatestSafeVersion } from '@/utils/chains'
 import { hasCanonicalDeployment } from '@/services/contracts/deployments'
 import { hasMultiChainCreationFeatures } from '@/features/multichain/utils/utils'
+import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
 
 const NetworkMultiSelector = ({
   name,

@@ -6,7 +6,7 @@ import { getSafeMigrationDeployment } from '@safe-global/safe-deployments'
 import { type MetaTransactionData, OperationType, type SafeVersion } from '@safe-global/safe-core-sdk-types'
 import type { ChainInfo, TransactionData } from '@safe-global/safe-gateway-typescript-sdk'
 
-import { LATEST_SAFE_VERSION } from '@/config/constants'
+import { LATEST_SAFE_VERSION } from '@safe-global/utils/config/constants'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 
 export const SAFE_TO_L2_MIGRATION_VERSION = '1.4.1'

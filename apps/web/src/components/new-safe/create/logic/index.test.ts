@@ -22,7 +22,7 @@ import {
   getReadOnlyProxyFactoryContract,
 } from '@/services/contracts/safeContracts'
 import * as gateway from '@safe-global/safe-gateway-typescript-sdk'
-import { FEATURES, getLatestSafeVersion } from '@/utils/chains'
+import { FEATURES } from '@/utils/chains'
 import { chainBuilder } from '@/tests/builders/chains'
 import { type ReplayedSafeProps } from '@/store/slices'
 import { faker } from '@faker-js/faker'
@@ -35,6 +35,7 @@ import {
   getSafeToL2SetupDeployment,
 } from '@safe-global/safe-deployments'
 import { Safe_to_l2_setup__factory } from '@/types/contracts'
+import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
 
 const provider = new JsonRpcProvider(undefined, { name: 'ethereum', chainId: 1 })
 

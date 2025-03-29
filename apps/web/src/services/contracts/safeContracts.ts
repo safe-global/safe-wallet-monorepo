@@ -14,9 +14,9 @@ import type { SafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import type { SafeVersion } from '@safe-global/safe-core-sdk-types'
 import { assertValidSafeVersion, getSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
 import semver from 'semver'
-import { getLatestSafeVersion } from '@/utils/chains'
 import { getSafeMigrationDeployment } from '@safe-global/safe-deployments'
 import { SAFE_TO_L2_MIGRATION_VERSION } from '@/utils/safe-migrations'
+import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
 
 // `UNKNOWN` is returned if the mastercopy does not match supported ones
 // @see https://github.com/safe-global/safe-client-gateway/blob/main/src/routes/safes/handlers/safes.rs#L28-L31

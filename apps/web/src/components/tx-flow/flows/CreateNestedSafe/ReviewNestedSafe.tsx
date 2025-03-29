@@ -7,7 +7,6 @@ import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useBalances from '@/hooks/useBalances'
 import { useCurrentChain } from '@/hooks/useChains'
-import { getLatestSafeVersion } from '@/utils/chains'
 import useAsync from '@/hooks/useAsync'
 import { createNewUndeployedSafeWithoutSalt, encodeSafeCreationTx } from '@/components/new-safe/create/logic'
 import { useGetOwnedSafesQuery } from '@/store/slices'
@@ -18,6 +17,7 @@ import { createMultiSendCallOnlyTx, createTx } from '@/services/tx/tx-sender'
 import { SetupNestedSafeFormAssetFields } from '@/components/tx-flow/flows/CreateNestedSafe/SetupNestedSafe'
 import type { SetupNestedSafeForm } from '@/components/tx-flow/flows/CreateNestedSafe/SetupNestedSafe'
 import ReviewTransaction from '@/components/tx/ReviewTransaction'
+import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
 
 export function ReviewNestedSafe({
   params,
