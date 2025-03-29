@@ -1,18 +1,20 @@
 import React from 'react'
+import { Linking } from 'react-native'
+import { router } from 'expo-router'
+
 import { Text, View } from 'tamagui'
 import { AppSettings } from './AppSettings'
 import { useTheme } from '@/src/theme/provider/safeTheme'
 import { SafeFontIcon as Icon } from '@/src/components/SafeFontIcon/SafeFontIcon'
-import { router } from 'expo-router'
 import { FloatingMenu } from '../FloatingMenu'
 import { LoadableSwitch } from '@/src/components/LoadableSwitch'
 import { useBiometrics } from '@/src/hooks/useBiometrics'
 import { capitalize } from '@/src/utils/formatters'
-import { Linking } from 'react-native'
 
 export const AppSettingsContainer = () => {
   const { toggleBiometrics, isBiometricsEnabled, isLoading } = useBiometrics()
   const { themePreference, setThemePreference } = useTheme()
+
   const settingsSections = [
     {
       sectionName: 'Preferences',
@@ -63,7 +65,7 @@ export const AppSettingsContainer = () => {
       items: [
         {
           label: 'Face ID',
-          leftIcon: 'appearance',
+          leftIcon: 'face-id',
           rightNode: (
             <LoadableSwitch
               testID="toggle-app-biometrics"
@@ -100,13 +102,13 @@ export const AppSettingsContainer = () => {
       items: [
         {
           label: 'Rate us',
-          leftIcon: 'token',
+          leftIcon: 'star',
           onPress: () => console.log('rate us'),
           disabled: false,
         },
         {
           label: 'Follow us on X',
-          leftIcon: 'sign',
+          leftIcon: 'twitter-x',
           onPress: () => Linking.openURL('https://x.com/safe?s=21'),
           disabled: false,
         },

@@ -1,16 +1,29 @@
 import React, { useEffect } from 'react'
 import { useColorScheme, Platform } from 'react-native'
 import { OptIn } from '@/src/components/OptIn'
-import { router } from 'expo-router'
+import { router, useLocalSearchParams } from 'expo-router'
+import { useToastController } from '@tamagui/toast'
 import { useBiometrics } from '@/src/hooks/useBiometrics'
+import Logger from '@/src/utils/logger'
 
 function BiometricsOptIn() {
   const { toggleBiometrics, getBiometricsButtonLabel, isBiometricsEnabled, isLoading } = useBiometrics()
+  const local = useLocalSearchParams<{ safeAddress: string; chainId: string; import_safe: string }>()
+
   const colorScheme = useColorScheme()
+  const toast = useToastController()
 
   useEffect(() => {
     if (isBiometricsEnabled) {
-      router.replace('/import-signers/private-key')
+      router.dismiss()
+      router.push({
+        pathname: '/import-signers',
+        params: {
+          safeAddress: local.safeAddress,
+          chainId: local.chainId,
+          import_safe: local.import_safe,
+        },
+      })
     }
   }, [isBiometricsEnabled])
 
@@ -18,8 +31,16 @@ function BiometricsOptIn() {
     router.back()
   }
 
-  const handleAccept = () => {
-    toggleBiometrics(true)
+  const handleAccept = async () => {
+    try {
+      await toggleBiometrics(true)
+    } catch (error) {
+      Logger.error('Error enabling biometrics', error)
+      toast.show('Error enabling biometrics', {
+        native: false,
+        duration: 2000,
+      })
+    }
   }
 
   const darkImage =
