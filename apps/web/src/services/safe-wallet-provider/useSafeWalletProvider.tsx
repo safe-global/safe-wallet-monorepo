@@ -22,7 +22,7 @@ import { NotificationMessages, showNotification } from './notifications'
 import { SignMessageOnChainFlow } from '@/components/tx-flow/flows'
 import { useAppSelector } from '@/store'
 import { selectOnChainSigning } from '@/store/settingsSlice'
-import { isOffchainEIP1271Supported } from '@/utils/safe-messages'
+import { isOffchainEIP1271Supported } from '@safe-global/utils/utils/safe-messages'
 import { getCreateCallContractDeployment } from '../contracts/deployments'
 
 export const useTxFlowApi = (chainId: string, safeAddress: string): WalletSDK | undefined => {

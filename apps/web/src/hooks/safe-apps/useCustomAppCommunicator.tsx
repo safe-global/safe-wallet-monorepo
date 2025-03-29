@@ -10,7 +10,7 @@ import {
   type SendTransactionRequestParams,
 } from '@safe-global/safe-apps-sdk'
 import { SafeAppsTxFlow, SignMessageFlow, SignMessageOnChainFlow } from '@/components/tx-flow/flows'
-import { isOffchainEIP1271Supported } from '@/utils/safe-messages'
+import { isOffchainEIP1271Supported } from '@safe-global/utils/utils/safe-messages'
 import {
   getBalances,
   getSafeMessage,

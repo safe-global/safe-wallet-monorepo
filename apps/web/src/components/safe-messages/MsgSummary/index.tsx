@@ -11,7 +11,7 @@ import TxConfirmations from '@/components/transactions/TxConfirmations'
 
 import css from '@/components/transactions/TxSummary/styles.module.css'
 import useIsSafeMessagePending from '@/hooks/messages/useIsSafeMessagePending'
-import { isEIP712TypedData } from '@/utils/safe-messages'
+import { isEIP712TypedData } from '@safe-global/utils/utils/safe-messages'
 
 const getStatusColor = (value: SafeMessageStatus, palette: Palette): string => {
   switch (value) {
