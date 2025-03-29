@@ -2,9 +2,9 @@ import { OperationType } from '@safe-global/safe-core-sdk-types'
 import { getMultiSendCallOnlyDeployment } from '@safe-global/safe-deployments'
 import { toBeHex } from 'ethers'
 
-import { DelegateCallModule } from '.'
-import { createMockSafeTransaction, getMockMultiSendCalldata } from '@/tests/transactions'
-import { chainBuilder } from '@/tests/builders/chains'
+import { DelegateCallModule } from './index'
+import { createMockSafeTransaction, getMockMultiSendCalldata } from '@safe-global/web/src/tests/transactions'
+import { chainBuilder } from '@safe-global/web/src/tests/builders/chains'
 
 describe('DelegateCallModule', () => {
   const DelegateCallModuleInstance = new DelegateCallModule()

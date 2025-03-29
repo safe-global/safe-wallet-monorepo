@@ -1,4 +1,4 @@
-import { SecuritySeverity } from '@/services/security/modules/types'
+import { SecuritySeverity } from '@safe-global/utils/services/security/modules/types'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import {
   createContext,
@@ -9,7 +9,7 @@ import {
   useState,
   type ReactElement,
 } from 'react'
-import type { BlockaidModuleResponse } from '@/services/security/modules/BlockaidModule'
+import type { BlockaidModuleResponse } from '@safe-global/utils/services/security/modules/BlockaidModule'
 import { useBlockaid } from '../blockaid/useBlockaid'
 
 export const defaultSecurityContextValues = {

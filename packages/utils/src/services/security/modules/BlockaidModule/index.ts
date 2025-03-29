@@ -11,8 +11,8 @@ import type {
   ProxyUpgradeManagement,
   TransactionScanResponse,
 } from './types'
-import { BLOCKAID_API, BLOCKAID_CLIENT_ID } from '@/config/constants'
-import { numberToHex } from '@/utils/hex'
+import { BLOCKAID_API, BLOCKAID_CLIENT_ID } from '@safe-global/utils/config/constants'
+import { numberToHex } from '@safe-global/web/src/utils/hex'
 
 /** @see https://docs.blockaid.io/docs/supported-chains */
 

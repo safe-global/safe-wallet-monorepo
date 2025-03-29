@@ -1,4 +1,4 @@
-import { SecuritySeverity } from '@/services/security/modules/types'
+import { SecuritySeverity } from '@safe-global/utils/services/security/modules/types'
 import CloseIcon from '@/public/images/common/close.svg'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import type { ComponentType } from 'react'
