@@ -1,6 +1,6 @@
 import type { TypedData } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import { renderHook } from '@/tests/test-utils'
-import { zeroPadValue, Interface } from 'ethers'
+import { Interface, zeroPadValue } from 'ethers'
 import { type ApprovalInfo, useApprovalInfos } from '@/components/tx/ApprovalEditor/hooks/useApprovalInfos'
 import { waitFor } from '@testing-library/react'
 import { createMockSafeTransaction } from '@/tests/transactions'
@@ -13,6 +13,7 @@ import { faker } from '@faker-js/faker'
 import { PSEUDO_APPROVAL_VALUES } from '../utils/approvals'
 import { encodeMultiSendData } from '@safe-global/protocol-kit'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
+import { UNLIMITED_PERMIT2_AMOUNT } from '@safe-global/utils/utils/tokens'
 
 const ERC20_INTERFACE = ERC20__factory.createInterface()
 
@@ -307,7 +308,7 @@ describe('useApprovalInfos', () => {
     const { result } = renderHook(() => useApprovalInfos({ safeMessage: mockMessage }))
 
     const mockApproval: ApprovalInfo = {
-      amount: BigInt(getTokenInfo.UNLIMITED_PERMIT2_AMOUNT),
+      amount: BigInt(UNLIMITED_PERMIT2_AMOUNT),
       amountFormatted: PSEUDO_APPROVAL_VALUES.UNLIMITED,
       spender: spenderAddress,
       tokenAddress: '0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174'.toLowerCase(),
@@ -405,7 +406,7 @@ describe('useApprovalInfos', () => {
 
     const expectedApprovals: ApprovalInfo[] = [
       {
-        amount: BigInt(getTokenInfo.UNLIMITED_PERMIT2_AMOUNT),
+        amount: BigInt(UNLIMITED_PERMIT2_AMOUNT),
         amountFormatted: PSEUDO_APPROVAL_VALUES.UNLIMITED,
         spender: spenderAddress,
         tokenAddress: token1.toLowerCase(),
@@ -414,7 +415,7 @@ describe('useApprovalInfos', () => {
         transactionIndex: 0,
       },
       {
-        amount: BigInt(getTokenInfo.UNLIMITED_PERMIT2_AMOUNT),
+        amount: BigInt(UNLIMITED_PERMIT2_AMOUNT),
         amountFormatted: PSEUDO_APPROVAL_VALUES.UNLIMITED,
         spender: spenderAddress,
         tokenAddress: token2.toLowerCase(),
