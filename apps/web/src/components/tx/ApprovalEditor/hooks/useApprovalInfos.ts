@@ -1,7 +1,7 @@
 import type { TypedData } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import useAsync from '@/hooks/useAsync'
 import useBalances from '@/hooks/useBalances'
-import { type Approval, ApprovalModule } from '@/services/security/modules/ApprovalModule'
+import { type Approval, ApprovalModule } from '@safe-global/utils/services/security/modules/ApprovalModule'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { getERC20TokenInfoOnChain, getErc721Symbol, isErc721Token } from '@/utils/tokens'
 import { type SafeTransaction } from '@safe-global/safe-core-sdk-types'

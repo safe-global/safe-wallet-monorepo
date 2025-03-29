@@ -26,7 +26,7 @@ import type {
   Erc721TokenDetails,
   GeneralAssetDiff,
   NativeDiff,
-} from '@/services/security/modules/BlockaidModule/types'
+} from '@safe-global/utils/services/security/modules/BlockaidModule/types'
 import { formatAmount } from '@safe-global/utils/utils/formatNumber'
 
 const FungibleBalanceChange = ({ change, asset }: { asset: AssetDiff['asset']; change: Erc20Diff | NativeDiff }) => {
