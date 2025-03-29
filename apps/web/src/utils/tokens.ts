@@ -2,12 +2,7 @@ import { getWeb3ReadOnly } from '@/hooks/wallets/web3'
 import { ERC20__factory, ERC721__factory } from '@safe-global/utils/types/contracts'
 import { parseBytes32String } from '@ethersproject/strings'
 import { type TokenInfo, TokenType } from '@safe-global/safe-gateway-typescript-sdk'
-
-export const UNLIMITED_APPROVAL_AMOUNT = 2n ** 256n - 1n
-export const UNLIMITED_PERMIT2_AMOUNT = 2n ** 160n - 1n
-
-// As per https://eips.ethereum.org/EIPS/eip-721#specification
-export const ERC721_IDENTIFIER = '0x80ac58cd'
+import { ERC721_IDENTIFIER } from '@safe-global/utils/utils/tokens'
 
 /**
  * Fetches ERC20 token symbol and decimals from on-chain.

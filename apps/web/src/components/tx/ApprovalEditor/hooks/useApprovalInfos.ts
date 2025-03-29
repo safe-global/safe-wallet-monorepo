@@ -3,18 +3,13 @@ import useAsync from '@/hooks/useAsync'
 import useBalances from '@/hooks/useBalances'
 import { type Approval, ApprovalModule } from '@/services/security/modules/ApprovalModule'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import {
-  getERC20TokenInfoOnChain,
-  getErc721Symbol,
-  isErc721Token,
-  UNLIMITED_APPROVAL_AMOUNT,
-  UNLIMITED_PERMIT2_AMOUNT,
-} from '@/utils/tokens'
+import { getERC20TokenInfoOnChain, getErc721Symbol, isErc721Token } from '@/utils/tokens'
 import { type SafeTransaction } from '@safe-global/safe-core-sdk-types'
 import { type TokenInfo, TokenType } from '@safe-global/safe-gateway-typescript-sdk'
 import { useMemo } from 'react'
 import { PSEUDO_APPROVAL_VALUES } from '../utils/approvals'
 import { safeFormatUnits } from '@safe-global/utils/utils/formatters'
+import { UNLIMITED_APPROVAL_AMOUNT, UNLIMITED_PERMIT2_AMOUNT } from '@safe-global/utils/utils/tokens'
 
 export type ApprovalInfo = {
   tokenInfo: (Omit<TokenInfo, 'logoUri' | 'name'> & { logoUri?: string }) | undefined
