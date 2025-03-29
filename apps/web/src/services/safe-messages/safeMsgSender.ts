@@ -5,7 +5,7 @@ import type { Eip1193Provider } from 'ethers'
 
 import { safeMsgDispatch, SafeMsgEvent } from './safeMsgEvents'
 import { generateSafeMessageHash, isEIP712TypedData, tryOffChainMsgSigning } from '@/utils/safe-messages'
-import { normalizeTypedData } from '@/utils/web3'
+import { normalizeTypedData } from '@safe-global/utils/utils/web3'
 import { getAssertedChainSigner } from '@/services/tx/tx-sender/sdk'
 import { asError } from '../exceptions/utils'
 

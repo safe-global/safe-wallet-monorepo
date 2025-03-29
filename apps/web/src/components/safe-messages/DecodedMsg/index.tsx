@@ -2,7 +2,7 @@ import type { MessageItem } from '@safe-global/store/gateway/AUTO_GENERATED/mess
 import { generateDataRowValue, TxDataRow } from '@/components/transactions/TxDetails/Summary/TxDataRow'
 import { Value } from '@/components/transactions/TxDetails/TxData/DecodedData/ValueArray'
 import { isByte } from '@/utils/transaction-guards'
-import { normalizeTypedData } from '@/utils/web3'
+import { normalizeTypedData } from '@safe-global/utils/utils/web3'
 import { type TypedData } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import { Box, Typography } from '@mui/material'
 import { ErrorBoundary } from '@sentry/react'
