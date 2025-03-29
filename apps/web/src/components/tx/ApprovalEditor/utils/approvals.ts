@@ -1,4 +1,4 @@
-import { ERC20__factory } from '@/types/contracts'
+import { ERC20__factory } from '@safe-global/utils/types/contracts'
 import { UNLIMITED_APPROVAL_AMOUNT } from '@/utils/tokens'
 import type { BaseTransaction } from '@safe-global/safe-apps-sdk'
 import type { DecodedDataResponse } from '@safe-global/safe-gateway-typescript-sdk'

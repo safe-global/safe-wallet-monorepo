@@ -2,10 +2,10 @@ import { id } from 'ethers'
 import type { FunctionFragment } from 'ethers'
 import type { BaseTransaction } from '@safe-global/safe-apps-sdk'
 
-import { Multi_send__factory } from '@/types/contracts/factories/@safe-global/safe-deployments/dist/assets/v1.3.0'
-import { ERC20__factory } from '@/types/contracts/factories/@openzeppelin/contracts/build/contracts/ERC20__factory'
-import { ERC721__factory } from '@/types/contracts/factories/@openzeppelin/contracts/build/contracts/ERC721__factory'
-import { Safe__factory } from '@/types/contracts'
+import { Multi_send__factory } from '@safe-global/utils/types/contracts/factories/@safe-global/safe-deployments/dist/assets/v1.3.0'
+import { ERC20__factory } from '@safe-global/utils/types/contracts/factories/@openzeppelin/contracts/build/contracts/ERC20__factory'
+import { ERC721__factory } from '@safe-global/utils/types/contracts/factories/@openzeppelin/contracts/build/contracts/ERC721__factory'
+import { Safe__factory } from '@safe-global/utils/types/contracts'
 import { decodeMultiSendData } from '@safe-global/protocol-kit/dist/src/utils'
 
 export const isCalldata = (data: string, fragment: FunctionFragment): boolean => {

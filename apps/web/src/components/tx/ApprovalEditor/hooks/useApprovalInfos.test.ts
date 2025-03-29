@@ -5,7 +5,7 @@ import { type ApprovalInfo, useApprovalInfos } from '@/components/tx/ApprovalEdi
 import { waitFor } from '@testing-library/react'
 import { createMockSafeTransaction } from '@/tests/transactions'
 import { OperationType } from '@safe-global/safe-core-sdk-types'
-import { ERC20__factory, Multi_send__factory } from '@/types/contracts'
+import { ERC20__factory, Multi_send__factory } from '@safe-global/utils/types/contracts'
 import * as balances from '@/hooks/useBalances'
 import { TokenType } from '@safe-global/safe-gateway-typescript-sdk'
 import * as getTokenInfo from '@/utils/tokens'

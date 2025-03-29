@@ -5,7 +5,7 @@ import { keccak256, ethers, solidityPacked, getCreate2Address, type Provider } f
 
 import { type UndeployedSafesState, type ReplayedSafeProps } from '@/store/slices'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import { Safe_proxy_factory__factory } from '@/types/contracts'
+import { Safe_proxy_factory__factory } from '@safe-global/utils/types/contracts'
 import { extractCounterfactualSafeSetup } from '@/features/counterfactual/utils'
 import { encodeSafeSetupCall } from '@/components/new-safe/create/logic'
 import { FEATURES, hasFeature } from '@/utils/chains'

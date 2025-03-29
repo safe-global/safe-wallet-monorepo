@@ -3,7 +3,7 @@ import {
   APPROVAL_SIGNATURE_HASH,
   INCREASE_ALLOWANCE_SIGNATURE_HASH,
 } from '@/components/tx/ApprovalEditor/utils/approvals'
-import { ERC20__factory } from '@/types/contracts'
+import { ERC20__factory } from '@safe-global/utils/types/contracts'
 import { normalizeTypedData } from '@safe-global/utils/utils/web3'
 import { type SafeTransaction } from '@safe-global/safe-core-sdk-types'
 import { id } from 'ethers'

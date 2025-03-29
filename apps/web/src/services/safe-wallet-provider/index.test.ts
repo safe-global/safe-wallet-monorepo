@@ -1,7 +1,7 @@
 // Unit tests for the SafeWalletProvider class
 import { faker } from '@faker-js/faker'
 import { SafeWalletProvider } from '.'
-import { ERC20__factory } from '@/types/contracts'
+import { ERC20__factory } from '@safe-global/utils/types/contracts'
 import { numberToHex } from '@/utils/hex'
 import type { TransactionReceipt } from 'ethers'
 
