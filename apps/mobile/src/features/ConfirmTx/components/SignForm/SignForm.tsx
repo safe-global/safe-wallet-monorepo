@@ -8,7 +8,7 @@ import { EthAddress } from '@/src/components/EthAddress'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import Signature from '@/assets/images/signature.png'
 import { router } from 'expo-router'
-
+import { useBiometrics } from '@/src/hooks/useBiometrics'
 export interface SignFormProps {
   address: Address
   name?: string
@@ -16,8 +16,17 @@ export interface SignFormProps {
 }
 
 export function SignForm({ address, name, txId }: SignFormProps) {
+  const { isBiometricsEnabled } = useBiometrics()
+
   const onSignPress = () => {
-    router.push({ pathname: '/sign-transaction', params: { txId, signerAddress: address } })
+    if (isBiometricsEnabled) {
+      router.push({ pathname: '/sign-transaction', params: { txId, signerAddress: address } })
+    } else {
+      router.push({
+        pathname: '/biometrics-opt-in',
+        params: { txId, signerAddress: address, caller: '/sign-transaction' },
+      })
+    }
   }
 
   return (

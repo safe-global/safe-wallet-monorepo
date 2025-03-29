@@ -23,6 +23,9 @@ export function SignTransaction() {
   const sign = useCallback(async () => {
     try {
       const privateKey = await getPrivateKey(signerAddress)
+      if (!privateKey) {
+        return
+      }
 
       const signedTx = await signTx({
         chain: activeChain as ChainInfo,

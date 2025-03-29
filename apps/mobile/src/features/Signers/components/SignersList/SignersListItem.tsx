@@ -54,6 +54,7 @@ function SignersListItem({ item, index, signersGroup }: SignersListItemProps) {
           safeAddress: local.safeAddress,
           chainId: local.chainId,
           import_safe: local.import_safe,
+          caller: '/import-signers',
         },
       })
     }

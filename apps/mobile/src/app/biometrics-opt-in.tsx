@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useMemo } from 'react'
 import { useColorScheme, Platform } from 'react-native'
 import { OptIn } from '@/src/components/OptIn'
 import { router, useLocalSearchParams } from 'expo-router'
@@ -8,7 +8,35 @@ import Logger from '@/src/utils/logger'
 
 function BiometricsOptIn() {
   const { toggleBiometrics, getBiometricsButtonLabel, isBiometricsEnabled, isLoading } = useBiometrics()
-  const local = useLocalSearchParams<{ safeAddress: string; chainId: string; import_safe: string }>()
+
+  const local = useLocalSearchParams<{
+    safeAddress: string
+    chainId: string
+    import_safe: string
+    txId: string
+    signerAddress: string
+    caller: '/import-signers' | '/sign-transaction'
+  }>()
+
+  const redirectTo = useMemo(() => {
+    if (local.caller === '/import-signers') {
+      return {
+        pathname: '/import-signers' as const,
+        params: {
+          safeAddress: local.safeAddress,
+          chainId: local.chainId,
+          import_safe: local.import_safe,
+        },
+      }
+    }
+    return {
+      pathname: '/sign-transaction' as const,
+      params: {
+        txId: local.txId,
+        signerAddress: local.signerAddress,
+      },
+    }
+  }, [local.caller])
 
   const colorScheme = useColorScheme()
   const toast = useToastController()
@@ -16,14 +44,7 @@ function BiometricsOptIn() {
   useEffect(() => {
     if (isBiometricsEnabled) {
       router.dismiss()
-      router.push({
-        pathname: '/import-signers',
-        params: {
-          safeAddress: local.safeAddress,
-          chainId: local.chainId,
-          import_safe: local.import_safe,
-        },
-      })
+      router.push(redirectTo)
     }
   }, [isBiometricsEnabled])
 
