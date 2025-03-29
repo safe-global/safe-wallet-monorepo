@@ -1,5 +1,5 @@
 import type { JsonRpcSigner } from 'ethers'
-import { signTypedData } from '../web3'
+import { signTypedData } from '@safe-global/utils/utils/web3'
 
 describe('web3', () => {
   describe('signTypedData', () => {

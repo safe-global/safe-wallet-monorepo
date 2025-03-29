@@ -3,7 +3,7 @@ import { hashMessage, type TypedDataDomain, type JsonRpcSigner } from 'ethers'
 import { gte } from 'semver'
 import { adjustVInSignature } from '@safe-global/protocol-kit/dist/src/utils/signatures'
 
-import { hashTypedData } from '@/utils/web3'
+import { hashTypedData } from '@safe-global/utils/utils/web3'
 import { isValidAddress } from '@safe-global/utils/utils/validation'
 import { type SafeInfo, type ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import { FEATURES } from '@/utils/chains'
