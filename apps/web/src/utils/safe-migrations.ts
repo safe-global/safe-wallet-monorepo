@@ -1,6 +1,6 @@
 import { Safe_migration__factory } from '@/types/contracts'
 import { getCompatibilityFallbackHandlerDeployments } from '@safe-global/safe-deployments'
-import { hasMatchingDeployment } from '@/services/contracts/deployments'
+import { hasMatchingDeployment } from '@safe-global/utils/services/contracts/deployments'
 
 import { getSafeMigrationDeployment } from '@safe-global/safe-deployments'
 import { type MetaTransactionData, OperationType, type SafeVersion } from '@safe-global/safe-core-sdk-types'

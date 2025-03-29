@@ -1,6 +1,6 @@
 import { type ReplayedSafeProps } from '@/features/counterfactual/store/undeployedSafesSlice'
 import useChains from '@/hooks/useChains'
-import { hasCanonicalDeployment, hasMatchingDeployment } from '@/services/contracts/deployments'
+import { hasCanonicalDeployment, hasMatchingDeployment } from '@safe-global/utils/services/contracts/deployments'
 import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
 import { type SafeVersion } from '@safe-global/safe-core-sdk-types'
 import {
