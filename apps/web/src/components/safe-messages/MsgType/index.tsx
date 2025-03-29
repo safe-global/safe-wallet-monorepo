@@ -3,7 +3,7 @@ import { Box, SvgIcon } from '@mui/material'
 import RequiredIcon from '@/public/images/messages/required.svg'
 import ImageFallback from '@/components/common/ImageFallback'
 import txTypeCss from '@/components/transactions/TxType/styles.module.css'
-import { isEIP712TypedData } from '@/utils/safe-messages'
+import { isEIP712TypedData } from '@safe-global/utils/utils/safe-messages'
 
 const FALLBACK_LOGO_URI = '/images/transactions/custom.svg'
 const MAX_TRIMMED_LENGTH = 20

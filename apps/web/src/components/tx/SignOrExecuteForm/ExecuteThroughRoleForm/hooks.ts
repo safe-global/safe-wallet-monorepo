@@ -26,7 +26,7 @@ import useWallet from '@/hooks/wallets/useWallet'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@/utils/chains'
 import { encodeMultiSendData } from '@safe-global/protocol-kit'
-import { Multi_send__factory } from '@/types/contracts'
+import { Multi_send__factory } from '@safe-global/utils/types/contracts'
 import { decodeMultiSendData } from '@safe-global/protocol-kit/dist/src/utils'
 
 const ROLES_V2_SUPPORTED_CHAINS = Object.keys(chains)

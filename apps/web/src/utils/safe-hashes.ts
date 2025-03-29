@@ -3,7 +3,7 @@ import semverSatisfies from 'semver/functions/satisfies'
 import { getEip712MessageTypes, getEip712TxTypes } from '@safe-global/protocol-kit/dist/src/utils'
 import type { SafeTransactionData, SafeVersion } from '@safe-global/safe-core-sdk-types'
 import type { MessageItem } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
-import { generateSafeMessageMessage } from './safe-messages'
+import { generateSafeMessageMessage } from '@safe-global/utils/utils/safe-messages'
 
 const NEW_DOMAIN_TYPE_HASH_VERSION = '>=1.3.0'
 const NEW_SAFE_TX_TYPE_HASH_VERSION = '>=1.0.0'

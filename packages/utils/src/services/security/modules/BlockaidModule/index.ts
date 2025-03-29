@@ -1,6 +1,6 @@
 import type { TypedData } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
-import { isEIP712TypedData } from '@/utils/safe-messages'
-import { normalizeTypedData } from '@/utils/web3'
+import { isEIP712TypedData } from '@safe-global/utils/utils/safe-messages'
+import { normalizeTypedData } from '@safe-global/utils/utils/web3'
 import { type SafeTransaction } from '@safe-global/safe-core-sdk-types'
 import { generateTypedData } from '@safe-global/protocol-kit/dist/src/utils/eip-712'
 import { type SecurityResponse, type SecurityModule, SecuritySeverity } from '../types'
@@ -11,8 +11,8 @@ import type {
   ProxyUpgradeManagement,
   TransactionScanResponse,
 } from './types'
-import { BLOCKAID_API, BLOCKAID_CLIENT_ID } from '@/config/constants'
-import { numberToHex } from '@/utils/hex'
+import { BLOCKAID_API, BLOCKAID_CLIENT_ID } from '@safe-global/utils/config/constants'
+import { numberToHex } from '@safe-global/web/src/utils/hex'
 
 /** @see https://docs.blockaid.io/docs/supported-chains */
 

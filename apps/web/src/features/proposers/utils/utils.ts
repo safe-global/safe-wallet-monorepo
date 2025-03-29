@@ -1,4 +1,4 @@
-import { signTypedData } from '@/utils/web3'
+import { signTypedData } from '@safe-global/utils/utils/web3'
 import { SigningMethod } from '@safe-global/protocol-kit'
 import { adjustVInSignature } from '@safe-global/protocol-kit/dist/src/utils/signatures'
 import type { JsonRpcSigner } from 'ethers'

@@ -8,7 +8,7 @@ import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
 import type { JsonRpcProvider } from 'ethers'
 import { getSpendingLimitContract } from '@/services/contracts/spendingLimitContracts'
 import type { AddressEx, TokenInfo } from '@safe-global/safe-gateway-typescript-sdk'
-import { type AllowanceModule } from '@/types/contracts'
+import { type AllowanceModule } from '@safe-global/utils/types/contracts'
 import { getERC20TokenInfoOnChain } from '@/utils/tokens'
 
 import { sameString } from '@safe-global/protocol-kit/dist/src/utils'

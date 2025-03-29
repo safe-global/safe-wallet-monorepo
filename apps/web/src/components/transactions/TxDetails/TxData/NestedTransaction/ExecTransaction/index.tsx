@@ -1,4 +1,4 @@
-import { Safe__factory } from '@/types/contracts'
+import { Safe__factory } from '@safe-global/utils/types/contracts'
 import { Skeleton } from '@mui/material'
 import { type TransactionData } from '@safe-global/safe-gateway-typescript-sdk'
 import ErrorMessage from '@/components/tx/ErrorMessage'

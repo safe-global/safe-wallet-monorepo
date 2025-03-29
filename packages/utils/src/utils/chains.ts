@@ -1,5 +1,9 @@
 import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import { getExplorerLink } from '@safe-global/utils/utils/gateway'
+import type { SafeVersion } from '@safe-global/safe-core-sdk-types'
+import { getSafeSingletonDeployment } from '@safe-global/safe-deployments'
+import semverSatisfies from 'semver/functions/satisfies'
+import { LATEST_SAFE_VERSION } from '@safe-global/utils/config/constants'
 
 export enum FEATURES {
   ERC721 = 'ERC721',
@@ -37,7 +41,6 @@ export enum FEATURES {
   TARGETED_MASS_PAYOUTS = 'TARGETED_MASS_PAYOUTS',
 }
 
-
 export const hasFeature = (chain: ChainInfo, feature: FEATURES): boolean => {
   return (chain.features as string[]).includes(feature)
 }
@@ -48,5 +51,23 @@ export const getBlockExplorerLink = (
 ): { href: string; title: string } | undefined => {
   if (chain.blockExplorerUriTemplate) {
     return getExplorerLink(address, chain.blockExplorerUriTemplate)
+  }
+}
+/** This version is used if a network does not have the LATEST_SAFE_VERSION deployed yet */
+const FALLBACK_SAFE_VERSION = '1.3.0' as const
+export const getLatestSafeVersion = (chain: ChainInfo | undefined, isUpgrade = false): SafeVersion => {
+  const latestSafeVersion = isUpgrade
+    ? chain?.recommendedMasterCopyVersion || LATEST_SAFE_VERSION // for upgrades, use the recommended version
+    : LATEST_SAFE_VERSION // for Safe creation, always use the latest version
+
+  // Without version filter it will always return the LATEST_SAFE_VERSION constant to avoid automatically updating to the newest version if the deployments change
+  const latestDeploymentVersion = (getSafeSingletonDeployment({ network: chain?.chainId, released: true })?.version ??
+    FALLBACK_SAFE_VERSION) as SafeVersion
+
+  // The version needs to be smaller or equal to the
+  if (semverSatisfies(latestDeploymentVersion, `<=${latestSafeVersion}`)) {
+    return latestDeploymentVersion
+  } else {
+    return latestSafeVersion as SafeVersion
   }
 }
