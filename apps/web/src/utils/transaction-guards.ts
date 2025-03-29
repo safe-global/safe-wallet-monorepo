@@ -68,7 +68,7 @@ import { hasMatchingDeployment } from '@/services/contracts/deployments'
 import { isMultiSendCalldata } from './transaction-calldata'
 import { decodeMultiSendData } from '@safe-global/protocol-kit/dist/src/utils'
 import { OperationType } from '@safe-global/safe-core-sdk-types'
-import { LATEST_SAFE_VERSION } from '@/config/constants'
+import { LATEST_SAFE_VERSION } from '@safe-global/utils/config/constants'
 
 export const isTxQueued = (value: TransactionStatus): boolean => {
   return [TransactionStatus.AWAITING_CONFIRMATIONS, TransactionStatus.AWAITING_EXECUTION].includes(value)

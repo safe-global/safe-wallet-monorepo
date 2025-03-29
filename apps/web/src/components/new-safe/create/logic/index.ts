@@ -13,7 +13,6 @@ import { isValidSafeVersion } from '@/hooks/coreSDK/safeCoreSDK'
 
 import { backOff } from 'exponential-backoff'
 import { EMPTY_DATA, ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
-import { getLatestSafeVersion } from '@/utils/chains'
 import {
   getCompatibilityFallbackHandlerDeployment,
   getProxyFactoryDeployment,
@@ -28,6 +27,7 @@ import { getSafeContractDeployment } from '@/services/contracts/deployments'
 import { Safe__factory, Safe_proxy_factory__factory, Safe_to_l2_setup__factory } from '@/types/contracts'
 import { createWeb3 } from '@/hooks/wallets/web3'
 import { hasMultiChainCreationFeatures } from '@/features/multichain/utils/utils'
+import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
 
 export type SafeCreationProps = {
   owners: string[]

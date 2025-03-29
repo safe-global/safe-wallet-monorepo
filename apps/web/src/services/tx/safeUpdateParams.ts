@@ -7,7 +7,6 @@ import { getReadOnlyFallbackHandlerContract, getReadOnlyGnosisSafeContract } fro
 import { assertValidSafeVersion } from '@/hooks/coreSDK/safeCoreSDK'
 import { SAFE_FEATURES } from '@safe-global/protocol-kit/dist/src/utils/safeVersions'
 import { hasSafeFeature } from '@/utils/safe-versions'
-import { getLatestSafeVersion } from '@/utils/chains'
 import { createUpdateMigration, SAFE_TO_L2_MIGRATION_VERSION } from '@/utils/safe-migrations'
 import { isMultiSendCalldata } from '@/utils/transaction-calldata'
 import { decodeMultiSendData } from '@safe-global/protocol-kit/dist/src/utils'
@@ -15,6 +14,7 @@ import { Gnosis_safe__factory } from '@/types/contracts/factories/@safe-global/s
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { determineMasterCopyVersion } from '@/features/counterfactual/utils'
 import { getSafeMigrationDeployment } from '@safe-global/safe-deployments'
+import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
 
 const getChangeFallbackHandlerCallData = async (
   safeContractInstance: SafeContractImplementationType,

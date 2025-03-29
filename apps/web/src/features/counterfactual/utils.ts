@@ -1,4 +1,3 @@
-import { getLatestSafeVersion } from '@/utils/chains'
 import { POLLING_INTERVAL } from '@/config/constants'
 import type { PayMethod } from '@/features/counterfactual/PayNowPayLater'
 import { safeCreationDispatch, SafeCreationEvent } from '@/features/counterfactual/services/safeCreationEvents'
@@ -32,6 +31,7 @@ import { getSafeL2SingletonDeployments, getSafeSingletonDeployments } from '@saf
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 
 import { encodeSafeCreationTx } from '@/components/new-safe/create/logic'
+import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
 
 export const getUndeployedSafeInfo = (undeployedSafe: UndeployedSafe, address: string, chain: ChainInfo) => {
   const safeSetup = extractCounterfactualSafeSetup(undeployedSafe, chain.chainId)

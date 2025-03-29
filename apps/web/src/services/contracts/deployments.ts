@@ -11,9 +11,9 @@ import {
 } from '@safe-global/safe-deployments'
 import type { SingletonDeployment, DeploymentFilter, SingletonDeploymentV2 } from '@safe-global/safe-deployments'
 import type { ChainInfo, SafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
-import { getLatestSafeVersion } from '@/utils/chains'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { type SafeVersion } from '@safe-global/safe-core-sdk-types'
+import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
 
 const toNetworkAddressList = (addresses: string | string[]) => (Array.isArray(addresses) ? addresses : [addresses])
 

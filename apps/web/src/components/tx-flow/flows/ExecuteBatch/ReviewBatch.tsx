@@ -34,11 +34,11 @@ import { TX_EVENTS, TX_TYPES } from '@/services/analytics/events/transactions'
 import { isWalletRejection } from '@/utils/wallets'
 import WalletRejectionError from '@/components/tx/SignOrExecuteForm/WalletRejectionError'
 import useUserNonce from '@/components/tx/AdvancedParams/useUserNonce'
-import { getLatestSafeVersion } from '@/utils/chains'
 import { HexEncodedData } from '@/components/transactions/HexEncodedData'
 import { useGetMultipleTransactionDetailsQuery } from '@/store/api/gateway'
 import { skipToken } from '@reduxjs/toolkit/query/react'
 import NetworkWarning from '@/components/new-safe/create/NetworkWarning'
+import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
 
 export const ReviewBatch = ({ params }: { params: ExecuteBatchFlowProps }) => {
   const [isSubmittable, setIsSubmittable] = useState<boolean>(true)

@@ -1,0 +1,1 @@
+export const LATEST_SAFE_VERSION = process.env.NEXT_PUBLIC_SAFE_VERSION || process.env.EXPO_PUBLIC_SAFE_VERSION || '1.4.1'
