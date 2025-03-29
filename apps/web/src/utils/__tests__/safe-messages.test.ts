@@ -1,7 +1,11 @@
 import { zeroPadValue } from 'ethers'
 import type { SafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
 
-import { generateSafeMessageTypedData, isBlindSigningPayload, isOffchainEIP1271Supported } from '../safe-messages'
+import {
+  generateSafeMessageTypedData,
+  isBlindSigningPayload,
+  isOffchainEIP1271Supported,
+} from '@safe-global/utils/utils/safe-messages'
 import { toBeHex } from 'ethers'
 import { FEATURES } from '../chains'
 import { faker } from '@faker-js/faker'

@@ -6,9 +6,9 @@ import { adjustVInSignature } from '@safe-global/protocol-kit/dist/src/utils/sig
 import { hashTypedData } from '@safe-global/utils/utils/web3'
 import { isValidAddress } from '@safe-global/utils/utils/validation'
 import { type SafeInfo, type ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
-import { FEATURES } from '@/utils/chains'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 
-import { hasFeature } from './chains'
+import { hasFeature } from '@safe-global/utils/utils/chains'
 import { SigningMethod } from '@safe-global/protocol-kit'
 
 /*

@@ -13,7 +13,7 @@ import { generateDataRowValue, TxDataRow } from '@/components/transactions/TxDet
 import MsgSigners from '@/components/safe-messages/MsgSigners'
 import useWallet from '@/hooks/wallets/useWallet'
 import SignMsgButton from '@/components/safe-messages/SignMsgButton'
-import { generateSafeMessageMessage, isEIP712TypedData } from '@/utils/safe-messages'
+import { generateSafeMessageMessage, isEIP712TypedData } from '@safe-global/utils/utils/safe-messages'
 
 import txDetailsCss from '@/components/transactions/TxDetails/styles.module.css'
 import singleTxDecodedCss from '@/components/transactions/TxDetails/TxData/DecodedData/SingleTxDecoded/styles.module.css'

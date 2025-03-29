@@ -18,7 +18,7 @@ import * as sdk from '@/hooks/coreSDK/safeCoreSDK'
 import { render, fireEvent, waitFor } from '@/tests/test-utils'
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import type { EIP1193Provider, WalletState, AppState, OnboardAPI } from '@web3-onboard/core'
-import { generateSafeMessageHash } from '@/utils/safe-messages'
+import { generateSafeMessageHash } from '@safe-global/utils/utils/safe-messages'
 import { getSafeMessage } from '@safe-global/safe-gateway-typescript-sdk'
 import { chainBuilder } from '@/tests/builders/chains'
 

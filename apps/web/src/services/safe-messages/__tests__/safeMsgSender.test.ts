@@ -4,7 +4,7 @@ import type { JsonRpcSigner } from 'ethers'
 import { zeroPadBytes } from 'ethers'
 
 import { dispatchSafeMsgConfirmation, dispatchSafeMsgProposal } from '@/services/safe-messages/safeMsgSender'
-import * as utils from '@/utils/safe-messages'
+import * as utils from '@safe-global/utils/utils/safe-messages'
 import * as events from '@/services/safe-messages/safeMsgEvents'
 import * as sdk from '@/services/tx/tx-sender/sdk'
 import { zeroPadValue } from 'ethers'
