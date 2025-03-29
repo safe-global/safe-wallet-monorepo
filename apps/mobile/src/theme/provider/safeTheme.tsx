@@ -1,20 +1,21 @@
-import React, { createContext, useContext, useState, useMemo } from 'react'
+import React, { createContext, useContext, useMemo, useCallback } from 'react'
 import { StatusBar, useColorScheme } from 'react-native'
 import { ThemeProvider } from '@react-navigation/native'
 import { TamaguiProvider } from '@tamagui/core'
+import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
+import { selectSettings, updateSettings } from '@/src/store/settingsSlice'
 
 import { config } from '@/src/theme/tamagui.config'
 import { NavDarkTheme, NavLightTheme } from '@/src/theme/navigation'
 import { FontProvider } from '@/src/theme/provider/font'
 import { isStorybookEnv } from '@/src/config/constants'
 import { View } from 'tamagui'
-
-export type ThemePreference = 'light' | 'dark' | 'auto'
+import { ThemePreference } from '@/src/types/theme'
 
 interface ThemeContextValue {
   themePreference: ThemePreference
   setThemePreference: (theme: ThemePreference) => void
-  currentTheme: 'light' | 'dark' | 'auto'
+  currentTheme: ThemePreference
 }
 
 const ThemeContext = createContext<ThemeContextValue | undefined>(undefined)
@@ -32,10 +33,18 @@ interface SafeThemeProviderProps {
 }
 
 export const SafeThemeProvider = ({ children }: SafeThemeProviderProps) => {
+  const dispatch = useAppDispatch()
   const systemColorScheme = useColorScheme()
-  const [themePreference, setThemePreference] = useState<ThemePreference>('auto')
+  const themePreference = useAppSelector((state) => selectSettings(state, 'themePreference'))
 
-  // Use useMemo to compute the current theme instead of state
+  console.log('themePreference :: ', themePreference)
+  const setThemePreference = useCallback(
+    (theme: ThemePreference) => {
+      dispatch(updateSettings({ themePreference: theme }))
+    },
+    [dispatch],
+  )
+
   const currentTheme = useMemo(() => {
     return themePreference === 'auto' ? systemColorScheme || 'dark' : themePreference
   }, [themePreference, systemColorScheme])
@@ -56,9 +65,9 @@ export const SafeThemeProvider = ({ children }: SafeThemeProviderProps) => {
 
   const contextValue = useMemo(
     () => ({
-      themePreference,
+      themePreference: themePreference as ThemePreference,
       setThemePreference,
-      currentTheme,
+      currentTheme: currentTheme as ThemePreference,
     }),
     [themePreference, currentTheme],
   )

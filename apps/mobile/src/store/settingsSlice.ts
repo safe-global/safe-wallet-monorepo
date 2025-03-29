@@ -1,13 +1,15 @@
-// src/store/settingsSlice.ts
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { RootState } from '.'
+import { ThemePreference } from '@/src/types/theme'
 
 export interface SettingsState {
   onboardingVersionSeen: string
+  themePreference: ThemePreference
 }
 
 const initialState: SettingsState = {
   onboardingVersionSeen: '',
+  themePreference: 'auto' as ThemePreference,
 }
 
 const settingsSlice = createSlice({
