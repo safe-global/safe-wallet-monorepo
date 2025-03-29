@@ -1,4 +1,4 @@
-import { _isL2 } from '@/services/contracts/deployments'
+import { _isL2 } from '@safe-global/utils/services/contracts/deployments'
 import { getSafeProvider } from '@/services/tx/tx-sender/sdk'
 import { type GetContractProps, SafeProvider } from '@safe-global/protocol-kit'
 import {

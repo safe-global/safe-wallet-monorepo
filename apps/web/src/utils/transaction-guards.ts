@@ -64,7 +64,7 @@ import {
   getMultiSendDeployments,
 } from '@safe-global/safe-deployments'
 import { Safe__factory, Safe_to_l2_migration__factory } from '@/types/contracts'
-import { hasMatchingDeployment } from '@/services/contracts/deployments'
+import { hasMatchingDeployment } from '@safe-global/utils/services/contracts/deployments'
 import { isMultiSendCalldata } from './transaction-calldata'
 import { decodeMultiSendData } from '@safe-global/protocol-kit/dist/src/utils'
 import { OperationType } from '@safe-global/safe-core-sdk-types'

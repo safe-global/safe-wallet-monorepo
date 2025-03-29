@@ -1,7 +1,7 @@
 import * as safeDeployments from '@safe-global/safe-deployments'
 import { type ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
 
-import * as deployments from '../deployments'
+import * as deployments from '@safe-global/utils/services/contracts/deployments'
 import { chainBuilder } from '@/tests/builders/chains'
 import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
 
