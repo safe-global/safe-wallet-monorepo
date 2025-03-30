@@ -1,7 +1,7 @@
 import type { RefObject } from 'react'
 import type { SDKMessageEvent, MethodToResponse, ErrorResponse, RequestId } from '@safe-global/safe-apps-sdk'
 import { getSDKVersion, Methods, MessageFormatter } from '@safe-global/safe-apps-sdk'
-import { asError } from '../exceptions/utils'
+import { asError } from '@safe-global/utils/services/exceptions/utils'
 
 type MessageHandler = (
   msg: SDKMessageEvent,

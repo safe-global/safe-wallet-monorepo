@@ -5,7 +5,7 @@ import { FETCH_STATUS, type TenderlySimulation } from '@/components/tx/security/
 import { getSimulationPayload, type SimulationTxParams } from '@/components/tx/security/tenderly/utils'
 import { useAppSelector } from '@/store'
 import { selectTenderly } from '@/store/settingsSlice'
-import { asError } from '@/services/exceptions/utils'
+import { asError } from '@safe-global/utils/services/exceptions/utils'
 
 export type UseSimulationReturn =
   | {

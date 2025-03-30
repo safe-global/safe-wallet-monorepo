@@ -21,7 +21,7 @@ import { useIsExecutionLoop } from '@/components/tx/SignOrExecuteForm/hooks'
 import type { SignOrExecuteProps } from '@/components/tx/SignOrExecuteForm/SignOrExecuteForm'
 import type { SafeTransaction } from '@safe-global/safe-core-sdk-types'
 import AdvancedParams, { useAdvancedParams } from '@/components/tx/AdvancedParams'
-import { asError } from '@/services/exceptions/utils'
+import { asError } from '@safe-global/utils/services/exceptions/utils'
 
 import css from '@/components/tx/SignOrExecuteForm/styles.module.css'
 import commonCss from '@/components/tx-flow/common/styles.module.css'

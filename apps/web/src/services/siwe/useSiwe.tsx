@@ -3,7 +3,7 @@ import { useAuthVerifyV1Mutation, useLazyAuthGetNonceV1Query } from '@safe-globa
 import { useCallback } from 'react'
 import { getSignableMessage } from './utils'
 import { logError } from '../exceptions'
-import ErrorCodes from '../exceptions/ErrorCodes'
+import ErrorCodes from '@safe-global/utils/services/exceptions/ErrorCodes'
 
 export const useSiwe = () => {
   const provider = useWeb3()

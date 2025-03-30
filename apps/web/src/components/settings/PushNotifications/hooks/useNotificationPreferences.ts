@@ -15,7 +15,7 @@ import {
   getPushNotificationPrefsKey,
 } from '@/services/push-notifications/preferences'
 import { logError } from '@/services/exceptions'
-import ErrorCodes from '@/services/exceptions/ErrorCodes'
+import ErrorCodes from '@safe-global/utils/services/exceptions/ErrorCodes'
 import type { PushNotificationPreferences, PushNotificationPrefsKey } from '@/services/push-notifications/preferences'
 import type { NotifiableSafes } from '../logic'
 

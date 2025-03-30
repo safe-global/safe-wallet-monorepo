@@ -1,7 +1,7 @@
 import { sentryCaptureException } from '@/services/sentry'
 import { IS_PRODUCTION } from '@/config/constants'
-import ErrorCodes from './ErrorCodes'
-import { asError } from './utils'
+import ErrorCodes from '@safe-global/utils/services/exceptions/ErrorCodes'
+import { asError } from '@safe-global/utils/services/exceptions/utils'
 
 export class CodedException extends Error {
   public readonly code: number

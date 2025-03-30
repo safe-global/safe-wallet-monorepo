@@ -1,7 +1,7 @@
 import type { TypedData, MessageItem } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import useWallet from '@/hooks/wallets/useWallet'
 import { Errors, logError } from '@/services/exceptions'
-import { asError } from '@/services/exceptions/utils'
+import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { dispatchPreparedSignature } from '@/services/safe-messages/safeMsgNotifications'
 import { dispatchSafeMsgProposal, dispatchSafeMsgConfirmation } from '@/services/safe-messages/safeMsgSender'
 import { getSafeMessage } from '@safe-global/safe-gateway-typescript-sdk'

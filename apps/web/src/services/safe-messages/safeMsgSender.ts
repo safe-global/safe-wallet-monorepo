@@ -11,7 +11,7 @@ import {
 } from '@safe-global/utils/utils/safe-messages'
 import { normalizeTypedData } from '@safe-global/utils/utils/web3'
 import { getAssertedChainSigner } from '@/services/tx/tx-sender/sdk'
-import { asError } from '../exceptions/utils'
+import { asError } from '@safe-global/utils/services/exceptions/utils'
 
 export const dispatchSafeMsgProposal = async ({
   provider,

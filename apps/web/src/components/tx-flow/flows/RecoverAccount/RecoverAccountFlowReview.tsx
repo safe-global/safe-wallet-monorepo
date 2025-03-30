@@ -21,7 +21,7 @@ import { selectDelayModifierByRecoverer } from '@/features/recovery/services/sel
 import useWallet from '@/hooks/wallets/useWallet'
 import useOnboard from '@/hooks/wallets/useOnboard'
 import { TxModalContext } from '../..'
-import { asError } from '@/services/exceptions/utils'
+import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { trackError, Errors } from '@/services/exceptions'
 import { getPeriod } from '@safe-global/utils/utils/date'
 import useRecovery from '@/features/recovery/hooks/useRecovery'
