@@ -1,7 +1,7 @@
 import chains from '@/config/chains'
 import type { UndeployedSafe } from '@/features/counterfactual/store/undeployedSafesSlice'
 import { getSafeSingletonDeployments, getSafeL2SingletonDeployments } from '@safe-global/safe-deployments'
-import ExternalStore from '@/services/ExternalStore'
+import ExternalStore from '@safe-global/utils/services/ExternalStore'
 import { Gnosis_safe__factory } from '@safe-global/utils/types/contracts'
 import { invariant } from '@/utils/helpers'
 import type { JsonRpcProvider } from 'ethers'

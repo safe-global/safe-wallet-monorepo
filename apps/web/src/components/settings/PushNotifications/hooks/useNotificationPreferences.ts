@@ -8,7 +8,7 @@ import {
 import { useCallback, useEffect, useMemo } from 'react'
 
 import { WebhookType } from '@/service-workers/firebase-messaging/webhook-types'
-import ExternalStore from '@/services/ExternalStore'
+import ExternalStore from '@safe-global/utils/services/ExternalStore'
 import {
   createPushNotificationPrefsIndexedDb,
   createPushNotificationUuidIndexedDb,

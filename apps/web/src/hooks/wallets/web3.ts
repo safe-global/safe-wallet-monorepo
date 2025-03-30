@@ -1,7 +1,7 @@
 import { type ChainInfo, RPC_AUTHENTICATION, type RpcUri } from '@safe-global/safe-gateway-typescript-sdk'
 import { INFURA_TOKEN, SAFE_APPS_INFURA_TOKEN } from '@/config/constants'
 import { JsonRpcProvider, BrowserProvider, type Eip1193Provider } from 'ethers'
-import ExternalStore from '@/services/ExternalStore'
+import ExternalStore from '@safe-global/utils/services/ExternalStore'
 
 /**
  * Infura and other RPC providers limit the max amount included in a batch RPC call.

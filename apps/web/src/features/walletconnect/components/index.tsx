@@ -1,5 +1,5 @@
 import dynamic from 'next/dynamic'
-import ExternalStore from '@/services/ExternalStore'
+import ExternalStore from '@safe-global/utils/services/ExternalStore'
 
 const WalletConnectUi = dynamic(() => import('./WalletConnectUi'))
 
