@@ -12,6 +12,12 @@ import {
 import { SafeOverview } from './AUTO_GENERATED/safes'
 import { MessageItem, MessagePage, TypedData } from './AUTO_GENERATED/messages'
 
+export enum RPC_AUTHENTICATION {
+  API_KEY_PATH = 'API_KEY_PATH',
+  NO_AUTHENTICATION = 'NO_AUTHENTICATION',
+  UNKNOWN = 'UNKNOWN',
+}
+
 export type ExecutionInfo = ModuleExecutionInfo | MultisigExecutionInfo
 
 export type SafeMessageListItemType = MessageItem['type']
