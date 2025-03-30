@@ -8,12 +8,16 @@ import {
   getReadOnlyMultiSendCallOnlyContract,
   getReadOnlyCurrentGnosisSafeContract,
 } from '@/services/contracts/safeContracts'
-import { TENDERLY_SIMULATE_ENDPOINT_URL, TENDERLY_ORG_NAME, TENDERLY_PROJECT_NAME } from '@/config/constants'
 import { FEATURES, hasFeature } from '@/utils/chains'
 import type { StateObject, TenderlySimulatePayload, TenderlySimulation } from '@/components/tx/security/tenderly/types'
 import { getWeb3ReadOnly } from '@/hooks/wallets/web3'
 import { toBeHex } from 'ethers'
 import type { EnvState } from '@/store/settingsSlice'
+import {
+  TENDERLY_ORG_NAME,
+  TENDERLY_PROJECT_NAME,
+  TENDERLY_SIMULATE_ENDPOINT_URL,
+} from '@safe-global/utils/config/constants'
 
 export const isTxSimulationEnabled = (chain?: ChainInfo): boolean => {
   if (!chain) {
