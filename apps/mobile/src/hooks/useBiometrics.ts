@@ -1,4 +1,4 @@
-import { useState, useCallback, useLayoutEffect, useRef } from 'react'
+import { useState, useCallback, useLayoutEffect } from 'react'
 import * as Keychain from 'react-native-keychain'
 import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
 import {
@@ -7,7 +7,7 @@ import {
   setBiometricsType,
   setUserAttempts,
 } from '@/src/store/biometricsSlice'
-import { Platform, Linking, AppState, AppStateStatus } from 'react-native'
+import { Platform, Linking } from 'react-native'
 import Logger from '@/src/utils/logger'
 
 const BIOMETRICS_KEY = 'SAFE_WALLET_BIOMETRICS'
@@ -19,7 +19,6 @@ export function useBiometrics() {
   const isEnabled = useAppSelector((state) => state.biometrics.isEnabled)
   const biometricsType = useAppSelector((state) => state.biometrics.type)
   const userAttempts = useAppSelector((state) => state.biometrics.userAttempts)
-  const appState = useRef(AppState.currentState)
 
   const openBiometricSettings = () => {
     if (Platform.OS === 'ios') {
@@ -64,7 +63,6 @@ export function useBiometrics() {
     try {
       // This checks if biometrics is available at system level
       const result = await Keychain.getSupportedBiometryType()
-
       // If biometrics is not set up at OS level, this will return null
       // If Face ID is available, it returns 'FaceID'
       // If Touch ID is available, it returns 'TouchID'
@@ -179,21 +177,13 @@ export function useBiometrics() {
   }, [biometricsType])
 
   useLayoutEffect(() => {
-    const subscription = AppState.addEventListener('change', async (nextAppState: AppStateStatus) => {
+    const checkBiometrics = async () => {
       const { biometricsEnabled: isEnabledAtOSLevel } = await checkBiometricsOSSettingsStatus()
-
-      if (appState.current.match(/inactive|background/) && nextAppState === 'active') {
-        if (!isEnabledAtOSLevel) {
-          await toggleBiometrics(false)
-        }
+      if (!isEnabledAtOSLevel) {
+        toggleBiometrics(false)
       }
-
-      appState.current = nextAppState
-    })
-
-    return () => {
-      subscription.remove()
     }
+    checkBiometrics()
   }, [])
 
   return {

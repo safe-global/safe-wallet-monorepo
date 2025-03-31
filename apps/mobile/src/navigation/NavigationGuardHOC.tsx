@@ -5,6 +5,7 @@ import { selectSettings } from '@/src/store/settingsSlice'
 import { selectActiveSafe } from '@/src/store/activeSafeSlice'
 import { selectAppNotificationStatus, updatePromptAttempts, selectPromptAttempts } from '@/src/store/notificationsSlice'
 import { ONBOARDING_VERSION } from '@/src/config/constants'
+import { useBiometrics } from '../hooks/useBiometrics'
 let navigated = false
 
 function useInitialNavigationScreen() {
@@ -65,5 +66,6 @@ function useInitialNavigationScreen() {
 
 export function NavigationGuardHOC({ children }: { children: React.ReactNode }) {
   useInitialNavigationScreen()
+  useBiometrics()
   return children
 }
