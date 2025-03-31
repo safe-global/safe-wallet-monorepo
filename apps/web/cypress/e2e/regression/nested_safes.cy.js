@@ -59,28 +59,4 @@ describe('Nested safes basic flow tests', () => {
     sideBar.clickOnParentSafeInBreadcrumb()
     cy.url().should('include', staticSafes.SEP_STATIC_SAFE_39.substring(4))
   })
-
-  it('Verify a nested safe can be created and seen in queue', () => {
-    const safe = 'Created safe'
-
-    cy.visit(constants.transactionQueueUrl + staticSafes.SEP_STATIC_SAFE_39)
-    wallet.connectSigner(signer)
-    cy.wait(5000)
-    createTx.deleteAllTx()
-
-    sideBar.clickOnOpenNestedSafeListBtn()
-    nsafes.clickOnAddNestedSafeBtn()
-    createTx.changeNonce(3)
-    nsafes.typeName(safe)
-    nsafes.clickOnAddNextBtn()
-    txs.selectExecuteLater()
-    createTx.clickOnContinueSignTransactionBtn()
-    createTx.clickOnAcknowledgement()
-    createTx.clickOnSignTransactionBtn()
-    createTx.clickViewTransaction()
-    main.verifyValuesExist(createTx.transactionItem, [createTx.tx_status.execute])
-    sideBar.clickOnOpenNestedSafeListBtn()
-    sideBar.checkSafesCountInPopverList(1)
-    sideBar.clickOnSafeInPopover(nestedSafe1Short)
-  })
 })

@@ -2,13 +2,16 @@ import * as constants from '../../support/constants'
 import * as main from '../pages/main.page'
 import * as wallet from '../pages/create_wallet.pages'
 import * as modal from '../pages/modals.page'
+import { dataRow } from '../pages/tables.page'
 
 export const delegateCallWarning = '[data-testid="delegate-call-warning"]'
 export const policyChangeWarning = '[data-testid="threshold-warning"]'
 const newTransactionBtnStr = 'New transaction'
 const recepientInput = 'input[name="recipients.0.recipient"]'
+const recepientInput_ = (index) => `input[name="recipients.${index}.recipient"]`
 const tokenAddressInput = 'input[name="recipients.0.tokenAddress"]'
 const amountInput = 'input[name="recipients.0.amount"]'
+const amountInput_ = (index) => `input[name="recipients.${index}.amount"]`
 const nonceInput = 'input[name="nonce"]'
 const gasLimitInput = '[name="gasLimit"]'
 const rotateLeftIcon = '[data-testid="RotateLeftIcon"]'
@@ -63,7 +66,6 @@ export const altImgUsdt = 'img[alt="USDT"]'
 export const altImgSwaps = 'svg[alt="Swap order"]'
 export const altImgLimitOrder = 'svg[alt="Limit order"]'
 export const altImgTwapOrder = 'svg[alt="Twap Order"]'
-
 export const txShareBlock = '[data-testid="share-block"]'
 export const txShareBlockDetails = '[data-testid="share-block-details"]'
 const copyLinkBtn = '[data-testid="copy-link-btn"]'
@@ -79,6 +81,15 @@ const txStack = '[data-testid="tx-stack"]'
 const txOperation = '[data-testid="tx-operation"]'
 const nonceFld = '[data-testid="nonce-fld"]'
 const txHexDataRow = '[data-testid="tx-hexData"]'
+const addrecipientBtn = '[data-testid="add-recipient-btn"]'
+const removeRecipientBtn = '[data-testid="remove-recipient-btn"]'
+const maxRecipientsReachedMsg = '[data-testid="max-recipients-reached"]'
+const recipientsCount = '[data-testid="recipients-count"]'
+const maxBtn = '[data-testid="max-btn"]'
+const tokenAmountSection = '[data-testid="token-amount-section"]'
+const insufficientBalanceError = '[data-testid="insufficient-balance-error"]'
+
+const insufficientFundsErrorStr = 'Insufficient funds'
 const viewTransactionBtn = 'View transaction'
 const transactionDetailsTitle = 'Transaction details'
 const QueueLabel = 'needs to be executed first'
@@ -86,7 +97,6 @@ const TransactionSummary = 'Send '
 const transactionsPerHrStr = 'free transactions left today'
 const txHashesStr = 'Transaction hashes'
 const txAcknowledgementStr = 'I understand what'
-
 const maxAmountBtnStr = 'Max'
 const nextBtnStr = 'Next'
 const nativeTokenTransferStr = 'ETH'
@@ -121,13 +131,13 @@ export const settingsStr = 'Settings'
 export const assetsStr = 'Assets'
 export const topAssetsStr = 'Top assets'
 export const getStartedStr = 'Get started'
-
 export const txNoteWarningMessage = 'The notes are publicly visible, do not share any private or sensitive details'
 export const recordedTxNote = 'Tx note one'
 
 export const tx_status = {
   execution_needed: 'Execution needed',
   execute: 'Execute',
+  proposal: 'Proposal',
 }
 export const filterTypes = {
   incoming: 'Incoming',
@@ -616,6 +626,11 @@ export function clickOnNewtransactionBtn() {
 export function typeRecipientAddress(address) {
   cy.get(recepientInput).clear().type(address).should('have.value', address)
 }
+
+export function typeRecipientAddress_(index, address) {
+  cy.get(recepientInput_(index)).clear().type(address).should('have.value', address)
+}
+
 export function verifyENSResolves(fullAddress) {
   let split = fullAddress.split(':')
   let noPrefixAddress = split[1]
@@ -676,6 +691,10 @@ export function verifyMaxAmount(token, tokenAbbreviation) {
 
 export function setSendValue(value) {
   cy.get(amountInput).clear().type(value)
+}
+
+export function setSendValue_(index, value) {
+  cy.get(amountInput_(index)).clear().type(value)
 }
 
 export function clickOnNextBtn() {
@@ -850,4 +869,72 @@ export function clickOnSimulateTxBtn() {
 
 export function verifySuccessfulSimulation() {
   cy.get(simulateSuccess).should('exist')
+}
+
+export function insufficientBalanceErrorExists() {
+  cy.get(insufficientBalanceError).should('exist')
+}
+
+export function recipientAddress(index, address) {
+  cy.contains(`Recipient ${index}`)
+    .parents(dataRow)
+    .within(() => {
+      cy.contains(address).should('exist')
+    })
+}
+
+export function insufficientFundsErrorExists(index) {
+  cy.get(tokenAmountSection)
+    .eq(index)
+    .within(() => {
+      cy.get('label').should('contain.text', insufficientFundsErrorStr)
+    })
+}
+
+export function checkTokenValue(index, value) {
+  cy.get(amountInput_(index)).should('have.value', value)
+}
+export function clickOnMaxBtn(index) {
+  cy.get(maxBtn).eq(index).click()
+}
+
+export function verifyAddRecipientBtnIsVisible() {
+  cy.get(addrecipientBtn).should('be.visible')
+}
+
+export function verifyAddRecipientBtnDoesNotExist() {
+  main.verifyElementsCount(addrecipientBtn, 0)
+}
+
+export function clickOnAddRecipientBtn() {
+  cy.get(addrecipientBtn).click()
+}
+
+export function clickOnRemoveRecipientBtn(index) {
+  cy.get(removeRecipientBtn).eq(index).click()
+}
+
+export function checkNumberOfRecipients(count) {
+  cy.get(recipientsCount).should('have.text', `${count}`)
+}
+
+export function checkMaxRecipientReached(attempt = 0) {
+  const maxAttempts = 4
+
+  cy.get('body').then(($body) => {
+    if ($body.find(maxRecipientsReachedMsg).length > 0) {
+      cy.get(maxRecipientsReachedMsg).should('exist')
+      cy.get(addrecipientBtn).should('be.disabled')
+      checkNumberOfRecipients('5/5')
+      return
+    }
+
+    if (attempt >= maxAttempts) {
+      throw new Error('Max attempts reached but message did not appear')
+    }
+
+    clickOnAddRecipientBtn()
+    checkNumberOfRecipients(`${attempt + 2}/5`)
+    checkMaxRecipientReached(attempt + 1)
+  })
 }

@@ -198,13 +198,14 @@ export const CreateTokenTransfer = ({
                     </Button>
                   </Track>
                   <Typography
+                    data-testid="recipients-count"
                     variant="body2"
                     color={canAddMoreRecipients ? 'primary' : 'error.main'}
                   >{`${recipientFields.length}/${MAX_RECIPIENTS}`}</Typography>
                 </Stack>
 
                 {hasInsufficientFunds && (
-                  <Alert severity="error">
+                  <Alert data-testid="insufficient-balance-error" severity="error">
                     <AlertTitle>Insufficient balance</AlertTitle>
                     <Typography variant="body2">
                       The total amount assigned to all recipients exceeds your available balance. Please adjust the
@@ -222,7 +223,7 @@ export const CreateTokenTransfer = ({
                 )}
 
                 {!canAddMoreRecipients && (
-                  <Alert severity="warning">
+                  <Alert data-testid="max-recipients-reached" severity="warning">
                     <Typography variant="body2">
                       No more recipients can be added.
                       {!!csvAirdropAppUrl && (
