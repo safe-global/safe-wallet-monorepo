@@ -81,6 +81,23 @@ const AddressInput = ({
   // Validation function based on the current chain prefix
   const validatePrefixed = useMemo(() => validatePrefixedAddress(currentShortName), [currentShortName])
 
+  const transformAddressValue = useCallback(
+    (value: string): string => {
+      // Clean the input value
+      const cleanValue = cleanInputValue(value)
+      rawValueRef.current = cleanValue
+      // This also checksums the address
+      if (validatePrefixed(cleanValue) === undefined) {
+        // if the prefix is correct we remove it from the value
+        return parsePrefixedAddress(cleanValue).address
+      } else {
+        // we keep invalid prefixes such that the validation error is persistent
+        return cleanValue
+      }
+    },
+    [validatePrefixed],
+  )
+
   // Update the input value
   const setAddressValue = useCallback(
     (value: string) => setValue(name, value, { shouldValidate: true }),
@@ -93,6 +110,14 @@ const AddressInput = ({
       setAddressValue(`${currentShortName}:${address}`)
     }
   }, [address, currentShortName, setAddressValue])
+
+  // Retransform the value when chain changes
+  useEffect(() => {
+    if (watchedValue) {
+      const transformedValue = transformAddressValue(watchedValue)
+      setAddressValue(transformedValue)
+    }
+  }, [setAddressValue, transformAddressValue, watchedValue, currentChain])
 
   const endAdornment = (
     <InputAdornment position="end">
@@ -170,19 +195,7 @@ const AddressInput = ({
 
           required,
 
-          setValueAs: (value: string): string => {
-            // Clean the input value
-            const cleanValue = cleanInputValue(value)
-            rawValueRef.current = cleanValue
-            // This also checksums the address
-            if (validatePrefixed(cleanValue) === undefined) {
-              // if the prefix is correct we remove it from the value
-              return parsePrefixedAddress(cleanValue).address
-            } else {
-              // we keep invalid prefixes such that the validation error is persistet
-              return cleanValue
-            }
-          },
+          setValueAs: transformAddressValue,
 
           validate: async () => {
             const value = rawValueRef.current
