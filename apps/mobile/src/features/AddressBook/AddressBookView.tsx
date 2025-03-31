@@ -2,11 +2,10 @@ import { AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transacti
 import React, { useCallback, useState } from 'react'
 
 import { NoContacts } from './components/List/NoContacts'
-import { ScreenHeader } from '@/src/components/ScreenHeader'
 import { View } from 'tamagui'
 import SafeSearchBar from '@/src/components/SafeSearchBar/SafeSearchBar'
 import { AddressBookList } from './components/List/AddressBookList'
-
+import { LargeHeaderTitle } from '@/src/components/Title'
 type Props = {
   contacts: AddressInfo[]
 }
@@ -34,7 +33,7 @@ export const AddressBookView = ({ contacts }: Props) => {
   )
   return (
     <View paddingHorizontal="$4" marginTop="$2" style={{ flex: 1 }} testID={'address-book-screen'}>
-      <ScreenHeader sectionTitle="Address book" />
+      <LargeHeaderTitle>Address book</LargeHeaderTitle>
       <SafeSearchBar placeholder="Name, address" onSearch={handleSearch} throttleTime={300} />
       {contacts.length === 0 && <NoContacts />}
       <AddressBookList

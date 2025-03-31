@@ -1,6 +1,6 @@
 import React from 'react'
 import { H2, ScrollView, Text, Theme, View, XStack, YStack } from 'tamagui'
-import { SafeFontIcon as Icon, SafeFontIcon } from '@/src/components/SafeFontIcon/SafeFontIcon'
+import { SafeFontIcon } from '@/src/components/SafeFontIcon/SafeFontIcon'
 import { SafeListItem } from '@/src/components/SafeListItem'
 import { Skeleton } from 'moti/skeleton'
 import { Pressable } from 'react-native'
@@ -113,7 +113,7 @@ export const Settings = ({ address, data, onImplementationTap, displayDevMenu, c
                   >
                     <SafeListItem
                       label={'Signers'}
-                      leftNode={<Icon name={'owners'} color={'$colorSecondary'} />}
+                      leftNode={<SafeFontIcon name={'owners'} color={'$colorSecondary'} />}
                       rightNode={
                         <View flexDirection={'row'} alignItems={'center'} justifyContent={'center'}>
                           <Skeleton height={17}>
@@ -122,7 +122,7 @@ export const Settings = ({ address, data, onImplementationTap, displayDevMenu, c
                             </Text>
                           </Skeleton>
                           <View>
-                            <Icon name={'chevron-right'} />
+                            <SafeFontIcon name={'chevron-right'} />
                           </View>
                         </View>
                       }
@@ -141,8 +141,8 @@ export const Settings = ({ address, data, onImplementationTap, displayDevMenu, c
                     >
                       <SafeListItem
                         label={'Notifications'}
-                        leftNode={<Icon name={'bell'} color={'$colorSecondary'} />}
-                        rightNode={<Icon name={'chevron-right'} />}
+                        leftNode={<SafeFontIcon name={'bell'} color={'$colorSecondary'} />}
+                        rightNode={<SafeFontIcon name={'chevron-right'} />}
                       />
                     </Pressable>
                   </View>
@@ -160,8 +160,8 @@ export const Settings = ({ address, data, onImplementationTap, displayDevMenu, c
                       >
                         <SafeListItem
                           label={'Developer'}
-                          leftNode={<Icon name={'alert-triangle'} color={'$colorSecondary'} />}
-                          rightNode={<Icon name={'chevron-right'} />}
+                          leftNode={<SafeFontIcon name={'alert-triangle'} color={'$colorSecondary'} />}
+                          rightNode={<SafeFontIcon name={'chevron-right'} />}
                         />
                       </Pressable>
                     </View>
