@@ -7491,7 +7491,7 @@ __metadata:
     expo-constants: "npm:~17.0.6"
     expo-dev-client: "npm:~5.0.5"
     expo-device: "npm:~7.0.2"
-    expo-font: "npm:~13.0.3"
+    expo-font: "npm:~13.0.4"
     expo-image: "npm:~2.0.3"
     expo-linear-gradient: "npm:^14.0.2"
     expo-linking: "npm:~7.0.3"
@@ -18316,15 +18316,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"expo-font@npm:~13.0.3":
-  version: 13.0.3
-  resolution: "expo-font@npm:13.0.3"
+"expo-font@npm:~13.0.4":
+  version: 13.0.4
+  resolution: "expo-font@npm:13.0.4"
   dependencies:
     fontfaceobserver: "npm:^2.1.0"
   peerDependencies:
     expo: "*"
     react: "*"
-  checksum: 10/2957b6923b6450f6ac18fa01610351d72376e60469001fb1ffe1f9b8f27a8f4e6753dd7ce6db56cabcee7d6d159f80321f66cc5c46e924f77ae0cefcdb147c7f
+  checksum: 10/aa3dd8dc90991bdaa0e86db1e4506ae39620f22a4e3177ff4259c478553eab0b40b5e013534a1724240d7bfd70cb69e7ee44d3e315b8402f1b8963b09cf0e8ae
   languageName: node
   linkType: hard
 
