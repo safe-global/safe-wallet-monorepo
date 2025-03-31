@@ -91,12 +91,12 @@ export const SPACE_EVENTS = {
     action: 'Submit delete account',
     category: SPACE_CATEGORY,
   },
-  REMOVE_SPACE_MODAL: {
-    action: 'Open remove space modal',
+  DELETE_SPACE_MODAL: {
+    action: 'Open delete space modal',
     category: SPACE_CATEGORY,
   },
-  REMOVE_SPACE: {
-    action: 'Submit remove space',
+  DELETE_SPACE: {
+    action: 'Submit delete space',
     category: SPACE_CATEGORY,
   },
   VIEW_ALL_ACCOUNTS: {

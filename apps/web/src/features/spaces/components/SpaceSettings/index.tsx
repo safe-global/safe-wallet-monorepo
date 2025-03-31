@@ -53,7 +53,7 @@ const SpaceSettings = () => {
               variant="danger"
               onClick={() => {
                 setDeleteSpaceOpen(true)
-                trackEvent({ ...SPACE_EVENTS.REMOVE_SPACE_MODAL })
+                trackEvent({ ...SPACE_EVENTS.DELETE_SPACE_MODAL })
               }}
               disabled={!isAdmin}
             >
