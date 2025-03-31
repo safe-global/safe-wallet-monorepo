@@ -30,7 +30,6 @@ export type ReviewTransactionContentProps = PropsWithChildren<{
   onSubmit?: () => void
   isRejection?: boolean
   isBatch?: boolean
-  isBatchable?: boolean
   actions?: ReactNode
 }>
 
@@ -38,12 +37,16 @@ export const ReviewTransactionContent = ({
   safeTx,
   safeTxError,
   onSubmit,
+  isRejection,
   isBatch,
   actions,
   txOrigin,
   setTxOrigin,
   isOwner,
-  ...props
+  children,
+  txId,
+  txDetails,
+  txPreview,
 }: ReviewTransactionContentProps & {
   isOwner: ReturnType<typeof useIsSafeOwner>
   safeTx: ReturnType<typeof useSafeTx>
@@ -105,31 +108,31 @@ export const ReviewTransactionContent = ({
   return (
     <>
       <TxCard>
-        {props.children}
+        {children}
 
         <ConfirmationView
-          txId={props.txId}
+          txId={txId}
           isCreation={isCreation}
-          txDetails={props.txDetails}
-          txPreview={props.txPreview}
+          txDetails={txDetails}
+          txPreview={txPreview}
           safeTx={safeTx}
           isBatch={isBatch}
           showMethodCall={showMethodCall}
           isApproval={isApproval}
         >
-          {!props.isRejection && (
+          {!isRejection && (
             <ErrorBoundary fallback={<div>Error parsing data</div>}>
               {isApproval && <ApprovalEditor safeTransaction={safeTx} />}
             </ErrorBoundary>
           )}
         </ConfirmationView>
 
-        {!isCounterfactualSafe && !props.isRejection && <BlockaidBalanceChanges />}
+        {!isCounterfactualSafe && !isRejection && <BlockaidBalanceChanges />}
       </TxCard>
 
-      {!isCounterfactualSafe && !props.isRejection && safeTx && <TxChecks transaction={safeTx} />}
+      {!isCounterfactualSafe && !isRejection && safeTx && <TxChecks transaction={safeTx} />}
 
-      <TxNoteForm isCreation={isCreation ?? false} onChange={onNoteChange} txDetails={props.txDetails} />
+      <TxNoteForm isCreation={isCreation ?? false} onChange={onNoteChange} txDetails={txDetails} />
 
       <SignerForm willExecute={willExecute} />
 
@@ -157,7 +160,7 @@ export const ReviewTransactionContent = ({
 
         <NetworkWarning />
 
-        <UnknownContractError txData={props.txDetails?.txData ?? props.txPreview?.txData} />
+        <UnknownContractError txData={txDetails?.txData ?? txPreview?.txData} />
 
         <Blockaid />
 
