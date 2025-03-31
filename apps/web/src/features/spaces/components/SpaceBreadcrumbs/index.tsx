@@ -14,6 +14,8 @@ import { useParentSafe } from '@/hooks/useParentSafe'
 import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@/utils/chains'
+import Track from '@/components/common/Track'
+import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 
 const SpaceBreadcrumbs = () => {
   const isSpacesFeatureEnabled = useHasFeature(FEATURES.SPACES)
@@ -31,20 +33,24 @@ const SpaceBreadcrumbs = () => {
 
   return (
     <>
-      <Link href={{ pathname: AppRoutes.welcome.spaces }} passHref>
-        <IconButton size="small">
-          <SvgIcon component={SpaceIcon} inheritViewBox sx={{ fill: 'none' }} fontSize="small" color="primary" />
-        </IconButton>
-      </Link>
+      <Track {...SPACE_EVENTS.OPEN_SPACE_LIST_PAGE} label={SPACE_LABELS.space_breadcrumbs}>
+        <Link href={{ pathname: AppRoutes.welcome.spaces }} passHref>
+          <IconButton size="small">
+            <SvgIcon component={SpaceIcon} inheritViewBox sx={{ fill: 'none' }} fontSize="small" color="primary" />
+          </IconButton>
+        </Link>
+      </Track>
 
       <Typography variant="body2">/</Typography>
 
-      <Link href={{ pathname: AppRoutes.spaces.index, query: { spaceId } }} passHref className={css.spaceName}>
-        <InitialsAvatar name={space.name} size="xsmall" />
-        <Typography variant="body2" fontWeight="bold">
-          {space.name}
-        </Typography>
-      </Link>
+      <Track {...SPACE_EVENTS.OPEN_SPACE_DASHBOARD} label={SPACE_LABELS.space_breadcrumbs}>
+        <Link href={{ pathname: AppRoutes.spaces.index, query: { spaceId } }} passHref className={css.spaceName}>
+          <InitialsAvatar name={space.name} size="xsmall" />
+          <Typography variant="body2" fontWeight="bold">
+            {space.name}
+          </Typography>
+        </Link>
+      </Track>
 
       <Typography variant="body2">/</Typography>
 
