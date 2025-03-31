@@ -64,13 +64,13 @@ const HardwareWalletStep = [
   InfoSteps[2],
 ]
 
-export type ConfirmTxDetailsProps = {
+export type ConfirmTxReceiptProps = {
   actions?: ReactNode
   txId?: string
   children?: ReactNode
 }
 
-export const ConfirmTxDetails = ({ children, actions }: ConfirmTxDetailsProps) => {
+export const ConfirmTxReceipt = ({ children, actions }: ConfirmTxReceiptProps) => {
   const { safeTx } = useContext(SafeTxContext)
   const [txPreview] = useTxPreview(safeTx?.data)
   const wallet = useWallet()

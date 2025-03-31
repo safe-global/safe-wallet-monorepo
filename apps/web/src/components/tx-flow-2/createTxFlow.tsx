@@ -7,7 +7,7 @@ import TxFlowProvider, { type TxFlowContextType } from './TxFlowProvider'
 import { TxFlowContent } from './TxFlowContent'
 import { withMiddlewares } from './withMiddlewares'
 import ReviewTransaction from '../tx/ReviewTransactionV2'
-import { ConfirmTxDetails } from '../tx/ConfirmTxDetailsV2'
+import { ConfirmTxReceipt } from '../tx/ConfirmTxReceipt'
 import { Batching } from './features'
 import { Counterfactual, Execute, ExecuteThroughRole, Propose, Sign } from './actions'
 
@@ -102,7 +102,7 @@ export const createTxFlow = <T extends unknown>({ commonSteps = [] }: TxFlowProp
 
 export const createDefaultTxFlow = <T extends unknown>(
   ReviewTransactionComponent: ComponentWithChildren<{ onSubmit?: NextStepCallback<T> }> = ReviewTransaction,
-  TxReceiptComponent: ComponentWithChildren<{ onSubmit?: SubmitCallback }> = ConfirmTxDetails,
+  TxReceiptComponent: ComponentWithChildren<{ onSubmit?: SubmitCallback }> = ConfirmTxReceipt,
 ) =>
   createTxFlow<T>({
     commonSteps: [
