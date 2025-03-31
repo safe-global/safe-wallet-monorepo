@@ -5,6 +5,14 @@
     margin: 0 var(--space-1);
 }
 
+.sendButton:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+[data-theme='dark'] .sendButton:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
 .sendButton svg path {
     fill: var(--color-text-primary);
 }
