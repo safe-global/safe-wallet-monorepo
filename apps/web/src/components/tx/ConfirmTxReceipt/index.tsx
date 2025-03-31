@@ -3,7 +3,7 @@ import { Divider, Grid2 as Grid, Stack, StepIcon, Typography } from '@mui/materi
 import commonCss from '@/components/tx-flow/common/styles.module.css'
 import { TxDetails } from './TxDetails'
 import ExternalLink from '@/components/common/ExternalLink'
-import { type ReactNode, useContext } from 'react'
+import { type PropsWithChildren, type ReactNode, useContext } from 'react'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import useTxPreview from '../confirmation-views/useTxPreview'
 import Track from '@/components/common/Track'
@@ -64,13 +64,13 @@ const HardwareWalletStep = [
   InfoSteps[2],
 ]
 
-export type ConfirmTxReceiptProps = {
+export type ConfirmTxReceiptProps = PropsWithChildren<{
   actions?: ReactNode
+  features?: ReactNode
   txId?: string
-  children?: ReactNode
-}
+}>
 
-export const ConfirmTxReceipt = ({ children, actions }: ConfirmTxReceiptProps) => {
+export const ConfirmTxReceipt = ({ children, actions, features }: ConfirmTxReceiptProps) => {
   const { safeTx } = useContext(SafeTxContext)
   const [txPreview] = useTxPreview(safeTx?.data)
   const wallet = useWallet()
@@ -104,6 +104,8 @@ export const ConfirmTxReceipt = ({ children, actions }: ConfirmTxReceiptProps) =
         </Grid>
 
         {children}
+
+        {features}
 
         <Divider className={commonCss.nestedDivider} sx={{ pt: 3 }} />
 

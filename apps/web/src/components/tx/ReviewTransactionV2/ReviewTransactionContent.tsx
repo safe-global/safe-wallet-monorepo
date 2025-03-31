@@ -31,6 +31,7 @@ export type ReviewTransactionContentProps = PropsWithChildren<{
   isRejection?: boolean
   isBatch?: boolean
   actions?: ReactNode
+  features?: ReactNode
 }>
 
 export const ReviewTransactionContent = ({
@@ -40,6 +41,7 @@ export const ReviewTransactionContent = ({
   isRejection,
   isBatch,
   actions,
+  features,
   txOrigin,
   setTxOrigin,
   isOwner,
@@ -128,6 +130,8 @@ export const ReviewTransactionContent = ({
 
         {!isCounterfactualSafe && !isRejection && <BlockaidBalanceChanges />}
       </TxCard>
+
+      {features}
 
       {!isCounterfactualSafe && !isRejection && safeTx && <TxChecks transaction={safeTx} />}
 

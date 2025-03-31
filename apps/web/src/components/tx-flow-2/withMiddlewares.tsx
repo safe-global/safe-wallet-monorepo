@@ -4,11 +4,11 @@ import type { NextStepCallback, SubmitCallback } from './createTxFlow'
 const AppendElements = <T extends object = {}>({
   children,
   append = [],
-  props,
+  props = {} as T,
 }: {
   children?: ReactNode
   append?: Array<ComponentType<T>>
-  props: T
+  props?: T
 }) => {
   const [First, ...rest] = append
 
@@ -30,38 +30,36 @@ const withActions = <
   Callback extends NextStepCallback<T> | SubmitCallback = NextStepCallback<T>,
   ActionProps extends { onSubmit: SubmitCallback } = { onSubmit: SubmitCallback },
 >(
-  WrappedComponent: ComponentType<P & { actions: ReactNode }>,
+  WrappedComponent: ComponentType<P & { actions?: ReactNode }>,
   applyActions?: ComponentType<ActionProps>[],
 ) => {
   return function WithActionsComponent(props: P & { onSubmit?: Callback }) {
     const { onSubmit } = props
-    const actions = <AppendElements append={applyActions} props={{ onSubmit } as ActionProps} />
-
-    return <WrappedComponent {...props} actions={actions} />
+    return (
+      <WrappedComponent
+        {...props}
+        actions={<AppendElements append={applyActions} props={{ onSubmit } as ActionProps} />}
+      />
+    )
   }
 }
 
 const withFeatures = <P extends PropsWithChildren>(
-  WrappedComponent: ComponentType<P>,
+  WrappedComponent: ComponentType<P & { features?: ReactNode }>,
   applyFeatures?: ComponentType[],
 ) => {
   return function WithFeaturesComponent(props: P) {
-    const content = (
-      <AppendElements append={applyFeatures} props={{}}>
-        {props.children}
-      </AppendElements>
-    )
-
-    return <WrappedComponent {...props}>{content}</WrappedComponent>
+    return <WrappedComponent {...props} features={<AppendElements append={applyFeatures} />} />
   }
 }
 
 export const withMiddlewares = <
   T extends unknown,
   Callback extends NextStepCallback<T> | SubmitCallback = NextStepCallback<T>,
-  P extends PropsWithChildren<{ onSubmit?: Callback; actions?: ReactNode }> = PropsWithChildren<{
+  P extends PropsWithChildren<{ onSubmit?: Callback; actions?: ReactNode; features?: ReactNode }> = PropsWithChildren<{
     onSubmit?: Callback
     actions?: ReactNode
+    features?: ReactNode
   }>,
   ActionProps extends { onSubmit: SubmitCallback } = { onSubmit: SubmitCallback },
 >(
