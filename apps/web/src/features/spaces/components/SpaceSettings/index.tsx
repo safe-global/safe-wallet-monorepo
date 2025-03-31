@@ -9,7 +9,7 @@ import PreviewInvite from '@/features/spaces/components/InviteBanner/PreviewInvi
 import DeleteSpaceDialog from '@/features/spaces/components/SpaceSettings/DeleteSpaceDialog'
 import UpdateSpaceForm from '@/features/spaces/components/SpaceSettings/UpdateSpaceForm'
 import { trackEvent } from '@/services/analytics'
-import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
+import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import ExternalLink from '@/components/common/ExternalLink'
 import { AppRoutes } from '@/config/routes'
 
@@ -53,7 +53,7 @@ const SpaceSettings = () => {
               variant="danger"
               onClick={() => {
                 setDeleteSpaceOpen(true)
-                trackEvent({ ...SPACE_EVENTS.REMOVE_SPACE_MODAL })
+                trackEvent({ ...SPACE_EVENTS.DELETE_SPACE_MODAL, label: SPACE_LABELS.space_settings })
               }}
               disabled={!isAdmin}
             >
