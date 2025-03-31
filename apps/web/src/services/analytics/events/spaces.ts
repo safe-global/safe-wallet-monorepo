@@ -15,6 +15,10 @@ export const SPACE_EVENTS = {
     action: 'Open space list page',
     category: SPACE_CATEGORY,
   },
+  OPEN_SPACE_DASHBOARD: {
+    action: 'Open space dashboard',
+    category: SPACE_CATEGORY,
+  },
   CREATE_SPACE_MODAL: {
     action: 'Open create space dialog',
     category: SPACE_CATEGORY,
@@ -146,4 +150,5 @@ export enum SPACE_LABELS {
   add_accounts_modal = 'add_accounts_modal',
   space_settings = 'space_settings',
   space_context_menu = 'space_context_menu',
+  space_breadcrumbs = 'space_breadcrumbs',
 }
