@@ -73,8 +73,8 @@ const createSkeletonMessage = (confirmationsRequired: number): MessageItem => {
     proposedBy: {
       value: '',
     },
-    status: 'NEEDS_CONFIRMATION' as const,
-    type: 'MESSAGE' as const,
+    status: 'NEEDS_CONFIRMATION',
+    type: 'MESSAGE',
   }
 }
 

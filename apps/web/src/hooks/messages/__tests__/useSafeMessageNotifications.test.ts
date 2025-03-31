@@ -20,8 +20,8 @@ describe('useSafeMessageNotifications', () => {
     it('should return all SafeMessages awaiting confirmation of the current wallet', () => {
       const items: SafeMessageListItem[] = [
         {
-          type: 'MESSAGE' as const,
-          status: 'NEEDS_CONFIRMATION' as const,
+          type: 'MESSAGE',
+          status: 'NEEDS_CONFIRMATION',
           messageHash: '0x123',
           confirmations: [],
         } as unknown as SafeMessageListItem,
@@ -31,8 +31,8 @@ describe('useSafeMessageNotifications', () => {
 
       expect(messages).toStrictEqual([
         {
-          type: 'MESSAGE' as const,
-          status: 'NEEDS_CONFIRMATION' as const,
+          type: 'MESSAGE',
+          status: 'NEEDS_CONFIRMATION',
           messageHash: '0x123',
           confirmations: [],
         },
@@ -54,8 +54,8 @@ describe('useSafeMessageNotifications', () => {
     it('should filter pending messages', () => {
       const items: SafeMessageListItem[] = [
         {
-          type: 'MESSAGE' as const,
-          status: 'NEEDS_CONFIRMATION' as const,
+          type: 'MESSAGE',
+          status: 'NEEDS_CONFIRMATION',
           messageHash: '0x123',
           confirmations: [
             {
@@ -80,8 +80,8 @@ describe('useSafeMessageNotifications', () => {
     it('should filter messages already confirmed by the connected wallet', () => {
       const items: SafeMessageListItem[] = [
         {
-          type: 'MESSAGE' as const,
-          status: 'NEEDS_CONFIRMATION' as const,
+          type: 'MESSAGE',
+          status: 'NEEDS_CONFIRMATION',
           messageHash: '0x123',
           confirmations: [
             {

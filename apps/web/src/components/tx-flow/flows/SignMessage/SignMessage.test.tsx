@@ -229,7 +229,7 @@ describe('SignMessage', () => {
     const proposalSpy = jest.spyOn(sender, 'dispatchSafeMsgProposal').mockImplementation(() => Promise.resolve())
     const mockMessageHash = '0x456'
     const msg = {
-      type: 'MESSAGE' as const,
+      type: 'MESSAGE',
       messageHash: mockMessageHash,
       confirmations: [
         {
@@ -284,7 +284,7 @@ describe('SignMessage', () => {
       messageText,
     )
     const msg = {
-      type: 'MESSAGE' as const,
+      type: 'MESSAGE',
       messageHash,
       confirmations: [
         {
@@ -442,7 +442,7 @@ describe('SignMessage', () => {
       messageText,
     )
     const msg = {
-      type: 'MESSAGE' as const,
+      type: 'MESSAGE',
       messageHash,
       confirmations: [
         {
@@ -531,7 +531,7 @@ describe('SignMessage', () => {
       messageText,
     )
     const msg = {
-      type: 'MESSAGE' as const,
+      type: 'MESSAGE',
       messageHash,
       confirmations: [
         {
@@ -595,7 +595,7 @@ describe('SignMessage', () => {
       messageText,
     )
     const msg = {
-      type: 'MESSAGE' as const,
+      type: 'MESSAGE',
       messageHash,
       confirmations: [
         {

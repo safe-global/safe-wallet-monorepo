@@ -15,9 +15,9 @@ import { isEIP712TypedData } from '@/utils/safe-messages'
 
 const getStatusColor = (value: SafeMessageStatus, palette: Palette): string => {
   switch (value) {
-    case 'CONFIRMED' as const:
+    case 'CONFIRMED':
       return palette.success.main
-    case 'NEEDS_CONFIRMATION' as const:
+    case 'NEEDS_CONFIRMATION':
       return palette.warning.main
     default:
       return palette.text.primary

@@ -32,7 +32,7 @@ describe('safeMessagesSlice', () => {
       }
 
       const message = {
-        type: 'MESSAGE' as const,
+        type: 'MESSAGE',
         messageHash: '0x123',
       } as MessageItem
 
@@ -114,7 +114,7 @@ describe('safeMessagesSlice', () => {
       }
 
       const message = {
-        type: 'MESSAGE' as const,
+        type: 'MESSAGE',
         messageHash: '0x456',
       } as MessageItem
 

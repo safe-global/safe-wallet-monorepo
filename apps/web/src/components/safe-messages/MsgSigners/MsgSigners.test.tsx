@@ -31,8 +31,8 @@ describe('MsgSigners', () => {
       proposedBy: {
         value: '',
       },
-      status: 'NEEDS_CONFIRMATION' as const,
-      type: 'MESSAGE' as const,
+      status: 'NEEDS_CONFIRMATION',
+      type: 'MESSAGE',
     }
 
     const result = render(<MsgSigners msg={mockMessage} />)
@@ -63,8 +63,8 @@ describe('MsgSigners', () => {
       proposedBy: {
         value: '',
       },
-      status: 'NEEDS_CONFIRMATION' as const,
-      type: 'MESSAGE' as const,
+      status: 'NEEDS_CONFIRMATION',
+      type: 'MESSAGE',
     }
 
     const result = render(<MsgSigners msg={mockMessage} showMissingSignatures />)

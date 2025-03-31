@@ -16,7 +16,7 @@ export const fetchSafeMessage = async (safeMessageHash: string, chainId: string)
     // fetchedMessage does not have a type because it is explicitly a message
     const fetchedMessage = await getSafeMessage(chainId, safeMessageHash)
     // @ts-expect-error - the getSafeMessage type from the safe-gateway-typescript-sdk is wrong. The gateway returns a MessageItem
-    message = { ...fetchedMessage, type: 'MESSAGE' as const }
+    message = { ...fetchedMessage, type: 'MESSAGE' }
   } catch (err) {
     logError(Errors._613, err)
     throw err

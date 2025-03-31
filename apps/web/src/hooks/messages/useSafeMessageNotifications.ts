@@ -30,7 +30,7 @@ export const _getSafeMessagesAwaitingConfirmations = (
   walletAddress: string,
 ) => {
   return items.filter(isSafeMessageListItem).filter((message) => {
-    const needsConfirmation = message.status === ('NEEDS_CONFIRMATION' as const)
+    const needsConfirmation = message.status === 'NEEDS_CONFIRMATION'
     const isPending = !!pendingMsgs[message.messageHash]
     const canSign = message.confirmations.every(({ owner }) => owner.value !== walletAddress)
     return needsConfirmation && !isPending && canSign
