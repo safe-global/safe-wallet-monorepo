@@ -2,9 +2,10 @@ import Track from '@/components/common/Track'
 import { AppRoutes } from '@/config/routes'
 import css from '@/features/myAccounts/styles.module.css'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
-import { Chip, Link, Stack, Typography } from '@mui/material'
+import { Chip, Stack, Typography } from '@mui/material'
 import classNames from 'classnames'
 import { useRouter } from 'next/router'
+import Link from 'next/link'
 
 const AccountsNavigation = () => {
   const router = useRouter()
