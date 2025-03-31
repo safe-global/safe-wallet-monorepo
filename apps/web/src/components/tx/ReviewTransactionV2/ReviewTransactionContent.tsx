@@ -28,7 +28,6 @@ import useIsCounterfactualSafe from '@/features/counterfactual/hooks/useIsCounte
 
 export type ReviewTransactionContentProps = PropsWithChildren<{
   onSubmit?: () => void
-  isRejection?: boolean
   isBatch?: boolean
   actions?: ReactNode
   features?: ReactNode
@@ -38,7 +37,6 @@ export const ReviewTransactionContent = ({
   safeTx,
   safeTxError,
   onSubmit,
-  isRejection,
   isBatch,
   actions,
   features,
@@ -69,6 +67,7 @@ export const ReviewTransactionContent = ({
     showMethodCall,
     isSubmittable,
     isProposing,
+    isRejection,
   } = useContext(TxFlowContext)
   const [customOrigin, setCustomOrigin] = useState<string | undefined>(txOrigin)
   const isNewExecutableTx = useImmediatelyExecutable() && isCreation

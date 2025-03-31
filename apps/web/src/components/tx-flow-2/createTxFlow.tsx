@@ -41,6 +41,7 @@ export const createTxFlow = <T extends unknown>({ commonSteps = [] }: TxFlowProp
     onlyExecute,
     isExecutable,
     showMethodCall,
+    isRejection,
     ...txLayoutProps
   }: {
     children?: ReactNode[] | ReactNode
@@ -50,6 +51,7 @@ export const createTxFlow = <T extends unknown>({ commonSteps = [] }: TxFlowProp
     onlyExecute?: boolean
     isExecutable?: boolean
     showMethodCall?: boolean
+    isRejection?: boolean
   } & TxFlowContextType['txLayoutProps']) => {
     const { step, data, nextStep, prevStep } = useTxStepper(initialData, 'test') // TODO: replace 'test' string
 
@@ -75,6 +77,7 @@ export const createTxFlow = <T extends unknown>({ commonSteps = [] }: TxFlowProp
               onlyExecute={onlyExecute}
               isExecutable={isExecutable}
               showMethodCall={showMethodCall}
+              isRejection={isRejection}
             >
               <TxFlowContent>
                 {...childrenArray}

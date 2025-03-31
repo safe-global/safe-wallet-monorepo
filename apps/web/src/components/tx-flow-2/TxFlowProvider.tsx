@@ -32,6 +32,7 @@ export type TxFlowContextType = {
 
   txId?: string
   isCreation: boolean
+  isRejection: boolean
   onlyExecute: boolean
   isProposing: boolean
   willExecute: boolean
@@ -58,6 +59,7 @@ const initialContext: TxFlowContextType = {
   trackTxEvent: () => {},
 
   isCreation: false,
+  isRejection: false,
   onlyExecute: false,
   isProposing: false,
   willExecute: false,
@@ -82,6 +84,7 @@ type TxFlowProviderProps<T extends unknown> = {
   txId?: string
   isExecutable?: boolean
   onlyExecute?: TxFlowContextType['onlyExecute']
+  isRejection?: TxFlowContextType['isRejection']
   txLayoutProps?: TxFlowContextType['txLayoutProps']
   showMethodCall?: TxFlowContextType['showMethodCall']
 }
@@ -97,6 +100,7 @@ const TxFlowProvider = <T extends unknown>({
   isExecutable = false,
   onlyExecute = initialContext.onlyExecute,
   txLayoutProps: defaultTxLayoutProps = initialContext.txLayoutProps,
+  isRejection = initialContext.isRejection,
   showMethodCall,
 }: TxFlowProviderProps<T>): ReactElement => {
   const signer = useSigner()
@@ -167,6 +171,7 @@ const TxFlowProvider = <T extends unknown>({
 
     txId,
     isCreation,
+    isRejection,
     onlyExecute,
     isProposing,
     isExecutable,
