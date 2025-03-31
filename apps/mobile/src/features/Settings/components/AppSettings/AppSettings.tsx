@@ -5,28 +5,32 @@ import { Pressable } from 'react-native'
 import { type SettingsSection } from './AppSettings.types'
 import { IconName } from '@/src/types/iconTypes'
 import { LargeHeaderTitle } from '@/src/components/Title'
+import { useMemo } from 'react'
 
 interface AppSettingsProps {
   sections: SettingsSection[]
 }
 
 export const AppSettings = ({ sections }: AppSettingsProps) => {
+  const memoizedSections = useMemo(() => sections, [sections])
+
   return (
     <Theme name={'settings'}>
       <LargeHeaderTitle marginLeft={16} marginTop={8}>
         Settings
       </LargeHeaderTitle>
       <ScrollView
-        style={{
-          paddingTop: 0,
-        }}
         contentContainerStyle={{
-          marginTop: 10,
+          paddingTop: 10,
         }}
+        keyboardShouldPersistTaps="handled"
+        scrollEventThrottle={16}
+        showsVerticalScrollIndicator={false}
+        overScrollMode="never"
       >
         <YStack flex={1} paddingHorizontal="$3">
           <YStack space="$4">
-            {sections.map((section, sectionIndex) => (
+            {memoizedSections.map((section, sectionIndex) => (
               <View
                 key={`section-${sectionIndex}`}
                 backgroundColor="$backgroundDark"
