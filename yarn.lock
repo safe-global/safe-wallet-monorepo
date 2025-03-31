@@ -6583,18 +6583,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-native-firebase/crashlytics@npm:^21.12.0":
-  version: 21.12.0
-  resolution: "@react-native-firebase/crashlytics@npm:21.12.0"
+"@react-native-firebase/crashlytics@npm:^21.12.3":
+  version: 21.12.3
+  resolution: "@react-native-firebase/crashlytics@npm:21.12.3"
   dependencies:
     stacktrace-js: "npm:^2.0.2"
   peerDependencies:
-    "@react-native-firebase/app": 21.12.0
+    "@react-native-firebase/app": 21.12.3
     expo: ">=47.0.0"
   peerDependenciesMeta:
     expo:
       optional: true
-  checksum: 10/5eda198f58213d2e305930d5630144151b2d0826c2282cd045d7753c2d3f799020bf1ee472cb10147fef6bb99679ea82c0ab1b53b3eef3c72b03ae1b1c7f2ec6
+  checksum: 10/a2fb744857f0aad12ca7daf4787aaa7ee69e1dc1ea06c60017050c061f7bb7139ef9fe6fa0cf26b181158bdd9a5021535366aaad341253a56937e36ca82cdbdf
   languageName: node
   linkType: hard
 
@@ -7435,7 +7435,7 @@ __metadata:
     "@react-native-community/slider": "npm:4.5.5"
     "@react-native-firebase/analytics": "npm:^21.12.0"
     "@react-native-firebase/app": "npm:^21.12.0"
-    "@react-native-firebase/crashlytics": "npm:^21.12.0"
+    "@react-native-firebase/crashlytics": "npm:^21.12.3"
     "@react-native-firebase/messaging": "npm:^21.12.0"
     "@react-native-menu/menu": "npm:^1.1.6"
     "@react-native/babel-preset": "npm:^0.76.2"

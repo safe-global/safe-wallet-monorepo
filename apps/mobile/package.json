@@ -52,7 +52,7 @@
     "@react-native-community/blur": "^4.4.1",
     "@react-native-firebase/analytics": "^21.12.0",
     "@react-native-firebase/app": "^21.12.0",
-    "@react-native-firebase/crashlytics": "^21.12.0",
+    "@react-native-firebase/crashlytics": "^21.12.3",
     "@react-native-firebase/messaging": "^21.12.0",
     "@react-native-menu/menu": "^1.1.6",
     "@react-native/babel-preset": "^0.76.2",
