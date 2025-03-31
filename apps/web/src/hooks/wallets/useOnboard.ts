@@ -8,11 +8,12 @@ import ExternalStore from '@safe-global/utils/services/ExternalStore'
 import { logError, Errors } from '@/services/exceptions'
 import { trackEvent, WALLET_EVENTS } from '@/services/analytics'
 import { useAppSelector, useAppDispatch } from '@/store'
-import { type EnvState, selectRpc } from '@/store/settingsSlice'
+import { selectRpc } from '@/store/settingsSlice'
 import { formatAmount } from '@safe-global/utils/utils/formatNumber'
 import { localItem } from '@/services/local-storage/local'
 import { isWalletConnect, isWalletUnlocked } from '@/utils/wallets'
 import { setUnauthenticated } from '@/store/authSlice'
+import type { EnvState } from '@safe-global/store/settingsSlice'
 
 export type ConnectedWallet = {
   label: string
