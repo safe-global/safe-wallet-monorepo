@@ -47,6 +47,7 @@ import { addOrUpdateSafe, pinSafe, selectAllAddedSafes, unpinSafe } from '@/stor
 import { defaultSafeInfo } from '@/store/safeInfoSlice'
 import { selectOrderByPreference } from '@/store/orderByPreferenceSlice'
 import { getComparator } from '@/features/myAccounts/utils/utils'
+import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
 
 export const MultichainIndicator = ({ safes }: { safes: SafeItem[] }) => {
   return (
@@ -77,6 +78,7 @@ function useMultiAccountItemData(multiSafeAccountItem: MultiChainSafeItem) {
 
   const router = useRouter()
   const isWelcomePage = router.pathname === AppRoutes.welcome.accounts
+  const isSpaceRoute = useIsSpaceRoute()
   const safeAddress = useSafeAddress()
   const isCurrentSafe = sameAddress(safeAddress, address)
 
@@ -134,6 +136,7 @@ function useMultiAccountItemData(multiSafeAccountItem: MultiChainSafeItem) {
     isReadOnly,
     isWelcomePage,
     deployedChainIds,
+    isSpaceRoute,
   }
 }
 
@@ -232,6 +235,7 @@ const MultiAccountItem = ({ onLinkClick, multiSafeAccountItem, isSpaceSafe = fal
     isReadOnly,
     isWelcomePage,
     deployedChainIds,
+    isSpaceRoute,
   } = useMultiAccountItemData(multiSafeAccountItem)
   const { addToPinnedList, removeFromPinnedList } = usePinActions(address, name, sortedSafes, safeOverviews)
 
@@ -240,7 +244,7 @@ const MultiAccountItem = ({ onLinkClick, multiSafeAccountItem, isSpaceSafe = fal
 
   const toggleExpand = () => {
     setExpanded((prev) => {
-      if (!prev) {
+      if (!prev && !isSpaceRoute) {
         trackEvent({ ...OVERVIEW_EVENTS.EXPAND_MULTI_SAFE, label: trackingLabel })
       }
       return !prev
