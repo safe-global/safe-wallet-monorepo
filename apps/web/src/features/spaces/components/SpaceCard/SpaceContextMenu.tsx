@@ -59,7 +59,7 @@ const SpaceContextMenu = ({ space }: { space: GetSpaceResponse }) => {
           <ListItemText>Rename</ListItemText>
         </MenuItem>
 
-        <Track {...SPACE_EVENTS.DELETE_SPACE_MODAL} label={SPACE_LABELS.space_dashboard_card}>
+        <Track {...SPACE_EVENTS.DELETE_SPACE_MODAL} label={SPACE_LABELS.space_context_menu}>
           <MenuItem onClick={(e) => handleOpenModal(e, ModalType.REMOVE)}>
             <ListItemIcon>
               <SvgIcon component={DeleteIcon} inheritViewBox fontSize="small" color="error" />

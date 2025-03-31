@@ -42,13 +42,13 @@ const DeleteSpaceDialog = ({ space, onClose }: { space: GetSpaceResponse | undef
     if (!space) return
 
     setError(undefined)
-    trackEvent({ ...SPACE_EVENTS.DELETE_SPACE })
 
     try {
       await deleteSpace({ id: space.id })
 
       onClose()
 
+      trackEvent({ ...SPACE_EVENTS.DELETE_SPACE })
       dispatch(
         showNotification({
           message: `Deleted space ${space.name}.`,
