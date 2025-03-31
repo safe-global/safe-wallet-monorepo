@@ -8,10 +8,10 @@ import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { Safe_proxy_factory__factory } from '@safe-global/utils/types/contracts'
 import { extractCounterfactualSafeSetup } from '@/features/counterfactual/utils'
 import { encodeSafeSetupCall } from '@/components/new-safe/create/logic'
-import { FEATURES, hasFeature } from '@/utils/chains'
 import { type SafeItem } from '@/features/myAccounts/hooks/useAllSafes'
 import { type MultiChainSafeItem } from '@/features/myAccounts/hooks/useAllSafesGrouped'
 import { LATEST_SAFE_VERSION } from '@safe-global/utils/config/constants'
+import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 
 type SafeSetup = {
   owners: string[]

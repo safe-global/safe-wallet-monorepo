@@ -8,7 +8,8 @@ import { fetchFilteredTxHistory, useTxFilter } from '@/utils/tx-history-filter'
 import { getTxHistory } from '@/services/transactions'
 import { selectSettings } from '@/store/settingsSlice'
 import { useHasFeature } from './useChains'
-import { FEATURES } from '@/utils/chains'
+
+import { FEATURES } from '@safe-global/utils/utils/chains'
 
 const useTxHistory = (
   pageUrl?: string,

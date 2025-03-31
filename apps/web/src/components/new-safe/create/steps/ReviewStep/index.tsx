@@ -31,7 +31,6 @@ import { CREATE_SAFE_CATEGORY, CREATE_SAFE_EVENTS, OVERVIEW_EVENTS, trackEvent }
 import { gtmSetChainId, gtmSetSafeAddress } from '@/services/analytics/gtm'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { useAppDispatch, useAppSelector } from '@/store'
-import { FEATURES, hasFeature } from '@/utils/chains'
 import { hasRemainingRelays } from '@/utils/relaying'
 import { isWalletRejection } from '@/utils/wallets'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
@@ -52,6 +51,7 @@ import { createWeb3ReadOnly, getRpcServiceUrl } from '@/hooks/wallets/web3'
 import { type DeploySafeProps } from '@safe-global/protocol-kit'
 import { updateAddressBook } from '../../logic/address-book'
 import chains from '@/config/chains'
+import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 
 export const NetworkFee = ({
   totalFee,

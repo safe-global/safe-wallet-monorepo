@@ -3,8 +3,8 @@ import type { NextRouter } from 'next/router'
 
 import { render } from '@/tests/test-utils'
 import { _FeatureWrapper } from '@/components/wrappers/FeatureWrapper'
-import { FEATURES } from '@/utils/chains'
 import type * as useChains from '@/hooks/useChains'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 
 const mockRouter = {
   replace: jest.fn(),

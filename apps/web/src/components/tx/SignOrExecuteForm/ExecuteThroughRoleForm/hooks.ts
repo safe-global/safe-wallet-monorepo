@@ -24,10 +24,10 @@ import { type JsonRpcProvider } from 'ethers'
 import { KnownContracts, getModuleInstance } from '@gnosis.pm/zodiac'
 import useWallet from '@/hooks/wallets/useWallet'
 import { useHasFeature } from '@/hooks/useChains'
-import { FEATURES } from '@/utils/chains'
 import { encodeMultiSendData } from '@safe-global/protocol-kit'
 import { Multi_send__factory } from '@safe-global/utils/types/contracts'
 import { decodeMultiSendData } from '@safe-global/protocol-kit/dist/src/utils'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 
 const ROLES_V2_SUPPORTED_CHAINS = Object.keys(chains)
 const multiSendInterface = Multi_send__factory.createInterface()

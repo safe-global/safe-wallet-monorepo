@@ -7,8 +7,8 @@ import {
   isOffchainEIP1271Supported,
 } from '@safe-global/utils/utils/safe-messages'
 import { toBeHex } from 'ethers'
-import { FEATURES } from '../chains'
 import { faker } from '@faker-js/faker'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 
 const MOCK_ADDRESS = zeroPadValue('0x0123', 20)
 

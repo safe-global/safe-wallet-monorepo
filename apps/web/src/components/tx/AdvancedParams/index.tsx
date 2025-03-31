@@ -1,10 +1,10 @@
 import GasParams from '@/components/tx/GasParams'
 import { useHasFeature } from '@/hooks/useChains'
 import { MODALS_EVENTS, trackEvent } from '@/services/analytics'
-import { FEATURES } from '@/utils/chains'
 import { useState } from 'react'
 import AdvancedParamsForm from './AdvancedParamsForm'
 import { type AdvancedParameters } from './types'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 
 type Props = {
   params: AdvancedParameters

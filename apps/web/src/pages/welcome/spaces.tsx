@@ -4,7 +4,7 @@ import SpacesList from '@/features/spaces/components/SpacesList'
 import { BRAND_NAME } from '@/config/constants'
 import useFeatureFlagRedirect from '@/features/spaces/hooks/useFeatureFlagRedirect'
 import { useHasFeature } from '@/hooks/useChains'
-import { FEATURES } from '@/utils/chains'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 
 const Spaces: NextPage = () => {
   const isSpacesFeatureEnabled = useHasFeature(FEATURES.SPACES)

@@ -1,8 +1,8 @@
 import useAsync from '@/hooks/useAsync'
 import useSafeInfo from './useSafeInfo'
-import { FEATURES, hasFeature } from '@/utils/chains'
 import { useCurrentChain } from '@/hooks/useChains'
 import { getRelayCount } from '@safe-global/safe-gateway-typescript-sdk'
+import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 
 export const MAX_DAY_RELAYS = 5
 

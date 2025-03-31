@@ -20,11 +20,9 @@ import { OVERVIEW_EVENTS, trackEvent, WALLET_EVENTS } from '@/services/analytics
 import { TX_EVENTS, TX_TYPES } from '@/services/analytics/events/transactions'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { useAppSelector } from '@/store'
-import { hasFeature } from '@/utils/chains'
 import { hasRemainingRelays } from '@/utils/relaying'
 import { Box, Button, CircularProgress, Divider, Grid, Typography } from '@mui/material'
 import type { DeploySafeProps } from '@safe-global/protocol-kit'
-import { FEATURES } from '@/utils/chains'
 import React, { useContext, useMemo, useState } from 'react'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { useEstimateSafeCreationGas } from '@/components/new-safe/create/useEstimateSafeCreationGas'
@@ -32,7 +30,7 @@ import useIsWrongChain from '@/hooks/useIsWrongChain'
 import NetworkWarning from '@/components/new-safe/create/NetworkWarning'
 import CheckWallet from '@/components/common/CheckWallet'
 import { getSafeToL2SetupDeployment } from '@safe-global/safe-deployments'
-import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
+import { FEATURES, getLatestSafeVersion, hasFeature } from '@safe-global/utils/utils/chains'
 
 const useActivateAccount = (undeployedSafe: UndeployedSafe | undefined) => {
   const chain = useCurrentChain()

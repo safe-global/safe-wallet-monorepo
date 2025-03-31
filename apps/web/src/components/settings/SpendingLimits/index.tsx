@@ -4,13 +4,13 @@ import { NoSpendingLimits } from '@/components/settings/SpendingLimits/NoSpendin
 import { SpendingLimitsTable } from '@/components/settings/SpendingLimits/SpendingLimitsTable'
 import { useSelector } from 'react-redux'
 import { selectSpendingLimits, selectSpendingLimitsLoading } from '@/store/spendingLimitsSlice'
-import { FEATURES } from '@/utils/chains'
 import { useHasFeature } from '@/hooks/useChains'
 import { NewSpendingLimitFlow } from '@/components/tx-flow/flows'
 import { SETTINGS_EVENTS } from '@/services/analytics'
 import CheckWallet from '@/components/common/CheckWallet'
 import Track from '@/components/common/Track'
 import { TxModalContext } from '@/components/tx-flow'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 
 const SpendingLimits = () => {
   const { setTxFlow } = useContext(TxModalContext)

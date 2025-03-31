@@ -12,7 +12,8 @@ import useWallet from '@/hooks/wallets/useWallet'
 import { isSpeedableTx } from '@/features/speedup/utils/IsSpeedableTx'
 import { MODALS_EVENTS, trackEvent } from '@/services/analytics'
 import { useHasFeature } from '@/hooks/useChains'
-import { FEATURES } from '@/utils/chains'
+
+import { FEATURES } from '@safe-global/utils/utils/chains'
 
 type SpeedUpMonitorProps = {
   txId: string

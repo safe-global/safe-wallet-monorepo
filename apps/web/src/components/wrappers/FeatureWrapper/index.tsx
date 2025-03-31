@@ -3,7 +3,8 @@ import type { ReactElement } from 'react'
 import { Navigate } from '@/components/common/Navigate'
 import { useHasFeature } from '@/hooks/useChains'
 import madProps from '@/utils/mad-props'
-import type { FEATURES } from '@/utils/chains'
+
+import type { FEATURES } from '@safe-global/utils/utils/chains'
 
 // TODO: Use with swaps/staking
 export function _FeatureWrapper({

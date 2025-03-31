@@ -2,7 +2,8 @@ import NavTabs from '@/components/common/NavTabs'
 import { transactionNavItems } from '@/components/sidebar/SidebarNavigation/config'
 import { AppRoutes } from '@/config/routes'
 import { useHasFeature } from '@/hooks/useChains'
-import { FEATURES } from '@/utils/chains'
+
+import { FEATURES } from '@safe-global/utils/utils/chains'
 
 const TxNavigation = () => {
   const isEIP1271 = useHasFeature(FEATURES.EIP1271)

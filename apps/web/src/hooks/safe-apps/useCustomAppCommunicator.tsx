@@ -18,7 +18,6 @@ import {
   type SafeAppData,
 } from '@safe-global/safe-gateway-typescript-sdk'
 import useGetSafeInfo from '@/components/safe-apps/AppFrame/useGetSafeInfo'
-import { FEATURES, hasFeature } from '@/utils/chains'
 import { isSafeMessageListItem } from '@/utils/safe-message-guards'
 import { TxModalContext } from '@/components/tx-flow'
 import { selectOnChainSigning, selectTokenList, TOKEN_LISTS } from '@/store/settingsSlice'
@@ -33,6 +32,7 @@ import useChainId from '@/hooks/useChainId'
 import type AppCommunicator from '@/services/safe-apps/AppCommunicator'
 import useBalances from '@/hooks/useBalances'
 import type { TypedData } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
+import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 
 export const useCustomAppCommunicator = (
   iframeRef: MutableRefObject<HTMLIFrameElement | null>,

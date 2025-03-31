@@ -1,5 +1,5 @@
-import { hasFeature, getBlockExplorerLink, FEATURES } from '@/utils/chains'
-import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
+import { getBlockExplorerLink } from '@/utils/chains'
+import { FEATURES, getLatestSafeVersion, hasFeature } from '@safe-global/utils/utils/chains'
 import { CONFIG_SERVICE_CHAINS } from '@/tests/mocks/chains'
 import { chainBuilder } from '@/tests/builders/chains'
 

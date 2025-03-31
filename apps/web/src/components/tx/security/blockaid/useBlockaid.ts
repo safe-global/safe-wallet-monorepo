@@ -5,7 +5,6 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import { useSigner } from '@/hooks/wallets/useWallet'
 import { MODALS_EVENTS, trackEvent } from '@/services/analytics'
 import type { SecurityResponse } from '@safe-global/utils/services/security/modules/types'
-import { FEATURES } from '@/utils/chains'
 import type { SafeTransaction } from '@safe-global/safe-core-sdk-types'
 
 import { useEffect, useMemo } from 'react'
@@ -13,6 +12,7 @@ import {
   BlockaidModule,
   type BlockaidModuleResponse,
 } from '@safe-global/utils/services/security/modules/BlockaidModule'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 
 const BlockaidModuleInstance = new BlockaidModule()
 

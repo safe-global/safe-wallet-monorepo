@@ -36,10 +36,10 @@ import { SafeAppsName } from '@/config/constants'
 import { useRemoteSafeApps } from '@/hooks/safe-apps/useRemoteSafeApps'
 import CSVAirdropAppModal from './CSVAirdropAppModal'
 import { InsufficientFundsValidationError } from '@/components/common/TokenAmountInput'
-import { FEATURES } from '@/utils/chains'
 import { useHasFeature } from '@/hooks/useChains'
 import Track from '@/components/common/Track'
 import { MODALS_EVENTS } from '@/services/analytics'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 
 export const AutocompleteItem = (item: { tokenInfo: TokenInfo; balance: string }): ReactElement => (
   <Grid

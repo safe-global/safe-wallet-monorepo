@@ -10,10 +10,10 @@ import * as onboardHooks from '@/hooks/wallets/useOnboard'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import { type OnboardAPI } from '@web3-onboard/core'
 import { AbiCoder, ZeroAddress, encodeBytes32String } from 'ethers'
-import { FEATURES } from '@/utils/chains'
 import { chainBuilder } from '@/tests/builders/chains'
 import { useHasFeature } from '@/hooks/useChains'
 import { useRoles } from '../hooks'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 
 const mockChain = chainBuilder()
   // @ts-expect-error - we are using a local FEATURES enum

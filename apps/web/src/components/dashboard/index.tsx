@@ -11,12 +11,12 @@ import GovernanceSection from '@/components/dashboard/GovernanceSection/Governan
 import { useIsRecoverySupported } from '@/features/recovery/hooks/useIsRecoverySupported'
 import StakingBanner from '@/components/dashboard/StakingBanner'
 import { useHasFeature } from '@/hooks/useChains'
-import { FEATURES } from '@/utils/chains'
 import css from './styles.module.css'
 import { InconsistentSignerSetupWarning } from '@/features/multichain/components/SignerSetupWarning/InconsistentSignerSetupWarning'
 import useIsStakingBannerEnabled from '@/features/stake/hooks/useIsStakingBannerEnabled'
 import { UnsupportedMastercopyWarning } from '@/features/multichain/components/UnsupportedMastercopyWarning/UnsupportedMasterCopyWarning'
 import SpacesDashboardWidget from 'src/features/spaces/components/SpacesDashboardWidget'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 
 const RecoveryHeader = dynamic(() => import('@/features/recovery/components/RecoveryHeader'))
 

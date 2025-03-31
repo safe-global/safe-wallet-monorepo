@@ -1,7 +1,6 @@
 import useWallet from '@/hooks/wallets/useWallet'
 import { CircularProgress, Typography, Button, CardActions, Divider, Alert } from '@mui/material'
 import useAsync from '@/hooks/useAsync'
-import { FEATURES } from '@/utils/chains'
 import { getReadOnlyMultiSendCallOnlyContract } from '@/services/contracts/safeContracts'
 import { useCurrentChain } from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
@@ -27,7 +26,6 @@ import ConfirmationTitle, { ConfirmationTitleTypes } from '@/components/tx/SignO
 import commonCss from '@/components/tx-flow/common/styles.module.css'
 import { TxModalContext } from '@/components/tx-flow'
 import useGasPrice from '@/hooks/useGasPrice'
-import { hasFeature } from '@/utils/chains'
 import type { Overrides } from 'ethers'
 import { trackEvent } from '@/services/analytics'
 import { TX_EVENTS, TX_TYPES } from '@/services/analytics/events/transactions'
@@ -38,7 +36,7 @@ import { HexEncodedData } from '@/components/transactions/HexEncodedData'
 import { useGetMultipleTransactionDetailsQuery } from '@/store/api/gateway'
 import { skipToken } from '@reduxjs/toolkit/query/react'
 import NetworkWarning from '@/components/new-safe/create/NetworkWarning'
-import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
+import { FEATURES, getLatestSafeVersion, hasFeature } from '@safe-global/utils/utils/chains'
 
 export const ReviewBatch = ({ params }: { params: ExecuteBatchFlowProps }) => {
   const [isSubmittable, setIsSubmittable] = useState<boolean>(true)

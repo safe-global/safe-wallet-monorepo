@@ -16,7 +16,6 @@ import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { getTxOptions } from '@/utils/transactions'
 import { useCurrentChain, useHasFeature } from '@/hooks/useChains'
 import { SimpleTxWatcher } from '@/utils/SimpleTxWatcher'
-import { FEATURES } from '@/utils/chains'
 import { isWalletRejection } from '@/utils/wallets'
 import { type TransactionOptions } from '@safe-global/safe-core-sdk-types'
 import { PendingTxType, type PendingProcessingTx } from '@/store/pendingTxsSlice'
@@ -29,6 +28,7 @@ import ErrorCodes from '@safe-global/utils/services/exceptions/ErrorCodes'
 import CheckWallet from '@/components/common/CheckWallet'
 import { useLazyGetTransactionDetailsQuery } from '@/store/api/gateway'
 import NetworkWarning from '@/components/new-safe/create/NetworkWarning'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 
 type Props = {
   open: boolean

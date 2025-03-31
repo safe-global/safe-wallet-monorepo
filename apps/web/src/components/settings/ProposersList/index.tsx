@@ -10,12 +10,12 @@ import { useHasFeature } from '@/hooks/useChains'
 import useProposers from '@/hooks/useProposers'
 import AddIcon from '@/public/images/common/add.svg'
 import { SETTINGS_EVENTS } from '@/services/analytics'
-import { FEATURES } from '@/utils/chains'
 import { Box, Button, Grid, Paper, SvgIcon, Typography } from '@mui/material'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import ExternalLink from '@/components/common/ExternalLink'
 import { HelpCenterArticle } from '@/config/constants'
 import React, { useMemo, useState } from 'react'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 
 const headCells = [
   {
