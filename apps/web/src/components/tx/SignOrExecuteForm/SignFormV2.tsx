@@ -19,6 +19,7 @@ import { isWalletRejection } from '@/utils/wallets'
 import { useSigner } from '@/hooks/wallets/useWallet'
 import { NestedTxSuccessScreenFlow } from '@/components/tx-flow/flows'
 import { useValidateTxData } from '@/hooks/useValidateTxData'
+import { TxFlowContext } from '@/components/tx-flow-2/TxFlowProvider'
 
 export const SignFormV2 = ({
   safeTx,
@@ -38,7 +39,6 @@ export const SignFormV2 = ({
   tooltip?: string
 }): ReactElement => {
   // Form state
-  const [isSubmittable, setIsSubmittable] = useState<boolean>(true)
   const [submitError, setSubmitError] = useState<Error | undefined>()
   const [isRejectedByUser, setIsRejectedByUser] = useState<Boolean>(false)
 
@@ -51,6 +51,7 @@ export const SignFormV2 = ({
   // Hooks
   const { signTx } = txActions
   const { setTxFlow } = useContext(TxModalContext)
+  const { isSubmittable, setIsSubmittable } = useContext(TxFlowContext)
   const { needsRiskConfirmation, isRiskConfirmed, setIsRiskIgnored } = txSecurity
   const hasSigned = useAlreadySigned(safeTx)
   const signer = useSigner()
