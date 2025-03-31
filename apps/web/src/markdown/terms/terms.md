@@ -24,7 +24,7 @@ Last updated: April, 2025
 
 [11\. Are we responsible for the issuance of the Safe Token and any related functionalities or reward programs?](#11.-are-we-responsible-for-the-issuance-of-the-safe-token-and-any-related-functionalities-or-reward-programs?)
 
-[12\. Are we responsible for third-party content and services?](#12.-what-is-cloud-storage-and-the-spaces-feature?)
+[12\. What is Cloud Storage and the Spaces feature?](#12.-what-is-cloud-storage-and-the-spaces-feature?)
 
 [13\. Can we terminate or limit your right to use our Services?](#13.-can-we-terminate-or-limit-your-right-to-use-our-services?)
 
