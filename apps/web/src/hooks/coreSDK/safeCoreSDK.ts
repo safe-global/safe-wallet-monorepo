@@ -3,7 +3,6 @@ import type { UndeployedSafe } from '@/features/counterfactual/store/undeployedS
 import { getSafeSingletonDeployments, getSafeL2SingletonDeployments } from '@safe-global/safe-deployments'
 import ExternalStore from '@safe-global/utils/services/ExternalStore'
 import { Gnosis_safe__factory } from '@safe-global/utils/types/contracts'
-import { invariant } from '@/utils/helpers'
 import type { JsonRpcProvider } from 'ethers'
 import Safe from '@safe-global/protocol-kit'
 import type { SafeVersion } from '@safe-global/safe-core-sdk-types'
@@ -12,6 +11,7 @@ import semverSatisfies from 'semver/functions/satisfies'
 import { isValidMasterCopy } from '@/services/contracts/safeContracts'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { isPredictedSafeProps, isReplayedSafeProps } from '@/features/counterfactual/utils'
+import { invariant } from '@safe-global/utils/utils/helpers'
 
 export const isLegacyVersion = (safeVersion: string): boolean => {
   const LEGACY_VERSION = '<1.3.0'
