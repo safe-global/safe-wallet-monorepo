@@ -30,6 +30,9 @@ type TxFlowProps<T extends unknown> = {
 }
 
 export const createTxFlow = <T extends unknown>({ commonSteps = [] }: TxFlowProps<T>) => {
+  const extraSteps = commonSteps.slice(0, -1) as ComponentWithChildren<{ onSubmit: NextStepCallback<T> }>[]
+  const [LastStep] = commonSteps.slice(-1) as [ComponentWithChildren<{ onSubmit: SubmitCallback }>] | []
+
   const TxFlow = ({
     children = [],
     initialData,
@@ -52,12 +55,9 @@ export const createTxFlow = <T extends unknown>({ commonSteps = [] }: TxFlowProp
 
     const childrenArray = Array.isArray(children) ? children : [children]
 
-    const extraSteps = commonSteps.slice(0, -1) as ComponentWithChildren<{ onSubmit: NextStepCallback<T> }>[]
-    const [LastStep] = commonSteps.slice(-1) as [ComponentWithChildren<{ onSubmit: SubmitCallback }>] | []
-
     const progress = useMemo(
       () => Math.round(((step + 1) / (commonSteps.length + childrenArray.length)) * 100),
-      [step, commonSteps, childrenArray.length],
+      [step, childrenArray.length],
     )
 
     return (

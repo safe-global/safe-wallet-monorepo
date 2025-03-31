@@ -104,7 +104,7 @@ const TxFlowProvider = <T extends unknown>({
   const isSafeOwner = useIsSafeOwner()
   const isProposer = useIsWalletProposer()
   const chainId = useChainId()
-  const { safeTx } = useContext(SafeTxContext)
+  const { safeTx, txOrigin } = useContext(SafeTxContext)
   const isCorrectNonce = useValidateNonce(safeTx)
   const { transactionExecution } = useAppSelector(selectSettings)
   const [shouldExecute, setShouldExecute] = useState<boolean>(transactionExecution)
@@ -148,11 +148,11 @@ const TxFlowProvider = <T extends unknown>({
         isRoleExecution,
         isProposerCreation,
         !!signer?.isSafe,
-        origin,
+        txOrigin,
         // isMassPayout, // TODO: Add this parameter
       )
     },
-    [chainId, isCreation, trigger, signer?.isSafe, origin],
+    [chainId, isCreation, trigger, signer?.isSafe, txOrigin],
   )
 
   const value = {

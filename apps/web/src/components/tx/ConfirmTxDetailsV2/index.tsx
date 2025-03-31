@@ -3,7 +3,7 @@ import { Divider, Grid2 as Grid, Stack, StepIcon, Typography } from '@mui/materi
 import commonCss from '@/components/tx-flow/common/styles.module.css'
 import { TxDetails } from './TxDetails'
 import ExternalLink from '@/components/common/ExternalLink'
-import { ReactNode, useContext } from 'react'
+import { type ReactNode, useContext } from 'react'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import useTxPreview from '../confirmation-views/useTxPreview'
 import Track from '@/components/common/Track'

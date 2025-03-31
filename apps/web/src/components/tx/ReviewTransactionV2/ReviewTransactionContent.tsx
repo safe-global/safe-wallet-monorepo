@@ -3,7 +3,7 @@ import type { PropsWithChildren, SyntheticEvent, ReactElement, ReactNode } from 
 import { useState, useContext, useCallback } from 'react'
 import madProps from '@/utils/mad-props'
 import ExecuteCheckbox from '../ExecuteCheckbox'
-import { useImmediatelyExecutable, useTxActions } from '../SignOrExecuteForm/hooks'
+import { useImmediatelyExecutable } from '../SignOrExecuteForm/hooks'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import ErrorMessage from '../ErrorMessage'
 import TxCard from '@/components/tx-flow/common/TxCard'
@@ -39,15 +39,13 @@ export const ReviewTransactionContent = ({
   safeTxError,
   onSubmit,
   isBatch,
-  txActions,
-  isOwner,
   actions,
   txOrigin,
   setTxOrigin,
+  isOwner,
   ...props
 }: ReviewTransactionContentProps & {
   isOwner: ReturnType<typeof useIsSafeOwner>
-  txActions: ReturnType<typeof useTxActions>
   safeTx: ReturnType<typeof useSafeTx>
   safeTxError: ReturnType<typeof useSafeTxError>
   txOrigin: ReturnType<typeof useTxOrigin>
@@ -73,16 +71,13 @@ export const ReviewTransactionContent = ({
   const [readableApprovals] = useApprovalInfos({ safeTransaction: safeTx })
   const isApproval = readableApprovals && readableApprovals.length > 0
   const { safe } = useSafeInfo()
-  const isSafeOwner = useIsSafeOwner()
   const isCounterfactualSafe = !safe.deployed
 
   // Check if a Zodiac Roles mod is enabled and if the user is a member of any role that allows the transaction
-  const roles = useRoles(
-    !isCounterfactualSafe && isCreation && !(isNewExecutableTx && isSafeOwner) ? safeTx : undefined,
-  )
+  const roles = useRoles(!isCounterfactualSafe && isCreation && !(isNewExecutableTx && isOwner) ? safeTx : undefined)
   const allowingRole = findAllowingRole(roles)
   const mostLikelyRole = findMostLikelyRole(roles)
-  const canExecuteThroughRole = !!allowingRole || (!!mostLikelyRole && !isSafeOwner)
+  const canExecuteThroughRole = !!allowingRole || (!!mostLikelyRole && !isOwner)
 
   const onContinueClick = useCallback(
     async (e: SyntheticEvent) => {
@@ -210,5 +205,4 @@ export default madProps(ReviewTransactionContent, {
   txOrigin: useTxOrigin,
   setTxOrigin: useSetTxOrigin,
   safeTxError: useSafeTxError,
-  txActions: useTxActions,
 })
