@@ -1,4 +1,3 @@
-import { isTxSimulationEnabled } from '@/components/tx/security/tenderly/utils'
 import { useCurrentChain, useHasFeature } from '@/hooks/useChains'
 import { type ReactElement } from 'react'
 import { TxSimulation, TxSimulationMessage } from '@/components/tx/security/tenderly'
@@ -9,6 +8,7 @@ import type { SafeTransaction, MetaTransactionData } from '@safe-global/safe-cor
 
 import css from './styles.module.css'
 import { FEATURES } from '@safe-global/utils/utils/chains'
+import { isTxSimulationEnabled } from '@safe-global/utils/components/tx/security/tenderly/utils'
 
 const TxChecks = ({
   executionOwner,

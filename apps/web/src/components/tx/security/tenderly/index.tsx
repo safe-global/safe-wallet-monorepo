@@ -11,8 +11,10 @@ import { useDarkMode } from '@/hooks/useDarkMode'
 import CircularProgress from '@mui/material/CircularProgress'
 import ExternalLink from '@/components/common/ExternalLink'
 import { useCurrentChain } from '@/hooks/useChains'
-import { isTxSimulationEnabled } from '@/components/tx/security/tenderly/utils'
-import type { SimulationTxParams } from '@/components/tx/security/tenderly/utils'
+import {
+  isTxSimulationEnabled,
+  type SimulationTxParams,
+} from '@safe-global/utils/components/tx/security/tenderly/utils'
 
 import css from './styles.module.css'
 import sharedCss from '@/components/tx/security/shared/styles.module.css'

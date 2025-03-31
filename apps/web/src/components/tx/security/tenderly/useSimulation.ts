@@ -1,29 +1,16 @@
 import { useCallback, useMemo, useState } from 'react'
 
-import { getSimulation, getSimulationLink } from '@/components/tx/security/tenderly/utils'
-import { FETCH_STATUS, type TenderlySimulation } from '@/components/tx/security/tenderly/types'
-import { getSimulationPayload, type SimulationTxParams } from '@/components/tx/security/tenderly/utils'
+import { getSimulationPayload } from '@/components/tx/security/tenderly/utils'
+import { FETCH_STATUS, type TenderlySimulation } from '@safe-global/utils/components/tx/security/tenderly/types'
 import { useAppSelector } from '@/store'
 import { selectTenderly } from '@/store/settingsSlice'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
-
-export type UseSimulationReturn =
-  | {
-      _simulationRequestStatus: FETCH_STATUS.NOT_ASKED | FETCH_STATUS.ERROR | FETCH_STATUS.LOADING
-      simulation: undefined
-      simulateTransaction: (params: SimulationTxParams) => void
-      simulationLink: string
-      requestError?: string
-      resetSimulation: () => void
-    }
-  | {
-      _simulationRequestStatus: FETCH_STATUS.SUCCESS
-      simulation: TenderlySimulation
-      simulateTransaction: (params: SimulationTxParams) => void
-      simulationLink: string
-      requestError?: string
-      resetSimulation: () => void
-    }
+import { type UseSimulationReturn } from '@safe-global/utils/components/tx/security/tenderly/useSimulation'
+import {
+  getSimulation,
+  getSimulationLink,
+  type SimulationTxParams,
+} from '@safe-global/utils/components/tx/security/tenderly/utils'
 
 export const useSimulation = (): UseSimulationReturn => {
   const [simulation, setSimulation] = useState<TenderlySimulation | undefined>()

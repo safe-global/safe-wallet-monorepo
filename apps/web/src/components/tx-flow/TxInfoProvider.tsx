@@ -1,7 +1,8 @@
 import { createContext, type ReactElement } from 'react'
 
-import { useSimulation, type UseSimulationReturn } from '@/components/tx/security/tenderly/useSimulation'
+import { useSimulation } from '@/components/tx/security/tenderly/useSimulation'
 import { FETCH_STATUS, type TenderlySimulation } from '@safe-global/utils/components/tx/security/tenderly/types'
+import type { UseSimulationReturn } from '@safe-global/utils/components/tx/security/tenderly/useSimulation'
 
 const getCallTraceErrors = (simulation?: TenderlySimulation) => {
   if (!simulation || !simulation.simulation.status) {
