@@ -1,5 +1,5 @@
-import React, { useCallback, useMemo } from 'react'
-import { StatusBar, useColorScheme } from 'react-native'
+import React from 'react'
+import { StatusBar } from 'react-native'
 import { ThemeProvider } from '@react-navigation/native'
 import { TamaguiProvider } from '@tamagui/core'
 
@@ -8,10 +8,7 @@ import { NavDarkTheme, NavLightTheme } from '@/src/theme/navigation'
 import { FontProvider } from '@/src/theme/provider/font'
 import { isStorybookEnv } from '@/src/config/constants'
 import { View } from 'tamagui'
-import { updateSettings } from '@/src/store/settingsSlice'
-import { selectSettings } from '@/src/store/settingsSlice'
-import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
-import { ThemePreference } from '@/src/types/theme'
+import { useTheme } from '../hooks/useTheme'
 
 interface SafeThemeProviderProps {
   children: React.ReactNode
@@ -40,25 +37,4 @@ export const SafeThemeProvider = ({ children }: SafeThemeProviderProps) => {
       </TamaguiProvider>
     </FontProvider>
   )
-}
-
-export const useTheme = () => {
-  const dispatch = useAppDispatch()
-  const colorScheme = useColorScheme()
-  const themePreference = useAppSelector(
-    (state) => selectSettings(state, 'themePreference') ?? 'auto',
-  ) as ThemePreference
-
-  const setThemePreference = useCallback(
-    (theme: ThemePreference) => {
-      dispatch(updateSettings({ themePreference: theme }))
-    },
-    [dispatch],
-  )
-
-  const currentTheme = useMemo(() => {
-    return themePreference === 'auto' ? colorScheme : themePreference
-  }, [themePreference, colorScheme])
-
-  return { themePreference, setThemePreference, currentTheme }
 }
