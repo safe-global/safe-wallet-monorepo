@@ -15,7 +15,7 @@ export interface SignFormProps {
   txId: string
 }
 
-export function SignForm({ address, name, txId }: SignFormProps) {
+export function SignForm({ address, txId }: SignFormProps) {
   const { isBiometricsEnabled } = useBiometrics()
 
   const onSignPress = () => {

@@ -1,7 +1,7 @@
 import React from 'react'
 import { Pressable } from 'react-native'
 import { MenuAction, MenuView, NativeActionEvent } from '@react-native-menu/menu'
-import { ThemePreference } from '@/src/theme/provider/safeTheme'
+import { ThemePreference } from '@/src/types/theme'
 
 type FloatingMenuProps = {
   onPressAction: (event: NativeActionEvent) => void
