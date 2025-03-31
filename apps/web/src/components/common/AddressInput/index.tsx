@@ -113,11 +113,13 @@ const AddressInput = ({
 
   // Retransform the value when chain changes
   useEffect(() => {
+    if (address) return
+
     if (watchedValue) {
       const transformedValue = transformAddressValue(watchedValue)
       setAddressValue(transformedValue)
     }
-  }, [setAddressValue, transformAddressValue, watchedValue, currentChain])
+  }, [address, currentShortName, setAddressValue, transformAddressValue, watchedValue])
 
   const endAdornment = (
     <InputAdornment position="end">

@@ -30,7 +30,7 @@ const AddManually = ({ handleAddSafe }: { handleAddSafe: (data: AddManuallyFormV
     },
   })
 
-  const { handleSubmit, watch, register, reset, formState, trigger } = formMethods
+  const { handleSubmit, watch, register, reset, formState } = formMethods
 
   const chainId = watch('chainId')
   const selectedChain = configs.find((chain) => chain.chainId === chainId)
