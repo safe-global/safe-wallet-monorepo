@@ -3,13 +3,14 @@ import { getMultiSendCallOnlyDeployment } from '@safe-global/safe-deployments'
 import { toBeHex } from 'ethers'
 
 import { DelegateCallModule } from './index'
-import { createMockSafeTransaction, getMockMultiSendCalldata } from '@safe-global/web/src/tests/transactions'
-import { chainBuilder } from '@safe-global/web/src/tests/builders/chains'
+import { createMockSafeTransaction, getMockMultiSendCalldata } from '@safe-global/utils/tests/transactions'
+import { chainBuilder } from '@safe-global/utils/tests/builders/chains'
+import { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
 
 describe('DelegateCallModule', () => {
   const DelegateCallModuleInstance = new DelegateCallModule()
 
-  const chainInfo = chainBuilder().with({ chainId: '1' }).build()
+  const chainInfo = chainBuilder().with({ chainId: '1', chainLogoUri: null }).build() as unknown as ChainInfo
 
   it('should not warn about Call operation transactions', async () => {
     const recipient = toBeHex('0x1', 20)
