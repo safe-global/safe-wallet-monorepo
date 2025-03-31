@@ -21,7 +21,7 @@ function BiometricsOptIn() {
   const redirectTo = useMemo(() => {
     if (local.caller === '/import-signers') {
       return {
-        pathname: '/import-signers' as const,
+        pathname: '/(import-accounts)/signers' as const,
         params: {
           safeAddress: local.safeAddress,
           chainId: local.chainId,
