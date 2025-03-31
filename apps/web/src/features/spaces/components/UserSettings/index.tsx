@@ -1,26 +1,18 @@
-import { Box, Typography, Card, Stack, Button, SvgIcon, IconButton } from '@mui/material'
+import { Box, Typography, Card, Stack, Button, SvgIcon, Tooltip } from '@mui/material'
 import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
-import { useRouter } from 'next/router'
-import { AppRoutes } from '@/config/routes'
 import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
-import { useEffect } from 'react'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import LinkIcon from '@/public/images/messages/link.svg'
-import DeleteIcon from '@/public/images/common/delete.svg'
 import css from './styles.module.css'
 import InfoBox from '@/components/safe-messages/InfoBox'
+import SignedOutState from '@/features/spaces/components/SignedOutState'
 
 const UserSettings = () => {
-  const router = useRouter()
   const isUserSignedIn = useAppSelector(isAuthenticated)
-  const { data: user, isError } = useUsersGetWithWalletsV1Query()
+  const { currentData: user } = useUsersGetWithWalletsV1Query(undefined, { skip: !isUserSignedIn })
 
-  useEffect(() => {
-    if (isUserSignedIn && (isError || !user)) {
-      router.push(AppRoutes['404'])
-    }
-  }, [isUserSignedIn, isError, user, router])
+  if (!isUserSignedIn) return <SignedOutState />
 
   return (
     <Box className={css.container}>
@@ -49,20 +41,22 @@ const UserSettings = () => {
                   justifyContent="space-between"
                 >
                   <EthHashInfo shortAddress={false} address={wallet.address} showCopyButton hasExplorer />
-                  <IconButton onClick={() => {}} size="small">
-                    <SvgIcon component={DeleteIcon} inheritViewBox color="error" fontSize="small" sx={{ m: 1 }} />
-                  </IconButton>
                 </Stack>
               ))}
             </Box>
-            <Button
-              startIcon={<SvgIcon component={LinkIcon} inheritViewBox fontSize="medium" className={css.linkIcon} />}
-              variant="text"
-              color="primary"
-              sx={{ width: 'fit-content', p: 1 }}
-            >
-              Link another wallet
-            </Button>
+            <Tooltip title="Coming soon">
+              <Typography component="span" sx={{ alignSelf: 'flex-start' }}>
+                <Button
+                  startIcon={<SvgIcon component={LinkIcon} inheritViewBox fontSize="medium" className={css.linkIcon} />}
+                  variant="text"
+                  color="primary"
+                  sx={{ p: 1 }}
+                  disabled
+                >
+                  Link another wallet
+                </Button>
+              </Typography>
+            </Tooltip>
             <InfoBox
               title="How to link a wallet?"
               message={
