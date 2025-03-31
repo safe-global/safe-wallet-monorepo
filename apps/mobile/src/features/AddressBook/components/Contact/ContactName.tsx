@@ -1,6 +1,5 @@
 import { EthAddress } from '@/src/components/EthAddress/ETHAddress'
 import { Text, type TextProps, View } from 'tamagui'
-// import { Text } from 'react-native'
 
 type Props = {
   name?: string
