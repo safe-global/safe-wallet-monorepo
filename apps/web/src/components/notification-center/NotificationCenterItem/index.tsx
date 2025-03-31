@@ -11,7 +11,7 @@ import type { ReactElement } from 'react'
 
 import type { Notification } from '@/store/notificationsSlice'
 import UnreadBadge from '@/components/common/UnreadBadge'
-import { formatTimeInWords } from '@/utils/date'
+import { formatTimeInWords } from '@safe-global/utils/utils/date'
 
 import css from './styles.module.css'
 import classnames from 'classnames'

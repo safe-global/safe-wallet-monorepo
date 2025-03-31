@@ -1,4 +1,4 @@
-import { sameAddress } from '@/utils/addresses'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 import {
   isSwapOwnerCalldata,
   isAddOwnerWithThresholdCalldata,

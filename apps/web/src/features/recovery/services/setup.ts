@@ -5,7 +5,7 @@ import { Interface } from 'ethers'
 import type { JsonRpcProvider } from 'ethers'
 import type { MetaTransactionData } from '@safe-global/safe-core-sdk-types'
 
-import { sameAddress } from '@/utils/addresses'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { MAX_RECOVERER_PAGE_SIZE } from './recovery-state'
 import type { UpsertRecoveryFlowProps } from '@/components/tx-flow/flows/UpsertRecovery'
 

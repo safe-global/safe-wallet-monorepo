@@ -37,6 +37,21 @@ export const fetchSafeData = (safeAddress) => {
       expect(response.status).to.eq(200)
     })
 }
+export const getSafe = (safeAddress, chain) => {
+  return cy
+    .request({
+      method: 'GET',
+      url: `${constants.stagingCGWUrlv1}${constants.stagingCGWChains}${chain}${constants.stagingCGWSafes}${safeAddress}`,
+      headers: {
+        accept: 'application/json',
+      },
+    })
+    .then((response) => {
+      expect(response.status).to.eq(200)
+      console.log('********* RESPONSE ' + JSON.stringify(response.body))
+      return response.body
+    })
+}
 
 export const getSafeBalance = (safeAddress, chain) => {
   return cy

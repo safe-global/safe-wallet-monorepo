@@ -9,6 +9,9 @@ export const isTestingEnv = process.env.NODE_ENV === 'test'
 export const isStorybookEnv = Constants?.expoConfig?.extra?.storybookEnabled === 'true'
 export const POLLING_INTERVAL = 15_000
 
+export const COMING_SOON_MESSAGE = 'This feature is coming soon.'
+export const COMING_SOON_TITLE = 'Coming soon'
+
 export const GATEWAY_URL_PRODUCTION =
   process.env.EXPO_PUBLIC_GATEWAY_URL_PRODUCTION || 'https://safe-client.safe.global'
 export const GATEWAY_URL_STAGING = process.env.EXPO_PUBLIC_GATEWAY_URL_STAGING || 'https://safe-client.staging.5afe.dev'
@@ -20,3 +23,6 @@ export const GATEWAY_URL = isProduction ? GATEWAY_URL_PRODUCTION : GATEWAY_URL_S
  */
 export const ONBOARDING_VERSION = 'v1'
 export const INFURA_TOKEN = process.env.EXPO_PUBLIC_INFURA_TOKEN || ''
+
+export const SAFE_WEB_URL = 'https://app.safe.global'
+export const SAFE_WEB_TRANSACTIONS_URL = `${SAFE_WEB_URL}/transactions/tx?safe=:safeAddressWithChainPrefix&id=:txId`

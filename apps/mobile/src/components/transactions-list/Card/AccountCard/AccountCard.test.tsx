@@ -8,19 +8,20 @@ import { ellipsis } from '@/src/utils/formatters'
 describe('AccountCard', () => {
   it('should render the account card with only one chain provided', () => {
     const accountName = 'This is my account'
+    const balance = '758.932'
     const container = render(
       <AccountCard
         name={accountName}
         chains={mockedChains as unknown as Chain[]}
         owners={5}
-        balance={mockedActiveSafeInfo.fiatTotal}
+        balance={balance}
         address={mockedActiveSafeInfo.address.value as Address}
         threshold={2}
       />,
     )
     expect(container.getByTestId('threshold-info-badge')).toBeVisible()
     expect(container.getByText('2/5')).toBeDefined()
-    expect(container.getByText(`$${mockedActiveSafeInfo.fiatTotal}`)).toBeDefined()
+    expect(container.getByText(`$ 758.93`)).toBeDefined()
     expect(container.getByText(accountName)).toBeDefined()
   })
 
@@ -39,7 +40,7 @@ describe('AccountCard', () => {
     )
     expect(container.getByTestId('threshold-info-badge')).toBeVisible()
     expect(container.getByText('2/5')).toBeDefined()
-    expect(container.getByText(`$${ellipsis(longBalance, 14)}`)).toBeDefined()
+    expect(container.getByText(`$ 21,312,321,3...`)).toBeDefined()
     expect(container.getByText(ellipsis(longAccountName, 18))).toBeDefined()
   })
 })

@@ -5,7 +5,7 @@ import type { SafeInfo, AddressEx } from '@safe-global/safe-gateway-typescript-s
 
 import { Builder } from '../Builder'
 import { generateRandomArray } from './utils'
-import { checksumAddress } from '@/utils/addresses'
+import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import type { IBuilder } from '../Builder'
 
 const MAX_OWNERS_LENGTH = 10

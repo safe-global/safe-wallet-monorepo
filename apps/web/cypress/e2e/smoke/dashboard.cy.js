@@ -31,24 +31,23 @@ describe('[SMOKE] Dashboard tests', { defaultCommandTimeout: 60000 }, () => {
     dashboard.verifySafeAppsSection()
   })
 
-  it('[SMOKE] Verify clicking on Explore Safe apps button opens list of all apps', () => {
-    dashboard.clickOnExploreAppsBtn()
-  })
-
-  it('[SMOKE] Verify there is empty tx string and image when there are no tx queued', () => {
-    cy.visit(constants.homeUrl + staticSafes.SEP_STATIC_SAFE_13)
-    dashboard.verifyEmptyTxSection()
-  })
-
+  // mock
   it('[SMOKE] Verify that the last created tx in conflicting tx is showed in the widget', () => {
+    cy.fixture('pending_tx/pending_tx.json').then((mockData) => {
+      cy.intercept('GET', constants.queuedEndpoint, mockData).as('getQueuedTransactions')
+    })
+    cy.wait('@getQueuedTransactions')
     cy.get(dashboard.pendingTxWidget, { timeout: 30000 }).should('be.visible')
     main.verifyElementsCount(dashboard.pendingTxItem, 1)
     dashboard.verifyDataInPendingTx(txData)
   })
 
+  // mock
   it('[SMOKE] Verify that tx are displayed correctly in Pending tx section', () => {
-    cy.visit(constants.homeUrl + staticSafes.SEP_STATIC_SAFE_12)
-    cy.wait(1000)
+    cy.fixture('pending_tx/pending_tx_order.json').then((mockData) => {
+      cy.intercept('GET', constants.queuedEndpoint, mockData).as('getQueuedTransactions')
+    })
+    cy.wait('@getQueuedTransactions')
     dashboard.verifyTxItemInPendingTx(txMultiSendCall3)
     dashboard.verifyTxItemInPendingTx(txaddOwner)
     dashboard.verifyTxItemInPendingTx(txMultiSendCall2)

@@ -1,5 +1,5 @@
 import type { EthersError } from '@/utils/ethers-utils'
-import { type ConnectedWallet } from '@/hooks/wallets/useOnboard'
+import { getWalletConnectLabel, type ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import { getWeb3ReadOnly } from '@/hooks/wallets/web3'
 import { WALLET_KEYS } from '@/hooks/wallets/consts'
 import { EMPTY_DATA } from '@safe-global/protocol-kit/dist/src/utils/constants'
@@ -8,6 +8,7 @@ import { PRIVATE_KEY_MODULE_LABEL } from '@/services/private-key-module'
 import { type JsonRpcProvider } from 'ethers'
 
 const WALLETCONNECT = 'WalletConnect'
+const WC_LEDGER = 'Ledger Wallet'
 
 const isWCRejection = (err: Error): boolean => {
   return /rejected/.test(err?.message)
@@ -23,6 +24,14 @@ export const isWalletRejection = (err: EthersError | Error): boolean => {
 
 export const isEthSignWallet = (wallet: ConnectedWallet): boolean => {
   return [WALLET_KEYS.TREZOR, WALLET_KEYS.KEYSTONE].includes(wallet.label.toUpperCase() as WALLET_KEYS)
+}
+
+export const isLedgerLive = (wallet: ConnectedWallet): boolean => {
+  return getWalletConnectLabel(wallet) === WC_LEDGER
+}
+
+export const isLedger = (wallet: ConnectedWallet): boolean => {
+  return wallet.label.toUpperCase() === WALLET_KEYS.LEDGER || isLedgerLive(wallet)
 }
 
 export const isWalletConnect = (wallet: ConnectedWallet): boolean => {

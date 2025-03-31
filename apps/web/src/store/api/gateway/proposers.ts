@@ -6,7 +6,7 @@ import { getDelegates } from '@safe-global/safe-gateway-typescript-sdk'
 import type { Delegate, DelegateResponse } from '@safe-global/safe-gateway-typescript-sdk/dist/types/delegates'
 
 export const proposerEndpoints = (
-  builder: EndpointBuilder<ReturnType<typeof fakeBaseQuery<Error>>, 'Submissions', 'gatewayApi'>,
+  builder: EndpointBuilder<ReturnType<typeof fakeBaseQuery<Error>>, 'OwnedSafes' | 'Submissions', 'gatewayApi'>,
 ) => ({
   getProposers: builder.query<DelegateResponse, { chainId: string; safeAddress: string }>({
     queryFn({ chainId, safeAddress }) {

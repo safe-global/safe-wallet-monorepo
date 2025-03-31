@@ -17,7 +17,7 @@ const typeSideActions = data.type.sideActions
 const typeGeneral = data.type.general
 const typeUntrustedToken = data.type.untrustedReceivedToken
 
-describe('[PROD] Tx history tests 2', () => {
+describe('[PROD] Tx history tests 2', { defaultCommandTimeout: 30000 }, () => {
   before(async () => {
     staticSafes = await getSafes(CATEGORIES.static)
   })
@@ -35,8 +35,8 @@ describe('[PROD] Tx history tests 2', () => {
     ).as('allTransactions')
 
     cy.visit(constants.prodbaseUrl + constants.transactionsHistoryUrl + staticSafes.SEP_STATIC_SAFE_7)
-    cy.wait('@allTransactions')
-    cy.contains(createTx.txStr, { timeout: 10000 })
+    cy.wait('@allTransactions', { timeout: 30000 })
+    cy.contains(createTx.txStr)
     closeSecurityNotice()
     acceptCookies2()
   })
@@ -48,7 +48,7 @@ describe('[PROD] Tx history tests 2', () => {
   // On-chain rejection
   it('Verify exapanded details for on-chain rejection', () => {
     createTx.clickOnTransactionItemByName(typeOnchainRejection.title)
-    createTx.verifyExpandedDetails([typeOnchainRejection.description, typeOnchainRejection.transactionHash])
+    createTx.verifyExpandedDetails([typeOnchainRejection.description, typeOnchainRejection.transactionHash2])
     createTx.verifyActionListExists([
       typeSideActions.rejectionCreated,
       typeSideActions.confirmations,

@@ -6,6 +6,7 @@
 
 # testing
 /coverage
+/packages/utils/coverage
 
 # next.js
 **/.next/

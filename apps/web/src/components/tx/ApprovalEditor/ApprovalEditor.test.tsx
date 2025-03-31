@@ -10,7 +10,7 @@ import { encodeMultiSendData } from '@safe-global/protocol-kit'
 import { ERC20__factory, Multi_send__factory } from '@/types/contracts'
 import { getAndValidateSafeSDK } from '@/services/tx/tx-sender/sdk'
 import { parseUnits } from 'ethers'
-import { checksumAddress } from '@/utils/addresses'
+import { checksumAddress } from '@safe-global/utils/utils/addresses'
 
 jest.mock('@/services/tx/tx-sender/sdk', () => ({
   getAndValidateSafeSDK: jest.fn().mockReturnValue({

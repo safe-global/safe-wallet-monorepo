@@ -11,11 +11,11 @@ import { selectChainById } from '@/store/chainsSlice'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import css from './styles.module.css'
 import { selectAllAddressBooks } from '@/store/addressBookSlice'
-import { shortenAddress } from '@/utils/formatters'
+import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import SafeListContextMenu from '@/components/sidebar/SafeListContextMenu'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import useChainId from '@/hooks/useChainId'
-import { sameAddress } from '@/utils/addresses'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 import classnames from 'classnames'
 import { useRouter } from 'next/router'
 import type { SafeItem } from '@/features/myAccounts/hooks/useAllSafes'
@@ -241,6 +241,7 @@ const SingleAccountItem = ({ onLinkClick, safeItem, isMultiChainItem = false }: 
             addNetwork={isReplayable}
             rename
             undeployedSafe={!!undeployedSafe}
+            onClose={onLinkClick}
           />
         </>
       )}
