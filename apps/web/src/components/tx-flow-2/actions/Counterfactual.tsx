@@ -1,19 +1,18 @@
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { useCallback, useContext } from 'react'
 import { TxFlowContext } from '../TxFlowProvider'
-import useSafeInfo from '@/hooks/useSafeInfo'
 import type { SubmitCallback } from '../createTxFlow'
 import CounterfactualForm from '@/features/counterfactual/CounterfactualForm'
+import useIsCounterfactualSafe from '@/features/counterfactual/hooks/useIsCounterfactualSafe'
 
 type CounterfactualProps = {
   onSubmit: SubmitCallback
 }
 
 const Counterfactual = ({ onSubmit }: CounterfactualProps) => {
-  const { safe } = useSafeInfo()
   const { safeTx, txOrigin } = useContext(SafeTxContext)
   const { isCreation, isProposing, trackTxEvent, isSubmittable } = useContext(TxFlowContext)
-  const isCounterfactualSafe = !safe.deployed
+  const isCounterfactualSafe = useIsCounterfactualSafe()
 
   const handleSubmit = useCallback(
     async (txId: string, isExecuted = false) => {

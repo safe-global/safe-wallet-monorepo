@@ -1,6 +1,5 @@
 import { createContext, useCallback, useContext, useState } from 'react'
 import type { ReactNode, ReactElement, SetStateAction, Dispatch } from 'react'
-import useSafeInfo from '@/hooks/useSafeInfo'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import { useIsWalletProposer } from '@/hooks/useProposers'
 import { useImmediatelyExecutable, useValidateNonce } from '@/components/tx/SignOrExecuteForm/hooks'
@@ -18,6 +17,7 @@ import { useLazyGetTransactionDetailsQuery } from '@/store/slices'
 import { trackTxEvents } from '../tx/SignOrExecuteForm/tracking'
 import { useSigner } from '@/hooks/wallets/useWallet'
 import useChainId from '@/hooks/useChainId'
+import useIsCounterfactualSafe from '@/features/counterfactual/hooks/useIsCounterfactualSafe'
 
 export type TxFlowContextType = {
   step: number
@@ -99,7 +99,6 @@ const TxFlowProvider = <T extends unknown>({
   txLayoutProps: defaultTxLayoutProps = initialContext.txLayoutProps,
   showMethodCall,
 }: TxFlowProviderProps<T>): ReactElement => {
-  const { safe } = useSafeInfo()
   const signer = useSigner()
   const isSafeOwner = useIsSafeOwner()
   const isProposer = useIsWalletProposer()
@@ -111,12 +110,12 @@ const TxFlowProvider = <T extends unknown>({
   const [isSubmittable, setIsSubmittable] = useState<boolean>(true)
   const [txLayoutProps, setTxLayoutProps] = useState<TxFlowContextType['txLayoutProps']>(defaultTxLayoutProps)
   const [trigger] = useLazyGetTransactionDetailsQuery()
+  const isCounterfactualSafe = useIsCounterfactualSafe()
 
   const isCreation = !txId
   const isNewExecutableTx = useImmediatelyExecutable() && isCreation
 
   const isProposing = !!isProposer && !isSafeOwner && isCreation
-  const isCounterfactualSafe = !safe.deployed
 
   // Check if a Zodiac Roles mod is enabled and if the user is a member of any role that allows the transaction
   const roles = useRoles(

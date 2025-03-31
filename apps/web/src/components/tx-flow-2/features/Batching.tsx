@@ -3,11 +3,11 @@ import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import BatchButton from '@/components/tx/SignOrExecuteForm/BatchButton'
 import { useTxActions } from '@/components/tx/SignOrExecuteForm/hooks'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
-import useSafeInfo from '@/hooks/useSafeInfo'
 import { isDelegateCall } from '@/services/tx/tx-sender/sdk'
 import { TxModalContext } from '@/components/tx-flow'
 import { TxFlowContext } from '../TxFlowProvider'
 import type { SubmitCallback } from '../createTxFlow'
+import useIsCounterfactualSafe from '@/features/counterfactual/hooks/useIsCounterfactualSafe'
 
 export type BatchProps = {
   origin?: string
@@ -23,9 +23,7 @@ const Batching = ({ submitDisabled, isBatch }: BatchProps): ReactElement | null 
   const { willExecute, isProposing, willExecuteThroughRole, isSubmittable, setIsSubmittable, isCreation } =
     useContext(TxFlowContext)
   const isOwner = useIsSafeOwner()
-  const { safe } = useSafeInfo()
-
-  const isCounterfactualSafe = !safe.deployed
+  const isCounterfactualSafe = useIsCounterfactualSafe()
 
   const isBatchable = !!safeTx && !isDelegateCall(safeTx)
 

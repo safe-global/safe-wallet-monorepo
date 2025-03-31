@@ -1,4 +1,3 @@
-import useSafeInfo from '@/hooks/useSafeInfo'
 import type { PropsWithChildren, SyntheticEvent, ReactElement, ReactNode } from 'react'
 import { useState, useContext, useCallback } from 'react'
 import madProps from '@/utils/mad-props'
@@ -25,6 +24,7 @@ import TxChecks from '../SignOrExecuteForm/TxChecks'
 import { Button, CardActions, CircularProgress, Stack } from '@mui/material'
 import CheckWallet from '@/components/common/CheckWallet'
 import { TxFlowContext } from '@/components/tx-flow-2/TxFlowProvider'
+import useIsCounterfactualSafe from '@/features/counterfactual/hooks/useIsCounterfactualSafe'
 
 export type ReviewTransactionContentProps = PropsWithChildren<{
   onSubmit?: () => void
@@ -73,8 +73,7 @@ export const ReviewTransactionContent = ({
 
   const [readableApprovals] = useApprovalInfos({ safeTransaction: safeTx })
   const isApproval = readableApprovals && readableApprovals.length > 0
-  const { safe } = useSafeInfo()
-  const isCounterfactualSafe = !safe.deployed
+  const isCounterfactualSafe = useIsCounterfactualSafe()
 
   // Check if a Zodiac Roles mod is enabled and if the user is a member of any role that allows the transaction
   const roles = useRoles(!isCounterfactualSafe && isCreation && !(isNewExecutableTx && isOwner) ? safeTx : undefined)
