@@ -20,7 +20,6 @@ import ConfirmationView from '../confirmation-views'
 import { TxNoteForm, encodeTxNote, trackAddNote } from '@/features/tx-notes'
 import { SignerForm } from '../SignOrExecuteForm/SignerForm'
 import UnknownContractError from '../SignOrExecuteForm/UnknownContractError'
-import TxChecks from '../SignOrExecuteForm/TxChecks'
 import { Button, CardActions, CircularProgress, Stack } from '@mui/material'
 import CheckWallet from '@/components/common/CheckWallet'
 import { TxFlowContext } from '@/components/tx-flow-2/TxFlowProvider'
@@ -131,8 +130,6 @@ export const ReviewTransactionContent = ({
       </TxCard>
 
       {features}
-
-      {!isCounterfactualSafe && !isRejection && safeTx && <TxChecks transaction={safeTx} />}
 
       <TxNoteForm isCreation={isCreation ?? false} onChange={onNoteChange} txDetails={txDetails} />
 
