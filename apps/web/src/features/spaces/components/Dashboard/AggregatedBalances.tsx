@@ -7,10 +7,12 @@ import { selectCurrency } from '@/store/settingsSlice'
 import { useGetMultipleSafeOverviewsQuery } from '@/store/api/gateway'
 import type { SafeOverview } from '@safe-global/safe-gateway-typescript-sdk'
 import type { SafeItem } from '@/features/myAccounts/hooks/useAllSafes'
+import ChainIndicator from '@/components/common/ChainIndicator'
 
 type FiatTotalByChain = {
   chainId: string
   total: number
+  percentage: number
 }
 
 function aggregateFiatTotalsByChainId(items: SafeOverview[]): FiatTotalByChain[] {
@@ -21,10 +23,15 @@ function aggregateFiatTotalsByChainId(items: SafeOverview[]): FiatTotalByChain[]
     totals[item.chainId] = (totals[item.chainId] || 0) + fiatValue
   }
 
+  const grandTotal = Object.values(totals).reduce((sum, val) => sum + val, 0)
+
   const result = Object.entries(totals).map(([chainId, total]) => {
+    const percentage = grandTotal ? (total / grandTotal) * 100 : 0
+
     return {
       chainId,
       total,
+      percentage: parseFloat(percentage.toFixed(2)),
     }
   })
 
@@ -43,10 +50,12 @@ function getTopFiatTotals(chainTotals: FiatTotalByChain[]): FiatTotalByChain[] {
   const rest = chainTotals.slice(MAX_NETWORKS - 1)
 
   const otherTotal = rest.reduce((sum, item) => sum + item.total, 0)
+  const percentage = rest.reduce((sum, item) => sum + item.percentage, 0)
 
   const otherItem: FiatTotalByChain = {
     chainId: 'Other',
     total: otherTotal,
+    percentage,
   }
 
   return [...topTotals, otherItem]
@@ -57,17 +66,22 @@ const AggregatedBalanceByChain = ({ fiatTotalByChain }: { fiatTotalByChain: Fiat
 
   return (
     <Stack>
-      <div className={css.chainIndicator}>
-        <Typography component="span" className={css.chainIndicatorColor} bgcolor={chain?.theme.backgroundColor} />
-      </div>
-
-      <Typography variant="body2" color="primary.light" fontWeight="700" mt={0.5}>
-        {chain?.chainName || fiatTotalByChain.chainId}
+      <Typography variant="body2" color="primary.light" mb={0.5} height="24px">
+        {fiatTotalByChain.chainId === 'Other' ? 'Other' : <ChainIndicator chainId={fiatTotalByChain.chainId} />}
       </Typography>
 
-      <Typography variant="h3" fontWeight="700">
+      <Typography variant="h3" fontWeight="700" mb={0.5}>
         <FiatValue value={fiatTotalByChain.total.toString()} maxLength={20} precise />
       </Typography>
+
+      <div className={css.chainIndicator}>
+        <Typography
+          component="span"
+          className={css.chainIndicatorColor}
+          bgcolor={chain?.theme.backgroundColor || '#dddee0'}
+          width={`${fiatTotalByChain.percentage}%`}
+        />
+      </div>
     </Stack>
   )
 }
