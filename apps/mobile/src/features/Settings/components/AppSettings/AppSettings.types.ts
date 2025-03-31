@@ -6,6 +6,7 @@ export interface SettingsItem {
   rightNode?: ReactNode
   onPress?: () => void
   disabled?: boolean
+  type?: string
 }
 
 export interface SettingsSection {

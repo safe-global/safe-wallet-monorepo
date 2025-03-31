@@ -4,7 +4,7 @@ import { router } from 'expo-router'
 
 import { Text, View } from 'tamagui'
 import { AppSettings } from './AppSettings'
-import { useTheme } from '@/src/theme/provider/safeTheme'
+import { useTheme } from '@/src/theme/hooks/useTheme'
 import { SafeFontIcon as Icon } from '@/src/components/SafeFontIcon/SafeFontIcon'
 import { FloatingMenu } from '../FloatingMenu'
 import { LoadableSwitch } from '@/src/components/LoadableSwitch'
@@ -29,6 +29,7 @@ export const AppSettingsContainer = () => {
           label: 'Appearance',
           leftIcon: 'appearance',
           disabled: false,
+          type: 'floating-menu',
           rightNode: (
             <FloatingMenu
               themeVariant={themePreference}
@@ -53,7 +54,7 @@ export const AppSettingsContainer = () => {
             >
               <View flexDirection="row" alignItems="center" gap={4}>
                 <Text color="$colorSecondary">{capitalize(themePreference)}</Text>
-                <Icon name={'chevron-right'} />
+                <Icon name={'chevron-down'} />
               </View>
             </FloatingMenu>
           ),
@@ -66,6 +67,7 @@ export const AppSettingsContainer = () => {
         {
           label: 'Face ID',
           leftIcon: 'face-id',
+          type: 'switch',
           rightNode: (
             <LoadableSwitch
               testID="toggle-app-biometrics"
@@ -92,6 +94,7 @@ export const AppSettingsContainer = () => {
         {
           label: 'Address book',
           leftIcon: 'address-book',
+          type: 'menu',
           onPress: () => router.push('/address-book'),
           disabled: false,
         },
@@ -105,24 +108,28 @@ export const AppSettingsContainer = () => {
           leftIcon: 'star',
           onPress: () => console.log('rate us'),
           disabled: false,
+          type: 'external-link',
         },
         {
           label: 'Follow us on X',
           leftIcon: 'twitter-x',
           onPress: () => Linking.openURL('https://x.com/safe?s=21'),
           disabled: false,
+          type: 'external-link',
         },
         {
           label: 'Leave feedback',
           leftIcon: 'chat',
           onPress: () => console.log('leave feedback'),
           disabled: false,
+          type: 'external-link',
         },
         {
           label: 'Help center',
           leftIcon: 'question',
           onPress: () => Linking.openURL('https://help.safe.global/en/'),
           disabled: false,
+          type: 'external-link',
         },
       ],
     },
