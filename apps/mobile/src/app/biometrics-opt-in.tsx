@@ -21,7 +21,7 @@ function BiometricsOptIn() {
   const redirectTo = useMemo(() => {
     if (local.caller === '/import-signers') {
       return {
-        pathname: '/(import-accounts)/signers' as const,
+        pathname: '/import-signers/private-key' as const,
         params: {
           safeAddress: local.safeAddress,
           chainId: local.chainId,
@@ -43,7 +43,7 @@ function BiometricsOptIn() {
 
   useEffect(() => {
     if (isBiometricsEnabled) {
-      router.dismiss()
+      router.dismissAll()
       router.push(redirectTo)
     }
   }, [isBiometricsEnabled])

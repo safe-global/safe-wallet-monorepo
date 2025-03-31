@@ -120,6 +120,9 @@ export function LoadingImport() {
         params: {
           name: owner.name,
           address: owner.value,
+          safeAddress: safeAddress,
+          chainId: chainId,
+          import_safe: glob.import_safe,
         },
       })
     } else {

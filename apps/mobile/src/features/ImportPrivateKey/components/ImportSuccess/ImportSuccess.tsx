@@ -16,6 +16,7 @@ import { useCopyAndDispatchToast } from '@/src/hooks/useCopyAndDispatchToast'
 export function ImportSuccess() {
   const isAppNotificationEnabled = useAppSelector(selectAppNotificationStatus)
   const { address, name } = useLocalSearchParams<{ address: `0x${string}`; name: string }>()
+  const local = useLocalSearchParams<{ safeAddress: string; chainId: string; import_safe: string }>()
   const router = useRouter()
   const copy = useCopyAndDispatchToast()
 
@@ -29,7 +30,10 @@ export function ImportSuccess() {
 
   const handleContinuePress = async () => {
     await updatePermissions()
-    router.dismissAll()
+
+    router.push(
+      `/(import-accounts)/signers?safeAddress=${local.safeAddress}&chainId=${local.chainId}&import_safe=true&safeName=${local.import_safe}`,
+    )
   }
 
   return (
