@@ -4,7 +4,7 @@ import { useVisibleBalances } from '@/hooks/useVisibleBalances'
 import useWallet from '@/hooks/wallets/useWallet'
 import { useAppSelector } from '@/store'
 import { selectSpendingLimits } from '@/store/spendingLimitsSlice'
-import { sameAddress } from '@/utils/addresses'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { type SafeBalanceResponse } from '@safe-global/safe-gateway-typescript-sdk'
 
 export const useTokenAmount = (selectedToken: SafeBalanceResponse['items'][0] | undefined) => {

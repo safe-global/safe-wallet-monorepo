@@ -1,6 +1,6 @@
 import chains from '@/config/chains'
 import { type AddressBookState } from '@/store/addressBookSlice'
-import { isChecksummedAddress } from '@/utils/addresses'
+import { isChecksummedAddress } from '@safe-global/utils/utils/addresses'
 import type { LOCAL_STORAGE_DATA } from './common'
 import { parseLsValue } from './common'
 

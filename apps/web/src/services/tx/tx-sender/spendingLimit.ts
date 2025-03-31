@@ -13,7 +13,7 @@ import {
 } from '@/services/tx/spendingLimitParams'
 import type { ChainInfo, SafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import { parseUnits } from 'ethers'
-import { currentMinutes } from '@/utils/date'
+import { currentMinutes } from '@safe-global/utils/utils/date'
 import { createMultiSendCallOnlyTx } from '@/services/tx/tx-sender/create'
 
 export type NewSpendingLimitData = {

@@ -3,6 +3,7 @@ import { BalanceContainer } from '../Balance'
 import { PendingTransactions } from '@/src/components/StatusBanners/PendingTransactions'
 import { View } from 'tamagui'
 import { StyledAssetsHeader } from './styles'
+import { ReadOnlyContainer } from '../ReadOnly/ReadOnly.container'
 
 interface AssetsHeaderProps {
   amount: number
@@ -25,6 +26,10 @@ export function AssetsHeader({ amount, isLoading, onPendingTransactionsPress, ha
       </View>
 
       <BalanceContainer />
+
+      <View marginBottom="$4">
+        <ReadOnlyContainer />
+      </View>
     </StyledAssetsHeader>
   )
 }

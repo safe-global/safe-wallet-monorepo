@@ -1,5 +1,5 @@
 import { type PendingProcessingTx, PendingStatus, type PendingTx } from '@/store/pendingTxsSlice'
-import { sameAddress } from '@/utils/addresses'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 
 export const isSpeedableTx = (
   pendingTx: PendingTx,

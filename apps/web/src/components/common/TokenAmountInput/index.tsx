@@ -1,7 +1,7 @@
 import NumberField from '@/components/common/NumberField'
 import { AutocompleteItem } from '@/components/tx-flow/flows/TokenTransfer/CreateTokenTransfer'
-import { safeFormatUnits, safeParseUnits } from '@/utils/formatters'
-import { validateDecimalLength, validateLimitedAmount } from '@/utils/validation'
+import { safeFormatUnits, safeParseUnits } from '@safe-global/utils/utils/formatters'
+import { validateDecimalLength, validateLimitedAmount } from '@safe-global/utils/utils/validation'
 import { Button, Divider, FormControl, InputLabel, MenuItem, TextField } from '@mui/material'
 import { type SafeBalanceResponse } from '@safe-global/safe-gateway-typescript-sdk'
 import classNames from 'classnames'
@@ -10,7 +10,7 @@ import { get, useFormContext } from 'react-hook-form'
 import type { FieldArrayPath, FieldValues } from 'react-hook-form'
 import css from './styles.module.css'
 import { MultiTokenTransferFields, type MultiTokenTransferParams } from '@/components/tx-flow/flows/TokenTransfer'
-import { sameAddress } from '@/utils/addresses'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 
 export enum TokenAmountFields {
   tokenAddress = 'tokenAddress',

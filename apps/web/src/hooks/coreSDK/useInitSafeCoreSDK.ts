@@ -8,7 +8,7 @@ import ErrorCodes from '@/services/exceptions/ErrorCodes'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { showNotification } from '@/store/notificationsSlice'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
-import { parsePrefixedAddress, sameAddress } from '@/utils/addresses'
+import { parsePrefixedAddress, sameAddress } from '@safe-global/utils/utils/addresses'
 import { asError } from '@/services/exceptions/utils'
 
 export const useInitSafeCoreSDK = () => {

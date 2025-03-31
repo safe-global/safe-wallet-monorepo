@@ -7,7 +7,7 @@ import { createMultiSendCallOnlyTx, createTx } from '@/services/tx/tx-sender'
 import { SafeTxContext } from '../../SafeTxProvider'
 import { NftItems } from '@/components/tx-flow/flows/NftTransfer/SendNftBatch'
 import ReviewTransaction from '@/components/tx/ReviewTransaction'
-import { maybePlural } from '@/utils/formatters'
+import { maybePlural } from '@safe-global/utils/utils/formatters'
 import FieldsGrid from '@/components/tx/FieldsGrid'
 
 type ReviewNftBatchProps = {

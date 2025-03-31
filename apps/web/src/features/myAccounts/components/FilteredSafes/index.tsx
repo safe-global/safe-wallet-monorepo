@@ -1,7 +1,7 @@
 import SafesList from '@/features/myAccounts/components/SafesList'
 import type { AllSafeItems } from '@/features/myAccounts/hooks/useAllSafesGrouped'
 import { useSafesSearch } from '@/features/myAccounts/hooks/useSafesSearch'
-import { maybePlural } from '@/utils/formatters'
+import { maybePlural } from '@safe-global/utils/utils/formatters'
 import { Box, Typography } from '@mui/material'
 
 const FilteredSafes = ({
@@ -21,7 +21,7 @@ const FilteredSafes = ({
         Found {filteredSafes.length} result{maybePlural(filteredSafes)}
       </Typography>
       <Box mt={1}>
-        <SafesList safes={filteredSafes} onLinkClick={onLinkClick} useTransitions={false} />
+        <SafesList safes={filteredSafes} onLinkClick={onLinkClick} />
       </Box>
     </>
   )

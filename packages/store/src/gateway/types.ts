@@ -89,6 +89,12 @@ export type SafeOverviewResult = { data: SafeOverview[]; error: unknown; isLoadi
 
 export type OrderTransactionInfo = SwapOrderTransactionInfo | TwapOrderTransactionInfo | SwapTransferTransactionInfo
 
+export enum StartTimeValue {
+  AT_MINING_TIME = "AT_MINING_TIME",
+  AT_EPOCH = "AT_EPOCH"
+}
+
+
 export type PendingTransactionItems = QueuedItemPage['results'][number]
 export type HistoryTransactionItems = TransactionItemPage['results'][number]
 

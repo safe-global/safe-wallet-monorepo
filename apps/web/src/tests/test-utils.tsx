@@ -10,7 +10,7 @@ import * as web3 from '@/hooks/wallets/web3'
 import { type JsonRpcProvider, AbiCoder } from 'ethers'
 import { id } from 'ethers'
 import { Provider } from 'react-redux'
-import { checksumAddress } from '@/utils/addresses'
+import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { faker } from '@faker-js/faker'
 import { userEvent } from '@testing-library/user-event'
 

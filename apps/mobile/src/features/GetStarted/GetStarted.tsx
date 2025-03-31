@@ -7,6 +7,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { BlurView } from 'expo-blur'
 import crashlytics from '@react-native-firebase/crashlytics'
 import { Alert } from 'react-native'
+import { COMING_SOON_MESSAGE, COMING_SOON_TITLE } from '@/src/config/constants'
 
 export const GetStarted = () => {
   const router = useRouter()
@@ -22,7 +23,7 @@ export const GetStarted = () => {
   }, [])
 
   const onPressJoinAccount = useCallback(() => {
-    Alert.alert('Coming soon', 'This feature is not yet available.')
+    Alert.alert(COMING_SOON_TITLE, COMING_SOON_MESSAGE)
   }, [])
 
   return (

@@ -7,7 +7,7 @@ import type { UrlObject } from 'url'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useAddressBook from '@/hooks/useAddressBook'
 import Identicon from '../Identicon'
-import { shortenAddress } from '@/utils/formatters'
+import { shortenAddress } from '@safe-global/utils/utils/formatters'
 
 import css from './styles.module.css'
 import { useParentSafe } from '@/hooks/useParentSafe'
@@ -22,7 +22,7 @@ export function NestedSafeBreadcrumbs(): ReactElement | null {
   }
 
   return (
-    <div className={css.container}>
+    <div className={css.container} data-testid="safe-breadcrumb-container">
       <BreadcrumbItem
         title="Parent Safe"
         address={parentSafe.address.value}

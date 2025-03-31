@@ -94,9 +94,11 @@ export const stagingCGWAllTokensBalances = '/balances/USD?trusted=false&exclude_
 
 export const proposeEndpoint = '/**/propose'
 export const appsEndpoint = '/**/safe-apps'
-export const transactionHistoryEndpoint = '**/history*'
+export const transactionHistoryEndpoint = '**/history**'
 export const safeListEndpoint = '**/safes'
 export const queuedEndpoint = '**/queued'
+export const messagesEndpoint = '**/messages'
+export const collectiblesEndpoint = '**/collectibles'
 
 export const indexStatusUrl = 'https://status.safe.global'
 

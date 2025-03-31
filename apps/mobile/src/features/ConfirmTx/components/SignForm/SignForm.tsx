@@ -4,14 +4,14 @@ import { Text, View, YStack, Image } from 'tamagui'
 import { SafeButton } from '@/src/components/SafeButton'
 import { Identicon } from '@/src/components/Identicon'
 import { Address } from '@/src/types/address'
-import { EthAddress } from '@/src/components/EthAddress'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import Signature from '@/assets/images/signature.png'
 import { router } from 'expo-router'
 import { useBiometrics } from '@/src/hooks/useBiometrics'
+import { Contact } from '@/src/features/AddressBook'
+
 export interface SignFormProps {
   address: Address
-  name?: string
   txId: string
 }
 
@@ -43,7 +43,7 @@ export function SignForm({ address, name, txId }: SignFormProps) {
 
         <Identicon address={address} size={24} />
 
-        {name ? <Text fontWeight={500}>{name}</Text> : <EthAddress address={address} />}
+        <Contact address={address} />
 
         <SafeFontIcon name="chevron-right" />
       </View>

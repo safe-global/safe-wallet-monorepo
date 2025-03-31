@@ -1,7 +1,7 @@
 import type { TwapOrder } from '@safe-global/safe-gateway-typescript-sdk'
 import { getOrderFeeBps } from '@/features/swap/helpers/utils'
 import { DataRow } from '@/components/common/Table/DataRow'
-import { formatVisualAmount } from '@/utils/formatters'
+import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
 import { HelpIconTooltip } from '@/features/swap/components/HelpIconTooltip'
 
 export const SurplusFee = ({

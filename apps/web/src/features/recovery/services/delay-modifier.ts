@@ -4,7 +4,7 @@ import type { Delay, SupportedNetworks } from '@gnosis.pm/zodiac'
 import { type JsonRpcProvider, isAddress } from 'ethers'
 import type { SafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
 
-import { sameAddress } from '@/utils/addresses'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { getGenericProxyMasterCopy, getGnosisProxyMasterCopy, isGenericProxy, isGnosisProxy } from './proxies'
 import { MAX_RECOVERER_PAGE_SIZE } from './recovery-state'
 

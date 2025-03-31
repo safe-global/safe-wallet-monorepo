@@ -1,0 +1,189 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AlreadySigned matches snapshot 1`] = `
+<View>
+  <View
+    style={
+      {
+        "alignItems": "center",
+        "flexDirection": "column",
+        "gap": 16,
+        "justifyContent": "center",
+        "paddingLeft": 16,
+        "paddingRight": 16,
+      }
+    }
+  >
+    <Text
+      style={
+        {
+          "color": "#A1A3A7",
+          "fontSize": 16,
+          "fontWeight": 400,
+          "textAlign": "center",
+        }
+      }
+      suppressHighlighting={true}
+    >
+      This transaction can be executed in the web app only.
+    </Text>
+    <View
+      accessibilityState={
+        {
+          "busy": undefined,
+          "checked": undefined,
+          "disabled": undefined,
+          "expanded": undefined,
+          "selected": undefined,
+        }
+      }
+      accessibilityValue={
+        {
+          "max": undefined,
+          "min": undefined,
+          "now": undefined,
+          "text": undefined,
+        }
+      }
+      accessible={true}
+      collapsable={false}
+      focusable={true}
+      onClick={[Function]}
+      onResponderGrant={[Function]}
+      onResponderMove={[Function]}
+      onResponderRelease={[Function]}
+      onResponderTerminate={[Function]}
+      onResponderTerminationRequest={[Function]}
+      onStartShouldSetResponder={[Function]}
+      style={
+        {
+          "opacity": 1,
+        }
+      }
+    >
+      <View
+        style={
+          {
+            "alignItems": "center",
+            "flexDirection": "row",
+            "gap": 8,
+          }
+        }
+      >
+        <Text
+          style={
+            {
+              "color": "#121312",
+              "fontSize": 16,
+              "fontWeight": 700,
+              "textAlign": "center",
+            }
+          }
+          suppressHighlighting={true}
+        >
+          Go to Web app
+        </Text>
+        <Text
+          allowFontScaling={false}
+          selectable={false}
+          style={
+            [
+              {
+                "color": "#121312",
+                "fontSize": 16,
+              },
+              undefined,
+              {
+                "fontFamily": "SafeIcons",
+                "fontStyle": "normal",
+                "fontWeight": "normal",
+              },
+              {},
+            ]
+          }
+        >
+          
+        </Text>
+      </View>
+    </View>
+    <View
+      style={
+        {
+          "height": 50,
+          "width": "100%",
+        }
+      }
+    >
+      <View
+        focusVisibleStyle={
+          {
+            "borderColor": "$background",
+          }
+        }
+        lineHeight={20}
+        pointerEvents="none"
+        role="button"
+        style={
+          {
+            "alignItems": "center",
+            "backgroundColor": "#7878801F",
+            "borderBottomColor": "transparent",
+            "borderBottomLeftRadius": 8,
+            "borderBottomRightRadius": 8,
+            "borderBottomWidth": 1,
+            "borderLeftColor": "transparent",
+            "borderLeftWidth": 1,
+            "borderRightColor": "transparent",
+            "borderRightWidth": 1,
+            "borderStyle": "solid",
+            "borderTopColor": "transparent",
+            "borderTopLeftRadius": 8,
+            "borderTopRightRadius": 8,
+            "borderTopWidth": 1,
+            "bottom": 0,
+            "color": "#636669",
+            "flexDirection": "row",
+            "flexWrap": "nowrap",
+            "fontWeight": 600,
+            "height": "100%",
+            "justifyContent": "center",
+            "left": 0,
+            "marginBottom": 0,
+            "marginLeft": 0,
+            "marginRight": 0,
+            "marginTop": 0,
+            "paddingBottom": 14,
+            "paddingLeft": 20,
+            "paddingRight": 20,
+            "paddingTop": 14,
+            "position": "absolute",
+            "right": 0,
+            "top": 0,
+          }
+        }
+        testID="confirm-button"
+      >
+        <Text
+          lineBreakMode="clip"
+          numberOfLines={1}
+          style={
+            {
+              "color": "#636669",
+              "flexGrow": 0,
+              "flexShrink": 1,
+              "fontFamily": "DMSans-SemiBold",
+              "fontSize": 14,
+              "letterSpacing": -0.1,
+              "lineHeight": 15.400000000000002,
+              "userSelect": "none",
+            }
+          }
+          suppressHighlighting={true}
+        >
+          Confirm
+        </Text>
+      </View>
+    </View>
+  </View>
+</View>
+`;

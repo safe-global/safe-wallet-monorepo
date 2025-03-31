@@ -1,6 +1,6 @@
 import { DataDecodedParameter } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { ListTableItem } from '@/src/features/ConfirmTx/components/ListTable'
-import { shortenText } from '@safe-global/utils/formatters'
+import { shortenText } from '@safe-global/utils/utils/formatters'
 import { Text, View } from 'tamagui'
 import { CopyButton } from '@/src/components/CopyButton'
 import { EthAddress } from '@/src/components/EthAddress'

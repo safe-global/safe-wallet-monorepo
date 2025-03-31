@@ -21,7 +21,7 @@ import InfoIcon from '@/public/images/notifications/info.svg'
 import { TOOLTIP_TITLES } from '@/components/tx-flow/common/constants'
 
 import commonCss from '@/components/tx-flow/common/styles.module.css'
-import { maybePlural } from '@/utils/formatters'
+import { maybePlural } from '@safe-global/utils/utils/formatters'
 
 export const ChooseThreshold = ({
   params,

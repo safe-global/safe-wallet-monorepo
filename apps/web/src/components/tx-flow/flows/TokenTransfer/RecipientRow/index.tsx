@@ -15,7 +15,7 @@ import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import SpendingLimitRow from '../SpendingLimitRow'
 import { useSelector } from 'react-redux'
 import { selectSpendingLimits } from '@/store/spendingLimitsSlice'
-import { sameAddress } from '@/utils/addresses'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 import Track from '@/components/common/Track'
 import { MODALS_EVENTS } from '@/services/analytics'
 

@@ -1,4 +1,4 @@
-import { shortenText } from '@/utils/formatters'
+import { shortenText } from '@safe-global/utils/utils/formatters'
 import { Box, Link, Tooltip } from '@mui/material'
 import type { ReactElement } from 'react'
 import { useState } from 'react'

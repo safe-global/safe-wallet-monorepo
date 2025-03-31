@@ -7,7 +7,7 @@ import useChains from '@/hooks/useChains'
 import useWallet from '@/hooks/wallets/useWallet'
 import type { AddressBookState, UndeployedSafesState, VisitedSafesState } from '@/store/slices'
 import { selectAllAddressBooks, selectAllVisitedSafes, selectUndeployedSafes } from '@/store/slices'
-import { sameAddress } from '@/utils/addresses'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 import useAllOwnedSafes from './useAllOwnedSafes'
 
 export type SafeItem = {

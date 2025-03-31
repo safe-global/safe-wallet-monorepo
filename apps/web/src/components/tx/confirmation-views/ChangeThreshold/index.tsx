@@ -7,7 +7,7 @@ import { ChangeThresholdReviewContext } from '@/components/tx-flow/flows/ChangeT
 import { ChangeSignerSetupWarning } from '@/features/multichain/components/SignerSetupWarning/ChangeSignerSetupWarning'
 import { type TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
 import { isChangeThresholdView } from '../utils'
-import { maybePlural } from '@/utils/formatters'
+import { maybePlural } from '@safe-global/utils/utils/formatters'
 
 interface ChangeThresholdProps {
   txInfo?: TransactionDetails['txInfo']
