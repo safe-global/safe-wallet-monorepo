@@ -34,7 +34,7 @@ runs:
           **/node_modules
           /home/runner/.cache/Cypress
           ${{ github.workspace }}/.yarn/install-state.gz
-          ${{ github.workspace }}/apps/web/src/types
+          ${{ github.workspace }}/packages/utils/src/types
         key: ${{ runner.os }}-web-core-modules-${{ hashFiles('**/package.json','**/yarn.lock') }}
         restore-keys: |
           ${{ runner.os }}-web-core-modules-
@@ -54,7 +54,7 @@ runs:
           **/node_modules
           /home/runner/.cache/Cypress
           ${{ github.workspace }}/.yarn/install-state.gz
-          ${{ github.workspace }}/apps/web/src/types
+          ${{ github.workspace }}/packages/utils/src/types
         key: ${{inputs.key}}
 
     - name: Restore Next.js
