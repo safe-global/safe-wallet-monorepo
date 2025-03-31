@@ -10,12 +10,14 @@ import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_G
 import { MemberStatus } from '@/features/spaces/hooks/useSpaceMembers'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@/utils/chains'
+import useFeatureFlagRedirect from '@/features/spaces/hooks/useFeatureFlagRedirect'
 
 const AuthState = ({ spaceId, children }: { spaceId: string; children: ReactNode }) => {
   const isUserSignedIn = useAppSelector(isAuthenticated)
   const { currentData: currentUser } = useUsersGetWithWalletsV1Query(undefined, { skip: !isUserSignedIn })
   const { currentData, error, isLoading } = useSpacesGetOneV1Query({ id: Number(spaceId) }, { skip: !isUserSignedIn })
   const isSpacesFeatureEnabled = useHasFeature(FEATURES.SPACES)
+  useFeatureFlagRedirect()
 
   const isCurrentUserDeclined = currentData?.members.some(
     (member) => member.user.id === currentUser?.id && member.status === MemberStatus.DECLINED,
