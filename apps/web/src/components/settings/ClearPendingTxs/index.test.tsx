@@ -9,7 +9,7 @@ import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 const safeAddress = faker.finance.ethereumAddress()
 
 describe('ClearPendingTxs', () => {
-  it('clear single transaction', () => {
+  it('clears a single transaction', () => {
     render(<ClearPendingTxs />, {
       initialReduxState: {
         pendingTxs: {
@@ -42,7 +42,7 @@ describe('ClearPendingTxs', () => {
     })
     expect(screen.getByText('No pending transactions')).toBeInTheDocument()
   })
-  it('clear multiple transactions', () => {
+  it('clears multiple transactions', () => {
     render(<ClearPendingTxs />, {
       initialReduxState: {
         pendingTxs: {
