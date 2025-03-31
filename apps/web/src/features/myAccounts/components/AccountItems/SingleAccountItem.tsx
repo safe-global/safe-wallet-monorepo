@@ -3,17 +3,7 @@ import type { SafeListProps } from '@/features/myAccounts/components/SafesList'
 import SpaceSafeContextMenu from '@/features/spaces/components/SafeAccounts/SpaceSafeContextMenu'
 import { type SafeOverview } from '@safe-global/safe-gateway-typescript-sdk'
 import { useMemo, useRef } from 'react'
-import {
-  ListItemButton,
-  Box,
-  Typography,
-  IconButton,
-  SvgIcon,
-  Skeleton,
-  useTheme,
-  useMediaQuery,
-  ListItem,
-} from '@mui/material'
+import { ListItemButton, Box, Typography, IconButton, SvgIcon, Skeleton, useTheme, useMediaQuery } from '@mui/material'
 import Link from 'next/link'
 import Track from '@/components/common/Track'
 import { OVERVIEW_EVENTS, OVERVIEW_LABELS, PIN_SAFE_LABELS, trackEvent } from '@/services/analytics'
@@ -76,7 +66,11 @@ const SingleAccountItem = ({
 
   const dispatch = useAppDispatch()
 
-  const trackingLabel = isWelcomePage ? OVERVIEW_LABELS.login_page : OVERVIEW_LABELS.sidebar
+  const trackingLabel = isWelcomePage
+    ? OVERVIEW_LABELS.login_page
+    : isSpaceSafe
+      ? OVERVIEW_LABELS.space_page
+      : OVERVIEW_LABELS.sidebar
 
   const getHref = useGetHref(router)
 
@@ -288,12 +282,7 @@ const SingleAccountItem = ({
     </>
   )
 
-  return isSpaceSafe ? (
-    <ListItem component="div" ref={elementRef} className={css.listItem}>
-      <Box className={css.safeLink}>{content}</Box>
-      {actions}
-    </ListItem>
-  ) : (
+  return (
     <ListItemButton
       ref={elementRef}
       data-testid="safe-list-item"
