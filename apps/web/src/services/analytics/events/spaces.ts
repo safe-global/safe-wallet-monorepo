@@ -144,4 +144,5 @@ export enum SPACE_LABELS {
   member_list = 'member_list',
   invite_list = 'invite_list',
   add_accounts_modal = 'add_accounts_modal',
+  space_settings = 'space_settings',
 }
