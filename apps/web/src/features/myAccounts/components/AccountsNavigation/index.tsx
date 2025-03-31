@@ -14,7 +14,7 @@ const AccountsNavigation = () => {
     return router.pathname === pathname
   }
 
-  const trackOpenSpaces = () => {
+  const trackSpacesClick = () => {
     if (isActiveNavigation(AppRoutes.welcome.spaces)) {
       trackEvent({ ...SPACE_EVENTS.OPEN_SPACE_LIST_PAGE, label: SPACE_LABELS.accounts_page })
     }
@@ -33,7 +33,7 @@ const AccountsNavigation = () => {
 
       <Typography variant="h1" fontWeight={700} className={css.title}>
         <Link
-          onClick={trackOpenSpaces}
+          onClick={trackSpacesClick}
           href={AppRoutes.welcome.spaces}
           className={classNames(css.link, { [css.active]: isActiveNavigation(AppRoutes.welcome.spaces) })}
         >
