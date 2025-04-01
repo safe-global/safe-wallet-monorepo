@@ -1,5 +1,5 @@
 import { SectionTitle } from '@/src/components/Title'
-import React from 'react'
+import React, { useMemo } from 'react'
 import { ScrollView } from 'react-native-gesture-handler'
 import Seed from '@/assets/images/seed.png'
 import Wallet from '@/assets/images/wallet.png'
@@ -9,8 +9,9 @@ import { useScrollableHeader } from '@/src/navigation/useScrollableHeader'
 import { NavBarTitle } from '@/src/components/Title'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { SafeCard } from '@/src/components/SafeCard'
-import { router } from 'expo-router'
+import { router, useLocalSearchParams } from 'expo-router'
 import { Tag } from '@/src/components/Tag'
+import { useBiometrics } from '@/src/hooks/useBiometrics'
 
 const items = [
   {
@@ -44,9 +45,32 @@ const items = [
 const title = 'Import a signer'
 
 function ImportSignersPage() {
+  const { isBiometricsEnabled } = useBiometrics()
+  const local = useLocalSearchParams<{ safeAddress: string; chainId: string; import_safe: string }>()
   const { handleScroll } = useScrollableHeader({
     children: <NavBarTitle paddingRight={5}>{title}</NavBarTitle>,
   })
+
+  const memoizedItems = useMemo(() => {
+    return items.map((item) => {
+      const newItem = { ...item }
+
+      if (!isBiometricsEnabled && item.name === 'seed') {
+        newItem.onPress = () =>
+          router.push({
+            pathname: '/biometrics-opt-in',
+            params: {
+              safeAddress: local.safeAddress,
+              chainId: local.chainId,
+              import_safe: local.import_safe,
+              caller: '/import-signers',
+            },
+          })
+      }
+
+      return newItem
+    })
+  }, [isBiometricsEnabled, local.safeAddress, local.chainId, local.import_safe])
 
   return (
     <SafeAreaView edges={['bottom']}>
@@ -56,7 +80,7 @@ function ImportSignersPage() {
           description="Select how you'd like to import your signer. Ensure it belongs to this Safe account so you can interact with it seamlessly."
         />
 
-        {items.map((item, index) => (
+        {memoizedItems.map((item, index) => (
           <SafeCard
             testID={item.name}
             onPress={item.onPress}

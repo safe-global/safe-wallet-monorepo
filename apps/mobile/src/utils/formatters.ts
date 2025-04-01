@@ -47,3 +47,5 @@ const calculateRatio = (a: Quantity, b: Quantity) => {
   }
   return asDecimal(BigInt(a.amount), a.decimals) / asDecimal(BigInt(b.amount), b.decimals)
 }
+
+export const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1)

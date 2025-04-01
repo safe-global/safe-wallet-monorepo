@@ -30,12 +30,11 @@ export class KeyStorageService implements IKeyStorageService {
     options: PrivateKeyStorageOptions = { requireAuthentication: true },
   ): Promise<void> {
     try {
-      Logger.info('storePrivateKey', { userId, options })
       const { requireAuthentication = true } = options
       const isEmulator = await DeviceInfo.isEmulator()
       await this.storeKey(userId, privateKey, requireAuthentication, isEmulator)
     } catch (err) {
-      console.log(err)
+      Logger.error('Error storing private key:', err)
       throw new Error('Failed to store private key')
     }
   }
@@ -45,10 +44,9 @@ export class KeyStorageService implements IKeyStorageService {
     options: PrivateKeyStorageOptions = { requireAuthentication: true },
   ): Promise<string | undefined> {
     try {
-      Logger.info('getPrivateKey', { userId, options })
       return await this.getKey(userId, options.requireAuthentication ?? true)
     } catch (err) {
-      console.log(err)
+      Logger.error('Error getting private key:', err)
       return undefined
     }
   }
@@ -63,9 +61,10 @@ export class KeyStorageService implements IKeyStorageService {
         accessLevel: requireAuth ? (isEmulator ? 1 : 2) : 1,
         invalidateOnNewBiometry: requireAuth,
       })
+
       return keyName
     } catch (error) {
-      console.error('Error creating key:', error)
+      Logger.error('Error creating key:', error)
       throw new Error('Failed to create encryption key')
     }
   }
@@ -87,7 +86,6 @@ export class KeyStorageService implements IKeyStorageService {
   }
 
   private async storeKey(userId: string, privateKey: string, requireAuth: boolean, isEmulator: boolean): Promise<void> {
-    Logger.info(requireAuth ? 'storeWithBiometrics' : 'storeWithoutBiometrics', { userId })
     const keyName = this.getKeyName(userId)
 
     if (Platform.OS === 'android') {
@@ -117,7 +115,6 @@ export class KeyStorageService implements IKeyStorageService {
   }
 
   private async getKey(userId: string, requireAuth: boolean): Promise<string> {
-    Logger.info(requireAuth ? 'getWithBiometrics' : 'getWithoutBiometrics', { userId })
     const keyName = this.getKeyName(userId)
 
     const keychainOptions: Keychain.GetOptions = { service: keyName }

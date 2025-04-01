@@ -1,4 +1,9 @@
 export type IconName =
+  | 'face-id'
+  | 'magic'
+  | 'signature'
+  | 'star'
+  | 'twitter-x'
   | 'add-owner'
   | 'address-book'
   | 'alert-triangle'
@@ -107,6 +112,11 @@ export type IconName =
   | 'what-is-new'
 
 export const iconNames: IconName[] = [
+  'face-id',
+  'magic',
+  'signature',
+  'star',
+  'twitter-x',
   'add-owner',
   'address-book',
   'alert-triangle',
