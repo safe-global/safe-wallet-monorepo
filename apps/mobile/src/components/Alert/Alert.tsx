@@ -21,7 +21,18 @@ interface AlertProps {
 
 const icons = {
   error: <SafeFontIcon testID="error-icon" name={'alert'} />,
-  warning: <SafeFontIcon testID="warning-icon" name={'alert'} />,
+  warning: (
+    <View
+      display="flex"
+      alignItems="center"
+      justifyContent="center"
+      padding="$1"
+      borderRadius={'$10'}
+      backgroundColor="#FF8C00"
+    >
+      <SafeFontIcon testID="warning-icon" name={'alert'} color={'$colorContrast'} size={16} />
+    </View>
+  ),
   info: <SafeFontIcon testID="info-icon" name={'info'} />,
   success: <SafeFontIcon testID="success-icon" name={'check'} />,
 }
@@ -58,7 +69,6 @@ export const Alert = ({
             flexDirection="row"
             justifyContent="center"
             backgroundColor="$background"
-            paddingHorizontal="$7"
             paddingVertical="$3"
             borderRadius={'$2'}
           >
