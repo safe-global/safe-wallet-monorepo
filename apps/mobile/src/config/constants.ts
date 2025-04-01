@@ -22,7 +22,6 @@ export const GATEWAY_URL = isProduction ? GATEWAY_URL_PRODUCTION : GATEWAY_URL_S
  * If we change it and need all users to see it again, we can bump the version here.
  */
 export const ONBOARDING_VERSION = 'v1'
-export const INFURA_TOKEN = process.env.EXPO_PUBLIC_INFURA_TOKEN || ''
 
 export const SAFE_WEB_URL = 'https://app.safe.global'
 export const SAFE_WEB_TRANSACTIONS_URL = `${SAFE_WEB_URL}/transactions/tx?safe=:safeAddressWithChainPrefix&id=:txId`

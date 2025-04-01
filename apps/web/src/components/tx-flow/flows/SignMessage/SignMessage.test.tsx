@@ -1,9 +1,9 @@
+import type { MessageItem } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import type Safe from '@safe-global/protocol-kit'
 import { act } from 'react'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import { hexlify, zeroPadValue, toUtf8Bytes } from 'ethers'
-import type { SafeInfo, SafeMessage } from '@safe-global/safe-gateway-typescript-sdk'
-import { SafeMessageListItemType } from '@safe-global/safe-gateway-typescript-sdk'
+import type { SafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import SignMessage from './SignMessage'
 
 import * as useIsWrongChainHook from '@/hooks/useIsWrongChain'
@@ -18,7 +18,7 @@ import * as sdk from '@/hooks/coreSDK/safeCoreSDK'
 import { render, fireEvent, waitFor } from '@/tests/test-utils'
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import type { EIP1193Provider, WalletState, AppState, OnboardAPI } from '@web3-onboard/core'
-import { generateSafeMessageHash } from '@/utils/safe-messages'
+import { generateSafeMessageHash } from '@safe-global/utils/utils/safe-messages'
 import { getSafeMessage } from '@safe-global/safe-gateway-typescript-sdk'
 import { chainBuilder } from '@/tests/builders/chains'
 
@@ -229,7 +229,7 @@ describe('SignMessage', () => {
     const proposalSpy = jest.spyOn(sender, 'dispatchSafeMsgProposal').mockImplementation(() => Promise.resolve())
     const mockMessageHash = '0x456'
     const msg = {
-      type: SafeMessageListItemType.MESSAGE,
+      type: 'MESSAGE',
       messageHash: mockMessageHash,
       confirmations: [
         {
@@ -240,7 +240,7 @@ describe('SignMessage', () => {
       ],
       confirmationsRequired: 2,
       confirmationsSubmitted: 1,
-    } as unknown as SafeMessage
+    } as unknown as MessageItem
 
     ;(getSafeMessage as jest.Mock).mockResolvedValue(msg)
 
@@ -284,7 +284,7 @@ describe('SignMessage', () => {
       messageText,
     )
     const msg = {
-      type: SafeMessageListItemType.MESSAGE,
+      type: 'MESSAGE',
       messageHash,
       confirmations: [
         {
@@ -295,7 +295,7 @@ describe('SignMessage', () => {
       ],
       confirmationsRequired: 2,
       confirmationsSubmitted: 1,
-    } as unknown as SafeMessage
+    } as unknown as MessageItem
 
     jest.spyOn(useSafeMessage, 'default').mockReturnValueOnce([msg, jest.fn, undefined])
 
@@ -327,7 +327,7 @@ describe('SignMessage', () => {
       confirmationsRequired: 2,
       confirmationsSubmitted: 2,
       preparedSignature: '0x789',
-    } as unknown as SafeMessage
+    } as unknown as MessageItem
 
     ;(getSafeMessage as jest.Mock).mockResolvedValue(newMsg)
 
@@ -442,7 +442,7 @@ describe('SignMessage', () => {
       messageText,
     )
     const msg = {
-      type: SafeMessageListItemType.MESSAGE,
+      type: 'MESSAGE',
       messageHash,
       confirmations: [
         {
@@ -453,7 +453,7 @@ describe('SignMessage', () => {
       ],
       confirmationsRequired: 2,
       confirmationsSubmitted: 1,
-    } as unknown as SafeMessage
+    } as unknown as MessageItem
 
     jest.spyOn(useSafeMessage, 'default').mockReturnValue([msg, jest.fn, undefined])
 
@@ -531,7 +531,7 @@ describe('SignMessage', () => {
       messageText,
     )
     const msg = {
-      type: SafeMessageListItemType.MESSAGE,
+      type: 'MESSAGE',
       messageHash,
       confirmations: [
         {
@@ -542,7 +542,7 @@ describe('SignMessage', () => {
       ],
       confirmationsRequired: 2,
       confirmationsSubmitted: 1,
-    } as unknown as SafeMessage
+    } as unknown as MessageItem
     ;(getSafeMessage as jest.Mock).mockResolvedValue(msg)
 
     jest.spyOn(useSafeMessage, 'default').mockReturnValue([msg, jest.fn(), undefined])
@@ -595,7 +595,7 @@ describe('SignMessage', () => {
       messageText,
     )
     const msg = {
-      type: SafeMessageListItemType.MESSAGE,
+      type: 'MESSAGE',
       messageHash,
       confirmations: [
         {
@@ -612,7 +612,7 @@ describe('SignMessage', () => {
       confirmationsRequired: 2,
       confirmationsSubmitted: 2,
       preparedSignature: '0x678',
-    } as unknown as SafeMessage
+    } as unknown as MessageItem
 
     jest.spyOn(useSafeMessage, 'default').mockReturnValue([msg, jest.fn(), undefined])
     ;(getSafeMessage as jest.Mock).mockResolvedValue(msg)

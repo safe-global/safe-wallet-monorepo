@@ -2,6 +2,8 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 import type { BaseQueryFn, FetchArgs, FetchBaseQueryError } from '@reduxjs/toolkit/query/react'
 
 const CREDENTIAL_ROUTES = [
+  /^\/v1\/users/,
+  /^\/v1\/spaces/,
   /^\/v1\/auth/,
   /^\/v2\/register\/notifications$/,
   /^\/v2\/chains\/[^\/]+\/notifications\/devices/,

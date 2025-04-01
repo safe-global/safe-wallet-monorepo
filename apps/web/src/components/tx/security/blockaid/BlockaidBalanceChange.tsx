@@ -4,7 +4,6 @@ import useBalances from '@/hooks/useBalances'
 import useChainId from '@/hooks/useChainId'
 import { useHasFeature } from '@/hooks/useChains'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import { FEATURES } from '@/utils/chains'
 import { Box, Chip, CircularProgress, Grid, SvgIcon, Tooltip, Typography } from '@mui/material'
 import { TokenType } from '@safe-global/safe-gateway-typescript-sdk'
 import { ErrorBoundary } from '@sentry/react'
@@ -26,8 +25,9 @@ import type {
   Erc721TokenDetails,
   GeneralAssetDiff,
   NativeDiff,
-} from '@/services/security/modules/BlockaidModule/types'
+} from '@safe-global/utils/services/security/modules/BlockaidModule/types'
 import { formatAmount } from '@safe-global/utils/utils/formatNumber'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 
 const FungibleBalanceChange = ({ change, asset }: { asset: AssetDiff['asset']; change: Erc20Diff | NativeDiff }) => {
   const { balances } = useBalances()

@@ -1,0 +1,12 @@
+.spaceSelectorButton {
+  justify-content: space-between;
+  text-align: left;
+  padding: var(--space-1);
+  margin: var(--space-1);
+  border: 1px solid var(--color-border-light);
+  font-size: 14px;
+}
+
+.spaceSelectorButton:hover {
+  border: 1px solid var(--color-border-light);
+}

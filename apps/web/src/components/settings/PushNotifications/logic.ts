@@ -6,7 +6,7 @@ import type { RegisterNotificationsRequest } from '@safe-global/safe-gateway-typ
 import { FIREBASE_VAPID_KEY, initializeFirebaseApp } from '@/services/push-notifications/firebase'
 import packageJson from '../../../../package.json'
 import { logError } from '@/services/exceptions'
-import ErrorCodes from '@/services/exceptions/ErrorCodes'
+import ErrorCodes from '@safe-global/utils/services/exceptions/ErrorCodes'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { createWeb3 } from '@/hooks/wallets/web3'
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'

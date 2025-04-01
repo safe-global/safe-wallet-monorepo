@@ -33,10 +33,11 @@ import {
   prepareApproveTxHash,
 } from './sdk'
 import { createWeb3, getUserNonce } from '@/hooks/wallets/web3'
-import { asError } from '@/services/exceptions/utils'
+import { asError } from '@safe-global/utils/services/exceptions/utils'
 import chains from '@/config/chains'
 import { createExistingTx } from './create'
-import { getLatestSafeVersion } from '@/utils/chains'
+
+import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
 
 /**
  * Propose a transaction

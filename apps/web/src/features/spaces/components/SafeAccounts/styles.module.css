@@ -1,0 +1,26 @@
+
+.sendButton {
+    background-color: var(--color-background-main);
+    border-radius: 3px;
+    margin: 0 var(--space-1);
+}
+
+.sendButton:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+[data-theme='dark'] .sendButton:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.sendButton svg path {
+    fill: var(--color-text-primary);
+}
+
+.sendButton:global(.Mui-disabled) {
+    background-color: var(--color-background-main);
+}
+
+.sendButton:global(.Mui-disabled) svg path {
+    fill: var(--color-border-main);
+}

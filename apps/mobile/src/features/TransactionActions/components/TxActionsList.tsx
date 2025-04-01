@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react'
 import { Text, View, YStack } from 'tamagui'
-import { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { TransactionDetails, MultiSend } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { ActionValueDecoded, AddressInfoIndex } from '@safe-global/store/gateway/types'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
@@ -12,7 +12,7 @@ interface TxActionsListProps {
   txDetails: TransactionDetails
 }
 
-export const getActionName = (action: ActionValueDecoded, addressInfoIndex?: AddressInfoIndex): string => {
+export const getActionName = (action: ActionValueDecoded | MultiSend, addressInfoIndex?: AddressInfoIndex): string => {
   const contractName = (addressInfoIndex as AddressInfoIndex)?.[action.to]?.name
   let name = shortenAddress(action.to)
 
@@ -28,7 +28,7 @@ export function TxActionsList({ txDetails }: TxActionsListProps) {
 
   const { dataDecoded, addressInfoIndex } = txDetails.txData || {}
 
-  const onActionPress = (action: ActionValueDecoded) => {
+  const onActionPress = (action: MultiSend) => {
     router.push({
       pathname: '/action-details',
       params: {
@@ -46,28 +46,33 @@ export function TxActionsList({ txDetails }: TxActionsListProps) {
 
   return (
     <YStack gap="$2" padding="$4">
-      {actions?.map((action, index) => (
-        <Container
-          key={`${getActionName(action, addressInfoIndex as AddressInfoIndex)}-${index}`}
-          padding="$42"
-          gap="$5"
-          borderRadius="$3"
-          onPress={() => onActionPress(action)}
-        >
-          <View alignItems="center" flexDirection="row" justifyContent="space-between" gap={'$2'} flexWrap="wrap">
-            <View flexDirection="row" alignItems="center" gap={'$3'} maxWidth="90%">
-              <SafeFontIcon name="transaction-contract" color="$colorSecondary" size={18} />
-              <Text marginRight={'$2'}>{index + 1}</Text>
+      {actions?.map((action, index) => {
+        if (!action || !('operation' in action)) {
+          return null
+        }
+        return (
+          <Container
+            key={`${getActionName(action, addressInfoIndex as AddressInfoIndex)}-${index}`}
+            padding="$42"
+            gap="$5"
+            borderRadius="$3"
+            onPress={() => onActionPress(action)}
+          >
+            <View alignItems="center" flexDirection="row" justifyContent="space-between" gap={'$2'} flexWrap="wrap">
+              <View flexDirection="row" alignItems="center" gap={'$3'} maxWidth="90%">
+                <SafeFontIcon name="transaction-contract" color="$colorSecondary" size={18} />
+                <Text marginRight={'$2'}>{index + 1}</Text>
 
-              <Text fontSize="$4" flexShrink={1} flexWrap="wrap">
-                {getActionName(action, addressInfoIndex as AddressInfoIndex)}
-              </Text>
+                <Text fontSize="$4" flexShrink={1} flexWrap="wrap">
+                  {getActionName(action, addressInfoIndex as AddressInfoIndex)}
+                </Text>
+              </View>
+
+              <SafeFontIcon name="chevron-right" size={18} />
             </View>
-
-            <SafeFontIcon name="chevron-right" size={18} />
-          </View>
-        </Container>
-      ))}
+          </Container>
+        )
+      })}
     </YStack>
   )
 }

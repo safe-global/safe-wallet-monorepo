@@ -1,6 +1,6 @@
 import type { JsonRpcSigner } from 'ethers'
 import { deleteTransaction } from '@safe-global/safe-gateway-typescript-sdk'
-import { signTypedData } from './web3'
+import { signTypedData } from '@safe-global/utils/utils/web3'
 
 export const signTxServiceMessage = async (
   chainId: string,
@@ -18,13 +18,14 @@ export const signTxServiceMessage = async (
     domain: {
       name: 'Safe Transaction Service',
       version: '1.0',
-      chainId,
+      chainId: Number(chainId),
       verifyingContract: safeAddress,
     },
     message: {
       safeTxHash,
       totp: Math.floor(Date.now() / 3600e3),
     },
+    primaryType: 'DeleteRequest',
   })
 }
 

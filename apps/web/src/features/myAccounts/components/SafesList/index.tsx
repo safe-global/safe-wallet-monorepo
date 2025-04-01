@@ -4,25 +4,30 @@ import type { AllSafeItems, MultiChainSafeItem } from '@/features/myAccounts/hoo
 import MultiAccountItem from '@/features/myAccounts/components/AccountItems/MultiAccountItem'
 import { isMultiChainSafeItem } from '@/features/multichain/utils/utils'
 
-type SafeListProps = {
+export type SafeListProps = {
   safes?: AllSafeItems
   onLinkClick?: () => void
+  isSpaceSafe?: boolean
 }
 
-const renderSafeItem = (item: SafeItem | MultiChainSafeItem, onLinkClick?: () => void) => {
+const renderSafeItem = (
+  item: SafeItem | MultiChainSafeItem,
+  onLinkClick?: SafeListProps['onLinkClick'],
+  isSpaceSafe = false,
+) => {
   return isMultiChainSafeItem(item) ? (
-    <MultiAccountItem onLinkClick={onLinkClick} multiSafeAccountItem={item} />
+    <MultiAccountItem onLinkClick={onLinkClick} multiSafeAccountItem={item} isSpaceSafe={isSpaceSafe} />
   ) : (
-    <SingleAccountItem onLinkClick={onLinkClick} safeItem={item} />
+    <SingleAccountItem onLinkClick={onLinkClick} safeItem={item} isSpaceSafe={isSpaceSafe} />
   )
 }
 
-const SafesList = ({ safes, onLinkClick }: SafeListProps) => {
+const SafesList = ({ safes, onLinkClick, isSpaceSafe = false }: SafeListProps) => {
   if (!safes || safes.length === 0) {
     return null
   }
 
-  return safes.map((item) => <div key={item.address}>{renderSafeItem(item, onLinkClick)}</div>)
+  return safes.map((item) => <div key={item.address}>{renderSafeItem(item, onLinkClick, isSpaceSafe)}</div>)
 }
 
 export default SafesList

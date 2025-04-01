@@ -13,7 +13,7 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import { trackEvent } from '@/services/analytics'
 import { WALLETCONNECT_EVENTS } from '@/services/analytics/events/walletconnect'
 
-import { asError } from '@/services/exceptions/utils'
+import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { Button, Checkbox, CircularProgress, Divider, FormControlLabel, Typography } from '@mui/material'
 import type { WalletKitTypes } from '@reown/walletkit'
 import type { ChangeEvent, ReactElement } from 'react'

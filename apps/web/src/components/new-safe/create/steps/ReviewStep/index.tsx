@@ -29,9 +29,8 @@ import useWalletCanPay from '@/hooks/useWalletCanPay'
 import useWallet from '@/hooks/wallets/useWallet'
 import { CREATE_SAFE_CATEGORY, CREATE_SAFE_EVENTS, OVERVIEW_EVENTS, trackEvent } from '@/services/analytics'
 import { gtmSetChainId, gtmSetSafeAddress } from '@/services/analytics/gtm'
-import { asError } from '@/services/exceptions/utils'
+import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { useAppDispatch, useAppSelector } from '@/store'
-import { FEATURES, hasFeature } from '@/utils/chains'
 import { hasRemainingRelays } from '@/utils/relaying'
 import { isWalletRejection } from '@/utils/wallets'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
@@ -52,6 +51,7 @@ import { createWeb3ReadOnly, getRpcServiceUrl } from '@/hooks/wallets/web3'
 import { type DeploySafeProps } from '@safe-global/protocol-kit'
 import { updateAddressBook } from '../../logic/address-book'
 import chains from '@/config/chains'
+import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 
 export const NetworkFee = ({
   totalFee,

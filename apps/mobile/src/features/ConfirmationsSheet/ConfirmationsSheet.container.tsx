@@ -6,7 +6,6 @@ import { SignersCard } from '@/src/components/transactions-list/Card/SignersCard
 import { Badge } from '@/src/components/Badge'
 import { Text, View } from 'tamagui'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
-import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { Address } from '@/src/types/address'
 import {
   AddressInfo,
@@ -15,6 +14,7 @@ import {
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { selectSigners } from '@/src/store/signersSlice'
 import { useAppSelector } from '@/src/store/hooks'
+import { ContactContainer } from '../AddressBook/Contact.container'
 
 export const ConfirmationsSheetContainer = () => {
   const activeSafe = useDefinedActiveSafe()
@@ -49,7 +49,6 @@ export const ConfirmationsSheetContainer = () => {
       if (proposer?.value === signerAddress) {
         return 'Creator'
       }
-      console.log({ importedSigners, signerAddress })
 
       return undefined
     }
@@ -62,7 +61,7 @@ export const ConfirmationsSheetContainer = () => {
       return (
         <View width="100%">
           <SignersCard
-            name={item.name || shortenAddress(item.value)}
+            name={<ContactContainer address={item.value as Address} />}
             getSignerTag={getSignerTag}
             address={item.value as Address}
             rightNode={

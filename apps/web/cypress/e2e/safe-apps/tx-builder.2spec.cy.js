@@ -158,10 +158,7 @@ describe('Transaction Builder 2 tests', { defaultCommandTimeout: 20000 }, () => 
     navigation.clickOnWalletExpandMoreIcon()
     navigation.clickOnDisconnectBtn()
     wallet.connectSigner(signer2)
-
     createtx.clickOnConfirmTransactionBtn()
-    createtx.clickOnNoLaterOption()
-
     createtx.clickOnContinueSignTransactionBtn()
     createtx.clickOnAcknowledgement()
     createtx.clickOnSignTransactionBtn()

@@ -3,7 +3,6 @@ import { useContext } from 'react'
 import { TxSecurityContext } from '@/components/tx/security/shared/TxSecurityContext'
 import groupBy from 'lodash/groupBy'
 import { Alert, AlertTitle, Box, Checkbox, FormControlLabel, Stack, Typography } from '@mui/material'
-import { FEATURES } from '@/utils/chains'
 import { useHasFeature } from '@/hooks/useChains'
 import { ErrorBoundary } from '@sentry/react'
 import css from './styles.module.css'
@@ -16,6 +15,7 @@ import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { type SecurityWarningProps, mapSecuritySeverity } from '../utils'
 import { BlockaidHint } from './BlockaidHint'
 import { ContractChangeWarning } from './ContractChangeWarning'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 
 export const REASON_MAPPING: Record<string, string> = {
   raw_ether_transfer: 'transfers native currency',

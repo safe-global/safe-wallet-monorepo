@@ -13,10 +13,10 @@ import type {
 } from '@safe-global/safe-gateway-typescript-sdk'
 
 import { Builder } from '@/tests/Builder'
-import { FEATURES } from '@/utils/chains'
 import { generateRandomArray } from './utils'
 import type { IBuilder } from '@/tests/Builder'
 import type useChains from '@/hooks/useChains'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 
 const rpcUriBuilder = (): IBuilder<RpcUri> => {
   return Builder.new<RpcUri>().with({

@@ -11,7 +11,7 @@ import { useTxActions } from '@/components/tx/SignOrExecuteForm/hooks'
 import type { SignOrExecuteProps } from '@/components/tx/SignOrExecuteForm/SignOrExecuteForm'
 import useWallet from '@/hooks/wallets/useWallet'
 import { Errors, trackError } from '@/services/exceptions'
-import { asError } from '@/services/exceptions/utils'
+import { asError } from '@safe-global/utils/services/exceptions/utils'
 import madProps from '@/utils/mad-props'
 import Stack from '@mui/system/Stack'
 

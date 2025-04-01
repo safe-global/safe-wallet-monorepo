@@ -18,10 +18,7 @@ export const GATEWAY_URL_STAGING = process.env.NEXT_PUBLIC_GATEWAY_URL_STAGING |
 export const POLLING_INTERVAL = 15_000
 export const BASE_TX_GAS = 21_000
 export const LS_NAMESPACE = 'SAFE_v2__'
-export const LATEST_SAFE_VERSION = process.env.NEXT_PUBLIC_SAFE_VERSION || '1.4.1'
 
-// Access keys
-export const INFURA_TOKEN = process.env.NEXT_PUBLIC_INFURA_TOKEN || ''
 export const SENTRY_DSN = process.env.NEXT_PUBLIC_SENTRY_DSN || ''
 export const BEAMER_ID = process.env.NEXT_PUBLIC_BEAMER_ID || ''
 
@@ -44,8 +41,6 @@ export const SAFE_LOCKING_ADDRESS: { [chainId: string]: string } = {
   [chains.sep]: '0xb161ccb96b9b817F9bDf0048F212725128779DE9',
 }
 
-// Safe Apps
-export const SAFE_APPS_INFURA_TOKEN = process.env.NEXT_PUBLIC_SAFE_APPS_INFURA_TOKEN || INFURA_TOKEN
 export const SAFE_APPS_THIRD_PARTY_COOKIES_CHECK_URL = 'https://third-party-cookies-check.gnosis-safe.com'
 export const SAFE_APPS_DEMO_SAFE_MAINNET = 'eth:0xfF501B324DC6d78dC9F983f140B9211c3EdB4dc7'
 export const SAFE_APPS_SDK_DOCS_URL =
@@ -56,11 +51,6 @@ export const PROD_GA_TRACKING_ID = process.env.NEXT_PUBLIC_PROD_GA_TRACKING_ID |
 export const TEST_GA_TRACKING_ID = process.env.NEXT_PUBLIC_TEST_GA_TRACKING_ID || ''
 export const SAFE_APPS_GA_TRACKING_ID = process.env.NEXT_PUBLIC_SAFE_APPS_GA_TRACKING_ID || ''
 export const GA_TRACKING_ID = IS_PRODUCTION ? PROD_GA_TRACKING_ID : TEST_GA_TRACKING_ID
-
-// Tenderly - API docs: https://www.notion.so/Simulate-API-Documentation-6f7009fe6d1a48c999ffeb7941efc104
-export const TENDERLY_SIMULATE_ENDPOINT_URL = process.env.NEXT_PUBLIC_TENDERLY_SIMULATE_ENDPOINT_URL || ''
-export const TENDERLY_PROJECT_NAME = process.env.NEXT_PUBLIC_TENDERLY_PROJECT_NAME || ''
-export const TENDERLY_ORG_NAME = process.env.NEXT_PUBLIC_TENDERLY_ORG_NAME || ''
 
 // Safe Apps tags
 export enum SafeAppsTag {
@@ -117,9 +107,6 @@ export const IPFS_HOSTS = /\.ipfs\.dweb\.link|\.ipfs\.w3s\.link|\.ipfs\.inbrowse
 export const BRAND_NAME = process.env.NEXT_PUBLIC_BRAND_NAME || (IS_OFFICIAL_HOST ? 'Safe{Wallet}' : 'Wallet fork')
 export const BRAND_LOGO = process.env.NEXT_PUBLIC_BRAND_LOGO || ''
 
-// Risk mitigation (Blockaid)
-export const BLOCKAID_API = 'https://client.blockaid.io'
-export const BLOCKAID_CLIENT_ID = process.env.NEXT_PUBLIC_BLOCKAID_CLIENT_ID
 export const REDEFINE_ARTICLE = 'https://safe.mirror.xyz/rInLWZwD_sf7enjoFerj6FIzCYmVMGrrV8Nhg4THdwI'
 
 export const CHAINALYSIS_OFAC_CONTRACT = '0x40c57923924b5c5c5455c48d93317139addac8fb'

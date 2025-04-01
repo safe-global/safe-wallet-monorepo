@@ -4,10 +4,10 @@ import { act, renderHook, waitFor } from '@/tests/test-utils'
 import { toBeHex } from 'ethers'
 import useLoadBalances from '../loadables/useLoadBalances'
 import { TokenType } from '@safe-global/safe-apps-sdk'
-import { FEATURES } from '@/utils/chains'
 import * as useChainId from '@/hooks/useChainId'
 import * as balancesQueries from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import { TOKEN_LISTS } from '@/store/settingsSlice'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 
 const safeAddress = toBeHex('0x1234', 20)
 

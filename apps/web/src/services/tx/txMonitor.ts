@@ -5,7 +5,7 @@ import { txDispatch, TxEvent } from '@/services/tx/txEvents'
 import { POLLING_INTERVAL } from '@/config/constants'
 import { Errors, logError } from '@/services/exceptions'
 import { getSafeTransaction } from '@/utils/transactions'
-import { asError } from '../exceptions/utils'
+import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { type JsonRpcProvider, type TransactionReceipt } from 'ethers'
 import { SimpleTxWatcher } from '@/utils/SimpleTxWatcher'
 

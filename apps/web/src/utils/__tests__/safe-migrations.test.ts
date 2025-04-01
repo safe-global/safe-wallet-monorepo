@@ -1,6 +1,6 @@
 import { type ChainInfo, type TransactionData } from '@safe-global/safe-gateway-typescript-sdk'
 import { OperationType } from '@safe-global/safe-core-sdk-types'
-import { Safe_migration__factory } from '@/types/contracts'
+import { Safe_migration__factory } from '@safe-global/utils/types/contracts'
 import { faker } from '@faker-js/faker'
 
 import { createUpdateMigration, isMigrateL2SingletonCall } from '../safe-migrations'

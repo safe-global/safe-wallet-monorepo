@@ -16,8 +16,8 @@ import { Alert, AlertTitle, Box, Button, Paper, Stack, SvgIcon, Typography } fro
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
-import { getLatestSafeVersion } from '@/utils/chains'
 import { isPredictedSafeProps } from '@/features/counterfactual/utils'
+import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
 
 const SPEED_UP_THRESHOLD_IN_SECONDS = 15
 

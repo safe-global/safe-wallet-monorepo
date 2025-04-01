@@ -5,7 +5,7 @@ import { sameAddress } from '@safe-global/utils/utils/addresses'
 import type { RootState } from '../..'
 import { selectCurrency } from '../../settingsSlice'
 import { type SafeItem } from '@/features/myAccounts/hooks/useAllSafes'
-import { asError } from '@/services/exceptions/utils'
+import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { makeSafeTag } from '.'
 
 type SafeOverviewQueueItem = {

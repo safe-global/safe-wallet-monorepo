@@ -16,7 +16,7 @@ module.exports = {
   // setupFilesAfterEnv: ['<rootDir>/../../config/jest-presets/jest/setup.js'],
 
   transformIgnorePatterns: [
-    'node_modules/(?!((jest-)?react-native|@react-native(-community)?)|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@sentry/react-native|native-base|react-native-svg|react-redux|moti/.*)',
+    'node_modules/(?!((jest-)?react-native|@react-native(-community)?)|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@sentry/react-native|native-base|react-native-svg|react-redux|moti/.*|@safe-global/safe-apps-sdk|ethereum-cryptography|@safe-global/protocol-kit|@safe-global/safe-gateway-typescript-sdk)',
   ],
   coverageDirectory: '<rootDir>/coverage',
   coverageReporters: ['json', 'lcov', 'html'],

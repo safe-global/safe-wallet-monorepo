@@ -7,7 +7,8 @@ import { getTxHistory } from '@/services/transactions'
 import { useAppSelector } from '@/store'
 import { selectSettings } from '@/store/settingsSlice'
 import { useHasFeature } from '../useChains'
-import { FEATURES } from '@/utils/chains'
+
+import { FEATURES } from '@safe-global/utils/utils/chains'
 
 export const useLoadTxHistory = (): AsyncResult<TransactionListPage> => {
   const { safe, safeAddress, safeLoaded } = useSafeInfo()

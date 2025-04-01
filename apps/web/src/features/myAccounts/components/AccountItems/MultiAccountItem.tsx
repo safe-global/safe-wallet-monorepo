@@ -1,5 +1,7 @@
 import { selectUndeployedSafes } from '@/features/counterfactual/store/undeployedSafesSlice'
 import NetworkLogosList from '@/features/multichain/components/NetworkLogosList'
+import type { SafeListProps } from '@/features/myAccounts/components/SafesList'
+import SpaceSafeContextMenu from '@/features/spaces/components/SafeAccounts/SpaceSafeContextMenu'
 import { showNotification } from '@/store/notificationsSlice'
 import SingleAccountItem from '@/features/myAccounts/components/AccountItems/SingleAccountItem'
 import type { SafeOverview } from '@safe-global/safe-gateway-typescript-sdk'
@@ -45,32 +47,29 @@ import { addOrUpdateSafe, pinSafe, selectAllAddedSafes, unpinSafe } from '@/stor
 import { defaultSafeInfo } from '@/store/safeInfoSlice'
 import { selectOrderByPreference } from '@/store/orderByPreferenceSlice'
 import { getComparator } from '@/features/myAccounts/utils/utils'
+import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
 
-type MultiAccountItemProps = {
-  multiSafeAccountItem: MultiChainSafeItem
-  safeOverviews?: SafeOverview[]
-  onLinkClick?: () => void
-}
-
-const MultichainIndicator = ({ safes }: { safes: SafeItem[] }) => {
+export const MultichainIndicator = ({ safes }: { safes: SafeItem[] }) => {
   return (
-    <Tooltip
-      title={
-        <Box data-testid="multichain-tooltip">
-          <Typography fontSize="14px">Multichain account on:</Typography>
-          {safes.map((safeItem) => (
-            <Box key={safeItem.chainId} sx={{ p: '4px 0px' }}>
-              <ChainIndicator chainId={safeItem.chainId} />
-            </Box>
-          ))}
+    <Box className={css.multiChains}>
+      <Tooltip
+        title={
+          <Box data-testid="multichain-tooltip">
+            <Typography fontSize="14px">Multichain account on:</Typography>
+            {safes.map((safeItem) => (
+              <Box key={safeItem.chainId} sx={{ p: '4px 0px' }}>
+                <ChainIndicator chainId={safeItem.chainId} />
+              </Box>
+            ))}
+          </Box>
+        }
+        arrow
+      >
+        <Box>
+          <NetworkLogosList networks={safes} showHasMore />
         </Box>
-      }
-      arrow
-    >
-      <Box className={css.multiChains}>
-        <NetworkLogosList networks={safes} showHasMore />
-      </Box>
-    </Tooltip>
+      </Tooltip>
+    </Box>
   )
 }
 
@@ -79,6 +78,7 @@ function useMultiAccountItemData(multiSafeAccountItem: MultiChainSafeItem) {
 
   const router = useRouter()
   const isWelcomePage = router.pathname === AppRoutes.welcome.accounts
+  const isSpaceRoute = useIsSpaceRoute()
   const safeAddress = useSafeAddress()
   const isCurrentSafe = sameAddress(safeAddress, address)
 
@@ -136,6 +136,7 @@ function useMultiAccountItemData(multiSafeAccountItem: MultiChainSafeItem) {
     isReadOnly,
     isWelcomePage,
     deployedChainIds,
+    isSpaceRoute,
   }
 }
 
@@ -213,7 +214,14 @@ function usePinActions(
   return { addToPinnedList, removeFromPinnedList }
 }
 
-const MultiAccountItem = ({ onLinkClick, multiSafeAccountItem }: MultiAccountItemProps) => {
+type MultiAccountItemProps = {
+  multiSafeAccountItem: MultiChainSafeItem
+  safeOverviews?: SafeOverview[]
+  onLinkClick?: SafeListProps['onLinkClick']
+  isSpaceSafe?: boolean
+}
+
+const MultiAccountItem = ({ onLinkClick, multiSafeAccountItem, isSpaceSafe = false }: MultiAccountItemProps) => {
   const {
     address,
     name,
@@ -227,6 +235,7 @@ const MultiAccountItem = ({ onLinkClick, multiSafeAccountItem }: MultiAccountIte
     isReadOnly,
     isWelcomePage,
     deployedChainIds,
+    isSpaceRoute,
   } = useMultiAccountItemData(multiSafeAccountItem)
   const { addToPinnedList, removeFromPinnedList } = usePinActions(address, name, sortedSafes, safeOverviews)
 
@@ -235,7 +244,7 @@ const MultiAccountItem = ({ onLinkClick, multiSafeAccountItem }: MultiAccountIte
 
   const toggleExpand = () => {
     setExpanded((prev) => {
-      if (!prev) {
+      if (!prev && !isSpaceRoute) {
         trackEvent({ ...OVERVIEW_EVENTS.EXPAND_MULTI_SAFE, label: trackingLabel })
       }
       return !prev
@@ -297,29 +306,40 @@ const MultiAccountItem = ({ onLinkClick, multiSafeAccountItem }: MultiAccountIte
               )}
             </Typography>
           </Box>
-          <IconButton
-            data-testid="bookmark-icon"
-            edge="end"
-            size="medium"
-            sx={{ mx: 1 }}
-            onClick={(event) => {
-              event.stopPropagation()
-              isPinned ? removeFromPinnedList() : addToPinnedList()
-            }}
-          >
-            <SvgIcon
-              component={isPinned ? BookmarkedIcon : BookmarkIcon}
-              inheritViewBox
-              color={isPinned ? 'primary' : undefined}
-              fontSize="small"
+
+          {!isSpaceSafe && (
+            <IconButton
+              data-testid="bookmark-icon"
+              edge="end"
+              size="medium"
+              sx={{ mx: 1 }}
+              onClick={(event) => {
+                event.stopPropagation()
+                isPinned ? removeFromPinnedList() : addToPinnedList()
+              }}
+            >
+              <SvgIcon
+                component={isPinned ? BookmarkedIcon : BookmarkIcon}
+                inheritViewBox
+                color={isPinned ? 'primary' : undefined}
+                fontSize="small"
+              />
+            </IconButton>
+          )}
+
+          {isSpaceSafe ? (
+            <>
+              <Box width="40px" /> {/* Spacer for the send button */}
+              <SpaceSafeContextMenu safeItem={multiSafeAccountItem} />
+            </>
+          ) : (
+            <MultiAccountContextMenu
+              name={multiSafeAccountItem.name ?? ''}
+              address={address}
+              chainIds={deployedChainIds}
+              addNetwork={hasReplayableSafe}
             />
-          </IconButton>
-          <MultiAccountContextMenu
-            name={multiSafeAccountItem.name ?? ''}
-            address={address}
-            chainIds={deployedChainIds}
-            addNetwork={hasReplayableSafe}
-          />
+          )}
         </AccordionSummary>
         <AccordionDetails sx={{ padding: '0px 12px' }}>
           <Box data-testid="subacounts-container">
@@ -329,10 +349,11 @@ const MultiAccountItem = ({ onLinkClick, multiSafeAccountItem }: MultiAccountIte
                 safeItem={safeItem}
                 key={`${safeItem.chainId}:${safeItem.address}`}
                 isMultiChainItem
+                isSpaceSafe={isSpaceSafe}
               />
             ))}
           </Box>
-          {!isReadOnly && hasReplayableSafe && (
+          {!isReadOnly && hasReplayableSafe && !isSpaceSafe && (
             <>
               <Divider sx={{ ml: '-12px', mr: '-12px' }} />
               <Box

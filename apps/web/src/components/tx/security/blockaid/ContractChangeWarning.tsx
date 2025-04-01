@@ -3,8 +3,8 @@ import type {
   ModulesChangeManagement,
   OwnershipChangeManagement,
   ProxyUpgradeManagement,
-} from '@/services/security/modules/BlockaidModule/types'
-import { SecuritySeverity } from '@/services/security/modules/types'
+} from '@safe-global/utils/services/security/modules/BlockaidModule/types'
+import { SecuritySeverity } from '@safe-global/utils/services/security/modules/types'
 import { mapSecuritySeverity } from '../utils'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import { Warning } from '.'

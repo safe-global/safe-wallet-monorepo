@@ -2,9 +2,9 @@ import type { ChainInfo, TransactionData } from '@safe-global/safe-gateway-types
 import { _UpdateSafe as UpdateSafe } from './index'
 import { render } from '@/tests/test-utils'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
-import { Gnosis_safe__factory } from '@/types/contracts/factories/@safe-global/safe-deployments/dist/assets/v1.1.1'
+import { Gnosis_safe__factory } from '@safe-global/utils/types/contracts/factories/@safe-global/safe-deployments/dist/assets/v1.1.1'
 import { getSafeMigrationDeployment, getSafeSingletonDeployment } from '@safe-global/safe-deployments'
-import { Safe_migration__factory } from '@/types/contracts'
+import { Safe_migration__factory } from '@safe-global/utils/types/contracts'
 import { faker } from '@faker-js/faker'
 
 const chain = {

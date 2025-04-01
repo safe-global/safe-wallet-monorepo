@@ -2,6 +2,11 @@ import groupBy from 'lodash/groupBy'
 import useAllSafes, { type SafeItem, type SafeItems } from './useAllSafes'
 import { useMemo } from 'react'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
+import { type AddressBookState, selectAllAddressBooks } from '@/store/addressBookSlice'
+import useWallet from '@/hooks/wallets/useWallet'
+import useAllOwnedSafes from '@/features/myAccounts/hooks/useAllOwnedSafes'
+import { useAppSelector } from '@/store'
+import { isMultiChainSafeItem } from '@/features/multichain/utils/utils'
 
 export type MultiChainSafeItem = {
   address: string
@@ -26,6 +31,33 @@ export const _buildMultiChainSafeItem = (address: string, safes: SafeItems): Mul
   return { address, safes, isPinned, lastVisited, name }
 }
 
+export function _buildSafeItems(safes: Record<string, string[]>, allSafeNames: AddressBookState): SafeItem[] {
+  const result: SafeItem[] = []
+
+  for (const chainId in safes) {
+    const addresses = safes[chainId]
+
+    addresses.forEach((address) => {
+      const name = allSafeNames[chainId]?.[address]
+
+      result.push({
+        chainId,
+        address,
+        isReadOnly: false,
+        isPinned: false,
+        lastVisited: 0,
+        name,
+      })
+    })
+  }
+
+  return result
+}
+
+export function flattenSafeItems(items: Array<SafeItem | MultiChainSafeItem>): SafeItem[] {
+  return items.flatMap((item) => (isMultiChainSafeItem(item) ? item.safes : [item]))
+}
+
 export const _getMultiChainAccounts = (safes: SafeItems): MultiChainSafeItem[] => {
   const groupedByAddress = groupBy(safes, (safe) => safe.address)
 
@@ -42,8 +74,9 @@ export const _getSingleChainAccounts = (safes: SafeItems, allMultiChainSafes: Mu
   return safes.filter((safe) => !allMultiChainSafes.some((multiSafe) => sameAddress(multiSafe.address, safe.address)))
 }
 
-export const useAllSafesGrouped = () => {
-  const allSafes = useAllSafes()
+export const useAllSafesGrouped = (customSafes?: SafeItems) => {
+  const safes = useAllSafes()
+  const allSafes = customSafes ?? safes
 
   return useMemo<AllSafeItemsGrouped>(() => {
     if (!allSafes) {
@@ -58,4 +91,13 @@ export const useAllSafesGrouped = () => {
       allSingleSafes,
     }
   }, [allSafes])
+}
+
+export const useOwnedSafesGrouped = () => {
+  const { address: walletAddress = '' } = useWallet() || {}
+  const [allOwned = {}] = useAllOwnedSafes(walletAddress)
+  const allSafeNames = useAppSelector(selectAllAddressBooks)
+  const safeItems = _buildSafeItems(allOwned, allSafeNames)
+
+  return useAllSafesGrouped(safeItems)
 }

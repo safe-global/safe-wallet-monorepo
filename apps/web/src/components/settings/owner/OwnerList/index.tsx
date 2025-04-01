@@ -109,7 +109,7 @@ export const OwnerList = () => {
           </Typography>
         </Grid>
 
-        <Grid item xs>
+        <Grid data-testid="signer-list" item xs>
           <Typography
             fontWeight="bold"
             sx={{

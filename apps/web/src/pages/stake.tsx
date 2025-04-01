@@ -3,8 +3,8 @@ import Head from 'next/head'
 import dynamic from 'next/dynamic'
 import { Typography } from '@mui/material'
 import { useHasFeature } from '@/hooks/useChains'
-import { FEATURES } from '@/utils/chains'
 import { BRAND_NAME } from '@/config/constants'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 
 const LazyStakePage = dynamic(() => import('@/features/stake/components/StakePage'), { ssr: false })
 

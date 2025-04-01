@@ -10,8 +10,20 @@ import {
   AddressInfo,
 } from './AUTO_GENERATED/transactions'
 import { SafeOverview } from './AUTO_GENERATED/safes'
+import { MessageItem, MessagePage, TypedData } from './AUTO_GENERATED/messages'
+
+export enum RPC_AUTHENTICATION {
+  API_KEY_PATH = 'API_KEY_PATH',
+  NO_AUTHENTICATION = 'NO_AUTHENTICATION',
+  UNKNOWN = 'UNKNOWN',
+}
 
 export type ExecutionInfo = ModuleExecutionInfo | MultisigExecutionInfo
+
+export type SafeMessageListItemType = MessageItem['type']
+export type SafeMessageStatus = MessageItem['status']
+export type SafeMessageListItem = MessagePage['results'][number]
+export type TypedMessageTypes = TypedData['types']
 
 export enum TransactionStatus {
   AWAITING_CONFIRMATIONS = 'AWAITING_CONFIRMATIONS',
@@ -90,10 +102,9 @@ export type SafeOverviewResult = { data: SafeOverview[]; error: unknown; isLoadi
 export type OrderTransactionInfo = SwapOrderTransactionInfo | TwapOrderTransactionInfo | SwapTransferTransactionInfo
 
 export enum StartTimeValue {
-  AT_MINING_TIME = "AT_MINING_TIME",
-  AT_EPOCH = "AT_EPOCH"
+  AT_MINING_TIME = 'AT_MINING_TIME',
+  AT_EPOCH = 'AT_EPOCH',
 }
-
 
 export type PendingTransactionItems = QueuedItemPage['results'][number]
 export type HistoryTransactionItems = TransactionItemPage['results'][number]

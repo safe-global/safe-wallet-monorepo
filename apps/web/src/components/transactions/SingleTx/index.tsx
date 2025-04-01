@@ -15,7 +15,7 @@ import GroupLabel from '../GroupLabel'
 import { isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
 import { useGetTransactionDetailsQuery } from '@/store/api/gateway'
 import { skipToken } from '@reduxjs/toolkit/query/react'
-import { asError } from '@/services/exceptions/utils'
+import { asError } from '@safe-global/utils/services/exceptions/utils'
 
 const SingleTxGrid = ({ txDetails }: { txDetails: TransactionDetails }): ReactElement => {
   const tx: Transaction = makeTxFromDetails(txDetails)

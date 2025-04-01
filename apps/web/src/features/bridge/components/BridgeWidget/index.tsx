@@ -4,10 +4,10 @@ import type { ReactElement } from 'react'
 import AppFrame from '@/components/safe-apps/AppFrame'
 import { getEmptySafeApp } from '@/components/safe-apps/utils'
 import useChains from '@/hooks/useChains'
-import { FEATURES, hasFeature } from '@/utils/chains'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import type { SafeAppDataWithPermissions } from '@/components/safe-apps/types'
 import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 
 export const BRIDGE_WIDGET_URL = 'https://iframe.jumper.exchange'
 

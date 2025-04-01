@@ -1,6 +1,6 @@
 import TokenIcon from '@/components/common/TokenIcon'
 import css from '@/components/tx/ApprovalEditor/styles.module.css'
-import type { Approval } from '@/services/security/modules/ApprovalModule'
+import type { Approval } from '@safe-global/utils/services/security/modules/ApprovalModule'
 import { Box, Stack, Typography } from '@mui/material'
 import { TokenType } from '@safe-global/safe-gateway-typescript-sdk/dist/types/common'
 import type { ApprovalInfo } from './hooks/useApprovalInfos'

@@ -1,12 +1,17 @@
+import type { MessageItem } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import { proposeSafeMessage, confirmSafeMessage } from '@safe-global/safe-gateway-typescript-sdk'
-import type { SafeInfo, SafeMessage } from '@safe-global/safe-gateway-typescript-sdk'
+import type { SafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import type { Eip1193Provider } from 'ethers'
 
 import { safeMsgDispatch, SafeMsgEvent } from './safeMsgEvents'
-import { generateSafeMessageHash, isEIP712TypedData, tryOffChainMsgSigning } from '@/utils/safe-messages'
-import { normalizeTypedData } from '@/utils/web3'
+import {
+  generateSafeMessageHash,
+  isEIP712TypedData,
+  tryOffChainMsgSigning,
+} from '@safe-global/utils/utils/safe-messages'
+import { normalizeTypedData } from '@safe-global/utils/utils/web3'
 import { getAssertedChainSigner } from '@/services/tx/tx-sender/sdk'
-import { asError } from '../exceptions/utils'
+import { asError } from '@safe-global/utils/services/exceptions/utils'
 
 export const dispatchSafeMsgProposal = async ({
   provider,
@@ -16,7 +21,7 @@ export const dispatchSafeMsgProposal = async ({
 }: {
   provider: Eip1193Provider
   safe: SafeInfo
-  message: SafeMessage['message']
+  message: MessageItem['message']
   origin: string | undefined
 }): Promise<void> => {
   const messageHash = generateSafeMessageHash(safe, message)
@@ -56,7 +61,7 @@ export const dispatchSafeMsgConfirmation = async ({
 }: {
   provider: Eip1193Provider
   safe: SafeInfo
-  message: SafeMessage['message']
+  message: MessageItem['message']
 }): Promise<void> => {
   const messageHash = generateSafeMessageHash(safe, message)
 

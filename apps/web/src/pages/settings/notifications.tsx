@@ -4,8 +4,8 @@ import type { NextPage } from 'next'
 import SettingsHeader from '@/components/settings/SettingsHeader'
 import { PushNotifications } from '@/components/settings/PushNotifications'
 import { useHasFeature } from '@/hooks/useChains'
-import { FEATURES } from '@/utils/chains'
 import { BRAND_NAME } from '@/config/constants'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 
 const NotificationsPage: NextPage = () => {
   const isNotificationFeatureEnabled = useHasFeature(FEATURES.PUSH_NOTIFICATIONS)

@@ -1,7 +1,7 @@
 import { getAllowanceModuleDeployment } from '@safe-global/safe-modules-deployments'
 
-import type { AllowanceModule } from '@/types/contracts'
-import { AllowanceModule__factory } from '@/types/contracts'
+import type { AllowanceModule } from '@safe-global/utils/types/contracts'
+import { AllowanceModule__factory } from '@safe-global/utils/types/contracts'
 import type { JsonRpcProvider, JsonRpcSigner } from 'ethers'
 import type { SafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import { sameAddress } from '@safe-global/utils/utils/addresses'

@@ -6,7 +6,7 @@ import type { Eip1193Provider, TransactionResponse } from 'ethers'
 
 import { didReprice, didRevert } from '@/utils/ethers-utils'
 import { recoveryDispatch, RecoveryEvent, RecoveryTxType } from './recoveryEvents'
-import { asError } from '@/services/exceptions/utils'
+import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { getUncheckedSigner } from '../../../services/tx/tx-sender/sdk'
 import { isSmartContractWallet } from '@/utils/wallets'
 

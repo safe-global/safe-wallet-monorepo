@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { asError } from '@/services/exceptions/utils'
+import { asError } from '@safe-global/utils/services/exceptions/utils'
 
 export type AsyncResult<T> = [result: T | undefined, error: Error | undefined, loading: boolean]
 

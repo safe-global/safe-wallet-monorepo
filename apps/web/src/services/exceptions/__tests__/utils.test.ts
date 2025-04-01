@@ -1,4 +1,4 @@
-import { asError } from '@/services/exceptions/utils'
+import { asError } from '@safe-global/utils/services/exceptions/utils'
 
 describe('utils', () => {
   describe('asError', () => {

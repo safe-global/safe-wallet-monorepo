@@ -21,10 +21,10 @@ import useWallet from '@/hooks/wallets/useWallet'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { AppRoutes } from '@/config/routes'
 import { useHasFeature } from '@/hooks/useChains'
-import { FEATURES } from '@/utils/chains'
 import Track from '@/components/common/Track'
 import { REJECT_TX_EVENTS } from '@/services/analytics/events/reject-tx'
 import { useRecommendedNonce } from '@/components/tx/SignOrExecuteForm/hooks'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 
 const goToQueue = (router: NextRouter) => {
   if (router.pathname === AppRoutes.transactions.tx) {

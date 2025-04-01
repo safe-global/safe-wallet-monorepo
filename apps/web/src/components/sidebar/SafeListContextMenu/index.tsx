@@ -24,7 +24,8 @@ import { useGetOwnedSafesQuery } from '@/store/slices'
 import { NestedSafesPopover } from '../NestedSafesPopover'
 import { NESTED_SAFE_EVENTS, NESTED_SAFE_LABELS } from '@/services/analytics/events/nested-safes'
 import { useHasFeature } from '@/hooks/useChains'
-import { FEATURES } from '@/utils/chains'
+
+import { FEATURES } from '@safe-global/utils/utils/chains'
 
 enum ModalType {
   NESTED_SAFES = 'nested_safes',
