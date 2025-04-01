@@ -5,6 +5,7 @@ import { IconName } from '@/src/types/iconTypes'
 import { TouchableOpacity } from 'react-native'
 
 export type AlertType = 'error' | 'warning' | 'info' | 'success'
+export type AlertOrientation = 'left' | 'center' | 'right'
 
 interface AlertProps {
   type: AlertType
@@ -17,6 +18,7 @@ interface AlertProps {
   startIcon?: React.ReactNode
   onPress?: () => void
   testID?: string
+  orientation?: AlertOrientation
 }
 
 const icons = {
@@ -45,6 +47,30 @@ const getAlertIcon = (type: AlertType, iconName?: IconName, displayIcon?: boolea
   return iconName ? <SafeFontIcon testID={`${iconName}-icon`} name={iconName} /> : icons[type]
 }
 
+const getContainerAlignment = (orientation: AlertOrientation) => {
+  switch (orientation) {
+    case 'left':
+      return 'flex-start'
+    case 'right':
+      return 'flex-end'
+    case 'center':
+    default:
+      return 'center'
+  }
+}
+
+const getContentAlignment = (orientation: AlertOrientation) => {
+  switch (orientation) {
+    case 'left':
+      return 'flex-start'
+    case 'right':
+      return 'flex-start' // Still flex-start for content alignment, but container will be aligned right
+    case 'center':
+    default:
+      return 'center'
+  }
+}
+
 export const Alert = ({
   type,
   fullWidth = true,
@@ -56,18 +82,22 @@ export const Alert = ({
   onPress,
   testID,
   info,
+  orientation = 'center',
 }: AlertProps) => {
   const Icon = getAlertIcon(type, iconName, displayIcon)
+  const containerAlignment = getContainerAlignment(orientation)
+  const contentAlignment = getContentAlignment(orientation)
+
   return (
     <Theme name={type}>
       <TouchableOpacity disabled={!onPress} onPress={onPress} testID={testID}>
-        <View flexDirection="row" width="100%" justifyContent="center">
+        <View flexDirection="row" width="100%" justifyContent={containerAlignment}>
           <View
             alignItems="center"
             gap={'$3'}
             width={fullWidth ? '100%' : 'auto'}
             flexDirection="row"
-            justifyContent="flex-start"
+            justifyContent={contentAlignment}
             backgroundColor="$background"
             paddingLeft="$4"
             paddingRight="$4"
@@ -76,7 +106,7 @@ export const Alert = ({
           >
             {startIcon ? <View testID="alert-start-icon">{startIcon}</View> : Icon}
 
-            <View gap={'$1'} flex={1}>
+            <View gap={'$1'} flex={orientation !== 'center' ? 1 : undefined}>
               <Text fontSize={'$4'} fontWeight={'600'} fontFamily={'$body'}>
                 {message}
               </Text>
