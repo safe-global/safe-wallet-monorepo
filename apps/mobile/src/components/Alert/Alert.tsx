@@ -67,14 +67,16 @@ export const Alert = ({
             gap={'$3'}
             width={fullWidth ? '100%' : 'auto'}
             flexDirection="row"
-            justifyContent="center"
+            justifyContent="flex-start"
             backgroundColor="$background"
+            paddingLeft="$4"
+            paddingRight="$4"
             paddingVertical="$3"
             borderRadius={'$2'}
           >
             {startIcon ? <View testID="alert-start-icon">{startIcon}</View> : Icon}
 
-            <View gap={'$1'}>
+            <View gap={'$1'} flex={1}>
               <Text fontSize={'$4'} fontWeight={'600'} fontFamily={'$body'}>
                 {message}
               </Text>
