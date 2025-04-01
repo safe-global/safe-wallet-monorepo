@@ -18,7 +18,6 @@ type SignOrExecuteExtendedProps = SignOrExecuteProps & {
   disableSubmit?: boolean
   origin?: string
   isCreation?: boolean
-  showMethodCall?: boolean
 }
 
 const SignOrExecute = (props: SignOrExecuteExtendedProps) => {

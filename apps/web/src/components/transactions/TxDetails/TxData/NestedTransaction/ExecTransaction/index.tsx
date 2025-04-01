@@ -3,7 +3,6 @@ import { Skeleton } from '@mui/material'
 import { type TransactionData } from '@safe-global/safe-gateway-typescript-sdk'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 
-import DecodedTx from '@/components/tx/DecodedTx'
 import Link from 'next/link'
 import { useCurrentChain } from '@/hooks/useChains'
 import { AppRoutes } from '@/config/routes'
@@ -12,6 +11,7 @@ import type { SafeTransaction } from '@safe-global/safe-core-sdk-types'
 import ExternalLink from '@/components/common/ExternalLink'
 import { NestedTransaction } from '../NestedTransaction'
 import useTxPreview from '@/components/tx/confirmation-views/useTxPreview'
+import Summary from '../../../Summary'
 
 const safeInterface = Safe__factory.createInterface()
 
@@ -67,9 +67,7 @@ export const ExecTransaction = ({
     data?.to.value,
   )
 
-  const decodedNestedTxDataBlock = txPreview ? (
-    <DecodedTx {...txPreview} tx={childSafeTx} showMethodCall showAdvancedDetails={false} />
-  ) : null
+  const decodedNestedTxDataBlock = txPreview ? <Summary {...txPreview} safeTxData={childSafeTx?.data} /> : null
 
   return (
     <NestedTransaction txData={data} isConfirmationView={isConfirmationView}>

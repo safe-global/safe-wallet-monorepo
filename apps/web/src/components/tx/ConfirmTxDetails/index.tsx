@@ -99,7 +99,7 @@ export const ConfirmTxDetails = (props: SignOrExecuteProps) => {
           </Stack>
         </Grid>
         <Grid size={{ xs: 12, sm: 6 }}>
-          <TxDetails safeTx={safeTx} txData={txPreview?.txData} showHashes={showHashes} />
+          <TxDetails safeTxData={safeTx.data} txData={txPreview?.txData} showHashes={showHashes} />
         </Grid>
       </Grid>
 

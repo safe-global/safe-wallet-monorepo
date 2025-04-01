@@ -32,7 +32,7 @@ const ReviewChangeThreshold = ({ params, onSubmit }: { params: ChangeThresholdFl
 
   return (
     <ChangeThresholdReviewContext.Provider value={{ newThreshold }}>
-      <ReviewTransaction onSubmit={handleSubmit} showMethodCall />
+      <ReviewTransaction onSubmit={handleSubmit} />
     </ChangeThresholdReviewContext.Provider>
   )
 }

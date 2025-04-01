@@ -1,43 +1,35 @@
 import type { ReactElement } from 'react'
-import React, { useState } from 'react'
-import { Link, Box, Stack, Typography } from '@mui/material'
+import React from 'react'
 import { generateDataRowValue, TxDataRow } from '@/components/transactions/TxDetails/Summary/TxDataRow'
 import { isCustomTxInfo, isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
 import type { TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
-import { Operation } from '@safe-global/safe-gateway-typescript-sdk'
 import type { SafeTransactionData } from '@safe-global/safe-core-sdk-types'
 import { dateString } from '@safe-global/utils/utils/formatters'
-import css from './styles.module.css'
-import DecodedData from '../TxData/DecodedData'
-import { SafeTxHashDataRow } from './SafeTxHashDataRow'
-import { Divider } from '@/components/tx/DecodedTx'
 import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
+import { TxDetails } from '@/components/tx/ConfirmTxDetails/TxDetails'
+import DecodedData from '../TxData/DecodedData'
+import { AccordionDetails, AccordionSummary, Box } from '@mui/material'
+import HelpTooltip from '@/components/tx/ColorCodedTxAccodion/HelpTooltip'
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+import accordionCss from '@/styles/accordion.module.css'
+import ColorCodedTxAccodion from '@/components/tx/ColorCodedTxAccodion'
+import { BackgroundAccordion } from './BackgroundAccordion'
 
 interface Props {
   safeTxData?: SafeTransactionData
   txData: TransactionDetails['txData']
   txInfo?: TransactionDetails['txInfo']
   txDetails?: TransactionDetails
-  isTxDetailsPreview?: boolean
-  hideDecodedData?: boolean
 }
 
-const Summary = ({
-  safeTxData,
-  txData,
-  txInfo,
-  txDetails,
-  isTxDetailsPreview = false,
-  hideDecodedData = false,
-}: Props): ReactElement => {
-  const [expanded, setExpanded] = useState<boolean>(!isTxDetailsPreview)
-  const toggleExpanded = () => setExpanded((val) => !val)
+const Summary = ({ safeTxData, txData, txInfo, txDetails }: Props): ReactElement => {
   const { txHash, executedAt } = txDetails ?? {}
-  const isCustom = txInfo && isCustomTxInfo(txInfo)
+  const toInfo = txData?.addressInfoIndex?.[txData?.to.value] || txData?.to
+  const isExpanded = txInfo && isCustomTxInfo(txInfo)
 
-  let confirmations, baseGas, gasPrice, gasToken, safeTxGas, refundReceiver, submittedAt, nonce
+  let baseGas, gasPrice, gasToken, safeTxGas, refundReceiver, submittedAt, nonce
   if (txDetails && isMultisigDetailedExecutionInfo(txDetails.detailedExecutionInfo)) {
-    ;({ confirmations, baseGas, gasPrice, gasToken, safeTxGas, nonce } = txDetails.detailedExecutionInfo)
+    ;({ baseGas, gasPrice, gasToken, safeTxGas, nonce } = txDetails.detailedExecutionInfo)
     refundReceiver = txDetails.detailedExecutionInfo.refundReceiver?.value
   }
 
@@ -72,88 +64,28 @@ const Summary = ({
         </TxDataRow>
       )}
 
-      {/* Advanced TxData */}
-      {txData && isTxDetailsPreview && (
-        <Link
-          data-testid="tx-advanced-details"
-          className={css.buttonExpand}
-          onClick={toggleExpanded}
-          component="button"
-          variant="body1"
-        >
-          Advanced details
-        </Link>
-      )}
+      <ColorCodedTxAccodion txInfo={txInfo} txData={txData} defaultExpanded={isExpanded}>
+        <DecodedData txData={txData} toInfo={toInfo} />
 
-      {txData && expanded && (
-        <Stack mt={isTxDetailsPreview ? 2 : 0} gap={0.5}>
-          {!isCustom && !hideDecodedData && (
-            <>
-              <DecodedData txData={txData} toInfo={txData?.to} />
-              <Divider />
-            </>
-          )}
+        <Box my={3} />
 
-          <Typography fontWeight="bold" pb={1}>
-            Transaction data
-          </Typography>
+        <BackgroundAccordion elevation={0} defaultExpanded={false}>
+          <AccordionSummary
+            data-testid="decoded-tx-summary"
+            expandIcon={<ExpandMoreIcon />}
+            className={accordionCss.accordion}
+          >
+            Advanced details
+            <HelpTooltip />
+          </AccordionSummary>
 
-          <TxDataRow datatestid="tx-to" title="to:">
-            {generateDataRowValue(safeTxData.to, 'address', true)}
-          </TxDataRow>
-
-          <TxDataRow datatestid="tx-value" title="value:">
-            {generateDataRowValue(safeTxData.value)}
-          </TxDataRow>
-
-          <TxDataRow datatestid="tx-raw-data" title="data:">
-            {generateDataRowValue(safeTxData.data, 'rawData')}
-          </TxDataRow>
-
-          <TxDataRow datatestid="tx-operation" title="operation:">
-            {`${safeTxData.operation} (${Operation[safeTxData.operation].toLowerCase()})`}
-          </TxDataRow>
-
-          <TxDataRow datatestid="tx-safe-gas" title="safeTxGas:">
-            {safeTxData.safeTxGas}
-          </TxDataRow>
-
-          <TxDataRow datatestid="tx-base-gas" title="baseGas:">
-            {safeTxData.baseGas}
-          </TxDataRow>
-
-          <TxDataRow datatestid="tx-gas-price" title="gasPrice:">
-            {safeTxData.gasPrice}
-          </TxDataRow>
-
-          <TxDataRow datatestid="tx-gas-token" title="gasToken:">
-            {generateDataRowValue(safeTxData.gasToken, 'hash', true)}
-          </TxDataRow>
-
-          <TxDataRow datatestid="tx-refund-receiver" title="refundReceiver:">
-            {generateDataRowValue(safeTxData.refundReceiver, 'hash', true)}
-          </TxDataRow>
-
-          <TxDataRow datatestid="tx-nonce" title="nonce:">
-            {safeTxData.nonce}
-          </TxDataRow>
-
-          {!!confirmations && <Box pt={1} />}
-
-          {confirmations?.map(({ signature }, index) => (
-            <TxDataRow datatestid="tx-signature" title={`Signature ${index + 1}:`} key={`signature-${index}:`}>
-              {generateDataRowValue(signature, 'rawData')}
-            </TxDataRow>
-          ))}
-
-          <Divider />
-
-          <Typography fontWeight="bold" pb={1}>
-            Transaction hashes
-          </Typography>
-          <SafeTxHashDataRow safeTxData={safeTxData} />
-        </Stack>
-      )}
+          <AccordionDetails data-testid="decoded-tx-details">
+            <Box my={-4}>
+              <TxDetails safeTxData={safeTxData} txData={txData} showHashes noTitle />
+            </Box>
+          </AccordionDetails>
+        </BackgroundAccordion>
+      </ColorCodedTxAccodion>
     </>
   )
 }

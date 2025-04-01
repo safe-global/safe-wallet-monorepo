@@ -17,9 +17,10 @@ import {
 } from '@/components/transactions/TxDetails/Summary/SafeTxHashDataRow'
 
 type TxDetailsProps = {
-  safeTx: SafeTransaction
+  safeTxData: SafeTransaction['data']
   txData?: TransactionData
   showHashes: boolean
+  noTitle?: boolean
 }
 
 const TxDetailsRow = ({
@@ -45,17 +46,17 @@ const TxDetailsRow = ({
   </Stack>
 )
 
-const ContentWrapper = ({ children }: { children: ReactElement | ReactElement[] }) => (
-  <Box sx={{ maxHeight: '550px', overflowY: 'auto', px: 2 }}>{children}</Box>
+const ContentWrapper = ({ noTitle, children }: { noTitle?: boolean; children: ReactElement | ReactElement[] }) => (
+  <Box sx={{ maxHeight: noTitle ? '' : '550px', overflowY: 'auto', px: 2, pb: 2 }}>{children}</Box>
 )
 
-export const TxDetails = ({ safeTx, txData, showHashes }: TxDetailsProps) => {
+export const TxDetails = ({ safeTxData, txData, showHashes, noTitle }: TxDetailsProps) => {
   const [expandHashes, setExpandHashes] = useState(showHashes)
-  const safeTxHash = useSafeTxHash({ safeTxData: safeTx.data })
+  const safeTxHash = useSafeTxHash({ safeTxData })
   const domainHash = useDomainHash()
-  const messageHash = useMessageHash({ safeTxData: safeTx.data })
+  const messageHash = useMessageHash({ safeTxData })
 
-  const toInfo = txData?.addressInfoIndex?.[safeTx.data.to] || txData?.to
+  const toInfo = txData?.addressInfoIndex?.[safeTxData.to] || txData?.to
   const toName = toInfo?.name || (toInfo && 'displayName' in toInfo ? String(toInfo.displayName || '') : undefined)
   const toLogo = toInfo?.logoUri
 
@@ -63,14 +64,16 @@ export const TxDetails = ({ safeTx, txData, showHashes }: TxDetailsProps) => {
     <PaperViewToggle>
       {[
         {
-          title: (
+          title: noTitle ? (
+            ''
+          ) : (
             <Typography color="primary.light" fontWeight="bold">
               Transaction details
             </Typography>
           ),
           icon: <TableRowsRoundedIcon />,
           content: (
-            <ContentWrapper>
+            <ContentWrapper noTitle>
               <Divider sx={{ mb: 1 }} />
 
               <Stack spacing={1} divider={<Divider />}>
@@ -80,7 +83,7 @@ export const TxDetails = ({ safeTx, txData, showHashes }: TxDetailsProps) => {
                       sx={{ backgroundColor: 'background.paper', height: 'unset', '& > *': { p: 0.5 } }}
                       label={
                         <EthHashInfo
-                          address={safeTx.data.to}
+                          address={safeTxData.to}
                           name={toName}
                           customAvatar={toLogo}
                           showAvatar={!!toLogo}
@@ -99,7 +102,7 @@ export const TxDetails = ({ safeTx, txData, showHashes }: TxDetailsProps) => {
                     }}
                   >
                     <EthHashInfo
-                      address={safeTx.data.to}
+                      address={safeTxData.to}
                       avatarSize={20}
                       showPrefix={false}
                       showName={false}
@@ -111,29 +114,29 @@ export const TxDetails = ({ safeTx, txData, showHashes }: TxDetailsProps) => {
                   </Typography>
                 </TxDetailsRow>
 
-                <TxDetailsRow label="Value">{safeTx.data.value}</TxDetailsRow>
+                <TxDetailsRow label="Value">{safeTxData.value}</TxDetailsRow>
 
-                <TxDetailsRow label="Data" direction={safeTx.data.data === '0x' ? 'row' : 'column'}>
+                <TxDetailsRow label="Data" direction={safeTxData.data === '0x' ? 'row' : 'column'}>
                   <Typography variant="body2">
-                    <HexEncodedData hexData={safeTx.data.data} limit={66} />
+                    <HexEncodedData hexData={safeTxData.data} limit={66} />
                   </Typography>
                 </TxDetailsRow>
 
                 <TxDetailsRow label="Operation">
-                  {safeTx.data.operation} (
-                  {(Number(safeTx.data.operation) as Operation) === Operation.CALL ? 'call' : 'delegate call'})
+                  {safeTxData.operation} (
+                  {(Number(safeTxData.operation) as Operation) === Operation.CALL ? 'call' : 'delegate call'})
                 </TxDetailsRow>
 
-                <TxDetailsRow label="SafeTxGas">{safeTx.data.safeTxGas}</TxDetailsRow>
+                <TxDetailsRow label="SafeTxGas">{safeTxData.safeTxGas}</TxDetailsRow>
 
-                <TxDetailsRow label="BaseGas">{safeTx.data.baseGas}</TxDetailsRow>
+                <TxDetailsRow label="BaseGas">{safeTxData.baseGas}</TxDetailsRow>
 
-                <TxDetailsRow label="GasPrice">{safeTx.data.gasPrice}</TxDetailsRow>
+                <TxDetailsRow label="GasPrice">{safeTxData.gasPrice}</TxDetailsRow>
 
                 <TxDetailsRow label="GasToken">
                   <Typography variant="body2">
                     <EthHashInfo
-                      address={safeTx.data.gasToken}
+                      address={safeTxData.gasToken}
                       avatarSize={20}
                       showPrefix={false}
                       showName={false}
@@ -145,7 +148,7 @@ export const TxDetails = ({ safeTx, txData, showHashes }: TxDetailsProps) => {
                 <TxDetailsRow label="RefundReceiver">
                   <Typography variant="body2">
                     <EthHashInfo
-                      address={safeTx.data.refundReceiver}
+                      address={safeTxData.refundReceiver}
                       avatarSize={20}
                       showPrefix={false}
                       showName={false}
@@ -154,7 +157,7 @@ export const TxDetails = ({ safeTx, txData, showHashes }: TxDetailsProps) => {
                   </Typography>
                 </TxDetailsRow>
 
-                <TxDetailsRow label="Nonce">{safeTx.data.nonce}</TxDetailsRow>
+                <TxDetailsRow label="Nonce">{safeTxData.nonce}</TxDetailsRow>
 
                 <Button onClick={() => setExpandHashes(!expandHashes)} sx={{ all: 'unset' }}>
                   <Typography
@@ -211,7 +214,7 @@ export const TxDetails = ({ safeTx, txData, showHashes }: TxDetailsProps) => {
 
               <TxDetailsRow label="Message" direction="column">
                 <Typography variant="body2" sx={{ wordWrap: 'break-word', whiteSpace: 'pre-wrap' }}>
-                  {JSON.stringify(safeTx.data, null, 2)}
+                  {JSON.stringify(safeTxData, null, 2)}
                 </Typography>
               </TxDetailsRow>
             </ContentWrapper>
