@@ -115,7 +115,7 @@ const Navigation = (): ReactElement => {
                   href={
                     item.href && {
                       pathname: getRoute(item.href),
-                      query: { safe: router.query.safe, spaceId: router.query.spaceId },
+                      query: { ...router.query, safe: router.query.safe },
                     }
                   }
                   disabled={isDisabled}
