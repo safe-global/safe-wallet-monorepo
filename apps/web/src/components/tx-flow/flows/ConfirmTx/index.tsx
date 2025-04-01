@@ -7,7 +7,7 @@ import { useMemo } from 'react'
 import { isExecutable, isMultisigExecutionInfo, isSignableBy } from '@/utils/transaction-guards'
 import { useSigner } from '@/hooks/wallets/useWallet'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { createDefaultTxFlow } from '@/components/tx-flow-2/createTxFlow'
+import { createDefaultTxFlow } from '@/components/tx-flow/createTxFlow'
 
 const ConfirmTxFlow = ({ txSummary }: { txSummary: TransactionSummary }) => {
   const { text } = useTransactionType(txSummary)

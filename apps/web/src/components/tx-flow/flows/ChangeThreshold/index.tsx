@@ -1,6 +1,6 @@
 import SaveAddressIcon from '@/public/images/common/save-address.svg'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { createDefaultTxFlow, type SubmitCallbackWithData } from '@/components/tx-flow-2/createTxFlow'
+import { createDefaultTxFlow, type SubmitCallbackWithData } from '@/components/tx-flow/createTxFlow'
 import { ChooseThreshold } from './ChooseThreshold'
 import { SETTINGS_EVENTS, trackEvent } from '@/services/analytics'
 

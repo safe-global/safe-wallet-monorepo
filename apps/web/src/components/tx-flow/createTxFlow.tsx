@@ -1,15 +1,15 @@
 import React, { type ComponentType, type PropsWithChildren, useMemo, type ReactNode } from 'react'
-import useTxStepper from '../tx-flow/useTxStepper'
-import SafeTxProvider from '../tx-flow/SafeTxProvider'
-import { TxInfoProvider } from '../tx-flow/TxInfoProvider'
+import useTxStepper from './useTxStepper'
+import SafeTxProvider from './SafeTxProvider'
+import { TxInfoProvider } from './TxInfoProvider'
 import { TxSecurityProvider } from '../tx/security/shared/TxSecurityContext'
-import TxFlowProvider, { type TxFlowContextType } from './TxFlowProvider'
-import { TxFlowContent } from '../tx-flow/common/TxFlowContent'
-import { withMiddlewares } from './withMiddlewares'
+import TxFlowProvider, { type TxFlowContextType } from '../tx-flow-2/TxFlowProvider'
+import { TxFlowContent } from './common/TxFlowContent'
+import { withMiddlewares } from '../tx-flow-2/withMiddlewares'
 import ReviewTransaction from '../tx/ReviewTransactionV2'
 import { ConfirmTxReceipt } from '../tx/ConfirmTxReceipt'
-import { TxChecks, TxNote } from './features'
-import { Batching, Counterfactual, Execute, ExecuteThroughRole, Propose, Sign } from './actions'
+import { TxChecks, TxNote } from '../tx-flow-2/features'
+import { Batching, Counterfactual, Execute, ExecuteThroughRole, Propose, Sign } from '../tx-flow-2/actions'
 
 type ComponentWithChildren<T> = ComponentType<PropsWithChildren<T>>
 

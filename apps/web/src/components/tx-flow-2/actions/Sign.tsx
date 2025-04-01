@@ -3,7 +3,7 @@ import { MODALS_EVENTS, trackEvent } from '@/services/analytics'
 import { useCallback, useContext, useState } from 'react'
 import { TxFlowContext } from '../TxFlowProvider'
 import SignFormV2 from '@/components/tx/SignOrExecuteForm/SignFormV2'
-import type { SubmitCallback } from '../createTxFlow'
+import type { SubmitCallback } from '../../tx-flow/createTxFlow'
 import { withCheckboxGuard } from '../withCheckboxGuard'
 import useIsCounterfactualSafe from '@/features/counterfactual/hooks/useIsCounterfactualSafe'
 
