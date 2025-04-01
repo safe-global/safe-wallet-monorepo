@@ -20,6 +20,8 @@ import { NavigationGuardHOC } from '@/src/navigation/NavigationGuardHOC'
 import { StatusBar } from 'expo-status-bar'
 import { TestCtrls } from '@/src/tests/e2e-maestro/components/TestCtrls'
 import Logger, { LogLevel } from '@/src/utils/logger'
+import { useInitWeb3 } from '@/src/hooks/useInitWeb3'
+import { useInitSafeCoreSDK } from '@/src/hooks/coreSDK/useInitSafeCoreSDK'
 
 Logger.setLevel(__DEV__ ? LogLevel.TRACE : LogLevel.ERROR)
 
@@ -28,9 +30,16 @@ configureReanimatedLogger({
   strict: false,
 })
 
-function RootLayout() {
-  store.dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfig.initiate())
+// Initialize store-side effects
+store.dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfig.initiate())
 
+const HooksInitializer = () => {
+  useInitWeb3()
+  useInitSafeCoreSDK()
+  return null
+}
+
+function RootLayout() {
   return (
     <GestureHandlerRootView>
       <Provider store={store}>
@@ -41,6 +50,7 @@ function RootLayout() {
                 <SafeThemeProvider>
                   <SafeToastProvider>
                     <NavigationGuardHOC>
+                      <HooksInitializer />
                       <TestCtrls />
                       <Stack
                         screenOptions={({ navigation }) => ({

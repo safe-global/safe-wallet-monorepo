@@ -29,9 +29,8 @@ import type {
   Transaction,
   CreationTransactionInfo,
   CustomTransactionInfo,
+  MultisigExecutionDetails,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-
-import type { DetailedExecutionInfo, MultisigExecutionDetails } from '@safe-global/safe-gateway-typescript-sdk'
 
 import { HistoryTransactionItems, PendingTransactionItems } from '@safe-global/store/gateway/types'
 
@@ -51,7 +50,9 @@ export const isTxQueued = (value: Transaction['txStatus']): boolean => {
   )
 }
 
-export const isMultisigDetailedExecutionInfo = (value?: DetailedExecutionInfo): value is MultisigExecutionDetails => {
+export const isMultisigDetailedExecutionInfo = (
+  value?: TransactionDetails['detailedExecutionInfo'],
+): value is MultisigExecutionDetails => {
   return value?.type === DetailedExecutionInfoType.MULTISIG
 }
 

@@ -25,9 +25,17 @@ export function TransactionInfo({
     })
   }
 
+  const onTransactionChecksPress = () => {
+    router.push({
+      pathname: '/transaction-checks',
+      params: { txId },
+    })
+  }
+
   return (
     <YStack paddingHorizontal="$4" gap="$4" marginTop="$4">
       <SafeListItem
+        onPress={onTransactionChecksPress}
         leftNode={<SafeFontIcon name="shield" />}
         label="Transaction checks"
         rightNode={<SafeFontIcon name={'chevron-right'} />}
