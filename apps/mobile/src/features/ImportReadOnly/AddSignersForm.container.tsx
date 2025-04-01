@@ -53,7 +53,7 @@ export const AddSignersFormContainer = () => {
     // Navigates to first screen in stack
     router.dismissAll()
     // closes first screen in stack
-    router.back()
+    // router.back()
     if (!hasActiveSafe) {
       router.replace('/(tabs)')
     } else {
