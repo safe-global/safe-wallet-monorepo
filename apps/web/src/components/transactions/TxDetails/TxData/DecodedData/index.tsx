@@ -10,7 +10,7 @@ import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants
 import SendToBlock from '@/components/tx/SendToBlock'
 import MethodCall from './MethodCall'
 import useSafeAddress from '@/hooks/useSafeAddress'
-import { sameAddress } from '@/utils/addresses'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { DelegateCallWarning } from '@/components/transactions/Warning'
 
 interface Props {

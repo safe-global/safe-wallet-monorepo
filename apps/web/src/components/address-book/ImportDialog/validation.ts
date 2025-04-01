@@ -1,6 +1,6 @@
 import type { ParseResult } from 'papaparse'
 
-import { validateAddress } from '@/utils/validation'
+import { validateAddress } from '@safe-global/utils/utils/validation'
 
 export const abCsvReaderValidator = ({ size }: File): string[] | undefined => {
   if (size > 1_000_000) {

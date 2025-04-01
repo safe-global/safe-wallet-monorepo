@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react'
 import { Tooltip } from '@mui/material'
-import { formatDateTime, formatTime, formatTimeInWords } from '@/utils/date'
+import { formatDateTime, formatTime, formatTimeInWords } from '@safe-global/utils/utils/date'
 
 type DateTimeProps = {
   value: number

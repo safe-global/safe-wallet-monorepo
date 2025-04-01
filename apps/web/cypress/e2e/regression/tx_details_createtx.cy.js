@@ -3,6 +3,7 @@ import * as main from '../pages/main.page.js'
 import * as swaps from '../pages/swaps.pages.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as txs from '../pages/transactions.page.js'
+import * as createtx from '../pages/create_tx.pages.js'
 import * as safeapps from '../pages/safeapps.pages'
 import * as wallet from '../../support/utils/wallet.js'
 
@@ -56,9 +57,12 @@ describe('Transaction details create tests', { defaultCommandTimeout: 30000 }, (
         swaps.selectInputCurrency(swaps.swapTokens.cow)
         swaps.setInputValue(600)
         swaps.selectOutputCurrency(swaps.swapTokens.dai)
+        swaps.confirmPriceImpact()
         swaps.clickOnReviewOrderBtn()
         swaps.placeTwapOrder()
       })
+      createtx.clickOnContinueSignTransactionBtn()
+      createtx.clickOnAcknowledgement()
       txs.verifyExecuteBtnIsVisible()
       txs.verifyUntrustedHandllerWarningDoesNotExist()
     },

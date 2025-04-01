@@ -1,5 +1,5 @@
 import { SafesSliceItem, selectAllSafes, setSafes } from '@/src/store/safesSlice'
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { DragEndParams } from 'react-native-draggable-flatlist'
 import { useDispatch, useSelector } from 'react-redux'
 
@@ -12,6 +12,10 @@ export const useMyAccountsSortable = (): useMyAccountsSortableReturn => {
   const dispatch = useDispatch()
   const safes = useSelector(selectAllSafes)
   const [sortableSafes, setSortableSafes] = useState(() => Object.values(safes))
+
+  useEffect(() => {
+    setSortableSafes(Object.values(safes))
+  }, [safes])
 
   const onDragEnd = useCallback(({ data }: DragEndParams<SafesSliceItem>) => {
     // Defer Redux update due to incompatibility issues between

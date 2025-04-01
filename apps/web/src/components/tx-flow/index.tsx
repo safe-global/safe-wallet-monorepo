@@ -2,9 +2,9 @@ import { createContext, type ReactElement, type ReactNode, useState, useEffect, 
 import { usePathname } from 'next/navigation'
 import TxModalDialog from '@/components/common/TxModalDialog'
 import { SuccessScreenFlow, NestedTxSuccessScreenFlow } from './flows'
-import useSafeAddress from '@/hooks/useSafeAddress'
 import useChainId from '@/hooks/useChainId'
 import { useWalletContext } from '@/hooks/wallets/useWallet'
+import { useSafeAddressFromUrl } from '@/hooks/useSafeAddressFromUrl'
 
 const noop = () => {}
 
@@ -30,7 +30,7 @@ export const TxModalProvider = ({ children }: { children: ReactNode }): ReactEle
   const [fullWidth, setFullWidth] = useState<boolean>(false)
   const shouldWarn = useRef<boolean>(true)
   const onClose = useRef<() => void>(noop)
-  const safeId = useChainId() + useSafeAddress()
+  const safeId = useChainId() + useSafeAddressFromUrl()
   const prevSafeId = useRef<string>(safeId ?? '')
   const pathname = usePathname()
   const prevPathname = useRef<string | null>(pathname)

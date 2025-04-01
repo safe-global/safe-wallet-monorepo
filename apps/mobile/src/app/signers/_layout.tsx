@@ -1,5 +1,6 @@
 import { Stack } from 'expo-router'
 import { getDefaultScreenOptions } from '@/src/navigation/hooks/utils'
+import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 
 export default function SignersLayout() {
   return (
@@ -9,7 +10,10 @@ export default function SignersLayout() {
       })}
     >
       <Stack.Screen name="index" options={{ headerShown: true, title: 'Signers' }} />
-      <Stack.Screen name="signers/[address]" options={{ headerShown: true, title: '' }} />
+      <Stack.Screen
+        name="[address]"
+        options={{ headerShown: true, title: 'Signer', headerRight: () => <SafeFontIcon name={'edit'} size={20} /> }}
+      />
     </Stack>
   )
 }

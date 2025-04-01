@@ -1,6 +1,6 @@
 import { isSmartContract } from '@/utils/wallets'
 import { type ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
-import { sameAddress } from '@/utils/addresses'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { createWeb3ReadOnly, getRpcServiceUrl } from '@/hooks/wallets/web3'
 import { type ReplayedSafeProps } from '@/store/slices'
 import { predictAddressBasedOnReplayData } from '@/features/multichain/utils/utils'

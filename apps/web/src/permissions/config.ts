@@ -1,7 +1,7 @@
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import type { ExtendedSafeInfo } from '@/store/safeInfoSlice'
 import type { SpendingLimitState } from '@/store/spendingLimitsSlice'
-import { sameAddress } from '@/utils/addresses'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 import type { SafeTransaction } from '@safe-global/safe-core-sdk-types'
 
 export enum Role {

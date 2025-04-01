@@ -6,7 +6,7 @@ import type { Delay } from '@gnosis.pm/zodiac'
 import type { TransactionAddedEvent } from '@gnosis.pm/zodiac/dist/cjs/types/Delay'
 import { toBeHex, type JsonRpcProvider, type TransactionReceipt } from 'ethers'
 import { trimTrailingSlash } from '@/utils/url'
-import { sameAddress } from '@/utils/addresses'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { isMultiSendCalldata } from '@/utils/transaction-calldata'
 import { decodeMultiSendData } from '@safe-global/protocol-kit/dist/src/utils'
 

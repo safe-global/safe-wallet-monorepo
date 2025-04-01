@@ -73,13 +73,4 @@ describe('FilteredSafes', () => {
     const safesListProps = (SafesList as jest.Mock).mock.calls[0][0]
     expect(safesListProps.onLinkClick).toBe(onLinkClickMock)
   })
-
-  it('sets useTransitions to false in SafesList', () => {
-    // Just verify that we are passing useTransitions={false}
-    jest.spyOn(safesSearch, 'useSafesSearch').mockReturnValue([])
-    render(<FilteredSafes searchQuery="test" allSafes={[]} />)
-
-    const safesListProps = (SafesList as jest.Mock).mock.calls[0][0]
-    expect(safesListProps.useTransitions).toBe(false)
-  })
 })

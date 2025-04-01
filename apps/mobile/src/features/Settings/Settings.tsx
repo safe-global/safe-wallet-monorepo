@@ -11,13 +11,17 @@ import { router } from 'expo-router'
 import { IdenticonWithBadge } from '@/src/features/Settings/components/IdenticonWithBadge'
 
 import { Navbar } from '@/src/features/Settings/components/Navbar/Navbar'
+import { type Contact } from '@/src/store/addressBookSlice'
 
 interface SettingsProps {
   data: SafeState
   address: `0x${string}`
+  displayDevMenu: boolean
+  onImplementationTap: () => void
+  contact: Contact | null
 }
 
-export const Settings = ({ address, data }: SettingsProps) => {
+export const Settings = ({ address, data, onImplementationTap, displayDevMenu, contact }: SettingsProps) => {
   const { owners = [], threshold, implementation } = data
 
   return (
@@ -40,8 +44,8 @@ export const Settings = ({ address, data }: SettingsProps) => {
                   address={address}
                   badgeContent={owners.length ? `${threshold}/${owners.length}` : ''}
                 />
-                <H2 color="$foreground" fontWeight={600}>
-                  My DAO
+                <H2 color="$foreground" fontWeight={600} numberOfLines={1}>
+                  {contact?.name || 'Unnamed Safe'}
                 </H2>
                 <View>
                   <EthAddress
@@ -52,19 +56,13 @@ export const Settings = ({ address, data }: SettingsProps) => {
                     }}
                   />
                 </View>
-
-                <View>
-                  <Skeleton>
-                    <Text color="$primary">saaafe.xyz</Text>
-                  </Skeleton>
-                </View>
               </YStack>
 
               <XStack justifyContent="center" marginBottom="$6">
                 <YStack
                   alignItems="center"
                   backgroundColor={'$background'}
-                  padding={'$2'}
+                  padding={'$4'}
                   borderRadius={'$6'}
                   width={80}
                   marginRight={'$2'}
@@ -84,7 +82,8 @@ export const Settings = ({ address, data }: SettingsProps) => {
                 <YStack
                   alignItems="center"
                   backgroundColor={'$background'}
-                  padding={'$2'}
+                  paddingTop={'$4'}
+                  paddingBottom={'$2'}
                   borderRadius={'$6'}
                   width={80}
                 >
@@ -132,12 +131,12 @@ export const Settings = ({ address, data }: SettingsProps) => {
                 </View>
 
                 <View backgroundColor="$backgroundDark" padding="$4" borderRadius="$3" gap={'$2'}>
-                  <Text color="$foreground">General</Text>
+                  <Text color="$colorSecondary">General</Text>
                   <View backgroundColor={'$background'} borderRadius={'$3'}>
                     <Pressable
                       style={({ pressed }) => [{ opacity: pressed ? 0.5 : 1.0 }]}
                       onPress={() => {
-                        router.push('/notifications')
+                        router.push('/notifications-settings')
                       }}
                     >
                       <SafeListItem
@@ -146,15 +145,49 @@ export const Settings = ({ address, data }: SettingsProps) => {
                         rightNode={<Icon name={'chevron-right'} />}
                       />
                     </Pressable>
+                    <Pressable
+                      style={({ pressed }) => [{ opacity: pressed ? 0.5 : 1.0 }]}
+                      onPress={() => {
+                        router.push('/address-book')
+                      }}
+                    >
+                      <SafeListItem
+                        label={'Address book'}
+                        leftNode={<Icon name={'address-book'} color={'$colorSecondary'} />}
+                        rightNode={<Icon name={'chevron-right'} />}
+                      />
+                    </Pressable>
                   </View>
                 </View>
+
+                {displayDevMenu && (
+                  <View backgroundColor="$backgroundDark" padding="$4" borderRadius="$3" gap={'$2'}>
+                    <Text color="$foreground">Developer</Text>
+                    <View backgroundColor={'$background'} borderRadius={'$3'}>
+                      <Pressable
+                        style={({ pressed }) => [{ opacity: pressed ? 0.5 : 1.0 }]}
+                        onPress={() => {
+                          router.push('/developer')
+                        }}
+                      >
+                        <SafeListItem
+                          label={'Developer'}
+                          leftNode={<Icon name={'alert-triangle'} color={'$colorSecondary'} />}
+                          rightNode={<Icon name={'chevron-right'} />}
+                        />
+                      </Pressable>
+                    </View>
+                  </View>
+                )}
               </YStack>
             </Skeleton.Group>
 
             {/* Footer */}
-            <Text textAlign="center" color="$colorSecondary" marginTop="$8">
-              {implementation?.name}
-            </Text>
+            <Pressable onPress={onImplementationTap}>
+              <Text textAlign="center" color="$colorSecondary" marginTop="$8">
+                {implementation?.name}
+              </Text>
+            </Pressable>
           </YStack>
         </ScrollView>
       </Theme>

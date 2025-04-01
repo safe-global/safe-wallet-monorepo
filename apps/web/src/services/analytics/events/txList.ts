@@ -2,6 +2,11 @@ import { EventType } from '@/services/analytics/types'
 
 const TX_LIST_CATEGORY = 'tx-list'
 
+export enum CopyDeeplinkLabels {
+  shareBlock = 'share-block',
+  button = 'button',
+}
+
 export const TX_LIST_EVENTS = {
   QUEUED_TXS: {
     event: EventType.META,
@@ -19,6 +24,7 @@ export const TX_LIST_EVENTS = {
   COPY_DEEPLINK: {
     action: 'Copy deeplink',
     category: TX_LIST_CATEGORY,
+    label: CopyDeeplinkLabels.shareBlock,
   },
   OPEN_SHARE_BLOCK: {
     action: 'Open share block',

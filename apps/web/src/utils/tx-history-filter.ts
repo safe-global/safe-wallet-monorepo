@@ -11,7 +11,6 @@ import type { ParsedUrlQuery } from 'querystring'
 import { startOfDay, endOfDay } from 'date-fns'
 
 import type { TxFilterFormState } from '@/components/transactions/TxFilterForm'
-import { safeFormatUnits, safeParseUnits } from '@/utils/formatters'
 import { getTimezone } from '@/services/transactions'
 
 type IncomingTxFilter = NonNullable<operations['incoming_transfers']['parameters']['query']>
@@ -69,7 +68,7 @@ export const txFilter = {
       execution_date__lte: formData.execution_date__lte
         ? endOfDay(formData.execution_date__lte).toISOString()
         : undefined,
-      value: formData.value ? safeParseUnits(formData.value, 18)?.toString() : undefined,
+      value: formData.value,
     })
 
     return {
@@ -93,7 +92,7 @@ export const txFilter = {
       ...filter,
       execution_date__gte: !isModule && filter.execution_date__gte ? new Date(filter.execution_date__gte) : null,
       execution_date__lte: !isModule && filter.execution_date__lte ? new Date(filter.execution_date__lte) : null,
-      value: !isModule && filter.value ? safeFormatUnits(filter.value, 18)?.toString() : '',
+      value: isModule ? '' : filter.value,
     }
   },
 }

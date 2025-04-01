@@ -1,11 +1,12 @@
 import { type EndpointBuilder } from '@reduxjs/toolkit/query/react'
 
 import { type SafeOverview, getSafeOverviews } from '@safe-global/safe-gateway-typescript-sdk'
-import { sameAddress } from '@/utils/addresses'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 import type { RootState } from '../..'
 import { selectCurrency } from '../../settingsSlice'
 import { type SafeItem } from '@/features/myAccounts/hooks/useAllSafes'
 import { asError } from '@/services/exceptions/utils'
+import { makeSafeTag } from '.'
 
 type SafeOverviewQueueItem = {
   safeAddress: string
@@ -16,9 +17,7 @@ type SafeOverviewQueueItem = {
 }
 
 const _BATCH_SIZE = 10
-const _FETCH_TIMEOUT = 50
-
-const makeSafeId = (chainId: string, address: string) => `${chainId}:${address}` as `${number}:0x${string}`
+const _FETCH_TIMEOUT = 300
 
 class SafeOverviewFetcher {
   private requestQueue: SafeOverviewQueueItem[] = []
@@ -61,7 +60,7 @@ class SafeOverviewFetcher {
         return
       }
 
-      const safeIds = nextBatch.map((request) => makeSafeId(request.chainId, request.safeAddress))
+      const safeIds = nextBatch.map((request) => makeSafeTag(request.chainId, request.safeAddress))
       const { walletAddress, currency } = nextBatch[0]
       overviews = await this.fetchSafeOverviews({ safeIds, currency, walletAddress })
     } catch (err) {
@@ -117,7 +116,7 @@ type MultiOverviewQueryParams = {
   safes: SafeItem[]
 }
 
-export const safeOverviewEndpoints = (builder: EndpointBuilder<any, 'Submissions', 'gatewayApi'>) => ({
+export const safeOverviewEndpoints = (builder: EndpointBuilder<any, 'OwnedSafes' | 'Submissions', 'gatewayApi'>) => ({
   getSafeOverview: builder.query<SafeOverview | null, { safeAddress: string; walletAddress?: string; chainId: string }>(
     {
       async queryFn({ safeAddress, walletAddress, chainId }, { getState }) {

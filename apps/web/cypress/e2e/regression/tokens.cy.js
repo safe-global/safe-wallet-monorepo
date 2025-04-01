@@ -11,8 +11,7 @@ const FIAT_AMOUNT_COLUMN = 2
 let staticSafes = []
 
 describe('Tokens tests', () => {
-  const domain = window.location.hostname
-  const value = domain === new URL(constants.prodbaseUrl).hostname ? assets.fiatRegex : '--'
+  const value = '--'
 
   before(async () => {
     staticSafes = await getSafes(CATEGORIES.static)

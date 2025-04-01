@@ -1,5 +1,5 @@
 import { Typography } from '@mui/material'
-import { formatVisualAmount } from '@/utils/formatters'
+import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
 import { type TwapOrder } from '@safe-global/safe-gateway-typescript-sdk'
 import { DataRow } from '@/components/common/Table/DataRow'
 import { Box } from '@mui/system'

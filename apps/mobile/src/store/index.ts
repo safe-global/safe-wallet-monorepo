@@ -5,10 +5,13 @@ import txHistory from './txHistorySlice'
 import activeSafe from './activeSafeSlice'
 import activeSigner from './activeSignerSlice'
 import signers from './signersSlice'
+import delegated from './delegatedSlice'
 import myAccounts from './myAccountsSlice'
 import notifications from './notificationsSlice'
+import addressBook from './addressBookSlice'
 import settings from './settingsSlice'
 import safes from './safesSlice'
+import biometrics from './biometricsSlice'
 import { cgwClient, setBaseUrl } from '@safe-global/store/gateway/cgwClient'
 import devToolsEnhancer from 'redux-devtools-expo-dev-plugin'
 import { GATEWAY_URL, isTestingEnv } from '../config/constants'
@@ -31,9 +34,12 @@ export const rootReducer = combineReducers({
   activeSigner,
   activeSafe,
   notifications,
+  addressBook,
   myAccounts,
   signers,
+  delegated,
   settings,
+  biometrics,
   [web3API.reducerPath]: web3API.reducer,
   [cgwClient.reducerPath]: cgwClient.reducer,
 })

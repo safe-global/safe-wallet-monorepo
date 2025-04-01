@@ -14,7 +14,11 @@ interface Props {
 }
 
 export const PendingTransactions = ({ number, isLoading, fullWidth, onPress }: Props) => {
-  const startIcon = isLoading ? <Spinner size="small" color="$warning1ContrastTextDark" /> : <Badge content={number} />
+  const startIcon = isLoading ? (
+    <Spinner size="small" color="$warning1ContrastTextDark" />
+  ) : (
+    <Badge content={number} themeName="badge_warning_variant2" />
+  )
   const endIcon = <SafeFontIcon name="chevron-right" size={20} />
 
   return (
@@ -23,7 +27,7 @@ export const PendingTransactions = ({ number, isLoading, fullWidth, onPress }: P
       fullWidth={fullWidth}
       endIcon={endIcon}
       startIcon={startIcon}
-      message="Pending Transactions"
+      message="Pending transactions"
       onPress={onPress}
       testID="pending-transactions"
     />

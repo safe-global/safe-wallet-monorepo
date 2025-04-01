@@ -7,18 +7,24 @@ import { Typography, Grid, Alert } from '@mui/material'
 import SpendingLimitLabel from '@/components/common/SpendingLimitLabel'
 import { getResetTimeOptions } from '@/components/transactions/TxDetails/TxData/SpendingLimits'
 import SendAmountBlock from '@/components/tx-flow/flows/TokenTransfer/SendAmountBlock'
-import SignOrExecuteForm from '@/components/tx/SignOrExecuteForm'
 import useBalances from '@/hooks/useBalances'
 import useChainId from '@/hooks/useChainId'
 import { trackEvent, SETTINGS_EVENTS } from '@/services/analytics'
 import { createNewSpendingLimitTx } from '@/services/tx/tx-sender'
 import { selectSpendingLimits } from '@/store/spendingLimitsSlice'
-import { formatVisualAmount, safeParseUnits } from '@/utils/formatters'
+import { formatVisualAmount, safeParseUnits } from '@safe-global/utils/utils/formatters'
 import type { NewSpendingLimitFlowProps } from '.'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import { SafeTxContext } from '../../SafeTxProvider'
+import ReviewTransaction from '@/components/tx/ReviewTransaction'
 
-export const ReviewSpendingLimit = ({ params }: { params: NewSpendingLimitFlowProps }) => {
+export const ReviewSpendingLimit = ({
+  params,
+  onSubmit,
+}: {
+  params: NewSpendingLimitFlowProps
+  onSubmit: () => void
+}) => {
   const spendingLimits = useSelector(selectSpendingLimits)
   const { safe } = useSafeInfo()
   const chainId = useChainId()
@@ -80,6 +86,8 @@ export const ReviewSpendingLimit = ({ params }: { params: NewSpendingLimitFlowPr
       ...SETTINGS_EVENTS.SPENDING_LIMIT.RESET_PERIOD,
       label: resetTime,
     })
+
+    onSubmit()
   }
 
   const existingAmount = existingSpendingLimit
@@ -91,7 +99,7 @@ export const ReviewSpendingLimit = ({ params }: { params: NewSpendingLimitFlowPr
     : undefined
 
   return (
-    <SignOrExecuteForm onSubmit={onFormSubmit}>
+    <ReviewTransaction onSubmit={onFormSubmit}>
       {token && (
         <SendAmountBlock amountInWei={amountInWei} tokenInfo={token.tokenInfo} title="Amount">
           {existingAmount && existingAmount !== params.amount && (
@@ -210,6 +218,6 @@ export const ReviewSpendingLimit = ({ params }: { params: NewSpendingLimitFlowPr
           </Typography>
         </Alert>
       )}
-    </SignOrExecuteForm>
+    </ReviewTransaction>
   )
 }

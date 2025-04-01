@@ -13,7 +13,7 @@ import TxCard from '../../common/TxCard'
 import css from '@/components/tx/ExecuteCheckbox/styles.module.css'
 import TokenAmountInput from '@/components/common/TokenAmountInput'
 import { SpendingLimitFields } from '.'
-import { validateAmount, validateDecimalLength } from '@/utils/validation'
+import { validateAmount, validateDecimalLength } from '@safe-global/utils/utils/validation'
 
 export const _validateSpendingLimit = (val: string, decimals?: number | null) => {
   // Allowance amount is uint96 https://github.com/safe-global/safe-modules/blob/master/allowances/contracts/AlowanceModule.sol#L52

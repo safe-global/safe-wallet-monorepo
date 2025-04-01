@@ -23,12 +23,12 @@ import AddressBookInput from '@/components/common/AddressBookInput'
 import { TOOLTIP_TITLES } from '../../common/constants'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { sameAddress } from '@/utils/addresses'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 import type { RecoverAccountFlowProps } from '.'
 import type { AddressEx } from '@safe-global/safe-gateway-typescript-sdk'
 
 import commonCss from '@/components/tx-flow/common/styles.module.css'
-import { maybePlural } from '@/utils/formatters'
+import { maybePlural } from '@safe-global/utils/utils/formatters'
 
 export function _isSameSetup({
   oldOwners,

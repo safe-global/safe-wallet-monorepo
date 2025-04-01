@@ -1,0 +1,40 @@
+name: Package @safe-global/utils unit tests
+on:
+  pull_request:
+    paths:
+      - packages/utils/**
+      - packages/store/**
+  push:
+    branches:
+      - main
+    paths:
+      - packages/**
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  eslint:
+    permissions:
+      checks: write
+      pull-requests: read
+      statuses: write
+
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/yarn
+
+      # Run tests with coverage
+      - name: Run Jest tests with coverage
+        run: |
+          yarn workspace @safe-global/utils test:coverage --coverageReporters=text --coverageReporters=json-summary | tee ./coverage.txt && exit ${PIPESTATUS[0]}
+
+      - name: Jest Coverage Comment
+        uses: MishaKav/jest-coverage-comment@v1
+        with:
+          title: Package @safe-global/utils coverage
+          coverage-summary-path: ./coverage/coverage-summary.json
+          coverage-title: Coverage
+          coverage-path: ./coverage.txt

@@ -124,7 +124,7 @@ function AddressBookTable({ chain, setTxFlow }: AddressBookTableProps) {
                     variant="contained"
                     color="primary"
                     size="small"
-                    onClick={() => setTxFlow(<TokenTransferFlow recipient={address} />)}
+                    onClick={() => setTxFlow(<TokenTransferFlow recipients={[{ recipient: address }]} />)}
                     disabled={!isOk}
                   >
                     Send

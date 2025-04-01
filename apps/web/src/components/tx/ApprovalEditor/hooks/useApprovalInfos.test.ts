@@ -11,7 +11,7 @@ import * as getTokenInfo from '@/utils/tokens'
 import { faker } from '@faker-js/faker'
 import { PSEUDO_APPROVAL_VALUES } from '../utils/approvals'
 import { encodeMultiSendData } from '@safe-global/protocol-kit'
-import { checksumAddress } from '@/utils/addresses'
+import { checksumAddress } from '@safe-global/utils/utils/addresses'
 
 const ERC20_INTERFACE = ERC20__factory.createInterface()
 

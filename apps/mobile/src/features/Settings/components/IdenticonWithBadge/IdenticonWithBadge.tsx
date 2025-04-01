@@ -23,7 +23,7 @@ export const IdenticonWithBadge = ({
 }: IdenticonWithBadgeProps) => {
   return (
     <View style={styles.container} testID={testID}>
-      <Identicon address={address} rounded size={size} />
+      <Identicon address={address} size={size} />
       <View style={styles.badge}>
         <Skeleton colorMode={'dark'} radius="round" height={28} width={28}>
           {badgeContent && (
@@ -33,8 +33,8 @@ export const IdenticonWithBadge = ({
                 fontSize,
                 fontWeight: 500,
               }}
-              themeName={'badge_success'}
-              circleProps={{ bordered: true }}
+              themeName={'badge_success_variant2'}
+              circleProps={{ bordered: true, borderColor: '$colorContrast' }}
             />
           )}
         </Skeleton>

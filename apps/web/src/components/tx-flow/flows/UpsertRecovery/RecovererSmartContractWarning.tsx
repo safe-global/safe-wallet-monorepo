@@ -10,7 +10,7 @@ import { isSmartContractWallet } from '@/utils/wallets'
 import useDebounce from '@/hooks/useDebounce'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { UpsertRecoveryFlowFields } from '.'
-import { sameAddress } from '@/utils/addresses'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 
 import addressBookInputCss from '@/components/common/AddressBookInput/styles.module.css'
 

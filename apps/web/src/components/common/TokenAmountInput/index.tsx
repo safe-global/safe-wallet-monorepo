@@ -1,17 +1,34 @@
-import { safeFormatUnits } from '@/utils/formatters'
+import NumberField from '@/components/common/NumberField'
+import { AutocompleteItem } from '@/components/tx-flow/flows/TokenTransfer/CreateTokenTransfer'
+import { safeFormatUnits, safeParseUnits } from '@safe-global/utils/utils/formatters'
+import { validateDecimalLength, validateLimitedAmount } from '@safe-global/utils/utils/validation'
 import { Button, Divider, FormControl, InputLabel, MenuItem, TextField } from '@mui/material'
 import { type SafeBalanceResponse } from '@safe-global/safe-gateway-typescript-sdk'
-import css from './styles.module.css'
-import NumberField from '@/components/common/NumberField'
-import { validateDecimalLength, validateLimitedAmount } from '@/utils/validation'
-import { AutocompleteItem } from '@/components/tx-flow/flows/TokenTransfer/CreateTokenTransfer'
-import { useFormContext } from 'react-hook-form'
 import classNames from 'classnames'
 import { useCallback } from 'react'
+import { get, useFormContext } from 'react-hook-form'
+import type { FieldArrayPath, FieldValues } from 'react-hook-form'
+import css from './styles.module.css'
+import { MultiTokenTransferFields, type MultiTokenTransferParams } from '@/components/tx-flow/flows/TokenTransfer'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 
 export enum TokenAmountFields {
   tokenAddress = 'tokenAddress',
   amount = 'amount',
+}
+
+export const InsufficientFundsValidationError = 'Insufficient funds'
+
+const getFieldName = (field: TokenAmountFields, fieldArray?: TokenAmountInputProps['fieldArray']) =>
+  fieldArray ? `${fieldArray.name}.${fieldArray.index}.${field}` : field
+
+type TokenAmountInputProps = {
+  balances: SafeBalanceResponse['items']
+  selectedToken: SafeBalanceResponse['items'][number] | undefined
+  maxAmount?: bigint
+  validate?: (value: string) => string | undefined
+  fieldArray?: { name: FieldArrayPath<FieldValues>; index: number }
+  deps?: string[]
 }
 
 const TokenAmountInput = ({
@@ -19,38 +36,71 @@ const TokenAmountInput = ({
   selectedToken,
   maxAmount,
   validate,
-}: {
-  balances: SafeBalanceResponse['items']
-  selectedToken: SafeBalanceResponse['items'][number] | undefined
-  maxAmount?: bigint
-  validate?: (value: string) => string | undefined
-}) => {
+  fieldArray,
+  deps,
+}: TokenAmountInputProps) => {
   const {
-    formState: { errors },
+    formState: { errors, defaultValues },
     register,
     resetField,
     watch,
     setValue,
-  } = useFormContext<{ [TokenAmountFields.tokenAddress]: string; [TokenAmountFields.amount]: string }>()
+    trigger,
+  } = useFormContext()
 
-  const tokenAddress = watch(TokenAmountFields.tokenAddress)
-  const isAmountError = !!errors[TokenAmountFields.tokenAddress] || !!errors[TokenAmountFields.amount]
+  const { getValues } = useFormContext<MultiTokenTransferParams>()
+
+  const tokenAddressField = getFieldName(TokenAmountFields.tokenAddress, fieldArray)
+  const amountField = getFieldName(TokenAmountFields.amount, fieldArray)
+
+  const tokenAddress = watch(tokenAddressField)
+
+  const isAmountError = !!get(errors, tokenAddressField) || !!get(errors, amountField)
 
   const validateAmount = useCallback(
     (value: string) => {
       const decimals = selectedToken?.tokenInfo.decimals
-      return validateLimitedAmount(value, decimals, maxAmount?.toString()) || validateDecimalLength(value, decimals)
+      const maxAmountString = maxAmount?.toString()
+
+      const valueValidationError =
+        validateLimitedAmount(value, decimals, maxAmountString) || validateDecimalLength(value, decimals)
+
+      if (valueValidationError) {
+        return valueValidationError
+      }
+
+      // Validate the total amount of the selected token in the multi transfer
+      const recipients = getValues(MultiTokenTransferFields.recipients)
+      const sumAmount = recipients.reduce<bigint>((acc, item) => {
+        const value = safeParseUnits(item.amount || '0', decimals) || 0n
+        return acc + (sameAddress(item.tokenAddress, tokenAddress) ? value : 0n)
+      }, 0n)
+
+      return validateLimitedAmount(sumAmount.toString(), 0, maxAmountString, InsufficientFundsValidationError)
     },
-    [maxAmount, selectedToken?.tokenInfo.decimals],
+    [maxAmount, selectedToken?.tokenInfo.decimals, getValues, tokenAddress],
   )
 
   const onMaxAmountClick = useCallback(() => {
     if (!selectedToken || maxAmount === undefined) return
 
-    setValue(TokenAmountFields.amount, safeFormatUnits(maxAmount.toString(), selectedToken.tokenInfo.decimals ?? 0), {
+    setValue(amountField, safeFormatUnits(maxAmount.toString(), selectedToken.tokenInfo.decimals), {
       shouldValidate: true,
     })
-  }, [maxAmount, selectedToken, setValue])
+
+    trigger(deps)
+  }, [maxAmount, selectedToken, setValue, amountField, trigger, deps])
+
+  const onChangeToken = useCallback(() => {
+    const amountDefaultValue = get(
+      defaultValues,
+      getFieldName(TokenAmountFields.amount, fieldArray ? { ...fieldArray, index: 0 } : undefined),
+    )
+
+    resetField(amountField, amountDefaultValue)
+
+    trigger(deps)
+  }, [resetField, amountField, trigger, deps, defaultValues, fieldArray])
 
   return (
     <FormControl
@@ -59,7 +109,9 @@ const TokenAmountInput = ({
       fullWidth
     >
       <InputLabel shrink required className={css.label}>
-        {errors[TokenAmountFields.tokenAddress]?.message || errors[TokenAmountFields.amount]?.message || 'Amount'}
+        {get(errors, tokenAddressField)?.message?.toString() ||
+          get(errors, amountField)?.message?.toString() ||
+          'Amount'}
       </InputLabel>
       <div className={css.inputs}>
         <NumberField
@@ -76,9 +128,10 @@ const TokenAmountInput = ({
           className={css.amount}
           required
           placeholder="0"
-          {...register(TokenAmountFields.amount, {
+          {...register(amountField, {
             required: true,
             validate: validate ?? validateAmount,
+            deps,
           })}
         />
         <Divider orientation="vertical" flexItem />
@@ -90,11 +143,9 @@ const TokenAmountInput = ({
             disableUnderline: true,
           }}
           className={css.select}
-          {...register(TokenAmountFields.tokenAddress, {
+          {...register(tokenAddressField, {
             required: true,
-            onChange: () => {
-              resetField(TokenAmountFields.amount, { defaultValue: '' })
-            },
+            onChange: onChangeToken,
           })}
           value={tokenAddress}
           required

@@ -1,4 +1,4 @@
-import { safeFormatUnits, safeParseUnits } from '@/utils/formatters'
+import { safeFormatUnits, safeParseUnits } from '@safe-global/utils/utils/formatters'
 import type { SafeBalanceResponse } from '@safe-global/safe-gateway-typescript-sdk'
 import { useMemo } from 'react'
 import useBalances from './useBalances'

@@ -9,15 +9,15 @@ import {
   isCreationTxInfo,
   isCustomTxInfo,
   isMultiSendTxInfo,
+  isOrderTxInfo,
   isSettingsChangeTxInfo,
-  isSwapOrderTxInfo,
   isTransferTxInfo,
 } from '@/src/utils/transaction-guards'
 import { TxBatchCard } from '@/src/components/transactions-list/Card/TxBatchCard'
 import { TxSafeAppCard } from '@/src/components/transactions-list/Card/TxSafeAppCard'
 import { TxRejectionCard } from '@/src/components/transactions-list/Card/TxRejectionCard'
 import { TxContractInteractionCard } from '@/src/components/transactions-list/Card/TxContractInteractionCard'
-import { TxSwapCard } from '@/src/components/transactions-list/Card/TxSwapCard'
+import { TxOrderCard } from '@/src/components/transactions-list/Card/TxOrderCard'
 import { TxCreationCard } from '@/src/components/transactions-list/Card/TxCreationCard'
 import { TxCardPress } from './types'
 
@@ -128,9 +128,9 @@ function TxInfoComponent({ tx, bordered, inQueue, onPress }: TxInfoProps) {
     )
   }
 
-  if (isSwapOrderTxInfo(txInfo)) {
+  if (isOrderTxInfo(txInfo)) {
     return (
-      <TxSwapCard
+      <TxOrderCard
         bordered={bordered}
         onPress={onCardPress}
         executionInfo={tx.executionInfo}

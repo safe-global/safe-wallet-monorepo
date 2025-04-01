@@ -3,7 +3,7 @@ import type { TokenInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import useWallet from '@/hooks/wallets/useWallet'
 import type { SpendingLimitState } from '@/store/spendingLimitsSlice'
 import { selectSpendingLimits } from '@/store/spendingLimitsSlice'
-import { sameAddress } from '@/utils/addresses'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 
 const useSpendingLimit = (selectedToken?: TokenInfo): SpendingLimitState | undefined => {
   const wallet = useWallet()

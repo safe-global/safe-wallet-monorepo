@@ -1,5 +1,5 @@
 import type { ReactElement, ComponentType, SyntheticEvent } from 'react'
-import { Box, IconButton, SvgIcon, Tooltip, Typography } from '@mui/material'
+import { Box, IconButton, SvgIcon, Tooltip, Typography, type TypographyProps } from '@mui/material'
 import LinkIcon from '@/public/images/common/link.svg'
 import Link from 'next/link'
 
@@ -10,6 +10,7 @@ export type ExplorerButtonProps = {
   icon?: ComponentType
   onClick?: (e: SyntheticEvent) => void
   isCompact?: boolean
+  fontSize?: TypographyProps['fontSize']
 }
 
 const ExplorerButton = ({
@@ -19,6 +20,7 @@ const ExplorerButton = ({
   className,
   onClick,
   isCompact = true,
+  fontSize = 'small',
 }: ExplorerButtonProps): ReactElement | null => {
   if (!href) return null
 
@@ -47,7 +49,7 @@ const ExplorerButton = ({
       onClick={onClick}
     >
       <Box display="flex" alignItems="center">
-        <Typography fontWeight={700} fontSize="small" mr="var(--space-1)" noWrap>
+        <Typography fontWeight={700} fontSize={fontSize} mr="var(--space-1)" noWrap>
           View on explorer
         </Typography>
 

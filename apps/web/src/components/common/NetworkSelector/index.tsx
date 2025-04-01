@@ -30,7 +30,7 @@ import { OVERVIEW_EVENTS, OVERVIEW_LABELS, trackEvent } from '@/services/analyti
 
 import { useAllSafesGrouped } from '@/features/myAccounts/hooks/useAllSafesGrouped'
 import useSafeAddress from '@/hooks/useSafeAddress'
-import { sameAddress } from '@/utils/addresses'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 import uniq from 'lodash/uniq'
 import { useCompatibleNetworks } from '@/features/multichain/hooks/useCompatibleNetworks'
 import { useSafeCreationData } from '@/features/multichain/hooks/useSafeCreationData'
@@ -81,7 +81,6 @@ export const getNetworkLink = (router: NextRouter, safeAddress: string, networkS
     safe?: string
     chain?: string
     safeViewRedirectURL?: string
-    appUrl?: string
   }
 
   const route = {
@@ -91,10 +90,6 @@ export const getNetworkLink = (router: NextRouter, safeAddress: string, networkS
 
   if (router.query?.safeViewRedirectURL) {
     route.query.safeViewRedirectURL = router.query?.safeViewRedirectURL.toString()
-  }
-
-  if (router.query?.appUrl) {
-    route.query.appUrl = router.query.appUrl.toString()
   }
 
   return route

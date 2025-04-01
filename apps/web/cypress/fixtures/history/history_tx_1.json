@@ -1,0 +1,811 @@
+{
+  "count": 23,
+  "next": "https://safe-client.staging.5afe.dev/v1/chains/11155111/safes/0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb/transactions/history?timezone=Europe%2FBerlin&trusted=false&imitation=true&cursor=limit%3D20%26offset%3D20",
+  "previous": null,
+  "results": [
+    { "type": "DATE_LABEL", "timestamp": 1742302260000 },
+    {
+      "type": "TRANSACTION",
+      "transaction": {
+        "txInfo": {
+          "type": "Custom",
+          "humanDescription": null,
+          "to": { "value": "0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb", "name": "GnosisSafeProxy", "logoUri": null },
+          "dataSize": "0",
+          "value": "0",
+          "methodName": null,
+          "actionCount": null,
+          "isCancellation": true
+        },
+        "id": "multisig_0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb_0x9b4ee6ef9271fa2f2a4e97c3b5165dc7844a124accbf02cddaf91393ef2687da",
+        "timestamp": 1742302260000,
+        "txStatus": "SUCCESS",
+        "executionInfo": {
+          "type": "MULTISIG",
+          "nonce": 16,
+          "confirmationsRequired": 2,
+          "confirmationsSubmitted": 2,
+          "missingSigners": null
+        },
+        "safeAppInfo": null,
+        "txHash": "0x636e46b37283725b92f878cc504275f0254a627901c416ec6c0fe21304bf0524"
+      },
+      "conflictType": "None"
+    },
+    { "type": "DATE_LABEL", "timestamp": 1742204292000 },
+    {
+      "type": "TRANSACTION",
+      "transaction": {
+        "txInfo": {
+          "type": "Transfer",
+          "humanDescription": null,
+          "sender": { "value": "0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb", "name": null, "logoUri": null },
+          "recipient": { "value": "0x96D4c6fFC338912322813a77655fCC926b9A5aC5", "name": null, "logoUri": null },
+          "direction": "OUTGOING",
+          "transferInfo": { "type": "NATIVE_COIN", "value": "100000000000000" }
+        },
+        "id": "multisig_0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb_0xcfbe040521dd80d43f408c7fd3ce7d80f21e8916a04a56ff0fe5cd14eb1a508f",
+        "timestamp": 1742204292000,
+        "txStatus": "SUCCESS",
+        "executionInfo": {
+          "type": "MULTISIG",
+          "nonce": 15,
+          "confirmationsRequired": 2,
+          "confirmationsSubmitted": 2,
+          "missingSigners": null
+        },
+        "safeAppInfo": null,
+        "txHash": "0x2a4abc4b31e339fd170b6b482c4c1b605fac1a0ffddb8259fe4c0552ba996d66"
+      },
+      "conflictType": "None"
+    },
+    { "type": "DATE_LABEL", "timestamp": 1720167780000 },
+    {
+      "type": "TRANSACTION",
+      "transaction": {
+        "txInfo": {
+          "type": "SettingsChange",
+          "humanDescription": "Add new owner 0x4fe7...dC90 with threshold 2",
+          "dataDecoded": {
+            "method": "addOwnerWithThreshold",
+            "parameters": [
+              {
+                "name": "owner",
+                "type": "address",
+                "value": "0x4fe7164d7cA511Ab35520bb14065F1693240dC90",
+                "valueDecoded": null
+              },
+              { "name": "_threshold", "type": "uint256", "value": "2", "valueDecoded": null }
+            ]
+          },
+          "settingsInfo": {
+            "type": "ADD_OWNER",
+            "owner": { "value": "0x4fe7164d7cA511Ab35520bb14065F1693240dC90", "name": null, "logoUri": null },
+            "threshold": 2
+          }
+        },
+        "id": "multisig_0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb_0x85835820c4119ea7e44537dd4a447264cc08d80ea1467b545b500670573c3d2d",
+        "timestamp": 1720167780000,
+        "txStatus": "SUCCESS",
+        "executionInfo": {
+          "type": "MULTISIG",
+          "nonce": 14,
+          "confirmationsRequired": 2,
+          "confirmationsSubmitted": 2,
+          "missingSigners": null
+        },
+        "safeAppInfo": null,
+        "txHash": "0xfcad9959d5f194c129d16f91f61a28719287e9beefb39cc5fe81a368f400ab35"
+      },
+      "conflictType": "None"
+    },
+    { "type": "DATE_LABEL", "timestamp": 1702636380000 },
+    {
+      "type": "TRANSACTION",
+      "transaction": {
+        "txInfo": {
+          "type": "Transfer",
+          "humanDescription": null,
+          "sender": { "value": "0x96D4c6fFC338912322813a77655fCC926b9A5aC5", "name": null, "logoUri": null },
+          "recipient": {
+            "value": "0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb",
+            "name": "GnosisSafeProxy",
+            "logoUri": null
+          },
+          "direction": "INCOMING",
+          "transferInfo": {
+            "type": "ERC20",
+            "tokenAddress": "0x7CB180dE9BE0d8935EbAAc9b4fc533952Df128Ae",
+            "value": "1000000000000000000000",
+            "tokenName": "QATRUSTED",
+            "tokenSymbol": "QTRUST",
+            "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0x7CB180dE9BE0d8935EbAAc9b4fc533952Df128Ae.png",
+            "decimals": 18,
+            "trusted": true,
+            "imitation": false
+          }
+        },
+        "id": "transfer_0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb_ed89d768d24991bca3a9eed93f369a3fa10727accc3d02aacb5c38794ba5b9136119",
+        "timestamp": 1702636380000,
+        "txStatus": "SUCCESS",
+        "executionInfo": null,
+        "safeAppInfo": null,
+        "txHash": "0xd89d768d24991bca3a9eed93f369a3fa10727accc3d02aacb5c38794ba5b9136"
+      },
+      "conflictType": "None"
+    },
+    { "type": "DATE_LABEL", "timestamp": 1701851760000 },
+    {
+      "type": "TRANSACTION",
+      "transaction": {
+        "txInfo": {
+          "type": "SettingsChange",
+          "humanDescription": "Change threshold to 2",
+          "dataDecoded": {
+            "method": "changeThreshold",
+            "parameters": [{ "name": "_threshold", "type": "uint256", "value": "2", "valueDecoded": null }]
+          },
+          "settingsInfo": { "type": "CHANGE_THRESHOLD", "threshold": 2 }
+        },
+        "id": "multisig_0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb_0x46eb9b5370d38a676d0bc895dbd8e7e3c9544f121c7019bfb0e632597d7be7d5",
+        "timestamp": 1701851760000,
+        "txStatus": "SUCCESS",
+        "executionInfo": {
+          "type": "MULTISIG",
+          "nonce": 13,
+          "confirmationsRequired": 1,
+          "confirmationsSubmitted": 1,
+          "missingSigners": null
+        },
+        "safeAppInfo": null,
+        "txHash": "0xf3d2062541580f5f1b2a0c9e587d4696bdeecbaaa8d92a413c750ea86aed26df"
+      },
+      "conflictType": "None"
+    },
+    { "type": "DATE_LABEL", "timestamp": 1701418524000 },
+    {
+      "type": "TRANSACTION",
+      "transaction": {
+        "txInfo": {
+          "type": "Transfer",
+          "humanDescription": null,
+          "sender": {
+            "value": "0x06373d5e45AD31BD354CeBfA8dB4eD2c75B8708e",
+            "name": "GnosisSafeProxy",
+            "logoUri": null
+          },
+          "recipient": {
+            "value": "0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb",
+            "name": "GnosisSafeProxy",
+            "logoUri": null
+          },
+          "direction": "INCOMING",
+          "transferInfo": {
+            "type": "ERC20",
+            "tokenAddress": "0x4463F6662be2fdb319Dc3C491A004DEAe39Dc70a",
+            "value": "5000000000000000000",
+            "tokenName": "test-token-type-one",
+            "tokenSymbol": "TTONE",
+            "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0x4463F6662be2fdb319Dc3C491A004DEAe39Dc70a.png",
+            "decimals": 18,
+            "trusted": false,
+            "imitation": false
+          }
+        },
+        "id": "transfer_0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb_e54e7e766b08d4210bc1cfcc84d84ca4782a0cc1efe9e7d9c032d305060ed2a7c3044",
+        "timestamp": 1701418524000,
+        "txStatus": "SUCCESS",
+        "executionInfo": null,
+        "safeAppInfo": null,
+        "txHash": "0x54e7e766b08d4210bc1cfcc84d84ca4782a0cc1efe9e7d9c032d305060ed2a7c"
+      },
+      "conflictType": "None"
+    },
+    {
+      "type": "TRANSACTION",
+      "transaction": {
+        "txInfo": {
+          "type": "Transfer",
+          "humanDescription": null,
+          "sender": {
+            "value": "0x06373d5e45AD31BD354CeBfA8dB4eD2c75B8708e",
+            "name": "GnosisSafeProxy",
+            "logoUri": null
+          },
+          "recipient": {
+            "value": "0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb",
+            "name": "GnosisSafeProxy",
+            "logoUri": null
+          },
+          "direction": "INCOMING",
+          "transferInfo": {
+            "type": "ERC20",
+            "tokenAddress": "0x4463F6662be2fdb319Dc3C491A004DEAe39Dc70a",
+            "value": "19000000000000000000",
+            "tokenName": "test-token-type-one",
+            "tokenSymbol": "TTONE",
+            "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0x4463F6662be2fdb319Dc3C491A004DEAe39Dc70a.png",
+            "decimals": 18,
+            "trusted": false,
+            "imitation": false
+          }
+        },
+        "id": "transfer_0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb_e54e7e766b08d4210bc1cfcc84d84ca4782a0cc1efe9e7d9c032d305060ed2a7c3043",
+        "timestamp": 1701418524000,
+        "txStatus": "SUCCESS",
+        "executionInfo": null,
+        "safeAppInfo": null,
+        "txHash": "0x54e7e766b08d4210bc1cfcc84d84ca4782a0cc1efe9e7d9c032d305060ed2a7c"
+      },
+      "conflictType": "None"
+    },
+    {
+      "type": "TRANSACTION",
+      "transaction": {
+        "txInfo": {
+          "type": "Transfer",
+          "humanDescription": null,
+          "sender": {
+            "value": "0x06373d5e45AD31BD354CeBfA8dB4eD2c75B8708e",
+            "name": "GnosisSafeProxy",
+            "logoUri": null
+          },
+          "recipient": {
+            "value": "0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb",
+            "name": "GnosisSafeProxy",
+            "logoUri": null
+          },
+          "direction": "INCOMING",
+          "transferInfo": {
+            "type": "ERC20",
+            "tokenAddress": "0x4463F6662be2fdb319Dc3C491A004DEAe39Dc70a",
+            "value": "12000000000000000000",
+            "tokenName": "test-token-type-one",
+            "tokenSymbol": "TTONE",
+            "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0x4463F6662be2fdb319Dc3C491A004DEAe39Dc70a.png",
+            "decimals": 18,
+            "trusted": false,
+            "imitation": false
+          }
+        },
+        "id": "transfer_0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb_e54e7e766b08d4210bc1cfcc84d84ca4782a0cc1efe9e7d9c032d305060ed2a7c3042",
+        "timestamp": 1701418524000,
+        "txStatus": "SUCCESS",
+        "executionInfo": null,
+        "safeAppInfo": null,
+        "txHash": "0x54e7e766b08d4210bc1cfcc84d84ca4782a0cc1efe9e7d9c032d305060ed2a7c"
+      },
+      "conflictType": "None"
+    },
+    {
+      "type": "TRANSACTION",
+      "transaction": {
+        "txInfo": {
+          "type": "Transfer",
+          "humanDescription": null,
+          "sender": {
+            "value": "0x06373d5e45AD31BD354CeBfA8dB4eD2c75B8708e",
+            "name": "GnosisSafeProxy",
+            "logoUri": null
+          },
+          "recipient": {
+            "value": "0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb",
+            "name": "GnosisSafeProxy",
+            "logoUri": null
+          },
+          "direction": "INCOMING",
+          "transferInfo": {
+            "type": "ERC20",
+            "tokenAddress": "0x4463F6662be2fdb319Dc3C491A004DEAe39Dc70a",
+            "value": "10000000000000000000",
+            "tokenName": "test-token-type-one",
+            "tokenSymbol": "TTONE",
+            "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0x4463F6662be2fdb319Dc3C491A004DEAe39Dc70a.png",
+            "decimals": 18,
+            "trusted": false,
+            "imitation": false
+          }
+        },
+        "id": "transfer_0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb_e54e7e766b08d4210bc1cfcc84d84ca4782a0cc1efe9e7d9c032d305060ed2a7c3041",
+        "timestamp": 1701418524000,
+        "txStatus": "SUCCESS",
+        "executionInfo": null,
+        "safeAppInfo": null,
+        "txHash": "0x54e7e766b08d4210bc1cfcc84d84ca4782a0cc1efe9e7d9c032d305060ed2a7c"
+      },
+      "conflictType": "None"
+    },
+    {
+      "type": "TRANSACTION",
+      "transaction": {
+        "txInfo": {
+          "type": "Transfer",
+          "humanDescription": null,
+          "sender": {
+            "value": "0x06373d5e45AD31BD354CeBfA8dB4eD2c75B8708e",
+            "name": "GnosisSafeProxy",
+            "logoUri": null
+          },
+          "recipient": {
+            "value": "0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb",
+            "name": "GnosisSafeProxy",
+            "logoUri": null
+          },
+          "direction": "INCOMING",
+          "transferInfo": { "type": "NATIVE_COIN", "value": "1000000000000000" }
+        },
+        "id": "transfer_0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb_i1f54e48bccaa3d304908eee98e2d6ba3258c841bd39a84fedc112d5c6f049d910,0,0,0,0,0,1",
+        "timestamp": 1701417900000,
+        "txStatus": "SUCCESS",
+        "executionInfo": null,
+        "safeAppInfo": null,
+        "txHash": "0x1f54e48bccaa3d304908eee98e2d6ba3258c841bd39a84fedc112d5c6f049d91"
+      },
+      "conflictType": "None"
+    },
+    {
+      "type": "TRANSACTION",
+      "transaction": {
+        "txInfo": {
+          "type": "Transfer",
+          "humanDescription": null,
+          "sender": {
+            "value": "0x06373d5e45AD31BD354CeBfA8dB4eD2c75B8708e",
+            "name": "GnosisSafeProxy",
+            "logoUri": null
+          },
+          "recipient": {
+            "value": "0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb",
+            "name": "GnosisSafeProxy",
+            "logoUri": null
+          },
+          "direction": "INCOMING",
+          "transferInfo": { "type": "NATIVE_COIN", "value": "1000000000000000" }
+        },
+        "id": "transfer_0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb_i1f54e48bccaa3d304908eee98e2d6ba3258c841bd39a84fedc112d5c6f049d910,0,0,0,0,0,0",
+        "timestamp": 1701417900000,
+        "txStatus": "SUCCESS",
+        "executionInfo": null,
+        "safeAppInfo": null,
+        "txHash": "0x1f54e48bccaa3d304908eee98e2d6ba3258c841bd39a84fedc112d5c6f049d91"
+      },
+      "conflictType": "None"
+    },
+    {
+      "type": "TRANSACTION",
+      "transaction": {
+        "txInfo": {
+          "type": "Custom",
+          "humanDescription": null,
+          "to": {
+            "value": "0xA1dabEF33b3B82c7814B6D82A79e50F4AC44102B",
+            "name": "Safe: MultiSendCallOnly 1.3.0",
+            "logoUri": "https://safe-transaction-assets.staging.5afe.dev/contracts/logos/0xA1dabEF33b3B82c7814B6D82A79e50F4AC44102B.png"
+          },
+          "dataSize": "260",
+          "value": "0",
+          "methodName": "multiSend",
+          "actionCount": 2,
+          "isCancellation": false
+        },
+        "id": "multisig_0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb_0x4dd0916d9fea51b6b724ff8155c3e7cd616f2c54634c0769b9dc0edfd4f6b2b8",
+        "timestamp": 1701417276000,
+        "txStatus": "SUCCESS",
+        "executionInfo": {
+          "type": "MULTISIG",
+          "nonce": 12,
+          "confirmationsRequired": 1,
+          "confirmationsSubmitted": 1,
+          "missingSigners": null
+        },
+        "safeAppInfo": null,
+        "txHash": "0xa5dd2ebff8c270268f218c70e3aaae29f9570cf2a29fb4bdb17638653852b064"
+      },
+      "conflictType": "None"
+    },
+    {
+      "type": "TRANSACTION",
+      "transaction": {
+        "txInfo": {
+          "type": "Transfer",
+          "humanDescription": null,
+          "sender": { "value": "0x96D4c6fFC338912322813a77655fCC926b9A5aC5", "name": null, "logoUri": null },
+          "recipient": {
+            "value": "0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb",
+            "name": "GnosisSafeProxy",
+            "logoUri": null
+          },
+          "direction": "INCOMING",
+          "transferInfo": { "type": "NATIVE_COIN", "value": "500000000000000000" }
+        },
+        "id": "transfer_0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb_i9cf7595977c9087f31aedc68c2554c7c898486aa132aa6bd063906a5d8564110",
+        "timestamp": 1701417156000,
+        "txStatus": "SUCCESS",
+        "executionInfo": null,
+        "safeAppInfo": null,
+        "txHash": "0x9cf7595977c9087f31aedc68c2554c7c898486aa132aa6bd063906a5d8564110"
+      },
+      "conflictType": "None"
+    },
+    {
+      "type": "TRANSACTION",
+      "transaction": {
+        "txInfo": {
+          "type": "SettingsChange",
+          "humanDescription": null,
+          "dataDecoded": {
+            "method": "disableModule",
+            "parameters": [
+              {
+                "name": "prevModule",
+                "type": "address",
+                "value": "0x0000000000000000000000000000000000000001",
+                "valueDecoded": null
+              },
+              {
+                "name": "module",
+                "type": "address",
+                "value": "0xCFbFaC74C26F8647cBDb8c5caf80BB5b32E43134",
+                "valueDecoded": null
+              }
+            ]
+          },
+          "settingsInfo": {
+            "type": "DISABLE_MODULE",
+            "module": {
+              "value": "0xCFbFaC74C26F8647cBDb8c5caf80BB5b32E43134",
+              "name": "AllowanceModule",
+              "logoUri": null
+            }
+          }
+        },
+        "id": "multisig_0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb_0xb82070c01297392754b4b972c064f48f4ab944c5979813c01b871c8f8d57bc4a",
+        "timestamp": 1701416244000,
+        "txStatus": "SUCCESS",
+        "executionInfo": {
+          "type": "MULTISIG",
+          "nonce": 11,
+          "confirmationsRequired": 1,
+          "confirmationsSubmitted": 1,
+          "missingSigners": null
+        },
+        "safeAppInfo": null,
+        "txHash": "0x8b3972a18cdba64348961ecd7d04f98fa155cd471e7a6fd981653177d049adeb"
+      },
+      "conflictType": "None"
+    },
+    { "type": "DATE_LABEL", "timestamp": 1701345096000 },
+    {
+      "type": "TRANSACTION",
+      "transaction": {
+        "txInfo": {
+          "type": "SettingsChange",
+          "humanDescription": "Change threshold to 1",
+          "dataDecoded": {
+            "method": "changeThreshold",
+            "parameters": [{ "name": "_threshold", "type": "uint256", "value": "1", "valueDecoded": null }]
+          },
+          "settingsInfo": { "type": "CHANGE_THRESHOLD", "threshold": 1 }
+        },
+        "id": "multisig_0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb_0x94d7f35334ef6f52f442ed2b498b085bd2a4d5b3b66d7878a5d2bb85e384b88e",
+        "timestamp": 1701345096000,
+        "txStatus": "SUCCESS",
+        "executionInfo": {
+          "type": "MULTISIG",
+          "nonce": 10,
+          "confirmationsRequired": 2,
+          "confirmationsSubmitted": 2,
+          "missingSigners": null
+        },
+        "safeAppInfo": null,
+        "txHash": "0x34280fafb7edd2ea9ca09a7a35d14c8fb01a4f915e958572fcbc94f09876972e"
+      },
+      "conflictType": "None"
+    },
+    {
+      "type": "TRANSACTION",
+      "transaction": {
+        "txInfo": {
+          "type": "SettingsChange",
+          "humanDescription": "Change threshold to 2",
+          "dataDecoded": {
+            "method": "changeThreshold",
+            "parameters": [{ "name": "_threshold", "type": "uint256", "value": "2", "valueDecoded": null }]
+          },
+          "settingsInfo": { "type": "CHANGE_THRESHOLD", "threshold": 2 }
+        },
+        "id": "multisig_0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb_0x87163acb6b21520a00b70f7d42bdbdf92b7970d3672e0d97d1072dbb6e13c85e",
+        "timestamp": 1701344928000,
+        "txStatus": "SUCCESS",
+        "executionInfo": {
+          "type": "MULTISIG",
+          "nonce": 9,
+          "confirmationsRequired": 1,
+          "confirmationsSubmitted": 1,
+          "missingSigners": null
+        },
+        "safeAppInfo": null,
+        "txHash": "0x8d1bb1a8cb53dcfebf58fa53fdea131bc8233fd1e7900e4dc7c3780ff437a8f9"
+      },
+      "conflictType": "None"
+    },
+    {
+      "type": "TRANSACTION",
+      "transaction": {
+        "txInfo": {
+          "type": "SettingsChange",
+          "humanDescription": "Remove owner 0x8a39...8E4E with threshold 1",
+          "dataDecoded": {
+            "method": "removeOwner",
+            "parameters": [
+              {
+                "name": "prevOwner",
+                "type": "address",
+                "value": "0x0000000000000000000000000000000000000001",
+                "valueDecoded": null
+              },
+              {
+                "name": "owner",
+                "type": "address",
+                "value": "0x8a39cE4E27C326B87B75AaFf820D442311CD8E4E",
+                "valueDecoded": null
+              },
+              { "name": "_threshold", "type": "uint256", "value": "1", "valueDecoded": null }
+            ]
+          },
+          "settingsInfo": {
+            "type": "REMOVE_OWNER",
+            "owner": { "value": "0x8a39cE4E27C326B87B75AaFf820D442311CD8E4E", "name": null, "logoUri": null },
+            "threshold": 1
+          }
+        },
+        "id": "multisig_0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb_0xafd58598ec10f89395d57c4d914480e50a568416e3226bc4d1853fae06697929",
+        "timestamp": 1701344808000,
+        "txStatus": "SUCCESS",
+        "executionInfo": {
+          "type": "MULTISIG",
+          "nonce": 8,
+          "confirmationsRequired": 1,
+          "confirmationsSubmitted": 1,
+          "missingSigners": null
+        },
+        "safeAppInfo": null,
+        "txHash": "0xac665db3053c6e0ef0b0bba8d508117be28667aa96fee858cbc514c57371a4b8"
+      },
+      "conflictType": "None"
+    },
+    {
+      "type": "TRANSACTION",
+      "transaction": {
+        "txInfo": {
+          "type": "SettingsChange",
+          "humanDescription": "Swap owner 0x01A9...C46f with 0x8a39...8E4E",
+          "dataDecoded": {
+            "method": "swapOwner",
+            "parameters": [
+              {
+                "name": "prevOwner",
+                "type": "address",
+                "value": "0x0000000000000000000000000000000000000001",
+                "valueDecoded": null
+              },
+              {
+                "name": "oldOwner",
+                "type": "address",
+                "value": "0x01A9F68e339da12565cfBc47fe7D6EdEcB11C46f",
+                "valueDecoded": null
+              },
+              {
+                "name": "newOwner",
+                "type": "address",
+                "value": "0x8a39cE4E27C326B87B75AaFf820D442311CD8E4E",
+                "valueDecoded": null
+              }
+            ]
+          },
+          "settingsInfo": {
+            "type": "SWAP_OWNER",
+            "oldOwner": { "value": "0x01A9F68e339da12565cfBc47fe7D6EdEcB11C46f", "name": null, "logoUri": null },
+            "newOwner": { "value": "0x8a39cE4E27C326B87B75AaFf820D442311CD8E4E", "name": null, "logoUri": null }
+          }
+        },
+        "id": "multisig_0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb_0xd7a2578ba2e610959961ad9816115d33521d7e7904797cece08051c38fa3af6f",
+        "timestamp": 1701344748000,
+        "txStatus": "SUCCESS",
+        "executionInfo": {
+          "type": "MULTISIG",
+          "nonce": 7,
+          "confirmationsRequired": 1,
+          "confirmationsSubmitted": 1,
+          "missingSigners": null
+        },
+        "safeAppInfo": null,
+        "txHash": "0x8cf95d03bcf824b5251636bfb827c8e97f5f17fd4932b6ff343553c449472f17"
+      },
+      "conflictType": "None"
+    },
+    {
+      "type": "TRANSACTION",
+      "transaction": {
+        "txInfo": {
+          "type": "Transfer",
+          "humanDescription": null,
+          "sender": { "value": "0x96D4c6fFC338912322813a77655fCC926b9A5aC5", "name": null, "logoUri": null },
+          "recipient": {
+            "value": "0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb",
+            "name": "GnosisSafeProxy",
+            "logoUri": null
+          },
+          "direction": "INCOMING",
+          "transferInfo": { "type": "NATIVE_COIN", "value": "500000000000000" }
+        },
+        "id": "transfer_0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb_i2339acf27d3ed017e8b25bb4d9f83439a11a37a4b1a121ecb46284c5143c058a",
+        "timestamp": 1701344064000,
+        "txStatus": "SUCCESS",
+        "executionInfo": null,
+        "safeAppInfo": null,
+        "txHash": "0x2339acf27d3ed017e8b25bb4d9f83439a11a37a4b1a121ecb46284c5143c058a"
+      },
+      "conflictType": "None"
+    },
+    {
+      "type": "TRANSACTION",
+      "transaction": {
+        "txInfo": {
+          "type": "Custom",
+          "humanDescription": null,
+          "to": {
+            "value": "0xA1dabEF33b3B82c7814B6D82A79e50F4AC44102B",
+            "name": "Safe: MultiSendCallOnly 1.3.0",
+            "logoUri": "https://safe-transaction-assets.staging.5afe.dev/contracts/logos/0xA1dabEF33b3B82c7814B6D82A79e50F4AC44102B.png"
+          },
+          "dataSize": "452",
+          "value": "0",
+          "methodName": "multiSend",
+          "actionCount": 2,
+          "isCancellation": false
+        },
+        "id": "multisig_0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb_0xfac5d6ee5e07a48c5313e059da5828f9f16cdbb3bcacfd479ac8c121eb6cc86e",
+        "timestamp": 1701343740000,
+        "txStatus": "SUCCESS",
+        "executionInfo": {
+          "type": "MULTISIG",
+          "nonce": 6,
+          "confirmationsRequired": 1,
+          "confirmationsSubmitted": 1,
+          "missingSigners": null
+        },
+        "safeAppInfo": null,
+        "txHash": "0x580a9ee45b5a3e15691e283f7cec0df95f4f7b60da64bb35420595f484d9005d"
+      },
+      "conflictType": "None"
+    },
+    {
+      "type": "TRANSACTION",
+      "transaction": {
+        "txInfo": {
+          "type": "SettingsChange",
+          "humanDescription": "Add new owner 0x01A9...C46f with threshold 1",
+          "dataDecoded": {
+            "method": "addOwnerWithThreshold",
+            "parameters": [
+              {
+                "name": "owner",
+                "type": "address",
+                "value": "0x01A9F68e339da12565cfBc47fe7D6EdEcB11C46f",
+                "valueDecoded": null
+              },
+              { "name": "_threshold", "type": "uint256", "value": "1", "valueDecoded": null }
+            ]
+          },
+          "settingsInfo": {
+            "type": "ADD_OWNER",
+            "owner": { "value": "0x01A9F68e339da12565cfBc47fe7D6EdEcB11C46f", "name": null, "logoUri": null },
+            "threshold": 1
+          }
+        },
+        "id": "multisig_0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb_0xdcc572db274bb0dbf704ec0dc173c484726709fda240a453a2477db973f6e1b2",
+        "timestamp": 1701343644000,
+        "txStatus": "SUCCESS",
+        "executionInfo": {
+          "type": "MULTISIG",
+          "nonce": 5,
+          "confirmationsRequired": 1,
+          "confirmationsSubmitted": 1,
+          "missingSigners": null
+        },
+        "safeAppInfo": null,
+        "txHash": "0x51d526bb4588b06106d39f28e51bb32f8473fcea127c2b1ad4ad71336ddeda62"
+      },
+      "conflictType": "None"
+    },
+    {
+      "type": "TRANSACTION",
+      "transaction": {
+        "txInfo": {
+          "type": "Custom",
+          "humanDescription": null,
+          "to": {
+            "value": "0xA1dabEF33b3B82c7814B6D82A79e50F4AC44102B",
+            "name": "Safe: MultiSendCallOnly 1.3.0",
+            "logoUri": "https://safe-transaction-assets.staging.5afe.dev/contracts/logos/0xA1dabEF33b3B82c7814B6D82A79e50F4AC44102B.png"
+          },
+          "dataSize": "260",
+          "value": "0",
+          "methodName": "multiSend",
+          "actionCount": 2,
+          "isCancellation": false
+        },
+        "id": "multisig_0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb_0x417227c10599d67ed82ffd8424979991fd4b5185ace6256e9a1157570d9c665d",
+        "timestamp": 1701343440000,
+        "txStatus": "SUCCESS",
+        "executionInfo": {
+          "type": "MULTISIG",
+          "nonce": 4,
+          "confirmationsRequired": 1,
+          "confirmationsSubmitted": 1,
+          "missingSigners": null
+        },
+        "safeAppInfo": null,
+        "txHash": "0x833ee631f939f149b3fe7f30beec0fb89b40ee327f84a22cc7d86eac5793b88c"
+      },
+      "conflictType": "None"
+    },
+    {
+      "type": "TRANSACTION",
+      "transaction": {
+        "txInfo": {
+          "type": "Custom",
+          "humanDescription": null,
+          "to": { "value": "0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb", "name": "GnosisSafeProxy", "logoUri": null },
+          "dataSize": "0",
+          "value": "0",
+          "methodName": null,
+          "actionCount": null,
+          "isCancellation": true
+        },
+        "id": "multisig_0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb_0x13037f442aa430867c6f50799382fe42ae788896e2d032a6849bf07bc87d0fe2",
+        "timestamp": 1701343044000,
+        "txStatus": "SUCCESS",
+        "executionInfo": {
+          "type": "MULTISIG",
+          "nonce": 3,
+          "confirmationsRequired": 1,
+          "confirmationsSubmitted": 1,
+          "missingSigners": null
+        },
+        "safeAppInfo": null,
+        "txHash": "0x4fbfb61f83380aa165155f87ef49407a109a922bbdb8bebd8cb6539f78e0067d"
+      },
+      "conflictType": "None"
+    },
+    {
+      "type": "TRANSACTION",
+      "transaction": {
+        "txInfo": {
+          "type": "Custom",
+          "humanDescription": null,
+          "to": { "value": "0xCFbFaC74C26F8647cBDb8c5caf80BB5b32E43134", "name": "AllowanceModule", "logoUri": null },
+          "dataSize": "68",
+          "value": "0",
+          "methodName": "deleteAllowance",
+          "actionCount": null,
+          "isCancellation": false
+        },
+        "id": "multisig_0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb_0x4380e4deadbd29fb0d098bdfe80572bc22985586e0b400732af8371a5595b84c",
+        "timestamp": 1701342528000,
+        "txStatus": "SUCCESS",
+        "executionInfo": {
+          "type": "MULTISIG",
+          "nonce": 2,
+          "confirmationsRequired": 1,
+          "confirmationsSubmitted": 1,
+          "missingSigners": null
+        },
+        "safeAppInfo": null,
+        "txHash": "0xd6e886cc910a9aceb57f9e55c20b9f8edf4442527336df2b8b4328cad4f5de8b"
+      },
+      "conflictType": "None"
+    }
+  ]
+}

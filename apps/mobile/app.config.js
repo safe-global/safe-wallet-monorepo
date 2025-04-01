@@ -74,6 +74,7 @@ export default {
         {
           cameraPermissionText: 'Safe{Wallet} needs access to your Camera to scan QR Codes.',
           enableCodeScanner: true,
+          enableLocation: false
         },
       ],
       ['./expo-plugins/withDrawableAssets.js', './assets/android/drawable'],
@@ -90,6 +91,7 @@ export default {
       ],
       '@react-native-firebase/app',
       '@react-native-firebase/messaging',
+      '@react-native-firebase/crashlytics',
       [
         'react-native-share',
         {

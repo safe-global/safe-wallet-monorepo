@@ -8,7 +8,7 @@ import { FIREBASE_VAPID_KEY, initializeFirebaseApp } from '@/services/push-notif
 import packageJson from '../../../../package.json'
 import { logError } from '@/services/exceptions'
 import ErrorCodes from '@/services/exceptions/ErrorCodes'
-import { checksumAddress } from '@/utils/addresses'
+import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { isLedger } from '@/utils/wallets'
 import { createWeb3 } from '@/hooks/wallets/web3'
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'

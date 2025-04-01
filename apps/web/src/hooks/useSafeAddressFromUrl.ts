@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { useRouter } from 'next/router'
-import { parsePrefixedAddress } from '@/utils/addresses'
+import { parsePrefixedAddress } from '@safe-global/utils/utils/addresses'
 
 export const useSafeAddressFromUrl = (): string => {
   const router = useRouter()

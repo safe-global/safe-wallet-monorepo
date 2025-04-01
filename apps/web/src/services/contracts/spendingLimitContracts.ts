@@ -4,7 +4,7 @@ import type { AllowanceModule } from '@/types/contracts'
 import { AllowanceModule__factory } from '@/types/contracts'
 import type { JsonRpcProvider, JsonRpcSigner } from 'ethers'
 import type { SafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
-import { sameAddress } from '@/utils/addresses'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 
 enum ALLOWANCE_MODULE_VERSIONS {
   '0.1.0' = '0.1.0',

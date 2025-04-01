@@ -37,6 +37,8 @@ const limitOrderExpiryItem = (item) => `div[data-valuetext="${item}"]`
 const tokenBlock = '[data-testid="block-label"]'
 const confirmPriceImpactInput = '[id="confirm-modal-input"]'
 const confirmPriceImpactBtn = '[id="confirm-modal-button"]'
+const tokenBalance = 'div[class*="TokenMetadata"]'
+const tokenItem = 'div[class*="TokenItem"]'
 
 const limitStrBtn = 'Limit'
 const swapStrBtn = 'Swap'
@@ -260,7 +262,7 @@ export function clickOnReviewOrderBtn() {
       }
       cy.wrap($button).click()
     })
-  cy.get(reviewTwapBtn).click()
+  cy.get(reviewTwapBtn).should('be.enabled').click()
 }
 
 export function placeTwapOrder() {
@@ -274,20 +276,30 @@ export function placeTwapOrder() {
       }
       cy.wrap($button).click()
     })
-  cy.contains(placeTwapOrderStrBtn).click()
+  cy.get('button').contains(placeTwapOrderStrBtn).should('be.enabled').click()
 }
 
 export function confirmPriceImpact() {
   cy.wait(3000)
-  cy.get(confirmPriceImpactInput)
+
+  cy.get('span')
+    .contains('Swap anyway')
     .should(() => {})
-    .then(($input) => {
-      if (!$input.length) {
-        return
+    .then(($checkbox) => {
+      if ($checkbox.length) {
+        cy.wrap($checkbox).type('confirm')
+        cy.get(confirmPriceImpactBtn).should('be.enabled').click()
+      } else {
+        cy.get(confirmPriceImpactInput)
+          .should(() => {})
+          .then(($input) => {
+            if ($input.length) {
+              cy.wrap($input).type('confirm')
+              cy.get(confirmPriceImpactBtn).should('be.enabled').click()
+            }
+          })
       }
-      cy.wrap($input).type('confirm')
     })
-  cy.get(confirmPriceImpactBtn).should('be.enabled').click()
 }
 
 export function placeLimitOrder() {
@@ -558,14 +570,14 @@ export function checkPercentageFilled(percentage, str) {
 export function clickOnTokenSelctor(direction) {
   let selector = inputCurrencyInput
   if (direction === 'output') selector = outputCurrencyInput
-  cy.get(selector).find('button').click()
+  cy.get(selector).find('button').eq(0).click()
 }
 
 export function checkTokenList(tokens) {
   cy.get(tokenList).within(() => {
     tokens.forEach(({ name, balance }) => {
-      cy.get('span').contains(name).should('exist')
-      cy.get('span').contains(balance).should('exist')
+      cy.get(tokenItem).contains(name).should('exist')
+      cy.get(tokenBalance).contains(balance).should('exist')
     })
   })
 }
@@ -613,6 +625,7 @@ export function checkTwapSettlement(index, sentValue, receivedValue) {
 }
 
 export function getTwapInitialData() {
+  cy.wait(1000)
   let formData = {}
 
   return cy
