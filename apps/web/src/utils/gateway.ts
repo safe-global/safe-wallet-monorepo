@@ -18,13 +18,14 @@ export const signTxServiceMessage = async (
     domain: {
       name: 'Safe Transaction Service',
       version: '1.0',
-      chainId,
+      chainId: Number(chainId),
       verifyingContract: safeAddress,
     },
     message: {
       safeTxHash,
       totp: Math.floor(Date.now() / 3600e3),
     },
+    primaryType: 'DeleteRequest',
   })
 }
 

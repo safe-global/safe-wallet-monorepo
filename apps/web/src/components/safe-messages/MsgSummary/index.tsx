@@ -1,7 +1,7 @@
+import type { MessageItem } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
+import type { SafeMessageStatus } from '@safe-global/store/gateway/types'
 import { Box, CircularProgress, type Palette, Typography } from '@mui/material'
 import type { ReactElement } from 'react'
-import { SafeMessageStatus } from '@safe-global/safe-gateway-typescript-sdk'
-import type { SafeMessage } from '@safe-global/safe-gateway-typescript-sdk'
 
 import DateTime from '@/components/common/DateTime'
 import MsgType from '@/components/safe-messages/MsgType'
@@ -15,19 +15,19 @@ import { isEIP712TypedData } from '@/utils/safe-messages'
 
 const getStatusColor = (value: SafeMessageStatus, palette: Palette): string => {
   switch (value) {
-    case SafeMessageStatus.CONFIRMED:
+    case 'CONFIRMED':
       return palette.success.main
-    case SafeMessageStatus.NEEDS_CONFIRMATION:
+    case 'NEEDS_CONFIRMATION':
       return palette.warning.main
     default:
       return palette.text.primary
   }
 }
 
-const MsgSummary = ({ msg }: { msg: SafeMessage }): ReactElement => {
+const MsgSummary = ({ msg }: { msg: MessageItem }): ReactElement => {
   const { confirmationsSubmitted, confirmationsRequired } = msg
   const txStatusLabel = useSafeMessageStatus(msg)
-  const isConfirmed = msg.status === SafeMessageStatus.CONFIRMED
+  const isConfirmed = msg.status === 'CONFIRMED'
   const isPending = useIsSafeMessagePending(msg.messageHash)
   let type = ''
   if (isEIP712TypedData(msg.message)) {

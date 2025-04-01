@@ -1,3 +1,4 @@
+import type { MessageItem } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import {
   Grid,
   Button,
@@ -14,9 +15,7 @@ import {
 import { useTheme } from '@mui/material/styles'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import { useContext, useEffect } from 'react'
-import { SafeMessageListItemType, SafeMessageStatus } from '@safe-global/safe-gateway-typescript-sdk'
 import type { ReactElement } from 'react'
-import type { SafeMessage } from '@safe-global/safe-gateway-typescript-sdk'
 import type { RequestId } from '@safe-global/safe-apps-sdk'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import RequiredIcon from '@/public/images/messages/required.svg'
@@ -60,7 +59,7 @@ import NetworkWarning from '@/components/new-safe/create/NetworkWarning'
 import { getDomainHash, getSafeMessageMessageHash } from '@/utils/safe-hashes'
 import type { SafeVersion } from '@safe-global/safe-core-sdk-types'
 
-const createSkeletonMessage = (confirmationsRequired: number): SafeMessage => {
+const createSkeletonMessage = (confirmationsRequired: number): MessageItem => {
   return {
     confirmations: [],
     confirmationsRequired,
@@ -74,8 +73,8 @@ const createSkeletonMessage = (confirmationsRequired: number): SafeMessage => {
     proposedBy: {
       value: '',
     },
-    status: SafeMessageStatus.NEEDS_CONFIRMATION,
-    type: SafeMessageListItemType.MESSAGE,
+    status: 'NEEDS_CONFIRMATION',
+    type: 'MESSAGE',
   }
 }
 
@@ -220,7 +219,7 @@ const BlindSigningWarning = ({
   )
 }
 
-const SuccessCard = ({ safeMessage, onContinue }: { safeMessage: SafeMessage; onContinue: () => void }) => {
+const SuccessCard = ({ safeMessage, onContinue }: { safeMessage: MessageItem; onContinue: () => void }) => {
   return (
     <TxCard>
       <Typography
@@ -242,7 +241,7 @@ const SuccessCard = ({ safeMessage, onContinue }: { safeMessage: SafeMessage; on
   )
 }
 
-type BaseProps = Pick<SafeMessage, 'logoUri' | 'name' | 'message'>
+type BaseProps = Pick<MessageItem, 'logoUri' | 'name' | 'message'>
 
 export type SignMessageProps = BaseProps & {
   origin?: string

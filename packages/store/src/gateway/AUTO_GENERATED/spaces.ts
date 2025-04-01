@@ -211,7 +211,8 @@ export type DeleteSpaceSafesDto = {
 }
 export type Invitation = {
   userId: number
-  orgId: number
+  name: string
+  spaceId: number
   role: 'ADMIN' | 'MEMBER'
   status: 'INVITED' | 'ACTIVE' | 'DECLINED'
   invitedBy?: string | null
