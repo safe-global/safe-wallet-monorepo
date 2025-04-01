@@ -84,7 +84,7 @@ const NoSpacesState = () => {
           </Link>
         </Box>
         <Track {...SPACE_EVENTS.CREATE_SPACE_MODAL} label={SPACE_LABELS.space_list_page}>
-          <AddSpaceButton disabled={false} size="medium" />
+          <AddSpaceButton disabled={false} />
         </Track>
       </Card>
       {isInfoOpen && (
