@@ -1,6 +1,6 @@
 import { _isL2 } from '@safe-global/utils/services/contracts/deployments'
 import { getSafeProvider } from '@/services/tx/tx-sender/sdk'
-import { type GetContractProps, SafeProvider } from '@safe-global/protocol-kit'
+import { SafeProvider } from '@safe-global/protocol-kit'
 import {
   getCompatibilityFallbackHandlerContractInstance,
   getMultiSendCallOnlyContractInstance,
@@ -9,35 +9,14 @@ import {
   getSignMessageLibContractInstance,
 } from '@safe-global/protocol-kit/dist/src/contracts/contractInstances'
 import type SafeBaseContract from '@safe-global/protocol-kit/dist/src/contracts/Safe/SafeBaseContract'
-import { type ChainInfo, ImplementationVersionState } from '@safe-global/safe-gateway-typescript-sdk'
 import type { SafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
-import type { SafeVersion } from '@safe-global/safe-core-sdk-types'
-import { assertValidSafeVersion, getSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
+import { type ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import { getSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
 import semver from 'semver'
 import { getSafeMigrationDeployment } from '@safe-global/safe-deployments'
 import { SAFE_TO_L2_MIGRATION_VERSION } from '@/utils/safe-migrations'
 import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
-
-// `UNKNOWN` is returned if the mastercopy does not match supported ones
-// @see https://github.com/safe-global/safe-client-gateway/blob/main/src/routes/safes/handlers/safes.rs#L28-L31
-//      https://github.com/safe-global/safe-client-gateway/blob/main/src/routes/safes/converters.rs#L77-L79
-export const isValidMasterCopy = (implementationVersionState: SafeInfo['implementationVersionState']): boolean => {
-  return implementationVersionState !== ImplementationVersionState.UNKNOWN
-}
-
-export const _getValidatedGetContractProps = (
-  safeVersion: SafeInfo['version'],
-): Pick<GetContractProps, 'safeVersion'> => {
-  assertValidSafeVersion(safeVersion)
-
-  // SDK request here: https://github.com/safe-global/safe-core-sdk/issues/261
-  // Remove '+L2'/'+Circles' metadata from version
-  const [noMetadataVersion] = safeVersion.split('+')
-
-  return {
-    safeVersion: noMetadataVersion as SafeVersion,
-  }
-}
+import { _getValidatedGetContractProps } from '@safe-global/utils/services/contracts/safeContracts'
 
 // GnosisSafe
 

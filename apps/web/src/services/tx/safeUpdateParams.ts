@@ -4,7 +4,6 @@ import { OperationType } from '@safe-global/safe-core-sdk-types'
 import type { ChainInfo, SafeInfo, TransactionData } from '@safe-global/safe-gateway-typescript-sdk'
 import semverSatisfies from 'semver/functions/satisfies'
 import { getReadOnlyFallbackHandlerContract, getReadOnlyGnosisSafeContract } from '@/services/contracts/safeContracts'
-import { assertValidSafeVersion } from '@/hooks/coreSDK/safeCoreSDK'
 import { SAFE_FEATURES } from '@safe-global/protocol-kit/dist/src/utils/safeVersions'
 import { hasSafeFeature } from '@/utils/safe-versions'
 import { createUpdateMigration, SAFE_TO_L2_MIGRATION_VERSION } from '@/utils/safe-migrations'
@@ -15,6 +14,7 @@ import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { determineMasterCopyVersion } from '@/features/counterfactual/utils'
 import { getSafeMigrationDeployment } from '@safe-global/safe-deployments'
 import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
+import { assertValidSafeVersion } from '@safe-global/utils/services/contracts/utils'
 
 const getChangeFallbackHandlerCallData = async (
   safeContractInstance: SafeContractImplementationType,
