@@ -22,8 +22,8 @@ import commonCss from '@/components/tx-flow/common/styles.module.css'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { createUpdateThresholdTx } from '@/services/tx/tx-sender'
-import { TxFlowContext } from '@/components/tx-flow-2/TxFlowProvider'
-import { TxFlowStep } from '@/components/tx-flow-2/TxFlowStep'
+import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
+import { TxFlowStep } from '@/components/tx-flow/TxFlowStep'
 
 export const ChooseThreshold = () => {
   const { onNext, data } = useContext(TxFlowContext)

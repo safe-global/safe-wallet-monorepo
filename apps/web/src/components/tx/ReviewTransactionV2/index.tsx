@@ -4,8 +4,8 @@ import ReviewTransactionSkeleton from './ReviewTransactionSkeleton'
 import useTxPreview from '../confirmation-views/useTxPreview'
 import type { ReviewTransactionContentProps } from './ReviewTransactionContent'
 import ReviewTransactionContent from './ReviewTransactionContent'
-import { TxFlowStep } from '@/components/tx-flow-2/TxFlowStep'
-import { TxFlowContext } from '@/components/tx-flow-2/TxFlowProvider'
+import { TxFlowStep } from '@/components/tx-flow/TxFlowStep'
+import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
 
 const ReviewTransaction = (props: ReviewTransactionContentProps) => {
   const { safeTx, safeTxError } = useContext(SafeTxContext)

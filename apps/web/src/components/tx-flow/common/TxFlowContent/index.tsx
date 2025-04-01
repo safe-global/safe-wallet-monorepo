@@ -1,4 +1,4 @@
-import { TxFlowContext } from '../../../tx-flow-2/TxFlowProvider'
+import { TxFlowContext } from '../../TxFlowProvider'
 import { type ReactNode, useContext, useEffect, useState } from 'react'
 import { Box, Container, Grid, Typography, Button, Paper, IconButton, useMediaQuery } from '@mui/material'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'

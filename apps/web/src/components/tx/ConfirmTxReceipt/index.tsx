@@ -10,7 +10,7 @@ import Track from '@/components/common/Track'
 import { MODALS_EVENTS } from '@/services/analytics'
 import useWallet from '@/hooks/wallets/useWallet'
 import { isHardwareWallet, isLedgerLive } from '@/utils/wallets'
-import { TxFlowStep } from '@/components/tx-flow-2/TxFlowStep'
+import { TxFlowStep } from '@/components/tx-flow/TxFlowStep'
 
 const InfoSteps = [
   {

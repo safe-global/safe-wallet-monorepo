@@ -3,13 +3,13 @@ import useTxStepper from './useTxStepper'
 import SafeTxProvider from './SafeTxProvider'
 import { TxInfoProvider } from './TxInfoProvider'
 import { TxSecurityProvider } from '../tx/security/shared/TxSecurityContext'
-import TxFlowProvider, { type TxFlowContextType } from '../tx-flow-2/TxFlowProvider'
+import TxFlowProvider, { type TxFlowContextType } from './TxFlowProvider'
 import { TxFlowContent } from './common/TxFlowContent'
-import { withMiddlewares } from '../tx-flow-2/withMiddlewares'
+import { withMiddlewares } from './withMiddlewares'
 import ReviewTransaction from '../tx/ReviewTransactionV2'
 import { ConfirmTxReceipt } from '../tx/ConfirmTxReceipt'
-import { TxChecks, TxNote } from '../tx-flow-2/features'
-import { Batching, Counterfactual, Execute, ExecuteThroughRole, Propose, Sign } from '../tx-flow-2/actions'
+import { TxChecks, TxNote } from './features'
+import { Batching, Counterfactual, Execute, ExecuteThroughRole, Propose, Sign } from './actions'
 
 type ComponentWithChildren<T> = ComponentType<PropsWithChildren<T>>
 

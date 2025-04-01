@@ -1,6 +1,6 @@
 import { MODAL_NAVIGATION, trackEvent } from '@/services/analytics'
 import { useCallback, useState } from 'react'
-import { txFlowDispatch, TxFlowEvent } from '../tx-flow-2/txFlowEvents'
+import { txFlowDispatch, TxFlowEvent } from './txFlowEvents'
 
 const useTxStepper = <T extends unknown>(initialData: T, eventCategory?: string) => {
   const [step, setStep] = useState(0)

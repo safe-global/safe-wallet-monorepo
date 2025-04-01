@@ -5,7 +5,7 @@ import { createExistingTx } from '@/services/tx/tx-sender'
 import ReviewTransaction from '@/components/tx/ReviewTransactionV2'
 import type { ReviewTransactionContentProps } from '@/components/tx/ReviewTransactionV2/ReviewTransactionContent'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
-import { TxFlowContext } from '@/components/tx-flow-2/TxFlowProvider'
+import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
 
 type ConfirmProposedTxProps = {
   txNonce: number | undefined

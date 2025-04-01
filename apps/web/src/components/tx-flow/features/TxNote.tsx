@@ -2,7 +2,7 @@ import type { ReactElement } from 'react'
 import { useCallback, useContext, useState } from 'react'
 import madProps from '@/utils/mad-props'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
-import { TxFlowContext } from '@/components/tx-flow-2/TxFlowProvider'
+import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
 import { encodeTxNote, trackAddNote, TxNoteForm } from '@/features/tx-notes'
 import { TxFlowEvent, useOnEvent } from '../txFlowEvents'
 

@@ -21,7 +21,7 @@ import { SignerForm } from '../SignOrExecuteForm/SignerForm'
 import UnknownContractError from '../SignOrExecuteForm/UnknownContractError'
 import { Button, CardActions, CircularProgress, Stack } from '@mui/material'
 import CheckWallet from '@/components/common/CheckWallet'
-import { TxFlowContext } from '@/components/tx-flow-2/TxFlowProvider'
+import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
 import useIsCounterfactualSafe from '@/features/counterfactual/hooks/useIsCounterfactualSafe'
 
 export type ReviewTransactionContentProps = PropsWithChildren<{

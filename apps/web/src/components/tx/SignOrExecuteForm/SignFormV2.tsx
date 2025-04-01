@@ -19,7 +19,7 @@ import { isWalletRejection } from '@/utils/wallets'
 import { useSigner } from '@/hooks/wallets/useWallet'
 import { NestedTxSuccessScreenFlow } from '@/components/tx-flow/flows'
 import { useValidateTxData } from '@/hooks/useValidateTxData'
-import { TxFlowContext } from '@/components/tx-flow-2/TxFlowProvider'
+import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
 
 export const SignFormV2 = ({
   safeTx,

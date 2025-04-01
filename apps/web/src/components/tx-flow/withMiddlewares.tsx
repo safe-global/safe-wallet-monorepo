@@ -1,5 +1,5 @@
 import React, { type ComponentType, type PropsWithChildren, type ReactNode } from 'react'
-import type { NextStepCallback, SubmitCallback } from '../tx-flow/createTxFlow'
+import type { NextStepCallback, SubmitCallback } from './createTxFlow'
 
 const AppendElements = <T extends object = {}>({
   children,

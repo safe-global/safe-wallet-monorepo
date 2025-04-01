@@ -1,7 +1,7 @@
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { useCallback, useContext } from 'react'
 import { TxFlowContext } from '../TxFlowProvider'
-import type { SubmitCallback } from '../../tx-flow/createTxFlow'
+import type { SubmitCallback } from '../createTxFlow'
 import ProposerForm from '@/components/tx/SignOrExecuteForm/ProposerForm'
 
 type ProposeProps = {
