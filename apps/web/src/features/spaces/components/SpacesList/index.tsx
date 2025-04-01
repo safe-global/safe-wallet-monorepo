@@ -18,7 +18,7 @@ import Track from '@/components/common/Track'
 import SpaceInfoModal from '../SpaceInfoModal'
 import { filterSpacesByStatus } from '@/features/spaces/utils'
 
-const AddSpaceButton = ({ disabled }: { disabled: boolean }) => {
+const AddSpaceButton = () => {
   const [openCreationModal, setOpenCreationModal] = useState<boolean>(false)
 
   return (
@@ -29,7 +29,6 @@ const AddSpaceButton = ({ disabled }: { disabled: boolean }) => {
         size="small"
         onClick={() => setOpenCreationModal(true)}
         sx={{ height: '36px' }}
-        disabled={disabled}
       >
         <Box mt="1px">Create space</Box>
       </Button>
@@ -84,7 +83,7 @@ const NoSpacesState = () => {
           </Link>
         </Box>
         <Track {...SPACE_EVENTS.CREATE_SPACE_MODAL} label={SPACE_LABELS.space_list_page}>
-          <AddSpaceButton disabled={false} />
+          <AddSpaceButton />
         </Track>
       </Card>
       {isInfoOpen && (
@@ -111,7 +110,7 @@ const SpacesList = () => {
 
           {isUserSignedIn && activeSpaces.length > 0 && (
             <Track {...SPACE_EVENTS.CREATE_SPACE_MODAL} label={SPACE_LABELS.space_list_page}>
-              <AddSpaceButton disabled={false} />
+              <AddSpaceButton />
             </Track>
           )}
         </Box>
