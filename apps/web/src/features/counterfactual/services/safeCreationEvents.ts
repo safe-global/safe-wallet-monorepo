@@ -1,6 +1,6 @@
-import type { PayMethod } from '@/features/counterfactual/PayNowPayLater'
 import EventBus from '@/services/EventBus'
 import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import type { PayMethod } from '@safe-global/utils/features/counterfactual/types'
 
 export enum SafeCreationEvent {
   AWAITING_EXECUTION = 'AWAITING_EXECUTION',

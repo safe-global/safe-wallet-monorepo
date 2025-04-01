@@ -1,7 +1,8 @@
 import { faker } from '@faker-js/faker/locale/af_ZA'
 import { getDeviatingSetups, getSafeSetups, getSharedSetup, isMultiChainSafeItem } from './utils'
-import { PendingSafeStatus } from '@/store/slices'
-import { PayMethod } from '@/features/counterfactual/PayNowPayLater'
+import { PendingSafeStatus } from '@safe-global/utils/features/counterfactual/store/types'
+
+import { PayMethod } from '@safe-global/utils/features/counterfactual/types'
 
 describe('multiChain/utils', () => {
   describe('isMultiChainSafeItem', () => {

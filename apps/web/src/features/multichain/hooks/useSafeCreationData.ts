@@ -1,6 +1,7 @@
 import useAsync, { type AsyncResult } from '@/hooks/useAsync'
 import { createWeb3ReadOnly } from '@/hooks/wallets/web3'
-import { type UndeployedSafe, selectRpc, type ReplayedSafeProps, selectUndeployedSafes } from '@/store/slices'
+import { selectRpc, selectUndeployedSafes } from '@/store/slices'
+import { type UndeployedSafe, type ReplayedSafeProps } from '@safe-global/utils/features/counterfactual/store/types'
 import { Safe__factory, Safe_proxy_factory__factory } from '@safe-global/utils/types/contracts'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { getCreationTransaction } from '@safe-global/safe-client-gateway-sdk'

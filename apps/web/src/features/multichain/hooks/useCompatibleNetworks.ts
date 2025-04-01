@@ -1,4 +1,3 @@
-import { type ReplayedSafeProps } from '@/features/counterfactual/store/undeployedSafesSlice'
 import useChains from '@/hooks/useChains'
 import { hasCanonicalDeployment, hasMatchingDeployment } from '@safe-global/utils/services/contracts/deployments'
 import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
@@ -12,6 +11,7 @@ import {
   getSafeToL2SetupDeployments,
 } from '@safe-global/safe-deployments'
 import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import type { ReplayedSafeProps } from '@safe-global/utils/features/counterfactual/store/types'
 
 const SUPPORTED_VERSIONS: SafeVersion[] = ['1.4.1', '1.3.0']
 

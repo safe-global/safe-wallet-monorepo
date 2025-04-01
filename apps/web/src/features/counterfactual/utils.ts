@@ -1,13 +1,6 @@
 import { POLLING_INTERVAL } from '@/config/constants'
-import type { PayMethod } from '@/features/counterfactual/PayNowPayLater'
 import { safeCreationDispatch, SafeCreationEvent } from '@/features/counterfactual/services/safeCreationEvents'
-import {
-  addUndeployedSafe,
-  type UndeployedSafeProps,
-  type ReplayedSafeProps,
-  type UndeployedSafe,
-  PendingSafeStatus,
-} from '@/features/counterfactual/store/undeployedSafesSlice'
+import { addUndeployedSafe } from '@/features/counterfactual/store/undeployedSafesSlice'
 import { type ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import { getWeb3ReadOnly } from '@/hooks/wallets/web3'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
@@ -32,6 +25,13 @@ import { sameAddress } from '@safe-global/utils/utils/addresses'
 
 import { encodeSafeCreationTx } from '@/components/new-safe/create/logic'
 import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
+import type {
+  ReplayedSafeProps,
+  UndeployedSafe,
+  UndeployedSafeProps,
+} from '@safe-global/utils/features/counterfactual/store/types'
+import { PendingSafeStatus } from '@safe-global/utils/features/counterfactual/store/types'
+import type { PayMethod } from '@safe-global/utils/features/counterfactual/types'
 
 export const getUndeployedSafeInfo = (undeployedSafe: UndeployedSafe, address: string, chain: ChainInfo) => {
   const safeSetup = extractCounterfactualSafeSetup(undeployedSafe, chain.chainId)
