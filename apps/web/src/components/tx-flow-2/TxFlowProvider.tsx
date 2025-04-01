@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useState } from 'react'
-import type { ReactNode, ReactElement, SetStateAction, Dispatch } from 'react'
+import type { ReactNode, ReactElement, SetStateAction, Dispatch, ComponentType } from 'react'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import { useIsWalletProposer } from '@/hooks/useProposers'
 import { useImmediatelyExecutable, useValidateNonce } from '@/components/tx/SignOrExecuteForm/hooks'
@@ -12,14 +12,13 @@ import {
   useRoles,
 } from '@/components/tx/SignOrExecuteForm/ExecuteThroughRoleForm/hooks'
 import { SafeTxContext } from '../tx-flow/SafeTxProvider'
-import type { TxLayoutProps } from './common/TxLayout'
 import { useLazyGetTransactionDetailsQuery } from '@/store/slices'
 import { trackTxEvents } from '../tx/SignOrExecuteForm/tracking'
 import { useSigner } from '@/hooks/wallets/useWallet'
 import useChainId from '@/hooks/useChainId'
 import useIsCounterfactualSafe from '@/features/counterfactual/hooks/useIsCounterfactualSafe'
 import useTxDetails from '@/hooks/useTxDetails'
-import type { TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
+import type { TransactionDetails, TransactionSummary } from '@safe-global/safe-gateway-typescript-sdk'
 
 export type TxFlowContextType = {
   step: number
@@ -28,7 +27,18 @@ export type TxFlowContextType = {
   onPrev: () => void
   onNext: (data: any) => void
 
-  txLayoutProps: Partial<Omit<TxLayoutProps, 'children' | 'progress' | 'onBack' | 'step'>>
+  txLayoutProps: {
+    title?: ReactNode
+    subtitle?: ReactNode
+    icon?: ComponentType
+    txSummary?: TransactionSummary
+    hideNonce?: boolean
+    fixedNonce?: boolean
+    hideProgress?: boolean
+    isBatch?: boolean
+    isReplacement?: boolean
+    isMessage?: boolean
+  }
   updateTxLayoutProps: (props: TxFlowContextType['txLayoutProps']) => void
   trackTxEvent: (txId: string, isExecuted?: boolean, isRoleExecution?: boolean, isProposerCreation?: boolean) => void
 

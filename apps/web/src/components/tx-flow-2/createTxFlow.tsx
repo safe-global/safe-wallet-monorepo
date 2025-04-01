@@ -4,7 +4,7 @@ import SafeTxProvider from '../tx-flow/SafeTxProvider'
 import { TxInfoProvider } from '../tx-flow/TxInfoProvider'
 import { TxSecurityProvider } from '../tx/security/shared/TxSecurityContext'
 import TxFlowProvider, { type TxFlowContextType } from './TxFlowProvider'
-import { TxFlowContent } from './TxFlowContent'
+import { TxFlowContent } from '../tx-flow/common/TxFlowContent'
 import { withMiddlewares } from './withMiddlewares'
 import ReviewTransaction from '../tx/ReviewTransactionV2'
 import { ConfirmTxReceipt } from '../tx/ConfirmTxReceipt'
@@ -104,8 +104,16 @@ export const createTxFlow = <T extends unknown>({ commonSteps = [] }: TxFlowProp
 }
 
 export const createDefaultTxFlow = <T extends unknown>(
-  ReviewTransactionComponent: ComponentWithChildren<{ onSubmit?: NextStepCallback<T> }> = ReviewTransaction,
-  TxReceiptComponent: ComponentWithChildren<{ onSubmit?: SubmitCallback }> = ConfirmTxReceipt,
+  ReviewTransactionComponent: ComponentWithChildren<{
+    onSubmit?: NextStepCallback<T>
+    actions?: ReactNode
+    features?: ReactNode
+  }> = ReviewTransaction,
+  TxReceiptComponent: ComponentWithChildren<{
+    onSubmit?: SubmitCallback
+    actions?: ReactNode
+    features?: ReactNode
+  }> = ConfirmTxReceipt,
 ) =>
   createTxFlow<T>({
     commonSteps: [
