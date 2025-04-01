@@ -45,7 +45,7 @@ export function ledgerModule(): WalletInit {
         const { hexaStringToBuffer } = await import('@ledgerhq/device-management-kit')
         const { createEIP1193Provider, ProviderRpcError, ProviderRpcErrorCode } = await import('@web3-onboard/common')
         const { accountSelect, getHardwareWalletProvider } = await import('@web3-onboard/hw-common')
-        const { getBytes, Signature, Transaction, JsonRpcProvider } = await import('ethers')
+        const { Signature, Transaction, JsonRpcProvider } = await import('ethers')
 
         const eventEmitter = new EventEmitter()
         const ledgerSdk = await getLedgerSdk()
@@ -175,12 +175,12 @@ export function ledgerModule(): WalletInit {
               })) as string
             },
             eth_sign: async (args) => {
+              // The Safe requires transactions be signed as bytes, but eth_sign is only used by
+              // the Transaction Service, e.g. notification registration. We therefore sign
+              // messages as is to avoid unreadable byte notation (e.g. \xef\xbe\xad\xde). Instead,
+              // the Ledger device shows plain hex (e.g. 0xdeadbeef).
               const message = args.params[1]
-              const signature = await ledgerSdk.signMessage(
-                getAssertedDerivationPath(),
-                // Safe signs bytes
-                getBytes(message),
-              )
+              const signature = await ledgerSdk.signMessage(getAssertedDerivationPath(), message)
               return Signature.from(signature).serialized
             },
             personal_sign: async (args) => {
