@@ -1,5 +1,5 @@
 import type { PropsWithChildren, SyntheticEvent, ReactElement, ReactNode } from 'react'
-import { useState, useContext, useCallback } from 'react'
+import { useContext, useCallback } from 'react'
 import madProps from '@/utils/mad-props'
 import ExecuteCheckbox from '../ExecuteCheckbox'
 import { useImmediatelyExecutable } from '../SignOrExecuteForm/hooks'
@@ -17,7 +17,6 @@ import { useApprovalInfos } from '../ApprovalEditor/hooks/useApprovalInfos'
 import type { TransactionDetails, TransactionPreview } from '@safe-global/safe-gateway-typescript-sdk'
 import NetworkWarning from '@/components/new-safe/create/NetworkWarning'
 import ConfirmationView from '../confirmation-views'
-import { TxNoteForm, encodeTxNote, trackAddNote } from '@/features/tx-notes'
 import { SignerForm } from '../SignOrExecuteForm/SignerForm'
 import UnknownContractError from '../SignOrExecuteForm/UnknownContractError'
 import { Button, CardActions, CircularProgress, Stack } from '@mui/material'
@@ -39,8 +38,6 @@ export const ReviewTransactionContent = ({
   isBatch,
   actions,
   features,
-  txOrigin,
-  setTxOrigin,
   isOwner,
   children,
   txId,
@@ -50,8 +47,6 @@ export const ReviewTransactionContent = ({
   isOwner: ReturnType<typeof useIsSafeOwner>
   safeTx: ReturnType<typeof useSafeTx>
   safeTxError: ReturnType<typeof useSafeTxError>
-  txOrigin: ReturnType<typeof useTxOrigin>
-  setTxOrigin: ReturnType<typeof useSetTxOrigin>
   isCreation?: boolean
   txDetails?: TransactionDetails
   txPreview?: TransactionPreview
@@ -68,9 +63,8 @@ export const ReviewTransactionContent = ({
     isProposing,
     isRejection,
   } = useContext(TxFlowContext)
-  const [customOrigin, setCustomOrigin] = useState<string | undefined>(txOrigin)
-  const isNewExecutableTx = useImmediatelyExecutable() && isCreation
 
+  const isNewExecutableTx = useImmediatelyExecutable() && isCreation
   const [readableApprovals] = useApprovalInfos({ safeTransaction: safeTx })
   const isApproval = readableApprovals && readableApprovals.length > 0
   const isCounterfactualSafe = useIsCounterfactualSafe()
@@ -84,22 +78,9 @@ export const ReviewTransactionContent = ({
   const onContinueClick = useCallback(
     async (e: SyntheticEvent) => {
       e.preventDefault()
-
-      if (customOrigin !== txOrigin) {
-        trackAddNote()
-      }
-
-      setTxOrigin(customOrigin)
       onSubmit?.()
     },
-    [onSubmit, customOrigin, txOrigin, setTxOrigin],
-  )
-
-  const onNoteChange = useCallback(
-    (note: string) => {
-      setCustomOrigin(encodeTxNote(note, txOrigin))
-    },
-    [setCustomOrigin, txOrigin],
+    [onSubmit],
   )
 
   const submitDisabled = !safeTx || !isSubmittable
@@ -130,8 +111,6 @@ export const ReviewTransactionContent = ({
       </TxCard>
 
       {features}
-
-      <TxNoteForm isCreation={isCreation ?? false} onChange={onNoteChange} txDetails={txDetails} />
 
       <SignerForm willExecute={willExecute} />
 
@@ -198,13 +177,9 @@ export const ReviewTransactionContent = ({
 
 const useSafeTx = () => useContext(SafeTxContext).safeTx
 const useSafeTxError = () => useContext(SafeTxContext).safeTxError
-const useTxOrigin = () => useContext(SafeTxContext).txOrigin
-const useSetTxOrigin = () => useContext(SafeTxContext).setTxOrigin
 
 export default madProps(ReviewTransactionContent, {
   isOwner: useIsSafeOwner,
   safeTx: useSafeTx,
-  txOrigin: useTxOrigin,
-  setTxOrigin: useSetTxOrigin,
   safeTxError: useSafeTxError,
 })

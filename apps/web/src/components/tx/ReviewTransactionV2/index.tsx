@@ -1,7 +1,6 @@
 import { useContext } from 'react'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import ReviewTransactionSkeleton from './ReviewTransactionSkeleton'
-import useTxDetails from '@/hooks/useTxDetails'
 import useTxPreview from '../confirmation-views/useTxPreview'
 import type { ReviewTransactionContentProps } from './ReviewTransactionContent'
 import ReviewTransactionContent from './ReviewTransactionContent'
@@ -10,8 +9,7 @@ import { TxFlowContext } from '@/components/tx-flow-2/TxFlowProvider'
 
 const ReviewTransaction = (props: ReviewTransactionContentProps) => {
   const { safeTx, safeTxError } = useContext(SafeTxContext)
-  const { txId } = useContext(TxFlowContext)
-  const [txDetails, , txDetailsLoading] = useTxDetails(txId)
+  const { txId, txDetails, txDetailsLoading } = useContext(TxFlowContext)
   const [txPreview, , txPreviewLoading] = useTxPreview(safeTx?.data, undefined, txId)
 
   if ((!safeTx && !safeTxError) || txDetailsLoading || txPreviewLoading) {

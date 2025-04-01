@@ -18,6 +18,8 @@ import { trackTxEvents } from '../tx/SignOrExecuteForm/tracking'
 import { useSigner } from '@/hooks/wallets/useWallet'
 import useChainId from '@/hooks/useChainId'
 import useIsCounterfactualSafe from '@/features/counterfactual/hooks/useIsCounterfactualSafe'
+import useTxDetails from '@/hooks/useTxDetails'
+import { TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
 
 export type TxFlowContextType = {
   step: number
@@ -43,6 +45,8 @@ export type TxFlowContextType = {
   isSubmittable: boolean
   setIsSubmittable: Dispatch<SetStateAction<boolean>>
   willExecuteThroughRole: boolean
+  txDetails?: TransactionDetails
+  txDetailsLoading?: boolean
   showMethodCall?: boolean
   role?: Role
 }
@@ -115,6 +119,7 @@ const TxFlowProvider = <T extends unknown>({
   const [txLayoutProps, setTxLayoutProps] = useState<TxFlowContextType['txLayoutProps']>(defaultTxLayoutProps)
   const [trigger] = useLazyGetTransactionDetailsQuery()
   const isCounterfactualSafe = useIsCounterfactualSafe()
+  const [txDetails, , txDetailsLoading] = useTxDetails(txId)
 
   const isCreation = !txId
   const isNewExecutableTx = useImmediatelyExecutable() && isCreation
@@ -184,6 +189,8 @@ const TxFlowProvider = <T extends unknown>({
     willExecuteThroughRole,
     role: allowingRole || mostLikelyRole,
     showMethodCall,
+    txDetails,
+    txDetailsLoading,
   }
 
   return <TxFlowContext.Provider value={value}>{children}</TxFlowContext.Provider>

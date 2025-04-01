@@ -8,7 +8,7 @@ import { TxFlowContent } from './TxFlowContent'
 import { withMiddlewares } from './withMiddlewares'
 import ReviewTransaction from '../tx/ReviewTransactionV2'
 import { ConfirmTxReceipt } from '../tx/ConfirmTxReceipt'
-import { TxChecks } from './features'
+import { TxChecks, TxNote } from './features'
 import { Batching, Counterfactual, Execute, ExecuteThroughRole, Propose, Sign } from './actions'
 
 type ComponentWithChildren<T> = ComponentType<PropsWithChildren<T>>
@@ -109,7 +109,7 @@ export const createDefaultTxFlow = <T extends unknown>(
 ) =>
   createTxFlow<T>({
     commonSteps: [
-      withMiddlewares<T>(ReviewTransactionComponent, [TxChecks], [Batching]),
+      withMiddlewares<T>(ReviewTransactionComponent, [TxChecks, TxNote], [Batching]),
       withMiddlewares<T, SubmitCallback>(TxReceiptComponent, undefined, [
         Counterfactual,
         Execute,
