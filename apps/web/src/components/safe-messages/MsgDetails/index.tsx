@@ -25,7 +25,7 @@ import MsgShareLink from '../MsgShareLink'
 
 const MsgDetails = ({ msg }: { msg: MessageItem }): ReactElement => {
   const wallet = useWallet()
-  const isConfirmed = msg.status === ('CONFIRMED' as const)
+  const isConfirmed = msg.status === 'CONFIRMED'
   const safeMessage = useMemo(() => {
     try {
       return generateSafeMessageMessage(msg.message)

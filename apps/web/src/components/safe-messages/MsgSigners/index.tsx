@@ -38,7 +38,7 @@ const Signed = () => (
 const Dot = () => <SvgIcon component={DotIcon} inheritViewBox className={css.dot} />
 
 const shouldHideConfirmations = (msg: MessageItem): boolean => {
-  const isConfirmed = msg.status === ('CONFIRMED' as const)
+  const isConfirmed = msg.status === 'CONFIRMED'
 
   // Threshold reached or more than 3 confirmations
   return isConfirmed || msg.confirmations.length > 3
@@ -65,7 +65,7 @@ export const MsgSigners = ({
 
   const missingConfirmations = [...new Array(Math.max(0, confirmationsRequired - confirmationsSubmitted))]
 
-  const isConfirmed = msg.status === ('CONFIRMED' as const)
+  const isConfirmed = msg.status === 'CONFIRMED'
 
   return (
     <List className={css.signers}>

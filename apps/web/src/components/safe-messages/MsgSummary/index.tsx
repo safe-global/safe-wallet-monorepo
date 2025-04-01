@@ -27,7 +27,7 @@ const getStatusColor = (value: SafeMessageStatus, palette: Palette): string => {
 const MsgSummary = ({ msg }: { msg: MessageItem }): ReactElement => {
   const { confirmationsSubmitted, confirmationsRequired } = msg
   const txStatusLabel = useSafeMessageStatus(msg)
-  const isConfirmed = msg.status === ('CONFIRMED' as const)
+  const isConfirmed = msg.status === 'CONFIRMED'
   const isPending = useIsSafeMessagePending(msg.messageHash)
   let type = ''
   if (isEIP712TypedData(msg.message)) {
