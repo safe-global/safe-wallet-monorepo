@@ -11,7 +11,7 @@ const NetworkWarning = () => {
 
   const message = isUnsupportedChain ? (
     <>
-      <strong>Unfortunately, creating a Safe Account on {chain.chainName} is not supported. </strong> Please switch to a
+      <strong>Unfortunately, creating a Safe Account on {chain.chainName} is disabled. </strong> Please switch to a
       supported network.
     </>
   ) : (
