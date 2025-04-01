@@ -23,7 +23,7 @@ describe('API Tx history decimals filter tests', () => {
   it('Verify incoming USDC can be filtered with decimals', () => {
     const params = {
       transactionType: txType_incoming,
-      value: '12087258546746105003',
+      value: '12.087258546746105003',
     }
     const url = buildQueryUrl({ chainId, safeAddress, ...params })
     console.log('*****. Generated URL:', url)
@@ -41,7 +41,7 @@ describe('API Tx history decimals filter tests', () => {
   it('Verify incoming ETH can be filtered with decimals', () => {
     const params = {
       transactionType: txType_incoming,
-      value: '50000000000000000',
+      value: '0.05',
     }
     const url = buildQueryUrl({ chainId, safeAddress, ...params })
     console.log('*****. Generated URL:', url)

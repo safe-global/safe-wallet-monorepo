@@ -1,4 +1,5 @@
 import * as constants from '../../support/constants'
+import { accordionActionItem } from '../pages/create_tx.pages'
 
 const searchAppInput = 'input[id="search-by-name"]'
 const appUrlInput = 'input[name="appUrl"]'
@@ -104,7 +105,13 @@ export const signOnchainMsgStr = 'Sign message (on-chain)'
 export const pinWalletConnectStr = /pin walletconnect/i
 export const transactionBuilderStr = 'Transaction Builder'
 export const cowswapStr = 'CowSwap'
+export const basicTypesTestContractStr = 'BasicTypesTestContract'
 export const testAddressValueStr = 'testAddressValue'
+
+export function checkActions(count, action) {
+  cy.get(accordionActionItem).filter(`:contains("${action}")`).should('have.length', count)
+}
+
 export const logoWalletConnect = /logo.*walletconnect/i
 export const walletConnectHeadlinePreview = /walletconnect/i
 export const newAddressValueStr = 'newValue (address)'
