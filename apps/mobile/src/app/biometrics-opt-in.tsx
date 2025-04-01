@@ -43,7 +43,7 @@ function BiometricsOptIn() {
 
   useEffect(() => {
     if (isBiometricsEnabled) {
-      router.dismissAll()
+      router.dismiss()
       router.push(redirectTo)
     }
   }, [isBiometricsEnabled])

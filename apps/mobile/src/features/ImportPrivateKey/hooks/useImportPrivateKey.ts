@@ -30,7 +30,6 @@ export const useImportPrivateKey = () => {
 
     try {
       await storePrivateKey(wallet.address, privateKey)
-      router.dismiss()
       router.push({
         pathname: '/import-signers/loading',
         params: {

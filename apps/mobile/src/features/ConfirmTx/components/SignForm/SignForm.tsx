@@ -1,11 +1,11 @@
 import React from 'react'
 import { Text, View, YStack, Image } from 'tamagui'
+import Signature from '@/assets/images/signature.png'
 
 import { SafeButton } from '@/src/components/SafeButton'
 import { Identicon } from '@/src/components/Identicon'
 import { Address } from '@/src/types/address'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
-import Signature from '@/assets/images/signature.png'
 import { router } from 'expo-router'
 import { useBiometrics } from '@/src/hooks/useBiometrics'
 import { Contact } from '@/src/features/AddressBook'
@@ -22,7 +22,7 @@ export function SignForm({ address, txId }: SignFormProps) {
     if (isBiometricsEnabled) {
       router.push({ pathname: '/sign-transaction', params: { txId, signerAddress: address } })
     } else {
-      router.push({
+      router.navigate({
         pathname: '/biometrics-opt-in',
         params: { txId, signerAddress: address, caller: '/sign-transaction' },
       })

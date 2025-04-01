@@ -50,10 +50,11 @@ export const AddSignersFormContainer = () => {
         chainId: currentData[0].chainId,
       }),
     )
+
     // Navigates to first screen in stack
     router.dismissAll()
     // closes first screen in stack
-    // router.back()
+    router.back()
     if (!hasActiveSafe) {
       router.replace('/(tabs)')
     } else {
