@@ -20,16 +20,25 @@ export type NextStepCallback<T> = (args?: T) => void
 export type SubmitCallback = (args: SubmitCallbackProps) => void
 export type SubmitCallbackWithData<T> = (args: SubmitCallbackPropsWithData<T>) => void
 
-type TxFlowProps<T extends unknown> = {
-  commonSteps?:
-    | [
-        ...ComponentWithChildren<{ onSubmit: NextStepCallback<T> }>[],
-        ComponentWithChildren<{ onSubmit: SubmitCallback }>,
-      ]
-    | []
-}
+type CommonTxFlowSteps<T extends unknown> =
+  | [...ComponentWithChildren<{ onSubmit: NextStepCallback<T> }>[], ComponentWithChildren<{ onSubmit: SubmitCallback }>]
+  | []
 
-export const createTxFlow = <T extends unknown>({ commonSteps = [] }: TxFlowProps<T>) => {
+/**
+ * Creates a transaction flow component with the provided common steps.
+ * @param commonSteps - Common steps to be used in the end of the transaction flow
+ * @returns a transaction flow component
+ * @example
+ * const MyTxFlow = createTxFlow([Step4, Step5])
+ * <MyTxFlow>
+ *   <Step1 />
+ *   <Step2 />
+ *   <Step3 />
+ * </MyTxFlow>
+ * // This will render Step1, Step2, Step3, Step4 and Step5 in order
+ * // The last step will be Step3, which will have the onSubmit prop passed to it
+ */
+export const createTxFlow = <T extends unknown>(commonSteps: CommonTxFlowSteps<T> = []) => {
   const extraSteps = commonSteps.slice(0, -1) as ComponentWithChildren<{ onSubmit: NextStepCallback<T> }>[]
   const [LastStep] = commonSteps.slice(-1) as [ComponentWithChildren<{ onSubmit: SubmitCallback }>] | []
 
@@ -103,6 +112,20 @@ export const createTxFlow = <T extends unknown>({ commonSteps = [] }: TxFlowProp
   return TxFlow
 }
 
+/**
+ * Creates a transaction flow component with the default steps, features and actions.
+ * @param ReviewTransactionComponent optional component to replace the default ReviewTransaction component
+ * @param TxReceiptComponent optional component to replace the default TxReceipt component
+ * @returns a transaction flow component with the default steps
+ * @example
+ * const MyTxFlow = createDefaultTxFlow()
+ * <MyTxFlow>
+ *   <Step1 />
+ *   <Step2 />
+ * </MyTxFlow>
+ * // This will render Step1, Step2, ReviewTransaction and TxReceipt in order
+ * // The last step will be TxReceipt, which will have the onSubmit prop passed to it
+ */
 export const createDefaultTxFlow = <T extends unknown>(
   ReviewTransactionComponent: ComponentWithChildren<{
     onSubmit?: NextStepCallback<T>
@@ -115,15 +138,13 @@ export const createDefaultTxFlow = <T extends unknown>(
     features?: ReactNode
   }> = ConfirmTxReceipt,
 ) =>
-  createTxFlow<T>({
-    commonSteps: [
-      withMiddlewares<T>(ReviewTransactionComponent, [TxChecks, TxNote], [Batching]),
-      withMiddlewares<T, SubmitCallback>(TxReceiptComponent, undefined, [
-        Counterfactual,
-        Execute,
-        ExecuteThroughRole,
-        Sign,
-        Propose,
-      ]),
-    ],
-  })
+  createTxFlow<T>([
+    withMiddlewares<T>(ReviewTransactionComponent, [TxChecks, TxNote], [Batching]),
+    withMiddlewares<T, SubmitCallback>(TxReceiptComponent, undefined, [
+      Counterfactual,
+      Execute,
+      ExecuteThroughRole,
+      Sign,
+      Propose,
+    ]),
+  ])

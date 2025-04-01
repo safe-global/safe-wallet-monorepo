@@ -1,6 +1,12 @@
 import React, { type ComponentType, type PropsWithChildren, type ReactNode } from 'react'
 import type { NextStepCallback, SubmitCallback } from './createTxFlow'
 
+/**
+ * Recursively appends elements to the children.
+ * @param append - Array of components to be appended
+ * @param props - Props to be passed to the appended components
+ * @returns A new component that renders the children and the appended components
+ */
 const AppendElements = <T extends object = {}>({
   children,
   append = [],
@@ -24,6 +30,12 @@ const AppendElements = <T extends object = {}>({
   return children
 }
 
+/**
+ * Higher-order component to add actions to a component.
+ * @param WrappedComponent - The component to wrap
+ * @param applyActions - An array of action components to be added
+ * @returns A new component that renders the wrapped component with the rendered actions as a prop
+ */
 const withActions = <
   T extends unknown,
   P extends object,
@@ -44,6 +56,12 @@ const withActions = <
   }
 }
 
+/**
+ * Higher-order component to add features to a component.
+ * @param WrappedComponent - The component to wrap
+ * @param applyFeatures - An array of feature components to be added
+ * @returns A new component that renders the wrapped component with the rendered features as a prop
+ */
 const withFeatures = <P extends PropsWithChildren>(
   WrappedComponent: ComponentType<P & { features?: ReactNode }>,
   applyFeatures?: ComponentType[],
@@ -53,6 +71,13 @@ const withFeatures = <P extends PropsWithChildren>(
   }
 }
 
+/**
+ * Higher-order component to add features and actions to a component.
+ * @param WrappedComponent - The component to wrap
+ * @param applyFeatures - An array of feature components to be added
+ * @param applyActions - An array of action components to be added
+ * @returns A new component that renders the wrapped component with the rendered features and actions as props
+ */
 export const withMiddlewares = <
   T extends unknown,
   Callback extends NextStepCallback<T> | SubmitCallback = NextStepCallback<T>,
