@@ -1,32 +1,13 @@
-import chains from '@/config/chains'
-import type { UndeployedSafe } from '@/features/counterfactual/store/undeployedSafesSlice'
+import chains from '@safe-global/utils/config/chains'
 import { getSafeL2SingletonDeployments, getSafeSingletonDeployments } from '@safe-global/safe-deployments'
 import ExternalStore from '@safe-global/utils/services/ExternalStore'
 import { Gnosis_safe__factory } from '@safe-global/utils/types/contracts'
-import type { JsonRpcProvider } from 'ethers'
 import Safe from '@safe-global/protocol-kit'
-import type { SafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import { isValidMasterCopy } from '@safe-global/utils/services/contracts/safeContracts'
-import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { isPredictedSafeProps, isReplayedSafeProps } from '@/features/counterfactual/utils'
 import { isLegacyVersion } from '@safe-global/utils/services/contracts/utils'
-
-type SafeCoreSDKProps = {
-  provider: JsonRpcProvider
-  chainId: SafeInfo['chainId']
-  address: SafeInfo['address']['value']
-  version: SafeInfo['version']
-  implementationVersionState: SafeInfo['implementationVersionState']
-  implementation: SafeInfo['implementation']['value']
-  undeployedSafe?: UndeployedSafe
-}
-
-const isInDeployments = (address: string, deployments: string | string[] | undefined): boolean => {
-  if (Array.isArray(deployments)) {
-    return deployments.some((deployment) => sameAddress(deployment, address))
-  }
-  return sameAddress(address, deployments)
-}
+import { isInDeployments } from '@safe-global/utils/hooks/coreSDK/utils'
+import type { SafeCoreSDKProps } from '@safe-global/utils/hooks/coreSDK/types'
 
 // Safe Core SDK
 export const initSafeSDK = async ({
