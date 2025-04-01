@@ -1,7 +1,7 @@
 import { SafeCreationEvent, safeCreationSubscribe } from '@/features/counterfactual/services/safeCreationEvents'
 import useWallet from '@/hooks/wallets/useWallet'
 import { useGetAllOwnedSafesQuery } from '@/store/api/gateway'
-import { getBlockExplorerLink } from '@/utils/chains'
+import { getBlockExplorerLink } from '@safe-global/utils/utils/chains'
 import { skipToken } from '@reduxjs/toolkit/query'
 import { useEffect } from 'react'
 import { formatError } from '@safe-global/utils/utils/formatters'
