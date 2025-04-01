@@ -7,6 +7,7 @@ import useWallet from '@/hooks/wallets/useWallet'
 import useAllOwnedSafes from '@/features/myAccounts/hooks/useAllOwnedSafes'
 import { useAppSelector } from '@/store'
 import { isMultiChainSafeItem } from '@/features/multichain/utils/utils'
+import type { AllOwnedSafes } from '@safe-global/safe-gateway-typescript-sdk'
 
 export type MultiChainSafeItem = {
   address: string
@@ -31,19 +32,24 @@ export const _buildMultiChainSafeItem = (address: string, safes: SafeItems): Mul
   return { address, safes, isPinned, lastVisited, name }
 }
 
-export function _buildSafeItems(safes: Record<string, string[]>, allSafeNames: AddressBookState): SafeItem[] {
+export function _buildSafeItems(
+  safes: Record<string, string[]>,
+  allSafeNames: AddressBookState,
+  allOwned?: AllOwnedSafes,
+): SafeItem[] {
   const result: SafeItem[] = []
 
   for (const chainId in safes) {
     const addresses = safes[chainId]
 
     addresses.forEach((address) => {
+      const isReadOnly = !!allOwned && !(allOwned[chainId] || []).includes(address)
       const name = allSafeNames[chainId]?.[address]
 
       result.push({
         chainId,
         address,
-        isReadOnly: false,
+        isReadOnly,
         isPinned: false,
         lastVisited: 0,
         name,

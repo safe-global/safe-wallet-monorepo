@@ -8,6 +8,8 @@ import { getComparator } from '@/features/myAccounts/utils/utils'
 import { useMemo } from 'react'
 import { selectAllAddressBooks } from '@/store/addressBookSlice'
 import { isAuthenticated } from '@/store/authSlice'
+import useAllOwnedSafes from '@/features/myAccounts/hooks/useAllOwnedSafes'
+import useWallet from '@/hooks/wallets/useWallet'
 
 export const useSpaceSafes = () => {
   const spaceId = useCurrentSpaceId()
@@ -15,7 +17,9 @@ export const useSpaceSafes = () => {
   const { currentData, isLoading } = useSpaceSafesGetV1Query({ spaceId: Number(spaceId) }, { skip: !isUserSignedIn })
 
   const allSafeNames = useAppSelector(selectAllAddressBooks)
-  const safeItems = currentData ? _buildSafeItems(currentData.safes, allSafeNames) : []
+  const { address: walletAddress = '' } = useWallet() || {}
+  const [allOwned = {}] = useAllOwnedSafes(walletAddress)
+  const safeItems = currentData ? _buildSafeItems(currentData.safes, allSafeNames, allOwned) : []
   const safes = useAllSafesGrouped(safeItems)
   const { orderBy } = useAppSelector(selectOrderByPreference)
   const sortComparator = getComparator(orderBy)
