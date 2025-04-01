@@ -15,6 +15,7 @@ import {
   useMessageHash,
   useSafeTxHash,
 } from '@/components/transactions/TxDetails/Summary/SafeTxHashDataRow'
+import { useAddressName } from '@/components/common/NamedAddressInfo'
 
 type TxDetailsProps = {
   safeTx: SafeTransaction
@@ -49,15 +50,34 @@ const ContentWrapper = ({ children }: { children: ReactElement | ReactElement[] 
   <Box sx={{ maxHeight: '550px', overflowY: 'auto', px: 2 }}>{children}</Box>
 )
 
+const NameChip = ({ txData }: { txData?: TransactionData }) => {
+  const toAddress = txData?.to.value
+  const toInfo = txData?.addressInfoIndex?.[txData?.to.value] || txData?.to
+  const toName = toInfo?.name || (toInfo && 'displayName' in toInfo ? String(toInfo.displayName || '') : undefined)
+  const toLogo = toInfo?.logoUri
+  const contractInfo = useAddressName(toAddress, toName)
+  const name = toName || contractInfo?.name
+  const logo = toLogo || contractInfo?.logoUri
+
+  return toAddress && (name || logo) ? (
+    <Chip
+      sx={{
+        backgroundColor: contractInfo?.isUnverifiedContract ? 'error.background' : 'background.paper',
+        color: contractInfo?.isUnverifiedContract ? 'error.main' : undefined,
+        height: 'unset',
+      }}
+      label={
+        <EthHashInfo address={toAddress} name={name} customAvatar={logo} showAvatar={!!logo} avatarSize={20} onlyName />
+      }
+    ></Chip>
+  ) : null
+}
+
 export const TxDetails = ({ safeTx, txData, showHashes }: TxDetailsProps) => {
   const [expandHashes, setExpandHashes] = useState(showHashes)
   const safeTxHash = useSafeTxHash({ safeTxData: safeTx.data })
   const domainHash = useDomainHash()
   const messageHash = useMessageHash({ safeTxData: safeTx.data })
-
-  const toInfo = txData?.addressInfoIndex?.[safeTx.data.to] || txData?.to
-  const toName = toInfo?.name || (toInfo && 'displayName' in toInfo ? String(toInfo.displayName || '') : undefined)
-  const toLogo = toInfo?.logoUri
 
   return (
     <PaperViewToggle>
@@ -75,21 +95,7 @@ export const TxDetails = ({ safeTx, txData, showHashes }: TxDetailsProps) => {
 
               <Stack spacing={1} divider={<Divider />}>
                 <TxDetailsRow label="To">
-                  {toName || toLogo ? (
-                    <Chip
-                      sx={{ backgroundColor: 'background.paper', height: 'unset', '& > *': { p: 0.5 } }}
-                      label={
-                        <EthHashInfo
-                          address={safeTx.data.to}
-                          name={toName}
-                          customAvatar={toLogo}
-                          showAvatar={!!toLogo}
-                          avatarSize={20}
-                          onlyName
-                        />
-                      }
-                    ></Chip>
-                  ) : null}
+                  <NameChip txData={txData} />
 
                   <Typography
                     variant="body2"
