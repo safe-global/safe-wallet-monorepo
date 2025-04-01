@@ -51,7 +51,7 @@ export function TokensContainer() {
     )
   }, [])
 
-  if (!error) {
+  if (error) {
     return (
       <Fallback loading={isFetching}>
         <AssetError assetType={'token'} onRetry={() => refetch()} />

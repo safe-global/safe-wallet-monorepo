@@ -37,7 +37,7 @@ export function NFTsContainer() {
     data,
   })
 
-  if (!error) {
+  if (error) {
     return (
       <Fallback loading={isFetching}>
         <AssetError assetType={'nft'} onRetry={() => refetch()} />
