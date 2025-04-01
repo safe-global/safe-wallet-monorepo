@@ -37,7 +37,7 @@ const Dashboard = (): ReactElement => {
         </Grid>
 
         {isSpacesFeatureEnabled && (
-          <Grid item xs={12}>
+          <Grid item xs={12} className={css.hideIfEmpty}>
             <SpacesDashboardWidget />
           </Grid>
         )}

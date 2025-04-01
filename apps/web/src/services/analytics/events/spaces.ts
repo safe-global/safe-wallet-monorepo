@@ -133,6 +133,10 @@ export const SPACE_EVENTS = {
     category: SPACE_CATEGORY,
     event: EventType.META,
   },
+  HIDE_DASHBOARD_WIDGET: {
+    action: 'Hide spaces dashboard widget',
+    category: SPACE_CATEGORY,
+  },
 }
 
 export enum SPACE_LABELS {
