@@ -16,6 +16,7 @@ import NetworkWarning from '@/components/new-safe/create/NetworkWarning'
 import useIsWrongChain from '@/hooks/useIsWrongChain'
 import { CREATE_SAFE_EVENTS, trackEvent } from '@/services/analytics'
 import OwnerRow from '@/components/new-safe/OwnerRow'
+import { useIsUnsupportedChain } from '@/hooks/useIsUnsupportedChain'
 
 enum OwnerPolicyStepFields {
   owners = 'owners',
@@ -39,6 +40,7 @@ const OwnerPolicyStep = ({
   setDynamicHint: (hints: CreateSafeInfoItem | undefined) => void
 }): ReactElement => {
   const isWrongChain = useIsWrongChain()
+  const isUnsupportedChain = useIsUnsupportedChain()
   useSyncSafeCreationStep(setStep)
 
   const formMethods = useForm<OwnerPolicyStepForm>({
@@ -165,7 +167,7 @@ const OwnerPolicyStep = ({
             </Grid>
           </Grid>
 
-          {isWrongChain && <NetworkWarning />}
+          {(isWrongChain || isUnsupportedChain) && <NetworkWarning />}
         </Box>
         <Divider />
         <Box className={layoutCss.row}>

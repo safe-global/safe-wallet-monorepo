@@ -27,9 +27,11 @@ import { hasRemainingRelays } from '@/utils/relaying'
 import { BigNumber } from 'ethers'
 import { usePendingSafe } from '../StatusStep/usePendingSafe'
 import { LATEST_SAFE_VERSION } from '@/config/constants'
+import { useIsUnsupportedChain } from '@/hooks/useIsUnsupportedChain'
 
 const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafeFormData>) => {
   const isWrongChain = useIsWrongChain()
+  const isUnsupportedChain = useIsUnsupportedChain()
   useSyncSafeCreationStep(setStep)
   const chain = useCurrentChain()
   const wallet = useWallet()
@@ -189,7 +191,7 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
           </Grid>
         </Grid>
 
-        {isWrongChain && <NetworkWarning />}
+        {(isWrongChain || isUnsupportedChain) && <NetworkWarning />}
       </Box>
       <Divider />
       <Box className={layoutCss.row}>

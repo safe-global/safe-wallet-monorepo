@@ -16,6 +16,7 @@ import { CREATE_SAFE_EVENTS, trackEvent } from '@/services/analytics'
 import { AppRoutes } from '@/config/routes'
 import MUILink from '@mui/material/Link'
 import Link from 'next/link'
+import { useIsUnsupportedChain } from '@/hooks/useIsUnsupportedChain'
 
 type SetNameStepForm = {
   name: string
@@ -59,7 +60,8 @@ function SetNameStep({
     }
   }
 
-  const isDisabled = isWrongChain || !isValid
+  const isUnsupportedChain = useIsUnsupportedChain()
+  const isDisabled = isWrongChain || !isValid || isUnsupportedChain
 
   return (
     <FormProvider {...formMethods}>
@@ -72,6 +74,7 @@ function SetNameStep({
                 label={errors?.[SetNameStepFields.name]?.message || 'Name'}
                 placeholder={fallbackName}
                 InputLabelProps={{ shrink: true }}
+                disabled={isUnsupportedChain}
                 InputProps={{
                   endAdornment: (
                     <Tooltip
@@ -105,7 +108,7 @@ function SetNameStep({
             .
           </Typography>
 
-          {isWrongChain && <NetworkWarning />}
+          {(isWrongChain || isUnsupportedChain) && <NetworkWarning />}
         </Box>
         <Divider />
         <Box className={layoutCss.row}>
