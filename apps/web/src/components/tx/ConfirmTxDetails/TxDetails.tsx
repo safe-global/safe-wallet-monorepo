@@ -73,7 +73,7 @@ export const TxDetails = ({ safeTxData, txData, showHashes, noTitle }: TxDetails
           ),
           icon: <TableRowsRoundedIcon />,
           content: (
-            <ContentWrapper noTitle>
+            <ContentWrapper noTitle={noTitle}>
               <Divider sx={{ mb: 1 }} />
 
               <Stack spacing={1} divider={<Divider />}>
@@ -201,7 +201,9 @@ export const TxDetails = ({ safeTxData, txData, showHashes, noTitle }: TxDetails
           ),
         },
         {
-          title: (
+          title: noTitle ? (
+            ''
+          ) : (
             <Typography color="primary.light" fontWeight="bold">
               Transaction details
             </Typography>
