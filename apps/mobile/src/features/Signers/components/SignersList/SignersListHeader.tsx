@@ -23,6 +23,7 @@ export function SignersListHeader({ withAlert, sectionTitle }: SignersListHeader
             type="warning"
             message="Before you import signers..."
             info={`Make sure to import signers from this list only.\nOthers will not be imported.`}
+            orientation="left"
           />
         </View>
       )}
