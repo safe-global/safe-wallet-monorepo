@@ -28,7 +28,7 @@ const AddSpaceButton = ({ disabled }: { disabled: boolean }) => {
         variant="contained"
         size="small"
         onClick={() => setOpenCreationModal(true)}
-        sx={{ height: '36px', px: 2 }}
+        sx={{ height: '36px' }}
         disabled={disabled}
       >
         <Box mt="1px">Create space</Box>
@@ -47,7 +47,7 @@ const SignedOutState = () => {
       <Card sx={{ p: 5, textAlign: 'center' }}>
         <SpacesIcon />
 
-        <Box mb={2}>
+        <Box mb={3}>
           <Typography color="text.secondary" mb={1}>
             To view your space or create one,{' '}
             {!!wallet ? 'sign in with your connected wallet.' : 'connect your wallet.'}
@@ -74,13 +74,18 @@ const NoSpacesState = () => {
       <Card sx={{ p: 5, textAlign: 'center', width: 1 }}>
         <SpacesIcon />
 
-        <Typography color="text.secondary" mb={1}>
-          No spaces found.
-          <br />
-        </Typography>
-        <Link onClick={() => setIsInfoOpen(true)} href="#">
-          What are spaces?
-        </Link>
+        <Box mb={3}>
+          <Typography color="text.secondary" mb={1}>
+            No spaces found.
+            <br />
+          </Typography>
+          <Link onClick={() => setIsInfoOpen(true)} href="#">
+            What are spaces?
+          </Link>
+        </Box>
+        <Track {...SPACE_EVENTS.CREATE_SPACE_MODAL} label={SPACE_LABELS.space_list_page}>
+          <AddSpaceButton disabled={false} size="medium" />
+        </Track>
       </Card>
       {isInfoOpen && (
         <SpaceInfoModal onCreateSpace={() => setOpenCreationModal(true)} onClose={() => setIsInfoOpen(false)} />
@@ -104,9 +109,11 @@ const SpacesList = () => {
         <Box className={css.spacesHeader}>
           <AccountsNavigation />
 
-          <Track {...SPACE_EVENTS.CREATE_SPACE_MODAL} label={SPACE_LABELS.space_list_page}>
-            <AddSpaceButton disabled={!isUserSignedIn} />
-          </Track>
+          {isUserSignedIn && activeSpaces.length > 0 && (
+            <Track {...SPACE_EVENTS.CREATE_SPACE_MODAL} label={SPACE_LABELS.space_list_page}>
+              <AddSpaceButton disabled={false} />
+            </Track>
+          )}
         </Box>
 
         {isUserSignedIn &&
