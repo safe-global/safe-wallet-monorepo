@@ -19,7 +19,7 @@ import { useSigner } from '@/hooks/wallets/useWallet'
 import useChainId from '@/hooks/useChainId'
 import useIsCounterfactualSafe from '@/features/counterfactual/hooks/useIsCounterfactualSafe'
 import useTxDetails from '@/hooks/useTxDetails'
-import { TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
+import type { TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
 
 export type TxFlowContextType = {
   step: number
