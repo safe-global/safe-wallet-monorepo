@@ -2,8 +2,8 @@ import { usePendingTxIds } from '@/hooks/usePendingTxs'
 import { SETTINGS_EVENTS, trackEvent } from '@/services/analytics'
 import { useAppDispatch } from '@/store'
 import { clearPendingTx } from '@/store/pendingTxsSlice'
-import { maybePlural } from '@/utils/formatters'
 import { Stack, Typography, Box, Button, Alert } from '@mui/material'
+import { maybePlural } from '@safe-global/utils/utils/formatters'
 import { useCallback } from 'react'
 
 export const ClearPendingTxs = () => {
