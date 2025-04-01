@@ -2879,598 +2879,6 @@
         ]
       }
     },
-    "/v1/organizations": {
-      "post": {
-        "operationId": "organizationsCreateV1",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateOrganizationDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Organization created",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CreateOrganizationResponse"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Signer address not provided"
-          },
-          "403": {
-            "description": "Forbidden resource"
-          },
-          "404": {
-            "description": "User not found."
-          }
-        },
-        "tags": [
-          "organizations"
-        ]
-      },
-      "get": {
-        "operationId": "organizationsGetV1",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Organizations found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/GetOrganizationResponse"
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Signer address not provided"
-          },
-          "403": {
-            "description": "Forbidden resource"
-          },
-          "404": {
-            "description": "User not found."
-          }
-        },
-        "tags": [
-          "organizations"
-        ]
-      }
-    },
-    "/v1/organizations/create-with-user": {
-      "post": {
-        "operationId": "organizationsCreateWithUserV1",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateOrganizationDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Organization created",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CreateOrganizationResponse"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Signer address not provided"
-          },
-          "403": {
-            "description": "Forbidden resource"
-          }
-        },
-        "tags": [
-          "organizations"
-        ]
-      }
-    },
-    "/v1/organizations/{id}": {
-      "get": {
-        "operationId": "organizationsGetOneV1",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "number"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Organization found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetOrganizationResponse"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Signer address not provided"
-          },
-          "403": {
-            "description": "Forbidden resource"
-          },
-          "404": {
-            "description": "Organization not found. OR User not found."
-          }
-        },
-        "tags": [
-          "organizations"
-        ]
-      },
-      "patch": {
-        "operationId": "organizationsUpdateV1",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "number"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateOrganizationDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Organization updated",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UpdateOrganizationResponse"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Signer address not provided OR User is unauthorized"
-          },
-          "403": {
-            "description": "Forbidden resource"
-          },
-          "404": {
-            "description": "User not found."
-          }
-        },
-        "tags": [
-          "organizations"
-        ]
-      },
-      "delete": {
-        "operationId": "organizationsDeleteV1",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "number"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "Organization deleted"
-          },
-          "401": {
-            "description": "Signer address not provided OR User is unauthorized"
-          },
-          "403": {
-            "description": "Forbidden resource"
-          },
-          "404": {
-            "description": "User not found."
-          }
-        },
-        "tags": [
-          "organizations"
-        ]
-      }
-    },
-    "/v1/organizations/{organizationId}/safes": {
-      "post": {
-        "operationId": "organizationSafesCreateV1",
-        "parameters": [
-          {
-            "name": "organizationId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "number"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateOrganizationSafesDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Safes created successfully"
-          },
-          "401": {
-            "description": "User unauthorize OR signer address not provided"
-          },
-          "404": {
-            "description": "User not found."
-          }
-        },
-        "tags": [
-          "organizations-safe"
-        ]
-      },
-      "get": {
-        "operationId": "organizationSafesGetV1",
-        "parameters": [
-          {
-            "name": "organizationId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "number"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Safes fetched successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetOrganizationSafeResponse"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "User unauthorized OR signer address not provided"
-          },
-          "404": {
-            "description": "User not found."
-          }
-        },
-        "tags": [
-          "organizations-safe"
-        ]
-      },
-      "delete": {
-        "operationId": "organizationSafesDeleteV1",
-        "parameters": [
-          {
-            "name": "organizationId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "number"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/DeleteOrganizationSafesDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "204": {
-            "description": "Safes deleted successfully"
-          },
-          "401": {
-            "description": "User unauthorized OR signer address not provided"
-          },
-          "404": {
-            "description": "Organization has no Safes OR user not found."
-          }
-        },
-        "tags": [
-          "organizations-safe"
-        ]
-      }
-    },
-    "/v1/organizations/{orgId}/members/invite": {
-      "post": {
-        "operationId": "userOrganizationsInviteUserV1",
-        "parameters": [
-          {
-            "name": "orgId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "number"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/InviteUsersDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Users invited",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Invitation"
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "User not admin OR signer address not provided OR member is not active"
-          },
-          "403": {
-            "description": "User not authorized"
-          },
-          "409": {
-            "description": "Too many invites"
-          }
-        },
-        "tags": [
-          "organizations"
-        ]
-      }
-    },
-    "/v1/organizations/{orgId}/members/accept": {
-      "post": {
-        "operationId": "userOrganizationsAcceptInviteV1",
-        "parameters": [
-          {
-            "name": "orgId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "number"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AcceptInviteDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Invite accepted"
-          },
-          "403": {
-            "description": "Signer not authorized"
-          },
-          "404": {
-            "description": "Signer, organization or membership not found"
-          },
-          "409": {
-            "description": "User invite not pending"
-          }
-        },
-        "tags": [
-          "organizations"
-        ]
-      }
-    },
-    "/v1/organizations/{orgId}/members/decline": {
-      "post": {
-        "operationId": "userOrganizationsDeclineInviteV1",
-        "parameters": [
-          {
-            "name": "orgId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "number"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Invite declined"
-          },
-          "403": {
-            "description": "Signer not authorized"
-          },
-          "404": {
-            "description": "Signer, organization or membership not found"
-          },
-          "409": {
-            "description": "User invite not pending"
-          }
-        },
-        "tags": [
-          "organizations"
-        ]
-      }
-    },
-    "/v1/organizations/{orgId}/members": {
-      "get": {
-        "operationId": "userOrganizationsGetUsersV1",
-        "parameters": [
-          {
-            "name": "orgId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "number"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Organization and members list",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UserOrganizationsDto"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Signer not authorized"
-          },
-          "404": {
-            "description": "Signer or organization not found"
-          }
-        },
-        "tags": [
-          "organizations"
-        ]
-      }
-    },
-    "/v1/organizations/{orgId}/members/{userId}/role": {
-      "patch": {
-        "operationId": "userOrganizationsUpdateRoleV1",
-        "parameters": [
-          {
-            "name": "orgId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "name": "userId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "number"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateRoleDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Role updated"
-          },
-          "401": {
-            "description": "Signer not active or admin"
-          },
-          "403": {
-            "description": "Signer not authorized"
-          },
-          "404": {
-            "description": "Signer, organization or signer/user-to-update membership not found"
-          },
-          "409": {
-            "description": "Cannot remove last admin"
-          }
-        },
-        "tags": [
-          "organizations"
-        ]
-      }
-    },
-    "/v1/organizations/{orgId}/members/{userId}": {
-      "delete": {
-        "operationId": "userOrganizationsRemoveUserV1",
-        "parameters": [
-          {
-            "name": "orgId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "name": "userId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "number"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Membership deleted"
-          },
-          "401": {
-            "description": "Signer not active or admin"
-          },
-          "403": {
-            "description": "Signer not authorized"
-          },
-          "404": {
-            "description": "Signer or organization not found"
-          },
-          "409": {
-            "description": "Cannot remove last admin"
-          }
-        },
-        "tags": [
-          "organizations"
-        ]
-      }
-    },
     "/v1/chains/{chainId}/owners/{ownerAddress}/safes": {
       "get": {
         "operationId": "ownersGetSafesByOwnerV1",
@@ -3599,8 +3007,15 @@
           }
         },
         "responses": {
-          "201": {
-            "description": ""
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Relay"
+                }
+              }
+            }
           }
         },
         "tags": [
@@ -3631,7 +3046,14 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RelaysRemaining"
+                }
+              }
+            }
           }
         },
         "tags": [
@@ -5002,7 +4424,9 @@
         "type": "object",
         "properties": {
           "address": {
-            "type": "string"
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 30
           },
           "name": {
             "type": "string"
@@ -5152,7 +4576,9 @@
         "type": "object",
         "properties": {
           "name": {
-            "type": "string"
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 30
           },
           "address": {
             "type": "string"
@@ -6352,14 +5778,56 @@
           "to": {
             "type": "string",
             "description": "The target Ethereum address"
-          },
-          "value": {
-            "type": "string",
-            "description": "The wei amount being sent to a payable function"
           }
         },
         "required": [
           "data"
+        ]
+      },
+      "BaseDataDecoded": {
+        "type": "object",
+        "properties": {
+          "method": {
+            "type": "string"
+          },
+          "parameters": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DataDecodedParameter"
+            }
+          }
+        },
+        "required": [
+          "method"
+        ]
+      },
+      "MultiSend": {
+        "type": "object",
+        "properties": {
+          "operation": {
+            "type": "number",
+            "enum": [
+              0,
+              1
+            ]
+          },
+          "value": {
+            "type": "string"
+          },
+          "dataDecoded": {
+            "$ref": "#/components/schemas/BaseDataDecoded"
+          },
+          "to": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "operation",
+          "value",
+          "to"
         ]
       },
       "DataDecodedParameter": {
@@ -6377,16 +5845,18 @@
           "valueDecoded": {
             "oneOf": [
               {
-                "type": "object"
+                "$ref": "#/components/schemas/BaseDataDecoded"
               },
               {
                 "type": "array",
                 "items": {
-                  "type": "object"
+                  "$ref": "#/components/schemas/MultiSend"
                 }
+              },
+              {
+                "type": "null"
               }
-            ],
-            "nullable": true
+            ]
           }
         },
         "required": [
@@ -6407,6 +5877,17 @@
             "items": {
               "$ref": "#/components/schemas/DataDecodedParameter"
             }
+          },
+          "accuracy": {
+            "type": "string",
+            "enum": [
+              "FULL_MATCH",
+              "PARTIAL_MATCH",
+              "ONLY_FUNCTION_MATCH",
+              "NO_MATCH",
+              "UNKNOWN"
+            ],
+            "default": "UNKNOWN"
           }
         },
         "required": [
@@ -6671,6 +6152,71 @@
           "deviceType"
         ]
       },
+      "TypedDataParameter": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "type"
+        ]
+      },
+      "TypedDataDomain": {
+        "type": "object",
+        "properties": {
+          "chainId": {
+            "type": "number"
+          },
+          "name": {
+            "type": "string"
+          },
+          "salt": {
+            "type": "string"
+          },
+          "verifyingContract": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          }
+        }
+      },
+      "TypedData": {
+        "type": "object",
+        "properties": {
+          "domain": {
+            "$ref": "#/components/schemas/TypedDataDomain"
+          },
+          "primaryType": {
+            "type": "string"
+          },
+          "types": {
+            "type": "object",
+            "additionalProperties": {
+              "items": {
+                "$ref": "#/components/schemas/TypedDataParameter"
+              },
+              "type": "array"
+            }
+          },
+          "message": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "required": [
+          "domain",
+          "primaryType",
+          "types",
+          "message"
+        ]
+      },
       "AddressInfo": {
         "type": "object",
         "properties": {
@@ -6690,6 +6236,21 @@
           "value"
         ]
       },
+      "MessageConfirmation": {
+        "type": "object",
+        "properties": {
+          "owner": {
+            "$ref": "#/components/schemas/AddressInfo"
+          },
+          "signature": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "owner",
+          "signature"
+        ]
+      },
       "Message": {
         "type": "object",
         "properties": {
@@ -6697,7 +6258,11 @@
             "type": "string"
           },
           "status": {
-            "type": "string"
+            "type": "string",
+            "enum": [
+              "NEEDS_CONFIRMATION",
+              "CONFIRMED"
+            ]
           },
           "logoUri": {
             "type": "string",
@@ -6708,7 +6273,14 @@
             "nullable": true
           },
           "message": {
-            "type": "object"
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "$ref": "#/components/schemas/TypedData"
+              }
+            ]
           },
           "creationTimestamp": {
             "type": "number"
@@ -6728,7 +6300,7 @@
           "confirmations": {
             "type": "array",
             "items": {
-              "type": "string"
+              "$ref": "#/components/schemas/MessageConfirmation"
             }
           },
           "preparedSignature": {
@@ -6759,7 +6331,11 @@
             "type": "string"
           },
           "status": {
-            "type": "string"
+            "type": "string",
+            "enum": [
+              "NEEDS_CONFIRMATION",
+              "CONFIRMED"
+            ]
           },
           "logoUri": {
             "type": "string",
@@ -6770,7 +6346,14 @@
             "nullable": true
           },
           "message": {
-            "type": "object"
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "$ref": "#/components/schemas/TypedData"
+              }
+            ]
           },
           "creationTimestamp": {
             "type": "number"
@@ -6790,7 +6373,7 @@
           "confirmations": {
             "type": "array",
             "items": {
-              "type": "string"
+              "$ref": "#/components/schemas/MessageConfirmation"
             }
           },
           "preparedSignature": {
@@ -6802,7 +6385,10 @@
             "nullable": true
           },
           "type": {
-            "type": "string"
+            "type": "string",
+            "enum": [
+              "MESSAGE"
+            ]
           }
         },
         "required": [
@@ -6873,7 +6459,14 @@
         "type": "object",
         "properties": {
           "message": {
-            "type": "object"
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "$ref": "#/components/schemas/TypedData"
+              }
+            ]
           },
           "safeAppId": {
             "type": "number",
@@ -7270,7 +6863,9 @@
             "type": "string"
           },
           "name": {
-            "type": "string"
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 30
           },
           "role": {
             "type": "string",
@@ -7306,7 +6901,10 @@
           "userId": {
             "type": "number"
           },
-          "orgId": {
+          "name": {
+            "type": "string"
+          },
+          "spaceId": {
             "type": "number"
           },
           "role": {
@@ -7331,7 +6929,8 @@
         },
         "required": [
           "userId",
-          "orgId",
+          "name",
+          "spaceId",
           "role",
           "status"
         ]
@@ -7340,7 +6939,9 @@
         "type": "object",
         "properties": {
           "name": {
-            "type": "string"
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 30
           }
         },
         "required": [
@@ -7445,299 +7046,6 @@
           "role"
         ]
       },
-      "CreateOrganizationDto": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "name"
-        ]
-      },
-      "CreateOrganizationResponse": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string"
-          },
-          "id": {
-            "type": "number"
-          }
-        },
-        "required": [
-          "name",
-          "id"
-        ]
-      },
-      "UserOrganizationDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "number"
-          },
-          "role": {
-            "type": "string",
-            "enum": [
-              "ADMIN",
-              "MEMBER"
-            ]
-          },
-          "name": {
-            "type": "string"
-          },
-          "invitedBy": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string",
-            "enum": [
-              "INVITED",
-              "ACTIVE",
-              "DECLINED"
-            ]
-          },
-          "createdAt": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "updatedAt": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "user": {
-            "$ref": "#/components/schemas/UserDto"
-          }
-        },
-        "required": [
-          "id",
-          "role",
-          "name",
-          "invitedBy",
-          "status",
-          "createdAt",
-          "updatedAt",
-          "user"
-        ]
-      },
-      "GetOrganizationResponse": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "number"
-          },
-          "name": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string",
-            "enum": [
-              "ACTIVE"
-            ]
-          },
-          "userOrganizations": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/UserOrganizationDto"
-            }
-          }
-        },
-        "required": [
-          "id",
-          "name",
-          "status",
-          "userOrganizations"
-        ]
-      },
-      "UpdateOrganizationDto": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string",
-            "enum": [
-              "ACTIVE"
-            ]
-          }
-        }
-      },
-      "UpdateOrganizationResponse": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "number"
-          }
-        },
-        "required": [
-          "id"
-        ]
-      },
-      "CreateOrganizationSafeDto": {
-        "type": "object",
-        "properties": {
-          "chainId": {
-            "type": "string"
-          },
-          "address": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "chainId",
-          "address"
-        ]
-      },
-      "CreateOrganizationSafesDto": {
-        "type": "object",
-        "properties": {
-          "safes": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/CreateOrganizationSafeDto"
-            }
-          }
-        },
-        "required": [
-          "safes"
-        ]
-      },
-      "GetOrganizationSafeResponse": {
-        "type": "object",
-        "properties": {
-          "safes": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            },
-            "example": {
-              "{chainId}": [
-                "0x..."
-              ]
-            }
-          }
-        },
-        "required": [
-          "safes"
-        ]
-      },
-      "DeleteOrganizationSafeDto": {
-        "type": "object",
-        "properties": {
-          "chainId": {
-            "type": "string"
-          },
-          "address": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "chainId",
-          "address"
-        ]
-      },
-      "DeleteOrganizationSafesDto": {
-        "type": "object",
-        "properties": {
-          "safes": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/DeleteOrganizationSafeDto"
-            }
-          }
-        },
-        "required": [
-          "safes"
-        ]
-      },
-      "UserOrganizationUser": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "number"
-          },
-          "status": {
-            "type": "string",
-            "enum": [
-              "PENDING",
-              "ACTIVE"
-            ]
-          }
-        },
-        "required": [
-          "id",
-          "status"
-        ]
-      },
-      "UserOrganization": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "number"
-          },
-          "role": {
-            "type": "string",
-            "enum": [
-              "ADMIN",
-              "MEMBER"
-            ]
-          },
-          "status": {
-            "type": "string",
-            "enum": [
-              "INVITED",
-              "ACTIVE",
-              "DECLINED"
-            ]
-          },
-          "name": {
-            "type": "string"
-          },
-          "invitedBy": {
-            "type": "string",
-            "nullable": true
-          },
-          "createdAt": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "updatedAt": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "user": {
-            "$ref": "#/components/schemas/UserOrganizationUser"
-          }
-        },
-        "required": [
-          "id",
-          "role",
-          "status",
-          "name",
-          "createdAt",
-          "updatedAt",
-          "user"
-        ]
-      },
-      "UserOrganizationsDto": {
-        "type": "object",
-        "properties": {
-          "members": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/UserOrganization"
-            }
-          }
-        },
-        "required": [
-          "members"
-        ]
-      },
       "SafeList": {
         "type": "object",
         "properties": {
@@ -7774,6 +7082,32 @@
           "version",
           "to",
           "data"
+        ]
+      },
+      "Relay": {
+        "type": "object",
+        "properties": {
+          "taskId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "taskId"
+        ]
+      },
+      "RelaysRemaining": {
+        "type": "object",
+        "properties": {
+          "remaining": {
+            "type": "number"
+          },
+          "limit": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "remaining",
+          "limit"
         ]
       },
       "SafeAppProvider": {
@@ -8205,6 +7539,172 @@
           "isCancellation"
         ]
       },
+      "AddOwner": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "ADD_OWNER"
+            ]
+          },
+          "owner": {
+            "$ref": "#/components/schemas/AddressInfo"
+          },
+          "threshold": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "type",
+          "owner",
+          "threshold"
+        ]
+      },
+      "ChangeMasterCopy": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "CHANGE_MASTER_COPY"
+            ]
+          },
+          "implementation": {
+            "$ref": "#/components/schemas/AddressInfo"
+          }
+        },
+        "required": [
+          "type",
+          "implementation"
+        ]
+      },
+      "ChangeThreshold": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "CHANGE_THRESHOLD"
+            ]
+          },
+          "threshold": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "type",
+          "threshold"
+        ]
+      },
+      "DeleteGuard": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "DELETE_GUARD"
+            ]
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "DisableModule": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "DISABLE_MODULE"
+            ]
+          },
+          "module": {
+            "$ref": "#/components/schemas/AddressInfo"
+          }
+        },
+        "required": [
+          "type",
+          "module"
+        ]
+      },
+      "EnableModule": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "ENABLE_MODULE"
+            ]
+          },
+          "module": {
+            "$ref": "#/components/schemas/AddressInfo"
+          }
+        },
+        "required": [
+          "type",
+          "module"
+        ]
+      },
+      "RemoveOwner": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "REMOVE_OWNER"
+            ]
+          },
+          "owner": {
+            "$ref": "#/components/schemas/AddressInfo"
+          },
+          "threshold": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "type",
+          "owner",
+          "threshold"
+        ]
+      },
+      "SetFallbackHandler": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "SET_FALLBACK_HANDLER"
+            ]
+          },
+          "handler": {
+            "$ref": "#/components/schemas/AddressInfo"
+          }
+        },
+        "required": [
+          "type",
+          "handler"
+        ]
+      },
+      "SetGuard": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "SET_GUARD"
+            ]
+          },
+          "guard": {
+            "$ref": "#/components/schemas/AddressInfo"
+          }
+        },
+        "required": [
+          "type",
+          "guard"
+        ]
+      },
       "SettingsChange": {
         "type": "object",
         "properties": {
@@ -8228,6 +7728,28 @@
           "type"
         ]
       },
+      "SwapOwner": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "SWAP_OWNER"
+            ]
+          },
+          "oldOwner": {
+            "$ref": "#/components/schemas/AddressInfo"
+          },
+          "newOwner": {
+            "$ref": "#/components/schemas/AddressInfo"
+          }
+        },
+        "required": [
+          "type",
+          "oldOwner",
+          "newOwner"
+        ]
+      },
       "SettingsChangeTransaction": {
         "type": "object",
         "properties": {
@@ -8245,17 +7767,44 @@
             "$ref": "#/components/schemas/DataDecoded"
           },
           "settingsInfo": {
-            "nullable": true,
-            "allOf": [
+            "oneOf": [
               {
-                "$ref": "#/components/schemas/SettingsChange"
+                "$ref": "#/components/schemas/AddOwner"
+              },
+              {
+                "$ref": "#/components/schemas/ChangeMasterCopy"
+              },
+              {
+                "$ref": "#/components/schemas/ChangeThreshold"
+              },
+              {
+                "$ref": "#/components/schemas/DeleteGuard"
+              },
+              {
+                "$ref": "#/components/schemas/DisableModule"
+              },
+              {
+                "$ref": "#/components/schemas/EnableModule"
+              },
+              {
+                "$ref": "#/components/schemas/RemoveOwner"
+              },
+              {
+                "$ref": "#/components/schemas/SetFallbackHandler"
+              },
+              {
+                "$ref": "#/components/schemas/SetGuard"
+              },
+              {
+                "$ref": "#/components/schemas/SwapOwner"
               }
             ]
           }
         },
         "required": [
           "type",
-          "dataDecoded"
+          "dataDecoded",
+          "settingsInfo"
         ]
       },
       "Erc20Transfer": {
@@ -8754,6 +8303,70 @@
           "owner"
         ]
       },
+      "DurationAuto": {
+        "type": "object",
+        "properties": {
+          "durationType": {
+            "type": "string",
+            "enum": [
+              "AUTO"
+            ]
+          }
+        },
+        "required": [
+          "durationType"
+        ]
+      },
+      "DurationLimit": {
+        "type": "object",
+        "properties": {
+          "durationType": {
+            "type": "string",
+            "enum": [
+              "LIMIT_DURATION"
+            ]
+          },
+          "duration": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "durationType",
+          "duration"
+        ]
+      },
+      "StartTimeAtMining": {
+        "type": "object",
+        "properties": {
+          "startType": {
+            "type": "string",
+            "enum": [
+              "AT_MINING_TIME"
+            ]
+          }
+        },
+        "required": [
+          "startType"
+        ]
+      },
+      "StartTimeAtEpoch": {
+        "type": "object",
+        "properties": {
+          "startType": {
+            "type": "string",
+            "enum": [
+              "AT_EPOCH"
+            ]
+          },
+          "epoch": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "startType",
+          "epoch"
+        ]
+      },
       "TwapOrderTransactionInfo": {
         "type": "object",
         "properties": {
@@ -8877,12 +8490,26 @@
             "description": "The duration of the TWAP interval"
           },
           "durationOfPart": {
-            "type": "object",
-            "description": "Whether the TWAP is valid for the entire interval or not"
+            "description": "Whether the TWAP is valid for the entire interval or not",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/DurationAuto"
+              },
+              {
+                "$ref": "#/components/schemas/DurationLimit"
+              }
+            ]
           },
           "startTime": {
-            "type": "object",
-            "description": "The start time of the TWAP"
+            "description": "The start time of the TWAP",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/StartTimeAtMining"
+              },
+              {
+                "$ref": "#/components/schemas/StartTimeAtEpoch"
+              }
+            ]
           }
         },
         "required": [
