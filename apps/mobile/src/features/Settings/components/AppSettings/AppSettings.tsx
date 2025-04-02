@@ -42,12 +42,14 @@ export const AppSettings = ({ sections }: AppSettingsProps) => {
                 <View backgroundColor={'$background'} borderRadius={'$3'}>
                   {section.items.map((item, itemIndex) => {
                     if (item.type === 'floating-menu') {
+                      console.log('item', item.label, item.tag)
                       return (
                         <SafeListItem
                           key={`item-${sectionIndex}-${itemIndex}`}
                           label={item.label}
                           leftNode={<Icon name={item.leftIcon as IconName} color={'$colorSecondary'} />}
                           rightNode={item.rightNode ?? <Icon name={'chevron-right'} />}
+                          tag={item.tag}
                         />
                       )
                     }
@@ -63,6 +65,7 @@ export const AppSettings = ({ sections }: AppSettingsProps) => {
                           label={item.label}
                           leftNode={<Icon name={item.leftIcon as IconName} color={'$colorSecondary'} />}
                           rightNode={item.rightNode ?? <Icon name={'chevron-right'} />}
+                          tag={item.tag}
                         />
                       </Pressable>
                     )

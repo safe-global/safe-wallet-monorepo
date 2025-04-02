@@ -7,6 +7,7 @@ export interface SettingsItem {
   onPress?: () => void
   disabled?: boolean
   type?: string
+  tag?: string
 }
 
 export interface SettingsSection {
