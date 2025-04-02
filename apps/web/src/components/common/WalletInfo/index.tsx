@@ -12,7 +12,7 @@ import madProps from '@/utils/mad-props'
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew'
 import useChainId from '@/hooks/useChainId'
 import { useAuthLogoutV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/auth'
-import { setUnauthenticated } from '@/store/authSlice'
+import { setUnauthenticated, isAuthenticated } from '@/store/authSlice'
 
 type WalletInfoProps = {
   wallet: ConnectedWallet
@@ -25,6 +25,7 @@ type WalletInfoProps = {
 
 export const WalletInfo = ({ wallet, balance, currentChainId, onboard, addressBook, handleClose }: WalletInfoProps) => {
   const [authLogout] = useAuthLogoutV1Mutation()
+  const isUserSignedIn = useAppSelector(isAuthenticated)
   const dispatch = useAppDispatch()
   const chainInfo = useAppSelector((state) => selectChainById(state, wallet.chainId))
   const prefix = chainInfo?.shortName
@@ -42,7 +43,9 @@ export const WalletInfo = ({ wallet, balance, currentChainId, onboard, addressBo
     })
     try {
       await authLogout()
-      dispatch(setUnauthenticated())
+      if (isUserSignedIn) {
+        dispatch(setUnauthenticated())
+      }
     } catch (error) {
       // TODO: handle error
     }
