@@ -24,7 +24,7 @@ describe('Container', () => {
     const safe = extendedSafeInfoBuilder().with({ version: '1.1.1' }).build()
     const txData: TransactionData = {
       operation: 0,
-      to: safe.address,
+      to: { value: safe.address.value, name: safe.address.name ?? undefined },
       trustedDelegateCallTarget: true,
       value: '0',
       hexData: Safe_111_interface.encodeFunctionData('changeMasterCopy', [newSingleton]),
@@ -47,7 +47,7 @@ describe('Container', () => {
     const safe = extendedSafeInfoBuilder().with({ version: '1.1.1' }).build()
     const txData: TransactionData = {
       operation: 0,
-      to: safe.address,
+      to: { value: safe.address.value, name: safe.address.name ?? undefined },
       trustedDelegateCallTarget: true,
       value: '0',
       hexData: Safe_111_interface.encodeFunctionData('changeMasterCopy', [newSingleton]),
@@ -93,7 +93,7 @@ describe('Container', () => {
     const safe = extendedSafeInfoBuilder().with({ version: '1.1.1' }).build()
     const txData: TransactionData = {
       operation: 0,
-      to: safe.address,
+      to: { value: safe.address.value, name: safe.address.name ?? undefined },
       trustedDelegateCallTarget: true,
       value: '0',
       hexData: Safe_111_interface.encodeFunctionData('changeMasterCopy', [newSingleton]),

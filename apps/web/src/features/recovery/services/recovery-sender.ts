@@ -1,5 +1,5 @@
 import { getModuleInstance, KnownContracts } from '@gnosis.pm/zodiac'
-import type { SafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import { type SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import type { SafeTransaction } from '@safe-global/safe-core-sdk-types'
 import type { TransactionAddedEvent } from '@gnosis.pm/zodiac/dist/cjs/types/Delay'
 import type { Eip1193Provider, Overrides, TransactionResponse } from 'ethers'
@@ -79,7 +79,7 @@ export async function dispatchRecoveryProposal({
   overrides,
 }: {
   provider: Eip1193Provider
-  safe: SafeInfo
+  safe: SafeState
   safeTx: SafeTransaction
   delayModifierAddress: string
   signerAddress: string

@@ -1,7 +1,8 @@
 import { OperationType } from '@safe-global/safe-core-sdk-types'
 import { getMultiSendCallOnlyContractDeployment } from '@safe-global/utils/services/contracts/deployments'
 import type { SafeTransaction } from '@safe-global/safe-core-sdk-types'
-import type { ChainInfo, SafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import { type SafeState as SafeInfo } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 
 import { SecuritySeverity } from '../types'
 import type { SecurityModule, SecurityResponse } from '../types'

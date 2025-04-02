@@ -91,7 +91,7 @@ const SafeModules = () => {
                   key={module.value}
                   chainId={safe.chainId}
                   moduleAddress={module.value}
-                  name={module.name}
+                  name={module.name || undefined}
                 />
               ))
             )}

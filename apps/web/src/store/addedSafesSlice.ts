@@ -1,10 +1,10 @@
 import { createSelector, createSlice, type PayloadAction } from '@reduxjs/toolkit'
-import type { AddressEx, SafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import type { SafeState, AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import type { RootState } from '.'
 
 export type AddedSafesOnChain = {
   [safeAddress: string]: {
-    owners: AddressEx[]
+    owners: AddressInfo[]
     threshold: number
     ethBalance?: string
   }
@@ -29,7 +29,7 @@ export const addedSafesSlice = createSlice({
     setAddedSafes: (_, action: PayloadAction<AddedSafesState>) => {
       return action.payload
     },
-    addOrUpdateSafe: (state, { payload }: PayloadAction<{ safe: SafeInfo }>) => {
+    addOrUpdateSafe: (state, { payload }: PayloadAction<{ safe: SafeState }>) => {
       const { chainId, address, owners, threshold } = payload.safe
 
       state[chainId] ??= {}

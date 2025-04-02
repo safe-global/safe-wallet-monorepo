@@ -1,7 +1,6 @@
-import { type SafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import type { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { makeLoadableSlice } from './common'
-
-export type ExtendedSafeInfo = SafeInfo & { deployed: boolean }
+export type ExtendedSafeInfo = SafeState & { deployed: boolean }
 
 export const defaultSafeInfo: ExtendedSafeInfo = {
   address: { value: '' },
@@ -10,7 +9,7 @@ export const defaultSafeInfo: ExtendedSafeInfo = {
   threshold: 0,
   owners: [],
   implementation: { value: '' },
-  implementationVersionState: '' as SafeInfo['implementationVersionState'],
+  implementationVersionState: '' as SafeState['implementationVersionState'],
   modules: null,
   guard: null,
   fallbackHandler: { value: '' },

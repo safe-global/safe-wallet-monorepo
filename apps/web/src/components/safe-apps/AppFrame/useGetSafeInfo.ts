@@ -26,7 +26,7 @@ const useGetSafeInfo = () => {
       modules: safe.modules ? safe.modules.map((module) => module.value) : null,
       fallbackHandler: safe.fallbackHandler ? safe.fallbackHandler?.value : null,
       guard: safe.guard?.value || null,
-      version: safe.version,
+      version: safe.version || null,
       network: getLegacyChainName(chainName || '', chainId).toUpperCase(),
     }
   }, [

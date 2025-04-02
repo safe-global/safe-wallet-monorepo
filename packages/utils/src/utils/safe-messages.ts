@@ -5,7 +5,8 @@ import { adjustVInSignature } from '@safe-global/protocol-kit/dist/src/utils/sig
 
 import { hashTypedData } from '@safe-global/utils/utils/web3'
 import { isValidAddress } from '@safe-global/utils/utils/validation'
-import { type SafeInfo, type ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import { type ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import { type SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 
 import { hasFeature } from '@safe-global/utils/utils/chains'
@@ -45,7 +46,7 @@ export const generateSafeMessageMessage = (message: MessageItem['message']): str
  * @returns `SafeMessage` types for signing
  */
 export const generateSafeMessageTypedData = (
-  { version, chainId, address }: SafeInfo,
+  { version, chainId, address }: SafeState,
   message: MessageItem['message'],
 ): TypedData => {
   if (!version) {
@@ -70,13 +71,13 @@ export const generateSafeMessageTypedData = (
   }
 }
 
-export const generateSafeMessageHash = (safe: SafeInfo, message: MessageItem['message']): string => {
+export const generateSafeMessageHash = (safe: SafeState, message: MessageItem['message']): string => {
   const typedData = generateSafeMessageTypedData(safe, message)
   return hashTypedData(typedData)
 }
 
 export const isOffchainEIP1271Supported = (
-  { version, fallbackHandler }: SafeInfo,
+  { version, fallbackHandler }: SafeState,
   chain: ChainInfo | undefined,
   sdkVersion?: string,
 ): boolean => {
@@ -98,7 +99,7 @@ export const isOffchainEIP1271Supported = (
   const isHandledByFallbackHandler = gte(version, EIP1271_FALLBACK_HANDLER_SUPPORTED_SAFE_VERSION)
   if (isHandledByFallbackHandler) {
     // We only check if any fallback Handler is set as we expect / assume that users who overwrite the fallback handler by a custom one know what they are doing
-    return fallbackHandler !== null && isValidAddress(fallbackHandler.value)
+    return fallbackHandler !== null && typeof fallbackHandler !== 'undefined' && isValidAddress(fallbackHandler.value)
   }
 
   // check if Safe version supports EIP-1271
@@ -107,7 +108,7 @@ export const isOffchainEIP1271Supported = (
 
 export const tryOffChainMsgSigning = async (
   signer: JsonRpcSigner,
-  safe: SafeInfo,
+  safe: SafeState,
   message: MessageItem['message'],
 ): Promise<string> => {
   const typedData = generateSafeMessageTypedData(safe, message)

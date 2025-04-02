@@ -2,12 +2,9 @@ import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import { isMultisigExecutionInfo } from '@/utils/transaction-guards'
 import { isEthSignWallet, isSmartContractWallet } from '@/utils/wallets'
 import type { MultiSendCallOnlyContractImplementationType } from '@safe-global/protocol-kit'
-import {
-  type ChainInfo,
-  relayTransaction,
-  type SafeInfo,
-  type TransactionDetails,
-} from '@safe-global/safe-gateway-typescript-sdk'
+import { type ChainInfo, relayTransaction, type TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
+import { type SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
+
 import type {
   SafeSignature,
   SafeTransaction,
@@ -138,7 +135,7 @@ export const dispatchOnChainSigning = async (
   safeTx: SafeTransaction,
   txId: string,
   provider: Eip1193Provider,
-  chainId: SafeInfo['chainId'],
+  chainId: SafeState['chainId'],
   signerAddress: string,
   safeAddress: string,
   isNestedSafe: boolean,
@@ -188,7 +185,7 @@ export const dispatchSafeTxSpeedUp = async (
   txOptions: Omit<TransactionOptions, 'nonce'> & { nonce: number },
   txId: string,
   provider: Eip1193Provider,
-  chainId: SafeInfo['chainId'],
+  chainId: SafeState['chainId'],
   signerAddress: string,
   safeAddress: string,
   nonce: number,
@@ -432,9 +429,9 @@ export const dispatchSpendingLimitTxExecution = async (
   txParams: SpendingLimitTxParams,
   txOptions: TransactionOptions,
   provider: Eip1193Provider,
-  chainId: SafeInfo['chainId'],
+  chainId: SafeState['chainId'],
   safeAddress: string,
-  safeModules: SafeInfo['modules'],
+  safeModules: SafeState['modules'],
 ) => {
   const id = JSON.stringify(txParams)
 
@@ -500,7 +497,7 @@ export const dispatchSafeAppsTx = async (
 
 export const dispatchTxRelay = async (
   safeTx: SafeTransaction,
-  safe: SafeInfo,
+  safe: SafeState,
   txId: string,
   chain: ChainInfo,
   gasLimit?: string | number,

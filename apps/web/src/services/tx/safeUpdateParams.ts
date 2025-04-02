@@ -1,7 +1,8 @@
 import type { SafeContractImplementationType } from '@safe-global/protocol-kit/dist/src/types/contracts'
 import type { MetaTransactionData, SafeVersion } from '@safe-global/safe-core-sdk-types'
 import { OperationType } from '@safe-global/safe-core-sdk-types'
-import type { ChainInfo, SafeInfo, TransactionData } from '@safe-global/safe-gateway-typescript-sdk'
+import type { ChainInfo, TransactionData } from '@safe-global/safe-gateway-typescript-sdk'
+import { type SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import semverSatisfies from 'semver/functions/satisfies'
 import { getReadOnlyFallbackHandlerContract, getReadOnlyGnosisSafeContract } from '@/services/contracts/safeContracts'
 import { SAFE_FEATURES } from '@safe-global/protocol-kit/dist/src/utils/safeVersions'
@@ -38,7 +39,7 @@ const getChangeFallbackHandlerCallData = async (
  * - change the mastercopy address
  * - set the fallback handler address
  */
-export const createUpdateSafeTxs = async (safe: SafeInfo, chain: ChainInfo): Promise<MetaTransactionData[]> => {
+export const createUpdateSafeTxs = async (safe: SafeState, chain: ChainInfo): Promise<MetaTransactionData[]> => {
   assertValidSafeVersion(safe.version)
 
   // 1.3.0 Safes are updated using a delegate call to a migration contract
@@ -79,7 +80,7 @@ const SAFE_1_1_1_INTERFACE = Gnosis_safe__factory.createInterface()
 
 export const extractTargetVersionFromUpdateSafeTx = (
   txData: TransactionData | undefined,
-  safe: SafeInfo,
+  safe: SafeState,
 ): SafeVersion | undefined => {
   if (!txData) {
     return
