@@ -47,7 +47,7 @@ const ContactItem: React.FC<AddressBookContactItemProps> = ({ contact, onPress }
               </Text>
             )}
 
-            <EthAddress address={`0x${contact.value}`} textProps={textProps} />
+            <EthAddress address={`${contact.value as Address}`} textProps={textProps} />
           </View>
         }
         leftNode={
