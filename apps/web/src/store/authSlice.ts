@@ -4,30 +4,40 @@ import { cgwClient } from '@safe-global/store/gateway/cgwClient'
 
 type AuthPayload = {
   sessionExpiresAt: number | null
+  lastUsedSpace: string | null
 }
 
 const initialState: AuthPayload = {
   sessionExpiresAt: null,
+  lastUsedSpace: null,
 }
 
 export const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
-    setAuthenticated: (state, { payload }: PayloadAction<AuthPayload>) => {
-      state.sessionExpiresAt = payload.sessionExpiresAt
+    setAuthenticated: (state, { payload }: PayloadAction<AuthPayload['sessionExpiresAt']>) => {
+      state.sessionExpiresAt = payload
     },
 
     setUnauthenticated: (state) => {
       state.sessionExpiresAt = null
     },
+
+    setLastUsedSpace: (state, { payload }: PayloadAction<AuthPayload['lastUsedSpace']>) => {
+      state.lastUsedSpace = payload
+    },
   },
 })
 
-export const { setAuthenticated, setUnauthenticated } = authSlice.actions
+export const { setAuthenticated, setUnauthenticated, setLastUsedSpace } = authSlice.actions
 
 export const isAuthenticated = (state: RootState): boolean => {
   return !!state.auth.sessionExpiresAt && state.auth.sessionExpiresAt > Date.now()
+}
+
+export const lastUsedSpace = (state: RootState) => {
+  return state.auth.lastUsedSpace
 }
 
 export const authListener = (listenerMiddleware: typeof listenerMiddlewareInstance) => {

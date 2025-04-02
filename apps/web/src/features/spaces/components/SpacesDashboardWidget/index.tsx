@@ -27,16 +27,13 @@ const SpacesDashboardWidget = () => {
   return (
     <>
       <Stack direction="row" flexWrap="wrap" gap={2} p={3} sx={gradientBg} position="relative">
-        <Track {...SPACE_EVENTS.HIDE_DASHBOARD_WIDGET}>
-          <IconButton
-            aria-label="close"
-            onClick={onHide}
-            size="small"
-            sx={{ position: 'absolute', right: 24, top: 16 }}
-          >
-            <CloseIcon fontSize="medium" />
-          </IconButton>
-        </Track>
+        <Box sx={{ position: 'absolute', right: 24, top: 16 }}>
+          <Track {...SPACE_EVENTS.HIDE_DASHBOARD_WIDGET}>
+            <IconButton aria-label="close" onClick={onHide} size="small">
+              <CloseIcon fontSize="medium" />
+            </IconButton>
+          </Track>
+        </Box>
 
         <Box flex={1} minWidth="60%">
           <Chip label="Beta" sx={{ backgroundColor: '#12FF80', borderRadius: '4px' }} size="small" />

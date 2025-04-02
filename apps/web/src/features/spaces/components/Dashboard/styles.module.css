@@ -1,48 +1,48 @@
 .content {
-  min-height: calc(100vh - 100px); /* Header + padding height */
-  border-radius: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+    min-height: calc(100vh - 100px); /* Header + padding height */
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .contentWrapper {
-  position: relative;
-  z-index: 1;
+    position: relative;
+    z-index: 1;
 }
 
 .contentInner {
-  background-color: var(--color-background-paper);
-  max-width: 500px;
-  padding: var(--space-5);
-  border-radius: var(--space-1);
+    background-color: var(--color-background-paper);
+    max-width: 500px;
+    padding: var(--space-5);
+    border-radius: var(--space-1);
 }
 
 .iconBG {
-  width: 40px;
-  height: 40px;
-  background-color: var(--color-background-main);
-  border-radius: 50%;
-  margin-bottom: var(--space-2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+    width: 40px;
+    height: 40px;
+    background-color: var(--color-background-main);
+    border-radius: 50%;
+    margin-bottom: var(--space-2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .image {
-  max-width: 100%;
-  height: auto;
+    max-width: 100%;
+    height: auto;
 }
 
 .chainIndicator {
-  width: 100%;
-  height: 4px;
-  background-color: var(--color-background-main);
-  border-radius: 5px;
+    width: 100%;
+    height: 4px;
+    background-color: var(--color-background-main);
+    border-radius: 5px;
 }
 
 .chainIndicatorColor {
-  display: block;
-  height: 100%;
-  border-radius: 5px;
+    display: block;
+    height: 100%;
+    border-radius: 5px;
 }
