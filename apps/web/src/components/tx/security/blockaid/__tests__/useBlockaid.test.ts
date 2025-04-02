@@ -12,9 +12,9 @@ import {
 import { faker } from '@faker-js/faker/locale/af_ZA'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { safeInfoBuilder } from '@/tests/builders/safe'
-import { CLASSIFICATION_MAPPING, REASON_MAPPING } from '..'
 import { renderHook, waitFor } from '@/tests/test-utils'
 import { type SignerWallet } from '@/components/common/WalletProvider'
+import { CLASSIFICATION_MAPPING, REASON_MAPPING } from '@safe-global/utils/components/tx/security/blockaid/utils'
 
 const setupFetchStub = (data: any) => () => {
   return Promise.resolve({

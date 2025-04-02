@@ -7,7 +7,7 @@ import type { TransactionDetails } from '@safe-global/safe-gateway-typescript-sd
 import { ReviewTransactionContent } from '../ReviewTransactionContent'
 import * as useSafeInfo from '@/hooks/useSafeInfo'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
-import { defaultSecurityContextValues } from '../../security/shared/TxSecurityContext'
+import { defaultSecurityContextValues } from '@safe-global/utils/components/tx/security/shared/utils'
 
 const txDetails = {
   safeAddress: '0xE20CcFf2c38Ef3b64109361D7b7691ff2c7D5f67',

@@ -8,15 +8,7 @@ import { SecuritySeverity } from '@safe-global/utils/services/security/modules/t
 import { mapSecuritySeverity } from '../utils'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import { Warning } from '.'
-
-const CONTRACT_CHANGE_TITLES_MAPPING: Record<
-  ProxyUpgradeManagement['type'] | OwnershipChangeManagement['type'] | ModulesChangeManagement['type'],
-  string
-> = {
-  PROXY_UPGRADE: 'This transaction will change the mastercopy of the Safe',
-  OWNERSHIP_CHANGE: 'This transaction will change the ownership of the Safe',
-  MODULES_CHANGE: 'This transaction contains a Safe modules change',
-}
+import { CONTRACT_CHANGE_TITLES_MAPPING } from '@safe-global/utils/components/tx/security/blockaid/utils'
 
 const ProxyUpgradeSummary = ({ beforeAddress, afterAddress }: { beforeAddress: string; afterAddress: string }) => {
   return (

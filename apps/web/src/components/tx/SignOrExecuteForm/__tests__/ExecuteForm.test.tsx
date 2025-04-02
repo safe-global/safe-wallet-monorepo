@@ -1,4 +1,4 @@
-import { defaultSecurityContextValues } from '@/components/tx/security/shared/TxSecurityContext'
+import { defaultSecurityContextValues } from '@safe-global/utils/components/tx/security/shared/utils'
 import { type AsyncResult } from '@/hooks/useAsync'
 import { createMockSafeTransaction } from '@/tests/transactions'
 import { OperationType } from '@safe-global/safe-core-sdk-types'
