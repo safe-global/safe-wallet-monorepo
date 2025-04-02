@@ -1,4 +1,3 @@
-import { Spinner } from 'tamagui'
 import React, { useMemo } from 'react'
 import { SectionList } from 'react-native'
 
@@ -7,6 +6,7 @@ import { TransactionItem } from '@safe-global/store/gateway/AUTO_GENERATED/trans
 import { getTxHash, GroupedTxsWithTitle, groupTxsByDate } from '@/src/features/TxHistory/utils'
 import { HistoryTransactionItems } from '@safe-global/store/gateway/types'
 import { renderItem } from '@/src/features/TxHistory/utils'
+import { Loader } from '@/src/components/Loader'
 
 interface TxHistoryList {
   transactions?: HistoryTransactionItems[]
@@ -29,7 +29,7 @@ export function TxHistoryList({ transactions, onEndReached, isLoading }: TxHisto
       renderItem={renderItem}
       onEndReached={onEndReached}
       contentContainerStyle={{ paddingHorizontal: 16 }}
-      ListFooterComponent={isLoading ? <Spinner size="small" color="$color" /> : undefined}
+      ListFooterComponent={isLoading ? <Loader size={24} color="$color" /> : undefined}
       renderSectionHeader={({ section: { title } }) => <SafeListItem.Header title={title} />}
     />
   )

@@ -1,9 +1,10 @@
 import React from 'react'
 import { ImageSourcePropType, StyleSheet } from 'react-native'
-import { View, Image, Text, Spinner } from 'tamagui'
+import { View, Image, Text } from 'tamagui'
 import { SafeButton } from '@/src/components/SafeButton'
 import { WINDOW_HEIGHT } from '@/src/store/constants'
 import { FloatingContainer } from '../FloatingContainer'
+import { Loader } from '../Loader'
 
 interface OptInProps {
   title: string
@@ -55,7 +56,7 @@ export const OptIn: React.FC<OptInProps> = React.memo(
 
         <FloatingContainer sticky testID="notifications-opt-in-cta-buttons">
           <SafeButton onPress={ctaButton.onPress} marginBottom={'$3'} testID={'opt-in-primary-button'}>
-            {!isLoading ? ctaButton.label : <Spinner size="small" color="$successLightDark" />}
+            {!isLoading ? ctaButton.label : <Loader size={24} color="$successLightDark" />}
           </SafeButton>
           {secondaryButton && (
             <SafeButton text onPress={secondaryButton.onPress} testID={'opt-in-secondary-button'}>

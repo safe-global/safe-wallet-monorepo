@@ -1,12 +1,12 @@
 import React from 'react'
 import { Switch, StyleSheet } from 'react-native'
 import { Text, View } from 'tamagui'
-import { CircleSnail } from 'react-native-progress'
 import { SafeListItem } from '@/src/components/SafeListItem'
 import { NotificationPermissions } from './NotificationPermissions'
 import { useNotificationGTWPermissions } from '@/src/hooks/useNotificationGTWPermissions'
 import { selectActiveSafe } from '@/src/store/activeSafeSlice'
 import { useAppSelector } from '@/src/store/hooks'
+import { Loader } from '@/src/components/Loader'
 
 type Props = {
   onChange: () => void
@@ -35,7 +35,7 @@ const LoadableSwitch: React.FC<LoadableSwitchProps> = ({
   if (isLoading) {
     return (
       <View style={styles.loaderContainer}>
-        <CircleSnail size={24} color={value ? trackColor.true : '#ccc'} />
+        <Loader size={24} color={value ? trackColor.true : '#ccc'} />
       </View>
     )
   }
