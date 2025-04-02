@@ -56,13 +56,13 @@ export const OptIn: React.FC<OptInProps> = React.memo(
           {title}
         </Text>
         {description && (
-          <Text textAlign="center" fontWeight={400} fontSize="$4">
+          <Text textAlign="center" fontWeight={400} fontSize="$4" paddingHorizontal={'$4'}>
             {description}
           </Text>
         )}
         {image && <Image style={styles.image} source={image} />}
 
-        <FloatingContainer sticky testID="notifications-opt-in-cta-buttons">
+        <FloatingContainer sticky testID="notifications-opt-in-cta-buttons" style={{ paddingHorizontal: 16 }}>
           <SafeButton onPress={ctaButton.onPress} marginBottom={'$3'} testID={'opt-in-primary-button'}>
             {!isLoading ? (
               ctaButton.label
@@ -92,7 +92,6 @@ const styles = StyleSheet.create({
   wrapper: {
     flex: 1,
     marginTop: 24,
-    paddingHorizontal: 24,
     gap: '$8',
     alignItems: 'center',
     justifyContent: 'flex-start',

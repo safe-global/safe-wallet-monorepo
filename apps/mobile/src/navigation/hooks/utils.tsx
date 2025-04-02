@@ -2,6 +2,7 @@ import { HeaderBackButton } from '@react-navigation/elements'
 import { type NativeStackHeaderLeftProps } from '@react-navigation/native-stack'
 import { View } from 'tamagui'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
+import { Platform, StyleSheet } from 'react-native'
 
 export const getDefaultScreenOptions = (goBack: () => void) => {
   return {
@@ -11,6 +12,7 @@ export const getDefaultScreenOptions = (goBack: () => void) => {
       return (
         <HeaderBackButton
           {...props}
+          style={Platform.OS === 'android' ? styles.android : styles.ios}
           testID={'go-back'}
           onPress={goBack}
           backImage={() => {
@@ -33,3 +35,12 @@ export const getDefaultScreenOptions = (goBack: () => void) => {
     },
   }
 }
+
+const styles = StyleSheet.create({
+  android: {
+    marginLeft: -16,
+  },
+  ios: {
+    marginLeft: -8,
+  },
+})
