@@ -2,6 +2,7 @@ import { SafeButton } from '@/src/components/SafeButton'
 import React from 'react'
 import { H6, Text, View } from 'tamagui'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon/SafeFontIcon'
+
 export const AssetError = ({ assetType, onRetry }: { assetType: 'token' | 'nft'; onRetry: () => void }) => {
   const title = assetType === 'token' ? 'Couldn’t load tokens balances' : 'Couldn’t load NFTs'
 
@@ -12,7 +13,7 @@ export const AssetError = ({ assetType, onRetry }: { assetType: 'token' | 'nft';
         Something went wrong. Please try to load the page again.
       </Text>
       <SafeButton backgroundColor="$backgroundSecondary" color="$colorPrimary" onPress={onRetry}>
-        <SafeFontIcon name="update" color="$colorPrimary" />
+        <SafeFontIcon size={16} name="update" color="$colorPrimary" />
         Retry
       </SafeButton>
     </View>
