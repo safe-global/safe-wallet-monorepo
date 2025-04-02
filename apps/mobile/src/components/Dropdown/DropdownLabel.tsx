@@ -25,7 +25,14 @@ export const DropdownLabel = ({
   labelProps = defaultLabelProps,
 }: DropdownLabelProps) => {
   return (
-    <View testID="dropdown-label-view" onPress={onPress} flexDirection="row" columnGap="$2">
+    <View
+      testID="dropdown-label-view"
+      onPress={onPress}
+      flexDirection="row"
+      columnGap="$2"
+      justifyContent="space-between"
+      alignItems="center"
+    >
       {leftNode}
 
       <View justifyContent={'center'}>
@@ -35,7 +42,7 @@ export const DropdownLabel = ({
       </View>
 
       {displayDropDownIcon && (
-        <View paddingTop={'$1'}>
+        <View>
           <SafeFontIcon testID="dropdown-arrow" name="chevron-down" size={16} />
         </View>
       )}
