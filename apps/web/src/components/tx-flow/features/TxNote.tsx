@@ -1,10 +1,9 @@
 import type { ReactElement } from 'react'
-import { useCallback, useContext, useState } from 'react'
+import { useCallback, useContext } from 'react'
 import madProps from '@/utils/mad-props'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
-import { encodeTxNote, trackAddNote, TxNoteForm } from '@/features/tx-notes'
-import { TxFlowEvent, useOnEvent } from '../txFlowEvents'
+import { encodeTxNote, TxNoteForm } from '@/features/tx-notes'
 
 export const TxNote = ({
   txDetails,
@@ -17,24 +16,12 @@ export const TxNote = ({
   txOrigin: ReturnType<typeof useTxOrigin>
   setTxOrigin: ReturnType<typeof useSetTxOrigin>
 }): ReactElement | null => {
-  const [customOrigin, setCustomOrigin] = useState<string | undefined>(txOrigin)
-
   const onNoteChange = useCallback(
     (note: string) => {
-      setCustomOrigin(encodeTxNote(note, txOrigin))
+      setTxOrigin(encodeTxNote(note, txOrigin))
     },
-    [setCustomOrigin, txOrigin],
+    [setTxOrigin, txOrigin],
   )
-
-  const handleNextStep = useCallback(() => {
-    if (customOrigin !== txOrigin) {
-      trackAddNote()
-    }
-    setTxOrigin(customOrigin)
-  }, [customOrigin, setTxOrigin, txOrigin])
-
-  // Subscribe to the NEXT event to track the note change
-  useOnEvent(TxFlowEvent.NEXT, handleNextStep)
 
   return <TxNoteForm isCreation={isCreation} onChange={onNoteChange} txDetails={txDetails} />
 }

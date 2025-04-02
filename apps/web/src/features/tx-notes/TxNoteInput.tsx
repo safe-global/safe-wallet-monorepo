@@ -1,14 +1,20 @@
 import { useCallback, useState } from 'react'
 import { InputAdornment, Stack, TextField, Typography, Alert } from '@mui/material'
+import { MODALS_EVENTS, trackEvent } from '@/services/analytics'
 
 const MAX_NOTE_LENGTH = 60
 
 export const TxNoteInput = ({ onChange }: { onChange: (note: string) => void }) => {
   const [note, setNote] = useState('')
+  const [isDirty, setIsDirty] = useState(false)
 
-  const onInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setNote(e.target.value)
-  }, [])
+  const onInput = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setIsDirty(isDirty || e.target.value !== note)
+      setNote(e.target.value)
+    },
+    [isDirty, note],
+  )
 
   const onInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -16,6 +22,18 @@ export const TxNoteInput = ({ onChange }: { onChange: (note: string) => void }) 
     },
     [onChange],
   )
+
+  const onFocus = useCallback(() => {
+    setIsDirty(false)
+  }, [])
+
+  const onBlur = useCallback(() => {
+    if (isDirty) {
+      // Track the event only if the note is dirty
+      // This prevents tracking the event when the user focuses and blurs the input without changing the note
+      trackEvent(MODALS_EVENTS.SUBMIT_TX_NOTE)
+    }
+  }, [isDirty])
 
   return (
     <>
@@ -49,6 +67,8 @@ export const TxNoteInput = ({ onChange }: { onChange: (note: string) => void }) 
         }}
         onInput={onInput}
         onChange={onInputChange}
+        onFocus={onFocus}
+        onBlur={onBlur}
       />
     </>
   )
