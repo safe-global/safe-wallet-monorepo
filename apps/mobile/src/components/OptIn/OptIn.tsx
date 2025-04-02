@@ -1,6 +1,6 @@
 import React from 'react'
-import { ImageSourcePropType, StyleSheet } from 'react-native'
-import { View, Image, Text } from 'tamagui'
+import { ColorSchemeName, ImageSourcePropType, StyleSheet } from 'react-native'
+import { View, Image, Text, getTokenValue } from 'tamagui'
 import { SafeButton } from '@/src/components/SafeButton'
 import { WINDOW_HEIGHT } from '@/src/store/constants'
 import { FloatingContainer } from '../FloatingContainer'
@@ -22,10 +22,22 @@ interface OptInProps {
   testID?: string
   isVisible?: boolean
   isLoading?: boolean
+  colorScheme: ColorSchemeName
 }
 
 export const OptIn: React.FC<OptInProps> = React.memo(
-  ({ testID, kicker, title, description, image, ctaButton, secondaryButton, isVisible, isLoading }: OptInProps) => {
+  ({
+    testID,
+    kicker,
+    title,
+    description,
+    image,
+    ctaButton,
+    secondaryButton,
+    isVisible,
+    isLoading,
+    colorScheme,
+  }: OptInProps) => {
     if (!isVisible) {
       return
     }
@@ -56,7 +68,18 @@ export const OptIn: React.FC<OptInProps> = React.memo(
 
         <FloatingContainer sticky testID="notifications-opt-in-cta-buttons">
           <SafeButton onPress={ctaButton.onPress} marginBottom={'$3'} testID={'opt-in-primary-button'}>
-            {!isLoading ? ctaButton.label : <Loader size={24} color="$successLightDark" />}
+            {!isLoading ? (
+              ctaButton.label
+            ) : (
+              <Loader
+                size={24}
+                color={
+                  colorScheme === 'dark'
+                    ? getTokenValue('$color.textContrastDark')
+                    : getTokenValue('$color.primaryLightDark')
+                }
+              />
+            )}
           </SafeButton>
           {secondaryButton && (
             <SafeButton text onPress={secondaryButton.onPress} testID={'opt-in-secondary-button'}>

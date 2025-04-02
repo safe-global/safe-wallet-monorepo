@@ -1,3 +1,5 @@
+import React from 'react'
+
 import { Badge } from '@/src/components/Badge'
 import { SafeButton } from '@/src/components/SafeButton'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
@@ -6,12 +8,12 @@ import { SignersCard } from '@/src/components/transactions-list/Card/SignersCard
 import { useAppSelector } from '@/src/store/hooks'
 import { selectAppNotificationStatus } from '@/src/store/notificationsSlice'
 import { useLocalSearchParams, useRouter } from 'expo-router'
-import React from 'react'
 import { ScrollView } from 'react-native'
 import { Button, Text, View } from 'tamagui'
 import { useNotificationManager } from '@/src/hooks/useNotificationManager'
 import { ToastViewport } from '@tamagui/toast'
 import { useCopyAndDispatchToast } from '@/src/hooks/useCopyAndDispatchToast'
+import Logger from '@/src/utils/logger'
 
 export function ImportSuccess() {
   const isAppNotificationEnabled = useAppSelector(selectAppNotificationStatus)
@@ -28,11 +30,13 @@ export function ImportSuccess() {
   }
 
   const handleContinuePress = async () => {
-    await updatePermissions()
-    // Go to top of the navigator stack
-    router.dismissAll()
-    // now close it
-    router.back()
+    try {
+      await updatePermissions()
+      router.dismissAll()
+      router.back()
+    } catch (error) {
+      Logger.error('Navigation error:', error)
+    }
   }
 
   return (
