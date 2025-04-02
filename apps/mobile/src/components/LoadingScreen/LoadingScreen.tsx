@@ -1,6 +1,7 @@
 import React from 'react'
-import { CircleSnail } from 'react-native-progress'
 import { H4, View } from 'tamagui'
+
+import { Loader } from '@/src/components/Loader'
 
 interface LoadingScreenProps {
   title: string
@@ -10,7 +11,7 @@ interface LoadingScreenProps {
 export function LoadingScreen({ title, description }: LoadingScreenProps) {
   return (
     <View flex={1} justifyContent="center" alignItems="center">
-      <CircleSnail size={64} color={['#12FF80']} />
+      <Loader size={64} color="#12FF80" />
       <H4 fontWeight={600} marginTop="$7" marginBottom="$4">
         {title}
       </H4>

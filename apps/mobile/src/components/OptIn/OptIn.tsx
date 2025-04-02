@@ -1,9 +1,10 @@
 import React from 'react'
 import { ColorSchemeName, ImageSourcePropType, StyleSheet } from 'react-native'
-import { View, Image, Text, Spinner, getTokenValue } from 'tamagui'
+import { View, Image, Text, getTokenValue } from 'tamagui'
 import { SafeButton } from '@/src/components/SafeButton'
 import { WINDOW_HEIGHT } from '@/src/store/constants'
 import { FloatingContainer } from '../FloatingContainer'
+import { Loader } from '../Loader'
 
 interface OptInProps {
   title: string
@@ -70,8 +71,8 @@ export const OptIn: React.FC<OptInProps> = React.memo(
             {!isLoading ? (
               ctaButton.label
             ) : (
-              <Spinner
-                size="small"
+              <Loader
+                size={24}
                 color={
                   colorScheme === 'dark'
                     ? getTokenValue('$color.textContrastDark')

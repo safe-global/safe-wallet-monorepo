@@ -14,11 +14,11 @@ import { formatCurrency, formatCurrencyPrecise } from '@safe-global/utils/utils/
 import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
 import { shouldDisplayPreciseBalance } from '@/src/utils/balance'
 import { NoFunds } from '@/src/features/Assets/components/NoFunds'
-
+import { AssetError } from '@/src/features/Assets/Assets.error'
 export function TokensContainer() {
   const activeSafe = useSelector(selectActiveSafe)
 
-  const { data, isFetching, error, isLoading } = useBalancesGetBalancesV1Query(
+  const { data, isFetching, error, isLoading, refetch } = useBalancesGetBalancesV1Query(
     !activeSafe
       ? skipToken
       : {
@@ -51,9 +51,17 @@ export function TokensContainer() {
     )
   }, [])
 
-  if (isLoading || !data?.items.length || error) {
+  if (error) {
     return (
-      <Fallback loading={isFetching} hasError={!!error}>
+      <Fallback loading={isFetching}>
+        <AssetError assetType={'token'} onRetry={() => refetch()} />
+      </Fallback>
+    )
+  }
+
+  if (isLoading || !data?.items.length) {
+    return (
+      <Fallback loading={isFetching}>
         <NoFunds fundsType={'token'} />
       </Fallback>
     )

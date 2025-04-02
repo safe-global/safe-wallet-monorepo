@@ -1,8 +1,7 @@
 import React from 'react'
 
 import { SafeListItem } from '@/src/components/SafeListItem'
-import { Spinner } from 'tamagui'
-
+import { Loader } from '@/src/components/Loader'
 import { SectionList } from 'react-native'
 import { useCallback } from 'react'
 import { useScrollableHeader } from '@/src/navigation/useScrollableHeader'
@@ -52,7 +51,7 @@ export function SignersList({ signersGroup, isFetching, hasLocalSingers, navbarT
       stickySectionHeadersEnabled
       contentInsetAdjustmentBehavior="automatic"
       sections={signersGroup}
-      ListFooterComponent={isFetching ? <Spinner size="small" color="$color" /> : undefined}
+      ListFooterComponent={isFetching ? <Loader size={24} color="$color" /> : undefined}
       keyExtractor={keyExtractor}
       renderItem={renderItem}
       scrollEventThrottle={16}

@@ -1,7 +1,7 @@
 import React from 'react'
 import { Switch, StyleSheet } from 'react-native'
 import { View } from 'tamagui'
-import { CircleSnail } from 'react-native-progress'
+import { Loader } from '../Loader'
 
 interface LoadableSwitchProps {
   isLoading?: boolean
@@ -24,7 +24,7 @@ export const LoadableSwitch: React.FC<LoadableSwitchProps> = ({
   if (isLoading) {
     return (
       <View style={styles.loaderContainer}>
-        <CircleSnail size={24} color={value ? trackColor.true : '#ccc'} />
+        <Loader size={24} color={value ? trackColor.true : '#ccc'} />
       </View>
     )
   }
