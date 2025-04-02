@@ -1,5 +1,5 @@
 import React, { type ComponentType, type PropsWithChildren, type ReactNode } from 'react'
-import type { NextStepCallback, SubmitCallback } from './createTxFlow'
+import type { NextStepCallback, SubmitCallback } from './TxFlow'
 
 /**
  * Recursively appends elements to the children.

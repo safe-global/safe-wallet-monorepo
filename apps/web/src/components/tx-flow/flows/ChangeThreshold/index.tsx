@@ -1,8 +1,8 @@
 import SaveAddressIcon from '@/public/images/common/save-address.svg'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { createDefaultTxFlow, type SubmitCallbackWithData } from '@/components/tx-flow/createTxFlow'
 import { ChooseThreshold } from './ChooseThreshold'
-import { SETTINGS_EVENTS, trackEvent } from '@/services/analytics'
+import { SETTINGS_EVENTS, trackEvent, TxFlowType } from '@/services/analytics'
+import { type SubmitCallbackWithData, TxFlow } from '../../TxFlow'
 
 export enum ChangeThresholdFlowFieldNames {
   threshold = 'threshold',
@@ -11,8 +11,6 @@ export enum ChangeThresholdFlowFieldNames {
 export type ChangeThresholdFlowProps = {
   [ChangeThresholdFlowFieldNames.threshold]: number
 }
-
-const TxFlow = createDefaultTxFlow<ChangeThresholdFlowProps>()
 
 const ChangeThresholdFlow = () => {
   const {
@@ -34,6 +32,7 @@ const ChangeThresholdFlow = () => {
       icon={SaveAddressIcon}
       subtitle="Change threshold"
       onSubmit={handleSubmit}
+      eventCategory={TxFlowType.CHANGE_THRESHOLD}
       showMethodCall
     >
       <ChooseThreshold key={0} />

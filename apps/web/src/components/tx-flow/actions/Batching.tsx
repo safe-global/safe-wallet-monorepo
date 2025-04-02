@@ -6,8 +6,8 @@ import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import { isDelegateCall } from '@/services/tx/tx-sender/sdk'
 import { TxModalContext } from '@/components/tx-flow'
 import { TxFlowContext } from '../TxFlowProvider'
-import type { SubmitCallback } from '../createTxFlow'
 import useIsCounterfactualSafe from '@/features/counterfactual/hooks/useIsCounterfactualSafe'
+import type { SubmitCallback } from '../TxFlow'
 
 export type BatchProps = {
   origin?: string

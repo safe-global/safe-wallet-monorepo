@@ -1,7 +1,7 @@
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { useCallback, useContext, useState } from 'react'
 import { TxFlowContext } from '../TxFlowProvider'
-import type { SubmitCallback } from '../createTxFlow'
+import type { SubmitCallback } from '../TxFlow'
 import ExecuteForm from '@/components/tx/SignOrExecuteForm/ExecuteForm'
 import { useAlreadySigned } from '@/components/tx/SignOrExecuteForm/hooks'
 import { MODALS_EVENTS, trackEvent } from '@/services/analytics'

@@ -3,11 +3,11 @@ import type { TransactionSummary } from '@safe-global/safe-gateway-typescript-sd
 import ConfirmProposedTx from './ConfirmProposedTx'
 import { useTransactionType } from '@/hooks/useTransactionType'
 import SwapIcon from '@/public/images/common/swap.svg'
-import { useMemo } from 'react'
 import { isExecutable, isMultisigExecutionInfo, isSignableBy } from '@/utils/transaction-guards'
 import { useSigner } from '@/hooks/wallets/useWallet'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { createDefaultTxFlow } from '@/components/tx-flow/createTxFlow'
+import { TxFlow } from '../../TxFlow'
+import { TxFlowType } from '@/services/analytics'
 
 const ConfirmTxFlow = ({ txSummary }: { txSummary: TransactionSummary }) => {
   const { text } = useTransactionType(txSummary)
@@ -20,11 +20,6 @@ const ConfirmTxFlow = ({ txSummary }: { txSummary: TransactionSummary }) => {
   const canExecute = isExecutable(txSummary, signer?.address || '', safe)
   const canSign = isSignableBy(txSummary, signer?.address || '')
 
-  const TxFlow = useMemo(
-    () => createDefaultTxFlow<undefined>((props) => <ConfirmProposedTx txNonce={txNonce} {...props} />),
-    [txNonce],
-  )
-
   return (
     <TxFlow
       icon={isSwapOrder && SwapIcon}
@@ -33,6 +28,8 @@ const ConfirmTxFlow = ({ txSummary }: { txSummary: TransactionSummary }) => {
       isExecutable={canExecute}
       onlyExecute={!canSign}
       txSummary={txSummary}
+      ReviewTransactionComponent={(props) => <ConfirmProposedTx txNonce={txNonce} {...props} />}
+      eventCategory={TxFlowType.CONFIRM_TX}
       showMethodCall
     />
   )
