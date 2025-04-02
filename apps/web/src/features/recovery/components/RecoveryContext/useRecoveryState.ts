@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import type { Delay } from '@gnosis.pm/zodiac'
 
-import useAsync from '@/hooks/useAsync'
+import useAsync from '@safe-global/utils/hooks/useAsync'
 import { useCurrentChain } from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
@@ -13,7 +13,7 @@ import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { addListener } from '@reduxjs/toolkit'
 import { txHistorySlice } from '@/store/txHistorySlice'
 import { RecoveryEvent, recoverySubscribe } from '@/features/recovery/services/recoveryEvents'
-import type { AsyncResult } from '@/hooks/useAsync'
+import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import type { RecoveryState } from '@/features/recovery/services/recovery-state'
 
 const REFRESH_DELAY = 5 * 60 * 1_000 // 5 minutes
