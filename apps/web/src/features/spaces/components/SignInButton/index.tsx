@@ -28,7 +28,7 @@ const SignInButton = () => {
 
       if (result) {
         const oneDayInMs = 24 * 60 * 60 * 1000
-        dispatch(setAuthenticated({ sessionExpiresAt: Date.now() + oneDayInMs }))
+        dispatch(setAuthenticated(Date.now() + oneDayInMs))
       }
     } catch (error) {
       logError(ErrorCodes._640)
