@@ -1,5 +1,6 @@
 import React from 'react'
-import { Text, View, YStack, Image } from 'tamagui'
+import { SafeAreaView } from 'react-native'
+import { Text, View, Image } from 'tamagui'
 import Signature from '@/assets/images/signature.png'
 
 import { SafeButton } from '@/src/components/SafeButton'
@@ -30,7 +31,7 @@ export function SignForm({ address, txId }: SignFormProps) {
   }
 
   return (
-    <YStack gap="$6">
+    <SafeAreaView style={{ gap: 24 }}>
       <View
         onPress={() => router.push({ pathname: '/change-signer-sheet', params: { txId } })}
         flexDirection="row"
@@ -55,6 +56,6 @@ export function SignForm({ address, txId }: SignFormProps) {
           Confirm and sign
         </SafeButton>
       </View>
-    </YStack>
+    </SafeAreaView>
   )
 }
