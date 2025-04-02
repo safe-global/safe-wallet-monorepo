@@ -1,7 +1,7 @@
 import type { AppThunk } from '@/store'
 import { addOrUpdateSafe } from '@/store/addedSafesSlice'
 import { upsertAddressBookEntries } from '@/store/addressBookSlice'
-import { defaultSafeInfo } from '@/store/safeInfoSlice'
+import { defaultSafeInfo } from '@safe-global/store/slices/SafeInfo/utils'
 import type { NamedAddress } from '@/components/new-safe/create/types'
 
 export const updateAddressBook = (

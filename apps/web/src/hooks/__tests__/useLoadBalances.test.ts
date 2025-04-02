@@ -1,5 +1,5 @@
 import * as store from '@/store'
-import { defaultSafeInfo } from '@/store/safeInfoSlice'
+import { defaultSafeInfo } from '@safe-global/store/slices/SafeInfo/utils'
 import { act, renderHook, waitFor } from '@/tests/test-utils'
 import { toBeHex } from 'ethers'
 import useLoadBalances from '../loadables/useLoadBalances'

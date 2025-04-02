@@ -18,7 +18,7 @@ import {
   getSimulateTxAccessorContract,
 } from '@safe-global/protocol-kit/dist/src/contracts/safeDeploymentContracts'
 import { type JsonRpcProvider } from 'ethers'
-import { type ExtendedSafeInfo } from '@/store/safeInfoSlice'
+import type { ExtendedSafeInfo } from '@safe-global/store/slices/SafeInfo/types'
 
 const getEncodedSafeTx = (
   safeSDK: Safe,
