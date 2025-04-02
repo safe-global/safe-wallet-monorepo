@@ -1,5 +1,5 @@
 import { Button, useTheme } from 'tamagui'
-import { Linking, Platform, Alert } from 'react-native'
+import { Linking, Platform, Alert, View } from 'react-native'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon/SafeFontIcon'
 import React from 'react'
 import { getExplorerLink } from '@safe-global/utils/utils/gateway'
@@ -36,12 +36,13 @@ export const SettingsMenu = ({ safeAddress }: Props) => {
   }
 
   return (
-    <>
+    <View style={{ position: 'relative', flexDirection: 'row', alignItems: 'center', gap: 8, height: 48 }}>
       <Button
         testID={'settings-screen-header-app-settings-button'}
         size={'$8'}
         circular={true}
         scaleSpace={1.5}
+        hitSlop={22}
         backgroundColor={'$backgroundSkeleton'}
         onPress={() => {
           router.push('/app-settings')
@@ -154,6 +155,6 @@ export const SettingsMenu = ({ safeAddress }: Props) => {
           <SafeFontIcon name={'options-horizontal'} size={16} />
         </Button>
       </FloatingMenu>
-    </>
+    </View>
   )
 }
