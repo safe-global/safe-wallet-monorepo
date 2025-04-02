@@ -1,6 +1,7 @@
 import React from 'react'
-import { ColorSchemeName, ImageSourcePropType, StyleSheet } from 'react-native'
-import { View, Image, Text, getTokenValue } from 'tamagui'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { ColorSchemeName, ImageSourcePropType, SafeAreaView, StyleSheet } from 'react-native'
+import { Image, Text, getTokenValue } from 'tamagui'
 import { SafeButton } from '@/src/components/SafeButton'
 import { WINDOW_HEIGHT } from '@/src/store/constants'
 import { FloatingContainer } from '../FloatingContainer'
@@ -38,19 +39,14 @@ export const OptIn: React.FC<OptInProps> = React.memo(
     isLoading,
     colorScheme,
   }: OptInProps) => {
+    const insets = useSafeAreaInsets()
+
     if (!isVisible) {
       return
     }
 
     return (
-      <View
-        testID={testID}
-        style={styles.wrapper}
-        padding="$4"
-        gap="$8"
-        alignItems="center"
-        justifyContent="flex-start"
-      >
+      <SafeAreaView testID={testID} style={[styles.wrapper, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
         {kicker && (
           <Text textAlign="center" fontWeight={700} fontSize="$4" lineHeight="$6">
             {kicker}
@@ -87,7 +83,7 @@ export const OptIn: React.FC<OptInProps> = React.memo(
             </SafeButton>
           )}
         </FloatingContainer>
-      </View>
+      </SafeAreaView>
     )
   },
 )
@@ -95,6 +91,11 @@ export const OptIn: React.FC<OptInProps> = React.memo(
 const styles = StyleSheet.create({
   wrapper: {
     flex: 1,
+    marginTop: 24,
+    paddingHorizontal: 24,
+    gap: '$8',
+    alignItems: 'center',
+    justifyContent: 'flex-start',
   },
   image: {
     width: '100%',
