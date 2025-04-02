@@ -5,13 +5,17 @@ import { useSafeInfo } from '@/src/hooks/useSafeInfo'
 import { useEffect } from 'react'
 import { RouteProp, useRoute } from '@react-navigation/native'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
-import { useTransactionsGetTransactionByIdV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import {
+  MultisigExecutionDetails,
+  useTransactionsGetTransactionByIdV1Query,
+} from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import React from 'react'
 import { TransactionChecksView } from './components/TransactionChecksView'
 import { useAppSelector } from '@/src/store/hooks'
 import { selectActiveChain } from '@/src/store/chains'
 import { isTxSimulationEnabled } from '@safe-global/utils/components/tx/security/tenderly/utils'
 import { SafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import { useTxSigner } from '@/src/features/ConfirmTx/hooks/useTxSigner'
 
 export const TransactionChecksContainer = () => {
   const { simulation, simulateTransaction, simulationLink, _simulationRequestStatus } = useSimulation()
@@ -26,6 +30,8 @@ export const TransactionChecksContainer = () => {
     id: txId,
   })
 
+  const { activeSigner } = useTxSigner(data?.detailedExecutionInfo as MultisigExecutionDetails)
+
   useEffect(() => {
     const getSafeTx = async () => {
       if (!data) {
@@ -38,7 +44,7 @@ export const TransactionChecksContainer = () => {
 
       await simulateTransaction({
         safe: safeInfo.safe as SafeInfo,
-        executionOwner: '0x4cF25c77De50baBAB44c6BcC76D88624DDb3EbBE',
+        executionOwner: activeSigner ? activeSigner.value : safeInfo.safe.owners[0].value,
         transactions: safeTx,
       })
     }

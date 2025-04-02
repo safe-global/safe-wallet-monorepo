@@ -10,6 +10,7 @@ import {
 } from '@safe-global/utils/components/tx/security/tenderly/utils'
 import { useAppSelector } from '@/src/store/hooks'
 import { selectTenderly } from '@/src/store/settingsSlice'
+import Logger from '@/src/utils/logger'
 
 export const useSimulation = (): UseSimulationReturn => {
   const [simulation, setSimulation] = useState<TenderlySimulation | undefined>()
@@ -35,11 +36,10 @@ export const useSimulation = (): UseSimulationReturn => {
 
         const data = await getSimulation(simulationPayload, tenderly)
 
-        console.log('simulation data', data)
         setSimulation(data)
         setSimulationRequestStatus(FETCH_STATUS.SUCCESS)
       } catch (error) {
-        console.error(error)
+        Logger.error(asError(error).message)
 
         setRequestError(asError(error).message)
         setSimulationRequestStatus(FETCH_STATUS.ERROR)

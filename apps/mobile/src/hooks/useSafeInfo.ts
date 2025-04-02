@@ -1,15 +1,16 @@
-import { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { useGetSafeQuery } from '@safe-global/store/gateway'
 import { useAppSelector } from '@/src/store/hooks'
 import { selectActiveSafe } from '@/src/store/activeSafeSlice'
+import { defaultSafeInfo } from '@safe-global/store/slices/SafeInfo/utils'
 
 export const useSafeInfo = () => {
   const activeSafe = useAppSelector(selectActiveSafe)
 
   const {
-    data = {} as SafeState,
+    data = defaultSafeInfo,
     error,
     isLoading,
+    isSuccess,
   } = useGetSafeQuery(
     {
       chainId: activeSafe?.chainId ?? '',
@@ -20,19 +21,10 @@ export const useSafeInfo = () => {
     },
   )
 
-  if (!activeSafe) {
-    return {
-      safe: {} as SafeState,
-      safeAddress: null,
-      safeLoaded: false,
-      safeError: null,
-      safeLoading: false,
-    }
-  }
   return {
     safe: data,
-    safeAddress: activeSafe.address,
-    safeLoaded: !!data?.address,
+    safeAddress: activeSafe?.address,
+    safeLoaded: isSuccess,
     safeError: error,
     safeLoading: isLoading,
   }
