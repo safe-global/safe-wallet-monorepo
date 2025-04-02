@@ -31,7 +31,7 @@ export default function TabLayout() {
           headerShown: false,
           tabBarButtonTestID: 'transactions-tab',
           tabBarItemStyle: {
-            paddingTop: 10,
+            paddingTop: 6,
           },
           tabBarIcon: ({ color }) => <TabBarIcon name={'transactions'} color={color} />,
         }}
@@ -63,11 +63,11 @@ const styles = StyleSheet.create({
   homeTab: {
     flex: 1,
     alignItems: 'flex-end',
-    paddingTop: 15,
+    paddingTop: 10,
   },
   settingsTab: {
     flex: 1,
     alignItems: 'flex-start',
-    paddingTop: 15,
+    paddingTop: 10,
   },
 })
