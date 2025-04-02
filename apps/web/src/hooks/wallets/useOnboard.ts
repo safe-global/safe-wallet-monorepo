@@ -12,7 +12,7 @@ import { type EnvState, selectRpc } from '@/store/settingsSlice'
 import { formatAmount } from '@safe-global/utils/utils/formatNumber'
 import { localItem } from '@/services/local-storage/local'
 import { isWalletConnect, isWalletUnlocked } from '@/utils/wallets'
-import { isAuthenticated, setUnauthenticated } from '@/store/authSlice'
+import { setUnauthenticated } from '@/store/authSlice'
 
 export type ConnectedWallet = {
   label: string
@@ -158,7 +158,6 @@ export const useInitOnboard = () => {
   const chain = useCurrentChain()
   const onboard = useStore()
   const customRpc = useAppSelector(selectRpc)
-  const isUserSignedIn = useAppSelector(isAuthenticated)
   const dispatch = useAppDispatch()
 
   useEffect(() => {
@@ -199,17 +198,14 @@ export const useInitOnboard = () => {
       } else if (lastConnectedWallet) {
         lastConnectedWallet = ''
         saveLastWallet(lastConnectedWallet)
-
-        if (isUserSignedIn) {
-          dispatch(setUnauthenticated())
-        }
+        dispatch(setUnauthenticated())
       }
     })
 
     return () => {
       walletSubscription.unsubscribe()
     }
-  }, [onboard, dispatch, isUserSignedIn])
+  }, [onboard, dispatch])
 }
 
 export default useStore
