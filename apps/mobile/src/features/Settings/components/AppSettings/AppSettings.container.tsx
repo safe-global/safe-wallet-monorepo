@@ -24,6 +24,7 @@ export const AppSettingsContainer = () => {
           leftIcon: 'token',
           onPress: () => console.log('currency'),
           disabled: true,
+          tag: 'Coming soon',
         },
         {
           label: 'Appearance',
@@ -82,9 +83,9 @@ export const AppSettingsContainer = () => {
         {
           label: 'Change passcode',
           leftIcon: 'lock',
-
           onPress: () => console.log('change passcode'),
           disabled: true,
+          tag: 'Coming soon',
         },
       ],
     },
@@ -107,8 +108,9 @@ export const AppSettingsContainer = () => {
           label: 'Rate us',
           leftIcon: 'star',
           onPress: () => console.log('rate us'),
-          disabled: false,
+          disabled: true,
           type: 'external-link',
+          tag: 'Coming soon',
         },
         {
           label: 'Follow us on X',

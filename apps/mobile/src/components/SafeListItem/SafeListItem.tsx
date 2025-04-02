@@ -6,6 +6,7 @@ import { ellipsis } from '@/src/utils/formatters'
 import { isMultisigExecutionInfo } from '@/src/utils/transaction-guards'
 import { Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { Badge } from '../Badge'
+import { Tag } from '../Tag'
 
 interface SafeListItemProps {
   type?: string
@@ -21,6 +22,7 @@ interface SafeListItemProps {
   executionInfo?: Transaction['executionInfo']
   themeName?: ThemeName
   onPress?: () => void
+  tag?: string
 }
 
 export function SafeListItem({
@@ -37,6 +39,7 @@ export function SafeListItem({
   executionInfo,
   themeName,
   onPress,
+  tag,
 }: SafeListItemProps) {
   return (
     <Container
@@ -72,6 +75,7 @@ export function SafeListItem({
             label
           )}
         </View>
+        {tag && <Tag>{tag}</Tag>}
       </View>
 
       {inQueue && executionInfo && isMultisigExecutionInfo(executionInfo) ? (

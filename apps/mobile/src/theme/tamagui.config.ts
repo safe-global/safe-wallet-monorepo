@@ -154,6 +154,9 @@ export const config = createTamagui({
     },
   },
   tokens,
+  settings: {
+    defaultFont: 'body',
+  },
   animations: createAnimations({
     fast: {
       type: 'spring',

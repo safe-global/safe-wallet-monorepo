@@ -138,6 +138,7 @@ export const Settings = ({ address, data, onImplementationTap, displayDevMenu, c
                       onPress={() => {
                         router.push('/notifications-settings')
                       }}
+                      hitSlop={100}
                     >
                       <SafeListItem
                         label={'Notifications'}
@@ -157,6 +158,7 @@ export const Settings = ({ address, data, onImplementationTap, displayDevMenu, c
                         onPress={() => {
                           router.push('/developer')
                         }}
+                        hitSlop={100}
                       >
                         <SafeListItem
                           label={'Developer'}

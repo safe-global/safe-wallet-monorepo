@@ -5,9 +5,13 @@ import useRegisterForNotifications from '@/src/hooks/useRegisterForNotifications
 import Logger from '@/src/utils/logger'
 import { useAppSelector } from '../store/hooks'
 import { selectAppNotificationStatus } from '../store/notificationsSlice'
+import { useBiometrics } from './useBiometrics'
+import { useToastController } from '@tamagui/toast'
 
 export const useNotificationManager = () => {
   const isAppNotificationEnabled = useAppSelector(selectAppNotificationStatus)
+  const { isBiometricsEnabled } = useBiometrics()
+  const toast = useToastController()
   const { registerForNotifications, unregisterForNotifications, updatePermissionsForNotifications, isLoading } =
     useRegisterForNotifications()
 
@@ -15,6 +19,13 @@ export const useNotificationManager = () => {
 
   const enableNotification = useCallback(async () => {
     try {
+      if (!isBiometricsEnabled) {
+        return toast.show('Enable biometrics first', {
+          native: true,
+          duration: 3000,
+        })
+      }
+
       // Check if device notifications are enabled
       const deviceNotificationStatus = await NotificationsService.isDeviceNotificationEnabled()
 

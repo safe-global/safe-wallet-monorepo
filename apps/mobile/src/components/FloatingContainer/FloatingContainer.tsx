@@ -2,7 +2,7 @@ import { Layout } from '@/src/store/constants'
 import React, { FC, useMemo } from 'react'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
-import { KeyboardAvoidingView, KeyboardAvoidingViewProps, Platform, StyleSheet, View } from 'react-native'
+import { KeyboardAvoidingView, KeyboardAvoidingViewProps, Platform, StyleSheet, View, ViewStyle } from 'react-native'
 
 interface FloatingContainerProps {
   children: React.ReactNode
@@ -11,6 +11,7 @@ interface FloatingContainerProps {
   keyboardAvoidEnabled?: boolean
   onLayout?: KeyboardAvoidingViewProps['onLayout']
   testID?: string
+  style?: ViewStyle
 }
 
 export const FloatingContainer: FC<FloatingContainerProps> = ({
@@ -20,6 +21,7 @@ export const FloatingContainer: FC<FloatingContainerProps> = ({
   keyboardAvoidEnabled,
   onLayout,
   testID,
+  style,
 }: FloatingContainerProps) => {
   const bottomInset = useSafeAreaInsets().bottom
   const deviceBottom = Layout.isSmallDevice ? 10 : 20
@@ -41,7 +43,7 @@ export const FloatingContainer: FC<FloatingContainerProps> = ({
       style={[styles.floatingContainer, { paddingBottom: bottomPadding }]}
       onLayout={onLayout}
     >
-      <View style={styles.childContainer}>{children}</View>
+      <View style={[styles.childContainer, style]}>{children}</View>
     </KeyboardAvoidingView>
   )
 }
