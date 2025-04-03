@@ -7,7 +7,7 @@ import type { TransactionDetails } from '@safe-global/safe-gateway-typescript-sd
 import { ReviewTransactionContent } from '../ReviewTransactionContent'
 import * as useSafeInfo from '@/hooks/useSafeInfo'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
-import { defaultSecurityContextValues } from '../../security/shared/TxSecurityContext'
+import { defaultSecurityContextValues } from '@safe-global/utils/components/tx/security/shared/utils'
 import { SlotProvider } from '@/components/tx-flow/SlotProvider'
 import * as slotProvider from '@/components/tx-flow/SlotProvider'
 import TxFlowProvider, { type TxFlowProviderProps } from '@/components/tx-flow/TxFlowProvider'
