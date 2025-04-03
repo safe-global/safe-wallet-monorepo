@@ -20,7 +20,7 @@ const ExecuteThroughRole = ({ onSubmit }: SlotComponentProps<SlotName.Submit>) =
   return <ExecuteThroughRoleForm safeTx={safeTx} disableSubmit={!isSubmittable} role={role!} onSubmit={handleSubmit} />
 }
 
-export default () => {
+const RegisterExecuteThroughRole = () => {
   const isCounterfactualSafe = useIsCounterfactualSafe()
   const { willExecuteThroughRole } = useContext(TxFlowContext)
 
@@ -33,3 +33,5 @@ export default () => {
 
   return false
 }
+
+export default RegisterExecuteThroughRole

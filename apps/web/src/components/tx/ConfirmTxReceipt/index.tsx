@@ -3,7 +3,7 @@ import { Divider, Grid2 as Grid, Stack, StepIcon, Typography } from '@mui/materi
 import commonCss from '@/components/tx-flow/common/styles.module.css'
 import { TxDetails } from './TxDetails'
 import ExternalLink from '@/components/common/ExternalLink'
-import { type PropsWithChildren, type ReactNode, useContext } from 'react'
+import { type PropsWithChildren, useContext } from 'react'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import useTxPreview from '../confirmation-views/useTxPreview'
 import Track from '@/components/common/Track'
@@ -12,7 +12,7 @@ import useWallet from '@/hooks/wallets/useWallet'
 import { isHardwareWallet, isLedgerLive } from '@/utils/wallets'
 import { TxFlowStep } from '@/components/tx-flow/TxFlowStep'
 import { SlotName, useSlot } from '@/components/tx-flow/SlotProvider'
-import { SubmitCallback } from '@/components/tx-flow/TxFlow'
+import type { SubmitCallback } from '@/components/tx-flow/TxFlow'
 import { Sign } from '@/components/tx-flow/actions/Sign'
 
 const InfoSteps = [
@@ -68,12 +68,10 @@ const HardwareWalletStep = [
 ]
 
 export type ConfirmTxReceiptProps = PropsWithChildren<{
-  action?: ReactNode
-  features?: ReactNode
   onSubmit: SubmitCallback
 }>
 
-export const ConfirmTxReceipt = ({ children, action, features, onSubmit }: ConfirmTxReceiptProps) => {
+export const ConfirmTxReceipt = ({ children, onSubmit }: ConfirmTxReceiptProps) => {
   const { safeTx } = useContext(SafeTxContext)
   const [txPreview] = useTxPreview(safeTx?.data)
   const wallet = useWallet()
@@ -108,8 +106,6 @@ export const ConfirmTxReceipt = ({ children, action, features, onSubmit }: Confi
         </Grid>
 
         {children}
-
-        {features}
 
         <Divider className={commonCss.nestedDivider} sx={{ pt: 3 }} />
 

@@ -156,6 +156,7 @@ const TxFlowProvider = <T extends unknown>({
 
   const updateTxLayoutProps = useCallback((props: TxFlowContextType['txLayoutProps']) => {
     setTxLayoutProps({ ...defaultTxLayoutProps, ...props })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const trackTxEvent = useCallback(

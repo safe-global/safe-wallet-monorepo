@@ -47,7 +47,7 @@ const Execute = ({ onSubmit }: SlotComponentProps<SlotName.Submit>) => {
   )
 }
 
-export default () => {
+const RegisterExecute = () => {
   const isCounterfactualSafe = useIsCounterfactualSafe()
   const { willExecute, isProposing } = useContext(TxFlowContext)
 
@@ -55,3 +55,5 @@ export default () => {
 
   return false
 }
+
+export default RegisterExecute

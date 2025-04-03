@@ -13,6 +13,7 @@ export const TxFlowStep = ({ children, ...txLayoutProps }: TxFlowStepProps) => {
 
   useEffect(() => {
     updateTxLayoutProps(txLayoutProps)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   return <>{children}</>

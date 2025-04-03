@@ -101,5 +101,5 @@ export const useRegisterSlot = <T extends SlotName>(
     } else {
       unregisterSlot(slotName, id)
     }
-  }, [condition, registerSlot, slotName, Component, id])
+  }, [condition, registerSlot, unregisterSlot, slotName, Component, id])
 }

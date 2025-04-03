@@ -19,10 +19,12 @@ const Propose = ({ onSubmit }: SlotComponentProps<SlotName.Submit>) => {
   return <ProposerForm safeTx={safeTx} origin={txOrigin} disableSubmit={!isSubmittable} onSubmit={handleSubmit} />
 }
 
-export default () => {
+const RegisterPropose = () => {
   const { isProposing } = useContext(TxFlowContext)
 
   useRegisterSlot(SlotName.Submit, 'propose', Propose, isProposing)
 
   return false
 }
+
+export default RegisterPropose

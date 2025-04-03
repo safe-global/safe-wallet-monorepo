@@ -29,7 +29,7 @@ const Counterfactual = ({ onSubmit }: SlotComponentProps<SlotName.Submit>) => {
   )
 }
 
-export default () => {
+const RegisterCounterfactual = () => {
   const isCounterfactualSafe = useIsCounterfactualSafe()
   const { isProposing } = useContext(TxFlowContext)
 
@@ -37,3 +37,5 @@ export default () => {
 
   return false
 }
+
+export default RegisterCounterfactual

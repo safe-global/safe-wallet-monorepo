@@ -43,7 +43,7 @@ export const Sign = ({ onSubmit }: SlotComponentProps<SlotName.Submit>) => {
   )
 }
 
-export default () => {
+const RegisterSign = () => {
   const { isProposing, willExecute, willExecuteThroughRole } = useContext(TxFlowContext)
   const { safeTx } = useContext(SafeTxContext)
   const isCounterfactualSafe = useIsCounterfactualSafe()
@@ -57,3 +57,5 @@ export default () => {
 
   return false
 }
+
+export default RegisterSign

@@ -19,10 +19,12 @@ const TxNote = (): ReactElement => {
   return <TxNoteForm isCreation={isCreation} onChange={onNoteChange} txDetails={txDetails} />
 }
 
-export default () => {
+const RegisterTxNote = () => {
   const { txDetails, isCreation } = useContext(TxFlowContext)
 
   useRegisterSlot(SlotName.Feature, 'txNote', TxNote, isCreation || !!txDetails?.note)
 
   return false
 }
+
+export default RegisterTxNote

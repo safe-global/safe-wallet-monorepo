@@ -5,7 +5,7 @@ import useIsCounterfactualSafe from '@/features/counterfactual/hooks/useIsCounte
 import TxChecksComponent from '@/components/tx/SignOrExecuteForm/TxChecks'
 import { SlotName, useRegisterSlot } from '../SlotProvider'
 
-export default () => {
+const TxChecks = () => {
   const { isRejection } = useContext(TxFlowContext)
   const { safeTx } = useContext(SafeTxContext)
   const isCounterfactualSafe = useIsCounterfactualSafe()
@@ -23,3 +23,5 @@ export default () => {
 
   return false
 }
+
+export default TxChecks

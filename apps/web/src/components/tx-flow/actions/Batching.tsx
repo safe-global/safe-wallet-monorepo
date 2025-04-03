@@ -40,7 +40,7 @@ const Batching = () => {
   )
 }
 
-export default () => {
+const RegisterBatching = () => {
   const isCounterfactualSafe = useIsCounterfactualSafe()
   const { willExecute, isBatch, isProposing, willExecuteThroughRole, isCreation } = useContext(TxFlowContext)
 
@@ -61,3 +61,5 @@ export default () => {
 
   return false
 }
+
+export default RegisterBatching
