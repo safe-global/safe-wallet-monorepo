@@ -41,7 +41,7 @@ export function TokensContainer() {
         logoUri={item.tokenInfo.logoUri}
         description={`${formatVisualAmount(item.balance, item.tokenInfo.decimals as number)} ${item.tokenInfo.symbol}`}
         rightNode={
-          <Text fontSize="$4" fontWeight={400} color="$color">
+          <Text fontSize="$4" fontWeight={600} color="$color">
             {shouldDisplayPreciseBalance(fiatBalance, 7)
               ? formatCurrencyPrecise(fiatBalance, 'usd')
               : formatCurrency(fiatBalance, 'usd')}
