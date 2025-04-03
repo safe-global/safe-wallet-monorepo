@@ -30,7 +30,7 @@ const ConfirmProposedTx = ({ txNonce, ...props }: ConfirmProposedTxProps): React
     }
   }, [txId, chainId, setSafeTx, setSafeTxError])
 
-  const text = onlyExecute ? (isExecutable ? SIGN_EXECUTE_TEXT : SIGN_TEXT) : EXECUTE_TEXT
+  const text = !onlyExecute ? (isExecutable ? SIGN_EXECUTE_TEXT : SIGN_TEXT) : EXECUTE_TEXT
 
   return (
     <ReviewTransaction {...props}>
