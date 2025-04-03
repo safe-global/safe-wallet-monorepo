@@ -1,4 +1,4 @@
-import useAsync, { type AsyncResult } from '@/hooks/useAsync'
+import useAsync, { type AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { createWeb3ReadOnly } from '@/hooks/wallets/web3'
 import { selectRpc, selectUndeployedSafes } from '@/store/slices'
 import { type UndeployedSafe, type ReplayedSafeProps } from '@safe-global/utils/features/counterfactual/store/types'

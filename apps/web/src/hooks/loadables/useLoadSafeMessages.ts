@@ -2,10 +2,10 @@ import type { MessagePage } from '@safe-global/store/gateway/AUTO_GENERATED/mess
 import { useEffect } from 'react'
 import { getSafeMessages } from '@safe-global/safe-gateway-typescript-sdk'
 
-import useAsync from '@/hooks/useAsync'
+import useAsync from '@safe-global/utils/hooks/useAsync'
 import { logError, Errors } from '@/services/exceptions'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import type { AsyncResult } from '@/hooks/useAsync'
+import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 
 export const useLoadSafeMessages = (): AsyncResult<MessagePage> => {
   const { safe, safeAddress, safeLoaded } = useSafeInfo()

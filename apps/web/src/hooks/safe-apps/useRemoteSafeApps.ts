@@ -4,8 +4,8 @@ import { Errors, logError } from '@/services/exceptions'
 import type { SafeAppsResponse } from '@safe-global/safe-gateway-typescript-sdk'
 import { getSafeApps } from '@safe-global/safe-gateway-typescript-sdk'
 import { useEffect, useMemo } from 'react'
-import type { AsyncResult } from '../useAsync'
-import useAsync from '../useAsync'
+import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
+import useAsync from '@safe-global/utils/hooks/useAsync'
 
 // To avoid multiple simultaneous requests (e.g. the Dashboard and the SAFE header widget),
 // cache the request promise for 100ms

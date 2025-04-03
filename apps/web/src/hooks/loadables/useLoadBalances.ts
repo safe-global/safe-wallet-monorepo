@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { type Balances, useBalancesGetBalancesV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import { useAppSelector } from '@/store'
-import { type AsyncResult } from '../useAsync'
+import { type AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { selectCurrency, selectSettings, TOKEN_LISTS } from '@/store/settingsSlice'
 import { useCurrentChain } from '../useChains'
 import useSafeInfo from '../useSafeInfo'

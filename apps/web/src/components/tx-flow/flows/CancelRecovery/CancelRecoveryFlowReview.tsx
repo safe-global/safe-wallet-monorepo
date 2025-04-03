@@ -10,7 +10,7 @@ import { getRecoverySkipTransaction } from '@/features/recovery/services/transac
 import { createTx } from '@/services/tx/tx-sender'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import type { RecoveryQueueItem } from '@/features/recovery/services/recovery-state'
-import useAsync from '@/hooks/useAsync'
+import useAsync from '@safe-global/utils/hooks/useAsync'
 import ReviewTransaction from '@/components/tx/ReviewTransaction'
 
 export function CancelRecoveryFlowReview({

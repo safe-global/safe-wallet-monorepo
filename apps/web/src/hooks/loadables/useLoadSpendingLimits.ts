@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import useAsync, { type AsyncResult } from '../useAsync'
+import useAsync, { type AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import useSafeInfo from '../useSafeInfo'
 import { Errors, logError } from '@/services/exceptions'
 import type { SpendingLimitState } from '@/store/spendingLimitsSlice'
