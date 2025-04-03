@@ -54,6 +54,7 @@ export type TxFlowContextType<T extends unknown = any> = {
   isSubmittable: boolean
   setIsSubmittable: Dispatch<SetStateAction<boolean>>
   willExecuteThroughRole: boolean
+  canExecuteThroughRole: boolean
   txDetails?: TransactionDetails
   txDetailsLoading?: boolean
   showMethodCall?: boolean
@@ -84,12 +85,13 @@ const initialContext: TxFlowContextType = {
   isSubmittable: true,
   setIsSubmittable: () => {},
   willExecuteThroughRole: false,
+  canExecuteThroughRole: false,
   isBatch: false,
 }
 
 export const TxFlowContext = createContext<TxFlowContextType>(initialContext)
 
-type TxFlowProviderProps<T extends unknown> = {
+export type TxFlowProviderProps<T extends unknown> = {
   children: ReactNode
   step: number
   data: T
@@ -201,6 +203,7 @@ const TxFlowProvider = <T extends unknown>({
     isSubmittable,
     setIsSubmittable,
     willExecuteThroughRole,
+    canExecuteThroughRole,
     role: allowingRole || mostLikelyRole,
     showMethodCall,
     txDetails,

@@ -2,15 +2,12 @@ import type { PropsWithChildren, SyntheticEvent, ReactElement } from 'react'
 import { useContext, useCallback } from 'react'
 import madProps from '@/utils/mad-props'
 import ExecuteCheckbox from '../ExecuteCheckbox'
-import { useImmediatelyExecutable } from '../SignOrExecuteForm/hooks'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import ErrorMessage from '../ErrorMessage'
 import TxCard from '@/components/tx-flow/common/TxCard'
 import ConfirmationTitle, { ConfirmationTitleTypes } from '@/components/tx/SignOrExecuteForm/ConfirmationTitle'
 import { ErrorBoundary } from '@sentry/react'
 import ApprovalEditor from '../ApprovalEditor'
-import { findAllowingRole, findMostLikelyRole, useRoles } from '../SignOrExecuteForm/ExecuteThroughRoleForm/hooks'
-import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import { BlockaidBalanceChanges } from '../security/blockaid/BlockaidBalanceChange'
 import { Blockaid } from '../security/blockaid'
 import { useApprovalInfos } from '../ApprovalEditor/hooks/useApprovalInfos'
@@ -35,13 +32,11 @@ export const ReviewTransactionContent = ({
   safeTxError,
   onSubmit,
   isBatch,
-  isOwner,
   children,
   txId,
   txDetails,
   txPreview,
 }: ReviewTransactionContentProps & {
-  isOwner: ReturnType<typeof useIsSafeOwner>
   safeTx: ReturnType<typeof useSafeTx>
   safeTxError: ReturnType<typeof useSafeTxError>
   isCreation?: boolean
@@ -59,20 +54,14 @@ export const ReviewTransactionContent = ({
     isSubmittable,
     isProposing,
     isRejection,
+    canExecuteThroughRole,
   } = useContext(TxFlowContext)
 
-  const isNewExecutableTx = useImmediatelyExecutable() && isCreation
   const [readableApprovals] = useApprovalInfos({ safeTransaction: safeTx })
   const isApproval = readableApprovals && readableApprovals.length > 0
   const isCounterfactualSafe = useIsCounterfactualSafe()
   const [ActionComponent] = useSlot(SlotName.Action)
   const features = useSlot(SlotName.Feature)
-
-  // Check if a Zodiac Roles mod is enabled and if the user is a member of any role that allows the transaction
-  const roles = useRoles(!isCounterfactualSafe && isCreation && !(isNewExecutableTx && isOwner) ? safeTx : undefined)
-  const allowingRole = findAllowingRole(roles)
-  const mostLikelyRole = findMostLikelyRole(roles)
-  const canExecuteThroughRole = !!allowingRole || (!!mostLikelyRole && !isOwner)
 
   const onContinueClick = useCallback(
     async (e: SyntheticEvent) => {
@@ -179,7 +168,6 @@ const useSafeTx = () => useContext(SafeTxContext).safeTx
 const useSafeTxError = () => useContext(SafeTxContext).safeTxError
 
 export default madProps(ReviewTransactionContent, {
-  isOwner: useIsSafeOwner,
   safeTx: useSafeTx,
   safeTxError: useSafeTxError,
 })
