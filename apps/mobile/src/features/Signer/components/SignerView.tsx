@@ -10,7 +10,7 @@ import { SafeButton } from '@/src/components/SafeButton'
 import { SafeInputWithLabel } from '@/src/components/SafeInput/SafeInputWithLabel'
 import { Controller, FieldNamesMarkedBoolean, type Control, type FieldErrors } from 'react-hook-form'
 import { type FormValues } from '@/src/features/Signer/types'
-
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 type Props = {
   signerAddress: string
   onPressExplorer: () => void
@@ -32,6 +32,7 @@ export const SignerView = ({
   editMode,
   name,
 }: Props) => {
+  const { bottom } = useSafeAreaInsets()
   return (
     <YStack flex={1}>
       <ScrollView flex={1}>
@@ -81,10 +82,12 @@ export const SignerView = ({
           </XStack>
         </Container>
       </ScrollView>
-      {editMode && (
-        <SafeButton danger={true} onPress={onPressDelete} marginBottom={'$4'}>
-          Remove signer
-        </SafeButton>
+      {!editMode && (
+        <View paddingHorizontal={'$4'} paddingTop={'$2'} paddingBottom={bottom ?? 60}>
+          <SafeButton danger={true} onPress={onPressDelete}>
+            Remove signer
+          </SafeButton>
+        </View>
       )}
     </YStack>
   )
