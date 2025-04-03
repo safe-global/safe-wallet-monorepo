@@ -110,12 +110,14 @@ export function confirmProposerDeletion(index) {
 export function deleteAllProposers() {
   cy.get('body').then(($body) => {
     if ($body.find(deleteProposerBtn).length > 0) {
-      cy.get(deleteProposerBtn).then(($items) => {
-        for (let i = 0; i < $items.length; i++) {
-          cy.wrap($items[i]).click({ force: true })
-          confirmProposerDeletion(0)
-        }
-      })
+      cy.get(deleteProposerBtn)
+        .should('be.enabled')
+        .then(($items) => {
+          for (let i = 0; i < $items.length; i++) {
+            cy.wrap($items[i]).click({ force: true })
+            confirmProposerDeletion(0)
+          }
+        })
     }
     main.verifyElementsCount(deleteProposerBtn, 0)
   })
