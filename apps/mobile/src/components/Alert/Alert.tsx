@@ -1,4 +1,4 @@
-import { View, Text, Theme, type TextProps } from 'tamagui'
+import { View, Text, Theme } from 'tamagui'
 import React, { type ReactElement } from 'react'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon/SafeFontIcon'
 import { IconName } from '@/src/types/iconTypes'

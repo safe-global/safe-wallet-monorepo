@@ -7,7 +7,7 @@ import { POLLING_INTERVAL } from '@/src/config/constants'
 export const useBalances = (poll = false, pollingInterval = POLLING_INTERVAL) => {
   const activeSafe = useSelector(selectActiveSafe)
 
-  const { data, isFetching, error, isLoading } = useBalancesGetBalancesV1Query(
+  const { data, error, isLoading } = useBalancesGetBalancesV1Query(
     !activeSafe
       ? skipToken
       : {

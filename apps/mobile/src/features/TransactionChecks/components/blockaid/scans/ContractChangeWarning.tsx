@@ -44,7 +44,7 @@ export const ContractChangeWarning = ({
 
   const warningContent = (
     <>
-      {isProxyUpgrade ? (
+      {isProxyUpgrade && 'address' in before && 'address' in after ? (
         <ProxyUpgradeSummary beforeAddress={before.address} afterAddress={after.address} />
       ) : (
         <Text>Please verify that this change is intended and correct.</Text>
