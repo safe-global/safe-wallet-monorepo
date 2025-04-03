@@ -82,9 +82,9 @@ export const SignerView = ({
           </XStack>
         </Container>
       </ScrollView>
-      {editMode && (
-        <View paddingHorizontal={'$4'} paddingTop={'$2'} paddingBottom={bottom || 60}>
-          <SafeButton danger={true} onPress={onPressDelete} marginBottom={'$4'}>
+      {!editMode && (
+        <View paddingHorizontal={'$4'} paddingTop={'$2'} paddingBottom={bottom ?? 60}>
+          <SafeButton danger={true} onPress={onPressDelete}>
             Remove signer
           </SafeButton>
         </View>
