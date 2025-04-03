@@ -5,6 +5,7 @@ import type { SafeTxContextParams } from '@/components/tx-flow/SafeTxProvider'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { createSafeTx } from '@/tests/builders/safeTx'
 import * as useTxPreviewHooks from '@/components/tx/confirmation-views/useTxPreview'
+import { SlotProvider } from '@/components/tx-flow/SlotProvider'
 
 describe('ReviewTransaction', () => {
   beforeEach(() => {
@@ -28,15 +29,18 @@ describe('ReviewTransaction', () => {
     ])
 
     const { container, getByTestId } = render(
-      <SafeTxContext.Provider
-        value={
-          {
-            safeTx: createSafeTx(),
-          } as SafeTxContextParams
-        }
-      >
-        <ReviewTransaction onSubmit={jest.fn()} />
-      </SafeTxContext.Provider>,
+      <SlotProvider>
+        <SafeTxContext.Provider
+          value={
+            {
+              safeTx: createSafeTx(),
+            } as SafeTxContextParams
+          }
+        >
+          <ReviewTransaction onSubmit={jest.fn()} />
+        </SafeTxContext.Provider>
+        ,
+      </SlotProvider>,
     )
 
     expect(getByTestId('continue-sign-btn')).toBeInTheDocument()
@@ -49,15 +53,18 @@ describe('ReviewTransaction', () => {
       .mockReturnValue([undefined, new Error('This is a mock error message'), false])
 
     const { container } = render(
-      <SafeTxContext.Provider
-        value={
-          {
-            safeTx: createSafeTx(),
-          } as SafeTxContextParams
-        }
-      >
-        <ReviewTransaction onSubmit={jest.fn()} />
-      </SafeTxContext.Provider>,
+      <SlotProvider>
+        <SafeTxContext.Provider
+          value={
+            {
+              safeTx: createSafeTx(),
+            } as SafeTxContextParams
+          }
+        >
+          <ReviewTransaction onSubmit={jest.fn()} />
+        </SafeTxContext.Provider>
+        ,
+      </SlotProvider>,
     )
 
     expect(container.querySelector('continue-sign-btn')).not.toBeInTheDocument()

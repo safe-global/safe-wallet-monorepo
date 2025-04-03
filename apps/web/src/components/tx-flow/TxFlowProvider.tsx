@@ -20,12 +20,12 @@ import useIsCounterfactualSafe from '@/features/counterfactual/hooks/useIsCounte
 import useTxDetails from '@/hooks/useTxDetails'
 import type { TransactionDetails, TransactionSummary } from '@safe-global/safe-gateway-typescript-sdk'
 
-export type TxFlowContextType = {
+export type TxFlowContextType<T extends unknown = any> = {
   step: number
   progress: number
-  data: any
+  data?: T
   onPrev: () => void
-  onNext: (data: any) => void
+  onNext: (data?: T) => void
 
   txLayoutProps: {
     title?: ReactNode
@@ -124,7 +124,7 @@ const TxFlowProvider = <T extends unknown>({
   const isSafeOwner = useIsSafeOwner()
   const isProposer = useIsWalletProposer()
   const chainId = useChainId()
-  const { safeTx, txOrigin } = useContext(SafeTxContext)
+  const { safeTx, txOrigin, isMassPayout } = useContext(SafeTxContext)
   const isCorrectNonce = useValidateNonce(safeTx)
   const { transactionExecution } = useAppSelector(selectSettings)
   const [shouldExecute, setShouldExecute] = useState<boolean>(transactionExecution)
@@ -171,10 +171,10 @@ const TxFlowProvider = <T extends unknown>({
         isProposerCreation,
         !!signer?.isSafe,
         txOrigin,
-        // isMassPayout, // TODO: Add this parameter
+        isMassPayout,
       )
     },
-    [chainId, isCreation, trigger, signer?.isSafe, txOrigin],
+    [chainId, isCreation, trigger, signer?.isSafe, txOrigin, isMassPayout],
   )
 
   const value = {
