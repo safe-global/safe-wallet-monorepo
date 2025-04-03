@@ -39,6 +39,7 @@ export const SignFormV2 = ({
   tooltip?: string
 }): ReactElement => {
   // Form state
+  const [isSubmittableLocal, setIsSubmittableLocal] = useState<boolean>(true) // TODO: remove this local state and use only the one from TxFlowContext when tx-flow refactor is done
   const [submitError, setSubmitError] = useState<Error | undefined>()
   const [isRejectedByUser, setIsRejectedByUser] = useState<Boolean>(false)
 
@@ -68,6 +69,8 @@ export const SignFormV2 = ({
     if (!safeTx || validationError) return
 
     setIsSubmittable(false)
+    setIsSubmittableLocal(false)
+
     setSubmitError(undefined)
     setIsRejectedByUser(false)
 
@@ -83,6 +86,7 @@ export const SignFormV2 = ({
         setSubmitError(err)
       }
       setIsSubmittable(true)
+      setIsSubmittableLocal(true)
       return
     }
 
@@ -100,6 +104,7 @@ export const SignFormV2 = ({
   const submitDisabled =
     !safeTx ||
     !isSubmittable ||
+    !isSubmittableLocal ||
     disableSubmit ||
     cannotPropose ||
     (needsRiskConfirmation && !isRiskConfirmed) ||
@@ -150,7 +155,7 @@ export const SignFormV2 = ({
                     disabled={!isOk || submitDisabled}
                     sx={{ minWidth: '82px', order: '1', width: ['100%', '100%', '100%', 'auto'] }}
                   >
-                    {!isSubmittable ? <CircularProgress size={20} /> : 'Sign'}
+                    {!isSubmittable || !isSubmittableLocal ? <CircularProgress size={20} /> : 'Sign'}
                   </Button>
                 </span>
               </Tooltip>
