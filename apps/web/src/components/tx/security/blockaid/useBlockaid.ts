@@ -1,5 +1,5 @@
 import type { TypedData } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
-import useAsync, { type AsyncResult } from '@/hooks/useAsync'
+import useAsync, { type AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { useHasFeature } from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useSigner } from '@/hooks/wallets/useWallet'

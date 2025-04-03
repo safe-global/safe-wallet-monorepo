@@ -23,7 +23,7 @@ import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { isEIP712TypedData } from '@safe-global/utils/utils/safe-messages'
 import ApprovalEditor from '@/components/tx/ApprovalEditor'
 import { ErrorBoundary } from '@sentry/react'
-import useAsync from '@/hooks/useAsync'
+import useAsync from '@safe-global/utils/hooks/useAsync'
 import { HexEncodedData } from '@/components/transactions/HexEncodedData'
 import ReviewTransaction from '@/components/tx/ReviewTransaction'
 

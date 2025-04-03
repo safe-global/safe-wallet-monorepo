@@ -1,6 +1,6 @@
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { useSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
-import useAsync from '@/hooks/useAsync'
+import useAsync from '@safe-global/utils/hooks/useAsync'
 import { logError } from '@/services/exceptions'
 import ErrorCodes from '@safe-global/utils/services/exceptions/ErrorCodes'
 import { ethers } from 'ethers'

@@ -2,7 +2,7 @@ import { type SafeBalanceResponse } from '@safe-global/safe-gateway-typescript-s
 import { getCounterfactualBalance } from '@/features/counterfactual/utils'
 import { useWeb3 } from '@/hooks/wallets/web3'
 import type { ExtendedSafeInfo } from '@safe-global/store/slices/SafeInfo/types'
-import useAsync from '@/hooks/useAsync'
+import useAsync from '@safe-global/utils/hooks/useAsync'
 import { useCurrentChain } from '@/hooks/useChains'
 
 export function useCounterfactualBalances(safe: ExtendedSafeInfo) {

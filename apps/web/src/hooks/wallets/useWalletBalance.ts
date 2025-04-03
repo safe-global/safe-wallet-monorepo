@@ -1,4 +1,4 @@
-import useAsync, { type AsyncResult } from '../useAsync'
+import useAsync, { type AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import useWallet from './useWallet'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
 

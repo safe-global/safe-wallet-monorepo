@@ -1,4 +1,4 @@
-import useAsync from '@/hooks/useAsync'
+import useAsync from '@safe-global/utils/hooks/useAsync'
 import useSafeInfo from './useSafeInfo'
 import { useCurrentChain } from '@/hooks/useChains'
 import { getRelayCount } from '@safe-global/safe-gateway-typescript-sdk'

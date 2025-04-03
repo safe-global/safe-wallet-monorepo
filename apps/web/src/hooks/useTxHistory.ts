@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { type TransactionListPage } from '@safe-global/safe-gateway-typescript-sdk'
 import { useAppSelector } from '@/store'
-import useAsync from './useAsync'
+import useAsync from '@safe-global/utils/hooks/useAsync'
 import { selectTxHistory } from '@/store/txHistorySlice'
 import useSafeInfo from './useSafeInfo'
 import { fetchFilteredTxHistory, useTxFilter } from '@/utils/tx-history-filter'

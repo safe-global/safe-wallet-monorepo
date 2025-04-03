@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { getTransactionQueue, type TransactionListPage } from '@safe-global/safe-gateway-typescript-sdk'
-import useAsync, { type AsyncResult } from '../useAsync'
+import useAsync, { type AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import useSafeInfo from '../useSafeInfo'
 import { Errors, logError } from '@/services/exceptions'
 import { TxEvent, txSubscribe } from '@/services/tx/txEvents'

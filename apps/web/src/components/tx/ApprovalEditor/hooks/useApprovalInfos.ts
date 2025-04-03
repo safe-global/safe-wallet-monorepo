@@ -1,5 +1,5 @@
 import type { TypedData } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
-import useAsync from '@/hooks/useAsync'
+import useAsync from '@safe-global/utils/hooks/useAsync'
 import useBalances from '@/hooks/useBalances'
 import { type Approval, ApprovalModule } from '@safe-global/utils/services/security/modules/ApprovalModule'
 import { sameAddress } from '@safe-global/utils/utils/addresses'

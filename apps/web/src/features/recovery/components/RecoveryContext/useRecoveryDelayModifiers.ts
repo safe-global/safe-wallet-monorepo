@@ -2,11 +2,11 @@ import type { Delay } from '@gnosis.pm/zodiac'
 import { type SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 
 import { getRecoveryDelayModifiers } from '@/features/recovery/services/delay-modifier'
-import useAsync from '@/hooks/useAsync'
+import useAsync from '@safe-global/utils/hooks/useAsync'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
 import { getDeployedSpendingLimitModuleAddress } from '@/services/contracts/spendingLimitContracts'
-import type { AsyncResult } from '@/hooks/useAsync'
+import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { useIsRecoverySupported } from '../../hooks/useIsRecoverySupported'
 
 function isOnlySpendingLimitEnabled(chainId: string, modules: SafeState['modules']) {

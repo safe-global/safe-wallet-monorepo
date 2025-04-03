@@ -16,7 +16,7 @@ import {
 } from '@/services/tx/tx-sender'
 import { useHasPendingTxs } from '@/hooks/usePendingTxs'
 import { getSafeTxGas, getNonces } from '@/services/tx/tx-sender/recommendedNonce'
-import useAsync from '@/hooks/useAsync'
+import useAsync from '@safe-global/utils/hooks/useAsync'
 import { useUpdateBatch } from '@/hooks/useDraftBatch'
 import { type TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
 import { useCurrentChain } from '@/hooks/useChains'

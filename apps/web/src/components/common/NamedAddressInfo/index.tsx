@@ -1,4 +1,4 @@
-import useAsync from '@/hooks/useAsync'
+import useAsync from '@safe-global/utils/hooks/useAsync'
 import useChainId from '@/hooks/useChainId'
 import { getContract } from '@safe-global/safe-gateway-typescript-sdk'
 import EthHashInfo from '../EthHashInfo'
