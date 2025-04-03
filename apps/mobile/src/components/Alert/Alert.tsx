@@ -9,8 +9,8 @@ export type AlertOrientation = 'left' | 'center' | 'right'
 
 interface AlertProps {
   type: AlertType
-  message: string
-  info?: string
+  message: string | React.ReactNode
+  info?: string | React.ReactNode
   iconName?: IconName
   displayIcon?: boolean
   fullWidth?: boolean
@@ -107,14 +107,13 @@ export const Alert = ({
             {startIcon ? <View testID="alert-start-icon">{startIcon}</View> : Icon}
 
             <View gap={'$1'} flex={orientation !== 'center' ? 1 : undefined}>
-              <Text fontSize={'$4'} fontWeight={'600'} fontFamily={'$body'}>
-                {message}
-              </Text>
-
-              {info && (
+              {typeof message === 'string' ? <AlertTitleStyled message={message} /> : message}
+              {info && typeof info === 'string' ? (
                 <Text fontSize={'$3'} fontFamily={'$body'}>
                   {info}
                 </Text>
+              ) : (
+                info
               )}
             </View>
 
@@ -124,4 +123,16 @@ export const Alert = ({
       </TouchableOpacity>
     </Theme>
   )
+}
+
+export const AlertTitleStyled = ({ message }: { message: string }) => {
+  if (typeof message === 'string') {
+    return (
+      <Text fontSize={'$4'} fontWeight={'600'} fontFamily={'$body'}>
+        {message}
+      </Text>
+    )
+  }
+
+  return message
 }
