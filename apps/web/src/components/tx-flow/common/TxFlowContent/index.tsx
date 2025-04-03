@@ -12,6 +12,12 @@ import SecurityWarnings from '@/components/tx/security/SecurityWarnings'
 import TxStatusWidget from '@/components/tx-flow/common/TxStatusWidget'
 import { TxLayoutHeader } from '../TxLayout'
 
+/**
+ * TxFlowContent is a component that renders the main content of the transaction flow.
+ * It uses the TxFlowContext to manage the transaction state and layout properties.
+ * The component also handles the transaction steps and progress.
+ * It accepts children components to be rendered within the flow.
+ */
 export const TxFlowContent = ({ children }: { children?: ReactNode[] | ReactNode }) => {
   const {
     txLayoutProps: {
