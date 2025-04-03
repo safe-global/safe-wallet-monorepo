@@ -18,8 +18,8 @@ exports[`AlreadySigned matches snapshot 1`] = `
       style={
         {
           "color": "#A1A3A7",
-          "fontSize": 16,
-          "fontWeight": 400,
+          "fontFamily": "DM Sans",
+          "fontSize": 14,
           "textAlign": "center",
         }
       }
@@ -74,8 +74,8 @@ exports[`AlreadySigned matches snapshot 1`] = `
           style={
             {
               "color": "#121312",
-              "fontSize": 16,
-              "fontWeight": 700,
+              "fontFamily": "DMSans-Bold",
+              "fontSize": 14,
               "textAlign": "center",
             }
           }

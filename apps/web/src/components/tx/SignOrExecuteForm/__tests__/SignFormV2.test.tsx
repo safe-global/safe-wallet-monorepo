@@ -1,4 +1,4 @@
-import { defaultSecurityContextValues } from '@/components/tx/security/shared/TxSecurityContext'
+import { defaultSecurityContextValues } from '@safe-global/utils/components/tx/security/shared/utils'
 import { type ReactElement } from 'react'
 import * as hooks from '@/components/tx/SignOrExecuteForm/hooks'
 import * as useValidateTxData from '@/hooks/useValidateTxData'
