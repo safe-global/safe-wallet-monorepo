@@ -6,7 +6,6 @@ export type TxFlowStepProps = TxFlowContextType['txLayoutProps'] & { children?: 
 /**
  * TxFlowStep is a component that allows you to set the layout properties for a transaction flow step.
  * It uses the TxFlowContext to update the layout properties when the component is mounted.
- * @param param0 - The properties for the TxFlowStep component.
  */
 export const TxFlowStep = ({ children, ...txLayoutProps }: TxFlowStepProps) => {
   const { updateTxLayoutProps } = useContext(TxFlowContext)

@@ -28,6 +28,12 @@ type TxFlowProps<T extends unknown> = {
   eventCategory?: string
 } & TxFlowContextType['txLayoutProps']
 
+/**
+ * TxFlow component is a wrapper for the transaction flow, providing context and state management.
+ * It uses various providers to manage the transaction state and security context.
+ * The component also handles the transaction steps and progress.
+ * It accepts children components to be rendered within the flow.
+ */
 export const TxFlow = <T extends unknown>({
   children = [],
   initialData,

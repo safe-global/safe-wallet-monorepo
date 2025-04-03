@@ -45,6 +45,11 @@ type SlotStore = {
 
 const SlotContext = createContext<SlotContextType | null>(null)
 
+/**
+ * SlotProvider is a context provider for managing slots in the transaction flow.
+ * It allows components to register and unregister themselves in specific slots,
+ * and provides a way to retrieve the components registered in a slot.
+ */
 export const SlotProvider = ({ children }: { children: ReactNode }) => {
   const [slots, setSlots] = useState<SlotStore>({})
 
@@ -73,7 +78,7 @@ export const SlotProvider = ({ children }: { children: ReactNode }) => {
   return <SlotContext.Provider value={{ registerSlot, unregisterSlot, getSlot }}>{children}</SlotContext.Provider>
 }
 
-export const useSlotContext = () => {
+const useSlotContext = () => {
   const context = useContext(SlotContext)
   if (!context) {
     throw new Error('useSlotContext must be used within a SlotProvider')
