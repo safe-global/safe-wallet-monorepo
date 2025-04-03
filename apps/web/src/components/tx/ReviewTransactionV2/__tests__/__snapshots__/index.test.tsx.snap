@@ -18,7 +18,7 @@ exports[`ReviewTransaction should display a confirmation screen 1`] = `
         >
           <div
             class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiAccordion-root MuiAccordion-rounded MuiAccordion-gutters css-1ve84rd-MuiPaper-root-MuiAccordion-root"
-            colorlevel="info"
+            color="info"
             style="--Paper-shadow: none;"
           >
             <h3
@@ -542,7 +542,7 @@ exports[`ReviewTransaction should display an error screen 1`] = `
         >
           <div
             class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiAccordion-root MuiAccordion-rounded MuiAccordion-gutters css-1ve84rd-MuiPaper-root-MuiAccordion-root"
-            colorlevel="info"
+            color="info"
             style="--Paper-shadow: none;"
           >
             <h3
