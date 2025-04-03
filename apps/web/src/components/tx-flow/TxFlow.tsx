@@ -69,7 +69,7 @@ export const TxFlow = <T extends unknown>({
               isRejection={isRejection}
             >
               <TxFlowContent>
-                {...childrenArray}
+                {childrenArray}
 
                 <ReviewTransactionComponent onSubmit={() => nextStep(data)}>
                   <Batching />
