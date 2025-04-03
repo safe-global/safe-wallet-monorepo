@@ -11,6 +11,9 @@ import { MODALS_EVENTS } from '@/services/analytics'
 import useWallet from '@/hooks/wallets/useWallet'
 import { isHardwareWallet, isLedgerLive } from '@/utils/wallets'
 import { TxFlowStep } from '@/components/tx-flow/TxFlowStep'
+import { SlotName, useSlot } from '@/components/tx-flow/SlotProvider'
+import { SubmitCallback } from '@/components/tx-flow/TxFlow'
+import { Sign } from '@/components/tx-flow/actions/Sign'
 
 const InfoSteps = [
   {
@@ -67,14 +70,16 @@ const HardwareWalletStep = [
 export type ConfirmTxReceiptProps = PropsWithChildren<{
   action?: ReactNode
   features?: ReactNode
+  onSubmit: SubmitCallback
 }>
 
-export const ConfirmTxReceipt = ({ children, action, features }: ConfirmTxReceiptProps) => {
+export const ConfirmTxReceipt = ({ children, action, features, onSubmit }: ConfirmTxReceiptProps) => {
   const { safeTx } = useContext(SafeTxContext)
   const [txPreview] = useTxPreview(safeTx?.data)
   const wallet = useWallet()
   const showHashes = wallet ? isHardwareWallet(wallet) || isLedgerLive(wallet) : false
   const steps = showHashes ? HardwareWalletStep : InfoSteps
+  const [SubmitComponent] = useSlot(SlotName.Submit)
 
   if (!safeTx) {
     return false
@@ -108,7 +113,7 @@ export const ConfirmTxReceipt = ({ children, action, features }: ConfirmTxReceip
 
         <Divider className={commonCss.nestedDivider} sx={{ pt: 3 }} />
 
-        {action}
+        {SubmitComponent ? <SubmitComponent onSubmit={onSubmit} /> : <Sign onSubmit={onSubmit} />}
       </TxCard>
     </TxFlowStep>
   )

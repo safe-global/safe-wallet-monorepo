@@ -23,12 +23,11 @@ import { Button, CardActions, CircularProgress, Stack } from '@mui/material'
 import CheckWallet from '@/components/common/CheckWallet'
 import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
 import useIsCounterfactualSafe from '@/features/counterfactual/hooks/useIsCounterfactualSafe'
+import { SlotName, useSlot } from '@/components/tx-flow/SlotProvider'
 
 export type ReviewTransactionContentProps = PropsWithChildren<{
   onSubmit: () => void
   isBatch?: boolean
-  action?: ReactNode
-  features?: ReactNode
 }>
 
 export const ReviewTransactionContent = ({
@@ -36,8 +35,6 @@ export const ReviewTransactionContent = ({
   safeTxError,
   onSubmit,
   isBatch,
-  action,
-  features,
   isOwner,
   children,
   txId,
@@ -68,6 +65,8 @@ export const ReviewTransactionContent = ({
   const [readableApprovals] = useApprovalInfos({ safeTransaction: safeTx })
   const isApproval = readableApprovals && readableApprovals.length > 0
   const isCounterfactualSafe = useIsCounterfactualSafe()
+  const [ActionComponent] = useSlot(SlotName.Action)
+  const features = useSlot(SlotName.Feature)
 
   // Check if a Zodiac Roles mod is enabled and if the user is a member of any role that allows the transaction
   const roles = useRoles(!isCounterfactualSafe && isCreation && !(isNewExecutableTx && isOwner) ? safeTx : undefined)
@@ -110,7 +109,9 @@ export const ReviewTransactionContent = ({
         {!isCounterfactualSafe && !isRejection && <BlockaidBalanceChanges />}
       </TxCard>
 
-      {features}
+      {features.map((Feature, i) => (
+        <Feature key={`feature-${i}`} />
+      ))}
 
       <SignerForm willExecute={willExecute} />
 
@@ -150,7 +151,7 @@ export const ReviewTransactionContent = ({
             direction={{ xs: 'column-reverse', lg: 'row' }}
             spacing={{ xs: 2, md: 2 }}
           >
-            {action}
+            {ActionComponent && <ActionComponent />}
 
             {/* Continue button */}
             <CheckWallet allowNonOwner={onlyExecute} checkNetwork={!submitDisabled}>

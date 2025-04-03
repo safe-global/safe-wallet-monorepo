@@ -7,15 +7,13 @@ import { MODALS_EVENTS, trackEvent } from '@/services/analytics'
 import { withCheckboxGuard } from '../withCheckboxGuard'
 import { SIGN_CHECKBOX_LABEL, SIGN_CHECKBOX_TOOLTIP } from './Sign'
 import useIsCounterfactualSafe from '@/features/counterfactual/hooks/useIsCounterfactualSafe'
-import type { ActionComponent } from '../withActions'
+import { SlotComponentProps, SlotName, useRegisterSlot } from '../SlotProvider'
 
 const CheckboxGuardedExecuteForm = withCheckboxGuard(ExecuteForm, SIGN_CHECKBOX_LABEL, SIGN_CHECKBOX_TOOLTIP)
 
-const Execute: ActionComponent = ({ onSubmit, children = false }) => {
+const Execute = ({ onSubmit }: SlotComponentProps<SlotName.Submit>) => {
   const { safeTx, txOrigin } = useContext(SafeTxContext)
-  const { txId, isCreation, willExecute, isProposing, onlyExecute, isSubmittable, trackTxEvent } =
-    useContext(TxFlowContext)
-  const isCounterfactualSafe = useIsCounterfactualSafe()
+  const { txId, isCreation, onlyExecute, isSubmittable, trackTxEvent } = useContext(TxFlowContext)
   const hasSigned = useAlreadySigned(safeTx)
   const [checked, setChecked] = useState(false)
 
@@ -32,25 +30,28 @@ const Execute: ActionComponent = ({ onSubmit, children = false }) => {
     trackEvent({ ...MODALS_EVENTS.CONFIRM_SIGN_CHECKBOX, label: checked })
   }, [])
 
-  if (!isCounterfactualSafe && willExecute && !isProposing) {
-    const ExecuteFormComponent = hasSigned ? ExecuteForm : CheckboxGuardedExecuteForm
+  const ExecuteFormComponent = hasSigned ? ExecuteForm : CheckboxGuardedExecuteForm
 
-    return (
-      <ExecuteFormComponent
-        safeTx={safeTx}
-        txId={txId}
-        onSubmit={handleSubmit}
-        onCheckboxChange={handleCheckboxChange}
-        isChecked={checked}
-        disableSubmit={!isSubmittable}
-        origin={txOrigin}
-        onlyExecute={onlyExecute}
-        isCreation={isCreation}
-      />
-    )
-  }
-
-  return children
+  return (
+    <ExecuteFormComponent
+      safeTx={safeTx}
+      txId={txId}
+      onSubmit={handleSubmit}
+      onCheckboxChange={handleCheckboxChange}
+      isChecked={checked}
+      disableSubmit={!isSubmittable}
+      origin={txOrigin}
+      onlyExecute={onlyExecute}
+      isCreation={isCreation}
+    />
+  )
 }
 
-export default Execute
+export default () => {
+  const isCounterfactualSafe = useIsCounterfactualSafe()
+  const { willExecute, isProposing } = useContext(TxFlowContext)
+
+  useRegisterSlot(SlotName.Submit, 'execute', Execute, !isCounterfactualSafe && willExecute && !isProposing)
+
+  return false
+}

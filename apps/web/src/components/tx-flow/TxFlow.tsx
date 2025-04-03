@@ -7,15 +7,13 @@ import TxFlowProvider, { type TxFlowContextType } from './TxFlowProvider'
 import { TxFlowContent } from './common/TxFlowContent'
 import ReviewTransaction from '../tx/ReviewTransactionV2'
 import { ConfirmTxReceipt } from '../tx/ConfirmTxReceipt'
-// import { TxChecks, TxNote } from './features'
+import { TxChecks, TxNote } from './features'
 import { Batching, Counterfactual, Execute, ExecuteThroughRole, Propose, Sign } from './actions'
-import { withActions } from './withActions'
+import { SlotProvider } from './SlotProvider'
 
 type SubmitCallbackProps = { txId?: string; isExecuted?: boolean }
 export type SubmitCallback = (args?: SubmitCallbackProps) => void
 export type SubmitCallbackWithData<T> = (args: SubmitCallbackProps & { data?: T }) => void
-
-const ConfirmTxReceiptStep = withActions(ConfirmTxReceipt, [Counterfactual, Execute, ExecuteThroughRole, Propose, Sign])
 
 type TxFlowProps<T extends unknown> = {
   children?: ReactNode[] | ReactNode
@@ -52,31 +50,43 @@ export const TxFlow = <T extends unknown>({
     [step, childrenArray.length],
   )
 
-  const ReviewTransactionStep = withActions(ReviewTransactionComponent, [Batching])
-
   return (
     <SafeTxProvider>
       <TxInfoProvider>
         <TxSecurityProvider>
-          <TxFlowProvider
-            step={step}
-            data={data}
-            nextStep={nextStep}
-            prevStep={prevStep}
-            progress={progress}
-            txId={txId}
-            txLayoutProps={txLayoutProps}
-            onlyExecute={onlyExecute}
-            isExecutable={isExecutable}
-            showMethodCall={showMethodCall}
-            isRejection={isRejection}
-          >
-            <TxFlowContent>
-              {...childrenArray}
-              <ReviewTransactionStep onSubmit={() => nextStep(data)} />
-              <ConfirmTxReceiptStep onSubmit={(props = {}) => onSubmit?.({ ...props, data })} />
-            </TxFlowContent>
-          </TxFlowProvider>
+          <SlotProvider>
+            <TxFlowProvider
+              step={step}
+              data={data}
+              nextStep={nextStep}
+              prevStep={prevStep}
+              progress={progress}
+              txId={txId}
+              txLayoutProps={txLayoutProps}
+              onlyExecute={onlyExecute}
+              isExecutable={isExecutable}
+              showMethodCall={showMethodCall}
+              isRejection={isRejection}
+            >
+              <TxFlowContent>
+                {...childrenArray}
+
+                <ReviewTransactionComponent onSubmit={() => nextStep(data)}>
+                  <Batching />
+                  <TxChecks />
+                  <TxNote />
+                </ReviewTransactionComponent>
+
+                <ConfirmTxReceipt onSubmit={(props = {}) => onSubmit?.({ ...props, data })}>
+                  <Counterfactual />
+                  <Execute />
+                  <ExecuteThroughRole />
+                  <Sign />
+                  <Propose />
+                </ConfirmTxReceipt>
+              </TxFlowContent>
+            </TxFlowProvider>
+          </SlotProvider>
         </TxSecurityProvider>
       </TxInfoProvider>
     </SafeTxProvider>

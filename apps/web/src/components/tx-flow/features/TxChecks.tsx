@@ -1,32 +1,25 @@
-import type { ReactElement } from 'react'
-import { useContext } from 'react'
-import madProps from '@/utils/mad-props'
+import { useContext, useMemo } from 'react'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
 import useIsCounterfactualSafe from '@/features/counterfactual/hooks/useIsCounterfactualSafe'
 import TxChecksComponent from '@/components/tx/SignOrExecuteForm/TxChecks'
+import { SlotName, useRegisterSlot } from '../SlotProvider'
 
-export const TxChecks = ({
-  safeTx,
-  isRejection,
-  isCounterfactualSafe,
-}: {
-  safeTx: ReturnType<typeof useSafeTx>
-  isRejection: ReturnType<typeof useIsRejection>
-  isCounterfactualSafe: ReturnType<typeof useIsCounterfactualSafe>
-}): ReactElement | null => {
-  if (isCounterfactualSafe || isRejection || !safeTx) {
-    return null
-  }
+export default () => {
+  const { isRejection } = useContext(TxFlowContext)
+  const { safeTx } = useContext(SafeTxContext)
+  const isCounterfactualSafe = useIsCounterfactualSafe()
 
-  return <TxChecksComponent transaction={safeTx} />
+  const shouldRegister = useMemo(
+    () => !isCounterfactualSafe && !isRejection && !!safeTx,
+    [isCounterfactualSafe, isRejection, safeTx],
+  )
+
+  const Component = useMemo(() => {
+    return safeTx ? () => <TxChecksComponent transaction={safeTx} /> : () => false
+  }, [safeTx])
+
+  useRegisterSlot(SlotName.Feature, 'txChecks', Component, shouldRegister)
+
+  return false
 }
-
-const useSafeTx = () => useContext(SafeTxContext).safeTx
-const useIsRejection = () => useContext(TxFlowContext).isRejection
-
-export default madProps(TxChecks, {
-  safeTx: useSafeTx,
-  isRejection: useIsRejection,
-  isCounterfactualSafe: useIsCounterfactualSafe,
-})

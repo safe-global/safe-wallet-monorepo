@@ -2,11 +2,11 @@ import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { useCallback, useContext } from 'react'
 import { TxFlowContext } from '../TxFlowProvider'
 import ProposerForm from '@/components/tx/SignOrExecuteForm/ProposerForm'
-import type { ActionComponent } from '../withActions'
+import { SlotComponentProps, SlotName, useRegisterSlot } from '../SlotProvider'
 
-const Propose: ActionComponent = ({ onSubmit, children = false }) => {
+const Propose = ({ onSubmit }: SlotComponentProps<SlotName.Submit>) => {
   const { safeTx, txOrigin } = useContext(SafeTxContext)
-  const { isProposing, trackTxEvent, isSubmittable } = useContext(TxFlowContext)
+  const { trackTxEvent, isSubmittable } = useContext(TxFlowContext)
 
   const handleSubmit = useCallback(
     async (txId: string, isExecuted = false) => {
@@ -16,11 +16,13 @@ const Propose: ActionComponent = ({ onSubmit, children = false }) => {
     [onSubmit, trackTxEvent],
   )
 
-  if (isProposing) {
-    return <ProposerForm safeTx={safeTx} origin={txOrigin} disableSubmit={!isSubmittable} onSubmit={handleSubmit} />
-  }
-
-  return children
+  return <ProposerForm safeTx={safeTx} origin={txOrigin} disableSubmit={!isSubmittable} onSubmit={handleSubmit} />
 }
 
-export default Propose
+export default () => {
+  const { isProposing } = useContext(TxFlowContext)
+
+  useRegisterSlot(SlotName.Submit, 'propose', Propose, isProposing)
+
+  return false
+}
