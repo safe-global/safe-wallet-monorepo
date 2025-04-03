@@ -1,11 +1,7 @@
 import type { MetaTransactionData, SafeTransaction } from '@safe-global/safe-core-sdk-types'
 import type { SafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import { zeroPadValue, Interface } from 'ethers'
-import {
-  getSimulationPayload,
-  NONCE_STORAGE_POSITION,
-  THRESHOLD_STORAGE_POSITION,
-} from '@/components/tx/security/tenderly/utils'
+import { getSimulationPayload } from '@/components/tx/security/tenderly/utils'
 import * as safeContracts from '@/services/contracts/safeContracts'
 import { getMultiSendCallOnlyDeployment, getSafeSingletonDeployment } from '@safe-global/safe-deployments'
 import EthSafeTransaction from '@safe-global/protocol-kit/dist/src/utils/transactions/SafeTransaction'
@@ -13,6 +9,10 @@ import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants
 import { generatePreValidatedSignature } from '@safe-global/protocol-kit/dist/src/utils/signatures'
 import { toBeHex } from 'ethers'
 import * as Web3 from '@/hooks/wallets/web3'
+import {
+  NONCE_STORAGE_POSITION,
+  THRESHOLD_STORAGE_POSITION,
+} from '@safe-global/utils/components/tx/security/tenderly/utils'
 
 const SIGNATURE_LENGTH = 65 * 2
 

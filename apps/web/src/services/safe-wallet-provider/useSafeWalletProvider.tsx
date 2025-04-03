@@ -11,7 +11,8 @@ import { safeMsgSubscribe, SafeMsgEvent } from '@/services/safe-messages/safeMsg
 import { SafeAppsTxFlow } from '@/components/tx-flow/flows'
 import { TxEvent, txSubscribe } from '@/services/tx/txEvents'
 import { Methods } from '@safe-global/safe-apps-sdk'
-import type { EIP712TypedData, SafeSettings } from '@safe-global/safe-apps-sdk'
+import type { SafeSettings } from '@safe-global/safe-apps-sdk'
+import type { TypedData } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
 import { getTransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
 import { Interface, getAddress } from 'ethers'
@@ -21,8 +22,8 @@ import { NotificationMessages, showNotification } from './notifications'
 import { SignMessageOnChainFlow } from '@/components/tx-flow/flows'
 import { useAppSelector } from '@/store'
 import { selectOnChainSigning } from '@/store/settingsSlice'
-import { isOffchainEIP1271Supported } from '@/utils/safe-messages'
-import { getCreateCallContractDeployment } from '../contracts/deployments'
+import { isOffchainEIP1271Supported } from '@safe-global/utils/utils/safe-messages'
+import { getCreateCallContractDeployment } from '@safe-global/utils/services/contracts/deployments'
 
 export const useTxFlowApi = (chainId: string, safeAddress: string): WalletSDK | undefined => {
   const { safe } = useSafeInfo()
@@ -50,7 +51,7 @@ export const useTxFlowApi = (chainId: string, safeAddress: string): WalletSDK | 
     if (!chainId || !safeAddress) return
 
     const signMessage = (
-      message: string | EIP712TypedData,
+      message: string | TypedData,
       appInfo: AppInfo,
       method: Methods.signMessage | Methods.signTypedMessage,
     ): Promise<{ signature: string }> => {
@@ -108,7 +109,7 @@ export const useTxFlowApi = (chainId: string, safeAddress: string): WalletSDK | 
       },
 
       async signTypedMessage(typedData, appInfo) {
-        return await signMessage(typedData as EIP712TypedData, appInfo, Methods.signTypedMessage)
+        return await signMessage(typedData as TypedData, appInfo, Methods.signTypedMessage)
       },
 
       async send(params: { txs: any[]; params: { safeTxGas: number } }, appInfo) {

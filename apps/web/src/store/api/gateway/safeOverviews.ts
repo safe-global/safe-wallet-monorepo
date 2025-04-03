@@ -1,11 +1,11 @@
 import { type EndpointBuilder } from '@reduxjs/toolkit/query/react'
 
 import { type SafeOverview, getSafeOverviews } from '@safe-global/safe-gateway-typescript-sdk'
-import { sameAddress } from '@/utils/addresses'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 import type { RootState } from '../..'
 import { selectCurrency } from '../../settingsSlice'
 import { type SafeItem } from '@/features/myAccounts/hooks/useAllSafes'
-import { asError } from '@/services/exceptions/utils'
+import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { makeSafeTag } from '.'
 
 type SafeOverviewQueueItem = {
@@ -17,7 +17,7 @@ type SafeOverviewQueueItem = {
 }
 
 const _BATCH_SIZE = 10
-const _FETCH_TIMEOUT = 50
+const _FETCH_TIMEOUT = 300
 
 class SafeOverviewFetcher {
   private requestQueue: SafeOverviewQueueItem[] = []

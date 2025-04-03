@@ -3,7 +3,7 @@ import SingleTxDecoded from '.'
 import { Operation } from '@safe-global/safe-gateway-typescript-sdk'
 import { faker } from '@faker-js/faker'
 import { parseUnits } from 'ethers'
-import { ERC20__factory } from '@/types/contracts'
+import { ERC20__factory } from '@safe-global/utils/types/contracts'
 
 describe('SingleTxDecoded', () => {
   it('should show native transfers', () => {

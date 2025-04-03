@@ -8,7 +8,7 @@ import useMediaQuery from '@mui/material/useMediaQuery'
 import Identicon from '../../Identicon'
 import CopyAddressButton from '../../CopyAddressButton'
 import ExplorerButton, { type ExplorerButtonProps } from '../../ExplorerButton'
-import { shortenAddress } from '@/utils/formatters'
+import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import ImageFallback from '../../ImageFallback'
 import css from './styles.module.css'
 

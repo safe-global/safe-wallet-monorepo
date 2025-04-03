@@ -13,7 +13,7 @@ import EthHashInfo from '@/components/common/EthHashInfo'
 
 import commonCss from '@/components/tx-flow/common/styles.module.css'
 import { ChangeSignerSetupWarning } from '@/features/multichain/components/SignerSetupWarning/ChangeSignerSetupWarning'
-import { maybePlural } from '@/utils/formatters'
+import { maybePlural } from '@safe-global/utils/utils/formatters'
 import ReviewTransaction from '@/components/tx/ReviewTransaction'
 
 export const ReviewRemoveOwner = ({

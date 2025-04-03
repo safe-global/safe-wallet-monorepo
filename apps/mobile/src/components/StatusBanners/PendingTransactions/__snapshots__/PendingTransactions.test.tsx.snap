@@ -59,8 +59,8 @@ exports[`PendingTransactions should render the pending transactions in fullWidth
             "gap": 12,
             "justifyContent": "center",
             "paddingBottom": 12,
-            "paddingLeft": 28,
-            "paddingRight": 28,
+            "paddingLeft": 16,
+            "paddingRight": 16,
             "paddingTop": 12,
             "width": "100%",
           }
@@ -97,6 +97,7 @@ exports[`PendingTransactions should render the pending transactions in fullWidth
               style={
                 {
                   "color": "#121312",
+                  "fontFamily": "DM Sans",
                   "fontSize": 14,
                 }
               }
@@ -118,7 +119,7 @@ exports[`PendingTransactions should render the pending transactions in fullWidth
               {
                 "color": "#121312",
                 "fontFamily": "DMSans-SemiBold",
-                "fontSize": 16,
+                "fontSize": 14,
               }
             }
             suppressHighlighting={true}

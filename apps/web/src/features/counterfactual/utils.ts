@@ -1,21 +1,13 @@
-import { getLatestSafeVersion } from '@/utils/chains'
 import { POLLING_INTERVAL } from '@/config/constants'
-import type { PayMethod } from '@/features/counterfactual/PayNowPayLater'
 import { safeCreationDispatch, SafeCreationEvent } from '@/features/counterfactual/services/safeCreationEvents'
-import {
-  addUndeployedSafe,
-  type UndeployedSafeProps,
-  type ReplayedSafeProps,
-  type UndeployedSafe,
-  PendingSafeStatus,
-} from '@/features/counterfactual/store/undeployedSafesSlice'
+import { addUndeployedSafe } from '@/features/counterfactual/store/undeployedSafesSlice'
 import { type ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import { getWeb3ReadOnly } from '@/hooks/wallets/web3'
-import { asError } from '@/services/exceptions/utils'
+import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { getSafeSDKWithSigner, getUncheckedSigner, tryOffChainTxSigning } from '@/services/tx/tx-sender/sdk'
 import { getRelayTxStatus, TaskState } from '@/services/tx/txMonitor'
 import type { AppDispatch } from '@/store'
-import { defaultSafeInfo } from '@/store/safeInfoSlice'
+import { defaultSafeInfo } from '@safe-global/store/slices/SafeInfo/utils'
 import { didRevert, type EthersError } from '@/utils/ethers-utils'
 import { assertProvider, assertTx, assertWallet } from '@/utils/helpers'
 import { type DeploySafeProps, type PredictedSafeProps } from '@safe-global/protocol-kit'
@@ -29,9 +21,17 @@ import {
 } from '@safe-global/safe-gateway-typescript-sdk'
 import type { BrowserProvider, ContractTransactionResponse, Eip1193Provider, Provider } from 'ethers'
 import { getSafeL2SingletonDeployments, getSafeSingletonDeployments } from '@safe-global/safe-deployments'
-import { sameAddress } from '@/utils/addresses'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 
 import { encodeSafeCreationTx } from '@/components/new-safe/create/logic'
+import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
+import type {
+  ReplayedSafeProps,
+  UndeployedSafe,
+  UndeployedSafeProps,
+} from '@safe-global/utils/features/counterfactual/store/types'
+import { PendingSafeStatus } from '@safe-global/utils/features/counterfactual/store/types'
+import type { PayMethod } from '@safe-global/utils/features/counterfactual/types'
 
 export const getUndeployedSafeInfo = (undeployedSafe: UndeployedSafe, address: string, chain: ChainInfo) => {
   const safeSetup = extractCounterfactualSafeSetup(undeployedSafe, chain.chainId)

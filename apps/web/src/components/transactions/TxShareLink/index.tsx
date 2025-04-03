@@ -6,7 +6,7 @@ import { CopyDeeplinkLabels, trackEvent, TX_LIST_EVENTS } from '@/services/analy
 import TxShareLink from './TxShareLink'
 
 import css from './styles.module.css'
-import { getBlockExplorerLink } from '@/utils/chains'
+import { getBlockExplorerLink } from '@safe-global/utils/utils/chains'
 import { useCurrentChain } from '@/hooks/useChains'
 import ExplorerButton from '@/components/common/ExplorerButton'
 

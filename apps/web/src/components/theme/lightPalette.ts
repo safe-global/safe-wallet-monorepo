@@ -29,13 +29,13 @@ const lightPalette = {
   success: {
     dark: '#028D4C',
     main: '#00B460',
-    light: '#72F5B8',
+    light: '#D3F2E4',
     background: '#EFFAF1',
   },
   info: {
     dark: '#52BFDC',
     main: '#5FDDFF',
-    light: '#B7F0FF',
+    light: '#D7F6FF',
     background: '#EFFCFF',
   },
   warning: {

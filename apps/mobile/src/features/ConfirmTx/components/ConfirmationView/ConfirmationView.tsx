@@ -62,6 +62,7 @@ export function ConfirmationView({ txDetails }: ConfirmationViewProps) {
         <SwapOrder
           executionInfo={txDetails.detailedExecutionInfo as MultisigExecutionDetails}
           txInfo={txDetails.txInfo as OrderTransactionInfo}
+          decodedData={txDetails.txData?.dataDecoded}
         />
       )
     case ETxType.CONTRACT_INTERACTION:

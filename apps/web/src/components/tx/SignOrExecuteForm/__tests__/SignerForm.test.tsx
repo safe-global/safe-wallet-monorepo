@@ -12,7 +12,7 @@ import { WalletContext } from '@/components/common/WalletProvider'
 import { SafeTxContext, type SafeTxContextParams } from '@/components/tx-flow/SafeTxProvider'
 import { type SafeSignature, type SafeTransaction } from '@safe-global/safe-core-sdk-types'
 import { safeSignatureBuilder, safeTxBuilder } from '@/tests/builders/safeTx'
-import { shortenAddress } from '@/utils/formatters'
+import { shortenAddress } from '@safe-global/utils/utils/formatters'
 
 jest.mock('@/hooks/useNestedSafeOwners')
 jest.mock('@/hooks/useSafeInfo')

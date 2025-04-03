@@ -1,4 +1,4 @@
-import { formatVisualAmount } from '@/utils/formatters'
+import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
 import { type FeeData } from 'ethers'
 import type {
   ChainInfo,
@@ -13,8 +13,8 @@ import { useCurrentChain } from './useChains'
 import useIntervalCounter from './useIntervalCounter'
 import { useWeb3ReadOnly } from '../hooks/wallets/web3'
 import { Errors, logError } from '@/services/exceptions'
-import { FEATURES, hasFeature } from '@/utils/chains'
-import { asError } from '@/services/exceptions/utils'
+import { asError } from '@safe-global/utils/services/exceptions/utils'
+import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 
 type EstimatedGasPrice =
   | {

@@ -37,6 +37,8 @@ const limitOrderExpiryItem = (item) => `div[data-valuetext="${item}"]`
 const tokenBlock = '[data-testid="block-label"]'
 const confirmPriceImpactInput = '[id="confirm-modal-input"]'
 const confirmPriceImpactBtn = '[id="confirm-modal-button"]'
+const tokenBalance = 'div[class*="TokenMetadata"]'
+const tokenItem = 'div[class*="TokenItem"]'
 
 const limitStrBtn = 'Limit'
 const swapStrBtn = 'Swap'
@@ -279,23 +281,12 @@ export function placeTwapOrder() {
 
 export function confirmPriceImpact() {
   cy.wait(3000)
-
   cy.get('span')
     .contains('Swap anyway')
     .should(() => {})
     .then(($checkbox) => {
       if ($checkbox.length) {
-        cy.wrap($checkbox).type('confirm')
-        cy.get(confirmPriceImpactBtn).should('be.enabled').click()
-      } else {
-        cy.get(confirmPriceImpactInput)
-          .should(() => {})
-          .then(($input) => {
-            if ($input.length) {
-              cy.wrap($input).type('confirm')
-              cy.get(confirmPriceImpactBtn).should('be.enabled').click()
-            }
-          })
+        cy.wrap($checkbox).click()
       }
     })
 }
@@ -503,9 +494,9 @@ export function closeIntroTwapModal() {
 }
 
 export function switchToTwap() {
-  cy.get('a').contains(swapStrBtn).click()
+  cy.get('a').contains(swapStrBtn).should('be.visible').click()
   cy.wait(1000)
-  cy.get('a').contains(twapStrBtn).click()
+  cy.get('a').contains(twapStrBtn).should('be.visible').click()
   cy.wait(1000)
   closeIntroTwapModal()
 }
@@ -574,8 +565,8 @@ export function clickOnTokenSelctor(direction) {
 export function checkTokenList(tokens) {
   cy.get(tokenList).within(() => {
     tokens.forEach(({ name, balance }) => {
-      cy.get('span').contains(name).should('exist')
-      cy.get('span').contains(balance).should('exist')
+      cy.get(tokenItem).contains(name).should('exist')
+      cy.get(tokenBalance).contains(balance).should('exist')
     })
   })
 }

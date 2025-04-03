@@ -2,9 +2,9 @@ import type { SafeTransaction } from '@safe-global/safe-core-sdk-types'
 
 import useAsync from '@/hooks/useAsync'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { DelegateCallModule } from '@/services/security/modules/DelegateCallModule'
-import type { DelegateCallModuleResponse } from '@/services/security/modules/DelegateCallModule'
-import type { SecurityResponse } from '@/services/security/modules/types'
+import { DelegateCallModule } from '@safe-global/utils/services/security/modules/DelegateCallModule'
+import type { DelegateCallModuleResponse } from '@safe-global/utils/services/security/modules/DelegateCallModule'
+import type { SecurityResponse } from '@safe-global/utils/services/security/modules/types'
 import { useCurrentChain } from '@/hooks/useChains'
 
 const DelegateCallModuleInstance = new DelegateCallModule()

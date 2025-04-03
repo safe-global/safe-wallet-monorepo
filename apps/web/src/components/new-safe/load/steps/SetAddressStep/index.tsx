@@ -21,7 +21,7 @@ import { useMnemonicSafeName } from '@/hooks/useMnemonicName'
 import { useAddressResolver } from '@/hooks/useAddressResolver'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import AddressInput from '@/components/common/AddressInput'
-import React, { useEffect } from 'react'
+import React from 'react'
 import { getSafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import useChainId from '@/hooks/useChainId'
 import { useAppSelector } from '@/store'
@@ -57,7 +57,6 @@ const SetAddressStep = ({ data, onSubmit, onBack }: StepRenderProps<LoadSafeForm
     formState: { errors, isValid },
     watch,
     getValues,
-    trigger,
   } = formMethods
 
   const safeAddress = watch(Field.address)
@@ -66,13 +65,6 @@ const SetAddressStep = ({ data, onSubmit, onBack }: StepRenderProps<LoadSafeForm
 
   // Address book, ENS, mnemonic
   const fallbackName = name || ens || randomName
-
-  // Re-validate when chainId changes
-  useEffect(() => {
-    if (safeAddress) {
-      trigger(Field.address)
-    }
-  }, [currentChainId, trigger, safeAddress])
 
   const validateSafeAddress = async (address: string) => {
     if (addedSafes && Object.keys(addedSafes).includes(address)) {

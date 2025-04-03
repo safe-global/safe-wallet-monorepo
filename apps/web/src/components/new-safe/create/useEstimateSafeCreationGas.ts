@@ -4,7 +4,7 @@ import useAsync from '@/hooks/useAsync'
 import { useCurrentChain } from '@/hooks/useChains'
 import { estimateSafeCreationGas } from '@/components/new-safe/create/logic'
 import { type SafeVersion } from '@safe-global/safe-core-sdk-types'
-import { type UndeployedSafeProps } from '@/store/slices'
+import { type UndeployedSafeProps } from '@safe-global/utils/features/counterfactual/store/types'
 
 export const useEstimateSafeCreationGas = (
   undeployedSafe: UndeployedSafeProps | undefined,

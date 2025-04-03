@@ -1,4 +1,4 @@
-import type { SafeMessageListPage } from '@safe-global/safe-gateway-typescript-sdk'
+import type { MessagePage } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import type { listenerMiddlewareInstance } from '.'
 
 import { safeMsgDispatch, SafeMsgEvent } from '@/services/safe-messages/safeMsgEvents'
@@ -6,7 +6,7 @@ import { isSafeMessageListItem } from '@/utils/safe-message-guards'
 import { makeLoadableSlice } from '@/store/common'
 import { selectPendingSafeMessages } from '@/store/pendingSafeMessagesSlice'
 
-const { slice, selector } = makeLoadableSlice('safeMessages', undefined as SafeMessageListPage | undefined)
+const { slice, selector } = makeLoadableSlice('safeMessages', undefined as MessagePage | undefined)
 
 export const safeMessagesSlice = slice
 export const selectSafeMessages = selector

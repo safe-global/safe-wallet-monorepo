@@ -1,6 +1,6 @@
 import React from 'react'
 import { H2, ScrollView, Text, Theme, View, XStack, YStack } from 'tamagui'
-import { SafeFontIcon as Icon } from '@/src/components/SafeFontIcon/SafeFontIcon'
+import { SafeFontIcon } from '@/src/components/SafeFontIcon/SafeFontIcon'
 import { SafeListItem } from '@/src/components/SafeListItem'
 import { Skeleton } from 'moti/skeleton'
 import { Pressable, useColorScheme } from 'react-native'
@@ -114,7 +114,7 @@ export const Settings = ({ address, data, onImplementationTap, displayDevMenu, c
                   >
                     <SafeListItem
                       label={'Signers'}
-                      leftNode={<Icon name={'owners'} color={'$colorSecondary'} />}
+                      leftNode={<SafeFontIcon name={'owners'} color={'$colorSecondary'} />}
                       rightNode={
                         <View flexDirection={'row'} alignItems={'center'} justifyContent={'center'}>
                           <Skeleton colorMode={colorScheme === 'dark' ? 'dark' : 'light'} height={17}>
@@ -123,7 +123,7 @@ export const Settings = ({ address, data, onImplementationTap, displayDevMenu, c
                             </Text>
                           </Skeleton>
                           <View>
-                            <Icon name={'chevron-right'} />
+                            <SafeFontIcon name={'chevron-right'} />
                           </View>
                         </View>
                       }
@@ -139,23 +139,12 @@ export const Settings = ({ address, data, onImplementationTap, displayDevMenu, c
                       onPress={() => {
                         router.push('/notifications-settings')
                       }}
+                      hitSlop={100}
                     >
                       <SafeListItem
                         label={'Notifications'}
-                        leftNode={<Icon name={'bell'} color={'$colorSecondary'} />}
-                        rightNode={<Icon name={'chevron-right'} />}
-                      />
-                    </Pressable>
-                    <Pressable
-                      style={({ pressed }) => [{ opacity: pressed ? 0.5 : 1.0 }]}
-                      onPress={() => {
-                        router.push('/address-book')
-                      }}
-                    >
-                      <SafeListItem
-                        label={'Address book'}
-                        leftNode={<Icon name={'address-book'} color={'$colorSecondary'} />}
-                        rightNode={<Icon name={'chevron-right'} />}
+                        leftNode={<SafeFontIcon name={'bell'} color={'$colorSecondary'} />}
+                        rightNode={<SafeFontIcon name={'chevron-right'} />}
                       />
                     </Pressable>
                   </View>
@@ -170,11 +159,12 @@ export const Settings = ({ address, data, onImplementationTap, displayDevMenu, c
                         onPress={() => {
                           router.push('/developer')
                         }}
+                        hitSlop={100}
                       >
                         <SafeListItem
                           label={'Developer'}
-                          leftNode={<Icon name={'alert-triangle'} color={'$colorSecondary'} />}
-                          rightNode={<Icon name={'chevron-right'} />}
+                          leftNode={<SafeFontIcon name={'alert-triangle'} color={'$colorSecondary'} />}
+                          rightNode={<SafeFontIcon name={'chevron-right'} />}
                         />
                       </Pressable>
                     </View>
@@ -184,8 +174,18 @@ export const Settings = ({ address, data, onImplementationTap, displayDevMenu, c
             </Skeleton.Group>
 
             {/* Footer */}
-            <Pressable onPress={onImplementationTap}>
-              <Text textAlign="center" color="$colorSecondary" marginTop="$8">
+            <Pressable
+              onPress={onImplementationTap}
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '$2',
+                marginTop: 14,
+              }}
+            >
+              <SafeFontIcon name={'check-filled'} color={'$success'} />
+              <Text marginLeft={'$2'} textAlign="center" color="$colorSecondary">
                 {implementation?.name}
               </Text>
             </Pressable>

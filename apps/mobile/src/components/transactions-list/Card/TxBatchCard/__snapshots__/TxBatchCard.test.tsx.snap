@@ -187,7 +187,8 @@ exports[`TxBatchCard should render the default markup 1`] = `
             style={
               {
                 "color": "#A1A3A7",
-                "fontSize": 12,
+                "fontFamily": "DM Sans",
+                "fontSize": 13,
                 "marginBottom": 2,
               }
             }
@@ -200,8 +201,8 @@ exports[`TxBatchCard should render the default markup 1`] = `
           style={
             {
               "color": "#121312",
-              "fontSize": 16,
-              "fontWeight": 600,
+              "fontFamily": "DMSans-SemiBold",
+              "fontSize": 14,
             }
           }
           suppressHighlighting={true}

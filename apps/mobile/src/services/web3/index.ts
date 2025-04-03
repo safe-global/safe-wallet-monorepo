@@ -2,6 +2,7 @@ import { ethers, JsonRpcProvider } from 'ethers'
 import { ChainInfo, RPC_AUTHENTICATION, RpcUri } from '@safe-global/safe-gateway-typescript-sdk'
 import Safe from '@safe-global/protocol-kit'
 import { SafeInfo } from '@/src/types/address'
+import { INFURA_TOKEN } from '@safe-global/utils/config/constants'
 
 export const createWeb3ReadOnly = (chain: ChainInfo, customRpc?: string): JsonRpcProvider | undefined => {
   const url = customRpc || getRpcServiceUrl(chain.rpcUri)
@@ -28,7 +29,7 @@ const formatRpcServiceUrl = ({ authentication, value }: RpcUri, token?: string):
 }
 
 export const getRpcServiceUrl = (rpcUri: RpcUri): string => {
-  return formatRpcServiceUrl(rpcUri, process.env.EXPO_PUBLIC_INFURA_TOKEN)
+  return formatRpcServiceUrl(rpcUri, INFURA_TOKEN)
 }
 
 export const createConnectedWallet = async (

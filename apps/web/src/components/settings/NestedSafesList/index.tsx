@@ -16,9 +16,9 @@ import { useGetOwnedSafesQuery } from '@/store/slices'
 import { NESTED_SAFE_EVENTS } from '@/services/analytics/events/nested-safes'
 import Track from '@/components/common/Track'
 import { useHasFeature } from '@/hooks/useChains'
-import { FEATURES } from '@/utils/chains'
 
 import tableCss from '@/components/common/EnhancedTable/styles.module.css'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 
 export function NestedSafesList(): ReactElement | null {
   const isEnabled = useHasFeature(FEATURES.NESTED_SAFES)
@@ -92,19 +92,21 @@ export function NestedSafesList(): ReactElement | null {
               </Typography>
             )}
 
-            <CheckWallet>
-              {(isOk) => (
-                <Button
-                  onClick={() => setTxFlow(<CreateNestedSafe />)}
-                  variant="text"
-                  startIcon={<SvgIcon component={AddIcon} inheritViewBox fontSize="small" />}
-                  disabled={!isOk}
-                  sx={{ mb: 3 }}
-                >
-                  Add nested Safe
-                </Button>
-              )}
-            </CheckWallet>
+            {safe.deployed && (
+              <CheckWallet>
+                {(isOk) => (
+                  <Button
+                    onClick={() => setTxFlow(<CreateNestedSafe />)}
+                    variant="text"
+                    startIcon={<SvgIcon component={AddIcon} inheritViewBox fontSize="small" />}
+                    disabled={!isOk}
+                    sx={{ mb: 3 }}
+                  >
+                    Add nested Safe
+                  </Button>
+                )}
+              </CheckWallet>
+            )}
 
             {rows && rows.length > 0 && <EnhancedTable rows={rows} headCells={[]} />}
           </Grid2>

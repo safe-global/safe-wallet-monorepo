@@ -7,7 +7,7 @@ import { useCurrentChain } from '@/hooks/useChains'
 import { faker } from '@faker-js/faker'
 import { chainBuilder } from '@/tests/builders/chains'
 import { FEATURES } from '@safe-global/safe-gateway-typescript-sdk'
-import { checksumAddress } from '@/utils/addresses'
+import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import type { AddressBook } from '@/store/addressBookSlice'
 
 // We use Rinkeby and chainId 4 here as this is our default url chain (see jest.setup.js)

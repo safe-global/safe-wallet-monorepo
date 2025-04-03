@@ -2,7 +2,7 @@ import type { DataDecoded, Order as SwapOrder } from '@safe-global/safe-gateway-
 import { formatUnits } from 'ethers'
 import type { AnyAppDataDocVersion, latest, LatestAppDataDocVersion } from '@cowprotocol/app-data'
 
-import { TradeType, UiOrderType } from '@/features/swap/types'
+import { TradeType, UiOrderType } from '@safe-global/utils/features/swap/types'
 
 type Quantity = {
   amount: string | number | bigint

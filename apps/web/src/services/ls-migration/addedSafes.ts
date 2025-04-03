@@ -1,7 +1,7 @@
 import { type AddedSafesState, type AddedSafesOnChain } from '@/store/addedSafesSlice'
 import type { LOCAL_STORAGE_DATA } from './common'
 import { parseLsValue } from './common'
-import { isChecksummedAddress } from '@/utils/addresses'
+import { isChecksummedAddress } from '@safe-global/utils/utils/addresses'
 import isObject from 'lodash/isObject'
 import type { AddressEx } from '@safe-global/safe-gateway-typescript-sdk'
 

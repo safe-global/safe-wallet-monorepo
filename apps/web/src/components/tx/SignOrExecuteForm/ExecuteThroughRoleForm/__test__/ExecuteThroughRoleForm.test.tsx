@@ -14,9 +14,9 @@ import { type OnboardAPI } from '@web3-onboard/core'
 import { AbiCoder, ZeroAddress, encodeBytes32String } from 'ethers'
 import ExecuteThroughRoleForm from '..'
 import * as hooksModule from '../hooks'
-import { FEATURES } from '@/utils/chains'
 import { chainBuilder } from '@/tests/builders/chains'
 import { useHasFeature } from '@/hooks/useChains'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 
 // Mock fetch
 Object.defineProperty(window, 'fetch', {

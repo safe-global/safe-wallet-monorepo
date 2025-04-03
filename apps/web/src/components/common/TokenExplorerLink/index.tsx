@@ -1,7 +1,7 @@
 import { type ReactElement } from 'react'
 import ExplorerButton from '@/components/common/ExplorerButton'
 import { useCurrentChain } from '@/hooks/useChains'
-import { getBlockExplorerLink } from '@/utils/chains'
+import { getBlockExplorerLink } from '@safe-global/utils/utils/chains'
 import { Typography } from '@mui/material'
 
 const ExplorerLink = ({ address }: { address: string }): ReactElement | null => {

@@ -24,7 +24,8 @@ import { useGetOwnedSafesQuery } from '@/store/slices'
 import { NestedSafesPopover } from '../NestedSafesPopover'
 import { NESTED_SAFE_EVENTS, NESTED_SAFE_LABELS } from '@/services/analytics/events/nested-safes'
 import { useHasFeature } from '@/hooks/useChains'
-import { FEATURES } from '@/utils/chains'
+
+import { FEATURES } from '@safe-global/utils/utils/chains'
 
 enum ModalType {
   NESTED_SAFES = 'nested_safes',
@@ -57,14 +58,13 @@ const SafeListContextMenu = ({
   undeployedSafe: boolean
   onClose?: () => void
 }): ReactElement => {
+  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
   const isNestedSafesEnabled = useHasFeature(FEATURES.NESTED_SAFES)
   const { data: nestedSafes } = useGetOwnedSafesQuery(
-    isNestedSafesEnabled && address ? { chainId, ownerAddress: address } : skipToken,
+    isNestedSafesEnabled && address && anchorEl ? { chainId, ownerAddress: address } : skipToken,
   )
   const addressBook = useAddressBook()
   const hasName = address in addressBook
-
-  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
   const [open, setOpen] = useState<typeof defaultOpen>(defaultOpen)
 
   const trackingLabel =

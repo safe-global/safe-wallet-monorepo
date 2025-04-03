@@ -3,6 +3,7 @@ import * as Keychain from 'react-native-keychain'
 import DeviceInfo from 'react-native-device-info'
 import { IKeyStorageService, PrivateKeyStorageOptions } from './types'
 import Logger from '@/src/utils/logger'
+import { Platform } from 'react-native'
 
 export class KeyStorageService implements IKeyStorageService {
   private readonly BIOMETRIC_PROMPTS = {
@@ -29,12 +30,11 @@ export class KeyStorageService implements IKeyStorageService {
     options: PrivateKeyStorageOptions = { requireAuthentication: true },
   ): Promise<void> {
     try {
-      Logger.info('storePrivateKey', { userId, options })
       const { requireAuthentication = true } = options
       const isEmulator = await DeviceInfo.isEmulator()
       await this.storeKey(userId, privateKey, requireAuthentication, isEmulator)
     } catch (err) {
-      console.log(err)
+      Logger.error('Error storing private key:', err)
       throw new Error('Failed to store private key')
     }
   }
@@ -44,10 +44,9 @@ export class KeyStorageService implements IKeyStorageService {
     options: PrivateKeyStorageOptions = { requireAuthentication: true },
   ): Promise<string | undefined> {
     try {
-      Logger.info('getPrivateKey', { userId, options })
       return await this.getKey(userId, options.requireAuthentication ?? true)
     } catch (err) {
-      console.log(err)
+      Logger.error('Error getting private key:', err)
       return undefined
     }
   }
@@ -56,24 +55,45 @@ export class KeyStorageService implements IKeyStorageService {
     return `signer_address_${userId}`
   }
 
-  private async getOrCreateKey(keyName: string, requireAuth: boolean, isEmulator: boolean): Promise<string> {
+  private async getOrCreateKeyIOS(keyName: string, requireAuth: boolean, isEmulator: boolean): Promise<string> {
     try {
       await DeviceCrypto.getOrCreateAsymmetricKey(keyName, {
         accessLevel: requireAuth ? (isEmulator ? 1 : 2) : 1,
         invalidateOnNewBiometry: requireAuth,
       })
+
       return keyName
     } catch (error) {
-      console.error('Error creating key:', error)
+      Logger.error('Error creating key:', error)
       throw new Error('Failed to create encryption key')
     }
   }
 
+  /**
+   * The android implementation of the device-crypto diverges from the iOS implementation
+   * On Android, the encrypt function expects a symmetric key, while on iOS it expects an asymmetric key.
+   */
+  private async getOrCreateKeyAndroid(keyName: string, requireAuth: boolean, isEmulator: boolean): Promise<void> {
+    try {
+      await DeviceCrypto.getOrCreateSymmetricKey(keyName, {
+        accessLevel: requireAuth ? (isEmulator ? 1 : 2) : 1,
+        invalidateOnNewBiometry: requireAuth,
+      })
+    } catch (error) {
+      Logger.error('Error creating symmetric encryption key:', error)
+      throw new Error('Failed to create symmetric key')
+    }
+  }
+
   private async storeKey(userId: string, privateKey: string, requireAuth: boolean, isEmulator: boolean): Promise<void> {
-    Logger.info(requireAuth ? 'storeWithBiometrics' : 'storeWithoutBiometrics', { userId })
     const keyName = this.getKeyName(userId)
 
-    await this.getOrCreateKey(keyName, requireAuth, isEmulator)
+    if (Platform.OS === 'android') {
+      await this.getOrCreateKeyAndroid(keyName, requireAuth, isEmulator)
+    } else {
+      await this.getOrCreateKeyIOS(keyName, requireAuth, isEmulator)
+    }
+
     const encryptedPrivateKey = await DeviceCrypto.encrypt(keyName, privateKey, this.BIOMETRIC_PROMPTS.SAVE)
 
     await Keychain.setGenericPassword(
@@ -95,7 +115,6 @@ export class KeyStorageService implements IKeyStorageService {
   }
 
   private async getKey(userId: string, requireAuth: boolean): Promise<string> {
-    Logger.info(requireAuth ? 'getWithBiometrics' : 'getWithoutBiometrics', { userId })
     const keyName = this.getKeyName(userId)
 
     const keychainOptions: Keychain.GetOptions = { service: keyName }

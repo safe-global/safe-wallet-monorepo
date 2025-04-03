@@ -32,7 +32,7 @@ export default function TransactionsLayout() {
         tabBarItemStyle: {
           backgroundColor: 'transparent',
           shadowColor: 'transparent',
-          width: 100,
+          width: 104,
           alignSelf: 'center',
           borderBottomWidth: 0,
           left: -6,

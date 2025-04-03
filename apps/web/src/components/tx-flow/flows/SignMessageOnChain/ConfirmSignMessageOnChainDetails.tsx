@@ -5,7 +5,7 @@ import { type RequestId } from '@safe-global/safe-apps-sdk'
 import { dispatchSafeAppsTx } from '@/services/tx/tx-sender'
 import useOnboard from '@/hooks/wallets/useOnboard'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
-import { asError } from '@/services/exceptions/utils'
+import { asError } from '@safe-global/utils/services/exceptions/utils'
 import type { SignOrExecuteProps } from '@/components/tx/SignOrExecuteForm/SignOrExecuteFormV2'
 import { ConfirmTxDetails } from '@/components/tx/ConfirmTxDetails'
 

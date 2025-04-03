@@ -4,8 +4,8 @@ import * as safeAddress from '@/hooks/useSafeAddress'
 
 import { render } from '@/tests/test-utils'
 import { faker } from '@faker-js/faker'
-import { FEATURES } from '@/utils/chains'
 import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 
 describe('SettingsHeader', () => {
   beforeEach(() => {

@@ -12,7 +12,7 @@ import { JsonRpcProvider } from 'ethers'
 import { EMPTY_DATA, ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
 import { waitFor } from '@testing-library/react'
 import { type EIP1193Provider } from '@web3-onboard/core'
-import { type ReplayedSafeProps } from '@/store/slices'
+import { type ReplayedSafeProps } from '@safe-global/utils/features/counterfactual/store/types'
 import { faker } from '@faker-js/faker'
 
 const mockProps: ReplayedSafeProps = {

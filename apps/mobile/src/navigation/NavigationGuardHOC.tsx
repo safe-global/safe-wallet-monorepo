@@ -1,11 +1,11 @@
 import { useRouter, useSegments } from 'expo-router'
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
 import { selectSettings } from '@/src/store/settingsSlice'
 import { selectActiveSafe } from '@/src/store/activeSafeSlice'
 import { selectAppNotificationStatus, updatePromptAttempts, selectPromptAttempts } from '@/src/store/notificationsSlice'
 import { ONBOARDING_VERSION } from '@/src/config/constants'
-
+import { useBiometrics } from '../hooks/useBiometrics'
 let navigated = false
 
 function useInitialNavigationScreen() {
@@ -21,18 +21,18 @@ function useInitialNavigationScreen() {
    * If the user has not enabled notifications and has not been prompted to enable them,
    * show him the opt-in screen, but only if he is in a navigator that has (tabs) as the first screen
    * */
+  const [hasShownNotifications, setHasShownNotifications] = useState(false)
   const shouldShowOptIn = !isAppNotificationEnabled && !promptAttempts && segments[0] === '(tabs)'
 
   useEffect(() => {
-    if (shouldShowOptIn) {
+    if (shouldShowOptIn && !hasShownNotifications) {
       dispatch(updatePromptAttempts(1))
-      // The user most probably just navigated to the (tabs) screen
-      // wait a bit before showing the popup
+      setHasShownNotifications(true)
       setTimeout(() => {
         router.navigate('/notifications-opt-in')
       }, 500)
     }
-  }, [shouldShowOptIn])
+  }, [shouldShowOptIn, hasShownNotifications, dispatch])
 
   React.useEffect(() => {
     // We will navigate only on startup. Any other navigation should not happen here
@@ -66,5 +66,6 @@ function useInitialNavigationScreen() {
 
 export function NavigationGuardHOC({ children }: { children: React.ReactNode }) {
   useInitialNavigationScreen()
+  useBiometrics()
   return children
 }

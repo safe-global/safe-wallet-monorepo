@@ -7,8 +7,9 @@ import useChainId from '@/hooks/useChainId'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
 import type { JsonRpcProvider } from 'ethers'
 import { getSpendingLimitContract } from '@/services/contracts/spendingLimitContracts'
-import type { AddressEx, TokenInfo } from '@safe-global/safe-gateway-typescript-sdk'
-import { type AllowanceModule } from '@/types/contracts'
+import type { TokenInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import { type AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
+import { type AllowanceModule } from '@safe-global/utils/types/contracts'
 import { getERC20TokenInfoOnChain } from '@/utils/tokens'
 
 import { sameString } from '@safe-global/protocol-kit/dist/src/utils'
@@ -65,7 +66,7 @@ export const getTokensForDelegate = async (
 
 export const getSpendingLimits = async (
   provider: JsonRpcProvider,
-  safeModules: AddressEx[],
+  safeModules: AddressInfo[],
   safeAddress: string,
   chainId: string,
   tokenInfoFromBalances: TokenInfo[],

@@ -15,11 +15,7 @@ import {
 
 import css from './styles.module.css'
 import ErrorMessage from '@/components/tx/ErrorMessage'
-
-export const enum PayMethod {
-  PayNow = 'PayNow',
-  PayLater = 'PayLater',
-}
+import { PayMethod } from '@safe-global/utils/features/counterfactual/types'
 
 const PayNowPayLater = ({
   totalFee,

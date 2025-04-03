@@ -21,10 +21,11 @@ export const addInitialTransactionStr = 'Add an initial transaction to the batch
 export const transactionAddedToBatchStr = 'Transaction is added to batch'
 export const addNewStransactionStr = 'Add new transaction'
 
-const recipientInput = 'input[name="recipient"]'
+const recipientInput = 'input[name^="recipients."][name$=".recipient"]'
+const tokenBalance = '[data-testid="token-balance"]'
 const tokenAddressInput = 'input[name="tokenAddress"]'
 const listBox = 'ul[role="listbox"]'
-const amountInput = '[name="amount"]'
+const amountInput = 'input[name^="recipients."][name$=".amount"]'
 const nonceInput = 'input[name="nonce"]'
 const executeOptionsContainer = 'div[role="radiogroup"]'
 const expandedItem = 'div[class*="MuiCollapse-entered"]'
@@ -44,7 +45,7 @@ export function addToBatch(EOA, currentNonce, amount, verify = false) {
 function fillTransactionData(EOA, amount) {
   cy.get(recipientInput).type(EOA, { delay: 1 })
   // Click on the Token selector
-  cy.get(tokenAddressInput).prev().click()
+  cy.get(tokenBalance).click()
   cy.get(listBox).contains(constants.tokenNames.sepoliaEther).click()
   cy.get(amountInput).type(amount)
   cy.contains(nextBtn).click()

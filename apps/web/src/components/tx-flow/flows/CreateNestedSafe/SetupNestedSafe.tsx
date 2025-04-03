@@ -28,8 +28,8 @@ import tokenInputCss from '@/components/common/TokenAmountInput/styles.module.cs
 import NumberField from '@/components/common/NumberField'
 import { useVisibleBalances } from '@/hooks/useVisibleBalances'
 import { AutocompleteItem } from '@/components/tx-flow/flows/TokenTransfer/CreateTokenTransfer'
-import { validateDecimalLength, validateLimitedAmount } from '@/utils/validation'
-import { safeFormatUnits } from '@/utils/formatters'
+import { validateDecimalLength, validateLimitedAmount } from '@safe-global/utils/utils/validation'
+import { safeFormatUnits } from '@safe-global/utils/utils/formatters'
 import { useMnemonicPrefixedSafeName } from '@/hooks/useMnemonicName'
 
 import css from '@/components/tx-flow/flows/CreateNestedSafe/styles.module.css'
@@ -85,6 +85,7 @@ export function SetUpNestedSafe({
 
           <FormControl fullWidth sx={{ mt: 3 }}>
             <NameInput
+              data-testid="nested-safe-name-input"
               name={SetupNestedSafeFormFields.name}
               label="Name"
               placeholder={fallbackName}
@@ -110,7 +111,7 @@ export function SetUpNestedSafe({
           <Divider className={commonCss.nestedDivider} />
 
           <CardActions>
-            <Button variant="contained" type="submit">
+            <Button data-testid="next-button" variant="contained" type="submit">
               Next
             </Button>
           </CardActions>

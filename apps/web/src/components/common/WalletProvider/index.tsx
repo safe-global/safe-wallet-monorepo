@@ -7,7 +7,7 @@ import { useCurrentChain } from '@/hooks/useChains'
 import { useRouter } from 'next/router'
 import { type Eip1193Provider } from 'ethers'
 import { getNestedWallet } from '@/utils/nested-safe-wallet'
-import { sameAddress } from '@/utils/addresses'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 
 export type SignerWallet = {
   provider: Eip1193Provider | null

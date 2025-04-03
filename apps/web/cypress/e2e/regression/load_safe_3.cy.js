@@ -57,4 +57,9 @@ describe('Load Safe tests - 3', () => {
     safe.clickNetworkSelector(constants.networks.polygon)
     safe.selectSepolia()
   })
+
+  it('Verify there are mandatory networks in dropdown: Eth, Polygon, Sepolia', () => {
+    safe.clickNetworkSelector(constants.networks.sepolia)
+    safe.verifyMandatoryNetworksExist()
+  })
 })

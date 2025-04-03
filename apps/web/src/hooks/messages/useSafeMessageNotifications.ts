@@ -1,11 +1,10 @@
+import type { SafeMessageListItem } from '@safe-global/store/gateway/types'
 import { useEffect, useMemo, useRef } from 'react'
-import { SafeMessageStatus } from '@safe-global/safe-gateway-typescript-sdk'
-import type { SafeMessageListItem } from '@safe-global/safe-gateway-typescript-sdk'
 
 import { SafeMsgEvent, safeMsgSubscribe } from '@/services/safe-messages/safeMsgEvents'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { selectNotifications, showNotification } from '@/store/notificationsSlice'
-import { formatError } from '@/utils/formatters'
+import { formatError } from '@safe-global/utils/utils/formatters'
 import { isSafeMessageListItem } from '@/utils/safe-message-guards'
 import useSafeMessages from '@/hooks/messages/useSafeMessages'
 import { selectPendingSafeMessages } from '@/store/pendingSafeMessagesSlice'
@@ -31,7 +30,7 @@ export const _getSafeMessagesAwaitingConfirmations = (
   walletAddress: string,
 ) => {
   return items.filter(isSafeMessageListItem).filter((message) => {
-    const needsConfirmation = message.status === SafeMessageStatus.NEEDS_CONFIRMATION
+    const needsConfirmation = message.status === 'NEEDS_CONFIRMATION'
     const isPending = !!pendingMsgs[message.messageHash]
     const canSign = message.confirmations.every(({ owner }) => owner.value !== walletAddress)
     return needsConfirmation && !isPending && canSign

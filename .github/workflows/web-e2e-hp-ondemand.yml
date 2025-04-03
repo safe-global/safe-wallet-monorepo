@@ -3,7 +3,7 @@ name: Web Happy path on demand tests
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 5 * * 3'
+    - cron: '0 4 * * 3'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -11,7 +11,7 @@ concurrency:
 
 jobs:
   e2e:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     timeout-minutes: 60
     name: Cypress Happy path on demand tests
     strategy:

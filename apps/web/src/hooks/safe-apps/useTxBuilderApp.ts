@@ -7,7 +7,7 @@ import { AppRoutes } from '@/config/routes'
 import { useRemoteSafeApps } from '@/hooks/safe-apps/useRemoteSafeApps'
 
 export const useTxBuilderApp = (): { app?: SafeAppData; link: UrlObject } | undefined => {
-  const [matchingApps] = useRemoteSafeApps(SafeAppsTag.TX_BUILDER)
+  const [matchingApps] = useRemoteSafeApps({ tag: SafeAppsTag.TX_BUILDER })
   const router = useRouter()
   const app = matchingApps?.[0]
 

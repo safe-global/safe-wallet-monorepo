@@ -1,4 +1,4 @@
-import type { SafeMessage } from '@safe-global/safe-gateway-typescript-sdk'
+import type { MessageItem } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 
 import { renderHook } from '@/tests/test-utils'
 import * as useIsSafeOwnerHook from '@/hooks/useIsSafeOwner'
@@ -16,7 +16,7 @@ describe('useIsSafeMessageSignableBy', () => {
           },
         },
       ],
-    } as SafeMessage
+    } as MessageItem
 
     const address = '0x456'
 
@@ -35,7 +35,7 @@ describe('useIsSafeMessageSignableBy', () => {
           },
         },
       ],
-    } as SafeMessage
+    } as MessageItem
 
     const address = '0x456'
 
@@ -53,7 +53,7 @@ describe('useIsSafeMessageSignableBy', () => {
           },
         },
       ],
-    } as SafeMessage
+    } as MessageItem
 
     const address = '0x123'
 

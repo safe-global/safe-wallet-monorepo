@@ -6,7 +6,7 @@ import ExpandableTransactionItem from '@/components/transactions/TxListItem/Expa
 import BatchIcon from '@/public/images/common/batch.svg'
 import css from './styles.module.css'
 import ExplorerButton from '@/components/common/ExplorerButton'
-import { getBlockExplorerLink } from '@/utils/chains'
+import { getBlockExplorerLink } from '@safe-global/utils/utils/chains'
 import { useCurrentChain } from '@/hooks/useChains'
 import { getOrderClass } from '@/features/swap/helpers/utils'
 

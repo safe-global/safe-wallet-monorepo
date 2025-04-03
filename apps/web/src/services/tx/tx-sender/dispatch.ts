@@ -2,12 +2,9 @@ import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import { isMultisigExecutionInfo } from '@/utils/transaction-guards'
 import { isHardwareWallet, isSmartContractWallet } from '@/utils/wallets'
 import type { MultiSendCallOnlyContractImplementationType } from '@safe-global/protocol-kit'
-import {
-  type ChainInfo,
-  relayTransaction,
-  type SafeInfo,
-  type TransactionDetails,
-} from '@safe-global/safe-gateway-typescript-sdk'
+import { type ChainInfo, relayTransaction, type TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
+import { type SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
+
 import type {
   SafeSignature,
   SafeTransaction,
@@ -33,10 +30,11 @@ import {
   prepareApproveTxHash,
 } from './sdk'
 import { createWeb3, getUserNonce } from '@/hooks/wallets/web3'
-import { asError } from '@/services/exceptions/utils'
+import { asError } from '@safe-global/utils/services/exceptions/utils'
 import chains from '@/config/chains'
 import { createExistingTx } from './create'
-import { getLatestSafeVersion } from '@/utils/chains'
+
+import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
 
 /**
  * Propose a transaction
@@ -137,7 +135,7 @@ export const dispatchOnChainSigning = async (
   safeTx: SafeTransaction,
   txId: string,
   provider: Eip1193Provider,
-  chainId: SafeInfo['chainId'],
+  chainId: SafeState['chainId'],
   signerAddress: string,
   safeAddress: string,
   isNestedSafe: boolean,
@@ -184,7 +182,7 @@ export const dispatchSafeTxSpeedUp = async (
   txOptions: Omit<TransactionOptions, 'nonce'> & { nonce: number },
   txId: string,
   provider: Eip1193Provider,
-  chainId: SafeInfo['chainId'],
+  chainId: SafeState['chainId'],
   signerAddress: string,
   safeAddress: string,
   nonce: number,
@@ -428,9 +426,9 @@ export const dispatchSpendingLimitTxExecution = async (
   txParams: SpendingLimitTxParams,
   txOptions: TransactionOptions,
   provider: Eip1193Provider,
-  chainId: SafeInfo['chainId'],
+  chainId: SafeState['chainId'],
   safeAddress: string,
-  safeModules: SafeInfo['modules'],
+  safeModules: SafeState['modules'],
 ) => {
   const id = JSON.stringify(txParams)
 
@@ -496,7 +494,7 @@ export const dispatchSafeAppsTx = async (
 
 export const dispatchTxRelay = async (
   safeTx: SafeTransaction,
-  safe: SafeInfo,
+  safe: SafeState,
   txId: string,
   chain: ChainInfo,
   gasLimit?: string | number,

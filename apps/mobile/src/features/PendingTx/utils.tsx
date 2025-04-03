@@ -38,8 +38,8 @@ export const groupPendingTxs = (list: PendingTransactionItems[]) => {
     pointer: -1,
     amount: 0,
     sections: [
-      { title: 'Ready to execute', data: [] },
-      { title: 'Confirmation needed', data: [] },
+      { title: 'Next', data: [] },
+      { title: 'In queue', data: [] },
     ],
   }
 

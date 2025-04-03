@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { Operation } from '@safe-global/safe-gateway-typescript-sdk'
 import type { ReactElement } from 'react'
 
-import { dateString } from '@/utils/formatters'
+import { dateString } from '@safe-global/utils/utils/formatters'
 import { generateDataRowValue, TxDataRow } from '@/components/transactions/TxDetails/Summary/TxDataRow'
 import { RecoverySigners } from '../RecoverySigners'
 import { RecoveryDescription } from '../RecoveryDescription'

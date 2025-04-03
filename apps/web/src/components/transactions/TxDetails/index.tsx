@@ -31,13 +31,13 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import useIsPending from '@/hooks/useIsPending'
 import { isImitation, isTrustedTx } from '@/utils/transactions'
 import { useHasFeature } from '@/hooks/useChains'
-import { FEATURES } from '@/utils/chains'
 import { useGetTransactionDetailsQuery } from '@/store/api/gateway'
-import { asError } from '@/services/exceptions/utils'
+import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { POLLING_INTERVAL } from '@/config/constants'
 import { TxNote } from '@/features/tx-notes'
 import { TxShareBlock } from '../TxShareLink'
 import { TxShareButton } from '../TxShareLink/TxShareButton'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 
 export const NOT_AVAILABLE = 'n/a'
 
@@ -184,6 +184,7 @@ const TxDetails = ({
     { chainId, txId: txSummary.id },
     {
       pollingInterval: isOpenSwapOrder(txSummary.txInfo) ? POLLING_INTERVAL : undefined,
+      skipPollingIfUnfocused: true,
     },
   )
 

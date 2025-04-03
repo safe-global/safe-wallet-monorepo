@@ -4,10 +4,10 @@ import { useAppSelector } from '@/store'
 import { type AsyncResult } from '../useAsync'
 import { selectCurrency, selectSettings, TOKEN_LISTS } from '@/store/settingsSlice'
 import { useCurrentChain } from '../useChains'
-import { FEATURES, hasFeature } from '@/utils/chains'
 import useSafeInfo from '../useSafeInfo'
 import { POLLING_INTERVAL } from '@/config/constants'
 import { useCounterfactualBalances } from '@/features/counterfactual/useCounterfactualBalances'
+import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 
 export const useTokenListSetting = (): boolean | undefined => {
   const chain = useCurrentChain()
@@ -42,6 +42,8 @@ const useLoadBalances = () => {
     {
       skip: !isReady,
       pollingInterval: POLLING_INTERVAL,
+      skipPollingIfUnfocused: true,
+      refetchOnFocus: true,
     },
   )
 

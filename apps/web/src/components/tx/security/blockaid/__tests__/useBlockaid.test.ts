@@ -1,11 +1,14 @@
 import * as useChains from '@/hooks/useChains'
 import * as useWallet from '@/hooks/wallets/useWallet'
-import { SecuritySeverity } from '@/services/security/modules/types'
+import { SecuritySeverity } from '@safe-global/utils/services/security/modules/types'
 import { eip712TypedDataBuilder } from '@/tests/builders/messages'
 import { safeTxBuilder } from '@/tests/builders/safeTx'
 import { parseUnits, toBeHex } from 'ethers'
 import { useBlockaid } from '../useBlockaid'
-import { type AssetDiff, type TransactionScanResponse } from '@/services/security/modules/BlockaidModule/types'
+import {
+  type AssetDiff,
+  type TransactionScanResponse,
+} from '@safe-global/utils/services/security/modules/BlockaidModule/types'
 import { faker } from '@faker-js/faker/locale/af_ZA'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { safeInfoBuilder } from '@/tests/builders/safe'
@@ -22,8 +25,8 @@ const setupFetchStub = (data: any) => () => {
 }
 
 // Mock BLOCKAID_API
-jest.mock('@/config/constants', () => ({
-  ...jest.requireActual('@/config/constants'),
+jest.mock('@safe-global/utils/config/constants', () => ({
+  ...jest.requireActual('@safe-global/utils/config/constants'),
   BLOCKAID_CLIENT_ID: 'some-client-id',
 }))
 

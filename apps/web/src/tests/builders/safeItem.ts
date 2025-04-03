@@ -1,6 +1,6 @@
 import type { SafeItem } from '@/features/myAccounts/hooks/useAllSafes'
 import { Builder, type IBuilder } from '@/tests/Builder'
-import { checksumAddress } from '@/utils/addresses'
+import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { faker } from '@faker-js/faker'
 
 export function safeItemBuilder(): IBuilder<SafeItem> {

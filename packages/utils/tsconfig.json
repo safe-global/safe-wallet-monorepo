@@ -1,6 +1,7 @@
 {
   "extends": "../../config/tsconfig/confs/base.json",
   "compilerOptions": {
+    "baseUrl": "./",
 //    "rootDir": "./"
     "paths": {
         "@safe-global/store/*": ["../../packages/store/src/*"],
