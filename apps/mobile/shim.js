@@ -5,6 +5,7 @@ global.fetch = (url, options = {}) => {
   options.headers = {
     ...options.headers,
     'User-Agent': `SafeMobile/${Platform.OS === 'ios' ? 'iOS' : 'Android'}/${Application.nativeApplicationVersion}/${Application.nativeBuildVersion}`,
+    Origin: 'https://app.safe.global',
   }
   return originalFetch(url, options)
 }
