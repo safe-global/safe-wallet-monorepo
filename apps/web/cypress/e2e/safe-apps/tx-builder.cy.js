@@ -1,21 +1,12 @@
 import 'cypress-file-upload'
-import * as constants from '../../support/constants'
-import * as safeapps from '../pages/safeapps.pages'
-import * as createtx from '../../e2e/pages/create_tx.pages'
-import * as navigation from '../pages/navigation.page'
+import * as constants from '../../support/constants.js'
+import * as safeapps from '../pages/safeapps.pages.js'
+import * as navigation from '../pages/navigation.page.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
-import * as ls from '../../support/localstorage_data.js'
-import { getEvents, events, checkDataLayerEvents } from '../../support/utils/gtag.js'
-import * as wallet from '../../support/utils/wallet.js'
 import * as utils from '../../support/utils/checkers.js'
-import { getMockAddress } from '../../support/utils/ethers.js'
 
 let safeAppSafes = []
 let iframeSelector
-
-const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
-const signer = walletCredentials.OWNER_4_PRIVATE_KEY
-const signer2 = walletCredentials.OWNER_1_PRIVATE_KEY
 
 describe('Transaction Builder tests', { defaultCommandTimeout: 20000 }, () => {
   before(async () => {

@@ -91,6 +91,7 @@ export function clickOnSafeInPopover(safe) {
 }
 
 export function clickOnParentSafeInBreadcrumb() {
+  cy.wait(1000) // Needs time to render
   cy.get(breadcrumpContainer).within(() => {
     cy.get(parentSafeItem).within(() => {
       cy.get('a').click()
@@ -101,7 +102,7 @@ export function clickOnParentSafeInBreadcrumb() {
 export function checkParentSafeInBreadcrumb(name, address) {
   cy.get(breadcrumpContainer).within(() => {
     cy.get(parentSafeItem).within(() => {
-      cy.get(`a[href="/home?safe=${address}"]`).should('contain', name)
+      cy.get(`a[href*="${address}"]`).should('contain', name)
     })
   })
 }

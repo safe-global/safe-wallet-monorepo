@@ -3,6 +3,7 @@ import * as owner from '../pages/owners.pages.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as wallet from '../../support/utils/wallet.js'
 import * as proposer from '../pages/proposers.pages.js'
+import * as navigation from '../pages/navigation.page.js'
 
 let staticSafes = []
 const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
@@ -43,6 +44,7 @@ describe('Happy path Proposers tests', { defaultCommandTimeout: 30000 }, () => {
     cy.visit(constants.setupUrl + staticSafes.SEP_STATIC_SAFE_32)
     wallet.connectSigner(signer)
     cy.contains(owner.safeAccountNonceStr, { timeout: 10000 })
+    navigation.verifyTxBtnStatus(constants.enabledStates.enabled)
     proposer.deleteAllProposers()
     proposer.clickOnAddProposerBtn()
     proposer.enterProposerData(addedProposer, proposerName)
