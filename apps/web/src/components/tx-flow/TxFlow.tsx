@@ -9,7 +9,7 @@ import ReviewTransaction from '../tx/ReviewTransactionV2'
 import { ConfirmTxReceipt } from '../tx/ConfirmTxReceipt'
 import { TxChecks, TxNote } from './features'
 import { Batching, Counterfactual, Execute, ExecuteThroughRole, Propose, Sign } from './actions'
-import { SlotProvider } from './SlotProvider'
+import { SlotProvider } from './slots'
 
 type SubmitCallbackProps = { txId?: string; isExecuted?: boolean }
 export type SubmitCallback = (args?: SubmitCallbackProps) => void

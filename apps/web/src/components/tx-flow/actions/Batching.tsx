@@ -7,7 +7,7 @@ import { isDelegateCall } from '@/services/tx/tx-sender/sdk'
 import { TxModalContext } from '@/components/tx-flow'
 import { TxFlowContext } from '../TxFlowProvider'
 import useIsCounterfactualSafe from '@/features/counterfactual/hooks/useIsCounterfactualSafe'
-import { SlotName, useRegisterSlot } from '../SlotProvider'
+import { SlotName, withSlot } from '../slots'
 
 const Batching = () => {
   const { setTxFlow } = useContext(TxModalContext)
@@ -40,26 +40,27 @@ const Batching = () => {
   )
 }
 
-const RegisterBatching = () => {
+const useShouldRegisterSlot = () => {
   const isCounterfactualSafe = useIsCounterfactualSafe()
   const { willExecute, isBatch, isProposing, willExecuteThroughRole, isCreation } = useContext(TxFlowContext)
-
   const isOwner = useIsSafeOwner()
 
-  useRegisterSlot(
-    SlotName.Action,
-    'batching',
-    Batching,
+  return (
     isOwner &&
-      isCreation &&
-      !isBatch &&
-      !isCounterfactualSafe &&
-      !willExecute &&
-      !willExecuteThroughRole &&
-      !isProposing,
+    isCreation &&
+    !isBatch &&
+    !isCounterfactualSafe &&
+    !willExecute &&
+    !willExecuteThroughRole &&
+    !isProposing
   )
-
-  return false
 }
 
-export default RegisterBatching
+const BatchingSlot = withSlot({
+  Component: Batching,
+  slotName: SlotName.Action,
+  id: 'batching',
+  useSlotCondition: useShouldRegisterSlot,
+})
+
+export default BatchingSlot

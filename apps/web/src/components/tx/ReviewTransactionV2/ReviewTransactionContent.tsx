@@ -20,7 +20,7 @@ import { Button, CardActions, CircularProgress, Stack } from '@mui/material'
 import CheckWallet from '@/components/common/CheckWallet'
 import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
 import useIsCounterfactualSafe from '@/features/counterfactual/hooks/useIsCounterfactualSafe'
-import { SlotName, useSlot } from '@/components/tx-flow/SlotProvider'
+import { SlotName, useSlot } from '@/components/tx-flow/slots'
 
 export type ReviewTransactionContentProps = PropsWithChildren<{
   onSubmit: () => void

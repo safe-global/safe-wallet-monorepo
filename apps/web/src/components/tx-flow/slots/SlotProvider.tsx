@@ -1,15 +1,12 @@
 import React, {
   createContext,
-  useContext,
   type ReactNode,
   type ComponentType,
-  useEffect,
   useState,
   useCallback,
-  useMemo,
   type PropsWithChildren,
 } from 'react'
-import type { SubmitCallback } from './TxFlow'
+import type { SubmitCallback } from '../TxFlow'
 
 export enum SlotName {
   Submit = 'submit',
@@ -43,7 +40,7 @@ type SlotStore = {
   [K in SlotName]?: Record<string, ComponentType<SlotComponentProps<K>> | null> | null
 }
 
-const SlotContext = createContext<SlotContextType | null>(null)
+export const SlotContext = createContext<SlotContextType | null>(null)
 
 /**
  * SlotProvider is a context provider for managing slots in the transaction flow.
@@ -76,35 +73,4 @@ export const SlotProvider = ({ children }: { children: ReactNode }) => {
   )
 
   return <SlotContext.Provider value={{ registerSlot, unregisterSlot, getSlot }}>{children}</SlotContext.Provider>
-}
-
-const useSlotContext = () => {
-  const context = useContext(SlotContext)
-  if (!context) {
-    throw new Error('useSlotContext must be used within a SlotProvider')
-  }
-  return context
-}
-
-export const useSlot = <T extends SlotName>(slotName: T): ComponentType<SlotComponentProps<T>>[] => {
-  const { getSlot } = useSlotContext()
-  const slot = useMemo(() => getSlot(slotName), [getSlot, slotName])
-  return slot
-}
-
-export const useRegisterSlot = <T extends SlotName>(
-  slotName: T,
-  id: string,
-  Component: ComponentType<SlotComponentProps<T>>,
-  condition = true,
-) => {
-  const { registerSlot, unregisterSlot } = useSlotContext()
-
-  useEffect(() => {
-    if (condition) {
-      registerSlot(slotName, id, Component)
-    } else {
-      unregisterSlot(slotName, id)
-    }
-  }, [condition, registerSlot, unregisterSlot, slotName, Component, id])
 }

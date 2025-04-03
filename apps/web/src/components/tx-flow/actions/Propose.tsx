@@ -2,7 +2,7 @@ import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { useCallback, useContext } from 'react'
 import { TxFlowContext } from '../TxFlowProvider'
 import ProposerForm from '@/components/tx/SignOrExecuteForm/ProposerForm'
-import { type SlotComponentProps, SlotName, useRegisterSlot } from '../SlotProvider'
+import { type SlotComponentProps, SlotName, withSlot } from '../slots'
 
 const Propose = ({ onSubmit }: SlotComponentProps<SlotName.Submit>) => {
   const { safeTx, txOrigin } = useContext(SafeTxContext)
@@ -19,12 +19,16 @@ const Propose = ({ onSubmit }: SlotComponentProps<SlotName.Submit>) => {
   return <ProposerForm safeTx={safeTx} origin={txOrigin} disableSubmit={!isSubmittable} onSubmit={handleSubmit} />
 }
 
-const RegisterPropose = () => {
+const useShouldRegisterSlot = () => {
   const { isProposing } = useContext(TxFlowContext)
-
-  useRegisterSlot(SlotName.Submit, 'propose', Propose, isProposing)
-
-  return false
+  return isProposing
 }
 
-export default RegisterPropose
+const ProposeSlot = withSlot({
+  Component: Propose,
+  slotName: SlotName.Submit,
+  id: 'propose',
+  useSlotCondition: useShouldRegisterSlot,
+})
+
+export default ProposeSlot

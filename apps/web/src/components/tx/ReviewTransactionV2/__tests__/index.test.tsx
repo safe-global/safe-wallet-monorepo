@@ -5,7 +5,7 @@ import type { SafeTxContextParams } from '@/components/tx-flow/SafeTxProvider'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { createSafeTx } from '@/tests/builders/safeTx'
 import * as useTxPreviewHooks from '@/components/tx/confirmation-views/useTxPreview'
-import { SlotProvider } from '@/components/tx-flow/SlotProvider'
+import { SlotProvider } from '@/components/tx-flow/slots'
 
 describe('ReviewTransaction', () => {
   beforeEach(() => {

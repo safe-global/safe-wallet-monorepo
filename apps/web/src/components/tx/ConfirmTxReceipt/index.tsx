@@ -11,7 +11,7 @@ import { MODALS_EVENTS } from '@/services/analytics'
 import useWallet from '@/hooks/wallets/useWallet'
 import { isHardwareWallet, isLedgerLive } from '@/utils/wallets'
 import { TxFlowStep } from '@/components/tx-flow/TxFlowStep'
-import { SlotName, useSlot } from '@/components/tx-flow/SlotProvider'
+import { SlotName, useSlot } from '@/components/tx-flow/slots'
 import type { SubmitCallback } from '@/components/tx-flow/TxFlow'
 import { Sign } from '@/components/tx-flow/actions/Sign'
 

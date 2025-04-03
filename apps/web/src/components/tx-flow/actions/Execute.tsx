@@ -7,7 +7,7 @@ import { MODALS_EVENTS, trackEvent } from '@/services/analytics'
 import { withCheckboxGuard } from '../withCheckboxGuard'
 import { SIGN_CHECKBOX_LABEL, SIGN_CHECKBOX_TOOLTIP } from './Sign'
 import useIsCounterfactualSafe from '@/features/counterfactual/hooks/useIsCounterfactualSafe'
-import { type SlotComponentProps, SlotName, useRegisterSlot } from '../SlotProvider'
+import { type SlotComponentProps, SlotName, withSlot } from '../slots'
 
 const CheckboxGuardedExecuteForm = withCheckboxGuard(ExecuteForm, SIGN_CHECKBOX_LABEL, SIGN_CHECKBOX_TOOLTIP)
 
@@ -47,13 +47,18 @@ const Execute = ({ onSubmit }: SlotComponentProps<SlotName.Submit>) => {
   )
 }
 
-const RegisterExecute = () => {
+const useShouldRegisterSlot = () => {
   const isCounterfactualSafe = useIsCounterfactualSafe()
   const { willExecute, isProposing } = useContext(TxFlowContext)
 
-  useRegisterSlot(SlotName.Submit, 'execute', Execute, !isCounterfactualSafe && willExecute && !isProposing)
-
-  return false
+  return !isCounterfactualSafe && willExecute && !isProposing
 }
 
-export default RegisterExecute
+const ExecuteSlot = withSlot({
+  Component: Execute,
+  slotName: SlotName.Submit,
+  id: 'execute',
+  useSlotCondition: useShouldRegisterSlot,
+})
+
+export default ExecuteSlot

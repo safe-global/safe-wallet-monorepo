@@ -3,7 +3,7 @@ import { useCallback, useContext } from 'react'
 import { TxFlowContext } from '../TxFlowProvider'
 import ExecuteThroughRoleForm from '@/components/tx/SignOrExecuteForm/ExecuteThroughRoleForm'
 import useIsCounterfactualSafe from '@/features/counterfactual/hooks/useIsCounterfactualSafe'
-import { type SlotComponentProps, SlotName, useRegisterSlot } from '../SlotProvider'
+import { type SlotComponentProps, SlotName, withSlot } from '../slots'
 
 const ExecuteThroughRole = ({ onSubmit }: SlotComponentProps<SlotName.Submit>) => {
   const { safeTx } = useContext(SafeTxContext)
@@ -20,18 +20,18 @@ const ExecuteThroughRole = ({ onSubmit }: SlotComponentProps<SlotName.Submit>) =
   return <ExecuteThroughRoleForm safeTx={safeTx} disableSubmit={!isSubmittable} role={role!} onSubmit={handleSubmit} />
 }
 
-const RegisterExecuteThroughRole = () => {
+const useShouldRegisterSlot = () => {
   const isCounterfactualSafe = useIsCounterfactualSafe()
   const { willExecuteThroughRole } = useContext(TxFlowContext)
 
-  useRegisterSlot(
-    SlotName.Submit,
-    'executeThroughRole',
-    ExecuteThroughRole,
-    !isCounterfactualSafe && willExecuteThroughRole,
-  )
-
-  return false
+  return !isCounterfactualSafe && willExecuteThroughRole
 }
 
-export default RegisterExecuteThroughRole
+const ExecuteThroughRoleSlot = withSlot({
+  Component: ExecuteThroughRole,
+  slotName: SlotName.Submit,
+  id: 'executeThroughRole',
+  useSlotCondition: useShouldRegisterSlot,
+})
+
+export default ExecuteThroughRoleSlot

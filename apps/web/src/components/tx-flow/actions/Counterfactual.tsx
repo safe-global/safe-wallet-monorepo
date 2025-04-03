@@ -3,7 +3,7 @@ import { useCallback, useContext } from 'react'
 import { TxFlowContext } from '../TxFlowProvider'
 import CounterfactualForm from '@/features/counterfactual/CounterfactualForm'
 import useIsCounterfactualSafe from '@/features/counterfactual/hooks/useIsCounterfactualSafe'
-import { type SlotComponentProps, SlotName, useRegisterSlot } from '../SlotProvider'
+import { type SlotComponentProps, SlotName, withSlot } from '../slots'
 
 const Counterfactual = ({ onSubmit }: SlotComponentProps<SlotName.Submit>) => {
   const { safeTx, txOrigin } = useContext(SafeTxContext)
@@ -29,13 +29,18 @@ const Counterfactual = ({ onSubmit }: SlotComponentProps<SlotName.Submit>) => {
   )
 }
 
-const RegisterCounterfactual = () => {
+const useShouldRegisterSlot = () => {
   const isCounterfactualSafe = useIsCounterfactualSafe()
   const { isProposing } = useContext(TxFlowContext)
 
-  useRegisterSlot(SlotName.Submit, 'counterfactual', Counterfactual, isCounterfactualSafe && !isProposing)
-
-  return false
+  return isCounterfactualSafe && !isProposing
 }
 
-export default RegisterCounterfactual
+const CounterfactualSlot = withSlot({
+  Component: Counterfactual,
+  slotName: SlotName.Submit,
+  id: 'counterfactual',
+  useSlotCondition: useShouldRegisterSlot,
+})
+
+export default CounterfactualSlot

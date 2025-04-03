@@ -5,7 +5,7 @@ import { TxFlowContext } from '../TxFlowProvider'
 import SignFormV2 from '@/components/tx/SignOrExecuteForm/SignFormV2'
 import { withCheckboxGuard } from '../withCheckboxGuard'
 import useIsCounterfactualSafe from '@/features/counterfactual/hooks/useIsCounterfactualSafe'
-import { type SlotComponentProps, SlotName, useRegisterSlot } from '../SlotProvider'
+import { type SlotComponentProps, SlotName, withSlot } from '../slots'
 
 export const SIGN_CHECKBOX_LABEL = "I understand what I'm signing and that this is an irreversible action."
 export const SIGN_CHECKBOX_TOOLTIP = 'Review details and check the box to enable signing'
@@ -43,19 +43,19 @@ export const Sign = ({ onSubmit }: SlotComponentProps<SlotName.Submit>) => {
   )
 }
 
-const RegisterSign = () => {
+const useShouldRegisterSlot = () => {
   const { isProposing, willExecute, willExecuteThroughRole } = useContext(TxFlowContext)
   const { safeTx } = useContext(SafeTxContext)
   const isCounterfactualSafe = useIsCounterfactualSafe()
 
-  useRegisterSlot(
-    SlotName.Submit,
-    'sign',
-    Sign,
-    safeTx && !isCounterfactualSafe && !willExecute && !willExecuteThroughRole && !isProposing,
-  )
-
-  return false
+  return !!safeTx && !isCounterfactualSafe && !willExecute && !willExecuteThroughRole && !isProposing
 }
 
-export default RegisterSign
+const SignSlot = withSlot({
+  Component: Sign,
+  slotName: SlotName.Submit,
+  id: 'sign',
+  useSlotCondition: useShouldRegisterSlot,
+})
+
+export default SignSlot

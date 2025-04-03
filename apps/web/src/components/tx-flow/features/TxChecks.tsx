@@ -1,27 +1,31 @@
-import { useContext, useMemo } from 'react'
+import { useContext } from 'react'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
 import useIsCounterfactualSafe from '@/features/counterfactual/hooks/useIsCounterfactualSafe'
 import TxChecksComponent from '@/components/tx/SignOrExecuteForm/TxChecks'
-import { SlotName, useRegisterSlot } from '../SlotProvider'
+import { SlotName, withSlot } from '../slots'
 
 const TxChecks = () => {
+  const { safeTx } = useContext(SafeTxContext)
+
+  if (!safeTx) return false
+
+  return <TxChecksComponent transaction={safeTx} />
+}
+
+const useShouldRegisterSlot = () => {
   const { isRejection } = useContext(TxFlowContext)
   const { safeTx } = useContext(SafeTxContext)
   const isCounterfactualSafe = useIsCounterfactualSafe()
 
-  const shouldRegister = useMemo(
-    () => !isCounterfactualSafe && !isRejection && !!safeTx,
-    [isCounterfactualSafe, isRejection, safeTx],
-  )
-
-  const Component = useMemo(() => {
-    return safeTx ? () => <TxChecksComponent transaction={safeTx} /> : () => false
-  }, [safeTx])
-
-  useRegisterSlot(SlotName.Feature, 'txChecks', Component, shouldRegister)
-
-  return false
+  return !isCounterfactualSafe && !isRejection && !!safeTx
 }
 
-export default TxChecks
+const TxChecksSlot = withSlot({
+  Component: TxChecks,
+  slotName: SlotName.Feature,
+  id: 'txChecks',
+  useSlotCondition: useShouldRegisterSlot,
+})
+
+export default TxChecksSlot
