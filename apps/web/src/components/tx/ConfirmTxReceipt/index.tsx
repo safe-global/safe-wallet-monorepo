@@ -65,12 +65,11 @@ const HardwareWalletStep = [
 ]
 
 export type ConfirmTxReceiptProps = PropsWithChildren<{
-  actions?: ReactNode
+  action?: ReactNode
   features?: ReactNode
-  txId?: string
 }>
 
-export const ConfirmTxReceipt = ({ children, actions, features }: ConfirmTxReceiptProps) => {
+export const ConfirmTxReceipt = ({ children, action, features }: ConfirmTxReceiptProps) => {
   const { safeTx } = useContext(SafeTxContext)
   const [txPreview] = useTxPreview(safeTx?.data)
   const wallet = useWallet()
@@ -78,7 +77,7 @@ export const ConfirmTxReceipt = ({ children, actions, features }: ConfirmTxRecei
   const steps = showHashes ? HardwareWalletStep : InfoSteps
 
   if (!safeTx) {
-    return null
+    return false
   }
 
   return (
@@ -109,7 +108,7 @@ export const ConfirmTxReceipt = ({ children, actions, features }: ConfirmTxRecei
 
         <Divider className={commonCss.nestedDivider} sx={{ pt: 3 }} />
 
-        {actions}
+        {action}
       </TxCard>
     </TxFlowStep>
   )

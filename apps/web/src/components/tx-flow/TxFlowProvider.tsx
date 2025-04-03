@@ -35,7 +35,6 @@ export type TxFlowContextType = {
     hideNonce?: boolean
     fixedNonce?: boolean
     hideProgress?: boolean
-    isBatch?: boolean
     isReplacement?: boolean
     isMessage?: boolean
   }
@@ -58,6 +57,7 @@ export type TxFlowContextType = {
   txDetails?: TransactionDetails
   txDetailsLoading?: boolean
   showMethodCall?: boolean
+  isBatch: boolean
   role?: Role
 }
 
@@ -84,6 +84,7 @@ const initialContext: TxFlowContextType = {
   isSubmittable: true,
   setIsSubmittable: () => {},
   willExecuteThroughRole: false,
+  isBatch: false,
 }
 
 export const TxFlowContext = createContext<TxFlowContextType>(initialContext)
@@ -101,6 +102,7 @@ type TxFlowProviderProps<T extends unknown> = {
   isRejection?: TxFlowContextType['isRejection']
   txLayoutProps?: TxFlowContextType['txLayoutProps']
   showMethodCall?: TxFlowContextType['showMethodCall']
+  isBatch?: TxFlowContextType['isBatch']
 }
 
 const TxFlowProvider = <T extends unknown>({
@@ -115,6 +117,7 @@ const TxFlowProvider = <T extends unknown>({
   onlyExecute = initialContext.onlyExecute,
   txLayoutProps: defaultTxLayoutProps = initialContext.txLayoutProps,
   isRejection = initialContext.isRejection,
+  isBatch = initialContext.isBatch,
   showMethodCall,
 }: TxFlowProviderProps<T>): ReactElement => {
   const signer = useSigner()
@@ -201,6 +204,7 @@ const TxFlowProvider = <T extends unknown>({
     showMethodCall,
     txDetails,
     txDetailsLoading,
+    isBatch,
   }
 
   return <TxFlowContext.Provider value={value}>{children}</TxFlowContext.Provider>

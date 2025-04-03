@@ -5,18 +5,17 @@ import { TxInfoProvider } from './TxInfoProvider'
 import { TxSecurityProvider } from '../tx/security/shared/TxSecurityContext'
 import TxFlowProvider, { type TxFlowContextType } from './TxFlowProvider'
 import { TxFlowContent } from './common/TxFlowContent'
-import { withMiddlewares } from './withMiddlewares'
 import ReviewTransaction from '../tx/ReviewTransactionV2'
 import { ConfirmTxReceipt } from '../tx/ConfirmTxReceipt'
-import { TxChecks, TxNote } from './features'
+// import { TxChecks, TxNote } from './features'
 import { Batching, Counterfactual, Execute, ExecuteThroughRole, Propose, Sign } from './actions'
+import { withActions } from './withActions'
 
-export type SubmitCallbackProps = { txId?: string; isExecuted?: boolean }
-export type SubmitCallbackPropsWithData<T extends unknown> = SubmitCallbackProps & { data?: T }
+type SubmitCallbackProps = { txId?: string; isExecuted?: boolean }
+export type SubmitCallback = (args?: SubmitCallbackProps) => void
+export type SubmitCallbackWithData<T> = (args: SubmitCallbackProps & { data?: T }) => void
 
-export type NextStepCallback<T> = (args?: T) => void
-export type SubmitCallback = (args: SubmitCallbackProps) => void
-export type SubmitCallbackWithData<T> = (args: SubmitCallbackPropsWithData<T>) => void
+const ConfirmTxReceiptStep = withActions(ConfirmTxReceipt, [Counterfactual, Execute, ExecuteThroughRole, Propose, Sign])
 
 type TxFlowProps<T extends unknown> = {
   children?: ReactNode[] | ReactNode
@@ -53,15 +52,7 @@ export const TxFlow = <T extends unknown>({
     [step, childrenArray.length],
   )
 
-  const ReviewTransactionStep = withMiddlewares<T>(ReviewTransactionComponent, [TxChecks, TxNote], [Batching])
-
-  const ConfirmTxReceiptStep = withMiddlewares<T, SubmitCallback>(ConfirmTxReceipt, undefined, [
-    Counterfactual,
-    Execute,
-    ExecuteThroughRole,
-    Sign,
-    Propose,
-  ])
+  const ReviewTransactionStep = withActions(ReviewTransactionComponent, [Batching])
 
   return (
     <SafeTxProvider>
@@ -82,9 +73,7 @@ export const TxFlow = <T extends unknown>({
           >
             <TxFlowContent>
               {...childrenArray}
-
-              <ReviewTransactionStep onSubmit={nextStep} />
-
+              <ReviewTransactionStep onSubmit={() => nextStep(data)} />
               <ConfirmTxReceiptStep onSubmit={(props = {}) => onSubmit?.({ ...props, data })} />
             </TxFlowContent>
           </TxFlowProvider>

@@ -1,15 +1,11 @@
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { useCallback, useContext } from 'react'
 import { TxFlowContext } from '../TxFlowProvider'
-import type { SubmitCallback } from '../TxFlow'
 import ExecuteThroughRoleForm from '@/components/tx/SignOrExecuteForm/ExecuteThroughRoleForm'
 import useIsCounterfactualSafe from '@/features/counterfactual/hooks/useIsCounterfactualSafe'
+import type { ActionComponent } from '../withActions'
 
-type ExecuteThroughRoleProps = {
-  onSubmit: SubmitCallback
-}
-
-const ExecuteThroughRole = ({ onSubmit }: ExecuteThroughRoleProps) => {
+const ExecuteThroughRole: ActionComponent = ({ onSubmit, children = false }) => {
   const { safeTx } = useContext(SafeTxContext)
   const { willExecuteThroughRole, trackTxEvent, role, isSubmittable } = useContext(TxFlowContext)
   const isCounterfactualSafe = useIsCounterfactualSafe()
@@ -22,11 +18,13 @@ const ExecuteThroughRole = ({ onSubmit }: ExecuteThroughRoleProps) => {
     [onSubmit, trackTxEvent],
   )
 
-  if (isCounterfactualSafe || !willExecuteThroughRole) {
-    return null
+  if (!isCounterfactualSafe && willExecuteThroughRole) {
+    return (
+      <ExecuteThroughRoleForm safeTx={safeTx} disableSubmit={!isSubmittable} role={role!} onSubmit={handleSubmit} />
+    )
   }
 
-  return <ExecuteThroughRoleForm safeTx={safeTx} disableSubmit={!isSubmittable} role={role!} onSubmit={handleSubmit} />
+  return children
 }
 
 export default ExecuteThroughRole

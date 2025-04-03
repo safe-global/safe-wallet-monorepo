@@ -25,9 +25,9 @@ import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
 import useIsCounterfactualSafe from '@/features/counterfactual/hooks/useIsCounterfactualSafe'
 
 export type ReviewTransactionContentProps = PropsWithChildren<{
-  onSubmit?: () => void
+  onSubmit: () => void
   isBatch?: boolean
-  actions?: ReactNode
+  action?: ReactNode
   features?: ReactNode
 }>
 
@@ -36,7 +36,7 @@ export const ReviewTransactionContent = ({
   safeTxError,
   onSubmit,
   isBatch,
-  actions,
+  action,
   features,
   isOwner,
   children,
@@ -78,7 +78,7 @@ export const ReviewTransactionContent = ({
   const onContinueClick = useCallback(
     async (e: SyntheticEvent) => {
       e.preventDefault()
-      onSubmit?.()
+      onSubmit()
     },
     [onSubmit],
   )
@@ -150,8 +150,7 @@ export const ReviewTransactionContent = ({
             direction={{ xs: 'column-reverse', lg: 'row' }}
             spacing={{ xs: 2, md: 2 }}
           >
-            {/* Additional actions */}
-            {actions}
+            {action}
 
             {/* Continue button */}
             <CheckWallet allowNonOwner={onlyExecute} checkNetwork={!submitDisabled}>
