@@ -8,8 +8,6 @@ import { useSigner } from '@/hooks/wallets/useWallet'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { TxFlow } from '../../TxFlow'
 import { TxFlowType } from '@/services/analytics'
-import { useMemo } from 'react'
-import ReviewTransaction from '@/components/tx/ReviewTransactionV2'
 
 const ConfirmTxFlow = ({ txSummary }: { txSummary: TransactionSummary }) => {
   const { text } = useTransactionType(txSummary)
@@ -22,11 +20,6 @@ const ConfirmTxFlow = ({ txSummary }: { txSummary: TransactionSummary }) => {
   const canExecute = isExecutable(txSummary, signer?.address || '', safe)
   const canSign = isSignableBy(txSummary, signer?.address || '')
 
-  const ReviewTransactionComponent = useMemo<typeof ReviewTransaction>(
-    () => (props) => <ConfirmProposedTx txNonce={txNonce} {...props} />,
-    [txNonce],
-  )
-
   return (
     <TxFlow
       icon={isSwapOrder && SwapIcon}
@@ -35,7 +28,7 @@ const ConfirmTxFlow = ({ txSummary }: { txSummary: TransactionSummary }) => {
       isExecutable={canExecute}
       onlyExecute={!canSign}
       txSummary={txSummary}
-      ReviewTransactionComponent={ReviewTransactionComponent}
+      ReviewTransactionComponent={(props) => <ConfirmProposedTx txNonce={txNonce} {...props} />}
       eventCategory={TxFlowType.CONFIRM_TX}
       showMethodCall
     />
