@@ -82,7 +82,7 @@ export const useNotificationManager = () => {
     const subscription = AppState.addEventListener('change', async (nextAppState) => {
       if (appState.current.match(/inactive|background/) && nextAppState === 'active') {
         const deviceNotificationStatus = await NotificationsService.isDeviceNotificationEnabled()
-        if (deviceNotificationStatus && !isAppNotificationEnabled) {
+        if (deviceNotificationStatus && isAppNotificationEnabled) {
           await registerForNotifications()
         }
       }
