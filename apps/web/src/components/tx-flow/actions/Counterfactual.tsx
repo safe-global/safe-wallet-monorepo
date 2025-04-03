@@ -3,7 +3,7 @@ import { useCallback, useContext } from 'react'
 import { TxFlowContext } from '../TxFlowProvider'
 import CounterfactualForm from '@/features/counterfactual/CounterfactualForm'
 import useIsCounterfactualSafe from '@/features/counterfactual/hooks/useIsCounterfactualSafe'
-import { SlotComponentProps, SlotName, useRegisterSlot } from '../SlotProvider'
+import { type SlotComponentProps, SlotName, useRegisterSlot } from '../SlotProvider'
 
 const Counterfactual = ({ onSubmit }: SlotComponentProps<SlotName.Submit>) => {
   const { safeTx, txOrigin } = useContext(SafeTxContext)

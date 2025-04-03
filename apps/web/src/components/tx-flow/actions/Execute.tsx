@@ -7,7 +7,7 @@ import { MODALS_EVENTS, trackEvent } from '@/services/analytics'
 import { withCheckboxGuard } from '../withCheckboxGuard'
 import { SIGN_CHECKBOX_LABEL, SIGN_CHECKBOX_TOOLTIP } from './Sign'
 import useIsCounterfactualSafe from '@/features/counterfactual/hooks/useIsCounterfactualSafe'
-import { SlotComponentProps, SlotName, useRegisterSlot } from '../SlotProvider'
+import { type SlotComponentProps, SlotName, useRegisterSlot } from '../SlotProvider'
 
 const CheckboxGuardedExecuteForm = withCheckboxGuard(ExecuteForm, SIGN_CHECKBOX_LABEL, SIGN_CHECKBOX_TOOLTIP)
 

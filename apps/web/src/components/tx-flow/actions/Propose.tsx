@@ -2,7 +2,7 @@ import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { useCallback, useContext } from 'react'
 import { TxFlowContext } from '../TxFlowProvider'
 import ProposerForm from '@/components/tx/SignOrExecuteForm/ProposerForm'
-import { SlotComponentProps, SlotName, useRegisterSlot } from '../SlotProvider'
+import { type SlotComponentProps, SlotName, useRegisterSlot } from '../SlotProvider'
 
 const Propose = ({ onSubmit }: SlotComponentProps<SlotName.Submit>) => {
   const { safeTx, txOrigin } = useContext(SafeTxContext)

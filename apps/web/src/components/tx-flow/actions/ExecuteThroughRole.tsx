@@ -3,7 +3,7 @@ import { useCallback, useContext } from 'react'
 import { TxFlowContext } from '../TxFlowProvider'
 import ExecuteThroughRoleForm from '@/components/tx/SignOrExecuteForm/ExecuteThroughRoleForm'
 import useIsCounterfactualSafe from '@/features/counterfactual/hooks/useIsCounterfactualSafe'
-import { SlotComponentProps, SlotName, useRegisterSlot } from '../SlotProvider'
+import { type SlotComponentProps, SlotName, useRegisterSlot } from '../SlotProvider'
 
 const ExecuteThroughRole = ({ onSubmit }: SlotComponentProps<SlotName.Submit>) => {
   const { safeTx } = useContext(SafeTxContext)

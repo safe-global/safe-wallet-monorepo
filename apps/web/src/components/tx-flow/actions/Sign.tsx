@@ -5,7 +5,7 @@ import { TxFlowContext } from '../TxFlowProvider'
 import SignFormV2 from '@/components/tx/SignOrExecuteForm/SignFormV2'
 import { withCheckboxGuard } from '../withCheckboxGuard'
 import useIsCounterfactualSafe from '@/features/counterfactual/hooks/useIsCounterfactualSafe'
-import { SlotComponentProps, SlotName, useRegisterSlot } from '../SlotProvider'
+import { type SlotComponentProps, SlotName, useRegisterSlot } from '../SlotProvider'
 
 export const SIGN_CHECKBOX_LABEL = "I understand what I'm signing and that this is an irreversible action."
 export const SIGN_CHECKBOX_TOOLTIP = 'Review details and check the box to enable signing'
