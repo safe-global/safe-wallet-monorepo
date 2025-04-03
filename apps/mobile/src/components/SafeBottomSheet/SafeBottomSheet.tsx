@@ -121,7 +121,7 @@ export function SafeBottomSheet<T>({
       enablePanDownToClose
       overDragResistanceFactor={10}
       backgroundComponent={BackgroundComponent}
-      backdropComponent={BackdropComponent}
+      backdropComponent={() => <BackdropComponent />}
       footerComponent={isSortable ? undefined : renderFooter}
       topInset={insets.top}
       handleIndicatorStyle={{ backgroundColor: getVariable(theme.borderMain) }}
