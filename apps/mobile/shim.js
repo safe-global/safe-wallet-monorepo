@@ -1,3 +1,14 @@
+import { Platform } from 'react-native'
+import * as Application from 'expo-application'
+const originalFetch = global.fetch
+global.fetch = (url, options = {}) => {
+  options.headers = {
+    ...options.headers,
+    'User-Agent': `SafeMobile/${Platform.OS === 'ios' ? 'iOS' : 'Android'}/${Application.nativeApplicationVersion}/${Application.nativeBuildVersion}`,
+  }
+  return originalFetch(url, options)
+}
+
 import { install } from 'react-native-quick-crypto'
 install()
 
