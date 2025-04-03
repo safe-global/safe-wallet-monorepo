@@ -1,4 +1,4 @@
-import { useContext, useEffect, useMemo } from 'react'
+import { type PropsWithChildren, useContext, useEffect, useMemo } from 'react'
 import useBalances from '@/hooks/useBalances'
 import { createTokenTransferParams } from '@/services/tx/tokenTransferParams'
 import { createMultiSendCallOnlyTx } from '@/services/tx/tx-sender'
@@ -14,11 +14,12 @@ const ReviewTokenTransfer = ({
   params,
   onSubmit,
   txNonce,
-}: {
+  children,
+}: PropsWithChildren<{
   params?: MultiTokenTransferParams
   onSubmit: () => void
   txNonce?: number
-}) => {
+}>) => {
   const { setSafeTx, setSafeTxError, setNonce, setIsMassPayout } = useContext(SafeTxContext)
   const { balances } = useBalances()
 
@@ -62,6 +63,8 @@ const ReviewTokenTransfer = ({
           />
         ))}
       </Stack>
+
+      {children}
     </ReviewTransaction>
   )
 }
