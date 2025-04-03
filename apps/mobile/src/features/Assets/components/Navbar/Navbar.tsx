@@ -1,10 +1,10 @@
+import React from 'react'
 import { Theme, XStack, getTokenValue } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { Pressable } from 'react-native-gesture-handler'
 import { Identicon } from '@/src/components/Identicon'
 import { shortenAddress } from '@/src/utils/formatters'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
-import { TouchableOpacity } from 'react-native'
-import React from 'react'
 import { useAppSelector } from '@/src/store/hooks'
 import { Link, useRouter } from 'expo-router'
 import { DropdownLabel } from '@/src/components/Dropdown/DropdownLabel'
@@ -52,13 +52,13 @@ export const Navbar = () => {
         />
         <XStack alignItems={'center'} justifyContent={'center'} gap={12}>
           <Link href={'/share'} asChild>
-            <TouchableOpacity>
+            <Pressable>
               <SafeFontIcon name="qr-code-1" size={16} />
-            </TouchableOpacity>
+            </Pressable>
           </Link>
-          <TouchableOpacity onPress={handleNotificationAccess}>
+          <Pressable onPress={handleNotificationAccess}>
             <SafeFontIcon name="bell" size={20} />
-          </TouchableOpacity>
+          </Pressable>
         </XStack>
       </XStack>
     </Theme>

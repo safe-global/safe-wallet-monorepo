@@ -27,7 +27,7 @@ export const Fiat = ({ value, currency, maxLength, precise }: FiatProps) => {
     <View flexDirection="row" alignItems="center" testID={'fiat-balance-display'}>
       {precise ? (
         <XStack>
-          <H2 fontWeight={'600'} alignSelf={'flex-end'} marginBottom={'$2'}>
+          <H2 fontWeight={'600'} alignSelf={'flex-end'} marginBottom={'$2'} fontSize={27}>
             {symbol}
           </H2>
           <H1 fontWeight="600">{whole}</H1>

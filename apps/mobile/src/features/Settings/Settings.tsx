@@ -3,7 +3,7 @@ import { H2, ScrollView, Text, Theme, View, XStack, YStack } from 'tamagui'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon/SafeFontIcon'
 import { SafeListItem } from '@/src/components/SafeListItem'
 import { Skeleton } from 'moti/skeleton'
-import { Pressable } from 'react-native'
+import { Pressable, useColorScheme } from 'react-native'
 import { EthAddress } from '@/src/components/EthAddress'
 import { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { Address } from '@/src/types/address'
@@ -23,7 +23,7 @@ interface SettingsProps {
 
 export const Settings = ({ address, data, onImplementationTap, displayDevMenu, contact }: SettingsProps) => {
   const { owners = [], threshold, implementation } = data
-
+  const colorScheme = useColorScheme()
   return (
     <>
       <Theme name={'settings'}>
@@ -68,7 +68,7 @@ export const Settings = ({ address, data, onImplementationTap, displayDevMenu, c
                   marginRight={'$2'}
                 >
                   <View width={30}>
-                    <Skeleton>
+                    <Skeleton colorMode={colorScheme === 'dark' ? 'dark' : 'light'}>
                       <Text fontWeight="700" textAlign="center" fontSize={'$4'}>
                         {owners.length}
                       </Text>
@@ -88,7 +88,7 @@ export const Settings = ({ address, data, onImplementationTap, displayDevMenu, c
                   width={80}
                 >
                   <View width={30}>
-                    <Skeleton>
+                    <Skeleton colorMode={colorScheme === 'dark' ? 'dark' : 'light'}>
                       <Text fontWeight="bold" textAlign="center" fontSize={'$4'}>
                         {threshold}/{owners.length}
                       </Text>
@@ -116,7 +116,7 @@ export const Settings = ({ address, data, onImplementationTap, displayDevMenu, c
                       leftNode={<SafeFontIcon name={'owners'} color={'$colorSecondary'} />}
                       rightNode={
                         <View flexDirection={'row'} alignItems={'center'} justifyContent={'center'}>
-                          <Skeleton height={17}>
+                          <Skeleton colorMode={colorScheme === 'dark' ? 'dark' : 'light'} height={17}>
                             <Text minWidth={15} marginRight={'$3'} color={'$colorSecondary'}>
                               {owners.length}
                             </Text>
