@@ -7,7 +7,7 @@ import { dateString } from '@safe-global/utils/utils/formatters'
 import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
 import { TxDetails } from '@/components/tx/ConfirmTxDetails/TxDetails'
 import DecodedData from '../TxData/DecodedData'
-import ColorCodedTxAccodion from '@/components/tx/ColorCodedTxAccodion'
+import ColorCodedTxAccordion from '@/components/tx/ColorCodedTxAccordion'
 import { Box, Divider } from '@mui/material'
 import DecoderLinks from './DecoderLinks'
 
@@ -61,7 +61,7 @@ const Summary = ({ safeTxData, txData, txInfo, txDetails }: Props): ReactElement
       )}
 
       <Box mt={3}>
-        <ColorCodedTxAccodion txInfo={txInfo} txData={txData} defaultExpanded={isExpanded}>
+        <ColorCodedTxAccordion txInfo={txInfo} txData={txData} defaultExpanded={isExpanded}>
           <DecodedData txData={txData} toInfo={toInfo} />
 
           <DecoderLinks />
@@ -71,7 +71,7 @@ const Summary = ({ safeTxData, txData, txInfo, txDetails }: Props): ReactElement
 
             <TxDetails safeTxData={safeTxData} txData={txData} grid />
           </Box>
-        </ColorCodedTxAccodion>
+        </ColorCodedTxAccordion>
       </Box>
     </>
   )

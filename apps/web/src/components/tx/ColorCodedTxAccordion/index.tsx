@@ -89,7 +89,7 @@ const onChangeExpand = (_: SyntheticEvent, expanded: boolean) => {
   trackEvent({ ...MODALS_EVENTS.TX_DETAILS, label: expanded ? 'Open' : 'Close' })
 }
 
-const ColorCodedTxAccodion = ({ txInfo, txData, children, defaultExpanded }: DecodedTxProps): ReactElement => {
+const ColorCodedTxAccordion = ({ txInfo, txData, children, defaultExpanded }: DecodedTxProps): ReactElement => {
   const isDarkMode = useDarkMode()
   const decodedData = txData?.dataDecoded
   const level = useMemo(() => getMethodLevel(txInfo?.type), [txInfo?.type])
@@ -135,4 +135,4 @@ const ColorCodedTxAccodion = ({ txInfo, txData, children, defaultExpanded }: Dec
   )
 }
 
-export default memo(ColorCodedTxAccodion)
+export default memo(ColorCodedTxAccordion)
