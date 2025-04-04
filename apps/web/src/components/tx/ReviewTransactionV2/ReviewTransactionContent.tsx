@@ -60,7 +60,7 @@ export const ReviewTransactionContent = ({
   const [readableApprovals] = useApprovalInfos({ safeTransaction: safeTx })
   const isApproval = readableApprovals && readableApprovals.length > 0
   const isCounterfactualSafe = useIsCounterfactualSafe()
-  const [ActionComponent] = useSlot(SlotName.Action)
+  const actions = useSlot(SlotName.Action)
   const features = useSlot(SlotName.Feature)
 
   const onContinueClick = useCallback(
@@ -140,7 +140,9 @@ export const ReviewTransactionContent = ({
             direction={{ xs: 'column-reverse', lg: 'row' }}
             spacing={{ xs: 2, md: 2 }}
           >
-            {ActionComponent && <ActionComponent />}
+            {actions.map((Action, i) => (
+              <Action key={`action-${i}`} />
+            ))}
 
             {/* Continue button */}
             <CheckWallet allowNonOwner={onlyExecute} checkNetwork={!submitDisabled}>
