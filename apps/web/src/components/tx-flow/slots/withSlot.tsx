@@ -13,10 +13,9 @@ export const withSlot = <T extends SlotName>({
 }: Omit<UseRegisterSlotProps<T>, 'condition'> & {
   useSlotCondition: () => boolean
 }) => {
-  const WithSlot = () => {
+  return () => {
     const shouldRegisterSlot = useSlotCondition()
     useRegisterSlot({ slotName, id, Component, condition: shouldRegisterSlot })
     return false
   }
-  return WithSlot
 }
