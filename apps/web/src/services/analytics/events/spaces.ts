@@ -137,6 +137,10 @@ export const SPACE_EVENTS = {
     action: 'Hide spaces dashboard widget',
     category: SPACE_CATEGORY,
   },
+  ADD_ADDRESS: {
+    action: 'Add address',
+    category: SPACE_CATEGORY,
+  },
 }
 
 export enum SPACE_LABELS {
