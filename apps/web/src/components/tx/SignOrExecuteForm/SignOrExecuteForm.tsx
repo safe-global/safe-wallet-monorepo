@@ -6,7 +6,7 @@ import { type ReactElement, type ReactNode, useState, useContext, useCallback } 
 import madProps from '@/utils/mad-props'
 import ExecuteCheckbox from '../ExecuteCheckbox'
 import { useImmediatelyExecutable, useValidateNonce } from './hooks'
-import ExecuteForm from './ExecuteForm'
+import ExecuteForm from '@/components/tx-flow/actions/Execute/ExecuteForm'
 import SignForm from './SignForm'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import ErrorMessage from '../ErrorMessage'
