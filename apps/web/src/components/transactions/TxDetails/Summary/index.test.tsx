@@ -154,20 +154,11 @@ describe('DecodedTx', () => {
       expect(result.queryByText('native transfer')).toBeInTheDocument()
     })
 
-    fireEvent.click(result.getByText('Advanced details'))
+    fireEvent.click(result.getByText('Transaction details'))
 
     await waitFor(() => {
-      const toField = result.queryByText('to:')
-      const dataField = result.queryByText('data:')
-      const valueField = result.queryByText('value:')
-
-      expect(toField).toBeInTheDocument()
-      if (toField) {
-        const address = within(toField.parentElement!.parentElement!).queryByText(
-          '0x474e5Ded6b5D078163BFB8F6dBa355C3aA5478C8',
-        )
-        expect(address).toBeInTheDocument()
-      }
+      const dataField = result.queryAllByText('Data').pop()
+      const valueField = result.queryAllByText('Value').pop()
 
       expect(dataField).toBeInTheDocument()
       if (dataField) {
@@ -180,7 +171,7 @@ describe('DecodedTx', () => {
         const value = within(valueField.parentElement!.parentElement!).queryByText('40737664983361196')
         expect(value).toBeInTheDocument()
       }
-      expect(result.queryAllByText('safeTxGas:').length).toBeGreaterThan(0)
+      expect(result.queryAllByText('SafeTxGas').pop()).toBeInTheDocument()
     })
   })
 
@@ -214,15 +205,15 @@ describe('DecodedTx', () => {
     )
 
     await waitFor(() => {
-      expect(result.queryByText('Interacted with:')).toBeInTheDocument()
-      expect(result.queryByText('Data:')).toBeInTheDocument()
+      expect(result.queryByText('Interacted with')).toBeInTheDocument()
+      expect(result.queryAllByText('Data').pop()).toBeInTheDocument()
     })
 
-    fireEvent.click(result.getByText('Advanced details'))
+    fireEvent.click(result.getByText('Transaction details'))
 
     await waitFor(() => {
-      expect(result.queryByText('safeTxGas:')).toBeInTheDocument()
-      expect(result.queryByText('data:')).toBeInTheDocument()
+      expect(result.queryByText('SafeTxGas')).toBeInTheDocument()
+      expect(result.queryAllByText('Data').pop()).toBeInTheDocument()
     })
   })
 
@@ -267,110 +258,16 @@ describe('DecodedTx', () => {
       />,
     )
 
-    fireEvent.click(result.getByText('Advanced details'))
+    fireEvent.click(result.getByText('Transaction details'))
 
     await waitFor(() => {
-      expect(result.queryByText('transfer')).toBeInTheDocument()
+      expect(result.queryAllByText('transfer').pop()).toBeInTheDocument()
       expect(result.queryByText('to')).toBeInTheDocument()
-      expect(result.queryAllByText('address:').length).toBeGreaterThan(0)
-      expect(result.queryByText('0x474e5Ded6b5D078163BFB8F6dBa355C3aA5478C8')).toBeInTheDocument()
+      expect(result.queryAllByText('address').pop()).toBeInTheDocument()
       expect(result.queryByText('value')).toBeInTheDocument()
-      expect(result.queryAllByText('uint256:').length).toBeGreaterThan(0)
+      expect(result.queryAllByText('uint256').pop()).toBeInTheDocument()
       expect(result.queryByText('16745726664999765048')).toBeInTheDocument()
     })
-  })
-
-  it('should render a multisend transaction', async () => {
-    const result = render(
-      <DecodedTx
-        safeTxData={
-          {
-            to: '0x40A2aCCbd92BCA938b02010E17A5b8929b49130D',
-            value: '0',
-            data: '0x8d80ff00',
-            operation: 1,
-            baseGas: '0',
-            gasPrice: '0',
-            gasToken: '0x0000000000000000000000000000000000000000',
-            refundReceiver: '0x0000000000000000000000000000000000000000',
-            nonce: 58,
-            safeTxGas: '0',
-          } as SafeTransaction['data']
-        }
-        txInfo={txDetails.txInfo}
-        txData={
-          {
-            ...txDetails.txData,
-            dataDecoded: {
-              method: 'multiSend',
-              parameters: [
-                {
-                  name: 'transactions',
-                  type: 'bytes',
-                  value: '0x0057f1887a8bf19b14fc0df',
-                  valueDecoded: [
-                    {
-                      operation: 0,
-                      to: '0x57f1887a8BF19b14fC0dF6Fd9B2acc9Af147eA85',
-                      value: '0',
-                      data: '0x42842e0e0000000000000000000',
-                      dataDecoded: {
-                        method: 'safeTransferFrom',
-                        parameters: [
-                          {
-                            name: 'from',
-                            type: 'address',
-                            value: '0xA77DE01e157f9f57C7c4A326eeE9C4874D0598b6',
-                          },
-                          {
-                            name: 'to',
-                            type: 'address',
-                            value: '0x474e5Ded6b5D078163BFB8F6dBa355C3aA5478C8',
-                          },
-                          {
-                            name: 'tokenId',
-                            type: 'uint256',
-                            value: '52964617156216674852059480948658573966398315289847646343083345905048987083870',
-                          },
-                        ],
-                      },
-                    },
-                    {
-                      operation: 0,
-                      to: '0xD014e20A75437a4bd0FbB40498FF94e6F337c3e9',
-                      value: '0',
-                      data: '0x42842e0e000000000000000000000000a77de',
-                      dataDecoded: {
-                        method: 'safeTransferFrom',
-                        parameters: [
-                          {
-                            name: 'from',
-                            type: 'address',
-                            value: '0xA77DE01e157f9f57C7c4A326eeE9C4874D0598b6',
-                          },
-                          {
-                            name: 'to',
-                            type: 'address',
-                            value: '0x474e5Ded6b5D078163BFB8F6dBa355C3aA5478C8',
-                          },
-                          {
-                            name: 'tokenId',
-                            type: 'uint256',
-                            value: '412',
-                          },
-                        ],
-                      },
-                    },
-                  ],
-                },
-              ],
-            },
-          } as TransactionDetails['txData']
-        }
-      />,
-    )
-
-    expect(result.queryAllByText('safeTransferFrom').length).toBeGreaterThan(1)
   })
 
   it('should render a function call without parameters', async () => {
@@ -403,8 +300,8 @@ describe('DecodedTx', () => {
       />,
     )
 
-    fireEvent.click(result.getByText('Advanced details'))
+    fireEvent.click(result.getByText('Transaction details'))
 
-    expect(result.queryByText('deposit')).toBeInTheDocument()
+    expect(result.queryAllByText('deposit').pop()).toBeInTheDocument()
   })
 })

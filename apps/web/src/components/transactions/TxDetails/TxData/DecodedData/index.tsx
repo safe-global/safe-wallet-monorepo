@@ -25,7 +25,7 @@ export const DecodedData = ({ txData, toInfo }: Props): ReactElement | null => {
 
     return (
       <SendToBlock
-        title="Interact with:"
+        title="Interact with"
         address={toInfo.value}
         name={toInfo.name}
         customAvatar={toInfo.logoUri}
@@ -36,11 +36,11 @@ export const DecodedData = ({ txData, toInfo }: Props): ReactElement | null => {
 
   const amountInWei = txData.value ?? '0'
   const isDelegateCall = txData.operation === Operation.DELEGATE
-  const toAddress = toInfo?.value || txData.to.value
+  const toAddress = toInfo?.value || txData.to?.value
   const method = txData.dataDecoded?.method || ''
   const addressInfo = txData.addressInfoIndex?.[toAddress]
-  const name = addressInfo?.name || toInfo?.name || txData.to.name
-  const avatar = addressInfo?.logoUri || toInfo?.logoUri || txData.to.logoUri
+  const name = addressInfo?.name || toInfo?.name || txData.to?.name
+  const avatar = addressInfo?.logoUri || toInfo?.logoUri || txData.to?.logoUri
 
   return (
     <Stack spacing={2}>
@@ -69,7 +69,7 @@ export const DecodedData = ({ txData, toInfo }: Props): ReactElement | null => {
       {txData.dataDecoded ? (
         <MethodDetails data={txData.dataDecoded} hexData={txData.hexData} addressInfoIndex={txData.addressInfoIndex} />
       ) : txData.hexData ? (
-        <HexEncodedData title="Data:" hexData={txData.hexData} />
+        <HexEncodedData title="Data" hexData={txData.hexData} />
       ) : null}
     </Stack>
   )
