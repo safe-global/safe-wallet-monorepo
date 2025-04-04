@@ -8,7 +8,7 @@ import type { MetaTransactionData } from '@safe-global/safe-core-sdk-types'
 import { Divider, Stack } from '@mui/material'
 import ReviewRecipientRow from './ReviewRecipientRow'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import ReviewTransaction from '@/components/tx/ReviewTransaction'
+import ReviewTransaction from '@/components/tx/ReviewTransactionV2'
 
 const ReviewTokenTransfer = ({
   params,
