@@ -1,7 +1,7 @@
 import type { DataDecoded, TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
 
 import { predictSafeAddress } from '@/features/multichain/utils/utils'
-import useAsync from './useAsync'
+import useAsync from '@safe-global/utils/hooks/useAsync'
 import { useWeb3ReadOnly } from './wallets/web3'
 
 export function _getSetupFromDataDecoded(dataDecoded: DataDecoded) {

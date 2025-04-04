@@ -5,6 +5,7 @@ import * as wallet from '../../support/utils/wallet.js'
 import * as spendinglimit from '../pages/spending_limits.pages'
 import * as navigation from '../pages/navigation.page'
 import { getMockAddress } from '../../support/utils/ethers.js'
+import { selectToken, selectTokenList, tokenListOptions } from '../pages/assets.pages.js'
 
 let staticSafes = []
 

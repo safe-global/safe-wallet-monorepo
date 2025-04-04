@@ -281,23 +281,12 @@ export function placeTwapOrder() {
 
 export function confirmPriceImpact() {
   cy.wait(3000)
-
   cy.get('span')
     .contains('Swap anyway')
     .should(() => {})
     .then(($checkbox) => {
       if ($checkbox.length) {
-        cy.wrap($checkbox).type('confirm')
-        cy.get(confirmPriceImpactBtn).should('be.enabled').click()
-      } else {
-        cy.get(confirmPriceImpactInput)
-          .should(() => {})
-          .then(($input) => {
-            if ($input.length) {
-              cy.wrap($input).type('confirm')
-              cy.get(confirmPriceImpactBtn).should('be.enabled').click()
-            }
-          })
+        cy.wrap($checkbox).click()
       }
     })
 }
@@ -505,9 +494,9 @@ export function closeIntroTwapModal() {
 }
 
 export function switchToTwap() {
-  cy.get('a').contains(swapStrBtn).click()
+  cy.get('a').contains(swapStrBtn).should('be.visible').click()
   cy.wait(1000)
-  cy.get('a').contains(twapStrBtn).click()
+  cy.get('a').contains(twapStrBtn).should('be.visible').click()
   cy.wait(1000)
   closeIntroTwapModal()
 }

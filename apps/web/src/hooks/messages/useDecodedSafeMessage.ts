@@ -1,7 +1,7 @@
 import type { TypedData } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import { getDecodedMessage } from '@/components/safe-apps/utils'
 import { generateSafeMessageMessage, generateSafeMessageHash } from '@safe-global/utils/utils/safe-messages'
-import type { SafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import { type SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { useMemo } from 'react'
 
 /**
@@ -18,7 +18,7 @@ import { useMemo } from 'react'
  */
 const useDecodedSafeMessage = (
   message: string | TypedData,
-  safe: SafeInfo,
+  safe: SafeState,
 ): { decodedMessage: string | TypedData; safeMessageMessage: string; safeMessageHash: string } => {
   // Decode message if UTF-8 encoded
   const decodedMessage = useMemo(() => {

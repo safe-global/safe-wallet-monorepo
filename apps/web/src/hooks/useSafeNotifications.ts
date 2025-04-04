@@ -4,12 +4,13 @@ import { ImplementationVersionState } from '@safe-global/safe-gateway-typescript
 import useSafeInfo from './useSafeInfo'
 import { useAppDispatch } from '@/store'
 import { AppRoutes } from '@/config/routes'
-import { isMigrationToL2Possible, isValidMasterCopy } from '@/services/contracts/safeContracts'
+import { isMigrationToL2Possible } from '@/services/contracts/safeContracts'
+import { isValidMasterCopy } from '@safe-global/utils/services/contracts/safeContracts'
 import { useRouter } from 'next/router'
 import useIsSafeOwner from './useIsSafeOwner'
-import { isValidSafeVersion } from './coreSDK/safeCoreSDK'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
+import { isValidSafeVersion } from '@safe-global/utils/services/contracts/utils'
 
 const CLI_LINK = {
   href: 'https://github.com/5afe/safe-cli',

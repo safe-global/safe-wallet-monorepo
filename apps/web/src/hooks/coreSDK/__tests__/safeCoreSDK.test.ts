@@ -6,7 +6,8 @@ import {
   getSafeContract,
 } from '@safe-global/protocol-kit/dist/src/contracts/safeDeploymentContracts'
 import { ImplementationVersionState } from '@safe-global/safe-gateway-typescript-sdk'
-import { initSafeSDK, isValidSafeVersion } from '../safeCoreSDK'
+import { initSafeSDK } from '../safeCoreSDK'
+import { isValidSafeVersion } from '@safe-global/utils/services/contracts/utils'
 
 jest.mock('@/services/contracts/safeContracts', () => {
   return {

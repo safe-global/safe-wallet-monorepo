@@ -6,16 +6,18 @@ import { isAuthenticated } from '@/store/authSlice'
 import SpaceIcon from '@/public/images/spaces/space.svg'
 import Link from 'next/link'
 import { AppRoutes } from '@/config/routes'
-import { useSpacesGetOneV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { useSpaceSafesGetV1Query, useSpacesGetOneV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import InitialsAvatar from '@/features/spaces/components/InitialsAvatar'
 import { BreadcrumbItem } from '@/components/common/Breadcrumbs/BreadcrumbItem'
-import useSafeInfo from '@/hooks/useSafeInfo'
 import { useParentSafe } from '@/hooks/useParentSafe'
 import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import Track from '@/components/common/Track'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
+import { useSafeAddressFromUrl } from '@/hooks/useSafeAddressFromUrl'
+import useChainId from '@/hooks/useChainId'
+import { useMemo } from 'react'
 
 const SpaceBreadcrumbs = () => {
   const isSpacesFeatureEnabled = useHasFeature(FEATURES.SPACES)
@@ -23,11 +25,21 @@ const SpaceBreadcrumbs = () => {
   const spaceId = useCurrentSpaceId()
   const isUserSignedIn = useAppSelector(isAuthenticated)
   const { currentData: space } = useSpacesGetOneV1Query({ id: Number(spaceId) }, { skip: !isUserSignedIn || !spaceId })
-  const { safeAddress } = useSafeInfo()
+  const { currentData: safes } = useSpaceSafesGetV1Query(
+    { spaceId: Number(spaceId) },
+    { skip: !isUserSignedIn || !spaceId },
+  )
+  const safeAddress = useSafeAddressFromUrl()
+  const chainId = useChainId()
   const parentSafe = useParentSafe()
-  const isSpaceRoute = pathname.startsWith(AppRoutes.spaces.index)
+  const isSpaceRoute = pathname.startsWith(AppRoutes.spaces.index) || pathname.startsWith(AppRoutes.welcome.spaces)
 
-  if (!isUserSignedIn || !spaceId || isSpaceRoute || !space || !isSpacesFeatureEnabled) {
+  const isSafePartOfSpace = useMemo(
+    () => safes && Object.entries(safes.safes).some((safe) => safe[0] === chainId && safe[1].includes(safeAddress)),
+    [chainId, safeAddress, safes],
+  )
+
+  if (!isUserSignedIn || !spaceId || isSpaceRoute || !space || !isSpacesFeatureEnabled || !isSafePartOfSpace) {
     return null
   }
 

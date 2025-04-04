@@ -28,6 +28,7 @@ const addOwnerNextBtn = '[data-testid="add-owner-next-btn"]'
 const modalHeader = '[data-testid="modal-header"]'
 const addressToBeRemoved = '[aria-label="Copy to clipboard"] span'
 const thresholdNextBtn = '[data-testid="threshold-next-btn"]'
+const signerList = '[data-testid="signer-list"]'
 
 const disconnectBtnStr = 'Disconnect'
 const notConnectedStatus = 'Connect'
@@ -45,6 +46,14 @@ const changeThresholdStr = 'Change threshold'
 export const safeAccountNonceStr = 'Safe Account nonce'
 export const nonOwnerErrorMsg = 'Your connected wallet is not a signer of this Safe Account'
 export const disconnectedUserErrorMsg = 'Please connect your wallet'
+
+export function checkExistingSignerCount(count) {
+  cy.get(signerList).find(addressBook.tableRow).should('have.length', count)
+}
+
+export function checkExistingSignerAddress(index, address) {
+  cy.get(signerList).find(addressBook.tableRow).eq(index).should('contain.text', address)
+}
 
 export function verifyOwnerTransactionComplted() {
   cy.get(processedTransactionStr).should('exist')

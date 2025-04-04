@@ -1,10 +1,10 @@
 .initialsAvatar {
-    grid-area: logo;
-    text-transform: uppercase;
-    font-weight: bold;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    justify-self: start;
+  grid-area: logo;
+  text-transform: uppercase;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  justify-self: start;
 }

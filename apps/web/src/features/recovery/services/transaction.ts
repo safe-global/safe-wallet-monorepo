@@ -5,7 +5,7 @@ import { OperationType } from '@safe-global/safe-core-sdk-types'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { getModuleInstance, KnownContracts } from '@gnosis.pm/zodiac'
 import type { MetaTransactionData } from '@safe-global/safe-core-sdk-types'
-import type { AddressEx, SafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import { type SafeState, type AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import type { RecoveryQueueItem } from '@/features/recovery/services/recovery-state'
 import type { Provider } from 'ethers'
 
@@ -14,9 +14,9 @@ export function getRecoveryProposalTransactions({
   newThreshold,
   newOwners,
 }: {
-  safe: SafeInfo
+  safe: SafeState
   newThreshold: number
-  newOwners: Array<AddressEx>
+  newOwners: Array<AddressInfo>
 }): Array<MetaTransactionData> {
   const safeDeployment = getSafeSingletonDeployment({ network: safe.chainId, version: safe.version ?? undefined })
 

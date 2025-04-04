@@ -2,8 +2,9 @@ import { selectUndeployedSafe } from '@/features/counterfactual/store/undeployed
 import { getUndeployedSafeInfo } from '@/features/counterfactual/utils'
 import { useAppSelector } from '@/store'
 import { useEffect, useMemo } from 'react'
-import { getSafeInfo, type SafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
-import useAsync, { type AsyncResult } from '../useAsync'
+import { getSafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import { type SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
+import useAsync, { type AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { useChainId } from '../useChainId'
 import useIntervalCounter from '../useIntervalCounter'
 import useSafeInfo from '../useSafeInfo'
@@ -12,7 +13,7 @@ import { POLLING_INTERVAL } from '@/config/constants'
 import { useCurrentChain } from '../useChains'
 import { useSafeAddressFromUrl } from '../useSafeAddressFromUrl'
 
-export const useLoadSafeInfo = (): AsyncResult<SafeInfo> => {
+export const useLoadSafeInfo = (): AsyncResult<SafeState> => {
   const address = useSafeAddressFromUrl()
   const chainId = useChainId()
   const chain = useCurrentChain()
@@ -22,7 +23,7 @@ export const useLoadSafeInfo = (): AsyncResult<SafeInfo> => {
   const cache = isStoredSafeValid ? safe : undefined
   const undeployedSafe = useAppSelector((state) => selectUndeployedSafe(state, chainId, address))
 
-  const [undeployedData, undeployedError] = useAsync<SafeInfo | undefined>(async () => {
+  const [undeployedData, undeployedError] = useAsync<SafeState | undefined>(async () => {
     if (!undeployedSafe || !chain) return
     /**
      * This is the one place where we can't check for `safe.deployed` as we want to update that value
@@ -31,7 +32,7 @@ export const useLoadSafeInfo = (): AsyncResult<SafeInfo> => {
     return getUndeployedSafeInfo(undeployedSafe, address, chain)
   }, [undeployedSafe, address, chain])
 
-  const [cgwData, cgwError, cgwLoading] = useAsync<SafeInfo | undefined>(async () => {
+  const [cgwData, cgwError, cgwLoading] = useAsync<SafeState | undefined>(async () => {
     if (!chainId || !address || pollCount === undefined) return
     const safeInfo = await getSafeInfo(chainId, address)
     return { ...safeInfo, deployed: true }

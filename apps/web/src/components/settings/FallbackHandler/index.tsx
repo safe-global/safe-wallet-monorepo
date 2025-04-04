@@ -118,7 +118,7 @@ export const FallbackHandler = (): ReactElement | null => {
                   shortAddress={false}
                   name={safe.fallbackHandler.name || fallbackHandlerDeployments?.contractName}
                   address={safe.fallbackHandler.value}
-                  customAvatar={safe.fallbackHandler.logoUri}
+                  customAvatar={safe.fallbackHandler.logoUri || undefined}
                   showCopyButton
                   hasExplorer
                 />

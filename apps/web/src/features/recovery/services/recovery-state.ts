@@ -1,7 +1,7 @@
 import { SENTINEL_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
 import memoize from 'lodash/memoize'
 import { getMultiSendCallOnlyDeployment } from '@safe-global/safe-deployments'
-import type { SafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import { type SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import type { Delay } from '@gnosis.pm/zodiac'
 import type { TransactionAddedEvent } from '@gnosis.pm/zodiac/dist/cjs/types/Delay'
 import { toBeHex, type JsonRpcProvider, type TransactionReceipt } from 'ethers'
@@ -40,7 +40,7 @@ export function _isMaliciousRecovery({
   transaction,
 }: {
   chainId: string
-  version: SafeInfo['version']
+  version: SafeState['version']
   safeAddress: string
   transaction: Pick<AddedEvent['args'], 'to' | 'data'>
 }) {
@@ -168,7 +168,7 @@ const getRecoveryQueueItem = async ({
   expiry: bigint
   provider: JsonRpcProvider
   chainId: string
-  version: SafeInfo['version']
+  version: SafeState['version']
   safeAddress: string
 }): Promise<RecoveryQueueItem> => {
   const [timestamps, receipt] = await Promise.all([
@@ -209,7 +209,7 @@ export const _getRecoveryStateItem = async ({
   safeAddress: string
   provider: JsonRpcProvider
   chainId: string
-  version: SafeInfo['version']
+  version: SafeState['version']
 }): Promise<RecoveryStateItem> => {
   const [[recoverers], expiry, delay, txNonce, queueNonce] = await Promise.all([
     delayModifier.getModulesPaginated(SENTINEL_ADDRESS, MAX_RECOVERER_PAGE_SIZE),
@@ -263,7 +263,7 @@ export function getRecoveryState({
   safeAddress: string
   provider: JsonRpcProvider
   chainId: string
-  version: SafeInfo['version']
+  version: SafeState['version']
 }): Promise<RecoveryState> {
   return Promise.all(delayModifiers.map((delayModifier) => _getRecoveryStateItem({ delayModifier, ...rest })))
 }

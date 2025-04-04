@@ -1,9 +1,11 @@
 import React from 'react'
-import { ImageSourcePropType, StyleSheet } from 'react-native'
-import { View, Image, Text, Spinner } from 'tamagui'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { ColorSchemeName, ImageSourcePropType, SafeAreaView, StyleSheet } from 'react-native'
+import { Image, Text, getTokenValue } from 'tamagui'
 import { SafeButton } from '@/src/components/SafeButton'
 import { WINDOW_HEIGHT } from '@/src/store/constants'
 import { FloatingContainer } from '../FloatingContainer'
+import { Loader } from '../Loader'
 
 interface OptInProps {
   title: string
@@ -21,23 +23,30 @@ interface OptInProps {
   testID?: string
   isVisible?: boolean
   isLoading?: boolean
+  colorScheme: ColorSchemeName
 }
 
 export const OptIn: React.FC<OptInProps> = React.memo(
-  ({ testID, kicker, title, description, image, ctaButton, secondaryButton, isVisible, isLoading }: OptInProps) => {
+  ({
+    testID,
+    kicker,
+    title,
+    description,
+    image,
+    ctaButton,
+    secondaryButton,
+    isVisible,
+    isLoading,
+    colorScheme,
+  }: OptInProps) => {
+    const insets = useSafeAreaInsets()
+
     if (!isVisible) {
       return
     }
 
     return (
-      <View
-        testID={testID}
-        style={styles.wrapper}
-        padding="$4"
-        gap="$8"
-        alignItems="center"
-        justifyContent="flex-start"
-      >
+      <SafeAreaView testID={testID} style={[styles.wrapper, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
         {kicker && (
           <Text textAlign="center" fontWeight={700} fontSize="$4" lineHeight="$6">
             {kicker}
@@ -47,15 +56,26 @@ export const OptIn: React.FC<OptInProps> = React.memo(
           {title}
         </Text>
         {description && (
-          <Text textAlign="center" fontWeight={400} fontSize="$4">
+          <Text textAlign="center" fontWeight={400} fontSize="$4" paddingHorizontal={'$4'}>
             {description}
           </Text>
         )}
         {image && <Image style={styles.image} source={image} />}
 
-        <FloatingContainer sticky testID="notifications-opt-in-cta-buttons">
+        <FloatingContainer sticky testID="notifications-opt-in-cta-buttons" style={{ paddingHorizontal: 16 }}>
           <SafeButton onPress={ctaButton.onPress} marginBottom={'$3'} testID={'opt-in-primary-button'}>
-            {!isLoading ? ctaButton.label : <Spinner size="small" color="$successLightDark" />}
+            {!isLoading ? (
+              ctaButton.label
+            ) : (
+              <Loader
+                size={24}
+                color={
+                  colorScheme === 'dark'
+                    ? getTokenValue('$color.textContrastDark')
+                    : getTokenValue('$color.primaryLightDark')
+                }
+              />
+            )}
           </SafeButton>
           {secondaryButton && (
             <SafeButton text onPress={secondaryButton.onPress} testID={'opt-in-secondary-button'}>
@@ -63,7 +83,7 @@ export const OptIn: React.FC<OptInProps> = React.memo(
             </SafeButton>
           )}
         </FloatingContainer>
-      </View>
+      </SafeAreaView>
     )
   },
 )
@@ -71,6 +91,10 @@ export const OptIn: React.FC<OptInProps> = React.memo(
 const styles = StyleSheet.create({
   wrapper: {
     flex: 1,
+    marginTop: 24,
+    gap: '$8',
+    alignItems: 'center',
+    justifyContent: 'flex-start',
   },
   image: {
     width: '100%',

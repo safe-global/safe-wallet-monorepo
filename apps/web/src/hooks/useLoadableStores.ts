@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { type Slice } from '@reduxjs/toolkit'
 import { useAppDispatch } from '@/store'
-import { type AsyncResult } from './useAsync'
+import { type AsyncResult } from '@safe-global/utils/hooks/useAsync'
 
 // Import all the loadable hooks
 import useLoadChains from './loadables/useLoadChains'

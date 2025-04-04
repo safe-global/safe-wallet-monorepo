@@ -1,5 +1,5 @@
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
-import type { ExtendedSafeInfo } from '@/store/safeInfoSlice'
+import type { ExtendedSafeInfo } from '@safe-global/store/slices/SafeInfo/types'
 import type { SpendingLimitState } from '@/store/spendingLimitsSlice'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import type { SafeTransaction } from '@safe-global/safe-core-sdk-types'

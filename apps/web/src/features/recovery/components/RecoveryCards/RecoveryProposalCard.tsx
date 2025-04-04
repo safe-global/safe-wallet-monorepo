@@ -13,7 +13,7 @@ import madProps from '@/utils/mad-props'
 import { TxModalContext } from '@/components/tx-flow'
 import { HelpCenterArticle, HelperCenterArticleTitles } from '@/config/constants'
 import type { TxModalContextType } from '@/components/tx-flow'
-import type { SafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import { type SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 
 import css from './styles.module.css'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
@@ -22,13 +22,13 @@ type Props =
   | {
       orientation?: 'vertical'
       onClose: () => void
-      safe: SafeInfo
+      safe: SafeState
       setTxFlow: TxModalContextType['setTxFlow']
     }
   | {
       orientation: 'horizontal'
       onClose?: never
-      safe: SafeInfo
+      safe: SafeState
       setTxFlow: TxModalContextType['setTxFlow']
     }
 

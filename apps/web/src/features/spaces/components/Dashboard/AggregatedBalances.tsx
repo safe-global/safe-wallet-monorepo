@@ -66,7 +66,7 @@ const AggregatedBalanceByChain = ({ fiatTotalByChain }: { fiatTotalByChain: Fiat
 
   return (
     <Stack>
-      <Typography variant="body2" color="primary.light" mb={0.5} height="24px">
+      <Typography component="div" variant="body2" color="primary.light" mb={0.5} height="24px">
         {fiatTotalByChain.chainId === 'Other' ? 'Other' : <ChainIndicator chainId={fiatTotalByChain.chainId} />}
       </Typography>
 
