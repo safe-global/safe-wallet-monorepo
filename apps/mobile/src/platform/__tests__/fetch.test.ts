@@ -33,7 +33,7 @@ describe('fetch global override', () => {
     require('../fetch')
   })
 
-  it('should add User-Agent and Origin headers for string URL', async () => {
+  it('should add User-Agent and Origin headers for domain URL', async () => {
     const mockFetch = jest.fn(() => Promise.resolve(new Response()))
     global.fetch = mockFetch
 
@@ -52,7 +52,45 @@ describe('fetch global override', () => {
     })
   })
 
-  it('should add User-Agent and Origin headers for URL object', async () => {
+  it('should not add Origin header for localhost URL', async () => {
+    const mockFetch = jest.fn(() => Promise.resolve(new Response()))
+    global.fetch = mockFetch
+
+    // Re-import to override fetch again with our mock
+    jest.resetModules()
+    require('../fetch')
+
+    const url = 'http://localhost:8081/symbolicate'
+    await global.fetch(url)
+
+    expect(mockFetch).toHaveBeenCalledWith(url, {
+      headers: {
+        'User-Agent': `SafeMobile/iOS/1.0.0/100`,
+        // No Origin header
+      },
+    })
+  })
+
+  it('should not add Origin header for IP address URL', async () => {
+    const mockFetch = jest.fn(() => Promise.resolve(new Response()))
+    global.fetch = mockFetch
+
+    // Re-import to override fetch again with our mock
+    jest.resetModules()
+    require('../fetch')
+
+    const url = 'http://192.168.0.252:8081/symbolicate'
+    await global.fetch(url)
+
+    expect(mockFetch).toHaveBeenCalledWith(url, {
+      headers: {
+        'User-Agent': `SafeMobile/iOS/1.0.0/100`,
+        // No Origin header
+      },
+    })
+  })
+
+  it('should add User-Agent and Origin headers for URL object with domain', async () => {
     const mockFetch = jest.fn(() => Promise.resolve(new Response()))
     global.fetch = mockFetch
 
@@ -71,7 +109,7 @@ describe('fetch global override', () => {
     })
   })
 
-  it('should add User-Agent and Origin headers for Request object', async () => {
+  it('should add User-Agent and Origin headers for Request object with domain', async () => {
     // Create a mock implementation that captures the actual Request object
     let capturedRequest: unknown = null
     const mockFetch = jest.fn((req: Request | RequestInfo | URL) => {
@@ -101,33 +139,40 @@ describe('fetch global override', () => {
     expect(typedRequest.headers.get('Origin')).toBe('https://app.safe.global')
   })
 
-  it('should merge existing headers with User-Agent and Origin for Request with init', async () => {
-    const mockFetch = jest.fn(() => Promise.resolve(new Response()))
+  it('should not add Origin header for Request object with localhost', async () => {
+    // Create a mock implementation that captures the actual Request object
+    let capturedRequest: unknown = null
+    const mockFetch = jest.fn((req: Request | RequestInfo | URL) => {
+      if (req instanceof Request) {
+        capturedRequest = req
+      }
+      return Promise.resolve(new Response())
+    })
+
     global.fetch = mockFetch
 
     // Re-import to override fetch again with our mock
     jest.resetModules()
+    // Import with our current implementation
     require('../fetch')
 
-    const request = new Request('https://example.com/api')
-    const init = {
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    }
+    const request = new Request('http://localhost:8081/symbolicate')
+    await global.fetch(request)
 
-    await global.fetch(request, init)
+    // Check that the fetch was called
+    expect(mockFetch).toHaveBeenCalled()
 
-    expect(mockFetch).toHaveBeenCalledWith(request, {
-      headers: {
-        'Content-Type': 'application/json',
-        'User-Agent': `SafeMobile/iOS/1.0.0/100`,
-        Origin: 'https://app.safe.global',
-      },
-    })
+    // Verify the captured request has the expected headers
+    expect(capturedRequest).not.toBeNull()
+    // We've verified capturedRequest is not null above and know it's a Request
+    const typedRequest = capturedRequest as Request
+    expect(typedRequest.headers.get('User-Agent')).toBe('SafeMobile/iOS/1.0.0/100')
+    // Expect no Origin header for localhost
+    // Note: Using toBeFalsy() instead of toBeNull() to be more flexible in test
+    expect(typedRequest.headers.get('Origin')).toBeFalsy()
   })
 
-  it('should preserve existing init options', async () => {
+  it('should merge existing headers with User-Agent and Origin for domain requests', async () => {
     const mockFetch = jest.fn(() => Promise.resolve(new Response()))
     global.fetch = mockFetch
 
@@ -136,6 +181,32 @@ describe('fetch global override', () => {
     require('../fetch')
 
     const url = 'https://example.com/api'
+    const init = {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    }
+
+    await global.fetch(url, init)
+
+    expect(mockFetch).toHaveBeenCalledWith(url, {
+      headers: {
+        'Content-Type': 'application/json',
+        'User-Agent': `SafeMobile/iOS/1.0.0/100`,
+        Origin: 'https://app.safe.global',
+      },
+    })
+  })
+
+  it('should preserve existing init options and not add Origin for IP URL', async () => {
+    const mockFetch = jest.fn(() => Promise.resolve(new Response()))
+    global.fetch = mockFetch
+
+    // Re-import to override fetch again with our mock
+    jest.resetModules()
+    require('../fetch')
+
+    const url = 'http://192.168.1.1:8081/api'
     const init = {
       method: 'POST',
       body: JSON.stringify({ test: true }),
@@ -154,7 +225,7 @@ describe('fetch global override', () => {
       headers: {
         'Content-Type': 'application/json',
         'User-Agent': `SafeMobile/iOS/1.0.0/100`,
-        Origin: 'https://app.safe.global',
+        // No Origin header for IP address
       },
     })
   })
