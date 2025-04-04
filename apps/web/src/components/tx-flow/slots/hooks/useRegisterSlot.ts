@@ -9,6 +9,10 @@ export type UseRegisterSlotProps<T extends SlotName> = {
   condition?: boolean
 }
 
+/**
+ * Custom hook to register a slot with a condition.
+ * This is useful for conditionally rendering components in specific slots.
+ */
 export const useRegisterSlot = <T extends SlotName>({
   slotName,
   id,
@@ -21,6 +25,10 @@ export const useRegisterSlot = <T extends SlotName>({
     if (condition) {
       registerSlot(slotName, id, Component)
     } else {
+      unregisterSlot(slotName, id)
+    }
+
+    return () => {
       unregisterSlot(slotName, id)
     }
   }, [condition, registerSlot, unregisterSlot, slotName, Component, id])
