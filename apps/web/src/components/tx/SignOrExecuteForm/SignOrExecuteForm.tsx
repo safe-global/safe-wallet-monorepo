@@ -1,4 +1,4 @@
-import ProposerForm from '@/components/tx/SignOrExecuteForm/ProposerForm'
+import ProposerForm from '@/components/tx-flow/actions/Propose/ProposerForm'
 import CounterfactualForm from '@/features/counterfactual/CounterfactualForm'
 import { useIsWalletProposer } from '@/hooks/useProposers'
 import useSafeInfo from '@/hooks/useSafeInfo'
