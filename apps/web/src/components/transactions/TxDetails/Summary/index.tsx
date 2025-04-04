@@ -63,8 +63,8 @@ const Summary = ({ safeTxData, txData, txInfo, txDetails }: Props): ReactElement
         <ColorCodedTxAccodion txInfo={txInfo} txData={txData} defaultExpanded={isExpanded}>
           <DecodedData txData={txData} toInfo={toInfo} />
 
-          <Box mt={4}>
-            <Divider sx={{ mx: -3 }} />
+          <Box mt={4} mx={-2}>
+            <Divider sx={{ mx: -1 }} />
 
             <TxDetails safeTxData={safeTxData} txData={txData} grid />
           </Box>

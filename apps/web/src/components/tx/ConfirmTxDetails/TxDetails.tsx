@@ -82,8 +82,8 @@ export const TxDetails = ({ safeTxData, txData, grid }: TxDetailsProps) => {
                   {safeTxData.value}
                 </TxDetailsRow>
 
-                <TxDetailsRow label="Data" direction={safeTxData.data === '0x' ? 'row' : 'column'} grid={grid}>
-                  <Typography variant="body2">
+                <TxDetailsRow label="Data" grid={grid}>
+                  <Typography variant="body2" width={grid ? '70%' : undefined}>
                     <HexEncodedData hexData={safeTxData.data} limit={66} />
                   </Typography>
                 </TxDetailsRow>
@@ -112,6 +112,7 @@ export const TxDetails = ({ safeTxData, txData, grid }: TxDetailsProps) => {
                       avatarSize={20}
                       showPrefix={false}
                       showName={false}
+                      shortAddress={!grid}
                       hasExplorer
                     />
                   </Typography>
@@ -123,6 +124,7 @@ export const TxDetails = ({ safeTxData, txData, grid }: TxDetailsProps) => {
                       address={safeTxData.refundReceiver}
                       avatarSize={20}
                       showPrefix={false}
+                      shortAddress={!grid}
                       showName={false}
                       hasExplorer
                     />

@@ -2,17 +2,11 @@ import { Stack, type StackProps, Typography } from '@mui/material'
 import type { ReactNode } from 'react'
 import isString from 'lodash/isString'
 import isNumber from 'lodash/isNumber'
-
-const gridSx = {
-  width: { xl: '25%', lg: '150px', xs: 'auto' },
-  minWidth: { xl: '25%', lg: '150px' },
-  flexWrap: { xl: 'nowrap' },
-}
+import { gridSx } from '../FieldsGrid'
 
 const TxDetailsRow = ({
   label,
   children,
-  direction = 'row',
   grid = false,
 }: {
   label: string
@@ -22,12 +16,12 @@ const TxDetailsRow = ({
 }) => (
   <Stack
     gap={1}
-    direction={direction}
+    direction="row"
     justifyContent={grid ? 'flex-start' : 'space-between'}
-    flexWrap={direction === 'row' ? 'wrap' : 'initial'}
-    alignItems={direction === 'row' ? 'center' : 'initial'}
+    flexWrap="wrap"
+    alignItems="center"
   >
-    <Typography variant="body2" color="text.secondary" sx={grid ? gridSx : undefined}>
+    <Typography variant="body2" color={grid ? 'primary.light' : 'text.secondary'} sx={grid ? gridSx : undefined}>
       {label}
     </Typography>
 
