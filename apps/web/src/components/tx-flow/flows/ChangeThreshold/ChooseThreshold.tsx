@@ -23,7 +23,6 @@ import { maybePlural } from '@safe-global/utils/utils/formatters'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { createUpdateThresholdTx } from '@/services/tx/tx-sender'
 import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
-import { TxFlowStep } from '@/components/tx-flow/TxFlowStep'
 
 export const ChooseThreshold = () => {
   const { onNext, data } = useContext(TxFlowContext)
@@ -42,124 +41,122 @@ export const ChooseThreshold = () => {
   }, [newThreshold, setSafeTx, setSafeTxError])
 
   return (
-    <TxFlowStep title="New transaction">
-      <TxCard>
-        <div>
-          <Typography
-            variant="h3"
-            sx={{
-              fontWeight: 700,
+    <TxCard>
+      <div>
+        <Typography
+          variant="h3"
+          sx={{
+            fontWeight: 700,
+          }}
+        >
+          Threshold
+          <Tooltip title={TOOLTIP_TITLES.THRESHOLD} arrow placement="top">
+            <span>
+              <SvgIcon
+                component={InfoIcon}
+                inheritViewBox
+                color="border"
+                fontSize="small"
+                sx={{
+                  verticalAlign: 'middle',
+                  ml: 0.5,
+                }}
+              />
+            </span>
+          </Tooltip>
+        </Typography>
+
+        <Typography>Any transaction will require the confirmation of:</Typography>
+      </div>
+      <form onSubmit={formMethods.handleSubmit(onNext)}>
+        <Box
+          sx={{
+            mb: 2,
+          }}
+        >
+          <Controller
+            control={formMethods.control}
+            rules={{
+              validate: (value) => {
+                if (value === safe.threshold) {
+                  return `Current policy is already set to ${safe.threshold}.`
+                }
+              },
             }}
-          >
-            Threshold
-            <Tooltip title={TOOLTIP_TITLES.THRESHOLD} arrow placement="top">
-              <span>
-                <SvgIcon
-                  component={InfoIcon}
-                  inheritViewBox
-                  color="border"
-                  fontSize="small"
+            name={ChangeThresholdFlowFieldNames.threshold}
+            render={({ field, fieldState }) => {
+              const isError = !!fieldState.error
+
+              return (
+                <Grid
+                  container
+                  direction="row"
                   sx={{
-                    verticalAlign: 'middle',
-                    ml: 0.5,
+                    gap: 2,
+                    alignItems: 'center',
                   }}
-                />
-              </span>
-            </Tooltip>
-          </Typography>
-
-          <Typography>Any transaction will require the confirmation of:</Typography>
-        </div>
-        <form onSubmit={formMethods.handleSubmit(onNext)}>
-          <Box
-            sx={{
-              mb: 2,
-            }}
-          >
-            <Controller
-              control={formMethods.control}
-              rules={{
-                validate: (value) => {
-                  if (value === safe.threshold) {
-                    return `Current policy is already set to ${safe.threshold}.`
-                  }
-                },
-              }}
-              name={ChangeThresholdFlowFieldNames.threshold}
-              render={({ field, fieldState }) => {
-                const isError = !!fieldState.error
-
-                return (
-                  <Grid
-                    container
-                    direction="row"
-                    sx={{
-                      gap: 2,
-                      alignItems: 'center',
-                    }}
-                  >
-                    <Grid item>
-                      <TextField select {...field} error={isError}>
-                        {safe.owners.map((_, idx) => (
-                          <MenuItem data-testid="threshold-item" key={idx + 1} value={idx + 1}>
-                            {idx + 1}
-                          </MenuItem>
-                        ))}
-                      </TextField>
-                    </Grid>
-                    <Grid item>
-                      <Typography>
-                        out of {safe.owners.length} signer{maybePlural(safe.owners)}
-                      </Typography>
-                    </Grid>
-                    <Grid item xs={12}>
-                      {isError ? (
-                        <Typography
-                          color="error"
-                          sx={{
-                            mb: 2,
-                          }}
-                        >
-                          {fieldState.error?.message}
-                        </Typography>
-                      ) : (
-                        <Typography
-                          sx={{
-                            mb: 2,
-                          }}
-                        >
-                          {fieldState.isDirty ? 'Previous policy was ' : 'Current policy is '}
-                          <b>
-                            {safe.threshold} out of {safe.owners.length}
-                          </b>
-                          .
-                        </Typography>
-                      )}
-                    </Grid>
+                >
+                  <Grid item>
+                    <TextField select {...field} error={isError}>
+                      {safe.owners.map((_, idx) => (
+                        <MenuItem data-testid="threshold-item" key={idx + 1} value={idx + 1}>
+                          {idx + 1}
+                        </MenuItem>
+                      ))}
+                    </TextField>
                   </Grid>
-                )
-              }}
-            />
-          </Box>
+                  <Grid item>
+                    <Typography>
+                      out of {safe.owners.length} signer{maybePlural(safe.owners)}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12}>
+                    {isError ? (
+                      <Typography
+                        color="error"
+                        sx={{
+                          mb: 2,
+                        }}
+                      >
+                        {fieldState.error?.message}
+                      </Typography>
+                    ) : (
+                      <Typography
+                        sx={{
+                          mb: 2,
+                        }}
+                      >
+                        {fieldState.isDirty ? 'Previous policy was ' : 'Current policy is '}
+                        <b>
+                          {safe.threshold} out of {safe.owners.length}
+                        </b>
+                        .
+                      </Typography>
+                    )}
+                  </Grid>
+                </Grid>
+              )
+            }}
+          />
+        </Box>
 
-          <Divider className={commonCss.nestedDivider} />
+        <Divider className={commonCss.nestedDivider} />
 
-          <CardActions>
-            <Button
-              data-testid="threshold-next-btn"
-              variant="contained"
-              type="submit"
-              disabled={
-                !!formMethods.formState.errors[ChangeThresholdFlowFieldNames.threshold] ||
-                // Prevent initial submit before field was interacted with
-                newThreshold === safe.threshold
-              }
-            >
-              Next
-            </Button>
-          </CardActions>
-        </form>
-      </TxCard>
-    </TxFlowStep>
+        <CardActions>
+          <Button
+            data-testid="threshold-next-btn"
+            variant="contained"
+            type="submit"
+            disabled={
+              !!formMethods.formState.errors[ChangeThresholdFlowFieldNames.threshold] ||
+              // Prevent initial submit before field was interacted with
+              newThreshold === safe.threshold
+            }
+          >
+            Next
+          </Button>
+        </CardActions>
+      </form>
+    </TxCard>
   )
 }

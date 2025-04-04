@@ -6,6 +6,7 @@ import { TokenAmountFields } from '@/components/common/TokenAmountInput'
 import { useMemo } from 'react'
 import { TxFlowType } from '@/services/analytics'
 import { TxFlow } from '../../TxFlow'
+import { TxFlowStep } from '../../TxFlowStep'
 
 export enum TokenTransferType {
   multiSig = 'multiSig',
@@ -74,7 +75,9 @@ const TokenTransferFlow = ({ txNonce, ...params }: MultiTokenTransferFlowProps) 
       eventCategory={TxFlowType.TOKEN_TRANSFER}
       ReviewTransactionComponent={ReviewTokenTx}
     >
-      <CreateTokenTransfer txNonce={txNonce} />
+      <TxFlowStep title="New transaction">
+        <CreateTokenTransfer txNonce={txNonce} />
+      </TxFlowStep>
     </TxFlow>
   )
 }

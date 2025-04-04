@@ -3,6 +3,7 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import { ChooseThreshold } from './ChooseThreshold'
 import { SETTINGS_EVENTS, trackEvent, TxFlowType } from '@/services/analytics'
 import { type SubmitCallbackWithData, TxFlow } from '../../TxFlow'
+import { TxFlowStep } from '../../TxFlowStep'
 
 export enum ChangeThresholdFlowFieldNames {
   threshold = 'threshold',
@@ -35,7 +36,9 @@ const ChangeThresholdFlow = () => {
       eventCategory={TxFlowType.CHANGE_THRESHOLD}
       showMethodCall
     >
-      <ChooseThreshold key={0} />
+      <TxFlowStep title="New transaction">
+        <ChooseThreshold key={0} />
+      </TxFlowStep>
     </TxFlow>
   )
 }

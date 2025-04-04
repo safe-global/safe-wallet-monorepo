@@ -40,7 +40,6 @@ import { useHasFeature } from '@/hooks/useChains'
 import Track from '@/components/common/Track'
 import { MODALS_EVENTS } from '@/services/analytics'
 import { FEATURES } from '@safe-global/utils/utils/chains'
-import { TxFlowStep } from '../../TxFlowStep'
 import { TxFlowContext, type TxFlowContextType } from '../../TxFlowProvider'
 
 export const AutocompleteItem = (item: { tokenInfo: TokenInfo; balance: string }): ReactElement => (
@@ -166,97 +165,95 @@ export const CreateTokenTransfer = ({ txNonce }: CreateTokenTransferProps): Reac
   const canBatch = isMassPayoutsEnabled && type === TokenTransferType.multiSig
 
   return (
-    <TxFlowStep title="New transaction">
-      <TxCard>
-        <FormProvider {...formMethods}>
-          <form onSubmit={handleSubmit(onNext)} className={commonCss.form}>
-            <Stack spacing={3}>
-              <Stack spacing={8}>
-                {recipientFields.map((field, index) => (
-                  <RecipientRow
-                    key={field.id}
-                    removable={recipientFields.length > 1}
-                    fieldArray={{ name: MultiTokenTransferFields.recipients, index }}
-                    remove={removeRecipient}
-                    disableSpendingLimit={disableSpendingLimit || recipientFields.length > 1}
-                  />
-                ))}
-              </Stack>
-
-              {canBatch && (
-                <>
-                  <Stack direction="row" alignItems="center" justifyContent="space-between" mb={4}>
-                    <Track {...MODALS_EVENTS.ADD_RECIPIENT}>
-                      <Button
-                        data-testid="add-recipient-btn"
-                        variant="text"
-                        onClick={addRecipient}
-                        disabled={!canAddMoreRecipients}
-                        startIcon={<SvgIcon component={AddIcon} inheritViewBox fontSize="small" />}
-                        size="large"
-                      >
-                        Add recipient
-                      </Button>
-                    </Track>
-                    <Typography
-                      data-testid="recipients-count"
-                      variant="body2"
-                      color={canAddMoreRecipients ? 'primary' : 'error.main'}
-                    >{`${recipientFields.length}/${MAX_RECIPIENTS}`}</Typography>
-                  </Stack>
-
-                  {hasInsufficientFunds && (
-                    <Alert data-testid="insufficient-balance-error" severity="error">
-                      <AlertTitle>Insufficient balance</AlertTitle>
-                      <Typography variant="body2">
-                        The total amount assigned to all recipients exceeds your available balance. Please adjust the
-                        amounts you want to send.
-                      </Typography>
-                    </Alert>
-                  )}
-
-                  {canAddMoreRecipients && maxRecipientsInfo && !!csvAirdropAppUrl && (
-                    <Alert severity="info" onClose={() => setMaxRecipientsInfo(false)}>
-                      <Typography variant="body2">
-                        If you want to add more than {MAX_RECIPIENTS} recipients, use <CsvAirdropLink />
-                      </Typography>
-                    </Alert>
-                  )}
-
-                  {!canAddMoreRecipients && (
-                    <Alert data-testid="max-recipients-reached" severity="warning">
-                      <Typography variant="body2">
-                        No more recipients can be added.
-                        {!!csvAirdropAppUrl && (
-                          <>
-                            <br />
-                            Please use <CsvAirdropLink />
-                          </>
-                        )}
-                      </Typography>
-                    </Alert>
-                  )}
-
-                  {csvAirdropModalOpen && (
-                    <CSVAirdropAppModal onClose={() => setCsvAirdropModalOpen(false)} appUrl={csvAirdropAppUrl} />
-                  )}
-                </>
-              )}
-
-              <Box>
-                <Divider className={commonCss.nestedDivider} />
-
-                <CardActions>
-                  <Button variant="contained" type="submit">
-                    Next
-                  </Button>
-                </CardActions>
-              </Box>
+    <TxCard>
+      <FormProvider {...formMethods}>
+        <form onSubmit={handleSubmit(onNext)} className={commonCss.form}>
+          <Stack spacing={3}>
+            <Stack spacing={8}>
+              {recipientFields.map((field, index) => (
+                <RecipientRow
+                  key={field.id}
+                  removable={recipientFields.length > 1}
+                  fieldArray={{ name: MultiTokenTransferFields.recipients, index }}
+                  remove={removeRecipient}
+                  disableSpendingLimit={disableSpendingLimit || recipientFields.length > 1}
+                />
+              ))}
             </Stack>
-          </form>
-        </FormProvider>
-      </TxCard>
-    </TxFlowStep>
+
+            {canBatch && (
+              <>
+                <Stack direction="row" alignItems="center" justifyContent="space-between" mb={4}>
+                  <Track {...MODALS_EVENTS.ADD_RECIPIENT}>
+                    <Button
+                      data-testid="add-recipient-btn"
+                      variant="text"
+                      onClick={addRecipient}
+                      disabled={!canAddMoreRecipients}
+                      startIcon={<SvgIcon component={AddIcon} inheritViewBox fontSize="small" />}
+                      size="large"
+                    >
+                      Add recipient
+                    </Button>
+                  </Track>
+                  <Typography
+                    data-testid="recipients-count"
+                    variant="body2"
+                    color={canAddMoreRecipients ? 'primary' : 'error.main'}
+                  >{`${recipientFields.length}/${MAX_RECIPIENTS}`}</Typography>
+                </Stack>
+
+                {hasInsufficientFunds && (
+                  <Alert data-testid="insufficient-balance-error" severity="error">
+                    <AlertTitle>Insufficient balance</AlertTitle>
+                    <Typography variant="body2">
+                      The total amount assigned to all recipients exceeds your available balance. Please adjust the
+                      amounts you want to send.
+                    </Typography>
+                  </Alert>
+                )}
+
+                {canAddMoreRecipients && maxRecipientsInfo && !!csvAirdropAppUrl && (
+                  <Alert severity="info" onClose={() => setMaxRecipientsInfo(false)}>
+                    <Typography variant="body2">
+                      If you want to add more than {MAX_RECIPIENTS} recipients, use <CsvAirdropLink />
+                    </Typography>
+                  </Alert>
+                )}
+
+                {!canAddMoreRecipients && (
+                  <Alert data-testid="max-recipients-reached" severity="warning">
+                    <Typography variant="body2">
+                      No more recipients can be added.
+                      {!!csvAirdropAppUrl && (
+                        <>
+                          <br />
+                          Please use <CsvAirdropLink />
+                        </>
+                      )}
+                    </Typography>
+                  </Alert>
+                )}
+
+                {csvAirdropModalOpen && (
+                  <CSVAirdropAppModal onClose={() => setCsvAirdropModalOpen(false)} appUrl={csvAirdropAppUrl} />
+                )}
+              </>
+            )}
+
+            <Box>
+              <Divider className={commonCss.nestedDivider} />
+
+              <CardActions>
+                <Button variant="contained" type="submit">
+                  Next
+                </Button>
+              </CardActions>
+            </Box>
+          </Stack>
+        </form>
+      </FormProvider>
+    </TxCard>
   )
 }
 
