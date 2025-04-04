@@ -16,7 +16,7 @@ import { TxSecurityProvider } from '@/components/tx/security/shared/TxSecurityCo
 import ChainIndicator from '@/components/common/ChainIndicator'
 import SecurityWarnings from '@/components/tx/security/SecurityWarnings'
 
-const TxLayoutHeader = ({
+export const TxLayoutHeader = ({
   hideNonce,
   fixedNonce,
   icon,

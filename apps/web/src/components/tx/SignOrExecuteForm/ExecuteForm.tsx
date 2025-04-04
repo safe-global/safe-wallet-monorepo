@@ -1,7 +1,7 @@
 import useWalletCanPay from '@/hooks/useWalletCanPay'
 import madProps from '@/utils/mad-props'
 import { type ReactElement, type SyntheticEvent, useContext, useMemo, useState } from 'react'
-import { CircularProgress, Box, Button, CardActions, Divider } from '@mui/material'
+import { CircularProgress, Box, Button, CardActions, Divider, Tooltip } from '@mui/material'
 import classNames from 'classnames'
 
 import ErrorMessage from '@/components/tx/ErrorMessage'
@@ -43,6 +43,7 @@ export const ExecuteForm = ({
   isOwner,
   isExecutionLoop,
   txActions,
+  tooltip,
   txSecurity,
 }: SignOrExecuteProps & {
   isOwner: ReturnType<typeof useIsSafeOwner>
@@ -51,6 +52,7 @@ export const ExecuteForm = ({
   txSecurity: ReturnType<typeof useTxSecurityContext>
   isCreation?: boolean
   safeTx?: SafeTransaction
+  tooltip?: string
 }): ReactElement => {
   // Form state
   const [isSubmittable, setIsSubmittable] = useState<boolean>(true)
@@ -205,15 +207,19 @@ export const ExecuteForm = ({
           {/* Submit button */}
           <CheckWallet allowNonOwner={onlyExecute} checkNetwork={!submitDisabled}>
             {(isOk) => (
-              <Button
-                data-testid="execute-form-btn"
-                variant="contained"
-                type="submit"
-                disabled={!isOk || submitDisabled}
-                sx={{ minWidth: '112px', width: ['100%', '100%', '100%', 'auto'] }}
-              >
-                {!isSubmittable ? <CircularProgress size={20} /> : 'Execute'}
-              </Button>
+              <Tooltip title={tooltip} placement="top">
+                <Box sx={{ minWidth: '112px', width: ['100%', '100%', '100%', 'auto'] }}>
+                  <Button
+                    data-testid="execute-form-btn"
+                    variant="contained"
+                    type="submit"
+                    disabled={!isOk || submitDisabled}
+                    sx={{ minWidth: '112px', width: ['100%', '100%', '100%', 'auto'] }}
+                  >
+                    {!isSubmittable ? <CircularProgress size={20} /> : 'Execute'}
+                  </Button>
+                </Box>
+              </Tooltip>
             )}
           </CheckWallet>
         </CardActions>

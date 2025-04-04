@@ -1,21 +1,39 @@
-import { useCallback, useState } from 'react'
+import { useCallback } from 'react'
 import { InputAdornment, Stack, TextField, Typography, Alert } from '@mui/material'
+import { MODALS_EVENTS, trackEvent } from '@/services/analytics'
+import { useForm } from 'react-hook-form'
 
 const MAX_NOTE_LENGTH = 60
 
 export const TxNoteInput = ({ onChange }: { onChange: (note: string) => void }) => {
-  const [note, setNote] = useState('')
+  const {
+    register,
+    watch,
+    reset,
+    formState: { isDirty },
+  } = useForm<{ note: string }>()
 
-  const onInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setNote(e.target.value)
-  }, [])
+  const note = watch('note') || ''
 
-  const onInputChange = useCallback(
+  const onInput = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       onChange(e.target.value.slice(0, MAX_NOTE_LENGTH))
     },
     [onChange],
   )
+
+  const onFocus = useCallback(() => {
+    // Reset the isDirty state when the user focuses on the input
+    reset({ note })
+  }, [reset, note])
+
+  const onBlur = useCallback(() => {
+    if (isDirty && note.length > 0) {
+      // Track the event only if the note is dirty and not empty
+      // This prevents tracking the event when the user focuses and blurs the input without changing the note
+      trackEvent(MODALS_EVENTS.SUBMIT_TX_NOTE)
+    }
+  }, [isDirty, note])
 
   return (
     <>
@@ -32,7 +50,6 @@ export const TxNoteInput = ({ onChange }: { onChange: (note: string) => void }) 
 
       <TextField
         data-testid="tx-note-textfield"
-        name="note"
         label="Note"
         fullWidth
         slotProps={{
@@ -47,8 +64,10 @@ export const TxNoteInput = ({ onChange }: { onChange: (note: string) => void }) 
             ),
           },
         }}
+        {...register('note')}
         onInput={onInput}
-        onChange={onInputChange}
+        onBlur={onBlur}
+        onFocus={onFocus}
       />
     </>
   )
