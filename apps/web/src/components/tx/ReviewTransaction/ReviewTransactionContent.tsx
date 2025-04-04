@@ -14,7 +14,11 @@ import { selectSettings } from '@/store/settingsSlice'
 import { ErrorBoundary } from '@sentry/react'
 import ApprovalEditor from '../ApprovalEditor'
 import { isDelegateCall } from '@/services/tx/tx-sender/sdk'
-import { findAllowingRole, findMostLikelyRole, useRoles } from '../SignOrExecuteForm/ExecuteThroughRoleForm/hooks'
+import {
+  findAllowingRole,
+  findMostLikelyRole,
+  useRoles,
+} from '@/components/tx-flow/actions/ExecuteThroughRole/ExecuteThroughRoleForm/hooks'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import { BlockaidBalanceChanges } from '../security/blockaid/BlockaidBalanceChange'
 import { Blockaid } from '../security/blockaid'

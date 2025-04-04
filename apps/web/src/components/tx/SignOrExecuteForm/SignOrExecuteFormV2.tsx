@@ -11,8 +11,12 @@ import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { useAppSelector } from '@/store'
 import { selectSettings } from '@/store/settingsSlice'
 import useChainId from '@/hooks/useChainId'
-import ExecuteThroughRoleForm from './ExecuteThroughRoleForm'
-import { findAllowingRole, findMostLikelyRole, useRoles } from './ExecuteThroughRoleForm/hooks'
+import ExecuteThroughRoleForm from '@/components/tx-flow/actions/ExecuteThroughRole/ExecuteThroughRoleForm'
+import {
+  findAllowingRole,
+  findMostLikelyRole,
+  useRoles,
+} from '@/components/tx-flow/actions/ExecuteThroughRole/ExecuteThroughRoleForm/hooks'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import { useLazyGetTransactionDetailsQuery } from '@/store/api/gateway'
 import type { TransactionDetails, TransactionPreview } from '@safe-global/safe-gateway-typescript-sdk'

@@ -23,7 +23,6 @@ import type { SafeTransaction } from '@safe-global/safe-core-sdk-types'
 import AdvancedParams, { useAdvancedParams } from '@/components/tx/AdvancedParams'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 
-import css from '@/components/tx/SignOrExecuteForm/styles.module.css'
 import commonCss from '@/components/tx-flow/common/styles.module.css'
 import { TxSecurityContext } from '@/components/tx/security/shared/TxSecurityContext'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
@@ -134,7 +133,7 @@ export const CounterfactualForm = ({
           </ul>
         </Alert>
 
-        <div className={classNames(css.params)}>
+        <div className={classNames(commonCss.params)}>
           <AdvancedParams
             willExecute
             params={advancedParams}

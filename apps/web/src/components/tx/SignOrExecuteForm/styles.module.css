@@ -39,9 +39,6 @@
   color: var(--color-success-dark);
 }
 
-.params {
-  margin-bottom: var(--space-2);
-}
 
 .mobileTxCheckMessages,
 .mobileTxCheckMessages:empty {
@@ -52,15 +49,4 @@
   .mobileTxCheckMessages {
     display: block;
   }
-}
-
-.zodiac {
-  color: var(--color-text-primary);
-}
-
-.roleChip {
-  background-color: var(--color-background-main);
-  font-size: 12px;
-  border-radius: 4px;
-  padding: 2px 8px;
 }

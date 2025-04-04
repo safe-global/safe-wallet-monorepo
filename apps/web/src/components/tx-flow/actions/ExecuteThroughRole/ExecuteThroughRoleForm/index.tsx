@@ -9,17 +9,17 @@ import { useCurrentChain } from '@/hooks/useChains'
 import { getTxOptions } from '@/utils/transactions'
 import CheckWallet from '@/components/common/CheckWallet'
 
-import type { SignOrExecuteProps } from '../SignOrExecuteForm'
+import type { SignOrExecuteProps } from '@/components/tx/SignOrExecuteForm/SignOrExecuteForm'
 import type { SafeTransaction } from '@safe-global/safe-core-sdk-types'
 import { TxModalContext } from '@/components/tx-flow'
 import { SuccessScreenFlow } from '@/components/tx-flow/flows'
-import AdvancedParams, { useAdvancedParams } from '../../AdvancedParams'
+import AdvancedParams, { useAdvancedParams } from '../../../../tx/AdvancedParams'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { isWalletRejection } from '@/utils/wallets'
 
-import css from '../styles.module.css'
+import css from './styles.module.css'
 import commonCss from '@/components/tx-flow/common/styles.module.css'
-import { TxSecurityContext } from '../../security/shared/TxSecurityContext'
+import { TxSecurityContext } from '@/components/tx/security/shared/TxSecurityContext'
 
 import WalletRejectionError from '@/components/tx/SignOrExecuteForm/WalletRejectionError'
 import { pollModuleTransactionId, useExecuteThroughRole, useGasLimit, useMetaTransactions, type Role } from './hooks'
@@ -152,7 +152,7 @@ export const ExecuteThroughRoleForm = ({
               other owners.
             </Typography>
 
-            <div className={css.params}>
+            <div className={commonCss.params}>
               <AdvancedParams
                 willExecute
                 params={advancedParams}

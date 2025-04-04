@@ -20,8 +20,12 @@ import { ErrorBoundary } from '@sentry/react'
 import ApprovalEditor from '../ApprovalEditor'
 import { isDelegateCall } from '@/services/tx/tx-sender/sdk'
 import useChainId from '@/hooks/useChainId'
-import ExecuteThroughRoleForm from './ExecuteThroughRoleForm'
-import { findAllowingRole, findMostLikelyRole, useRoles } from './ExecuteThroughRoleForm/hooks'
+import ExecuteThroughRoleForm from '@/components/tx-flow/actions/ExecuteThroughRole/ExecuteThroughRoleForm'
+import {
+  findAllowingRole,
+  findMostLikelyRole,
+  useRoles,
+} from '@/components/tx-flow/actions/ExecuteThroughRole/ExecuteThroughRoleForm/hooks'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import { BlockaidBalanceChanges } from '../security/blockaid/BlockaidBalanceChange'
 import { Blockaid } from '../security/blockaid'
