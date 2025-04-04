@@ -24,7 +24,7 @@ const NameInput = ({
         maxLength: 50,
         required,
         validate: (value) => {
-          if (value?.trim() === '') return 'Required'
+          if (value?.trim() === '' && required) return 'Required'
           return true
         },
       }}
