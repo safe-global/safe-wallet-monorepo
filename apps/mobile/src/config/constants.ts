@@ -25,3 +25,5 @@ export const ONBOARDING_VERSION = 'v1'
 
 export const SAFE_WEB_URL = 'https://app.safe.global'
 export const SAFE_WEB_TRANSACTIONS_URL = `${SAFE_WEB_URL}/transactions/tx?safe=:safeAddressWithChainPrefix&id=:txId`
+export const SAFE_WEB_FEEDBACK_URL =
+  'https://docs.google.com/forms/d/e/1FAIpQLSfJXkNNsZqVtg3w3dwk-YrTNutQ00n3MMfLtH-dN8zSHaJu5Q/viewform?usp=dialog'
