@@ -6,7 +6,7 @@ import { type ReactElement, type ReactNode, useContext, useCallback } from 'reac
 import madProps from '@/utils/mad-props'
 import { useImmediatelyExecutable, useValidateNonce } from './hooks'
 import ExecuteForm from '@/components/tx-flow/actions/Execute/ExecuteForm'
-import SignFormV2 from './SignFormV2'
+import SignForm from '@/components/tx-flow/actions/Sign/SignForm'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { useAppSelector } from '@/store'
 import { selectSettings } from '@/store/settingsSlice'
@@ -140,7 +140,7 @@ export const SignOrExecuteFormV2 = ({
   }
 
   if (!isCounterfactualSafe && !willExecute && !willExecuteThroughRole && !isProposing) {
-    return <SignFormV2 {...commonProps} />
+    return <SignForm {...commonProps} />
   }
 
   if (isProposing) {
