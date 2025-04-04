@@ -70,7 +70,7 @@ const Summary = ({ safeTxData, txData, txInfo, txDetails }: Props): ReactElement
 
           <Box my={3} />
 
-          <BackgroundAccordion elevation={0} defaultExpanded={!isExpanded}>
+          <BackgroundAccordion elevation={0} defaultExpanded>
             <AccordionSummary
               data-testid="decoded-tx-summary"
               expandIcon={<ExpandMoreIcon />}
