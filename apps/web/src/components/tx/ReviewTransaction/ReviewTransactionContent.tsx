@@ -27,7 +27,7 @@ import { SignerForm } from '../SignOrExecuteForm/SignerForm'
 import UnknownContractError from '../SignOrExecuteForm/UnknownContractError'
 import TxChecks from '../SignOrExecuteForm/TxChecks'
 import { Button, CardActions, CircularProgress, Stack } from '@mui/material'
-import BatchButton from '../SignOrExecuteForm/BatchButton'
+import BatchButton from '@/components/tx-flow/actions/Batching/BatchButton'
 import { TxModalContext } from '@/components/tx-flow'
 import CheckWallet from '@/components/common/CheckWallet'
 
