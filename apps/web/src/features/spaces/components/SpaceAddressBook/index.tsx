@@ -51,7 +51,7 @@ const SpaceAddressBook = () => {
         {isAdmin && (
           <Track {...SPACE_EVENTS.ADD_ADDRESS}>
             <Button variant="contained" startIcon={<PlusIcon />} onClick={() => {}}>
-              Add entry
+              Add contact
             </Button>
           </Track>
         )}

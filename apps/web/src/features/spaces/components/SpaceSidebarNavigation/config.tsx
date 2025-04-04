@@ -45,7 +45,6 @@ export const navItems: DynamicNavItem[] = [
     label: 'Address book',
     icon: <SvgIcon component={ABIcon} inheritViewBox />,
     href: AppRoutes.spaces.addressBook,
-    disabled: false,
   },
   {
     label: 'Settings',
