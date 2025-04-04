@@ -8,7 +8,7 @@ import classNames from 'classnames'
 import { useSpaceSafeCount } from '@/features/spaces/hooks/useSpaceSafeCount'
 import InitialsAvatar from '@/features/spaces/components/InitialsAvatar'
 import SpaceContextMenu from '@/features/spaces/components/SpaceCard/SpaceContextMenu'
-import { useIsAdmin } from '@/features/spaces/hooks/useSpaceMembers'
+import { MemberStatus, useIsAdmin } from '@/features/spaces/hooks/useSpaceMembers'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
 
 export const SpaceSummary = ({
@@ -53,7 +53,7 @@ const SpaceCard = ({
   isLink?: boolean
 }) => {
   const { id, name, members } = space
-  const numberOfMembers = members.length
+  const numberOfMembers = members.filter((member) => member.status === MemberStatus.ACTIVE).length
   const numberOfAccounts = useSpaceSafeCount(id)
   const isAdmin = useIsAdmin(id)
 

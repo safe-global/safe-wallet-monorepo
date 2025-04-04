@@ -1,4 +1,4 @@
-import useAsync from '@/hooks/useAsync'
+import useAsync from '@safe-global/utils/hooks/useAsync'
 import { useCurrentChain } from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3'

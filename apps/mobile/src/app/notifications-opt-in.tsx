@@ -9,6 +9,7 @@ import { updatePromptAttempts } from '@/src/store/notificationsSlice'
 function NotificationsOptIn() {
   const dispatch = useAppDispatch()
   const { isAppNotificationEnabled, enableNotification, isLoading } = useNotificationManager()
+
   const colorScheme = useColorScheme()
 
   useEffect(() => {
@@ -34,6 +35,7 @@ function NotificationsOptIn() {
       description="Get notified when you receive assets, and when transactions require your action."
       image={image}
       isVisible
+      colorScheme={colorScheme}
       isLoading={isLoading}
       ctaButton={{
         onPress: enableNotification,

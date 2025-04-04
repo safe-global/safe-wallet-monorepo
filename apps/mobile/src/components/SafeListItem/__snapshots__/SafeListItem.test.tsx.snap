@@ -36,6 +36,7 @@ exports[`SafeListItem should render a list item with a custom label template 1`]
         style={
           {
             "color": "#121312",
+            "fontFamily": "DM Sans",
           }
         }
         suppressHighlighting={true}
@@ -79,7 +80,8 @@ exports[`SafeListItem should render a list item with a custom label template 1`]
             style={
               {
                 "color": "#A1A3A7",
-                "fontSize": 12,
+                "fontFamily": "DM Sans",
+                "fontSize": 13,
                 "marginBottom": 2,
               }
             }
@@ -93,6 +95,7 @@ exports[`SafeListItem should render a list item with a custom label template 1`]
             style={
               {
                 "color": "#121312",
+                "fontFamily": "DM Sans",
               }
             }
             suppressHighlighting={true}

@@ -3,7 +3,10 @@ import semverSatisfies from 'semver/functions/satisfies'
 import memoize from 'lodash/memoize'
 import { keccak256, ethers, solidityPacked, getCreate2Address, type Provider } from 'ethers'
 
-import { type UndeployedSafesState, type ReplayedSafeProps } from '@/store/slices'
+import {
+  type UndeployedSafesState,
+  type ReplayedSafeProps,
+} from '@safe-global/utils/features/counterfactual/store/types'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { Safe_proxy_factory__factory } from '@safe-global/utils/types/contracts'
 import { extractCounterfactualSafeSetup } from '@/features/counterfactual/utils'

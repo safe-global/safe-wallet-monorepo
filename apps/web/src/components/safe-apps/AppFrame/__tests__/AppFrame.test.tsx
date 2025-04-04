@@ -8,7 +8,7 @@ import {
   TransactionListItemType,
   TransactionStatus,
 } from '@safe-global/safe-gateway-typescript-sdk'
-import { defaultSafeInfo } from '@/store/safeInfoSlice'
+import { defaultSafeInfo } from '@safe-global/store/slices/SafeInfo/utils'
 import { getEmptySafeApp } from '@/components/safe-apps/utils'
 
 const emptySafeApp = getEmptySafeApp()

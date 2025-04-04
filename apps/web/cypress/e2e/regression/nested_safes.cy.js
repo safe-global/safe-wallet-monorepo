@@ -7,6 +7,7 @@ import * as txs from '../pages/transactions.page.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as wallet from '../../support/utils/wallet.js'
 import * as createTx from '../pages/create_tx.pages.js'
+import { checkExistingSignerCount, checkExistingSignerAddress } from '../pages/owners.pages.js'
 
 let staticSafes = []
 const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
@@ -34,10 +35,10 @@ describe('Nested safes basic flow tests', () => {
     cy.url().should('include', staticSafes.SEP_STATIC_SAFE_40.substring(4))
     sideBar.checkParentSafeInBreadcrumb(mainSafe, staticSafes.SEP_STATIC_SAFE_39.substring(4))
     sideBar.checkNestedSafeInBreadcrumb(nestedSafe1)
-    main.getSafe(staticSafes.SEP_STATIC_SAFE_40.substring(4), constants.networkKeys.sepolia).then((body) => {
-      expect(body.owners).to.have.length(1)
-      expect(body.owners[0].value).to.eq(staticSafes.SEP_STATIC_SAFE_39.substring(4))
-    })
+
+    cy.visit(constants.setupUrl + staticSafes.SEP_STATIC_SAFE_40)
+    checkExistingSignerCount(1)
+    checkExistingSignerAddress(0, staticSafes.SEP_STATIC_SAFE_39.substring(4))
 
     // Check nested safe 2
     sideBar.clickOnOpenNestedSafeListBtn()
@@ -46,10 +47,10 @@ describe('Nested safes basic flow tests', () => {
     cy.url().should('include', staticSafes.SEP_STATIC_SAFE_41.substring(4))
     sideBar.checkParentSafeInBreadcrumb(nestedSafe1, staticSafes.SEP_STATIC_SAFE_40.substring(4))
     sideBar.checkNestedSafeInBreadcrumb(nestedSafe2)
-    main.getSafe(staticSafes.SEP_STATIC_SAFE_41.substring(4), constants.networkKeys.sepolia).then((body) => {
-      expect(body.owners).to.have.length(1)
-      expect(body.owners[0].value).to.eq(staticSafes.SEP_STATIC_SAFE_40.substring(4))
-    })
+
+    cy.visit(constants.setupUrl + staticSafes.SEP_STATIC_SAFE_41)
+    checkExistingSignerCount(1)
+    checkExistingSignerAddress(0, staticSafes.SEP_STATIC_SAFE_40.substring(4))
 
     // Go to nested safe 1
     sideBar.clickOnParentSafeInBreadcrumb()

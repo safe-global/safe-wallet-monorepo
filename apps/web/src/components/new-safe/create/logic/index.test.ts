@@ -23,7 +23,7 @@ import {
 } from '@/services/contracts/safeContracts'
 import * as gateway from '@safe-global/safe-gateway-typescript-sdk'
 import { chainBuilder } from '@/tests/builders/chains'
-import { type ReplayedSafeProps } from '@/store/slices'
+import { type ReplayedSafeProps } from '@safe-global/utils/features/counterfactual/store/types'
 import { faker } from '@faker-js/faker'
 import { ECOSYSTEM_ID_ADDRESS } from '@/config/constants'
 import {

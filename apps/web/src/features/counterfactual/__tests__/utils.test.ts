@@ -6,8 +6,8 @@ import type { PredictedSafeProps } from '@safe-global/protocol-kit'
 import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
 import { TokenType } from '@safe-global/safe-gateway-typescript-sdk'
 import { type BrowserProvider, type JsonRpcProvider } from 'ethers'
-import { PendingSafeStatus } from '../store/undeployedSafesSlice'
-import { PayMethod } from '../PayNowPayLater'
+import { PendingSafeStatus } from '@safe-global/utils/features/counterfactual/store/types'
+import { PayMethod } from '@safe-global/utils/features/counterfactual/types'
 
 describe('Counterfactual utils', () => {
   describe('getUndeployedSafeInfo', () => {

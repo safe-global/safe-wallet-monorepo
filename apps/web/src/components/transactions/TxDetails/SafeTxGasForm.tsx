@@ -4,7 +4,8 @@ import { useForm } from 'react-hook-form'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import NumberField from '@/components/common/NumberField'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { isLegacyVersion } from '@/hooks/coreSDK/safeCoreSDK'
+
+import { isLegacyVersion } from '@safe-global/utils/services/contracts/utils'
 
 type FormFields = {
   safeTxGas: string

@@ -9,7 +9,6 @@ import { AppRoutes } from '@/config/routes'
 import { SAFE_APPS_EVENTS, trackEvent } from '@/services/analytics'
 import { predictSafeAddress, SafeFactory, SafeProvider } from '@safe-global/protocol-kit'
 import type { DeploySafeProps, PredictedSafeProps } from '@safe-global/protocol-kit'
-import { isValidSafeVersion } from '@/hooks/coreSDK/safeCoreSDK'
 
 import { backOff } from 'exponential-backoff'
 import { EMPTY_DATA, ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
@@ -21,7 +20,7 @@ import {
   getSafeToL2SetupDeployment,
 } from '@safe-global/safe-deployments'
 import { ECOSYSTEM_ID_ADDRESS } from '@/config/constants'
-import type { ReplayedSafeProps, UndeployedSafeProps } from '@/store/slices'
+import type { ReplayedSafeProps, UndeployedSafeProps } from '@safe-global/utils/features/counterfactual/store/types'
 import { activateReplayedSafe, isPredictedSafeProps } from '@/features/counterfactual/utils'
 import { getSafeContractDeployment } from '@safe-global/utils/services/contracts/deployments'
 import {
@@ -32,6 +31,7 @@ import {
 import { createWeb3 } from '@/hooks/wallets/web3'
 import { hasMultiChainCreationFeatures } from '@/features/multichain/utils/utils'
 import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
+import { isValidSafeVersion } from '@safe-global/utils/services/contracts/utils'
 
 export type SafeCreationProps = {
   owners: string[]

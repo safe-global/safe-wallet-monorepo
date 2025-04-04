@@ -7,7 +7,7 @@ import {
 } from '@safe-global/safe-gateway-typescript-sdk'
 import { useAppSelector } from '@/store'
 import { selectPendingTxIdsBySafe } from '@/store/pendingTxsSlice'
-import useAsync from './useAsync'
+import useAsync from '@safe-global/utils/hooks/useAsync'
 import {
   isConflictHeaderListItem,
   isLabelListItem,

@@ -1,5 +1,5 @@
 import { Provider } from 'react-redux'
-import type { ExtendedSafeInfo } from '@/store/safeInfoSlice'
+import type { ExtendedSafeInfo } from '@safe-global/store/slices/SafeInfo/types'
 import * as gateway from '@safe-global/safe-gateway-typescript-sdk'
 import * as router from 'next/router'
 

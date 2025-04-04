@@ -1,4 +1,4 @@
-import useAsync from '@/hooks/useAsync'
+import useAsync from '@safe-global/utils/hooks/useAsync'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useWallet from '@/hooks/wallets/useWallet'
 import { isSmartContractWallet } from '@/utils/wallets'

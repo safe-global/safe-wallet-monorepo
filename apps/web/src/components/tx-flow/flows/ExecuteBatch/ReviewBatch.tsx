@@ -1,6 +1,6 @@
 import useWallet from '@/hooks/wallets/useWallet'
 import { CircularProgress, Typography, Button, CardActions, Divider, Alert } from '@mui/material'
-import useAsync from '@/hooks/useAsync'
+import useAsync from '@safe-global/utils/hooks/useAsync'
 import { getReadOnlyMultiSendCallOnlyContract } from '@/services/contracts/safeContracts'
 import { useCurrentChain } from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'

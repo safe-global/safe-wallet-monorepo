@@ -1,5 +1,4 @@
 import type {
-  AddressEx,
   BaselineConfirmationView,
   Cancellation,
   ConflictHeader,
@@ -42,6 +41,7 @@ import type {
   StakingTxInfo,
   TransactionData,
 } from '@safe-global/safe-gateway-typescript-sdk'
+import { type AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import {
   ConfirmationViewTypes,
   ConflictType,
@@ -77,11 +77,11 @@ export const isTxQueued = (value: TransactionStatus): boolean => {
 export const isAwaitingExecution = (txStatus: TransactionStatus): boolean =>
   TransactionStatus.AWAITING_EXECUTION === txStatus
 
-const isAddressEx = (owners: AddressEx[] | NamedAddress[]): owners is AddressEx[] => {
-  return (owners as AddressEx[]).every((owner) => owner.value !== undefined)
+const isAddressEx = (owners: AddressInfo[] | NamedAddress[]): owners is AddressInfo[] => {
+  return (owners as AddressInfo[]).every((owner) => owner.value !== undefined)
 }
 
-export const isOwner = (safeOwners: AddressEx[] | NamedAddress[] = [], walletAddress?: string) => {
+export const isOwner = (safeOwners: AddressInfo[] | NamedAddress[] = [], walletAddress?: string) => {
   if (isAddressEx(safeOwners)) {
     return safeOwners.some((owner) => sameAddress(owner.value, walletAddress))
   }
@@ -352,7 +352,11 @@ export const isConfirmableBy = (txSummary: TransactionSummary, walletAddress: st
   )
 }
 
-export const isExecutable = (txSummary: TransactionSummary, walletAddress: string, safe: SafeInfo): boolean => {
+export const isExecutable = (
+  txSummary: TransactionSummary,
+  walletAddress: string,
+  safe: Pick<SafeInfo, 'nonce'>,
+): boolean => {
   if (
     !txSummary.executionInfo ||
     !isMultisigExecutionInfo(txSummary.executionInfo) ||

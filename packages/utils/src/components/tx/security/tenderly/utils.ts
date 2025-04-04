@@ -1,4 +1,5 @@
 import type { ChainInfo, SafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { MetaTransactionData, SafeTransaction } from '@safe-global/safe-core-sdk-types'
 import {
   TENDERLY_ORG_NAME,
@@ -31,7 +32,7 @@ export type MultiSendTransactionSimulationParams = {
   gasLimit?: number
 }
 export type SimulationTxParams = SingleTransactionSimulationParams | MultiSendTransactionSimulationParams
-export const isTxSimulationEnabled = (chain?: ChainInfo): boolean => {
+export const isTxSimulationEnabled = (chain?: Pick<Chain, 'features'>): boolean => {
   if (!chain) {
     return false
   }

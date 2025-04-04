@@ -51,10 +51,12 @@ describe('Happy path Swaps tests', () => {
       ]
       // Clean txs in the queue
       cy.visit(constants.transactionQueueUrl + staticSafes.SEP_STATIC_SAFE_30)
+      navigation.verifyTxBtnStatus(constants.enabledStates.enabled)
       cy.wait(5000)
       create_tx.deleteAllTx()
 
       cy.visit(constants.swapUrl + staticSafes.SEP_STATIC_SAFE_30)
+      navigation.verifyTxBtnStatus(constants.enabledStates.enabled)
       swaps.acceptLegalDisclaimer()
       cy.wait(4000)
       main.getIframeBody(iframeSelector).within(() => {
@@ -79,7 +81,7 @@ describe('Happy path Swaps tests', () => {
       navigation.clickOnWalletExpandMoreIcon()
       navigation.clickOnDisconnectBtn()
       wallet.connectSigner(signer3)
-
+      navigation.verifyTxBtnStatus(constants.enabledStates.enabled)
       cy.wait(5000)
       create_tx.verifyConfirmTransactionBtnIsVisible()
       create_tx.clickOnConfirmTransactionBtn()
@@ -91,6 +93,7 @@ describe('Happy path Swaps tests', () => {
       navigation.clickOnWalletExpandMoreIcon()
       navigation.clickOnDisconnectBtn()
       wallet.connectSigner(signer)
+      navigation.verifyTxBtnStatus(constants.enabledStates.enabled)
       main.verifyValuesExist(dataRow, [create_tx.tx_status.execution_needed])
       create_tx.deleteTx()
 

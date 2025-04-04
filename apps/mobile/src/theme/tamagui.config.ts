@@ -8,7 +8,7 @@ import { createAnimations } from '@tamagui/animations-moti'
 import { inputTheme, inputWithLabelTheme } from '../components/SafeInput/theme'
 import { safeTabTheme } from '@/src/components/SafeTab/theme'
 import { SafeListItemTheme } from '@/src/components/SafeListItem/theme'
-
+import { alertTheme } from '@/src/components/Alert/theme'
 const DmSansFont = createDmSansFont({
   face: {
     500: { normal: 'DMSans-Medium', italic: 'DMSans-MediumItalic' },
@@ -61,48 +61,14 @@ export const config = createTamagui({
     dark_label: {
       color: tokens.color.textSecondaryDark,
     },
-    light_info: {
-      background: tokens.color.infoBackgroundLight,
-      color: tokens.color.infoMainLight,
-    },
-    dark_info: {
-      background: tokens.color.infoBackgroundDark,
-      color: tokens.color.infoMainDark,
-    },
     ...badgeTheme,
+    ...alertTheme,
     ...inputTheme,
     ...NetworkBadgeTheme,
     ...navbarTheme,
     ...safeTabTheme,
     ...inputWithLabelTheme,
-    light_success: {
-      background: tokens.color.successBackgroundLight,
-      color: tokens.color.successMainLight,
-      badgeBackground: tokens.color.successDarkLight,
-      badgeTextColor: tokens.color.backgroundMainDark,
-    },
-    dark_success: {
-      background: tokens.color.successBackgroundDark,
-      color: tokens.color.successMainDark,
-      badgeBackground: tokens.color.successDarkDark,
-    },
     dark_success_light: {},
-    light_warning: {
-      background: tokens.color.warning1MainLight,
-      color: tokens.color.warning1TextLight,
-    },
-    dark_warning: {
-      background: tokens.color.warning1MainDark,
-      color: tokens.color.warning1TextDark,
-    },
-    light_error: {
-      background: tokens.color.error1MainLight,
-      color: tokens.color.error1ContrastTextLight,
-    },
-    dark_error: {
-      background: tokens.color.error1MainDark,
-      color: tokens.color.error1ContrastTextDark,
-    },
     light_logo: {
       background: tokens.color.logoBackgroundLight,
     },
@@ -154,6 +120,9 @@ export const config = createTamagui({
     },
   },
   tokens,
+  settings: {
+    defaultFont: 'body',
+  },
   animations: createAnimations({
     fast: {
       type: 'spring',

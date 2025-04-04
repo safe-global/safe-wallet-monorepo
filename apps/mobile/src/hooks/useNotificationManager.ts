@@ -8,6 +8,7 @@ import { selectAppNotificationStatus } from '../store/notificationsSlice'
 
 export const useNotificationManager = () => {
   const isAppNotificationEnabled = useAppSelector(selectAppNotificationStatus)
+
   const { registerForNotifications, unregisterForNotifications, updatePermissionsForNotifications, isLoading } =
     useRegisterForNotifications()
 
@@ -81,7 +82,7 @@ export const useNotificationManager = () => {
     const subscription = AppState.addEventListener('change', async (nextAppState) => {
       if (appState.current.match(/inactive|background/) && nextAppState === 'active') {
         const deviceNotificationStatus = await NotificationsService.isDeviceNotificationEnabled()
-        if (deviceNotificationStatus && !isAppNotificationEnabled) {
+        if (deviceNotificationStatus && isAppNotificationEnabled) {
           await registerForNotifications()
         }
       }

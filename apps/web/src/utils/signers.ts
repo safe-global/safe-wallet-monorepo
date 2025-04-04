@@ -1,12 +1,12 @@
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import type { SafeTransaction } from '@safe-global/safe-core-sdk-types'
-import type { SafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import { type SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 
 export const getAvailableSigners = (
   wallet: ConnectedWallet | null | undefined,
   nestedSafeOwners: string[] | null,
-  safe: SafeInfo,
+  safe: SafeState,
   tx: SafeTransaction | undefined,
 ) => {
   if (!wallet || !nestedSafeOwners || !tx) {

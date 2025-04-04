@@ -2,7 +2,7 @@ import type { MessagePage } from '@safe-global/store/gateway/AUTO_GENERATED/mess
 import { getSafeMessages } from '@safe-global/safe-gateway-typescript-sdk'
 
 import { useAppSelector } from '@/store'
-import useAsync from '@/hooks/useAsync'
+import useAsync from '@safe-global/utils/hooks/useAsync'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { selectSafeMessages } from '@/store/safeMessagesSlice'
 

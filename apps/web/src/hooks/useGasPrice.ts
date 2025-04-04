@@ -8,7 +8,7 @@ import type {
   GasPriceOracle,
 } from '@safe-global/safe-gateway-typescript-sdk'
 import { GAS_PRICE_TYPE } from '@safe-global/safe-gateway-typescript-sdk'
-import useAsync, { type AsyncResult } from '@/hooks/useAsync'
+import useAsync, { type AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { useCurrentChain } from './useChains'
 import useIntervalCounter from './useIntervalCounter'
 import { useWeb3ReadOnly } from '../hooks/wallets/web3'

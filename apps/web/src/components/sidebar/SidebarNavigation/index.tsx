@@ -89,6 +89,11 @@ const Navigation = (): ReactElement => {
         const isSelected = currentSubdirectory === getSubdirectory(item.href)
         const isDisabled = item.disabled || !enabledNavItems.includes(item)
         let ItemTag = item.tag ? item.tag : null
+        const spaceId = router.query.spaceId
+        const query = {
+          safe: router.query.safe,
+          ...(spaceId && { spaceId }),
+        }
 
         if (item.href === AppRoutes.transactions.history) {
           ItemTag = queueSize ? <SidebarListItemCounter count={queueSize} /> : null
@@ -115,7 +120,7 @@ const Navigation = (): ReactElement => {
                   href={
                     item.href && {
                       pathname: getRoute(item.href),
-                      query: { safe: router.query.safe, spaceId: router.query.spaceId },
+                      query,
                     }
                   }
                   disabled={isDisabled}

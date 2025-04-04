@@ -7,7 +7,7 @@ import TxLayout from '@/components/tx-flow/common/TxLayout'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import { ExecutionMethod, ExecutionMethodSelector } from '@/components/tx/ExecutionMethodSelector'
 import { safeCreationDispatch, SafeCreationEvent } from '@/features/counterfactual/services/safeCreationEvents'
-import { selectUndeployedSafe, type UndeployedSafe } from '@/features/counterfactual/store/undeployedSafesSlice'
+import { selectUndeployedSafe } from '@/features/counterfactual/store/undeployedSafesSlice'
 import { CF_TX_GROUP_KEY, extractCounterfactualSafeSetup, isPredictedSafeProps } from '@/features/counterfactual/utils'
 import useChainId from '@/hooks/useChainId'
 import { useCurrentChain } from '@/hooks/useChains'
@@ -31,6 +31,7 @@ import NetworkWarning from '@/components/new-safe/create/NetworkWarning'
 import CheckWallet from '@/components/common/CheckWallet'
 import { getSafeToL2SetupDeployment } from '@safe-global/safe-deployments'
 import { FEATURES, getLatestSafeVersion, hasFeature } from '@safe-global/utils/utils/chains'
+import type { UndeployedSafe } from '@safe-global/utils/features/counterfactual/store/types'
 
 const useActivateAccount = (undeployedSafe: UndeployedSafe | undefined) => {
   const chain = useCurrentChain()

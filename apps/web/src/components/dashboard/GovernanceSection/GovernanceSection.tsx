@@ -18,7 +18,7 @@ import useGetSafeInfo from '@/components/safe-apps/AppFrame/useGetSafeInfo'
 import type { SafeAppData } from '@safe-global/safe-gateway-typescript-sdk'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { fetchSafeAppFromManifest } from '@/services/safe-apps/manifest'
-import useAsync from '@/hooks/useAsync'
+import useAsync from '@safe-global/utils/hooks/useAsync'
 import { getOrigin } from '@/components/safe-apps/utils'
 import InfiniteScroll from '@/components/common/InfiniteScroll'
 
