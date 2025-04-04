@@ -41,6 +41,10 @@
   border-bottom: 1px solid var(--color-border-light);
 }
 
+.txData:empty {
+  display: none;
+}
+
 .txSummary,
 .advancedDetails {
   height: 100%;

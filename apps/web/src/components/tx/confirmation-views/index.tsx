@@ -1,6 +1,5 @@
 import type { TransactionPreview } from '@safe-global/safe-gateway-typescript-sdk'
 import { type TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
-import DecodedTx from '../DecodedTx'
 import type { SafeTransaction } from '@safe-global/safe-core-sdk-types'
 import {
   isAnyStakingTxInfo,
@@ -30,6 +29,7 @@ import UpdateSafe from './UpdateSafe'
 import { MigrateToL2Information } from './MigrateToL2Information'
 import { NestedSafeCreation } from './NestedSafeCreation'
 import { isNestedSafeCreation } from '@/utils/nested-safes'
+import Summary from '@/components/transactions/TxDetails/Summary'
 
 type ConfirmationViewProps = {
   txDetails?: TransactionDetails
@@ -39,7 +39,6 @@ type ConfirmationViewProps = {
   isBatch?: boolean
   isApproval?: boolean
   isCreation?: boolean
-  showMethodCall?: boolean // @TODO: remove this prop when we migrate all tx types
   children?: ReactNode
 }
 
@@ -107,14 +106,7 @@ const ConfirmationView = ({ safeTx, txPreview, txDetails, ...props }: Confirmati
 
       {props.children}
 
-      <DecodedTx
-        tx={safeTx}
-        txDetails={txDetails}
-        txData={details?.txData}
-        txInfo={details?.txInfo}
-        showMultisend={!props.isBatch}
-        showMethodCall={props.showMethodCall && !ConfirmationViewComponent && !showTxDetails && !props.isApproval}
-      />
+      <Summary safeTxData={safeTx?.data} txDetails={txDetails} txData={details?.txData} txInfo={details?.txInfo} />
     </>
   )
 }

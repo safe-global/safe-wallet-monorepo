@@ -1,7 +1,7 @@
 import { Stack, SvgIcon, Typography } from '@mui/material'
 import { type TransactionData } from '@safe-global/safe-gateway-typescript-sdk'
 
-import { Divider } from '@/components/tx/DecodedTx'
+import { Divider } from '@/components/tx/ColorCodedTxAccordion'
 
 import NestedTransactionIcon from '@/public/images/transactions/nestedTx.svg'
 import { type ReactElement } from 'react'

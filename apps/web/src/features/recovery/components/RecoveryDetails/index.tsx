@@ -10,7 +10,6 @@ import { RecoveryDescription } from '../RecoveryDescription'
 import type { RecoveryQueueItem } from '@/features/recovery/services/recovery-state'
 
 import txDetailsCss from '@/components/transactions/TxDetails/styles.module.css'
-import summaryCss from '@/components/transactions/TxDetails/Summary/styles.module.css'
 
 export function RecoveryDetails({ item }: { item: RecoveryQueueItem }): ReactElement {
   const { transactionHash, timestamp, validFrom, expiresAt, args, address } = item
@@ -35,7 +34,7 @@ export function RecoveryDetails({ item }: { item: RecoveryQueueItem }): ReactEle
 
           {expiresAt !== null && <TxDataRow title="Expires:">{dateString(Number(expiresAt))}</TxDataRow>}
 
-          <Link className={summaryCss.buttonExpand} onClick={toggleExpanded} component="button" variant="body1">
+          <Link onClick={toggleExpanded} component="button" variant="body1">
             Advanced details
           </Link>
 

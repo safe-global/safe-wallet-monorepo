@@ -27,5 +27,5 @@ export const ConfirmSignMessageOnChainDetails = ({
     }
   }
 
-  return <ConfirmTxDetails {...props} onSubmit={handleSubmit} showMethodCall />
+  return <ConfirmTxDetails {...props} onSubmit={handleSubmit} />
 }

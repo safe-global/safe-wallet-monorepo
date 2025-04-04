@@ -26,7 +26,7 @@ const ConfirmTxFlow = ({ txSummary }: { txSummary: TransactionSummary }) => {
   const canSign = isSignableBy(txSummary, signer?.address || '')
 
   const commonProps = useMemo(
-    () => ({ txId, isExecutable: canExecute, onlyExecute: !canSign, showMethodCall: true }),
+    () => ({ txId, isExecutable: canExecute, onlyExecute: !canSign }),
     [txId, canExecute, canSign],
   )
 

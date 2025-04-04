@@ -40,7 +40,7 @@ const ReviewSafeAppsTx = ({ safeAppsTx: { txs, params }, onSubmit, origin }: Rev
   const error = !isTxValid(txs)
 
   return (
-    <ReviewTransaction onSubmit={onSubmit} origin={origin} showMethodCall>
+    <ReviewTransaction onSubmit={onSubmit} origin={origin}>
       {error ? (
         <ErrorMessage error={safeTxError}>
           This Safe App initiated a transaction which cannot be processed. Please get in touch with the developer of
