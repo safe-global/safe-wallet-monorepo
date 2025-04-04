@@ -1,5 +1,5 @@
-import '../../shim'
-import '@/src/config/polyfills'
+import '@/src/platform/crypto-shims'
+import '@/src/platform/intl-polyfills'
 import { Stack } from 'expo-router'
 import 'react-native-reanimated'
 import { SafeThemeProvider } from '@/src/theme/provider/safeTheme'
