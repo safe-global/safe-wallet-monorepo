@@ -1,7 +1,6 @@
 import type { PropsWithChildren, SyntheticEvent, ReactElement } from 'react'
 import { useContext, useCallback } from 'react'
 import madProps from '@/utils/mad-props'
-import ExecuteCheckbox from '../ExecuteCheckbox'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import ErrorMessage from '../ErrorMessage'
 import TxCard from '@/components/tx-flow/common/TxCard'
@@ -43,24 +42,15 @@ export const ReviewTransactionContent = ({
   txPreview?: TransactionPreview
   txId?: string
 }): ReactElement => {
-  const {
-    canExecute,
-    onlyExecute,
-    willExecute,
-    isCreation,
-    setShouldExecute,
-    showMethodCall,
-    isSubmittable,
-    isProposing,
-    isRejection,
-    canExecuteThroughRole,
-  } = useContext(TxFlowContext)
+  const { onlyExecute, willExecute, isCreation, showMethodCall, isSubmittable, isProposing, isRejection } =
+    useContext(TxFlowContext)
 
   const [readableApprovals] = useApprovalInfos({ safeTransaction: safeTx })
   const isApproval = readableApprovals && readableApprovals.length > 0
   const isCounterfactualSafe = useIsCounterfactualSafe()
   const actions = useSlot(SlotName.Action)
   const features = useSlot(SlotName.Feature)
+  const footerFeatures = useSlot(SlotName.Footer)
 
   const onContinueClick = useCallback(
     async (e: SyntheticEvent) => {
@@ -119,9 +109,9 @@ export const ReviewTransactionContent = ({
           </ErrorMessage>
         )}
 
-        {(canExecute || canExecuteThroughRole) && !onlyExecute && !isCounterfactualSafe && !isProposing && (
-          <ExecuteCheckbox onChange={setShouldExecute} />
-        )}
+        {footerFeatures.map((FooterFeature, i) => (
+          <FooterFeature key={`footer-feature-${i}`} />
+        ))}
 
         <NetworkWarning />
 

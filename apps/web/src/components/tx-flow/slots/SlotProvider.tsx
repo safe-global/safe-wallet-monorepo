@@ -12,6 +12,7 @@ export enum SlotName {
   Submit = 'submit',
   Action = 'action',
   Feature = 'feature',
+  Footer = 'footer',
 }
 
 type SlotComponentPropsMap = {
@@ -22,6 +23,7 @@ type SlotComponentPropsMap = {
     onSubmit?: (args?: any) => void
   }
   [SlotName.Feature]: {}
+  [SlotName.Footer]: {}
 }
 
 export type SlotComponentProps<T extends SlotName> = SlotComponentPropsMap[T]
