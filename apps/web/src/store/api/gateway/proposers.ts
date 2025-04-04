@@ -21,16 +21,16 @@ export const proposerEndpoints = (
       delegateAddress: string
       delegator: string
       signature: string
-      isHardwareWallet: boolean
+      shouldEthSign: boolean
     }
   >({
-    queryFn({ chainId, safeAddress, delegateAddress, delegator, signature, isHardwareWallet }) {
+    queryFn({ chainId, safeAddress, delegateAddress, delegator, signature, shouldEthSign }) {
       const options = {
         params: { path: { chainId, delegateAddress } },
         body: { safe: safeAddress, signature, delegator },
       }
       return buildQueryFn(() =>
-        isHardwareWallet
+        shouldEthSign
           ? deleteDelegate({ params: options.params, body: { ...options.body, delegate: delegateAddress } })
           : deleteDelegateV2(options),
       )
@@ -60,16 +60,16 @@ export const proposerEndpoints = (
       delegator: string
       label: string
       signature: string
-      isHardwareWallet: boolean
+      shouldEthSign: boolean
     }
   >({
-    queryFn({ chainId, safeAddress, delegate, delegator, label, signature, isHardwareWallet }) {
+    queryFn({ chainId, safeAddress, delegate, delegator, label, signature, shouldEthSign }) {
       const options = {
         params: { path: { chainId } },
         body: { delegate, delegator, label, signature, safe: safeAddress },
       }
 
-      return buildQueryFn(() => (isHardwareWallet ? postDelegate(options) : postDelegateV2(options)))
+      return buildQueryFn(() => (shouldEthSign ? postDelegate(options) : postDelegateV2(options)))
     },
     // Optimistically update the cache and roll back in case the mutation fails
     async onQueryStarted({ chainId, safeAddress, delegate, delegator, label }, { dispatch, queryFulfilled }) {

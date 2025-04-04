@@ -15,7 +15,7 @@ import { useAddProposerMutation } from '@/store/api/gateway'
 import { showNotification } from '@/store/notificationsSlice'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { addressIsNotCurrentSafe } from '@safe-global/utils/utils/validation'
-import { isHardwareWallet } from '@/utils/wallets'
+import { isEthSignWallet } from '@/utils/wallets'
 import { Close } from '@mui/icons-material'
 import {
   Alert,
@@ -79,9 +79,9 @@ const UpsertProposer = ({ onClose, onSuccess, proposer }: UpsertProposerProps) =
     setIsLoading(true)
 
     try {
-      const hardwareWallet = isHardwareWallet(wallet)
+      const shouldEthSign = isEthSignWallet(wallet)
       const signer = await getAssertedChainSigner(wallet.provider)
-      const signature = hardwareWallet
+      const signature = shouldEthSign
         ? await signProposerData(data.address, signer)
         : await signProposerTypedData(chainId, data.address, signer)
 
@@ -92,7 +92,7 @@ const UpsertProposer = ({ onClose, onSuccess, proposer }: UpsertProposerProps) =
         label: data.name,
         delegate: data.address,
         safeAddress,
-        isHardwareWallet: hardwareWallet,
+        shouldEthSign,
       })
 
       trackEvent(
