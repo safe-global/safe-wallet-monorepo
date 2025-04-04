@@ -19,7 +19,9 @@ const FieldsGrid = ({ title, children }: { title: string | ReactNode; children: 
       ]}
     >
       <Grid item data-testid="tx-row-title" style={{ wordBreak: 'break-word' }} sx={gridSx}>
-        <Typography color="primary.light">{title}</Typography>
+        <Typography color="primary.light" variant="body2">
+          {title}
+        </Typography>
       </Grid>
       <Grid item xs data-testid="tx-data-row">
         {children}

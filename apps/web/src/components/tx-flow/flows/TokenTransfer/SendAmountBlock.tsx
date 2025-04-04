@@ -19,26 +19,16 @@ const SendAmountBlock = ({
 }) => {
   return (
     <FieldsGrid title={title}>
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 1,
-        }}
-      >
+      <Box display="flex" alignItems="center" gap={1}>
         <TokenIcon logoUri={tokenInfo.logoUri} tokenSymbol={tokenInfo.symbol} />
 
-        <Typography
-          sx={{
-            fontWeight: 'bold',
-          }}
-        >
+        <Typography variant="body2" fontWeight="bold">
           {tokenInfo.symbol}
         </Typography>
 
         {children}
 
-        <Typography data-testid="token-amount">
+        <Typography variant="body2" data-testid="token-amount">
           {formatVisualAmount(amountInWei, tokenInfo.decimals, tokenInfo.decimals ?? 0)}
         </Typography>
       </Box>

@@ -9,6 +9,7 @@ import { TxDetails } from '@/components/tx/ConfirmTxDetails/TxDetails'
 import DecodedData from '../TxData/DecodedData'
 import ColorCodedTxAccodion from '@/components/tx/ColorCodedTxAccodion'
 import { Box, Divider } from '@mui/material'
+import DecoderLinks from './DecoderLinks'
 
 interface Props {
   safeTxData?: SafeTransactionData
@@ -63,7 +64,9 @@ const Summary = ({ safeTxData, txData, txInfo, txDetails }: Props): ReactElement
         <ColorCodedTxAccodion txInfo={txInfo} txData={txData} defaultExpanded={isExpanded}>
           <DecodedData txData={txData} toInfo={toInfo} />
 
-          <Box mt={4} mx={-2}>
+          <DecoderLinks />
+
+          <Box mx={-2}>
             <Divider sx={{ mx: -1 }} />
 
             <TxDetails safeTxData={safeTxData} txData={txData} grid />

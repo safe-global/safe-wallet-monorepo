@@ -29,7 +29,7 @@ export const PaperViewToggle = ({ children, withBackground, activeView = 0 }: Pa
       }}
     >
       <Stack spacing={2}>
-        <Stack direction="row-reverse" justifyContent="space-between" px={2}>
+        <Stack direction={withBackground ? 'row-reverse' : 'row'} justifyContent="space-between" px={2} py={1}>
           <ToggleButtonGroup onChange={onChangeView} withBackground={withBackground}>
             {children}
           </ToggleButtonGroup>

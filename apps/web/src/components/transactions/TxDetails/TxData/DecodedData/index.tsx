@@ -9,8 +9,6 @@ import SendAmountBlock from '@/components/tx-flow/flows/TokenTransfer/SendAmount
 import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
 import SendToBlock from '@/components/tx/SendToBlock'
 import MethodCall from './MethodCall'
-import useSafeAddress from '@/hooks/useSafeAddress'
-import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { DelegateCallWarning } from '@/components/transactions/Warning'
 
 interface Props {
@@ -19,7 +17,6 @@ interface Props {
 }
 
 export const DecodedData = ({ txData, toInfo }: Props): ReactElement | null => {
-  const safeAddress = useSafeAddress()
   const chainInfo = useCurrentChain()
 
   // nothing to render
@@ -42,9 +39,7 @@ export const DecodedData = ({ txData, toInfo }: Props): ReactElement | null => {
   const toAddress = toInfo?.value || txData.to.value
   const method = txData.dataDecoded?.method || ''
   const addressInfo = txData.addressInfoIndex?.[toAddress]
-  const name = sameAddress(toAddress, safeAddress)
-    ? 'this Safe Account'
-    : addressInfo?.name || toInfo?.name || txData.to.name
+  const name = addressInfo?.name || toInfo?.name || txData.to.name
   const avatar = addressInfo?.logoUri || toInfo?.logoUri || txData.to.logoUri
 
   return (
@@ -54,12 +49,12 @@ export const DecodedData = ({ txData, toInfo }: Props): ReactElement | null => {
       {method ? (
         <MethodCall contractAddress={toAddress} contractName={name} contractLogo={avatar} method={method} />
       ) : (
-        <SendToBlock address={toAddress} name={name} title="Interacted with:" avatarSize={26} customAvatar={avatar} />
+        <SendToBlock address={toAddress} name={name} title="Interacted with" avatarSize={20} customAvatar={avatar} />
       )}
 
       {amountInWei !== '0' && (
         <SendAmountBlock
-          title="Value:"
+          title="Value"
           amountInWei={amountInWei}
           tokenInfo={{
             type: TokenType.NATIVE_TOKEN,

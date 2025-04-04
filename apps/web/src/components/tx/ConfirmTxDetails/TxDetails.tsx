@@ -112,7 +112,7 @@ export const TxDetails = ({ safeTxData, txData, grid }: TxDetailsProps) => {
                       avatarSize={20}
                       showPrefix={false}
                       showName={false}
-                      shortAddress={!grid}
+                      shortAddress
                       hasExplorer
                     />
                   </Typography>
@@ -124,7 +124,7 @@ export const TxDetails = ({ safeTxData, txData, grid }: TxDetailsProps) => {
                       address={safeTxData.refundReceiver}
                       avatarSize={20}
                       showPrefix={false}
-                      shortAddress={!grid}
+                      shortAddress
                       showName={false}
                       hasExplorer
                     />

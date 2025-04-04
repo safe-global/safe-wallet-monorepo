@@ -3,15 +3,15 @@
 exports[`HexEncodedData should not cut the text in case the limit option is higher than the provided hexData 1`] = `
 <div>
   <div
-    class="MuiGrid-root MuiGrid-container css-1m1clne-MuiGrid-root"
+    class="MuiGrid-root MuiGrid-container css-1yff1ei-MuiGrid-root"
   >
     <div
-      class="MuiGrid-root MuiGrid-item css-p1l0hx-MuiGrid-root"
+      class="MuiGrid-root MuiGrid-item css-ezmk0c-MuiGrid-root"
       data-testid="tx-row-title"
       style="word-break: break-word;"
     >
       <p
-        class="MuiTypography-root MuiTypography-body1 css-shf88x-MuiTypography-root"
+        class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
       >
         Data (hex-encoded)
       </p>
@@ -62,15 +62,15 @@ exports[`HexEncodedData should not cut the text in case the limit option is high
 exports[`HexEncodedData should not highlight the data if highlight option is false 1`] = `
 <div>
   <div
-    class="MuiGrid-root MuiGrid-container css-1m1clne-MuiGrid-root"
+    class="MuiGrid-root MuiGrid-container css-1yff1ei-MuiGrid-root"
   >
     <div
-      class="MuiGrid-root MuiGrid-item css-p1l0hx-MuiGrid-root"
+      class="MuiGrid-root MuiGrid-item css-ezmk0c-MuiGrid-root"
       data-testid="tx-row-title"
       style="word-break: break-word;"
     >
       <p
-        class="MuiTypography-root MuiTypography-body1 css-shf88x-MuiTypography-root"
+        class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
       >
         Some arbitrary data
       </p>
@@ -122,15 +122,15 @@ exports[`HexEncodedData should not highlight the data if highlight option is fal
 exports[`HexEncodedData should render the default component markup 1`] = `
 <div>
   <div
-    class="MuiGrid-root MuiGrid-container css-1m1clne-MuiGrid-root"
+    class="MuiGrid-root MuiGrid-container css-1yff1ei-MuiGrid-root"
   >
     <div
-      class="MuiGrid-root MuiGrid-item css-p1l0hx-MuiGrid-root"
+      class="MuiGrid-root MuiGrid-item css-ezmk0c-MuiGrid-root"
       data-testid="tx-row-title"
       style="word-break: break-word;"
     >
       <p
-        class="MuiTypography-root MuiTypography-body1 css-shf88x-MuiTypography-root"
+        class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
       >
         Data (hex-encoded)
       </p>
