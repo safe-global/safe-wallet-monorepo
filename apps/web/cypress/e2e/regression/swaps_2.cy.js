@@ -24,6 +24,7 @@ describe('Swaps 2 tests', () => {
 
   it('Verify Setting the top token first in a swap creates a "Sell order" tx', { defaultCommandTimeout: 30000 }, () => {
     const value = '200 COW'
+    swaps.getMockQuoteResponse(swaps.quoteResponse.quote1)
     swaps.acceptLegalDisclaimer()
     cy.wait(4000)
     main.getIframeBody(iframeSelector).within(() => {
@@ -31,6 +32,10 @@ describe('Swaps 2 tests', () => {
       swaps.setInputValue(200)
 
       swaps.selectOutputCurrency(swaps.swapTokens.dai)
+      cy.wait('@mockedQuote').then((interception) => {
+        expect(interception.response.statusCode).to.eq(200)
+        cy.log('Intercepted response:', JSON.stringify(interception.response.body))
+      })
       swaps.checkSwapBtnIsVisible()
       swaps.isInputGreaterZero(swaps.outputCurrencyInput).then((isGreaterThanZero) => {
         cy.wrap(isGreaterThanZero).should('be.true')
@@ -49,12 +54,17 @@ describe('Swaps 2 tests', () => {
     () => {
       const value = swaps.getTokenValue()
       const tokenValue = '600'
+      swaps.getMockQuoteResponse(swaps.quoteResponse.quote2)
       swaps.acceptLegalDisclaimer()
       cy.wait(4000)
       main.getIframeBody(iframeSelector).within(() => {
         swaps.selectOutputCurrency(swaps.swapTokens.dai)
         swaps.setOutputValue(tokenValue)
         swaps.selectInputCurrency(swaps.swapTokens.cow)
+        cy.wait('@mockedQuote').then((interception) => {
+          expect(interception.response.statusCode).to.eq(200)
+          cy.log('Intercepted response:', JSON.stringify(interception.response.body))
+        })
         swaps.checkSwapBtnIsVisible()
         swaps.isInputGreaterZero(swaps.outputCurrencyInput).then((isGreaterThanZero) => {
           cy.wrap(isGreaterThanZero).should('be.true')

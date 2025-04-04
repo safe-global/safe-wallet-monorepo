@@ -10,6 +10,7 @@
     "orderDetails": {
       "expiry2Mins": "in 2 minutes",
       "expiry5Mins": "in 5 minutes",
+      "expiry24hrs": "in about 24 hours",
       "expiry12Months": "in 12 months",
       "interactWith": "GPv2Settlement",
       "DAIeqCOW": "1 DAI = COW"

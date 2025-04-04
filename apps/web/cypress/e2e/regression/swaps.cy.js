@@ -9,6 +9,8 @@ import * as wallet from '../../support/utils/wallet.js'
 import * as swaps_data from '../../fixtures/swaps_data.json'
 import * as navigation from '../pages/navigation.page'
 import { getEvents, events, checkDataLayerEvents } from '../../support/utils/gtag.js'
+import { getMockAddress } from '../../support/utils/ethers.js'
+import { add } from 'lodash'
 
 const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
 const signer = walletCredentials.OWNER_4_PRIVATE_KEY
@@ -38,6 +40,7 @@ describe('Swaps tests', () => {
     { defaultCommandTimeout: 30000 },
     () => {
       let isCustomRecipientFound
+      swaps.getMockQuoteResponse(swaps.quoteResponse.quote1)
       swaps.acceptLegalDisclaimer()
       cy.wait(4000)
       main
@@ -55,13 +58,22 @@ describe('Swaps tests', () => {
           swaps.clickOnSettingsBtn()
           swaps.enterRecipient(swaps.blockedAddress)
           swaps.selectOutputCurrency(swaps.swapTokens.dai)
+          cy.wait('@mockedQuote').then((interception) => {
+            expect(interception.response.statusCode).to.eq(200)
+            cy.log('Intercepted response:', JSON.stringify(interception.response.body))
+          })
         })
       cy.contains(swaps.blockedAddressStr)
     },
   )
 
   it('Verify enabling custom recipient adds that field to the form', { defaultCommandTimeout: 30000 }, () => {
+    const address = getMockAddress()
+    const address_ = '0x1234...5678'
+
+    swaps.getMockQuoteResponse(swaps.quoteResponse.quote1)
     swaps.acceptLegalDisclaimer()
+
     cy.wait(4000)
 
     const isCustomRecipientFound = ($frame, customRecipient) => {
@@ -84,8 +96,22 @@ describe('Swaps tests', () => {
         }
 
         swaps.clickOnSettingsBtn()
-        swaps.enterRecipient('1')
+        swaps.selectOutputCurrency(swaps.swapTokens.dai)
+        cy.wait('@mockedQuote').then((interception) => {
+          expect(interception.response.statusCode).to.eq(200)
+          cy.log('Intercepted response:', JSON.stringify(interception.response.body))
+        })
+        swaps.enterRecipient(address)
+        swaps.checkSwapBtnIsVisible()
+        swaps.isInputGreaterZero(swaps.outputCurrencyInput).then((isGreaterThanZero) => {
+          cy.wrap(isGreaterThanZero).should('be.true')
+        })
+        swaps.clickOnExceeFeeChkbox()
+        swaps.clickOnSwapBtn()
+        swaps.clickOnSwapBtn()
+        swaps.confirmPriceImpact()
       })
+      cy.contains(address_)
     })
   })
 
@@ -95,16 +121,19 @@ describe('Swaps tests', () => {
     const orderID = swaps.getOrderID()
     const slippage = swaps.getWidgetFee()
 
+    swaps.getMockQuoteResponse(swaps.quoteResponse.quote1)
     swaps.acceptLegalDisclaimer()
     cy.wait(4000)
     main.getIframeBody(iframeSelector).within(() => {
       swaps.selectInputCurrency(swaps.swapTokens.cow)
-      swaps.clickOnSettingsBtn()
-      swaps.setSlippage('0.30')
-      swaps.setExpiry('2')
-      swaps.clickOnSettingsBtn()
       swaps.setInputValue(200)
       swaps.selectOutputCurrency(swaps.swapTokens.dai)
+
+      cy.wait('@mockedQuote').then((interception) => {
+        expect(interception.response.statusCode).to.eq(200)
+        cy.log('Intercepted response:', JSON.stringify(interception.response.body))
+      })
+
       swaps.checkSwapBtnIsVisible()
       swaps.isInputGreaterZero(swaps.outputCurrencyInput).then((isGreaterThanZero) => {
         cy.wrap(isGreaterThanZero).should('be.true')
@@ -115,7 +144,7 @@ describe('Swaps tests', () => {
       swaps.confirmPriceImpact()
     })
 
-    swaps.verifyOrderDetails(limitPrice, swapOrder.expiry2Mins, slippage, swapOrder.interactWith, orderID, widgetFee)
+    swaps.verifyOrderDetails(limitPrice, swapOrder.expiry24hrs, slippage, swapOrder.interactWith, orderID, widgetFee)
   })
 
   it(
@@ -130,7 +159,7 @@ describe('Swaps tests', () => {
         const element = $frame.find(customRecipient)
         return element.length > 0
       }
-
+      swaps.getMockQuoteResponse(swaps.quoteResponse.quote1)
       swaps.acceptLegalDisclaimer()
       cy.wait(4000)
       main.getIframeBody(iframeSelector).then(($frame) => {
@@ -138,6 +167,10 @@ describe('Swaps tests', () => {
           swaps.selectInputCurrency(swaps.swapTokens.cow)
           swaps.setInputValue(1000)
           swaps.selectOutputCurrency(swaps.swapTokens.dai)
+          cy.wait('@mockedQuote').then((interception) => {
+            expect(interception.response.statusCode).to.eq(200)
+            cy.log('Intercepted response:', JSON.stringify(interception.response.body))
+          })
           swaps.checkSwapBtnIsVisible()
           swaps.clickOnSettingsBtn()
 
