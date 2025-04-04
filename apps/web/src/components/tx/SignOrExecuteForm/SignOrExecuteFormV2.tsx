@@ -30,7 +30,6 @@ export type SignOrExecuteProps = {
   onlyExecute?: boolean
   disableSubmit?: boolean
   origin?: string
-  showMethodCall?: boolean
   tooltip?: string
   isMassPayout?: boolean
 }
