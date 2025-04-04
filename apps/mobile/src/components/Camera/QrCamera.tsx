@@ -16,6 +16,8 @@ type QrCameraProps = {
   onScan: (code: Code[]) => void
   isCameraActive: boolean
   permission: CameraPermissionStatus
+  requestPermission: () => void
+  hasPermission: boolean
 }
 
 function CameraHeader({ heading }: { heading: React.ReactNode }) {
@@ -48,7 +50,25 @@ function CameraFooter(props: { footer: React.ReactNode }) {
   )
 }
 
-function CameraLens({ denied, onPress }: { denied: boolean; onPress: () => Promise<void> }) {
+function CameraLens({
+  denied,
+  onPress,
+  requestPermission,
+  hasPermission,
+}: {
+  denied: boolean
+  onPress: () => Promise<void>
+  requestPermission: () => void
+  hasPermission: boolean
+}) {
+  const handlePress = () => {
+    if (!hasPermission) {
+      requestPermission()
+    } else {
+      onPress()
+    }
+  }
+
   return (
     <View style={[styles.transparentBox, denied && { backgroundColor: 'rgba(0, 0, 0, 0.8)' }]}>
       {/* Green corners */}
@@ -57,19 +77,28 @@ function CameraLens({ denied, onPress }: { denied: boolean; onPress: () => Promi
       <View borderColor={denied ? '$error' : '$success'} style={[styles.corner, styles.bottomLeft]} />
       <View borderColor={denied ? '$error' : '$success'} style={[styles.corner, styles.bottomRight]} />
 
-      {denied && (
-        <View style={styles.deniedCameraContainer}>
-          <SafeFontIcon name={'camera'} size={40} color={'$error'} />
-          <SafeButton rounded secondary onPress={onPress} marginTop={20}>
-            Enable camera
-          </SafeButton>
-        </View>
-      )}
+      {denied ||
+        (!hasPermission && (
+          <View style={styles.deniedCameraContainer}>
+            <SafeFontIcon name={'camera'} size={40} color={'$error'} />
+            <SafeButton rounded secondary onPress={handlePress} marginTop={20}>
+              Enable camera
+            </SafeButton>
+          </View>
+        ))}
     </View>
   )
 }
 
-export const QrCamera = ({ heading = 'Scan a QR Code', footer, onScan, isCameraActive, permission }: QrCameraProps) => {
+export const QrCamera = ({
+  heading = 'Scan a QR Code',
+  footer,
+  onScan,
+  isCameraActive,
+  permission,
+  requestPermission,
+  hasPermission,
+}: QrCameraProps) => {
   const device = useCameraDevice('back')
   const { height } = useWindowDimensions()
   const codeScanner = useCodeScanner({
@@ -112,7 +141,12 @@ export const QrCamera = ({ heading = 'Scan a QR Code', footer, onScan, isCameraA
                 tint={'systemUltraThinMaterialDark'}
               />
 
-              <CameraLens denied={denied} onPress={openSettings} />
+              <CameraLens
+                denied={denied}
+                onPress={openSettings}
+                requestPermission={requestPermission}
+                hasPermission={hasPermission}
+              />
               <BlurView
                 style={[styles.sideBlur, denied && styles.deniedCameraBlur]}
                 intensity={30}

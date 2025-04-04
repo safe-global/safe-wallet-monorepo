@@ -6,7 +6,6 @@ import { SignersCard } from '@/src/components/transactions-list/Card/SignersCard
 import { AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { SignerSection } from './SignersList'
 import { View } from 'tamagui'
-import { TouchableOpacity } from 'react-native-gesture-handler'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { Alert, useColorScheme } from 'react-native'
 import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
@@ -58,25 +57,24 @@ function SignersListItem({ item, index, signersGroup }: SignersListItemProps) {
   }
 
   return (
-    <TouchableOpacity onPress={onPress} testID={`signer-${item.value}`}>
-      <View
-        backgroundColor={colorScheme === 'dark' ? '$backgroundPaper' : '$background'}
-        borderTopRightRadius={index === 0 ? '$4' : undefined}
-        borderTopLeftRadius={index === 0 ? '$4' : undefined}
-        borderBottomRightRadius={isLastItem ? '$4' : undefined}
-        borderBottomLeftRadius={isLastItem ? '$4' : undefined}
-      >
-        <SignersCard
-          name={contact ? (contact.name as string) : (item.name as string)}
-          address={item.value as `0x${string}`}
-          rightNode={
-            <MenuView onPressAction={onPressMenuAction} actions={actions}>
-              <SafeFontIcon name="options-horizontal" />
-            </MenuView>
-          }
-        />
-      </View>
-    </TouchableOpacity>
+    <View
+      backgroundColor={colorScheme === 'dark' ? '$backgroundPaper' : '$background'}
+      borderTopRightRadius={index === 0 ? '$4' : undefined}
+      borderTopLeftRadius={index === 0 ? '$4' : undefined}
+      borderBottomRightRadius={isLastItem ? '$4' : undefined}
+      borderBottomLeftRadius={isLastItem ? '$4' : undefined}
+    >
+      <SignersCard
+        onLeftNodePress={onPress}
+        name={contact ? (contact.name as string) : (item.name as string)}
+        address={item.value as `0x${string}`}
+        rightNode={
+          <MenuView onPressAction={onPressMenuAction} actions={actions}>
+            <SafeFontIcon name="options-horizontal" />
+          </MenuView>
+        }
+      />
+    </View>
   )
 }
 

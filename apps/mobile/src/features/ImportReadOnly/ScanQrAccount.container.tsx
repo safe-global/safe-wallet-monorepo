@@ -1,5 +1,5 @@
 import { Camera, Code, useCameraPermission } from 'react-native-vision-camera'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useState } from 'react'
 import { useFocusEffect, useRouter } from 'expo-router'
 
 import { parsePrefixedAddress } from '@safe-global/utils/utils/addresses'
@@ -16,12 +16,6 @@ export const ScanQrAccountContainer = () => {
 
   const permission = Camera.getCameraPermissionStatus()
   const { hasPermission, requestPermission } = useCameraPermission()
-
-  useEffect(() => {
-    if (hasPermission === false && permission === 'not-determined') {
-      requestPermission()
-    }
-  }, [permission, hasPermission, requestPermission])
 
   useFocusEffect(
     // Callback should be wrapped in `React.useCallback` to avoid running the effect too often.
@@ -68,6 +62,8 @@ export const ScanQrAccountContainer = () => {
   return (
     <QrCameraView
       permission={permission}
+      hasPermission={hasPermission}
+      requestPermission={requestPermission}
       isCameraActive={isCameraActive}
       onScan={onScan}
       onEnterManuallyPress={onEnterManuallyPress}
