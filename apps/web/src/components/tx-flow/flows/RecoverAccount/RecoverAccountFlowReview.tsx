@@ -9,7 +9,7 @@ import { getRecoveryProposalTransactions } from '@/features/recovery/services/tr
 import DecodedTx from '@/components/tx/DecodedTx'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import ConfirmationTitle, { ConfirmationTitleTypes } from '@/components/tx/SignOrExecuteForm/ConfirmationTitle'
-import TxChecks from '@/components/tx/SignOrExecuteForm/TxChecks'
+import TxChecks from '@/components/tx-flow/features/TxChecks/TxChecks'
 import TxCard from '../../common/TxCard'
 import { SafeTxContext } from '../../SafeTxProvider'
 import CheckWallet from '@/components/common/CheckWallet'
