@@ -133,6 +133,10 @@ export const SETTINGS_EVENTS = {
       action: 'Imported visited safes via Import all',
       category: SETTINGS_CATEGORY,
     },
+    CLEAR_PENDING_TXS: {
+      action: 'Cleared pending transactions',
+      category: SETTINGS_CATEGORY,
+    },
   },
   ENV_VARIABLES: {
     SAVE: {
