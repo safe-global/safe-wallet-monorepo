@@ -18,13 +18,13 @@ const NameInput = ({
 
   return (
     <Controller
-      {...props}
       name={name}
       control={control}
       // eslint-disable-next-line
       render={({ field: { ref, ...field } }) => (
         <TextField
           {...field}
+          {...props}
           variant="outlined"
           label={<>{fieldError?.type === 'maxLength' ? 'Maximum 50 symbols' : fieldError?.message || props.label}</>}
           error={Boolean(fieldError)}
@@ -35,7 +35,6 @@ const NameInput = ({
           {...register(name, {
             maxLength: 50,
             required,
-            setValueAs: (value) => value.trim(),
           })}
         />
       )}
