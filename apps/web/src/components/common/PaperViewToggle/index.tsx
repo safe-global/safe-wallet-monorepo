@@ -1,36 +1,38 @@
-import { ToggleButtonGroup } from '@/components/common/ToggleButtonGroup'
-import { Paper, Stack, Typography } from '@mui/material'
-import { isString } from 'lodash'
-import type { ReactElement } from 'react'
+import type { ReactNode } from 'react'
 import React, { useState } from 'react'
+import { Paper, Stack } from '@mui/material'
+import { ToggleButtonGroup } from '@/components/common/ToggleButtonGroup'
 
 type PaperViewToggleProps = {
   children: {
-    content: ReactElement
-    title?: string | ReactElement
+    title: ReactNode
+    content: ReactNode
   }[]
   activeView?: number
+  withBackground?: boolean
 }
 
-export const PaperViewToggle = ({ children, activeView = 0 }: PaperViewToggleProps) => {
+export const PaperViewToggle = ({ children, withBackground, activeView = 0 }: PaperViewToggleProps) => {
   const [active, setActive] = useState(activeView)
 
   const onChangeView = (index: number) => {
     setActive(index)
   }
 
-  const Title = ({ index }: { index: number }) => {
-    const { title } = children?.[index] || {}
-    return isString(title) ? <Typography color="text.secondary">{title}</Typography> : title
-  }
-
   const Content = ({ index }: { index: number }) => children?.[index]?.content || null
 
   return (
-    <Paper sx={{ backgroundColor: 'background.main', py: 2 }}>
+    <Paper
+      sx={{
+        backgroundColor: withBackground ? 'background.main' : undefined,
+        py: 2,
+      }}
+    >
       <Stack spacing={2}>
         <Stack direction="row-reverse" justifyContent="space-between" px={2}>
-          <ToggleButtonGroup onChange={onChangeView}>{children}</ToggleButtonGroup>
+          <ToggleButtonGroup onChange={onChangeView} withBackground={withBackground}>
+            {children}
+          </ToggleButtonGroup>
         </Stack>
 
         <Content index={active} />

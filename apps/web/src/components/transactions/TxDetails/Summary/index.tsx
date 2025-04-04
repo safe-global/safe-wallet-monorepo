@@ -8,7 +8,7 @@ import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants
 import { TxDetails } from '@/components/tx/ConfirmTxDetails/TxDetails'
 import DecodedData from '../TxData/DecodedData'
 import ColorCodedTxAccodion from '@/components/tx/ColorCodedTxAccodion'
-import { Box } from '@mui/material'
+import { Box, Divider } from '@mui/material'
 
 interface Props {
   safeTxData?: SafeTransactionData
@@ -63,8 +63,10 @@ const Summary = ({ safeTxData, txData, txInfo, txDetails }: Props): ReactElement
         <ColorCodedTxAccodion txInfo={txInfo} txData={txData} defaultExpanded={isExpanded}>
           <DecodedData txData={txData} toInfo={toInfo} />
 
-          <Box mt={3}>
-            <TxDetails safeTxData={safeTxData} txData={txData} />
+          <Box mt={4}>
+            <Divider sx={{ mx: -3 }} />
+
+            <TxDetails safeTxData={safeTxData} txData={txData} grid />
           </Box>
         </ColorCodedTxAccodion>
       </Box>

@@ -47,16 +47,6 @@ export const DecodedData = ({ txData, toInfo }: Props): ReactElement | null => {
     : addressInfo?.name || toInfo?.name || txData.to.name
   const avatar = addressInfo?.logoUri || toInfo?.logoUri || txData.to.logoUri
 
-  let decodedData = <></>
-  if (txData.dataDecoded) {
-    decodedData = (
-      <MethodDetails data={txData.dataDecoded} hexData={txData.hexData} addressInfoIndex={txData.addressInfoIndex} />
-    )
-  } else if (txData.hexData) {
-    // When no decoded data, display raw hex data
-    decodedData = <HexEncodedData title="Data:" hexData={txData.hexData} />
-  }
-
   return (
     <Stack spacing={2}>
       {isDelegateCall && <DelegateCallWarning showWarning={!txData.trustedDelegateCallTarget} />}
@@ -81,7 +71,11 @@ export const DecodedData = ({ txData, toInfo }: Props): ReactElement | null => {
         />
       )}
 
-      {decodedData}
+      {txData.dataDecoded ? (
+        <MethodDetails data={txData.dataDecoded} hexData={txData.hexData} addressInfoIndex={txData.addressInfoIndex} />
+      ) : txData.hexData ? (
+        <HexEncodedData title="Data:" hexData={txData.hexData} />
+      ) : null}
     </Stack>
   )
 }
