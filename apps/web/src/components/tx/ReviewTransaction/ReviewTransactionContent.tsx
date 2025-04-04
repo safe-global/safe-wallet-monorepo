@@ -27,7 +27,7 @@ import type { TransactionDetails, TransactionPreview } from '@safe-global/safe-g
 import NetworkWarning from '@/components/new-safe/create/NetworkWarning'
 import ConfirmationView from '../confirmation-views'
 import { TxNoteForm, encodeTxNote, trackAddNote } from '@/features/tx-notes'
-import { SignerForm } from '../SignOrExecuteForm/SignerForm'
+import { SignerForm } from '@/components/tx-flow/features/SignerSelect/SignerForm'
 import UnknownContractError from '../SignOrExecuteForm/UnknownContractError'
 import TxChecks from '@/components/tx-flow/features/TxChecks/TxChecks'
 import { Button, CardActions, CircularProgress, Stack } from '@mui/material'

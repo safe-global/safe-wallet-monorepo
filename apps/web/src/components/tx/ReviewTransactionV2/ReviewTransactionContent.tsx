@@ -14,7 +14,6 @@ import { useApprovalInfos } from '../ApprovalEditor/hooks/useApprovalInfos'
 import type { TransactionDetails, TransactionPreview } from '@safe-global/safe-gateway-typescript-sdk'
 import NetworkWarning from '@/components/new-safe/create/NetworkWarning'
 import ConfirmationView from '../confirmation-views'
-import { SignerForm } from '../SignOrExecuteForm/SignerForm'
 import UnknownContractError from '../SignOrExecuteForm/UnknownContractError'
 import { Button, CardActions, CircularProgress, Stack } from '@mui/material'
 import CheckWallet from '@/components/common/CheckWallet'
@@ -101,8 +100,6 @@ export const ReviewTransactionContent = ({
       {features.map((Feature, i) => (
         <Feature key={`feature-${i}`} />
       ))}
-
-      <SignerForm willExecute={willExecute} />
 
       <TxCard>
         <ConfirmationTitle
