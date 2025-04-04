@@ -30,7 +30,7 @@ export const generateDataRowValue = (
             avatarSize={20}
             showPrefix={false}
             shortAddress={type !== 'address'}
-            hasExplorer
+            hasExplorer={hasExplorer}
             highlight4bytes
           />
         </Typography>
