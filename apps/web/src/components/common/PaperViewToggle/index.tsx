@@ -1,13 +1,11 @@
 import { ToggleButtonGroup } from '@/components/common/ToggleButtonGroup'
-import { Box, Paper, Stack, Typography } from '@mui/material'
+import { Paper, Stack, Typography } from '@mui/material'
 import { isString } from 'lodash'
 import type { ReactElement } from 'react'
 import React, { useState } from 'react'
 
 type PaperViewToggleProps = {
   children: {
-    icon: ReactElement
-    tooltip?: string
     content: ReactElement
     title?: string | ReactElement
   }[]
@@ -33,12 +31,9 @@ export const PaperViewToggle = ({ children, activeView = 0 }: PaperViewTogglePro
       <Stack spacing={2}>
         <Stack direction="row-reverse" justifyContent="space-between" px={2}>
           <ToggleButtonGroup onChange={onChangeView}>{children}</ToggleButtonGroup>
-          <Title index={active} />
         </Stack>
 
-        <Box>
-          <Content index={active} />
-        </Box>
+        <Content index={active} />
       </Stack>
     </Paper>
   )

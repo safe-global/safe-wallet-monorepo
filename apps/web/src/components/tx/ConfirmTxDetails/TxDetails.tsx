@@ -20,8 +20,6 @@ import { useAddressName } from '@/components/common/NamedAddressInfo'
 type TxDetailsProps = {
   safeTxData: SafeTransaction['data']
   txData?: TransactionData
-  showHashes: boolean
-  noTitle?: boolean
 }
 
 const TxDetailsRow = ({
@@ -47,8 +45,8 @@ const TxDetailsRow = ({
   </Stack>
 )
 
-const ContentWrapper = ({ noTitle, children }: { noTitle?: boolean; children: ReactElement | ReactElement[] }) => (
-  <Box sx={{ maxHeight: noTitle ? '' : '550px', overflowY: 'auto', px: 2, pb: 2 }}>{children}</Box>
+const ContentWrapper = ({ children }: { children: ReactElement | ReactElement[] }) => (
+  <Box sx={{ maxHeight: '550px', overflowY: 'auto', px: 2, pb: 2 }}>{children}</Box>
 )
 
 const NameChip = ({ txData }: { txData?: TransactionData }) => {
@@ -74,8 +72,7 @@ const NameChip = ({ txData }: { txData?: TransactionData }) => {
   ) : null
 }
 
-export const TxDetails = ({ safeTxData, txData, showHashes, noTitle }: TxDetailsProps) => {
-  const [expandHashes, setExpandHashes] = useState(showHashes)
+export const TxDetails = ({ safeTxData, txData }: TxDetailsProps) => {
   const safeTxHash = useSafeTxHash({ safeTxData })
   const domainHash = useDomainHash()
   const messageHash = useMessageHash({ safeTxData })
@@ -84,16 +81,9 @@ export const TxDetails = ({ safeTxData, txData, showHashes, noTitle }: TxDetails
     <PaperViewToggle>
       {[
         {
-          title: noTitle ? (
-            ''
-          ) : (
-            <Typography color="primary.light" fontWeight="bold">
-              Transaction details
-            </Typography>
-          ),
-          icon: <TableRowsRoundedIcon />,
+          title: 'Data',
           content: (
-            <ContentWrapper noTitle={noTitle}>
+            <ContentWrapper>
               <Divider sx={{ mb: 1 }} />
 
               <Stack spacing={1} divider={<Divider />}>
@@ -164,22 +154,18 @@ export const TxDetails = ({ safeTxData, txData, showHashes, noTitle }: TxDetails
                 </TxDetailsRow>
 
                 <TxDetailsRow label="Nonce">{safeTxData.nonce}</TxDetailsRow>
+              </Stack>
+            </ContentWrapper>
+          ),
+        },
+        {
+          title: 'Hashes',
+          content: (
+            <ContentWrapper>
+              <Divider sx={{ mb: 1 }} />
 
-                <Button onClick={() => setExpandHashes(!expandHashes)} sx={{ all: 'unset' }}>
-                  <Typography
-                    variant="body2"
-                    fontWeight={700}
-                    display="inline-flex"
-                    alignItems="center"
-                    color="primary.light"
-                    sx={{ cursor: 'pointer' }}
-                  >
-                    Transaction hashes{' '}
-                    <ExpandMoreIcon sx={expandHashes ? { transform: 'rotate(180deg)' } : undefined} />
-                  </Typography>
-                </Button>
-
-                {expandHashes && domainHash && (
+              <Stack spacing={1} divider={<Divider />}>
+                {domainHash && (
                   <TxDetailsRow label="Domain hash">
                     <Typography variant="body2" width="100%" sx={{ wordWrap: 'break-word' }}>
                       <HexEncodedData hexData={domainHash} limit={66} highlightFirstBytes={false} />
@@ -187,7 +173,7 @@ export const TxDetails = ({ safeTxData, txData, showHashes, noTitle }: TxDetails
                   </TxDetailsRow>
                 )}
 
-                {expandHashes && messageHash && (
+                {messageHash && (
                   <TxDetailsRow label="Message hash">
                     <Typography variant="body2" width="100%" sx={{ wordWrap: 'break-word' }}>
                       <HexEncodedData hexData={messageHash} limit={66} highlightFirstBytes={false} />
@@ -195,7 +181,7 @@ export const TxDetails = ({ safeTxData, txData, showHashes, noTitle }: TxDetails
                   </TxDetailsRow>
                 )}
 
-                {expandHashes && safeTxHash && (
+                {safeTxHash && (
                   <TxDetailsRow label="safeTxHash">
                     <Typography variant="body2" width="100%" sx={{ wordWrap: 'break-word' }}>
                       <HexEncodedData hexData={safeTxHash} limit={66} highlightFirstBytes={false} />
@@ -203,28 +189,6 @@ export const TxDetails = ({ safeTxData, txData, showHashes, noTitle }: TxDetails
                   </TxDetailsRow>
                 )}
               </Stack>
-            </ContentWrapper>
-          ),
-        },
-        {
-          title: noTitle ? (
-            ''
-          ) : (
-            <Typography color="primary.light" fontWeight="bold">
-              Transaction details
-            </Typography>
-          ),
-          icon: <DataObjectIcon />,
-          tooltip: 'View .json/raw data',
-          content: (
-            <ContentWrapper>
-              <Divider sx={{ mb: 1 }} />
-
-              <TxDetailsRow label="Message" direction="column">
-                <Typography variant="body2" sx={{ wordWrap: 'break-word', whiteSpace: 'pre-wrap' }}>
-                  {JSON.stringify(safeTxData, null, 2)}
-                </Typography>
-              </TxDetailsRow>
             </ContentWrapper>
           ),
         },

@@ -1,5 +1,4 @@
 import type { ReactElement } from 'react'
-import React from 'react'
 import { generateDataRowValue, TxDataRow } from '@/components/transactions/TxDetails/Summary/TxDataRow'
 import { isCustomTxInfo, isMultiSendTxInfo, isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
 import type { TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
@@ -8,12 +7,8 @@ import { dateString } from '@safe-global/utils/utils/formatters'
 import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
 import { TxDetails } from '@/components/tx/ConfirmTxDetails/TxDetails'
 import DecodedData from '../TxData/DecodedData'
-import { AccordionDetails, AccordionSummary, Box } from '@mui/material'
-import HelpTooltip from '@/components/tx/ColorCodedTxAccodion/HelpTooltip'
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
-import accordionCss from '@/styles/accordion.module.css'
 import ColorCodedTxAccodion from '@/components/tx/ColorCodedTxAccodion'
-import { BackgroundAccordion } from './BackgroundAccordion'
+import { Box } from '@mui/material'
 
 interface Props {
   safeTxData?: SafeTransactionData
@@ -68,26 +63,9 @@ const Summary = ({ safeTxData, txData, txInfo, txDetails }: Props): ReactElement
         <ColorCodedTxAccodion txInfo={txInfo} txData={txData} defaultExpanded={isExpanded}>
           <DecodedData txData={txData} toInfo={toInfo} />
 
-          <Box my={3} />
-
-          <BackgroundAccordion elevation={0} defaultExpanded>
-            <AccordionSummary
-              data-testid="decoded-tx-summary"
-              expandIcon={<ExpandMoreIcon />}
-              className={accordionCss.accordion}
-            >
-              <Box position="relative" zIndex={2}>
-                Advanced details
-                <HelpTooltip />
-              </Box>
-            </AccordionSummary>
-
-            <AccordionDetails data-testid="decoded-tx-details">
-              <Box ml={-2} maxWidth="calc(100% - 10px)" top={-75} mb="-105px" position="relative">
-                <TxDetails safeTxData={safeTxData} txData={txData} showHashes noTitle />
-              </Box>
-            </AccordionDetails>
-          </BackgroundAccordion>
+          <Box mt={3}>
+            <TxDetails safeTxData={safeTxData} txData={txData} />
+          </Box>
         </ColorCodedTxAccodion>
       </Box>
     </>
