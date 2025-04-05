@@ -15,7 +15,7 @@ const AccountsNavigation = () => {
   }
 
   const trackSpacesClick = () => {
-    if (isActiveNavigation(AppRoutes.welcome.spaces)) {
+    if (!isActiveNavigation(AppRoutes.welcome.spaces)) {
       trackEvent({ ...SPACE_EVENTS.OPEN_SPACE_LIST_PAGE, label: SPACE_LABELS.accounts_page })
     }
   }
