@@ -1,7 +1,6 @@
 import TxCard from '@/components/tx-flow/common/TxCard'
 import { Divider, Grid2 as Grid, Stack, StepIcon, Typography } from '@mui/material'
 import commonCss from '@/components/tx-flow/common/styles.module.css'
-import { TxDetails } from './TxDetails'
 import ExternalLink from '@/components/common/ExternalLink'
 import { type PropsWithChildren, useContext } from 'react'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
@@ -14,6 +13,7 @@ import { TxFlowStep } from '@/components/tx-flow/TxFlowStep'
 import { SlotName, useSlot } from '@/components/tx-flow/slots'
 import type { SubmitCallback } from '@/components/tx-flow/TxFlow'
 import { Sign } from '@/components/tx-flow/actions/Sign'
+import { TxDetails } from '../ConfirmTxDetails/TxDetails'
 
 const InfoSteps = [
   {
@@ -101,7 +101,7 @@ export const ConfirmTxReceipt = ({ children, onSubmit }: ConfirmTxReceiptProps) 
             </Stack>
           </Grid>
           <Grid size={{ xs: 12, sm: 6 }}>
-            <TxDetails safeTx={safeTx} txData={txPreview?.txData} showHashes={showHashes} />
+            <TxDetails safeTxData={safeTx?.data} txData={txPreview?.txData} />
           </Grid>
         </Grid>
 
