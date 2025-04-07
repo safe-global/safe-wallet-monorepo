@@ -18,6 +18,7 @@ type QrCameraProps = {
   permission: CameraPermissionStatus
   requestPermission: () => void
   hasPermission: boolean
+  onActivateCamera: () => void
 }
 
 function CameraHeader({ heading }: { heading: React.ReactNode }) {
@@ -52,41 +53,52 @@ function CameraFooter(props: { footer: React.ReactNode }) {
 
 function CameraLens({
   denied,
-  onPress,
+  onPressSettings,
   requestPermission,
   hasPermission,
+  onActivateCamera,
+  isCameraActive,
 }: {
   denied: boolean
-  onPress: () => Promise<void>
+  onPressSettings: () => Promise<void>
   requestPermission: () => void
   hasPermission: boolean
+  onActivateCamera: () => void
+  isCameraActive: boolean
 }) {
-  const handlePress = () => {
+  const handleGrantOrActivatePress = () => {
     if (!hasPermission) {
       requestPermission()
-    } else {
-      onPress()
+    } else if (hasPermission && !isCameraActive) {
+      onActivateCamera()
     }
   }
 
+  const showEnableButton = denied || !hasPermission
+  const buttonText = denied ? 'Open Settings' : 'Enable camera'
+  const buttonAction = denied ? onPressSettings : handleGrantOrActivatePress
+
   return (
-    <View style={[styles.transparentBox, denied && { backgroundColor: 'rgba(0, 0, 0, 0.8)' }]}>
+    <Pressable
+      style={[styles.transparentBox, denied && { backgroundColor: 'rgba(0, 0, 0, 0.8)' }]}
+      onPress={hasPermission && !isCameraActive ? handleGrantOrActivatePress : undefined}
+      disabled={denied || !hasPermission}
+    >
       {/* Green corners */}
       <View borderColor={denied ? '$error' : '$success'} style={[styles.corner, styles.topLeft]} />
       <View borderColor={denied ? '$error' : '$success'} style={[styles.corner, styles.topRight]} />
       <View borderColor={denied ? '$error' : '$success'} style={[styles.corner, styles.bottomLeft]} />
       <View borderColor={denied ? '$error' : '$success'} style={[styles.corner, styles.bottomRight]} />
 
-      {denied ||
-        (!hasPermission && (
-          <View style={styles.deniedCameraContainer}>
-            <SafeFontIcon name={'camera'} size={40} color={'$error'} />
-            <SafeButton rounded secondary onPress={handlePress} marginTop={20}>
-              Enable camera
-            </SafeButton>
-          </View>
-        ))}
-    </View>
+      {(showEnableButton || (hasPermission && !isCameraActive && !denied)) && (
+        <View style={styles.deniedCameraContainer}>
+          <SafeFontIcon name={'camera'} size={40} color={denied ? '$error' : '$white50'} />
+          <SafeButton rounded secondary onPress={buttonAction} marginTop={20}>
+            {buttonText}
+          </SafeButton>
+        </View>
+      )}
+    </Pressable>
   )
 }
 
@@ -98,6 +110,7 @@ export const QrCamera = ({
   permission,
   requestPermission,
   hasPermission,
+  onActivateCamera,
 }: QrCameraProps) => {
   const device = useCameraDevice('back')
   const { height } = useWindowDimensions()
@@ -143,9 +156,11 @@ export const QrCamera = ({
 
               <CameraLens
                 denied={denied}
-                onPress={openSettings}
+                onPressSettings={openSettings}
                 requestPermission={requestPermission}
                 hasPermission={hasPermission}
+                onActivateCamera={onActivateCamera}
+                isCameraActive={isCameraActive}
               />
               <BlurView
                 style={[styles.sideBlur, denied && styles.deniedCameraBlur]}
