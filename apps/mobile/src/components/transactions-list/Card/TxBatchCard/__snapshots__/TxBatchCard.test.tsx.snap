@@ -3,15 +3,6 @@
 exports[`TxBatchCard should render the default markup 1`] = `
 <View>
   <View
-    onBlur={[Function]}
-    onClick={[Function]}
-    onFocus={[Function]}
-    onResponderGrant={[Function]}
-    onResponderMove={[Function]}
-    onResponderRelease={[Function]}
-    onResponderTerminate={[Function]}
-    onResponderTerminationRequest={[Function]}
-    onStartShouldSetResponder={[Function]}
     style={
       {
         "alignItems": "center",
@@ -32,12 +23,23 @@ exports[`TxBatchCard should render the default markup 1`] = `
     }
   >
     <View
+      onBlur={[Function]}
+      onClick={[Function]}
+      onFocus={[Function]}
+      onResponderGrant={[Function]}
+      onResponderMove={[Function]}
+      onResponderRelease={[Function]}
+      onResponderTerminate={[Function]}
+      onResponderTerminationRequest={[Function]}
+      onStartShouldSetResponder={[Function]}
       style={
         {
           "alignItems": "center",
           "flexDirection": "row",
+          "flexGrow": 1,
+          "flexShrink": 1,
           "gap": 12,
-          "maxWidth": "100%",
+          "opacity": 1,
         }
       }
     >
