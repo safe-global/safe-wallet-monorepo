@@ -48,7 +48,6 @@ export type SignOrExecuteProps = {
   onlyExecute?: boolean
   disableSubmit?: boolean
   origin?: string
-  showMethodCall?: boolean
 }
 
 export const SignOrExecuteForm = ({
@@ -186,7 +185,6 @@ export const SignOrExecuteForm = ({
           txPreview={props.txPreview}
           safeTx={safeTx}
           isBatch={props.isBatch}
-          showMethodCall={props.showMethodCall}
           isApproval={isApproval}
         >
           {!props.isRejection && (

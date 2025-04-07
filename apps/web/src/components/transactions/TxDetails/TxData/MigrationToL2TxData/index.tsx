@@ -1,4 +1,3 @@
-import DecodedTx from '@/components/tx/DecodedTx'
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import { useCurrentChain } from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
@@ -14,6 +13,7 @@ import { MigrateToL2Information } from '@/components/tx/confirmation-views/Migra
 import { Box } from '@mui/material'
 import { isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
 import useTxPreview from '@/components/tx/confirmation-views/useTxPreview'
+import Summary from '../../Summary'
 
 export const MigrationToL2TxData = ({ txDetails }: { txDetails: TransactionDetails }) => {
   const readOnlyProvider = useWeb3ReadOnly()
@@ -80,7 +80,7 @@ export const MigrationToL2TxData = ({ txDetails }: { txDetails: TransactionDetai
       ) : decodedDataUnavailable ? (
         <DecodedData txData={txDetails.txData} />
       ) : (
-        txPreview && <DecodedTx {...txPreview} tx={realSafeTx} />
+        txPreview && <Summary {...txPreview} safeTxData={realSafeTx?.data} />
       )}
     </Box>
   )

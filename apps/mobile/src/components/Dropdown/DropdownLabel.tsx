@@ -1,5 +1,6 @@
 import React from 'react'
 import { GetThemeValueForKey, Text, View } from 'tamagui'
+import { Pressable } from 'react-native-gesture-handler'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 
 type DropdownLabelProps = {
@@ -25,27 +26,22 @@ export const DropdownLabel = ({
   labelProps = defaultLabelProps,
 }: DropdownLabelProps) => {
   return (
-    <View
-      testID="dropdown-label-view"
-      onPress={onPress}
-      flexDirection="row"
-      columnGap="$2"
-      justifyContent="space-between"
-      alignItems="center"
-    >
-      {leftNode}
+    <Pressable testID="dropdown-label-view" onPress={onPress}>
+      <View flexDirection="row" columnGap="$2" justifyContent="space-between" alignItems="center">
+        {leftNode}
 
-      <View justifyContent={'center'}>
-        <Text fontSize={labelProps.fontSize} fontWeight={labelProps.fontWeight} numberOfLines={1} maxWidth={170}>
-          {label}
-        </Text>
-      </View>
-
-      {displayDropDownIcon && (
-        <View>
-          <SafeFontIcon testID="dropdown-arrow" name="chevron-down" size={16} />
+        <View justifyContent={'center'}>
+          <Text fontSize={labelProps.fontSize} fontWeight={labelProps.fontWeight} numberOfLines={1} maxWidth={170}>
+            {label}
+          </Text>
         </View>
-      )}
-    </View>
+
+        {displayDropDownIcon && (
+          <View>
+            <SafeFontIcon testID="dropdown-arrow" name="chevron-down" size={16} />
+          </View>
+        )}
+      </View>
+    </Pressable>
   )
 }

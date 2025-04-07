@@ -1,5 +1,5 @@
 import React from 'react'
-import { H3, Text, View } from 'tamagui'
+import { H4, Text, View } from 'tamagui'
 import EmptyToken from './EmptyToken'
 import EmptyNft from './EmptyNFT'
 
@@ -21,9 +21,9 @@ type Props = {
 }
 export const NoFunds = ({ fundsType }: Props) => {
   return (
-    <View testID="empty-token" alignItems="center" gap="$4">
+    <View testID="empty-token" alignItems="center" gap="$2">
       {texts[fundsType].icon}
-      <H3 fontWeight={600}>{texts[fundsType].title}</H3>
+      <H4 fontWeight={600}>{texts[fundsType].title}</H4>
       <Text textAlign="center" color="$colorSecondary" width="70%" fontSize="$4">
         {texts[fundsType].description}
       </Text>

@@ -1,4 +1,4 @@
-import EthHashInfo from '@/components/common/EthHashInfo'
+import NamedAddressInfo from '@/components/common/NamedAddressInfo'
 import { TransferTx } from '@/components/transactions/TxInfo'
 import { isTxQueued } from '@/utils/transaction-guards'
 import type { TransactionStatus, Transfer } from '@safe-global/safe-gateway-typescript-sdk'
@@ -42,7 +42,7 @@ const TransferTxInfo = ({ txInfo, txStatus, trusted, imitation }: TransferTxInfo
       <TransferTxInfoMain txInfo={txInfo} txStatus={txStatus} trusted={trusted} imitation={imitation} />
 
       <Box display="flex" alignItems="center" width="100%">
-        <EthHashInfo
+        <NamedAddressInfo
           address={address.value}
           name={address.name}
           customAvatar={address.logoUri}
@@ -52,7 +52,7 @@ const TransferTxInfo = ({ txInfo, txStatus, trusted, imitation }: TransferTxInfo
           trusted={trusted && !imitation}
         >
           <TransferActions address={address.value} txInfo={txInfo} trusted={trusted} />
-        </EthHashInfo>
+        </NamedAddressInfo>
       </Box>
       {imitation && <ImitationTransactionWarning />}
     </Box>

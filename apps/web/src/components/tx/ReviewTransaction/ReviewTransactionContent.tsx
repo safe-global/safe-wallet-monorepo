@@ -42,7 +42,6 @@ export type ReviewTransactionContentProps = {
   onlyExecute?: boolean
   disableSubmit?: boolean
   origin?: string
-  showMethodCall?: boolean
 }
 
 export const ReviewTransactionContent = ({
@@ -157,7 +156,6 @@ export const ReviewTransactionContent = ({
           txPreview={props.txPreview}
           safeTx={safeTx}
           isBatch={isBatch}
-          showMethodCall={props.showMethodCall}
           isApproval={isApproval}
         >
           {!props.isRejection && (

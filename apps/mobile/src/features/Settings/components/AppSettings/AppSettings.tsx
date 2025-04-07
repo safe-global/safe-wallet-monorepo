@@ -4,8 +4,10 @@ import { SafeFontIcon as Icon } from '@/src/components/SafeFontIcon/SafeFontIcon
 import { Pressable } from 'react-native'
 import { type SettingsSection } from './AppSettings.types'
 import { IconName } from '@/src/types/iconTypes'
-import { LargeHeaderTitle } from '@/src/components/Title'
+import { LargeHeaderTitle, NavBarTitle } from '@/src/components/Title'
 import { useMemo } from 'react'
+import { useScrollableHeader } from '@/src/navigation/useScrollableHeader'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 interface AppSettingsProps {
   sections: SettingsSection[]
@@ -13,21 +15,27 @@ interface AppSettingsProps {
 
 export const AppSettings = ({ sections }: AppSettingsProps) => {
   const memoizedSections = useMemo(() => sections, [sections])
+  const insets = useSafeAreaInsets()
+  const { handleScroll } = useScrollableHeader({
+    children: <NavBarTitle paddingRight={5}>Settings</NavBarTitle>,
+  })
 
   return (
     <Theme name={'settings'}>
-      <LargeHeaderTitle marginLeft={16} marginTop={8}>
-        Settings
-      </LargeHeaderTitle>
       <ScrollView
         contentContainerStyle={{
           paddingTop: 10,
         }}
+        contentInset={{ bottom: insets.bottom }}
         keyboardShouldPersistTaps="handled"
         scrollEventThrottle={16}
         showsVerticalScrollIndicator={false}
         overScrollMode="never"
+        onScroll={handleScroll}
       >
+        <LargeHeaderTitle marginLeft={16} marginTop={8}>
+          Settings
+        </LargeHeaderTitle>
         <YStack flex={1} paddingHorizontal="$3">
           <YStack space="$4">
             {memoizedSections.map((section, sectionIndex) => (

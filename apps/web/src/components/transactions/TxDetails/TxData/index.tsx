@@ -23,7 +23,6 @@ import { SpendingLimits } from '@/components/transactions/TxDetails/TxData/Spend
 import { TransactionStatus, type TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
 import { type ReactElement } from 'react'
 import RejectionTxInfo from '@/components/transactions/TxDetails/TxData/Rejection'
-import DecodedData from '@/components/transactions/TxDetails/TxData/DecodedData'
 import TransferTxInfo from '@/components/transactions/TxDetails/TxData/Transfer'
 import useChainId from '@/hooks/useChainId'
 import { MigrationToL2TxData } from './MigrationToL2TxData'
@@ -47,7 +46,7 @@ const TxData = ({
   txDetails?: TransactionDetails
   trusted: boolean
   imitation: boolean
-}): ReactElement => {
+}): ReactElement | null => {
   const chainId = useChainId()
 
   if (isOrderTxInfo(txInfo)) {
@@ -109,7 +108,7 @@ const TxData = ({
     return <SafeUpdate txData={txData} />
   }
 
-  return <DecodedData txData={txData} toInfo={isCustomTxInfo(txInfo) ? txInfo.to : undefined} />
+  return null
 }
 
 export default TxData
