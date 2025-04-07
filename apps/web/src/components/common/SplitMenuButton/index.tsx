@@ -8,17 +8,20 @@ import Paper from '@mui/material/Paper'
 import Popper from '@mui/material/Popper'
 import MenuItem from '@mui/material/MenuItem'
 import MenuList from '@mui/material/MenuList'
+import { CircularProgress } from '@mui/material'
 
 export default function SplitMenuButton({
   options,
   disabled = false,
   onClick,
   disabledIndex,
+  loading = false,
 }: {
   options: string[]
   disabled?: boolean
   onClick: (option: string, e: SyntheticEvent) => void
   disabledIndex?: number
+  loading?: boolean
 }) {
   const [open, setOpen] = useState(false)
   const anchorRef = useRef<HTMLDivElement>(null)
@@ -51,19 +54,23 @@ export default function SplitMenuButton({
     <>
       <ButtonGroup variant="contained" ref={anchorRef} aria-label="Button group with a nested menu">
         <Button onClick={handleClick} type="submit" disabled={disabled} sx={{ minWidth: `${maxCharLen}ch !important` }}>
-          {options[selectedIndex]}
+          {loading ? <CircularProgress size={20} /> : options[selectedIndex]}
         </Button>
-        <Button
-          size="small"
-          aria-expanded={open ? 'true' : undefined}
-          aria-label="select merge strategy"
-          aria-haspopup="menu"
-          onClick={handleToggle}
-          sx={{ minWidth: '0 !important', px: 1.5 }}
-        >
-          <ArrowDropDownIcon />
-        </Button>
+
+        {options.length > 1 && (
+          <Button
+            size="small"
+            aria-expanded={open ? 'true' : undefined}
+            aria-label="select merge strategy"
+            aria-haspopup="menu"
+            onClick={handleToggle}
+            sx={{ minWidth: '0 !important', px: 1.5 }}
+          >
+            <ArrowDropDownIcon />
+          </Button>
+        )}
       </ButtonGroup>
+
       <Popper
         sx={{ zIndex: 100 }}
         open={open}
