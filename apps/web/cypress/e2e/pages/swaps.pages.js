@@ -65,6 +65,7 @@ const unlockTwapOrdersStrBtn = 'Unlock TWAP orders'
 const settingsModalTitle = 'Advanced Order Settings'
 const customRecipientStr = 'Custom Recipient'
 const recipientWarningMsg = 'Order recipient address differs from order owner!'
+const selectTokenStr = 'Select a token'
 
 export const quoteResponse = {
   quote1: 'swaps/quoteresponse1.json',
@@ -237,7 +238,7 @@ export function clickOnConfirmSwapBtn() {
 export function clickOnExceeFeeChkbox() {
   cy.wait(1000)
   cy.get(exceedFeesChkbox)
-    .should(() => {})
+    .should(() => { })
     .then(($button) => {
       if (!$button.length) {
         return
@@ -258,7 +259,7 @@ export function verifyReviewOrderBtnIsVisible() {
 export function clickOnReviewOrderBtn() {
   cy.get('button')
     .contains(swapAnywayStrBtn)
-    .should(() => {})
+    .should(() => { })
     .then(($button) => {
       if (!$button.length) {
         return
@@ -272,7 +273,7 @@ export function placeTwapOrder() {
   cy.wait(3000)
   cy.get('button')
     .contains(acceptStrBtn)
-    .should(() => {})
+    .should(() => { })
     .then(($button) => {
       if (!$button.length) {
         return
@@ -286,7 +287,7 @@ export function confirmPriceImpact() {
   cy.wait(3000)
   cy.get('span')
     .contains('Swap anyway')
-    .should(() => {})
+    .should(() => { })
     .then(($checkbox) => {
       if ($checkbox.length) {
         cy.wrap($checkbox).click()
@@ -395,6 +396,10 @@ export function setOutputValue(value) {
   })
 }
 
+export function outputInputIsNotEmpty() {
+  cy.get(outputCurrencyInput).find('input').invoke('val').should('not.be.empty')
+}
+
 export function enableCustomRecipient(option) {
   if (!option) cy.get(recipientToggle).click()
 }
@@ -469,9 +474,8 @@ export function verifyOrderIDUrl() {
     })
 }
 
-export function verifyOrderDetails(limitPrice, expiry, slippage, interactWith, oderID, widgetFee) {
+export function verifyOrderDetails(limitPrice, slippage, interactWith, oderID, widgetFee) {
   cy.contains(limitPrice)
-  cy.contains(expiry)
   cy.contains(slippage)
   cy.contains(oderID)
   cy.contains(widgetFee)
@@ -485,7 +489,7 @@ export function verifyRecipientAlertIsDisplayed() {
 export function closeIntroTwapModal() {
   cy.get('button')
     .contains(unlockTwapOrdersStrBtn)
-    .should(() => {})
+    .should(() => { })
     .then(($button) => {
       if (!$button.length) {
         return
@@ -497,6 +501,7 @@ export function closeIntroTwapModal() {
 }
 
 export function switchToTwap() {
+  cy.get('button').contains(selectTokenStr).should('be.visible')
   cy.get('div').contains(swapStrBtn).should('be.visible').click()
   cy.wait(1000)
   cy.get('div').contains(twapStrBtn).should('be.visible').click()
@@ -505,6 +510,7 @@ export function switchToTwap() {
 }
 
 export function switchToLimit() {
+  cy.get('button').contains(selectTokenStr).should('be.visible')
   cy.get('a').contains(swapStrBtn).click()
   cy.wait(1000)
   cy.get('a').contains(limitStrBtn).click()

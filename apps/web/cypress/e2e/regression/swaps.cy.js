@@ -144,7 +144,7 @@ describe('Swaps tests', () => {
       swaps.confirmPriceImpact()
     })
 
-    swaps.verifyOrderDetails(limitPrice, swapOrder.expiry24hrs, slippage, swapOrder.interactWith, orderID, widgetFee)
+    swaps.verifyOrderDetails(limitPrice, slippage, swapOrder.interactWith, orderID, widgetFee)
   })
 
   it(

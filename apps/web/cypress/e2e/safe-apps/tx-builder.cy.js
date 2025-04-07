@@ -33,7 +33,7 @@ describe('Transaction Builder tests', { defaultCommandTimeout: 20000 }, () => {
     })
 
     cy.get('h4').contains(safeapps.transactionBuilderStr).should('be.visible')
-    navigation.clickOnModalCloseBtn(1)
+    navigation.clickOnModalCloseBtn(0)
     cy.enter(iframeSelector).then((getBody) => {
       getBody().findAllByText(constants.SEPOLIA_CONTRACT_SHORT).should('have.length', 1)
       getBody().findByText(safeapps.testAddressValueStr).should('exist')
@@ -62,7 +62,7 @@ describe('Transaction Builder tests', { defaultCommandTimeout: 20000 }, () => {
       getBody().findByText(safeapps.sendBatchStr).click()
     })
     cy.get('h4').contains(safeapps.transactionBuilderStr).should('be.visible')
-    navigation.clickOnModalCloseBtn(1)
+    navigation.clickOnModalCloseBtn(0)
     cy.enter(iframeSelector).then((getBody) => {
       getBody().findAllByText(constants.SEPOLIA_CONTRACT_SHORT).should('have.length', 3)
       getBody().findAllByText(safeapps.testBooleanValue).should('have.length', 3)
@@ -102,7 +102,7 @@ describe('Transaction Builder tests', { defaultCommandTimeout: 20000 }, () => {
       getBody().findByText(safeapps.sendBatchStr).click()
     })
     cy.get('h4').contains(safeapps.transactionBuilderStr).should('be.visible')
-    navigation.clickOnModalCloseBtn(1)
+    navigation.clickOnModalCloseBtn(0)
     cy.enter(iframeSelector).then((getBody) => {
       getBody().findAllByText(constants.SEPOLIA_RECIPIENT_ADDR_SHORT).should('have.length', 1)
       getBody().findAllByText(safeapps.testFallback).should('have.length', 1)
@@ -124,7 +124,7 @@ describe('Transaction Builder tests', { defaultCommandTimeout: 20000 }, () => {
       getBody().findByText(safeapps.sendBatchStr).click()
     })
     cy.get('h4').contains(safeapps.transactionBuilderStr).should('be.visible')
-    navigation.clickOnModalCloseBtn(1)
+    navigation.clickOnModalCloseBtn(0)
     cy.enter(iframeSelector).then((getBody) => {
       getBody().findAllByText(constants.SEPOLIA_CONTRACT_SHORT).should('have.length', 1)
       getBody().findAllByText(safeapps.customData).should('have.length', 1)
@@ -180,7 +180,7 @@ describe('Transaction Builder tests', { defaultCommandTimeout: 20000 }, () => {
     })
     cy.get('h4').contains(safeapps.transactionBuilderStr).should('be.visible')
     safeapps.checkActions(2, safeapps.basicTypesTestContractStr)
-    navigation.clickOnModalCloseBtn(1)
+    navigation.clickOnModalCloseBtn(0)
     cy.enter(iframeSelector).then((getBody) => {
       getBody().findAllByText(constants.SEPOLIA_CONTRACT_SHORT).should('have.length', 2)
       getBody().findAllByText(safeapps.testAddressValue2).should('have.length', 2)

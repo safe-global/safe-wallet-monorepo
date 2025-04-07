@@ -21,7 +21,7 @@ const nftItemList = '[data-testid="nft-item-list"]'
 const nftItemNane = '[data-testid="nft-item-name"]'
 const txDetailsSummary = '[data-testid="decoded-tx-summary"]'
 const txAccordionDetails = '[data-testid="decoded-tx-details"]'
-const accordionActionItem = '[data-testid="action-item"]'
+export const accordionActionItem = '[data-testid="action-item"]'
 
 const noneNFTSelected = /0 NFT[s]? selected/
 const sendNFTStr = 'Send NFTs'
