@@ -54,9 +54,7 @@ export default function SplitMenuButton({
     <>
       <ButtonGroup variant="contained" ref={anchorRef} aria-label="Button group with a nested menu">
         <Button onClick={handleClick} type="submit" disabled={disabled} sx={{ minWidth: `${maxCharLen}ch !important` }}>
-          {loading ? (
-            <CircularProgress size={20} />
-          ) : options[selectedIndex]}
+          {loading ? <CircularProgress size={20} /> : options[selectedIndex]}
         </Button>
 
         {options.length > 1 && (
