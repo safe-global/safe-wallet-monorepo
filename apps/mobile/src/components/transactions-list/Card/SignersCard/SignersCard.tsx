@@ -1,5 +1,4 @@
 import React, { useMemo } from 'react'
-import { TouchableOpacity } from 'react-native'
 import { Text, View, type TextProps } from 'tamagui'
 import { Identicon } from '@/src/components/Identicon'
 import { SafeListItem } from '@/src/components/SafeListItem'
@@ -11,9 +10,8 @@ type SignersCardProps = {
   address: `0x${string}`
   rightNode?: React.ReactNode
   transparent?: boolean
-  onPress?: () => void
   getSignerTag?: (address: Address) => string | undefined
-  onLeftNodePress?: () => void
+  onPress?: () => void
 }
 
 const descriptionStyle: Partial<TextProps> = {
@@ -27,15 +25,7 @@ const titleStyle: Partial<TextProps> = {
   fontWeight: 600,
 }
 
-export function SignersCard({
-  onPress,
-  name,
-  transparent = true,
-  address,
-  rightNode,
-  getSignerTag,
-  onLeftNodePress,
-}: SignersCardProps) {
+export function SignersCard({ onPress, name, transparent = true, address, rightNode, getSignerTag }: SignersCardProps) {
   const textProps = useMemo(() => {
     return name ? descriptionStyle : titleStyle
   }, [name])
@@ -45,7 +35,7 @@ export function SignersCard({
       onPress={onPress}
       transparent={transparent}
       label={
-        <TouchableOpacity onPress={onLeftNodePress} testID={`signer-${address}`}>
+        <View testID={`signer-${address}`}>
           {name && (
             <View flexDirection="row" alignItems="center" gap="$2">
               {typeof name === 'string' ? (
@@ -77,7 +67,7 @@ export function SignersCard({
           )}
 
           <EthAddress address={address} textProps={textProps} />
-        </TouchableOpacity>
+        </View>
       }
       rightNode={rightNode}
       leftNode={

@@ -73,7 +73,7 @@ function SignersListItem({ item, index, signersGroup }: SignersListItemProps) {
       borderBottomLeftRadius={isLastItem ? '$4' : undefined}
     >
       <SignersCard
-        onLeftNodePress={onPress}
+        onPress={onPress}
         name={contact ? (contact.name as string) : (item.name as string)}
         address={item.value as `0x${string}`}
         rightNode={

@@ -1,6 +1,6 @@
 import React from 'react'
 import { Container } from '../Container'
-import { Text, Theme, ThemeName, View } from 'tamagui'
+import { Text, Theme, ThemeName, View, Stack } from 'tamagui'
 import { IconProps, SafeFontIcon } from '../SafeFontIcon/SafeFontIcon'
 import { ellipsis } from '@/src/utils/formatters'
 import { isMultisigExecutionInfo } from '@/src/utils/transaction-guards'
@@ -46,7 +46,6 @@ export function SafeListItem({
       spaced={spaced}
       bordered={bordered}
       gap={12}
-      onPress={onPress}
       transparent={transparent}
       themeName={themeName}
       alignItems={'center'}
@@ -54,7 +53,15 @@ export function SafeListItem({
       flexDirection="row"
       justifyContent="space-between"
     >
-      <View flexDirection="row" maxWidth={rightNode ? '55%' : '100%'} alignItems="center" gap={12}>
+      <Stack
+        flexDirection="row"
+        alignItems="center"
+        gap={12}
+        onPress={onPress}
+        flexShrink={1}
+        flexGrow={1}
+        pressStyle={{ opacity: 0.7 }}
+      >
         {leftNode}
 
         <View>
@@ -76,7 +83,7 @@ export function SafeListItem({
           )}
         </View>
         {tag && <Tag>{tag}</Tag>}
-      </View>
+      </Stack>
 
       {inQueue && executionInfo && isMultisigExecutionInfo(executionInfo) ? (
         <View alignItems="center" flexDirection="row">
