@@ -1,7 +1,6 @@
 import madProps from '@/utils/mad-props'
 import { type ReactElement, type SyntheticEvent, useContext, useMemo, useState } from 'react'
-import { CircularProgress, Box, Button, CardActions, Divider, Tooltip } from '@mui/material'
-import Stack from '@mui/system/Stack'
+import { CircularProgress, Box, Button, Divider, Tooltip } from '@mui/material'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import { trackError, Errors } from '@/services/exceptions'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'

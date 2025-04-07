@@ -1,7 +1,7 @@
 import WalletRejectionError from '@/components/tx/SignOrExecuteForm/WalletRejectionError'
 import { isWalletRejection } from '@/utils/wallets'
 import { type ReactElement, type SyntheticEvent, useContext, useState } from 'react'
-import { Box, Button, CardActions, CircularProgress, Divider, Typography } from '@mui/material'
+import { Box, Button, CircularProgress, Divider, Typography } from '@mui/material'
 import type { SafeTransaction } from '@safe-global/safe-core-sdk-types'
 import CheckWallet from '@/components/common/CheckWallet'
 import { TxModalContext } from '@/components/tx-flow'
@@ -13,7 +13,6 @@ import useWallet from '@/hooks/wallets/useWallet'
 import { Errors, trackError } from '@/services/exceptions'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import madProps from '@/utils/mad-props'
-import Stack from '@mui/system/Stack'
 import { TxCardActions } from '@/components/tx-flow/common/TxCard'
 
 export const ProposerForm = ({
