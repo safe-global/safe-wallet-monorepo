@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { AppState } from 'react-native'
 import NotificationsService from '@/src/services/notifications/NotificationService'
 import useRegisterForNotifications from '@/src/hooks/useRegisterForNotifications'
@@ -8,7 +8,7 @@ import { selectAppNotificationStatus } from '../store/notificationsSlice'
 
 export const useNotificationManager = () => {
   const isAppNotificationEnabled = useAppSelector(selectAppNotificationStatus)
-
+  const [permission, setPermission] = useState<string | null>(null)
   const { registerForNotifications, unregisterForNotifications, updatePermissionsForNotifications, isLoading } =
     useRegisterForNotifications()
 
@@ -27,14 +27,15 @@ export const useNotificationManager = () => {
           return true
         }
       } else {
-        await NotificationsService.getAllPermissions()
-        return false
+        const res = await NotificationsService.getAllPermissions()
+        setPermission(res.permission)
+        return res.permission
       }
     } catch (error) {
       Logger.error('Error enabling push notifications', error)
       return false
     }
-  }, [registerForNotifications])
+  }, [registerForNotifications, permission])
 
   const disableNotification = useCallback(async () => {
     try {
