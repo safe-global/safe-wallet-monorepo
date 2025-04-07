@@ -5,6 +5,7 @@ import PreviewInvite from '../InviteBanner/PreviewInvite'
 import Track from '@/components/common/Track'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import AddContact from './AddContact'
+import EmptyAddressBook from '@/features/spaces/components/SpaceAddressBook/EmptyAddressBook'
 
 const SpaceAddressBook = () => {
   const isAdmin = useIsAdmin()
@@ -14,6 +15,9 @@ const SpaceAddressBook = () => {
     // TODO: implement search
     console.log(value)
   }
+
+  // TODO: Get data from CGW
+  const entries = []
 
   return (
     <>
@@ -54,6 +58,8 @@ const SpaceAddressBook = () => {
           </Track>
         )}
       </Stack>
+
+      {entries.length === 0 ? <EmptyAddressBook /> : <EmptyAddressBook />}
     </>
   )
 }
