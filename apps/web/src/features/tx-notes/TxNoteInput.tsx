@@ -1,7 +1,8 @@
 import { useCallback } from 'react'
-import { InputAdornment, Stack, TextField, Typography, Alert } from '@mui/material'
+import { InputAdornment, Stack, TextField, Typography, SvgIcon, Box } from '@mui/material'
 import { MODALS_EVENTS, trackEvent } from '@/services/analytics'
 import { useForm } from 'react-hook-form'
+import InfoOutlinedIcon from '@/public/images/notifications/info.svg'
 
 const MAX_NOTE_LENGTH = 60
 
@@ -38,19 +39,12 @@ export const TxNoteInput = ({ onChange }: { onChange: (note: string) => void }) 
   return (
     <>
       <Stack direction="row" alignItems="flex-end" gap={1}>
-        <Typography variant="h5">Optional note</Typography>
-        <Typography variant="body2" color="text.secondary">
-          Experimental
-        </Typography>
+        <Typography variant="h5">Add transaction note</Typography>
       </Stack>
-
-      <Alert data-testid="tx-note-alert" severity="info">
-        The notes are <b>publicly visible</b>, do not share any private or sensitive details.
-      </Alert>
 
       <TextField
         data-testid="tx-note-textfield"
-        label="Note"
+        label="Note (optional)"
         fullWidth
         slotProps={{
           htmlInput: { maxLength: MAX_NOTE_LENGTH },
@@ -69,6 +63,16 @@ export const TxNoteInput = ({ onChange }: { onChange: (note: string) => void }) 
         onBlur={onBlur}
         onFocus={onFocus}
       />
+
+      <Stack data-testid="tx-note-alert" direction="row" gap={1} color="text.secondary">
+        <SvgIcon component={InfoOutlinedIcon} sx={{ width: '20px', height: '20px', rotate: '180deg' }} inheritViewBox />
+        <Box>
+          <Typography variant="body2" fontWeight="700">
+            Notes are publicly visible.
+          </Typography>
+          <Typography variant="body2">Do not share any private or sensitive details.</Typography>
+        </Box>
+      </Stack>
     </>
   )
 }
