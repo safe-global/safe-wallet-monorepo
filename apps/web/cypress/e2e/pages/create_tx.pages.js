@@ -16,7 +16,6 @@ const nonceInput = 'input[name="nonce"]'
 const gasLimitInput = '[name="gasLimit"]'
 const rotateLeftIcon = '[data-testid="RotateLeftIcon"]'
 export const transactionItem = '[data-testid="transaction-item"]'
-export const accordionActionItem = '[data-testid="action-item"]'
 export const connectedWalletExecMethod = '[data-testid="connected-wallet-execution-method"]'
 export const relayExecMethod = '[data-testid="relay-execution-method"]'
 export const payNowExecMethod = '[data-testid="pay-now-execution-method"]'
@@ -264,6 +263,12 @@ export function verifyCopiedURL() {
 export function expandTxShareBlock() {
   cy.get(txShareBlock).click()
   cy.get(txShareBlockDetails).should('be.visible')
+}
+
+export function checkCopyBtnExistsInShareblock() {
+  cy.get(txShareBlock).within(() => {
+    cy.get(copyLinkBtn).should('exist')
+  })
 }
 
 export function verifyBulkExecuteBtnIsEnabled(txs) {
