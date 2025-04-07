@@ -4,15 +4,15 @@ import { useCallback, useEffect, type ReactElement } from 'react'
 import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import { Controller, useFormContext, useWatch } from 'react-hook-form'
 import { useRouter } from 'next/router'
-import { getNetworkLink } from '.'
+import { getNetworkLink } from '../../../components/common/NetworkSelector'
 import { SetNameStepFields } from '@/components/new-safe/create/steps/SetNameStep'
 import { getSafeSingletonDeployments, getSafeToL2SetupDeployments } from '@safe-global/safe-deployments'
 import { hasCanonicalDeployment } from '@safe-global/utils/services/contracts/deployments'
 import { hasMultiChainCreationFeatures } from '@/features/multichain/utils/utils'
 import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
-import NetworkMultiSelectorInput from './NetworkMultiSelectorInput'
+import NetworkMultiSelectorInput from '../../../components/common/NetworkSelector/NetworkMultiSelectorInput'
 
-const NetworkMultiSelector = ({
+const SafeCreationNetworkInput = ({
   name,
   isAdvancedFlow = false,
 }: {
@@ -118,4 +118,4 @@ const NetworkMultiSelector = ({
   )
 }
 
-export default NetworkMultiSelector
+export default SafeCreationNetworkInput

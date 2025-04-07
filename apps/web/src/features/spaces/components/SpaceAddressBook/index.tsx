@@ -1,10 +1,10 @@
-import { Button, InputAdornment, Stack, SvgIcon, TextField, Typography } from '@mui/material'
+import { InputAdornment, Stack, SvgIcon, TextField, Typography } from '@mui/material'
 import SearchIcon from '@/public/images/common/search.svg'
 import { useIsInvited, useIsAdmin } from '@/features/spaces/hooks/useSpaceMembers'
 import PreviewInvite from '../InviteBanner/PreviewInvite'
 import Track from '@/components/common/Track'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
-import PlusIcon from '@/public/images/common/plus.svg'
+import AddContact from './AddContact'
 
 const SpaceAddressBook = () => {
   const isAdmin = useIsAdmin()
@@ -50,9 +50,7 @@ const SpaceAddressBook = () => {
         />
         {isAdmin && (
           <Track {...SPACE_EVENTS.ADD_ADDRESS}>
-            <Button variant="contained" startIcon={<PlusIcon />} onClick={() => {}}>
-              Add contact
-            </Button>
+            <AddContact />
           </Track>
         )}
       </Stack>

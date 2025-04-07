@@ -138,7 +138,11 @@ export const SPACE_EVENTS = {
     category: SPACE_CATEGORY,
   },
   ADD_ADDRESS: {
-    action: 'Add address',
+    action: 'Open add address dialog',
+    category: SPACE_CATEGORY,
+  },
+  ADD_ADDRESS_SUBMIT: {
+    action: 'Submit add address',
     category: SPACE_CATEGORY,
   },
 }
