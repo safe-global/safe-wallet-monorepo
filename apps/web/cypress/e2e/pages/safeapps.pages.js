@@ -1,5 +1,5 @@
 import * as constants from '../../support/constants'
-import { accordionActionItem } from '../pages/create_tx.pages'
+import { accordionActionItem } from '../pages/nfts.pages'
 
 const searchAppInput = 'input[id="search-by-name"]'
 const appUrlInput = 'input[name="appUrl"]'

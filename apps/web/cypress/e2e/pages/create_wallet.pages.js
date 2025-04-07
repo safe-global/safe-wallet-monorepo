@@ -1,5 +1,5 @@
 import * as main from '../pages/main.page'
-import { connectedWalletExecMethod, relayExecMethod } from '../pages/create_tx.pages'
+import { connectedWalletExecMethod, relayExecMethod, connectedWalletMethod } from '../pages/create_tx.pages'
 import * as sidebar from '../pages/sidebar.pages'
 import * as constants from '../../support/constants'
 
@@ -124,6 +124,10 @@ export function selectPayLaterOption() {
 
 export function selectRelayOption() {
   cy.get(relayExecMethod).click()
+}
+
+export function selectPayNowOption() {
+  cy.get(connectedWalletMethod).click()
 }
 
 export function cancelWalletCreation() {

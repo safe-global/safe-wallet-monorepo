@@ -19,13 +19,6 @@ describe('Transaction Builder happy path tests', { defaultCommandTimeout: 20000 
     safeAppSafes = await getSafes(CATEGORIES.safeapps)
   })
 
-  beforeEach(() => {
-    const appUrl = constants.TX_Builder_url
-    iframeSelector = `iframe[id="iframe-${appUrl}"]`
-    const visitUrl = `/apps/open?safe=${safeAppSafes.SEP_SAFEAPP_SAFE_1}&appUrl=${encodeURIComponent(appUrl)}`
-    cy.visit(visitUrl)
-  })
-
   it(
     'Verify a simple batch can be created, signed by second signer and deleted. GA tx_confirm, tx_created',
     { defaultCommandTimeout: 50000 },
@@ -47,7 +40,16 @@ describe('Transaction Builder happy path tests', { defaultCommandTimeout: 20000 
           safeAddress: safeAppSafes.SEP_SAFEAPP_SAFE_1.slice(6),
         },
       ]
+
+      const appUrl = constants.TX_Builder_url
+      iframeSelector = `iframe[id="iframe-${appUrl}"]`
+      const visitUrl = `/apps/open?safe=${safeAppSafes.SEP_SAFEAPP_SAFE_1}&appUrl=${encodeURIComponent(appUrl)}`
+
+      cy.visit(constants.transactionQueueUrl + safeAppSafes.SEP_SAFEAPP_SAFE_1)
       wallet.connectSigner(signer)
+      cy.wait(5000)
+      createtx.deleteAllTx()
+      cy.visit(visitUrl)
       navigation.verifyTxBtnStatus(constants.enabledStates.enabled)
       cy.enter(iframeSelector).then((getBody) => {
         getBody().findByLabelText(safeapps.enterAddressStr).type(constants.SAFE_APP_ADDRESS)
@@ -67,9 +69,11 @@ describe('Transaction Builder happy path tests', { defaultCommandTimeout: 20000 
       createtx.clickViewTransaction()
       navigation.clickOnWalletExpandMoreIcon()
       navigation.clickOnDisconnectBtn()
+
       wallet.connectSigner(signer2)
       navigation.verifyTxBtnStatus(constants.enabledStates.enabled)
       createtx.clickOnConfirmTransactionBtn()
+      createtx.clickOnNoLaterOption()
       createtx.clickOnContinueSignTransactionBtn()
       createtx.clickOnAcknowledgement()
       createtx.clickOnSignTransactionBtn()
