@@ -10,6 +10,7 @@ import { FloatingMenu } from '../FloatingMenu'
 import { LoadableSwitch } from '@/src/components/LoadableSwitch'
 import { useBiometrics } from '@/src/hooks/useBiometrics'
 import { capitalize } from '@/src/utils/formatters'
+import { SAFE_WEB_FEEDBACK_URL } from '@/src/config/constants'
 
 export const AppSettingsContainer = () => {
   const { toggleBiometrics, isBiometricsEnabled, isLoading } = useBiometrics()
@@ -122,7 +123,7 @@ export const AppSettingsContainer = () => {
         {
           label: 'Leave feedback',
           leftIcon: 'chat',
-          onPress: () => console.log('leave feedback'),
+          onPress: () => Linking.openURL(SAFE_WEB_FEEDBACK_URL),
           disabled: false,
           type: 'external-link',
         },

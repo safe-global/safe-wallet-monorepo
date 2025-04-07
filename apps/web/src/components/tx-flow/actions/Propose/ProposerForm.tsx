@@ -1,7 +1,7 @@
 import WalletRejectionError from '@/components/tx/SignOrExecuteForm/WalletRejectionError'
 import { isWalletRejection } from '@/utils/wallets'
 import { type ReactElement, type SyntheticEvent, useContext, useState } from 'react'
-import { Box, Button, CardActions, CircularProgress, Divider, Typography } from '@mui/material'
+import { Box, Button, CircularProgress, Divider, Typography } from '@mui/material'
 import type { SafeTransaction } from '@safe-global/safe-core-sdk-types'
 import CheckWallet from '@/components/common/CheckWallet'
 import { TxModalContext } from '@/components/tx-flow'
@@ -13,7 +13,7 @@ import useWallet from '@/hooks/wallets/useWallet'
 import { Errors, trackError } from '@/services/exceptions'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import madProps from '@/utils/mad-props'
-import Stack from '@mui/system/Stack'
+import { TxCardActions } from '@/components/tx-flow/common/TxCard'
 
 export const ProposerForm = ({
   safeTx,
@@ -85,30 +85,22 @@ export const ProposerForm = ({
 
       <Divider className={commonCss.nestedDivider} sx={{ pt: 3 }} />
 
-      <CardActions>
-        <Stack
-          sx={{
-            width: ['100%', '100%', '100%', 'auto'],
-          }}
-          direction={{ xs: 'column-reverse', lg: 'row' }}
-          spacing={{ xs: 2, md: 2 }}
-        >
-          {/* Submit button */}
-          <CheckWallet checkNetwork>
-            {(isOk) => (
-              <Button
-                data-testid="sign-btn"
-                variant="contained"
-                type="submit"
-                disabled={!isOk || submitDisabled}
-                sx={{ minWidth: '82px', order: '1', width: ['100%', '100%', '100%', 'auto'] }}
-              >
-                {!isSubmittable ? <CircularProgress size={20} /> : 'Propose transaction'}
-              </Button>
-            )}
-          </CheckWallet>
-        </Stack>
-      </CardActions>
+      <TxCardActions>
+        {/* Submit button */}
+        <CheckWallet checkNetwork>
+          {(isOk) => (
+            <Button
+              data-testid="sign-btn"
+              variant="contained"
+              type="submit"
+              disabled={!isOk || submitDisabled}
+              sx={{ minWidth: '82px', order: '1', width: ['100%', '100%', '100%', 'auto'] }}
+            >
+              {!isSubmittable ? <CircularProgress size={20} /> : 'Propose transaction'}
+            </Button>
+          )}
+        </CheckWallet>
+      </TxCardActions>
     </form>
   )
 }

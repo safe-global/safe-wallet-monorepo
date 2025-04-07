@@ -171,7 +171,7 @@ export const ReviewBatch = ({ params }: { params: ExecuteBatchFlowProps }) => {
 
         {multiSendContract && <SendToBlock address={multisendContractAddress} title="Interact with" />}
 
-        {multiSendTxData && <HexEncodedData title="Data:" hexData={multiSendTxData} />}
+        {multiSendTxData && <HexEncodedData title="Data" hexData={multiSendTxData} />}
 
         <div>
           <DecodedTxs txs={txsWithDetails} />

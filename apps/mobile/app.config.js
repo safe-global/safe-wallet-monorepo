@@ -26,7 +26,7 @@ export default {
         NSFaceIDUsageDescription: 'Enabling Face ID allows you to create/access secure keys.',
         UIBackgroundModes: ['remote-notification'],
       },
-      supportsTablet: true,
+      supportsTablet: false,
       appleTeamId: 'MXRS32BBL4',
       bundleIdentifier: IS_DEV ? 'global.safe.mobileapp.dev' : 'global.safe.mobileapp',
       entitlements: {
@@ -74,7 +74,7 @@ export default {
         {
           cameraPermissionText: 'Safe{Wallet} needs access to your Camera to scan QR Codes.',
           enableCodeScanner: true,
-          enableLocation: false
+          enableLocation: false,
         },
       ],
       ['./expo-plugins/withDrawableAssets.js', './assets/android/drawable'],

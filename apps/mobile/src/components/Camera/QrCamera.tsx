@@ -1,6 +1,6 @@
 import { Camera, useCodeScanner, useCameraDevice, Code, CameraPermissionStatus } from 'react-native-vision-camera'
 import { View, Theme, H3 } from 'tamagui'
-import { Dimensions, Linking, Pressable, StyleSheet } from 'react-native'
+import { Dimensions, Linking, Pressable, StyleSheet, useWindowDimensions } from 'react-native'
 import React, { useCallback } from 'react'
 import { useRouter } from 'expo-router'
 
@@ -71,7 +71,7 @@ function CameraLens({ denied, onPress }: { denied: boolean; onPress: () => Promi
 
 export const QrCamera = ({ heading = 'Scan a QR Code', footer, onScan, isCameraActive, permission }: QrCameraProps) => {
   const device = useCameraDevice('back')
-
+  const { height } = useWindowDimensions()
   const codeScanner = useCodeScanner({
     codeTypes: ['qr'],
     onCodeScanned: (codes) => {
@@ -97,7 +97,7 @@ export const QrCamera = ({ heading = 'Scan a QR Code', footer, onScan, isCameraA
         <View style={styles.overlay}>
           <View flex={1}>
             <BlurView
-              style={[styles.blurTop, denied && styles.deniedCameraBlur]}
+              style={[styles.blurTop, denied && styles.deniedCameraBlur, { height: height * 0.3 }]}
               intensity={30}
               tint={'systemUltraThinMaterialDark'}
             >
@@ -152,7 +152,6 @@ const styles = StyleSheet.create({
   blurTop: {
     flex: 0,
     backgroundColor: 'rgba(0, 0, 0, 0.7)', // Simulates blur
-    height: 250,
   },
   topContainer: {
     flex: 1,

@@ -7,7 +7,7 @@ import ExecuteCheckbox from '../ExecuteCheckbox'
 import { useImmediatelyExecutable, useValidateNonce, useTxActions } from '../SignOrExecuteForm/hooks'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import ErrorMessage from '../ErrorMessage'
-import TxCard from '@/components/tx-flow/common/TxCard'
+import TxCard, { TxCardActions } from '@/components/tx-flow/common/TxCard'
 import ConfirmationTitle, { ConfirmationTitleTypes } from '@/components/tx/SignOrExecuteForm/ConfirmationTitle'
 import { useAppSelector } from '@/store'
 import { selectSettings } from '@/store/settingsSlice'
@@ -30,7 +30,7 @@ import { TxNoteForm, encodeTxNote, trackAddNote } from '@/features/tx-notes'
 import { SignerForm } from '@/components/tx-flow/features/SignerSelect/SignerForm'
 import UnknownContractError from '../SignOrExecuteForm/UnknownContractError'
 import TxChecks from '@/components/tx-flow/features/TxChecks/TxChecks'
-import { Button, CardActions, CircularProgress, Stack } from '@mui/material'
+import { Button, CircularProgress } from '@mui/material'
 import BatchButton from '@/components/tx-flow/actions/Batching/BatchButton'
 import { TxModalContext } from '@/components/tx-flow'
 import CheckWallet from '@/components/common/CheckWallet'
@@ -46,7 +46,6 @@ export type ReviewTransactionContentProps = {
   onlyExecute?: boolean
   disableSubmit?: boolean
   origin?: string
-  showMethodCall?: boolean
 }
 
 export const ReviewTransactionContent = ({
@@ -161,7 +160,6 @@ export const ReviewTransactionContent = ({
           txPreview={props.txPreview}
           safeTx={safeTx}
           isBatch={isBatch}
-          showMethodCall={props.showMethodCall}
           isApproval={isApproval}
         >
           {!props.isRejection && (
@@ -208,40 +206,32 @@ export const ReviewTransactionContent = ({
 
         <Blockaid />
 
-        <CardActions>
-          <Stack
-            sx={{
-              width: ['100%', '100%', '100%', 'auto'],
-            }}
-            direction={{ xs: 'column-reverse', lg: 'row' }}
-            spacing={{ xs: 2, md: 2 }}
-          >
-            {/* Batch button */}
-            {showBatchButton && (
-              <BatchButton
-                onClick={onBatchClick}
-                disabled={submitDisabled || !isBatchable}
-                tooltip={!isBatchable ? `Cannot batch this type of transaction` : undefined}
-              />
-            )}
+        <TxCardActions>
+          {/* Batch button */}
+          {showBatchButton && (
+            <BatchButton
+              onClick={onBatchClick}
+              disabled={submitDisabled || !isBatchable}
+              tooltip={!isBatchable ? `Cannot batch this type of transaction` : undefined}
+            />
+          )}
 
-            {/* Continue button */}
-            <CheckWallet allowNonOwner={props.onlyExecute} checkNetwork={!submitDisabled}>
-              {(isOk) => (
-                <Button
-                  data-testid="continue-sign-btn"
-                  variant="contained"
-                  type="submit"
-                  onClick={onContinueClick}
-                  disabled={!isOk || submitDisabled}
-                  sx={{ minWidth: '82px', order: '1', width: ['100%', '100%', '100%', 'auto'] }}
-                >
-                  {!isSubmittable ? <CircularProgress size={20} /> : 'Continue'}
-                </Button>
-              )}
-            </CheckWallet>
-          </Stack>
-        </CardActions>
+          {/* Continue button */}
+          <CheckWallet allowNonOwner={props.onlyExecute} checkNetwork={!submitDisabled}>
+            {(isOk) => (
+              <Button
+                data-testid="continue-sign-btn"
+                variant="contained"
+                type="submit"
+                onClick={onContinueClick}
+                disabled={!isOk || submitDisabled}
+                sx={{ minWidth: '82px', order: '1', width: ['100%', '100%', '100%', 'auto'] }}
+              >
+                {!isSubmittable ? <CircularProgress size={20} /> : 'Continue'}
+              </Button>
+            )}
+          </CheckWallet>
+        </TxCardActions>
       </TxCard>
     </>
   )
