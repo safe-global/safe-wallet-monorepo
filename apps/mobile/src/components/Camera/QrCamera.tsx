@@ -1,7 +1,7 @@
 import { Camera, useCodeScanner, useCameraDevice, Code, CameraPermissionStatus } from 'react-native-vision-camera'
 import { View, Theme, H3 } from 'tamagui'
 import { Dimensions, Linking, Pressable, StyleSheet, useWindowDimensions } from 'react-native'
-import React, { useCallback } from 'react'
+import React, { useCallback, useEffect } from 'react'
 import { useRouter } from 'expo-router'
 
 const { width } = Dimensions.get('window')
@@ -74,7 +74,6 @@ function CameraLens({
     }
   }
 
-  const showEnableButton = denied || !hasPermission
   const buttonText = denied ? 'Open Settings' : 'Enable camera'
   const buttonAction = denied ? onPressSettings : handleGrantOrActivatePress
 
@@ -90,7 +89,8 @@ function CameraLens({
       <View borderColor={denied ? '$error' : '$success'} style={[styles.corner, styles.bottomLeft]} />
       <View borderColor={denied ? '$error' : '$success'} style={[styles.corner, styles.bottomRight]} />
 
-      {(showEnableButton || (hasPermission && !isCameraActive && !denied)) && (
+      {/* Show button/icon only if permission denied, not granted, or granted but inactive */}
+      {(denied || !hasPermission || (hasPermission && !isCameraActive)) && (
         <View style={styles.deniedCameraContainer}>
           <SafeFontIcon name={'camera'} size={40} color={denied ? '$error' : '$white50'} />
           <SafeButton rounded secondary onPress={buttonAction} marginTop={20}>
@@ -125,13 +125,20 @@ export const QrCamera = ({
     await Linking.openSettings()
   }, [])
 
+  // Effect to automatically activate camera once permission is granted
+  useEffect(() => {
+    if (permission === 'granted' && hasPermission && !isCameraActive) {
+      onActivateCamera()
+    }
+  }, [permission, hasPermission, isCameraActive, onActivateCamera])
+
   const denied = permission === 'denied'
 
   return (
     <Theme name={'dark'}>
       <View style={styles.container}>
-        {/* Camera View */}
-        {device && (
+        {/* Only render Camera when active and device is available */}
+        {isCameraActive && device && (
           <Camera style={StyleSheet.absoluteFill} device={device} isActive={isCameraActive} codeScanner={codeScanner} />
         )}
 
