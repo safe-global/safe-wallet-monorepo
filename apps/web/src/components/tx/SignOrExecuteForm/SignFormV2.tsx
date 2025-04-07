@@ -20,6 +20,7 @@ import { useSigner } from '@/hooks/wallets/useWallet'
 import { NestedTxSuccessScreenFlow } from '@/components/tx-flow/flows'
 import { useValidateTxData } from '@/hooks/useValidateTxData'
 import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
+import { TxCardActions } from '@/components/tx-flow/common/TxCard'
 
 export const SignFormV2 = ({
   safeTx,
@@ -135,34 +136,26 @@ export const SignFormV2 = ({
 
       <Divider className={commonCss.nestedDivider} sx={{ pt: 3 }} />
 
-      <CardActions>
-        <Stack
-          sx={{
-            width: ['100%', '100%', '100%', 'auto'],
-          }}
-          direction={{ xs: 'column-reverse', lg: 'row' }}
-          spacing={{ xs: 2, md: 2 }}
-        >
-          {/* Submit button */}
-          <CheckWallet checkNetwork={!submitDisabled}>
-            {(isOk) => (
-              <Tooltip title={isOk ? tooltip : undefined} placement="top">
-                <span>
-                  <Button
-                    data-testid="sign-btn"
-                    variant="contained"
-                    type="submit"
-                    disabled={!isOk || submitDisabled}
-                    sx={{ minWidth: '82px', order: '1', width: ['100%', '100%', '100%', 'auto'] }}
-                  >
-                    {!isSubmittable || !isSubmittableLocal ? <CircularProgress size={20} /> : 'Sign'}
-                  </Button>
-                </span>
-              </Tooltip>
-            )}
-          </CheckWallet>
-        </Stack>
-      </CardActions>
+      <TxCardActions>
+        {/* Submit button */}
+        <CheckWallet checkNetwork={!submitDisabled}>
+          {(isOk) => (
+            <Tooltip title={isOk ? tooltip : undefined} placement="top">
+              <span>
+                <Button
+                  data-testid="sign-btn"
+                  variant="contained"
+                  type="submit"
+                  disabled={!isOk || submitDisabled}
+                  sx={{ minWidth: '82px', order: '1', width: ['100%', '100%', '100%', 'auto'] }}
+                >
+                  {!isSubmittable || !isSubmittableLocal ? <CircularProgress size={20} /> : 'Sign'}
+                </Button>
+              </span>
+            </Tooltip>
+          )}
+        </CheckWallet>
+      </TxCardActions>
     </form>
   )
 }

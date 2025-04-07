@@ -4,7 +4,7 @@ import madProps from '@/utils/mad-props'
 import ExecuteCheckbox from '../ExecuteCheckbox'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import ErrorMessage from '../ErrorMessage'
-import TxCard from '@/components/tx-flow/common/TxCard'
+import TxCard, { TxCardActions } from '@/components/tx-flow/common/TxCard'
 import ConfirmationTitle, { ConfirmationTitleTypes } from '@/components/tx/SignOrExecuteForm/ConfirmationTitle'
 import { ErrorBoundary } from '@sentry/react'
 import ApprovalEditor from '../ApprovalEditor'
@@ -132,35 +132,27 @@ export const ReviewTransactionContent = ({
 
         <Blockaid />
 
-        <CardActions>
-          <Stack
-            sx={{
-              width: ['100%', '100%', '100%', 'auto'],
-            }}
-            direction={{ xs: 'column-reverse', lg: 'row' }}
-            spacing={{ xs: 2, md: 2 }}
-          >
-            {actions.map((Action, i) => (
-              <Action key={`action-${i}`} />
-            ))}
+        <TxCardActions>
+          {actions.map((Action, i) => (
+            <Action key={`action-${i}`} />
+          ))}
 
-            {/* Continue button */}
-            <CheckWallet allowNonOwner={onlyExecute} checkNetwork={!submitDisabled}>
-              {(isOk) => (
-                <Button
-                  data-testid="continue-sign-btn"
-                  variant="contained"
-                  type="submit"
-                  onClick={onContinueClick}
-                  disabled={!isOk || submitDisabled}
-                  sx={{ minWidth: '82px', order: '1', width: ['100%', '100%', '100%', 'auto'] }}
-                >
-                  {!isSubmittable ? <CircularProgress size={20} /> : 'Continue'}
-                </Button>
-              )}
-            </CheckWallet>
-          </Stack>
-        </CardActions>
+          {/* Continue button */}
+          <CheckWallet allowNonOwner={onlyExecute} checkNetwork={!submitDisabled}>
+            {(isOk) => (
+              <Button
+                data-testid="continue-sign-btn"
+                variant="contained"
+                type="submit"
+                onClick={onContinueClick}
+                disabled={!isOk || submitDisabled}
+                sx={{ minWidth: '82px', order: '1', width: ['100%', '100%', '100%', 'auto'] }}
+              >
+                {!isSubmittable ? <CircularProgress size={20} /> : 'Continue'}
+              </Button>
+            )}
+          </CheckWallet>
+        </TxCardActions>
       </TxCard>
     </>
   )
