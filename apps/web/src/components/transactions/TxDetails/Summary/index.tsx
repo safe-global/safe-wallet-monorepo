@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react'
 import { generateDataRowValue, TxDataRow } from '@/components/transactions/TxDetails/Summary/TxDataRow'
-import { isCustomTxInfo, isMultiSendTxInfo, isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
+import { isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
 import type { TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
 import type { SafeTransactionData } from '@safe-global/safe-core-sdk-types'
 import { dateString } from '@safe-global/utils/utils/formatters'
@@ -16,12 +16,13 @@ interface Props {
   txData: TransactionDetails['txData']
   txInfo?: TransactionDetails['txInfo']
   txDetails?: TransactionDetails
+  showMethodCall?: boolean
 }
 
-const Summary = ({ safeTxData, txData, txInfo, txDetails }: Props): ReactElement => {
+const Summary = ({ safeTxData, txData, txInfo, txDetails, showMethodCall }: Props): ReactElement => {
   const { txHash, executedAt } = txDetails ?? {}
   const toInfo = txData?.addressInfoIndex?.[txData?.to.value] || txData?.to
-  const isExpanded = txInfo && isCustomTxInfo(txInfo) && !isMultiSendTxInfo(txInfo)
+  const isExpanded = txInfo && showMethodCall
 
   let baseGas, gasPrice, gasToken, safeTxGas, refundReceiver, submittedAt, nonce
   if (txDetails && isMultisigDetailedExecutionInfo(txDetails.detailedExecutionInfo)) {
