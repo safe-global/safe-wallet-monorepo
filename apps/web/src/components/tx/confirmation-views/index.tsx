@@ -40,6 +40,7 @@ type ConfirmationViewProps = {
   isApproval?: boolean
   isCreation?: boolean
   children?: ReactNode
+  showMethodCall?: boolean
 }
 
 const getConfirmationViewComponent = ({
@@ -106,7 +107,13 @@ const ConfirmationView = ({ safeTx, txPreview, txDetails, ...props }: Confirmati
 
       {props.children}
 
-      <Summary safeTxData={safeTx?.data} txDetails={txDetails} txData={details?.txData} txInfo={details?.txInfo} />
+      <Summary
+        safeTxData={safeTx?.data}
+        txDetails={txDetails}
+        txData={details?.txData}
+        txInfo={details?.txInfo}
+        showMethodCall={props.showMethodCall}
+      />
     </>
   )
 }
