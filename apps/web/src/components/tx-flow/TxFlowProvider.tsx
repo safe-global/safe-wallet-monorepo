@@ -10,7 +10,7 @@ import {
   findMostLikelyRole,
   type Role,
   useRoles,
-} from '@/components/tx/SignOrExecuteForm/ExecuteThroughRoleForm/hooks'
+} from '@/components/tx-flow/actions/ExecuteThroughRole/ExecuteThroughRoleForm/hooks'
 import { SafeTxContext } from '../tx-flow/SafeTxProvider'
 import { useLazyGetTransactionDetailsQuery } from '@/store/slices'
 import { trackTxEvents } from '../tx/SignOrExecuteForm/tracking'

@@ -14,7 +14,11 @@ import { selectSettings } from '@/store/settingsSlice'
 import { ErrorBoundary } from '@sentry/react'
 import ApprovalEditor from '../ApprovalEditor'
 import { isDelegateCall } from '@/services/tx/tx-sender/sdk'
-import { findAllowingRole, findMostLikelyRole, useRoles } from '../SignOrExecuteForm/ExecuteThroughRoleForm/hooks'
+import {
+  findAllowingRole,
+  findMostLikelyRole,
+  useRoles,
+} from '@/components/tx-flow/actions/ExecuteThroughRole/ExecuteThroughRoleForm/hooks'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import { BlockaidBalanceChanges } from '../security/blockaid/BlockaidBalanceChange'
 import { Blockaid } from '../security/blockaid'
@@ -23,11 +27,11 @@ import type { TransactionDetails, TransactionPreview } from '@safe-global/safe-g
 import NetworkWarning from '@/components/new-safe/create/NetworkWarning'
 import ConfirmationView from '../confirmation-views'
 import { TxNoteForm, encodeTxNote, trackAddNote } from '@/features/tx-notes'
-import { SignerForm } from '../SignOrExecuteForm/SignerForm'
+import { SignerForm } from '@/components/tx-flow/features/SignerSelect/SignerForm'
 import UnknownContractError from '../SignOrExecuteForm/UnknownContractError'
-import TxChecks from '../SignOrExecuteForm/TxChecks'
+import TxChecks from '@/components/tx-flow/features/TxChecks/TxChecks'
 import { Button, CircularProgress } from '@mui/material'
-import BatchButton from '../SignOrExecuteForm/BatchButton'
+import BatchButton from '@/components/tx-flow/actions/Batching/BatchButton'
 import { TxModalContext } from '@/components/tx-flow'
 import CheckWallet from '@/components/common/CheckWallet'
 

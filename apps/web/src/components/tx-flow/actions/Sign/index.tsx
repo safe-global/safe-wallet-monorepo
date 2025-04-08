@@ -1,16 +1,16 @@
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { MODALS_EVENTS, trackEvent } from '@/services/analytics'
 import { useCallback, useContext, useState } from 'react'
-import { TxFlowContext } from '../TxFlowProvider'
-import SignFormV2 from '@/components/tx/SignOrExecuteForm/SignFormV2'
-import { withCheckboxGuard } from '../withCheckboxGuard'
+import { TxFlowContext } from '../../TxFlowProvider'
+import SignForm from './SignForm'
+import { withCheckboxGuard } from '../../withCheckboxGuard'
 import useIsCounterfactualSafe from '@/features/counterfactual/hooks/useIsCounterfactualSafe'
-import { type SlotComponentProps, SlotName, withSlot } from '../slots'
+import { type SlotComponentProps, SlotName, withSlot } from '../../slots'
 
 export const SIGN_CHECKBOX_LABEL = "I understand what I'm signing and that this is an irreversible action."
 export const SIGN_CHECKBOX_TOOLTIP = 'Review details and check the box to enable signing'
 
-const CheckboxGuardedSignForm = withCheckboxGuard(SignFormV2, SIGN_CHECKBOX_LABEL, SIGN_CHECKBOX_TOOLTIP)
+const CheckboxGuardedSignForm = withCheckboxGuard(SignForm, SIGN_CHECKBOX_LABEL, SIGN_CHECKBOX_TOOLTIP)
 
 export const Sign = ({ onSubmit }: SlotComponentProps<SlotName.Submit>) => {
   const [checked, setChecked] = useState(false)

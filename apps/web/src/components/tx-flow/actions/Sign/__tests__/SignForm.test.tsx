@@ -2,7 +2,7 @@ import { defaultSecurityContextValues } from '@safe-global/utils/components/tx/s
 import { type ReactElement } from 'react'
 import * as hooks from '@/components/tx/SignOrExecuteForm/hooks'
 import * as useValidateTxData from '@/hooks/useValidateTxData'
-import { SignFormV2 } from '@/components/tx/SignOrExecuteForm/SignFormV2'
+import { SignForm } from '../SignForm'
 import { render } from '@/tests/test-utils'
 import { createMockSafeTransaction } from '@/tests/transactions'
 import { OperationType } from '@safe-global/safe-core-sdk-types'
@@ -16,7 +16,7 @@ jest.mock('@/components/common/CheckWallet', () => ({
   },
 }))
 
-describe('SignFormV2', () => {
+describe('SignForm', () => {
   const safeTransaction = createMockSafeTransaction({
     to: '0x1',
     data: '0x',
@@ -45,7 +45,7 @@ describe('SignFormV2', () => {
   it('displays a warning if connected wallet already signed the tx', () => {
     jest.spyOn(hooks, 'useAlreadySigned').mockReturnValue(true)
 
-    const { getByText } = render(<SignFormV2 {...defaultProps} />)
+    const { getByText } = render(<SignForm {...defaultProps} />)
 
     expect(getByText('You have already signed this transaction.')).toBeInTheDocument()
   })
@@ -53,7 +53,7 @@ describe('SignFormV2', () => {
   it('does not display a warning if connected wallet has not signed the tx yet', () => {
     jest.spyOn(hooks, 'useAlreadySigned').mockReturnValue(false)
 
-    const { queryByText } = render(<SignFormV2 {...defaultProps} />)
+    const { queryByText } = render(<SignForm {...defaultProps} />)
 
     expect(queryByText('You have already signed this transaction.')).not.toBeInTheDocument()
   })
@@ -61,7 +61,7 @@ describe('SignFormV2', () => {
   it('shows a non-owner error', () => {
     jest.spyOn(hooks, 'useAlreadySigned').mockReturnValue(false)
 
-    const { queryByText } = render(<SignFormV2 {...defaultProps} isOwner={false} />)
+    const { queryByText } = render(<SignForm {...defaultProps} isOwner={false} />)
 
     expect(
       queryByText(
@@ -76,7 +76,7 @@ describe('SignFormV2', () => {
     })
 
     const { getByText } = render(
-      <SignFormV2
+      <SignForm
         {...defaultProps}
         safeTx={safeTransaction}
         txActions={{
@@ -102,7 +102,7 @@ describe('SignFormV2', () => {
     const mockSignTx = jest.fn()
 
     const { getByText } = render(
-      <SignFormV2
+      <SignForm
         {...defaultProps}
         safeTx={safeTransaction}
         txActions={{
@@ -125,7 +125,7 @@ describe('SignFormV2', () => {
   })
 
   it('shows a disabled submit button if there is no safeTx', () => {
-    const { getByText } = render(<SignFormV2 {...defaultProps} safeTx={undefined} />)
+    const { getByText } = render(<SignForm {...defaultProps} safeTx={undefined} />)
 
     const button = getByText('Sign')
 
@@ -134,7 +134,7 @@ describe('SignFormV2', () => {
   })
 
   it('shows a disabled submit button if passed via props', () => {
-    const { getByText } = render(<SignFormV2 {...defaultProps} safeTx={safeTransaction} disableSubmit />)
+    const { getByText } = render(<SignForm {...defaultProps} safeTx={safeTransaction} disableSubmit />)
 
     const button = getByText('Sign')
 
@@ -143,7 +143,7 @@ describe('SignFormV2', () => {
   })
 
   it('shows a disabled submit button if not an owner', () => {
-    const { getByText } = render(<SignFormV2 {...defaultProps} safeTx={safeTransaction} isOwner={false} />)
+    const { getByText } = render(<SignForm {...defaultProps} safeTx={safeTransaction} isOwner={false} />)
 
     const button = getByText('Sign')
 
@@ -153,7 +153,7 @@ describe('SignFormV2', () => {
 
   it('shows a disabled submit button if there is a high or critical risk and user has not confirmed it', () => {
     const { getByText } = render(
-      <SignFormV2
+      <SignForm
         {...defaultProps}
         safeTx={safeTransaction}
         txSecurity={{ ...defaultSecurityContextValues, needsRiskConfirmation: true, isRiskConfirmed: false }}
@@ -168,7 +168,7 @@ describe('SignFormV2', () => {
 
   it('shows an enabled submit button if there is a high or critical risk and user has confirmed it', () => {
     const { getByText } = render(
-      <SignFormV2
+      <SignForm
         {...defaultProps}
         safeTx={safeTransaction}
         txSecurity={{ ...defaultSecurityContextValues, needsRiskConfirmation: true, isRiskConfirmed: true }}

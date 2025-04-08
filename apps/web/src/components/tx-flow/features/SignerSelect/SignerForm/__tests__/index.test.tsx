@@ -1,7 +1,7 @@
 import { useNestedSafeOwners } from '@/hooks/useNestedSafeOwners'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { render, waitFor } from '@/tests/test-utils'
-import { SignerForm } from '../SignerForm'
+import { SignerForm } from '..'
 import { faker } from '@faker-js/faker'
 import { extendedSafeInfoBuilder, addressExBuilder } from '@/tests/builders/safe'
 import { generateRandomArray } from '@/tests/builders/utils'

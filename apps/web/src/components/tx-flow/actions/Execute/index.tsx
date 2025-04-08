@@ -1,13 +1,13 @@
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { useCallback, useContext, useState } from 'react'
-import { TxFlowContext } from '../TxFlowProvider'
-import ExecuteForm from '@/components/tx/SignOrExecuteForm/ExecuteForm'
+import { TxFlowContext } from '../../TxFlowProvider'
+import ExecuteForm from './ExecuteForm'
 import { useAlreadySigned } from '@/components/tx/SignOrExecuteForm/hooks'
 import { MODALS_EVENTS, trackEvent } from '@/services/analytics'
-import { withCheckboxGuard } from '../withCheckboxGuard'
-import { SIGN_CHECKBOX_LABEL, SIGN_CHECKBOX_TOOLTIP } from './Sign'
+import { withCheckboxGuard } from '../../withCheckboxGuard'
+import { SIGN_CHECKBOX_LABEL, SIGN_CHECKBOX_TOOLTIP } from '../Sign'
 import useIsCounterfactualSafe from '@/features/counterfactual/hooks/useIsCounterfactualSafe'
-import { type SlotComponentProps, SlotName, withSlot } from '../slots'
+import { type SlotComponentProps, SlotName, withSlot } from '../../slots'
 
 const CheckboxGuardedExecuteForm = withCheckboxGuard(ExecuteForm, SIGN_CHECKBOX_LABEL, SIGN_CHECKBOX_TOOLTIP)
 

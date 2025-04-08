@@ -12,6 +12,7 @@ export enum SlotName {
   Submit = 'submit',
   Action = 'action',
   Feature = 'feature',
+  Footer = 'footer',
   Sidebar = 'sidebar',
 }
 

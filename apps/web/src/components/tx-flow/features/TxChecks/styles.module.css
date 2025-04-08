@@ -1,0 +1,10 @@
+.mobileTxCheckMessages,
+.mobileTxCheckMessages:empty {
+  display: none;
+}
+
+@media (max-width: 899.95px) {
+  .mobileTxCheckMessages {
+    display: block;
+  }
+}

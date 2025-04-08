@@ -1,18 +1,22 @@
-import ProposerForm from '@/components/tx/SignOrExecuteForm/ProposerForm'
+import ProposerForm from '@/components/tx-flow/actions/Propose/ProposerForm'
 import CounterfactualForm from '@/features/counterfactual/CounterfactualForm'
 import { useIsWalletProposer } from '@/hooks/useProposers'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { type ReactElement, type ReactNode, useContext, useCallback } from 'react'
 import madProps from '@/utils/mad-props'
 import { useImmediatelyExecutable, useValidateNonce } from './hooks'
-import ExecuteForm from './ExecuteForm'
-import SignFormV2 from './SignFormV2'
+import ExecuteForm from '@/components/tx-flow/actions/Execute/ExecuteForm'
+import SignForm from '@/components/tx-flow/actions/Sign/SignForm'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { useAppSelector } from '@/store'
 import { selectSettings } from '@/store/settingsSlice'
 import useChainId from '@/hooks/useChainId'
-import ExecuteThroughRoleForm from './ExecuteThroughRoleForm'
-import { findAllowingRole, findMostLikelyRole, useRoles } from './ExecuteThroughRoleForm/hooks'
+import ExecuteThroughRoleForm from '@/components/tx-flow/actions/ExecuteThroughRole/ExecuteThroughRoleForm'
+import {
+  findAllowingRole,
+  findMostLikelyRole,
+  useRoles,
+} from '@/components/tx-flow/actions/ExecuteThroughRole/ExecuteThroughRoleForm/hooks'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import { useLazyGetTransactionDetailsQuery } from '@/store/api/gateway'
 import type { TransactionDetails, TransactionPreview } from '@safe-global/safe-gateway-typescript-sdk'
@@ -135,7 +139,7 @@ export const SignOrExecuteFormV2 = ({
   }
 
   if (!isCounterfactualSafe && !willExecute && !willExecuteThroughRole && !isProposing) {
-    return <SignFormV2 {...commonProps} />
+    return <SignForm {...commonProps} />
   }
 
   if (isProposing) {

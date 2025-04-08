@@ -10,23 +10,23 @@ import { useCurrentChain } from '@/hooks/useChains'
 import { getTxOptions } from '@/utils/transactions'
 import useIsValidExecution from '@/hooks/useIsValidExecution'
 import CheckWallet from '@/components/common/CheckWallet'
-import { useIsExecutionLoop, useTxActions } from './hooks'
+import { useIsExecutionLoop, useTxActions } from '@/components/tx/SignOrExecuteForm/hooks'
 import { useRelaysBySafe } from '@/hooks/useRemainingRelays'
 import useWalletCanRelay from '@/hooks/useWalletCanRelay'
-import { ExecutionMethod, ExecutionMethodSelector } from '../ExecutionMethodSelector'
+import { ExecutionMethod, ExecutionMethodSelector } from '@/components/tx/ExecutionMethodSelector'
 import { hasRemainingRelays } from '@/utils/relaying'
-import type { SignOrExecuteProps } from './SignOrExecuteForm'
+import type { SignOrExecuteProps } from '@/components/tx/SignOrExecuteForm/SignOrExecuteFormV2'
 import type { SafeTransaction } from '@safe-global/safe-core-sdk-types'
 import { TxModalContext } from '@/components/tx-flow'
 import { SuccessScreenFlow } from '@/components/tx-flow/flows'
 import useGasLimit from '@/hooks/useGasLimit'
-import AdvancedParams, { useAdvancedParams } from '../AdvancedParams'
+import AdvancedParams, { useAdvancedParams } from '@/components/tx/AdvancedParams'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { isWalletRejection } from '@/utils/wallets'
 
 import css from './styles.module.css'
 import commonCss from '@/components/tx-flow/common/styles.module.css'
-import { TxSecurityContext } from '../security/shared/TxSecurityContext'
+import { TxSecurityContext } from '@/components/tx/security/shared/TxSecurityContext'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import NonOwnerError from '@/components/tx/SignOrExecuteForm/NonOwnerError'
 import WalletRejectionError from '@/components/tx/SignOrExecuteForm/WalletRejectionError'
@@ -144,7 +144,7 @@ export const ExecuteForm = ({
   return (
     <>
       <form onSubmit={handleSubmit}>
-        <div className={classNames(css.params, { [css.noBottomBorderRadius]: canRelay })}>
+        <div className={classNames(commonCss.params, { [css.noBottomBorderRadius]: canRelay })}>
           <AdvancedParams
             willExecute
             params={advancedParams}

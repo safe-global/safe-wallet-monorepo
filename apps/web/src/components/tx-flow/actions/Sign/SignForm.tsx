@@ -5,12 +5,12 @@ import ErrorMessage from '@/components/tx/ErrorMessage'
 import { trackError, Errors } from '@/services/exceptions'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import CheckWallet from '@/components/common/CheckWallet'
-import { useAlreadySigned, useTxActions } from './hooks'
-import type { SignOrExecuteProps } from './SignOrExecuteFormV2'
+import { useAlreadySigned, useTxActions } from '@/components/tx/SignOrExecuteForm/hooks'
+import type { SignOrExecuteProps } from '@/components/tx/SignOrExecuteForm/SignOrExecuteFormV2'
 import type { SafeTransaction } from '@safe-global/safe-core-sdk-types'
 import { TxModalContext } from '@/components/tx-flow'
 import commonCss from '@/components/tx-flow/common/styles.module.css'
-import { TxSecurityContext } from '../security/shared/TxSecurityContext'
+import { TxSecurityContext } from '@/components/tx/security/shared/TxSecurityContext'
 import NonOwnerError from '@/components/tx/SignOrExecuteForm/NonOwnerError'
 import WalletRejectionError from '@/components/tx/SignOrExecuteForm/WalletRejectionError'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
@@ -21,7 +21,7 @@ import { useValidateTxData } from '@/hooks/useValidateTxData'
 import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
 import { TxCardActions } from '@/components/tx-flow/common/TxCard'
 
-export const SignFormV2 = ({
+export const SignForm = ({
   safeTx,
   txId,
   onSubmit,
@@ -161,7 +161,7 @@ export const SignFormV2 = ({
 
 const useTxSecurityContext = () => useContext(TxSecurityContext)
 
-export default madProps(SignFormV2, {
+export default madProps(SignForm, {
   isOwner: useIsSafeOwner,
   txActions: useTxActions,
   txSecurity: useTxSecurityContext,
