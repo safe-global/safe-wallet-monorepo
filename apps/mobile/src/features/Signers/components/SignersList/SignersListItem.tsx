@@ -25,9 +25,9 @@ function SignersListItem({ item, index, signersGroup }: SignersListItemProps) {
   const contact = useAppSelector(selectContactByAddress(item.value))
   const local = useLocalSearchParams<{ safeAddress: string; chainId: string; import_safe: string }>()
 
-  // Check if the current item belongs to the 'My signers' section
+  // Check if the current item belongs to the 'Imported signers' section
   const isMySigner = signersGroup.some(
-    (section) => section.title === 'My signers' && section.data.some((signer) => signer.value === item.value),
+    (section) => section.id === 'imported_signers' && section.data.some((signer) => signer.value === item.value),
   )
 
   const fullActions = useSignersActions(isMySigner) // This was necessary to prevent typescript from complaining about the actions array

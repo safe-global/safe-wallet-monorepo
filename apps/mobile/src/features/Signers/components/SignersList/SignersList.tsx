@@ -12,6 +12,7 @@ import { AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transacti
 import SignersListItem from './SignersListItem'
 
 export type SignerSection = {
+  id: string
   title: string
   data: SafeState['owners']
 }
