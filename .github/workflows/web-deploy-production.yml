@@ -1,8 +1,6 @@
 name: Web Release
 
 on:
-  pull_request:
-
   release:
     types: [published]
 
@@ -33,6 +31,31 @@ jobs:
       - name: Add SRI to scripts
         run: node ./scripts/integrity-hashes.cjs
         working-directory: apps/web
+
+      - name: Create archive
+        run: tar -czf "$ARCHIVE_NAME".tar.gz out
+        working-directory: apps/web
+
+      - name: Generate artifact attestation
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: apps/web/${{ env.ARCHIVE_NAME }}.tar.gz
+
+      - name: Create checksum
+        run: sha256sum "$ARCHIVE_NAME".tar.gz > "$ARCHIVE_NAME-sha256-checksum.txt"
+        working-directory: apps/web
+
+      - name: Upload archive as release asset
+        uses: shogo82148/actions-upload-release-asset@v1
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: apps/web/${{ env.ARCHIVE_NAME }}.tar.gz
+
+      - name: Upload archive as release asset
+        uses: shogo82148/actions-upload-release-asset@v1
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: apps/web/${{ env.ARCHIVE_NAME }}-sha256-checksum.txt
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
