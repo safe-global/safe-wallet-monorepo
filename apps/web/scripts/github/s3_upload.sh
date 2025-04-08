@@ -9,13 +9,18 @@ fi
 cd out
 
 # Upload the build to S3
-aws s3 sync . $BUCKET --delete
+aws s3 sync . "$BUCKET" --delete
 
-# Upload all HTML files again but w/o an extention so that URLs like /welcome open the right page
-for file in $(find . -name '*.html' | sed 's|^\./||'); do
-    aws s3 cp ${file%} $BUCKET/${file%.*} --content-type 'text/html' &
-done
+export BUCKET
 
-wait
+MAX_JOBS=10
+
+# Upload all HTML files again but w/o an extension so that URLs like /welcome open the right page
+find . -name '*.html' -print0 | \
+xargs -0 -n 1 -P "$MAX_JOBS" -I {} bash -c '
+  filepath="{}"
+  noext="${filepath%.html}"
+  aws s3 cp "$filepath" "$BUCKET/$noext" --content-type "text/html"
+'
 
 cd -
