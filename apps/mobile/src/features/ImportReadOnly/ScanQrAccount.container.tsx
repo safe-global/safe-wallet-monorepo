@@ -1,6 +1,6 @@
 import { Camera, Code, useCameraPermission } from 'react-native-vision-camera'
-import React, { useCallback, useEffect, useState } from 'react'
-import { useFocusEffect, useRouter } from 'expo-router'
+import React, { useCallback, useState } from 'react'
+import { useRouter } from 'expo-router'
 
 import { parsePrefixedAddress } from '@safe-global/utils/utils/addresses'
 import { isValidAddress } from '@safe-global/utils/utils/validation'
@@ -11,30 +11,11 @@ const toastForValueShown: Record<string, boolean> = {}
 
 export const ScanQrAccountContainer = () => {
   const router = useRouter()
-  const [isCameraActive, setIsCameraActive] = useState(true)
+  const [isCameraActive, setIsCameraActive] = useState(false)
   const toast = useToastController()
 
   const permission = Camera.getCameraPermissionStatus()
   const { hasPermission, requestPermission } = useCameraPermission()
-
-  useEffect(() => {
-    if (hasPermission === false && permission === 'not-determined') {
-      requestPermission()
-    }
-  }, [permission, hasPermission, requestPermission])
-
-  useFocusEffect(
-    // Callback should be wrapped in `React.useCallback` to avoid running the effect too often.
-    useCallback(() => {
-      // Invoked whenever the route is focused.
-      setIsCameraActive(true)
-
-      // Return function is invoked whenever the route gets out of focus.
-      return () => {
-        setIsCameraActive(false)
-      }
-    }, []),
-  )
 
   const onScan = useCallback(
     (codes: Code[]) => {
@@ -65,11 +46,18 @@ export const ScanQrAccountContainer = () => {
     router.push(`/(import-accounts)/form`)
   }, [router])
 
+  const handleActivateCamera = useCallback(() => {
+    setIsCameraActive(true)
+  }, [])
+
   return (
     <QrCameraView
       permission={permission}
+      hasPermission={hasPermission}
+      requestPermission={requestPermission}
       isCameraActive={isCameraActive}
       onScan={onScan}
+      onActivateCamera={handleActivateCamera}
       onEnterManuallyPress={onEnterManuallyPress}
     />
   )
