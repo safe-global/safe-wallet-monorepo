@@ -30,9 +30,7 @@ const NetworkMultiSelectorInput = ({
 
   const handleChange = useCallback(
     (newNetworks: ChainInfo[]) => {
-      // Update the form value
       setValue(name, newNetworks, { shouldValidate: true })
-      // Notify parent component about the change
       if (onNetworkChange) {
         onNetworkChange(newNetworks)
       }
@@ -43,7 +41,6 @@ const NetworkMultiSelectorInput = ({
   const handleDelete = useCallback(
     (deletedChainId: string) => {
       const updatedValues = value.filter((chain) => chain.chainId !== deletedChainId)
-      // Update the form value
       handleChange(updatedValues)
     },
     [handleChange, value],
