@@ -28,6 +28,7 @@ const TokenAmount = ({
   const sign = direction === TransferDirection.OUTGOING ? '-' : ''
   const amount =
     decimals !== undefined ? formatVisualAmount(value, decimals, preciseAmount ? PRECISION : undefined) : value
+  
   const fullAmount =
     decimals !== undefined ? sign + formatVisualAmount(value, decimals, PRECISION) + ' ' + tokenSymbol : value
 
@@ -35,7 +36,7 @@ const TokenAmount = ({
     <Tooltip title={fullAmount}>
       <span className={classNames(css.container, { [css.verticalAlign]: logoUri })}>
         {logoUri && <TokenIcon logoUri={logoUri} tokenSymbol={tokenSymbol} fallbackSrc={fallbackSrc} />}
-        <b>
+        <b className={css.tokenText}>
           {sign}
           {amount} {tokenSymbol}
         </b>
