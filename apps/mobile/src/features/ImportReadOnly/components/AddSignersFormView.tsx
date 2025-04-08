@@ -25,7 +25,7 @@ export const AddSignersFormView = ({
       <SignersList
         navbarTitle={'Import your signers to unlock account'}
         isFetching={isFetching}
-        hasLocalSingers={!!signersGroupedBySection.imported?.data.length}
+        hasLocalSigners={!!signersGroupedBySection.imported?.data.length}
         signersGroup={signersSections}
       />
       <View paddingHorizontal={'$4'} paddingTop={'$2'} paddingBottom={bottom || 60}>

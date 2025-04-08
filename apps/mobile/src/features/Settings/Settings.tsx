@@ -62,14 +62,15 @@ export const Settings = ({ address, data, onImplementationTap, displayDevMenu, c
                 <YStack
                   alignItems="center"
                   backgroundColor={'$background'}
-                  padding={'$4'}
+                  paddingTop={'$3'}
+                  paddingBottom={'$2'}
                   borderRadius={'$6'}
                   width={80}
                   marginRight={'$2'}
                 >
                   <View width={30}>
                     <Skeleton colorMode={colorScheme === 'dark' ? 'dark' : 'light'}>
-                      <Text fontWeight="700" textAlign="center" fontSize={'$4'}>
+                      <Text fontWeight="bold" textAlign="center" fontSize={'$4'}>
                         {owners.length}
                       </Text>
                     </Skeleton>
@@ -82,7 +83,7 @@ export const Settings = ({ address, data, onImplementationTap, displayDevMenu, c
                 <YStack
                   alignItems="center"
                   backgroundColor={'$background'}
-                  paddingTop={'$4'}
+                  paddingTop={'$3'}
                   paddingBottom={'$2'}
                   borderRadius={'$6'}
                   width={80}
