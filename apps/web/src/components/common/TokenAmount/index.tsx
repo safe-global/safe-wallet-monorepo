@@ -2,12 +2,11 @@ import { type ReactElement } from 'react'
 import { Tooltip } from '@mui/material'
 import { TransferDirection } from '@safe-global/safe-gateway-typescript-sdk'
 import css from './styles.module.css'
-import { formatVisualAmount, ellipsis } from '@safe-global/utils/utils/formatters'
+import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
 import TokenIcon from '../TokenIcon'
 import classNames from 'classnames'
 
 const PRECISION = 20
-const MAX_TOKEN_SYMBOL_LENGTH = 15
 
 const TokenAmount = ({
   value,
@@ -30,9 +29,6 @@ const TokenAmount = ({
   const amount =
     decimals !== undefined ? formatVisualAmount(value, decimals, preciseAmount ? PRECISION : undefined) : value
   
-  // Truncate token symbol if it's too long
-  const displayTokenSymbol = tokenSymbol ? ellipsis(tokenSymbol, MAX_TOKEN_SYMBOL_LENGTH) : undefined
-  
   const fullAmount =
     decimals !== undefined ? sign + formatVisualAmount(value, decimals, PRECISION) + ' ' + tokenSymbol : value
 
@@ -42,7 +38,7 @@ const TokenAmount = ({
         {logoUri && <TokenIcon logoUri={logoUri} tokenSymbol={tokenSymbol} fallbackSrc={fallbackSrc} />}
         <b className={css.tokenText}>
           {sign}
-          {amount} {displayTokenSymbol}
+          {amount} {tokenSymbol}
         </b>
       </span>
     </Tooltip>
