@@ -1,4 +1,4 @@
-import { useState, useCallback, useLayoutEffect } from 'react'
+import { useState, useCallback, useLayoutEffect, useEffect } from 'react'
 import * as Keychain from 'react-native-keychain'
 import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
 import {
@@ -7,8 +7,9 @@ import {
   setBiometricsType,
   setUserAttempts,
 } from '@/src/store/biometricsSlice'
-import { Platform, Linking } from 'react-native'
+import { Platform, Linking, Alert, AppState } from 'react-native'
 import Logger from '@/src/utils/logger'
+import DeviceCrypto, { BiometryType } from 'react-native-device-crypto'
 
 const BIOMETRICS_KEY = 'SAFE_WALLET_BIOMETRICS'
 
@@ -20,72 +21,62 @@ export function useBiometrics() {
   const biometricsType = useAppSelector((state) => state.biometrics.type)
   const userAttempts = useAppSelector((state) => state.biometrics.userAttempts)
 
-  const openBiometricSettings = () => {
+  const openBiometricSettings = useCallback(() => {
     if (Platform.OS === 'ios') {
       Linking.openURL('app-settings:')
     } else {
       Linking.openSettings()
     }
-  }
+  }, [])
 
-  const checkBiometricsSupport = useCallback(async () => {
+  const checkOSBiometricsSupport = useCallback(async () => {
     try {
-      const supportedBiometrics = await Keychain.getSupportedBiometryType()
+      const biometryType = await DeviceCrypto.getBiometryType()
 
-      if (supportedBiometrics) {
-        let type: 'FACE_ID' | 'TOUCH_ID' | 'FINGERPRINT' | 'NONE' = 'NONE'
+      dispatch(setBiometricsType(biometryType))
+      dispatch(setBiometricsSupported(biometryType !== BiometryType.NONE))
 
-        switch (supportedBiometrics) {
-          case Keychain.BIOMETRY_TYPE.FACE_ID:
-            type = 'FACE_ID'
-            break
-          case Keychain.BIOMETRY_TYPE.TOUCH_ID:
-            type = 'TOUCH_ID'
-            break
-          case Keychain.BIOMETRY_TYPE.FINGERPRINT:
-            type = 'FINGERPRINT'
-            break
-        }
-
-        dispatch(setBiometricsType(type))
-        dispatch(setBiometricsSupported(true))
-        return true
+      return {
+        biometricsEnabled: biometryType !== BiometryType.NONE,
+        biometryType: biometryType,
       }
-
-      return false
     } catch (error) {
       Logger.error('Error checking biometrics support:', error)
-      return false
-    }
-  }, [dispatch])
-
-  const checkBiometricsOSSettingsStatus = useCallback(async () => {
-    try {
-      // This checks if biometrics is available at system level
-      const result = await Keychain.getSupportedBiometryType()
-      // If biometrics is not set up at OS level, this will return null
-      // If Face ID is available, it returns 'FaceID'
-      // If Touch ID is available, it returns 'TouchID'
-      return {
-        biometricsEnabled: result !== null,
-        biometryType: result, // 'FaceID', 'TouchID', or null
-      }
-    } catch (error) {
-      Logger.error('Error checking biometrics:', error)
       return {
         biometricsEnabled: false,
         biometryType: null,
       }
     }
-  }, [])
+  }, [dispatch])
+
+  const ensureBiometricsAvailable = useCallback(async () => {
+    const { biometricsEnabled } = await checkOSBiometricsSupport()
+
+    if (!biometricsEnabled) {
+      Alert.alert(
+        'Biometric Authentication Required',
+        'To secure your private keys, you need to set up fingerprint or face recognition on your device. Would you like to set it up now?',
+        [
+          { text: 'Not Now', style: 'cancel' },
+          { text: 'Open Settings', onPress: openBiometricSettings },
+        ],
+        { cancelable: false },
+      )
+      return false
+    }
+
+    return true
+  }, [checkOSBiometricsSupport, openBiometricSettings])
 
   const disableBiometrics = useCallback(async () => {
     setIsLoading(true)
     try {
       await Keychain.resetGenericPassword()
       dispatch(setBiometricsEnabled(false))
+      return true
     } catch (error) {
       Logger.error('Error disabling biometrics:', error)
+      return false
     } finally {
       setIsLoading(false)
     }
@@ -94,27 +85,31 @@ export function useBiometrics() {
   const enableBiometrics = useCallback(async () => {
     setIsLoading(true)
     try {
-      const isSupported = await checkBiometricsSupport()
-      const { biometricsEnabled: isEnabledAtOSLevel } = await checkBiometricsOSSettingsStatus()
+      const { biometricsEnabled: isEnabledAtOSLevel } = await checkOSBiometricsSupport()
 
-      if (!isSupported && userCancelled) {
-        openBiometricSettings()
-      }
-
-      if (!isEnabledAtOSLevel && userCancelled) {
-        openBiometricSettings()
+      if (!isEnabledAtOSLevel) {
+        if (userCancelled) {
+          openBiometricSettings()
+        } else {
+          await ensureBiometricsAvailable()
+        }
+        setIsLoading(false)
+        return false
       }
 
       try {
-        // Wrap the biometrics operations in a nested try-catch to allow for user cancellation
+        // Try with biometrics first
+        const accessControl = Keychain.ACCESS_CONTROL.BIOMETRY_ANY
+        const accessible = Keychain.ACCESSIBLE.WHEN_UNLOCKED
+
         const setGenericPasswordResult = await Keychain.setGenericPassword(BIOMETRICS_KEY, 'biometrics-enabled', {
-          accessControl: Keychain.ACCESS_CONTROL.BIOMETRY_ANY,
-          accessible: Keychain.ACCESSIBLE.WHEN_UNLOCKED,
+          accessControl,
+          accessible,
         })
 
         if (setGenericPasswordResult) {
           const getGenericPasswordResult = await Keychain.getGenericPassword({
-            accessControl: Keychain.ACCESS_CONTROL.BIOMETRY_ANY,
+            accessControl,
           })
 
           if (getGenericPasswordResult) {
@@ -125,25 +120,50 @@ export function useBiometrics() {
           }
         }
 
-        // If we get here, something went wrong with setting or getting the password
         throw new Error('Failed to verify biometrics setup')
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } catch (biometricsError: any) {
-        // Handle user cancellation specifically
+      } catch (biometricsError: unknown) {
+        // Handle user cancellation
+        const error = biometricsError as { code?: string; message?: string }
         if (
-          biometricsError.code === '-128' || // User pressed Cancel
-          biometricsError.code === 'AuthenticationFailed' ||
-          biometricsError.message.includes('cancel') ||
-          biometricsError.message.includes('user name or passphrase')
+          error.code === '-128' || // User pressed Cancel
+          error.code === 'AuthenticationFailed' ||
+          error.message?.includes('cancel') ||
+          error.message?.includes('user name or passphrase')
         ) {
-          Keychain.resetGenericPassword().then(() => {
-            dispatch(setUserAttempts(userAttempts + 1))
-            setUserCancelled(true)
-          })
+          await Keychain.resetGenericPassword()
+          dispatch(setUserAttempts(userAttempts + 1))
+          setUserCancelled(true)
           dispatch(setBiometricsEnabled(false))
           return false
         }
-        // Re-throw other errors
+
+        // Try with device passcode fallback if biometrics fails for other reasons
+        try {
+          const accessControl = Keychain.ACCESS_CONTROL.DEVICE_PASSCODE
+          const accessible = Keychain.ACCESSIBLE.WHEN_UNLOCKED
+
+          const passcodeResult = await Keychain.setGenericPassword(BIOMETRICS_KEY, 'passcode-enabled', {
+            accessControl,
+            accessible,
+          })
+
+          if (passcodeResult) {
+            const getPasscodeResult = await Keychain.getGenericPassword({
+              accessControl,
+            })
+
+            if (getPasscodeResult) {
+              dispatch(setBiometricsEnabled(true))
+              dispatch(setUserAttempts(0))
+              setUserCancelled(false)
+              return true
+            }
+          }
+        } catch (passcodeError) {
+          Logger.error('Passcode fallback failed:', passcodeError)
+          throw passcodeError
+        }
+
         throw biometricsError
       }
     } catch (error) {
@@ -154,7 +174,14 @@ export function useBiometrics() {
     } finally {
       setIsLoading(false)
     }
-  }, [dispatch, checkBiometricsSupport, userCancelled, userAttempts])
+  }, [
+    dispatch,
+    checkOSBiometricsSupport,
+    userCancelled,
+    userAttempts,
+    openBiometricSettings,
+    ensureBiometricsAvailable,
+  ])
 
   const toggleBiometrics = useCallback(
     async (newValue: boolean) => {
@@ -165,34 +192,54 @@ export function useBiometrics() {
 
   const getBiometricsButtonLabel = useCallback(() => {
     switch (biometricsType) {
-      case 'FACE_ID':
+      case BiometryType.FACE:
         return 'Enable Face ID'
-      case 'TOUCH_ID':
+      case BiometryType.TOUCH:
         return 'Enable Touch ID'
-      case 'FINGERPRINT':
-        return 'Enable Fingerprint'
+      case BiometryType.IRIS:
+        return 'Enable Iris ID'
       default:
         return 'Enable Biometrics'
     }
   }, [biometricsType])
 
-  useLayoutEffect(() => {
-    const checkBiometrics = async () => {
-      const { biometricsEnabled: isEnabledAtOSLevel } = await checkBiometricsOSSettingsStatus()
+  const syncBiometricsWithOSSettings = useCallback(async () => {
+    if (isEnabled) {
+      const { biometricsEnabled: isEnabledAtOSLevel } = await checkOSBiometricsSupport()
       if (!isEnabledAtOSLevel) {
-        toggleBiometrics(false)
+        disableBiometrics()
       }
     }
-    checkBiometrics()
-  }, [])
+  }, [isEnabled, checkOSBiometricsSupport, disableBiometrics])
+
+  // Check biometrics on initial mount
+  useLayoutEffect(() => {
+    checkOSBiometricsSupport()
+  }, [checkOSBiometricsSupport])
+
+  // Monitor app state changes to sync biometrics with OS settings when app returns from background
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', (nextAppState) => {
+      if (nextAppState === 'active') {
+        syncBiometricsWithOSSettings()
+      }
+    })
+
+    return () => {
+      subscription.remove()
+    }
+  }, [syncBiometricsWithOSSettings])
 
   return {
+    enableBiometrics,
+    disableBiometrics,
     toggleBiometrics,
     openBiometricSettings,
     isBiometricsEnabled: isEnabled,
     biometricsType,
     isLoading,
     getBiometricsButtonLabel,
-    checkBiometricsOSSettingsStatus,
+    ensureBiometricsAvailable,
+    checkOSBiometricsSupport,
   }
 }

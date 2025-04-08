@@ -1,9 +1,20 @@
-import DeviceCrypto from 'react-native-device-crypto'
+import DeviceCrypto, { AccessLevel, BiometryType } from 'react-native-device-crypto'
 import * as Keychain from 'react-native-keychain'
 import DeviceInfo from 'react-native-device-info'
 import { IKeyStorageService, PrivateKeyStorageOptions } from './types'
 import Logger from '@/src/utils/logger'
 import { Platform } from 'react-native'
+
+// Import this from a shared utility or use a local implementation
+const ensureBiometricsAvailable = async (): Promise<boolean> => {
+  try {
+    const biometryType = await DeviceCrypto.getBiometryType()
+    return biometryType !== BiometryType.NONE
+  } catch (error) {
+    Logger.error('Error checking biometrics support:', error)
+    return false
+  }
+}
 
 export class KeyStorageService implements IKeyStorageService {
   private readonly BIOMETRIC_PROMPTS = {
@@ -22,6 +33,11 @@ export class KeyStorageService implements IKeyStorageService {
       biometrySubTitle: 'Saving key',
       biometryDescription: 'Please authenticate yourself',
     },
+  }
+
+  // Add the missing checkBiometricSupport method
+  private async checkBiometricSupport(): Promise<boolean> {
+    return ensureBiometricsAvailable()
   }
 
   async storePrivateKey(
@@ -55,10 +71,41 @@ export class KeyStorageService implements IKeyStorageService {
     return `signer_address_${userId}`
   }
 
+  /**
+   * Determines the appropriate access level based on device capabilities and requirements
+   *
+   * If the device is an emulator, we use UNLOCKED_DEVICE
+   * If the device is not an emulator and biometrics are not supported, we use UNLOCKED_DEVICE
+   * Otherwise, we use AUTHENTICATION_REQUIRED
+   */
+  private async getAppropriateAccessLevel(requireAuth: boolean, isEmulator: boolean): Promise<AccessLevel> {
+    if (!requireAuth) {
+      return AccessLevel.ALWAYS
+    }
+
+    // Check if the device supports biometrics
+    const biometricsSupported = await ensureBiometricsAvailable()
+
+    if (isEmulator) {
+      return AccessLevel.UNLOCKED_DEVICE
+    }
+
+    // If authentication is required but biometrics aren't available, fall back to device unlock
+    if (requireAuth && !biometricsSupported) {
+      Logger.info('Biometrics not supported, falling back to UNLOCKED_DEVICE')
+      return AccessLevel.UNLOCKED_DEVICE
+    }
+
+    // Otherwise use biometric authentication
+    return AccessLevel.AUTHENTICATION_REQUIRED
+  }
+
   private async getOrCreateKeyIOS(keyName: string, requireAuth: boolean, isEmulator: boolean): Promise<string> {
     try {
+      const accessLevel = await this.getAppropriateAccessLevel(requireAuth, isEmulator)
+
       await DeviceCrypto.getOrCreateAsymmetricKey(keyName, {
-        accessLevel: requireAuth ? (isEmulator ? 1 : 2) : 1,
+        accessLevel,
         invalidateOnNewBiometry: requireAuth,
       })
 
@@ -75,8 +122,10 @@ export class KeyStorageService implements IKeyStorageService {
    */
   private async getOrCreateKeyAndroid(keyName: string, requireAuth: boolean, isEmulator: boolean): Promise<void> {
     try {
+      const accessLevel = await this.getAppropriateAccessLevel(requireAuth, isEmulator)
+
       await DeviceCrypto.getOrCreateSymmetricKey(keyName, {
-        accessLevel: requireAuth ? (isEmulator ? 1 : 2) : 1,
+        accessLevel,
         invalidateOnNewBiometry: requireAuth,
       })
     } catch (error) {
@@ -105,10 +154,16 @@ export class KeyStorageService implements IKeyStorageService {
       { accessible: Keychain.ACCESSIBLE.WHEN_UNLOCKED_THIS_DEVICE_ONLY, service: keyName },
     )
 
-    // Enroll biometrics if required
+    // Enroll biometrics only if required and available
     if (requireAuth) {
+      // Check if biometrics are supported on the device
+      const biometricsSupported = await this.checkBiometricSupport()
+      const accessControl = biometricsSupported
+        ? Keychain.ACCESS_CONTROL.BIOMETRY_CURRENT_SET_OR_DEVICE_PASSCODE
+        : Keychain.ACCESS_CONTROL.DEVICE_PASSCODE
+
       await Keychain.getGenericPassword({
-        accessControl: Keychain.ACCESS_CONTROL.BIOMETRY_CURRENT_SET_OR_DEVICE_PASSCODE,
+        accessControl,
         service: keyName,
       })
     }
@@ -119,7 +174,11 @@ export class KeyStorageService implements IKeyStorageService {
 
     const keychainOptions: Keychain.GetOptions = { service: keyName }
     if (requireAuth) {
-      keychainOptions.accessControl = Keychain.ACCESS_CONTROL.BIOMETRY_CURRENT_SET_OR_DEVICE_PASSCODE
+      // Check if biometrics are supported on the device
+      const biometricsSupported = await this.checkBiometricSupport()
+      keychainOptions.accessControl = biometricsSupported
+        ? Keychain.ACCESS_CONTROL.BIOMETRY_CURRENT_SET_OR_DEVICE_PASSCODE
+        : Keychain.ACCESS_CONTROL.DEVICE_PASSCODE
     }
 
     const result = await Keychain.getGenericPassword(keychainOptions)
