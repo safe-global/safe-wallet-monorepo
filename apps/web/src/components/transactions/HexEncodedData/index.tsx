@@ -32,9 +32,7 @@ export const HexEncodedData = ({ hexData, title, highlightFirstBytes = true, lim
 
   const content = (
     <Box data-testid="tx-hexData" className={css.encodedData}>
-      <CopyButton text={hexData} />
-
-      <>
+      <CopyButton text={hexData}>
         {firstBytes}
         {showTxData || !showExpandBtn ? restBytes : shortenText(restBytes, limit - FIRST_BYTES)}{' '}
         {showExpandBtn && (
@@ -48,7 +46,7 @@ export const HexEncodedData = ({ hexData, title, highlightFirstBytes = true, lim
             Show {showTxData ? 'less' : 'more'}
           </Link>
         )}
-      </>
+      </CopyButton>
     </Box>
   )
 
