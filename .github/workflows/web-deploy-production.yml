@@ -1,6 +1,8 @@
 name: Web Release
 
 on:
+  pull_request:
+
   release:
     types: [published]
 
