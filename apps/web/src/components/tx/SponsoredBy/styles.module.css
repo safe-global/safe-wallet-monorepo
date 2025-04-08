@@ -17,4 +17,15 @@
 .logo {
   width: 16px;
   height: 16px;
+  margin-left: 2px;
+}
+
+[data-theme='dark'] .logo {
+  filter: brightness(0) invert(1);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .logo {
+    filter: brightness(0) invert(1);
+  }
 }
