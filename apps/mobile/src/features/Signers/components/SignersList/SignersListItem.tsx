@@ -1,5 +1,5 @@
 import React from 'react'
-import { MenuView, NativeActionEvent } from '@react-native-menu/menu'
+import { MenuView, NativeActionEvent, MenuAction } from '@react-native-menu/menu'
 import { useSignersActions } from './hooks/useSignersActions'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { SignersCard } from '@/src/components/transactions-list/Card/SignersCard'
@@ -24,7 +24,15 @@ function SignersListItem({ item, index, signersGroup }: SignersListItemProps) {
   const colorScheme = useColorScheme()
   const contact = useAppSelector(selectContactByAddress(item.value))
   const local = useLocalSearchParams<{ safeAddress: string; chainId: string; import_safe: string }>()
-  const actions = useSignersActions()
+
+  // Check if the current item belongs to the 'Imported signers' section
+  const isMySigner = signersGroup.some(
+    (section) => section.id === 'imported_signers' && section.data.some((signer) => signer.value === item.value),
+  )
+
+  const fullActions = useSignersActions(isMySigner) // This was necessary to prevent typescript from complaining about the actions array
+  // Filter out any false values to ensure the array type matches MenuAction[]
+  const actions = fullActions.filter(Boolean) as MenuAction[]
   const isLastItem = signersGroup.some((section) => section.data.length === index + 1)
   const dispatch = useAppDispatch()
   const copy = useCopyAndDispatchToast()
@@ -45,7 +53,7 @@ function SignersListItem({ item, index, signersGroup }: SignersListItemProps) {
       copy(item.value as string)
     }
 
-    if (nativeEvent.event === 'import') {
+    if (nativeEvent.event === 'import' && !isMySigner) {
       router.push({
         pathname: '/import-signers',
         params: {
