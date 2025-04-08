@@ -26,7 +26,7 @@ const Summary = ({ safeTxData, txData, txInfo, txDetails, showMethodCall }: Prop
 
   let baseGas, gasPrice, gasToken, safeTxGas, refundReceiver, submittedAt, nonce
   if (txDetails && isMultisigDetailedExecutionInfo(txDetails.detailedExecutionInfo)) {
-    ;({ baseGas, gasPrice, gasToken, safeTxGas, nonce } = txDetails.detailedExecutionInfo)
+    ;({ baseGas, gasPrice, gasToken, safeTxGas, submittedAt, nonce } = txDetails.detailedExecutionInfo)
     refundReceiver = txDetails.detailedExecutionInfo.refundReceiver?.value
   }
 
@@ -46,17 +46,19 @@ const Summary = ({ safeTxData, txData, txInfo, txDetails, showMethodCall }: Prop
   return (
     <>
       {txHash && (
-        <TxDataRow datatestid="tx-hash" title="Transaction hash:">
+        <TxDataRow datatestid="tx-hash" title="Transaction hash">
           {generateDataRowValue(txHash, 'hash', true)}{' '}
         </TxDataRow>
       )}
 
-      <TxDataRow datatestid="tx-created-at" title="Created:">
-        {submittedAt ? dateString(submittedAt) : null}
-      </TxDataRow>
+      {submittedAt && (
+        <TxDataRow datatestid="tx-created-at" title="Created">
+          {dateString(submittedAt)}
+        </TxDataRow>
+      )}
 
       {executedAt && (
-        <TxDataRow datatestid="tx-executed-at" title="Executed:">
+        <TxDataRow datatestid="tx-executed-at" title="Executed">
           {dateString(executedAt)}
         </TxDataRow>
       )}
