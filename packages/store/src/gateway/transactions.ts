@@ -24,16 +24,29 @@ export const txHistoryApi = api.injectEndpoints({
             return undefined
           }
 
-          // Extract the cursor from the next URL
-          // The URL format is something like: /v1/chains/{chainId}/safes/{safeAddress}/transactions/history?cursor=XYZ
-          const nextUrl = lastPage.next
-          const cursor = nextUrl.split('cursor=')[1]
+          // Extract the cursor from the next URL using URLSearchParams
+          // This is more robust than using string.split when dealing with complex URLs
+          try {
+            // The URL might be a relative URL like /v1/chains/{chainId}/safes/{safeAddress}/transactions/history?cursor=XYZ&other=param
+            // or a full URL with hostname
+            const urlParts = lastPage.next.split('?')
+            if (urlParts.length < 2) {
+              return undefined // No query string in the URL
+            }
 
-          if (!cursor) {
+            const queryString = urlParts[1]
+            const searchParams = new URLSearchParams(queryString)
+            const cursor = searchParams.get('cursor')
+
+            if (!cursor) {
+              return undefined
+            }
+
+            return cursor
+          } catch (error) {
+            console.error('Error extracting cursor from next URL:', error)
             return undefined
           }
-
-          return cursor
         },
       },
 
