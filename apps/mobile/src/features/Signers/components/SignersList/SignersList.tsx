@@ -21,11 +21,11 @@ const keyExtractor = (item: AddressInfo, index: number) => item.value + index
 interface SignersListProps {
   signersGroup: SignerSection[]
   isFetching: boolean
-  hasLocalSingers: boolean
+  hasLocalSigners: boolean
   navbarTitle?: string
 }
 
-export function SignersList({ signersGroup, isFetching, hasLocalSingers, navbarTitle }: SignersListProps) {
+export function SignersList({ signersGroup, isFetching, hasLocalSigners, navbarTitle }: SignersListProps) {
   const title = navbarTitle || 'Signers'
   const { handleScroll } = useScrollableHeader({
     children: <NavBarTitle>{title}</NavBarTitle>,
@@ -39,8 +39,8 @@ export function SignersList({ signersGroup, isFetching, hasLocalSingers, navbarT
   )
 
   const ListHeaderComponent = useCallback(
-    () => <SignersListHeader sectionTitle={title} withAlert={!hasLocalSingers} />,
-    [hasLocalSingers],
+    () => <SignersListHeader sectionTitle={title} withAlert={!hasLocalSigners} />,
+    [hasLocalSigners],
   )
 
   return (
