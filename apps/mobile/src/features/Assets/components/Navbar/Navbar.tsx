@@ -2,7 +2,8 @@ import React from 'react'
 import { Theme, XStack, getTokenValue } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Pressable } from 'react-native-gesture-handler'
-import { Identicon } from '@/src/components/Identicon'
+import { IdenticonWithBadge } from '@/src/features/Settings/components/IdenticonWithBadge'
+
 import { shortenAddress } from '@/src/utils/formatters'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { useAppSelector } from '@/src/store/hooks'
@@ -11,6 +12,8 @@ import { DropdownLabel } from '@/src/components/Dropdown/DropdownLabel'
 import { selectAppNotificationStatus } from '@/src/store/notificationsSlice'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { selectContactByAddress } from '@/src/store/addressBookSlice'
+import { selectSafeInfo } from '@/src/store/safesSlice'
+import { RootState } from '@/src/store'
 
 const dropdownLabelProps = {
   fontSize: '$5',
@@ -32,6 +35,8 @@ export const Navbar = () => {
     }
   }
 
+  const activeSafeInfo = useAppSelector((state: RootState) => selectSafeInfo(state, activeSafe.address))
+
   return (
     <Theme name="navbar">
       <XStack
@@ -45,7 +50,17 @@ export const Navbar = () => {
         <DropdownLabel
           label={contact ? contact.name : shortenAddress(activeSafe.address)}
           labelProps={dropdownLabelProps}
-          leftNode={<Identicon address={activeSafe.address} size={30} />}
+          leftNode={
+            <IdenticonWithBadge
+              testID="threshold-info-badge"
+              variant="sm"
+              size={40}
+              fontSize={10}
+              address={activeSafe.address}
+              badgeContent={`${activeSafeInfo?.SafeInfo.threshold}/${activeSafeInfo?.SafeInfo.owners.length}`}
+            />
+          }
+          // leftNode={<Identicon address={activeSafe.address} size={30} />}
           onPress={() => {
             router.push('/accounts-sheet')
           }}
