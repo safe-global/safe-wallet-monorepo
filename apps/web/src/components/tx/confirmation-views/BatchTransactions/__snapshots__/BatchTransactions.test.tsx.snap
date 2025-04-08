@@ -55,7 +55,9 @@ exports[`BatchTransactions should render a list of batch transactions 1`] = `
                     class="container"
                     data-mui-internal-clone-element="true"
                   >
-                    <b>
+                    <b
+                      class="tokenText"
+                    >
                       -
                       1000000000000
                        
@@ -118,7 +120,9 @@ exports[`BatchTransactions should render a list of batch transactions 1`] = `
                               class="container"
                               data-mui-internal-clone-element="true"
                             >
-                              <b>
+                              <b
+                                class="tokenText"
+                              >
                                 1000000000000
                                  
                               </b>
