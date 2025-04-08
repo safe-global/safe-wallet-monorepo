@@ -1,6 +1,6 @@
 import { Camera, useCodeScanner, useCameraDevice, Code, CameraPermissionStatus } from 'react-native-vision-camera'
-import { View, Theme, H3 } from 'tamagui'
-import { Dimensions, Linking, Pressable, StyleSheet, useWindowDimensions } from 'react-native'
+import { View, Theme, H3, getTokenValue } from 'tamagui'
+import { Dimensions, Linking, Pressable, StyleSheet, useColorScheme, useWindowDimensions } from 'react-native'
 import React, { useCallback, useEffect } from 'react'
 import { useRouter } from 'expo-router'
 
@@ -66,6 +66,14 @@ function CameraLens({
   onActivateCamera: () => void
   isCameraActive: boolean
 }) {
+  const colorScheme = useColorScheme()
+
+  let color = getTokenValue('$color.textPrimaryDark')
+
+  if (colorScheme === 'light') {
+    color = getTokenValue('$color.textPrimaryLight')
+  }
+
   const handleGrantOrActivatePress = () => {
     if (!hasPermission) {
       requestPermission()
@@ -92,7 +100,7 @@ function CameraLens({
       {/* Show button/icon only if permission denied, not granted, or granted but inactive */}
       {(denied || !hasPermission || (hasPermission && !isCameraActive)) && (
         <View style={styles.deniedCameraContainer}>
-          <SafeFontIcon name={'camera'} size={40} color={denied ? '$error' : '$white50'} />
+          <SafeFontIcon name={'camera'} size={40} color={denied ? '$error' : color} />
           <SafeButton rounded secondary onPress={buttonAction} marginTop={20}>
             {buttonText}
           </SafeButton>
