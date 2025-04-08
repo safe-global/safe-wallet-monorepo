@@ -32,6 +32,7 @@ describe('Limit order tests', { defaultCommandTimeout: 30000 }, () => {
     iframeSelector = `iframe[src*="${constants.swapWidget}"]`
     swaps.acceptLegalDisclaimer()
     main.getIframeBody(iframeSelector).within(() => {
+      cy.wait(20000) // Need more time to load UI
       swaps.switchToLimit()
       swaps.selectInputCurrency(swaps.swapTokens.cow)
       swaps.setInputValue(500)

@@ -118,17 +118,15 @@ export function verifyCFSafeCreated() {
   main.verifyElementsIsVisible([sidebar.pendingActivationIcon, safeActivationSection])
 }
 
-export function selectPayLaterOption() {
-  cy.get(connectedWalletExecMethod).click()
+export function selectPayNowOption() {
+  cy.get(connectedWalletMethod).click()
 }
 
 export function selectRelayOption() {
   cy.get(relayExecMethod).click()
 }
 
-export function selectPayNowOption() {
-  cy.get(connectedWalletMethod).click()
-}
+
 
 export function cancelWalletCreation() {
   cy.get(cancelBtn).click()
