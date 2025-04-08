@@ -11,6 +11,7 @@ import ChainIndicator from '@/components/common/ChainIndicator'
 import SecurityWarnings from '@/components/tx/security/SecurityWarnings'
 import TxStatusWidget from '@/components/tx-flow/common/TxStatusWidget'
 import { TxLayoutHeader } from '../TxLayout'
+import { SlotName, useSlot } from '../../slots'
 
 /**
  * TxFlowContent is a component that renders the main content of the transaction flow.
@@ -36,6 +37,8 @@ export const TxFlowContent = ({ children }: { children?: ReactNode[] | ReactNode
     progress,
     onPrev,
   } = useContext(TxFlowContext)
+
+  const sidebarFeatures = useSlot(SlotName.Sidebar)
 
   const childrenArray = Array.isArray(children) ? children : [children]
 
@@ -127,6 +130,10 @@ export const TxFlowContent = ({ children }: { children?: ReactNode[] | ReactNode
                   isMessage={isMessage}
                 />
               )}
+
+              {sidebarFeatures.map((SidebarFeature, i) => (
+                <SidebarFeature key={`sidebar-feature-${i}`} />
+              ))}
 
               <Box className={css.sticky}>
                 <SecurityWarnings />
