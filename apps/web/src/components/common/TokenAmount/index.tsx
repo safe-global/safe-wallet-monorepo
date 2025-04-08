@@ -28,7 +28,7 @@ const TokenAmount = ({
   const sign = direction === TransferDirection.OUTGOING ? '-' : ''
   const amount =
     decimals !== undefined ? formatVisualAmount(value, decimals, preciseAmount ? PRECISION : undefined) : value
-  
+
   const fullAmount =
     decimals !== undefined ? sign + formatVisualAmount(value, decimals, PRECISION) + ' ' + tokenSymbol : value
 
