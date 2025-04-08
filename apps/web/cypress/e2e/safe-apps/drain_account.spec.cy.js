@@ -69,7 +69,7 @@ describe('Drain Account tests', { defaultCommandTimeout: 40000 }, () => {
       getBody().findByLabelText(safeapps.recipientStr).type(getMockAddress())
       getBody().findAllByText(safeapps.transferEverythingStr).click()
     })
-    navigation.clickOnModalCloseBtn(1)
+    navigation.clickOnModalCloseBtn(0)
     cy.enter(iframeSelector).then((getBody) => {
       getBody().findAllByText(safeapps.transferEverythingStr).should('be.visible')
     })
