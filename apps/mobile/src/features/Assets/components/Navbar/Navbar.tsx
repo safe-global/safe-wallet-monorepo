@@ -53,6 +53,7 @@ export const Navbar = () => {
           leftNode={
             <IdenticonWithBadge
               testID="threshold-info-badge"
+              variant="sm"
               size={40}
               fontSize={10}
               address={activeSafe.address}
