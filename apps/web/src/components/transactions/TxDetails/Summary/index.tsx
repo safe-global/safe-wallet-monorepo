@@ -8,7 +8,7 @@ import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants
 import { TxDetails } from '@/components/tx/ConfirmTxDetails/TxDetails'
 import DecodedData from '../TxData/DecodedData'
 import ColorCodedTxAccordion from '@/components/tx/ColorCodedTxAccordion'
-import { Box, Divider } from '@mui/material'
+import { Box, Divider, Typography } from '@mui/material'
 import DecoderLinks from './DecoderLinks'
 
 interface Props {
@@ -23,6 +23,7 @@ const Summary = ({ safeTxData, txData, txInfo, txDetails, showMethodCall }: Prop
   const { txHash, executedAt } = txDetails ?? {}
   const toInfo = txData?.addressInfoIndex?.[txData?.to.value] || txData?.to
   const isExpanded = txInfo && showMethodCall
+  const showDetails = Boolean(txInfo && txData)
 
   let baseGas, gasPrice, gasToken, safeTxGas, refundReceiver, submittedAt, nonce
   if (txDetails && isMultisigDetailedExecutionInfo(txDetails.detailedExecutionInfo)) {
@@ -53,29 +54,31 @@ const Summary = ({ safeTxData, txData, txInfo, txDetails, showMethodCall }: Prop
 
       {submittedAt && (
         <TxDataRow datatestid="tx-created-at" title="Created">
-          {dateString(submittedAt)}
+          <Typography variant="body2">{dateString(submittedAt)}</Typography>
         </TxDataRow>
       )}
 
       {executedAt && (
         <TxDataRow datatestid="tx-executed-at" title="Executed">
-          {dateString(executedAt)}
+          <Typography variant="body2">{dateString(executedAt)}</Typography>
         </TxDataRow>
       )}
 
-      <Box mt={3}>
-        <ColorCodedTxAccordion txInfo={txInfo} txData={txData} defaultExpanded={isExpanded}>
-          <DecodedData txData={txData} toInfo={toInfo} />
+      {showDetails && (
+        <Box mt={3}>
+          <ColorCodedTxAccordion txInfo={txInfo} txData={txData} defaultExpanded={isExpanded}>
+            <DecodedData txData={txData} toInfo={toInfo} />
 
-          <DecoderLinks />
+            <DecoderLinks />
 
-          <Box mx={-2}>
-            <Divider sx={{ mx: -1 }} />
+            <Box mx={-2} mb={-3.5}>
+              <Divider sx={{ mx: -1 }} />
 
-            <TxDetails safeTxData={safeTxData} txData={txData} grid />
-          </Box>
-        </ColorCodedTxAccordion>
-      </Box>
+              <TxDetails safeTxData={safeTxData} txData={txData} grid />
+            </Box>
+          </ColorCodedTxAccordion>
+        </Box>
+      )}
     </>
   )
 }
