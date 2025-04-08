@@ -18,7 +18,6 @@ import { configureReanimatedLogger, ReanimatedLogLevel } from 'react-native-rean
 import { OnboardingHeader } from '@/src/features/Onboarding/components/OnboardingHeader'
 import { getDefaultScreenOptions } from '@/src/navigation/hooks/utils'
 import { NavigationGuardHOC } from '@/src/navigation/NavigationGuardHOC'
-import { StatusBar } from 'expo-status-bar'
 import { TestCtrls } from '@/src/tests/e2e-maestro/components/TestCtrls'
 import Logger, { LogLevel } from '@/src/utils/logger'
 import { useInitWeb3 } from '@/src/hooks/useInitWeb3'
@@ -160,7 +159,6 @@ function RootLayout() {
                         />
                         <Stack.Screen name="+not-found" />
                       </Stack>
-                      <StatusBar />
                     </NavigationGuardHOC>
                   </SafeToastProvider>
                 </SafeThemeProvider>

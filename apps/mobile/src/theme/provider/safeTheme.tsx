@@ -1,5 +1,4 @@
 import React from 'react'
-import { StatusBar } from 'react-native'
 import { ThemeProvider } from '@react-navigation/native'
 import { TamaguiProvider } from '@tamagui/core'
 
@@ -30,8 +29,6 @@ export const SafeThemeProvider = ({ children }: SafeThemeProviderProps) => {
 
   return (
     <FontProvider>
-      <StatusBar animated={true} barStyle="light-content" backgroundColor="transparent" translucent={true} />
-
       <TamaguiProvider config={config} defaultTheme={currentTheme ?? 'light'}>
         {themeProvider}
       </TamaguiProvider>
