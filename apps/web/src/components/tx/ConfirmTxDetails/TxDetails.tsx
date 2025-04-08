@@ -12,7 +12,6 @@ import {
 } from '@/components/transactions/TxDetails/Summary/SafeTxHashDataRow'
 import TxDetailsRow from './TxDetailsRow'
 import NameChip from './NameChip'
-import NamedAddressInfo from '@/components/common/NamedAddressInfo'
 
 type TxDetailsProps = {
   safeTxData: SafeTransaction['data']
@@ -42,40 +41,26 @@ export const TxDetails = ({ safeTxData, txData, grid }: TxDetailsProps) => {
                 </TxDetailsRow>
 
                 <TxDetailsRow label="To" grid={grid}>
-                  {!grid && <NameChip txData={txData} withBackground={grid} />}
+                  <NameChip txData={txData} withBackground={grid} />
 
-                  {grid ? (
-                    <Typography variant="body2">
-                      <NamedAddressInfo
-                        address={safeTxData.to}
-                        avatarSize={20}
-                        showPrefix={false}
-                        shortAddress={false}
-                        hasExplorer
-                        showAvatar
-                        highlight4bytes
-                      />
-                    </Typography>
-                  ) : (
-                    <Typography
-                      variant="body2"
-                      width="100%"
-                      sx={{
-                        '& *': { whiteSpace: 'normal', wordWrap: 'break-word', alignItems: 'flex-start !important' },
-                      }}
-                    >
-                      <EthHashInfo
-                        address={safeTxData.to}
-                        avatarSize={20}
-                        showPrefix={false}
-                        showName={false}
-                        shortAddress={false}
-                        hasExplorer
-                        showAvatar
-                        highlight4bytes
-                      />
-                    </Typography>
-                  )}
+                  <Typography
+                    variant="body2"
+                    width="100%"
+                    sx={{
+                      '& *': { whiteSpace: 'normal', wordWrap: 'break-word', alignItems: 'flex-start !important' },
+                    }}
+                  >
+                    <EthHashInfo
+                      address={safeTxData.to}
+                      avatarSize={20}
+                      showPrefix={false}
+                      showName={false}
+                      shortAddress={false}
+                      hasExplorer
+                      showAvatar
+                      highlight4bytes
+                    />
+                  </Typography>
                 </TxDetailsRow>
 
                 <TxDetailsRow label="Value" grid={grid}>

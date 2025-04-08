@@ -8,9 +8,20 @@ import useSafeAddress from '@/hooks/useSafeAddress'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { memo, useMemo } from 'react'
 
+const useIsUnverifiedContract = (address?: string, error?: Error): boolean => {
+  const web3 = useWeb3ReadOnly()
+
+  const [isUnverifiedContract] = useAsync<boolean>(async () => {
+    if (!error || !address) return false // Only check via RPC if getContract returned an error
+    const code = await web3?.getCode(address)
+    return code !== '0x'
+  }, [address, web3, error])
+
+  return isUnverifiedContract ?? false
+}
+
 export function useAddressName(address?: string, name?: string | null, customAvatar?: string) {
   const chainId = useChainId()
-  const web3 = useWeb3ReadOnly()
 
   const [contract, error] = useAsync(
     () => (!name && address ? getContract(chainId, address) : undefined),
@@ -18,11 +29,7 @@ export function useAddressName(address?: string, name?: string | null, customAva
     false,
   )
 
-  const [isUnverifiedContract] = useAsync<boolean>(async () => {
-    if (!error || !address) return false // Only check via RPC if getContract returned an error
-    const code = await web3?.getCode(address)
-    return code !== '0x'
-  }, [address, web3, error])
+  const isUnverifiedContract = useIsUnverifiedContract(address, error)
 
   return useMemo(
     () => ({

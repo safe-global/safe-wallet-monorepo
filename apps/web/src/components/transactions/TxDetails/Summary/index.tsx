@@ -71,7 +71,7 @@ const Summary = ({ safeTxData, txData, txInfo, txDetails, showMethodCall }: Prop
 
             <DecoderLinks />
 
-            <Box mx={-2} mb={-3.5}>
+            <Box mx={-2} mb={-2}>
               <Divider sx={{ mx: -1 }} />
 
               <TxDetails safeTxData={safeTxData} txData={txData} grid />

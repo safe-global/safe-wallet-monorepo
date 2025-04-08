@@ -25,7 +25,8 @@ export const PaperViewToggle = ({ children, withBackground, activeView = 0 }: Pa
     <Paper
       sx={{
         backgroundColor: withBackground ? 'background.main' : undefined,
-        py: 2,
+        pt: 1,
+        pb: 1.5,
       }}
     >
       <Stack spacing={2}>
