@@ -1,4 +1,4 @@
-import type { ReactElement } from 'react'
+import { memo, type ReactElement } from 'react'
 import { generateDataRowValue, TxDataRow } from '@/components/transactions/TxDetails/Summary/TxDataRow'
 import { isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
 import type { TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
@@ -10,6 +10,7 @@ import DecodedData from '../TxData/DecodedData'
 import ColorCodedTxAccordion from '@/components/tx/ColorCodedTxAccordion'
 import { Box, Divider, Typography } from '@mui/material'
 import DecoderLinks from './DecoderLinks'
+import isEqual from 'lodash/isEqual'
 
 interface Props {
   safeTxData?: SafeTransactionData
@@ -83,4 +84,4 @@ const Summary = ({ safeTxData, txData, txInfo, txDetails, showMethodCall }: Prop
   )
 }
 
-export default Summary
+export default memo(Summary, isEqual)
