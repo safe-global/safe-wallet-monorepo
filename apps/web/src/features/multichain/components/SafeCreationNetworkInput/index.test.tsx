@@ -1,7 +1,7 @@
 import * as useChains from '@/hooks/useChains'
 import { type ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import { FormProvider, useForm } from 'react-hook-form'
-import SafeCreationNetworkInput from '../../../../features/multichain/components/SafeCreationNetworkInput'
+import SafeCreationNetworkInput from '.'
 import { chainBuilder } from '@/tests/builders/chains'
 import { render, waitFor } from '@/tests/test-utils'
 import { act } from 'react'
