@@ -1,4 +1,4 @@
-import { useState, useCallback, useLayoutEffect, useEffect } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import * as Keychain from 'react-native-keychain'
 import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
 import {
@@ -13,10 +13,16 @@ import DeviceCrypto, { BiometryType } from 'react-native-device-crypto'
 
 const BIOMETRICS_KEY = 'SAFE_WALLET_BIOMETRICS'
 
+interface BiometricsError {
+  code?: string | number
+  message?: string
+}
+
 export function useBiometrics() {
   const dispatch = useAppDispatch()
   const [isLoading, setIsLoading] = useState(false)
   const [userCancelled, setUserCancelled] = useState(false)
+  const [isAppActive, setIsAppActive] = useState(false)
   const isEnabled = useAppSelector((state) => state.biometrics.isEnabled)
   const biometricsType = useAppSelector((state) => state.biometrics.type)
   const userAttempts = useAppSelector((state) => state.biometrics.userAttempts)
@@ -33,14 +39,35 @@ export function useBiometrics() {
     try {
       const biometryType = await DeviceCrypto.getBiometryType()
 
-      dispatch(setBiometricsType(biometryType))
-      dispatch(setBiometricsSupported(biometryType !== BiometryType.NONE))
+      // Only update state if we have a valid biometry type
+      if (biometryType !== BiometryType.NONE) {
+        dispatch(setBiometricsType(biometryType))
+        dispatch(setBiometricsSupported(true))
+      } else {
+        dispatch(setBiometricsType(BiometryType.NONE))
+        dispatch(setBiometricsSupported(false))
+      }
 
       return {
         biometricsEnabled: biometryType !== BiometryType.NONE,
         biometryType: biometryType,
       }
     } catch (error) {
+      const biometricsError = error as BiometricsError
+
+      // Handle the specific error case for no enrolled identities
+      if (
+        biometricsError.code === "Couldn't get biometry type" ||
+        (biometricsError.code === '-7' && biometricsError.message?.includes('No identities are enrolled'))
+      ) {
+        dispatch(setBiometricsType(BiometryType.NONE))
+        dispatch(setBiometricsSupported(false))
+        return {
+          biometricsEnabled: false,
+          biometryType: BiometryType.NONE,
+        }
+      }
+
       Logger.error('Error checking biometrics support:', error)
       return {
         biometricsEnabled: false,
@@ -212,23 +239,23 @@ export function useBiometrics() {
     }
   }, [isEnabled, checkOSBiometricsSupport, disableBiometrics])
 
-  // Check biometrics on initial mount
-  useLayoutEffect(() => {
-    checkOSBiometricsSupport()
-  }, [checkOSBiometricsSupport])
-
   // Monitor app state changes to sync biometrics with OS settings when app returns from background
   useEffect(() => {
-    const subscription = AppState.addEventListener('change', (nextAppState) => {
-      if (nextAppState === 'active') {
-        syncBiometricsWithOSSettings()
+    const handleAppStateChange = async (nextAppState: string) => {
+      if (nextAppState === 'active' && !isAppActive) {
+        setIsAppActive(true)
+        await syncBiometricsWithOSSettings()
+      } else if (nextAppState !== 'active') {
+        setIsAppActive(false)
       }
-    })
+    }
+
+    const subscription = AppState.addEventListener('change', handleAppStateChange)
 
     return () => {
       subscription.remove()
     }
-  }, [syncBiometricsWithOSSettings])
+  }, [syncBiometricsWithOSSettings, isAppActive])
 
   return {
     enableBiometrics,
