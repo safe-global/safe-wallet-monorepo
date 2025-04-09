@@ -238,7 +238,7 @@ export function clickOnConfirmSwapBtn() {
 export function clickOnExceeFeeChkbox() {
   cy.wait(1000)
   cy.get(exceedFeesChkbox)
-    .should(() => { })
+    .should(() => {})
     .then(($button) => {
       if (!$button.length) {
         return
@@ -259,7 +259,7 @@ export function verifyReviewOrderBtnIsVisible() {
 export function clickOnReviewOrderBtn() {
   cy.get('button')
     .contains(swapAnywayStrBtn)
-    .should(() => { })
+    .should(() => {})
     .then(($button) => {
       if (!$button.length) {
         return
@@ -273,7 +273,7 @@ export function placeTwapOrder() {
   cy.wait(3000)
   cy.get('button')
     .contains(acceptStrBtn)
-    .should(() => { })
+    .should(() => {})
     .then(($button) => {
       if (!$button.length) {
         return
@@ -287,7 +287,7 @@ export function confirmPriceImpact() {
   cy.wait(3000)
   cy.get('span')
     .contains('Swap anyway')
-    .should(() => { })
+    .should(() => {})
     .then(($checkbox) => {
       if ($checkbox.length) {
         cy.wrap($checkbox).click()
@@ -489,7 +489,7 @@ export function verifyRecipientAlertIsDisplayed() {
 export function closeIntroTwapModal() {
   cy.get('button')
     .contains(unlockTwapOrdersStrBtn)
-    .should(() => { })
+    .should(() => {})
     .then(($button) => {
       if (!$button.length) {
         return

@@ -6,10 +6,8 @@ const modalCloseIcon = '[data-testid="CloseIcon"]'
 export const expandMoreIcon = 'svg[data-testid="ExpandMoreIcon"]'
 const sentinelStart = 'div[data-testid="sentinelStart"]'
 
-
 const disconnectBtnStr = 'Disconnect'
 const notConnectedStatus = 'Connect'
-
 
 export function verifyTxBtnStatus(status) {
   cy.get(newTxBtn).should(status)
