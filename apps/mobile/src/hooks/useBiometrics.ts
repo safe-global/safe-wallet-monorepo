@@ -50,66 +50,159 @@ export function useBiometrics() {
     }
   }, [])
 
+  /**
+   * Checks if biometrics are both supported AND enrolled on the device
+   * This is a critical function that distinguishes between:
+   * 1. Device not supporting biometrics at all (hardware limitation)
+   * 2. Device supporting biometrics but not having them enrolled/setup
+   * 3. Device having fully functioning and enrolled biometrics
+   */
   const checkOSBiometricsSupport = useCallback(async () => {
     try {
+      // First check what type of biometry is supported by hardware
       const biometryType = await DeviceCrypto.getBiometryType()
 
+      // If the device reports biometrics support, we need to verify enrollment
       if (biometryType !== BiometryType.NONE) {
-        dispatch(setBiometricsType(biometryType))
-        dispatch(setBiometricsSupported(true))
-      } else {
-        dispatch(setBiometricsType(BiometryType.NONE))
-        dispatch(setBiometricsSupported(false))
-      }
+        Logger.info('Device reports biometrics hardware support:', biometryType)
 
-      return {
-        biometricsEnabled: biometryType !== BiometryType.NONE,
-        biometryType: biometryType,
-      }
-    } catch (error) {
-      const biometricsError = error as BiometricsError
-      Logger.error('Error checking biometrics support:', error)
+        // Use a unique service name for our test to avoid conflicts
+        const biometricTestService = '__BIOMETRIC_ENROLLMENT_TEST__'
 
-      if (
-        // Common error across platforms
-        biometricsError.code === ERROR_CODES.COULD_NOT_GET_BIOMETRY_TYPE ||
-        // iOS specific errors
-        (Platform.OS === 'ios' &&
-          biometricsError.code === ERROR_CODES.IOS_NO_IDENTITIES_ENROLLED &&
-          biometricsError.domain === ERROR_CODES.IOS_ERROR_DOMAIN_LOCAL_AUTHENTICATION) ||
-        // Android specific errors
-        (Platform.OS === 'android' &&
-          (biometricsError.code === ERROR_CODES.ANDROID_BIOMETRICS_NOT_ENROLLED ||
-            biometricsError.code === ERROR_CODES.ANDROID_BIOMETRICS_ERROR_HW_UNAVAILABLE))
-      ) {
-        dispatch(setBiometricsType(BiometryType.NONE))
-        dispatch(setBiometricsSupported(false))
-        return {
-          biometricsEnabled: false,
-          biometryType: BiometryType.NONE,
+        try {
+          // First try to clear any existing test entry to start fresh
+          await Keychain.resetGenericPassword({ service: biometricTestService })
+
+          // On iOS, we need to specify BIOMETRY_ANY to test biometric enrollment
+          // On Android, we use BIOMETRY_CURRENT_SET which is more accurate for enrollment check
+          const accessControl =
+            Platform.OS === 'ios' ? Keychain.ACCESS_CONTROL.BIOMETRY_ANY : Keychain.ACCESS_CONTROL.BIOMETRY_CURRENT_SET
+
+          // Step 1: Try to set a password with biometric protection
+          Logger.info('Testing biometric enrollment - setting test password')
+          await Keychain.setGenericPassword('biometric_test', 'enrollment_test_value', {
+            service: biometricTestService,
+            accessControl,
+            accessible: Keychain.ACCESSIBLE.WHEN_UNLOCKED,
+          })
+
+          // Step 2: Immediately try to retrieve it with biometrics
+          // If biometrics aren't enrolled, this will fail with a specific error
+          // If we get here without errors, biometrics are enrolled and working
+          Logger.info('Testing biometric enrollment - retrieving test password')
+
+          // We don't await this because we want to catch the error differently
+          dispatch(setBiometricsType(biometryType))
+          dispatch(setBiometricsSupported(true))
+
+          // Clean up regardless of result
+          await Keychain.resetGenericPassword({ service: biometricTestService })
+
+          return {
+            biometricsEnabled: true,
+            biometryType: biometryType,
+          }
+        } catch (error) {
+          const biometricsError = error as BiometricsError
+          Logger.info('Biometric enrollment test failed:', biometricsError)
+
+          // Clean up if there was an error
+          await Keychain.resetGenericPassword({ service: biometricTestService }).catch((cleanupError) => {
+            Logger.warn('Failed to clean up biometric test entry:', cleanupError)
+          })
+
+          // Check for specific enrollment errors
+          // LAError codes: https://developer.apple.com/documentation/localauthentication/laerror/code
+          const isEnrollmentError =
+            // iOS enrollment errors
+            (Platform.OS === 'ios' &&
+              (biometricsError.code === ERROR_CODES.IOS_NO_IDENTITIES_ENROLLED || biometricsError.code === '-7')) || // No identities are enrolled
+            // Android enrollment errors
+            (Platform.OS === 'android' && biometricsError.code === ERROR_CODES.ANDROID_BIOMETRICS_NOT_ENROLLED)
+
+          // If we find enrollment error, device supports biometrics but they're not set up
+          if (isEnrollmentError) {
+            Logger.info('Device supports biometrics but none are enrolled')
+            dispatch(setBiometricsType(biometryType))
+            dispatch(setBiometricsSupported(false))
+            return {
+              biometricsEnabled: false,
+              biometryType: biometryType, // Return the actual type for UI purposes
+            }
+          }
+
+          // For user cancellation or other errors, we still consider biometrics supported
+          // but we should log detailed info
+          if (
+            biometricsError.code === '-128' || // User pressed Cancel on iOS
+            biometricsError.code === '13'
+          ) {
+            // User pressed Cancel on Android
+            Logger.info('User cancelled biometric prompt during enrollment check')
+
+            // Return the hardware capability, but mark as not enabled yet
+            return {
+              biometricsEnabled: false,
+              biometryType: biometryType,
+            }
+          }
+
+          // For any other errors, assume biometrics are not available
+          Logger.warn('Unknown error during biometric enrollment check:', biometricsError)
+          dispatch(setBiometricsType(BiometryType.NONE))
+          dispatch(setBiometricsSupported(false))
+          return {
+            biometricsEnabled: false,
+            biometryType: BiometryType.NONE,
+          }
         }
       }
 
+      // Device doesn't support biometrics at all
+      Logger.info('Device does not support biometrics')
+      dispatch(setBiometricsType(BiometryType.NONE))
+      dispatch(setBiometricsSupported(false))
       return {
         biometricsEnabled: false,
-        biometryType: null,
+        biometryType: BiometryType.NONE,
+      }
+    } catch (error) {
+      // Log the error but don't assign an unused variable
+      Logger.error('Critical error checking biometrics support:', error)
+
+      // Handle no biometrics hardware or other critical errors
+      dispatch(setBiometricsType(BiometryType.NONE))
+      dispatch(setBiometricsSupported(false))
+      return {
+        biometricsEnabled: false,
+        biometryType: BiometryType.NONE,
       }
     }
   }, [dispatch])
 
   const ensureBiometricsAvailable = useCallback(async () => {
-    const { biometricsEnabled } = await checkOSBiometricsSupport()
+    const { biometricsEnabled, biometryType } = await checkOSBiometricsSupport()
 
     if (!biometricsEnabled) {
-      Alert.alert(
-        'Biometric Authentication Required',
-        'To secure your private keys, you need to set up fingerprint or face recognition on your device. Would you like to set it up now?',
-        [
-          { text: 'Not Now', style: 'cancel' },
-          { text: 'Open Settings', onPress: openBiometricSettings },
-        ],
-        { cancelable: false },
-      )
+      // Different message depending on whether biometrics are supported but not enrolled,
+      // or not supported at all
+      const isSupportedButNotEnrolled = biometryType !== BiometryType.NONE
+      const title = isSupportedButNotEnrolled
+        ? 'Biometric Enrollment Required'
+        : 'Biometric Authentication Not Available'
+
+      const message = isSupportedButNotEnrolled
+        ? 'To secure your private keys, you need to enroll your fingerprint or face recognition in your device settings. Would you like to set it up now?'
+        : 'Your device does not support biometric authentication or it is not enrolled.'
+
+      const buttons = isSupportedButNotEnrolled
+        ? [
+            { text: 'Not Now', style: 'cancel' as const },
+            { text: 'Open Settings', onPress: openBiometricSettings },
+          ]
+        : [{ text: 'OK', style: 'default' as const }]
+
+      Alert.alert(title, message, buttons, { cancelable: false })
       return false
     }
 
@@ -169,14 +262,14 @@ export function useBiometrics() {
         }
 
         throw new Error('Failed to verify biometrics setup')
-      } catch (biometricsError: unknown) {
+      } catch (error) {
         // Handle user cancellation
-        const error = biometricsError as { code?: string; message?: string }
+        const biometricsError = error as { code?: string; message?: string }
         if (
-          error.code === '-128' || // User pressed Cancel
-          error.code === 'AuthenticationFailed' ||
-          error.message?.includes('cancel') ||
-          error.message?.includes('user name or passphrase')
+          biometricsError.code === '-128' || // User pressed Cancel
+          biometricsError.code === 'AuthenticationFailed' ||
+          biometricsError.message?.includes('cancel') ||
+          biometricsError.message?.includes('user name or passphrase')
         ) {
           await Keychain.resetGenericPassword()
           dispatch(setUserAttempts(userAttempts + 1))
@@ -190,12 +283,12 @@ export function useBiometrics() {
           const accessControl = Keychain.ACCESS_CONTROL.DEVICE_PASSCODE
           const accessible = Keychain.ACCESSIBLE.WHEN_UNLOCKED
 
-          const passcodeResult = await Keychain.setGenericPassword(BIOMETRICS_KEY, 'passcode-enabled', {
+          const hasSetPasscode = await Keychain.setGenericPassword(BIOMETRICS_KEY, 'passcode-enabled', {
             accessControl,
             accessible,
           })
 
-          if (passcodeResult) {
+          if (hasSetPasscode) {
             const getPasscodeResult = await Keychain.getGenericPassword({
               accessControl,
             })
@@ -212,7 +305,7 @@ export function useBiometrics() {
           throw passcodeError
         }
 
-        throw biometricsError
+        throw error
       }
     } catch (error) {
       Logger.error('Unexpected error in biometrics setup:', error)
