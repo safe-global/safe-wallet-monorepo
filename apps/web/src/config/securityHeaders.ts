@@ -1,6 +1,5 @@
-import { IS_PRODUCTION } from '@/config/constants'
-
 const isCypress = Boolean(typeof window !== 'undefined' && window.Cypress)
+const isLocal = Boolean(typeof window !== 'undefined' && window.location.hostname === 'localhost')
 
 /**
  * CSP Header notes:
@@ -14,7 +13,7 @@ export const ContentSecurityPolicy = `
  default-src 'self';
  connect-src 'self' *;
  script-src 'self' 'unsafe-inline' https://*.getbeamer.com https://www.googletagmanager.com https://*.ingest.sentry.io https://sentry.io ${
-   !IS_PRODUCTION || isCypress
+   isLocal || isCypress
      ? "'unsafe-eval'" // Dev server and cypress need unsafe-eval
      : "'wasm-unsafe-eval'"
  };
