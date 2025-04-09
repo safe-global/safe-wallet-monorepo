@@ -36,7 +36,8 @@ export const getAvailableSaltNonce = async (
       throw new Error('Could not initiate RPC')
     }
     let safeAddress: string
-    if (chain.chainId === chains['zksync']) {
+    // FIXME a new check to indicate ZKsync chain will be added to the config service and available under ChainInfo
+    if (chain.chainId === chains['zksync'] || chain.chainId === chains['lens']) {
       // ZK-sync is using a different create2 method which is supported by the SDK
       safeAddress = await computeNewSafeAddress(
         rpcUrl,

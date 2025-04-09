@@ -126,8 +126,6 @@ export function selectRelayOption() {
   cy.get(relayExecMethod).click()
 }
 
-
-
 export function cancelWalletCreation() {
   cy.get(cancelBtn).click()
   cy.get('button').contains(continueWithWalletBtn).should('be.visible')

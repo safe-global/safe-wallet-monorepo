@@ -144,7 +144,10 @@ export const dispatchOnChainSigning = async (
   const safeTxHash = await sdk.getTransactionHash(safeTx)
   const eventParams = { txId, nonce: safeTx.data.nonce }
 
-  const options = chainId === chains.zksync ? { gasLimit: ZK_SYNC_ON_CHAIN_SIGNATURE_GAS_LIMIT } : undefined
+  const options =
+    chainId === chains.zksync || chainId === chains.lens
+      ? { gasLimit: ZK_SYNC_ON_CHAIN_SIGNATURE_GAS_LIMIT }
+      : undefined
   let txHashOrParentSafeTxHash: string
   try {
     // TODO: This is a workaround until there is a fix for unchecked transactions in the protocol-kit

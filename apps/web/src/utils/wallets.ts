@@ -40,6 +40,10 @@ export const isHardwareWallet = (wallet: ConnectedWallet): boolean => {
   )
 }
 
+export const isPKWallet = (wallet: ConnectedWallet): boolean => {
+  return wallet.label.toUpperCase() === WALLET_KEYS.PK
+}
+
 export const isSmartContract = async (address: string, provider?: JsonRpcProvider): Promise<boolean> => {
   const web3 = provider ?? getWeb3ReadOnly()
 

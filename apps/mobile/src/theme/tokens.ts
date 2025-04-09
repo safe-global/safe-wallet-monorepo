@@ -31,6 +31,8 @@ export const fontSizes = {
   3: 13,
   4: 14,
   true: 14,
+  $sm: 14,
+  $md: 14,
   5: 16,
   6: 18,
   7: 20,
