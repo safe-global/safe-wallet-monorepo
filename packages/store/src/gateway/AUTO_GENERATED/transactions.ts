@@ -599,6 +599,27 @@ export type NativeStakingWithdrawTransactionInfo = {
   tokenInfo: TokenInfo
   validators: string[]
 }
+export type VaultDepositAdditionalRewards = {
+  tokenInfo: TokenInfo
+  returnRate: number
+}
+export type VaultDepositTransactionInfo = {
+  type: 'VaultDeposit'
+  humanDescription?: string | null
+  chainId: string
+  expectedMonthlyReward: number
+  expectedAnnualReward: number
+  tokenInfo: TokenInfo
+  value: number
+  returnRate: number
+  vaultAddress: string
+  vaultName: string
+  vaultDisplayName: string
+  vaultDescription: string
+  vaultDashboardURL: string | null
+  vaultTVL: number
+  additionalRewards?: VaultDepositAdditionalRewards[]
+}
 export type TransactionData = {
   hexData?: string | null
   dataDecoded?: DataDecoded | null
@@ -662,6 +683,7 @@ export type TransactionDetails = {
     | NativeStakingDepositTransactionInfo
     | NativeStakingValidatorsExitTransactionInfo
     | NativeStakingWithdrawTransactionInfo
+    | VaultDepositTransactionInfo
   safeAddress: string
   txId: string
   executedAt?: number | null
@@ -734,6 +756,7 @@ export type Transaction = {
     | NativeStakingDepositTransactionInfo
     | NativeStakingValidatorsExitTransactionInfo
     | NativeStakingWithdrawTransactionInfo
+    | VaultDepositTransactionInfo
   id: string
   txHash?: string | null
   timestamp: number
@@ -792,6 +815,7 @@ export type TransactionPreview = {
     | NativeStakingDepositTransactionInfo
     | NativeStakingValidatorsExitTransactionInfo
     | NativeStakingWithdrawTransactionInfo
+    | VaultDepositTransactionInfo
   txData: TransactionData
 }
 export type PreviewTransactionDto = {
