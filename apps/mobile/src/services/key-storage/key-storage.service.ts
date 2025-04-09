@@ -5,7 +5,21 @@ import { IKeyStorageService, PrivateKeyStorageOptions } from './types'
 import Logger from '@/src/utils/logger'
 import { Platform } from 'react-native'
 
-// Import this from a shared utility or use a local implementation
+/**
+ * Checks if biometric authentication is available and enabled on the device.
+ *
+ * @returns {Promise<boolean>} A promise that resolves to true if biometrics are available and enabled,
+ * false otherwise. This includes cases where biometrics are not enrolled or hardware is unavailable.
+ *
+ * @throws Will log any errors encountered while checking biometrics, but will return false rather than throw.
+ *
+ * @remarks
+ * This function is defined separately from the similar one in useBiometrics hook to:
+ * 1. Avoid circular dependencies - this service is used by hooks but shouldn't depend on them
+ * 2. Maintain separation of concerns - services should be independent of UI/React hooks
+ * 3. Support non-React contexts - allows this function to be used in pure service layers
+ * 4. Ensure lightweight implementation - provides just the core functionality without UI-related logic
+ */
 const ensureBiometricsAvailable = async (): Promise<boolean> => {
   try {
     const biometryType = await DeviceCrypto.getBiometryType()
@@ -35,7 +49,6 @@ export class KeyStorageService implements IKeyStorageService {
     },
   }
 
-  // Add the missing checkBiometricSupport method
   private async checkBiometricSupport(): Promise<boolean> {
     return ensureBiometricsAvailable()
   }
