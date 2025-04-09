@@ -88,7 +88,7 @@ function EnhancedTableHead(props: EnhancedTableHeadProps) {
                   active={orderBy === headCell.id}
                   direction={orderBy === headCell.id ? order : 'asc'}
                   onClick={createSortHandler(headCell.id)}
-                  sx={{ mr: [0, '-26px'] }}
+                  sx={{ mr: [0, '-26px'], textWrap: 'nowrap' }}
                 >
                   {headCell.label}
                   {orderBy === headCell.id ? (

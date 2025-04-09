@@ -1,8 +1,6 @@
 import CheckBalance from '@/features/counterfactual/CheckBalance'
 import { type ReactElement } from 'react'
 import { Box, IconButton, Checkbox, Skeleton, Tooltip, Typography } from '@mui/material'
-import type { TokenInfo } from '@safe-global/safe-gateway-typescript-sdk'
-import { TokenType } from '@safe-global/safe-gateway-typescript-sdk'
 import css from './styles.module.css'
 import TokenAmount from '@/components/common/TokenAmount'
 import TokenIcon from '@/components/common/TokenIcon'
@@ -23,6 +21,9 @@ import useIsStakingFeatureEnabled from '@/features/stake/hooks/useIsStakingFeatu
 import { STAKE_LABELS } from '@/services/analytics/events/stake'
 import StakeButton from '@/features/stake/components/StakeButton'
 import { FiatBalance } from './FiatBalance'
+import { TokenType } from '@safe-global/safe-gateway-typescript-sdk'
+import { type Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
+import { FiatChange } from './FiatChange'
 
 const skeletonCells: EnhancedTableProps['rows'][0]['cells'] = {
   asset: {
@@ -52,6 +53,14 @@ const skeletonCells: EnhancedTableProps['rows'][0]['cells'] = {
       </Typography>
     ),
   },
+  change: {
+    rawValue: '0',
+    content: (
+      <Typography>
+        <Skeleton width="32px" />
+      </Typography>
+    ),
+  },
   actions: {
     rawValue: '',
     sticky: true,
@@ -61,7 +70,7 @@ const skeletonCells: EnhancedTableProps['rows'][0]['cells'] = {
 
 const skeletonRows: EnhancedTableProps['rows'] = Array(3).fill({ cells: skeletonCells })
 
-const isNativeToken = (tokenInfo: TokenInfo) => {
+const isNativeToken = (tokenInfo: Balance['tokenInfo']) => {
   return tokenInfo.type === TokenType.NATIVE_TOKEN
 }
 
@@ -81,6 +90,12 @@ const headCells = [
     label: 'Value',
     width: '20%',
     align: 'right',
+  },
+  {
+    id: 'change',
+    label: '(24h change)',
+    width: '20%',
+    align: 'left',
   },
   {
     id: 'actions',
@@ -156,6 +171,11 @@ const AssetsTable = ({
               rawValue: rawFiatValue,
               collapsed: item.tokenInfo.address === hidingAsset,
               content: <FiatBalance balanceItem={item} />,
+            },
+            change: {
+              rawValue: Number(item.fiatBalance24hChange ?? -9999999999999999),
+              collapsed: item.tokenInfo.address === hidingAsset,
+              content: <FiatChange balanceItem={item} />,
             },
             actions: {
               rawValue: '',

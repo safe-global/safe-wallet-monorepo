@@ -116,4 +116,18 @@ describe('formatters', () => {
       expect(maybePlural(['1'])).toEqual('')
     })
   })
+
+  describe('formatPercentage', () => {
+    it('should format percentage correctly', () => {
+      expect(formatters.formatPercentage(0.123456789)).toEqual('12.35%')
+    })
+
+    it('should not return signs', () => {
+      expect(formatters.formatPercentage(-0.123456789)).toEqual('12.35%')
+    })
+
+    it('should only show 2 decimals if required', () => {
+      expect(formatters.formatPercentage(0.69)).toEqual('69%')
+    })
+  })
 })

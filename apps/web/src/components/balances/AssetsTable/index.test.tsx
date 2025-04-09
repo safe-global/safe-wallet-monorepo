@@ -8,6 +8,7 @@ import { toBeHex } from 'ethers'
 import { useState } from 'react'
 import AssetsTable from '.'
 import { COLLAPSE_TIMEOUT_MS } from './useHideAssets'
+import { type Balances } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 
 const getParentRow = (element: HTMLElement | null) => {
   while (element !== null) {
@@ -47,7 +48,7 @@ describe('AssetsTable', () => {
     const mockHiddenAssets = {
       '5': [toBeHex('0x2', 20), toBeHex('0x3', 20)],
     }
-    const mockBalances = {
+    const mockBalances: Balances = {
       fiatTotal: '300',
       items: [
         {
@@ -152,7 +153,7 @@ describe('AssetsTable', () => {
     const mockHiddenAssets = {
       '5': [toBeHex('0x2', 20), toBeHex('0x3', 20), toBeHex('0xdead', 20)],
     }
-    const mockBalances = {
+    const mockBalances: Balances = {
       fiatTotal: '300',
       items: [
         {
@@ -253,7 +254,7 @@ describe('AssetsTable', () => {
     const mockHiddenAssets = {
       '5': [],
     }
-    const mockBalances = {
+    const mockBalances: Balances = {
       fiatTotal: '300',
       items: [
         {
@@ -351,7 +352,7 @@ describe('AssetsTable', () => {
     const mockHiddenAssets = {
       '5': [],
     }
-    const mockBalances = {
+    const mockBalances: Balances = {
       fiatTotal: '300',
       items: [
         {
