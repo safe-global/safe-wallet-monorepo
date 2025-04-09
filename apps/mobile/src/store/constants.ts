@@ -371,7 +371,7 @@ export enum PressActionId {
   OPEN_TRANSACTION_VIEW = 'open-transactions-view-press-action-id',
 }
 
-export const LAUNCH_ACTIVITY = 'global.safe.mobileapp.ui.MainActivity'
+export const LAUNCH_ACTIVITY = '.MainActivity'
 
 export const ERROR_MSG = 'useDelegateKey: Something went wrong'
 
