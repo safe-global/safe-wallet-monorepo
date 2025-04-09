@@ -1,6 +1,6 @@
 import madProps from '@/utils/mad-props'
 import { type ReactElement, type SyntheticEvent, useContext, useMemo, useState } from 'react'
-import { Divider } from '@mui/material'
+import { Box, Divider, Stack } from '@mui/material'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import { trackError, Errors } from '@/services/exceptions'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
@@ -123,7 +123,7 @@ export const SignForm = ({
     validationLoading
 
   return (
-    <form onSubmit={handleSubmit}>
+    <Stack gap={3}>
       {hasSigned && <ErrorMessage level="warning">You have already signed this transaction.</ErrorMessage>}
 
       {cannotPropose && <NonOwnerError />}
@@ -132,25 +132,29 @@ export const SignForm = ({
         <ErrorMessage error={validationError}>Error validating transaction data</ErrorMessage>
       )}
 
-      <Divider className={commonCss.nestedDivider} sx={{ pt: 3 }} />
+      <Box>
+        <Divider className={commonCss.nestedDivider} />
 
-      <TxCardActions>
         {/* Submit button */}
-        <CheckWallet checkNetwork={!submitDisabled}>
-          {(isOk) => (
-            <SplitMenuButton
-              data-testid="sign-btn"
-              selectedOption="sign"
-              onChange={handleOptionChange}
-              options={options}
-              disabled={!isOk || submitDisabled}
-              loading={!isSubmittable || !isSubmittableLocal}
-              tooltip={isOk ? tooltip : undefined}
-            />
-          )}
-        </CheckWallet>
-      </TxCardActions>
-    </form>
+        <TxCardActions>
+          <form onSubmit={handleSubmit}>
+            <CheckWallet checkNetwork={!submitDisabled}>
+              {(isOk) => (
+                <SplitMenuButton
+                  data-testid="sign-btn"
+                  selectedOption="sign"
+                  onChange={handleOptionChange}
+                  options={options}
+                  disabled={!isOk || submitDisabled}
+                  loading={!isSubmittable || !isSubmittableLocal}
+                  tooltip={isOk ? tooltip : undefined}
+                />
+              )}
+            </CheckWallet>
+          </form>
+        </TxCardActions>
+      </Box>
+    </Stack>
   )
 }
 

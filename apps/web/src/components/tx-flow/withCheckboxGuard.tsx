@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, type ComponentType } from 'react'
-import { Checkbox, FormControlLabel } from '@mui/material'
+import { Checkbox, FormControlLabel, Stack } from '@mui/material'
 
 /**
  * Higher-order component that wraps a given component with a checkbox guard.
@@ -33,15 +33,15 @@ export const withCheckboxGuard = <P extends { disableSubmit?: boolean; tooltip?:
     const checkboxTooltip = useMemo(() => (tooltip || !isChecked ? tooltipText : undefined), [tooltip, isChecked])
 
     return (
-      <>
+      <Stack gap={2} width="100%">
         <FormControlLabel
-          sx={{ mt: 2, mb: -1.3 }}
+          sx={{ mt: 2 }}
           control={<Checkbox checked={isChecked} onChange={handleCheckboxChange} />}
           label={label}
         />
 
         <WrappedComponent {...(props as P)} disableSubmit={!isChecked || disableSubmit} tooltip={checkboxTooltip} />
-      </>
+      </Stack>
     )
   }
 }

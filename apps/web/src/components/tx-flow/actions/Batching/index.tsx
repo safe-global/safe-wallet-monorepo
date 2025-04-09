@@ -11,6 +11,9 @@ import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { Errors, logError } from '@/services/exceptions'
 import SplitMenuButton from '@/components/common/SplitMenuButton'
 import { BATCH_EVENTS, trackEvent } from '@/services/analytics'
+import { TxCardActions } from '../../common/TxCard'
+import { Box, Divider } from '@mui/material'
+import commonCss from '@/components/tx-flow/common/styles.module.css'
 
 const Batching = ({ onSubmit, options = [], onChange }: SlotComponentProps<SlotName.ComboSubmit>) => {
   const { setTxFlow } = useContext(TxModalContext)
@@ -50,15 +53,21 @@ const Batching = ({ onSubmit, options = [], onChange }: SlotComponentProps<SlotN
   }
 
   return (
-    <SplitMenuButton
-      onClick={handleSubmit}
-      selectedOption="batching"
-      onChange={onChange}
-      options={options}
-      disabled={!isSubmittable || !isBatchable}
-      loading={!isSubmittable}
-      tooltip={!isBatchable ? `Cannot batch this type of transaction` : undefined}
-    />
+    <Box>
+      <Divider className={commonCss.nestedDivider} />
+
+      <TxCardActions>
+        <SplitMenuButton
+          onClick={handleSubmit}
+          selectedOption="batching"
+          onChange={onChange}
+          options={options}
+          disabled={!isSubmittable || !isBatchable}
+          loading={!isSubmittable}
+          tooltip={!isBatchable ? `Cannot batch this type of transaction` : undefined}
+        />
+      </TxCardActions>
+    </Box>
   )
 }
 

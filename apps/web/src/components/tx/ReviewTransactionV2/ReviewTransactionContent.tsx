@@ -3,7 +3,7 @@ import { useContext } from 'react'
 import madProps from '@/utils/mad-props'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import ErrorMessage from '../ErrorMessage'
-import TxCard, { TxCardActions } from '@/components/tx-flow/common/TxCard'
+import TxCard from '@/components/tx-flow/common/TxCard'
 import ConfirmationTitle, { ConfirmationTitleTypes } from '@/components/tx/SignOrExecuteForm/ConfirmationTitle'
 import { ErrorBoundary } from '@sentry/react'
 import ApprovalEditor from '../ApprovalEditor'
@@ -108,14 +108,11 @@ export const ReviewTransactionContent = ({
 
         <Blockaid />
 
-        <TxCardActions>
-          {/* Submit button */}
-          {SubmitComponent ? (
-            <SubmitComponent onSubmit={onSubmit} />
-          ) : (
-            <Sign onSubmit={onSubmit} options={['sign']} onChange={() => {}} />
-          )}
-        </TxCardActions>
+        {SubmitComponent ? (
+          <SubmitComponent onSubmit={onSubmit} />
+        ) : (
+          <Sign onSubmit={onSubmit} options={['sign']} onChange={() => {}} />
+        )}
       </TxCard>
     </>
   )
