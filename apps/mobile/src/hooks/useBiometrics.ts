@@ -16,6 +16,21 @@ const BIOMETRICS_KEY = 'SAFE_WALLET_BIOMETRICS'
 interface BiometricsError {
   code?: string | number
   message?: string
+  domain?: string
+}
+
+// Error constants that are language-independent
+const ERROR_CODES = {
+  // iOS specific error codes
+  IOS_NO_IDENTITIES_ENROLLED: '-7',
+  IOS_ERROR_DOMAIN_LOCAL_AUTHENTICATION: 'com.apple.LocalAuthentication',
+
+  // Android specific error codes
+  ANDROID_BIOMETRICS_NOT_ENROLLED: '11',
+  ANDROID_BIOMETRICS_ERROR_HW_UNAVAILABLE: '1',
+
+  // Common error codes across platforms
+  COULD_NOT_GET_BIOMETRY_TYPE: "Couldn't get biometry type",
 }
 
 export function useBiometrics() {
@@ -39,7 +54,6 @@ export function useBiometrics() {
     try {
       const biometryType = await DeviceCrypto.getBiometryType()
 
-      // Only update state if we have a valid biometry type
       if (biometryType !== BiometryType.NONE) {
         dispatch(setBiometricsType(biometryType))
         dispatch(setBiometricsSupported(true))
@@ -54,11 +68,19 @@ export function useBiometrics() {
       }
     } catch (error) {
       const biometricsError = error as BiometricsError
+      Logger.error('Error checking biometrics support:', error)
 
-      // Handle the specific error case for no enrolled identities
       if (
-        biometricsError.code === "Couldn't get biometry type" ||
-        (biometricsError.code === '-7' && biometricsError.message?.includes('No identities are enrolled'))
+        // Common error across platforms
+        biometricsError.code === ERROR_CODES.COULD_NOT_GET_BIOMETRY_TYPE ||
+        // iOS specific errors
+        (Platform.OS === 'ios' &&
+          biometricsError.code === ERROR_CODES.IOS_NO_IDENTITIES_ENROLLED &&
+          biometricsError.domain === ERROR_CODES.IOS_ERROR_DOMAIN_LOCAL_AUTHENTICATION) ||
+        // Android specific errors
+        (Platform.OS === 'android' &&
+          (biometricsError.code === ERROR_CODES.ANDROID_BIOMETRICS_NOT_ENROLLED ||
+            biometricsError.code === ERROR_CODES.ANDROID_BIOMETRICS_ERROR_HW_UNAVAILABLE))
       ) {
         dispatch(setBiometricsType(BiometryType.NONE))
         dispatch(setBiometricsSupported(false))
@@ -68,7 +90,6 @@ export function useBiometrics() {
         }
       }
 
-      Logger.error('Error checking biometrics support:', error)
       return {
         biometricsEnabled: false,
         biometryType: null,
