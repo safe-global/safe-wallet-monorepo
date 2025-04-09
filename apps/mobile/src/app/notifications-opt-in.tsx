@@ -5,8 +5,11 @@ import { router } from 'expo-router'
 import { useNotificationManager } from '@/src/hooks/useNotificationManager'
 import { useAppDispatch } from '../store/hooks'
 import { updatePromptAttempts } from '@/src/store/notificationsSlice'
+import { useModalStyle } from '@/src/navigation/hooks/useModalStyle'
 
+import { View } from 'tamagui'
 function NotificationsOptIn() {
+  const modalStyle = useModalStyle()
   const dispatch = useAppDispatch()
   const { isAppNotificationEnabled, enableNotification, isLoading } = useNotificationManager()
 
@@ -29,23 +32,25 @@ function NotificationsOptIn() {
       : require('@/assets/images/notifications-light.png')
 
   return (
-    <OptIn
-      testID="notifications-opt-in-screen"
-      title="Stay in the loop with account activity"
-      description="Get notified when you receive assets, and when transactions require your action."
-      image={image}
-      isVisible
-      colorScheme={colorScheme}
-      isLoading={isLoading}
-      ctaButton={{
-        onPress: enableNotification,
-        label: 'Enable notifications',
-      }}
-      secondaryButton={{
-        onPress: handleReject,
-        label: 'Maybe later',
-      }}
-    />
+    <View style={{ ...modalStyle }}>
+      <OptIn
+        testID="notifications-opt-in-screen"
+        title="Stay in the loop with account activity"
+        description="Get notified when you receive assets, and when transactions require your action."
+        image={image}
+        isVisible
+        colorScheme={colorScheme}
+        isLoading={isLoading}
+        ctaButton={{
+          onPress: enableNotification,
+          label: 'Enable notifications',
+        }}
+        secondaryButton={{
+          onPress: handleReject,
+          label: 'Maybe later',
+        }}
+      />
+    </View>
   )
 }
 
