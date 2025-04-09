@@ -4,6 +4,7 @@ import notifee, {
   EventDetail,
   AndroidChannel,
   AuthorizationStatus,
+  AndroidImportance,
 } from '@notifee/react-native'
 import { FirebaseMessagingTypes } from '@react-native-firebase/messaging'
 import { Linking, Platform, Alert as NativeAlert } from 'react-native'
@@ -338,6 +339,7 @@ class NotificationsService {
             id: PressActionId.OPEN_NOTIFICATIONS_VIEW,
             launchActivity: LAUNCH_ACTIVITY,
           },
+          importance: AndroidImportance.HIGH,
         },
         ios: {
           launchImageName: 'Default',
