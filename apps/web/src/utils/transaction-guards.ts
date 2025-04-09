@@ -69,6 +69,10 @@ import { isMultiSendCalldata } from './transaction-calldata'
 import { decodeMultiSendData } from '@safe-global/protocol-kit/dist/src/utils'
 import { OperationType } from '@safe-global/safe-core-sdk-types'
 import { LATEST_SAFE_VERSION } from '@safe-global/utils/config/constants'
+import type {
+  TransactionDetails,
+  VaultDepositTransactionInfo,
+} from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
 export const isTxQueued = (value: TransactionStatus): boolean => {
   return [TransactionStatus.AWAITING_CONFIRMATIONS, TransactionStatus.AWAITING_EXECUTION].includes(value)
@@ -487,4 +491,8 @@ export const isSafeMigrationTxData = (data?: TransactionData): boolean => {
     to: data.to.value,
     operation: data.operation as number,
   })
+}
+
+export const isVaultDepositTxInfo = (value: TransactionDetails['txInfo']): value is VaultDepositTransactionInfo => {
+  return value.type === 'VaultDeposit'
 }
