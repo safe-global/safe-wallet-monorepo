@@ -74,8 +74,26 @@ function SignersListItem({ item, index, signersGroup }: SignersListItemProps) {
         </View>
       </TouchableOpacity>
 
-      <View position="absolute" right={16} top={23}>
-        <MenuView onPressAction={onPressMenuAction} actions={actions}>
+      <View
+        position="absolute"
+        right={0}
+        top={0}
+        height={'100%'}
+        display="flex"
+        alignItems="center"
+        justifyContent="center"
+      >
+        <MenuView
+          onPressAction={onPressMenuAction}
+          actions={actions}
+          style={{
+            height: '100%',
+            justifyContent: 'center',
+            alignItems: 'center',
+            paddingRight: 16,
+            paddingLeft: 16,
+          }}
+        >
           <SafeFontIcon name="options-horizontal" />
         </MenuView>
       </View>
