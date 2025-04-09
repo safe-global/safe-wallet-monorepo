@@ -19,8 +19,10 @@ export const SignerContainer = () => {
   const { address } = useLocalSearchParams<{ address: string }>()
   const dispatch = useAppDispatch()
   const activeChain = useAppSelector(selectActiveChain)
+  const local = useLocalSearchParams<{ editMode: string }>()
   const contact = useAppSelector(selectContactByAddress(address))
-  const [editMode, setEditMode] = useState(false)
+  const [editMode, setEditMode] = useState(Boolean(local.editMode))
+
   usePreventLeaveScreen(editMode)
 
   const onPressExplorer = useCallback(() => {
