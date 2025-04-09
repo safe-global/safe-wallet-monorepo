@@ -3,14 +3,15 @@ import Button from '@mui/material/Button'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import tableCss from '@/components/common/EnhancedTable/styles.module.css'
 import Identicon from '@/components/common/Identicon'
-import { Stack, Typography } from '@mui/material'
+import { Box, Stack, Tooltip } from '@mui/material'
 import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import NetworkLogosList from '@/features/multichain/components/NetworkLogosList'
 import AddressBookContextMenu from './AddressBookContextMenu'
+import ChainIndicator from '@/components/common/ChainIndicator'
 
 const headCells = [
   { id: 'contact', label: 'Contact' },
-  { id: 'networks', label: 'Networks' },
+  { id: 'Box, networks', label: 'Networks' },
   { id: 'actions', label: '' },
 ]
 
@@ -27,15 +28,40 @@ function SpaceAddressBookTable({ entries }: SpaceAddressBookTableProps) {
           <Stack direction="row" spacing={1} alignItems="center">
             <Identicon address={address} size={32} />
             <Stack direction="column" spacing={0.5}>
-              <Typography variant="body2">{name}</Typography>
-              <EthHashInfo showAvatar={false} address={address} shortAddress={false} hasExplorer showCopyButton />
+              <EthHashInfo
+                name={name}
+                showAvatar={false}
+                address={address}
+                shortAddress={false}
+                hasExplorer
+                showCopyButton
+              />
             </Stack>
           </Stack>
         ),
       },
       networks: {
         rawValue: '',
-        content: <NetworkLogosList networks={networks.map(({ chainId }) => ({ chainId }))} />,
+        content: (
+          <>
+            <Tooltip
+              title={
+                <Box>
+                  {networks.map((safeItem) => (
+                    <Box key={safeItem.chainId} sx={{ p: '4px 0px' }}>
+                      <ChainIndicator chainId={safeItem.chainId} />
+                    </Box>
+                  ))}
+                </Box>
+              }
+              arrow
+            >
+              <Box sx={{ display: 'inline-block' }}>
+                <NetworkLogosList networks={networks.map(({ chainId }) => ({ chainId }))} />
+              </Box>
+            </Tooltip>
+          </>
+        ),
       },
       actions: {
         rawValue: '',
