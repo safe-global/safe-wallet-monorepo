@@ -124,7 +124,7 @@ export const SettingsMenu = ({ safeAddress }: Props) => {
             },
             {
               id: 'explorer',
-              title: 'View on Explorer',
+              title: 'View on explorer',
               image: Platform.select({
                 ios: 'link',
                 android: 'baseline_explore_24',
