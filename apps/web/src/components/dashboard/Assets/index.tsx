@@ -55,11 +55,11 @@ const AssetRow = ({ item, showSwap }: { item: Balances['items'][number]; showSwa
       />
     </Box>
 
-    <Box display={['none', 'block']} pr={4}>
+    <Box flex={1} display={['none', 'block']} pr={4}>
       <FiatBalance balanceItem={item} />
     </Box>
 
-    <Box display={['none', 'block']} pr={4}>
+    <Box flex={1} display={['none', 'block']} pr={4}>
       <FiatChange balanceItem={item} />
     </Box>
 

@@ -3,17 +3,18 @@ import { type Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances
 import { formatPercentage } from '@safe-global/utils/utils/formatters'
 import ArrowDown from '@/public/images/balances/change-down.svg'
 import ArrowUp from '@/public/images/balances/change-up.svg'
+
 export const FiatChange = ({ balanceItem }: { balanceItem: Balance }) => {
   if (!balanceItem.fiatBalance24hChange) {
     return (
-      <Typography variant="caption" color="text.secondary" textAlign="center" display="block">
+      <Typography variant="caption" color="text.secondary" paddingLeft={3} display="block">
         n/a
       </Typography>
     )
   }
 
   const changeAsNumber = Number(balanceItem.fiatBalance24hChange) / 100
-  const changeLabel = formatPercentage(Number(balanceItem.fiatBalance24hChange ?? 0) / 100)
+  const changeLabel = formatPercentage(changeAsNumber)
   const direction = changeAsNumber < 0 ? 'down' : changeAsNumber > 0 ? 'up' : 'none'
 
   const backgroundColor =

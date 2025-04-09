@@ -78,29 +78,29 @@ const headCells = [
   {
     id: 'asset',
     label: 'Asset',
-    width: '60%',
+    width: '44%',
   },
   {
     id: 'balance',
     label: 'Balance',
-    width: '20%',
+    width: '14%',
   },
   {
     id: 'value',
     label: 'Value',
-    width: '20%',
+    width: '14%',
     align: 'right',
   },
   {
     id: 'change',
-    label: '(24h change)',
-    width: '20%',
+    label: '24h change',
+    width: '14%',
     align: 'left',
   },
   {
     id: 'actions',
     label: '',
-    width: '20%',
+    width: '14%',
     sticky: true,
   },
 ]
@@ -173,12 +173,12 @@ const AssetsTable = ({
               content: <FiatBalance balanceItem={item} />,
             },
             change: {
-              rawValue: Number(item.fiatBalance24hChange ?? -9999999999999999),
+              rawValue: item.fiatBalance24hChange ? Number(item.fiatBalance24hChange) : null,
               collapsed: item.tokenInfo.address === hidingAsset,
               content: <FiatChange balanceItem={item} />,
             },
             actions: {
-              rawValue: '',
+              rawValue: Number(item.fiatBalance24hChange),
               sticky: true,
               collapsed: item.tokenInfo.address === hidingAsset,
               content: (
