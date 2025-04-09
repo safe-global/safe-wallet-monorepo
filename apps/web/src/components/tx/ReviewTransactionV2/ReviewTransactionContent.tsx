@@ -16,7 +16,7 @@ import ConfirmationView from '../confirmation-views'
 import UnknownContractError from '../SignOrExecuteForm/UnknownContractError'
 import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
 import useIsCounterfactualSafe from '@/features/counterfactual/hooks/useIsCounterfactualSafe'
-import { SlotName, useSlot } from '@/components/tx-flow/slots'
+import { Slot, SlotName } from '@/components/tx-flow/slots'
 import { Sign } from '@/components/tx-flow/actions/Sign'
 
 export type ReviewTransactionContentProps = PropsWithChildren<{
@@ -43,13 +43,9 @@ export const ReviewTransactionContent = ({
 }): ReactElement => {
   const { willExecute, isCreation, showMethodCall, isProposing, isRejection } = useContext(TxFlowContext)
 
-  const [{ Component: SubmitComponent } = {}] = useSlot(SlotName.Submit)
-
   const [readableApprovals] = useApprovalInfos({ safeTransaction: safeTx })
   const isApproval = readableApprovals && readableApprovals.length > 0
   const isCounterfactualSafe = useIsCounterfactualSafe()
-  const features = useSlot(SlotName.Feature)
-  const footerFeatures = useSlot(SlotName.Footer)
 
   return (
     <>
@@ -76,9 +72,7 @@ export const ReviewTransactionContent = ({
         {!isCounterfactualSafe && !isRejection && <BlockaidBalanceChanges />}
       </TxCard>
 
-      {features.map(({ Component }, i) => (
-        <Component key={`feature-${i}`} />
-      ))}
+      <Slot name={SlotName.Feature} />
 
       <TxCard>
         <ConfirmationTitle
@@ -98,9 +92,7 @@ export const ReviewTransactionContent = ({
           </ErrorMessage>
         )}
 
-        {footerFeatures.map(({ Component }, i) => (
-          <Component key={`footer-feature-${i}`} />
-        ))}
+        <Slot name={SlotName.Footer} />
 
         <NetworkWarning />
 
@@ -108,11 +100,9 @@ export const ReviewTransactionContent = ({
 
         <Blockaid />
 
-        {SubmitComponent ? (
-          <SubmitComponent onSubmit={onSubmit} />
-        ) : (
+        <Slot name={SlotName.Submit} onSubmit={onSubmit}>
           <Sign onSubmit={onSubmit} options={[{ id: 'sign', label: 'Sign' }]} onChange={() => {}} />
-        )}
+        </Slot>
       </TxCard>
     </>
   )

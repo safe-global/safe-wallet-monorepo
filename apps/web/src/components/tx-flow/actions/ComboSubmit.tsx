@@ -1,5 +1,5 @@
 import { useContext, useMemo, useState } from 'react'
-import { type SlotComponentProps, SlotName, useSlot, useSlotIds, withSlot } from '../slots'
+import { Slot, type SlotComponentProps, SlotName, useSlot, useSlotIds, withSlot } from '../slots'
 import { Box } from '@mui/material'
 import WalletRejectionError from '@/components/tx/SignOrExecuteForm/WalletRejectionError'
 import ErrorMessage from '@/components/tx/ErrorMessage'
@@ -9,7 +9,6 @@ const ComboSubmit = ({ onSubmit }: SlotComponentProps<SlotName.Submit>) => {
   const { submitError, isRejectedByUser } = useContext(TxFlowContext)
   const slotItems = useSlot(SlotName.ComboSubmit)
   const [submitAction, setSubmitAction] = useState<string>('sign')
-  const [{ Component: SubmitComponent } = {}] = useSlot(SlotName.ComboSubmit, submitAction)
 
   const options = useMemo(() => slotItems.map(({ label, id }) => ({ label, id })), [slotItems])
 
@@ -27,7 +26,13 @@ const ComboSubmit = ({ onSubmit }: SlotComponentProps<SlotName.Submit>) => {
         </Box>
       )}
 
-      {!!SubmitComponent && <SubmitComponent onSubmit={onSubmit} options={options} onChange={setSubmitAction} />}
+      <Slot
+        name={SlotName.ComboSubmit}
+        id={submitAction}
+        onSubmit={onSubmit}
+        options={options}
+        onChange={setSubmitAction}
+      />
     </>
   )
 }
