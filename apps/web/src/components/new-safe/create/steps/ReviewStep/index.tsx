@@ -181,14 +181,14 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
     () =>
       chain
         ? createNewUndeployedSafeWithoutSalt(
-            data.safeVersion,
-            {
-              owners: data.owners.map((owner) => owner.address),
-              threshold: data.threshold,
-              paymentReceiver: data.paymentReceiver,
-            },
-            chain,
-          )
+          data.safeVersion,
+          {
+            owners: data.owners.map((owner) => owner.address),
+            threshold: data.threshold,
+            paymentReceiver: data.paymentReceiver,
+          },
+          chain,
+        )
         : undefined,
     [chain, data.owners, data.safeVersion, data.threshold, data.paymentReceiver],
   )
@@ -196,9 +196,9 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
   const safePropsForGasEstimation = useMemo(() => {
     return newSafeProps
       ? {
-          ...newSafeProps,
-          saltNonce: Date.now().toString(),
-        }
+        ...newSafeProps,
+        saltNonce: Date.now().toString(),
+      }
       : undefined
   }, [newSafeProps])
 
@@ -241,7 +241,8 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
 
       let safeAddress: string
 
-      if (chain.chainId === chains['zksync']) {
+      // FIXME a new check to indicate ZKsync chain will be added to the config service and available under ChainInfo
+      if (chain.chainId === chains['zksync'] || chain.chainId === chains['lens']) {
         safeAddress = await computeNewSafeAddress(
           customRpcUrl || getRpcServiceUrl(chain.rpcUri),
           {
@@ -308,10 +309,10 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
 
       const options: DeploySafeProps['options'] = isEIP1559
         ? {
-            maxFeePerGas: maxFeePerGas?.toString(),
-            maxPriorityFeePerGas: maxPriorityFeePerGas?.toString(),
-            gasLimit: gasLimit?.toString(),
-          }
+          maxFeePerGas: maxFeePerGas?.toString(),
+          maxPriorityFeePerGas: maxPriorityFeePerGas?.toString(),
+          gasLimit: gasLimit?.toString(),
+        }
         : { gasPrice: maxFeePerGas?.toString(), gasLimit: gasLimit?.toString() }
 
       const onSubmitCallback = async (taskId?: string, txHash?: string) => {
