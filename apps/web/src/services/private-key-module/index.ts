@@ -100,7 +100,7 @@ const PrivateKeyModule = (chainId: ChainInfo['chainId'], rpcUri: ChainInfo['rpcU
               },
 
               personal_sign: async ({ params }) => {
-                return wallet.signMessageSync(params[0])
+                return wallet.signMessage(params[0])
               },
 
               eth_signTypedData: async ({ params }) => {

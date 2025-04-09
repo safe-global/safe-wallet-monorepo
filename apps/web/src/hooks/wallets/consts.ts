@@ -7,7 +7,7 @@ export const enum WALLET_KEYS {
   LEDGER_V2 = 'LEDGER_V2',
   TREZOR = 'TREZOR',
   KEYSTONE = 'KEYSTONE',
-  PK = 'PK',
+  PK = 'PRIVATE KEY',
 }
 
 // TODO: Check if undefined is needed as a return type, possibly couple this with WALLET_MODULES
