@@ -332,8 +332,8 @@ class NotificationsService {
         body,
         data,
         android: {
-          smallIcon: 'ic_notification_small',
-          largeIcon: 'ic_notification',
+          smallIcon: require('./ic_notification.png'),
+          largeIcon: require('./ic_notification.png'),
           channelId: channelId ?? ChannelId.DEFAULT_NOTIFICATION_CHANNEL_ID,
           pressAction: {
             id: PressActionId.OPEN_NOTIFICATIONS_VIEW,
