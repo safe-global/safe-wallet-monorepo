@@ -37,7 +37,7 @@ export function MyAccountsFooter() {
           </View>
 
           <Text fontSize="$4" fontWeight={600}>
-            Add Existing Account
+            Add existing account
           </Text>
         </MyAccountsButton>
       </Link>
@@ -49,7 +49,7 @@ export function MyAccountsFooter() {
           </View>
 
           <Text fontSize="$4" fontWeight={600}>
-            Join New Account
+            Join new account
           </Text>
         </MyAccountsButton>
       </TouchableOpacity>

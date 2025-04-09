@@ -61,7 +61,7 @@ export const GetStarted = () => {
           onPress={onPressJoinAccount}
           testID={'join-account-button'}
         >
-          Join Account
+          Join account
         </SafeButton>
         <SafeButton
           outlined
