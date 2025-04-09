@@ -54,11 +54,6 @@ export class CodedException extends Error {
 
     if (IS_PRODUCTION) {
       sentryCaptureException(this)
-
-      // Log to Datadog
-      logger.error(this.message, {
-        code: this.code,
-      })
     }
   }
 }
