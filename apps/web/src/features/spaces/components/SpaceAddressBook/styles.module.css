@@ -1,0 +1,11 @@
+.tagContainer {
+  background-color: var(--color-background-lightGrey);
+}
+
+.tagContainer path {
+  fill: var(--color-border-main);
+}
+
+.tagContainer path * {
+  stroke-width: 4px;
+}
