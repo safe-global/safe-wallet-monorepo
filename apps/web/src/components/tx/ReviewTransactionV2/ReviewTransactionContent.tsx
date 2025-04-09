@@ -43,7 +43,7 @@ export const ReviewTransactionContent = ({
 }): ReactElement => {
   const { willExecute, isCreation, showMethodCall, isProposing, isRejection } = useContext(TxFlowContext)
 
-  const [SubmitComponent] = useSlot(SlotName.Submit)
+  const [{ Component: SubmitComponent } = {}] = useSlot(SlotName.Submit)
 
   const [readableApprovals] = useApprovalInfos({ safeTransaction: safeTx })
   const isApproval = readableApprovals && readableApprovals.length > 0
@@ -76,8 +76,8 @@ export const ReviewTransactionContent = ({
         {!isCounterfactualSafe && !isRejection && <BlockaidBalanceChanges />}
       </TxCard>
 
-      {features.map((Feature, i) => (
-        <Feature key={`feature-${i}`} />
+      {features.map(({ Component }, i) => (
+        <Component key={`feature-${i}`} />
       ))}
 
       <TxCard>
@@ -98,8 +98,8 @@ export const ReviewTransactionContent = ({
           </ErrorMessage>
         )}
 
-        {footerFeatures.map((FooterFeature, i) => (
-          <FooterFeature key={`footer-feature-${i}`} />
+        {footerFeatures.map(({ Component }, i) => (
+          <Component key={`footer-feature-${i}`} />
         ))}
 
         <NetworkWarning />
@@ -111,7 +111,7 @@ export const ReviewTransactionContent = ({
         {SubmitComponent ? (
           <SubmitComponent onSubmit={onSubmit} />
         ) : (
-          <Sign onSubmit={onSubmit} options={['sign']} onChange={() => {}} />
+          <Sign onSubmit={onSubmit} options={[{ id: 'sign', label: 'Sign' }]} onChange={() => {}} />
         )}
       </TxCard>
     </>

@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react'
+import { useContext, useMemo, useState } from 'react'
 import { type SlotComponentProps, SlotName, useSlot, useSlotIds, withSlot } from '../slots'
 import { Box } from '@mui/material'
 import WalletRejectionError from '@/components/tx/SignOrExecuteForm/WalletRejectionError'
@@ -7,9 +7,11 @@ import { TxFlowContext } from '../TxFlowProvider'
 
 const ComboSubmit = ({ onSubmit }: SlotComponentProps<SlotName.Submit>) => {
   const { submitError, isRejectedByUser } = useContext(TxFlowContext)
-  const slotIds = useSlotIds(SlotName.ComboSubmit)
+  const slotItems = useSlot(SlotName.ComboSubmit)
   const [submitAction, setSubmitAction] = useState<string>('sign')
-  const [SubmitComponent] = useSlot(SlotName.ComboSubmit, submitAction)
+  const [{ Component: SubmitComponent } = {}] = useSlot(SlotName.ComboSubmit, submitAction)
+
+  const options = useMemo(() => slotItems.map(({ label, id }) => ({ label, id })), [slotItems])
 
   return (
     <>
@@ -24,7 +26,8 @@ const ComboSubmit = ({ onSubmit }: SlotComponentProps<SlotName.Submit>) => {
           <WalletRejectionError />
         </Box>
       )}
-      <SubmitComponent onSubmit={onSubmit} options={slotIds} onChange={setSubmitAction} />
+
+      {!!SubmitComponent && <SubmitComponent onSubmit={onSubmit} options={options} onChange={setSubmitAction} />}
     </>
   )
 }

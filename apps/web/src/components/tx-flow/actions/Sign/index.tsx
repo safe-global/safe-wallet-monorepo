@@ -56,6 +56,7 @@ const useShouldRegisterSlot = () => {
 
 const SignSlot = withSlot({
   Component: Sign,
+  label: 'Sign',
   slotName: SlotName.ComboSubmit,
   id: 'sign',
   useSlotCondition: useShouldRegisterSlot,

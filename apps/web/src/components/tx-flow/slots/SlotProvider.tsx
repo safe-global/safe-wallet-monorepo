@@ -22,7 +22,7 @@ type SlotComponentPropsMap = {
   }>
   [SlotName.ComboSubmit]: PropsWithChildren<{
     onSubmit: SubmitCallback
-    options: string[]
+    options: { label: string; id: string }[]
     onChange: (option: string) => void
   }>
 }
@@ -32,18 +32,27 @@ export type SlotComponentProps<T extends SlotName> = T extends keyof SlotCompone
   : {}
 
 type SlotContextType = {
-  registerSlot: <T extends SlotName>(
-    slotName: T,
-    id: string,
-    Component: ComponentType<SlotComponentProps<T> | any>,
-  ) => void
+  registerSlot: <T extends SlotName>(args: {
+    slotName: T
+    id: string
+    Component: SlotItem<T>['Component']
+    label?: SlotItem<T>['label']
+  }) => void
   unregisterSlot: (slotName: SlotName, id: string) => void
-  getSlot: <T extends SlotName>(slotName: T, id?: string) => ComponentType<SlotComponentProps<T> | any>[]
+  getSlot: <T extends SlotName>(slotName: T, id?: string) => SlotItem<T>[]
   getSlotIds: (slotName: SlotName) => string[]
 }
 
+export type SlotItem<S extends SlotName> = {
+  Component: ComponentType<SlotComponentProps<S>>
+  id: string
+  label: string
+}
+
 type SlotStore = {
-  [K in SlotName]?: Record<string, ComponentType<SlotComponentProps<K>> | null> | null
+  [K in SlotName]?: {
+    [id: string]: SlotItem<K> | null
+  }
 }
 
 export const SlotContext = createContext<SlotContextType | null>(null)
@@ -56,10 +65,10 @@ export const SlotContext = createContext<SlotContextType | null>(null)
 export const SlotProvider = ({ children }: { children: ReactNode }) => {
   const [slots, setSlots] = useState<SlotStore>({})
 
-  const registerSlot = useCallback<SlotContextType['registerSlot']>((slotName, id, Component) => {
+  const registerSlot = useCallback<SlotContextType['registerSlot']>(({ slotName, id, Component, label }) => {
     setSlots((prevSlots) => ({
       ...prevSlots,
-      [slotName]: { ...prevSlots[slotName], [id]: Component },
+      [slotName]: { ...prevSlots[slotName], [id]: { Component, label: label || id, id } },
     }))
   }, [])
 
@@ -71,17 +80,17 @@ export const SlotProvider = ({ children }: { children: ReactNode }) => {
   }, [])
 
   const getSlot = useCallback(
-    <T extends SlotName>(slotName: T, id?: string): ComponentType<SlotComponentProps<T>>[] => {
+    <T extends SlotName>(slotName: T, id?: string): SlotItem<T>[] => {
       const slot = slots[slotName]
 
       if (id) {
-        const Component = slot?.[id]
-        if (Component) {
-          return [Component]
+        const slotItem = slot?.[id]
+        if (slotItem) {
+          return [slotItem]
         }
       }
 
-      return Object.values(slot || {}).filter((component) => !!component) as ComponentType<SlotComponentProps<T>>[]
+      return Object.values(slot || {}).filter((component) => !!component) as SlotItem<T>[]
     },
     [slots],
   )

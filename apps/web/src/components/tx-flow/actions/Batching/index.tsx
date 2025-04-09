@@ -23,7 +23,7 @@ const Batching = ({ onSubmit, options = [], onChange }: SlotComponentProps<SlotN
 
   const isBatchable = !!safeTx && !isDelegateCall(safeTx)
 
-  const handleSubmit = async (_option: string, e: SyntheticEvent) => {
+  const handleSubmit = async (e: SyntheticEvent) => {
     e.preventDefault()
 
     if (!safeTx) return
@@ -58,9 +58,9 @@ const Batching = ({ onSubmit, options = [], onChange }: SlotComponentProps<SlotN
 
       <TxCardActions>
         <SplitMenuButton
-          onClick={handleSubmit}
-          selectedOption="batching"
-          onChange={onChange}
+          onClick={(_, e) => handleSubmit(e)}
+          selected="batching"
+          onChange={({ id }) => onChange(id)}
           options={options}
           disabled={!isSubmittable || !isBatchable}
           loading={!isSubmittable}
@@ -89,6 +89,7 @@ const useShouldRegisterSlot = () => {
 
 const BatchingSlot = withSlot({
   Component: Batching,
+  label: 'Add to batch',
   slotName: SlotName.ComboSubmit,
   id: 'batching',
   useSlotCondition: useShouldRegisterSlot,

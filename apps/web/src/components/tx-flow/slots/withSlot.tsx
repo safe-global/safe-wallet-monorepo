@@ -8,6 +8,7 @@ import { useRegisterSlot, type UseRegisterSlotProps } from './hooks'
  */
 export const withSlot = <T extends SlotName>({
   Component,
+  label,
   slotName,
   id,
   useSlotCondition = () => true,
@@ -16,7 +17,7 @@ export const withSlot = <T extends SlotName>({
 }) => {
   return ({ children }: PropsWithChildren) => {
     const shouldRegisterSlot = useSlotCondition()
-    useRegisterSlot({ slotName, id, Component, condition: shouldRegisterSlot })
+    useRegisterSlot({ slotName, id, Component, label, condition: shouldRegisterSlot })
     return children
   }
 }

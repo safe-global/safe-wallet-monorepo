@@ -142,8 +142,8 @@ export const SignForm = ({
               {(isOk) => (
                 <SplitMenuButton
                   data-testid="sign-btn"
-                  selectedOption="sign"
-                  onChange={handleOptionChange}
+                  selected="sign"
+                  onChange={({ id }) => handleOptionChange(id)}
                   options={options}
                   disabled={!isOk || submitDisabled}
                   loading={!isSubmittable || !isSubmittableLocal}

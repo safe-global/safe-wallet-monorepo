@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type SyntheticEvent } from 'react'
+import { useEffect, useMemo, useRef, useState, type SyntheticEvent } from 'react'
 import Button from '@mui/material/Button'
 import ButtonGroup from '@mui/material/ButtonGroup'
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
@@ -6,22 +6,27 @@ import MenuItem from '@mui/material/MenuItem'
 import MenuList from '@mui/material/MenuList'
 import { Box, CircularProgress, Popover, Tooltip } from '@mui/material'
 
+type Option = {
+  id: string
+  label?: string
+}
+
 export default function SplitMenuButton({
   options,
   disabled = false,
   tooltip,
   onClick,
   onChange,
-  selectedOption,
+  selected,
   disabledIndex,
   loading = false,
 }: {
-  options: string[]
+  options: Option[]
   disabled?: boolean
   tooltip?: string
-  onClick?: (option: string, e: SyntheticEvent) => void
-  onChange?: (option: string) => void
-  selectedOption?: string
+  onClick?: (option: Option, e: SyntheticEvent) => void
+  onChange?: (option: Option) => void
+  selected?: Option['id']
   disabledIndex?: number
   loading?: boolean
 }) {
@@ -30,13 +35,13 @@ export default function SplitMenuButton({
   const [selectedIndex, setSelectedIndex] = useState(0)
 
   useEffect(() => {
-    if (selectedOption) {
-      const index = options.indexOf(selectedOption)
+    if (selected) {
+      const index = options.findIndex((option) => option.id === selected)
       if (index !== -1) {
         setSelectedIndex(index)
       }
     }
-  }, [selectedOption, options])
+  }, [selected, options])
 
   const handleClick = (e: SyntheticEvent) => {
     onClick?.(options[selectedIndex], e)
@@ -61,13 +66,15 @@ export default function SplitMenuButton({
     setOpen(false)
   }
 
+  const { label, id } = useMemo(() => options[selectedIndex], [options, selectedIndex])
+
   return (
     <>
       <ButtonGroup variant="contained" ref={anchorRef} aria-label="Button group with a nested menu" fullWidth>
         <Tooltip title={tooltip} placement="top">
           <Box flex={1}>
             <Button onClick={handleClick} type="submit" disabled={disabled}>
-              {loading ? <CircularProgress size={20} /> : options[selectedIndex]}
+              {loading ? <CircularProgress size={20} /> : label || id}
             </Button>
           </Box>
         </Tooltip>
@@ -79,6 +86,7 @@ export default function SplitMenuButton({
             aria-label="select action"
             aria-haspopup="menu"
             onClick={handleToggle}
+            disabled={loading}
             sx={{ minWidth: '0 !important', maxWidth: 48, px: 1.5 }}
           >
             <ArrowDropDownIcon />
@@ -102,12 +110,12 @@ export default function SplitMenuButton({
         <MenuList autoFocusItem>
           {options.map((option, index) => (
             <MenuItem
-              key={option}
+              key={option.id}
               selected={index === selectedIndex}
               disabled={disabledIndex === index}
               onClick={(event) => handleMenuItemClick(event, index)}
             >
-              {option}
+              {option.label || option.id}
             </MenuItem>
           ))}
         </MenuList>

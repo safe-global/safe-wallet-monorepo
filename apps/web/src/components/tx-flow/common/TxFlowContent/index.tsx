@@ -131,8 +131,8 @@ export const TxFlowContent = ({ children }: { children?: ReactNode[] | ReactNode
                 />
               )}
 
-              {sidebarFeatures.map((SidebarFeature, i) => (
-                <SidebarFeature key={`sidebar-feature-${i}`} />
+              {sidebarFeatures.map(({ Component }, i) => (
+                <Component key={`sidebar-feature-${i}`} />
               ))}
 
               <Box className={css.sticky}>
