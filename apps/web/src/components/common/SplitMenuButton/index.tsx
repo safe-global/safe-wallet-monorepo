@@ -67,13 +67,19 @@ export default function SplitMenuButton({
   }
 
   const { label, id } = useMemo(() => options[selectedIndex], [options, selectedIndex])
+  const maxCharLen = Math.max(...options.map(({ id, label }) => (label || id).length)) + 2
 
   return (
     <>
       <ButtonGroup variant="contained" ref={anchorRef} aria-label="Button group with a nested menu" fullWidth>
         <Tooltip title={tooltip} placement="top">
           <Box flex={1}>
-            <Button onClick={handleClick} type="submit" disabled={disabled}>
+            <Button
+              onClick={handleClick}
+              type="submit"
+              disabled={disabled}
+              sx={{ minWidth: `${maxCharLen}ch !important` }}
+            >
               {loading ? <CircularProgress size={20} /> : label || id}
             </Button>
           </Box>
