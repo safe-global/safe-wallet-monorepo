@@ -4,7 +4,8 @@ import ButtonGroup from '@mui/material/ButtonGroup'
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
 import MenuItem from '@mui/material/MenuItem'
 import MenuList from '@mui/material/MenuList'
-import { Box, CircularProgress, Popover, Tooltip } from '@mui/material'
+import { Box, CircularProgress, ListItemText, Popover, Tooltip } from '@mui/material'
+import CheckIcon from '@mui/icons-material/Check'
 
 type Option = {
   id: string
@@ -120,8 +121,10 @@ export default function SplitMenuButton({
               selected={index === selectedIndex}
               disabled={disabledIndex === index}
               onClick={(event) => handleMenuItemClick(event, index)}
+              sx={{ gap: 2 }}
             >
-              {option.label || option.id}
+              <ListItemText>{option.label || option.id}</ListItemText>
+              {index === selectedIndex ? <CheckIcon /> : <Box sx={{ width: 24 }} />}
             </MenuItem>
           ))}
         </MenuList>
