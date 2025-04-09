@@ -332,8 +332,8 @@ class NotificationsService {
         body,
         data,
         android: {
-          smallIcon: require('./ic_notification.png'),
-          largeIcon: require('./ic_notification.png'),
+          smallIcon: 'ic_notification',
+          largeIcon: 'ic_notification',
           channelId: channelId ?? ChannelId.DEFAULT_NOTIFICATION_CHANNEL_ID,
           pressAction: {
             id: PressActionId.OPEN_NOTIFICATIONS_VIEW,
@@ -355,7 +355,7 @@ class NotificationsService {
         },
       })
     } catch (error) {
-      Logger.error('NotificationService.displayNotification :: error', error)
+      Logger.info('NotificationService.displayNotification :: error', error)
     }
   }
 }

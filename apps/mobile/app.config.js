@@ -33,6 +33,11 @@ export default {
         'aps-environment': 'production',
       },
       googleServicesFile: IS_DEV ? process.env.GOOGLE_SERVICES_PLIST_DEV : process.env.GOOGLE_SERVICES_PLIST,
+      notification: {
+        icon: './assets/images/ic_notification.png',
+        color: '#000000',
+        androidMode: 'default',
+      },
     },
     android: {
       adaptiveIcon: {
@@ -50,6 +55,7 @@ export default {
       favicon: './assets/images/favicon.png',
     },
     plugins: [
+      ['./expo-plugins/withNotificationIcons.js'],
       'expo-router',
       [
         'expo-font',
