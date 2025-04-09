@@ -192,7 +192,7 @@ export const Settings = ({
                 marginTop: 14,
               }}
             >
-              {isLatestVersion && <SafeFontIcon name={'check-filled'} color={'$success'} />}
+              {isLatestVersion && <SafeFontIcon testID="check-icon" name={'check-filled'} color={'$success'} />}
               <Text marginLeft={'$2'} textAlign="center" color="$colorSecondary">
                 {implementation?.name} {isLatestVersion ? `(Latest version)` : `(Latest version: ${latestSafeVersion})`}
               </Text>
