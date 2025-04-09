@@ -10,7 +10,7 @@ import type { SubmitCallback } from '../TxFlow'
 
 export enum SlotName {
   Submit = 'submit',
-  Action = 'action',
+  ComboSubmit = 'combo-submit',
   Feature = 'feature',
   Footer = 'footer',
   Sidebar = 'sidebar',
@@ -20,9 +20,11 @@ type SlotComponentPropsMap = {
   [SlotName.Submit]: PropsWithChildren<{
     onSubmit: SubmitCallback
   }>
-  [SlotName.Action]: {
-    onSubmit?: (args?: any) => void
-  }
+  [SlotName.ComboSubmit]: PropsWithChildren<{
+    onSubmit: SubmitCallback
+    options: string[]
+    onChange: (option: string) => void
+  }>
 }
 
 export type SlotComponentProps<T extends SlotName> = T extends keyof SlotComponentPropsMap
@@ -36,7 +38,8 @@ type SlotContextType = {
     Component: ComponentType<SlotComponentProps<T> | any>,
   ) => void
   unregisterSlot: (slotName: SlotName, id: string) => void
-  getSlot: <T extends SlotName>(slotName: T) => ComponentType<SlotComponentProps<T> | any>[]
+  getSlot: <T extends SlotName>(slotName: T, id?: string) => ComponentType<SlotComponentProps<T> | any>[]
+  getSlotIds: (slotName: SlotName) => string[]
 }
 
 type SlotStore = {
@@ -68,12 +71,33 @@ export const SlotProvider = ({ children }: { children: ReactNode }) => {
   }, [])
 
   const getSlot = useCallback(
-    <T extends SlotName>(slotName: T): ComponentType<SlotComponentProps<T>>[] => {
+    <T extends SlotName>(slotName: T, id?: string): ComponentType<SlotComponentProps<T>>[] => {
       const slot = slots[slotName]
+
+      if (id) {
+        const Component = slot?.[id]
+        if (Component) {
+          return [Component]
+        }
+      }
+
       return Object.values(slot || {}).filter((component) => !!component) as ComponentType<SlotComponentProps<T>>[]
     },
     [slots],
   )
 
-  return <SlotContext.Provider value={{ registerSlot, unregisterSlot, getSlot }}>{children}</SlotContext.Provider>
+  const getSlotIds = useCallback(
+    (slotName: SlotName): string[] => {
+      const slot = slots[slotName]
+      if (!slot) return []
+      return Object.keys(slot).filter((id) => !!slot?.[id])
+    },
+    [slots],
+  )
+
+  return (
+    <SlotContext.Provider value={{ registerSlot, unregisterSlot, getSlot, getSlotIds }}>
+      {children}
+    </SlotContext.Provider>
+  )
 }

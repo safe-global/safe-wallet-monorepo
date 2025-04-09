@@ -51,8 +51,14 @@ export type TxFlowContextType<T extends unknown = any> = {
   canExecute: boolean
   shouldExecute: boolean
   setShouldExecute: Dispatch<SetStateAction<boolean>>
+
   isSubmittable: boolean
   setIsSubmittable: Dispatch<SetStateAction<boolean>>
+  submitError?: Error
+  setSubmitError: Dispatch<SetStateAction<Error | undefined>>
+  isRejectedByUser: boolean
+  setIsRejectedByUser: Dispatch<SetStateAction<boolean>>
+
   willExecuteThroughRole: boolean
   canExecuteThroughRole: boolean
   txDetails?: TransactionDetails
@@ -82,8 +88,14 @@ const initialContext: TxFlowContextType = {
   canExecute: false,
   shouldExecute: false,
   setShouldExecute: () => {},
+
   isSubmittable: true,
   setIsSubmittable: () => {},
+  submitError: undefined,
+  setSubmitError: () => {},
+  isRejectedByUser: false,
+  setIsRejectedByUser: () => {},
+
   willExecuteThroughRole: false,
   canExecuteThroughRole: false,
   isBatch: false,
@@ -130,7 +142,9 @@ const TxFlowProvider = <T extends unknown>({
   const isCorrectNonce = useValidateNonce(safeTx)
   const { transactionExecution } = useAppSelector(selectSettings)
   const [shouldExecute, setShouldExecute] = useState<boolean>(transactionExecution)
-  const [isSubmittable, setIsSubmittable] = useState<boolean>(true)
+  const [isSubmittable, setIsSubmittable] = useState<boolean>(initialContext.isSubmittable)
+  const [submitError, setSubmitError] = useState<Error | undefined>(initialContext.submitError)
+  const [isRejectedByUser, setIsRejectedByUser] = useState<boolean>(initialContext.isRejectedByUser)
   const [txLayoutProps, setTxLayoutProps] = useState<TxFlowContextType['txLayoutProps']>(defaultTxLayoutProps)
   const [trigger] = useLazyGetTransactionDetailsQuery()
   const isCounterfactualSafe = useIsCounterfactualSafe()
@@ -200,8 +214,14 @@ const TxFlowProvider = <T extends unknown>({
     willExecute,
     shouldExecute,
     setShouldExecute,
+
     isSubmittable,
     setIsSubmittable,
+    submitError,
+    setSubmitError,
+    isRejectedByUser,
+    setIsRejectedByUser,
+
     willExecuteThroughRole,
     canExecuteThroughRole,
     role: allowingRole || mostLikelyRole,

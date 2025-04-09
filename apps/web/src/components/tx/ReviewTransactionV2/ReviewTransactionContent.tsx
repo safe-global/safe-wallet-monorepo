@@ -1,5 +1,5 @@
-import type { PropsWithChildren, SyntheticEvent, ReactElement } from 'react'
-import { useContext, useCallback } from 'react'
+import type { PropsWithChildren, ReactElement } from 'react'
+import { useContext } from 'react'
 import madProps from '@/utils/mad-props'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import ErrorMessage from '../ErrorMessage'
@@ -14,11 +14,10 @@ import type { TransactionDetails, TransactionPreview } from '@safe-global/safe-g
 import NetworkWarning from '@/components/new-safe/create/NetworkWarning'
 import ConfirmationView from '../confirmation-views'
 import UnknownContractError from '../SignOrExecuteForm/UnknownContractError'
-import { Button, CircularProgress } from '@mui/material'
-import CheckWallet from '@/components/common/CheckWallet'
 import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
 import useIsCounterfactualSafe from '@/features/counterfactual/hooks/useIsCounterfactualSafe'
 import { SlotName, useSlot } from '@/components/tx-flow/slots'
+import { Sign } from '@/components/tx-flow/actions/Sign'
 
 export type ReviewTransactionContentProps = PropsWithChildren<{
   onSubmit: () => void
@@ -42,25 +41,15 @@ export const ReviewTransactionContent = ({
   txPreview?: TransactionPreview
   txId?: string
 }): ReactElement => {
-  const { onlyExecute, willExecute, isCreation, showMethodCall, isSubmittable, isProposing, isRejection } =
-    useContext(TxFlowContext)
+  const { willExecute, isCreation, showMethodCall, isProposing, isRejection } = useContext(TxFlowContext)
+
+  const [SubmitComponent] = useSlot(SlotName.Submit)
 
   const [readableApprovals] = useApprovalInfos({ safeTransaction: safeTx })
   const isApproval = readableApprovals && readableApprovals.length > 0
   const isCounterfactualSafe = useIsCounterfactualSafe()
-  const actions = useSlot(SlotName.Action)
   const features = useSlot(SlotName.Feature)
   const footerFeatures = useSlot(SlotName.Footer)
-
-  const onContinueClick = useCallback(
-    async (e: SyntheticEvent) => {
-      e.preventDefault()
-      onSubmit()
-    },
-    [onSubmit],
-  )
-
-  const submitDisabled = !safeTx || !isSubmittable
 
   return (
     <>
@@ -120,25 +109,12 @@ export const ReviewTransactionContent = ({
         <Blockaid />
 
         <TxCardActions>
-          {actions.map((Action, i) => (
-            <Action key={`action-${i}`} />
-          ))}
-
-          {/* Continue button */}
-          <CheckWallet allowNonOwner={onlyExecute} checkNetwork={!submitDisabled}>
-            {(isOk) => (
-              <Button
-                data-testid="continue-sign-btn"
-                variant="contained"
-                type="submit"
-                onClick={onContinueClick}
-                disabled={!isOk || submitDisabled}
-                sx={{ minWidth: '82px', order: '1', width: ['100%', '100%', '100%', 'auto'] }}
-              >
-                {!isSubmittable ? <CircularProgress size={20} /> : 'Continue'}
-              </Button>
-            )}
-          </CheckWallet>
+          {/* Submit button */}
+          {SubmitComponent ? (
+            <SubmitComponent onSubmit={onSubmit} />
+          ) : (
+            <Sign onSubmit={onSubmit} options={['sign']} onChange={() => {}} />
+          )}
         </TxCardActions>
       </TxCard>
     </>

@@ -8,7 +8,7 @@ import { TxFlowContent } from './common/TxFlowContent'
 import ReviewTransaction from '../tx/ReviewTransactionV2'
 import { ConfirmTxReceipt } from '../tx/ConfirmTxReceipt'
 import { ExecuteCheckbox, TxChecks, TxNote, SignerSelect } from './features'
-import { Batching, Counterfactual, Execute, ExecuteThroughRole, Propose, Sign } from './actions'
+import { Batching, ComboSubmit, Counterfactual, Execute, ExecuteThroughRole, Propose, Sign } from './actions'
 import { SlotProvider } from './slots'
 
 type SubmitCallbackProps = { txId?: string; isExecuted?: boolean }
@@ -78,20 +78,22 @@ export const TxFlow = <T extends unknown>({
                 {...childrenArray}
 
                 <ReviewTransactionComponent onSubmit={() => nextStep(data)}>
-                  <Batching />
                   <TxChecks />
                   <TxNote />
                   <SignerSelect />
                   <ExecuteCheckbox />
-                </ReviewTransactionComponent>
 
-                <ConfirmTxReceipt onSubmit={(props = {}) => onSubmit?.({ ...props, data })}>
                   <Counterfactual />
                   <Execute />
                   <ExecuteThroughRole />
-                  <Sign />
+                  <ComboSubmit>
+                    <Sign />
+                    <Batching />
+                  </ComboSubmit>
                   <Propose />
-                </ConfirmTxReceipt>
+                </ReviewTransactionComponent>
+
+                <ConfirmTxReceipt onSubmit={(props = {}) => onSubmit?.({ ...props, data })} />
               </TxFlowContent>
             </TxFlowProvider>
           </SlotProvider>
