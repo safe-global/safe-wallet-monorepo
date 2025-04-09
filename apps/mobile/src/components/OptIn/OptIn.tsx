@@ -1,11 +1,11 @@
 import React from 'react'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { ColorSchemeName, ImageSourcePropType, SafeAreaView, StyleSheet } from 'react-native'
-import { Image, Text, getTokenValue } from 'tamagui'
+import { ColorSchemeName, ImageSourcePropType, StyleSheet } from 'react-native'
+import { H2, Image, Text, getTokenValue, View } from 'tamagui'
 import { SafeButton } from '@/src/components/SafeButton'
 import { WINDOW_HEIGHT } from '@/src/store/constants'
-import { FloatingContainer } from '../FloatingContainer'
 import { Loader } from '../Loader'
+import { SafeFontIcon } from '../SafeFontIcon'
+import { Container } from '../Container'
 
 interface OptInProps {
   title: string
@@ -24,6 +24,7 @@ interface OptInProps {
   isVisible?: boolean
   isLoading?: boolean
   colorScheme: ColorSchemeName
+  infoMessage?: string
 }
 
 export const OptIn: React.FC<OptInProps> = React.memo(
@@ -38,31 +39,48 @@ export const OptIn: React.FC<OptInProps> = React.memo(
     isVisible,
     isLoading,
     colorScheme,
+    infoMessage,
   }: OptInProps) => {
-    const insets = useSafeAreaInsets()
-
     if (!isVisible) {
       return
     }
 
     return (
-      <SafeAreaView testID={testID} style={[styles.wrapper, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
-        {kicker && (
-          <Text textAlign="center" fontWeight={700} fontSize="$4" lineHeight="$6">
-            {kicker}
-          </Text>
-        )}
-        <Text textAlign="center" fontWeight={600} fontSize="$8" lineHeight="$8">
-          {title}
-        </Text>
-        {description && (
-          <Text textAlign="center" fontWeight={400} fontSize="$4" paddingHorizontal={'$4'}>
-            {description}
-          </Text>
-        )}
-        {image && <Image style={styles.image} source={image} />}
+      <View testID={testID} style={[styles.wrapper]} paddingTop={'$10'}>
+        <View flex={1} justifyContent="space-between" alignItems="center">
+          <View gap={'$4'}>
+            {kicker && (
+              <Text textAlign="center" fontWeight={700} fontSize="$4" lineHeight="$6">
+                {kicker}
+              </Text>
+            )}
+            <H2 textAlign="center" fontWeight={600}>
+              {title}
+            </H2>
+            {description && (
+              <Text textAlign="center" fontWeight={400} fontSize="$4" paddingHorizontal={'$4'}>
+                {description}
+              </Text>
+            )}
+            {infoMessage && (
+              <Container
+                flexDirection="row"
+                gap={'$2'}
+                paddingVertical={'$2'}
+                justifyContent="center"
+                alignItems="center"
+              >
+                <SafeFontIcon testID="info-icon" name="info" size={20} />
+                <Text fontSize="$3" color="$textMuted">
+                  {infoMessage}
+                </Text>
+              </Container>
+            )}
+          </View>
+          {image && <Image style={styles.image} source={image} />}
+        </View>
 
-        <FloatingContainer sticky testID="notifications-opt-in-cta-buttons" style={{ paddingHorizontal: 16 }}>
+        <View testID="notifications-opt-in-cta-buttons" flexDirection="column">
           <SafeButton onPress={ctaButton.onPress} marginBottom={'$3'} testID={'opt-in-primary-button'}>
             {!isLoading ? (
               ctaButton.label
@@ -82,8 +100,8 @@ export const OptIn: React.FC<OptInProps> = React.memo(
               {secondaryButton.label}
             </SafeButton>
           )}
-        </FloatingContainer>
-      </SafeAreaView>
+        </View>
+      </View>
     )
   },
 )
@@ -91,10 +109,9 @@ export const OptIn: React.FC<OptInProps> = React.memo(
 const styles = StyleSheet.create({
   wrapper: {
     flex: 1,
-    marginTop: 24,
-    gap: '$8',
-    alignItems: 'center',
-    justifyContent: 'flex-start',
+    gap: getTokenValue('$4', 'space'),
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
   },
   image: {
     width: '100%',
