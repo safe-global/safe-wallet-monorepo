@@ -13,7 +13,7 @@ import { trackEvent } from '@/services/analytics'
 import { useIsAdmin } from '@/features/spaces/hooks/useSpaceMembers'
 
 import EditContactDialog from './EditContactDialog'
-import RemoveContactDialog from './DeleteContactDialog'
+import DeleteContactDialog from './DeleteContactDialog'
 import type { SpaceAddressBookEntry } from '../../types'
 
 enum ModalType {
@@ -75,7 +75,7 @@ const AddressBookContextMenu = ({ entry }: { entry: SpaceAddressBookEntry }) => 
       {open[ModalType.EDIT] && <EditContactDialog entry={entry} onClose={handleCloseModal} />}
 
       {open[ModalType.REMOVE] && (
-        <RemoveContactDialog
+        <DeleteContactDialog
           name={entry.name}
           address={entry.address}
           networks={entry.networks}
