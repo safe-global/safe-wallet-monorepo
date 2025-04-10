@@ -9,7 +9,6 @@ import { useValidateTxData } from '@/hooks/useValidateTxData'
 const ComboSubmit = ({ onSubmit }: SlotComponentProps<SlotName.Submit>) => {
   const { txId, submitError, isRejectedByUser } = useContext(TxFlowContext)
   const slotItems = useSlot(SlotName.ComboSubmit)
-  const [submitAction, setSubmitAction] = useState<string>('sign')
 
   const [validationResult, , validationLoading] = useValidateTxData(txId)
   const validationError = useMemo(
@@ -18,8 +17,13 @@ const ComboSubmit = ({ onSubmit }: SlotComponentProps<SlotName.Submit>) => {
   )
 
   const options = useMemo(() => slotItems.map(({ label, id }) => ({ label, id })), [slotItems])
+  const [submitAction, setSubmitAction] = useState<string | undefined>(options?.[0]?.id)
 
   const disabled = validationError !== undefined || validationLoading
+
+  if (options.length === 0) {
+    return false
+  }
 
   return (
     <>
