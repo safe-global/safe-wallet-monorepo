@@ -67,7 +67,7 @@ export default function SplitMenuButton({
     setOpen(false)
   }
 
-  const { label, id } = useMemo(() => options[selectedIndex], [options, selectedIndex])
+  const { label, id } = useMemo(() => options[selectedIndex] || {}, [options, selectedIndex])
   const maxCharLen = Math.max(...options.map(({ id, label }) => (label || id).length)) + 2
 
   return (
