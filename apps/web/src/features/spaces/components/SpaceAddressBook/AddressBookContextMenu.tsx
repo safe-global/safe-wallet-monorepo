@@ -11,7 +11,9 @@ import EditIcon from '@/public/images/common/edit.svg'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { trackEvent } from '@/services/analytics'
 import { useIsAdmin } from '@/features/spaces/hooks/useSpaceMembers'
-import RemoveAddressBookEntryDialog from './RemoveAddressBookEntryDialog'
+
+import EditAddressBookEntryDialog from './EditContactDialog'
+import RemoveAddressBookEntryDialog from './DeleteContactDialog'
 import type { SpaceAddressBookEntry } from '../../types'
 
 enum ModalType {
@@ -69,6 +71,8 @@ const AddressBookContextMenu = ({ entry }: { entry: SpaceAddressBookEntry }) => 
           </MenuItem>
         )}
       </ContextMenu>
+
+      {open[ModalType.RENAME] && <EditAddressBookEntryDialog entry={entry} onClose={handleCloseModal} />}
 
       {open[ModalType.REMOVE] && (
         <RemoveAddressBookEntryDialog
