@@ -10,7 +10,7 @@ import NetworkMultiSelectorInput from '@/components/common/NetworkSelector/Netwo
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 
-type ContactField = {
+export type ContactField = {
   name: string
   address: string
   networks: ChainInfo[]
@@ -69,22 +69,21 @@ const AddContact = () => {
       <Button variant="contained" startIcon={<PlusIcon />} onClick={handleOpen}>
         Add contact
       </Button>
-      <ModalDialog open={open} onClose={handleClose} dialogTitle="Add member" hideChainIndicator>
+      <ModalDialog open={open} onClose={handleClose} dialogTitle="Add contact" hideChainIndicator>
         <FormProvider {...methods}>
           <form onSubmit={onSubmit}>
             <DialogContent sx={{ py: 2 }}>
-              <Typography mb={2}>Add any contact to your address book. Anyone in the space can see it.</Typography>
               <Stack spacing={3}>
                 <NameInput name="name" label="Name" required />
 
                 <AddressInput name="address" label="Address" required showPrefix={false} />
 
                 <Box>
-                  <Typography variant="h5" fontWeight={700} display="inline-flex" alignItems="center" gap={1} mt={2}>
-                    Select Networks
+                  <Typography variant="h5" fontWeight={700} display="inline-flex" alignItems="center" gap={1} mb={1}>
+                    Select networks
                   </Typography>
-                  <Typography variant="body2" mb={1}>
-                    Choose which networks you want your address book entry to apply to.
+                  <Typography variant="body2" mb={2}>
+                    Add contact on all networks or only on specific ones of your choice.{' '}
                   </Typography>
                   <Controller
                     name="networks"
@@ -115,7 +114,7 @@ const AddContact = () => {
                 Cancel
               </Button>
               <Button type="submit" variant="contained" disabled={!formState.isValid} disableElevation>
-                {isSubmitting ? <CircularProgress size={20} /> : 'Add member'}
+                {isSubmitting ? <CircularProgress size={20} /> : 'Add contact'}
               </Button>
             </DialogActions>
           </form>
