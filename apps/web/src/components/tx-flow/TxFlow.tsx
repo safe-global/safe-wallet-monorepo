@@ -84,12 +84,14 @@ export const TxFlow = <T extends unknown>({
                   <ExecuteCheckbox />
 
                   <Counterfactual />
-                  <Execute />
                   <ExecuteThroughRole />
+
                   <ComboSubmit>
                     <Sign />
+                    <Execute />
                     <Batching />
                   </ComboSubmit>
+
                   <Propose />
                 </ReviewTransactionComponent>
 

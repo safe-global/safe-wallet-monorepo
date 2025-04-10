@@ -8,19 +8,20 @@ import { withCheckboxGuard } from '../../withCheckboxGuard'
 import { SIGN_CHECKBOX_LABEL, SIGN_CHECKBOX_TOOLTIP } from '../Sign'
 import useIsCounterfactualSafe from '@/features/counterfactual/hooks/useIsCounterfactualSafe'
 import { type SlotComponentProps, SlotName, withSlot } from '../../slots'
+import { SubmitCallback } from '../../TxFlow'
 
 const CheckboxGuardedExecuteForm = withCheckboxGuard(ExecuteForm, SIGN_CHECKBOX_LABEL, SIGN_CHECKBOX_TOOLTIP)
 
-const Execute = ({ onSubmit }: SlotComponentProps<SlotName.Submit>) => {
+const Execute = ({ onSubmit, options = [], onChange }: SlotComponentProps<SlotName.ComboSubmit>) => {
   const { safeTx, txOrigin } = useContext(SafeTxContext)
   const { txId, isCreation, onlyExecute, isSubmittable, trackTxEvent } = useContext(TxFlowContext)
   const hasSigned = useAlreadySigned(safeTx)
   const [checked, setChecked] = useState(false)
 
-  const handleSubmit = useCallback(
-    async (txId: string, isExecuted = false) => {
+  const handleSubmit = useCallback<SubmitCallback>(
+    async ({ txId, isExecuted = false } = {}) => {
       onSubmit({ txId, isExecuted })
-      trackTxEvent(txId, isExecuted)
+      trackTxEvent(txId!, isExecuted)
     },
     [onSubmit, trackTxEvent],
   )
@@ -37,6 +38,8 @@ const Execute = ({ onSubmit }: SlotComponentProps<SlotName.Submit>) => {
       safeTx={safeTx}
       txId={txId}
       onSubmit={handleSubmit}
+      onChange={onChange}
+      options={options}
       onCheckboxChange={handleCheckboxChange}
       isChecked={checked}
       disableSubmit={!isSubmittable}
@@ -49,15 +52,16 @@ const Execute = ({ onSubmit }: SlotComponentProps<SlotName.Submit>) => {
 
 const useShouldRegisterSlot = () => {
   const isCounterfactualSafe = useIsCounterfactualSafe()
-  const { willExecute, isProposing } = useContext(TxFlowContext)
+  const { canExecute, isProposing } = useContext(TxFlowContext)
 
-  return !isCounterfactualSafe && willExecute && !isProposing
+  return !isCounterfactualSafe && canExecute && !isProposing
 }
 
 const ExecuteSlot = withSlot({
   Component: Execute,
-  slotName: SlotName.Submit,
+  slotName: SlotName.ComboSubmit,
   id: 'execute',
+  label: 'Execute',
   useSlotCondition: useShouldRegisterSlot,
 })
 

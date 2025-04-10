@@ -73,18 +73,10 @@ const Batching = ({ onSubmit, options = [], onChange }: SlotComponentProps<SlotN
 
 const useShouldRegisterSlot = () => {
   const isCounterfactualSafe = useIsCounterfactualSafe()
-  const { willExecute, isBatch, isProposing, willExecuteThroughRole, isCreation } = useContext(TxFlowContext)
+  const { isBatch, isProposing, willExecuteThroughRole, isCreation } = useContext(TxFlowContext)
   const isOwner = useIsSafeOwner()
 
-  return (
-    isOwner &&
-    isCreation &&
-    !isBatch &&
-    !isCounterfactualSafe &&
-    !willExecute &&
-    !willExecuteThroughRole &&
-    !isProposing
-  )
+  return isOwner && isCreation && !isBatch && !isCounterfactualSafe && !willExecuteThroughRole && !isProposing
 }
 
 const BatchingSlot = withSlot({
