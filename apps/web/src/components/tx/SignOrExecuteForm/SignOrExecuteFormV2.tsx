@@ -128,6 +128,7 @@ export const SignOrExecuteFormV2 = ({
       <ExecuteForm
         {...commonProps}
         options={[{ label: 'Execute', id: 'execute' }]}
+        slotId="execute"
         onChange={() => {}}
         onSubmit={({ txId, isExecuted } = {}) => onFormSubmit(txId!, isExecuted)}
       />

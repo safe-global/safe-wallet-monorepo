@@ -44,6 +44,7 @@ export const ExecuteForm = ({
   isCreation,
   isOwner,
   isExecutionLoop,
+  slotId,
   txActions,
   tooltip,
   txSecurity,
@@ -200,7 +201,7 @@ export const ExecuteForm = ({
               <Tooltip title={tooltip} placement="top">
                 <Box sx={{ minWidth: '112px', width: ['100%', '100%', '100%', 'auto'] }}>
                   <SplitMenuButton
-                    selected="execute"
+                    selected={slotId}
                     onChange={({ id }) => onChange?.(id)}
                     options={options}
                     disabled={!isOk || submitDisabled}

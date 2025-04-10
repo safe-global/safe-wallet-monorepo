@@ -28,9 +28,13 @@ type SlotComponentPropsMap = {
   }>
 }
 
+type BaseSlotComponentProps = {
+  slotId: string
+}
+
 export type SlotComponentProps<T extends SlotName> = T extends keyof SlotComponentPropsMap
-  ? SlotComponentPropsMap[T]
-  : {}
+  ? SlotComponentPropsMap[T] & BaseSlotComponentProps
+  : BaseSlotComponentProps
 
 type SlotContextType = {
   registerSlot: <T extends SlotName>(args: {

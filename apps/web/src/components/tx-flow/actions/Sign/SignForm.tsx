@@ -29,6 +29,7 @@ export const SignForm = ({
   disableSubmit = false,
   origin,
   isOwner,
+  slotId,
   txActions,
   txSecurity,
   tooltip,
@@ -129,7 +130,7 @@ export const SignForm = ({
               {(isOk) => (
                 <SplitMenuButton
                   data-testid="sign-btn"
-                  selected="sign"
+                  selected={slotId}
                   onChange={({ id }) => handleOptionChange(id)}
                   options={options}
                   disabled={!isOk || submitDisabled}

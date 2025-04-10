@@ -14,7 +14,7 @@ export const SIGN_CHECKBOX_TOOLTIP = 'Review details and check the box to enable
 
 const CheckboxGuardedSignForm = withCheckboxGuard(SignForm, SIGN_CHECKBOX_LABEL, SIGN_CHECKBOX_TOOLTIP)
 
-export const Sign = ({ onSubmit, options, onChange, disabled = false }: SlotComponentProps<SlotName.ComboSubmit>) => {
+export const Sign = ({ onSubmit, disabled = false, ...props }: SlotComponentProps<SlotName.ComboSubmit>) => {
   const [checked, setChecked] = useState(false)
   const { safeTx, txOrigin } = useContext(SafeTxContext)
   const { txId, trackTxEvent, isSubmittable } = useContext(TxFlowContext)
@@ -38,11 +38,10 @@ export const Sign = ({ onSubmit, options, onChange, disabled = false }: SlotComp
       origin={txOrigin}
       safeTx={safeTx}
       onSubmit={handleSubmit}
-      options={options}
-      onChange={onChange}
       isChecked={checked}
       onCheckboxChange={handleCheckboxChange}
       txId={txId}
+      {...props}
     />
   )
 }

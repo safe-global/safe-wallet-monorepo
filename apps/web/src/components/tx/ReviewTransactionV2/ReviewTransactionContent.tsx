@@ -101,7 +101,7 @@ export const ReviewTransactionContent = ({
         <Blockaid />
 
         <Slot name={SlotName.Submit} onSubmit={onSubmit}>
-          <Sign onSubmit={onSubmit} options={[{ id: 'sign', label: 'Sign' }]} onChange={() => {}} />
+          <Sign onSubmit={onSubmit} options={[{ id: 'sign', label: 'Sign' }]} onChange={() => {}} slotId={'sign'} />
         </Slot>
       </TxCard>
     </>
