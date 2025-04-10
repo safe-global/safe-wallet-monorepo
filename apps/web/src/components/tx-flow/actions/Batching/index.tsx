@@ -15,7 +15,7 @@ import { TxCardActions } from '../../common/TxCard'
 import { Box, Divider } from '@mui/material'
 import commonCss from '@/components/tx-flow/common/styles.module.css'
 
-const Batching = ({ onSubmit, options = [], onChange }: SlotComponentProps<SlotName.ComboSubmit>) => {
+const Batching = ({ onSubmit, options = [], onChange, disabled = false }: SlotComponentProps<SlotName.ComboSubmit>) => {
   const { setTxFlow } = useContext(TxModalContext)
   const { addToBatch } = useTxActions()
   const { safeTx } = useContext(SafeTxContext)
@@ -62,7 +62,7 @@ const Batching = ({ onSubmit, options = [], onChange }: SlotComponentProps<SlotN
           selected="batching"
           onChange={({ id }) => onChange(id)}
           options={options}
-          disabled={!isSubmittable || !isBatchable}
+          disabled={!isSubmittable || !isBatchable || disabled}
           loading={!isSubmittable}
           tooltip={!isBatchable ? `Cannot batch this type of transaction` : undefined}
         />

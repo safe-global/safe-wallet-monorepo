@@ -31,7 +31,6 @@ import NonOwnerError from '@/components/tx/SignOrExecuteForm/NonOwnerError'
 import SplitMenuButton from '@/components/common/SplitMenuButton'
 import { SlotComponentProps, SlotName } from '../../slots'
 import { TxFlowContext } from '../../TxFlowProvider'
-import WalletRejectionError from '@/components/tx/SignOrExecuteForm/WalletRejectionError'
 
 export const ExecuteForm = ({
   safeTx,
@@ -64,11 +63,6 @@ export const ExecuteForm = ({
   // Form state
   const [isSubmittableLocal, setIsSubmittableLocal] = useState<boolean>(true) // TODO: remove this local state and use only the one from TxFlowContext when tx-flow refactor is done
 
-  const [validationResult, , validationLoading] = useValidateTxData(txId)
-  const validationError = useMemo(
-    () => (validationResult !== undefined ? new Error(validationResult) : undefined),
-    [validationResult],
-  )
   // Hooks
   const currentChain = useCurrentChain()
   const { executeTx } = txActions
@@ -151,9 +145,7 @@ export const ExecuteForm = ({
     disableSubmit ||
     isExecutionLoop ||
     cannotPropose ||
-    (needsRiskConfirmation && !isRiskConfirmed) ||
-    validationError !== undefined ||
-    validationLoading
+    (needsRiskConfirmation && !isRiskConfirmed)
 
   return (
     <>
@@ -197,22 +189,6 @@ export const ExecuteForm = ({
               {` To save gas costs, ${isCreation ? 'avoid creating' : 'reject'} this transaction.`}
             </ErrorMessage>
           )
-        )}
-
-        {submitError && (
-          <Box mt={1}>
-            <ErrorMessage error={submitError}>Error submitting the transaction. Please try again.</ErrorMessage>
-          </Box>
-        )}
-
-        {isRejectedByUser && (
-          <Box mt={1}>
-            <WalletRejectionError />
-          </Box>
-        )}
-
-        {validationError !== undefined && (
-          <ErrorMessage error={validationError}>Error validating transaction data</ErrorMessage>
         )}
 
         <Divider className={commonCss.nestedDivider} sx={{ pt: 3 }} />

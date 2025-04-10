@@ -12,7 +12,7 @@ import { SubmitCallback } from '../../TxFlow'
 
 const CheckboxGuardedExecuteForm = withCheckboxGuard(ExecuteForm, SIGN_CHECKBOX_LABEL, SIGN_CHECKBOX_TOOLTIP)
 
-const Execute = ({ onSubmit, options = [], onChange }: SlotComponentProps<SlotName.ComboSubmit>) => {
+const Execute = ({ onSubmit, options = [], onChange, disabled = false }: SlotComponentProps<SlotName.ComboSubmit>) => {
   const { safeTx, txOrigin } = useContext(SafeTxContext)
   const { txId, isCreation, onlyExecute, isSubmittable, trackTxEvent } = useContext(TxFlowContext)
   const hasSigned = useAlreadySigned(safeTx)
@@ -42,7 +42,7 @@ const Execute = ({ onSubmit, options = [], onChange }: SlotComponentProps<SlotNa
       options={options}
       onCheckboxChange={handleCheckboxChange}
       isChecked={checked}
-      disableSubmit={!isSubmittable}
+      disableSubmit={!isSubmittable || disabled}
       origin={txOrigin}
       onlyExecute={onlyExecute}
       isCreation={isCreation}

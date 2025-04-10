@@ -24,6 +24,7 @@ type SlotComponentPropsMap = {
     onSubmit: SubmitCallback
     options: { label: string; id: string }[]
     onChange: (option: string) => void
+    disabled?: boolean
   }>
 }
 

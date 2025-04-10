@@ -1,5 +1,5 @@
 import madProps from '@/utils/mad-props'
-import { type ReactElement, type SyntheticEvent, useContext, useMemo, useState } from 'react'
+import { type ReactElement, type SyntheticEvent, useContext, useState } from 'react'
 import { Box, Divider, Stack } from '@mui/material'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import { trackError, Errors } from '@/services/exceptions'
@@ -15,7 +15,6 @@ import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { isWalletRejection } from '@/utils/wallets'
 import { useSigner } from '@/hooks/wallets/useWallet'
 import { NestedTxSuccessScreenFlow } from '@/components/tx-flow/flows'
-import { useValidateTxData } from '@/hooks/useValidateTxData'
 import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
 import { TxCardActions } from '@/components/tx-flow/common/TxCard'
 import SplitMenuButton from '@/components/common/SplitMenuButton'
@@ -46,12 +45,6 @@ export const SignForm = ({
   // Form state
   const [isSubmittableLocal, setIsSubmittableLocal] = useState<boolean>(true) // TODO: remove this local state and use only the one from TxFlowContext when tx-flow refactor is done
 
-  const [validationResult, , validationLoading] = useValidateTxData(txId)
-  const validationError = useMemo(
-    () => (validationResult !== undefined ? new Error(validationResult) : undefined),
-    [validationResult],
-  )
-
   // Hooks
   const { signTx } = txActions
   const { setTxFlow } = useContext(TxModalContext)
@@ -74,7 +67,7 @@ export const SignForm = ({
       return
     }
 
-    if (!safeTx || validationError) return
+    if (!safeTx) return
 
     setIsSubmittable(false)
     setIsSubmittableLocal(false)
@@ -118,19 +111,13 @@ export const SignForm = ({
     !isSubmittableLocal ||
     disableSubmit ||
     cannotPropose ||
-    (needsRiskConfirmation && !isRiskConfirmed) ||
-    validationError !== undefined ||
-    validationLoading
+    (needsRiskConfirmation && !isRiskConfirmed)
 
   return (
     <Stack gap={3}>
       {hasSigned && <ErrorMessage level="warning">You have already signed this transaction.</ErrorMessage>}
 
       {cannotPropose && <NonOwnerError />}
-
-      {validationError !== undefined && (
-        <ErrorMessage error={validationError}>Error validating transaction data</ErrorMessage>
-      )}
 
       <Box>
         <Divider className={commonCss.nestedDivider} />
