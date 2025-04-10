@@ -15,9 +15,13 @@ interface Props {
 
 const FIRST_BYTES = 10
 
+const SHOW_MORE = 'Show more'
+const SHOW_LESS = 'Show less'
+
 export const HexEncodedData = ({ hexData, title, highlightFirstBytes = true, limit = 20 }: Props): ReactElement => {
   const [showTxData, setShowTxData] = useState(false)
-  const showExpandBtn = hexData.length > limit
+  // Check if
+  const showExpandBtn = hexData.length > limit + SHOW_MORE.length + 2 // 2 for the space and the ellipsis
 
   const toggleExpanded = () => {
     setShowTxData((val) => !val)
@@ -43,7 +47,7 @@ export const HexEncodedData = ({ hexData, title, highlightFirstBytes = true, lim
             type="button"
             sx={{ verticalAlign: 'text-top' }}
           >
-            Show {showTxData ? 'less' : 'more'}
+            {showTxData ? SHOW_LESS : SHOW_MORE}
           </Link>
         )}
       </CopyButton>

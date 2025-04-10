@@ -76,16 +76,8 @@ exports[`HexEncodedData should not highlight the data if highlight option is fal
           data-mui-internal-clone-element="true"
           style="cursor: pointer;"
         >
-          0x10238476...
+          0x102384763718984309876
            
-          <button
-            class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways MuiLink-button css-5r1yio-MuiTypography-root-MuiLink-root"
-            data-testid="show-more"
-            type="button"
-          >
-            Show 
-            more
-          </button>
         </span>
       </div>
     </div>
@@ -130,15 +122,14 @@ exports[`HexEncodedData should render the default component markup 1`] = `
           >
             0xed2ad31e
           </b>
-          d00088fc64...
+          d00088fc64…
            
           <button
             class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways MuiLink-button css-5r1yio-MuiTypography-root-MuiLink-root"
             data-testid="show-more"
             type="button"
           >
-            Show 
-            more
+            Show more
           </button>
         </span>
       </div>
