@@ -18,7 +18,7 @@ import { NestedTxSuccessScreenFlow } from '@/components/tx-flow/flows'
 import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
 import { TxCardActions } from '@/components/tx-flow/common/TxCard'
 import SplitMenuButton from '@/components/common/SplitMenuButton'
-import { type SlotComponentProps, SlotName } from '../../slots'
+import type { SlotComponentProps, SlotName } from '../../slots'
 
 export const SignForm = ({
   safeTx,

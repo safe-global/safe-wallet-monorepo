@@ -8,7 +8,7 @@ import { withCheckboxGuard } from '../../withCheckboxGuard'
 import { SIGN_CHECKBOX_LABEL, SIGN_CHECKBOX_TOOLTIP } from '../Sign'
 import useIsCounterfactualSafe from '@/features/counterfactual/hooks/useIsCounterfactualSafe'
 import { type SlotComponentProps, SlotName, withSlot } from '../../slots'
-import { SubmitCallback } from '../../TxFlow'
+import type { SubmitCallback } from '../../TxFlow'
 
 const CheckboxGuardedExecuteForm = withCheckboxGuard(ExecuteForm, SIGN_CHECKBOX_LABEL, SIGN_CHECKBOX_TOOLTIP)
 
@@ -20,6 +20,7 @@ const Execute = ({ onSubmit, disabled = false, onChange, ...props }: SlotCompone
 
   useEffect(() => {
     setShouldExecute(true)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const handleSubmit = useCallback<SubmitCallback>(

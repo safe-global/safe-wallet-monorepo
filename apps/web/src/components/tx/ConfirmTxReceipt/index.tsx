@@ -10,7 +10,6 @@ import { MODALS_EVENTS } from '@/services/analytics'
 import useWallet from '@/hooks/wallets/useWallet'
 import { isHardwareWallet, isLedgerLive } from '@/utils/wallets'
 import { TxFlowStep } from '@/components/tx-flow/TxFlowStep'
-import type { SubmitCallback } from '@/components/tx-flow/TxFlow'
 import { TxDetails } from '../ConfirmTxDetails/TxDetails'
 
 const InfoSteps = [
@@ -65,11 +64,7 @@ const HardwareWalletStep = [
   InfoSteps[2],
 ]
 
-export type ConfirmTxReceiptProps = PropsWithChildren<{
-  onSubmit: SubmitCallback
-}>
-
-export const ConfirmTxReceipt = ({ children, onSubmit }: ConfirmTxReceiptProps) => {
+export const ConfirmTxReceipt = ({ children }: PropsWithChildren) => {
   const { safeTx } = useContext(SafeTxContext)
   const [txPreview] = useTxPreview(safeTx?.data)
   const wallet = useWallet()

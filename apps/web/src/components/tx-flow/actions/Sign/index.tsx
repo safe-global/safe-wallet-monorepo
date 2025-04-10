@@ -6,7 +6,7 @@ import SignForm from './SignForm'
 import { withCheckboxGuard } from '../../withCheckboxGuard'
 import useIsCounterfactualSafe from '@/features/counterfactual/hooks/useIsCounterfactualSafe'
 import { type SlotComponentProps, SlotName, withSlot } from '../../slots'
-import { SubmitCallback } from '../../TxFlow'
+import type { SubmitCallback } from '../../TxFlow'
 import { useAlreadySigned } from '@/components/tx/SignOrExecuteForm/hooks'
 
 export const SIGN_CHECKBOX_LABEL = "I understand what I'm signing and that this is an irreversible action."

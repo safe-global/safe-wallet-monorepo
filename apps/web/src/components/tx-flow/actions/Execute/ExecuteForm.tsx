@@ -29,7 +29,7 @@ import { TxSecurityContext } from '@/components/tx/security/shared/TxSecurityCon
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import NonOwnerError from '@/components/tx/SignOrExecuteForm/NonOwnerError'
 import SplitMenuButton from '@/components/common/SplitMenuButton'
-import { SlotComponentProps, SlotName } from '../../slots'
+import type { SlotComponentProps, SlotName } from '../../slots'
 import { TxFlowContext } from '../../TxFlowProvider'
 
 export const ExecuteForm = ({
