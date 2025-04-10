@@ -139,10 +139,10 @@ const EditContactDialog = ({ entry, onClose }: EditContactDialogProps) => {
 
               <Box>
                 <Typography variant="h5" fontWeight={700} display="inline-flex" alignItems="center" gap={1} mt={2}>
-                  Select Networks
+                  Select networks
                 </Typography>
                 <Typography variant="body2" mb={1}>
-                  Choose which networks you want your address book entry to apply to.
+                  Add contact on all networks or only on specific ones of your choice.
                 </Typography>
                 <Controller
                   name="networks"
