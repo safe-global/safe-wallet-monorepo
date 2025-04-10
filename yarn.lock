@@ -8238,7 +8238,7 @@ __metadata:
     react-hook-form: "npm:^7.54.2"
     react-native: "npm:0.76.9"
     react-native-collapsible-tab-view: "npm:^8.0.0"
-    react-native-device-crypto: "npm:^0.1.7"
+    react-native-device-crypto: "patch:react-native-device-crypto@npm%3A0.1.7#~/.yarn/patches/react-native-device-crypto-npm-0.1.7-dbd2698fc4.patch"
     react-native-device-info: "npm:^14.0.1"
     react-native-draggable-flatlist: "npm:^4.0.1"
     react-native-gesture-handler: "npm:~2.20.2"
@@ -27965,13 +27965,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-device-crypto@npm:^0.1.7":
+"react-native-device-crypto@npm:0.1.7":
   version: 0.1.7
   resolution: "react-native-device-crypto@npm:0.1.7"
   peerDependencies:
     react: "*"
     react-native: "*"
   checksum: 10/0c4f9e8b8a10659511d74e4ec33cc3353a1cbe15038e5f4bae4012d679f2733e00fac4568a3c332ce11f984c2324f9a51373858ccf6ec24a2e6755273b5e595f
+  languageName: node
+  linkType: hard
+
+"react-native-device-crypto@patch:react-native-device-crypto@npm%3A0.1.7#~/.yarn/patches/react-native-device-crypto-npm-0.1.7-dbd2698fc4.patch":
+  version: 0.1.7
+  resolution: "react-native-device-crypto@patch:react-native-device-crypto@npm%3A0.1.7#~/.yarn/patches/react-native-device-crypto-npm-0.1.7-dbd2698fc4.patch::version=0.1.7&hash=a313f2"
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+  checksum: 10/78d90c718b8e7436bba7971cc5e6d431592701e40c2f0b83e8b3cc8b4dd384866eb56487ceb2b738a4286f9ad750f7642fd2562bba0c1338c53bf0a4bf67ffad
   languageName: node
   linkType: hard
 
