@@ -68,12 +68,18 @@ const Summary = ({ safeTxData, txData, txInfo, txDetails, showMethodCall }: Prop
       {showDetails && (
         <Box mt={3}>
           <ColorCodedTxAccordion txInfo={txInfo} txData={txData} defaultExpanded={isExpanded}>
-            <DecodedData txData={txData} toInfo={toInfo} />
+            <Box my={1}>
+              <DecodedData txData={txData} toInfo={toInfo} />
+            </Box>
 
-            <DecoderLinks />
+            <Box>
+              <Divider sx={{ mx: -2, mt: 2.5 }} />
 
-            <Box mx={-2} mb={-2}>
-              <Divider sx={{ mx: -1 }} />
+              <Typography variant="h5" mt={2.5} mb={2}>
+                Advanced details
+              </Typography>
+
+              <DecoderLinks />
 
               <TxDetails safeTxData={safeTxData} txData={txData} grid />
             </Box>

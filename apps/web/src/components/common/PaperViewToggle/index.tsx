@@ -9,10 +9,10 @@ type PaperViewToggleProps = {
     content: ReactNode
   }[]
   activeView?: number
-  withBackground?: boolean
+  leftAlign?: boolean
 }
 
-export const PaperViewToggle = ({ children, withBackground, activeView = 0 }: PaperViewToggleProps) => {
+export const PaperViewToggle = ({ children, leftAlign, activeView = 0 }: PaperViewToggleProps) => {
   const [active, setActive] = useState(activeView)
 
   const onChangeView = (index: number) => {
@@ -24,16 +24,14 @@ export const PaperViewToggle = ({ children, withBackground, activeView = 0 }: Pa
   return (
     <Paper
       sx={{
-        backgroundColor: withBackground ? 'background.main' : undefined,
+        backgroundColor: 'background.main',
         pt: 1,
         pb: 1.5,
       }}
     >
       <Stack spacing={2}>
-        <Stack direction={withBackground ? 'row-reverse' : 'row'} justifyContent="space-between" px={2} py={1}>
-          <ToggleButtonGroup onChange={onChangeView} withBackground={withBackground}>
-            {children}
-          </ToggleButtonGroup>
+        <Stack direction={leftAlign ? 'row' : 'row-reverse'} justifyContent="space-between" px={2} py={1}>
+          <ToggleButtonGroup onChange={onChangeView}>{children}</ToggleButtonGroup>
         </Stack>
 
         <Content index={active} />

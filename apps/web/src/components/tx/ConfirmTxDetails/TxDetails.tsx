@@ -31,7 +31,7 @@ export const TxDetails = ({ safeTxData, txData, grid }: TxDetailsProps) => {
   const operation = Number(safeTxData.operation) as Operation
 
   return (
-    <PaperViewToggle withBackground={!grid} activeView={0}>
+    <PaperViewToggle activeView={0} leftAlign={grid}>
       {[
         {
           title: 'Data',
