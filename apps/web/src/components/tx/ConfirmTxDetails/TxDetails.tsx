@@ -1,4 +1,4 @@
-import { type ReactElement } from 'react'
+import { Fragment, type ReactElement } from 'react'
 import { Box, Divider, Stack, Typography } from '@mui/material'
 import CheckIcon from '@mui/icons-material/Check'
 import type { SafeTransaction } from '@safe-global/safe-core-sdk-types'
@@ -30,6 +30,8 @@ export const TxDetails = ({ safeTxData, txData, grid }: TxDetailsProps) => {
   const messageHash = useMessageHash({ safeTxData })
   const operation = Number(safeTxData.operation) as Operation
 
+  const ToWrapper = grid ? Box : Fragment
+
   return (
     <PaperViewToggle activeView={0} leftAlign={grid}>
       {[
@@ -43,26 +45,29 @@ export const TxDetails = ({ safeTxData, txData, grid }: TxDetailsProps) => {
                 </TxDetailsRow>
 
                 <TxDetailsRow label="To" grid={grid}>
-                  <NameChip txData={txData} withBackground={grid} />
+                  <ToWrapper>
+                    <NameChip txData={txData} withBackground={grid} />
 
-                  <Typography
-                    variant="body2"
-                    width="100%"
-                    sx={{
-                      '& *': { whiteSpace: 'normal', wordWrap: 'break-word', alignItems: 'flex-start !important' },
-                    }}
-                  >
-                    <EthHashInfo
-                      address={safeTxData.to}
-                      avatarSize={20}
-                      showPrefix={false}
-                      showName={false}
-                      shortAddress={false}
-                      hasExplorer
-                      showAvatar
-                      highlight4bytes
-                    />
-                  </Typography>
+                    <Typography
+                      variant="body2"
+                      mt={grid ? 0.75 : 0}
+                      width={grid ? undefined : '100%'}
+                      sx={{
+                        '& *': { whiteSpace: 'normal', wordWrap: 'break-word', alignItems: 'flex-start !important' },
+                      }}
+                    >
+                      <EthHashInfo
+                        address={safeTxData.to}
+                        avatarSize={20}
+                        showPrefix={false}
+                        showName={false}
+                        shortAddress={false}
+                        hasExplorer
+                        showAvatar
+                        highlight4bytes
+                      />
+                    </Typography>
+                  </ToWrapper>
                 </TxDetailsRow>
 
                 <TxDetailsRow label="Value" grid={grid}>
@@ -76,8 +81,10 @@ export const TxDetails = ({ safeTxData, txData, grid }: TxDetailsProps) => {
                 </TxDetailsRow>
 
                 <TxDetailsRow label="Operation" grid={grid}>
-                  {safeTxData.operation} ({operation === Operation.CALL ? 'call' : 'delegate call'})
-                  {operation === Operation.CALL && <CheckIcon color="success" fontSize="small" />}
+                  <Typography variant="body2" display="flex" alignItems="center" gap={0.5}>
+                    {safeTxData.operation} ({operation === Operation.CALL ? 'call' : 'delegate call'})
+                    {operation === Operation.CALL && <CheckIcon color="success" fontSize="inherit" />}
+                  </Typography>
                 </TxDetailsRow>
 
                 <TxDetailsRow label="SafeTxGas" grid={grid}>
