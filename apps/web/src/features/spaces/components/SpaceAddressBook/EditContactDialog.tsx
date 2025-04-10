@@ -1,7 +1,7 @@
 import { Alert, DialogActions, Stack, Button, DialogContent, Typography, CircularProgress, Box } from '@mui/material'
 import { Controller, FormProvider, useForm } from 'react-hook-form'
 import ModalDialog from '@/components/common/ModalDialog'
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import AddressInput from '@/components/common/AddressInput'
 import NameInput from '@/components/common/NameInput'
 import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
@@ -10,12 +10,7 @@ import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import type { SpaceAddressBookEntry } from '../../types'
 import useChains from '@/hooks/useChains'
-
-type ContactField = {
-  name: string
-  address: string
-  networks: ChainInfo[]
-}
+import type { ContactField } from './AddContact'
 
 type EditAddressBookEntryDialogProps = {
   entry: SpaceAddressBookEntry
@@ -60,9 +55,26 @@ const EditAddressBookEntryDialog = ({ entry, onClose }: EditAddressBookEntryDial
     defaultValues,
   })
 
-  const { handleSubmit, formState, control, reset } = methods
+  const { handleSubmit, formState, control, reset, watch } = methods
 
   const { errors } = formState
+
+  // Watch for changes in name and networks
+  const watchedName = watch('name')
+  const watchedNetworks = watch('networks')
+
+  // Check if any changes were made
+  const hasChanges = useMemo(() => {
+    const nameChanged = watchedName !== entry.name
+
+    const originalChainIds = entry.networks.map((network) => network.chainId).sort()
+    const currentChainIds = watchedNetworks.map((network) => network.chainId).sort()
+    const networksChanged =
+      originalChainIds.length !== currentChainIds.length ||
+      originalChainIds.some((id, index) => id !== currentChainIds[index])
+
+    return nameChanged || networksChanged
+  }, [watchedName, watchedNetworks, entry.name, entry.networks])
 
   const handleClose = () => {
     reset(defaultValues)
@@ -159,8 +171,13 @@ const EditAddressBookEntryDialog = ({ entry, onClose }: EditAddressBookEntryDial
             <Button data-testid="cancel-btn" onClick={handleClose}>
               Cancel
             </Button>
-            <Button type="submit" variant="contained" disabled={!formState.isValid} disableElevation>
-              {isSubmitting ? <CircularProgress size={20} /> : 'Save changes'}
+            <Button
+              type="submit"
+              variant="contained"
+              disabled={!formState.isValid || !hasChanges || isSubmitting}
+              disableElevation
+            >
+              {isSubmitting ? <CircularProgress size={20} /> : 'Save'}
             </Button>
           </DialogActions>
         </form>

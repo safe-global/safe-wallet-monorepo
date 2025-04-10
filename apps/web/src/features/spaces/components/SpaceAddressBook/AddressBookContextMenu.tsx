@@ -12,16 +12,16 @@ import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { trackEvent } from '@/services/analytics'
 import { useIsAdmin } from '@/features/spaces/hooks/useSpaceMembers'
 
-import EditAddressBookEntryDialog from './EditContactDialog'
-import RemoveAddressBookEntryDialog from './DeleteContactDialog'
+import EditContactDialog from './EditContactDialog'
+import RemoveContactDialog from './DeleteContactDialog'
 import type { SpaceAddressBookEntry } from '../../types'
 
 enum ModalType {
-  RENAME = 'rename',
+  EDIT = 'edit',
   REMOVE = 'remove',
 }
 
-const defaultOpen = { [ModalType.RENAME]: false, [ModalType.REMOVE]: false }
+const defaultOpen = { [ModalType.EDIT]: false, [ModalType.REMOVE]: false }
 
 const AddressBookContextMenu = ({ entry }: { entry: SpaceAddressBookEntry }) => {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | undefined>()
@@ -55,7 +55,7 @@ const AddressBookContextMenu = ({ entry }: { entry: SpaceAddressBookEntry }) => 
         <MoreVertIcon sx={({ palette }) => ({ color: palette.border.main })} />
       </IconButton>
       <ContextMenu anchorEl={anchorEl} open={!!anchorEl} onClose={handleCloseContextMenu}>
-        <MenuItem onClick={(e) => handleOpenModal(e, ModalType.RENAME)}>
+        <MenuItem onClick={(e) => handleOpenModal(e, ModalType.EDIT)}>
           <ListItemIcon>
             <SvgIcon component={EditIcon} inheritViewBox fontSize="small" color="success" />
           </ListItemIcon>
@@ -72,10 +72,10 @@ const AddressBookContextMenu = ({ entry }: { entry: SpaceAddressBookEntry }) => 
         )}
       </ContextMenu>
 
-      {open[ModalType.RENAME] && <EditAddressBookEntryDialog entry={entry} onClose={handleCloseModal} />}
+      {open[ModalType.EDIT] && <EditContactDialog entry={entry} onClose={handleCloseModal} />}
 
       {open[ModalType.REMOVE] && (
-        <RemoveAddressBookEntryDialog
+        <RemoveContactDialog
           name={entry.name}
           address={entry.address}
           networks={entry.networks}

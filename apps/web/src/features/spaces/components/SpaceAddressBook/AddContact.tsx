@@ -10,7 +10,7 @@ import NetworkMultiSelectorInput from '@/components/common/NetworkSelector/Netwo
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 
-type ContactField = {
+export type ContactField = {
   name: string
   address: string
   networks: ChainInfo[]
