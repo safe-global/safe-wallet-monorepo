@@ -9,7 +9,7 @@ const MemberInfoForm = ({ isEdit = false }: { isEdit?: boolean }) => {
 
   return (
     <Stack direction="row" spacing={2} alignItems="center">
-      <NameInput name="name" label="Name" required disabled={isEdit} />
+      <NameInput data-testid="member-name-input" name="name" label="Name" required disabled={isEdit} />
 
       <Controller
         control={control}

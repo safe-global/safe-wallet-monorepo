@@ -165,7 +165,12 @@ const AddAccounts = () => {
     <>
       <Tooltip title={!isAdmin ? 'You need to be an Admin to add accounts' : ''} placement="top">
         <Box component="span">
-          <Button variant="contained" onClick={() => setOpen(true)} disabled={!isAdmin}>
+          <Button
+            data-testid="add-space-account-button"
+            variant="contained"
+            onClick={() => setOpen(true)}
+            disabled={!isAdmin}
+          >
             Add accounts
           </Button>
         </Box>
@@ -238,7 +243,12 @@ const AddAccounts = () => {
 
                   <DialogActions>
                     <Button onClick={handleClose}>Cancel</Button>
-                    <Button variant="contained" disabled={selectedSafesLength === 0} type="submit">
+                    <Button
+                      data-testid="add-accounts-button"
+                      variant="contained"
+                      disabled={selectedSafesLength === 0}
+                      type="submit"
+                    >
                       Add Accounts ({selectedSafesLength})
                     </Button>
                   </DialogActions>

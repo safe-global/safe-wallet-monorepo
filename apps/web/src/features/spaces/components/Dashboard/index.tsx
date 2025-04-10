@@ -67,7 +67,7 @@ const SpaceDashboard = () => {
 
           <Grid container spacing={3}>
             <Grid size={{ xs: 12, md: 8 }}>
-              <Card sx={{ p: 2 }}>
+              <Card data-testid="dashboard-safe-list" sx={{ p: 2 }}>
                 <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
                   <Typography variant="h5">Safe Accounts ({safeItems.length})</Typography>
                   {spaceId && (

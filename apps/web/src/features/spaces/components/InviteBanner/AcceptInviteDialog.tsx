@@ -69,7 +69,7 @@ function AcceptInviteDialog({ space, onClose }: { space: GetSpaceResponse; onClo
         <form onSubmit={onSubmit}>
           <DialogContent sx={{ py: 2 }}>
             <Box mb={2}>
-              <NameInput data-testid="name-input" label="Name" autoFocus name="name" required />
+              <NameInput data-testid="invite-name-input" label="Name" autoFocus name="name" required />
             </Box>
             <Typography variant="body2" color="text.secondary">
               How is my data processed? Read our <ExternalLink href={AppRoutes.privacy}>privacy policy</ExternalLink>
@@ -86,7 +86,13 @@ function AcceptInviteDialog({ space, onClose }: { space: GetSpaceResponse; onClo
             <Button data-testid="cancel-btn" onClick={onClose}>
               Cancel
             </Button>
-            <Button type="submit" variant="contained" disabled={!formState.isValid} disableElevation>
+            <Button
+              data-testid="confirm-accept-invite-button"
+              type="submit"
+              variant="contained"
+              disabled={!formState.isValid}
+              disableElevation
+            >
               {isSubmitting ? <CircularProgress size={20} /> : 'Accept invite'}
             </Button>
           </DialogActions>

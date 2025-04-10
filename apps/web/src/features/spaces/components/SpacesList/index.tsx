@@ -24,6 +24,7 @@ const AddSpaceButton = () => {
   return (
     <>
       <Button
+        data-testid="create-space-button"
         disableElevation
         variant="contained"
         size="small"

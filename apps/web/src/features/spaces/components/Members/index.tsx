@@ -66,7 +66,12 @@ const SpaceMembers = () => {
         />
         {isAdmin && (
           <Track {...SPACE_EVENTS.ADD_MEMBER_MODAL} label={SPACE_LABELS.members_page}>
-            <Button variant="contained" startIcon={<PlusIcon />} onClick={() => setOpenAddMembersModal(true)}>
+            <Button
+              data-testid="add-member-button"
+              variant="contained"
+              startIcon={<PlusIcon />}
+              onClick={() => setOpenAddMembersModal(true)}
+            >
               Add member
             </Button>
           </Track>
