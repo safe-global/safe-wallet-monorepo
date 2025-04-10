@@ -48,6 +48,7 @@ import { defaultSafeInfo } from '@safe-global/store/slices/SafeInfo/utils'
 import { selectOrderByPreference } from '@/store/orderByPreferenceSlice'
 import { getComparator } from '@/features/myAccounts/utils/utils'
 import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
+import EthHashInfo from '@/components/common/EthHashInfo'
 
 export const MultichainIndicator = ({ safes }: { safes: SafeItem[] }) => {
   return (
@@ -272,22 +273,16 @@ const MultiAccountItem = ({ onLinkClick, multiSafeAccountItem, isSpaceSafe = fal
             <Box sx={{ pr: 2.5 }} data-testid="group-safe-icon">
               <SafeIcon address={address} owners={sharedSetup?.owners.length} threshold={sharedSetup?.threshold} />
             </Box>
+
             <Typography variant="body2" component="div" className={css.safeAddress}>
-              {multiSafeAccountItem.name && (
-                <Typography variant="subtitle2" component="p" sx={{ fontWeight: 'bold' }} className={css.safeName}>
-                  {multiSafeAccountItem.name}
-                </Typography>
-              )}
-              <Typography
-                data-testid="group-address"
-                component="span"
-                sx={{
-                  color: 'var(--color-primary-light)',
-                  fontSize: 'inherit',
-                }}
-              >
-                {shortenAddress(address)}
-              </Typography>
+              <EthHashInfo
+                address={address}
+                name={multiSafeAccountItem.name}
+                shortAddress
+                showPrefix={false}
+                showAvatar={false}
+                copyPrefix={false}
+              />
             </Typography>
             <MultichainIndicator safes={sortedSafes} />
             <Typography

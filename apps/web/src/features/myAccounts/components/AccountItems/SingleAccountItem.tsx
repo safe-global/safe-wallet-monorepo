@@ -36,6 +36,7 @@ import { defaultSafeInfo } from '@safe-global/store/slices/SafeInfo/utils'
 import FiatValue from '@/components/common/FiatValue'
 import { AccountInfoChips } from '../AccountInfoChips'
 import SendTransactionButton from '@/features/spaces/components/SafeAccounts/SendTransactionButton'
+import EthHashInfo from '@/components/common/EthHashInfo'
 
 type AccountItemProps = {
   safeItem: SafeItem
@@ -185,18 +186,7 @@ const SingleAccountItem = ({
             {chain?.chainName}
           </Typography>
         ) : (
-          <>
-            {chain?.shortName}:
-            <Typography
-              component="span"
-              sx={{
-                color: 'var(--color-primary-light)',
-                fontSize: 'inherit',
-              }}
-            >
-              {shortenAddress(address)}
-            </Typography>
-          </>
+          <EthHashInfo address={address} shortAddress chainId={chain?.chainId} showAvatar={false} />
         )}
         {!isMobile && (
           <AccountInfoChips

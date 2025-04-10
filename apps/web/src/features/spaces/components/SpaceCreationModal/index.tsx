@@ -47,9 +47,10 @@ function SpaceCreationModal({ onClose }: { onClose: () => void }): ReactElement 
       if (response.error) {
         throw response.error
       }
-    } catch (e) {
-      // TODO: Show more specific error message
-      setError('Failed creating the space. Please try again.')
+    } catch (error) {
+      // @ts-ignore
+      const errorMessage = error?.data?.message || 'Failed creating the space. Please try again.'
+      setError(errorMessage)
     } finally {
       setIsSubmitting(false)
     }
