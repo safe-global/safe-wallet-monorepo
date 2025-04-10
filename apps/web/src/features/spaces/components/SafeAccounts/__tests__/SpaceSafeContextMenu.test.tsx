@@ -8,24 +8,20 @@ import type { MultiChainSafeItem } from '@/features/myAccounts/hooks/useAllSafes
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 
-// Mock dependencies
 jest.mock('@/store')
 jest.mock('@/features/spaces/hooks/useSpaceMembers')
 jest.mock('@/services/analytics')
 jest.mock('@/features/multichain/utils/utils')
 
-// Mock the RemoveSafeDialog component
 jest.mock('../RemoveSafeDialog', () => {
   return jest.fn(() => <div data-testid="remove-safe-dialog">Remove Safe Dialog</div>)
 })
 
-// Mock the EntryDialog component
 jest.mock('@/components/address-book/EntryDialog', () => {
   return jest.fn(() => <div data-testid="entry-dialog">Entry Dialog</div>)
 })
 
 describe('SpaceSafeContextMenu', () => {
-  // Create mock objects that match the required interfaces
   const mockSafeItem: SafeItem = {
     address: '0x123',
     chainId: '5',
@@ -54,8 +50,6 @@ describe('SpaceSafeContextMenu', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
-
-    // Default mocks
     ;(useAppSelector as jest.Mock).mockReturnValue(mockAddressBooks)
     ;(useIsAdmin as jest.Mock).mockReturnValue(false)
     ;(isMultiChainSafeItem as unknown as jest.Mock).mockImplementation(
