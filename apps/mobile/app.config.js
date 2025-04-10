@@ -33,11 +33,6 @@ export default {
         'aps-environment': 'production',
       },
       googleServicesFile: IS_DEV ? process.env.GOOGLE_SERVICES_PLIST_DEV : process.env.GOOGLE_SERVICES_PLIST,
-      notification: {
-        icon: './assets/images/ic_notification.png',
-        color: '#000000',
-        androidMode: 'default',
-      },
     },
     android: {
       adaptiveIcon: {
@@ -47,7 +42,7 @@ export default {
       },
       package: IS_DEV ? 'global.safe.mobileapp.dev' : 'global.safe.mobileapp',
       googleServicesFile: IS_DEV ? process.env.GOOGLE_SERVICES_JSON_DEV : process.env.GOOGLE_SERVICES_JSON,
-      permissions: ['android.permission.CAMERA'],
+      permissions: ['android.permission.CAMERA', 'android.permission.POST_NOTIFICATIONS'],
     },
     web: {
       bundler: 'metro',

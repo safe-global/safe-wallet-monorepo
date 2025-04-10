@@ -333,8 +333,6 @@ class NotificationsService {
         body,
         data,
         android: {
-          smallIcon: 'ic_notification',
-          largeIcon: 'ic_notification',
           channelId: channelId ?? ChannelId.DEFAULT_NOTIFICATION_CHANNEL_ID,
           importance: AndroidImportance.HIGH,
           visibility: AndroidVisibility.PUBLIC,
