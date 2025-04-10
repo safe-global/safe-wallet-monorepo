@@ -50,9 +50,12 @@ export default function SplitMenuButton({
 
   const handleMenuItemClick = (e: React.MouseEvent<HTMLLIElement, MouseEvent>, index: number) => {
     e.preventDefault()
-    setSelectedIndex(index)
-    setOpen(false)
-    onChange?.(options[index])
+
+    if (index !== selectedIndex) {
+      setSelectedIndex(index)
+      setOpen(false)
+      onChange?.(options[index])
+    }
   }
 
   const handleToggle = () => {
