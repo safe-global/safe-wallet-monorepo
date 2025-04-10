@@ -8,7 +8,7 @@ import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { ChainIndicatorList } from '@/features/multichain/components/SignerSetupWarning/InconsistentSignerSetupWarning'
 
-type RemoveAddressBookEntryDialogProps = {
+type DeleteContactDialogProps = {
   name: string
   address: string
   networks: {
@@ -19,7 +19,7 @@ type RemoveAddressBookEntryDialogProps = {
   onClose: () => void
 }
 
-const RemoveAddressBookEntryDialog = ({ name, address, networks, onClose }: RemoveAddressBookEntryDialogProps) => {
+const DeleteContactDialog = ({ name, address, networks, onClose }: DeleteContactDialogProps) => {
   const handleConfirm = async () => {
     try {
       // TODO: Implement the API call to remove the address book entry
@@ -56,4 +56,4 @@ const RemoveAddressBookEntryDialog = ({ name, address, networks, onClose }: Remo
   )
 }
 
-export default RemoveAddressBookEntryDialog
+export default DeleteContactDialog

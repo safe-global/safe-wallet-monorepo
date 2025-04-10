@@ -12,7 +12,7 @@ import type { SpaceAddressBookEntry } from '../../types'
 import useChains from '@/hooks/useChains'
 import type { ContactField } from './AddContact'
 
-type EditAddressBookEntryDialogProps = {
+type EditContactDialogProps = {
   entry: SpaceAddressBookEntry
   onClose: () => void
 }
@@ -33,7 +33,7 @@ const deleteAddressBookEntry = async (id: string, chainId: string) => {
   return
 }
 
-const EditAddressBookEntryDialog = ({ entry, onClose }: EditAddressBookEntryDialogProps) => {
+const EditContactDialog = ({ entry, onClose }: EditContactDialogProps) => {
   const [error, setError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { configs } = useChains()
@@ -186,4 +186,4 @@ const EditAddressBookEntryDialog = ({ entry, onClose }: EditAddressBookEntryDial
   )
 }
 
-export default EditAddressBookEntryDialog
+export default EditContactDialog
