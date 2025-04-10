@@ -789,26 +789,104 @@ exports[`ReviewTransaction should display an error screen 1`] = `
         </div>
       </div>
       <div
-        class="MuiCardActions-root MuiCardActions-spacing css-1q4nm6f-MuiCardActions-root"
+        class="MuiStack-root css-eir3lh-MuiStack-root"
       >
-        <div
-          class="MuiStack-root css-irtfmw-MuiStack-root"
+        <label
+          class="MuiFormControlLabel-root MuiFormControlLabel-labelPlacementEnd css-q4bnt8-MuiFormControlLabel-root"
         >
           <span
-            aria-label="Please connect your wallet"
-            class=""
-            data-mui-internal-clone-element="true"
+            class="MuiButtonBase-root MuiCheckbox-root MuiCheckbox-colorPrimary MuiCheckbox-sizeMedium PrivateSwitchBase-root MuiCheckbox-root MuiCheckbox-colorPrimary MuiCheckbox-sizeMedium MuiCheckbox-root MuiCheckbox-colorPrimary MuiCheckbox-sizeMedium css-a4ywlg-MuiButtonBase-root-MuiCheckbox-root"
           >
-            <button
-              class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary Mui-disabled MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary css-1hp2ejb-MuiButtonBase-root-MuiButton-root"
-              data-testid="continue-sign-btn"
-              disabled=""
-              tabindex="-1"
-              type="submit"
+            <input
+              class="PrivateSwitchBase-input css-j8yymo"
+              data-indeterminate="false"
+              type="checkbox"
+            />
+            <svg
+              aria-hidden="true"
+              class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-1dhtbeh-MuiSvgIcon-root"
+              data-testid="CheckBoxOutlineBlankIcon"
+              focusable="false"
+              viewBox="0 0 24 24"
             >
-              Continue
-            </button>
+              <path
+                d="M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"
+              />
+            </svg>
           </span>
+          <span
+            class="MuiTypography-root MuiTypography-body1 MuiFormControlLabel-label css-v6lhhw-MuiTypography-root"
+          >
+            I understand what I'm signing and that this is an irreversible action.
+          </span>
+        </label>
+        <div
+          class="MuiStack-root css-msk5bl-MuiStack-root"
+        >
+          <div
+            class="container error errorMessage"
+            data-testid="error-message"
+          >
+            <div
+              class="message"
+            >
+              <mock-icon
+                aria-hidden=""
+                class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-1vcpomi-MuiSvgIcon-root"
+                focusable="false"
+              />
+              <div>
+                <span
+                  class="MuiTypography-root MuiTypography-body2 css-17vdyq3-MuiTypography-root"
+                >
+                  You are currently not a signer of this Safe Account and won't be able to submit this transaction.
+                </span>
+              </div>
+            </div>
+          </div>
+          <div
+            class="MuiBox-root css-0"
+          >
+            <hr
+              class="MuiDivider-root MuiDivider-fullWidth nestedDivider css-1facvfi-MuiDivider-root"
+            />
+            <div
+              class="MuiCardActions-root MuiCardActions-spacing css-1q4nm6f-MuiCardActions-root"
+            >
+              <div
+                class="MuiStack-root css-irtfmw-MuiStack-root"
+              >
+                <form>
+                  <span
+                    aria-label="Please connect your wallet"
+                    class=""
+                    data-mui-internal-clone-element="true"
+                  >
+                    <div
+                      aria-label="Button group with a nested menu"
+                      class="MuiButtonGroup-root MuiButtonGroup-contained MuiButtonGroup-horizontal MuiButtonGroup-fullWidth MuiButtonGroup-colorPrimary css-izkk6m-MuiButtonGroup-root"
+                      role="group"
+                    >
+                      <div
+                        class="MuiBox-root css-1rr4qq7"
+                        data-mui-internal-clone-element="true"
+                      >
+                        <button
+                          class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary MuiButton-fullWidth Mui-disabled MuiButtonGroup-grouped MuiButtonGroup-groupedHorizontal MuiButtonGroup-groupedContained MuiButtonGroup-groupedContainedHorizontal MuiButtonGroup-groupedContainedPrimary MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary MuiButton-fullWidth MuiButtonGroup-grouped MuiButtonGroup-groupedHorizontal MuiButtonGroup-groupedContained MuiButtonGroup-groupedContainedHorizontal MuiButtonGroup-groupedContainedPrimary css-jfe8rk-MuiButtonBase-root-MuiButton-root"
+                          data-testid="combo-submit-sign"
+                          disabled=""
+                          tabindex="-1"
+                          type="submit"
+                        >
+                          Sign
+                        </button>
+                      </div>
+                    </div>
+                  </span>
+                </form>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

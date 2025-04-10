@@ -3,10 +3,11 @@ import { type ReactElement } from 'react'
 import * as hooks from '@/components/tx/SignOrExecuteForm/hooks'
 import * as useValidateTxData from '@/hooks/useValidateTxData'
 import { SignForm } from '../SignForm'
-import { render } from '@/tests/test-utils'
+import { render as renderTestUtils } from '@/tests/test-utils'
 import { createMockSafeTransaction } from '@/tests/transactions'
 import { OperationType } from '@safe-global/safe-core-sdk-types'
 import { fireEvent, waitFor } from '@testing-library/react'
+import { initialContext, TxFlowContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
 
 // We assume that CheckWallet always returns true
 jest.mock('@/components/common/CheckWallet', () => ({
@@ -15,6 +16,12 @@ jest.mock('@/components/common/CheckWallet', () => ({
     return children(true)
   },
 }))
+
+const render = (ui: ReactElement, txFlowContext: Partial<TxFlowContextType> = {}) => {
+  return renderTestUtils(
+    <TxFlowContext.Provider value={{ ...initialContext, ...txFlowContext }}>{ui}</TxFlowContext.Provider>,
+  )
+}
 
 describe('SignForm', () => {
   const safeTransaction = createMockSafeTransaction({
@@ -36,11 +43,11 @@ describe('SignForm', () => {
     },
     txSecurity: defaultSecurityContextValues,
     options: [
-      { id: 'item1', label: 'Item 1' },
-      { id: 'item2', label: 'Item 2' },
+      { id: 'sign', label: 'Sign' },
+      { id: 'execute', label: 'Execute' },
     ],
     onChange: jest.fn(),
-    slotId: 'item1',
+    slotId: 'sign',
   }
 
   beforeEach(() => {
@@ -76,34 +83,6 @@ describe('SignForm', () => {
     ).not.toBeInTheDocument()
   })
 
-  it('shows a submit error', async () => {
-    const mockSignTx = jest.fn(() => {
-      throw new Error('Error signing the tx')
-    })
-
-    const { getByText } = render(
-      <SignForm
-        {...defaultProps}
-        safeTx={safeTransaction}
-        txActions={{
-          proposeTx: jest.fn(),
-          signTx: mockSignTx,
-          addToBatch: jest.fn(),
-          signProposerTx: jest.fn(),
-          executeTx: jest.fn(),
-        }}
-      />,
-    )
-
-    const button = getByText('Sign')
-
-    fireEvent.click(button)
-
-    await waitFor(() => {
-      expect(getByText('Error submitting the transaction. Please try again.')).toBeInTheDocument()
-    })
-  })
-
   it('signs a transaction', async () => {
     const mockSignTx = jest.fn()
 
@@ -130,46 +109,57 @@ describe('SignForm', () => {
     })
   })
 
-  it('shows a disabled submit button if there is no safeTx', () => {
-    const { getByText } = render(<SignForm {...defaultProps} safeTx={undefined} />)
+  describe('shows a disabled submit button if', () => {
+    it('there is no safeTx', () => {
+      const { getByText } = render(<SignForm {...defaultProps} safeTx={undefined} />)
 
-    const button = getByText('Sign')
+      const button = getByText('Sign')
 
-    expect(button).toBeInTheDocument()
-    expect(button).toBeDisabled()
-  })
+      expect(button).toBeInTheDocument()
+      expect(button).toBeDisabled()
+    })
 
-  it('shows a disabled submit button if passed via props', () => {
-    const { getByText } = render(<SignForm {...defaultProps} safeTx={safeTransaction} disableSubmit />)
+    it('is not submitable', () => {
+      const { getByTestId } = render(<SignForm {...defaultProps} />, { isSubmittable: false })
 
-    const button = getByText('Sign')
+      const button = getByTestId('combo-submit-sign')
 
-    expect(button).toBeInTheDocument()
-    expect(button).toBeDisabled()
-  })
+      expect(button).toBeInTheDocument()
+      expect(button).toBeDisabled()
+    })
 
-  it('shows a disabled submit button if not an owner', () => {
-    const { getByText } = render(<SignForm {...defaultProps} safeTx={safeTransaction} isOwner={false} />)
+    it('passed via props', () => {
+      const { getByText } = render(<SignForm {...defaultProps} safeTx={safeTransaction} disableSubmit />)
 
-    const button = getByText('Sign')
+      const button = getByText('Sign')
 
-    expect(button).toBeInTheDocument()
-    expect(button).toBeDisabled()
-  })
+      expect(button).toBeInTheDocument()
+      expect(button).toBeDisabled()
+    })
 
-  it('shows a disabled submit button if there is a high or critical risk and user has not confirmed it', () => {
-    const { getByText } = render(
-      <SignForm
-        {...defaultProps}
-        safeTx={safeTransaction}
-        txSecurity={{ ...defaultSecurityContextValues, needsRiskConfirmation: true, isRiskConfirmed: false }}
-      />,
-    )
+    it('connected wallet is not an owner', () => {
+      const { getByText } = render(<SignForm {...defaultProps} safeTx={safeTransaction} isOwner={false} />)
 
-    const button = getByText('Sign')
+      const button = getByText('Sign')
 
-    expect(button).toBeInTheDocument()
-    expect(button).toBeDisabled()
+      expect(button).toBeInTheDocument()
+      expect(button).toBeDisabled()
+    })
+
+    it('there is a high or critical risk and user has not confirmed it', () => {
+      const { getByText } = render(
+        <SignForm
+          {...defaultProps}
+          safeTx={safeTransaction}
+          txSecurity={{ ...defaultSecurityContextValues, needsRiskConfirmation: true, isRiskConfirmed: false }}
+        />,
+      )
+
+      const button = getByText('Sign')
+
+      expect(button).toBeInTheDocument()
+      expect(button).toBeDisabled()
+    })
   })
 
   it('shows an enabled submit button if there is a high or critical risk and user has confirmed it', () => {

@@ -129,7 +129,6 @@ export const SignForm = ({
             <CheckWallet checkNetwork={!submitDisabled}>
               {(isOk) => (
                 <SplitMenuButton
-                  data-testid="sign-btn"
                   selected={slotId}
                   onChange={({ id }) => handleOptionChange(id)}
                   options={options}

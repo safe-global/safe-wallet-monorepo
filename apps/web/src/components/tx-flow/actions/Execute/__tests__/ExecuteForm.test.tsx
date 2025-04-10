@@ -44,11 +44,11 @@ describe('ExecuteForm', () => {
     },
     txSecurity: defaultSecurityContextValues,
     options: [
-      { id: 'item1', label: 'Item 1' },
-      { id: 'item2', label: 'Item 2' },
+      { id: 'execute', label: 'Execute' },
+      { id: 'sign', label: 'Sign' },
     ],
     onChange: jest.fn(),
-    slotId: 'item1',
+    slotId: 'execute',
   }
 
   beforeEach(() => {
@@ -148,35 +148,6 @@ describe('ExecuteForm', () => {
     expect(
       getByText('This transaction will most likely fail. To save gas costs, reject this transaction.'),
     ).toBeInTheDocument()
-  })
-
-  it('shows a submit error', async () => {
-    const mockExecuteTx = jest.fn(() => {
-      throw new Error('Error submitting the tx')
-    })
-
-    const { getByText } = render(
-      <ExecuteForm
-        {...defaultProps}
-        safeTx={safeTransaction}
-        onSubmit={jest.fn()}
-        txActions={{
-          proposeTx: jest.fn(),
-          signTx: jest.fn(),
-          addToBatch: jest.fn(),
-          executeTx: mockExecuteTx,
-          signProposerTx: jest.fn(),
-        }}
-      />,
-    )
-
-    const button = getByText('Execute')
-
-    fireEvent.click(button)
-
-    await waitFor(() => {
-      expect(getByText('Error submitting the transaction. Please try again.')).toBeInTheDocument()
-    })
   })
 
   it('execute the tx when the submit button is clicked', async () => {

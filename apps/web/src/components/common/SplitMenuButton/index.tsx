@@ -79,6 +79,7 @@ export default function SplitMenuButton({
         <Tooltip title={tooltip} placement="top">
           <Box flex={1}>
             <Button
+              data-testid={`combo-submit-${id}`}
               onClick={handleClick}
               type="submit"
               disabled={disabled}

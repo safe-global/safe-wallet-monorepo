@@ -68,7 +68,7 @@ export type TxFlowContextType<T extends unknown = any> = {
   role?: Role
 }
 
-const initialContext: TxFlowContextType = {
+export const initialContext: TxFlowContextType = {
   step: 0,
   progress: 0,
   data: undefined,
