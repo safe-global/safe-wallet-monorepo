@@ -1,4 +1,4 @@
-import { useContext, useEffect, useMemo, useState } from 'react'
+import { useContext, useMemo, useState } from 'react'
 import { Slot, type SlotComponentProps, SlotName, useSlot, useSlotIds, withSlot } from '../slots'
 import { Box } from '@mui/material'
 import WalletRejectionError from '@/components/tx/SignOrExecuteForm/WalletRejectionError'
@@ -7,7 +7,7 @@ import { TxFlowContext } from '../TxFlowProvider'
 import { useValidateTxData } from '@/hooks/useValidateTxData'
 
 const ComboSubmit = ({ onSubmit }: SlotComponentProps<SlotName.Submit>) => {
-  const { txId, submitError, isRejectedByUser, setShouldExecute } = useContext(TxFlowContext)
+  const { txId, submitError, isRejectedByUser } = useContext(TxFlowContext)
   const slotItems = useSlot(SlotName.ComboSubmit)
   const [submitAction, setSubmitAction] = useState<string>('sign')
 
@@ -16,10 +16,6 @@ const ComboSubmit = ({ onSubmit }: SlotComponentProps<SlotName.Submit>) => {
     () => (validationResult !== undefined ? new Error(validationResult) : undefined),
     [validationResult],
   )
-
-  useEffect(() => {
-    setShouldExecute(submitAction === 'execute')
-  }, [submitAction, setShouldExecute])
 
   const options = useMemo(() => slotItems.map(({ label, id }) => ({ label, id })), [slotItems])
 

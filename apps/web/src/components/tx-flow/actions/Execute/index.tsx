@@ -1,5 +1,5 @@
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
-import { useCallback, useContext, useState } from 'react'
+import { useCallback, useContext, useEffect, useState } from 'react'
 import { TxFlowContext } from '../../TxFlowProvider'
 import ExecuteForm from './ExecuteForm'
 import { useAlreadySigned } from '@/components/tx/SignOrExecuteForm/hooks'
@@ -12,11 +12,15 @@ import { SubmitCallback } from '../../TxFlow'
 
 const CheckboxGuardedExecuteForm = withCheckboxGuard(ExecuteForm, SIGN_CHECKBOX_LABEL, SIGN_CHECKBOX_TOOLTIP)
 
-const Execute = ({ onSubmit, disabled = false, ...props }: SlotComponentProps<SlotName.ComboSubmit>) => {
+const Execute = ({ onSubmit, disabled = false, onChange, ...props }: SlotComponentProps<SlotName.ComboSubmit>) => {
   const { safeTx, txOrigin } = useContext(SafeTxContext)
-  const { txId, isCreation, onlyExecute, isSubmittable, trackTxEvent } = useContext(TxFlowContext)
+  const { txId, isCreation, onlyExecute, isSubmittable, trackTxEvent, setShouldExecute } = useContext(TxFlowContext)
   const hasSigned = useAlreadySigned(safeTx)
   const [checked, setChecked] = useState(false)
+
+  useEffect(() => {
+    setShouldExecute(true)
+  }, [])
 
   const handleSubmit = useCallback<SubmitCallback>(
     async ({ txId, isExecuted = false } = {}) => {
@@ -24,6 +28,15 @@ const Execute = ({ onSubmit, disabled = false, ...props }: SlotComponentProps<Sl
       trackTxEvent(txId!, isExecuted)
     },
     [onSubmit, trackTxEvent],
+  )
+
+  const onChangeSubmitOption = useCallback(
+    async (option: string) => {
+      // When changing to another submit option, we update the context to not execute the transaction
+      setShouldExecute(false)
+      onChange(option)
+    },
+    [setShouldExecute, onChange],
   )
 
   const handleCheckboxChange = useCallback((checked: boolean) => {
@@ -44,6 +57,7 @@ const Execute = ({ onSubmit, disabled = false, ...props }: SlotComponentProps<Sl
       origin={txOrigin}
       onlyExecute={onlyExecute}
       isCreation={isCreation}
+      onChange={onChangeSubmitOption}
       {...props}
     />
   )
