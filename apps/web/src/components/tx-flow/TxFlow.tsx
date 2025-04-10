@@ -77,7 +77,7 @@ export const TxFlow = <T extends unknown>({
               <TxFlowContent>
                 {...childrenArray}
 
-                <ReviewTransactionComponent onSubmit={() => nextStep(data)}>
+                <ReviewTransactionComponent onSubmit={(props = {}) => onSubmit?.({ ...props, data })}>
                   <TxChecks />
                   <TxNote />
                   <SignerSelect />
@@ -94,7 +94,7 @@ export const TxFlow = <T extends unknown>({
                   <Propose />
                 </ReviewTransactionComponent>
 
-                <ConfirmTxReceipt onSubmit={(props = {}) => onSubmit?.({ ...props, data })} />
+                <ConfirmTxReceipt />
               </TxFlowContent>
             </TxFlowProvider>
           </SlotProvider>

@@ -18,9 +18,10 @@ import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
 import useIsCounterfactualSafe from '@/features/counterfactual/hooks/useIsCounterfactualSafe'
 import { Slot, SlotName } from '@/components/tx-flow/slots'
 import { Sign } from '@/components/tx-flow/actions/Sign'
+import type { SubmitCallback } from '@/components/tx-flow/TxFlow'
 
 export type ReviewTransactionContentProps = PropsWithChildren<{
-  onSubmit: () => void
+  onSubmit: SubmitCallback
   isBatch?: boolean
 }>
 
