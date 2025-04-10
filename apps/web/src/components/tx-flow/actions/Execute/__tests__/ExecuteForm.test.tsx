@@ -43,6 +43,12 @@ describe('ExecuteForm', () => {
       signProposerTx: jest.fn(),
     },
     txSecurity: defaultSecurityContextValues,
+    options: [
+      { id: 'item1', label: 'Item 1' },
+      { id: 'item2', label: 'Item 2' },
+    ],
+    onChange: jest.fn(),
+    slotId: 'item1',
   }
 
   beforeEach(() => {
