@@ -3,6 +3,10 @@ import { useFonts } from 'expo-font'
 import DmSansSemiBold from '@tamagui/font-dm-sans/fonts/static/DMSans-SemiBold.ttf'
 import DmSansRegular from '@tamagui/font-dm-sans/fonts/static/DMSans-Regular.ttf'
 import DmSansMedium from '@tamagui/font-dm-sans/fonts/static/DMSans-Medium.ttf'
+import DmSansMediumItalic from '@tamagui/font-dm-sans/fonts/static/DMSans-MediumItalic.ttf'
+import DmSansSemiBoldItalic from '@tamagui/font-dm-sans/fonts/static/DMSans-SemiBoldItalic.ttf'
+import DmSansBold from '@tamagui/font-dm-sans/fonts/static/DMSans-Bold.ttf'
+import DmSansBoldItalic from '@tamagui/font-dm-sans/fonts/static/DMSans-BoldItalic.ttf'
 import * as SplashScreen from 'expo-splash-screen'
 
 interface SafeThemeProviderProps {
@@ -19,9 +23,13 @@ SplashScreen.setOptions({
 
 export const FontProvider = ({ children }: SafeThemeProviderProps) => {
   const [loaded] = useFonts({
-    'DmSans-SemiBold': DmSansSemiBold,
-    'DmSans-Regular': DmSansRegular,
-    'DmSans-Medium': DmSansMedium,
+    'DMSans-SemiBold': DmSansSemiBold,
+    'DMSans-Regular': DmSansRegular,
+    'DMSans-Medium': DmSansMedium,
+    'DMSans-MediumItalic': DmSansMediumItalic,
+    'DMSans-SemiBoldItalic': DmSansSemiBoldItalic,
+    'DMSans-Bold': DmSansBold,
+    'DMSans-BoldItalic': DmSansBoldItalic,
   })
 
   useEffect(() => {

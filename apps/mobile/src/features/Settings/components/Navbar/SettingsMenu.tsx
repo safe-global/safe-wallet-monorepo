@@ -8,12 +8,11 @@ import { useCopyAndDispatchToast } from '@/src/hooks/useCopyAndDispatchToast'
 import { useToastController } from '@tamagui/toast'
 import { selectChainById } from '@/src/store/chains'
 import { RootState } from '@/src/store'
-import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
+import { useAppSelector } from '@/src/store/hooks'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { useEditAccountItem } from '@/src/features/AccountsSheet/AccountItem/hooks/useEditAccountItem'
 import { type Address } from '@/src/types/address'
-import { useRouter } from 'expo-router'
-import { selectContactByAddress, upsertContact } from '@/src/store/addressBookSlice'
+import { router } from 'expo-router'
 import { FloatingMenu } from '../FloatingMenu'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 type Props = {
@@ -24,13 +23,10 @@ export const SettingsMenu = ({ safeAddress }: Props) => {
   const insets = useSafeAreaInsets()
   const activeSafe = useDefinedActiveSafe()
   const { deleteSafe } = useEditAccountItem()
-  const dispatch = useAppDispatch()
   const activeChain = useAppSelector((state: RootState) => selectChainById(state, activeSafe.chainId))
   const copyAndDispatchToast = useCopyAndDispatchToast()
-  const contact = useAppSelector(selectContactByAddress(activeSafe.address))
   const theme = useTheme()
   const color = theme.color?.get()
-  const router = useRouter()
   const colorError = 'red'
 
   if (!safeAddress) {
@@ -71,10 +67,9 @@ export const SettingsMenu = ({ safeAddress }: Props) => {
         <FloatingMenu
           onPressAction={({ nativeEvent }) => {
             if (nativeEvent.event === 'rename') {
-              Alert.prompt('Rename safe', 'Enter a new name for the safe', (newName) => {
-                if (newName) {
-                  dispatch(upsertContact({ ...contact, value: safeAddress, name: newName }))
-                }
+              router.push({
+                pathname: '/signers/[address]',
+                params: { address: safeAddress, editMode: 'true', title: 'Rename safe' },
               })
             }
 

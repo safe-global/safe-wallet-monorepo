@@ -7,11 +7,11 @@ import { AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transacti
 import { SignerSection } from './SignersList'
 import { View } from 'tamagui'
 import { TouchableOpacity } from 'react-native-gesture-handler'
-import { useLocalSearchParams, useRouter } from 'expo-router'
-import { Alert, useColorScheme } from 'react-native'
-import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
-import { selectContactByAddress, upsertContact } from '@/src/store/addressBookSlice'
+import { useColorScheme } from 'react-native'
+import { useAppSelector } from '@/src/store/hooks'
+import { selectContactByAddress } from '@/src/store/addressBookSlice'
 import { useCopyAndDispatchToast } from '@/src/hooks/useCopyAndDispatchToast'
+import { router, useLocalSearchParams } from 'expo-router'
 
 interface SignersListItemProps {
   item: AddressInfo
@@ -20,7 +20,6 @@ interface SignersListItemProps {
 }
 
 function SignersListItem({ item, index, signersGroup }: SignersListItemProps) {
-  const router = useRouter()
   const colorScheme = useColorScheme()
   const contact = useAppSelector(selectContactByAddress(item.value))
   const local = useLocalSearchParams<{ safeAddress: string; chainId: string; import_safe: string }>()
@@ -34,27 +33,26 @@ function SignersListItem({ item, index, signersGroup }: SignersListItemProps) {
   // Filter out any false values to ensure the array type matches MenuAction[]
   const actions = fullActions.filter(Boolean) as MenuAction[]
   const isLastItem = signersGroup.some((section) => section.data.length === index + 1)
-  const dispatch = useAppDispatch()
   const copy = useCopyAndDispatchToast()
-  const onPress = () => {
-    router.push(`/signers/${item.value}`)
+
+  const redirectToDetails = (editMode?: boolean) => {
+    router.push({
+      pathname: '/signers/[address]',
+      params: { address: item.value, editMode: editMode?.toString() },
+    })
   }
 
   const onPressMenuAction = ({ nativeEvent }: NativeActionEvent) => {
     if (nativeEvent.event === 'rename') {
-      Alert.prompt('Rename signer', 'Enter a new name for the signer', (newName) => {
-        if (newName) {
-          dispatch(upsertContact({ ...contact, value: item.value, name: newName }))
-        }
-      })
+      return redirectToDetails(true)
     }
 
     if (nativeEvent.event === 'copy') {
-      copy(item.value as string)
+      return copy(item.value as string)
     }
 
     if (nativeEvent.event === 'import' && !isMySigner) {
-      router.push({
+      return router.push({
         pathname: '/import-signers',
         params: {
           safeAddress: local.safeAddress,
@@ -67,7 +65,7 @@ function SignersListItem({ item, index, signersGroup }: SignersListItemProps) {
 
   return (
     <View position="relative">
-      <TouchableOpacity onPress={onPress} testID={`signer-${item.value}`}>
+      <TouchableOpacity onPress={() => redirectToDetails()} testID={`signer-${item.value}`}>
         <View
           backgroundColor={colorScheme === 'dark' ? '$backgroundPaper' : '$background'}
           borderTopRightRadius={index === 0 ? '$4' : undefined}
