@@ -1,5 +1,6 @@
 import { type ReactElement } from 'react'
 import { Box, Divider, Stack, Typography } from '@mui/material'
+import CheckIcon from '@mui/icons-material/Check'
 import type { SafeTransaction } from '@safe-global/safe-core-sdk-types'
 import { PaperViewToggle } from '../../common/PaperViewToggle'
 import EthHashInfo from '@/components/common/EthHashInfo'
@@ -27,6 +28,7 @@ export const TxDetails = ({ safeTxData, txData, grid }: TxDetailsProps) => {
   const safeTxHash = useSafeTxHash({ safeTxData })
   const domainHash = useDomainHash()
   const messageHash = useMessageHash({ safeTxData })
+  const operation = Number(safeTxData.operation) as Operation
 
   return (
     <PaperViewToggle withBackground={!grid} activeView={0}>
@@ -74,8 +76,8 @@ export const TxDetails = ({ safeTxData, txData, grid }: TxDetailsProps) => {
                 </TxDetailsRow>
 
                 <TxDetailsRow label="Operation" grid={grid}>
-                  {safeTxData.operation} (
-                  {(Number(safeTxData.operation) as Operation) === Operation.CALL ? 'call' : 'delegate call'})
+                  {safeTxData.operation} ({operation === Operation.CALL ? 'call' : 'delegate call'})
+                  {operation === Operation.CALL && <CheckIcon color="success" fontSize="small" />}
                 </TxDetailsRow>
 
                 <TxDetailsRow label="SafeTxGas" grid={grid}>
