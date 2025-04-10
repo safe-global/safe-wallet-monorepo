@@ -7,6 +7,7 @@ import { withCheckboxGuard } from '../../withCheckboxGuard'
 import useIsCounterfactualSafe from '@/features/counterfactual/hooks/useIsCounterfactualSafe'
 import { type SlotComponentProps, SlotName, withSlot } from '../../slots'
 import { SubmitCallback } from '../../TxFlow'
+import { useAlreadySigned } from '@/components/tx/SignOrExecuteForm/hooks'
 
 export const SIGN_CHECKBOX_LABEL = "I understand what I'm signing and that this is an irreversible action."
 export const SIGN_CHECKBOX_TOOLTIP = 'Review details and check the box to enable signing'
@@ -50,8 +51,9 @@ const useShouldRegisterSlot = () => {
   const { isProposing, willExecuteThroughRole } = useContext(TxFlowContext)
   const { safeTx } = useContext(SafeTxContext)
   const isCounterfactualSafe = useIsCounterfactualSafe()
+  const hasSigned = useAlreadySigned(safeTx)
 
-  return !!safeTx && !isCounterfactualSafe && !willExecuteThroughRole && !isProposing
+  return !!safeTx && !hasSigned && !isCounterfactualSafe && !willExecuteThroughRole && !isProposing
 }
 
 const SignSlot = withSlot({
