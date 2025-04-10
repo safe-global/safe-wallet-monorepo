@@ -1,14 +1,18 @@
-import { useContext, useMemo, useState } from 'react'
+import { useContext, useMemo } from 'react'
 import { Slot, type SlotComponentProps, SlotName, useSlot, useSlotIds, withSlot } from '../slots'
 import { Box } from '@mui/material'
 import WalletRejectionError from '@/components/tx/SignOrExecuteForm/WalletRejectionError'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import { TxFlowContext } from '../TxFlowProvider'
 import { useValidateTxData } from '@/hooks/useValidateTxData'
+import useLocalStorage from '@/services/local-storage/useLocalStorage'
+
+const COMBO_SUBMIT_ACTION = 'comboSubmitAction'
 
 const ComboSubmit = ({ onSubmit }: SlotComponentProps<SlotName.Submit>) => {
   const { txId, submitError, isRejectedByUser } = useContext(TxFlowContext)
   const slotItems = useSlot(SlotName.ComboSubmit)
+  const slotIds = useSlotIds(SlotName.ComboSubmit)
 
   const [validationResult, , validationLoading] = useValidateTxData(txId)
   const validationError = useMemo(
@@ -16,14 +20,20 @@ const ComboSubmit = ({ onSubmit }: SlotComponentProps<SlotName.Submit>) => {
     [validationResult],
   )
 
+  const initialSubmitAction = slotIds?.[0]
   const options = useMemo(() => slotItems.map(({ label, id }) => ({ label, id })), [slotItems])
-  const [submitAction, setSubmitAction] = useState<string | undefined>(options?.[0]?.id)
+  const [submitAction = initialSubmitAction, setSubmitAction] = useLocalStorage<string>(COMBO_SUBMIT_ACTION)
 
-  const disabled = validationError !== undefined || validationLoading
+  const slotId = useMemo(
+    () => (slotIds.includes(submitAction) ? submitAction : initialSubmitAction),
+    [slotIds, submitAction, initialSubmitAction],
+  )
 
-  if (options.length === 0) {
+  if (slotIds.length === 0) {
     return false
   }
+
+  const disabled = validationError !== undefined || validationLoading
 
   return (
     <>
@@ -45,7 +55,7 @@ const ComboSubmit = ({ onSubmit }: SlotComponentProps<SlotName.Submit>) => {
 
       <Slot
         name={SlotName.ComboSubmit}
-        id={submitAction}
+        id={slotId}
         onSubmit={onSubmit}
         options={options}
         onChange={setSubmitAction}
