@@ -99,7 +99,7 @@
     "react-hook-form": "^7.54.2",
     "react-native": "0.76.9",
     "react-native-collapsible-tab-view": "^8.0.0",
-    "react-native-device-crypto": "^0.1.7",
+    "react-native-device-crypto": "patch:react-native-device-crypto@npm%3A0.1.7#~/.yarn/patches/react-native-device-crypto-npm-0.1.7-dbd2698fc4.patch",
     "react-native-device-info": "^14.0.1",
     "react-native-draggable-flatlist": "^4.0.1",
     "react-native-gesture-handler": "~2.20.2",
