@@ -4,10 +4,10 @@ import EthHashInfo from '@/components/common/EthHashInfo'
 import tableCss from '@/components/common/EnhancedTable/styles.module.css'
 import Identicon from '@/components/common/Identicon'
 import { Box, Stack, Tooltip } from '@mui/material'
-import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import NetworkLogosList from '@/features/multichain/components/NetworkLogosList'
 import AddressBookContextMenu from './AddressBookContextMenu'
 import ChainIndicator from '@/components/common/ChainIndicator'
+import type { SpaceAddressBookEntry } from '../../types'
 
 const headCells = [
   { id: 'contact', label: 'Contact' },
@@ -16,7 +16,7 @@ const headCells = [
 ]
 
 type SpaceAddressBookTableProps = {
-  entries: { address: string; name: string; networks: ChainInfo[] }[]
+  entries: SpaceAddressBookEntry[]
 }
 
 function SpaceAddressBookTable({ entries }: SpaceAddressBookTableProps) {
@@ -71,7 +71,7 @@ function SpaceAddressBookTable({ entries }: SpaceAddressBookTableProps) {
             <Button data-testid="send-btn" variant="contained" color="primary" size="small" onClick={() => {}}>
               Send
             </Button>
-            <AddressBookContextMenu />
+            <AddressBookContextMenu entry={{ address, name, networks }} />
           </div>
         ),
       },

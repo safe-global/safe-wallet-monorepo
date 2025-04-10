@@ -7,7 +7,7 @@ import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import AddContact from './AddContact'
 import EmptyAddressBook from '@/features/spaces/components/SpaceAddressBook/EmptyAddressBook'
 import SpaceAddressBookTable from './SpaceAddressBookTable'
-import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import type { SpaceAddressBookEntry } from '../../types'
 
 const SpaceAddressBook = () => {
   const isAdmin = useIsAdmin()
@@ -19,35 +19,26 @@ const SpaceAddressBook = () => {
   }
 
   // TODO: Get data from CGW
-  const entries = [
+  const entries: SpaceAddressBookEntry[] = [
     {
       address: '0xF94c38db9992cfE106C6502bfB6efa58519f7570',
       name: 'John Doe',
       networks: [
         {
           chainId: '11155111',
-          chainName: 'Sepolia',
-          l2: false,
-          nativeCurrency: {
-            symbol: 'ETH',
-          },
-        } as ChainInfo,
+          name: 'John Doe',
+          id: '123',
+        },
         {
           chainId: '137',
-          chainName: 'Polygon',
-          l2: false,
-          nativeCurrency: {
-            symbol: 'ETH',
-          },
-        } as ChainInfo,
+          name: 'John Doe',
+          id: '123',
+        },
         {
           chainId: '17000',
-          chainName: 'Holesky',
-          l2: false,
-          nativeCurrency: {
-            symbol: 'ETH',
-          },
-        } as ChainInfo,
+          name: 'John Doe',
+          id: '123',
+        },
       ],
     },
     {
@@ -56,12 +47,9 @@ const SpaceAddressBook = () => {
       networks: [
         {
           chainId: '1',
-          chainName: 'Ethereum',
-          l2: false,
-          nativeCurrency: {
-            symbol: 'ETH',
-          },
-        } as ChainInfo,
+          name: 'Jane Smith',
+          id: '123',
+        },
       ],
     },
   ]

@@ -11,6 +11,8 @@ import EditIcon from '@/public/images/common/edit.svg'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { trackEvent } from '@/services/analytics'
 import { useIsAdmin } from '@/features/spaces/hooks/useSpaceMembers'
+import RemoveAddressBookEntryDialog from './RemoveAddressBookEntryDialog'
+import type { SpaceAddressBookEntry } from '../../types'
 
 enum ModalType {
   RENAME = 'rename',
@@ -19,7 +21,7 @@ enum ModalType {
 
 const defaultOpen = { [ModalType.RENAME]: false, [ModalType.REMOVE]: false }
 
-const AddressBookContextMenu = () => {
+const AddressBookContextMenu = ({ entry }: { entry: SpaceAddressBookEntry }) => {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | undefined>()
   const [open, setOpen] = useState<typeof defaultOpen>(defaultOpen)
   const isAdmin = useIsAdmin()
@@ -39,6 +41,10 @@ const AddressBookContextMenu = () => {
     if (type === ModalType.REMOVE) trackEvent({ ...SPACE_EVENTS.DELETE_ACCOUNT_MODAL })
     setAnchorEl(undefined)
     setOpen((prev) => ({ ...prev, [type]: true }))
+  }
+
+  const handleCloseModal = () => {
+    setOpen(defaultOpen)
   }
 
   return (
@@ -63,6 +69,15 @@ const AddressBookContextMenu = () => {
           </MenuItem>
         )}
       </ContextMenu>
+
+      {open[ModalType.REMOVE] && (
+        <RemoveAddressBookEntryDialog
+          name={entry.name}
+          address={entry.address}
+          networks={entry.networks}
+          onClose={handleCloseModal}
+        />
+      )}
     </>
   )
 }

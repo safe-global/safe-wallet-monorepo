@@ -145,6 +145,14 @@ export const SPACE_EVENTS = {
     action: 'Submit add address',
     category: SPACE_CATEGORY,
   },
+  REMOVE_ADDRESS: {
+    action: 'Open remove address dialog',
+    category: SPACE_CATEGORY,
+  },
+  REMOVE_ADDRESS_SUBMIT: {
+    action: 'Submit remove address',
+    category: SPACE_CATEGORY,
+  },
 }
 
 export enum SPACE_LABELS {
