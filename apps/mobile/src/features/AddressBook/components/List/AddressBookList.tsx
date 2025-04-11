@@ -73,5 +73,9 @@ export const AddressBookList: React.FC<AddressBookListProps> = ({ contacts, onSe
 
   const keyExtractor = useCallback((item: AddressInfo) => item.value, [])
 
+  if (contacts.length === 0) {
+    return null
+  }
+
   return <FlashList data={contacts} renderItem={renderContact} estimatedItemSize={200} keyExtractor={keyExtractor} />
 }

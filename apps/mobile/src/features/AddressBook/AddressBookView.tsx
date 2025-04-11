@@ -6,11 +6,14 @@ import { View } from 'tamagui'
 import SafeSearchBar from '@/src/components/SafeSearchBar/SafeSearchBar'
 import { AddressBookList } from './components/List/AddressBookList'
 import { LargeHeaderTitle } from '@/src/components/Title'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
+
 type Props = {
   contacts: AddressInfo[]
 }
 
 export const AddressBookView = ({ contacts }: Props) => {
+  const insets = useSafeAreaInsets()
   const [filteredContacts, setFilteredContacts] = useState<AddressInfo[]>(contacts)
 
   const handleSearch = useCallback(
@@ -32,7 +35,12 @@ export const AddressBookView = ({ contacts }: Props) => {
     [contacts],
   )
   return (
-    <View paddingHorizontal="$4" marginTop="$2" style={{ flex: 1 }} testID={'address-book-screen'}>
+    <View
+      paddingHorizontal="$4"
+      marginTop="$2"
+      style={{ flex: 1, marginBottom: insets.bottom }}
+      testID={'address-book-screen'}
+    >
       <LargeHeaderTitle>Address book</LargeHeaderTitle>
       <SafeSearchBar placeholder="Name, address" onSearch={handleSearch} throttleTime={300} />
       {contacts.length === 0 && <NoContacts />}
