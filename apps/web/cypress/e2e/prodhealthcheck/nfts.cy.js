@@ -69,7 +69,7 @@ describe('[PROD] NFTs tests', () => {
     nfts.verifySendNFTBtnDisabled()
   })
 
-  it.only('Verify Send NFT transaction has been created', () => {
+  it('Verify Send NFT transaction has been created', () => {
     cy.visit(constants.prodbaseUrl + constants.balanceNftsUrl + nftsSafes.SEP_NFT_SAFE_1)
     wallet.connectSigner(signer)
     nfts.verifyInitialNFTData()
