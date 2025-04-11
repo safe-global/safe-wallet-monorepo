@@ -61,7 +61,7 @@ function CameraLens({
 }: {
   denied: boolean
   onPressSettings: () => Promise<void>
-  requestPermission: () => void
+  requestPermission: () => Promise<void>
   hasPermission: boolean
   onActivateCamera: () => void
   isCameraActive: boolean
@@ -74,16 +74,20 @@ function CameraLens({
     color = getTokenValue('$color.textPrimaryLight')
   }
 
-  const handleGrantOrActivatePress = () => {
+  const handleGrantOrActivatePress = useCallback(async () => {
     if (!hasPermission) {
-      requestPermission()
+      const permission = await Camera.requestCameraPermission()
+
+      if (permission === 'denied') {
+        await onPressSettings()
+      }
     } else if (hasPermission && !isCameraActive) {
       onActivateCamera()
     }
-  }
+  }, [hasPermission, isCameraActive, onActivateCamera, onPressSettings])
 
-  const buttonText = denied ? 'Open Settings' : 'Enable camera'
-  const buttonAction = denied ? onPressSettings : handleGrantOrActivatePress
+  const buttonText = 'Enable camera'
+  const buttonAction = handleGrantOrActivatePress
 
   return (
     <Pressable
