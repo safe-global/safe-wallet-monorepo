@@ -42,7 +42,7 @@ export const ReviewTransactionContent = ({
   txPreview?: TransactionPreview
   txId?: string
 }): ReactElement => {
-  const { willExecute, isCreation, showMethodCall, isProposing, isRejection } = useContext(TxFlowContext)
+  const { willExecute, isCreation, showMethodCall, isProposing, isRejection, onNext } = useContext(TxFlowContext)
 
   const [readableApprovals] = useApprovalInfos({ safeTransaction: safeTx })
   const isApproval = readableApprovals && readableApprovals.length > 0
@@ -101,8 +101,14 @@ export const ReviewTransactionContent = ({
 
         <Blockaid />
 
-        <Slot name={SlotName.Submit} onSubmit={onSubmit}>
-          <Sign onSubmit={onSubmit} options={[{ id: 'sign', label: 'Sign' }]} onChange={() => {}} slotId="sign" />
+        <Slot name={SlotName.Submit} onSubmit={onNext} onSubmitSuccess={onSubmit}>
+          <Sign
+            onSubmit={onNext}
+            onSubmitSuccess={onSubmit}
+            options={[{ id: 'sign', label: 'Sign' }]}
+            onChange={() => {}}
+            slotId="sign"
+          />
         </Slot>
       </TxCard>
     </>
