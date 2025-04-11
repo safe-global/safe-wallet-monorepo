@@ -46,6 +46,8 @@ export default {
         'android.permission.CAMERA',
         'android.permission.POST_NOTIFICATIONS',
         'android.permission.RECEIVE_BOOT_COMPLETED',
+        'android.permission.FOREGROUND_SERVICE',
+        'android.permission.WAKE_LOCK',
       ],
     },
     web: {
@@ -120,10 +122,10 @@ export default {
     // Define background tasks
     tasks: {
       'app.notifee.notification-event': {
-        backgroundMode: ['processing'],
+        backgroundMode: ['processing', 'remote-notification'],
       },
       ReactNativeFirebaseMessagingHeadlessTask: {
-        backgroundMode: ['processing'],
+        backgroundMode: ['processing', 'remote-notification'],
       },
     },
   },
