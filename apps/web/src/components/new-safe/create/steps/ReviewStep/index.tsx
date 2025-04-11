@@ -241,7 +241,8 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
 
       let safeAddress: string
 
-      if (chain.chainId === chains['zksync']) {
+      // FIXME a new check to indicate ZKsync chain will be added to the config service and available under ChainInfo
+      if (chain.chainId === chains['zksync'] || chain.chainId === chains['lens']) {
         safeAddress = await computeNewSafeAddress(
           customRpcUrl || getRpcServiceUrl(chain.rpcUri),
           {

@@ -25,7 +25,7 @@ describe('CF Safe creation happy path tests', () => {
     createwallet.clickOnCreateNewSafeBtn()
     createwallet.clickOnNextBtn()
     createwallet.clickOnNextBtn()
-    createwallet.selectPayLaterOption()
+    createwallet.selectPayNowOption()
     createwallet.clickOnReviewStepNextBtn()
     cy.wait(1000)
     main.getAddedSafeAddressFromLocalStorage(constants.networkKeys.sepolia, 0).then((address) => {

@@ -64,6 +64,10 @@
   color: var(--color-text-secondary);
 }
 
+.link:hover {
+  color: var(--color-text-primary);
+}
+
 .active {
   pointer-events: none;
   color: var(--color-text-primary);

@@ -5,8 +5,10 @@ import { router, useLocalSearchParams } from 'expo-router'
 import { useToastController } from '@tamagui/toast'
 import { useBiometrics } from '@/src/hooks/useBiometrics'
 import Logger from '@/src/utils/logger'
-
+import { View } from 'tamagui'
+import { useModalStyle } from '@/src/navigation/hooks/useModalStyle'
 function BiometricsOptIn() {
+  const modalStyle = useModalStyle()
   const { toggleBiometrics, getBiometricsButtonLabel, isBiometricsEnabled, isLoading } = useBiometrics()
 
   const local = useLocalSearchParams<{
@@ -76,24 +78,29 @@ function BiometricsOptIn() {
 
   const image = colorScheme === 'dark' ? darkImage : lightImage
 
+  const infoMessage = 'Biometrics is required to import a signer.'
+
   return (
-    <OptIn
-      testID="biometrics-opt-in-screen"
-      title="Simplify access, enhance security"
-      description="Enable biometrics to unlock the app quickly and confirm transactions securely using Face ID."
-      image={image}
-      isVisible
-      isLoading={isLoading}
-      colorScheme={colorScheme}
-      ctaButton={{
-        onPress: handleAccept,
-        label: getBiometricsButtonLabel(),
-      }}
-      secondaryButton={{
-        onPress: handleReject,
-        label: 'Maybe later',
-      }}
-    />
+    <View style={{ ...modalStyle }}>
+      <OptIn
+        testID="biometrics-opt-in-screen"
+        title="Simplify access, enhance security"
+        description="Enable biometrics to unlock the app quickly and confirm transactions securely using Face ID."
+        image={image}
+        isVisible
+        isLoading={isLoading}
+        colorScheme={colorScheme}
+        infoMessage={infoMessage}
+        ctaButton={{
+          onPress: handleAccept,
+          label: getBiometricsButtonLabel(),
+        }}
+        secondaryButton={{
+          onPress: handleReject,
+          label: 'Maybe later',
+        }}
+      />
+    </View>
   )
 }
 

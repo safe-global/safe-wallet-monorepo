@@ -32,6 +32,7 @@ jest.mock('@/src/services/notifications/NotificationService', () => ({
   isDeviceNotificationEnabled: jest.fn(),
   getAllPermissions: jest.fn(),
   requestPushNotificationsPermission: jest.fn(),
+  handlePermissionFlow: jest.fn(),
 }))
 
 jest.mock('@/src/hooks/useRegisterForNotifications', () => ({
@@ -87,6 +88,7 @@ describe('useNotificationManager', () => {
 
   it('handles device notification permission check when enabling notifications', async () => {
     jest.mocked(NotificationsService.isDeviceNotificationEnabled).mockResolvedValueOnce(false)
+    jest.mocked(NotificationsService.handlePermissionFlow).mockResolvedValueOnce({ granted: false })
 
     const { result } = renderHook(() => useNotificationManager())
 
@@ -95,7 +97,7 @@ describe('useNotificationManager', () => {
       expect(success).toBe(false)
     })
 
-    expect(NotificationsService.getAllPermissions).toHaveBeenCalled()
+    expect(NotificationsService.handlePermissionFlow).toHaveBeenCalledWith(true)
   })
 
   it('handles errors when enabling notifications', async () => {
