@@ -11,6 +11,8 @@ import useWallet from '@/hooks/wallets/useWallet'
 import { isHardwareWallet, isLedgerLive } from '@/utils/wallets'
 import { TxFlowStep } from '@/components/tx-flow/TxFlowStep'
 import { TxDetails } from '../ConfirmTxDetails/TxDetails'
+import { Slot, SlotName } from '@/components/tx-flow/slots'
+import { Sign } from '@/components/tx-flow/actions/Sign'
 
 const InfoSteps = [
   {
@@ -64,7 +66,7 @@ const HardwareWalletStep = [
   InfoSteps[2],
 ]
 
-export const ConfirmTxReceipt = ({ children }: PropsWithChildren) => {
+export const ConfirmTxReceipt = ({ children, onSubmit }: PropsWithChildren<{ onSubmit: () => void }>) => {
   const { safeTx } = useContext(SafeTxContext)
   const [txPreview] = useTxPreview(safeTx?.data)
   const wallet = useWallet()
@@ -100,6 +102,15 @@ export const ConfirmTxReceipt = ({ children }: PropsWithChildren) => {
         {children}
 
         <Divider className={commonCss.nestedDivider} sx={{ pt: 3 }} />
+
+        <Slot name={SlotName.Submit} onSubmitSuccess={onSubmit}>
+          <Sign
+            onSubmitSuccess={onSubmit}
+            options={[{ id: 'sign', label: 'Sign' }]}
+            onChange={() => {}}
+            slotId="sign"
+          />
+        </Slot>
       </TxCard>
     </TxFlowStep>
   )

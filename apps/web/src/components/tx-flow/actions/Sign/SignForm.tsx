@@ -24,6 +24,7 @@ export const SignForm = ({
   safeTx,
   txId,
   onSubmit,
+  onSubmitSuccess,
   onChange,
   options = [],
   disableSubmit = false,
@@ -49,8 +50,7 @@ export const SignForm = ({
   // Hooks
   const { signTx } = txActions
   const { setTxFlow } = useContext(TxModalContext)
-  const { isSubmittable, setIsSubmittable, onNext, onPrev, setSubmitError, setIsRejectedByUser } =
-    useContext(TxFlowContext)
+  const { isSubmittable, setIsSubmittable, setSubmitError, setIsRejectedByUser } = useContext(TxFlowContext)
   const { needsRiskConfirmation, isRiskConfirmed, setIsRiskIgnored } = txSecurity
   const hasSigned = useAlreadySigned(safeTx)
   const signer = useSigner()
@@ -76,7 +76,7 @@ export const SignForm = ({
     setSubmitError(undefined)
     setIsRejectedByUser(false)
 
-    onNext()
+    onSubmit?.()
 
     let resultTxId: string
     try {
@@ -89,14 +89,13 @@ export const SignForm = ({
         trackError(Errors._804, err)
         setSubmitError(err)
       }
-      onPrev()
       setIsSubmittable(true)
       setIsSubmittableLocal(true)
       return
     }
 
     // On successful sign
-    onSubmit?.({ txId: resultTxId })
+    onSubmitSuccess?.({ txId: resultTxId })
 
     if (signer?.isSafe) {
       setTxFlow(<NestedTxSuccessScreenFlow txId={resultTxId} />, undefined, false)

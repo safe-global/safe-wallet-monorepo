@@ -36,6 +36,7 @@ export const ExecuteForm = ({
   safeTx,
   txId,
   onSubmit,
+  onSubmitSuccess,
   options = [],
   onChange,
   disableSubmit = false,
@@ -69,8 +70,7 @@ export const ExecuteForm = ({
   const { executeTx } = txActions
   const { setTxFlow } = useContext(TxModalContext)
   const { needsRiskConfirmation, isRiskConfirmed, setIsRiskIgnored } = txSecurity
-  const { isSubmittable, setIsSubmittable, onNext, onPrev, setSubmitError, setIsRejectedByUser } =
-    useContext(TxFlowContext)
+  const { isSubmittable, setIsSubmittable, setSubmitError, setIsRejectedByUser } = useContext(TxFlowContext)
 
   // We default to relay, but the option is only shown if we canRelay
   const [executionMethod, setExecutionMethod] = useState(ExecutionMethod.RELAY)
@@ -108,7 +108,7 @@ export const ExecuteForm = ({
 
     const txOptions = getTxOptions(advancedParams, currentChain)
 
-    onNext()
+    onSubmit?.()
 
     let executedTxId: string
     try {
@@ -122,14 +122,13 @@ export const ExecuteForm = ({
         setSubmitError(err)
       }
 
-      onPrev()
       setIsSubmittable(true)
       setIsSubmittableLocal(true)
       return
     }
 
     // On success
-    onSubmit?.({ txId: executedTxId, isExecuted: true })
+    onSubmitSuccess?.({ txId: executedTxId, isExecuted: true })
     setTxFlow(<SuccessScreenFlow txId={executedTxId} />, undefined, false)
   }
 

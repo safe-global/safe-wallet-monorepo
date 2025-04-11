@@ -1,4 +1,4 @@
-import React, { useMemo, type ReactNode } from 'react'
+import React, { useCallback, useMemo, type ReactNode } from 'react'
 import useTxStepper from './useTxStepper'
 import SafeTxProvider from './SafeTxProvider'
 import { TxInfoProvider } from './TxInfoProvider'
@@ -56,6 +56,28 @@ export const TxFlow = <T extends unknown>({
     [step, childrenArray.length],
   )
 
+  const handleFlowSubmit = useCallback<SubmitCallback>(
+    (props) => {
+      onSubmit?.({ ...props, data })
+    },
+    [onSubmit, data],
+  )
+
+  const submit = (
+    <>
+      <Counterfactual />
+      <ExecuteThroughRole />
+
+      <ComboSubmit>
+        <Sign />
+        <Execute />
+        <Batching />
+      </ComboSubmit>
+
+      <Propose />
+    </>
+  )
+
   return (
     <SafeTxProvider>
       <TxInfoProvider>
@@ -77,24 +99,15 @@ export const TxFlow = <T extends unknown>({
               <TxFlowContent>
                 {...childrenArray}
 
-                <ReviewTransactionComponent onSubmit={(props = {}) => onSubmit?.({ ...props, data })}>
+                <ReviewTransactionComponent onSubmit={handleFlowSubmit}>
                   <TxChecks />
                   <TxNote />
                   <SignerSelect />
 
-                  <Counterfactual />
-                  <ExecuteThroughRole />
-
-                  <ComboSubmit>
-                    <Sign />
-                    <Execute />
-                    <Batching />
-                  </ComboSubmit>
-
-                  <Propose />
+                  {submit}
                 </ReviewTransactionComponent>
 
-                <ConfirmTxReceipt />
+                <ConfirmTxReceipt onSubmit={handleFlowSubmit}>{submit}</ConfirmTxReceipt>
               </TxFlowContent>
             </TxFlowProvider>
           </SlotProvider>

@@ -17,6 +17,7 @@ import commonCss from '@/components/tx-flow/common/styles.module.css'
 
 const Batching = ({
   onSubmit,
+  onSubmitSuccess,
   options = [],
   onChange,
   disabled = false,
@@ -33,6 +34,8 @@ const Batching = ({
     e.preventDefault()
 
     if (!safeTx) return
+
+    onSubmit?.()
 
     trackEvent(BATCH_EVENTS.BATCH_APPEND)
 
@@ -51,7 +54,7 @@ const Batching = ({
       return
     }
 
-    onSubmit({ isExecuted: false })
+    onSubmitSuccess?.({ isExecuted: false })
 
     setIsSubmittable(true)
 

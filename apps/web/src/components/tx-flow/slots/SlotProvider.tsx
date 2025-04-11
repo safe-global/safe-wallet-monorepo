@@ -18,10 +18,12 @@ export enum SlotName {
 
 type SlotComponentPropsMap = {
   [SlotName.Submit]: PropsWithChildren<{
-    onSubmit: SubmitCallback
+    onSubmit?: () => void
+    onSubmitSuccess?: SubmitCallback
   }>
   [SlotName.ComboSubmit]: PropsWithChildren<{
-    onSubmit: SubmitCallback
+    onSubmit?: () => void
+    onSubmitSuccess?: SubmitCallback
     options: { label: string; id: string }[]
     onChange: (option: string) => void
     disabled?: boolean

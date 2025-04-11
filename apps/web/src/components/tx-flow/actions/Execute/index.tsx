@@ -12,7 +12,13 @@ import type { SubmitCallback } from '../../TxFlow'
 
 const CheckboxGuardedExecuteForm = withCheckboxGuard(ExecuteForm, SIGN_CHECKBOX_LABEL, SIGN_CHECKBOX_TOOLTIP)
 
-const Execute = ({ onSubmit, disabled = false, onChange, ...props }: SlotComponentProps<SlotName.ComboSubmit>) => {
+const Execute = ({
+  onSubmit,
+  onSubmitSuccess,
+  disabled = false,
+  onChange,
+  ...props
+}: SlotComponentProps<SlotName.ComboSubmit>) => {
   const { safeTx, txOrigin } = useContext(SafeTxContext)
   const { txId, isCreation, onlyExecute, isSubmittable, trackTxEvent, setShouldExecute } = useContext(TxFlowContext)
   const hasSigned = useAlreadySigned(safeTx)
@@ -25,10 +31,10 @@ const Execute = ({ onSubmit, disabled = false, onChange, ...props }: SlotCompone
 
   const handleSubmit = useCallback<SubmitCallback>(
     async ({ txId, isExecuted = false } = {}) => {
-      onSubmit({ txId, isExecuted })
+      onSubmitSuccess?.({ txId, isExecuted })
       trackTxEvent(txId!, isExecuted)
     },
-    [onSubmit, trackTxEvent],
+    [onSubmitSuccess, trackTxEvent],
   )
 
   const onChangeSubmitOption = useCallback(
@@ -51,7 +57,8 @@ const Execute = ({ onSubmit, disabled = false, onChange, ...props }: SlotCompone
     <ExecuteFormComponent
       safeTx={safeTx}
       txId={txId}
-      onSubmit={handleSubmit}
+      onSubmit={onSubmit}
+      onSubmitSuccess={handleSubmit}
       onCheckboxChange={handleCheckboxChange}
       isChecked={checked}
       disableSubmit={!isSubmittable || disabled}
