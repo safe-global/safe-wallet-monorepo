@@ -66,7 +66,13 @@ const UpdateSpaceForm = ({ space }: { space: GetSpaceResponse | undefined }) => 
           </Alert>
         )}
 
-        <Button variant="contained" type="submit" sx={{ mt: 2 }} disabled={!isNameChanged || !isAdmin}>
+        <Button
+          data-testid="space-save-button"
+          variant="contained"
+          type="submit"
+          sx={{ mt: 2 }}
+          disabled={!isNameChanged || !isAdmin}
+        >
           Save
         </Button>
       </form>

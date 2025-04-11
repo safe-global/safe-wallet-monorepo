@@ -24,6 +24,7 @@ const AcceptButton = ({ space }: AcceptButtonProps) => {
   return (
     <>
       <Button
+        data-testid="accept-invite-button"
         className={css.inviteButton}
         variant="contained"
         onClick={handleAcceptInvite}
