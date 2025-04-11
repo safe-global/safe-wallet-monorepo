@@ -103,7 +103,7 @@
     "react-native-device-info": "^14.0.1",
     "react-native-draggable-flatlist": "^4.0.1",
     "react-native-gesture-handler": "~2.20.2",
-    "react-native-keychain": "^9.2.2",
+    "react-native-keychain": "^10.0.0",
     "react-native-mmkv": "^3.1.0",
     "react-native-pager-view": "^6.7.0",
     "react-native-progress": "^5.0.1",

@@ -51,8 +51,12 @@ export class KeyStorageService implements IKeyStorageService {
     }
   }
 
-  private getKeyName(userId: string): string {
+  private getKeyNameDeviceCrypto(userId: string): string {
     return `signer_address_${userId}`
+  }
+
+  private getKeyService(userId: string): string {
+    return `${this.getKeyNameDeviceCrypto(userId)}_encrypted_storage`
   }
 
   private async getOrCreateKeyIOS(keyName: string, requireAuth: boolean, isEmulator: boolean): Promise<string> {
@@ -86,7 +90,7 @@ export class KeyStorageService implements IKeyStorageService {
   }
 
   private async storeKey(userId: string, privateKey: string, requireAuth: boolean, isEmulator: boolean): Promise<void> {
-    const keyName = this.getKeyName(userId)
+    const keyName = this.getKeyNameDeviceCrypto(userId)
 
     if (Platform.OS === 'android') {
       await this.getOrCreateKeyAndroid(keyName, requireAuth, isEmulator)
@@ -102,22 +106,14 @@ export class KeyStorageService implements IKeyStorageService {
         encryptedPassword: encryptedPrivateKey.encryptedText,
         iv: encryptedPrivateKey.iv,
       }),
-      { accessible: Keychain.ACCESSIBLE.WHEN_UNLOCKED_THIS_DEVICE_ONLY, service: keyName },
+      { accessible: Keychain.ACCESSIBLE.WHEN_UNLOCKED_THIS_DEVICE_ONLY, service: this.getKeyService(userId) },
     )
-
-    // Enroll biometrics if required
-    if (requireAuth) {
-      await Keychain.getGenericPassword({
-        accessControl: Keychain.ACCESS_CONTROL.BIOMETRY_CURRENT_SET_OR_DEVICE_PASSCODE,
-        service: keyName,
-      })
-    }
   }
 
   private async getKey(userId: string, requireAuth: boolean): Promise<string> {
-    const keyName = this.getKeyName(userId)
+    const keyName = this.getKeyNameDeviceCrypto(userId)
 
-    const keychainOptions: Keychain.GetOptions = { service: keyName }
+    const keychainOptions: Keychain.GetOptions = { service: this.getKeyService(userId) }
     if (requireAuth) {
       keychainOptions.accessControl = Keychain.ACCESS_CONTROL.BIOMETRY_CURRENT_SET_OR_DEVICE_PASSCODE
     }
@@ -129,8 +125,6 @@ export class KeyStorageService implements IKeyStorageService {
 
     const { encryptedPassword, iv } = JSON.parse(result.password)
 
-    // Skip second biometric prompt if we already authenticated via Keychain
-    const decryptParams = requireAuth ? this.BIOMETRIC_PROMPTS.SKIP : this.BIOMETRIC_PROMPTS.STANDARD
-    return DeviceCrypto.decrypt(keyName, encryptedPassword, iv, decryptParams)
+    return DeviceCrypto.decrypt(keyName, encryptedPassword, iv, this.BIOMETRIC_PROMPTS.STANDARD)
   }
 }
