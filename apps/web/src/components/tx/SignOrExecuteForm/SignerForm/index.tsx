@@ -23,6 +23,8 @@ import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { MODALS_EVENTS, trackEvent } from '@/services/analytics'
 import { useIsNestedSafeOwner } from '@/hooks/useIsNestedSafeOwner'
+import { useIsWalletProposer } from '@/hooks/useProposers'
+import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 
 export const SignerForm = ({ willExecute }: { willExecute?: boolean }) => {
   const { signer, setSignerAddress, connectedWallet: wallet } = useWalletContext() ?? {}
@@ -31,6 +33,8 @@ export const SignerForm = ({ willExecute }: { willExecute?: boolean }) => {
   const { safe } = useSafeInfo()
   const { safeTx } = useContext(SafeTxContext)
   const isNestedOwner = useIsNestedSafeOwner()
+  const isProposer = useIsWalletProposer()
+  const isOwner = useIsSafeOwner()
 
   const onChange = (event: SelectChangeEvent<string>) => {
     trackEvent(MODALS_EVENTS.CHANGE_SIGNER)
@@ -70,8 +74,12 @@ export const SignerForm = ({ willExecute }: { willExecute?: boolean }) => {
       owners.add(wallet.address)
     }
 
+    if (isProposer) {
+      owners.add(wallet.address)
+    }
+
     return Array.from(owners)
-  }, [nestedSafeOwners, safe.owners, safe.threshold, safeTx, wallet, willExecute])
+  }, [nestedSafeOwners, safe.owners, safe.threshold, safeTx, wallet, willExecute, isProposer])
 
   // Select first option if no signer is selected and the connected wallet cannot sign
   useEffect(() => {
@@ -86,7 +94,12 @@ export const SignerForm = ({ willExecute }: { willExecute?: boolean }) => {
     }
   }, [isOptionEnabled, options, setSignerAddress, signerAddress, wallet])
 
-  if (!wallet || !isNestedOwner || (options.length === 1 && options[0] === wallet.address)) {
+  if (
+    !wallet ||
+    !isNestedOwner ||
+    (options.length === 1 && options[0] === wallet.address) ||
+    (!isOwner && isProposer)
+  ) {
     return null
   }
 
