@@ -134,8 +134,7 @@ describe('Safe creation tests', () => {
       })
   })
 
-  // Unskip when the bug is fixed
-  it.skip('Verify Next button is disabled until switching to network is done', () => {
+  it('Verify Next button is disabled until switching to network is done', () => {
     createwallet.clickOnContinueWithWalletBtn()
     createwallet.clickOnCreateNewSafeBtn()
     createwallet.verifyNextBtnIsEnabled()

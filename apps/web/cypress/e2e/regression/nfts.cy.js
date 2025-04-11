@@ -17,7 +17,7 @@ let nftsSafes,
 const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
 const signer = walletCredentials.OWNER_4_PRIVATE_KEY
 
-describe.skip('NFTs tests', () => {
+describe('NFTs tests', () => {
   before(() => {
     getSafes(CATEGORIES.nfts)
       .then((nfts) => {
@@ -95,6 +95,8 @@ describe.skip('NFTs tests', () => {
     nfts.typeRecipientAddress(staticSafes.SEP_STATIC_SAFE_1)
     createTx.changeNonce(2)
     nfts.clikOnNextBtn()
+    createTx.clickOnContinueSignTransactionBtn()
+    createTx.clickOnAcknowledgement()
     createTx.clickOnSignTransactionBtn()
     createTx.waitForProposeRequest()
     createTx.clickViewTransaction()

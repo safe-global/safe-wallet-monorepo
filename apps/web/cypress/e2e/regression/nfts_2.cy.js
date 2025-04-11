@@ -27,14 +27,6 @@ describe('NFTs 2 tests', () => {
     nfts.verifyDataInTable(nftsName, nftsAddress, nftsTokenID)
   })
 
-  // skipped because the NFT metadata fetching is turned off on tx_service
-  it.skip('Verify NFT preview window can be opened', () => {
-    nfts.openActiveNFT(0)
-    nfts.verifyNameInNFTModal(nftsTokenID)
-    nfts.verifySelectedNetwrokSepolia()
-    nfts.closeNFTModal()
-  })
-
   it('Verify NFT open does not open if no NFT exits', () => {
     nfts.clickOnInactiveNFT()
     nfts.verifyNFTModalDoesNotExist()
