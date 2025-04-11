@@ -11,7 +11,7 @@ import { ERC20__factory, Multi_send__factory } from '@safe-global/utils/types/co
 import { getAndValidateSafeSDK } from '@/services/tx/tx-sender/sdk'
 import { parseUnits } from 'ethers'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
-
+import { type Balances } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 jest.mock('@/services/tx/tx-sender/sdk', () => ({
   getAndValidateSafeSDK: jest.fn().mockReturnValue({
     createTransaction: jest.fn(),
@@ -164,7 +164,7 @@ describe('ApprovalEditor', () => {
       operation: OperationType.DelegateCall,
     })
 
-    const mockBalances = {
+    const mockBalances: Balances = {
       fiatTotal: '0',
       items: [
         {
@@ -274,7 +274,7 @@ describe('ApprovalEditor', () => {
       operation: OperationType.DelegateCall,
     })
 
-    const mockBalances = {
+    const mockBalances: Balances = {
       fiatTotal: '0',
       items: [
         {

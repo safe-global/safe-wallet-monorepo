@@ -14,6 +14,8 @@ import { PSEUDO_APPROVAL_VALUES } from '../utils/approvals'
 import { encodeMultiSendData } from '@safe-global/protocol-kit'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { UNLIMITED_PERMIT2_AMOUNT } from '@safe-global/utils/utils/tokens'
+import { type Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
+import { type Erc20Token } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
 const ERC20_INTERFACE = ERC20__factory.createInterface()
 
@@ -431,7 +433,7 @@ describe('useApprovalInfos', () => {
   })
 
   it('returns an ApprovalInfo with token infos if the token exists in balances', async () => {
-    const mockBalanceItem = {
+    const mockBalanceItem: Balance = {
       balance: '40',
       fiatBalance: '40',
       fiatConversion: '1',
@@ -474,7 +476,7 @@ describe('useApprovalInfos', () => {
   })
 
   it('fetches token info for an approval if its missing', async () => {
-    const mockTokenInfo = {
+    const mockTokenInfo: Omit<Erc20Token, 'name' | 'logoUri'> = {
       address: '0x0000000000000000000000000000000000000123',
       symbol: 'HT',
       decimals: 18,
