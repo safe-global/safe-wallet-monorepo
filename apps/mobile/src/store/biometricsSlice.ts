@@ -1,16 +1,17 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { RootState } from '.'
+import { BiometryType } from 'react-native-device-crypto'
 
 interface BiometricsState {
   isEnabled: boolean
-  type: 'FACE_ID' | 'TOUCH_ID' | 'FINGERPRINT' | 'NONE'
+  type: BiometryType
   isSupported: boolean
   userAttempts: number
 }
 
 const initialState: BiometricsState = {
   isEnabled: false,
-  type: 'NONE',
+  type: BiometryType.NONE,
   isSupported: false,
   userAttempts: 0,
 }
