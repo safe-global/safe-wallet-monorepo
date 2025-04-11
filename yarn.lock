@@ -8226,6 +8226,7 @@ __metadata:
     expo-splash-screen: "npm:~0.29.22"
     expo-status-bar: "npm:~2.0.1"
     expo-system-ui: "npm:~4.0.9"
+    expo-task-manager: "npm:^12.0.6"
     expo-web-browser: "npm:~14.0.2"
     glob: "npm:^11.0.1"
     globals: "npm:^15.14.0"
@@ -19299,6 +19300,18 @@ __metadata:
     react-native-web:
       optional: true
   checksum: 10/a3065b69a3d8312a6ec672920bb794b0b7338afb87e2f08b55a3f273a82e1b22635f8217663b1dda4b68980f8ebb7f1d4f266802d879884b33c59659804d9678
+  languageName: node
+  linkType: hard
+
+"expo-task-manager@npm:^12.0.6":
+  version: 12.0.6
+  resolution: "expo-task-manager@npm:12.0.6"
+  dependencies:
+    unimodules-app-loader: "npm:~5.0.1"
+  peerDependencies:
+    expo: "*"
+    react-native: "*"
+  checksum: 10/992be752303a76f96a28298886efca8ad3cae70f05e44e2bfb088e1639c40f83d1888c485682402e7df4139b0d07a37fa84fff0e532a55f40192b7f4a727bb28
   languageName: node
   linkType: hard
 
@@ -32436,6 +32449,13 @@ __metadata:
     trough: "npm:^2.0.0"
     vfile: "npm:^6.0.0"
   checksum: 10/d9e6e88900a075f391b6bbf06f34062d41fa6257798110d1647753cfc2c6a6e2c1d016434e8ee35706c50485f9fb9ae4707a6a4790bd8dc461ec7e7315ed908b
+  languageName: node
+  linkType: hard
+
+"unimodules-app-loader@npm:~5.0.1":
+  version: 5.0.1
+  resolution: "unimodules-app-loader@npm:5.0.1"
+  checksum: 10/4258ff8c85d21b94a9eac8435160ace00c87218c5f17e70c6722f50e4c800effa5d11571d091efbe780ccaf166c554d7b9ee44b77625ad1176faeb33cbfab1a0
   languageName: node
   linkType: hard
 
