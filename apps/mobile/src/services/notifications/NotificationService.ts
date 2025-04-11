@@ -69,32 +69,26 @@ class NotificationsService {
       )
       // 1 - Creates android's notifications channel
       await Promise.allSettled(promises)
-      await notifee.requestPermission()
+      const { authorizationStatus } = await notifee.requestPermission()
       // 2 - Verifies blocked notifications
       const blockedNotifications = await withTimeout(this.getBlockedNotifications(), 5000)
-
       /**
        * 3 - If permission has not being granted already or blocked notifications are found, open device's settings
        * so that user can enable DEVICE notifications, but ONLY if explicitly requested via shouldOpenSettings
        **/
-      if (shouldOpenSettings) {
-        Logger.info('Checking if device settings should be opened', { shouldOpenSettings })
+      if (shouldOpenSettings && authorizationStatus === AuthorizationStatus.DENIED) {
         const settings = await notifee.getNotificationSettings()
 
-        Logger.info('Checking if device settings should be opened', { settings })
         if (
           settings.authorizationStatus === AuthorizationStatus.NOT_DETERMINED ||
           settings.authorizationStatus === AuthorizationStatus.DENIED
         ) {
-          Logger.info('Opening device settings')
           await this.openDeviceSettings()
         }
       }
 
       // 4 - Check if the user has enabled device notifications
       const permission = await withTimeout(this.checkCurrentPermissions(), 5000)
-
-      Logger.info('Checking if the user has enabled device notifications', { permission })
 
       return {
         permission,
@@ -139,43 +133,6 @@ class NotificationsService {
       }
     } catch (error) {
       Logger.error('Error checking if a user has push notifications permission', error)
-    }
-  }
-
-  /**
-   * Handles the full notification permission flow:
-   * 1. Checks current status
-   * 2. Requests permissions if needed
-   * 3. Opens settings only if user has explicitly denied and is trying again
-   */
-  async handlePermissionFlow(forceOpenSettings = false) {
-    try {
-      const currentStatus = await this.getAuthorizationStatus()
-
-      // If already authorized, just return success
-      if (currentStatus === AuthorizationStatus.AUTHORIZED || currentStatus === AuthorizationStatus.PROVISIONAL) {
-        return { granted: true }
-      }
-
-      // If not determined, request permission normally
-      if (currentStatus === AuthorizationStatus.NOT_DETERMINED) {
-        await this.getAllPermissions(false)
-        // Check if permission was granted after the request
-        const newStatus = await this.getAuthorizationStatus()
-        return {
-          granted: newStatus === AuthorizationStatus.AUTHORIZED || newStatus === AuthorizationStatus.PROVISIONAL,
-        }
-      }
-
-      // If denied and user is trying again, open settings if requested
-      if (currentStatus === AuthorizationStatus.DENIED && forceOpenSettings) {
-        await this.openDeviceSettings()
-      }
-
-      return { granted: false }
-    } catch (error) {
-      Logger.error('Error handling permission flow', error)
-      return { granted: false }
     }
   }
 
