@@ -1,24 +1,20 @@
-import * as hooks from '@/components/tx/SignOrExecuteForm/hooks'
-import * as execThroughRoleHooks from '@/components/tx-flow/actions/ExecuteThroughRole/ExecuteThroughRoleForm/hooks'
 import { safeTxBuilder } from '@/tests/builders/safeTx'
-import { render } from '@/tests/test-utils'
-import { fireEvent } from '@testing-library/react'
-import type { TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
+import { render as renderTestUtils } from '@/tests/test-utils'
+import { within } from '@testing-library/react'
+import {
+  DetailedExecutionInfoType,
+  SettingsInfoType,
+  TransactionInfoType,
+} from '@safe-global/safe-gateway-typescript-sdk'
 import { ReviewTransactionContent } from '../ReviewTransactionContent'
-import * as useSafeInfo from '@/hooks/useSafeInfo'
-import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import { defaultSecurityContextValues } from '@safe-global/utils/components/tx/security/shared/utils'
-import { SlotProvider } from '@/components/tx-flow/slots'
-import * as slotProvider from '@/components/tx-flow/slots'
-import TxFlowProvider, { type TxFlowProviderProps } from '@/components/tx-flow/TxFlowProvider'
+import * as slots from '@/components/tx-flow/slots'
+import { initialContext, TxFlowContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
+import { createMockTransactionDetails } from '@/tests/transactions'
 
-const txDetails = {
-  safeAddress: '0xE20CcFf2c38Ef3b64109361D7b7691ff2c7D5f67',
-  txId: 'multisig_0xE20CcFf2c38Ef3b64109361D7b7691ff2c7D5f67_0x938635afdeab5ab17b377896f10dbe161fcc44d488296bc0000b733623d57c80',
-  executedAt: null,
-  txStatus: 'AWAITING_EXECUTION',
+const txDetails = createMockTransactionDetails({
   txInfo: {
-    type: 'SettingsChange',
+    type: TransactionInfoType.SETTINGS_CHANGE,
     humanDescription: 'Add new owner 0xd8dA...6045 with threshold 1',
     dataDecoded: {
       method: 'addOwnerWithThreshold',
@@ -27,22 +23,20 @@ const txDetails = {
           name: 'owner',
           type: 'address',
           value: '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045',
-          valueDecoded: null,
         },
         {
           name: '_threshold',
           type: 'uint256',
           value: '1',
-          valueDecoded: null,
         },
       ],
     },
     settingsInfo: {
-      type: 'ADD_OWNER',
+      type: SettingsInfoType.ADD_OWNER,
       owner: {
         value: '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045',
-        name: null,
-        logoUri: null,
+        name: 'Nevinha',
+        logoUri: 'http://something.com',
       },
       threshold: 1,
     },
@@ -57,31 +51,32 @@ const txDetails = {
           name: 'owner',
           type: 'address',
           value: '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045',
-          valueDecoded: null,
         },
         {
           name: '_threshold',
           type: 'uint256',
           value: '1',
-          valueDecoded: null,
         },
       ],
     },
     to: {
       value: '0xE20CcFf2c38Ef3b64109361D7b7691ff2c7D5f67',
-      name: 'SafeProxy',
-      logoUri: null,
+      name: '',
     },
     value: '0',
     operation: 0,
-    trustedDelegateCallTarget: null,
-    addressInfoIndex: null,
+    trustedDelegateCallTarget: false,
+    addressInfoIndex: {
+      '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045': {
+        value: '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045',
+        name: 'MetaMultiSigWallet',
+      },
+    },
   },
-  txHash: null,
   detailedExecutionInfo: {
-    type: 'MULTISIG',
-    submittedAt: 1726497729356,
-    nonce: 8,
+    type: DetailedExecutionInfoType.MULTISIG,
+    submittedAt: 1726064794013,
+    nonce: 4,
     safeTxGas: '0',
     baseGas: '0',
     gasPrice: '0',
@@ -89,41 +84,24 @@ const txDetails = {
     refundReceiver: {
       value: '0x0000000000000000000000000000000000000000',
       name: 'MetaMultiSigWallet',
-      logoUri: null,
     },
-    safeTxHash: '0x938635afdeab5ab17b377896f10dbe161fcc44d488296bc0000b733623d57c80',
-    executor: null,
+    safeTxHash: '0x96a96c11b8d013ff5d7a6ce960b22e961046cfa42eff422ac71c1daf6adef2e0',
     signers: [
       {
         value: '0xDa5e9FA404881Ff36DDa97b41Da402dF6430EE6b',
-        name: null,
-        logoUri: null,
+        name: '',
       },
     ],
     confirmationsRequired: 1,
-    confirmations: [
-      {
-        signer: {
-          value: '0xDa5e9FA404881Ff36DDa97b41Da402dF6430EE6b',
-          name: null,
-          logoUri: null,
-        },
-        signature:
-          '0xd91721922d38384a4d40b20d923c49cefb56f60bfe0b357de11a4a044483d670075842d7bba26cf4aa84788ab0bd85137ad09c7f9cd84154db00d456b15e42dc1b',
-        submittedAt: 1726497740521,
-      },
-    ],
+    confirmations: [],
     rejectors: [],
-    gasTokenInfo: null,
-    trusted: true,
+    trusted: false,
     proposer: {
       value: '0xDa5e9FA404881Ff36DDa97b41Da402dF6430EE6b',
-      name: null,
-      logoUri: null,
+      name: '',
     },
   },
-  safeAppInfo: null,
-} as unknown as TransactionDetails
+})
 
 const defaultProps = {
   onSubmit: jest.fn(),
@@ -139,25 +117,77 @@ const defaultProps = {
   txSecurity: defaultSecurityContextValues,
   safeTxError: undefined,
   safeTx: safeTxBuilder().build(),
+  txDetails,
 }
 
-const renderReviewTransactionContent = (
+const render = (
   props: Partial<Parameters<typeof ReviewTransactionContent>[0]> = {},
-  txFlowProviderProps: Partial<TxFlowProviderProps<unknown>> = {},
+  txFlowContext: Partial<TxFlowContextType> = {},
 ) => {
-  return render(
-    <SlotProvider>
-      <TxFlowProvider step={0} prevStep={() => {}} nextStep={() => {}} data={{}} {...txFlowProviderProps}>
+  return renderTestUtils(
+    <slots.SlotProvider>
+      <TxFlowContext.Provider value={{ ...initialContext, ...txFlowContext }}>
         <ReviewTransactionContent {...defaultProps} {...props} />
-      </TxFlowProvider>
-    </SlotProvider>,
+      </TxFlowContext.Provider>
+    </slots.SlotProvider>,
   )
 }
 
 describe('ReviewTransactionContent', () => {
+  const slotComponentSpy = jest.spyOn(slots, 'Slot')
+
+  beforeEach(() => {
+    jest.clearAllMocks()
+    slotComponentSpy.mockImplementation(({ name, children }) => <div data-testid={`slot-${name}`}>{children}</div>)
+  })
+
+  it('should render Feature slot', () => {
+    const { getByTestId } = render()
+
+    expect(getByTestId(`slot-${slots.SlotName.Feature}`)).toBeInTheDocument()
+  })
+
+  it('should render Footer slot', () => {
+    const { getByTestId } = render()
+
+    expect(getByTestId(`slot-${slots.SlotName.Footer}`)).toBeInTheDocument()
+  })
+
+  it('should render Submit slot', () => {
+    const { getByTestId } = render()
+
+    expect(getByTestId(`slot-${slots.SlotName.Submit}`)).toBeInTheDocument()
+  })
+
+  it('should render Sign button as fallback for submit slot', () => {
+    const { getByTestId } = render()
+
+    const submitSlot = getByTestId(`slot-${slots.SlotName.Submit}`)
+    expect(within(submitSlot).getByTestId('combo-submit-sign')).toBeInTheDocument()
+  })
+
+  describe('should display the correct title', () => {
+    it('when transaction will be signed', () => {
+      const { getByText } = render()
+
+      expect(getByText("You're about to confirm this transaction.")).toBeInTheDocument()
+    })
+
+    it('when transaction will be executed', () => {
+      const { getByText } = render(undefined, { willExecute: true })
+
+      expect(getByText("You're about to execute this transaction.")).toBeInTheDocument()
+    })
+
+    it('when transaction will be proposed', () => {
+      const { getByText } = render(undefined, { isProposing: true })
+
+      expect(getByText("You're about to propose this transaction.")).toBeInTheDocument()
+    })
+  })
+
   it('should display a safeTxError', () => {
-    const { getByText } = renderReviewTransactionContent({
-      txDetails,
+    const { getByText } = render({
       safeTxError: new Error('Safe transaction error'),
       safeTx: safeTxBuilder().build(),
     })
@@ -167,92 +197,8 @@ describe('ReviewTransactionContent', () => {
     ).toBeInTheDocument()
   })
 
-  describe('Existing transaction', () => {
-    it('should display radio options to sign or execute if both are possible', () => {
-      jest.spyOn(hooks, 'useValidateNonce').mockReturnValue(true)
-
-      const { getByText } = renderReviewTransactionContent({ txDetails }, { isExecutable: true })
-
-      expect(getByText('Would you like to execute the transaction immediately?')).toBeInTheDocument()
-    })
-  })
-
-  describe('New transaction', () => {
-    it('should display radio options to sign or execute if both are possible', () => {
-      jest.spyOn(hooks, 'useValidateNonce').mockReturnValueOnce(true)
-
-      const { getByText } = renderReviewTransactionContent({ txDetails }, { isExecutable: true })
-
-      expect(getByText('Would you like to execute the transaction immediately?')).toBeInTheDocument()
-    })
-
-    describe('Batch', () => {
-      const safe = extendedSafeInfoBuilder().build()
-      const safeInfo = { safe, safeAddress: safe.address.value }
-
-      beforeEach(() => {
-        jest.spyOn(useSafeInfo, 'default').mockReturnValue(safeInfo as any)
-      })
-
-      it('Does not show Add to batch button if not registered', () => {
-        jest.spyOn(slotProvider, 'useSlot').mockReturnValue([])
-
-        const { queryByText } = renderReviewTransactionContent()
-
-        const button = queryByText('Add to batch')
-
-        expect(button).not.toBeInTheDocument()
-      })
-
-      it('Shows the Add to batch button if there registered for the "action" slot', () => {
-        jest
-          .spyOn(slotProvider, 'useSlot')
-          .mockImplementation((slotName) =>
-            slotName === slotProvider.SlotName.Action ? [() => <button>Add to batch</button>] : [],
-          )
-
-        const { getByText } = renderReviewTransactionContent()
-
-        const button = getByText('Add to batch')
-
-        expect(button).toBeInTheDocument()
-      })
-    })
-  })
-
-  it('should not display radio options if execution is the only option', () => {
-    jest.spyOn(execThroughRoleHooks, 'useRoles').mockReturnValue([])
-
-    const { queryByText } = renderReviewTransactionContent({ txDetails }, { onlyExecute: true })
-    expect(queryByText('Would you like to execute the transaction immediately?')).not.toBeInTheDocument()
-  })
-
-  it('should display a sign/execute title if that option is selected', () => {
-    jest.spyOn(hooks, 'useValidateNonce').mockReturnValue(true)
-
-    const { getByTestId, getByText } = renderReviewTransactionContent(
-      { txDetails },
-      { isExecutable: true, txId: '123' },
-    )
-
-    expect(getByText('Would you like to execute the transaction immediately?')).toBeInTheDocument()
-
-    const executeCheckbox = getByTestId('execute-checkbox')
-    const signCheckbox = getByTestId('sign-checkbox')
-
-    expect(getByText("You're about to execute this transaction.")).toBeInTheDocument()
-
-    fireEvent.click(signCheckbox)
-
-    expect(getByText("You're about to confirm this transaction.")).toBeInTheDocument()
-
-    fireEvent.click(executeCheckbox)
-
-    expect(getByText("You're about to execute this transaction.")).toBeInTheDocument()
-  })
-
   it('should not display safeTxError message for valid transactions', () => {
-    const { queryByText } = renderReviewTransactionContent({ txDetails })
+    const { queryByText } = render()
 
     expect(
       queryByText('This transaction will most likely fail. To save gas costs, avoid confirming the transaction.'),

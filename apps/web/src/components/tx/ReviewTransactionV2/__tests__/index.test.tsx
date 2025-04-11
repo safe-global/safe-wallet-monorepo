@@ -28,22 +28,16 @@ describe('ReviewTransaction', () => {
       false,
     ])
 
-    const { container, getByTestId } = render(
+    const { container, getByText } = render(
       <SlotProvider>
-        <SafeTxContext.Provider
-          value={
-            {
-              safeTx: createSafeTx(),
-            } as SafeTxContextParams
-          }
-        >
+        <SafeTxContext.Provider value={{ safeTx: createSafeTx() } as SafeTxContextParams}>
           <ReviewTransaction onSubmit={jest.fn()} />
         </SafeTxContext.Provider>
         ,
       </SlotProvider>,
     )
 
-    expect(getByTestId('continue-sign-btn')).toBeInTheDocument()
+    expect(getByText("You're about to confirm this transaction.")).toBeInTheDocument()
     expect(container).toMatchSnapshot()
   })
 
