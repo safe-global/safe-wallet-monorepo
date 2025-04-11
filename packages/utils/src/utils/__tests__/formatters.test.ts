@@ -126,8 +126,8 @@ describe('formatters', () => {
       expect(formatters.formatPercentage(-0.123456789)).toEqual('12.35%')
     })
 
-    it('should only show 2 decimals if required', () => {
-      expect(formatters.formatPercentage(0.69)).toEqual('69%')
+    it('should always show 2 decimals', () => {
+      expect(formatters.formatPercentage(0.69)).toEqual('69.00%')
     })
   })
 })

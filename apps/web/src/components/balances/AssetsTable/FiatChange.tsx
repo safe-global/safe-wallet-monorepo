@@ -1,4 +1,4 @@
-import { Chip, SvgIcon, Typography } from '@mui/material'
+import { Chip, SvgIcon, Tooltip, Typography } from '@mui/material'
 import { type Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import { formatPercentage } from '@safe-global/utils/utils/formatters'
 import ArrowDown from '@/public/images/balances/change-down.svg'
@@ -22,23 +22,25 @@ export const FiatChange = ({ balanceItem }: { balanceItem: Balance }) => {
   const color = direction === 'down' ? 'error.main' : direction === 'up' ? 'success.main' : 'default'
 
   return (
-    <Chip
-      size="small"
-      sx={{
-        backgroundColor,
-        color,
-        padding: '2px 8px',
-      }}
-      label={changeLabel}
-      icon={
-        direction === 'down' ? (
-          <SvgIcon color="error" inheritViewBox component={ArrowDown} sx={{ width: '9px', height: '6px' }} />
-        ) : direction === 'up' ? (
-          <SvgIcon color="success" inheritViewBox component={ArrowUp} sx={{ width: '9px', height: '6px' }} />
-        ) : (
-          <>-</>
-        )
-      }
-    />
+    <Tooltip title="24h change">
+      <Chip
+        size="small"
+        sx={{
+          backgroundColor,
+          color,
+          padding: '2px 8px',
+        }}
+        label={changeLabel}
+        icon={
+          direction === 'down' ? (
+            <SvgIcon color="error" inheritViewBox component={ArrowDown} sx={{ width: '9px', height: '6px' }} />
+          ) : direction === 'up' ? (
+            <SvgIcon color="success" inheritViewBox component={ArrowUp} sx={{ width: '9px', height: '6px' }} />
+          ) : (
+            <>-</>
+          )
+        }
+      />
+    </Tooltip>
   )
 }
