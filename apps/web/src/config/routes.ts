@@ -8,6 +8,7 @@ export const AppRoutes = {
   stake: '/stake',
   privacy: '/privacy',
   licenses: '/licenses',
+  lend: '/lend',
   index: '/',
   imprint: '/imprint',
   home: '/home',
