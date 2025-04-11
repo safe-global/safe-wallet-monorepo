@@ -1,9 +1,9 @@
-import type { PropsWithChildren, SyntheticEvent, ReactElement } from 'react'
-import { useContext, useCallback } from 'react'
+import type { PropsWithChildren, ReactElement } from 'react'
+import { useContext } from 'react'
 import madProps from '@/utils/mad-props'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import ErrorMessage from '../ErrorMessage'
-import TxCard, { TxCardActions } from '@/components/tx-flow/common/TxCard'
+import TxCard from '@/components/tx-flow/common/TxCard'
 import ConfirmationTitle, { ConfirmationTitleTypes } from '@/components/tx/SignOrExecuteForm/ConfirmationTitle'
 import { ErrorBoundary } from '@sentry/react'
 import ApprovalEditor from '../ApprovalEditor'
@@ -14,14 +14,14 @@ import type { TransactionDetails, TransactionPreview } from '@safe-global/safe-g
 import NetworkWarning from '@/components/new-safe/create/NetworkWarning'
 import ConfirmationView from '../confirmation-views'
 import UnknownContractError from '../SignOrExecuteForm/UnknownContractError'
-import { Button, CircularProgress } from '@mui/material'
-import CheckWallet from '@/components/common/CheckWallet'
 import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
 import useIsCounterfactualSafe from '@/features/counterfactual/hooks/useIsCounterfactualSafe'
-import { SlotName, useSlot } from '@/components/tx-flow/slots'
+import { Slot, SlotName } from '@/components/tx-flow/slots'
+import { Sign } from '@/components/tx-flow/actions/Sign'
+import type { SubmitCallback } from '@/components/tx-flow/TxFlow'
 
 export type ReviewTransactionContentProps = PropsWithChildren<{
-  onSubmit: () => void
+  onSubmit: SubmitCallback
   isBatch?: boolean
 }>
 
@@ -42,25 +42,11 @@ export const ReviewTransactionContent = ({
   txPreview?: TransactionPreview
   txId?: string
 }): ReactElement => {
-  const { onlyExecute, willExecute, isCreation, showMethodCall, isSubmittable, isProposing, isRejection } =
-    useContext(TxFlowContext)
+  const { willExecute, isCreation, showMethodCall, isProposing, isRejection } = useContext(TxFlowContext)
 
   const [readableApprovals] = useApprovalInfos({ safeTransaction: safeTx })
   const isApproval = readableApprovals && readableApprovals.length > 0
   const isCounterfactualSafe = useIsCounterfactualSafe()
-  const actions = useSlot(SlotName.Action)
-  const features = useSlot(SlotName.Feature)
-  const footerFeatures = useSlot(SlotName.Footer)
-
-  const onContinueClick = useCallback(
-    async (e: SyntheticEvent) => {
-      e.preventDefault()
-      onSubmit()
-    },
-    [onSubmit],
-  )
-
-  const submitDisabled = !safeTx || !isSubmittable
 
   return (
     <>
@@ -87,9 +73,7 @@ export const ReviewTransactionContent = ({
         {!isCounterfactualSafe && !isRejection && <BlockaidBalanceChanges />}
       </TxCard>
 
-      {features.map((Feature, i) => (
-        <Feature key={`feature-${i}`} />
-      ))}
+      <Slot name={SlotName.Feature} />
 
       <TxCard>
         <ConfirmationTitle
@@ -109,9 +93,7 @@ export const ReviewTransactionContent = ({
           </ErrorMessage>
         )}
 
-        {footerFeatures.map((FooterFeature, i) => (
-          <FooterFeature key={`footer-feature-${i}`} />
-        ))}
+        <Slot name={SlotName.Footer} />
 
         <NetworkWarning />
 
@@ -119,27 +101,9 @@ export const ReviewTransactionContent = ({
 
         <Blockaid />
 
-        <TxCardActions>
-          {actions.map((Action, i) => (
-            <Action key={`action-${i}`} />
-          ))}
-
-          {/* Continue button */}
-          <CheckWallet allowNonOwner={onlyExecute} checkNetwork={!submitDisabled}>
-            {(isOk) => (
-              <Button
-                data-testid="continue-sign-btn"
-                variant="contained"
-                type="submit"
-                onClick={onContinueClick}
-                disabled={!isOk || submitDisabled}
-                sx={{ minWidth: '82px', order: '1', width: ['100%', '100%', '100%', 'auto'] }}
-              >
-                {!isSubmittable ? <CircularProgress size={20} /> : 'Continue'}
-              </Button>
-            )}
-          </CheckWallet>
-        </TxCardActions>
+        <Slot name={SlotName.Submit} onSubmit={onSubmit}>
+          <Sign onSubmit={onSubmit} options={[{ id: 'sign', label: 'Sign' }]} onChange={() => {}} slotId="sign" />
+        </Slot>
       </TxCard>
     </>
   )

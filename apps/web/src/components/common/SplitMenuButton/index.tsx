@@ -1,25 +1,33 @@
-import { useRef, useState, type SyntheticEvent } from 'react'
+import { useEffect, useMemo, useRef, useState, type SyntheticEvent } from 'react'
 import Button from '@mui/material/Button'
 import ButtonGroup from '@mui/material/ButtonGroup'
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
-import ClickAwayListener from '@mui/material/ClickAwayListener'
-import Grow from '@mui/material/Grow'
-import Paper from '@mui/material/Paper'
-import Popper from '@mui/material/Popper'
 import MenuItem from '@mui/material/MenuItem'
 import MenuList from '@mui/material/MenuList'
-import { CircularProgress } from '@mui/material'
+import { Box, CircularProgress, ListItemText, Popover, Tooltip } from '@mui/material'
+import CheckIcon from '@mui/icons-material/Check'
+
+type Option = {
+  id: string
+  label?: string
+}
 
 export default function SplitMenuButton({
   options,
   disabled = false,
+  tooltip,
   onClick,
+  onChange,
+  selected,
   disabledIndex,
   loading = false,
 }: {
-  options: string[]
+  options: Option[]
   disabled?: boolean
-  onClick: (option: string, e: SyntheticEvent) => void
+  tooltip?: string
+  onClick?: (option: Option, e: SyntheticEvent) => void
+  onChange?: (option: Option) => void
+  selected?: Option['id']
   disabledIndex?: number
   loading?: boolean
 }) {
@@ -27,13 +35,27 @@ export default function SplitMenuButton({
   const anchorRef = useRef<HTMLDivElement>(null)
   const [selectedIndex, setSelectedIndex] = useState(0)
 
+  useEffect(() => {
+    if (selected) {
+      const index = options.findIndex((option) => option.id === selected)
+      if (index !== -1) {
+        setSelectedIndex(index)
+      }
+    }
+  }, [selected, options])
+
   const handleClick = (e: SyntheticEvent) => {
-    onClick(options[selectedIndex], e)
+    onClick?.(options[selectedIndex], e)
   }
 
-  const handleMenuItemClick = (event: React.MouseEvent<HTMLLIElement, MouseEvent>, index: number) => {
-    setSelectedIndex(index)
-    setOpen(false)
+  const handleMenuItemClick = (e: React.MouseEvent<HTMLLIElement, MouseEvent>, index: number) => {
+    e.preventDefault()
+
+    if (index !== selectedIndex) {
+      setSelectedIndex(index)
+      setOpen(false)
+      onChange?.(options[index])
+    }
   }
 
   const handleToggle = () => {
@@ -48,63 +70,69 @@ export default function SplitMenuButton({
     setOpen(false)
   }
 
-  const maxCharLen = Math.max(...options.map((option) => option.length)) + 2
+  const { label, id } = useMemo(() => options[selectedIndex] || {}, [options, selectedIndex])
+  const maxCharLen = Math.max(...options.map(({ id, label }) => (label || id).length)) + 2
 
   return (
     <>
-      <ButtonGroup variant="contained" ref={anchorRef} aria-label="Button group with a nested menu">
-        <Button onClick={handleClick} type="submit" disabled={disabled} sx={{ minWidth: `${maxCharLen}ch !important` }}>
-          {loading ? <CircularProgress size={20} /> : options[selectedIndex]}
-        </Button>
+      <ButtonGroup variant="contained" ref={anchorRef} aria-label="Button group with a nested menu" fullWidth>
+        <Tooltip title={tooltip} placement="top">
+          <Box flex={1}>
+            <Button
+              data-testid={`combo-submit-${id}`}
+              onClick={handleClick}
+              type="submit"
+              disabled={disabled}
+              sx={{ minWidth: `${maxCharLen}ch !important` }}
+            >
+              {loading ? <CircularProgress size={20} /> : label || id}
+            </Button>
+          </Box>
+        </Tooltip>
 
         {options.length > 1 && (
           <Button
             size="small"
             aria-expanded={open ? 'true' : undefined}
-            aria-label="select merge strategy"
+            aria-label="select action"
             aria-haspopup="menu"
             onClick={handleToggle}
-            sx={{ minWidth: '0 !important', px: 1.5 }}
+            disabled={loading}
+            sx={{ minWidth: '0 !important', maxWidth: 48, px: 1.5 }}
           >
             <ArrowDropDownIcon />
           </Button>
         )}
       </ButtonGroup>
 
-      <Popper
-        sx={{ zIndex: 100 }}
+      <Popover
         open={open}
         anchorEl={anchorRef.current}
-        role={undefined}
-        transition
-        placement="bottom-end"
+        onClose={handleClose}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'right',
+        }}
+        transformOrigin={{ horizontal: 'right', vertical: -2 }}
+        slotProps={{
+          root: { slotProps: { backdrop: { sx: { backgroundColor: 'transparent' } } } },
+        }}
       >
-        {({ TransitionProps }) => (
-          <Grow
-            {...TransitionProps}
-            style={{
-              transformOrigin: 'center right',
-            }}
-          >
-            <Paper elevation={1}>
-              <ClickAwayListener onClickAway={handleClose}>
-                <MenuList autoFocusItem>
-                  {options.map((option, index) => (
-                    <MenuItem
-                      key={option}
-                      selected={index === selectedIndex}
-                      disabled={disabledIndex === index}
-                      onClick={(event) => handleMenuItemClick(event, index)}
-                    >
-                      {option}
-                    </MenuItem>
-                  ))}
-                </MenuList>
-              </ClickAwayListener>
-            </Paper>
-          </Grow>
-        )}
-      </Popper>
+        <MenuList autoFocusItem>
+          {options.map((option, index) => (
+            <MenuItem
+              key={option.id}
+              selected={index === selectedIndex}
+              disabled={disabledIndex === index}
+              onClick={(event) => handleMenuItemClick(event, index)}
+              sx={{ gap: 2 }}
+            >
+              <ListItemText>{option.label || option.id}</ListItemText>
+              {index === selectedIndex ? <CheckIcon /> : <Box sx={{ width: 24 }} />}
+            </MenuItem>
+          ))}
+        </MenuList>
+      </Popover>
     </>
   )
 }

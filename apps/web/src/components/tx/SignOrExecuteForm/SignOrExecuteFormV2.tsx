@@ -6,7 +6,6 @@ import { type ReactElement, type ReactNode, useContext, useCallback } from 'reac
 import madProps from '@/utils/mad-props'
 import { useImmediatelyExecutable, useValidateNonce } from './hooks'
 import ExecuteForm from '@/components/tx-flow/actions/Execute/ExecuteForm'
-import SignForm from '@/components/tx-flow/actions/Sign/SignForm'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { useAppSelector } from '@/store'
 import { selectSettings } from '@/store/settingsSlice'
@@ -22,6 +21,7 @@ import { useLazyGetTransactionDetailsQuery } from '@/store/api/gateway'
 import type { TransactionDetails, TransactionPreview } from '@safe-global/safe-gateway-typescript-sdk'
 import { useSigner } from '@/hooks/wallets/useWallet'
 import { trackTxEvents } from './tracking'
+import SignForm from './SignForm'
 
 export type SubmitCallback = (txId: string, isExecuted?: boolean) => void
 
@@ -124,7 +124,15 @@ export const SignOrExecuteFormV2 = ({
   }
 
   if (!isCounterfactualSafe && willExecute && !isProposing) {
-    return <ExecuteForm {...commonProps} />
+    return (
+      <ExecuteForm
+        {...commonProps}
+        options={[{ label: 'Execute', id: 'execute' }]}
+        slotId="execute"
+        onChange={() => {}}
+        onSubmit={({ txId, isExecuted } = {}) => onFormSubmit(txId!, isExecuted)}
+      />
+    )
   }
 
   if (!isCounterfactualSafe && willExecuteThroughRole) {

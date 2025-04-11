@@ -1,7 +1,7 @@
 import useWalletCanPay from '@/hooks/useWalletCanPay'
 import madProps from '@/utils/mad-props'
-import { type ReactElement, type SyntheticEvent, useContext, useMemo, useState } from 'react'
-import { CircularProgress, Box, Button, CardActions, Divider, Tooltip } from '@mui/material'
+import { type ReactElement, type SyntheticEvent, useContext, useState } from 'react'
+import { Box, CardActions, Divider, Tooltip } from '@mui/material'
 import classNames from 'classnames'
 
 import ErrorMessage from '@/components/tx/ErrorMessage'
@@ -15,7 +15,6 @@ import { useRelaysBySafe } from '@/hooks/useRemainingRelays'
 import useWalletCanRelay from '@/hooks/useWalletCanRelay'
 import { ExecutionMethod, ExecutionMethodSelector } from '@/components/tx/ExecutionMethodSelector'
 import { hasRemainingRelays } from '@/utils/relaying'
-import type { SignOrExecuteProps } from '@/components/tx/SignOrExecuteForm/SignOrExecuteFormV2'
 import type { SafeTransaction } from '@safe-global/safe-core-sdk-types'
 import { TxModalContext } from '@/components/tx-flow'
 import { SuccessScreenFlow } from '@/components/tx-flow/flows'
@@ -29,23 +28,31 @@ import commonCss from '@/components/tx-flow/common/styles.module.css'
 import { TxSecurityContext } from '@/components/tx/security/shared/TxSecurityContext'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import NonOwnerError from '@/components/tx/SignOrExecuteForm/NonOwnerError'
-import WalletRejectionError from '@/components/tx/SignOrExecuteForm/WalletRejectionError'
-import { useValidateTxData } from '@/hooks/useValidateTxData'
+import SplitMenuButton from '@/components/common/SplitMenuButton'
+import type { SlotComponentProps, SlotName } from '../../slots'
+import { TxFlowContext } from '../../TxFlowProvider'
 
 export const ExecuteForm = ({
   safeTx,
   txId,
   onSubmit,
+  options = [],
+  onChange,
   disableSubmit = false,
   origin,
   onlyExecute,
   isCreation,
   isOwner,
   isExecutionLoop,
+  slotId,
   txActions,
   tooltip,
   txSecurity,
-}: SignOrExecuteProps & {
+}: SlotComponentProps<SlotName.ComboSubmit> & {
+  txId?: string
+  disableSubmit?: boolean
+  onlyExecute?: boolean
+  origin?: string
   isOwner: ReturnType<typeof useIsSafeOwner>
   isExecutionLoop: ReturnType<typeof useIsExecutionLoop>
   txActions: ReturnType<typeof useTxActions>
@@ -55,20 +62,15 @@ export const ExecuteForm = ({
   tooltip?: string
 }): ReactElement => {
   // Form state
-  const [isSubmittable, setIsSubmittable] = useState<boolean>(true)
-  const [submitError, setSubmitError] = useState<Error | undefined>()
-  const [isRejectedByUser, setIsRejectedByUser] = useState<Boolean>(false)
+  const [isSubmittableLocal, setIsSubmittableLocal] = useState<boolean>(true) // TODO: remove this local state and use only the one from TxFlowContext when tx-flow refactor is done
 
-  const [validationResult, , validationLoading] = useValidateTxData(txId)
-  const validationError = useMemo(
-    () => (validationResult !== undefined ? new Error(validationResult) : undefined),
-    [validationResult],
-  )
   // Hooks
   const currentChain = useCurrentChain()
   const { executeTx } = txActions
   const { setTxFlow } = useContext(TxModalContext)
   const { needsRiskConfirmation, isRiskConfirmed, setIsRiskIgnored } = txSecurity
+  const { isSubmittable, setIsSubmittable, onNext, onPrev, setSubmitError, setIsRejectedByUser } =
+    useContext(TxFlowContext)
 
   // We default to relay, but the option is only shown if we canRelay
   const [executionMethod, setExecutionMethod] = useState(ExecutionMethod.RELAY)
@@ -100,10 +102,13 @@ export const ExecuteForm = ({
     }
 
     setIsSubmittable(false)
+    setIsSubmittableLocal(false)
     setSubmitError(undefined)
     setIsRejectedByUser(false)
 
     const txOptions = getTxOptions(advancedParams, currentChain)
+
+    onNext()
 
     let executedTxId: string
     try {
@@ -116,12 +121,15 @@ export const ExecuteForm = ({
         trackError(Errors._804, err)
         setSubmitError(err)
       }
+
+      onPrev()
       setIsSubmittable(true)
+      setIsSubmittableLocal(true)
       return
     }
 
     // On success
-    onSubmit?.(executedTxId, true)
+    onSubmit?.({ txId: executedTxId, isExecuted: true })
     setTxFlow(<SuccessScreenFlow txId={executedTxId} />, undefined, false)
   }
 
@@ -134,12 +142,11 @@ export const ExecuteForm = ({
   const submitDisabled =
     !safeTx ||
     !isSubmittable ||
+    !isSubmittableLocal ||
     disableSubmit ||
     isExecutionLoop ||
     cannotPropose ||
-    (needsRiskConfirmation && !isRiskConfirmed) ||
-    validationError !== undefined ||
-    validationLoading
+    (needsRiskConfirmation && !isRiskConfirmed)
 
   return (
     <>
@@ -185,22 +192,6 @@ export const ExecuteForm = ({
           )
         )}
 
-        {submitError && (
-          <Box mt={1}>
-            <ErrorMessage error={submitError}>Error submitting the transaction. Please try again.</ErrorMessage>
-          </Box>
-        )}
-
-        {isRejectedByUser && (
-          <Box mt={1}>
-            <WalletRejectionError />
-          </Box>
-        )}
-
-        {validationError !== undefined && (
-          <ErrorMessage error={validationError}>Error validating transaction data</ErrorMessage>
-        )}
-
         <Divider className={commonCss.nestedDivider} sx={{ pt: 3 }} />
 
         <CardActions>
@@ -209,15 +200,14 @@ export const ExecuteForm = ({
             {(isOk) => (
               <Tooltip title={tooltip} placement="top">
                 <Box sx={{ minWidth: '112px', width: ['100%', '100%', '100%', 'auto'] }}>
-                  <Button
-                    data-testid="execute-form-btn"
-                    variant="contained"
-                    type="submit"
+                  <SplitMenuButton
+                    selected={slotId}
+                    onChange={({ id }) => onChange?.(id)}
+                    options={options}
                     disabled={!isOk || submitDisabled}
-                    sx={{ minWidth: '112px', width: ['100%', '100%', '100%', 'auto'] }}
-                  >
-                    {!isSubmittable ? <CircularProgress size={20} /> : 'Execute'}
-                  </Button>
+                    loading={!isSubmittable || !isSubmittableLocal}
+                    tooltip={tooltip}
+                  />
                 </Box>
               </Tooltip>
             )}

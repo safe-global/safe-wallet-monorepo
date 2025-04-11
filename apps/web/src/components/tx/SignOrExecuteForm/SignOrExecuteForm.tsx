@@ -154,7 +154,15 @@ export const SignOrExecuteForm = ({
     }
 
     if (!isCounterfactualSafe && willExecute && !isProposing) {
-      return <ExecuteForm {...commonProps} />
+      return (
+        <ExecuteForm
+          {...commonProps}
+          options={[{ label: 'Execute', id: 'execute' }]}
+          slotId="execute"
+          onChange={() => {}}
+          onSubmit={({ txId, isExecuted } = {}) => onFormSubmit(txId!, isExecuted)}
+        />
+      )
     }
 
     if (!isCounterfactualSafe && willExecuteThroughRole) {

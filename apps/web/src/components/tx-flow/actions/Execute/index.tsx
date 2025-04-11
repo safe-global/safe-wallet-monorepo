@@ -1,5 +1,5 @@
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
-import { useCallback, useContext, useState } from 'react'
+import { useCallback, useContext, useEffect, useState } from 'react'
 import { TxFlowContext } from '../../TxFlowProvider'
 import ExecuteForm from './ExecuteForm'
 import { useAlreadySigned } from '@/components/tx/SignOrExecuteForm/hooks'
@@ -8,21 +8,36 @@ import { withCheckboxGuard } from '../../withCheckboxGuard'
 import { SIGN_CHECKBOX_LABEL, SIGN_CHECKBOX_TOOLTIP } from '../Sign'
 import useIsCounterfactualSafe from '@/features/counterfactual/hooks/useIsCounterfactualSafe'
 import { type SlotComponentProps, SlotName, withSlot } from '../../slots'
+import type { SubmitCallback } from '../../TxFlow'
 
 const CheckboxGuardedExecuteForm = withCheckboxGuard(ExecuteForm, SIGN_CHECKBOX_LABEL, SIGN_CHECKBOX_TOOLTIP)
 
-const Execute = ({ onSubmit }: SlotComponentProps<SlotName.Submit>) => {
+const Execute = ({ onSubmit, disabled = false, onChange, ...props }: SlotComponentProps<SlotName.ComboSubmit>) => {
   const { safeTx, txOrigin } = useContext(SafeTxContext)
-  const { txId, isCreation, onlyExecute, isSubmittable, trackTxEvent } = useContext(TxFlowContext)
+  const { txId, isCreation, onlyExecute, isSubmittable, trackTxEvent, setShouldExecute } = useContext(TxFlowContext)
   const hasSigned = useAlreadySigned(safeTx)
   const [checked, setChecked] = useState(false)
 
-  const handleSubmit = useCallback(
-    async (txId: string, isExecuted = false) => {
+  useEffect(() => {
+    setShouldExecute(true)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  const handleSubmit = useCallback<SubmitCallback>(
+    async ({ txId, isExecuted = false } = {}) => {
       onSubmit({ txId, isExecuted })
-      trackTxEvent(txId, isExecuted)
+      trackTxEvent(txId!, isExecuted)
     },
     [onSubmit, trackTxEvent],
+  )
+
+  const onChangeSubmitOption = useCallback(
+    async (option: string) => {
+      // When changing to another submit option, we update the context to not execute the transaction
+      setShouldExecute(false)
+      onChange(option)
+    },
+    [setShouldExecute, onChange],
   )
 
   const handleCheckboxChange = useCallback((checked: boolean) => {
@@ -39,24 +54,27 @@ const Execute = ({ onSubmit }: SlotComponentProps<SlotName.Submit>) => {
       onSubmit={handleSubmit}
       onCheckboxChange={handleCheckboxChange}
       isChecked={checked}
-      disableSubmit={!isSubmittable}
+      disableSubmit={!isSubmittable || disabled}
       origin={txOrigin}
       onlyExecute={onlyExecute}
       isCreation={isCreation}
+      onChange={onChangeSubmitOption}
+      {...props}
     />
   )
 }
 
 const useShouldRegisterSlot = () => {
   const isCounterfactualSafe = useIsCounterfactualSafe()
-  const { willExecute, isProposing } = useContext(TxFlowContext)
+  const { canExecute, isProposing } = useContext(TxFlowContext)
 
-  return !isCounterfactualSafe && willExecute && !isProposing
+  return !isCounterfactualSafe && canExecute && !isProposing
 }
 
 const ExecuteSlot = withSlot({
   Component: Execute,
-  slotName: SlotName.Submit,
+  slotName: SlotName.ComboSubmit,
+  label: 'Execute',
   id: 'execute',
   useSlotCondition: useShouldRegisterSlot,
 })
