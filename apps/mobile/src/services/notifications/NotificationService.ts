@@ -4,6 +4,8 @@ import notifee, {
   EventDetail,
   AndroidChannel,
   AuthorizationStatus,
+  AndroidImportance,
+  AndroidVisibility,
 } from '@notifee/react-native'
 import { FirebaseMessagingTypes } from '@react-native-firebase/messaging'
 import { Linking, Platform, Alert as NativeAlert } from 'react-native'
@@ -11,6 +13,8 @@ import { store } from '@/src/store'
 import { updatePromptAttempts, updateLastTimePromptAttempted } from '@/src/store/notificationsSlice'
 import { toggleAppNotifications, toggleDeviceNotifications } from '@/src/store/notificationsSlice'
 import { HandleNotificationCallback, LAUNCH_ACTIVITY, PressActionId } from '@/src/store/constants'
+import messaging from '@react-native-firebase/messaging'
+import * as TaskManager from 'expo-task-manager'
 
 import { ChannelId, notificationChannels, withTimeout } from '@/src/utils/notifications'
 import Logger from '@/src/utils/logger'
@@ -331,9 +335,9 @@ class NotificationsService {
         body,
         data,
         android: {
-          smallIcon: 'ic_notification_small',
-          largeIcon: 'ic_notification',
           channelId: channelId ?? ChannelId.DEFAULT_NOTIFICATION_CHANNEL_ID,
+          importance: AndroidImportance.HIGH,
+          visibility: AndroidVisibility.PUBLIC,
           pressAction: {
             id: PressActionId.OPEN_NOTIFICATIONS_VIEW,
             launchActivity: LAUNCH_ACTIVITY,
@@ -353,8 +357,105 @@ class NotificationsService {
         },
       })
     } catch (error) {
-      Logger.error('NotificationService.displayNotification :: error', error)
+      Logger.info('NotificationService.displayNotification :: error', error)
     }
+  }
+
+  /**
+   * Initializes all notification handlers
+   */
+  initializeNotificationHandlers(): void {
+    this.registerNotifeeBackgroundHandler()
+    this.registerFirebaseBackgroundHandler()
+    this.registerExpoTasks()
+    Logger.info('NotificationService: Successfully initialized all notification handlers')
+  }
+
+  /**
+   * Registers the Notifee background event handler
+   */
+  private registerNotifeeBackgroundHandler(): void {
+    notifee.onBackgroundEvent(async ({ type, detail }) => {
+      if (type === EventType.PRESS) {
+        await this.handleNotificationPress({ detail })
+      } else if (type === EventType.DELIVERED) {
+        await this.incrementBadgeCount(1)
+      } else if (type === EventType.DISMISSED) {
+        Logger.info('User dismissed notification:', detail.notification?.id)
+      }
+
+      return Promise.resolve()
+    })
+  }
+
+  /**
+   * Registers the Firebase messaging background handler
+   */
+  private registerFirebaseBackgroundHandler(): void {
+    messaging().setBackgroundMessageHandler(async (remoteMessage) => {
+      Logger.info('Message handled in the background!', remoteMessage)
+
+      // Display the notification using Notifee
+      await this.displayNotification({
+        channelId: ChannelId.DEFAULT_NOTIFICATION_CHANNEL_ID,
+        title: remoteMessage.notification?.title || '',
+        body: remoteMessage.notification?.body || '',
+        data: remoteMessage.data,
+      })
+
+      return Promise.resolve()
+    })
+  }
+
+  /**
+   * Registers Expo background tasks
+   */
+  private registerExpoTasks(): void {
+    // Register Notifee task
+    TaskManager.defineTask(
+      'app.notifee.notification-event',
+      async (taskData: TaskManager.TaskManagerTaskBody<unknown>) => {
+        const { data, error } = taskData
+
+        if (error) {
+          Logger.error('Notification task error:', error)
+          return
+        }
+
+        // Process the notification event with type casting
+        if (data && typeof data === 'object' && 'type' in data) {
+          const notificationData = data as { type: EventType; detail: EventDetail }
+          if (notificationData.type === EventType.PRESS && notificationData.detail) {
+            await this.handleNotificationPress({ detail: notificationData.detail })
+          }
+        }
+      },
+    )
+
+    // Register Firebase task
+    TaskManager.defineTask(
+      'ReactNativeFirebaseMessagingHeadlessTask',
+      async (taskData: TaskManager.TaskManagerTaskBody<unknown>) => {
+        const { data, error } = taskData
+
+        if (error) {
+          Logger.error('Firebase messaging task error:', error)
+          return
+        }
+
+        if (data && typeof data === 'object' && 'message' in data) {
+          const fcmData = data as { message: FirebaseMessagingTypes.RemoteMessage }
+          const remoteMessage = fcmData.message
+
+          await this.displayNotification({
+            channelId: ChannelId.DEFAULT_NOTIFICATION_CHANNEL_ID,
+            title: remoteMessage.notification?.title || '',
+            body: remoteMessage.notification?.body || '',
+            data: remoteMessage.data,
+          })
+        }
+      },
+    )
   }
 }
 

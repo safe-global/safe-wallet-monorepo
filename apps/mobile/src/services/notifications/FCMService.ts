@@ -42,6 +42,7 @@ class FCMService {
       Logger.info('listenForMessagesForeground: listening for messages in Foreground', remoteMessage)
     })
   }
+
   listenForMessagesBackground = (): void => {
     messaging().setBackgroundMessageHandler(async (remoteMessage: FirebaseMessagingTypes.RemoteMessage) => {
       NotificationsService.displayNotification({

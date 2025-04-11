@@ -24,7 +24,7 @@ export default {
       },
       infoPlist: {
         NSFaceIDUsageDescription: 'Enabling Face ID allows you to create/access secure keys.',
-        UIBackgroundModes: ['remote-notification'],
+        UIBackgroundModes: ['remote-notification', 'processing'],
       },
       supportsTablet: false,
       appleTeamId: 'MXRS32BBL4',
@@ -42,7 +42,13 @@ export default {
       },
       package: IS_DEV ? 'global.safe.mobileapp.dev' : 'global.safe.mobileapp',
       googleServicesFile: IS_DEV ? process.env.GOOGLE_SERVICES_JSON_DEV : process.env.GOOGLE_SERVICES_JSON,
-      permissions: ['android.permission.CAMERA'],
+      permissions: [
+        'android.permission.CAMERA',
+        'android.permission.POST_NOTIFICATIONS',
+        'android.permission.RECEIVE_BOOT_COMPLETED',
+        'android.permission.FOREGROUND_SERVICE',
+        'android.permission.WAKE_LOCK',
+      ],
     },
     web: {
       bundler: 'metro',
@@ -50,6 +56,7 @@ export default {
       favicon: './assets/images/favicon.png',
     },
     plugins: [
+      ['./expo-plugins/withNotificationIcons.js'],
       'expo-router',
       [
         'expo-font',
@@ -100,9 +107,26 @@ export default {
           enableBase64ShareAndroid: true,
         },
       ],
+      'expo-task-manager',
     ],
     experiments: {
       typedRoutes: true,
+    },
+    notification: {
+      icon: './assets/images/ic_notification.png',
+      color: '#FFFFFF',
+      androidMode: 'default',
+      androidCollapsedTitle: 'Updates from Safe Wallet',
+      iosDisplayInForeground: true,
+    },
+    // Define background tasks
+    tasks: {
+      'app.notifee.notification-event': {
+        backgroundMode: ['processing', 'remote-notification'],
+      },
+      ReactNativeFirebaseMessagingHeadlessTask: {
+        backgroundMode: ['processing', 'remote-notification'],
+      },
     },
   },
 }

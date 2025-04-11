@@ -5,7 +5,7 @@
     "crashlytics_javascript_exception_handler_chaining_enabled": false,
     "messaging_auto_init_enabled": true,
     "messaging_ios_auto_register_for_remote_messages": false,
-    "android_task_executor_maximum_pool_size": 10,
-    "android_task_executor_keep_alive_seconds": 3
+    "android_task_executor_maximum_pool_size": 20,
+    "android_task_executor_keep_alive_seconds": 5
   }
 }
