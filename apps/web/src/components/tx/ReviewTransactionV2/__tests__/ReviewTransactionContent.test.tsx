@@ -204,11 +204,13 @@ describe('ReviewTransactionContent', () => {
         expect(button).not.toBeInTheDocument()
       })
 
-      it('Shows the Add to batch button if there registered for the "action" slot', () => {
+      it('Shows the Add to batch button if there registered for the "feature" slot', () => {
         jest
           .spyOn(slotProvider, 'useSlot')
           .mockImplementation((slotName) =>
-            slotName === slotProvider.SlotName.Action ? [() => <button>Add to batch</button>] : [],
+            slotName === slotProvider.SlotName.Feature
+              ? [{ Component: () => <button>Add to batch</button>, id: 'batching', label: 'Add to batch' }]
+              : [],
           )
 
         const { getByText } = renderReviewTransactionContent()
