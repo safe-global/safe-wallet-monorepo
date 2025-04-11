@@ -37,7 +37,7 @@ const SafeAppsTxFlow = ({
       },
       {
         txLayoutProps: { title: 'Confirm transaction details', fixedNonce: true },
-        content: <ConfirmSafeAppsTxDetails key={1} safeAppsTx={data} onSubmit={onSubmit} showMethodCall />,
+        content: <ConfirmSafeAppsTxDetails key={1} safeAppsTx={data} onSubmit={onSubmit} />,
       },
     ],
     [nextStep, data, onSubmit, origin],

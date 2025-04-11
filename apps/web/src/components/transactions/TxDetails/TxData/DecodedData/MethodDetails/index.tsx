@@ -20,7 +20,7 @@ export const MethodDetails = ({ data, hexData, addressInfoIndex }: MethodDetails
       <>
         <Typography color="text.secondary">No parameters</Typography>
 
-        {hexData && <HexEncodedData title="Data:" hexData={hexData} />}
+        {hexData && <HexEncodedData title="Data" hexData={hexData} />}
       </>
     )
   }
@@ -34,9 +34,11 @@ export const MethodDetails = ({ data, hexData, addressInfoIndex }: MethodDetails
 
         const title = (
           <Box mb={-1}>
-            <Typography component="span">{param.name}</Typography>{' '}
-            <Typography component="span" color="text.secondary">
-              {param.type}:
+            <Typography variant="body2" component="span">
+              {param.name}
+            </Typography>{' '}
+            <Typography variant="body2" component="span" color="text.secondary">
+              {param.type}
             </Typography>
           </Box>
         )

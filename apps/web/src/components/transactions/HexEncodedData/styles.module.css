@@ -2,10 +2,9 @@
   line-break: anywhere;
   word-break: break-all;
   line-height: 1.1;
+  font-family: monospace;
 }
 
-.encodedData button {
-  padding-top: 0;
-  padding-bottom: 0;
-  padding-left: 0;
+.zeroes {
+  opacity: 0.75;
 }

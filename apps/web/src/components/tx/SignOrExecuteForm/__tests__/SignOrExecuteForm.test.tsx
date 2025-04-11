@@ -1,6 +1,6 @@
 import { SignOrExecuteForm } from '@/components/tx/SignOrExecuteForm/SignOrExecuteForm'
 import * as hooks from '@/components/tx/SignOrExecuteForm/hooks'
-import * as execThroughRoleHooks from '@/components/tx/SignOrExecuteForm/ExecuteThroughRoleForm/hooks'
+import * as execThroughRoleHooks from '@/components/tx-flow/actions/ExecuteThroughRole/ExecuteThroughRoleForm/hooks'
 import { safeTxBuilder } from '@/tests/builders/safeTx'
 import { render } from '@/tests/test-utils'
 import { fireEvent } from '@testing-library/react'

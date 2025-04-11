@@ -6,10 +6,9 @@ import type { ReactElement } from 'react'
 
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { getRecoveryProposalTransactions } from '@/features/recovery/services/transaction'
-import DecodedTx from '@/components/tx/DecodedTx'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import ConfirmationTitle, { ConfirmationTitleTypes } from '@/components/tx/SignOrExecuteForm/ConfirmationTitle'
-import TxChecks from '@/components/tx/SignOrExecuteForm/TxChecks'
+import TxChecks from '@/components/tx-flow/features/TxChecks/TxChecks'
 import TxCard from '../../common/TxCard'
 import { SafeTxContext } from '../../SafeTxProvider'
 import CheckWallet from '@/components/common/CheckWallet'
@@ -36,6 +35,7 @@ import NetworkWarning from '@/components/new-safe/create/NetworkWarning'
 import { useGetTransactionDetailsQuery } from '@/store/api/gateway'
 import { skipToken } from '@reduxjs/toolkit/query'
 import useTxPreview from '@/components/tx/confirmation-views/useTxPreview'
+import Summary from '@/components/transactions/TxDetails/Summary'
 
 export function RecoverAccountFlowReview({ params }: { params: RecoverAccountFlowProps }): ReactElement | null {
   // Form state
@@ -131,7 +131,7 @@ export function RecoverAccountFlowReview({ params }: { params: RecoverAccountFlo
 
         <Divider className={commonCss.nestedDivider} />
 
-        <DecodedTx txDetails={txDetails} tx={safeTx} {...txPreview} />
+        {txPreview && <Summary txDetails={txDetails} safeTxData={safeTx?.data} {...txPreview} />}
 
         <BlockaidBalanceChanges />
       </TxCard>

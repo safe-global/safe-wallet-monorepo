@@ -6,8 +6,9 @@ const useTxStepper = <T extends unknown>(initialData: T, eventCategory?: string)
   const [data, setData] = useState<T>(initialData)
 
   const nextStep = useCallback(
-    (entireData: T) => {
-      setData(entireData)
+    (entireData?: T) => {
+      if (entireData) setData(entireData)
+
       setStep((prevStep) => {
         if (eventCategory) {
           trackEvent({ action: MODAL_NAVIGATION.Next, category: eventCategory, label: prevStep })

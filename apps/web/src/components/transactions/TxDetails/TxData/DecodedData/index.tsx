@@ -9,8 +9,6 @@ import SendAmountBlock from '@/components/tx-flow/flows/TokenTransfer/SendAmount
 import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
 import SendToBlock from '@/components/tx/SendToBlock'
 import MethodCall from './MethodCall'
-import useSafeAddress from '@/hooks/useSafeAddress'
-import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { DelegateCallWarning } from '@/components/transactions/Warning'
 
 interface Props {
@@ -19,7 +17,6 @@ interface Props {
 }
 
 export const DecodedData = ({ txData, toInfo }: Props): ReactElement | null => {
-  const safeAddress = useSafeAddress()
   const chainInfo = useCurrentChain()
 
   // nothing to render
@@ -28,7 +25,7 @@ export const DecodedData = ({ txData, toInfo }: Props): ReactElement | null => {
 
     return (
       <SendToBlock
-        title="Interact with:"
+        title="Interact with"
         address={toInfo.value}
         name={toInfo.name}
         customAvatar={toInfo.logoUri}
@@ -39,23 +36,11 @@ export const DecodedData = ({ txData, toInfo }: Props): ReactElement | null => {
 
   const amountInWei = txData.value ?? '0'
   const isDelegateCall = txData.operation === Operation.DELEGATE
-  const toAddress = toInfo?.value || txData.to.value
+  const toAddress = toInfo?.value || txData.to?.value
   const method = txData.dataDecoded?.method || ''
   const addressInfo = txData.addressInfoIndex?.[toAddress]
-  const name = sameAddress(toAddress, safeAddress)
-    ? 'this Safe Account'
-    : addressInfo?.name || toInfo?.name || txData.to.name
-  const avatar = addressInfo?.logoUri || toInfo?.logoUri || txData.to.logoUri
-
-  let decodedData = <></>
-  if (txData.dataDecoded) {
-    decodedData = (
-      <MethodDetails data={txData.dataDecoded} hexData={txData.hexData} addressInfoIndex={txData.addressInfoIndex} />
-    )
-  } else if (txData.hexData) {
-    // When no decoded data, display raw hex data
-    decodedData = <HexEncodedData title="Data:" hexData={txData.hexData} />
-  }
+  const name = addressInfo?.name || toInfo?.name || txData.to?.name
+  const avatar = addressInfo?.logoUri || toInfo?.logoUri || txData.to?.logoUri
 
   return (
     <Stack spacing={2}>
@@ -64,12 +49,12 @@ export const DecodedData = ({ txData, toInfo }: Props): ReactElement | null => {
       {method ? (
         <MethodCall contractAddress={toAddress} contractName={name} contractLogo={avatar} method={method} />
       ) : (
-        <SendToBlock address={toAddress} name={name} title="Interacted with:" avatarSize={26} customAvatar={avatar} />
+        <SendToBlock address={toAddress} name={name} title="Interacted with" avatarSize={20} customAvatar={avatar} />
       )}
 
       {amountInWei !== '0' && (
         <SendAmountBlock
-          title="Value:"
+          title="Value"
           amountInWei={amountInWei}
           tokenInfo={{
             type: TokenType.NATIVE_TOKEN,
@@ -81,7 +66,11 @@ export const DecodedData = ({ txData, toInfo }: Props): ReactElement | null => {
         />
       )}
 
-      {decodedData}
+      {txData.dataDecoded ? (
+        <MethodDetails data={txData.dataDecoded} hexData={txData.hexData} addressInfoIndex={txData.addressInfoIndex} />
+      ) : txData.hexData ? (
+        <HexEncodedData title="Data" hexData={txData.hexData} />
+      ) : null}
     </Stack>
   )
 }

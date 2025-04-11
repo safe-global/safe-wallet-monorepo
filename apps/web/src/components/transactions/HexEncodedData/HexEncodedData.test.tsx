@@ -10,12 +10,9 @@ describe('HexEncodedData', () => {
     const tooltipComponent = result.getByLabelText(
       'The first 4 bytes determine the contract method that is being called',
     )
-    const copyButton = result.getByTestId('copy-btn-icon')
-
     expect(showMoreButton).toBeInTheDocument()
     expect(showMoreButton).toHaveTextContent('Show more')
     expect(tooltipComponent).toBeInTheDocument()
-    expect(copyButton).toBeInTheDocument()
 
     expect(result.container).toMatchSnapshot()
   })

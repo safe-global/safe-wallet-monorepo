@@ -1,13 +1,9 @@
-import type { StackProps } from '@mui/material'
-import { Box, Button, Chip, Divider, Stack, Typography } from '@mui/material'
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+import { Fragment, type ReactElement } from 'react'
+import { Box, Divider, Stack, Typography } from '@mui/material'
+import CheckIcon from '@mui/icons-material/Check'
 import type { SafeTransaction } from '@safe-global/safe-core-sdk-types'
 import { PaperViewToggle } from '../../common/PaperViewToggle'
-import TableRowsRoundedIcon from '@mui/icons-material/TableRowsRounded'
-import DataObjectIcon from '@mui/icons-material/DataObject'
 import EthHashInfo from '@/components/common/EthHashInfo'
-import { useState, type ReactElement, type ReactNode } from 'react'
-import { isNumber, isString } from 'lodash'
 import { Operation, type TransactionData } from '@safe-global/safe-gateway-typescript-sdk/dist/types/transactions'
 import { HexEncodedData } from '@/components/transactions/HexEncodedData'
 import {
@@ -15,205 +11,156 @@ import {
   useMessageHash,
   useSafeTxHash,
 } from '@/components/transactions/TxDetails/Summary/SafeTxHashDataRow'
+import TxDetailsRow from './TxDetailsRow'
+import NameChip from './NameChip'
 
 type TxDetailsProps = {
-  safeTx: SafeTransaction
+  safeTxData: SafeTransaction['data']
   txData?: TransactionData
-  showHashes: boolean
+  grid?: boolean
 }
 
-const TxDetailsRow = ({
-  label,
-  children,
-  direction = 'row',
-}: {
-  label: string
-  children: ReactNode
-  direction?: StackProps['direction']
-}) => (
-  <Stack
-    gap={1}
-    direction={direction}
-    justifyContent="space-between"
-    flexWrap={direction === 'row' ? 'wrap' : 'initial'}
-    alignItems={direction === 'row' ? 'center' : 'initial'}
-  >
-    <Typography variant="body2" color="text.secondary">
-      {label}
-    </Typography>
-    {isString(children) || isNumber(children) ? <Typography variant="body2">{children}</Typography> : children}
-  </Stack>
-)
-
 const ContentWrapper = ({ children }: { children: ReactElement | ReactElement[] }) => (
-  <Box sx={{ maxHeight: '550px', overflowY: 'auto', px: 2 }}>{children}</Box>
+  <Box sx={{ maxHeight: '550px', minHeight: '447px', overflowY: 'auto', px: 2 }}>{children}</Box>
 )
 
-export const TxDetails = ({ safeTx, txData, showHashes }: TxDetailsProps) => {
-  const [expandHashes, setExpandHashes] = useState(showHashes)
-  const safeTxHash = useSafeTxHash({ safeTxData: safeTx.data })
+export const TxDetails = ({ safeTxData, txData, grid }: TxDetailsProps) => {
+  const safeTxHash = useSafeTxHash({ safeTxData })
   const domainHash = useDomainHash()
-  const messageHash = useMessageHash({ safeTxData: safeTx.data })
+  const messageHash = useMessageHash({ safeTxData })
+  const operation = Number(safeTxData.operation) as Operation
 
-  const toInfo = txData?.addressInfoIndex?.[safeTx.data.to] || txData?.to
-  const toName = toInfo?.name || (toInfo && 'displayName' in toInfo ? String(toInfo.displayName || '') : undefined)
-  const toLogo = toInfo?.logoUri
+  const ToWrapper = grid ? Box : Fragment
 
   return (
-    <PaperViewToggle>
+    <PaperViewToggle activeView={0} leftAlign={grid}>
       {[
         {
-          title: (
-            <Typography color="primary.light" fontWeight="bold">
-              Transaction details
-            </Typography>
-          ),
-          icon: <TableRowsRoundedIcon />,
+          title: 'Data',
           content: (
             <ContentWrapper>
-              <Divider sx={{ mb: 1 }} />
-
               <Stack spacing={1} divider={<Divider />}>
-                <TxDetailsRow label="To">
-                  {toName || toLogo ? (
-                    <Chip
-                      sx={{ backgroundColor: 'background.paper', height: 'unset', '& > *': { p: 0.5 } }}
-                      label={
-                        <EthHashInfo
-                          address={safeTx.data.to}
-                          name={toName}
-                          customAvatar={toLogo}
-                          showAvatar={!!toLogo}
-                          avatarSize={20}
-                          onlyName
-                        />
-                      }
-                    ></Chip>
-                  ) : null}
+                <TxDetailsRow label="Primary type" grid={grid}>
+                  SafeTx
+                </TxDetailsRow>
 
-                  <Typography
-                    variant="body2"
-                    width="100%"
-                    sx={{
-                      '& *': { whiteSpace: 'normal', wordWrap: 'break-word', alignItems: 'flex-start !important' },
-                    }}
-                  >
-                    <EthHashInfo
-                      address={safeTx.data.to}
-                      avatarSize={20}
-                      showPrefix={false}
-                      showName={false}
-                      shortAddress={false}
-                      hasExplorer
-                      showAvatar
-                      highlight4bytes
-                    />
+                <TxDetailsRow label="To" grid={grid}>
+                  <ToWrapper>
+                    <NameChip txData={txData} withBackground={grid} />
+
+                    <Typography
+                      variant="body2"
+                      mt={grid ? 0.75 : 0}
+                      width={grid ? undefined : '100%'}
+                      sx={{
+                        '& *': { whiteSpace: 'normal', wordWrap: 'break-word', alignItems: 'flex-start !important' },
+                      }}
+                    >
+                      <EthHashInfo
+                        address={safeTxData.to}
+                        avatarSize={20}
+                        showPrefix={false}
+                        showName={false}
+                        shortAddress={false}
+                        hasExplorer
+                        showAvatar
+                        highlight4bytes
+                      />
+                    </Typography>
+                  </ToWrapper>
+                </TxDetailsRow>
+
+                <TxDetailsRow label="Value" grid={grid}>
+                  {safeTxData.value}
+                </TxDetailsRow>
+
+                <TxDetailsRow label="Data" grid={grid}>
+                  <Typography variant="body2" width={grid ? '70%' : undefined}>
+                    <HexEncodedData hexData={safeTxData.data} limit={66} />
                   </Typography>
                 </TxDetailsRow>
 
-                <TxDetailsRow label="Value">{safeTx.data.value}</TxDetailsRow>
-
-                <TxDetailsRow label="Data" direction={safeTx.data.data === '0x' ? 'row' : 'column'}>
-                  <Typography variant="body2">
-                    <HexEncodedData hexData={safeTx.data.data} limit={66} />
+                <TxDetailsRow label="Operation" grid={grid}>
+                  <Typography variant="body2" display="flex" alignItems="center" gap={0.5}>
+                    {safeTxData.operation} ({operation === Operation.CALL ? 'call' : 'delegate call'})
+                    {operation === Operation.CALL && <CheckIcon color="success" fontSize="inherit" />}
                   </Typography>
                 </TxDetailsRow>
 
-                <TxDetailsRow label="Operation">
-                  {safeTx.data.operation} (
-                  {(Number(safeTx.data.operation) as Operation) === Operation.CALL ? 'call' : 'delegate call'})
+                <TxDetailsRow label="SafeTxGas" grid={grid}>
+                  {safeTxData.safeTxGas}
                 </TxDetailsRow>
 
-                <TxDetailsRow label="SafeTxGas">{safeTx.data.safeTxGas}</TxDetailsRow>
+                <TxDetailsRow label="BaseGas" grid={grid}>
+                  {safeTxData.baseGas}
+                </TxDetailsRow>
 
-                <TxDetailsRow label="BaseGas">{safeTx.data.baseGas}</TxDetailsRow>
+                <TxDetailsRow label="GasPrice" grid={grid}>
+                  {safeTxData.gasPrice}
+                </TxDetailsRow>
 
-                <TxDetailsRow label="GasPrice">{safeTx.data.gasPrice}</TxDetailsRow>
-
-                <TxDetailsRow label="GasToken">
+                <TxDetailsRow label="GasToken" grid={grid}>
                   <Typography variant="body2">
                     <EthHashInfo
-                      address={safeTx.data.gasToken}
+                      address={safeTxData.gasToken}
                       avatarSize={20}
                       showPrefix={false}
                       showName={false}
-                      hasExplorer
-                    />
-                  </Typography>
-                </TxDetailsRow>
-
-                <TxDetailsRow label="RefundReceiver">
-                  <Typography variant="body2">
-                    <EthHashInfo
-                      address={safeTx.data.refundReceiver}
-                      avatarSize={20}
-                      showPrefix={false}
-                      showName={false}
+                      shortAddress
                       hasExplorer
                     />
                   </Typography>
                 </TxDetailsRow>
 
-                <TxDetailsRow label="Nonce">{safeTx.data.nonce}</TxDetailsRow>
-
-                <Button onClick={() => setExpandHashes(!expandHashes)} sx={{ all: 'unset' }}>
-                  <Typography
-                    variant="body2"
-                    fontWeight={700}
-                    display="inline-flex"
-                    alignItems="center"
-                    color="primary.light"
-                    sx={{ cursor: 'pointer' }}
-                  >
-                    Transaction hashes{' '}
-                    <ExpandMoreIcon sx={expandHashes ? { transform: 'rotate(180deg)' } : undefined} />
+                <TxDetailsRow label="RefundReceiver" grid={grid}>
+                  <Typography variant="body2">
+                    <EthHashInfo
+                      address={safeTxData.refundReceiver}
+                      avatarSize={20}
+                      showPrefix={false}
+                      shortAddress
+                      showName={false}
+                      hasExplorer
+                    />
                   </Typography>
-                </Button>
+                </TxDetailsRow>
 
-                {expandHashes && domainHash && (
-                  <TxDetailsRow label="Domain hash">
+                <TxDetailsRow label="Nonce" grid={grid}>
+                  {safeTxData.nonce}
+                </TxDetailsRow>
+              </Stack>
+            </ContentWrapper>
+          ),
+        },
+        {
+          title: 'Hashes',
+          content: (
+            <ContentWrapper>
+              <Stack spacing={1} divider={<Divider />}>
+                {domainHash && (
+                  <TxDetailsRow label="Domain hash" grid={grid}>
                     <Typography variant="body2" width="100%" sx={{ wordWrap: 'break-word' }}>
                       <HexEncodedData hexData={domainHash} limit={66} highlightFirstBytes={false} />
                     </Typography>
                   </TxDetailsRow>
                 )}
 
-                {expandHashes && messageHash && (
-                  <TxDetailsRow label="Message hash">
+                {messageHash && (
+                  <TxDetailsRow label="Message hash" grid={grid}>
                     <Typography variant="body2" width="100%" sx={{ wordWrap: 'break-word' }}>
                       <HexEncodedData hexData={messageHash} limit={66} highlightFirstBytes={false} />
                     </Typography>
                   </TxDetailsRow>
                 )}
 
-                {expandHashes && safeTxHash && (
-                  <TxDetailsRow label="safeTxHash">
+                {safeTxHash && (
+                  <TxDetailsRow label="safeTxHash" grid={grid}>
                     <Typography variant="body2" width="100%" sx={{ wordWrap: 'break-word' }}>
                       <HexEncodedData hexData={safeTxHash} limit={66} highlightFirstBytes={false} />
                     </Typography>
                   </TxDetailsRow>
                 )}
               </Stack>
-            </ContentWrapper>
-          ),
-        },
-        {
-          title: (
-            <Typography color="primary.light" fontWeight="bold">
-              Transaction details
-            </Typography>
-          ),
-          icon: <DataObjectIcon />,
-          tooltip: 'View .json/raw data',
-          content: (
-            <ContentWrapper>
-              <Divider sx={{ mb: 1 }} />
-
-              <TxDetailsRow label="Message" direction="column">
-                <Typography variant="body2" sx={{ wordWrap: 'break-word', whiteSpace: 'pre-wrap' }}>
-                  {JSON.stringify(safeTx.data, null, 2)}
-                </Typography>
-              </TxDetailsRow>
             </ContentWrapper>
           ),
         },
