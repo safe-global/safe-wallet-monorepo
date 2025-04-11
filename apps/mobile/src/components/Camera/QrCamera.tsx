@@ -54,14 +54,12 @@ function CameraFooter(props: { footer: React.ReactNode }) {
 function CameraLens({
   denied,
   onPressSettings,
-  requestPermission,
   hasPermission,
   onActivateCamera,
   isCameraActive,
 }: {
   denied: boolean
   onPressSettings: () => Promise<void>
-  requestPermission: () => Promise<void>
   hasPermission: boolean
   onActivateCamera: () => void
   isCameraActive: boolean
@@ -120,7 +118,6 @@ export const QrCamera = ({
   onScan,
   isCameraActive,
   permission,
-  requestPermission,
   hasPermission,
   onActivateCamera,
 }: QrCameraProps) => {
@@ -176,7 +173,6 @@ export const QrCamera = ({
               <CameraLens
                 denied={denied}
                 onPressSettings={openSettings}
-                requestPermission={requestPermission}
                 hasPermission={hasPermission}
                 onActivateCamera={onActivateCamera}
                 isCameraActive={isCameraActive}
