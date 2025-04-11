@@ -11,6 +11,7 @@ import {
   getSimulationLink,
   type SimulationTxParams,
 } from '@safe-global/utils/components/tx/security/tenderly/utils'
+import { Errors, logError } from '@/services/exceptions'
 
 export const useSimulation = (): UseSimulationReturn => {
   const [simulation, setSimulation] = useState<TenderlySimulation | undefined>()
@@ -39,7 +40,7 @@ export const useSimulation = (): UseSimulationReturn => {
         setSimulation(data)
         setSimulationRequestStatus(FETCH_STATUS.SUCCESS)
       } catch (error) {
-        console.error(error)
+        logError(Errors._200, error)
 
         setRequestError(asError(error).message)
         setSimulationRequestStatus(FETCH_STATUS.ERROR)
