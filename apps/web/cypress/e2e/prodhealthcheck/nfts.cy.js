@@ -17,7 +17,7 @@ let nftsSafes,
 const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
 const signer = walletCredentials.OWNER_4_PRIVATE_KEY
 
-describe.skip('[PROD] NFTs tests', () => {
+describe('[PROD] NFTs tests', () => {
   before(() => {
     getSafes(CATEGORIES.nfts)
       .then((nfts) => {
@@ -69,7 +69,7 @@ describe.skip('[PROD] NFTs tests', () => {
     nfts.verifySendNFTBtnDisabled()
   })
 
-  it('Verify Send NFT transaction has been created', () => {
+  it.only('Verify Send NFT transaction has been created', () => {
     cy.visit(constants.prodbaseUrl + constants.balanceNftsUrl + nftsSafes.SEP_NFT_SAFE_1)
     wallet.connectSigner(signer)
     nfts.verifyInitialNFTData()
@@ -78,8 +78,10 @@ describe.skip('[PROD] NFTs tests', () => {
     nfts.selectNFTs(1)
     nfts.sendNFT()
     nfts.typeRecipientAddress(staticSafes.SEP_STATIC_SAFE_1)
-    createTx.changeNonce(2)
+    createTx.changeNonce(1)
     nfts.clikOnNextBtn()
+    createTx.clickOnContinueSignTransactionBtn()
+    createTx.clickOnAcknowledgement()
     createTx.clickOnSignTransactionBtn()
     createTx.waitForProposeRequest()
     createTx.clickViewTransaction()

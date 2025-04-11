@@ -54,7 +54,7 @@ describe('Drain Account tests', { defaultCommandTimeout: 40000 }, () => {
     navigation.clickOnDisconnectBtn()
   })
 
-  // TODO: ENS does not resolve
+  // Skip until ENS resolve bug is fixed
   it.skip('Verify a drain can be created when a ENS is specified', () => {
     cy.enter(iframeSelector).then((getBody) => {
       getBody().findByLabelText(safeapps.recipientStr).type(constants.ENS_TEST_SEPOLIA).wait(2000)

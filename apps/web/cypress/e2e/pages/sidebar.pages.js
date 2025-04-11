@@ -71,6 +71,7 @@ const nestedSafeListPopover = '[data-testid="nested-safe-list"]'
 const breadcrumpContainer = '[data-testid="safe-breadcrumb-container"]'
 const parentSafeItem = 'div[aria-label="Parent Safe"]'
 const nestedSafeItem = 'div[aria-label="Nested Safe"]'
+const safeIconItem = '[data-testid="safe-icon"]'
 
 export function clickOnOpenNestedSafeListBtn() {
   cy.get(openNestedSafeListBtn).click()
@@ -428,6 +429,10 @@ export function verifyQueuedTx(safe) {
   return getSafeItemOptions(safe).find(queuedTxInfo).should('exist')
 }
 
+export function verifySafeIconData(safe) {
+  return getSafeByName(safe).find(safeIconItem).should('be.visible')
+}
+
 export function clickOnSafeItemOptionsBtn(name) {
   getSafeItemOptions(name).find(safeItemOptionsBtn).click()
 }
@@ -682,7 +687,7 @@ export function checkNetworksInRange(expectedString, expectedCount, direction = 
 
   return cy
     .get(startSelector)
-    [traversalMethod](endSelector, 'li')
+  [traversalMethod](endSelector, 'li')
     .then((liElements) => {
       expect(liElements.length).to.equal(expectedCount)
       const optionTexts = [...liElements].map((li) => li.innerText)

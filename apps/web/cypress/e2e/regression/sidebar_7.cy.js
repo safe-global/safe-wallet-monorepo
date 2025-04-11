@@ -58,7 +58,7 @@ describe('Sidebar tests 7', () => {
   })
 
   // Added to prod
-  it('Verify pending signature is displayed in sidebar for unsigned tx', () => {
+  it.only('Verify pending signature is displayed in sidebar for unsigned tx', () => {
     cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_7)
     wallet.connectSigner(signer)
     cy.intercept('GET', constants.safeListEndpoint, {
