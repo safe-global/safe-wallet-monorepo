@@ -170,6 +170,7 @@ const AddAccounts = () => {
             variant="contained"
             onClick={() => setOpen(true)}
             disabled={!isAdmin}
+            sx={{ whiteSpace: 'nowrap' }}
           >
             Add accounts
           </Button>
