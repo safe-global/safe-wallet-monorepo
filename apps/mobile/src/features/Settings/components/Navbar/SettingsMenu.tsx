@@ -1,6 +1,6 @@
-import { getTokenValue, Theme, useTheme, XStack, View } from 'tamagui'
+import { getTokenValue, Theme, useTheme } from 'tamagui'
 import { Pressable } from 'react-native-gesture-handler'
-import { Linking, Platform, Alert } from 'react-native'
+import { Linking, Platform, Alert, View } from 'react-native'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon/SafeFontIcon'
 import React from 'react'
 import { getExplorerLink } from '@safe-global/utils/utils/gateway'
@@ -35,33 +35,37 @@ export const SettingsMenu = ({ safeAddress }: Props) => {
 
   return (
     <Theme name="navbar">
-      <XStack
-        paddingTop={getTokenValue('$2') + insets.top}
-        justifyContent={'flex-end'}
-        paddingHorizontal={16}
-        alignItems={'center'}
-        paddingBottom={'$2'}
-        backgroundColor={'$background'}
+      <View
+        style={{
+          flexDirection: 'row',
+          paddingTop: getTokenValue('$3') + insets.top,
+          paddingHorizontal: 16,
+          paddingBottom: getTokenValue('$2'),
+          backgroundColor: '$background',
+          marginRight: 4,
+          alignItems: 'center',
+          justifyContent: 'flex-end',
+          right: -10,
+        }}
       >
         <Pressable
           testID={'settings-screen-header-app-settings-button'}
+          hitSlop={{ top: 20, bottom: 20, left: 20 }}
+          style={{
+            zIndex: 2,
+            backgroundColor: '$backgroundSkeleton',
+            borderRadius: 16,
+            marginRight: 4,
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: 32,
+            height: 32,
+          }}
           onPress={() => {
             router.push('/app-settings')
           }}
         >
-          <View
-            style={{
-              backgroundColor: '$backgroundSkeleton',
-              borderRadius: 16,
-              marginRight: 4,
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: 32,
-              height: 32,
-            }}
-          >
-            <SafeFontIcon name={'settings'} size={16} />
-          </View>
+          <SafeFontIcon name={'settings'} size={20} />
         </Pressable>
 
         <FloatingMenu
@@ -158,23 +162,24 @@ export const SettingsMenu = ({ safeAddress }: Props) => {
             },
           ]}
         >
-          <Pressable testID={'settings-screen-header-more-settings-button'}>
-            <View
-              style={{
-                backgroundColor: '$backgroundSkeleton',
-                borderRadius: 16,
-                marginLeft: 4,
-                alignItems: 'center',
-                justifyContent: 'center',
-                width: 32,
-                height: 32,
-              }}
-            >
-              <SafeFontIcon name={'options-horizontal'} size={16} />
-            </View>
+          <Pressable
+            hitSlop={{ top: 20, bottom: 20, right: 20 }}
+            style={{
+              zIndex: 2,
+              backgroundColor: '$backgroundSkeleton',
+              borderRadius: 16,
+              marginLeft: 4,
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: 32,
+              height: 32,
+            }}
+            testID={'settings-screen-header-more-settings-button'}
+          >
+            <SafeFontIcon name={'options-horizontal'} size={20} />
           </Pressable>
         </FloatingMenu>
-      </XStack>
+      </View>
     </Theme>
   )
 }

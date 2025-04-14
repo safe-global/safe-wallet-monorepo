@@ -1,4 +1,5 @@
 import React from 'react'
+import { View } from 'react-native'
 import { Theme, XStack, getTokenValue } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Pressable } from 'react-native-gesture-handler'
@@ -40,7 +41,7 @@ export const Navbar = () => {
   return (
     <Theme name="navbar">
       <XStack
-        paddingTop={getTokenValue('$2') + insets.top}
+        paddingTop={getTokenValue('$3') + insets.top}
         justifyContent={'space-between'}
         paddingHorizontal={16}
         alignItems={'center'}
@@ -65,16 +66,23 @@ export const Navbar = () => {
             router.push('/accounts-sheet')
           }}
         />
-        <XStack alignItems={'center'} justifyContent={'center'} gap={12}>
+        <View
+          style={{
+            flexDirection: 'row',
+            gap: 12,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
           <Link href={'/share'} asChild>
-            <Pressable>
+            <Pressable hitSlop={{ top: 20, bottom: 20, left: 20 }}>
               <SafeFontIcon name="qr-code-1" size={16} />
             </Pressable>
           </Link>
-          <Pressable onPress={handleNotificationAccess}>
+          <Pressable onPress={handleNotificationAccess} hitSlop={{ top: 20, bottom: 20, right: 20 }}>
             <SafeFontIcon name="bell" size={20} />
           </Pressable>
-        </XStack>
+        </View>
       </XStack>
     </Theme>
   )
