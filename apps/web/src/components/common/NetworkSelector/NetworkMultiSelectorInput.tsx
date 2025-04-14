@@ -34,12 +34,16 @@ const NetworkMultiSelectorInput = ({
 
   const handleChange = useCallback(
     (newNetworks: ChainInfo[]) => {
-      setValue(name, newNetworks, { shouldValidate: true })
+      const filteredData = showSelectAll
+        ? (newNetworks.filter((item) => item.chainId !== SELECT_ALL_OPTION.chainId) as ChainInfo[])
+        : (newNetworks as ChainInfo[])
+
+      setValue(name, filteredData, { shouldValidate: true })
       if (onNetworkChange) {
-        onNetworkChange(newNetworks)
+        onNetworkChange(filteredData)
       }
     },
-    [name, setValue, onNetworkChange],
+    [name, setValue, onNetworkChange, showSelectAll],
   )
 
   const handleDelete = useCallback(
@@ -62,54 +66,68 @@ const NetworkMultiSelectorInput = ({
 
   const options = showSelectAll ? [SELECT_ALL_OPTION, ...configs] : configs
 
+  const renderTags = useCallback(
+    (selectedOptions: (ChainInfo | typeof SELECT_ALL_OPTION)[]) => {
+      if (showSelectAll && isAllSelected) {
+        return (
+          <Typography variant="body2">
+            All networks{' '}
+            <Box component="span" sx={{ color: 'text.secondary' }}>
+              (Default)
+            </Box>
+          </Typography>
+        )
+      }
+
+      return selectedOptions.map((chain) => (
+        <Chip
+          variant="outlined"
+          key={chain.chainId}
+          avatar={<ChainIndicator chainId={chain.chainId} onlyLogo inline />}
+          label={chain.chainName}
+          onDelete={() => handleDelete(chain.chainId)}
+          className={css.multiChainChip}
+        />
+      ))
+    },
+    [showSelectAll, isAllSelected, handleDelete],
+  )
+
+  const renderOption = useCallback(
+    (
+      props: React.HTMLAttributes<HTMLLIElement> & { key: string },
+      chain: ChainInfo | typeof SELECT_ALL_OPTION,
+      { selected }: { selected: boolean },
+    ) => {
+      const { key, ...rest } = props
+
+      if (showSelectAll && chain.chainId === SELECT_ALL_OPTION.chainId) {
+        return (
+          <Box component="li" key={key} {...rest} onClick={toggleSelectAll}>
+            <Checkbox data-testid="select-all-checkbox" size="small" checked={isAllSelected} />
+            <span>Select All</span>
+          </Box>
+        )
+      }
+
+      return (
+        <Box component="li" key={key} {...rest}>
+          <Checkbox data-testid="network-checkbox" size="small" checked={selected} />
+          <ChainIndicator chainId={chain.chainId} inline />
+        </Box>
+      )
+    },
+    [showSelectAll, isAllSelected, toggleSelectAll],
+  )
+
   return (
     <Autocomplete
       multiple
       value={value || []}
       disableCloseOnSelect
       options={options}
-      renderTags={(selectedOptions) => {
-        if (showSelectAll && isAllSelected) {
-          return (
-            <Typography variant="body2">
-              All networks{' '}
-              <Box component="span" sx={{ color: 'text.secondary' }}>
-                (Default)
-              </Box>
-            </Typography>
-          )
-        }
-
-        return selectedOptions.map((chain) => (
-          <Chip
-            variant="outlined"
-            key={chain.chainId}
-            avatar={<ChainIndicator chainId={chain.chainId} onlyLogo inline />}
-            label={chain.chainName}
-            onDelete={() => handleDelete(chain.chainId)}
-            className={css.multiChainChip}
-          />
-        ))
-      }}
-      renderOption={(props, chain, { selected }) => {
-        const { key, ...rest } = props
-
-        if (showSelectAll && chain.chainId === SELECT_ALL_OPTION.chainId) {
-          return (
-            <Box component="li" key={key} {...rest} onClick={toggleSelectAll}>
-              <Checkbox data-testid="select-all-checkbox" size="small" checked={isAllSelected} />
-              <span>Select All</span>
-            </Box>
-          )
-        }
-
-        return (
-          <Box component="li" key={key} {...rest}>
-            <Checkbox data-testid="network-checkbox" size="small" checked={selected} />
-            <ChainIndicator chainId={chain.chainId} inline />
-          </Box>
-        )
-      }}
+      renderTags={renderTags}
+      renderOption={renderOption}
       getOptionLabel={(option) => option.chainName}
       getOptionDisabled={(option) =>
         showSelectAll && option.chainId === SELECT_ALL_OPTION.chainId ? false : getOptionDisabled(option as ChainInfo)
@@ -124,12 +142,7 @@ const NetworkMultiSelectorInput = ({
         )
       }}
       isOptionEqualToValue={(option, value) => option.chainId === value.chainId}
-      onChange={(_, data) => {
-        const filteredData = showSelectAll
-          ? (data.filter((item) => item.chainId !== SELECT_ALL_OPTION.chainId) as ChainInfo[])
-          : (data as ChainInfo[])
-        handleChange(filteredData)
-      }}
+      onChange={(_, data) => handleChange(data as ChainInfo[])}
     />
   )
 }
