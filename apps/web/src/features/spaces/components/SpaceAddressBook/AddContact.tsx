@@ -92,6 +92,7 @@ const AddContact = () => {
                     render={({ field }) => (
                       <NetworkMultiSelectorInput
                         name="networks"
+                        showSelectAll
                         value={field.value || []}
                         error={!!errors.networks}
                         helperText={errors.networks ? 'Select at least one network' : ''}
