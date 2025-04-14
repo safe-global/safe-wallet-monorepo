@@ -39,7 +39,20 @@ const ContactsList = ({ contactItems }: { contactItems: ContactItem[] }) => {
   const spaceContacts: ContactItem[] = [] // TODO: Fetch via RTK Query
 
   return (
-    <List sx={{ display: 'flex', flexDirection: 'column', gap: 1, maxHeight: 400, minHeight: 400, overflow: 'auto' }}>
+    <List
+      sx={{
+        pt: 0,
+        px: 2,
+        pb: 2,
+        mt: 2,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 1,
+        maxHeight: 400,
+        minHeight: 400,
+        overflow: 'auto',
+      }}
+    >
       {contactItems.map((contactItem) => {
         const contactItemId = getContactId(contactItem)
         const alreadyAdded = spaceContacts.some(

@@ -66,7 +66,7 @@ const AddContact = () => {
 
   return (
     <>
-      <Button variant="contained" startIcon={<PlusIcon />} onClick={handleOpen}>
+      <Button variant="contained" size="small" startIcon={<PlusIcon />} onClick={handleOpen} sx={{ height: '40px' }}>
         Add contact
       </Button>
       <ModalDialog open={open} onClose={handleClose} dialogTitle="Add contact" hideChainIndicator>
