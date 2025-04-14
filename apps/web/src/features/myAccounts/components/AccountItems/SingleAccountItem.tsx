@@ -163,18 +163,6 @@ const SingleAccountItem = ({
       </Box>
 
       <Typography variant="body2" component="div" className={css.safeAddress}>
-        {name && (
-          <Typography
-            variant="subtitle2"
-            component="p"
-            className={css.safeName}
-            sx={{
-              fontWeight: 'bold',
-            }}
-          >
-            {name}
-          </Typography>
-        )}
         {isMultiChainItem ? (
           <Typography
             component="span"
@@ -186,7 +174,14 @@ const SingleAccountItem = ({
             {chain?.chainName}
           </Typography>
         ) : (
-          <EthHashInfo address={address} shortAddress chainId={chain?.chainId} showAvatar={false} />
+          <EthHashInfo
+            address={address}
+            name={name}
+            shortAddress
+            chainId={chain?.chainId}
+            showAvatar={false}
+            copyAddress={!isMobile}
+          />
         )}
         {!isMobile && (
           <AccountInfoChips

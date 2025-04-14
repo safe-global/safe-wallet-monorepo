@@ -18,6 +18,7 @@ import {
   Tooltip,
   SvgIcon,
   IconButton,
+  useMediaQuery,
 } from '@mui/material'
 import SafeIcon from '@/components/common/SafeIcon'
 import { OVERVIEW_EVENTS, OVERVIEW_LABELS, PIN_SAFE_LABELS, trackEvent } from '@/services/analytics'
@@ -49,6 +50,7 @@ import { selectOrderByPreference } from '@/store/orderByPreferenceSlice'
 import { getComparator } from '@/features/myAccounts/utils/utils'
 import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
 import EthHashInfo from '@/components/common/EthHashInfo'
+import { useTheme } from '@mui/material/styles'
 
 export const MultichainIndicator = ({ safes }: { safes: SafeItem[] }) => {
   return (
@@ -223,6 +225,9 @@ type MultiAccountItemProps = {
 }
 
 const MultiAccountItem = ({ onLinkClick, multiSafeAccountItem, isSpaceSafe = false }: MultiAccountItemProps) => {
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
+
   const {
     address,
     name,
@@ -282,6 +287,7 @@ const MultiAccountItem = ({ onLinkClick, multiSafeAccountItem, isSpaceSafe = fal
                 showPrefix={false}
                 showAvatar={false}
                 copyPrefix={false}
+                copyAddress={!isMobile}
               />
             </Typography>
             <MultichainIndicator safes={sortedSafes} />
