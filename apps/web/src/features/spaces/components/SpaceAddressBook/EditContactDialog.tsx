@@ -17,22 +17,6 @@ type EditContactDialogProps = {
   onClose: () => void
 }
 
-// TODO: Replace with actual CGW API calls
-const createAddressBookEntry = async (address: string, name: string, chainId: string) => {
-  console.log('CREATE:', { address, name, chainId })
-  return
-}
-
-const updateAddressBookEntry = async (id: string, name: string) => {
-  console.log('UPDATE:', { id, name })
-  return
-}
-
-const deleteAddressBookEntry = async (id: string, chainId: string) => {
-  console.log('DELETE:', { id, chainId })
-  return
-}
-
 const EditContactDialog = ({ entry, onClose }: EditContactDialogProps) => {
   const [error, setError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -86,31 +70,8 @@ const EditContactDialog = ({ entry, onClose }: EditContactDialogProps) => {
     try {
       setIsSubmitting(true)
       trackEvent({ ...SPACE_EVENTS.ADD_ADDRESS_SUBMIT })
-
-      const selectedChainIds = data.networks.map((network) => network.chainId)
-      const originalChainIds = entry.networks.map((network) => network.chainId)
-
-      // Determine which networks need to be created, updated, or deleted
-      const toCreate = selectedChainIds.filter((chainId) => !originalChainIds.includes(chainId))
-      const toDelete = originalChainIds.filter((chainId) => !selectedChainIds.includes(chainId))
-      // Only update if the name has changed
-      const nameHasChanged = data.name !== entry.name
-      const toUpdate = nameHasChanged ? selectedChainIds.filter((chainId) => originalChainIds.includes(chainId)) : []
-
-      const createPromises = toCreate.map((chainId) => createAddressBookEntry(data.address, data.name, chainId))
-      const updatePromises = toUpdate.map((chainId) => {
-        const networkEntry = entry.networks.find((network) => network.chainId === chainId)
-        if (!networkEntry) return Promise.resolve(null)
-        return updateAddressBookEntry(networkEntry.id, data.name)
-      })
-      const deletePromises = toDelete.map((chainId) => {
-        const networkEntry = entry.networks.find((network) => network.chainId === chainId)
-        if (!networkEntry) return Promise.resolve(true)
-        return deleteAddressBookEntry(networkEntry.id, chainId)
-      })
-
-      await Promise.all([...createPromises, ...updatePromises, ...deletePromises])
-
+      // TODO: handle edit contact submission
+      console.log(data)
       handleClose()
     } catch (error) {
       setError('Something went wrong. Please try again.')
