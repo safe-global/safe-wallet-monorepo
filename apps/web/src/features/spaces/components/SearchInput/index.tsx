@@ -9,13 +9,14 @@ interface SearchInputProps {
   debounceTime?: number
 }
 
-const SearchInput = ({ placeholder = 'Search', onSearch, debounceTime = 300 }: SearchInputProps) => {
+const SearchInput = ({ onSearch, debounceTime = 300 }: SearchInputProps) => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const handleSearch = useCallback(debounce(onSearch, debounceTime), [onSearch, debounceTime])
 
   return (
     <TextField
-      placeholder={placeholder}
+      aria-label="Search"
+      placeholder="Search"
       variant="filled"
       hiddenLabel
       onChange={(e) => {
@@ -24,7 +25,7 @@ const SearchInput = ({ placeholder = 'Search', onSearch, debounceTime = 300 }: S
       InputProps={{
         startAdornment: (
           <InputAdornment position="start">
-            <SvgIcon component={SearchIcon} inheritViewBox color="border" fontSize="small" />
+            <SvgIcon component={SearchIcon} inheritViewBox color="border" fontSize="small" data-testid="search-icon" />
           </InputAdornment>
         ),
         disableUnderline: true,

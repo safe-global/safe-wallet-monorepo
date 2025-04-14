@@ -43,7 +43,7 @@ const SpaceSafeAccounts = () => {
         flexWrap="nowrap"
         flexDirection={{ xs: 'column-reverse', md: 'row' }}
       >
-        <SearchInput onSearch={setSearchQuery} placeholder="Search accounts" />
+        <SearchInput onSearch={setSearchQuery} />
 
         {isAdmin && (
           <Track {...SPACE_EVENTS.ADD_ACCOUNTS_MODAL} label={SPACE_LABELS.accounts_page}>
