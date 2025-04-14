@@ -19,7 +19,7 @@ describe('FiatChange', () => {
 
     render(<FiatChange balanceItem={mockBalance} />)
 
-    const chip = screen.getByText('5%')
+    const chip = screen.getByText('5.00%')
     expect(chip).toBeInTheDocument()
     expect(chip).toHaveStyle({ backgroundColor: 'success.background', color: 'success.main' })
   })
@@ -31,7 +31,7 @@ describe('FiatChange', () => {
 
     render(<FiatChange balanceItem={mockBalance} />)
 
-    const chip = screen.getByText('3%')
+    const chip = screen.getByText('3.00%')
     expect(chip).toBeInTheDocument()
     expect(chip).toHaveStyle({ backgroundColor: 'error.background', color: 'error.main' })
   })
@@ -43,7 +43,7 @@ describe('FiatChange', () => {
 
     render(<FiatChange balanceItem={mockBalance} />)
 
-    const chip = screen.getByText('0%')
+    const chip = screen.getByText('0.00%')
     expect(chip).toBeInTheDocument()
     expect(chip).toHaveStyle({ backgroundColor: 'default', color: 'default' })
   })
