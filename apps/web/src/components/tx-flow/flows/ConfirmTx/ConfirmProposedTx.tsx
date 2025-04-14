@@ -19,11 +19,13 @@ const SIGN_EXECUTE_TEXT = 'Sign or immediately execute this transaction.'
 
 const ConfirmProposedTx = ({ txNonce, ...props }: ConfirmProposedTxProps): ReactElement => {
   const chainId = useChainId()
-  const { setSafeTx, setSafeTxError, setNonce } = useContext(SafeTxContext)
+  const { setSafeTx, setSafeTxError, setNonce, setIsReadOnly } = useContext(SafeTxContext)
 
   useEffect(() => {
     txNonce !== undefined && setNonce(txNonce)
-  }, [setNonce, txNonce])
+    // Data of transactions in the queue should never be editable
+    setIsReadOnly(true)
+  }, [setNonce, txNonce, setIsReadOnly])
 
   useEffect(() => {
     createExistingTx(chainId, props.txId).then(setSafeTx).catch(setSafeTxError)
