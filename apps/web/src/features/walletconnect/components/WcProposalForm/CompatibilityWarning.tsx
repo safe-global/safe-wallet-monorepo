@@ -30,7 +30,7 @@ export const CompatibilityWarning = ({
             Supported networks
           </Typography>
 
-          <Stack direction="row">
+          <Stack direction="row" flexWrap="wrap" justifyContent="center" className={css.chainContainer}>
             {chainIds.map((chainId) => (
               <ChainIndicator inline chainId={chainId} key={chainId} className={css.chain} />
             ))}
