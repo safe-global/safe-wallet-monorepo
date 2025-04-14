@@ -60,10 +60,6 @@ const NetworkMultiSelectorInput = ({
     }
   }, [isAllSelected, handleChange, configs])
 
-  const handleDeleteAll = useCallback(() => {
-    handleChange([])
-  }, [handleChange])
-
   const options = showSelectAll ? [SELECT_ALL_OPTION, ...configs] : configs
 
   return (
