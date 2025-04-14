@@ -32,8 +32,7 @@ const ContactsList = ({ contactItems }: { contactItems: ContactItem[] }) => {
         display: 'flex',
         flexDirection: 'column',
         gap: 1,
-        maxHeight: 400,
-        minHeight: 400,
+        height: 400,
         overflow: 'auto',
       }}
     >
