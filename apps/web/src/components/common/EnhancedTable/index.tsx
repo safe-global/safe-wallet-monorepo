@@ -19,7 +19,7 @@ import { Collapse } from '@mui/material'
 
 type EnhancedCell = {
   content: ReactNode
-  rawValue: string | number
+  rawValue: string | number | null
   sticky?: boolean
 }
 
@@ -38,20 +38,29 @@ type EnhancedHeadCell = {
   sticky?: boolean
 }
 
-function descendingComparator(a: EnhancedRow, b: EnhancedRow, orderBy: string) {
-  if (b.cells[orderBy].rawValue < a.cells[orderBy].rawValue) {
+function descendingComparator(a: string | number, b: string | number) {
+  if (b < a) {
     return -1
   }
-  if (b.cells[orderBy].rawValue > a.cells[orderBy].rawValue) {
+  if (b > a) {
     return 1
   }
   return 0
 }
 
 function getComparator(order: SortDirection, orderBy: string) {
-  return order === 'desc'
-    ? (a: any, b: any) => descendingComparator(a, b, orderBy)
-    : (a: any, b: any) => -descendingComparator(a, b, orderBy)
+  return (a: EnhancedRow, b: EnhancedRow) => {
+    const aValue = a.cells[orderBy].rawValue
+    const bValue = b.cells[orderBy].rawValue
+
+    // Handle null/undefined values - always sort to end
+    if (aValue == null) return 1
+    if (bValue == null) return -1
+    if (aValue == null && bValue == null) return 0
+
+    // Use existing comparator for non-null values
+    return order === 'desc' ? descendingComparator(aValue, bValue) : -descendingComparator(aValue, bValue)
+  }
 }
 
 type EnhancedTableHeadProps = {
@@ -88,7 +97,7 @@ function EnhancedTableHead(props: EnhancedTableHeadProps) {
                   active={orderBy === headCell.id}
                   direction={orderBy === headCell.id ? order : 'asc'}
                   onClick={createSortHandler(headCell.id)}
-                  sx={{ mr: [0, '-26px'] }}
+                  sx={{ mr: [0, '-26px'], textWrap: 'nowrap' }}
                 >
                   {headCell.label}
                   {orderBy === headCell.id ? (
