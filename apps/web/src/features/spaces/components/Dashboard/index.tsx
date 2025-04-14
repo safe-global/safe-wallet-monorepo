@@ -1,6 +1,6 @@
 import MembersCard from '@/features/spaces/components/Dashboard/MembersCard'
-import NewFeaturesCard from '@/features/spaces/components/Dashboard/NewFeaturesCard'
 import SpacesCTACard from '@/features/spaces/components/Dashboard/SpacesCTACard'
+import AddressBookCard from '@/features/spaces/components/Dashboard/ImportAddressBookCard'
 import { Card, Grid2, Stack, Typography } from '@mui/material'
 import Grid from '@mui/material/Grid2'
 import { useSpaceSafes } from '@/features/spaces/hooks/useSpaceSafes'
@@ -105,16 +105,17 @@ const SpaceDashboard = () => {
             <Grid size={12}>
               <AddAccountsCard />
             </Grid>
+
+            <Grid2 size={{ xs: 12, md: 4 }}>
+              <AddressBookCard />
+            </Grid2>
+
             <Grid size={{ xs: 12, md: 4 }}>
               <MembersCard />
             </Grid>
 
             <Grid2 size={{ xs: 12, md: 4 }}>
               <SpacesCTACard />
-            </Grid2>
-
-            <Grid2 size={{ xs: 12, md: 4 }}>
-              <NewFeaturesCard />
             </Grid2>
           </Grid>
         </>
