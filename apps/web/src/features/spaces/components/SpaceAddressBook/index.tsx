@@ -8,6 +8,7 @@ import AddContact from './AddContact'
 import EmptyAddressBook from '@/features/spaces/components/SpaceAddressBook/EmptyAddressBook'
 import SpaceAddressBookTable from './SpaceAddressBookTable'
 import type { SpaceAddressBookEntry } from '../../types'
+import ImportAddressBook from '@/features/spaces/components/SpaceAddressBook/Import'
 
 const SpaceAddressBook = () => {
   const isAdmin = useIsAdmin()
@@ -88,9 +89,12 @@ const SpaceAddressBook = () => {
           size="small"
         />
         {isAdmin && (
-          <Track {...SPACE_EVENTS.ADD_ADDRESS}>
-            <AddContact />
-          </Track>
+          <Stack direction="row" gap={1}>
+            <ImportAddressBook />
+            <Track {...SPACE_EVENTS.ADD_ADDRESS}>
+              <AddContact />
+            </Track>
+          </Stack>
         )}
       </Stack>
 

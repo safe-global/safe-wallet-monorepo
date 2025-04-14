@@ -67,9 +67,7 @@ const SafesList = ({ safes }: { safes: AllSafeItems }) => {
   const multiChainSpaceSafes = spaceSafes.filter(isMultiChainSafeItem)
 
   return (
-    <List
-      sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 1, maxHeight: 400, minHeight: 400, overflow: 'auto' }}
-    >
+    <List sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 1, height: 400, overflow: 'auto' }}>
       {safes.map((safe, index) => {
         if (isMultiChainSafeItem(safe)) {
           const parentSafeId = getMultiChainSafeId(safe)
