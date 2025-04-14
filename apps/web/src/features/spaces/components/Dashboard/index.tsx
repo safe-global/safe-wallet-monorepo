@@ -117,10 +117,6 @@ const SpaceDashboard = () => {
             <Grid2 size={{ xs: 12, md: 4 }}>
               <SpacesCTACard />
             </Grid2>
-
-            {/* <Grid2 size={{ xs: 12, md: 4 }}>
-              <NewFeaturesCard />
-            </Grid2> */}
           </Grid>
         </>
       )}
