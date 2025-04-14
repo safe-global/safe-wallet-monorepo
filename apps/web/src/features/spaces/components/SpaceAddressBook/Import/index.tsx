@@ -1,7 +1,7 @@
 import ImportIcon from '@/public/images/common/import.svg'
 import { Button } from '@mui/material'
 import { useState } from 'react'
-import ImportContactsDialog from '@/features/spaces/components/SpaceAddressBook/Import/ImportContactsDialog'
+import ImportAddressBookDialog from '@/features/spaces/components/SpaceAddressBook/Import/ImportAddressBookDialog'
 
 const ImportAddressBook = () => {
   const [open, setOpen] = useState(false)
@@ -11,7 +11,7 @@ const ImportAddressBook = () => {
       <Button variant="text" size="small" startIcon={<ImportIcon />} onClick={() => setOpen(true)}>
         Import
       </Button>
-      {open && <ImportContactsDialog handleClose={() => setOpen(false)} />}
+      {open && <ImportAddressBookDialog handleClose={() => setOpen(false)} />}
     </>
   )
 }

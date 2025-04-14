@@ -14,37 +14,24 @@ import {
 } from '@mui/material'
 
 import ModalDialog from '@/components/common/ModalDialog'
-import ContactsList, {
-  type ContactItem,
-  getContactId,
-} from '@/features/spaces/components/SpaceAddressBook/Import/ContactsList'
+import ContactsList from '@/features/spaces/components/SpaceAddressBook/Import/ContactsList'
 import React, { useCallback, useMemo, useState } from 'react'
 import useAllAddressBooks from '@/hooks/useAllAddressBooks'
 import css from '@/features/spaces/components/AddAccounts/styles.module.css'
 import SearchIcon from '@/public/images/common/search.svg'
 import { debounce } from 'lodash'
-import { flattenAddressBook, useContactSearch } from '@/features/spaces/components/SpaceAddressBook/useContactSearch'
-
-const createContactItems = (data: ImportContactsFormValues) => {
-  return Object.entries(data.contacts)
-    .map(([contactItemId, name]) => {
-      const [chainId, address] = contactItemId.split(':')
-      if (!name) return
-
-      return {
-        chainId,
-        address,
-        name,
-      }
-    })
-    .filter(Boolean) as ContactItem[]
-}
+import { useContactSearch } from '@/features/spaces/components/SpaceAddressBook/useContactSearch'
+import {
+  createContactItems,
+  flattenAddressBook,
+  getContactId,
+} from '@/features/spaces/components/SpaceAddressBook/utils'
 
 export type ImportContactsFormValues = {
-  contacts: Record<string, string> // e.g. "1:0x123": "Alice"
+  contacts: Record<string, string | undefined> // e.g. "1:0x123": "Alice"
 }
 
-const ImportContactsDialog = ({ handleClose }: { handleClose: () => void }) => {
+const ImportAddressBookDialog = ({ handleClose }: { handleClose: () => void }) => {
   const [error, setError] = useState<string>()
   const [searchQuery, setSearchQuery] = useState('')
 
@@ -162,4 +149,4 @@ const ImportContactsDialog = ({ handleClose }: { handleClose: () => void }) => {
   )
 }
 
-export default ImportContactsDialog
+export default ImportAddressBookDialog

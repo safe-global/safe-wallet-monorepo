@@ -6,24 +6,8 @@ import ListItemButton from '@mui/material/ListItemButton'
 import ListItemIcon from '@mui/material/ListItemIcon'
 import ListItemText from '@mui/material/ListItemText'
 import { Controller, useFormContext, useWatch } from 'react-hook-form'
-import type { ImportContactsFormValues } from '@/features/spaces/components/SpaceAddressBook/Import/ImportContactsDialog'
-
-export const getContactId = (contact: ContactItem) => {
-  return `${contact.chainId}:${contact.address}`
-}
-
-const getSelectedAddresses = (contacts: ImportContactsFormValues['contacts']) => {
-  const selectedAddresses = new Set<string>()
-
-  Object.entries(contacts).forEach(([contactId, contactName]) => {
-    if (contactName) {
-      const [, address] = contactId.split(':')
-      selectedAddresses.add(address)
-    }
-  })
-
-  return selectedAddresses
-}
+import type { ImportContactsFormValues } from '@/features/spaces/components/SpaceAddressBook/Import/ImportAddressBookDialog'
+import { getSelectedAddresses, getContactId } from '@/features/spaces/components/SpaceAddressBook/utils'
 
 export type ContactItem = {
   chainId: string
