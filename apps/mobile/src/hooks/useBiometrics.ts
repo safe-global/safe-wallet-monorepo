@@ -163,16 +163,16 @@ export function useBiometrics() {
     [enableBiometrics, disableBiometrics],
   )
 
-  const getBiometricsButtonLabel = useCallback(() => {
+  const getBiometricsUIInfo = useCallback(() => {
     switch (biometricsType) {
       case 'FACE_ID':
-        return 'Enable Face ID'
+        return { label: 'Enable Face ID', icon: 'face-id' }
       case 'TOUCH_ID':
-        return 'Enable Touch ID'
+        return { label: 'Enable Touch ID', icon: 'fingerprint' }
       case 'FINGERPRINT':
-        return 'Enable Fingerprint'
+        return { label: 'Enable Fingerprint', icon: 'fingerprint' }
       default:
-        return 'Enable Biometrics'
+        return { label: 'Enable Biometrics', icon: 'fingerprint' }
     }
   }, [biometricsType])
 
@@ -192,7 +192,7 @@ export function useBiometrics() {
     isBiometricsEnabled: isEnabled,
     biometricsType,
     isLoading,
-    getBiometricsButtonLabel,
+    getBiometricsUIInfo,
     checkBiometricsOSSettingsStatus,
   }
 }
