@@ -210,6 +210,7 @@ export const tokenNames = {
   wrappedEther: 'Wrapped Ether',
   sepoliaEther: 'Sepolia Ether',
   qaToken: 'QAtest10',
+  cow: 'CoW Protocol Token',
 }
 
 export const addressBookErrrMsg = {

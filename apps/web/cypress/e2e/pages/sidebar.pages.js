@@ -687,7 +687,7 @@ export function checkNetworksInRange(expectedString, expectedCount, direction = 
 
   return cy
     .get(startSelector)
-  [traversalMethod](endSelector, 'li')
+    [traversalMethod](endSelector, 'li')
     .then((liElements) => {
       expect(liElements.length).to.equal(expectedCount)
       const optionTexts = [...liElements].map((li) => li.innerText)
