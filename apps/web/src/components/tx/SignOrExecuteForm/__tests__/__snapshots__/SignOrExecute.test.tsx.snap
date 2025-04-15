@@ -41,9 +41,9 @@ exports[`SignOrExecute should display a confirmation screen 1`] = `
                   class="avatarContainer"
                   style="width: 20px; height: 20px;"
                 >
-                  <span
-                    class="MuiSkeleton-root MuiSkeleton-circular MuiSkeleton-pulse css-143xw5x-MuiSkeleton-root"
-                    style="width: 20px; height: 20px;"
+                  <div
+                    class="icon"
+                    style="background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4IDgiIHNoYXBlLXJlbmRlcmluZz0ib3B0aW1pemVTcGVlZCIgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0Ij48cGF0aCBmaWxsPSJoc2woOTIgOTYlIDQzJSkiIGQ9Ik0wLDBIOFY4SDB6Ii8+PHBhdGggZmlsbD0iaHNsKDMxMCA4NCUgMzglKSIgZD0iTTEsMGgxdjFoLTF6TTYsMGgxdjFoLTF6TTIsMGgxdjFoLTF6TTUsMGgxdjFoLTF6TTMsMGgxdjFoLTF6TTQsMGgxdjFoLTF6TTAsMWgxdjFoLTF6TTcsMWgxdjFoLTF6TTEsMWgxdjFoLTF6TTYsMWgxdjFoLTF6TTIsMWgxdjFoLTF6TTUsMWgxdjFoLTF6TTMsMWgxdjFoLTF6TTQsMWgxdjFoLTF6TTAsMmgxdjFoLTF6TTcsMmgxdjFoLTF6TTIsMmgxdjFoLTF6TTUsMmgxdjFoLTF6TTMsMmgxdjFoLTF6TTQsMmgxdjFoLTF6TTMsM2gxdjFoLTF6TTQsM2gxdjFoLTF6TTAsNGgxdjFoLTF6TTcsNGgxdjFoLTF6TTEsNGgxdjFoLTF6TTYsNGgxdjFoLTF6TTIsNGgxdjFoLTF6TTUsNGgxdjFoLTF6TTEsNWgxdjFoLTF6TTYsNWgxdjFoLTF6TTIsNWgxdjFoLTF6TTUsNWgxdjFoLTF6TTMsNWgxdjFoLTF6TTQsNWgxdjFoLTF6TTIsNmgxdjFoLTF6TTUsNmgxdjFoLTF6TTMsNmgxdjFoLTF6TTQsNmgxdjFoLTF6TTMsN2gxdjFoLTF6TTQsN2gxdjFoLTF6Ii8+PHBhdGggZmlsbD0iaHNsKDM1MSA2MSUgNjUlKSIgZD0iTTMsNGgxdjFoLTF6TTQsNGgxdjFoLTF6TTAsNWgxdjFoLTF6TTcsNWgxdjFoLTF6TTAsN2gxdjFoLTF6TTcsN2gxdjFoLTF6Ii8+PC9zdmc+); width: 20px; height: 20px;"
                   />
                 </div>
                 <div
@@ -61,7 +61,9 @@ exports[`SignOrExecute should display a confirmation screen 1`] = `
                         data-mui-internal-clone-element="true"
                         style="cursor: pointer;"
                       >
-                        <span />
+                        <span>
+                          0xE20CcFf2c38Ef3b64109361D7b7691ff2c7D5f67
+                        </span>
                       </span>
                     </div>
                     <span
@@ -204,9 +206,9 @@ exports[`SignOrExecute should display a confirmation screen 1`] = `
                                   class="avatarContainer"
                                   style="width: 20px; height: 20px;"
                                 >
-                                  <span
-                                    class="MuiSkeleton-root MuiSkeleton-circular MuiSkeleton-pulse css-143xw5x-MuiSkeleton-root"
-                                    style="width: 20px; height: 20px;"
+                                  <div
+                                    class="icon"
+                                    style="background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4IDgiIHNoYXBlLXJlbmRlcmluZz0ib3B0aW1pemVTcGVlZCIgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0Ij48cGF0aCBmaWxsPSJoc2woOTIgOTYlIDQzJSkiIGQ9Ik0wLDBIOFY4SDB6Ii8+PHBhdGggZmlsbD0iaHNsKDMxMCA4NCUgMzglKSIgZD0iTTEsMGgxdjFoLTF6TTYsMGgxdjFoLTF6TTIsMGgxdjFoLTF6TTUsMGgxdjFoLTF6TTMsMGgxdjFoLTF6TTQsMGgxdjFoLTF6TTAsMWgxdjFoLTF6TTcsMWgxdjFoLTF6TTEsMWgxdjFoLTF6TTYsMWgxdjFoLTF6TTIsMWgxdjFoLTF6TTUsMWgxdjFoLTF6TTMsMWgxdjFoLTF6TTQsMWgxdjFoLTF6TTAsMmgxdjFoLTF6TTcsMmgxdjFoLTF6TTIsMmgxdjFoLTF6TTUsMmgxdjFoLTF6TTMsMmgxdjFoLTF6TTQsMmgxdjFoLTF6TTMsM2gxdjFoLTF6TTQsM2gxdjFoLTF6TTAsNGgxdjFoLTF6TTcsNGgxdjFoLTF6TTEsNGgxdjFoLTF6TTYsNGgxdjFoLTF6TTIsNGgxdjFoLTF6TTUsNGgxdjFoLTF6TTEsNWgxdjFoLTF6TTYsNWgxdjFoLTF6TTIsNWgxdjFoLTF6TTUsNWgxdjFoLTF6TTMsNWgxdjFoLTF6TTQsNWgxdjFoLTF6TTIsNmgxdjFoLTF6TTUsNmgxdjFoLTF6TTMsNmgxdjFoLTF6TTQsNmgxdjFoLTF6TTMsN2gxdjFoLTF6TTQsN2gxdjFoLTF6Ii8+PHBhdGggZmlsbD0iaHNsKDM1MSA2MSUgNjUlKSIgZD0iTTMsNGgxdjFoLTF6TTQsNGgxdjFoLTF6TTAsNWgxdjFoLTF6TTcsNWgxdjFoLTF6TTAsN2gxdjFoLTF6TTcsN2gxdjFoLTF6Ii8+PC9zdmc+); width: 20px; height: 20px;"
                                   />
                                 </div>
                                 <div
@@ -224,7 +226,9 @@ exports[`SignOrExecute should display a confirmation screen 1`] = `
                                         data-mui-internal-clone-element="true"
                                         style="cursor: pointer;"
                                       >
-                                        <span />
+                                        <span>
+                                          0xE20CcFf2c38Ef3b64109361D7b7691ff2c7D5f67
+                                        </span>
                                       </span>
                                     </div>
                                     <span

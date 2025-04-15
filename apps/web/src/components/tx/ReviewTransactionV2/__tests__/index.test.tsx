@@ -22,29 +22,22 @@ describe('ReviewTransaction', () => {
     jest.spyOn(useTxPreviewHooks, 'default').mockReturnValue([
       {
         txInfo: {},
-        txData: {
-          to: {},
-        },
+        txData: { to: { value: '0xE20CcFf2c38Ef3b64109361D7b7691ff2c7D5f67' } },
       } as TransactionPreview,
       undefined,
       false,
     ])
 
-    const { container } = render(
+    const { container, getByText } = render(
       <SlotProvider>
-        <SafeTxContext.Provider
-          value={
-            {
-              safeTx: createSafeTx(),
-            } as SafeTxContextParams
-          }
-        >
+        <SafeTxContext.Provider value={{ safeTx: createSafeTx() } as SafeTxContextParams}>
           <ReviewTransaction onSubmit={jest.fn()} />
         </SafeTxContext.Provider>
         ,
       </SlotProvider>,
     )
 
+    expect(getByText("You're about to confirm this transaction.")).toBeInTheDocument()
     expect(container).toMatchSnapshot()
   })
 
