@@ -9,6 +9,7 @@ import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import NetworkMultiSelectorInput from '@/components/common/NetworkSelector/NetworkMultiSelectorInput'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
+import useChains from '@/hooks/useChains'
 
 export type ContactField = {
   name: string
@@ -16,16 +17,17 @@ export type ContactField = {
   networks: ChainInfo[]
 }
 
-const defaultValues = {
-  name: '',
-  address: '',
-  networks: [],
-}
-
 const AddContact = () => {
   const [open, setOpen] = useState(false)
   const [error, setError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const { configs: allNetworks } = useChains()
+
+  const defaultValues = {
+    name: '',
+    address: '',
+    networks: allNetworks,
+  }
 
   const methods = useForm<ContactField>({
     mode: 'onChange',
@@ -88,10 +90,10 @@ const AddContact = () => {
                   <Controller
                     name="networks"
                     control={control}
-                    defaultValue={[]}
                     render={({ field }) => (
                       <NetworkMultiSelectorInput
                         name="networks"
+                        showSelectAll
                         value={field.value || []}
                         error={!!errors.networks}
                         helperText={errors.networks ? 'Select at least one network' : ''}
