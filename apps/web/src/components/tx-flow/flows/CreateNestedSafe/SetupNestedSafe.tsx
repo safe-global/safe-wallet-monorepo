@@ -162,7 +162,7 @@ function AssetInputs({ name }: { name: SetupNestedSafeFormFields.assets }) {
           )
         })
         return (
-          <Box className={css.assetInput} key={field.id}>
+          <Box data-testid="asset-data" className={css.assetInput} key={field.id}>
             <FormControl className={classNames(tokenInputCss.outline, { [tokenInputCss.error]: isError })} fullWidth>
               <InputLabel shrink required className={tokenInputCss.label}>
                 {label}
@@ -189,11 +189,12 @@ function AssetInputs({ name }: { name: SetupNestedSafeFormFields.assets }) {
                     }
                     return (
                       <NumberField
+                        data-testid="amount-input"
                         variant="standard"
                         InputProps={{
                           disableUnderline: true,
                           endAdornment: (
-                            <Button className={tokenInputCss.max} onClick={onClickMax}>
+                            <Button data-testid="max-button" className={tokenInputCss.max} onClick={onClickMax}>
                               Max
                             </Button>
                           ),
@@ -215,6 +216,7 @@ function AssetInputs({ name }: { name: SetupNestedSafeFormFields.assets }) {
                   render={({ field }) => {
                     return (
                       <TextField
+                        data-testid="token-selector"
                         select
                         variant="standard"
                         InputProps={{
@@ -239,7 +241,7 @@ function AssetInputs({ name }: { name: SetupNestedSafeFormFields.assets }) {
               </div>
             </FormControl>
 
-            <IconButton onClick={() => fieldArray.remove(index)}>
+            <IconButton data-testid="remove-asset-icon" onClick={() => fieldArray.remove(index)}>
               <SvgIcon component={DeleteIcon} inheritViewBox />
             </IconButton>
           </Box>
@@ -247,6 +249,7 @@ function AssetInputs({ name }: { name: SetupNestedSafeFormFields.assets }) {
       })}
 
       <Button
+        data-testid="fund-asset-button"
         variant="text"
         onClick={() => {
           fieldArray.append(defaultAsset, { shouldFocus: true })

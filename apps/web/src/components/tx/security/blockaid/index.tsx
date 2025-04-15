@@ -96,7 +96,7 @@ const ResultDescription = ({
 
 const BlockaidError = () => {
   return (
-    <Alert severity="warning" className={css.customAlert}>
+    <Alert data-testid="blockaid-error" severity="warning" className={css.customAlert}>
       <AlertTitle>
         <Typography
           variant="subtitle1"

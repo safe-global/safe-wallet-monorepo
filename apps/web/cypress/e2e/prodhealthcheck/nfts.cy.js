@@ -80,6 +80,7 @@ describe('[PROD] NFTs tests', () => {
     nfts.typeRecipientAddress(staticSafes.SEP_STATIC_SAFE_1)
     createTx.changeNonce(1)
     nfts.clikOnNextBtn()
+    createTx.clickOnNoLaterOption()
     createTx.clickOnContinueSignTransactionBtn()
     createTx.clickOnAcknowledgement()
     createTx.clickOnSignTransactionBtn()

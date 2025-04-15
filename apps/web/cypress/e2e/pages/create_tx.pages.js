@@ -724,6 +724,10 @@ export function changeNonce(value) {
   cy.get(nonceInput).clear().type(value, { force: true })
 }
 
+export function hasNonce() {
+  cy.get(nonceInput).invoke('val').should('match', /^\d+$/)
+}
+
 export function verifyNonceInputValue(value) {
   cy.get(nonceInput).should('have.value', value)
 }

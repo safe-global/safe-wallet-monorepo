@@ -24,7 +24,7 @@ describe('Twaps tests', { defaultCommandTimeout: 30000 }, () => {
   it('Verify list of tokens with balances is displayed in the token selector', () => {
     const tokens = [
       { name: swaps.swapTokenNames.eth, balance: '0' },
-      { name: swaps.swapTokenNames.cow, balance: '750' },
+      { name: swaps.swapTokenNames.cow, balance: '749' },
       { name: swaps.swapTokenNames.daiTest, balance: '0' },
       { name: swaps.swapTokenNames.gnoTest, balance: '0' },
       { name: swaps.swapTokenNames.uni, balance: '0' },
@@ -59,7 +59,7 @@ describe('Twaps tests', { defaultCommandTimeout: 30000 }, () => {
       swaps.selectInputCurrency(swaps.swapTokens.cow)
       swaps.setInputValue(500)
       swaps.selectOutputCurrency(swaps.swapTokens.dai)
-      swaps.checkTokenBalanceAndValue('input', '750 COW', tokenValue)
+      swaps.checkTokenBalanceAndValue('input', '749 COW', tokenValue)
     })
   })
 
@@ -73,7 +73,7 @@ describe('Twaps tests', { defaultCommandTimeout: 30000 }, () => {
     main.getIframeBody(iframeSelector).within(() => {
       swaps.selectInputCurrency(swaps.swapTokens.cow)
       swaps.clickOnMaxBtn()
-      swaps.checkInputValue('input', '750')
+      swaps.checkInputValue('input', '749')
     })
   })
 })

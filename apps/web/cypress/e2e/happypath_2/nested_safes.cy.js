@@ -6,6 +6,7 @@ import * as txs from '../pages/transactions.page.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as wallet from '../../support/utils/wallet.js'
 import * as createTx from '../pages/create_tx.pages.js'
+import * as owner from '../pages/owners.pages'
 
 let staticSafes = []
 const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
@@ -18,7 +19,7 @@ describe('Nested safes happy path tests', () => {
     staticSafes = await getSafes(CATEGORIES.static)
   })
 
-  it('Verify a nested safe can be created and seen in queue', () => {
+  it('Verify that batch tx appears in the Queue with create proxy action', () => {
     const safe = 'Created safe'
 
     cy.visit(constants.transactionQueueUrl + staticSafes.SEP_STATIC_SAFE_39)
@@ -28,7 +29,11 @@ describe('Nested safes happy path tests', () => {
 
     sideBar.clickOnOpenNestedSafeListBtn()
     nsafes.clickOnAddNestedSafeBtn()
+    createTx.hasNonce()
     createTx.changeNonce(3)
+    nsafes.nameInputHasPlaceholder()
+    nsafes.typeName(main.generateRandomString(51))
+    owner.verifyErrorMsgInvalidAddress(constants.addressBookErrrMsg.exceedChars)
     nsafes.typeName(safe)
     nsafes.clickOnAddNextBtn()
     txs.selectExecuteLater()
@@ -36,7 +41,11 @@ describe('Nested safes happy path tests', () => {
     createTx.clickOnAcknowledgement()
     createTx.clickOnSignTransactionBtn()
     createTx.clickViewTransaction()
-    main.verifyValuesExist(createTx.transactionItem, [createTx.tx_status.execute])
+    main.verifyValuesExist(createTx.transactionItem, [
+      createTx.tx_status.execute,
+      nsafes.nonfundAssetsActions[0],
+      nsafes.nonfundAssetsActions[1],
+    ])
     sideBar.clickOnOpenNestedSafeListBtn()
     sideBar.checkSafesCountInPopverList(1)
     sideBar.clickOnSafeInPopover(nestedSafe1Short)
