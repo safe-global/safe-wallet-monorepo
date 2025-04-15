@@ -22,13 +22,15 @@ describe('ReviewTransaction', () => {
     jest.spyOn(useTxPreviewHooks, 'default').mockReturnValue([
       {
         txInfo: {},
-        txData: {},
+        txData: {
+          to: {},
+        },
       } as TransactionPreview,
       undefined,
       false,
     ])
 
-    const { container, getByTestId } = render(
+    const { container } = render(
       <SlotProvider>
         <SafeTxContext.Provider
           value={
@@ -43,7 +45,6 @@ describe('ReviewTransaction', () => {
       </SlotProvider>,
     )
 
-    expect(getByTestId('continue-sign-btn')).toBeInTheDocument()
     expect(container).toMatchSnapshot()
   })
 

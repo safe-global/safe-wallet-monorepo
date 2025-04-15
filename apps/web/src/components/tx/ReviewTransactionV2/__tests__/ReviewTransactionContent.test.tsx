@@ -1,8 +1,5 @@
-import * as hooks from '@/components/tx/SignOrExecuteForm/hooks'
-import * as execThroughRoleHooks from '@/components/tx-flow/actions/ExecuteThroughRole/ExecuteThroughRoleForm/hooks'
 import { safeTxBuilder } from '@/tests/builders/safeTx'
 import { render } from '@/tests/test-utils'
-import { fireEvent } from '@testing-library/react'
 import type { TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
 import { ReviewTransactionContent } from '../ReviewTransactionContent'
 import * as useSafeInfo from '@/hooks/useSafeInfo'
@@ -167,25 +164,7 @@ describe('ReviewTransactionContent', () => {
     ).toBeInTheDocument()
   })
 
-  describe('Existing transaction', () => {
-    it('should display radio options to sign or execute if both are possible', () => {
-      jest.spyOn(hooks, 'useValidateNonce').mockReturnValue(true)
-
-      const { getByText } = renderReviewTransactionContent({ txDetails }, { isExecutable: true })
-
-      expect(getByText('Would you like to execute the transaction immediately?')).toBeInTheDocument()
-    })
-  })
-
   describe('New transaction', () => {
-    it('should display radio options to sign or execute if both are possible', () => {
-      jest.spyOn(hooks, 'useValidateNonce').mockReturnValueOnce(true)
-
-      const { getByText } = renderReviewTransactionContent({ txDetails }, { isExecutable: true })
-
-      expect(getByText('Would you like to execute the transaction immediately?')).toBeInTheDocument()
-    })
-
     describe('Batch', () => {
       const safe = extendedSafeInfoBuilder().build()
       const safeInfo = { safe, safeAddress: safe.address.value }
@@ -220,37 +199,6 @@ describe('ReviewTransactionContent', () => {
         expect(button).toBeInTheDocument()
       })
     })
-  })
-
-  it('should not display radio options if execution is the only option', () => {
-    jest.spyOn(execThroughRoleHooks, 'useRoles').mockReturnValue([])
-
-    const { queryByText } = renderReviewTransactionContent({ txDetails }, { onlyExecute: true })
-    expect(queryByText('Would you like to execute the transaction immediately?')).not.toBeInTheDocument()
-  })
-
-  it('should display a sign/execute title if that option is selected', () => {
-    jest.spyOn(hooks, 'useValidateNonce').mockReturnValue(true)
-
-    const { getByTestId, getByText } = renderReviewTransactionContent(
-      { txDetails },
-      { isExecutable: true, txId: '123' },
-    )
-
-    expect(getByText('Would you like to execute the transaction immediately?')).toBeInTheDocument()
-
-    const executeCheckbox = getByTestId('execute-checkbox')
-    const signCheckbox = getByTestId('sign-checkbox')
-
-    expect(getByText("You're about to execute this transaction.")).toBeInTheDocument()
-
-    fireEvent.click(signCheckbox)
-
-    expect(getByText("You're about to confirm this transaction.")).toBeInTheDocument()
-
-    fireEvent.click(executeCheckbox)
-
-    expect(getByText("You're about to execute this transaction.")).toBeInTheDocument()
   })
 
   it('should not display safeTxError message for valid transactions', () => {

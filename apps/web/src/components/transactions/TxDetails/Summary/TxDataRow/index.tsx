@@ -38,7 +38,7 @@ export const generateDataRowValue = (
       return <HexEncodedData highlightFirstBytes={false} limit={66} hexData={value} />
     default:
       return (
-        <Typography variant="body2" sx={{ wordBreak: 'break-all' }}>
+        <Typography variant="body2" sx={{ wordBreak: 'break-all' }} component="span">
           {value}
         </Typography>
       )

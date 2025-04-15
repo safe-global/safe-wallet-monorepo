@@ -1,6 +1,5 @@
 import TxCard from '@/components/tx-flow/common/TxCard'
-import { Divider, Grid2 as Grid, Stack, StepIcon, Typography } from '@mui/material'
-import commonCss from '@/components/tx-flow/common/styles.module.css'
+import { Grid2 as Grid, Stack, StepIcon, Typography } from '@mui/material'
 import ExternalLink from '@/components/common/ExternalLink'
 import { type PropsWithChildren, useContext } from 'react'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
@@ -100,8 +99,6 @@ export const ConfirmTxReceipt = ({ children, onSubmit }: PropsWithChildren<{ onS
         </Grid>
 
         {children}
-
-        <Divider className={commonCss.nestedDivider} sx={{ pt: 3 }} />
 
         <Slot name={SlotName.Submit} onSubmitSuccess={onSubmit}>
           <Sign

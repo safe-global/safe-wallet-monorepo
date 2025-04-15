@@ -21,7 +21,9 @@ describe('ReviewTransaction', () => {
     jest.spyOn(useTxPreviewHooks, 'default').mockReturnValue([
       {
         txInfo: {},
-        txData: {},
+        txData: {
+          to: {},
+        },
       } as TransactionPreview,
       undefined,
       false,

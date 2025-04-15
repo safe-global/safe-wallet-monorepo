@@ -16,11 +16,9 @@ type MethodDetailsProps = {
 export const MethodDetails = ({ data, addressInfoIndex }: MethodDetailsProps): ReactElement | null => {
   if (!data.parameters?.length) {
     return (
-      <>
-        <Typography color="text.secondary" variant="body2">
-          No parameters
-        </Typography>
-      </>
+      <Typography color="text.secondary" variant="body2">
+        No parameters
+      </Typography>
     )
   }
 
