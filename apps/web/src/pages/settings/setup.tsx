@@ -1,6 +1,6 @@
 import type { NextPage } from 'next'
 import Head from 'next/head'
-import { Grid, Paper, Skeleton, SvgIcon, Tooltip, Typography } from '@mui/material'
+import { Grid, Paper, Skeleton, SvgIcon, Tooltip, Typography, Box } from '@mui/material'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import { ContractVersion } from '@/components/settings/ContractVersion'
 import { OwnerList } from '@/components/settings/owner/OwnerList'
@@ -61,9 +61,20 @@ const Setup: NextPage = () => {
         </Paper>
 
         <Paper sx={{ p: 4, mb: 2 }}>
-          <OwnerList />
+          <Grid container spacing={3}>
+            <Grid item lg={4} xs={12}>
+              <Typography variant="h4" fontWeight={700}>
+                Members
+              </Typography>
+            </Grid>
 
-          <ProposersList />
+            <Grid item xs>
+              <Box display="flex" flexDirection="column" gap={2}>
+                <OwnerList />
+                <ProposersList />
+              </Box>
+            </Grid>
+          </Grid>
 
           <RequiredConfirmation threshold={threshold} owners={ownerLength} />
         </Paper>
