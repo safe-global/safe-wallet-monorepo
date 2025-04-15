@@ -1,5 +1,4 @@
-import { InputAdornment, Stack, SvgIcon, TextField, Typography } from '@mui/material'
-import SearchIcon from '@/public/images/common/search.svg'
+import { Stack, Typography } from '@mui/material'
 import { useIsInvited, useIsAdmin } from '@/features/spaces/hooks/useSpaceMembers'
 import PreviewInvite from '../InviteBanner/PreviewInvite'
 import Track from '@/components/common/Track'
@@ -9,15 +8,14 @@ import EmptyAddressBook from '@/features/spaces/components/SpaceAddressBook/Empt
 import SpaceAddressBookTable from './SpaceAddressBookTable'
 import type { SpaceAddressBookEntry } from '../../types'
 import ImportAddressBook from '@/features/spaces/components/SpaceAddressBook/Import'
+import SearchInput from '@/features/spaces/components/SearchInput'
+import useAddressBookSearch from '@/features/spaces/hooks/useAddressBookSearch'
+import { useState } from 'react'
 
 const SpaceAddressBook = () => {
   const isAdmin = useIsAdmin()
   const isInvited = useIsInvited()
-
-  const handleSearch = (value: string) => {
-    // TODO: implement search
-    console.log(value)
-  }
+  const [searchQuery, setSearchQuery] = useState('')
 
   // TODO: Get data from CGW
   const entries: SpaceAddressBookEntry[] = [
@@ -55,6 +53,8 @@ const SpaceAddressBook = () => {
     },
   ]
 
+  const filteredAddressBook = useAddressBookSearch(entries, searchQuery)
+
   return (
     <>
       {isInvited && <PreviewInvite />}
@@ -71,23 +71,8 @@ const SpaceAddressBook = () => {
         gap={2}
         flexDirection={{ xs: 'column-reverse', md: 'row' }}
       >
-        <TextField
-          placeholder="Search"
-          variant="filled"
-          hiddenLabel
-          onChange={(e) => {
-            handleSearch(e.target.value)
-          }}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SvgIcon component={SearchIcon} inheritViewBox color="border" fontSize="small" />
-              </InputAdornment>
-            ),
-            disableUnderline: true,
-          }}
-          size="small"
-        />
+        <SearchInput onSearch={setSearchQuery} />
+
         {isAdmin && (
           <Stack direction="row" gap={1}>
             <ImportAddressBook />
@@ -98,7 +83,17 @@ const SpaceAddressBook = () => {
         )}
       </Stack>
 
-      {entries.length === 0 ? <EmptyAddressBook /> : <SpaceAddressBookTable entries={entries} />}
+      {searchQuery && !filteredAddressBook.length && (
+        <Typography variant="h5" fontWeight="normal" mb={2} color="primary.light">
+          Found 0 results
+        </Typography>
+      )}
+
+      {entries.length === 0 ? (
+        <EmptyAddressBook />
+      ) : (
+        filteredAddressBook.length > 0 && <SpaceAddressBookTable entries={filteredAddressBook} />
+      )}
     </>
   )
 }
