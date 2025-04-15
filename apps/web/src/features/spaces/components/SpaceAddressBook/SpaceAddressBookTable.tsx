@@ -11,7 +11,7 @@ import type { SpaceAddressBookEntry } from '../../types'
 
 const headCells = [
   { id: 'contact', label: 'Contact' },
-  { id: 'Box, networks', label: 'Networks' },
+  { id: 'networks', label: 'Networks' },
   { id: 'actions', label: '' },
 ]
 
@@ -41,7 +41,7 @@ function SpaceAddressBookTable({ entries }: SpaceAddressBookTableProps) {
         ),
       },
       networks: {
-        rawValue: '',
+        rawValue: networks.length,
         content: (
           <>
             <Tooltip
