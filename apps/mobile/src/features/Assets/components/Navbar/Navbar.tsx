@@ -1,8 +1,7 @@
 import React from 'react'
-import { View } from 'react-native'
+import { View, Pressable } from 'react-native'
 import { Theme, XStack, getTokenValue } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { Pressable } from 'react-native-gesture-handler'
 import { IdenticonWithBadge } from '@/src/features/Settings/components/IdenticonWithBadge'
 
 import { shortenAddress } from '@/src/utils/formatters'
@@ -79,7 +78,7 @@ export const Navbar = () => {
               <SafeFontIcon name="qr-code-1" size={16} />
             </Pressable>
           </Link>
-          <Pressable onPress={handleNotificationAccess} hitSlop={{ top: 20, bottom: 20, right: 20 }}>
+          <Pressable onPressIn={handleNotificationAccess} hitSlop={{ top: 20, bottom: 20, right: 20 }}>
             <SafeFontIcon name="bell" size={20} />
           </Pressable>
         </View>
