@@ -11,6 +11,92 @@ exports[`SignOrExecute should display a confirmation screen 1`] = `
       data-testid="card-content"
     >
       <div
+        class="MuiStack-root css-1sazv7p-MuiStack-root"
+      >
+        <div
+          class="MuiGrid-root MuiGrid-container css-1yff1ei-MuiGrid-root"
+        >
+          <div
+            class="MuiGrid-root MuiGrid-item css-ezmk0c-MuiGrid-root"
+            data-testid="tx-row-title"
+            style="word-break: break-word;"
+          >
+            <span
+              class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
+            >
+              Interacted with
+            </span>
+          </div>
+          <div
+            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true css-1vd824g-MuiGrid-root"
+            data-testid="tx-data-row"
+          >
+            <div
+              class="MuiTypography-root MuiTypography-body2 css-17vdyq3-MuiTypography-root"
+            >
+              <div
+                class="container"
+              >
+                <div
+                  class="avatarContainer"
+                  style="width: 20px; height: 20px;"
+                >
+                  <div
+                    class="icon"
+                    style="background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4IDgiIHNoYXBlLXJlbmRlcmluZz0ib3B0aW1pemVTcGVlZCIgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0Ij48cGF0aCBmaWxsPSJoc2woOTIgOTYlIDQzJSkiIGQ9Ik0wLDBIOFY4SDB6Ii8+PHBhdGggZmlsbD0iaHNsKDMxMCA4NCUgMzglKSIgZD0iTTEsMGgxdjFoLTF6TTYsMGgxdjFoLTF6TTIsMGgxdjFoLTF6TTUsMGgxdjFoLTF6TTMsMGgxdjFoLTF6TTQsMGgxdjFoLTF6TTAsMWgxdjFoLTF6TTcsMWgxdjFoLTF6TTEsMWgxdjFoLTF6TTYsMWgxdjFoLTF6TTIsMWgxdjFoLTF6TTUsMWgxdjFoLTF6TTMsMWgxdjFoLTF6TTQsMWgxdjFoLTF6TTAsMmgxdjFoLTF6TTcsMmgxdjFoLTF6TTIsMmgxdjFoLTF6TTUsMmgxdjFoLTF6TTMsMmgxdjFoLTF6TTQsMmgxdjFoLTF6TTMsM2gxdjFoLTF6TTQsM2gxdjFoLTF6TTAsNGgxdjFoLTF6TTcsNGgxdjFoLTF6TTEsNGgxdjFoLTF6TTYsNGgxdjFoLTF6TTIsNGgxdjFoLTF6TTUsNGgxdjFoLTF6TTEsNWgxdjFoLTF6TTYsNWgxdjFoLTF6TTIsNWgxdjFoLTF6TTUsNWgxdjFoLTF6TTMsNWgxdjFoLTF6TTQsNWgxdjFoLTF6TTIsNmgxdjFoLTF6TTUsNmgxdjFoLTF6TTMsNmgxdjFoLTF6TTQsNmgxdjFoLTF6TTMsN2gxdjFoLTF6TTQsN2gxdjFoLTF6Ii8+PHBhdGggZmlsbD0iaHNsKDM1MSA2MSUgNjUlKSIgZD0iTTMsNGgxdjFoLTF6TTQsNGgxdjFoLTF6TTAsNWgxdjFoLTF6TTcsNWgxdjFoLTF6TTAsN2gxdjFoLTF6TTcsN2gxdjFoLTF6Ii8+PC9zdmc+); width: 20px; height: 20px;"
+                  />
+                </div>
+                <div
+                  class="MuiBox-root css-1lchl8k"
+                >
+                  <div
+                    class="addressContainer"
+                  >
+                    <div
+                      class="MuiBox-root css-b5p5gz"
+                    >
+                      <span
+                        aria-label="Copy to clipboard"
+                        class=""
+                        data-mui-internal-clone-element="true"
+                        style="cursor: pointer;"
+                      >
+                        <span>
+                          0xE20CcFf2c38Ef3b64109361D7b7691ff2c7D5f67
+                        </span>
+                      </span>
+                    </div>
+                    <span
+                      aria-label="Copy to clipboard"
+                      class=""
+                      data-mui-internal-clone-element="true"
+                      style="cursor: pointer;"
+                    >
+                      <button
+                        aria-label="Copy to clipboard"
+                        class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-xyrzjn-MuiButtonBase-root-MuiIconButton-root"
+                        tabindex="0"
+                        type="button"
+                      >
+                        <mock-icon
+                          aria-hidden=""
+                          class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeSmall css-gvpe62-MuiSvgIcon-root"
+                          data-testid="copy-btn-icon"
+                          focusable="false"
+                        />
+                      </button>
+                    </span>
+                    <div
+                      class="MuiBox-root css-yjghm1"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
         class="MuiBox-root css-178yklu"
       >
         <div
@@ -34,8 +120,8 @@ exports[`SignOrExecute should display a confirmation screen 1`] = `
                 <div
                   class="MuiStack-root css-1bujbuo-MuiStack-root"
                 >
-                  <div
-                    class="MuiBox-root css-0"
+                  <h6
+                    class="MuiTypography-root MuiTypography-subtitle2 css-8ydk8b-MuiTypography-root"
                   >
                     Transaction details
                     <span
@@ -48,7 +134,7 @@ exports[`SignOrExecute should display a confirmation screen 1`] = `
                         focusable="false"
                       />
                     </span>
-                  </div>
+                  </h6>
                 </div>
               </span>
               <span
@@ -100,11 +186,11 @@ exports[`SignOrExecute should display a confirmation screen 1`] = `
                             data-testid="tx-row-title"
                             style="word-break: break-word;"
                           >
-                            <p
+                            <span
                               class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
                             >
                               Interacted with
-                            </p>
+                            </span>
                           </div>
                           <div
                             class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true css-1vd824g-MuiGrid-root"

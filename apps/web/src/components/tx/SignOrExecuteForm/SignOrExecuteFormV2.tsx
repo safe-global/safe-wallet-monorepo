@@ -130,7 +130,8 @@ export const SignOrExecuteFormV2 = ({
         options={[{ label: 'Execute', id: 'execute' }]}
         slotId="execute"
         onChange={() => {}}
-        onSubmit={({ txId, isExecuted } = {}) => onFormSubmit(txId!, isExecuted)}
+        onSubmit={() => {}}
+        onSubmitSuccess={({ txId, isExecuted } = {}) => onFormSubmit(txId!, isExecuted)}
       />
     )
   }

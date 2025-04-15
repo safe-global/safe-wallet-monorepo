@@ -10,11 +10,11 @@ exports[`HexEncodedData should not cut the text in case the limit option is high
       data-testid="tx-row-title"
       style="word-break: break-word;"
     >
-      <p
+      <span
         class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
       >
         Data (hex-encoded)
-      </p>
+      </span>
     </div>
     <div
       class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true css-1vd824g-MuiGrid-root"
@@ -56,11 +56,11 @@ exports[`HexEncodedData should not highlight the data if highlight option is fal
       data-testid="tx-row-title"
       style="word-break: break-word;"
     >
-      <p
+      <span
         class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
       >
         Some arbitrary data
-      </p>
+      </span>
     </div>
     <div
       class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true css-1vd824g-MuiGrid-root"
@@ -95,11 +95,11 @@ exports[`HexEncodedData should render the default component markup 1`] = `
       data-testid="tx-row-title"
       style="word-break: break-word;"
     >
-      <p
+      <span
         class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
       >
         Data (hex-encoded)
-      </p>
+      </span>
     </div>
     <div
       class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true css-1vd824g-MuiGrid-root"

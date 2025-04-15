@@ -160,7 +160,8 @@ export const SignOrExecuteForm = ({
           options={[{ label: 'Execute', id: 'execute' }]}
           slotId="execute"
           onChange={() => {}}
-          onSubmit={({ txId, isExecuted } = {}) => onFormSubmit(txId!, isExecuted)}
+          onSubmit={() => {}}
+          onSubmitSuccess={({ txId, isExecuted } = {}) => onFormSubmit(txId!, isExecuted)}
         />
       )
     }
@@ -191,7 +192,6 @@ export const SignOrExecuteForm = ({
         {props.children}
 
         <ConfirmationView
-          txId={props.txId}
           isCreation={isCreation}
           txDetails={props.txDetails}
           txPreview={props.txPreview}

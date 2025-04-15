@@ -33,6 +33,7 @@ import StakingTxWithdrawDetails from '@/features/stake/components/StakingTxWithd
 import { OnChainConfirmation } from './NestedTransaction/OnChainConfirmation'
 import { ExecTransaction } from './NestedTransaction/ExecTransaction'
 import SafeUpdate from './SafeUpdate'
+import DecodedData from './DecodedData'
 
 const TxData = ({
   txInfo,
@@ -46,7 +47,7 @@ const TxData = ({
   txDetails?: TransactionDetails
   trusted: boolean
   imitation: boolean
-}): ReactElement | null => {
+}): ReactElement => {
   const chainId = useChainId()
 
   if (isOrderTxInfo(txInfo)) {
@@ -108,7 +109,7 @@ const TxData = ({
     return <SafeUpdate txData={txData} />
   }
 
-  return null
+  return <DecodedData txData={txData} toInfo={txData?.to} />
 }
 
 export default TxData

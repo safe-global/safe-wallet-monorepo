@@ -1,4 +1,4 @@
-import React, { useMemo, type ReactNode } from 'react'
+import React, { useCallback, useMemo, type ReactNode } from 'react'
 import useTxStepper from './useTxStepper'
 import SafeTxProvider from './SafeTxProvider'
 import { TxInfoProvider } from './TxInfoProvider'
@@ -22,7 +22,6 @@ type TxFlowProps<T extends unknown> = {
   onSubmit?: SubmitCallbackWithData<T>
   onlyExecute?: boolean
   isExecutable?: boolean
-  showMethodCall?: boolean
   isRejection?: boolean
   ReviewTransactionComponent?: typeof ReviewTransaction
   eventCategory?: string
@@ -41,7 +40,6 @@ export const TxFlow = <T extends unknown>({
   onSubmit,
   onlyExecute,
   isExecutable,
-  showMethodCall,
   isRejection,
   ReviewTransactionComponent = ReviewTransaction,
   eventCategory,
@@ -54,6 +52,28 @@ export const TxFlow = <T extends unknown>({
   const progress = useMemo(
     () => Math.round(((step + 1) / (childrenArray.length + 2)) * 100),
     [step, childrenArray.length],
+  )
+
+  const handleFlowSubmit = useCallback<SubmitCallback>(
+    (props) => {
+      onSubmit?.({ ...props, data })
+    },
+    [onSubmit, data],
+  )
+
+  const submit = (
+    <>
+      <Counterfactual />
+      <ExecuteThroughRole />
+
+      <ComboSubmit>
+        <Sign />
+        <Execute />
+        <Batching />
+      </ComboSubmit>
+
+      <Propose />
+    </>
   )
 
   return (
@@ -71,30 +91,20 @@ export const TxFlow = <T extends unknown>({
               txLayoutProps={txLayoutProps}
               onlyExecute={onlyExecute}
               isExecutable={isExecutable}
-              showMethodCall={showMethodCall}
               isRejection={isRejection}
             >
               <TxFlowContent>
                 {...childrenArray}
 
-                <ReviewTransactionComponent onSubmit={(props = {}) => onSubmit?.({ ...props, data })}>
+                <ReviewTransactionComponent onSubmit={handleFlowSubmit}>
                   <TxChecks />
                   <TxNote />
                   <SignerSelect />
 
-                  <Counterfactual />
-                  <ExecuteThroughRole />
-
-                  <ComboSubmit>
-                    <Sign />
-                    <Execute />
-                    <Batching />
-                  </ComboSubmit>
-
-                  <Propose />
+                  {submit}
                 </ReviewTransactionComponent>
 
-                <ConfirmTxReceipt />
+                <ConfirmTxReceipt onSubmit={handleFlowSubmit}>{submit}</ConfirmTxReceipt>
               </TxFlowContent>
             </TxFlowProvider>
           </SlotProvider>

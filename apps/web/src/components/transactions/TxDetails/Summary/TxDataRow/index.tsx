@@ -21,30 +21,24 @@ export const generateDataRowValue = (
       const customAvatar = addressInfo?.logoUri
 
       return (
-        <Typography variant="body2">
-          <NamedAddressInfo
-            address={value}
-            name={addressInfo?.name}
-            customAvatar={customAvatar}
-            showAvatar={type === 'address'}
-            avatarSize={20}
-            showPrefix={false}
-            shortAddress={type !== 'address'}
-            hasExplorer={hasExplorer}
-            highlight4bytes
-          />
-        </Typography>
+        <NamedAddressInfo
+          address={value}
+          name={addressInfo?.name}
+          customAvatar={customAvatar}
+          showAvatar={type === 'address'}
+          avatarSize={20}
+          showPrefix={false}
+          shortAddress={type !== 'address'}
+          hasExplorer={hasExplorer}
+          highlight4bytes
+        />
       )
     case 'rawData':
     case 'bytes':
-      return (
-        <Typography variant="body2">
-          <HexEncodedData highlightFirstBytes={false} limit={66} hexData={value} />
-        </Typography>
-      )
+      return <HexEncodedData highlightFirstBytes={false} limit={66} hexData={value} />
     default:
       return (
-        <Typography variant="body2" sx={{ wordBreak: 'break-all' }}>
+        <Typography variant="body2" sx={{ wordBreak: 'break-all' }} component="span">
           {value}
         </Typography>
       )

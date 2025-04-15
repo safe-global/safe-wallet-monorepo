@@ -18,7 +18,7 @@ const ReviewTransaction = (props: ReviewTransactionContentProps) => {
 
   return (
     <TxFlowStep title="Confirm transaction">
-      <ReviewTransactionContent {...props} txId={txId} txDetails={txDetails} txPreview={txPreview}>
+      <ReviewTransactionContent {...props} txDetails={txDetails} txPreview={txPreview}>
         {props.children}
       </ReviewTransactionContent>
     </TxFlowStep>

@@ -4,16 +4,16 @@ import { TxFlowContext } from '../../TxFlowProvider'
 import ProposerForm from './ProposerForm'
 import { type SlotComponentProps, SlotName, withSlot } from '../../slots'
 
-const Propose = ({ onSubmit }: SlotComponentProps<SlotName.Submit>) => {
+const Propose = ({ onSubmitSuccess }: SlotComponentProps<SlotName.Submit>) => {
   const { safeTx, txOrigin } = useContext(SafeTxContext)
   const { trackTxEvent, isSubmittable } = useContext(TxFlowContext)
 
   const handleSubmit = useCallback(
     async (txId: string, isExecuted = false) => {
-      onSubmit({ txId, isExecuted })
+      onSubmitSuccess?.({ txId, isExecuted })
       trackTxEvent(txId, isExecuted, false, true)
     },
-    [onSubmit, trackTxEvent],
+    [onSubmitSuccess, trackTxEvent],
   )
 
   return <ProposerForm safeTx={safeTx} origin={txOrigin} disableSubmit={!isSubmittable} onSubmit={handleSubmit} />

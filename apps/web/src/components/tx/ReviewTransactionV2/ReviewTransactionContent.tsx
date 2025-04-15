@@ -31,7 +31,6 @@ export const ReviewTransactionContent = ({
   onSubmit,
   isBatch,
   children,
-  txId,
   txDetails,
   txPreview,
 }: ReviewTransactionContentProps & {
@@ -40,9 +39,8 @@ export const ReviewTransactionContent = ({
   isCreation?: boolean
   txDetails?: TransactionDetails
   txPreview?: TransactionPreview
-  txId?: string
 }): ReactElement => {
-  const { willExecute, isCreation, showMethodCall, isProposing, isRejection } = useContext(TxFlowContext)
+  const { willExecute, isCreation, isProposing, isRejection, onNext } = useContext(TxFlowContext)
 
   const [readableApprovals] = useApprovalInfos({ safeTransaction: safeTx })
   const isApproval = readableApprovals && readableApprovals.length > 0
@@ -54,13 +52,11 @@ export const ReviewTransactionContent = ({
         {children}
 
         <ConfirmationView
-          txId={txId}
           isCreation={isCreation}
           txDetails={txDetails}
           txPreview={txPreview}
           safeTx={safeTx}
           isBatch={isBatch}
-          showMethodCall={showMethodCall}
           isApproval={isApproval}
         >
           {!isRejection && (
@@ -101,8 +97,14 @@ export const ReviewTransactionContent = ({
 
         <Blockaid />
 
-        <Slot name={SlotName.Submit} onSubmit={onSubmit}>
-          <Sign onSubmit={onSubmit} options={[{ id: 'sign', label: 'Sign' }]} onChange={() => {}} slotId="sign" />
+        <Slot name={SlotName.Submit} onSubmit={onNext} onSubmitSuccess={onSubmit}>
+          <Sign
+            onSubmit={onNext}
+            onSubmitSuccess={onSubmit}
+            options={[{ id: 'sign', label: 'Sign' }]}
+            onChange={() => {}}
+            slotId="sign"
+          />
         </Slot>
       </TxCard>
     </>

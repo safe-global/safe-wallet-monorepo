@@ -30,7 +30,6 @@ const ConfirmTxFlow = ({ txSummary }: { txSummary: TransactionSummary }) => {
       txSummary={txSummary}
       ReviewTransactionComponent={(props) => <ConfirmProposedTx txNonce={txNonce} {...props} />}
       eventCategory={TxFlowType.CONFIRM_TX}
-      showMethodCall
     />
   )
 }

@@ -34,7 +34,6 @@ const ChangeThresholdFlow = () => {
       subtitle="Change threshold"
       onSubmit={handleSubmit}
       eventCategory={TxFlowType.CHANGE_THRESHOLD}
-      showMethodCall
     >
       <TxFlowStep title="New transaction">
         <ChooseThreshold key={0} />

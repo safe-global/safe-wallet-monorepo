@@ -1,6 +1,5 @@
 import TxCard from '@/components/tx-flow/common/TxCard'
-import { Divider, Grid2 as Grid, Stack, StepIcon, Typography } from '@mui/material'
-import commonCss from '@/components/tx-flow/common/styles.module.css'
+import { Grid2 as Grid, Stack, StepIcon, Typography } from '@mui/material'
 import ExternalLink from '@/components/common/ExternalLink'
 import { type PropsWithChildren, useContext } from 'react'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
@@ -11,6 +10,8 @@ import useWallet from '@/hooks/wallets/useWallet'
 import { isHardwareWallet, isLedgerLive } from '@/utils/wallets'
 import { TxFlowStep } from '@/components/tx-flow/TxFlowStep'
 import { TxDetails } from '../ConfirmTxDetails/TxDetails'
+import { Slot, SlotName } from '@/components/tx-flow/slots'
+import { Sign } from '@/components/tx-flow/actions/Sign'
 
 const InfoSteps = [
   {
@@ -64,7 +65,7 @@ const HardwareWalletStep = [
   InfoSteps[2],
 ]
 
-export const ConfirmTxReceipt = ({ children }: PropsWithChildren) => {
+export const ConfirmTxReceipt = ({ children, onSubmit }: PropsWithChildren<{ onSubmit: () => void }>) => {
   const { safeTx } = useContext(SafeTxContext)
   const [txPreview] = useTxPreview(safeTx?.data)
   const wallet = useWallet()
@@ -99,7 +100,14 @@ export const ConfirmTxReceipt = ({ children }: PropsWithChildren) => {
 
         {children}
 
-        <Divider className={commonCss.nestedDivider} sx={{ pt: 3 }} />
+        <Slot name={SlotName.Submit} onSubmitSuccess={onSubmit}>
+          <Sign
+            onSubmitSuccess={onSubmit}
+            options={[{ id: 'sign', label: 'Sign' }]}
+            onChange={() => {}}
+            slotId="sign"
+          />
+        </Slot>
       </TxCard>
     </TxFlowStep>
   )

@@ -17,13 +17,11 @@ interface Props {
   txData: TransactionDetails['txData']
   txInfo?: TransactionDetails['txInfo']
   txDetails?: TransactionDetails
-  showMethodCall?: boolean
 }
 
-const Summary = ({ safeTxData, txData, txInfo, txDetails, showMethodCall }: Props): ReactElement => {
+const Summary = ({ safeTxData, txData, txInfo, txDetails }: Props): ReactElement => {
   const { txHash, executedAt } = txDetails ?? {}
   const toInfo = txData?.addressInfoIndex?.[txData?.to.value] || txData?.to
-  const isExpanded = txInfo && showMethodCall
   const showDetails = Boolean(txInfo && txData)
 
   let baseGas, gasPrice, gasToken, safeTxGas, refundReceiver, submittedAt, nonce
@@ -67,7 +65,7 @@ const Summary = ({ safeTxData, txData, txInfo, txDetails, showMethodCall }: Prop
 
       {showDetails && (
         <Box mt={3}>
-          <ColorCodedTxAccordion txInfo={txInfo} txData={txData} defaultExpanded={isExpanded}>
+          <ColorCodedTxAccordion txInfo={txInfo} txData={txData}>
             <Box my={1}>
               <DecodedData txData={txData} toInfo={toInfo} />
             </Box>

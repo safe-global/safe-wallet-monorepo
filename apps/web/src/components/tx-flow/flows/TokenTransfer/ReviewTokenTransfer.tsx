@@ -54,15 +54,19 @@ const ReviewTokenTransfer = ({
 
   return (
     <ReviewTransaction onSubmit={onSubmit}>
-      <Stack divider={<Divider />} gap={2}>
-        {recipients.map((recipient, index) => (
-          <ReviewRecipientRow
-            params={recipient}
-            key={`${recipient.recipient}_${index}`}
-            name={`Recipient ${index + 1}`}
-          />
-        ))}
-      </Stack>
+      {recipients.length > 1 && (
+        <Stack divider={<Divider />} gap={2}>
+          {recipients.map((recipient, index) => (
+            <ReviewRecipientRow
+              params={recipient}
+              key={`${recipient.recipient}_${index}`}
+              name={`Recipient ${index + 1}`}
+            />
+          ))}
+        </Stack>
+      )}
+
+      {recipients.length > 1 && <Divider />}
 
       {children}
     </ReviewTransaction>
