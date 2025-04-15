@@ -61,7 +61,7 @@ export const shortenAddress = (address: string, length = 4): string => {
   return `${address.slice(0, length + 2)}...${address.slice(-length)}`
 }
 
-export const shortenText = (text: string, length = 10, separator = '...'): string => {
+export const shortenText = (text: string, length = 10, separator = '…'): string => {
   return `${text.slice(0, length)}${separator}`
 }
 

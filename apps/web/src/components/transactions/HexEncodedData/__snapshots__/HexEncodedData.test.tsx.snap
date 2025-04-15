@@ -30,15 +30,19 @@ exports[`HexEncodedData should not cut the text in case the limit option is high
           data-mui-internal-clone-element="true"
           style="cursor: pointer;"
         >
-          <b
-            aria-label="The first 4 bytes determine the contract method that is being called"
-            class=""
-            data-mui-internal-clone-element="true"
+          <span
+            class="monospace"
           >
-            0xed2ad31e
-          </b>
-          d00088fc64d00c49774b2fe3fb7fd7db1c2a714700892607b9f77dc1
-           
+            <b
+              aria-label="The first 4 bytes determine the contract method that is being called"
+              class=""
+              data-mui-internal-clone-element="true"
+            >
+              0xed2ad31e
+            </b>
+            d00088fc64d00c49774b2fe3fb7fd7db1c2a714700892607b9f77dc1
+             
+          </span>
         </span>
       </div>
     </div>
@@ -76,8 +80,12 @@ exports[`HexEncodedData should not highlight the data if highlight option is fal
           data-mui-internal-clone-element="true"
           style="cursor: pointer;"
         >
-          0x102384763718984309876
-           
+          <span
+            class="monospace"
+          >
+            0x102384763718984309876
+             
+          </span>
         </span>
       </div>
     </div>
@@ -115,23 +123,27 @@ exports[`HexEncodedData should render the default component markup 1`] = `
           data-mui-internal-clone-element="true"
           style="cursor: pointer;"
         >
-          <b
-            aria-label="The first 4 bytes determine the contract method that is being called"
-            class=""
-            data-mui-internal-clone-element="true"
+          <span
+            class="monospace"
           >
-            0xed2ad31e
-          </b>
-          d00088fc64...
-           
-          <button
-            class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways MuiLink-button css-5r1yio-MuiTypography-root-MuiLink-root"
-            data-testid="show-more"
-            type="button"
-          >
-            Show more
-          </button>
+            <b
+              aria-label="The first 4 bytes determine the contract method that is being called"
+              class=""
+              data-mui-internal-clone-element="true"
+            >
+              0xed2ad31e
+            </b>
+            d00088fc64…
+             
+          </span>
         </span>
+        <button
+          class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways MuiLink-button showMore css-izn2ge-MuiTypography-root-MuiLink-root"
+          data-testid="show-more"
+          type="button"
+        >
+          Show more
+        </button>
       </div>
     </div>
   </div>

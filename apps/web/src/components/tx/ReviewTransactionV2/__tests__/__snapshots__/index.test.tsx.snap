@@ -497,14 +497,18 @@ exports[`ReviewTransaction should display a confirmation screen 1`] = `
                                       data-mui-internal-clone-element="true"
                                       style="cursor: pointer;"
                                     >
-                                      <b
-                                        aria-label="The first 4 bytes determine the contract method that is being called"
-                                        class=""
-                                        data-mui-internal-clone-element="true"
+                                      <span
+                                        class="monospace"
                                       >
-                                        0x
-                                      </b>
-                                       
+                                        <b
+                                          aria-label="The first 4 bytes determine the contract method that is being called"
+                                          class=""
+                                          data-mui-internal-clone-element="true"
+                                        >
+                                          0x
+                                        </b>
+                                         
+                                      </span>
                                     </span>
                                   </div>
                                 </p>

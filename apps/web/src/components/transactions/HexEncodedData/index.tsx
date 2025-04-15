@@ -54,20 +54,23 @@ export const HexEncodedData = ({ hexData, title, highlightFirstBytes = true, lim
   const content = (
     <Box data-testid="tx-hexData" className={css.encodedData}>
       <CopyButton text={hexData}>
-        {firstBytes}
-        {showTxData || !showExpandBtn ? fullData : shortenText(restBytes, limit - FIRST_BYTES)}{' '}
-        {showExpandBtn && (
-          <Link
-            component="button"
-            data-testid="show-more"
-            onClick={toggleExpanded}
-            type="button"
-            sx={{ verticalAlign: 'text-top' }}
-          >
-            {showTxData ? SHOW_LESS : SHOW_MORE}
-          </Link>
-        )}
+        <span className={css.monospace}>
+          {firstBytes}
+          {showTxData || !showExpandBtn ? fullData : shortenText(restBytes, limit - FIRST_BYTES)}{' '}
+        </span>
       </CopyButton>
+
+      {showExpandBtn && (
+        <Link
+          component="button"
+          data-testid="show-more"
+          onClick={toggleExpanded}
+          type="button"
+          className={css.showMore}
+        >
+          {showTxData ? SHOW_LESS : SHOW_MORE}
+        </Link>
+      )}
     </Box>
   )
 

@@ -23,14 +23,14 @@ export const MethodDetails = ({ data, addressInfoIndex }: MethodDetailsProps): R
   }
 
   return (
-    <Stack gap={1}>
+    <Stack gap={0.75}>
       {data.parameters?.map((param, index) => {
         const isArrayValueParam = isArrayParameter(param.type) || Array.isArray(param.value)
         const inlineType = isAddress(param.type) ? 'address' : isByte(param.type) ? 'bytes' : undefined
         const addressEx = typeof param.value === 'string' ? addressInfoIndex?.[param.value] : undefined
 
         const title = (
-          <Box mb={-1}>
+          <Box mb={-0.75}>
             <Typography variant="body2" component="span">
               {param.name}
             </Typography>{' '}
