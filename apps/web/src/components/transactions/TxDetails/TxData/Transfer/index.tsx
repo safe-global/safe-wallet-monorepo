@@ -3,7 +3,7 @@ import { TransferTx } from '@/components/transactions/TxInfo'
 import { isTxQueued } from '@/utils/transaction-guards'
 import type { TransactionStatus, Transfer } from '@safe-global/safe-gateway-typescript-sdk'
 import { TransferDirection } from '@safe-global/safe-gateway-typescript-sdk'
-import { Box, Typography } from '@mui/material'
+import { Box } from '@mui/material'
 import React from 'react'
 
 import TransferActions from '@/components/transactions/TxDetails/TxData/Transfer/TransferActions'
@@ -22,13 +22,11 @@ const TransferTxInfoMain = ({ txInfo, txStatus, trusted, imitation }: TransferTx
 
   return (
     <Box display="flex" flexDirection="row" alignItems="center" gap={1}>
-      <Typography>
-        {direction === TransferDirection.INCOMING ? 'Received' : isTxQueued(txStatus) ? 'Send' : 'Sent'}{' '}
-        <b>
-          <TransferTx info={txInfo} withLogo={false} omitSign preciseAmount />
-        </b>
-        {direction === TransferDirection.INCOMING ? ' from:' : ' to:'}
-      </Typography>
+      {direction === TransferDirection.INCOMING ? 'Received' : isTxQueued(txStatus) ? 'Send' : 'Sent'}{' '}
+      <b>
+        <TransferTx info={txInfo} omitSign preciseAmount />
+      </b>
+      {direction === TransferDirection.INCOMING ? ' from' : ' to'}
       {!trusted && !imitation && <MaliciousTxWarning />}
     </Box>
   )

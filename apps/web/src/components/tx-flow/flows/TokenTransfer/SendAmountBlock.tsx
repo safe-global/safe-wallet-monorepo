@@ -9,7 +9,7 @@ const SendAmountBlock = ({
   amountInWei,
   tokenInfo,
   children,
-  title = 'Send:',
+  title = 'Send',
 }: {
   /** Amount in WEI */
   amountInWei: number | string

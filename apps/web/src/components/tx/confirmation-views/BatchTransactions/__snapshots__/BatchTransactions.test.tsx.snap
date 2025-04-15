@@ -109,27 +109,23 @@ exports[`BatchTransactions should render a list of batch transactions 1`] = `
                       <div
                         class="MuiBox-root css-8v90jo"
                       >
-                        <p
-                          class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
-                        >
-                          Send
-                           
-                          <b>
-                            <span
-                              aria-label="1000000000000"
-                              class="container"
-                              data-mui-internal-clone-element="true"
+                        Send
+                         
+                        <b>
+                          <span
+                            aria-label="1000000000000"
+                            class="container"
+                            data-mui-internal-clone-element="true"
+                          >
+                            <b
+                              class="tokenText"
                             >
-                              <b
-                                class="tokenText"
-                              >
-                                1000000000000
-                                 
-                              </b>
-                            </span>
-                          </b>
-                           to:
-                        </p>
+                              1000000000000
+                               
+                            </b>
+                          </span>
+                        </b>
+                         to
                       </div>
                       <div
                         class="MuiBox-root css-7pf6at"
