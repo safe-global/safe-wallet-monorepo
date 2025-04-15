@@ -16,7 +16,7 @@ type NetworkMultiSelectorInputProps = {
   showSelectAll?: boolean
 }
 
-const SELECT_ALL_OPTION = { chainId: 'select-all', chainName: 'Select All' }
+const SELECT_ALL_OPTION = { chainId: 'select-all', chainName: 'Select All' } as ChainInfo
 
 const NetworkMultiSelectorInput = ({
   value,
@@ -35,8 +35,8 @@ const NetworkMultiSelectorInput = ({
   const handleChange = useCallback(
     (newNetworks: ChainInfo[]) => {
       const filteredData = showSelectAll
-        ? (newNetworks.filter((item) => item.chainId !== SELECT_ALL_OPTION.chainId) as ChainInfo[])
-        : (newNetworks as ChainInfo[])
+        ? newNetworks.filter((item) => item.chainId !== SELECT_ALL_OPTION.chainId)
+        : newNetworks
 
       setValue(name, filteredData, { shouldValidate: true })
       if (onNetworkChange) {
@@ -130,7 +130,7 @@ const NetworkMultiSelectorInput = ({
       renderOption={renderOption}
       getOptionLabel={(option) => option.chainName}
       getOptionDisabled={(option) =>
-        showSelectAll && option.chainId === SELECT_ALL_OPTION.chainId ? false : getOptionDisabled(option as ChainInfo)
+        showSelectAll && option.chainId === SELECT_ALL_OPTION.chainId ? false : getOptionDisabled(option)
       }
       renderInput={(params) => <TextField {...params} error={error} helperText={helperText} />}
       filterOptions={(options, { inputValue }) => {
@@ -142,7 +142,7 @@ const NetworkMultiSelectorInput = ({
         )
       }}
       isOptionEqualToValue={(option, value) => option.chainId === value.chainId}
-      onChange={(_, data) => handleChange(data as ChainInfo[])}
+      onChange={(_, data) => handleChange(data)}
     />
   )
 }
