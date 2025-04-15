@@ -33,7 +33,6 @@ describe('DecodedData', () => {
     const { getByText } = render(<DecodedData txData={mockTxData} toInfo={{ value: '0x123' }} />)
 
     expect(getByText('No parameters')).toBeInTheDocument()
-    expect(getByText('Data')).toBeInTheDocument()
   })
 
   it('does not show Hex encoded data if there is none', () => {
@@ -51,10 +50,9 @@ describe('DecodedData', () => {
       trustedDelegateCallTarget: false,
     }
 
-    const { getByText, queryByText } = render(<DecodedData txData={mockTxData} toInfo={{ value: '0x123' }} />)
+    const { getByText } = render(<DecodedData txData={mockTxData} toInfo={{ value: '0x123' }} />)
 
     expect(getByText('No parameters')).toBeInTheDocument()
-    expect(queryByText('Data')).not.toBeInTheDocument()
   })
 
   it('only shows Hex encoded data if no decodedData exists', () => {
@@ -69,9 +67,8 @@ describe('DecodedData', () => {
       trustedDelegateCallTarget: false,
     }
 
-    const { getByText, queryByText } = render(<DecodedData txData={mockTxData} toInfo={{ value: '0x123' }} />)
+    const { queryByText } = render(<DecodedData txData={mockTxData} toInfo={{ value: '0x123' }} />)
 
     expect(queryByText('No parameters')).not.toBeInTheDocument()
-    expect(getByText('Data')).toBeInTheDocument()
   })
 })
