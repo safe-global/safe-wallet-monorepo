@@ -39,8 +39,7 @@ describe('[PROD] Sidebar tests', () => {
     sideBar.verifyNewTxBtnStatus(constants.enabledStates.enabled)
   })
 
-  // Re-enable when the new implementation is released
-  it.skip('Verify New Transaction button disabled for non-owners', () => {
+  it('Verify New Transaction button disabled for non-owners', () => {
     sideBar.verifyNewTxBtnStatus(constants.enabledStates.disabled)
   })
 })

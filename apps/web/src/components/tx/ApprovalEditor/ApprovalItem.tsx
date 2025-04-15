@@ -6,10 +6,13 @@ import { TokenType } from '@safe-global/safe-gateway-typescript-sdk/dist/types/c
 import type { ApprovalInfo } from './hooks/useApprovalInfos'
 import { PSEUDO_APPROVAL_VALUES } from './utils/approvals'
 import { formatAmountPrecise } from '@safe-global/utils/utils/formatNumber'
-import type { Token } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
+import { type Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 
-export const approvalMethodDescription: Record<Approval['method'], (symbol: string, type?: Token['type']) => string> = {
-  approve: (symbol: string, type?: Token['type']) =>
+export const approvalMethodDescription: Record<
+  Approval['method'],
+  (symbol: string, type?: Balance['tokenInfo']['type']) => string
+> = {
+  approve: (symbol: string, type?: Balance['tokenInfo']['type']) =>
     type === TokenType.ERC721 ? `Allow to transfer ${symbol}` : `Set ${symbol} allowance to`,
   increaseAllowance: (symbol: string) => `Increase ${symbol} allowance by`,
   Permit2: (symbol: string) => `Give permission to spend ${symbol}`,

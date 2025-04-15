@@ -1,5 +1,6 @@
-import '../../shim'
-import '@/src/config/polyfills'
+import '@/src/platform/fetch'
+import '@/src/platform/crypto-shims'
+import '@/src/platform/intl-polyfills'
 import { Stack } from 'expo-router'
 import 'react-native-reanimated'
 import { SafeThemeProvider } from '@/src/theme/provider/safeTheme'
@@ -17,13 +18,15 @@ import { configureReanimatedLogger, ReanimatedLogLevel } from 'react-native-rean
 import { OnboardingHeader } from '@/src/features/Onboarding/components/OnboardingHeader'
 import { getDefaultScreenOptions } from '@/src/navigation/hooks/utils'
 import { NavigationGuardHOC } from '@/src/navigation/NavigationGuardHOC'
-import { StatusBar } from 'expo-status-bar'
 import { TestCtrls } from '@/src/tests/e2e-maestro/components/TestCtrls'
 import Logger, { LogLevel } from '@/src/utils/logger'
 import { useInitWeb3 } from '@/src/hooks/useInitWeb3'
 import { useInitSafeCoreSDK } from '@/src/hooks/coreSDK/useInitSafeCoreSDK'
+import NotificationsService from '@/src/services/notifications/NotificationService'
 
 Logger.setLevel(__DEV__ ? LogLevel.TRACE : LogLevel.ERROR)
+// Initialize all notification handlers
+NotificationsService.initializeNotificationHandlers()
 
 configureReanimatedLogger({
   level: ReanimatedLogLevel.warn,
@@ -159,7 +162,6 @@ function RootLayout() {
                         />
                         <Stack.Screen name="+not-found" />
                       </Stack>
-                      <StatusBar />
                     </NavigationGuardHOC>
                   </SafeToastProvider>
                 </SafeThemeProvider>

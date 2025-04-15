@@ -85,19 +85,6 @@ describe('useNotificationManager', () => {
     expect(result.current.isAppNotificationEnabled).toBe(true)
   })
 
-  it('handles device notification permission check when enabling notifications', async () => {
-    jest.mocked(NotificationsService.isDeviceNotificationEnabled).mockResolvedValueOnce(false)
-
-    const { result } = renderHook(() => useNotificationManager())
-
-    await act(async () => {
-      const success = await result.current.enableNotification()
-      expect(success).toBe(false)
-    })
-
-    expect(NotificationsService.getAllPermissions).toHaveBeenCalled()
-  })
-
   it('handles errors when enabling notifications', async () => {
     jest.mocked(NotificationsService.isDeviceNotificationEnabled).mockRejectedValueOnce(new Error('Test error'))
 

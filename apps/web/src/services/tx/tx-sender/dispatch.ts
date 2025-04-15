@@ -1,6 +1,6 @@
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import { isMultisigExecutionInfo } from '@/utils/transaction-guards'
-import { isHardwareWallet, isSmartContractWallet } from '@/utils/wallets'
+import { isEthSignWallet, isSmartContractWallet } from '@/utils/wallets'
 import type { MultiSendCallOnlyContractImplementationType } from '@safe-global/protocol-kit'
 import { type ChainInfo, relayTransaction, type TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
 import { type SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
@@ -114,7 +114,7 @@ export const dispatchProposerTxSigning = async (safeTx: SafeTransaction, wallet:
   const sdk = await getSafeSDKWithSigner(wallet.provider)
 
   let signature: SafeSignature
-  if (isHardwareWallet(wallet)) {
+  if (isEthSignWallet(wallet)) {
     const txHash = await sdk.getTransactionHash(safeTx)
     signature = await sdk.signHash(txHash)
   } else {
@@ -144,7 +144,10 @@ export const dispatchOnChainSigning = async (
   const safeTxHash = await sdk.getTransactionHash(safeTx)
   const eventParams = { txId, nonce: safeTx.data.nonce }
 
-  const options = chainId === chains.zksync ? { gasLimit: ZK_SYNC_ON_CHAIN_SIGNATURE_GAS_LIMIT } : undefined
+  const options =
+    chainId === chains.zksync || chainId === chains.lens
+      ? { gasLimit: ZK_SYNC_ON_CHAIN_SIGNATURE_GAS_LIMIT }
+      : undefined
   let txHashOrParentSafeTxHash: string
   try {
     // TODO: This is a workaround until there is a fix for unchecked transactions in the protocol-kit

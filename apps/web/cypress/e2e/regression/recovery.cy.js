@@ -195,7 +195,7 @@ describe('Recovery regression tests', { defaultCommandTimeout: 50000 }, () => {
     navigation.clickOnDisconnectBtn()
   })
 
-  it.skip('Verify that the Security section contains Account recovery block on supported netwroks', () => {
+  it('Verify that the Security section contains Account recovery block on supported netwroks', () => {
     const safes = [
       staticSafes.ETH_STATIC_SAFE_15,
       staticSafes.GNO_STATIC_SAFE_16,

@@ -12,9 +12,11 @@ interface TxHistoryList {
   transactions?: HistoryTransactionItems[]
   onEndReached: (info: { distanceFromEnd: number }) => void
   isLoading?: boolean
+  refreshing?: boolean
+  onRefresh?: () => void
 }
 
-export function TxHistoryList({ transactions, onEndReached, isLoading }: TxHistoryList) {
+export function TxHistoryList({ transactions, onEndReached, isLoading, refreshing, onRefresh }: TxHistoryList) {
   const groupedList: GroupedTxsWithTitle<TransactionItem>[] = useMemo(() => {
     return groupTxsByDate(transactions || [])
   }, [transactions])
@@ -28,7 +30,12 @@ export function TxHistoryList({ transactions, onEndReached, isLoading }: TxHisto
       keyExtractor={(item, index) => (Array.isArray(item) ? getTxHash(item[0]) + index : getTxHash(item) + index)}
       renderItem={renderItem}
       onEndReached={onEndReached}
-      contentContainerStyle={{ paddingHorizontal: 16 }}
+      refreshing={refreshing}
+      onRefresh={onRefresh}
+      contentContainerStyle={{
+        paddingHorizontal: 16,
+        paddingTop: 8,
+      }}
       ListFooterComponent={isLoading ? <Loader size={24} color="$color" /> : undefined}
       renderSectionHeader={({ section: { title } }) => <SafeListItem.Header title={title} />}
     />

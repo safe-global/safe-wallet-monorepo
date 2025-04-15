@@ -1,49 +1,61 @@
-import React, { useEffect, useState } from 'react'
-import { safelyDecodeURIComponent } from 'expo-router/build/fork/getStateFromPath-forks'
+import React from 'react'
 
-import { useGetTxsHistoryQuery } from '@safe-global/store/gateway'
+import { useGetTxsHistoryInfiniteQuery } from '@safe-global/store/gateway'
 import type { TransactionItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { TxHistoryList } from '@/src/features/TxHistory/components/TxHistoryList'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
-import { SafeInfo } from '@/src/types/address'
+import Logger from '@/src/utils/logger'
 
 export function TxHistoryContainer() {
-  const [pageUrl, setPageUrl] = useState<string>()
-  const [list, setList] = useState<TransactionItemPage['results']>([])
   const activeSafe = useDefinedActiveSafe()
-  const [prevActiveSafe, setPrevActiveSafe] = useState<SafeInfo | null>(null)
-  const { data, refetch, isFetching, isUninitialized } = useGetTxsHistoryQuery({
-    chainId: activeSafe.chainId,
-    safeAddress: activeSafe.address,
-    cursor: pageUrl && safelyDecodeURIComponent(pageUrl?.split('cursor=')[1]),
-  })
+  const [isRefreshing, setIsRefreshing] = React.useState(false)
 
-  // Reset list when activeSafe changes
-  useEffect(() => {
-    if (prevActiveSafe?.address !== activeSafe.address || prevActiveSafe?.chainId !== activeSafe.chainId) {
-      setList([])
-      setPageUrl(undefined)
-    }
-    setPrevActiveSafe(activeSafe)
-  }, [activeSafe])
+  // Using the infinite query hook
+  const { currentData, fetchNextPage, hasNextPage, isFetching, isLoading, isUninitialized, refetch } =
+    useGetTxsHistoryInfiniteQuery({
+      chainId: activeSafe.chainId,
+      safeAddress: activeSafe.address,
+    })
 
-  // Update list when new data arrives
-  useEffect(() => {
-    if (!data?.results) {
-      return
+  // Flatten all pages into a single transactions array
+  const transactions = React.useMemo(() => {
+    if (!currentData?.pages) {
+      return []
     }
 
-    setList((prev) => [...prev, ...data.results])
-  }, [data])
+    // Combine results from all pages
+    return currentData.pages.flatMap((page: TransactionItemPage) => page.results || [])
+  }, [currentData?.pages])
 
   const onEndReached = () => {
-    if (!data?.next) {
-      return
+    if (hasNextPage && !isFetching) {
+      fetchNextPage()
     }
-
-    setPageUrl(data.next)
-    refetch()
   }
 
-  return <TxHistoryList transactions={list} onEndReached={onEndReached} isLoading={isFetching || isUninitialized} />
+  // Handle pull-to-refresh - reset the data and fetch from the beginning
+  const onRefresh = React.useCallback(async () => {
+    setIsRefreshing(true)
+    try {
+      // Refetch will reset the data and start fresh with page 1
+      await refetch()
+    } catch (error) {
+      Logger.error('Error refreshing transaction history:', error)
+    } finally {
+      setIsRefreshing(false)
+    }
+  }, [refetch])
+
+  // Combine loading states, but don't show loader when refreshing
+  const isLoadingState = (isFetching && !isRefreshing) || isLoading || isUninitialized
+
+  return (
+    <TxHistoryList
+      transactions={transactions}
+      onEndReached={onEndReached}
+      isLoading={isLoadingState}
+      onRefresh={onRefresh}
+      refreshing={isRefreshing}
+    />
+  )
 }

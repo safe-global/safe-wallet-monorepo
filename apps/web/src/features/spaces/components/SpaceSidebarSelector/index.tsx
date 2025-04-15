@@ -55,6 +55,7 @@ const SpaceSidebarSelector = () => {
     <>
       <Box display="flex" width="100%">
         <Button
+          data-testid="space-selector-button"
           id="space-selector-button"
           onClick={handleClick}
           endIcon={
@@ -83,6 +84,7 @@ const SpaceSidebarSelector = () => {
         </Button>
 
         <Menu
+          data-testid="space-selector-menu"
           id="space-selector-menu"
           anchorEl={anchorEl}
           open={open}

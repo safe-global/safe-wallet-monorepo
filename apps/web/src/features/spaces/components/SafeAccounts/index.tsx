@@ -1,9 +1,7 @@
 import AddAccounts from '@/features/spaces/components/AddAccounts'
 import EmptySafeAccounts from '@/features/spaces/components/SafeAccounts/EmptySafeAccounts'
-import SearchIcon from '@/public/images/common/search.svg'
-import { Stack, SvgIcon, TextField, Typography } from '@mui/material'
-import InputAdornment from '@mui/material/InputAdornment'
-import { useCallback, useEffect, useState } from 'react'
+import { Stack, Typography } from '@mui/material'
+import { useEffect, useState } from 'react'
 import SafesList from '@/features/myAccounts/components/SafesList'
 import { useSpaceSafes } from '@/features/spaces/hooks/useSpaceSafes'
 import { useSafesSearch } from '@/features/myAccounts/hooks/useSafesSearch'
@@ -13,7 +11,7 @@ import { SPACE_LABELS } from '@/services/analytics/events/spaces'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import Track from '@/components/common/Track'
 import { trackEvent } from '@/services/analytics'
-import debounce from 'lodash/debounce'
+import SearchInput from '../SearchInput'
 
 const SpaceSafeAccounts = () => {
   const [searchQuery, setSearchQuery] = useState('')
@@ -23,9 +21,6 @@ const SpaceSafeAccounts = () => {
   const isInvited = useIsInvited()
 
   const safes = searchQuery ? filteredSafes : allSafes
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const handleSearch = useCallback(debounce(setSearchQuery, 300), [])
 
   useEffect(() => {
     if (searchQuery) {
@@ -45,26 +40,10 @@ const SpaceSafeAccounts = () => {
         alignItems="flex-start"
         gap={2}
         mb={3}
-        flexWrap="wrap"
+        flexWrap="nowrap"
         flexDirection={{ xs: 'column-reverse', md: 'row' }}
       >
-        <TextField
-          placeholder="Search"
-          variant="filled"
-          hiddenLabel
-          onChange={(e) => {
-            handleSearch(e.target.value)
-          }}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SvgIcon component={SearchIcon} inheritViewBox color="border" fontSize="small" />
-              </InputAdornment>
-            ),
-            disableUnderline: true,
-          }}
-          size="small"
-        />
+        <SearchInput onSearch={setSearchQuery} />
 
         {isAdmin && (
           <Track {...SPACE_EVENTS.ADD_ACCOUNTS_MODAL} label={SPACE_LABELS.accounts_page}>

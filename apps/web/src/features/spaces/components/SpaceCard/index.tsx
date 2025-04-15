@@ -58,7 +58,7 @@ const SpaceCard = ({
   const isAdmin = useIsAdmin(id)
 
   return (
-    <Card className={classNames(css.card, { [css.compact]: isCompact })}>
+    <Card data-testid="space-card" className={classNames(css.card, { [css.compact]: isCompact })}>
       {isLink && <Link className={css.cardLink} href={{ pathname: AppRoutes.spaces.index, query: { spaceId: id } }} />}
 
       <InitialsAvatar name={name} size={isCompact ? 'medium' : 'large'} />

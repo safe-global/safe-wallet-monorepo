@@ -422,3 +422,7 @@ export function getSafeAddressFromUrl(url) {
   const match = url.match(addressPattern)
   return match ? match[0] : null
 }
+
+export function shortenAddress(address) {
+  return `${address.slice(0, 6)}...${address.slice(-4)}`
+}
