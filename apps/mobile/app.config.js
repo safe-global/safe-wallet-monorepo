@@ -24,7 +24,7 @@ export default {
       },
       infoPlist: {
         NSFaceIDUsageDescription: 'Enabling Face ID allows you to create/access secure keys.',
-        UIBackgroundModes: ['remote-notification', 'processing'],
+        UIBackgroundModes: ['remote-notification'],
       },
       supportsTablet: false,
       appleTeamId: 'MXRS32BBL4',
