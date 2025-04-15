@@ -63,7 +63,6 @@ export type TxFlowContextType<T extends unknown = any> = {
   canExecuteThroughRole: boolean
   txDetails?: TransactionDetails
   txDetailsLoading?: boolean
-  showMethodCall?: boolean
   isBatch: boolean
   role?: Role
 }
@@ -115,7 +114,6 @@ export type TxFlowProviderProps<T extends unknown> = {
   onlyExecute?: TxFlowContextType['onlyExecute']
   isRejection?: TxFlowContextType['isRejection']
   txLayoutProps?: TxFlowContextType['txLayoutProps']
-  showMethodCall?: TxFlowContextType['showMethodCall']
   isBatch?: TxFlowContextType['isBatch']
 }
 
@@ -132,7 +130,6 @@ const TxFlowProvider = <T extends unknown>({
   txLayoutProps: defaultTxLayoutProps = initialContext.txLayoutProps,
   isRejection = initialContext.isRejection,
   isBatch = initialContext.isBatch,
-  showMethodCall,
 }: TxFlowProviderProps<T>): ReactElement => {
   const signer = useSigner()
   const isSafeOwner = useIsSafeOwner()
@@ -225,7 +222,6 @@ const TxFlowProvider = <T extends unknown>({
     willExecuteThroughRole,
     canExecuteThroughRole,
     role: allowingRole || mostLikelyRole,
-    showMethodCall,
     txDetails,
     txDetailsLoading,
     isBatch,

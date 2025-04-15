@@ -22,7 +22,6 @@ type TxFlowProps<T extends unknown> = {
   onSubmit?: SubmitCallbackWithData<T>
   onlyExecute?: boolean
   isExecutable?: boolean
-  showMethodCall?: boolean
   isRejection?: boolean
   ReviewTransactionComponent?: typeof ReviewTransaction
   eventCategory?: string
@@ -41,7 +40,6 @@ export const TxFlow = <T extends unknown>({
   onSubmit,
   onlyExecute,
   isExecutable,
-  showMethodCall,
   isRejection,
   ReviewTransactionComponent = ReviewTransaction,
   eventCategory,
@@ -93,7 +91,6 @@ export const TxFlow = <T extends unknown>({
               txLayoutProps={txLayoutProps}
               onlyExecute={onlyExecute}
               isExecutable={isExecutable}
-              showMethodCall={showMethodCall}
               isRejection={isRejection}
             >
               <TxFlowContent>

@@ -6,7 +6,6 @@ import {
   isCustomTxInfo,
   isExecTxData,
   isOnChainConfirmationTxData,
-  isOrderTxInfo,
   isSafeMigrationTxData,
   isSafeUpdateTxData,
   isSwapOrderTxInfo,
@@ -35,12 +34,10 @@ type ConfirmationViewProps = {
   txDetails?: TransactionDetails
   txPreview?: TransactionPreview
   safeTx?: SafeTransaction
-  txId?: string
   isBatch?: boolean
   isApproval?: boolean
   isCreation?: boolean
   children?: ReactNode
-  showMethodCall?: boolean
 }
 
 const getConfirmationViewComponent = ({
@@ -76,7 +73,6 @@ const getConfirmationViewComponent = ({
 }
 
 const ConfirmationView = ({ safeTx, txPreview, txDetails, ...props }: ConfirmationViewProps) => {
-  const { txId } = props
   const { txFlow } = useContext(TxModalContext)
   const details = txDetails ?? txPreview
 
@@ -90,30 +86,16 @@ const ConfirmationView = ({ safeTx, txPreview, txDetails, ...props }: Confirmati
       : undefined
   }, [details, txFlow])
 
-  const showTxDetails =
-    txId &&
-    !props.isCreation &&
-    txDetails &&
-    !isCustomTxInfo(txDetails.txInfo) &&
-    !isAnyStakingTxInfo(txDetails.txInfo) &&
-    !isOrderTxInfo(txDetails.txInfo)
-
   return (
     <>
       {ConfirmationViewComponent ||
-        (showTxDetails && details && (
+        (details && (
           <TxData txData={details?.txData} txInfo={details?.txInfo} txDetails={txDetails} imitation={false} trusted />
         ))}
 
       {props.children}
 
-      <Summary
-        safeTxData={safeTx?.data}
-        txDetails={txDetails}
-        txData={details?.txData}
-        txInfo={details?.txInfo}
-        showMethodCall={props.showMethodCall}
-      />
+      <Summary safeTxData={safeTx?.data} txDetails={txDetails} txData={details?.txData} txInfo={details?.txInfo} />
     </>
   )
 }
