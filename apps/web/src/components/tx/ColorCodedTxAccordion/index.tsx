@@ -108,10 +108,10 @@ const ColorCodedTxAccordion = ({ txInfo, txData, children, defaultExpanded }: De
         className={accordionCss.accordion}
       >
         <Stack direction="row" justifyContent="space-between" alignItems="center" width="100%">
-          <Box>
+          <Typography variant="subtitle2" fontWeight={700}>
             Transaction details
             <HelpTooltip />
-          </Box>
+          </Typography>
 
           {methodLabel && (
             <Typography
