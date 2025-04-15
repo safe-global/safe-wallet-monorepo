@@ -22,7 +22,7 @@
 .chainContainer {
   display: flex;
   flex-wrap: wrap;
-  justify-content: center;
+  justify-content: left-align;
   align-items: center;
   width: 100%;
   margin: 0 auto;
