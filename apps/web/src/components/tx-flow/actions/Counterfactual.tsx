@@ -5,16 +5,16 @@ import CounterfactualForm from '@/features/counterfactual/CounterfactualForm'
 import useIsCounterfactualSafe from '@/features/counterfactual/hooks/useIsCounterfactualSafe'
 import { type SlotComponentProps, SlotName, withSlot } from '../slots'
 
-const Counterfactual = ({ onSubmit }: SlotComponentProps<SlotName.Submit>) => {
+const Counterfactual = ({ onSubmitSuccess }: SlotComponentProps<SlotName.Submit>) => {
   const { safeTx, txOrigin } = useContext(SafeTxContext)
   const { isCreation, trackTxEvent, isSubmittable } = useContext(TxFlowContext)
 
   const handleSubmit = useCallback(
     async (txId: string, isExecuted = false) => {
-      onSubmit({ txId, isExecuted })
+      onSubmitSuccess?.({ txId, isExecuted })
       trackTxEvent(txId, isExecuted)
     },
-    [onSubmit, trackTxEvent],
+    [onSubmitSuccess, trackTxEvent],
   )
 
   return (

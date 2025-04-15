@@ -14,7 +14,12 @@ export const SIGN_CHECKBOX_TOOLTIP = 'Review details and check the box to enable
 
 const CheckboxGuardedSignForm = withCheckboxGuard(SignForm, SIGN_CHECKBOX_LABEL, SIGN_CHECKBOX_TOOLTIP)
 
-export const Sign = ({ onSubmit, disabled = false, ...props }: SlotComponentProps<SlotName.ComboSubmit>) => {
+export const Sign = ({
+  onSubmit,
+  onSubmitSuccess,
+  disabled = false,
+  ...props
+}: SlotComponentProps<SlotName.ComboSubmit>) => {
   const [checked, setChecked] = useState(false)
   const { safeTx, txOrigin } = useContext(SafeTxContext)
   const { txId, trackTxEvent, isSubmittable } = useContext(TxFlowContext)
@@ -24,12 +29,12 @@ export const Sign = ({ onSubmit, disabled = false, ...props }: SlotComponentProp
     trackEvent({ ...MODALS_EVENTS.CONFIRM_SIGN_CHECKBOX, label: checked })
   }, [])
 
-  const handleSubmit = useCallback<SubmitCallback>(
+  const handleSubmitSuccess = useCallback<SubmitCallback>(
     async ({ txId, isExecuted = false } = {}) => {
-      onSubmit({ txId, isExecuted })
+      onSubmitSuccess?.({ txId, isExecuted })
       trackTxEvent(txId!, isExecuted)
     },
-    [onSubmit, trackTxEvent],
+    [onSubmitSuccess, trackTxEvent],
   )
 
   return (
@@ -37,7 +42,8 @@ export const Sign = ({ onSubmit, disabled = false, ...props }: SlotComponentProp
       disableSubmit={!isSubmittable || disabled}
       origin={txOrigin}
       safeTx={safeTx}
-      onSubmit={handleSubmit}
+      onSubmit={onSubmit}
+      onSubmitSuccess={handleSubmitSuccess}
       isChecked={checked}
       onCheckboxChange={handleCheckboxChange}
       txId={txId}
