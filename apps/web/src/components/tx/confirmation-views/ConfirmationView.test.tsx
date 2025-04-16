@@ -111,9 +111,7 @@ const safeTxWithNativeData = {
 }
 xdescribe('ConfirmationView', () => {
   it('should display a confirmation screen for a SETTINGS_CHANGE transaction', () => {
-    const { container } = render(
-      <ConfirmationView safeTx={safeTxWithNativeData} txDetails={txDetails} txId={txDetails.txId} isApproval />,
-    )
+    const { container } = render(<ConfirmationView safeTx={safeTxWithNativeData} txDetails={txDetails} isApproval />)
 
     expect(container).toMatchSnapshot()
   })
@@ -122,12 +120,7 @@ xdescribe('ConfirmationView', () => {
     const CustomTxDetails = { ...txDetails, txInfo: { ...txDetails.txInfo, type: TransactionInfoType.CUSTOM } }
 
     const { container } = render(
-      <ConfirmationView
-        safeTx={safeTxWithNativeData}
-        txDetails={CustomTxDetails as TransactionDetails}
-        txId={txDetails.txId}
-        isApproval
-      />,
+      <ConfirmationView safeTx={safeTxWithNativeData} txDetails={CustomTxDetails as TransactionDetails} isApproval />,
     )
 
     expect(container).toMatchSnapshot()

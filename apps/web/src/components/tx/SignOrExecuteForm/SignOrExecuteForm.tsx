@@ -1,4 +1,4 @@
-import ProposerForm from '@/components/tx/SignOrExecuteForm/ProposerForm'
+import ProposerForm from '@/components/tx-flow/actions/Propose/ProposerForm'
 import CounterfactualForm from '@/features/counterfactual/CounterfactualForm'
 import { useIsWalletProposer } from '@/hooks/useProposers'
 import useSafeInfo from '@/hooks/useSafeInfo'
@@ -6,11 +6,11 @@ import { type ReactElement, type ReactNode, useState, useContext, useCallback } 
 import madProps from '@/utils/mad-props'
 import ExecuteCheckbox from '../ExecuteCheckbox'
 import { useImmediatelyExecutable, useValidateNonce } from './hooks'
-import ExecuteForm from './ExecuteForm'
+import ExecuteForm from '@/components/tx-flow/actions/Execute/ExecuteForm'
 import SignForm from './SignForm'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import ErrorMessage from '../ErrorMessage'
-import TxChecks from './TxChecks'
+import TxChecks from '@/components/tx-flow/features/TxChecks/TxChecks'
 import TxCard from '@/components/tx-flow/common/TxCard'
 import ConfirmationTitle, { ConfirmationTitleTypes } from '@/components/tx/SignOrExecuteForm/ConfirmationTitle'
 import { useAppSelector } from '@/store'
@@ -20,8 +20,12 @@ import { ErrorBoundary } from '@sentry/react'
 import ApprovalEditor from '../ApprovalEditor'
 import { isDelegateCall } from '@/services/tx/tx-sender/sdk'
 import useChainId from '@/hooks/useChainId'
-import ExecuteThroughRoleForm from './ExecuteThroughRoleForm'
-import { findAllowingRole, findMostLikelyRole, useRoles } from './ExecuteThroughRoleForm/hooks'
+import ExecuteThroughRoleForm from '@/components/tx-flow/actions/ExecuteThroughRole/ExecuteThroughRoleForm'
+import {
+  findAllowingRole,
+  findMostLikelyRole,
+  useRoles,
+} from '@/components/tx-flow/actions/ExecuteThroughRole/ExecuteThroughRoleForm/hooks'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import { BlockaidBalanceChanges } from '../security/blockaid/BlockaidBalanceChange'
 import { Blockaid } from '../security/blockaid'
@@ -30,7 +34,7 @@ import { useApprovalInfos } from '../ApprovalEditor/hooks/useApprovalInfos'
 import type { TransactionDetails, TransactionPreview } from '@safe-global/safe-gateway-typescript-sdk'
 import NetworkWarning from '@/components/new-safe/create/NetworkWarning'
 import ConfirmationView from '../confirmation-views'
-import { SignerForm } from './SignerForm'
+import { SignerForm } from '@/components/tx-flow/features/SignerSelect/SignerForm'
 import { useSigner } from '@/hooks/wallets/useWallet'
 import { trackTxEvents } from './tracking'
 import { TxNoteForm, encodeTxNote, trackAddNote } from '@/features/tx-notes'
@@ -48,7 +52,6 @@ export type SignOrExecuteProps = {
   onlyExecute?: boolean
   disableSubmit?: boolean
   origin?: string
-  showMethodCall?: boolean
 }
 
 export const SignOrExecuteForm = ({
@@ -151,7 +154,16 @@ export const SignOrExecuteForm = ({
     }
 
     if (!isCounterfactualSafe && willExecute && !isProposing) {
-      return <ExecuteForm {...commonProps} />
+      return (
+        <ExecuteForm
+          {...commonProps}
+          options={[{ label: 'Execute', id: 'execute' }]}
+          slotId="execute"
+          onChange={() => {}}
+          onSubmit={() => {}}
+          onSubmitSuccess={({ txId, isExecuted } = {}) => onFormSubmit(txId!, isExecuted)}
+        />
+      )
     }
 
     if (!isCounterfactualSafe && willExecuteThroughRole) {
@@ -180,13 +192,11 @@ export const SignOrExecuteForm = ({
         {props.children}
 
         <ConfirmationView
-          txId={props.txId}
           isCreation={isCreation}
           txDetails={props.txDetails}
           txPreview={props.txPreview}
           safeTx={safeTx}
           isBatch={props.isBatch}
-          showMethodCall={props.showMethodCall}
           isApproval={isApproval}
         >
           {!props.isRejection && (

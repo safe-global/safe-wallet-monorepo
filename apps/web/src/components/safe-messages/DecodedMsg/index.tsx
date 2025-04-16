@@ -38,7 +38,7 @@ const DecodedTypedObject = ({ displayedType, eip712Msg }: { displayedType: strin
         const inlineType = isAddress(paramValue as string) ? 'address' : isByte(type) ? 'bytes' : undefined
         const paramValueAsString = typeof paramValue === 'string' ? paramValue : JSON.stringify(paramValue, null, 2)
         return (
-          <TxDataRow key={`${displayedType}_param-${index}`} title={`${param[0]}(${type}):`}>
+          <TxDataRow key={`${displayedType}_param-${index}`} title={`${param[0]}(${type})`}>
             {isNested ? (
               <Box
                 className={css.nestedMsg}
