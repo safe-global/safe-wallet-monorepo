@@ -22,6 +22,7 @@ import SearchIcon from '@/public/images/common/search.svg'
 import { debounce } from 'lodash'
 import { useContactSearch } from '@/features/spaces/components/SpaceAddressBook/useContactSearch'
 import { createContactItems, flattenAddressBook } from '@/features/spaces/components/SpaceAddressBook/utils'
+import useChains from '@/hooks/useChains'
 
 export type ImportContactsFormValues = {
   contacts: Record<string, string | undefined> // e.g. "1:0x123": "Alice"
@@ -30,13 +31,20 @@ export type ImportContactsFormValues = {
 const ImportAddressBookDialog = ({ handleClose }: { handleClose: () => void }) => {
   const [error, setError] = useState<string>()
   const [searchQuery, setSearchQuery] = useState('')
+  const { configs } = useChains()
 
   const allAddressBooks = useAllAddressBooks()
-  const allContactItems = useMemo(() => flattenAddressBook(allAddressBooks), [allAddressBooks])
+  const allContactItems = useMemo(
+    () =>
+      flattenAddressBook(allAddressBooks).filter((contactItem) =>
+        configs.some((chain) => chain.chainId === contactItem.chainId),
+      ),
+    [allAddressBooks, configs],
+  )
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const handleSearch = useCallback(debounce(setSearchQuery, 300), [])
-  const filteredEntries = useContactSearch(allAddressBooks, searchQuery)
+  const filteredEntries = useContactSearch(allContactItems, searchQuery)
 
   const formMethods = useForm<ImportContactsFormValues>({
     mode: 'onChange',
