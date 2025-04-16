@@ -39,7 +39,6 @@ export const RecipientRow = ({ fieldArray, removable = true, remove, disableSpen
     formState: { errors },
     trigger,
     watch,
-    clearErrors,
   } = useFormContext<MultiTokenTransferParams>()
 
   const { setNonceNeeded } = useContext(SafeTxContext)
@@ -74,9 +73,8 @@ export const RecipientRow = ({ fieldArray, removable = true, remove, disableSpen
 
   const onRemove = useCallback(() => {
     remove?.(fieldArray.index)
-    clearErrors(MultiTokenTransferFields.recipients)
     trigger(MultiTokenTransferFields.recipients)
-  }, [remove, fieldArray.index, clearErrors, trigger])
+  }, [remove, fieldArray.index, trigger])
 
   useEffect(() => {
     setNonceNeeded(!isSpendingLimitType || spendingLimitAmount === 0n)
