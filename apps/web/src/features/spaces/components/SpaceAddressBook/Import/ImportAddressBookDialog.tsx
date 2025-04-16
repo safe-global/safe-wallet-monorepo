@@ -21,11 +21,7 @@ import css from '@/features/spaces/components/AddAccounts/styles.module.css'
 import SearchIcon from '@/public/images/common/search.svg'
 import { debounce } from 'lodash'
 import { useContactSearch } from '@/features/spaces/components/SpaceAddressBook/useContactSearch'
-import {
-  createContactItems,
-  flattenAddressBook,
-  getContactId,
-} from '@/features/spaces/components/SpaceAddressBook/utils'
+import { createContactItems, flattenAddressBook } from '@/features/spaces/components/SpaceAddressBook/utils'
 
 export type ImportContactsFormValues = {
   contacts: Record<string, string | undefined> // e.g. "1:0x123": "Alice"
@@ -49,17 +45,10 @@ const ImportAddressBookDialog = ({ handleClose }: { handleClose: () => void }) =
     },
   })
 
-  const { handleSubmit, formState, setValue, watch } = formMethods
+  const { handleSubmit, formState, watch } = formMethods
 
   const selectedContacts = watch('contacts')
   const selectedContactsLength = Object.values(selectedContacts).filter(Boolean)
-
-  const selectAll = () => {
-    allContactItems.forEach((item) => {
-      const itemId = getContactId(item)
-      setValue(`contacts.${itemId}`, item.name)
-    })
-  }
 
   const onSubmit = handleSubmit(async (data) => {
     setError(undefined)
@@ -121,10 +110,6 @@ const ImportAddressBookDialog = ({ handleClose }: { handleClose: () => void }) =
                 ) : (
                   <ContactsList contactItems={allContactItems} />
                 )}
-
-                <Box m={2}>
-                  <Button onClick={selectAll}>Select all</Button>
-                </Box>
 
                 {error && (
                   <Alert severity="error" sx={{ mt: 2 }}>
