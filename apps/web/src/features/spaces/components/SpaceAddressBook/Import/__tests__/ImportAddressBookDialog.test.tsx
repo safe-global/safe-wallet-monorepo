@@ -4,12 +4,20 @@ import userEvent from '@testing-library/user-event'
 import ImportAddressBookDialog from '../ImportAddressBookDialog'
 import useAllAddressBooks from '@/hooks/useAllAddressBooks'
 import { render } from '@/tests/test-utils'
+import useChains from '@/hooks/useChains'
+import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
 
 jest.mock('@/hooks/useAllAddressBooks')
+jest.mock('@/hooks/useChains')
 const mockedUseAllAddressBooks = useAllAddressBooks as jest.MockedFunction<typeof useAllAddressBooks>
+const mockedUseChains = useChains as jest.MockedFunction<typeof useChains>
 const consoleLogSpy = jest.spyOn(console, 'log').mockImplementation(() => {})
 
 describe('ImportAddressBookDialog', () => {
+  beforeEach(() => {
+    mockedUseChains.mockReturnValue({ configs: [{ chainId: '1' } as ChainInfo, { chainId: '5' } as ChainInfo] })
+  })
+
   afterAll(() => {
     consoleLogSpy.mockRestore()
   })
@@ -47,31 +55,6 @@ describe('ImportAddressBookDialog', () => {
     expect(handleClose).toHaveBeenCalledTimes(1)
   })
 
-  it('selects all contacts when "Select all" is clicked', async () => {
-    mockedUseAllAddressBooks.mockReturnValue({
-      '1': {
-        '0x123': 'Alice',
-        '0x456': 'Bob',
-      },
-      '5': {
-        '0xABC': 'Charlie',
-      },
-    })
-    const handleClose = jest.fn()
-
-    render(<ImportAddressBookDialog handleClose={handleClose} />)
-
-    const selectAllButton = screen.getByText(/select all/i)
-    expect(selectAllButton).toBeInTheDocument()
-
-    const importButton = screen.getByText(/Import contacts \(0\)/i)
-    expect(importButton).toBeInTheDocument()
-
-    await userEvent.click(selectAllButton)
-
-    expect(screen.getByText(/Import contacts \(3\)/i)).toBeInTheDocument()
-  })
-
   it('submits the form and logs the result to console', async () => {
     mockedUseAllAddressBooks.mockReturnValue({
       '1': {
@@ -85,8 +68,11 @@ describe('ImportAddressBookDialog', () => {
 
     render(<ImportAddressBookDialog handleClose={handleClose} />)
 
-    const selectAllButton = screen.getByText(/select all/i)
-    await userEvent.click(selectAllButton)
+    const selectAliceButton = screen.getByText(/Alice/i)
+    await userEvent.click(selectAliceButton)
+
+    const selectCharlieButton = screen.getByText(/Charlie/i)
+    await userEvent.click(selectCharlieButton)
 
     const importButton = screen.getByText(/Import contacts \(2\)/i)
     expect(importButton).toBeInTheDocument()

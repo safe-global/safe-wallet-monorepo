@@ -1,34 +1,28 @@
 import { useMemo } from 'react'
 import Fuse from 'fuse.js'
-import type { AddressBookState } from '@/store/addressBookSlice'
 import type { ContactItem } from '@/features/spaces/components/SpaceAddressBook/Import/ContactsList'
-import { flattenAddressBook } from '@/features/spaces/components/SpaceAddressBook/utils'
 
 /**
  * Custom hook to filter the address book by a search query.
  *
- * @param addressBookState - The entire address book state.
+ * @param contactItems - The contact items
  * @param searchQuery - The string to filter by (address or name).
  * @returns A list of objects matching the search query.
  */
-export function useContactSearch(addressBookState: AddressBookState, searchQuery: string): ContactItem[] {
-  const flattenedAddresses = useMemo<ContactItem[]>(() => {
-    return flattenAddressBook(addressBookState)
-  }, [addressBookState])
-
+export function useContactSearch(contactItems: ContactItem[], searchQuery: string): ContactItem[] {
   const fuse = useMemo(() => {
-    return new Fuse<ContactItem>(flattenedAddresses, {
+    return new Fuse<ContactItem>(contactItems, {
       keys: ['address', 'name'],
       includeScore: true,
       threshold: 0.3,
     })
-  }, [flattenedAddresses])
+  }, [contactItems])
 
   const results = useMemo(() => {
-    if (!searchQuery) return flattenedAddresses
+    if (!searchQuery) return contactItems
 
     return fuse.search(searchQuery).map((result) => result.item)
-  }, [searchQuery, flattenedAddresses, fuse])
+  }, [searchQuery, contactItems, fuse])
 
   return results
 }

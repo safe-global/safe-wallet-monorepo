@@ -1,7 +1,7 @@
 import ChainIndicator from '@/components/common/ChainIndicator'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import css from '@/features/spaces/components/AddAccounts/styles.module.css'
-import { Box, Checkbox, List, ListItem } from '@mui/material'
+import { Box, Checkbox, List, ListItem, Tooltip } from '@mui/material'
 import ListItemButton from '@mui/material/ListItemButton'
 import ListItemIcon from '@mui/material/ListItemIcon'
 import ListItemText from '@mui/material/ListItemText'
@@ -57,29 +57,34 @@ const ContactsList = ({ contactItems }: { contactItems: ContactItem[] }) => {
               }
 
               return (
-                <ListItem className={css.safeItem} disablePadding>
-                  <ListItemButton onClick={handleItemClick} disabled={alreadyAdded || isSameAddressSelected}>
-                    <ListItemIcon onClick={(e) => e.stopPropagation()}>
-                      <Checkbox
-                        checked={isSelected || alreadyAdded}
-                        onChange={(event) => field.onChange(event.target.checked ? contactItem.name : undefined)}
+                <Tooltip
+                  title={isSameAddressSelected ? 'There is already an item with this address selected' : undefined}
+                  arrow
+                >
+                  <ListItem className={css.safeItem} disablePadding>
+                    <ListItemButton onClick={handleItemClick} disabled={alreadyAdded || isSameAddressSelected}>
+                      <ListItemIcon onClick={(e) => e.stopPropagation()}>
+                        <Checkbox
+                          checked={isSelected || alreadyAdded}
+                          onChange={(event) => field.onChange(event.target.checked ? contactItem.name : undefined)}
+                        />
+                      </ListItemIcon>
+                      <ListItemText
+                        primary={
+                          <Box className={css.safeRow}>
+                            <EthHashInfo
+                              address={contactItem.address}
+                              chainId={contactItem.chainId}
+                              name={contactItem.name}
+                              copyAddress={false}
+                            />
+                            <ChainIndicator chainId={contactItem.chainId} responsive onlyLogo />
+                          </Box>
+                        }
                       />
-                    </ListItemIcon>
-                    <ListItemText
-                      primary={
-                        <Box className={css.safeRow}>
-                          <EthHashInfo
-                            address={contactItem.address}
-                            chainId={contactItem.chainId}
-                            name={contactItem.name}
-                            copyAddress={false}
-                          />
-                          <ChainIndicator chainId={contactItem.chainId} responsive onlyLogo />
-                        </Box>
-                      }
-                    />
-                  </ListItemButton>
-                </ListItem>
+                    </ListItemButton>
+                  </ListItem>
+                </Tooltip>
               )
             }}
           />
