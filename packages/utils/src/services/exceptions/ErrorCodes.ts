@@ -13,12 +13,11 @@ enum ErrorCodes {
   _104 = '104: Invalid chain short name in the URL',
   _105 = '105: Error connecting to the blockchain',
   _106 = '106: Failed to get connected wallet',
+  _107 = '107: Error connecting to the wallet',
+  _108 = '108: Error disconnecting the wallet',
 
-  _302 = '302: Error connecting to the wallet',
-  _304 = '304: Error enabling MFA',
-  _305 = '305: Error exporting account key',
-  _306 = '306: Error logging in',
-  _307 = '307: Error attempted new account creation',
+  _200 = '200: Tenderly simulation failed',
+  _201 = '201: Blockaid scan failed',
 
   _400 = '400: Error requesting browser notification permissions',
   _401 = '401: Error tracking push notifications',

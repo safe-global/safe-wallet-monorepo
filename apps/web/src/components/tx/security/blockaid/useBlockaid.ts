@@ -13,6 +13,7 @@ import {
   type BlockaidModuleResponse,
 } from '@safe-global/utils/services/security/modules/BlockaidModule'
 import { FEATURES } from '@safe-global/utils/utils/chains'
+import { Errors, logError } from '@/services/exceptions'
 
 const BlockaidModuleInstance = new BlockaidModule()
 
@@ -58,5 +59,10 @@ export const useBlockaid = (
 
     [blockaidErrors, blockaidPayload],
   )
+
+  useEffect(() => {
+    logError(Errors._201, errorMsg)
+  }, [errorMsg])
+
   return [blockaidPayload, errorMsg, loading]
 }

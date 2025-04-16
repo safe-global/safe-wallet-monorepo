@@ -1879,6 +1879,27 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@datadog/browser-core@npm:6.6.3":
+  version: 6.6.3
+  resolution: "@datadog/browser-core@npm:6.6.3"
+  checksum: 10/2b0ccf614bd0c1e99dbd916ae7308fccddc4d1330f4e9dc28c66a11481db5222f7ffc8ca7eff985dc7359810d295adacb535ccf4c095ba02ec1e03472855d907
+  languageName: node
+  linkType: hard
+
+"@datadog/browser-logs@npm:^6.6.3":
+  version: 6.6.3
+  resolution: "@datadog/browser-logs@npm:6.6.3"
+  dependencies:
+    "@datadog/browser-core": "npm:6.6.3"
+  peerDependencies:
+    "@datadog/browser-rum": 6.6.3
+  peerDependenciesMeta:
+    "@datadog/browser-rum":
+      optional: true
+  checksum: 10/2a347917afd3739d672daac3cd5113cae4e8b94d87542775a6e81ff86661837e39bda3457b8d0b32784ef76f4ad2191b0912ea184620dbe0a0eadf76528691bf
+  languageName: node
+  linkType: hard
+
 "@discoveryjs/json-ext@npm:0.5.7":
   version: 0.5.7
   resolution: "@discoveryjs/json-ext@npm:0.5.7"
@@ -8469,6 +8490,7 @@ __metadata:
     "@chromatic-com/storybook": "npm:^1.3.1"
     "@cowprotocol/app-data": "npm:^2.4.0"
     "@cowprotocol/widget-react": "npm:^0.13.0"
+    "@datadog/browser-logs": "npm:^6.6.3"
     "@ducanh2912/next-pwa": "npm:^10.2.9"
     "@emotion/cache": "npm:^11.13.5"
     "@emotion/react": "npm:^11.13.5"
