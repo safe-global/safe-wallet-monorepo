@@ -1,6 +1,6 @@
-import { DATADOG_CLIENT_TOKEN, IS_PRODUCTION } from '@/config/constants'
-import { datadogLogs } from '@datadog/browser-logs'
 import { useEffect } from 'react'
+import { datadogLogs } from '@datadog/browser-logs'
+import { DATADOG_CLIENT_TOKEN, IS_PRODUCTION } from '@/config/constants'
 
 let isDatadogInitialized = false
 
