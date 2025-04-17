@@ -19,6 +19,11 @@ jest.mock('@/services/tx/proposeTransaction', () => ({
   default: jest.fn(() => Promise.resolve({ txId: '123' })),
 }))
 
+jest.mock('@/hooks/useValidateTxData', () => ({
+  __esModule: true,
+  useValidateTxData: jest.fn().mockReturnValue([undefined, undefined, false]),
+}))
+
 describe('SignOrExecute', () => {
   beforeEach(() => {
     isSafeOwner = true
@@ -35,7 +40,7 @@ describe('SignOrExecute', () => {
     jest.spyOn(useTxPreviewHooks, 'default').mockReturnValue([
       {
         txInfo: {},
-        txData: {},
+        txData: { to: { value: '0xE20CcFf2c38Ef3b64109361D7b7691ff2c7D5f67' } },
       } as TransactionPreview,
       undefined,
       false,

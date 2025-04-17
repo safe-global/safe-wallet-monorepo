@@ -13,7 +13,7 @@ const safeIcon = '[data-testid="safe-icon"]'
 const sidebarContainer = '[data-testid="sidebar-container"]'
 const openSafesIcon = '[data-testid="open-safes-icon"]'
 const qrModalBtn = '[data-testid="qr-modal-btn"]'
-const copyAddressBtn = '[data-testid="copy-address-btn"]'
+export const copyAddressBtn = '[data-testid="copy-address-btn"]'
 const explorerBtn = '[data-testid="explorer-btn"]'
 export const sideBarListItem = '[data-testid="sidebar-list-item"]'
 const sideBarListItemWhatsNew = '[data-testid="list-item-whats-new"]'
@@ -61,11 +61,65 @@ const emptyAccountList = '[data-testid="empty-account-list"]'
 const searchInput = '[id="search-by-name"]'
 const accountsList = '[data-testid="accounts-list"]'
 const sortbyBtn = '[data-testid="sortby-button"]'
+export const currentSafeSection = '[data-testid="current-safe-section"]'
+const readOnlyChip = '[data-testid="read-only-chip"]'
+const addSafeBtn = '[data-testid="add-safe-button"]'
+const indexStatusSection = '[data-testid="index-status"]'
+const needHelpBtn = '[data-testid="need-help-btn"]'
+const openNestedSafeListBtn = '[data-track="nested-safes: Open nested Safe list"]'
+const nestedSafeListPopover = '[data-testid="nested-safe-list"]'
+const breadcrumpContainer = '[data-testid="safe-breadcrumb-container"]'
+const parentSafeItem = 'div[aria-label="Parent Safe"]'
+const nestedSafeItem = 'div[aria-label="Nested Safe"]'
+const safeIconItem = '[data-testid="safe-icon"]'
+
+export function clickOnOpenNestedSafeListBtn() {
+  cy.get(openNestedSafeListBtn).click()
+}
+
+export function checkSafesInPopverList(safes) {
+  main.verifyValuesExist(nestedSafeListPopover, safes)
+}
+
+export function checkSafesCountInPopverList(number) {
+  main.verifyElementsCount(nestedSafeListPopover, number)
+}
+
+export function clickOnSafeInPopover(safe) {
+  cy.get(nestedSafeListPopover).within(() => {
+    cy.contains(safe).click()
+  })
+}
+
+export function clickOnParentSafeInBreadcrumb() {
+  cy.wait(1000) // Needs time to render
+  cy.get(breadcrumpContainer).within(() => {
+    cy.get(parentSafeItem).within(() => {
+      cy.get('a').click()
+    })
+  })
+}
+
+export function checkParentSafeInBreadcrumb(name, address) {
+  cy.get(breadcrumpContainer).within(() => {
+    cy.get(parentSafeItem).within(() => {
+      cy.get(`a[href*="${address}"]`).should('contain', name)
+    })
+  })
+}
+
+export function checkNestedSafeInBreadcrumb(name) {
+  cy.get(breadcrumpContainer).within(() => {
+    cy.get(nestedSafeItem).within(() => {
+      cy.get('p').should('contain', name)
+    })
+  })
+}
 
 export const importBtnStr = 'Import'
 export const exportBtnStr = 'Export'
 export const undeployedSafe = 'Undeployed Sepolia'
-const notActivatedStr = 'Not activated'
+export const notActivatedStr = 'Not activated'
 export const addingNetworkNotPossibleStr = 'Adding another network is not possible for this Safe.'
 export const createSafeMsg = (network) => `Successfully added your account on ${network}`
 const signersNotConsistentMsg = 'Signers are not consistent'
@@ -106,13 +160,23 @@ const confirmTxStr = (number) => `${number} to confirm`
 const pedningTxStr = (n) => `${n} pending`
 export const confirmGenStr = 'to confirm'
 const searchResults = (number) => `Found ${number} result${number === 1 ? '' : 's'}`
+const needHelpLink = 'https://help.safe.global'
 
 export const sortOptions = {
   lastVisited: '[data-testid="last-visited-option"]',
   name: '[data-testid="name-option"]',
 }
+
+export function whatsNewBtnIsVisible() {
+  cy.get(sideBarListItemWhatsNew).should('be.visible')
+}
+
 export function checkSearchResults(number) {
   cy.contains(searchResults(number)).should('exist')
+}
+
+export function checkNeedHelpBtnLink() {
+  cy.get(needHelpBtn).find('a').should('have.attr', 'href', needHelpLink)
 }
 
 export const multichainSafes = {
@@ -121,7 +185,7 @@ export const multichainSafes = {
 }
 
 export function searchSafe(safe) {
-  cy.get(searchInput).clear().type(safe)
+  cy.get(searchInput).clear().type(safe, { force: true })
 }
 
 export function openSortOptionsMenu() {
@@ -157,6 +221,33 @@ export function verifyPinnedSafe(safe) {
   })
 }
 
+export function verifyCurrentSafe(safe) {
+  cy.get(currentSafeSection).within(() => {
+    cy.get(sideSafeListItem).contains(safe)
+  })
+}
+
+export function verifyCurrentSafeReadOnly(number) {
+  cy.get(currentSafeSection).within(() => {
+    cy.get(readOnlyChip).should('have.length', number)
+  })
+}
+
+export function verifyIndexStatusPresent() {
+  cy.get(indexStatusSection).within(() => {
+    cy.get('a').should('have.attr', 'href', constants.indexStatusUrl)
+  })
+}
+
+export function clickOnAddSafeBtn() {
+  cy.get(addSafeBtn).click()
+  cy.url().should('include', constants.loadNewSafeUrl)
+}
+
+export function verifyCurrentSafeDoesNotExist() {
+  cy.get(currentSafeSection).should('not.exist')
+}
+
 export function getImportBtn() {
   return cy.get(importBtn).scrollIntoView().should('be.visible')
 }
@@ -164,6 +255,18 @@ export function clickOnSidebarImportBtn() {
   getImportBtn().click()
   modal.verifyModalTitle(modal.modalTitiles.dataImport)
   file.verifyValidImportInputExists()
+}
+
+export function clickOnCopyAddressBtn(expectedData) {
+  cy.window().then((win) => {
+    cy.stub(win.navigator.clipboard, 'writeText').as('clipboardWrite')
+  })
+  cy.get(copyAddressBtn).click()
+  cy.get('@clipboardWrite', { timeout: 10000 }).should('have.been.called')
+  cy.get('@clipboardWrite').then((stub) => {
+    const actualCallArgs = stub.args[0][0]
+    expect(actualCallArgs).to.include(expectedData)
+  })
 }
 
 export function showAllSafes() {
@@ -200,11 +303,7 @@ export function verifySafeHeaderDetails(details) {
 }
 
 export function clickOnQRCodeBtn() {
-  cy.get(sidebarContainer)
-    .should('be.visible')
-    .within(() => {
-      cy.get(qrModalBtn).click()
-    })
+  cy.get(qrModalBtn).should('be.visible').click()
 }
 
 export function verifyQRModalDisplayed() {
@@ -266,6 +365,12 @@ export function verifyAccountListSafeCount(count) {
   })
 }
 
+export function verifyAccountListSafeData(data) {
+  cy.get(accountsList).within(() => {
+    main.verifyValuesExist(sideSafeListItem, [data])
+  })
+}
+
 export function clickOnOpenSidebarBtn() {
   cy.get(openSafesIcon).click()
 }
@@ -322,6 +427,10 @@ export function verifyMissingSignature(safe) {
 
 export function verifyQueuedTx(safe) {
   return getSafeItemOptions(safe).find(queuedTxInfo).should('exist')
+}
+
+export function verifySafeIconData(safe) {
+  return getSafeByName(safe).find(safeIconItem).should('be.visible')
 }
 
 export function clickOnSafeItemOptionsBtn(name) {
@@ -533,8 +642,12 @@ export function checkBalanceExists() {
   const element = cy.get(chainLogo).prev().contains(balance)
 }
 
-export function checkAddChainDialogDisplayed() {
+export function clickOnAddOptionsBtn() {
   cy.get(safeItemOptionsAddChainBtn).click()
+}
+
+export function checkAddChainDialogDisplayed() {
+  clickOnAddOptionsBtn()
   cy.get(addChainDialog).should('be.visible')
 }
 
@@ -599,7 +712,7 @@ function getNetworkElements() {
 }
 
 export function checkNetworkDisabled(networks) {
-  getNetworkElements().should('have.length', 20)
+  getNetworkElements().should('have.length.gte', 20)
   getNetworkElements().each(($el) => {
     const text = $el[0].innerText.trim()
     console.log(`Element text: ${text}`)

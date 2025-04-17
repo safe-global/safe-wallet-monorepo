@@ -81,7 +81,7 @@ const SafeModules = () => {
             <Typography>
               Modules allow you to customize the access-control logic of your Safe Account. Modules are potentially
               risky, so make sure to only use modules from trusted sources. Learn more about modules{' '}
-              <ExternalLink href="https://docs.safe.global/safe-core-protocol/plugins">here</ExternalLink>
+              <ExternalLink href="https://help.safe.global/en/articles/40827-what-is-a-module">here</ExternalLink>
             </Typography>
             {safeModules.length === 0 ? (
               <NoModules />
@@ -91,7 +91,7 @@ const SafeModules = () => {
                   key={module.value}
                   chainId={safe.chainId}
                   moduleAddress={module.value}
-                  name={module.name}
+                  name={module.name || undefined}
                 />
               ))
             )}

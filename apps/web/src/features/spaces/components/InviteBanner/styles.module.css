@@ -1,0 +1,49 @@
+.previewInviteContent {
+  display: flex;
+  flex-direction: row;
+  gap: var(--space-2);
+}
+
+.spacesListInviteContent {
+  display: flex;
+  flex-direction: row;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.inviteButtonContainer {
+  display: flex;
+  flex-direction: row;
+  gap: var(--space-1);
+}
+
+.inviteButton {
+  padding: 4px var(--space-2);
+  min-height: 32px;
+}
+
+@media (max-width: 600px) {
+  .previewInviteContent {
+    flex-direction: column;
+    gap: var(--space-1);
+  }
+
+  .spacesListInviteContent {
+    flex-direction: column;
+    gap: var(--space-1);
+    align-items: flex-start;
+  }
+
+  .inviteButtonContainer {
+    flex-direction: column;
+    gap: var(--space-1);
+    width: 100%;
+  }
+
+  .inviteButton {
+    width: 100%;
+    padding-top: var(--space-1);
+    padding-bottom: var(--space-1);
+    min-height: 40px;
+  }
+}

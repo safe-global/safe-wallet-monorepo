@@ -7,7 +7,7 @@ import PlusIcon from '@/public/images/common/plus.svg'
 import EthHashInfo from '@/components/common/EthHashInfo'
 
 import css from './styles.module.css'
-import { maybePlural } from '@/utils/formatters'
+import { maybePlural } from '@safe-global/utils/utils/formatters'
 
 export function OwnerList({
   title,

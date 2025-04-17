@@ -13,9 +13,9 @@ import { AppRoutes } from '@/config/routes'
 import useSafeAppsFilters from '@/hooks/safe-apps/useSafeAppsFilters'
 import SafeAppsFilters from '@/components/safe-apps/SafeAppsFilters'
 import { useHasFeature } from '@/hooks/useChains'
-import { FEATURES } from '@/utils/chains'
 import { SAFE_APPS_LABELS } from '@/services/analytics'
 import { BRAND_NAME } from '@/config/constants'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 
 const SafeApps: NextPage = () => {
   const router = useRouter()

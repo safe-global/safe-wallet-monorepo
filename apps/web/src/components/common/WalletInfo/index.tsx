@@ -6,11 +6,14 @@ import EthHashInfo from '@/components/common/EthHashInfo'
 import ChainSwitcher from '@/components/common/ChainSwitcher'
 import useOnboard, { type ConnectedWallet, switchWallet } from '@/hooks/wallets/useOnboard'
 import useAddressBook from '@/hooks/useAddressBook'
-import { useAppSelector } from '@/store'
+import { useAppDispatch, useAppSelector } from '@/store'
 import { selectChainById } from '@/store/chainsSlice'
 import madProps from '@/utils/mad-props'
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew'
 import useChainId from '@/hooks/useChainId'
+import { useAuthLogoutV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/auth'
+import { setUnauthenticated } from '@/store/authSlice'
+import { logError, Errors } from '@/services/exceptions'
 
 type WalletInfoProps = {
   wallet: ConnectedWallet
@@ -22,6 +25,8 @@ type WalletInfoProps = {
 }
 
 export const WalletInfo = ({ wallet, balance, currentChainId, onboard, addressBook, handleClose }: WalletInfoProps) => {
+  const [authLogout] = useAuthLogoutV1Mutation()
+  const dispatch = useAppDispatch()
   const chainInfo = useAppSelector((state) => selectChainById(state, wallet.chainId))
   const prefix = chainInfo?.shortName
 
@@ -32,10 +37,16 @@ export const WalletInfo = ({ wallet, balance, currentChainId, onboard, addressBo
     }
   }
 
-  const handleDisconnect = () => {
+  const handleDisconnect = async () => {
     onboard?.disconnectWallet({
       label: wallet.label,
     })
+    try {
+      await authLogout()
+      dispatch(setUnauthenticated())
+    } catch (error) {
+      logError(Errors._108, error)
+    }
 
     handleClose()
   }

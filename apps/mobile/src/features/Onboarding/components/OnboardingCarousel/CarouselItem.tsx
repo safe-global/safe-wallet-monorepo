@@ -1,4 +1,5 @@
-import { Text, View, YStack } from 'tamagui'
+import { getTokenValue, Text, View, YStack } from 'tamagui'
+import React from 'react'
 
 export type CarouselItem = {
   title: string | React.ReactNode
@@ -10,16 +11,20 @@ export type CarouselItem = {
 
 interface CarouselItemProps {
   item: CarouselItem
+  testID?: string
 }
 
-export const CarouselItem = ({ item: { title, description, image, imagePosition = 'top' } }: CarouselItemProps) => {
+export const CarouselItem = ({
+  item: { title, description, image, imagePosition = 'top' },
+  testID,
+}: CarouselItemProps) => {
   return (
-    <View gap="$8" alignItems="center" justifyContent="center">
+    <View gap="$8" alignItems="center" justifyContent="center" testID={testID}>
       {imagePosition === 'top' && image}
       <YStack gap="$8" paddingHorizontal="$5">
         <YStack>{title}</YStack>
 
-        <Text textAlign="center" fontSize={'$4'}>
+        <Text textAlign="center" fontSize={'$4'} color={getTokenValue('$color.textContrastDark')}>
           {description}
         </Text>
       </YStack>

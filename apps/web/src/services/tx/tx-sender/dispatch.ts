@@ -1,13 +1,10 @@
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import { isMultisigExecutionInfo } from '@/utils/transaction-guards'
-import { isHardwareWallet, isSmartContractWallet } from '@/utils/wallets'
+import { isEthSignWallet, isSmartContractWallet } from '@/utils/wallets'
 import type { MultiSendCallOnlyContractImplementationType } from '@safe-global/protocol-kit'
-import {
-  type ChainInfo,
-  relayTransaction,
-  type SafeInfo,
-  type TransactionDetails,
-} from '@safe-global/safe-gateway-typescript-sdk'
+import { type ChainInfo, relayTransaction, type TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
+import { type SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
+
 import type {
   SafeSignature,
   SafeTransaction,
@@ -33,10 +30,11 @@ import {
   prepareApproveTxHash,
 } from './sdk'
 import { createWeb3, getUserNonce } from '@/hooks/wallets/web3'
-import { asError } from '@/services/exceptions/utils'
+import { asError } from '@safe-global/utils/services/exceptions/utils'
 import chains from '@/config/chains'
 import { createExistingTx } from './create'
-import { getLatestSafeVersion } from '@/utils/chains'
+
+import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
 
 /**
  * Propose a transaction
@@ -90,7 +88,6 @@ export const dispatchTxProposal = async ({
  */
 export const dispatchTxSigning = async (
   safeTx: SafeTransaction,
-  safeVersion: SafeInfo['version'],
   provider: Eip1193Provider,
   txId?: string,
 ): Promise<SafeTransaction> => {
@@ -98,7 +95,7 @@ export const dispatchTxSigning = async (
 
   let signedTx: SafeTransaction | undefined
   try {
-    signedTx = await tryOffChainTxSigning(safeTx, safeVersion, sdk)
+    signedTx = await tryOffChainTxSigning(safeTx, sdk)
   } catch (error) {
     txDispatch(TxEvent.SIGN_FAILED, {
       txId,
@@ -117,7 +114,7 @@ export const dispatchProposerTxSigning = async (safeTx: SafeTransaction, wallet:
   const sdk = await getSafeSDKWithSigner(wallet.provider)
 
   let signature: SafeSignature
-  if (isHardwareWallet(wallet)) {
+  if (isEthSignWallet(wallet)) {
     const txHash = await sdk.getTransactionHash(safeTx)
     signature = await sdk.signHash(txHash)
   } else {
@@ -138,7 +135,7 @@ export const dispatchOnChainSigning = async (
   safeTx: SafeTransaction,
   txId: string,
   provider: Eip1193Provider,
-  chainId: SafeInfo['chainId'],
+  chainId: SafeState['chainId'],
   signerAddress: string,
   safeAddress: string,
   isNestedSafe: boolean,
@@ -147,7 +144,10 @@ export const dispatchOnChainSigning = async (
   const safeTxHash = await sdk.getTransactionHash(safeTx)
   const eventParams = { txId, nonce: safeTx.data.nonce }
 
-  const options = chainId === chains.zksync ? { gasLimit: ZK_SYNC_ON_CHAIN_SIGNATURE_GAS_LIMIT } : undefined
+  const options =
+    chainId === chains.zksync || chainId === chains.lens
+      ? { gasLimit: ZK_SYNC_ON_CHAIN_SIGNATURE_GAS_LIMIT }
+      : undefined
   let txHashOrParentSafeTxHash: string
   try {
     // TODO: This is a workaround until there is a fix for unchecked transactions in the protocol-kit
@@ -185,7 +185,7 @@ export const dispatchSafeTxSpeedUp = async (
   txOptions: Omit<TransactionOptions, 'nonce'> & { nonce: number },
   txId: string,
   provider: Eip1193Provider,
-  chainId: SafeInfo['chainId'],
+  chainId: SafeState['chainId'],
   signerAddress: string,
   safeAddress: string,
   nonce: number,
@@ -429,9 +429,9 @@ export const dispatchSpendingLimitTxExecution = async (
   txParams: SpendingLimitTxParams,
   txOptions: TransactionOptions,
   provider: Eip1193Provider,
-  chainId: SafeInfo['chainId'],
+  chainId: SafeState['chainId'],
   safeAddress: string,
-  safeModules: SafeInfo['modules'],
+  safeModules: SafeState['modules'],
 ) => {
   const id = JSON.stringify(txParams)
 
@@ -497,7 +497,7 @@ export const dispatchSafeAppsTx = async (
 
 export const dispatchTxRelay = async (
   safeTx: SafeTransaction,
-  safe: SafeInfo,
+  safe: SafeState,
   txId: string,
   chain: ChainInfo,
   gasLimit?: string | number,

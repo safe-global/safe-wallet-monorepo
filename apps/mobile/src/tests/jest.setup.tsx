@@ -2,6 +2,7 @@ import React from 'react'
 
 import '@testing-library/react-native/extend-expect'
 import mockRNDeviceInfo from 'react-native-device-info/jest/react-native-device-info-mock'
+import mockSafeAreaContext from 'react-native-safe-area-context/jest/mock'
 
 import { server } from './server'
 
@@ -83,7 +84,7 @@ jest.mock('redux-persist', () => {
   const real = jest.requireActual('redux-persist')
   return {
     ...real,
-    persistReducer: jest.fn().mockImplementation((config, reducers) => reducers),
+    persistReducer: jest.fn().mockImplementation((_, reducers) => reducers),
   }
 })
 jest.mock('redux-devtools-expo-dev-plugin', () => ({
@@ -199,6 +200,8 @@ jest.mock('@react-native-clipboard/clipboard', () => ({
   setString: jest.fn(),
   getString: jest.fn(),
 }))
+
+jest.mock('react-native-safe-area-context', () => mockSafeAreaContext)
 
 beforeAll(() => server.listen())
 afterEach(() => server.resetHandlers())

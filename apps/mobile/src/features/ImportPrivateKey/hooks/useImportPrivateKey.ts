@@ -1,15 +1,15 @@
 import { ethers } from 'ethers'
 import { useState } from 'react'
 import Clipboard from '@react-native-clipboard/clipboard'
-import { useSign } from '@/src/hooks/useSign'
-import { useRouter } from 'expo-router'
+import { useLocalSearchParams, useRouter } from 'expo-router'
+import { storePrivateKey } from '@/src/hooks/useSign/useSign'
 
 const ERROR_MESSAGE = 'Invalid private key.'
 export const useImportPrivateKey = () => {
   const [privateKey, setPrivateKey] = useState('')
   const [wallet, setWallet] = useState<ethers.Wallet>()
+  const local = useLocalSearchParams<{ safeAddress: string; chainId: string; import_safe: string }>()
   const [error, setError] = useState<string>()
-  const { storePrivateKey } = useSign()
   const router = useRouter()
 
   const handlePrivateKeyChange = (text: string) => {
@@ -34,6 +34,9 @@ export const useImportPrivateKey = () => {
         pathname: '/import-signers/loading',
         params: {
           address: wallet.address,
+          safeAddress: local.safeAddress,
+          chainId: local.chainId,
+          import_safe: local.import_safe,
         },
       })
     } catch (err) {

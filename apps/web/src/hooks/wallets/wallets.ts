@@ -1,13 +1,11 @@
-import { TREZOR_APP_URL, TREZOR_EMAIL, WC_PROJECT_ID } from '@/config/constants'
+import { WC_PROJECT_ID } from '@/config/constants'
 import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import type { InitOptions } from '@web3-onboard/core'
 import coinbaseModule from '@web3-onboard/coinbase'
 import injectedWalletModule from '@web3-onboard/injected-wallets'
-import ledgerModule from '@web3-onboard/ledger/dist/index'
-import { ledgerModuleV2 } from '@/services/onboard/ledger-module'
-import trezorModule from '@web3-onboard/trezor'
 import walletConnect from '@web3-onboard/walletconnect'
 import pkModule from '@/services/private-key-module'
+import { ledgerModule } from '@/services/onboard/ledger-module'
 
 import { CGW_NAMES, WALLET_KEYS } from './consts'
 
@@ -43,8 +41,6 @@ const WALLET_MODULES: Partial<{ [_key in WALLET_KEYS]: (chain: ChainInfo) => Wal
   [WALLET_KEYS.WALLETCONNECT_V2]: (chain) => walletConnectV2(chain) as WalletInit,
   [WALLET_KEYS.COINBASE]: () => coinbaseModule({ darkMode: prefersDarkMode() }) as WalletInit,
   [WALLET_KEYS.LEDGER]: () => ledgerModule(),
-  [WALLET_KEYS.LEDGER_V2]: () => ledgerModuleV2(),
-  [WALLET_KEYS.TREZOR]: () => trezorModule({ appUrl: TREZOR_APP_URL, email: TREZOR_EMAIL }) as WalletInit,
   [WALLET_KEYS.PK]: (chain) => pkModule(chain.chainId, chain.rpcUri) as WalletInit,
 }
 

@@ -26,13 +26,13 @@ export default {
         NSFaceIDUsageDescription: 'Enabling Face ID allows you to create/access secure keys.',
         UIBackgroundModes: ['remote-notification'],
       },
-      supportsTablet: true,
+      supportsTablet: false,
       appleTeamId: 'MXRS32BBL4',
       bundleIdentifier: IS_DEV ? 'global.safe.mobileapp.dev' : 'global.safe.mobileapp',
       entitlements: {
         'aps-environment': 'production',
       },
-      googleServicesFile: process.env.GOOGLE_SERVICES_PLIST ?? './GoogleService-Info.plist',
+      googleServicesFile: IS_DEV ? process.env.GOOGLE_SERVICES_PLIST_DEV : process.env.GOOGLE_SERVICES_PLIST,
     },
     android: {
       adaptiveIcon: {
@@ -41,7 +41,14 @@ export default {
         monochromeImage: './assets/images/monochrome-icon.png',
       },
       package: IS_DEV ? 'global.safe.mobileapp.dev' : 'global.safe.mobileapp',
-      googleServicesFile: process.env.GOOGLE_SERVICES_JSON ?? './google-services.json',
+      googleServicesFile: IS_DEV ? process.env.GOOGLE_SERVICES_JSON_DEV : process.env.GOOGLE_SERVICES_JSON,
+      permissions: [
+        'android.permission.CAMERA',
+        'android.permission.POST_NOTIFICATIONS',
+        'android.permission.RECEIVE_BOOT_COMPLETED',
+        'android.permission.FOREGROUND_SERVICE',
+        'android.permission.WAKE_LOCK',
+      ],
     },
     web: {
       bundler: 'metro',
@@ -49,6 +56,7 @@ export default {
       favicon: './assets/images/favicon.png',
     },
     plugins: [
+      ['./expo-plugins/withNotificationIcons.js'],
       'expo-router',
       [
         'expo-font',
@@ -73,6 +81,7 @@ export default {
         {
           cameraPermissionText: 'Safe{Wallet} needs access to your Camera to scan QR Codes.',
           enableCodeScanner: true,
+          enableLocation: false,
         },
       ],
       ['./expo-plugins/withDrawableAssets.js', './assets/android/drawable'],
@@ -82,13 +91,42 @@ export default {
           ios: {
             useFrameworks: 'static',
           },
+          android: {
+            extraMavenRepos: ['../../../../node_modules/@notifee/react-native/android/libs'],
+          },
         },
       ],
       '@react-native-firebase/app',
       '@react-native-firebase/messaging',
+      '@react-native-firebase/crashlytics',
+      [
+        'react-native-share',
+        {
+          ios: ['fb', 'instagram', 'twitter', 'tiktoksharesdk'],
+          android: ['com.facebook.katana', 'com.instagram.android', 'com.twitter.android', 'com.zhiliaoapp.musically'],
+          enableBase64ShareAndroid: true,
+        },
+      ],
+      'expo-task-manager',
     ],
     experiments: {
       typedRoutes: true,
+    },
+    notification: {
+      icon: './assets/images/ic_notification.png',
+      color: '#FFFFFF',
+      androidMode: 'default',
+      androidCollapsedTitle: 'Updates from Safe Wallet',
+      iosDisplayInForeground: true,
+    },
+    // Define background tasks
+    tasks: {
+      'app.notifee.notification-event': {
+        backgroundMode: ['processing', 'remote-notification'],
+      },
+      ReactNativeFirebaseMessagingHeadlessTask: {
+        backgroundMode: ['processing', 'remote-notification'],
+      },
     },
   },
 }

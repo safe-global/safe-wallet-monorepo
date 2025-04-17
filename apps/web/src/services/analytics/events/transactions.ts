@@ -13,6 +13,7 @@ export enum TX_TYPES {
 
   // Transfers
   transfer_token = 'transfer_token',
+  batch_transfer_token = 'batch_transfer_token',
   transfer_nft = 'transfer_nft',
 
   // Other

@@ -11,14 +11,28 @@ type QrCameraViewProps = {
   isCameraActive: boolean
   onScan: (codes: Code[]) => void
   onEnterManuallyPress: () => void
+  requestPermission: () => void
+  hasPermission: boolean
+  onActivateCamera: () => void
 }
 
-export const QrCameraView = ({ permission, isCameraActive, onScan, onEnterManuallyPress }: QrCameraViewProps) => (
+export const QrCameraView = ({
+  permission,
+  isCameraActive,
+  onScan,
+  onEnterManuallyPress,
+  requestPermission,
+  hasPermission,
+  onActivateCamera,
+}: QrCameraViewProps) => (
   <>
     <QrCamera
       permission={permission}
+      hasPermission={hasPermission}
+      requestPermission={requestPermission}
       isCameraActive={isCameraActive}
       onScan={onScan}
+      onActivateCamera={onActivateCamera}
       heading={permission === 'denied' ? 'Camera access disabled' : 'Scan a QR code'}
       footer={
         <>
@@ -28,7 +42,12 @@ export const QrCameraView = ({ permission, isCameraActive, onScan, onEnterManual
               : 'Scan the QR code of the account you want to import. You can find it under Receive or in the sidebar.'}
           </Text>
           <View alignItems="center" marginTop="$5">
-            <SafeButton secondary icon={<SafeFontIcon name="copy" />} onPress={onEnterManuallyPress}>
+            <SafeButton
+              secondary
+              icon={<SafeFontIcon name="copy" size={18} />}
+              onPress={onEnterManuallyPress}
+              testID={'enter-manually'}
+            >
               Enter manually
             </SafeButton>
           </View>

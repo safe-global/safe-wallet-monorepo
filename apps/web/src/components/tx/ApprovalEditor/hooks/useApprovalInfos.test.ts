@@ -1,17 +1,21 @@
+import type { TypedData } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import { renderHook } from '@/tests/test-utils'
-import { zeroPadValue, Interface } from 'ethers'
+import { Interface, zeroPadValue } from 'ethers'
 import { type ApprovalInfo, useApprovalInfos } from '@/components/tx/ApprovalEditor/hooks/useApprovalInfos'
 import { waitFor } from '@testing-library/react'
 import { createMockSafeTransaction } from '@/tests/transactions'
 import { OperationType } from '@safe-global/safe-core-sdk-types'
-import { ERC20__factory, Multi_send__factory } from '@/types/contracts'
+import { ERC20__factory, Multi_send__factory } from '@safe-global/utils/types/contracts'
 import * as balances from '@/hooks/useBalances'
-import { type EIP712TypedData, TokenType } from '@safe-global/safe-gateway-typescript-sdk'
+import { TokenType } from '@safe-global/safe-gateway-typescript-sdk'
 import * as getTokenInfo from '@/utils/tokens'
 import { faker } from '@faker-js/faker'
 import { PSEUDO_APPROVAL_VALUES } from '../utils/approvals'
 import { encodeMultiSendData } from '@safe-global/protocol-kit'
-import { checksumAddress } from '@/utils/addresses'
+import { checksumAddress } from '@safe-global/utils/utils/addresses'
+import { UNLIMITED_PERMIT2_AMOUNT } from '@safe-global/utils/utils/tokens'
+import { type Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
+import { type Erc20Token } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
 const ERC20_INTERFACE = ERC20__factory.createInterface()
 
@@ -236,7 +240,8 @@ describe('useApprovalInfos', () => {
 
   it('returns an ApprovalInfo for Permit2 PermitSingle message', async () => {
     const spenderAddress = faker.finance.ethereumAddress()
-    const mockMessage: EIP712TypedData = {
+    const mockMessage: TypedData = {
+      primaryType: 'PermitSingle',
       types: {
         EIP712Domain: [
           {
@@ -305,7 +310,7 @@ describe('useApprovalInfos', () => {
     const { result } = renderHook(() => useApprovalInfos({ safeMessage: mockMessage }))
 
     const mockApproval: ApprovalInfo = {
-      amount: BigInt(getTokenInfo.UNLIMITED_PERMIT2_AMOUNT),
+      amount: BigInt(UNLIMITED_PERMIT2_AMOUNT),
       amountFormatted: PSEUDO_APPROVAL_VALUES.UNLIMITED,
       spender: spenderAddress,
       tokenAddress: '0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174'.toLowerCase(),
@@ -324,7 +329,8 @@ describe('useApprovalInfos', () => {
     const token1 = faker.finance.ethereumAddress()
     const token2 = faker.finance.ethereumAddress()
 
-    const mockMessage: EIP712TypedData = {
+    const mockMessage: TypedData = {
+      primaryType: 'PermitBatch',
       types: {
         EIP712Domain: [
           {
@@ -402,7 +408,7 @@ describe('useApprovalInfos', () => {
 
     const expectedApprovals: ApprovalInfo[] = [
       {
-        amount: BigInt(getTokenInfo.UNLIMITED_PERMIT2_AMOUNT),
+        amount: BigInt(UNLIMITED_PERMIT2_AMOUNT),
         amountFormatted: PSEUDO_APPROVAL_VALUES.UNLIMITED,
         spender: spenderAddress,
         tokenAddress: token1.toLowerCase(),
@@ -411,7 +417,7 @@ describe('useApprovalInfos', () => {
         transactionIndex: 0,
       },
       {
-        amount: BigInt(getTokenInfo.UNLIMITED_PERMIT2_AMOUNT),
+        amount: BigInt(UNLIMITED_PERMIT2_AMOUNT),
         amountFormatted: PSEUDO_APPROVAL_VALUES.UNLIMITED,
         spender: spenderAddress,
         tokenAddress: token2.toLowerCase(),
@@ -427,7 +433,7 @@ describe('useApprovalInfos', () => {
   })
 
   it('returns an ApprovalInfo with token infos if the token exists in balances', async () => {
-    const mockBalanceItem = {
+    const mockBalanceItem: Balance = {
       balance: '40',
       fiatBalance: '40',
       fiatConversion: '1',
@@ -470,7 +476,7 @@ describe('useApprovalInfos', () => {
   })
 
   it('fetches token info for an approval if its missing', async () => {
-    const mockTokenInfo = {
+    const mockTokenInfo: Omit<Erc20Token, 'name' | 'logoUri'> = {
       address: '0x0000000000000000000000000000000000000123',
       symbol: 'HT',
       decimals: 18,

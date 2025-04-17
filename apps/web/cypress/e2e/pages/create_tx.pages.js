@@ -2,30 +2,35 @@ import * as constants from '../../support/constants'
 import * as main from '../pages/main.page'
 import * as wallet from '../pages/create_wallet.pages'
 import * as modal from '../pages/modals.page'
+import { dataRow } from '../pages/tables.page'
 
 export const delegateCallWarning = '[data-testid="delegate-call-warning"]'
 export const policyChangeWarning = '[data-testid="threshold-warning"]'
 const newTransactionBtnStr = 'New transaction'
-const recepientInput = 'input[name="recipient"]'
-const tokenAddressInput = 'input[name="tokenAddress"]'
-const amountInput = 'input[name="amount"]'
+const recepientInput = 'input[name="recipients.0.recipient"]'
+const recepientInput_ = (index) => `input[name="recipients.${index}.recipient"]`
+const tokenAddressInput = 'input[name="recipients.0.tokenAddress"]'
+const amountInput = 'input[name="recipients.0.amount"]'
+const amountInput_ = (index) => `input[name="recipients.${index}.amount"]`
 const nonceInput = 'input[name="nonce"]'
 const gasLimitInput = '[name="gasLimit"]'
 const rotateLeftIcon = '[data-testid="RotateLeftIcon"]'
 export const transactionItem = '[data-testid="transaction-item"]'
 export const connectedWalletExecMethod = '[data-testid="connected-wallet-execution-method"]'
 export const relayExecMethod = '[data-testid="relay-execution-method"]'
+export const connectedWalletMethod = '[data-testid="connected-wallet-execution-method"]'
 export const payNowExecMethod = '[data-testid="pay-now-execution-method"]'
-const addToBatchBtn = '[data-track="batching: Add to batch"]'
+export const addToBatchBtn = '[data-track="batching: Add to batch"]'
 const accordionDetails = '[data-testid="accordion-details"]'
-const copyIcon = '[data-testid="copy-btn-icon"]'
+export const copyIcon = '[data-testid="copy-btn-icon"]'
+export const explorerBtn = '[data-testid="explorer-btn"]'
 const transactionSideList = '[data-testid="transaction-actions-list"]'
 const confirmationVisibilityBtn = '[data-testid="confirmation-visibility-btn"]'
 const expandAllBtn = '[data-testid="expande-all-btn"]'
 const collapseAllBtn = '[data-testid="collapse-all-btn"]'
 export const txRowTitle = '[data-testid="tx-row-title"]'
 const advancedDetails = '[data-testid="tx-advanced-details"]'
-const baseGas = '[data-testid="tx-bas-gas"]'
+const baseGas = '[data-testid="tx-base-gas"]'
 const requiredConfirmation = '[data-testid="required-confirmations"]'
 export const txDate = '[data-testid="tx-date"]'
 export const proposalStatus = '[data-testid="proposal-status"]'
@@ -45,14 +50,23 @@ const filterClearBtn = '[data-testid="clear-btn"]'
 export const addressItem = '[data-testid="address-item"]'
 const radioSelector = 'div[role="radiogroup"]'
 const rejectTxBtn = '[data-testid="reject-btn"]'
+const rejectChoiceBtn = '[data-track="reject-tx: Reject onchain button"]'
+const replaceChoiceBtn = '[data-track="reject-tx: Replace tx button"]'
+export const deleteChoiceBtn = '[data-track="reject-tx: Delete offchain button"]'
 const deleteTxModalBtn = '[data-testid="delete-tx-btn"]'
 const toggleUntrustedBtn = '[data-testid="toggle-untrusted"]'
 const simulateTxBtn = '[data-testid="simulate-btn"]'
 const simulateSuccess = '[data-testid="simulation-success-msg"]'
 const signBtn = '[data-testid="sign-btn"]'
+const continueSignBtn = '[data-testid="continue-sign-btn"]'
 export const altImgDai = 'img[alt="DAI"]'
 export const altImgCow = 'img[alt="COW"]'
+export const altImgWeth = 'img[alt="WETH"]'
+export const altImgUsdc = 'img[alt="USDC"]'
+export const altImgUsdt = 'img[alt="USDT"]'
 export const altImgSwaps = 'svg[alt="Swap order"]'
+export const altImgLimitOrder = 'svg[alt="Limit order"]'
+export const altImgTwapOrder = 'svg[alt="Twap Order"]'
 export const txShareBlock = '[data-testid="share-block"]'
 export const txShareBlockDetails = '[data-testid="share-block-details"]'
 const copyLinkBtn = '[data-testid="copy-link-btn"]'
@@ -66,13 +80,24 @@ const gridViewBtn = '[data-testid="grid-view-btn"]'
 const txHexData = '[data-testid="tx-hex-data"]'
 const txStack = '[data-testid="tx-stack"]'
 const txOperation = '[data-testid="tx-operation"]'
+const nonceFld = '[data-testid="nonce-fld"]'
+const txHexDataRow = '[data-testid="tx-hexData"]'
+const addrecipientBtn = '[data-testid="add-recipient-btn"]'
+const removeRecipientBtn = '[data-testid="remove-recipient-btn"]'
+const maxRecipientsReachedMsg = '[data-testid="max-recipients-reached"]'
+const recipientsCount = '[data-testid="recipients-count"]'
+const maxBtn = '[data-testid="max-btn"]'
+const tokenAmountSection = '[data-testid="token-amount-section"]'
+const insufficientBalanceError = '[data-testid="insufficient-balance-error"]'
 
+const insufficientFundsErrorStr = 'Insufficient funds'
 const viewTransactionBtn = 'View transaction'
 const transactionDetailsTitle = 'Transaction details'
 const QueueLabel = 'needs to be executed first'
 const TransactionSummary = 'Send '
 const transactionsPerHrStr = 'free transactions left today'
-
+const txHashesStr = 'Transaction hashes'
+const txAcknowledgementStr = 'I understand what'
 const maxAmountBtnStr = 'Max'
 const nextBtnStr = 'Next'
 const nativeTokenTransferStr = 'ETH'
@@ -101,19 +126,95 @@ const bulkExecuteBtnStr = 'Bulk execute'
 const batchModalTitle = 'Batch'
 export const swapOrder = 'Swap order settlement'
 export const bulkTxs = 'Bulk transactions'
-
+export const txStr = 'Transactions'
+export const txDetailsStr = 'Transaction details'
+export const settingsStr = 'Settings'
+export const assetsStr = 'Assets'
+export const topAssetsStr = 'Top assets'
+export const getStartedStr = 'Get started'
 export const txNoteWarningMessage = 'The notes are publicly visible, do not share any private or sensitive details'
 export const recordedTxNote = 'Tx note one'
 
+export const tx_status = {
+  execution_needed: 'Execution needed',
+  execute: 'Execute',
+  proposal: 'Proposal',
+}
 export const filterTypes = {
   incoming: 'Incoming',
   outgoing: 'Outgoing',
   module: 'Module-based',
 }
 
+export const txActions = {
+  setFallbackHandler: 'setFallbackHandler',
+}
+
 export const advancedDetailsViewOptions = {
   table: 'table',
   grid: 'grid',
+}
+
+export function checkHashesExist(count) {
+  cy.contains(txHashesStr)
+    .next()
+    .within(() => {
+      main.verifyElementsCount(txHexDataRow, count)
+      cy.get(txHexDataRow).each(($el) => {
+        cy.wrap($el)
+          .invoke('text')
+          .should('match', /0x[a-fA-F0-9]{64}/)
+      })
+    })
+}
+export function clickOnReplaceTxOption() {
+  cy.get(replaceChoiceBtn).find('button').click()
+}
+
+export function verifyReplaceChoiceBtnVisible() {
+  cy.get(replaceChoiceBtn).find('button').should('be.visible')
+}
+
+export function getRejectButton() {
+  return cy.get(rejectTxBtn)
+}
+
+export function clickOnRejectBtn() {
+  getRejectButton().click()
+}
+
+export function hoverOverRejectBtnBtn() {
+  getRejectButton().trigger('mouseover', { force: true })
+}
+
+export function verifyRejectBtnDisabled() {
+  getRejectButton().should('be.disabled')
+}
+
+export function verifyTxRejectModalVisible() {
+  main.verifyMinimumElementsCount(wallet.choiceBtn, 2)
+}
+
+export function clickOnRejectionChoiceBtn(choice) {
+  cy.get(wallet.choiceBtn).eq(choice).click()
+}
+
+export function verifyTxNonceDisplayed(nonce) {
+  cy.get(nonceFld).should('include.text', nonce)
+}
+
+export function checkNonceIsReadOnly() {
+  cy.get(nonceFld).then(($el) => {
+    expect($el[0].nodeName).to.equal('DIV')
+  })
+}
+
+export function verifyRejecChoiceBtnStatus(option) {
+  cy.get(rejectChoiceBtn).find('button').should(option)
+}
+
+export function verifyDeleteChoiceBtnStatus(option) {
+  cy.get(deleteChoiceBtn).find('button').should(option)
 }
 
 export function typeNoteText(text) {
@@ -165,8 +266,10 @@ export function expandTxShareBlock() {
   cy.get(txShareBlockDetails).should('be.visible')
 }
 
-function clickOnRejectBtn() {
-  cy.get(rejectTxBtn).click()
+export function checkCopyBtnExistsInShareblock() {
+  cy.get(txShareBlock).within(() => {
+    cy.get(copyLinkBtn).should('exist')
+  })
 }
 
 export function verifyBulkExecuteBtnIsEnabled(txs) {
@@ -377,7 +480,7 @@ export function clickOnExpandableAction(data) {
 }
 
 export function clickOnAdvancedDetails() {
-  cy.get(advancedDetails).click()
+  cy.get(advancedDetails).click({ force: true })
 }
 
 export function expandAdvancedDetails(data) {
@@ -398,11 +501,12 @@ export function switchView(view) {
 }
 
 export function clickOnCopyDataBtn(expectedData) {
-  cy.get(txStack).find('button').click()
-  cy.wait(2000)
   cy.window().then((win) => {
-    cy.wrap(win.navigator.clipboard.readText()).should('eq', expectedData)
+    cy.stub(win.navigator.clipboard, 'writeText').as('clipboardWrite')
   })
+
+  cy.get(txStack).find('button').click()
+  cy.get('@clipboardWrite').should('have.been.calledWith', expectedData)
 }
 
 export function switchToGridView() {
@@ -529,6 +633,11 @@ export function clickOnNewtransactionBtn() {
 export function typeRecipientAddress(address) {
   cy.get(recepientInput).clear().type(address).should('have.value', address)
 }
+
+export function typeRecipientAddress_(index, address) {
+  cy.get(recepientInput_(index)).clear().type(address).should('have.value', address)
+}
+
 export function verifyENSResolves(fullAddress) {
   let split = fullAddress.split(':')
   let noPrefixAddress = split[1]
@@ -559,7 +668,7 @@ export function selectCurrentWallet() {
 }
 
 export function verifyRelayerAttemptsAvailable() {
-  cy.contains(transactionsPerHrStr).should('be.visible')
+  cy.contains(transactionsPerHrStr).should('exist')
 }
 
 export function clickOnTokenselectorAndSelectSepoliaEth() {
@@ -591,6 +700,10 @@ export function setSendValue(value) {
   cy.get(amountInput).clear().type(value)
 }
 
+export function setSendValue_(index, value) {
+  cy.get(amountInput_(index)).clear().type(value)
+}
+
 export function clickOnNextBtn() {
   cy.contains(nextBtnStr).click()
 }
@@ -611,14 +724,16 @@ export function changeNonce(value) {
   cy.get(nonceInput).clear().type(value, { force: true })
 }
 
-export function verifyConfirmTransactionData() {
+export function hasNonce() {
+  cy.get(nonceInput).invoke('val').should('match', /^\d+$/)
+}
+
+export function verifyNonceInputValue(value) {
+  cy.get(nonceInput).should('have.value', value)
+}
+
+export function clickOnYesOption() {
   cy.contains(yesStr).should('exist').click()
-  cy.contains(estimatedFeeStr).should('exist')
-
-  // Asserting the sponsored info is present
-  cy.contains(executeStr).scrollIntoView().should('be.visible')
-
-  cy.get('span').contains(estimatedFeeStr)
 }
 
 export function openExecutionParamsModal() {
@@ -646,6 +761,14 @@ export function clickOnNoLaterOption() {
 
 export function clickOnSignTransactionBtn() {
   cy.get(signBtn).click()
+}
+
+export function clickOnContinueSignTransactionBtn() {
+  cy.get(continueSignBtn).click()
+}
+
+export function clickOnAcknowledgement() {
+  cy.contains(txAcknowledgementStr).click()
 }
 
 export function clickOnConfirmTransactionBtn() {
@@ -757,4 +880,72 @@ export function clickOnSimulateTxBtn() {
 
 export function verifySuccessfulSimulation() {
   cy.get(simulateSuccess).should('exist')
+}
+
+export function insufficientBalanceErrorExists() {
+  cy.get(insufficientBalanceError).should('exist')
+}
+
+export function recipientAddress(index, address) {
+  cy.contains(`Recipient ${index}`)
+    .parents(dataRow)
+    .within(() => {
+      cy.contains(address).should('exist')
+    })
+}
+
+export function insufficientFundsErrorExists(index) {
+  cy.get(tokenAmountSection)
+    .eq(index)
+    .within(() => {
+      cy.get('label').should('contain.text', insufficientFundsErrorStr)
+    })
+}
+
+export function checkTokenValue(index, value) {
+  cy.get(amountInput_(index)).should('have.value', value)
+}
+export function clickOnMaxBtn(index) {
+  cy.get(maxBtn).eq(index).click()
+}
+
+export function verifyAddRecipientBtnIsVisible() {
+  cy.get(addrecipientBtn).should('be.visible')
+}
+
+export function verifyAddRecipientBtnDoesNotExist() {
+  main.verifyElementsCount(addrecipientBtn, 0)
+}
+
+export function clickOnAddRecipientBtn() {
+  cy.get(addrecipientBtn).click()
+}
+
+export function clickOnRemoveRecipientBtn(index) {
+  cy.get(removeRecipientBtn).eq(index).click()
+}
+
+export function checkNumberOfRecipients(count) {
+  cy.get(recipientsCount).should('have.text', `${count}`)
+}
+
+export function checkMaxRecipientReached(attempt = 0) {
+  const maxAttempts = 4
+
+  cy.get('body').then(($body) => {
+    if ($body.find(maxRecipientsReachedMsg).length > 0) {
+      cy.get(maxRecipientsReachedMsg).should('exist')
+      cy.get(addrecipientBtn).should('be.disabled')
+      checkNumberOfRecipients('5/5')
+      return
+    }
+
+    if (attempt >= maxAttempts) {
+      throw new Error('Max attempts reached but message did not appear')
+    }
+
+    clickOnAddRecipientBtn()
+    checkNumberOfRecipients(`${attempt + 2}/5`)
+    checkMaxRecipientReached(attempt + 1)
+  })
 }

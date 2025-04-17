@@ -13,6 +13,9 @@ import { Fallback } from '../Fallback'
 import { NFTItem } from './NFTItem'
 import { useInfiniteScroll } from '@/src/hooks/useInfiniteScroll'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
+import { NoFunds } from '@/src/features/Assets/components/NoFunds'
+import { AssetError } from '../../Assets.error'
+import { Loader } from '@/src/components/Loader'
 
 export function NFTsContainer() {
   const activeSafe = useDefinedActiveSafe()
@@ -34,15 +37,28 @@ export function NFTsContainer() {
     data,
   })
 
-  if (isFetching || !list?.length || error) {
-    return <Fallback loading={isFetching || !list} hasError={!!error} />
+  if (error) {
+    return (
+      <Fallback loading={isFetching}>
+        <AssetError assetType={'nft'} onRetry={() => refetch()} />
+      </Fallback>
+    )
+  }
+
+  if (!list?.results.length) {
+    return (
+      <Fallback loading={isFetching || !list}>
+        <NoFunds fundsType={'nft'} />
+      </Fallback>
+    )
   }
 
   return (
     <SafeTab.FlatList<Collectible>
       onEndReached={onEndReached}
-      data={list}
+      data={list?.results}
       renderItem={NFTItem}
+      ListFooterComponent={isFetching ? <Loader size={24} /> : undefined}
       keyExtractor={(item) => item.id}
     />
   )

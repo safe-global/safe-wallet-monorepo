@@ -33,6 +33,8 @@ describe('[PROD] Remove Owners tests', () => {
     owner.getAddressToBeRemoved()
     owner.verifyOwnerDeletionWindowDisplayed()
     createTx.changeNonce(10)
+    createTx.clickOnContinueSignTransactionBtn()
+    createTx.clickOnAcknowledgement()
     createTx.clickOnSignTransactionBtn()
     createTx.waitForProposeRequest()
     createTx.clickViewTransaction()

@@ -1,5 +1,6 @@
 import AddressInputReadOnly from '@/components/common/AddressInputReadOnly'
 import useAddressBook from '@/hooks/useAddressBook'
+import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import type { ReactElement } from 'react'
 import { useEffect, useCallback, useRef, useMemo } from 'react'
 import {
@@ -10,13 +11,13 @@ import {
   IconButton,
   SvgIcon,
   Skeleton,
+  Box,
 } from '@mui/material'
 import { useFormContext, useWatch, type Validate, get } from 'react-hook-form'
-import { validatePrefixedAddress } from '@/utils/validation'
+import { validatePrefixedAddress } from '@safe-global/utils/utils/validation'
 import { useCurrentChain } from '@/hooks/useChains'
 import useNameResolver from './useNameResolver'
-import { FEATURES, hasFeature } from '@/utils/chains'
-import { cleanInputValue, parsePrefixedAddress } from '@/utils/addresses'
+import { cleanInputValue, parsePrefixedAddress } from '@safe-global/utils/utils/addresses'
 import useDebounce from '@/hooks/useDebounce'
 import CaretDownIcon from '@/public/images/common/caret-down.svg'
 import SaveAddressIcon from '@/public/images/common/save-address.svg'
@@ -24,6 +25,7 @@ import classnames from 'classnames'
 import css from './styles.module.css'
 import inputCss from '@/styles/inputs.module.css'
 import Identicon from '../Identicon'
+import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 
 export type AddressInputProps = TextFieldProps & {
   name: string
@@ -33,6 +35,8 @@ export type AddressInputProps = TextFieldProps & {
   validate?: Validate<string>
   deps?: string | string[]
   onAddressBookClick?: () => void
+  chain?: ChainInfo
+  showPrefix?: boolean
 }
 
 const AddressInput = ({
@@ -43,6 +47,8 @@ const AddressInput = ({
   isAutocompleteOpen,
   onAddressBookClick,
   deps,
+  chain,
+  showPrefix = true,
   ...props
 }: AddressInputProps): ReactElement => {
   const {
@@ -56,7 +62,7 @@ const AddressInput = ({
   const currentChain = useCurrentChain()
   const rawValueRef = useRef<string>('')
   const watchedValue = useWatch({ name, control })
-  const currentShortName = currentChain?.shortName || ''
+  const currentShortName = chain?.shortName || currentChain?.shortName || ''
 
   const addressBook = useAddressBook()
 
@@ -75,6 +81,23 @@ const AddressInput = ({
   // Validation function based on the current chain prefix
   const validatePrefixed = useMemo(() => validatePrefixedAddress(currentShortName), [currentShortName])
 
+  const transformAddressValue = useCallback(
+    (value: string): string => {
+      // Clean the input value
+      const cleanValue = cleanInputValue(value)
+      rawValueRef.current = cleanValue
+      // This also checksums the address
+      if (validatePrefixed(cleanValue) === undefined) {
+        // if the prefix is correct we remove it from the value
+        return parsePrefixedAddress(cleanValue).address
+      } else {
+        // we keep invalid prefixes such that the validation error is persistent
+        return cleanValue
+      }
+    },
+    [validatePrefixed],
+  )
+
   // Update the input value
   const setAddressValue = useCallback(
     (value: string) => setValue(name, value, { shouldValidate: true }),
@@ -87,6 +110,16 @@ const AddressInput = ({
       setAddressValue(`${currentShortName}:${address}`)
     }
   }, [address, currentShortName, setAddressValue])
+
+  // Retransform the value when chain changes
+  useEffect(() => {
+    if (address) return
+
+    if (watchedValue) {
+      const transformedValue = transformAddressValue(watchedValue)
+      setAddressValue(transformedValue)
+    }
+  }, [address, currentShortName, setAddressValue, transformAddressValue, watchedValue])
 
   const endAdornment = (
     <InputAdornment position="end">
@@ -137,17 +170,19 @@ const AddressInput = ({
           className: addressBook[watchedValue] ? css.readOnly : undefined,
 
           startAdornment: addressBook[watchedValue] ? (
-            <AddressInputReadOnly address={watchedValue} />
+            <AddressInputReadOnly address={watchedValue} showPrefix={showPrefix} chainId={chain?.chainId} />
           ) : (
             // Display the current short name in the adornment, unless the value contains the same prefix
-            <InputAdornment position="end" sx={{ ml: 0, gap: 1 }}>
-              {watchedValue && !fieldError ? (
-                <Identicon address={watchedValue} size={32} />
-              ) : (
-                <Skeleton variant="circular" width={32} height={32} animation={false} />
-              )}
+            <InputAdornment position="end" sx={{ ml: 0 }}>
+              <Box mr={1}>
+                {watchedValue && !fieldError ? (
+                  <Identicon address={watchedValue} size={32} />
+                ) : (
+                  <Skeleton variant="circular" width={32} height={32} animation={false} />
+                )}
+              </Box>
 
-              {!rawValueRef.current.startsWith(`${currentShortName}:`) && <>{currentShortName}:</>}
+              {showPrefix && !rawValueRef.current.startsWith(`${currentShortName}:`) && <Box>{currentShortName}:</Box>}
             </InputAdornment>
           ),
 
@@ -162,19 +197,7 @@ const AddressInput = ({
 
           required,
 
-          setValueAs: (value: string): string => {
-            // Clean the input value
-            const cleanValue = cleanInputValue(value)
-            rawValueRef.current = cleanValue
-            // This also checksums the address
-            if (validatePrefixed(cleanValue) === undefined) {
-              // if the prefix is correct we remove it from the value
-              return parsePrefixedAddress(cleanValue).address
-            } else {
-              // we keep invalid prefixes such that the validation error is persistet
-              return cleanValue
-            }
-          },
+          setValueAs: transformAddressValue,
 
           validate: async () => {
             const value = rawValueRef.current

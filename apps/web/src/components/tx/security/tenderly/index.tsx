@@ -11,8 +11,10 @@ import { useDarkMode } from '@/hooks/useDarkMode'
 import CircularProgress from '@mui/material/CircularProgress'
 import ExternalLink from '@/components/common/ExternalLink'
 import { useCurrentChain } from '@/hooks/useChains'
-import { isTxSimulationEnabled } from '@/components/tx/security/tenderly/utils'
-import type { SimulationTxParams } from '@/components/tx/security/tenderly/utils'
+import {
+  isTxSimulationEnabled,
+  type SimulationTxParams,
+} from '@safe-global/utils/components/tx/security/tenderly/utils'
 
 import css from './styles.module.css'
 import sharedCss from '@/components/tx/security/shared/styles.module.css'
@@ -173,15 +175,15 @@ export const TxSimulationMessage = () => {
   if (!isSuccess || isError || isCallTraceError) {
     return (
       <Alert severity="error" sx={{ border: 'unset' }}>
-        <Typography variant="body2" fontWeight={700}>
+        <Typography variant="body1" fontWeight={700}>
           Simulation failed
         </Typography>
         {requestError ? (
-          <Typography color="error">
+          <Typography color="error" variant="body2">
             An unexpected error occurred during simulation: <b>{requestError}</b>.
           </Typography>
         ) : (
-          <Typography>
+          <Typography variant="body2">
             {isCallTraceError ? (
               <>The transaction failed during the simulation.</>
             ) : (

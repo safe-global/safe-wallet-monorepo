@@ -4,14 +4,16 @@ import { type ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import type { Eip1193Provider } from 'ethers'
 import { getAddress } from 'ethers'
 import useChains, { useCurrentChain } from '@/hooks/useChains'
-import ExternalStore from '@/services/ExternalStore'
+import ExternalStore from '@safe-global/utils/services/ExternalStore'
 import { logError, Errors } from '@/services/exceptions'
 import { trackEvent, WALLET_EVENTS } from '@/services/analytics'
-import { useAppSelector } from '@/store'
-import { type EnvState, selectRpc } from '@/store/settingsSlice'
-import { formatAmount } from '@/utils/formatNumber'
+import { useAppSelector, useAppDispatch } from '@/store'
+import { selectRpc } from '@/store/settingsSlice'
+import { formatAmount } from '@safe-global/utils/utils/formatNumber'
 import { localItem } from '@/services/local-storage/local'
 import { isWalletConnect, isWalletUnlocked } from '@/utils/wallets'
+import { setUnauthenticated } from '@/store/authSlice'
+import type { EnvState } from '@safe-global/store/settingsSlice'
 
 export type ConnectedWallet = {
   label: string
@@ -79,7 +81,7 @@ export const getConnectedWallet = (wallets: WalletState[]): ConnectedWallet | nu
   }
 }
 
-const getWalletConnectLabel = async (wallet: ConnectedWallet): Promise<string | undefined> => {
+export const getWalletConnectLabel = (wallet: ConnectedWallet): string | undefined => {
   const UNKNOWN_PEER = 'Unknown'
   if (!isWalletConnect(wallet)) return
   const { connector } = wallet.provider as unknown as any
@@ -90,16 +92,13 @@ const getWalletConnectLabel = async (wallet: ConnectedWallet): Promise<string | 
 const trackWalletType = (wallet: ConnectedWallet) => {
   trackEvent({ ...WALLET_EVENTS.CONNECT, label: wallet.label })
 
-  getWalletConnectLabel(wallet)
-    .then((wcLabel) => {
-      if (wcLabel) {
-        trackEvent({
-          ...WALLET_EVENTS.WALLET_CONNECT,
-          label: wcLabel,
-        })
-      }
+  const wcLabel = getWalletConnectLabel(wallet)
+  if (wcLabel) {
+    trackEvent({
+      ...WALLET_EVENTS.WALLET_CONNECT,
+      label: wcLabel,
     })
-    .catch(() => null)
+  }
 }
 
 let isConnecting = false
@@ -120,7 +119,7 @@ export const connectWallet = async (
   try {
     wallets = await onboard.connectWallet(options)
   } catch (e) {
-    logError(Errors._302, e)
+    logError(Errors._107, e)
     isConnecting = false
 
     return
@@ -160,6 +159,7 @@ export const useInitOnboard = () => {
   const chain = useCurrentChain()
   const onboard = useStore()
   const customRpc = useAppSelector(selectRpc)
+  const dispatch = useAppDispatch()
 
   useEffect(() => {
     if (configs.length > 0 && chain) {
@@ -199,13 +199,14 @@ export const useInitOnboard = () => {
       } else if (lastConnectedWallet) {
         lastConnectedWallet = ''
         saveLastWallet(lastConnectedWallet)
+        dispatch(setUnauthenticated())
       }
     })
 
     return () => {
       walletSubscription.unsubscribe()
     }
-  }, [onboard])
+  }, [onboard, dispatch])
 }
 
 export default useStore

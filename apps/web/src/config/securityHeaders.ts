@@ -1,4 +1,6 @@
-import { CYPRESS_MNEMONIC, IS_PRODUCTION } from '@/config/constants'
+import { IS_PRODUCTION } from './constants'
+
+const isCypress = Boolean(typeof window !== 'undefined' && window.Cypress)
 
 /**
  * CSP Header notes:
@@ -6,14 +8,13 @@ import { CYPRESS_MNEMONIC, IS_PRODUCTION } from '@/config/constants'
  * connect-src * because the RPCs are configurable (config service)
  * style-src unsafe-inline for our styled components
  * script-src unsafe-eval is needed by next.js in dev mode, otherwise only self
- *            unsafe-inline is needed for gtm https://developers.google.com/tag-platform/tag-manager/web/csp
  * frame-ancestors can not be set via meta tag
  */
 export const ContentSecurityPolicy = `
  default-src 'self';
  connect-src 'self' *;
- script-src 'self' https://www.google-analytics.com https://ssl.google-analytics.com 'unsafe-inline' https://*.getbeamer.com https://www.googletagmanager.com https://*.ingest.sentry.io https://sentry.io ${
-   !IS_PRODUCTION || CYPRESS_MNEMONIC
+ script-src 'self' 'unsafe-inline' https://*.getbeamer.com https://www.googletagmanager.com https://*.ingest.sentry.io https://sentry.io ${
+   !IS_PRODUCTION || isCypress
      ? "'unsafe-eval'" // Dev server and cypress need unsafe-eval
      : "'wasm-unsafe-eval'"
  };

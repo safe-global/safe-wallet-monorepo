@@ -1,4 +1,4 @@
-import { signTypedData } from '@/utils/web3'
+import { signTypedData } from '@safe-global/utils/utils/web3'
 import { SigningMethod } from '@safe-global/protocol-kit'
 import { adjustVInSignature } from '@safe-global/protocol-kit/dist/src/utils/signatures'
 import type { JsonRpcSigner } from 'ethers'
@@ -9,7 +9,7 @@ const getProposerDataV2 = (chainId: string, proposerAddress: string) => {
   const domain = {
     name: 'Safe Transaction Service',
     version: '1.0',
-    chainId,
+    chainId: Number(chainId),
   }
 
   const types = {
@@ -28,6 +28,7 @@ const getProposerDataV2 = (chainId: string, proposerAddress: string) => {
     domain,
     types,
     message,
+    primaryType: 'Delegate',
   }
 }
 

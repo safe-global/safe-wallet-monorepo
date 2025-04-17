@@ -3,7 +3,7 @@ import { useEffect } from 'react'
 import type Safe from '@safe-global/protocol-kit'
 import { encodeSignatures } from '@/services/tx/encodeSignatures'
 import type { SafeTransaction } from '@safe-global/safe-core-sdk-types'
-import useAsync from '@/hooks/useAsync'
+import useAsync from '@safe-global/utils/hooks/useAsync'
 import useChainId from '@/hooks/useChainId'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
 import chains from '@/config/chains'
@@ -18,7 +18,7 @@ import {
   getSimulateTxAccessorContract,
 } from '@safe-global/protocol-kit/dist/src/contracts/safeDeploymentContracts'
 import { type JsonRpcProvider } from 'ethers'
-import { type ExtendedSafeInfo } from '@/store/safeInfoSlice'
+import type { ExtendedSafeInfo } from '@safe-global/store/slices/SafeInfo/types'
 
 const getEncodedSafeTx = (
   safeSDK: Safe,
@@ -161,7 +161,11 @@ const useGasLimit = (
     )
 
     // if we are dealing with zksync and the walletAddress is a Safe, we have to do some magic
-    if (safe.chainId === chains.zksync && (await web3ReadOnly.getCode(walletAddress)) !== '0x') {
+    // FIXME a new check to indicate ZKsync chain will be added to the config service and available under ChainInfo
+    if (
+      (safe.chainId === chains.zksync || safe.chainId === chains.lens) &&
+      (await web3ReadOnly.getCode(walletAddress)) !== '0x'
+    ) {
       return getGasLimitForZkSync(safe, web3ReadOnly, safeSDK, safeTx)
     }
 

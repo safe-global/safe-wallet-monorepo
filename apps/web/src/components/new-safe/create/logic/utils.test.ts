@@ -2,11 +2,11 @@ import * as creationUtils from '@/components/new-safe/create/logic/index'
 import { getAvailableSaltNonce } from '@/components/new-safe/create/logic/utils'
 import { faker } from '@faker-js/faker'
 import { chainBuilder } from '@/tests/builders/chains'
-import { type ReplayedSafeProps } from '@/store/slices'
+import { type ReplayedSafeProps } from '@safe-global/utils/features/counterfactual/store/types'
 import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
 import * as web3Hooks from '@/hooks/wallets/web3'
 import { type JsonRpcProvider, id } from 'ethers'
-import { Safe_proxy_factory__factory } from '@/types/contracts'
+import { Safe_proxy_factory__factory } from '@safe-global/utils/types/contracts'
 import { predictAddressBasedOnReplayData } from '@/features/multichain/utils/utils'
 
 // Proxy Factory 1.3.0 creation code

@@ -3,7 +3,7 @@ import type { StakingTxExitInfo } from '@safe-global/safe-gateway-typescript-sdk
 import { NativeStakingStatus } from '@safe-global/safe-gateway-typescript-sdk'
 import FieldsGrid from '@/components/tx/FieldsGrid'
 import StakingStatus from '@/features/stake/components/StakingStatus'
-import { formatDurationFromMilliseconds } from '@/utils/formatters'
+import { formatDurationFromMilliseconds } from '@safe-global/utils/utils/formatters'
 import { BEACON_CHAIN_EXPLORERS } from '@/features/stake/constants'
 import useChainId from '@/hooks/useChainId'
 

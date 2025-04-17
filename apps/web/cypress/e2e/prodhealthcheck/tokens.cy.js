@@ -1,7 +1,8 @@
 import * as constants from '../../support/constants'
 import * as assets from '../pages/assets.pages'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
-import { acceptCookies2 } from '../pages/main.page.js'
+import { acceptCookies2, closeSecurityNotice } from '../pages/main.page.js'
+import * as createTx from '../pages/create_tx.pages.js'
 
 const TOKEN_AMOUNT_COLUMN = 1
 const FIAT_AMOUNT_COLUMN = 2
@@ -9,13 +10,15 @@ const FIAT_AMOUNT_COLUMN = 2
 let staticSafes = []
 
 describe('[PROD] Prod tokens tests', () => {
-  const fiatRegex = assets.fiatRegex
+  const value = '--'
 
   before(async () => {
     staticSafes = await getSafes(CATEGORIES.static)
   })
   beforeEach(() => {
     cy.visit(constants.prodbaseUrl + constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_2)
+    cy.contains(createTx.assetsStr, { timeout: 10000 })
+    closeSecurityNotice()
     acceptCookies2()
   })
 
@@ -27,7 +30,7 @@ describe('[PROD] Prod tokens tests', () => {
       assets.currencyDaiFormat_2,
       TOKEN_AMOUNT_COLUMN,
       FIAT_AMOUNT_COLUMN,
-      fiatRegex,
+      value,
     )
 
     assets.verifyBalance(assets.currencyAave, TOKEN_AMOUNT_COLUMN, assets.currencyAaveAlttext)
@@ -36,7 +39,7 @@ describe('[PROD] Prod tokens tests', () => {
       assets.currentcyAaveFormat,
       TOKEN_AMOUNT_COLUMN,
       FIAT_AMOUNT_COLUMN,
-      fiatRegex,
+      value,
     )
 
     assets.verifyBalance(assets.currencyLink, TOKEN_AMOUNT_COLUMN, assets.currencyLinkAlttext)
@@ -45,7 +48,7 @@ describe('[PROD] Prod tokens tests', () => {
       assets.currentcyLinkFormat,
       TOKEN_AMOUNT_COLUMN,
       FIAT_AMOUNT_COLUMN,
-      fiatRegex,
+      value,
     )
 
     assets.verifyBalance(assets.currencyTestTokenA, TOKEN_AMOUNT_COLUMN, assets.currencyTestTokenAAlttext)
@@ -54,7 +57,7 @@ describe('[PROD] Prod tokens tests', () => {
       assets.currentcyTestTokenAFormat,
       TOKEN_AMOUNT_COLUMN,
       FIAT_AMOUNT_COLUMN,
-      fiatRegex,
+      value,
     )
 
     assets.verifyBalance(assets.currencyTestTokenB, TOKEN_AMOUNT_COLUMN, assets.currencyTestTokenBAlttext)
@@ -63,7 +66,7 @@ describe('[PROD] Prod tokens tests', () => {
       assets.currentcyTestTokenBFormat,
       TOKEN_AMOUNT_COLUMN,
       FIAT_AMOUNT_COLUMN,
-      fiatRegex,
+      value,
     )
 
     assets.verifyBalance(assets.currencyUSDC, TOKEN_AMOUNT_COLUMN, assets.currencyTestUSDCAlttext)
@@ -72,7 +75,7 @@ describe('[PROD] Prod tokens tests', () => {
       assets.currentcyTestUSDCFormat,
       TOKEN_AMOUNT_COLUMN,
       FIAT_AMOUNT_COLUMN,
-      fiatRegex,
+      value,
     )
   })
 

@@ -1,9 +1,9 @@
 import { FormControl, FormControlLabel, InputLabel, Radio, RadioGroup, SvgIcon, Tooltip } from '@mui/material'
 import { Controller, useFormContext } from 'react-hook-form'
 import classNames from 'classnames'
-import { safeFormatUnits } from '@/utils/formatters'
+import { safeFormatUnits } from '@safe-global/utils/utils/formatters'
 import type { TokenInfo } from '@safe-global/safe-gateway-typescript-sdk'
-import { TokenTransferFields, TokenTransferType } from '@/components/tx-flow/flows/TokenTransfer'
+import { MultiTransfersFields, TokenTransferType } from '@/components/tx-flow/flows/TokenTransfer'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import ExternalLink from '@/components/common/ExternalLink'
 import { HelpCenterArticle } from '@/config/constants'
@@ -24,7 +24,9 @@ const SpendingLimitRow = ({
 }) => {
   const { control, trigger, resetField } = useFormContext()
   const canCreateStandardTx = useHasPermission(Permission.CreateTransaction)
-  const canCreateSpendingLimitTx = useHasPermission(Permission.CreateSpendingLimitTransaction, { token: selectedToken })
+  const canCreateSpendingLimitTx = useHasPermission(Permission.CreateSpendingLimitTransaction, {
+    tokenAddress: selectedToken?.address,
+  })
   const { setNonceNeeded } = useContext(SafeTxContext)
 
   const formattedAmount = safeFormatUnits(availableAmount, selectedToken?.decimals)
@@ -32,7 +34,7 @@ const SpendingLimitRow = ({
   useEffect(() => {
     return () => {
       // reset the field value to default when the component is unmounted
-      resetField(TokenTransferFields.type)
+      resetField(MultiTransfersFields.type)
     }
   }, [resetField])
 
@@ -44,7 +46,7 @@ const SpendingLimitRow = ({
       <Controller
         rules={{ required: true }}
         control={control}
-        name={TokenTransferFields.type}
+        name={MultiTransfersFields.type}
         render={({ field: { onChange, ...field } }) => (
           <RadioGroup
             row

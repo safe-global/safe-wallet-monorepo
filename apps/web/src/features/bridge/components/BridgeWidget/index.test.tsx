@@ -2,7 +2,8 @@ import { faker } from '@faker-js/faker'
 
 import { _getAppData } from '@/features/bridge/components/BridgeWidget'
 import { chainBuilder } from '@/tests/builders/chains'
-import { FEATURES } from '@/utils/chains'
+
+import { FEATURES } from '@safe-global/utils/utils/chains'
 
 describe('BridgeWidget', () => {
   describe('getAppData', () => {

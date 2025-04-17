@@ -1,8 +1,7 @@
-import React, { useMemo } from 'react'
+import React from 'react'
 
 import { SafeListItem } from '@/src/components/SafeListItem'
-import { getTokenValue, Spinner } from 'tamagui'
-
+import { Loader } from '@/src/components/Loader'
 import { SectionList } from 'react-native'
 import { useCallback } from 'react'
 import { useScrollableHeader } from '@/src/navigation/useScrollableHeader'
@@ -13,6 +12,7 @@ import { AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transacti
 import SignersListItem from './SignersListItem'
 
 export type SignerSection = {
+  id: string
   title: string
   data: SafeState['owners']
 }
@@ -22,11 +22,11 @@ const keyExtractor = (item: AddressInfo, index: number) => item.value + index
 interface SignersListProps {
   signersGroup: SignerSection[]
   isFetching: boolean
-  hasLocalSingers: boolean
+  hasLocalSigners: boolean
   navbarTitle?: string
 }
 
-export function SignersList({ signersGroup, isFetching, hasLocalSingers, navbarTitle }: SignersListProps) {
+export function SignersList({ signersGroup, isFetching, hasLocalSigners, navbarTitle }: SignersListProps) {
   const title = navbarTitle || 'Signers'
   const { handleScroll } = useScrollableHeader({
     children: <NavBarTitle>{title}</NavBarTitle>,
@@ -40,14 +40,8 @@ export function SignersList({ signersGroup, isFetching, hasLocalSingers, navbarT
   )
 
   const ListHeaderComponent = useCallback(
-    () => <SignersListHeader sectionTitle={title} withAlert={!hasLocalSingers} />,
-    [hasLocalSingers],
-  )
-  const contentContainerStyle = useMemo(
-    () => ({
-      paddingHorizontal: getTokenValue('$3'),
-    }),
-    [],
+    () => <SignersListHeader sectionTitle={title} withAlert={!hasLocalSigners} />,
+    [hasLocalSigners],
   )
 
   return (
@@ -58,11 +52,10 @@ export function SignersList({ signersGroup, isFetching, hasLocalSingers, navbarT
       stickySectionHeadersEnabled
       contentInsetAdjustmentBehavior="automatic"
       sections={signersGroup}
-      ListFooterComponent={isFetching ? <Spinner size="small" color="$color" /> : undefined}
+      ListFooterComponent={isFetching ? <Loader size={24} color="$color" /> : undefined}
       keyExtractor={keyExtractor}
       renderItem={renderItem}
       scrollEventThrottle={16}
-      contentContainerStyle={contentContainerStyle}
       renderSectionHeader={({ section: { title } }) => <SafeListItem.Header title={title} />}
     />
   )

@@ -1,9 +1,8 @@
 import React from 'react'
-import { Spinner } from 'tamagui'
 
 import { SafeFontIcon } from '@/src/components/SafeFontIcon/SafeFontIcon'
 import { Badge } from '@/src/components/Badge'
-
+import { Loader } from '@/src/components/Loader'
 import { Alert } from '../../Alert'
 
 interface Props {
@@ -14,8 +13,12 @@ interface Props {
 }
 
 export const PendingTransactions = ({ number, isLoading, fullWidth, onPress }: Props) => {
-  const startIcon = isLoading ? <Spinner size="small" color="$warning1ContrastTextDark" /> : <Badge content={number} />
-  const endIcon = <SafeFontIcon name="arrow-right" size={20} />
+  const startIcon = isLoading ? (
+    <Loader size={24} color="$warning1ContrastTextDark" />
+  ) : (
+    <Badge content={number} themeName="badge_warning_variant2" />
+  )
+  const endIcon = <SafeFontIcon name="chevron-right" size={20} />
 
   return (
     <Alert
@@ -23,7 +26,7 @@ export const PendingTransactions = ({ number, isLoading, fullWidth, onPress }: P
       fullWidth={fullWidth}
       endIcon={endIcon}
       startIcon={startIcon}
-      message="Pending Transactions"
+      message="Pending transactions"
       onPress={onPress}
       testID="pending-transactions"
     />

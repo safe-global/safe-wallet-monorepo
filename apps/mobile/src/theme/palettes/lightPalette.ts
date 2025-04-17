@@ -51,6 +51,7 @@ const lightPalette = {
   },
   warning1: {
     main: '#fff0e0',
+    text: '#121312',
     contrastText: '#FF8C00',
   },
   background: {
@@ -59,7 +60,8 @@ const lightPalette = {
     paper: '#F4F4F4',
     light: '#EFFFF4',
     secondary: '#DDDEE0',
-    skeleton: 'rgba(255, 255, 255, 0.04)',
+    skeleton: 'rgba(0, 0, 0, 0.04)',
+    disabled: '#7878801F',
   },
   backdrop: {
     main: '#636669',

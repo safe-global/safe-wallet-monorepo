@@ -1,5 +1,5 @@
 import * as web3 from '@/hooks/wallets/web3'
-import { ERC20__factory } from '@/types/contracts'
+import { ERC20__factory } from '@safe-global/utils/types/contracts'
 import { getERC20TokenInfoOnChain } from '@/utils/tokens'
 import { faker } from '@faker-js/faker'
 import { keccak256, toUtf8Bytes } from 'ethers'

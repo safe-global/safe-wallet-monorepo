@@ -1,22 +1,27 @@
-import useAsync, { type AsyncResult } from '@/hooks/useAsync'
+import type { TypedData } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
+import useAsync, { type AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { useHasFeature } from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useSigner } from '@/hooks/wallets/useWallet'
 import { MODALS_EVENTS, trackEvent } from '@/services/analytics'
-import type { SecurityResponse } from '@/services/security/modules/types'
-import { FEATURES } from '@/utils/chains'
+import type { SecurityResponse } from '@safe-global/utils/services/security/modules/types'
 import type { SafeTransaction } from '@safe-global/safe-core-sdk-types'
-import { useEffect, useMemo } from 'react'
 
-import type { EIP712TypedData } from '@safe-global/safe-gateway-typescript-sdk'
-import { BlockaidModule, type BlockaidModuleResponse } from '@/services/security/modules/BlockaidModule'
+import { useEffect, useMemo } from 'react'
+import {
+  BlockaidModule,
+  type BlockaidModuleResponse,
+} from '@safe-global/utils/services/security/modules/BlockaidModule'
+import { FEATURES } from '@safe-global/utils/utils/chains'
+import { Errors, logError } from '@/services/exceptions'
 
 const BlockaidModuleInstance = new BlockaidModule()
 
 const DEFAULT_ERROR_MESSAGE = 'Unavailable'
 
 export const useBlockaid = (
-  data: SafeTransaction | EIP712TypedData | undefined,
+  data: SafeTransaction | TypedData | undefined,
+  origin?: string,
 ): AsyncResult<SecurityResponse<BlockaidModuleResponse>> => {
   const { safe, safeAddress } = useSafeInfo()
   const signer = useSigner()
@@ -34,9 +39,10 @@ export const useBlockaid = (
         safeAddress,
         walletAddress: signer.address,
         threshold: safe.threshold,
+        origin,
       })
     },
-    [safe.chainId, safe.threshold, safeAddress, data, signer?.address, isFeatureEnabled],
+    [safe.chainId, safe.threshold, safeAddress, data, signer?.address, isFeatureEnabled, origin],
     false,
   )
 
@@ -53,5 +59,10 @@ export const useBlockaid = (
 
     [blockaidErrors, blockaidPayload],
   )
+
+  useEffect(() => {
+    logError(Errors._201, errorMsg)
+  }, [errorMsg])
+
   return [blockaidPayload, errorMsg, loading]
 }

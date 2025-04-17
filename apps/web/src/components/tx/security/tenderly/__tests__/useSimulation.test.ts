@@ -4,7 +4,7 @@ import type { SafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import { renderHook, waitFor } from '@/tests/test-utils'
 import { useSimulation } from '@/components/tx/security/tenderly/useSimulation'
 import * as utils from '@/components/tx/security/tenderly/utils'
-import { FETCH_STATUS, type TenderlySimulation } from '@/components/tx/security/tenderly/types'
+import { FETCH_STATUS, type TenderlySimulation } from '@safe-global/utils/components/tx/security/tenderly/types'
 
 const setupFetchStub = (data: any) => () => {
   return Promise.resolve({

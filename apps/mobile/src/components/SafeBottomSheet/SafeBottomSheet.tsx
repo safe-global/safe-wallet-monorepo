@@ -1,10 +1,18 @@
 import { BackdropComponent, BackgroundComponent } from '@/src/components/Dropdown/sheetComponents'
-import { H5, ScrollView, View } from 'tamagui'
-import React, { useCallback } from 'react'
-import BottomSheet, { BottomSheetFooterProps, BottomSheetModalProps, BottomSheetView } from '@gorhom/bottom-sheet'
+import { getTokenValue, getVariable, H5, useTheme, View } from 'tamagui'
+import React, { useCallback, useEffect, useRef } from 'react'
+import BottomSheet, {
+  BottomSheetFooterProps,
+  BottomSheetModalProps,
+  BottomSheetView,
+  BottomSheetScrollView,
+  BottomSheetFooter,
+} from '@gorhom/bottom-sheet'
 import DraggableFlatList, { DragEndParams, RenderItemParams, ScaleDecorator } from 'react-native-draggable-flatlist'
 import { StyleSheet } from 'react-native'
 import { useRouter } from 'expo-router'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { LoadingTx } from '@/src/features/ConfirmTx/components/LoadingTx'
 
 interface SafeBottomSheetProps<T> {
   children?: React.ReactNode
@@ -14,9 +22,10 @@ interface SafeBottomSheetProps<T> {
   items?: T[]
   snapPoints?: BottomSheetModalProps['snapPoints']
   actions?: React.ReactNode
-  footerComponent?: React.FC<BottomSheetFooterProps>
+  FooterComponent?: React.FC
   renderItem?: React.FC<{ item: T; isDragging?: boolean; drag?: () => void; onClose: () => void }>
   keyExtractor?: ({ item, index }: { item: T; index: number }) => string
+  loading?: boolean
 }
 
 export function SafeBottomSheet<T>({
@@ -24,16 +33,21 @@ export function SafeBottomSheet<T>({
   title,
   sortable,
   items,
-  snapPoints = [600, '90%'],
+  loading,
+  snapPoints = [600, '100%'],
   keyExtractor,
   actions,
   renderItem: Render,
-  footerComponent,
+  FooterComponent,
   onDragEnd,
 }: SafeBottomSheetProps<T>) {
+  const ref = useRef<BottomSheet>(null)
   const router = useRouter()
-  const hasCustomItems = items && Render
-  const isSortable = items && sortable
+  const insets = useSafeAreaInsets()
+  const [footerHeight, setFooterHeight] = React.useState(0)
+  const hasCustomItems = items?.length && Render
+  const isSortable = items?.length && sortable
+  const theme = useTheme()
 
   const onClose = useCallback(() => {
     router.back()
@@ -72,8 +86,34 @@ export function SafeBottomSheet<T>({
     }
   }, [])
 
+  // Auto-expand when sorting is enabled
+  useEffect(() => {
+    if (sortable && ref.current) {
+      ref.current.expand()
+    }
+  }, [sortable])
+
+  // Wrapping the footer component with a function to get the height of the footer
+  const renderFooter: React.FC<BottomSheetFooterProps> = useCallback(
+    (props) => {
+      return (
+        <BottomSheetFooter animatedFooterPosition={props.animatedFooterPosition}>
+          <View
+            onLayout={(e) => {
+              setFooterHeight(e.nativeEvent.layout.height)
+            }}
+          >
+            {FooterComponent && <FooterComponent />}
+          </View>
+        </BottomSheetFooter>
+      )
+    },
+    [FooterComponent, setFooterHeight],
+  )
+
   return (
     <BottomSheet
+      ref={ref}
       enableOverDrag={false}
       snapPoints={snapPoints}
       enableDynamicSizing={true}
@@ -81,36 +121,51 @@ export function SafeBottomSheet<T>({
       enablePanDownToClose
       overDragResistanceFactor={10}
       backgroundComponent={BackgroundComponent}
-      backdropComponent={BackdropComponent}
-      footerComponent={footerComponent}
+      backdropComponent={() => <BackdropComponent />}
+      footerComponent={isSortable ? undefined : renderFooter}
+      topInset={insets.top}
+      handleIndicatorStyle={{ backgroundColor: getVariable(theme.borderMain) }}
     >
-      {!isSortable && !!title && <TitleHeader />}
-      <BottomSheetView style={[styles.contentContainer, !isSortable ? { flex: 1, paddingHorizontal: 20 } : undefined]}>
+      <BottomSheetView
+        style={[
+          styles.contentContainer,
+          {
+            paddingBottom: insets.bottom,
+          },
+        ]}
+      >
+        {title && <TitleHeader />}
         {isSortable ? (
           <DraggableFlatList<T>
             data={items}
+            style={{ marginBottom: insets.bottom }}
             containerStyle={{ height: '100%' }}
-            ListHeaderComponent={title ? <TitleHeader /> : undefined}
+            contentContainerStyle={{ paddingBottom: 50 }}
             onDragEnd={onDragEnd}
             keyExtractor={(item, index) => (keyExtractor ? keyExtractor({ item, index }) : index.toString())}
             renderItem={renderItem}
           />
         ) : (
-          <ScrollView>
+          <BottomSheetScrollView
+            style={{
+              marginBottom: (!sortable && FooterComponent ? footerHeight : 0) + 12,
+            }}
+            contentContainerStyle={[styles.scrollInnerContainer]}
+          >
             <View minHeight={200} alignItems="center" paddingVertical="$3">
               <View alignItems="flex-start" paddingBottom="$4" width="100%">
-                {hasCustomItems
-                  ? items.map((item, index) => (
-                      <Render
-                        key={keyExtractor ? keyExtractor({ item, index }) : index}
-                        item={item}
-                        onClose={onClose}
-                      />
-                    ))
-                  : children}
+                {loading ? (
+                  <LoadingTx />
+                ) : hasCustomItems ? (
+                  items.map((item, index) => (
+                    <Render key={keyExtractor ? keyExtractor({ item, index }) : index} item={item} onClose={onClose} />
+                  ))
+                ) : (
+                  children
+                )}
               </View>
             </View>
-          </ScrollView>
+          </BottomSheetScrollView>
         )}
       </BottomSheetView>
     </BottomSheet>
@@ -120,5 +175,8 @@ export function SafeBottomSheet<T>({
 const styles = StyleSheet.create({
   contentContainer: {
     justifyContent: 'space-around',
+  },
+  scrollInnerContainer: {
+    paddingHorizontal: getTokenValue('$2'),
   },
 })

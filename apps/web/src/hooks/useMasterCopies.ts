@@ -1,4 +1,4 @@
-import useAsync from '@/hooks/useAsync'
+import useAsync from '@safe-global/utils/hooks/useAsync'
 import useChainId from '@/hooks/useChainId'
 import { Errors, logError } from '@/services/exceptions'
 import type { MasterCopyReponse } from '@safe-global/safe-gateway-typescript-sdk'

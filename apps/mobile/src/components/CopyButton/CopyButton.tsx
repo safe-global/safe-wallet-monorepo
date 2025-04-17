@@ -2,8 +2,15 @@ import { Button, TextProps } from 'tamagui'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon/SafeFontIcon'
 import { useCopyAndDispatchToast } from '@/src/hooks/useCopyAndDispatchToast'
 
-export const CopyButton = ({ value, color }: { value: string; color: TextProps['color'] }) => {
-  const copyAndDispatchToast = useCopyAndDispatchToast()
+interface CopyButtonProps {
+  value: string
+  color: TextProps['color']
+  size?: number
+  text?: string
+}
+
+export const CopyButton = ({ value, color, size = 13, text }: CopyButtonProps) => {
+  const copyAndDispatchToast = useCopyAndDispatchToast(text)
   return (
     <Button
       onPress={() => {
@@ -12,7 +19,7 @@ export const CopyButton = ({ value, color }: { value: string; color: TextProps['
       height={20}
       backgroundColor={'transparent'}
     >
-      <SafeFontIcon name={'copy'} size={13} color={color as string} />
+      <SafeFontIcon name={'copy'} size={size} color={color as string} />
     </Button>
   )
 }

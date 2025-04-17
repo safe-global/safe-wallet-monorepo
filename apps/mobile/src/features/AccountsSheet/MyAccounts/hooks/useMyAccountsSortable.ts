@@ -1,4 +1,3 @@
-import { selectMyAccountsMode, toggleMode } from '@/src/store/myAccountsSlice'
 import { SafesSliceItem, selectAllSafes, setSafes } from '@/src/store/safesSlice'
 import { useCallback, useEffect, useState } from 'react'
 import { DragEndParams } from 'react-native-draggable-flatlist'
@@ -13,24 +12,17 @@ export const useMyAccountsSortable = (): useMyAccountsSortableReturn => {
   const dispatch = useDispatch()
   const safes = useSelector(selectAllSafes)
   const [sortableSafes, setSortableSafes] = useState(() => Object.values(safes))
-  const isEdit = useSelector(selectMyAccountsMode)
 
   useEffect(() => {
-    const newSafes = Object.values(safes)
-    const shouldGoToListMode = newSafes.length <= 1 && isEdit
-
-    setSortableSafes(newSafes)
-
-    if (shouldGoToListMode) {
-      dispatch(toggleMode())
-    }
-  }, [safes, isEdit])
+    setSortableSafes(Object.values(safes))
+  }, [safes])
 
   const onDragEnd = useCallback(({ data }: DragEndParams<SafesSliceItem>) => {
     // Defer Redux update due to incompatibility issues between
     // react-native-draggable-flatlist and new architecture.
     setTimeout(() => {
       const safes = data.reduce((acc, item) => ({ ...acc, [item.SafeInfo.address.value]: item }), {})
+      setSortableSafes(Object.values(safes))
       dispatch(setSafes(safes))
     }, 0) // Ensure this happens after the re-render
   }, [])

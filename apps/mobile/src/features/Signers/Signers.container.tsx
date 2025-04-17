@@ -4,7 +4,6 @@ import React, { useMemo } from 'react'
 import { SafeButton } from '@/src/components/SafeButton'
 
 import { SignersList } from './components/SignersList'
-import { Dimensions } from 'react-native'
 import { useSignersGroupService } from './hooks/useSignersGroupService'
 import { useRouter } from 'expo-router'
 
@@ -25,18 +24,18 @@ export const SignersContainer = () => {
   }, [group])
 
   return (
-    <View gap="$6">
-      <View height={Dimensions.get('window').height - 230}>
+    <View gap="$6" testID={'signers-screen'} flex={1}>
+      <View flex={1}>
         <SignersList
           isFetching={isFetching}
-          hasLocalSingers={!!group.imported?.data.length}
+          hasLocalSigners={!!group.imported?.data.length}
           signersGroup={signersSections}
         />
       </View>
 
-      <View paddingHorizontal={'$3'}>
-        <SafeButton onPress={onImportSigner}>Import signer</SafeButton>
-      </View>
+      <SafeButton onPress={onImportSigner} testID={'import-signer-button'}>
+        Import signer
+      </SafeButton>
     </View>
   )
 }

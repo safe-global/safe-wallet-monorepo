@@ -45,11 +45,7 @@ describe('Tx history tests 2', () => {
   // On-chain rejection
   it('Verify exapanded details for on-chain rejection', () => {
     createTx.clickOnTransactionItemByName(typeOnchainRejection.title)
-    createTx.verifyExpandedDetails([
-      typeOnchainRejection.description,
-      typeOnchainRejection.transactionHash,
-      typeOnchainRejection.safeTxHash,
-    ])
+    createTx.verifyExpandedDetails([typeOnchainRejection.description, typeOnchainRejection.transactionHash2])
     createTx.verifyActionListExists([
       typeSideActions.rejectionCreated,
       typeSideActions.confirmations,
@@ -61,10 +57,7 @@ describe('Tx history tests 2', () => {
   // Batch transaction
   it('Verify exapanded details for batch', () => {
     createTx.clickOnTransactionItemByName(typeBatch.title, typeBatch.summaryTxInfo)
-    createTx.verifyExpandedDetails(
-      [typeBatch.contractTitle, typeBatch.transactionHash, typeBatch.safeTxHash],
-      createTx.delegateCallWarning,
-    )
+    createTx.verifyExpandedDetails([typeBatch.contractTitle, typeBatch.transactionHash], createTx.delegateCallWarning)
     createTx.verifyActions([typeBatch.nativeTransfer.title])
   })
 
@@ -82,7 +75,6 @@ describe('Tx history tests 2', () => {
         typeAddOwner.requiredConfirmationsTitle,
         typeAddOwner.ownerAddress,
         typeAddOwner.transactionHash,
-        typeAddOwner.safeTxHash,
       ],
       createTx.policyChangeWarning,
     )
@@ -103,9 +95,7 @@ describe('Tx history tests 2', () => {
       typeChangeOwner.newOwner.ownerAddress,
       typeChangeOwner.oldOwner.actionTitile,
       typeChangeOwner.oldOwner.ownerAddress,
-
       typeChangeOwner.transactionHash,
-      typeChangeOwner.safeTxHash,
     ])
   })
 
@@ -123,7 +113,6 @@ describe('Tx history tests 2', () => {
         typeRemoveOwner.requiredConfirmationsTitle,
         typeRemoveOwner.ownerAddress,
         typeRemoveOwner.transactionHash,
-        typeRemoveOwner.safeTxHash,
       ],
       createTx.policyChangeWarning,
     )
@@ -142,7 +131,6 @@ describe('Tx history tests 2', () => {
       typeDisableOwner.description,
       typeDisableOwner.address,
       typeDisableOwner.transactionHash,
-      typeDisableOwner.safeTxHash,
     ])
   })
 
@@ -156,11 +144,7 @@ describe('Tx history tests 2', () => {
   it('Verify exapanded details for changing threshold', () => {
     createTx.clickOnTransactionItemByName(typeChangeThreshold.title)
     createTx.verifyExpandedDetails(
-      [
-        typeChangeThreshold.requiredConfirmationsTitle,
-        typeChangeThreshold.transactionHash,
-        typeChangeThreshold.safeTxHash,
-      ],
+      [typeChangeThreshold.requiredConfirmationsTitle, typeChangeThreshold.transactionHash],
       createTx.policyChangeWarning,
     )
     createTx.checkRequiredThreshold(2)
@@ -170,5 +154,16 @@ describe('Tx history tests 2', () => {
   it('Verify that sender address of untrusted token will not be copied until agreed in warning popup', () => {
     createTx.clickOnTransactionItemByName(typeUntrustedToken.summaryTitle, typeUntrustedToken.summaryTxInfo)
     createTx.verifyAddressNotCopied(0, typeUntrustedToken.senderAddress)
+  })
+
+  it('Verify tx hashes are grouped in advanced details', () => {
+    createTx.clickOnTransactionItemByName(typeDisableOwner.title)
+    createTx.verifyExpandedDetails([
+      typeDisableOwner.description,
+      typeDisableOwner.address,
+      typeDisableOwner.transactionHash,
+    ])
+    createTx.clickOnAdvancedDetails()
+    createTx.checkHashesExist(3)
   })
 })

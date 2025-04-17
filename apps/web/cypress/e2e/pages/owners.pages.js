@@ -28,12 +28,14 @@ const addOwnerNextBtn = '[data-testid="add-owner-next-btn"]'
 const modalHeader = '[data-testid="modal-header"]'
 const addressToBeRemoved = '[aria-label="Copy to clipboard"] span'
 const thresholdNextBtn = '[data-testid="threshold-next-btn"]'
+const signerList = '[data-testid="signer-list"]'
 
 const disconnectBtnStr = 'Disconnect'
 const notConnectedStatus = 'Connect'
 const e2eWalletStr = 'E2E Wallet'
 const max50charsLimitStr = 'Maximum 50 symbols'
 const executeBtnStr = 'Execute'
+const continueBtnStr = 'Continue'
 const backbtnStr = 'Back'
 const removeOwnerStr = 'Remove signer'
 const selectedOwnerStr = 'Selected signer'
@@ -44,6 +46,14 @@ const changeThresholdStr = 'Change threshold'
 export const safeAccountNonceStr = 'Safe Account nonce'
 export const nonOwnerErrorMsg = 'Your connected wallet is not a signer of this Safe Account'
 export const disconnectedUserErrorMsg = 'Please connect your wallet'
+
+export function checkExistingSignerCount(count) {
+  cy.get(signerList).find(addressBook.tableRow).should('have.length', count)
+}
+
+export function checkExistingSignerAddress(index, address) {
+  cy.get(signerList).find(addressBook.tableRow).eq(index).should('contain.text', address)
+}
 
 export function verifyOwnerTransactionComplted() {
   cy.get(processedTransactionStr).should('exist')
@@ -113,7 +123,9 @@ export function hoverOverDeleteOwnerBtn(index) {
 }
 
 export function openRemoveOwnerWindow(btn) {
-  cy.get(removeOwnerBtn).eq(btn).click({ force: true })
+  const minimumCount = btn === 0 ? 1 : btn
+  main.verifyMinimumElementsCount(removeOwnerBtn, minimumCount)
+  cy.get(removeOwnerBtn).eq(btn).should('be.enabled').click({ force: true })
   cy.get('div').contains(removeOwnerStr).should('exist')
 }
 
@@ -133,7 +145,9 @@ export function getAddressToBeRemoved() {
 }
 
 export function openReplaceOwnerWindow(index) {
-  cy.get(replaceOwnerBtn).eq(index).click({ force: true })
+  const minimumCount = index === 0 ? 1 : index
+  main.verifyMinimumElementsCount(replaceOwnerBtn, minimumCount)
+  cy.get(replaceOwnerBtn).eq(index).should('be.enabled').click({ force: true })
   cy.get(newOwnerName).should('be.visible')
   cy.get(newOwnerAddress).should('be.visible')
 }
@@ -169,7 +183,7 @@ export function verifyTooltiptext(text) {
 }
 
 export function clickOnWalletExpandMoreIcon() {
-  cy.get(expandMoreIcon).eq(0).click()
+  cy.get(expandMoreIcon).eq(0).click({ force: true })
   cy.get(sentinelStart).next().should('be.visible')
 }
 
@@ -242,7 +256,7 @@ export function clickOnBackBtn() {
 
 export function verifyConfirmTransactionWindowDisplayed() {
   cy.get('div').contains(constants.transactionStatus.confirm).should('exist')
-  cy.get('button').contains(executeBtnStr).should('exist')
+  cy.get('button').contains(continueBtnStr).should('exist')
   cy.get('button').contains(backbtnStr).should('exist')
 }
 

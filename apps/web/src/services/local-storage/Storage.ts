@@ -1,6 +1,6 @@
 import { LS_NAMESPACE } from '@/config/constants'
 import { Errors, logError } from '@/services/exceptions'
-import { asError } from '../exceptions/utils'
+import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { reviver, replacer } from './storageHelpers'
 type BrowserStorage = typeof localStorage | typeof sessionStorage
 

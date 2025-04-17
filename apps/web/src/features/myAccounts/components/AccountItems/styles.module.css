@@ -28,6 +28,10 @@
   background-color: var(--color-background-paper);
 }
 
+.listItem {
+  background-color: var(--color-background-paper);
+}
+
 .listItem.subItem {
   margin-bottom: 8px;
 }
@@ -69,6 +73,10 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.safeAddress :global .ethHashInfo-name {
+  font-weight: bold;
 }
 
 .listHeader {

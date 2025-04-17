@@ -4,7 +4,7 @@ import * as useWallet from '@/hooks/wallets/useWallet'
 import WalletLogin from '../WalletLogin'
 import { toBeHex } from 'ethers'
 import { type EIP1193Provider } from '@web3-onboard/common'
-import { shortenAddress } from '@/utils/formatters'
+import { shortenAddress } from '@safe-global/utils/utils/formatters'
 
 describe('WalletLogin', () => {
   beforeEach(() => {

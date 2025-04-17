@@ -37,15 +37,18 @@ export const goerlySafeName = /g(ö|oe)rli-safe/
 export const sepoliaSafeName = 'sepolia-safe'
 export const goerliToken = /G(ö|oe)rli Ether/
 
+export const spaceUrl = '/spaces/settings?spaceId='
+export const spaceMembersUrl = '/spaces/members?spaceId='
 export const prodbaseUrl = 'https://app.safe.global'
 export const swapWidget = 'https://swap.cow.fi/#/11155111/widget/swap/'
+export const bridgeWidget = 'https://iframe.jumper.exchange/?theme=light'
 export const safeTestAppurl = 'https://safe-apps-test-app.pages.dev'
 export const TX_Builder_url = 'https://safe-apps.dev.5afe.dev/tx-builder'
 export const drainAccount_url = 'https://safe-apps.dev.5afe.dev/drain-safe'
 export const testAppUrl = 'https://safe-test-app.com'
 export const swapUrl = '/swap?safe='
 export const addressBookUrl = '/address-book?safe='
-export const appsUrlGeneral = '/apps?=safe='
+export const appsUrlGeneral = '/apps?safe='
 export const stakingUrl = '/stake?safe='
 export const appsCustomUrl = 'apps/custom?safe='
 export const BALANCE_URL = '/balances?safe='
@@ -57,10 +60,15 @@ export const transactionsQueued = 'transactions/queued'
 export const transactionUrl = '/transactions/tx?safe='
 export const openAppsUrl = '/apps/open?safe='
 export const homeUrl = '/home?safe='
+export const spacesUrl = '/welcome/spaces'
 export const welcomeUrl = '/welcome'
+export const welcomeAccountUrl = 'welcome/accounts'
+export const welcomeAccountsSepoliaUrl = 'welcome/accounts?chain=sep'
+export const welcomeSepoliaUrl = '/welcome?chain=sep'
 export const chainMaticUrl = '/welcome?chain=matic'
 export const createNewSafeSepoliaUrl = '/new-safe/create?chain=sep'
 export const loadNewSafeSepoliaUrl = '/new-safe/load?chain=sep'
+export const loadNewSafeUrl = '/new-safe/load'
 export const appsUrl = '/apps'
 export const requestPermissionsUrl = '/request-permissions'
 export const getPermissionsUrl = '/get-permissions'
@@ -70,14 +78,12 @@ export const dataSettingsUrl = '/settings/data?safe='
 export const securityUrl = '/settings/security?safe='
 export const modulesUrl = '/settings/modules?safe='
 export const notificationsUrl = '/settings/notifications?safe='
-export const invalidAppUrl = 'https://my-invalid-custom-app.com/manifest.json'
-export const validAppUrlJson = 'https://my-valid-custom-app.com/manifest.json'
 export const validAppUrl = 'https://my-valid-custom-app.com'
 export const etherscanlLink = 'etherscan.io'
 export const stagingTxServiceUrl = 'https://safe-transaction-sepolia.staging.5afe.dev/api'
 export const stagingTxServiceSafesUrl = '/safes/'
 export const stagingTxServiceBalancesUrl = '/balances/'
-
+export const appearanceSettingsUrl = '/settings/appearance?safe='
 export const stagingCGWUrl = 'https://safe-client.staging.5afe.dev/'
 export const stagingCGWUrlv1 = 'https://safe-client.staging.5afe.dev/v1'
 export const stagingCGWUrlv2 = 'https://safe-client.staging.5afe.dev/v2'
@@ -89,10 +95,16 @@ export const stagingCGWDelegatesUrl = '/delegates?safe='
 export const relayPath = '/relay/'
 export const stagingCGWAllTokensBalances = '/balances/USD?trusted=false&exclude_spam=false'
 
+export const spacesEndpoint = '**/**/spaces'
 export const proposeEndpoint = '/**/propose'
 export const appsEndpoint = '/**/safe-apps'
-export const transactionHistoryEndpoint = '**/history*'
+export const transactionHistoryEndpoint = '**/history**'
 export const safeListEndpoint = '**/safes'
+export const queuedEndpoint = '**/queued'
+export const messagesEndpoint = '**/messages'
+export const collectiblesEndpoint = '**/collectibles'
+
+export const indexStatusUrl = 'https://status.safe.global'
 
 export const VALID_QR_CODE_PATH = '../fixtures/sepolia_test_safe_QR.png'
 export const INVALID_QR_CODE_PATH = '../fixtures/invalid_image_QR_test.png'
@@ -132,6 +144,7 @@ export const networks = {
   sepolia: 'Sepolia',
   polygon: 'Polygon',
   gnosis: 'Gnosis',
+  berachain: 'Berachain',
   zkSync: 'zkSync Era',
   base: 'Base',
   optimism: 'Optimism',
@@ -197,6 +210,7 @@ export const tokenNames = {
   wrappedEther: 'Wrapped Ether',
   sepoliaEther: 'Sepolia Ether',
   qaToken: 'QAtest10',
+  cow: 'CoW Protocol Token',
 }
 
 export const addressBookErrrMsg = {

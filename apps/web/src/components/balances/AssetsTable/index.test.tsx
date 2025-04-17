@@ -2,13 +2,13 @@ import * as useChainId from '@/hooks/useChainId'
 import useHiddenTokens from '@/hooks/useHiddenTokens'
 import { TOKEN_LISTS } from '@/store/settingsSlice'
 import { act, fireEvent, getByRole, getByTestId, render, waitFor } from '@/tests/test-utils'
-import { safeParseUnits } from '@/utils/formatters'
+import { safeParseUnits } from '@safe-global/utils/utils/formatters'
 import { TokenType } from '@safe-global/safe-gateway-typescript-sdk'
 import { toBeHex } from 'ethers'
 import { useState } from 'react'
 import AssetsTable from '.'
 import { COLLAPSE_TIMEOUT_MS } from './useHideAssets'
-import * as balancesQueries from '@safe-global/store/gateway/AUTO_GENERATED/balances'
+import { type Balances } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 
 const getParentRow = (element: HTMLElement | null) => {
   while (element !== null) {
@@ -48,7 +48,7 @@ describe('AssetsTable', () => {
     const mockHiddenAssets = {
       '5': [toBeHex('0x2', 20), toBeHex('0x3', 20)],
     }
-    const mockBalances = {
+    const mockBalances: Balances = {
       fiatTotal: '300',
       items: [
         {
@@ -80,12 +80,12 @@ describe('AssetsTable', () => {
       ],
     }
 
-    jest
-      .spyOn(balancesQueries, 'useBalancesGetBalancesV1Query')
-      .mockImplementation(() => ({ data: mockBalances, isLoading: false, error: undefined, refetch: jest.fn() }))
-
     const result = render(<TestComponent />, {
       initialReduxState: {
+        balances: {
+          data: mockBalances,
+          loading: false,
+        },
         settings: {
           currency: 'usd',
           hiddenTokens: mockHiddenAssets,
@@ -153,7 +153,7 @@ describe('AssetsTable', () => {
     const mockHiddenAssets = {
       '5': [toBeHex('0x2', 20), toBeHex('0x3', 20), toBeHex('0xdead', 20)],
     }
-    const mockBalances = {
+    const mockBalances: Balances = {
       fiatTotal: '300',
       items: [
         {
@@ -187,6 +187,10 @@ describe('AssetsTable', () => {
 
     const result = render(<TestComponent />, {
       initialReduxState: {
+        balances: {
+          data: mockBalances,
+          loading: false,
+        },
         settings: {
           currency: 'usd',
           hiddenTokens: mockHiddenAssets,
@@ -213,10 +217,6 @@ describe('AssetsTable', () => {
         },
       },
     })
-
-    jest
-      .spyOn(balancesQueries, 'useBalancesGetBalancesV1Query')
-      .mockImplementation(() => ({ data: mockBalances, isLoading: false, error: undefined, refetch: jest.fn() }))
 
     const toggleHiddenButton = result.getByTestId('showHidden')
 
@@ -254,7 +254,7 @@ describe('AssetsTable', () => {
     const mockHiddenAssets = {
       '5': [],
     }
-    const mockBalances = {
+    const mockBalances: Balances = {
       fiatTotal: '300',
       items: [
         {
@@ -288,6 +288,10 @@ describe('AssetsTable', () => {
 
     const result = render(<TestComponent />, {
       initialReduxState: {
+        balances: {
+          data: mockBalances,
+          loading: false,
+        },
         settings: {
           currency: 'usd',
           hiddenTokens: mockHiddenAssets,
@@ -314,10 +318,6 @@ describe('AssetsTable', () => {
         },
       },
     })
-
-    jest
-      .spyOn(balancesQueries, 'useBalancesGetBalancesV1Query')
-      .mockImplementation(() => ({ data: mockBalances, isLoading: false, error: undefined, refetch: jest.fn() }))
 
     // Initially we see all tokens
     expect(result.queryByText('100 DAI')).not.toBeNull()
@@ -352,7 +352,7 @@ describe('AssetsTable', () => {
     const mockHiddenAssets = {
       '5': [],
     }
-    const mockBalances = {
+    const mockBalances: Balances = {
       fiatTotal: '300',
       items: [
         {
@@ -386,6 +386,10 @@ describe('AssetsTable', () => {
 
     const result = render(<TestComponent />, {
       initialReduxState: {
+        balances: {
+          data: mockBalances,
+          loading: false,
+        },
         settings: {
           currency: 'usd',
           hiddenTokens: mockHiddenAssets,
@@ -412,10 +416,6 @@ describe('AssetsTable', () => {
         },
       },
     })
-
-    jest
-      .spyOn(balancesQueries, 'useBalancesGetBalancesV1Query')
-      .mockImplementation(() => ({ data: mockBalances, isLoading: false, error: undefined, refetch: jest.fn() }))
 
     const toggleHiddenButton = result.getByTestId('showHidden')
 

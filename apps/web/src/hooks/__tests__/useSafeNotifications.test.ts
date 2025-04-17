@@ -38,13 +38,10 @@ describe('useSafeNotifications', () => {
       // mock useSafeInfo to return a SafeInfo with an outdated version
       ;(useSafeInfo as jest.Mock).mockReturnValue({
         safe: {
-          implementation: { value: '0x123' },
+          implementation: { value: '0x234' },
           implementationVersionState: 'OUTDATED',
           version: '1.1.1',
-          address: {
-            value: '0x1',
-          },
-          chainId: '5',
+          address: { value: '0x123' },
         },
         safeAddress: '0x123',
       })
@@ -73,13 +70,10 @@ describe('useSafeNotifications', () => {
       // mock useSafeInfo to return a SafeInfo with an outdated version
       ;(useSafeInfo as jest.Mock).mockReturnValue({
         safe: {
-          implementation: { value: '0x123' },
+          implementation: { value: '0x234' },
           implementationVersionState: 'OUTDATED',
           version: '0.0.1',
-          address: {
-            value: '0x1',
-          },
-          chainId: '5',
+          address: { value: '0x123' },
         },
         safeAddress: '0x123',
       })
@@ -104,13 +98,10 @@ describe('useSafeNotifications', () => {
     it('should not show a notification when the Safe version is up to date', () => {
       ;(useSafeInfo as jest.Mock).mockReturnValue({
         safe: {
-          implementation: { value: '0x123' },
+          implementation: { value: '0x234' },
           implementationVersionState: 'UP_TO_DATE',
           version: '1.3.0',
-          address: {
-            value: '0x1',
-          },
-          chainId: '5',
+          address: { value: '0x123' },
         },
       })
 
@@ -127,14 +118,10 @@ describe('useSafeNotifications', () => {
     it('should show a notification when the mastercopy is invalid', () => {
       ;(useSafeInfo as jest.Mock).mockReturnValue({
         safe: {
-          implementation: { value: '0x123' },
+          implementation: { value: '0x234' },
           implementationVersionState: 'UNKNOWN',
           version: '1.3.0',
-          nonce: 1,
-          address: {
-            value: '0x1',
-          },
-          chainId: '10',
+          address: { value: '0x123' },
         },
       })
 
@@ -155,6 +142,24 @@ describe('useSafeNotifications', () => {
         },
       })
     })
+    it('should not show a notification when the mastercopy is valid', async () => {
+      ;(useSafeInfo as jest.Mock).mockReturnValue({
+        safe: {
+          implementation: { value: '0x456' },
+          implementationVersionState: 'UP_TO_DATE',
+          version: '1.3.0',
+          address: { value: '0x123' },
+        },
+      })
+
+      // render the hook
+      const { result } = renderHook(() => useSafeNotifications())
+
+      // check that the notification was shown
+      expect(result.current).toBeUndefined()
+      expect(showNotification).not.toHaveBeenCalled()
+    })
+
     it('should show a notification when the mastercopy is invalid but can be migrated', () => {
       ;(useSafeInfo as jest.Mock).mockReturnValue({
         safe: {
@@ -177,30 +182,10 @@ describe('useSafeNotifications', () => {
       expect(showNotification).toHaveBeenCalledWith({
         variant: 'info',
         message: `This Safe Account was created with an unsupported base contract.
-           It is possible to migrate it to a compatible base contract. This migration will be automatically included with your first transaction.`,
+           It is possible to migrate it to a compatible base contract. You can migrate it to a compatible contract on the Home screen.`,
         groupKey: 'invalid-mastercopy',
         link: undefined,
       })
-    })
-    it('should not show a notification when the mastercopy is valid', async () => {
-      ;(useSafeInfo as jest.Mock).mockReturnValue({
-        safe: {
-          implementation: { value: '0x456' },
-          implementationVersionState: 'UP_TO_DATE',
-          version: '1.3.0',
-          address: {
-            value: '0x1',
-          },
-          chainId: '10',
-        },
-      })
-
-      // render the hook
-      const { result } = renderHook(() => useSafeNotifications())
-
-      // check that the notification was shown
-      expect(result.current).toBeUndefined()
-      expect(showNotification).not.toHaveBeenCalled()
     })
   })
 })

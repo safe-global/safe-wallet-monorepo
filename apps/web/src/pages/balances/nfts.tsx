@@ -10,7 +10,7 @@ import { useRemoteSafeApps } from '@/hooks/safe-apps/useRemoteSafeApps'
 
 // `React.memo` requires a `displayName`
 const NftApps = memo(function NftApps(): ReactElement | null {
-  const [nftApps] = useRemoteSafeApps(SafeAppsTag.NFT)
+  const [nftApps] = useRemoteSafeApps({ tag: SafeAppsTag.NFT })
 
   if (nftApps?.length === 0) {
     return null

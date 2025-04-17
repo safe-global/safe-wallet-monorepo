@@ -5,7 +5,7 @@ import { WalletConnectContext } from '@/features/walletconnect/WalletConnectCont
 import useDebounce from '@/hooks/useDebounce'
 import { trackEvent } from '@/services/analytics'
 import { WALLETCONNECT_EVENTS } from '@/services/analytics/events/walletconnect'
-import { asError } from '@/services/exceptions/utils'
+import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { getClipboard, isClipboardSupported } from '@/utils/clipboard'
 import { Button, CircularProgress, InputAdornment, TextField } from '@mui/material'
 import { useCallback, useContext, useEffect, useState } from 'react'
@@ -78,6 +78,7 @@ const WcInput = ({ uri }: { uri: string }) => {
 
   return (
     <TextField
+      data-testid="wc-input"
       value={value}
       onChange={(e) => onInput(e.target.value)}
       fullWidth

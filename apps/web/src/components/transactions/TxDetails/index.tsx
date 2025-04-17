@@ -21,7 +21,6 @@ import { InfoDetails } from '@/components/transactions/InfoDetails'
 import NamedAddressInfo from '@/components/common/NamedAddressInfo'
 import css from './styles.module.css'
 import ErrorMessage from '@/components/tx/ErrorMessage'
-import { TxShareButton } from '../TxShareLink/TxShareButton'
 import { ErrorBoundary } from '@sentry/react'
 import ExecuteTxButton from '@/components/transactions/ExecuteTxButton'
 import SignTxButton from '@/components/transactions/SignTxButton'
@@ -32,12 +31,13 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import useIsPending from '@/hooks/useIsPending'
 import { isImitation, isTrustedTx } from '@/utils/transactions'
 import { useHasFeature } from '@/hooks/useChains'
-import { FEATURES } from '@/utils/chains'
 import { useGetTransactionDetailsQuery } from '@/store/api/gateway'
-import { asError } from '@/services/exceptions/utils'
+import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { POLLING_INTERVAL } from '@/config/constants'
 import { TxNote } from '@/features/tx-notes'
-import { TxShareBlock } from '../TxShareLink/TxShareBlock'
+import { TxShareBlock } from '../TxShareLink'
+import { TxShareButton } from '../TxShareLink/TxShareButton'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 
 export const NOT_AVAILABLE = 'n/a'
 
@@ -122,7 +122,8 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
 
         <div className={css.txSummary}>
           {isUntrusted && !isPending && <UnsignedWarning />}
-          <Summary txDetails={txDetails} />
+
+          <Summary txDetails={txDetails} txData={txDetails.txData} txInfo={txDetails.txInfo} />
         </div>
 
         {(isMultiSendTxInfo(txDetails.txInfo) || isOrderTxInfo(txDetails.txInfo)) && (
@@ -143,7 +144,7 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
             proposer={proposedByDelegate}
           />
 
-          {isQueue && <TxShareBlock txId={txDetails.txId} />}
+          <TxShareBlock txId={txDetails.txId} txHash={txDetails.txHash} />
 
           {isQueue && (
             <Box className={css.buttons}>
@@ -183,6 +184,7 @@ const TxDetails = ({
     { chainId, txId: txSummary.id },
     {
       pollingInterval: isOpenSwapOrder(txSummary.txInfo) ? POLLING_INTERVAL : undefined,
+      skipPollingIfUnfocused: true,
     },
   )
 

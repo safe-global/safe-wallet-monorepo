@@ -13,7 +13,15 @@ import {
 } from '@/utils/transaction-guards'
 import { BRIDGE_WIDGET_URL } from '@/features/bridge/components/BridgeWidget'
 
-export const getTransactionTrackingType = (details: TransactionDetails | undefined, origin?: string): string => {
+export const getTransactionTrackingType = (
+  details: TransactionDetails | undefined,
+  origin?: string,
+  isMassPayout?: boolean,
+): string => {
+  if (isMassPayout) {
+    return TX_TYPES.batch_transfer_token
+  }
+
   if (!details) {
     return TX_TYPES.custom
   }

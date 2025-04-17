@@ -1,5 +1,5 @@
 import { getFilledAmount, getFilledPercentage } from '@/features/swap/helpers/utils'
-import { formatAmount } from '@/utils/formatNumber'
+import { formatAmount } from '@safe-global/utils/utils/formatNumber'
 import { LinearProgress, Stack, Typography } from '@mui/material'
 import type { Order } from '@safe-global/safe-gateway-typescript-sdk'
 

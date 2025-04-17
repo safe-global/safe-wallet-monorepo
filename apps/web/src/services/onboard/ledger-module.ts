@@ -8,10 +8,9 @@ import type {
 } from '@ledgerhq/device-signer-kit-ethereum'
 import type { Chain, WalletInit, WalletInterface } from '@web3-onboard/common'
 import type { Account, Asset, BasePath, DerivationPath, ScanAccountsOptions } from '@web3-onboard/hw-common'
-import type { Transaction } from 'ethers-v6'
 
 const LEDGER_LIVE_PATH: DerivationPath = "44'/60'"
-const LEDGER_DEFAULT_PATH: DerivationPath = "44'/60'/0'"
+const LEDGER_LEGACY_PATH: DerivationPath = "44'/60'/0'"
 
 const DEFAULT_BASE_PATHS: Array<BasePath> = [
   {
@@ -20,7 +19,7 @@ const DEFAULT_BASE_PATHS: Array<BasePath> = [
   },
   {
     label: 'Ledger Legacy',
-    value: LEDGER_DEFAULT_PATH,
+    value: LEDGER_LEGACY_PATH,
   },
 ]
 
@@ -30,10 +29,7 @@ const DEFAULT_ASSETS: Array<Asset> = [
   },
 ]
 
-// Error code returned by Ledger device when user rejects action
-const REJECTION_ERROR_CODE = '6985'
-
-export function ledgerModuleV2(): WalletInit {
+export function ledgerModule(): WalletInit {
   return () => {
     return {
       label: 'Ledger',
@@ -45,10 +41,11 @@ export function ledgerModuleV2(): WalletInit {
       getInterface: async ({ chains, EventEmitter }): Promise<WalletInterface> => {
         const DEFAULT_CHAIN = chains[0]
 
+        const { BigNumber } = await import('@ethersproject/bignumber')
+        const { hexaStringToBuffer } = await import('@ledgerhq/device-management-kit')
         const { createEIP1193Provider, ProviderRpcError, ProviderRpcErrorCode } = await import('@web3-onboard/common')
         const { accountSelect, getHardwareWalletProvider } = await import('@web3-onboard/hw-common')
-        const { BigNumber } = await import('ethers-v5')
-        const { getBytes, Signature, Transaction, JsonRpcProvider } = await import('ethers-v6')
+        const { Signature, Transaction, JsonRpcProvider } = await import('ethers')
 
         const eventEmitter = new EventEmitter()
         const ledgerSdk = await getLedgerSdk()
@@ -76,7 +73,7 @@ export function ledgerModuleV2(): WalletInit {
         // Sets the current account and emits the accountsChanged event
         function setCurrentAccount(account: Account): void {
           currentAccount = account
-          eventEmitter.emit('accountsChanged', [account.address])
+          eventEmitter.emit('accountsChanged', [currentAccount.address])
         }
 
         // Clears the current account and emits the accountsChanged event
@@ -139,6 +136,15 @@ export function ledgerModuleV2(): WalletInit {
               const txParams = args.params[0]
 
               const gasLimit = txParams.gas ?? txParams.gasLimit
+              const nonce =
+                txParams.nonce ??
+                // Safe creation does not provide nonce
+                ((await eip1193Provider.request({
+                  method: 'eth_getTransactionCount',
+                  // Take pending transactions into account
+                  params: [currentAccount!.address, 'pending'],
+                })) as string)
+
               const transaction = Transaction.from({
                 chainId: BigInt(currentChain.id),
                 data: txParams.data,
@@ -146,12 +152,15 @@ export function ledgerModuleV2(): WalletInit {
                 gasPrice: txParams.gasPrice ? BigInt(txParams.gasPrice) : null,
                 maxFeePerGas: txParams.maxFeePerGas ? BigInt(txParams.maxFeePerGas) : null,
                 maxPriorityFeePerGas: txParams.maxPriorityFeePerGas ? BigInt(txParams.maxPriorityFeePerGas) : null,
-                nonce: txParams.nonce ? parseInt(txParams.nonce, 16) : null,
+                nonce: parseInt(nonce, 16),
                 to: txParams.to,
                 value: txParams.value ? BigInt(txParams.value) : null,
               })
 
-              transaction.signature = await ledgerSdk.signTransaction(getAssertedDerivationPath(), transaction)
+              transaction.signature = await ledgerSdk.signTransaction(
+                getAssertedDerivationPath(),
+                hexaStringToBuffer(transaction.unsignedSerialized)!,
+              )
 
               return transaction.serialized
             },
@@ -166,12 +175,12 @@ export function ledgerModuleV2(): WalletInit {
               })) as string
             },
             eth_sign: async (args) => {
+              // The Safe requires transactions be signed as bytes, but eth_sign is only used by
+              // the Transaction Service, e.g. notification registration. We therefore sign
+              // messages as is to avoid unreadable byte notation (e.g. \xef\xbe\xad\xde). Instead,
+              // the Ledger device shows plain hex (e.g. 0xdeadbeef).
               const message = args.params[1]
-              const signature = await ledgerSdk.signMessage(
-                getAssertedDerivationPath(),
-                // Safe signs bytes
-                getBytes(message),
-              )
+              const signature = await ledgerSdk.signMessage(getAssertedDerivationPath(), message)
               return Signature.from(signature).serialized
             },
             personal_sign: async (args) => {
@@ -250,12 +259,13 @@ export function ledgerModuleV2(): WalletInit {
           const provider = new JsonRpcProvider(currentChain.rpcUrl)
 
           // Only return exact account from custom derivation
-          if (args.derivationPath !== LEDGER_LIVE_PATH && args.derivationPath !== LEDGER_DEFAULT_PATH) {
+          if (args.derivationPath !== LEDGER_LIVE_PATH && args.derivationPath !== LEDGER_LEGACY_PATH) {
             const account = await deriveAccount({ ...args, provider })
             return [account]
           }
 
           const accounts = []
+
           let zeroBalanceAccounts = 0
           let index = 0
 
@@ -310,24 +320,23 @@ export function ledgerModuleV2(): WalletInit {
   }
 }
 
+const enum LedgerErrorCode {
+  REJECTED = '6985',
+}
+
 // Promisified Ledger SDK
 async function getLedgerSdk() {
-  const { BuiltinTransports, DeviceActionStatus, DeviceManagementKitBuilder } = await import(
-    '@ledgerhq/device-management-kit'
-  )
+  const { DeviceActionStatus, DeviceManagementKitBuilder } = await import('@ledgerhq/device-management-kit')
+  const { webHidTransportFactory, webHidIdentifier } = await import('@ledgerhq/device-transport-kit-web-hid')
   const { SignerEthBuilder } = await import('@ledgerhq/device-signer-kit-ethereum')
-  const { makeError } = await import('ethers-v6')
+  const { makeError } = await import('ethers')
   const { default: get } = await import('lodash/get')
   const { lastValueFrom } = await import('rxjs')
 
   // Get connected device and create signer
-  const transport = BuiltinTransports.USB
-  const dmk = new DeviceManagementKitBuilder().addTransport(transport).build()
-  const device = await lastValueFrom(dmk.startDiscovering({ transport }))
+  const dmk = new DeviceManagementKitBuilder().addTransport(webHidTransportFactory).build()
+  const device = await lastValueFrom(dmk.startDiscovering({ transport: webHidIdentifier }))
   const sessionId = await dmk.connect({ device })
-
-  // TODO: Create a Safe-specific ContextModule for clear signing
-  // @see https://github.com/LedgerHQ/device-sdk-ts/tree/develop/packages/signer/context-module
   const signer = new SignerEthBuilder({ dmk, sessionId }).build()
 
   function mapOutput<T>(actionState: DeviceActionState<T, unknown, unknown>): T {
@@ -337,12 +346,13 @@ async function getLedgerSdk() {
       }
       case DeviceActionStatus.Error: {
         const errorCode = get(actionState.error, 'originalError.errorCode')
-        const isRejection = errorCode === REJECTION_ERROR_CODE
+        const isRejection = errorCode === LedgerErrorCode.REJECTED
 
         if (!isRejection) {
           throw actionState.error
         }
 
+        // Ethers error for user rejection
         throw makeError('user rejected action', 'ACTION_REJECTED', {
           action: 'unknown',
           reason: 'rejected',
@@ -356,7 +366,7 @@ async function getLedgerSdk() {
   }
 
   return {
-    disconnect: async () => {
+    disconnect: async (): Promise<void> => {
       return dmk.disconnect({ sessionId })
     },
     getAddress: async (derivationPath: string): Promise<GetAddressDAOutput> => {
@@ -367,7 +377,7 @@ async function getLedgerSdk() {
       const actionState = await lastValueFrom(signer.signMessage(derivationPath, message).observable)
       return mapOutput(actionState)
     },
-    signTransaction: async (derivationPath: string, transaction: Transaction): Promise<SignTransactionDAOutput> => {
+    signTransaction: async (derivationPath: string, transaction: Uint8Array): Promise<SignTransactionDAOutput> => {
       const actionState = await lastValueFrom(signer.signTransaction(derivationPath, transaction).observable)
       return mapOutput(actionState)
     },

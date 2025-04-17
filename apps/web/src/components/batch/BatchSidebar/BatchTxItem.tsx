@@ -9,7 +9,7 @@ import DeleteIcon from '@/public/images/common/delete.svg'
 import TxData from '@/components/transactions/TxDetails/TxData'
 import { MethodDetails } from '@/components/transactions/TxDetails/TxData/DecodedData/MethodDetails'
 import { TxDataRow } from '@/components/transactions/TxDetails/Summary/TxDataRow'
-import { dateString } from '@/utils/formatters'
+import { dateString } from '@safe-global/utils/utils/formatters'
 import { BATCH_EVENTS, trackEvent } from '@/services/analytics'
 
 type BatchTxItemProps = DraftBatchItem & {

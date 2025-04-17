@@ -1,9 +1,9 @@
-import TxLayout from '@/components/tx-flow/common/TxLayout'
-import ReviewChangeThreshold from '@/components/tx-flow/flows/ChangeThreshold/ReviewChangeThreshold'
-import useTxStepper from '@/components/tx-flow/useTxStepper'
 import SaveAddressIcon from '@/public/images/common/save-address.svg'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { ChooseThreshold } from '@/components/tx-flow/flows/ChangeThreshold/ChooseThreshold'
+import { ChooseThreshold } from './ChooseThreshold'
+import { SETTINGS_EVENTS, trackEvent, TxFlowType } from '@/services/analytics'
+import { type SubmitCallbackWithData, TxFlow } from '../../TxFlow'
+import { TxFlowStep } from '../../TxFlowStep'
 
 export enum ChangeThresholdFlowFieldNames {
   threshold = 'threshold',
@@ -14,27 +14,31 @@ export type ChangeThresholdFlowProps = {
 }
 
 const ChangeThresholdFlow = () => {
-  const { safe } = useSafeInfo()
+  const {
+    safe: { threshold, owners },
+  } = useSafeInfo()
 
-  const { data, step, nextStep, prevStep } = useTxStepper<ChangeThresholdFlowProps>({
-    [ChangeThresholdFlowFieldNames.threshold]: safe.threshold,
-  })
+  const trackEvents = (newThreshold: number) => {
+    trackEvent({ ...SETTINGS_EVENTS.SETUP.OWNERS, label: owners.length })
+    trackEvent({ ...SETTINGS_EVENTS.SETUP.THRESHOLD, label: newThreshold })
+  }
 
-  const steps = [
-    <ChooseThreshold key={0} params={data} onSubmit={(formData) => nextStep(formData)} />,
-    <ReviewChangeThreshold key={1} params={data} />,
-  ]
+  const handleSubmit: SubmitCallbackWithData<ChangeThresholdFlowProps> = ({ data }) => {
+    trackEvents(data?.threshold || threshold)
+  }
 
   return (
-    <TxLayout
-      title={step === 0 ? 'New transaction' : 'Confirm transaction'}
-      subtitle="Change threshold"
+    <TxFlow
+      initialData={{ threshold }}
       icon={SaveAddressIcon}
-      step={step}
-      onBack={prevStep}
+      subtitle="Change threshold"
+      onSubmit={handleSubmit}
+      eventCategory={TxFlowType.CHANGE_THRESHOLD}
     >
-      {steps}
-    </TxLayout>
+      <TxFlowStep title="New transaction">
+        <ChooseThreshold key={0} />
+      </TxFlowStep>
+    </TxFlow>
   )
 }
 

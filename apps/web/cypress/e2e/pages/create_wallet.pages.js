@@ -1,5 +1,5 @@
 import * as main from '../pages/main.page'
-import { connectedWalletExecMethod, relayExecMethod } from '../pages/create_tx.pages'
+import { connectedWalletExecMethod, relayExecMethod, connectedWalletMethod } from '../pages/create_tx.pages'
 import * as sidebar from '../pages/sidebar.pages'
 import * as constants from '../../support/constants'
 
@@ -52,6 +52,7 @@ export const cfSafeCreationSuccessMsg = '[data-testid="account-success-message"]
 export const cfSafeActivationMsg = '[data-testid="safe-activation-message"]'
 export const cfSafeInfo = '[data-testid="safe-info"]'
 const connectWalletBtn = '[data-testid="connect-wallet-btn"]'
+const networkSelectorItem = '[data-testid="network-selector-item"]'
 
 const sponsorStr = 'Your account is sponsored by Goerli'
 const safeCreationProcessing = 'Transaction is being executed'
@@ -117,8 +118,8 @@ export function verifyCFSafeCreated() {
   main.verifyElementsIsVisible([sidebar.pendingActivationIcon, safeActivationSection])
 }
 
-export function selectPayLaterOption() {
-  cy.get(connectedWalletExecMethod).click()
+export function selectPayNowOption() {
+  cy.get(connectedWalletMethod).click()
 }
 
 export function selectRelayOption() {
@@ -210,7 +211,7 @@ export function clearWalletName() {
 }
 
 export function openNetworkSelector() {
-  cy.get(newtworkSelectorDiv).find(expandMoreIcon).parent().click()
+  cy.get(networkSelectorItem).should('be.visible').click({ force: true })
 }
 export function selectNetwork(network) {
   cy.wait(1000)

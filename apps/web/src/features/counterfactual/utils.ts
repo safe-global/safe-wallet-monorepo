@@ -1,22 +1,13 @@
-import { getLatestSafeVersion } from '@/utils/chains'
 import { POLLING_INTERVAL } from '@/config/constants'
-import type { PayMethod } from '@/features/counterfactual/PayNowPayLater'
 import { safeCreationDispatch, SafeCreationEvent } from '@/features/counterfactual/services/safeCreationEvents'
-import {
-  addUndeployedSafe,
-  type UndeployedSafeProps,
-  type ReplayedSafeProps,
-  type UndeployedSafe,
-  PendingSafeStatus,
-} from '@/features/counterfactual/store/undeployedSafesSlice'
+import { addUndeployedSafe } from '@/features/counterfactual/store/undeployedSafesSlice'
 import { type ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import { getWeb3ReadOnly } from '@/hooks/wallets/web3'
-import { asError } from '@/services/exceptions/utils'
-import ExternalStore from '@/services/ExternalStore'
+import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { getSafeSDKWithSigner, getUncheckedSigner, tryOffChainTxSigning } from '@/services/tx/tx-sender/sdk'
 import { getRelayTxStatus, TaskState } from '@/services/tx/txMonitor'
 import type { AppDispatch } from '@/store'
-import { defaultSafeInfo } from '@/store/safeInfoSlice'
+import { defaultSafeInfo } from '@safe-global/store/slices/SafeInfo/utils'
 import { didRevert, type EthersError } from '@/utils/ethers-utils'
 import { assertProvider, assertTx, assertWallet } from '@/utils/helpers'
 import { type DeploySafeProps, type PredictedSafeProps } from '@safe-global/protocol-kit'
@@ -30,9 +21,17 @@ import {
 } from '@safe-global/safe-gateway-typescript-sdk'
 import type { BrowserProvider, ContractTransactionResponse, Eip1193Provider, Provider } from 'ethers'
 import { getSafeL2SingletonDeployments, getSafeSingletonDeployments } from '@safe-global/safe-deployments'
-import { sameAddress } from '@/utils/addresses'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 
 import { encodeSafeCreationTx } from '@/components/new-safe/create/logic'
+import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
+import type {
+  ReplayedSafeProps,
+  UndeployedSafe,
+  UndeployedSafeProps,
+} from '@safe-global/utils/features/counterfactual/store/types'
+import { PendingSafeStatus } from '@safe-global/utils/features/counterfactual/store/types'
+import type { PayMethod } from '@safe-global/utils/features/counterfactual/types'
 
 export const getUndeployedSafeInfo = (undeployedSafe: UndeployedSafe, address: string, chain: ChainInfo) => {
   const safeSetup = extractCounterfactualSafeSetup(undeployedSafe, chain.chainId)
@@ -69,7 +68,7 @@ export const dispatchTxExecutionAndDeploySafe = async (
 
   let result: ContractTransactionResponse | undefined
   try {
-    const signedTx = await tryOffChainTxSigning(safeTx, await sdk.getContractVersion(), sdk)
+    const signedTx = await tryOffChainTxSigning(safeTx, sdk)
     const signer = await getUncheckedSigner(provider)
 
     const deploymentTx = await sdk.wrapSafeTransactionIntoDeploymentBatch(signedTx, txOptions)
@@ -103,14 +102,7 @@ export const deploySafeAndExecuteTx = async (
   return dispatchTxExecutionAndDeploySafe(safeTx, txOptions, provider, safeAddress)
 }
 
-export const { getStore: getNativeBalance, setStore: setNativeBalance } = new ExternalStore<bigint>(0n)
-
-export const getCounterfactualBalance = async (
-  safeAddress: string,
-  provider?: BrowserProvider,
-  chain?: ChainInfo,
-  ignoreCache?: boolean,
-) => {
+export const getCounterfactualBalance = async (safeAddress: string, provider?: BrowserProvider, chain?: ChainInfo) => {
   let balance: bigint | undefined
 
   if (!chain) return undefined
@@ -120,10 +112,7 @@ export const getCounterfactualBalance = async (
   if (provider) {
     balance = await provider.getBalance(safeAddress)
   } else {
-    const cachedBalance = getNativeBalance()
-    const useCache = cachedBalance !== undefined && cachedBalance > 0n && !ignoreCache
-    balance = useCache ? cachedBalance : ((await getWeb3ReadOnly()?.getBalance(safeAddress)) ?? 0n)
-    setNativeBalance(balance)
+    balance = (await getWeb3ReadOnly()?.getBalance(safeAddress)) ?? 0n
   }
 
   return <SafeBalanceResponse>{

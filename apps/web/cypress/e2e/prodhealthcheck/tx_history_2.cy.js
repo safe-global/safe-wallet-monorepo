@@ -2,7 +2,7 @@ import * as constants from '../../support/constants'
 import * as createTx from '../pages/create_tx.pages'
 import * as data from '../../fixtures/txhistory_data_data.json'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
-import { acceptCookies2 } from '../pages/main.page.js'
+import { acceptCookies2, closeSecurityNotice } from '../pages/main.page.js'
 
 let staticSafes = []
 
@@ -17,7 +17,7 @@ const typeSideActions = data.type.sideActions
 const typeGeneral = data.type.general
 const typeUntrustedToken = data.type.untrustedReceivedToken
 
-describe('[PROD] Tx history tests 2', () => {
+describe('[PROD] Tx history tests 2', { defaultCommandTimeout: 30000 }, () => {
   before(async () => {
     staticSafes = await getSafes(CATEGORIES.static)
   })
@@ -35,6 +35,9 @@ describe('[PROD] Tx history tests 2', () => {
     ).as('allTransactions')
 
     cy.visit(constants.prodbaseUrl + constants.transactionsHistoryUrl + staticSafes.SEP_STATIC_SAFE_7)
+    cy.wait('@allTransactions', { timeout: 30000 })
+    cy.contains(createTx.txStr)
+    closeSecurityNotice()
     acceptCookies2()
   })
 
@@ -45,11 +48,7 @@ describe('[PROD] Tx history tests 2', () => {
   // On-chain rejection
   it('Verify exapanded details for on-chain rejection', () => {
     createTx.clickOnTransactionItemByName(typeOnchainRejection.title)
-    createTx.verifyExpandedDetails([
-      typeOnchainRejection.description,
-      typeOnchainRejection.transactionHash,
-      typeOnchainRejection.safeTxHash,
-    ])
+    createTx.verifyExpandedDetails([typeOnchainRejection.description, typeOnchainRejection.transactionHash2])
     createTx.verifyActionListExists([
       typeSideActions.rejectionCreated,
       typeSideActions.confirmations,
@@ -60,10 +59,7 @@ describe('[PROD] Tx history tests 2', () => {
   // Batch transaction
   it('Verify exapanded details for batch', () => {
     createTx.clickOnTransactionItemByName(typeBatch.title, typeBatch.summaryTxInfo)
-    createTx.verifyExpandedDetails(
-      [typeBatch.contractTitle, typeBatch.transactionHash, typeBatch.safeTxHash],
-      createTx.delegateCallWarning,
-    )
+    createTx.verifyExpandedDetails([typeBatch.contractTitle, typeBatch.transactionHash], createTx.delegateCallWarning)
     createTx.verifyActions([typeBatch.nativeTransfer.title])
   })
 
@@ -87,7 +83,6 @@ describe('[PROD] Tx history tests 2', () => {
       typeChangeOwner.oldOwner.ownerAddress,
 
       typeChangeOwner.transactionHash,
-      typeChangeOwner.safeTxHash,
     ])
   })
 
@@ -109,11 +104,7 @@ describe('[PROD] Tx history tests 2', () => {
   it('Verify exapanded details for changing threshold', () => {
     createTx.clickOnTransactionItemByName(typeChangeThreshold.title)
     createTx.verifyExpandedDetails(
-      [
-        typeChangeThreshold.requiredConfirmationsTitle,
-        typeChangeThreshold.transactionHash,
-        typeChangeThreshold.safeTxHash,
-      ],
+      [typeChangeThreshold.requiredConfirmationsTitle, typeChangeThreshold.transactionHash],
       createTx.policyChangeWarning,
     )
     createTx.checkRequiredThreshold(2)

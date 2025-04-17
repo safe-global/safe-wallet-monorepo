@@ -26,8 +26,8 @@ import css from './styles.module.css'
 import { trackEvent, OVERVIEW_EVENTS } from '@/services/analytics'
 import SvgIcon from '@mui/icons-material/ExpandLess'
 import { useHasFeature } from '@/hooks/useChains'
-import { FEATURES } from '@/utils/chains'
 import { useShowNotificationsRenewalMessage } from '@/components/settings/PushNotifications/hooks/useShowNotificationsRenewalMessage'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 
 const NOTIFICATION_CENTER_LIMIT = 4
 
@@ -139,7 +139,7 @@ const NotificationCenter = (): ReactElement => {
         <Paper className={css.popoverContainer}>
           <div className={css.popoverHeader}>
             <div>
-              <Typography variant="h4" component="span" fontWeight={700}>
+              <Typography data-testid="notifications-title" variant="h4" component="span" fontWeight={700}>
                 Notifications
               </Typography>
               {hasUnread && (
@@ -188,7 +188,12 @@ const NotificationCenter = (): ReactElement => {
                 passHref
                 legacyBehavior
               >
-                <MuiLink className={css.settingsLink} variant="body2" onClick={onSettingsClick}>
+                <MuiLink
+                  data-testid="notifications-button"
+                  className={css.settingsLink}
+                  variant="body2"
+                  onClick={onSettingsClick}
+                >
                   <SvgIcon component={SettingsIcon} inheritViewBox fontSize="small" /> Push notifications settings
                 </MuiLink>
               </Link>

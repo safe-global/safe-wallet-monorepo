@@ -1,6 +1,7 @@
 # Safe{Wallet} mobile app 📱
 
-This project is now part of the **@safe-global/safe-wallet** monorepo! The monorepo setup allows centralized management of multiple
+This project is now part of the **@safe-global/safe-wallet** monorepo! The monorepo setup allows centralized management
+of multiple
 applications and shared libraries. This workspace (`apps/mobile`) contains the Safe Mobile App.
 
 You can run commands for this workspace in two ways:
@@ -16,7 +17,8 @@ In the addition to the monorepo prerequisites, the mobile app requires the follo
 - iOS/Android Development Tools
 - [Maestro](https://maestro.mobile.dev/) if you want to run E2E tests
 
-You can follow the [expo documentation](https://docs.expo.dev/get-started/set-up-your-environment/) to install the CLI and set up your development environment.
+You can follow the [expo documentation](https://docs.expo.dev/get-started/set-up-your-environment/) to install the CLI
+and set up your development environment.
 
 Follow the [Maestro](https://maestro.mobile.dev/) documentation to install the tool for E2E testing.
 
@@ -29,6 +31,19 @@ yarn install
 ```
 
 ## Running the app
+
+There is a `.env.example` file in the root of the mobile app. Create a `.env.local` file and paste the contents of the `.env.example`
+file into it and set the correct values for the environment variables.
+
+For local development you need to place the `google-services.json` and `GoogleService-Info.plist` files in the root of
+the mobile app.
+
+If you use EAS to manage your environement variables you can issue the 
+```bash
+eas env:pull
+```
+
+command. This will pull the variables from your eas project and place them in the .env.local file.
 
 ### Running on iOS
 
@@ -46,7 +61,8 @@ yarn start:ios
 
 > [!NOTE]
 >
-> From now on for brevity we will only show the command to run from the root of the monorepo. You can always run the command from the `apps/mobile` directory you just need to omit the `workspace @safe-global/mobile`.
+> From now on for brevity we will only show the command to run from the root of the monorepo. You can always run the
+> command from the `apps/mobile` directory you just need to omit the `workspace @safe-global/mobile`.
 
 ### Running on Android
 

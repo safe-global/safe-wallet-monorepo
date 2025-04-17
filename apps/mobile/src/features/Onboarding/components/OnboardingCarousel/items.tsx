@@ -1,10 +1,11 @@
 import { Dimensions, StyleSheet } from 'react-native'
-import { H1, Image, View } from 'tamagui'
-import Signing from '@/assets/images/illustration.png'
+import { getTokenValue, H1, Image, View } from 'tamagui'
+import Signing from '@/assets/images/select-signer.png'
+import PersonalisedUpdates from '@/assets/images/personalised-updates.png'
 
 import TrackAnywhere from '@/assets/images/anywhere.png'
 import { CarouselItem } from './CarouselItem'
-import { ParticlesLogo } from '../ParticlesLogo'
+import React from 'react'
 
 const windowHeight = Dimensions.get('window').height
 
@@ -24,82 +25,77 @@ const styles = StyleSheet.create({
   textContainer: {
     textAlign: 'center',
     flexDirection: 'column',
+    letterSpacing: -0.1,
+    color: getTokenValue('$color.textContrastDark'),
   },
 })
 
 export const items: CarouselItem[] = [
   {
-    name: 'multisig',
+    name: 'tracking',
     image: (
-      <View justifyContent="flex-end" height={Math.abs(windowHeight * 0.35)}>
-        <ParticlesLogo />
+      <View height={300} width={'100%'}>
+        <Image style={[styles.image, styles.anywhere]} source={TrackAnywhere} />
       </View>
     ),
     title: (
       <>
         <H1 style={styles.textContainer} fontWeight={600}>
-          Your main
+          Track your
         </H1>
         <H1 style={styles.textContainer} fontWeight={600}>
-          <H1 fontWeight={600} color="$primary">
-            Safe
-          </H1>{' '}
-          multisig
-        </H1>
-        <H1 style={styles.textContainer} fontWeight={600}>
-          companion
-        </H1>
-      </>
-    ),
-  },
-  {
-    name: 'tracking',
-    image: <Image style={[styles.image, styles.anywhere]} source={TrackAnywhere} />,
-    title: (
-      <>
-        <H1 style={styles.textContainer} fontWeight={600}>
-          Track
-        </H1>
-        <H1 style={styles.textContainer} fontWeight={600}>
-          everything.
+          accounts.
         </H1>
         <H1 style={styles.textContainer} fontWeight={600} color="$primary">
           Anywhere.
         </H1>
       </>
     ),
-    description: 'Quickly check your asset balances and portfolio performance anytime, anywhere.',
+    description: 'Easily track balances and get real-time updates on account activity - anytime.',
   },
   {
     name: 'signing',
-    image: <Image style={[styles.image, styles.signing]} source={Signing} />,
+    image: (
+      <View height={300} width={'100%'}>
+        <Image style={[styles.image, styles.signing]} source={Signing} />
+      </View>
+    ),
     title: (
       <>
         <H1 style={styles.textContainer} fontWeight={600}>
-          Seamless
+          Sign transaction
+        </H1>
+
+        <H1 style={styles.textContainer} fontWeight={600}>
+          securely on-
         </H1>
         <H1 style={styles.textContainer} fontWeight={600}>
-          signing
+          the-go..
         </H1>
       </>
     ),
-    description:
-      'Sign and execute transactions securely from your mobile device. Ensuring your assets are protected, even on the move.',
+    description: 'Enjoy peace of mind with transaction checks, ensuring secure signing.',
   },
   {
     name: 'update-to-date',
-    image: <View height={Math.abs(windowHeight * 0.32)} />,
+    image: (
+      <View height={300} width={'100%'}>
+        <Image style={[styles.image, styles.signing]} source={PersonalisedUpdates} />
+      </View>
+    ),
     title: (
       <>
         <H1 style={styles.textContainer} fontWeight={600}>
-          Stay
+          ...and get
         </H1>
         <H1 style={styles.textContainer} fontWeight={600}>
-          up-to-date
+          personalised
+        </H1>
+        <H1 style={styles.textContainer} fontWeight={600}>
+          updates
         </H1>
       </>
     ),
-    description:
-      'Sign and execute transactions securely from your mobile device. Ensuring your assets are protected, even on the move.',
+    description: 'Stay informed with personalized notifications tailored to your accounts.',
   },
 ]

@@ -6,7 +6,7 @@ import { encodeMultiSendData } from '@safe-global/protocol-kit/dist/src/utils/tr
 
 import { safeInfoBuilder } from '@/tests/builders/safe'
 import { getRecoveredSafeInfo } from '../transaction-list'
-import { checksumAddress, sameAddress } from '@/utils/addresses'
+import { checksumAddress, sameAddress } from '@safe-global/utils/utils/addresses'
 
 describe('getRecoveredSafeInfo', () => {
   describe('non-MultiSend', () => {

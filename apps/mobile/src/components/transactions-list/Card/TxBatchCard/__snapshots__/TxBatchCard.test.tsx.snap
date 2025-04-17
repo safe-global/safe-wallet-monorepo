@@ -3,6 +3,15 @@
 exports[`TxBatchCard should render the default markup 1`] = `
 <View>
   <View
+    onBlur={[Function]}
+    onClick={[Function]}
+    onFocus={[Function]}
+    onResponderGrant={[Function]}
+    onResponderMove={[Function]}
+    onResponderRelease={[Function]}
+    onResponderTerminate={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
     style={
       {
         "alignItems": "center",
@@ -136,7 +145,7 @@ exports[`TxBatchCard should render the default markup 1`] = `
                 ]
               }
             >
-              
+              
             </Text>
           </View>
         </View>
@@ -172,13 +181,14 @@ exports[`TxBatchCard should render the default markup 1`] = `
             }
             testID="safe-list-batch-icon"
           >
-            
+            
           </Text>
           <Text
             style={
               {
                 "color": "#A1A3A7",
-                "fontSize": 12,
+                "fontFamily": "DM Sans",
+                "fontSize": 13,
                 "marginBottom": 2,
               }
             }
@@ -191,8 +201,8 @@ exports[`TxBatchCard should render the default markup 1`] = `
           style={
             {
               "color": "#121312",
-              "fontSize": 16,
-              "fontWeight": 600,
+              "fontFamily": "DMSans-SemiBold",
+              "fontSize": 14,
             }
           }
           suppressHighlighting={true}

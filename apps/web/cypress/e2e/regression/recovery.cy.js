@@ -90,6 +90,7 @@ describe('Recovery regression tests', { defaultCommandTimeout: 50000 }, () => {
     main.acceptCookies()
     recovery.clickOnRecoverLaterBtn()
     cy.reload()
+    owner.waitForConnectionStatus()
     recovery.verifyRecoveryProposalModalState(constants.elementExistanceStates.not_exist)
     navigation.clickOnWalletExpandMoreIcon()
     navigation.clickOnDisconnectBtn()

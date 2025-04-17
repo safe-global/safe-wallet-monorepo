@@ -1,4 +1,5 @@
 import * as constants from '../../support/constants'
+import { accordionActionItem } from '../pages/nfts.pages'
 
 const searchAppInput = 'input[id="search-by-name"]'
 const appUrlInput = 'input[name="appUrl"]'
@@ -11,6 +12,10 @@ const appModal = '[data-testid="app-info-modal"]'
 export const safeAppsList = '[data-testid="apps-list"]'
 const openSafeAppBtn = '[data-testid="open-safe-app-btn"]'
 const appMessageInput = 'input[placeholder="Message"]'
+const txBuilderUntrustedFallbackAlert = '[data-testid="untrusted-fallback-handler-alert"]'
+export const handlerInput = 'input[id="contract-field-handler"]'
+const decodedTxSummary = '[data-testid="decoded-tx-summary"]'
+export const cowFallBackHandlerTitle = 'div[title="CowSwapFallbackHandler"]'
 
 const addBtnStr = /add/i
 const noAppsStr = /no Safe Apps found/i
@@ -57,6 +62,7 @@ export const contractMethodSelector = 'input[id="contract-method-selector"]'
 export const testAddressValue2 = 'testAddressValue'
 export const testBooleanValue = 'testBooleanValue'
 export const testFallback = 'fallback'
+export const cowFallback = 'setFallbackHandler'
 export const customData = 'Custom hex data'
 export const testBooleanValue1 = '1 testBooleanValue'
 export const testBooleanValue2 = '2 testBooleanValue'
@@ -101,7 +107,13 @@ export const signOnchainMsgStr = 'Sign message (on-chain)'
 export const pinWalletConnectStr = /pin walletconnect/i
 export const transactionBuilderStr = 'Transaction Builder'
 export const cowswapStr = 'CowSwap'
+export const basicTypesTestContractStr = 'BasicTypesTestContract'
 export const testAddressValueStr = 'testAddressValue'
+
+export function checkActions(count, action) {
+  cy.get(accordionActionItem).filter(`:contains("${action}")`).should('have.length', count)
+}
+
 export const logoWalletConnect = /logo.*walletconnect/i
 export const walletConnectHeadlinePreview = /walletconnect/i
 export const newAddressValueStr = 'newValue (address)'
@@ -109,10 +121,7 @@ export const newAddressValueStr2 = 'newValue(address)'
 export const transactiobUilderHeadlinePreview = 'Transaction Builder'
 export const availableNetworksPreview = 'Available networks'
 export const connecttextPreview = 'Compose custom contract interactions and batch them into a single transaction'
-const warningDefaultAppStr = 'The application you are trying to access is not in the default Safe Apps list'
 export const AddressEmptyCodeStr = 'AddressEmptyCode'
-export const localStorageItem =
-  '{"https://safe-test-app.com":[{"feature":"camera","status":"granted"},{"feature":"microphone","status":"denied"}]}'
 export const gridItem = 'main .MuiPaper-root > .MuiGrid-item'
 export const linkNames = {
   wcLogo: /WalletConnect logo/i,
@@ -139,6 +148,20 @@ export const permissionCheckboxNames = {
   microphone: 'Microphone',
   geolocation: 'Geolocation',
   fullscreen: 'Fullscreen',
+}
+
+export const cowFallbackHandler = 'sep:0x2f55e8b20D0B9FEFA187AA7d00B6Cbe563605bF5'
+
+export function verifyUntrustedHandllerWarningVisible() {
+  cy.get(txBuilderUntrustedFallbackAlert).should('be.visible')
+}
+
+export function verifyUntrustedHandllerWarningDoesNotExist() {
+  cy.get(txBuilderUntrustedFallbackAlert).should('not.exist')
+}
+
+export function clickOnAdvancedDetails() {
+  cy.get(decodedTxSummary).click({ force: true })
 }
 
 export function triggetOffChainTx() {
@@ -172,11 +195,6 @@ export function verifySignBtnDisabled() {
 
 export function triggetOnChainTx() {
   cy.contains(signOnchainMsgStr).click()
-}
-
-export function verifyWarningDefaultAppMsgIsDisplayed() {
-  cy.get('p').contains(warningDefaultAppStr).should('be.visible')
-  cy.wait(1000)
 }
 
 export function typeAppName(name) {
@@ -290,7 +308,9 @@ export function clickOnContinueBtn() {
 
 export function checkLocalStorage() {
   clickOnContinueBtn().should(() => {
-    expect(window.localStorage.getItem(constants.BROWSER_PERMISSIONS_KEY)).to.eq(localStorageItem)
+    const storedItem = window.localStorage.getItem(constants.BROWSER_PERMISSIONS_KEY)
+    expect(storedItem).to.include('"feature":"camera","status":"granted"')
+    expect(storedItem).to.include('"feature":"microphone","status":"denied"')
   })
 }
 

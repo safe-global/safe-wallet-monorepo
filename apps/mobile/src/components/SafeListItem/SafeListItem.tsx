@@ -6,6 +6,7 @@ import { ellipsis } from '@/src/utils/formatters'
 import { isMultisigExecutionInfo } from '@/src/utils/transaction-guards'
 import { Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { Badge } from '../Badge'
+import { Tag } from '../Tag'
 
 interface SafeListItemProps {
   type?: string
@@ -20,6 +21,8 @@ interface SafeListItemProps {
   inQueue?: boolean
   executionInfo?: Transaction['executionInfo']
   themeName?: ThemeName
+  onPress?: () => void
+  tag?: string
 }
 
 export function SafeListItem({
@@ -35,12 +38,15 @@ export function SafeListItem({
   inQueue,
   executionInfo,
   themeName,
+  onPress,
+  tag,
 }: SafeListItemProps) {
   return (
     <Container
       spaced={spaced}
       bordered={bordered}
       gap={12}
+      onPress={onPress}
       transparent={transparent}
       themeName={themeName}
       alignItems={'center'}
@@ -63,12 +69,13 @@ export function SafeListItem({
 
           {typeof label === 'string' ? (
             <Text fontSize="$4" fontWeight={600}>
-              {ellipsis(label, rightNode ? 21 : 30)}
+              {ellipsis(label, rightNode || inQueue ? 21 : 30)}
             </Text>
           ) : (
             label
           )}
         </View>
+        {tag && <Tag>{tag}</Tag>}
       </View>
 
       {inQueue && executionInfo && isMultisigExecutionInfo(executionInfo) ? (
@@ -91,7 +98,7 @@ export function SafeListItem({
             }
           />
 
-          <SafeFontIcon name="arrow-right" />
+          <SafeFontIcon name="chevron-right" />
         </View>
       ) : (
         rightNode
@@ -105,7 +112,7 @@ export function SafeListItem({
 SafeListItem.Header = function Header({ title }: { title: string }) {
   return (
     <Theme name="safe_list">
-      <View paddingVertical="$4" paddingHorizontal="$3" backgroundColor={'$background'}>
+      <View paddingVertical="$4" backgroundColor={'$background'}>
         <Text fontWeight={500} color="$colorSecondary">
           {title}
         </Text>

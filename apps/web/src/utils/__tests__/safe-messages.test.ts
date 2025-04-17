@@ -1,10 +1,14 @@
 import { zeroPadValue } from 'ethers'
 import type { SafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
 
-import { generateSafeMessageTypedData, isBlindSigningPayload, isOffchainEIP1271Supported } from '../safe-messages'
+import {
+  generateSafeMessageTypedData,
+  isBlindSigningPayload,
+  isOffchainEIP1271Supported,
+} from '@safe-global/utils/utils/safe-messages'
 import { toBeHex } from 'ethers'
-import { FEATURES } from '../chains'
 import { faker } from '@faker-js/faker'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 
 const MOCK_ADDRESS = zeroPadValue('0x0123', 20)
 
@@ -31,6 +35,7 @@ describe('safe-messages', () => {
         types: {
           SafeMessage: [{ name: 'message', type: 'bytes' }],
         },
+        primaryType: 'SafeMessage',
         message: {
           message: '0xaa05af77f274774b8bdc7b61d98bc40da523dc2821fdea555f4d6aa413199bcc',
         },
@@ -57,6 +62,7 @@ describe('safe-messages', () => {
         types: {
           SafeMessage: [{ name: 'message', type: 'bytes' }],
         },
+        primaryType: 'SafeMessage',
         message: {
           message: '0xaa05af77f274774b8bdc7b61d98bc40da523dc2821fdea555f4d6aa413199bcc',
         },
@@ -147,6 +153,7 @@ describe('safe-messages', () => {
         types: {
           SafeMessage: [{ name: 'message', type: 'bytes' }],
         },
+        primaryType: 'SafeMessage',
         message: {
           message: '0xbe609aee343fb3c4b28e1df9e632fca64fcfaede20f02e86244efddf30957bd2',
         },
@@ -236,6 +243,7 @@ describe('safe-messages', () => {
         types: {
           SafeMessage: [{ name: 'message', type: 'bytes' }],
         },
+        primaryType: 'SafeMessage',
         message: {
           message: '0xbe609aee343fb3c4b28e1df9e632fca64fcfaede20f02e86244efddf30957bd2',
         },

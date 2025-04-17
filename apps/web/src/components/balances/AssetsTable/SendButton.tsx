@@ -14,7 +14,7 @@ const SendButton = ({ tokenInfo, isOutlined }: { tokenInfo: TokenInfo; isOutline
   const { setTxFlow } = useContext(TxModalContext)
 
   const onSendClick = () => {
-    setTxFlow(<TokenTransferFlow tokenAddress={tokenInfo.address} />)
+    setTxFlow(<TokenTransferFlow recipients={[{ tokenAddress: tokenInfo.address }]} />)
   }
 
   return (
@@ -22,6 +22,7 @@ const SendButton = ({ tokenInfo, isOutlined }: { tokenInfo: TokenInfo; isOutline
       {(isOk) => (
         <Track {...ASSETS_EVENTS.SEND}>
           <Button
+            data-testid="send-button"
             variant={isOutlined ? 'outlined' : 'contained'}
             color="primary"
             size="small"

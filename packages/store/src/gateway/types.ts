@@ -7,11 +7,23 @@ import {
   SwapTransferTransactionInfo,
   ModuleExecutionInfo,
   MultisigExecutionInfo,
-  Transaction,
+  AddressInfo,
 } from './AUTO_GENERATED/transactions'
 import { SafeOverview } from './AUTO_GENERATED/safes'
+import { MessageItem, MessagePage, TypedData } from './AUTO_GENERATED/messages'
+
+export enum RPC_AUTHENTICATION {
+  API_KEY_PATH = 'API_KEY_PATH',
+  NO_AUTHENTICATION = 'NO_AUTHENTICATION',
+  UNKNOWN = 'UNKNOWN',
+}
 
 export type ExecutionInfo = ModuleExecutionInfo | MultisigExecutionInfo
+
+export type SafeMessageListItemType = MessageItem['type']
+export type SafeMessageStatus = MessageItem['status']
+export type SafeMessageListItem = MessagePage['results'][number]
+export type TypedMessageTypes = TypedData['types']
 
 export enum TransactionStatus {
   AWAITING_CONFIRMATIONS = 'AWAITING_CONFIRMATIONS',
@@ -89,7 +101,30 @@ export type SafeOverviewResult = { data: SafeOverview[]; error: unknown; isLoadi
 
 export type OrderTransactionInfo = SwapOrderTransactionInfo | TwapOrderTransactionInfo | SwapTransferTransactionInfo
 
+export enum StartTimeValue {
+  AT_MINING_TIME = 'AT_MINING_TIME',
+  AT_EPOCH = 'AT_EPOCH',
+}
+
 export type PendingTransactionItems = QueuedItemPage['results'][number]
 export type HistoryTransactionItems = TransactionItemPage['results'][number]
+
+// TODO: fix CGW DataDecodedParameter type. The decodedValue is typed only as an object or object[] there.
+export type ActionValueDecoded = {
+  data: string
+  dataDecoded: {
+    method: string
+    parameters: {
+      name: string
+      type: string
+      value: string
+    }[]
+  }
+  operation: number
+  to: string
+  value: string
+}
+
+export type AddressInfoIndex = Record<string, AddressInfo>
 
 export type { BalancesGetSupportedFiatCodesV1ApiResponse as FiatCurrencies } from './AUTO_GENERATED/balances'

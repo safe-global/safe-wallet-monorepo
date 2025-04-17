@@ -4,7 +4,8 @@ import * as sideBar from '../pages/sidebar.pages'
 import * as navigation from '../pages/navigation.page'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as wallet from '../../support/utils/wallet.js'
-import { acceptCookies2 } from '../pages/main.page.js'
+import { acceptCookies2, closeSecurityNotice } from '../pages/main.page.js'
+import * as createTx from '../pages/create_tx.pages.js'
 
 let staticSafes = []
 const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
@@ -17,6 +18,8 @@ describe('[PROD] Sidebar tests', () => {
 
   beforeEach(() => {
     cy.visit(constants.prodbaseUrl + constants.homeUrl + staticSafes.SEP_STATIC_SAFE_9)
+    cy.contains(createTx.topAssetsStr, { timeout: 10000 })
+    closeSecurityNotice()
     acceptCookies2()
   })
 
@@ -37,6 +40,6 @@ describe('[PROD] Sidebar tests', () => {
   })
 
   it('Verify New Transaction button disabled for non-owners', () => {
-    main.verifyElementsCount(navigation.newTxBtn, 0)
+    sideBar.verifyNewTxBtnStatus(constants.enabledStates.disabled)
   })
 })

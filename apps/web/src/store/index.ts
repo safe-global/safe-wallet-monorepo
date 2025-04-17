@@ -21,6 +21,7 @@ import {
   swapOrderStatusListener,
   txHistoryListener,
   txQueueListener,
+  authListener,
 } from './slices'
 import * as slices from './slices'
 import * as hydrate from './useHydrateStore'
@@ -29,6 +30,7 @@ import { safePassApi } from './api/safePass'
 import { version as termsVersion } from '@/markdown/terms/version'
 import { cgwClient, setBaseUrl } from '@safe-global/store/gateway/cgwClient'
 import { GATEWAY_URL } from '@/config/gateway'
+import { setupListeners } from '@reduxjs/toolkit/query'
 
 const rootReducer = combineReducers({
   [slices.chainsSlice.name]: slices.chainsSlice.reducer,
@@ -58,6 +60,7 @@ const rootReducer = combineReducers({
   [safePassApi.reducerPath]: safePassApi.reducer,
   [slices.gatewayApi.reducerPath]: slices.gatewayApi.reducer,
   [cgwClient.reducerPath]: cgwClient.reducer,
+  [slices.authSlice.reducerPath]: slices.authSlice.reducer,
 })
 
 const persistedSlices: (keyof Partial<RootState>)[] = [
@@ -75,6 +78,7 @@ const persistedSlices: (keyof Partial<RootState>)[] = [
   slices.swapOrderSlice.name,
   slices.visitedSafesSlice.name,
   slices.orderByPreferenceSlice.name,
+  slices.authSlice.name,
 ]
 
 export const getPersistedState = () => {
@@ -92,7 +96,14 @@ const middleware: Middleware<{}, RootState>[] = [
   slices.gatewayApi.middleware,
 ]
 
-const listeners = [safeMessagesListener, txHistoryListener, txQueueListener, swapOrderListener, swapOrderStatusListener]
+const listeners = [
+  safeMessagesListener,
+  txHistoryListener,
+  txQueueListener,
+  swapOrderListener,
+  swapOrderStatusListener,
+  authListener,
+]
 
 export const _hydrationReducer: typeof rootReducer = (state, action) => {
   if (action.type === hydrate.HYDRATE_ACTION) {
@@ -141,6 +152,8 @@ export const makeStore = (
   if (!options?.skipBroadcast) {
     listenToBroadcast(store)
   }
+
+  setupListeners(store.dispatch)
 
   return store
 }

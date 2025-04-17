@@ -2,7 +2,7 @@ import { defineConfig } from 'cypress'
 import 'dotenv/config'
 import * as fs from 'fs'
 import { configureVisualRegression } from 'cypress-visual-regression'
-import { version } from './src/markdown/terms/version.ts'
+import { version } from './src/markdown/terms/version.js'
 
 export default defineConfig({
   projectId: 'exhdra',

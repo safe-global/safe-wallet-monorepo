@@ -4,8 +4,8 @@ import { useRouter } from 'next/router'
 import dynamic from 'next/dynamic'
 import { Typography } from '@mui/material'
 import { useHasFeature } from '@/hooks/useChains'
-import { FEATURES } from '@/utils/chains'
 import { BRAND_NAME } from '@/config/constants'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 
 // Cow Swap expects native token addresses to be in the format '0xeeee...eeee'
 const adjustEthAddress = (address: string) => {

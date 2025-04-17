@@ -93,4 +93,22 @@ describe('Alert', () => {
 
     expect(container.queryByTestId('add-owner-icon')).toBeTruthy()
   })
+
+  it('should render an alert with a left orientation', () => {
+    const container = render(<Alert type="error" orientation="left" message="Error alert" />)
+
+    expect(container.queryByTestId('error-icon')).toBeTruthy()
+  })
+
+  it('should render an alert with a right orientation', () => {
+    const container = render(<Alert type="error" orientation="right" message="Error alert" />)
+
+    expect(container.queryByTestId('error-icon')).toBeTruthy()
+  })
+
+  it('should render an alert with a center orientation', () => {
+    const container = render(<Alert type="error" orientation="center" message="Error alert" />)
+
+    expect(container.queryByTestId('error-icon')).toBeTruthy()
+  })
 })
