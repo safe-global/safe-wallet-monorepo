@@ -1,30 +1,9 @@
-import { useRef, useEffect } from 'react'
+import { useEffect } from 'react'
 import { useRouter } from 'next/router'
 
 export function usePreventNavigation(onNavigate?: () => boolean): void {
   const router = useRouter()
-  const previousPath = useRef(router.asPath)
-  const isRedirecting = useRef(false)
-  const { asPath, replace } = router
-
-  useEffect(() => {
-    const previousRoute = previousPath.current
-    if (asPath === previousRoute) return
-    previousPath.current = asPath
-
-    if (isRedirecting.current) {
-      isRedirecting.current = false
-      return
-    }
-
-    if (!onNavigate) return
-    const allowNavigation = onNavigate()
-
-    if (!allowNavigation) {
-      isRedirecting.current = true
-      replace(previousRoute, undefined, { shallow: true })
-    }
-  }, [replace, asPath, onNavigate])
+  const { push } = router
 
   useEffect(() => {
     if (!onNavigate) return
@@ -32,11 +11,15 @@ export function usePreventNavigation(onNavigate?: () => boolean): void {
     const onLinkClick = (e: MouseEvent) => {
       const target = e.target as HTMLElement
       const link = target.closest('a')
-      if (!link || !link.getAttribute('href')) return
-      if (onNavigate()) return
-      e.preventDefault()
-      e.stopImmediatePropagation()
-      e.stopPropagation()
+      const href = link?.getAttribute('href')
+      if (!link || !href) return
+      if (onNavigate()) {
+        push(href)
+      } else {
+        e.preventDefault()
+        e.stopImmediatePropagation()
+        e.stopPropagation()
+      }
     }
 
     document.addEventListener('mousedown', onLinkClick)
@@ -44,5 +27,5 @@ export function usePreventNavigation(onNavigate?: () => boolean): void {
     return () => {
       document.removeEventListener('mousedown', onLinkClick)
     }
-  }, [onNavigate])
+  }, [push, onNavigate])
 }
