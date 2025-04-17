@@ -11,7 +11,6 @@ type QrCameraViewProps = {
   isCameraActive: boolean
   onScan: (codes: Code[]) => void
   onEnterManuallyPress: () => void
-  requestPermission: () => void
   hasPermission: boolean
   onActivateCamera: () => void
 }
@@ -21,7 +20,6 @@ export const QrCameraView = ({
   isCameraActive,
   onScan,
   onEnterManuallyPress,
-  requestPermission,
   hasPermission,
   onActivateCamera,
 }: QrCameraViewProps) => (
@@ -29,7 +27,6 @@ export const QrCameraView = ({
     <QrCamera
       permission={permission}
       hasPermission={hasPermission}
-      requestPermission={requestPermission}
       isCameraActive={isCameraActive}
       onScan={onScan}
       onActivateCamera={onActivateCamera}

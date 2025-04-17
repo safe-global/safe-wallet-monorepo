@@ -16,7 +16,6 @@ type QrCameraProps = {
   onScan: (code: Code[]) => void
   isCameraActive: boolean
   permission: CameraPermissionStatus
-  requestPermission: () => void
   hasPermission: boolean
   onActivateCamera: () => void
 }

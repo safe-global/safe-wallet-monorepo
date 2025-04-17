@@ -15,7 +15,7 @@ export const ScanQrAccountContainer = () => {
   const toast = useToastController()
 
   const permission = Camera.getCameraPermissionStatus()
-  const { hasPermission, requestPermission } = useCameraPermission()
+  const { hasPermission } = useCameraPermission()
 
   const onScan = useCallback(
     (codes: Code[]) => {
@@ -54,7 +54,6 @@ export const ScanQrAccountContainer = () => {
     <QrCameraView
       permission={permission}
       hasPermission={hasPermission}
-      requestPermission={requestPermission}
       isCameraActive={isCameraActive}
       onScan={onScan}
       onActivateCamera={handleActivateCamera}
