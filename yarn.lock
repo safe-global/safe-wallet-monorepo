@@ -4168,12 +4168,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@expo/vector-icons@npm:^14.0.0, @expo/vector-icons@npm:^14.0.2":
+"@expo/vector-icons@npm:^14.0.0":
   version: 14.0.4
   resolution: "@expo/vector-icons@npm:14.0.4"
   dependencies:
     prop-types: "npm:^15.8.1"
   checksum: 10/bb807830dd886cb439e90bbaf5afd5e9ea538486d3bd0cc240210a230c53e7d858b460d05836875ae0ef3958bc591c21afedb5f58086be4aeeb362d08665c809
+  languageName: node
+  linkType: hard
+
+"@expo/vector-icons@npm:^14.1.0":
+  version: 14.1.0
+  resolution: "@expo/vector-icons@npm:14.1.0"
+  peerDependencies:
+    expo-font: "*"
+    react: "*"
+    react-native: "*"
+  checksum: 10/5b80a684042672e40f311a921fca7acc964fdddb1edd2c2c22253f5b9097e9fe441626ffa50c98ffc2622a3f1a9b5315a8a73796348d3b03108b4da2600384bc
   languageName: node
   linkType: hard
 
@@ -8167,7 +8178,7 @@ __metadata:
     "@eslint/js": "npm:^9.18.0"
     "@ethersproject/shims": "npm:^5.7.0"
     "@expo/config-plugins": "npm:^9.0.10"
-    "@expo/vector-icons": "npm:^14.0.2"
+    "@expo/vector-icons": "npm:^14.1.0"
     "@faker-js/faker": "npm:^9.0.3"
     "@formatjs/intl-getcanonicallocales": "npm:^2.5.4"
     "@formatjs/intl-locale": "npm:^4.2.10"
