@@ -7423,10 +7423,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-native-community/slider@npm:4.5.5":
-  version: 4.5.5
-  resolution: "@react-native-community/slider@npm:4.5.5"
-  checksum: 10/8c49f7e0b7d7c37b91c936805106e88ee31011dc210d5c237c07e35d330870536b560b48e6212195fffc2e2706b16c31715b6cebbb2cc33127702bff9850f134
+"@react-native-community/slider@npm:4.5.6":
+  version: 4.5.6
+  resolution: "@react-native-community/slider@npm:4.5.6"
+  checksum: 10/9c892ccdce9971e6cf69a91e3e8caab3fe668d6944f1a7195de228d5433c7fab2b15f6c945fd90464fc7b15b557ddcbf4d6b522b4b7d1a19f28ee2b4d6b6af93
   languageName: node
   linkType: hard
 
@@ -8180,7 +8180,7 @@ __metadata:
     "@react-native-clipboard/clipboard": "npm:^1.15.0"
     "@react-native-community/blur": "npm:^4.4.1"
     "@react-native-community/datetimepicker": "npm:8.2.0"
-    "@react-native-community/slider": "npm:4.5.5"
+    "@react-native-community/slider": "npm:4.5.6"
     "@react-native-firebase/analytics": "npm:^21.12.0"
     "@react-native-firebase/app": "npm:^21.12.0"
     "@react-native-firebase/crashlytics": "npm:^21.12.0"
