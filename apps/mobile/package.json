@@ -145,7 +145,7 @@
     "@storybook/addon-webpack5-compiler-swc": "^1.0.5",
     "@storybook/blocks": "^8.4.6",
     "@storybook/react": "^8.4.6",
-    "@storybook/react-native": "^8.4.2",
+    "@storybook/react-native": "^8.6.2",
     "@storybook/react-webpack5": "^8.4.6",
     "@storybook/test": "^8.4.6",
     "@testing-library/react-native": "^12.7.2",
