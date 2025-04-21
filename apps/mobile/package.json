@@ -142,7 +142,7 @@
     "@storybook/addon-onboarding": "^8.4.6",
     "@storybook/addon-ondevice-actions": "^8.4.4",
     "@storybook/addon-ondevice-controls": "^8.4.2",
-    "@storybook/addon-webpack5-compiler-swc": "^1.0.5",
+    "@storybook/addon-webpack5-compiler-swc": "^3.0.0",
     "@storybook/blocks": "^8.4.6",
     "@storybook/react": "^8.4.6",
     "@storybook/react-native": "^8.4.2",
