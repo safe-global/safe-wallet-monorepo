@@ -86,7 +86,7 @@ const CONFIG_SERVICE_CHAINS: ChainInfo[] = [
     blockExplorerUriTemplate: {
       address: 'https://blockscout.com/xdai/mainnet/address/{{address}}/transactions',
       txHash: 'https://blockscout.com/xdai/mainnet/tx/{{txHash}}/',
-      api: 'https://blockscout.com/poa/xdai/api?module={{module}}&action={{action}}&address={{address}}&apiKey={{apiKey}}',
+      api: 'ttp://gnosis.blockscout.com/api?module={{module}}&action={{action}}&address={{address}}&apiKey={{apiKey}}',
     },
     nativeCurrency: {
       name: 'xDai',
