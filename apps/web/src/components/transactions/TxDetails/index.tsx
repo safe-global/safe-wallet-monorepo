@@ -56,8 +56,7 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
 
   const isTxFromProposer =
     isMultisigDetailedExecutionInfo(txDetails.detailedExecutionInfo) &&
-    txDetails.detailedExecutionInfo.trusted &&
-    isUnsigned
+    Boolean(txDetails.detailedExecutionInfo.proposedByDelegate)
 
   const isUntrusted =
     isMultisigDetailedExecutionInfo(txDetails.detailedExecutionInfo) && !txDetails.detailedExecutionInfo.trusted
