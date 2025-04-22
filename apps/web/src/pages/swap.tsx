@@ -17,11 +17,13 @@ const adjustEthAddress = (address: string) => {
 }
 
 const SwapWidgetNoSSR = dynamic(() => import('@/features/swap'), { ssr: false })
+const RedirectToSwapApp = dynamic(() => import('@/features/swap/components/RedirectToSwapApp/index'), { ssr: false })
 
 const SwapPage: NextPage = () => {
   const router = useRouter()
   const { token, amount } = router.query
   const isFeatureEnabled = useHasFeature(FEATURES.NATIVE_SWAPS)
+  const isCowEnabled = useHasFeature(FEATURES.NATIVE_SWAPS_COW)
 
   let sell = undefined
   if (token && amount) {
@@ -38,8 +40,10 @@ const SwapPage: NextPage = () => {
       </Head>
 
       <main style={{ height: 'calc(100vh - 52px)' }}>
-        {isFeatureEnabled === true ? (
+        {isFeatureEnabled === true && isCowEnabled === true ? (
           <SwapWidgetNoSSR sell={sell} />
+        ) : isCowEnabled === false ? (
+          <RedirectToSwapApp />
         ) : isFeatureEnabled === false ? (
           <Typography textAlign="center" my={3}>
             Swaps are not supported on this network.
