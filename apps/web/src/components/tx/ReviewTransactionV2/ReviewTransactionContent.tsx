@@ -8,7 +8,6 @@ import ConfirmationTitle, { ConfirmationTitleTypes } from '@/components/tx/SignO
 import { ErrorBoundary } from '@sentry/react'
 import ApprovalEditor from '../ApprovalEditor'
 import { BlockaidBalanceChanges } from '../security/blockaid/BlockaidBalanceChange'
-import { Blockaid } from '../security/blockaid'
 import { useApprovalInfos } from '../ApprovalEditor/hooks/useApprovalInfos'
 import type { TransactionDetails, TransactionPreview } from '@safe-global/safe-gateway-typescript-sdk'
 import NetworkWarning from '@/components/new-safe/create/NetworkWarning'
@@ -89,10 +88,10 @@ export const ReviewTransactionContent = ({
             This transaction will most likely fail. To save gas costs, avoid confirming the transaction.
           </ErrorMessage>
         )}
+
         <Slot name={SlotName.Footer} />
         <NetworkWarning />
         <UnknownContractError txData={txDetails?.txData ?? txPreview?.txData} />
-        <Blockaid />
 
         <TxCardActions>
           {/* Continue button */}
