@@ -751,71 +751,26 @@ exports[`ReviewTransaction should display a confirmation screen 1`] = `
         </div>
       </div>
       <div
-        class="MuiStack-root css-msk5bl-MuiStack-root"
+        class="MuiCardActions-root MuiCardActions-spacing css-1q4nm6f-MuiCardActions-root"
       >
         <div
-          class="container error errorMessage"
-          data-testid="error-message"
+          class="MuiStack-root css-irtfmw-MuiStack-root"
         >
-          <div
-            class="message"
+          <span
+            aria-label="Please connect your wallet"
+            class=""
+            data-mui-internal-clone-element="true"
           >
-            <mock-icon
-              aria-hidden=""
-              class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-1vcpomi-MuiSvgIcon-root"
-              focusable="false"
-            />
-            <div>
-              <span
-                class="MuiTypography-root MuiTypography-body2 css-17vdyq3-MuiTypography-root"
-              >
-                You are currently not a signer of this Safe Account and won't be able to submit this transaction.
-              </span>
-            </div>
-          </div>
-        </div>
-        <div
-          class="MuiBox-root css-0"
-        >
-          <hr
-            class="MuiDivider-root MuiDivider-fullWidth nestedDivider css-1facvfi-MuiDivider-root"
-          />
-          <div
-            class="MuiCardActions-root MuiCardActions-spacing css-1q4nm6f-MuiCardActions-root"
-          >
-            <div
-              class="MuiStack-root css-irtfmw-MuiStack-root"
+            <button
+              class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary Mui-disabled MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary css-1hp2ejb-MuiButtonBase-root-MuiButton-root"
+              data-testid="continue-sign-btn"
+              disabled=""
+              tabindex="-1"
+              type="submit"
             >
-              <form>
-                <span
-                  aria-label="Please connect your wallet"
-                  class=""
-                  data-mui-internal-clone-element="true"
-                >
-                  <div
-                    aria-label="Button group with a nested menu"
-                    class="MuiButtonGroup-root MuiButtonGroup-contained MuiButtonGroup-horizontal MuiButtonGroup-fullWidth MuiButtonGroup-colorPrimary css-izkk6m-MuiButtonGroup-root"
-                    role="group"
-                  >
-                    <div
-                      class="MuiBox-root css-1rr4qq7"
-                      data-mui-internal-clone-element="true"
-                    >
-                      <button
-                        class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary MuiButton-fullWidth Mui-disabled MuiButtonGroup-grouped MuiButtonGroup-groupedHorizontal MuiButtonGroup-groupedContained MuiButtonGroup-groupedContainedHorizontal MuiButtonGroup-groupedContainedPrimary MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary MuiButton-fullWidth MuiButtonGroup-grouped MuiButtonGroup-groupedHorizontal MuiButtonGroup-groupedContained MuiButtonGroup-groupedContainedHorizontal MuiButtonGroup-groupedContainedPrimary css-jfe8rk-MuiButtonBase-root-MuiButton-root"
-                        data-testid="combo-submit-sign"
-                        disabled=""
-                        tabindex="-1"
-                        type="submit"
-                      >
-                        Sign
-                      </button>
-                    </div>
-                  </div>
-                </span>
-              </form>
-            </div>
-          </div>
+              Continue
+            </button>
+          </span>
         </div>
       </div>
     </div>
@@ -936,71 +891,26 @@ exports[`ReviewTransaction should display an error screen 1`] = `
         </div>
       </div>
       <div
-        class="MuiStack-root css-msk5bl-MuiStack-root"
+        class="MuiCardActions-root MuiCardActions-spacing css-1q4nm6f-MuiCardActions-root"
       >
         <div
-          class="container error errorMessage"
-          data-testid="error-message"
+          class="MuiStack-root css-irtfmw-MuiStack-root"
         >
-          <div
-            class="message"
+          <span
+            aria-label="Please connect your wallet"
+            class=""
+            data-mui-internal-clone-element="true"
           >
-            <mock-icon
-              aria-hidden=""
-              class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-1vcpomi-MuiSvgIcon-root"
-              focusable="false"
-            />
-            <div>
-              <span
-                class="MuiTypography-root MuiTypography-body2 css-17vdyq3-MuiTypography-root"
-              >
-                You are currently not a signer of this Safe Account and won't be able to submit this transaction.
-              </span>
-            </div>
-          </div>
-        </div>
-        <div
-          class="MuiBox-root css-0"
-        >
-          <hr
-            class="MuiDivider-root MuiDivider-fullWidth nestedDivider css-1facvfi-MuiDivider-root"
-          />
-          <div
-            class="MuiCardActions-root MuiCardActions-spacing css-1q4nm6f-MuiCardActions-root"
-          >
-            <div
-              class="MuiStack-root css-irtfmw-MuiStack-root"
+            <button
+              class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary Mui-disabled MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary css-1hp2ejb-MuiButtonBase-root-MuiButton-root"
+              data-testid="continue-sign-btn"
+              disabled=""
+              tabindex="-1"
+              type="submit"
             >
-              <form>
-                <span
-                  aria-label="Please connect your wallet"
-                  class=""
-                  data-mui-internal-clone-element="true"
-                >
-                  <div
-                    aria-label="Button group with a nested menu"
-                    class="MuiButtonGroup-root MuiButtonGroup-contained MuiButtonGroup-horizontal MuiButtonGroup-fullWidth MuiButtonGroup-colorPrimary css-izkk6m-MuiButtonGroup-root"
-                    role="group"
-                  >
-                    <div
-                      class="MuiBox-root css-1rr4qq7"
-                      data-mui-internal-clone-element="true"
-                    >
-                      <button
-                        class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary MuiButton-fullWidth Mui-disabled MuiButtonGroup-grouped MuiButtonGroup-groupedHorizontal MuiButtonGroup-groupedContained MuiButtonGroup-groupedContainedHorizontal MuiButtonGroup-groupedContainedPrimary MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary MuiButton-fullWidth MuiButtonGroup-grouped MuiButtonGroup-groupedHorizontal MuiButtonGroup-groupedContained MuiButtonGroup-groupedContainedHorizontal MuiButtonGroup-groupedContainedPrimary css-jfe8rk-MuiButtonBase-root-MuiButton-root"
-                        data-testid="combo-submit-sign"
-                        disabled=""
-                        tabindex="-1"
-                        type="submit"
-                      >
-                        Sign
-                      </button>
-                    </div>
-                  </div>
-                </span>
-              </form>
-            </div>
-          </div>
+              Continue
+            </button>
+          </span>
         </div>
       </div>
     </div>
