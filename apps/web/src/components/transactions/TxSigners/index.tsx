@@ -12,7 +12,6 @@ import {
   type ListItemIconProps,
 } from '@mui/material'
 import type {
-  AddressEx,
   DetailedExecutionInfo,
   TransactionDetails,
   TransactionSummary,
@@ -107,7 +106,7 @@ type TxSignersProps = {
   txDetails: TransactionDetails
   txSummary: TransactionSummary
   isTxFromProposer: boolean
-  proposer?: AddressEx
+  proposer?: string
 }
 
 export const TxSigners = ({
@@ -163,12 +162,12 @@ export const TxSigners = ({
         </ListItem>
 
         {proposer && (
-          <ListItem key={proposer.value} sx={{ py: 0 }}>
+          <ListItem key={proposer} sx={{ py: 0 }}>
             <StyledListItemIcon $state={StepState.CONFIRMED}>
               <Dot />
             </StyledListItemIcon>
             <ListItemText data-testid="signer">
-              <EthHashInfo address={proposer.value} hasExplorer showCopyButton />
+              <EthHashInfo address={proposer} hasExplorer showCopyButton />
             </ListItemText>
           </ListItem>
         )}
