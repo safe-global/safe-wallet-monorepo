@@ -29,7 +29,7 @@ const SwapPage: NextPage = () => {
   if (token && amount) {
     sell = {
       asset: adjustEthAddress(String(token ?? '')),
-      amount: adjustEthAddress(String(amount ?? '')),
+      amount: String(amount ?? ''),
     }
   }
 
@@ -43,7 +43,7 @@ const SwapPage: NextPage = () => {
         {isFeatureEnabled === true && isCowEnabled === true ? (
           <SwapWidgetNoSSR sell={sell} />
         ) : isFeatureEnabled === true && isCowEnabled === false ? (
-          <RedirectToSwapApp />
+          <RedirectToSwapApp tokenAddress={token?.[0]} />
         ) : isFeatureEnabled === false ? (
           <Typography textAlign="center" my={3}>
             Swaps are not supported on this network.
