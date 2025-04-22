@@ -129,7 +129,7 @@ export const Blockaid = () => {
   )
 }
 
-const BlockaidWarning = () => {
+export const BlockaidWarning = () => {
   const { blockaidResponse, setIsRiskConfirmed, needsRiskConfirmation, isRiskConfirmed } = useContext(TxSecurityContext)
   const { severity, isLoading, error } = blockaidResponse ?? {}
 
