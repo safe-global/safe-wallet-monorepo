@@ -42,7 +42,7 @@ const SwapPage: NextPage = () => {
       <main style={{ height: 'calc(100vh - 52px)' }}>
         {isFeatureEnabled === true && isCowEnabled === true ? (
           <SwapWidgetNoSSR sell={sell} />
-        ) : isCowEnabled === false ? (
+        ) : isFeatureEnabled === true && isCowEnabled === false ? (
           <RedirectToSwapApp />
         ) : isFeatureEnabled === false ? (
           <Typography textAlign="center" my={3}>
