@@ -2,7 +2,7 @@
   "name": "@safe-global/web",
   "homepage": "https://github.com/safe-global/safe-wallet-web",
   "license": "GPL-3.0",
-  "version": "1.56.2",
+  "version": "1.57.0",
   "type": "module",
   "scripts": {
     "dev": "next dev",
