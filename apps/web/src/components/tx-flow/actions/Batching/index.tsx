@@ -26,7 +26,8 @@ const Batching = ({
   const { setTxFlow } = useContext(TxModalContext)
   const { addToBatch } = useTxActions()
   const { safeTx } = useContext(SafeTxContext)
-  const { isSubmittable, setIsSubmittable, setSubmitError, setIsRejectedByUser } = useContext(TxFlowContext)
+  const { isSubmitDisabled, setIsSubmitLoading, isSubmitLoading, setSubmitError, setIsRejectedByUser } =
+    useContext(TxFlowContext)
 
   const isBatchable = !!safeTx && !isDelegateCall(safeTx)
 
@@ -39,7 +40,7 @@ const Batching = ({
 
     trackEvent(BATCH_EVENTS.BATCH_APPEND)
 
-    setIsSubmittable(false)
+    setIsSubmitLoading(true)
     setIsRejectedByUser(false)
     setSubmitError(undefined)
 
@@ -50,13 +51,13 @@ const Batching = ({
       logError(Errors._819, err)
       setSubmitError(err)
 
-      setIsSubmittable(true)
+      setIsSubmitLoading(false)
       return
     }
 
     onSubmitSuccess?.({ isExecuted: false })
 
-    setIsSubmittable(true)
+    setIsSubmitLoading(false)
 
     setTxFlow(undefined)
   }
@@ -71,8 +72,8 @@ const Batching = ({
           selected={slotId}
           onChange={({ id }) => onChange(id)}
           options={options}
-          disabled={!isSubmittable || !isBatchable || disabled}
-          loading={!isSubmittable}
+          disabled={isSubmitDisabled || !isBatchable || disabled}
+          loading={isSubmitLoading}
           tooltip={!isBatchable ? `Cannot batch this type of transaction` : undefined}
         />
       </TxCardActions>

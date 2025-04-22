@@ -41,7 +41,8 @@ export const ReviewTransactionContent = ({
   txDetails?: TransactionDetails
   txPreview?: TransactionPreview
 }): ReactElement => {
-  const { willExecute, isCreation, isProposing, isRejection, isSubmittable, onlyExecute } = useContext(TxFlowContext)
+  const { willExecute, isCreation, isProposing, isRejection, isSubmitLoading, isSubmitDisabled, onlyExecute } =
+    useContext(TxFlowContext)
 
   const [readableApprovals] = useApprovalInfos({ safeTransaction: safeTx })
   const isApproval = readableApprovals && readableApprovals.length > 0
@@ -95,17 +96,17 @@ export const ReviewTransactionContent = ({
 
         <TxCardActions>
           {/* Continue button */}
-          <CheckWallet allowNonOwner={onlyExecute} checkNetwork={isSubmittable}>
+          <CheckWallet allowNonOwner={onlyExecute} checkNetwork={!isSubmitDisabled}>
             {(isOk) => (
               <Button
                 data-testid="continue-sign-btn"
                 variant="contained"
                 type="submit"
                 onClick={() => onSubmit()}
-                disabled={!isOk || !isSubmittable}
+                disabled={!isOk || isSubmitDisabled}
                 sx={{ minWidth: '82px', order: '1', width: ['100%', '100%', '100%', 'auto'] }}
               >
-                {!isSubmittable ? <CircularProgress size={20} /> : 'Continue'}
+                {isSubmitLoading ? <CircularProgress size={20} /> : 'Continue'}
               </Button>
             )}
           </CheckWallet>

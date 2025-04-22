@@ -45,12 +45,13 @@ export const SignForm = ({
   tooltip?: string
 }): ReactElement => {
   // Form state
-  const [isSubmittableLocal, setIsSubmittableLocal] = useState<boolean>(true) // TODO: remove this local state and use only the one from TxFlowContext when tx-flow refactor is done
+  const [isSubmitLoadingLocal, setIsSubmitLoadingLocal] = useState<boolean>(false) // TODO: remove this local state and use only the one from TxFlowContext when tx-flow refactor is done
 
   // Hooks
   const { signTx } = txActions
   const { setTxFlow } = useContext(TxModalContext)
-  const { isSubmittable, setIsSubmittable, setSubmitError, setIsRejectedByUser } = useContext(TxFlowContext)
+  const { isSubmitDisabled, isSubmitLoading, setIsSubmitLoading, setSubmitError, setIsRejectedByUser } =
+    useContext(TxFlowContext)
   const { needsRiskConfirmation, isRiskConfirmed, setIsRiskIgnored } = txSecurity
   const hasSigned = useAlreadySigned(safeTx)
   const signer = useSigner()
@@ -70,8 +71,8 @@ export const SignForm = ({
 
     if (!safeTx) return
 
-    setIsSubmittable(false)
-    setIsSubmittableLocal(false)
+    setIsSubmitLoading(true)
+    setIsSubmitLoadingLocal(true)
 
     setSubmitError(undefined)
     setIsRejectedByUser(false)
@@ -89,8 +90,8 @@ export const SignForm = ({
         trackError(Errors._804, err)
         setSubmitError(err)
       }
-      setIsSubmittable(true)
-      setIsSubmittableLocal(true)
+      setIsSubmitLoading(false)
+      setIsSubmitLoadingLocal(false)
       return
     }
 
@@ -107,8 +108,8 @@ export const SignForm = ({
   const cannotPropose = !isOwner
   const submitDisabled =
     !safeTx ||
-    !isSubmittable ||
-    !isSubmittableLocal ||
+    isSubmitDisabled ||
+    isSubmitLoadingLocal ||
     disableSubmit ||
     cannotPropose ||
     (needsRiskConfirmation && !isRiskConfirmed)
@@ -132,7 +133,7 @@ export const SignForm = ({
                   onChange={({ id }) => handleOptionChange(id)}
                   options={options}
                   disabled={!isOk || submitDisabled}
-                  loading={!isSubmittable || !isSubmittableLocal}
+                  loading={isSubmitLoading || isSubmitLoadingLocal}
                   tooltip={isOk ? tooltip : undefined}
                 />
               )}
