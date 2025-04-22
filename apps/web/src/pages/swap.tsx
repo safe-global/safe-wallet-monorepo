@@ -6,6 +6,7 @@ import { Typography } from '@mui/material'
 import { useHasFeature } from '@/hooks/useChains'
 import { BRAND_NAME } from '@/config/constants'
 import { FEATURES } from '@safe-global/utils/utils/chains'
+import RedirectToSwapApp from '@/features/swap/components/RedirectToSwapApp'
 
 // Cow Swap expects native token addresses to be in the format '0xeeee...eeee'
 const adjustEthAddress = (address: string) => {
@@ -17,7 +18,6 @@ const adjustEthAddress = (address: string) => {
 }
 
 const SwapWidgetNoSSR = dynamic(() => import('@/features/swap'), { ssr: false })
-const RedirectToSwapApp = dynamic(() => import('@/features/swap/components/RedirectToSwapApp/index'), { ssr: false })
 
 const SwapPage: NextPage = () => {
   const router = useRouter()
