@@ -61,21 +61,6 @@ export const TxFlow = <T extends unknown>({
     [onSubmit, data],
   )
 
-  const submit = (
-    <>
-      <Counterfactual />
-      <ExecuteThroughRole />
-
-      <ComboSubmit>
-        <Sign />
-        <Execute />
-        <Batching />
-      </ComboSubmit>
-
-      <Propose />
-    </>
-  )
-
   return (
     <SafeTxProvider>
       <TxInfoProvider>
@@ -96,15 +81,24 @@ export const TxFlow = <T extends unknown>({
               <TxFlowContent>
                 {...childrenArray}
 
-                <ReviewTransactionComponent onSubmit={handleFlowSubmit}>
+                <ReviewTransactionComponent onSubmit={() => nextStep()}>
                   <TxChecks />
                   <TxNote />
                   <SignerSelect />
-
-                  {submit}
                 </ReviewTransactionComponent>
 
-                <ConfirmTxReceipt onSubmit={handleFlowSubmit}>{submit}</ConfirmTxReceipt>
+                <ConfirmTxReceipt onSubmit={handleFlowSubmit}>
+                  <Counterfactual />
+                  <ExecuteThroughRole />
+
+                  <ComboSubmit>
+                    <Sign />
+                    <Execute />
+                    <Batching />
+                  </ComboSubmit>
+
+                  <Propose />
+                </ConfirmTxReceipt>
               </TxFlowContent>
             </TxFlowProvider>
           </SlotProvider>
