@@ -1,6 +1,4 @@
-import dynamic from 'next/dynamic'
-
-export const ExecuteCheckbox = dynamic(() => import('./ExecuteCheckbox'))
-export const TxChecks = dynamic(() => import('./TxChecks'))
-export const TxNote = dynamic(() => import('./TxNote'))
-export const SignerSelect = dynamic(() => import('./SignerSelect'))
+export { default as ExecuteCheckbox } from './ExecuteCheckbox'
+export { default as TxChecks } from './TxChecks'
+export { default as TxNote } from './TxNote'
+export { default as SignerSelect } from './SignerSelect'

@@ -1,9 +1,7 @@
-import dynamic from 'next/dynamic'
-
-export const Batching = dynamic(() => import('./Batching'))
-export const ComboSubmit = dynamic(() => import('./ComboSubmit'))
-export const Counterfactual = dynamic(() => import('./Counterfactual'))
-export const Execute = dynamic(() => import('./Execute'))
-export const ExecuteThroughRole = dynamic(() => import('./ExecuteThroughRole'))
-export const Propose = dynamic(() => import('./Propose'))
-export const Sign = dynamic(() => import('./Sign'))
+export { default as Batching } from './Batching'
+export { default as ComboSubmit } from './ComboSubmit'
+export { default as Counterfactual } from './Counterfactual'
+export { default as Execute } from './Execute'
+export { default as ExecuteThroughRole } from './ExecuteThroughRole'
+export { default as Propose } from './Propose'
+export { default as Sign } from './Sign'
