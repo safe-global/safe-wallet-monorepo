@@ -53,18 +53,22 @@ const Summary = ({ safeTxData, txData, txInfo, txDetails }: Props): ReactElement
 
       {submittedAt && (
         <TxDataRow datatestid="tx-created-at" title="Created">
-          <Typography variant="body2">{dateString(submittedAt)}</Typography>
+          <Typography variant="body2" component="div">
+            {dateString(submittedAt)}
+          </Typography>
         </TxDataRow>
       )}
 
       {executedAt && (
         <TxDataRow datatestid="tx-executed-at" title="Executed">
-          <Typography variant="body2">{dateString(executedAt)}</Typography>
+          <Typography variant="body2" component="div">
+            {dateString(executedAt)}
+          </Typography>
         </TxDataRow>
       )}
 
       {showDetails && (
-        <Box mt={3}>
+        <Box mt={submittedAt ? 2 : 3}>
           <ColorCodedTxAccordion txInfo={txInfo} txData={txData}>
             <Box my={1}>
               <DecodedData txData={txData} toInfo={toInfo} />

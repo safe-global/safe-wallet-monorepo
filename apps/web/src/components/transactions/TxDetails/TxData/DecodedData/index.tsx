@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react'
-import { Stack } from '@mui/material'
+import { Stack, Typography } from '@mui/material'
 import { type AddressEx, TokenType, type TransactionDetails, Operation } from '@safe-global/safe-gateway-typescript-sdk'
 
 import { HexEncodedData } from '@/components/transactions/HexEncodedData'
@@ -69,7 +69,9 @@ export const DecodedData = ({ txData, toInfo }: Props): ReactElement | null => {
       {txData.dataDecoded ? (
         <MethodDetails data={txData.dataDecoded} hexData={txData.hexData} addressInfoIndex={txData.addressInfoIndex} />
       ) : txData.hexData ? (
-        <HexEncodedData title="Data" hexData={txData.hexData} />
+        <Typography variant="body2" component="div">
+          <HexEncodedData title="Data" hexData={txData.hexData} />
+        </Typography>
       ) : null}
     </Stack>
   )
