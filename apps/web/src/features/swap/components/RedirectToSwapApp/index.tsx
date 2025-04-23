@@ -33,6 +33,7 @@ function RedirectToSwapApp({ tokenAddress }: { tokenAddress?: string }) {
       query: {
         safe: router.query.safe,
         appUrl: addTokenParam(fallbackAppUrl, chainId, tokenAddress),
+        sidebar: true,
       },
     })
   }, [router, fallbackAppUrl, chainId, tokenAddress])

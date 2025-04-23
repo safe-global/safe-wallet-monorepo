@@ -43,7 +43,7 @@ const SwapPage: NextPage = () => {
         {isFeatureEnabled === true && isCowEnabled === true ? (
           <SwapWidgetNoSSR sell={sell} />
         ) : isFeatureEnabled === true && isCowEnabled === false ? (
-          <RedirectToSwapApp tokenAddress={token?.[0]} />
+          <RedirectToSwapApp tokenAddress={token && String(token)} />
         ) : isFeatureEnabled === false ? (
           <Typography textAlign="center" my={3}>
             Swaps are not supported on this network.
