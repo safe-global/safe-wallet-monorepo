@@ -9,7 +9,7 @@ export interface ReadOnlyProps {
   marginTop?: DimensionValue | string
 }
 
-export const ReadOnly = ({ signers, marginBottom = '$7', marginTop = '$2' }: ReadOnlyProps) => {
+export const ReadOnly = ({ signers, marginBottom = '$8', marginTop = '$2' }: ReadOnlyProps) => {
   if (signers.length === 0) {
     return (
       <Container
