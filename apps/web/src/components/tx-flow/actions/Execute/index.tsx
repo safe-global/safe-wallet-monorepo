@@ -14,7 +14,7 @@ const Execute = ({
   ...props
 }: SlotComponentProps<SlotName.ComboSubmit>) => {
   const { safeTx, txOrigin } = useContext(SafeTxContext)
-  const { txId, isCreation, onlyExecute, isSubmittable, trackTxEvent, setShouldExecute } = useContext(TxFlowContext)
+  const { txId, isCreation, onlyExecute, isSubmitDisabled, trackTxEvent, setShouldExecute } = useContext(TxFlowContext)
 
   useEffect(() => {
     setShouldExecute(true)
@@ -44,7 +44,7 @@ const Execute = ({
       txId={txId}
       onSubmit={onSubmit}
       onSubmitSuccess={handleSubmit}
-      disableSubmit={!isSubmittable || disabled}
+      disableSubmit={isSubmitDisabled || disabled}
       origin={txOrigin}
       onlyExecute={onlyExecute}
       isCreation={isCreation}

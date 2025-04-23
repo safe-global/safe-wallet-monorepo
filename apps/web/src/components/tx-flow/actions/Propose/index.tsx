@@ -6,7 +6,7 @@ import { type SlotComponentProps, SlotName, withSlot } from '../../slots'
 
 const Propose = ({ onSubmitSuccess }: SlotComponentProps<SlotName.Submit>) => {
   const { safeTx, txOrigin } = useContext(SafeTxContext)
-  const { trackTxEvent, isSubmittable } = useContext(TxFlowContext)
+  const { trackTxEvent, isSubmitDisabled } = useContext(TxFlowContext)
 
   const handleSubmit = useCallback(
     async (txId: string, isExecuted = false) => {
@@ -16,7 +16,7 @@ const Propose = ({ onSubmitSuccess }: SlotComponentProps<SlotName.Submit>) => {
     [onSubmitSuccess, trackTxEvent],
   )
 
-  return <ProposerForm safeTx={safeTx} origin={txOrigin} disableSubmit={!isSubmittable} onSubmit={handleSubmit} />
+  return <ProposerForm safeTx={safeTx} origin={txOrigin} disableSubmit={isSubmitDisabled} onSubmit={handleSubmit} />
 }
 
 const useShouldRegisterSlot = () => {

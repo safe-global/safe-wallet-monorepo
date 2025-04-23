@@ -8,7 +8,6 @@ import ConfirmationTitle, { ConfirmationTitleTypes } from '@/components/tx/SignO
 import { ErrorBoundary } from '@sentry/react'
 import ApprovalEditor from '../ApprovalEditor'
 import { BlockaidBalanceChanges } from '../security/blockaid/BlockaidBalanceChange'
-import { Blockaid } from '../security/blockaid'
 import { useApprovalInfos } from '../ApprovalEditor/hooks/useApprovalInfos'
 import type { TransactionDetails, TransactionPreview } from '@safe-global/safe-gateway-typescript-sdk'
 import NetworkWarning from '@/components/new-safe/create/NetworkWarning'
@@ -41,7 +40,8 @@ export const ReviewTransactionContent = ({
   txDetails?: TransactionDetails
   txPreview?: TransactionPreview
 }): ReactElement => {
-  const { willExecute, isCreation, isProposing, isRejection, isSubmittable, onlyExecute } = useContext(TxFlowContext)
+  const { willExecute, isCreation, isProposing, isRejection, isSubmitLoading, isSubmitDisabled, onlyExecute } =
+    useContext(TxFlowContext)
 
   const [readableApprovals] = useApprovalInfos({ safeTransaction: safeTx })
   const isApproval = readableApprovals && readableApprovals.length > 0
@@ -88,24 +88,24 @@ export const ReviewTransactionContent = ({
             This transaction will most likely fail. To save gas costs, avoid confirming the transaction.
           </ErrorMessage>
         )}
+
         <Slot name={SlotName.Footer} />
         <NetworkWarning />
         <UnknownContractError txData={txDetails?.txData ?? txPreview?.txData} />
-        <Blockaid />
 
         <TxCardActions>
           {/* Continue button */}
-          <CheckWallet allowNonOwner={onlyExecute} checkNetwork={isSubmittable}>
+          <CheckWallet allowNonOwner={onlyExecute} checkNetwork={!isSubmitDisabled}>
             {(isOk) => (
               <Button
                 data-testid="continue-sign-btn"
                 variant="contained"
                 type="submit"
                 onClick={() => onSubmit()}
-                disabled={!isOk || !isSubmittable}
+                disabled={!isOk || isSubmitDisabled}
                 sx={{ minWidth: '82px', order: '1', width: ['100%', '100%', '100%', 'auto'] }}
               >
-                {!isSubmittable ? <CircularProgress size={20} /> : 'Continue'}
+                {isSubmitLoading ? <CircularProgress size={20} /> : 'Continue'}
               </Button>
             )}
           </CheckWallet>
