@@ -145,12 +145,14 @@ export async function dispatchRecoveryExecution({
   args,
   delayModifierAddress,
   signerAddress,
+  overrides,
 }: {
   provider: Eip1193Provider
   chainId: string
   args: TransactionAddedEvent.Log['args']
   delayModifierAddress: string
   signerAddress: string
+  overrides: Overrides
 }) {
   const { delayModifier, isUnchecked } = await getDelayModifierContract({
     provider,
@@ -162,7 +164,7 @@ export async function dispatchRecoveryExecution({
   const txType = RecoveryTxType.EXECUTION
 
   try {
-    const tx = await delayModifier.executeNextTx(args.to, args.value, args.data, args.operation)
+    const tx = await delayModifier.executeNextTx(args.to, args.value, args.data, args.operation, overrides)
 
     if (isUnchecked) {
       recoveryDispatch(RecoveryEvent.PROCESSING_BY_SMART_CONTRACT_WALLET, {

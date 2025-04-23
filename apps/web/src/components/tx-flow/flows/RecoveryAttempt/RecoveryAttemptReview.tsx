@@ -16,6 +16,9 @@ import { useAsyncCallback } from '@/hooks/useAsync'
 import FieldsGrid from '@/components/tx/FieldsGrid'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import { SafeTxContext } from '../../SafeTxProvider'
+import useGasPrice from '@/hooks/useGasPrice'
+import { useCurrentChain } from '@/hooks/useChains'
+import { hasFeature, FEATURES } from '@/utils/chains'
 
 type RecoveryAttemptReviewProps = {
   item: RecoveryQueueItem
@@ -27,12 +30,22 @@ const RecoveryAttemptReview = ({ item }: RecoveryAttemptReviewProps) => {
   const { safe } = useSafeInfo()
   const { setTxFlow } = useContext(TxModalContext)
   const { setNonceNeeded } = useContext(SafeTxContext)
+  const [gasPrice] = useGasPrice()
+  const chain = useCurrentChain()
 
   const onFormSubmit = useCallback(
     async (e: SyntheticEvent) => {
       e.preventDefault()
 
-      if (!wallet) return
+      if (!wallet || !gasPrice) return
+
+      const isEIP1559 = chain && hasFeature(chain, FEATURES.EIP1559)
+      const overrides = isEIP1559
+        ? {
+            maxFeePerGas: gasPrice?.maxFeePerGas?.toString(),
+            maxPriorityFeePerGas: gasPrice?.maxPriorityFeePerGas?.toString(),
+          }
+        : { gasPrice: gasPrice?.maxFeePerGas?.toString() }
 
       try {
         await asyncCallback({
@@ -41,13 +54,14 @@ const RecoveryAttemptReview = ({ item }: RecoveryAttemptReviewProps) => {
           args: item.args,
           delayModifierAddress: item.address,
           signerAddress: wallet.address,
+          overrides,
         })
         setTxFlow(undefined)
       } catch (err) {
         trackError(Errors._812, err)
       }
     },
-    [asyncCallback, setTxFlow, wallet, safe, item.address, item.args],
+    [wallet, gasPrice, chain, asyncCallback, safe.chainId, item.args, item.address, setTxFlow],
   )
 
   useEffect(() => {
