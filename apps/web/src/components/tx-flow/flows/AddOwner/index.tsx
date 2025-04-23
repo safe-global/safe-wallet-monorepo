@@ -7,7 +7,7 @@ import { TxFlowType } from '@/services/analytics'
 import { TxFlow } from '../../TxFlow'
 import { TxFlowStep } from '../../TxFlowStep'
 import { TxFlowContext } from '../../TxFlowProvider'
-import ReviewTransaction from '@/components/tx/ReviewTransactionV2'
+import type ReviewTransaction from '@/components/tx/ReviewTransactionV2'
 
 type Owner = {
   address: string
