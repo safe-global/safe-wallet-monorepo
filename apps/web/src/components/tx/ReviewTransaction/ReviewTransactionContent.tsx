@@ -34,6 +34,7 @@ import { Button, CircularProgress } from '@mui/material'
 import BatchButton from '@/components/tx-flow/actions/Batching/BatchButton'
 import { TxModalContext } from '@/components/tx-flow'
 import CheckWallet from '@/components/common/CheckWallet'
+import { MODALS_EVENTS, trackEvent } from '@/services/analytics'
 
 export type ReviewTransactionContentProps = {
   txId?: string
@@ -110,6 +111,8 @@ export const ReviewTransactionContent = ({
         trackAddNote()
       }
 
+      trackEvent(MODALS_EVENTS.CONTINUE_CLICKED)
+
       setTxOrigin(customOrigin)
       onSubmit?.()
     },
@@ -131,6 +134,8 @@ export const ReviewTransactionContent = ({
     setIsSubmittable(false)
 
     await addToBatch(safeTx, customOrigin)
+
+    trackEvent(MODALS_EVENTS.CONTINUE_CLICKED)
 
     setIsSubmittable(true)
 
