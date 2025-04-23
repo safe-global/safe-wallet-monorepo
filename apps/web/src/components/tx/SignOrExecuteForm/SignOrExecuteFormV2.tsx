@@ -20,7 +20,7 @@ import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import { useLazyGetTransactionDetailsQuery } from '@/store/api/gateway'
 import type { TransactionDetails, TransactionPreview } from '@safe-global/safe-gateway-typescript-sdk'
 import { useSigner } from '@/hooks/wallets/useWallet'
-import { trackTxEvents } from './tracking'
+import { trackTxEvents, useTrackTimeSpent } from './tracking'
 import SignForm from './SignForm'
 
 export type SubmitCallback = (txId: string, isExecuted?: boolean) => void
@@ -58,6 +58,7 @@ export const SignOrExecuteFormV2 = ({
   const { transactionExecution: shouldExecute } = useAppSelector(selectSettings)
   const isNewExecutableTx = useImmediatelyExecutable() && isCreation
   const isCorrectNonce = useValidateNonce(safeTx)
+  const trackTimeSpent = useTrackTimeSpent()
 
   const [trigger] = useLazyGetTransactionDetailsQuery()
   const { safe } = useSafeInfo()
@@ -98,6 +99,8 @@ export const SignOrExecuteFormV2 = ({
         origin,
         isMassPayout,
       )
+
+      trackTimeSpent()
     },
     [chainId, isCreation, onSubmit, trigger, signer?.isSafe, origin, isMassPayout],
   )
