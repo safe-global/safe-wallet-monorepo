@@ -1,4 +1,3 @@
-import { useEffect } from 'react'
 import TxCard from '@/components/tx-flow/common/TxCard'
 import { Grid2 as Grid, Stack, StepIcon, Typography } from '@mui/material'
 import { TxDetails } from './TxDetails'
@@ -9,7 +8,7 @@ import SignOrExecuteFormV2 from '../SignOrExecuteForm/SignOrExecuteFormV2'
 import type { SignOrExecuteProps } from '../SignOrExecuteForm/SignOrExecuteFormV2'
 import useTxPreview from '../confirmation-views/useTxPreview'
 import Track from '@/components/common/Track'
-import { MODALS_EVENTS, trackEvent } from '@/services/analytics'
+import { MODALS_EVENTS } from '@/services/analytics'
 import useWallet from '@/hooks/wallets/useWallet'
 import { isHardwareWallet, isLedgerLive } from '@/utils/wallets'
 
@@ -65,27 +64,12 @@ const HardwareWalletStep = [
   InfoSteps[2],
 ]
 
-function trackTimeSpentOnStep(seconds: number) {
-  trackEvent({
-    ...MODALS_EVENTS.RECEIPT_TIME_SPENT,
-    label: seconds,
-  })
-}
-
 export const ConfirmTxDetails = (props: SignOrExecuteProps) => {
   const { safeTx, txOrigin } = useContext(SafeTxContext)
   const [txPreview] = useTxPreview(safeTx?.data)
   const wallet = useWallet()
   const showHashes = wallet ? isHardwareWallet(wallet) || isLedgerLive(wallet) : false
   const steps = showHashes ? HardwareWalletStep : InfoSteps
-
-  useEffect(() => {
-    const now = Date.now()
-    return () => {
-      const secondsElapsed = Math.round((Date.now() - now) / 1000)
-      trackTimeSpentOnStep(secondsElapsed)
-    }
-  }, [])
 
   if (!safeTx) {
     return null
