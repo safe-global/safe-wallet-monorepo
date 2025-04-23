@@ -5,7 +5,6 @@ import dynamic from 'next/dynamic'
 import { Typography } from '@mui/material'
 import { useHasFeature } from '@/hooks/useChains'
 import { BRAND_NAME } from '@/config/constants'
-import RedirectToSwapApp from '@/features/swap/components/RedirectToSwapApp'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 
 // Cow Swap expects native token addresses to be in the format '0xeeee...eeee'
@@ -18,13 +17,12 @@ const adjustEthAddress = (address: string) => {
 }
 
 const SwapWidgetNoSSR = dynamic(() => import('@/features/swap'), { ssr: false })
+const FallbackSwapWidgetNoSSR = dynamic(() => import('@/features/swap/components/FallbackSwapWidget'), { ssr: false })
 
 const SwapPage: NextPage = () => {
   const router = useRouter()
   const { token, amount } = router.query
-  // @ts-expect-error
   const isFeatureEnabled = useHasFeature(FEATURES.NATIVE_SWAPS)
-  // @ts-expect-error
   const isCowEnabled = useHasFeature(FEATURES.NATIVE_SWAPS_COW)
 
   let sell = undefined
@@ -45,7 +43,7 @@ const SwapPage: NextPage = () => {
         {isFeatureEnabled === true && isCowEnabled === true ? (
           <SwapWidgetNoSSR sell={sell} />
         ) : isFeatureEnabled === true && isCowEnabled === false ? (
-          <RedirectToSwapApp tokenAddress={token && String(token)} />
+          <FallbackSwapWidgetNoSSR fromToken={sell?.asset} />
         ) : isFeatureEnabled === false ? (
           <Typography textAlign="center" my={3}>
             Swaps are not supported on this network.
