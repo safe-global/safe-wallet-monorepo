@@ -85,8 +85,6 @@ export const SignOrExecuteFormV2 = ({
 
   const onFormSubmit = useCallback(
     async (txId: string, isExecuted = false, isRoleExecution = false, isProposerCreation = false) => {
-      onSubmit?.(txId, isExecuted)
-
       const { data: details } = await trigger({ chainId, txId })
       // Track tx event
       trackTxEvents(
@@ -101,6 +99,8 @@ export const SignOrExecuteFormV2 = ({
       )
 
       trackTimeSpent()
+
+      onSubmit?.(txId, isExecuted)
     },
     [chainId, isCreation, onSubmit, trigger, signer?.isSafe, origin, isMassPayout],
   )
