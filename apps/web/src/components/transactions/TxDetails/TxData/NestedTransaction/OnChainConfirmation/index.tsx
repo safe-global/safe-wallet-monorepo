@@ -1,5 +1,5 @@
 import useChainId from '@/hooks/useChainId'
-import { Skeleton } from '@mui/material'
+import { Skeleton, Stack } from '@mui/material'
 import { type TransactionData } from '@safe-global/safe-gateway-typescript-sdk'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import { useGetTransactionDetailsQuery } from '@/store/api/gateway'
@@ -67,10 +67,10 @@ export const OnChainConfirmation = ({
           )}
 
           {isConfirmationView && (
-            <>
+            <Stack spacing={2}>
               <TxSimulation disabled={false} transactions={nestedTx} title="Simulate nested transaction" isNested />
               <TxSimulationMessage isNested />
-            </>
+            </Stack>
           )}
         </>
       ) : txDetailsError ? (
