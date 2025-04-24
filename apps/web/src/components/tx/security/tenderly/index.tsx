@@ -1,5 +1,5 @@
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
-import { Alert, Button, Paper, SvgIcon, Tooltip, Typography } from '@mui/material'
+import { Alert, Box, Button, Paper, SvgIcon, Tooltip, Typography } from '@mui/material'
 import { useContext, useEffect } from 'react'
 import type { ReactElement } from 'react'
 
@@ -30,6 +30,7 @@ export type TxSimulationProps = {
   disabled: boolean
   executionOwner?: string
   isNested?: boolean
+  title?: string
 }
 
 // TODO: Investigate resetting on gasLimit change as we are not simulating with the gasLimit of the tx
@@ -41,6 +42,7 @@ const TxSimulationBlock = ({
   gasLimit,
   executionOwner,
   isNested = false,
+  title = 'Run a simulation',
 }: TxSimulationProps): ReactElement => {
   const { safe } = useSafeInfo()
   const signer = useSigner()
@@ -81,89 +83,102 @@ const TxSimulationBlock = ({
   }, [safeTx, resetSimulation])
 
   return (
-    <Paper variant="outlined" className={sharedCss.wrapper}>
-      <div className={css.wrapper}>
-        <Typography variant="body2" fontWeight={700}>
-          Run a simulation
-          <Tooltip
-            title="This transaction can be simulated before execution to ensure that it will be succeed, generating a detailed report of the transaction execution."
-            arrow
-            placement="top"
-          >
-            <span>
-              <SvgIcon
-                component={InfoIcon}
-                inheritViewBox
-                color="border"
-                fontSize="small"
-                sx={{
-                  verticalAlign: 'middle',
-                  ml: 0.5,
-                }}
-              />
-            </span>
-          </Tooltip>
-        </Typography>
-        <Typography variant="caption" className={sharedCss.poweredBy}>
-          Powered by{' '}
-          <img
-            src={isDarkMode ? '/images/transactions/tenderly-light.svg' : '/images/transactions/tenderly-dark.svg'}
-            alt="Tenderly"
-            width="65px"
-            height="15px"
-          />
-        </Typography>
-      </div>
+    <Box>
+      <Paper variant="outlined" className={sharedCss.wrapper} sx={{ backgroundColor: 'transparent' }}>
+        <div className={css.wrapper}>
+          <Typography variant="body2" fontWeight={700}>
+            {title}
 
-      <div className={sharedCss.result}>
-        {isLoading ? (
-          <CircularProgress
-            size={22}
-            sx={{
-              color: ({ palette }) => palette.text.secondary,
-            }}
-          />
-        ) : isFinished ? (
-          !isSuccess || isError || isCallTraceError ? (
-            <Typography
-              variant="body2"
-              className={sharedCss.result}
-              sx={{
-                color: 'error.main',
-              }}
+            <Tooltip
+              title="This transaction can be simulated before execution to ensure that it will be succeed, generating a detailed report of the transaction execution."
+              arrow
+              placement="top"
             >
-              <SvgIcon component={CloseIcon} inheritViewBox fontSize="small" sx={{ verticalAlign: 'middle', mr: 1 }} />
-              Error
-            </Typography>
+              <span>
+                <SvgIcon
+                  component={InfoIcon}
+                  inheritViewBox
+                  color="border"
+                  fontSize="small"
+                  sx={{
+                    verticalAlign: 'middle',
+                    ml: 0.5,
+                  }}
+                />
+              </span>
+            </Tooltip>
+          </Typography>
+          <Typography variant="caption" className={sharedCss.poweredBy}>
+            Powered by{' '}
+            <img
+              src={isDarkMode ? '/images/transactions/tenderly-light.svg' : '/images/transactions/tenderly-dark.svg'}
+              alt="Tenderly"
+              width="65px"
+              height="15px"
+            />
+          </Typography>
+        </div>
+
+        <div className={sharedCss.result}>
+          {isLoading ? (
+            <CircularProgress
+              size={22}
+              sx={{
+                color: ({ palette }) => palette.text.secondary,
+              }}
+            />
+          ) : isFinished ? (
+            !isSuccess || isError || isCallTraceError ? (
+              <Typography
+                variant="body2"
+                className={sharedCss.result}
+                sx={{
+                  color: 'error.main',
+                }}
+              >
+                <SvgIcon
+                  component={CloseIcon}
+                  inheritViewBox
+                  fontSize="small"
+                  sx={{ verticalAlign: 'middle', mr: 1 }}
+                />
+                Error
+              </Typography>
+            ) : (
+              <Typography
+                data-testid="simulation-success-msg"
+                variant="body2"
+                className={sharedCss.result}
+                sx={{
+                  color: 'success.main',
+                }}
+              >
+                <SvgIcon
+                  component={CheckIcon}
+                  inheritViewBox
+                  fontSize="small"
+                  sx={{ verticalAlign: 'middle', mr: 1 }}
+                />
+                Success
+              </Typography>
+            )
           ) : (
-            <Typography
-              data-testid="simulation-success-msg"
-              variant="body2"
-              className={sharedCss.result}
-              sx={{
-                color: 'success.main',
-              }}
-            >
-              <SvgIcon component={CheckIcon} inheritViewBox fontSize="small" sx={{ verticalAlign: 'middle', mr: 1 }} />
-              Success
-            </Typography>
-          )
-        ) : (
-          <Track {...MODALS_EVENTS.SIMULATE_TX}>
-            <Button
-              data-testid="simulate-btn"
-              variant="outlined"
-              size="small"
-              className={css.simulate}
-              onClick={handleSimulation}
-              disabled={!transactions || disabled}
-            >
-              Simulate
-            </Button>
-          </Track>
-        )}
-      </div>
-    </Paper>
+            <Track {...MODALS_EVENTS.SIMULATE_TX}>
+              <Button
+                data-testid="simulate-btn"
+                variant="outlined"
+                size="small"
+                className={css.simulate}
+                onClick={handleSimulation}
+                disabled={!transactions || disabled}
+              >
+                Simulate
+              </Button>
+            </Track>
+          )}
+        </div>
+      </Paper>
+    </Box>
   )
 }
 
