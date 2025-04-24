@@ -75,7 +75,7 @@ export const NestedTransaction = ({
           title={<Typography variant="h5">Nested transaction</Typography>}
         />
         <CardContent>
-          <Stack spacing={2}>{children}</Stack>
+          <Stack spacing={4}>{children}</Stack>
         </CardContent>
       </Card>
     </Stack>
