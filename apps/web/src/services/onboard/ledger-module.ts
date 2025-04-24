@@ -366,7 +366,7 @@ async function waitForAction<Output, Error extends DmkError, IntermediateValue>(
   let subscription: Subscription | undefined
 
   try {
-    return await new Promise(async (resolve, reject) => {
+    return await new Promise((resolve, reject) => {
       subscription = observable.subscribe({
         next: (actionState) => {
           if (actionState.status === DeviceActionStatus.Completed) {
