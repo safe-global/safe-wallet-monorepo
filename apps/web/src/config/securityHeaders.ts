@@ -1,4 +1,4 @@
-import { IS_PRODUCTION } from '@/config/constants'
+import { IS_PRODUCTION } from './constants'
 
 const isCypress = Boolean(typeof window !== 'undefined' && window.Cypress)
 

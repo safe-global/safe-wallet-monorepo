@@ -119,7 +119,7 @@ export const connectWallet = async (
   try {
     wallets = await onboard.connectWallet(options)
   } catch (e) {
-    logError(Errors._302, e)
+    logError(Errors._107, e)
     isConnecting = false
 
     return

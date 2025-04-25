@@ -1,9 +1,8 @@
 import { Box, Divider, Typography } from '@mui/material'
-import React, { useContext } from 'react'
+import React from 'react'
 
 import commonCss from '@/components/tx-flow/common/styles.module.css'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { ChangeThresholdReviewContext } from '@/components/tx-flow/flows/ChangeThreshold/context'
 import { ChangeSignerSetupWarning } from '@/features/multichain/components/SignerSetupWarning/ChangeSignerSetupWarning'
 import { type TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
 import { isChangeThresholdView } from '../utils'
@@ -15,7 +14,6 @@ interface ChangeThresholdProps {
 
 function ChangeThreshold({ txInfo }: ChangeThresholdProps) {
   const { safe } = useSafeInfo()
-  const { newThreshold } = useContext(ChangeThresholdReviewContext)
   const threshold = txInfo && isChangeThresholdView(txInfo) && txInfo.settingsInfo?.threshold
 
   return (
@@ -28,7 +26,7 @@ function ChangeThreshold({ txInfo }: ChangeThresholdProps) {
         </Typography>
 
         <Typography aria-label="threshold">
-          <b>{newThreshold || threshold}</b> out of{' '}
+          <b>{threshold}</b> out of{' '}
           <b>
             {safe.owners.length} signer{maybePlural(safe.owners)}
           </b>
