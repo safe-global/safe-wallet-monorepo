@@ -7,7 +7,7 @@ import type { TransactionDetails } from '@safe-global/safe-gateway-typescript-sd
 
 export const useSetsUntrustedFallbackHandler = (txData: TransactionDetails['txData']): boolean => {
   // multiSend method receives one parameter `transactions`
-  const multiSendTransactions = txData?.dataDecoded?.parameters?.[0].valueDecoded
+  const multiSendTransactions = txData?.dataDecoded?.parameters?.[0]?.valueDecoded
 
   const fallbackHandlers = useMemo(
     () =>
