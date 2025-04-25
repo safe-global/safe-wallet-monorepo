@@ -119,8 +119,8 @@ describe('SignForm', () => {
       expect(button).toBeDisabled()
     })
 
-    it('is not submitable', () => {
-      const { getByTestId } = render(<SignForm {...defaultProps} />, { isSubmittable: false })
+    it('is submit loading', () => {
+      const { getByTestId } = render(<SignForm {...defaultProps} />, { isSubmitLoading: true })
 
       const button = getByTestId('combo-submit-sign')
 

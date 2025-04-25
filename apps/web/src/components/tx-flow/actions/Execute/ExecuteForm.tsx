@@ -63,14 +63,15 @@ export const ExecuteForm = ({
   tooltip?: string
 }): ReactElement => {
   // Form state
-  const [isSubmittableLocal, setIsSubmittableLocal] = useState<boolean>(true) // TODO: remove this local state and use only the one from TxFlowContext when tx-flow refactor is done
+  const [isSubmitLoadingLocal, setIsSubmitLoadingLocal] = useState<boolean>(false) // TODO: remove this local state and use only the one from TxFlowContext when tx-flow refactor is done
 
   // Hooks
   const currentChain = useCurrentChain()
   const { executeTx } = txActions
   const { setTxFlow } = useContext(TxModalContext)
   const { needsRiskConfirmation, isRiskConfirmed, setIsRiskIgnored } = txSecurity
-  const { isSubmittable, setIsSubmittable, setSubmitError, setIsRejectedByUser } = useContext(TxFlowContext)
+  const { isSubmitDisabled, isSubmitLoading, setIsSubmitLoading, setSubmitError, setIsRejectedByUser } =
+    useContext(TxFlowContext)
 
   // We default to relay, but the option is only shown if we canRelay
   const [executionMethod, setExecutionMethod] = useState(ExecutionMethod.RELAY)
@@ -101,8 +102,8 @@ export const ExecuteForm = ({
       return
     }
 
-    setIsSubmittable(false)
-    setIsSubmittableLocal(false)
+    setIsSubmitLoading(true)
+    setIsSubmitLoadingLocal(true)
     setSubmitError(undefined)
     setIsRejectedByUser(false)
 
@@ -122,8 +123,8 @@ export const ExecuteForm = ({
         setSubmitError(err)
       }
 
-      setIsSubmittable(true)
-      setIsSubmittableLocal(true)
+      setIsSubmitLoading(false)
+      setIsSubmitLoadingLocal(false)
       return
     }
 
@@ -140,8 +141,8 @@ export const ExecuteForm = ({
   const cannotPropose = !isOwner && !onlyExecute
   const submitDisabled =
     !safeTx ||
-    !isSubmittable ||
-    !isSubmittableLocal ||
+    isSubmitDisabled ||
+    isSubmitLoadingLocal ||
     disableSubmit ||
     isExecutionLoop ||
     cannotPropose ||
@@ -204,7 +205,7 @@ export const ExecuteForm = ({
                     onChange={({ id }) => onChange?.(id)}
                     options={options}
                     disabled={!isOk || submitDisabled}
-                    loading={!isSubmittable || !isSubmittableLocal}
+                    loading={isSubmitLoading || isSubmitLoadingLocal}
                     tooltip={tooltip}
                   />
                 </Box>

@@ -52,8 +52,12 @@ export type TxFlowContextType<T extends unknown = any> = {
   shouldExecute: boolean
   setShouldExecute: Dispatch<SetStateAction<boolean>>
 
-  isSubmittable: boolean
-  setIsSubmittable: Dispatch<SetStateAction<boolean>>
+  isSubmitLoading: boolean
+  setIsSubmitLoading: Dispatch<SetStateAction<boolean>>
+
+  isSubmitDisabled: boolean
+  setIsSubmitDisabled: Dispatch<SetStateAction<boolean>>
+
   submitError?: Error
   setSubmitError: Dispatch<SetStateAction<Error | undefined>>
   isRejectedByUser: boolean
@@ -88,8 +92,12 @@ export const initialContext: TxFlowContextType = {
   shouldExecute: false,
   setShouldExecute: () => {},
 
-  isSubmittable: true,
-  setIsSubmittable: () => {},
+  isSubmitLoading: false,
+  setIsSubmitLoading: () => {},
+
+  isSubmitDisabled: false,
+  setIsSubmitDisabled: () => {},
+
   submitError: undefined,
   setSubmitError: () => {},
   isRejectedByUser: false,
@@ -139,7 +147,8 @@ const TxFlowProvider = <T extends unknown>({
   const isCorrectNonce = useValidateNonce(safeTx)
   const { transactionExecution } = useAppSelector(selectSettings)
   const [shouldExecute, setShouldExecute] = useState<boolean>(transactionExecution)
-  const [isSubmittable, setIsSubmittable] = useState<boolean>(initialContext.isSubmittable)
+  const [isSubmitLoading, setIsSubmitLoading] = useState<boolean>(initialContext.isSubmitLoading)
+  const [isSubmitDisabled, setIsSubmitDisabled] = useState<boolean>(initialContext.isSubmitDisabled)
   const [submitError, setSubmitError] = useState<Error | undefined>(initialContext.submitError)
   const [isRejectedByUser, setIsRejectedByUser] = useState<boolean>(initialContext.isRejectedByUser)
   const [txLayoutProps, setTxLayoutProps] = useState<TxFlowContextType['txLayoutProps']>(defaultTxLayoutProps)
@@ -212,8 +221,12 @@ const TxFlowProvider = <T extends unknown>({
     shouldExecute,
     setShouldExecute,
 
-    isSubmittable,
-    setIsSubmittable,
+    isSubmitLoading,
+    setIsSubmitLoading,
+
+    isSubmitDisabled: isSubmitDisabled || isSubmitLoading,
+    setIsSubmitDisabled,
+
     submitError,
     setSubmitError,
     isRejectedByUser,

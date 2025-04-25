@@ -7,7 +7,7 @@ import { type SlotComponentProps, SlotName, withSlot } from '../../slots'
 
 const ExecuteThroughRole = ({ onSubmitSuccess }: SlotComponentProps<SlotName.Submit>) => {
   const { safeTx } = useContext(SafeTxContext)
-  const { trackTxEvent, role, isSubmittable } = useContext(TxFlowContext)
+  const { trackTxEvent, role, isSubmitDisabled } = useContext(TxFlowContext)
 
   const handleSubmit = useCallback(
     async (txId: string, isExecuted = false) => {
@@ -17,7 +17,9 @@ const ExecuteThroughRole = ({ onSubmitSuccess }: SlotComponentProps<SlotName.Sub
     [onSubmitSuccess, trackTxEvent],
   )
 
-  return <ExecuteThroughRoleForm safeTx={safeTx} disableSubmit={!isSubmittable} role={role!} onSubmit={handleSubmit} />
+  return (
+    <ExecuteThroughRoleForm safeTx={safeTx} disableSubmit={isSubmitDisabled} role={role!} onSubmit={handleSubmit} />
+  )
 }
 
 const useShouldRegisterSlot = () => {
