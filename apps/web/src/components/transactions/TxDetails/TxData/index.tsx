@@ -109,7 +109,13 @@ const TxData = ({
     return <SafeUpdate txData={txData} />
   }
 
-  return <DecodedData txData={txData} toInfo={isCustomTxInfo(txInfo) ? txInfo.to : txData?.to} />
+  return (
+    <DecodedData
+      txData={txData}
+      toInfo={isCustomTxInfo(txInfo) ? txInfo.to : txData?.to}
+      isTxExecuted={!!txDetails?.executedAt}
+    />
+  )
 }
 
 export default TxData

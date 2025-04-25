@@ -6,8 +6,6 @@ import InfoOutlinedIcon from '@/public/images/notifications/info.svg'
 import css from './styles.module.css'
 import ExternalLink from '@/components/common/ExternalLink'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
-import { useIsOfficialFallbackHandler } from '@/hooks/useIsOfficialFallbackHandler'
-import { useIsTWAPFallbackHandler } from '@/features/swap/hooks/useIsTWAPFallbackHandler'
 import { UntrustedFallbackHandlerTxText } from '@/components/tx/confirmation-views/SettingsChange/UntrustedFallbackHandlerTxAlert'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 
@@ -59,28 +57,17 @@ export const DelegateCallWarning = ({ showWarning }: { showWarning: boolean }): 
 }
 
 export const UntrustedFallbackHandlerWarning = ({
-  fallbackHandler,
   isTxExecuted = false,
 }: {
-  fallbackHandler: string
   isTxExecuted?: boolean
-}): ReactElement | null => {
-  const isOfficial = useIsOfficialFallbackHandler(fallbackHandler)
-  const isTWAPFallbackHandler = useIsTWAPFallbackHandler(fallbackHandler)
-
-  if (isOfficial || isTWAPFallbackHandler) {
-    return null
-  }
-
-  return (
-    <Warning
-      datatestid="untrusted-fallback-handler-warning"
-      title={<UntrustedFallbackHandlerTxText isTxExecuted={isTxExecuted} />}
-      severity="warning"
-      text="Untrusted fallback handler"
-    />
-  )
-}
+}): ReactElement | null => (
+  <Warning
+    datatestid="untrusted-fallback-handler-warning"
+    title={<UntrustedFallbackHandlerTxText isTxExecuted={isTxExecuted} />}
+    severity="warning"
+    text="Untrusted fallback handler"
+  />
+)
 
 export const ApprovalWarning = ({ approvalTxCount }: { approvalTxCount: number }): ReactElement => (
   <Warning title="" severity="warning" text={`${approvalTxCount} ERC20 approval${maybePlural(approvalTxCount)}`} />

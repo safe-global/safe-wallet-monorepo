@@ -11,6 +11,7 @@ import { useContext } from 'react'
 import { SettingsChangeContext } from '@/components/tx-flow/flows/AddOwner/context'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
 import { UntrustedFallbackHandlerTxAlert } from '@/components/tx/confirmation-views/SettingsChange/UntrustedFallbackHandlerTxAlert'
+import { useHasUntrustedFallbackHandler } from '@/hooks/useHasUntrustedFallbackHandler'
 
 export interface SettingsChangeProps extends NarrowConfirmationViewProps {
   txInfo: SettingsChange
@@ -20,16 +21,19 @@ const SettingsChange: React.FC<SettingsChangeProps> = ({ txInfo: { settingsInfo 
   const { safe } = useSafeInfo()
   const params = useContext(SettingsChangeContext)
 
+  const setsUntrustedFallbackHandler = useHasUntrustedFallbackHandler(
+    settingsInfo?.type === SettingsInfoType.SET_FALLBACK_HANDLER ? settingsInfo.handler.value : undefined,
+  )
+
   if (!settingsInfo || settingsInfo.type === SettingsInfoType.REMOVE_OWNER) return null
 
   const shouldShowChangeSigner = 'owner' in settingsInfo || 'newOwner' in params
   const hasNewOwner = 'newOwner' in params
   const newSignersLength = safe.owners.length + ('removedOwner' in settingsInfo ? 0 : 1)
-  const setsFallbackHandler = settingsInfo.type === SettingsInfoType.SET_FALLBACK_HANDLER
 
   return (
     <>
-      {setsFallbackHandler && <UntrustedFallbackHandlerTxAlert fallbackHandler={settingsInfo.handler.value} />}
+      {setsUntrustedFallbackHandler && <UntrustedFallbackHandlerTxAlert />}
 
       {'oldOwner' in settingsInfo && (
         <Paper sx={{ backgroundColor: ({ palette }) => palette.warning.background, p: 2 }}>
