@@ -76,6 +76,7 @@ const SpaceSidebarSelector = () => {
               variant="body2"
               fontWeight="bold"
               noWrap
+              color="text.primary"
               sx={{ maxWidth: '140px', textOverflow: 'ellipsis', overflow: 'hidden' }}
             >
               {selectedSpace.name}

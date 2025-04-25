@@ -6,3 +6,11 @@
     '.         description checkIcon';
   column-gap: var(--space-1);
 }
+
+.menuItem:hover {
+  background-color: var(--color-background-main) !important;
+}
+
+.menuItem:global(.Mui-selected) {
+  background-color: var(--color-background-main);
+}
