@@ -1,6 +1,5 @@
-import type { DeviceActionState } from '@ledgerhq/device-management-kit'
-import { makeError } from 'ethers'
 import type { DmkError, ExecuteDeviceActionReturnType } from '@ledgerhq/device-management-kit'
+import { makeError } from 'ethers'
 import type {
   GetAddressDAOutput,
   SignPersonalMessageDAOutput,
@@ -332,8 +331,6 @@ async function getLedgerSdk() {
   const { DeviceManagementKitBuilder } = await import('@ledgerhq/device-management-kit')
   const { webHidTransportFactory, webHidIdentifier } = await import('@ledgerhq/device-transport-kit-web-hid')
   const { SignerEthBuilder } = await import('@ledgerhq/device-signer-kit-ethereum')
-  const { makeError } = await import('ethers')
-  const { default: get } = await import('lodash/get')
   const { lastValueFrom } = await import('rxjs')
 
   // Get connected device and create signer
