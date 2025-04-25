@@ -52,7 +52,7 @@ export const TwapOrder = ({ order, bordered, executionInfo, inQueue, onPress }: 
       rightNode={
         <View alignItems="flex-end">
           <Text color="$primary">
-            +{formatValue(order.buyAmount, order.buyToken.decimals)} {order.buyToken.symbol}
+            ~{formatValue(order.buyAmount, order.buyToken.decimals)} {order.buyToken.symbol}
           </Text>
           <Text fontSize="$3">
             −{formatValue(order.sellAmount, order.sellToken.decimals)} {order.sellToken.symbol}
