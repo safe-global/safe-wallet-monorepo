@@ -9,6 +9,7 @@ import useChainId from '@/hooks/useChainId'
 // This is a mapping of app URLs to their respective token parameter functions
 const urlTokenParams: Record<string, (url: string, chainId: string, token: string) => string> = {
   'app.1inch.io': (url, chainId, token) => `${url}/#/${chainId}/simple/swap/${chainId}:${token}`,
+  'kyberswap.com': (url, chainId, token) => `${url}/swap/${chainId}/${token}`,
 }
 
 function addTokenParam(url: string, chainId: string, tokenAddress?: string) {
