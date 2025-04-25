@@ -45,7 +45,6 @@ export const RecipientRow = ({ fieldArray, removable = true, remove, disableSpen
 
   const recipientFieldName = getFieldName(TokenTransferFields.recipient, fieldArray)
 
-  const recipients = watch(MultiTokenTransferFields.recipients)
   const type = watch(MultiTokenTransferFields.type)
   const recipient = watch(recipientFieldName)
   const tokenAddress = watch(getFieldName(TokenTransferFields.tokenAddress, fieldArray))
@@ -72,18 +71,10 @@ export const RecipientRow = ({ fieldArray, removable = true, remove, disableSpen
 
   const maxAmount = isSpendingLimitType && totalAmount > spendingLimitAmount ? spendingLimitAmount : totalAmount
 
-  const deps = useMemo(
-    () =>
-      recipients.map((_, index) =>
-        getFieldName(TokenTransferFields.amount, { name: MultiTokenTransferFields.recipients, index }),
-      ),
-    [recipients],
-  )
-
   const onRemove = useCallback(() => {
     remove?.(fieldArray.index)
-    trigger(deps)
-  }, [remove, fieldArray.index, trigger, deps])
+    trigger(MultiTokenTransferFields.recipients)
+  }, [remove, fieldArray.index, trigger])
 
   useEffect(() => {
     setNonceNeeded(!isSpendingLimitType || spendingLimitAmount === 0n)
@@ -103,7 +94,7 @@ export const RecipientRow = ({ fieldArray, removable = true, remove, disableSpen
               balances={isSpendingLimitType ? spendingLimitBalances : balances.items}
               selectedToken={selectedToken}
               maxAmount={maxAmount}
-              deps={deps}
+              deps={[MultiTokenTransferFields.recipients]}
             />
           </FormControl>
 
