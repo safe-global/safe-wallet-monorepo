@@ -2,7 +2,7 @@ import TxCard from '@/components/tx-flow/common/TxCard'
 import { Grid2 as Grid, Stack, StepIcon, Typography } from '@mui/material'
 import { Receipt } from './Receipt'
 import ExternalLink from '@/components/common/ExternalLink'
-import { useContext, useEffect } from 'react'
+import { useContext } from 'react'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import SignOrExecuteFormV2 from '../SignOrExecuteForm/SignOrExecuteFormV2'
 import type { SignOrExecuteProps } from '../SignOrExecuteForm/SignOrExecuteFormV2'
@@ -11,7 +11,6 @@ import Track from '@/components/common/Track'
 import { MODALS_EVENTS } from '@/services/analytics'
 import useWallet from '@/hooks/wallets/useWallet'
 import { isHardwareWallet, isLedgerLive } from '@/utils/wallets'
-import { useTrackTimeSpent } from '../SignOrExecuteForm/tracking'
 
 const InfoSteps = [
   {
@@ -71,12 +70,6 @@ export const ConfirmTxDetails = (props: SignOrExecuteProps) => {
   const wallet = useWallet()
   const showHashes = wallet ? isHardwareWallet(wallet) || isLedgerLive(wallet) : false
   const steps = showHashes ? HardwareWalletStep : InfoSteps
-  const trackTimeSpent = useTrackTimeSpent()
-
-  // Track time spent on the confirmation screen on unmount
-  useEffect(() => {
-    return trackTimeSpent
-  }, [trackTimeSpent])
 
   if (!safeTx) {
     return null
