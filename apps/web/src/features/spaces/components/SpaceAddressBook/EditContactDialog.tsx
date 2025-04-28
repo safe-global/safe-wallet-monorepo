@@ -10,7 +10,13 @@ import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import useChains from '@/hooks/useChains'
 import type { ContactField } from './AddContact'
-import type { SpaceAddressBookItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import {
+  SpaceAddressBookItemDto,
+  useAddressBooksUpsertAddressBookItemsV1Mutation,
+} from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { showNotification } from '@/store/notificationsSlice'
+import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
+import { useAppDispatch } from '@/store'
 
 type EditContactDialogProps = {
   entry: SpaceAddressBookItemDto
@@ -18,9 +24,12 @@ type EditContactDialogProps = {
 }
 
 const EditContactDialog = ({ entry, onClose }: EditContactDialogProps) => {
-  const [error, setError] = useState('')
+  const [error, setError] = useState<string>()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { configs } = useChains()
+  const dispatch = useAppDispatch()
+  const spaceId = useCurrentSpaceId()
+  const [upsertAddressBook] = useAddressBooksUpsertAddressBookItemsV1Mutation()
 
   const defaultNetworks = entry.chainIds
     .map((chainId) => {
@@ -51,7 +60,7 @@ const EditContactDialog = ({ entry, onClose }: EditContactDialogProps) => {
   const hasChanges = useMemo(() => {
     const nameChanged = watchedName !== entry.name
 
-    const originalChainIds = entry.chainIds.sort()
+    const originalChainIds = entry.chainIds.toSorted()
     const currentChainIds = watchedNetworks.map((network) => network.chainId).sort()
     const networksChanged =
       originalChainIds.length !== currentChainIds.length ||
@@ -67,15 +76,39 @@ const EditContactDialog = ({ entry, onClose }: EditContactDialogProps) => {
   }
 
   const onSubmit = handleSubmit(async (data) => {
+    setError(undefined)
+
+    const addressBookItem = {
+      name: data.name,
+      address: data.address,
+      chainIds: data.networks.map((network) => network.chainId),
+    }
+
     try {
       setIsSubmitting(true)
-      trackEvent({ ...SPACE_EVENTS.ADD_ADDRESS_SUBMIT })
-      // TODO: handle edit contact submission
-      console.log(data)
+      trackEvent({ ...SPACE_EVENTS.EDIT_ADDRESS_SUBMIT })
+
+      const result = await upsertAddressBook({
+        spaceId: Number(spaceId),
+        upsertAddressBookItemsDto: { items: [addressBookItem] },
+      })
+
+      if (result.error) {
+        setError('Something went wrong. Please try again.')
+        return
+      }
+
+      dispatch(
+        showNotification({
+          message: `Updated contact`,
+          variant: 'success',
+          groupKey: 'update-contact-success',
+        }),
+      )
+
       handleClose()
     } catch (error) {
       setError('Something went wrong. Please try again.')
-      console.error(error)
     } finally {
       setIsSubmitting(false)
     }
