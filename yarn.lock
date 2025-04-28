@@ -8560,7 +8560,7 @@ __metadata:
     "@web3-onboard/coinbase": "npm:^2.4.2"
     "@web3-onboard/core": "npm:2.24.0"
     "@web3-onboard/hw-common": "npm:^2.3.3"
-    "@web3-onboard/injected-wallets": "npm:^2.11.2"
+    "@web3-onboard/injected-wallets": "npm:^2.11.3"
     "@web3-onboard/walletconnect": "npm:^2.6.1"
     blo: "npm:^1.1.1"
     cheerio: "npm:^1.0.0"
@@ -13508,14 +13508,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@web3-onboard/injected-wallets@npm:^2.11.2":
-  version: 2.11.2
-  resolution: "@web3-onboard/injected-wallets@npm:2.11.2"
+"@web3-onboard/injected-wallets@npm:^2.11.3":
+  version: 2.11.3
+  resolution: "@web3-onboard/injected-wallets@npm:2.11.3"
   dependencies:
     "@web3-onboard/common": "npm:^2.4.1"
     joi: "npm:17.9.1"
     lodash.uniqby: "npm:^4.7.0"
-  checksum: 10/3dd84ac8c4c71b628ac5327603ab18e801460ff655d7724c7dbebb7d7e8595f0b1d822dde903633ed991fd7d293e930ee5178476edd0fbf7f1c80a790eaff878
+  checksum: 10/513c447852b6467b45ea7b470d66aba77d2957a093c8b2b8a870274fca0bd2d0e01da3864188740e02bf1bd8bb0a63f3a4821fd2f73450ec2907decc34f6ca53
   languageName: node
   linkType: hard
 
