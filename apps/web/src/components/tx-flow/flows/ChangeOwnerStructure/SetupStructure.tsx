@@ -45,7 +45,15 @@ export function SetupStructure({
   const newOwners = formMethods.watch(ChangeOwnerStructureFormFields.owners)
   const newThreshold = formMethods.watch(ChangeOwnerStructureFormFields.threshold)
 
-  // TODO: Include validation that the Safe is not being set as an owner, nor are duplicates
+  const onRemove = (index: number) => {
+    fieldArray.remove(index)
+    // newOwners does not update immediately after removal
+    const newOwnersLength = newOwners.length - 1
+    if (newThreshold > newOwnersLength) {
+      formMethods.setValue(ChangeOwnerStructureFormFields.threshold, newOwnersLength)
+    }
+  }
+
   const isSameOwners = newOwners.every((newOwner) => {
     return safe.owners.some((currentOwner) => sameAddress(currentOwner.value, newOwner.address))
   })
@@ -61,8 +69,8 @@ export function SetupStructure({
                 key={field.id}
                 index={index}
                 groupName={ChangeOwnerStructureFormFields.owners}
-                removable={index > 0}
-                remove={fieldArray.remove}
+                removable={fieldArray.fields.length > 1}
+                remove={onRemove}
               />
             )
           })}
@@ -71,13 +79,14 @@ export function SetupStructure({
             onClick={() => fieldArray.append({ name: '', address: '' }, { shouldFocus: true })}
             startIcon={<SvgIcon component={AddIcon} inheritViewBox fontSize="small" />}
             size="large"
+            sx={{ mt: -1, mb: 3 }}
           >
             Add new signer
           </Button>
 
           <Divider className={commonCss.nestedDivider} />
 
-          <Box>
+          <Box sx={{ my: 3 }}>
             <Typography
               variant="h4"
               sx={{

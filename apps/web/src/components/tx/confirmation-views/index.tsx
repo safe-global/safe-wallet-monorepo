@@ -29,6 +29,7 @@ import { MigrateToL2Information } from './MigrateToL2Information'
 import { NestedSafeCreation } from './NestedSafeCreation'
 import { isNestedSafeCreation } from '@/utils/nested-safes'
 import Summary from '@/components/transactions/TxDetails/Summary'
+import { ChangeOwnerStructureFlow } from '@/components/tx-flow/flows/ChangeOwnerStructure'
 
 type ConfirmationViewProps = {
   txDetails?: TransactionDetails
@@ -45,6 +46,9 @@ const getConfirmationViewComponent = ({
   txData,
   txFlow,
 }: NarrowConfirmationViewProps & { txFlow?: ReactElement }) => {
+  // Don't show ChangeThreshold on ChangeOwnerStructure flow
+  if (txFlow?.type === ChangeOwnerStructureFlow) return null
+
   if (isChangeThresholdView(txInfo)) return <ChangeThreshold txInfo={txInfo} />
 
   if (isConfirmBatchView(txFlow)) return <BatchTransactions />

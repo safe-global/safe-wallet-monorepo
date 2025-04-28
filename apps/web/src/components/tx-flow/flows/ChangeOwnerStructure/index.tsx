@@ -39,7 +39,7 @@ export function ChangeOwnerStructureFlow(): ReactElement {
   return (
     <TxLayout
       title={step === 0 ? 'New transaction' : 'Confirm transaction'}
-      subtitle="Change owner structure"
+      subtitle="Manage signers"
       icon={SaveAddressIcon}
       step={step}
       onBack={prevStep}
