@@ -2,7 +2,7 @@ import { getModuleInstance, KnownContracts } from '@gnosis.pm/zodiac'
 import { type SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import type { SafeTransaction } from '@safe-global/safe-core-sdk-types'
 import type { TransactionAddedEvent } from '@gnosis.pm/zodiac/dist/cjs/types/Delay'
-import type { Eip1193Provider, TransactionResponse } from 'ethers'
+import type { Eip1193Provider, Overrides, TransactionResponse } from 'ethers'
 
 import { didReprice, didRevert } from '@/utils/ethers-utils'
 import { recoveryDispatch, RecoveryEvent, RecoveryTxType } from './recoveryEvents'
@@ -76,12 +76,14 @@ export async function dispatchRecoveryProposal({
   safeTx,
   delayModifierAddress,
   signerAddress,
+  overrides,
 }: {
   provider: Eip1193Provider
   safe: SafeState
   safeTx: SafeTransaction
   delayModifierAddress: string
   signerAddress: string
+  overrides: Overrides
 }) {
   const { delayModifier, isUnchecked } = await getDelayModifierContract({
     provider,
@@ -107,6 +109,7 @@ export async function dispatchRecoveryProposal({
       safeTx.data.value,
       safeTx.data.data,
       safeTx.data.operation,
+      overrides,
     )
 
     if (isUnchecked) {
@@ -142,12 +145,14 @@ export async function dispatchRecoveryExecution({
   args,
   delayModifierAddress,
   signerAddress,
+  overrides,
 }: {
   provider: Eip1193Provider
   chainId: string
   args: TransactionAddedEvent.Log['args']
   delayModifierAddress: string
   signerAddress: string
+  overrides: Overrides
 }) {
   const { delayModifier, isUnchecked } = await getDelayModifierContract({
     provider,
@@ -159,7 +164,7 @@ export async function dispatchRecoveryExecution({
   const txType = RecoveryTxType.EXECUTION
 
   try {
-    const tx = await delayModifier.executeNextTx(args.to, args.value, args.data, args.operation)
+    const tx = await delayModifier.executeNextTx(args.to, args.value, args.data, args.operation, overrides)
 
     if (isUnchecked) {
       recoveryDispatch(RecoveryEvent.PROCESSING_BY_SMART_CONTRACT_WALLET, {

@@ -168,9 +168,9 @@ export function useBiometrics() {
       case 'FACE_ID':
         return { label: 'Enable Face ID', icon: 'face-id' }
       case 'TOUCH_ID':
-        return { label: 'Enable Touch ID', icon: 'face-id' } // TODO: change icon to fingerprint
+        return { label: 'Enable Touch ID', icon: 'fingerprint' }
       case 'FINGERPRINT':
-        return { label: 'Enable Fingerprint', icon: 'face-id' } // TODO: change icon to fingerprint
+        return { label: 'Enable Fingerprint', icon: 'fingerprint' }
       default:
         return { label: 'Enable Biometrics', icon: 'face-id' }
     }

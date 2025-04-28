@@ -43,7 +43,7 @@ export const SafeTabBar = ({
     >
       {tabNames.map((name) => (
         <TouchableOpacity style={isActiveTab(name) && activeButtonStyle} onPress={handleTabPressed(name)} key={name}>
-          <Text color={isActiveTab(name) ? '$color' : '$colorSecondary'} fontSize="$4" fontWeight={600}>
+          <Text color={isActiveTab(name) ? '$color' : '$colorSecondary'} fontSize="$6" fontWeight={700}>
             {name}
           </Text>
         </TouchableOpacity>

@@ -187,7 +187,7 @@ function EnhancedTable({ rows, headCells, mobileVariant }: EnhancedTableProps) {
         </Table>
       </TableContainer>
 
-      {rows.length > pagedRows.length && (
+      {(rows.length > pageSizes[0] || rowsPerPage !== pageSizes[1]) && (
         <TablePagination
           data-testid="table-pagination"
           rowsPerPageOptions={pageSizes}

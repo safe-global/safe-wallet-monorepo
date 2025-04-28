@@ -1,4 +1,4 @@
-import EthHashInfo from '@/components/common/EthHashInfo'
+import NamedAddressInfo from '@/components/common/NamedAddressInfo'
 import { TransferTx } from '@/components/transactions/TxInfo'
 import { isTxQueued } from '@/utils/transaction-guards'
 import type { TransactionStatus, Transfer } from '@safe-global/safe-gateway-typescript-sdk'
@@ -24,13 +24,11 @@ const TransferTxInfoMain = ({ txInfo, txStatus, trusted, imitation }: TransferTx
 
   return (
     <Box display="flex" flexDirection="row" alignItems="center" gap={1}>
-      <Typography>
-        {direction === TransferDirection.INCOMING ? 'Received' : isTxQueued(txStatus) ? 'Send' : 'Sent'}{' '}
-        <b>
-          <TransferTx info={txInfo} withLogo={false} omitSign preciseAmount />
-        </b>
-        {direction === TransferDirection.INCOMING ? ' from:' : ' to:'}
-      </Typography>
+      {direction === TransferDirection.INCOMING ? 'Received' : isTxQueued(txStatus) ? 'Send' : 'Sent'}{' '}
+      <b>
+        <TransferTx info={txInfo} omitSign preciseAmount />
+      </b>
+      {direction === TransferDirection.INCOMING ? ' from' : ' to'}
       {!trusted && !imitation && <MaliciousTxWarning />}
     </Box>
   )
@@ -44,7 +42,7 @@ const TransferTxInfo = ({ txInfo, txStatus, trusted, imitation }: TransferTxInfo
       <TransferTxInfoMain txInfo={txInfo} txStatus={txStatus} trusted={trusted} imitation={imitation} />
 
       <Box display="flex" alignItems="center" width="100%">
-        <EthHashInfo
+        <NamedAddressInfo
           address={address.value}
           name={address.name}
           customAvatar={address.logoUri}
@@ -54,7 +52,7 @@ const TransferTxInfo = ({ txInfo, txStatus, trusted, imitation }: TransferTxInfo
           trusted={trusted && !imitation}
         >
           <TransferActions address={address.value} txInfo={txInfo} trusted={trusted} />
-        </EthHashInfo>
+        </NamedAddressInfo>
       </Box>
       {imitation && <ImitationTransactionWarning />}
     </Box>
@@ -81,7 +79,7 @@ export const InlineTransferTxInfo = ({
         iconSize={16}
       />
       <Typography>to</Typography>
-      <EthHashInfo address={recipient} copyAddress={false} shortAddress={true} onlyName avatarSize={16} />
+      <NamedAddressInfo address={recipient} copyAddress={false} shortAddress={true} onlyName avatarSize={16} />
     </Stack>
   )
 }

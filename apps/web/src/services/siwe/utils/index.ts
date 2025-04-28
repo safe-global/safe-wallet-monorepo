@@ -3,7 +3,7 @@ const getSignableMessage = (address: string, chainId: bigint, nonce: string) => 
     domain: window.location.host,
     address,
     statement:
-      'By signing, you are agreeing to store this data on the Safe Cloud. This does not initiate a transaction or cost any fees.',
+      'By signing, you are agreeing to store this data in the Safe infrastructure. This does not initiate a transaction or cost any fees.',
     uri: window.location.origin,
     version: '1',
     chainId: Number(chainId),

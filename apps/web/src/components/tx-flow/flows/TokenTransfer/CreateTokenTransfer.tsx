@@ -40,6 +40,7 @@ import { useHasFeature } from '@/hooks/useChains'
 import Track from '@/components/common/Track'
 import { MODALS_EVENTS } from '@/services/analytics'
 import { FEATURES } from '@safe-global/utils/utils/chains'
+import { TxFlowContext, type TxFlowContextType } from '../../TxFlowProvider'
 
 export const AutocompleteItem = (item: { tokenInfo: TokenInfo; balance: string }): ReactElement => (
   <Grid
@@ -70,15 +71,11 @@ export const AutocompleteItem = (item: { tokenInfo: TokenInfo; balance: string }
 
 const MAX_RECIPIENTS = 5
 
-export const CreateTokenTransfer = ({
-  params,
-  onSubmit,
-  txNonce,
-}: {
-  params: MultiTokenTransferParams
-  onSubmit: (data: MultiTokenTransferParams) => void
+export type CreateTokenTransferProps = {
   txNonce?: number
-}): ReactElement => {
+}
+
+export const CreateTokenTransfer = ({ txNonce }: CreateTokenTransferProps): ReactElement => {
   const disableSpendingLimit = txNonce !== undefined
   const [csvAirdropModalOpen, setCsvAirdropModalOpen] = useState<boolean>(false)
   const [maxRecipientsInfo, setMaxRecipientsInfo] = useState<boolean>(false)
@@ -88,6 +85,7 @@ export const CreateTokenTransfer = ({
   const { setNonce } = useContext(SafeTxContext)
   const [safeApps] = useRemoteSafeApps({ name: SafeAppsName.CSV })
   const isMassPayoutsEnabled = useHasFeature(FEATURES.MASS_PAYOUTS)
+  const { onNext, data } = useContext(TxFlowContext) as TxFlowContextType<MultiTokenTransferParams>
 
   useEffect(() => {
     if (txNonce !== undefined) {
@@ -97,17 +95,18 @@ export const CreateTokenTransfer = ({
 
   const formMethods = useForm<MultiTokenTransferParams>({
     defaultValues: {
-      ...params,
+      ...data,
       [MultiTransfersFields.type]: disableSpendingLimit
         ? TokenTransferType.multiSig
         : canCreateSpendingLimitTx && !canCreateStandardTx
           ? TokenTransferType.spendingLimit
-          : params.type,
-      recipients: params.recipients.map(({ tokenAddress, ...rest }) => ({
-        ...rest,
-        [TokenTransferFields.tokenAddress]:
-          canCreateSpendingLimitTx && !canCreateStandardTx ? balancesItems[0]?.tokenInfo.address : tokenAddress,
-      })),
+          : data?.type,
+      recipients:
+        data?.recipients.map(({ tokenAddress, ...rest }) => ({
+          ...rest,
+          [TokenTransferFields.tokenAddress]:
+            canCreateSpendingLimitTx && !canCreateStandardTx ? balancesItems[0]?.tokenInfo.address : tokenAddress,
+        })) || [],
     },
     mode: 'onChange',
     delayError: 500,
@@ -168,7 +167,7 @@ export const CreateTokenTransfer = ({
   return (
     <TxCard>
       <FormProvider {...formMethods}>
-        <form onSubmit={handleSubmit(onSubmit)} className={commonCss.form}>
+        <form onSubmit={handleSubmit(onNext)} className={commonCss.form}>
           <Stack spacing={3}>
             <Stack spacing={8}>
               {recipientFields.map((field, index) => (
