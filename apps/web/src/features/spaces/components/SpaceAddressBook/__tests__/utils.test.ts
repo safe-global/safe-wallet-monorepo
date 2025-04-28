@@ -92,7 +92,7 @@ describe('space address book utils', () => {
       }
 
       const result = createContactItems(data)
-      expect(result).toEqual([{ chainId: '1', address: '0x123', name: 'Alice' }])
+      expect(result).toEqual([{ chainIds: ['1'], address: '0x123', name: 'Alice' }])
     })
 
     it('filters out entries without a name and only keeps valid items', () => {
@@ -108,8 +108,8 @@ describe('space address book utils', () => {
       expect(result).toHaveLength(2)
       expect(result).toEqual(
         expect.arrayContaining([
-          { chainId: '1', address: '0x123', name: 'Alice' },
-          { chainId: '5', address: '0xABC', name: 'Charlie' },
+          { chainIds: ['1'], address: '0x123', name: 'Alice' },
+          { chainIds: ['5'], address: '0xABC', name: 'Charlie' },
         ]),
       )
     })
@@ -127,9 +127,9 @@ describe('space address book utils', () => {
       expect(result).toHaveLength(3)
       expect(result).toEqual(
         expect.arrayContaining([
-          { chainId: '1', address: '0x123', name: 'Alice' },
-          { chainId: '1', address: '0x456', name: 'Bob' },
-          { chainId: '5', address: '0xABC', name: 'Charlie' },
+          { chainIds: ['1'], address: '0x123', name: 'Alice' },
+          { chainIds: ['1'], address: '0x456', name: 'Bob' },
+          { chainIds: ['5'], address: '0xABC', name: 'Charlie' },
         ]),
       )
     })
