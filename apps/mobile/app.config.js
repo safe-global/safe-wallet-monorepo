@@ -119,6 +119,7 @@ export default {
         },
       ],
       'expo-task-manager',
+      'expo-web-browser',
     ],
     experiments: {
       typedRoutes: true,
