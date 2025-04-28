@@ -1,4 +1,4 @@
-import { Typography } from '@mui/material'
+import { Box, Stack } from '@mui/material'
 import { useContext, useEffect } from 'react'
 import type { SafeTransaction } from '@safe-global/safe-core-sdk-types'
 import type { ReactElement } from 'react'
@@ -9,6 +9,8 @@ import { SafeTxContext } from '../../SafeTxProvider'
 import { getRecoveryProposalTransactions } from '@/features/recovery/services/transaction'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import SignOrExecuteForm from '@/components/tx/SignOrExecuteForm'
+import FieldsGrid from '@/components/tx/FieldsGrid'
+import { maybePlural } from '@/utils/formatters'
 import type { ChangeOwnerStructureForm } from '.'
 
 export function ReviewStructure({ params }: { params: ChangeOwnerStructureForm }): ReactElement {
@@ -34,18 +36,56 @@ export function ReviewStructure({ params }: { params: ChangeOwnerStructureForm }
 
   return (
     <SignOrExecuteForm>
-      {params.owners.map((owner) => (
-        <EthHashInfo key={owner.address} address={owner.address} shortAddress={false} showCopyButton hasExplorer />
-      ))}
-
-      <div>
-        <Typography fontWeight={700} gutterBottom>
-          Required confirmations for new transactions:
-        </Typography>
-        <Typography>
-          {params.threshold} out of {params.owners.length} owner(s)
-        </Typography>
-      </div>
+      {/* We cannot create a ConfirmationView out of the following as it accesses params */}
+      <Stack
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 3,
+          mb: 2,
+          '& .MuiGrid-container': {
+            alignItems: 'flex-start',
+          },
+        }}
+      >
+        <FieldsGrid title="Signers">
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 2,
+              fontSize: '14px',
+            }}
+          >
+            {params.owners.map((owner) => (
+              <EthHashInfo
+                avatarSize={32}
+                key={owner.address}
+                showName
+                address={owner.address}
+                shortAddress={false}
+                showCopyButton
+                hasExplorer
+              />
+            ))}
+          </Box>
+        </FieldsGrid>
+        <FieldsGrid title="Threshold">
+          <Box
+            component="span"
+            sx={{
+              backgroundColor: 'background.main',
+              py: 0.5,
+              px: 1,
+              borderRadius: ({ shape }) => `${shape.borderRadius}px`,
+              fontWeight: 700,
+            }}
+          >
+            {params.threshold} of {params.owners.length} signer{maybePlural(params.owners)}
+          </Box>{' '}
+          required to confirm new transactions
+        </FieldsGrid>
+      </Stack>
     </SignOrExecuteForm>
   )
 }

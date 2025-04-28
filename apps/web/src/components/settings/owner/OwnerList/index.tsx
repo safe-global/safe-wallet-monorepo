@@ -15,6 +15,7 @@ import CheckWallet from '@/components/common/CheckWallet'
 import { TxModalContext } from '@/components/tx-flow'
 import ReplaceOwnerIcon from '@/public/images/settings/setup/replace-owner.svg'
 import DeleteIcon from '@/public/images/common/delete.svg'
+import EditOwnerIcon from '@/public/images/common/edit-owner.svg'
 import type { AddressBook } from '@/store/addressBookSlice'
 
 import tableCss from '@/components/common/EnhancedTable/styles.module.css'
@@ -114,7 +115,7 @@ export const OwnerList = () => {
 
           <Box
             sx={{
-              pt: 2,
+              py: 2,
               display: 'flex',
               justifyContent: 'space-between',
             }}
@@ -123,13 +124,14 @@ export const OwnerList = () => {
               {(isOk) => (
                 <Track {...SETTINGS_EVENTS.SETUP.ADD_OWNER}>
                   <Button
-                    data-testid="add-owner-btn"
+                    data-testid="manage-signers-btn"
+                    startIcon={<SvgIcon component={EditOwnerIcon} inheritViewBox />}
                     onClick={() => setTxFlow(<ChangeOwnerStructureFlow />)}
                     variant="text"
                     disabled={!isOk}
                     size="compact"
                   >
-                    Change structure
+                    Manage signers
                   </Button>
                 </Track>
               )}
