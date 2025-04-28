@@ -21,6 +21,7 @@ export const LS_NAMESPACE = 'SAFE_v2__'
 
 export const SENTRY_DSN = process.env.NEXT_PUBLIC_SENTRY_DSN || ''
 export const BEAMER_ID = process.env.NEXT_PUBLIC_BEAMER_ID || ''
+export const DATADOG_CLIENT_TOKEN = process.env.NEXT_PUBLIC_DATADOG_CLIENT_TOKEN || ''
 
 // Wallets
 export const WC_PROJECT_ID = process.env.NEXT_PUBLIC_WC_PROJECT_ID || ''
@@ -56,6 +57,7 @@ export enum SafeAppsTag {
   SAFE_GOVERNANCE_APP = 'safe-governance-app',
   ONRAMP = 'onramp',
   RECOVERY_SYGNUM = 'recovery-sygnum',
+  SWAP_FALLBACK = 'swap-fallback',
 }
 
 // Safe Apps names

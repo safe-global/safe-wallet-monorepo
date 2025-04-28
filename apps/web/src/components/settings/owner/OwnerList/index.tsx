@@ -98,17 +98,6 @@ export const OwnerList = () => {
       }}
     >
       <Grid container spacing={3}>
-        <Grid item lg={4} xs={12}>
-          <Typography
-            variant="h4"
-            sx={{
-              fontWeight: 700,
-            }}
-          >
-            Members
-          </Typography>
-        </Grid>
-
         <Grid data-testid="signer-list" item xs>
           <Typography
             fontWeight="bold"

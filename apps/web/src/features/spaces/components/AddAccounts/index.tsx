@@ -183,7 +183,7 @@ const AddAccounts = () => {
         hideChainIndicator
         PaperProps={{ sx: { backgroundColor: 'border.background' } }}
       >
-        <DialogContent sx={{ display: 'flex', alignItems: 'center' }}>
+        <DialogContent sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap' }}>
           <Container fixed maxWidth="sm" disableGutters>
             <Typography component="div" variant="h1" mb={1}>
               Add Safe Accounts
@@ -195,7 +195,7 @@ const AddAccounts = () => {
             <Card>
               <FormProvider {...formMethods}>
                 <form onSubmit={onSubmit}>
-                  <Box mt={2} mx={2}>
+                  <Box m={2}>
                     <TextField
                       id="search-by-name"
                       placeholder="Search"

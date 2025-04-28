@@ -1879,6 +1879,27 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@datadog/browser-core@npm:6.6.3":
+  version: 6.6.3
+  resolution: "@datadog/browser-core@npm:6.6.3"
+  checksum: 10/2b0ccf614bd0c1e99dbd916ae7308fccddc4d1330f4e9dc28c66a11481db5222f7ffc8ca7eff985dc7359810d295adacb535ccf4c095ba02ec1e03472855d907
+  languageName: node
+  linkType: hard
+
+"@datadog/browser-logs@npm:^6.6.3":
+  version: 6.6.3
+  resolution: "@datadog/browser-logs@npm:6.6.3"
+  dependencies:
+    "@datadog/browser-core": "npm:6.6.3"
+  peerDependencies:
+    "@datadog/browser-rum": 6.6.3
+  peerDependenciesMeta:
+    "@datadog/browser-rum":
+      optional: true
+  checksum: 10/2a347917afd3739d672daac3cd5113cae4e8b94d87542775a6e81ff86661837e39bda3457b8d0b32784ef76f4ad2191b0912ea184620dbe0a0eadf76528691bf
+  languageName: node
+  linkType: hard
+
 "@discoveryjs/json-ext@npm:0.5.7":
   version: 0.5.7
   resolution: "@discoveryjs/json-ext@npm:0.5.7"
@@ -8368,10 +8389,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@safe-global/safe-gateway-typescript-sdk@npm:3.22.9":
-  version: 3.22.9
-  resolution: "@safe-global/safe-gateway-typescript-sdk@npm:3.22.9"
-  checksum: 10/139a046ed4216bf0ed9da1852bcb8bf24241609e24e802b66dd5ba3708588c205155bf9c8d24d90a6f7e86dc73c814193746efb56644e0b1c0102dca87f4fb58
+"@safe-global/safe-gateway-typescript-sdk@npm:3.23.1":
+  version: 3.23.1
+  resolution: "@safe-global/safe-gateway-typescript-sdk@npm:3.23.1"
+  checksum: 10/22912217095341bdac331d964961379c4f9c1d08e7e70a623388ccb940461ec2805d1c17d5aea6c2d48b915c49f0921faf23d150f4b948dfda8c9647bc785371
   languageName: node
   linkType: hard
 
@@ -8469,6 +8490,7 @@ __metadata:
     "@chromatic-com/storybook": "npm:^1.3.1"
     "@cowprotocol/app-data": "npm:^2.4.0"
     "@cowprotocol/widget-react": "npm:^0.13.0"
+    "@datadog/browser-logs": "npm:^6.6.3"
     "@ducanh2912/next-pwa": "npm:^10.2.9"
     "@emotion/cache": "npm:^11.13.5"
     "@emotion/react": "npm:^11.13.5"
@@ -8499,7 +8521,7 @@ __metadata:
     "@safe-global/safe-client-gateway-sdk": "npm:v1.60.1"
     "@safe-global/safe-core-sdk-types": "npm:^5.0.1"
     "@safe-global/safe-deployments": "npm:^1.37.31"
-    "@safe-global/safe-gateway-typescript-sdk": "npm:3.22.9"
+    "@safe-global/safe-gateway-typescript-sdk": "npm:3.23.1"
     "@safe-global/safe-modules-deployments": "npm:^2.2.7"
     "@safe-global/store": "workspace:^"
     "@safe-global/test": "workspace:^"
@@ -8538,7 +8560,7 @@ __metadata:
     "@web3-onboard/coinbase": "npm:^2.4.2"
     "@web3-onboard/core": "npm:2.24.0"
     "@web3-onboard/hw-common": "npm:^2.3.3"
-    "@web3-onboard/injected-wallets": "npm:^2.11.2"
+    "@web3-onboard/injected-wallets": "npm:^2.11.3"
     "@web3-onboard/walletconnect": "npm:^2.6.1"
     blo: "npm:^1.1.1"
     cheerio: "npm:^1.0.0"
@@ -13486,14 +13508,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@web3-onboard/injected-wallets@npm:^2.11.2":
-  version: 2.11.2
-  resolution: "@web3-onboard/injected-wallets@npm:2.11.2"
+"@web3-onboard/injected-wallets@npm:^2.11.3":
+  version: 2.11.3
+  resolution: "@web3-onboard/injected-wallets@npm:2.11.3"
   dependencies:
     "@web3-onboard/common": "npm:^2.4.1"
     joi: "npm:17.9.1"
     lodash.uniqby: "npm:^4.7.0"
-  checksum: 10/3dd84ac8c4c71b628ac5327603ab18e801460ff655d7724c7dbebb7d7e8595f0b1d822dde903633ed991fd7d293e930ee5178476edd0fbf7f1c80a790eaff878
+  checksum: 10/513c447852b6467b45ea7b470d66aba77d2957a093c8b2b8a870274fca0bd2d0e01da3864188740e02bf1bd8bb0a63f3a4821fd2f73450ec2907decc34f6ca53
   languageName: node
   linkType: hard
 
