@@ -64,7 +64,7 @@
     "@safe-global/utils": "workspace:^",
     "@shopify/flash-list": "1.7.3",
     "@storybook/addon-react-native-web": "^0.0.26",
-    "@storybook/addon-webpack5-compiler-babel": "^3.0.3",
+    "@storybook/addon-webpack5-compiler-babel": "^3.0.6",
     "@tamagui/animations-moti": "^1.117.1",
     "@tamagui/babel-plugin": "^1.121.12",
     "@tamagui/config": "^1.117.1",
