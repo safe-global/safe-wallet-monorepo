@@ -8,12 +8,12 @@ import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import NetworkMultiSelectorInput from '@/components/common/NetworkSelector/NetworkMultiSelectorInput'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
-import type { SpaceAddressBookEntry } from '../../types'
 import useChains from '@/hooks/useChains'
 import type { ContactField } from './AddContact'
+import type { SpaceAddressBookItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 
 type EditContactDialogProps = {
-  entry: SpaceAddressBookEntry
+  entry: SpaceAddressBookItemDto
   onClose: () => void
 }
 
@@ -22,9 +22,9 @@ const EditContactDialog = ({ entry, onClose }: EditContactDialogProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { configs } = useChains()
 
-  const defaultNetworks = entry.networks
-    .map((network) => {
-      return configs.find((chain) => chain.chainId === network.chainId) as ChainInfo
+  const defaultNetworks = entry.chainIds
+    .map((chainId) => {
+      return configs.find((chain) => chain.chainId === chainId) as ChainInfo
     })
     .filter(Boolean)
 
@@ -51,14 +51,14 @@ const EditContactDialog = ({ entry, onClose }: EditContactDialogProps) => {
   const hasChanges = useMemo(() => {
     const nameChanged = watchedName !== entry.name
 
-    const originalChainIds = entry.networks.map((network) => network.chainId).sort()
+    const originalChainIds = entry.chainIds.sort()
     const currentChainIds = watchedNetworks.map((network) => network.chainId).sort()
     const networksChanged =
       originalChainIds.length !== currentChainIds.length ||
       originalChainIds.some((id, index) => id !== currentChainIds[index])
 
     return nameChanged || networksChanged
-  }, [watchedName, watchedNetworks, entry.name, entry.networks])
+  }, [watchedName, watchedNetworks, entry.name, entry.chainIds])
 
   const handleClose = () => {
     reset(defaultValues)

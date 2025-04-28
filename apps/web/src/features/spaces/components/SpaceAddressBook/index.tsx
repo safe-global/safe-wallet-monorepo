@@ -6,54 +6,28 @@ import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import AddContact from './AddContact'
 import EmptyAddressBook from '@/features/spaces/components/SpaceAddressBook/EmptyAddressBook'
 import SpaceAddressBookTable from './SpaceAddressBookTable'
-import type { SpaceAddressBookEntry } from '../../types'
 import ImportAddressBook from '@/features/spaces/components/SpaceAddressBook/Import'
 import SearchInput from '@/features/spaces/components/SearchInput'
 import useAddressBookSearch from '@/features/spaces/hooks/useAddressBookSearch'
 import { useState } from 'react'
+import { useAddressBooksGetAddressBookItemsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
+import { useAppSelector } from '@/store'
+import { isAuthenticated } from '@/store/authSlice'
 
 const SpaceAddressBook = () => {
+  const [searchQuery, setSearchQuery] = useState('')
   const isAdmin = useIsAdmin()
   const isInvited = useIsInvited()
-  const [searchQuery, setSearchQuery] = useState('')
+  const spaceId = useCurrentSpaceId()
+  const isUserSignedIn = useAppSelector(isAuthenticated)
+  const { currentData: addressBook } = useAddressBooksGetAddressBookItemsV1Query(
+    { spaceId: Number(spaceId) },
+    { skip: !isUserSignedIn },
+  )
 
-  // TODO: Get data from CGW
-  const entries: SpaceAddressBookEntry[] = [
-    {
-      address: '0xF94c38db9992cfE106C6502bfB6efa58519f7570',
-      name: 'John Doe',
-      networks: [
-        {
-          chainId: '11155111',
-          name: 'John Doe',
-          id: '123',
-        },
-        {
-          chainId: '137',
-          name: 'John Doe',
-          id: '123',
-        },
-        {
-          chainId: '17000',
-          name: 'John Doe',
-          id: '123',
-        },
-      ],
-    },
-    {
-      address: '0x2c303045f1e716FFe38aEe71A3E834dB23E955Ff',
-      name: 'Jane Smith',
-      networks: [
-        {
-          chainId: '1',
-          name: 'Jane Smith',
-          id: '123',
-        },
-      ],
-    },
-  ]
-
-  const filteredAddressBook = useAddressBookSearch(entries, searchQuery)
+  const addressBookItems = addressBook?.data || []
+  const filteredAddressBook = useAddressBookSearch(addressBookItems, searchQuery)
 
   return (
     <>
@@ -89,7 +63,7 @@ const SpaceAddressBook = () => {
         </Typography>
       )}
 
-      {entries.length === 0 ? (
+      {addressBookItems.length === 0 ? (
         <EmptyAddressBook />
       ) : (
         filteredAddressBook.length > 0 && <SpaceAddressBookTable entries={filteredAddressBook} />

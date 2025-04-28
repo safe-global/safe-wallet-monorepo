@@ -7,7 +7,7 @@ import { Box, Stack, Tooltip } from '@mui/material'
 import NetworkLogosList from '@/features/multichain/components/NetworkLogosList'
 import AddressBookContextMenu from './AddressBookContextMenu'
 import ChainIndicator from '@/components/common/ChainIndicator'
-import type { SpaceAddressBookEntry } from '../../types'
+import type { SpaceAddressBookItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 
 const headCells = [
   { id: 'contact', label: 'Contact' },
@@ -16,22 +16,22 @@ const headCells = [
 ]
 
 type SpaceAddressBookTableProps = {
-  entries: SpaceAddressBookEntry[]
+  entries: SpaceAddressBookItemDto[]
 }
 
 function SpaceAddressBookTable({ entries }: SpaceAddressBookTableProps) {
-  const rows = entries.map(({ address, name, networks }) => ({
+  const rows = entries.map((entry) => ({
     cells: {
       contact: {
-        rawValue: address,
+        rawValue: entry.address,
         content: (
           <Stack direction="row" spacing={1} alignItems="center">
-            <Identicon address={address} size={32} />
+            <Identicon address={entry.address} size={32} />
             <Stack direction="column" spacing={0.5}>
               <EthHashInfo
-                name={name}
+                name={entry.name}
                 showAvatar={false}
-                address={address}
+                address={entry.address}
                 shortAddress={false}
                 hasExplorer
                 showCopyButton
@@ -41,15 +41,15 @@ function SpaceAddressBookTable({ entries }: SpaceAddressBookTableProps) {
         ),
       },
       networks: {
-        rawValue: networks.length,
+        rawValue: entry.chainIds.length,
         content: (
           <>
             <Tooltip
               title={
                 <Box>
-                  {networks.map((safeItem) => (
-                    <Box key={safeItem.chainId} sx={{ p: '4px 0px' }}>
-                      <ChainIndicator chainId={safeItem.chainId} />
+                  {entry.chainIds.map((chainId) => (
+                    <Box key={chainId} sx={{ p: '4px 0px' }}>
+                      <ChainIndicator chainId={chainId} />
                     </Box>
                   ))}
                 </Box>
@@ -57,7 +57,7 @@ function SpaceAddressBookTable({ entries }: SpaceAddressBookTableProps) {
               arrow
             >
               <Box sx={{ display: 'inline-block' }}>
-                <NetworkLogosList networks={networks.map(({ chainId }) => ({ chainId }))} />
+                <NetworkLogosList networks={entry.chainIds.map((chainId) => ({ chainId }))} />
               </Box>
             </Tooltip>
           </>
@@ -71,7 +71,7 @@ function SpaceAddressBookTable({ entries }: SpaceAddressBookTableProps) {
             <Button data-testid="send-btn" variant="contained" color="primary" size="small" onClick={() => {}}>
               Send
             </Button>
-            <AddressBookContextMenu entry={{ address, name, networks }} />
+            <AddressBookContextMenu entry={entry} />
           </div>
         ),
       },
