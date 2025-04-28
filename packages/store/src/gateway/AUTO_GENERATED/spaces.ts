@@ -62,6 +62,16 @@ const injectedRtkApi = api
         }),
         invalidatesTags: ['spaces'],
       }),
+      addressBooksDeleteByAddressV1: build.mutation<
+        AddressBooksDeleteByAddressV1ApiResponse,
+        AddressBooksDeleteByAddressV1ApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/v1/spaces/${queryArg.spaceId}/address-book/${queryArg.address}`,
+          method: 'DELETE',
+        }),
+        invalidatesTags: ['spaces'],
+      }),
       spacesCreateV1: build.mutation<SpacesCreateV1ApiResponse, SpacesCreateV1ApiArg>({
         query: (queryArg) => ({ url: `/v1/spaces`, method: 'POST', body: queryArg.createSpaceDto }),
         invalidatesTags: ['spaces'],
@@ -177,6 +187,11 @@ export type AddressBooksUpsertAddressBookItemsV1ApiResponse = /** status 200 Add
 export type AddressBooksUpsertAddressBookItemsV1ApiArg = {
   spaceId: number
   upsertAddressBookItemsDto: UpsertAddressBookItemsDto
+}
+export type AddressBooksDeleteByAddressV1ApiResponse = unknown
+export type AddressBooksDeleteByAddressV1ApiArg = {
+  spaceId: number
+  address: string
 }
 export type SpacesCreateV1ApiResponse = /** status 200 Space created */ CreateSpaceResponse
 export type SpacesCreateV1ApiArg = {
@@ -374,6 +389,7 @@ export const {
   useAddressBooksGetAddressBookItemsV1Query,
   useLazyAddressBooksGetAddressBookItemsV1Query,
   useAddressBooksUpsertAddressBookItemsV1Mutation,
+  useAddressBooksDeleteByAddressV1Mutation,
   useSpacesCreateV1Mutation,
   useSpacesGetV1Query,
   useLazySpacesGetV1Query,

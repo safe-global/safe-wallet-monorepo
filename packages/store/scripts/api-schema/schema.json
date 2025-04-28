@@ -2373,6 +2373,43 @@
         ]
       }
     },
+    "/v1/spaces/{spaceId}/address-book/{address}": {
+      "delete": {
+        "operationId": "addressBooksDeleteByAddressV1",
+        "parameters": [
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "address",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Address book item deleted"
+          },
+          "403": {
+            "description": "Signer address not present or not authorized"
+          },
+          "404": {
+            "description": "User, member or Space not found"
+          }
+        },
+        "tags": [
+          "spaces"
+        ]
+      }
+    },
     "/v1/spaces": {
       "post": {
         "operationId": "spacesCreateV1",
