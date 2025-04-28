@@ -71,6 +71,7 @@ const nestedSafeListPopover = '[data-testid="nested-safe-list"]'
 const breadcrumpContainer = '[data-testid="safe-breadcrumb-container"]'
 const parentSafeItem = 'div[aria-label="Parent Safe"]'
 const nestedSafeItem = 'div[aria-label="Nested Safe"]'
+const safeIconItem = '[data-testid="safe-icon"]'
 
 export function clickOnOpenNestedSafeListBtn() {
   cy.get(openNestedSafeListBtn).click()
@@ -426,6 +427,10 @@ export function verifyMissingSignature(safe) {
 
 export function verifyQueuedTx(safe) {
   return getSafeItemOptions(safe).find(queuedTxInfo).should('exist')
+}
+
+export function verifySafeIconData(safe) {
+  return getSafeByName(safe).find(safeIconItem).should('be.visible')
 }
 
 export function clickOnSafeItemOptionsBtn(name) {

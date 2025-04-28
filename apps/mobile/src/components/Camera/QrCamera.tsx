@@ -16,7 +16,6 @@ type QrCameraProps = {
   onScan: (code: Code[]) => void
   isCameraActive: boolean
   permission: CameraPermissionStatus
-  requestPermission: () => void
   hasPermission: boolean
   onActivateCamera: () => void
 }
@@ -54,14 +53,12 @@ function CameraFooter(props: { footer: React.ReactNode }) {
 function CameraLens({
   denied,
   onPressSettings,
-  requestPermission,
   hasPermission,
   onActivateCamera,
   isCameraActive,
 }: {
   denied: boolean
   onPressSettings: () => Promise<void>
-  requestPermission: () => void
   hasPermission: boolean
   onActivateCamera: () => void
   isCameraActive: boolean
@@ -74,16 +71,20 @@ function CameraLens({
     color = getTokenValue('$color.textPrimaryLight')
   }
 
-  const handleGrantOrActivatePress = () => {
+  const handleGrantOrActivatePress = useCallback(async () => {
     if (!hasPermission) {
-      requestPermission()
+      const permission = await Camera.requestCameraPermission()
+
+      if (permission === 'denied') {
+        await onPressSettings()
+      }
     } else if (hasPermission && !isCameraActive) {
       onActivateCamera()
     }
-  }
+  }, [hasPermission, isCameraActive, onActivateCamera, onPressSettings])
 
-  const buttonText = denied ? 'Open Settings' : 'Enable camera'
-  const buttonAction = denied ? onPressSettings : handleGrantOrActivatePress
+  const buttonText = 'Enable camera'
+  const buttonAction = handleGrantOrActivatePress
 
   return (
     <Pressable
@@ -116,7 +117,6 @@ export const QrCamera = ({
   onScan,
   isCameraActive,
   permission,
-  requestPermission,
   hasPermission,
   onActivateCamera,
 }: QrCameraProps) => {
@@ -172,7 +172,6 @@ export const QrCamera = ({
               <CameraLens
                 denied={denied}
                 onPressSettings={openSettings}
-                requestPermission={requestPermission}
                 hasPermission={hasPermission}
                 onActivateCamera={onActivateCamera}
                 isCameraActive={isCameraActive}

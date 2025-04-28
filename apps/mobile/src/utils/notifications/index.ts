@@ -1,4 +1,4 @@
-import { AndroidChannel, AndroidImportance } from '@notifee/react-native'
+import { AndroidChannel, AndroidImportance, AndroidVisibility } from '@notifee/react-native'
 import { NotificationType } from '@safe-global/store/gateway/AUTO_GENERATED/notifications'
 import { HDNodeWallet, Wallet } from 'ethers'
 
@@ -20,6 +20,7 @@ export const notificationChannels = [
     lights: true,
     vibration: true,
     importance: AndroidImportance.HIGH,
+    visibility: AndroidVisibility.PUBLIC,
     title: 'Transaction',
     subtitle: 'Transaction Complete',
   } as SafeAndroidChannel,
@@ -29,6 +30,7 @@ export const notificationChannels = [
     lights: true,
     vibration: true,
     importance: AndroidImportance.HIGH,
+    visibility: AndroidVisibility.PUBLIC,
     title: 'Announcement',
     subtitle: 'Safe Announcement',
   } as SafeAndroidChannel,

@@ -96,7 +96,7 @@ const ResultDescription = ({
 
 const BlockaidError = () => {
   return (
-    <Alert severity="warning" className={css.customAlert}>
+    <Alert data-testid="blockaid-error" severity="warning" className={css.customAlert}>
       <AlertTitle>
         <Typography
           variant="subtitle1"
@@ -129,7 +129,7 @@ export const Blockaid = () => {
   )
 }
 
-const BlockaidWarning = () => {
+export const BlockaidWarning = () => {
   const { blockaidResponse, setIsRiskConfirmed, needsRiskConfirmation, isRiskConfirmed } = useContext(TxSecurityContext)
   const { severity, isLoading, error } = blockaidResponse ?? {}
 

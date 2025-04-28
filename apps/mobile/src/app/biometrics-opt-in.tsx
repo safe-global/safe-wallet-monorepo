@@ -9,7 +9,7 @@ import { View } from 'tamagui'
 import { useModalStyle } from '@/src/navigation/hooks/useModalStyle'
 function BiometricsOptIn() {
   const modalStyle = useModalStyle()
-  const { toggleBiometrics, getBiometricsButtonLabel, isBiometricsEnabled, isLoading } = useBiometrics()
+  const { toggleBiometrics, getBiometricsUIInfo, isBiometricsEnabled, isLoading } = useBiometrics()
 
   const local = useLocalSearchParams<{
     safeAddress: string
@@ -93,7 +93,7 @@ function BiometricsOptIn() {
         infoMessage={infoMessage}
         ctaButton={{
           onPress: handleAccept,
-          label: getBiometricsButtonLabel(),
+          label: getBiometricsUIInfo().label,
         }}
         secondaryButton={{
           onPress: handleReject,
