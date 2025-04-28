@@ -14,7 +14,7 @@ import { useIsAdmin } from '@/features/spaces/hooks/useSpaceMembers'
 
 import EditContactDialog from './EditContactDialog'
 import DeleteContactDialog from './DeleteContactDialog'
-import type { SpaceAddressBookEntry } from '../../types'
+import type { SpaceAddressBookItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 
 enum ModalType {
   EDIT = 'edit',
@@ -23,7 +23,7 @@ enum ModalType {
 
 const defaultOpen = { [ModalType.EDIT]: false, [ModalType.REMOVE]: false }
 
-const AddressBookContextMenu = ({ entry }: { entry: SpaceAddressBookEntry }) => {
+const AddressBookContextMenu = ({ entry }: { entry: SpaceAddressBookItemDto }) => {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | undefined>()
   const [open, setOpen] = useState<typeof defaultOpen>(defaultOpen)
   const isAdmin = useIsAdmin()
@@ -78,7 +78,7 @@ const AddressBookContextMenu = ({ entry }: { entry: SpaceAddressBookEntry }) => 
         <DeleteContactDialog
           name={entry.name}
           address={entry.address}
-          networks={entry.networks}
+          networks={entry.chainIds}
           onClose={handleCloseModal}
         />
       )}

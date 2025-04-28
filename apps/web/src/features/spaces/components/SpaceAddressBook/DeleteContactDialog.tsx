@@ -11,11 +11,7 @@ import { ChainIndicatorList } from '@/features/multichain/components/SignerSetup
 type DeleteContactDialogProps = {
   name: string
   address: string
-  networks: {
-    chainId: string
-    name: string
-    id: string
-  }[]
+  networks: string[]
   onClose: () => void
 }
 
@@ -41,7 +37,7 @@ const DeleteContactDialog = ({ name, address, networks, onClose }: DeleteContact
           Are you sure you want to remove <strong>{name}</strong> from the address book? This change will apply to the
           following networks:
         </Typography>
-        <ChainIndicatorList chainIds={networks.map(({ chainId }) => chainId)} />
+        <ChainIndicatorList chainIds={networks} />
       </DialogContent>
 
       <DialogActions>
