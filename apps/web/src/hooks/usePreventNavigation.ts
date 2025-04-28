@@ -13,7 +13,9 @@ export function usePreventNavigation(onNavigate?: () => boolean): void {
       const link = target.closest('a')
       const href = link?.getAttribute('href')
       if (!link || !href) return
-      if (onNavigate()) {
+
+      const isAllowedToNavigate = onNavigate()
+      if (isAllowedToNavigate) {
         push(href)
       } else {
         e.preventDefault()
