@@ -10,7 +10,7 @@ import { getRecoveryProposalTransactions } from '@/features/recovery/services/tr
 import EthHashInfo from '@/components/common/EthHashInfo'
 import SignOrExecuteForm from '@/components/tx/SignOrExecuteForm'
 import FieldsGrid from '@/components/tx/FieldsGrid'
-import { maybePlural } from '@/utils/formatters'
+import { maybePlural } from '@safe-global/utils/utils/formatters'
 import type { ChangeOwnerStructureForm } from '.'
 
 export function ReviewStructure({ params }: { params: ChangeOwnerStructureForm }): ReactElement {
