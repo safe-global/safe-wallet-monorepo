@@ -23,14 +23,16 @@ import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import Track from '@/components/common/Track'
 import { MODALS_EVENTS } from '@/services/analytics'
+import useAsync from '@safe-global/utils/hooks/useAsync'
+import { getSafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
 
 export type TxSimulationProps = {
   transactions?: SimulationTxParams['transactions']
   gasLimit?: number
   disabled: boolean
   executionOwner?: string
-  isNested?: boolean
   title?: string
+  nestedSafe?: string
 }
 
 // TODO: Investigate resetting on gasLimit change as we are not simulating with the gasLimit of the tx
@@ -41,10 +43,11 @@ const TxSimulationBlock = ({
   disabled,
   gasLimit,
   executionOwner,
-  isNested = false,
+  nestedSafe,
   title = 'Run a simulation',
 }: TxSimulationProps): ReactElement => {
   const { safe } = useSafeInfo()
+  const chain = useCurrentChain()
   const signer = useSigner()
   const isSafeOwner = useIsSafeOwner()
   const isDarkMode = useDarkMode()
@@ -55,27 +58,32 @@ const TxSimulationBlock = ({
     nestedTx,
   } = useContext(TxInfoContext)
 
+  const [nestedSafeInfo] = useAsync(
+    () => (!!chain && !!nestedSafe ? getSafeInfo(chain.chainId, nestedSafe) : undefined),
+    [chain, nestedSafe],
+  )
+
   const handleSimulation = async () => {
     if (!signer || !transactions) {
       return
     }
 
     const simulationTxParams = {
-      safe,
+      safe: nestedSafeInfo ?? safe,
       // fall back to the first owner of the safe in case the transaction is created by a proposer
-      executionOwner: (executionOwner ?? isSafeOwner) ? signer.address : safe.owners[0].value,
+      executionOwner: executionOwner ?? (isSafeOwner ? signer.address : safe.owners[0].value),
       transactions,
       gasLimit,
     } as SimulationTxParams
 
-    if (isNested) {
+    if (!!nestedSafe) {
       nestedTx.simulation.simulateTransaction(simulationTxParams)
     } else {
       simulateTransaction(simulationTxParams)
     }
   }
 
-  const { isFinished, isError, isSuccess, isCallTraceError, isLoading } = isNested ? nestedTx.status : status
+  const { isFinished, isError, isSuccess, isCallTraceError, isLoading } = !!nestedSafe ? nestedTx.status : status
 
   // Reset simulation if safeTx changes
   useEffect(() => {
