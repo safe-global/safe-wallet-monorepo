@@ -70,7 +70,7 @@
     "@web3-onboard/coinbase": "^2.4.2",
     "@web3-onboard/core": "2.24.0",
     "@web3-onboard/hw-common": "^2.3.3",
-    "@web3-onboard/injected-wallets": "^2.11.2",
+    "@web3-onboard/injected-wallets": "^2.11.3",
     "@web3-onboard/walletconnect": "^2.6.1",
     "blo": "^1.1.1",
     "classnames": "^2.5.1",
