@@ -40,8 +40,6 @@ export const formatActionDetails = ({ txData, action }: formatActionDetailsRetur
 
   let columns: ListTableItem[] = []
 
-  const contractCall = getContractCall(action, txData.addressInfoIndex as AddressInfoIndex)
-
   if (action.dataDecoded?.method) {
     columns.push({
       label: 'Call',
@@ -68,18 +66,20 @@ export const formatActionDetails = ({ txData, action }: formatActionDetailsRetur
     })
   }
 
+  const contractCall = getContractCall(action, txData.addressInfoIndex as AddressInfoIndex)
+
   if (contractCall) {
     columns.push({
       label: 'Contract',
       render: () => (
         <View flexDirection="row" alignItems="center" gap="$2">
-          {txData.to.logoUri ? (
-            <Logo logoUri={txData.to.logoUri} size="$6" />
+          {contractCall.logoUri ? (
+            <Logo logoUri={contractCall.logoUri} size="$6" />
           ) : (
-            <Identicon address={txData.to.value as Address} size={24} />
+            <Identicon address={contractCall.value as Address} size={24} />
           )}
-          <Text fontSize="$4">{ellipsis(txData.to.name || txData.to.value, 16)}</Text>
-          <TxOptions value={txData.to.value} />
+          <Text fontSize="$4">{ellipsis(contractCall.name || contractCall.value, 16)}</Text>
+          <TxOptions value={contractCall.value} />
         </View>
       ),
     })
