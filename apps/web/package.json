@@ -142,7 +142,7 @@
     "cypress-visual-regression": "^5.2.2",
     "eslint": "^9.20.1",
     "eslint-config-next": "^15.0.4",
-    "eslint-config-prettier": "^9.1.0",
+    "eslint-config-prettier": "^10.1.2",
     "eslint-plugin-no-only-tests": "^3.3.0",
     "eslint-plugin-prettier": "^5.2.1",
     "eslint-plugin-storybook": "^0.11.0",
