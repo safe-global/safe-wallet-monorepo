@@ -51,7 +51,7 @@
     "@react-native-clipboard/clipboard": "^1.15.0",
     "@react-native-community/blur": "^4.4.1",
     "@react-native-firebase/analytics": "^22.0.0",
-    "@react-native-firebase/app": "^22.0.0",
+    "@react-native-firebase/app": "patch:@react-native-firebase/app@npm%3A22.0.0#~/.yarn/patches/@react-native-firebase-app-npm-22.0.0-5ff76269da.patch",
     "@react-native-firebase/crashlytics": "^22.0.0",
     "@react-native-firebase/messaging": "^22.0.0",
     "@react-native-menu/menu": "^1.2.3",

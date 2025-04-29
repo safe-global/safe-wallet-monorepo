@@ -7386,7 +7386,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-native-firebase/app@npm:^22.0.0":
+"@react-native-firebase/app@npm:22.0.0":
   version: 22.0.0
   resolution: "@react-native-firebase/app@npm:22.0.0"
   dependencies:
@@ -7399,6 +7399,22 @@ __metadata:
     expo:
       optional: true
   checksum: 10/7fb0f34f7bc31dc51623b25ca463e31370a14181f18be69b6101edd871910240bcfe7b7657bf682830a7297a53c92da4e8ea5a3922edb528e387c97d2d9cee89
+  languageName: node
+  linkType: hard
+
+"@react-native-firebase/app@patch:@react-native-firebase/app@npm%3A22.0.0#~/.yarn/patches/@react-native-firebase-app-npm-22.0.0-5ff76269da.patch":
+  version: 22.0.0
+  resolution: "@react-native-firebase/app@patch:@react-native-firebase/app@npm%3A22.0.0#~/.yarn/patches/@react-native-firebase-app-npm-22.0.0-5ff76269da.patch::version=22.0.0&hash=a5619e"
+  dependencies:
+    firebase: "npm:11.3.1"
+  peerDependencies:
+    expo: ">=47.0.0"
+    react: "*"
+    react-native: "*"
+  peerDependenciesMeta:
+    expo:
+      optional: true
+  checksum: 10/92d8e9f2452d531284624e92c01f6a9b8740a401a09ecd21085eb834895734799c3aadc3202ab610c45ff1f9f61d2389e633d1b60c47d1057e84b1f43f3d27df
   languageName: node
   linkType: hard
 
@@ -8094,7 +8110,7 @@ __metadata:
     "@react-native-community/datetimepicker": "npm:8.3.0"
     "@react-native-community/slider": "npm:4.5.6"
     "@react-native-firebase/analytics": "npm:^22.0.0"
-    "@react-native-firebase/app": "npm:^22.0.0"
+    "@react-native-firebase/app": "patch:@react-native-firebase/app@npm%3A22.0.0#~/.yarn/patches/@react-native-firebase-app-npm-22.0.0-5ff76269da.patch"
     "@react-native-firebase/crashlytics": "npm:^22.0.0"
     "@react-native-firebase/messaging": "npm:^22.0.0"
     "@react-native-menu/menu": "npm:^1.2.3"
