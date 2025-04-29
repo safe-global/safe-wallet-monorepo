@@ -12,6 +12,7 @@ import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
 import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
 import { useAddressBooksGetAddressBookItemsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 
 export type ContactItem = {
   chainId: string
@@ -48,7 +49,9 @@ const ContactsList = ({ contactItems }: { contactItems: ContactItem[] }) => {
     >
       {contactItems.map((contactItem) => {
         const contactItemId = getContactId(contactItem)
-        const alreadyAdded = spaceContacts.some((spaceContact) => spaceContact.address === contactItem.address)
+        const alreadyAdded = spaceContacts.some((spaceContact) =>
+          sameAddress(spaceContact.address, contactItem.address),
+        )
 
         return (
           <Controller
