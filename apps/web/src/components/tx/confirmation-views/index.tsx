@@ -1,13 +1,11 @@
 import type { TransactionPreview } from '@safe-global/safe-gateway-typescript-sdk'
 import { type TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
-import DecodedTx from '../DecodedTx'
 import type { SafeTransaction } from '@safe-global/safe-core-sdk-types'
 import {
   isAnyStakingTxInfo,
   isCustomTxInfo,
   isExecTxData,
   isOnChainConfirmationTxData,
-  isOrderTxInfo,
   isSafeMigrationTxData,
   isSafeUpdateTxData,
   isSwapOrderTxInfo,
@@ -32,17 +30,16 @@ import UpdateSafe from './UpdateSafe'
 import { MigrateToL2Information } from './MigrateToL2Information'
 import { NestedSafeCreation } from './NestedSafeCreation'
 import { isNestedSafeCreation } from '@/utils/nested-safes'
+import Summary from '@/components/transactions/TxDetails/Summary'
 import VaultDeposit from '@/features/earn/components/VaultDeposit'
 
 type ConfirmationViewProps = {
   txDetails?: TransactionDetails
   txPreview?: TransactionPreview
   safeTx?: SafeTransaction
-  txId?: string
   isBatch?: boolean
   isApproval?: boolean
   isCreation?: boolean
-  showMethodCall?: boolean // @TODO: remove this prop when we migrate all tx types
   children?: ReactNode
 }
 
@@ -85,7 +82,6 @@ const getConfirmationViewComponent = ({
 }
 
 const ConfirmationView = ({ safeTx, txPreview, txDetails, ...props }: ConfirmationViewProps) => {
-  const { txId } = props
   const { txFlow } = useContext(TxModalContext)
   const details = txDetails ?? txPreview
 
@@ -99,31 +95,16 @@ const ConfirmationView = ({ safeTx, txPreview, txDetails, ...props }: Confirmati
       : undefined
   }, [details, txFlow])
 
-  const showTxDetails =
-    txId &&
-    !props.isCreation &&
-    txDetails &&
-    !isCustomTxInfo(txDetails.txInfo) &&
-    !isAnyStakingTxInfo(txDetails.txInfo) &&
-    !isOrderTxInfo(txDetails.txInfo)
-
   return (
     <>
       {ConfirmationViewComponent ||
-        (showTxDetails && details && (
+        (details && (
           <TxData txData={details?.txData} txInfo={details?.txInfo} txDetails={txDetails} imitation={false} trusted />
         ))}
 
       {props.children}
 
-      <DecodedTx
-        tx={safeTx}
-        txDetails={txDetails}
-        txData={details?.txData}
-        txInfo={details?.txInfo}
-        showMultisend={!props.isBatch}
-        showMethodCall={props.showMethodCall && !ConfirmationViewComponent && !showTxDetails && !props.isApproval}
-      />
+      <Summary safeTxData={safeTx?.data} txDetails={txDetails} txData={details?.txData} txInfo={details?.txInfo} />
     </>
   )
 }

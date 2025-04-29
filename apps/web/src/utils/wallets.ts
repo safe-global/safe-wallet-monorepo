@@ -22,6 +22,10 @@ export const isWalletRejection = (err: EthersError | Error): boolean => {
   return isEthersRejection(err as EthersError) || isWCRejection(err)
 }
 
+export const isEthSignWallet = (wallet: ConnectedWallet): boolean => {
+  return [WALLET_KEYS.TREZOR, WALLET_KEYS.KEYSTONE].includes(wallet.label.toUpperCase() as WALLET_KEYS)
+}
+
 export const isLedgerLive = (wallet: ConnectedWallet): boolean => {
   return getWalletConnectLabel(wallet) === WC_LEDGER
 }
@@ -38,6 +42,10 @@ export const isHardwareWallet = (wallet: ConnectedWallet): boolean => {
   return [WALLET_KEYS.LEDGER, WALLET_KEYS.TREZOR, WALLET_KEYS.KEYSTONE].includes(
     wallet.label.toUpperCase() as WALLET_KEYS,
   )
+}
+
+export const isPKWallet = (wallet: ConnectedWallet): boolean => {
+  return wallet.label.toUpperCase() === WALLET_KEYS.PK
 }
 
 export const isSmartContract = async (address: string, provider?: JsonRpcProvider): Promise<boolean> => {

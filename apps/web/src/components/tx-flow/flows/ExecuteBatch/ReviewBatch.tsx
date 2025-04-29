@@ -10,7 +10,7 @@ import type { SyntheticEvent } from 'react'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import { ExecutionMethod, ExecutionMethodSelector } from '@/components/tx/ExecutionMethodSelector'
 import DecodedTxs from '@/components/tx-flow/flows/ExecuteBatch/DecodedTxs'
-import TxChecks from '@/components/tx/SignOrExecuteForm/TxChecks'
+import TxChecks from '@/components/tx-flow/features/TxChecks/TxChecks'
 import { useRelaysBySafe } from '@/hooks/useRemainingRelays'
 import useOnboard from '@/hooks/wallets/useOnboard'
 import { logError, Errors } from '@/services/exceptions'
@@ -171,7 +171,7 @@ export const ReviewBatch = ({ params }: { params: ExecuteBatchFlowProps }) => {
 
         {multiSendContract && <SendToBlock address={multisendContractAddress} title="Interact with" />}
 
-        {multiSendTxData && <HexEncodedData title="Data:" hexData={multiSendTxData} />}
+        {multiSendTxData && <HexEncodedData title="Data" hexData={multiSendTxData} />}
 
         <div>
           <DecodedTxs txs={txsWithDetails} />

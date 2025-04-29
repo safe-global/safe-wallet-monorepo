@@ -139,7 +139,7 @@ export class BlockaidModule implements SecurityModule<BlockaidModuleRequest, Blo
       balanceChange = simulation.assets_diffs[safeAddress]
       contractManagement = simulation.contract_management?.[safeAddress] || []
     } else if (simulation?.status === 'Error') {
-      error = new Error('Simulation failed')
+      error = new Error(simulation.error)
     }
 
     // Sometimes the validation is missing

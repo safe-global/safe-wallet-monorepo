@@ -2,7 +2,7 @@ import { Methods } from '@safe-global/safe-apps-sdk'
 import * as web3 from '@/hooks/wallets/web3'
 import * as useSafeInfo from '@/hooks/useSafeInfo'
 import { render, screen } from '@/tests/test-utils'
-import * as execThroughRoleHooks from '@/components/tx/SignOrExecuteForm/ExecuteThroughRoleForm/hooks'
+import * as execThroughRoleHooks from '@/components/tx-flow/actions/ExecuteThroughRole/ExecuteThroughRoleForm/hooks'
 import type { TransactionPreview } from '@safe-global/safe-gateway-typescript-sdk'
 import { SafeAppAccessPolicyTypes } from '@safe-global/safe-gateway-typescript-sdk'
 import ReviewSignMessageOnChain from '@/components/tx-flow/flows/SignMessageOnChain/ReviewSignMessageOnChain'
@@ -21,7 +21,7 @@ describe('ReviewSignMessageOnChain', () => {
     jest.spyOn(useTxPreviewHooks, 'default').mockReturnValue([
       {
         txInfo: {},
-        txData: {},
+        txData: { to: { value: '0xE20CcFf2c38Ef3b64109361D7b7691ff2c7D5f67' } },
       } as TransactionPreview,
       undefined,
       false,

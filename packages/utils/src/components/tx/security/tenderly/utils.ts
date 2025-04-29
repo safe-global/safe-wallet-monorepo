@@ -119,7 +119,7 @@ const getNonceOverwrite = (params: SimulationTxParams): number | undefined => {
   to do a proper simulation that takes transaction guards into account.
   The threshold is stored in storage slot 4 and uses full 32 bytes slot.
   Safe storage layout can be found here:
-  https://github.com/gnosis/safe-contracts/blob/main/contracts/libraries/GnosisSafeStorage.sol */
+  https://github.com/gnosis/safe-contracts/blob/main/contracts/libraries/SafeStorage.sol */
 export const THRESHOLD_STORAGE_POSITION = toBeHex('0x4', 32)
 export const THRESHOLD_OVERWRITE = toBeHex('0x1', 32)
 export const NONCE_STORAGE_POSITION = toBeHex('0x5', 32)

@@ -34,10 +34,12 @@ describe('Twaps history tests', { defaultCommandTimeout: 30000 }, () => {
     iframeSelector = `iframe[src*="${constants.swapWidget}"]`
     swaps.acceptLegalDisclaimer()
     main.getIframeBody(iframeSelector).within(() => {
+      cy.wait(20000) // Need more time to load UI
       swaps.switchToTwap()
       swaps.selectInputCurrency(swaps.swapTokens.cow)
       swaps.setInputValue(500)
       swaps.selectOutputCurrency(swaps.swapTokens.dai)
+      swaps.outputInputIsNotEmpty()
       swaps.confirmPriceImpact()
       swaps.verifyReviewOrderBtnIsVisible()
       swaps.getTwapInitialData().then((formData) => {

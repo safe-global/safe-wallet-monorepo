@@ -19,9 +19,19 @@ interface SettingsProps {
   displayDevMenu: boolean
   onImplementationTap: () => void
   contact: Contact | null
+  isLatestVersion: boolean
+  latestSafeVersion: string
 }
 
-export const Settings = ({ address, data, onImplementationTap, displayDevMenu, contact }: SettingsProps) => {
+export const Settings = ({
+  address,
+  data,
+  onImplementationTap,
+  displayDevMenu,
+  contact,
+  isLatestVersion,
+  latestSafeVersion,
+}: SettingsProps) => {
   const { owners = [], threshold, implementation } = data
   const colorScheme = useColorScheme()
   return (
@@ -62,14 +72,15 @@ export const Settings = ({ address, data, onImplementationTap, displayDevMenu, c
                 <YStack
                   alignItems="center"
                   backgroundColor={'$background'}
-                  padding={'$4'}
+                  paddingTop={'$3'}
+                  paddingBottom={'$2'}
                   borderRadius={'$6'}
                   width={80}
                   marginRight={'$2'}
                 >
                   <View width={30}>
                     <Skeleton colorMode={colorScheme === 'dark' ? 'dark' : 'light'}>
-                      <Text fontWeight="700" textAlign="center" fontSize={'$4'}>
+                      <Text fontWeight="bold" textAlign="center" fontSize={'$4'}>
                         {owners.length}
                       </Text>
                     </Skeleton>
@@ -82,7 +93,7 @@ export const Settings = ({ address, data, onImplementationTap, displayDevMenu, c
                 <YStack
                   alignItems="center"
                   backgroundColor={'$background'}
-                  paddingTop={'$4'}
+                  paddingTop={'$3'}
                   paddingBottom={'$2'}
                   borderRadius={'$6'}
                   width={80}
@@ -181,9 +192,9 @@ export const Settings = ({ address, data, onImplementationTap, displayDevMenu, c
                 marginTop: 14,
               }}
             >
-              <SafeFontIcon name={'check-filled'} color={'$success'} />
+              {isLatestVersion && <SafeFontIcon testID="check-icon" name={'check-filled'} color={'$success'} />}
               <Text marginLeft={'$2'} textAlign="center" color="$colorSecondary">
-                {implementation?.name}
+                {implementation?.name} {isLatestVersion ? `(Latest version)` : `(Latest version: ${latestSafeVersion})`}
               </Text>
             </Pressable>
           </YStack>

@@ -12,6 +12,7 @@ type IdenticonWithBadgeProps = {
   size?: number
   testID?: string
   fontSize?: number
+  variant?: 'sm' | 'md'
 }
 
 export const IdenticonWithBadge = ({
@@ -20,11 +21,12 @@ export const IdenticonWithBadge = ({
   badgeContent,
   fontSize = 12,
   size = 56,
+  variant = 'md',
 }: IdenticonWithBadgeProps) => {
   return (
     <View style={styles.container} testID={testID}>
       <Identicon address={address} size={size} />
-      <View style={styles.badge}>
+      <View style={[variant === 'sm' ? styles.badgeSm : styles.badge]}>
         <Skeleton colorMode={'dark'} radius="round" height={28} width={28}>
           {badgeContent && (
             <Badge
@@ -51,5 +53,10 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: -5,
     right: -10,
+  },
+  badgeSm: {
+    position: 'absolute',
+    top: -5,
+    right: -5,
   },
 })

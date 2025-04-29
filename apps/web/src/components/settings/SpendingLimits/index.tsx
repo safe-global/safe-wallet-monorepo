@@ -26,7 +26,6 @@ const SpendingLimits = () => {
         spacing={3}
         sx={{
           justifyContent: 'space-between',
-          mb: 2,
         }}
       >
         <Grid item lg={4} xs={12}>
@@ -54,7 +53,7 @@ const SpendingLimits = () => {
                     <Button
                       data-testid="new-spending-limit"
                       onClick={() => setTxFlow(<NewSpendingLimitFlow />)}
-                      sx={{ mt: 2 }}
+                      sx={{ mt: 2, mb: 2 }}
                       variant="contained"
                       disabled={!isOk}
                       size="small"
@@ -66,13 +65,15 @@ const SpendingLimits = () => {
               </CheckWallet>
 
               {!spendingLimits.length && !spendingLimitsLoading && <NoSpendingLimits />}
+              {spendingLimits.length > 0 && (
+                <SpendingLimitsTable isLoading={spendingLimitsLoading} spendingLimits={spendingLimits} />
+              )}
             </Box>
           ) : (
             <Typography>The spending limit feature is not yet available on this chain.</Typography>
           )}
         </Grid>
       </Grid>
-      <SpendingLimitsTable isLoading={spendingLimitsLoading} spendingLimits={spendingLimits} />
     </Paper>
   )
 }

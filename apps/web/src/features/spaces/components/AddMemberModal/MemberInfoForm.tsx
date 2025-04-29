@@ -3,13 +3,14 @@ import { Controller, useFormContext } from 'react-hook-form'
 import { MenuItem, Select, Stack } from '@mui/material'
 import { RoleMenuItem } from '@/features/spaces/components/AddMemberModal/index'
 import { MemberRole } from '@/features/spaces/hooks/useSpaceMembers'
+import css from './styles.module.css'
 
 const MemberInfoForm = ({ isEdit = false }: { isEdit?: boolean }) => {
   const { control } = useFormContext()
 
   return (
     <Stack direction="row" spacing={2} alignItems="center">
-      <NameInput name="name" label="Name" required disabled={isEdit} />
+      <NameInput data-testid="member-name-input" name="name" label="Name" required disabled={isEdit} />
 
       <Controller
         control={control}
@@ -24,10 +25,10 @@ const MemberInfoForm = ({ isEdit = false }: { isEdit?: boolean }) => {
             sx={{ minWidth: '150px', py: 0.5 }}
             renderValue={(role) => <RoleMenuItem role={role as MemberRole} />}
           >
-            <MenuItem value={MemberRole.ADMIN}>
+            <MenuItem value={MemberRole.ADMIN} className={css.menuItem}>
               <RoleMenuItem role={MemberRole.ADMIN} hasDescription selected={value === MemberRole.ADMIN} />
             </MenuItem>
-            <MenuItem value={MemberRole.MEMBER}>
+            <MenuItem value={MemberRole.MEMBER} className={css.menuItem}>
               <RoleMenuItem role={MemberRole.MEMBER} hasDescription selected={value === MemberRole.MEMBER} />
             </MenuItem>
           </Select>

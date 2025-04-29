@@ -18,6 +18,7 @@ import {
   Tooltip,
   SvgIcon,
   IconButton,
+  useMediaQuery,
 } from '@mui/material'
 import SafeIcon from '@/components/common/SafeIcon'
 import { OVERVIEW_EVENTS, OVERVIEW_LABELS, PIN_SAFE_LABELS, trackEvent } from '@/services/analytics'
@@ -48,6 +49,8 @@ import { defaultSafeInfo } from '@safe-global/store/slices/SafeInfo/utils'
 import { selectOrderByPreference } from '@/store/orderByPreferenceSlice'
 import { getComparator } from '@/features/myAccounts/utils/utils'
 import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
+import EthHashInfo from '@/components/common/EthHashInfo'
+import { useTheme } from '@mui/material/styles'
 
 export const MultichainIndicator = ({ safes }: { safes: SafeItem[] }) => {
   return (
@@ -222,6 +225,9 @@ type MultiAccountItemProps = {
 }
 
 const MultiAccountItem = ({ onLinkClick, multiSafeAccountItem, isSpaceSafe = false }: MultiAccountItemProps) => {
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
+
   const {
     address,
     name,
@@ -272,22 +278,17 @@ const MultiAccountItem = ({ onLinkClick, multiSafeAccountItem, isSpaceSafe = fal
             <Box sx={{ pr: 2.5 }} data-testid="group-safe-icon">
               <SafeIcon address={address} owners={sharedSetup?.owners.length} threshold={sharedSetup?.threshold} />
             </Box>
+
             <Typography variant="body2" component="div" className={css.safeAddress}>
-              {multiSafeAccountItem.name && (
-                <Typography variant="subtitle2" component="p" sx={{ fontWeight: 'bold' }} className={css.safeName}>
-                  {multiSafeAccountItem.name}
-                </Typography>
-              )}
-              <Typography
-                data-testid="group-address"
-                component="span"
-                sx={{
-                  color: 'var(--color-primary-light)',
-                  fontSize: 'inherit',
-                }}
-              >
-                {shortenAddress(address)}
-              </Typography>
+              <EthHashInfo
+                address={address}
+                name={multiSafeAccountItem.name}
+                shortAddress
+                showPrefix={false}
+                showAvatar={false}
+                copyPrefix={false}
+                copyAddress={!isMobile}
+              />
             </Typography>
             <MultichainIndicator safes={sortedSafes} />
             <Typography

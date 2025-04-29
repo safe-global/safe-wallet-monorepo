@@ -61,6 +61,7 @@ const AddManually = ({ handleAddSafe }: { handleAddSafe: (data: AddManuallyFormV
 
       return (
         <MenuItem
+          data-testid="network-item"
           key={chainId}
           value={chainId}
           sx={{ '&:hover': { backgroundColor: isSelected ? 'transparent' : 'inherit' } }}
@@ -77,7 +78,7 @@ const AddManually = ({ handleAddSafe }: { handleAddSafe: (data: AddManuallyFormV
 
   return (
     <>
-      <Button size="compact" onClick={() => setAddManuallyOpen(true)}>
+      <Button data-testid="add-manually-button" size="compact" onClick={() => setAddManuallyOpen(true)}>
         + Add manually
       </Button>
       <ModalDialog
@@ -97,13 +98,14 @@ const AddManually = ({ handleAddSafe }: { handleAddSafe: (data: AddManuallyFormV
             <DialogContent>
               <Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
                 <AddressInput
+                  data-testid="add-address-input"
                   label="Safe Account"
                   chain={selectedChain}
                   validate={validateSafeAddress}
                   name="address"
                   deps={chainId}
                 />
-                <Box className={css.selectWrapper}>
+                <Box data-testid="network-selector" className={css.selectWrapper}>
                   <Select
                     {...chainIdField}
                     value={chainId}
@@ -125,7 +127,12 @@ const AddManually = ({ handleAddSafe }: { handleAddSafe: (data: AddManuallyFormV
             </DialogContent>
             <DialogActions>
               <Button onClick={onClose}>Cancel</Button>
-              <Button variant="contained" disabled={!formState.isValid} type="submit">
+              <Button
+                data-testid="add-space-account-manually-button"
+                variant="contained"
+                disabled={!formState.isValid}
+                type="submit"
+              >
                 Add
               </Button>
             </DialogActions>

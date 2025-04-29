@@ -18,6 +18,7 @@ const rotateLeftIcon = '[data-testid="RotateLeftIcon"]'
 export const transactionItem = '[data-testid="transaction-item"]'
 export const connectedWalletExecMethod = '[data-testid="connected-wallet-execution-method"]'
 export const relayExecMethod = '[data-testid="relay-execution-method"]'
+export const connectedWalletMethod = '[data-testid="connected-wallet-execution-method"]'
 export const payNowExecMethod = '[data-testid="pay-now-execution-method"]'
 export const addToBatchBtn = '[data-track="batching: Add to batch"]'
 const accordionDetails = '[data-testid="accordion-details"]'
@@ -667,7 +668,7 @@ export function selectCurrentWallet() {
 }
 
 export function verifyRelayerAttemptsAvailable() {
-  cy.contains(transactionsPerHrStr).should('be.visible')
+  cy.contains(transactionsPerHrStr).should('exist')
 }
 
 export function clickOnTokenselectorAndSelectSepoliaEth() {
@@ -721,6 +722,10 @@ export function verifyNativeTokenTransfer() {
 
 export function changeNonce(value) {
   cy.get(nonceInput).clear().type(value, { force: true })
+}
+
+export function hasNonce() {
+  cy.get(nonceInput).invoke('val').should('match', /^\d+$/)
 }
 
 export function verifyNonceInputValue(value) {

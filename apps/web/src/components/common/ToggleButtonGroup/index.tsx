@@ -1,4 +1,4 @@
-import type { ReactElement } from 'react'
+import type { ReactNode, ReactElement } from 'react'
 import React from 'react'
 import {
   ToggleButtonGroup as MuiToggleButtonGroup,
@@ -6,9 +6,10 @@ import {
   toggleButtonGroupClasses,
   styled,
   svgIconClasses,
-  Tooltip,
+  Box,
 } from '@mui/material'
 
+// @ts-ignore
 const StyledMuiToggleButtonGroup = styled(MuiToggleButtonGroup)(({ theme }) => ({
   '&': {
     backgroundColor: theme.palette.background.paper,
@@ -35,8 +36,8 @@ const StyledMuiToggleButtonGroup = styled(MuiToggleButtonGroup)(({ theme }) => (
 interface ToggleButtonGroupProps {
   value?: number
   children: {
-    icon: ReactElement
-    tooltip?: string
+    title: ReactNode
+    content: ReactNode
   }[]
   onChange?: (newValue: number) => void
 }
@@ -59,11 +60,9 @@ export const ToggleButtonGroup = ({ value = 0, children, onChange }: ToggleButto
       onChange={changeView}
       aria-label="text alignment"
     >
-      {children.map(({ tooltip, icon }, index) => (
+      {children.map(({ title }, index) => (
         <ToggleButton key={index} value={index}>
-          <Tooltip title={tooltip} placement="top">
-            {icon}
-          </Tooltip>
+          <Box px={1}>{title}</Box>
         </ToggleButton>
       ))}
     </StyledMuiToggleButtonGroup>

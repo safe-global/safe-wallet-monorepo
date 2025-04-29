@@ -27,9 +27,7 @@ export function AssetsHeader({ amount, isLoading, onPendingTransactionsPress, ha
 
       <BalanceContainer />
 
-      <View marginBottom="$4">
-        <ReadOnlyContainer />
-      </View>
+      <ReadOnlyContainer />
     </StyledAssetsHeader>
   )
 }
