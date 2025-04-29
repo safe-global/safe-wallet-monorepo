@@ -6,7 +6,7 @@ import type { ReactElement } from 'react'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { createMultiSendCallOnlyTx, createTx } from '@/services/tx/tx-sender'
 import { SafeTxContext } from '../../SafeTxProvider'
-import { getRecoveryProposalTransactions } from '@/features/recovery/services/transaction'
+import { getOwnerStructureChangeTransaction } from '@/features/recovery/services/transaction'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import SignOrExecuteForm from '@/components/tx/SignOrExecuteForm'
 import FieldsGrid from '@/components/tx/FieldsGrid'
@@ -18,7 +18,7 @@ export function ReviewStructure({ params }: { params: ChangeOwnerStructureForm }
   const { safe } = useSafeInfo()
 
   useEffect(() => {
-    const transactions = getRecoveryProposalTransactions({
+    const transactions = getOwnerStructureChangeTransaction({
       safe,
       newThreshold: params.threshold,
       newOwners: params.owners.map((owner) => ({
