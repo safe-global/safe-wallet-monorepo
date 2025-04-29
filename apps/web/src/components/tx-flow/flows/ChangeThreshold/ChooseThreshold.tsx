@@ -11,33 +11,34 @@ import {
   SvgIcon,
   Tooltip,
 } from '@mui/material'
-import type { ReactElement } from 'react'
-
+import { useContext, useEffect } from 'react'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import TxCard from '@/components/tx-flow/common/TxCard'
 import { ChangeThresholdFlowFieldNames } from '@/components/tx-flow/flows/ChangeThreshold'
 import type { ChangeThresholdFlowProps } from '@/components/tx-flow/flows/ChangeThreshold'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import { TOOLTIP_TITLES } from '@/components/tx-flow/common/constants'
-
 import commonCss from '@/components/tx-flow/common/styles.module.css'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
+import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
+import { createUpdateThresholdTx } from '@/services/tx/tx-sender'
+import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
 
-export const ChooseThreshold = ({
-  params,
-  onSubmit,
-}: {
-  params: ChangeThresholdFlowProps
-  onSubmit: (data: ChangeThresholdFlowProps) => void
-}): ReactElement => {
+export const ChooseThreshold = () => {
+  const { onNext, data } = useContext(TxFlowContext)
+  const { setSafeTx, setSafeTxError } = useContext(SafeTxContext)
   const { safe } = useSafeInfo()
 
   const formMethods = useForm<ChangeThresholdFlowProps>({
-    defaultValues: params,
+    defaultValues: data,
     mode: 'onChange',
   })
 
   const newThreshold = formMethods.watch(ChangeThresholdFlowFieldNames.threshold)
+
+  useEffect(() => {
+    createUpdateThresholdTx(newThreshold).then(setSafeTx).catch(setSafeTxError)
+  }, [newThreshold, setSafeTx, setSafeTxError])
 
   return (
     <TxCard>
@@ -67,7 +68,7 @@ export const ChooseThreshold = ({
 
         <Typography>Any transaction will require the confirmation of:</Typography>
       </div>
-      <form onSubmit={formMethods.handleSubmit(onSubmit)}>
+      <form onSubmit={formMethods.handleSubmit(onNext)}>
         <Box
           sx={{
             mb: 2,

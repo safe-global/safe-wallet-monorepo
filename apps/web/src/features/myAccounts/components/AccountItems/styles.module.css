@@ -75,6 +75,10 @@
   text-overflow: ellipsis;
 }
 
+.safeAddress :global .ethHashInfo-name {
+  font-weight: bold;
+}
+
 .listHeader {
   display: flex;
 }

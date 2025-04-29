@@ -41,7 +41,7 @@ const SafeAppLanding = ({ appUrl, chain }: Props) => {
 
     trackEvent(OVERVIEW_EVENTS.OPEN_ONBOARD)
 
-    onboard.connectWallet().catch((e) => logError(Errors._302, e))
+    onboard.connectWallet().catch((e) => logError(Errors._107, e))
   }
 
   const handleDemoClick = () => {

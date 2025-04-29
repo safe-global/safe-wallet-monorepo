@@ -168,7 +168,7 @@ const AddMemberModal = ({ onClose }: { onClose: () => void }): ReactElement => {
               data-testid="add-member-modal-button"
               type="submit"
               variant="contained"
-              disabled={!formState.isValid}
+              disabled={!formState.isValid || isSubmitting}
               disableElevation
             >
               {isSubmitting ? <CircularProgress size={20} /> : 'Add member'}

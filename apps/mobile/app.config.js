@@ -24,7 +24,7 @@ export default {
       },
       infoPlist: {
         NSFaceIDUsageDescription: 'Enabling Face ID allows you to create/access secure keys.',
-        UIBackgroundModes: ['remote-notification', 'processing'],
+        UIBackgroundModes: ['remote-notification'],
       },
       supportsTablet: false,
       appleTeamId: 'MXRS32BBL4',
@@ -73,6 +73,17 @@ export default {
           dark: {
             image: './assets/images/splash.png',
             backgroundColor: '#000000',
+          },
+          android: {
+            image: './assets/images/icon.png',
+            imageWidth: 124,
+            imageHeight: 124,
+            imageResizeMode: 'contain',
+            backgroundColor: '#000000',
+          },
+          ios: {
+            image: './assets/images/splash.png',
+            imageResizeMode: 'contain',
           },
         },
       ],
