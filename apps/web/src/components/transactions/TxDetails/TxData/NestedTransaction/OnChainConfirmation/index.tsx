@@ -14,6 +14,7 @@ import { TxSimulation, TxSimulationMessage } from '@/components/tx/security/tend
 import type { SafeTransaction } from '@safe-global/safe-core-sdk-types'
 import extractTxInfo from '@/services/tx/extractTxInfo'
 import { useSignedHash } from '../useSignedHash'
+import useSafeAddress from '@/hooks/useSafeAddress'
 
 export const OnChainConfirmation = ({
   data,
@@ -24,6 +25,7 @@ export const OnChainConfirmation = ({
 }) => {
   const chainId = useChainId()
   const signedHash = useSignedHash(data)
+  const safeAddress = useSafeAddress()
 
   const { data: nestedTxDetails, error: txDetailsError } = useGetTransactionDetailsQuery(
     signedHash
@@ -68,7 +70,13 @@ export const OnChainConfirmation = ({
 
           {isConfirmationView && (
             <Stack spacing={2}>
-              <TxSimulation disabled={false} transactions={nestedTx} title="Simulate nested transaction" isNested />
+              <TxSimulation
+                disabled={false}
+                transactions={nestedTx}
+                title="Simulate nested transaction"
+                executionOwner={safeAddress}
+                nestedSafe={nestedTxDetails.safeAddress}
+              />
               <TxSimulationMessage isNested />
             </Stack>
           )}
