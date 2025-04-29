@@ -6,12 +6,16 @@ import useAllAddressBooks from '@/hooks/useAllAddressBooks'
 import { render } from '@/tests/test-utils'
 import useChains from '@/hooks/useChains'
 import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import * as spacesRTK from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 
 jest.mock('@/hooks/useAllAddressBooks')
 jest.mock('@/hooks/useChains')
 const mockedUseAllAddressBooks = useAllAddressBooks as jest.MockedFunction<typeof useAllAddressBooks>
 const mockedUseChains = useChains as jest.MockedFunction<typeof useChains>
-const consoleLogSpy = jest.spyOn(console, 'log').mockImplementation(() => {})
+const upsertionSpyFn = jest.fn()
+const upsertionSpy = jest
+  .spyOn(spacesRTK, 'useAddressBooksUpsertAddressBookItemsV1Mutation')
+  .mockReturnValue([upsertionSpyFn, { reset: jest.fn() }])
 
 describe('ImportAddressBookDialog', () => {
   beforeEach(() => {
@@ -19,7 +23,7 @@ describe('ImportAddressBookDialog', () => {
   })
 
   afterAll(() => {
-    consoleLogSpy.mockRestore()
+    upsertionSpy.mockRestore()
   })
 
   it('renders the dialog with a list of contacts', () => {
@@ -78,19 +82,19 @@ describe('ImportAddressBookDialog', () => {
     expect(importButton).toBeInTheDocument()
 
     await userEvent.click(importButton)
-    expect(consoleLogSpy).toHaveBeenCalledTimes(1)
+    expect(upsertionSpyFn).toHaveBeenCalledTimes(1)
 
-    const callArgs = consoleLogSpy.mock.calls[0][0]
+    const callArgs = upsertionSpyFn.mock.calls[0][0]['upsertAddressBookItemsDto']['items']
     expect(callArgs).toHaveLength(2)
     expect(callArgs).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          chainId: '1',
+          chainIds: ['1'],
           address: '0x123',
           name: 'Alice',
         }),
         expect.objectContaining({
-          chainId: '5',
+          chainIds: ['5'],
           address: '0xABC',
           name: 'Charlie',
         }),

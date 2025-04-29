@@ -1,6 +1,7 @@
 import type { AddressBookState } from '@/store/addressBookSlice'
 import type { ContactItem } from '@/features/spaces/components/SpaceAddressBook/Import/ContactsList'
 import type { ImportContactsFormValues } from '@/features/spaces/components/SpaceAddressBook/Import/ImportAddressBookDialog'
+import type { AddressBookItem } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 
 export const flattenAddressBook = (allAddressBooks: AddressBookState): ContactItem[] => {
   return Object.entries(allAddressBooks).flatMap(([chainId, addressBook]) => {
@@ -19,12 +20,12 @@ export const createContactItems = (data: ImportContactsFormValues) => {
       if (!name) return
 
       return {
-        chainId,
+        chainIds: [chainId],
         address,
         name,
       }
     })
-    .filter(Boolean) as ContactItem[]
+    .filter(Boolean) as AddressBookItem[]
 }
 
 export const getSelectedAddresses = (contacts: ImportContactsFormValues['contacts']) => {

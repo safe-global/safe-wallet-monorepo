@@ -15,6 +15,7 @@ import { useIsAdmin } from '@/features/spaces/hooks/useSpaceMembers'
 import EditContactDialog from './EditContactDialog'
 import DeleteContactDialog from './DeleteContactDialog'
 import type { SpaceAddressBookItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import Track from '@/components/common/Track'
 
 enum ModalType {
   EDIT = 'edit',
@@ -55,20 +56,24 @@ const AddressBookContextMenu = ({ entry }: { entry: SpaceAddressBookItemDto }) =
         <MoreVertIcon sx={({ palette }) => ({ color: palette.border.main })} />
       </IconButton>
       <ContextMenu anchorEl={anchorEl} open={!!anchorEl} onClose={handleCloseContextMenu}>
-        <MenuItem onClick={(e) => handleOpenModal(e, ModalType.EDIT)}>
-          <ListItemIcon>
-            <SvgIcon component={EditIcon} inheritViewBox fontSize="small" color="success" />
-          </ListItemIcon>
-          <ListItemText>Edit</ListItemText>
-        </MenuItem>
+        <Track {...SPACE_EVENTS.EDIT_ADDRESS}>
+          <MenuItem onClick={(e) => handleOpenModal(e, ModalType.EDIT)}>
+            <ListItemIcon>
+              <SvgIcon component={EditIcon} inheritViewBox fontSize="small" color="success" />
+            </ListItemIcon>
+            <ListItemText>Edit</ListItemText>
+          </MenuItem>
+        </Track>
 
         {isAdmin && (
-          <MenuItem onClick={(e) => handleOpenModal(e, ModalType.REMOVE)}>
-            <ListItemIcon>
-              <SvgIcon component={DeleteIcon} inheritViewBox fontSize="small" color="error" />
-            </ListItemIcon>
-            <ListItemText>Remove</ListItemText>
-          </MenuItem>
+          <Track {...SPACE_EVENTS.REMOVE_ADDRESS}>
+            <MenuItem onClick={(e) => handleOpenModal(e, ModalType.REMOVE)}>
+              <ListItemIcon>
+                <SvgIcon component={DeleteIcon} inheritViewBox fontSize="small" color="error" />
+              </ListItemIcon>
+              <ListItemText>Remove</ListItemText>
+            </MenuItem>
+          </Track>
         )}
       </ContextMenu>
 

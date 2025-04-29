@@ -4,6 +4,7 @@ import {
   Box,
   Button,
   Card,
+  CircularProgress,
   Container,
   DialogActions,
   DialogContent,
@@ -23,6 +24,10 @@ import { debounce } from 'lodash'
 import { useContactSearch } from '@/features/spaces/components/SpaceAddressBook/useContactSearch'
 import { createContactItems, flattenAddressBook } from '@/features/spaces/components/SpaceAddressBook/utils'
 import useChains from '@/hooks/useChains'
+import { useAddressBooksUpsertAddressBookItemsV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
+import { showNotification } from '@/store/notificationsSlice'
+import { useAppDispatch } from '@/store'
 
 export type ImportContactsFormValues = {
   contacts: Record<string, string | undefined> // e.g. "1:0x123": "Alice"
@@ -31,7 +36,11 @@ export type ImportContactsFormValues = {
 const ImportAddressBookDialog = ({ handleClose }: { handleClose: () => void }) => {
   const [error, setError] = useState<string>()
   const [searchQuery, setSearchQuery] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const { configs } = useChains()
+  const dispatch = useAppDispatch()
+  const spaceId = useCurrentSpaceId()
+  const [upsertAddressBook] = useAddressBooksUpsertAddressBookItemsV1Mutation()
 
   const allAddressBooks = useAllAddressBooks()
   const allContactItems = useMemo(
@@ -61,7 +70,34 @@ const ImportAddressBookDialog = ({ handleClose }: { handleClose: () => void }) =
   const onSubmit = handleSubmit(async (data) => {
     setError(undefined)
     const contactItems = createContactItems(data)
-    console.log(contactItems)
+
+    try {
+      setIsSubmitting(true)
+
+      const result = await upsertAddressBook({
+        spaceId: Number(spaceId),
+        upsertAddressBookItemsDto: { items: contactItems },
+      })
+
+      if (result.error) {
+        setError('Something went wrong. Please try again.')
+        return
+      }
+
+      dispatch(
+        showNotification({
+          message: `Imported contact(s)`,
+          variant: 'success',
+          groupKey: 'import-contacts-success',
+        }),
+      )
+
+      handleClose()
+    } catch (e) {
+      setError('Something went wrong. Please try again.')
+    } finally {
+      setIsSubmitting(false)
+    }
   })
 
   return (
@@ -129,8 +165,17 @@ const ImportAddressBookDialog = ({ handleClose }: { handleClose: () => void }) =
                   <Button data-testid="cancel-btn" onClick={handleClose}>
                     Cancel
                   </Button>
-                  <Button type="submit" variant="contained" disabled={!formState.isValid} disableElevation>
-                    Import contacts ({selectedContactsLength.length})
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    disabled={!formState.isValid || isSubmitting}
+                    disableElevation
+                  >
+                    {isSubmitting ? (
+                      <CircularProgress size={20} />
+                    ) : (
+                      `Import contacts (${selectedContactsLength.length})`
+                    )}
                   </Button>
                 </DialogActions>
               </form>

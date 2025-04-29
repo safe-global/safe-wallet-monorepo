@@ -10,6 +10,10 @@ import NetworkMultiSelectorInput from '@/components/common/NetworkSelector/Netwo
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import useChains from '@/hooks/useChains'
+import { useAddressBooksUpsertAddressBookItemsV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
+import { showNotification } from '@/store/notificationsSlice'
+import { useAppDispatch } from '@/store'
 
 export type ContactField = {
   name: string
@@ -19,9 +23,12 @@ export type ContactField = {
 
 const AddContact = () => {
   const [open, setOpen] = useState(false)
-  const [error, setError] = useState('')
+  const [error, setError] = useState<string>()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { configs: allNetworks } = useChains()
+  const dispatch = useAppDispatch()
+  const spaceId = useCurrentSpaceId()
+  const [upsertAddressBook] = useAddressBooksUpsertAddressBookItemsV1Mutation()
 
   const defaultValues = {
     name: '',
@@ -50,16 +57,39 @@ const AddContact = () => {
     setError('')
   }
 
-  const onSubmit = handleSubmit((data) => {
+  const onSubmit = handleSubmit(async (data) => {
+    setError(undefined)
+
+    const addressBookItem = {
+      name: data.name,
+      address: data.address,
+      chainIds: data.networks.map((network) => network.chainId),
+    }
+
     try {
-      // Todo: handle submit when endpoint is ready
       setIsSubmitting(true)
       trackEvent({ ...SPACE_EVENTS.ADD_ADDRESS_SUBMIT })
-      console.log(data)
-      setOpen(false)
-      reset(defaultValues)
+
+      const result = await upsertAddressBook({
+        spaceId: Number(spaceId),
+        upsertAddressBookItemsDto: { items: [addressBookItem] },
+      })
+
+      if (result.error) {
+        setError('Something went wrong. Please try again.')
+        return
+      }
+
+      dispatch(
+        showNotification({
+          message: `Added contact`,
+          variant: 'success',
+          groupKey: 'add-contact-success',
+        }),
+      )
+
+      handleClose()
     } catch (error) {
-      // Todo: handle
       setError('Something went wrong. Please try again.')
     } finally {
       setIsSubmitting(false)
@@ -115,7 +145,7 @@ const AddContact = () => {
               <Button data-testid="cancel-btn" onClick={handleClose}>
                 Cancel
               </Button>
-              <Button type="submit" variant="contained" disabled={!formState.isValid} disableElevation>
+              <Button type="submit" variant="contained" disabled={!formState.isValid || isSubmitting} disableElevation>
                 {isSubmitting ? <CircularProgress size={20} /> : 'Add contact'}
               </Button>
             </DialogActions>

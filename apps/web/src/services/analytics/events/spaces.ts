@@ -157,6 +157,14 @@ export const SPACE_EVENTS = {
     action: 'Import address book',
     category: SPACE_CATEGORY,
   },
+  EDIT_ADDRESS: {
+    action: 'Open edit address',
+    category: SPACE_CATEGORY,
+  },
+  EDIT_ADDRESS_SUBMIT: {
+    action: 'Submit edit address',
+    category: SPACE_CATEGORY,
+  },
 }
 
 export enum SPACE_LABELS {

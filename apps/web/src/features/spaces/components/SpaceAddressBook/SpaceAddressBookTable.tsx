@@ -29,7 +29,7 @@ function SpaceAddressBookTable({ entries }: SpaceAddressBookTableProps) {
             <Identicon address={entry.address} size={32} />
             <Stack direction="column" spacing={0.5}>
               <EthHashInfo
-                name={entry.name}
+                spaceName={entry.name}
                 showAvatar={false}
                 address={entry.address}
                 shortAddress={false}
