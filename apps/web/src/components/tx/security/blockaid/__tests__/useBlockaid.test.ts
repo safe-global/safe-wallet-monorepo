@@ -115,13 +115,13 @@ describe.each([TEST_CASES.MESSAGE, TEST_CASES.TRANSACTION])('useBlockaid for %s'
     jest.spyOn(useChains, 'useHasFeature').mockReturnValue(true)
 
     const mockFetch = jest.spyOn(global, 'fetch')
-    mockFetch.mockImplementation(() => Promise.reject({ message: '403 not authorized' }))
+    mockFetch.mockImplementation(() => Promise.reject(new Error('403 not authorized')))
 
     const { result } = renderHook(() => useBlockaid(mockPayload))
 
     await waitFor(() => {
       expect(result.current[0]).toBeUndefined()
-      expect(result.current[1]).toEqual(new Error('Unavailable'))
+      expect(result.current[1]).toEqual(new Error('403 not authorized'))
       expect(result.current[2]).toBeFalsy()
     })
   })
@@ -161,7 +161,7 @@ describe.each([TEST_CASES.MESSAGE, TEST_CASES.TRANSACTION])('useBlockaid for %s'
 
     await waitFor(() => {
       expect(result.current[0]).toBeDefined()
-      expect(result.current[1]).toEqual(new Error('Simulation failed'))
+      expect(result.current[1]).toEqual(new Error('Simulation failed: GS13'))
       expect(result.current[2]).toBeFalsy()
     })
   })

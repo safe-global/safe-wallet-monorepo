@@ -17,8 +17,6 @@ import { Errors, logError } from '@/services/exceptions'
 
 const BlockaidModuleInstance = new BlockaidModule()
 
-const DEFAULT_ERROR_MESSAGE = 'Unavailable'
-
 export const useBlockaid = (
   data: SafeTransaction | TypedData | undefined,
   origin?: string,
@@ -54,11 +52,7 @@ export const useBlockaid = (
     }
   }, [loading, blockaidPayload])
 
-  const errorMsg = useMemo(
-    () => (blockaidErrors ? new Error(DEFAULT_ERROR_MESSAGE) : blockaidPayload?.payload?.error),
-
-    [blockaidErrors, blockaidPayload],
-  )
+  const errorMsg = useMemo(() => blockaidErrors ?? blockaidPayload?.payload?.error, [blockaidErrors, blockaidPayload])
 
   useEffect(() => {
     logError(Errors._201, errorMsg)
