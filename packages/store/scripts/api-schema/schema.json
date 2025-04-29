@@ -22,6 +22,513 @@
         ]
       }
     },
+    "/v1/accounts": {
+      "post": {
+        "operationId": "accountsCreateAccountV1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAccountDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Account"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "accounts"
+        ]
+      }
+    },
+    "/v1/accounts/data-types": {
+      "get": {
+        "operationId": "accountsGetDataTypesV1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AccountDataType"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "accounts"
+        ]
+      }
+    },
+    "/v1/accounts/{address}/data-settings": {
+      "get": {
+        "operationId": "accountsGetAccountDataSettingsV1",
+        "parameters": [
+          {
+            "name": "address",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AccountDataSetting"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "accounts"
+        ]
+      },
+      "put": {
+        "operationId": "accountsUpsertAccountDataSettingsV1",
+        "parameters": [
+          {
+            "name": "address",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpsertAccountDataSettingsDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AccountDataSetting"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "accounts"
+        ]
+      }
+    },
+    "/v1/accounts/{address}": {
+      "get": {
+        "operationId": "accountsGetAccountV1",
+        "parameters": [
+          {
+            "name": "address",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Account"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "accounts"
+        ]
+      },
+      "delete": {
+        "operationId": "accountsDeleteAccountV1",
+        "parameters": [
+          {
+            "name": "address",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "accounts"
+        ]
+      }
+    },
+    "/v1/accounts/{address}/address-books/{chainId}": {
+      "get": {
+        "operationId": "addressBooksGetAddressBookV1",
+        "parameters": [
+          {
+            "name": "address",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "chainId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddressBook"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "accounts"
+        ]
+      },
+      "post": {
+        "operationId": "addressBooksCreateAddressBookItemV1",
+        "parameters": [
+          {
+            "name": "address",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "chainId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAddressBookItemDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddressBookItem"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "accounts"
+        ]
+      },
+      "delete": {
+        "operationId": "addressBooksDeleteAddressBookV1",
+        "parameters": [
+          {
+            "name": "address",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "chainId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "accounts"
+        ]
+      }
+    },
+    "/v1/accounts/{address}/address-books/{chainId}/{addressBookItemId}": {
+      "delete": {
+        "operationId": "addressBooksDeleteAddressBookItemV1",
+        "parameters": [
+          {
+            "name": "address",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "chainId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "addressBookItemId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "accounts"
+        ]
+      }
+    },
+    "/v1/accounts/{address}/counterfactual-safes/{chainId}/{predictedAddress}": {
+      "get": {
+        "operationId": "counterfactualSafesGetCounterfactualSafeV1",
+        "parameters": [
+          {
+            "name": "address",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "chainId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "predictedAddress",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CounterfactualSafe"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "accounts"
+        ]
+      },
+      "delete": {
+        "operationId": "counterfactualSafesDeleteCounterfactualSafeV1",
+        "parameters": [
+          {
+            "name": "address",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "chainId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "predictedAddress",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "accounts"
+        ]
+      }
+    },
+    "/v1/accounts/{address}/counterfactual-safes": {
+      "get": {
+        "operationId": "counterfactualSafesGetCounterfactualSafesV1",
+        "parameters": [
+          {
+            "name": "address",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CounterfactualSafe"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "accounts"
+        ]
+      },
+      "put": {
+        "operationId": "counterfactualSafesCreateCounterfactualSafeV1",
+        "parameters": [
+          {
+            "name": "address",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCounterfactualSafeDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CounterfactualSafe"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "accounts"
+        ]
+      },
+      "delete": {
+        "operationId": "counterfactualSafesDeleteCounterfactualSafesV1",
+        "parameters": [
+          {
+            "name": "address",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "accounts"
+        ]
+      }
+    },
     "/v1/auth/nonce": {
       "get": {
         "operationId": "authGetNonceV1",
@@ -1119,6 +1626,86 @@
         ]
       }
     },
+    "/v1/chains/{chainId}/safes/{safeAddress}/recovery": {
+      "post": {
+        "operationId": "recoveryAddRecoveryModuleV1",
+        "parameters": [
+          {
+            "name": "chainId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "safeAddress",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddRecoveryModuleDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "recovery"
+        ]
+      }
+    },
+    "/v1/chains/{chainId}/safes/{safeAddress}/recovery/{moduleAddress}": {
+      "delete": {
+        "operationId": "recoveryDeleteRecoveryModuleV1",
+        "parameters": [
+          {
+            "name": "chainId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "moduleAddress",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "safeAddress",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "recovery"
+        ]
+      }
+    },
     "/v2/chains/{chainId}/safes/{address}/multisig-transactions/estimations": {
       "post": {
         "operationId": "estimationsGetEstimationV2",
@@ -1697,6 +2284,92 @@
         },
         "tags": [
           "users"
+        ]
+      }
+    },
+    "/v1/spaces/{spaceId}/address-book": {
+      "get": {
+        "operationId": "addressBooksGetAddressBookItemsV1",
+        "parameters": [
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Address Book Items found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SpaceAddressBookDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Signer address not provided"
+          },
+          "403": {
+            "description": "Signer not authorized."
+          },
+          "404": {
+            "description": "User, member or space not found"
+          }
+        },
+        "tags": [
+          "spaces"
+        ]
+      },
+      "put": {
+        "operationId": "addressBooksUpsertAddressBookItemsV1",
+        "parameters": [
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpsertAddressBookItemsDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Address Book updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SpaceAddressBookDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Signer address not provided"
+          },
+          "403": {
+            "description": "Signer not authorized."
+          },
+          "404": {
+            "description": "User, member or space not found"
+          }
+        },
+        "tags": [
+          "spaces"
         ]
       }
     },
@@ -3807,7 +4480,7 @@
   "info": {
     "title": "Safe Client Gateway",
     "description": "",
-    "version": "v1.79.1",
+    "version": "",
     "contact": {}
   },
   "tags": [],
@@ -3831,6 +4504,258 @@
         },
         "required": [
           "name"
+        ]
+      },
+      "CreateAccountDto": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 30
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "address",
+          "name"
+        ]
+      },
+      "Account": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "groupId": {
+            "type": "string",
+            "nullable": true
+          },
+          "address": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "address",
+          "name"
+        ]
+      },
+      "AccountDataType": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "isActive": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "isActive"
+        ]
+      },
+      "AccountDataSetting": {
+        "type": "object",
+        "properties": {
+          "dataTypeId": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "dataTypeId",
+          "enabled"
+        ]
+      },
+      "UpsertAccountDataSettingDto": {
+        "type": "object",
+        "properties": {
+          "dataTypeId": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "dataTypeId",
+          "enabled"
+        ]
+      },
+      "UpsertAccountDataSettingsDto": {
+        "type": "object",
+        "properties": {
+          "accountDataSettings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UpsertAccountDataSettingDto"
+            }
+          }
+        },
+        "required": [
+          "accountDataSettings"
+        ]
+      },
+      "AddressBookItem": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          },
+          "chainIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "name",
+          "address",
+          "chainIds"
+        ]
+      },
+      "AddressBook": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "accountId": {
+            "type": "string"
+          },
+          "chainId": {
+            "type": "string"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AddressBookItem"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "accountId",
+          "chainId",
+          "data"
+        ]
+      },
+      "CreateAddressBookItemDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 30
+          },
+          "address": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "address"
+        ]
+      },
+      "CounterfactualSafe": {
+        "type": "object",
+        "properties": {
+          "chainId": {
+            "type": "string"
+          },
+          "creator": {
+            "type": "string"
+          },
+          "fallbackHandler": {
+            "type": "string"
+          },
+          "owners": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "predictedAddress": {
+            "type": "string"
+          },
+          "saltNonce": {
+            "type": "string"
+          },
+          "singletonAddress": {
+            "type": "string"
+          },
+          "threshold": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "chainId",
+          "creator",
+          "fallbackHandler",
+          "owners",
+          "predictedAddress",
+          "saltNonce",
+          "singletonAddress",
+          "threshold"
+        ]
+      },
+      "CreateCounterfactualSafeDto": {
+        "type": "object",
+        "properties": {
+          "chainId": {
+            "type": "string"
+          },
+          "fallbackHandler": {
+            "type": "string"
+          },
+          "owners": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "predictedAddress": {
+            "type": "string"
+          },
+          "saltNonce": {
+            "type": "string"
+          },
+          "singletonAddress": {
+            "type": "string"
+          },
+          "threshold": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "chainId",
+          "fallbackHandler",
+          "owners",
+          "predictedAddress",
+          "saltNonce",
+          "singletonAddress",
+          "threshold"
         ]
       },
       "AuthNonce": {
@@ -4232,6 +5157,9 @@
           "isTestnet": {
             "type": "boolean"
           },
+          "zk": {
+            "type": "boolean"
+          },
           "nativeCurrency": {
             "$ref": "#/components/schemas/NativeCurrency"
           },
@@ -4308,6 +5236,7 @@
           "description",
           "l2",
           "isTestnet",
+          "zk",
           "nativeCurrency",
           "transactionService",
           "blockExplorerUriTemplate",
@@ -5195,6 +6124,17 @@
           "signature"
         ]
       },
+      "AddRecoveryModuleDto": {
+        "type": "object",
+        "properties": {
+          "moduleAddress": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "moduleAddress"
+        ]
+      },
       "GetEstimationDto": {
         "type": "object",
         "properties": {
@@ -5782,6 +6722,68 @@
         },
         "required": [
           "id"
+        ]
+      },
+      "SpaceAddressBookItemDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          },
+          "chainIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "createdBy": {
+            "type": "string"
+          },
+          "lastUpdatedBy": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "address",
+          "chainIds",
+          "createdBy",
+          "lastUpdatedBy"
+        ]
+      },
+      "SpaceAddressBookDto": {
+        "type": "object",
+        "properties": {
+          "spaceId": {
+            "type": "string"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SpaceAddressBookItemDto"
+            }
+          }
+        },
+        "required": [
+          "spaceId",
+          "data"
+        ]
+      },
+      "UpsertAddressBookItemsDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AddressBookItem"
+            }
+          }
+        },
+        "required": [
+          "items"
         ]
       },
       "CreateSpaceDto": {
@@ -6602,7 +7604,8 @@
               "SwapTransfer",
               "Transfer",
               "TwapOrder",
-              "VaultDeposit"
+              "VaultDeposit",
+              "VaultRedeem"
             ]
           },
           "humanDescription": {
@@ -7874,19 +8877,54 @@
           "validators"
         ]
       },
-      "VaultDepositAdditionalRewards": {
+      "VaultInfo": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "dashboardUri": {
+            "type": "string",
+            "nullable": true
+          },
+          "logoUri": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "address",
+          "name",
+          "description",
+          "logoUri"
+        ]
+      },
+      "VaultExtraReward": {
         "type": "object",
         "properties": {
           "tokenInfo": {
             "$ref": "#/components/schemas/TokenInfo"
           },
-          "returnRate": {
+          "nrr": {
             "type": "number"
+          },
+          "claimable": {
+            "type": "string"
+          },
+          "claimableNext": {
+            "type": "string"
           }
         },
         "required": [
           "tokenInfo",
-          "returnRate"
+          "nrr",
+          "claimable",
+          "claimableNext"
         ]
       },
       "VaultDepositTransactionInfo": {
@@ -7902,64 +8940,105 @@
             "type": "string",
             "nullable": true
           },
-          "chainId": {
+          "value": {
             "type": "string"
           },
-          "expectedMonthlyReward": {
+          "nrr": {
             "type": "number"
           },
-          "expectedAnnualReward": {
+          "fee": {
             "type": "number"
           },
           "tokenInfo": {
             "$ref": "#/components/schemas/TokenInfo"
           },
-          "value": {
-            "type": "number"
+          "vaultInfo": {
+            "$ref": "#/components/schemas/VaultInfo"
           },
-          "returnRate": {
-            "type": "number"
-          },
-          "vaultAddress": {
+          "currentReward": {
             "type": "string"
           },
-          "vaultName": {
-            "type": "string"
-          },
-          "vaultDisplayName": {
-            "type": "string"
-          },
-          "vaultDescription": {
-            "type": "string"
-          },
-          "vaultDashboardURL": {
-            "type": "string",
-            "nullable": true
-          },
-          "vaultTVL": {
+          "additionalRewardsNrr": {
             "type": "number"
           },
           "additionalRewards": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/VaultDepositAdditionalRewards"
+              "$ref": "#/components/schemas/VaultExtraReward"
+            }
+          },
+          "expectedMonthlyReward": {
+            "type": "string"
+          },
+          "expectedAnnualReward": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "value",
+          "nrr",
+          "fee",
+          "tokenInfo",
+          "vaultInfo",
+          "currentReward",
+          "additionalRewardsNrr",
+          "additionalRewards",
+          "expectedMonthlyReward",
+          "expectedAnnualReward"
+        ]
+      },
+      "VaultRedeemTransactionInfo": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "VaultRedeem"
+            ]
+          },
+          "humanDescription": {
+            "type": "string",
+            "nullable": true
+          },
+          "value": {
+            "type": "string"
+          },
+          "nrr": {
+            "type": "number"
+          },
+          "fee": {
+            "type": "number"
+          },
+          "tokenInfo": {
+            "$ref": "#/components/schemas/TokenInfo"
+          },
+          "vaultInfo": {
+            "$ref": "#/components/schemas/VaultInfo"
+          },
+          "currentReward": {
+            "type": "string"
+          },
+          "additionalRewardsNrr": {
+            "type": "number"
+          },
+          "additionalRewards": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VaultExtraReward"
             }
           }
         },
         "required": [
           "type",
-          "chainId",
-          "expectedMonthlyReward",
-          "expectedAnnualReward",
-          "tokenInfo",
           "value",
-          "returnRate",
-          "vaultAddress",
-          "vaultName",
-          "vaultDisplayName",
-          "vaultDescription",
-          "vaultDashboardURL",
-          "vaultTVL"
+          "nrr",
+          "fee",
+          "tokenInfo",
+          "vaultInfo",
+          "currentReward",
+          "additionalRewardsNrr",
+          "additionalRewards"
         ]
       },
       "TransactionData": {
@@ -7993,6 +9072,26 @@
           },
           "addressInfoIndex": {
             "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/AddressInfo"
+            },
+            "nullable": true
+          },
+          "tokenInfoIndex": {
+            "type": "object",
+            "additionalProperties": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/NativeToken"
+                },
+                {
+                  "$ref": "#/components/schemas/Erc20Token"
+                },
+                {
+                  "$ref": "#/components/schemas/Erc721Token"
+                }
+              ]
+            },
             "nullable": true
           }
         },
@@ -8207,6 +9306,9 @@
               },
               {
                 "$ref": "#/components/schemas/VaultDepositTransactionInfo"
+              },
+              {
+                "$ref": "#/components/schemas/VaultRedeemTransactionInfo"
               }
             ],
             "allOf": [
@@ -8524,6 +9626,9 @@
               },
               {
                 "$ref": "#/components/schemas/VaultDepositTransactionInfo"
+              },
+              {
+                "$ref": "#/components/schemas/VaultRedeemTransactionInfo"
               }
             ],
             "allOf": [
@@ -8816,6 +9921,9 @@
               },
               {
                 "$ref": "#/components/schemas/VaultDepositTransactionInfo"
+              },
+              {
+                "$ref": "#/components/schemas/VaultRedeemTransactionInfo"
               }
             ],
             "allOf": [
