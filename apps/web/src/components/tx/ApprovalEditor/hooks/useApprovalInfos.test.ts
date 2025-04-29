@@ -252,9 +252,9 @@ describe('useApprovalInfos', () => {
         symbol: 'USDC',
         type: TokenType.ERC20,
       },
-    }
+    } as const
     const spenderAddress = faker.finance.ethereumAddress()
-    const mockMessage: EIP712TypedData = {
+    const mockMessage: TypedData = {
       types: {
         EIP712Domain: [
           {
@@ -305,7 +305,8 @@ describe('useApprovalInfos', () => {
         nonce: BigInt(0),
         deadline: BigInt('0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'),
       },
-    }
+      primaryType: 'Permit',
+    } as const
 
     jest
       .spyOn(balances, 'default')
