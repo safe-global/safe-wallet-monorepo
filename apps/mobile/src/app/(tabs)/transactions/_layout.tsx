@@ -16,7 +16,7 @@ const getHeaderTitle = (route: Partial<Route<string>>) => {
 
 export default function TransactionsLayout() {
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <SafeAreaView style={{ flex: 1 }} edges={['top']}>
       <Stack
         screenOptions={{
           headerLargeTitle: false,

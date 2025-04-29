@@ -56,7 +56,7 @@ export function SellOrder({ order, bordered, executionInfo, inQueue, onPress }: 
       rightNode={
         <View alignItems="flex-end">
           <Text color="$primary">
-            +{ellipsis(formatValue(order.buyAmount, order.buyToken.decimals), 10)} {order.buyToken.symbol}
+            ~{ellipsis(formatValue(order.buyAmount, order.buyToken.decimals), 10)} {order.buyToken.symbol}
           </Text>
           <Text fontSize="$3">
             −{ellipsis(formatValue(order.sellAmount, order.sellToken.decimals), 10)} {order.sellToken.symbol}

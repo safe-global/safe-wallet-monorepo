@@ -97,6 +97,10 @@ const txDetails = createMockTransactionDetails({
       value: '0xDa5e9FA404881Ff36DDa97b41Da402dF6430EE6b',
       name: '',
     },
+    proposedByDelegate: {
+      value: '0xDa5e9FA404881Ff36DDa97b41Da402dF6430EE6b',
+      name: '',
+    },
   },
 })
 const safeTx = safeTxBuilder().build()

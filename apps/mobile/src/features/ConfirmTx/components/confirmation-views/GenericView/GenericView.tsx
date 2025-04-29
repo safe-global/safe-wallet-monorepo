@@ -17,6 +17,7 @@ import { Badge } from '@/src/components/Badge'
 import { ListTable } from '../../ListTable'
 import { TransactionHeader } from '../../TransactionHeader'
 import { ParametersButton } from '../../ParametersButton'
+import { router } from 'expo-router'
 
 interface GenericViewProps {
   txInfo: SettingsChangeTransaction
@@ -32,6 +33,13 @@ export function GenericView({ txInfo, txData, executionInfo, txId }: GenericView
     () => formatGenericViewItems({ txInfo, txData, chain, executionInfo }),
     [txInfo, executionInfo, txData, chain],
   )
+
+  const handleViewActions = () => {
+    router.push({
+      pathname: '/transaction-actions',
+      params: { txId },
+    })
+  }
 
   return (
     <YStack gap="$4">
@@ -51,6 +59,7 @@ export function GenericView({ txInfo, txData, executionInfo, txId }: GenericView
       {'actionCount' in txInfo && (
         <SafeListItem
           label="Actions"
+          onPress={handleViewActions}
           rightNode={
             <View flexDirection="row" alignItems="center" gap="$2">
               <Badge themeName="badge_background_inverted" content={txInfo.actionCount as string} />
