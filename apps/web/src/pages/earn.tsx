@@ -4,9 +4,9 @@ import dynamic from 'next/dynamic'
 import { Typography } from '@mui/material'
 import { BRAND_NAME } from '@/config/constants'
 
-const LazyLendPage = dynamic(() => import('@/features/lend'), { ssr: false })
+const LazyLendPage = dynamic(() => import('@/features/earn'), { ssr: false })
 
-const LendPage: NextPage = () => {
+const EarnPage: NextPage = () => {
   const isFeatureEnabled = true // TODO: Base is not available on staging so can't add a feature flag yet. Add one for prod.
 
   return (
@@ -28,4 +28,4 @@ const LendPage: NextPage = () => {
   )
 }
 
-export default LendPage
+export default EarnPage
