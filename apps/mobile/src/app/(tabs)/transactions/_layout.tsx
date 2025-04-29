@@ -3,7 +3,6 @@ import React from 'react'
 import type { Route } from '@react-navigation/routers'
 import { H2, View } from 'tamagui'
 import { getFocusedRouteNameFromRoute } from '@react-navigation/native'
-import { SafeAreaView } from 'react-native-safe-area-context'
 
 const getHeaderTitle = (route: Partial<Route<string>>) => {
   const routeName = getFocusedRouteNameFromRoute(route) ?? 'index'
