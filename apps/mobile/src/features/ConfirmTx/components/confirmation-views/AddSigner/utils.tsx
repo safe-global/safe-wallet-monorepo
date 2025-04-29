@@ -9,6 +9,8 @@ import { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { Identicon } from '@/src/components/Identicon'
 import { NormalizedSettingsChangeTransaction } from '../../ConfirmationView/types'
 import { CopyButton } from '@/src/components/CopyButton'
+import { TouchableOpacity } from 'react-native'
+import useOpenExplorer from '@/src/features/ConfirmTx/hooks/useOpenExplorer/useOpenExplorer'
 
 export const getSignerName = (txInfo: NormalizedSettingsChangeTransaction) => {
   if (!txInfo.settingsInfo) {
@@ -30,6 +32,7 @@ export const formatAddSignerItems = (
   executionInfo: MultisigExecutionDetails,
 ) => {
   const newSignerAddress = getSignerName(txInfo)
+  const viewOnExplorer = useOpenExplorer(txInfo.settingsInfo?.owner?.value)
 
   return [
     {
@@ -40,7 +43,9 @@ export const formatAddSignerItems = (
           <Text fontSize="$4">{newSignerAddress}</Text>
           <CopyButton value={txInfo.settingsInfo?.owner?.value} color={'$textSecondaryLight'} />
 
-          <SafeFontIcon name="external-link" size={14} color="textSecondaryLight" />
+          <TouchableOpacity onPress={viewOnExplorer}>
+            <SafeFontIcon name="external-link" size={14} color="textSecondaryLight" />
+          </TouchableOpacity>
         </View>
       ),
     },
