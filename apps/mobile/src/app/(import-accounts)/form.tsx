@@ -1,13 +1,12 @@
 import React from 'react'
-
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { ImportAccountFormContainer } from '@/src/features/ImportReadOnly'
 import { View } from 'tamagui'
-import { useModalStyle } from '@/src/navigation/hooks/useModalStyle'
 
 function ImportAccountFormScreen() {
-  const modalStyle = useModalStyle()
+  const { bottom } = useSafeAreaInsets()
   return (
-    <View style={modalStyle}>
+    <View style={{ flex: 1 }}>
       <ImportAccountFormContainer />
     </View>
   )
