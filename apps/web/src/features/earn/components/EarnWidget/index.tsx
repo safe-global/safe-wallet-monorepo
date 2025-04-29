@@ -1,10 +1,10 @@
 import { useMemo } from 'react'
 import AppFrame from '@/components/safe-apps/AppFrame'
 import { getEmptySafeApp } from '@/components/safe-apps/utils'
-import { widgetAppData } from '@/features/lend/constants'
-import useGetWidgetUrl from '@/features/lend/hooks/useGetWidgetUrl'
+import { widgetAppData } from '@/features/earn/constants'
+import useGetWidgetUrl from '@/features/earn/hooks/useGetWidgetUrl'
 
-const LendWidget = ({ asset }: { asset?: string }) => {
+const EarnWidget = ({ asset }: { asset?: string }) => {
   const url = useGetWidgetUrl(asset)
 
   const appData = useMemo(
@@ -26,4 +26,4 @@ const LendWidget = ({ asset }: { asset?: string }) => {
   )
 }
 
-export default LendWidget
+export default EarnWidget

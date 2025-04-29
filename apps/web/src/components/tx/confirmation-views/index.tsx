@@ -32,7 +32,7 @@ import UpdateSafe from './UpdateSafe'
 import { MigrateToL2Information } from './MigrateToL2Information'
 import { NestedSafeCreation } from './NestedSafeCreation'
 import { isNestedSafeCreation } from '@/utils/nested-safes'
-import VaultDeposit from '@/features/lend/components/VaultDeposit'
+import VaultDeposit from '@/features/earn/components/VaultDeposit'
 
 type ConfirmationViewProps = {
   txDetails?: TransactionDetails
