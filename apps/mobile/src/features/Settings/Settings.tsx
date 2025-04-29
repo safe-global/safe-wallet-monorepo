@@ -19,9 +19,19 @@ interface SettingsProps {
   displayDevMenu: boolean
   onImplementationTap: () => void
   contact: Contact | null
+  isLatestVersion: boolean
+  latestSafeVersion: string
 }
 
-export const Settings = ({ address, data, onImplementationTap, displayDevMenu, contact }: SettingsProps) => {
+export const Settings = ({
+  address,
+  data,
+  onImplementationTap,
+  displayDevMenu,
+  contact,
+  isLatestVersion,
+  latestSafeVersion,
+}: SettingsProps) => {
   const { owners = [], threshold, implementation } = data
   const colorScheme = useColorScheme()
   return (
@@ -182,9 +192,9 @@ export const Settings = ({ address, data, onImplementationTap, displayDevMenu, c
                 marginTop: 14,
               }}
             >
-              <SafeFontIcon name={'check-filled'} color={'$success'} />
+              {isLatestVersion && <SafeFontIcon testID="check-icon" name={'check-filled'} color={'$success'} />}
               <Text marginLeft={'$2'} textAlign="center" color="$colorSecondary">
-                {implementation?.name}
+                {implementation?.name} {isLatestVersion ? `(Latest version)` : `(Latest version: ${latestSafeVersion})`}
               </Text>
             </Pressable>
           </YStack>

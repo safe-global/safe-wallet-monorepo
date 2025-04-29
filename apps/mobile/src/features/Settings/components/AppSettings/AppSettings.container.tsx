@@ -13,7 +13,7 @@ import { capitalize } from '@/src/utils/formatters'
 import { SAFE_WEB_FEEDBACK_URL } from '@/src/config/constants'
 
 export const AppSettingsContainer = () => {
-  const { toggleBiometrics, isBiometricsEnabled, isLoading } = useBiometrics()
+  const { toggleBiometrics, isBiometricsEnabled, isLoading, getBiometricsUIInfo } = useBiometrics()
   const { themePreference, setThemePreference } = useTheme()
 
   const settingsSections = [
@@ -67,8 +67,8 @@ export const AppSettingsContainer = () => {
       sectionName: 'Security',
       items: [
         {
-          label: 'Face ID',
-          leftIcon: 'face-id',
+          label: getBiometricsUIInfo().label,
+          leftIcon: getBiometricsUIInfo().icon,
           type: 'switch',
           rightNode: (
             <LoadableSwitch

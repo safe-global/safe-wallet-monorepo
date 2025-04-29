@@ -51,7 +51,7 @@ const ReplaceOwnerFlow = ({ address }: { address: string }) => {
     },
     {
       txLayoutProps: { title: 'Confirm transaction details', fixedNonce: true },
-      content: <ConfirmTxDetails key={2} onSubmit={() => {}} showMethodCall />,
+      content: <ConfirmTxDetails key={2} onSubmit={() => {}} />,
     },
   ]
 

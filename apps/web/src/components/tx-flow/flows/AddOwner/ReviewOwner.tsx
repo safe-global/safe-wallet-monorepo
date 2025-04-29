@@ -64,7 +64,7 @@ export const ReviewOwner = ({
 
   return (
     <SettingsChangeContext.Provider value={params}>
-      <ReviewTransaction onSubmit={handleSubmit} showMethodCall />
+      <ReviewTransaction onSubmit={handleSubmit} />
     </SettingsChangeContext.Provider>
   )
 }

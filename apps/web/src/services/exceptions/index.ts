@@ -2,6 +2,7 @@ import { sentryCaptureException } from '@/services/sentry'
 import { IS_PRODUCTION } from '@/config/constants'
 import ErrorCodes from '@safe-global/utils/services/exceptions/ErrorCodes'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
+import { logger } from '../datadog'
 
 export class CodedException extends Error {
   public readonly code: number
@@ -39,6 +40,13 @@ export class CodedException extends Error {
 
     // Log only the message on prod, and the full error on dev
     console.error(IS_PRODUCTION ? this.message : this)
+
+    if (IS_PRODUCTION) {
+      // Log to Datadog
+      logger.error(this.message, {
+        code: this.code,
+      })
+    }
   }
 
   public track(): void {
