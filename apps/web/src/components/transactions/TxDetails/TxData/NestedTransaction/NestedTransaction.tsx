@@ -50,7 +50,8 @@ export const NestedTransaction = ({
           avatar={<SvgIcon component={NestedTransactionIcon} inheritViewBox fontSize="small" />}
           action={
             chain &&
-            txData && (
+            txData &&
+            signedHash && (
               <Track {...MODALS_EVENTS.OPEN_NESTED_TX}>
                 <Link
                   href={{
