@@ -50,7 +50,7 @@ export const FloatingContainer: FC<FloatingContainerProps> = ({
 
 const styles = StyleSheet.create({
   floatingContainer: {
-    position: 'fixed',
+    position: 'absolute',
     bottom: -40,
     width: '100%',
     zIndex: 1,

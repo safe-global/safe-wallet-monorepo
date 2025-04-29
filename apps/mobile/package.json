@@ -169,7 +169,7 @@
     "storybook": "^8.4.6",
     "ts-node": "^10.9.2",
     "typescript": "~5.8.3",
-    "typescript-eslint": "^8.24.1",
+    "typescript-eslint": "^8.31.1",
     "webpack": "^5.97.1"
   },
   "private": true
