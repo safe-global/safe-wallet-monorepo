@@ -1,4 +1,7 @@
-import type { VaultDepositTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import type {
+  VaultDepositTransactionInfo,
+  VaultRedeemTransactionInfo,
+} from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
 function ObjectViewer({ data }: { data: object }) {
   // If it's not an object or array, just show its value
@@ -33,7 +36,7 @@ function ObjectViewer({ data }: { data: object }) {
   )
 }
 
-const VaultDeposit = ({ txInfo }: { txInfo: VaultDepositTransactionInfo }) => {
+const VaultDeposit = ({ txInfo }: { txInfo: VaultDepositTransactionInfo | VaultRedeemTransactionInfo }) => {
   return <ObjectViewer data={txInfo} />
 }
 

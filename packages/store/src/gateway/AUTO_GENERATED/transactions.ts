@@ -599,40 +599,44 @@ export type NativeStakingWithdrawTransactionInfo = {
   tokenInfo: TokenInfo
   validators: string[]
 }
-export type VaultDepositAdditionalRewards = {
+export type VaultInfo = {
+  address: string
+  name: string
+  description: string
+  dashboardUri?: string | null
+  logoUri: string
+}
+export type VaultExtraReward = {
   tokenInfo: TokenInfo
-  returnRate: number
+  nrr: number
+  claimable: string
+  claimableNext: string
 }
 export type VaultDepositTransactionInfo = {
   type: 'VaultDeposit'
   humanDescription?: string | null
-  chainId: string
-  expectedMonthlyReward: number
-  expectedAnnualReward: number
+  value: string
+  nrr: number
+  fee: number
   tokenInfo: TokenInfo
-  value: number
-  returnRate: number
-  vaultAddress: string
-  vaultName: string
-  vaultDisplayName: string
-  vaultDescription: string
-  vaultDashboardURL: string | null
-  vaultTVL: number
-  additionalRewards?: VaultDepositAdditionalRewards[]
+  vaultInfo: VaultInfo
+  currentReward: string
+  additionalRewardsNrr: number
+  additionalRewards: VaultExtraReward[]
+  expectedMonthlyReward: string
+  expectedAnnualReward: string
 }
-export type TransactionData = {
-  hexData?: string | null
-  dataDecoded?: DataDecoded | null
-  to: AddressInfo
-  value?: string | null
-  operation: number
-  trustedDelegateCallTarget?: boolean | null
-  addressInfoIndex?: object | null
-}
-export type MultisigConfirmationDetails = {
-  signer: AddressInfo
-  signature?: string | null
-  submittedAt: number
+export type VaultRedeemTransactionInfo = {
+  type: 'VaultRedeem'
+  humanDescription?: string | null
+  value: string
+  nrr: number
+  fee: number
+  tokenInfo: TokenInfo
+  vaultInfo: VaultInfo
+  currentReward: string
+  additionalRewardsNrr: number
+  additionalRewards: VaultExtraReward[]
 }
 export type Token = {
   address: string
@@ -641,6 +645,25 @@ export type Token = {
   name: string
   symbol: string
   type: 'ERC721' | 'ERC20' | 'NATIVE_TOKEN' | 'UNKNOWN'
+}
+export type TransactionData = {
+  hexData?: string | null
+  dataDecoded?: DataDecoded | null
+  to: AddressInfo
+  value?: string | null
+  operation: number
+  trustedDelegateCallTarget?: boolean | null
+  addressInfoIndex?: {
+    [key: string]: AddressInfo
+  } | null
+  tokenInfoIndex?: {
+    [key: string]: NativeToken | Erc20Token | Erc721Token
+  } | null
+}
+export type MultisigConfirmationDetails = {
+  signer: AddressInfo
+  signature?: string | null
+  submittedAt: number
 }
 export type MultisigExecutionDetails = {
   type: 'MULTISIG'
@@ -684,6 +707,7 @@ export type TransactionDetails = {
     | NativeStakingValidatorsExitTransactionInfo
     | NativeStakingWithdrawTransactionInfo
     | VaultDepositTransactionInfo
+    | VaultRedeemTransactionInfo
   safeAddress: string
   txId: string
   executedAt?: number | null
@@ -757,6 +781,7 @@ export type Transaction = {
     | NativeStakingValidatorsExitTransactionInfo
     | NativeStakingWithdrawTransactionInfo
     | VaultDepositTransactionInfo
+    | VaultRedeemTransactionInfo
   id: string
   txHash?: string | null
   timestamp: number
@@ -816,6 +841,7 @@ export type TransactionPreview = {
     | NativeStakingValidatorsExitTransactionInfo
     | NativeStakingWithdrawTransactionInfo
     | VaultDepositTransactionInfo
+    | VaultRedeemTransactionInfo
   txData: TransactionData
 }
 export type PreviewTransactionDto = {

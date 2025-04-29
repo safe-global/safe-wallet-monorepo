@@ -13,6 +13,7 @@ import {
   isSwapOrderTxInfo,
   isTwapOrderTxInfo,
   isVaultDepositTxInfo,
+  isVaultRedeemTxInfo,
 } from '@/utils/transaction-guards'
 import { type ReactNode, useContext, useMemo } from 'react'
 import TxData from '@/components/transactions/TxDetails/TxData'
@@ -66,6 +67,9 @@ const getConfirmationViewComponent = ({
 
   // @ts-expect-error TODO: This will be hell to fix
   if (isVaultDepositTxInfo(txInfo)) return <VaultDeposit txInfo={txInfo} />
+
+  // @ts-expect-error TODO: This will be hell to fix
+  if (isVaultRedeemTxInfo(txInfo)) return <VaultDeposit txInfo={txInfo} />
 
   if (isCustomTxInfo(txInfo) && isSafeUpdateTxData(txData)) return <UpdateSafe txData={txData} />
 

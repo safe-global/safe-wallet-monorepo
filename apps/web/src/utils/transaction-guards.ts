@@ -72,6 +72,7 @@ import { LATEST_SAFE_VERSION } from '@/config/constants'
 import type {
   TransactionDetails,
   VaultDepositTransactionInfo,
+  VaultRedeemTransactionInfo,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
 export const isTxQueued = (value: TransactionStatus): boolean => {
@@ -491,4 +492,8 @@ export const isSafeMigrationTxData = (data?: TransactionData): boolean => {
 
 export const isVaultDepositTxInfo = (value: TransactionDetails['txInfo']): value is VaultDepositTransactionInfo => {
   return value.type === 'VaultDeposit'
+}
+
+export const isVaultRedeemTxInfo = (value: TransactionDetails['txInfo']): value is VaultRedeemTransactionInfo => {
+  return value.type === 'VaultRedeem'
 }
