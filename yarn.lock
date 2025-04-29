@@ -7502,13 +7502,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-native-menu/menu@npm:^1.1.6":
-  version: 1.1.7
-  resolution: "@react-native-menu/menu@npm:1.1.7"
+"@react-native-menu/menu@npm:^1.2.3":
+  version: 1.2.3
+  resolution: "@react-native-menu/menu@npm:1.2.3"
   peerDependencies:
     react: "*"
     react-native: "*"
-  checksum: 10/59571ef815cb395a4961e2e68883cc6bb8b3c35b3d5153f49b5f5b46b255035a07369baf7c54628fbf5c7ed71202dc20e9317a7df54dff09e9de533285c61c28
+  checksum: 10/d1970e96ce782874ebcca6f4f479b423a7fce0377a69bd94ec274372564a684fca543c36350d8d9fb92aee888b82f8beea61962db82c476de5b466d8a4c7460d
   languageName: node
   linkType: hard
 
@@ -8169,7 +8169,7 @@ __metadata:
     "@react-native-firebase/app": "npm:^22.0.0"
     "@react-native-firebase/crashlytics": "npm:^22.0.0"
     "@react-native-firebase/messaging": "npm:^22.0.0"
-    "@react-native-menu/menu": "npm:^1.1.6"
+    "@react-native-menu/menu": "npm:^1.2.3"
     "@react-native/babel-preset": "npm:^0.76.2"
     "@react-navigation/material-top-tabs": "npm:^7.2.10"
     "@react-navigation/native": "npm:^7.1.6"
@@ -8259,7 +8259,7 @@ __metadata:
     react-native-screens: "npm:^4.8.0"
     react-native-share: "npm:^12.0.9"
     react-native-svg: "npm:15.8.0"
-    react-native-vision-camera: "npm:^4.6.3"
+    react-native-vision-camera: "npm:^4.6.4"
     react-native-web: "npm:^0.20.0"
     react-redux: "npm:^9.1.2"
     redux: "npm:^5.0.1"
@@ -27739,9 +27739,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-vision-camera@npm:^4.6.3":
-  version: 4.6.3
-  resolution: "react-native-vision-camera@npm:4.6.3"
+"react-native-vision-camera@npm:^4.6.4":
+  version: 4.6.4
+  resolution: "react-native-vision-camera@npm:4.6.4"
   peerDependencies:
     "@shopify/react-native-skia": "*"
     react: "*"
@@ -27755,7 +27755,7 @@ __metadata:
       optional: true
     react-native-worklets-core:
       optional: true
-  checksum: 10/ff56e8126df423ba5d4c9f8d2b15a1b9b48e8669445464b2f301fa47946ce1759e6e4119c443cb8f02a44f8ab5fd6c52a8d534cfc385fc9d647e857ee46f82e6
+  checksum: 10/9de4166aae94f72d29ab6dc2b04066a8216b5d630508345da7cedfa300196b8c2500dd2b5c0076731357c0b9695961d4e71fe891b2714fffb278a410b081c3b5
   languageName: node
   linkType: hard
 
