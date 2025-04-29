@@ -1,13 +1,13 @@
 import { createContext, type ReactElement, type ReactNode, useEffect, useState, useMemo } from 'react'
 import useOnboard, { type ConnectedWallet, getConnectedWallet } from '@/hooks/wallets/useOnboard'
-import useAsync from '@/hooks/useAsync'
+import useAsync from '@safe-global/utils/hooks/useAsync'
 import { getSafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
 import { useCurrentChain } from '@/hooks/useChains'
 import { useRouter } from 'next/router'
 import { type Eip1193Provider } from 'ethers'
 import { getNestedWallet } from '@/utils/nested-safe-wallet'
-import { sameAddress } from '@/utils/addresses'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 
 export type SignerWallet = {
   provider: Eip1193Provider | null

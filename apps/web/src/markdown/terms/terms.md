@@ -1,6 +1,6 @@
 # Terms and Conditions
 
-Last updated: September, 2024
+Last updated: April, 2025
 
 [1\. What is the scope of the Terms?](#1.-what-is-the-scope-of-the-terms?)
 
@@ -24,7 +24,7 @@ Last updated: September, 2024
 
 [11\. Are we responsible for the issuance of the Safe Token and any related functionalities or reward programs?](#11.-are-we-responsible-for-the-issuance-of-the-safe-token-and-any-related-functionalities-or-reward-programs?)
 
-[12\. Are we responsible for third-party content and services?](#12.-are-we-responsible-for-third-party-content-and-services?)
+[12\. What is Cloud Storage and the Spaces feature?](#12.-what-is-cloud-storage-and-the-spaces-feature?)
 
 [13\. Can we terminate or limit your right to use our Services?](#13.-can-we-terminate-or-limit-your-right-to-use-our-services?)
 
@@ -140,15 +140,27 @@ Our Services do not consist of:
 
 # 5\. What do you need to know about Third-Party Safe Apps and Third-Party Services? {#5.-what-do-you-need-to-know-about-third-party-safe-apps-and-third-party-services?}
 
-1. We provide you the possibility to interact with your Safe Account through Third-Party Services. Any activities you engage in with, or services you receive from a third party is between you and that third party directly. The conditions of service provisions, if any, shall be governed by the applicable contractual provisions between you and the respective provider of the Third-Party Service.
+1. You may view, have access to, and may use Third-Party Safe Apps and Third-Party Services within the Safe{Wallet} App. You view, access, or use Third-Party Safe Apps and Third-Party Services at your own election. Your reliance on Third-Party Safe Apps and Third-Party Services is subject to separate terms and conditions set forth by the applicable third party content and/or service provider (“Third-Party Terms”). Third-Party Terms may, amongst other things,
 
-2. The Services rely in part on third-party and open-source software, including the Blockchain, and the continued development and support by third parties. There is no assurance or guarantee that those third parties will maintain their support of their software or that open-source software will continue to be maintained. This may have a material adverse effect on the Services.
+   1. involve separate fees and charges,
 
-3. This means specifically:
+   2. include disclaimers or risk warnings,
+
+   3. apply a different terms and privacy policy.
+
+2. It is your responsibility to understand the Third-Party Terms, including how Third-Party Safe Apps and Third-Party Services use any of your information under their privacy policies.
+
+3. Third-Party Safe Apps and Third-Party Services are provided for your convenience only. We do not verify or control Third-Party Safe Apps and Third-Party Services.
+
+4. If we offer access to Third-Party Safe Apps and Third-Party Services in the Safe App free of charge by us (third-parties may charge separate fees), the liability for providing access to such Third-Party Safe Apps and Third-Party Services is limited pursuant to Section 18 below. Furthermore we reserve the right to cease to provide access to those Third-Party Safe Apps and Third-Party Services through the Safe{Wallet} App without notice.
+
+5. The Services rely in part on third-party and open-source software, including the Blockchain, and the continued development and support by third parties. There is no assurance or guarantee that those third parties will maintain their support of their software or that open-source software will continue to be maintained. This may have a material adverse effect on the Services.
+
+6. This means specifically:
 
 * We do not have any oversight over your activities with Third-Party Services especially by using Third-Party Safe Apps, and therefore we do not and cannot make any representation regarding their appropriateness and suitability for you.
 
-* Third-Party Safe Apps and Third-Party Services are not hosted, owned, controlled or maintained by us. We also do not participate in the Transaction and will not and cannot monitor, verify, censor or edit the functioning or content of any Third-Party Safe Apps and Third-Party Services.
+* Third-Party Safe Apps and Third-Party Services are not hosted, owned, controlled or maintained by us. We also do not participate in the Transaction and will not and cannot monitor, verify, censor or edit the functioning or content of any Third-Party Safe Apps and Third-Party Service.
 
 * We have not conducted any security audit, bug bounty or formal verification (whether internal or external) of the Third-Party Safe Apps and Third-Party Services.
 
@@ -158,7 +170,7 @@ Our Services do not consist of:
 
 * You know of the inherent risks of cryptographic and Blockchain-based systems and the high volatility of Token markets. Transactions undertaken in the Blockchain are irrevocable and irreversible and there is no possibility to refund Token that have been deployed.
 
-* You should read the license requirements, terms and conditions as well as privacy policy of each Third-Party Safe Appz and Third-Party Service that you access or use. Certain Third-Party Safe Apps and Third-Party Services may involve complex Transactions that entail a high degree of risk.
+* You should read the license requirements, terms and conditions as well as privacy policy of each Third-Party Safe Apps and Third-Party Service that you access or use. Certain Third-Party Safe Apps and Third-Party Services may involve complex Transactions that entail a high degree of risk.
 
 * If you contribute integrations to Third-Party Safe Apps and Third-Party Services, you are responsible for all content you contribute, in any manner, and you must have all rights necessary to do so, in the manner in which you contribute it. You are responsible for all your activity in connection with any such Third-Party Safe Apps and Third-Party Services.
 
@@ -214,21 +226,33 @@ Our Services do not consist of:
 
 3. Any interface we provide that allows you to claim or delegate your Safe Tokens or to participate in any third party program related to Safe Tokens is provided free of charge and we exclude any and all liability for the correctness, completeness, speed or timeliness of these services. Furthermore we reserve the right to change the feature from time to time or cease to provide them without notice.
 
-# 12\. Are we responsible for third-party content and services? {#12.-are-we-responsible-for-third-party-content-and-services?}
+# 12\. What is Cloud Storage and the Spaces feature? {#12.-what-is-cloud-storage-and-the-spaces-feature?}
 
-1. You may view, have access to, and may use third-party content and services, for example widget integrations, within the Safe{Wallet} App (“Third-Party Features”). You view, access, or use Third-Party Features at your own election. Your reliance on Third-Party Features is subject to separate terms and conditions set forth by the applicable third party content and/or service provider (“Third-Party Terms”). Third-Party Terms may, amongst other things,
+1. We offer an optional cloud storage service for user created metadata to improve user experience and data management called Spaces. By opting into this service, your metadata, which is by default stored in your browser's local storage, will instead be stored in our private database. The metadata may include, amongst other things:
 
-   1. involve separate fees and charges,
+   1. Safe Accounts you created;
 
-   2. include disclaimers or risk warnings,
+   2. Counterfactual Safe Accounts you created;
 
-   3. apply a different terms and privacy policy.
+   3. Address book you created;
 
-   It is your responsibility to understand the Third-Party Terms, including how Third-Party Features use any of your information under their privacy policies.
+   4. Safe names you attributed;
 
-2. Third Party Features are provided for your convenience only. We do not verify, curate, or control Third Party Features.
+   5. Signer names you attributed;
 
-3. If we offer access to Third-Party Features in the Safe{Wallet} App free of charge by us (Third-Parties may charge separate fees), the liability for providing access to such Third-Party Feature is limited pursuant to Section 18 below. Furthermore we reserve the right to cease to provide access to those Third-Party Features through the Safe{Wallet} App without notice.
+   6. Watchlist you created (read-only Safe Accounts).
+
+2. The cloud storage also allows you to share your metadata with others by creating a shared set of metadata (“Spaces”), adding other users’ Wallet addresses to this Space, and them accepting. By creating or joining a Space, users acknowledge and agree to the following:
+
+* Users are solely responsible for verifying the identity of members they add to a Space. Users must not add others without their explicit consent. We do not verify or endorse Spacemembers or their actions.
+
+* Users must ensure that any metadata they add or share within aSpace complies with all applicable laws and regulations, including but not limited to data protection laws.
+
+* Users must not share or store metadata that is unlawful, fraudulent, misleading, or violates the rights of any third party. We do not assume any responsibility for any metadata shared within a Space.
+
+* We do not intend for users to process personal data via this feature. However, if a user chooses to process personal data within a Space , they are responsible for ensuring compliance with applicable data protection laws. In such cases, the user must inform us in advance and request a Data Processing Agreement (DPA). We reserve the right to refuse or impose conditions on such data processing.
+
+3. Any cloud storage of metadata we provide or offer within the Safe{Wallet} App is provided free of charge and liability is limited pursuant to Section 18 below. Furthermore we reserve the right to change the feature from time to time or cease to provide it with one week notice, prompting the deletion of your metadata from our database while retaining a copy in your local browser storage.
 
 # 13\. Can we terminate or limit your right to use our Services? {#13.-can-we-terminate-or-limit-your-right-to-use-our-services?}
 
@@ -383,4 +407,4 @@ For users who are merchants within the meaning of the German Commercial Code (Ha
 
 # 31\. Is this all? {#31.-is-this-all?}
 
-These Terms constitute the entire agreement between you and us in relation to the Agreement’s subject matter. It replaces and extinguishes any and all prior agreements, draft agreements, arrangements, warranties, statements, assurances, representations and undertakings of any nature made by, or on behalf of either of us, whether oral or written, public or private, in relation to that subject matter.
+These Terms constitute the entire agreement between you and us in relation to the Agreement’s subject matter. It replaces and extinguishes any and all prior agreements, draft agreements, arrangements, warranties, statements, assurances, representations and undertakings of any nature made by, or on behalf of either of us, whether oral or written, public or private, in relation to that subject matter.  

@@ -1,35 +1,8 @@
 import type { JsonRpcSigner } from 'ethers'
-import { type ChainInfo, deleteTransaction } from '@safe-global/safe-gateway-typescript-sdk'
-import { signTypedData } from './web3'
+import { deleteTransaction } from '@safe-global/safe-gateway-typescript-sdk'
+import { signTypedData } from '@safe-global/utils/utils/web3'
 
-export const _replaceTemplate = (uri: string, data: Record<string, string>): string => {
-  // Template syntax returned from gateway is {{this}}
-  const TEMPLATE_REGEX = /\{\{([^}]+)\}\}/g
-
-  return uri.replace(TEMPLATE_REGEX, (_, key: string) => data[key])
-}
-
-export const getHashedExplorerUrl = (
-  hash: string,
-  blockExplorerUriTemplate: ChainInfo['blockExplorerUriTemplate'],
-): string => {
-  const isTx = hash.length > 42
-  const param = isTx ? 'txHash' : 'address'
-
-  return _replaceTemplate(blockExplorerUriTemplate[param], { [param]: hash })
-}
-
-export const getExplorerLink = (
-  hash: string,
-  blockExplorerUriTemplate: ChainInfo['blockExplorerUriTemplate'],
-): { href: string; title: string } => {
-  const href = getHashedExplorerUrl(hash, blockExplorerUriTemplate)
-  const title = `View on ${new URL(href).hostname}`
-
-  return { href, title }
-}
-
-const signTxServiceMessage = async (
+export const signTxServiceMessage = async (
   chainId: string,
   safeAddress: string,
   safeTxHash: string,
@@ -45,13 +18,14 @@ const signTxServiceMessage = async (
     domain: {
       name: 'Safe Transaction Service',
       version: '1.0',
-      chainId,
+      chainId: Number(chainId),
       verifyingContract: safeAddress,
     },
     message: {
       safeTxHash,
       totp: Math.floor(Date.now() / 3600e3),
     },
+    primaryType: 'DeleteRequest',
   })
 }
 

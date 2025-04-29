@@ -16,14 +16,17 @@ import useChainId from '@/hooks/useChainId'
 import { AppRoutes } from '@/config/routes'
 import { getOrigin } from '@/components/safe-apps/utils'
 import { useHasFeature } from '@/hooks/useChains'
-import { FEATURES } from '@/utils/chains'
+
+import { FEATURES } from '@safe-global/utils/utils/chains'
 
 const SafeApps: NextPage = () => {
   const chainId = useChainId()
   const router = useRouter()
   const appUrl = useSafeAppUrl()
+  const appHostname = getOrigin(appUrl)
   const { allSafeApps, remoteSafeAppsLoading } = useSafeApps()
-  const safeAppData = allSafeApps.find((app) => app.url === appUrl)
+  const safeAppData =
+    allSafeApps.find((app) => app.url === appUrl) || allSafeApps.find((app) => getOrigin(app.url) === appHostname)
   const { safeApp, isLoading } = useSafeAppFromManifest(appUrl || '', chainId, safeAppData)
   const isSafeAppsEnabled = useHasFeature(FEATURES.SAFE_APPS)
 

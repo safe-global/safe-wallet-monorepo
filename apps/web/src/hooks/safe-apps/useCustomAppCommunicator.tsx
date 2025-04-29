@@ -10,15 +10,9 @@ import {
   type SendTransactionRequestParams,
 } from '@safe-global/safe-apps-sdk'
 import { SafeAppsTxFlow, SignMessageFlow, SignMessageOnChainFlow } from '@/components/tx-flow/flows'
-import { isOffchainEIP1271Supported } from '@/utils/safe-messages'
-import {
-  getBalances,
-  getSafeMessage,
-  getTransactionDetails,
-  type SafeAppData,
-} from '@safe-global/safe-gateway-typescript-sdk'
+import { isOffchainEIP1271Supported } from '@safe-global/utils/utils/safe-messages'
+import { getSafeMessage, getTransactionDetails, type SafeAppData } from '@safe-global/safe-gateway-typescript-sdk'
 import useGetSafeInfo from '@/components/safe-apps/AppFrame/useGetSafeInfo'
-import { FEATURES, hasFeature } from '@/utils/chains'
 import { isSafeMessageListItem } from '@/utils/safe-message-guards'
 import { TxModalContext } from '@/components/tx-flow'
 import { selectOnChainSigning, selectTokenList, TOKEN_LISTS } from '@/store/settingsSlice'
@@ -32,6 +26,9 @@ import type { ChainInfo as WebCoreChainInfo } from '@safe-global/safe-gateway-ty
 import useChainId from '@/hooks/useChainId'
 import type AppCommunicator from '@/services/safe-apps/AppCommunicator'
 import useBalances from '@/hooks/useBalances'
+import type { TypedData } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
+import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
+import { useLazyBalancesGetBalancesV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 
 export const useCustomAppCommunicator = (
   iframeRef: MutableRefObject<HTMLIFrameElement | null>,
@@ -60,6 +57,7 @@ export const useCustomAppCommunicator = (
   const tokenlist = useAppSelector(selectTokenList)
   const chainId = useChainId()
   const { balances } = useBalances()
+  const [getBalances] = useLazyBalancesGetBalancesV1Query()
 
   const communicator = useAppCommunicator(iframeRef, appData, chain, {
     onConfirmTransactions: (txs: BaseTransaction[], requestId: RequestId, params?: SendTransactionRequestParams) => {
@@ -91,7 +89,7 @@ export const useCustomAppCommunicator = (
           <SignMessageFlow
             logoUri={appData?.iconUrl || ''}
             name={appData?.name || ''}
-            message={message}
+            message={message as string | TypedData}
             origin={appData?.url}
             requestId={requestId}
           />,
@@ -120,12 +118,14 @@ export const useCustomAppCommunicator = (
     onGetSafeInfo: useGetSafeInfo(),
     onGetSafeBalances: (currency) => {
       const isDefaultTokenlistSupported = chain && hasFeature(chain, FEATURES.DEFAULT_TOKENLIST)
-
       return safe.deployed
-        ? getBalances(chainId, safeAddress, currency, {
-            exclude_spam: true,
+        ? getBalances({
+            chainId,
+            safeAddress,
+            fiatCode: currency,
+            excludeSpam: true,
             trusted: isDefaultTokenlistSupported && TOKEN_LISTS.TRUSTED === tokenlist,
-          })
+          }).then((res) => res.data ?? balances)
         : Promise.resolve(balances)
     },
     onGetChainInfo: () => {
@@ -157,14 +157,14 @@ export const useCustomAppCommunicator = (
         ?.find((item) => item.messageHash === messageHash)
 
       if (safeMessage) {
-        return safeMessage.preparedSignature
+        return safeMessage.preparedSignature || undefined
       }
 
       try {
         const { preparedSignature } = await getSafeMessage(chainId, messageHash)
-        return preparedSignature
+        return preparedSignature || undefined
       } catch {
-        return ''
+        return undefined
       }
     },
     ...overrideHandlers,

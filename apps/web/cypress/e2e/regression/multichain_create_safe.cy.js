@@ -23,7 +23,7 @@ describe('Multichain safe creation tests', () => {
     createwallet.selectMultiNetwork(1, constants.networks.polygon.toLowerCase())
     createwallet.clickOnNextBtn()
     createwallet.clickOnNextBtn()
-    main.verifyElementsCount(createwallet.payNowExecMethod, 0)
+    main.verifyElementsCount(createtx.payNowExecMethod, 0)
   })
 
   it('Verify that Pay now is available for single safe creation', () => {

@@ -19,7 +19,7 @@ import {
   useValidateNonce,
 } from '../hooks'
 import * as recommendedNonce from '@/services/tx/tx-sender/recommendedNonce'
-import { defaultSafeInfo } from '@/store/safeInfoSlice'
+import { defaultSafeInfo } from '@safe-global/store/slices/SafeInfo/utils'
 import { chainBuilder } from '@/tests/builders/chains'
 import * as useChains from '@/hooks/useChains'
 import { MockEip1193Provider } from '@/tests/mocks/providers'

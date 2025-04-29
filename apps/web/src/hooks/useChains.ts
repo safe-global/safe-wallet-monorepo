@@ -4,7 +4,8 @@ import { type ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import { useAppSelector } from '@/store'
 import { selectChainById, selectChains } from '@/store/chainsSlice'
 import { useChainId } from './useChainId'
-import { type FEATURES, hasFeature } from '@/utils/chains'
+import type { FEATURES } from '@safe-global/utils/utils/chains'
+import { hasFeature } from '@safe-global/utils/utils/chains'
 
 const useChains = (): { configs: ChainInfo[]; error?: string; loading?: boolean } => {
   const state = useAppSelector(selectChains, isEqual)

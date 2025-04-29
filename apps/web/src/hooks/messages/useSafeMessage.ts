@@ -1,13 +1,13 @@
 import { isSafeMessageListItem } from '@/utils/safe-message-guards'
-import { type SafeMessage } from '@safe-global/safe-gateway-typescript-sdk'
 import { useState, useEffect } from 'react'
 import useSafeMessages from './useSafeMessages'
-import useAsync from '../useAsync'
+import useAsync from '@safe-global/utils/hooks/useAsync'
 import useSafeInfo from '../useSafeInfo'
 import { fetchSafeMessage } from './useSyncSafeMessageSigner'
+import type { MessageItem } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 
 const useSafeMessage = (safeMessageHash: string | undefined) => {
-  const [safeMessage, setSafeMessage] = useState<SafeMessage | undefined>()
+  const [safeMessage, setSafeMessage] = useState<MessageItem | undefined>()
 
   const { safe } = useSafeInfo()
 

@@ -1,0 +1,127 @@
+{
+  "count": 16,
+  "next": "https://safe-client.staging.5afe.dev/v2/chains/11155111/safes/0xBd69b0a9DC90eB6F9bAc3E4a5875f437348b6415/collectibles?cursor=limit%3D10%26offset%3D10",
+  "previous": null,
+  "results": [
+    {
+      "address": "0x373Ba1E9E2fe272B4Ee3144198Fe2994ac9e866c",
+      "tokenName": "CatFactory",
+      "tokenSymbol": "CF",
+      "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0x373Ba1E9E2fe272B4Ee3144198Fe2994ac9e866c.png",
+      "id": "0",
+      "uri": "ipfs://QmdmA3gwGukA8QDPH7Ypq1WAoVfX82nx7SaXFvh1T7UmvZ/0",
+      "name": null,
+      "description": null,
+      "imageUri": null,
+      "metadata": {}
+    },
+    {
+      "address": "0x373Ba1E9E2fe272B4Ee3144198Fe2994ac9e866c",
+      "tokenName": "CatFactory",
+      "tokenSymbol": "CF",
+      "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0x373Ba1E9E2fe272B4Ee3144198Fe2994ac9e866c.png",
+      "id": "1",
+      "uri": "ipfs://QmdmA3gwGukA8QDPH7Ypq1WAoVfX82nx7SaXFvh1T7UmvZ/1",
+      "name": null,
+      "description": null,
+      "imageUri": null,
+      "metadata": {}
+    },
+    {
+      "address": "0xC2B7414eAc24D98a38F5Bebdb4CCb59b6b0a3334",
+      "tokenName": "CatTestImages",
+      "tokenSymbol": "CTI",
+      "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xC2B7414eAc24D98a38F5Bebdb4CCb59b6b0a3334.png",
+      "id": "0",
+      "uri": "ipfs://QmQdYF6ntmjdE8vSSTbDPjVaRd7zk98Wm3HbQdGyFWMXVF/0",
+      "name": null,
+      "description": null,
+      "imageUri": null,
+      "metadata": {}
+    },
+    {
+      "address": "0xC2B7414eAc24D98a38F5Bebdb4CCb59b6b0a3334",
+      "tokenName": "CatTestImages",
+      "tokenSymbol": "CTI",
+      "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xC2B7414eAc24D98a38F5Bebdb4CCb59b6b0a3334.png",
+      "id": "1",
+      "uri": "ipfs://QmQdYF6ntmjdE8vSSTbDPjVaRd7zk98Wm3HbQdGyFWMXVF/1",
+      "name": null,
+      "description": null,
+      "imageUri": null,
+      "metadata": {}
+    },
+    {
+      "address": "0xC2B7414eAc24D98a38F5Bebdb4CCb59b6b0a3334",
+      "tokenName": "CatTestImages",
+      "tokenSymbol": "CTI",
+      "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xC2B7414eAc24D98a38F5Bebdb4CCb59b6b0a3334.png",
+      "id": "2",
+      "uri": "ipfs://QmQdYF6ntmjdE8vSSTbDPjVaRd7zk98Wm3HbQdGyFWMXVF/2",
+      "name": null,
+      "description": null,
+      "imageUri": null,
+      "metadata": {}
+    },
+    {
+      "address": "0xC2B7414eAc24D98a38F5Bebdb4CCb59b6b0a3334",
+      "tokenName": "CatTestImages",
+      "tokenSymbol": "CTI",
+      "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xC2B7414eAc24D98a38F5Bebdb4CCb59b6b0a3334.png",
+      "id": "3",
+      "uri": "ipfs://QmQdYF6ntmjdE8vSSTbDPjVaRd7zk98Wm3HbQdGyFWMXVF/3",
+      "name": null,
+      "description": null,
+      "imageUri": null,
+      "metadata": {}
+    },
+    {
+      "address": "0xC2B7414eAc24D98a38F5Bebdb4CCb59b6b0a3334",
+      "tokenName": "CatTestImages",
+      "tokenSymbol": "CTI",
+      "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xC2B7414eAc24D98a38F5Bebdb4CCb59b6b0a3334.png",
+      "id": "4",
+      "uri": "ipfs://QmQdYF6ntmjdE8vSSTbDPjVaRd7zk98Wm3HbQdGyFWMXVF/4",
+      "name": null,
+      "description": null,
+      "imageUri": null,
+      "metadata": {}
+    },
+    {
+      "address": "0xC2B7414eAc24D98a38F5Bebdb4CCb59b6b0a3334",
+      "tokenName": "CatTestImages",
+      "tokenSymbol": "CTI",
+      "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xC2B7414eAc24D98a38F5Bebdb4CCb59b6b0a3334.png",
+      "id": "5",
+      "uri": "ipfs://QmQdYF6ntmjdE8vSSTbDPjVaRd7zk98Wm3HbQdGyFWMXVF/5",
+      "name": null,
+      "description": null,
+      "imageUri": null,
+      "metadata": {}
+    },
+    {
+      "address": "0xC2B7414eAc24D98a38F5Bebdb4CCb59b6b0a3334",
+      "tokenName": "CatTestImages",
+      "tokenSymbol": "CTI",
+      "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xC2B7414eAc24D98a38F5Bebdb4CCb59b6b0a3334.png",
+      "id": "6",
+      "uri": "ipfs://QmQdYF6ntmjdE8vSSTbDPjVaRd7zk98Wm3HbQdGyFWMXVF/6",
+      "name": null,
+      "description": null,
+      "imageUri": null,
+      "metadata": {}
+    },
+    {
+      "address": "0xD13F683CE031B66fe19D4765B932B21F1Bf76c10",
+      "tokenName": "NFTSafeTest",
+      "tokenSymbol": "NFTST",
+      "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xD13F683CE031B66fe19D4765B932B21F1Bf76c10.png",
+      "id": "0",
+      "uri": "https://example.com/nft/0",
+      "name": null,
+      "description": null,
+      "imageUri": null,
+      "metadata": {}
+    }
+  ]
+}

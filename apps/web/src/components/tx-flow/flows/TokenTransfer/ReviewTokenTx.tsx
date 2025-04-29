@@ -1,23 +1,18 @@
-import { type ReactElement } from 'react'
-import { type TokenTransferParams, TokenTransferType } from '@/components/tx-flow/flows/TokenTransfer/index'
+import { useContext, type ReactElement, type PropsWithChildren } from 'react'
+import { type MultiTokenTransferParams, TokenTransferType } from '@/components/tx-flow/flows/TokenTransfer/index'
 import ReviewTokenTransfer from '@/components/tx-flow/flows/TokenTransfer/ReviewTokenTransfer'
 import ReviewSpendingLimitTx from '@/components/tx-flow/flows/TokenTransfer/ReviewSpendingLimitTx'
+import { TxFlowContext, type TxFlowContextType } from '../../TxFlowProvider'
 
-const ReviewTokenTx = ({
-  params,
-  onSubmit,
-  txNonce,
-}: {
-  params: TokenTransferParams
-  onSubmit: () => void
-  txNonce?: number
-}): ReactElement => {
-  const isSpendingLimitTx = params.type === TokenTransferType.spendingLimit
+const ReviewTokenTx = (props: PropsWithChildren<{ onSubmit: () => void; txNonce?: number }>): ReactElement => {
+  const { data } = useContext(TxFlowContext) as TxFlowContextType<MultiTokenTransferParams>
+  const isSpendingLimitTx = data?.type === TokenTransferType.spendingLimit
 
-  return isSpendingLimitTx ? (
-    <ReviewSpendingLimitTx params={params} onSubmit={onSubmit} />
+  return isSpendingLimitTx && data?.recipients.length === 1 ? (
+    // TODO: Allow batched spending limit txs
+    <ReviewSpendingLimitTx params={data.recipients[0]} onSubmit={props.onSubmit} />
   ) : (
-    <ReviewTokenTransfer params={params} onSubmit={onSubmit} txNonce={txNonce} />
+    <ReviewTokenTransfer params={data} {...props} />
   )
 }
 

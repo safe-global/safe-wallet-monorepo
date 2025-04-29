@@ -1,9 +1,9 @@
 import { TypedDataEncoder } from 'ethers'
 import semverSatisfies from 'semver/functions/satisfies'
 import { getEip712MessageTypes, getEip712TxTypes } from '@safe-global/protocol-kit/dist/src/utils'
-import type { SafeMessage, SafeTransactionData, SafeVersion } from '@safe-global/safe-core-sdk-types'
-
-import { generateSafeMessageMessage } from './safe-messages'
+import type { SafeTransactionData, SafeVersion } from '@safe-global/safe-core-sdk-types'
+import type { MessageItem } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
+import { generateSafeMessageMessage } from '@safe-global/utils/utils/safe-messages'
 
 const NEW_DOMAIN_TYPE_HASH_VERSION = '>=1.3.0'
 const NEW_SAFE_TX_TYPE_HASH_VERSION = '>=1.0.0'
@@ -51,7 +51,7 @@ export function getSafeMessageMessageHash({
   message,
   safeVersion,
 }: {
-  message: SafeMessage['data']
+  message: MessageItem['message']
   safeVersion: SafeVersion
 }): string {
   const SafeMessage = getEip712MessageTypes(safeVersion).SafeMessage

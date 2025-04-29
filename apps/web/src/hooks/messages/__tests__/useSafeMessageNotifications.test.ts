@@ -1,6 +1,5 @@
+import type { SafeMessageListItem } from '@safe-global/store/gateway/types'
 import { toBeHex } from 'ethers'
-import { SafeMessageStatus, SafeMessageListItemType } from '@safe-global/safe-gateway-typescript-sdk'
-import type { SafeMessageListItem } from '@safe-global/safe-gateway-typescript-sdk'
 
 import { safeMsgDispatch, SafeMsgEvent } from '@/services/safe-messages/safeMsgEvents'
 import { showNotification } from '@/store/notificationsSlice'
@@ -21,8 +20,8 @@ describe('useSafeMessageNotifications', () => {
     it('should return all SafeMessages awaiting confirmation of the current wallet', () => {
       const items: SafeMessageListItem[] = [
         {
-          type: SafeMessageListItemType.MESSAGE,
-          status: SafeMessageStatus.NEEDS_CONFIRMATION,
+          type: 'MESSAGE',
+          status: 'NEEDS_CONFIRMATION',
           messageHash: '0x123',
           confirmations: [],
         } as unknown as SafeMessageListItem,
@@ -32,8 +31,8 @@ describe('useSafeMessageNotifications', () => {
 
       expect(messages).toStrictEqual([
         {
-          type: SafeMessageListItemType.MESSAGE,
-          status: SafeMessageStatus.NEEDS_CONFIRMATION,
+          type: 'MESSAGE',
+          status: 'NEEDS_CONFIRMATION',
           messageHash: '0x123',
           confirmations: [],
         },
@@ -43,7 +42,7 @@ describe('useSafeMessageNotifications', () => {
     it('should filter DATE_LABELs', () => {
       const items = [
         {
-          type: SafeMessageListItemType.DATE_LABEL,
+          type: 'DATE_LABEL' as const,
         } as SafeMessageListItem,
       ]
 
@@ -55,8 +54,8 @@ describe('useSafeMessageNotifications', () => {
     it('should filter pending messages', () => {
       const items: SafeMessageListItem[] = [
         {
-          type: SafeMessageListItemType.MESSAGE,
-          status: SafeMessageStatus.NEEDS_CONFIRMATION,
+          type: 'MESSAGE',
+          status: 'NEEDS_CONFIRMATION',
           messageHash: '0x123',
           confirmations: [
             {
@@ -81,8 +80,8 @@ describe('useSafeMessageNotifications', () => {
     it('should filter messages already confirmed by the connected wallet', () => {
       const items: SafeMessageListItem[] = [
         {
-          type: SafeMessageListItemType.MESSAGE,
-          status: SafeMessageStatus.NEEDS_CONFIRMATION,
+          type: 'MESSAGE',
+          status: 'NEEDS_CONFIRMATION',
           messageHash: '0x123',
           confirmations: [
             {

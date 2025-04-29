@@ -1,18 +1,14 @@
-import SignOrExecuteForm from '@/components/tx/SignOrExecuteForm'
 import { Grid, Typography } from '@mui/material'
-import { useContext, useEffect } from 'react'
+import { useCallback, useContext, useEffect } from 'react'
 import { Errors, logError } from '@/services/exceptions'
 import { trackEvent, SETTINGS_EVENTS } from '@/services/analytics'
 import { createRemoveModuleTx } from '@/services/tx/tx-sender'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { type RemoveModuleFlowProps } from '.'
 import EthHashInfo from '@/components/common/EthHashInfo'
+import ReviewTransaction from '@/components/tx/ReviewTransaction'
 
-const onFormSubmit = () => {
-  trackEvent(SETTINGS_EVENTS.MODULES.REMOVE_MODULE)
-}
-
-export const ReviewRemoveModule = ({ params }: { params: RemoveModuleFlowProps }) => {
+export const ReviewRemoveModule = ({ params, onSubmit }: { params: RemoveModuleFlowProps; onSubmit: () => void }) => {
   const { setSafeTx, safeTxError, setSafeTxError } = useContext(SafeTxContext)
 
   useEffect(() => {
@@ -25,8 +21,13 @@ export const ReviewRemoveModule = ({ params }: { params: RemoveModuleFlowProps }
     }
   }, [safeTxError])
 
+  const onFormSubmit = useCallback(() => {
+    trackEvent(SETTINGS_EVENTS.MODULES.REMOVE_MODULE)
+    onSubmit()
+  }, [onSubmit])
+
   return (
-    <SignOrExecuteForm onSubmit={onFormSubmit}>
+    <ReviewTransaction onSubmit={onFormSubmit}>
       <Grid
         container
         sx={{
@@ -49,6 +50,6 @@ export const ReviewRemoveModule = ({ params }: { params: RemoveModuleFlowProps }
         After removing this module, any feature or app that uses this module might no longer work. If this Safe Account
         requires more then one signature, the module removal will have to be confirmed by other signers as well.
       </Typography>
-    </SignOrExecuteForm>
+    </ReviewTransaction>
   )
 }

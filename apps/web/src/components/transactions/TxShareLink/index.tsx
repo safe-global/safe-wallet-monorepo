@@ -6,7 +6,7 @@ import { CopyDeeplinkLabels, trackEvent, TX_LIST_EVENTS } from '@/services/analy
 import TxShareLink from './TxShareLink'
 
 import css from './styles.module.css'
-import { getBlockExplorerLink } from '@/utils/chains'
+import { getBlockExplorerLink } from '@safe-global/utils/utils/chains'
 import { useCurrentChain } from '@/hooks/useChains'
 import ExplorerButton from '@/components/common/ExplorerButton'
 
@@ -47,7 +47,7 @@ export function TxShareBlock({ txId, txHash }: { txId: string; txHash?: string }
     <Paper data-testid="share-block" className={css.wrapper}>
       <TxShareAccordion noExpand={!!txHash} />
 
-      <Box p={2} pt={0.5} display="flex" alignItems="center" gap={1}>
+      <Box p={2} pt={0.5} display="flex" flexWrap="wrap" alignItems="center" gap={1}>
         <TxShareLink id={txId} eventLabel={CopyDeeplinkLabels.shareBlock}>
           <Button
             data-testid="copy-link-btn"

@@ -1,10 +1,11 @@
+import type { TypedData } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import Approvals from '@/components/tx/ApprovalEditor/Approvals'
 import { createMultiSendCallOnlyTx, createTx } from '@/services/tx/tx-sender'
 import { decodeSafeTxToBaseTransactions } from '@/utils/transactions'
 import { Alert, Box, Skeleton, Typography } from '@mui/material'
 import { type SafeTransaction } from '@safe-global/safe-core-sdk-types'
-import { type EIP712TypedData, TokenType } from '@safe-global/safe-gateway-typescript-sdk'
+import { TokenType } from '@safe-global/safe-gateway-typescript-sdk'
 import { useContext } from 'react'
 import { ApprovalEditorForm } from './ApprovalEditorForm'
 import { useApprovalInfos } from './hooks/useApprovalInfos'
@@ -36,7 +37,7 @@ export const ApprovalEditor = ({
   safeMessage,
 }: {
   safeTransaction?: SafeTransaction
-  safeMessage?: EIP712TypedData
+  safeMessage?: TypedData
 }) => {
   const { setSafeTx, setSafeTxError } = useContext(SafeTxContext)
   const [readableApprovals, error, loading] = useApprovalInfos({ safeTransaction, safeMessage })

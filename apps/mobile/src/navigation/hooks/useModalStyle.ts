@@ -27,6 +27,6 @@ export const useModalStyle = () => {
 
   return {
     ...modalStyle,
-    paddingBottom: bottom * 2 + getTokenValue('$4'),
+    paddingBottom: bottom + getTokenValue('$4'),
   }
 }

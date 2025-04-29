@@ -11,6 +11,7 @@ export const getDefaultScreenOptions = (goBack: () => void) => {
       return (
         <HeaderBackButton
           {...props}
+          style={{ marginLeft: -8 }}
           testID={'go-back'}
           onPress={goBack}
           backImage={() => {

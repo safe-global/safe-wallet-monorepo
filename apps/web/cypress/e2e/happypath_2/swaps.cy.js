@@ -51,10 +51,13 @@ describe('Happy path Swaps tests', () => {
       ]
       // Clean txs in the queue
       cy.visit(constants.transactionQueueUrl + staticSafes.SEP_STATIC_SAFE_30)
+      navigation.verifyTxBtnStatus(constants.enabledStates.enabled)
       cy.wait(5000)
       create_tx.deleteAllTx()
 
       cy.visit(constants.swapUrl + staticSafes.SEP_STATIC_SAFE_30)
+      navigation.verifyTxBtnStatus(constants.enabledStates.enabled)
+      swaps.getMockQuoteResponse(swaps.quoteResponse.quote1)
       swaps.acceptLegalDisclaimer()
       cy.wait(4000)
       main.getIframeBody(iframeSelector).within(() => {
@@ -71,22 +74,28 @@ describe('Happy path Swaps tests', () => {
         swaps.confirmPriceImpact()
       })
       create_tx.changeNonce(0)
+      create_tx.clickOnContinueSignTransactionBtn()
+      create_tx.clickOnAcknowledgement()
       create_tx.clickOnSignTransactionBtn()
       create_tx.clickViewTransaction()
       main.verifyValuesExist(dataRow, [create_tx.tx_status.execution_needed])
+      cy.wait(1000) // Give it some time to logout properly on UI
       navigation.clickOnWalletExpandMoreIcon()
       navigation.clickOnDisconnectBtn()
       wallet.connectSigner(signer3)
-
+      navigation.verifyTxBtnStatus(constants.enabledStates.enabled)
       cy.wait(5000)
       create_tx.verifyConfirmTransactionBtnIsVisible()
       create_tx.clickOnConfirmTransactionBtn()
       create_tx.clickOnNoLaterOption()
 
+      create_tx.clickOnContinueSignTransactionBtn()
+      create_tx.clickOnAcknowledgement()
       create_tx.clickOnSignTransactionBtn()
       navigation.clickOnWalletExpandMoreIcon()
       navigation.clickOnDisconnectBtn()
       wallet.connectSigner(signer)
+      navigation.verifyTxBtnStatus(constants.enabledStates.enabled)
       main.verifyValuesExist(dataRow, [create_tx.tx_status.execution_needed])
       create_tx.deleteTx()
 

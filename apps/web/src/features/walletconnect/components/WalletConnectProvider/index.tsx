@@ -4,7 +4,7 @@ import { formatJsonRpcError } from '@walletconnect/jsonrpc-utils'
 
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useSafeWalletProvider from '@/services/safe-wallet-provider/useSafeWalletProvider'
-import { asError } from '@/services/exceptions/utils'
+import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { IS_PRODUCTION } from '@/config/constants'
 import { getPeerName, stripEip155Prefix } from '@/features/walletconnect/services/utils'
 import { trackRequest } from '@/features/walletconnect//services/tracking'

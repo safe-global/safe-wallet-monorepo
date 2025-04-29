@@ -7,7 +7,7 @@ import { useModalStyle } from '@/src/navigation/hooks/useModalStyle'
 function ImportAccountFormScreen() {
   const modalStyle = useModalStyle()
   return (
-    <View style={modalStyle} paddingHorizontal={'$4'}>
+    <View style={modalStyle}>
       <ImportAccountFormContainer />
     </View>
   )

@@ -14,7 +14,6 @@ import { OVERVIEW_EVENTS } from '@/services/analytics'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { selectSettings, setQrShortName } from '@/store/settingsSlice'
 import { selectOutgoingTransactions } from '@/store/txHistorySlice'
-import { getExplorerLink } from '@/utils/gateway'
 import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import classnames from 'classnames'
 import { type ReactNode, useState } from 'react'
@@ -27,6 +26,7 @@ import LightbulbOutlinedIcon from '@mui/icons-material/LightbulbOutlined'
 import css from './styles.module.css'
 import ActivateAccountButton from '@/features/counterfactual/ActivateAccountButton'
 import { isReplayedSafeProps } from '@/features/counterfactual/utils'
+import { getExplorerLink } from '@safe-global/utils/utils/gateway'
 
 const calculateProgress = (items: boolean[]) => {
   const totalNumberOfItems = items.length

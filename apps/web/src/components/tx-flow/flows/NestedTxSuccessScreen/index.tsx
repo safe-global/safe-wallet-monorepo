@@ -14,7 +14,7 @@ import { useAppSelector } from '@/store'
 import ExternalLink from '@/components/common/ExternalLink'
 import { MODALS_EVENTS } from '@/services/analytics'
 import Track from '@/components/common/Track'
-import useAsync from '@/hooks/useAsync'
+import useAsync from '@safe-global/utils/hooks/useAsync'
 import { getSafeTransaction } from '@/utils/transactions'
 import { isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
 

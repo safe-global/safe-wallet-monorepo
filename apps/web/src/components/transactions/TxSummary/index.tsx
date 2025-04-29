@@ -17,8 +17,8 @@ import QueueActions from './QueueActions'
 import useIsPending from '@/hooks/useIsPending'
 import TxConfirmations from '../TxConfirmations'
 import { useHasFeature } from '@/hooks/useChains'
-import { FEATURES } from '@/utils/chains'
 import TxStatusLabel from '@/components/transactions/TxStatusLabel'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 
 type TxSummaryProps = {
   isConflictGroup?: boolean

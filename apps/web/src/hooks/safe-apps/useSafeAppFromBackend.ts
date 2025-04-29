@@ -2,8 +2,8 @@ import { useEffect } from 'react'
 import type { SafeAppData } from '@safe-global/safe-gateway-typescript-sdk'
 import { getSafeApps } from '@safe-global/safe-gateway-typescript-sdk'
 import { Errors, logError } from '@/services/exceptions'
-import type { AsyncResult } from '../useAsync'
-import useAsync from '../useAsync'
+import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
+import useAsync from '@safe-global/utils/hooks/useAsync'
 import { trimTrailingSlash } from '@/utils/url'
 
 const useSafeAppFromBackend = (url: string, chainId: string): AsyncResult<SafeAppData> => {

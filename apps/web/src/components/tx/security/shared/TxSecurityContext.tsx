@@ -1,56 +1,9 @@
-import { SecuritySeverity } from '@/services/security/modules/types'
+import { SecuritySeverity } from '@safe-global/utils/services/security/modules/types'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
-import {
-  createContext,
-  type Dispatch,
-  type SetStateAction,
-  useContext,
-  useMemo,
-  useState,
-  type ReactElement,
-} from 'react'
-import type { BlockaidModuleResponse } from '@/services/security/modules/BlockaidModule'
+import { createContext, type ReactElement, useContext, useMemo, useState } from 'react'
 import { useBlockaid } from '../blockaid/useBlockaid'
-
-export const defaultSecurityContextValues = {
-  blockaidResponse: {
-    warnings: [],
-    description: undefined,
-    classification: undefined,
-    reason: undefined,
-    balanceChange: undefined,
-    severity: SecuritySeverity.NONE,
-    contractManagement: undefined,
-    isLoading: false,
-    error: undefined,
-  },
-  needsRiskConfirmation: false,
-  isRiskConfirmed: false,
-  setIsRiskConfirmed: () => {},
-  isRiskIgnored: false,
-  setIsRiskIgnored: () => {},
-}
-
-export type TxSecurityContextProps = {
-  blockaidResponse:
-    | {
-        description: BlockaidModuleResponse['description']
-        classification: BlockaidModuleResponse['classification']
-        reason: BlockaidModuleResponse['reason']
-        warnings: NonNullable<BlockaidModuleResponse['issues']>
-        balanceChange: BlockaidModuleResponse['balanceChange'] | undefined
-        severity: SecuritySeverity | undefined
-        contractManagement: BlockaidModuleResponse['contractManagement'] | undefined
-        isLoading: boolean
-        error: Error | undefined
-      }
-    | undefined
-  needsRiskConfirmation: boolean
-  isRiskConfirmed: boolean
-  setIsRiskConfirmed: Dispatch<SetStateAction<boolean>>
-  isRiskIgnored: boolean
-  setIsRiskIgnored: Dispatch<SetStateAction<boolean>>
-}
+import { defaultSecurityContextValues } from '@safe-global/utils/components/tx/security/shared/utils'
+import { type TxSecurityContextProps } from '@safe-global/utils/components/tx/security/shared/types'
 
 export const TxSecurityContext = createContext<TxSecurityContextProps>(defaultSecurityContextValues)
 

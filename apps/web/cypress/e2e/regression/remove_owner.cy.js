@@ -48,7 +48,7 @@ describe('Remove Owners tests', () => {
   })
 
   // Added to prod
-  it.skip('Verify owner deletion transaction has been created', () => {
+  it('Verify owner deletion transaction has been created', () => {
     wallet.connectSigner(signer)
     owner.waitForConnectionStatus()
     owner.openRemoveOwnerWindow(1)
@@ -58,6 +58,8 @@ describe('Remove Owners tests', () => {
     owner.getAddressToBeRemoved()
     owner.verifyOwnerDeletionWindowDisplayed()
     createTx.changeNonce(10)
+    createTx.clickOnContinueSignTransactionBtn()
+    createTx.clickOnAcknowledgement()
     createTx.clickOnSignTransactionBtn()
     createTx.waitForProposeRequest()
     createTx.clickViewTransaction()

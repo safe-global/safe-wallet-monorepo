@@ -1,0 +1,90 @@
+diff --git a/android/src/main/java/com/reactnativedevicecrypto/Helpers.java b/android/src/main/java/com/reactnativedevicecrypto/Helpers.java
+index 03fd79e8a389f33a2841ecf0e177ffc9ea01b78c..681f07efab020e078ee75d697434a1d3ce414f32 100644
+--- a/android/src/main/java/com/reactnativedevicecrypto/Helpers.java
++++ b/android/src/main/java/com/reactnativedevicecrypto/Helpers.java
+@@ -39,6 +39,7 @@ public class Helpers {
+     private static final int AES_IV_SIZE = 128;
+     public static final String PEM_HEADER = "-----BEGIN PUBLIC KEY-----\n";
+     public static final String PEM_FOOTER = "-----END PUBLIC KEY-----";
++    private static Boolean sIsStrongBoxSupported = null; // Cache for StrongBox support
+ 
+     public interface KeyType {
+         @Retention(SOURCE)
+@@ -81,6 +82,64 @@ public class Helpers {
+         }
+     }
+ 
++    public static boolean isStrongBoxSupported() {
++        // Return cached result if available
++        if (sIsStrongBoxSupported != null) {
++            return sIsStrongBoxSupported;
++        }
++
++        // Try to create a key with StrongBox requirement and see if it succeeds
++        String testAlias = "test_strongbox_support";
++        try {
++            // First, clean up any existing test key
++            try {
++                KeyStore keyStore = getKeyStore();
++                if (keyStore.containsAlias(testAlias)) {
++                    keyStore.deleteEntry(testAlias);
++                }
++            } catch (Exception e) {
++                // Ignore errors during cleanup
++            }
++
++            // Attempt to create a key with StrongBox backing
++            KeyGenParameterSpec testSpec = new KeyGenParameterSpec.Builder(testAlias, KeyProperties.PURPOSE_ENCRYPT)
++                    .setIsStrongBoxBacked(true)
++                    .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
++                    .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
++                    .setKeySize(256)
++                    .build();
++            KeyGenerator testKeyGen = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, KEY_STORE);
++            testKeyGen.init(testSpec);
++            testKeyGen.generateKey();
++
++            // If we reach here, StrongBox is supported
++            // Clean up the test key
++            KeyStore keyStore = getKeyStore();
++            keyStore.deleteEntry(testAlias);
++
++            // Cache the result
++            sIsStrongBoxSupported = true;
++            Log.i(RN_MODULE, "StrongBox is supported on this device");
++            return true;
++        } catch (Exception e) {
++            Log.i(RN_MODULE, "StrongBox not supported on this device: " + e.getMessage());
++
++            // Clean up any test key that might have been created
++            try {
++                KeyStore keyStore = getKeyStore();
++                if (keyStore.containsAlias(testAlias)) {
++                    keyStore.deleteEntry(testAlias);
++                }
++            } catch (Exception cleanupEx) {
++                // Ignore errors during cleanup
++            }
++
++            // Cache the result
++            sIsStrongBoxSupported = false;
++            return false;
++        }
++    }
++
+     public static boolean isKeyExists(@NonNull String alias, @KeyType.Types int keyType) throws Exception {
+         KeyStore keyStore = Helpers.getKeyStore();
+         if (!keyStore.containsAlias(alias)) {
+@@ -143,8 +202,10 @@ public class Helpers {
+             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+               builder.setInvalidatedByBiometricEnrollment(invalidateOnNewBiometry);
+             }
+-            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.R) {
+-              builder.setIsStrongBoxBacked(true);
++            // Only try to enable StrongBox if API level is high enough and the device
++            // actually supports it
++            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P && isStrongBoxSupported()) {
++                builder.setIsStrongBoxBacked(true);
+             }
+             break;
+         }

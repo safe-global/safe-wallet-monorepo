@@ -14,7 +14,7 @@ interface TransactionHeaderProps {
   badgeIcon: IconName
   badgeThemeName?: BadgeThemeTypes
   badgeColor: string
-  title: string
+  title: string | React.ReactNode
   isIdenticon?: boolean
   submittedAt: number
 }
@@ -45,7 +45,7 @@ export function TransactionHeader({
       )}
 
       <View alignItems="center" gap="$1">
-        <H3 fontWeight={600}>{title}</H3>
+        {typeof title === 'string' ? <H3 fontWeight={600}>{title}</H3> : title}
         <Text color="$textSecondaryLight">
           {date} at {time}
         </Text>

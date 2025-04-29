@@ -1,19 +1,19 @@
+import type { MessageItem } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import { useMemo, type ReactElement } from 'react'
 import { Accordion, AccordionSummary, Typography, AccordionDetails, Box } from '@mui/material'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import CodeIcon from '@mui/icons-material/Code'
 import classNames from 'classnames'
-import { SafeMessageStatus, type SafeMessage } from '@safe-global/safe-gateway-typescript-sdk'
 import { ErrorBoundary } from '@sentry/react'
 
-import { formatDateTime } from '@/utils/date'
+import { formatDateTime } from '@safe-global/utils/utils/date'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import { InfoDetails } from '@/components/transactions/InfoDetails'
 import { generateDataRowValue, TxDataRow } from '@/components/transactions/TxDetails/Summary/TxDataRow'
 import MsgSigners from '@/components/safe-messages/MsgSigners'
 import useWallet from '@/hooks/wallets/useWallet'
 import SignMsgButton from '@/components/safe-messages/SignMsgButton'
-import { generateSafeMessageMessage, isEIP712TypedData } from '@/utils/safe-messages'
+import { generateSafeMessageMessage, isEIP712TypedData } from '@safe-global/utils/utils/safe-messages'
 
 import txDetailsCss from '@/components/transactions/TxDetails/styles.module.css'
 import singleTxDecodedCss from '@/components/transactions/TxDetails/TxData/DecodedData/SingleTxDecoded/styles.module.css'
@@ -23,9 +23,9 @@ import CopyButton from '@/components/common/CopyButton'
 import NamedAddressInfo from '@/components/common/NamedAddressInfo'
 import MsgShareLink from '../MsgShareLink'
 
-const MsgDetails = ({ msg }: { msg: SafeMessage }): ReactElement => {
+const MsgDetails = ({ msg }: { msg: MessageItem }): ReactElement => {
   const wallet = useWallet()
-  const isConfirmed = msg.status === SafeMessageStatus.CONFIRMED
+  const isConfirmed = msg.status === 'CONFIRMED'
   const safeMessage = useMemo(() => {
     try {
       return generateSafeMessageMessage(msg.message)
@@ -46,7 +46,7 @@ const MsgDetails = ({ msg }: { msg: SafeMessage }): ReactElement => {
             <EthHashInfo
               address={msg.proposedBy.value || ''}
               name={msg.proposedBy.name}
-              customAvatar={msg.proposedBy.logoUri}
+              customAvatar={msg.proposedBy.logoUri || undefined}
               shortAddress={false}
               showCopyButton
               hasExplorer
@@ -77,10 +77,10 @@ const MsgDetails = ({ msg }: { msg: SafeMessage }): ReactElement => {
         </div>
 
         <div className={txDetailsCss.txSummary}>
-          <TxDataRow title="Created:">{formatDateTime(msg.creationTimestamp)}</TxDataRow>
-          <TxDataRow title="Last modified:">{formatDateTime(msg.modifiedTimestamp)}</TxDataRow>
-          <TxDataRow title="Message hash:">{generateDataRowValue(msg.messageHash, 'hash')}</TxDataRow>
-          {safeMessage && <TxDataRow title="SafeMessage:">{generateDataRowValue(safeMessage, 'hash')}</TxDataRow>}
+          <TxDataRow title="Created">{formatDateTime(msg.creationTimestamp)}</TxDataRow>
+          <TxDataRow title="Last modified">{formatDateTime(msg.modifiedTimestamp)}</TxDataRow>
+          <TxDataRow title="Message hash">{generateDataRowValue(msg.messageHash, 'hash')}</TxDataRow>
+          {safeMessage && <TxDataRow title="SafeMessage">{generateDataRowValue(safeMessage, 'hash')}</TxDataRow>}
         </div>
 
         {msg.preparedSignature && (
@@ -108,7 +108,7 @@ const MsgDetails = ({ msg }: { msg: SafeMessage }): ReactElement => {
                   <EthHashInfo
                     address={confirmation.owner.value || ''}
                     name={confirmation.owner.name}
-                    customAvatar={confirmation.owner.logoUri}
+                    customAvatar={confirmation.owner.logoUri || undefined}
                     shortAddress={false}
                     showCopyButton
                     hasExplorer

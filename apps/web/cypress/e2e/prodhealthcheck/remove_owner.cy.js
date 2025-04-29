@@ -23,7 +23,7 @@ describe('[PROD] Remove Owners tests', () => {
     cy.contains(owner.safeAccountNonceStr, { timeout: 10000 })
   })
 
-  it.skip('Verify owner deletion transaction has been created', () => {
+  it('Verify owner deletion transaction has been created', () => {
     wallet.connectSigner(signer)
     owner.waitForConnectionStatus()
     owner.openRemoveOwnerWindow(1)
@@ -33,6 +33,8 @@ describe('[PROD] Remove Owners tests', () => {
     owner.getAddressToBeRemoved()
     owner.verifyOwnerDeletionWindowDisplayed()
     createTx.changeNonce(10)
+    createTx.clickOnContinueSignTransactionBtn()
+    createTx.clickOnAcknowledgement()
     createTx.clickOnSignTransactionBtn()
     createTx.waitForProposeRequest()
     createTx.clickViewTransaction()

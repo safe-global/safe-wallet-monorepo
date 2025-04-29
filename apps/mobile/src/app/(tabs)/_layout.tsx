@@ -2,7 +2,7 @@ import { Tabs } from 'expo-router'
 import React from 'react'
 import { TabBarIcon } from '@/src/components/navigation/TabBarIcon'
 import { Navbar as AssetsNavbar } from '@/src/features/Assets/components/Navbar/Navbar'
-import { Pressable, StyleSheet } from 'react-native'
+import { Pressable, StyleSheet, Platform } from 'react-native'
 
 export default function TabLayout() {
   return (
@@ -31,7 +31,7 @@ export default function TabLayout() {
           headerShown: false,
           tabBarButtonTestID: 'transactions-tab',
           tabBarItemStyle: {
-            paddingTop: 10,
+            paddingTop: Platform.OS === 'android' ? 6 : 10,
           },
           tabBarIcon: ({ color }) => <TabBarIcon name={'transactions'} color={color} />,
         }}
@@ -63,11 +63,11 @@ const styles = StyleSheet.create({
   homeTab: {
     flex: 1,
     alignItems: 'flex-end',
-    paddingTop: 15,
+    paddingTop: Platform.OS === 'android' ? 10 : 15,
   },
   settingsTab: {
     flex: 1,
     alignItems: 'flex-start',
-    paddingTop: 15,
+    paddingTop: Platform.OS === 'android' ? 10 : 15,
   },
 })

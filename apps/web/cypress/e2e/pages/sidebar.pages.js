@@ -66,6 +66,55 @@ const readOnlyChip = '[data-testid="read-only-chip"]'
 const addSafeBtn = '[data-testid="add-safe-button"]'
 const indexStatusSection = '[data-testid="index-status"]'
 const needHelpBtn = '[data-testid="need-help-btn"]'
+const openNestedSafeListBtn = '[data-track="nested-safes: Open nested Safe list"]'
+const nestedSafeListPopover = '[data-testid="nested-safe-list"]'
+const breadcrumpContainer = '[data-testid="safe-breadcrumb-container"]'
+const parentSafeItem = 'div[aria-label="Parent Safe"]'
+const nestedSafeItem = 'div[aria-label="Nested Safe"]'
+const safeIconItem = '[data-testid="safe-icon"]'
+
+export function clickOnOpenNestedSafeListBtn() {
+  cy.get(openNestedSafeListBtn).click()
+}
+
+export function checkSafesInPopverList(safes) {
+  main.verifyValuesExist(nestedSafeListPopover, safes)
+}
+
+export function checkSafesCountInPopverList(number) {
+  main.verifyElementsCount(nestedSafeListPopover, number)
+}
+
+export function clickOnSafeInPopover(safe) {
+  cy.get(nestedSafeListPopover).within(() => {
+    cy.contains(safe).click()
+  })
+}
+
+export function clickOnParentSafeInBreadcrumb() {
+  cy.wait(1000) // Needs time to render
+  cy.get(breadcrumpContainer).within(() => {
+    cy.get(parentSafeItem).within(() => {
+      cy.get('a').click()
+    })
+  })
+}
+
+export function checkParentSafeInBreadcrumb(name, address) {
+  cy.get(breadcrumpContainer).within(() => {
+    cy.get(parentSafeItem).within(() => {
+      cy.get(`a[href*="${address}"]`).should('contain', name)
+    })
+  })
+}
+
+export function checkNestedSafeInBreadcrumb(name) {
+  cy.get(breadcrumpContainer).within(() => {
+    cy.get(nestedSafeItem).within(() => {
+      cy.get('p').should('contain', name)
+    })
+  })
+}
 
 export const importBtnStr = 'Import'
 export const exportBtnStr = 'Export'
@@ -378,6 +427,10 @@ export function verifyMissingSignature(safe) {
 
 export function verifyQueuedTx(safe) {
   return getSafeItemOptions(safe).find(queuedTxInfo).should('exist')
+}
+
+export function verifySafeIconData(safe) {
+  return getSafeByName(safe).find(safeIconItem).should('be.visible')
 }
 
 export function clickOnSafeItemOptionsBtn(name) {

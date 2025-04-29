@@ -1,8 +1,8 @@
 import type { OperationType } from '@safe-global/safe-core-sdk-types'
 import { type SafeTransactionData } from '@safe-global/safe-core-sdk-types'
-import type { TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
 import { Operation } from '@safe-global/safe-gateway-typescript-sdk'
 import { isMultisigDetailedExecutionInfo, isNativeTokenTransfer } from '@/src/utils/transaction-guards'
+import { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
 const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000'
 const EMPTY_DATA = '0x'
@@ -77,7 +77,8 @@ const extractTxInfo = (
   })()
 
   const to = (() => {
-    switch (txDetails.txInfo.type) {
+    const type = txDetails.txInfo.type
+    switch (type) {
       case 'Transfer':
         if (isNativeTokenTransfer(txDetails.txInfo.transferInfo)) {
           return txDetails.txInfo.recipient.value
@@ -101,7 +102,8 @@ const extractTxInfo = (
       case 'SettingsChange':
         return safeAddress
       default: {
-        throw new Error(`Unknown transaction type: ${txDetails.txInfo.type}`)
+        // This should never happen as we've handled all possible cases
+        throw new Error(`Unexpected transaction type: ${type}`)
       }
     }
   })()
@@ -117,7 +119,7 @@ const extractTxInfo = (
       gasToken,
       nonce,
       refundReceiver,
-      value,
+      value: value ?? '0',
       to,
       operation,
     },

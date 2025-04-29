@@ -4,14 +4,7 @@ import type { SafeTransaction } from '@safe-global/safe-core-sdk-types'
 import { type ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import type { OnboardAPI } from '@web3-onboard/core'
 import type { Eip1193Provider } from 'ethers'
-
-export function invariant<T extends unknown>(condition: T, error: string): asserts condition {
-  if (condition) {
-    return
-  }
-
-  throw new Error(error)
-}
+import { invariant } from '@safe-global/utils/utils/helpers'
 
 export function assertTx(safeTx: SafeTransaction | undefined): asserts safeTx {
   return invariant(safeTx, 'Transaction not provided')

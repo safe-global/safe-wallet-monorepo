@@ -3,7 +3,7 @@ import OrderId from '@/features/swap/components/OrderId'
 import StatusLabel from '@/features/swap/components/StatusLabel'
 import SwapProgress from '@/features/swap/components/SwapProgress'
 import { capitalize } from '@/hooks/useMnemonicName'
-import { formatDateTime, formatTimeInWords } from '@/utils/date'
+import { formatDateTime, formatTimeInWords } from '@safe-global/utils/utils/date'
 import Stack from '@mui/material/Stack'
 import type { ReactElement } from 'react'
 import type { TwapOrder as SwapTwapOrder } from '@safe-global/safe-gateway-typescript-sdk'
@@ -17,7 +17,7 @@ import { DataTable } from '@/components/common/Table/DataTable'
 import { compareAsc } from 'date-fns'
 import css from './styles.module.css'
 import { Typography } from '@mui/material'
-import { formatAmount } from '@/utils/formatNumber'
+import { formatAmount } from '@safe-global/utils/utils/formatNumber'
 import {
   getExecutionPrice,
   getLimitPrice,

@@ -6,6 +6,10 @@
 
 # testing
 /coverage
+/packages/utils/coverage
+
+# generated types
+/packages/utils/src/types/contracts
 
 # next.js
 **/.next/

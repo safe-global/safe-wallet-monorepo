@@ -17,8 +17,8 @@ import CreateSafeInfos from '@/components/new-safe/create/CreateSafeInfos'
 import { useState } from 'react'
 import { type NewSafeFormData } from '.'
 import AdvancedOptionsStep from './steps/AdvancedOptionsStep'
-import { getLatestSafeVersion } from '@/utils/chains'
 import { useCurrentChain } from '@/hooks/useChains'
+import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
 
 const AdvancedCreateSafe = () => {
   const router = useRouter()

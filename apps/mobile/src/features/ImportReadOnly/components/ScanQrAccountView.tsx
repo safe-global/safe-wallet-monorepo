@@ -11,14 +11,25 @@ type QrCameraViewProps = {
   isCameraActive: boolean
   onScan: (codes: Code[]) => void
   onEnterManuallyPress: () => void
+  hasPermission: boolean
+  onActivateCamera: () => void
 }
 
-export const QrCameraView = ({ permission, isCameraActive, onScan, onEnterManuallyPress }: QrCameraViewProps) => (
+export const QrCameraView = ({
+  permission,
+  isCameraActive,
+  onScan,
+  onEnterManuallyPress,
+  hasPermission,
+  onActivateCamera,
+}: QrCameraViewProps) => (
   <>
     <QrCamera
       permission={permission}
+      hasPermission={hasPermission}
       isCameraActive={isCameraActive}
       onScan={onScan}
+      onActivateCamera={onActivateCamera}
       heading={permission === 'denied' ? 'Camera access disabled' : 'Scan a QR code'}
       footer={
         <>
@@ -30,7 +41,7 @@ export const QrCameraView = ({ permission, isCameraActive, onScan, onEnterManual
           <View alignItems="center" marginTop="$5">
             <SafeButton
               secondary
-              icon={<SafeFontIcon name="copy" />}
+              icon={<SafeFontIcon name="copy" size={18} />}
               onPress={onEnterManuallyPress}
               testID={'enter-manually'}
             >

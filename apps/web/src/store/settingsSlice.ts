@@ -4,16 +4,7 @@ import merge from 'lodash/merge'
 
 import type { RootState } from '@/store'
 import isEqual from 'lodash/isEqual'
-
-export type EnvState = {
-  tenderly: {
-    url: string
-    accessToken: string
-  }
-  rpc: {
-    [chainId: string]: string
-  }
-}
+import type { EnvState } from '@safe-global/store/settingsSlice'
 
 export enum TOKEN_LISTS {
   TRUSTED = 'TRUSTED',

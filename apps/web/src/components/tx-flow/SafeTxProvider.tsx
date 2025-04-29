@@ -1,17 +1,17 @@
+import type { TypedData } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import { createContext, useState, useEffect } from 'react'
 import type { Dispatch, ReactNode, SetStateAction, ReactElement } from 'react'
 import type { SafeTransaction } from '@safe-global/safe-core-sdk-types'
 import { createTx } from '@/services/tx/tx-sender'
 import { useRecommendedNonce, useSafeTxGas } from '../tx/SignOrExecuteForm/hooks'
 import { Errors, logError } from '@/services/exceptions'
-import type { EIP712TypedData } from '@safe-global/safe-gateway-typescript-sdk'
 
 export type SafeTxContextParams = {
   safeTx?: SafeTransaction
   setSafeTx: Dispatch<SetStateAction<SafeTransaction | undefined>>
 
-  safeMessage?: EIP712TypedData
-  setSafeMessage: Dispatch<SetStateAction<EIP712TypedData | undefined>>
+  safeMessage?: TypedData
+  setSafeMessage: Dispatch<SetStateAction<TypedData | undefined>>
 
   safeTxError?: Error
   setSafeTxError: Dispatch<SetStateAction<Error | undefined>>
@@ -28,6 +28,9 @@ export type SafeTxContextParams = {
 
   txOrigin?: string
   setTxOrigin: Dispatch<SetStateAction<string | undefined>>
+
+  isMassPayout?: boolean
+  setIsMassPayout: Dispatch<SetStateAction<boolean | undefined>>
 }
 
 export const SafeTxContext = createContext<SafeTxContextParams>({
@@ -38,16 +41,18 @@ export const SafeTxContext = createContext<SafeTxContextParams>({
   setNonceNeeded: () => {},
   setSafeTxGas: () => {},
   setTxOrigin: () => {},
+  setIsMassPayout: () => {},
 })
 
 const SafeTxProvider = ({ children }: { children: ReactNode }): ReactElement => {
   const [safeTx, setSafeTx] = useState<SafeTransaction>()
-  const [safeMessage, setSafeMessage] = useState<EIP712TypedData>()
+  const [safeMessage, setSafeMessage] = useState<TypedData>()
   const [safeTxError, setSafeTxError] = useState<Error>()
   const [nonce, setNonce] = useState<number>()
   const [nonceNeeded, setNonceNeeded] = useState<boolean>(true)
   const [safeTxGas, setSafeTxGas] = useState<string>()
   const [txOrigin, setTxOrigin] = useState<string>()
+  const [isMassPayout, setIsMassPayout] = useState<boolean>()
 
   // Signed txs cannot be updated
   const isSigned = safeTx && safeTx.signatures.size > 0
@@ -99,6 +104,8 @@ const SafeTxProvider = ({ children }: { children: ReactNode }): ReactElement => 
         recommendedNonce,
         txOrigin,
         setTxOrigin,
+        isMassPayout,
+        setIsMassPayout,
       }}
     >
       {children}

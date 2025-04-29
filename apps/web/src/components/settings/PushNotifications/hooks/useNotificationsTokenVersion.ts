@@ -3,7 +3,8 @@ import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import type { NotificationsTokenVersion } from '@/services/push-notifications/preferences'
 import type { NotifiableSafes } from '../logic'
 import { useHasFeature } from '@/hooks/useChains'
-import { FEATURES } from '@/utils/chains'
+
+import { FEATURES } from '@safe-global/utils/utils/chains'
 
 export const NOTIFICATIONS_TOKEN_VERSION_KEY = 'notificationsTokenVersion'
 

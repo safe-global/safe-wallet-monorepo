@@ -208,4 +208,6 @@ export enum OVERVIEW_LABELS {
   welcome_page = 'welcome_page',
   login_page = 'login_page',
   settings = 'settings',
+  space_list_page = 'space_list_page',
+  space_page = 'space_page',
 }

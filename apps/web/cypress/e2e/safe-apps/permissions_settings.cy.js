@@ -8,8 +8,7 @@ let $dapps,
 const app1 = 'https://app1.com'
 const app3 = 'https://app3.com'
 
-// TODO: Skip until connection error is resolved
-describe.skip('Permissions settings tests', () => {
+describe('Permissions settings tests', () => {
   before(() => {
     getSafes(CATEGORIES.static).then((statics) => {
       staticSafes = statics
@@ -51,6 +50,7 @@ describe.skip('Permissions settings tests', () => {
       cy.visit(`${constants.appSettingsUrl}?safe=${staticSafes.SEP_STATIC_SAFE_2}`, {
         failOnStatusCode: false,
       })
+      main.acceptCookies2()
     })
   })
 
