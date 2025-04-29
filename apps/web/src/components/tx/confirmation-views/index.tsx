@@ -5,6 +5,7 @@ import {
   isAnyStakingTxInfo,
   isCustomTxInfo,
   isExecTxData,
+  isMultiSendTxInfo,
   isOnChainConfirmationTxData,
   isSafeMigrationTxData,
   isSafeUpdateTxData,
@@ -29,6 +30,7 @@ import { MigrateToL2Information } from './MigrateToL2Information'
 import { NestedSafeCreation } from './NestedSafeCreation'
 import { isNestedSafeCreation } from '@/utils/nested-safes'
 import Summary from '@/components/transactions/TxDetails/Summary'
+import Multisend from '@/components/transactions/TxDetails/TxData/DecodedData/Multisend'
 
 type ConfirmationViewProps = {
   txDetails?: TransactionDetails
@@ -67,6 +69,10 @@ const getConfirmationViewComponent = ({
 
   if (isCustomTxInfo(txInfo) && txData && isNestedSafeCreation(txData)) {
     return <NestedSafeCreation txData={txData} />
+  }
+
+  if (isMultiSendTxInfo(txInfo)) {
+    return <Multisend txData={txData} compact />
   }
 
   return null
