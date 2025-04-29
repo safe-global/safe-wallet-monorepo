@@ -148,7 +148,7 @@
     "@storybook/react-native": "^8.4.2",
     "@storybook/react-webpack5": "^8.4.6",
     "@storybook/test": "^8.4.6",
-    "@testing-library/react-native": "^12.7.2",
+    "@testing-library/react-native": "^13.2.0",
     "@types/eslint__js": "^8.42.3",
     "@types/jest": "^29.5.12",
     "@types/lodash": "^4.17.13",
