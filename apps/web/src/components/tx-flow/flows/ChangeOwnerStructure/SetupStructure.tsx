@@ -150,7 +150,11 @@ export function SetupStructure({
           <Divider className={commonCss.nestedDivider} />
 
           <CardActions>
-            <Button variant="contained" type="submit" disabled={isSameOwners && isSameThreshold}>
+            <Button
+              variant="contained"
+              type="submit"
+              disabled={(isSameOwners && isSameThreshold) || !formMethods.formState.isValid}
+            >
               Next
             </Button>
           </CardActions>
