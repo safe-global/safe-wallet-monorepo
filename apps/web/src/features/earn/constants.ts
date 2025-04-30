@@ -1,4 +1,4 @@
-export const EARN_TITLE = 'Lend'
+export const EARN_TITLE = 'Earn'
 export const WIDGET_TESTNET_URL = 'https://safe.widget.testnet.kiln.fi/overview'
 export const EARN_CONSENT_STORAGE_KEY = 'lendDisclaimerAcceptedV1'
 
