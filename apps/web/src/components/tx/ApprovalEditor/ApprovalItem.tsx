@@ -16,6 +16,7 @@ export const approvalMethodDescription: Record<
     type === TokenType.ERC721 ? `Allow to transfer ${symbol}` : `Set ${symbol} allowance to`,
   increaseAllowance: (symbol: string) => `Increase ${symbol} allowance by`,
   Permit2: (symbol: string) => `Give permission to spend ${symbol}`,
+  Permit: (symbol: string) => `Give permission to spend ${symbol}`,
 }
 
 const ApprovalItem = ({
