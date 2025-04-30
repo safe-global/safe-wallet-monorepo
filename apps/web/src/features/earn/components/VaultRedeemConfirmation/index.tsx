@@ -36,8 +36,8 @@ function ObjectViewer({ data }: { data: object }) {
   )
 }
 
-const VaultDeposit = ({ txInfo }: { txInfo: VaultDepositTransactionInfo | VaultRedeemTransactionInfo }) => {
+const VaultRedeemConfirmation = ({ txInfo }: { txInfo: VaultRedeemTransactionInfo }) => {
   return <ObjectViewer data={txInfo} />
 }
 
-export default VaultDeposit
+export default VaultRedeemConfirmation
