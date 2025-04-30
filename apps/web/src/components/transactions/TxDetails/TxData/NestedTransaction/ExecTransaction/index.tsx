@@ -1,5 +1,5 @@
 import { Safe__factory } from '@safe-global/utils/types/contracts'
-import { Skeleton, Stack } from '@mui/material'
+import { Box, Skeleton, Stack } from '@mui/material'
 import { type TransactionData } from '@safe-global/safe-gateway-typescript-sdk'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 
@@ -92,16 +92,18 @@ export const ExecTransaction = ({
           )}
 
           {chain && data && (
-            <Link
-              href={{
-                pathname: AppRoutes.transactions.history,
-                query: { safe: `${chain.shortName}:${data.to.value}` },
-              }}
-              passHref
-              legacyBehavior
-            >
-              <ExternalLink>Open Safe</ExternalLink>
-            </Link>
+            <Box>
+              <Link
+                href={{
+                  pathname: AppRoutes.transactions.history,
+                  query: { safe: `${chain.shortName}:${data.to.value}` },
+                }}
+                passHref
+                legacyBehavior
+              >
+                <ExternalLink>Open Safe</ExternalLink>
+              </Link>
+            </Box>
           )}
         </>
       ) : error ? (
