@@ -26,10 +26,16 @@ const Batching = ({
   const { setTxFlow } = useContext(TxModalContext)
   const { addToBatch } = useTxActions()
   const { safeTx } = useContext(SafeTxContext)
-  const { isSubmitDisabled, setIsSubmitLoading, isSubmitLoading, setSubmitError, setIsRejectedByUser } =
-    useContext(TxFlowContext)
+  const {
+    isBatchable: isBatchableTxFlowContext,
+    isSubmitDisabled,
+    setIsSubmitLoading,
+    isSubmitLoading,
+    setSubmitError,
+    setIsRejectedByUser,
+  } = useContext(TxFlowContext)
 
-  const isBatchable = !!safeTx && !isDelegateCall(safeTx)
+  const isBatchable = isBatchableTxFlowContext && !!safeTx && !isDelegateCall(safeTx)
 
   const handleSubmit = async (e: SyntheticEvent) => {
     e.preventDefault()
@@ -83,12 +89,10 @@ const Batching = ({
 
 const useShouldRegisterSlot = () => {
   const isCounterfactualSafe = useIsCounterfactualSafe()
-  const { isBatch, isBatchable, isProposing, willExecuteThroughRole, isCreation } = useContext(TxFlowContext)
+  const { isBatch, isProposing, willExecuteThroughRole, isCreation } = useContext(TxFlowContext)
   const isOwner = useIsSafeOwner()
 
-  return (
-    isBatchable && isOwner && isCreation && !isBatch && !isCounterfactualSafe && !willExecuteThroughRole && !isProposing
-  )
+  return isOwner && isCreation && !isBatch && !isCounterfactualSafe && !willExecuteThroughRole && !isProposing
 }
 
 const BatchingSlot = withSlot({
