@@ -78,7 +78,7 @@ export const ImportAccountFormContainer = () => {
       `/(import-accounts)/signers?safeAddress=${address}&chainId=${result.data?.[0].chainId}&import_safe=true&safeName=${getValues('name')}`,
     )
   }, [result.data, router])
-  console.log(errors)
+
   return (
     <ImportAccountFormView
       canContinue={canContinue}
