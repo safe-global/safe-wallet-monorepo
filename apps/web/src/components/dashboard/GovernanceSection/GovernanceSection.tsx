@@ -4,7 +4,7 @@ import { WidgetBody } from '@/components/dashboard/styled'
 import css from './styles.module.css'
 import { useBrowserPermissions } from '@/hooks/safe-apps/permissions'
 import { useRemoteSafeApps } from '@/hooks/safe-apps/useRemoteSafeApps'
-import { DISCORD_URL, SafeAppsTag } from '@/config/constants'
+import { SafeAppsTag } from '@/config/constants'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import { OpenInNew } from '@mui/icons-material'
 import NetworkError from '@/public/images/common/network-error.svg'
@@ -21,6 +21,7 @@ import { fetchSafeAppFromManifest } from '@/services/safe-apps/manifest'
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import { getOrigin } from '@/components/safe-apps/utils'
 import InfiniteScroll from '@/components/common/InfiniteScroll'
+import { DISCORD_URL } from '@safe-global/utils/config/constants'
 
 // A fallback component when the Safe App fails to load
 const WidgetLoadErrorFallback = () => (

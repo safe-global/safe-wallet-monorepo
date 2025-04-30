@@ -1,7 +1,8 @@
 import { Tooltip, SvgIcon } from '@mui/material'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import ExternalLink from '@/components/common/ExternalLink'
-import { HelpCenterArticle } from '@/config/constants'
+
+import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 
 const HelpTooltip = () => (
   <Tooltip

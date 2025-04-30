@@ -8,7 +8,8 @@ import { AdvancedField, type AdvancedParameters } from './types'
 import GasLimitInput from './GasLimitInput'
 import ExternalLink from '@/components/common/ExternalLink'
 import NumberField from '@/components/common/NumberField'
-import { HelpCenterArticle } from '@/config/constants'
+
+import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 
 type AdvancedParamsFormProps = {
   params: AdvancedParameters

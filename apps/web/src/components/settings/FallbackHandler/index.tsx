@@ -6,13 +6,14 @@ import classnames from 'classnames'
 
 import EthHashInfo from '@/components/common/EthHashInfo'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { BRAND_NAME, HelpCenterArticle } from '@/config/constants'
+import { BRAND_NAME } from '@/config/constants'
 import ExternalLink from '@/components/common/ExternalLink'
 import { useTxBuilderApp } from '@/hooks/safe-apps/useTxBuilderApp'
 import { useCompatibilityFallbackHandlerDeployments } from '@/hooks/useCompatibilityFallbackHandlerDeployments'
 import { useIsOfficialFallbackHandler } from '@/hooks/useIsOfficialFallbackHandler'
 import { useIsTWAPFallbackHandler } from '@/features/swap/hooks/useIsTWAPFallbackHandler'
 import css from '../TransactionGuards/styles.module.css'
+import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 
 const FALLBACK_HANDLER_VERSION = '>=1.1.1'
 

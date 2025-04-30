@@ -5,11 +5,11 @@ import type { AlertColor } from '@mui/material'
 import InfoOutlinedIcon from '@/public/images/notifications/info.svg'
 import css from './styles.module.css'
 import ExternalLink from '@/components/common/ExternalLink'
-import { HelpCenterArticle } from '@/config/constants'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
 import { useIsOfficialFallbackHandler } from '@/hooks/useIsOfficialFallbackHandler'
 import { useIsTWAPFallbackHandler } from '@/features/swap/hooks/useIsTWAPFallbackHandler'
 import { UntrustedFallbackHandlerTxText } from '@/components/tx/confirmation-views/SettingsChange/UntrustedFallbackHandlerTxAlert'
+import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 
 const Warning = ({
   datatestid,

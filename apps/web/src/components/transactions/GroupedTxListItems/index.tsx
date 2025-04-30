@@ -7,7 +7,8 @@ import ExpandableTransactionItem from '@/components/transactions/TxListItem/Expa
 import css from './styles.module.css'
 import { ReplaceTxHoverContext, ReplaceTxHoverProvider } from './ReplaceTxHoverProvider'
 import ExternalLink from '@/components/common/ExternalLink'
-import { HelpCenterArticle } from '@/config/constants'
+
+import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 
 const Disclaimer = () => (
   <Typography>

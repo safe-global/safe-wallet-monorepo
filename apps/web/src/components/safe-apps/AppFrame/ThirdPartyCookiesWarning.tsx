@@ -1,7 +1,8 @@
 import React from 'react'
 import { Alert, AlertTitle } from '@mui/material'
 import ExternalLink from '@/components/common/ExternalLink'
-import { HelpCenterArticle } from '@/config/constants'
+
+import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 
 type ThirdPartyCookiesWarningProps = {
   onClose: () => void

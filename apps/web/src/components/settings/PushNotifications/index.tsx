@@ -23,7 +23,7 @@ import { useNotificationRegistrations } from './hooks/useNotificationRegistratio
 import { useNotificationPreferences } from './hooks/useNotificationPreferences'
 import { GlobalPushNotifications } from './GlobalPushNotifications'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
-import { HelpCenterArticle, IS_DEV } from '@/config/constants'
+import { IS_DEV } from '@/config/constants'
 import { trackEvent } from '@/services/analytics'
 import { PUSH_NOTIFICATION_EVENTS } from '@/services/analytics/events/push-notifications'
 import { AppRoutes } from '@/config/routes'
@@ -35,6 +35,7 @@ import { Permission } from '@/permissions/config'
 import css from './styles.module.css'
 import NetworkWarning from '@/components/new-safe/create/NetworkWarning'
 import NotificationRenewal from '@/components/notification-center/NotificationRenewal'
+import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 
 export const PushNotifications = (): ReactElement => {
   const { safe, safeLoaded } = useSafeInfo()
