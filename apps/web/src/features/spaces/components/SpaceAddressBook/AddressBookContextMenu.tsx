@@ -9,7 +9,6 @@ import ContextMenu from '@/components/common/ContextMenu'
 import DeleteIcon from '@/public/images/common/delete.svg'
 import EditIcon from '@/public/images/common/edit.svg'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
-import { trackEvent } from '@/services/analytics'
 import { useIsAdmin } from '@/features/spaces/hooks/useSpaceMembers'
 
 import EditContactDialog from './EditContactDialog'
@@ -41,7 +40,6 @@ const AddressBookContextMenu = ({ entry }: { entry: SpaceAddressBookItemDto }) =
 
   const handleOpenModal = (e: MouseEvent, type: keyof typeof open) => {
     e.stopPropagation()
-    if (type === ModalType.REMOVE) trackEvent({ ...SPACE_EVENTS.DELETE_ACCOUNT_MODAL })
     setAnchorEl(undefined)
     setOpen((prev) => ({ ...prev, [type]: true }))
   }

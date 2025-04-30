@@ -2,7 +2,7 @@ import { Alert, DialogActions, Stack, Button, DialogContent, Typography, Circula
 import { Controller, FormProvider, useForm } from 'react-hook-form'
 import ModalDialog from '@/components/common/ModalDialog'
 import { useState, useMemo } from 'react'
-import AddressInput from '@/components/common/AddressInput'
+import AddressInputReadOnly from '@/components/common/AddressInputReadOnly'
 import NameInput from '@/components/common/NameInput'
 import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import NetworkMultiSelectorInput from '@/components/common/NetworkSelector/NetworkMultiSelectorInput'
@@ -121,14 +121,10 @@ const EditContactDialog = ({ entry, onClose }: EditContactDialogProps) => {
           <DialogContent sx={{ py: 2 }}>
             <Typography mb={2}>Edit contact details. Anyone in the space can see it.</Typography>
             <Stack spacing={3}>
-              <AddressInput
-                name="address"
-                label="Address"
-                required
-                showPrefix={false}
-                disabled={true}
-                InputProps={{ readOnly: true }}
-              />
+              <Box pt={1}>
+                <AddressInputReadOnly address={entry.address} name={entry.name} />
+              </Box>
+
               <NameInput name="name" label="Name" required />
 
               <Box>
