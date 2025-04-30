@@ -7,7 +7,7 @@ import { OperationType } from '@safe-global/safe-core-sdk-types'
 import BatchIcon from '@/public/images/common/batch.svg'
 import { useDraftBatch } from '@/hooks/useDraftBatch'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
-import ReviewTransaction from '@/components/tx/ReviewTransactionV2'
+import ReviewTransaction, { type ReviewTransactionProps } from '@/components/tx/ReviewTransactionV2'
 import { TxFlowType } from '@/services/analytics'
 import { TxFlow } from '../../TxFlow'
 
@@ -24,7 +24,7 @@ const getData = (txDetails: TransactionDetails): MetaTransactionData => {
   }
 }
 
-const ConfirmBatch: typeof ReviewTransaction = (props) => {
+const ConfirmBatch = (props: ReviewTransactionProps) => {
   const { setSafeTx, setSafeTxError } = useContext(SafeTxContext)
   const batchTxs = useDraftBatch()
 
