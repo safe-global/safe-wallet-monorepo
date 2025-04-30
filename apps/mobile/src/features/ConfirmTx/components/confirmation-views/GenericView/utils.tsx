@@ -4,7 +4,7 @@ import { Logo } from '@/src/components/Logo'
 import { Badge } from '@/src/components/Badge'
 import { ellipsis } from '@/src/utils/formatters'
 import { CircleProps, Text, View } from 'tamagui'
-import { shortenAddress } from '@safe-global/utils/formatters'
+import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import {
   MultisigExecutionDetails,
@@ -54,6 +54,7 @@ export const formatGenericViewItems = ({
           )}
           <Text fontSize="$4">{genericViewName}</Text>
           <CopyButton value={txData.to.value} color={'$textSecondaryLight'} />
+
           <SafeFontIcon name="external-link" size={14} color="textSecondaryLight" />
         </View>
       ),

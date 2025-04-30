@@ -1,5 +1,5 @@
 import React from 'react'
-import { render } from '@testing-library/react-native'
+import { render } from '@/src/tests/test-utils'
 import { DataRow } from './index'
 import { Text } from 'react-native'
 import { View } from 'tamagui'
@@ -75,7 +75,9 @@ describe('DataRow.Header', () => {
     const { getByText } = render(<DataRow.Header>Header Child</DataRow.Header>)
     const header = getByText('Header Child')
     expect(header.props.style).toMatchObject({
-      fontWeight: '600',
+      fontFamily: 'DMSans-SemiBold',
+      marginBottom: 8,
+      marginTop: 8,
     })
   })
 })

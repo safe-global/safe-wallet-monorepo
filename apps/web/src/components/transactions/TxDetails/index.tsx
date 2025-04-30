@@ -31,13 +31,13 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import useIsPending from '@/hooks/useIsPending'
 import { isImitation, isTrustedTx } from '@/utils/transactions'
 import { useHasFeature } from '@/hooks/useChains'
-import { FEATURES } from '@/utils/chains'
 import { useGetTransactionDetailsQuery } from '@/store/api/gateway'
-import { asError } from '@/services/exceptions/utils'
+import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { POLLING_INTERVAL } from '@/config/constants'
 import { TxNote } from '@/features/tx-notes'
 import { TxShareBlock } from '../TxShareLink'
 import { TxShareButton } from '../TxShareLink/TxShareButton'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 
 export const NOT_AVAILABLE = 'n/a'
 
@@ -54,11 +54,6 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
   const isUnsigned =
     isMultisigExecutionInfo(txSummary.executionInfo) && txSummary.executionInfo.confirmationsSubmitted === 0
 
-  const isTxFromProposer =
-    isMultisigDetailedExecutionInfo(txDetails.detailedExecutionInfo) &&
-    txDetails.detailedExecutionInfo.trusted &&
-    isUnsigned
-
   const isUntrusted =
     isMultisigDetailedExecutionInfo(txDetails.detailedExecutionInfo) && !txDetails.detailedExecutionInfo.trusted
 
@@ -69,7 +64,6 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
   let proposer, safeTxHash, proposedByDelegate
   if (isMultisigDetailedExecutionInfo(txDetails.detailedExecutionInfo)) {
     safeTxHash = txDetails.detailedExecutionInfo.safeTxHash
-    // @ts-expect-error TODO: Need to update the types from the new SDK
     proposedByDelegate = txDetails.detailedExecutionInfo.proposedByDelegate
     proposer = proposedByDelegate?.value ?? txDetails.detailedExecutionInfo.proposer?.value
   }
@@ -123,7 +117,7 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
         <div className={css.txSummary}>
           {isUntrusted && !isPending && <UnsignedWarning />}
 
-          <Summary txDetails={txDetails} txData={txDetails.txData} txInfo={txDetails.txInfo} isTxDetailsPreview />
+          <Summary txDetails={txDetails} txData={txDetails.txData} txInfo={txDetails.txInfo} />
         </div>
 
         {(isMultiSendTxInfo(txDetails.txInfo) || isOrderTxInfo(txDetails.txInfo)) && (
@@ -135,13 +129,13 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
         )}
       </div>
       {/* Signers */}
-      {(!isUnsigned || isTxFromProposer) && (
+      {(!isUnsigned || proposedByDelegate) && (
         <div className={css.txSigners}>
           <TxSigners
             txDetails={txDetails}
             txSummary={txSummary}
-            isTxFromProposer={isTxFromProposer}
-            proposer={proposedByDelegate}
+            isTxFromProposer={Boolean(proposedByDelegate)}
+            proposer={proposer}
           />
 
           <TxShareBlock txId={txDetails.txId} txHash={txDetails.txHash} />
@@ -184,6 +178,7 @@ const TxDetails = ({
     { chainId, txId: txSummary.id },
     {
       pollingInterval: isOpenSwapOrder(txSummary.txInfo) ? POLLING_INTERVAL : undefined,
+      skipPollingIfUnfocused: true,
     },
   )
 

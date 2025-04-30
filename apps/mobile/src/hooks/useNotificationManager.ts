@@ -1,39 +1,67 @@
 import { useCallback, useEffect, useRef } from 'react'
-import { AppState } from 'react-native'
+import { AppState, Platform } from 'react-native'
 import NotificationsService from '@/src/services/notifications/NotificationService'
 import useRegisterForNotifications from '@/src/hooks/useRegisterForNotifications'
 import Logger from '@/src/utils/logger'
-import { useAppSelector } from '../store/hooks'
-import { selectAppNotificationStatus } from '../store/notificationsSlice'
+import { useAppDispatch, useAppSelector } from '../store/hooks'
+import {
+  selectAppNotificationStatus,
+  selectPromptAttempts,
+  toggleDeviceNotifications,
+  updatePromptAttempts,
+} from '../store/notificationsSlice'
 
 export const useNotificationManager = () => {
+  const dispatch = useAppDispatch()
+  const promptAttempts = useAppSelector(selectPromptAttempts)
   const isAppNotificationEnabled = useAppSelector(selectAppNotificationStatus)
+  const isAndroid = Platform.OS === 'android'
+  const promptThreshold = isAndroid ? 3 : 2
   const { registerForNotifications, unregisterForNotifications, updatePermissionsForNotifications, isLoading } =
     useRegisterForNotifications()
 
   const appState = useRef(AppState.currentState)
 
+  // Using a ref instead of state to ensure the value persists across app background/foreground cycles
+  const pendingPermissionRequestRef = useRef(false)
+
   const enableNotification = useCallback(async () => {
     try {
+      Logger.info('enableNotification :: STARTED', { promptAttempts })
       // Check if device notifications are enabled
       const deviceNotificationStatus = await NotificationsService.isDeviceNotificationEnabled()
 
       if (deviceNotificationStatus) {
-        // Register for notifications
         const { loading, error } = await registerForNotifications()
 
         if (!loading && !error) {
+          dispatch(toggleDeviceNotifications(true))
           return true
         }
-      } else {
-        await NotificationsService.getAllPermissions()
         return false
+      } else if (promptAttempts < promptThreshold) {
+        dispatch(updatePromptAttempts(promptAttempts + 1))
+        // Prompt user to enable notifications
+        const { permission } = await NotificationsService.getAllPermissions()
+
+        if (permission === 'granted') {
+          const { loading, error } = await registerForNotifications()
+
+          if (!loading && !error) {
+            dispatch(toggleDeviceNotifications(true))
+            return true
+          }
+        }
+      } else {
+        pendingPermissionRequestRef.current = true
+        await NotificationsService.getAllPermissions(true)
       }
     } catch (error) {
+      pendingPermissionRequestRef.current = false
       Logger.error('Error enabling push notifications', error)
       return false
     }
-  }, [registerForNotifications])
+  }, [dispatch, registerForNotifications, promptAttempts])
 
   const disableNotification = useCallback(async () => {
     try {
@@ -53,16 +81,34 @@ export const useNotificationManager = () => {
       const deviceNotificationStatus = await NotificationsService.isDeviceNotificationEnabled()
 
       if (!deviceNotificationStatus && !isAppNotificationEnabled) {
-        await NotificationsService.getAllPermissions()
+        // Prompt user to enable notifications
+        const { permission } = await NotificationsService.getAllPermissions()
+
+        if (permission === 'granted') {
+          const { loading, error } = await registerForNotifications()
+
+          pendingPermissionRequestRef.current = false
+
+          if (!loading && !error) {
+            dispatch(toggleDeviceNotifications(true))
+            return true
+          }
+        } else {
+          pendingPermissionRequestRef.current = true
+          await NotificationsService.getAllPermissions(true)
+        }
+
+        // Don't clear the flag here if not granted immediately
       } else if (deviceNotificationStatus && !isAppNotificationEnabled) {
         await registerForNotifications()
       } else {
         await unregisterForNotifications()
       }
     } catch (error) {
+      pendingPermissionRequestRef.current = false
       Logger.error('Error toggling notifications', error)
     }
-  }, [isAppNotificationEnabled, registerForNotifications, unregisterForNotifications])
+  }, [isAppNotificationEnabled, registerForNotifications, unregisterForNotifications, dispatch])
 
   const updateNotificationPermissions = useCallback(async () => {
     try {
@@ -80,9 +126,21 @@ export const useNotificationManager = () => {
   useEffect(() => {
     const subscription = AppState.addEventListener('change', async (nextAppState) => {
       if (appState.current.match(/inactive|background/) && nextAppState === 'active') {
+        // App has come to the foreground
         const deviceNotificationStatus = await NotificationsService.isDeviceNotificationEnabled()
-        if (deviceNotificationStatus && !isAppNotificationEnabled) {
+
+        // CASE 1: App notifications enabled but device notifications disabled
+        // Action: Disable app notifications to keep in sync
+        if (!deviceNotificationStatus && isAppNotificationEnabled) {
+          await disableNotification()
+        }
+
+        // CASE 2: Device notifications enabled but app notifications disabled
+        // Action: Only enable app notifications if we were waiting for the user to return from settings
+        else if (deviceNotificationStatus && !isAppNotificationEnabled && pendingPermissionRequestRef.current) {
           await registerForNotifications()
+          // Clear the pending flag after handling
+          pendingPermissionRequestRef.current = false
         }
       }
 
@@ -92,7 +150,7 @@ export const useNotificationManager = () => {
     return () => {
       subscription.remove()
     }
-  }, [isAppNotificationEnabled, registerForNotifications])
+  }, [isAppNotificationEnabled, registerForNotifications, disableNotification])
 
   return {
     isAppNotificationEnabled,

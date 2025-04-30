@@ -15,9 +15,15 @@ describe('[SMOKE] Offchain Messages tests', () => {
   })
 
   beforeEach(() => {
-    cy.visit(constants.transactionsMessagesUrl + staticSafes.SEP_STATIC_SAFE_10)
+    cy.fixture('messages/messages.json').then((mockData) => {
+      cy.intercept('GET', constants.messagesEndpoint, mockData).as('getMessages')
+    })
+    cy.visit(constants.transactionsMessagesUrl + staticSafes.SEP_STATIC_SAFE_23)
+
+    cy.wait('@getMessages')
   })
 
+  // mock
   it('[SMOKE] Verify summary for off-chain unsigned messages', () => {
     createTx.verifySummaryByIndex(0, [
       typeMessagesGeneral.sign,
@@ -31,6 +37,7 @@ describe('[SMOKE] Offchain Messages tests', () => {
     ])
   })
 
+  // mock
   it('[SMOKE] Verify summary for off-chain signed messages', () => {
     createTx.verifySummaryByIndex(1, [
       typeMessagesGeneral.sign,
@@ -44,11 +51,13 @@ describe('[SMOKE] Offchain Messages tests', () => {
     ])
   })
 
+  // mock
   it('[SMOKE] Verify exapanded details for EIP 191 off-chain message', () => {
     createTx.clickOnTransactionItemByIndex(2)
     cy.contains(typeMessagesOffchain.message2).should('be.visible')
   })
 
+  // mock
   it('[SMOKE] Verify exapanded details for EIP 712 off-chain message', () => {
     const jsonString = createTx.messageNestedStr
     const values = [

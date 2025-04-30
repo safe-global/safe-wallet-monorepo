@@ -21,7 +21,8 @@
       "@gnosis.pm/zodiac/*": ["../../node_modules/@gnosis.pm/zodiac/*"],
       "@cowprotocol/app-data": ["../../node_modules/@cowprotocol/app-data"],
       "@/public/*": ["./public/*"],
-      "@safe-global/store/*": ["../../packages/store/src/*"]
+      "@safe-global/store/*": ["../../packages/store/src/*"],
+      "@safe-global/utils/*": ["../../packages/utils/src/*"],
     },
     "plugins": [
       {

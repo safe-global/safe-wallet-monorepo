@@ -3,7 +3,7 @@ import { useMemo } from 'react'
 import { Tooltip, Typography } from '@mui/material'
 import { useAppSelector } from '@/store'
 import { selectCurrency } from '@/store/settingsSlice'
-import { formatCurrency, formatCurrencyPrecise } from '@/utils/formatNumber'
+import { formatCurrency, formatCurrencyPrecise } from '@safe-global/utils/utils/formatNumber'
 
 const style = { whiteSpace: 'nowrap' } as CSSProperties
 

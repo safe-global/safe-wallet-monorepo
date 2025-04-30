@@ -149,6 +149,15 @@ export function checkSelectedToken(token) {
   cy.get(tokenBalance).contains(token)
 }
 
+function clickOnTokenSelector(index) {
+  cy.get(tokenBalance).eq(index).click()
+}
+
+export function selectToken(index, token) {
+  clickOnTokenSelector(index)
+  cy.get(tokenItem).contains(token).click()
+}
+
 function clickOnCurrencySelector() {
   cy.get(currencySelector).click()
 }

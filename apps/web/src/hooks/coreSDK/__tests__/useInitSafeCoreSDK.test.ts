@@ -1,4 +1,4 @@
-import type { ExtendedSafeInfo } from '@/store/safeInfoSlice'
+import type { ExtendedSafeInfo } from '@safe-global/store/slices/SafeInfo/types'
 import { renderHook } from '@/tests/test-utils'
 import { useInitSafeCoreSDK } from '@/hooks/coreSDK/useInitSafeCoreSDK'
 import * as web3 from '@/hooks/wallets/web3'

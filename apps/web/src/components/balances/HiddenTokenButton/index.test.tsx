@@ -2,10 +2,12 @@ import * as useChainId from '@/hooks/useChainId'
 import { fireEvent, render } from '@/tests/test-utils'
 import { toBeHex } from 'ethers'
 import { TokenType } from '@safe-global/safe-gateway-typescript-sdk'
-import { safeParseUnits } from '@/utils/formatters'
+import { safeParseUnits } from '@safe-global/utils/utils/formatters'
 import HiddenTokenButton from '.'
 import { useState } from 'react'
 import { TOKEN_LISTS } from '@/store/settingsSlice'
+import { type Balances } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
+import { type Loadable } from '@/store/common'
 
 const TestComponent = () => {
   const [showHidden, setShowHidden] = useState(false)
@@ -25,7 +27,7 @@ describe('HiddenTokenToggle', () => {
     const mockHiddenAssets = {
       '5': [toBeHex('0x3', 20)],
     }
-    const mockBalances = {
+    const mockBalances: Loadable<Balances> = {
       data: {
         fiatTotal: '300',
         items: [

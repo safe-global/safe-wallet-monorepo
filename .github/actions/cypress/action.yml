@@ -41,7 +41,6 @@ runs:
     - uses: ./.github/actions/build
       with:
         secrets: ${{ inputs.secrets }}
-        e2e_mnemonic: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_CYPRESS_MNEMONIC }}
 
     - uses: cypress-io/github-action@v6
       with:

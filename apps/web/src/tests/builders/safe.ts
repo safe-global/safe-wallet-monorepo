@@ -1,11 +1,14 @@
-import type { ExtendedSafeInfo } from '@/store/safeInfoSlice'
+import type { ExtendedSafeInfo } from '@safe-global/store/slices/SafeInfo/types'
 import { faker } from '@faker-js/faker'
 import { ImplementationVersionState } from '@safe-global/safe-gateway-typescript-sdk'
-import type { SafeInfo, AddressEx } from '@safe-global/safe-gateway-typescript-sdk'
+import {
+  type SafeState as SafeInfo,
+  type AddressInfo as AddressEx,
+} from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 
 import { Builder } from '../Builder'
 import { generateRandomArray } from './utils'
-import { checksumAddress } from '@/utils/addresses'
+import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import type { IBuilder } from '../Builder'
 
 const MAX_OWNERS_LENGTH = 10

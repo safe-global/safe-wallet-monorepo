@@ -1,29 +1,17 @@
 import { useCallback, useMemo, useState } from 'react'
 
-import { getSimulation, getSimulationLink } from '@/components/tx/security/tenderly/utils'
-import { FETCH_STATUS, type TenderlySimulation } from '@/components/tx/security/tenderly/types'
-import { getSimulationPayload, type SimulationTxParams } from '@/components/tx/security/tenderly/utils'
+import { getSimulationPayload } from '@/components/tx/security/tenderly/utils'
+import { FETCH_STATUS, type TenderlySimulation } from '@safe-global/utils/components/tx/security/tenderly/types'
 import { useAppSelector } from '@/store'
 import { selectTenderly } from '@/store/settingsSlice'
-import { asError } from '@/services/exceptions/utils'
-
-export type UseSimulationReturn =
-  | {
-      _simulationRequestStatus: FETCH_STATUS.NOT_ASKED | FETCH_STATUS.ERROR | FETCH_STATUS.LOADING
-      simulation: undefined
-      simulateTransaction: (params: SimulationTxParams) => void
-      simulationLink: string
-      requestError?: string
-      resetSimulation: () => void
-    }
-  | {
-      _simulationRequestStatus: FETCH_STATUS.SUCCESS
-      simulation: TenderlySimulation
-      simulateTransaction: (params: SimulationTxParams) => void
-      simulationLink: string
-      requestError?: string
-      resetSimulation: () => void
-    }
+import { asError } from '@safe-global/utils/services/exceptions/utils'
+import { type UseSimulationReturn } from '@safe-global/utils/components/tx/security/tenderly/useSimulation'
+import {
+  getSimulation,
+  getSimulationLink,
+  type SimulationTxParams,
+} from '@safe-global/utils/components/tx/security/tenderly/utils'
+import { Errors, logError } from '@/services/exceptions'
 
 export const useSimulation = (): UseSimulationReturn => {
   const [simulation, setSimulation] = useState<TenderlySimulation | undefined>()
@@ -52,7 +40,7 @@ export const useSimulation = (): UseSimulationReturn => {
         setSimulation(data)
         setSimulationRequestStatus(FETCH_STATUS.SUCCESS)
       } catch (error) {
-        console.error(error)
+        logError(Errors._200, error)
 
         setRequestError(asError(error).message)
         setSimulationRequestStatus(FETCH_STATUS.ERROR)

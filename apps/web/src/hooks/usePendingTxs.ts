@@ -7,7 +7,7 @@ import {
 } from '@safe-global/safe-gateway-typescript-sdk'
 import { useAppSelector } from '@/store'
 import { selectPendingTxIdsBySafe } from '@/store/pendingTxsSlice'
-import useAsync from './useAsync'
+import useAsync from '@safe-global/utils/hooks/useAsync'
 import {
   isConflictHeaderListItem,
   isLabelListItem,
@@ -17,7 +17,7 @@ import {
 import useSafeInfo from './useSafeInfo'
 import { shallowEqual } from 'react-redux'
 
-const usePendingTxIds = (): Array<TransactionSummary['id']> => {
+export const usePendingTxIds = (): Array<TransactionSummary['id']> => {
   const { safe, safeAddress } = useSafeInfo()
   const { chainId } = safe
   return useAppSelector((state) => selectPendingTxIdsBySafe(state, chainId, safeAddress), shallowEqual)

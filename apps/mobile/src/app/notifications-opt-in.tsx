@@ -6,9 +6,13 @@ import { useNotificationManager } from '@/src/hooks/useNotificationManager'
 import { useAppDispatch } from '../store/hooks'
 import { updatePromptAttempts } from '@/src/store/notificationsSlice'
 
+import { View } from 'tamagui'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 function NotificationsOptIn() {
+  const { bottom } = useSafeAreaInsets()
   const dispatch = useAppDispatch()
   const { isAppNotificationEnabled, enableNotification, isLoading } = useNotificationManager()
+
   const colorScheme = useColorScheme()
 
   useEffect(() => {
@@ -28,22 +32,25 @@ function NotificationsOptIn() {
       : require('@/assets/images/notifications-light.png')
 
   return (
-    <OptIn
-      testID="notifications-opt-in-screen"
-      title="Stay in the loop with account activity"
-      description="Get notified when you receive assets, and when transactions require your action."
-      image={image}
-      isVisible
-      isLoading={isLoading}
-      ctaButton={{
-        onPress: enableNotification,
-        label: 'Enable notifications',
-      }}
-      secondaryButton={{
-        onPress: handleReject,
-        label: 'Maybe later',
-      }}
-    />
+    <View style={{ flex: 1, paddingBottom: bottom }}>
+      <OptIn
+        testID="notifications-opt-in-screen"
+        title="Stay in the loop with account activity"
+        description="Get notified when you receive assets, and when transactions require your action."
+        image={image}
+        isVisible
+        colorScheme={colorScheme}
+        isLoading={isLoading}
+        ctaButton={{
+          onPress: enableNotification,
+          label: 'Enable notifications',
+        }}
+        secondaryButton={{
+          onPress: handleReject,
+          label: 'Maybe later',
+        }}
+      />
+    </View>
   )
 }
 

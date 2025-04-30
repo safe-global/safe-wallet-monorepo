@@ -1,7 +1,6 @@
 import madProps from '@/utils/mad-props'
 import { type ReactElement, type SyntheticEvent, useContext, useMemo, useState } from 'react'
-import { CircularProgress, Box, Button, CardActions, Divider, Tooltip } from '@mui/material'
-import Stack from '@mui/system/Stack'
+import { CircularProgress, Box, Button, Divider, Tooltip } from '@mui/material'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import { trackError, Errors } from '@/services/exceptions'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
@@ -14,12 +13,13 @@ import commonCss from '@/components/tx-flow/common/styles.module.css'
 import { TxSecurityContext } from '../security/shared/TxSecurityContext'
 import NonOwnerError from '@/components/tx/SignOrExecuteForm/NonOwnerError'
 import WalletRejectionError from '@/components/tx/SignOrExecuteForm/WalletRejectionError'
-import BatchButton from './BatchButton'
-import { asError } from '@/services/exceptions/utils'
+import BatchButton from '@/components/tx-flow/actions/Batching/BatchButton'
+import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { isWalletRejection } from '@/utils/wallets'
 import { useSigner } from '@/hooks/wallets/useWallet'
 import { NestedTxSuccessScreenFlow } from '@/components/tx-flow/flows'
 import { useValidateTxData } from '@/hooks/useValidateTxData'
+import { TxCardActions } from '@/components/tx-flow/common/TxCard'
 
 export const SignForm = ({
   safeTx,
@@ -140,43 +140,35 @@ export const SignForm = ({
 
       <Divider className={commonCss.nestedDivider} sx={{ pt: 3 }} />
 
-      <CardActions>
-        <Stack
-          sx={{
-            width: ['100%', '100%', '100%', 'auto'],
-          }}
-          direction={{ xs: 'column-reverse', lg: 'row' }}
-          spacing={{ xs: 2, md: 2 }}
-        >
-          {/* Batch button */}
-          {isCreation && !isBatch && (
-            <BatchButton
-              onClick={onBatchClick}
-              disabled={submitDisabled || !isBatchable}
-              tooltip={!isBatchable ? `Cannot batch this type of transaction` : undefined}
-            />
-          )}
+      <TxCardActions>
+        {/* Batch button */}
+        {isCreation && !isBatch && (
+          <BatchButton
+            onClick={onBatchClick}
+            disabled={submitDisabled || !isBatchable}
+            tooltip={!isBatchable ? `Cannot batch this type of transaction` : undefined}
+          />
+        )}
 
-          {/* Submit button */}
-          <CheckWallet checkNetwork={!submitDisabled}>
-            {(isOk) => (
-              <Tooltip title={tooltip} placement="top">
-                <span>
-                  <Button
-                    data-testid="sign-btn"
-                    variant="contained"
-                    type="submit"
-                    disabled={!isOk || submitDisabled}
-                    sx={{ minWidth: '82px', order: '1', width: ['100%', '100%', '100%', 'auto'] }}
-                  >
-                    {!isSubmittable ? <CircularProgress size={20} /> : 'Sign'}
-                  </Button>
-                </span>
-              </Tooltip>
-            )}
-          </CheckWallet>
-        </Stack>
-      </CardActions>
+        {/* Submit button */}
+        <CheckWallet checkNetwork={!submitDisabled}>
+          {(isOk) => (
+            <Tooltip title={tooltip} placement="top">
+              <span>
+                <Button
+                  data-testid="sign-btn"
+                  variant="contained"
+                  type="submit"
+                  disabled={!isOk || submitDisabled}
+                  sx={{ minWidth: '82px', order: '1', width: ['100%', '100%', '100%', 'auto'] }}
+                >
+                  {!isSubmittable ? <CircularProgress size={20} /> : 'Sign'}
+                </Button>
+              </span>
+            </Tooltip>
+          )}
+        </CheckWallet>
+      </TxCardActions>
     </form>
   )
 }

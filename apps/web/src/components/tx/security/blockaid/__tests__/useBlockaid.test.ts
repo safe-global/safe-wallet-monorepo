@@ -1,17 +1,20 @@
 import * as useChains from '@/hooks/useChains'
 import * as useWallet from '@/hooks/wallets/useWallet'
-import { SecuritySeverity } from '@/services/security/modules/types'
+import { SecuritySeverity } from '@safe-global/utils/services/security/modules/types'
 import { eip712TypedDataBuilder } from '@/tests/builders/messages'
 import { safeTxBuilder } from '@/tests/builders/safeTx'
 import { parseUnits, toBeHex } from 'ethers'
 import { useBlockaid } from '../useBlockaid'
-import { type AssetDiff, type TransactionScanResponse } from '@/services/security/modules/BlockaidModule/types'
+import {
+  type AssetDiff,
+  type TransactionScanResponse,
+} from '@safe-global/utils/services/security/modules/BlockaidModule/types'
 import { faker } from '@faker-js/faker/locale/af_ZA'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { safeInfoBuilder } from '@/tests/builders/safe'
-import { CLASSIFICATION_MAPPING, REASON_MAPPING } from '..'
 import { renderHook, waitFor } from '@/tests/test-utils'
 import { type SignerWallet } from '@/components/common/WalletProvider'
+import { CLASSIFICATION_MAPPING, REASON_MAPPING } from '@safe-global/utils/components/tx/security/blockaid/utils'
 
 const setupFetchStub = (data: any) => () => {
   return Promise.resolve({
@@ -22,8 +25,8 @@ const setupFetchStub = (data: any) => () => {
 }
 
 // Mock BLOCKAID_API
-jest.mock('@/config/constants', () => ({
-  ...jest.requireActual('@/config/constants'),
+jest.mock('@safe-global/utils/config/constants', () => ({
+  ...jest.requireActual('@safe-global/utils/config/constants'),
   BLOCKAID_CLIENT_ID: 'some-client-id',
 }))
 
@@ -112,13 +115,13 @@ describe.each([TEST_CASES.MESSAGE, TEST_CASES.TRANSACTION])('useBlockaid for %s'
     jest.spyOn(useChains, 'useHasFeature').mockReturnValue(true)
 
     const mockFetch = jest.spyOn(global, 'fetch')
-    mockFetch.mockImplementation(() => Promise.reject({ message: '403 not authorized' }))
+    mockFetch.mockImplementation(() => Promise.reject(new Error('403 not authorized')))
 
     const { result } = renderHook(() => useBlockaid(mockPayload))
 
     await waitFor(() => {
       expect(result.current[0]).toBeUndefined()
-      expect(result.current[1]).toEqual(new Error('Unavailable'))
+      expect(result.current[1]).toEqual(new Error('403 not authorized'))
       expect(result.current[2]).toBeFalsy()
     })
   })
@@ -158,7 +161,7 @@ describe.each([TEST_CASES.MESSAGE, TEST_CASES.TRANSACTION])('useBlockaid for %s'
 
     await waitFor(() => {
       expect(result.current[0]).toBeDefined()
-      expect(result.current[1]).toEqual(new Error('Simulation failed'))
+      expect(result.current[1]).toEqual(new Error('Simulation failed: GS13'))
       expect(result.current[2]).toBeFalsy()
     })
   })

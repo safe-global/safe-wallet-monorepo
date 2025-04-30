@@ -1,6 +1,5 @@
 import { useMemo } from 'react'
 import { Box, Skeleton, Typography, Paper } from '@mui/material'
-import type { SafeBalanceResponse } from '@safe-global/safe-gateway-typescript-sdk'
 import useBalances from '@/hooks/useBalances'
 import TokenAmount from '@/components/common/TokenAmount'
 import SwapButton from '@/features/swap/components/SwapButton'
@@ -14,6 +13,8 @@ import BuyCryptoButton from '@/components/common/BuyCryptoButton'
 import SendButton from '@/components/balances/AssetsTable/SendButton'
 import useIsSwapFeatureEnabled from '@/features/swap/hooks/useIsSwapFeatureEnabled'
 import { FiatBalance } from '@/components/balances/AssetsTable/FiatBalance'
+import { type Balances } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
+import { FiatChange } from '@/components/balances/AssetsTable/FiatChange'
 
 const MAX_ASSETS = 5
 
@@ -43,7 +44,7 @@ const NoAssets = () => (
   </Paper>
 )
 
-const AssetRow = ({ item, showSwap }: { item: SafeBalanceResponse['items'][number]; showSwap?: boolean }) => (
+const AssetRow = ({ item, showSwap }: { item: Balances['items'][number]; showSwap?: boolean }) => (
   <Box className={css.container} key={item.tokenInfo.address}>
     <Box flex={1}>
       <TokenAmount
@@ -54,8 +55,12 @@ const AssetRow = ({ item, showSwap }: { item: SafeBalanceResponse['items'][numbe
       />
     </Box>
 
-    <Box display={['none', 'block']} pr={4}>
+    <Box flex={1} display={['none', 'block']} pr={4}>
       <FiatBalance balanceItem={item} />
+    </Box>
+
+    <Box flex={1} display={['none', 'block']} pr={4}>
+      <FiatChange balanceItem={item} />
     </Box>
 
     <Box my={-0.7}>
@@ -68,7 +73,7 @@ const AssetRow = ({ item, showSwap }: { item: SafeBalanceResponse['items'][numbe
   </Box>
 )
 
-const AssetList = ({ items }: { items: SafeBalanceResponse['items'] }) => {
+const AssetList = ({ items }: { items: Balances['items'] }) => {
   const isSwapFeatureEnabled = useIsSwapFeatureEnabled()
 
   return (
@@ -80,7 +85,7 @@ const AssetList = ({ items }: { items: SafeBalanceResponse['items'] }) => {
   )
 }
 
-const isNonZeroBalance = (item: SafeBalanceResponse['items'][number]) => item.balance !== '0'
+const isNonZeroBalance = (item: Balances['items'][number]) => item.balance !== '0'
 
 const AssetsWidget = () => {
   const router = useRouter()

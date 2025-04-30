@@ -45,7 +45,7 @@ export const { updateSafeInfo, setSafes, removeSafe, addSafe } = activeSafeSlice
 export const selectAllSafes = (state: RootState) => state.safes
 export const selectSafeInfo = createSelector(
   [selectAllSafes, (_state, activeSafeAddress: Address) => activeSafeAddress],
-  (safes: SafesSlice, activeSafeAddress: Address) => safes[activeSafeAddress],
+  (safes: SafesSlice, activeSafeAddress: Address): SafesSliceItem | undefined => safes[activeSafeAddress],
 )
 
 export default activeSafeSlice.reducer

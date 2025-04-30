@@ -3,8 +3,8 @@ import { useLeastRemainingRelays, useRelaysBySafe } from '@/hooks/useRemainingRe
 import * as useSafeInfo from '@/hooks/useSafeInfo'
 import * as useChains from '@/hooks/useChains'
 import { chainBuilder } from '@/tests/builders/chains'
-import { FEATURES } from '@/utils/chains'
 import * as gateway from '@safe-global/safe-gateway-typescript-sdk'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 
 const SAFE_ADDRESS = '0x0000000000000000000000000000000000000001'
 

@@ -2,17 +2,9 @@
 
 The code is being actively developed on the `dev` branch. Pull requests are made against this branch.
 
-When it's time to make a release, we "freeze" the code by creating a release branch off of the `dev` branch. A release PR is created from that branch, and sent to QA.
-
-After the PR is tested and approved by QA, it's merged into the `main` branch. `Main` is automatically deployed to the staging environment.
-
-Schematically:
-
-```
-<feature branches> –> dev -> release -> main
-```
-
 We prepare at least one release every sprint. Sprints are two weeks long.
+
+When it's time to make a release, we "freeze" the code by creating a release branch off of the `dev` branch. A release PR is created from that branch, and sent to QA.
 
 ### Preparing a release branch
 
@@ -28,7 +20,22 @@ We prepare at least one release every sprint. Sprints are two weeks long.
   > git log origin/main..origin/dev --pretty=format:'* %s'
   > ```
 
-- Add the PR to the Project `Web Squad` and set the status to `Ready for QA`
+```bash
+git checkout release # switch to the release branch
+git fetch --all; git reset --hard origin/dev # sync it with dev
+```
+
+Change the version in `app/web/package.json` to the new version.
+
+```bash
+git add .
+git commit -m '1.54.0' # where 1.54.0 is the new version
+git push
+```
+
+Once pushed:
+* Create a PR from `release` to `main`.
+* Add the PR to the Wallet project and set the status to `Ready for QA`
 
 ### QA
 
@@ -38,7 +45,7 @@ We prepare at least one release every sprint. Sprints are two weeks long.
 
 ### Releasing to production
 
-Wait for all the checks on GitHub to pass.
+After the PR is tested and approved by QA:
 
 - Switch to the main branch and make sure it's up to date:
 
@@ -60,14 +67,14 @@ git pull origin release
 git push
 ```
 
-A deployment workflow will kick in and do the following things:
+A deployment workflow will be triggered and it will do the following things:
 
-- Deploy the code to staging
-- Create a new git tag from the version in package.json
+- Deploy the build to [staging](https://safe-wallet-web.staging.5afe.dev/)
+- Create a new git tag from the version in `package.json`
 - Create a draft [GitHub release](https://github.com/safe-global/safe-wallet-web/releases) linked to this tag, with a changelog taken from the release PR
 
 After that, the release manager should:
 
-- Create a final release from the draft release. This will trigger a build and upload the code to an S3 bucket
+- Publish the draft release. This will trigger a build and upload the code to an S3 bucket – wait for the job to finish
 - Notify devops on Slack and send them the release link to deploy to production
 - Back-merge `main` into the `dev` branch to keep them in sync unless the release branch was based on `dev`

@@ -1,12 +1,10 @@
 import { pollSafeInfo } from '@/components/new-safe/create/logic'
-import { PayMethod } from '@/features/counterfactual/PayNowPayLater'
 import {
   safeCreationDispatch,
   SafeCreationEvent,
   safeCreationSubscribe,
 } from '@/features/counterfactual/services/safeCreationEvents'
 import {
-  PendingSafeStatus,
   removeUndeployedSafe,
   selectUndeployedSafes,
   updateUndeployedSafeStatus,
@@ -20,6 +18,8 @@ import { useAppDispatch, useAppSelector } from '@/store'
 import { useEffect, useRef } from 'react'
 import { isSmartContract } from '@/utils/wallets'
 import { gtmSetSafeAddress } from '@/services/analytics/gtm'
+import { PendingSafeStatus } from '@safe-global/utils/features/counterfactual/store/types'
+import { PayMethod } from '@safe-global/utils/features/counterfactual/types'
 
 export const safeCreationPendingStatuses: Partial<Record<SafeCreationEvent, PendingSafeStatus | null>> = {
   [SafeCreationEvent.AWAITING_EXECUTION]: PendingSafeStatus.AWAITING_EXECUTION,

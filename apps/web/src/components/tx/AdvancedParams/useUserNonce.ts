@@ -1,4 +1,4 @@
-import useAsync from '@/hooks/useAsync'
+import useAsync from '@safe-global/utils/hooks/useAsync'
 import useWallet from '@/hooks/wallets/useWallet'
 import { getUserNonce } from '@/hooks/wallets/web3'
 

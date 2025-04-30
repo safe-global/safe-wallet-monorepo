@@ -1,7 +1,7 @@
-import { PayMethod } from '@/features/counterfactual/PayNowPayLater'
 import { selectUndeployedSafes } from '@/features/counterfactual/store/undeployedSafesSlice'
 import useChainId from '@/hooks/useChainId'
 import { useAppSelector } from '@/store'
+import { PayMethod } from '@safe-global/utils/features/counterfactual/types'
 
 // Returns the undeployed safe for the current network
 const useUndeployedSafe = () => {

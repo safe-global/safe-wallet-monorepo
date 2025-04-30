@@ -8,7 +8,7 @@ import useMediaQuery from '@mui/material/useMediaQuery'
 import Identicon from '../../Identicon'
 import CopyAddressButton from '../../CopyAddressButton'
 import ExplorerButton, { type ExplorerButtonProps } from '../../ExplorerButton'
-import { shortenAddress } from '@/utils/formatters'
+import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import ImageFallback from '../../ImageFallback'
 import css from './styles.module.css'
 
@@ -97,7 +97,7 @@ const SrcEthHashInfo = ({
 
       <Box overflow="hidden" className={onlyName ? css.inline : undefined} gap={0.5}>
         {name && (
-          <Box title={name} display="flex" alignItems="center" gap={0.5}>
+          <Box title={name} className="ethHashInfo-name" display="flex" alignItems="center" gap={0.5}>
             <Box overflow="hidden" textOverflow="ellipsis">
               {name}
             </Box>

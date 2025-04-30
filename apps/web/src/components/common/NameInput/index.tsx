@@ -26,7 +26,11 @@ const NameInput = ({
       required={required}
       className={inputCss.input}
       onKeyDown={(e) => e.stopPropagation()}
-      {...register(name, { maxLength: 50, required })}
+      {...register(name, {
+        maxLength: 50,
+        required,
+        setValueAs: (value) => value.trim(),
+      })}
     />
   )
 }

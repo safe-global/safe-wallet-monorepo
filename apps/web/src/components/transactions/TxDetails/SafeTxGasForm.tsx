@@ -4,7 +4,8 @@ import { useForm } from 'react-hook-form'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import NumberField from '@/components/common/NumberField'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { isLegacyVersion } from '@/hooks/coreSDK/safeCoreSDK'
+
+import { isLegacyVersion } from '@safe-global/utils/services/contracts/utils'
 
 type FormFields = {
   safeTxGas: string
@@ -55,10 +56,10 @@ const Form = ({ onSubmit }: { onSubmit: () => void }) => {
 }
 
 const SafeTxGasForm = () => {
-  const { safeTx, safeTxGas = 0 } = useContext(SafeTxContext)
+  const { safeTx, safeTxGas = 0, isReadOnly } = useContext(SafeTxContext)
   const { safe } = useSafeInfo()
   const isOldSafe = safe.version && isLegacyVersion(safe.version)
-  const isEditable = safeTx?.signatures.size === 0 && (Number(safeTxGas) > 0 || isOldSafe)
+  const isEditable = !isReadOnly && safeTx?.signatures.size === 0 && (Number(safeTxGas) > 0 || isOldSafe)
   const [editing, setEditing] = useState(false)
 
   return (

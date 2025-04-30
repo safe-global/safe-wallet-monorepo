@@ -1,0 +1,36 @@
+.container {
+  display: flex;
+  justify-content: center;
+}
+
+.userSettings {
+  max-width: 750px;
+  margin-top: var(--space-3);
+}
+
+.linkIcon {
+  width: 24px;
+  height: 24px;
+}
+
+.step {
+  font-size: 14px;
+}
+
+.stepNumber {
+  margin-top: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #d7f6ff;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  font-size: 12px;
+}
+
+@media (max-width: 599.95px) {
+  .userSettings {
+    margin: var(--space-2) 0 0 0;
+  }
+}

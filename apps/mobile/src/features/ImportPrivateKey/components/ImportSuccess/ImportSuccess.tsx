@@ -1,3 +1,5 @@
+import React from 'react'
+
 import { Badge } from '@/src/components/Badge'
 import { SafeButton } from '@/src/components/SafeButton'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
@@ -5,34 +7,37 @@ import { LargeHeaderTitle } from '@/src/components/Title'
 import { SignersCard } from '@/src/components/transactions-list/Card/SignersCard'
 import { useAppSelector } from '@/src/store/hooks'
 import { selectAppNotificationStatus } from '@/src/store/notificationsSlice'
-import Clipboard from '@react-native-clipboard/clipboard'
 import { useLocalSearchParams, useRouter } from 'expo-router'
-import React, { useEffect } from 'react'
 import { ScrollView } from 'react-native'
 import { Button, Text, View } from 'tamagui'
 import { useNotificationManager } from '@/src/hooks/useNotificationManager'
+import { ToastViewport } from '@tamagui/toast'
+import { useCopyAndDispatchToast } from '@/src/hooks/useCopyAndDispatchToast'
+import Logger from '@/src/utils/logger'
 
 export function ImportSuccess() {
-  const { updateNotificationPermissions } = useNotificationManager()
   const isAppNotificationEnabled = useAppSelector(selectAppNotificationStatus)
   const { address, name } = useLocalSearchParams<{ address: `0x${string}`; name: string }>()
   const router = useRouter()
+  const copy = useCopyAndDispatchToast()
 
-  const handleContinuePress = () => {
-    // Go to top of the navigator stack
-    router.dismissAll()
-    // now close it
-    router.back()
+  const { updateNotificationPermissions } = useNotificationManager()
+
+  const updatePermissions = async () => {
+    if (isAppNotificationEnabled) {
+      await updateNotificationPermissions()
+    }
   }
 
-  useEffect(() => {
-    const updatePermissions = async () => {
-      if (isAppNotificationEnabled) {
-        await updateNotificationPermissions()
-      }
+  const handleContinuePress = async () => {
+    try {
+      await updatePermissions()
+      router.dismissAll()
+      router.back()
+    } catch (error) {
+      Logger.error('Navigation error:', error)
     }
-    updatePermissions()
-  }, [isAppNotificationEnabled])
+  }
 
   return (
     <View flex={1} justifyContent="space-between" testID={'import-success'}>
@@ -40,7 +45,7 @@ export function ImportSuccess() {
         <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
           <View flex={1} flexGrow={1} alignItems="center" justifyContent="center" paddingHorizontal="$3">
             <Badge
-              circleProps={{ backgroundColor: '#1B2A22' }}
+              circleProps={{ backgroundColor: '$success' }}
               themeName="badge_success"
               circleSize={64}
               content={<SafeFontIcon size={32} color="$primary" name="check-filled" />}
@@ -67,7 +72,7 @@ export function ImportSuccess() {
                     fontWeight="500"
                     size="$5"
                     onPress={() => {
-                      Clipboard.setString(address)
+                      copy(address)
                     }}
                     icon={<SafeFontIcon name="copy" />}
                   >
@@ -80,6 +85,7 @@ export function ImportSuccess() {
             />
           </View>
         </ScrollView>
+        <ToastViewport multipleToasts={false} left={0} right={0} />
       </View>
 
       <View paddingHorizontal="$3">

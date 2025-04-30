@@ -1,5 +1,5 @@
 import { LoadingScreen } from '@/src/components/LoadingScreen'
-import React, { useCallback, useLayoutEffect } from 'react'
+import React, { useCallback, useLayoutEffect, useState } from 'react'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { useAppSelector } from '@/src/store/hooks'
 import { selectChainById } from '@/src/store/chains'
@@ -15,6 +15,7 @@ import logger from '@/src/utils/logger'
 
 export function SignTransaction() {
   const { txId, signerAddress } = useLocalSearchParams<{ txId: string; signerAddress: string }>()
+  const [signStepStatus, setSignStepStatus] = useState<'error' | 'success' | 'loading'>('loading')
   const activeSafe = useDefinedActiveSafe()
   const activeChain = useAppSelector((state: RootState) => selectChainById(state, activeSafe.chainId))
 
@@ -23,6 +24,11 @@ export function SignTransaction() {
   const sign = useCallback(async () => {
     try {
       const privateKey = await getPrivateKey(signerAddress)
+
+      if (!privateKey) {
+        setSignStepStatus('error')
+        return
+      }
 
       const signedTx = await signTx({
         chain: activeChain as ChainInfo,
@@ -49,6 +55,10 @@ export function SignTransaction() {
   useLayoutEffect(() => {
     sign()
   }, [sign])
+
+  if (signStepStatus === 'error') {
+    return <SignError onRetryPress={sign} description="There was an error signing the transaction." />
+  }
 
   if (isError) {
     return <SignError onRetryPress={sign} />

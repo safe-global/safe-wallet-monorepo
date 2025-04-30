@@ -5,7 +5,8 @@ import * as useSafeInfoHook from '@/hooks/useSafeInfo'
 import * as localStorage from '@/services/local-storage/useLocalStorage'
 import { NotificationsTokenVersion } from '@/services/push-notifications/preferences'
 import { renderHook } from '@testing-library/react'
-import { FEATURES } from '@/utils/chains'
+
+import { FEATURES } from '@safe-global/utils/utils/chains'
 
 const { V1, V2 } = NotificationsTokenVersion
 

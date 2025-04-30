@@ -3,21 +3,28 @@ import type { ReactElement } from 'react'
 
 import AppFrame from '@/components/safe-apps/AppFrame'
 import { getEmptySafeApp } from '@/components/safe-apps/utils'
-import useChains from '@/hooks/useChains'
-import { FEATURES, hasFeature } from '@/utils/chains'
+import { useCurrentChain } from '@/hooks/useChains'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import type { SafeAppDataWithPermissions } from '@/components/safe-apps/types'
 import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 
 export const BRIDGE_WIDGET_URL = 'https://iframe.jumper.exchange'
 
-export function BridgeWidget(): ReactElement {
+export function BridgeWidget(): ReactElement | null {
   const isDarkMode = useDarkMode()
-  const { configs } = useChains()
+  const chain = useCurrentChain()
 
-  const appData = useMemo((): SafeAppDataWithPermissions => {
-    return _getAppData(isDarkMode, configs)
-  }, [configs, isDarkMode])
+  const appData = useMemo((): SafeAppDataWithPermissions | null => {
+    if (!chain || !hasFeature(chain, FEATURES.BRIDGE)) {
+      return null
+    }
+    return _getAppData(isDarkMode, chain)
+  }, [chain, isDarkMode])
+
+  if (!appData) {
+    return null
+  }
 
   return (
     <AppFrame
@@ -29,25 +36,13 @@ export function BridgeWidget(): ReactElement {
   )
 }
 
-export function _getAppData(isDarkMode: boolean, chains?: Array<ChainInfo>): SafeAppDataWithPermissions {
+export function _getAppData(isDarkMode: boolean, chain: ChainInfo): SafeAppDataWithPermissions {
   const theme = isDarkMode ? 'dark' : 'light'
   return {
     ...getEmptySafeApp(),
     name: 'Bridge',
     iconUrl: '/images/common/bridge.svg',
-    chainIds: getChainIds(chains),
-    url: `${BRIDGE_WIDGET_URL}/?theme=${theme}`,
+    chainIds: [chain.chainId],
+    url: `${BRIDGE_WIDGET_URL}/?fromChain=${chain.chainId}&theme=${theme}`,
   }
-}
-
-function getChainIds(chains?: Array<ChainInfo>): Array<string> {
-  if (!chains) {
-    return []
-  }
-  return chains.reduce<Array<string>>((acc, cur) => {
-    if (hasFeature(cur, FEATURES.BRIDGE)) {
-      acc.push(cur.chainId)
-    }
-    return acc
-  }, [])
 }

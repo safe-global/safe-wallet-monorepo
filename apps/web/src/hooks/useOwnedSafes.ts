@@ -16,7 +16,9 @@ const useOwnedSafes = (): OwnedSafesCache['walletAddress'] => {
   const chainId = useChainId()
   const { address: walletAddress } = useWallet() || {}
 
-  const { data: ownedSafes } = useGetOwnedSafesQuery(walletAddress ? { chainId, walletAddress } : skipToken)
+  const { data: ownedSafes } = useGetOwnedSafesQuery(
+    walletAddress ? { chainId, ownerAddress: walletAddress } : skipToken,
+  )
 
   const result = useMemo(() => ({ [chainId]: ownedSafes?.safes ?? [] }), [chainId, ownedSafes])
 

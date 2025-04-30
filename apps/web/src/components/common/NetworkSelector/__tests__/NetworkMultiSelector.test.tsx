@@ -3,11 +3,11 @@ import { type ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import { FormProvider, useForm } from 'react-hook-form'
 import NetworkMultiSelector from '../NetworkMultiSelector'
 import { chainBuilder } from '@/tests/builders/chains'
-import { FEATURES } from '@/utils/chains'
 import { render, waitFor } from '@/tests/test-utils'
 import { act } from 'react'
 import userEvent from '@testing-library/user-event'
 import * as router from 'next/router'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 
 const TestForm = ({ isAdvancedFlow = false }: { isAdvancedFlow?: boolean }) => {
   const formMethods = useForm<{ networks: ChainInfo[] }>({

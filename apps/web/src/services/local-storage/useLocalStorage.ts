@@ -1,5 +1,5 @@
 import { useCallback, useEffect } from 'react'
-import ExternalStore from '../ExternalStore'
+import ExternalStore from '@safe-global/utils/services/ExternalStore'
 import session from './session'
 import local from './local'
 import type Storage from './Storage'

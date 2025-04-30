@@ -1,4 +1,3 @@
-import type { UndeployedSafe } from '@/features/counterfactual/store/undeployedSafesSlice'
 import type { AllOwnedSafes, ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
 
 import {
@@ -17,6 +16,7 @@ import {
   _transformAddedSafes,
 } from '../GlobalPushNotifications'
 import type { AddedSafesState } from '@/store/addedSafesSlice'
+import type { UndeployedSafe } from '@safe-global/utils/features/counterfactual/store/types'
 
 describe('GlobalPushNotifications', () => {
   describe('transformAddedSafes', () => {
