@@ -17,7 +17,7 @@ export const useSignedHash = (txData?: TransactionData) => {
     }
 
     return params[0]
-  }, [txData?.hexData])
+  }, [txData])
 
   return signedHash
 }
