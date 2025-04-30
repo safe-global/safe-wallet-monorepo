@@ -21,6 +21,9 @@ export const ImportAccountFormContainer = () => {
     control,
     getValues,
     getFieldState,
+    setError,
+    watch,
+    clearErrors,
     formState: { errors, dirtyFields, isValid },
   } = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -36,12 +39,13 @@ export const ImportAccountFormContainer = () => {
   const [trigger, result] = useLazySafesGetOverviewForManyQuery()
 
   const safeExists = (result.data && result.data.length > 0) || false
+  const inputAddress = watch('safeAddress')
 
   useEffect(() => {
     if (!addressState.invalid) {
-      const inputAddress = getValues('safeAddress')
       const { address } = parsePrefixedAddress(inputAddress)
       const isValid = isValidAddress(address)
+
       if (isValid) {
         trigger({
           safes: chainIds.map((chainId: string) => makeSafeId(chainId, address)),
@@ -51,7 +55,19 @@ export const ImportAccountFormContainer = () => {
         })
       }
     }
-  }, [chainIds, trigger, addressState.isDirty, addressState.invalid])
+  }, [chainIds, trigger, inputAddress, addressState.isDirty, addressState.invalid])
+
+  useEffect(() => {
+    if (!addressState.isDirty) {
+      return
+    }
+
+    if (!result?.data?.length) {
+      setError('safeAddress', { message: 'Safe not found' })
+    } else {
+      clearErrors('safeAddress')
+    }
+  }, [result.data, setError, getValues, addressState.isDirty, clearErrors, addressState.invalid])
 
   const canContinue = isValid && safeExists
 
