@@ -12,7 +12,7 @@ const LendPage: NextPage = () => {
   return (
     <>
       <Head>
-        <title>{`${BRAND_NAME} – Lend`}</title>
+        <title>{`${BRAND_NAME} – Earn`}</title>
       </Head>
 
       {isFeatureEnabled === true ? (
