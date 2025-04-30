@@ -1,4 +1,4 @@
 export const vaultTypeToLabel = {
   VaultDeposit: 'Deposit',
-  VaultRedeem: 'Redeem',
+  VaultRedeem: 'Withdraw',
 }
