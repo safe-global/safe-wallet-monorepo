@@ -10,7 +10,7 @@ interface SafeSearchBarProps {
 
 const SafeSearchBar: React.FC<SafeSearchBarProps> = ({ placeholder, onSearch, throttleTime = 300 }) => {
   const [searchQuery, setSearchQuery] = useState('')
-  const [timer, setTimer] = useState<NodeJS.Timeout | null>(null)
+  const [timer, setTimer] = useState<ReturnType<typeof setTimeout> | null>(null)
 
   const throttleSearch = useCallback(
     (query: string) => {

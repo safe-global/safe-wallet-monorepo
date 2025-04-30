@@ -1,6 +1,6 @@
 import { mockedChains } from '@/src/store/constants'
 import { ChainsDisplay } from './ChainsDisplay'
-import { render } from '@testing-library/react-native'
+import { render } from '@/src/tests/test-utils'
 import { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 
 describe('ChainsDisplay', () => {

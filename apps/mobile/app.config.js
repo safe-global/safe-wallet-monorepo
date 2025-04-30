@@ -49,6 +49,7 @@ export default {
         'android.permission.FOREGROUND_SERVICE',
         'android.permission.WAKE_LOCK',
       ],
+      edgeToEdgeEnabled: true,
     },
     web: {
       bundler: 'metro',
@@ -119,6 +120,7 @@ export default {
         },
       ],
       'expo-task-manager',
+      'expo-web-browser',
     ],
     experiments: {
       typedRoutes: true,

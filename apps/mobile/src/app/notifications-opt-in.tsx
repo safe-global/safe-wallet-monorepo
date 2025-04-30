@@ -5,11 +5,11 @@ import { router } from 'expo-router'
 import { useNotificationManager } from '@/src/hooks/useNotificationManager'
 import { useAppDispatch } from '../store/hooks'
 import { updatePromptAttempts } from '@/src/store/notificationsSlice'
-import { useModalStyle } from '@/src/navigation/hooks/useModalStyle'
 
 import { View } from 'tamagui'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 function NotificationsOptIn() {
-  const modalStyle = useModalStyle()
+  const { bottom } = useSafeAreaInsets()
   const dispatch = useAppDispatch()
   const { isAppNotificationEnabled, enableNotification, isLoading } = useNotificationManager()
 
@@ -32,7 +32,7 @@ function NotificationsOptIn() {
       : require('@/assets/images/notifications-light.png')
 
   return (
-    <View style={{ ...modalStyle }}>
+    <View style={{ flex: 1, paddingBottom: bottom }}>
       <OptIn
         testID="notifications-opt-in-screen"
         title="Stay in the loop with account activity"

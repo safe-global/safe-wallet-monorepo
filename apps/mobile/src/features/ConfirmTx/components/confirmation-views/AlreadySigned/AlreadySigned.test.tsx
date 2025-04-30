@@ -8,10 +8,9 @@ import { server } from '@/src/tests/server'
 import { apiSliceWithChainsConfig } from '@safe-global/store/gateway/chains'
 import { makeStore } from '@/src/store'
 
-// Mock Linking
-jest.mock('react-native/Libraries/Linking/Linking', () => ({
-  openURL: jest.fn(),
-}))
+// Mock Linking.openURL
+const mockOpenURL = jest.fn()
+Linking.openURL = mockOpenURL
 
 describe('AlreadySigned', () => {
   const mockProps = {
@@ -63,7 +62,7 @@ describe('AlreadySigned', () => {
     ).replace(':txId', mockProps.txId)
 
     fireEvent.press(getByText('Go to Web app'))
-    expect(Linking.openURL).toHaveBeenCalledWith(expectedUrl)
+    expect(mockOpenURL).toHaveBeenCalledWith(expectedUrl)
   })
 
   it('matches snapshot', async () => {

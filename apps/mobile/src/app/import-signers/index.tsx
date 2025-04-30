@@ -7,12 +7,12 @@ import Metamask from '@/assets/images/metamask.png'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { useScrollableHeader } from '@/src/navigation/useScrollableHeader'
 import { NavBarTitle } from '@/src/components/Title'
-import { SafeAreaView } from 'react-native-safe-area-context'
 import { SafeCard } from '@/src/components/SafeCard'
 import { router, useLocalSearchParams } from 'expo-router'
 import { Tag } from '@/src/components/Tag'
 import { useBiometrics } from '@/src/hooks/useBiometrics'
-
+import { View } from 'tamagui'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 const items = [
   {
     name: 'seed',
@@ -45,6 +45,7 @@ const items = [
 const title = 'Import a signer'
 
 function ImportSignersPage() {
+  const { bottom } = useSafeAreaInsets()
   const { isBiometricsEnabled } = useBiometrics()
   const local = useLocalSearchParams<{ safeAddress: string; chainId: string; import_safe: string }>()
   const { handleScroll } = useScrollableHeader({
@@ -73,7 +74,7 @@ function ImportSignersPage() {
   }, [isBiometricsEnabled, local.safeAddress, local.chainId, local.import_safe])
 
   return (
-    <SafeAreaView edges={['bottom']}>
+    <View style={{ flex: 1 }} paddingBottom={bottom}>
       <ScrollView onScroll={handleScroll}>
         <SectionTitle
           title={title}
@@ -94,7 +95,7 @@ function ImportSignersPage() {
           />
         ))}
       </ScrollView>
-    </SafeAreaView>
+    </View>
   )
 }
 
