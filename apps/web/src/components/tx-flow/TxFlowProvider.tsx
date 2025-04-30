@@ -68,6 +68,7 @@ export type TxFlowContextType<T extends unknown = any> = {
   txDetails?: TransactionDetails
   txDetailsLoading?: boolean
   isBatch: boolean
+  isBatchable: boolean
   role?: Role
 }
 
@@ -106,6 +107,7 @@ export const initialContext: TxFlowContextType = {
   willExecuteThroughRole: false,
   canExecuteThroughRole: false,
   isBatch: false,
+  isBatchable: true,
 }
 
 export const TxFlowContext = createContext<TxFlowContextType>(initialContext)
@@ -123,6 +125,7 @@ export type TxFlowProviderProps<T extends unknown> = {
   isRejection?: TxFlowContextType['isRejection']
   txLayoutProps?: TxFlowContextType['txLayoutProps']
   isBatch?: TxFlowContextType['isBatch']
+  isBatchable?: TxFlowContextType['isBatchable']
 }
 
 const TxFlowProvider = <T extends unknown>({
@@ -138,6 +141,7 @@ const TxFlowProvider = <T extends unknown>({
   txLayoutProps: defaultTxLayoutProps = initialContext.txLayoutProps,
   isRejection = initialContext.isRejection,
   isBatch = initialContext.isBatch,
+  isBatchable = initialContext.isBatchable,
 }: TxFlowProviderProps<T>): ReactElement => {
   const signer = useSigner()
   const isSafeOwner = useIsSafeOwner()
@@ -238,6 +242,7 @@ const TxFlowProvider = <T extends unknown>({
     txDetails,
     txDetailsLoading,
     isBatch,
+    isBatchable,
   }
 
   return <TxFlowContext.Provider value={value}>{children}</TxFlowContext.Provider>

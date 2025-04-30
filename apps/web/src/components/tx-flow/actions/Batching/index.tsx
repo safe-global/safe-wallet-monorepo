@@ -83,10 +83,12 @@ const Batching = ({
 
 const useShouldRegisterSlot = () => {
   const isCounterfactualSafe = useIsCounterfactualSafe()
-  const { isBatch, isProposing, willExecuteThroughRole, isCreation } = useContext(TxFlowContext)
+  const { isBatch, isBatchable, isProposing, willExecuteThroughRole, isCreation } = useContext(TxFlowContext)
   const isOwner = useIsSafeOwner()
 
-  return isOwner && isCreation && !isBatch && !isCounterfactualSafe && !willExecuteThroughRole && !isProposing
+  return (
+    isBatchable && isOwner && isCreation && !isBatch && !isCounterfactualSafe && !willExecuteThroughRole && !isProposing
+  )
 }
 
 const BatchingSlot = withSlot({
