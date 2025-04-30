@@ -616,7 +616,7 @@ export type VaultDepositTransactionInfo = {
   type: 'VaultDeposit'
   humanDescription?: string | null
   value: string
-  nrr: number
+  baseNrr: number
   fee: number
   tokenInfo: TokenInfo
   vaultInfo: VaultInfo
@@ -630,7 +630,7 @@ export type VaultRedeemTransactionInfo = {
   type: 'VaultRedeem'
   humanDescription?: string | null
   value: string
-  nrr: number
+  baseNrr: number
   fee: number
   tokenInfo: TokenInfo
   vaultInfo: VaultInfo

@@ -32,7 +32,8 @@ import UpdateSafe from './UpdateSafe'
 import { MigrateToL2Information } from './MigrateToL2Information'
 import { NestedSafeCreation } from './NestedSafeCreation'
 import { isNestedSafeCreation } from '@/utils/nested-safes'
-import VaultDeposit from '@/features/earn/components/VaultDeposit'
+import VaultDepositConfirmation from 'src/features/earn/components/VaultDepositConfirmation'
+import VaultRedeemConfirmation from '@/features/earn/components/VaultRedeemConfirmation'
 
 type ConfirmationViewProps = {
   txDetails?: TransactionDetails
@@ -65,11 +66,11 @@ const getConfirmationViewComponent = ({
 
   if (isAnyStakingTxInfo(txInfo)) return <StakingTx txInfo={txInfo} />
 
-  // @ts-expect-error TODO: This will be hell to fix
-  if (isVaultDepositTxInfo(txInfo)) return <VaultDeposit txInfo={txInfo} />
+  // @ts-expect-error TODO: Fix these if there is time
+  if (isVaultDepositTxInfo(txInfo)) return <VaultDepositConfirmation txInfo={txInfo} />
 
-  // @ts-expect-error TODO: This will be hell to fix
-  if (isVaultRedeemTxInfo(txInfo)) return <VaultDeposit txInfo={txInfo} />
+  // @ts-expect-error TODO: Fix these if there is time
+  if (isVaultRedeemTxInfo(txInfo)) return <VaultRedeemConfirmation txInfo={txInfo} />
 
   if (isCustomTxInfo(txInfo) && isSafeUpdateTxData(txData)) return <UpdateSafe txData={txData} />
 
