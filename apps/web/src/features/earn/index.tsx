@@ -47,7 +47,7 @@ const EarnPage = () => {
         >
           <Disclaimer
             title="Note"
-            content={<WidgetDisclaimer widgetName="Lend Widget by Kiln" />}
+            content={<WidgetDisclaimer widgetName="Earn Widget by Kiln" />}
             onAccept={onAccept}
             buttonText="Continue"
           />
