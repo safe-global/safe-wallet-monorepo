@@ -54,6 +54,7 @@ export const formatGenericViewItems = ({
           )}
           <Text fontSize="$4">{genericViewName}</Text>
           <CopyButton value={txData.to.value} color={'$textSecondaryLight'} />
+
           <SafeFontIcon name="external-link" size={14} color="textSecondaryLight" />
         </View>
       ),

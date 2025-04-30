@@ -43,9 +43,7 @@ export function Contract({ txInfo, executionInfo, txId }: ContractProps) {
         submittedAt={executionInfo.submittedAt}
       />
 
-      <ListTable items={items}>
-        <ParametersButton txId={txId} />
-      </ListTable>
+      <ListTable items={items}>{!txInfo.actionCount && <ParametersButton txId={txId} />}</ListTable>
 
       {txInfo.actionCount && (
         <SafeListItem
