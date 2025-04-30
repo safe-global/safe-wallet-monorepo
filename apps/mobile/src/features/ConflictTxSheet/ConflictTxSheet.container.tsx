@@ -1,6 +1,8 @@
 import { Badge } from '@/src/components/Badge'
 import { SafeBottomSheet } from '@/src/components/SafeBottomSheet'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
+import { Link } from 'expo-router'
+import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 import { H3, H6, Text, View } from 'tamagui'
 
 export const ConflictTxSheetContainer = () => {
@@ -22,12 +24,22 @@ export const ConflictTxSheetContainer = () => {
           the other(s).
         </H6>
 
-        <View marginTop="$4" flexDirection="row" alignItems="center" gap="$2">
-          <SafeFontIcon color="$textSecondaryLight" name="info" size={16} />
-          <Text fontWeight={600} color="$textSecondaryLight">
-            Why did it happen?
-          </Text>
-        </View>
+        <Link href={HelpCenterArticle.CONFLICTING_TRANSACTIONS} asChild>
+          <View
+            marginTop="$2"
+            flexDirection="row"
+            justifyContent="center"
+            alignItems="center"
+            gap="$2"
+            paddingVertical="$3"
+            paddingHorizontal="$10"
+          >
+            <SafeFontIcon color="$textSecondaryLight" name="info" size={16} />
+            <Text fontWeight={600} color="$textSecondaryLight">
+              Why did it happen?
+            </Text>
+          </View>
+        </Link>
       </View>
     </SafeBottomSheet>
   )
