@@ -1,6 +1,6 @@
 import { memo, type ReactElement } from 'react'
 import { generateDataRowValue, TxDataRow } from '@/components/transactions/TxDetails/Summary/TxDataRow'
-import { isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
+import { isMultiSendTxInfo, isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
 import type { TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
 import type { SafeTransactionData } from '@safe-global/safe-core-sdk-types'
 import { dateString } from '@safe-global/utils/utils/formatters'
@@ -11,6 +11,8 @@ import ColorCodedTxAccordion from '@/components/tx/ColorCodedTxAccordion'
 import { Box, Divider, Typography } from '@mui/material'
 import DecoderLinks from './DecoderLinks'
 import isEqual from 'lodash/isEqual'
+import Multisend from '../TxData/DecodedData/Multisend'
+import { isMultiSendCalldata } from '@/utils/transaction-calldata'
 
 interface Props {
   safeTxData?: SafeTransactionData
@@ -43,8 +45,13 @@ const Summary = ({ safeTxData, txData, txInfo, txDetails }: Props): ReactElement
     safeTxGas: safeTxGas ?? BigInt(0).toString(),
   }
 
+  const isMultisend = (txInfo !== undefined && isMultiSendTxInfo(txInfo)) || isMultiSendCalldata(safeTxData.data)
+  const transactionData = txData ?? txDetails?.txData
+
   return (
     <>
+      {isMultisend && <Multisend txData={transactionData} compact />}
+
       {txHash && (
         <TxDataRow datatestid="tx-hash" title="Transaction hash">
           {generateDataRowValue(txHash, 'hash', true)}{' '}
