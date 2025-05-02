@@ -19,9 +19,10 @@ interface Props {
   txData: TransactionDetails['txData']
   txInfo?: TransactionDetails['txInfo']
   txDetails?: TransactionDetails
+  showMultisend?: boolean
 }
 
-const Summary = ({ safeTxData, txData, txInfo, txDetails }: Props): ReactElement => {
+const Summary = ({ safeTxData, txData, txInfo, txDetails, showMultisend = true }: Props): ReactElement => {
   const { txHash, executedAt } = txDetails ?? {}
   const toInfo = txData?.addressInfoIndex?.[txData?.to.value] || txData?.to
   const showDetails = Boolean(txInfo && txData)
@@ -50,7 +51,7 @@ const Summary = ({ safeTxData, txData, txInfo, txDetails }: Props): ReactElement
 
   return (
     <>
-      {isMultisend && <Multisend txData={transactionData} compact />}
+      {showMultisend && isMultisend && <Multisend txData={transactionData} compact />}
 
       {txHash && (
         <TxDataRow datatestid="tx-hash" title="Transaction hash">

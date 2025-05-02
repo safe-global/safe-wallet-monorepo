@@ -12,7 +12,6 @@ import {
   isTwapOrderTxInfo,
 } from '@/utils/transaction-guards'
 import { type ReactNode, useContext, useMemo } from 'react'
-import TxData from '@/components/transactions/TxDetails/TxData'
 import type { NarrowConfirmationViewProps } from './types'
 import SettingsChange from './SettingsChange'
 import ChangeThreshold from './ChangeThreshold'
@@ -88,10 +87,7 @@ const ConfirmationView = ({ safeTx, txPreview, txDetails, ...props }: Confirmati
 
   return (
     <>
-      {ConfirmationViewComponent ||
-        (details && (
-          <TxData txData={details?.txData} txInfo={details?.txInfo} txDetails={txDetails} imitation={false} trusted />
-        ))}
+      {ConfirmationViewComponent}
 
       {props.children}
 
