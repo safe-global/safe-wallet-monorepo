@@ -1,4 +1,4 @@
-import type { VaultDepositTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import type { VaultRedeemTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { Box, Stack, Typography } from '@mui/material'
 import TokenIcon from '@/components/common/TokenIcon'
 import TokenAmount from '@/components/common/TokenAmount'
@@ -43,7 +43,7 @@ function ObjectViewer({ data }: { data: object }) {
   )
 }
 
-const AdditionalRewards = ({ txInfo }: { txInfo: VaultDepositTransactionInfo }) => {
+const AdditionalRewards = ({ txInfo }: { txInfo: VaultRedeemTransactionInfo }) => {
   const additionalRewardsClaimable = Number(txInfo.additionalRewards[0].claimable) > 0
   if (!additionalRewardsClaimable) return null
 
@@ -80,72 +80,84 @@ const AdditionalRewards = ({ txInfo }: { txInfo: VaultDepositTransactionInfo }) 
   )
 }
 
-const VaultRedeemConfirmation = ({ txInfo }: { txInfo: VaultDepositTransactionInfo }) => {
+const ConfirmationHeader = ({ txInfo }: { txInfo: VaultRedeemTransactionInfo }) => {
+  return (
+    <Stack key="amount" direction="row" gap={1} mb={1}>
+      <Stack
+        direction="row"
+        sx={{
+          flexWrap: 'wrap',
+          alignItems: 'center',
+          width: '50%',
+          bgcolor: 'border.background',
+          position: 'relative',
+          borderRadius: 1,
+          py: 2,
+          px: 3,
+        }}
+      >
+        {txInfo.tokenInfo && (
+          <Box width={40} mr={2}>
+            <TokenIcon size={40} logoUri={txInfo.tokenInfo.logoUri || ''} tokenSymbol={txInfo.tokenInfo.symbol} />
+          </Box>
+        )}
+
+        <Box flex={1}>
+          <Typography variant="body2" color="primary.light">
+            {vaultTypeToLabel[txInfo.type]}
+          </Typography>
+
+          <Typography variant="h4" fontWeight="bold" component="div">
+            {txInfo.tokenInfo ? (
+              <TokenAmount tokenSymbol={txInfo.tokenInfo.symbol} value={txInfo.value} />
+            ) : (
+              txInfo.value
+            )}
+          </Typography>
+        </Box>
+      </Stack>
+
+      <Stack
+        direction="row"
+        sx={{
+          flexWrap: 'wrap',
+          alignItems: 'center',
+          width: '50%',
+          bgcolor: 'border.background',
+          position: 'relative',
+          borderRadius: 1,
+          py: 2,
+          px: 3,
+        }}
+      >
+        <Box flex={1}>
+          <Typography variant="body2" color="primary.light">
+            Current reward
+          </Typography>
+
+          <Typography variant="h4" fontWeight="bold" component="div">
+            <TokenAmount value={txInfo.currentReward} tokenSymbol={txInfo.tokenInfo.symbol} />
+          </Typography>
+        </Box>
+      </Stack>
+    </Stack>
+  )
+}
+
+const VaultRedeemConfirmation = ({
+  txInfo,
+  isTxDetails = false,
+}: {
+  txInfo: VaultRedeemTransactionInfo
+  isTxDetails?: boolean
+}) => {
   const totalNrr = (txInfo.baseNrr + txInfo.additionalRewardsNrr) / 100
 
   return (
     <>
       <DataTable
         rows={[
-          <Stack key="amount" direction="row" gap={1} mb={1}>
-            <Stack
-              direction="row"
-              sx={{
-                flexWrap: 'wrap',
-                alignItems: 'center',
-                width: '50%',
-                bgcolor: 'border.background',
-                position: 'relative',
-                borderRadius: 1,
-                py: 2,
-                px: 3,
-              }}
-            >
-              {txInfo.tokenInfo && (
-                <Box width={40} mr={2}>
-                  <TokenIcon size={40} logoUri={txInfo.tokenInfo.logoUri || ''} tokenSymbol={txInfo.tokenInfo.symbol} />
-                </Box>
-              )}
-
-              <Box flex={1}>
-                <Typography variant="body2" color="primary.light">
-                  {vaultTypeToLabel[txInfo.type]}
-                </Typography>
-
-                <Typography variant="h4" fontWeight="bold" component="div">
-                  {txInfo.tokenInfo ? (
-                    <TokenAmount tokenSymbol={txInfo.tokenInfo.symbol} value={txInfo.value} />
-                  ) : (
-                    txInfo.value
-                  )}
-                </Typography>
-              </Box>
-            </Stack>
-
-            <Stack
-              direction="row"
-              sx={{
-                flexWrap: 'wrap',
-                alignItems: 'center',
-                width: '50%',
-                bgcolor: 'border.background',
-                position: 'relative',
-                borderRadius: 1,
-                py: 2,
-                px: 3,
-              }}
-            >
-              <Box flex={1}>
-                <Typography variant="body2" color="primary.light">
-                  Current reward
-                </Typography>
-
-                <Typography variant="h4" fontWeight="bold" component="div">
-                  <TokenAmount value={txInfo.currentReward} tokenSymbol={txInfo.tokenInfo.symbol} />
-                </Typography>
-              </Box>
-            </Stack>
-          </Stack>,
+          <>{!isTxDetails && <ConfirmationHeader txInfo={txInfo} />}</>,
 
           <DataRow key="Withdraw from" title="Withdraw from">
             <ExternalLink href={txInfo.vaultInfo.dashboardUri!}>
@@ -160,7 +172,7 @@ const VaultRedeemConfirmation = ({ txInfo }: { txInfo: VaultDepositTransactionIn
             {formatPercentage(totalNrr)}
           </DataRow>,
 
-          <AdditionalRewards txInfo={txInfo} />,
+          <AdditionalRewards key="Additional rewards" txInfo={txInfo} />,
 
           <Typography key="Vault description" variant="body2" color="text.secondary" mt={1}>
             {txInfo.vaultInfo.description}
