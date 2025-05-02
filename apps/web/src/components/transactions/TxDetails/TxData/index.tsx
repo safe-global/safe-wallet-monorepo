@@ -5,6 +5,8 @@ import {
   isOnChainConfirmationTxData,
   isSafeUpdateTxData,
   isStakingTxWithdrawInfo,
+  isVaultDepositTxInfo,
+  isVaultRedeemTxInfo,
 } from '@/utils/transaction-guards'
 import { isStakingTxExitInfo } from '@/utils/transaction-guards'
 import {
@@ -23,7 +25,6 @@ import { SpendingLimits } from '@/components/transactions/TxDetails/TxData/Spend
 import { TransactionStatus, type TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
 import { type ReactElement } from 'react'
 import RejectionTxInfo from '@/components/transactions/TxDetails/TxData/Rejection'
-import DecodedData from '@/components/transactions/TxDetails/TxData/DecodedData'
 import TransferTxInfo from '@/components/transactions/TxDetails/TxData/Transfer'
 import useChainId from '@/hooks/useChainId'
 import { MigrationToL2TxData } from './MigrationToL2TxData'
@@ -34,6 +35,9 @@ import StakingTxWithdrawDetails from '@/features/stake/components/StakingTxWithd
 import { OnChainConfirmation } from './NestedTransaction/OnChainConfirmation'
 import { ExecTransaction } from './NestedTransaction/ExecTransaction'
 import SafeUpdate from './SafeUpdate'
+import DecodedData from './DecodedData'
+import VaultDepositTxDetails from '@/features/earn/components/VaultDepositTxDetails'
+import VaultRedeemTxDetails from '@/features/earn/components/VaultRedeemTxDetails'
 
 const TxData = ({
   txInfo,
@@ -64,6 +68,16 @@ const TxData = ({
 
   if (isStakingTxWithdrawInfo(txInfo)) {
     return <StakingTxWithdrawDetails info={txInfo} />
+  }
+
+  // @ts-ignore: TODO: Fix this type
+  if (isVaultDepositTxInfo(txInfo)) {
+    return <VaultDepositTxDetails info={txInfo} />
+  }
+
+  // @ts-ignore: TODO: Fix this type
+  if (isVaultRedeemTxInfo(txInfo)) {
+    return <VaultRedeemTxDetails info={txInfo} />
   }
 
   if (isTransferTxInfo(txInfo)) {
@@ -109,7 +123,7 @@ const TxData = ({
     return <SafeUpdate txData={txData} />
   }
 
-  return <DecodedData txData={txData} toInfo={isCustomTxInfo(txInfo) ? txInfo.to : undefined} />
+  return <DecodedData txData={txData} toInfo={txData?.to} />
 }
 
 export default TxData
