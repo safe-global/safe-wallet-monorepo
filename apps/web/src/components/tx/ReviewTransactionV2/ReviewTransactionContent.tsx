@@ -20,16 +20,12 @@ import type { SubmitCallback } from '@/components/tx-flow/TxFlow'
 import { Button, CircularProgress } from '@mui/material'
 import CheckWallet from '@/components/common/CheckWallet'
 
-export type ReviewTransactionContentProps = PropsWithChildren<{
-  onSubmit: SubmitCallback
-  isBatch?: boolean
-}>
+export type ReviewTransactionContentProps = PropsWithChildren<{ onSubmit: SubmitCallback }>
 
 export const ReviewTransactionContent = ({
   safeTx,
   safeTxError,
   onSubmit,
-  isBatch,
   children,
   txDetails,
   txPreview,
@@ -40,7 +36,7 @@ export const ReviewTransactionContent = ({
   txDetails?: TransactionDetails
   txPreview?: TransactionPreview
 }): ReactElement => {
-  const { willExecute, isCreation, isProposing, isRejection, isSubmitLoading, isSubmitDisabled, onlyExecute } =
+  const { willExecute, isBatch, isCreation, isProposing, isRejection, isSubmitLoading, isSubmitDisabled, onlyExecute } =
     useContext(TxFlowContext)
 
   const [readableApprovals] = useApprovalInfos({ safeTransaction: safeTx })
