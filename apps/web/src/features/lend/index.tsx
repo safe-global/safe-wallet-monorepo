@@ -1,18 +1,14 @@
-import { useRouter } from 'next/router'
 import { Stack } from '@mui/material'
 import Disclaimer from '@/components/common/Disclaimer'
 import WidgetDisclaimer from '@/components/common/WidgetDisclaimer'
 import BlockedAddress from '@/components/common/BlockedAddress'
 import useBlockedAddress from '@/hooks/useBlockedAddress'
-import LendWidget from '@/features/lend/components/LendWidget'
 import useConsent from '@/hooks/useConsent'
-import { LEND_CONSENT_STORAGE_KEY } from '@/features/lend/constants'
+import { EARN_CONSENT_STORAGE_KEY } from '@/features/earn/constants'
+import EarnView from '@/features/earn/components/EarnView'
 
-const LendPage = () => {
-  const { isConsentAccepted, onAccept } = useConsent(LEND_CONSENT_STORAGE_KEY)
-  const router = useRouter()
-  const { asset } = router.query
-
+const EarnPage = () => {
+  const { isConsentAccepted, onAccept } = useConsent(EARN_CONSENT_STORAGE_KEY)
   const blockedAddress = useBlockedAddress()
 
   if (blockedAddress) {
@@ -35,7 +31,7 @@ const LendPage = () => {
   return (
     <>
       {isConsentAccepted ? (
-        <LendWidget asset={String(asset)} />
+        <EarnView />
       ) : (
         <Stack
           direction="column"
@@ -57,4 +53,4 @@ const LendPage = () => {
   )
 }
 
-export default LendPage
+export default EarnPage
