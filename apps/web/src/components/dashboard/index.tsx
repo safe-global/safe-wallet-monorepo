@@ -17,6 +17,8 @@ import useIsStakingBannerEnabled from '@/features/stake/hooks/useIsStakingBanner
 import { UnsupportedMastercopyWarning } from '@/features/multichain/components/UnsupportedMastercopyWarning/UnsupportedMasterCopyWarning'
 import SpacesDashboardWidget from 'src/features/spaces/components/SpacesDashboardWidget'
 import { FEATURES } from '@safe-global/utils/utils/chains'
+import EarnDashboardBanner from '@/features/earn/components/EarnDashboardBanner'
+import useIsEarnBannerEnabled from '@/features/earn/hooks/useIsEarnBannerEnabled'
 
 const RecoveryHeader = dynamic(() => import('@/features/recovery/components/RecoveryHeader'))
 
@@ -25,6 +27,7 @@ const Dashboard = (): ReactElement => {
   const showSafeApps = useHasFeature(FEATURES.SAFE_APPS)
   const isSpacesFeatureEnabled = useHasFeature(FEATURES.SPACES)
   const isStakingBannerEnabled = useIsStakingBannerEnabled()
+  const isEarnBannerEnabled = useIsEarnBannerEnabled()
   const supportsRecovery = useIsRecoverySupported()
 
   return (
@@ -56,6 +59,12 @@ const Dashboard = (): ReactElement => {
 
         {safe.deployed && (
           <>
+            {isEarnBannerEnabled && (
+              <Grid item xs={12} className={css.hideIfEmpty}>
+                <EarnDashboardBanner />
+              </Grid>
+            )}
+
             {isStakingBannerEnabled && (
               <Grid item xs={12} className={css.hideIfEmpty}>
                 <StakingBanner hideLocalStorageKey="hideStakingBannerDashboard" large />

@@ -41,6 +41,7 @@ export enum FEATURES {
   NESTED_SAFES = 'NESTED_SAFES',
   MASS_PAYOUTS = 'MASS_PAYOUTS',
   SPACES = 'SPACES',
+  EARN = 'EARN',
 }
 
 export const hasFeature = (chain: Pick<Chain, 'features'>, feature: FEATURES): boolean => {
