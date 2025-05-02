@@ -43,8 +43,8 @@ describe('Replace Owners tests', () => {
     wallet.connectSigner(signer)
     owner.waitForConnectionStatus()
     owner.openReplaceOwnerWindow(0)
-    owner.typeOwnerAddress(constants.addresBookContacts.user1.address)
-    owner.verifyNewOwnerName(constants.addresBookContacts.user1.name)
+    owner.typeOwnerAddress(constants.addressBookContacts.user1.address)
+    owner.verifyNewOwnerName(constants.addressBookContacts.user1.name)
   })
 
   it('Verify that Name field not mandatory. Verify confirmation for owner replacement is displayed', () => {
