@@ -186,6 +186,14 @@ export const OVERVIEW_EVENTS = {
     action: 'Staking banner learn more',
     category: OVERVIEW_CATEGORY,
   },
+  OPEN_EARN_WIDGET: {
+    action: 'Open earn widget from banner',
+    category: OVERVIEW_CATEGORY,
+  },
+  HIDE_EARN_BANNER: {
+    action: 'Hide earn banner',
+    category: OVERVIEW_CATEGORY,
+  },
 }
 
 export enum PIN_SAFE_LABELS {
