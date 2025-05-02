@@ -41,15 +41,15 @@ describe('Add Owners tests', () => {
   it('Verify that the "Name" field is auto-filled with the relevant name from Address Book', () => {
     cy.visit(constants.addressBookUrl + staticSafes.SEP_STATIC_SAFE_4)
     addressBook.clickOnCreateEntryBtn()
-    addressBook.typeInName(constants.addresBookContacts.user1.name)
-    addressBook.typeInAddress(constants.addresBookContacts.user1.address)
+    addressBook.typeInName(constants.addressBookContacts.user1.name)
+    addressBook.typeInAddress(constants.addressBookContacts.user1.address)
     addressBook.clickOnSaveEntryBtn()
-    addressBook.verifyNewEntryAdded(constants.addresBookContacts.user1.name, constants.addresBookContacts.user1.address)
+    addressBook.verifyNewEntryAdded(constants.addressBookContacts.user1.name, constants.addressBookContacts.user1.address)
     cy.visit(constants.setupUrl + staticSafes.SEP_STATIC_SAFE_4)
     wallet.connectSigner(signer)
     owner.openAddOwnerWindow()
-    owner.typeOwnerAddress(constants.addresBookContacts.user1.address)
-    owner.verifyNewOwnerName(constants.addresBookContacts.user1.name)
+    owner.typeOwnerAddress(constants.addressBookContacts.user1.address)
+    owner.verifyNewOwnerName(constants.addressBookContacts.user1.name)
   })
 
   it('Verify that Name field not mandatory', () => {
