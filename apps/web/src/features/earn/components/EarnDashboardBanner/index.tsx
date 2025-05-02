@@ -10,6 +10,7 @@ import { AppRoutes } from '@/config/routes'
 import Image from 'next/image'
 import { OVERVIEW_EVENTS, trackEvent } from '@/services/analytics'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
+import useIsEarnBannerEnabled from '@/features/earn/hooks/useIsEarnBannerEnabled'
 
 const hideLocalStorageKey = 'hideEarnDashboardBanner'
 
@@ -18,6 +19,7 @@ const EarnDashboardBanner = () => {
 
   const isDarkMode = useDarkMode()
   const router = useRouter()
+  const isEarnBannerEnabled = useIsEarnBannerEnabled()
 
   const tryEarn = () => {
     trackEvent(OVERVIEW_EVENTS.OPEN_EARN_WIDGET)
@@ -28,7 +30,7 @@ const EarnDashboardBanner = () => {
     trackEvent(OVERVIEW_EVENTS.HIDE_EARN_BANNER)
   }
 
-  if (widgetHidden) return null
+  if (!isEarnBannerEnabled || widgetHidden) return null
 
   return (
     <Card className={css.bannerWrapper}>
