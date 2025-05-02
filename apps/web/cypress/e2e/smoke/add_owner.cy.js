@@ -27,13 +27,13 @@ describe('[SMOKE] Add Owners tests', () => {
     owner.typeOwnerAddress(main.generateRandomString(10))
     owner.verifyErrorMsgInvalidAddress(constants.addressBookErrrMsg.invalidFormat)
 
-    owner.typeOwnerAddress(constants.addresBookContacts.user1.address.toUpperCase())
+    owner.typeOwnerAddress(constants.addressBookContacts.user1.address.toUpperCase())
     owner.verifyErrorMsgInvalidAddress(constants.addressBookErrrMsg.invalidChecksum)
 
     owner.typeOwnerAddress(staticSafes.SEP_STATIC_SAFE_4)
     owner.verifyErrorMsgInvalidAddress(constants.addressBookErrrMsg.ownSafe)
 
-    owner.typeOwnerAddress(constants.addresBookContacts.user1.address.replace('F', 'f'))
+    owner.typeOwnerAddress(constants.addressBookContacts.user1.address.replace('F', 'f'))
     owner.verifyErrorMsgInvalidAddress(constants.addressBookErrrMsg.invalidChecksum)
 
     owner.typeOwnerAddress(constants.DEFAULT_OWNER_ADDRESS)
