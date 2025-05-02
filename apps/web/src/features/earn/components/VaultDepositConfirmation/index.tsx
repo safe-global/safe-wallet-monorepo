@@ -77,72 +77,84 @@ const AdditionalRewards = ({ txInfo }: { txInfo: VaultDepositTransactionInfo }) 
   )
 }
 
-const VaultDepositConfirmation = ({ txInfo }: { txInfo: VaultDepositTransactionInfo }) => {
+const ConfirmationHeader = ({ txInfo }: { txInfo: VaultDepositTransactionInfo }) => {
   const totalNrr = (txInfo.baseNrr + txInfo.additionalRewardsNrr) / 100
 
+  return (
+    <Stack key="amount" direction="row" gap={1} mb={1}>
+      <Stack
+        direction="row"
+        sx={{
+          flexWrap: 'wrap',
+          alignItems: 'center',
+          width: '50%',
+          bgcolor: 'border.background',
+          position: 'relative',
+          borderRadius: 1,
+          py: 2,
+          px: 3,
+        }}
+      >
+        {txInfo.tokenInfo && (
+          <Box width={40} mr={2}>
+            <TokenIcon size={40} logoUri={txInfo.tokenInfo.logoUri || ''} tokenSymbol={txInfo.tokenInfo.symbol} />
+          </Box>
+        )}
+
+        <Box flex={1}>
+          <Typography variant="body2" color="primary.light">
+            {vaultTypeToLabel[txInfo.type]}
+          </Typography>
+
+          <Typography variant="h4" fontWeight="bold" component="div">
+            {txInfo.tokenInfo ? (
+              <TokenAmount tokenSymbol={txInfo.tokenInfo.symbol} value={txInfo.value} />
+            ) : (
+              txInfo.value
+            )}
+          </Typography>
+        </Box>
+      </Stack>
+
+      <Stack
+        direction="row"
+        sx={{
+          flexWrap: 'wrap',
+          alignItems: 'center',
+          width: '50%',
+          bgcolor: 'border.background',
+          position: 'relative',
+          borderRadius: 1,
+          py: 2,
+          px: 3,
+        }}
+      >
+        <Box flex={1}>
+          <Typography variant="body2" color="primary.light">
+            Earn
+          </Typography>
+
+          <Typography variant="h4" fontWeight="bold" component="div">
+            {formatPercentage(totalNrr)}
+          </Typography>
+        </Box>
+      </Stack>
+    </Stack>
+  )
+}
+
+const VaultDepositConfirmation = ({
+  txInfo,
+  isTxDetails = false,
+}: {
+  txInfo: VaultDepositTransactionInfo
+  isTxDetails?: boolean
+}) => {
   return (
     <>
       <DataTable
         rows={[
-          <Stack key="amount" direction="row" gap={1} mb={1}>
-            <Stack
-              direction="row"
-              sx={{
-                flexWrap: 'wrap',
-                alignItems: 'center',
-                width: '50%',
-                bgcolor: 'border.background',
-                position: 'relative',
-                borderRadius: 1,
-                py: 2,
-                px: 3,
-              }}
-            >
-              {txInfo.tokenInfo && (
-                <Box width={40} mr={2}>
-                  <TokenIcon size={40} logoUri={txInfo.tokenInfo.logoUri || ''} tokenSymbol={txInfo.tokenInfo.symbol} />
-                </Box>
-              )}
-
-              <Box flex={1}>
-                <Typography variant="body2" color="primary.light">
-                  {vaultTypeToLabel[txInfo.type]}
-                </Typography>
-
-                <Typography variant="h4" fontWeight="bold" component="div">
-                  {txInfo.tokenInfo ? (
-                    <TokenAmount tokenSymbol={txInfo.tokenInfo.symbol} value={txInfo.value} />
-                  ) : (
-                    txInfo.value
-                  )}
-                </Typography>
-              </Box>
-            </Stack>
-
-            <Stack
-              direction="row"
-              sx={{
-                flexWrap: 'wrap',
-                alignItems: 'center',
-                width: '50%',
-                bgcolor: 'border.background',
-                position: 'relative',
-                borderRadius: 1,
-                py: 2,
-                px: 3,
-              }}
-            >
-              <Box flex={1}>
-                <Typography variant="body2" color="primary.light">
-                  Earn
-                </Typography>
-
-                <Typography variant="h4" fontWeight="bold" component="div">
-                  {formatPercentage(totalNrr)}
-                </Typography>
-              </Box>
-            </Stack>
-          </Stack>,
+          <>{!isTxDetails && <ConfirmationHeader txInfo={txInfo} />}</>,
 
           <DataRow key="Deposit via" title="Deposit via">
             <ExternalLink href={txInfo.vaultInfo.dashboardUri!}>

@@ -5,6 +5,8 @@ import {
   isOnChainConfirmationTxData,
   isSafeUpdateTxData,
   isStakingTxWithdrawInfo,
+  isVaultDepositTxInfo,
+  isVaultRedeemTxInfo,
 } from '@/utils/transaction-guards'
 import { isStakingTxExitInfo } from '@/utils/transaction-guards'
 import {
@@ -34,6 +36,8 @@ import StakingTxWithdrawDetails from '@/features/stake/components/StakingTxWithd
 import { OnChainConfirmation } from './NestedTransaction/OnChainConfirmation'
 import { ExecTransaction } from './NestedTransaction/ExecTransaction'
 import SafeUpdate from './SafeUpdate'
+import VaultDepositTxDetails from '@/features/earn/components/VaultDepositTxDetails'
+import VaultRedeemTxDetails from '@/features/earn/components/VaultRedeemTxDetails'
 
 const TxData = ({
   txInfo,
@@ -64,6 +68,16 @@ const TxData = ({
 
   if (isStakingTxWithdrawInfo(txInfo)) {
     return <StakingTxWithdrawDetails info={txInfo} />
+  }
+
+  // @ts-ignore: TODO: Fix this type
+  if (isVaultDepositTxInfo(txInfo)) {
+    return <VaultDepositTxDetails info={txInfo} />
+  }
+
+  // @ts-ignore: TODO: Fix this type
+  if (isVaultRedeemTxInfo(txInfo)) {
+    return <VaultRedeemTxDetails info={txInfo} />
   }
 
   if (isTransferTxInfo(txInfo)) {
