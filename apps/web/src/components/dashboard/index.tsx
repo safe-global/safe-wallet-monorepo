@@ -7,7 +7,6 @@ import PendingTxsList from '@/components/dashboard/PendingTxs/PendingTxsList'
 import AssetsWidget from '@/components/dashboard/Assets'
 import Overview from '@/components/dashboard/Overview/Overview'
 import SafeAppsDashboardSection from '@/components/dashboard/SafeAppsDashboardSection/SafeAppsDashboardSection'
-import GovernanceSection from '@/components/dashboard/GovernanceSection/GovernanceSection'
 import { useIsRecoverySupported } from '@/features/recovery/hooks/useIsRecoverySupported'
 import StakingBanner from '@/components/dashboard/StakingBanner'
 import { useHasFeature } from '@/hooks/useChains'
@@ -21,6 +20,9 @@ import EarnDashboardBanner from '@/features/earn/components/EarnDashboardBanner'
 import useIsEarnBannerEnabled from '@/features/earn/hooks/useIsEarnBannerEnabled'
 
 const RecoveryHeader = dynamic(() => import('@/features/recovery/components/RecoveryHeader'))
+const GovernanceSection = dynamic(() => import('@/components/dashboard/GovernanceSection/GovernanceSection'), {
+  ssr: false,
+})
 
 const Dashboard = (): ReactElement => {
   const { safe } = useSafeInfo()
