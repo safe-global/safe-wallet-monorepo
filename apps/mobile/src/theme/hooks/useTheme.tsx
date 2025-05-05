@@ -33,7 +33,7 @@ export const useTheme = () => {
     return () => {
       subscription.remove()
     }
-  }, [colorScheme, themePreference])
+  }, [themePreference])
 
   return {
     themePreference,
