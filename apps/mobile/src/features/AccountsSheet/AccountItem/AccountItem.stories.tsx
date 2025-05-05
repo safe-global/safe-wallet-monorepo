@@ -1,5 +1,5 @@
 import { AccountItem } from './AccountItem'
-import { Meta, StoryObj } from '@storybook/react/*'
+import { Meta, StoryObj } from '@storybook/react'
 import { mockedActiveSafeInfo, mockedChains } from '@/src/store/constants'
 import { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { action } from '@storybook/addon-actions'
