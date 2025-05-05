@@ -7,7 +7,7 @@ import TxFlowProvider, { type TxFlowContextType } from './TxFlowProvider'
 import { TxFlowContent } from './common/TxFlowContent'
 import ReviewTransaction from '../tx/ReviewTransactionV2'
 import { ConfirmTxReceipt } from '../tx/ConfirmTxReceipt'
-import { TxChecks, TxNote, SignerSelect } from './features'
+import { TxChecks, TxNote, SignerSelect, Blockaid } from './features'
 import { Batching, ComboSubmit, Counterfactual, Execute, ExecuteThroughRole, Propose, Sign } from './actions'
 import { SlotProvider } from './slots'
 
@@ -61,21 +61,6 @@ export const TxFlow = <T extends unknown>({
     [onSubmit, data],
   )
 
-  const submit = (
-    <>
-      <Counterfactual />
-      <ExecuteThroughRole />
-
-      <ComboSubmit>
-        <Sign />
-        <Execute />
-        <Batching />
-      </ComboSubmit>
-
-      <Propose />
-    </>
-  )
-
   return (
     <SafeTxProvider>
       <TxInfoProvider>
@@ -96,15 +81,25 @@ export const TxFlow = <T extends unknown>({
               <TxFlowContent>
                 {...childrenArray}
 
-                <ReviewTransactionComponent onSubmit={handleFlowSubmit}>
+                <ReviewTransactionComponent onSubmit={() => nextStep()}>
                   <TxChecks />
                   <TxNote />
                   <SignerSelect />
-
-                  {submit}
+                  <Blockaid />
                 </ReviewTransactionComponent>
 
-                <ConfirmTxReceipt onSubmit={handleFlowSubmit}>{submit}</ConfirmTxReceipt>
+                <ConfirmTxReceipt onSubmit={handleFlowSubmit}>
+                  <Counterfactual />
+                  <ExecuteThroughRole />
+
+                  <ComboSubmit>
+                    <Sign />
+                    <Execute />
+                    <Batching />
+                  </ComboSubmit>
+
+                  <Propose />
+                </ConfirmTxReceipt>
               </TxFlowContent>
             </TxFlowProvider>
           </SlotProvider>

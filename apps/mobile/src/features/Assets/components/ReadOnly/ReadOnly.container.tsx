@@ -4,14 +4,14 @@ import { selectSafeInfo } from '@/src/store/safesSlice'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { selectSigners } from '@/src/store/signersSlice'
 import { getSafeSigners } from '@/src/utils/signer'
-import { ReadOnly } from './ReadOnly'
+import { ReadOnly, ReadOnlyProps } from './ReadOnly'
 
-export const ReadOnlyContainer = () => {
+export const ReadOnlyContainer = ({ marginBottom, marginTop }: Omit<ReadOnlyProps, 'signers'>) => {
   const activeSafe = useDefinedActiveSafe()
   const safeInfo = useSelector((state: RootState) => selectSafeInfo(state, activeSafe?.address))
   const signers = useSelector(selectSigners)
 
   const safeSigners = safeInfo?.SafeInfo ? getSafeSigners(safeInfo.SafeInfo, signers) : []
 
-  return <ReadOnly signers={safeSigners} />
+  return <ReadOnly signers={safeSigners} marginBottom={marginBottom} marginTop={marginTop} />
 }

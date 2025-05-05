@@ -14,7 +14,7 @@ export const Sign = ({
   ...props
 }: SlotComponentProps<SlotName.ComboSubmit>) => {
   const { safeTx, txOrigin } = useContext(SafeTxContext)
-  const { txId, trackTxEvent, isSubmittable } = useContext(TxFlowContext)
+  const { txId, trackTxEvent, isSubmitDisabled } = useContext(TxFlowContext)
 
   const handleSubmitSuccess = useCallback<SubmitCallback>(
     async ({ txId, isExecuted = false } = {}) => {
@@ -26,7 +26,7 @@ export const Sign = ({
 
   return (
     <SignForm
-      disableSubmit={!isSubmittable || disabled}
+      disableSubmit={isSubmitDisabled || disabled}
       origin={txOrigin}
       safeTx={safeTx}
       onSubmit={onSubmit}

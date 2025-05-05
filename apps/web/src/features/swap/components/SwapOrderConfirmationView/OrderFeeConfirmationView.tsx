@@ -1,9 +1,10 @@
 import type { SwapOrderConfirmationView, TwapOrderConfirmationView } from '@safe-global/safe-gateway-typescript-sdk'
 import { getOrderFeeBps } from '@/features/swap/helpers/utils'
 import { DataRow } from '@/components/common/Table/DataRow'
-import { BRAND_NAME, HelpCenterArticle } from '@/config/constants'
+import { BRAND_NAME } from '@/config/constants'
 import { HelpIconTooltip } from '@/features/swap/components/HelpIconTooltip'
 import MUILink from '@mui/material/Link'
+import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 
 export const OrderFeeConfirmationView = ({
   order,

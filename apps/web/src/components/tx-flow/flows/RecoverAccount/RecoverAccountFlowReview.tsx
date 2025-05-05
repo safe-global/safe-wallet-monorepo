@@ -36,6 +36,9 @@ import { useGetTransactionDetailsQuery } from '@/store/api/gateway'
 import { skipToken } from '@reduxjs/toolkit/query'
 import useTxPreview from '@/components/tx/confirmation-views/useTxPreview'
 import Summary from '@/components/transactions/TxDetails/Summary'
+import useGasPrice from '@/hooks/useGasPrice'
+import { useCurrentChain } from '@/hooks/useChains'
+import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 
 export function RecoverAccountFlowReview({ params }: { params: RecoverAccountFlowProps }): ReactElement | null {
   // Form state
@@ -52,6 +55,8 @@ export function RecoverAccountFlowReview({ params }: { params: RecoverAccountFlo
   const [data] = useRecovery()
   const recovery = data && selectDelayModifierByRecoverer(data, wallet?.address ?? '')
   const [, executionValidationError] = useIsValidRecoveryExecTransactionFromModule(recovery?.address, safeTx)
+  const [gasPrice] = useGasPrice()
+  const chain = useCurrentChain()
 
   const { data: txDetails } = useGetTransactionDetailsQuery(skipToken)
   const [txPreview] = useTxPreview(safeTx?.data, undefined, txDetails?.txId)
@@ -74,13 +79,21 @@ export function RecoverAccountFlowReview({ params }: { params: RecoverAccountFlo
 
   // On modal submit
   const onSubmit = async () => {
-    if (!recovery || !onboard || !wallet || !safeTx) {
+    if (!recovery || !onboard || !wallet || !safeTx || !gasPrice) {
       return
     }
 
     setIsSubmittable(false)
     setSubmitError(undefined)
     setIsRejectedByUser(false)
+
+    const isEIP1559 = chain && hasFeature(chain, FEATURES.EIP1559)
+    const overrides = isEIP1559
+      ? {
+          maxFeePerGas: gasPrice?.maxFeePerGas?.toString(),
+          maxPriorityFeePerGas: gasPrice?.maxPriorityFeePerGas?.toString(),
+        }
+      : { gasPrice: gasPrice?.maxFeePerGas?.toString() }
 
     try {
       await dispatchRecoveryProposal({
@@ -89,6 +102,7 @@ export function RecoverAccountFlowReview({ params }: { params: RecoverAccountFlo
         safeTx,
         delayModifierAddress: recovery.address,
         signerAddress: wallet.address,
+        overrides,
       })
       trackEvent({ ...RECOVERY_EVENTS.SUBMIT_RECOVERY_ATTEMPT })
     } catch (_err) {

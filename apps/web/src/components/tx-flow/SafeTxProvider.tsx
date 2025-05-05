@@ -29,6 +29,8 @@ export type SafeTxContextParams = {
   txOrigin?: string
   setTxOrigin: Dispatch<SetStateAction<string | undefined>>
 
+  isReadOnly: boolean
+  setIsReadOnly: Dispatch<SetStateAction<boolean>>
   isMassPayout?: boolean
   setIsMassPayout: Dispatch<SetStateAction<boolean | undefined>>
 }
@@ -41,6 +43,8 @@ export const SafeTxContext = createContext<SafeTxContextParams>({
   setNonceNeeded: () => {},
   setSafeTxGas: () => {},
   setTxOrigin: () => {},
+  isReadOnly: false,
+  setIsReadOnly: () => {},
   setIsMassPayout: () => {},
 })
 
@@ -52,6 +56,7 @@ const SafeTxProvider = ({ children }: { children: ReactNode }): ReactElement => 
   const [nonceNeeded, setNonceNeeded] = useState<boolean>(true)
   const [safeTxGas, setSafeTxGas] = useState<string>()
   const [txOrigin, setTxOrigin] = useState<string>()
+  const [isReadOnly, setIsReadOnly] = useState<boolean>(false)
   const [isMassPayout, setIsMassPayout] = useState<boolean>()
 
   // Signed txs cannot be updated
@@ -61,15 +66,17 @@ const SafeTxProvider = ({ children }: { children: ReactNode }): ReactElement => 
   const recommendedNonce = useRecommendedNonce()
   const recommendedSafeTxGas = useSafeTxGas(safeTx)
 
+  const canEdit = !isSigned && !isReadOnly
+
   // Priority to external nonce, then to the recommended one
-  const finalNonce = isSigned ? safeTx?.data.nonce : (nonce ?? recommendedNonce ?? safeTx?.data.nonce)
-  const finalSafeTxGas = isSigned
+  const finalNonce = canEdit ? safeTx?.data.nonce : (nonce ?? recommendedNonce ?? safeTx?.data.nonce)
+  const finalSafeTxGas = canEdit
     ? safeTx?.data.safeTxGas
     : (safeTxGas ?? recommendedSafeTxGas ?? safeTx?.data.safeTxGas)
 
   // Update the tx when the nonce or safeTxGas change
   useEffect(() => {
-    if (isSigned || !safeTx?.data) return
+    if (canEdit || !safeTx?.data) return
     if (safeTx.data.nonce === finalNonce && safeTx.data.safeTxGas === finalSafeTxGas) return
 
     setSafeTxError(undefined)
@@ -79,7 +86,7 @@ const SafeTxProvider = ({ children }: { children: ReactNode }): ReactElement => 
         setSafeTx(tx)
       })
       .catch(setSafeTxError)
-  }, [isSigned, finalNonce, finalSafeTxGas, safeTx?.data])
+  }, [canEdit, finalNonce, finalSafeTxGas, safeTx?.data])
 
   // Log errors
   useEffect(() => {
@@ -104,6 +111,8 @@ const SafeTxProvider = ({ children }: { children: ReactNode }): ReactElement => 
         recommendedNonce,
         txOrigin,
         setTxOrigin,
+        isReadOnly,
+        setIsReadOnly,
         isMassPayout,
         setIsMassPayout,
       }}

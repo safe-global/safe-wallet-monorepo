@@ -276,7 +276,7 @@ exports[`TxSwapCard should render the default markup 1`] = `
         }
         suppressHighlighting={true}
       >
-        +
+        ~
         0.05
          
         ETH

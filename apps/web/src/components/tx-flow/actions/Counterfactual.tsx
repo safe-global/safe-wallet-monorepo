@@ -7,7 +7,7 @@ import { type SlotComponentProps, SlotName, withSlot } from '../slots'
 
 const Counterfactual = ({ onSubmitSuccess }: SlotComponentProps<SlotName.Submit>) => {
   const { safeTx, txOrigin } = useContext(SafeTxContext)
-  const { isCreation, trackTxEvent, isSubmittable } = useContext(TxFlowContext)
+  const { isCreation, trackTxEvent, isSubmitDisabled } = useContext(TxFlowContext)
 
   const handleSubmit = useCallback(
     async (txId: string, isExecuted = false) => {
@@ -20,7 +20,7 @@ const Counterfactual = ({ onSubmitSuccess }: SlotComponentProps<SlotName.Submit>
   return (
     <CounterfactualForm
       origin={txOrigin}
-      disableSubmit={!isSubmittable}
+      disableSubmit={isSubmitDisabled}
       isCreation={isCreation}
       safeTx={safeTx}
       onSubmit={handleSubmit}

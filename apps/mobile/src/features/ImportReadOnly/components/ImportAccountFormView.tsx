@@ -6,11 +6,10 @@ import { Identicon } from '@/src/components/Identicon'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { SafeButton } from '@/src/components/SafeButton'
 import { VerificationStatus } from '@/src/features/ImportReadOnly/components/VerificationStatus'
-import { View, Text, ScrollView, YStack } from 'tamagui'
+import { View, Text, ScrollView, YStack, getTokenValue } from 'tamagui'
 import { useLazySafesGetOverviewForManyQuery } from '@safe-global/store/gateway/safes'
 import { useScrollableHeader } from '@/src/navigation/useScrollableHeader'
 import { NavBarTitle } from '@/src/components/Title'
-import { useModalStyle } from '@/src/navigation/hooks/useModalStyle'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { type Control, Controller, type FieldErrors, FieldNamesMarkedBoolean } from 'react-hook-form'
 import type { FormValues } from '@/src/features/ImportReadOnly/types'
@@ -38,7 +37,6 @@ export const ImportAccountFormView: React.FC<ImportAccountFormViewProps> = ({
   errors,
   dirtyFields,
 }) => {
-  const modalStyle = useModalStyle()
   const { top, bottom } = useSafeAreaInsets()
 
   const { handleScroll } = useScrollableHeader({
@@ -46,11 +44,7 @@ export const ImportAccountFormView: React.FC<ImportAccountFormViewProps> = ({
   })
 
   return (
-    <KeyboardAvoidingView
-      behavior="padding"
-      style={{ flex: 1 }}
-      keyboardVerticalOffset={modalStyle.paddingBottom + top}
-    >
+    <KeyboardAvoidingView behavior="padding" style={{ flex: 1 }} keyboardVerticalOffset={bottom + top}>
       <YStack flex={1}>
         <ScrollView
           paddingBottom={'$4'}
@@ -121,7 +115,7 @@ export const ImportAccountFormView: React.FC<ImportAccountFormViewProps> = ({
           )}
         </ScrollView>
 
-        <View paddingHorizontal={'$4'} paddingTop={'$2'} paddingBottom={bottom || 60}>
+        <View paddingHorizontal={'$4'} paddingTop={'$2'} paddingBottom={bottom || getTokenValue('$4')}>
           <SafeButton primary onPress={onContinue} disabled={!canContinue} testID={'continue-button'}>
             Continue
           </SafeButton>

@@ -49,6 +49,7 @@ export default {
         'android.permission.FOREGROUND_SERVICE',
         'android.permission.WAKE_LOCK',
       ],
+      edgeToEdgeEnabled: true,
     },
     web: {
       bundler: 'metro',
@@ -73,6 +74,17 @@ export default {
           dark: {
             image: './assets/images/splash.png',
             backgroundColor: '#000000',
+          },
+          android: {
+            image: './assets/images/icon.png',
+            imageWidth: 124,
+            imageHeight: 124,
+            imageResizeMode: 'contain',
+            backgroundColor: '#000000',
+          },
+          ios: {
+            image: './assets/images/splash.png',
+            imageResizeMode: 'contain',
           },
         },
       ],
@@ -108,6 +120,7 @@ export default {
         },
       ],
       'expo-task-manager',
+      'expo-web-browser',
     ],
     experiments: {
       typedRoutes: true,
