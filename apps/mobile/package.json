@@ -65,7 +65,7 @@
     "@shopify/flash-list": "1.7.6",
     "@storybook/addon-react-native-web": "^0.0.26",
     "@storybook/addon-webpack5-compiler-babel": "^3.0.3",
-    "@tamagui/animations-moti": "^1.126.3",
+    "@tamagui/animations-moti": "^1.126.5",
     "@tamagui/babel-plugin": "^1.126.3",
     "@tamagui/config": "^1.126.3",
     "@tamagui/font-dm-sans": "^1.126.3",
