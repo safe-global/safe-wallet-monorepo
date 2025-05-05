@@ -5,6 +5,7 @@ import {
   isAnyStakingTxInfo,
   isCustomTxInfo,
   isExecTxData,
+  isMultiSendTxInfo,
   isOnChainConfirmationTxData,
   isSafeMigrationTxData,
   isSafeUpdateTxData,
@@ -28,6 +29,7 @@ import { MigrateToL2Information } from './MigrateToL2Information'
 import { NestedSafeCreation } from './NestedSafeCreation'
 import { isNestedSafeCreation } from '@/utils/nested-safes'
 import Summary from '@/components/transactions/TxDetails/Summary'
+import TxData from '@/components/transactions/TxDetails/TxData'
 
 type ConfirmationViewProps = {
   txDetails?: TransactionDetails
@@ -85,9 +87,14 @@ const ConfirmationView = ({ safeTx, txPreview, txDetails, ...props }: Confirmati
       : undefined
   }, [details, txFlow])
 
+  const showTxDetails = txDetails !== undefined && !isMultiSendTxInfo(txDetails.txInfo)
+
   return (
     <>
-      {ConfirmationViewComponent}
+      {ConfirmationViewComponent ||
+        (details && showTxDetails && (
+          <TxData txData={details?.txData} txInfo={details?.txInfo} txDetails={txDetails} imitation={false} trusted />
+        ))}
 
       {props.children}
 
