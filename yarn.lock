@@ -8189,7 +8189,7 @@ __metadata:
     react-native: "npm:0.79.1"
     react-native-collapsible-tab-view: "npm:^8.0.0"
     react-native-device-crypto: "patch:react-native-device-crypto@npm%3A0.1.7#~/.yarn/patches/react-native-device-crypto-npm-0.1.7-dbd2698fc4.patch"
-    react-native-device-info: "npm:^14.0.1"
+    react-native-device-info: "npm:^14.0.4"
     react-native-draggable-flatlist: "npm:^4.0.1"
     react-native-gesture-handler: "npm:^2.25.0"
     react-native-keychain: "npm:^10.0.0"
@@ -27386,12 +27386,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-device-info@npm:^14.0.1":
-  version: 14.0.2
-  resolution: "react-native-device-info@npm:14.0.2"
+"react-native-device-info@npm:^14.0.4":
+  version: 14.0.4
+  resolution: "react-native-device-info@npm:14.0.4"
   peerDependencies:
     react-native: "*"
-  checksum: 10/7d08a2bc77e397dd88fbcb9e2a983dab94d2e076ba3a2f2c2b65c9721b0c1a8496b25fcc0c5c58d54c31e980c3395126c1d9cd361acd69a2358700cfaf11ca6d
+  checksum: 10/bf031048551597b1a9ab2965d498cbd073eacf50005dffa4e3496286578734a45854141d47654e7e58ef8531b8c2cd6d1670bfd75625271c91aab3b3b8d0a8d8
   languageName: node
   linkType: hard
 
