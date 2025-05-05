@@ -10,12 +10,10 @@ import { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { CopyButton } from '@/src/components/CopyButton'
 import { TouchableOpacity } from 'react-native'
 
-import useOpenExplorer from '@/src/features/ConfirmTx/hooks/useOpenExplorer/useOpenExplorer'
 const mintBadgeProps: CircleProps = { borderRadius: '$2', paddingHorizontal: '$2', paddingVertical: '$1' }
 
-export const formatContractItems = (txInfo: CustomTransactionInfo, chain: Chain) => {
+export const formatContractItems = (txInfo: CustomTransactionInfo, chain: Chain, viewOnExplorer: () => void) => {
   const contractName = txInfo.to.name ? ellipsis(txInfo.to.name, 18) : shortenAddress(txInfo.to.value)
-  const viewOnExplorer = useOpenExplorer(txInfo.to.value)
 
   return [
     {
@@ -38,8 +36,9 @@ export const formatContractItems = (txInfo: CustomTransactionInfo, chain: Chain)
             <Logo logoUri={txInfo.to.logoUri} size="$6" />
             <Text fontSize="$4">{contractName}</Text>
             <CopyButton value={txInfo.to.value} color={'$textSecondaryLight'} />
+
             <TouchableOpacity onPress={viewOnExplorer}>
-              <SafeFontIcon name="external-link" size={14} color="textSecondaryLight" />
+              <SafeFontIcon name="external-link" size={14} color="$textSecondaryLight" />
             </TouchableOpacity>
           </View>
         )

@@ -9,11 +9,8 @@ import { Identicon } from '@/src/components/Identicon'
 import { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { TouchableOpacity } from 'react-native'
-import useOpenExplorer from '@/src/features/ConfirmTx/hooks/useOpenExplorer/useOpenExplorer'
 
-export const formatSendNFTItems = (txInfo: TransferTransactionInfo, chain: Chain) => {
-  const viewOnExplorer = useOpenExplorer(txInfo.recipient.value)
-
+export const formatSendNFTItems = (txInfo: TransferTransactionInfo, chain: Chain, viewOnExplorer: () => void) => {
   return [
     {
       label: 'New signer',
@@ -23,9 +20,9 @@ export const formatSendNFTItems = (txInfo: TransferTransactionInfo, chain: Chain
           <Text fontSize="$4">
             {txInfo.recipient.name ? ellipsis(txInfo.recipient.name, 18) : shortenAddress(txInfo.recipient.value)}
           </Text>
-          <SafeFontIcon name="copy" size={14} color="textSecondaryLight" />
+          <SafeFontIcon name="copy" size={14} color="$textSecondaryLight" />
           <TouchableOpacity onPress={viewOnExplorer}>
-            <SafeFontIcon name="external-link" size={14} color="textSecondaryLight" />
+            <SafeFontIcon name="external-link" size={14} color="$textSecondaryLight" />
           </TouchableOpacity>
         </View>
       ),

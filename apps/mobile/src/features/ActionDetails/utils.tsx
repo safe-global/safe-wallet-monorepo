@@ -28,7 +28,7 @@ const TxOptions = ({ value }: { value: string }) => {
   return (
     <View flexDirection="row" alignItems="center">
       <CopyButton value={value} color={'$textSecondaryLight'} />
-      <SafeFontIcon name="external-link" size={14} color="textSecondaryLight" />
+      <SafeFontIcon name="external-link" size={14} color="$textSecondaryLight" />
     </View>
   )
 }
@@ -79,7 +79,7 @@ export const formatActionDetails = ({ txData, action }: formatActionDetailsRetur
         <View flexDirection="row" alignItems="center" gap="$2">
           <Identicon address={action.to as Address} size={24} />
           <EthAddress copy copyProps={{ color: '$textSecondaryLight' }} address={action.to as Address} />
-          <SafeFontIcon name="external-link" size={14} color="textSecondaryLight" />
+          <SafeFontIcon name="external-link" size={14} color="$textSecondaryLight" />
         </View>
       ),
     })
