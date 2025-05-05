@@ -5,7 +5,6 @@ import {
   isAnyStakingTxInfo,
   isCustomTxInfo,
   isExecTxData,
-  isMultiSendTxInfo,
   isOnChainConfirmationTxData,
   isSafeMigrationTxData,
   isSafeUpdateTxData,
@@ -30,6 +29,7 @@ import { NestedSafeCreation } from './NestedSafeCreation'
 import { isNestedSafeCreation } from '@/utils/nested-safes'
 import Summary from '@/components/transactions/TxDetails/Summary'
 import TxData from '@/components/transactions/TxDetails/TxData'
+import { isMultiSendCalldata } from '@/utils/transaction-calldata'
 
 type ConfirmationViewProps = {
   txDetails?: TransactionDetails
@@ -87,7 +87,7 @@ const ConfirmationView = ({ safeTx, txPreview, txDetails, ...props }: Confirmati
       : undefined
   }, [details, txFlow])
 
-  const showTxDetails = txDetails !== undefined && !isMultiSendTxInfo(txDetails.txInfo)
+  const showTxDetails = details !== undefined && !isMultiSendCalldata(details.txData?.hexData ?? '0x')
 
   return (
     <>
