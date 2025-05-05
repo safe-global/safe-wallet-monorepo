@@ -20,6 +20,7 @@ type TxFlowProps<T extends unknown> = {
   initialData?: T
   onSubmit?: SubmitCallbackWithData<T>
   txId?: TxFlowProviderProps<T>['txId']
+  txNonce?: TxFlowProviderProps<T>['txNonce']
   onlyExecute?: TxFlowProviderProps<T>['onlyExecute']
   isExecutable?: TxFlowProviderProps<T>['isExecutable']
   isRejection?: TxFlowProviderProps<T>['isRejection']
@@ -39,6 +40,7 @@ export const TxFlow = <T extends unknown>({
   children = [],
   initialData,
   txId,
+  txNonce,
   onSubmit,
   onlyExecute,
   isExecutable,
@@ -77,6 +79,7 @@ export const TxFlow = <T extends unknown>({
               prevStep={prevStep}
               progress={progress}
               txId={txId}
+              txNonce={txNonce}
               txLayoutProps={txLayoutProps}
               onlyExecute={onlyExecute}
               isExecutable={isExecutable}
