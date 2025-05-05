@@ -19,6 +19,7 @@ import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { Address } from '@/src/types/address'
 import Logger from '@/src/utils/logger'
 import { TokenAmount } from '@/src/components/TokenAmount'
+import useOpenExplorer from '../../../hooks/useOpenExplorer/useOpenExplorer'
 interface TokenTransferProps {
   txInfo: TransferTransactionInfo
   executionInfo: MultisigExecutionDetails
@@ -32,15 +33,7 @@ export function TokenTransfer({ txInfo, executionInfo, executedAt }: TokenTransf
 
   const recipientAddress = txInfo.recipient.value as Address
 
-  const onPressShare = async () => {
-    Share.open({
-      title: 'Recipient address',
-      message: recipientAddress,
-      type: 'text/plain',
-    }).then((res) => {
-      Logger.info(res.message)
-    })
-  }
+  const viewOnExplorer = useOpenExplorer(recipientAddress)
 
   return (
     <>
@@ -80,9 +73,7 @@ export function TokenTransfer({ txInfo, executionInfo, executedAt }: TokenTransf
                   />
                 </View>
                 <Button
-                  onPress={() => {
-                    onPressShare()
-                  }}
+                  onPress={viewOnExplorer}
                   height={18}
                   style={{ marginLeft: -12 }}
                   pressStyle={{ backgroundColor: 'transparent' }}

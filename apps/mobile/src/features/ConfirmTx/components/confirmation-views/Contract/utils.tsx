@@ -38,8 +38,9 @@ export const formatContractItems = (txInfo: CustomTransactionInfo, chain: Chain)
             <Logo logoUri={txInfo.to.logoUri} size="$6" />
             <Text fontSize="$4">{contractName}</Text>
             <CopyButton value={txInfo.to.value} color={'$textSecondaryLight'} />
+
             <TouchableOpacity onPress={viewOnExplorer}>
-              <SafeFontIcon name="external-link" size={14} color="textSecondaryLight" />
+              <SafeFontIcon name="external-link" size={14} color="$textSecondaryLight" />
             </TouchableOpacity>
           </View>
         )
