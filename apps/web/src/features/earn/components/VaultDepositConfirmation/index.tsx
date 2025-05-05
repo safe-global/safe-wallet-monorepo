@@ -150,6 +150,8 @@ const VaultDepositConfirmation = ({
   txInfo: VaultDepositTransactionInfo
   isTxDetails?: boolean
 }) => {
+  if (!txInfo.vaultInfo) return null // TODO: Workaround until new CGW changes are on prod
+
   return (
     <>
       <DataTable
