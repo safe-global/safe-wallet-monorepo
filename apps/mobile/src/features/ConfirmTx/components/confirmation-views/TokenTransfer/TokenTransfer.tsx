@@ -1,7 +1,6 @@
 import React from 'react'
 import { Container } from '@/src/components/Container'
 import { View, YStack, Text, Button, H3 } from 'tamagui'
-import Share from 'react-native-share'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { Logo } from '@/src/components/Logo'
 import { EthAddress } from '@/src/components/EthAddress'
@@ -17,9 +16,8 @@ import { selectChainById } from '@/src/store/chains'
 import { RootState } from '@/src/store'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { Address } from '@/src/types/address'
-import Logger from '@/src/utils/logger'
 import { TokenAmount } from '@/src/components/TokenAmount'
-import useOpenExplorer from '../../../hooks/useOpenExplorer/useOpenExplorer'
+import { useOpenExplorer } from '@/src/features/ConfirmTx/hooks/useOpenExplorer'
 interface TokenTransferProps {
   txInfo: TransferTransactionInfo
   executionInfo: MultisigExecutionDetails
