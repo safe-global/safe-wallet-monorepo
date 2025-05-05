@@ -63,7 +63,7 @@ const ContactsList = ({ contactItems }: { contactItems: ContactItem[] }) => {
               const isSameAddressSelected = selectedAddresses.has(contactItem.address) && !isSelected
 
               const handleItemClick = () => {
-                field.onChange(field.value ? undefined : contactItem.name)
+                field.onChange(field.value ? false : contactItem.name)
               }
 
               return (
@@ -78,7 +78,7 @@ const ContactsList = ({ contactItems }: { contactItems: ContactItem[] }) => {
                       <ListItemIcon onClick={(e) => e.stopPropagation()}>
                         <Checkbox
                           checked={isSelected || alreadyAdded}
-                          onChange={(event) => field.onChange(event.target.checked ? contactItem.name : undefined)}
+                          onChange={(event) => field.onChange(event.target.checked ? contactItem.name : false)}
                         />
                       </ListItemIcon>
                       <ListItemText
