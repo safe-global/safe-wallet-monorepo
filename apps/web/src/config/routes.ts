@@ -11,6 +11,7 @@ export const AppRoutes = {
   index: '/',
   imprint: '/imprint',
   home: '/home',
+  earn: '/earn',
   cookie: '/cookie',
   bridge: '/bridge',
   addressBook: '/address-book',

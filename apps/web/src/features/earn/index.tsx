@@ -1,18 +1,14 @@
 import { Stack } from '@mui/material'
 import Disclaimer from '@/components/common/Disclaimer'
 import WidgetDisclaimer from '@/components/common/WidgetDisclaimer'
-import StakingWidget from '../StakingWidget'
-import { useRouter } from 'next/router'
 import BlockedAddress from '@/components/common/BlockedAddress'
 import useBlockedAddress from '@/hooks/useBlockedAddress'
 import useConsent from '@/hooks/useConsent'
-import { STAKE_CONSENT_STORAGE_KEY } from '@/features/stake/constants'
+import { EARN_CONSENT_STORAGE_KEY } from '@/features/earn/constants'
+import EarnView from '@/features/earn/components/EarnView'
 
-const StakePage = () => {
-  const { isConsentAccepted, onAccept } = useConsent(STAKE_CONSENT_STORAGE_KEY)
-  const router = useRouter()
-  const { asset } = router.query
-
+const EarnPage = () => {
+  const { isConsentAccepted, onAccept } = useConsent(EARN_CONSENT_STORAGE_KEY)
   const blockedAddress = useBlockedAddress()
 
   if (blockedAddress) {
@@ -25,15 +21,17 @@ const StakePage = () => {
           flex: 1,
         }}
       >
-        <BlockedAddress address={blockedAddress} featureTitle="stake feature with Kiln" />
+        <BlockedAddress address={blockedAddress} featureTitle="lend feature with Kiln" />
       </Stack>
     )
   }
 
+  if (isConsentAccepted === undefined) return null
+
   return (
     <>
-      {isConsentAccepted === undefined ? null : isConsentAccepted ? (
-        <StakingWidget asset={String(asset)} />
+      {isConsentAccepted ? (
+        <EarnView />
       ) : (
         <Stack
           direction="column"
@@ -45,7 +43,7 @@ const StakePage = () => {
         >
           <Disclaimer
             title="Note"
-            content={<WidgetDisclaimer widgetName="Stake Widget by Kiln" />}
+            content={<WidgetDisclaimer widgetName="Earn Widget by Kiln" />}
             onAccept={onAccept}
             buttonText="Continue"
           />
@@ -55,4 +53,4 @@ const StakePage = () => {
   )
 }
 
-export default StakePage
+export default EarnPage

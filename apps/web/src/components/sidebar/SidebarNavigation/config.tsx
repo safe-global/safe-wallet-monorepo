@@ -49,6 +49,11 @@ export const navItems: NavItem[] = [
     href: AppRoutes.stake,
   },
   {
+    label: 'Earn',
+    icon: <SvgIcon component={StakeIcon} inheritViewBox />, // TODO: Change icon
+    href: AppRoutes.earn,
+  },
+  {
     label: 'Transactions',
     icon: <SvgIcon component={TransactionIcon} inheritViewBox />,
     href: AppRoutes.transactions.history,

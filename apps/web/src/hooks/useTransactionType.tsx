@@ -110,6 +110,20 @@ export const getTransactionType = (tx: TransactionSummary, addressBook: AddressB
         text: 'Claim',
       }
     }
+    // @ts-ignore TODO: Add types to old SDK or switch to auto-generated
+    case 'VaultDeposit': {
+      return {
+        icon: <StakeIcon component={StakeIcon} inheritViewBox fontSize="small" alt="Deposit icon" />,
+        text: 'Deposit',
+      }
+    }
+    // @ts-ignore TODO: Add types to old SDK or switch to auto-generated
+    case 'VaultRedeem': {
+      return {
+        icon: <StakeIcon component={StakeIcon} inheritViewBox fontSize="small" alt="Withdraw icon" />,
+        text: 'Withdraw',
+      }
+    }
     case TransactionInfoType.CUSTOM: {
       if (tx.safeAppInfo) {
         return {
