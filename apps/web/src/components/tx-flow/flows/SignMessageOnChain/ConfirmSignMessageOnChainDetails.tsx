@@ -21,7 +21,7 @@ export const ConfirmSignMessageOnChainDetails = ({
     if (!safeTx || !onboard || !wallet) return
 
     try {
-      await dispatchSafeAppsTx(safeTx, requestId, wallet.provider)
+      await dispatchSafeAppsTx({ safeTx, safeAppRequestId: requestId, provider: wallet.provider })
     } catch (error) {
       setSafeTxError(asError(error))
     }

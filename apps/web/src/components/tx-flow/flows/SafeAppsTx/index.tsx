@@ -1,14 +1,12 @@
 import type { BaseTransaction, RequestId, SendTransactionRequestParams } from '@safe-global/safe-apps-sdk'
-import TxLayout from '@/components/tx-flow/common/TxLayout'
-import type { TxStep } from '../../common/TxLayout'
 import type { SafeAppData } from '@safe-global/safe-gateway-typescript-sdk'
 import ReviewSafeAppsTx from './ReviewSafeAppsTx'
 import { AppTitle } from '@/components/tx-flow/flows/SignMessage'
-import useTxStepper from '../../useTxStepper'
-import { useMemo } from 'react'
-import { getTxOrigin } from '@/utils/transactions'
-import { ConfirmSafeAppsTxDetails } from './ConfirmSafeAppsTxDetails'
-import { TxFlowType } from '@/services/analytics'
+import { useCallback } from 'react'
+import { type SubmitCallback, TxFlow } from '../../TxFlow'
+import { type ReviewTransactionContentProps } from '@/components/tx/ReviewTransactionV2/ReviewTransactionContent'
+import { dispatchSafeAppsTx } from '@/services/tx/tx-sender'
+import { trackSafeAppTxCount } from '@/services/safe-apps/track-app-usage-count'
 
 export type SafeAppsTxParams = {
   appId?: string
@@ -25,32 +23,34 @@ const SafeAppsTxFlow = ({
   data: SafeAppsTxParams
   onSubmit?: (txId: string, safeTxHash: string) => void
 }) => {
-  const { step, nextStep, prevStep } = useTxStepper(undefined, TxFlowType.SAFE_APPS_TX)
-
-  const origin = useMemo(() => getTxOrigin(data.app), [data.app])
-
-  const steps = useMemo<TxStep[]>(
-    () => [
-      {
-        txLayoutProps: { title: 'Confirm transaction' },
-        content: <ReviewSafeAppsTx key={0} safeAppsTx={data} origin={origin} onSubmit={() => nextStep(undefined)} />,
-      },
-      {
-        txLayoutProps: { title: 'Confirm transaction details', fixedNonce: true },
-        content: <ConfirmSafeAppsTxDetails key={1} safeAppsTx={data} onSubmit={onSubmit} />,
-      },
-    ],
-    [nextStep, data, onSubmit, origin],
+  const ReviewTransactionComponent = useCallback(
+    (props: ReviewTransactionContentProps) => {
+      return <ReviewSafeAppsTx safeAppsTx={data} {...props} />
+    },
+    [data],
   )
+
+  const handleSubmit: SubmitCallback = useCallback(
+    (args) => {
+      if (!args || !args.txId) {
+        return
+      }
+
+      const safeTxHash = args.txId.slice(-66)
+
+      trackSafeAppTxCount(Number(data.appId))
+      dispatchSafeAppsTx({ safeAppRequestId: data.requestId, txId: args.txId, safeTxHash })
+      onSubmit?.(args.txId, safeTxHash)
+    },
+    [data.appId, data.requestId, onSubmit],
+  )
+
   return (
-    <TxLayout
+    <TxFlow
+      onSubmit={handleSubmit}
       subtitle={<AppTitle name={data.app?.name} logoUri={data.app?.iconUrl} txs={data.txs} />}
-      step={step}
-      onBack={prevStep}
-      {...(steps?.[step]?.txLayoutProps || {})}
-    >
-      {steps.map(({ content }) => content)}
-    </TxLayout>
+      ReviewTransactionComponent={ReviewTransactionComponent}
+    />
   )
 }
 
