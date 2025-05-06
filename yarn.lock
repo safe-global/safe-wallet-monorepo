@@ -8265,10 +8265,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@safe-global/safe-modules-deployments@npm:^2.2.1, @safe-global/safe-modules-deployments@npm:^2.2.4, @safe-global/safe-modules-deployments@npm:^2.2.5, @safe-global/safe-modules-deployments@npm:^2.2.7":
+"@safe-global/safe-modules-deployments@npm:^2.2.1, @safe-global/safe-modules-deployments@npm:^2.2.4, @safe-global/safe-modules-deployments@npm:^2.2.5":
   version: 2.2.7
   resolution: "@safe-global/safe-modules-deployments@npm:2.2.7"
   checksum: 10/3dfce979b2879d72828365a36cebd59ff76b4781e26033724ba858293f38c9a4cf90ce423767e1f5fa23cccd6d5a151e10a7db9d8ea4340c610ee7c615c22797
+  languageName: node
+  linkType: hard
+
+"@safe-global/safe-modules-deployments@npm:^2.2.8":
+  version: 2.2.8
+  resolution: "@safe-global/safe-modules-deployments@npm:2.2.8"
+  checksum: 10/7d2f0cffcbfc827e435c7f2510d373109c6f4a74b85119246d49ccc80d183fc71cde5a4b77aa710081da27efc81366dd28cf53e9fcbb9583d4dd3ac567f9ddf6
   languageName: node
   linkType: hard
 
@@ -8384,7 +8391,7 @@ __metadata:
     "@safe-global/safe-core-sdk-types": "npm:^5.0.1"
     "@safe-global/safe-deployments": "npm:^1.37.31"
     "@safe-global/safe-gateway-typescript-sdk": "npm:3.23.1"
-    "@safe-global/safe-modules-deployments": "npm:^2.2.7"
+    "@safe-global/safe-modules-deployments": "npm:^2.2.8"
     "@safe-global/store": "workspace:^"
     "@safe-global/test": "workspace:^"
     "@sentry/react": "npm:^7.91.0"
