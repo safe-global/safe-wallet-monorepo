@@ -28,7 +28,7 @@ export const ReviewRemoveGuard = ({ params, onSubmit }: { params: RemoveGuardFlo
 
   return (
     <ReviewTransaction onSubmit={onFormSubmit}>
-      <Typography sx={({ palette }) => ({ color: palette.primary.light })}>Transaction guard</Typography>
+      <Typography color="primary.light">Transaction guard</Typography>
 
       <EthHashInfo address={params.address} showCopyButton hasExplorer shortAddress={false} />
 
