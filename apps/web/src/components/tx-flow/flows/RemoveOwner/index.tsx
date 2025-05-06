@@ -7,7 +7,7 @@ import { TxFlowType } from '@/services/analytics'
 import { TxFlowContext } from '../../TxFlowProvider'
 import { TxFlow } from '../../TxFlow'
 import { TxFlowStep } from '../../TxFlowStep'
-import type ReviewTransaction from '@/components/tx/ReviewTransactionV2'
+import { type ReviewTransactionProps } from '@/components/tx/ReviewTransactionV2'
 
 type Owner = {
   address: string
@@ -24,7 +24,7 @@ const SetThresholdStep = () => {
   return <SetThreshold onSubmit={onNext} params={data} />
 }
 
-const ReviewOwnerStep: typeof ReviewTransaction = (props) => {
+const ReviewOwnerStep = (props: ReviewTransactionProps) => {
   const { data } = useContext(TxFlowContext)
   return <ReviewRemoveOwner params={data} {...props} />
 }

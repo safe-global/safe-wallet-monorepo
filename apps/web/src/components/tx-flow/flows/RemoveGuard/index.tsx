@@ -3,13 +3,13 @@ import { TxFlow } from '../../TxFlow'
 import { TxFlowContext } from '../../TxFlowProvider'
 import { TxFlowType } from '@/services/analytics'
 import { ReviewRemoveGuard } from './ReviewRemoveGuard'
-import type ReviewTransaction from '@/components/tx/ReviewTransactionV2'
+import { type ReviewTransactionProps } from '@/components/tx/ReviewTransactionV2'
 
 export type RemoveGuardFlowProps = {
   address: string
 }
 
-const ReviewRemoveGuardStep: typeof ReviewTransaction = (props) => {
+const ReviewRemoveGuardStep = (props: ReviewTransactionProps) => {
   const { data } = useContext(TxFlowContext)
   return <ReviewRemoveGuard params={data} {...props} />
 }
