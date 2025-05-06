@@ -1,6 +1,6 @@
 import { useCallback, useContext, useEffect } from 'react'
 import { Typography, Divider, Box, Paper, SvgIcon } from '@mui/material'
-import type { ReactElement } from 'react'
+import type { ReactElement, PropsWithChildren } from 'react'
 
 import useAddressBook from '@/hooks/useAddressBook'
 import useSafeInfo from '@/hooks/useSafeInfo'
@@ -14,15 +14,16 @@ import EthHashInfo from '@/components/common/EthHashInfo'
 import commonCss from '@/components/tx-flow/common/styles.module.css'
 import { ChangeSignerSetupWarning } from '@/features/multichain/components/SignerSetupWarning/ChangeSignerSetupWarning'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
-import ReviewTransaction from '@/components/tx/ReviewTransaction'
+import ReviewTransaction from '@/components/tx/ReviewTransactionV2'
 
 export const ReviewRemoveOwner = ({
   params,
   onSubmit,
-}: {
+  children,
+}: PropsWithChildren<{
   params: RemoveOwnerFlowProps
   onSubmit: () => void
-}): ReactElement => {
+}>): ReactElement => {
   const addressBook = useAddressBook()
   const { setSafeTx, setSafeTxError } = useContext(SafeTxContext)
   const { safe } = useSafeInfo()
@@ -67,6 +68,8 @@ export const ReviewRemoveOwner = ({
         </Typography>
       </Box>
       <Divider className={commonCss.nestedDivider} />
+
+      {children}
     </ReviewTransaction>
   )
 }

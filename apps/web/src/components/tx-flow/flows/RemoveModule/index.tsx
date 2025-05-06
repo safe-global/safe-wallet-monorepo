@@ -3,15 +3,15 @@ import { TxFlow } from '../../TxFlow'
 import { TxFlowContext } from '../../TxFlowProvider'
 import { TxFlowType } from '@/services/analytics'
 import { ReviewRemoveModule } from './ReviewRemoveModule'
-import type ReviewTransaction from '@/components/tx/ReviewTransactionV2'
+import { type ReviewTransactionProps } from '@/components/tx/ReviewTransactionV2'
 
 export type RemoveModuleFlowProps = {
   address: string
 }
 
-const ReviewRemoveModuleStep: typeof ReviewTransaction = ({ onSubmit }) => {
+const ReviewRemoveModuleStep = (props: ReviewTransactionProps) => {
   const { data } = useContext(TxFlowContext)
-  return <ReviewRemoveModule onSubmit={onSubmit} params={data} />
+  return <ReviewRemoveModule params={data} {...props} />
 }
 
 const RemoveModuleFlow = ({ address }: RemoveModuleFlowProps) => {
