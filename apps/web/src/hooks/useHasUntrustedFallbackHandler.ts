@@ -14,10 +14,13 @@ export const useHasUntrustedFallbackHandler = (fallbackHandler?: string | string
   const { safe } = useSafeInfo()
   const twapFallbackHandler = useTWAPFallbackHandlerAddress()
 
-  const fallbackHandlerAddresses = useMemo(
-    () => (Array.isArray(fallbackHandler) ? fallbackHandler : [fallbackHandler || safe.fallbackHandler?.value]),
-    [fallbackHandler, safe.fallbackHandler?.value],
-  )
+  const fallbackHandlerAddresses = useMemo(() => {
+    if (Array.isArray(fallbackHandler)) {
+      return fallbackHandler.length > 0 ? fallbackHandler : [safe.fallbackHandler?.value]
+    }
+
+    return [fallbackHandler || safe.fallbackHandler?.value]
+  }, [fallbackHandler, safe.fallbackHandler?.value])
 
   const officialFallbackHandlerAddresses = useMemo(() => {
     const addresses = !!twapFallbackHandler ? [twapFallbackHandler] : []
