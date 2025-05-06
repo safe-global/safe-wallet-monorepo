@@ -19,7 +19,7 @@ const RemoveModuleFlow = ({ address }: RemoveModuleFlowProps) => {
     <TxFlow
       initialData={{ address }}
       subtitle="Remove module"
-      eventCategory={TxFlowType.REMOVE_GUARD}
+      eventCategory={TxFlowType.REMOVE_MODULE}
       ReviewTransactionComponent={ReviewRemoveModuleStep}
     />
   )
