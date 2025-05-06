@@ -4,7 +4,7 @@ import { ChooseThreshold } from './ChooseThreshold'
 import { TxFlowType } from '@/services/analytics'
 import { TxFlow } from '../../TxFlow'
 import { TxFlowStep } from '../../TxFlowStep'
-import type ReviewTransaction from '@/components/tx/ReviewTransactionV2'
+import { type ReviewTransactionProps } from '@/components/tx/ReviewTransactionV2'
 import { useContext } from 'react'
 import { TxFlowContext } from '../../TxFlowProvider'
 import ReviewChangeThreshold from './ReviewChangeThreshold'
@@ -17,10 +17,10 @@ export type ChangeThresholdFlowProps = {
   [ChangeThresholdFlowFieldNames.threshold]: number
 }
 
-const ReviewThresholdStep: typeof ReviewTransaction = ({ onSubmit }) => {
+const ReviewThresholdStep = (props: ReviewTransactionProps) => {
   const { data } = useContext(TxFlowContext)
 
-  return <ReviewChangeThreshold onSubmit={onSubmit} params={data} />
+  return <ReviewChangeThreshold params={data} {...props} />
 }
 
 const ChangeThresholdFlow = () => {
