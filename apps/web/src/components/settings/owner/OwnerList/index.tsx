@@ -1,20 +1,21 @@
 import { jsonToCSV } from 'react-papaparse'
 import { type SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import EthHashInfo from '@/components/common/EthHashInfo'
-import { AddOwnerFlow, ReplaceOwnerFlow, RemoveOwnerFlow } from '@/components/tx-flow/flows'
+import { ReplaceOwnerFlow, RemoveOwnerFlow } from '@/components/tx-flow/flows'
 import useAddressBook from '@/hooks/useAddressBook'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { Box, Grid, Typography, Button, SvgIcon, Tooltip, IconButton } from '@mui/material'
 import { useContext, useMemo } from 'react'
 import { EditOwnerDialog } from '../EditOwnerDialog'
 import EnhancedTable from '@/components/common/EnhancedTable'
-import AddIcon from '@/public/images/common/add.svg'
+import { ChangeOwnerStructureFlow } from '@/components/tx-flow/flows/ChangeOwnerStructure'
 import Track from '@/components/common/Track'
 import { SETTINGS_EVENTS } from '@/services/analytics/events/settings'
 import CheckWallet from '@/components/common/CheckWallet'
 import { TxModalContext } from '@/components/tx-flow'
 import ReplaceOwnerIcon from '@/public/images/settings/setup/replace-owner.svg'
 import DeleteIcon from '@/public/images/common/delete.svg'
+import EditOwnerIcon from '@/public/images/common/edit-owner.svg'
 import type { AddressBook } from '@/store/addressBookSlice'
 
 import tableCss from '@/components/common/EnhancedTable/styles.module.css'
@@ -114,7 +115,7 @@ export const OwnerList = () => {
 
           <Box
             sx={{
-              pt: 2,
+              py: 2,
               display: 'flex',
               justifyContent: 'space-between',
             }}
@@ -123,14 +124,14 @@ export const OwnerList = () => {
               {(isOk) => (
                 <Track {...SETTINGS_EVENTS.SETUP.ADD_OWNER}>
                   <Button
-                    data-testid="add-owner-btn"
-                    onClick={() => setTxFlow(<AddOwnerFlow />)}
+                    data-testid="manage-signers-btn"
+                    startIcon={<SvgIcon component={EditOwnerIcon} inheritViewBox />}
+                    onClick={() => setTxFlow(<ChangeOwnerStructureFlow />)}
                     variant="text"
-                    startIcon={<SvgIcon component={AddIcon} inheritViewBox fontSize="small" />}
                     disabled={!isOk}
                     size="compact"
                   >
-                    Add signer
+                    Manage signers
                   </Button>
                 </Track>
               )}

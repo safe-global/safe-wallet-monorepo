@@ -46,6 +46,7 @@ export enum AnalyticsUserProperties {
 export enum TxFlowType {
   ADD_OWNER = 'add-owner',
   CANCEL_RECOVERY = 'cancel-recovery',
+  CHANGE_OWNER_STRUCTURE = 'change-owner-structure',
   CHANGE_THRESHOLD = 'change-threshold',
   CONFIRM_BATCH = 'confirm-batch',
   CONFIRM_TX = 'confirm-tx',
