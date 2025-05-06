@@ -40,7 +40,7 @@ const RemoveOwnerFlow = (props: Owner) => {
   return (
     <TxFlow
       initialData={defaultValues}
-      eventCategory={TxFlowType.ADD_OWNER}
+      eventCategory={TxFlowType.REMOVE_OWNER}
       icon={SaveAddressIcon}
       subtitle="Remove signer"
       ReviewTransactionComponent={ReviewOwnerStep}
