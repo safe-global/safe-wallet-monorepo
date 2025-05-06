@@ -19,7 +19,8 @@ type LazyQueryResult = ReturnType<typeof useLazySafesGetOverviewForManyQuery>[1]
 
 type ImportAccountFormViewProps = {
   canContinue: boolean
-  result: LazyQueryResult
+  isLoading: boolean
+  data: LazyQueryResult['data']
   isEnteredAddressValid: boolean
   onContinue: () => void
   control: Control<FormValues>
@@ -30,7 +31,8 @@ type ImportAccountFormViewProps = {
 
 export const ImportAccountFormView: React.FC<ImportAccountFormViewProps> = ({
   canContinue,
-  result,
+  isLoading,
+  data,
   isEnteredAddressValid,
   onContinue,
   control,
@@ -94,7 +96,7 @@ export const ImportAccountFormView: React.FC<ImportAccountFormViewProps> = ({
                       ) : null
                     }
                     right={
-                      result?.data?.length && !errors.safeAddress ? (
+                      data?.length && !errors.safeAddress ? (
                         <SafeFontIcon name={'check-filled'} size={20} color={'$success'} testID={'success-icon'} />
                       ) : (
                         <View width={20} />
@@ -107,11 +109,7 @@ export const ImportAccountFormView: React.FC<ImportAccountFormViewProps> = ({
           </View>
 
           {!errors.safeAddress && (
-            <VerificationStatus
-              isLoading={result.isLoading}
-              data={result.data}
-              isEnteredAddressValid={isEnteredAddressValid}
-            />
+            <VerificationStatus isLoading={isLoading} data={data} isEnteredAddressValid={isEnteredAddressValid} />
           )}
         </ScrollView>
 

@@ -36,13 +36,13 @@ export const ImportAccountFormContainer = () => {
 
   const addressState = getFieldState('safeAddress')
 
-  const [trigger, result] = useLazySafesGetOverviewForManyQuery()
+  const [trigger, { data, isLoading, isError }] = useLazySafesGetOverviewForManyQuery()
 
-  const safeExists = (result.data && result.data.length > 0) || false
+  const safeExists = (data && data.length > 0) || false
   const inputAddress = watch('safeAddress')
 
   useEffect(() => {
-    if (!addressState.invalid) {
+    if (!addressState.invalid && addressState.isDirty) {
       const { address } = parsePrefixedAddress(inputAddress)
       const isValid = isValidAddress(address)
 
@@ -53,36 +53,48 @@ export const ImportAccountFormContainer = () => {
           trusted: true,
           excludeSpam: true,
         })
+      } else {
+        setError('safeAddress', { message: 'Invalid address' })
       }
     }
-  }, [chainIds, trigger, inputAddress, addressState.isDirty, addressState.invalid])
+  }, [chainIds, trigger, setError, clearErrors, inputAddress, addressState.isDirty, addressState.invalid])
 
   useEffect(() => {
-    if (!addressState.isDirty) {
-      return
+    const validateSafe = () => {
+      const { address } = parsePrefixedAddress(inputAddress)
+      const isValid = isValidAddress(address)
+
+      if (!addressState.isDirty || !isValid) {
+        return
+      }
+
+      if ((isError || !data?.length) && !isLoading) {
+        setError('safeAddress', { message: 'Safe not found' })
+      } else {
+        clearErrors('safeAddress')
+      }
     }
 
-    if (!result?.data?.length) {
-      setError('safeAddress', { message: 'Safe not found' })
-    } else {
-      clearErrors('safeAddress')
-    }
-  }, [result.data, setError, getValues, addressState.isDirty, clearErrors, addressState.invalid])
+    const debouncedValidation = setTimeout(validateSafe, 300)
 
-  const canContinue = isValid && safeExists
+    return () => clearTimeout(debouncedValidation)
+  }, [isError, data, addressState.isDirty, isLoading, clearErrors, setError, inputAddress, addressState.invalid])
+
+  const canContinue = isValid && safeExists && !isLoading
 
   const handleContinue = useCallback(() => {
     const inputAddress = getValues('safeAddress')
     const { address } = parsePrefixedAddress(inputAddress)
     router.push(
-      `/(import-accounts)/signers?safeAddress=${address}&chainId=${result.data?.[0].chainId}&import_safe=true&safeName=${getValues('name')}`,
+      `/(import-accounts)/signers?safeAddress=${address}&chainId=${data?.[0].chainId}&import_safe=true&safeName=${getValues('name')}`,
     )
-  }, [result.data, router])
+  }, [data, router])
 
   return (
     <ImportAccountFormView
       canContinue={canContinue}
-      result={result}
+      isLoading={isLoading}
+      data={data}
       isEnteredAddressValid={addressState.isTouched && !addressState.invalid}
       onContinue={handleContinue}
       control={control}
