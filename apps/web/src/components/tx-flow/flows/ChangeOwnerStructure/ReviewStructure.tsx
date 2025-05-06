@@ -50,7 +50,6 @@ export function ReviewStructure({ onSubmit, children }: ReviewTransactionContent
           display: 'flex',
           flexDirection: 'column',
           gap: 3,
-          mb: 2,
           '& .MuiGrid-container': {
             alignItems: 'flex-start',
           },
