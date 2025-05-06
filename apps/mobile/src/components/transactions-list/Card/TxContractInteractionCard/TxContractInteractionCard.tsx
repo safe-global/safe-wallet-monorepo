@@ -1,9 +1,10 @@
 import React from 'react'
-import { Avatar, Text, Theme, View } from 'tamagui'
+import { Text, Theme } from 'tamagui'
 import { SafeListItem } from '@/src/components/SafeListItem'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon/SafeFontIcon'
 import { MultiSend } from '@safe-global/store/gateway/types'
 import { Transaction, CustomTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { SafeAvatar } from '@/src/components/SafeAvatar/SafeAvatar'
 
 interface TxContractInteractionCardProps {
   bordered?: boolean
@@ -32,25 +33,14 @@ export function TxContractInteractionCard({
       executionInfo={executionInfo}
       inQueue={inQueue}
       leftNode={
-        <Avatar circular size="$10">
-          <Theme name="logo">
-            {logoUri && <Avatar.Image backgroundColor="$color" accessibilityLabel={label} src={logoUri} />}
-
-            <Avatar.Fallback backgroundColor="$background">
-              <View
-                backgroundColor="$background"
-                padding="$2"
-                flexDirection="row"
-                alignItems="center"
-                justifyContent="center"
-                borderRadius={100}
-                flex={1}
-              >
-                <SafeFontIcon name="code-blocks" color="$color" size={16} />
-              </View>
-            </Avatar.Fallback>
-          </Theme>
-        </Avatar>
+        <Theme name="logo">
+          <SafeAvatar
+            size="$10"
+            src={logoUri || ''}
+            label={label}
+            fallbackIcon={<SafeFontIcon name="code-blocks" color="$color" size={16} />}
+          />
+        </Theme>
       }
       rightNode={<Text>{txInfo.methodName}</Text>}
       onPress={onPress}
