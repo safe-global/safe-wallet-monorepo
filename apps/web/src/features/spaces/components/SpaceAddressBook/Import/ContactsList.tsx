@@ -9,7 +9,7 @@ import { Controller, useFormContext, useWatch } from 'react-hook-form'
 import type { ImportContactsFormValues } from '@/features/spaces/components/SpaceAddressBook/Import/ImportAddressBookDialog'
 import { getSelectedAddresses, getContactId } from '@/features/spaces/components/SpaceAddressBook/utils'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import useGetAddressBook from '@/features/spaces/hooks/useGetAddressBook'
+import useGetSpaceAddressBook from '@/features/spaces/hooks/useGetSpaceAddressBook'
 
 export type ContactItem = {
   chainId: string
@@ -21,7 +21,7 @@ const ContactsList = ({ contactItems }: { contactItems: ContactItem[] }) => {
   const { control } = useFormContext<ImportContactsFormValues>()
   const selectedContacts = useWatch({ control, name: 'contacts' })
   const selectedAddresses = getSelectedAddresses(selectedContacts)
-  const spaceContacts = useGetAddressBook()
+  const spaceContacts = useGetSpaceAddressBook()
 
   return (
     <List

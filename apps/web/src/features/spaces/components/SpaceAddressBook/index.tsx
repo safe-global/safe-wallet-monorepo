@@ -10,13 +10,13 @@ import ImportAddressBook from '@/features/spaces/components/SpaceAddressBook/Imp
 import SearchInput from '@/features/spaces/components/SearchInput'
 import useAddressBookSearch from '@/features/spaces/hooks/useAddressBookSearch'
 import { useState } from 'react'
-import useGetAddressBook from '@/features/spaces/hooks/useGetAddressBook'
+import useGetSpaceAddressBook from '@/features/spaces/hooks/useGetSpaceAddressBook'
 
 const SpaceAddressBook = () => {
   const [searchQuery, setSearchQuery] = useState('')
   const isAdmin = useIsAdmin()
   const isInvited = useIsInvited()
-  const addressBookItems = useGetAddressBook()
+  const addressBookItems = useGetSpaceAddressBook()
 
   const filteredAddressBook = useAddressBookSearch(addressBookItems, searchQuery)
 

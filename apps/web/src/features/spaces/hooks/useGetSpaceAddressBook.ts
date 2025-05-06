@@ -3,7 +3,7 @@ import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
 import { useAddressBooksGetAddressBookItemsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 
-const useGetAddressBook = () => {
+const useGetSpaceAddressBook = () => {
   const spaceId = useCurrentSpaceId()
   const isUserSignedIn = useAppSelector(isAuthenticated)
   const { currentData: addressBook } = useAddressBooksGetAddressBookItemsV1Query(
@@ -14,4 +14,4 @@ const useGetAddressBook = () => {
   return addressBook?.data || []
 }
 
-export default useGetAddressBook
+export default useGetSpaceAddressBook

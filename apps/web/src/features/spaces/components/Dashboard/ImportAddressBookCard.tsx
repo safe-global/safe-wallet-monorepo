@@ -5,13 +5,13 @@ import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import { useState } from 'react'
 import ImportAddressBookDialog from '@/features/spaces/components/SpaceAddressBook/Import/ImportAddressBookDialog'
-import useGetAddressBook from '@/features/spaces/hooks/useGetAddressBook'
+import useGetSpaceAddressBook from '@/features/spaces/hooks/useGetSpaceAddressBook'
 import CheckIcon from '@/public/images/common/check.svg'
 import classnames from 'classnames'
 
 const AddressBookCard = () => {
   const [open, setOpen] = useState(false)
-  const addressBookItems = useGetAddressBook()
+  const addressBookItems = useGetSpaceAddressBook()
 
   const handleImport = () => {
     trackEvent({ ...SPACE_EVENTS.IMPORT_ADDRESS_BOOK, label: SPACE_LABELS.space_dashboard_card })
