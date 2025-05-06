@@ -23,6 +23,8 @@ import Logger, { LogLevel } from '@/src/utils/logger'
 import { useInitWeb3 } from '@/src/hooks/useInitWeb3'
 import { useInitSafeCoreSDK } from '@/src/hooks/coreSDK/useInitSafeCoreSDK'
 import NotificationsService from '@/src/services/notifications/NotificationService'
+import { StatusBar } from 'expo-status-bar'
+import { useScreenTracking } from '@/src/hooks/useScreenTracking'
 
 Logger.setLevel(__DEV__ ? LogLevel.TRACE : LogLevel.ERROR)
 // Initialize all notification handlers
@@ -43,6 +45,8 @@ const HooksInitializer = () => {
 }
 
 function RootLayout() {
+  useScreenTracking()
+
   return (
     <GestureHandlerRootView>
       <Provider store={store}>
@@ -162,6 +166,7 @@ function RootLayout() {
                         />
                         <Stack.Screen name="+not-found" />
                       </Stack>
+                      <StatusBar />
                     </NavigationGuardHOC>
                   </SafeToastProvider>
                 </SafeThemeProvider>

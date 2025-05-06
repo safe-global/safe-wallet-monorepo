@@ -8,8 +8,8 @@ import { AppRoutes } from '@/config/routes'
 import packageJson from '../../../../package.json'
 import ExternalLink from '../ExternalLink'
 import MUILink from '@mui/material/Link'
-import { HELP_CENTER_URL } from '@/config/constants'
 import { useIsOfficialHost } from '@/hooks/useIsOfficialHost'
+import { HELP_CENTER_URL } from '@safe-global/utils/config/constants'
 
 const footerPages = [
   AppRoutes.welcome.index,

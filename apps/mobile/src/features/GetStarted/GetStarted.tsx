@@ -6,6 +6,7 @@ import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { BlurView } from 'expo-blur'
 import crashlytics from '@react-native-firebase/crashlytics'
+import analytics from '@react-native-firebase/analytics'
 
 export const GetStarted = () => {
   const router = useRouter()
@@ -13,6 +14,7 @@ export const GetStarted = () => {
 
   const enableCrashlytics = async () => {
     await crashlytics().setCrashlyticsCollectionEnabled(true)
+    await analytics().setAnalyticsCollectionEnabled(true)
   }
 
   const onPressAddAccount = useCallback(async () => {

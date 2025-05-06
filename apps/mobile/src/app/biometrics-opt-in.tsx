@@ -6,11 +6,10 @@ import { useToastController } from '@tamagui/toast'
 import { useBiometrics } from '@/src/hooks/useBiometrics'
 import Logger from '@/src/utils/logger'
 import { View } from 'tamagui'
-import { useModalStyle } from '@/src/navigation/hooks/useModalStyle'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 function BiometricsOptIn() {
-  const modalStyle = useModalStyle()
   const { toggleBiometrics, getBiometricsUIInfo, isBiometricsEnabled, isLoading } = useBiometrics()
-
+  const { bottom } = useSafeAreaInsets()
   const local = useLocalSearchParams<{
     safeAddress: string
     chainId: string
@@ -81,7 +80,7 @@ function BiometricsOptIn() {
   const infoMessage = 'Biometrics is required to import a signer.'
 
   return (
-    <View style={{ ...modalStyle }}>
+    <View style={{ flex: 1, paddingBottom: bottom }}>
       <OptIn
         testID="biometrics-opt-in-screen"
         title="Simplify access, enhance security"

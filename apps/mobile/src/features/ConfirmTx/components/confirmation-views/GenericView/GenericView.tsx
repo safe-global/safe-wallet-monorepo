@@ -18,7 +18,7 @@ import { ListTable } from '../../ListTable'
 import { TransactionHeader } from '../../TransactionHeader'
 import { ParametersButton } from '../../ParametersButton'
 import { router } from 'expo-router'
-
+import { useOpenExplorer } from '@/src/features/ConfirmTx/hooks/useOpenExplorer'
 interface GenericViewProps {
   txInfo: SettingsChangeTransaction
   executionInfo: MultisigExecutionDetails
@@ -29,9 +29,10 @@ interface GenericViewProps {
 export function GenericView({ txInfo, txData, executionInfo, txId }: GenericViewProps) {
   const activeSafe = useDefinedActiveSafe()
   const chain = useAppSelector((state: RootState) => selectChainById(state, activeSafe.chainId))
+  const viewOnExplorer = useOpenExplorer(txData.to.value)
   const items = useMemo(
-    () => formatGenericViewItems({ txInfo, txData, chain, executionInfo }),
-    [txInfo, executionInfo, txData, chain],
+    () => formatGenericViewItems({ txInfo, txData, chain, executionInfo, viewOnExplorer }),
+    [txInfo, executionInfo, txData, chain, viewOnExplorer],
   )
 
   const handleViewActions = () => {
