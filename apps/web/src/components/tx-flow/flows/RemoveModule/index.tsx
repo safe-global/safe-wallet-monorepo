@@ -9,9 +9,9 @@ export type RemoveModuleFlowProps = {
   address: string
 }
 
-const ReviewRemoveModuleStep: typeof ReviewTransaction = ({ onSubmit }) => {
+const ReviewRemoveModuleStep: typeof ReviewTransaction = (props) => {
   const { data } = useContext(TxFlowContext)
-  return <ReviewRemoveModule onSubmit={onSubmit} params={data} />
+  return <ReviewRemoveModule params={data} {...props} />
 }
 
 const RemoveModuleFlow = ({ address }: RemoveModuleFlowProps) => {

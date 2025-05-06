@@ -24,9 +24,9 @@ const SetThresholdStep = () => {
   return <SetThreshold onSubmit={onNext} params={data} />
 }
 
-const ReviewOwnerStep: typeof ReviewTransaction = ({ onSubmit }) => {
+const ReviewOwnerStep: typeof ReviewTransaction = (props) => {
   const { data } = useContext(TxFlowContext)
-  return <ReviewRemoveOwner key={1} params={data} onSubmit={onSubmit} />
+  return <ReviewRemoveOwner params={data} {...props} />
 }
 
 const RemoveOwnerFlow = (props: Owner) => {

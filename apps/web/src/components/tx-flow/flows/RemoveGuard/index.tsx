@@ -9,9 +9,9 @@ export type RemoveGuardFlowProps = {
   address: string
 }
 
-const ReviewRemoveGuardStep: typeof ReviewTransaction = ({ onSubmit }) => {
+const ReviewRemoveGuardStep: typeof ReviewTransaction = (props) => {
   const { data } = useContext(TxFlowContext)
-  return <ReviewRemoveGuard onSubmit={onSubmit} params={data} />
+  return <ReviewRemoveGuard params={data} {...props} />
 }
 
 const RemoveGuardFlow = ({ address }: RemoveGuardFlowProps) => {
