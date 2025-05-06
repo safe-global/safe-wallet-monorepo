@@ -29,6 +29,10 @@
   justify-content: center;
 }
 
+.iconBGBlue {
+  background-color: var(--color-info-background);
+}
+
 .image {
   max-width: 100%;
   height: auto;
