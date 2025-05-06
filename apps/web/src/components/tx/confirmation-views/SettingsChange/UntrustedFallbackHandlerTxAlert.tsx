@@ -13,13 +13,12 @@ export const useSetsUntrustedFallbackHandler = (txData: TransactionDetails['txDa
     () =>
       Array.isArray(multiSendTransactions)
         ? multiSendTransactions
-            .map(
-              ({ dataDecoded }) =>
-                (dataDecoded?.method === 'setFallbackHandler'
-                  ? dataDecoded?.parameters?.find(({ name }) => name === 'handler')?.value
-                  : undefined) as string | undefined,
+            .map(({ dataDecoded }) =>
+              dataDecoded?.method === 'setFallbackHandler'
+                ? dataDecoded?.parameters?.find(({ name }) => name === 'handler')?.value
+                : undefined,
             )
-            .filter((handler) => handler != null)
+            .filter((handler) => typeof handler === 'string')
         : [],
     [multiSendTransactions],
   )
