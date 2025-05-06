@@ -22,6 +22,7 @@ export function TxContractInteractionCard({
 }: TxContractInteractionCardProps) {
   const logoUri = txInfo.to.logoUri
   const label = txInfo.to.name || 'Contract interaction'
+
   return (
     <SafeListItem
       label={label}
@@ -36,8 +37,16 @@ export function TxContractInteractionCard({
             {logoUri && <Avatar.Image backgroundColor="$color" accessibilityLabel={label} src={logoUri} />}
 
             <Avatar.Fallback backgroundColor="$background">
-              <View backgroundColor="$background" padding="$2" borderRadius={100}>
-                <SafeFontIcon name="code-blocks" color="$color" />
+              <View
+                backgroundColor="$background"
+                padding="$2"
+                flexDirection="row"
+                alignItems="center"
+                justifyContent="center"
+                borderRadius={100}
+                flex={1}
+              >
+                <SafeFontIcon name="code-blocks" color="$color" size={16} />
               </View>
             </Avatar.Fallback>
           </Theme>

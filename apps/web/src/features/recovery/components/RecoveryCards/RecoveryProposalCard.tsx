@@ -11,12 +11,12 @@ import { RecoverAccountFlow } from '@/components/tx-flow/flows'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import madProps from '@/utils/mad-props'
 import { TxModalContext } from '@/components/tx-flow'
-import { HelpCenterArticle, HelperCenterArticleTitles } from '@/config/constants'
 import type { TxModalContextType } from '@/components/tx-flow'
 import { type SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 
 import css from './styles.module.css'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
+import { HelpCenterArticle, HelperCenterArticleTitles } from '@safe-global/utils/config/constants'
 
 type Props =
   | {

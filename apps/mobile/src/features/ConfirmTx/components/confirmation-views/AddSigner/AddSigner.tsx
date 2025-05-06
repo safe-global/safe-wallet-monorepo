@@ -11,6 +11,7 @@ import { ListTable } from '../../ListTable'
 import { TransactionHeader } from '../../TransactionHeader'
 import { ParametersButton } from '../../ParametersButton'
 import { NormalizedSettingsChangeTransaction } from '../../ConfirmationView/types'
+import { useOpenExplorer } from '@/src/features/ConfirmTx/hooks/useOpenExplorer'
 
 interface AddSignerProps {
   txInfo: NormalizedSettingsChangeTransaction
@@ -21,9 +22,10 @@ interface AddSignerProps {
 export function AddSigner({ txInfo, executionInfo, txId }: AddSignerProps) {
   const activeSafe = useDefinedActiveSafe()
   const activeChain = useAppSelector((state: RootState) => selectChainById(state, activeSafe.chainId))
+  const viewOnExplorer = useOpenExplorer(txInfo.settingsInfo?.owner?.value)
   const items = useMemo(
-    () => formatAddSignerItems(txInfo, activeChain, executionInfo),
-    [txInfo, activeChain, executionInfo],
+    () => formatAddSignerItems(txInfo, activeChain, executionInfo, viewOnExplorer),
+    [txInfo, activeChain, executionInfo, viewOnExplorer],
   )
   const newSignerAddress = getSignerName(txInfo)
 

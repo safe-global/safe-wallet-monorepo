@@ -1,5 +1,5 @@
 import Track from '@/components/common/Track'
-import { RECOVERY_FEEDBACK_FORM, HelpCenterArticle, SafeAppsTag } from '@/config/constants'
+import { RECOVERY_FEEDBACK_FORM, SafeAppsTag } from '@/config/constants'
 import { trackEvent } from '@/services/analytics'
 import { RECOVERY_EVENTS } from '@/services/analytics/events/recovery'
 import { type ChangeEvent, type ReactElement, useContext, useState, useCallback } from 'react'
@@ -35,6 +35,7 @@ import { useSearchParams } from 'next/navigation'
 import { useRemoteSafeApps } from '@/hooks/safe-apps/useRemoteSafeApps'
 import TxStatusChip from '@/components/transactions/TxStatusChip'
 import { ZkEmailFakeDoorModal } from './ZkEmailFakeDoorModal'
+import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 
 enum RecoveryMethod {
   SelfCustody = 'SelfCustody',

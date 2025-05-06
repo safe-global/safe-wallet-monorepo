@@ -21,7 +21,11 @@ export function ChainsDisplay({ chains, activeChainId, max }: ChainsDisplayProps
   return (
     <View flexDirection="row">
       {slicedChains.map(({ chainLogoUri, chainName, chainId }, index) => (
-        <View key={chainId} testID="chain-display" marginRight={(showBadge || index !== slicedChains.length - 1) && -8}>
+        <View
+          key={chainId}
+          testID="chain-display"
+          marginRight={showBadge || index !== slicedChains.length - 1 ? -8 : 0}
+        >
           <Logo size="$7" logoUri={chainLogoUri} accessibilityLabel={chainName} />
         </View>
       ))}

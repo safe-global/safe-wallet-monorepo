@@ -30,7 +30,7 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import { RecovererWarning } from './RecovererSmartContractWarning'
 import ExternalLink from '@/components/common/ExternalLink'
-import { BRAND_NAME, HelpCenterArticle, HelperCenterArticleTitles } from '@/config/constants'
+import { BRAND_NAME } from '@/config/constants'
 import { TOOLTIP_TITLES } from '../../common/constants'
 import Track from '@/components/common/Track'
 import type { RecoveryStateItem } from '@/features/recovery/services/recovery-state'
@@ -39,6 +39,7 @@ import commonCss from '@/components/tx-flow/common/styles.module.css'
 import css from './styles.module.css'
 import NumberField from '@/components/common/NumberField'
 import { getDelay, isCustomDelaySelected } from './utils'
+import { HelpCenterArticle, HelperCenterArticleTitles } from '@safe-global/utils/config/constants'
 
 export function UpsertRecoveryFlowSettings({
   params,

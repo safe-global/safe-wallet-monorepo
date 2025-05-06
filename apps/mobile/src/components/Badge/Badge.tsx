@@ -40,7 +40,13 @@ export const Badge = ({
   if (circular) {
     return (
       <Theme name={themeName}>
-        <Circle testID={testID} size={circleSize} backgroundColor={'$background'} {...circleProps}>
+        <Circle
+          testID={testID}
+          size={circleSize}
+          backgroundColor={'$background'}
+          borderColor={'$borderColor'}
+          {...circleProps}
+        >
           {contentToRender}
         </Circle>
       </Theme>
