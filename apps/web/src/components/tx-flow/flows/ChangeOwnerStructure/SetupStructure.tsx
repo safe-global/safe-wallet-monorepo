@@ -11,7 +11,7 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material'
-import type { ReactElement } from 'react'
+import { useContext, type ReactElement } from 'react'
 
 import AddIcon from '@/public/images/common/add.svg'
 import commonCss from '@/components/tx-flow/common/styles.module.css'
@@ -22,19 +22,16 @@ import OwnerRow from '@/components/new-safe/OwnerRow'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { ChangeOwnerStructureFormFields } from '.'
+import { TxFlowContext } from '../../TxFlowProvider'
 import type { ChangeOwnerStructureForm } from '.'
+import type { TxFlowContextType } from '../../TxFlowProvider'
 
-export function SetupStructure({
-  params,
-  onSubmit,
-}: {
-  params: ChangeOwnerStructureForm
-  onSubmit: (data: ChangeOwnerStructureForm) => void
-}): ReactElement {
+export function SetupStructure(): ReactElement {
+  const { onNext, data } = useContext<TxFlowContextType<ChangeOwnerStructureForm>>(TxFlowContext)
   const { safe } = useSafeInfo()
 
   const formMethods = useForm<ChangeOwnerStructureForm>({
-    defaultValues: params,
+    defaultValues: data,
     mode: 'onChange',
   })
   const fieldArray = useFieldArray<ChangeOwnerStructureForm>({
@@ -54,15 +51,17 @@ export function SetupStructure({
     }
   }
 
-  const isSameOwners = newOwners.every((newOwner) => {
-    return safe.owners.some((currentOwner) => sameAddress(currentOwner.value, newOwner.address))
-  })
+  const isSameOwners =
+    newOwners.length === safe.owners.length &&
+    newOwners.every((newOwner) => {
+      return safe.owners.some((currentOwner) => sameAddress(currentOwner.value, newOwner.address))
+    })
   const isSameThreshold = safe.threshold === newThreshold
 
   return (
     <TxCard>
       <FormProvider {...formMethods}>
-        <form onSubmit={formMethods.handleSubmit(onSubmit)} className={commonCss.form}>
+        <form onSubmit={formMethods.handleSubmit(onNext)} className={commonCss.form}>
           {fieldArray.fields.map((field, index) => {
             return (
               <OwnerRow

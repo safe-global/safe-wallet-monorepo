@@ -8,20 +8,28 @@ import { createMultiSendCallOnlyTx, createTx } from '@/services/tx/tx-sender'
 import { SafeTxContext } from '../../SafeTxProvider'
 import { getOwnerStructureChangeTransaction } from '@/features/recovery/services/transaction'
 import EthHashInfo from '@/components/common/EthHashInfo'
-import SignOrExecuteForm from '@/components/tx/SignOrExecuteForm'
+import ReviewTransaction from '@/components/tx/ReviewTransactionV2'
 import FieldsGrid from '@/components/tx/FieldsGrid'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
+import { TxFlowContext } from '../../TxFlowProvider'
 import type { ChangeOwnerStructureForm } from '.'
+import type { TxFlowContextType } from '../../TxFlowProvider'
+import type { ReviewTransactionContentProps } from '@/components/tx/ReviewTransactionV2/ReviewTransactionContent'
 
-export function ReviewStructure({ params }: { params: ChangeOwnerStructureForm }): ReactElement {
+export function ReviewStructure({ onSubmit }: ReviewTransactionContentProps): ReactElement {
+  const { data } = useContext<TxFlowContextType<ChangeOwnerStructureForm>>(TxFlowContext)
   const { setSafeTx, setSafeTxError } = useContext(SafeTxContext)
   const { safe } = useSafeInfo()
 
   useEffect(() => {
+    if (!data) {
+      return
+    }
+
     const transactions = getOwnerStructureChangeTransaction({
       safe,
-      newThreshold: params.threshold,
-      newOwners: params.owners.map((owner) => ({
+      newThreshold: data.threshold,
+      newOwners: data.owners.map((owner) => ({
         value: owner.address,
       })),
     })
@@ -32,10 +40,10 @@ export function ReviewStructure({ params }: { params: ChangeOwnerStructureForm }
     }
 
     createSafeTx().then(setSafeTx).catch(setSafeTxError)
-  }, [params.owners, params.threshold, safe, safe.deployed, setSafeTx, setSafeTxError])
+  }, [data, safe, safe.deployed, setSafeTx, setSafeTxError])
 
   return (
-    <SignOrExecuteForm>
+    <ReviewTransaction onSubmit={onSubmit}>
       {/* We cannot create a ConfirmationView out of the following as it accesses params */}
       <Stack
         sx={{
@@ -57,7 +65,7 @@ export function ReviewStructure({ params }: { params: ChangeOwnerStructureForm }
               fontSize: '14px',
             }}
           >
-            {params.owners.map((owner) => (
+            {data?.owners.map((owner) => (
               <EthHashInfo
                 avatarSize={32}
                 key={owner.address}
@@ -81,11 +89,11 @@ export function ReviewStructure({ params }: { params: ChangeOwnerStructureForm }
               fontWeight: 700,
             }}
           >
-            {params.threshold} of {params.owners.length} signer{maybePlural(params.owners)}
+            {data?.threshold} of {data?.owners.length} signer{maybePlural(data?.owners ?? [])}
           </Box>{' '}
           required to confirm new transactions
         </FieldsGrid>
       </Stack>
-    </SignOrExecuteForm>
+    </ReviewTransaction>
   )
 }

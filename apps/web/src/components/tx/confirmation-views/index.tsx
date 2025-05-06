@@ -46,8 +46,8 @@ const getConfirmationViewComponent = ({
   txData,
   txFlow,
 }: NarrowConfirmationViewProps & { txFlow?: ReactElement }) => {
-  // Don't show ChangeThreshold on ChangeOwnerStructure flow
-  if (txFlow?.type === ChangeOwnerStructureFlow) return null
+  // Prevent collision with ChangeThreshold/SettingsChange
+  if (txFlow?.type === ChangeOwnerStructureFlow) return <></>
 
   if (isChangeThresholdView(txInfo)) return <ChangeThreshold txInfo={txInfo} />
 

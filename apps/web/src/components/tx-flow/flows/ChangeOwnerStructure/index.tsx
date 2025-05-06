@@ -1,7 +1,8 @@
-import type { ReactElement } from 'react'
+import { useMemo, type ReactElement } from 'react'
 
-import TxLayout from '@/components/tx-flow/common/TxLayout'
-import useTxStepper from '@/components/tx-flow/useTxStepper'
+import { TxFlowType } from '@/services/analytics'
+import { TxFlow } from '../../TxFlow'
+import { TxFlowStep } from '../../TxFlowStep'
 import SaveAddressIcon from '@/public/images/common/save-address.svg'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { SetupStructure } from './SetupStructure'
@@ -21,30 +22,29 @@ export type ChangeOwnerStructureForm = {
 export function ChangeOwnerStructureFlow(): ReactElement {
   const { safe } = useSafeInfo()
 
-  const { data, step, nextStep, prevStep } = useTxStepper<ChangeOwnerStructureForm>({
-    [ChangeOwnerStructureFormFields.threshold]: safe.threshold,
-    [ChangeOwnerStructureFormFields.owners]: safe.owners.map((owner) => {
-      return {
-        address: owner.value,
-        name: '',
-      }
-    }),
-  })
-
-  const steps = [
-    <SetupStructure key={0} params={data} onSubmit={(formData) => nextStep(formData)} />,
-    <ReviewStructure key={1} params={data} />,
-  ]
+  const defaultValues = useMemo(() => {
+    return {
+      [ChangeOwnerStructureFormFields.threshold]: safe.threshold,
+      [ChangeOwnerStructureFormFields.owners]: safe.owners.map((owner) => {
+        return {
+          address: owner.value,
+          name: '',
+        }
+      }),
+    }
+  }, [safe.threshold, safe.owners])
 
   return (
-    <TxLayout
-      title={step === 0 ? 'New transaction' : 'Confirm transaction'}
-      subtitle="Manage signers"
+    <TxFlow
       icon={SaveAddressIcon}
-      step={step}
-      onBack={prevStep}
+      subtitle="Manage signers"
+      ReviewTransactionComponent={ReviewStructure}
+      eventCategory={TxFlowType.CHANGE_OWNER_STRUCTURE}
+      initialData={defaultValues}
     >
-      {steps}
-    </TxLayout>
+      <TxFlowStep title="New transaction">
+        <SetupStructure />
+      </TxFlowStep>
+    </TxFlow>
   )
 }
