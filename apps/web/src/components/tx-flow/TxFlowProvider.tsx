@@ -42,6 +42,7 @@ export type TxFlowContextType<T extends unknown = any> = {
   trackTxEvent: (txId: string, isExecuted?: boolean, isRoleExecution?: boolean, isProposerCreation?: boolean) => void
 
   txId?: string
+  txNonce?: number
   isCreation: boolean
   isRejection: boolean
   onlyExecute: boolean
@@ -120,6 +121,7 @@ export type TxFlowProviderProps<T extends unknown> = {
   nextStep: (data: T) => void
   progress?: number
   txId?: string
+  txNonce?: TxFlowContextType['txNonce']
   isExecutable?: boolean
   onlyExecute?: TxFlowContextType['onlyExecute']
   isRejection?: TxFlowContextType['isRejection']
@@ -136,6 +138,7 @@ const TxFlowProvider = <T extends unknown>({
   prevStep,
   progress = 0,
   txId,
+  txNonce,
   isExecutable = false,
   onlyExecute = initialContext.onlyExecute,
   txLayoutProps: defaultTxLayoutProps = initialContext.txLayoutProps,
@@ -215,6 +218,7 @@ const TxFlowProvider = <T extends unknown>({
     trackTxEvent,
 
     txId,
+    txNonce,
     isCreation,
     isRejection,
     onlyExecute,
