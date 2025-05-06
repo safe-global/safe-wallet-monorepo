@@ -7,7 +7,7 @@ import { TxFlowType } from '@/services/analytics'
 import { TxFlow } from '../../TxFlow'
 import { TxFlowStep } from '../../TxFlowStep'
 import { TxFlowContext } from '../../TxFlowProvider'
-import type ReviewTransaction from '@/components/tx/ReviewTransactionV2'
+import { type ReviewTransactionProps } from '@/components/tx/ReviewTransactionV2'
 
 type Owner = {
   address: string
@@ -26,10 +26,10 @@ const ChooseOwnerStep = () => {
   return <ChooseOwner onSubmit={onNext} params={data} mode={ChooseOwnerMode.ADD} />
 }
 
-const ReviewOwnerStep: typeof ReviewTransaction = ({ onSubmit }) => {
+const ReviewOwnerStep = (props: ReviewTransactionProps) => {
   const { data } = useContext(TxFlowContext)
 
-  return <ReviewOwner onSubmit={onSubmit} params={data} />
+  return <ReviewOwner params={data} {...props} />
 }
 
 const AddOwnerFlow = ({ address }: { address?: string }) => {

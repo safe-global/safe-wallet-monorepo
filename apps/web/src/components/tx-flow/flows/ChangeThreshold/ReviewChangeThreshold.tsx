@@ -1,5 +1,5 @@
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { useContext, useEffect } from 'react'
+import { useContext, useEffect, type PropsWithChildren } from 'react'
 
 import { createUpdateThresholdTx } from '@/services/tx/tx-sender'
 import { SETTINGS_EVENTS, trackEvent } from '@/services/analytics'
@@ -9,7 +9,11 @@ import type { ChangeThresholdFlowProps } from '@/components/tx-flow/flows/Change
 
 import ReviewTransaction from '@/components/tx/ReviewTransactionV2'
 
-const ReviewChangeThreshold = ({ params, onSubmit }: { params: ChangeThresholdFlowProps; onSubmit: () => void }) => {
+const ReviewChangeThreshold = ({
+  params,
+  onSubmit,
+  children,
+}: PropsWithChildren<{ params: ChangeThresholdFlowProps; onSubmit: () => void }>) => {
   const { safe } = useSafeInfo()
   const newThreshold = params[ChangeThresholdFlowFieldNames.threshold]
 
@@ -29,7 +33,7 @@ const ReviewChangeThreshold = ({ params, onSubmit }: { params: ChangeThresholdFl
     onSubmit()
   }
 
-  return <ReviewTransaction onSubmit={handleSubmit} />
+  return <ReviewTransaction onSubmit={handleSubmit}>{children}</ReviewTransaction>
 }
 
 export default ReviewChangeThreshold
