@@ -2,7 +2,7 @@ import { useContext } from 'react'
 import { TxFlow } from '../../TxFlow'
 import { TxFlowContext } from '../../TxFlowProvider'
 import { TxFlowType } from '@/services/analytics'
-import { ReviewRemoveGuard } from '@/components/tx-flow/flows/RemoveGuard/ReviewRemoveGuard'
+import { ReviewRemoveGuard } from './ReviewRemoveGuard'
 import type ReviewTransaction from '@/components/tx/ReviewTransactionV2'
 
 export type RemoveGuardFlowProps = {

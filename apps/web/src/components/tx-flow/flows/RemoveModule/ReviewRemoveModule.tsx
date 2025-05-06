@@ -1,4 +1,4 @@
-import { Grid, Typography } from '@mui/material'
+import { Typography } from '@mui/material'
 import { useCallback, useContext, useEffect } from 'react'
 import { Errors, logError } from '@/services/exceptions'
 import { trackEvent, SETTINGS_EVENTS } from '@/services/analytics'
@@ -28,25 +28,11 @@ export const ReviewRemoveModule = ({ params, onSubmit }: { params: RemoveModuleF
 
   return (
     <ReviewTransaction onSubmit={onFormSubmit}>
-      <Grid
-        container
-        sx={{
-          gap: 1,
-          alignItems: 'center',
-        }}
-      >
-        <Grid item xs={2}>
-          Module
-        </Grid>
-        <Typography variant="body2" component="div">
-          <EthHashInfo address={params.address} shortAddress={false} hasExplorer showCopyButton />
-        </Typography>
-      </Grid>
-      <Typography
-        sx={{
-          my: 2,
-        }}
-      >
+      <Typography color="primary.light">Module</Typography>
+
+      <EthHashInfo address={params.address} showCopyButton hasExplorer shortAddress={false} />
+
+      <Typography my={2}>
         After removing this module, any feature or app that uses this module might no longer work. If this Safe Account
         requires more then one signature, the module removal will have to be confirmed by other signers as well.
       </Typography>
