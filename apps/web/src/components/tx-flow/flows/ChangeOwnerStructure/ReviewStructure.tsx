@@ -16,7 +16,7 @@ import type { ChangeOwnerStructureForm } from '.'
 import type { TxFlowContextType } from '../../TxFlowProvider'
 import type { ReviewTransactionContentProps } from '@/components/tx/ReviewTransactionV2/ReviewTransactionContent'
 
-export function ReviewStructure({ onSubmit }: ReviewTransactionContentProps): ReactElement {
+export function ReviewStructure({ onSubmit, children }: ReviewTransactionContentProps): ReactElement {
   const { data } = useContext<TxFlowContextType<ChangeOwnerStructureForm>>(TxFlowContext)
   const { setSafeTx, setSafeTxError } = useContext(SafeTxContext)
   const { safe } = useSafeInfo()
@@ -94,6 +94,8 @@ export function ReviewStructure({ onSubmit }: ReviewTransactionContentProps): Re
           required to confirm new transactions
         </FieldsGrid>
       </Stack>
+
+      {children}
     </ReviewTransaction>
   )
 }
