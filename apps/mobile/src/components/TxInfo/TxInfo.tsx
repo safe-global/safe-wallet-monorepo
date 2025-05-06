@@ -71,10 +71,10 @@ function TxInfoComponent({ tx, bordered, inQueue, onPress }: TxInfoProps) {
       <TxBatchCard
         executionInfo={tx.executionInfo}
         inQueue={inQueue}
-        label={txType.text}
         onPress={onCardPress}
         bordered={bordered}
         txInfo={txInfo}
+        safeAppInfo={tx.safeAppInfo}
       />
     )
   }
@@ -124,6 +124,7 @@ function TxInfoComponent({ tx, bordered, inQueue, onPress }: TxInfoProps) {
         inQueue={inQueue}
         bordered={bordered}
         txInfo={txInfo}
+        safeAppInfo={tx.safeAppInfo}
       />
     )
   }

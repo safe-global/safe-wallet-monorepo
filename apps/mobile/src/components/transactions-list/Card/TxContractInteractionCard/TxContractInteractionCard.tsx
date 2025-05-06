@@ -3,8 +3,8 @@ import { Text, Theme } from 'tamagui'
 import { SafeListItem } from '@/src/components/SafeListItem'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon/SafeFontIcon'
 import { MultiSend } from '@safe-global/store/gateway/types'
-import { Transaction, CustomTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { SafeAvatar } from '@/src/components/SafeAvatar/SafeAvatar'
+import { Transaction, CustomTransactionInfo, SafeAppInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
 interface TxContractInteractionCardProps {
   bordered?: boolean
@@ -12,6 +12,7 @@ interface TxContractInteractionCardProps {
   inQueue?: boolean
   executionInfo?: Transaction['executionInfo']
   onPress: () => void
+  safeAppInfo?: SafeAppInfo | null
 }
 
 export function TxContractInteractionCard({
@@ -20,15 +21,15 @@ export function TxContractInteractionCard({
   txInfo,
   inQueue,
   onPress,
+  safeAppInfo,
 }: TxContractInteractionCardProps) {
   const logoUri = txInfo.to.logoUri
   const label = txInfo.to.name || 'Contract interaction'
-
   return (
     <SafeListItem
       label={label}
       icon={logoUri ? 'transaction-contract' : undefined}
-      type={txInfo.methodName || ''}
+      type={safeAppInfo?.name || txInfo.methodName || ''}
       bordered={bordered}
       executionInfo={executionInfo}
       inQueue={inQueue}
