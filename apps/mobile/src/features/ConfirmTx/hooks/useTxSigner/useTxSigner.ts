@@ -50,5 +50,7 @@ export const useTxSigner = (detailedExecutionInfo?: MultisigExecutionDetails) =>
     }
   }, [activeTxSigner, appSigners, proposedSigner])
 
-  return { activeSigner, hasSigned }
+  const canSign = Boolean(proposedSigner) && !hasSigned
+
+  return { activeSigner, hasSigned, canSign }
 }
