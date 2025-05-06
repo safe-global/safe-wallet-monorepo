@@ -24,7 +24,6 @@ const SwapPage: NextPage = () => {
   const { token, amount } = router.query
   const isFeatureEnabled = useHasFeature(FEATURES.NATIVE_SWAPS)
   const isCowEnabled = useHasFeature(FEATURES.NATIVE_SWAPS_COW)
-  const isLifiEnabled = useHasFeature(FEATURES.NATIVE_SWAPS_LIFI)
 
   let sell = undefined
   if (token && amount) {
@@ -43,7 +42,7 @@ const SwapPage: NextPage = () => {
       <main style={{ height: 'calc(100vh - 52px)' }}>
         {isFeatureEnabled === true && isCowEnabled === true ? (
           <SwapWidgetNoSSR sell={sell} />
-        ) : isFeatureEnabled === true && isCowEnabled === false && isLifiEnabled === true ? (
+        ) : isFeatureEnabled === true && isCowEnabled === false ? (
           <FallbackSwapWidgetNoSSR fromToken={sell?.asset} />
         ) : isFeatureEnabled === false ? (
           <Typography textAlign="center" my={3}>

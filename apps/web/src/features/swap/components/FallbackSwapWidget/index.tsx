@@ -8,7 +8,7 @@ import { useDarkMode } from '@/hooks/useDarkMode'
 import type { SafeAppDataWithPermissions } from '@/components/safe-apps/types'
 import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
 
-export const BRIDGE_WIDGET_URL = 'https://iframe.jumper.exchange'
+export const SWAP_WIDGET_URL = 'https://iframe.jumper.exchange/swap'
 
 export function FallbackSwapWidget({ fromToken }: { fromToken?: string }): ReactElement | null {
   const isDarkMode = useDarkMode()
@@ -37,12 +37,19 @@ export function FallbackSwapWidget({ fromToken }: { fromToken?: string }): React
 
 export function _getAppData(isDarkMode: boolean, chain: ChainInfo, fromToken?: string): SafeAppDataWithPermissions {
   const theme = isDarkMode ? 'dark' : 'light'
+  const appUrl = new URL(SWAP_WIDGET_URL)
+  appUrl.searchParams.set('theme', theme)
+  appUrl.searchParams.set('fromChain', chain.chainId)
+  if (fromToken) {
+    appUrl.searchParams.set('fromToken', fromToken)
+  }
+
   return {
     ...getEmptySafeApp(),
     name: 'Swap',
     iconUrl: '/images/common/swap.svg',
     chainIds: [chain.chainId],
-    url: `${BRIDGE_WIDGET_URL}/swap?theme=${theme}${fromToken ? `&fromToken=${fromToken}` : ''}`,
+    url: appUrl.toString(),
   }
 }
 
