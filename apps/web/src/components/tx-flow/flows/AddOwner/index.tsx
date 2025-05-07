@@ -33,17 +33,20 @@ const ReviewOwnerStep = (props: ReviewTransactionProps) => {
 }
 
 const AddOwnerFlow = ({ address }: { address?: string }) => {
-  const { safe, safeLoading, safeLoaded } = useSafeInfo()
+  const {
+    safe: { threshold },
+    safeLoaded,
+  } = useSafeInfo()
 
   const defaultValues: AddOwnerFlowProps = {
     newOwner: {
       address: address || '',
       name: '',
     },
-    threshold: safe.threshold,
+    threshold,
   }
 
-  if (!safeLoaded || safeLoading) return null
+  if (!safeLoaded) return null
 
   return (
     <TxFlow
