@@ -9,6 +9,8 @@ import RecoveryExecution from '@/public/images/transactions/recovery-execution.s
 
 import css from './styles.module.css'
 import commonCss from '@/components/tx-flow/common/styles.module.css'
+import { useContext } from 'react'
+import { TxFlowContext } from '../../TxFlowProvider'
 
 const RecoverySteps = [
   {
@@ -35,7 +37,8 @@ const RecoverySteps = [
   },
 ]
 
-export function UpsertRecoveryFlowIntro({ onSubmit }: { onSubmit: () => void }): ReactElement {
+export function UpsertRecoveryFlowIntro(): ReactElement {
+  const { onNext } = useContext(TxFlowContext)
   return (
     <TxCard>
       <Grid
@@ -75,7 +78,7 @@ export function UpsertRecoveryFlowIntro({ onSubmit }: { onSubmit: () => void }):
       </Grid>
       <Divider className={commonCss.nestedDivider} />
       <CardActions sx={{ mt: 'var(--space-1) !important' }}>
-        <Button data-testid="next-btn" variant="contained" onClick={onSubmit}>
+        <Button data-testid="next-btn" variant="contained" onClick={onNext}>
           Next
         </Button>
       </CardActions>
