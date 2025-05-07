@@ -3,12 +3,14 @@ import { TransferTx } from '@/components/transactions/TxInfo'
 import { isTxQueued } from '@/utils/transaction-guards'
 import type { TransactionStatus, Transfer } from '@safe-global/safe-gateway-typescript-sdk'
 import { TransferDirection } from '@safe-global/safe-gateway-typescript-sdk'
-import { Box } from '@mui/material'
+import { Box, Stack, Typography } from '@mui/material'
 import React from 'react'
 
 import TransferActions from '@/components/transactions/TxDetails/TxData/Transfer/TransferActions'
 import MaliciousTxWarning from '@/components/transactions/MaliciousTxWarning'
 import { ImitationTransactionWarning } from '@/components/transactions/ImitationTransactionWarning'
+import TokenAmount from '@/components/common/TokenAmount'
+import { type NativeToken, type Erc20Token } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
 type TransferTxInfoProps = {
   txInfo: Transfer
@@ -54,6 +56,31 @@ const TransferTxInfo = ({ txInfo, txStatus, trusted, imitation }: TransferTxInfo
       </Box>
       {imitation && <ImitationTransactionWarning />}
     </Box>
+  )
+}
+
+export const InlineTransferTxInfo = ({
+  value,
+  tokenInfo,
+  recipient,
+}: {
+  value: string
+  tokenInfo: Erc20Token | NativeToken
+  recipient: string
+}) => {
+  return (
+    <Stack direction="row" alignItems="center" spacing={1}>
+      <Typography>Send</Typography>
+      <TokenAmount
+        value={value}
+        decimals={tokenInfo.decimals}
+        logoUri={tokenInfo.logoUri}
+        tokenSymbol={tokenInfo.symbol}
+        iconSize={16}
+      />
+      <Typography>to</Typography>
+      <NamedAddressInfo address={recipient} copyAddress={false} shortAddress={true} onlyName avatarSize={16} />
+    </Stack>
   )
 }
 

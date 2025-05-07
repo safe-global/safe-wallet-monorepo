@@ -119,6 +119,7 @@ export type Chain = {
   chainLogoUri?: string | null
   l2: boolean
   isTestnet: boolean
+  zk: boolean
   nativeCurrency: NativeCurrency
   transactionService: string
   blockExplorerUriTemplate: BlockExplorerUriTemplate
