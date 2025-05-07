@@ -1,5 +1,5 @@
 import type { AllowedFeatures, SafeAppDataWithPermissions } from '@/components/safe-apps/types'
-import { isRelativeUrl, trimTrailingSlash, stripURLParams } from '@/utils/url'
+import { isRelativeUrl, trimTrailingSlash, stripUrlParams } from '@/utils/url'
 import { SafeAppAccessPolicyTypes } from '@safe-global/safe-gateway-typescript-sdk'
 
 type AppManifestIcon = {
@@ -57,7 +57,7 @@ const getAppLogoUrl = (appUrl: string, { icons = [], iconPath = '' }: AppManifes
 
 const fetchAppManifest = async (appUrl: string, timeout = 5000): Promise<unknown> => {
   // Strip URL parameters for fetching the manifest
-  const baseUrl = stripURLParams(appUrl)
+  const baseUrl = stripUrlParams(appUrl)
   const normalizedUrl = trimTrailingSlash(baseUrl)
   const manifestUrl = `${normalizedUrl}/manifest.json`
 
@@ -92,7 +92,7 @@ const fetchSafeAppFromManifest = async (
   currentChainId: string,
 ): Promise<SafeAppDataWithPermissions> => {
   // Strip URL parameters for the normalized app URL but keep the original URL for the iframe
-  const baseUrl = stripURLParams(appUrl)
+  const baseUrl = stripUrlParams(appUrl)
   const normalizedAppUrl = trimTrailingSlash(baseUrl)
   // Use the base URL to fetch the manifest
   const appManifest = await fetchAppManifest(appUrl)
