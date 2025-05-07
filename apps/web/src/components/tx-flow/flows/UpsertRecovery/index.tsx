@@ -1,15 +1,14 @@
-import { useMemo, type ReactElement } from 'react'
-import TxLayout from '@/components/tx-flow/common/TxLayout'
-import type { TxStep } from '../../common/TxLayout'
+import { useCallback, type ReactElement } from 'react'
 import RecoveryPlus from '@/public/images/common/recovery-plus.svg'
-import useTxStepper from '../../useTxStepper'
 import { UpsertRecoveryFlowReview as UpsertRecoveryFlowReview } from './UpsertRecoveryFlowReview'
 import { UpsertRecoveryFlowSettings as UpsertRecoveryFlowSettings } from './UpsertRecoveryFlowSettings'
 import { UpsertRecoveryFlowIntro as UpsertRecoveryFlowIntro } from './UpsertRecoveryFlowIntro'
 import { DAY_IN_SECONDS } from './useRecoveryPeriods'
 import type { RecoveryState } from '@/features/recovery/services/recovery-state'
-import { ConfirmTxDetails } from '@/components/tx/ConfirmTxDetails'
 import { TxFlowType } from '@/services/analytics'
+import { TxFlow } from '../../TxFlow'
+import { TxFlowStep } from '../../TxFlowStep'
+import { type ReviewTransactionProps } from '@/components/tx/ReviewTransactionV2'
 
 export enum UpsertRecoveryFlowFields {
   recoverer = 'recoverer',
@@ -28,67 +27,35 @@ export type UpsertRecoveryFlowProps = {
 }
 
 function UpsertRecoveryFlow({ delayModifier }: { delayModifier?: RecoveryState[number] }): ReactElement {
-  const { data, step, nextStep, prevStep } = useTxStepper<UpsertRecoveryFlowProps>(
-    {
-      [UpsertRecoveryFlowFields.recoverer]: delayModifier?.recoverers?.[0] ?? '',
-      [UpsertRecoveryFlowFields.delay]: '',
-      [UpsertRecoveryFlowFields.selectedDelay]: delayModifier?.delay?.toString() ?? `${DAY_IN_SECONDS * 28}`, // 28 days in seconds
-      [UpsertRecoveryFlowFields.customDelay]: '',
-      [UpsertRecoveryFlowFields.expiry]: delayModifier?.expiry?.toString() ?? '0',
-    },
-    TxFlowType.SETUP_RECOVERY,
-  )
+  const initialData = {
+    [UpsertRecoveryFlowFields.recoverer]: delayModifier?.recoverers?.[0] ?? '',
+    [UpsertRecoveryFlowFields.delay]: '',
+    [UpsertRecoveryFlowFields.selectedDelay]: delayModifier?.delay?.toString() ?? `${DAY_IN_SECONDS * 28}`, // 28 days in seconds
+    [UpsertRecoveryFlowFields.customDelay]: '',
+    [UpsertRecoveryFlowFields.expiry]: delayModifier?.expiry?.toString() ?? '0',
+  }
 
-  const steps = useMemo<TxStep[]>(
-    () => [
-      {
-        txLayoutProps: {
-          title: 'Account recovery',
-          subtitle: 'How does recovery work?',
-          hideNonce: true,
-          hideProgress: true,
-        },
-        content: <UpsertRecoveryFlowIntro key={0} onSubmit={() => nextStep(data)} />,
-      },
-      {
-        txLayoutProps: { title: 'Account recovery', subtitle: 'Set up recovery settings', icon: RecoveryPlus },
-        content: (
-          <UpsertRecoveryFlowSettings
-            key={1}
-            params={data}
-            delayModifier={delayModifier}
-            onSubmit={(formData) => nextStep({ ...data, ...formData })}
-          />
-        ),
-      },
-      {
-        txLayoutProps: { title: 'Confirm transaction', subtitle: 'Set up account recovery', icon: RecoveryPlus },
-        content: (
-          <UpsertRecoveryFlowReview
-            key={2}
-            params={data}
-            moduleAddress={delayModifier?.address}
-            onSubmit={() => nextStep(data)}
-          />
-        ),
-      },
-      {
-        txLayoutProps: {
-          title: 'Confirm transaction details',
-          subtitle: 'Set up account recovery',
-          icon: RecoveryPlus,
-          fixedNonce: true,
-        },
-        content: <ConfirmTxDetails key={3} onSubmit={() => {}} />,
-      },
-    ],
-    [nextStep, data, delayModifier],
+  const ReviewComponent = useCallback(
+    (props: ReviewTransactionProps) => <UpsertRecoveryFlowReview moduleAddress={delayModifier?.address} {...props} />,
+    [delayModifier?.address],
   )
 
   return (
-    <TxLayout step={step} onBack={prevStep} {...(steps?.[step]?.txLayoutProps || {})}>
-      {steps.map(({ content }) => content)}
-    </TxLayout>
+    <TxFlow
+      initialData={initialData}
+      eventCategory={TxFlowType.SETUP_RECOVERY}
+      ReviewTransactionComponent={ReviewComponent}
+      icon={RecoveryPlus}
+      title="Account recovery"
+      subtitle="Set up account recovery"
+    >
+      <TxFlowStep title="Account recovery" subtitle="How does recovery work" hideNonce hideProgress>
+        <UpsertRecoveryFlowIntro />
+      </TxFlowStep>
+      <TxFlowStep title="Account recovery" subtitle="Set up recovery settings" icon={RecoveryPlus}>
+        <UpsertRecoveryFlowSettings />
+      </TxFlowStep>
+    </TxFlow>
   )
 }
 
