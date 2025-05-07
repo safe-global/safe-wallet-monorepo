@@ -1,13 +1,12 @@
 import EnhancedTable from '@/components/common/EnhancedTable'
-import Button from '@mui/material/Button'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import tableCss from '@/components/common/EnhancedTable/styles.module.css'
 import Identicon from '@/components/common/Identicon'
 import { Box, Stack, Tooltip } from '@mui/material'
 import NetworkLogosList from '@/features/multichain/components/NetworkLogosList'
-import AddressBookContextMenu from './AddressBookContextMenu'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import type { SpaceAddressBookItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import SpaceAddressBookActions from '@/features/spaces/components/SpaceAddressBook/SpaceAddressBookActions'
 
 const headCells = [
   { id: 'contact', label: 'Contact' },
@@ -68,10 +67,7 @@ function SpaceAddressBookTable({ entries }: SpaceAddressBookTableProps) {
         sticky: true,
         content: (
           <div className={tableCss.actions}>
-            <Button data-testid="send-btn" variant="contained" color="primary" size="small" onClick={() => {}}>
-              Send
-            </Button>
-            <AddressBookContextMenu entry={entry} />
+            <SpaceAddressBookActions entry={entry} />
           </div>
         ),
       },
