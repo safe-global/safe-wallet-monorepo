@@ -8,11 +8,8 @@ import ListItemText from '@mui/material/ListItemText'
 import { Controller, useFormContext, useWatch } from 'react-hook-form'
 import type { ImportContactsFormValues } from '@/features/spaces/components/SpaceAddressBook/Import/ImportAddressBookDialog'
 import { getSelectedAddresses, getContactId } from '@/features/spaces/components/SpaceAddressBook/utils'
-import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
-import { useAppSelector } from '@/store'
-import { isAuthenticated } from '@/store/authSlice'
-import { useAddressBooksGetAddressBookItemsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
+import useGetSpaceAddressBook from '@/features/spaces/hooks/useGetSpaceAddressBook'
 
 export type ContactItem = {
   chainId: string
@@ -24,14 +21,7 @@ const ContactsList = ({ contactItems }: { contactItems: ContactItem[] }) => {
   const { control } = useFormContext<ImportContactsFormValues>()
   const selectedContacts = useWatch({ control, name: 'contacts' })
   const selectedAddresses = getSelectedAddresses(selectedContacts)
-  const spaceId = useCurrentSpaceId()
-  const isUserSignedIn = useAppSelector(isAuthenticated)
-  const { currentData } = useAddressBooksGetAddressBookItemsV1Query(
-    { spaceId: Number(spaceId) },
-    { skip: !isUserSignedIn },
-  )
-
-  const spaceContacts = currentData?.data || []
+  const spaceContacts = useGetSpaceAddressBook()
 
   return (
     <List
