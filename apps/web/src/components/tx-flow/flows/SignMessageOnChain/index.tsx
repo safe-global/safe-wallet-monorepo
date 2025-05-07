@@ -7,6 +7,7 @@ import { TxFlowType } from '@/services/analytics'
 import { type ReviewTransactionProps } from '@/components/tx/ReviewTransactionV2'
 import { type SubmitCallback, TxFlow } from '../../TxFlow'
 import { dispatchSafeAppsTx } from '@/services/tx/tx-sender'
+import { getSafeTxHashFromTxId } from '@/utils/transactions'
 
 const SignMessageOnChainFlow = ({ props }: { props: Omit<SignMessageOnChainProps, 'onSubmit'> }) => {
   const { requestId } = props
@@ -19,11 +20,15 @@ const SignMessageOnChainFlow = ({ props }: { props: Omit<SignMessageOnChainProps
 
   const handleSubmit: SubmitCallback = useCallback(
     async (args) => {
-      debugger
       if (!args?.txId) {
         return
       }
-      const safeTxHash = args.txId.slice(-66)
+      const safeTxHash = getSafeTxHashFromTxId(args.txId)
+
+      if (!safeTxHash) {
+        return
+      }
+
       await dispatchSafeAppsTx({ safeAppRequestId: requestId, safeTxHash, txId: args.txId })
     },
     [requestId],
