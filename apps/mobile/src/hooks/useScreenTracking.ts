@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { usePathname, useGlobalSearchParams } from 'expo-router'
-import analytics from '@react-native-firebase/analytics'
+import { getAnalytics } from '@react-native-firebase/analytics'
 
 export const useScreenTracking = () => {
   const pathname = usePathname()
@@ -8,7 +8,7 @@ export const useScreenTracking = () => {
 
   useEffect(() => {
     const logScreenView = async () => {
-      await analytics().logScreenView({
+      await getAnalytics().logScreenView({
         screen_name: pathname,
         screen_class: pathname,
       })
