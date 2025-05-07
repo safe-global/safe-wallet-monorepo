@@ -1,4 +1,4 @@
-import { MouseEvent, useState } from 'react'
+import { type MouseEvent, useState } from 'react'
 import Track from '@/components/common/Track'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { SvgIcon, Tooltip } from '@mui/material'
@@ -7,7 +7,7 @@ import DeleteIcon from '@/public/images/common/delete.svg'
 import EditContactDialog from '@/features/spaces/components/SpaceAddressBook/EditContactDialog'
 import DeleteContactDialog from '@/features/spaces/components/SpaceAddressBook/DeleteContactDialog'
 import { useIsAdmin } from '@/features/spaces/hooks/useSpaceMembers'
-import { SpaceAddressBookItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import type { SpaceAddressBookItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import IconButton from '@mui/material/IconButton'
 
 enum ModalType {
