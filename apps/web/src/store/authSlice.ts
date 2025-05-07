@@ -45,7 +45,7 @@ export const authListener = (listenerMiddleware: typeof listenerMiddlewareInstan
     actionCreator: authSlice.actions.setUnauthenticated,
     effect: (_action, { dispatch }) => {
       // @ts-ignore TS2322: Type string is not assignable to type FullTagDescription<never>
-      dispatch(cgwClient.util.invalidateTags(['spaces']))
+      dispatch(cgwClient.util.invalidateTags(['spaces', 'users']))
     },
   })
 }
