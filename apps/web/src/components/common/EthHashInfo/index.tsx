@@ -18,7 +18,7 @@ const EthHashInfo = ({
   const addressBooks = useAllAddressBooks()
   const link = chain && props.hasExplorer ? getBlockExplorerLink(chain, props.address) : undefined
   const addressBookName = chain ? addressBooks?.[chain.chainId]?.[props.address] : undefined
-  const name = showName ? addressBookName || props.name : undefined
+  const name = showName ? props.spaceName || addressBookName || props.name : undefined
 
   return (
     <SrcEthHashInfo
@@ -26,7 +26,7 @@ const EthHashInfo = ({
       copyPrefix={settings.shortName.copy}
       {...props}
       name={name}
-      isAddressBookName={!!addressBookName}
+      isAddressBookName={!!addressBookName && !props.spaceName}
       customAvatar={props.customAvatar}
       ExplorerButtonProps={{ title: link?.title || '', href: link?.href || '' }}
       avatarSize={avatarSize}

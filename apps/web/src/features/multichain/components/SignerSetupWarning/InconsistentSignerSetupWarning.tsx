@@ -11,7 +11,7 @@ import { getDeviatingSetups, getSafeSetups } from '@/features/multichain/utils/u
 import { Box, Typography } from '@mui/material'
 import ChainIndicator from '@/components/common/ChainIndicator'
 
-const ChainIndicatorList = ({ chainIds }: { chainIds: string[] }) => {
+export const ChainIndicatorList = ({ chainIds }: { chainIds: string[] }) => {
   const { configs } = useChains()
 
   return (
@@ -20,7 +20,7 @@ const ChainIndicatorList = ({ chainIds }: { chainIds: string[] }) => {
         const chain = configs.find((chain) => chain.chainId === chainId)
         return (
           <Box key={chainId} display="inline-flex" flexWrap="wrap" position="relative" top={5}>
-            <ChainIndicator key={chainId} chainId={chainId} showUnknown={false} onlyLogo={true} />
+            <ChainIndicator responsive key={chainId} chainId={chainId} showUnknown={false} onlyLogo={true} />
             <Typography position="relative" mx={0.5} top={2}>
               {chain && chain.chainName}
               {index === chainIds.length - 1 ? '.' : ','}

@@ -16,6 +16,7 @@ export type EthHashInfoProps = {
   address: string
   chainId?: string
   name?: string | null
+  spaceName?: string | null
   showAvatar?: boolean
   onlyName?: boolean
   showCopyButton?: boolean
