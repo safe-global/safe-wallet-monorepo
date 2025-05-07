@@ -25,29 +25,46 @@ global.fetch = (url: RequestInfo | URL, init?: RequestInit | undefined) => {
     return originalFetch(new Request(url, { headers }))
   }
 
-  let options: RequestInit = {}
+  const options: RequestInit = init ? { ...init } : {}
 
-  if (init) {
-    options = { ...init }
-  }
-
+  // Properly handle headers from Request object
   if (url instanceof Request) {
-    // If url is a Request object, we need to merge its headers
     const requestHeaders = new Headers(url.headers)
-    options.headers = {
-      ...Object.fromEntries(requestHeaders.entries()),
-      ...options.headers,
+    if (!options.headers) {
+      options.headers = requestHeaders
+    } else if (options.headers instanceof Headers) {
+      // Merge headers if options.headers is already a Headers object
+      requestHeaders.forEach((value, key) => {
+        ;(options.headers as Headers).append(key, value)
+      })
+    } else {
+      // Convert to Headers object for proper merging
+      const newHeaders = new Headers(options.headers)
+      requestHeaders.forEach((value, key) => {
+        newHeaders.append(key, value)
+      })
+      options.headers = newHeaders
     }
   }
 
+  // If headers don't exist yet, create them
+  if (!options.headers) {
+    options.headers = new Headers()
+  }
+
+  // Convert to Headers object if it's not already
+  if (!(options.headers instanceof Headers)) {
+    options.headers = new Headers(options.headers)
+  }
+
+  // Add custom headers
+  const headers = options.headers as Headers
+  headers.set('User-Agent', userAgent)
+
   // Only add Origin header for actual domain requests, not for IP addresses or localhost
   const isIpOrLocalhost = isIpOrLocalhostUrl(url instanceof URL ? url.toString() : url.toString())
-
-  options.headers = {
-    ...options.headers,
-    'User-Agent': userAgent,
-    // Only set Origin for actual domain requests
-    ...(isIpOrLocalhost ? {} : { Origin: origin }),
+  if (!isIpOrLocalhost) {
+    headers.set('Origin', origin)
   }
 
   return originalFetch(url, options)
