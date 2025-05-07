@@ -7,6 +7,7 @@ import { type SubmitCallback, TxFlow } from '../../TxFlow'
 import { type ReviewTransactionContentProps } from '@/components/tx/ReviewTransactionV2/ReviewTransactionContent'
 import { dispatchSafeAppsTx } from '@/services/tx/tx-sender'
 import { trackSafeAppTxCount } from '@/services/safe-apps/track-app-usage-count'
+import { getSafeTxHashFromTxId } from '@/utils/transactions'
 
 export type SafeAppsTxParams = {
   appId?: string
@@ -36,7 +37,11 @@ const SafeAppsTxFlow = ({
         return
       }
 
-      const safeTxHash = args.txId.slice(-66)
+      const safeTxHash = getSafeTxHashFromTxId(args.txId)
+
+      if (!safeTxHash) {
+        return
+      }
 
       trackSafeAppTxCount(Number(data.appId))
       dispatchSafeAppsTx({ safeAppRequestId: data.requestId, txId: args.txId, safeTxHash })
