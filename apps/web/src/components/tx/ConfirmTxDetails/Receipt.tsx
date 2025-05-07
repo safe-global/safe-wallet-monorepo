@@ -14,17 +14,19 @@ import {
 import TxDetailsRow from './TxDetailsRow'
 import NameChip from './NameChip'
 
-type TxDetailsProps = {
+type ReceiptProps = {
   safeTxData: SafeTransaction['data']
   txData?: TransactionData
   grid?: boolean
 }
 
-const ContentWrapper = ({ children }: { children: ReactElement | ReactElement[] }) => (
-  <Box sx={{ maxHeight: '550px', minHeight: '447px', overflowY: 'auto', px: 2 }}>{children}</Box>
+const ScrollWrapper = ({ children }: { children: ReactElement | ReactElement[] }) => (
+  <Box maxHeight="550px" minHeight="447px" px={2} sx={{ overflowY: 'auto' }}>
+    {children}
+  </Box>
 )
 
-export const TxDetails = ({ safeTxData, txData, grid }: TxDetailsProps) => {
+export const Receipt = ({ safeTxData, txData, grid }: ReceiptProps) => {
   const safeTxHash = useSafeTxHash({ safeTxData })
   const domainHash = useDomainHash()
   const messageHash = useMessageHash({ safeTxData })
@@ -38,7 +40,7 @@ export const TxDetails = ({ safeTxData, txData, grid }: TxDetailsProps) => {
         {
           title: 'Data',
           content: (
-            <ContentWrapper>
+            <ScrollWrapper>
               <Stack spacing={1} divider={<Divider />}>
                 <TxDetailsRow label="Primary type" grid={grid}>
                   SafeTx
@@ -129,13 +131,13 @@ export const TxDetails = ({ safeTxData, txData, grid }: TxDetailsProps) => {
                   {safeTxData.nonce}
                 </TxDetailsRow>
               </Stack>
-            </ContentWrapper>
+            </ScrollWrapper>
           ),
         },
         {
           title: 'Hashes',
           content: (
-            <ContentWrapper>
+            <ScrollWrapper>
               <Stack spacing={1} divider={<Divider />}>
                 {domainHash && (
                   <TxDetailsRow label="Domain hash" grid={grid}>
@@ -161,7 +163,7 @@ export const TxDetails = ({ safeTxData, txData, grid }: TxDetailsProps) => {
                   </TxDetailsRow>
                 )}
               </Stack>
-            </ContentWrapper>
+            </ScrollWrapper>
           ),
         },
       ]}

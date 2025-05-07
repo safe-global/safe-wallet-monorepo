@@ -111,6 +111,16 @@ export const MODALS_EVENTS = {
     category: MODALS_CATEGORY,
     event: EventType.CLICK,
   },
+  CONTINUE_CLICKED: {
+    action: 'Continue to receipt',
+    category: MODALS_CATEGORY,
+    event: EventType.CLICK,
+  },
+  RECEIPT_TIME_SPENT: {
+    action: 'Time spent on receipt',
+    category: MODALS_CATEGORY,
+    event: EventType.META,
+  },
 }
 
 export enum MODAL_NAVIGATION {
