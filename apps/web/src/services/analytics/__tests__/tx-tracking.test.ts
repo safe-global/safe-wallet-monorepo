@@ -181,8 +181,19 @@ describe('getTransactionTrackingType', () => {
         type: TransactionInfoType.CUSTOM,
       },
     } as unknown as TransactionDetails
-    const origin = '{"url":"https://iframe.jumper.exchange","name":"Bridge"}'
+    const origin = '{"url":"https://iframe.jumper.exchange/bridge","name":"Bridge"}'
     const txType = getTransactionTrackingType(details, origin)
     expect(txType).toEqual(TX_TYPES.native_bridge)
+  })
+
+  it('should return native_swap_lifi for native swap lifi transactions', () => {
+    const details = {
+      txInfo: {
+        type: TransactionInfoType.CUSTOM,
+      },
+    } as unknown as TransactionDetails
+    const origin = '{"url":"https://iframe.jumper.exchange/swap","name":"Swap"}'
+    const txType = getTransactionTrackingType(details, origin)
+    expect(txType).toEqual(TX_TYPES.native_swap_lifi)
   })
 })

@@ -7,20 +7,19 @@ import { useCurrentChain } from '@/hooks/useChains'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import type { SafeAppDataWithPermissions } from '@/components/safe-apps/types'
 import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
-import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 
-export const BRIDGE_WIDGET_URL = 'https://iframe.jumper.exchange/bridge'
+export const SWAP_WIDGET_URL = 'https://iframe.jumper.exchange/swap'
 
-export function BridgeWidget(): ReactElement | null {
+export function FallbackSwapWidget({ fromToken }: { fromToken?: string }): ReactElement | null {
   const isDarkMode = useDarkMode()
   const chain = useCurrentChain()
 
   const appData = useMemo((): SafeAppDataWithPermissions | null => {
-    if (!chain || !hasFeature(chain, FEATURES.BRIDGE)) {
+    if (!chain) {
       return null
     }
-    return _getAppData(isDarkMode, chain)
-  }, [chain, isDarkMode])
+    return _getAppData(isDarkMode, chain, fromToken)
+  }, [chain, isDarkMode, fromToken])
 
   if (!appData) {
     return null
@@ -36,17 +35,22 @@ export function BridgeWidget(): ReactElement | null {
   )
 }
 
-export function _getAppData(isDarkMode: boolean, chain: ChainInfo): SafeAppDataWithPermissions {
+export function _getAppData(isDarkMode: boolean, chain: ChainInfo, fromToken?: string): SafeAppDataWithPermissions {
   const theme = isDarkMode ? 'dark' : 'light'
-  const appUrl = new URL(BRIDGE_WIDGET_URL)
-  appUrl.searchParams.set('fromChain', chain.chainId)
+  const appUrl = new URL(SWAP_WIDGET_URL)
   appUrl.searchParams.set('theme', theme)
+  appUrl.searchParams.set('fromChain', chain.chainId)
+  if (fromToken) {
+    appUrl.searchParams.set('fromToken', fromToken)
+  }
 
   return {
     ...getEmptySafeApp(),
-    name: 'Bridge',
-    iconUrl: '/images/common/bridge.svg',
+    name: 'Swap',
+    iconUrl: '/images/common/swap.svg',
     chainIds: [chain.chainId],
     url: appUrl.toString(),
   }
 }
+
+export default FallbackSwapWidget

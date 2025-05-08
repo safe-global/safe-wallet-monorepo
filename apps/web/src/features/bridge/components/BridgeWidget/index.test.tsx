@@ -21,7 +21,7 @@ describe('BridgeWidget', () => {
         safeAppsPermissions: [],
         socialProfiles: [],
         tags: [],
-        url: `https://iframe.jumper.exchange/?fromChain=${chain.chainId}&theme=light`,
+        url: `https://iframe.jumper.exchange/bridge?fromChain=${chain.chainId}&theme=light`,
       })
     })
 
@@ -43,7 +43,7 @@ describe('BridgeWidget', () => {
         safeAppsPermissions: [],
         socialProfiles: [],
         tags: [],
-        url: `https://iframe.jumper.exchange/?fromChain=${chain.chainId}&theme=dark`,
+        url: `https://iframe.jumper.exchange/bridge?fromChain=${chain.chainId}&theme=dark`,
       })
     })
   })
