@@ -25,7 +25,14 @@ export function ConfirmTxForm({
   const activeSafe = useDefinedActiveSafe()
 
   if (hasSigned) {
-    return <AlreadySigned txId={txId} safeAddress={activeSafe.address} chainId={activeSafe.chainId} />
+    return (
+      <AlreadySigned
+        hasEnoughConfirmations={hasEnoughConfirmations}
+        txId={txId}
+        safeAddress={activeSafe.address}
+        chainId={activeSafe.chainId}
+      />
+    )
   }
 
   if (!canSign) {
