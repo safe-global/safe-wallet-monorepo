@@ -7,7 +7,11 @@ import ReviewTransactionContent from './ReviewTransactionContent'
 import { TxFlowStep } from '@/components/tx-flow/TxFlowStep'
 import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
 
-const ReviewTransaction = (props: ReviewTransactionContentProps) => {
+export type ReviewTransactionProps = {
+  title?: string
+} & ReviewTransactionContentProps
+
+const ReviewTransaction = ({ title, ...props }: ReviewTransactionProps) => {
   const { safeTx, safeTxError } = useContext(SafeTxContext)
   const { txId, txDetails, txDetailsLoading } = useContext(TxFlowContext)
   const [txPreview, , txPreviewLoading] = useTxPreview(safeTx?.data, undefined, txId)
@@ -17,7 +21,7 @@ const ReviewTransaction = (props: ReviewTransactionContentProps) => {
   }
 
   return (
-    <TxFlowStep title="Confirm transaction">
+    <TxFlowStep title={title ?? 'Confirm transaction'}>
       <ReviewTransactionContent {...props} txDetails={txDetails} txPreview={txPreview}>
         {props.children}
       </ReviewTransactionContent>

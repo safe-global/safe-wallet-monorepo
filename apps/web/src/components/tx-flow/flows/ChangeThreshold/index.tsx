@@ -1,9 +1,13 @@
 import SaveAddressIcon from '@/public/images/common/save-address.svg'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { ChooseThreshold } from './ChooseThreshold'
-import { SETTINGS_EVENTS, trackEvent, TxFlowType } from '@/services/analytics'
-import { type SubmitCallbackWithData, TxFlow } from '../../TxFlow'
+import { TxFlowType } from '@/services/analytics'
+import { TxFlow } from '../../TxFlow'
 import { TxFlowStep } from '../../TxFlowStep'
+import { type ReviewTransactionProps } from '@/components/tx/ReviewTransactionV2'
+import { useContext } from 'react'
+import { TxFlowContext } from '../../TxFlowProvider'
+import ReviewChangeThreshold from './ReviewChangeThreshold'
 
 export enum ChangeThresholdFlowFieldNames {
   threshold = 'threshold',
@@ -13,30 +17,27 @@ export type ChangeThresholdFlowProps = {
   [ChangeThresholdFlowFieldNames.threshold]: number
 }
 
+const ReviewThresholdStep = (props: ReviewTransactionProps) => {
+  const { data } = useContext(TxFlowContext)
+
+  return <ReviewChangeThreshold params={data} {...props} />
+}
+
 const ChangeThresholdFlow = () => {
   const {
-    safe: { threshold, owners },
+    safe: { threshold },
   } = useSafeInfo()
-
-  const trackEvents = (newThreshold: number) => {
-    trackEvent({ ...SETTINGS_EVENTS.SETUP.OWNERS, label: owners.length })
-    trackEvent({ ...SETTINGS_EVENTS.SETUP.THRESHOLD, label: newThreshold })
-  }
-
-  const handleSubmit: SubmitCallbackWithData<ChangeThresholdFlowProps> = ({ data }) => {
-    trackEvents(data?.threshold || threshold)
-  }
 
   return (
     <TxFlow
       initialData={{ threshold }}
       icon={SaveAddressIcon}
       subtitle="Change threshold"
-      onSubmit={handleSubmit}
       eventCategory={TxFlowType.CHANGE_THRESHOLD}
+      ReviewTransactionComponent={ReviewThresholdStep}
     >
       <TxFlowStep title="New transaction">
-        <ChooseThreshold key={0} />
+        <ChooseThreshold />
       </TxFlowStep>
     </TxFlow>
   )

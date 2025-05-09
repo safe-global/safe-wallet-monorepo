@@ -1,36 +1,27 @@
-import TxLayout from '@/components/tx-flow/common/TxLayout'
-import type { TxStep } from '../../common/TxLayout'
-import { ReviewRemoveModule } from './ReviewRemoveModule'
-import { useMemo } from 'react'
-import useTxStepper from '../../useTxStepper'
-import { ConfirmTxDetails } from '@/components/tx/ConfirmTxDetails'
+import { useContext } from 'react'
+import { TxFlow } from '../../TxFlow'
+import { TxFlowContext } from '../../TxFlowProvider'
 import { TxFlowType } from '@/services/analytics'
+import { ReviewRemoveModule } from './ReviewRemoveModule'
+import { type ReviewTransactionProps } from '@/components/tx/ReviewTransactionV2'
 
 export type RemoveModuleFlowProps = {
   address: string
 }
 
+const ReviewRemoveModuleStep = (props: ReviewTransactionProps) => {
+  const { data } = useContext(TxFlowContext)
+  return <ReviewRemoveModule params={data} {...props} />
+}
+
 const RemoveModuleFlow = ({ address }: RemoveModuleFlowProps) => {
-  const { step, nextStep, prevStep } = useTxStepper(undefined, TxFlowType.REMOVE_MODULE)
-
-  const steps = useMemo<TxStep[]>(
-    () => [
-      {
-        txLayoutProps: { title: 'Confirm transaction' },
-        content: <ReviewRemoveModule key={0} params={{ address }} onSubmit={() => nextStep(undefined)} />,
-      },
-      {
-        txLayoutProps: { title: 'Confirm transaction details', fixedNonce: true },
-        content: <ConfirmTxDetails key={1} onSubmit={() => {}} />,
-      },
-    ],
-    [nextStep, address],
-  )
-
   return (
-    <TxLayout subtitle="Remove module" step={step} onBack={prevStep} {...(steps?.[step]?.txLayoutProps || {})}>
-      {steps.map(({ content }) => content)}
-    </TxLayout>
+    <TxFlow
+      initialData={{ address }}
+      subtitle="Remove module"
+      eventCategory={TxFlowType.REMOVE_MODULE}
+      ReviewTransactionComponent={ReviewRemoveModuleStep}
+    />
   )
 }
 

@@ -16,41 +16,37 @@ import { formatVisualAmount, safeParseUnits } from '@safe-global/utils/utils/for
 import type { NewSpendingLimitFlowProps } from '.'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import { SafeTxContext } from '../../SafeTxProvider'
-import ReviewTransaction from '@/components/tx/ReviewTransaction'
+import ReviewTransaction, { type ReviewTransactionProps } from '@/components/tx/ReviewTransactionV2'
+import { TxFlowContext, type TxFlowContextType } from '../../TxFlowProvider'
 
-export const ReviewSpendingLimit = ({
-  params,
-  onSubmit,
-}: {
-  params: NewSpendingLimitFlowProps
-  onSubmit: () => void
-}) => {
+export const ReviewSpendingLimit = ({ onSubmit, children }: ReviewTransactionProps) => {
+  const { data } = useContext<TxFlowContextType<NewSpendingLimitFlowProps>>(TxFlowContext)
   const spendingLimits = useSelector(selectSpendingLimits)
   const { safe } = useSafeInfo()
   const chainId = useChainId()
   const chain = useCurrentChain()
   const { balances } = useBalances()
   const { setSafeTx, setSafeTxError } = useContext(SafeTxContext)
-  const token = balances.items.find((item) => item.tokenInfo.address === params.tokenAddress)
+  const token = balances.items.find((item) => item.tokenInfo.address === data?.tokenAddress)
   const { decimals } = token?.tokenInfo || {}
 
   const amountInWei = useMemo(
-    () => safeParseUnits(params.amount, token?.tokenInfo.decimals)?.toString() || '0',
-    [params.amount, token?.tokenInfo.decimals],
+    () => safeParseUnits(data?.amount || '0', token?.tokenInfo.decimals)?.toString() || '0',
+    [data?.amount, token?.tokenInfo.decimals],
   )
 
   const existingSpendingLimit = useMemo(() => {
     return spendingLimits.find(
       (spendingLimit) =>
-        spendingLimit.beneficiary === params.beneficiary && spendingLimit.token.address === params.tokenAddress,
+        spendingLimit.beneficiary === data?.beneficiary && spendingLimit.token.address === data?.tokenAddress,
     )
-  }, [spendingLimits, params])
+  }, [spendingLimits, data])
 
   useEffect(() => {
-    if (!chain) return
+    if (!chain || !data) return
 
     createNewSpendingLimitTx(
-      params,
+      data,
       spendingLimits,
       chainId,
       chain,
@@ -66,7 +62,7 @@ export const ReviewSpendingLimit = ({
     chainId,
     decimals,
     existingSpendingLimit,
-    params,
+    data,
     safe.modules,
     safe.deployed,
     setSafeTx,
@@ -74,12 +70,12 @@ export const ReviewSpendingLimit = ({
     spendingLimits,
   ])
 
-  const isOneTime = params.resetTime === '0'
+  const isOneTime = data?.resetTime === '0'
   const resetTime = useMemo(() => {
     return isOneTime
       ? 'One-time spending limit'
-      : getResetTimeOptions(chainId).find((time) => time.value === params.resetTime)?.label
-  }, [isOneTime, params.resetTime, chainId])
+      : getResetTimeOptions(chainId).find((time) => time.value === data?.resetTime)?.label
+  }, [isOneTime, data?.resetTime, chainId])
 
   const onFormSubmit = () => {
     trackEvent({
@@ -102,7 +98,7 @@ export const ReviewSpendingLimit = ({
     <ReviewTransaction onSubmit={onFormSubmit}>
       {token && (
         <SendAmountBlock amountInWei={amountInWei} tokenInfo={token.tokenInfo} title="Amount">
-          {existingAmount && existingAmount !== params.amount && (
+          {existingAmount && existingAmount !== data?.amount && (
             <>
               <Typography
                 data-testid="old-token-amount"
@@ -137,7 +133,7 @@ export const ReviewSpendingLimit = ({
 
         <Grid data-testid="beneficiary-address" item md={10}>
           <EthHashInfo
-            address={params.beneficiary}
+            address={data?.beneficiary || ''}
             shortAddress={false}
             hasExplorer
             showCopyButton
@@ -168,7 +164,7 @@ export const ReviewSpendingLimit = ({
               <SpendingLimitLabel
                 label={
                   <>
-                    {existingSpendingLimit.resetTimeMin !== params.resetTime && (
+                    {existingSpendingLimit.resetTimeMin !== data?.resetTime && (
                       <>
                         <Typography
                           data-testid="old-reset-time"
@@ -218,6 +214,8 @@ export const ReviewSpendingLimit = ({
           </Typography>
         </Alert>
       )}
+
+      {children}
     </ReviewTransaction>
   )
 }

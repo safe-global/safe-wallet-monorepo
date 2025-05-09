@@ -26,10 +26,16 @@ const Batching = ({
   const { setTxFlow } = useContext(TxModalContext)
   const { addToBatch } = useTxActions()
   const { safeTx } = useContext(SafeTxContext)
-  const { isSubmitDisabled, setIsSubmitLoading, isSubmitLoading, setSubmitError, setIsRejectedByUser } =
-    useContext(TxFlowContext)
+  const {
+    isBatchable: isBatchableTxFlowContext,
+    isSubmitDisabled,
+    setIsSubmitLoading,
+    isSubmitLoading,
+    setSubmitError,
+    setIsRejectedByUser,
+  } = useContext(TxFlowContext)
 
-  const isBatchable = !!safeTx && !isDelegateCall(safeTx)
+  const isBatchable = isBatchableTxFlowContext && !!safeTx && !isDelegateCall(safeTx)
 
   const handleSubmit = async (e: SyntheticEvent) => {
     e.preventDefault()

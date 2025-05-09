@@ -15,7 +15,7 @@ import {
 } from '@mui/material'
 import classNames from 'classnames'
 import { Controller, FormProvider, useFieldArray, useForm, useFormContext } from 'react-hook-form'
-import type { ReactElement } from 'react'
+import { useContext, type ReactElement } from 'react'
 
 import InfoIcon from '@/public/images/notifications/info.svg'
 import AddIcon from '@/public/images/common/add.svg'
@@ -31,9 +31,9 @@ import { AutocompleteItem } from '@/components/tx-flow/flows/TokenTransfer/Creat
 import { validateDecimalLength, validateLimitedAmount } from '@safe-global/utils/utils/validation'
 import { safeFormatUnits } from '@safe-global/utils/utils/formatters'
 import { useMnemonicPrefixedSafeName } from '@/hooks/useMnemonicName'
-
 import css from '@/components/tx-flow/flows/CreateNestedSafe/styles.module.css'
 import commonCss from '@/components/tx-flow/common/styles.module.css'
+import { TxFlowContext, type TxFlowContextType } from '../../TxFlowProvider'
 
 export type SetupNestedSafeForm = {
   [SetupNestedSafeFormFields.name]: string
@@ -50,25 +50,20 @@ export enum SetupNestedSafeFormAssetFields {
   amount = 'amount',
 }
 
-export function SetUpNestedSafe({
-  params,
-  onSubmit,
-}: {
-  params: SetupNestedSafeForm
-  onSubmit: (params: SetupNestedSafeForm) => void
-}): ReactElement {
+export function SetUpNestedSafe(): ReactElement {
   const addressBook = useAddressBook()
   const safeAddress = useSafeAddress()
   const randomName = useMnemonicPrefixedSafeName('Nested')
   const fallbackName = addressBook[safeAddress] ?? randomName
+  const { onNext, data } = useContext<TxFlowContextType<SetupNestedSafeForm>>(TxFlowContext)
 
   const formMethods = useForm<SetupNestedSafeForm>({
-    defaultValues: params,
+    defaultValues: data,
     mode: 'onChange',
   })
 
   const onFormSubmit = (data: SetupNestedSafeForm) => {
-    onSubmit({
+    onNext({
       ...data,
       [SetupNestedSafeFormFields.name]: data[SetupNestedSafeFormFields.name] || fallbackName,
     })

@@ -42,6 +42,7 @@ export type TxFlowContextType<T extends unknown = any> = {
   trackTxEvent: (txId: string, isExecuted?: boolean, isRoleExecution?: boolean, isProposerCreation?: boolean) => void
 
   txId?: string
+  txNonce?: number
   isCreation: boolean
   isRejection: boolean
   onlyExecute: boolean
@@ -68,6 +69,7 @@ export type TxFlowContextType<T extends unknown = any> = {
   txDetails?: TransactionDetails
   txDetailsLoading?: boolean
   isBatch: boolean
+  isBatchable: boolean
   role?: Role
 }
 
@@ -106,6 +108,7 @@ export const initialContext: TxFlowContextType = {
   willExecuteThroughRole: false,
   canExecuteThroughRole: false,
   isBatch: false,
+  isBatchable: true,
 }
 
 export const TxFlowContext = createContext<TxFlowContextType>(initialContext)
@@ -118,11 +121,13 @@ export type TxFlowProviderProps<T extends unknown> = {
   nextStep: (data: T) => void
   progress?: number
   txId?: string
+  txNonce?: TxFlowContextType['txNonce']
   isExecutable?: boolean
   onlyExecute?: TxFlowContextType['onlyExecute']
   isRejection?: TxFlowContextType['isRejection']
   txLayoutProps?: TxFlowContextType['txLayoutProps']
   isBatch?: TxFlowContextType['isBatch']
+  isBatchable?: TxFlowContextType['isBatchable']
 }
 
 const TxFlowProvider = <T extends unknown>({
@@ -133,11 +138,13 @@ const TxFlowProvider = <T extends unknown>({
   prevStep,
   progress = 0,
   txId,
+  txNonce,
   isExecutable = false,
   onlyExecute = initialContext.onlyExecute,
   txLayoutProps: defaultTxLayoutProps = initialContext.txLayoutProps,
   isRejection = initialContext.isRejection,
   isBatch = initialContext.isBatch,
+  isBatchable = initialContext.isBatchable,
 }: TxFlowProviderProps<T>): ReactElement => {
   const signer = useSigner()
   const isSafeOwner = useIsSafeOwner()
@@ -211,6 +218,7 @@ const TxFlowProvider = <T extends unknown>({
     trackTxEvent,
 
     txId,
+    txNonce,
     isCreation,
     isRejection,
     onlyExecute,
@@ -238,6 +246,7 @@ const TxFlowProvider = <T extends unknown>({
     txDetails,
     txDetailsLoading,
     isBatch,
+    isBatchable,
   }
 
   return <TxFlowContext.Provider value={value}>{children}</TxFlowContext.Provider>

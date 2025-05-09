@@ -5,9 +5,9 @@ import { SafeTxContext } from '../../SafeTxProvider'
 import { createMigrateToL2 } from '@/utils/safe-migrations'
 import { Box, Typography } from '@mui/material'
 import ErrorMessage from '@/components/tx/ErrorMessage'
-import ReviewTransaction from '@/components/tx/ReviewTransaction'
+import ReviewTransaction, { type ReviewTransactionProps } from '@/components/tx/ReviewTransactionV2'
 
-export const MigrateSafeL2Review = ({ onSubmit }: { onSubmit: () => void }) => {
+export const MigrateSafeL2Review = ({ children, ...props }: ReviewTransactionProps) => {
   const chain = useCurrentChain()
   const { setSafeTx, setSafeTxError } = useContext(SafeTxContext)
 
@@ -20,7 +20,7 @@ export const MigrateSafeL2Review = ({ onSubmit }: { onSubmit: () => void }) => {
 
   return (
     <Box>
-      <ReviewTransaction onSubmit={onSubmit}>
+      <ReviewTransaction {...props}>
         <ErrorMessage level="warning" title="Migration transaction">
           <Typography>
             When executing this transaction, it will not get indexed and appear in the history due to the current
@@ -29,6 +29,8 @@ export const MigrateSafeL2Review = ({ onSubmit }: { onSubmit: () => void }) => {
             indexed as usual, and there will be no further restrictions.
           </Typography>
         </ErrorMessage>
+
+        {children}
       </ReviewTransaction>
     </Box>
   )

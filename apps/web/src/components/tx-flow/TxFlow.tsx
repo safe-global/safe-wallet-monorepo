@@ -3,7 +3,7 @@ import useTxStepper from './useTxStepper'
 import SafeTxProvider from './SafeTxProvider'
 import { TxInfoProvider } from './TxInfoProvider'
 import { TxSecurityProvider } from '../tx/security/shared/TxSecurityContext'
-import TxFlowProvider, { type TxFlowContextType } from './TxFlowProvider'
+import TxFlowProvider, { type TxFlowProviderProps, type TxFlowContextType } from './TxFlowProvider'
 import { TxFlowContent } from './common/TxFlowContent'
 import ReviewTransaction from '../tx/ReviewTransactionV2'
 import { ConfirmTxReceipt } from '../tx/ConfirmTxReceipt'
@@ -18,11 +18,14 @@ export type SubmitCallbackWithData<T> = (args: SubmitCallbackProps & { data?: T 
 type TxFlowProps<T extends unknown> = {
   children?: ReactNode[] | ReactNode
   initialData?: T
-  txId?: string
   onSubmit?: SubmitCallbackWithData<T>
-  onlyExecute?: boolean
-  isExecutable?: boolean
-  isRejection?: boolean
+  txId?: TxFlowProviderProps<T>['txId']
+  txNonce?: TxFlowProviderProps<T>['txNonce']
+  onlyExecute?: TxFlowProviderProps<T>['onlyExecute']
+  isExecutable?: TxFlowProviderProps<T>['isExecutable']
+  isRejection?: TxFlowProviderProps<T>['isRejection']
+  isBatch?: TxFlowProviderProps<T>['isBatch']
+  isBatchable?: TxFlowProviderProps<T>['isBatchable']
   ReviewTransactionComponent?: typeof ReviewTransaction
   eventCategory?: string
 } & TxFlowContextType['txLayoutProps']
@@ -37,10 +40,13 @@ export const TxFlow = <T extends unknown>({
   children = [],
   initialData,
   txId,
+  txNonce,
   onSubmit,
   onlyExecute,
   isExecutable,
   isRejection,
+  isBatch,
+  isBatchable,
   ReviewTransactionComponent = ReviewTransaction,
   eventCategory,
   ...txLayoutProps
@@ -73,10 +79,13 @@ export const TxFlow = <T extends unknown>({
               prevStep={prevStep}
               progress={progress}
               txId={txId}
+              txNonce={txNonce}
               txLayoutProps={txLayoutProps}
               onlyExecute={onlyExecute}
               isExecutable={isExecutable}
               isRejection={isRejection}
+              isBatch={isBatch}
+              isBatchable={isBatchable}
             >
               <TxFlowContent>
                 {...childrenArray}
