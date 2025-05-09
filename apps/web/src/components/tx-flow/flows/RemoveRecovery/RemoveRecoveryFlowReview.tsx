@@ -2,18 +2,19 @@ import { trackEvent } from '@/services/analytics'
 import { RECOVERY_EVENTS } from '@/services/analytics/events/recovery'
 import { Typography } from '@mui/material'
 import { useCallback, useContext, useEffect } from 'react'
-import type { ReactElement } from 'react'
+import type { PropsWithChildren, ReactElement } from 'react'
 
 import { createRemoveModuleTx } from '@/services/tx/tx-sender'
 import { OwnerList } from '../../common/OwnerList'
 import { SafeTxContext } from '../../SafeTxProvider'
 import type { RecoveryFlowProps } from '.'
-import ReviewTransaction from '@/components/tx/ReviewTransaction'
+import ReviewTransaction from '@/components/tx/ReviewTransactionV2'
 
 export function RemoveRecoveryFlowReview({
   delayModifier,
   onSubmit,
-}: RecoveryFlowProps & { onSubmit: () => void }): ReactElement {
+  children,
+}: PropsWithChildren<RecoveryFlowProps & { onSubmit: () => void }>): ReactElement {
   const { setSafeTx, setSafeTxError } = useContext(SafeTxContext)
 
   useEffect(() => {
@@ -37,6 +38,8 @@ export function RemoveRecoveryFlowReview({
         owners={delayModifier.recoverers.map((recoverer) => ({ value: recoverer }))}
         sx={{ bgcolor: ({ palette }) => `${palette.warning.background} !important` }}
       />
+
+      {children}
     </ReviewTransaction>
   )
 }
