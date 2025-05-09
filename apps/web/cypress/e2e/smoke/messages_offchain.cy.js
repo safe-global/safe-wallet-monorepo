@@ -52,13 +52,13 @@ describe('[SMOKE] Offchain Messages tests', () => {
   })
 
   // mock
-  it('[SMOKE] Verify exapanded details for EIP 191 off-chain message', () => {
+  it('[SMOKE] Verify expanded details for EIP 191 off-chain message', () => {
     createTx.clickOnTransactionItemByIndex(2)
     cy.contains(typeMessagesOffchain.message2).should('be.visible')
   })
 
   // mock
-  it('[SMOKE] Verify exapanded details for EIP 712 off-chain message', () => {
+  it('[SMOKE] Verify expanded details for EIP 712 off-chain message', () => {
     const jsonString = createTx.messageNestedStr
     const values = [
       typeMessagesOffchain.name,
