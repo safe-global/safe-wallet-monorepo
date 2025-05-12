@@ -1,4 +1,4 @@
-import { useCallback, type ReactElement } from 'react'
+import type { ReactElement } from 'react'
 import RecoveryPlus from '@/public/images/common/recovery-plus.svg'
 import { UpsertRecoveryFlowReview as UpsertRecoveryFlowReview } from './UpsertRecoveryFlowReview'
 import { UpsertRecoveryFlowSettings as UpsertRecoveryFlowSettings } from './UpsertRecoveryFlowSettings'
@@ -8,7 +8,6 @@ import type { RecoveryState } from '@/features/recovery/services/recovery-state'
 import { TxFlowType } from '@/services/analytics'
 import { TxFlow } from '../../TxFlow'
 import { TxFlowStep } from '../../TxFlowStep'
-import { type ReviewTransactionProps } from '@/components/tx/ReviewTransactionV2'
 
 export enum UpsertRecoveryFlowFields {
   recoverer = 'recoverer',
@@ -16,6 +15,7 @@ export enum UpsertRecoveryFlowFields {
   customDelay = 'customDelay',
   selectedDelay = 'selectedDelay',
   expiry = 'expiry',
+  moduleAddress = 'moduleAddress',
 }
 
 export type UpsertRecoveryFlowProps = {
@@ -24,6 +24,7 @@ export type UpsertRecoveryFlowProps = {
   [UpsertRecoveryFlowFields.customDelay]: string
   [UpsertRecoveryFlowFields.selectedDelay]: string
   [UpsertRecoveryFlowFields.expiry]: string
+  [UpsertRecoveryFlowFields.moduleAddress]?: string
 }
 
 function UpsertRecoveryFlow({ delayModifier }: { delayModifier?: RecoveryState[number] }): ReactElement {
@@ -33,18 +34,14 @@ function UpsertRecoveryFlow({ delayModifier }: { delayModifier?: RecoveryState[n
     [UpsertRecoveryFlowFields.selectedDelay]: delayModifier?.delay?.toString() ?? `${DAY_IN_SECONDS * 28}`, // 28 days in seconds
     [UpsertRecoveryFlowFields.customDelay]: '',
     [UpsertRecoveryFlowFields.expiry]: delayModifier?.expiry?.toString() ?? '0',
+    [UpsertRecoveryFlowFields.moduleAddress]: delayModifier?.address,
   }
-
-  const ReviewComponent = useCallback(
-    (props: ReviewTransactionProps) => <UpsertRecoveryFlowReview moduleAddress={delayModifier?.address} {...props} />,
-    [delayModifier?.address],
-  )
 
   return (
     <TxFlow
       initialData={initialData}
       eventCategory={TxFlowType.SETUP_RECOVERY}
-      ReviewTransactionComponent={ReviewComponent}
+      ReviewTransactionComponent={UpsertRecoveryFlowReview}
       icon={RecoveryPlus}
       title="Account recovery"
       subtitle="Set up account recovery"

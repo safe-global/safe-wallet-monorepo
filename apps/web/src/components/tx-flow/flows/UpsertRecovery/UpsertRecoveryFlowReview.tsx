@@ -20,11 +20,7 @@ import { TxFlowContext, type TxFlowContextType } from '../../TxFlowProvider'
 import ReviewTransaction, { type ReviewTransactionProps } from '@/components/tx/ReviewTransactionV2'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 
-export function UpsertRecoveryFlowReview({
-  moduleAddress,
-  children,
-  ...props
-}: { moduleAddress?: string } & ReviewTransactionProps): ReactElement {
+export function UpsertRecoveryFlowReview({ children, ...props }: ReviewTransactionProps): ReactElement {
   const web3ReadOnly = useWeb3ReadOnly()
   const { safe, safeAddress } = useSafeInfo()
   const { setSafeTx, safeTxError, setSafeTxError } = useContext(SafeTxContext)
@@ -42,14 +38,13 @@ export function UpsertRecoveryFlowReview({
       provider: web3ReadOnly,
       chainId: safe.chainId,
       safeAddress,
-      moduleAddress,
     })
       .then((transactions) => {
         return transactions.length > 1 ? createMultiSendCallOnlyTx(transactions) : createTx(transactions[0])
       })
       .then(setSafeTx)
       .catch(setSafeTxError)
-  }, [moduleAddress, data, safe.chainId, safeAddress, setSafeTx, setSafeTxError, web3ReadOnly])
+  }, [data, safe.chainId, safeAddress, setSafeTx, setSafeTxError, web3ReadOnly])
 
   useEffect(() => {
     if (safeTxError) {
@@ -57,7 +52,7 @@ export function UpsertRecoveryFlowReview({
     }
   }, [safeTxError])
 
-  const isEdit = !!moduleAddress
+  const isEdit = !!data?.moduleAddress
 
   if (!data) {
     return <ErrorMessage>No data provided</ErrorMessage>
