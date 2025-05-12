@@ -44,16 +44,10 @@ describe('chains', () => {
     describe('getLatestSafeVersion', () => {
       it('should return the version from recommendedMasterCopyVersion', () => {
         expect(
-          getLatestSafeVersion(
-            chainBuilder().with({ chainId: '1', recommendedMasterCopyVersion: '1.4.1' }).build(),
-            true,
-          ),
+          getLatestSafeVersion(chainBuilder().with({ chainId: '1', recommendedMasterCopyVersion: '1.4.1' }).build()),
         ).toEqual('1.4.1')
         expect(
-          getLatestSafeVersion(
-            chainBuilder().with({ chainId: '137', recommendedMasterCopyVersion: '1.3.0' }).build(),
-            true,
-          ),
+          getLatestSafeVersion(chainBuilder().with({ chainId: '137', recommendedMasterCopyVersion: '1.3.0' }).build()),
         ).toEqual('1.3.0')
       })
 
@@ -70,7 +64,6 @@ describe('chains', () => {
         expect(
           getLatestSafeVersion(
             chainBuilder().with({ chainId: '11155111', recommendedMasterCopyVersion: null }).build(),
-            true,
           ),
         ).toEqual('1.4.1')
       })
