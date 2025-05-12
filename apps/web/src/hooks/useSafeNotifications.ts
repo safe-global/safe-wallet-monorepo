@@ -90,7 +90,8 @@ const useSafeNotifications = (): void => {
       }
     }
 
-    // Is Safe version is outdated?
+    // Is Safe version outdated?
+    // Non-critical Safe upgrades (versions >= '1.3.0') intentionally skip notifications
     if (implementationVersionState !== ImplementationVersionState.OUTDATED || isNonCriticalUpdate(version)) return
 
     const isUnsupported = !isValidSafeVersion(version)
