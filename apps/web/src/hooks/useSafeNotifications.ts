@@ -1,4 +1,5 @@
 import { useCallback, useEffect } from 'react'
+import semverSatisfies from 'semver/functions/satisfies'
 import { showNotification, closeNotification } from '@/store/notificationsSlice'
 import { ImplementationVersionState } from '@safe-global/safe-gateway-typescript-sdk'
 import useSafeInfo from './useSafeInfo'
@@ -25,9 +26,14 @@ type DismissedUpdateNotifications = {
 
 const DISMISS_NOTIFICATION_KEY = 'dismissUpdateSafe'
 const OUTDATED_VERSION_KEY = 'safe-outdated-version'
+const MIN_SAFE_VERSION = '1.3.0'
 
 const isUpdateSafeNotification = (groupKey: string) => {
   return groupKey === OUTDATED_VERSION_KEY
+}
+
+const isNonCriticalUpdate = (version?: string | null) => {
+  return version && semverSatisfies(version, `>= ${MIN_SAFE_VERSION}`)
 }
 
 /**
@@ -67,7 +73,6 @@ const useSafeNotifications = (): void => {
   /**
    * Show a notification when the Safe version is out of date
    */
-
   useEffect(() => {
     if (safeAddress !== urlSafeAddress) return
     if (!isOwner) return
@@ -85,7 +90,8 @@ const useSafeNotifications = (): void => {
       }
     }
 
-    if (implementationVersionState !== ImplementationVersionState.OUTDATED) return
+    // Is Safe version is outdated?
+    if (implementationVersionState !== ImplementationVersionState.OUTDATED || isNonCriticalUpdate(version)) return
 
     const isUnsupported = !isValidSafeVersion(version)
 
