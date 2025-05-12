@@ -165,7 +165,7 @@
     "jest": "^29.7.0",
     "jest-expo": "~53.0.4",
     "react-native-svg": "15.11.2",
-    "redux-devtools-expo-dev-plugin": "^1.0.0",
+    "redux-devtools-expo-dev-plugin": "^2.0.0",
     "storybook": "^8.4.6",
     "ts-node": "^10.9.2",
     "typescript": "~5.8.3",
