@@ -30,8 +30,10 @@ import { useSanctionedAddress } from '@/hooks/useSanctionedAddress'
 import BlockedAddress from '@/components/common/BlockedAddress'
 import { isSafePassApp } from '@/features/walletconnect/services/utils'
 import { BRAND_NAME } from '@/config/constants'
+import { AppRoutes } from '@/config/routes'
 
 const UNKNOWN_APP_NAME = 'Unknown Safe App'
+const NON_QUEUE_BAR_ROUTES = [AppRoutes.bridge]
 
 type AppFrameProps = {
   appUrl: string
@@ -55,7 +57,8 @@ const AppFrame = ({ appUrl, allowedFeaturesList, safeAppFromManifest, isNativeEm
     dismissQueueBar,
     transactions,
   } = useTransactionQueueBarState()
-  const queueBarVisible = transactions.results.length > 0 && !queueBarDismissed
+  const queueBarVisible =
+    transactions.results.length > 0 && !queueBarDismissed && !NON_QUEUE_BAR_ROUTES.includes(router.pathname)
   const [remoteApp] = useSafeAppFromBackend(appUrl, safe.chainId)
   const { thirdPartyCookiesDisabled, setThirdPartyCookiesDisabled } = useThirdPartyCookies()
   const { iframeRef, appIsLoading, isLoadingSlow, setAppIsLoading } = useAppIsLoading()
