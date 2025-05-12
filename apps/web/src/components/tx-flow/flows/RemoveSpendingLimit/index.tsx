@@ -9,7 +9,7 @@ import type ReviewTransaction from '@/components/tx/ReviewTransactionV2'
 const RemoveSpendingLimitFlow = ({ spendingLimit }: { spendingLimit: SpendingLimitState }) => {
   const ReviewTransactionComponent = useMemo<typeof ReviewTransaction>(
     () =>
-      function ReviewCancelRecovery(props) {
+      function ReviewRemoveSpendingLimit(props) {
         return <RemoveSpendingLimitReview params={spendingLimit} {...props} />
       },
     [spendingLimit],
