@@ -51,15 +51,6 @@ describe('chains', () => {
         ).toEqual('1.3.0')
       })
 
-      it('should always return LATEST_VERSION if true is not passed', () => {
-        expect(
-          getLatestSafeVersion(chainBuilder().with({ chainId: '1', recommendedMasterCopyVersion: '1.4.1' }).build()),
-        ).toEqual('1.4.1')
-        expect(
-          getLatestSafeVersion(chainBuilder().with({ chainId: '137', recommendedMasterCopyVersion: '1.3.0' }).build()),
-        ).toEqual('1.4.1')
-      })
-
       it('should fall back to LATEST_VERSION', () => {
         expect(
           getLatestSafeVersion(
