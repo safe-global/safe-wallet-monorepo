@@ -46,6 +46,10 @@ export const initialState: SettingsState = {
 
   hideSuspiciousTransactions: true,
 
+  // The `shortName` object contains settings related to short name interactions.
+  // The `copy` setting determines if the short name can be copied, while the `qr` setting
+  // determines if a QR code for the short name is displayed. Both are disabled by default
+  // for consistency and to avoid unintended behavior.
   shortName: {
     copy: false,
     qr: false,
