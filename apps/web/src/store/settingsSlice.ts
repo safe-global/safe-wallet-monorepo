@@ -47,8 +47,8 @@ export const initialState: SettingsState = {
   hideSuspiciousTransactions: true,
 
   shortName: {
-    copy: true,
-    qr: true,
+    copy: false,
+    qr: false,
   },
   theme: {},
   env: {
