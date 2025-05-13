@@ -1,0 +1,1 @@
+export { StakingTxDepositCard } from './StakingTxDepositCard'
