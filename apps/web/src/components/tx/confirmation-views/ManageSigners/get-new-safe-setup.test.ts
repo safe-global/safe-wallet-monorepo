@@ -98,25 +98,25 @@ describe('getNewSafeSetup', () => {
       newOwners: [prevOwner, checksumAddress(ownerToAdd)],
       newThreshold: safe.threshold,
     })
+  })
 
-    it('should return new owners/threshold for changeThreshold', () => {
-      const thresholdToSet = faker.number.int({ min: 1, max: 10 })
-      const safe = extendedSafeInfoBuilder().build()
-      const txInfo = txInfoBuilder().build()
-      const txData = {
-        hexData: safeInterface.encodeFunctionData('changeThreshold', [thresholdToSet]),
-      } as TransactionDetails['txData']
+  it('should return new owners/threshold for changeThreshold', () => {
+    const thresholdToSet = faker.number.int({ min: 1, max: 10 })
+    const safe = extendedSafeInfoBuilder().build()
+    const txInfo = txInfoBuilder().build()
+    const txData = {
+      hexData: safeInterface.encodeFunctionData('changeThreshold', [thresholdToSet]),
+    } as TransactionDetails['txData']
 
-      const result = getNewSafeSetup({
-        txInfo,
-        txData,
-        safe,
-      })
+    const result = getNewSafeSetup({
+      txInfo,
+      txData,
+      safe,
+    })
 
-      expect(result).toEqual({
-        newOwners: safe.owners.map((owner) => owner.value),
-        newThreshold: thresholdToSet,
-      })
+    expect(result).toEqual({
+      newOwners: safe.owners.map((owner) => owner.value),
+      newThreshold: thresholdToSet,
     })
   })
 
