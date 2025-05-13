@@ -3,7 +3,7 @@ import { Interface } from 'ethers'
 import { SENTINEL_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
 import type { SafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
 
-import { getOwnerStructureChangeTransaction } from '../transaction'
+import { getRecoveryProposalTransactions } from '../transaction'
 
 describe('transaction', () => {
   describe('getRecoveryTransactions', () => {
@@ -33,7 +33,7 @@ describe('transaction', () => {
 
             const newOwners = [{ value: newOwner1 }]
 
-            const transactions = getOwnerStructureChangeTransaction({ safe, newThreshold: oldThreshold, newOwners })
+            const transactions = getRecoveryProposalTransactions({ safe, newThreshold: oldThreshold, newOwners })
 
             expect(transactions).toHaveLength(1)
 
@@ -66,7 +66,7 @@ describe('transaction', () => {
 
             const newOwners = [{ value: newOwner1 }, { value: newOwner2 }, { value: newOwner3 }]
 
-            const transactions = getOwnerStructureChangeTransaction({ safe, newThreshold: oldThreshold, newOwners })
+            const transactions = getRecoveryProposalTransactions({ safe, newThreshold: oldThreshold, newOwners })
 
             expect(transactions).toHaveLength(3)
 
@@ -103,7 +103,7 @@ describe('transaction', () => {
 
           const newOwners = [{ value: newOwner1 }, { value: newOwner2 }, { value: newOwner3 }]
 
-          const transactions = getOwnerStructureChangeTransaction({ safe, newThreshold, newOwners })
+          const transactions = getRecoveryProposalTransactions({ safe, newThreshold, newOwners })
 
           expect(transactions).toHaveLength(4)
 
@@ -136,7 +136,7 @@ describe('transaction', () => {
 
             const newOwners = [{ value: oldOwner1 }]
 
-            const transactions = getOwnerStructureChangeTransaction({ safe, newThreshold: oldThreshold, newOwners })
+            const transactions = getRecoveryProposalTransactions({ safe, newThreshold: oldThreshold, newOwners })
 
             expect(transactions).toHaveLength(0)
 
@@ -164,7 +164,7 @@ describe('transaction', () => {
 
             const newOwners = [{ value: newOwner1 }, { value: newOwner2 }, { value: newOwner3 }]
 
-            const transactions = getOwnerStructureChangeTransaction({ safe, newThreshold: oldThreshold, newOwners })
+            const transactions = getRecoveryProposalTransactions({ safe, newThreshold: oldThreshold, newOwners })
 
             expect(transactions).toHaveLength(2)
 
@@ -199,7 +199,7 @@ describe('transaction', () => {
 
           const newOwners = [{ value: newOwner1 }, { value: newOwner2 }, { value: oldOwner3 }]
 
-          const transactions = getOwnerStructureChangeTransaction({ safe, newThreshold, newOwners })
+          const transactions = getRecoveryProposalTransactions({ safe, newThreshold, newOwners })
 
           expect(transactions).toHaveLength(3)
 
@@ -232,7 +232,7 @@ describe('transaction', () => {
 
         const newOwners = [{ value: oldOwner1 }, { value: oldOwner2 }, { value: oldOwner3 }]
 
-        const transactions = getOwnerStructureChangeTransaction({ safe, newThreshold, newOwners })
+        const transactions = getRecoveryProposalTransactions({ safe, newThreshold, newOwners })
 
         expect(transactions).toHaveLength(1)
 
@@ -263,7 +263,7 @@ describe('transaction', () => {
 
             const newOwners = [{ value: newOwner1 }, { value: newOwner2 }, { value: newOwner3 }]
 
-            const transactions = getOwnerStructureChangeTransaction({ safe, newThreshold: oldThreshold, newOwners })
+            const transactions = getRecoveryProposalTransactions({ safe, newThreshold: oldThreshold, newOwners })
 
             expect(transactions).toHaveLength(3)
 
@@ -297,7 +297,7 @@ describe('transaction', () => {
 
             const newOwners = [{ value: newOwner1 }, { value: newOwner2 }, { value: newOwner3 }]
 
-            const transactions = getOwnerStructureChangeTransaction({ safe, newThreshold: oldThreshold, newOwners })
+            const transactions = getRecoveryProposalTransactions({ safe, newThreshold: oldThreshold, newOwners })
 
             expect(transactions).toHaveLength(3)
 
@@ -333,7 +333,7 @@ describe('transaction', () => {
 
           const newOwners = [{ value: newOwner1 }, { value: newOwner2 }, { value: newOwner3 }]
 
-          const transactions = getOwnerStructureChangeTransaction({ safe, newThreshold, newOwners })
+          const transactions = getRecoveryProposalTransactions({ safe, newThreshold, newOwners })
 
           expect(transactions).toHaveLength(3)
 
@@ -367,7 +367,7 @@ describe('transaction', () => {
 
           const newOwners = [{ value: oldOwner1 }, { value: newOwner2 }, { value: newOwner3 }]
 
-          const transactions = getOwnerStructureChangeTransaction({ safe, newThreshold: oldThreshold, newOwners })
+          const transactions = getRecoveryProposalTransactions({ safe, newThreshold: oldThreshold, newOwners })
 
           expect(transactions).toHaveLength(2)
 
@@ -404,7 +404,7 @@ describe('transaction', () => {
             { value: newOwner5 },
           ]
 
-          const transactions = getOwnerStructureChangeTransaction({ safe, newThreshold, newOwners })
+          const transactions = getRecoveryProposalTransactions({ safe, newThreshold, newOwners })
 
           expect(transactions).toHaveLength(5)
 
@@ -450,7 +450,7 @@ describe('transaction', () => {
 
           const newOwners = [{ value: newOwner1 }, { value: newOwner2 }]
 
-          const transactions = getOwnerStructureChangeTransaction({
+          const transactions = getRecoveryProposalTransactions({
             safe,
             newThreshold: oldThreshold,
             newOwners,
@@ -489,7 +489,7 @@ describe('transaction', () => {
 
           const newOwners = [{ value: newOwner1 }, { value: newOwner2 }]
 
-          const transactions = getOwnerStructureChangeTransaction({ safe, newThreshold, newOwners })
+          const transactions = getRecoveryProposalTransactions({ safe, newThreshold, newOwners })
 
           expect(transactions).toHaveLength(3)
 
@@ -524,7 +524,7 @@ describe('transaction', () => {
 
           const newOwners = [{ value: oldOwner1 }, { value: newOwner1 }]
 
-          const transactions = getOwnerStructureChangeTransaction({ safe, newThreshold: oldThreshold, newOwners })
+          const transactions = getRecoveryProposalTransactions({ safe, newThreshold: oldThreshold, newOwners })
 
           expect(transactions).toHaveLength(2)
 
@@ -553,7 +553,7 @@ describe('transaction', () => {
 
           const newOwners = [{ value: oldOwner1 }, { value: newOwner1 }]
 
-          const transactions = getOwnerStructureChangeTransaction({ safe, newThreshold, newOwners })
+          const transactions = getRecoveryProposalTransactions({ safe, newThreshold, newOwners })
 
           expect(transactions).toHaveLength(2)
 

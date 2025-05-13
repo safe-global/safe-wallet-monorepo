@@ -5,7 +5,7 @@ import { useContext, useEffect, useState } from 'react'
 import type { ReactElement } from 'react'
 
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { getOwnerStructureChangeTransaction } from '@/features/recovery/services/transaction'
+import { getRecoveryProposalTransactions } from '@/features/recovery/services/transaction'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import ConfirmationTitle, { ConfirmationTitleTypes } from '@/components/tx/SignOrExecuteForm/ConfirmationTitle'
 import TxChecks from '@/components/tx-flow/features/TxChecks/TxChecks'
@@ -66,7 +66,7 @@ export function RecoverAccountFlowReview({ params }: { params: RecoverAccountFlo
   const newOwners = params[RecoverAccountFlowFields.owners]
 
   useEffect(() => {
-    const transactions = getOwnerStructureChangeTransaction({
+    const transactions = getRecoveryProposalTransactions({
       safe,
       newThreshold,
       newOwners,
