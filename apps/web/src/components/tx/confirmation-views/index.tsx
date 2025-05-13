@@ -8,6 +8,7 @@ import {
   isOnChainConfirmationTxData,
   isSafeMigrationTxData,
   isSafeUpdateTxData,
+  isSignerManagement,
   isSwapOrderTxInfo,
   isTwapOrderTxInfo,
 } from '@/utils/transaction-guards'
@@ -46,6 +47,9 @@ const getConfirmationViewComponent = ({
   txData,
   txFlow,
 }: NarrowConfirmationViewProps & { txFlow?: ReactElement }) => {
+  // Prevent collision with ChangeThreshold/SettingsChange
+  if (txFlow && isSignerManagement(txFlow)) return <></>
+
   if (isChangeThresholdView(txInfo)) return <ChangeThreshold txInfo={txInfo} />
 
   if (isConfirmBatchView(txFlow)) return <BatchTransactions />
