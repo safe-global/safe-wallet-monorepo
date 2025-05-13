@@ -91,6 +91,14 @@ export const makeTxFromDetails = (txDetails: TransactionDetails): Transaction =>
   }
 }
 
+export const getSafeTxHashFromTxId = (txId: string) => {
+  if (txId.startsWith('multisig_')) {
+    return txId.slice(-66)
+  }
+
+  return
+}
+
 const getSignatures = (confirmations: Record<string, string>) => {
   return Object.entries(confirmations)
     .filter(([, signature]) => Boolean(signature))
