@@ -29,7 +29,7 @@ const useLoadBalances = () => {
   const isCounterfactual = !safe.deployed
 
   let {
-    data: balances,
+    currentData: balances,
     isLoading: loading,
     error: errorStr,
   } = useBalancesGetBalancesV1Query(
