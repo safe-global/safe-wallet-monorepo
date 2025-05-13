@@ -1,5 +1,4 @@
 import { useCallback, useEffect } from 'react'
-import semverSatisfies from 'semver/functions/satisfies'
 import { showNotification, closeNotification } from '@/store/notificationsSlice'
 import { ImplementationVersionState } from '@safe-global/safe-gateway-typescript-sdk'
 import useSafeInfo from './useSafeInfo'
@@ -12,6 +11,7 @@ import useIsSafeOwner from './useIsSafeOwner'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import { isValidSafeVersion } from '@safe-global/utils/services/contracts/utils'
+import { isNonCriticalUpdate } from '@safe-global/utils/utils/chains'
 
 const CLI_LINK = {
   href: 'https://github.com/5afe/safe-cli',
@@ -26,14 +26,9 @@ type DismissedUpdateNotifications = {
 
 const DISMISS_NOTIFICATION_KEY = 'dismissUpdateSafe'
 const OUTDATED_VERSION_KEY = 'safe-outdated-version'
-const MIN_SAFE_VERSION = '1.3.0'
 
 const isUpdateSafeNotification = (groupKey: string) => {
   return groupKey === OUTDATED_VERSION_KEY
-}
-
-const isNonCriticalUpdate = (version?: string | null) => {
-  return version && semverSatisfies(version, `>= ${MIN_SAFE_VERSION}`)
 }
 
 /**

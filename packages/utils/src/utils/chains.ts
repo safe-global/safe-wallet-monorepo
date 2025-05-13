@@ -43,6 +43,8 @@ export enum FEATURES {
   SPACES = 'SPACES',
 }
 
+const MIN_SAFE_VERSION = '1.3.0'
+
 export const hasFeature = (chain: Pick<Chain, 'features'>, feature: FEATURES): boolean => {
   return (chain.features as string[]).includes(feature)
 }
@@ -72,4 +74,8 @@ export const getLatestSafeVersion = (
   } else {
     return latestSafeVersion as SafeVersion
   }
+}
+
+export const isNonCriticalUpdate = (version?: string | null) => {
+  return version && semverSatisfies(version, `>= ${MIN_SAFE_VERSION}`)
 }
