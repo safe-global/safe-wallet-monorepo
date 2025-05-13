@@ -8316,6 +8316,7 @@ __metadata:
   dependencies:
     "@types/jest": "npm:^29.5.14"
     jest: "npm:^29.7.0"
+    redux-persist: "npm:^6.0.0"
     ts-node: "npm:^10.9.2"
   languageName: unknown
   linkType: soft
