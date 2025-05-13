@@ -9,7 +9,7 @@ import { type SafeState, type AddressInfo } from '@safe-global/store/gateway/AUT
 import type { RecoveryQueueItem } from '@/features/recovery/services/recovery-state'
 import type { Provider } from 'ethers'
 
-export function getRecoveryProposalTransactions({
+export function getOwnerStructureChangeTransaction({
   safe,
   newThreshold,
   newOwners,
