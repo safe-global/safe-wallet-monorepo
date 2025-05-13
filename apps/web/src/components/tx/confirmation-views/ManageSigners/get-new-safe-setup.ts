@@ -23,10 +23,6 @@ export function getNewSafeSetup({
   let newThreshold = safe.threshold
 
   for (const data of _getTransactionsData(txInfo, txData)) {
-    if (!data) {
-      continue
-    }
-
     const decodedData = safeInterface.parseTransaction({ data })
 
     if (!decodedData) {
