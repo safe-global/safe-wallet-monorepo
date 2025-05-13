@@ -8,7 +8,6 @@ import {
   isOnChainConfirmationTxData,
   isSafeMigrationTxData,
   isSafeUpdateTxData,
-  isSignerManagement,
   isSwapOrderTxInfo,
   isTwapOrderTxInfo,
 } from '@/utils/transaction-guards'
@@ -18,7 +17,7 @@ import SettingsChange from './SettingsChange'
 import ChangeThreshold from './ChangeThreshold'
 import BatchTransactions from './BatchTransactions'
 import { TxModalContext } from '@/components/tx-flow'
-import { isSettingsChangeView, isChangeThresholdView, isConfirmBatchView } from './utils'
+import { isSettingsChangeView, isChangeThresholdView, isConfirmBatchView, isManageSignersView } from './utils'
 import { OnChainConfirmation } from '@/components/transactions/TxDetails/TxData/NestedTransaction/OnChainConfirmation'
 import { ExecTransaction } from '@/components/transactions/TxDetails/TxData/NestedTransaction/ExecTransaction'
 import { type ReactElement } from 'react'
@@ -31,6 +30,7 @@ import { isNestedSafeCreation } from '@/utils/nested-safes'
 import Summary from '@/components/transactions/TxDetails/Summary'
 import TxData from '@/components/transactions/TxDetails/TxData'
 import { isMultiSendCalldata } from '@/utils/transaction-calldata'
+import { ManageSigners } from './ManageSigners'
 
 type ConfirmationViewProps = {
   txDetails?: TransactionDetails
@@ -47,8 +47,7 @@ const getConfirmationViewComponent = ({
   txData,
   txFlow,
 }: NarrowConfirmationViewProps & { txFlow?: ReactElement }) => {
-  // Prevent collision with ChangeThreshold/SettingsChange
-  if (txFlow && isSignerManagement(txFlow)) return <></>
+  if (txData && isManageSignersView(txInfo, txData)) return <ManageSigners txInfo={txInfo} txData={txData} />
 
   if (isChangeThresholdView(txInfo)) return <ChangeThreshold txInfo={txInfo} />
 
