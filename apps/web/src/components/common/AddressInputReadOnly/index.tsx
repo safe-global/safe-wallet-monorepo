@@ -5,12 +5,10 @@ import css from './styles.module.css'
 
 const AddressInputReadOnly = ({
   address,
-  name,
   showPrefix,
   chainId,
 }: {
   address: string
-  name?: string
   showPrefix?: boolean
   chainId?: string
 }): ReactElement => {
@@ -24,7 +22,6 @@ const AddressInputReadOnly = ({
             copyAddress={false}
             chainId={chainId}
             showPrefix={showPrefix}
-            spaceName={name}
           />
         </Typography>
       </InputAdornment>
