@@ -2,7 +2,7 @@ import { useContext, type SyntheticEvent } from 'react'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { useTxActions } from '@/components/tx/SignOrExecuteForm/hooks'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
-import { isDelegateCall } from '@/services/tx/tx-sender/sdk'
+import { isDelegateCall as checkIsDelegateCall } from '@/services/tx/tx-sender/sdk'
 import { TxModalContext } from '@/components/tx-flow'
 import { TxFlowContext } from '../../TxFlowProvider'
 import useIsCounterfactualSafe from '@/features/counterfactual/hooks/useIsCounterfactualSafe'
@@ -26,16 +26,8 @@ const Batching = ({
   const { setTxFlow } = useContext(TxModalContext)
   const { addToBatch } = useTxActions()
   const { safeTx } = useContext(SafeTxContext)
-  const {
-    isBatchable: isBatchableTxFlowContext,
-    isSubmitDisabled,
-    setIsSubmitLoading,
-    isSubmitLoading,
-    setSubmitError,
-    setIsRejectedByUser,
-  } = useContext(TxFlowContext)
-
-  const isBatchable = isBatchableTxFlowContext && !!safeTx && !isDelegateCall(safeTx)
+  const { isSubmitDisabled, setIsSubmitLoading, isSubmitLoading, setSubmitError, setIsRejectedByUser } =
+    useContext(TxFlowContext)
 
   const handleSubmit = async (e: SyntheticEvent) => {
     e.preventDefault()
@@ -78,9 +70,8 @@ const Batching = ({
           selected={slotId}
           onChange={({ id }) => onChange(id)}
           options={options}
-          disabled={isSubmitDisabled || !isBatchable || disabled}
+          disabled={isSubmitDisabled || disabled}
           loading={isSubmitLoading}
-          tooltip={!isBatchable ? `Cannot batch this type of transaction` : undefined}
         />
       </TxCardActions>
     </Box>
@@ -89,10 +80,21 @@ const Batching = ({
 
 const useShouldRegisterSlot = () => {
   const isCounterfactualSafe = useIsCounterfactualSafe()
-  const { isBatch, isProposing, willExecuteThroughRole, isCreation } = useContext(TxFlowContext)
+  const { isBatch, isProposing, willExecuteThroughRole, isCreation, isBatchable } = useContext(TxFlowContext)
   const isOwner = useIsSafeOwner()
+  const { safeTx } = useContext(SafeTxContext)
+  const isDelegateCall = safeTx ? checkIsDelegateCall(safeTx) : false
 
-  return isOwner && isCreation && !isBatch && !isCounterfactualSafe && !willExecuteThroughRole && !isProposing
+  return (
+    isOwner &&
+    isCreation &&
+    !isBatch &&
+    !isCounterfactualSafe &&
+    !willExecuteThroughRole &&
+    !isProposing &&
+    !isDelegateCall &&
+    isBatchable
+  )
 }
 
 const BatchingSlot = withSlot({
