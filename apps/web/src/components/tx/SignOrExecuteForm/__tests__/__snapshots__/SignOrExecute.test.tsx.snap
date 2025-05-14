@@ -268,11 +268,11 @@ exports[`SignOrExecute should display a confirmation screen 1`] = `
                       <hr
                         class="MuiDivider-root MuiDivider-fullWidth css-mnly1g-MuiDivider-root"
                       />
-                      <h5
-                        class="MuiTypography-root MuiTypography-h5 css-f8kb98-MuiTypography-root"
+                      <h6
+                        class="MuiTypography-root MuiTypography-subtitle2 css-1ckyqq0-MuiTypography-root"
                       >
                         Advanced details
-                      </h5>
+                      </h6>
                       <p
                         class="MuiTypography-root MuiTypography-body2 css-gkag80-MuiTypography-root"
                       >
