@@ -4,7 +4,6 @@ import '@/src/platform/intl-polyfills'
 import { Stack } from 'expo-router'
 import 'react-native-reanimated'
 import { SafeThemeProvider } from '@/src/theme/provider/safeTheme'
-import { useEffect } from 'react'
 import { Provider } from 'react-redux'
 import { persistor, store } from '@/src/store'
 import { PersistGate } from 'redux-persist/integration/react'
@@ -42,20 +41,16 @@ const HooksInitializer = () => {
   return null
 }
 
+persistor.subscribe(() => {
+  const { bootstrapped } = persistor.getState()
+  if (bootstrapped) {
+    // The chain config is persisted in the store, but might be outdated.
+    store.dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfig.initiate(undefined, { forceRefetch: true }))
+  }
+})
+
 function RootLayout() {
   useScreenTracking()
-
-  useEffect(() => {
-    const persistorSubscription = persistor.subscribe(() => {
-      const { bootstrapped } = persistor.getState()
-      if (bootstrapped) {
-        // The chain config is persisted in the store, but might be outdated.
-        store.dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfig.initiate(undefined, { forceRefetch: true }))
-      }
-    })
-
-    return () => persistorSubscription()
-  }, [])
 
   return (
     <GestureHandlerRootView>
