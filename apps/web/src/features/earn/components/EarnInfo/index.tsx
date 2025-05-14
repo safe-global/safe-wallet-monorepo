@@ -1,10 +1,10 @@
-import { Card, Box, Grid2 as Grid, Typography, Button } from '@mui/material'
+import { Card, Box, Grid2 as Grid, Typography, Button, SvgIcon } from '@mui/material'
 import Image from 'next/image'
 import EarnIllustrationLight from '@/public/images/common/earn-illustration-light.png'
-import { useDarkMode } from '@/hooks/useDarkMode'
 
-import css from '@/features/earn/components/EarnDashboardBanner/styles.module.css'
+import css from './styles.module.css'
 import { EarnPoweredBy } from '@/features/earn/components/EarnDashboardBanner'
+import CheckIcon from '@/public/images/common/check.svg'
 
 const EarnInfo = ({ onGetStarted }: { onGetStarted: () => void }) => {
   return (
@@ -21,7 +21,7 @@ const EarnInfo = ({ onGetStarted }: { onGetStarted: () => void }) => {
             </Grid>
 
             <Grid size={{ xs: 12, sm: 6 }} mb={1} zIndex={2} sx={{ width: '100% !important' }}>
-              <Typography variant="body1" className={css.content}>
+              <Typography variant="body1" sx={{ maxWidth: '550px' }}>
                 Earn rewards on your stablecoins, wstETH, ETH, and WBTC by lending with Kiln widget into the Morpho
                 protocol.
               </Typography>
@@ -43,6 +43,61 @@ const EarnInfo = ({ onGetStarted }: { onGetStarted: () => void }) => {
             sx={{ backgroundColor: 'background.main', alignItems: 'center', justifyContent: 'center' }}
           >
             <Image src={EarnIllustrationLight} alt="Earn illustration" width={239} height={239} />
+          </Grid>
+        </Grid>
+      </Card>
+
+      <Typography variant="h2" mt={3} mb={2}>
+        What are your benefits?
+      </Typography>
+
+      <Card sx={{ p: 4 }}>
+        <Grid container spacing={3} flexWrap={{ sm: 'wrap', md: 'nowrap' }}>
+          <Grid size={{ sm: 4, md: 'grow' }}>
+            <Box className={css.benefitIcon}>
+              <SvgIcon component={CheckIcon} color="success" inheritViewBox fontSize="small" />
+            </Box>
+            <Typography fontWeight="bold" mb={0.5}>
+              Collect earnings every day
+            </Typography>
+            <Typography>Your balance keeps working for you</Typography>
+          </Grid>
+
+          <Grid size={{ sm: 4, md: 'grow' }}>
+            <Box className={css.benefitIcon}>
+              <SvgIcon component={CheckIcon} color="success" inheritViewBox fontSize="small" />
+            </Box>
+            Deposit stablecoins, ETH, WETH, WBTC or wstETH
+          </Grid>
+
+          <Grid size={{ sm: 4, md: 'grow' }}>
+            <Box className={css.benefitIcon}>
+              <SvgIcon component={CheckIcon} color="success" inheritViewBox fontSize="small" />
+            </Box>
+            <Typography fontWeight="bold" mb={0.5}>
+              Extra rewards
+            </Typography>
+            <Typography>Earn MORPHO tokens on top to get extra yield</Typography>
+          </Grid>
+
+          <Grid size={{ sm: 4, md: 'grow' }}>
+            <Box className={css.benefitIcon}>
+              <SvgIcon component={CheckIcon} color="success" inheritViewBox fontSize="small" />
+            </Box>
+            <Typography fontWeight="bold" mb={0.5}>
+              Cash out whenever you want
+            </Typography>
+            <Typography>Zero lock-ups, zero penalties</Typography>
+          </Grid>
+
+          <Grid size={{ sm: 4, md: 'grow' }}>
+            <Box className={css.benefitIcon}>
+              <SvgIcon component={CheckIcon} color="success" inheritViewBox fontSize="small" />
+            </Box>
+            <Typography fontWeight="bold" mb={0.5}>
+              Retain complete self-custody
+            </Typography>
+            <Typography>Your Safe, your crypto</Typography>
           </Grid>
         </Grid>
       </Card>
