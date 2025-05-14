@@ -76,7 +76,7 @@ const Summary = ({ safeTxData, txData, txInfo, txDetails, showMultisend = true }
       )}
 
       {showDetails && (
-        <Box mt={submittedAt ? 2 : 3}>
+        <Box mt={2}>
           <ColorCodedTxAccordion txInfo={txInfo} txData={txData}>
             <Box my={1}>
               <DecodedData txData={txData} toInfo={toInfo} />

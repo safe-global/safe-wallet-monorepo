@@ -33,7 +33,7 @@ const ReviewNftBatch = ({ onSubmit, children }: ReviewTransactionProps): ReactEl
     <ReviewTransaction onSubmit={onSubmit}>
       <SendToBlock address={data?.recipient || ''} />
 
-      <FieldsGrid title={`NFT${maybePlural(tokens)}:`}>
+      <FieldsGrid title={`NFT${maybePlural(tokens)}`}>
         <NftItems tokens={tokens} />
       </FieldsGrid>
 

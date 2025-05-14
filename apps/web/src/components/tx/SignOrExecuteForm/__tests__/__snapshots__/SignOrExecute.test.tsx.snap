@@ -97,7 +97,7 @@ exports[`SignOrExecute should display a confirmation screen 1`] = `
         </div>
       </div>
       <div
-        class="MuiBox-root css-178yklu"
+        class="MuiBox-root css-1yuhvjn"
       >
         <div
           class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiAccordion-root MuiAccordion-rounded MuiAccordion-gutters css-wrhbuy-MuiPaper-root-MuiAccordion-root"
@@ -333,7 +333,7 @@ exports[`SignOrExecute should display a confirmation screen 1`] = `
                         style="--Paper-shadow: none;"
                       >
                         <div
-                          class="MuiStack-root css-1sazv7p-MuiStack-root"
+                          class="MuiStack-root css-eh7dui-MuiStack-root"
                         >
                           <div
                             class="MuiStack-root css-1n46f6x-MuiStack-root"
@@ -372,28 +372,11 @@ exports[`SignOrExecute should display a confirmation screen 1`] = `
                             </div>
                           </div>
                           <div
-                            class="MuiBox-root css-a35v6e"
+                            class="MuiBox-root css-e0rnc0"
                           >
                             <div
                               class="MuiStack-root css-jfdv4h-MuiStack-root"
                             >
-                              <div
-                                class="MuiStack-root css-665wph-MuiStack-root"
-                              >
-                                <p
-                                  class="MuiTypography-root MuiTypography-body2 css-1korokw-MuiTypography-root"
-                                >
-                                  Primary type
-                                </p>
-                                <p
-                                  class="MuiTypography-root MuiTypography-body2 css-17vdyq3-MuiTypography-root"
-                                >
-                                  SafeTx
-                                </p>
-                              </div>
-                              <hr
-                                class="MuiDivider-root MuiDivider-fullWidth css-1facvfi-MuiDivider-root"
-                              />
                               <div
                                 class="MuiStack-root css-665wph-MuiStack-root"
                               >
