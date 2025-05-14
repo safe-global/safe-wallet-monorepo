@@ -9,40 +9,6 @@ import { DataRow } from '@/components/common/Table/DataRow'
 import ExternalLink from '@/components/common/ExternalLink'
 import IframeIcon from '@/components/common/IframeIcon'
 
-// TODO: Remove this once implementation is finished
-function ObjectViewer({ data }: { data: object }) {
-  // If it's not an object or array, just show its value
-  if (typeof data !== 'object' || data === null) {
-    return <span>{JSON.stringify(data)}</span>
-  }
-
-  // If it's an array, render each item
-  if (Array.isArray(data)) {
-    return (
-      <ul>
-        {data.map((item, index) => (
-          <li key={index}>
-            <ObjectViewer data={item} />
-          </li>
-        ))}
-      </ul>
-    )
-  }
-
-  // Otherwise, it's a non-null object
-  const entries = Object.entries(data)
-  return (
-    <div style={{ marginLeft: '1rem' }}>
-      {entries.map(([key, value]) => (
-        <div key={key} style={{ marginBottom: '0.5rem' }}>
-          <strong>{key}: </strong>
-          <ObjectViewer data={value} />
-        </div>
-      ))}
-    </div>
-  )
-}
-
 const AdditionalRewards = ({ txInfo }: { txInfo: VaultDepositTransactionInfo }) => {
   return (
     <Stack sx={{ border: '1px solid #ddd', borderRadius: '6px', padding: '12px', mt: 1 }}>
@@ -108,7 +74,11 @@ const ConfirmationHeader = ({ txInfo }: { txInfo: VaultDepositTransactionInfo })
 
           <Typography variant="h4" fontWeight="bold" component="div">
             {txInfo.tokenInfo ? (
-              <TokenAmount tokenSymbol={txInfo.tokenInfo.symbol} value={txInfo.value} />
+              <TokenAmount
+                tokenSymbol={txInfo.tokenInfo.symbol}
+                value={txInfo.value}
+                decimals={txInfo.tokenInfo.decimals}
+              />
             ) : (
               txInfo.value
             )}
@@ -152,6 +122,9 @@ const VaultDepositConfirmation = ({
 }) => {
   if (!txInfo.vaultInfo) return null // TODO: Workaround until new CGW changes are on prod
 
+  const annualReward = Number(txInfo.expectedAnnualReward).toFixed(0)
+  const monthlyReward = Number(txInfo.expectedMonthlyReward).toFixed(0)
+
   return (
     <>
       <DataTable
@@ -168,11 +141,19 @@ const VaultDepositConfirmation = ({
           </DataRow>,
 
           <DataRow key="Expected annual reward" title="Exp. annual reward">
-            <TokenAmount tokenSymbol={txInfo.tokenInfo.symbol} value={txInfo.expectedAnnualReward} />
+            <TokenAmount
+              tokenSymbol={txInfo.tokenInfo.symbol}
+              value={annualReward}
+              decimals={txInfo.tokenInfo.decimals}
+            />
           </DataRow>,
 
           <DataRow key="Expected monthly reward" title="Exp. monthly reward">
-            <TokenAmount tokenSymbol={txInfo.tokenInfo.symbol} value={txInfo.expectedMonthlyReward} />
+            <TokenAmount
+              tokenSymbol={txInfo.tokenInfo.symbol}
+              value={monthlyReward}
+              decimals={txInfo.tokenInfo.decimals}
+            />
           </DataRow>,
 
           <DataRow key="Widget fee" title="Widget fee">
