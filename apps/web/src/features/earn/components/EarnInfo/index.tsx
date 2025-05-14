@@ -1,31 +1,19 @@
-import { Card, Box, Grid2 as Grid, Stack, Typography, SvgIcon, Button } from '@mui/material'
+import { Card, Box, Grid2 as Grid, Typography, Button } from '@mui/material'
 import Image from 'next/image'
 import EarnIllustrationLight from '@/public/images/common/earn-illustration-light.png'
 import { useDarkMode } from '@/hooks/useDarkMode'
-import Kiln from '@/public/images/common/kiln.svg'
-import classNames from 'classnames'
+
 import css from '@/features/earn/components/EarnDashboardBanner/styles.module.css'
+import { EarnPoweredBy } from '@/features/earn/components/EarnDashboardBanner'
 
 const EarnInfo = ({ onGetStarted }: { onGetStarted: () => void }) => {
-  const isDarkMode = useDarkMode()
-
   return (
     <Box m={3}>
       <Card sx={{ p: 4 }}>
         <Grid container>
           <Grid container size={{ xs: 12, md: 7 }} rowSpacing={2}>
             <Grid size={{ xs: 12 }} mb={1} zIndex={2}>
-              <Stack spacing={0.5} direction="row">
-                <Typography variant="overline" color="primary.light">
-                  Powered by
-                </Typography>
-                <SvgIcon
-                  component={Kiln}
-                  inheritViewBox
-                  color="border"
-                  className={classNames(css.kilnIcon, { [css.kilnIconDarkMode]: isDarkMode })}
-                />
-              </Stack>
+              <EarnPoweredBy />
             </Grid>
 
             <Grid size={{ xs: 12 }} zIndex={2} width={1}>
