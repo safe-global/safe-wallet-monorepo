@@ -36,6 +36,16 @@
     fill: var(--color-primary-light);
 }
 
+.morphoIcon {
+    height: 16px;
+    width: inherit;
+    margin-top: -2px !important;
+}
+
+.morphoIconDarkMode path {
+    fill: var(--color-primary-light);
+}
+
 .gradientText {
     background: linear-gradient(225deg, #5fddff 12.5%, #12ff80 88.07%);
     background-clip: text;

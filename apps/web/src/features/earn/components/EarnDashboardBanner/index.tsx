@@ -1,6 +1,7 @@
 import { Typography, Card, SvgIcon, Grid2 as Grid, Button, Box, Stack } from '@mui/material'
 import css from './styles.module.css'
 import Kiln from '@/public/images/common/kiln.svg'
+import Morpho from '@/public/images/common/morpho.svg'
 import EarnIllustrationLight from '@/public/images/common/earn-illustration-light.png'
 import classNames from 'classnames'
 import { useDarkMode } from '@/hooks/useDarkMode'
@@ -11,6 +12,30 @@ import Image from 'next/image'
 import { OVERVIEW_EVENTS, trackEvent } from '@/services/analytics'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import useIsEarnBannerEnabled from '@/features/earn/hooks/useIsEarnBannerEnabled'
+
+export const EarnPoweredBy = () => {
+  const isDarkMode = useDarkMode()
+
+  return (
+    <Stack spacing={1} direction="row">
+      <Typography variant="overline" color="primary.light">
+        Powered by
+      </Typography>
+      <SvgIcon
+        component={Morpho}
+        inheritViewBox
+        color="border"
+        className={classNames(css.morphoIcon, { [css.kilnIconDarkMode]: isDarkMode })}
+      />
+      <SvgIcon
+        component={Kiln}
+        inheritViewBox
+        color="border"
+        className={classNames(css.kilnIcon, { [css.kilnIconDarkMode]: isDarkMode })}
+      />
+    </Stack>
+  )
+}
 
 const hideLocalStorageKey = 'hideEarnDashboardBanner'
 
@@ -47,17 +72,7 @@ const EarnDashboardBanner = () => {
 
       <Grid container rowSpacing={2}>
         <Grid size={{ xs: 12 }} mb={1} zIndex={2}>
-          <Stack spacing={0.5} direction="row">
-            <Typography variant="overline" color="primary.light">
-              Powered by
-            </Typography>
-            <SvgIcon
-              component={Kiln}
-              inheritViewBox
-              color="border"
-              className={classNames(css.kilnIcon, { [css.kilnIconDarkMode]: isDarkMode })}
-            />
-          </Stack>
+          <EarnPoweredBy />
         </Grid>
 
         <Grid size={{ xs: 12 }} zIndex={2}>
