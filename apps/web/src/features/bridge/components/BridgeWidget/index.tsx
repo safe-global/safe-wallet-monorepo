@@ -45,7 +45,7 @@ export function _getAppData(isDarkMode: boolean, chain: ChainInfo): SafeAppDataW
   return {
     ...getEmptySafeApp(),
     name: 'Bridge',
-    iconUrl: '/images/common/bridge.svg',
+    iconUrl: isDarkMode ? '/images/common/safe-bridge-dark.svg' : '/images/common/safe-bridge.svg',
     chainIds: [chain.chainId],
     url: appUrl.toString(),
   }
