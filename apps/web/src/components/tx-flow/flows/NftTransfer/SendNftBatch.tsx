@@ -58,11 +58,9 @@ const NftItem = ({ image, name, description }: { image: string; name: string; de
 
 export const NftItems = ({ tokens }: { tokens: SafeCollectibleResponse[] }) => {
   return (
-    <Box
+    <Stack
       data-testid="nft-item-list"
       sx={{
-        display: 'flex',
-        flexDirection: 'column',
         gap: 2,
         overflow: 'auto',
         maxHeight: '20vh',
@@ -77,7 +75,7 @@ export const NftItems = ({ tokens }: { tokens: SafeCollectibleResponse[] }) => {
           description={`Token ID: ${token.id}${token.name ? ` - ${token.name}` : ''}`}
         />
       ))}
-    </Box>
+    </Stack>
   )
 }
 
