@@ -18,6 +18,7 @@ import EthHashInfo from '@/components/common/EthHashInfo'
 import { SafeTxContext } from '../../SafeTxProvider'
 import ReviewTransaction, { type ReviewTransactionProps } from '@/components/tx/ReviewTransactionV2'
 import { TxFlowContext, type TxFlowContextType } from '../../TxFlowProvider'
+import TxDetailsRow from '@/components/tx/ConfirmTxDetails/TxDetailsRow'
 
 export const ReviewSpendingLimit = ({ onSubmit, children }: ReviewTransactionProps) => {
   const { data } = useContext<TxFlowContextType<NewSpendingLimitFlowProps>>(TxFlowContext)
@@ -113,103 +114,57 @@ export const ReviewSpendingLimit = ({ onSubmit, children }: ReviewTransactionPro
           )}
         </SendAmountBlock>
       )}
-      <Grid
-        container
-        sx={{
-          gap: 1,
-          alignItems: 'center',
-        }}
-      >
-        <Grid item md>
-          <Typography
-            variant="body2"
-            sx={{
-              color: 'text.secondary',
-            }}
-          >
-            Beneficiary
-          </Typography>
-        </Grid>
 
-        <Grid data-testid="beneficiary-address" item md={10}>
-          <EthHashInfo
-            address={data?.beneficiary || ''}
-            shortAddress={false}
-            hasExplorer
-            showCopyButton
-            showAvatar={false}
-          />
-        </Grid>
-      </Grid>
-      <Grid
-        container
-        sx={{
-          gap: 1,
-          alignItems: 'center',
-        }}
-      >
-        <Grid item md>
-          <Typography
-            variant="body2"
-            sx={{
-              color: 'text.secondary',
-            }}
-          >
-            Reset time
-          </Typography>
-        </Grid>
-        <Grid item md={10}>
-          {existingSpendingLimit ? (
-            <>
-              <SpendingLimitLabel
-                label={
-                  <>
-                    {existingSpendingLimit.resetTimeMin !== data?.resetTime && (
-                      <>
-                        <Typography
-                          data-testid="old-reset-time"
-                          color="error"
-                          component="span"
-                          sx={{
-                            display: 'inline',
-                            textDecoration: 'line-through',
-                          }}
-                        >
-                          {oldResetTime}
-                        </Typography>
-                        {' → '}
-                      </>
-                    )}
-                    <Typography
-                      component="span"
-                      sx={{
-                        display: 'inline',
-                      }}
-                    >
-                      {resetTime}
-                    </Typography>
-                  </>
-                }
-                isOneTime={existingSpendingLimit.resetTimeMin === '0'}
-              />
-            </>
-          ) : (
+      <TxDetailsRow label="Beneficiary" grid>
+        <EthHashInfo
+          data-testid="beneficiary-address"
+          address={data?.beneficiary || ''}
+          shortAddress={false}
+          hasExplorer
+          showCopyButton
+          showAvatar={false}
+        />
+      </TxDetailsRow>
+
+      <TxDetailsRow label="Reset time" grid>
+        {existingSpendingLimit ? (
+          <>
             <SpendingLimitLabel
-              data-testid="spending-limit-label"
-              label={resetTime || 'One-time spending limit'}
-              isOneTime={!!resetTime && isOneTime}
+              label={
+                <>
+                  {existingSpendingLimit.resetTimeMin !== data?.resetTime && (
+                    <>
+                      <Typography
+                        data-testid="old-reset-time"
+                        color="error"
+                        component="span"
+                        sx={{
+                          textDecoration: 'line-through',
+                        }}
+                      >
+                        {oldResetTime}
+                      </Typography>
+                      {' → '}
+                    </>
+                  )}
+                  <Typography component="span">{resetTime}</Typography>
+                </>
+              }
+              isOneTime={existingSpendingLimit.resetTimeMin === '0'}
             />
-          )}
-        </Grid>
-      </Grid>
+          </>
+        ) : (
+          <SpendingLimitLabel
+            data-testid="spending-limit-label"
+            label={resetTime || 'One-time spending limit'}
+            isOneTime={!!resetTime && isOneTime}
+          />
+        )}
+      </TxDetailsRow>
+
       {existingSpendingLimit && (
         <Alert severity="warning" sx={{ border: 'unset' }}>
-          <Typography
-            data-testid="limit-replacement-warning"
-            sx={{
-              fontWeight: 700,
-            }}
-          >
+          <Typography data-testid="limit-replacement-warning" fontWeight={700}>
             You are about to replace an existing spending limit
           </Typography>
         </Alert>

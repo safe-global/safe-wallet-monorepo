@@ -5,7 +5,7 @@ import type { TransactionDetails } from '@safe-global/safe-gateway-typescript-sd
 import type { SafeTransactionData } from '@safe-global/safe-core-sdk-types'
 import { dateString } from '@safe-global/utils/utils/formatters'
 import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
-import { TxDetails } from '@/components/tx/ConfirmTxDetails/TxDetails'
+import { Receipt } from '@/components/tx/ConfirmTxDetails/Receipt'
 import DecodedData from '../TxData/DecodedData'
 import ColorCodedTxAccordion from '@/components/tx/ColorCodedTxAccordion'
 import { Box, Divider, Typography } from '@mui/material'
@@ -91,7 +91,7 @@ const Summary = ({ safeTxData, txData, txInfo, txDetails, showMultisend = true }
 
               <DecoderLinks />
 
-              <TxDetails safeTxData={safeTxData} txData={txData} grid />
+              <Receipt safeTxData={safeTxData} txData={txData} grid />
             </Box>
           </ColorCodedTxAccordion>
         </Box>
