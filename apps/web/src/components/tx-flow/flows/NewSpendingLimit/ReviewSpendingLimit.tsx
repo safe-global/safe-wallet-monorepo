@@ -2,7 +2,7 @@ import { useCurrentChain } from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useEffect, useMemo, useContext } from 'react'
 import { useSelector } from 'react-redux'
-import { Typography, Grid, Alert } from '@mui/material'
+import { Typography, Alert } from '@mui/material'
 
 import SpendingLimitLabel from '@/components/common/SpendingLimitLabel'
 import { getResetTimeOptions } from '@/components/transactions/TxDetails/TxData/SpendingLimits'
