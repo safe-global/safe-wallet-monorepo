@@ -8,6 +8,8 @@ import { DataTable } from '@/components/common/Table/DataTable'
 import { DataRow } from '@/components/common/Table/DataRow'
 import ExternalLink from '@/components/common/ExternalLink'
 import IframeIcon from '@/components/common/IframeIcon'
+import { InfoTooltip } from '@/features/stake/components/InfoTooltip'
+import { BRAND_NAME } from '@/config/constants'
 
 const AdditionalRewards = ({ txInfo }: { txInfo: VaultDepositTransactionInfo }) => {
   return (
@@ -156,8 +158,18 @@ const VaultDepositConfirmation = ({
             />
           </DataRow>,
 
-          <DataRow key="Widget fee" title="Widget fee">
-            {formatPercentage(txInfo.fee)}
+          <DataRow
+            key="Widget fee"
+            title={
+              <>
+                Widget fee
+                <InfoTooltip
+                  title={`The widget fee incurred here is charged by Kiln for the operation of this widget. The fee is calculated automatically. Part of the fee will contribute to a license fee that supports the Safe Community. Neither the Safe Ecosystem Foundation nor ${BRAND_NAME} operates the Kiln Widget and/or Kiln.`}
+                />
+              </>
+            }
+          >
+            {formatPercentage(txInfo.fee, true)}
           </DataRow>,
 
           <AdditionalRewards key="Additional rewards" txInfo={txInfo} />,

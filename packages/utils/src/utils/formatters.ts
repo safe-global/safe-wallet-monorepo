@@ -109,3 +109,14 @@ export const maybePlural = (quantity: number | unknown[]) => {
   quantity = Array.isArray(quantity) ? quantity.length : quantity
   return quantity === 1 ? '' : 's'
 }
+
+export const formatPercentage = (value: number, hideFractions?: boolean) => {
+  const fraction = hideFractions ? 0 : 2
+
+  return new Intl.NumberFormat(undefined, {
+    style: 'percent',
+    maximumFractionDigits: fraction,
+    signDisplay: 'never',
+    minimumFractionDigits: fraction,
+  }).format(value)
+}
