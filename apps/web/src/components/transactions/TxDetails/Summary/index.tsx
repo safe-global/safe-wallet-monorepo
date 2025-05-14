@@ -85,7 +85,7 @@ const Summary = ({ safeTxData, txData, txInfo, txDetails, showMultisend = true }
             <Box>
               <Divider sx={{ mx: -2, mt: 2.5 }} />
 
-              <Typography variant="h5" mt={2.5} mb={2}>
+              <Typography variant="subtitle2" fontWeight={700} mt={2.5} mb={2}>
                 Advanced details
               </Typography>
 
