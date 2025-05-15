@@ -25,7 +25,7 @@ export enum TX_TYPES {
   custom = 'custom',
   native_bridge = 'native_bridge',
   native_swap = 'native_swap',
-  native_swap_lifi = 'native_swap_lifi',
+  native_earn = 'native_earn',
   bulk_execute = 'bulk_execute',
 
   // Counterfactual

@@ -1,5 +1,5 @@
 export const EARN_TITLE = 'Earn'
-export const WIDGET_TESTNET_URL = 'https://safe.widget.testnet.kiln.fi/overview'
+export const WIDGET_TESTNET_URL = 'https://safe.widget.testnet.kiln.fi/overview' // TODO: Change to prod widget url
 export const EARN_CONSENT_STORAGE_KEY = 'lendDisclaimerAcceptedV1'
 
 export const widgetAppData = {
