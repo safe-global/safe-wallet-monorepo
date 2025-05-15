@@ -1,6 +1,6 @@
 import TxCard from '@/components/tx-flow/common/TxCard'
 import { Grid2 as Grid, Stack, StepIcon, Typography } from '@mui/material'
-import { TxDetails } from './TxDetails'
+import { Receipt } from './Receipt'
 import ExternalLink from '@/components/common/ExternalLink'
 import { useContext } from 'react'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
@@ -92,7 +92,7 @@ export const ConfirmTxDetails = (props: SignOrExecuteProps) => {
           </Stack>
         </Grid>
         <Grid size={{ xs: 12, sm: 6 }}>
-          <TxDetails safeTxData={safeTx.data} txData={txPreview?.txData} />
+          <Receipt safeTxData={safeTx.data} txData={txPreview?.txData} />
         </Grid>
       </Grid>
 

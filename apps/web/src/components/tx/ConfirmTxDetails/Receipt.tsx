@@ -21,10 +21,10 @@ type TxDetailsProps = {
 }
 
 const ContentWrapper = ({ children }: { children: ReactElement | ReactElement[] }) => (
-  <Box sx={{ maxHeight: '550px', minHeight: '447px', overflowY: 'auto', px: 2 }}>{children}</Box>
+  <Box sx={{ maxHeight: '550px', flex: 1, overflowY: 'auto', px: 2, pt: 1, mt: '0 !important' }}>{children}</Box>
 )
 
-export const TxDetails = ({ safeTxData, txData, grid }: TxDetailsProps) => {
+export const Receipt = ({ safeTxData, txData, grid }: TxDetailsProps) => {
   const safeTxHash = useSafeTxHash({ safeTxData })
   const domainHash = useDomainHash()
   const messageHash = useMessageHash({ safeTxData })
@@ -40,10 +40,6 @@ export const TxDetails = ({ safeTxData, txData, grid }: TxDetailsProps) => {
           content: (
             <ContentWrapper>
               <Stack spacing={1} divider={<Divider />}>
-                <TxDetailsRow label="Primary type" grid={grid}>
-                  SafeTx
-                </TxDetailsRow>
-
                 <TxDetailsRow label="To" grid={grid}>
                   <ToWrapper>
                     <NameChip txData={txData} withBackground={grid} />
@@ -76,7 +72,7 @@ export const TxDetails = ({ safeTxData, txData, grid }: TxDetailsProps) => {
 
                 <TxDetailsRow label="Data" grid={grid}>
                   <Typography variant="body2" width={grid ? '70%' : undefined}>
-                    <HexEncodedData hexData={safeTxData.data} limit={66} />
+                    <HexEncodedData hexData={safeTxData.data} limit={140} />
                   </Typography>
                 </TxDetailsRow>
 

@@ -13,6 +13,7 @@ import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { Badge } from '@/src/components/Badge'
 import { ParametersButton } from '../../ParametersButton'
 import { router } from 'expo-router'
+import { useOpenExplorer } from '@/src/features/ConfirmTx/hooks/useOpenExplorer'
 
 interface ContractProps {
   txInfo: CustomTransactionInfo
@@ -23,7 +24,9 @@ interface ContractProps {
 export function Contract({ txInfo, executionInfo, txId }: ContractProps) {
   const activeSafe = useDefinedActiveSafe()
   const chain = useAppSelector((state: RootState) => selectChainById(state, activeSafe.chainId))
-  const items = useMemo(() => formatContractItems(txInfo, chain), [txInfo, chain])
+  const viewOnExplorer = useOpenExplorer(txInfo.to.value)
+
+  const items = useMemo(() => formatContractItems(txInfo, chain, viewOnExplorer), [txInfo, chain, viewOnExplorer])
 
   const handleViewActions = () => {
     router.push({

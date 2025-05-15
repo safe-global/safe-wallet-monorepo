@@ -15,6 +15,7 @@ interface TokenAmountProps {
   preciseAmount?: boolean
   textProps?: TextProps
   displayPositiveSign?: boolean
+  testID?: string
 }
 
 export const TokenAmount = ({
@@ -25,6 +26,7 @@ export const TokenAmount = ({
   preciseAmount,
   textProps,
   displayPositiveSign,
+  testID,
 }: TokenAmountProps): ReactElement => {
   const getSign = (): string => {
     if (direction === TransferDirection.OUTGOING) {
@@ -44,7 +46,7 @@ export const TokenAmount = ({
   }
 
   return (
-    <Text fontWeight={700} {...textProps}>
+    <Text fontWeight={700} {...textProps} testID={testID}>
       {getSign()}
       {formatAmount()} {tokenSymbol}
     </Text>

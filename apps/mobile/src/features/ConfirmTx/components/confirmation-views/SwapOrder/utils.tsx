@@ -73,7 +73,7 @@ export const formatSwapOrderItems = (txInfo: Order, chain: Chain): ListTableItem
               <Text fontSize="$4">{ellipsis(txInfo.uid, 6)}</Text>
               <CopyButton value={txInfo.uid} color={'$textSecondaryLight'} />
               <TouchableOpacity onPress={openCowExplorer}>
-                <SafeFontIcon name="external-link" size={14} color="textSecondaryLight" />
+                <SafeFontIcon name="external-link" size={14} color="$textSecondaryLight" />
               </TouchableOpacity>
             </View>
           ),

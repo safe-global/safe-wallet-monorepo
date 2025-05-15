@@ -4,6 +4,7 @@ import { isAddress, isArrayParameter, isByte } from '@/utils/transaction-guards'
 import type { AddressEx, DataDecoded } from '@safe-global/safe-gateway-typescript-sdk'
 import { Box, Stack, Typography } from '@mui/material'
 import { Value } from '@/components/transactions/TxDetails/TxData/DecodedData/ValueArray'
+import { HexEncodedData } from '@/components/transactions/HexEncodedData'
 
 type MethodDetailsProps = {
   data: DataDecoded
@@ -13,12 +14,16 @@ type MethodDetailsProps = {
   }
 }
 
-export const MethodDetails = ({ data, addressInfoIndex }: MethodDetailsProps): ReactElement | null => {
+export const MethodDetails = ({ data, addressInfoIndex, hexData }: MethodDetailsProps): ReactElement | null => {
+  const showHexData = data.method === 'fallback' && !data.parameters?.length && hexData
   if (!data.parameters?.length) {
     return (
-      <Typography color="text.secondary" variant="body2">
-        No parameters
-      </Typography>
+      <>
+        <Typography color="text.secondary" variant="body2">
+          No parameters
+        </Typography>
+        {showHexData && <HexEncodedData title="Data" hexData={hexData} />}
+      </>
     )
   }
 

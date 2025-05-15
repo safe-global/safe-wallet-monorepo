@@ -1,40 +1,46 @@
-import TxLayout from '@/components/tx-flow/common/TxLayout'
-import type { TxStep } from '../../common/TxLayout'
 import { AppTitle } from '@/components/tx-flow/flows/SignMessage'
 import ReviewSignMessageOnChain, {
   type SignMessageOnChainProps,
 } from '@/components/tx-flow/flows/SignMessageOnChain/ReviewSignMessageOnChain'
-import { useMemo } from 'react'
-import useTxStepper from '../../useTxStepper'
-import { ConfirmSignMessageOnChainDetails } from './ConfirmSignMessageOnChainDetails'
+import { useCallback } from 'react'
 import { TxFlowType } from '@/services/analytics'
+import { type ReviewTransactionProps } from '@/components/tx/ReviewTransactionV2'
+import { type SubmitCallback, TxFlow } from '../../TxFlow'
+import { dispatchSafeAppsTx } from '@/services/tx/tx-sender'
+import { getSafeTxHashFromTxId } from '@/utils/transactions'
 
 const SignMessageOnChainFlow = ({ props }: { props: Omit<SignMessageOnChainProps, 'onSubmit'> }) => {
-  const { step, nextStep, prevStep } = useTxStepper(undefined, TxFlowType.SIGN_MESSAGE_ON_CHAIN)
+  const { requestId } = props
+  const ReviewComponent = useCallback(
+    (reviewTxProps: ReviewTransactionProps) => {
+      return <ReviewSignMessageOnChain {...props} {...reviewTxProps} />
+    },
+    [props],
+  )
 
-  const steps = useMemo<TxStep[]>(
-    () => [
-      {
-        txLayoutProps: { title: 'Confirm message' },
-        content: <ReviewSignMessageOnChain {...props} key={0} onSubmit={() => nextStep(undefined)} />,
-      },
-      {
-        txLayoutProps: { title: 'Confirm message details', fixedNonce: true },
-        content: <ConfirmSignMessageOnChainDetails requestId={props.requestId} key={1} />,
-      },
-    ],
-    [nextStep, props],
+  const handleSubmit: SubmitCallback = useCallback(
+    async (args) => {
+      if (!args?.txId) {
+        return
+      }
+      const safeTxHash = getSafeTxHashFromTxId(args.txId)
+
+      if (!safeTxHash) {
+        return
+      }
+
+      await dispatchSafeAppsTx({ safeAppRequestId: requestId, safeTxHash, txId: args.txId })
+    },
+    [requestId],
   )
 
   return (
-    <TxLayout
+    <TxFlow
       subtitle={<AppTitle name={props.app?.name} logoUri={props.app?.iconUrl} />}
-      step={step}
-      onBack={prevStep}
-      {...(steps?.[step]?.txLayoutProps || {})}
-    >
-      {steps.map(({ content }) => content)}
-    </TxLayout>
+      eventCategory={TxFlowType.SIGN_MESSAGE_ON_CHAIN}
+      ReviewTransactionComponent={ReviewComponent}
+      onSubmit={handleSubmit}
+    />
   )
 }
 

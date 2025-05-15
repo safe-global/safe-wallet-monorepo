@@ -43,6 +43,8 @@ export enum FEATURES {
   SPACES = 'SPACES',
 }
 
+const MIN_SAFE_VERSION = '1.3.0'
+
 export const hasFeature = (chain: Pick<Chain, 'features'>, feature: FEATURES): boolean => {
   return (chain.features as string[]).includes(feature)
 }
@@ -59,11 +61,8 @@ export const getBlockExplorerLink = (
 const FALLBACK_SAFE_VERSION = '1.3.0' as const
 export const getLatestSafeVersion = (
   chain: Pick<Chain, 'recommendedMasterCopyVersion' | 'chainId'> | undefined,
-  isUpgrade = false,
 ): SafeVersion => {
-  const latestSafeVersion = isUpgrade
-    ? chain?.recommendedMasterCopyVersion || LATEST_SAFE_VERSION // for upgrades, use the recommended version
-    : LATEST_SAFE_VERSION // for Safe creation, always use the latest version
+  const latestSafeVersion = chain?.recommendedMasterCopyVersion || LATEST_SAFE_VERSION
 
   // Without version filter it will always return the LATEST_SAFE_VERSION constant to avoid automatically updating to the newest version if the deployments change
   const latestDeploymentVersion = (getSafeSingletonDeployment({ network: chain?.chainId, released: true })?.version ??
@@ -75,4 +74,8 @@ export const getLatestSafeVersion = (
   } else {
     return latestSafeVersion as SafeVersion
   }
+}
+
+export const isNonCriticalUpdate = (version?: string | null) => {
+  return version && semverSatisfies(version, `>= ${MIN_SAFE_VERSION}`)
 }

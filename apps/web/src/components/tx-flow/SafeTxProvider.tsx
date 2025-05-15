@@ -60,7 +60,7 @@ const SafeTxProvider = ({ children }: { children: ReactNode }): ReactElement => 
   const [isMassPayout, setIsMassPayout] = useState<boolean>()
 
   // Signed txs cannot be updated
-  const isSigned = safeTx && safeTx.signatures.size > 0
+  const isSigned = Boolean(safeTx && safeTx.signatures.size > 0)
 
   // Recommended nonce and safeTxGas
   const recommendedNonce = useRecommendedNonce()
@@ -69,14 +69,14 @@ const SafeTxProvider = ({ children }: { children: ReactNode }): ReactElement => 
   const canEdit = !isSigned && !isReadOnly
 
   // Priority to external nonce, then to the recommended one
-  const finalNonce = canEdit ? safeTx?.data.nonce : (nonce ?? recommendedNonce ?? safeTx?.data.nonce)
+  const finalNonce = canEdit ? (nonce ?? recommendedNonce ?? safeTx?.data.nonce) : safeTx?.data.nonce
   const finalSafeTxGas = canEdit
-    ? safeTx?.data.safeTxGas
-    : (safeTxGas ?? recommendedSafeTxGas ?? safeTx?.data.safeTxGas)
+    ? (safeTxGas ?? recommendedSafeTxGas ?? safeTx?.data.safeTxGas)
+    : safeTx?.data.safeTxGas
 
   // Update the tx when the nonce or safeTxGas change
   useEffect(() => {
-    if (canEdit || !safeTx?.data) return
+    if (!canEdit || !safeTx?.data) return
     if (safeTx.data.nonce === finalNonce && safeTx.data.safeTxGas === finalSafeTxGas) return
 
     setSafeTxError(undefined)

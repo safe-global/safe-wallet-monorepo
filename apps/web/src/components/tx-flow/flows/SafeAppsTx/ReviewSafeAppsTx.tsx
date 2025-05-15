@@ -7,15 +7,20 @@ import useHighlightHiddenTab from '@/hooks/useHighlightHiddenTab'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { isTxValid } from '@/components/safe-apps/utils'
 import ErrorMessage from '@/components/tx/ErrorMessage'
-import ReviewTransaction from '@/components/tx/ReviewTransaction'
+import ReviewTransaction from '@/components/tx/ReviewTransactionV2'
+import { type ReviewTransactionContentProps } from '@/components/tx/ReviewTransactionV2/ReviewTransactionContent'
 
 type ReviewSafeAppsTxProps = {
   safeAppsTx: SafeAppsTxParams
   onSubmit: () => void
-  origin?: string
-}
+} & ReviewTransactionContentProps
 
-const ReviewSafeAppsTx = ({ safeAppsTx: { txs, params }, onSubmit, origin }: ReviewSafeAppsTxProps): ReactElement => {
+const ReviewSafeAppsTx = ({
+  safeAppsTx: { txs, params },
+  onSubmit,
+  children,
+  ...props
+}: ReviewSafeAppsTxProps): ReactElement => {
   const { setSafeTx, safeTxError, setSafeTxError } = useContext(SafeTxContext)
 
   useHighlightHiddenTab()
@@ -40,13 +45,14 @@ const ReviewSafeAppsTx = ({ safeAppsTx: { txs, params }, onSubmit, origin }: Rev
   const error = !isTxValid(txs)
 
   return (
-    <ReviewTransaction onSubmit={onSubmit} origin={origin}>
+    <ReviewTransaction onSubmit={onSubmit} {...props}>
       {error ? (
         <ErrorMessage error={safeTxError}>
           This Safe App initiated a transaction which cannot be processed. Please get in touch with the developer of
           this Safe App for more information.
         </ErrorMessage>
       ) : null}
+      {children}
     </ReviewTransaction>
   )
 }

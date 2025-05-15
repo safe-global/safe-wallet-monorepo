@@ -11,6 +11,7 @@ import useIsSafeOwner from './useIsSafeOwner'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import { isValidSafeVersion } from '@safe-global/utils/services/contracts/utils'
+import { isNonCriticalUpdate } from '@safe-global/utils/utils/chains'
 
 const CLI_LINK = {
   href: 'https://github.com/5afe/safe-cli',
@@ -67,7 +68,6 @@ const useSafeNotifications = (): void => {
   /**
    * Show a notification when the Safe version is out of date
    */
-
   useEffect(() => {
     if (safeAddress !== urlSafeAddress) return
     if (!isOwner) return
@@ -85,7 +85,9 @@ const useSafeNotifications = (): void => {
       }
     }
 
-    if (implementationVersionState !== ImplementationVersionState.OUTDATED) return
+    // Is Safe version outdated?
+    // Non-critical Safe upgrades (versions >= '1.3.0') intentionally skip notifications
+    if (implementationVersionState !== ImplementationVersionState.OUTDATED || isNonCriticalUpdate(version)) return
 
     const isUnsupported = !isValidSafeVersion(version)
 
