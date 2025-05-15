@@ -50,8 +50,9 @@ export const navItems: NavItem[] = [
   },
   {
     label: 'Earn',
-    icon: <SvgIcon component={StakeIcon} inheritViewBox />, // TODO: Change icon
+    icon: <SvgIcon component={StakeIcon} inheritViewBox />,
     href: AppRoutes.earn,
+    tag: <Chip label="New" sx={{ backgroundColor: 'secondary.light', color: 'static.main' }} />,
   },
   {
     label: 'Transactions',
