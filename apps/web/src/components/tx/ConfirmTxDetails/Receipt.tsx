@@ -140,7 +140,7 @@ export const Receipt = ({ safeTxData, txData, txDetails, grid, withSignatures }:
                         <TxDetailsRow
                           data-testid="tx-signature"
                           label={`Signature ${index + 1}`}
-                          key={`signature-${index}:`}
+                          key={`signature-${index}`}
                           grid={grid}
                         >
                           <Typography variant="body2" width={grid ? '70%' : undefined}>
