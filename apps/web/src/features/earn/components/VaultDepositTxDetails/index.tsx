@@ -11,7 +11,12 @@ const VaultDepositTxDetails = ({ info }: { info: VaultDepositTransactionInfo }) 
   return (
     <Box pl={1} pr={5} display="flex" flexDirection="column" gap={1}>
       <FieldsGrid title="Deposit">
-        <TokenAmount tokenSymbol={info.tokenInfo.symbol} value={info.value} logoUri={info.tokenInfo.logoUri || ''} />
+        <TokenAmount
+          tokenSymbol={info.tokenInfo.symbol}
+          value={info.value}
+          logoUri={info.tokenInfo.logoUri || ''}
+          decimals={info.tokenInfo.decimals}
+        />
       </FieldsGrid>
       <FieldsGrid title="Reward rate">{formatPercentage(totalNrr)}</FieldsGrid>
       <VaultDepositConfirmation txInfo={info} isTxDetails />
