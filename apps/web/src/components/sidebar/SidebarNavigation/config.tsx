@@ -33,15 +33,15 @@ export const navItems: NavItem[] = [
     href: AppRoutes.balances.index,
   },
   {
+    label: 'Swap',
+    icon: <SvgIcon component={SwapIcon} inheritViewBox />,
+    href: AppRoutes.swap,
+  },
+  {
     label: 'Bridge',
     icon: <SvgIcon component={BridgeIcon} inheritViewBox />,
     href: AppRoutes.bridge,
     tag: <Chip label="New" sx={{ backgroundColor: 'secondary.light', color: 'static.main' }} />,
-  },
-  {
-    label: 'Swap',
-    icon: <SvgIcon component={SwapIcon} inheritViewBox />,
-    href: AppRoutes.swap,
   },
   {
     label: 'Stake',

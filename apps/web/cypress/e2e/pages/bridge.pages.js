@@ -1,4 +1,4 @@
-export const exchangeStr = 'Exchange'
+export const exchangeStr = 'Bridge'
 
 const bridgleLink = 'a[href*="/bridge"]'
 

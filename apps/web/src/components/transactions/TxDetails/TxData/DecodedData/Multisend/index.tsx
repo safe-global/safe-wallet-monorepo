@@ -1,4 +1,3 @@
-import { HexEncodedData } from '@/components/transactions/HexEncodedData'
 import { Operation } from '@safe-global/safe-gateway-typescript-sdk'
 import type { TransactionData } from '@safe-global/safe-gateway-typescript-sdk'
 import { useState, useEffect } from 'react'
@@ -58,19 +57,8 @@ export const Multisend = ({ txData, compact = false }: MultisendProps): ReactEle
     }
   }, [multiSendTransactions, isOpenMapUndefined])
 
-  if (!txData) return null
+  if (!multiSendTransactions) return null
 
-  // ? when can a multiSend call take no parameters?
-  if (!txData.dataDecoded?.parameters) {
-    if (txData.hexData) {
-      return <HexEncodedData title="Data (hex encoded)" hexData={txData.hexData} />
-    }
-    return null
-  }
-
-  if (!multiSendTransactions) {
-    return null
-  }
   return (
     <>
       <MultisendActionsHeader setOpen={setOpenMap} amount={multiSendTransactions.length} compact={compact} />

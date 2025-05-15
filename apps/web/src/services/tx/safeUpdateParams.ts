@@ -53,7 +53,7 @@ export const createUpdateSafeTxs = async (safe: SafeState, chain: ChainInfo): Pr
   ).getAddress()
   const currentReadOnlySafeContract = await getReadOnlyGnosisSafeContract(chain, safe.version)
 
-  const updatedReadOnlySafeContract = await getReadOnlyGnosisSafeContract(chain, getLatestSafeVersion(chain, true))
+  const updatedReadOnlySafeContract = await getReadOnlyGnosisSafeContract(chain, getLatestSafeVersion(chain))
 
   // @ts-expect-error this was removed in 1.3.0 but we need to support it for older safe versions
   const changeMasterCopyCallData = currentReadOnlySafeContract.encode('changeMasterCopy', [latestMasterCopyAddress])
