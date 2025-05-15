@@ -9,15 +9,7 @@ const VaultDepositTxDetails = ({ info }: { info: VaultDepositTransactionInfo }) 
   const totalNrr = (info.baseNrr + info.additionalRewardsNrr) / 100
 
   return (
-    <Box
-      sx={{
-        pl: 1,
-        pr: 5,
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 1,
-      }}
-    >
+    <Box pl={1} pr={5} display="flex" flexDirection="column" gap={1}>
       <FieldsGrid title="Deposit">
         <TokenAmount tokenSymbol={info.tokenInfo.symbol} value={info.value} logoUri={info.tokenInfo.logoUri || ''} />
       </FieldsGrid>
