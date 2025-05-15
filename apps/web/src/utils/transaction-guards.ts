@@ -501,3 +501,9 @@ export const isVaultDepositTxInfo = (value: TransactionDetails['txInfo']): value
 export const isVaultRedeemTxInfo = (value: TransactionDetails['txInfo']): value is VaultRedeemTransactionInfo => {
   return value.type === 'VaultRedeem'
 }
+
+export const isAnyEarnTxInfo = (
+  value: TransactionDetails['txInfo'],
+): value is VaultDepositTransactionInfo | VaultRedeemTransactionInfo => {
+  return isVaultDepositTxInfo(value) || isVaultRedeemTxInfo(value)
+}

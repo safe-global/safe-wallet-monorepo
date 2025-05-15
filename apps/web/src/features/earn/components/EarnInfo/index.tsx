@@ -53,7 +53,7 @@ const EarnInfo = ({ onGetStarted }: { onGetStarted: () => void }) => {
 
       <Card sx={{ p: 4 }}>
         <Grid container spacing={3} flexWrap={{ sm: 'wrap', md: 'nowrap' }}>
-          <Grid size={{ sm: 4, md: 'grow' }}>
+          <Grid size={{ sm: 3, md: 'grow' }}>
             <Box className={css.benefitIcon}>
               <SvgIcon component={CheckIcon} color="success" inheritViewBox fontSize="small" />
             </Box>
@@ -63,24 +63,17 @@ const EarnInfo = ({ onGetStarted }: { onGetStarted: () => void }) => {
             <Typography>Your balance keeps working for you</Typography>
           </Grid>
 
-          <Grid size={{ sm: 4, md: 'grow' }}>
-            <Box className={css.benefitIcon}>
-              <SvgIcon component={CheckIcon} color="success" inheritViewBox fontSize="small" />
-            </Box>
-            Deposit stablecoins, ETH, WETH, WBTC or wstETH
-          </Grid>
-
-          <Grid size={{ sm: 4, md: 'grow' }}>
+          <Grid size={{ sm: 3, md: 'grow' }}>
             <Box className={css.benefitIcon}>
               <SvgIcon component={CheckIcon} color="success" inheritViewBox fontSize="small" />
             </Box>
             <Typography fontWeight="bold" mb={0.5}>
               Extra rewards
             </Typography>
-            <Typography>Earn MORPHO tokens on top to get extra yield</Typography>
+            <Typography>Earn MORPHO tokens on top</Typography>
           </Grid>
 
-          <Grid size={{ sm: 4, md: 'grow' }}>
+          <Grid size={{ sm: 3, md: 'grow' }}>
             <Box className={css.benefitIcon}>
               <SvgIcon component={CheckIcon} color="success" inheritViewBox fontSize="small" />
             </Box>
@@ -90,7 +83,7 @@ const EarnInfo = ({ onGetStarted }: { onGetStarted: () => void }) => {
             <Typography>Zero lock-ups, zero penalties</Typography>
           </Grid>
 
-          <Grid size={{ sm: 4, md: 'grow' }}>
+          <Grid size={{ sm: 3, md: 'grow' }}>
             <Box className={css.benefitIcon}>
               <SvgIcon component={CheckIcon} color="success" inheritViewBox fontSize="small" />
             </Box>
