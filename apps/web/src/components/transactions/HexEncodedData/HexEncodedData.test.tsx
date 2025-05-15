@@ -30,9 +30,11 @@ describe('HexEncodedData', () => {
   })
 
   it('should not cut the text in case the limit option is higher than the provided hexData', () => {
-    render(<HexEncodedData hexData={hexData} limit={1000} title="Data (hex-encoded)" />)
+    const result = render(<HexEncodedData hexData={hexData} limit={1000} title="Data (hex-encoded)" />)
 
-    expect(screen.queryByTestId('show-more')).not.toBeInTheDocument()
+    expect(result.container.querySelector("button[data-testid='show-more']")).not.toBeInTheDocument()
+
+    expect(result.container).toMatchSnapshot()
   })
 
   it('should show the full data when expanded', () => {
