@@ -9,7 +9,7 @@ import useLocalStorage from '@/services/local-storage/useLocalStorage'
 
 const COMBO_SUBMIT_ACTION = 'comboSubmitAction'
 
-export const ComboSubmit = ({ onSubmit }: SlotComponentProps<SlotName.Submit>) => {
+export const ComboSubmit = (props: SlotComponentProps<SlotName.Submit>) => {
   const { txId, submitError, isRejectedByUser } = useContext(TxFlowContext)
   const slotItems = useSlot(SlotName.ComboSubmit)
   const slotIds = useSlotIds(SlotName.ComboSubmit)
@@ -56,10 +56,10 @@ export const ComboSubmit = ({ onSubmit }: SlotComponentProps<SlotName.Submit>) =
       <Slot
         name={SlotName.ComboSubmit}
         id={slotId}
-        onSubmit={onSubmit}
         options={options}
         onChange={setSubmitAction}
         disabled={disabled}
+        {...props}
       />
     </>
   )

@@ -483,14 +483,22 @@ export const dispatchSpendingLimitTxExecution = async (
   return result?.hash
 }
 
-export const dispatchSafeAppsTx = async (
-  safeTx: SafeTransaction,
-  safeAppRequestId: RequestId,
-  provider: Eip1193Provider,
-  txId?: string,
-): Promise<string> => {
-  const sdk = await getSafeSDKWithSigner(provider)
-  const safeTxHash = await sdk.getTransactionHash(safeTx)
+export async function dispatchSafeAppsTx(
+  args: { safeAppRequestId: RequestId; txId?: string } & (
+    | { safeTx: SafeTransaction; provider: Eip1193Provider }
+    | { safeTxHash: string }
+  ),
+): Promise<string> {
+  let safeTxHash: string
+  if ('safeTx' in args && 'provider' in args) {
+    const { safeTx, provider } = args
+    const sdk = await getSafeSDKWithSigner(provider)
+    safeTxHash = await sdk.getTransactionHash(safeTx)
+  } else {
+    safeTxHash = args.safeTxHash
+  }
+
+  const { txId, safeAppRequestId } = args
   txDispatch(TxEvent.SAFE_APPS_REQUEST, { safeAppRequestId, safeTxHash, txId })
   return safeTxHash
 }

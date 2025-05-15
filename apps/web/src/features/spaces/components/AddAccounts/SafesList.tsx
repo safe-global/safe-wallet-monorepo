@@ -68,7 +68,17 @@ const SafesList = ({ safes }: { safes: AllSafeItems }) => {
 
   return (
     <List
-      sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 1, maxHeight: 400, minHeight: 400, overflow: 'auto' }}
+      sx={{
+        px: 2,
+        pb: 2,
+        pt: 0,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 1,
+        maxHeight: 400,
+        minHeight: 400,
+        overflow: 'auto',
+      }}
     >
       {safes.map((safe, index) => {
         if (isMultiChainSafeItem(safe)) {
@@ -94,7 +104,7 @@ const SafesList = ({ safes }: { safes: AllSafeItems }) => {
           }
 
           return (
-            <Accordion key={index} disableGutters sx={{ flexShrink: '0' }}>
+            <Accordion key={index} className={css.accordion} disableGutters sx={{ flexShrink: '0' }}>
               <AccordionSummary
                 expandIcon={<ExpandMoreIcon />}
                 sx={{

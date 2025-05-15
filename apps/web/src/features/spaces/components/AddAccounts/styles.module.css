@@ -21,3 +21,11 @@
   border: 1px solid var(--color-border-light);
   height: 66px;
 }
+
+.accordion {
+  border: 1px solid var(--color-border-light) !important;
+}
+
+.accordion:hover > h3 > button {
+  background-color: rgba(0, 0, 0, 0.04);
+}

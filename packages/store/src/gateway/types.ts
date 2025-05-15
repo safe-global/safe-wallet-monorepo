@@ -66,6 +66,9 @@ export enum TransactionInfoType {
   SWAP_ORDER = 'SwapOrder',
   TWAP_ORDER = 'TwapOrder',
   SWAP_TRANSFER = 'SwapTransfer',
+  NATIVE_STAKING_DEPOSIT = 'NativeStakingDeposit',
+  NATIVE_STAKING_VALIDATORS_EXIT = 'NativeStakingValidatorsExit',
+  NATIVE_STAKING_WITHDRAW = 'NativeStakingWithdraw',
 }
 
 export enum ConflictType {

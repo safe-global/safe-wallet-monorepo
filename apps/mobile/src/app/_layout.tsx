@@ -23,6 +23,8 @@ import Logger, { LogLevel } from '@/src/utils/logger'
 import { useInitWeb3 } from '@/src/hooks/useInitWeb3'
 import { useInitSafeCoreSDK } from '@/src/hooks/coreSDK/useInitSafeCoreSDK'
 import NotificationsService from '@/src/services/notifications/NotificationService'
+import { StatusBar } from 'expo-status-bar'
+import { useScreenTracking } from '@/src/hooks/useScreenTracking'
 
 Logger.setLevel(__DEV__ ? LogLevel.TRACE : LogLevel.ERROR)
 // Initialize all notification handlers
@@ -33,16 +35,23 @@ configureReanimatedLogger({
   strict: false,
 })
 
-// Initialize store-side effects
-store.dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfig.initiate())
-
 const HooksInitializer = () => {
   useInitWeb3()
   useInitSafeCoreSDK()
   return null
 }
 
+persistor.subscribe(() => {
+  const { bootstrapped } = persistor.getState()
+  if (bootstrapped) {
+    // The chain config is persisted in the store, but might be outdated.
+    store.dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfig.initiate(undefined, { forceRefetch: true }))
+  }
+})
+
 function RootLayout() {
+  useScreenTracking()
+
   return (
     <GestureHandlerRootView>
       <Provider store={store}>
@@ -162,6 +171,7 @@ function RootLayout() {
                         />
                         <Stack.Screen name="+not-found" />
                       </Stack>
+                      <StatusBar />
                     </NavigationGuardHOC>
                   </SafeToastProvider>
                 </SafeThemeProvider>

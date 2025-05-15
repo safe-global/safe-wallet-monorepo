@@ -21,9 +21,7 @@ type ReceiptProps = {
 }
 
 const ScrollWrapper = ({ children }: { children: ReactElement | ReactElement[] }) => (
-  <Box maxHeight="550px" minHeight="447px" px={2} sx={{ overflowY: 'auto' }}>
-    {children}
-  </Box>
+  <Box sx={{ maxHeight: '550px', flex: 1, overflowY: 'auto', px: 2, pt: 1, mt: '0 !important' }}>{children}</Box>
 )
 
 export const Receipt = ({ safeTxData, txData, grid }: ReceiptProps) => {
@@ -42,10 +40,6 @@ export const Receipt = ({ safeTxData, txData, grid }: ReceiptProps) => {
           content: (
             <ScrollWrapper>
               <Stack spacing={1} divider={<Divider />}>
-                <TxDetailsRow label="Primary type" grid={grid}>
-                  SafeTx
-                </TxDetailsRow>
-
                 <TxDetailsRow label="To" grid={grid}>
                   <ToWrapper>
                     <NameChip txData={txData} withBackground={grid} />
@@ -78,7 +72,7 @@ export const Receipt = ({ safeTxData, txData, grid }: ReceiptProps) => {
 
                 <TxDetailsRow label="Data" grid={grid}>
                   <Typography variant="body2" width={grid ? '70%' : undefined}>
-                    <HexEncodedData hexData={safeTxData.data} limit={66} />
+                    <HexEncodedData hexData={safeTxData.data} limit={140} />
                   </Typography>
                 </TxDetailsRow>
 

@@ -50,4 +50,7 @@ export const isBrowserFeature = (featureKey: string): featureKey is AllowedFeatu
 
 export type AllowedFeatureSelection = { feature: AllowedFeatures; checked: boolean }
 
-export type SafeAppDataWithPermissions = SafeAppData & { safeAppsPermissions: AllowedFeatures[] }
+export type SafeAppDataWithPermissions = SafeAppData & {
+  safeAppsPermissions: AllowedFeatures[]
+  originalUrl?: string
+}

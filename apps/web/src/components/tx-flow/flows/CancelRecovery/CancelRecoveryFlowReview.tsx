@@ -2,7 +2,7 @@ import { trackEvent } from '@/services/analytics'
 import { RECOVERY_EVENTS } from '@/services/analytics/events/recovery'
 import { Typography } from '@mui/material'
 import { useContext } from 'react'
-import type { ReactElement } from 'react'
+import type { PropsWithChildren, ReactElement } from 'react'
 
 import { SafeTxContext } from '../../SafeTxProvider'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
@@ -11,15 +11,16 @@ import { createTx } from '@/services/tx/tx-sender'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import type { RecoveryQueueItem } from '@/features/recovery/services/recovery-state'
 import useAsync from '@safe-global/utils/hooks/useAsync'
-import ReviewTransaction from '@/components/tx/ReviewTransaction'
+import ReviewTransaction from '@/components/tx/ReviewTransactionV2'
 
 export function CancelRecoveryFlowReview({
   recovery,
   onSubmit,
-}: {
+  children,
+}: PropsWithChildren<{
   recovery: RecoveryQueueItem
   onSubmit: () => void
-}): ReactElement {
+}>): ReactElement {
   const web3ReadOnly = useWeb3ReadOnly()
   const { setSafeTx, setSafeTxError } = useContext(SafeTxContext)
 
@@ -37,7 +38,7 @@ export function CancelRecoveryFlowReview({
   }
 
   return (
-    <ReviewTransaction onSubmit={handleSubmit} isBatchable={false}>
+    <ReviewTransaction onSubmit={handleSubmit}>
       <Typography mb={1}>
         All actions initiated by the Recoverer will be cancelled. The current signers will remain the signers of the
         Safe Account.
@@ -48,6 +49,8 @@ export function CancelRecoveryFlowReview({
         {recovery.isMalicious ? 'malicious transaction' : 'recovery proposal'}. It requires other signer signatures in
         order to be executed.
       </ErrorMessage>
+
+      {children}
     </ReviewTransaction>
   )
 }

@@ -1,6 +1,8 @@
 {
   "react-native": {
     "analytics_auto_collection_enabled": false,
+    "google_analytics_automatic_screen_reporting_enabled": false,
+    "analytics_default_allow_ad_personalization_signals": false,
     "crashlytics_auto_collection_enabled": false,
     "crashlytics_javascript_exception_handler_chaining_enabled": false,
     "messaging_auto_init_enabled": true,

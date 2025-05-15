@@ -13,7 +13,7 @@ import { store } from '@/src/store'
 import { updatePromptAttempts, updateLastTimePromptAttempted } from '@/src/store/notificationsSlice'
 import { toggleAppNotifications, toggleDeviceNotifications } from '@/src/store/notificationsSlice'
 import { HandleNotificationCallback, LAUNCH_ACTIVITY, PressActionId } from '@/src/store/constants'
-import messaging from '@react-native-firebase/messaging'
+import { getMessaging } from '@react-native-firebase/messaging'
 import * as TaskManager from 'expo-task-manager'
 
 import { ChannelId, notificationChannels, withTimeout } from '@/src/utils/notifications'
@@ -349,7 +349,7 @@ class NotificationsService {
    * Registers the Firebase messaging background handler
    */
   private registerFirebaseBackgroundHandler(): void {
-    messaging().setBackgroundMessageHandler(async (remoteMessage) => {
+    getMessaging().setBackgroundMessageHandler(async (remoteMessage) => {
       Logger.info('Message handled in the background!', remoteMessage)
 
       // Display the notification using Notifee
