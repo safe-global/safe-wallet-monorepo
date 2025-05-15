@@ -6,15 +6,7 @@ import VaultRedeemConfirmation from '@/features/earn/components/VaultRedeemConfi
 
 const VaultRedeemTxDetails = ({ info }: { info: VaultRedeemTransactionInfo }) => {
   return (
-    <Box
-      sx={{
-        pl: 1,
-        pr: 5,
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 1,
-      }}
-    >
+    <Box pl={1} pr={5} display="flex" flexDirection="column" gap={1}>
       <FieldsGrid title="Withdraw">
         <TokenAmount tokenSymbol={info.tokenInfo.symbol} value={info.value} logoUri={info.tokenInfo.logoUri || ''} />
       </FieldsGrid>
