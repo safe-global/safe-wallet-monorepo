@@ -35,7 +35,7 @@ export const SingleTxDecoded = ({ tx, txData, actionTitle, variant, expanded, on
   const safeToL2MigrationAddress = chain && safeToL2MigrationDeployment?.networkAddresses[chain.chainId]
   const tokenInfoIndex = (txData as TransactionDetails['txData'])?.tokenInfoIndex
 
-  const txDataHex = tx.data ?? txData.hexData
+  const txDataHex = tx.data ?? '0x'
 
   const transferTokenInfo = useTransferTokenInfo(txDataHex, tx.value, tx.to, tokenInfoIndex)
 
