@@ -15,6 +15,8 @@ import {
   isStakingTxExitInfo,
   isStakingTxWithdrawInfo,
   isTransferTxInfo,
+  isVaultDepositTxInfo,
+  isVaultRedeemTxInfo,
 } from '@/src/utils/transaction-guards'
 import { TxBatchCard } from '@/src/components/transactions-list/Card/TxBatchCard'
 import { TxSafeAppCard } from '@/src/components/transactions-list/Card/TxSafeAppCard'
@@ -26,6 +28,8 @@ import { TxCardPress } from './types'
 import { StakingTxWithdrawCard } from '@/src/components/transactions-list/Card/StakingTxWithdrawCard'
 import { StakingTxDepositCard } from '../transactions-list/Card/StakingTxDepositCard'
 import { StakingTxExitCard } from '../transactions-list/Card/StakingTxExitCard'
+import { VaultTxDepositCard } from '@/src/components/transactions-list/Card/VaultTxDepositCard'
+import { VaultTxRedeemCard } from '@/src/components/transactions-list/Card/VaultTxRedeemCard'
 interface TxInfoProps {
   tx: Transaction
   bordered?: boolean
@@ -156,6 +160,14 @@ function TxInfoComponent({ tx, bordered, inQueue, onPress }: TxInfoProps) {
 
   if (isStakingTxWithdrawInfo(txInfo)) {
     return <StakingTxWithdrawCard info={txInfo} />
+  }
+
+  if (isVaultDepositTxInfo(txInfo)) {
+    return <VaultTxDepositCard info={txInfo} />
+  }
+
+  if (isVaultRedeemTxInfo(txInfo)) {
+    return <VaultTxRedeemCard info={txInfo} />
   }
 
   return <></>
