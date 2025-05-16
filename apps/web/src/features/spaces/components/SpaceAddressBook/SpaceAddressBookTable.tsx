@@ -27,14 +27,7 @@ function SpaceAddressBookTable({ entries }: SpaceAddressBookTableProps) {
           <Stack direction="row" spacing={1} alignItems="center">
             <Identicon address={entry.address} size={32} />
             <Stack direction="column" spacing={0.5}>
-              <EthHashInfo
-                spaceName={entry.name}
-                showAvatar={false}
-                address={entry.address}
-                shortAddress={false}
-                hasExplorer
-                showCopyButton
-              />
+              <EthHashInfo showAvatar={false} address={entry.address} shortAddress={false} hasExplorer showCopyButton />
             </Stack>
           </Stack>
         ),
