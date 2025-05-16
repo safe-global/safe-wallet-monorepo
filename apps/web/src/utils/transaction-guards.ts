@@ -62,8 +62,13 @@ import {
   getSafeToL2MigrationDeployment,
   getSafeMigrationDeployment,
   getMultiSendDeployments,
+  getSignMessageLibDeployments,
 } from '@safe-global/safe-deployments'
-import { Safe__factory, Safe_to_l2_migration__factory } from '@safe-global/utils/types/contracts'
+import {
+  Safe__factory,
+  Safe_to_l2_migration__factory,
+  Sign_message_lib__factory,
+} from '@safe-global/utils/types/contracts'
 import { hasMatchingDeployment } from '@safe-global/utils/services/contracts/deployments'
 import { isMultiSendCalldata } from './transaction-calldata'
 import { decodeMultiSendData } from '@safe-global/protocol-kit/dist/src/utils'
@@ -423,6 +428,7 @@ export const isERC721Transfer = (value: TransferInfo): value is Erc721Transfer =
 }
 
 const safeInterface = Safe__factory.createInterface()
+const signMessageInterface = Sign_message_lib__factory.createInterface()
 /**
  * True if the tx calls `approveHash`
  */
@@ -436,6 +442,16 @@ export const isOnChainConfirmationTxInfo = (info: TransactionInfo): info is Cust
     return info.methodName === 'approveHash' && info.dataSize === '36'
   }
   return false
+}
+
+export const isOnChainSignMessageTxData = (data: TransactionData | undefined, chainId: string): boolean => {
+  const signMessageSelector = signMessageInterface.getFunction('signMessage').selector
+  const toAddress = data?.to.value
+  const isDelegateCall = data?.operation === Operation.DELEGATE
+  const isSignMessageLib =
+    toAddress !== undefined &&
+    hasMatchingDeployment(getSignMessageLibDeployments, toAddress, chainId, ['1.3.0', '1.4.1'])
+  return Boolean(data && data.hexData?.startsWith(signMessageSelector) && isSignMessageLib && isDelegateCall)
 }
 
 /**

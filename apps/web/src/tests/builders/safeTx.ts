@@ -6,9 +6,11 @@ import {
   type Custom,
   DetailedExecutionInfoType,
   type MultisigExecutionInfo,
+  Operation,
   type TransactionInfo,
   TransactionInfoType,
   type TransactionSummary,
+  type TransactionData,
 } from '@safe-global/safe-gateway-typescript-sdk'
 import { TransactionStatus } from '@safe-global/safe-apps-sdk'
 
@@ -109,5 +111,17 @@ export function txInfoBuilder(): IBuilder<TransactionInfo> {
     methodName: faker.string.alpha(),
     to: { value: faker.finance.ethereumAddress() },
     value: faker.number.bigInt({ min: 0, max: 10n ** 18n }).toString(),
+  })
+}
+
+export function txDataBuilder(): IBuilder<TransactionData> {
+  return Builder.new<TransactionData>().with({
+    hexData: faker.string.hexadecimal({ length: faker.number.int({ max: 128 }) }),
+    to: { value: faker.finance.ethereumAddress() },
+    addressInfoIndex: {},
+    value: faker.string.numeric({ length: { min: 1, max: 1000 } }),
+    operation: faker.helpers.enumValue(Operation),
+    trustedDelegateCallTarget: true,
+    dataDecoded: undefined,
   })
 }
