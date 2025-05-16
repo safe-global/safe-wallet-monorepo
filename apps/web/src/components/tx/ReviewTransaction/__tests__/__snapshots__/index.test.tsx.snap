@@ -333,7 +333,7 @@ exports[`ReviewTransaction should display a confirmation screen 1`] = `
                         style="--Paper-shadow: none;"
                       >
                         <div
-                          class="MuiStack-root css-eh7dui-MuiStack-root"
+                          class="MuiStack-root css-1uvd2my-MuiStack-root"
                         >
                           <div
                             class="MuiStack-root css-1n46f6x-MuiStack-root"
@@ -358,7 +358,7 @@ exports[`ReviewTransaction should display a confirmation screen 1`] = `
                               </button>
                               <button
                                 aria-pressed="false"
-                                class="MuiButtonBase-root MuiToggleButtonGroup-grouped MuiToggleButtonGroup-groupedHorizontal MuiToggleButton-root MuiToggleButton-sizeSmall MuiToggleButton-standard MuiToggleButtonGroup-grouped MuiToggleButtonGroup-groupedHorizontal MuiToggleButtonGroup-lastButton css-u2ogzi-MuiButtonBase-root-MuiToggleButton-root"
+                                class="MuiButtonBase-root MuiToggleButtonGroup-grouped MuiToggleButtonGroup-groupedHorizontal MuiToggleButton-root MuiToggleButton-sizeSmall MuiToggleButton-standard MuiToggleButtonGroup-grouped MuiToggleButtonGroup-groupedHorizontal MuiToggleButtonGroup-middleButton css-u2ogzi-MuiButtonBase-root-MuiToggleButton-root"
                                 tabindex="0"
                                 type="button"
                                 value="1"
@@ -367,6 +367,19 @@ exports[`ReviewTransaction should display a confirmation screen 1`] = `
                                   class="MuiBox-root css-mro3c9"
                                 >
                                   Hashes
+                                </div>
+                              </button>
+                              <button
+                                aria-pressed="false"
+                                class="MuiButtonBase-root MuiToggleButtonGroup-grouped MuiToggleButtonGroup-groupedHorizontal MuiToggleButton-root MuiToggleButton-sizeSmall MuiToggleButton-standard MuiToggleButtonGroup-grouped MuiToggleButtonGroup-groupedHorizontal MuiToggleButtonGroup-lastButton css-u2ogzi-MuiButtonBase-root-MuiToggleButton-root"
+                                tabindex="0"
+                                type="button"
+                                value="2"
+                              >
+                                <div
+                                  class="MuiBox-root css-mro3c9"
+                                >
+                                  JSON
                                 </div>
                               </button>
                             </div>

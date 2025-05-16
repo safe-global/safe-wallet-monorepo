@@ -1,4 +1,5 @@
-import { trackEvent } from '@/services/analytics'
+import { useCallback, useRef } from 'react'
+import { MODALS_EVENTS, trackEvent } from '@/services/analytics'
 import { TX_EVENTS } from '@/services/analytics/events/transactions'
 import { getTransactionTrackingType } from '@/services/analytics/tx-tracking'
 import { isNestedConfirmationTxInfo } from '@/utils/transaction-guards'
@@ -73,4 +74,17 @@ export function trackTxEvents(
   if (isCreation && isExecuted) {
     trackEvent({ ...executionEvent, label: txType })
   }
+}
+
+export function useTrackTimeSpent() {
+  const startTime = useRef(Date.now())
+
+  return useCallback(() => {
+    const secondsElapsed = Math.round((Date.now() - startTime.current) / 1000)
+
+    trackEvent({
+      ...MODALS_EVENTS.RECEIPT_TIME_SPENT,
+      label: secondsElapsed,
+    })
+  }, [startTime])
 }

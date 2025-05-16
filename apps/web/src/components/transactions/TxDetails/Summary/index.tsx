@@ -91,7 +91,7 @@ const Summary = ({ safeTxData, txData, txInfo, txDetails, showMultisend = true }
 
               <DecoderLinks />
 
-              <Receipt safeTxData={safeTxData} txData={txData} grid />
+              <Receipt safeTxData={safeTxData} txData={txData} txDetails={txDetails} withSignatures grid />
             </Box>
           </ColorCodedTxAccordion>
         </Box>
