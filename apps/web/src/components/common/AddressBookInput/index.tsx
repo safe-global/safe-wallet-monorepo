@@ -27,10 +27,14 @@ const AddressBookInput = ({ name, canAdd, ...props }: AddressInputProps & { canA
   const { setValue, control } = useFormContext()
   const addressValue = useWatch({ name, control })
 
-  const allAddressBookEntries = mergedAddressBook.map((entry) => ({
-    label: entry.address,
-    name: entry.name,
-  }))
+  const allAddressBookEntries = useMemo(
+    () =>
+      mergedAddressBook.map((entry) => ({
+        label: entry.address,
+        name: entry.name,
+      })),
+    [mergedAddressBook],
+  )
 
   const hasVisibleOptions = useMemo(
     () => !!allAddressBookEntries.filter((entry) => entry.label.includes(addressValue)).length,
