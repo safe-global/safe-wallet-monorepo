@@ -1,11 +1,21 @@
 import EthHashInfo from '@/components/common/EthHashInfo'
 import { useAddressName } from '@/components/common/NamedAddressInfo'
+import { isCustomTxInfo } from '@/utils/transaction-guards'
 import { Chip } from '@mui/material'
-import type { TransactionData } from '@safe-global/safe-gateway-typescript-sdk'
+import type { TransactionData, TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
 
-const NameChip = ({ txData, withBackground }: { txData?: TransactionData; withBackground?: boolean }) => {
+const NameChip = ({
+  txData,
+  withBackground,
+  txInfo,
+}: {
+  txData?: TransactionData
+  txInfo?: TransactionDetails['txInfo']
+  withBackground?: boolean
+}) => {
   const toAddress = txData?.to.value
-  const toInfo = txData?.addressInfoIndex?.[txData?.to.value] || txData?.to
+  const customTxInfo = txInfo && isCustomTxInfo(txInfo) ? txInfo : undefined
+  const toInfo = customTxInfo?.to || txData?.addressInfoIndex?.[txData?.to.value] || txData?.to
   const toName = toInfo?.name || (toInfo && 'displayName' in toInfo ? String(toInfo.displayName || '') : undefined)
   const toLogo = toInfo?.logoUri
   const contractInfo = useAddressName(toAddress, toName)

@@ -1,6 +1,6 @@
 import { memo, type ReactElement } from 'react'
 import { generateDataRowValue, TxDataRow } from '@/components/transactions/TxDetails/Summary/TxDataRow'
-import { isMultiSendTxInfo, isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
+import { isCustomTxInfo, isMultiSendTxInfo, isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
 import type { TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
 import type { SafeTransactionData } from '@safe-global/safe-core-sdk-types'
 import { dateString } from '@safe-global/utils/utils/formatters'
@@ -24,7 +24,8 @@ interface Props {
 
 const Summary = ({ safeTxData, txData, txInfo, txDetails, showMultisend = true }: Props): ReactElement => {
   const { txHash, executedAt } = txDetails ?? {}
-  const toInfo = txData?.addressInfoIndex?.[txData?.to.value] || txData?.to
+  const customTxInfo = txInfo && isCustomTxInfo(txInfo) ? txInfo : undefined
+  const toInfo = customTxInfo?.to || txData?.addressInfoIndex?.[txData?.to.value] || txData?.to
   const showDetails = Boolean(txInfo && txData)
 
   let baseGas, gasPrice, gasToken, safeTxGas, refundReceiver, submittedAt, nonce
@@ -91,7 +92,14 @@ const Summary = ({ safeTxData, txData, txInfo, txDetails, showMultisend = true }
 
               <DecoderLinks />
 
-              <Receipt safeTxData={safeTxData} txData={txData} txDetails={txDetails} withSignatures grid />
+              <Receipt
+                safeTxData={safeTxData}
+                txData={txData}
+                txDetails={txDetails}
+                txInfo={txInfo}
+                withSignatures
+                grid
+              />
             </Box>
           </ColorCodedTxAccordion>
         </Box>
