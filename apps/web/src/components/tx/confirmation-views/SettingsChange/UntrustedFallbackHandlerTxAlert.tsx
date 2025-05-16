@@ -10,21 +10,19 @@ export const useSetsUntrustedFallbackHandler = (txData: TransactionDetails['txDa
   const multiSendTransactions =
     txData?.dataDecoded?.method === 'multiSend' && txData?.dataDecoded?.parameters?.[0]?.valueDecoded
 
-  const transactions = Array.isArray(multiSendTransactions) ? multiSendTransactions : txData ? [txData] : []
+  const fallbackHandlers = useMemo(() => {
+    const transactions = Array.isArray(multiSendTransactions) ? multiSendTransactions : txData ? [txData] : []
 
-  const fallbackHandlers = useMemo(
-    () =>
-      Array.isArray(transactions)
-        ? transactions
-            .map(({ dataDecoded }) =>
-              dataDecoded?.method === 'setFallbackHandler'
-                ? dataDecoded?.parameters?.find(({ name }) => name === 'handler')?.value
-                : undefined,
-            )
-            .filter((handler) => typeof handler === 'string')
-        : [],
-    [transactions],
-  )
+    return Array.isArray(transactions)
+      ? transactions
+          .map(({ dataDecoded }) =>
+            dataDecoded?.method === 'setFallbackHandler'
+              ? dataDecoded?.parameters?.find(({ name }) => name === 'handler')?.value
+              : undefined,
+          )
+          .filter((handler) => typeof handler === 'string')
+      : []
+  }, [multiSendTransactions, txData])
 
   return useHasUntrustedFallbackHandler(fallbackHandlers)
 }
