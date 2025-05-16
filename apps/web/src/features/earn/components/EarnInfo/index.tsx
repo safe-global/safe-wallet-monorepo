@@ -5,6 +5,8 @@ import EarnIllustrationLight from '@/public/images/common/earn-illustration-ligh
 import css from './styles.module.css'
 import { EarnPoweredBy } from '@/features/earn/components/EarnDashboardBanner'
 import CheckIcon from '@/public/images/common/check.svg'
+import Track from '@/components/common/Track'
+import { EARN_EVENTS } from '@/services/analytics/events/earn'
 
 const EarnInfo = ({ onGetStarted }: { onGetStarted: () => void }) => {
   return (
@@ -29,9 +31,11 @@ const EarnInfo = ({ onGetStarted }: { onGetStarted: () => void }) => {
 
             <Grid container size={{ xs: 12 }} textAlign="center" spacing={2}>
               <Grid size={{ xs: 12, md: 'auto' }}>
-                <Button fullWidth variant="contained" onClick={onGetStarted}>
-                  Get started
-                </Button>
+                <Track {...EARN_EVENTS.GET_STARTED_WITH_EARN}>
+                  <Button fullWidth variant="contained" onClick={onGetStarted}>
+                    Get started
+                  </Button>
+                </Track>
               </Grid>
             </Grid>
           </Grid>
