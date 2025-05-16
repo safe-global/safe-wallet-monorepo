@@ -38,7 +38,7 @@ const RecoverySteps = [
 ]
 
 export function UpsertRecoveryFlowIntro(): ReactElement {
-  const { onNext } = useContext(TxFlowContext)
+  const { onNext, data } = useContext(TxFlowContext)
   return (
     <TxCard>
       <Grid
@@ -78,7 +78,7 @@ export function UpsertRecoveryFlowIntro(): ReactElement {
       </Grid>
       <Divider className={commonCss.nestedDivider} />
       <CardActions sx={{ mt: 'var(--space-1) !important' }}>
-        <Button data-testid="next-btn" variant="contained" onClick={onNext}>
+        <Button data-testid="next-btn" variant="contained" onClick={() => onNext(data)}>
           Next
         </Button>
       </CardActions>

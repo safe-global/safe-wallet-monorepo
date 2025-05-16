@@ -121,7 +121,7 @@ export function UpsertRecoveryFlowSettings({ delayModifier }: { delayModifier?: 
     trackEvent({ ...creationEvent })
     trackEvent({ ...RECOVERY_EVENTS.RECOVERY_SETTINGS, label: settings })
 
-    onNext({ expiry, delay, customDelay, selectedDelay, recoverer })
+    onNext({ expiry, delay, customDelay, selectedDelay, recoverer, moduleAddress: data?.moduleAddress })
   }
 
   return (
