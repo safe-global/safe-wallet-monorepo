@@ -33,6 +33,8 @@ import type {
   NativeStakingDepositTransactionInfo,
   NativeStakingValidatorsExitTransactionInfo,
   NativeStakingWithdrawTransactionInfo,
+  VaultDepositTransactionInfo,
+  VaultRedeemTransactionInfo,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
 import { HistoryTransactionItems, PendingTransactionItems } from '@safe-global/store/gateway/types'
@@ -195,4 +197,18 @@ export const isERC20Transfer = (value: TransferTransactionInfo['transferInfo']):
 
 export const isERC721Transfer = (value: TransferTransactionInfo['transferInfo']): value is Erc721Transfer => {
   return value.type === TransactionTokenType.ERC721
+}
+
+export const isVaultDepositTxInfo = (value: TransactionDetails['txInfo']): value is VaultDepositTransactionInfo => {
+  return value.type === 'VaultDeposit'
+}
+
+export const isVaultRedeemTxInfo = (value: TransactionDetails['txInfo']): value is VaultRedeemTransactionInfo => {
+  return value.type === 'VaultRedeem'
+}
+
+export const isAnyEarnTxInfo = (
+  value: TransactionDetails['txInfo'],
+): value is VaultDepositTransactionInfo | VaultRedeemTransactionInfo => {
+  return isVaultDepositTxInfo(value) || isVaultRedeemTxInfo(value)
 }
