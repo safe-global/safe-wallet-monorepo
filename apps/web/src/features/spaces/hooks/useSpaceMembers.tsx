@@ -36,7 +36,8 @@ export const useSpaceMembersByStatus = () => {
 
 const useCurrentMembership = (spaceId?: number) => {
   const allMembers = useAllMembers(spaceId)
-  const { currentData: user } = useUsersGetWithWalletsV1Query()
+  const isUserSignedIn = useAppSelector(isAuthenticated)
+  const { currentData: user } = useUsersGetWithWalletsV1Query(undefined, { skip: !isUserSignedIn })
   return allMembers.find((member) => member.user.id === user?.id)
 }
 

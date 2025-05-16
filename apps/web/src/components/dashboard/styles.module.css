@@ -1,3 +1,17 @@
 .hideIfEmpty:empty {
   display: none;
 }
+
+.topBanner {
+  margin-left: calc(var(--space-3) * -1);
+  margin-right: calc(var(--space-3) * -1);
+  margin-top: calc(var(--space-3) * -1);
+}
+
+@media (max-width: 599.95px) {
+  .topBanner {
+    margin-left: calc(var(--space-2) * -1);
+    margin-right: calc(var(--space-2) * -1);
+    margin-top: calc(var(--space-2) * -1);
+  }
+}
