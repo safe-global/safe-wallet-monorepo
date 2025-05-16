@@ -243,7 +243,7 @@ export const nonceTooltipMsg = {
   mustBeNumber: 'Nonce must be a number',
 }
 
-export const addresBookContacts = {
+export const addressBookContacts = {
   user1: {
     address: '0x01A9F68e339da12565cfBc47fe7D6EdEcB11C46f',
     name: 'David',
