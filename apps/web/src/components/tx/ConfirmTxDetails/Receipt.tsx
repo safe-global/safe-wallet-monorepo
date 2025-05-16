@@ -1,10 +1,10 @@
-import { Fragment, type ReactElement } from 'react'
+import { Fragment, useMemo, type ReactElement } from 'react'
 import { Box, Divider, Stack, Typography } from '@mui/material'
 import CheckIcon from '@mui/icons-material/Check'
 import type { SafeTransaction } from '@safe-global/safe-core-sdk-types'
 import { PaperViewToggle } from '../../common/PaperViewToggle'
 import EthHashInfo from '@/components/common/EthHashInfo'
-import { Operation, type TransactionData } from '@safe-global/safe-gateway-typescript-sdk/dist/types/transactions'
+import { Operation, type TransactionDetails, type TransactionData } from '@safe-global/safe-gateway-typescript-sdk'
 import { HexEncodedData } from '@/components/transactions/HexEncodedData'
 import {
   useDomainHash,
@@ -13,24 +13,32 @@ import {
 } from '@/components/transactions/TxDetails/Summary/SafeTxHashDataRow'
 import TxDetailsRow from './TxDetailsRow'
 import NameChip from './NameChip'
+import { isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
 
 type ReceiptProps = {
   safeTxData: SafeTransaction['data']
   txData?: TransactionData
+  txDetails?: TransactionDetails
   grid?: boolean
+  withSignatures?: boolean
 }
 
 const ScrollWrapper = ({ children }: { children: ReactElement | ReactElement[] }) => (
   <Box sx={{ maxHeight: '550px', flex: 1, overflowY: 'auto', px: 2, pt: 1, mt: '0 !important' }}>{children}</Box>
 )
 
-export const Receipt = ({ safeTxData, txData, grid }: ReceiptProps) => {
+export const Receipt = ({ safeTxData, txData, txDetails, grid, withSignatures = false }: ReceiptProps) => {
   const safeTxHash = useSafeTxHash({ safeTxData })
   const domainHash = useDomainHash()
   const messageHash = useMessageHash({ safeTxData })
   const operation = Number(safeTxData.operation) as Operation
 
   const ToWrapper = grid ? Box : Fragment
+
+  const confirmations = useMemo(() => {
+    const detailedExecutionInfo = txDetails?.detailedExecutionInfo
+    return isMultisigDetailedExecutionInfo(detailedExecutionInfo) ? detailedExecutionInfo.confirmations : []
+  }, [txDetails?.detailedExecutionInfo])
 
   return (
     <PaperViewToggle activeView={0} leftAlign={grid}>
@@ -124,6 +132,23 @@ export const Receipt = ({ safeTxData, txData, grid }: ReceiptProps) => {
                 <TxDetailsRow label="Nonce" grid={grid}>
                   {safeTxData.nonce}
                 </TxDetailsRow>
+
+                {withSignatures &&
+                  confirmations?.map(
+                    ({ signature }, index) =>
+                      !!signature && (
+                        <TxDetailsRow
+                          data-testid="tx-signature"
+                          label={`Signature ${index + 1}`}
+                          key={`signature-${index}`}
+                          grid={grid}
+                        >
+                          <Typography variant="body2" width={grid ? '70%' : undefined}>
+                            <HexEncodedData hexData={signature} highlightFirstBytes={false} limit={30} />
+                          </Typography>
+                        </TxDetailsRow>
+                      ),
+                  )}
               </Stack>
             </ScrollWrapper>
           ),
