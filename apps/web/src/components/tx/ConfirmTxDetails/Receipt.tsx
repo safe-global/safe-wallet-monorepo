@@ -16,7 +16,7 @@ import NameChip from './NameChip'
 import { isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
 import { JsonView } from './JsonView'
 
-type TxDetailsProps = {
+type ReceiptProps = {
   safeTxData: SafeTransaction['data']
   txData?: TransactionData
   txDetails?: TransactionDetails
@@ -28,7 +28,7 @@ const ScrollWrapper = ({ children }: { children: ReactElement | ReactElement[] }
   <Box sx={{ maxHeight: '550px', flex: 1, overflowY: 'auto', px: 2, pt: 1, mt: '0 !important' }}>{children}</Box>
 )
 
-export const Receipt = ({ safeTxData, txData, txDetails, grid, withSignatures = false }: TxDetailsProps) => {
+export const Receipt = ({ safeTxData, txData, txDetails, grid, withSignatures = false }: ReceiptProps) => {
   const safeTxHash = useSafeTxHash({ safeTxData })
   const domainHash = useDomainHash()
   const messageHash = useMessageHash({ safeTxData })

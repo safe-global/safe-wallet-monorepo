@@ -2157,6 +2157,88 @@
         "tags": ["users"]
       }
     },
+    "/v1/spaces/{spaceId}/address-book": {
+      "get": {
+        "operationId": "addressBooksGetAddressBookItemsV1",
+        "parameters": [
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Address Book Items found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SpaceAddressBookDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Signer address not provided"
+          },
+          "403": {
+            "description": "Signer not authorized."
+          },
+          "404": {
+            "description": "User, member or space not found"
+          }
+        },
+        "tags": ["spaces"]
+      },
+      "put": {
+        "operationId": "addressBooksUpsertAddressBookItemsV1",
+        "parameters": [
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpsertAddressBookItemsDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Address Book updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SpaceAddressBookDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Signer address not provided"
+          },
+          "403": {
+            "description": "Signer not authorized."
+          },
+          "404": {
+            "description": "User, member or space not found"
+          }
+        },
+        "tags": ["spaces"]
+      }
+    },
     "/v1/spaces": {
       "post": {
         "operationId": "spacesCreateV1",
@@ -4297,17 +4379,20 @@
       "AddressBookItem": {
         "type": "object",
         "properties": {
-          "id": {
-            "type": "string"
-          },
           "name": {
             "type": "string"
           },
           "address": {
             "type": "string"
+          },
+          "chainIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         },
-        "required": ["id", "name", "address"]
+        "required": ["name", "address", "chainIds"]
       },
       "AddressBook": {
         "type": "object",
@@ -4750,6 +4835,9 @@
           "isTestnet": {
             "type": "boolean"
           },
+          "zk": {
+            "type": "boolean"
+          },
           "nativeCurrency": {
             "$ref": "#/components/schemas/NativeCurrency"
           },
@@ -4826,6 +4914,7 @@
           "description",
           "l2",
           "isTestnet",
+          "zk",
           "nativeCurrency",
           "transactionService",
           "blockExplorerUriTemplate",
@@ -6087,6 +6176,57 @@
           }
         },
         "required": ["id"]
+      },
+      "SpaceAddressBookItemDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          },
+          "chainIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "createdBy": {
+            "type": "string"
+          },
+          "lastUpdatedBy": {
+            "type": "string"
+          }
+        },
+        "required": ["name", "address", "chainIds", "createdBy", "lastUpdatedBy"]
+      },
+      "SpaceAddressBookDto": {
+        "type": "object",
+        "properties": {
+          "spaceId": {
+            "type": "string"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SpaceAddressBookItemDto"
+            }
+          }
+        },
+        "required": ["spaceId", "data"]
+      },
+      "UpsertAddressBookItemsDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AddressBookItem"
+            }
+          }
+        },
+        "required": ["items"]
       },
       "CreateSpaceDto": {
         "type": "object",
@@ -7941,6 +8081,26 @@
           },
           "addressInfoIndex": {
             "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/AddressInfo"
+            },
+            "nullable": true
+          },
+          "tokenInfoIndex": {
+            "type": "object",
+            "additionalProperties": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/NativeToken"
+                },
+                {
+                  "$ref": "#/components/schemas/Erc20Token"
+                },
+                {
+                  "$ref": "#/components/schemas/Erc721Token"
+                }
+              ]
+            },
             "nullable": true
           }
         },

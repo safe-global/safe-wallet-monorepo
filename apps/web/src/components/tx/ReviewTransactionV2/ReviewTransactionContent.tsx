@@ -1,5 +1,5 @@
 import type { PropsWithChildren, ReactElement } from 'react'
-import { useContext } from 'react'
+import { useCallback, useContext } from 'react'
 import madProps from '@/utils/mad-props'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import ErrorMessage from '../ErrorMessage'
@@ -19,6 +19,7 @@ import { Slot, SlotName } from '@/components/tx-flow/slots'
 import type { SubmitCallback } from '@/components/tx-flow/TxFlow'
 import { Button, CircularProgress } from '@mui/material'
 import CheckWallet from '@/components/common/CheckWallet'
+import { MODALS_EVENTS, trackEvent } from '@/services/analytics'
 
 export type ReviewTransactionContentProps = PropsWithChildren<{ onSubmit: SubmitCallback }>
 
@@ -42,6 +43,11 @@ export const ReviewTransactionContent = ({
   const [readableApprovals] = useApprovalInfos({ safeTransaction: safeTx })
   const isApproval = readableApprovals && readableApprovals.length > 0
   const isCounterfactualSafe = useIsCounterfactualSafe()
+
+  const onContinueClick = useCallback(() => {
+    trackEvent(MODALS_EVENTS.CONTINUE_CLICKED)
+    onSubmit()
+  }, [onSubmit])
 
   return (
     <>
@@ -97,7 +103,7 @@ export const ReviewTransactionContent = ({
                 data-testid="continue-sign-btn"
                 variant="contained"
                 type="submit"
-                onClick={() => onSubmit()}
+                onClick={onContinueClick}
                 disabled={!isOk || isSubmitDisabled}
                 sx={{ minWidth: '82px', order: '1', width: ['100%', '100%', '100%', 'auto'] }}
               >
