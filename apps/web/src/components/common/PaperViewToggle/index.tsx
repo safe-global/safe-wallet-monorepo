@@ -14,7 +14,7 @@ type PaperViewToggleProps = {
 
 export const PaperViewToggle = ({ children, leftAlign, activeView = 0 }: PaperViewToggleProps) => {
   const [active, setActive] = useState(activeView)
-  const [minHeight, setMinHeight] = useState<number>(0)
+  const [minHeight, setMinHeight] = useState<number>()
   const stackRef = useRef<HTMLDivElement>(null)
 
   const onChangeView = useCallback(
@@ -42,7 +42,7 @@ export const PaperViewToggle = ({ children, leftAlign, activeView = 0 }: PaperVi
         pb: 1.5,
       }}
     >
-      <Stack spacing={2} height={`${minHeight}px`} ref={stackRef}>
+      <Stack spacing={2} height={minHeight ? `${minHeight}px` : undefined} ref={stackRef}>
         <Stack direction={leftAlign ? 'row' : 'row-reverse'} justifyContent="space-between" px={2} py={1}>
           <ToggleButtonGroup onChange={onChangeView}>{children}</ToggleButtonGroup>
         </Stack>
