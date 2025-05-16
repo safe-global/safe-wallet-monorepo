@@ -5,7 +5,7 @@ import CopyButton from '@/components/common/CopyButton'
 const containerSx = { backgroundColor: 'background.paper', borderRadius: 1, padding: 2 }
 const codeSx = { wordWrap: 'break-word', whiteSpace: 'pre-wrap' }
 
-export const JsonView = ({ data }: { data: Object }) => {
+export const JsonView = ({ data }: { data: unknown }) => {
   const json = useMemo(() => JSON.stringify(data, null, 2), [data])
 
   return (
