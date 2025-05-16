@@ -14,6 +14,7 @@ type PaperViewToggleProps = {
 
 export const PaperViewToggle = ({ children, leftAlign, activeView = 0 }: PaperViewToggleProps) => {
   const [active, setActive] = useState(activeView)
+  // Intentionally using undefined to prevent rendering a 0px height on initial render
   const [minHeight, setMinHeight] = useState<number>()
   const stackRef = useRef<HTMLDivElement>(null)
 
