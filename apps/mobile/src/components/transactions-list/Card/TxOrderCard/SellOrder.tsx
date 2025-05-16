@@ -14,14 +14,15 @@ interface TxSellOrderCardProps {
   inQueue?: boolean
   executionInfo?: Transaction['executionInfo']
   onPress: () => void
+  type: string
 }
 
-export function SellOrder({ order, bordered, executionInfo, inQueue, onPress }: TxSellOrderCardProps) {
+export function SellOrder({ order, type, bordered, executionInfo, inQueue, onPress }: TxSellOrderCardProps) {
   return (
     <SafeListItem
       label={`${order.sellToken.symbol} > ${order.buyToken.symbol}`}
       icon="transaction-swap"
-      type="Swap order"
+      type={type}
       executionInfo={executionInfo}
       bordered={bordered}
       onPress={onPress}

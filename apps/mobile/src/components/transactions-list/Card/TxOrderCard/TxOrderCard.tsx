@@ -4,6 +4,7 @@ import { Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transacti
 import { isSwapOrderTxInfo, isSwapTransferOrderTxInfo, isTwapOrderTxInfo } from '@/src/utils/transaction-guards'
 import { SellOrder } from '@/src/components/transactions-list/Card/TxOrderCard/SellOrder'
 import { TwapOrder } from '@/src/components/transactions-list/Card/TxOrderCard/TwapOrder'
+import { getOrderClass } from '@/src/hooks/useTransactionType'
 
 interface TxSwapCardProps {
   txInfo: OrderTransactionInfo
@@ -25,8 +26,18 @@ export function TxOrderCard({ txInfo, bordered, executionInfo, inQueue, onPress 
   }
 
   if (isSwapOrderTxInfo(txInfo) || isSwapTransferOrderTxInfo(txInfo)) {
+    const orderClass = getOrderClass(txInfo)
+    const type = orderClass === 'limit' ? 'Limit order' : 'Swap order'
+
     return (
-      <SellOrder order={txInfo} bordered={bordered} executionInfo={executionInfo} inQueue={inQueue} onPress={onPress} />
+      <SellOrder
+        order={txInfo}
+        type={type}
+        bordered={bordered}
+        executionInfo={executionInfo}
+        inQueue={inQueue}
+        onPress={onPress}
+      />
     )
   }
   return null
