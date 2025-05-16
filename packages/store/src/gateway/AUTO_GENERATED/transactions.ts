@@ -653,12 +653,7 @@ export type TransactionData = {
   value?: string | null
   operation: number
   trustedDelegateCallTarget?: boolean | null
-  addressInfoIndex?: {
-    [key: string]: AddressInfo
-  } | null
-  tokenInfoIndex?: {
-    [key: string]: NativeToken | Erc20Token | Erc721Token
-  } | null
+  addressInfoIndex?: object | null
 }
 export type MultisigConfirmationDetails = {
   signer: AddressInfo

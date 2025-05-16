@@ -50,7 +50,6 @@ export type Balance = {
   fiatBalance: string
   fiatConversion: string
   tokenInfo: Token
-  fiatBalance24hChange?: string | null
 }
 export type Balances = {
   fiatTotal: string

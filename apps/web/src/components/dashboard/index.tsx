@@ -18,6 +18,7 @@ import { UnsupportedMastercopyWarning } from '@/features/multichain/components/U
 import SpacesDashboardWidget from 'src/features/spaces/components/SpacesDashboardWidget'
 import EarnDashboardBanner from '@/features/earn/components/EarnDashboardBanner'
 import useIsEarnBannerEnabled from '@/features/earn/hooks/useIsEarnBannerEnabled'
+import classnames from 'classnames'
 
 const RecoveryHeader = dynamic(() => import('@/features/recovery/components/RecoveryHeader'))
 const GovernanceSection = dynamic(() => import('@/components/dashboard/GovernanceSection/GovernanceSection'), {
@@ -34,18 +35,18 @@ const Dashboard = (): ReactElement => {
 
   return (
     <>
+      {isSpacesFeatureEnabled && (
+        <Grid item xs={12} className={classnames(css.hideIfEmpty, css.topBanner)}>
+          <SpacesDashboardWidget />
+        </Grid>
+      )}
+
       <Grid container spacing={3}>
         {supportsRecovery && <RecoveryHeader />}
 
         <Grid item xs={12} className={css.hideIfEmpty}>
           <InconsistentSignerSetupWarning />
         </Grid>
-
-        {isSpacesFeatureEnabled && (
-          <Grid item xs={12} className={css.hideIfEmpty}>
-            <SpacesDashboardWidget />
-          </Grid>
-        )}
 
         <Grid item xs={12} className={css.hideIfEmpty}>
           <UnsupportedMastercopyWarning />
