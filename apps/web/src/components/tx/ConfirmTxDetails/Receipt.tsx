@@ -14,6 +14,7 @@ import {
 import TxDetailsRow from './TxDetailsRow'
 import NameChip from './NameChip'
 import { isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
+import { JsonView } from './JsonView'
 
 type TxDetailsProps = {
   safeTxData: SafeTransaction['data']
@@ -182,6 +183,14 @@ export const Receipt = ({ safeTxData, txData, txDetails, grid, withSignatures = 
                   </TxDetailsRow>
                 )}
               </Stack>
+            </ContentWrapper>
+          ),
+        },
+        {
+          title: 'JSON',
+          content: (
+            <ContentWrapper>
+              <JsonView data={safeTxData} />
             </ContentWrapper>
           ),
         },
