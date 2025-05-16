@@ -21,7 +21,10 @@ export const PaperViewToggle = ({ children, leftAlign, activeView = 0 }: PaperVi
     (index: number) => {
       // Avoid height change when switching between views
       setMinHeight((prev) => {
-        return Math.max(prev, stackRef.current?.offsetHeight || 0)
+        if (!prev && stackRef.current) {
+          return stackRef.current.offsetHeight
+        }
+        return prev
       })
 
       setActive(index)
@@ -39,7 +42,7 @@ export const PaperViewToggle = ({ children, leftAlign, activeView = 0 }: PaperVi
         pb: 1.5,
       }}
     >
-      <Stack spacing={2} minHeight={`${minHeight}px`} ref={stackRef}>
+      <Stack spacing={2} height={`${minHeight}px`} ref={stackRef}>
         <Stack direction={leftAlign ? 'row' : 'row-reverse'} justifyContent="space-between" px={2} py={1}>
           <ToggleButtonGroup onChange={onChangeView}>{children}</ToggleButtonGroup>
         </Stack>
