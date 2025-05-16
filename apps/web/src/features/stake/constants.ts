@@ -1,5 +1,5 @@
 export const STAKE_TITLE = 'Stake'
-
+export const STAKE_CONSENT_STORAGE_KEY = 'stakeDisclaimerAcceptedV1'
 export const WIDGET_PRODUCTION_URL = 'https://safe.widget.kiln.fi/overview'
 export const WIDGET_TESTNET_URL = 'https://safe.widget.testnet.kiln.fi/overview'
 

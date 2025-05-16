@@ -1,0 +1,69 @@
+.bannerWrapper {
+    position: relative;
+    border: none;
+    margin: 0;
+    padding: var(--space-4);
+}
+
+.earnIllustration {
+    position: absolute;
+    height: inherit;
+    right: var(--space-10);
+}
+
+.gradientShadow {
+    width: 400px;
+    height: 243px;
+    background: linear-gradient(#b0ffc9, #5fddff);
+    filter: blur(40px);
+    position: absolute;
+    right: 0;
+    top: var(--space-8);
+    border-radius: 50%;
+}
+
+.gradientShadowDarkMode {
+    background: linear-gradient(#04491a, #087796);
+}
+
+.kilnIcon {
+    height: 14px;
+    width: inherit;
+    margin-top: -2px !important;
+}
+
+.kilnIconDarkMode path {
+    fill: var(--color-primary-light);
+}
+
+.morphoIcon {
+    height: 16px;
+    width: inherit;
+    margin-top: -2px !important;
+}
+
+.morphoIconDarkMode path {
+    fill: var(--color-primary-light);
+}
+
+.gradientText {
+    background: linear-gradient(225deg, #5fddff 12.5%, #12ff80 88.07%);
+    background-clip: text;
+    color: transparent;
+}
+
+.header {
+    padding-right: var(--space-8);
+    max-width: 550px;
+    font-weight: bold;
+}
+
+.content {
+    max-width: 550px;
+}
+
+@media (max-width: 899.99px) {
+    .header {
+        padding: 0;
+    }
+}

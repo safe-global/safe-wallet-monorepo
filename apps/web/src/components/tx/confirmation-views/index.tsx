@@ -10,6 +10,8 @@ import {
   isSafeUpdateTxData,
   isSwapOrderTxInfo,
   isTwapOrderTxInfo,
+  isVaultDepositTxInfo,
+  isVaultRedeemTxInfo,
 } from '@/utils/transaction-guards'
 import { type ReactNode, useContext, useMemo } from 'react'
 import type { NarrowConfirmationViewProps } from './types'
@@ -28,6 +30,8 @@ import { MigrateToL2Information } from './MigrateToL2Information'
 import { NestedSafeCreation } from './NestedSafeCreation'
 import { isNestedSafeCreation } from '@/utils/nested-safes'
 import Summary from '@/components/transactions/TxDetails/Summary'
+import VaultDepositConfirmation from 'src/features/earn/components/VaultDepositConfirmation'
+import VaultRedeemConfirmation from '@/features/earn/components/VaultRedeemConfirmation'
 import TxData from '@/components/transactions/TxDetails/TxData'
 import { isMultiSendCalldata } from '@/utils/transaction-calldata'
 
@@ -59,6 +63,12 @@ const getConfirmationViewComponent = ({
   if (isSwapOrderTxInfo(txInfo) || isTwapOrderTxInfo(txInfo)) return <SwapOrder txInfo={txInfo} txData={txData} />
 
   if (isAnyStakingTxInfo(txInfo)) return <StakingTx txInfo={txInfo} />
+
+  // @ts-expect-error TODO: Fix these if there is time
+  if (isVaultDepositTxInfo(txInfo)) return <VaultDepositConfirmation txInfo={txInfo} />
+
+  // @ts-expect-error TODO: Fix these if there is time
+  if (isVaultRedeemTxInfo(txInfo)) return <VaultRedeemConfirmation txInfo={txInfo} />
 
   if (isCustomTxInfo(txInfo) && isSafeUpdateTxData(txData)) return <UpdateSafe txData={txData} />
 
