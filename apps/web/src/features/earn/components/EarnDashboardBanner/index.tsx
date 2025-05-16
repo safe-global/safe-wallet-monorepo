@@ -12,6 +12,8 @@ import Image from 'next/image'
 import { OVERVIEW_EVENTS, trackEvent } from '@/services/analytics'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import useIsEarnBannerEnabled from '@/features/earn/hooks/useIsEarnBannerEnabled'
+import Track from '@/components/common/Track'
+import { EARN_EVENTS, EARN_LABELS } from '@/services/analytics/events/earn'
 
 export const EarnPoweredBy = () => {
   const isDarkMode = useDarkMode()
@@ -90,21 +92,25 @@ const EarnDashboardBanner = () => {
 
         <Grid container size={{ xs: 12 }} textAlign="center" spacing={2}>
           <Grid size={{ xs: 12, md: 'auto' }}>
-            <NextLink
-              href={AppRoutes.earn && { pathname: AppRoutes.earn, query: { safe: router.query.safe } }}
-              passHref
-              rel="noreferrer"
-              onClick={tryEarn}
-            >
-              <Button fullWidth variant="contained">
-                Try now
-              </Button>
-            </NextLink>
+            <Track {...EARN_EVENTS.OPEN_EARN_PAGE} label={EARN_LABELS.safe_dashboard_banner}>
+              <NextLink
+                href={AppRoutes.earn && { pathname: AppRoutes.earn, query: { safe: router.query.safe } }}
+                passHref
+                rel="noreferrer"
+                onClick={tryEarn}
+              >
+                <Button fullWidth variant="contained">
+                  Try now
+                </Button>
+              </NextLink>
+            </Track>
           </Grid>
           <Grid size={{ xs: 12, md: 'auto' }}>
-            <Button variant="text" onClick={hideEarn}>
-              Don&apos;t show again
-            </Button>
+            <Track {...EARN_EVENTS.HIDE_EARN_BANNER}>
+              <Button variant="text" onClick={hideEarn}>
+                Don&apos;t show again
+              </Button>
+            </Track>
           </Grid>
         </Grid>
       </Grid>
