@@ -21,9 +21,18 @@ type SingleTxDecodedProps = {
   variant?: AccordionProps['variant']
   expanded?: boolean
   onChange?: AccordionProps['onChange']
+  isExecuted?: boolean
 }
 
-export const SingleTxDecoded = ({ tx, txData, actionTitle, variant, expanded, onChange }: SingleTxDecodedProps) => {
+export const SingleTxDecoded = ({
+  tx,
+  txData,
+  actionTitle,
+  variant,
+  expanded,
+  onChange,
+  isExecuted = false,
+}: SingleTxDecodedProps) => {
   const chain = useCurrentChain()
   const isNativeTransfer = tx.value !== '0' && (!tx.data || isEmptyHexData(tx.data))
   const method = tx.dataDecoded?.method || (isNativeTransfer ? 'native transfer' : 'contract interaction')
@@ -72,7 +81,7 @@ export const SingleTxDecoded = ({ tx, txData, actionTitle, variant, expanded, on
 
       <AccordionDetails>
         <Stack spacing={1}>
-          <DecodedData txData={singleTxData} toInfo={{ value: tx.to }} />
+          <DecodedData txData={singleTxData} toInfo={{ value: tx.to }} isTxExecuted={isExecuted} />
         </Stack>
       </AccordionDetails>
     </Accordion>

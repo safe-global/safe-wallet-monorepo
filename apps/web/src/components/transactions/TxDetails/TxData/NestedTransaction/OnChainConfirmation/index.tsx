@@ -62,7 +62,7 @@ export const OnChainConfirmation = ({
 
           {(isMultiSendTxInfo(nestedTxDetails.txInfo) || isOrderTxInfo(nestedTxDetails.txInfo)) && (
             <ErrorBoundary fallback={<div>Error parsing data</div>}>
-              <Multisend txData={nestedTxDetails.txData} />
+              <Multisend txData={nestedTxDetails.txData} isExecuted={!!nestedTxDetails.executedAt} />
             </ErrorBoundary>
           )}
 
