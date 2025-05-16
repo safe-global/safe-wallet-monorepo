@@ -27,7 +27,7 @@ describe('SingleTxDecoded', () => {
       />,
     )
 
-    expect(result.queryByText('native transfer')).not.toBeNull()
+    expect(result.getByText(`1 ETH`)).not.toBeNull()
   })
 
   it('should show unknown contract interactions', () => {

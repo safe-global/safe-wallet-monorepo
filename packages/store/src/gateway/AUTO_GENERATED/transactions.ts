@@ -685,20 +685,6 @@ export type VaultDepositTransactionInfo = {
   vaultTVL: number
   additionalRewards?: VaultDepositAdditionalRewards[]
 }
-export type TransactionData = {
-  hexData?: string | null
-  dataDecoded?: DataDecoded | null
-  to: AddressInfo
-  value?: string | null
-  operation: number
-  trustedDelegateCallTarget?: boolean | null
-  addressInfoIndex?: object | null
-}
-export type MultisigConfirmationDetails = {
-  signer: AddressInfo
-  signature?: string | null
-  submittedAt: number
-}
 export type NativeToken = {
   address: string
   decimals: number
@@ -722,6 +708,25 @@ export type Erc721Token = {
   name: string
   symbol: string
   type: 'ERC721'
+}
+export type TransactionData = {
+  hexData?: string | null
+  dataDecoded?: DataDecoded | null
+  to: AddressInfo
+  value?: string | null
+  operation: number
+  trustedDelegateCallTarget?: boolean | null
+  addressInfoIndex?: {
+    [key: string]: AddressInfo
+  } | null
+  tokenInfoIndex?: {
+    [key: string]: NativeToken | Erc20Token | Erc721Token
+  } | null
+}
+export type MultisigConfirmationDetails = {
+  signer: AddressInfo
+  signature?: string | null
+  submittedAt: number
 }
 export type MultisigExecutionDetails = {
   type: 'MULTISIG'
