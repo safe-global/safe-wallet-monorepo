@@ -15,11 +15,11 @@ export const useHasUntrustedFallbackHandler = (fallbackHandler?: string | string
   const twapFallbackHandler = useTWAPFallbackHandlerAddress()
 
   const fallbackHandlerAddresses = useMemo(() => {
-    if (Array.isArray(fallbackHandler)) {
-      return fallbackHandler.length > 0 ? fallbackHandler : [safe.fallbackHandler?.value]
+    if (!fallbackHandler) {
+      return safe.fallbackHandler?.value ? [safe.fallbackHandler?.value] : []
     }
 
-    return [fallbackHandler || safe.fallbackHandler?.value]
+    return Array.isArray(fallbackHandler) ? fallbackHandler : [fallbackHandler]
   }, [fallbackHandler, safe.fallbackHandler?.value])
 
   const officialFallbackHandlerAddresses = useMemo(() => {
@@ -35,6 +35,7 @@ export const useHasUntrustedFallbackHandler = (fallbackHandler?: string | string
 
   return useMemo(
     () =>
+      fallbackHandlerAddresses.length > 0 &&
       fallbackHandlerAddresses.some(
         (fallbackHandlerAddress) =>
           !!fallbackHandlerAddress &&

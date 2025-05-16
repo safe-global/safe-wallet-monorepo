@@ -7,12 +7,15 @@ import type { TransactionDetails } from '@safe-global/safe-gateway-typescript-sd
 
 export const useSetsUntrustedFallbackHandler = (txData: TransactionDetails['txData']): boolean => {
   // multiSend method receives one parameter `transactions`
-  const multiSendTransactions = txData?.dataDecoded?.parameters?.[0]?.valueDecoded
+  const multiSendTransactions =
+    txData?.dataDecoded?.method === 'multiSend' && txData?.dataDecoded?.parameters?.[0]?.valueDecoded
+
+  const transactions = Array.isArray(multiSendTransactions) ? multiSendTransactions : txData ? [txData] : []
 
   const fallbackHandlers = useMemo(
     () =>
-      Array.isArray(multiSendTransactions)
-        ? multiSendTransactions
+      Array.isArray(transactions)
+        ? transactions
             .map(({ dataDecoded }) =>
               dataDecoded?.method === 'setFallbackHandler'
                 ? dataDecoded?.parameters?.find(({ name }) => name === 'handler')?.value
@@ -20,7 +23,7 @@ export const useSetsUntrustedFallbackHandler = (txData: TransactionDetails['txDa
             )
             .filter((handler) => typeof handler === 'string')
         : [],
-    [multiSendTransactions],
+    [transactions],
   )
 
   return useHasUntrustedFallbackHandler(fallbackHandlers)
