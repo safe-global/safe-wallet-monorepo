@@ -12,7 +12,7 @@ import {
   isNestedConfirmationTxInfo,
 } from '@/utils/transaction-guards'
 import { BRIDGE_WIDGET_URL } from '@/features/bridge/components/BridgeWidget'
-
+import { SWAP_WIDGET_URL } from '@/features/swap/components/FallbackSwapWidget'
 export const getTransactionTrackingType = (
   details: TransactionDetails | undefined,
   origin?: string,
@@ -29,8 +29,14 @@ export const getTransactionTrackingType = (
   const { txInfo } = details
 
   const isNativeBridge = origin?.includes(BRIDGE_WIDGET_URL)
+  const isLiFiSwap = origin?.includes(SWAP_WIDGET_URL)
+
   if (isNativeBridge) {
     return TX_TYPES.native_bridge
+  }
+
+  if (isLiFiSwap) {
+    return TX_TYPES.native_swap_lifi
   }
 
   if (isTransferTxInfo(txInfo)) {

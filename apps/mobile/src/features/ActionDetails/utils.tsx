@@ -28,10 +28,29 @@ const TxOptions = ({ value }: { value: string }) => {
   return (
     <View flexDirection="row" alignItems="center">
       <CopyButton value={value} color={'$textSecondaryLight'} />
-      <SafeFontIcon name="external-link" size={14} color="textSecondaryLight" />
+      <SafeFontIcon name="external-link" size={14} color="$textSecondaryLight" />
     </View>
   )
 }
+
+const getContractItemLayout = ({
+  logoUri,
+  value,
+  name,
+}: {
+  logoUri?: string | null
+  value: string
+  name?: string | null
+}) => ({
+  label: 'Contract',
+  render: () => (
+    <View flexDirection="row" alignItems="center" gap="$2">
+      {logoUri ? <Logo logoUri={logoUri} size="$6" /> : <Identicon address={value as Address} size={24} />}
+      <Text fontSize="$4">{ellipsis(name || value, 16)}</Text>
+      <TxOptions value={value} />
+    </View>
+  ),
+})
 
 export const formatActionDetails = ({ txData, action }: formatActionDetailsReturn): ListTableItem[] => {
   if (!txData) {
@@ -60,7 +79,7 @@ export const formatActionDetails = ({ txData, action }: formatActionDetailsRetur
         <View flexDirection="row" alignItems="center" gap="$2">
           <Identicon address={action.to as Address} size={24} />
           <EthAddress copy copyProps={{ color: '$textSecondaryLight' }} address={action.to as Address} />
-          <SafeFontIcon name="external-link" size={14} color="textSecondaryLight" />
+          <SafeFontIcon name="external-link" size={14} color="$textSecondaryLight" />
         </View>
       ),
     })
@@ -69,20 +88,9 @@ export const formatActionDetails = ({ txData, action }: formatActionDetailsRetur
   const contractCall = getContractCall(action, txData.addressInfoIndex as AddressInfoIndex)
 
   if (contractCall) {
-    columns.push({
-      label: 'Contract',
-      render: () => (
-        <View flexDirection="row" alignItems="center" gap="$2">
-          {contractCall.logoUri ? (
-            <Logo logoUri={contractCall.logoUri} size="$6" />
-          ) : (
-            <Identicon address={contractCall.value as Address} size={24} />
-          )}
-          <Text fontSize="$4">{ellipsis(contractCall.name || contractCall.value, 16)}</Text>
-          <TxOptions value={contractCall.value} />
-        </View>
-      ),
-    })
+    columns.push(getContractItemLayout(contractCall))
+  } else if (action.to) {
+    columns.push(getContractItemLayout({ value: action.to }))
   }
 
   if (action.dataDecoded) {

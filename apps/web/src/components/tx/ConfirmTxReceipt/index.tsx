@@ -9,7 +9,7 @@ import { MODALS_EVENTS } from '@/services/analytics'
 import useWallet from '@/hooks/wallets/useWallet'
 import { isHardwareWallet, isLedgerLive } from '@/utils/wallets'
 import { TxFlowStep } from '@/components/tx-flow/TxFlowStep'
-import { TxDetails } from '../ConfirmTxDetails/TxDetails'
+import { Receipt } from '../ConfirmTxDetails/Receipt'
 import { Slot, SlotName } from '@/components/tx-flow/slots'
 import { Sign } from '@/components/tx-flow/actions/Sign'
 
@@ -94,7 +94,7 @@ export const ConfirmTxReceipt = ({ children, onSubmit }: PropsWithChildren<{ onS
             </Stack>
           </Grid>
           <Grid size={{ xs: 12, sm: 6 }}>
-            <TxDetails safeTxData={safeTx?.data} txData={txPreview?.txData} />
+            <Receipt safeTxData={safeTx?.data} txData={txPreview?.txData} />
           </Grid>
         </Grid>
 

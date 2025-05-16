@@ -17,6 +17,7 @@ import { BlockaidHint } from './BlockaidHint'
 import { ContractChangeWarning } from './ContractChangeWarning'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { CLASSIFICATION_MAPPING, REASON_MAPPING } from '@safe-global/utils/components/tx/security/blockaid/utils'
+import ErrorMessage from '../../ErrorMessage'
 
 export const Warning = ({
   title,
@@ -94,24 +95,14 @@ const ResultDescription = ({
   )
 }
 
-const BlockaidError = () => {
+const BlockaidError = ({ error }: { error: Error }) => {
   return (
-    <Alert data-testid="blockaid-error" severity="warning" className={css.customAlert}>
-      <AlertTitle>
-        <Typography
-          variant="subtitle1"
-          sx={{
-            fontWeight: 700,
-          }}
-        >
-          Proceed with caution
-        </Typography>
-      </AlertTitle>
+    <ErrorMessage level="warning" className={css.customAlert} title="Proceed with caution" error={error}>
       <Typography variant="body2">
         The transaction could not be checked for security alerts. Verify the details and addresses before proceeding.
       </Typography>
       <BlockaidMessage />
-    </Alert>
+    </ErrorMessage>
   )
 }
 
@@ -145,7 +136,7 @@ export const BlockaidWarning = () => {
   }
 
   if (error) {
-    return <BlockaidError />
+    return <BlockaidError error={error} />
   }
 
   if (isLoading || !blockaidResponse) {

@@ -1,15 +1,14 @@
 import type { ReactElement } from 'react'
 import { Stack, Typography } from '@mui/material'
-import { type AddressEx, TokenType, type TransactionDetails, Operation } from '@safe-global/safe-gateway-typescript-sdk'
+import { type AddressEx, type TransactionDetails, Operation } from '@safe-global/safe-gateway-typescript-sdk'
 
 import { HexEncodedData } from '@/components/transactions/HexEncodedData'
 import { MethodDetails } from '@/components/transactions/TxDetails/TxData/DecodedData/MethodDetails'
-import { useCurrentChain } from '@/hooks/useChains'
 import SendAmountBlock from '@/components/tx-flow/flows/TokenTransfer/SendAmountBlock'
-import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
 import SendToBlock from '@/components/tx/SendToBlock'
 import MethodCall from './MethodCall'
 import { DelegateCallWarning } from '@/components/transactions/Warning'
+import { useNativeTokenInfo } from '@/hooks/useNativeTokenInfo'
 
 interface Props {
   txData: TransactionDetails['txData']
@@ -17,7 +16,7 @@ interface Props {
 }
 
 export const DecodedData = ({ txData, toInfo }: Props): ReactElement | null => {
-  const chainInfo = useCurrentChain()
+  const nativeTokenInfo = useNativeTokenInfo()
 
   // nothing to render
   if (!txData) {
@@ -52,19 +51,7 @@ export const DecodedData = ({ txData, toInfo }: Props): ReactElement | null => {
         <SendToBlock address={toAddress} name={name} title="Interacted with" avatarSize={20} customAvatar={avatar} />
       )}
 
-      {amountInWei !== '0' && (
-        <SendAmountBlock
-          title="Value"
-          amountInWei={amountInWei}
-          tokenInfo={{
-            type: TokenType.NATIVE_TOKEN,
-            address: ZERO_ADDRESS,
-            decimals: chainInfo?.nativeCurrency.decimals ?? 18,
-            symbol: chainInfo?.nativeCurrency.symbol ?? 'ETH',
-            logoUri: chainInfo?.nativeCurrency.logoUri,
-          }}
-        />
-      )}
+      {amountInWei !== '0' && <SendAmountBlock title="Value" amountInWei={amountInWei} tokenInfo={nativeTokenInfo} />}
 
       {txData.dataDecoded ? (
         <MethodDetails data={txData.dataDecoded} hexData={txData.hexData} addressInfoIndex={txData.addressInfoIndex} />

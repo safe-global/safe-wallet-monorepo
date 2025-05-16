@@ -1,5 +1,5 @@
 import React from 'react'
-import { render } from '@testing-library/react-native'
+import { render } from '@/src/tests/test-utils'
 import { Identicon } from './index'
 
 describe('Identicon', () => {

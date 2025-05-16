@@ -43,3 +43,13 @@ export const getOriginPath = (url: string): string => {
     return url
   }
 }
+
+// Function to strip URL parameters, returning only the base URL
+export const stripUrlParams = (url: string): string => {
+  try {
+    const urlObj = new URL(url)
+    return `${urlObj.origin}${urlObj.pathname}`
+  } catch (e) {
+    return url
+  }
+}

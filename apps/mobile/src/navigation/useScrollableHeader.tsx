@@ -1,7 +1,7 @@
 // useScrollableHeader.ts
 import { useEffect } from 'react'
 import { NativeSyntheticEvent, NativeScrollEvent } from 'react-native'
-import { useNavigation } from 'expo-router'
+import { useNavigation } from '@react-navigation/native'
 import Animated, { useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated'
 
 interface UseScrollableHeaderProps {
