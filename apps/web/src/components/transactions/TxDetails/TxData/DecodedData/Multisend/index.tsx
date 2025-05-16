@@ -11,6 +11,7 @@ import classnames from 'classnames'
 type MultisendProps = {
   txData?: TransactionData
   compact?: boolean
+  isExecuted?: boolean
 }
 
 export const MultisendActionsHeader = ({
@@ -43,7 +44,7 @@ export const MultisendActionsHeader = ({
   )
 }
 
-export const Multisend = ({ txData, compact = false }: MultisendProps): ReactElement | null => {
+export const Multisend = ({ txData, compact = false, isExecuted = false }: MultisendProps): ReactElement | null => {
   const [openMap, setOpenMap] = useState<Record<number, boolean>>()
   const isOpenMapUndefined = openMap == null
 
@@ -87,6 +88,7 @@ export const Multisend = ({ txData, compact = false }: MultisendProps): ReactEle
               variant={compact ? 'outlined' : 'elevation'}
               expanded={openMap?.[index] ?? false}
               onChange={onChange}
+              isExecuted={isExecuted}
             />
           )
         })}
