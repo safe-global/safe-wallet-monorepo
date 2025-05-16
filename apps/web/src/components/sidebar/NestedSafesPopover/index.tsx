@@ -10,6 +10,7 @@ import { NestedSafesList } from '@/components/sidebar/NestedSafesList'
 import { NestedSafeInfo } from '@/components/sidebar/NestedSafeInfo'
 import Track from '@/components/common/Track'
 import { NESTED_SAFE_EVENTS } from '@/services/analytics/events/nested-safes'
+import CheckWallet from '@/components/common/CheckWallet'
 
 export function NestedSafesPopover({
   anchorEl,
@@ -85,15 +86,20 @@ export function NestedSafesPopover({
         )}
         {!hideCreationButton && (
           <Track {...NESTED_SAFE_EVENTS.ADD}>
-            <Button
-              data-testid="add-nested-safe-button"
-              variant="contained"
-              sx={{ width: '100%', mt: 3 }}
-              onClick={onAdd}
-            >
-              <SvgIcon component={AddIcon} inheritViewBox fontSize="small" />
-              Add Nested Safe
-            </Button>
+            <CheckWallet>
+              {(ok) => (
+                <Button
+                  data-testid="add-nested-safe-button"
+                  variant="contained"
+                  sx={{ width: '100%', mt: 3 }}
+                  onClick={onAdd}
+                  disabled={!ok}
+                >
+                  <SvgIcon component={AddIcon} inheritViewBox fontSize="small" />
+                  Add Nested Safe
+                </Button>
+              )}
+            </CheckWallet>
           </Track>
         )}
       </Stack>
