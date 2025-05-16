@@ -53,9 +53,10 @@ export default function SplitMenuButton({
 
     if (index !== selectedIndex) {
       setSelectedIndex(index)
-      setOpen(false)
       onChange?.(options[index])
     }
+
+    setOpen(false)
   }
 
   const handleToggle = () => {
