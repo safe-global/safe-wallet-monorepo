@@ -15,13 +15,13 @@ describe('BridgeWidget', () => {
         description: '',
         developerWebsite: '',
         features: [],
-        iconUrl: '/images/common/bridge.svg',
+        iconUrl: '/images/common/safe-bridge.svg',
         id: expect.any(Number),
         name: 'Bridge',
         safeAppsPermissions: [],
         socialProfiles: [],
         tags: [],
-        url: `https://iframe.jumper.exchange/?fromChain=${chain.chainId}&theme=light`,
+        url: `https://iframe.jumper.exchange/bridge?fromChain=${chain.chainId}&theme=light`,
       })
     })
 
@@ -37,13 +37,13 @@ describe('BridgeWidget', () => {
         description: '',
         developerWebsite: '',
         features: [],
-        iconUrl: '/images/common/bridge.svg',
+        iconUrl: '/images/common/safe-bridge-dark.svg',
         id: expect.any(Number),
         name: 'Bridge',
         safeAppsPermissions: [],
         socialProfiles: [],
         tags: [],
-        url: `https://iframe.jumper.exchange/?fromChain=${chain.chainId}&theme=dark`,
+        url: `https://iframe.jumper.exchange/bridge?fromChain=${chain.chainId}&theme=dark`,
       })
     })
   })

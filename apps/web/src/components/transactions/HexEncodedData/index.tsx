@@ -38,16 +38,17 @@ export const HexEncodedData = ({ hexData, title, highlightFirstBytes = true, lim
 
   const dimmedZeroes: ReactElement[] = []
   let index = 0
-  restBytes.replace(/(.*?)(0{18,})(.*?)/g, (_, p1, p2, p3) => {
+  const remainder = restBytes.replace(/(.*?)(0{18,})/g, (_, p1, p2) => {
     dimmedZeroes.push(
       <Fragment key={index++}>{p1}</Fragment>,
       <span className={css.zeroes} key={index++}>
         {p2}
       </span>,
-      <Fragment key={index++}>{p3}</Fragment>,
     )
     return ''
   })
+
+  dimmedZeroes.push(<Fragment key={index++}>{remainder}</Fragment>)
 
   const fullData = dimmedZeroes.length ? dimmedZeroes : restBytes
 

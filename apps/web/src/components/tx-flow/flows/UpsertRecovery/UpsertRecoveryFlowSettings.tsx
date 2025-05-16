@@ -18,7 +18,7 @@ import {
 import ExpandLessIcon from '@mui/icons-material/ExpandLess'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import { useForm, FormProvider, Controller } from 'react-hook-form'
-import { useState } from 'react'
+import { useContext, useState } from 'react'
 import type { ReactElement } from 'react'
 
 import TxCard from '../../common/TxCard'
@@ -40,23 +40,37 @@ import css from './styles.module.css'
 import NumberField from '@/components/common/NumberField'
 import { getDelay, isCustomDelaySelected } from './utils'
 import { HelpCenterArticle, HelperCenterArticleTitles } from '@safe-global/utils/config/constants'
+import { TxFlowContext, type TxFlowContextType } from '../../TxFlowProvider'
+import { isSmartContractWallet } from '@/utils/wallets'
+import { getSafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import useChainId from '@/hooks/useChainId'
 
-export function UpsertRecoveryFlowSettings({
-  params,
-  delayModifier,
-  onSubmit,
-}: {
-  params: UpsertRecoveryFlowProps
-  delayModifier?: RecoveryStateItem
-  onSubmit: (formData: UpsertRecoveryFlowProps) => void
-}): ReactElement {
+enum AddressType {
+  EOA = 'EOA',
+  Safe = 'Safe',
+  Other = 'Other',
+}
+
+const getAddressType = async (address: string, chainId: string) => {
+  const isSmartContract = await isSmartContractWallet(chainId, address)
+  if (!isSmartContract) return AddressType.EOA
+
+  const isSafeContract = await getSafeInfo(chainId, address)
+  if (isSafeContract) return AddressType.Safe
+
+  return AddressType.Other
+}
+
+export function UpsertRecoveryFlowSettings({ delayModifier }: { delayModifier?: RecoveryStateItem }): ReactElement {
+  const chainId = useChainId()
   const { safeAddress } = useSafeInfo()
-  const [showAdvanced, setShowAdvanced] = useState(params[UpsertRecoveryFlowFields.expiry] !== '0')
+  const { data, onNext } = useContext<TxFlowContextType<UpsertRecoveryFlowProps>>(TxFlowContext)
+  const [showAdvanced, setShowAdvanced] = useState(data?.[UpsertRecoveryFlowFields.expiry] !== '0')
   const [understandsRisk, setUnderstandsRisk] = useState(false)
   const periods = useRecoveryPeriods()
 
   const formMethods = useForm<UpsertRecoveryFlowProps>({
-    defaultValues: params,
+    defaultValues: data,
     mode: 'onChange',
   })
 
@@ -97,8 +111,17 @@ export function UpsertRecoveryFlowSettings({
 
   const isDisabled = !understandsRisk || !isDirty || !!customDelayState.error
 
-  const handleSubmit = () => {
-    onSubmit({ expiry, delay, customDelay, selectedDelay, recoverer })
+  const isEdit = !!delayModifier
+
+  const handleSubmit = async () => {
+    const addressType = await getAddressType(data?.recoverer ?? '', chainId)
+    const creationEvent = isEdit ? RECOVERY_EVENTS.SUBMIT_RECOVERY_EDIT : RECOVERY_EVENTS.SUBMIT_RECOVERY_CREATE
+    const settings = `delay_${delay},expiry_${expiry},type_${addressType}`
+
+    trackEvent({ ...creationEvent })
+    trackEvent({ ...RECOVERY_EVENTS.RECOVERY_SETTINGS, label: settings })
+
+    onNext({ expiry, delay, customDelay, selectedDelay, recoverer })
   }
 
   return (

@@ -1,0 +1,71 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CanNotSign matches snapshot with address 1`] = `
+<View>
+  <View
+    style={
+      {
+        "alignItems": "center",
+        "flexDirection": "column",
+        "gap": 16,
+        "justifyContent": "center",
+        "paddingBottom": 8,
+        "paddingLeft": 8,
+        "paddingRight": 8,
+        "paddingTop": 8,
+      }
+    }
+    testID="can-not-sign-container"
+  >
+    <Text
+      style={
+        {
+          "color": "#A1A3A7",
+          "fontFamily": "DM Sans",
+          "fontSize": 14,
+          "textAlign": "center",
+          "width": "70%",
+        }
+      }
+      suppressHighlighting={true}
+    >
+      Only signers of this safe can sign this transaction
+    </Text>
+  </View>
+</View>
+`;
+
+exports[`CanNotSign matches snapshot without address 1`] = `
+<View>
+  <View
+    style={
+      {
+        "alignItems": "center",
+        "flexDirection": "column",
+        "gap": 16,
+        "justifyContent": "center",
+        "paddingBottom": 8,
+        "paddingLeft": 8,
+        "paddingRight": 8,
+        "paddingTop": 8,
+      }
+    }
+    testID="can-not-sign-container"
+  >
+    <Text
+      style={
+        {
+          "color": "#A1A3A7",
+          "fontFamily": "DM Sans",
+          "fontSize": 14,
+          "textAlign": "center",
+          "width": "70%",
+        }
+      }
+      suppressHighlighting={true}
+    >
+      Only signers of this safe can sign this transaction
+    </Text>
+  </View>
+</View>
+`;

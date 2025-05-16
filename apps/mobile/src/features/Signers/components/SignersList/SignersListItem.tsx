@@ -12,6 +12,7 @@ import { useAppSelector } from '@/src/store/hooks'
 import { selectContactByAddress } from '@/src/store/addressBookSlice'
 import { useCopyAndDispatchToast } from '@/src/hooks/useCopyAndDispatchToast'
 import { router, useLocalSearchParams } from 'expo-router'
+import logger from '@/src/utils/logger'
 
 interface SignersListItemProps {
   item: AddressInfo
@@ -42,6 +43,25 @@ function SignersListItem({ item, index, signersGroup }: SignersListItemProps) {
     })
   }
 
+  const redirectToImport = () => {
+    router.push({
+      pathname: '/import-signers',
+      params: {
+        safeAddress: local.safeAddress,
+        chainId: local.chainId,
+        import_safe: local.import_safe,
+      },
+    })
+  }
+
+  const handleItemPress = () => {
+    if (local.import_safe && !isMySigner) {
+      return redirectToImport()
+    }
+
+    return redirectToDetails()
+  }
+
   const onPressMenuAction = ({ nativeEvent }: NativeActionEvent) => {
     if (nativeEvent.event === 'rename') {
       return redirectToDetails(true)
@@ -52,20 +72,15 @@ function SignersListItem({ item, index, signersGroup }: SignersListItemProps) {
     }
 
     if (nativeEvent.event === 'import' && !isMySigner) {
-      return router.push({
-        pathname: '/import-signers',
-        params: {
-          safeAddress: local.safeAddress,
-          chainId: local.chainId,
-          import_safe: local.import_safe,
-        },
-      })
+      return redirectToImport()
     }
+
+    logger.error('No action found for nativeEvent', nativeEvent)
   }
 
   return (
     <View position="relative">
-      <TouchableOpacity onPress={() => redirectToDetails()} testID={`signer-${item.value}`}>
+      <TouchableOpacity onPress={handleItemPress} testID={`signer-${item.value}`}>
         <View
           backgroundColor={colorScheme === 'dark' ? '$backgroundPaper' : '$background'}
           borderTopRightRadius={index === 0 ? '$4' : undefined}

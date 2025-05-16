@@ -1,5 +1,5 @@
 import type { AllowedFeatures, SafeAppDataWithPermissions } from '@/components/safe-apps/types'
-import { isRelativeUrl, trimTrailingSlash } from '@/utils/url'
+import { isRelativeUrl, trimTrailingSlash, stripUrlParams } from '@/utils/url'
 import { SafeAppAccessPolicyTypes } from '@safe-global/safe-gateway-typescript-sdk'
 
 type AppManifestIcon = {
@@ -56,7 +56,9 @@ const getAppLogoUrl = (appUrl: string, { icons = [], iconPath = '' }: AppManifes
 }
 
 const fetchAppManifest = async (appUrl: string, timeout = 5000): Promise<unknown> => {
-  const normalizedUrl = trimTrailingSlash(appUrl)
+  // Strip URL parameters for fetching the manifest
+  const baseUrl = stripUrlParams(appUrl)
+  const normalizedUrl = trimTrailingSlash(baseUrl)
   const manifestUrl = `${normalizedUrl}/manifest.json`
 
   // A lot of apps are hosted on IPFS and IPFS never times out, so we add our own timeout
@@ -89,7 +91,10 @@ const fetchSafeAppFromManifest = async (
   appUrl: string,
   currentChainId: string,
 ): Promise<SafeAppDataWithPermissions> => {
-  const normalizedAppUrl = trimTrailingSlash(appUrl)
+  // Strip URL parameters for the normalized app URL but keep the original URL for the iframe
+  const baseUrl = stripUrlParams(appUrl)
+  const normalizedAppUrl = trimTrailingSlash(baseUrl)
+  // Use the base URL to fetch the manifest
   const appManifest = await fetchAppManifest(appUrl)
 
   if (!isAppManifestValid(appManifest)) {
@@ -98,10 +103,14 @@ const fetchSafeAppFromManifest = async (
 
   const iconUrl = getAppLogoUrl(normalizedAppUrl, appManifest)
 
+  // Preserve the original URL with parameters
+  const originalUrl = appUrl
+
   return {
     // Must satisfy https://docs.djangoproject.com/en/5.0/ref/models/fields/#positiveintegerfield
     id: Math.round(Math.random() * 1e9 + 1e6),
-    url: normalizedAppUrl,
+    url: normalizedAppUrl, // Store the base URL without parameters for matching
+    originalUrl, // Store the original URL with parameters
     name: appManifest.name,
     description: appManifest.description,
     accessControl: { type: SafeAppAccessPolicyTypes.NoRestrictions },

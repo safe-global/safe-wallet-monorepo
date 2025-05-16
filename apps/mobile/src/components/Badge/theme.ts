@@ -26,7 +26,7 @@ export const badgeTheme = {
     color: tokens.color.primaryMainLight,
   },
   light_badge_warning: {
-    color: tokens.color.warning1MainLight,
+    color: tokens.color.warning1ContrastTextLight,
     background: tokens.color.warningBackgroundLight,
   },
   dark_badge_warning: {

@@ -3,7 +3,7 @@ import { Avatar, View } from 'tamagui'
 import { SafeListItem } from '@/src/components/SafeListItem'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon/SafeFontIcon'
 import type { MultiSend } from '@safe-global/store/gateway/types'
-import type { Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import type { Transaction, SafeAppInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
 interface TxBatchCardProps {
   txInfo: MultiSend
@@ -12,10 +12,19 @@ interface TxBatchCardProps {
   inQueue?: boolean
   executionInfo?: Transaction['executionInfo']
   onPress: () => void
+  safeAppInfo?: SafeAppInfo | null
 }
 
-export function TxBatchCard({ txInfo, bordered, executionInfo, inQueue, label, onPress }: TxBatchCardProps) {
-  const logoUri = txInfo.to.logoUri
+export function TxBatchCard({
+  txInfo,
+  bordered,
+  executionInfo,
+  inQueue,
+  label,
+  safeAppInfo,
+  onPress,
+}: TxBatchCardProps) {
+  const logoUri = safeAppInfo?.logoUri || txInfo.to.logoUri
 
   return (
     <SafeListItem
@@ -24,7 +33,7 @@ export function TxBatchCard({ txInfo, bordered, executionInfo, inQueue, label, o
       onPress={onPress}
       inQueue={inQueue}
       executionInfo={executionInfo}
-      type={'Batch'}
+      type={safeAppInfo?.name || 'Batch'}
       bordered={bordered}
       leftNode={
         <Avatar circular size="$10">
