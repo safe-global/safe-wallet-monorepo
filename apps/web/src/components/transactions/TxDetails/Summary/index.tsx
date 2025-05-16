@@ -52,7 +52,9 @@ const Summary = ({ safeTxData, txData, txInfo, txDetails, showMultisend = true }
 
   return (
     <>
-      {showMultisend && isMultisend && <Multisend txData={transactionData} compact />}
+      {showMultisend && isMultisend && (
+        <Multisend txData={transactionData} isExecuted={!!txDetails?.executedAt} compact />
+      )}
 
       {txHash && (
         <TxDataRow datatestid="tx-hash" title="Transaction hash">
@@ -80,7 +82,7 @@ const Summary = ({ safeTxData, txData, txInfo, txDetails, showMultisend = true }
         <Box mt={2}>
           <ColorCodedTxAccordion txInfo={txInfo} txData={txData}>
             <Box my={1}>
-              <DecodedData txData={txData} toInfo={toInfo} />
+              <DecodedData txData={txData} toInfo={toInfo} isTxExecuted={!!txDetails?.executedAt} />
             </Box>
 
             <Box>
