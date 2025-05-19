@@ -8494,7 +8494,7 @@ __metadata:
     storybook: "npm:^8.3.4"
     ts-prune: "npm:^0.10.3"
     typechain: "npm:^8.3.2"
-    typescript: "npm:^5.4.5"
+    typescript: "npm:^5.8.3"
     typescript-plugin-css-modules: "npm:^4.2.2"
     zodiac-roles-deployments: "npm:^2.3.4"
   languageName: unknown
@@ -31463,7 +31463,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@npm:^5.8.2, typescript@npm:~5.8.3":
+"typescript@npm:^5.8.2, typescript@npm:^5.8.3, typescript@npm:~5.8.3":
   version: 5.8.3
   resolution: "typescript@npm:5.8.3"
   bin:
@@ -31483,7 +31483,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@patch:typescript@npm%3A^5.8.2#optional!builtin<compat/typescript>, typescript@patch:typescript@npm%3A~5.8.3#optional!builtin<compat/typescript>":
+"typescript@patch:typescript@npm%3A^5.8.2#optional!builtin<compat/typescript>, typescript@patch:typescript@npm%3A^5.8.3#optional!builtin<compat/typescript>, typescript@patch:typescript@npm%3A~5.8.3#optional!builtin<compat/typescript>":
   version: 5.8.3
   resolution: "typescript@patch:typescript@npm%3A5.8.3#optional!builtin<compat/typescript>::version=5.8.3&hash=5786d5"
   bin:
