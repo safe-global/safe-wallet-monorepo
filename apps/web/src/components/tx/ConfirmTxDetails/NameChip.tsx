@@ -14,17 +14,19 @@ const NameChip = ({
   txInfo?: TransactionDetails['txInfo']
   withBackground?: boolean
 }) => {
+  const addressBook = useAddressBook()
   const toAddress = txData?.to.value
   const customTxInfo = txInfo && isCustomTxInfo(txInfo) ? txInfo : undefined
   const toInfo = customTxInfo?.to || txData?.addressInfoIndex?.[txData?.to.value] || txData?.to
-  const toName = toInfo?.name || (toInfo && 'displayName' in toInfo ? String(toInfo.displayName || '') : undefined)
+  const nameFromAb = toAddress !== undefined ? addressBook[toAddress] : undefined
+  const toName =
+    toInfo?.name || (toInfo && 'displayName' in toInfo ? String(toInfo.displayName || '') : undefined) || nameFromAb
   const toLogo = toInfo?.logoUri
   const contractInfo = useAddressName(toAddress, toName)
   const name = toName || contractInfo?.name
   const logo = toLogo || contractInfo?.logoUri
 
-  const addressBook = useAddressBook()
-  const isInAddressBook = toAddress !== undefined && !!addressBook[toAddress]
+  const isInAddressBook = !!nameFromAb
   const isUntrusted = !isInAddressBook && contractInfo.isUnverifiedContract
 
   return toAddress && (name || logo) ? (
