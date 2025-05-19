@@ -1,0 +1,138 @@
+import { useCallback, useState } from 'react'
+import { Wallet } from 'ethers'
+import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
+import { useSign } from './useSign/useSign'
+import { selectAllChains } from '@/src/store/chains'
+import { addDelegate } from '@/src/store/delegatesSlice'
+import { cgwApi } from '@safe-global/store/gateway/AUTO_GENERATED/delegates'
+import Logger from '@/src/utils/logger'
+import { getDelegateTypedData } from '@safe-global/utils/services/delegates'
+
+// Create a key ID for delegate keys in the keychain
+const getDelegateKeyId = (ownerAddress: string, delegateAddress: string): string => {
+  return `delegate_${ownerAddress}_${delegateAddress}`
+}
+
+interface UseDelegateProps {
+  createDelegate: (
+    ownerPrivateKey: string,
+    safe?: string | null,
+  ) => Promise<{
+    success: boolean
+    delegateAddress?: string
+    error?: string
+  }>
+  isLoading: boolean
+  error: string | null
+}
+
+export const useDelegate = (): UseDelegateProps => {
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const dispatch = useAppDispatch()
+  const { storePrivateKey } = useSign()
+
+  // Get all available chains
+  const allChains = useAppSelector(selectAllChains)
+
+  // Access API endpoints
+  const [registerDelegate] = cgwApi.useDelegatesPostDelegateV2Mutation()
+
+  const createDelegate = useCallback(
+    async (ownerPrivateKey: string, safe: string | null = null) => {
+      try {
+        setIsLoading(true)
+        setError(null)
+
+        // Create the owner wallet from the provided private key
+        const ownerWallet = new Wallet(ownerPrivateKey)
+        const ownerAddress = ownerWallet.address
+
+        // Create a random delegate wallet
+        const delegateWallet = Wallet.createRandom()
+        if (!delegateWallet) {
+          setIsLoading(false)
+          const errorMsg = 'Failed to create delegate wallet'
+          setError(errorMsg)
+          return { success: false, error: errorMsg }
+        }
+
+        // Store delegate private key in keychain with default protection (no biometrics)
+        const delegateKeyId = getDelegateKeyId(ownerAddress, delegateWallet.address)
+        const storeSuccess = await storePrivateKey(delegateKeyId, delegateWallet.privateKey, {
+          requireAuthentication: false,
+        })
+
+        if (!storeSuccess) {
+          setIsLoading(false)
+          const errorMsg = 'Failed to securely store delegate key'
+          setError(errorMsg)
+          return { success: false, error: errorMsg }
+        }
+
+        // Fire-and-forget registration for each chain
+        ;(async () => {
+          for (const chain of allChains) {
+            try {
+              // Generate typed data for this chain
+              const typedData = getDelegateTypedData(chain.chainId, delegateWallet.address)
+
+              // Sign the message with the owner's wallet
+              const signature = await ownerWallet.signTypedData(typedData.domain, typedData.types, typedData.message)
+
+              // Register delegate on the backend
+              await registerDelegate({
+                chainId: chain.chainId,
+                createDelegateDto: {
+                  safe,
+                  delegate: delegateWallet.address,
+                  delegator: ownerAddress,
+                  signature,
+                  label: 'Mobile App Delegate',
+                },
+              })
+
+              // Add to redux store immediately
+              dispatch(
+                addDelegate({
+                  ownerAddress,
+                  delegateAddress: delegateWallet.address,
+                  delegateInfo: {
+                    safe,
+                    delegate: delegateWallet.address,
+                    delegator: ownerAddress,
+                    label: 'Mobile App Delegate',
+                  },
+                }),
+              )
+
+              // Add a delay to avoid 429 rate limiting
+              await new Promise((resolve) => setTimeout(resolve, 300))
+            } catch (error) {
+              Logger.error(`Failed to register delegate for chain ${chain.chainId}`, error)
+              // We continue with other chains even if one fails
+            }
+          }
+        })()
+
+        setIsLoading(false)
+        return { success: true, delegateAddress: delegateWallet.address }
+      } catch (error) {
+        Logger.error('Delegate creation failed', error)
+        setIsLoading(false)
+        const errorMsg = error instanceof Error ? error.message : String(error)
+        setError(errorMsg)
+        return { success: false, error: errorMsg }
+      }
+    },
+    [allChains, dispatch, storePrivateKey, registerDelegate],
+  )
+
+  return {
+    createDelegate,
+    isLoading,
+    error,
+  }
+}
+
+export default useDelegate

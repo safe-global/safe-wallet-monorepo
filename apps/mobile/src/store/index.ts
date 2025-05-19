@@ -5,7 +5,7 @@ import txHistory from './txHistorySlice'
 import activeSafe from './activeSafeSlice'
 import activeSigner from './activeSignerSlice'
 import signers from './signersSlice'
-import delegated from './delegatedSlice'
+import delegates from './delegatesSlice'
 import myAccounts from './myAccountsSlice'
 import notifications from './notificationsSlice'
 import addressBook from './addressBookSlice'
@@ -49,7 +49,7 @@ export const rootReducer = combineReducers({
   addressBook,
   myAccounts,
   signers,
-  delegated,
+  delegates,
   settings,
   biometrics,
   [web3API.reducerPath]: web3API.reducer,
