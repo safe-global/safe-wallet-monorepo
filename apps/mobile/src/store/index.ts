@@ -18,9 +18,13 @@ import { GATEWAY_URL, isTestingEnv } from '../config/constants'
 import { web3API } from './signersBalance'
 import { setBaseUrl as setSDKBaseURL } from '@safe-global/safe-gateway-typescript-sdk'
 import { createFilter } from '@safe-global/store/utils/persistTransformFilter'
+import { setupMobileCookieHandling } from './utils/cookieHandling'
 
 setSDKBaseURL(GATEWAY_URL)
 setBaseUrl(GATEWAY_URL)
+
+// Set up mobile-specific cookie handling
+setupMobileCookieHandling()
 
 const cgwClientFilter = createFilter(
   cgwClient.reducerPath,
