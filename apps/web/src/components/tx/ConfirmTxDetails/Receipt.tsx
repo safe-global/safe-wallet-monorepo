@@ -20,6 +20,7 @@ type ReceiptProps = {
   safeTxData: SafeTransaction['data']
   txData?: TransactionData
   txDetails?: TransactionDetails
+  txInfo?: TransactionDetails['txInfo']
   grid?: boolean
   withSignatures?: boolean
 }
@@ -28,7 +29,7 @@ const ScrollWrapper = ({ children }: { children: ReactElement | ReactElement[] }
   <Box sx={{ maxHeight: '550px', flex: 1, overflowY: 'auto', px: 2, pt: 1, mt: '0 !important' }}>{children}</Box>
 )
 
-export const Receipt = ({ safeTxData, txData, txDetails, grid, withSignatures = false }: ReceiptProps) => {
+export const Receipt = ({ safeTxData, txData, txDetails, txInfo, grid, withSignatures = false }: ReceiptProps) => {
   const safeTxHash = useSafeTxHash({ safeTxData })
   const domainHash = useDomainHash()
   const messageHash = useMessageHash({ safeTxData })
@@ -51,7 +52,7 @@ export const Receipt = ({ safeTxData, txData, txDetails, grid, withSignatures = 
               <Stack spacing={1} divider={<Divider />}>
                 <TxDetailsRow label="To" grid={grid}>
                   <ToWrapper>
-                    <NameChip txData={txData} withBackground={grid} />
+                    <NameChip txData={txData} txInfo={txInfo} withBackground={grid} />
 
                     <Typography
                       variant="body2"
