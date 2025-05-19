@@ -1,19 +1,22 @@
 import { useMemo } from 'react'
 import AppFrame from '@/components/safe-apps/AppFrame'
 import { getEmptySafeApp } from '@/components/safe-apps/utils'
-import { widgetAppData } from '@/features/lend/constants'
-import useGetWidgetUrl from '@/features/lend/hooks/useGetWidgetUrl'
+import { widgetAppData } from '@/features/earn/constants'
+import useGetWidgetUrl from '@/features/earn/hooks/useGetWidgetUrl'
+import { useDarkMode } from '@/hooks/useDarkMode'
 
-const LendWidget = ({ asset }: { asset?: string }) => {
+const EarnWidget = ({ asset }: { asset?: string }) => {
   const url = useGetWidgetUrl(asset)
+  const isDarkMode = useDarkMode()
 
   const appData = useMemo(
     () => ({
       ...getEmptySafeApp(),
       ...widgetAppData,
+      iconUrl: isDarkMode ? '/images/common/earn-light.svg' : '/images/common/earn.svg',
       url,
     }),
-    [url],
+    [url, isDarkMode],
   )
 
   return (
@@ -26,4 +29,4 @@ const LendWidget = ({ asset }: { asset?: string }) => {
   )
 }
 
-export default LendWidget
+export default EarnWidget
