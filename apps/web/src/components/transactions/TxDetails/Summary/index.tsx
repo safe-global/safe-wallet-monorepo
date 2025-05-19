@@ -20,9 +20,17 @@ interface Props {
   txInfo?: TransactionDetails['txInfo']
   txDetails?: TransactionDetails
   showMultisend?: boolean
+  showDecodedData?: boolean
 }
 
-const Summary = ({ safeTxData, txData, txInfo, txDetails, showMultisend = true }: Props): ReactElement => {
+const Summary = ({
+  safeTxData,
+  txData,
+  txInfo,
+  txDetails,
+  showMultisend = true,
+  showDecodedData = true,
+}: Props): ReactElement => {
   const { txHash, executedAt } = txDetails ?? {}
   const customTxInfo = txInfo && isCustomTxInfo(txInfo) ? txInfo : undefined
   const toInfo = customTxInfo?.to || txData?.addressInfoIndex?.[txData?.to.value] || txData?.to
@@ -80,7 +88,7 @@ const Summary = ({ safeTxData, txData, txInfo, txDetails, showMultisend = true }
         <Box mt={2}>
           <ColorCodedTxAccordion txInfo={txInfo} txData={txData}>
             <Stack gap={1} divider={<Divider sx={{ mx: -2, my: 1 }} />}>
-              <DecodedData txData={txData} toInfo={toInfo} />
+              {showDecodedData && <DecodedData txData={txData} toInfo={toInfo} />}
 
               <Box>
                 <Typography variant="subtitle2" fontWeight={700} mb={2}>

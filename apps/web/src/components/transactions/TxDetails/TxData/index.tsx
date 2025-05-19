@@ -23,7 +23,7 @@ import {
 } from '@/utils/transaction-guards'
 import { SpendingLimits } from '@/components/transactions/TxDetails/TxData/SpendingLimits'
 import { TransactionStatus, type TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
-import { type ReactElement } from 'react'
+import { PropsWithChildren, type ReactElement } from 'react'
 import RejectionTxInfo from '@/components/transactions/TxDetails/TxData/Rejection'
 import TransferTxInfo from '@/components/transactions/TxDetails/TxData/Transfer'
 import useChainId from '@/hooks/useChainId'
@@ -45,13 +45,14 @@ const TxData = ({
   txDetails,
   trusted,
   imitation,
-}: {
+  children,
+}: PropsWithChildren<{
   txInfo: TransactionDetails['txInfo']
   txData: TransactionDetails['txData']
   txDetails?: TransactionDetails
   trusted: boolean
   imitation: boolean
-}): ReactElement => {
+}>): ReactElement => {
   const chainId = useChainId()
 
   if (isOrderTxInfo(txInfo)) {
@@ -123,7 +124,11 @@ const TxData = ({
     return <SafeUpdate txData={txData} />
   }
 
-  return <DecodedData txData={txData} toInfo={isCustomTxInfo(txInfo) ? txInfo.to : txData?.to} />
+  return !!children ? (
+    <>{children}</>
+  ) : (
+    <DecodedData txData={txData} toInfo={isCustomTxInfo(txInfo) ? txInfo.to : txData?.to} />
+  )
 }
 
 export default TxData
