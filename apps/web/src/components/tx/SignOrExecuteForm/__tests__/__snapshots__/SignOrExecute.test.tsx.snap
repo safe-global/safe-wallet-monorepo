@@ -333,7 +333,7 @@ exports[`SignOrExecute should display a confirmation screen 1`] = `
                         style="--Paper-shadow: none;"
                       >
                         <div
-                          class="MuiStack-root css-1uvd2my-MuiStack-root"
+                          class="MuiStack-root css-1sazv7p-MuiStack-root"
                         >
                           <div
                             class="MuiStack-root css-1n46f6x-MuiStack-root"

@@ -92,7 +92,7 @@ export const ConfirmTxDetails = (props: SignOrExecuteProps) => {
           </Stack>
         </Grid>
         <Grid size={{ xs: 12, sm: 6 }}>
-          <Receipt safeTxData={safeTx.data} txData={txPreview?.txData} />
+          <Receipt safeTxData={safeTx.data} txData={txPreview?.txData} txInfo={txPreview?.txInfo} />
         </Grid>
       </Grid>
 

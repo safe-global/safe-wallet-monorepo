@@ -68,7 +68,7 @@ export const TxFlow = <T extends unknown>({
       onSubmit?.({ ...props, data })
       trackTimeSpent()
     },
-    [onSubmit, data],
+    [onSubmit, data, trackTimeSpent],
   )
 
   return (

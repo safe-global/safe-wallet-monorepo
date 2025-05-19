@@ -6,6 +6,7 @@ import {
   isCustomTxInfo,
   isExecTxData,
   isOnChainConfirmationTxData,
+  isOnChainSignMessageTxData,
   isSafeMigrationTxData,
   isSafeUpdateTxData,
   isSwapOrderTxInfo,
@@ -34,6 +35,7 @@ import VaultDepositConfirmation from 'src/features/earn/components/VaultDepositC
 import VaultRedeemConfirmation from '@/features/earn/components/VaultRedeemConfirmation'
 import TxData from '@/components/transactions/TxDetails/TxData'
 import { isMultiSendCalldata } from '@/utils/transaction-calldata'
+import useChainId from '@/hooks/useChainId'
 
 type ConfirmationViewProps = {
   txDetails?: TransactionDetails
@@ -86,6 +88,7 @@ const getConfirmationViewComponent = ({
 const ConfirmationView = ({ safeTx, txPreview, txDetails, ...props }: ConfirmationViewProps) => {
   const { txFlow } = useContext(TxModalContext)
   const details = txDetails ?? txPreview
+  const chainId = useChainId()
 
   const ConfirmationViewComponent = useMemo(() => {
     return details
@@ -97,7 +100,10 @@ const ConfirmationView = ({ safeTx, txPreview, txDetails, ...props }: Confirmati
       : undefined
   }, [details, txFlow])
 
-  const showTxDetails = details !== undefined && !isMultiSendCalldata(details.txData?.hexData ?? '0x')
+  const showTxDetails =
+    details !== undefined &&
+    !isMultiSendCalldata(details.txData?.hexData ?? '0x') &&
+    !isOnChainSignMessageTxData(details?.txData, chainId)
 
   return (
     <>
