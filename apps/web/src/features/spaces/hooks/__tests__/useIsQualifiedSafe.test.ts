@@ -38,8 +38,6 @@ import useChainId from '@/hooks/useChainId'
 import { useHasFeature } from '@/hooks/useChains'
 import { useRouter } from 'next/router'
 
-const mockSignedIn = (signedIn: boolean) => (useAppSelector as jest.Mock).mockReturnValue(signedIn)
-
 const baseRouterPath = '/safes/1/0xSafe1'
 
 describe('useIsQualifiedSafe', () => {
