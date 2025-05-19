@@ -62,7 +62,7 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
   useEffect(() => {
     // If decodedDataRef.current is not null, the decoded data was rendered inside the TxData component
     setIsDecodedDataVisible(!!decodedDataRef.current)
-  }, [decodedDataRef.current])
+  }, [])
 
   const isUnsigned =
     isMultisigExecutionInfo(txSummary.executionInfo) && txSummary.executionInfo.confirmationsSubmitted === 0

@@ -23,7 +23,7 @@ import {
 } from '@/utils/transaction-guards'
 import { SpendingLimits } from '@/components/transactions/TxDetails/TxData/SpendingLimits'
 import { TransactionStatus, type TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
-import { PropsWithChildren, type ReactElement } from 'react'
+import type { PropsWithChildren, ReactElement } from 'react'
 import RejectionTxInfo from '@/components/transactions/TxDetails/TxData/Rejection'
 import TransferTxInfo from '@/components/transactions/TxDetails/TxData/Transfer'
 import useChainId from '@/hooks/useChainId'
