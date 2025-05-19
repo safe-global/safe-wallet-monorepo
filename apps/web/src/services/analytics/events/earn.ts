@@ -17,4 +17,5 @@ export const EARN_EVENTS = {
 
 export enum EARN_LABELS {
   safe_dashboard_banner = 'safe_dashboard_banner',
+  sidebar = 'sidebar',
 }
