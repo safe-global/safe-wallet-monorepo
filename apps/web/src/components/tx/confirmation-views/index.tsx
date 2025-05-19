@@ -58,7 +58,7 @@ const getConfirmationViewComponent = ({
 
   if (isConfirmBatchView(txFlow)) return <BatchTransactions />
 
-  if (isSettingsChangeView(txInfo)) return <SettingsChange txInfo={txInfo as SettingsChange} />
+  if (isSettingsChangeView(txInfo)) return <SettingsChange txInfo={txInfo} />
 
   if (isOnChainConfirmationTxData(txData)) return <OnChainConfirmation data={txData} isConfirmationView />
 

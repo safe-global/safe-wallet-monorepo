@@ -5,7 +5,7 @@ import { OwnerList } from '@/components/tx-flow/common/OwnerList'
 import MinusIcon from '@/public/images/common/minus.svg'
 import commonCss from '@/components/tx-flow/common/styles.module.css'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { SettingsInfoType, type SettingsChange } from '@safe-global/safe-gateway-typescript-sdk'
+import { SettingsInfoType, type SettingsChange as SettingsChangeType } from '@safe-global/safe-gateway-typescript-sdk'
 import { ChangeSignerSetupWarning } from '@/features/multichain/components/SignerSetupWarning/ChangeSignerSetupWarning'
 import { useContext } from 'react'
 import { SettingsChangeContext } from '@/components/tx-flow/flows/AddOwner/context'
@@ -13,7 +13,7 @@ import { maybePlural } from '@safe-global/utils/utils/formatters'
 import { UntrustedFallbackHandlerTxAlert } from '@/components/tx/confirmation-views/SettingsChange/UntrustedFallbackHandlerTxAlert'
 
 export interface SettingsChangeProps extends NarrowConfirmationViewProps {
-  txInfo: SettingsChange
+  txInfo: SettingsChangeType
 }
 
 const SettingsChange: React.FC<SettingsChangeProps> = ({ txInfo: { settingsInfo } }) => {
