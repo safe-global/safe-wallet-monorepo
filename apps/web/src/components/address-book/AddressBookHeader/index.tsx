@@ -21,6 +21,7 @@ import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
 import { isAuthenticated } from '@/store/authSlice'
 import { useSpacesGetOneV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useIsAdmin } from '@/features/spaces/hooks/useSpaceMembers'
+import useIsQualifiedSafe from '@/features/spaces/hooks/useIsQualifiedSafe'
 
 const HeaderButton = ({
   icon,
@@ -43,17 +44,18 @@ const HeaderButton = ({
 }
 
 const SpaceAddressBookCTA = () => {
+  const isQualifiedSafe = useIsQualifiedSafe()
+  const isAdmin = useIsAdmin()
   const spaceId = useCurrentSpaceId()
   const isUserSignedIn = useAppSelector(isAuthenticated)
-  const isAdmin = useIsAdmin()
   const { currentData: space } = useSpacesGetOneV1Query({ id: Number(spaceId) }, { skip: !isUserSignedIn || !spaceId })
 
-  if (!spaceId || !isUserSignedIn || !space || !isAdmin) return null
+  if (!isQualifiedSafe || !isAdmin) return null
 
   return (
     <Box width={1}>
       <Typography pl={1} mb={2} maxWidth="500px">
-        This data is stored in your local storage. Do you want to manage your <b>{space.name}</b> space address book
+        This data is stored in your local storage. Do you want to manage your <b>{space?.name}</b> space address book
         instead?{' '}
         <Link href={{ pathname: AppRoutes.spaces.addressBook, query: { spaceId } }} passHref>
           <MUILink>Click here</MUILink>
