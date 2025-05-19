@@ -8,7 +8,7 @@ import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants
 import { Receipt } from '@/components/tx/ConfirmTxDetails/Receipt'
 import DecodedData from '../TxData/DecodedData'
 import ColorCodedTxAccordion from '@/components/tx/ColorCodedTxAccordion'
-import { Box, Divider, Typography } from '@mui/material'
+import { Box, Divider, Stack, Typography } from '@mui/material'
 import DecoderLinks from './DecoderLinks'
 import isEqual from 'lodash/isEqual'
 import Multisend from '../TxData/DecodedData/Multisend'
@@ -79,28 +79,26 @@ const Summary = ({ safeTxData, txData, txInfo, txDetails, showMultisend = true }
       {showDetails && (
         <Box mt={2}>
           <ColorCodedTxAccordion txInfo={txInfo} txData={txData}>
-            <Box my={1}>
+            <Stack gap={1} divider={<Divider sx={{ mx: -2, my: 1 }} />}>
               <DecodedData txData={txData} toInfo={toInfo} />
-            </Box>
 
-            <Box>
-              <Divider sx={{ mx: -2, mt: 2.5 }} />
+              <Box>
+                <Typography variant="subtitle2" fontWeight={700} mb={2}>
+                  Advanced details
+                </Typography>
 
-              <Typography variant="subtitle2" fontWeight={700} mt={2.5} mb={2}>
-                Advanced details
-              </Typography>
+                <DecoderLinks />
 
-              <DecoderLinks />
-
-              <Receipt
-                safeTxData={safeTxData}
-                txData={txData}
-                txDetails={txDetails}
-                txInfo={txInfo}
-                withSignatures
-                grid
-              />
-            </Box>
+                <Receipt
+                  safeTxData={safeTxData}
+                  txData={txData}
+                  txDetails={txDetails}
+                  txInfo={txInfo}
+                  withSignatures
+                  grid
+                />
+              </Box>
+            </Stack>
           </ColorCodedTxAccordion>
         </Box>
       )}
