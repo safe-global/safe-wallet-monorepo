@@ -1,5 +1,6 @@
 import EthHashInfo from '@/components/common/EthHashInfo'
 import { useAddressName } from '@/components/common/NamedAddressInfo'
+import useAddressBook from '@/hooks/useAddressBook'
 import { isCustomTxInfo } from '@/utils/transaction-guards'
 import { Chip } from '@mui/material'
 import type { TransactionData, TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
@@ -22,15 +23,16 @@ const NameChip = ({
   const name = toName || contractInfo?.name
   const logo = toLogo || contractInfo?.logoUri
 
+  const addressBook = useAddressBook()
+  const isInAddressBook = toAddress !== undefined && !!addressBook[toAddress]
+  const isUntrusted = !isInAddressBook && contractInfo.isUnverifiedContract
+
   return toAddress && (name || logo) ? (
     <Chip
+      data-testid="name-chip"
       sx={{
-        backgroundColor: contractInfo?.isUnverifiedContract
-          ? 'error.background'
-          : withBackground
-            ? 'Background.main'
-            : 'background.paper',
-        color: contractInfo?.isUnverifiedContract ? 'error.main' : undefined,
+        backgroundColor: isUntrusted ? 'error.background' : withBackground ? 'background.main' : 'background.paper',
+        color: isUntrusted ? 'error.main' : undefined,
         height: 'unset',
       }}
       label={
