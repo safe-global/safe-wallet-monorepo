@@ -36,7 +36,6 @@ export const navItems: NavItem[] = [
     label: 'Bridge',
     icon: <SvgIcon component={BridgeIcon} inheritViewBox />,
     href: AppRoutes.bridge,
-    tag: <Chip label="New" sx={{ backgroundColor: 'secondary.light', color: 'static.main' }} />,
   },
   {
     label: 'Swap',
