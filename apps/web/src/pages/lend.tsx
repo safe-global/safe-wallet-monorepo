@@ -3,11 +3,13 @@ import Head from 'next/head'
 import dynamic from 'next/dynamic'
 import { Typography } from '@mui/material'
 import { BRAND_NAME } from '@/config/constants'
+import { FEATURES } from '@safe-global/utils/utils/chains'
+import { useHasFeature } from '@/hooks/useChains'
 
-const LazyLendPage = dynamic(() => import('@/features/lend'), { ssr: false })
+const LazyEarnPage = dynamic(() => import('@/features/earn'), { ssr: false })
 
-const LendPage: NextPage = () => {
-  const isFeatureEnabled = true // TODO: Base is not available on staging so can't add a feature flag yet. Add one for prod.
+const EarnPage: NextPage = () => {
+  const isFeatureEnabled = useHasFeature(FEATURES.EARN)
 
   return (
     <>
@@ -16,11 +18,11 @@ const LendPage: NextPage = () => {
       </Head>
 
       {isFeatureEnabled === true ? (
-        <LazyLendPage />
+        <LazyEarnPage />
       ) : isFeatureEnabled === false ? (
         <main>
           <Typography textAlign="center" my={3}>
-            Lending is not available on this network.
+            Earn is not available on this network.
           </Typography>
         </main>
       ) : null}
@@ -28,4 +30,4 @@ const LendPage: NextPage = () => {
   )
 }
 
-export default LendPage
+export default EarnPage
