@@ -10,6 +10,7 @@ import SettingsIcon from '@/public/images/sidebar/settings.svg'
 import BridgeIcon from '@/public/images/common/bridge.svg'
 import SwapIcon from '@/public/images/common/swap.svg'
 import StakeIcon from '@/public/images/common/stake.svg'
+import EarnIcon from '@/public/images/common/earn.svg'
 import { SvgIcon } from '@mui/material'
 import { Chip } from '@/components/common/Chip'
 
@@ -49,7 +50,7 @@ export const navItems: NavItem[] = [
   },
   {
     label: 'Earn',
-    icon: <SvgIcon component={StakeIcon} inheritViewBox />,
+    icon: <SvgIcon component={EarnIcon} inheritViewBox />,
     href: AppRoutes.earn,
     tag: <Chip label="New" sx={{ backgroundColor: 'secondary.light', color: 'static.main' }} />,
   },

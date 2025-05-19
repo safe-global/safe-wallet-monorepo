@@ -1,5 +1,5 @@
 import { useDarkMode } from '@/hooks/useDarkMode'
-import { WIDGET_TESTNET_URL } from '@/features/stake/constants'
+import { WIDGET_TESTNET_URL } from '@/features/earn/constants'
 
 const useGetWidgetUrl = (asset?: string) => {
   const params = new URLSearchParams()
