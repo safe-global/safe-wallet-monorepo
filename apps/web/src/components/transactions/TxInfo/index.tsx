@@ -173,7 +173,6 @@ const TxInfo = ({ info, ...rest }: { info: TransactionInfo; omitSign?: boolean; 
   }
 
   if (isCustomTxInfo(info)) {
-    console.log('ASD', info)
     return <CustomTx info={info} />
   }
 

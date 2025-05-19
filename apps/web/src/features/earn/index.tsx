@@ -21,7 +21,7 @@ const EarnPage = () => {
           flex: 1,
         }}
       >
-        <BlockedAddress address={blockedAddress} featureTitle="lend feature with Kiln" />
+        <BlockedAddress address={blockedAddress} featureTitle="Earn feature with Kiln" />
       </Stack>
     )
   }

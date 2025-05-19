@@ -122,7 +122,7 @@ const VaultDepositConfirmation = ({
   txInfo: VaultDepositTransactionInfo
   isTxDetails?: boolean
 }) => {
-  if (!txInfo.vaultInfo) return null // TODO: Workaround until new CGW changes are on prod
+  if (!txInfo.vaultInfo) return null
 
   const annualReward = Number(txInfo.expectedAnnualReward).toFixed(0)
   const monthlyReward = Number(txInfo.expectedMonthlyReward).toFixed(0)
