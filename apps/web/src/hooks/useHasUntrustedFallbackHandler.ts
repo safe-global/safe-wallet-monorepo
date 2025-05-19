@@ -1,8 +1,9 @@
-import { useMemo } from 'react'
+import { useCallback, useMemo } from 'react'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { useCompatibilityFallbackHandlerDeployments } from '@/hooks/useCompatibilityFallbackHandlerDeployments'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { useTWAPFallbackHandlerAddress } from '@/features/swap/hooks/useIsTWAPFallbackHandler'
+import { hasMatchingDeployment } from '@safe-global/utils/services/contracts/deployments'
+import { getCompatibilityFallbackHandlerDeployments } from '@safe-global/safe-deployments'
 
 /**
  * Hook to check if the Safe's fallback handler (or optionally provided addresses) contain a non-official one.
@@ -10,7 +11,6 @@ import { useTWAPFallbackHandlerAddress } from '@/features/swap/hooks/useIsTWAPFa
  * @returns Boolean indicating if an untrusted fallback handler is set or if the provided address(es) contain an untrusted one
  */
 export const useHasUntrustedFallbackHandler = (fallbackHandler?: string | string[]) => {
-  const fallbackHandlerDeployments = useCompatibilityFallbackHandlerDeployments()
   const { safe } = useSafeInfo()
   const twapFallbackHandler = useTWAPFallbackHandlerAddress()
 
@@ -22,25 +22,21 @@ export const useHasUntrustedFallbackHandler = (fallbackHandler?: string | string
     return Array.isArray(fallbackHandler) ? fallbackHandler : [fallbackHandler]
   }, [fallbackHandler, safe.fallbackHandler?.value])
 
-  const officialFallbackHandlerAddresses = useMemo(() => {
-    const addresses = !!twapFallbackHandler ? [twapFallbackHandler] : []
-    const officialAddresses = fallbackHandlerDeployments?.networkAddresses[safe.chainId]
-
-    if (!officialAddresses) {
-      return addresses
-    }
-
-    return [...addresses, ...(Array.isArray(officialAddresses) ? officialAddresses : [officialAddresses])]
-  }, [fallbackHandlerDeployments, safe.chainId, twapFallbackHandler])
+  const isFallbackHandlerUntrusted = useCallback(
+    (fallbackHandlerAddress: string) => {
+      return (
+        !sameAddress(fallbackHandlerAddress, twapFallbackHandler) &&
+        !hasMatchingDeployment(getCompatibilityFallbackHandlerDeployments, fallbackHandlerAddress, safe.chainId, [
+          '1.3.0',
+          '1.4.1',
+        ])
+      )
+    },
+    [safe.chainId, twapFallbackHandler],
+  )
 
   return useMemo(
-    () =>
-      fallbackHandlerAddresses.length > 0 &&
-      fallbackHandlerAddresses.some(
-        (fallbackHandlerAddress) =>
-          !!fallbackHandlerAddress &&
-          !officialFallbackHandlerAddresses.some((address) => sameAddress(address, fallbackHandlerAddress)),
-      ),
-    [fallbackHandlerAddresses, officialFallbackHandlerAddresses],
+    () => fallbackHandlerAddresses.length > 0 && fallbackHandlerAddresses.some(isFallbackHandlerUntrusted),
+    [fallbackHandlerAddresses, isFallbackHandlerUntrusted],
   )
 }
