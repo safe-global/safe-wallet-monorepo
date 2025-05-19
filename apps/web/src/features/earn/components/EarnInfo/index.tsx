@@ -12,18 +12,16 @@ const EarnInfo = ({ onGetStarted }: { onGetStarted: () => void }) => {
   return (
     <Box m={3}>
       <Card sx={{ p: 4 }}>
-        <Grid container>
-          <Grid container size={{ xs: 12, md: 7 }} rowSpacing={2}>
-            <Grid size={{ xs: 12 }} mb={1} zIndex={2}>
+        <Grid container spacing={3}>
+          <Grid container size={{ xs: 12, md: 7 }} rowSpacing={3}>
+            <Grid size={{ xs: 12 }} zIndex={2} maxWidth={500}>
               <EarnPoweredBy />
-            </Grid>
 
-            <Grid size={{ xs: 12 }} zIndex={2} width={1}>
-              <Typography variant="h2">Earn on your terms with MORPHO rewards</Typography>
-            </Grid>
+              <Typography variant="h1" component="div" my={2}>
+                Earn on your terms and get MORPHO rewards on top
+              </Typography>
 
-            <Grid size={{ xs: 12, sm: 6 }} mb={1} zIndex={2} sx={{ width: '100% !important' }}>
-              <Typography variant="body1" sx={{ maxWidth: '550px' }}>
+              <Typography variant="body1">
                 Earn rewards on your stablecoins, wstETH, ETH, and WBTC by lending with Kiln widget into the Morpho
                 protocol.
               </Typography>
