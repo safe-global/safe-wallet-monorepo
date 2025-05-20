@@ -14,6 +14,8 @@ import AcceptButton from './AcceptButton'
 import DeclineButton from './DeclineButton'
 import { trackEvent } from '@/services/analytics'
 import { MemberStatus } from '@/features/spaces/hooks/useSpaceMembers'
+import { useAppSelector } from '@/store'
+import { isAuthenticated } from '@/store/authSlice'
 
 type SpaceListInvite = {
   space: GetSpaceResponse
@@ -21,7 +23,8 @@ type SpaceListInvite = {
 
 const SpaceListInvite = ({ space }: SpaceListInvite) => {
   const { id, name, members } = space
-  const { currentData: currentUser } = useUsersGetWithWalletsV1Query()
+  const isUserSignedIn = useAppSelector(isAuthenticated)
+  const { currentData: currentUser } = useUsersGetWithWalletsV1Query(undefined, { skip: !isUserSignedIn })
   const numberOfAccounts = useSpaceSafeCount(id)
   const numberOfMembers = members.filter((member) => member.status === MemberStatus.ACTIVE).length
 
