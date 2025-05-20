@@ -42,7 +42,14 @@ export default {
       },
       package: IS_DEV ? 'global.safe.mobileapp.dev' : 'global.safe.mobileapp',
       googleServicesFile: IS_DEV ? process.env.GOOGLE_SERVICES_JSON_DEV : process.env.GOOGLE_SERVICES_JSON,
-      permissions: ['android.permission.CAMERA'],
+      permissions: [
+        'android.permission.CAMERA',
+        'android.permission.POST_NOTIFICATIONS',
+        'android.permission.RECEIVE_BOOT_COMPLETED',
+        'android.permission.FOREGROUND_SERVICE',
+        'android.permission.WAKE_LOCK',
+      ],
+      edgeToEdgeEnabled: true,
     },
     web: {
       bundler: 'metro',
@@ -50,6 +57,7 @@ export default {
       favicon: './assets/images/favicon.png',
     },
     plugins: [
+      ['./expo-plugins/withNotificationIcons.js'],
       'expo-router',
       [
         'expo-font',
@@ -66,6 +74,17 @@ export default {
           dark: {
             image: './assets/images/splash.png',
             backgroundColor: '#000000',
+          },
+          android: {
+            image: './assets/images/icon.png',
+            imageWidth: 124,
+            imageHeight: 124,
+            imageResizeMode: 'contain',
+            backgroundColor: '#000000',
+          },
+          ios: {
+            image: './assets/images/splash.png',
+            imageResizeMode: 'contain',
           },
         },
       ],
@@ -100,9 +119,27 @@ export default {
           enableBase64ShareAndroid: true,
         },
       ],
+      'expo-task-manager',
+      'expo-web-browser',
     ],
     experiments: {
       typedRoutes: true,
+    },
+    notification: {
+      icon: './assets/images/ic_notification.png',
+      color: '#FFFFFF',
+      androidMode: 'default',
+      androidCollapsedTitle: 'Updates from Safe Wallet',
+      iosDisplayInForeground: true,
+    },
+    // Define background tasks
+    tasks: {
+      'app.notifee.notification-event': {
+        backgroundMode: ['processing', 'remote-notification'],
+      },
+      ReactNativeFirebaseMessagingHeadlessTask: {
+        backgroundMode: ['processing', 'remote-notification'],
+      },
     },
   },
 }

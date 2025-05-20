@@ -1,13 +1,13 @@
-import TxLayout from '@/components/tx-flow/common/TxLayout'
-import type { TxStep } from '../../common/TxLayout'
-import useTxStepper from '@/components/tx-flow/useTxStepper'
 import { ChooseOwner, ChooseOwnerMode } from '@/components/tx-flow/flows/AddOwner/ChooseOwner'
 import { ReviewOwner } from '@/components/tx-flow/flows/AddOwner/ReviewOwner'
 import SaveAddressIcon from '@/public/images/common/save-address.svg'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { ConfirmTxDetails } from '@/components/tx/ConfirmTxDetails'
-import { useMemo } from 'react'
+import { useContext } from 'react'
 import { TxFlowType } from '@/services/analytics'
+import { TxFlow } from '../../TxFlow'
+import { TxFlowStep } from '../../TxFlowStep'
+import { TxFlowContext } from '../../TxFlowProvider'
+import { type ReviewTransactionProps } from '@/components/tx/ReviewTransactionV2'
 
 type Owner = {
   address: string
@@ -20,61 +20,47 @@ export type AddOwnerFlowProps = {
   threshold: number
 }
 
-const FlowInner = ({ defaultValues }: { defaultValues: AddOwnerFlowProps }) => {
-  const { data, step, nextStep, prevStep } = useTxStepper<AddOwnerFlowProps>(defaultValues, TxFlowType.ADD_OWNER)
+const ChooseOwnerStep = () => {
+  const { onNext, data } = useContext(TxFlowContext)
 
-  const steps = useMemo<TxStep[]>(
-    () => [
-      {
-        txLayoutProps: { title: 'New transaction' },
-        content: (
-          <ChooseOwner
-            key={0}
-            params={data}
-            onSubmit={(formData) => nextStep({ ...data, ...formData })}
-            mode={ChooseOwnerMode.ADD}
-          />
-        ),
-      },
-      {
-        txLayoutProps: { title: 'Confirm transaction' },
-        content: <ReviewOwner key={1} params={data} onSubmit={() => nextStep(data)} />,
-      },
-      {
-        txLayoutProps: { title: 'Confirm transaction details', fixedNonce: true },
-        content: <ConfirmTxDetails key={2} onSubmit={() => {}} showMethodCall />,
-      },
-    ],
-    [nextStep, data],
-  )
+  return <ChooseOwner onSubmit={onNext} params={data} mode={ChooseOwnerMode.ADD} />
+}
 
-  return (
-    <TxLayout
-      subtitle="Add signer"
-      icon={SaveAddressIcon}
-      step={step}
-      onBack={prevStep}
-      {...(steps?.[step]?.txLayoutProps || {})}
-    >
-      {steps.map(({ content }) => content)}
-    </TxLayout>
-  )
+const ReviewOwnerStep = (props: ReviewTransactionProps) => {
+  const { data } = useContext(TxFlowContext)
+
+  return <ReviewOwner params={data} {...props} />
 }
 
 const AddOwnerFlow = ({ address }: { address?: string }) => {
-  const { safe, safeLoading, safeLoaded } = useSafeInfo()
+  const {
+    safe: { threshold },
+    safeLoaded,
+  } = useSafeInfo()
 
   const defaultValues: AddOwnerFlowProps = {
     newOwner: {
       address: address || '',
       name: '',
     },
-    threshold: safe.threshold,
+    threshold,
   }
 
-  if (!safeLoaded || safeLoading) return null
+  if (!safeLoaded) return null
 
-  return <FlowInner defaultValues={defaultValues} />
+  return (
+    <TxFlow
+      initialData={defaultValues}
+      eventCategory={TxFlowType.ADD_OWNER}
+      icon={SaveAddressIcon}
+      subtitle="Add signer"
+      ReviewTransactionComponent={ReviewOwnerStep}
+    >
+      <TxFlowStep title="New transaction">
+        <ChooseOwnerStep />
+      </TxFlowStep>
+    </TxFlow>
+  )
 }
 
 export default AddOwnerFlow

@@ -1,13 +1,13 @@
-import TxLayout from '@/components/tx-flow/common/TxLayout'
-import type { TxStep } from '../../common/TxLayout'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import useTxStepper from '../../useTxStepper'
 import { ReviewRemoveOwner } from './ReviewRemoveOwner'
 import SaveAddressIcon from '@/public/images/common/save-address.svg'
 import { SetThreshold } from './SetThreshold'
-import { useMemo } from 'react'
-import { ConfirmTxDetails } from '@/components/tx/ConfirmTxDetails'
+import { useContext } from 'react'
 import { TxFlowType } from '@/services/analytics'
+import { TxFlowContext } from '../../TxFlowProvider'
+import { TxFlow } from '../../TxFlow'
+import { TxFlowStep } from '../../TxFlowStep'
+import { type ReviewTransactionProps } from '@/components/tx/ReviewTransactionV2'
 
 type Owner = {
   address: string
@@ -19,6 +19,16 @@ export type RemoveOwnerFlowProps = {
   threshold: number
 }
 
+const SetThresholdStep = () => {
+  const { onNext, data } = useContext(TxFlowContext)
+  return <SetThreshold onSubmit={onNext} params={data} />
+}
+
+const ReviewOwnerStep = (props: ReviewTransactionProps) => {
+  const { data } = useContext(TxFlowContext)
+  return <ReviewRemoveOwner params={data} {...props} />
+}
+
 const RemoveOwnerFlow = (props: Owner) => {
   const { safe } = useSafeInfo()
 
@@ -27,38 +37,18 @@ const RemoveOwnerFlow = (props: Owner) => {
     threshold: Math.min(safe.threshold, safe.owners.length - 1),
   }
 
-  const { data, step, nextStep, prevStep } = useTxStepper<RemoveOwnerFlowProps>(defaultValues, TxFlowType.REMOVE_OWNER)
-
-  const steps = useMemo<TxStep[]>(
-    () => [
-      {
-        txLayoutProps: { title: 'New transaction' },
-        content: (
-          <SetThreshold key={0} params={data} onSubmit={(formData: any) => nextStep({ ...data, ...formData })} />
-        ),
-      },
-      {
-        txLayoutProps: { title: 'Confirm transaction' },
-        content: <ReviewRemoveOwner key={1} params={data} onSubmit={() => nextStep(data)} />,
-      },
-      {
-        txLayoutProps: { title: 'Confirm transaction details', fixedNonce: true },
-        content: <ConfirmTxDetails key={2} onSubmit={() => {}} />,
-      },
-    ],
-    [nextStep, data],
-  )
-
   return (
-    <TxLayout
-      subtitle="Remove signer"
+    <TxFlow
+      initialData={defaultValues}
+      eventCategory={TxFlowType.REMOVE_OWNER}
       icon={SaveAddressIcon}
-      step={step}
-      onBack={prevStep}
-      {...(steps?.[step]?.txLayoutProps || {})}
+      subtitle="Remove signer"
+      ReviewTransactionComponent={ReviewOwnerStep}
     >
-      {steps.map(({ content }) => content)}
-    </TxLayout>
+      <TxFlowStep title="New transaction">
+        <SetThresholdStep />
+      </TxFlowStep>
+    </TxFlow>
   )
 }
 

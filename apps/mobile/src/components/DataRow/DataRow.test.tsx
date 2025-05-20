@@ -1,5 +1,5 @@
 import React from 'react'
-import { render } from '@testing-library/react-native'
+import { render } from '@/src/tests/test-utils'
 import { DataRow } from './index'
 import { Text } from 'react-native'
 import { View } from 'tamagui'

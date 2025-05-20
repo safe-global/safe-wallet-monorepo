@@ -22,6 +22,7 @@ import { GeoblockingContext } from '@/components/common/GeoblockingProvider'
 import { STAKE_EVENTS, STAKE_LABELS } from '@/services/analytics/events/stake'
 import { Tooltip } from '@mui/material'
 import { BRIDGE_EVENTS, BRIDGE_LABELS } from '@/services/analytics/events/bridge'
+import { isNonCriticalUpdate } from '@safe-global/utils/utils/chains'
 
 const getSubdirectory = (pathname: string): string => {
   return pathname.split('/')[1]
@@ -64,7 +65,9 @@ const Navigation = (): ReactElement => {
   const getBadge = (item: NavItem) => {
     // Indicate whether the current Safe needs an upgrade
     if (item.href === AppRoutes.settings.setup) {
-      return safe.implementationVersionState === ImplementationVersionState.OUTDATED
+      return (
+        safe.implementationVersionState === ImplementationVersionState.OUTDATED && !isNonCriticalUpdate(safe.version)
+      )
     }
   }
 

@@ -1,16 +1,22 @@
 import { useCallback, useEffect, useRef } from 'react'
-import { AppState } from 'react-native'
+import { AppState, Platform } from 'react-native'
 import NotificationsService from '@/src/services/notifications/NotificationService'
 import useRegisterForNotifications from '@/src/hooks/useRegisterForNotifications'
 import Logger from '@/src/utils/logger'
 import { useAppDispatch, useAppSelector } from '../store/hooks'
-import { selectAppNotificationStatus, toggleDeviceNotifications } from '../store/notificationsSlice'
+import {
+  selectAppNotificationStatus,
+  selectPromptAttempts,
+  toggleDeviceNotifications,
+  updatePromptAttempts,
+} from '../store/notificationsSlice'
 
 export const useNotificationManager = () => {
   const dispatch = useAppDispatch()
-
+  const promptAttempts = useAppSelector(selectPromptAttempts)
   const isAppNotificationEnabled = useAppSelector(selectAppNotificationStatus)
-
+  const isAndroid = Platform.OS === 'android'
+  const promptThreshold = isAndroid ? 3 : 2
   const { registerForNotifications, unregisterForNotifications, updatePermissionsForNotifications, isLoading } =
     useRegisterForNotifications()
 
@@ -19,19 +25,9 @@ export const useNotificationManager = () => {
   // Using a ref instead of state to ensure the value persists across app background/foreground cycles
   const pendingPermissionRequestRef = useRef(false)
 
-  // Helper for openSettings flow
-  const openSettingsForPermissions = useCallback(async () => {
-    // Mark that we're about to request permissions and redirect to settings
-    pendingPermissionRequestRef.current = true
-
-    // This will potentially open settings depending on the permission status
-    const result = await NotificationsService.handlePermissionFlow(true)
-
-    return result
-  }, [])
-
   const enableNotification = useCallback(async () => {
     try {
+      Logger.info('enableNotification :: STARTED', { promptAttempts })
       // Check if device notifications are enabled
       const deviceNotificationStatus = await NotificationsService.isDeviceNotificationEnabled()
 
@@ -43,29 +39,29 @@ export const useNotificationManager = () => {
           return true
         }
         return false
-      } else {
-        // Open settings and get result
-        const { granted } = await openSettingsForPermissions()
+      } else if (promptAttempts < promptThreshold) {
+        dispatch(updatePromptAttempts(promptAttempts + 1))
+        // Prompt user to enable notifications
+        const { permission } = await NotificationsService.getAllPermissions()
 
-        if (granted) {
+        if (permission === 'granted') {
           const { loading, error } = await registerForNotifications()
-
-          pendingPermissionRequestRef.current = false
 
           if (!loading && !error) {
             dispatch(toggleDeviceNotifications(true))
             return true
           }
         }
-
-        return false
+      } else {
+        pendingPermissionRequestRef.current = true
+        await NotificationsService.getAllPermissions(true)
       }
     } catch (error) {
       pendingPermissionRequestRef.current = false
       Logger.error('Error enabling push notifications', error)
       return false
     }
-  }, [dispatch, registerForNotifications, openSettingsForPermissions])
+  }, [dispatch, registerForNotifications, promptAttempts])
 
   const disableNotification = useCallback(async () => {
     try {
@@ -85,10 +81,10 @@ export const useNotificationManager = () => {
       const deviceNotificationStatus = await NotificationsService.isDeviceNotificationEnabled()
 
       if (!deviceNotificationStatus && !isAppNotificationEnabled) {
-        // Open settings and get result
-        const { granted } = await openSettingsForPermissions()
+        // Prompt user to enable notifications
+        const { permission } = await NotificationsService.getAllPermissions()
 
-        if (granted) {
+        if (permission === 'granted') {
           const { loading, error } = await registerForNotifications()
 
           pendingPermissionRequestRef.current = false
@@ -97,6 +93,9 @@ export const useNotificationManager = () => {
             dispatch(toggleDeviceNotifications(true))
             return true
           }
+        } else {
+          pendingPermissionRequestRef.current = true
+          await NotificationsService.getAllPermissions(true)
         }
 
         // Don't clear the flag here if not granted immediately
@@ -109,13 +108,7 @@ export const useNotificationManager = () => {
       pendingPermissionRequestRef.current = false
       Logger.error('Error toggling notifications', error)
     }
-  }, [
-    isAppNotificationEnabled,
-    registerForNotifications,
-    unregisterForNotifications,
-    dispatch,
-    openSettingsForPermissions,
-  ])
+  }, [isAppNotificationEnabled, registerForNotifications, unregisterForNotifications, dispatch])
 
   const updateNotificationPermissions = useCallback(async () => {
     try {

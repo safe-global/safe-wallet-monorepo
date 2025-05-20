@@ -1,5 +1,5 @@
 import { useCurrentChain } from '@/hooks/useChains'
-import { useContext, useEffect } from 'react'
+import { useContext, useEffect, type PropsWithChildren } from 'react'
 
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { trackEvent, SETTINGS_EVENTS } from '@/services/analytics'
@@ -10,15 +10,16 @@ import { SafeTxContext } from '../../SafeTxProvider'
 import type { AddOwnerFlowProps } from '.'
 import type { ReplaceOwnerFlowProps } from '../ReplaceOwner'
 import { SettingsChangeContext } from './context'
-import ReviewTransaction from '@/components/tx/ReviewTransaction'
+import ReviewTransaction from '@/components/tx/ReviewTransactionV2'
 
 export const ReviewOwner = ({
   params,
   onSubmit,
-}: {
+  children,
+}: PropsWithChildren<{
   params: AddOwnerFlowProps | ReplaceOwnerFlowProps
   onSubmit?: () => void
-}) => {
+}>) => {
   const dispatch = useAppDispatch()
   const { setSafeTx, setSafeTxError } = useContext(SafeTxContext)
   const { safe } = useSafeInfo()
@@ -64,7 +65,7 @@ export const ReviewOwner = ({
 
   return (
     <SettingsChangeContext.Provider value={params}>
-      <ReviewTransaction onSubmit={handleSubmit} showMethodCall />
+      <ReviewTransaction onSubmit={handleSubmit}>{children}</ReviewTransaction>
     </SettingsChangeContext.Provider>
   )
 }

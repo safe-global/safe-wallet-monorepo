@@ -3,7 +3,8 @@ import InfoIcon from '@/public/images/notifications/info.svg'
 import ExternalLink from '@/components/common/ExternalLink'
 import { useAppSelector } from '@/store'
 import { selectSafeMessages } from '@/store/safeMessagesSlice'
-import { HelpCenterArticle } from '@/config/constants'
+
+import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 
 const SignedMessagesHelpLink = () => {
   const safeMessages = useAppSelector(selectSafeMessages)

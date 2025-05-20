@@ -140,9 +140,12 @@ describe('useLoadBalances', () => {
   })
 
   test('pass correct currency and reload on currency change', async () => {
-    jest
-      .spyOn(balancesQueries, 'useBalancesGetBalancesV1Query')
-      .mockImplementation(() => ({ data: mockBalanceEUR, isLoading: false, error: undefined, refetch: jest.fn() }))
+    jest.spyOn(balancesQueries, 'useBalancesGetBalancesV1Query').mockImplementation(() => ({
+      currentData: mockBalanceEUR,
+      isLoading: false,
+      error: undefined,
+      refetch: jest.fn(),
+    }))
 
     const mockSelector = jest.spyOn(store, 'useAppSelector').mockImplementation((selector) =>
       selector({
@@ -175,9 +178,12 @@ describe('useLoadBalances', () => {
       expect(result.current[1]).toBeUndefined()
     })
 
-    jest
-      .spyOn(balancesQueries, 'useBalancesGetBalancesV1Query')
-      .mockImplementation(() => ({ data: mockBalanceUSD, isLoading: false, error: undefined, refetch: jest.fn() }))
+    jest.spyOn(balancesQueries, 'useBalancesGetBalancesV1Query').mockImplementation(() => ({
+      currentData: mockBalanceUSD,
+      isLoading: false,
+      error: undefined,
+      refetch: jest.fn(),
+    }))
 
     mockSelector.mockImplementation((selector) =>
       selector({
@@ -214,7 +220,7 @@ describe('useLoadBalances', () => {
 
   test('only use default list if feature is enabled', async () => {
     jest.spyOn(balancesQueries, 'useBalancesGetBalancesV1Query').mockImplementation(() => ({
-      data: mockBalanceAllTokens,
+      currentData: mockBalanceAllTokens,
       isLoading: false,
       error: undefined,
       refetch: jest.fn(),
@@ -254,7 +260,7 @@ describe('useLoadBalances', () => {
 
   test('use trusted filter for default list and reload on settings change', async () => {
     jest.spyOn(balancesQueries, 'useBalancesGetBalancesV1Query').mockImplementation(() => ({
-      data: mockBalanceDefaultList,
+      currentData: mockBalanceDefaultList,
       isLoading: false,
       error: undefined,
       refetch: jest.fn(),
@@ -295,7 +301,7 @@ describe('useLoadBalances', () => {
     })
 
     jest.spyOn(balancesQueries, 'useBalancesGetBalancesV1Query').mockImplementation(() => ({
-      data: mockBalanceAllTokens,
+      currentData: mockBalanceAllTokens,
       isLoading: false,
       error: undefined,
       refetch: jest.fn(),

@@ -20,7 +20,8 @@ import { useNotificationGTWPermissions } from './useNotificationGTWPermissions'
 import { useSign } from './useSign/useSign'
 import { selectActiveSafe } from '../store/activeSafeSlice'
 import { useGlobalSearchParams } from 'expo-router'
-
+import NotificationService from '../services/notifications/NotificationService'
+import { notificationChannels, withTimeout } from '@/src/utils/notifications'
 type RegisterForNotificationsProps = {
   loading: boolean
   error: string | null
@@ -90,6 +91,8 @@ const useRegisterForNotifications = (): NotificationsProps => {
         }
       }
       const fcmToken = await FCMService.initNotification()
+      // Force the creation of the notification channel for android
+      await withTimeout(NotificationService.createChannel(notificationChannels[0]), 5000)
 
       /* IMPORTANT - Create a new random (delegated) private key to avoid exposing the subscriber's private key
        *

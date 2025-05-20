@@ -35,7 +35,7 @@ export default function SignError({ onRetryPress, description }: { onRetryPress:
 
               <View margin="$4" width="100%" alignItems="center" gap="$4">
                 <LargeHeaderTitle textAlign="center" size="$8" lineHeight={32} maxWidth={200} fontWeight={600}>
-                  Couldn’t execute the transaction
+                  Couldn't sign the transaction
                 </LargeHeaderTitle>
 
                 <Text textAlign="center" fontSize="$4" width="80%">

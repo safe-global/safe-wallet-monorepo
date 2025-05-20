@@ -11,7 +11,6 @@ const customJestConfig = {
   moduleNameMapper: {
     // Handle module aliases (this will be automatically configured for you soon)
     '^@/(.*)$': '<rootDir>/src/$1',
-    '^react$': '<rootDir>/node_modules/react',
     '^react-dom$': '<rootDir>/node_modules/react-dom',
     '^.+\\.(svg)$': '<rootDir>/mocks/svg.js',
     '^.+/markdown/terms/terms\\.md$': '<rootDir>/mocks/terms.md.js',

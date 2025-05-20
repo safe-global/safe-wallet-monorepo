@@ -4,8 +4,14 @@
   line-height: 1.1;
 }
 
-.encodedData button {
-  padding-top: 0;
-  padding-bottom: 0;
-  padding-left: 0;
+.showMore {
+  white-space: nowrap;
+}
+
+.monospace {
+  font-family: monospace;
+}
+
+.zeroes {
+  opacity: 0.75;
 }

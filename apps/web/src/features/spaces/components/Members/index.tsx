@@ -1,17 +1,16 @@
 import PlusIcon from '@/public/images/common/plus.svg'
-import { Button, InputAdornment, Stack, SvgIcon, TextField, Typography } from '@mui/material'
+import { Button, Stack, Typography } from '@mui/material'
 import AddMemberModal from 'src/features/spaces/components/AddMemberModal'
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import MembersList from '@/features/spaces/components/MembersList'
-import SearchIcon from '@/public/images/common/search.svg'
 import { useMembersSearch } from '@/features/spaces/hooks/useMembersSearch'
 import { useIsInvited, useSpaceMembersByStatus, useIsAdmin } from '@/features/spaces/hooks/useSpaceMembers'
 import PreviewInvite from '../InviteBanner/PreviewInvite'
 import { SPACE_LABELS } from '@/services/analytics/events/spaces'
 import Track from '@/components/common/Track'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
-import { debounce } from 'lodash'
 import { trackEvent } from '@/services/analytics'
+import SearchInput from '../SearchInput'
 
 const SpaceMembers = () => {
   const [openAddMembersModal, setOpenAddMembersModal] = useState(false)
@@ -22,9 +21,6 @@ const SpaceMembers = () => {
 
   const filteredMembers = useMembersSearch(activeMembers, searchQuery)
   const filteredInvites = useMembersSearch(invitedMembers, searchQuery)
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const handleSearch = useCallback(debounce(setSearchQuery, 300), [])
 
   useEffect(() => {
     if (searchQuery) {
@@ -43,30 +39,20 @@ const SpaceMembers = () => {
         justifyContent="space-between"
         alignItems="flex-start"
         mb={3}
-        flexWrap="wrap"
+        flexWrap="nowrap"
         gap={2}
-        flexDirection={{ xs: 'column-reverse', md: 'row' }}
+        flexDirection={{ xs: 'column-reverse', sm: 'row' }}
       >
-        <TextField
-          placeholder="Search"
-          variant="filled"
-          hiddenLabel
-          onChange={(e) => {
-            handleSearch(e.target.value)
-          }}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SvgIcon component={SearchIcon} inheritViewBox color="border" fontSize="small" />
-              </InputAdornment>
-            ),
-            disableUnderline: true,
-          }}
-          size="small"
-        />
+        <SearchInput onSearch={setSearchQuery} />
         {isAdmin && (
           <Track {...SPACE_EVENTS.ADD_MEMBER_MODAL} label={SPACE_LABELS.members_page}>
-            <Button variant="contained" startIcon={<PlusIcon />} onClick={() => setOpenAddMembersModal(true)}>
+            <Button
+              data-testid="add-member-button"
+              variant="contained"
+              startIcon={<PlusIcon />}
+              onClick={() => setOpenAddMembersModal(true)}
+              sx={{ whiteSpace: 'nowrap' }}
+            >
               Add member
             </Button>
           </Track>

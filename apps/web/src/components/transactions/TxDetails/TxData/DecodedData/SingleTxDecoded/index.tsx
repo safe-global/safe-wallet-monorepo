@@ -10,6 +10,9 @@ import DecodedData from '@/components/transactions/TxDetails/TxData/DecodedData'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { getSafeToL2MigrationDeployment } from '@safe-global/safe-deployments'
 import { useCurrentChain } from '@/hooks/useChains'
+import { type TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { InlineTransferTxInfo } from '../../Transfer'
+import { useTransferTokenInfo } from './useTransferTokenInfo'
 
 type SingleTxDecodedProps = {
   tx: InternalTransaction
@@ -30,6 +33,11 @@ export const SingleTxDecoded = ({ tx, txData, actionTitle, variant, expanded, on
 
   const safeToL2MigrationDeployment = getSafeToL2MigrationDeployment()
   const safeToL2MigrationAddress = chain && safeToL2MigrationDeployment?.networkAddresses[chain.chainId]
+  const tokenInfoIndex = (txData as TransactionDetails['txData'])?.tokenInfoIndex
+
+  const txDataHex = tx.data ?? '0x'
+
+  const transferTokenInfo = useTransferTokenInfo(txDataHex, tx.value, tx.to, tokenInfoIndex)
 
   const singleTxData = {
     to: { value: tx.to },
@@ -47,10 +55,18 @@ export const SingleTxDecoded = ({ tx, txData, actionTitle, variant, expanded, on
         <div className={css.summary}>
           <CodeIcon color="border" fontSize="small" />
           <Typography>{actionTitle}</Typography>
-          <Typography ml="8px">
-            {name ? name + ': ' : ''}
-            <b>{method}</b>
-          </Typography>
+          {transferTokenInfo ? (
+            <InlineTransferTxInfo
+              value={transferTokenInfo.transferValue}
+              tokenInfo={transferTokenInfo.tokenInfo}
+              recipient={transferTokenInfo.recipient}
+            />
+          ) : (
+            <Typography ml="8px">
+              {name ? name + ': ' : ''}
+              <b>{method}</b>
+            </Typography>
+          )}
         </div>
       </AccordionSummary>
 

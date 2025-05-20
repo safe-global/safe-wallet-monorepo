@@ -11,8 +11,8 @@ import { type AddressBookState, selectAllAddressBooks } from '@/store/addressBoo
 import { useAppSelector } from '@/store'
 import { trackEvent, ADDRESS_BOOK_EVENTS } from '@/services/analytics'
 import ExternalLink from '@/components/common/ExternalLink'
-import { HelpCenterArticle } from '@/config/constants'
 import madProps from '@/utils/mad-props'
+import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 
 const COL_1 = 'address'
 const COL_2 = 'name'

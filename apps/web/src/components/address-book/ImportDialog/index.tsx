@@ -17,7 +17,8 @@ import ErrorMessage from '@/components/tx/ErrorMessage'
 import { Errors, logError } from '@/services/exceptions'
 import FileUpload, { FileTypes, type FileInfo } from '@/components/common/FileUpload'
 import ExternalLink from '@/components/common/ExternalLink'
-import { BRAND_NAME, HelpCenterArticle } from '@/config/constants'
+import { BRAND_NAME } from '@/config/constants'
+import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 
 type AddressBookCSVRow = ['address', 'name', 'chainId']
 

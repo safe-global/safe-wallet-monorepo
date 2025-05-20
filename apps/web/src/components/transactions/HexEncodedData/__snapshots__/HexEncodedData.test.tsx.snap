@@ -3,18 +3,18 @@
 exports[`HexEncodedData should not cut the text in case the limit option is higher than the provided hexData 1`] = `
 <div>
   <div
-    class="MuiGrid-root MuiGrid-container css-1m1clne-MuiGrid-root"
+    class="MuiGrid-root MuiGrid-container css-1yff1ei-MuiGrid-root"
   >
     <div
-      class="MuiGrid-root MuiGrid-item css-p1l0hx-MuiGrid-root"
+      class="MuiGrid-root MuiGrid-item css-ezmk0c-MuiGrid-root"
       data-testid="tx-row-title"
       style="word-break: break-word;"
     >
-      <p
-        class="MuiTypography-root MuiTypography-body1 css-shf88x-MuiTypography-root"
+      <span
+        class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
       >
         Data (hex-encoded)
-      </p>
+      </span>
     </div>
     <div
       class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true css-1vd824g-MuiGrid-root"
@@ -30,29 +30,20 @@ exports[`HexEncodedData should not cut the text in case the limit option is high
           data-mui-internal-clone-element="true"
           style="cursor: pointer;"
         >
-          <button
-            aria-label="Copy to clipboard"
-            class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-xyrzjn-MuiButtonBase-root-MuiIconButton-root"
-            tabindex="0"
-            type="button"
+          <span
+            class="monospace"
           >
-            <mock-icon
-              aria-hidden=""
-              class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeSmall css-gvpe62-MuiSvgIcon-root"
-              data-testid="copy-btn-icon"
-              focusable="false"
-            />
-          </button>
+            <b
+              aria-label="The first 4 bytes determine the contract method that is being called"
+              class=""
+              data-mui-internal-clone-element="true"
+            >
+              0xed2ad31e
+            </b>
+            d00088fc64d00c49774b2fe3fb7fd7db1c2a714700892607b9f77dc1
+             
+          </span>
         </span>
-        <b
-          aria-label="The first 4 bytes determine the contract method that is being called"
-          class=""
-          data-mui-internal-clone-element="true"
-        >
-          0xed2ad31e
-        </b>
-        d00088fc64d00c49774b2fe3fb7fd7db1c2a714700892607b9f77dc1
-         
       </div>
     </div>
   </div>
@@ -62,18 +53,18 @@ exports[`HexEncodedData should not cut the text in case the limit option is high
 exports[`HexEncodedData should not highlight the data if highlight option is false 1`] = `
 <div>
   <div
-    class="MuiGrid-root MuiGrid-container css-1m1clne-MuiGrid-root"
+    class="MuiGrid-root MuiGrid-container css-1yff1ei-MuiGrid-root"
   >
     <div
-      class="MuiGrid-root MuiGrid-item css-p1l0hx-MuiGrid-root"
+      class="MuiGrid-root MuiGrid-item css-ezmk0c-MuiGrid-root"
       data-testid="tx-row-title"
       style="word-break: break-word;"
     >
-      <p
-        class="MuiTypography-root MuiTypography-body1 css-shf88x-MuiTypography-root"
+      <span
+        class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
       >
         Some arbitrary data
-      </p>
+      </span>
     </div>
     <div
       class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true css-1vd824g-MuiGrid-root"
@@ -89,30 +80,13 @@ exports[`HexEncodedData should not highlight the data if highlight option is fal
           data-mui-internal-clone-element="true"
           style="cursor: pointer;"
         >
-          <button
-            aria-label="Copy to clipboard"
-            class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-xyrzjn-MuiButtonBase-root-MuiIconButton-root"
-            tabindex="0"
-            type="button"
+          <span
+            class="monospace"
           >
-            <mock-icon
-              aria-hidden=""
-              class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeSmall css-gvpe62-MuiSvgIcon-root"
-              data-testid="copy-btn-icon"
-              focusable="false"
-            />
-          </button>
+            0x102384763718984309876
+             
+          </span>
         </span>
-        0x10238476...
-         
-        <button
-          class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways MuiLink-button css-5r1yio-MuiTypography-root-MuiLink-root"
-          data-testid="show-more"
-          type="button"
-        >
-          Show 
-          more
-        </button>
       </div>
     </div>
   </div>
@@ -122,18 +96,18 @@ exports[`HexEncodedData should not highlight the data if highlight option is fal
 exports[`HexEncodedData should render the default component markup 1`] = `
 <div>
   <div
-    class="MuiGrid-root MuiGrid-container css-1m1clne-MuiGrid-root"
+    class="MuiGrid-root MuiGrid-container css-1yff1ei-MuiGrid-root"
   >
     <div
-      class="MuiGrid-root MuiGrid-item css-p1l0hx-MuiGrid-root"
+      class="MuiGrid-root MuiGrid-item css-ezmk0c-MuiGrid-root"
       data-testid="tx-row-title"
       style="word-break: break-word;"
     >
-      <p
-        class="MuiTypography-root MuiTypography-body1 css-shf88x-MuiTypography-root"
+      <span
+        class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
       >
         Data (hex-encoded)
-      </p>
+      </span>
     </div>
     <div
       class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true css-1vd824g-MuiGrid-root"
@@ -149,36 +123,26 @@ exports[`HexEncodedData should render the default component markup 1`] = `
           data-mui-internal-clone-element="true"
           style="cursor: pointer;"
         >
-          <button
-            aria-label="Copy to clipboard"
-            class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-xyrzjn-MuiButtonBase-root-MuiIconButton-root"
-            tabindex="0"
-            type="button"
+          <span
+            class="monospace"
           >
-            <mock-icon
-              aria-hidden=""
-              class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeSmall css-gvpe62-MuiSvgIcon-root"
-              data-testid="copy-btn-icon"
-              focusable="false"
-            />
-          </button>
+            <b
+              aria-label="The first 4 bytes determine the contract method that is being called"
+              class=""
+              data-mui-internal-clone-element="true"
+            >
+              0xed2ad31e
+            </b>
+            d00088fc64…
+             
+          </span>
         </span>
-        <b
-          aria-label="The first 4 bytes determine the contract method that is being called"
-          class=""
-          data-mui-internal-clone-element="true"
-        >
-          0xed2ad31e
-        </b>
-        d00088fc64...
-         
         <button
-          class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways MuiLink-button css-5r1yio-MuiTypography-root-MuiLink-root"
+          class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways MuiLink-button showMore css-izn2ge-MuiTypography-root-MuiLink-root"
           data-testid="show-more"
           type="button"
         >
-          Show 
-          more
+          Show more
         </button>
       </div>
     </div>

@@ -28,6 +28,7 @@ const MembersCard = () => {
             <Box component="span" sx={{ position: 'absolute', top: 0, right: 0 }}>
               <Track {...SPACE_EVENTS.ADD_MEMBER_MODAL} label={SPACE_LABELS.space_dashboard_card}>
                 <Button
+                  data-testid="add-member-button"
                   onClick={handleInviteClick}
                   variant={isButtonDisabled ? 'contained' : 'outlined'}
                   size="compact"

@@ -511,9 +511,9 @@ export function switchToTwap() {
 
 export function switchToLimit() {
   cy.get('button').contains(selectTokenStr).should('be.visible')
-  cy.get('a').contains(swapStrBtn).click()
+  cy.get('div').contains(swapStrBtn).click()
   cy.wait(1000)
-  cy.get('a').contains(limitStrBtn).click()
+  cy.get('div').contains(limitStrBtn).click()
   cy.wait(1000)
   closeIntroTwapModal()
 }
@@ -623,7 +623,7 @@ export function checkTwapSettlement(index, sentValue, receivedValue) {
 }
 
 export function getTwapInitialData() {
-  cy.wait(1000)
+  cy.wait(5000)
   let formData = {}
 
   return cy
@@ -633,6 +633,9 @@ export function getTwapInitialData() {
         cy.get('input', { timeout: 10000 })
           .should(($input) => {
             const value = parseFloat($input.val())
+            if (isNaN(value)) {
+              throw new Error('Input token value is invalid')
+            }
             expect(value).to.be.greaterThan(0)
           })
           .invoke('val')
@@ -646,6 +649,9 @@ export function getTwapInitialData() {
         cy.get('input', { timeout: 10000 })
           .should(($input) => {
             const value = parseFloat($input.val())
+            if (isNaN(value)) {
+              throw new Error('Output token value is invalid')
+            }
             expect(value).to.be.greaterThan(0)
           })
           .invoke('val')

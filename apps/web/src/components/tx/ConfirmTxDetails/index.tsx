@@ -1,15 +1,14 @@
 import TxCard from '@/components/tx-flow/common/TxCard'
-import { Checkbox, Divider, FormControlLabel, Grid2 as Grid, Stack, StepIcon, Typography } from '@mui/material'
-import commonCss from '@/components/tx-flow/common/styles.module.css'
-import { TxDetails } from './TxDetails'
+import { Grid2 as Grid, Stack, StepIcon, Typography } from '@mui/material'
+import { Receipt } from './Receipt'
 import ExternalLink from '@/components/common/ExternalLink'
-import { useCallback, useContext, useState } from 'react'
+import { useContext } from 'react'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import SignOrExecuteFormV2 from '../SignOrExecuteForm/SignOrExecuteFormV2'
 import type { SignOrExecuteProps } from '../SignOrExecuteForm/SignOrExecuteFormV2'
 import useTxPreview from '../confirmation-views/useTxPreview'
 import Track from '@/components/common/Track'
-import { MODALS_EVENTS, trackEvent } from '@/services/analytics'
+import { MODALS_EVENTS } from '@/services/analytics'
 import useWallet from '@/hooks/wallets/useWallet'
 import { isHardwareWallet, isLedgerLive } from '@/utils/wallets'
 
@@ -68,15 +67,9 @@ const HardwareWalletStep = [
 export const ConfirmTxDetails = (props: SignOrExecuteProps) => {
   const { safeTx, txOrigin } = useContext(SafeTxContext)
   const [txPreview] = useTxPreview(safeTx?.data)
-  const [checked, setChecked] = useState(false)
   const wallet = useWallet()
   const showHashes = wallet ? isHardwareWallet(wallet) || isLedgerLive(wallet) : false
   const steps = showHashes ? HardwareWalletStep : InfoSteps
-
-  const handleCheckboxChange = useCallback(({ target: { checked } }: React.ChangeEvent<HTMLInputElement>) => {
-    trackEvent({ ...MODALS_EVENTS.CONFIRM_SIGN_CHECKBOX, label: checked })
-    setChecked(checked)
-  }, [])
 
   if (!safeTx) {
     return null
@@ -99,25 +92,11 @@ export const ConfirmTxDetails = (props: SignOrExecuteProps) => {
           </Stack>
         </Grid>
         <Grid size={{ xs: 12, sm: 6 }}>
-          <TxDetails safeTx={safeTx} txData={txPreview?.txData} showHashes={showHashes} />
+          <Receipt safeTxData={safeTx.data} txData={txPreview?.txData} txInfo={txPreview?.txInfo} />
         </Grid>
       </Grid>
 
-      <Divider className={commonCss.nestedDivider} sx={{ pt: 3 }} />
-
-      <FormControlLabel
-        sx={{ mt: 2, mb: -1.3 }}
-        control={<Checkbox checked={checked} onChange={handleCheckboxChange} />}
-        label="I understand what I'm signing and that this is an irreversible action."
-      />
-
-      <SignOrExecuteFormV2
-        disableSubmit={!checked}
-        tooltip={!checked ? 'Review details and check the box to enable signing' : undefined}
-        origin={txOrigin}
-        isCreation={!props.txId}
-        {...props}
-      />
+      <SignOrExecuteFormV2 origin={txOrigin} isCreation={!props.txId} {...props} />
     </TxCard>
   )
 }

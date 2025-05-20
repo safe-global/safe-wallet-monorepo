@@ -9,9 +9,11 @@ import css from './styles.module.css'
 import ReplaceTxIcon from '@/public/images/transactions/replace-tx.svg'
 import { TxModalContext } from '../..'
 import TxCard from '../../common/TxCard'
+import { TxFlowContext } from '../../TxFlowProvider'
 
-export function CancelRecoveryOverview({ onSubmit }: { onSubmit: () => void }): ReactElement {
+export function CancelRecoveryOverview(): ReactElement {
   const { setTxFlow } = useContext(TxModalContext)
+  const { onNext } = useContext(TxFlowContext)
 
   const onClose = () => {
     setTxFlow(undefined)
@@ -38,7 +40,7 @@ export function CancelRecoveryOverview({ onSubmit }: { onSubmit: () => void }): 
             Go back
           </Button>
 
-          <Button data-testid="cancel-proposal-btn" variant="contained" onClick={onSubmit} className={css.button}>
+          <Button data-testid="cancel-proposal-btn" variant="contained" onClick={onNext} className={css.button}>
             Yes, cancel proposal
           </Button>
         </Box>
