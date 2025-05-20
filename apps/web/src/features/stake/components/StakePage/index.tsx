@@ -1,32 +1,19 @@
 import { Stack } from '@mui/material'
 import Disclaimer from '@/components/common/Disclaimer'
 import WidgetDisclaimer from '@/components/common/WidgetDisclaimer'
-import useStakeConsent from '@/features/stake/useStakeConsent'
 import StakingWidget from '../StakingWidget'
 import { useRouter } from 'next/router'
-import { useGetIsSanctionedQuery } from '@/store/api/ofac'
-import { skipToken } from '@reduxjs/toolkit/query/react'
-import useWallet from '@/hooks/wallets/useWallet'
-import useSafeInfo from '@/hooks/useSafeInfo'
-import { getKeyWithTrueValue } from '@/utils/helpers'
 import BlockedAddress from '@/components/common/BlockedAddress'
+import useBlockedAddress from '@/hooks/useBlockedAddress'
+import useConsent from '@/hooks/useConsent'
+import { STAKE_CONSENT_STORAGE_KEY } from '@/features/stake/constants'
 
 const StakePage = () => {
-  const { isConsentAccepted, onAccept } = useStakeConsent()
+  const { isConsentAccepted, onAccept } = useConsent(STAKE_CONSENT_STORAGE_KEY)
   const router = useRouter()
   const { asset } = router.query
 
-  const { safeAddress } = useSafeInfo()
-  const wallet = useWallet()
-
-  const { data: isSafeAddressBlocked } = useGetIsSanctionedQuery(safeAddress || skipToken)
-  const { data: isWalletAddressBlocked } = useGetIsSanctionedQuery(wallet?.address || skipToken)
-  const blockedAddresses = {
-    [safeAddress]: !!isSafeAddressBlocked,
-    [wallet?.address || '']: !!isWalletAddressBlocked,
-  }
-
-  const blockedAddress = getKeyWithTrueValue(blockedAddresses)
+  const blockedAddress = useBlockedAddress()
 
   if (blockedAddress) {
     return (

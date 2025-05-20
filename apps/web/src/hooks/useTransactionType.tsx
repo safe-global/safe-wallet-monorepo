@@ -9,6 +9,7 @@ import {
 } from '@safe-global/safe-gateway-typescript-sdk'
 import SwapIcon from '@/public/images/common/swap.svg'
 import StakeIcon from '@/public/images/common/stake.svg'
+import EarnIcon from '@/public/images/common/earn.svg'
 import NestedSafeIcon from '@/public/images/transactions/nestedTx.svg'
 import BatchIcon from '@/public/images/common/multisend.svg'
 
@@ -100,14 +101,28 @@ export const getTransactionType = (tx: TransactionSummary, addressBook: AddressB
     }
     case TransactionInfoType.NATIVE_STAKING_VALIDATORS_EXIT: {
       return {
-        icon: <StakeIcon component={StakeIcon} inheritViewBox fontSize="small" alt="Withdraw request" />,
+        icon: <SvgIcon component={StakeIcon} inheritViewBox fontSize="small" alt="Withdraw request" />,
         text: 'Withdraw request',
       }
     }
     case TransactionInfoType.NATIVE_STAKING_WITHDRAW: {
       return {
-        icon: <StakeIcon component={StakeIcon} inheritViewBox fontSize="small" alt="Claim" />,
+        icon: <SvgIcon component={StakeIcon} inheritViewBox fontSize="small" alt="Claim" />,
         text: 'Claim',
+      }
+    }
+    // @ts-ignore TODO: Add types to old SDK or switch to auto-generated
+    case 'VaultDeposit': {
+      return {
+        icon: <SvgIcon component={EarnIcon} inheritViewBox fontSize="small" alt="Deposit icon" />,
+        text: 'Deposit',
+      }
+    }
+    // @ts-ignore TODO: Add types to old SDK or switch to auto-generated
+    case 'VaultRedeem': {
+      return {
+        icon: <SvgIcon component={EarnIcon} inheritViewBox fontSize="small" alt="Withdraw icon" />,
+        text: 'Withdraw',
       }
     }
     case TransactionInfoType.CUSTOM: {

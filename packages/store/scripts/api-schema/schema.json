@@ -4264,7 +4264,7 @@
   "info": {
     "title": "Safe Client Gateway",
     "description": "",
-    "version": "main",
+    "version": "",
     "contact": {}
   },
   "tags": [],
@@ -6894,7 +6894,8 @@
               "SwapTransfer",
               "Transfer",
               "TwapOrder",
-              "VaultDeposit"
+              "VaultDeposit",
+              "VaultRedeem"
             ]
           },
           "humanDescription": {
@@ -7967,17 +7968,45 @@
         },
         "required": ["type", "value", "tokenInfo", "validators"]
       },
-      "VaultDepositAdditionalRewards": {
+      "VaultInfo": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "dashboardUri": {
+            "type": "string",
+            "nullable": true
+          },
+          "logoUri": {
+            "type": "string"
+          }
+        },
+        "required": ["address", "name", "description", "logoUri"]
+      },
+      "VaultExtraReward": {
         "type": "object",
         "properties": {
           "tokenInfo": {
             "$ref": "#/components/schemas/TokenInfo"
           },
-          "returnRate": {
+          "nrr": {
             "type": "number"
+          },
+          "claimable": {
+            "type": "string"
+          },
+          "claimableNext": {
+            "type": "string"
           }
         },
-        "required": ["tokenInfo", "returnRate"]
+        "required": ["tokenInfo", "nrr", "claimable", "claimableNext"]
       },
       "VaultDepositTransactionInfo": {
         "type": "object",
@@ -7990,64 +8019,103 @@
             "type": "string",
             "nullable": true
           },
-          "chainId": {
+          "value": {
             "type": "string"
           },
-          "expectedMonthlyReward": {
+          "baseNrr": {
             "type": "number"
           },
-          "expectedAnnualReward": {
+          "fee": {
             "type": "number"
           },
           "tokenInfo": {
             "$ref": "#/components/schemas/TokenInfo"
           },
-          "value": {
-            "type": "number"
+          "vaultInfo": {
+            "$ref": "#/components/schemas/VaultInfo"
           },
-          "returnRate": {
-            "type": "number"
-          },
-          "vaultAddress": {
+          "currentReward": {
             "type": "string"
           },
-          "vaultName": {
-            "type": "string"
-          },
-          "vaultDisplayName": {
-            "type": "string"
-          },
-          "vaultDescription": {
-            "type": "string"
-          },
-          "vaultDashboardURL": {
-            "type": "string",
-            "nullable": true
-          },
-          "vaultTVL": {
+          "additionalRewardsNrr": {
             "type": "number"
           },
           "additionalRewards": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/VaultDepositAdditionalRewards"
+              "$ref": "#/components/schemas/VaultExtraReward"
+            }
+          },
+          "expectedMonthlyReward": {
+            "type": "string"
+          },
+          "expectedAnnualReward": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "value",
+          "baseNrr",
+          "fee",
+          "tokenInfo",
+          "vaultInfo",
+          "currentReward",
+          "additionalRewardsNrr",
+          "additionalRewards",
+          "expectedMonthlyReward",
+          "expectedAnnualReward"
+        ]
+      },
+      "VaultRedeemTransactionInfo": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": ["VaultRedeem"]
+          },
+          "humanDescription": {
+            "type": "string",
+            "nullable": true
+          },
+          "value": {
+            "type": "string"
+          },
+          "baseNrr": {
+            "type": "number"
+          },
+          "fee": {
+            "type": "number"
+          },
+          "tokenInfo": {
+            "$ref": "#/components/schemas/TokenInfo"
+          },
+          "vaultInfo": {
+            "$ref": "#/components/schemas/VaultInfo"
+          },
+          "currentReward": {
+            "type": "string"
+          },
+          "additionalRewardsNrr": {
+            "type": "number"
+          },
+          "additionalRewards": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VaultExtraReward"
             }
           }
         },
         "required": [
           "type",
-          "chainId",
-          "expectedMonthlyReward",
-          "expectedAnnualReward",
-          "tokenInfo",
           "value",
-          "returnRate",
-          "vaultAddress",
-          "vaultName",
-          "vaultDisplayName",
-          "vaultDescription",
-          "vaultDashboardURL",
-          "vaultTVL"
+          "baseNrr",
+          "fee",
+          "tokenInfo",
+          "vaultInfo",
+          "currentReward",
+          "additionalRewardsNrr",
+          "additionalRewards"
         ]
       },
       "TransactionData": {
@@ -8299,6 +8367,9 @@
               },
               {
                 "$ref": "#/components/schemas/VaultDepositTransactionInfo"
+              },
+              {
+                "$ref": "#/components/schemas/VaultRedeemTransactionInfo"
               }
             ],
             "allOf": [
@@ -8591,6 +8662,9 @@
               },
               {
                 "$ref": "#/components/schemas/VaultDepositTransactionInfo"
+              },
+              {
+                "$ref": "#/components/schemas/VaultRedeemTransactionInfo"
               }
             ],
             "allOf": [
@@ -8832,6 +8906,9 @@
               },
               {
                 "$ref": "#/components/schemas/VaultDepositTransactionInfo"
+              },
+              {
+                "$ref": "#/components/schemas/VaultRedeemTransactionInfo"
               }
             ],
             "allOf": [

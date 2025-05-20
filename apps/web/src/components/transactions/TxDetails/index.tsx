@@ -1,5 +1,5 @@
 import useIsExpiredSwap from '@/features/swap/hooks/useIsExpiredSwap'
-import React, { type ReactElement, useEffect } from 'react'
+import React, { type ReactElement, useEffect, useRef, useState } from 'react'
 import type { TransactionDetails, TransactionSummary } from '@safe-global/safe-gateway-typescript-sdk'
 import { Box, CircularProgress, Typography } from '@mui/material'
 
@@ -16,6 +16,7 @@ import {
   isMultisigExecutionInfo,
   isOpenSwapOrder,
   isTxQueued,
+  isCustomTxInfo,
 } from '@/utils/transaction-guards'
 import { InfoDetails } from '@/components/transactions/InfoDetails'
 import NamedAddressInfo from '@/components/common/NamedAddressInfo'
@@ -38,6 +39,7 @@ import { TxNote } from '@/features/tx-notes'
 import { TxShareBlock } from '../TxShareLink'
 import { TxShareButton } from '../TxShareLink/TxShareButton'
 import { FEATURES } from '@safe-global/utils/utils/chains'
+import DecodedData from './TxData/DecodedData'
 
 export const NOT_AVAILABLE = 'n/a'
 
@@ -51,6 +53,17 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
   const hasDefaultTokenlist = useHasFeature(FEATURES.DEFAULT_TOKENLIST)
   const isQueue = isTxQueued(txSummary.txStatus)
   const awaitingExecution = isAwaitingExecution(txSummary.txStatus)
+
+  // Used to check if the decoded data was rendered inside the TxData component
+  // If it was, we hide the decoded data in the Summary to avoid showing it twice
+  const decodedDataRef = useRef(null)
+  const [isDecodedDataVisible, setIsDecodedDataVisible] = useState(false)
+
+  useEffect(() => {
+    // If decodedDataRef.current is not null, the decoded data was rendered inside the TxData component
+    setIsDecodedDataVisible(!!decodedDataRef.current)
+  }, [])
+
   const isUnsigned =
     isMultisigExecutionInfo(txSummary.executionInfo) && txSummary.executionInfo.confirmationsSubmitted === 0
 
@@ -94,7 +107,14 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
               txDetails={txDetails}
               trusted={isTrustedTransfer}
               imitation={isImitationTransaction}
-            />
+            >
+              <Box ref={decodedDataRef}>
+                <DecodedData
+                  txData={txDetails.txData}
+                  toInfo={isCustomTxInfo(txDetails.txInfo) ? txDetails.txInfo.to : txDetails.txData?.to}
+                />
+              </Box>
+            </TxData>
           </ErrorBoundary>
         </div>
 
@@ -117,7 +137,13 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
         <div className={css.txSummary}>
           {isUntrusted && !isPending && <UnsignedWarning />}
           <ErrorBoundary fallback={<div>Error parsing data</div>}>
-            <Summary txDetails={txDetails} txData={txDetails.txData} txInfo={txDetails.txInfo} showMultisend={false} />
+            <Summary
+              txDetails={txDetails}
+              txData={txDetails.txData}
+              txInfo={txDetails.txInfo}
+              showMultisend={false}
+              showDecodedData={!isDecodedDataVisible}
+            />
           </ErrorBoundary>
         </div>
 

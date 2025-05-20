@@ -23,6 +23,8 @@ import {
   isStakingTxDepositInfo,
   isStakingTxExitInfo,
   isStakingTxWithdrawInfo,
+  isVaultDepositTxInfo,
+  isVaultRedeemTxInfo,
 } from '@/utils/transaction-guards'
 import { ellipsis, maybePlural, shortenAddress } from '@safe-global/utils/utils/formatters'
 import { useCurrentChain } from '@/hooks/useChains'
@@ -32,6 +34,8 @@ import StakingTxWithdrawInfo from '@/features/stake/components/StakingTxWithdraw
 import { Box } from '@mui/material'
 import css from './styles.module.css'
 import StakingTxDepositInfo from '@/features/stake/components/StakingTxDepositInfo'
+import VaultDepositTxInfo from '@/features/earn/components/VaultDepositTxInfo'
+import VaultRedeemTxInfo from '@/features/earn/components/VaultRedeemTxInfo'
 
 export const TransferTx = ({
   info,
@@ -158,6 +162,14 @@ const TxInfo = ({ info, ...rest }: { info: TransactionInfo; omitSign?: boolean; 
 
   if (isStakingTxWithdrawInfo(info)) {
     return <StakingTxWithdrawInfo info={info} />
+  }
+
+  if (isVaultDepositTxInfo(info)) {
+    return <VaultDepositTxInfo txInfo={info} />
+  }
+
+  if (isVaultRedeemTxInfo(info)) {
+    return <VaultRedeemTxInfo txInfo={info} />
   }
 
   if (isCustomTxInfo(info)) {

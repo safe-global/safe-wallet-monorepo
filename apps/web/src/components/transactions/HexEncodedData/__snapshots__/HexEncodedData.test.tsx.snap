@@ -11,7 +11,7 @@ exports[`HexEncodedData should not cut the text in case the limit option is high
       style="word-break: break-word;"
     >
       <span
-        class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
+        class="MuiTypography-root MuiTypography-body1 css-shf88x-MuiTypography-root"
       >
         Data (hex-encoded)
       </span>
@@ -61,7 +61,7 @@ exports[`HexEncodedData should not highlight the data if highlight option is fal
       style="word-break: break-word;"
     >
       <span
-        class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
+        class="MuiTypography-root MuiTypography-body1 css-shf88x-MuiTypography-root"
       >
         Some arbitrary data
       </span>
@@ -104,7 +104,7 @@ exports[`HexEncodedData should render the default component markup 1`] = `
       style="word-break: break-word;"
     >
       <span
-        class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
+        class="MuiTypography-root MuiTypography-body1 css-shf88x-MuiTypography-root"
       >
         Data (hex-encoded)
       </span>
