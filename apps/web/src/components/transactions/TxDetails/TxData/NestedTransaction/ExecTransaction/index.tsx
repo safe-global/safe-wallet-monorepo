@@ -11,7 +11,7 @@ import type { SafeTransaction } from '@safe-global/safe-core-sdk-types'
 import ExternalLink from '@/components/common/ExternalLink'
 import { NestedTransaction } from '../NestedTransaction'
 import useTxPreview from '@/components/tx/confirmation-views/useTxPreview'
-import Summary from '../../../Summary'
+import TxData from '../..'
 import { TxSimulation, TxSimulationMessage } from '@/components/tx/security/tenderly'
 import useSafeAddress from '@/hooks/useSafeAddress'
 
@@ -70,7 +70,9 @@ export const ExecTransaction = ({
     data?.to.value,
   )
 
-  const decodedNestedTxDataBlock = txPreview ? <Summary {...txPreview} safeTxData={childSafeTx?.data} /> : null
+  const decodedNestedTxDataBlock = txPreview ? (
+    <TxData txData={txPreview.txData} txInfo={txPreview.txInfo} trusted imitation={false} />
+  ) : null
 
   return (
     <NestedTransaction txData={data} isConfirmationView={isConfirmationView}>
