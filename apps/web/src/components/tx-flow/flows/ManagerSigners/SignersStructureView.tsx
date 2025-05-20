@@ -22,6 +22,8 @@ import OwnerRow from '@/components/new-safe/OwnerRow'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
 import { ManageSignersFormFields } from '.'
 import { TxFlowContext } from '../../TxFlowProvider'
+import { SETTINGS_EVENTS, SETTINGS_LABELS, trackEvent } from '@/services/analytics'
+import Track from '@/components/common/Track'
 import type { TxFlowContextType } from '../../TxFlowProvider'
 import type { ManageSignersForm } from '.'
 import type { UseFormReturn, UseFieldArrayReturn } from 'react-hook-form'
@@ -65,7 +67,16 @@ export function SignersStructureView(props: Props): ReactElement {
   )
 }
 
-function Signers({ fieldArray, onRemove, onAdd }: Pick<Props, 'fieldArray' | 'onAdd' | 'onRemove'>): ReactElement {
+function Signers({
+  fieldArray,
+  onRemove: _onRemove,
+  onAdd,
+}: Pick<Props, 'fieldArray' | 'onAdd' | 'onRemove'>): ReactElement {
+  const onRemove = (index: number) => {
+    _onRemove(index)
+    trackEvent({ ...SETTINGS_EVENTS.SETUP.REMOVE_OWNER, label: SETTINGS_LABELS.manage_signers })
+  }
+
   return (
     <>
       {fieldArray.fields.map((field, index) => (
@@ -78,15 +89,17 @@ function Signers({ fieldArray, onRemove, onAdd }: Pick<Props, 'fieldArray' | 'on
         />
       ))}
 
-      <Button
-        variant="text"
-        onClick={onAdd}
-        startIcon={<SvgIcon component={AddIcon} inheritViewBox fontSize="small" />}
-        size="large"
-        sx={{ mt: -1, mb: 3 }}
-      >
-        Add new signer
-      </Button>
+      <Track {...SETTINGS_EVENTS.SETUP.ADD_OWNER} label={SETTINGS_LABELS.manage_signers}>
+        <Button
+          variant="text"
+          onClick={onAdd}
+          startIcon={<SvgIcon component={AddIcon} inheritViewBox fontSize="small" />}
+          size="large"
+          sx={{ mt: -1, mb: 3 }}
+        >
+          Add new signer
+        </Button>
+      </Track>
     </>
   )
 }
@@ -116,15 +129,22 @@ function Threshold({ formMethods, newOwners }: Pick<Props, 'formMethods' | 'newO
           <Controller
             control={formMethods.control}
             name="threshold"
-            render={({ field }) => (
-              <TextField select {...field}>
-                {newOwners.map((_, index) => (
-                  <MenuItem key={index + 1} value={index + 1}>
-                    {index + 1}
-                  </MenuItem>
-                ))}
-              </TextField>
-            )}
+            render={({ field }) => {
+              const onChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+                field.onChange(event)
+                trackEvent({ ...SETTINGS_EVENTS.SETUP.CHANGE_THRESHOLD, label: SETTINGS_LABELS.manage_signers })
+              }
+
+              return (
+                <TextField select {...field} onChange={onChange}>
+                  {newOwners.map((_, index) => (
+                    <MenuItem key={index + 1} value={index + 1}>
+                      {index + 1}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              )
+            }}
           />
         </Grid>
         <Grid item>

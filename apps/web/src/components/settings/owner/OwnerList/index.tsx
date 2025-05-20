@@ -122,7 +122,7 @@ export const OwnerList = () => {
           >
             <CheckWallet>
               {(isOk) => (
-                <Track {...SETTINGS_EVENTS.SETUP.ADD_OWNER}>
+                <Track {...SETTINGS_EVENTS.SETUP.MANAGE_SIGNERS}>
                   <Button
                     data-testid="manage-signers-btn"
                     onClick={() => setTxFlow(<ManageSignersFlow />)}

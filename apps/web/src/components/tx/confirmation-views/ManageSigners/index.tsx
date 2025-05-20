@@ -8,6 +8,7 @@ import { maybePlural } from '@safe-global/utils/utils/formatters'
 import FieldsGrid from '../../FieldsGrid'
 import { getNewSafeSetup } from './get-new-safe-setup'
 import type { TransactionInfo, TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
+import { ChangeSignerSetupWarning } from '@/features/multichain/components/SignerSetupWarning/ChangeSignerSetupWarning'
 
 export function ManageSigners({
   txInfo,
@@ -27,6 +28,8 @@ export function ManageSigners({
 
   return (
     <Stack display="flex" flexDirection="column" gap={3} sx={{ '& .MuiGrid-container': { alignItems: 'flex-start' } }}>
+      <ChangeSignerSetupWarning />
+
       <Signers owners={newOwners} />
 
       <Threshold owners={newOwners} threshold={newThreshold} />
