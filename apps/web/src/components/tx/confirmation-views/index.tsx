@@ -32,6 +32,7 @@ import Summary from '@/components/transactions/TxDetails/Summary'
 import TxData from '@/components/transactions/TxDetails/TxData'
 import { isMultiSendCalldata } from '@/utils/transaction-calldata'
 import useChainId from '@/hooks/useChainId'
+import { TransactionWarnings } from '../TransactionWarnings'
 
 type ConfirmationViewProps = {
   txDetails?: TransactionDetails
@@ -97,6 +98,7 @@ const ConfirmationView = ({ safeTx, txPreview, txDetails, ...props }: Confirmati
 
   return (
     <>
+      <TransactionWarnings txData={details?.txData} />
       {ConfirmationViewComponent ||
         (details && showTxDetails && (
           <TxData txData={details?.txData} txInfo={details?.txInfo} txDetails={txDetails} imitation={false} trusted />

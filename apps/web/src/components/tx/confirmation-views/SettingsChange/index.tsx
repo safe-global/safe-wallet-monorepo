@@ -10,8 +10,6 @@ import { ChangeSignerSetupWarning } from '@/features/multichain/components/Signe
 import { useContext } from 'react'
 import { SettingsChangeContext } from '@/components/tx-flow/flows/AddOwner/context'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
-import { UntrustedFallbackHandlerTxAlert } from '@/components/tx/confirmation-views/SettingsChange/UntrustedFallbackHandlerTxAlert'
-import { useHasUntrustedFallbackHandler } from '@/hooks/useHasUntrustedFallbackHandler'
 
 export interface SettingsChangeProps extends NarrowConfirmationViewProps {
   txInfo: SettingsChange
@@ -21,10 +19,6 @@ const SettingsChange: React.FC<SettingsChangeProps> = ({ txInfo: { settingsInfo 
   const { safe } = useSafeInfo()
   const params = useContext(SettingsChangeContext)
 
-  const setsUntrustedFallbackHandler = useHasUntrustedFallbackHandler(
-    settingsInfo?.type === SettingsInfoType.SET_FALLBACK_HANDLER ? settingsInfo.handler.value : undefined,
-  )
-
   if (!settingsInfo || settingsInfo.type === SettingsInfoType.REMOVE_OWNER) return null
 
   const shouldShowChangeSigner = 'owner' in settingsInfo || 'newOwner' in params
@@ -33,8 +27,6 @@ const SettingsChange: React.FC<SettingsChangeProps> = ({ txInfo: { settingsInfo 
 
   return (
     <>
-      {setsUntrustedFallbackHandler && <UntrustedFallbackHandlerTxAlert />}
-
       {'oldOwner' in settingsInfo && (
         <Paper sx={{ backgroundColor: ({ palette }) => palette.warning.background, p: 2 }}>
           <Typography color="text.secondary" mb={2} display="flex" alignItems="center">
