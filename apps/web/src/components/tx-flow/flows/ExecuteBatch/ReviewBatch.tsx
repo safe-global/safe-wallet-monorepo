@@ -84,7 +84,7 @@ export const ReviewBatch = ({ params }: { params: ExecuteBatchFlowProps }) => {
 
   const [multisendContractAddress = ''] = useAsync(async () => {
     if (!multiSendContract) return ''
-    return await multiSendContract.getAddress()
+    return multiSendContract.getAddress()
   }, [multiSendContract])
 
   const [multiSendTxs] = useAsync(async () => {

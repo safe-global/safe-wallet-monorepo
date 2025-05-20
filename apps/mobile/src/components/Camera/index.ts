@@ -1,1 +1,0 @@
-export { QrCamera } from './QrCamera'

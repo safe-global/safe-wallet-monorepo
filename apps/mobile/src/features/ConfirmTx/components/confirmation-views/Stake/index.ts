@@ -1,1 +1,0 @@
-export { Stake } from './Stake'

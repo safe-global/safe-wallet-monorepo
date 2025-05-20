@@ -25,9 +25,12 @@ const getChangeFallbackHandlerCallData = async (
     return '0x'
   }
 
-  const fallbackHandlerAddress = await (
-    await getReadOnlyFallbackHandlerContract(getLatestSafeVersion(chain))
-  ).getAddress()
+  const fallbackHandlerContract = await getReadOnlyFallbackHandlerContract(getLatestSafeVersion(chain))
+  const fallbackHandlerAddress = fallbackHandlerContract.getAddress()
+
+  // const fallbackHandlerAddress = await (
+  //   await getReadOnlyFallbackHandlerContract(getLatestSafeVersion(chain))
+  // ).getAddress()
   // @ts-ignore
   return safeContractInstance.encode('setFallbackHandler', [fallbackHandlerAddress])
 }
@@ -48,9 +51,12 @@ export const createUpdateSafeTxs = async (safe: SafeState, chain: ChainInfo): Pr
   }
 
   // For older Safes, we need to create two transactions
-  const latestMasterCopyAddress = await (
-    await getReadOnlyGnosisSafeContract(chain, getLatestSafeVersion(chain))
-  ).getAddress()
+  const latestMasterCopyContract = await getReadOnlyGnosisSafeContract(chain, getLatestSafeVersion(chain))
+  const latestMasterCopyAddress = latestMasterCopyContract.getAddress()
+
+  // const latestMasterCopyAddress = (
+  //   await getReadOnlyGnosisSafeContract(chain, getLatestSafeVersion(chain))
+  // ).getAddress()
   const currentReadOnlySafeContract = await getReadOnlyGnosisSafeContract(chain, safe.version)
 
   const updatedReadOnlySafeContract = await getReadOnlyGnosisSafeContract(chain, getLatestSafeVersion(chain))

@@ -1,1 +1,0 @@
-export { ConfirmationView } from './ConfirmationView'

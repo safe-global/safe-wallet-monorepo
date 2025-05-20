@@ -65,7 +65,7 @@ export const estimateBatchDeploymentTransaction = async (
   chainId: string,
 ) => {
   const customContracts = sdk.getContractManager().contractNetworks?.[chainId]
-  const safeVersion = await sdk.getContractVersion()
+  const safeVersion = sdk.getContractVersion()
   const safeProvider = sdk.getSafeProvider()
   const fallbackHandlerContract = await getCompatibilityFallbackHandlerContract({
     safeProvider,
@@ -97,7 +97,7 @@ export const estimateBatchDeploymentTransaction = async (
   ])
 
   const safeFunctionToEstimate: string = fallbackHandlerContract.encode('simulate', [
-    await simulateTxAccessorContract.getAddress(),
+    simulateTxAccessorContract.getAddress(),
     transactionDataToEstimate,
   ])
 

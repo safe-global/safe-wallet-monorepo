@@ -358,7 +358,7 @@ export const dispatchBatchExecution = async (
     })
     throw err
   }
-  const txTo = await multiSendContract.getAddress()
+  const txTo = multiSendContract.getAddress()
 
   txIds.forEach((txId) => {
     txDispatch(TxEvent.PROCESSING, {
@@ -557,7 +557,7 @@ export const dispatchBatchExecutionRelay = async (
   safeAddress: string,
   safeVersion: string,
 ) => {
-  const to = await multiSendContract.getAddress()
+  const to = multiSendContract.getAddress()
   const data = multiSendContract.contract.interface.encodeFunctionData('multiSend', [multiSendTxData])
   const groupKey = multiSendTxData
 

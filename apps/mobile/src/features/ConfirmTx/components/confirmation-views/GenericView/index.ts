@@ -1,1 +1,0 @@
-export { GenericView } from './GenericView'

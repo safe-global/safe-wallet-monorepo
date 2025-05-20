@@ -88,7 +88,7 @@ const getGasLimitForZkSync = async (
   // https://github.com/zkSync-Community-Hub/zksync-developers/discussions/144
   const fakeEOAFromAddress = '0x330d9F4906EDA1f73f668660d1946bea71f48827'
   const customContracts = safeSDK.getContractManager().contractNetworks?.[safe.chainId]
-  const safeVersion = await safeSDK.getContractVersion()
+  const safeVersion = safeSDK.getContractVersion()
   const safeProvider = new SafeProvider({ provider: web3._getConnection().url })
   const fallbackHandlerContract = await getCompatibilityFallbackHandlerContract({
     safeProvider,
@@ -112,7 +112,7 @@ const getGasLimitForZkSync = async (
   ])
 
   const safeFunctionToEstimate: string = fallbackHandlerContract.encode('simulate', [
-    await simulateTxAccessorContract.getAddress(),
+    simulateTxAccessorContract.getAddress(),
     transactionDataToEstimate,
   ])
 

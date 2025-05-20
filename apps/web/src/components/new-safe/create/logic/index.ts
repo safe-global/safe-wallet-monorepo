@@ -133,7 +133,7 @@ export const estimateSafeCreationGas = async (
 
   const gas = await provider.estimateGas({
     from,
-    to: await readOnlyProxyFactoryContract.getAddress(),
+    to: readOnlyProxyFactoryContract.getAddress(),
     data: encodedSafeCreationTx,
   })
 

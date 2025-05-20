@@ -55,7 +55,7 @@ export const _getSingleTransactionPayload = async (
   ])
 
   return {
-    to: await readOnlySafeContract.getAddress(),
+    to: readOnlySafeContract.getAddress(),
     input,
   }
 }
@@ -67,7 +67,7 @@ export const _getMultiSendCallOnlyPayload = async (
   const readOnlyMultiSendContract = await getReadOnlyMultiSendCallOnlyContract(params.safe.version)
 
   return {
-    to: await readOnlyMultiSendContract.getAddress(),
+    to: readOnlyMultiSendContract.getAddress(),
     input: readOnlyMultiSendContract.encode('multiSend', [data]),
   }
 }

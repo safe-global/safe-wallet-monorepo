@@ -38,7 +38,7 @@ export const createAddOwnerTx = async (
   const safeSDK = getAndValidateSafeSDK()
   if (isDeployed) return safeSDK.createAddOwnerTx(txParams)
 
-  const safeVersion = await safeSDK.getContractVersion()
+  const safeVersion = safeSDK.getContractVersion()
 
   const contract = await getReadOnlyGnosisSafeContract(chain, safeVersion)
   // @ts-ignore
@@ -63,7 +63,7 @@ export const createSwapOwnerTx = async (
   const safeSDK = getAndValidateSafeSDK()
   if (isDeployed) return safeSDK.createSwapOwnerTx(txParams)
 
-  const safeVersion = await safeSDK.getContractVersion()
+  const safeVersion = safeSDK.getContractVersion()
 
   const contract = await getReadOnlyGnosisSafeContract(chain, safeVersion)
   // @ts-ignore SwapOwnerTxParams is a union type and the method expects a specific one

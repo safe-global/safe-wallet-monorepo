@@ -1,1 +1,0 @@
-export { useInfiniteScroll } from './useInfiniteScroll'

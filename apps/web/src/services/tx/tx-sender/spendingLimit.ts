@@ -50,7 +50,7 @@ export const createNewSpendingLimitTx = async (
     const enableModuleTx = await createEnableModuleTx(
       chain,
       await sdk.getAddress(),
-      await sdk.getContractVersion(),
+      sdk.getContractVersion(),
       spendingLimitAddress,
     )
 
