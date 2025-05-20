@@ -96,6 +96,25 @@ describe('NameChip', () => {
     expect(chip).not.toHaveStyle({ color: COLORS.ERROR_MAIN })
   })
 
+  it('should prioritize address book name over txInfo name', () => {
+    const mockAddress = faker.finance.ethereumAddress()
+    const addressBookName = 'Address Book Name'
+    const txInfoName = 'TxInfo Name'
+
+    mockUseAddressName.mockReturnValue({ name: txInfoName, logoUri: undefined, isUnverifiedContract: false })
+    mockUseAddressBook.mockReturnValue({ [mockAddress]: addressBookName })
+
+    const txData = txDataBuilder()
+      .with({
+        to: { value: mockAddress, name: txInfoName },
+      })
+      .build()
+
+    render(<NameChip txData={txData} />)
+    expect(screen.getByText(addressBookName)).toBeInTheDocument()
+    expect(screen.queryByText(txInfoName)).not.toBeInTheDocument()
+  })
+
   it('should render with background when withBackground prop is true', () => {
     const mockAddress = faker.finance.ethereumAddress()
     mockUseAddressName.mockReturnValue({ name: 'Test Contract', logoUri: undefined, isUnverifiedContract: false })

@@ -20,7 +20,7 @@ const NameChip = ({
   const toInfo = customTxInfo?.to || txData?.addressInfoIndex?.[txData?.to.value] || txData?.to
   const nameFromAb = toAddress !== undefined ? addressBook[toAddress] : undefined
   const toName =
-    toInfo?.name || (toInfo && 'displayName' in toInfo ? String(toInfo.displayName || '') : undefined) || nameFromAb
+    nameFromAb || toInfo?.name || (toInfo && 'displayName' in toInfo ? String(toInfo.displayName || '') : undefined)
   const toLogo = toInfo?.logoUri
   const contractInfo = useAddressName(toAddress, toName)
   const name = toName || contractInfo?.name
