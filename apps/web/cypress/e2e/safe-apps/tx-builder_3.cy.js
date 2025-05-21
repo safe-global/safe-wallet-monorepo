@@ -14,7 +14,7 @@ describe('Transaction Builder 3 tests', { defaultCommandTimeout: 20000 }, () => 
 
   beforeEach(() => {
     const appUrl = constants.TX_Builder_url
-    iframeSelector = `iframe[id="iframe-${appUrl}"]`
+    iframeSelector = `iframe[id="iframe-${encodeURIComponent(appUrl)}"]`
     const visitUrl = `/apps/open?safe=${staticSafes.SEP_STATIC_SAFE_43}&appUrl=${encodeURIComponent(appUrl)}`
     cy.visit(visitUrl)
   })

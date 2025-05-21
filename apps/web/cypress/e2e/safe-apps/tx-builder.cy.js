@@ -15,9 +15,18 @@ describe('Transaction Builder tests', { defaultCommandTimeout: 20000 }, () => {
 
   beforeEach(() => {
     const appUrl = constants.TX_Builder_url
-    iframeSelector = `iframe[id="iframe-${appUrl}"]`
+    iframeSelector = `iframe[id="iframe-${encodeURIComponent(appUrl)}"]`
     const visitUrl = `/apps/open?safe=${safeAppSafes.SEP_SAFEAPP_SAFE_1}&appUrl=${encodeURIComponent(appUrl)}`
     cy.visit(visitUrl)
+    //Debuging
+    cy.get('iframe').then(($iframes) => {
+      cy.log(`Found ${$iframes.length} iframes`)
+      $iframes.each((i, iframe) => {
+        cy.log(`Iframe ${i} ID: ${iframe.id}`)
+      })
+    })
+
+    cy.get(iframeSelector, { timeout: 30000 }).should('be.visible')
   })
 
   it('Verify a simple batch can be created', () => {
