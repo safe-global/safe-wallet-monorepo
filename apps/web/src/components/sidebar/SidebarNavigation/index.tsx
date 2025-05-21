@@ -22,8 +22,8 @@ import { GeoblockingContext } from '@/components/common/GeoblockingProvider'
 import { STAKE_EVENTS, STAKE_LABELS } from '@/services/analytics/events/stake'
 import { Tooltip } from '@mui/material'
 import { BRIDGE_EVENTS, BRIDGE_LABELS } from '@/services/analytics/events/bridge'
-import { isNonCriticalUpdate } from '@safe-global/utils/utils/chains'
 import { EARN_EVENTS, EARN_LABELS } from '@/services/analytics/events/earn'
+import { isNonCriticalUpdate } from '@safe-global/utils/utils/chains'
 
 const getSubdirectory = (pathname: string): string => {
   return pathname.split('/')[1]

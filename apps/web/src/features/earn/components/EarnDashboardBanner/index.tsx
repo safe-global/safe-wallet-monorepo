@@ -14,6 +14,8 @@ import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import useIsEarnBannerEnabled from '@/features/earn/hooks/useIsEarnBannerEnabled'
 import Track from '@/components/common/Track'
 import { EARN_EVENTS, EARN_LABELS } from '@/services/analytics/events/earn'
+import ExternalLink from '@/components/common/ExternalLink'
+import { EARN_HELP_ARTICLE } from '@/features/earn/constants'
 
 export const EarnPoweredBy = () => {
   const isDarkMode = useDarkMode()
@@ -29,6 +31,9 @@ export const EarnPoweredBy = () => {
         color="border"
         className={classNames(css.morphoIcon, { [css.kilnIconDarkMode]: isDarkMode })}
       />
+      <Typography variant="overline" color="primary.light" textTransform="none">
+        via
+      </Typography>
       <SvgIcon
         component={Kiln}
         inheritViewBox
@@ -86,7 +91,10 @@ const EarnDashboardBanner = () => {
         <Grid size={{ xs: 12, sm: 6 }} mb={1} zIndex={2}>
           <Typography variant="body1" className={css.content}>
             Deposit stablecoins, wstETH, ETH, and WBTC straight from your account and let your assets compound in
-            minutes.
+            minutes.{' '}
+            <Track {...EARN_EVENTS.OPEN_EARN_LEARN_MORE} label={EARN_LABELS.safe_dashboard_banner}>
+              <ExternalLink href={EARN_HELP_ARTICLE}>Learn more</ExternalLink>
+            </Track>
           </Typography>
         </Grid>
 

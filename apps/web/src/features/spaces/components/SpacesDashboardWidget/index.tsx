@@ -28,23 +28,23 @@ const SpacesDashboardWidget = () => {
       position="relative"
     >
       <Box flex={1} minWidth="60%">
-        <Typography>
+        <Typography color="static.main">
           🎉 <b>New! Improved Spaces:</b> All your Safe Accounts, finally organized. Streamlined for teams and solo
           users alike
         </Typography>
       </Box>
 
-      <Stack className={css.buttons} direction="row" gap={2} alignItems="flex-end">
+      <Stack className={css.buttons} direction="row" gap={2} alignItems="flex-end" color="static.main">
         <Track {...SPACE_EVENTS.OPEN_SPACE_LIST_PAGE} label={SPACE_LABELS.safe_dashboard_banner}>
           <Link href={AppRoutes.welcome.spaces} passHref>
-            <Button variant="text" size="compact">
+            <Button variant="text" size="compact" color="inherit">
               Try now
             </Button>
           </Link>
         </Track>
 
         <Track {...SPACE_EVENTS.HIDE_DASHBOARD_WIDGET}>
-          <IconButton aria-label="close" onClick={onHide}>
+          <IconButton aria-label="close" onClick={onHide} sx={{ color: 'static.main' }}>
             <CloseIcon fontSize="small" />
           </IconButton>
         </Track>

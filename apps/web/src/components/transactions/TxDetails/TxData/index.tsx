@@ -35,9 +35,9 @@ import StakingTxWithdrawDetails from '@/features/stake/components/StakingTxWithd
 import { OnChainConfirmation } from './NestedTransaction/OnChainConfirmation'
 import { ExecTransaction } from './NestedTransaction/ExecTransaction'
 import SafeUpdate from './SafeUpdate'
-import DecodedData from './DecodedData'
 import VaultDepositTxDetails from '@/features/earn/components/VaultDepositTxDetails'
 import VaultRedeemTxDetails from '@/features/earn/components/VaultRedeemTxDetails'
+import DecodedData from './DecodedData'
 
 const TxData = ({
   txInfo,

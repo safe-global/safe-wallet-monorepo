@@ -13,9 +13,14 @@ export const EARN_EVENTS = {
     action: 'Get started with earn',
     category: EARN_CATEGORY,
   },
+  OPEN_EARN_LEARN_MORE: {
+    action: 'Open earn learn more',
+    category: EARN_CATEGORY,
+  },
 }
 
 export enum EARN_LABELS {
   safe_dashboard_banner = 'safe_dashboard_banner',
   sidebar = 'sidebar',
+  info_banner = 'info_banner',
 }

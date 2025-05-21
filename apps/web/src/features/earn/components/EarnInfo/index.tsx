@@ -6,7 +6,9 @@ import css from './styles.module.css'
 import { EarnPoweredBy } from '@/features/earn/components/EarnDashboardBanner'
 import CheckIcon from '@/public/images/common/check.svg'
 import Track from '@/components/common/Track'
-import { EARN_EVENTS } from '@/services/analytics/events/earn'
+import { EARN_EVENTS, EARN_LABELS } from '@/services/analytics/events/earn'
+import { EARN_HELP_ARTICLE } from '@/features/earn/constants'
+import ExternalLink from '@/components/common/ExternalLink'
 
 const EarnInfo = ({ onGetStarted }: { onGetStarted: () => void }) => {
   return (
@@ -23,7 +25,10 @@ const EarnInfo = ({ onGetStarted }: { onGetStarted: () => void }) => {
 
               <Typography variant="body1">
                 Earn rewards on your stablecoins, wstETH, ETH, and WBTC by lending with Kiln widget into the Morpho
-                protocol.
+                protocol.{' '}
+                <Track {...EARN_EVENTS.OPEN_EARN_LEARN_MORE} label={EARN_LABELS.info_banner}>
+                  <ExternalLink href={EARN_HELP_ARTICLE}>Learn more</ExternalLink>
+                </Track>
               </Typography>
             </Grid>
 
