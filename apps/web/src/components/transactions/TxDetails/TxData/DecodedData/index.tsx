@@ -7,16 +7,19 @@ import { MethodDetails } from '@/components/transactions/TxDetails/TxData/Decode
 import SendAmountBlock from '@/components/tx-flow/flows/TokenTransfer/SendAmountBlock'
 import SendToBlock from '@/components/tx/SendToBlock'
 import MethodCall from './MethodCall'
-import { DelegateCallWarning } from '@/components/transactions/Warning'
 import { useNativeTokenInfo } from '@/hooks/useNativeTokenInfo'
+import { DelegateCallWarning, UntrustedFallbackHandlerWarning } from '@/components/transactions/Warning'
+import { useSetsUntrustedFallbackHandler } from '@/components/tx/confirmation-views/SettingsChange/UntrustedFallbackHandlerTxAlert'
 
 interface Props {
   txData: TransactionDetails['txData']
   toInfo?: AddressEx
+  isTxExecuted?: boolean
 }
 
-export const DecodedData = ({ txData, toInfo }: Props): ReactElement | null => {
+export const DecodedData = ({ txData, toInfo, isTxExecuted = false }: Props): ReactElement | null => {
   const nativeTokenInfo = useNativeTokenInfo()
+  const setsUntrustedFallbackHandler = useSetsUntrustedFallbackHandler(txData)
 
   // nothing to render
   if (!txData) {
@@ -43,6 +46,7 @@ export const DecodedData = ({ txData, toInfo }: Props): ReactElement | null => {
 
   return (
     <Stack spacing={2}>
+      {setsUntrustedFallbackHandler && <UntrustedFallbackHandlerWarning isTxExecuted={isTxExecuted} />}
       {isDelegateCall && <DelegateCallWarning showWarning={!txData.trustedDelegateCallTarget} />}
 
       {method ? (

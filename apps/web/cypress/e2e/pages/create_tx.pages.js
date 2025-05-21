@@ -135,6 +135,9 @@ export const getStartedStr = 'Get started'
 export const txNoteWarningMessage = 'The notes are publicly visible, do not share any private or sensitive details'
 export const recordedTxNote = 'Tx note one'
 
+const comboButton = '[data-testid="combo-submit-dropdown"]'
+const comboButtonPopover = '[data-testid="combo-submit-popover"]'
+
 export const tx_status = {
   execution_needed: 'Execution needed',
   execute: 'Execute',
@@ -948,4 +951,9 @@ export function checkMaxRecipientReached(attempt = 0) {
     checkNumberOfRecipients(`${attempt + 2}/5`)
     checkMaxRecipientReached(attempt + 1)
   })
+}
+
+export function selectComboButtonOption(option) {
+  cy.get(comboButton).click()
+  cy.get(comboButtonPopover).findByText(option).click()
 }
