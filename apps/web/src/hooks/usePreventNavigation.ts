@@ -7,9 +7,12 @@ export function usePreventNavigation(onNavigate?: () => boolean): void {
 
   // Sync current path ref with router
   useEffect(() => {
-    setTimeout(() => {
+    const delay = setTimeout(() => {
       currentPathRef.current = router.asPath
     }, 300)
+    return () => {
+      clearTimeout(delay)
+    }
   }, [router.asPath])
 
   useEffect(() => {
