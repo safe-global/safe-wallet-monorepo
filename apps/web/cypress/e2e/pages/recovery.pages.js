@@ -163,7 +163,7 @@ export function enterOwnerAddress(address) {
 export function postponeRecovery() {
   cy.wait(7000)
   cy.get(postponeRecoveryBtn)
-    .should(() => {})
+    .should(() => { })
     .then(($button) => {
       if (!$button.length) {
         return
@@ -179,10 +179,10 @@ export function clickOnRecoverLaterBtn() {
 }
 
 export function verifyNonceState(state) {
-  if (state === constants.elementExistanceStates.exist) {
-    cy.get(nonceFld).should(constants.elementExistanceStates.exist)
+  if (state === constants.elementExistenceStates.exist) {
+    cy.get(nonceFld).should(constants.elementExistenceStates.exist)
   }
-  cy.get(nonceFld).should(constants.elementExistanceStates.not_exist)
+  cy.get(nonceFld).should(constants.elementExistenceStates.not_exist)
 }
 
 export function verifyRecoveryProposalModalState(option, horizontal = false) {

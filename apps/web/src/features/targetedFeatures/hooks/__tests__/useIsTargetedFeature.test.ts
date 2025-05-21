@@ -32,7 +32,7 @@ describe('useIsTargetedFeature', () => {
     expect(result.current).toBe(true)
   })
 
-  it('returns true if the the feature is unlocked and enabled', () => {
+  it('returns true if the feature is unlocked and enabled', () => {
     const feature = faker.helpers.arrayElement(targetedFeatures)
     jest.spyOn(useChainsHook, 'useHasFeature').mockReturnValue(true)
     jest.spyOn(useOutreachSafeHook, 'useIsOutreachSafe').mockReturnValue(false)

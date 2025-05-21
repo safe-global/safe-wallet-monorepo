@@ -18,7 +18,7 @@ const Warnings: Record<string, { severity: AlertColor; message: string }> = {
   },
   WARNED_BRIDGE: {
     severity: 'warning',
-    message: `While bridging via ${NAME_PLACEHOLDER}, please make sure that the desination address you send funds to matches the Safe address you have on the respective chain. Otherwise, the funds will be lost.`,
+    message: `While bridging via ${NAME_PLACEHOLDER}, please make sure that the destination address you send funds to matches the Safe address you have on the respective chain. Otherwise, the funds will be lost.`,
   },
   UNSUPPORTED_CHAIN: {
     severity: 'error',

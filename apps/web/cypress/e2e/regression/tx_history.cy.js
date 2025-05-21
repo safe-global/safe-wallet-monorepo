@@ -22,8 +22,7 @@ describe('Tx history tests 1', () => {
   beforeEach(() => {
     cy.intercept(
       'GET',
-      `**${constants.stagingCGWChains}${constants.networkKeys.sepolia}/${
-        constants.stagingCGWSafes
+      `**${constants.stagingCGWChains}${constants.networkKeys.sepolia}/${constants.stagingCGWSafes
       }${staticSafes.SEP_STATIC_SAFE_7.substring(4)}/transactions/history**`,
       (req) => {
         req.url = `https://safe-client.staging.5afe.dev/v1/chains/11155111/safes/0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb/transactions/history?timezone=Europe/Berlin&trusted=false&cursor=limit=100&offset=1`
@@ -48,7 +47,7 @@ describe('Tx history tests 1', () => {
   })
 
   // Added to prod
-  it('Verify exapanded details for account creation', () => {
+  it('Verify expanded details for account creation', () => {
     createTx.clickOnTransactionItemByName(typeCreateAccount.title)
     createTx.verifyExpandedDetails([
       typeCreateAccount.creator.actionTitle,
@@ -70,7 +69,7 @@ describe('Tx history tests 1', () => {
 
   // Added to prod
   // Token send
-  it('Verify exapanded details for token send', () => {
+  it('Verify expanded details for token send', () => {
     createTx.clickOnTransactionItemByName(typeSend.title, typeSend.summaryTxInfo)
     createTx.verifyExpandedDetails([typeSend.sentTo, typeSend.recipientAddress, typeSend.transactionHash])
     createTx.verifyActionListExists([
@@ -93,7 +92,7 @@ describe('Tx history tests 1', () => {
   })
 
   // Added to prod
-  it('Verify exapanded details for initial spending limits setup', () => {
+  it('Verify expanded details for initial spending limits setup', () => {
     createTx.clickOnTransactionItemByName(typeSpendingLimits.title, typeSpendingLimits.summaryTxInfo)
     createTx.verifyExpandedDetails(
       [typeSpendingLimits.contractTitle, typeSpendingLimits.call_multiSend, typeSpendingLimits.transactionHash],
@@ -133,7 +132,7 @@ describe('Tx history tests 1', () => {
   })
 
   // Spending limit deletion
-  it('Verify exapanded details for allowance deletion', () => {
+  it('Verify expanded details for allowance deletion', () => {
     createTx.clickOnTransactionItemByName(typeDeleteAllowance.title, typeDeleteAllowance.summaryTxInfo)
     createTx.verifyExpandedDetails([
       typeDeleteAllowance.description,
@@ -146,7 +145,7 @@ describe('Tx history tests 1', () => {
   })
 
   // Added to prod
-  it('Verify advanced details displayed in exapanded details for allowance deletion', () => {
+  it('Verify advanced details displayed in expanded details for allowance deletion', () => {
     createTx.clickOnTransactionItemByName(typeDeleteAllowance.title, typeDeleteAllowance.summaryTxInfo)
     createTx.expandAdvancedDetails([
       typeDeleteAllowance.baseGas,

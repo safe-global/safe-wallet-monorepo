@@ -25,8 +25,7 @@ describe('Tx history tests 2', () => {
   beforeEach(() => {
     cy.intercept(
       'GET',
-      `**${constants.stagingCGWChains}${constants.networkKeys.sepolia}/${
-        constants.stagingCGWSafes
+      `**${constants.stagingCGWChains}${constants.networkKeys.sepolia}/${constants.stagingCGWSafes
       }${staticSafes.SEP_STATIC_SAFE_7.substring(4)}/transactions/history**`,
       (req) => {
         req.url = `https://safe-client.staging.5afe.dev/v1/chains/11155111/safes/0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb/transactions/history?timezone=Europe/Berlin&trusted=false&cursor=limit=100&offset=1`
@@ -43,7 +42,7 @@ describe('Tx history tests 2', () => {
 
   // Added to prod
   // On-chain rejection
-  it('Verify exapanded details for on-chain rejection', () => {
+  it('Verify expanded details for on-chain rejection', () => {
     createTx.clickOnTransactionItemByName(typeOnchainRejection.title)
     createTx.verifyExpandedDetails([typeOnchainRejection.description, typeOnchainRejection.transactionHash2])
     createTx.verifyActionListExists([
@@ -55,7 +54,7 @@ describe('Tx history tests 2', () => {
 
   // Added to prod
   // Batch transaction
-  it('Verify exapanded details for batch', () => {
+  it('Verify expanded details for batch', () => {
     createTx.clickOnTransactionItemByName(typeBatch.title, typeBatch.summaryTxInfo)
     createTx.verifyExpandedDetails([typeBatch.contractTitle, typeBatch.transactionHash], createTx.delegateCallWarning)
     createTx.verifyActions([typeBatch.nativeTransfer.title])
@@ -67,7 +66,7 @@ describe('Tx history tests 2', () => {
     createTx.verifySummaryByName(typeAddOwner.title, null, [typeGeneral.statusOk], typeAddOwner.altImage)
   })
 
-  it('Verify exapanded details for adding owner', () => {
+  it('Verify expanded details for adding owner', () => {
     createTx.clickOnTransactionItemByName(typeAddOwner.title)
     createTx.verifyExpandedDetails(
       [
@@ -87,7 +86,7 @@ describe('Tx history tests 2', () => {
   })
 
   // Added to prod
-  it('Verify exapanded details for changing owner', () => {
+  it('Verify expanded details for changing owner', () => {
     createTx.clickOnTransactionItemByName(typeChangeOwner.title)
     createTx.verifyExpandedDetails([
       typeChangeOwner.description,
@@ -105,7 +104,7 @@ describe('Tx history tests 2', () => {
     createTx.verifySummaryByName(typeRemoveOwner.title, null, [typeGeneral.statusOk], typeRemoveOwner.altImage)
   })
 
-  it('Verify exapanded details for removing owner', () => {
+  it('Verify expanded details for removing owner', () => {
     createTx.clickOnTransactionItemByName(typeRemoveOwner.title)
     createTx.verifyExpandedDetails(
       [
@@ -125,7 +124,7 @@ describe('Tx history tests 2', () => {
     createTx.verifySummaryByName(typeDisableOwner.title, null, [typeGeneral.statusOk], typeDisableOwner.altImage)
   })
 
-  it('Verify exapanded details for disable module', () => {
+  it('Verify expanded details for disable module', () => {
     createTx.clickOnTransactionItemByName(typeDisableOwner.title)
     createTx.verifyExpandedDetails([
       typeDisableOwner.description,
@@ -141,7 +140,7 @@ describe('Tx history tests 2', () => {
   })
 
   // Added to prod
-  it('Verify exapanded details for changing threshold', () => {
+  it('Verify expanded details for changing threshold', () => {
     createTx.clickOnTransactionItemByName(typeChangeThreshold.title)
     createTx.verifyExpandedDetails(
       [typeChangeThreshold.requiredConfirmationsTitle, typeChangeThreshold.transactionHash],

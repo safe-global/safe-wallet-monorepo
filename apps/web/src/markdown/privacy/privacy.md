@@ -108,7 +108,7 @@ In this Policy, “processing” means any operation or set of operations which 
 
 What do some of the capitalized terms mean in this policy?
 
-1. “Blockchain” means a mathematically secured consensus ledger such as  the Ethereum Virtual Machine, an Ethereum Virtual Machine compatible validation mechanism, or other decentralized validation mechanisms.
+1. “Blockchain” means a mathematically secured consensus ledger such as the Ethereum Virtual Machine, an Ethereum Virtual Machine compatible validation mechanism, or other decentralized validation mechanisms.
    2. “Transaction” means a change to the data set through a new entry in the continuous Blockchain.
    3. “Smart Contract” is a piece of source code deployed as an application on the Blockchain which can be executed, including self-execution of Transactions as well as execution triggered by 3rd parties.
    4. “Token” is a digital asset transferred in a Transaction, including ETH, ERC20, ERC721 and ERC1155 tokens.
@@ -157,7 +157,7 @@ When visiting our website or using Safe Interfaces, we will collect and process 
 4. When you create a Profile for an existing Safe Account for the purpose of allowing you to view and use them in the Safe Interface, we process your
    1. public Wallet address,
    2. Safe Account balance,
-   3. smart contract address of theSafe Account and
+   3. smart contract address of the Safe Account and
    4. Safe Account owner's public Wallet addresses
 
 5. When you initiate a Safe Account Transaction we process the following data to compose the Transaction for you based on your entered data:
@@ -338,7 +338,7 @@ For all these activities (4.5.1-4.54) we rely on the legal base of performance o
 
 We rely on our legitimate interest (GDPR Art.6.1f) of ensuring product quality.
 
-3.5.6 We process your personal data to allow you to authenticate using your gmail account or AppleID and to create a signer wallet/owner account . For that purpose following personal data is processed:
+3.5.6 We process your personal data to allow you to authenticate using your gmail account or AppleID and to create a signer wallet/owner account. For that purpose following personal data is processed:
 
 1. Anonymised device information and identifiers, e.g. IP address, cookie IDs, device type
 2. User account authentication information (e.g. username, password)
@@ -394,7 +394,7 @@ Further, we may process your Personal data where such processing is necessary in
 
 ## 4.1 Blockchain {#4.1-blockchain}
 
-When usingSafe Accounts your smart contract address, Safe Account Transactions, addresses of signer accounts and ETH balances and token balances will be stored on the Blockchain. See section 2 of this Policy
+When using Safe Accounts your smart contract address, Safe Account Transactions, addresses of signer accounts and ETH balances and token balances will be stored on the Blockchain. See section 2 of this Policy
 
 THE INFORMATION WILL BE DISPLAYED PERMANENTLY AND PUBLIC, THIS IS PART OF THE NATURE OF THE BLOCKCHAIN. IF YOU ARE NEW TO THIS FIELD, WE HIGHLY RECOMMEND INFORMING YOURSELF ABOUT THE BLOCKCHAIN TECHNOLOGY BEFORE USING OUR SERVICES.
 

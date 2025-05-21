@@ -111,10 +111,10 @@ export function checkMaxValue() {
 }
 
 export function verifyNonceState(state) {
-  if (state === constants.elementExistanceStates.exist) {
-    cy.get(nonceFld).should(constants.elementExistanceStates.exist)
+  if (state === constants.elementExistenceStates.exist) {
+    cy.get(nonceFld).should(constants.elementExistenceStates.exist)
   }
-  cy.get(nonceFld).should(constants.elementExistanceStates.not_exist)
+  cy.get(nonceFld).should(constants.elementExistenceStates.not_exist)
 }
 
 export function clickOnMaxBtn() {

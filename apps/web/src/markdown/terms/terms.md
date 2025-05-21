@@ -18,7 +18,7 @@ Last updated: April, 2025
 
 [8\. Are we responsible for recovering your Safe Account?](#8.-are-we-responsible-for-recovering-your-safe-account?)
 
-[9\. Are we responsible for notifying you about events occuring in your Safe Account?](#9.-are-we-responsible-for-notifying-you-about-events-occuring-in-your-safe-account?)
+[9\. Are we responsible for notifying you about events occurring in your Safe Account?](#9.-are-we-responsible-for-notifying-you-about-events-occurring-in-your-safe-account?)
 
 [10\. Are we responsible for flagging malicious transactions?](#10.-are-we-responsible-for-flagging-malicious-transactions?)
 
@@ -174,7 +174,7 @@ Our Services do not consist of:
 
 * If you contribute integrations to Third-Party Safe Apps and Third-Party Services, you are responsible for all content you contribute, in any manner, and you must have all rights necessary to do so, in the manner in which you contribute it. You are responsible for all your activity in connection with any such Third-Party Safe Apps and Third-Party Services.
 
-* Your interactions with persons found on or through the Third-Party Safe Apps and and Third-Party Services, including payment and delivery of goods and services, financial transactions, and any other terms associated with such dealings, are solely between you and such persons. You agree that we shall not be responsible or liable for any loss or damage of any sort incurred as the result of any such dealings.
+* Your interactions with persons found on or through the Third-Party Safe Apps and Third-Party Services, including payment and delivery of goods and services, financial transactions, and any other terms associated with such dealings, are solely between you and such persons. You agree that we shall not be responsible or liable for any loss or damage of any sort incurred as the result of any such dealings.
 
 * If there is a dispute between you and the Third-Party Safe Apps or Third-Party Services provider or/and other users of the Third-Party Safe Apps or Third-Party Service, you agree that we are under no obligation to become involved. In the event that you have a dispute with one or more other users, you release us, our officers, employees, agents, contractors and successors from claims, demands, and damages of every kind or nature, known or unknown, suspected or unsuspected, disclosed or undisclosed, arising out of or in any way related to such disputes and/or our Services.
 
@@ -202,7 +202,7 @@ Our Services do not consist of:
 
 4. The recovery feature is provided free of charge and liability is limited pursuant to Section 18 below.
 
-# 9\. Are we responsible for notifying you about events occuring in your Safe Account? {#9.-are-we-responsible-for-notifying-you-about-events-occuring-in-your-safe-account?}
+# 9\. Are we responsible for notifying you about events occurring in your Safe Account? {#9.-are-we-responsible-for-notifying-you-about-events-occurring-in-your-safe-account?}
 
 1. We shall not be responsible for notifying you of any interactions or events occurring in your Safe Account, be it on the Blockchain, third-party interfaces, within any other infrastructure, or our Services.
 
@@ -246,7 +246,7 @@ Our Services do not consist of:
 
 * Users are solely responsible for verifying the identity of members they add to a Space. Users must not add others without their explicit consent. We do not verify or endorse Spacemembers or their actions.
 
-* Users must ensure that any metadata they add or share within aSpace complies with all applicable laws and regulations, including but not limited to data protection laws.
+* Users must ensure that any metadata they add or share within a Space complies with all applicable laws and regulations, including but not limited to data protection laws.
 
 * Users must not share or store metadata that is unlawful, fraudulent, misleading, or violates the rights of any third party. We do not assume any responsibility for any metadata shared within a Space.
 

@@ -36,7 +36,7 @@ This document outlines best practices for writing and maintaining end-to-end tes
 
 The easiest way to write tests is to use Maestro Studio:
 
-- build the app and start the the e2e metro server:
+- build the app and start the e2e metro server:
 
 ```
 yarn workspace @safe-global/mobile e2e:metro-ios

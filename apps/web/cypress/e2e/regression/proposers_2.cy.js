@@ -76,7 +76,7 @@ describe('Proposers 2 tests', () => {
     proposer.verifyDeleteProposerBtnIsDisabled(proposerAddress)
   })
 
-  //TODO: Unskip when tenderly visibilty bug is solved
+  //TODO: Unskip when tenderly visibility bug is solved
   it.skip('Verify a Tenderly simulation can be performed while proposing a tx', () => {
     cy.visit(constants.setupUrl + staticSafes.SEP_STATIC_SAFE_33)
     wallet.connectSigner(signer2)

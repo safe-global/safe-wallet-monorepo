@@ -17,12 +17,12 @@ describe('Onchain Messages tests', () => {
     cy.visit(constants.transactionsHistoryUrl + staticSafes.SEP_STATIC_SAFE_10)
   })
 
-  it('Verify exapanded details for signed on-chain message', () => {
+  it('Verify expanded details for signed on-chain message', () => {
     createTx.clickOnTransactionItemByName(typeMessagesOnchain.contractName)
     createTx.verifyExpandedDetails([typeMessagesOnchain.contractName, typeMessagesOnchain.delegateCall])
   })
 
-  it('Verify exapanded details for unsigned on-chain message', () => {
+  it('Verify expanded details for unsigned on-chain message', () => {
     cy.visit(constants.transactionQueueUrl + staticSafes.SEP_STATIC_SAFE_10)
     createTx.clickOnTransactionItemByName(typeMessagesOnchain.contractName)
     createTx.verifyExpandedDetails([typeMessagesOnchain.contractName, typeMessagesOnchain.delegateCall])

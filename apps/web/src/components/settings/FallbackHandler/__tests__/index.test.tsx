@@ -44,7 +44,7 @@ describe('FallbackHandler', () => {
     await waitFor(() => {
       expect(
         fbHandler.queryByText(
-          'The fallback handler adds fallback logic for funtionality that may not be present in the Safe contract. Learn more about the fallback handler',
+          'The fallback handler adds fallback logic for functionality that may not be present in the Safe contract. Learn more about the fallback handler',
         ),
       ).toBeDefined()
 
@@ -81,7 +81,7 @@ describe('FallbackHandler', () => {
     await waitFor(() => {
       expect(
         fbHandler.queryByText(
-          'The fallback handler adds fallback logic for funtionality that may not be present in the Safe contract. Learn more about the fallback handler',
+          'The fallback handler adds fallback logic for functionality that may not be present in the Safe contract. Learn more about the fallback handler',
         ),
       ).toBeDefined()
 
@@ -186,7 +186,7 @@ describe('FallbackHandler', () => {
       await waitFor(() => {
         expect(
           fbHandler.queryByText(
-            'The fallback handler adds fallback logic for funtionality that may not be present in the Safe Account contract. Learn more about the fallback handler',
+            'The fallback handler adds fallback logic for functionality that may not be present in the Safe Account contract. Learn more about the fallback handler',
           ),
         ).toBeDefined()
 

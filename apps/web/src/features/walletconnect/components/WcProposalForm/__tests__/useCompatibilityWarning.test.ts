@@ -56,7 +56,7 @@ describe('useCompatibilityWarning', () => {
 
       expect(result.current).toEqual({
         message:
-          'While bridging via Fake Bridge, please make sure that the desination address you send funds to matches the Safe address you have on the respective chain. Otherwise, the funds will be lost.',
+          'While bridging via Fake Bridge, please make sure that the destination address you send funds to matches the Safe address you have on the respective chain. Otherwise, the funds will be lost.',
         severity: 'warning',
       })
     })
@@ -74,7 +74,7 @@ describe('useCompatibilityWarning', () => {
 
       expect(result.current).toEqual({
         message:
-          'While bridging via this dApp, please make sure that the desination address you send funds to matches the Safe address you have on the respective chain. Otherwise, the funds will be lost.',
+          'While bridging via this dApp, please make sure that the destination address you send funds to matches the Safe address you have on the respective chain. Otherwise, the funds will be lost.',
         severity: 'warning',
       })
     })

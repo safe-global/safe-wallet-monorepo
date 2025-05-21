@@ -48,7 +48,7 @@ export function useRecoveryState(delayModifiers?: Array<Delay>): AsyncResult<Rec
     // that need be loaded before we can initially fetch the recovery state
     const listener = dispatch(
       addListener({
-        // Listen to history polls (only occuring when the txHistoryTag changes)
+        // Listen to history polls (only occurring when the txHistoryTag changes)
         actionCreator: txHistorySlice.actions.set,
         effect: async (action) => {
           // Get the most recent transaction

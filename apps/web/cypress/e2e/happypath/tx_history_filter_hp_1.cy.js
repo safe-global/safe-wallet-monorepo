@@ -10,7 +10,7 @@ const endDate = '01/12/2023'
 const startDate2 = '20/12/2023'
 const endDate2 = '20/12/2023'
 
-// TODO: Flaky tests, skiped until solved
+// TODO: Flaky tests, skipped until solved
 describe.skip('Tx history happy path tests 1', () => {
   before(async () => {
     staticSafes = await getSafes(CATEGORIES.static)

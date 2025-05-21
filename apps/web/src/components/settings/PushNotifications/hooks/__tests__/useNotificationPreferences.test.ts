@@ -308,7 +308,7 @@ describe('useNotificationPreferences', () => {
         })
       })
 
-      it('should hydrate accross instances', async () => {
+      it('should hydrate across instances', async () => {
         const chainId1 = '1'
         const safeAddress1 = toBeHex('0x1', 20)
         const safeAddress2 = toBeHex('0x1', 20)

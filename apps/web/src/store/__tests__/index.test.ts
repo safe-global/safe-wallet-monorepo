@@ -38,7 +38,7 @@ describe('store', () => {
       })
     })
 
-    it('should not replace the intial state', () => {
+    it('should not replace the initial state', () => {
       const persistedState = {
         str1: 'str1',
         obj1: {

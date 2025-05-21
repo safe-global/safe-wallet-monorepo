@@ -96,7 +96,7 @@ export const FallbackHandler = (): ReactElement | null => {
         <Grid item xs>
           <Box>
             <Typography>
-              The fallback handler adds fallback logic for funtionality that may not be present in the Safe Account
+              The fallback handler adds fallback logic for functionality that may not be present in the Safe Account
               contract. Learn more about the fallback handler{' '}
               <ExternalLink href={HelpCenterArticle.FALLBACK_HANDLER}>here</ExternalLink>
             </Typography>

@@ -95,7 +95,7 @@ describe('Spending limits tests', () => {
     navigation.clickOnNewTxBtn()
     tx.clickOnSendTokensBtn()
     spendinglimit.selectSpendingLimitOption()
-    spendinglimit.verifyNonceState(constants.elementExistanceStates.not_exist)
+    spendinglimit.verifyNonceState(constants.elementExistenceStates.not_exist)
   })
 
   it('Verify "Max" button value set to be no more than the allowed amount', () => {

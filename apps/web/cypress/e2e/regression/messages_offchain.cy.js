@@ -61,13 +61,13 @@ describe('Offchain Messages tests', () => {
     ])
   })
 
-  it('Verify exapanded details for EIP 191 off-chain message', () => {
+  it('Verify expanded details for EIP 191 off-chain message', () => {
     cy.visit(constants.transactionsMessagesUrl + staticSafes.SEP_STATIC_SAFE_10)
     createTx.clickOnTransactionItemByIndex(2)
     cy.contains(typeMessagesOffchain.message2).should('be.visible')
   })
 
-  it('Verify exapanded details for EIP 712 off-chain message', () => {
+  it('Verify expanded details for EIP 712 off-chain message', () => {
     cy.visit(constants.transactionsMessagesUrl + staticSafes.SEP_STATIC_SAFE_10)
     const jsonString = createTx.messageNestedStr
     const values = [

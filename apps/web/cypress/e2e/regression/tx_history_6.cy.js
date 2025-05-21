@@ -33,7 +33,7 @@ describe('Tx history tests 6', () => {
     )
   })
 
-  it('Verify exapanded details for token receipt', () => {
+  it('Verify expanded details for token receipt', () => {
     createTx.clickOnTransactionItemByName(typeReceive.summaryTitle, typeReceive.summaryTxInfo)
     createTx.verifyExpandedDetails([
       typeReceive.title,
