@@ -1,6 +1,6 @@
 import React from 'react'
-import { Onboarding } from './Onboarding.container'
 import { fireEvent, render } from '@/src/tests/test-utils'
+import { Onboarding } from './Onboarding.container'
 
 const mockNavigate = jest.fn()
 

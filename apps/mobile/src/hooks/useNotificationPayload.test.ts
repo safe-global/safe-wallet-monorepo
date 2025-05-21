@@ -1,4 +1,4 @@
-import { renderHook } from '@/src/tests/test-utils'
+import { act, renderHook } from '@/src/tests/test-utils'
 import { useNotificationPayload } from './useNotificationPayload'
 import { useSiwe } from '@/src/hooks/useSiwe'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
@@ -23,8 +23,19 @@ jest.mock('@/src/store/hooks', () => ({
     return {}
   },
 }))
-jest.mock('@/src/store/safesSlice')
+jest.mock('@/src/store/safesSlice', () => ({
+  selectSafeInfo: jest.fn().mockReturnValue({ SafeInfo: { owners: [{ value: 'owner1' }] } }),
+  initialState: {},
+}))
 jest.mock('@/src/utils/logger')
+
+const mockDispatch = jest.fn()
+const mockUseAppSelector = jest.fn()
+
+jest.mock('@/src/store/hooks', () => ({
+  useAppDispatch: () => mockDispatch,
+  useAppSelector: (selector: unknown) => mockUseAppSelector(selector),
+}))
 
 describe('useNotificationPayload', () => {
   const mockCreateSiweMessage = jest.fn()
@@ -42,13 +53,15 @@ describe('useNotificationPayload', () => {
 
   it('throws an error if signer is missing', async () => {
     const { result } = renderHook(() => useNotificationPayload())
-    await expect(
-      result.current.getNotificationRegisterPayload({
-        nonce: 'mock-nonce',
-        signer: null as unknown as Wallet,
-        chainId: '1',
-      }),
-    ).rejects.toThrow('registerForNotifications: Signer account not found')
+
+    await act(async () => {
+      await expect(
+        result.current.getNotificationRegisterPayload({
+          signer: null as unknown as Wallet,
+          chainId: '1',
+        }),
+      ).rejects.toThrow('registerForNotifications: Signer account not found')
+    })
   })
 
   it('returns the correct payload', async () => {
@@ -56,12 +69,13 @@ describe('useNotificationPayload', () => {
     mockCreateSiweMessage.mockReturnValue('mockSiweMessage')
 
     const { result } = renderHook(() => useNotificationPayload())
-    const payload = await result.current.getNotificationRegisterPayload({
-      nonce: 'mock-nonce-for-testing-12345',
-      signer: mockSigner,
-      chainId: '1',
+    let payload
+    await act(async () => {
+      payload = await result.current.getNotificationRegisterPayload({
+        signer: mockSigner,
+        chainId: '1',
+      })
     })
-
     expect(payload).toEqual({
       siweMessage: 'mockSiweMessage',
     })

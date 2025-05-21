@@ -1,6 +1,4 @@
 import { useCallback, useState } from 'react'
-import { Wallet } from 'ethers'
-import { useAuthGetNonceV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/auth'
 import FCMService from '@/src/services/notifications/FCMService'
 import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
 import {
@@ -11,9 +9,6 @@ import {
 import Logger from '@/src/utils/logger'
 
 import { useGTW } from './useGTW'
-import { addOrUpdateDelegatedAccount, selectDelegatedAccounts } from '../store/delegatedSlice'
-import { Address, SafeInfo } from '../types/address'
-import { useNotificationPayload } from './useNotificationPayload'
 import { ERROR_MSG } from '../store/constants'
 import { getSigner } from '../utils/notifications'
 import { useNotificationGTWPermissions } from './useNotificationGTWPermissions'
@@ -22,6 +17,10 @@ import { selectActiveSafe } from '../store/activeSafeSlice'
 import { useGlobalSearchParams } from 'expo-router'
 import NotificationService from '../services/notifications/NotificationService'
 import { notificationChannels, withTimeout } from '@/src/utils/notifications'
+import { selectFirstDelegateForAnySafeOwner } from '../store/delegatesSlice'
+import { selectSafeInfo } from '../store/safesSlice'
+import { Wallet } from 'ethers'
+
 type RegisterForNotificationsProps = {
   loading: boolean
   error: string | null
@@ -30,6 +29,7 @@ type RegisterForNotificationsProps = {
 interface NotificationsProps {
   registerForNotifications: () => Promise<RegisterForNotificationsProps>
   unregisterForNotifications: () => Promise<RegisterForNotificationsProps>
+  unregisterSafeFromNotifications: (safeAddress: string, chainId: string) => Promise<RegisterForNotificationsProps>
   updatePermissionsForNotifications: () => Promise<RegisterForNotificationsProps>
   isLoading: boolean
   error: string | null
@@ -45,14 +45,13 @@ const useRegisterForNotifications = (): NotificationsProps => {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   // Custom hooks
-  const { data: nonceData } = useAuthGetNonceV1Query()
   const { registerForNotificationsOnBackEnd, unregisterForNotificationsOnBackEnd } = useGTW()
-  const { getNotificationRegisterPayload } = useNotificationPayload()
-  const { storePrivateKey, getPrivateKey } = useSign()
+  const { getPrivateKey } = useSign()
   // Redux
   const dispatch = useAppDispatch()
   const activeSafe = useAppSelector(selectActiveSafe)
-  const delegatedAccounts = useAppSelector(selectDelegatedAccounts)
+  const safeInfoItem = useAppSelector((state) => (activeSafe ? selectSafeInfo(state, activeSafe.address) : undefined))
+  const safeOverview = safeInfoItem?.SafeInfo
 
   const glob = useGlobalSearchParams<{ safeAddress?: string; chainId?: string; import_safe?: string }>()
 
@@ -66,13 +65,32 @@ const useRegisterForNotifications = (): NotificationsProps => {
   const safeAddress = glob.safeAddress
   const chainId = glob.chainId
 
-  const { ownerFound, accountType } = useNotificationGTWPermissions(
-    safeAddress as `0x${string}`,
-    chainId,
+  // Use the selector to find the first delegate for any owner of the safe
+  const delegatesForNotification = useAppSelector((state) =>
+    safeAddress ? selectFirstDelegateForAnySafeOwner(state, safeAddress as `0x${string}`) : null,
+  )
+
+  // Only call getAccountType when safeAddress is defined
+  const accountTypeInfo = useNotificationGTWPermissions(
+    safeAddress ? (safeAddress as `0x${string}`) : ('0x' as `0x${string}`),
   ).getAccountType()
 
+  const { ownerFound, accountType } = accountTypeInfo
+
+  // Helper function to get signer from delegate
+  const getSignerFromDelegate = async (delegate: { owner: string; delegateAddress: string } | null) => {
+    if (!delegate) return { signer: null, owner: null, delegateAddress: null }
+
+    const { owner, delegateAddress } = delegate
+    const delegateKeyId = getDelegateKeyId(owner, delegateAddress)
+    const privateKey = await getPrivateKey(delegateKeyId, { requireAuthentication: false })
+    const signer = privateKey ? getSigner(privateKey) : null
+
+    return { signer, owner, delegateAddress }
+  }
+
   /*
-   * Push notifications can be enabled by an two type of users. The owner of the safe or an observer of the safe
+   * Push notifications can be enabled by two types of users: the owner of the safe or an observer of the safe
    * In the first case, the owner can subscribe to ALL NotificationTypes listed in @safe-global/store/gateway/AUTO_GENERATED/notifications
    * including confirmation requests notifications
    * In the second case, the observer notifications will not include confirmation requests
@@ -84,8 +102,7 @@ const useRegisterForNotifications = (): NotificationsProps => {
     try {
       setLoading(true)
       setError(null)
-
-      if (!activeSafe) {
+      if (!activeSafe || !safeOverview) {
         setLoading(false)
         setError(ERROR_MSG)
         return {
@@ -93,88 +110,28 @@ const useRegisterForNotifications = (): NotificationsProps => {
           error,
         }
       }
+
       const fcmToken = await FCMService.initNotification()
-      // Force the creation of the notification channel for android
       await withTimeout(NotificationService.createChannel(notificationChannels[0]), 5000)
 
-      /* IMPORTANT - Create a new random (delegated) private key to avoid exposing the subscriber's private key
-       *
-       * This key will be used to register for notifications on the backend
-       * avoiding the prompt to grant notifications permission
-       */
-      const randomDelegatedAccount = Wallet.createRandom()
-
-      if (!randomDelegatedAccount) {
-        setLoading(false)
-        setError(ERROR_MSG)
-        return {
-          loading,
-          error,
-        }
-      }
-
-      // Store the private key in the keychain with default protection (no biometrics)
-      const delegateKeyId = getDelegateKeyId(activeSafe.address, randomDelegatedAccount.address)
-      const storeSuccess = await storePrivateKey(delegateKeyId, randomDelegatedAccount.privateKey, {
-        requireAuthentication: false,
-      })
-
-      if (!storeSuccess) {
-        setLoading(false)
-        setError('Failed to securely store delegate key')
-        return {
-          loading,
-          error,
-        }
-      }
-
-      const accountDetails = {
-        address: randomDelegatedAccount.address,
-        type: accountType,
-      }
-
-      dispatch(
-        addOrUpdateDelegatedAccount({
-          accountDetails,
-          safes: [activeSafe],
-        }),
-      )
-
-      const { siweMessage } = await getNotificationRegisterPayload({
-        nonce: nonceData?.nonce,
-        signer: randomDelegatedAccount,
-        chainId: chainId as string,
-      })
-
-      if (!fcmToken) {
-        setLoading(false)
-        setError(ERROR_MSG)
-        return {
-          loading,
-          error,
-        }
-      }
+      // Get signer from delegate
+      const { signer } = await getSignerFromDelegate(delegatesForNotification)
 
       registerForNotificationsOnBackEnd({
         safeAddress: safeAddress as `0x${string}`,
-        signer: randomDelegatedAccount,
-        message: siweMessage,
+        signer,
         chainId: chainId as string,
-        fcmToken,
-        delegatorAddress: ownerFound?.value,
-        delegatedAccountAddress: randomDelegatedAccount.address,
+        fcmToken: fcmToken || '',
         notificationAccountType: accountType,
       }).then(() => {
-        // Upon successful registration, the Redux store is updated
         dispatch(toggleAppNotifications(true))
         dispatch(updatePromptAttempts(0))
         dispatch(updateLastTimePromptAttempted(0))
-
         setLoading(false)
         setError(null)
       })
     } catch (error) {
-      Logger.error('FCM Registration or Token Save failed', error)
+      Logger.error('FCM Registration failed', error)
       setLoading(false)
       setError(error as string)
     }
@@ -182,14 +139,16 @@ const useRegisterForNotifications = (): NotificationsProps => {
       loading,
       error,
     }
-  }, [nonceData, activeSafe, storePrivateKey, safeAddress, chainId])
+  }, [activeSafe, safeOverview, delegatesForNotification, getPrivateKey, safeAddress, chainId])
 
   const unregisterForNotifications = useCallback(async () => {
     try {
       setLoading(true)
       setError(null)
 
-      if (!activeSafe) {
+      console.log('unregisterForNotifications :: activeSafe', activeSafe)
+      console.log('unregisterForNotifications :: safeOverview', safeOverview)
+      if (!activeSafe || !safeOverview) {
         setLoading(false)
         setError(ERROR_MSG)
         return {
@@ -198,45 +157,14 @@ const useRegisterForNotifications = (): NotificationsProps => {
         }
       }
 
-      const delegatedAddress = Object.entries(delegatedAccounts).find(([, safesSliceItem]) =>
-        safesSliceItem.safes.some((safe: SafeInfo) => safe.address === activeSafe.address),
-      )?.[0] as Address
+      console.log('unregister')
 
-      if (!delegatedAddress) {
-        setLoading(false)
-        Logger.error('Delegated address not found')
-        setError(ERROR_MSG)
-        return {
-          loading,
-          error,
-        }
-      }
-
-      // Retrieve the private key from the keychain
-      const delegateKeyId = getDelegateKeyId(activeSafe.address, delegatedAddress)
-      const privateKey = await getPrivateKey(delegateKeyId, { requireAuthentication: false })
-
-      if (!privateKey) {
-        setLoading(false)
-        setError('Failed to retrieve delegate key')
-        return {
-          loading,
-          error,
-        }
-      }
-
-      const signer = getSigner(privateKey)
-
-      const { siweMessage } = await getNotificationRegisterPayload({
-        nonce: nonceData?.nonce,
-        signer,
-        chainId: activeSafe.chainId,
-      })
+      // Get signer from delegate
+      const { signer } = await getSignerFromDelegate(delegatesForNotification)
 
       // Triggers the final step on the backend
       unregisterForNotificationsOnBackEnd({
         signer,
-        message: siweMessage,
         activeSafe,
       }).then(() => {
         dispatch(toggleAppNotifications(false))
@@ -254,14 +182,91 @@ const useRegisterForNotifications = (): NotificationsProps => {
       loading,
       error,
     }
-  }, [nonceData, activeSafe, getPrivateKey, safeAddress, chainId])
+  }, [activeSafe, safeOverview, delegatesForNotification, getPrivateKey, safeAddress, chainId])
+
+  const registerSafeForNotifications = useCallback(
+    async (safeAddress: string, chainId: string) => {
+      try {
+        setLoading(true)
+        setError(null)
+        if (!safeAddress || !chainId) {
+          setLoading(false)
+          setError('No safe address or chain ID provided')
+          return {
+            loading,
+            error,
+          }
+        }
+
+        const fcmToken = await FCMService.initNotification()
+        await withTimeout(NotificationService.createChannel(notificationChannels[0]), 5000)
+
+        // Get signer from delegate
+        const { signer } = await getSignerFromDelegate(delegatesForNotification)
+
+        registerForNotificationsOnBackEnd({
+          safeAddress: safeAddress as `0x${string}`,
+          signer,
+          chainId: chainId as string,
+          fcmToken: fcmToken || '',
+          notificationAccountType: accountType,
+        }).then(() => {
+          setLoading(false)
+          setError(null)
+        })
+      } catch (error) {
+        Logger.error('FCM Registration failed', error)
+        setLoading(false)
+        setError(error as string)
+      }
+      return {
+        loading,
+        error,
+      }
+    },
+    [delegatesForNotification, getPrivateKey],
+  )
+
+  // New method to unregister a specific safe without toggling app notifications
+  const unregisterSafeFromNotifications = useCallback(async (safeAddress: string, chainId: string) => {
+    try {
+      setLoading(true)
+      setError(null)
+
+      if (!safeAddress || !chainId) {
+        setLoading(false)
+        setError('Missing safe address or chain ID')
+        return { loading, error }
+      }
+
+      // For the specific safe, we'll work with whatever delegate we can find at the time of unregistration
+      // We don't rely on React hooks inside callbacks
+
+      // Triggers the backend unregistration without affecting app notification state
+      await unregisterForNotificationsOnBackEnd({
+        signer: null, // We'll attempt to unregister without a signer
+        activeSafe: { address: safeAddress as `0x${string}`, chainId },
+      })
+
+      setLoading(false)
+      setError(null)
+    } catch (error) {
+      Logger.error('Safe unregistration from notifications failed', error)
+      setLoading(false)
+      setError(error as string)
+    }
+    return {
+      loading,
+      error,
+    }
+  }, [])
 
   const updatePermissionsForNotifications = useCallback(async () => {
     try {
       setLoading(true)
       setError(null)
 
-      if (!activeSafe) {
+      if (!activeSafe || !safeOverview) {
         setLoading(false)
         setError(ERROR_MSG)
         return {
@@ -272,57 +277,39 @@ const useRegisterForNotifications = (): NotificationsProps => {
 
       const fcmToken = await FCMService.getFCMToken()
 
-      const delegatedAddress = Object.entries(delegatedAccounts).find(([, safesSliceItem]) =>
-        safesSliceItem.safes.some((safe: SafeInfo) => safe.address === activeSafe.address),
-      )?.[0] as Address
-
-      if (!delegatedAddress) {
+      if (!delegatesForNotification) {
         setLoading(false)
-        Logger.error('Delegated address not found')
-        setError(ERROR_MSG)
+        setError('No delegate found to update permissions')
         return {
           loading,
           error,
         }
       }
 
-      // Retrieve the private key from the keychain
-      const delegateKeyId = getDelegateKeyId(activeSafe.address, delegatedAddress)
-      const privateKey = await getPrivateKey(delegateKeyId, { requireAuthentication: false })
+      // Get signer from delegate
+      const { signer, owner, delegateAddress } = await getSignerFromDelegate(delegatesForNotification)
 
-      if (!privateKey || !fcmToken) {
+      if (!signer || !fcmToken) {
         setLoading(false)
-        setError(ERROR_MSG)
+        setError('Failed to retrieve delegate key or FCM token')
         return {
           loading,
           error,
         }
       }
-
-      const signer = getSigner(privateKey)
-      const delegatedAccount = delegatedAccounts[delegatedAddress]
-
-      const { siweMessage } = await getNotificationRegisterPayload({
-        nonce: nonceData?.nonce,
-        signer,
-        chainId: activeSafe.chainId,
-      })
 
       registerForNotificationsOnBackEnd({
         safeAddress: activeSafe.address,
-        signer: signer,
-        message: siweMessage,
+        signer,
         chainId: activeSafe.chainId,
         fcmToken,
-        delegatorAddress: ownerFound?.value,
-        delegatedAccountAddress: delegatedAccount.accountDetails.address,
         notificationAccountType: accountType,
       }).then(() => {
         setLoading(false)
         setError(null)
       })
     } catch (error) {
-      Logger.error('FCM Unregistration failed', error)
+      Logger.error('Notification permission update failed', error)
       setLoading(false)
       setError(error as string)
     }
@@ -330,11 +317,12 @@ const useRegisterForNotifications = (): NotificationsProps => {
       loading,
       error,
     }
-  }, [nonceData, activeSafe, getPrivateKey, safeAddress, chainId])
+  }, [activeSafe, safeOverview, delegatesForNotification, getPrivateKey, safeAddress, chainId])
 
   return {
     registerForNotifications,
     unregisterForNotifications,
+    unregisterSafeFromNotifications,
     updatePermissionsForNotifications,
     isLoading: loading,
     error,

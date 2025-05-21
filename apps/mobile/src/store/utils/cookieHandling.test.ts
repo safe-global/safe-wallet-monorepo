@@ -74,7 +74,6 @@ describe('Cookie Handling', () => {
         __esModule: true,
         ...originalModule,
         isCredentialRoute: (url: string) => {
-          console.log('MOCK (doMock) of isCredentialRoute CALLED with URL:', url)
           return url.includes('/api/')
         },
       }

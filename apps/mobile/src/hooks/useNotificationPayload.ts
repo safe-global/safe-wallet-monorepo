@@ -1,5 +1,5 @@
 import { ERROR_MSG } from '@/src/store/constants'
-import { useAuthGetNonceV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/auth'
+import { useLazyAuthGetNonceV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/auth'
 import { useCallback } from 'react'
 import { useSiwe } from '@/src/hooks/useSiwe'
 
@@ -7,21 +7,14 @@ import Logger from '@/src/utils/logger'
 import { HDNodeWallet, Wallet } from 'ethers'
 
 export function useNotificationPayload() {
-  const { data: nonceData } = useAuthGetNonceV1Query()
+  const [getNonce] = useLazyAuthGetNonceV1Query()
   const { createSiweMessage } = useSiwe()
 
   const getNotificationRegisterPayload = useCallback(
-    async ({
-      nonce,
-      signer,
-      chainId,
-    }: {
-      nonce: string | undefined
-      signer: Wallet | HDNodeWallet
-      chainId: string
-    }) => {
-      if (!nonce) {
-        Logger.error('registerForNotifications: Missing required data', { nonce })
+    async ({ signer, chainId }: { signer: Wallet | HDNodeWallet; chainId: string }) => {
+      const { data: nonceData } = await getNonce()
+      if (!nonceData) {
+        Logger.error('registerForNotifications: Failed to get nonce')
         throw new Error(ERROR_MSG)
       }
 
@@ -32,7 +25,7 @@ export function useNotificationPayload() {
       const siweMessage = createSiweMessage({
         address: signer.address,
         chainId: Number(chainId),
-        nonce,
+        nonce: nonceData.nonce,
         statement: 'Safe Wallet wants you to sign in with your Ethereum account',
       })
 
@@ -40,7 +33,7 @@ export function useNotificationPayload() {
         siweMessage,
       }
     },
-    [nonceData],
+    [getNonce],
   )
 
   return {
