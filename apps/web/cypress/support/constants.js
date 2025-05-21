@@ -44,8 +44,6 @@ export const swapWidget = 'https://swap.cow.fi/#/11155111/widget/swap/'
 export const bridgeWidget = 'https://iframe.jumper.exchange/bridge?fromChain=11155111&theme=light'
 export const safeTestAppurl = 'https://safe-apps-test-app.pages.dev/'
 export const TX_Builder_url = 'https://safe-apps.dev.5afe.dev/tx-builder/'
-//'https%3A%2F%2Fapps-portal.safe.global%2Ftx-builder'
-
 export const drainAccount_url = 'https://safe-apps.dev.5afe.dev/drain-safe/'
 export const testAppUrl = 'https://safe-test-app.com/'
 export const swapUrl = '/swap?safe='

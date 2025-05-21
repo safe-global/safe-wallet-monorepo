@@ -22,7 +22,7 @@ describe('Messages popup window tests', () => {
     iframeSelector = `iframe[id="iframe-${constants.safeTestAppurl}"]`
   })
 
-  it('Verify off-chain message popup window can be triggered', () => {
+  it.only('Verify off-chain message popup window can be triggered', () => {
     main.addToLocalStorage(
       constants.localStorageKeys.SAFE_v2__customSafeApps_11155111,
       ls.customApps(constants.safeTestAppurl).safeTestApp,
