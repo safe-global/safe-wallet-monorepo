@@ -25,6 +25,7 @@ describe('Drain Account tests', { defaultCommandTimeout: 40000 }, () => {
       fixture: 'balances.json',
     })
     cy.visit(visitUrl)
+    cy.get(iframeSelector, { timeout: 30000 }).should('be.visible')
   })
 
   it('Verify drain can be created', () => {
