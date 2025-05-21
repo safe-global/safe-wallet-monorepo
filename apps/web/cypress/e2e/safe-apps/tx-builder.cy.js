@@ -18,14 +18,6 @@ describe('Transaction Builder tests', { defaultCommandTimeout: 20000 }, () => {
     iframeSelector = `iframe[id="iframe-${encodeURIComponent(appUrl)}"]`
     const visitUrl = `/apps/open?safe=${safeAppSafes.SEP_SAFEAPP_SAFE_1}&appUrl=${encodeURIComponent(appUrl)}`
     cy.visit(visitUrl)
-    //Debuging
-    cy.get('iframe').then(($iframes) => {
-      cy.log(`Found ${$iframes.length} iframes`)
-      $iframes.each((i, iframe) => {
-        cy.log(`Iframe ${i} ID: ${iframe.id}`)
-      })
-    })
-
     cy.get(iframeSelector, { timeout: 30000 }).should('be.visible')
   })
 
