@@ -1,4 +1,4 @@
-import type { MetaTransactionData, SafeTransaction } from '@safe-global/safe-core-sdk-types'
+import type { MetaTransactionData, SafeTransaction } from '@safe-global/types-kit'
 import type { SafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import { zeroPadValue, Interface } from 'ethers'
 import { getSimulationPayload } from '@/components/tx/security/tenderly/utils'

@@ -137,6 +137,7 @@
     "@react-native-community/slider": "4.5.6",
     "@rtk-query/codegen-openapi": "^2.0.0",
     "@safe-global/test": "workspace:^",
+    "@safe-global/types-kit": "^1.0.4",
     "@storybook/addon-essentials": "^8.4.6",
     "@storybook/addon-interactions": "^8.4.6",
     "@storybook/addon-onboarding": "^8.4.6",

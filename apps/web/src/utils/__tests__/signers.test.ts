@@ -2,7 +2,7 @@ import { getAvailableSigners } from '../signers'
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import { safeInfoBuilder } from '@/tests/builders/safe'
 import { faker } from '@faker-js/faker'
-import type { SafeTransaction } from '@safe-global/safe-core-sdk-types'
+import type { SafeTransaction } from '@safe-global/types-kit'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 
 describe('getAvailableSigners', () => {

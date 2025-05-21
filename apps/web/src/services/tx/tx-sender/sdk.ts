@@ -8,7 +8,7 @@ import {
 } from '@safe-global/protocol-kit/dist/src/utils'
 import type { Eip1193Provider, JsonRpcSigner } from 'ethers'
 import { isHardwareWallet, isWalletConnect } from '@/utils/wallets'
-import { OperationType, type SafeTransaction } from '@safe-global/safe-core-sdk-types'
+import { OperationType, type SafeTransaction } from '@safe-global/types-kit'
 import { getChainConfig } from '@safe-global/safe-gateway-typescript-sdk'
 import { createWeb3, getWeb3ReadOnly } from '@/hooks/wallets/web3'
 import { toQuantity } from 'ethers'

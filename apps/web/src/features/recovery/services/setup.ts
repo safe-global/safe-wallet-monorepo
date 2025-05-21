@@ -1,9 +1,9 @@
-import { OperationType } from '@safe-global/safe-core-sdk-types'
+import { OperationType } from '@safe-global/types-kit'
 import { SENTINEL_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
 import { getModuleInstance, KnownContracts, deployAndSetUpModule } from '@gnosis.pm/zodiac'
 import { Interface } from 'ethers'
 import type { JsonRpcProvider } from 'ethers'
-import type { MetaTransactionData } from '@safe-global/safe-core-sdk-types'
+import type { MetaTransactionData } from '@safe-global/types-kit'
 
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { MAX_RECOVERER_PAGE_SIZE } from './recovery-state'

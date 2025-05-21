@@ -5,7 +5,7 @@ import * as useValidateTxData from '@/hooks/useValidateTxData'
 import { SignForm } from '../SignForm'
 import { render as renderTestUtils } from '@/tests/test-utils'
 import { createMockSafeTransaction } from '@/tests/transactions'
-import { OperationType } from '@safe-global/safe-core-sdk-types'
+import { OperationType } from '@safe-global/types-kit'
 import { fireEvent, waitFor } from '@testing-library/react'
 import { initialContext, TxFlowContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
 
