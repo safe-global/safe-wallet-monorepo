@@ -19,6 +19,7 @@ import { web3API } from './signersBalance'
 import { setBaseUrl as setSDKBaseURL } from '@safe-global/safe-gateway-typescript-sdk'
 import { createFilter } from '@safe-global/store/utils/persistTransformFilter'
 import { setupMobileCookieHandling } from './utils/cookieHandling'
+import notificationsMiddleware from './middleware/notifications'
 
 setSDKBaseURL(GATEWAY_URL)
 setBaseUrl(GATEWAY_URL)
@@ -71,7 +72,7 @@ export const makeStore = () =>
         serializableCheck: {
           ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
         },
-      }).concat(cgwClient.middleware, web3API.middleware),
+      }).concat(cgwClient.middleware, web3API.middleware, notificationsMiddleware),
     enhancers: (getDefaultEnhancers) => {
       if (isTestingEnv) {
         return getDefaultEnhancers()
