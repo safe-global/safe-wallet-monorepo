@@ -163,7 +163,7 @@ export function enterOwnerAddress(address) {
 export function postponeRecovery() {
   cy.wait(7000)
   cy.get(postponeRecoveryBtn)
-    .should(() => { })
+    .should(() => {})
     .then(($button) => {
       if (!$button.length) {
         return
