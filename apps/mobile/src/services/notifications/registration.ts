@@ -23,7 +23,17 @@ import { convertToUuid } from '@/src/utils/uuid'
 import { isAndroid } from '@/src/config/constants'
 import { getPrivateKey } from '@/src/hooks/useSign/useSign'
 
+import '@safe-global/store/gateway/AUTO_GENERATED/auth'
+
 type DelegateInfo = { owner: string; delegateAddress: string } | null
+
+// Cache to track authenticated signers and their authentication timestamps
+type AuthCacheEntry = {
+  timestamp: number
+  chainId: string
+}
+const authCache: Record<string, AuthCacheEntry> = {}
+const AUTH_CACHE_EXPIRY_MS = 60000 // 60 seconds
 
 export const getDelegateKeyId = (safe: string, delegateAddress: string): string =>
   `delegate_${safe}_${delegateAddress}`
@@ -49,7 +59,14 @@ const getNotificationRegisterPayload = async ({
   signer: Wallet | HDNodeWallet
   chainId: string
 }) => {
-  const { nonce } = await store.dispatch(cgwClient.endpoints.authGetNonceV1.initiate()).unwrap()
+  // Add a cache buster to force a fresh request
+  const cacheBuster = Date.now().toString()
+  const { nonce } = await store.dispatch(
+    cgwClient.endpoints.authGetNonceV1.initiate(
+      { cacheBuster },
+      { forceRefetch: true } // Force RTK to bypass cache
+    )
+  ).unwrap()
 
   if (!nonce) {
     throw new Error(ERROR_MSG)
@@ -71,9 +88,25 @@ const getNotificationRegisterPayload = async ({
 
 const authenticateSigner = async (signer: Wallet | HDNodeWallet | null, chainId: string) => {
   if (!signer) return
+
+  const signerAddress = signer.address
+  const cacheKey = `${signerAddress.toLowerCase()}`
+  const cachedAuth = authCache[cacheKey]
+
+  const now = Date.now()
+  if (cachedAuth &&
+    cachedAuth.chainId === chainId &&
+    now - cachedAuth.timestamp < AUTH_CACHE_EXPIRY_MS) {
+    // Use cached authentication if it's recent enough
+    Logger.info('Using cached authentication for signer', { signerAddress })
+    return
+  }
+
+  // Authenticate the signer
   const { siweMessage } = await getNotificationRegisterPayload({ signer, chainId })
   const signature = await signer.signMessage(siweMessage)
-  console.log('store', store, cgwClient)
+
+  // Add cache buster to force a fresh request
   await store
     .dispatch(
       cgwClient.endpoints.authVerifyV1.initiate({
@@ -81,6 +114,13 @@ const authenticateSigner = async (signer: Wallet | HDNodeWallet | null, chainId:
       }),
     )
     .unwrap()
+
+  // Update the cache with the new authentication timestamp
+  authCache[cacheKey] = {
+    timestamp: now,
+    chainId
+  }
+  Logger.info('Authenticated signer and updated cache', { signerAddress })
 }
 
 export const registerForNotificationsOnBackEnd = async ({
@@ -103,7 +143,6 @@ export const registerForNotificationsOnBackEnd = async ({
 
   const NOTIFICATIONS_GRANTED = isOwner ? OWNER_NOTIFICATIONS : REGULAR_NOTIFICATIONS
 
-  console.log('cgwClient', cgwClient, store)
   await store
     .dispatch(
       cgwClient.endpoints.notificationsUpsertSubscriptionsV2.initiate({

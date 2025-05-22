@@ -3,6 +3,7 @@ import { RootState } from '..'
 import { addSafe, removeSafe, selectAllSafes } from '../safesSlice'
 import { subscribeSafe, unsubscribeSafe } from '@/src/services/notifications/SubscriptionManager'
 import { selectAllChainsIds } from '../chains'
+import { addDelegate } from '../delegatesSlice'
 
 const notificationsMiddleware: Middleware<{}, RootState> = (store) => (next) => (action) => {
   const prevState = store.getState() as RootState
@@ -23,6 +24,27 @@ const notificationsMiddleware: Middleware<{}, RootState> = (store) => (next) => 
     const chainIds = selectAllChainsIds(store.getState())
     if (safeInfo) {
       unsubscribeSafe(safeInfo.SafeInfo.address.value, chainIds)
+    }
+  }
+
+  if (action.type === addDelegate.type) {
+    const { ownerAddress, delegateInfo } = action.payload
+    const notificationsEnabled = store.getState().notifications.isAppNotificationsEnabled
+
+    if (notificationsEnabled) {
+      const chainIds = selectAllChainsIds(store.getState())
+      const safes = Object.values(selectAllSafes(store.getState()))
+      safes.forEach((safe) => {
+        const safeAddress = safe.SafeInfo.address.value
+        const owners = safe.SafeInfo.owners.map((o) => o.value)
+        const isTargetSafe = delegateInfo.safe
+          ? delegateInfo.safe === safeAddress
+          : owners.includes(ownerAddress)
+
+        if (isTargetSafe) {
+          subscribeSafe(safeAddress, chainIds)
+        }
+      })
     }
   }
 
