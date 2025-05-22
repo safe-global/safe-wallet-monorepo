@@ -1,7 +1,6 @@
 import { renderHook, act } from '@/src/tests/test-utils'
 import { useDelegate } from './useDelegate'
 import { selectAllChains } from '@/src/store/chains'
-import { addDelegate } from '@/src/store/delegatesSlice'
 
 const TEST_PRIVATE_KEY = '0xdd503e13625fa99fdea1e1dfb180dd3de94ee4d16c858bb04128b46225f92f84'
 // The address corresponding to the test private key
@@ -21,10 +20,6 @@ jest.mock('ethers', () => {
       address = OWNER_ADDRESS
       privateKey = TEST_PRIVATE_KEY
 
-      constructor(privateKey: string) {
-        // Do nothing special with the constructor
-      }
-
       static createRandom() {
         return {
           address: '0xDelegateAddress123',
@@ -36,8 +31,31 @@ jest.mock('ethers', () => {
         return 'mockedSignature'
       }
     },
+    verifyMessage: () => 'mockedVerification',
   }
 })
+
+// Explicitly mock siwe to avoid the verifyMessage dependency
+jest.mock('siwe', () => ({
+  SiweMessage: class {
+    constructor(props: {
+      address: string
+      chainId: number
+      domain: string
+      statement: string
+      nonce: string
+      uri: string
+      version: string
+      issuedAt: string
+    }) {
+      Object.assign(this, props)
+    }
+
+    prepareMessage() {
+      return 'mockedSiweMessage'
+    }
+  },
+}))
 
 jest.mock('@/src/store/hooks', () => ({
   useAppDispatch: () => mockDispatch,

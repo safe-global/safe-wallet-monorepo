@@ -83,7 +83,9 @@ export const useNotificationManager = () => {
   }, [unregisterForNotifications])
 
   const toggleNotificationState = useCallback(async () => {
-    if (!activeSafe) return
+    if (!activeSafe) {
+      return
+    }
     try {
       const deviceNotificationStatus = await NotificationsService.isDeviceNotificationEnabled()
 

@@ -13,11 +13,5 @@ export const NotificationsSettingsContainer = () => {
     activeSafe ? selectSafeSubscriptionStatus(state, activeSafe.address, activeSafe.chainId) : false,
   )
 
-  return (
-    <NotificationsSettingsView
-      onChange={toggleNotificationState}
-      value={!!isSubscribed}
-      isLoading={isLoading}
-    />
-  )
+  return <NotificationsSettingsView onChange={toggleNotificationState} value={!!isSubscribed} isLoading={isLoading} />
 }

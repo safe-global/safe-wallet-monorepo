@@ -45,10 +45,12 @@ const delegatesSlice = createSlice({
       const { ownerAddress, delegateAddress } = action.payload
 
       if (state[ownerAddress] && state[ownerAddress][delegateAddress]) {
+        // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
         delete state[ownerAddress][delegateAddress]
 
         // Clean up empty owner entries
         if (Object.keys(state[ownerAddress]).length === 0) {
+          // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
           delete state[ownerAddress]
         }
       }
@@ -71,7 +73,9 @@ export const selectFirstDelegateForAnySafeOwner = (state: RootState, safeAddress
   const safeInfoItem = selectSafeInfo(state, safeAddress)
   const safeOverview = safeInfoItem?.SafeInfo
 
-  if (!safeOverview?.owners) return null
+  if (!safeOverview?.owners) {
+    return null
+  }
 
   for (const owner of safeOverview.owners) {
     const delegates = selectDelegatesByOwner(state, owner.value)

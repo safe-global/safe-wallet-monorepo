@@ -35,64 +35,67 @@ const useRegisterForNotifications = (): NotificationsProps => {
   const allChainIds = useAppSelector(selectAllChainsIds)
   console.log('allChainIds', allChainIds)
 
+  const registerForNotifications = useCallback(
+    async (updateNotificationSettings = true) => {
+      try {
+        setLoading(true)
+        setError(null)
 
-  const registerForNotifications = useCallback(async (updateNotificationSettings = true) => {
-    try {
-      setLoading(true)
-      setError(null)
+        if (!activeSafe) {
+          setLoading(false)
+          setError(ERROR_MSG)
+          return { loading, error }
+        }
 
-      if (!activeSafe) {
+        await registerSafe(activeSafe.address, allChainIds)
+
+        if (updateNotificationSettings) {
+          dispatch(toggleAppNotifications(true))
+          dispatch(updatePromptAttempts(0))
+          dispatch(updateLastTimePromptAttempted(0))
+        }
         setLoading(false)
-        setError(ERROR_MSG)
-        return { loading, error }
-      }
-
-      await registerSafe(activeSafe.address, allChainIds)
-
-      if (updateNotificationSettings) {
-        dispatch(toggleAppNotifications(true))
-        dispatch(updatePromptAttempts(0))
-        dispatch(updateLastTimePromptAttempted(0))
-      }
-      setLoading(false)
-      setError(null)
-    } catch (err) {
-      Logger.error('FCM Registration failed', err)
-      setLoading(false)
-      setError((err as Error).toString())
-    }
-    return { loading, error }
-  }, [activeSafe, dispatch])
-
-  const unregisterForNotifications = useCallback(async (updateNotificationSettings = true) => {
-    try {
-      setLoading(true)
-      setError(null)
-
-      if (!activeSafe) {
+        setError(null)
+      } catch (err) {
+        Logger.error('FCM Registration failed', err)
         setLoading(false)
-        setError(ERROR_MSG)
-        return { loading, error }
+        setError((err as Error).toString())
       }
+      return { loading, error }
+    },
+    [activeSafe, dispatch],
+  )
 
-      await unregisterSafe(activeSafe.address, allChainIds)
+  const unregisterForNotifications = useCallback(
+    async (updateNotificationSettings = true) => {
+      try {
+        setLoading(true)
+        setError(null)
 
-      if (updateNotificationSettings) {
-        dispatch(toggleAppNotifications(false))
-        dispatch(updatePromptAttempts(0))
-        dispatch(updateLastTimePromptAttempted(0))
+        if (!activeSafe) {
+          setLoading(false)
+          setError(ERROR_MSG)
+          return { loading, error }
+        }
+
+        await unregisterSafe(activeSafe.address, allChainIds)
+
+        if (updateNotificationSettings) {
+          dispatch(toggleAppNotifications(false))
+          dispatch(updatePromptAttempts(0))
+          dispatch(updateLastTimePromptAttempted(0))
+        }
+        setLoading(false)
+        setError(null)
+      } catch (err) {
+        Logger.error('FCM Unregistration failed', err)
+        setLoading(false)
+        setError((err as Error).toString())
       }
-      setLoading(false)
-      setError(null)
-    } catch (err) {
-      Logger.error('FCM Unregistration failed', err)
-      setLoading(false)
-      setError((err as Error).toString())
-    }
-    return { loading, error }
-  }, [activeSafe, dispatch])
-
-
+      return { loading, error }
+    },
+    [activeSafe, dispatch],
+  )
 
   const updatePermissionsForNotifications = useCallback(async () => {
     try {

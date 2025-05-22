@@ -35,7 +35,9 @@ export function useGTW() {
   // Helper function to authenticate a signer
   const authenticateSigner = useCallback(
     async (signer: Wallet | HDNodeWallet | null, chainId: string) => {
-      if (!signer) return
+      if (!signer) {
+        return
+      }
 
       // Generate message internally
       const { siweMessage } = await getNotificationRegisterPayload({
