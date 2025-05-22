@@ -17,13 +17,12 @@ import {
 import FCMService from './FCMService'
 import NotificationService from './NotificationService'
 import { setSafeSubscriptionStatus } from '@/src/store/safeSubscriptionsSlice'
-import { cgwClient } from '@safe-global/store/gateway/cgwClient'
+import { cgwApi as authApi } from '@safe-global/store/gateway/AUTO_GENERATED/auth'
+import { cgwApi as notificationsApi } from '@safe-global/store/gateway/AUTO_GENERATED/notifications'
 import Logger from '@/src/utils/logger'
 import { convertToUuid } from '@/src/utils/uuid'
 import { isAndroid } from '@/src/config/constants'
 import { getPrivateKey } from '@/src/hooks/useSign/useSign'
-
-import '@safe-global/store/gateway/AUTO_GENERATED/auth'
 
 type DelegateInfo = { owner: string; delegateAddress: string } | null
 
@@ -35,11 +34,12 @@ type AuthCacheEntry = {
 const authCache: Record<string, AuthCacheEntry> = {}
 const AUTH_CACHE_EXPIRY_MS = 60000 // 60 seconds
 
-export const getDelegateKeyId = (safe: string, delegateAddress: string): string =>
-  `delegate_${safe}_${delegateAddress}`
+export const getDelegateKeyId = (safe: string, delegateAddress: string): string => `delegate_${safe}_${delegateAddress}`
 
 export const getDelegateSigner = async (delegate: DelegateInfo) => {
-  if (!delegate) return { signer: null as Wallet | HDNodeWallet | null }
+  if (!delegate) {
+    return { signer: null as Wallet | HDNodeWallet | null }
+  }
   const { owner, delegateAddress } = delegate
   const delegateKeyId = getDelegateKeyId(owner, delegateAddress)
   const privateKey = await getPrivateKey(delegateKeyId, { requireAuthentication: false })
@@ -60,13 +60,13 @@ const getNotificationRegisterPayload = async ({
   chainId: string
 }) => {
   // Add a cache buster to force a fresh request
-  const cacheBuster = Date.now().toString()
-  const { nonce } = await store.dispatch(
-    cgwClient.endpoints.authGetNonceV1.initiate(
-      { cacheBuster },
-      { forceRefetch: true } // Force RTK to bypass cache
+  const { nonce } = await store
+    .dispatch(
+      authApi.endpoints.authGetNonceV1.initiate(undefined, {
+        forceRefetch: true,
+      }),
     )
-  ).unwrap()
+    .unwrap()
 
   if (!nonce) {
     throw new Error(ERROR_MSG)
@@ -87,16 +87,16 @@ const getNotificationRegisterPayload = async ({
 }
 
 const authenticateSigner = async (signer: Wallet | HDNodeWallet | null, chainId: string) => {
-  if (!signer) return
+  if (!signer) {
+    return
+  }
 
   const signerAddress = signer.address
   const cacheKey = `${signerAddress.toLowerCase()}`
   const cachedAuth = authCache[cacheKey]
 
   const now = Date.now()
-  if (cachedAuth &&
-    cachedAuth.chainId === chainId &&
-    now - cachedAuth.timestamp < AUTH_CACHE_EXPIRY_MS) {
+  if (cachedAuth && cachedAuth.chainId === chainId && now - cachedAuth.timestamp < AUTH_CACHE_EXPIRY_MS) {
     // Use cached authentication if it's recent enough
     Logger.info('Using cached authentication for signer', { signerAddress })
     return
@@ -109,7 +109,7 @@ const authenticateSigner = async (signer: Wallet | HDNodeWallet | null, chainId:
   // Add cache buster to force a fresh request
   await store
     .dispatch(
-      cgwClient.endpoints.authVerifyV1.initiate({
+      authApi.endpoints.authVerifyV1.initiate({
         siweDto: { message: siweMessage, signature },
       }),
     )
@@ -118,7 +118,7 @@ const authenticateSigner = async (signer: Wallet | HDNodeWallet | null, chainId:
   // Update the cache with the new authentication timestamp
   authCache[cacheKey] = {
     timestamp: now,
-    chainId
+    chainId,
   }
   Logger.info('Authenticated signer and updated cache', { signerAddress })
 }
@@ -145,7 +145,7 @@ export const registerForNotificationsOnBackEnd = async ({
 
   await store
     .dispatch(
-      cgwClient.endpoints.notificationsUpsertSubscriptionsV2.initiate({
+      notificationsApi.endpoints.notificationsUpsertSubscriptionsV2.initiate({
         upsertSubscriptionsDto: {
           cloudMessagingToken: fcmToken,
           safes: chainIds.map((chainId) => ({
@@ -176,7 +176,7 @@ export const unregisterForNotificationsOnBackEnd = async ({
   for (const chainId of chainIds) {
     await store
       .dispatch(
-        cgwClient.endpoints.notificationsDeleteSubscriptionV2.initiate({
+        notificationsApi.endpoints.notificationsDeleteSubscriptionV2.initiate({
           deviceUuid,
           chainId,
           safeAddress,
@@ -224,9 +224,7 @@ export async function registerSafe(address: string, chainIds: string[]): Promise
     })
 
     chainIds.forEach((chainId) =>
-      store.dispatch(
-        setSafeSubscriptionStatus({ safeAddress: address, chainId, subscribed: true }),
-      ),
+      store.dispatch(setSafeSubscriptionStatus({ safeAddress: address, chainId, subscribed: true })),
     )
   } catch (err) {
     Logger.error('registerSafe failed', err)
@@ -243,9 +241,7 @@ export async function unregisterSafe(address: string, chainIds: string[]): Promi
     await unregisterForNotificationsOnBackEnd({ signer, safeAddress: address, chainIds })
 
     chainIds.forEach((chainId) =>
-      store.dispatch(
-        setSafeSubscriptionStatus({ safeAddress: address, chainId, subscribed: false }),
-      ),
+      store.dispatch(setSafeSubscriptionStatus({ safeAddress: address, chainId, subscribed: false })),
     )
   } catch (err) {
     Logger.error('unregisterSafe failed', err)

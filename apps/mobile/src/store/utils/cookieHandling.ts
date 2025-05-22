@@ -81,7 +81,7 @@ export const setupMobileCookieHandling = () => {
   cookies = {}
 
   // Set up the custom header hook
-  setPrepareHeadersHook((headers, url, endpoint) => {
+  setPrepareHeadersHook((headers, url) => {
     return prepareCookieHeaders(headers, url, cookies)
   })
 

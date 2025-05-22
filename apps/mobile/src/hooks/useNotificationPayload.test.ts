@@ -3,44 +3,41 @@ import { useNotificationPayload } from './useNotificationPayload'
 import { useSiwe } from '@/src/hooks/useSiwe'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { Wallet } from 'ethers'
+import { RootState } from '@/src/store'
 
+// Keep these mocks as they're not part of the store
 jest.mock('@/src/hooks/useSiwe')
 jest.mock('@/src/store/hooks/activeSafe')
-jest.mock('@/src/store/hooks', () => ({
-  useAppSelector: (selector: (state: unknown) => unknown) => {
-    if (selector.name === 'selectSafeInfo') {
-      return {
-        '1': {
-          owners: [{ value: 'owner1' }],
-          address: { value: '0x1' },
-          chainId: '1',
-          threshold: 1,
-          fiatTotal: '0',
-          queued: 0,
-        },
-      }
-    }
-    return {}
-  },
-}))
-jest.mock('@/src/store/safesSlice', () => ({
-  selectSafeInfo: jest.fn().mockReturnValue({ SafeInfo: { owners: [{ value: 'owner1' }] } }),
-  initialState: {},
-}))
 jest.mock('@/src/utils/logger')
-
-const mockDispatch = jest.fn()
-const mockUseAppSelector = jest.fn()
-
-jest.mock('@/src/store/hooks', () => ({
-  useAppDispatch: () => mockDispatch,
-  useAppSelector: (selector: unknown) => mockUseAppSelector(selector),
-}))
 
 describe('useNotificationPayload', () => {
   const mockCreateSiweMessage = jest.fn()
   const mockUseSiwe = useSiwe as jest.Mock
   const mockUseDefinedActiveSafe = useDefinedActiveSafe as jest.Mock
+
+  // Create a proper initial store state for testing
+  const initialStoreState: Partial<RootState> = {
+    notifications: {
+      isAppNotificationsEnabled: true,
+      isDeviceNotificationsEnabled: false,
+      fcmToken: null,
+      remoteMessages: [],
+      promptAttempts: 0,
+      lastTimePromptAttempted: null,
+    },
+    settings: {
+      themePreference: 'light',
+      onboardingVersionSeen: '1.0.0',
+      env: {
+        rpc: {},
+        tenderly: {
+          url: '',
+          accessToken: '',
+        },
+      },
+    },
+    safes: {},
+  }
 
   beforeEach(() => {
     mockUseSiwe.mockReturnValue({ createSiweMessage: mockCreateSiweMessage })
@@ -52,7 +49,7 @@ describe('useNotificationPayload', () => {
   })
 
   it('throws an error if signer is missing', async () => {
-    const { result } = renderHook(() => useNotificationPayload())
+    const { result } = renderHook(() => useNotificationPayload(), initialStoreState)
 
     await act(async () => {
       await expect(
@@ -68,7 +65,7 @@ describe('useNotificationPayload', () => {
     const mockSigner = Wallet.createRandom()
     mockCreateSiweMessage.mockReturnValue('mockSiweMessage')
 
-    const { result } = renderHook(() => useNotificationPayload())
+    const { result } = renderHook(() => useNotificationPayload(), initialStoreState)
     let payload
     await act(async () => {
       payload = await result.current.getNotificationRegisterPayload({

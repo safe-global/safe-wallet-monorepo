@@ -7,9 +7,7 @@
       "@safe-global/store/*": ["../../packages/store/src/*"],
       "@safe-global/utils/*": ["../../packages/utils/src/*"],
       "@safe-global/test/*": ["../../config/test/*"],
-      "@cowprotocol/app-data": [
-        "../../node_modules/@cowprotocol/app-data/dist/index.d.ts",
-      ]
+      "@cowprotocol/app-data": ["../../node_modules/@cowprotocol/app-data/dist/index.d.ts"]
     },
     "types": ["jest", "node"]
   },

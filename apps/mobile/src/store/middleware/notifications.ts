@@ -1,17 +1,18 @@
-import { Middleware } from '@reduxjs/toolkit'
-import { RootState } from '..'
+import type { Middleware, AnyAction } from '@reduxjs/toolkit'
+import type { RootState } from '..'
 import { addSafe, removeSafe, selectAllSafes } from '../safesSlice'
 import { subscribeSafe, unsubscribeSafe } from '@/src/services/notifications/SubscriptionManager'
 import { selectAllChainsIds } from '../chains'
 import { addDelegate } from '../delegatesSlice'
 
-const notificationsMiddleware: Middleware<{}, RootState> = (store) => (next) => (action) => {
+const notificationsMiddleware: Middleware = (store) => (next) => (action) => {
+  const typedAction = action as AnyAction
   const prevState = store.getState() as RootState
 
-  const result = next(action)
+  const result = next(typedAction)
 
-  if (action.type === addSafe.type) {
-    const { SafeInfo } = action.payload
+  if (typedAction.type === addSafe.type) {
+    const { SafeInfo } = typedAction.payload
     const notificationsEnabled = store.getState().notifications.isAppNotificationsEnabled
     if (notificationsEnabled) {
       const chainIds = selectAllChainsIds(store.getState())
@@ -19,16 +20,16 @@ const notificationsMiddleware: Middleware<{}, RootState> = (store) => (next) => 
     }
   }
 
-  if (action.type === removeSafe.type) {
-    const safeInfo = prevState.safes[action.payload]
+  if (typedAction.type === removeSafe.type) {
+    const safeInfo = prevState.safes[typedAction.payload]
     const chainIds = selectAllChainsIds(store.getState())
     if (safeInfo) {
       unsubscribeSafe(safeInfo.SafeInfo.address.value, chainIds)
     }
   }
 
-  if (action.type === addDelegate.type) {
-    const { ownerAddress, delegateInfo } = action.payload
+  if (typedAction.type === addDelegate.type) {
+    const { ownerAddress, delegateInfo } = typedAction.payload
     const notificationsEnabled = store.getState().notifications.isAppNotificationsEnabled
 
     if (notificationsEnabled) {
@@ -37,9 +38,7 @@ const notificationsMiddleware: Middleware<{}, RootState> = (store) => (next) => 
       safes.forEach((safe) => {
         const safeAddress = safe.SafeInfo.address.value
         const owners = safe.SafeInfo.owners.map((o) => o.value)
-        const isTargetSafe = delegateInfo.safe
-          ? delegateInfo.safe === safeAddress
-          : owners.includes(ownerAddress)
+        const isTargetSafe = delegateInfo.safe ? delegateInfo.safe === safeAddress : owners.includes(ownerAddress)
 
         if (isTargetSafe) {
           subscribeSafe(safeAddress, chainIds)
@@ -48,10 +47,10 @@ const notificationsMiddleware: Middleware<{}, RootState> = (store) => (next) => 
     }
   }
 
-  const prevSetting = prevState.settings as any
-  const nextSetting = store.getState().settings as any
-  if (prevSetting?.notificationsEnabled !== nextSetting?.notificationsEnabled) {
-    const enabled = nextSetting?.notificationsEnabled
+  const prevEnabled = prevState.notifications.isAppNotificationsEnabled
+  const nextEnabled = store.getState().notifications.isAppNotificationsEnabled
+  if (prevEnabled !== nextEnabled) {
+    const enabled = nextEnabled
     const safes = Object.values(selectAllSafes(store.getState()))
     const chainIds = selectAllChainsIds(store.getState())
     safes.forEach((safe) => {
