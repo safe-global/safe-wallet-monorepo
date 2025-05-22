@@ -17,7 +17,7 @@ enum Field {
 type FormData = Pick<NftTransferParams, Field.recipient>
 
 const NftItem = ({ image, name, description }: { image: string; name: string; description?: string }) => (
-  <Stack direction="row" spacing={1} flexWrap="nowrap" alignItems="flex-start">
+  <Stack direction="row" spacing={2} flexWrap="nowrap" alignItems="flex-start">
     <Box flex={0}>
       <ImageFallback
         src={image}
