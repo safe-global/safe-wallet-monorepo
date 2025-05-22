@@ -124,9 +124,7 @@ export const QrCamera = ({
   const { height } = useWindowDimensions()
   const codeScanner = useCodeScanner({
     codeTypes: ['qr'],
-    onCodeScanned: (codes) => {
-      onScan(codes)
-    },
+    onCodeScanned: onScan,
   })
 
   const openSettings = useCallback(async () => {
@@ -135,10 +133,10 @@ export const QrCamera = ({
 
   // Effect to automatically activate camera once permission is granted
   useEffect(() => {
-    if (permission === 'granted' && hasPermission && !isCameraActive) {
+    if (permission === 'granted' && hasPermission) {
       onActivateCamera()
     }
-  }, [permission, hasPermission, isCameraActive, onActivateCamera])
+  }, [permission, hasPermission, onActivateCamera])
 
   const denied = permission === 'denied'
 
