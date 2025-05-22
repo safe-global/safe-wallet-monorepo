@@ -40,7 +40,7 @@ describe('tokens', () => {
           }) as any,
       )
 
-      const result = await getERC20TokenInfoOnChain('0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984')
+      const result = (await getERC20TokenInfoOnChain('0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984'))?.[0]
 
       expect(result?.symbol).toEqual('UNI')
       expect(result?.decimals).toEqual(18)
@@ -68,7 +68,7 @@ describe('tokens', () => {
           }) as any,
       )
 
-      const result = await getERC20TokenInfoOnChain('0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984')
+      const result = (await getERC20TokenInfoOnChain('0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984'))?.[0]
 
       expect(result?.symbol).toEqual('MKR')
       expect(result?.decimals).toEqual(18)

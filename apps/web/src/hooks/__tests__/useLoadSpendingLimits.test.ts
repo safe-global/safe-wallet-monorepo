@@ -3,14 +3,11 @@ import { JsonRpcProvider } from 'ethers'
 import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
 import type { AllowanceModule } from '@safe-global/utils/types/contracts'
 import { ERC20__factory } from '@safe-global/utils/types/contracts'
-import {
-  getSpendingLimits,
-  getTokenAllowanceForDelegate,
-  getTokensForDelegate,
-} from '../loadables/useLoadSpendingLimits'
+import { getSpendingLimits, getTokenAllowances, getTokensForDelegates } from '../loadables/useLoadSpendingLimits'
 import * as web3 from '../wallets/web3'
 import { keccak256, toUtf8Bytes } from 'ethers'
 import { TokenType } from '@safe-global/safe-gateway-typescript-sdk'
+import { mockWeb3Provider } from '@/tests/test-utils'
 
 const mockProvider = new JsonRpcProvider()
 const mockModule = {
@@ -102,12 +99,14 @@ describe('getSpendingLimits', () => {
   })
 })
 
-describe('getTokensForDelegate', () => {
+describe('getTokensForDelegates', () => {
   it('should fetch tokens for a given delegate', async () => {
     const getTokensMock = jest.fn(() => [])
     const mockContract = { getTokens: getTokensMock } as unknown as AllowanceModule
 
-    await getTokensForDelegate(mockContract, ZERO_ADDRESS, '0x1', [])
+    const mockProvider = mockWeb3Provider([])
+
+    await getTokensForDelegates(mockContract, mockProvider, ZERO_ADDRESS, ['0x1'], [])
 
     expect(getTokensMock).toHaveBeenCalledWith(ZERO_ADDRESS, '0x1')
   })
@@ -118,7 +117,11 @@ describe('getTokenAllowanceForDelegate', () => {
     const getTokenAllowanceMock = jest.fn(() => [BigInt(0), BigInt(0), BigInt(0), BigInt(0), BigInt(0)])
     const mockContract = { getTokenAllowance: getTokenAllowanceMock } as unknown as AllowanceModule
 
-    const result = await getTokenAllowanceForDelegate(mockContract, ZERO_ADDRESS, '0x1', '0x10', [])
+    const mockProvider = mockWeb3Provider([])
+
+    const result = (
+      await getTokenAllowances(mockContract, mockProvider, ZERO_ADDRESS, [{ delegate: '0x1', token: '0x10' }], [])
+    )[0]
 
     expect(result.beneficiary).toBe('0x1')
     expect(result.nonce).toBe('0')
@@ -143,13 +146,15 @@ describe('getTokenAllowanceForDelegate', () => {
       },
     ]
 
-    const result = await getTokenAllowanceForDelegate(
-      mockContract,
-      ZERO_ADDRESS,
-      '0x1',
-      '0x10',
-      mockTokenInfoFromBalances,
-    )
+    const result = (
+      await getTokenAllowances(
+        mockContract,
+        mockProvider,
+        ZERO_ADDRESS,
+        [{ delegate: '0x1', token: '0x10' }],
+        mockTokenInfoFromBalances,
+      )
+    )[0]
 
     expect(result.token.address).toBe('0x10')
     expect(result.token.decimals).toBe(10)
@@ -183,7 +188,11 @@ describe('getTokenAllowanceForDelegate', () => {
 
     const mockContract = { getTokenAllowance: getTokenAllowanceMock } as unknown as AllowanceModule
 
-    const result = await getTokenAllowanceForDelegate(mockContract, ZERO_ADDRESS, '0x1', '0x10', [])
+    const mockProvider = mockWeb3Provider([])
+
+    const result = (
+      await getTokenAllowances(mockContract, mockProvider, ZERO_ADDRESS, [{ delegate: '0x1', token: '0x10' }], [])
+    )[0]
 
     expect(result.token.address).toBe('0x10')
     expect(result.token.decimals).toBe(10)

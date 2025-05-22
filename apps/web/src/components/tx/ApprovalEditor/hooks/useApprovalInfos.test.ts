@@ -580,7 +580,7 @@ describe('useApprovalInfos', () => {
     }
     const fetchMock = jest
       .spyOn(getTokenInfo, 'getERC20TokenInfoOnChain')
-      .mockReturnValue(Promise.resolve(mockTokenInfo))
+      .mockReturnValue(Promise.resolve([mockTokenInfo]))
     const testInterface = new Interface(['function approve(address, uint256)'])
 
     const mockSafeTx = createMockSafeTransaction({
