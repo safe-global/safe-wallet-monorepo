@@ -11,10 +11,12 @@ import { maybePlural } from '@safe-global/utils/utils/formatters'
 
 export function OwnerList({
   title,
+  icon,
   owners,
   sx,
 }: {
   owners: Array<AddressEx>
+  icon?: React.ElementType
   title?: string
   sx?: PaperProps['sx']
 }): ReactElement {
@@ -25,10 +27,11 @@ export function OwnerList({
           color: 'text.secondary',
           display: 'flex',
           alignItems: 'center',
+          fontSize: 'inherit',
         }}
       >
-        <SvgIcon component={PlusIcon} inheritViewBox fontSize="small" sx={{ mr: 1 }} />
-        {title ?? `New signer${maybePlural(owners)}`}
+        <SvgIcon component={icon ?? PlusIcon} inheritViewBox fontSize="small" sx={{ mr: 1 }} />
+        {title ?? `Add owner${maybePlural(owners)}`}
       </Typography>
       {owners.map((newOwner) => (
         <EthHashInfo

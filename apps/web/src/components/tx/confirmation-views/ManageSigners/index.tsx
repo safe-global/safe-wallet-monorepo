@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import type { ReactElement } from 'react'
 
+import MinusIcon from '@/public/images/common/minus.svg'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { Stack, Box } from '@mui/material'
@@ -9,6 +10,7 @@ import FieldsGrid from '../../FieldsGrid'
 import { getNewSafeSetup } from './get-new-safe-setup'
 import type { TransactionInfo, TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
 import { ChangeSignerSetupWarning } from '@/features/multichain/components/SignerSetupWarning/ChangeSignerSetupWarning'
+import { OwnerList } from '@/components/tx-flow/common/OwnerList'
 
 export function ManageSigners({
   txInfo,
@@ -30,10 +32,45 @@ export function ManageSigners({
     <Stack display="flex" flexDirection="column" gap={3} sx={{ '& .MuiGrid-container': { alignItems: 'flex-start' } }}>
       <ChangeSignerSetupWarning />
 
+      <Actions newOwners={newOwners} />
+
       <Signers owners={newOwners} />
 
       <Threshold owners={newOwners} threshold={newThreshold} />
     </Stack>
+  )
+}
+
+function Actions({ newOwners }: { newOwners: Array<string> }): ReactElement | null {
+  const { safe } = useSafeInfo()
+
+  const addedOwners = newOwners
+    .filter((owner) => safe.owners.every(({ value }) => value !== owner))
+    .map((addedOwner) => ({ value: addedOwner }))
+  const removedOwners = safe.owners
+    .filter((owner) => !newOwners.includes(owner.value))
+    .map((removedOwner) => ({
+      value: removedOwner.value,
+      name: removedOwner.name ?? undefined,
+    }))
+
+  if (addedOwners.length === 0 && removedOwners.length === 0) {
+    return null
+  }
+
+  return (
+    <FieldsGrid title="Actions">
+      {removedOwners.length > 0 && (
+        <OwnerList
+          owners={removedOwners}
+          title={`Remove owner${maybePlural(removedOwners)}`}
+          icon={MinusIcon}
+          sx={{ backgroundColor: ({ palette }) => `${palette.warning.background} !important` }}
+        />
+      )}
+
+      {addedOwners.length > 0 && <OwnerList owners={addedOwners} />}
+    </FieldsGrid>
   )
 }
 
