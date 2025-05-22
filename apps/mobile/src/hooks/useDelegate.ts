@@ -70,50 +70,55 @@ export const useDelegate = (): UseDelegateProps => {
           return { success: false, error: errorMsg }
         }
 
-        // Fire-and-forget registration for each chain
-        ;(async () => {
-          for (const chain of allChains) {
-            try {
-              // Generate typed data for this chain
-              const typedData = getDelegateTypedData(chain.chainId, delegateWallet.address)
-
-              // Sign the message with the owner's wallet
-              const signature = await ownerWallet.signTypedData(typedData.domain, typedData.types, typedData.message)
-
-              // Register delegate on the backend
-              await registerDelegate({
-                chainId: chain.chainId,
-                createDelegateDto: {
-                  safe,
-                  delegate: delegateWallet.address,
-                  delegator: ownerAddress,
-                  signature,
-                  label: 'Mobile App Delegate',
-                },
-              })
-
-              // Add to redux store immediately
-              dispatch(
-                addDelegate({
-                  ownerAddress,
-                  delegateAddress: delegateWallet.address,
-                  delegateInfo: {
-                    safe,
-                    delegate: delegateWallet.address,
-                    delegator: ownerAddress,
-                    label: 'Mobile App Delegate',
-                  },
-                }),
-              )
-
-              // Add a delay to avoid 429 rate limiting
-              await new Promise((resolve) => setTimeout(resolve, 300))
-            } catch (error) {
-              Logger.error(`Failed to register delegate for chain ${chain.chainId}`, error)
-              // We continue with other chains even if one fails
+        // Register on all chains and wait for completion
+        const registrationPromises = allChains.map(async (chain, index) => {
+          try {
+            // Add a delay to avoid 429 rate limiting, staggered by index
+            if (index > 0) {
+              await new Promise((resolve) => setTimeout(resolve, 300 * index))
             }
+
+            // Generate typed data for this chain
+            const typedData = getDelegateTypedData(chain.chainId, delegateWallet.address)
+
+            // Sign the message with the owner's wallet
+            const signature = await ownerWallet.signTypedData(typedData.domain, typedData.types, typedData.message)
+
+            // Register delegate on the backend
+            await registerDelegate({
+              chainId: chain.chainId,
+              createDelegateDto: {
+                safe,
+                delegate: delegateWallet.address,
+                delegator: ownerAddress,
+                signature,
+                label: 'Mobile App Delegate',
+              },
+            })
+
+            return true
+          } catch (error) {
+            Logger.error(`Failed to register delegate for chain ${chain.chainId}`, error)
+            return false
           }
-        })()
+        })
+
+        // Wait for all registrations to complete
+        Promise.all(registrationPromises)
+
+        // Add to redux store once after all chains are processed
+        dispatch(
+          addDelegate({
+            ownerAddress,
+            delegateAddress: delegateWallet.address,
+            delegateInfo: {
+              safe,
+              delegate: delegateWallet.address,
+              delegator: ownerAddress,
+              label: 'Mobile App Delegate',
+            },
+          }),
+        )
 
         setIsLoading(false)
         return { success: true, delegateAddress: delegateWallet.address }
