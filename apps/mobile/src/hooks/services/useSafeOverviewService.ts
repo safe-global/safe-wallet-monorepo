@@ -5,19 +5,24 @@ import { useMemo } from 'react'
 import { makeSafeId } from '@/src/utils/formatters'
 import { useSafesGetOverviewForManyQuery } from '@safe-global/store/gateway/safes'
 
-export const useSafeOverviewService = (safeAddress: string) => {
+export const useSafeOverviewService = (safeAddress?: string) => {
   const chainIds = useAppSelector(selectAllChainsIds)
   const safes = useMemo(
-    () => chainIds.map((chainId: string) => makeSafeId(chainId, safeAddress)),
+    () => (safeAddress ? chainIds.map((chainId: string) => makeSafeId(chainId, safeAddress)) : []),
     [chainIds, safeAddress],
   )
 
-  const { data } = useSafesGetOverviewForManyQuery<SafeOverviewResult>({
-    safes,
-    currency: 'usd',
-    trusted: true,
-    excludeSpam: true,
-  })
+  const { data } = useSafesGetOverviewForManyQuery<SafeOverviewResult>(
+    {
+      safes,
+      currency: 'usd',
+      trusted: true,
+      excludeSpam: true,
+    },
+    {
+      skip: !safeAddress,
+    },
+  )
 
   return data
 }

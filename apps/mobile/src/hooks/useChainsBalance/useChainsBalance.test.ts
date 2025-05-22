@@ -1,5 +1,5 @@
 import { renderHook, waitFor } from '@/src/tests/test-utils'
-import { useMyAccounts } from './useMyAccounts'
+import { useChainsBalance } from './index'
 import { server } from '@/src/tests/server'
 import { http, HttpResponse } from 'msw'
 import { GATEWAY_URL } from '@/src/config/constants'
@@ -37,7 +37,7 @@ jest.mock('@/src/store/hooks', () => ({
   },
 }))
 
-describe('useMyAccountsService', () => {
+describe('useChainsBalance', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     server.use(
@@ -64,7 +64,7 @@ describe('useMyAccountsService', () => {
   })
 
   it('should fetch safe overview and update store', async () => {
-    renderHook(() => useMyAccounts(mockSafeItem))
+    renderHook(() => useChainsBalance(mockSafeItem.SafeInfo.address.value))
 
     // Wait for dispatch to be called
     await waitFor(() => {
@@ -94,7 +94,7 @@ describe('useMyAccountsService', () => {
       }),
     )
 
-    renderHook(() => useMyAccounts(mockSafeItem))
+    renderHook(() => useChainsBalance(mockSafeItem.SafeInfo.address.value))
 
     await waitFor(() => {
       expect(mockDispatch).not.toHaveBeenCalled()
@@ -108,7 +108,7 @@ describe('useMyAccountsService', () => {
       }),
     )
 
-    renderHook(() => useMyAccounts(mockSafeItem))
+    renderHook(() => useChainsBalance(mockSafeItem.SafeInfo.address.value))
 
     await waitFor(() => {
       expect(mockDispatch).not.toHaveBeenCalled()
