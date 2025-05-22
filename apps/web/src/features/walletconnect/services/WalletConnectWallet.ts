@@ -8,8 +8,8 @@ import uniq from 'lodash/uniq'
 
 import { IS_PRODUCTION, LS_NAMESPACE, WC_PROJECT_ID } from '@/config/constants'
 import { EIP155, SAFE_COMPATIBLE_EVENTS, SAFE_COMPATIBLE_METHODS, SAFE_WALLET_METADATA } from '../constants'
-import { invariant } from '@/utils/helpers'
 import { getEip155ChainId, stripEip155Prefix } from './utils'
+import { invariant } from '@safe-global/utils/utils/helpers'
 
 const SESSION_ADD_EVENT = 'session_add' as WalletKitTypes.Event // Workaround: WalletConnect doesn't emit session_add event
 const SESSION_REJECT_EVENT = 'session_reject' as WalletKitTypes.Event // Workaround: WalletConnect doesn't emit session_reject event

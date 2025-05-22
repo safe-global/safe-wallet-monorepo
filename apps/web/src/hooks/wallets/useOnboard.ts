@@ -4,15 +4,16 @@ import { type ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import type { Eip1193Provider } from 'ethers'
 import { getAddress } from 'ethers'
 import useChains, { useCurrentChain } from '@/hooks/useChains'
-import ExternalStore from '@/services/ExternalStore'
+import ExternalStore from '@safe-global/utils/services/ExternalStore'
 import { logError, Errors } from '@/services/exceptions'
 import { trackEvent, WALLET_EVENTS } from '@/services/analytics'
 import { useAppSelector, useAppDispatch } from '@/store'
-import { type EnvState, selectRpc } from '@/store/settingsSlice'
+import { selectRpc } from '@/store/settingsSlice'
 import { formatAmount } from '@safe-global/utils/utils/formatNumber'
 import { localItem } from '@/services/local-storage/local'
 import { isWalletConnect, isWalletUnlocked } from '@/utils/wallets'
 import { setUnauthenticated } from '@/store/authSlice'
+import type { EnvState } from '@safe-global/store/settingsSlice'
 
 export type ConnectedWallet = {
   label: string
@@ -118,7 +119,7 @@ export const connectWallet = async (
   try {
     wallets = await onboard.connectWallet(options)
   } catch (e) {
-    logError(Errors._302, e)
+    logError(Errors._107, e)
     isConnecting = false
 
     return

@@ -1,6 +1,6 @@
 import React from 'react'
 
-import '@testing-library/react-native/extend-expect'
+import '@testing-library/react-native'
 import mockRNDeviceInfo from 'react-native-device-info/jest/react-native-device-info-mock'
 import mockSafeAreaContext from 'react-native-safe-area-context/jest/mock'
 

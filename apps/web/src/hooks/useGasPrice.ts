@@ -8,13 +8,13 @@ import type {
   GasPriceOracle,
 } from '@safe-global/safe-gateway-typescript-sdk'
 import { GAS_PRICE_TYPE } from '@safe-global/safe-gateway-typescript-sdk'
-import useAsync, { type AsyncResult } from '@/hooks/useAsync'
+import useAsync, { type AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { useCurrentChain } from './useChains'
 import useIntervalCounter from './useIntervalCounter'
 import { useWeb3ReadOnly } from '../hooks/wallets/web3'
 import { Errors, logError } from '@/services/exceptions'
-import { FEATURES, hasFeature } from '@/utils/chains'
-import { asError } from '@/services/exceptions/utils'
+import { asError } from '@safe-global/utils/services/exceptions/utils'
+import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 
 type EstimatedGasPrice =
   | {

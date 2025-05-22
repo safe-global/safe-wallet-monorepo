@@ -1,18 +1,15 @@
-import { type ReactElement, useContext, useEffect, useMemo } from 'react'
+import { useContext, useEffect } from 'react'
 import { type TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
 import { createMultiSendCallOnlyTx } from '@/services/tx/tx-sender'
 import { SafeTxContext } from '../../SafeTxProvider'
 import type { MetaTransactionData } from '@safe-global/safe-core-sdk-types'
 import { OperationType } from '@safe-global/safe-core-sdk-types'
-import TxLayout from '../../common/TxLayout'
-import type { TxStep } from '../../common/TxLayout'
 import BatchIcon from '@/public/images/common/batch.svg'
 import { useDraftBatch } from '@/hooks/useDraftBatch'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
-import { ConfirmTxDetails } from '@/components/tx/ConfirmTxDetails'
-import useTxStepper from '../../useTxStepper'
-import ReviewTransaction from '@/components/tx/ReviewTransaction'
+import ReviewTransaction, { type ReviewTransactionProps } from '@/components/tx/ReviewTransactionV2'
 import { TxFlowType } from '@/services/analytics'
+import { TxFlow } from '../../TxFlow'
 
 type ConfirmBatchProps = {
   onSubmit: () => void
@@ -27,7 +24,7 @@ const getData = (txDetails: TransactionDetails): MetaTransactionData => {
   }
 }
 
-const ConfirmBatch = ({ onSubmit }: ConfirmBatchProps): ReactElement => {
+const ConfirmBatch = (props: ReviewTransactionProps) => {
   const { setSafeTx, setSafeTxError } = useContext(SafeTxContext)
   const batchTxs = useDraftBatch()
 
@@ -36,38 +33,21 @@ const ConfirmBatch = ({ onSubmit }: ConfirmBatchProps): ReactElement => {
     createMultiSendCallOnlyTx(calls).then(setSafeTx).catch(setSafeTxError)
   }, [batchTxs, setSafeTx, setSafeTxError])
 
-  return <ReviewTransaction onSubmit={onSubmit} isBatch />
+  return <ReviewTransaction {...props} title="Confirm batch" />
 }
 
-const ConfirmBatchFlow = (props: ConfirmBatchProps) => {
+const ConfirmBatchFlow = ({ onSubmit }: ConfirmBatchProps) => {
   const { length } = useDraftBatch()
-  const { step, nextStep, prevStep } = useTxStepper(undefined, TxFlowType.CONFIRM_BATCH)
-
-  const steps = useMemo<TxStep[]>(
-    () => [
-      {
-        txLayoutProps: { title: 'Confirm batch' },
-        content: <ConfirmBatch key={0} onSubmit={() => nextStep(undefined)} />,
-      },
-      {
-        txLayoutProps: { title: 'Confirm transaction details', fixedNonce: true },
-        content: <ConfirmTxDetails key={1} {...props} />,
-      },
-    ],
-    [nextStep, props],
-  )
 
   return (
-    <TxLayout
-      subtitle={`This batch contains ${length} transaction${maybePlural(length)}`}
+    <TxFlow
       icon={BatchIcon}
-      step={step}
-      onBack={prevStep}
+      subtitle={`This batch contains ${length} transaction${maybePlural(length)}`}
+      eventCategory={TxFlowType.CONFIRM_BATCH}
+      ReviewTransactionComponent={ConfirmBatch}
+      onSubmit={onSubmit}
       isBatch
-      {...(steps?.[step]?.txLayoutProps || {})}
-    >
-      {steps.map(({ content }) => content)}
-    </TxLayout>
+    />
   )
 }
 

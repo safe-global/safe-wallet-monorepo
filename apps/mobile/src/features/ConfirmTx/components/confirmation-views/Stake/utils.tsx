@@ -41,8 +41,8 @@ export const formatStakingItems = () => {
         <View flexDirection="row" alignItems="center" gap="$2">
           <Logo logoUri={MOCKED_LOGO} size="$6" />
           <Text fontSize="$4">{ellipsis(' Kiln Vault (Aave V3 USDC)', 10)}</Text>
-          <SafeFontIcon name="copy" size={14} color="textSecondaryLight" />
-          <SafeFontIcon name="external-link" size={14} color="textSecondaryLight" />
+          <SafeFontIcon name="copy" size={14} color="$textSecondaryLight" />
+          <SafeFontIcon name="external-link" size={14} color="$textSecondaryLight" />
         </View>
       ),
     },

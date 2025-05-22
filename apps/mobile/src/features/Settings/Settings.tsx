@@ -1,9 +1,9 @@
 import React from 'react'
 import { H2, ScrollView, Text, Theme, View, XStack, YStack } from 'tamagui'
-import { SafeFontIcon as Icon } from '@/src/components/SafeFontIcon/SafeFontIcon'
+import { SafeFontIcon } from '@/src/components/SafeFontIcon/SafeFontIcon'
 import { SafeListItem } from '@/src/components/SafeListItem'
 import { Skeleton } from 'moti/skeleton'
-import { Pressable } from 'react-native'
+import { Pressable, useColorScheme } from 'react-native'
 import { EthAddress } from '@/src/components/EthAddress'
 import { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { Address } from '@/src/types/address'
@@ -19,11 +19,21 @@ interface SettingsProps {
   displayDevMenu: boolean
   onImplementationTap: () => void
   contact: Contact | null
+  isLatestVersion: boolean
+  latestSafeVersion: string
 }
 
-export const Settings = ({ address, data, onImplementationTap, displayDevMenu, contact }: SettingsProps) => {
+export const Settings = ({
+  address,
+  data,
+  onImplementationTap,
+  displayDevMenu,
+  contact,
+  isLatestVersion,
+  latestSafeVersion,
+}: SettingsProps) => {
   const { owners = [], threshold, implementation } = data
-
+  const colorScheme = useColorScheme()
   return (
     <>
       <Theme name={'settings'}>
@@ -37,7 +47,7 @@ export const Settings = ({ address, data, onImplementationTap, displayDevMenu, c
             marginTop: -15,
           }}
         >
-          <YStack flex={1} padding="$4" paddingTop={'$10'}>
+          <YStack flex={1} padding="$2" paddingTop={'$10'}>
             <Skeleton.Group show={!owners.length}>
               <YStack alignItems="center" space="$3" marginBottom="$6">
                 <IdenticonWithBadge
@@ -62,14 +72,15 @@ export const Settings = ({ address, data, onImplementationTap, displayDevMenu, c
                 <YStack
                   alignItems="center"
                   backgroundColor={'$background'}
-                  padding={'$4'}
+                  paddingTop={'$3'}
+                  paddingBottom={'$2'}
                   borderRadius={'$6'}
                   width={80}
                   marginRight={'$2'}
                 >
                   <View width={30}>
-                    <Skeleton>
-                      <Text fontWeight="700" textAlign="center" fontSize={'$4'}>
+                    <Skeleton colorMode={colorScheme === 'dark' ? 'dark' : 'light'}>
+                      <Text fontWeight="bold" textAlign="center" fontSize={'$4'}>
                         {owners.length}
                       </Text>
                     </Skeleton>
@@ -82,13 +93,13 @@ export const Settings = ({ address, data, onImplementationTap, displayDevMenu, c
                 <YStack
                   alignItems="center"
                   backgroundColor={'$background'}
-                  paddingTop={'$4'}
+                  paddingTop={'$3'}
                   paddingBottom={'$2'}
                   borderRadius={'$6'}
                   width={80}
                 >
                   <View width={30}>
-                    <Skeleton>
+                    <Skeleton colorMode={colorScheme === 'dark' ? 'dark' : 'light'}>
                       <Text fontWeight="bold" textAlign="center" fontSize={'$4'}>
                         {threshold}/{owners.length}
                       </Text>
@@ -113,16 +124,16 @@ export const Settings = ({ address, data, onImplementationTap, displayDevMenu, c
                   >
                     <SafeListItem
                       label={'Signers'}
-                      leftNode={<Icon name={'owners'} color={'$colorSecondary'} />}
+                      leftNode={<SafeFontIcon name={'owners'} color={'$colorSecondary'} />}
                       rightNode={
                         <View flexDirection={'row'} alignItems={'center'} justifyContent={'center'}>
-                          <Skeleton height={17}>
+                          <Skeleton colorMode={colorScheme === 'dark' ? 'dark' : 'light'} height={17}>
                             <Text minWidth={15} marginRight={'$3'} color={'$colorSecondary'}>
                               {owners.length}
                             </Text>
                           </Skeleton>
                           <View>
-                            <Icon name={'chevron-right'} />
+                            <SafeFontIcon name={'chevron-right'} />
                           </View>
                         </View>
                       }
@@ -141,20 +152,8 @@ export const Settings = ({ address, data, onImplementationTap, displayDevMenu, c
                     >
                       <SafeListItem
                         label={'Notifications'}
-                        leftNode={<Icon name={'bell'} color={'$colorSecondary'} />}
-                        rightNode={<Icon name={'chevron-right'} />}
-                      />
-                    </Pressable>
-                    <Pressable
-                      style={({ pressed }) => [{ opacity: pressed ? 0.5 : 1.0 }]}
-                      onPress={() => {
-                        router.push('/address-book')
-                      }}
-                    >
-                      <SafeListItem
-                        label={'Address book'}
-                        leftNode={<Icon name={'address-book'} color={'$colorSecondary'} />}
-                        rightNode={<Icon name={'chevron-right'} />}
+                        leftNode={<SafeFontIcon name={'bell'} color={'$colorSecondary'} />}
+                        rightNode={<SafeFontIcon name={'chevron-right'} />}
                       />
                     </Pressable>
                   </View>
@@ -172,8 +171,8 @@ export const Settings = ({ address, data, onImplementationTap, displayDevMenu, c
                       >
                         <SafeListItem
                           label={'Developer'}
-                          leftNode={<Icon name={'alert-triangle'} color={'$colorSecondary'} />}
-                          rightNode={<Icon name={'chevron-right'} />}
+                          leftNode={<SafeFontIcon name={'alert-triangle'} color={'$colorSecondary'} />}
+                          rightNode={<SafeFontIcon name={'chevron-right'} />}
                         />
                       </Pressable>
                     </View>
@@ -183,9 +182,19 @@ export const Settings = ({ address, data, onImplementationTap, displayDevMenu, c
             </Skeleton.Group>
 
             {/* Footer */}
-            <Pressable onPress={onImplementationTap}>
-              <Text textAlign="center" color="$colorSecondary" marginTop="$8">
-                {implementation?.name}
+            <Pressable
+              onPress={onImplementationTap}
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '$2',
+                marginTop: 14,
+              }}
+            >
+              {isLatestVersion && <SafeFontIcon testID="check-icon" name={'check-filled'} color={'$success'} />}
+              <Text marginLeft={'$2'} textAlign="center" color="$colorSecondary">
+                {implementation?.name} {isLatestVersion ? `(Latest version)` : `(Latest version: ${latestSafeVersion})`}
               </Text>
             </Pressable>
           </YStack>

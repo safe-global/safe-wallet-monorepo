@@ -1,5 +1,5 @@
 import { useHasFeature } from '@/hooks/useChains'
-import { FEATURES } from '@/utils/chains'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 import { useContext } from 'react'
 import { GeoblockingContext } from '@/components/common/GeoblockingProvider'
 

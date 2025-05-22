@@ -1,6 +1,7 @@
 import dynamic from 'next/dynamic'
 import { useHasFeature } from '@/hooks/useChains'
-import { FEATURES } from '@/utils/chains'
+
+import { FEATURES } from '@safe-global/utils/utils/chains'
 
 const LazyOutreachPopup = dynamic(() => import('./OutreachPopup'), {
   ssr: false,

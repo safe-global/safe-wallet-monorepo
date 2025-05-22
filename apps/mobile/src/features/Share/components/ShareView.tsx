@@ -85,20 +85,10 @@ export const ShareView = ({ activeSafe, availableChains }: ShareViewProps) => {
             </View>
           </Container>
           <XStack gap={'$3'} marginTop={'$6'}>
-            <SafeButton
-              size={'$sm'}
-              onPress={onPressShare}
-              icon={<SafeFontIcon name={'export'} size={16} style={{ marginTop: -4 }} />}
-              secondary
-            >
+            <SafeButton size={'$sm'} onPress={onPressShare} icon={<SafeFontIcon name={'export'} size={16} />} secondary>
               Share
             </SafeButton>
-            <SafeButton
-              size={'$sm'}
-              onPress={onPressCopy}
-              icon={<SafeFontIcon name={'copy'} size={16} style={{ marginTop: -4 }} />}
-              secondary
-            >
+            <SafeButton size={'$sm'} onPress={onPressCopy} icon={<SafeFontIcon name={'copy'} size={16} />} secondary>
               Copy
             </SafeButton>
           </XStack>

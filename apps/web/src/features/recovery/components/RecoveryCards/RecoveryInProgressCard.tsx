@@ -9,10 +9,10 @@ import { Countdown } from '@/components/common/Countdown'
 import RecoveryPending from '@/public/images/common/recovery-pending.svg'
 import ExternalLink from '@/components/common/ExternalLink'
 import { AppRoutes } from '@/config/routes'
-import { HelpCenterArticle, HelperCenterArticleTitles } from '@/config/constants'
 import type { RecoveryQueueItem } from '@/features/recovery/services/recovery-state'
 
 import css from './styles.module.css'
+import { HelpCenterArticle, HelperCenterArticleTitles } from '@safe-global/utils/config/constants'
 
 type Props =
   | {

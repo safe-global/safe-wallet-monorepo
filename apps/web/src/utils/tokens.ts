@@ -1,13 +1,9 @@
 import { getWeb3ReadOnly } from '@/hooks/wallets/web3'
-import { ERC20__factory, ERC721__factory } from '@/types/contracts'
+import { ERC20__factory, ERC721__factory } from '@safe-global/utils/types/contracts'
 import { parseBytes32String } from '@ethersproject/strings'
-import { type TokenInfo, TokenType } from '@safe-global/safe-gateway-typescript-sdk'
-
-export const UNLIMITED_APPROVAL_AMOUNT = 2n ** 256n - 1n
-export const UNLIMITED_PERMIT2_AMOUNT = 2n ** 160n - 1n
-
-// As per https://eips.ethereum.org/EIPS/eip-721#specification
-export const ERC721_IDENTIFIER = '0x80ac58cd'
+import { TokenType } from '@safe-global/safe-gateway-typescript-sdk'
+import { ERC721_IDENTIFIER } from '@safe-global/utils/utils/tokens'
+import { type Erc20Token } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
 /**
  * Fetches ERC20 token symbol and decimals from on-chain.
@@ -15,7 +11,7 @@ export const ERC721_IDENTIFIER = '0x80ac58cd'
  */
 export const getERC20TokenInfoOnChain = async (
   address: string,
-): Promise<Omit<TokenInfo, 'name' | 'logoUri'> | undefined> => {
+): Promise<Omit<Erc20Token, 'name' | 'logoUri'> | undefined> => {
   const web3 = getWeb3ReadOnly()
   if (!web3) return
 

@@ -1,15 +1,15 @@
 .buttons {
-    position: absolute;
-    right: 16px;
-    top: 50%;
-    transform: translateY(-50%);
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 @media (max-width: 1199.95px) {
-    .buttons {
-        position: relative;
-        transform: none;
-        top: 0;
-        right: 0;
-    }
+  .buttons {
+    position: relative;
+    transform: none;
+    top: 0;
+    right: 0;
+  }
 }

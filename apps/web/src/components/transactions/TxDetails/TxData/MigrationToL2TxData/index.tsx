@@ -1,21 +1,25 @@
-import DecodedTx from '@/components/tx/DecodedTx'
-import useAsync from '@/hooks/useAsync'
+import useAsync from '@safe-global/utils/hooks/useAsync'
 import { useCurrentChain } from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
-import { getMultiSendContractDeployment } from '@/services/contracts/deployments'
+import { getMultiSendContractDeployment } from '@safe-global/utils/services/contracts/deployments'
 import { createTx } from '@/services/tx/tx-sender/create'
-import { Safe__factory } from '@/types/contracts'
+import { Safe__factory } from '@safe-global/utils/types/contracts'
 import { type TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
 import DecodedData from '../DecodedData'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import { useSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
 import { MigrateToL2Information } from '@/components/tx/confirmation-views/MigrateToL2Information'
 import { Box } from '@mui/material'
-import { isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
+import { isCustomTxInfo, isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
 import useTxPreview from '@/components/tx/confirmation-views/useTxPreview'
+import Summary from '../../Summary'
 
-export const MigrationToL2TxData = ({ txDetails }: { txDetails: TransactionDetails }) => {
+export const MigrationToL2TxData = ({
+  txDetails: { txData, txInfo, txHash, detailedExecutionInfo },
+}: {
+  txDetails: TransactionDetails
+}) => {
   const readOnlyProvider = useWeb3ReadOnly()
   const chain = useCurrentChain()
   const { safe } = useSafeInfo()
@@ -23,10 +27,10 @@ export const MigrationToL2TxData = ({ txDetails }: { txDetails: TransactionDetai
   // Reconstruct real tx
   const [realSafeTx, realSafeTxError, realSafeTxLoading] = useAsync(async () => {
     // Fetch tx receipt from backend
-    if (!txDetails.txHash || !chain || !sdk) {
+    if (!txHash || !chain || !sdk) {
       return undefined
     }
-    const txResult = await readOnlyProvider?.getTransaction(txDetails.txHash)
+    const txResult = await readOnlyProvider?.getTransaction(txHash)
     const txData = txResult?.data
 
     // Search for a Safe Tx to MultiSend contract
@@ -59,28 +63,26 @@ export const MigrationToL2TxData = ({ txDetails }: { txDetails: TransactionDetai
           gasToken: execTxArgs[7].toString(),
           refundReceiver: execTxArgs[8],
         },
-        isMultisigDetailedExecutionInfo(txDetails.detailedExecutionInfo)
-          ? txDetails.detailedExecutionInfo.nonce
-          : undefined,
+        isMultisigDetailedExecutionInfo(detailedExecutionInfo) ? detailedExecutionInfo.nonce : undefined,
       )
     }
-  }, [txDetails.txHash, txDetails.detailedExecutionInfo, chain, sdk, readOnlyProvider, safe.version])
+  }, [txHash, detailedExecutionInfo, chain, sdk, readOnlyProvider, safe.version])
 
   const decodedDataUnavailable = !realSafeTx && !realSafeTxLoading
   const [txPreview, txPreviewError] = useTxPreview(realSafeTx?.data)
 
   return (
     <Box>
-      <MigrateToL2Information variant="history" txData={txDetails.txData} />
+      <MigrateToL2Information variant="history" txData={txData} />
 
       {realSafeTxError ? (
         <ErrorMessage>{realSafeTxError.message}</ErrorMessage>
       ) : txPreviewError ? (
         <ErrorMessage>{txPreviewError.message}</ErrorMessage>
       ) : decodedDataUnavailable ? (
-        <DecodedData txData={txDetails.txData} />
+        <DecodedData txData={txData} toInfo={txInfo && isCustomTxInfo(txInfo) ? txInfo.to : txData?.to} />
       ) : (
-        txPreview && <DecodedTx {...txPreview} tx={realSafeTx} />
+        txPreview && <Summary {...txPreview} safeTxData={realSafeTx?.data} />
       )}
     </Box>
   )

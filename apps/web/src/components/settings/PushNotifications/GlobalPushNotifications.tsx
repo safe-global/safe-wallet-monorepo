@@ -1,4 +1,4 @@
-import { selectUndeployedSafes, type UndeployedSafesState } from '@/features/counterfactual/store/undeployedSafesSlice'
+import { selectUndeployedSafes } from '@/features/counterfactual/store/undeployedSafesSlice'
 import {
   Box,
   Grid,
@@ -42,6 +42,7 @@ import useWallet from '@/hooks/wallets/useWallet'
 import { selectAllAddedSafes, type AddedSafesState } from '@/store/addedSafesSlice'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
 import { useNotificationsRenewal } from './hooks/useNotificationsRenewal'
+import type { UndeployedSafesState } from '@safe-global/utils/features/counterfactual/store/types'
 
 // UI logic
 

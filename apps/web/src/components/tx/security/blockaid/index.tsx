@@ -3,7 +3,6 @@ import { useContext } from 'react'
 import { TxSecurityContext } from '@/components/tx/security/shared/TxSecurityContext'
 import groupBy from 'lodash/groupBy'
 import { Alert, AlertTitle, Box, Checkbox, FormControlLabel, Stack, Typography } from '@mui/material'
-import { FEATURES } from '@/utils/chains'
 import { useHasFeature } from '@/hooks/useChains'
 import { ErrorBoundary } from '@sentry/react'
 import css from './styles.module.css'
@@ -16,33 +15,9 @@ import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { type SecurityWarningProps, mapSecuritySeverity } from '../utils'
 import { BlockaidHint } from './BlockaidHint'
 import { ContractChangeWarning } from './ContractChangeWarning'
-
-export const REASON_MAPPING: Record<string, string> = {
-  raw_ether_transfer: 'transfers native currency',
-  signature_farming: 'is a raw signed transaction',
-  transfer_farming: 'transfers tokens',
-  approval_farming: 'approves erc20 tokens',
-  set_approval_for_all: 'approves all tokens of the account',
-  permit_farming: 'authorizes access or permissions',
-  seaport_farming: 'authorizes transfer of assets via Opeansea marketplace',
-  blur_farming: 'authorizes transfer of assets via Blur marketplace',
-  delegatecall_execution: 'involves a delegate call',
-}
-
-export const CLASSIFICATION_MAPPING: Record<string, string> = {
-  known_malicious: 'to a known malicious address',
-  unverified_contract: 'to an unverified contract',
-  new_address: 'to a new address',
-  untrusted_address: 'to an untrusted address',
-  address_poisoning: 'to a poisoned address',
-  losing_mint: 'resulting in a mint for a new token with a significantly higher price than the known price',
-  losing_assets: 'resulting in a loss of assets without any compensation',
-  losing_trade: 'resulting in a losing trade',
-  drainer_contract: 'to a known drainer contract',
-  user_mistake: 'resulting in a loss of assets due to an innocent mistake',
-  gas_farming_attack: 'resulting in a waste of the account address’ gas to generate tokens for a scammer',
-  other: 'resulting in a malicious outcome',
-}
+import { FEATURES } from '@safe-global/utils/utils/chains'
+import { CLASSIFICATION_MAPPING, REASON_MAPPING } from '@safe-global/utils/components/tx/security/blockaid/utils'
+import ErrorMessage from '../../ErrorMessage'
 
 export const Warning = ({
   title,
@@ -120,24 +95,14 @@ const ResultDescription = ({
   )
 }
 
-const BlockaidError = () => {
+const BlockaidError = ({ error }: { error: Error }) => {
   return (
-    <Alert severity="warning" className={css.customAlert}>
-      <AlertTitle>
-        <Typography
-          variant="subtitle1"
-          sx={{
-            fontWeight: 700,
-          }}
-        >
-          Proceed with caution
-        </Typography>
-      </AlertTitle>
+    <ErrorMessage level="warning" className={css.customAlert} title="Proceed with caution" error={error}>
       <Typography variant="body2">
         The transaction could not be checked for security alerts. Verify the details and addresses before proceeding.
       </Typography>
       <BlockaidMessage />
-    </Alert>
+    </ErrorMessage>
   )
 }
 
@@ -155,7 +120,7 @@ export const Blockaid = () => {
   )
 }
 
-const BlockaidWarning = () => {
+export const BlockaidWarning = () => {
   const { blockaidResponse, setIsRiskConfirmed, needsRiskConfirmation, isRiskConfirmed } = useContext(TxSecurityContext)
   const { severity, isLoading, error } = blockaidResponse ?? {}
 
@@ -171,7 +136,7 @@ const BlockaidWarning = () => {
   }
 
   if (error) {
-    return <BlockaidError />
+    return <BlockaidError error={error} />
   }
 
   if (isLoading || !blockaidResponse) {

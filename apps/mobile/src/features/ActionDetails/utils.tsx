@@ -28,10 +28,29 @@ const TxOptions = ({ value }: { value: string }) => {
   return (
     <View flexDirection="row" alignItems="center">
       <CopyButton value={value} color={'$textSecondaryLight'} />
-      <SafeFontIcon name="external-link" size={14} color="textSecondaryLight" />
+      <SafeFontIcon name="external-link" size={14} color="$textSecondaryLight" />
     </View>
   )
 }
+
+const getContractItemLayout = ({
+  logoUri,
+  value,
+  name,
+}: {
+  logoUri?: string | null
+  value: string
+  name?: string | null
+}) => ({
+  label: 'Contract',
+  render: () => (
+    <View flexDirection="row" alignItems="center" gap="$2">
+      {logoUri ? <Logo logoUri={logoUri} size="$6" /> : <Identicon address={value as Address} size={24} />}
+      <Text fontSize="$4">{ellipsis(name || value, 16)}</Text>
+      <TxOptions value={value} />
+    </View>
+  ),
+})
 
 export const formatActionDetails = ({ txData, action }: formatActionDetailsReturn): ListTableItem[] => {
   if (!txData) {
@@ -39,8 +58,6 @@ export const formatActionDetails = ({ txData, action }: formatActionDetailsRetur
   }
 
   let columns: ListTableItem[] = []
-
-  const contractCall = getContractCall(action, txData.addressInfoIndex as AddressInfoIndex)
 
   if (action.dataDecoded?.method) {
     columns.push({
@@ -62,27 +79,18 @@ export const formatActionDetails = ({ txData, action }: formatActionDetailsRetur
         <View flexDirection="row" alignItems="center" gap="$2">
           <Identicon address={action.to as Address} size={24} />
           <EthAddress copy copyProps={{ color: '$textSecondaryLight' }} address={action.to as Address} />
-          <SafeFontIcon name="external-link" size={14} color="textSecondaryLight" />
+          <SafeFontIcon name="external-link" size={14} color="$textSecondaryLight" />
         </View>
       ),
     })
   }
 
+  const contractCall = getContractCall(action, txData.addressInfoIndex as AddressInfoIndex)
+
   if (contractCall) {
-    columns.push({
-      label: 'Contract',
-      render: () => (
-        <View flexDirection="row" alignItems="center" gap="$2">
-          {txData.to.logoUri ? (
-            <Logo logoUri={txData.to.logoUri} size="$6" />
-          ) : (
-            <Identicon address={txData.to.value as Address} size={24} />
-          )}
-          <Text fontSize="$4">{ellipsis(txData.to.name || txData.to.value, 16)}</Text>
-          <TxOptions value={txData.to.value} />
-        </View>
-      ),
-    })
+    columns.push(getContractItemLayout(contractCall))
+  } else if (action.to) {
+    columns.push(getContractItemLayout({ value: action.to }))
   }
 
   if (action.dataDecoded) {

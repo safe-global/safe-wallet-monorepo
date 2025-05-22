@@ -73,7 +73,7 @@ export const formatSwapOrderItems = (txInfo: Order, chain: Chain): ListTableItem
               <Text fontSize="$4">{ellipsis(txInfo.uid, 6)}</Text>
               <CopyButton value={txInfo.uid} color={'$textSecondaryLight'} />
               <TouchableOpacity onPress={openCowExplorer}>
-                <SafeFontIcon name="external-link" size={14} color="textSecondaryLight" />
+                <SafeFontIcon name="external-link" size={14} color="$textSecondaryLight" />
               </TouchableOpacity>
             </View>
           ),
@@ -97,13 +97,10 @@ export const formatSwapOrderItems = (txInfo: Order, chain: Chain): ListTableItem
 export const formatTwapOrderItems = (order: TwapOrderTransactionInfo) => {
   const { timeBetweenParts } = order
   let startTime = ''
-  // @ts-expect-error - @safe-global/store typings are incomplete should work after we get this through https://github.com/safe-global/safe-wallet-monorepo/pull/5500
   if (order.startTime.startType === StartTimeValue.AT_MINING_TIME) {
     startTime = 'Now'
   }
-  // @ts-expect-error - @safe-global/store typings are incomplete should work after we get this through https://github.com/safe-global/safe-wallet-monorepo/pull/5500
   if (order.startTime.startType === StartTimeValue.AT_EPOCH) {
-    // @ts-expect-error - @safe-global/store typings are incomplete should work after we get this through https://github.com/safe-global/safe-wallet-monorepo/pull/5500
     startTime = `At block number: ${order.startTime.epoch}`
   }
 

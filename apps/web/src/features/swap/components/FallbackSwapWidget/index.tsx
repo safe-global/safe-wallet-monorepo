@@ -47,7 +47,7 @@ export function _getAppData(isDarkMode: boolean, chain: ChainInfo, fromToken?: s
   return {
     ...getEmptySafeApp(),
     name: 'Swap',
-    iconUrl: '/images/common/swap.svg',
+    iconUrl: isDarkMode ? '/images/common/safe-swap-dark.svg' : '/images/common/safe-swap.svg',
     chainIds: [chain.chainId],
     url: appUrl.toString(),
   }

@@ -32,14 +32,6 @@ describe('[SMOKE] NFTs tests', () => {
     nfts.verifyDataInTable(nftsName, nftsAddress, nftsTokenID)
   })
 
-  // skipped because the NFT metadata fetching is turned off on tx_service
-  it.skip('[SMOKE] Verify NFT preview window can be opened', () => {
-    nfts.openActiveNFT(0)
-    nfts.verifyNameInNFTModal(nftsTokenID)
-    nfts.verifySelectedNetwrokSepolia()
-    nfts.closeNFTModal()
-  })
-
   // mock
   it('[SMOKE] Verify NFT open does not open if no NFT exits', () => {
     nfts.clickOnInactiveNFT()

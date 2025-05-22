@@ -1,4 +1,6 @@
-import { CYPRESS_MNEMONIC, IS_PRODUCTION } from '@/config/constants'
+import { IS_PRODUCTION } from './constants'
+
+const isCypress = Boolean(typeof window !== 'undefined' && window.Cypress)
 
 /**
  * CSP Header notes:
@@ -12,7 +14,7 @@ export const ContentSecurityPolicy = `
  default-src 'self';
  connect-src 'self' *;
  script-src 'self' 'unsafe-inline' https://*.getbeamer.com https://www.googletagmanager.com https://*.ingest.sentry.io https://sentry.io ${
-   !IS_PRODUCTION || CYPRESS_MNEMONIC
+   !IS_PRODUCTION || isCypress
      ? "'unsafe-eval'" // Dev server and cypress need unsafe-eval
      : "'wasm-unsafe-eval'"
  };

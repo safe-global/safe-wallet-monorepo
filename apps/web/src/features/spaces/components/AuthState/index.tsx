@@ -9,7 +9,7 @@ import { useSpacesGetOneV1Query } from '@safe-global/store/gateway/AUTO_GENERATE
 import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
 import { MemberStatus } from '@/features/spaces/hooks/useSpaceMembers'
 import { useHasFeature } from '@/hooks/useChains'
-import { FEATURES } from '@/utils/chains'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 import useFeatureFlagRedirect from '@/features/spaces/hooks/useFeatureFlagRedirect'
 
 const AuthState = ({ spaceId, children }: { spaceId: string; children: ReactNode }) => {

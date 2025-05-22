@@ -1,7 +1,7 @@
 import { type Chain as ChainInfo } from '../AUTO_GENERATED/chains'
 import { createEntityAdapter, EntityState } from '@reduxjs/toolkit'
 import { cgwClient, getBaseUrl } from '../cgwClient'
-import { QueryReturnValue, FetchBaseQueryError, FetchBaseQueryMeta } from '@reduxjs/toolkit/dist/query'
+import { QueryReturnValue, FetchBaseQueryError, FetchBaseQueryMeta } from '@reduxjs/toolkit/query'
 
 export const chainsAdapter = createEntityAdapter<ChainInfo, string>({ selectId: (chain: ChainInfo) => chain.chainId })
 export const initialState = chainsAdapter.getInitialState()

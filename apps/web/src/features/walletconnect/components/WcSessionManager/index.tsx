@@ -1,6 +1,6 @@
 import { WCLoadingState } from '@/features/walletconnect/components/WalletConnectProvider'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { asError } from '@/services/exceptions/utils'
+import { asError } from '@safe-global/utils/services/exceptions/utils'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import { useCallback, useContext, useEffect, useState } from 'react'
 import type { WalletKitTypes } from '@reown/walletkit'

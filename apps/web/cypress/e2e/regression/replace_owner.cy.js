@@ -76,7 +76,7 @@ describe('Replace Owners tests', () => {
     owner.verifyErrorMsgInvalidAddress(constants.addressBookErrrMsg.alreadyAdded)
   })
 
-  it.skip("Verify 'Replace' tx is created. GA tx_created", () => {
+  it("Verify 'Replace' tx is created. GA tx_created", () => {
     const tx_created = [
       {
         eventLabel: events.txCreatedSwapOwner.eventLabel,
@@ -95,6 +95,8 @@ describe('Replace Owners tests', () => {
     owner.typeOwnerAddress(constants.SEPOLIA_OWNER_2)
     createTx.changeNonce(0)
     owner.clickOnNextBtn()
+    createTx.clickOnContinueSignTransactionBtn()
+    createTx.clickOnAcknowledgement()
     createTx.clickOnSignTransactionBtn()
     createTx.clickViewTransaction()
     createTx.verifyReplacedSigner(ownerName)

@@ -10,10 +10,10 @@ import { isRecoveryQueueItem } from '@/utils/transaction-guards'
 import ExpandableTransactionItem from '@/components/transactions/TxListItem/ExpandableTransactionItem'
 import { RecoveryListItem } from '../RecoveryListItem'
 import ExternalLink from '@/components/common/ExternalLink'
-import { HelpCenterArticle, HelperCenterArticleTitles } from '@/config/constants'
 
 import css from '@/components/transactions/GroupedTxListItems/styles.module.css'
 import customCss from './styles.module.css'
+import { HelpCenterArticle, HelperCenterArticleTitles } from '@safe-global/utils/config/constants'
 
 function Disclaimer({ isMalicious }: { isMalicious: boolean }): ReactElement {
   return (

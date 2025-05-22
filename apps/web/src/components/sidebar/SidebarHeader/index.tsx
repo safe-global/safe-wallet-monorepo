@@ -18,7 +18,7 @@ import LinkIconBold from '@/public/images/sidebar/link-bold.svg'
 
 import { selectSettings } from '@/store/settingsSlice'
 import { useCurrentChain } from '@/hooks/useChains'
-import { getBlockExplorerLink } from '@/utils/chains'
+import { getBlockExplorerLink } from '@safe-global/utils/utils/chains'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import QrCodeButton from '../QrCodeButton'
 import Track from '@/components/common/Track'

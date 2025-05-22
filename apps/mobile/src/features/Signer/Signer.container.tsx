@@ -1,5 +1,6 @@
 import { SignerView } from '@/src/features/Signer/components/SignerView'
-import { useLocalSearchParams, useNavigation } from 'expo-router'
+import { useLocalSearchParams } from 'expo-router'
+import { useNavigation } from '@react-navigation/native'
 import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
 import { selectContactByAddress, upsertContact } from '@/src/store/addressBookSlice'
 import React, { useCallback, useEffect, useState } from 'react'
@@ -19,8 +20,10 @@ export const SignerContainer = () => {
   const { address } = useLocalSearchParams<{ address: string }>()
   const dispatch = useAppDispatch()
   const activeChain = useAppSelector(selectActiveChain)
+  const local = useLocalSearchParams<{ editMode: string }>()
   const contact = useAppSelector(selectContactByAddress(address))
-  const [editMode, setEditMode] = useState(false)
+  const [editMode, setEditMode] = useState(Boolean(local.editMode))
+
   usePreventLeaveScreen(editMode)
 
   const onPressExplorer = useCallback(() => {

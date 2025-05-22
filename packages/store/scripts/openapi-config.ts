@@ -67,9 +67,6 @@ const config: ConfigFile = {
     '../src/gateway/AUTO_GENERATED/users.ts': {
       filterEndpoints: [/^users/],
     },
-    '../src/gateway/AUTO_GENERATED/organizations.ts': {
-      filterEndpoints: [/^(organizations|userOrganizations|organizationSafes)/],
-    },
     '../src/gateway/AUTO_GENERATED/spaces.ts': {
       filterEndpoints: [/^(spaces|members|spaceSafes)/],
     },

@@ -4,10 +4,10 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import { createUpdateSafeTxs } from '@/services/tx/safeUpdateParams'
 import { createMultiSendCallOnlyTx, createTx } from '@/services/tx/tx-sender'
 import { SafeTxContext } from '../../SafeTxProvider'
-import useAsync from '@/hooks/useAsync'
-import ReviewTransaction from '@/components/tx/ReviewTransaction'
+import useAsync from '@safe-global/utils/hooks/useAsync'
+import ReviewTransaction, { type ReviewTransactionProps } from '@/components/tx/ReviewTransactionV2'
 
-export const UpdateSafeReview = ({ onSubmit }: { onSubmit: () => void }) => {
+export const UpdateSafeReview = (props: ReviewTransactionProps) => {
   const { safe, safeLoaded } = useSafeInfo()
   const chain = useCurrentChain()
   const { setSafeTx, setSafeTxError } = useContext(SafeTxContext)
@@ -21,5 +21,5 @@ export const UpdateSafeReview = ({ onSubmit }: { onSubmit: () => void }) => {
     safeTxPromise.then(setSafeTx).catch(setSafeTxError)
   }, [safe, safeLoaded, chain, setSafeTx, setSafeTxError])
 
-  return <ReviewTransaction onSubmit={onSubmit} />
+  return <ReviewTransaction {...props} />
 }

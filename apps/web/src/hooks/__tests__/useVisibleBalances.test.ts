@@ -1,16 +1,17 @@
-import { type SafeBalanceResponse, TokenType } from '@safe-global/safe-gateway-typescript-sdk'
+import { TokenType } from '@safe-global/safe-gateway-typescript-sdk'
 import * as store from '@/store'
 import * as useBalancesHooks from '@/hooks/useBalances'
 import { renderHook } from '@/tests/test-utils'
 import { toBeHex } from 'ethers'
 import { useVisibleBalances } from '../useVisibleBalances'
+import { type Balances } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 
 describe('useVisibleBalances', () => {
   const hiddenTokenAddress = toBeHex('0x2', 20)
   const visibleTokenAddress = toBeHex('0x3', 20)
 
   test('empty balance', () => {
-    const balance: SafeBalanceResponse = {
+    const balance: Balances = {
       fiatTotal: '0',
       items: [],
     }
@@ -45,7 +46,7 @@ describe('useVisibleBalances', () => {
   })
 
   test('return only visible balance', () => {
-    const balance: SafeBalanceResponse = {
+    const balance: Balances = {
       fiatTotal: '100',
       items: [
         {
@@ -108,7 +109,7 @@ describe('useVisibleBalances', () => {
   })
 
   test('computation works for high precision numbers', () => {
-    const balance: SafeBalanceResponse = {
+    const balance: Balances = {
       fiatTotal: '200.01234567890123456789',
       items: [
         {
@@ -185,7 +186,7 @@ describe('useVisibleBalances', () => {
   })
 
   test('computation works for high USD values', () => {
-    const balance: SafeBalanceResponse = {
+    const balance: Balances = {
       // Current total USD value of all Safes on mainnet * 1 million
       fiatTotal: '28303710905000100.0123456789',
       items: [

@@ -10,11 +10,11 @@ import type { AddedSafesState } from '@/store/addedSafesSlice'
 import type { AddressBookState } from '@/store/addressBookSlice'
 import type { SafeAppsState } from '@/store/safeAppsSlice'
 import type { SettingsState } from '@/store/settingsSlice'
-import type { UndeployedSafesState } from '@/features/counterfactual/store/undeployedSafesSlice'
 import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
 
 import css from './styles.module.css'
 import type { VisitedSafesState } from '@/store/visitedSafesSlice'
+import type { UndeployedSafesState } from '@safe-global/utils/features/counterfactual/store/types'
 
 const getItemSecondaryText = (
   chains: ChainInfo[],

@@ -1,4 +1,5 @@
 import * as constants from '../../support/constants'
+import { clickOnContinueSignTransactionBtn, selectComboButtonOption } from './create_tx.pages'
 
 const tokenSelectorText = 'G(ö|oe)rli Ether'
 const noLaterString = 'No, later'
@@ -31,13 +32,13 @@ const executeOptionsContainer = 'div[role="radiogroup"]'
 const expandedItem = 'div[class*="MuiCollapse-entered"]'
 const collapsedItem = 'div[class*="MuiCollapse-hidden"]'
 
-export function addToBatch(EOA, currentNonce, amount, verify = false) {
+export function addToBatch(EOA, currentNonce, amount) {
   fillTransactionData(EOA, amount)
   setNonceAndProceed(currentNonce)
-  // Execute the transaction if verification is required
-  if (verify) {
-    executeTransaction()
-  }
+  clickOnContinueSignTransactionBtn()
+
+  selectComboButtonOption('Add to batch')
+
   addToBatchButton()
   cy.contains(transactionAddedToBatchStr).click().should('not.be.visible')
 }

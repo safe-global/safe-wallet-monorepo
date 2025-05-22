@@ -1,7 +1,8 @@
 import { createContext, type ReactElement } from 'react'
 
-import { useSimulation, type UseSimulationReturn } from '@/components/tx/security/tenderly/useSimulation'
-import { FETCH_STATUS, type TenderlySimulation } from '@/components/tx/security/tenderly/types'
+import { useSimulation } from '@/components/tx/security/tenderly/useSimulation'
+import { FETCH_STATUS, type TenderlySimulation } from '@safe-global/utils/components/tx/security/tenderly/types'
+import type { UseSimulationReturn } from '@safe-global/utils/components/tx/security/tenderly/useSimulation'
 
 const getCallTraceErrors = (simulation?: TenderlySimulation) => {
   if (!simulation || !simulation.simulation.status) {
@@ -19,30 +20,40 @@ type SimulationStatus = {
   isError: boolean
 }
 
+const initialSimulation: UseSimulationReturn = {
+  simulateTransaction: () => {},
+  simulation: undefined,
+  _simulationRequestStatus: FETCH_STATUS.NOT_ASKED,
+  simulationLink: '',
+  requestError: undefined,
+  resetSimulation: () => {},
+}
+
+const initialStatus: SimulationStatus = {
+  isLoading: false,
+  isFinished: false,
+  isSuccess: false,
+  isCallTraceError: false,
+  isError: false,
+}
+
 export const TxInfoContext = createContext<{
   simulation: UseSimulationReturn
   status: SimulationStatus
+  nestedTx: {
+    simulation: UseSimulationReturn
+    status: SimulationStatus
+  }
 }>({
-  simulation: {
-    simulateTransaction: () => {},
-    simulation: undefined,
-    _simulationRequestStatus: FETCH_STATUS.NOT_ASKED,
-    simulationLink: '',
-    requestError: undefined,
-    resetSimulation: () => {},
-  },
-  status: {
-    isLoading: false,
-    isFinished: false,
-    isSuccess: false,
-    isCallTraceError: false,
-    isError: false,
+  simulation: initialSimulation,
+  status: initialStatus,
+  nestedTx: {
+    simulation: initialSimulation,
+    status: initialStatus,
   },
 })
 
-export const TxInfoProvider = ({ children }: { children: ReactElement }) => {
-  const simulation = useSimulation()
-
+const getSimulationStatus = (simulation: UseSimulationReturn): SimulationStatus => {
   const isLoading = simulation._simulationRequestStatus === FETCH_STATUS.LOADING
 
   const isFinished =
@@ -55,13 +66,25 @@ export const TxInfoProvider = ({ children }: { children: ReactElement }) => {
   const isCallTraceError = isSuccess && getCallTraceErrors(simulation.simulation).length > 0
   const isError = simulation._simulationRequestStatus === FETCH_STATUS.ERROR
 
-  const status = {
+  return {
     isLoading,
     isFinished,
     isSuccess,
     isCallTraceError,
     isError,
   }
+}
 
-  return <TxInfoContext.Provider value={{ simulation, status }}>{children}</TxInfoContext.Provider>
+export const TxInfoProvider = ({ children }: { children: ReactElement }) => {
+  const simulation = useSimulation()
+  const nestedSimulation = useSimulation()
+
+  const status = getSimulationStatus(simulation)
+
+  const nestedTx = {
+    simulation: nestedSimulation,
+    status: getSimulationStatus(nestedSimulation),
+  }
+
+  return <TxInfoContext.Provider value={{ simulation, status, nestedTx }}>{children}</TxInfoContext.Provider>
 }

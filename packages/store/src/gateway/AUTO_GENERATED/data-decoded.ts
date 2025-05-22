@@ -26,22 +26,32 @@ export type DataDecodedGetDataDecodedV1ApiArg = {
   chainId: string
   transactionDataDto: TransactionDataDto
 }
+export type BaseDataDecoded = {
+  method: string
+  parameters?: DataDecodedParameter[]
+}
+export type MultiSend = {
+  operation: 0 | 1
+  value: string
+  dataDecoded?: BaseDataDecoded
+  to: string
+  data?: object
+}
 export type DataDecodedParameter = {
   name: string
   type: string
   value: object
-  valueDecoded?: ((object | null) | (object[] | null)) | null
+  valueDecoded?: BaseDataDecoded | MultiSend[] | null
 }
 export type DataDecoded = {
   method: string
   parameters?: DataDecodedParameter[] | null
+  accuracy?: 'FULL_MATCH' | 'PARTIAL_MATCH' | 'ONLY_FUNCTION_MATCH' | 'NO_MATCH' | 'UNKNOWN'
 }
 export type TransactionDataDto = {
   /** Hexadecimal value */
   data: string
   /** The target Ethereum address */
   to?: string
-  /** The wei amount being sent to a payable function */
-  value?: string
 }
 export const { useDataDecodedGetDataDecodedV1Mutation } = injectedRtkApi

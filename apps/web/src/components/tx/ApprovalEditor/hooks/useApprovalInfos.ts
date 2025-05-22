@@ -1,22 +1,19 @@
-import useAsync from '@/hooks/useAsync'
+import type { TypedData } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
+import useAsync from '@safe-global/utils/hooks/useAsync'
 import useBalances from '@/hooks/useBalances'
-import { type Approval, ApprovalModule } from '@/services/security/modules/ApprovalModule'
+import { type Approval, ApprovalModule } from '@safe-global/utils/services/security/modules/ApprovalModule'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import {
-  getERC20TokenInfoOnChain,
-  getErc721Symbol,
-  isErc721Token,
-  UNLIMITED_APPROVAL_AMOUNT,
-  UNLIMITED_PERMIT2_AMOUNT,
-} from '@/utils/tokens'
+import { getERC20TokenInfoOnChain, getErc721Symbol, isErc721Token } from '@/utils/tokens'
 import { type SafeTransaction } from '@safe-global/safe-core-sdk-types'
-import { type EIP712TypedData, type TokenInfo, TokenType } from '@safe-global/safe-gateway-typescript-sdk'
+import { TokenType } from '@safe-global/safe-gateway-typescript-sdk'
 import { useMemo } from 'react'
 import { PSEUDO_APPROVAL_VALUES } from '../utils/approvals'
 import { safeFormatUnits } from '@safe-global/utils/utils/formatters'
+import { UNLIMITED_APPROVAL_AMOUNT, UNLIMITED_PERMIT2_AMOUNT } from '@safe-global/utils/utils/tokens'
+import { type Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 
 export type ApprovalInfo = {
-  tokenInfo: (Omit<TokenInfo, 'logoUri' | 'name'> & { logoUri?: string }) | undefined
+  tokenInfo: (Omit<Balance['tokenInfo'], 'logoUri' | 'name'> & { logoUri?: string }) | undefined
   tokenAddress: string
   spender: any
   amount: any
@@ -32,7 +29,7 @@ const ApprovalModuleInstance = new ApprovalModule()
 
 export const useApprovalInfos = (payload: {
   safeTransaction?: SafeTransaction
-  safeMessage?: EIP712TypedData
+  safeMessage?: TypedData
 }): [ApprovalInfo[] | undefined, Error | undefined, boolean] => {
   const { safeTransaction, safeMessage } = payload
   const { balances } = useBalances()
@@ -53,7 +50,7 @@ export const useApprovalInfos = (payload: {
 
       return Promise.all(
         approvals.payload.map(async (approval) => {
-          let tokenInfo: Omit<TokenInfo, 'name' | 'logoUri'> | undefined = balances.items.find((item) =>
+          let tokenInfo: Omit<Balance['tokenInfo'], 'name' | 'logoUri'> | undefined = balances.items.find((item) =>
             sameAddress(item.tokenInfo.address, approval.tokenAddress),
           )?.tokenInfo
 

@@ -16,9 +16,9 @@ const nonceInput = 'input[name="nonce"]'
 const gasLimitInput = '[name="gasLimit"]'
 const rotateLeftIcon = '[data-testid="RotateLeftIcon"]'
 export const transactionItem = '[data-testid="transaction-item"]'
-export const accordionActionItem = '[data-testid="action-item"]'
 export const connectedWalletExecMethod = '[data-testid="connected-wallet-execution-method"]'
 export const relayExecMethod = '[data-testid="relay-execution-method"]'
+export const connectedWalletMethod = '[data-testid="connected-wallet-execution-method"]'
 export const payNowExecMethod = '[data-testid="pay-now-execution-method"]'
 export const addToBatchBtn = '[data-track="batching: Add to batch"]'
 const accordionDetails = '[data-testid="accordion-details"]'
@@ -134,6 +134,9 @@ export const topAssetsStr = 'Top assets'
 export const getStartedStr = 'Get started'
 export const txNoteWarningMessage = 'The notes are publicly visible, do not share any private or sensitive details'
 export const recordedTxNote = 'Tx note one'
+
+const comboButton = '[data-testid="combo-submit-dropdown"]'
+const comboButtonPopover = '[data-testid="combo-submit-popover"]'
 
 export const tx_status = {
   execution_needed: 'Execution needed',
@@ -264,6 +267,12 @@ export function verifyCopiedURL() {
 export function expandTxShareBlock() {
   cy.get(txShareBlock).click()
   cy.get(txShareBlockDetails).should('be.visible')
+}
+
+export function checkCopyBtnExistsInShareblock() {
+  cy.get(txShareBlock).within(() => {
+    cy.get(copyLinkBtn).should('exist')
+  })
 }
 
 export function verifyBulkExecuteBtnIsEnabled(txs) {
@@ -662,7 +671,7 @@ export function selectCurrentWallet() {
 }
 
 export function verifyRelayerAttemptsAvailable() {
-  cy.contains(transactionsPerHrStr).should('be.visible')
+  cy.contains(transactionsPerHrStr).should('exist')
 }
 
 export function clickOnTokenselectorAndSelectSepoliaEth() {
@@ -716,6 +725,10 @@ export function verifyNativeTokenTransfer() {
 
 export function changeNonce(value) {
   cy.get(nonceInput).clear().type(value, { force: true })
+}
+
+export function hasNonce() {
+  cy.get(nonceInput).invoke('val').should('match', /^\d+$/)
 }
 
 export function verifyNonceInputValue(value) {
@@ -938,4 +951,9 @@ export function checkMaxRecipientReached(attempt = 0) {
     checkNumberOfRecipients(`${attempt + 2}/5`)
     checkMaxRecipientReached(attempt + 1)
   })
+}
+
+export function selectComboButtonOption(option) {
+  cy.get(comboButton).click()
+  cy.get(comboButtonPopover).findByText(option).click()
 }

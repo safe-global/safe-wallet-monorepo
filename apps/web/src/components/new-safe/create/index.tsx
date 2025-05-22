@@ -17,11 +17,11 @@ import type { CreateSafeInfoItem } from '@/components/new-safe/create/CreateSafe
 import CreateSafeInfos from '@/components/new-safe/create/CreateSafeInfos'
 import { type ReactElement, useMemo, useState } from 'react'
 import ExternalLink from '@/components/common/ExternalLink'
-import { HelpCenterArticle } from '@/config/constants'
 import { type SafeVersion } from '@safe-global/safe-core-sdk-types'
-import { getLatestSafeVersion } from '@/utils/chains'
 import { useCurrentChain } from '@/hooks/useChains'
 import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
+import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 
 export type NewSafeFormData = {
   name: string

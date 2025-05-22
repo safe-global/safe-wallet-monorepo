@@ -1,25 +1,20 @@
 import useChainId from '@/hooks/useChainId'
-import { Safe__factory } from '@/types/contracts'
-import { Skeleton } from '@mui/material'
+import { Skeleton, Stack } from '@mui/material'
 import { type TransactionData } from '@safe-global/safe-gateway-typescript-sdk'
 import ErrorMessage from '@/components/tx/ErrorMessage'
-
-import Link from 'next/link'
-import { useCurrentChain } from '@/hooks/useChains'
-import { AppRoutes } from '@/config/routes'
 import { useGetTransactionDetailsQuery } from '@/store/api/gateway'
 import { useMemo } from 'react'
 import { skipToken } from '@reduxjs/toolkit/query'
-import ExternalLink from '@/components/common/ExternalLink'
 import { NestedTransaction } from '../NestedTransaction'
 import TxData from '../..'
 import { isMultiSendTxInfo, isOrderTxInfo } from '@/utils/transaction-guards'
 import { ErrorBoundary } from '@sentry/react'
 import Multisend from '../../DecodedData/Multisend'
-import { MODALS_EVENTS } from '@/services/analytics'
-import Track from '@/components/common/Track'
-
-const safeInterface = Safe__factory.createInterface()
+import { TxSimulation, TxSimulationMessage } from '@/components/tx/security/tenderly'
+import type { SafeTransaction } from '@safe-global/safe-core-sdk-types'
+import extractTxInfo from '@/services/tx/extractTxInfo'
+import { useSignedHash } from '../useSignedHash'
+import useSafeAddress from '@/hooks/useSafeAddress'
 
 export const OnChainConfirmation = ({
   data,
@@ -28,16 +23,9 @@ export const OnChainConfirmation = ({
   data?: TransactionData
   isConfirmationView?: boolean
 }) => {
-  const chain = useCurrentChain()
   const chainId = useChainId()
-  const signedHash = useMemo(() => {
-    const params = data?.hexData ? safeInterface.decodeFunctionData('approveHash', data?.hexData) : undefined
-    if (!params || params.length !== 1 || typeof params[0] !== 'string') {
-      return
-    }
-
-    return params[0]
-  }, [data?.hexData])
+  const signedHash = useSignedHash(data)
+  const safeAddress = useSafeAddress()
 
   const { data: nestedTxDetails, error: txDetailsError } = useGetTransactionDetailsQuery(
     signedHash
@@ -46,6 +34,20 @@ export const OnChainConfirmation = ({
           txId: signedHash,
         }
       : skipToken,
+  )
+
+  const nestedTx = useMemo<SafeTransaction | undefined>(
+    () =>
+      nestedTxDetails
+        ? {
+            addSignature: () => {},
+            encodedSignatures: () => '',
+            getSignature: () => undefined,
+            data: extractTxInfo(nestedTxDetails).txParams,
+            signatures: new Map(),
+          }
+        : undefined,
+    [nestedTxDetails],
   )
 
   return (
@@ -62,26 +64,21 @@ export const OnChainConfirmation = ({
 
           {(isMultiSendTxInfo(nestedTxDetails.txInfo) || isOrderTxInfo(nestedTxDetails.txInfo)) && (
             <ErrorBoundary fallback={<div>Error parsing data</div>}>
-              <Multisend txData={nestedTxDetails.txData} />
+              <Multisend txData={nestedTxDetails.txData} isExecuted={!!nestedTxDetails.executedAt} />
             </ErrorBoundary>
           )}
 
-          {chain && data && (
-            <Track {...MODALS_EVENTS.OPEN_NESTED_TX}>
-              <Link
-                href={{
-                  pathname: AppRoutes.transactions.tx,
-                  query: {
-                    safe: `${chain?.shortName}:${data?.to.value}`,
-                    id: nestedTxDetails.txId,
-                  },
-                }}
-                passHref
-                legacyBehavior
-              >
-                <ExternalLink>Open nested transaction</ExternalLink>
-              </Link>
-            </Track>
+          {isConfirmationView && (
+            <Stack spacing={2}>
+              <TxSimulation
+                disabled={false}
+                transactions={nestedTx}
+                title="Simulate nested transaction"
+                executionOwner={safeAddress}
+                nestedSafe={nestedTxDetails.safeAddress}
+              />
+              <TxSimulationMessage isNested />
+            </Stack>
           )}
         </>
       ) : txDetailsError ? (

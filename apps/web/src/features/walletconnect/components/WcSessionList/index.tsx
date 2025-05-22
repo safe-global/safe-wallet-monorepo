@@ -5,7 +5,7 @@ import { WalletConnectContext } from '@/features/walletconnect/WalletConnectCont
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { trackEvent } from '@/services/analytics'
 import { WALLETCONNECT_EVENTS } from '@/services/analytics/events/walletconnect'
-import { asError } from '@/services/exceptions/utils'
+import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { Button, CircularProgress, List, ListItem, ListItemAvatar, ListItemIcon, ListItemText } from '@mui/material'
 import type { SessionTypes } from '@walletconnect/types'
 import { useCallback, useContext } from 'react'

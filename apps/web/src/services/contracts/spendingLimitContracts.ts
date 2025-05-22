@@ -1,9 +1,9 @@
 import { getAllowanceModuleDeployment } from '@safe-global/safe-modules-deployments'
 
-import type { AllowanceModule } from '@/types/contracts'
-import { AllowanceModule__factory } from '@/types/contracts'
+import type { AllowanceModule } from '@safe-global/utils/types/contracts'
+import { AllowanceModule__factory } from '@safe-global/utils/types/contracts'
 import type { JsonRpcProvider, JsonRpcSigner } from 'ethers'
-import type { SafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import { type SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 
 enum ALLOWANCE_MODULE_VERSIONS {
@@ -13,7 +13,7 @@ enum ALLOWANCE_MODULE_VERSIONS {
 
 const ALL_VERSIONS = [ALLOWANCE_MODULE_VERSIONS['0.1.0'], ALLOWANCE_MODULE_VERSIONS['0.1.1']]
 
-const getDeployment = (chainId: string, modules: SafeInfo['modules']) => {
+const getDeployment = (chainId: string, modules: SafeState['modules']) => {
   if (!modules?.length) return
   for (let version of ALL_VERSIONS) {
     const deployment = getAllowanceModuleDeployment({ network: chainId, version })
@@ -31,7 +31,7 @@ export const getLatestSpendingLimitAddress = (chainId: string): string | undefin
 
 export const getDeployedSpendingLimitModuleAddress = (
   chainId: string,
-  modules: SafeInfo['modules'],
+  modules: SafeState['modules'],
 ): string | undefined => {
   const deployment = getDeployment(chainId, modules)
   return deployment?.networkAddresses[chainId]
@@ -40,7 +40,7 @@ export const getDeployedSpendingLimitModuleAddress = (
 // SDK request here: https://github.com/safe-global/safe-core-sdk/issues/263
 export const getSpendingLimitContract = (
   chainId: string,
-  modules: SafeInfo['modules'],
+  modules: SafeState['modules'],
   provider: JsonRpcProvider | JsonRpcSigner,
 ): AllowanceModule => {
   const allowanceModuleDeployment = getDeployment(chainId, modules)

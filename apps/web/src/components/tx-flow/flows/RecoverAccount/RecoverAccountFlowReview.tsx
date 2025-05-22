@@ -6,10 +6,9 @@ import type { ReactElement } from 'react'
 
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { getRecoveryProposalTransactions } from '@/features/recovery/services/transaction'
-import DecodedTx from '@/components/tx/DecodedTx'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import ConfirmationTitle, { ConfirmationTitleTypes } from '@/components/tx/SignOrExecuteForm/ConfirmationTitle'
-import TxChecks from '@/components/tx/SignOrExecuteForm/TxChecks'
+import TxChecks from '@/components/tx-flow/features/TxChecks/TxChecks'
 import TxCard from '../../common/TxCard'
 import { SafeTxContext } from '../../SafeTxProvider'
 import CheckWallet from '@/components/common/CheckWallet'
@@ -21,7 +20,7 @@ import { selectDelayModifierByRecoverer } from '@/features/recovery/services/sel
 import useWallet from '@/hooks/wallets/useWallet'
 import useOnboard from '@/hooks/wallets/useOnboard'
 import { TxModalContext } from '../..'
-import { asError } from '@/services/exceptions/utils'
+import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { trackError, Errors } from '@/services/exceptions'
 import { getPeriod } from '@safe-global/utils/utils/date'
 import useRecovery from '@/features/recovery/hooks/useRecovery'
@@ -36,9 +35,10 @@ import NetworkWarning from '@/components/new-safe/create/NetworkWarning'
 import { useGetTransactionDetailsQuery } from '@/store/api/gateway'
 import { skipToken } from '@reduxjs/toolkit/query'
 import useTxPreview from '@/components/tx/confirmation-views/useTxPreview'
+import Summary from '@/components/transactions/TxDetails/Summary'
 import useGasPrice from '@/hooks/useGasPrice'
 import { useCurrentChain } from '@/hooks/useChains'
-import { hasFeature, FEATURES } from '@/utils/chains'
+import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 
 export function RecoverAccountFlowReview({ params }: { params: RecoverAccountFlowProps }): ReactElement | null {
   // Form state
@@ -145,7 +145,7 @@ export function RecoverAccountFlowReview({ params }: { params: RecoverAccountFlo
 
         <Divider className={commonCss.nestedDivider} />
 
-        <DecodedTx txDetails={txDetails} tx={safeTx} {...txPreview} />
+        {txPreview && <Summary txDetails={txDetails} safeTxData={safeTx?.data} {...txPreview} />}
 
         <BlockaidBalanceChanges />
       </TxCard>

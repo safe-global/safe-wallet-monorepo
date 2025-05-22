@@ -7,7 +7,7 @@ import {
   getTransactionDetails,
   type TransactionDetails,
 } from '@safe-global/safe-gateway-typescript-sdk'
-import { asError } from '@/services/exceptions/utils'
+import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { safeOverviewEndpoints } from './safeOverviews'
 import { createSubmission, getSafe, getSafesByOwner, getSubmission } from '@safe-global/safe-client-gateway-sdk'
 

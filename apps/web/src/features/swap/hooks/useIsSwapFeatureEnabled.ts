@@ -1,7 +1,7 @@
 import { GeoblockingContext } from '@/components/common/GeoblockingProvider'
 import { useHasFeature } from '@/hooks/useChains'
-import { FEATURES } from '@/utils/chains'
 import { useContext } from 'react'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 
 const useIsSwapFeatureEnabled = () => {
   const isBlockedCountry = useContext(GeoblockingContext)

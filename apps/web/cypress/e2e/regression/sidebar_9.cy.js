@@ -59,8 +59,15 @@ describe('Sidebar UI tests', () => {
       cy.visit(link + staticSafes.SEP_STATIC_SAFE_4)
       clickOnBridgeOption()
       swaps.acceptLegalDisclaimer()
-      main.getIframeBody(iframeSelector).within(() => {
-        cy.contains(exchangeStr).should('be.visible')
+      // Wait for iframe to be present and visible
+      cy.get(iframeSelector).should('be.visible')
+      cy.wait(2000) // Add delay for iframe to load
+
+      // Try to access iframe content
+      cy.get(iframeSelector).then(($iframe) => {
+        const $body = $iframe.contents().find('body')
+        cy.wrap($body).should('exist')
+        cy.wrap($body).contains(exchangeStr).should('be.visible')
       })
     })
   })

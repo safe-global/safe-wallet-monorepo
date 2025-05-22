@@ -1,40 +1,27 @@
-import TxLayout from '@/components/tx-flow/common/TxLayout'
-import type { TxStep } from '../../common/TxLayout'
-import { RemoveSpendingLimit } from './RemoveSpendingLimit'
+import { RemoveSpendingLimitReview } from 'src/components/tx-flow/flows/RemoveSpendingLimit/RemoveSpendingLimitReview'
 import type { SpendingLimitState } from '@/store/spendingLimitsSlice'
 import SaveAddressIcon from '@/public/images/common/save-address.svg'
 import { useMemo } from 'react'
-import useTxStepper from '../../useTxStepper'
-import { ConfirmTxDetails } from '@/components/tx/ConfirmTxDetails'
 import { TxFlowType } from '@/services/analytics'
+import { TxFlow } from '../../TxFlow'
+import type ReviewTransaction from '@/components/tx/ReviewTransactionV2'
 
 const RemoveSpendingLimitFlow = ({ spendingLimit }: { spendingLimit: SpendingLimitState }) => {
-  const { step, nextStep, prevStep } = useTxStepper(undefined, TxFlowType.REMOVE_SPENDING_LIMIT)
-
-  const steps = useMemo<TxStep[]>(
-    () => [
-      {
-        txLayoutProps: { title: 'Confirm transaction' },
-        content: <RemoveSpendingLimit params={spendingLimit} key={0} onSubmit={() => nextStep(undefined)} />,
+  const ReviewTransactionComponent = useMemo<typeof ReviewTransaction>(
+    () =>
+      function ReviewRemoveSpendingLimit(props) {
+        return <RemoveSpendingLimitReview params={spendingLimit} {...props} />
       },
-      {
-        txLayoutProps: { title: 'Confirm transaction details', fixedNonce: true },
-        content: <ConfirmTxDetails key={1} onSubmit={() => {}} />,
-      },
-    ],
-    [nextStep, spendingLimit],
+    [spendingLimit],
   )
 
   return (
-    <TxLayout
+    <TxFlow
       subtitle="Remove spending limit"
+      eventCategory={TxFlowType.REMOVE_SPENDING_LIMIT}
       icon={SaveAddressIcon}
-      step={step}
-      onBack={prevStep}
-      {...(steps?.[step]?.txLayoutProps || {})}
-    >
-      {steps.map(({ content }) => content)}
-    </TxLayout>
+      ReviewTransactionComponent={ReviewTransactionComponent}
+    />
   )
 }
 

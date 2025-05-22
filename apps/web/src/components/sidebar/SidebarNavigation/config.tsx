@@ -34,14 +34,14 @@ export const navItems: NavItem[] = [
     href: AppRoutes.balances.index,
   },
   {
-    label: 'Bridge',
-    icon: <SvgIcon component={BridgeIcon} inheritViewBox />,
-    href: AppRoutes.bridge,
-  },
-  {
     label: 'Swap',
     icon: <SvgIcon component={SwapIcon} inheritViewBox />,
     href: AppRoutes.swap,
+  },
+  {
+    label: 'Bridge',
+    icon: <SvgIcon component={BridgeIcon} inheritViewBox />,
+    href: AppRoutes.bridge,
   },
   {
     label: 'Stake',

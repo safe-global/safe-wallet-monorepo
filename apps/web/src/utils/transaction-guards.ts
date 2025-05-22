@@ -1,5 +1,4 @@
 import type {
-  AddressEx,
   BaselineConfirmationView,
   Cancellation,
   ConflictHeader,
@@ -42,6 +41,7 @@ import type {
   StakingTxInfo,
   TransactionData,
 } from '@safe-global/safe-gateway-typescript-sdk'
+import { type AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import {
   ConfirmationViewTypes,
   ConflictType,
@@ -62,13 +62,18 @@ import {
   getSafeToL2MigrationDeployment,
   getSafeMigrationDeployment,
   getMultiSendDeployments,
+  getSignMessageLibDeployments,
 } from '@safe-global/safe-deployments'
-import { Safe__factory, Safe_to_l2_migration__factory } from '@/types/contracts'
-import { hasMatchingDeployment } from '@/services/contracts/deployments'
+import {
+  Safe__factory,
+  Safe_to_l2_migration__factory,
+  Sign_message_lib__factory,
+} from '@safe-global/utils/types/contracts'
+import { hasMatchingDeployment } from '@safe-global/utils/services/contracts/deployments'
 import { isMultiSendCalldata } from './transaction-calldata'
 import { decodeMultiSendData } from '@safe-global/protocol-kit/dist/src/utils'
 import { OperationType } from '@safe-global/safe-core-sdk-types'
-import { LATEST_SAFE_VERSION } from '@/config/constants'
+import { LATEST_SAFE_VERSION } from '@safe-global/utils/config/constants'
 import type {
   TransactionDetails,
   VaultDepositTransactionInfo,
@@ -82,11 +87,11 @@ export const isTxQueued = (value: TransactionStatus): boolean => {
 export const isAwaitingExecution = (txStatus: TransactionStatus): boolean =>
   TransactionStatus.AWAITING_EXECUTION === txStatus
 
-const isAddressEx = (owners: AddressEx[] | NamedAddress[]): owners is AddressEx[] => {
-  return (owners as AddressEx[]).every((owner) => owner.value !== undefined)
+const isAddressEx = (owners: AddressInfo[] | NamedAddress[]): owners is AddressInfo[] => {
+  return (owners as AddressInfo[]).every((owner) => owner.value !== undefined)
 }
 
-export const isOwner = (safeOwners: AddressEx[] | NamedAddress[] = [], walletAddress?: string) => {
+export const isOwner = (safeOwners: AddressInfo[] | NamedAddress[] = [], walletAddress?: string) => {
   if (isAddressEx(safeOwners)) {
     return safeOwners.some((owner) => sameAddress(owner.value, walletAddress))
   }
@@ -357,7 +362,11 @@ export const isConfirmableBy = (txSummary: TransactionSummary, walletAddress: st
   )
 }
 
-export const isExecutable = (txSummary: TransactionSummary, walletAddress: string, safe: SafeInfo): boolean => {
+export const isExecutable = (
+  txSummary: TransactionSummary,
+  walletAddress: string,
+  safe: Pick<SafeInfo, 'nonce'>,
+): boolean => {
   if (
     !txSummary.executionInfo ||
     !isMultisigExecutionInfo(txSummary.executionInfo) ||
@@ -424,6 +433,7 @@ export const isERC721Transfer = (value: TransferInfo): value is Erc721Transfer =
 }
 
 const safeInterface = Safe__factory.createInterface()
+const signMessageInterface = Sign_message_lib__factory.createInterface()
 /**
  * True if the tx calls `approveHash`
  */
@@ -437,6 +447,16 @@ export const isOnChainConfirmationTxInfo = (info: TransactionInfo): info is Cust
     return info.methodName === 'approveHash' && info.dataSize === '36'
   }
   return false
+}
+
+export const isOnChainSignMessageTxData = (data: TransactionData | undefined, chainId: string): boolean => {
+  const signMessageSelector = signMessageInterface.getFunction('signMessage').selector
+  const toAddress = data?.to.value
+  const isDelegateCall = data?.operation === Operation.DELEGATE
+  const isSignMessageLib =
+    toAddress !== undefined &&
+    hasMatchingDeployment(getSignMessageLibDeployments, toAddress, chainId, ['1.3.0', '1.4.1'])
+  return Boolean(data && data.hexData?.startsWith(signMessageSelector) && isSignMessageLib && isDelegateCall)
 }
 
 /**

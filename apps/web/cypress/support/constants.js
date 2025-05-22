@@ -37,13 +37,15 @@ export const goerlySafeName = /g(ö|oe)rli-safe/
 export const sepoliaSafeName = 'sepolia-safe'
 export const goerliToken = /G(ö|oe)rli Ether/
 
+export const spaceUrl = '/spaces/settings?spaceId='
+export const spaceMembersUrl = '/spaces/members?spaceId='
 export const prodbaseUrl = 'https://app.safe.global'
 export const swapWidget = 'https://swap.cow.fi/#/11155111/widget/swap/'
-export const bridgeWidget = 'https://iframe.jumper.exchange/?theme=light'
-export const safeTestAppurl = 'https://safe-apps-test-app.pages.dev'
-export const TX_Builder_url = 'https://safe-apps.dev.5afe.dev/tx-builder'
-export const drainAccount_url = 'https://safe-apps.dev.5afe.dev/drain-safe'
-export const testAppUrl = 'https://safe-test-app.com'
+export const bridgeWidget = 'https://iframe.jumper.exchange/bridge?fromChain=11155111&theme=light'
+export const safeTestAppurl = 'https://safe-apps-test-app.pages.dev/'
+export const TX_Builder_url = 'https://safe-apps.dev.5afe.dev/tx-builder/'
+export const drainAccount_url = 'https://safe-apps.dev.5afe.dev/drain-safe/'
+export const testAppUrl = 'https://safe-test-app.com/'
 export const swapUrl = '/swap?safe='
 export const addressBookUrl = '/address-book?safe='
 export const appsUrlGeneral = '/apps?safe='
@@ -58,6 +60,7 @@ export const transactionsQueued = 'transactions/queued'
 export const transactionUrl = '/transactions/tx?safe='
 export const openAppsUrl = '/apps/open?safe='
 export const homeUrl = '/home?safe='
+export const spacesUrl = '/welcome/spaces'
 export const welcomeUrl = '/welcome'
 export const welcomeAccountUrl = 'welcome/accounts'
 export const welcomeAccountsSepoliaUrl = 'welcome/accounts?chain=sep'
@@ -92,6 +95,7 @@ export const stagingCGWDelegatesUrl = '/delegates?safe='
 export const relayPath = '/relay/'
 export const stagingCGWAllTokensBalances = '/balances/USD?trusted=false&exclude_spam=false'
 
+export const spacesEndpoint = '**/**/spaces'
 export const proposeEndpoint = '/**/propose'
 export const appsEndpoint = '/**/safe-apps'
 export const transactionHistoryEndpoint = '**/history**'
@@ -206,6 +210,7 @@ export const tokenNames = {
   wrappedEther: 'Wrapped Ether',
   sepoliaEther: 'Sepolia Ether',
   qaToken: 'QAtest10',
+  cow: 'CoW Protocol Token',
 }
 
 export const addressBookErrrMsg = {

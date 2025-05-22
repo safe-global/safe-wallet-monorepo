@@ -1,9 +1,8 @@
-import { Safe__factory } from '@/types/contracts'
-import { Skeleton } from '@mui/material'
+import { Safe__factory } from '@safe-global/utils/types/contracts'
+import { Box, Skeleton, Stack } from '@mui/material'
 import { type TransactionData } from '@safe-global/safe-gateway-typescript-sdk'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 
-import DecodedTx from '@/components/tx/DecodedTx'
 import Link from 'next/link'
 import { useCurrentChain } from '@/hooks/useChains'
 import { AppRoutes } from '@/config/routes'
@@ -12,6 +11,9 @@ import type { SafeTransaction } from '@safe-global/safe-core-sdk-types'
 import ExternalLink from '@/components/common/ExternalLink'
 import { NestedTransaction } from '../NestedTransaction'
 import useTxPreview from '@/components/tx/confirmation-views/useTxPreview'
+import TxData from '../..'
+import { TxSimulation, TxSimulationMessage } from '@/components/tx/security/tenderly'
+import useSafeAddress from '@/hooks/useSafeAddress'
 
 const safeInterface = Safe__factory.createInterface()
 
@@ -49,6 +51,7 @@ export const ExecTransaction = ({
   isConfirmationView?: boolean
 }) => {
   const chain = useCurrentChain()
+  const safeAddress = useSafeAddress()
 
   const childSafeTx = useMemo<SafeTransaction | undefined>(
     () => (data?.hexData ? extractTransactionData(data.hexData) : undefined),
@@ -68,7 +71,7 @@ export const ExecTransaction = ({
   )
 
   const decodedNestedTxDataBlock = txPreview ? (
-    <DecodedTx {...txPreview} tx={childSafeTx} showMethodCall showAdvancedDetails={false} />
+    <TxData txData={txPreview.txData} txInfo={txPreview.txInfo} trusted imitation={false} />
   ) : null
 
   return (
@@ -77,17 +80,32 @@ export const ExecTransaction = ({
         <>
           {decodedNestedTxDataBlock}
 
+          {isConfirmationView && childSafeTx && data?.to.value && (
+            <Stack spacing={2}>
+              <TxSimulation
+                disabled={false}
+                transactions={childSafeTx}
+                title="Simulate nested transaction"
+                executionOwner={safeAddress}
+                nestedSafe={data?.to.value}
+              />
+              <TxSimulationMessage isNested />
+            </Stack>
+          )}
+
           {chain && data && (
-            <Link
-              href={{
-                pathname: AppRoutes.transactions.history,
-                query: { safe: `${chain.shortName}:${data.to.value}` },
-              }}
-              passHref
-              legacyBehavior
-            >
-              <ExternalLink>Open Safe</ExternalLink>
-            </Link>
+            <Box>
+              <Link
+                href={{
+                  pathname: AppRoutes.transactions.history,
+                  query: { safe: `${chain.shortName}:${data.to.value}` },
+                }}
+                passHref
+                legacyBehavior
+              >
+                <ExternalLink>Open Safe</ExternalLink>
+              </Link>
+            </Box>
           )}
         </>
       ) : error ? (

@@ -1,4 +1,4 @@
-import { Gnosis_safe__factory } from '@/types/contracts'
+import { Gnosis_safe__factory } from '@safe-global/utils/types/contracts'
 import { JsonRpcProvider, toBeHex } from 'ethers'
 import Safe from '@safe-global/protocol-kit'
 import {
@@ -6,7 +6,8 @@ import {
   getSafeContract,
 } from '@safe-global/protocol-kit/dist/src/contracts/safeDeploymentContracts'
 import { ImplementationVersionState } from '@safe-global/safe-gateway-typescript-sdk'
-import { initSafeSDK, isValidSafeVersion } from '../safeCoreSDK'
+import { initSafeSDK } from '../safeCoreSDK'
+import { isValidSafeVersion } from '@safe-global/utils/services/contracts/utils'
 
 jest.mock('@/services/contracts/safeContracts', () => {
   return {
@@ -17,10 +18,10 @@ jest.mock('@/services/contracts/safeContracts', () => {
 
 jest.mock('@safe-global/protocol-kit/dist/src/contracts/safeDeploymentContracts')
 
-jest.mock('@/types/contracts', () => {
+jest.mock('@safe-global/utils/types/contracts', () => {
   return {
     __esModule: true,
-    ...jest.requireActual('@/types/contracts'),
+    ...jest.requireActual('@safe-global/utils/types/contracts'),
   }
 })
 
@@ -34,9 +35,9 @@ jest.mock('@safe-global/protocol-kit', () => {
   }
 })
 
-jest.mock('@/types/contracts', () => {
+jest.mock('@safe-global/utils/types/contracts', () => {
   return {
-    ...jest.requireActual('@/types/contracts'),
+    ...jest.requireActual('@safe-global/utils/types/contracts'),
     _esModule: true,
     Gnosis_safe__factory: {
       connect: jest.fn().mockReturnValue({ VERSION: jest.fn() }),

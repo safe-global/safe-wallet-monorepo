@@ -1,9 +1,10 @@
 import React from 'react'
-import { Avatar, Text, Theme, View } from 'tamagui'
+import { Text, Theme } from 'tamagui'
 import { SafeListItem } from '@/src/components/SafeListItem'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon/SafeFontIcon'
 import { MultiSend } from '@safe-global/store/gateway/types'
-import { Transaction, CustomTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { SafeAvatar } from '@/src/components/SafeAvatar/SafeAvatar'
+import { Transaction, CustomTransactionInfo, SafeAppInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
 interface TxContractInteractionCardProps {
   bordered?: boolean
@@ -11,6 +12,7 @@ interface TxContractInteractionCardProps {
   inQueue?: boolean
   executionInfo?: Transaction['executionInfo']
   onPress: () => void
+  safeAppInfo?: SafeAppInfo | null
 }
 
 export function TxContractInteractionCard({
@@ -19,6 +21,7 @@ export function TxContractInteractionCard({
   txInfo,
   inQueue,
   onPress,
+  safeAppInfo,
 }: TxContractInteractionCardProps) {
   const logoUri = txInfo.to.logoUri
   const label = txInfo.to.name || 'Contract interaction'
@@ -26,22 +29,19 @@ export function TxContractInteractionCard({
     <SafeListItem
       label={label}
       icon={logoUri ? 'transaction-contract' : undefined}
-      type={txInfo.methodName || ''}
+      type={safeAppInfo?.name || txInfo.methodName || ''}
       bordered={bordered}
       executionInfo={executionInfo}
       inQueue={inQueue}
       leftNode={
-        <Avatar circular size="$10">
-          <Theme name="logo">
-            {logoUri && <Avatar.Image backgroundColor="$color" accessibilityLabel={label} src={logoUri} />}
-
-            <Avatar.Fallback backgroundColor="$background">
-              <View backgroundColor="$background" padding="$2" borderRadius={100}>
-                <SafeFontIcon name="code-blocks" color="$color" />
-              </View>
-            </Avatar.Fallback>
-          </Theme>
-        </Avatar>
+        <Theme name="logo">
+          <SafeAvatar
+            size="$10"
+            src={logoUri || ''}
+            label={label}
+            fallbackIcon={<SafeFontIcon name="code-blocks" color="$color" size={16} />}
+          />
+        </Theme>
       }
       rightNode={<Text>{txInfo.methodName}</Text>}
       onPress={onPress}

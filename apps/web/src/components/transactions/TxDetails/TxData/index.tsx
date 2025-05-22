@@ -23,9 +23,8 @@ import {
 } from '@/utils/transaction-guards'
 import { SpendingLimits } from '@/components/transactions/TxDetails/TxData/SpendingLimits'
 import { TransactionStatus, type TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
-import { type ReactElement } from 'react'
+import type { PropsWithChildren, ReactElement } from 'react'
 import RejectionTxInfo from '@/components/transactions/TxDetails/TxData/Rejection'
-import DecodedData from '@/components/transactions/TxDetails/TxData/DecodedData'
 import TransferTxInfo from '@/components/transactions/TxDetails/TxData/Transfer'
 import useChainId from '@/hooks/useChainId'
 import { MigrationToL2TxData } from './MigrationToL2TxData'
@@ -38,6 +37,7 @@ import { ExecTransaction } from './NestedTransaction/ExecTransaction'
 import SafeUpdate from './SafeUpdate'
 import VaultDepositTxDetails from '@/features/earn/components/VaultDepositTxDetails'
 import VaultRedeemTxDetails from '@/features/earn/components/VaultRedeemTxDetails'
+import DecodedData from './DecodedData'
 
 const TxData = ({
   txInfo,
@@ -45,13 +45,14 @@ const TxData = ({
   txDetails,
   trusted,
   imitation,
-}: {
+  children,
+}: PropsWithChildren<{
   txInfo: TransactionDetails['txInfo']
   txData: TransactionDetails['txData']
   txDetails?: TransactionDetails
   trusted: boolean
   imitation: boolean
-}): ReactElement => {
+}>): ReactElement => {
   const chainId = useChainId()
 
   if (isOrderTxInfo(txInfo)) {
@@ -123,7 +124,11 @@ const TxData = ({
     return <SafeUpdate txData={txData} />
   }
 
-  return <DecodedData txData={txData} toInfo={isCustomTxInfo(txInfo) ? txInfo.to : undefined} />
+  return !!children ? (
+    <>{children}</>
+  ) : (
+    <DecodedData txData={txData} toInfo={isCustomTxInfo(txInfo) ? txInfo.to : txData?.to} />
+  )
 }
 
 export default TxData

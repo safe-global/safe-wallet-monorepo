@@ -95,7 +95,7 @@ const DeleteSpaceDialog = ({ space, onClose }: { space: GetSpaceResponse | undef
 
       <DialogActions>
         <Button onClick={onClose}>No, keep it</Button>
-        <Button variant="danger" onClick={onDelete}>
+        <Button data-testid="space-confirm-delete-button" variant="danger" onClick={onDelete}>
           Permanently delete it
         </Button>
       </DialogActions>

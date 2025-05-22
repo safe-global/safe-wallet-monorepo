@@ -4,7 +4,7 @@ import FieldsGrid from '../FieldsGrid'
 
 const SendToBlock = ({
   address,
-  title = 'Recipient:',
+  title = 'Recipient',
   customAvatar,
   avatarSize,
   name,

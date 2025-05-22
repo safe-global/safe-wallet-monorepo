@@ -9,10 +9,10 @@ import {
 import { getSafeSingletonDeployment } from '@safe-global/safe-deployments'
 import { Interface } from 'ethers'
 import type { BaseTransaction } from '@safe-global/safe-apps-sdk'
-import type { SafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import { type SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { decodeMultiSendData } from '@safe-global/protocol-kit/dist/src/utils'
 
-function decodeOwnerManagementTransaction(safe: SafeInfo, transaction: BaseTransaction): SafeInfo {
+function decodeOwnerManagementTransaction(safe: SafeState, transaction: BaseTransaction): SafeState {
   const safeDeployment = getSafeSingletonDeployment({ network: safe.chainId, version: safe.version ?? undefined })
 
   if (!safeDeployment) {
@@ -53,7 +53,7 @@ function decodeOwnerManagementTransaction(safe: SafeInfo, transaction: BaseTrans
   }
 }
 
-export function getRecoveredSafeInfo(safe: SafeInfo, transaction: BaseTransaction): SafeInfo {
+export function getRecoveredSafeInfo(safe: SafeState, transaction: BaseTransaction): SafeState {
   const transactions = isMultiSendCalldata(transaction.data) ? decodeMultiSendData(transaction.data) : [transaction]
 
   return transactions.reduce((acc, cur) => {

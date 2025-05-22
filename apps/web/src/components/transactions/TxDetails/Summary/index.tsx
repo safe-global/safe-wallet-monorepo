@@ -1,25 +1,26 @@
-import type { ReactElement } from 'react'
-import React, { useState } from 'react'
-import { Link, Box, Stack, Typography } from '@mui/material'
+import { memo, type ReactElement } from 'react'
 import { generateDataRowValue, TxDataRow } from '@/components/transactions/TxDetails/Summary/TxDataRow'
-import { isCustomTxInfo, isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
+import { isCustomTxInfo, isMultiSendTxInfo, isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
 import type { TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
-import { Operation } from '@safe-global/safe-gateway-typescript-sdk'
 import type { SafeTransactionData } from '@safe-global/safe-core-sdk-types'
 import { dateString } from '@safe-global/utils/utils/formatters'
-import css from './styles.module.css'
-import DecodedData from '../TxData/DecodedData'
-import { SafeTxHashDataRow } from './SafeTxHashDataRow'
-import { Divider } from '@/components/tx/DecodedTx'
 import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
+import { Receipt } from '@/components/tx/ConfirmTxDetails/Receipt'
+import DecodedData from '../TxData/DecodedData'
+import ColorCodedTxAccordion from '@/components/tx/ColorCodedTxAccordion'
+import { Box, Divider, Stack, Typography } from '@mui/material'
+import DecoderLinks from './DecoderLinks'
+import isEqual from 'lodash/isEqual'
+import Multisend from '../TxData/DecodedData/Multisend'
+import { isMultiSendCalldata } from '@/utils/transaction-calldata'
 
 interface Props {
   safeTxData?: SafeTransactionData
   txData: TransactionDetails['txData']
   txInfo?: TransactionDetails['txInfo']
   txDetails?: TransactionDetails
-  isTxDetailsPreview?: boolean
-  hideDecodedData?: boolean
+  showMultisend?: boolean
+  showDecodedData?: boolean
 }
 
 const Summary = ({
@@ -27,17 +28,17 @@ const Summary = ({
   txData,
   txInfo,
   txDetails,
-  isTxDetailsPreview = false,
-  hideDecodedData = false,
+  showMultisend = true,
+  showDecodedData = true,
 }: Props): ReactElement => {
-  const [expanded, setExpanded] = useState<boolean>(!isTxDetailsPreview)
-  const toggleExpanded = () => setExpanded((val) => !val)
   const { txHash, executedAt } = txDetails ?? {}
-  const isCustom = txInfo && isCustomTxInfo(txInfo)
+  const customTxInfo = txInfo && isCustomTxInfo(txInfo) ? txInfo : undefined
+  const toInfo = customTxInfo?.to || txData?.addressInfoIndex?.[txData?.to.value] || txData?.to
+  const showDetails = Boolean(txInfo && txData)
 
-  let confirmations, baseGas, gasPrice, gasToken, safeTxGas, refundReceiver, submittedAt, nonce
+  let baseGas, gasPrice, gasToken, safeTxGas, refundReceiver, submittedAt, nonce
   if (txDetails && isMultisigDetailedExecutionInfo(txDetails.detailedExecutionInfo)) {
-    ;({ confirmations, baseGas, gasPrice, gasToken, safeTxGas, nonce } = txDetails.detailedExecutionInfo)
+    ;({ baseGas, gasPrice, gasToken, safeTxGas, submittedAt, nonce } = txDetails.detailedExecutionInfo)
     refundReceiver = txDetails.detailedExecutionInfo.refundReceiver?.value
   }
 
@@ -54,108 +55,65 @@ const Summary = ({
     safeTxGas: safeTxGas ?? BigInt(0).toString(),
   }
 
+  const isMultisend = (txInfo !== undefined && isMultiSendTxInfo(txInfo)) || isMultiSendCalldata(safeTxData.data)
+  const transactionData = txData ?? txDetails?.txData
+
   return (
     <>
+      {showMultisend && isMultisend && (
+        <Multisend txData={transactionData} isExecuted={!!txDetails?.executedAt} compact />
+      )}
+
       {txHash && (
-        <TxDataRow datatestid="tx-hash" title="Transaction hash:">
+        <TxDataRow datatestid="tx-hash" title="Transaction hash">
           {generateDataRowValue(txHash, 'hash', true)}{' '}
         </TxDataRow>
       )}
 
-      <TxDataRow datatestid="tx-created-at" title="Created:">
-        {submittedAt ? dateString(submittedAt) : null}
-      </TxDataRow>
-
-      {executedAt && (
-        <TxDataRow datatestid="tx-executed-at" title="Executed:">
-          {dateString(executedAt)}
+      {submittedAt && (
+        <TxDataRow datatestid="tx-created-at" title="Created">
+          <Typography variant="body2" component="div">
+            {dateString(submittedAt)}
+          </Typography>
         </TxDataRow>
       )}
 
-      {/* Advanced TxData */}
-      {txData && isTxDetailsPreview && (
-        <Link
-          data-testid="tx-advanced-details"
-          className={css.buttonExpand}
-          onClick={toggleExpanded}
-          component="button"
-          variant="body1"
-        >
-          Advanced details
-        </Link>
+      {executedAt && (
+        <TxDataRow datatestid="tx-executed-at" title="Executed">
+          <Typography variant="body2" component="div">
+            {dateString(executedAt)}
+          </Typography>
+        </TxDataRow>
       )}
 
-      {txData && expanded && (
-        <Stack mt={isTxDetailsPreview ? 2 : 0} gap={0.5}>
-          {!isCustom && !hideDecodedData && (
-            <>
-              <DecodedData txData={txData} toInfo={txData?.to} />
-              <Divider />
-            </>
-          )}
+      {showDetails && (
+        <Box mt={2}>
+          <ColorCodedTxAccordion txInfo={txInfo} txData={txData}>
+            <Stack gap={1} divider={<Divider sx={{ mx: -2, my: 1 }} />}>
+              {showDecodedData && <DecodedData txData={txData} toInfo={toInfo} />}
 
-          <Typography fontWeight="bold" pb={1}>
-            Transaction data
-          </Typography>
+              <Box>
+                <Typography variant="subtitle2" fontWeight={700} mb={2}>
+                  Advanced details
+                </Typography>
 
-          <TxDataRow datatestid="tx-to" title="to:">
-            {generateDataRowValue(safeTxData.to, 'address', true)}
-          </TxDataRow>
+                <DecoderLinks />
 
-          <TxDataRow datatestid="tx-value" title="value:">
-            {generateDataRowValue(safeTxData.value)}
-          </TxDataRow>
-
-          <TxDataRow datatestid="tx-raw-data" title="data:">
-            {generateDataRowValue(safeTxData.data, 'rawData')}
-          </TxDataRow>
-
-          <TxDataRow datatestid="tx-operation" title="operation:">
-            {`${safeTxData.operation} (${Operation[safeTxData.operation].toLowerCase()})`}
-          </TxDataRow>
-
-          <TxDataRow datatestid="tx-safe-gas" title="safeTxGas:">
-            {safeTxData.safeTxGas}
-          </TxDataRow>
-
-          <TxDataRow datatestid="tx-base-gas" title="baseGas:">
-            {safeTxData.baseGas}
-          </TxDataRow>
-
-          <TxDataRow datatestid="tx-gas-price" title="gasPrice:">
-            {safeTxData.gasPrice}
-          </TxDataRow>
-
-          <TxDataRow datatestid="tx-gas-token" title="gasToken:">
-            {generateDataRowValue(safeTxData.gasToken, 'hash', true)}
-          </TxDataRow>
-
-          <TxDataRow datatestid="tx-refund-receiver" title="refundReceiver:">
-            {generateDataRowValue(safeTxData.refundReceiver, 'hash', true)}
-          </TxDataRow>
-
-          <TxDataRow datatestid="tx-nonce" title="nonce:">
-            {safeTxData.nonce}
-          </TxDataRow>
-
-          {!!confirmations && <Box pt={1} />}
-
-          {confirmations?.map(({ signature }, index) => (
-            <TxDataRow datatestid="tx-signature" title={`Signature ${index + 1}:`} key={`signature-${index}:`}>
-              {generateDataRowValue(signature, 'rawData')}
-            </TxDataRow>
-          ))}
-
-          <Divider />
-
-          <Typography fontWeight="bold" pb={1}>
-            Transaction hashes
-          </Typography>
-          <SafeTxHashDataRow safeTxData={safeTxData} />
-        </Stack>
+                <Receipt
+                  safeTxData={safeTxData}
+                  txData={txData}
+                  txDetails={txDetails}
+                  txInfo={txInfo}
+                  withSignatures
+                  grid
+                />
+              </Box>
+            </Stack>
+          </ColorCodedTxAccordion>
+        </Box>
       )}
     </>
   )
 }
 
-export default Summary
+export default memo(Summary, isEqual)

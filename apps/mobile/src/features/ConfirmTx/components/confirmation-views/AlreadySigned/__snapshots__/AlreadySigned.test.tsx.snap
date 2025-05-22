@@ -18,8 +18,8 @@ exports[`AlreadySigned matches snapshot 1`] = `
       style={
         {
           "color": "#A1A3A7",
-          "fontSize": 16,
-          "fontWeight": 400,
+          "fontFamily": "DM Sans",
+          "fontSize": 14,
           "textAlign": "center",
         }
       }
@@ -74,8 +74,8 @@ exports[`AlreadySigned matches snapshot 1`] = `
           style={
             {
               "color": "#121312",
-              "fontSize": 16,
-              "fontWeight": 700,
+              "fontFamily": "DMSans-Bold",
+              "fontSize": 14,
               "textAlign": "center",
             }
           }
@@ -120,7 +120,6 @@ exports[`AlreadySigned matches snapshot 1`] = `
             "borderColor": "$background",
           }
         }
-        lineHeight={20}
         pointerEvents="none"
         role="button"
         style={
@@ -175,6 +174,7 @@ exports[`AlreadySigned matches snapshot 1`] = `
               "fontSize": 14,
               "letterSpacing": -0.1,
               "lineHeight": 15.400000000000002,
+              "marginBottom": -2.5,
               "userSelect": "none",
             }
           }

@@ -15,10 +15,11 @@ import BeamerIcon from '@/public/images/sidebar/whats-new.svg'
 import HelpCenterIcon from '@/public/images/sidebar/help-center.svg'
 import { ListItem } from '@mui/material'
 import DebugToggle from '../DebugToggle'
-import { HELP_CENTER_URL, IS_PRODUCTION } from '@/config/constants'
+import { IS_PRODUCTION } from '@/config/constants'
 import Track from '@/components/common/Track'
 import { OVERVIEW_EVENTS } from '@/services/analytics/events/overview'
 import { useCurrentChain } from '@/hooks/useChains'
+import { HELP_CENTER_URL } from '@safe-global/utils/config/constants'
 
 const SidebarFooter = (): ReactElement => {
   const dispatch = useAppDispatch()

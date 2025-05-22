@@ -6,7 +6,6 @@ import type { TokenInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import { MultiTransfersFields, TokenTransferType } from '@/components/tx-flow/flows/TokenTransfer'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import ExternalLink from '@/components/common/ExternalLink'
-import { HelpCenterArticle } from '@/config/constants'
 
 import css from './styles.module.css'
 import { TokenAmountFields } from '@/components/common/TokenAmountInput'
@@ -14,6 +13,7 @@ import { useContext, useEffect } from 'react'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { useHasPermission } from '@/permissions/hooks/useHasPermission'
 import { Permission } from '@/permissions/config'
+import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 
 const SpendingLimitRow = ({
   availableAmount,

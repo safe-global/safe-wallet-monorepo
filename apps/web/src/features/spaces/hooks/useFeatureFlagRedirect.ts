@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { AppRoutes } from '@/config/routes'
 import { useRouter } from 'next/router'
 import { useHasFeature } from '@/hooks/useChains'
-import { FEATURES } from '@/utils/chains'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 
 const useFeatureFlagRedirect = () => {
   const router = useRouter()

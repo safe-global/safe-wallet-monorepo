@@ -262,3 +262,95 @@ export const mockListItemByType = (type: TransactionListItemType): PendingTransa
     conflictType: ConflictType.NONE,
   } as TransactionQueuedItem
 }
+
+export const mockTwapOrder = {
+  type: TransactionInfoType.TWAP_ORDER,
+  sender: {
+    value: '0x000000',
+    name: 'something',
+  },
+  direction: TransferDirection.INCOMING,
+  recipient: {
+    value: '0x0ab',
+    name: 'something',
+  },
+  transferInfo: {
+    type: TransactionTokenType.ERC20,
+    tokenAddress: '0x000000',
+    value: '50000000000000000',
+    trusted: false,
+    imitation: true,
+  },
+  uid: '232',
+  humanDescription: 'a twap order',
+  status: 'fulfilled',
+  kind: 'buy',
+  validUntil: 11902381293,
+  sellAmount: '50000000000000000',
+  buyAmount: '50000000000000000',
+  executedSellAmount: '50000000000000000',
+  executedBuyAmount: '50000000000000000',
+  executedFee: '1000000000000000',
+  executedFeeToken: fakeToken,
+  sellToken: fakeToken2,
+  buyToken: fakeToken,
+  explorerUrl: 'http://google.com',
+  receiver: '0xbob',
+  owner: '0xalice',
+}
+
+export const mockSwapOrder = {
+  type: TransactionInfoType.SWAP_ORDER,
+  sender: {
+    value: '0x000000',
+    name: 'something',
+  },
+  direction: TransferDirection.INCOMING,
+  recipient: {
+    value: '0x0ab',
+    name: 'something',
+  },
+  transferInfo: {
+    type: TransactionTokenType.ERC20,
+    tokenAddress: '0x000000',
+    value: '50000000000000000',
+    trusted: false,
+    imitation: true,
+  },
+  uid: '233',
+  humanDescription: 'a swap order',
+  status: 'fulfilled',
+  kind: 'buy',
+  fullAppData: {
+    metadata: {
+      orderClass: {
+        orderClass: 'market',
+      },
+    },
+  },
+  validUntil: 11902381293,
+  sellAmount: '50000000000000000',
+  buyAmount: '50000000000000000',
+  executedSellAmount: '50000000000000000',
+  executedBuyAmount: '50000000000000000',
+  executedFee: '1000000000000000',
+  executedFeeToken: fakeToken,
+  sellToken: fakeToken2,
+  buyToken: fakeToken,
+  explorerUrl: 'http://google.com',
+  receiver: '0xbob',
+  owner: '0xalice',
+}
+
+export const mockLimitOrder = {
+  ...mockSwapOrder,
+  uid: '234',
+  humanDescription: 'a limit order',
+  fullAppData: {
+    metadata: {
+      orderClass: {
+        orderClass: 'limit',
+      },
+    },
+  },
+}

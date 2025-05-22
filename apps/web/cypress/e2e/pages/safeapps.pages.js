@@ -1,5 +1,5 @@
 import * as constants from '../../support/constants'
-import { accordionActionItem } from '../pages/create_tx.pages'
+import { accordionActionItem } from '../pages/nfts.pages'
 
 const searchAppInput = 'input[id="search-by-name"]'
 const appUrlInput = 'input[name="appUrl"]'
@@ -15,6 +15,7 @@ const appMessageInput = 'input[placeholder="Message"]'
 const txBuilderUntrustedFallbackAlert = '[data-testid="untrusted-fallback-handler-alert"]'
 export const handlerInput = 'input[id="contract-field-handler"]'
 const decodedTxSummary = '[data-testid="decoded-tx-summary"]'
+export const cowFallBackHandlerTitle = 'div[title="CowSwapFallbackHandler"]'
 
 const addBtnStr = /add/i
 const noAppsStr = /no Safe Apps found/i
@@ -61,6 +62,7 @@ export const contractMethodSelector = 'input[id="contract-method-selector"]'
 export const testAddressValue2 = 'testAddressValue'
 export const testBooleanValue = 'testBooleanValue'
 export const testFallback = 'fallback'
+export const cowFallback = 'setFallbackHandler'
 export const customData = 'Custom hex data'
 export const testBooleanValue1 = '1 testBooleanValue'
 export const testBooleanValue2 = '2 testBooleanValue'
@@ -69,7 +71,7 @@ export const transfer2AssetsStr = 'Transfer 2 assets'
 
 export const testTransfer1 = '1 transfer'
 export const testTransfer2 = '2 MetaMultiSigWallet: transfer'
-export const nativeTransfer2 = '2 native transfer'
+export const nativeTransfer2 = /2 Send.*ETH to.*/
 export const nativeTransfer1 = '1 native transfer'
 
 export const testNativeTransfer = 'native transfer'
@@ -147,6 +149,8 @@ export const permissionCheckboxNames = {
   geolocation: 'Geolocation',
   fullscreen: 'Fullscreen',
 }
+
+export const cowFallbackHandler = 'sep:0x2f55e8b20D0B9FEFA187AA7d00B6Cbe563605bF5'
 
 export function verifyUntrustedHandllerWarningVisible() {
   cy.get(txBuilderUntrustedFallbackAlert).should('be.visible')

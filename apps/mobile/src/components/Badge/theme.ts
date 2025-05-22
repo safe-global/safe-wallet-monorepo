@@ -26,7 +26,7 @@ export const badgeTheme = {
     color: tokens.color.primaryMainLight,
   },
   light_badge_warning: {
-    color: tokens.color.warning1MainLight,
+    color: tokens.color.warning1ContrastTextLight,
     background: tokens.color.warningBackgroundLight,
   },
   dark_badge_warning: {
@@ -56,6 +56,7 @@ export const badgeTheme = {
   light_badge_background: {
     color: tokens.color.textPrimaryLight,
     background: tokens.color.logoBackgroundLight,
+    borderColor: tokens.color.logoBackgroundLight,
   },
   light_badge_error: {
     color: tokens.color.errorMainLight,
@@ -63,7 +64,7 @@ export const badgeTheme = {
   },
   dark_badge_error: {
     color: tokens.color.errorMainDark,
-    background: tokens.color.errorBackgroundDark,
+    background: tokens.color.errorDarkDark,
   },
   light_badge_background_inverted: {
     color: tokens.color.logoBackgroundLight,

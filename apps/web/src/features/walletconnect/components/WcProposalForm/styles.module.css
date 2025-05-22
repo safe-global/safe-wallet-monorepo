@@ -10,7 +10,24 @@
 }
 
 .chain {
-  margin: 2px;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chainContainer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  align-items: center;
+  width: 100%;
+  margin: 0 auto;
+  gap: 10px;
+  padding: 0;
 }
 
 .origin {
@@ -23,6 +40,10 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-1);
+  width: 100%;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
 }
 
 .alert {

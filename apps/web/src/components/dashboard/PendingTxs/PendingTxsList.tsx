@@ -14,7 +14,8 @@ import { isSignableBy, isExecutable } from '@/utils/transaction-guards'
 import useWallet from '@/hooks/wallets/useWallet'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useRecoveryQueue } from '@/features/recovery/hooks/useRecoveryQueue'
-import type { SafeInfo, Transaction } from '@safe-global/safe-gateway-typescript-sdk'
+import type { Transaction } from '@safe-global/safe-gateway-typescript-sdk'
+import type { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import type { RecoveryQueueItem } from '@/features/recovery/services/recovery-state'
 
 const PendingRecoveryListItem = dynamic(() => import('./PendingRecoveryListItem'))
@@ -43,7 +44,7 @@ const LoadingState = () => (
   </div>
 )
 
-function getActionableTransactions(txs: Transaction[], safe: SafeInfo, walletAddress?: string): Transaction[] {
+function getActionableTransactions(txs: Transaction[], safe: SafeState, walletAddress?: string): Transaction[] {
   if (!walletAddress) {
     return txs
   }
@@ -62,7 +63,7 @@ export function _getTransactionsToDisplay({
   recoveryQueue: RecoveryQueueItem[]
   queue: Transaction[]
   walletAddress?: string
-  safe: SafeInfo
+  safe: SafeState
 }): [RecoveryQueueItem[], Transaction[]] {
   if (recoveryQueue.length >= MAX_TXS) {
     return [recoveryQueue.slice(0, MAX_TXS), []]

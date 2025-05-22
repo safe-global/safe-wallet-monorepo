@@ -22,9 +22,7 @@ const FallbackSwapWidgetNoSSR = dynamic(() => import('@/features/swap/components
 const SwapPage: NextPage = () => {
   const router = useRouter()
   const { token, amount } = router.query
-  // @ts-expect-error
   const isFeatureEnabled = useHasFeature(FEATURES.NATIVE_SWAPS)
-  // @ts-expect-error
   const isCowEnabled = useHasFeature(FEATURES.NATIVE_SWAPS_COW)
 
   let sell = undefined

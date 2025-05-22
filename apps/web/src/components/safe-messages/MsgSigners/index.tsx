@@ -1,7 +1,6 @@
+import type { MessageItem } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import { useState, type ReactElement } from 'react'
 import { Box, Link, List, ListItem, ListItemIcon, ListItemText, Skeleton, SvgIcon, Typography } from '@mui/material'
-import { SafeMessageStatus } from '@safe-global/safe-gateway-typescript-sdk'
-import type { SafeMessage } from '@safe-global/safe-gateway-typescript-sdk'
 import CircleOutlinedIcon from '@mui/icons-material/CircleOutlined'
 
 import CreatedIcon from '@/public/images/messages/created.svg'
@@ -38,8 +37,8 @@ const Signed = () => (
 
 const Dot = () => <SvgIcon component={DotIcon} inheritViewBox className={css.dot} />
 
-const shouldHideConfirmations = (msg: SafeMessage): boolean => {
-  const isConfirmed = msg.status === SafeMessageStatus.CONFIRMED
+const shouldHideConfirmations = (msg: MessageItem): boolean => {
+  const isConfirmed = msg.status === 'CONFIRMED'
 
   // Threshold reached or more than 3 confirmations
   return isConfirmed || msg.confirmations.length > 3
@@ -51,7 +50,7 @@ export const MsgSigners = ({
   showMissingSignatures = false,
   backgroundColor,
 }: {
-  msg: SafeMessage
+  msg: MessageItem
   showOnlyConfirmations?: boolean
   showMissingSignatures?: boolean
   backgroundColor?: string
@@ -66,7 +65,7 @@ export const MsgSigners = ({
 
   const missingConfirmations = [...new Array(Math.max(0, confirmationsRequired - confirmationsSubmitted))]
 
-  const isConfirmed = msg.status === SafeMessageStatus.CONFIRMED
+  const isConfirmed = msg.status === 'CONFIRMED'
 
   return (
     <List className={css.signers}>

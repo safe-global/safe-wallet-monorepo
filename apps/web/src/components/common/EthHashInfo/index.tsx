@@ -4,7 +4,7 @@ import useAllAddressBooks from '@/hooks/useAllAddressBooks'
 import useChainId from '@/hooks/useChainId'
 import { useAppSelector } from '@/store'
 import { selectSettings } from '@/store/settingsSlice'
-import { getBlockExplorerLink } from '@/utils/chains'
+import { getBlockExplorerLink } from '@safe-global/utils/utils/chains'
 import SrcEthHashInfo, { type EthHashInfoProps } from './SrcEthHashInfo'
 
 const EthHashInfo = ({

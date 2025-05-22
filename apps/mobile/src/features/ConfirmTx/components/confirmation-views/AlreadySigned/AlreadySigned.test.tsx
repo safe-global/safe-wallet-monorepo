@@ -8,10 +8,9 @@ import { server } from '@/src/tests/server'
 import { apiSliceWithChainsConfig } from '@safe-global/store/gateway/chains'
 import { makeStore } from '@/src/store'
 
-// Mock Linking
-jest.mock('react-native/Libraries/Linking/Linking', () => ({
-  openURL: jest.fn(),
-}))
+// Mock Linking.openURL
+const mockOpenURL = jest.fn()
+Linking.openURL = mockOpenURL
 
 describe('AlreadySigned', () => {
   const mockProps = {
@@ -47,7 +46,7 @@ describe('AlreadySigned', () => {
   }
 
   it('renders correctly with all required elements', async () => {
-    const { getByText } = await renderWithStore(<AlreadySigned {...mockProps} />)
+    const { getByText } = await renderWithStore(<AlreadySigned hasEnoughConfirmations={true} {...mockProps} />)
 
     expect(getByText('This transaction can be executed in the web app only.')).toBeTruthy()
     expect(getByText('Go to Web app')).toBeTruthy()
@@ -55,7 +54,7 @@ describe('AlreadySigned', () => {
   })
 
   it('opens web app URL when "Go to Web app" is pressed', async () => {
-    const { getByText } = await renderWithStore(<AlreadySigned {...mockProps} />)
+    const { getByText } = await renderWithStore(<AlreadySigned hasEnoughConfirmations={true} {...mockProps} />)
 
     const expectedUrl = SAFE_WEB_TRANSACTIONS_URL.replace(
       ':safeAddressWithChainPrefix',
@@ -63,11 +62,17 @@ describe('AlreadySigned', () => {
     ).replace(':txId', mockProps.txId)
 
     fireEvent.press(getByText('Go to Web app'))
-    expect(Linking.openURL).toHaveBeenCalledWith(expectedUrl)
+    expect(mockOpenURL).toHaveBeenCalledWith(expectedUrl)
+  })
+
+  it('renders correctly with all required elements', async () => {
+    const { getByText } = await renderWithStore(<AlreadySigned hasEnoughConfirmations={false} {...mockProps} />)
+
+    expect(getByText('Can be executed once the threshold is reached')).toBeTruthy()
   })
 
   it('matches snapshot', async () => {
-    const { toJSON } = await renderWithStore(<AlreadySigned {...mockProps} />)
+    const { toJSON } = await renderWithStore(<AlreadySigned hasEnoughConfirmations={true} {...mockProps} />)
     expect(toJSON()).toMatchSnapshot()
   })
 })

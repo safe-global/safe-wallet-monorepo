@@ -8,8 +8,13 @@ import { getSignerName } from '../AddSigner/utils'
 
 import { NormalizedSettingsChangeTransaction } from '../../ConfirmationView/types'
 import { CopyButton } from '@/src/components/CopyButton'
+import { TouchableOpacity } from 'react-native'
 
-export const formatRemoveSignerItems = (txInfo: NormalizedSettingsChangeTransaction, chain: Chain) => {
+export const formatRemoveSignerItems = (
+  txInfo: NormalizedSettingsChangeTransaction,
+  chain: Chain,
+  viewOnExplorer: () => void,
+) => {
   const newRemovedSigners = getSignerName(txInfo)
 
   return [
@@ -20,7 +25,9 @@ export const formatRemoveSignerItems = (txInfo: NormalizedSettingsChangeTransact
           <Identicon address={txInfo.settingsInfo?.owner?.value} size={24} />
           <Text fontSize="$4">{newRemovedSigners}</Text>
           <CopyButton value={txInfo.settingsInfo?.owner?.value} color={'$textSecondaryLight'} />
-          <SafeFontIcon name="external-link" size={14} color="textSecondaryLight" />
+          <TouchableOpacity onPress={viewOnExplorer}>
+            <SafeFontIcon name="external-link" size={14} color="$textSecondaryLight" />
+          </TouchableOpacity>
         </View>
       ),
     },

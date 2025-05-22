@@ -28,5 +28,6 @@ export const StyledInput = styled(Input, {
 
   style: {
     padding: 0,
+    lineHeight: 20.5,
   },
 })

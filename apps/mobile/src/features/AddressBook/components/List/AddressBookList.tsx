@@ -7,6 +7,7 @@ import { Pressable } from 'react-native'
 import { SafeListItem } from '@/src/components/SafeListItem'
 import { Text, View, type TextProps } from 'tamagui'
 import { EthAddress } from '@/src/components/EthAddress'
+import { type Address } from '@/src/types/address'
 
 interface AddressBookListProps {
   contacts: AddressInfo[]
@@ -46,12 +47,12 @@ const ContactItem: React.FC<AddressBookContactItemProps> = ({ contact, onPress }
               </Text>
             )}
 
-            <EthAddress address={`0x${contact.value}`} textProps={textProps} />
+            <EthAddress address={`${contact.value as Address}`} textProps={textProps} />
           </View>
         }
         leftNode={
           <View width="$10">
-            <Identicon address={`0x${contact.value}`} rounded size={40} />
+            <Identicon address={`${contact.value as Address}`} rounded size={40} />
           </View>
         }
         rightNode={
@@ -71,6 +72,10 @@ export const AddressBookList: React.FC<AddressBookListProps> = ({ contacts, onSe
   )
 
   const keyExtractor = useCallback((item: AddressInfo) => item.value, [])
+
+  if (contacts.length === 0) {
+    return null
+  }
 
   return <FlashList data={contacts} renderItem={renderContact} estimatedItemSize={200} keyExtractor={keyExtractor} />
 }

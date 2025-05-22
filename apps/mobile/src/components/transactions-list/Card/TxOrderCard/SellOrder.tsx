@@ -1,6 +1,6 @@
 import { SafeListItem } from '@/src/components/SafeListItem'
 import { Avatar, Text, Theme, View } from 'tamagui'
-import { formatValue } from '@/src/utils/formatters'
+import { ellipsis, formatValue } from '@/src/utils/formatters'
 import React from 'react'
 import {
   SwapOrderTransactionInfo,
@@ -14,14 +14,15 @@ interface TxSellOrderCardProps {
   inQueue?: boolean
   executionInfo?: Transaction['executionInfo']
   onPress: () => void
+  type: string
 }
 
-export function SellOrder({ order, bordered, executionInfo, inQueue, onPress }: TxSellOrderCardProps) {
+export function SellOrder({ order, type, bordered, executionInfo, inQueue, onPress }: TxSellOrderCardProps) {
   return (
     <SafeListItem
       label={`${order.sellToken.symbol} > ${order.buyToken.symbol}`}
       icon="transaction-swap"
-      type="Swap order"
+      type={type}
       executionInfo={executionInfo}
       bordered={bordered}
       onPress={onPress}
@@ -56,10 +57,10 @@ export function SellOrder({ order, bordered, executionInfo, inQueue, onPress }: 
       rightNode={
         <View alignItems="flex-end">
           <Text color="$primary">
-            +{formatValue(order.buyAmount, order.buyToken.decimals)} {order.buyToken.symbol}
+            ~{ellipsis(formatValue(order.buyAmount, order.buyToken.decimals), 10)} {order.buyToken.symbol}
           </Text>
           <Text fontSize="$3">
-            −{formatValue(order.sellAmount, order.sellToken.decimals)} {order.sellToken.symbol}
+            −{ellipsis(formatValue(order.sellAmount, order.sellToken.decimals), 10)} {order.sellToken.symbol}
           </Text>
         </View>
       }

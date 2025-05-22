@@ -71,6 +71,7 @@ const nestedSafeListPopover = '[data-testid="nested-safe-list"]'
 const breadcrumpContainer = '[data-testid="safe-breadcrumb-container"]'
 const parentSafeItem = 'div[aria-label="Parent Safe"]'
 const nestedSafeItem = 'div[aria-label="Nested Safe"]'
+const safeIconItem = '[data-testid="safe-icon"]'
 
 export function clickOnOpenNestedSafeListBtn() {
   cy.get(openNestedSafeListBtn).click()
@@ -91,6 +92,7 @@ export function clickOnSafeInPopover(safe) {
 }
 
 export function clickOnParentSafeInBreadcrumb() {
+  cy.wait(1000) // Needs time to render
   cy.get(breadcrumpContainer).within(() => {
     cy.get(parentSafeItem).within(() => {
       cy.get('a').click()
@@ -101,7 +103,7 @@ export function clickOnParentSafeInBreadcrumb() {
 export function checkParentSafeInBreadcrumb(name, address) {
   cy.get(breadcrumpContainer).within(() => {
     cy.get(parentSafeItem).within(() => {
-      cy.get(`a[href="/home?safe=${address}"]`).should('contain', name)
+      cy.get(`a[href*="${address}"]`).should('contain', name)
     })
   })
 }
@@ -425,6 +427,10 @@ export function verifyMissingSignature(safe) {
 
 export function verifyQueuedTx(safe) {
   return getSafeItemOptions(safe).find(queuedTxInfo).should('exist')
+}
+
+export function verifySafeIconData(safe) {
+  return getSafeByName(safe).find(safeIconItem).should('be.visible')
 }
 
 export function clickOnSafeItemOptionsBtn(name) {

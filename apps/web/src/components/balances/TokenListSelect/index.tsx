@@ -1,6 +1,5 @@
 import { useAppDispatch, useAppSelector } from '@/store'
 import { selectSettings, setTokenList, TOKEN_LISTS } from '@/store/settingsSlice'
-import { FEATURES } from '@/utils/chains'
 import type { SelectChangeEvent } from '@mui/material'
 import { Box, SvgIcon, Tooltip, Typography, FormControl, InputLabel, Select, MenuItem } from '@mui/material'
 import InfoIcon from '@/public/images/notifications/info.svg'
@@ -8,8 +7,9 @@ import ExternalLink from '@/components/common/ExternalLink'
 import { OnboardingTooltip } from '@/components/common/OnboardingTooltip'
 import Track from '@/components/common/Track'
 import { ASSETS_EVENTS, trackEvent } from '@/services/analytics'
-import { HelpCenterArticle } from '@/config/constants'
 import { useHasFeature } from '@/hooks/useChains'
+import { FEATURES } from '@safe-global/utils/utils/chains'
+import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 
 const LS_TOKENLIST_ONBOARDING = 'tokenlist_onboarding'
 

@@ -55,7 +55,9 @@ exports[`BatchTransactions should render a list of batch transactions 1`] = `
                     class="container"
                     data-mui-internal-clone-element="true"
                   >
-                    <b>
+                    <b
+                      class="tokenText"
+                    >
                       -
                       1000000000000
                        
@@ -107,25 +109,23 @@ exports[`BatchTransactions should render a list of batch transactions 1`] = `
                       <div
                         class="MuiBox-root css-8v90jo"
                       >
-                        <p
-                          class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
-                        >
-                          Send
-                           
-                          <b>
-                            <span
-                              aria-label="1000000000000"
-                              class="container"
-                              data-mui-internal-clone-element="true"
+                        Send
+                         
+                        <b>
+                          <span
+                            aria-label="1000000000000"
+                            class="container"
+                            data-mui-internal-clone-element="true"
+                          >
+                            <b
+                              class="tokenText"
                             >
-                              <b>
-                                1000000000000
-                                 
-                              </b>
-                            </span>
-                          </b>
-                           to:
-                        </p>
+                              1000000000000
+                               
+                            </b>
+                          </span>
+                        </b>
+                         to
                       </div>
                       <div
                         class="MuiBox-root css-7pf6at"
@@ -146,7 +146,7 @@ exports[`BatchTransactions should render a list of batch transactions 1`] = `
                             class="MuiBox-root css-1lchl8k"
                           >
                             <div
-                              class="MuiBox-root css-171onha"
+                              class="ethHashInfo-name MuiBox-root css-171onha"
                               title="GnosisSafeProxy"
                             >
                               <div
@@ -218,18 +218,18 @@ exports[`BatchTransactions should render a list of batch transactions 1`] = `
                       </div>
                     </div>
                     <div
-                      class="MuiGrid-root MuiGrid-container css-1m1clne-MuiGrid-root"
+                      class="MuiGrid-root MuiGrid-container css-1yff1ei-MuiGrid-root"
                     >
                       <div
-                        class="MuiGrid-root MuiGrid-item css-p1l0hx-MuiGrid-root"
+                        class="MuiGrid-root MuiGrid-item css-ezmk0c-MuiGrid-root"
                         data-testid="tx-row-title"
                         style="word-break: break-word;"
                       >
-                        <p
+                        <span
                           class="MuiTypography-root MuiTypography-body1 css-shf88x-MuiTypography-root"
                         >
                           Created:
-                        </p>
+                        </span>
                       </div>
                       <div
                         class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true css-1vd824g-MuiGrid-root"

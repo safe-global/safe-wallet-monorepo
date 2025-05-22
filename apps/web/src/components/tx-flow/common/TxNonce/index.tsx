@@ -276,7 +276,7 @@ const TxNonceForm = ({ nonce, recommendedNonce }: { nonce: string; recommendedNo
 const skeletonMinWidth = getFieldMinWidth('')
 
 const TxNonce = ({ canEdit = true }: { canEdit?: boolean } = {}) => {
-  const { nonce, recommendedNonce } = useContext(SafeTxContext)
+  const { nonce, recommendedNonce, isReadOnly } = useContext(SafeTxContext)
 
   return (
     <Box data-testid="nonce-fld" display="flex" alignItems="center" gap={1}>
@@ -286,7 +286,7 @@ const TxNonce = ({ canEdit = true }: { canEdit?: boolean } = {}) => {
       </Typography>
       {nonce === undefined || recommendedNonce === undefined ? (
         <Skeleton width={skeletonMinWidth} height="38px" />
-      ) : canEdit ? (
+      ) : canEdit && !isReadOnly ? (
         <TxNonceForm nonce={nonce.toString()} recommendedNonce={recommendedNonce.toString()} />
       ) : (
         <Typography ml={-1} fontWeight={700}>

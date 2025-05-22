@@ -5,14 +5,15 @@ import { useCounter } from '@/components/common/Notifications/useCounter'
 import type { MouseEventHandler } from 'react'
 import { useState } from 'react'
 import type { PendingProcessingTx } from '@/store/pendingTxsSlice'
-import useAsync from '@/hooks/useAsync'
+import useAsync from '@safe-global/utils/hooks/useAsync'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
 import { isSmartContract } from '@/utils/wallets'
 import useWallet from '@/hooks/wallets/useWallet'
 import { isSpeedableTx } from '@/features/speedup/utils/IsSpeedableTx'
 import { MODALS_EVENTS, trackEvent } from '@/services/analytics'
 import { useHasFeature } from '@/hooks/useChains'
-import { FEATURES } from '@/utils/chains'
+
+import { FEATURES } from '@safe-global/utils/utils/chains'
 
 type SpeedUpMonitorProps = {
   txId: string

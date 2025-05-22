@@ -8,7 +8,7 @@ import { isSmartContractWallet } from '@/utils/wallets'
 import { type ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import { initSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
 import { logError } from '@/services/exceptions'
-import ErrorCodes from '@/services/exceptions/ErrorCodes'
+import ErrorCodes from '@safe-global/utils/services/exceptions/ErrorCodes'
 import { tryOffChainTxSigning } from '@/services/tx/tx-sender/sdk'
 import type { TransactionResult } from '@safe-global/safe-core-sdk-types'
 

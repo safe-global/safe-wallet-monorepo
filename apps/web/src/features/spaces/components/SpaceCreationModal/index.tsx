@@ -47,9 +47,10 @@ function SpaceCreationModal({ onClose }: { onClose: () => void }): ReactElement 
       if (response.error) {
         throw response.error
       }
-    } catch (e) {
-      // TODO: Show more specific error message
-      setError('Failed creating the space. Please try again.')
+    } catch (error) {
+      // @ts-ignore
+      const errorMessage = error?.data?.message || 'Failed creating the space. Please try again.'
+      setError(errorMessage)
     } finally {
       setIsSubmitting(false)
     }
@@ -71,7 +72,7 @@ function SpaceCreationModal({ onClose }: { onClose: () => void }): ReactElement 
         <form onSubmit={onSubmit}>
           <DialogContent sx={{ py: 2 }}>
             <Box mb={2}>
-              <NameInput data-testid="name-input" label="Name" autoFocus name="name" required />
+              <NameInput data-testid="space-name-input" label="Name" autoFocus name="name" required />
             </Box>
             <Typography variant="body2" color="text.secondary">
               How is my data processed? Read our <ExternalLink href={AppRoutes.privacy}>privacy policy</ExternalLink>
@@ -89,6 +90,7 @@ function SpaceCreationModal({ onClose }: { onClose: () => void }): ReactElement 
               Cancel
             </Button>
             <Button
+              data-testid="create-space-modal-button"
               type="submit"
               variant="contained"
               disabled={!formState.isValid || isSubmitting}

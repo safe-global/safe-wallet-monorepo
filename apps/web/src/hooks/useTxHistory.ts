@@ -1,14 +1,15 @@
 import { useMemo } from 'react'
 import { type TransactionListPage } from '@safe-global/safe-gateway-typescript-sdk'
 import { useAppSelector } from '@/store'
-import useAsync from './useAsync'
+import useAsync from '@safe-global/utils/hooks/useAsync'
 import { selectTxHistory } from '@/store/txHistorySlice'
 import useSafeInfo from './useSafeInfo'
 import { fetchFilteredTxHistory, useTxFilter } from '@/utils/tx-history-filter'
 import { getTxHistory } from '@/services/transactions'
 import { selectSettings } from '@/store/settingsSlice'
 import { useHasFeature } from './useChains'
-import { FEATURES } from '@/utils/chains'
+
+import { FEATURES } from '@safe-global/utils/utils/chains'
 
 const useTxHistory = (
   pageUrl?: string,

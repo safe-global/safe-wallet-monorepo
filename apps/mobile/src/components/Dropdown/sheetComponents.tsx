@@ -13,12 +13,14 @@ const BackgroundComponent = React.memo(({ style }: BottomSheetBackgroundProps) =
   )
 })
 
-const BackdropComponent = React.memo(() => {
+const BackdropComponent = React.memo(({ shouldNavigateBack = true }: { shouldNavigateBack?: boolean }) => {
   const { close } = useBottomSheet()
   const router = useRouter()
   const handleClose = () => {
     close()
-    router.back()
+    if (shouldNavigateBack) {
+      router.back()
+    }
   }
 
   return (

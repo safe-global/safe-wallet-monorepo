@@ -1,7 +1,7 @@
 import type { ReactElement } from 'react'
 import React, { useMemo } from 'react'
 import type { Custom, TransactionData } from '@safe-global/safe-gateway-typescript-sdk'
-import { Box, Typography } from '@mui/material'
+import { Stack, Typography } from '@mui/material'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import TokenIcon from '@/components/common/TokenIcon'
 import SpendingLimitLabel from '@/components/common/SpendingLimitLabel'
@@ -12,8 +12,8 @@ import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
 import type { SpendingLimitMethods } from '@/utils/transaction-guards'
 import { isSetAllowance } from '@/utils/transaction-guards'
-import css from './styles.module.css'
 import chains from '@/config/chains'
+import TxDetailsRow from '@/components/tx/ConfirmTxDetails/TxDetailsRow'
 
 type SpendingLimitsProps = {
   txData?: TransactionData
@@ -42,12 +42,12 @@ export const SpendingLimits = ({ txData, txInfo, type }: SpendingLimitsProps): R
   if (!txData) return null
 
   return (
-    <Box className={css.container}>
+    <Stack spacing={1}>
       <Typography>
         <b>{`${isSetAllowanceMethod ? 'Modify' : 'Delete'} spending limit:`}</b>
       </Typography>
-      <Box className={css.group}>
-        <Typography sx={({ palette }) => ({ color: palette.primary.light })}>Beneficiary</Typography>
+
+      <TxDetailsRow label="Beneficiary" grid>
         <EthHashInfo
           address={(beneficiary as string) || txTo?.value || '0x'}
           name={txTo.name}
@@ -56,39 +56,35 @@ export const SpendingLimits = ({ txData, txInfo, type }: SpendingLimitsProps): R
           showCopyButton
           hasExplorer
         />
-      </Box>
-      <Box className={css.group}>
-        <Typography sx={({ palette }) => ({ color: palette.primary.light })}>
-          {isSetAllowanceMethod ? (tokenInfo ? 'Amount' : 'Raw Amount (in decimals)') : 'Token'}
-        </Typography>
-        <Box className={css.inline}>
-          {tokenInfo && (
-            <>
-              <TokenIcon logoUri={tokenInfo.logoUri} size={32} tokenSymbol={tokenInfo.symbol} />
-              <Typography>{tokenInfo.symbol}</Typography>
-            </>
-          )}
+      </TxDetailsRow>
 
-          {isSetAllowanceMethod && (
-            <>
-              {tokenInfo ? (
-                <Typography>
-                  {formatVisualAmount(amount as string, tokenInfo.decimals)} {tokenInfo.symbol}
-                </Typography>
-              ) : (
-                <Typography>{amount}</Typography>
-              )}
-            </>
-          )}
-        </Box>
-      </Box>
+      <TxDetailsRow label={isSetAllowanceMethod ? (tokenInfo ? 'Amount' : 'Raw Amount (in decimals)') : 'Token'} grid>
+        {tokenInfo && (
+          <>
+            <TokenIcon logoUri={tokenInfo.logoUri} size={32} tokenSymbol={tokenInfo.symbol} />
+            <Typography>{tokenInfo.symbol}</Typography>
+          </>
+        )}
+
+        {isSetAllowanceMethod && (
+          <>
+            {tokenInfo ? (
+              <Typography>
+                {formatVisualAmount(amount as string, tokenInfo.decimals)} {tokenInfo.symbol}
+              </Typography>
+            ) : (
+              <Typography>{amount}</Typography>
+            )}
+          </>
+        )}
+      </TxDetailsRow>
+
       {isSetAllowanceMethod && (
-        <Box className={css.group}>
-          <Typography sx={({ palette }) => ({ color: palette.primary.light })}>Reset time</Typography>
+        <TxDetailsRow label="Reset time" grid>
           <SpendingLimitLabel label={resetTimeLabel || 'One-time spending limit'} isOneTime={!resetTimeLabel} />
-        </Box>
+        </TxDetailsRow>
       )}
-    </Box>
+    </Stack>
   )
 }
 

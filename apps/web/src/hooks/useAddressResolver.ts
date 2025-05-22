@@ -1,11 +1,11 @@
 import useAddressBook from '@/hooks/useAddressBook'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
 import { lookupAddress } from '@/services/ens'
-import { FEATURES } from '@/utils/chains'
 import { useMemo } from 'react'
-import useAsync from '@/hooks/useAsync'
+import useAsync from '@safe-global/utils/hooks/useAsync'
 import useDebounce from './useDebounce'
 import { useHasFeature } from './useChains'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 
 export const useAddressResolver = (address: string) => {
   const addressBook = useAddressBook()

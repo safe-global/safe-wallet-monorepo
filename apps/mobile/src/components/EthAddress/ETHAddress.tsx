@@ -15,7 +15,7 @@ type Props = {
 }
 export const EthAddress = ({ address, copy, textProps, copyProps }: Props) => {
   return (
-    <View gap={'$1'} flexDirection={'row'}>
+    <View gap={'$1'} flexDirection={'row'} alignItems={'center'}>
       <Text color={'$color'} {...textProps}>
         {shortenAddress(address)}
       </Text>

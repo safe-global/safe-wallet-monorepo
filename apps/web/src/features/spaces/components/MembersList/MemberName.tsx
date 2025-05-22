@@ -14,7 +14,7 @@ const MemberName = ({ member }: { member: Member }) => {
         {member.name}{' '}
         {isCurrentUser && (
           <Typography variant="body2" component="span" color="text.secondary" ml={1}>
-            you
+            You
           </Typography>
         )}
       </Typography>

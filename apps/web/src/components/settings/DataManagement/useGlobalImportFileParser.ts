@@ -1,5 +1,5 @@
 import { logError } from '@/services/exceptions'
-import ErrorCodes from '@/services/exceptions/ErrorCodes'
+import ErrorCodes from '@safe-global/utils/services/exceptions/ErrorCodes'
 import { migrateAddedSafes } from '@/services/ls-migration/addedSafes'
 import { migrateAddressBook } from '@/services/ls-migration/addressBook'
 import { isChecksummedAddress } from '@safe-global/utils/utils/addresses'
@@ -7,10 +7,10 @@ import type { AddressBook, AddressBookState } from '@/store/addressBookSlice'
 import type { AddedSafesState } from '@/store/addedSafesSlice'
 import type { SafeAppsState } from '@/store/safeAppsSlice'
 import type { SettingsState } from '@/store/settingsSlice'
-import type { UndeployedSafesState } from '@/features/counterfactual/store/undeployedSafesSlice'
 
 import { useMemo } from 'react'
 import type { VisitedSafesState } from '@/store/visitedSafesSlice'
+import type { UndeployedSafesState } from '@safe-global/utils/features/counterfactual/store/types'
 
 export const enum SAFE_EXPORT_VERSION {
   V1 = '1.0',

@@ -12,7 +12,7 @@ import { connectedWalletBuilder } from '@/tests/builders/wallet'
 import { createMockSafeTransaction } from '@/tests/transactions'
 import { safeInfoBuilder } from '@/tests/builders/safe'
 import { type JsonRpcProvider, zeroPadValue } from 'ethers'
-import { Gnosis_safe__factory } from '@/types/contracts/factories/@safe-global/safe-deployments/dist/assets/v1.3.0'
+import { Gnosis_safe__factory } from '@safe-global/utils/types/contracts/factories/@safe-global/safe-deployments/dist/assets/v1.3.0'
 import { generatePreValidatedSignature } from '@safe-global/protocol-kit/dist/src/utils'
 
 const contractManager = mockContractManager()

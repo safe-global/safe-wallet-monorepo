@@ -25,7 +25,6 @@ import { getReadOnlyGnosisSafeContract } from '@/services/contracts/safeContract
 import extractTxInfo from '@/services/tx/extractTxInfo'
 import type { AdvancedParameters } from '@/components/tx/AdvancedParams'
 import type { SafeTransaction, TransactionOptions } from '@safe-global/safe-core-sdk-types'
-import { FEATURES, hasFeature } from '@/utils/chains'
 import uniqBy from 'lodash/uniqBy'
 import { Errors, logError } from '@/services/exceptions'
 import { type BaseTransaction } from '@safe-global/safe-apps-sdk'
@@ -33,6 +32,7 @@ import { isEmptyHexData } from '@/utils/hex'
 import { isMultiSendCalldata } from './transaction-calldata'
 import { decodeMultiSendData } from '@safe-global/protocol-kit/dist/src/utils'
 import { getOriginPath } from './url'
+import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 
 export const makeTxFromDetails = (txDetails: TransactionDetails): Transaction => {
   const getMissingSigners = ({
@@ -89,6 +89,14 @@ export const makeTxFromDetails = (txDetails: TransactionDetails): Transaction =>
     },
     conflictType: ConflictType.NONE,
   }
+}
+
+export const getSafeTxHashFromTxId = (txId: string) => {
+  if (txId.startsWith('multisig_')) {
+    return txId.slice(-66)
+  }
+
+  return
 }
 
 const getSignatures = (confirmations: Record<string, string>) => {

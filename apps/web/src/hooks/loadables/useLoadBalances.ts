@@ -1,13 +1,13 @@
 import { useMemo } from 'react'
 import { type Balances, useBalancesGetBalancesV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import { useAppSelector } from '@/store'
-import { type AsyncResult } from '../useAsync'
+import { type AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { selectCurrency, selectSettings, TOKEN_LISTS } from '@/store/settingsSlice'
 import { useCurrentChain } from '../useChains'
-import { FEATURES, hasFeature } from '@/utils/chains'
 import useSafeInfo from '../useSafeInfo'
 import { POLLING_INTERVAL } from '@/config/constants'
 import { useCounterfactualBalances } from '@/features/counterfactual/useCounterfactualBalances'
+import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 
 export const useTokenListSetting = (): boolean | undefined => {
   const chain = useCurrentChain()
@@ -29,7 +29,7 @@ const useLoadBalances = () => {
   const isCounterfactual = !safe.deployed
 
   let {
-    data: balances,
+    currentData: balances,
     isLoading: loading,
     error: errorStr,
   } = useBalancesGetBalancesV1Query(

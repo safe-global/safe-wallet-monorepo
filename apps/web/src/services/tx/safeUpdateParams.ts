@@ -1,20 +1,21 @@
 import type { SafeContractImplementationType } from '@safe-global/protocol-kit/dist/src/types/contracts'
 import type { MetaTransactionData, SafeVersion } from '@safe-global/safe-core-sdk-types'
 import { OperationType } from '@safe-global/safe-core-sdk-types'
-import type { ChainInfo, SafeInfo, TransactionData } from '@safe-global/safe-gateway-typescript-sdk'
+import type { ChainInfo, TransactionData } from '@safe-global/safe-gateway-typescript-sdk'
+import { type SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import semverSatisfies from 'semver/functions/satisfies'
 import { getReadOnlyFallbackHandlerContract, getReadOnlyGnosisSafeContract } from '@/services/contracts/safeContracts'
-import { assertValidSafeVersion } from '@/hooks/coreSDK/safeCoreSDK'
 import { SAFE_FEATURES } from '@safe-global/protocol-kit/dist/src/utils/safeVersions'
 import { hasSafeFeature } from '@/utils/safe-versions'
-import { getLatestSafeVersion } from '@/utils/chains'
 import { createUpdateMigration, SAFE_TO_L2_MIGRATION_VERSION } from '@/utils/safe-migrations'
 import { isMultiSendCalldata } from '@/utils/transaction-calldata'
 import { decodeMultiSendData } from '@safe-global/protocol-kit/dist/src/utils'
-import { Gnosis_safe__factory } from '@/types/contracts/factories/@safe-global/safe-deployments/dist/assets/v1.1.1'
+import { Gnosis_safe__factory } from '@safe-global/utils/types/contracts/factories/@safe-global/safe-deployments/dist/assets/v1.1.1'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { determineMasterCopyVersion } from '@/features/counterfactual/utils'
 import { getSafeMigrationDeployment } from '@safe-global/safe-deployments'
+import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
+import { assertValidSafeVersion } from '@safe-global/utils/services/contracts/utils'
 
 const getChangeFallbackHandlerCallData = async (
   safeContractInstance: SafeContractImplementationType,
@@ -38,7 +39,7 @@ const getChangeFallbackHandlerCallData = async (
  * - change the mastercopy address
  * - set the fallback handler address
  */
-export const createUpdateSafeTxs = async (safe: SafeInfo, chain: ChainInfo): Promise<MetaTransactionData[]> => {
+export const createUpdateSafeTxs = async (safe: SafeState, chain: ChainInfo): Promise<MetaTransactionData[]> => {
   assertValidSafeVersion(safe.version)
 
   // 1.3.0 Safes are updated using a delegate call to a migration contract
@@ -52,7 +53,7 @@ export const createUpdateSafeTxs = async (safe: SafeInfo, chain: ChainInfo): Pro
   ).getAddress()
   const currentReadOnlySafeContract = await getReadOnlyGnosisSafeContract(chain, safe.version)
 
-  const updatedReadOnlySafeContract = await getReadOnlyGnosisSafeContract(chain, getLatestSafeVersion(chain, true))
+  const updatedReadOnlySafeContract = await getReadOnlyGnosisSafeContract(chain, getLatestSafeVersion(chain))
 
   // @ts-expect-error this was removed in 1.3.0 but we need to support it for older safe versions
   const changeMasterCopyCallData = currentReadOnlySafeContract.encode('changeMasterCopy', [latestMasterCopyAddress])
@@ -79,7 +80,7 @@ const SAFE_1_1_1_INTERFACE = Gnosis_safe__factory.createInterface()
 
 export const extractTargetVersionFromUpdateSafeTx = (
   txData: TransactionData | undefined,
-  safe: SafeInfo,
+  safe: SafeState,
 ): SafeVersion | undefined => {
   if (!txData) {
     return

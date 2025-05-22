@@ -19,12 +19,13 @@ describe('Drain Account tests', { defaultCommandTimeout: 40000 }, () => {
 
   beforeEach(() => {
     const appUrl = constants.drainAccount_url
-    iframeSelector = `iframe[id="iframe-${appUrl}"]`
+    iframeSelector = `iframe[id="iframe-${encodeURIComponent(appUrl)}"]`
     const visitUrl = `/apps/open?safe=${safeAppSafes.SEP_SAFEAPP_SAFE_1}&appUrl=${encodeURIComponent(appUrl)}`
     cy.intercept(`**//v1/chains/11155111/safes/${safeAppSafes.SEP_SAFEAPP_SAFE_1.substring(4)}/balances/**`, {
       fixture: 'balances.json',
     })
     cy.visit(visitUrl)
+    cy.get(iframeSelector, { timeout: 30000 }).should('be.visible')
   })
 
   it('Verify drain can be created', () => {
@@ -54,7 +55,7 @@ describe('Drain Account tests', { defaultCommandTimeout: 40000 }, () => {
     navigation.clickOnDisconnectBtn()
   })
 
-  // TODO: ENS does not resolve
+  // Skip until ENS resolve bug is fixed
   it.skip('Verify a drain can be created when a ENS is specified', () => {
     cy.enter(iframeSelector).then((getBody) => {
       getBody().findByLabelText(safeapps.recipientStr).type(constants.ENS_TEST_SEPOLIA).wait(2000)
@@ -69,7 +70,7 @@ describe('Drain Account tests', { defaultCommandTimeout: 40000 }, () => {
       getBody().findByLabelText(safeapps.recipientStr).type(getMockAddress())
       getBody().findAllByText(safeapps.transferEverythingStr).click()
     })
-    navigation.clickOnModalCloseBtn(1)
+    navigation.clickOnModalCloseBtn(0)
     cy.enter(iframeSelector).then((getBody) => {
       getBody().findAllByText(safeapps.transferEverythingStr).should('be.visible')
     })

@@ -3,12 +3,15 @@ import {
   isExecTxInfo,
   isOnChainConfirmationTxData,
   isOnChainConfirmationTxInfo,
+  isOnChainSignMessageTxData,
   isSafeUpdateTxData,
 } from '../transaction-guards'
 import { faker } from '@faker-js/faker'
-import { Safe__factory } from '@/types/contracts'
+import { Safe__factory, Sign_message_lib__factory } from '@safe-global/utils/types/contracts'
 import { TransactionInfoType, TransactionTokenType, TransferDirection } from '@safe-global/safe-gateway-typescript-sdk'
 import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
+import { txDataBuilder } from '@/tests/builders/safeTx'
+import { getSignMessageLibDeployment } from '@safe-global/safe-deployments'
 
 describe('transaction-guards', () => {
   describe('isOnChainConfirmationTxData', () => {
@@ -276,6 +279,70 @@ describe('transaction-guards', () => {
       }
 
       expect(isSafeUpdateTxData(mockTxData)).toBeFalsy()
+    })
+  })
+
+  describe('isOnChainSignMessageTxData', () => {
+    it('should return false for undefined', () => {
+      expect(isOnChainSignMessageTxData(undefined, '1')).toBeFalsy()
+    })
+
+    it('should return false for arbitrary txData', () => {
+      expect(isOnChainSignMessageTxData(txDataBuilder().build(), '1')).toBeFalsy()
+    })
+
+    it('should return true for signMessage calls to the SignMessageLib', () => {
+      const signMessageInterface = Sign_message_lib__factory.createInterface()
+      const signMessageLibAddress = getSignMessageLibDeployment({ version: '1.3.0' })?.defaultAddress!
+
+      const mockTxData = txDataBuilder()
+        .with({
+          hexData: signMessageInterface.encodeFunctionData('signMessage', [faker.string.hexadecimal({ length: 64 })]),
+          to: { value: signMessageLibAddress },
+          addressInfoIndex: {},
+          value: '0',
+          operation: 1,
+          trustedDelegateCallTarget: true,
+        })
+        .build()
+
+      expect(isOnChainSignMessageTxData(mockTxData, '1')).toBeTruthy()
+    })
+
+    it('should return false for signMessage calls to a random address', () => {
+      const signMessageInterface = Sign_message_lib__factory.createInterface()
+      const randomAddress = faker.finance.ethereumAddress()
+
+      const mockTxData = txDataBuilder()
+        .with({
+          hexData: signMessageInterface.encodeFunctionData('signMessage', [faker.string.hexadecimal({ length: 64 })]),
+          to: { value: randomAddress },
+          addressInfoIndex: {},
+          value: '0',
+          operation: 1,
+          trustedDelegateCallTarget: true,
+        })
+        .build()
+
+      expect(isOnChainSignMessageTxData(mockTxData, '1')).toBeFalsy()
+    })
+
+    it('should return false for signMessage calls that are not delegate calls', () => {
+      const signMessageInterface = Sign_message_lib__factory.createInterface()
+      const signMessageLibAddress = getSignMessageLibDeployment({ version: '1.3.0' })?.defaultAddress!
+
+      const mockTxData = txDataBuilder()
+        .with({
+          hexData: signMessageInterface.encodeFunctionData('signMessage', [faker.string.hexadecimal({ length: 64 })]),
+          to: { value: signMessageLibAddress },
+          addressInfoIndex: {},
+          value: '0',
+          operation: 0, // Not a delegate call
+          trustedDelegateCallTarget: true,
+        })
+        .build()
+
+      expect(isOnChainSignMessageTxData(mockTxData, '1')).toBeFalsy()
     })
   })
 })

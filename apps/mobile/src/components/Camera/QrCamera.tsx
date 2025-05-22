@@ -1,7 +1,7 @@
 import { Camera, useCodeScanner, useCameraDevice, Code, CameraPermissionStatus } from 'react-native-vision-camera'
-import { View, Theme, H3 } from 'tamagui'
-import { Dimensions, Linking, Pressable, StyleSheet } from 'react-native'
-import React, { useCallback } from 'react'
+import { View, Theme, H3, getTokenValue } from 'tamagui'
+import { Dimensions, Linking, Pressable, StyleSheet, useColorScheme, useWindowDimensions } from 'react-native'
+import React, { useCallback, useEffect } from 'react'
 import { useRouter } from 'expo-router'
 
 const { width } = Dimensions.get('window')
@@ -16,6 +16,8 @@ type QrCameraProps = {
   onScan: (code: Code[]) => void
   isCameraActive: boolean
   permission: CameraPermissionStatus
+  hasPermission: boolean
+  onActivateCamera: () => void
 }
 
 function CameraHeader({ heading }: { heading: React.ReactNode }) {
@@ -48,30 +50,78 @@ function CameraFooter(props: { footer: React.ReactNode }) {
   )
 }
 
-function CameraLens({ denied, onPress }: { denied: boolean; onPress: () => Promise<void> }) {
+function CameraLens({
+  denied,
+  onPressSettings,
+  hasPermission,
+  onActivateCamera,
+  isCameraActive,
+}: {
+  denied: boolean
+  onPressSettings: () => Promise<void>
+  hasPermission: boolean
+  onActivateCamera: () => void
+  isCameraActive: boolean
+}) {
+  const colorScheme = useColorScheme()
+
+  let color = getTokenValue('$color.textPrimaryDark')
+
+  if (colorScheme === 'light') {
+    color = getTokenValue('$color.textPrimaryLight')
+  }
+
+  const handleGrantOrActivatePress = useCallback(async () => {
+    if (!hasPermission) {
+      const permission = await Camera.requestCameraPermission()
+
+      if (permission === 'denied') {
+        await onPressSettings()
+      }
+    } else if (hasPermission && !isCameraActive) {
+      onActivateCamera()
+    }
+  }, [hasPermission, isCameraActive, onActivateCamera, onPressSettings])
+
+  const buttonText = 'Enable camera'
+  const buttonAction = handleGrantOrActivatePress
+
   return (
-    <View style={[styles.transparentBox, denied && { backgroundColor: 'rgba(0, 0, 0, 0.8)' }]}>
+    <Pressable
+      style={[styles.transparentBox, denied && { backgroundColor: 'rgba(0, 0, 0, 0.8)' }]}
+      onPress={hasPermission && !isCameraActive ? handleGrantOrActivatePress : undefined}
+      disabled={denied || !hasPermission}
+    >
       {/* Green corners */}
       <View borderColor={denied ? '$error' : '$success'} style={[styles.corner, styles.topLeft]} />
       <View borderColor={denied ? '$error' : '$success'} style={[styles.corner, styles.topRight]} />
       <View borderColor={denied ? '$error' : '$success'} style={[styles.corner, styles.bottomLeft]} />
       <View borderColor={denied ? '$error' : '$success'} style={[styles.corner, styles.bottomRight]} />
 
-      {denied && (
+      {/* Show button/icon only if permission denied, not granted, or granted but inactive */}
+      {(denied || !hasPermission || (hasPermission && !isCameraActive)) && (
         <View style={styles.deniedCameraContainer}>
-          <SafeFontIcon name={'camera'} size={40} color={'$error'} />
-          <SafeButton rounded secondary onPress={onPress} marginTop={20}>
-            Enable camera
+          <SafeFontIcon name={'camera'} size={40} color={denied ? '$error' : color} />
+          <SafeButton rounded secondary onPress={buttonAction} marginTop={20}>
+            {buttonText}
           </SafeButton>
         </View>
       )}
-    </View>
+    </Pressable>
   )
 }
 
-export const QrCamera = ({ heading = 'Scan a QR Code', footer, onScan, isCameraActive, permission }: QrCameraProps) => {
+export const QrCamera = ({
+  heading = 'Scan a QR Code',
+  footer,
+  onScan,
+  isCameraActive,
+  permission,
+  hasPermission,
+  onActivateCamera,
+}: QrCameraProps) => {
   const device = useCameraDevice('back')
-
+  const { height } = useWindowDimensions()
   const codeScanner = useCodeScanner({
     codeTypes: ['qr'],
     onCodeScanned: (codes) => {
@@ -83,13 +133,20 @@ export const QrCamera = ({ heading = 'Scan a QR Code', footer, onScan, isCameraA
     await Linking.openSettings()
   }, [])
 
+  // Effect to automatically activate camera once permission is granted
+  useEffect(() => {
+    if (permission === 'granted' && hasPermission && !isCameraActive) {
+      onActivateCamera()
+    }
+  }, [permission, hasPermission, isCameraActive, onActivateCamera])
+
   const denied = permission === 'denied'
 
   return (
     <Theme name={'dark'}>
       <View style={styles.container}>
-        {/* Camera View */}
-        {device && (
+        {/* Only render Camera when active and device is available */}
+        {isCameraActive && device && (
           <Camera style={StyleSheet.absoluteFill} device={device} isActive={isCameraActive} codeScanner={codeScanner} />
         )}
 
@@ -97,7 +154,7 @@ export const QrCamera = ({ heading = 'Scan a QR Code', footer, onScan, isCameraA
         <View style={styles.overlay}>
           <View flex={1}>
             <BlurView
-              style={[styles.blurTop, denied && styles.deniedCameraBlur]}
+              style={[styles.blurTop, denied && styles.deniedCameraBlur, { height: height * 0.3 }]}
               intensity={30}
               tint={'systemUltraThinMaterialDark'}
             >
@@ -112,7 +169,13 @@ export const QrCamera = ({ heading = 'Scan a QR Code', footer, onScan, isCameraA
                 tint={'systemUltraThinMaterialDark'}
               />
 
-              <CameraLens denied={denied} onPress={openSettings} />
+              <CameraLens
+                denied={denied}
+                onPressSettings={openSettings}
+                hasPermission={hasPermission}
+                onActivateCamera={onActivateCamera}
+                isCameraActive={isCameraActive}
+              />
               <BlurView
                 style={[styles.sideBlur, denied && styles.deniedCameraBlur]}
                 intensity={30}
@@ -152,7 +215,6 @@ const styles = StyleSheet.create({
   blurTop: {
     flex: 0,
     backgroundColor: 'rgba(0, 0, 0, 0.7)', // Simulates blur
-    height: 250,
   },
   topContainer: {
     flex: 1,

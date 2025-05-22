@@ -3,6 +3,7 @@ import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
 import { TransferDirection } from '@safe-global/store/gateway/types'
 import { Text, TextProps } from 'tamagui'
 import { TransferTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { ellipsis } from '@/src/utils/formatters'
 
 const PRECISION = 20
 
@@ -14,6 +15,7 @@ interface TokenAmountProps {
   preciseAmount?: boolean
   textProps?: TextProps
   displayPositiveSign?: boolean
+  testID?: string
 }
 
 export const TokenAmount = ({
@@ -24,6 +26,7 @@ export const TokenAmount = ({
   preciseAmount,
   textProps,
   displayPositiveSign,
+  testID,
 }: TokenAmountProps): ReactElement => {
   const getSign = (): string => {
     if (direction === TransferDirection.OUTGOING) {
@@ -34,13 +37,16 @@ export const TokenAmount = ({
 
   const formatAmount = (): string => {
     if (decimals === undefined || decimals === null) {
-      return value
+      return ellipsis(value, 10)
     }
-    return formatVisualAmount(value, decimals, preciseAmount ? PRECISION : undefined)
+
+    const formattedAmount = formatVisualAmount(value, decimals, preciseAmount ? PRECISION : undefined)
+
+    return ellipsis(formattedAmount, 10)
   }
 
   return (
-    <Text fontWeight={700} {...textProps}>
+    <Text fontWeight={700} {...textProps} testID={testID}>
       {getSign()}
       {formatAmount()} {tokenSymbol}
     </Text>

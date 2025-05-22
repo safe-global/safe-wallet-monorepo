@@ -1,5 +1,8 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 import type { BaseQueryFn, FetchArgs, FetchBaseQueryError } from '@reduxjs/toolkit/query/react'
+import { REHYDRATE } from 'redux-persist'
+import type { UnknownAction } from '@reduxjs/toolkit'
+import type { Api, CombinedState } from '@reduxjs/toolkit/query'
 
 const CREDENTIAL_ROUTES = [
   /^\/v1\/users/,
@@ -56,4 +59,17 @@ export const dynamicBaseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBas
 export const cgwClient = createApi({
   baseQuery: dynamicBaseQuery,
   endpoints: () => ({}),
+  extractRehydrationInfo: (action: UnknownAction, { reducerPath }): CombinedState<{}, never, 'api'> | undefined => {
+    if (action.type === REHYDRATE && action.payload) {
+      // Use type assertion to tell TypeScript the expected structure
+      const payload = action.payload as {
+        [key: string]: { api?: unknown }
+      }
+
+      if (payload[reducerPath] && 'api' in payload[reducerPath]) {
+        return payload[reducerPath].api as CombinedState<{}, never, 'api'>
+      }
+    }
+    return undefined
+  },
 })

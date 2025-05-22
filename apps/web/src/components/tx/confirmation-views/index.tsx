@@ -1,13 +1,12 @@
 import type { TransactionPreview } from '@safe-global/safe-gateway-typescript-sdk'
 import { type TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
-import DecodedTx from '../DecodedTx'
 import type { SafeTransaction } from '@safe-global/safe-core-sdk-types'
 import {
   isAnyStakingTxInfo,
   isCustomTxInfo,
   isExecTxData,
   isOnChainConfirmationTxData,
-  isOrderTxInfo,
+  isOnChainSignMessageTxData,
   isSafeMigrationTxData,
   isSafeUpdateTxData,
   isSwapOrderTxInfo,
@@ -15,8 +14,7 @@ import {
   isVaultDepositTxInfo,
   isVaultRedeemTxInfo,
 } from '@/utils/transaction-guards'
-import { type ReactNode, useContext, useMemo } from 'react'
-import TxData from '@/components/transactions/TxDetails/TxData'
+import { type ReactNode, useContext, useMemo, useRef, useState, useEffect } from 'react'
 import type { NarrowConfirmationViewProps } from './types'
 import SettingsChange from './SettingsChange'
 import ChangeThreshold from './ChangeThreshold'
@@ -34,16 +32,21 @@ import { NestedSafeCreation } from './NestedSafeCreation'
 import { isNestedSafeCreation } from '@/utils/nested-safes'
 import VaultDepositConfirmation from 'src/features/earn/components/VaultDepositConfirmation'
 import VaultRedeemConfirmation from '@/features/earn/components/VaultRedeemConfirmation'
+import Summary from '@/components/transactions/TxDetails/Summary'
+import TxData from '@/components/transactions/TxDetails/TxData'
+import { isMultiSendCalldata } from '@/utils/transaction-calldata'
+import useChainId from '@/hooks/useChainId'
+import { TransactionWarnings } from '../TransactionWarnings'
+import { Box } from '@mui/material'
+import DecodedData from '@/components/transactions/TxDetails/TxData/DecodedData'
 
 type ConfirmationViewProps = {
   txDetails?: TransactionDetails
   txPreview?: TransactionPreview
   safeTx?: SafeTransaction
-  txId?: string
   isBatch?: boolean
   isApproval?: boolean
   isCreation?: boolean
-  showMethodCall?: boolean // @TODO: remove this prop when we migrate all tx types
   children?: ReactNode
 }
 
@@ -56,7 +59,7 @@ const getConfirmationViewComponent = ({
 
   if (isConfirmBatchView(txFlow)) return <BatchTransactions />
 
-  if (isSettingsChangeView(txInfo)) return <SettingsChange txInfo={txInfo as SettingsChange} />
+  if (isSettingsChangeView(txInfo)) return <SettingsChange txInfo={txInfo} />
 
   if (isOnChainConfirmationTxData(txData)) return <OnChainConfirmation data={txData} isConfirmationView />
 
@@ -86,9 +89,19 @@ const getConfirmationViewComponent = ({
 }
 
 const ConfirmationView = ({ safeTx, txPreview, txDetails, ...props }: ConfirmationViewProps) => {
-  const { txId } = props
   const { txFlow } = useContext(TxModalContext)
   const details = txDetails ?? txPreview
+  const chainId = useChainId()
+
+  // Used to check if the decoded data was rendered inside the TxData component
+  // If it was, we hide the decoded data in the Summary to avoid showing it twice
+  const decodedDataRef = useRef(null)
+  const [isDecodedDataVisible, setIsDecodedDataVisible] = useState(false)
+
+  useEffect(() => {
+    // If decodedDataRef.current is not null, the decoded data was rendered inside the TxData component
+    setIsDecodedDataVisible(!!decodedDataRef.current)
+  }, [])
 
   const ConfirmationViewComponent = useMemo(() => {
     return details
@@ -101,29 +114,33 @@ const ConfirmationView = ({ safeTx, txPreview, txDetails, ...props }: Confirmati
   }, [details, txFlow])
 
   const showTxDetails =
-    txId &&
-    !props.isCreation &&
-    txDetails &&
-    !isCustomTxInfo(txDetails.txInfo) &&
-    !isAnyStakingTxInfo(txDetails.txInfo) &&
-    !isOrderTxInfo(txDetails.txInfo)
+    details !== undefined &&
+    !isMultiSendCalldata(details.txData?.hexData ?? '0x') &&
+    !isOnChainSignMessageTxData(details?.txData, chainId)
 
   return (
     <>
+      <TransactionWarnings txData={details?.txData} />
       {ConfirmationViewComponent ||
-        (showTxDetails && details && (
-          <TxData txData={details?.txData} txInfo={details?.txInfo} txDetails={txDetails} imitation={false} trusted />
+        (details && showTxDetails && (
+          <TxData txData={details?.txData} txInfo={details?.txInfo} txDetails={txDetails} imitation={false} trusted>
+            <Box ref={decodedDataRef}>
+              <DecodedData
+                txData={details.txData}
+                toInfo={isCustomTxInfo(details.txInfo) ? details.txInfo.to : details.txData?.to}
+              />
+            </Box>
+          </TxData>
         ))}
 
       {props.children}
 
-      <DecodedTx
-        tx={safeTx}
+      <Summary
+        safeTxData={safeTx?.data}
         txDetails={txDetails}
         txData={details?.txData}
         txInfo={details?.txInfo}
-        showMultisend={!props.isBatch}
-        showMethodCall={props.showMethodCall && !ConfirmationViewComponent && !showTxDetails && !props.isApproval}
+        showDecodedData={!isDecodedDataVisible}
       />
     </>
   )

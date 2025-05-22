@@ -2,7 +2,7 @@ import { ContractVersions, getModuleInstance, KnownContracts } from '@gnosis.pm/
 import { SENTINEL_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
 import type { Delay, SupportedNetworks } from '@gnosis.pm/zodiac'
 import { type JsonRpcProvider, isAddress } from 'ethers'
-import type { SafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import { type SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { getGenericProxyMasterCopy, getGnosisProxyMasterCopy, isGenericProxy, isGnosisProxy } from './proxies'
@@ -63,7 +63,7 @@ export async function _isOfficialRecoveryDelayModifier(
 
 export async function getRecoveryDelayModifiers(
   chainId: string,
-  modules: SafeInfo['modules'],
+  modules: SafeState['modules'],
   provider: JsonRpcProvider,
 ): Promise<Array<Delay>> {
   if (!modules) {

@@ -1,5 +1,5 @@
 import { jsonToCSV } from 'react-papaparse'
-import type { SafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import { type SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import { AddOwnerFlow, ReplaceOwnerFlow, RemoveOwnerFlow } from '@/components/tx-flow/flows'
 import useAddressBook from '@/hooks/useAddressBook'
@@ -98,17 +98,6 @@ export const OwnerList = () => {
       }}
     >
       <Grid container spacing={3}>
-        <Grid item lg={4} xs={12}>
-          <Typography
-            variant="h4"
-            sx={{
-              fontWeight: 700,
-            }}
-          >
-            Members
-          </Typography>
-        </Grid>
-
         <Grid data-testid="signer-list" item xs>
           <Typography
             fontWeight="bold"
@@ -159,7 +148,10 @@ export const OwnerList = () => {
   )
 }
 
-function exportOwners({ chainId, address, owners }: SafeInfo, addressBook: AddressBook) {
+function exportOwners(
+  { chainId, address, owners }: Pick<SafeState, 'chainId' | 'address' | 'owners'>,
+  addressBook: AddressBook,
+) {
   const json = owners.map((owner) => {
     const address = owner.value
     const name = addressBook[address] || owner.name

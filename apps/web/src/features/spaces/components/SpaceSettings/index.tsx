@@ -50,6 +50,7 @@ const SpaceSettings = () => {
             <Typography mb={2}>This action cannot be undone.</Typography>
 
             <Button
+              data-testid="space-delete-button"
               variant="danger"
               onClick={() => {
                 setDeleteSpaceOpen(true)

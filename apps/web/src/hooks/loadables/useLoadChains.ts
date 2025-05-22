@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { useChainsGetChainsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { Errors, logError } from '@/services/exceptions'
 import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
-import type { AsyncResult } from '../useAsync'
+import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 
 const MAX_CHAINS = 40
 

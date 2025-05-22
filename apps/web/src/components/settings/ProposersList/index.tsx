@@ -10,12 +10,12 @@ import { useHasFeature } from '@/hooks/useChains'
 import useProposers from '@/hooks/useProposers'
 import AddIcon from '@/public/images/common/add.svg'
 import { SETTINGS_EVENTS } from '@/services/analytics'
-import { FEATURES } from '@/utils/chains'
 import { Box, Button, Grid, Paper, SvgIcon, Typography } from '@mui/material'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import ExternalLink from '@/components/common/ExternalLink'
-import { HelpCenterArticle } from '@/config/constants'
 import React, { useMemo, useState } from 'react'
+import { FEATURES } from '@safe-global/utils/utils/chains'
+import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 
 const headCells = [
   {
@@ -85,10 +85,6 @@ const ProposersList = () => {
     <Paper sx={{ mt: 2 }}>
       <Box data-testid="proposer-section" display="flex" flexDirection="column" gap={2}>
         <Grid container spacing={3}>
-          <Grid item lg={4} xs={12}>
-            <Typography variant="h4" fontWeight={700}></Typography>
-          </Grid>
-
           <Grid item xs>
             <Typography fontWeight="bold" mb={2}>
               Proposers <Chip label="New" sx={{ backgroundColor: 'secondary.light', color: 'static.main' }} />

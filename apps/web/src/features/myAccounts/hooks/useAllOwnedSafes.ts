@@ -1,7 +1,7 @@
 import type { AllOwnedSafes } from '@safe-global/safe-gateway-typescript-sdk'
-import type { AsyncResult } from '@/hooks/useAsync'
+import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { useGetAllOwnedSafesQuery } from '@/store/api/gateway'
-import { asError } from '@/services/exceptions/utils'
+import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { skipToken } from '@reduxjs/toolkit/query'
 
 const useAllOwnedSafes = (address: string): AsyncResult<AllOwnedSafes> => {

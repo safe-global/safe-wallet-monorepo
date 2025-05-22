@@ -1,49 +1,13 @@
-import chains from '@/config/chains'
-import type { UndeployedSafe } from '@/features/counterfactual/store/undeployedSafesSlice'
-import { getSafeSingletonDeployments, getSafeL2SingletonDeployments } from '@safe-global/safe-deployments'
-import ExternalStore from '@/services/ExternalStore'
-import { Gnosis_safe__factory } from '@/types/contracts'
-import { invariant } from '@/utils/helpers'
-import type { JsonRpcProvider } from 'ethers'
+import chains from '@safe-global/utils/config/chains'
+import { getSafeL2SingletonDeployments, getSafeSingletonDeployments } from '@safe-global/safe-deployments'
+import ExternalStore from '@safe-global/utils/services/ExternalStore'
+import { Gnosis_safe__factory } from '@safe-global/utils/types/contracts'
 import Safe from '@safe-global/protocol-kit'
-import type { SafeVersion } from '@safe-global/safe-core-sdk-types'
-import type { SafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
-import semverSatisfies from 'semver/functions/satisfies'
-import { isValidMasterCopy } from '@/services/contracts/safeContracts'
-import { sameAddress } from '@safe-global/utils/utils/addresses'
+import { isValidMasterCopy } from '@safe-global/utils/services/contracts/safeContracts'
 import { isPredictedSafeProps, isReplayedSafeProps } from '@/features/counterfactual/utils'
-
-export const isLegacyVersion = (safeVersion: string): boolean => {
-  const LEGACY_VERSION = '<1.3.0'
-  return semverSatisfies(safeVersion, LEGACY_VERSION)
-}
-
-export const isValidSafeVersion = (safeVersion?: SafeInfo['version']): safeVersion is SafeVersion => {
-  const SAFE_VERSIONS: SafeVersion[] = ['1.4.1', '1.3.0', '1.2.0', '1.1.1', '1.0.0']
-  return !!safeVersion && SAFE_VERSIONS.some((version) => semverSatisfies(safeVersion, version))
-}
-
-// `assert` does not work with arrow functions
-export function assertValidSafeVersion<T extends SafeInfo['version']>(safeVersion?: T): asserts safeVersion {
-  return invariant(isValidSafeVersion(safeVersion), `${safeVersion} is not a valid Safe Account version`)
-}
-
-type SafeCoreSDKProps = {
-  provider: JsonRpcProvider
-  chainId: SafeInfo['chainId']
-  address: SafeInfo['address']['value']
-  version: SafeInfo['version']
-  implementationVersionState: SafeInfo['implementationVersionState']
-  implementation: SafeInfo['implementation']['value']
-  undeployedSafe?: UndeployedSafe
-}
-
-const isInDeployments = (address: string, deployments: string | string[] | undefined): boolean => {
-  if (Array.isArray(deployments)) {
-    return deployments.some((deployment) => sameAddress(deployment, address))
-  }
-  return sameAddress(address, deployments)
-}
+import { isLegacyVersion } from '@safe-global/utils/services/contracts/utils'
+import { isInDeployments } from '@safe-global/utils/hooks/coreSDK/utils'
+import type { SafeCoreSDKProps } from '@safe-global/utils/hooks/coreSDK/types'
 
 // Safe Core SDK
 export const initSafeSDK = async ({

@@ -16,6 +16,7 @@ import Logger from '@/src/utils/logger'
 import { HDNodeWallet, Wallet } from 'ethers'
 import { NOTIFICATION_ACCOUNT_TYPE } from '../store/constants'
 import { OWNER_NOTIFICATIONS, REGULAR_NOTIFICATIONS } from '../utils/notifications'
+import { convertToUuid } from '@/src/utils/uuid'
 
 export function useGTW() {
   // Queries
@@ -49,7 +50,8 @@ export function useGTW() {
 
       try {
         const signature = await signMessage({ signer, message })
-        const deviceUuid = await DeviceInfo.getUniqueId()
+        const deviceId = await DeviceInfo.getUniqueId()
+        const deviceUuid = convertToUuid(deviceId)
 
         await authVerifyV1({
           siweDto: {
@@ -115,7 +117,8 @@ export function useGTW() {
         }
 
         const signature = await signMessage({ signer, message })
-        const deviceUuid = await DeviceInfo.getUniqueId()
+        const deviceId = await DeviceInfo.getUniqueId()
+        const deviceUuid = convertToUuid(deviceId)
 
         authVerifyV1({
           siweDto: {

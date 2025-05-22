@@ -14,6 +14,7 @@ import {
 import { Identicon } from '@/src/components/Identicon'
 import { Address } from '@/src/types/address'
 import { CopyButton } from '@/src/components/CopyButton'
+import { TouchableOpacity } from 'react-native'
 
 const mintBadgeProps: CircleProps = { borderRadius: '$2', paddingHorizontal: '$2', paddingVertical: '$1' }
 
@@ -22,11 +23,13 @@ export const formatGenericViewItems = ({
   txData,
   chain,
   executionInfo,
+  viewOnExplorer,
 }: {
   txInfo: SettingsChangeTransaction
   txData: TransactionData
   chain: Chain
   executionInfo: MultisigExecutionDetails
+  viewOnExplorer: () => void
 }) => {
   const genericViewName = txData.to.name ? ellipsis(txData.to.name, 18) : shortenAddress(txData.to.value)
 
@@ -54,7 +57,10 @@ export const formatGenericViewItems = ({
           )}
           <Text fontSize="$4">{genericViewName}</Text>
           <CopyButton value={txData.to.value} color={'$textSecondaryLight'} />
-          <SafeFontIcon name="external-link" size={14} color="textSecondaryLight" />
+
+          <TouchableOpacity onPress={viewOnExplorer}>
+            <SafeFontIcon name="external-link" size={14} color="$textSecondaryLight" />
+          </TouchableOpacity>
         </View>
       ),
     },

@@ -1,6 +1,8 @@
 import { View, Text, ScrollView, H2 } from 'tamagui'
 import { CopyButton } from '@/src/components/CopyButton'
 import { type Info } from '@/src/features/Developer/types'
+import { getCrashlytics } from '@react-native-firebase/crashlytics'
+import { SafeButton } from '@/src/components/SafeButton'
 
 type DeveloperProps = {
   info: Info
@@ -32,7 +34,7 @@ const Info = ({ info }: InfoProps) => {
 export const Developer = ({ info }: DeveloperProps) => {
   return (
     <View flex={1}>
-      <ScrollView marginHorizontal={'$4'}>
+      <ScrollView paddingHorizontal={'$4'}>
         <View>
           <H2>App info</H2>
           <Info info={info.application} />
@@ -40,6 +42,10 @@ export const Developer = ({ info }: DeveloperProps) => {
         <View marginTop={'$2'}>
           <H2>Device Info</H2>
           <Info info={info.device} />
+        </View>
+        <View marginTop={'$4'}>
+          <Text>The button below will crash the app on purpose. This is for testing purposes only.</Text>
+          <SafeButton onPress={() => getCrashlytics().crash()}>Crash App</SafeButton>
         </View>
       </ScrollView>
     </View>

@@ -1,8 +1,8 @@
 import { render } from '@/tests/test-utils'
 import ChangeThreshold from '.'
-import { ChangeThresholdReviewContext } from '@/components/tx-flow/flows/ChangeThreshold/context'
 import * as useSafeInfo from '@/hooks/useSafeInfo'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
+import { SettingsInfoType, type TransactionInfo, TransactionInfoType } from '@safe-global/safe-gateway-typescript-sdk'
 
 const extendedSafeInfo = extendedSafeInfoBuilder().build()
 
@@ -20,9 +20,14 @@ jest.spyOn(useSafeInfo, 'default').mockImplementation(() => ({
 describe('ChangeThreshold', () => {
   it('should display the ChangeThreshold component with the new threshold range', () => {
     const { container, getByLabelText } = render(
-      <ChangeThresholdReviewContext.Provider value={{ newThreshold: 3 }}>
-        <ChangeThreshold />
-      </ChangeThresholdReviewContext.Provider>,
+      <ChangeThreshold
+        txInfo={
+          {
+            type: TransactionInfoType.SETTINGS_CHANGE,
+            settingsInfo: { type: SettingsInfoType.CHANGE_THRESHOLD, threshold: 3 },
+          } as TransactionInfo
+        }
+      />,
     )
 
     expect(container).toMatchSnapshot()

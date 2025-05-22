@@ -1,21 +1,21 @@
+import type { MessagePage } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import { useEffect } from 'react'
 import { getSafeMessages } from '@safe-global/safe-gateway-typescript-sdk'
-import type { SafeMessageListPage } from '@safe-global/safe-gateway-typescript-sdk'
 
-import useAsync from '@/hooks/useAsync'
+import useAsync from '@safe-global/utils/hooks/useAsync'
 import { logError, Errors } from '@/services/exceptions'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import type { AsyncResult } from '@/hooks/useAsync'
+import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 
-export const useLoadSafeMessages = (): AsyncResult<SafeMessageListPage> => {
+export const useLoadSafeMessages = (): AsyncResult<MessagePage> => {
   const { safe, safeAddress, safeLoaded } = useSafeInfo()
 
-  const [data, error, loading] = useAsync<SafeMessageListPage>(
+  const [data, error, loading] = useAsync<MessagePage>(
     () => {
       if (!safeLoaded) return
       if (!safe.deployed) return Promise.resolve({ results: [] })
 
-      return getSafeMessages(safe.chainId, safeAddress)
+      return getSafeMessages(safe.chainId, safeAddress) as Promise<MessagePage>
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [safeLoaded, safe.chainId, safeAddress, safe.messagesTag, safe.deployed],

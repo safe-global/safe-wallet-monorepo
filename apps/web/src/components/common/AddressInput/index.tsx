@@ -17,7 +17,6 @@ import { useFormContext, useWatch, type Validate, get } from 'react-hook-form'
 import { validatePrefixedAddress } from '@safe-global/utils/utils/validation'
 import { useCurrentChain } from '@/hooks/useChains'
 import useNameResolver from './useNameResolver'
-import { FEATURES, hasFeature } from '@/utils/chains'
 import { cleanInputValue, parsePrefixedAddress } from '@safe-global/utils/utils/addresses'
 import useDebounce from '@/hooks/useDebounce'
 import CaretDownIcon from '@/public/images/common/caret-down.svg'
@@ -26,6 +25,7 @@ import classnames from 'classnames'
 import css from './styles.module.css'
 import inputCss from '@/styles/inputs.module.css'
 import Identicon from '../Identicon'
+import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 
 export type AddressInputProps = TextFieldProps & {
   name: string

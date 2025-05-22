@@ -1,5 +1,5 @@
-import { makeError } from 'ethers'
 import type { DmkError, ExecuteDeviceActionReturnType } from '@ledgerhq/device-management-kit'
+import { makeError } from 'ethers'
 import type {
   GetAddressDAOutput,
   SignPersonalMessageDAOutput,

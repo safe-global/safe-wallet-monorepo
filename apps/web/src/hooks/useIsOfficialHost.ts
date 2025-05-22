@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { IPFS_HOSTS, IS_OFFICIAL_HOST, OFFICIAL_HOSTS } from '@/config/constants'
 import packageJson from '../../package.json'
-import useAsync from './useAsync'
+import useAsync from '@safe-global/utils/hooks/useAsync'
 
 const GITHUB_API_URL = 'https://api.github.com/repos/5afe/safe-wallet-ipfs/releases/tags'
 

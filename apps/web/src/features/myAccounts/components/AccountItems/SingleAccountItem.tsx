@@ -31,10 +31,12 @@ import { addOrUpdateSafe, unpinSafe } from '@/store/addedSafesSlice'
 import SafeIcon from '@/components/common/SafeIcon'
 import useOnceVisible from '@/hooks/useOnceVisible'
 import { skipToken } from '@reduxjs/toolkit/query'
-import { defaultSafeInfo, showNotification, useGetSafeOverviewQuery } from '@/store/slices'
+import { showNotification, useGetSafeOverviewQuery } from '@/store/slices'
+import { defaultSafeInfo } from '@safe-global/store/slices/SafeInfo/utils'
 import FiatValue from '@/components/common/FiatValue'
 import { AccountInfoChips } from '../AccountInfoChips'
 import SendTransactionButton from '@/features/spaces/components/SafeAccounts/SendTransactionButton'
+import EthHashInfo from '@/components/common/EthHashInfo'
 
 type AccountItemProps = {
   safeItem: SafeItem
@@ -161,18 +163,6 @@ const SingleAccountItem = ({
       </Box>
 
       <Typography variant="body2" component="div" className={css.safeAddress}>
-        {name && (
-          <Typography
-            variant="subtitle2"
-            component="p"
-            className={css.safeName}
-            sx={{
-              fontWeight: 'bold',
-            }}
-          >
-            {name}
-          </Typography>
-        )}
         {isMultiChainItem ? (
           <Typography
             component="span"
@@ -184,18 +174,14 @@ const SingleAccountItem = ({
             {chain?.chainName}
           </Typography>
         ) : (
-          <>
-            {chain?.shortName}:
-            <Typography
-              component="span"
-              sx={{
-                color: 'var(--color-primary-light)',
-                fontSize: 'inherit',
-              }}
-            >
-              {shortenAddress(address)}
-            </Typography>
-          </>
+          <EthHashInfo
+            address={address}
+            name={name}
+            shortAddress
+            chainId={chain?.chainId}
+            showAvatar={false}
+            copyAddress={!isMobile}
+          />
         )}
         {!isMobile && (
           <AccountInfoChips

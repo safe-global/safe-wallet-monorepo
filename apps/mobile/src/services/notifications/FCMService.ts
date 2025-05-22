@@ -1,4 +1,4 @@
-import messaging, { FirebaseMessagingTypes } from '@react-native-firebase/messaging'
+import { FirebaseMessagingTypes, getMessaging } from '@react-native-firebase/messaging'
 import Logger from '@/src/utils/logger'
 import NotificationsService from './NotificationService'
 import { ChannelId, withTimeout } from '@/src/utils/notifications'
@@ -20,8 +20,8 @@ class FCMService {
   async saveFCMToken(): Promise<void> {
     try {
       // Register the app with FCM forcefully to get the token since it has not been reliably saved otherwise
-      await messaging().registerDeviceForRemoteMessages()
-      const fcmToken = await withTimeout(messaging().getToken(), 10000)
+      await getMessaging().registerDeviceForRemoteMessages()
+      const fcmToken = await withTimeout(getMessaging().getToken(), 10000)
       Logger.info('FCMService :: fcmToken', fcmToken)
       if (fcmToken) {
         store.dispatch(savePushToken(fcmToken))
@@ -32,7 +32,7 @@ class FCMService {
   }
 
   listenForMessagesForeground = (): UnsubscribeFunc => {
-    return messaging().onMessage(async (remoteMessage: FirebaseMessagingTypes.RemoteMessage) => {
+    return getMessaging().onMessage(async (remoteMessage: FirebaseMessagingTypes.RemoteMessage) => {
       NotificationsService.displayNotification({
         channelId: ChannelId.DEFAULT_NOTIFICATION_CHANNEL_ID,
         title: remoteMessage.notification?.title || '',
@@ -42,8 +42,9 @@ class FCMService {
       Logger.info('listenForMessagesForeground: listening for messages in Foreground', remoteMessage)
     })
   }
+
   listenForMessagesBackground = (): void => {
-    messaging().setBackgroundMessageHandler(async (remoteMessage: FirebaseMessagingTypes.RemoteMessage) => {
+    getMessaging().setBackgroundMessageHandler(async (remoteMessage: FirebaseMessagingTypes.RemoteMessage) => {
       NotificationsService.displayNotification({
         channelId: ChannelId.DEFAULT_NOTIFICATION_CHANNEL_ID,
         title: remoteMessage.notification?.title || '',
@@ -55,7 +56,7 @@ class FCMService {
   }
 
   async registerAppWithFCM(): Promise<void> {
-    await messaging()
+    await getMessaging()
       .registerDeviceForRemoteMessages()
       .then((status: unknown) => {
         Logger.info('registerDeviceForRemoteMessages status', status)

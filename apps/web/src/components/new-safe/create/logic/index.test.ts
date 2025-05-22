@@ -15,16 +15,15 @@ import { toBeHex } from 'ethers'
 import {
   Gnosis_safe__factory,
   Proxy_factory__factory,
-} from '@/types/contracts/factories/@safe-global/safe-deployments/dist/assets/v1.3.0'
+} from '@safe-global/utils/types/contracts/factories/@safe-global/safe-deployments/dist/assets/v1.3.0'
 import {
   getReadOnlyFallbackHandlerContract,
   getReadOnlyGnosisSafeContract,
   getReadOnlyProxyFactoryContract,
 } from '@/services/contracts/safeContracts'
 import * as gateway from '@safe-global/safe-gateway-typescript-sdk'
-import { FEATURES, getLatestSafeVersion } from '@/utils/chains'
 import { chainBuilder } from '@/tests/builders/chains'
-import { type ReplayedSafeProps } from '@/store/slices'
+import { type ReplayedSafeProps } from '@safe-global/utils/features/counterfactual/store/types'
 import { faker } from '@faker-js/faker'
 import { ECOSYSTEM_ID_ADDRESS } from '@/config/constants'
 import {
@@ -34,7 +33,8 @@ import {
   getSafeSingletonDeployment,
   getSafeToL2SetupDeployment,
 } from '@safe-global/safe-deployments'
-import { Safe_to_l2_setup__factory } from '@/types/contracts'
+import { Safe_to_l2_setup__factory } from '@safe-global/utils/types/contracts'
+import { FEATURES, getLatestSafeVersion } from '@safe-global/utils/utils/chains'
 
 const provider = new JsonRpcProvider(undefined, { name: 'ethereum', chainId: 1 })
 

@@ -16,9 +16,9 @@ import { useGetOwnedSafesQuery } from '@/store/slices'
 import { NESTED_SAFE_EVENTS } from '@/services/analytics/events/nested-safes'
 import Track from '@/components/common/Track'
 import { useHasFeature } from '@/hooks/useChains'
-import { FEATURES } from '@/utils/chains'
 
 import tableCss from '@/components/common/EnhancedTable/styles.module.css'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 
 export function NestedSafesList(): ReactElement | null {
   const isEnabled = useHasFeature(FEATURES.NESTED_SAFES)

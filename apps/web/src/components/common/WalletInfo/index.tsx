@@ -13,6 +13,7 @@ import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew'
 import useChainId from '@/hooks/useChainId'
 import { useAuthLogoutV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/auth'
 import { setUnauthenticated } from '@/store/authSlice'
+import { logError, Errors } from '@/services/exceptions'
 
 type WalletInfoProps = {
   wallet: ConnectedWallet
@@ -44,7 +45,7 @@ export const WalletInfo = ({ wallet, balance, currentChainId, onboard, addressBo
       await authLogout()
       dispatch(setUnauthenticated())
     } catch (error) {
-      // TODO: handle error
+      logError(Errors._108, error)
     }
 
     handleClose()

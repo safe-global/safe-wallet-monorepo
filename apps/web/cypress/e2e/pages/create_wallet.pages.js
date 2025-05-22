@@ -1,5 +1,5 @@
 import * as main from '../pages/main.page'
-import { connectedWalletExecMethod, relayExecMethod } from '../pages/create_tx.pages'
+import { connectedWalletExecMethod, relayExecMethod, connectedWalletMethod } from '../pages/create_tx.pages'
 import * as sidebar from '../pages/sidebar.pages'
 import * as constants from '../../support/constants'
 
@@ -118,8 +118,8 @@ export function verifyCFSafeCreated() {
   main.verifyElementsIsVisible([sidebar.pendingActivationIcon, safeActivationSection])
 }
 
-export function selectPayLaterOption() {
-  cy.get(connectedWalletExecMethod).click()
+export function selectPayNowOption() {
+  cy.get(connectedWalletMethod).click()
 }
 
 export function selectRelayOption() {

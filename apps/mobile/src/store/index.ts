@@ -17,15 +17,23 @@ import devToolsEnhancer from 'redux-devtools-expo-dev-plugin'
 import { GATEWAY_URL, isTestingEnv } from '../config/constants'
 import { web3API } from './signersBalance'
 import { setBaseUrl as setSDKBaseURL } from '@safe-global/safe-gateway-typescript-sdk'
+import { createFilter } from '@safe-global/store/utils/persistTransformFilter'
 
 setSDKBaseURL(GATEWAY_URL)
 setBaseUrl(GATEWAY_URL)
+
+const cgwClientFilter = createFilter(
+  cgwClient.reducerPath,
+  ['queries.getChainsConfig(undefined)', 'config'],
+  ['queries.getChainsConfig(undefined)', 'config'],
+)
 
 const persistConfig = {
   key: 'root',
   version: 1,
   storage: reduxStorage,
-  blacklist: [cgwClient.reducerPath, web3API.reducerPath, 'myAccounts'],
+  blacklist: [web3API.reducerPath, 'myAccounts'],
+  transforms: [cgwClientFilter],
 }
 
 export const rootReducer = combineReducers({
@@ -44,7 +52,11 @@ export const rootReducer = combineReducers({
   [cgwClient.reducerPath]: cgwClient.reducer,
 })
 
-const persistedReducer = persistReducer(persistConfig, rootReducer)
+// Define the type for the root reducer
+export type RootReducerState = ReturnType<typeof rootReducer>
+
+// Use the persistReducer with the correct types
+const persistedReducer = persistReducer<RootReducerState>(persistConfig, rootReducer)
 
 export const makeStore = () =>
   configureStore({

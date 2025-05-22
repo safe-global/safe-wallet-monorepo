@@ -1,10 +1,10 @@
 import { useIsWalletProposer } from '@/hooks/useProposers'
-import { FEATURES } from '@/utils/chains'
 import { useAppSelector } from '@/store'
 import { selectSpendingLimits } from '@/store/spendingLimitsSlice'
 import useWallet from '@/hooks/wallets/useWallet'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import { useHasFeature } from './useChains'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 
 export const useIsSpendingLimitBeneficiary = (): boolean => {
   const isEnabled = useHasFeature(FEATURES.SPENDING_LIMIT)

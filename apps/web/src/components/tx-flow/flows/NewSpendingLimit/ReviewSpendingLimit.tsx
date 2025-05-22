@@ -2,7 +2,7 @@ import { useCurrentChain } from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useEffect, useMemo, useContext } from 'react'
 import { useSelector } from 'react-redux'
-import { Typography, Grid, Alert } from '@mui/material'
+import { Typography, Alert } from '@mui/material'
 
 import SpendingLimitLabel from '@/components/common/SpendingLimitLabel'
 import { getResetTimeOptions } from '@/components/transactions/TxDetails/TxData/SpendingLimits'
@@ -16,41 +16,38 @@ import { formatVisualAmount, safeParseUnits } from '@safe-global/utils/utils/for
 import type { NewSpendingLimitFlowProps } from '.'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import { SafeTxContext } from '../../SafeTxProvider'
-import ReviewTransaction from '@/components/tx/ReviewTransaction'
+import ReviewTransaction, { type ReviewTransactionProps } from '@/components/tx/ReviewTransactionV2'
+import { TxFlowContext, type TxFlowContextType } from '../../TxFlowProvider'
+import TxDetailsRow from '@/components/tx/ConfirmTxDetails/TxDetailsRow'
 
-export const ReviewSpendingLimit = ({
-  params,
-  onSubmit,
-}: {
-  params: NewSpendingLimitFlowProps
-  onSubmit: () => void
-}) => {
+export const ReviewSpendingLimit = ({ onSubmit, children }: ReviewTransactionProps) => {
+  const { data } = useContext<TxFlowContextType<NewSpendingLimitFlowProps>>(TxFlowContext)
   const spendingLimits = useSelector(selectSpendingLimits)
   const { safe } = useSafeInfo()
   const chainId = useChainId()
   const chain = useCurrentChain()
   const { balances } = useBalances()
   const { setSafeTx, setSafeTxError } = useContext(SafeTxContext)
-  const token = balances.items.find((item) => item.tokenInfo.address === params.tokenAddress)
+  const token = balances.items.find((item) => item.tokenInfo.address === data?.tokenAddress)
   const { decimals } = token?.tokenInfo || {}
 
   const amountInWei = useMemo(
-    () => safeParseUnits(params.amount, token?.tokenInfo.decimals)?.toString() || '0',
-    [params.amount, token?.tokenInfo.decimals],
+    () => safeParseUnits(data?.amount || '0', token?.tokenInfo.decimals)?.toString() || '0',
+    [data?.amount, token?.tokenInfo.decimals],
   )
 
   const existingSpendingLimit = useMemo(() => {
     return spendingLimits.find(
       (spendingLimit) =>
-        spendingLimit.beneficiary === params.beneficiary && spendingLimit.token.address === params.tokenAddress,
+        spendingLimit.beneficiary === data?.beneficiary && spendingLimit.token.address === data?.tokenAddress,
     )
-  }, [spendingLimits, params])
+  }, [spendingLimits, data])
 
   useEffect(() => {
-    if (!chain) return
+    if (!chain || !data) return
 
     createNewSpendingLimitTx(
-      params,
+      data,
       spendingLimits,
       chainId,
       chain,
@@ -66,7 +63,7 @@ export const ReviewSpendingLimit = ({
     chainId,
     decimals,
     existingSpendingLimit,
-    params,
+    data,
     safe.modules,
     safe.deployed,
     setSafeTx,
@@ -74,12 +71,12 @@ export const ReviewSpendingLimit = ({
     spendingLimits,
   ])
 
-  const isOneTime = params.resetTime === '0'
+  const isOneTime = data?.resetTime === '0'
   const resetTime = useMemo(() => {
     return isOneTime
       ? 'One-time spending limit'
-      : getResetTimeOptions(chainId).find((time) => time.value === params.resetTime)?.label
-  }, [isOneTime, params.resetTime, chainId])
+      : getResetTimeOptions(chainId).find((time) => time.value === data?.resetTime)?.label
+  }, [isOneTime, data?.resetTime, chainId])
 
   const onFormSubmit = () => {
     trackEvent({
@@ -102,7 +99,7 @@ export const ReviewSpendingLimit = ({
     <ReviewTransaction onSubmit={onFormSubmit}>
       {token && (
         <SendAmountBlock amountInWei={amountInWei} tokenInfo={token.tokenInfo} title="Amount">
-          {existingAmount && existingAmount !== params.amount && (
+          {existingAmount && existingAmount !== data?.amount && (
             <>
               <Typography
                 data-testid="old-token-amount"
@@ -117,107 +114,63 @@ export const ReviewSpendingLimit = ({
           )}
         </SendAmountBlock>
       )}
-      <Grid
-        container
-        sx={{
-          gap: 1,
-          alignItems: 'center',
-        }}
-      >
-        <Grid item md>
-          <Typography
-            variant="body2"
-            sx={{
-              color: 'text.secondary',
-            }}
-          >
-            Beneficiary
-          </Typography>
-        </Grid>
 
-        <Grid data-testid="beneficiary-address" item md={10}>
-          <EthHashInfo
-            address={params.beneficiary}
-            shortAddress={false}
-            hasExplorer
-            showCopyButton
-            showAvatar={false}
-          />
-        </Grid>
-      </Grid>
-      <Grid
-        container
-        sx={{
-          gap: 1,
-          alignItems: 'center',
-        }}
-      >
-        <Grid item md>
-          <Typography
-            variant="body2"
-            sx={{
-              color: 'text.secondary',
-            }}
-          >
-            Reset time
-          </Typography>
-        </Grid>
-        <Grid item md={10}>
-          {existingSpendingLimit ? (
-            <>
-              <SpendingLimitLabel
-                label={
-                  <>
-                    {existingSpendingLimit.resetTimeMin !== params.resetTime && (
-                      <>
-                        <Typography
-                          data-testid="old-reset-time"
-                          color="error"
-                          component="span"
-                          sx={{
-                            display: 'inline',
-                            textDecoration: 'line-through',
-                          }}
-                        >
-                          {oldResetTime}
-                        </Typography>
-                        {' → '}
-                      </>
-                    )}
-                    <Typography
-                      component="span"
-                      sx={{
-                        display: 'inline',
-                      }}
-                    >
-                      {resetTime}
-                    </Typography>
-                  </>
-                }
-                isOneTime={existingSpendingLimit.resetTimeMin === '0'}
-              />
-            </>
-          ) : (
+      <TxDetailsRow label="Beneficiary" grid>
+        <EthHashInfo
+          data-testid="beneficiary-address"
+          address={data?.beneficiary || ''}
+          shortAddress={false}
+          hasExplorer
+          showCopyButton
+          showAvatar={false}
+        />
+      </TxDetailsRow>
+
+      <TxDetailsRow label="Reset time" grid>
+        {existingSpendingLimit ? (
+          <>
             <SpendingLimitLabel
-              data-testid="spending-limit-label"
-              label={resetTime || 'One-time spending limit'}
-              isOneTime={!!resetTime && isOneTime}
+              label={
+                <>
+                  {existingSpendingLimit.resetTimeMin !== data?.resetTime && (
+                    <>
+                      <Typography
+                        data-testid="old-reset-time"
+                        color="error"
+                        component="span"
+                        sx={{
+                          textDecoration: 'line-through',
+                        }}
+                      >
+                        {oldResetTime}
+                      </Typography>
+                      {' → '}
+                    </>
+                  )}
+                  <Typography component="span">{resetTime}</Typography>
+                </>
+              }
+              isOneTime={existingSpendingLimit.resetTimeMin === '0'}
             />
-          )}
-        </Grid>
-      </Grid>
+          </>
+        ) : (
+          <SpendingLimitLabel
+            data-testid="spending-limit-label"
+            label={resetTime || 'One-time spending limit'}
+            isOneTime={!!resetTime && isOneTime}
+          />
+        )}
+      </TxDetailsRow>
+
       {existingSpendingLimit && (
         <Alert severity="warning" sx={{ border: 'unset' }}>
-          <Typography
-            data-testid="limit-replacement-warning"
-            sx={{
-              fontWeight: 700,
-            }}
-          >
+          <Typography data-testid="limit-replacement-warning" fontWeight={700}>
             You are about to replace an existing spending limit
           </Typography>
         </Alert>
       )}
+
+      {children}
     </ReviewTransaction>
   )
 }

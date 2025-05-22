@@ -55,7 +55,7 @@ const AppFrame = ({ appUrl, allowedFeaturesList, safeAppFromManifest, isNativeEm
     dismissQueueBar,
     transactions,
   } = useTransactionQueueBarState()
-  const queueBarVisible = transactions.results.length > 0 && !queueBarDismissed
+  const queueBarVisible = transactions.results.length > 0 && !queueBarDismissed && !isNativeEmbed
   const [remoteApp] = useSafeAppFromBackend(appUrl, safe.chainId)
   const { thirdPartyCookiesDisabled, setThirdPartyCookiesDisabled } = useThirdPartyCookies()
   const { iframeRef, appIsLoading, isLoadingSlow, setAppIsLoading } = useAppIsLoading()

@@ -1,7 +1,7 @@
 import type { SafeTransaction } from '@safe-global/safe-core-sdk-types'
 import type { EthersError } from '@/utils/ethers-utils'
 
-import useAsync from './useAsync'
+import useAsync from '@safe-global/utils/hooks/useAsync'
 import ContractErrorCodes from '@/services/contracts/ContractErrorCodes'
 import { type SafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import { createWeb3, useWeb3ReadOnly } from '@/hooks/wallets/web3'

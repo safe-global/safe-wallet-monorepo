@@ -8,10 +8,10 @@ import { NestedSafesPopover } from '@/components/sidebar/NestedSafesPopover'
 import { useGetOwnedSafesQuery } from '@/store/slices'
 import { useHasFeature } from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { FEATURES } from '@/utils/chains'
 
 import headerCss from '@/components/sidebar/SidebarHeader/styles.module.css'
 import css from './styles.module.css'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 
 export function NestedSafesButton({
   chainId,

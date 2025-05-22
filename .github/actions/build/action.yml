@@ -11,10 +11,6 @@ inputs:
     description: 'Production build flag'
     required: false
 
-  e2e_mnemonic:
-    description: 'Mnemonic for the E2E tests'
-    required: false
-
 runs:
   using: 'composite'
 
@@ -41,7 +37,6 @@ runs:
       run: yarn workspace @safe-global/web build
       env:
         NEXT_PUBLIC_IS_PRODUCTION: ${{ inputs.prod }}
-        NEXT_PUBLIC_CYPRESS_MNEMONIC: ${{ inputs.e2e_mnemonic }}
         NEXT_PUBLIC_GATEWAY_URL_PRODUCTION: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_GATEWAY_URL_PRODUCTION }}
         NEXT_PUBLIC_GATEWAY_URL_STAGING: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_GATEWAY_URL_STAGING }}
         NEXT_PUBLIC_SAFE_VERSION: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_SAFE_VERSION }}
@@ -50,6 +45,7 @@ runs:
         NEXT_PUBLIC_TEST_GA_TRACKING_ID: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_TEST_GA_TRACKING_ID }}
         NEXT_PUBLIC_SAFE_APPS_GA_TRACKING_ID: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_SAFE_APPS_GA_TRACKING_ID }}
         NEXT_PUBLIC_SENTRY_DSN: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_SENTRY_DSN }}
+        NEXT_PUBLIC_DATADOG_CLIENT_TOKEN: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_DATADOG_CLIENT_TOKEN }}
         NEXT_PUBLIC_TENDERLY_ORG_NAME: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_TENDERLY_ORG_NAME }}
         NEXT_PUBLIC_TENDERLY_PROJECT_NAME: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_TENDERLY_PROJECT_NAME }}
         NEXT_PUBLIC_TENDERLY_SIMULATE_ENDPOINT_URL: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_TENDERLY_SIMULATE_ENDPOINT_URL }}
@@ -60,8 +56,6 @@ runs:
         NEXT_PUBLIC_BRAND_LOGO: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_BRAND_LOGO }}
         NEXT_PUBLIC_BRAND_NAME: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_BRAND_NAME }}
         NEXT_PUBLIC_BLOCKAID_CLIENT_ID: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_BLOCKAID_CLIENT_ID }}
-        NEXT_PUBLIC_SOCIAL_WALLET_OPTIONS_STAGING: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_SOCIAL_WALLET_OPTIONS_STAGING }}
-        NEXT_PUBLIC_SOCIAL_WALLET_OPTIONS_PRODUCTION: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_SOCIAL_WALLET_OPTIONS_PRODUCTION }}
         NEXT_PUBLIC_FIREBASE_OPTIONS_PRODUCTION: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_FIREBASE_OPTIONS_PRODUCTION }}
         NEXT_PUBLIC_FIREBASE_OPTIONS_STAGING: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_FIREBASE_OPTIONS_STAGING }}
         NEXT_PUBLIC_FIREBASE_VAPID_KEY_PRODUCTION: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_FIREBASE_VAPID_KEY_PRODUCTION }}

@@ -1,37 +1,27 @@
-import TxLayout from '@/components/tx-flow/common/TxLayout'
-import type { TxStep } from '../../common/TxLayout'
-import { ReviewRemoveGuard } from '@/components/tx-flow/flows/RemoveGuard/ReviewRemoveGuard'
-import useTxStepper from '../../useTxStepper'
-import { useMemo } from 'react'
-import { ConfirmTxDetails } from '@/components/tx/ConfirmTxDetails'
+import { useContext } from 'react'
+import { TxFlow } from '../../TxFlow'
+import { TxFlowContext } from '../../TxFlowProvider'
 import { TxFlowType } from '@/services/analytics'
+import { ReviewRemoveGuard } from './ReviewRemoveGuard'
+import { type ReviewTransactionProps } from '@/components/tx/ReviewTransactionV2'
 
-// TODO: This can possibly be combined with the remove module type
 export type RemoveGuardFlowProps = {
   address: string
 }
 
+const ReviewRemoveGuardStep = (props: ReviewTransactionProps) => {
+  const { data } = useContext(TxFlowContext)
+  return <ReviewRemoveGuard params={data} {...props} />
+}
+
 const RemoveGuardFlow = ({ address }: RemoveGuardFlowProps) => {
-  const { step, nextStep, prevStep } = useTxStepper(undefined, TxFlowType.REMOVE_GUARD)
-
-  const steps = useMemo<TxStep[]>(
-    () => [
-      {
-        txLayoutProps: { title: 'Confirm transaction' },
-        content: <ReviewRemoveGuard key={0} params={{ address }} onSubmit={() => nextStep(undefined)} />,
-      },
-      {
-        txLayoutProps: { title: 'Confirm transaction details', fixedNonce: true },
-        content: <ConfirmTxDetails key={2} onSubmit={() => {}} />,
-      },
-    ],
-    [nextStep, address],
-  )
-
   return (
-    <TxLayout subtitle="Remove guard" step={step} onBack={prevStep} {...(steps?.[step]?.txLayoutProps || {})}>
-      {steps.map(({ content }) => content)}
-    </TxLayout>
+    <TxFlow
+      initialData={{ address }}
+      subtitle="Remove guard"
+      eventCategory={TxFlowType.REMOVE_GUARD}
+      ReviewTransactionComponent={ReviewRemoveGuardStep}
+    />
   )
 }
 

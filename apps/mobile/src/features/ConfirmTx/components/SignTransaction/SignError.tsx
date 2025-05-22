@@ -9,7 +9,7 @@ import { LargeHeaderTitle } from '@/src/components/Title'
 import { SafeButton } from '@/src/components/SafeButton'
 import { router } from 'expo-router'
 
-export default function SignError({ onRetryPress }: { onRetryPress: () => void }) {
+export default function SignError({ onRetryPress, description }: { onRetryPress: () => void; description?: string }) {
   const theme = useTheme()
   const colors: [string, string] = [theme.errorDark.get(), 'transparent']
 
@@ -35,11 +35,11 @@ export default function SignError({ onRetryPress }: { onRetryPress: () => void }
 
               <View margin="$4" width="100%" alignItems="center" gap="$4">
                 <LargeHeaderTitle textAlign="center" size="$8" lineHeight={32} maxWidth={200} fontWeight={600}>
-                  Couldn’t execute the transaction
+                  Couldn't sign the transaction
                 </LargeHeaderTitle>
 
                 <Text textAlign="center" fontSize="$4" width="80%">
-                  There was an error executing this transaction.
+                  {description || 'There was an error executing this transaction.'}
                 </Text>
               </View>
             </View>

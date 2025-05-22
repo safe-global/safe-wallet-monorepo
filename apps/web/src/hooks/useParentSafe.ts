@@ -3,7 +3,8 @@ import { skipToken } from '@reduxjs/toolkit/query'
 import useSafeInfo from './useSafeInfo'
 import type { getSafe } from '@safe-global/safe-client-gateway-sdk'
 import { useHasFeature } from '@/hooks/useChains'
-import { FEATURES } from '@/utils/chains'
+
+import { FEATURES } from '@safe-global/utils/utils/chains'
 
 export function useParentSafe(): getSafe | undefined {
   const isEnabled = useHasFeature(FEATURES.NESTED_SAFES)
