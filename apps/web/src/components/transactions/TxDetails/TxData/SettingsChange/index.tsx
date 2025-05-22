@@ -5,6 +5,7 @@ import EthHashInfo from '@/components/common/EthHashInfo'
 import { InfoDetails } from '@/components/transactions/InfoDetails'
 import { ThresholdWarning } from '@/components/transactions/Warning'
 import { UntrustedFallbackHandlerWarning } from '@/components/transactions/Warning'
+import { useHasUntrustedFallbackHandler } from '@/hooks/useHasUntrustedFallbackHandler'
 
 type SettingsChangeTxInfoProps = {
   settingsInfo: SettingsChange['settingsInfo']
@@ -21,6 +22,10 @@ export const SettingsChangeTxInfo = ({
   settingsInfo,
   isTxExecuted = false,
 }: SettingsChangeTxInfoProps): ReactElement | null => {
+  const isUntrustedFallbackHandler = useHasUntrustedFallbackHandler(
+    settingsInfo?.type === SettingsInfoType.SET_FALLBACK_HANDLER ? settingsInfo.handler.value : undefined,
+  )
+
   if (!settingsInfo) {
     return null
   }
@@ -37,7 +42,7 @@ export const SettingsChangeTxInfo = ({
               {...addressInfoProps}
             />
           </InfoDetails>
-          <UntrustedFallbackHandlerWarning fallbackHandler={settingsInfo.handler.value} isTxExecuted={isTxExecuted} />
+          {isUntrustedFallbackHandler && <UntrustedFallbackHandlerWarning isTxExecuted={isTxExecuted} />}
         </>
       )
     }

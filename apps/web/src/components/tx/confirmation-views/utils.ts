@@ -43,7 +43,9 @@ export function isManageSignersView(txInfo: TransactionInfo, txData: Transaction
   return false
 }
 
-export const isSettingsChangeView = (txInfo: TransactionInfo) => txInfo.type === TransactionInfoType.SETTINGS_CHANGE
+export const isSettingsChangeView = (txInfo: TransactionInfo): txInfo is SettingsChange =>
+  txInfo.type === TransactionInfoType.SETTINGS_CHANGE &&
+  txInfo.settingsInfo?.type !== SettingsInfoType.SET_FALLBACK_HANDLER
 
 export const isConfirmBatchView = (txFlow?: ReactElement) => txFlow?.type === ConfirmBatchFlow
 
