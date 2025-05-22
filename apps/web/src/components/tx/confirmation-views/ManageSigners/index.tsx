@@ -65,7 +65,7 @@ function Actions({ newOwners }: { newOwners: Array<string> }): ReactElement | nu
           owners={removedOwners}
           title={`Remove owner${maybePlural(removedOwners)}`}
           icon={MinusIcon}
-          sx={{ backgroundColor: ({ palette }) => `${palette.warning.background} !important` }}
+          sx={{ backgroundColor: ({ palette }) => `${palette.warning.background} !important`, mb: 2 }}
         />
       )}
 
