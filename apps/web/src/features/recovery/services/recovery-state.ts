@@ -9,6 +9,7 @@ import { trimTrailingSlash } from '@/utils/url'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { isMultiSendCalldata } from '@/utils/transaction-calldata'
 import { decodeMultiSendData } from '@safe-global/protocol-kit/dist/src/utils'
+import { multicall } from '@safe-global/utils/utils/multicall'
 
 export const MAX_RECOVERER_PAGE_SIZE = 100
 
@@ -211,18 +212,48 @@ export const _getRecoveryStateItem = async ({
   chainId: string
   version: SafeState['version']
 }): Promise<RecoveryStateItem> => {
-  const [[recoverers], expiry, delay, txNonce, queueNonce] = await Promise.all([
-    delayModifier.getModulesPaginated(SENTINEL_ADDRESS, MAX_RECOVERER_PAGE_SIZE),
-    delayModifier.txExpiration(),
-    delayModifier.txCooldown(),
-    delayModifier.txNonce(),
-    delayModifier.queueNonce(),
-  ])
+  const calls = [
+    {
+      to: await delayModifier.getAddress(),
+      data: delayModifier.interface.encodeFunctionData('getModulesPaginated', [
+        SENTINEL_ADDRESS,
+        MAX_RECOVERER_PAGE_SIZE,
+      ]),
+    },
+    {
+      to: await delayModifier.getAddress(),
+      data: delayModifier.interface.encodeFunctionData('txExpiration'),
+    },
+    {
+      to: await delayModifier.getAddress(),
+      data: delayModifier.interface.encodeFunctionData('txCooldown'),
+    },
+    {
+      to: await delayModifier.getAddress(),
+      data: delayModifier.interface.encodeFunctionData('txNonce'),
+    },
+    {
+      to: await delayModifier.getAddress(),
+      data: delayModifier.interface.encodeFunctionData('queueNonce'),
+    },
+  ]
+  const callResults = await multicall(provider, calls)
+
+  const [[recoverers], expiry, delay, txNonce, queueNonce] = [
+    delayModifier.interface.decodeFunctionResult('getModulesPaginated', callResults[0].returnData) as unknown as [
+      string[],
+      string,
+    ],
+    BigInt(callResults[1].returnData),
+    BigInt(callResults[2].returnData),
+    BigInt(callResults[3].returnData),
+    BigInt(callResults[4].returnData),
+  ]
 
   const queuedTransactionsAdded = await queryAddedTransactions(
     delayModifier,
-    BigInt(queueNonce),
-    BigInt(txNonce),
+    queueNonce,
+    txNonce,
     transactionService,
     provider,
     safeAddress,

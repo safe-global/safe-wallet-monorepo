@@ -24,6 +24,19 @@ export const getMultiCallAddress = (chainId: string): string | null => {
 
 export type Aggregate3Response = { success: boolean; returnData: string }
 
+const fallbackMulticall = async (provider: AbstractProvider, calls: { to: string; data: string }[]) => {
+  const results: Aggregate3Response[] = []
+  for (const call of calls) {
+    try {
+      const result = await provider.call(call)
+      results.push({ success: true, returnData: result })
+    } catch (error) {
+      results.push({ success: false, returnData: '0x' })
+    }
+  }
+  return results
+}
+
 /**
  * Execute multiple calls in a single RPC request using the multicall contract
  * @param provider The ethers provider to use
@@ -35,22 +48,17 @@ export const multicall = async (
   provider: AbstractProvider,
   calls: { to: string; data: string }[],
 ): Promise<{ success: boolean; returnData: string }[]> => {
+  if (calls.length === 0) {
+    return []
+  }
   const chainId = (await provider.getNetwork()).chainId.toString()
 
   const multicallAddress = getMultiCallAddress(chainId)
-  if (!multicallAddress) {
-    // Fallback to consecutive calls if multicall is not supported
-    const results: Aggregate3Response[] = []
-    for (const call of calls) {
-      try {
-        const result = await provider.call(call)
-        results.push({ success: true, returnData: result })
-      } catch (error) {
-        results.push({ success: false, returnData: '0x' })
-      }
-    }
-    return results
+  if (!multicallAddress || calls.length === 1) {
+    // Fallback to consecutive calls if multicall is not supported or if there is only one call
+    return fallbackMulticall(provider, calls)
   }
+
   const multicallContract = new Contract(multicallAddress, MULTICALL_ABI, provider)
 
   try {
