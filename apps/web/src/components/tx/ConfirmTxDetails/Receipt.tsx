@@ -1,7 +1,7 @@
 import { Fragment, useMemo, type ReactElement } from 'react'
 import { Box, Divider, Stack, Typography } from '@mui/material'
 import CheckIcon from '@mui/icons-material/Check'
-import type { SafeTransaction } from '@safe-global/safe-core-sdk-types'
+import type { SafeTransaction } from '@safe-global/types-kit'
 import { PaperViewToggle } from '../../common/PaperViewToggle'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import { Operation, type TransactionDetails, type TransactionData } from '@safe-global/safe-gateway-typescript-sdk'

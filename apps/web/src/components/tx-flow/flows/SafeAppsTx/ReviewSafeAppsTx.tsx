@@ -1,6 +1,6 @@
 import { useContext, useEffect } from 'react'
 import type { ReactElement } from 'react'
-import type { SafeTransaction } from '@safe-global/safe-core-sdk-types'
+import type { SafeTransaction } from '@safe-global/types-kit'
 import type { SafeAppsTxParams } from '.'
 import { createMultiSendCallOnlyTx, createTx } from '@/services/tx/tx-sender'
 import useHighlightHiddenTab from '@/hooks/useHighlightHiddenTab'

@@ -6788,7 +6788,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@noble/hashes@npm:1.6.1, @noble/hashes@npm:^1.3.3, @noble/hashes@npm:^1.4.0, @noble/hashes@npm:^1.5.0, @noble/hashes@npm:~1.6.0":
+"@noble/hashes@npm:1.6.1, @noble/hashes@npm:^1.4.0, @noble/hashes@npm:^1.5.0, @noble/hashes@npm:~1.6.0":
   version: 1.6.1
   resolution: "@noble/hashes@npm:1.6.1"
   checksum: 10/74d9ad7b1437a22ba3b877584add3367587fbf818113152f293025d20d425aa74c191d18d434797312f2270458bc9ab3241c34d14ec6115fb16438b3248f631f
@@ -8110,6 +8110,7 @@ __metadata:
     "@safe-global/protocol-kit": "npm:^5.2.1"
     "@safe-global/store": "workspace:^"
     "@safe-global/test": "workspace:^"
+    "@safe-global/types-kit": "npm:^1.0.4"
     "@safe-global/utils": "workspace:^"
     "@shopify/flash-list": "npm:1.7.6"
     "@storybook/addon-essentials": "npm:^8.4.6"
@@ -8210,22 +8211,6 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@safe-global/protocol-kit@npm:^4.1.7":
-  version: 4.1.7
-  resolution: "@safe-global/protocol-kit@npm:4.1.7"
-  dependencies:
-    "@noble/hashes": "npm:^1.3.3"
-    "@safe-global/safe-core-sdk-types": "npm:^5.1.0"
-    "@safe-global/safe-deployments": "npm:^1.37.31"
-    "@safe-global/safe-modules-deployments": "npm:^2.2.1"
-    abitype: "npm:^1.0.2"
-    ethereumjs-util: "npm:^7.1.5"
-    ethers: "npm:^6.13.1"
-    semver: "npm:^7.6.2"
-  checksum: 10/5d2c46dc053fc921948777c7a8cf460c4fa3c1df52982543aaf5f9f79c2e761b752ad291788c02a329925aa3e9a220ab428141aabcae039532cfc1c1b38aa8d2
-  languageName: node
-  linkType: hard
-
 "@safe-global/protocol-kit@npm:^5.1.1":
   version: 5.1.1
   resolution: "@safe-global/protocol-kit@npm:5.1.1"
@@ -8268,6 +8253,27 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@safe-global/protocol-kit@npm:^5.2.4":
+  version: 5.2.6
+  resolution: "@safe-global/protocol-kit@npm:5.2.6"
+  dependencies:
+    "@noble/curves": "npm:^1.6.0"
+    "@peculiar/asn1-schema": "npm:^2.3.13"
+    "@safe-global/safe-deployments": "npm:^1.37.32"
+    "@safe-global/safe-modules-deployments": "npm:^2.2.7"
+    "@safe-global/types-kit": "npm:^1.0.5"
+    abitype: "npm:^1.0.2"
+    semver: "npm:^7.6.3"
+    viem: "npm:^2.21.8"
+  dependenciesMeta:
+    "@noble/curves":
+      optional: true
+    "@peculiar/asn1-schema":
+      optional: true
+  checksum: 10/2c8997f8f568b682938507ec99676a1671d4cbced11dc68d3e2f04f2780873ad25eb3c10f9328eaa196596e98b82d7181f333bf895c4e9d0bb60d943fd1ff856
+  languageName: node
+  linkType: hard
+
 "@safe-global/safe-apps-sdk@npm:^9.1.0":
   version: 9.1.0
   resolution: "@safe-global/safe-apps-sdk@npm:9.1.0"
@@ -8287,16 +8293,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@safe-global/safe-core-sdk-types@npm:^5.0.1, @safe-global/safe-core-sdk-types@npm:^5.1.0":
-  version: 5.1.0
-  resolution: "@safe-global/safe-core-sdk-types@npm:5.1.0"
-  dependencies:
-    abitype: "npm:^1.0.2"
-  checksum: 10/2ad129abe2367084c75b906dfa06bc4c2b43413fc00048164168b9fd9336a4ea7494b624d61282963062a20e6c6fe45ac28cd9c16c8b787f26ce19f0d8d054e9
-  languageName: node
-  linkType: hard
-
-"@safe-global/safe-deployments@npm:^1.37.22, @safe-global/safe-deployments@npm:^1.37.26, @safe-global/safe-deployments@npm:^1.37.31":
+"@safe-global/safe-deployments@npm:^1.37.22, @safe-global/safe-deployments@npm:^1.37.26":
   version: 1.37.31
   resolution: "@safe-global/safe-deployments@npm:1.37.31"
   dependencies:
@@ -8328,14 +8325,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@safe-global/safe-modules-deployments@npm:^2.2.1, @safe-global/safe-modules-deployments@npm:^2.2.4, @safe-global/safe-modules-deployments@npm:^2.2.5":
+"@safe-global/safe-modules-deployments@npm:^2.2.4, @safe-global/safe-modules-deployments@npm:^2.2.5":
   version: 2.2.7
   resolution: "@safe-global/safe-modules-deployments@npm:2.2.7"
   checksum: 10/3dfce979b2879d72828365a36cebd59ff76b4781e26033724ba858293f38c9a4cf90ce423767e1f5fa23cccd6d5a151e10a7db9d8ea4340c610ee7c615c22797
   languageName: node
   linkType: hard
 
-"@safe-global/safe-modules-deployments@npm:^2.2.8":
+"@safe-global/safe-modules-deployments@npm:^2.2.7, @safe-global/safe-modules-deployments@npm:^2.2.8":
   version: 2.2.8
   resolution: "@safe-global/safe-modules-deployments@npm:2.2.8"
   checksum: 10/7d2f0cffcbfc827e435c7f2510d373109c6f4a74b85119246d49ccc80d183fc71cde5a4b77aa710081da27efc81366dd28cf53e9fcbb9583d4dd3ac567f9ddf6
@@ -8404,6 +8401,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@safe-global/types-kit@npm:^1.0.4, @safe-global/types-kit@npm:^1.0.5":
+  version: 1.0.5
+  resolution: "@safe-global/types-kit@npm:1.0.5"
+  dependencies:
+    abitype: "npm:^1.0.2"
+  checksum: 10/732e8312458dab14557f0d08676ce2a55cb74b8296487ccacbb14564fdad44ff80ac1804ab75c73b8f21fc5ae6bc354d033ca968a6f1344e29316ec4b4018311
+  languageName: node
+  linkType: hard
+
 "@safe-global/utils@workspace:^, @safe-global/utils@workspace:packages/utils":
   version: 0.0.0-use.local
   resolution: "@safe-global/utils@workspace:packages/utils"
@@ -8413,6 +8419,10 @@ __metadata:
     ethers: "npm:^6.13.4"
     jest: "npm:^29.7.0"
     ts-node: "npm:^10.9.2"
+  peerDependencies:
+    "@safe-global/protocol-kit": ^5.x
+    "@safe-global/types-kit": ^1.x
+    ethers: ^6.x
   languageName: unknown
   linkType: soft
 
@@ -8449,15 +8459,15 @@ __metadata:
     "@reduxjs/toolkit": "npm:^2.5.0"
     "@reown/walletkit": "npm:^1.2.1"
     "@safe-global/api-kit": "npm:^2.4.6"
-    "@safe-global/protocol-kit": "npm:^4.1.7"
+    "@safe-global/protocol-kit": "npm:^5.2.4"
     "@safe-global/safe-apps-sdk": "npm:^9.1.0"
     "@safe-global/safe-client-gateway-sdk": "npm:v1.60.1"
-    "@safe-global/safe-core-sdk-types": "npm:^5.0.1"
     "@safe-global/safe-deployments": "npm:^1.37.32"
     "@safe-global/safe-gateway-typescript-sdk": "npm:3.23.1"
     "@safe-global/safe-modules-deployments": "npm:^2.2.8"
     "@safe-global/store": "workspace:^"
     "@safe-global/test": "workspace:^"
+    "@safe-global/types-kit": "npm:^1.0.4"
     "@sentry/react": "npm:^7.91.0"
     "@sentry/types": "npm:^7.74.0"
     "@spindl-xyz/attribution-lite": "npm:^1.8.1"
@@ -18379,7 +18389,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ethereumjs-util@npm:^7.1.4, ethereumjs-util@npm:^7.1.5":
+"ethereumjs-util@npm:^7.1.4":
   version: 7.1.5
   resolution: "ethereumjs-util@npm:7.1.5"
   dependencies:

@@ -10,9 +10,9 @@ import type { AppDispatch } from '@/store'
 import { defaultSafeInfo } from '@safe-global/store/slices/SafeInfo/utils'
 import { didRevert, type EthersError } from '@/utils/ethers-utils'
 import { assertProvider, assertTx, assertWallet } from '@/utils/helpers'
-import { type DeploySafeProps, type PredictedSafeProps } from '@safe-global/protocol-kit'
+import { type PredictedSafeProps } from '@safe-global/protocol-kit'
 import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
-import type { SafeTransaction, SafeVersion, TransactionOptions } from '@safe-global/safe-core-sdk-types'
+import type { SafeTransaction, SafeVersion, TransactionOptions } from '@safe-global/types-kit'
 import {
   type ChainInfo,
   ImplementationVersionState,
@@ -366,7 +366,7 @@ export const activateReplayedSafe = async (
   chain: ChainInfo,
   props: ReplayedSafeProps,
   provider: BrowserProvider,
-  options: DeploySafeProps['options'],
+  options: TransactionOptions,
 ) => {
   const data = encodeSafeCreationTx(props, chain)
 
