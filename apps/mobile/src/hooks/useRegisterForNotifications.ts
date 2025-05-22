@@ -19,8 +19,8 @@ export type RegisterForNotificationsProps = {
 }
 
 interface NotificationsProps {
-  registerForNotifications: () => Promise<RegisterForNotificationsProps>
-  unregisterForNotifications: () => Promise<RegisterForNotificationsProps>
+  registerForNotifications: (updateNotificationSettings?: boolean) => Promise<RegisterForNotificationsProps>
+  unregisterForNotifications: (updateNotificationSettings?: boolean) => Promise<RegisterForNotificationsProps>
   updatePermissionsForNotifications: () => Promise<RegisterForNotificationsProps>
   isLoading: boolean
   error: string | null
@@ -36,7 +36,7 @@ const useRegisterForNotifications = (): NotificationsProps => {
   console.log('allChainIds', allChainIds)
 
 
-  const registerForNotifications = useCallback(async () => {
+  const registerForNotifications = useCallback(async (updateNotificationSettings = true) => {
     try {
       setLoading(true)
       setError(null)
@@ -49,9 +49,11 @@ const useRegisterForNotifications = (): NotificationsProps => {
 
       await registerSafe(activeSafe.address, allChainIds)
 
-      dispatch(toggleAppNotifications(true))
-      dispatch(updatePromptAttempts(0))
-      dispatch(updateLastTimePromptAttempted(0))
+      if (updateNotificationSettings) {
+        dispatch(toggleAppNotifications(true))
+        dispatch(updatePromptAttempts(0))
+        dispatch(updateLastTimePromptAttempted(0))
+      }
       setLoading(false)
       setError(null)
     } catch (err) {
@@ -62,7 +64,7 @@ const useRegisterForNotifications = (): NotificationsProps => {
     return { loading, error }
   }, [activeSafe, dispatch])
 
-  const unregisterForNotifications = useCallback(async () => {
+  const unregisterForNotifications = useCallback(async (updateNotificationSettings = true) => {
     try {
       setLoading(true)
       setError(null)
@@ -75,9 +77,11 @@ const useRegisterForNotifications = (): NotificationsProps => {
 
       await unregisterSafe(activeSafe.address, allChainIds)
 
-      dispatch(toggleAppNotifications(false))
-      dispatch(updatePromptAttempts(0))
-      dispatch(updateLastTimePromptAttempted(0))
+      if (updateNotificationSettings) {
+        dispatch(toggleAppNotifications(false))
+        dispatch(updatePromptAttempts(0))
+        dispatch(updateLastTimePromptAttempted(0))
+      }
       setLoading(false)
       setError(null)
     } catch (err) {

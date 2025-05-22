@@ -16,6 +16,7 @@ import {
 } from '@/src/utils/notifications'
 import FCMService from './FCMService'
 import NotificationService from './NotificationService'
+import { setSafeSubscriptionStatus } from '@/src/store/safeSubscriptionsSlice'
 import { cgwClient } from '@safe-global/store/gateway/cgwClient'
 import Logger from '@/src/utils/logger'
 import { convertToUuid } from '@/src/utils/uuid'
@@ -182,6 +183,12 @@ export async function registerSafe(address: string, chainIds: string[]): Promise
       fcmToken: fcmToken || '',
       notificationAccountType: accountType,
     })
+
+    chainIds.forEach((chainId) =>
+      store.dispatch(
+        setSafeSubscriptionStatus({ safeAddress: address, chainId, subscribed: true }),
+      ),
+    )
   } catch (err) {
     Logger.error('registerSafe failed', err)
   }
@@ -195,6 +202,12 @@ export async function unregisterSafe(address: string, chainIds: string[]): Promi
     const { signer } = await getDelegateSigner(delegate)
 
     await unregisterForNotificationsOnBackEnd({ signer, safeAddress: address, chainIds })
+
+    chainIds.forEach((chainId) =>
+      store.dispatch(
+        setSafeSubscriptionStatus({ safeAddress: address, chainId, subscribed: false }),
+      ),
+    )
   } catch (err) {
     Logger.error('unregisterSafe failed', err)
   }

@@ -11,6 +11,7 @@ import notifications from './notificationsSlice'
 import addressBook from './addressBookSlice'
 import settings from './settingsSlice'
 import safes from './safesSlice'
+import safeSubscriptions from './safeSubscriptionsSlice'
 import biometrics from './biometricsSlice'
 import { cgwClient, setBaseUrl } from '@safe-global/store/gateway/cgwClient'
 import devToolsEnhancer from 'redux-devtools-expo-dev-plugin'
@@ -52,6 +53,7 @@ export const rootReducer = combineReducers({
   signers,
   delegates,
   settings,
+  safeSubscriptions,
   biometrics,
   [web3API.reducerPath]: web3API.reducer,
   [cgwClient.reducerPath]: cgwClient.reducer,
