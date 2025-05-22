@@ -20,7 +20,7 @@ export function BalanceContainer() {
   const copy = useCopyAndDispatchToast()
   const { data, isLoading } = useSafesGetOverviewForManyQuery<SafeOverviewResult>(
     {
-      safes: chains.map((chain) => makeSafeId(chain.chainId, activeSafe.address)),
+      safes: [makeSafeId(activeSafe.chainId, activeSafe.address)],
       currency: 'usd',
       trusted: true,
       excludeSpam: true,
@@ -34,7 +34,6 @@ export function BalanceContainer() {
   const balance = data?.find((chain) => chain.chainId === activeSafe.chainId)
 
   const onPressAddressCopy = useCallback(() => {
-    console.log('onPressAddressCopy')
     copy(activeSafe.address)
   }, [activeSafe.address])
 
