@@ -9,7 +9,8 @@ export const useMyAccounts = (item: SafesSliceItem) => {
   const data = useSafeOverviewService(item.SafeInfo.address.value)
 
   useEffect(() => {
-    if (!data) {
+    // On initial load, we don't have the safe info yet
+    if (!data || !data[0]) {
       return
     }
 
