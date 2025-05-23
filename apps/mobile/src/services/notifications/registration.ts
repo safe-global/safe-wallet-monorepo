@@ -4,8 +4,8 @@ import { store } from '@/src/store'
 import { selectSafeInfo } from '@/src/store/safesSlice'
 import { selectSigners } from '@/src/store/signersSlice'
 import { selectFirstDelegateForAnySafeOwner } from '@/src/store/delegatesSlice'
-import { NOTIFICATION_ACCOUNT_TYPE } from '@/src/store/constants'
 import { notificationChannels, withTimeout, getSigner } from '@/src/utils/notifications'
+import { getAccountType } from '@/src/utils/notifications/accountType'
 import FCMService from './FCMService'
 import NotificationService from './NotificationService'
 import { setSafeSubscriptionStatus } from '@/src/store/safeSubscriptionsSlice'
@@ -32,18 +32,8 @@ export const getDelegateSigner = async (delegate: DelegateInfo) => {
 export const getNotificationAccountType = (safeAddress: string) => {
   const state = store.getState()
   const safeInfoItem = selectSafeInfo(state, safeAddress as `0x${string}`)
-  if (!safeInfoItem) {
-    return { ownerFound: null, accountType: NOTIFICATION_ACCOUNT_TYPE.REGULAR }
-  }
-
-  const owners = safeInfoItem.SafeInfo.owners
   const signers = selectSigners(state)
-  const ownerFound = owners.find((owner) => signers[owner.value]) ?? null
-
-  return {
-    ownerFound,
-    accountType: ownerFound ? NOTIFICATION_ACCOUNT_TYPE.OWNER : NOTIFICATION_ACCOUNT_TYPE.REGULAR,
-  }
+  return getAccountType(safeInfoItem?.SafeInfo, signers)
 }
 
 export async function registerSafe(address: string, chainIds: string[]): Promise<void> {
