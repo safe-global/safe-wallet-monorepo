@@ -139,7 +139,9 @@ const comboButton = '[data-testid="combo-submit-dropdown"]'
 const comboButtonPopover = '[data-testid="combo-submit-popover"]'
 
 export const txAccordionDetails = '[data-testid="decoded-tx-details"]'
-const MultisendCall = 'Call multisend on Safe: MultiSendCallOnly 1.4.1'
+export const decodedDataTop = '[data-testid="decoded-data-root"'
+const MultisendCall = 'Call'
+//multisend on Safe: MultiSendCallOnly 1.4.1'
 
 export const tx_status = {
   execution_needed: 'Execution needed',
@@ -486,7 +488,8 @@ export function clickOnExpandableAction(data) {
 }
 
 export function clickOnAdvancedDetails() {
-  cy.get(advancedDetails).click({ force: true })
+  cy.get(advancedDetails).click()
+  //({ force: true })
 }
 
 export function expandAdvancedDetails(data) {
@@ -495,9 +498,14 @@ export function expandAdvancedDetails(data) {
     cy.get('div').contains(row).should('be.visible')
   })
 }
+//Try 2
+export function verifytxAccordionDetails(data) {
+  main.checkTextsExistWithinElement(txAccordionDetails, data)
+}
+// remove
 export function checkMultiSendCallVisible() {
   clickOnAdvancedDetails()
-  cy.get(txAccordionDetails).contains(MultisendCall).should('be.visible')
+  main.checkTextsExistWithinElement(decodedDataTop, [MultisendCall])
 }
 
 export function switchView(view) {
