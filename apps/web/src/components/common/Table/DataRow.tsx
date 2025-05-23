@@ -13,7 +13,9 @@ export const DataRow = ({ datatestid, title, children }: DataRowProps): ReactEle
 
   return (
     <FieldsGrid data-testid={datatestid} title={title}>
-      <Typography variant="body1">{children}</Typography>
+      <Typography variant="body1" component="div">
+        {children}
+      </Typography>
     </FieldsGrid>
   )
 }
