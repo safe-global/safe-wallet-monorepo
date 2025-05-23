@@ -13,9 +13,13 @@ import { SafeTxContext, type SafeTxContextParams } from '@/components/tx-flow/Sa
 import { type SafeSignature, type SafeTransaction } from '@safe-global/safe-core-sdk-types'
 import { safeSignatureBuilder, safeTxBuilder } from '@/tests/builders/safeTx'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
+import { useIsNestedSafeOwner } from '@/hooks/useIsNestedSafeOwner'
+import { useIsWalletProposer } from '@/hooks/useProposers'
 
 jest.mock('@/hooks/useNestedSafeOwners')
 jest.mock('@/hooks/useSafeInfo')
+jest.mock('@/hooks/useIsNestedSafeOwner')
+jest.mock('@/hooks/useProposers')
 
 const TestSafeTxProvider = ({
   initialSafeTx,
@@ -66,6 +70,8 @@ const TestWalletContextProvider = ({
 describe('SignerForm', () => {
   const mockUseSafeInfo = useSafeInfo as jest.MockedFunction<typeof useSafeInfo>
   const mockUseNestedSafeOwners = useNestedSafeOwners as jest.MockedFunction<typeof useNestedSafeOwners>
+  const mockUseIsNestedSafeOwner = useIsNestedSafeOwner as jest.MockedFunction<typeof useIsNestedSafeOwner>
+  const mockUseIsWalletProposer = useIsWalletProposer as jest.MockedFunction<typeof useIsWalletProposer>
 
   const safeAddress = faker.finance.ethereumAddress()
   // 2/3 Safe
@@ -83,8 +89,11 @@ describe('SignerForm', () => {
 
   const mockOwners = mockSafeInfo.safe.owners
 
-  beforeAll(() => {
+  beforeEach(() => {
+    jest.resetAllMocks()
+
     mockUseSafeInfo.mockReturnValue(mockSafeInfo)
+    mockUseIsNestedSafeOwner.mockReturnValue(true)
   })
 
   it('should not render anything if no wallet is connected', () => {
@@ -98,6 +107,7 @@ describe('SignerForm', () => {
 
   it('should not render if there are no nested Safes', () => {
     mockUseNestedSafeOwners.mockReturnValue([])
+    mockUseIsNestedSafeOwner.mockReturnValue(false)
 
     const result = render(
       <TestWalletContextProvider
@@ -250,5 +260,51 @@ describe('SignerForm', () => {
     await waitFor(() => {
       expect(result.queryByText(shortenAddress(mockSafeInfo.safe.owners[1].value))).toBeVisible()
     })
+  })
+
+  it('adds the connected wallet to the options when the wallet is the proposer of a new tx', async () => {
+    const proposerWallet = faker.finance.ethereumAddress()
+    mockUseIsWalletProposer.mockReturnValue(true)
+    mockUseNestedSafeOwners.mockReturnValue([mockOwners[0].value])
+
+    const result = render(
+      <TestWalletContextProvider
+        connectedWallet={{
+          address: proposerWallet,
+          chainId: '1',
+          label: 'MetaMask',
+          provider: {} as Eip1193Provider,
+        }}
+      >
+        <SignerForm />
+      </TestWalletContextProvider>,
+    )
+
+    expect(result.queryByText('Sign with')).toBeVisible()
+    await waitFor(() => expect(result.queryByText(shortenAddress(proposerWallet))).toBeVisible())
+  })
+
+  it('does not add the proposer wallet when editing an existing tx', async () => {
+    const proposerWallet = faker.finance.ethereumAddress()
+    mockUseIsWalletProposer.mockReturnValue(true)
+    mockUseNestedSafeOwners.mockReturnValue([mockOwners[0].value])
+
+    const result = render(
+      <TestSafeTxProvider initialSafeTx={safeTxBuilder().build()}>
+        <TestWalletContextProvider
+          connectedWallet={{
+            address: proposerWallet,
+            chainId: '1',
+            label: 'MetaMask',
+            provider: {} as Eip1193Provider,
+          }}
+        >
+          <SignerForm txId="0x123" />
+        </TestWalletContextProvider>
+      </TestSafeTxProvider>,
+    )
+
+    expect(result.queryByText('Sign with')).toBeVisible()
+    expect(result.queryByText(shortenAddress(proposerWallet))).toBeNull()
   })
 })
