@@ -15,7 +15,6 @@ import * as useSafeWalletProvider from '@/services/safe-wallet-provider/useSafeW
 
 jest.mock('@reown/walletkit', () => jest.fn())
 
-jest.mock('../services/WalletConnectWallet')
 jest.mock('@/services/safe-wallet-provider/useSafeWalletProvider')
 
 const TestComponent = () => {
