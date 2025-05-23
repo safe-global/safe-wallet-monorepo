@@ -99,7 +99,7 @@ export const useDelegate = (): UseDelegateProps => {
           }
         })
 
-        // Wait for all registrations to complete
+        // We are not awaiting this as we don't want to block the user from using the app
         Promise.all(registrationPromises)
 
         // Add to redux store once after all chains are processed
