@@ -1,6 +1,6 @@
 import { Core } from '@walletconnect/core'
 import { WalletKit, type WalletKitTypes } from '@reown/walletkit'
-import { buildApprovedNamespaces, getSdkError } from '@walletconnect/utils'
+import { buildApprovedNamespaces, buildAuthObject, getSdkError } from '@walletconnect/utils'
 import type Web3WalletType from '@reown/walletkit'
 import type { ProposalTypes, SessionTypes } from '@walletconnect/types'
 import { type JsonRpcResponse } from '@walletconnect/jsonrpc-utils'
@@ -10,6 +10,7 @@ import { IS_PRODUCTION, LS_NAMESPACE, WC_PROJECT_ID } from '@/config/constants'
 import { EIP155, SAFE_COMPATIBLE_EVENTS, SAFE_COMPATIBLE_METHODS, SAFE_WALLET_METADATA } from '../constants'
 import { getEip155ChainId, stripEip155Prefix } from './utils'
 import { invariant } from '@safe-global/utils/utils/helpers'
+import { hexlify, toUtf8Bytes } from 'ethers'
 
 const SESSION_ADD_EVENT = 'session_add' as WalletKitTypes.Event // Workaround: WalletConnect doesn't emit session_add event
 const SESSION_REJECT_EVENT = 'session_reject' as WalletKitTypes.Event // Workaround: WalletConnect doesn't emit session_reject event
@@ -287,6 +288,74 @@ class WalletConnectWallet {
     assertWeb3Wallet(this.web3Wallet)
 
     return await this.web3Wallet.respondSessionRequest({ topic, response })
+  }
+
+  /**
+   * Subscribe to SiWE requests
+   */
+  public onSessionAuth(handler: (e: WalletKitTypes.SessionAuthenticate) => void) {
+    // Subscribe to the session auth event
+    this.web3Wallet?.on('session_authenticate', handler)
+
+    // Return the unsubscribe function
+    return () => {
+      this.web3Wallet?.off('session_authenticate', handler)
+    }
+  }
+
+  /**
+   * Format SiWE message
+   */
+  public formatAuthMessage(
+    authPayload: WalletKitTypes.SessionAuthenticate['params']['authPayload'],
+    chainId: string,
+    address: string,
+  ): string {
+    assertWeb3Wallet(this.web3Wallet)
+
+    const message = this.web3Wallet.formatAuthMessage({
+      request: authPayload,
+      iss: `${getEip155ChainId(chainId)}:${address}`,
+    })
+
+    const hexMessage = hexlify(toUtf8Bytes(message))
+
+    return hexMessage
+  }
+
+  public async approveSessionAuth(
+    eventId: number,
+    authPayload: WalletKitTypes.SessionAuthenticate['params']['authPayload'],
+    signature: string,
+    chainId: string,
+    address: string,
+  ) {
+    assertWeb3Wallet(this.web3Wallet)
+
+    const auth = buildAuthObject(
+      authPayload,
+      {
+        t: 'eip1271',
+        s: signature,
+      },
+      `${getEip155ChainId(chainId)}:${address}`,
+    )
+
+    const resp = await this.web3Wallet.approveSessionAuthenticate({
+      id: eventId,
+      auths: [auth],
+    })
+
+    this.web3Wallet?.events.emit(SESSION_ADD_EVENT, resp.session)
+  }
+
+  public async rejectSessionAuth(eventId: number) {
+    assertWeb3Wallet(this.web3Wallet)
+
+    return this.web3Wallet.rejectSessionAuthenticate({
+      id: eventId,
+      reason: getSdkError('USER_REJECTED'),
+    })
   }
 }
 
