@@ -1,7 +1,7 @@
 import { Contract, AbstractProvider } from 'ethers'
 
 // Multicall contract ABI
-const MULTICALL_ABI = [
+export const MULTICALL_ABI = [
   'function aggregate3(tuple(address target, bool allowFailure, bytes callData)[] calls) payable returns (tuple(bool success, bytes returnData)[] returnData)',
 ]
 
