@@ -206,7 +206,7 @@ exports[`VaultTxRedeemCard renders correctly 1`] = `
             }
             suppressHighlighting={true}
           >
-            Stake
+            Earn
           </Text>
         </View>
         <Text
