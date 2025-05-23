@@ -67,8 +67,8 @@ describe('Incoming tx history details tests', () => {
       typeReceive.altImage,
       typeReceive.altToken,
     )
-    createTx.verifyExpandedDetails([typeReceive.senderAddressEth, typeReceive.txHashEth, typeReceive.executionDateEth])
-    createTx.verifyNumberOfExternalLinks(2)
+    createTx.verifyExpandedDetails([typeReceive.senderAddressEth, typeReceive.txHashEth, typeReceive.executionDateEth]),
+      createTx.verifyNumberOfExternalLinks(2)
   })
 
   it('Verify add to the address book for the sender in the incoming tx', () => {
@@ -79,6 +79,7 @@ describe('Incoming tx history details tests', () => {
     address_book.typeInName(senderName)
     address_book.clickOnSaveEntryBtn()
     cy.visit(constants.addressBookUrl + safe)
+    cy.get('body').should('be.visible')
     cy.contains(senderName)
   })
 })

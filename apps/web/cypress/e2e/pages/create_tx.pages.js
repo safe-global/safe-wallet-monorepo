@@ -427,11 +427,11 @@ export function verifyNumberOfCopyIcons(number) {
 }
 
 export function verifyNumberOfExternalLinks(number) {
-  cy.get(copyIcon)
-    .parent()
-    .parent()
-    .next()
-    .children('a')
+  cy.get(explorerBtn)
+    //.parent()
+    // .parent()
+    // .next()
+    //.children('a')
     .then(($links) => {
       expect($links.length).to.be.at.least(number)
       for (let i = 0; i < number; i++) {

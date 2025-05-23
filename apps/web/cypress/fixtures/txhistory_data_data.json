@@ -59,9 +59,9 @@
       "txHashDAI": "0x7156...3e47",
       "nftHash": "0x3873...6d0b",
       "txHashEth": "0xdc6b...f250",
-      "executionDateDAI": "10/30/2023, 2:37:11 AM",
-      "executionDateNFT": "9/28/2023, 2:48:11 AM",
-      "executionDateEth": "8/19/2020, 8:51:31 AM"
+      "executionDateDAI": "10/30/2023",
+      "executionDateNFT": "9/28/2023",
+      "executionDateEth": "8/19/2020"
     },
     "send": {
       "title": "Sent",
