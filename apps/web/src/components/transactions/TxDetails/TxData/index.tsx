@@ -5,6 +5,8 @@ import {
   isOnChainConfirmationTxData,
   isSafeUpdateTxData,
   isStakingTxWithdrawInfo,
+  isVaultDepositTxInfo,
+  isVaultRedeemTxInfo,
 } from '@/utils/transaction-guards'
 import { isStakingTxExitInfo } from '@/utils/transaction-guards'
 import {
@@ -21,7 +23,7 @@ import {
 } from '@/utils/transaction-guards'
 import { SpendingLimits } from '@/components/transactions/TxDetails/TxData/SpendingLimits'
 import { TransactionStatus, type TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
-import { type ReactElement } from 'react'
+import type { PropsWithChildren, ReactElement } from 'react'
 import RejectionTxInfo from '@/components/transactions/TxDetails/TxData/Rejection'
 import TransferTxInfo from '@/components/transactions/TxDetails/TxData/Transfer'
 import useChainId from '@/hooks/useChainId'
@@ -33,6 +35,8 @@ import StakingTxWithdrawDetails from '@/features/stake/components/StakingTxWithd
 import { OnChainConfirmation } from './NestedTransaction/OnChainConfirmation'
 import { ExecTransaction } from './NestedTransaction/ExecTransaction'
 import SafeUpdate from './SafeUpdate'
+import VaultDepositTxDetails from '@/features/earn/components/VaultDepositTxDetails'
+import VaultRedeemTxDetails from '@/features/earn/components/VaultRedeemTxDetails'
 import DecodedData from './DecodedData'
 
 const TxData = ({
@@ -41,13 +45,14 @@ const TxData = ({
   txDetails,
   trusted,
   imitation,
-}: {
+  children,
+}: PropsWithChildren<{
   txInfo: TransactionDetails['txInfo']
   txData: TransactionDetails['txData']
   txDetails?: TransactionDetails
   trusted: boolean
   imitation: boolean
-}): ReactElement => {
+}>): ReactElement => {
   const chainId = useChainId()
 
   if (isOrderTxInfo(txInfo)) {
@@ -64,6 +69,16 @@ const TxData = ({
 
   if (isStakingTxWithdrawInfo(txInfo)) {
     return <StakingTxWithdrawDetails info={txInfo} />
+  }
+
+  // @ts-ignore: TODO: Fix this type
+  if (isVaultDepositTxInfo(txInfo)) {
+    return <VaultDepositTxDetails info={txInfo} />
+  }
+
+  // @ts-ignore: TODO: Fix this type
+  if (isVaultRedeemTxInfo(txInfo)) {
+    return <VaultRedeemTxDetails info={txInfo} />
   }
 
   if (isTransferTxInfo(txInfo)) {
@@ -109,7 +124,11 @@ const TxData = ({
     return <SafeUpdate txData={txData} />
   }
 
-  return <DecodedData txData={txData} toInfo={txData?.to} />
+  return !!children ? (
+    <>{children}</>
+  ) : (
+    <DecodedData txData={txData} toInfo={isCustomTxInfo(txInfo) ? txInfo.to : txData?.to} />
+  )
 }
 
 export default TxData
