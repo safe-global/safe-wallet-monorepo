@@ -7,7 +7,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { setActiveSafe } from '@/src/store/activeSafeSlice'
 import { getChainsByIds } from '@/src/store/chains'
 import { RootState } from '@/src/store'
-import { useMyAccounts } from './hooks/useMyAccounts'
+import { useChainsBalance } from '@/src/hooks/useChainsBalance'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 
 interface MyAccountsContainerProps {
@@ -18,7 +18,7 @@ interface MyAccountsContainerProps {
 }
 
 export function MyAccountsContainer({ item, isDragging, drag, onClose }: MyAccountsContainerProps) {
-  useMyAccounts(item)
+  useChainsBalance(item.SafeInfo.address.value as Address)
 
   const dispatch = useDispatch()
   const activeSafe = useDefinedActiveSafe()

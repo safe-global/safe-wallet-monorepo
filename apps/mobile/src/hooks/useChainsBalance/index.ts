@@ -1,12 +1,12 @@
 import { useEffect } from 'react'
-import { SafesSliceItem, updateSafeInfo } from '@/src/store/safesSlice'
+import { updateSafeInfo } from '@/src/store/safesSlice'
 import { Address } from '@/src/types/address'
 import { useAppDispatch } from '@/src/store/hooks'
 import { useSafeOverviewService } from '@/src/hooks/services/useSafeOverviewService'
 
-export const useMyAccounts = (item: SafesSliceItem) => {
+export const useChainsBalance = (safeAddress?: Address) => {
   const dispatch = useAppDispatch()
-  const data = useSafeOverviewService(item.SafeInfo.address.value)
+  const data = useSafeOverviewService(safeAddress)
 
   useEffect(() => {
     if (!data) {
