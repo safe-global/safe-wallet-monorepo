@@ -20,7 +20,7 @@ import SettingsChange from './SettingsChange'
 import ChangeThreshold from './ChangeThreshold'
 import BatchTransactions from './BatchTransactions'
 import { TxModalContext } from '@/components/tx-flow'
-import { isSettingsChangeView, isChangeThresholdView, isConfirmBatchView } from './utils'
+import { isSettingsChangeView, isChangeThresholdView, isConfirmBatchView, isManageSignersView } from './utils'
 import { OnChainConfirmation } from '@/components/transactions/TxDetails/TxData/NestedTransaction/OnChainConfirmation'
 import { ExecTransaction } from '@/components/transactions/TxDetails/TxData/NestedTransaction/ExecTransaction'
 import { type ReactElement } from 'react'
@@ -36,6 +36,7 @@ import Summary from '@/components/transactions/TxDetails/Summary'
 import TxData from '@/components/transactions/TxDetails/TxData'
 import { isMultiSendCalldata } from '@/utils/transaction-calldata'
 import useChainId from '@/hooks/useChainId'
+import { ManageSigners } from './ManageSigners'
 import { TransactionWarnings } from '../TransactionWarnings'
 import { Box } from '@mui/material'
 import DecodedData from '@/components/transactions/TxDetails/TxData/DecodedData'
@@ -55,6 +56,8 @@ const getConfirmationViewComponent = ({
   txData,
   txFlow,
 }: NarrowConfirmationViewProps & { txFlow?: ReactElement }) => {
+  if (txData && isManageSignersView(txInfo, txData)) return <ManageSigners txInfo={txInfo} txData={txData} />
+
   if (isChangeThresholdView(txInfo)) return <ChangeThreshold txInfo={txInfo} />
 
   if (isConfirmBatchView(txFlow)) return <BatchTransactions />

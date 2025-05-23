@@ -4,6 +4,10 @@ const SETTINGS_CATEGORY = 'settings'
 
 export const SETTINGS_EVENTS = {
   SETUP: {
+    MANAGE_SIGNERS: {
+      action: 'Manage signers',
+      category: SETTINGS_CATEGORY,
+    },
     ADD_OWNER: {
       action: 'Add owner',
       category: SETTINGS_CATEGORY,
@@ -150,4 +154,8 @@ export const SETTINGS_EVENTS = {
       category: SETTINGS_CATEGORY,
     },
   },
+}
+
+export enum SETTINGS_LABELS {
+  manage_signers = 'manage_signers',
 }
