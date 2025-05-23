@@ -1,5 +1,5 @@
 import { useCallback, useContext, useEffect } from 'react'
-import { WalletConnectContext } from '../../WalletConnectContext'
+import { WalletConnectContext } from '@/features/walletconnect/WalletConnectContext'
 import WcConnectionForm from '../WcConnectionForm'
 import WcErrorMessage from '../WcErrorMessage'
 import { trackEvent } from '@/services/analytics'
