@@ -4,6 +4,7 @@ import { addSafe, removeSafe, selectAllSafes } from '../safesSlice'
 import { subscribeSafe, unsubscribeSafe } from '@/src/services/notifications/SubscriptionManager'
 import { selectAllChainsIds } from '../chains'
 import { addDelegate } from '../delegatesSlice'
+import { selectSafeSubscriptionStatus } from '../safeSubscriptionsSlice'
 
 const notificationsMiddleware: Middleware = (store) => (next) => (action) => {
   const typedAction = action as AnyAction
@@ -35,13 +36,22 @@ const notificationsMiddleware: Middleware = (store) => (next) => (action) => {
     if (notificationsEnabled) {
       const chainIds = selectAllChainsIds(store.getState())
       const safes = Object.values(selectAllSafes(store.getState()))
+      const state = store.getState()
+
       safes.forEach((safe) => {
         const safeAddress = safe.SafeInfo.address.value
         const owners = safe.SafeInfo.owners.map((o) => o.value)
         const isTargetSafe = delegateInfo.safe ? delegateInfo.safe === safeAddress : owners.includes(ownerAddress)
 
         if (isTargetSafe) {
-          subscribeSafe(safeAddress, chainIds)
+          // Only subscribe if the Safe is already subscribed for notifications on at least one chain
+          const isSafeSubscribedOnAnyChain = chainIds.some(
+            (chainId) => selectSafeSubscriptionStatus(state, safeAddress, chainId) !== false,
+          )
+
+          if (isSafeSubscribedOnAnyChain) {
+            subscribeSafe(safeAddress, chainIds)
+          }
         }
       })
     }
