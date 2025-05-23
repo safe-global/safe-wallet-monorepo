@@ -10,7 +10,6 @@ import { IS_PRODUCTION, LS_NAMESPACE, WC_PROJECT_ID } from '@/config/constants'
 import { EIP155, SAFE_COMPATIBLE_EVENTS, SAFE_COMPATIBLE_METHODS, SAFE_WALLET_METADATA } from '../constants'
 import { getEip155ChainId, stripEip155Prefix } from './utils'
 import { invariant } from '@safe-global/utils/utils/helpers'
-import { hexlify, toUtf8Bytes } from 'ethers'
 
 const SESSION_ADD_EVENT = 'session_add' as WalletKitTypes.Event // Workaround: WalletConnect doesn't emit session_add event
 const SESSION_REJECT_EVENT = 'session_reject' as WalletKitTypes.Event // Workaround: WalletConnect doesn't emit session_reject event
@@ -313,14 +312,10 @@ class WalletConnectWallet {
   ): string {
     assertWeb3Wallet(this.web3Wallet)
 
-    const message = this.web3Wallet.formatAuthMessage({
+    return this.web3Wallet.formatAuthMessage({
       request: authPayload,
       iss: `${getEip155ChainId(chainId)}:${address}`,
     })
-
-    const hexMessage = hexlify(toUtf8Bytes(message))
-
-    return hexMessage
   }
 
   public async approveSessionAuth(
