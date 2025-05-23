@@ -1,7 +1,6 @@
 import SafeAppIconCard from '@/components/safe-apps/SafeAppIconCard'
-import { WCLoadingState } from '@/features/walletconnect/components/WalletConnectProvider'
 import { getPeerName } from '@/features/walletconnect/services/utils'
-import { WalletConnectContext } from '@/features/walletconnect/WalletConnectContext'
+import { WalletConnectContext, WCLoadingState } from '@/features/walletconnect/WalletConnectContext'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { trackEvent } from '@/services/analytics'
 import { WALLETCONNECT_EVENTS } from '@/services/analytics/events/walletconnect'
