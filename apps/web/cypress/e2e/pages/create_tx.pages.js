@@ -138,10 +138,11 @@ export const recordedTxNote = 'Tx note one'
 const comboButton = '[data-testid="combo-submit-dropdown"]'
 const comboButtonPopover = '[data-testid="combo-submit-popover"]'
 
+// Transaction details on Tx creation
 export const txAccordionDetails = '[data-testid="decoded-tx-details"]'
-export const decodedDataTop = '[data-testid="decoded-data-root"'
-const MultisendCall = 'Call'
-//multisend on Safe: MultiSendCallOnly 1.4.1'
+
+//Arrays for the Transaction Details on Tx creation for different type of txs
+export const MultisendData = ['Call', 'multiSend', 'on', 'Safe: MultiSendCallOnly 1.4.1']
 
 export const tx_status = {
   execution_needed: 'Execution needed',
@@ -498,14 +499,13 @@ export function expandAdvancedDetails(data) {
     cy.get('div').contains(row).should('be.visible')
   })
 }
-//Try 2
+//The whole block inside Transaction details accordion: data-root and advanced details together
 export function verifytxAccordionDetails(data) {
   main.checkTextsExistWithinElement(txAccordionDetails, data)
 }
-// remove
-export function checkMultiSendCallVisible() {
-  clickOnAdvancedDetails()
-  main.checkTextsExistWithinElement(decodedDataTop, [MultisendCall])
+// Function to check elements inside Transaction details/DecodedDataRoot
+export function checkDataDecodingRoot(data) {
+  main.checkTextsExistWithinElement(decodedDataTop, data)
 }
 
 export function switchView(view) {
