@@ -235,11 +235,11 @@ exports[`BatchTransactions should render a list of batch transactions 1`] = `
                         class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true css-1vd824g-MuiGrid-root"
                         data-testid="tx-data-row"
                       >
-                        <p
+                        <div
                           class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
                         >
                           9/20/2024, 10:20:15 AM
-                        </p>
+                        </div>
                       </div>
                     </div>
                   </div>
