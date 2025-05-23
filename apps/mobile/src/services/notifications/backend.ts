@@ -20,9 +20,8 @@ type AuthCacheEntry = {
 
 let authCache: Record<string, AuthCacheEntry> = {}
 
-// in backend.ts
+// This is only used in testing as it turned mega hard to do jest.resetModules()
 export function clearAuthCache() {
-  console.log('clearing auth cache')
   authCache = {}
 }
 
@@ -47,7 +46,6 @@ const getNotificationRegisterPayload = async ({
     )
     .unwrap()
 
-  console.log(nonce)
   if (!nonce) {
     throw new Error(ERROR_MSG)
   }
@@ -70,8 +68,6 @@ export const authenticateSigner = async (signer: Wallet | HDNodeWallet | null, c
   if (!signer) {
     return
   }
-
-  console.log('authenticating signer', authCache)
 
   const signerAddress = signer.address
   const cacheKey = `${signerAddress.toLowerCase()}`

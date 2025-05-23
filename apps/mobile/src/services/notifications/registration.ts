@@ -16,8 +16,6 @@ import { getDelegateKeyId } from '@/src/utils/delegate'
 
 type DelegateInfo = { owner: string; delegateAddress: string } | null
 
-// Cache to track authenticated signers and their authentication timestamps
-
 export const getDelegateSigner = async (delegate: DelegateInfo) => {
   if (!delegate) {
     return { signer: null as Wallet | HDNodeWallet | null }
@@ -38,8 +36,6 @@ export const getNotificationAccountType = (safeAddress: string) => {
 
 export async function registerSafe(address: string, chainIds: string[]): Promise<void> {
   try {
-    Logger.info('registerSafe ::', { address, chainIds })
-
     const delegate = selectFirstDelegateForAnySafeOwner(store.getState(), address as `0x${string}`)
     const { signer } = await getDelegateSigner(delegate)
     const { accountType } = getNotificationAccountType(address)
@@ -65,8 +61,6 @@ export async function registerSafe(address: string, chainIds: string[]): Promise
 
 export async function unregisterSafe(address: string, chainIds: string[]): Promise<void> {
   try {
-    Logger.info('unregisterSafe ::', { address, chainIds })
-
     const delegate = selectFirstDelegateForAnySafeOwner(store.getState(), address as `0x${string}`)
     const { signer } = await getDelegateSigner(delegate)
 

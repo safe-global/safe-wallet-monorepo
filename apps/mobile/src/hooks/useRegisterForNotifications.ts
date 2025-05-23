@@ -33,7 +33,6 @@ const useRegisterForNotifications = (): NotificationsProps => {
   const dispatch = useAppDispatch()
   const activeSafe = useAppSelector(selectActiveSafe)
   const allChainIds = useAppSelector(selectAllChainsIds)
-  console.log('allChainIds', allChainIds)
 
   const registerForNotifications = useCallback(
     async (updateNotificationSettings = true) => {
