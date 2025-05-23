@@ -1,7 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { RootState } from '.'
 
-// Use descriptive type aliases
 type SafeAddress = string
 type ChainId = string
 

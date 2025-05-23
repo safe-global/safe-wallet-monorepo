@@ -213,7 +213,6 @@ jest.mock('react-native-quick-crypto', () => ({
       update: jest.fn().mockReturnThis(),
       digest: jest.fn(() => Buffer.from('mockedHash')),
     })),
-    // Add other crypto methods as needed
   },
   randomBytes: jest.fn((size) => Buffer.alloc(size)),
   createHash: jest.fn(() => ({
