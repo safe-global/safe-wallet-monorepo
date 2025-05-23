@@ -318,6 +318,7 @@ export const WalletConnectProvider = ({ children }: { children: ReactNode }) => 
   // Subscribe to session proposals
   useEffect(() => {
     return walletConnect?.onSessionPropose((proposalData) => {
+      setIsLoading(undefined)
       setSessionProposal(proposalData)
     })
   }, [walletConnect])
