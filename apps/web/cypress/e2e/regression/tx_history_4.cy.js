@@ -67,8 +67,8 @@ describe('Incoming tx history details tests', () => {
       typeReceive.altImage,
       typeReceive.altToken,
     )
-    createTx.verifyExpandedDetails([typeReceive.senderAddressEth, typeReceive.txHashEth, typeReceive.executionDateEth]),
-      createTx.verifyNumberOfExternalLinks(2)
+    createTx.verifyExpandedDetails([typeReceive.senderAddressEth, typeReceive.txHashEth, typeReceive.executionDateEth])
+    createTx.verifyNumberOfExternalLinks(2)
   })
 
   it('Verify add to the address book for the sender in the incoming tx', () => {
