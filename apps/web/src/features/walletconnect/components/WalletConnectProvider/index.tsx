@@ -23,6 +23,8 @@ export enum WCLoadingState {
   DISCONNECT = 'Disconnect',
 }
 
+const FALLBACK_PEER_NAME = 'WalletConnect'
+
 // The URL of the former WalletConnect Safe App
 // This is still used to differentiate these txs from Safe App txs in the analytics
 const LEGACY_WC_APP_URL = 'https://apps-portal.safe.global/wallet-connect'
@@ -73,6 +75,7 @@ export const WalletConnectProvider = ({ children }: { children: ReactNode }) => 
       const { topic } = event
       const session = walletConnect.getActiveSessions().find((s) => s.topic === topic)
       const requestChainId = stripEip155Prefix(event.params.chainId)
+      const peerName = (session && getPeerName(session.peer)) || FALLBACK_PEER_NAME
 
       // Track requests
       if (session) {
@@ -83,7 +86,7 @@ export const WalletConnectProvider = ({ children }: { children: ReactNode }) => 
         // Get error if wrong chain
         if (!session || requestChainId !== chainId) {
           if (session) {
-            setError(getWrongChainError(getPeerName(session.peer)))
+            setError(getWrongChainError(peerName))
           }
 
           const error = getSdkError('UNSUPPORTED_CHAINS')
@@ -93,7 +96,7 @@ export const WalletConnectProvider = ({ children }: { children: ReactNode }) => 
         // Get response from Safe Wallet Provider
         return safeWalletProvider.request(event.id, event.params.request, {
           url: LEGACY_WC_APP_URL, // required for server-side analytics
-          name: getPeerName(session.peer) || 'WalletConnect',
+          name: peerName,
           description: session.peer.metadata.description,
           iconUrl: session.peer.metadata.icons[0],
         })
@@ -116,13 +119,14 @@ export const WalletConnectProvider = ({ children }: { children: ReactNode }) => 
 
     return walletConnect.onSessionAuth(async (event) => {
       const { authPayload, requester } = event.params
+      const peerName = getPeerName(requester) || FALLBACK_PEER_NAME
 
       if (!IS_PRODUCTION) {
         console.log('[WalletConnect] auth', authPayload, requester)
       }
 
       if (!authPayload.chains.includes(getEip155ChainId(chainId))) {
-        setError(getWrongChainError(requester.metadata.name || 'WalletConnect'))
+        setError(getWrongChainError(peerName))
         return
       }
 
@@ -135,7 +139,7 @@ export const WalletConnectProvider = ({ children }: { children: ReactNode }) => 
 
         const appInfo = {
           url: LEGACY_WC_APP_URL, // required for server-side analytics
-          name: getPeerName(requester) || 'WalletConnect',
+          name: peerName,
           description: requester.metadata.description,
           iconUrl: requester.metadata.icons[0],
         }
