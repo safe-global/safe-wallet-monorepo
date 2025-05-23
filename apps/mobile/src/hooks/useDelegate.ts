@@ -7,11 +7,7 @@ import { addDelegate } from '@/src/store/delegatesSlice'
 import { cgwApi } from '@safe-global/store/gateway/AUTO_GENERATED/delegates'
 import Logger from '@/src/utils/logger'
 import { getDelegateTypedData } from '@safe-global/utils/services/delegates'
-
-// Create a key ID for delegate keys in the keychain
-const getDelegateKeyId = (ownerAddress: string, delegateAddress: string): string => {
-  return `delegate_${ownerAddress}_${delegateAddress}`
-}
+import { getDelegateKeyId } from '@/src/utils/delegate'
 
 interface UseDelegateProps {
   createDelegate: (
