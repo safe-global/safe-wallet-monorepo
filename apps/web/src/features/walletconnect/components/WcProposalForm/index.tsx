@@ -30,7 +30,7 @@ type ProposalFormProps = {
 }
 
 const WcProposalForm = ({ proposal, onApprove, onReject }: ProposalFormProps): ReactElement => {
-  const { isLoading } = useContext(WalletConnectContext)
+  const { loading } = useContext(WalletConnectContext)
 
   const { configs } = useChains()
   const { safeLoaded, safe } = useSafeInfo()
@@ -54,7 +54,7 @@ const WcProposalForm = ({ proposal, onApprove, onReject }: ProposalFormProps): R
     isUnsupportedChain ||
     isBlocked ||
     (isHighRisk && !understandsRisk) ||
-    !!isLoading ||
+    !!loading ||
     (Boolean(sanctionedAddress) && isSafePass)
 
   const onCheckboxClick = useCallback(
@@ -132,12 +132,12 @@ const WcProposalForm = ({ proposal, onApprove, onReject }: ProposalFormProps): R
       <Divider flexItem className={css.divider} />
 
       <div className={css.buttons}>
-        <Button variant="danger" onClick={onReject} className={css.button} disabled={!!isLoading}>
-          {isLoading === WCLoadingState.REJECT ? <CircularProgress size={20} /> : 'Reject'}
+        <Button variant="danger" onClick={onReject} className={css.button} disabled={!!loading}>
+          {loading === WCLoadingState.REJECT ? <CircularProgress size={20} /> : 'Reject'}
         </Button>
 
         <Button variant="contained" onClick={onApprove} className={css.button} disabled={disabled}>
-          {isLoading === WCLoadingState.APPROVE ? <CircularProgress size={20} /> : 'Approve'}
+          {loading === WCLoadingState.APPROVE ? <CircularProgress size={20} /> : 'Approve'}
         </Button>
       </div>
     </div>

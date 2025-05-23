@@ -29,8 +29,8 @@ type WalletConnectContextType = {
   setError: Dispatch<SetStateAction<Error | null>>
   open: boolean
   setOpen: (open: boolean) => void
-  isLoading: WCLoadingState | undefined
-  setIsLoading: Dispatch<SetStateAction<WCLoadingState | undefined>>
+  loading: WCLoadingState | null
+  setLoading: Dispatch<SetStateAction<WCLoadingState | null>>
   approveSession: () => Promise<void>
   rejectSession: () => Promise<void>
 }
@@ -43,8 +43,8 @@ export const WalletConnectContext = createContext<WalletConnectContextType>({
   setError: () => {},
   open: false,
   setOpen: () => {},
-  isLoading: undefined,
-  setIsLoading: () => {},
+  loading: null,
+  setLoading: () => {},
   approveSession: () => Promise.resolve(),
   rejectSession: () => Promise.resolve(),
 })
@@ -87,7 +87,7 @@ export const WalletConnectProvider = ({ children }: { children: ReactNode }) => 
   const open = wcPopupStore.useStore() ?? false
   const setOpen = wcPopupStore.setStore
   const [error, setError] = useState<Error | null>(null)
-  const [isLoading, setIsLoading] = useState<WCLoadingState>()
+  const [loading, setLoading] = useState<WCLoadingState | null>(null)
   const safeWalletProvider = useSafeWalletProvider()
   const [autoApprove = {}, setAutoApprove] = useLocalStorage<WcAutoApproveProps>(WC_AUTO_APPROVE_KEY)
 
@@ -202,7 +202,7 @@ export const WalletConnectProvider = ({ children }: { children: ReactNode }) => 
       }
 
       // Close the popup
-      setIsLoading(WCLoadingState.APPROVE)
+      setLoading(WCLoadingState.APPROVE)
       setOpen(false)
 
       // Get a signature and send it to WalletConnect
@@ -220,7 +220,7 @@ export const WalletConnectProvider = ({ children }: { children: ReactNode }) => 
         setOpen(true)
       }
 
-      setIsLoading(undefined)
+      setLoading(null)
     })
   }, [walletConnect, safeWalletProvider, chainId, safeAddress, setOpen])
 
@@ -254,7 +254,7 @@ export const WalletConnectProvider = ({ children }: { children: ReactNode }) => 
   const approveSession = useCallback(async () => {
     if (!walletConnect || !sessionProposal) return
 
-    setIsLoading(WCLoadingState.APPROVE)
+    setLoading(WCLoadingState.APPROVE)
 
     try {
       await walletConnect.approveSession(sessionProposal, chainId, safeAddress, {
@@ -280,11 +280,11 @@ export const WalletConnectProvider = ({ children }: { children: ReactNode }) => 
         }))
       }
     } catch (e) {
-      setIsLoading(undefined)
+      setLoading(null)
       throw e
     }
 
-    setIsLoading(undefined)
+    setLoading(null)
     setSessionProposal(null)
     setOpen(false)
   }, [walletConnect, sessionProposal, chainId, safeAddress, setAutoApprove, setOpen])
@@ -301,16 +301,16 @@ export const WalletConnectProvider = ({ children }: { children: ReactNode }) => 
   const rejectSession = useCallback(async () => {
     if (!walletConnect || !sessionProposal) return
 
-    setIsLoading(WCLoadingState.REJECT)
+    setLoading(WCLoadingState.REJECT)
 
     try {
       await walletConnect.rejectSession(sessionProposal)
     } catch (e) {
-      setIsLoading(undefined)
+      setLoading(null)
       throw e
     }
 
-    setIsLoading(undefined)
+    setLoading(null)
     setSessionProposal(null)
     setOpen(false)
   }, [walletConnect, sessionProposal, setOpen])
@@ -318,7 +318,7 @@ export const WalletConnectProvider = ({ children }: { children: ReactNode }) => 
   // Subscribe to session proposals
   useEffect(() => {
     return walletConnect?.onSessionPropose((proposalData) => {
-      setIsLoading(undefined)
+      setLoading(null)
       setSessionProposal(proposalData)
     })
   }, [walletConnect])
@@ -331,8 +331,8 @@ export const WalletConnectProvider = ({ children }: { children: ReactNode }) => 
         setError,
         open,
         setOpen,
-        isLoading,
-        setIsLoading,
+        loading,
+        setLoading,
         sessions,
         sessionProposal,
         approveSession,
