@@ -138,6 +138,9 @@ export const recordedTxNote = 'Tx note one'
 const comboButton = '[data-testid="combo-submit-dropdown"]'
 const comboButtonPopover = '[data-testid="combo-submit-popover"]'
 
+export const txAccordionDetails = '[data-testid="decoded-tx-details"]'
+const MultisendCall = 'Call multisend on Safe: MultiSendCallOnly 1.4.1'
+
 export const tx_status = {
   execution_needed: 'Execution needed',
   execute: 'Execute',
@@ -491,6 +494,10 @@ export function expandAdvancedDetails(data) {
   data.forEach((row) => {
     cy.get('div').contains(row).should('be.visible')
   })
+}
+export function checkMultiSendCallVisible() {
+  clickOnAdvancedDetails()
+  cy.get(txAccordionDetails).contains(MultisendCall).should('be.visible')
 }
 
 export function switchView(view) {
