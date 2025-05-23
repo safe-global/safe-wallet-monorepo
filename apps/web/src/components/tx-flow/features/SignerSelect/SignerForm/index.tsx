@@ -25,7 +25,7 @@ import { MODALS_EVENTS, trackEvent } from '@/services/analytics'
 import { useIsNestedSafeOwner } from '@/hooks/useIsNestedSafeOwner'
 import { useIsWalletProposer } from '@/hooks/useProposers'
 
-export const SignerForm = ({ willExecute }: { willExecute?: boolean }) => {
+export const SignerForm = ({ willExecute, txId }: { willExecute?: boolean; txId?: string }) => {
   const { signer, setSignerAddress, connectedWallet: wallet } = useWalletContext() ?? {}
   const nestedSafeOwners = useNestedSafeOwners()
   const signerAddress = signer?.address
@@ -33,6 +33,7 @@ export const SignerForm = ({ willExecute }: { willExecute?: boolean }) => {
   const { safeTx } = useContext(SafeTxContext)
   const isNestedOwner = useIsNestedSafeOwner()
   const isProposer = useIsWalletProposer()
+  const isCreation = !txId
 
   const onChange = (event: SelectChangeEvent<string>) => {
     trackEvent(MODALS_EVENTS.CHANGE_SIGNER)
@@ -72,12 +73,12 @@ export const SignerForm = ({ willExecute }: { willExecute?: boolean }) => {
       owners.add(wallet.address)
     }
 
-    if (isProposer) {
+    if (isProposer && isCreation) {
       owners.add(wallet.address)
     }
 
     return Array.from(owners)
-  }, [nestedSafeOwners, safe.owners, safe.threshold, safeTx, wallet, willExecute, isProposer])
+  }, [nestedSafeOwners, safe.owners, safe.threshold, safeTx, wallet, willExecute, isProposer, isCreation])
 
   // Select first option if no signer is selected and the connected wallet cannot sign
   useEffect(() => {
