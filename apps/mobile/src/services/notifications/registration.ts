@@ -12,12 +12,11 @@ import { setSafeSubscriptionStatus } from '@/src/store/safeSubscriptionsSlice'
 import Logger from '@/src/utils/logger'
 import { getPrivateKey } from '@/src/hooks/useSign/useSign'
 import { registerForNotificationsOnBackEnd, unregisterForNotificationsOnBackEnd } from './backend'
+import { getDelegateKeyId } from '@/src/utils/delegate'
 
 type DelegateInfo = { owner: string; delegateAddress: string } | null
 
 // Cache to track authenticated signers and their authentication timestamps
-
-export const getDelegateKeyId = (safe: string, delegateAddress: string): string => `delegate_${safe}_${delegateAddress}`
 
 export const getDelegateSigner = async (delegate: DelegateInfo) => {
   if (!delegate) {
