@@ -77,7 +77,7 @@ function Actions({ newOwners }: { newOwners: Array<string> }): ReactElement | nu
 function Signers({ owners }: { owners: Array<string> }): ReactElement {
   return (
     <FieldsGrid title="Signers">
-      <Box display="flex" flexDirection="column" gap={2} fontSize="14px">
+      <Box display="flex" flexDirection="column" gap={2} padding="var(--space-2)" fontSize="14px">
         {owners.map((owner) => (
           <EthHashInfo
             avatarSize={32}
