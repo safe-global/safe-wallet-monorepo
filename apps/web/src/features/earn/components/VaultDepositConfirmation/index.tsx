@@ -12,6 +12,8 @@ import { InfoTooltip } from '@/features/stake/components/InfoTooltip'
 import { BRAND_NAME } from '@/config/constants'
 
 const AdditionalRewards = ({ txInfo }: { txInfo: VaultDepositTransactionInfo }) => {
+  if (!txInfo.additionalRewards[0]) return null
+
   return (
     <Stack sx={{ border: '1px solid #ddd', borderRadius: '6px', padding: '12px', mt: 1 }}>
       <DataTable

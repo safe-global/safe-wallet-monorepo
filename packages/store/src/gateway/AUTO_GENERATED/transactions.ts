@@ -804,7 +804,6 @@ export type TxsMultisigTransaction = {
   to: string
   value: string
   data: object
-  dataDecoded: object
   operation: number
   gasToken: object
   safeTxGas: object
@@ -999,7 +998,6 @@ export type TxsCreationTransaction = {
   masterCopy: object
   setupData: object
   saltNonce: object
-  dataDecoded: object
 }
 export const {
   useTransactionsGetTransactionByIdV1Query,

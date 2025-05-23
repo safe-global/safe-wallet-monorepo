@@ -1,0 +1,1 @@
+export { VaultTxRedeemCard } from './VaultTxRedeemCard'
