@@ -18,25 +18,23 @@ jest.mock('@safe-global/utils/utils/validation', () => ({
 
 const mockPush = jest.fn()
 jest.mock('expo-router', () => {
-  const mockAddListener = jest.fn().mockImplementation((event, callback) => {
-    if (event === 'focus') {
-      mockFocusCallback = callback
-    }
-    return jest.fn() // Return unsubscribe function
-  })
-
   return {
     useRouter: () => ({
       push: mockPush,
-    }),
-    useNavigation: () => ({
-      addListener: mockAddListener,
     }),
   }
 })
 
 // Store the focus callback for later testing
 let mockFocusCallback: (() => void) | null = null
+
+jest.mock('@react-navigation/native', () => {
+  return {
+    useFocusEffect: jest.fn((callback: () => void) => {
+      mockFocusCallback = callback
+    }),
+  }
+})
 
 // Mock Toast
 const mockShow = jest.fn()

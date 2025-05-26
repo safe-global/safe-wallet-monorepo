@@ -1,7 +1,7 @@
 import { Camera, useCodeScanner, useCameraDevice, Code, CameraPermissionStatus } from 'react-native-vision-camera'
 import { View, Theme, H3, getTokenValue } from 'tamagui'
 import { Dimensions, Linking, Pressable, StyleSheet, useColorScheme, useWindowDimensions } from 'react-native'
-import React, { useCallback, useEffect } from 'react'
+import React, { useCallback } from 'react'
 import { useRouter } from 'expo-router'
 
 const { width } = Dimensions.get('window')
