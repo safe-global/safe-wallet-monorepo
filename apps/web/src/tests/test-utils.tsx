@@ -108,6 +108,7 @@ export const mockWeb3Provider = (
 ) => {
   const web3Provider = createMockWeb3Provider(callImplementations, resolveName, chainId)
   jest.spyOn(web3, 'useWeb3ReadOnly').mockReturnValue(web3Provider)
+  jest.spyOn(web3, 'getWeb3ReadOnly').mockReturnValue(web3Provider)
   return web3Provider
 }
 // re-export everything

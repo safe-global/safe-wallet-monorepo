@@ -35,20 +35,19 @@ export const getERC20TokenInfoOnChain = async (
   const results = await multicall(web3, calls)
 
   const tokenInfos: Omit<Erc20Token, 'name' | 'logoUri'>[] = []
-
-  while (results.length >= 2) {
-    const address = tokenAddresses.shift()
+  for (let i = 0; i < results.length; i += 2) {
+    const address = tokenAddresses[i / 2]
     if (!address) break
     let symbol: string
     try {
-      symbol = erc20_interface.decodeFunctionResult('symbol', results[0].returnData)[0]
+      symbol = erc20_interface.decodeFunctionResult('symbol', results[i].returnData)[0]
     } catch (error) {
       // Some older contracts use bytes32 instead of string
       symbol = parseBytes32String(
         error && typeof error === 'object' && 'value' in error ? (error.value as BytesLike) : '',
       )
     }
-    const decimals = Number(erc20_interface.decodeFunctionResult('decimals', results[1].returnData)[0])
+    const decimals = Number(erc20_interface.decodeFunctionResult('decimals', results[i + 1].returnData)[0])
 
     tokenInfos.push({
       address,
@@ -56,8 +55,6 @@ export const getERC20TokenInfoOnChain = async (
       decimals,
       type: TokenType.ERC20,
     })
-
-    results.splice(0, 2)
   }
 
   return tokenInfos

@@ -1,12 +1,11 @@
 import { getSafeTokenAddress, getSafeLockingAddress } from '@/components/common/SafeTokenWidget'
 import { IS_PRODUCTION } from '@/config/constants'
 import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
-import { AbiCoder, Interface, type JsonRpcProvider } from 'ethers'
+import { AbiCoder, Interface } from 'ethers'
 import { useMemo } from 'react'
 import useAsync, { type AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import useSafeInfo from './useSafeInfo'
 import { getWeb3ReadOnly } from './wallets/web3'
-import memoize from 'lodash/memoize'
 import { cgwDebugStorage } from '@/config/gateway'
 import { multicall } from '../../../../packages/utils/src/utils/multicall'
 
@@ -43,17 +42,6 @@ const tokenInterface = new Interface(['function balanceOf(address _owner) public
 const safeLockingInterface = new Interface([
   'function getUserTokenBalance(address holder) external view returns (uint96 amount)',
 ])
-
-export const _getRedeemDeadline = memoize(
-  async (allocation: VestingData, web3ReadOnly: JsonRpcProvider): Promise<string> => {
-    return web3ReadOnly.call({
-      to: allocation.contract,
-      data: airdropInterface.encodeFunctionData('redeemDeadline'),
-    })
-  },
-  ({ chainId, contract }) => chainId + contract,
-)
-
 /**
  * Add on-chain information to allocation.
  * Fetches if the redeem deadline is expired and the claimed tokens from on-chain
@@ -166,8 +154,8 @@ export const useSafeVotingPower = (allocationData?: Vesting[]): AsyncResult<bigi
   const { safe, safeAddress } = useSafeInfo()
   const chainId = safe.chainId
 
-  const [balance, balanceError, balanceLoading] = useAsync<bigint>(async () => {
-    if (!safeAddress) return BigInt(0)
+  const [balance, balanceError, balanceLoading] = useAsync<bigint | undefined>(async () => {
+    if (!safeAddress) return
     const [tokenBalance, lockingContractBalance] = await fetchTokenBalances(chainId, safeAddress)
     return tokenBalance + lockingContractBalance
   }, [chainId, safeAddress])

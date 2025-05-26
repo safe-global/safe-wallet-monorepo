@@ -212,28 +212,29 @@ export const _getRecoveryStateItem = async ({
   chainId: string
   version: SafeState['version']
 }): Promise<RecoveryStateItem> => {
+  const delayModifierAddress = await delayModifier.getAddress()
   const calls = [
     {
-      to: await delayModifier.getAddress(),
+      to: delayModifierAddress,
       data: delayModifier.interface.encodeFunctionData('getModulesPaginated', [
         SENTINEL_ADDRESS,
         MAX_RECOVERER_PAGE_SIZE,
       ]),
     },
     {
-      to: await delayModifier.getAddress(),
+      to: delayModifierAddress,
       data: delayModifier.interface.encodeFunctionData('txExpiration'),
     },
     {
-      to: await delayModifier.getAddress(),
+      to: delayModifierAddress,
       data: delayModifier.interface.encodeFunctionData('txCooldown'),
     },
     {
-      to: await delayModifier.getAddress(),
+      to: delayModifierAddress,
       data: delayModifier.interface.encodeFunctionData('txNonce'),
     },
     {
-      to: await delayModifier.getAddress(),
+      to: delayModifierAddress,
       data: delayModifier.interface.encodeFunctionData('queueNonce'),
     },
   ]
