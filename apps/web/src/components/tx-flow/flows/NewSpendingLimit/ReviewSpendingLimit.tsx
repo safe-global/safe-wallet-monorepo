@@ -96,7 +96,7 @@ export const ReviewSpendingLimit = ({ onSubmit, children }: ReviewTransactionPro
     : undefined
 
   return (
-    <ReviewTransaction onSubmit={onFormSubmit}>
+    <ReviewTransaction onSubmit={onFormSubmit} withDecodedData={false}>
       {token && (
         <SendAmountBlock amountInWei={amountInWei} tokenInfo={token.tokenInfo} title="Amount">
           {existingAmount && existingAmount !== data?.amount && (
