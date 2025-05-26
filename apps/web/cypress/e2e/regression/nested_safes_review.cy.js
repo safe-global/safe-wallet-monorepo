@@ -21,7 +21,7 @@ describe('Nested safes review step tests', () => {
     nsafes.clickOnAddNestedSafeBtn()
   })
 
-  it.only('Verify middle step with Fund new assets in create nestedsafe tx flow', () => {
+  it('Verify middle step with Fund new assets in create nestedsafe tx flow', () => {
     nsafes.clickOnFundAssetBtn()
     nsafes.setMaxAmountValue(0)
     nsafes.clickOnAddNextBtn()
