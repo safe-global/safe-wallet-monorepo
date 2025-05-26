@@ -11,6 +11,7 @@ const changeThresholdBtn = 'span[data-track="settings: Change threshold"] > butt
 const tooltip = 'div[role="tooltip"]'
 const expandMoreIcon = 'svg[data-testid="ExpandMoreIcon"]'
 const sentinelStart = 'div[data-testid="sentinelStart"]'
+const addNewSigner = '[data-testid="add-new-signer"]'
 const newOwnerName = 'input[name="newOwner.name"]'
 const newOwnerAddress = 'input[name="newOwner.address"]'
 const newOwnerNonceInput = 'input[name="nonce"]'
@@ -23,7 +24,7 @@ const existingOwnerAddressInput = (index) => `input[name="owners.${index}.addres
 const existingOwnerNameInput = (index) => `input[name="owners.${index}.name"]`
 const singleOwnerNameInput = 'input[name="name"]'
 const finishTransactionBtn = '[data-testid="finish-transaction-btn"]'
-const addOwnerBtn = '[data-testid="add-owner-btn"]'
+const manageSignersBtn = '[data-testid="manage-signers-btn"]'
 const addOwnerNextBtn = '[data-testid="add-owner-next-btn"]'
 const modalHeader = '[data-testid="modal-header"]'
 const addressToBeRemoved = '[aria-label="Copy to clipboard"] span'
@@ -166,16 +167,16 @@ export function hoverOverReplaceOwnerBtn() {
   cy.get(replaceOwnerBtn).trigger('mouseover', { force: true })
 }
 
-export function verifyAddOwnerBtnIsEnabled() {
-  cy.get(addOwnerBtn).should('exist').and('not.be.disabled')
+export function verifyManageSignersBtnIsEnabled() {
+  cy.get(manageSignersBtn).should('exist').and('not.be.disabled')
 }
 
-export function verifyAddOwnerBtnIsDisabled() {
-  cy.get(addOwnerBtn).should('exist').and('be.disabled')
+export function verifyManageOwnerBtnIsDisabled() {
+  cy.get(manageSignersBtn).should('exist').and('be.disabled')
 }
 
-export function hoverOverAddOwnerBtn() {
-  cy.get(addOwnerBtn).trigger('mouseover')
+export function hoverOverManageSignersBtn() {
+  cy.get(manageSignersBtn).trigger('mouseover')
 }
 
 export function verifyTooltiptext(text) {
@@ -200,15 +201,17 @@ export function waitForConnectionStatus() {
   cy.get(createWallet.accountInfoHeader).should('exist')
 }
 
-export function clickOnAddSignerBtn() {
-  cy.get(addOwnerBtn).should('be.enabled').click()
+export function clickOnManageSignersBtn() {
+  cy.get(manageSignersBtn).should('be.enabled').click()
 }
-export function openAddOwnerWindow() {
-  clickOnAddSignerBtn()
+export function openManageSignersWindow() {
+  clickOnManageSignersBtn()
   cy.get(newOwnerName).should('be.visible')
   cy.get(newOwnerAddress).should('be.visible')
 }
-
+export function clickOnAddSignerBtn() {
+  cy.get(addNewSigner).should('be.enabled').click()
+}
 export function verifyNonceInputValue(value) {
   cy.get(newOwnerNonceInput).should('not.be.disabled')
   main.verifyInputValue(newOwnerNonceInput, value)

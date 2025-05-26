@@ -23,7 +23,8 @@ describe('[SMOKE] Add Owners tests', () => {
   // TODO: Check if this test is covered with unit tests
   it('[SMOKE] Verify relevant error messages are displayed in Address input', () => {
     wallet.connectSigner(signer)
-    owner.openAddOwnerWindow()
+    owner.openManageSignersWindow()
+    owner.clickOnAddSignerBtn()
     owner.typeOwnerAddress(main.generateRandomString(10))
     owner.verifyErrorMsgInvalidAddress(constants.addressBookErrrMsg.invalidFormat)
 
@@ -40,14 +41,14 @@ describe('[SMOKE] Add Owners tests', () => {
     owner.verifyErrorMsgInvalidAddress(constants.addressBookErrrMsg.alreadyAdded)
   })
 
-  it('[SMOKE] Verify the presence of "Add Owner" button', () => {
+  it('[SMOKE] Verify the presence of "Manage Signers" button', () => {
     wallet.connectSigner(signer)
-    owner.verifyAddOwnerBtnIsEnabled()
+    owner.verifyManageSignersBtnIsEnabled()
   })
 
-  it('[SMOKE] Verify “Add new owner” button is disabled for Non-Owner', () => {
+  it('[SMOKE] Verify “Manage Signers” button is disabled for Non-Owner', () => {
     cy.visit(constants.setupUrl + staticSafes.SEP_STATIC_SAFE_3)
     main.waitForHistoryCallToComplete()
-    owner.verifyAddOwnerBtnIsDisabled()
+    owner.verifyManageSignersBtnIsDisabled()
   })
 })

@@ -22,18 +22,19 @@ describe('Add Owners tests', () => {
 
   // Added to prod
   it('Verify add owner button is disabled for disconnected user', () => {
-    owner.verifyAddOwnerBtnIsDisabled()
+    owner.verifyManageSignersBtnIsDisabled()
   })
 
   // Added to prod
   it('Verify the Add New Owner Form can be opened', () => {
     wallet.connectSigner(signer)
-    owner.openAddOwnerWindow()
+    owner.openManageSignersWindow()
   })
 
   it('Verify error message displayed if character limit is exceeded in Name input', () => {
     wallet.connectSigner(signer)
-    owner.openAddOwnerWindow()
+    owner.openManageSignersWindow()
+    owner.clickOnAddSignerBtn
     owner.typeOwnerName(main.generateRandomString(51))
     owner.verifyErrorMsgInvalidAddress(constants.addressBookErrrMsg.exceedChars)
   })
@@ -47,14 +48,14 @@ describe('Add Owners tests', () => {
     addressBook.verifyNewEntryAdded(constants.addresBookContacts.user1.name, constants.addresBookContacts.user1.address)
     cy.visit(constants.setupUrl + staticSafes.SEP_STATIC_SAFE_4)
     wallet.connectSigner(signer)
-    owner.openAddOwnerWindow()
+    owner.openManageSignersWindow()
     owner.typeOwnerAddress(constants.addresBookContacts.user1.address)
     owner.verifyNewOwnerName(constants.addresBookContacts.user1.name)
   })
 
   it('Verify that Name field not mandatory', () => {
     wallet.connectSigner(signer)
-    owner.openAddOwnerWindow()
+    owner.openManageSignersWindow()
     owner.typeOwnerAddress(getMockAddress())
     owner.clickOnNextBtn()
     owner.verifyConfirmTransactionWindowDisplayed()
@@ -62,14 +63,14 @@ describe('Add Owners tests', () => {
 
   it('Verify default threshold value. Verify correct threshold calculation', () => {
     wallet.connectSigner(signer)
-    owner.openAddOwnerWindow()
+    owner.openManageSignersWindow()
     owner.typeOwnerAddress(constants.DEFAULT_OWNER_ADDRESS)
     owner.verifyThreshold(1, 2)
   })
 
   it('Verify valid Address validation', () => {
     wallet.connectSigner(signer)
-    owner.openAddOwnerWindow()
+    owner.openManageSignersWindow()
     owner.typeOwnerAddress(constants.SEPOLIA_OWNER_2)
     owner.clickOnNextBtn()
     owner.verifyConfirmTransactionWindowDisplayed()
