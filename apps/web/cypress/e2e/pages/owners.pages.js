@@ -15,6 +15,8 @@ const addNewSigner = '[data-testid="add-new-signer"]'
 const newOwnerName = 'input[name="newOwner.name"]'
 const newOwnerAddress = 'input[name="newOwner.address"]'
 const newOwnerNonceInput = 'input[name="nonce"]'
+const signerNameField = '[data-testid="owner-name"]'
+const signerAddressField = '[data-testid="address-item"]'
 const thresholdInput = 'input[name="threshold"]'
 const thresHoldDropDownIcon = 'svg[data-testid="ArrowDropDownIcon"]'
 const thresholdList = 'ul[role="listbox"]'
@@ -171,7 +173,7 @@ export function verifyManageSignersBtnIsEnabled() {
   cy.get(manageSignersBtn).should('exist').and('not.be.disabled')
 }
 
-export function verifyManageOwnerBtnIsDisabled() {
+export function verifyManageSignersBtnIsDisabled() {
   cy.get(manageSignersBtn).should('exist').and('be.disabled')
 }
 
@@ -206,8 +208,8 @@ export function clickOnManageSignersBtn() {
 }
 export function openManageSignersWindow() {
   clickOnManageSignersBtn()
-  cy.get(newOwnerName).should('be.visible')
-  cy.get(newOwnerAddress).should('be.visible')
+  cy.get(signerNameField).should('be.visible')
+  cy.get(signerAddressField).should('be.visible')
 }
 export function clickOnAddSignerBtn() {
   cy.get(addNewSigner).should('be.enabled').click()
@@ -225,15 +227,9 @@ export function verifyValidWalletName(errorMsg) {
   cy.get('label').contains(errorMsg).should('not.exist')
 }
 
-export function typeOwnerAddress(address) {
-  cy.get(newOwnerAddress)
-    .clear()
-    .type(address)
-    .then(($input) => {
-      const typedValue = $input.val()
-      expect(address).to.contain(typedValue)
-    })
-  cy.wait(1000)
+//Type the signer address into the 'Signer Address' field on the Manage Signers page, defined by the index (owners.index.address)
+export function typeOwnerAddress(index, address) {
+  cy.get(existingOwnerAddressInput(index)).clear().type(address)
 }
 
 export function typeOwnerName(name) {
@@ -284,3 +280,31 @@ export function clickOnThresholdNextBtn() {
   cy.wait(3000)
   cy.get(thresholdNextBtn).click()
 }
+
+export function getLastSignerAddressField() {
+  // First get the count of all signer rows
+  cy.get('[data-testid="signer-row"]').then(($rows) => {
+    const totalSigners = $rows.length
+    // Then get the last signer row
+    return cy
+      .get('[data-testid="signer-row"]')
+      .eq(totalSigners - 1)
+      .within(() => {
+        // Find the address input field within the last row using the correct data-testid
+        return cy.get('[data-testid="address-item"]')
+      })
+  })
+}
+
+export function addNewSignerAddress(newSignerAddress) {
+  // Find the last signer row and interact with its address field
+  getLastSignerAddressField()
+    .click() // Click to focus the field
+    .clear() // Clear any existing value
+    .type(newSignerAddress) // Type the new address
+    .should('have.value', newSignerAddress) // Verify the value was entered correctly
+}
+
+// Example usage:
+// const NEW_SIGNER_ADDRESS = '0x123...' // Define your constant address
+// addNewSignerAddress(NEW_SIGNER_ADDRESS)

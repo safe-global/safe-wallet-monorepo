@@ -54,6 +54,7 @@ export function SignersStructureView(props: Props): ReactElement {
 
           <CardActions>
             <Button
+              data-testId="submit-next"
               variant="contained"
               type="submit"
               disabled={props.isSameSetup || !props.formMethods.formState.isValid}
@@ -81,6 +82,7 @@ function Signers({
     <>
       {fieldArray.fields.map((field, index) => (
         <OwnerRow
+          data-testid="signer-row"
           key={field.id}
           index={index}
           groupName={ManageSignersFormFields.owners}
@@ -91,6 +93,7 @@ function Signers({
 
       <Track {...SETTINGS_EVENTS.SETUP.ADD_OWNER} label={SETTINGS_LABELS.manage_signers}>
         <Button
+          data-testid="add-new-signer"
           variant="text"
           onClick={onAdd}
           startIcon={<SvgIcon component={AddIcon} inheritViewBox fontSize="small" />}
