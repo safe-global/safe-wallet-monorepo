@@ -29,6 +29,7 @@ export function ConfirmationView({ txDetails }: ConfirmationViewProps) {
     case ETxType.TOKEN_TRANSFER:
       return (
         <TokenTransfer
+          txId={txDetails.txId}
           executedAt={txDetails.executedAt || 0}
           executionInfo={txDetails.detailedExecutionInfo as MultisigExecutionDetails}
           txInfo={txDetails.txInfo as TransferTransactionInfo}
@@ -37,6 +38,7 @@ export function ConfirmationView({ txDetails }: ConfirmationViewProps) {
     case ETxType.NFT_TRANSFER:
       return (
         <SendNFT
+          txId={txDetails.txId}
           executionInfo={txDetails.detailedExecutionInfo as MultisigExecutionDetails}
           txInfo={txDetails.txInfo as TransferTransactionInfo}
         />
