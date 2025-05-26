@@ -15,7 +15,7 @@ export const useScan = () => {
   const [isCameraActive, setIsCameraActive] = useState(false)
   const toast = useToastController()
 
-  const handleScreenCycle = useCallback(() => {
+  const handleFocusEffect = useCallback(() => {
     setIsCameraActive(true)
     hasScanned.current = false
 
@@ -24,7 +24,7 @@ export const useScan = () => {
     }
   }, [])
 
-  useFocusEffect(handleScreenCycle)
+  useFocusEffect(handleFocusEffect)
 
   const onScan = useCallback(
     (codes: Code[]) => {
