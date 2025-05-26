@@ -18,9 +18,8 @@ import { Interface } from 'ethers'
 import { chainBuilder } from '@/tests/builders/chains'
 import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
 import { getModuleInstance, KnownContracts, ContractAbis } from '@gnosis.pm/zodiac'
-import { createMockWeb3Provider, toMultiCallImplementation } from '@safe-global/utils/tests/web3Provider'
+import { createMockWeb3Provider } from '@safe-global/utils/tests/web3Provider'
 import { SENTINEL_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
-import { MULTICALL_ABI } from '@safe-global/utils/utils/multicall'
 
 jest.mock('@/hooks/wallets/web3')
 
@@ -35,8 +34,6 @@ const SUPPORTED_MULTI_SEND_CALL_ONLY_VERSIONS = [
   // '1.4.1', TODO: Uncomment when safe-deployments is updated >1.25.0
   latestSafeVersion,
 ]
-
-const MULTICALL_INTERFACE = new Interface(MULTICALL_ABI)
 
 const DELAY_INTERFACE = new Interface(ContractAbis[KnownContracts.DELAY])
 
