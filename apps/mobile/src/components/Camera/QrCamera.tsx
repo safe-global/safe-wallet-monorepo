@@ -131,13 +131,6 @@ export const QrCamera = ({
     await Linking.openSettings()
   }, [])
 
-  // Effect to automatically activate camera once permission is granted
-  useEffect(() => {
-    if (permission === 'granted' && hasPermission) {
-      onActivateCamera()
-    }
-  }, [permission, hasPermission, onActivateCamera])
-
   const denied = permission === 'denied'
 
   return (
