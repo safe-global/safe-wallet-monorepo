@@ -9,7 +9,16 @@ jest.mock('@/src/store/hooks/activeSafe')
 jest.mock('@/src/store/hooks', () => ({
   useAppSelector: (selector: (state: unknown) => unknown) => {
     if (selector.name === 'selectSafeInfo') {
-      return { SafeInfo: { owners: [{ value: 'owner1' }] } }
+      return {
+        '1': {
+          owners: [{ value: 'owner1' }],
+          address: { value: '0x1' },
+          chainId: '1',
+          threshold: 1,
+          fiatTotal: '0',
+          queued: 0,
+        },
+      }
     }
     return {}
   },

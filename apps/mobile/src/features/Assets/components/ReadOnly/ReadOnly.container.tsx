@@ -11,7 +11,8 @@ export const ReadOnlyContainer = ({ marginBottom, marginTop }: Omit<ReadOnlyProp
   const safeInfo = useSelector((state: RootState) => selectSafeInfo(state, activeSafe?.address))
   const signers = useSelector(selectSigners)
 
-  const safeSigners = safeInfo?.SafeInfo ? getSafeSigners(safeInfo.SafeInfo, signers) : []
+  const chainSafe = safeInfo ? safeInfo[activeSafe.chainId] : undefined
+  const safeSigners = chainSafe ? getSafeSigners(chainSafe, signers) : []
 
   return <ReadOnly signers={safeSigners} marginBottom={marginBottom} marginTop={marginTop} />
 }

@@ -36,6 +36,7 @@ export const Navbar = () => {
   }
 
   const activeSafeInfo = useAppSelector((state: RootState) => selectSafeInfo(state, activeSafe.address))
+  const chainSafe = activeSafeInfo ? activeSafeInfo[activeSafe.chainId] : undefined
 
   return (
     <Theme name="navbar">
@@ -57,7 +58,7 @@ export const Navbar = () => {
               size={40}
               fontSize={10}
               address={activeSafe.address}
-              badgeContent={`${activeSafeInfo?.SafeInfo.threshold}/${activeSafeInfo?.SafeInfo.owners.length}`}
+              badgeContent={`${chainSafe?.threshold}/${chainSafe?.owners.length}`}
             />
           }
           // leftNode={<Identicon address={activeSafe.address} size={30} />}

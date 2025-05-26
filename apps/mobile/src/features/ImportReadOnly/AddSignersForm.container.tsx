@@ -7,10 +7,11 @@ import { useSafesGetOverviewForManyQuery } from '@safe-global/store/gateway/safe
 import { addSafe } from '@/src/store/safesSlice'
 import { selectActiveSafe, setActiveSafe } from '@/src/store/activeSafeSlice'
 import { Address } from '@/src/types/address'
+import { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { groupSigners } from '@/src/features/Signers/hooks/useSignersGroupService'
 import { selectSigners } from '@/src/store/signersSlice'
 import { SignerSection } from '@/src/features/Signers/components/SignersList/SignersList'
-import { extractChainsFromSafes, extractSignersFromSafes } from '@/src/features/ImportReadOnly/helpers/safes'
+import { extractSignersFromSafes } from '@/src/features/ImportReadOnly/helpers/safes'
 import { AddSignersFormView } from '@/src/features/ImportReadOnly/components/AddSignersFormView'
 import { upsertContact } from '@/src/store/addressBookSlice'
 
@@ -27,7 +28,6 @@ export const AddSignersFormContainer = () => {
     excludeSpam: true,
   })
 
-  const safeAvailableOnChains = extractChainsFromSafes(currentData || [])
   const signers = extractSignersFromSafes(currentData || [])
   const signersGroupedBySection = useMemo(() => groupSigners(Object.values(signers), appSigners), [signers, appSigners])
 
@@ -43,7 +43,11 @@ export const AddSignersFormContainer = () => {
     }
     const hasActiveSafe = !!activeSafe
     dispatch(upsertContact({ value: params.safeAddress, name: params.safeName }))
-    dispatch(addSafe({ SafeInfo: currentData[0], chains: safeAvailableOnChains }))
+    const info = currentData.reduce<Record<string, SafeOverview>>((acc, safe) => {
+      acc[safe.chainId] = safe
+      return acc
+    }, {})
+    dispatch(addSafe({ address: currentData[0].address.value as Address, info }))
     dispatch(
       setActiveSafe({
         address: currentData[0].address.value as Address,

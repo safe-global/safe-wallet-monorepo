@@ -64,7 +64,7 @@ describe('useNotificationManager', () => {
         return mockedState.isAppNotificationEnabled
       }
       return {
-        SafeInfo: mockedState.SafeInfo,
+        '1': mockedState.SafeInfo,
       }
     })
 

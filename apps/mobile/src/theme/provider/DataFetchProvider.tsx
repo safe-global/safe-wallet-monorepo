@@ -4,14 +4,11 @@ import { selectAllChains } from '@/src/store/chains'
 import { makeSafeId } from '@/src/utils/formatters'
 import { useSafesGetOverviewForManyQuery } from '@safe-global/store/gateway/safes'
 import { SafeOverviewResult } from '@safe-global/store/gateway/types'
-import { useChainsBalance } from '@/src/hooks/useChainsBalance'
 import { selectActiveSafe } from '@/src/store/activeSafeSlice'
 
 export const DataFetchProvider = ({ children }: { children: React.ReactNode }) => {
   const chains = useAppSelector(selectAllChains)
   const activeSafe = useAppSelector(selectActiveSafe)
-
-  useChainsBalance(activeSafe?.address)
 
   useSafesGetOverviewForManyQuery<SafeOverviewResult>(
     {

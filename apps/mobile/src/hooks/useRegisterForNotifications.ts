@@ -66,7 +66,10 @@ const useRegisterForNotifications = (): NotificationsProps => {
   const safeAddress = glob.safeAddress
   const chainId = glob.chainId
 
-  const { ownerFound, accountType } = useNotificationGTWPermissions(safeAddress as `0x${string}`).getAccountType()
+  const { ownerFound, accountType } = useNotificationGTWPermissions(
+    safeAddress as `0x${string}`,
+    chainId,
+  ).getAccountType()
 
   /*
    * Push notifications can be enabled by an two type of users. The owner of the safe or an observer of the safe

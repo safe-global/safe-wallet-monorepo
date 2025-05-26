@@ -35,7 +35,7 @@ describe('useNotificationGTWPermissions', () => {
         return mockedState.signers
       }
       return {
-        SafeInfo: mockedState.SafeInfo,
+        '1': mockedState.SafeInfo,
       }
     })
   })
@@ -45,7 +45,7 @@ describe('useNotificationGTWPermissions', () => {
   })
 
   it('returns the correct account type for an owner', () => {
-    const { result } = renderHook(() => useNotificationGTWPermissions('0x123'))
+    const { result } = renderHook(() => useNotificationGTWPermissions('0x123', '1'))
     const { ownerFound, accountType } = result.current.getAccountType()
     expect(ownerFound).toEqual({ value: '0x456' })
     expect(accountType).toBe('OWNER')
@@ -57,14 +57,14 @@ describe('useNotificationGTWPermissions', () => {
         return {} // No signers
       }
       return {
-        SafeInfo: {
+        '1': {
           ...mockedState.SafeInfo,
-          owners: [{ value: '0x789' }], // Owner that isn't a signer
+          owners: [{ value: '0x789' }],
         },
       }
     })
 
-    const { result } = renderHook(() => useNotificationGTWPermissions('0x123'))
+    const { result } = renderHook(() => useNotificationGTWPermissions('0x123', '1'))
     const { ownerFound, accountType } = result.current.getAccountType()
     expect(ownerFound).toBeNull()
     expect(accountType).toBe('REGULAR')
