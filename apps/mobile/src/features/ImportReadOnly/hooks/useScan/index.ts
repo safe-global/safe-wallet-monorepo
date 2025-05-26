@@ -1,6 +1,7 @@
 import { Code } from 'react-native-vision-camera'
-import { useCallback, useEffect, useRef, useState } from 'react'
-import { useNavigation, useRouter } from 'expo-router'
+import { useCallback, useRef, useState } from 'react'
+import { useRouter } from 'expo-router'
+import { useFocusEffect } from '@react-navigation/native'
 
 import { parsePrefixedAddress } from '@safe-global/utils/utils/addresses'
 import { isValidAddress } from '@safe-global/utils/utils/validation'
@@ -10,20 +11,20 @@ const toastForValueShown: Record<string, boolean> = {}
 
 export const useScan = () => {
   const router = useRouter()
-
-  const navigation = useNavigation()
   const hasScanned = useRef(false)
   const [isCameraActive, setIsCameraActive] = useState(false)
   const toast = useToastController()
 
-  useEffect(() => {
-    const unsubscribe = navigation.addListener('focus', () => {
-      hasScanned.current = false
-    })
+  const handleScreenCycle = useCallback(() => {
+    setIsCameraActive(true)
+    hasScanned.current = false
 
-    // Return the function to unsubscribe from the event so it gets removed on unmount
-    return unsubscribe
-  }, [navigation])
+    return () => {
+      setIsCameraActive(false)
+    }
+  }, [])
+
+  useFocusEffect(handleScreenCycle)
 
   const onScan = useCallback(
     (codes: Code[]) => {
