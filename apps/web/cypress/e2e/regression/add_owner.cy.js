@@ -34,8 +34,8 @@ describe('Add Owners tests', () => {
   it('Verify error message displayed if character limit is exceeded in Name input', () => {
     wallet.connectSigner(signer)
     owner.openManageSignersWindow()
-    owner.clickOnAddSignerBtn
-    owner.typeOwnerName(main.generateRandomString(51))
+    owner.clickOnAddSignerBtn()
+    owner.typeOwnerName(1, main.generateRandomString(51))
     owner.verifyErrorMsgInvalidAddress(constants.addressBookErrrMsg.exceedChars)
   })
 

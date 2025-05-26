@@ -232,9 +232,10 @@ export function typeOwnerAddress(index, address) {
   cy.get(existingOwnerAddressInput(index)).clear().type(address)
 }
 
-export function typeOwnerName(name) {
-  cy.get(newOwnerName).clear().type(name)
-  main.verifyInputValue(newOwnerName, name)
+//Type the signer name into the "Signer Name" field
+export function typeOwnerName(index, name) {
+  cy.get(existingOwnerNameInput(index)).clear().type(name)
+  main.verifyInputValue(existingOwnerNameInput(index), name)
 }
 
 export function selectNewOwner(name) {
