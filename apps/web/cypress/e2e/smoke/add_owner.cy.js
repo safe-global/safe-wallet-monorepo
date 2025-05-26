@@ -21,26 +21,26 @@ describe('[SMOKE] Add Owners tests', () => {
   })
 
   // TODO: Check if this test is covered with unit tests
-  it.only('[SMOKE] Verify relevant error messages are displayed in Address input', () => {
+  it('[SMOKE] Verify relevant error messages are displayed in Address input', () => {
     wallet.connectSigner(signer)
     owner.openManageSignersWindow()
     owner.clickOnAddSignerBtn()
 
-    owner.typeOwnerAddress(3, main.generateRandomString(10))
+    owner.typeOwnerAddress(1, main.generateRandomString(10))
 
-    // owner.verifyErrorMsgInvalidAddress(constants.addressBookErrrMsg.invalidFormat)
+    owner.verifyErrorMsgInvalidAddress(constants.addressBookErrrMsg.invalidFormat)
 
-    // owner.typeOwnerAddress(constants.addresBookContacts.user1.address.toUpperCase())
-    // owner.verifyErrorMsgInvalidAddress(constants.addressBookErrrMsg.invalidChecksum)
+    owner.typeOwnerAddress(1, constants.addresBookContacts.user1.address.toUpperCase())
+    owner.verifyErrorMsgInvalidAddress(constants.addressBookErrrMsg.invalidChecksum)
 
-    // owner.typeOwnerAddress(staticSafes.SEP_STATIC_SAFE_4)
-    // owner.verifyErrorMsgInvalidAddress(constants.addressBookErrrMsg.ownSafe)
+    owner.typeOwnerAddress(1, staticSafes.SEP_STATIC_SAFE_4)
+    owner.verifyErrorMsgInvalidAddress(constants.addressBookErrrMsg.ownSafe)
 
-    // owner.typeOwnerAddress(constants.addresBookContacts.user1.address.replace('F', 'f'))
-    // owner.verifyErrorMsgInvalidAddress(constants.addressBookErrrMsg.invalidChecksum)
+    owner.typeOwnerAddress(1, constants.addresBookContacts.user1.address.replace('F', 'f'))
+    owner.verifyErrorMsgInvalidAddress(constants.addressBookErrrMsg.invalidChecksum)
 
-    //  owner.typeOwnerAddress(constants.DEFAULT_OWNER_ADDRESS)
-    // owner.verifyErrorMsgInvalidAddress(constants.addressBookErrrMsg.alreadyAdded)
+    owner.typeOwnerAddress(1, constants.DEFAULT_OWNER_ADDRESS)
+    owner.verifyErrorMsgInvalidAddress(constants.addressBookErrrMsg.ownerAdded)
   })
 
   it('[SMOKE] Verify the presence of "Manage Signers" button', () => {
