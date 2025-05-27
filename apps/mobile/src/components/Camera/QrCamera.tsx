@@ -132,12 +132,13 @@ export const QrCamera = ({
   }, [])
 
   const denied = permission === 'denied'
+  const granted = permission === 'granted'
 
   return (
     <Theme name={'dark'}>
       <View style={styles.container}>
         {/* Only render Camera device is available */}
-        {device && !denied && (
+        {device && granted && (
           <Camera style={StyleSheet.absoluteFill} device={device} isActive={isCameraActive} codeScanner={codeScanner} />
         )}
 
