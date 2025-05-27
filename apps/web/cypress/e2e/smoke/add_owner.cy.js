@@ -26,20 +26,20 @@ describe('[SMOKE] Add Owners tests', () => {
     owner.openManageSignersWindow()
     owner.clickOnAddSignerBtn()
 
-    owner.typeOwnerAddress(1, main.generateRandomString(10))
+    owner.typeOwnerAddressManage(1, main.generateRandomString(10))
 
     owner.verifyErrorMsgInvalidAddress(constants.addressBookErrrMsg.invalidFormat)
 
-    owner.typeOwnerAddress(1, constants.addresBookContacts.user1.address.toUpperCase())
+    owner.typeOwnerAddressManage(1, constants.addresBookContacts.user1.address.toUpperCase())
     owner.verifyErrorMsgInvalidAddress(constants.addressBookErrrMsg.invalidChecksum)
 
-    owner.typeOwnerAddress(1, staticSafes.SEP_STATIC_SAFE_4)
-    owner.verifyErrorMsgInvalidAddress(constants.addressBookErrrMsg.ownSafe)
+    owner.typeOwnerAddressManage(1, staticSafes.SEP_STATIC_SAFE_4)
+    owner.verifyErrorMsgInvalidAddress(constants.addressBookErrrMsg.ownSafeManage)
 
-    owner.typeOwnerAddress(1, constants.addresBookContacts.user1.address.replace('F', 'f'))
+    owner.typeOwnerAddressManage(1, constants.addresBookContacts.user1.address.replace('F', 'f'))
     owner.verifyErrorMsgInvalidAddress(constants.addressBookErrrMsg.invalidChecksum)
 
-    owner.typeOwnerAddress(1, constants.DEFAULT_OWNER_ADDRESS)
+    owner.typeOwnerAddressManage(1, constants.DEFAULT_OWNER_ADDRESS)
     owner.verifyErrorMsgInvalidAddress(constants.addressBookErrrMsg.ownerAdded)
   })
 

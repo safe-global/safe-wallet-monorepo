@@ -28,7 +28,7 @@ const singleOwnerNameInput = 'input[name="name"]'
 const finishTransactionBtn = '[data-testid="finish-transaction-btn"]'
 const manageSignersBtn = '[data-testid="manage-signers-btn"]'
 const submitNextBt = '[data-testid="submit-next"]'
-//const addOwnerNextBtn = '[data-testid="add-owner-next-btn"]'
+const addOwnerNextBtn = '[data-testid="add-owner-next-btn"]'
 const modalHeader = '[data-testid="modal-header"]'
 const addressToBeRemoved = '[aria-label="Copy to clipboard"] span'
 const thresholdNextBtn = '[data-testid="threshold-next-btn"]'
@@ -227,14 +227,29 @@ export function verifyErrorMsgInvalidAddress(errorMsg) {
 export function verifyValidWalletName(errorMsg) {
   cy.get('label').contains(errorMsg).should('not.exist')
 }
-
+//Type owner address on the manage signers form
+export function typeOwnerAddress(address) {
+  cy.get(newOwnerAddress)
+    .clear()
+    .type(address)
+    .then(($input) => {
+      const typedValue = $input.val()
+      expect(address).to.contain(typedValue)
+    })
+  cy.wait(1000)
+}
 //Type the signer address into the 'Signer Address' field on the Manage Signers page, defined by the index (owners.index.address)
-export function typeOwnerAddress(index, address) {
+export function typeOwnerAddressManage(index, address) {
   cy.get(existingOwnerAddressInput(index)).clear().type(address)
 }
+//Type the signer name for one field pages
+export function typeOwnerName(name) {
+  cy.get(newOwnerName).clear().type(name)
+  main.verifyInputValue(newOwnerName, name)
+}
 
-//Type the signer name into the "Signer Name" field
-export function typeOwnerName(index, name) {
+//Type the signer name into the "Signer Name" field for manage signers
+export function typeOwnerNameManage(index, name) {
   cy.get(existingOwnerNameInput(index)).clear().type(name)
   main.verifyInputValue(existingOwnerNameInput(index), name)
 }
@@ -246,9 +261,13 @@ export function selectNewOwner(name) {
 export function verifyNewOwnerName(name) {
   cy.get(addressBook.addressBookRecipient).should('include.text', name)
 }
-
-export function clickOnNextBtn() {
+//next button on Manage signers
+export function clickOnNextBtnManage() {
   cy.get(submitNextBt).should('be.enabled').click()
+}
+//Next button for usual tx flow
+export function clickOnNextBtn() {
+  cy.get(addOwnerNextBtn).should('be.enabled').click()
 }
 
 export function clickOnBackBtn() {
