@@ -74,6 +74,10 @@ const injectedRtkApi = api
         query: (queryArg) => ({ url: `/v1/spaces/${queryArg.spaceId}/members` }),
         providesTags: ['spaces'],
       }),
+      membersSelfRemoveV1: build.mutation<MembersSelfRemoveV1ApiResponse, MembersSelfRemoveV1ApiArg>({
+        query: (queryArg) => ({ url: `/v1/spaces/${queryArg.spaceId}/members`, method: 'DELETE' }),
+        invalidatesTags: ['spaces'],
+      }),
       membersUpdateRoleV1: build.mutation<MembersUpdateRoleV1ApiResponse, MembersUpdateRoleV1ApiArg>({
         query: (queryArg) => ({
           url: `/v1/spaces/${queryArg.spaceId}/members/${queryArg.userId}/role`,
@@ -143,6 +147,10 @@ export type MembersDeclineInviteV1ApiArg = {
 }
 export type MembersGetUsersV1ApiResponse = /** status 200 Space and members list */ MembersDto
 export type MembersGetUsersV1ApiArg = {
+  spaceId: number
+}
+export type MembersSelfRemoveV1ApiResponse = unknown
+export type MembersSelfRemoveV1ApiArg = {
   spaceId: number
 }
 export type MembersUpdateRoleV1ApiResponse = unknown
@@ -266,6 +274,7 @@ export const {
   useMembersDeclineInviteV1Mutation,
   useMembersGetUsersV1Query,
   useLazyMembersGetUsersV1Query,
+  useMembersSelfRemoveV1Mutation,
   useMembersUpdateRoleV1Mutation,
   useMembersRemoveUserV1Mutation,
 } = injectedRtkApi
