@@ -25,6 +25,8 @@ interface AlertButton {
   onPress: () => void | Promise<void>
 }
 
+type UnsubscribeFunc = () => void
+
 class NotificationsService {
   async getBlockedNotifications(): Promise<Map<ChannelId, boolean>> {
     try {
@@ -326,6 +328,7 @@ class NotificationsService {
     this.registerNotifeeBackgroundHandler()
     this.registerFirebaseBackgroundHandler()
     this.registerExpoTasks()
+    this.listenForMessagesForeground()
     Logger.info('NotificationService: Successfully initialized all notification handlers')
   }
 
@@ -343,6 +346,19 @@ class NotificationsService {
       }
 
       return Promise.resolve()
+    })
+  }
+
+  private listenForMessagesForeground = (): UnsubscribeFunc => {
+    return getMessaging().onMessage(async (remoteMessage: FirebaseMessagingTypes.RemoteMessage) => {
+      const parsed = parseNotification(remoteMessage.data)
+      this.displayNotification({
+        channelId: ChannelId.DEFAULT_NOTIFICATION_CHANNEL_ID,
+        title: parsed?.title || remoteMessage.notification?.title || '',
+        body: parsed?.body || remoteMessage.notification?.body || '',
+        data: remoteMessage.data,
+      })
+      Logger.info('listenForMessagesForeground: listening for messages in Foreground', remoteMessage)
     })
   }
 

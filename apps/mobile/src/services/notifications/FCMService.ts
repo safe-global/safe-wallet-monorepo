@@ -1,12 +1,8 @@
-import { FirebaseMessagingTypes, getMessaging } from '@react-native-firebase/messaging'
+import { getMessaging } from '@react-native-firebase/messaging'
 import Logger from '@/src/utils/logger'
-import NotificationsService from './NotificationService'
-import { ChannelId, withTimeout } from '@/src/utils/notifications'
-import { parseNotification } from './notificationParser'
+import { withTimeout } from '@/src/utils/notifications'
 import { store } from '@/src/store'
 import { savePushToken } from '@/src/store/notificationsSlice'
-
-type UnsubscribeFunc = () => void
 
 class FCMService {
   async getFCMToken(): Promise<string | undefined> {
@@ -32,32 +28,6 @@ class FCMService {
     }
   }
 
-  listenForMessagesForeground = (): UnsubscribeFunc => {
-    return getMessaging().onMessage(async (remoteMessage: FirebaseMessagingTypes.RemoteMessage) => {
-      const parsed = parseNotification(remoteMessage.data)
-      NotificationsService.displayNotification({
-        channelId: ChannelId.DEFAULT_NOTIFICATION_CHANNEL_ID,
-        title: parsed?.title || remoteMessage.notification?.title || '',
-        body: parsed?.body || remoteMessage.notification?.body || '',
-        data: remoteMessage.data,
-      })
-      Logger.info('listenForMessagesForeground: listening for messages in Foreground', remoteMessage)
-    })
-  }
-
-  listenForMessagesBackground = (): void => {
-    getMessaging().setBackgroundMessageHandler(async (remoteMessage: FirebaseMessagingTypes.RemoteMessage) => {
-      const parsed = parseNotification(remoteMessage.data)
-      NotificationsService.displayNotification({
-        channelId: ChannelId.DEFAULT_NOTIFICATION_CHANNEL_ID,
-        title: parsed?.title || remoteMessage.notification?.title || '',
-        body: parsed?.body || remoteMessage.notification?.body || '',
-        data: remoteMessage.data,
-      })
-      Logger.info('listenForMessagesBackground :: listening for messages in background', remoteMessage)
-    })
-  }
-
   async registerAppWithFCM(): Promise<void> {
     await getMessaging()
       .registerDeviceForRemoteMessages()
@@ -74,7 +44,6 @@ class FCMService {
       await this.registerAppWithFCM()
       await this.saveFCMToken()
       const fcmToken = await this.getFCMToken()
-      this.listenForMessagesBackground()
       return fcmToken
     } catch (error) {
       Logger.error('initNotification: Something went wrong', error)
