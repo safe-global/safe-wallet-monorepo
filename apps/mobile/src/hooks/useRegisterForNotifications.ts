@@ -11,6 +11,7 @@ import { selectActiveSafe } from '../store/activeSafeSlice'
 import '@safe-global/store/gateway/AUTO_GENERATED/notifications'
 
 import { registerSafe, unregisterSafe } from '@/src/services/notifications/registration'
+import { store } from '@/src/store'
 import { selectAllChainsIds } from '../store/chains'
 
 export type RegisterForNotificationsProps = {
@@ -46,7 +47,7 @@ const useRegisterForNotifications = (): NotificationsProps => {
           return { loading, error }
         }
 
-        await registerSafe(activeSafe.address, allChainIds)
+        await registerSafe(store, activeSafe.address, allChainIds)
 
         if (updateNotificationSettings) {
           dispatch(toggleAppNotifications(true))
@@ -77,7 +78,7 @@ const useRegisterForNotifications = (): NotificationsProps => {
           return { loading, error }
         }
 
-        await unregisterSafe(activeSafe.address, allChainIds)
+        await unregisterSafe(store, activeSafe.address, allChainIds)
 
         if (updateNotificationSettings) {
           dispatch(toggleAppNotifications(false))
@@ -107,7 +108,7 @@ const useRegisterForNotifications = (): NotificationsProps => {
         return { loading, error }
       }
 
-      await registerSafe(activeSafe.address, [activeSafe.chainId])
+      await registerSafe(store, activeSafe.address, [activeSafe.chainId])
 
       setLoading(false)
       setError(null)

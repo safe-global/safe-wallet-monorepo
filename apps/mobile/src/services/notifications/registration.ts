@@ -1,6 +1,9 @@
 import { Wallet, HDNodeWallet } from 'ethers'
 
-import { store } from '@/src/store'
+import type { Store } from '@reduxjs/toolkit'
+import type { RootState } from '@/src/store'
+
+type StoreLike = Pick<Store<RootState>, 'dispatch' | 'getState'>
 import { selectSafeInfo } from '@/src/store/safesSlice'
 import { selectSigners } from '@/src/store/signersSlice'
 import { selectFirstDelegateForAnySafeOwner } from '@/src/store/delegatesSlice'
@@ -27,18 +30,28 @@ export const getDelegateSigner = async (delegate: DelegateInfo) => {
   return { signer }
 }
 
-export const getNotificationAccountType = (safeAddress: string) => {
+export const getNotificationAccountType = (
+  store: StoreLike,
+  safeAddress: string,
+) => {
   const state = store.getState()
   const safeInfoItem = selectSafeInfo(state, safeAddress as `0x${string}`)
   const signers = selectSigners(state)
   return getAccountType(safeInfoItem?.SafeInfo, signers)
 }
 
-export async function registerSafe(address: string, chainIds: string[]): Promise<void> {
+export async function registerSafe(
+  store: StoreLike,
+  address: string,
+  chainIds: string[],
+): Promise<void> {
   try {
-    const delegate = selectFirstDelegateForAnySafeOwner(store.getState(), address as `0x${string}`)
+    const delegate = selectFirstDelegateForAnySafeOwner(
+      store.getState(),
+      address as `0x${string}`,
+    )
     const { signer } = await getDelegateSigner(delegate)
-    const { accountType } = getNotificationAccountType(address)
+    const { accountType } = getNotificationAccountType(store, address)
 
     const fcmToken = await FCMService.initNotification()
     await withTimeout(NotificationService.createChannel(notificationChannels[0]), 5000)
@@ -59,9 +72,16 @@ export async function registerSafe(address: string, chainIds: string[]): Promise
   }
 }
 
-export async function unregisterSafe(address: string, chainIds: string[]): Promise<void> {
+export async function unregisterSafe(
+  store: StoreLike,
+  address: string,
+  chainIds: string[],
+): Promise<void> {
   try {
-    const delegate = selectFirstDelegateForAnySafeOwner(store.getState(), address as `0x${string}`)
+    const delegate = selectFirstDelegateForAnySafeOwner(
+      store.getState(),
+      address as `0x${string}`,
+    )
     const { signer } = await getDelegateSigner(delegate)
 
     await unregisterForNotificationsOnBackEnd({ signer, safeAddress: address, chainIds })

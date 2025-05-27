@@ -18,7 +18,7 @@ const notificationsMiddleware: Middleware = (store) => (next) => (action) => {
     const notificationsEnabled = store.getState().notifications.isAppNotificationsEnabled
     if (notificationsEnabled) {
       const chainIds = selectAllChainsIds(store.getState())
-      subscribeSafe(address, chainIds)
+      subscribeSafe(store, address, chainIds)
     }
   }
 
@@ -28,7 +28,7 @@ const notificationsMiddleware: Middleware = (store) => (next) => (action) => {
     const chainIds = selectAllChainsIds(store.getState())
 
     if (safeInfo) {
-      unsubscribeSafe(address, chainIds)
+      unsubscribeSafe(store, address, chainIds)
     }
   }
 
@@ -57,7 +57,7 @@ const notificationsMiddleware: Middleware = (store) => (next) => (action) => {
           )
 
           if (isSafeSubscribedOnAnyChain) {
-            subscribeSafe(safeAddress, chainIds)
+            subscribeSafe(store, safeAddress, chainIds)
           }
         }
       })
@@ -73,9 +73,9 @@ const notificationsMiddleware: Middleware = (store) => (next) => (action) => {
     safes.forEach((safe) => {
       const safeAdress = Object.values(safe)[0].address.value
       if (enabled) {
-        subscribeSafe(safeAdress, chainIds)
+        subscribeSafe(store, safeAdress, chainIds)
       } else {
-        unsubscribeSafe(safeAdress, chainIds)
+        unsubscribeSafe(store, safeAdress, chainIds)
       }
     })
   }
