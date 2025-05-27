@@ -49,7 +49,7 @@ const LeaveSpaceDialog = ({ space, onClose }: { space: GetSpaceResponse | undefi
     <ModalDialog dialogTitle="Leave space" hideChainIndicator open onClose={onClose}>
       <DialogContent sx={{ mt: 2 }}>
         <Typography mb={2}>
-          Are you sure you want like to leave this space? You won’t be able to access its data anymore.
+          Are you sure you want to leave this space? You won’t be able to access its data anymore.
         </Typography>
 
         {error && (
