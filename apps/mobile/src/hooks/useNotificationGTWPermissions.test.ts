@@ -15,8 +15,9 @@ const mockedSafeInfo = {
 const mockState = {
   safes: {
     [mockedSafeInfo.address.value]: {
-      chains: [mockedSafeInfo.chainId],
-      SafeInfo: mockedSafeInfo,
+      [mockedSafeInfo.chainId]: {
+        ...mockedSafeInfo,
+      },
     },
   },
   signers: {
@@ -43,7 +44,7 @@ describe('useNotificationGTWPermissions', () => {
   })
 
   it('returns the correct account type for an owner', () => {
-    const { result } = renderHook(() => useNotificationGTWPermissions('0x123'), mockState)
+    const { result } = renderHook(() => useNotificationGTWPermissions('0x123', '1'), mockState)
     const { ownerFound, accountType } = result.current.getAccountType()
     expect(ownerFound).toEqual({ value: '0x456' })
     expect(accountType).toBe('OWNER')
