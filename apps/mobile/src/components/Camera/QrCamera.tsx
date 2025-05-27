@@ -137,7 +137,7 @@ export const QrCamera = ({
     <Theme name={'dark'}>
       <View style={styles.container}>
         {/* Only render Camera device is available */}
-        {device && (
+        {device && !denied && (
           <Camera style={StyleSheet.absoluteFill} device={device} isActive={isCameraActive} codeScanner={codeScanner} />
         )}
 
