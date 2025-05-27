@@ -71,18 +71,23 @@ export const selectDelegatesByOwner = (state: RootState, ownerAddress: string) =
  */
 export const selectFirstDelegateForAnySafeOwner = (state: RootState, safeAddress: Address) => {
   const safeInfoItem = selectSafeInfo(state, safeAddress)
-  const safeOverview = safeInfoItem?.SafeInfo
-
-  if (!safeOverview?.owners) {
+  if (!safeInfoItem) {
     return null
   }
 
-  for (const owner of safeOverview.owners) {
-    const delegates = selectDelegatesByOwner(state, owner.value)
+  // Collect all unique owners across all chain deployments
+  const allOwners = new Set<string>()
+  Object.values(safeInfoItem).forEach((deployment) => {
+    deployment.owners.forEach((owner) => allOwners.add(owner.value))
+  })
+
+  // Check each owner for delegates
+  for (const ownerAddress of allOwners) {
+    const delegates = selectDelegatesByOwner(state, ownerAddress)
     const delegateAddresses = Object.keys(delegates)
 
     if (delegateAddresses.length > 0) {
-      return { owner: owner.value, delegateAddress: delegateAddresses[0] }
+      return { owner: ownerAddress, delegateAddress: delegateAddresses[0] }
     }
   }
 
