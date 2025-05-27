@@ -82,7 +82,6 @@ function Signers({
     <>
       {fieldArray.fields.map((field, index) => (
         <OwnerRow
-          data-testid="signer-row"
           key={field.id}
           index={index}
           groupName={ManageSignersFormFields.owners}
