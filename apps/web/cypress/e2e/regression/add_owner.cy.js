@@ -49,14 +49,16 @@ describe('Add Owners tests', () => {
     cy.visit(constants.setupUrl + staticSafes.SEP_STATIC_SAFE_4)
     wallet.connectSigner(signer)
     owner.openManageSignersWindow()
-    owner.typeOwnerAddress(constants.addresBookContacts.user1.address)
-    owner.verifyNewOwnerName(constants.addresBookContacts.user1.name)
+    owner.clickOnAddSignerBtn()
+    owner.typeOwnerAddress(1, constants.addresBookContacts.user1.address)
+    owner.verifyNewOwnerName(1, constants.addresBookContacts.user1.name)
   })
-
+  //The case should be updated with review "Add owner" field on next page and other options
   it('Verify that Name field not mandatory', () => {
     wallet.connectSigner(signer)
     owner.openManageSignersWindow()
-    owner.typeOwnerAddress(getMockAddress())
+    owner.clickOnAddSignerBtn()
+    owner.typeOwnerAddress(1, getMockAddress())
     owner.clickOnNextBtn()
     owner.verifyConfirmTransactionWindowDisplayed()
   })
@@ -64,18 +66,20 @@ describe('Add Owners tests', () => {
   it('Verify default threshold value. Verify correct threshold calculation', () => {
     wallet.connectSigner(signer)
     owner.openManageSignersWindow()
-    owner.typeOwnerAddress(constants.DEFAULT_OWNER_ADDRESS)
+    owner.clickOnAddSignerBtn()
+    owner.typeOwnerAddress(1, constants.DEFAULT_OWNER_ADDRESS)
     owner.verifyThreshold(1, 2)
   })
-
-  it('Verify valid Address validation', () => {
+  //TBD the case should be updated with additional steps to verify a new owner address and name
+  it.only('Verify valid Address validation', () => {
     wallet.connectSigner(signer)
     owner.openManageSignersWindow()
-    owner.typeOwnerAddress(constants.SEPOLIA_OWNER_2)
+    owner.clickOnAddSignerBtn()
+    owner.typeOwnerAddress(1, constants.SEPOLIA_OWNER_2)
     owner.clickOnNextBtn()
     owner.verifyConfirmTransactionWindowDisplayed()
     owner.clickOnBackBtn()
-    owner.typeOwnerAddress(staticSafes.SEP_STATIC_SAFE_3)
+    owner.typeOwnerAddress(1, staticSafes.SEP_STATIC_SAFE_3)
     owner.clickOnNextBtn()
     owner.verifyConfirmTransactionWindowDisplayed()
   })

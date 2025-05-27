@@ -27,7 +27,8 @@ const existingOwnerNameInput = (index) => `input[name="owners.${index}.name"]`
 const singleOwnerNameInput = 'input[name="name"]'
 const finishTransactionBtn = '[data-testid="finish-transaction-btn"]'
 const manageSignersBtn = '[data-testid="manage-signers-btn"]'
-const addOwnerNextBtn = '[data-testid="add-owner-next-btn"]'
+const submitNextBt = '[data-testid="submit-next"]'
+//const addOwnerNextBtn = '[data-testid="add-owner-next-btn"]'
 const modalHeader = '[data-testid="modal-header"]'
 const addressToBeRemoved = '[aria-label="Copy to clipboard"] span'
 const thresholdNextBtn = '[data-testid="threshold-next-btn"]'
@@ -247,7 +248,7 @@ export function verifyNewOwnerName(name) {
 }
 
 export function clickOnNextBtn() {
-  cy.get(addOwnerNextBtn).should('be.enabled').click()
+  cy.get(submitNextBt).should('be.enabled').click()
 }
 
 export function clickOnBackBtn() {
