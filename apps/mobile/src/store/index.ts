@@ -21,6 +21,7 @@ import { setBaseUrl as setSDKBaseURL } from '@safe-global/safe-gateway-typescrip
 import { createFilter } from '@safe-global/store/utils/persistTransformFilter'
 import { setupMobileCookieHandling } from './utils/cookieHandling'
 import notificationsMiddleware from './middleware/notifications'
+import { setBackendStore } from '@/src/store/utils/singletonStore'
 
 setSDKBaseURL(GATEWAY_URL)
 setBaseUrl(GATEWAY_URL)
@@ -85,6 +86,8 @@ export const makeStore = () =>
   })
 
 export const store = makeStore()
+// we are going around a circular dependency here
+setBackendStore(store)
 
 export const persistor = persistStore(store)
 

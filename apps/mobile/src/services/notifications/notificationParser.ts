@@ -1,9 +1,9 @@
 import { formatUnits } from 'ethers'
 import { NotificationType } from '@safe-global/store/gateway/AUTO_GENERATED/notifications'
-import { store } from '@/src/store'
 import { selectChainById } from '@/src/store/chains'
 import { shortenAddress } from '@/src/utils/formatters'
 import { selectContactByAddress } from '@/src/store/addressBookSlice'
+import { getStore } from '@/src/store/utils/singletonStore'
 
 export interface ParsedNotification {
   title: string
@@ -21,7 +21,7 @@ export const parseNotification = (data?: Record<string, unknown>): ParsedNotific
   const chainId = strData.chainId
   const address = strData.address
 
-  const state = store.getState()
+  const state = getStore().getState()
   const chain = chainId ? selectChainById(state, chainId) : null
 
   const chainName = chain?.chainName ?? `Chain Id ${chainId}`

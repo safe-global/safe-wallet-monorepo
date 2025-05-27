@@ -1,12 +1,12 @@
 import { getMessaging } from '@react-native-firebase/messaging'
 import Logger from '@/src/utils/logger'
 import { withTimeout } from '@/src/utils/notifications'
-import { store } from '@/src/store'
 import { savePushToken } from '@/src/store/notificationsSlice'
+import { getStore } from '@/src/store/utils/singletonStore'
 
 class FCMService {
   async getFCMToken(): Promise<string | undefined> {
-    const { fcmToken } = store.getState().notifications
+    const { fcmToken } = getStore().getState().notifications
     const token = fcmToken || undefined
     if (!token) {
       Logger.info('getFCMToken: No FCM token found')
@@ -21,7 +21,7 @@ class FCMService {
       const fcmToken = await withTimeout(getMessaging().getToken(), 10000)
       Logger.info('FCMService :: fcmToken', fcmToken)
       if (fcmToken) {
-        store.dispatch(savePushToken(fcmToken))
+        getStore().dispatch(savePushToken(fcmToken))
       }
     } catch (error) {
       Logger.info('FCMService :: error saving', error)

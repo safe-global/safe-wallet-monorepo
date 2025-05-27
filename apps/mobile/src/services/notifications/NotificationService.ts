@@ -10,7 +10,6 @@ import notifee, {
 import { parseNotification } from './notificationParser'
 import { FirebaseMessagingTypes } from '@react-native-firebase/messaging'
 import { Linking, Platform, Alert as NativeAlert } from 'react-native'
-import { store } from '@/src/store'
 import { updatePromptAttempts, updateLastTimePromptAttempted } from '@/src/store/notificationsSlice'
 import { toggleAppNotifications, toggleDeviceNotifications } from '@/src/store/notificationsSlice'
 import { HandleNotificationCallback, LAUNCH_ACTIVITY, PressActionId } from '@/src/store/constants'
@@ -19,6 +18,7 @@ import * as TaskManager from 'expo-task-manager'
 
 import { ChannelId, notificationChannels, withTimeout } from '@/src/utils/notifications'
 import Logger from '@/src/utils/logger'
+import { getStore } from '@/src/store/utils/singletonStore'
 
 interface AlertButton {
   text: string
@@ -56,10 +56,10 @@ class NotificationsService {
 
   enableNotifications() {
     try {
-      store.dispatch(toggleDeviceNotifications(true))
-      store.dispatch(toggleAppNotifications(true))
-      store.dispatch(updatePromptAttempts(0))
-      store.dispatch(updateLastTimePromptAttempted(0))
+      getStore().dispatch(toggleDeviceNotifications(true))
+      getStore().dispatch(toggleAppNotifications(true))
+      getStore().dispatch(updatePromptAttempts(0))
+      getStore().dispatch(updateLastTimePromptAttempted(0))
     } catch (error) {
       Logger.error('Error checking if a user has push notifications permission', error)
     }
@@ -147,8 +147,8 @@ class NotificationsService {
          * When user decides to NOT enable notifications, we should register the number of attempts and its dates
          * so we avoid to prompt the user again within a month given a maximum of 3 attempts
          */
-        store.dispatch(updatePromptAttempts(1))
-        store.dispatch(updateLastTimePromptAttempted(Date.now()))
+        getStore().dispatch(updatePromptAttempts(1))
+        getStore().dispatch(updateLastTimePromptAttempted(Date.now()))
         resolve(false)
       },
     },

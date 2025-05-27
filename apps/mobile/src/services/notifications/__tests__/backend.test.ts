@@ -1,14 +1,19 @@
 import { Wallet } from 'ethers'
 import { SiweMessage } from 'siwe'
-import { store } from '@/src/store'
 import { ERROR_MSG } from '@/src/store/constants'
 import { authenticateSigner, clearAuthCache } from '../backend'
 
 // Mock the store and SiweMessage
+const mockStore = {
+  dispatch: jest.fn(),
+}
+
 jest.mock('@/src/store', () => ({
-  store: {
-    dispatch: jest.fn(),
-  },
+  store: mockStore,
+}))
+
+jest.mock('@/src/store/utils/singletonStore', () => ({
+  getStore: () => mockStore,
 }))
 
 jest.mock('siwe', () => {
@@ -52,9 +57,7 @@ describe('authenticateSigner', () => {
     const mockVerifyDispatchReturn = { unwrap: mockVerifyUnwrap }
 
     // Setup the dispatch mock to return different values on sequential calls
-    ;(store.dispatch as jest.Mock)
-      .mockReturnValueOnce(mockNonceDispatchReturn)
-      .mockReturnValueOnce(mockVerifyDispatchReturn)
+    mockStore.dispatch.mockReturnValueOnce(mockNonceDispatchReturn).mockReturnValueOnce(mockVerifyDispatchReturn)
   })
 
   it('should authenticate a signer', async () => {
@@ -65,7 +68,7 @@ describe('authenticateSigner', () => {
     expect(mockSigner.signMessage).toHaveBeenCalledWith('prepared-siwe-message')
 
     // Check that store.dispatch was called for verification
-    expect(store.dispatch).toHaveBeenCalledTimes(2)
+    expect(mockStore.dispatch).toHaveBeenCalledTimes(2)
 
     // Check that SiweMessage constructor was called with the correct parameters
     expect(SiweMessage).toHaveBeenCalledWith({
@@ -83,7 +86,7 @@ describe('authenticateSigner', () => {
   it('should return early if signer is null', async () => {
     await authenticateSigner(null, mockChainId)
 
-    expect(store.dispatch).not.toHaveBeenCalled()
+    expect(mockStore.dispatch).not.toHaveBeenCalled()
     expect(mockSigner.signMessage).not.toHaveBeenCalled()
   })
 
@@ -98,17 +101,17 @@ describe('authenticateSigner', () => {
     await authenticateSigner(mockSigner, mockChainId)
 
     // Check that dispatch was not called again
-    expect(store.dispatch).not.toHaveBeenCalled()
+    expect(mockStore.dispatch).not.toHaveBeenCalled()
   })
 
   it('should throw an error if nonce is missing', async () => {
-    ;(store.dispatch as jest.Mock).mockReset()
+    mockStore.dispatch.mockReset()
     // override only the first queued return value
     const mockNonceUnwrap = jest.fn().mockResolvedValue({ nonce: null })
     const mockNonceDispatchReturn = { unwrap: mockNonceUnwrap }
 
     // replace the first of the two return-values
-    ;(store.dispatch as jest.Mock).mockReturnValueOnce(mockNonceDispatchReturn)
+    mockStore.dispatch.mockReturnValueOnce(mockNonceDispatchReturn)
 
     // Check that it throws an error
     await expect(authenticateSigner(mockSigner, mockChainId)).rejects.toThrow(ERROR_MSG)

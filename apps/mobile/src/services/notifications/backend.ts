@@ -2,7 +2,6 @@ import DeviceInfo from 'react-native-device-info'
 import { SiweMessage } from 'siwe'
 import { Wallet, HDNodeWallet } from 'ethers'
 
-import { store } from '@/src/store'
 import { NOTIFICATION_ACCOUNT_TYPE, ERROR_MSG } from '@/src/store/constants'
 import { withTimeout, REGULAR_NOTIFICATIONS, OWNER_NOTIFICATIONS } from '@/src/utils/notifications'
 import { cgwApi as authApi } from '@safe-global/store/gateway/AUTO_GENERATED/auth'
@@ -10,6 +9,7 @@ import { cgwApi as notificationsApi } from '@safe-global/store/gateway/AUTO_GENE
 import { convertToUuid } from '@/src/utils/uuid'
 import { isAndroid } from '@/src/config/constants'
 import Logger from '@/src/utils/logger'
+import { getStore } from '@/src/store/utils/singletonStore'
 
 const AUTH_CACHE_EXPIRY_MS = 60000 // 60 seconds
 
@@ -37,7 +37,7 @@ const getNotificationRegisterPayload = async ({
   signer: Wallet | HDNodeWallet
   chainId: string
 }) => {
-  const { nonce } = await store
+  const { nonce } = await getStore()
     .dispatch(
       authApi.endpoints.authGetNonceV1.initiate(undefined, {
         // don't use cached nonce
@@ -82,7 +82,7 @@ export const authenticateSigner = async (signer: Wallet | HDNodeWallet | null, c
   const { siweMessage } = await getNotificationRegisterPayload({ signer, chainId })
   const signature = await signer.signMessage(siweMessage)
 
-  await store
+  await getStore()
     .dispatch(
       authApi.endpoints.authVerifyV1.initiate({
         siweDto: { message: siweMessage, signature },
@@ -117,7 +117,7 @@ export const registerForNotificationsOnBackEnd = async ({
 
   const NOTIFICATIONS_GRANTED = isOwner ? OWNER_NOTIFICATIONS : REGULAR_NOTIFICATIONS
 
-  await store
+  await getStore()
     .dispatch(
       notificationsApi.endpoints.notificationsUpsertSubscriptionsV2.initiate({
         upsertSubscriptionsDto: {
@@ -148,7 +148,7 @@ export const unregisterForNotificationsOnBackEnd = async ({
   const deviceUuid = await getDeviceUuid()
 
   for (const chainId of chainIds) {
-    await store
+    await getStore()
       .dispatch(
         notificationsApi.endpoints.notificationsDeleteSubscriptionV2.initiate({
           deviceUuid,
