@@ -11,11 +11,14 @@ import { TxFlowContext } from '../../TxFlowProvider'
 import type { ManageSignersForm } from '.'
 import type { TxFlowContextType } from '../../TxFlowProvider'
 import type { ReviewTransactionContentProps } from '@/components/tx/ReviewTransactionV2/ReviewTransactionContent'
+import { upsertAddressBookEntries } from '@/store/addressBookSlice'
+import { useAppDispatch } from '@/store'
 
-export function ReviewSigners(props: ReviewTransactionContentProps): ReactElement {
+export function ReviewSigners({ onSubmit, ...props }: ReviewTransactionContentProps): ReactElement {
   const { data } = useContext<TxFlowContextType<ManageSignersForm>>(TxFlowContext)
   const { setSafeTx, setSafeTxError } = useContext(SafeTxContext)
   const { safe } = useSafeInfo()
+  const dispatch = useAppDispatch()
 
   useEffect(() => {
     if (!data) {
@@ -38,5 +41,27 @@ export function ReviewSigners(props: ReviewTransactionContentProps): ReactElemen
     createSafeTx().then(setSafeTx).catch(setSafeTxError)
   }, [data, safe, setSafeTx, setSafeTxError])
 
-  return <ReviewTransaction {...props} />
+  const addAddressBookEntryAndSubmit = () => {
+    if (!data) return
+
+    // Add address book entries for new owners with names
+    data.owners
+      .filter((owner) => !!owner.name)
+      .forEach((owner) => {
+        dispatch(
+          upsertAddressBookEntries({
+            chainIds: [safe.chainId],
+            address: owner.address,
+            name: owner.name,
+          }),
+        )
+      })
+  }
+
+  const handleSubmit = () => {
+    addAddressBookEntryAndSubmit()
+    onSubmit()
+  }
+
+  return <ReviewTransaction onSubmit={handleSubmit} {...props} />
 }
