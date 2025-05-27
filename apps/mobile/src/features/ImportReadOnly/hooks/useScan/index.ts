@@ -1,4 +1,4 @@
-import { Code } from 'react-native-vision-camera'
+import { Code, useCameraPermission } from 'react-native-vision-camera'
 import { useCallback, useRef, useState } from 'react'
 import { useRouter } from 'expo-router'
 import { useFocusEffect } from '@react-navigation/native'
@@ -14,15 +14,20 @@ export const useScan = () => {
   const hasScanned = useRef(false)
   const [isCameraActive, setIsCameraActive] = useState(false)
   const toast = useToastController()
+  const { hasPermission } = useCameraPermission()
 
   const handleFocusEffect = useCallback(() => {
+    if (!hasPermission) {
+      return
+    }
+
     setIsCameraActive(true)
     hasScanned.current = false
 
     return () => {
       setIsCameraActive(false)
     }
-  }, [])
+  }, [hasPermission])
 
   useFocusEffect(handleFocusEffect)
 
