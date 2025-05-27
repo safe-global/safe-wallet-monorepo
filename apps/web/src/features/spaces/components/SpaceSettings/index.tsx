@@ -4,7 +4,7 @@ import { useSpacesGetOneV1Query } from '@safe-global/store/gateway/AUTO_GENERATE
 import { useState } from 'react'
 import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
 import { isAuthenticated } from '@/store/authSlice'
-import { useIsAdmin, useIsInvited } from '@/features/spaces/hooks/useSpaceMembers'
+import { useIsAdmin, useIsInvited, useIsActiceMember } from '@/features/spaces/hooks/useSpaceMembers'
 import PreviewInvite from '@/features/spaces/components/InviteBanner/PreviewInvite'
 import DeleteSpaceDialog from '@/features/spaces/components/SpaceSettings/DeleteSpaceDialog'
 import UpdateSpaceForm from '@/features/spaces/components/SpaceSettings/UpdateSpaceForm'
@@ -24,6 +24,7 @@ const SpaceSettings = () => {
   const { currentData: space } = useSpacesGetOneV1Query({ id: Number(spaceId) }, { skip: !isUserSignedIn || !spaceId })
   const isInvited = useIsInvited()
   const isLastActiveAdmin = useIsLastActiveAdmin()
+  const isActiveMember = useIsActiceMember()
 
   return (
     <div>
@@ -64,7 +65,7 @@ const SpaceSettings = () => {
                     }}
                     variant={isAdmin ? 'outlined' : 'danger'}
                     color="error"
-                    disabled={isLastActiveAdmin}
+                    disabled={isLastActiveAdmin || !isActiveMember}
                   >
                     Leave space
                   </Button>

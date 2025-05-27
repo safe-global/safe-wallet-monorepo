@@ -44,6 +44,11 @@ export const useCurrentMembership = (spaceId?: number) => {
   return allMembers.find((member) => member.user.id === user?.id)
 }
 
+export const useIsActiceMember = (spaceId?: number) => {
+  const currentMembership = useCurrentMembership(spaceId)
+  return !!currentMembership && currentMembership.status === MemberStatus.ACTIVE
+}
+
 export const useIsAdmin = (spaceId?: number) => {
   const currentMembership = useCurrentMembership(spaceId)
   return !!currentMembership && isActiveAdmin(currentMembership)
