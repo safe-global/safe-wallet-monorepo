@@ -2707,6 +2707,39 @@
           }
         },
         "tags": ["spaces"]
+      },
+      "delete": {
+        "description": "Remove own membership from a space.",
+        "operationId": "membersSelfRemoveV1",
+        "parameters": [
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Membership deleted"
+          },
+          "401": {
+            "description": "Signer address not provided"
+          },
+          "403": {
+            "description": "Signer not authorized"
+          },
+          "404": {
+            "description": "Signer or space not found"
+          },
+          "409": {
+            "description": "Cannot remove last admin"
+          }
+        },
+        "summary": "Leave a space",
+        "tags": ["spaces"]
       }
     },
     "/v1/spaces/{spaceId}/members/{userId}/role": {
