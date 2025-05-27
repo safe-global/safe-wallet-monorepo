@@ -103,6 +103,14 @@ export const SPACE_EVENTS = {
     action: 'Submit delete space',
     category: SPACE_CATEGORY,
   },
+  LEAVE_SPACE_MODAL: {
+    action: 'Open leave space modal',
+    category: SPACE_CATEGORY,
+  },
+  LEAVE_SPACE: {
+    action: 'Submit leave space',
+    category: SPACE_CATEGORY,
+  },
   VIEW_ALL_ACCOUNTS: {
     action: 'View all accounts',
     category: SPACE_CATEGORY,
