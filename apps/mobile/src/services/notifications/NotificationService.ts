@@ -7,6 +7,7 @@ import notifee, {
   AndroidImportance,
   AndroidVisibility,
 } from '@notifee/react-native'
+import { parseNotification } from './notificationParser'
 import { FirebaseMessagingTypes } from '@react-native-firebase/messaging'
 import { Linking, Platform, Alert as NativeAlert } from 'react-native'
 import { store } from '@/src/store'
@@ -353,10 +354,11 @@ class NotificationsService {
       Logger.info('Message handled in the background!', remoteMessage)
 
       // Display the notification using Notifee
+      const parsed = parseNotification(remoteMessage.data)
       await this.displayNotification({
         channelId: ChannelId.DEFAULT_NOTIFICATION_CHANNEL_ID,
-        title: remoteMessage.notification?.title || '',
-        body: remoteMessage.notification?.body || '',
+        title: parsed?.title || remoteMessage.notification?.title || '',
+        body: parsed?.body || remoteMessage.notification?.body || '',
         data: remoteMessage.data,
       })
 
@@ -404,10 +406,11 @@ class NotificationsService {
           const fcmData = data as { message: FirebaseMessagingTypes.RemoteMessage }
           const remoteMessage = fcmData.message
 
+          const parsed = parseNotification(remoteMessage.data)
           await this.displayNotification({
             channelId: ChannelId.DEFAULT_NOTIFICATION_CHANNEL_ID,
-            title: remoteMessage.notification?.title || '',
-            body: remoteMessage.notification?.body || '',
+            title: parsed?.title || remoteMessage.notification?.title || '',
+            body: parsed?.body || remoteMessage.notification?.body || '',
             data: remoteMessage.data,
           })
         }

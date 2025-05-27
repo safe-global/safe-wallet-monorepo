@@ -2,6 +2,7 @@ import { FirebaseMessagingTypes, getMessaging } from '@react-native-firebase/mes
 import Logger from '@/src/utils/logger'
 import NotificationsService from './NotificationService'
 import { ChannelId, withTimeout } from '@/src/utils/notifications'
+import { parseNotification } from './notificationParser'
 import { store } from '@/src/store'
 import { savePushToken } from '@/src/store/notificationsSlice'
 
@@ -33,10 +34,11 @@ class FCMService {
 
   listenForMessagesForeground = (): UnsubscribeFunc => {
     return getMessaging().onMessage(async (remoteMessage: FirebaseMessagingTypes.RemoteMessage) => {
+      const parsed = parseNotification(remoteMessage.data)
       NotificationsService.displayNotification({
         channelId: ChannelId.DEFAULT_NOTIFICATION_CHANNEL_ID,
-        title: remoteMessage.notification?.title || '',
-        body: remoteMessage.notification?.body || '',
+        title: parsed?.title || remoteMessage.notification?.title || '',
+        body: parsed?.body || remoteMessage.notification?.body || '',
         data: remoteMessage.data,
       })
       Logger.info('listenForMessagesForeground: listening for messages in Foreground', remoteMessage)
@@ -45,10 +47,11 @@ class FCMService {
 
   listenForMessagesBackground = (): void => {
     getMessaging().setBackgroundMessageHandler(async (remoteMessage: FirebaseMessagingTypes.RemoteMessage) => {
+      const parsed = parseNotification(remoteMessage.data)
       NotificationsService.displayNotification({
         channelId: ChannelId.DEFAULT_NOTIFICATION_CHANNEL_ID,
-        title: remoteMessage.notification?.title || '',
-        body: remoteMessage.notification?.body || '',
+        title: parsed?.title || remoteMessage.notification?.title || '',
+        body: parsed?.body || remoteMessage.notification?.body || '',
         data: remoteMessage.data,
       })
       Logger.info('listenForMessagesBackground :: listening for messages in background', remoteMessage)
