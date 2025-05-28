@@ -4,13 +4,14 @@ import { safeTabItem } from './types'
 import { SafeTabBar } from './SafeTabBar'
 import { Theme } from 'tamagui'
 
-interface SafeTabProps {
+interface SafeTabProps<T> {
   renderHeader?: (props: TabBarProps<string>) => ReactElement
   headerHeight?: number
-  items: safeTabItem[]
+  items: safeTabItem<T>[]
+  containerProps?: T
 }
 
-export function SafeTab({ renderHeader, headerHeight, items }: SafeTabProps) {
+export function SafeTab<T extends object>({ renderHeader, headerHeight, items, containerProps }: SafeTabProps<T>) {
   const [activeTab, setActiveTab] = useState(items[0].label)
 
   return (
@@ -25,7 +26,7 @@ export function SafeTab({ renderHeader, headerHeight, items }: SafeTabProps) {
       >
         {items.map(({ label, Component }, index) => (
           <Tabs.Tab name={label} key={`${label}-${index}`}>
-            <Component />
+            <Component {...(containerProps as T)} />
           </Tabs.Tab>
         ))}
       </Tabs.Container>

@@ -4,8 +4,8 @@ import { isArrayParameter } from '@/src/utils/transaction-guards'
 import { shortenText } from '@safe-global/utils/utils/formatters'
 import { CircleProps, Text, View } from 'tamagui'
 import { CopyButton } from '@/src/components/CopyButton'
-import { characterDisplayLimit, formatValueTemplate } from './formatters/singleValue'
-import { formatArrayValue } from './formatters/arrayValue'
+import { characterDisplayLimit, formatValueTemplate } from '../formatters/singleValue'
+import { formatArrayValue } from '../formatters/arrayValue'
 import { Badge } from '@/src/components/Badge'
 
 interface formatParametersProps {
