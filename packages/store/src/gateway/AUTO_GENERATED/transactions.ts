@@ -513,6 +513,45 @@ export type SwapOrderTransactionInfo = {
   /** The App Data for this order */
   fullAppData?: object | null
 }
+export type BridgeFee = {
+  tokenAddress: string
+  integratorFee: string
+  lifiFee: string
+}
+export type BridgeAndSwapTransactionInfo = {
+  type: 'SwapAndBridge'
+  humanDescription?: string | null
+  fromToken: TokenInfo
+  recipient: AddressInfo
+  explorerUrl?: object
+  status: 'NOT_FOUND' | 'INVALID' | 'PENDING' | 'DONE' | 'FAILED' | 'UNKNOWN'
+  substatus:
+    | 'WAIT_SOURCE_CONFIRMATIONS'
+    | 'WAIT_DESTINATION_TRANSACTION'
+    | 'BRIDGE_NOT_AVAILABLE'
+    | 'CHAIN_NOT_AVAILABLE'
+    | 'REFUND_IN_PROGRESS'
+    | 'UNKNOWN_ERROR'
+    | 'COMPLETED'
+    | 'PARTIAL'
+    | 'REFUNDED'
+    | 'INSUFFICIENT_ALLOWANCE'
+    | 'INSUFFICIENT_BALANCE'
+    | 'OUT_OF_GAS'
+    | 'EXPIRED'
+    | 'SLIPPAGE_EXCEEDED'
+    | 'UNKNOWN_FAILED_ERROR'
+    | 'UNKNOWN'
+  fees: BridgeFee | null
+  fromAmount: string
+  toChain: string
+  toToken?: TokenInfo
+  toAmount?: string
+}
+export type SwapTransactionInfo = {
+  type: 'Swap'
+  humanDescription?: string | null
+}
 export type SwapTransferTransactionInfo = {
   type: 'SwapTransfer'
   humanDescription?: string | null
@@ -782,6 +821,8 @@ export type TransactionDetails = {
     | SettingsChangeTransaction
     | TransferTransactionInfo
     | SwapOrderTransactionInfo
+    | BridgeAndSwapTransactionInfo
+    | SwapTransactionInfo
     | SwapTransferTransactionInfo
     | TwapOrderTransactionInfo
     | NativeStakingDepositTransactionInfo
@@ -804,6 +845,7 @@ export type TxsMultisigTransaction = {
   to: string
   value: string
   data: object
+  dataDecoded: object
   operation: number
   gasToken: object
   safeTxGas: object
@@ -855,6 +897,8 @@ export type Transaction = {
     | SettingsChangeTransaction
     | TransferTransactionInfo
     | SwapOrderTransactionInfo
+    | BridgeAndSwapTransactionInfo
+    | SwapTransactionInfo
     | SwapTransferTransactionInfo
     | TwapOrderTransactionInfo
     | NativeStakingDepositTransactionInfo
@@ -915,6 +959,8 @@ export type TransactionPreview = {
     | SettingsChangeTransaction
     | TransferTransactionInfo
     | SwapOrderTransactionInfo
+    | BridgeAndSwapTransactionInfo
+    | SwapTransactionInfo
     | SwapTransferTransactionInfo
     | TwapOrderTransactionInfo
     | NativeStakingDepositTransactionInfo
@@ -998,6 +1044,7 @@ export type TxsCreationTransaction = {
   masterCopy: object
   setupData: object
   saltNonce: object
+  dataDecoded: object
 }
 export const {
   useTransactionsGetTransactionByIdV1Query,
