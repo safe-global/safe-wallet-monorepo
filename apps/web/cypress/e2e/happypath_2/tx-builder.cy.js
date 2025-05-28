@@ -42,7 +42,7 @@ describe('Transaction Builder happy path tests', { defaultCommandTimeout: 20000 
       ]
 
       const appUrl = constants.TX_Builder_url
-      iframeSelector = `iframe[id="iframe-${appUrl}"]`
+      iframeSelector = `iframe[id="iframe-${encodeURIComponent(appUrl)}"]`
       const visitUrl = `/apps/open?safe=${safeAppSafes.SEP_SAFEAPP_SAFE_1}&appUrl=${encodeURIComponent(appUrl)}`
 
       cy.visit(constants.transactionQueueUrl + safeAppSafes.SEP_SAFEAPP_SAFE_1)
