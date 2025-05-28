@@ -1,7 +1,7 @@
 import React from 'react'
+import { render } from '@/src/tests/test-utils'
 import { OnboardingCarousel } from './OnboardingCarousel'
 import { Text } from 'tamagui'
-import { render } from '@/src/tests/test-utils'
 
 describe('OnboardingCarousel', () => {
   const items = [

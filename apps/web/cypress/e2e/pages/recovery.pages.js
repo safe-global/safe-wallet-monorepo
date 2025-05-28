@@ -27,7 +27,7 @@ const executeFormBtn = '[data-testid="execute-form-btn"]'
 const advancedBtn = '[data-testid="advanced-btn"]'
 const recoveryProposalModal = '[data-testid="recovery-proposal"]'
 const recoveryProposalHorizontal = '[data-testid="recovery-proposal-hr"]'
-const recoveryModalTitle = 'How does recovery work?'
+const recoveryModalTitle = 'How does recovery work'
 
 export const recoveryOptions = {
   customPeriod: 'Custom period',

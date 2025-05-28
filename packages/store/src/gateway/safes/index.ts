@@ -13,7 +13,7 @@ function chunkArray<T>(array: T[], size: number): T[][] {
 
 const MAX_SAFES_PER_REQUEST = 10
 
-const additionalSafesRtkApi = cgwClient
+export const additionalSafesRtkApi = cgwClient
   .enhanceEndpoints({
     addTagTypes,
   })

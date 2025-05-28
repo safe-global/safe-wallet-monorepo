@@ -140,6 +140,11 @@ jest.mock('@notifee/react-native', () => {
       DEFAULT: 3,
       HIGH: 4,
     },
+    AndroidVisibility: {
+      SECRET: -1,
+      PRIVATE: 0,
+      PUBLIC: 1,
+    },
   }
 })
 
@@ -199,6 +204,21 @@ jest.mock('@gorhom/bottom-sheet', () => {
 jest.mock('@react-native-clipboard/clipboard', () => ({
   setString: jest.fn(),
   getString: jest.fn(),
+}))
+
+jest.mock('react-native-quick-crypto', () => ({
+  default: {
+    randomBytes: jest.fn((size) => Buffer.alloc(size)),
+    createHash: jest.fn(() => ({
+      update: jest.fn().mockReturnThis(),
+      digest: jest.fn(() => Buffer.from('mockedHash')),
+    })),
+  },
+  randomBytes: jest.fn((size) => Buffer.alloc(size)),
+  createHash: jest.fn(() => ({
+    update: jest.fn().mockReturnThis(),
+    digest: jest.fn(() => Buffer.from('mockedHash')),
+  })),
 }))
 
 jest.mock('react-native-safe-area-context', () => mockSafeAreaContext)

@@ -110,11 +110,13 @@ export const maybePlural = (quantity: number | unknown[]) => {
   return quantity === 1 ? '' : 's'
 }
 
-export const formatPercentage = (value: number) => {
+export const formatPercentage = (value: number, hideFractions?: boolean) => {
+  const fraction = hideFractions ? 0 : 2
+
   return new Intl.NumberFormat(undefined, {
     style: 'percent',
-    maximumFractionDigits: 2,
+    maximumFractionDigits: fraction,
     signDisplay: 'never',
-    minimumFractionDigits: 2,
+    minimumFractionDigits: fraction,
   }).format(value)
 }

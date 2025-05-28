@@ -4,7 +4,7 @@ import { getChainsByIds, selectAllChains, selectChainById } from '@/src/store/ch
 import { Balance } from './Balance'
 import { makeSafeId } from '@/src/utils/formatters'
 import { RootState } from '@/src/store'
-import { selectSafeInfo } from '@/src/store/safesSlice'
+import { selectSafeChains } from '@/src/store/safesSlice'
 import { useAppSelector } from '@/src/store/hooks'
 import { useSafesGetOverviewForManyQuery } from '@safe-global/store/gateway/safes'
 import React, { useCallback } from 'react'
@@ -15,12 +15,12 @@ import { useCopyAndDispatchToast } from '@/src/hooks/useCopyAndDispatchToast'
 export function BalanceContainer() {
   const chains = useAppSelector(selectAllChains)
   const activeSafe = useDefinedActiveSafe()
-  const activeSafeInfo = useAppSelector((state: RootState) => selectSafeInfo(state, activeSafe.address))
-  const activeSafeChains = useAppSelector((state: RootState) => getChainsByIds(state, activeSafeInfo?.chains || []))
+  const chainsIds = useAppSelector((state: RootState) => selectSafeChains(state, activeSafe.address))
+  const activeSafeChains = useAppSelector((state: RootState) => getChainsByIds(state, chainsIds))
   const copy = useCopyAndDispatchToast()
   const { data, isLoading } = useSafesGetOverviewForManyQuery<SafeOverviewResult>(
     {
-      safes: chains.map((chain) => makeSafeId(chain.chainId, activeSafe.address)),
+      safes: [makeSafeId(activeSafe.chainId, activeSafe.address)],
       currency: 'usd',
       trusted: true,
       excludeSpam: true,
@@ -34,7 +34,6 @@ export function BalanceContainer() {
   const balance = data?.find((chain) => chain.chainId === activeSafe.chainId)
 
   const onPressAddressCopy = useCallback(() => {
-    console.log('onPressAddressCopy')
     copy(activeSafe.address)
   }, [activeSafe.address])
 

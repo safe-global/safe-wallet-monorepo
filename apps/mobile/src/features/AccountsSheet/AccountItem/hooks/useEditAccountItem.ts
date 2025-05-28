@@ -17,13 +17,14 @@ export const useEditAccountItem = () => {
   const deleteSafe = useCallback(
     (address: Address) => {
       if (activeSafe?.address === address) {
-        const safe = Object.values(safes).find((item) => item.SafeInfo.address.value !== address)
+        const [nextAddress, nextInfo] = Object.entries(safes).find(([addr]) => addr !== address) || [null, null]
 
-        if (safe) {
+        if (nextAddress && nextInfo) {
+          const firstChain = Object.keys(nextInfo)[0]
           dispatch(
             setActiveSafe({
-              address: safe.SafeInfo.address.value as Address,
-              chainId: safe.chains[0],
+              address: nextAddress as Address,
+              chainId: firstChain,
             }),
           )
         } else {

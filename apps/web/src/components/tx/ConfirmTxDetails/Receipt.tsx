@@ -52,7 +52,7 @@ export const Receipt = ({ safeTxData, txData, txDetails, txInfo, grid, withSigna
               <Stack spacing={1} divider={<Divider />}>
                 <TxDetailsRow label="To" grid={grid}>
                   <ToWrapper>
-                    <NameChip txData={txData} txInfo={txInfo} withBackground={grid} />
+                    <NameChip txData={txData} txInfo={txInfo} />
 
                     <Typography
                       variant="body2"

@@ -21,11 +21,11 @@ describe('[PROD] Add Owners tests', () => {
   })
 
   it('Verify add owner button is disabled for disconnected user', () => {
-    owner.verifyAddOwnerBtnIsDisabled()
+    owner.verifyManageSignersBtnIsDisabled()
   })
 
-  it('Verify the Add New Owner Form can be opened', () => {
+  it('Verify the Manage Signers Form can be opened', () => {
     wallet.connectSigner(signer)
-    owner.openAddOwnerWindow()
+    owner.openManageSignersWindow()
   })
 })

@@ -2,14 +2,15 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 import type { BaseQueryFn, FetchArgs, FetchBaseQueryError } from '@reduxjs/toolkit/query/react'
 import { REHYDRATE } from 'redux-persist'
 import type { UnknownAction } from '@reduxjs/toolkit'
-import type { Api, CombinedState } from '@reduxjs/toolkit/query'
+import type { CombinedState } from '@reduxjs/toolkit/query'
 
-const CREDENTIAL_ROUTES = [
-  /^\/v1\/users/,
-  /^\/v1\/spaces/,
-  /^\/v1\/auth/,
-  /^\/v2\/register\/notifications$/,
-  /^\/v2\/chains\/[^\/]+\/notifications\/devices/,
+// Export these route patterns for use in platform-specific code
+export const CREDENTIAL_ROUTES = [
+  /\/v1\/users/,
+  /\/v1\/spaces/,
+  /\/v1\/auth/,
+  /\/v2\/register\/notifications$/,
+  /\/v2\/chains\/[^\/]+\/notifications\/devices/,
 ]
 
 export function isCredentialRoute(url: string) {
@@ -24,11 +25,54 @@ export const setBaseUrl = (url: string) => {
 export const getBaseUrl = () => {
   return baseUrl
 }
+
+// Hook for customizing headers - this can be overridden by platform-specific code
+type PrepareHeadersHook = (headers: Headers, url: string, endpoint: string) => Headers | Promise<Headers>
+
+// Default implementation (does nothing)
+let customPrepareHeaders: PrepareHeadersHook = (headers) => headers
+
+// Setter for the custom hook
+export const setPrepareHeadersHook = (hook: PrepareHeadersHook) => {
+  customPrepareHeaders = hook
+}
+
+// Hook for handling response - this can be overridden by platform-specific code
+type HandleResponseHook = (response: Response, url: string) => void | Promise<void>
+
+// Default implementation (does nothing)
+let customHandleResponse: HandleResponseHook = () => {}
+
+// Setter for the custom hook
+export const setHandleResponseHook = (hook: HandleResponseHook) => {
+  customHandleResponse = hook
+}
+
 export const rawBaseQuery = fetchBaseQuery({
   baseUrl: '/',
   headers: {
     'Content-Type': 'application/json',
     Accept: 'application/json',
+  },
+  prepareHeaders: async (headers, api) => {
+    // Extract URL from API arguments
+    let url = ''
+
+    if (typeof api.endpoint === 'string') {
+      url = api.endpoint
+    }
+
+    if (api.arg) {
+      // Handle both string and object arg types
+      if (typeof api.arg === 'string') {
+        url = api.arg
+      } else if (typeof api.arg === 'object' && 'url' in api.arg) {
+        url = api.arg.url as string
+      }
+    }
+
+    // Apply platform-specific header customization
+    return customPrepareHeaders(headers, url, api.endpoint as string)
   },
 })
 
@@ -53,7 +97,14 @@ export const dynamicBaseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBas
     credentials: shouldIncludeCredentials ? ('include' as RequestCredentials) : ('omit' as RequestCredentials),
   }
 
-  return rawBaseQuery(adjustedArgs, api, extraOptions)
+  const response = await rawBaseQuery(adjustedArgs, api, extraOptions)
+
+  // Apply platform-specific response handling
+  if (response.meta?.response) {
+    await customHandleResponse(response.meta.response, urlEnd)
+  }
+
+  return response
 }
 
 export const cgwClient = createApi({

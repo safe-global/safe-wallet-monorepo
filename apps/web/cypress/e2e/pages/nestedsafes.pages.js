@@ -14,7 +14,7 @@ const tokenItem = '[data-testid="token-item"]'
 const removeAssetIcon = '[data-testid="remove-asset-icon"]'
 const advancedDetailsSummary = '[data-testid="decoded-tx-summary"]'
 
-export const fundAssetsActions = ['SafeProxyFactory 1.4.1: createProxyWithNonce', 'native transfer']
+export const fundAssetsActions = ['SafeProxyFactory 1.4.1: createProxyWithNonce', /2\s*Send.*0\.00002\s*ETH.*to/]
 export const nonfundAssetsActions = ['createProxyWithNonce', 'SafeProxyFactory 1.4.1']
 
 export function clickOnAdvancedDetails() {

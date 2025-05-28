@@ -39,7 +39,7 @@ describe('Multichain setup tests', { defaultCommandTimeout: 60000 }, () => {
     main.verifyElementsCount(navigation.newTxBtn, 0)
     main.verifyElementsCount(create_wallet.activateAccountBtn, 2)
     cy.visit(constants.setupUrl + safe)
-    owner.verifyAddOwnerBtnIsDisabled()
+    owner.verifyManageSignersBtnIsDisabled()
     sideBar.verifyNavItemDisabled(sideBar.sideBarListItems[4])
     sideBar.verifyNavItemDisabled(sideBar.sideBarListItems[6])
   })

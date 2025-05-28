@@ -7,29 +7,30 @@ import { useDispatch, useSelector } from 'react-redux'
 import { setActiveSafe } from '@/src/store/activeSafeSlice'
 import { getChainsByIds } from '@/src/store/chains'
 import { RootState } from '@/src/store'
-import { useMyAccounts } from './hooks/useMyAccounts'
+import { useSafeOverviewService } from '@/src/hooks/services/useSafeOverviewService'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 
 interface MyAccountsContainerProps {
-  item: SafesSliceItem
+  item: { address: Address; info: SafesSliceItem }
   onClose: () => void
   isDragging?: boolean
-  drag?: RenderItemParams<SafesSliceItem>['drag']
+  drag?: RenderItemParams<{ address: Address; info: SafesSliceItem }>['drag']
 }
 
 export function MyAccountsContainer({ item, isDragging, drag, onClose }: MyAccountsContainerProps) {
-  useMyAccounts(item)
+  useSafeOverviewService(item.address)
 
   const dispatch = useDispatch()
   const activeSafe = useDefinedActiveSafe()
-  const filteredChains = useSelector((state: RootState) => getChainsByIds(state, item.chains))
+  const chainsIds = Object.keys(item.info)
+  const filteredChains = useSelector((state: RootState) => getChainsByIds(state, chainsIds))
 
   const handleAccountSelected = () => {
-    const chainId = item.chains[0]
+    const chainId = chainsIds[0]
 
     dispatch(
       setActiveSafe({
-        address: item.SafeInfo.address.value as Address,
+        address: item.address,
         chainId,
       }),
     )
@@ -40,7 +41,10 @@ export function MyAccountsContainer({ item, isDragging, drag, onClose }: MyAccou
   return (
     <AccountItem
       drag={drag}
-      account={item.SafeInfo}
+      account={{
+        ...item.info[chainsIds[0]],
+        fiatTotal: chainsIds.reduce((acc, id) => acc + parseFloat(item.info[id].fiatTotal), 0).toString(),
+      }}
       isDragging={isDragging}
       chains={filteredChains}
       onSelect={handleAccountSelected}

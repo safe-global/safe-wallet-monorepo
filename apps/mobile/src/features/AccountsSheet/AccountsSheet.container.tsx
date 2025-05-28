@@ -20,7 +20,7 @@ export const AccountsSheetContainer = () => {
     <SafeBottomSheet
       title="My accounts"
       items={safes}
-      keyExtractor={({ item }) => item.SafeInfo.address.value}
+      keyExtractor={({ item }) => item.address}
       FooterComponent={MyAccountsFooter}
       renderItem={MyAccountsContainer}
       sortable={isEdit}

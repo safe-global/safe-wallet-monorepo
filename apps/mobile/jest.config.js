@@ -12,7 +12,7 @@ module.exports = {
     '!./src/**/*.snap',
   ],
   coverageReporters: ['json-summary', 'html', 'text-summary'],
-  setupFilesAfterEnv: ['./src/tests/jest.setup.tsx', './src/tests/test-utils.tsx'],
+  setupFilesAfterEnv: ['./src/tests/jest.setup.tsx'],
   moduleNameMapper: {
     '\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$':
       '<rootDir>/__mocks__/fileMock.js',

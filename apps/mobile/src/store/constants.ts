@@ -371,7 +371,7 @@ export enum PressActionId {
   OPEN_TRANSACTION_VIEW = 'open-transactions-view-press-action-id',
 }
 
-const IS_DEV = process.env.APP_VARIANT === 'development'
+const IS_DEV = process.env.EXPO_PUBLIC_APP_VARIANT === 'development'
 
 export const LAUNCH_ACTIVITY = IS_DEV ? 'global.safe.mobileapp.dev.MainActivity' : 'global.safe.mobileapp.MainActivity'
 

@@ -59,6 +59,7 @@ const DecodedTxs = ({ txs }: { txs: TransactionDetails[] | undefined }) => {
               actionTitle={`${idx + 1}`}
               expanded={openMap?.[idx] ?? false}
               onChange={onChange}
+              isExecuted={!!transaction.executedAt}
             />
           )
         })}
