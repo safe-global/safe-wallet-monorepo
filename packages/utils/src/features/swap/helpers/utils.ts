@@ -198,6 +198,8 @@ export const UiOrderTypeToOrderType = (orderType: UiOrderType): TradeType => {
       return TradeType.LIMIT
     case UiOrderType.TWAP:
       return TradeType.ADVANCED
+    default:
+      throw new Error(`Unsupported order type: ${orderType}`)
   }
 }
 
