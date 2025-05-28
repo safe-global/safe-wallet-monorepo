@@ -41,7 +41,7 @@ export function ReviewSigners({ onSubmit, ...props }: ReviewTransactionContentPr
     createSafeTx().then(setSafeTx).catch(setSafeTxError)
   }, [data, safe, setSafeTx, setSafeTxError])
 
-  const addAddressBookEntryAndSubmit = () => {
+  const addAddressBookEntry = () => {
     if (!data) return
 
     // Add address book entries for new owners with names
@@ -59,7 +59,7 @@ export function ReviewSigners({ onSubmit, ...props }: ReviewTransactionContentPr
   }
 
   const handleSubmit = () => {
-    addAddressBookEntryAndSubmit()
+    addAddressBookEntry()
     onSubmit()
   }
 
