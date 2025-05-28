@@ -1,6 +1,7 @@
 import SettingsChangeTxInfo from '@/components/transactions/TxDetails/TxData/SettingsChange'
 import {
   isStakingTxExitInfo,
+  isBridgeOrderTxInfo,
   isExecTxData,
   isOnChainConfirmationTxData,
   isSafeUpdateTxData,
@@ -39,6 +40,7 @@ import VaultRedeemTxDetails from '@/features/earn/components/VaultRedeemTxDetail
 import DecodedData from './DecodedData'
 import { ErrorBoundary } from '@sentry/react'
 import Multisend from './DecodedData/Multisend'
+import BridgeTransaction from '@/components/tx/confirmation-views/BridgeTransaction'
 
 const TxData = ({
   txInfo,
@@ -80,6 +82,10 @@ const TxData = ({
   // @ts-ignore: TODO: Fix this type
   if (isVaultRedeemTxInfo(txInfo)) {
     return <VaultRedeemTxDetails info={txInfo} />
+  }
+
+  if (isBridgeOrderTxInfo(txInfo)) {
+    return <BridgeTransaction txInfo={txInfo} />
   }
 
   if (isTransferTxInfo(txInfo)) {
