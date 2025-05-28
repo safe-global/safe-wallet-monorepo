@@ -11,21 +11,6 @@ export type MockCallImplementation = {
 
 const MULTI_CALL_INTERFACE = new Interface(MULTICALL_ABI)
 
-export const toMultiCallImplementation = (calls: MockCallImplementation[]): MockCallImplementation => {
-  return {
-    signature: MULTI_CALL_INTERFACE.getFunction('aggregate3')?.selector!,
-    returnType: 'raw',
-    returnValue: MULTI_CALL_INTERFACE.encodeFunctionResult('aggregate3', [
-      calls.map((call) => {
-        return {
-          success: true,
-          returnData: AbiCoder.defaultAbiCoder().encode([call.returnType], [call.returnValue]),
-        }
-      }),
-    ]),
-  }
-}
-
 /**
  * Creates a getWeb3 spy which returns a Web3Provider with a mocked `call` and `resolveName` function.
  * It will automatically handle multicalls.

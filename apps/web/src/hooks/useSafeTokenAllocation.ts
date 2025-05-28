@@ -134,13 +134,13 @@ const fetchTokenBalances = async (chainId: string, safeAddress: string): Promise
       },
     ]
 
-    const results = await multicall(web3ReadOnly, calls)
+    const [balanceResponse, lockedResponse] = await multicall(web3ReadOnly, calls)
 
-    if (!results[0].success || !results[1].success) {
+    if (!balanceResponse.success || !lockedResponse.success) {
       throw new Error('Failed to fetch token balances')
     }
 
-    return [BigInt(results[0].returnData), BigInt(results[1].returnData)]
+    return [BigInt(balanceResponse.returnData), BigInt(lockedResponse.returnData)]
   } catch (err) {
     throw Error(`Error fetching Safe Token balances: ${err}`)
   }
