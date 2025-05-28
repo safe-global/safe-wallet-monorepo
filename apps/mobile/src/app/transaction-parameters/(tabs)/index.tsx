@@ -2,12 +2,12 @@ import React from 'react'
 
 import { SafeAreaView } from 'react-native-safe-area-context'
 
-import { TransactionParametersContainer } from '@/src/features/TransactionParameters'
+import { AdvancedDetailsContainer } from '@/src/features/AdvancedDetails'
 
 function TransactionParameters() {
   return (
     <SafeAreaView edges={['bottom']} style={{ flex: 1 }}>
-      <TransactionParametersContainer />
+      <AdvancedDetailsContainer />
     </SafeAreaView>
   )
 }

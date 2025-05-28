@@ -28,7 +28,12 @@ export const useScrollableHeader = ({ children, alwaysVisible, scrollYThreshold 
   useEffect(() => {
     navigation.setOptions({
       headerTitle: () => (
-        <Animated.View style={[{ flexDirection: 'row', alignItems: 'center' }, animatedHeaderStyle]}>
+        <Animated.View
+          style={[
+            { flex: 1, justifyContent: 'center', flexDirection: 'row', alignItems: 'center' },
+            animatedHeaderStyle,
+          ]}
+        >
           {children}
         </Animated.View>
       ),

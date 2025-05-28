@@ -1,27 +1,21 @@
-import { useLocalSearchParams } from 'expo-router'
 import React from 'react'
 import { ScrollView, View } from 'tamagui'
 import { useTransactionsGetTransactionByIdV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
-import { LargeHeaderTitle, NavBarTitle } from '@/src/components/Title'
-import { useScrollableHeader } from '@/src/navigation/useScrollableHeader'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { Alert } from '@/src/components/Alert'
 
 import { LoadingTx } from '../ConfirmTx/components/LoadingTx'
 import { TxParametersList } from './components/TxParametersList'
+import { useLocalSearchParams } from 'expo-router'
 
-export function TransactionParametersContainer() {
-  const { txId } = useLocalSearchParams<{ txId: string }>()
+export function AdvancedDetailsContainer() {
   const activeSafe = useDefinedActiveSafe()
+  const { txId } = useLocalSearchParams<{ txId: string }>()
 
   const { data, isFetching, isError } = useTransactionsGetTransactionByIdV1Query({
     chainId: activeSafe.chainId,
     id: txId,
-  })
-
-  const { handleScroll } = useScrollableHeader({
-    children: <NavBarTitle>Parameters</NavBarTitle>,
   })
 
   if (isError) {
@@ -33,9 +27,7 @@ export function TransactionParametersContainer() {
   }
 
   return (
-    <ScrollView onScroll={handleScroll}>
-      <LargeHeaderTitle paddingHorizontal="$4">Parameters</LargeHeaderTitle>
-
+    <ScrollView marginTop="$4">
       {isFetching || !data ? <LoadingTx /> : <TxParametersList txDetails={data} />}
     </ScrollView>
   )
