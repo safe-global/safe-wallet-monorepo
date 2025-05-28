@@ -189,7 +189,7 @@ const TxLayout = ({
                   <Grid item xs={12} md={4} className={classnames(css.widget, { [css.active]: statusVisible })}>
                     {statusVisible && (
                       <TxStatusWidget
-                        step={step}
+                        isLastStep={step === steps.length - 1}
                         txSummary={txSummary}
                         handleClose={() => setStatusVisible(false)}
                         isBatch={isBatch}

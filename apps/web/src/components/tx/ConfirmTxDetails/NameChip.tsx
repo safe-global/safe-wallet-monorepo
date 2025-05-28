@@ -5,15 +5,7 @@ import { isCustomTxInfo } from '@/utils/transaction-guards'
 import { Chip } from '@mui/material'
 import type { TransactionData, TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
 
-const NameChip = ({
-  txData,
-  withBackground,
-  txInfo,
-}: {
-  txData?: TransactionData
-  txInfo?: TransactionDetails['txInfo']
-  withBackground?: boolean
-}) => {
+const NameChip = ({ txData, txInfo }: { txData?: TransactionData; txInfo?: TransactionDetails['txInfo'] }) => {
   const addressBook = useAddressBook()
   const toAddress = txData?.to.value
   const customTxInfo = txInfo && isCustomTxInfo(txInfo) ? txInfo : undefined
@@ -33,7 +25,7 @@ const NameChip = ({
     <Chip
       data-testid="name-chip"
       sx={{
-        backgroundColor: isUntrusted ? 'error.background' : withBackground ? 'background.main' : 'background.paper',
+        backgroundColor: isUntrusted ? 'error.background' : 'background.paper',
         color: isUntrusted ? 'error.main' : undefined,
         height: 'unset',
       }}

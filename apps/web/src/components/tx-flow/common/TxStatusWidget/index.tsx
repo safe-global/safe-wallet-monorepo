@@ -2,7 +2,7 @@ import { useContext } from 'react'
 import { Divider, IconButton, List, ListItem, ListItemIcon, ListItemText, Paper, Typography } from '@mui/material'
 import CreatedIcon from '@/public/images/messages/created.svg'
 import SignedIcon from '@/public/images/messages/signed.svg'
-import { type TransactionSummary } from '@safe-global/safe-gateway-typescript-sdk'
+import { TransactionStatus, type TransactionSummary } from '@safe-global/safe-gateway-typescript-sdk'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { isMultisigExecutionInfo, isSignableBy, isConfirmableBy } from '@/utils/transaction-guards'
 import classnames from 'classnames'
@@ -15,17 +15,17 @@ import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import { useIsWalletProposer } from '@/hooks/useProposers'
 
 const TxStatusWidget = ({
-  step,
   txSummary,
   handleClose,
   isBatch = false,
   isMessage = false,
+  isLastStep = false,
 }: {
-  step: number
   txSummary?: TransactionSummary
   handleClose: () => void
   isBatch?: boolean
   isMessage?: boolean
+  isLastStep?: boolean
 }) => {
   const wallet = useWallet()
   const { safe } = useSafeInfo()
@@ -34,6 +34,7 @@ const TxStatusWidget = ({
   const isSafeOwner = useIsSafeOwner()
   const isProposer = useIsWalletProposer()
   const isProposing = isProposer && !isSafeOwner
+  const isAwaitingExecution = txSummary?.txStatus === TransactionStatus.AWAITING_EXECUTION
 
   const { executionInfo = undefined } = txSummary || {}
   const { confirmationsSubmitted = 0 } = isMultisigExecutionInfo(executionInfo) ? executionInfo : {}
@@ -96,7 +97,7 @@ const TxStatusWidget = ({
             </ListItemText>
           </ListItem>
 
-          <ListItem className={classnames({ [css.incomplete]: step < 2 })}>
+          <ListItem className={classnames({ [css.incomplete]: !(isAwaitingExecution && isLastStep) })}>
             <ListItemIcon>
               <SignedIcon />
             </ListItemIcon>
