@@ -1,7 +1,6 @@
 import SafeAppIconCard from '@/components/safe-apps/SafeAppIconCard'
-import { WCLoadingState } from '@/features/walletconnect/components/WalletConnectProvider'
 import { getPeerName } from '@/features/walletconnect/services/utils'
-import { WalletConnectContext } from '@/features/walletconnect/WalletConnectContext'
+import { WalletConnectContext, WCLoadingState } from '@/features/walletconnect/WalletConnectContext'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { trackEvent } from '@/services/analytics'
 import { WALLETCONNECT_EVENTS } from '@/services/analytics/events/walletconnect'
@@ -17,7 +16,7 @@ type WcSesstionListProps = {
 }
 
 const WcSessionListItem = ({ session }: { session: SessionTypes.Struct }) => {
-  const { walletConnect, setError, isLoading, setIsLoading } = useContext(WalletConnectContext)
+  const { walletConnect, setError, loading, setLoading } = useContext(WalletConnectContext)
 
   const MAX_NAME_LENGTH = 23
   const { safeLoaded } = useSafeInfo()
@@ -33,17 +32,17 @@ const WcSessionListItem = ({ session }: { session: SessionTypes.Struct }) => {
     const label = session.peer.metadata.url
     trackEvent({ ...WALLETCONNECT_EVENTS.DISCONNECT_CLICK, label })
 
-    setIsLoading(WCLoadingState.DISCONNECT)
+    setLoading(WCLoadingState.DISCONNECT)
 
     try {
       await walletConnect.disconnectSession(session)
     } catch (error) {
-      setIsLoading(undefined)
+      setLoading(null)
       setError(asError(error))
     }
 
-    setIsLoading(undefined)
-  }, [walletConnect, session, setIsLoading, setError])
+    setLoading(null)
+  }, [walletConnect, session, setLoading, setError])
 
   return (
     <ListItem className={css.sessionListItem}>
@@ -56,8 +55,8 @@ const WcSessionListItem = ({ session }: { session: SessionTypes.Struct }) => {
       <ListItemText primary={name} primaryTypographyProps={{ color: safeLoaded ? undefined : 'text.secondary' }} />
 
       <ListItemIcon className={css.sessionListSecondaryAction}>
-        <Button variant="danger" onClick={onDisconnect} className={css.button} disabled={!!isLoading}>
-          {isLoading === WCLoadingState.DISCONNECT ? <CircularProgress size={20} /> : 'Disconnect'}
+        <Button variant="danger" onClick={onDisconnect} className={css.button} disabled={!!loading}>
+          {loading === WCLoadingState.DISCONNECT ? <CircularProgress size={20} /> : 'Disconnect'}
         </Button>
       </ListItemIcon>
     </ListItem>
