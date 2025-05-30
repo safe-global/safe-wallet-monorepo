@@ -11,11 +11,12 @@
   position: relative;
 }
 
-.shareLink {
+.inlineSimulation {
   display: flex;
   justify-content: flex-end;
-  margin: var(--space-1);
+  margin: var(--space-2);
   margin-bottom: -40px;
+  z-index: 1;
 }
 
 .txNote {

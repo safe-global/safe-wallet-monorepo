@@ -37,9 +37,9 @@ import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { POLLING_INTERVAL } from '@/config/constants'
 import { TxNote } from '@/features/tx-notes'
 import { TxShareBlock } from '../TxShareLink'
-import { TxShareButton } from '../TxShareLink/TxShareButton'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import DecodedData from './TxData/DecodedData'
+import { QueuedTxSimulation } from '../QueuedTxSimulation'
 
 export const NOT_AVAILABLE = 'n/a'
 
@@ -95,8 +95,8 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
           <TxNote txDetails={txDetails} />
         </div>
 
-        <div className={css.shareLink}>
-          <TxShareButton txId={txSummary.id} />
+        <div className={css.inlineSimulation}>
+          <QueuedTxSimulation transaction={txDetails} />
         </div>
 
         <div className={css.txData}>
