@@ -28,23 +28,24 @@ describe('Create transactions tests 2', () => {
     createtx.clickOnNewtransactionBtn()
     createtx.clickOnSendTokensBtn()
   })
-
+  //TODO: Create test to edit fee and max fee and check those are saved correctly
   it('Verify advance parameters gas limit input', () => {
     happyPathToStepTwo()
     createtx.changeNonce('5')
     createtx.clickOnContinueSignTransactionBtn()
+    createtx.selectComboButtonOption('execute')
     createtx.selectCurrentWallet()
     createtx.openExecutionParamsModal()
     createtx.verifyAndSubmitExecutionParams()
   })
 
-  it('Verify a transaction shows relayer and addToBatch button', () => {
+  it('Verify a transaction shows relayer attempts', () => {
     happyPathToStepTwo()
     createtx.verifySubmitBtnIsEnabled()
     createtx.verifyNativeTokenTransfer()
-    createtx.verifyAddToBatchBtnIsEnabled()
     createtx.changeNonce('5')
     createtx.clickOnContinueSignTransactionBtn()
+    createtx.selectComboButtonOption('execute')
     createtx.verifyRelayerAttemptsAvailable()
   })
 })

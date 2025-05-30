@@ -137,6 +137,11 @@ export const recordedTxNote = 'Tx note one'
 
 const comboButton = '[data-testid="combo-submit-dropdown"]'
 const comboButtonPopover = '[data-testid="combo-submit-popover"]'
+const comboButtonOptions = {
+  sign: 'Sing',
+  execute: 'Execute',
+  addToBatch: 'Add to batch',
+}
 
 // Transaction details on Tx creation
 export const txAccordionDetails = '[data-testid="decoded-tx-details"]'
@@ -970,5 +975,5 @@ export function checkMaxRecipientReached(attempt = 0) {
 
 export function selectComboButtonOption(option) {
   cy.get(comboButton).click()
-  cy.get(comboButtonPopover).findByText(option).click()
+  cy.get(comboButtonPopover).findByText(comboButtonOptions[option]).click()
 }
