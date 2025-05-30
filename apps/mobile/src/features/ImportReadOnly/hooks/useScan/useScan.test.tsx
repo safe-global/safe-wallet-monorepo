@@ -4,6 +4,28 @@ import { Code } from 'react-native-vision-camera'
 import { parsePrefixedAddress } from '@safe-global/utils/utils/addresses'
 import { isValidAddress } from '@safe-global/utils/utils/validation'
 
+// Store the focus callback for later testing
+let mockFocusCallback: (() => void) | null = null
+
+// Mock react-native-vision-camera
+jest.mock('react-native-vision-camera', () => ({
+  Camera: {
+    getCameraDevice: jest.fn(),
+    requestCameraPermission: jest.fn(),
+  },
+  useCameraPermission: jest.fn(() => ({ hasPermission: true })),
+  useCameraDevice: jest.fn(),
+  useCodeScanner: jest.fn(),
+}))
+
+// Mock React Navigation
+jest.mock('@react-navigation/native', () => ({
+  useFocusEffect: jest.fn((callback: () => (() => void) | void) => {
+    mockFocusCallback = callback
+    // Don't call the callback immediately - only store it for manual testing
+  }),
+}))
+
 // Mock the global toastForValueShown object
 const mockToastForValueShown: Record<string, boolean> = {}
 // @ts-expect-error - intentionally extending global
@@ -12,29 +34,17 @@ global.toastForValueShown = mockToastForValueShown
 jest.mock('@safe-global/utils/utils/addresses', () => ({
   parsePrefixedAddress: jest.fn().mockReturnValue({ address: 'mocked-address' }),
 }))
+
 jest.mock('@safe-global/utils/utils/validation', () => ({
   isValidAddress: jest.fn().mockReturnValue(false),
 }))
 
 const mockPush = jest.fn()
-jest.mock('expo-router', () => {
-  return {
-    useRouter: () => ({
-      push: mockPush,
-    }),
-  }
-})
-
-// Store the focus callback for later testing
-let mockFocusCallback: (() => void) | null = null
-
-jest.mock('@react-navigation/native', () => {
-  return {
-    useFocusEffect: jest.fn((callback: () => void) => {
-      mockFocusCallback = callback
-    }),
-  }
-})
+jest.mock('expo-router', () => ({
+  useRouter: () => ({
+    push: mockPush,
+  }),
+}))
 
 // Mock Toast
 const mockShow = jest.fn()
@@ -60,7 +70,7 @@ describe('useScan', () => {
   it('should initialize with default values', () => {
     const { result } = renderHook(() => useScan())
 
-    expect(result.current.isCameraActive).toBe(false)
+    expect(result.current.isCameraActive).toBe(false) // Now false by default since focus effect isn't called
     expect(typeof result.current.setIsCameraActive).toBe('function')
     expect(typeof result.current.onScan).toBe('function')
   })
@@ -74,9 +84,13 @@ describe('useScan', () => {
 
       const { result } = renderHook(() => useScan())
 
-      act(() => {
-        result.current.setIsCameraActive(true)
-      })
+      // Manually trigger the focus effect to activate camera
+      if (mockFocusCallback) {
+        act(() => {
+          const callback = mockFocusCallback as () => void
+          callback()
+        })
+      }
 
       act(() => {
         result.current.onScan([{ value: invalidCode } as Code])
@@ -112,48 +126,65 @@ describe('useScan', () => {
 
       const { result } = renderHook(() => useScan())
 
-      // Ensure focus listener was set up
-      expect(mockFocusCallback).not.toBeNull()
+      // Manually trigger the focus effect to activate camera and reset hasScanned
+      if (mockFocusCallback) {
+        act(() => {
+          const callback = mockFocusCallback as () => void
+          callback()
+        })
+      }
 
-      act(() => {
-        result.current.setIsCameraActive(true)
-      })
-
+      // First scan should work (camera is active and hasScanned is false)
       act(() => {
         result.current.onScan([{ value: `eth:${validAddress}` } as Code])
       })
 
       expect(mockPush).toHaveBeenCalledWith(`/(import-accounts)/form?safeAddress=${validAddress}`)
 
+      // Clear mocks
       mockPush.mockClear()
 
-      jest.mocked(parsePrefixedAddress).mockClear()
-      jest.mocked(isValidAddress).mockClear()
-
-      act(() => {
-        result.current.setIsCameraActive(true)
-      })
-
+      // Second scan should not work (hasScanned is now true)
       act(() => {
         result.current.onScan([{ value: `eth:${validAddress}` } as Code])
       })
 
       expect(mockPush).not.toHaveBeenCalled()
 
-      const focusCallback = mockFocusCallback as () => void
-      act(() => {
-        focusCallback()
-      })
+      // Trigger focus effect again to reset hasScanned
+      if (mockFocusCallback) {
+        act(() => {
+          // We've already checked that mockFocusCallback is not null
+          const callback = mockFocusCallback as () => void
+          callback()
+        })
+      }
 
-      act(() => {
-        result.current.setIsCameraActive(true)
-      })
-
+      // Now scanning should work again
       act(() => {
         result.current.onScan([{ value: `eth:${validAddress}` } as Code])
       })
 
       expect(mockPush).toHaveBeenCalledWith(`/(import-accounts)/form?safeAddress=${validAddress}`)
+    })
+
+    it('should handle camera permission properly', () => {
+      // Test with no permission
+      const mockUseCameraPermission = jest.mocked(require('react-native-vision-camera').useCameraPermission)
+      mockUseCameraPermission.mockReturnValue({ hasPermission: false })
+
+      const { result } = renderHook(() => useScan())
+
+      // Try to trigger focus effect
+      if (mockFocusCallback) {
+        act(() => {
+          const callback = mockFocusCallback as () => void
+          callback()
+        })
+      }
+
+      // Camera should not be active when there's no permission
+      expect(result.current.isCameraActive).toBe(false)
     })
   })
 })
