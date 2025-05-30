@@ -330,13 +330,12 @@ export const dispatchBatchExecution = async (
   multiSendTxData: `0x${string}`,
   provider: Eip1193Provider,
   signerAddress: string,
-  safeAddress: string,
   overrides: Omit<Overrides, 'nonce'> & { nonce: number },
   nonce: number,
 ) => {
   const groupKey = multiSendTxData
 
-  let result: ContractTransactionResponse
+  let result: TransactionResponse
   const txIds = txs.map((tx) => tx.txId)
   let signerNonce = overrides.nonce
   let txData = multiSendContract.encode('multiSend', [multiSendTxData])
@@ -346,8 +345,13 @@ export const dispatchBatchExecution = async (
       signerNonce = await getUserNonce(signerAddress)
     }
     const signer = await getUncheckedSigner(provider)
-    // @ts-ignore
-    result = await multiSendContract.contract.connect(signer).multiSend(multiSendTxData, overrides)
+
+    result = await signer.sendTransaction({
+      to: multiSendContract.getAddress(),
+      value: '0',
+      data: txData,
+      ...overrides,
+    })
 
     txIds.forEach((txId) => {
       txDispatch(TxEvent.EXECUTING, { txId, groupKey, nonce })
