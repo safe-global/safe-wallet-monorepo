@@ -95,27 +95,29 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
           <TxNote txDetails={txDetails} />
         </div>
 
-        <div className={css.inlineSimulation}>
-          <QueuedTxSimulation transaction={txDetails} />
-        </div>
+        <div className={css.detailsWrapper}>
+          <div className={css.inlineSimulation}>
+            <QueuedTxSimulation transaction={txDetails} />
+          </div>
 
-        <div className={css.txData}>
-          <ErrorBoundary fallback={<div>Error parsing data</div>}>
-            <TxData
-              txData={txDetails.txData}
-              txInfo={txDetails.txInfo}
-              txDetails={txDetails}
-              trusted={isTrustedTransfer}
-              imitation={isImitationTransaction}
-            >
-              <Box ref={decodedDataRef}>
-                <DecodedData
-                  txData={txDetails.txData}
-                  toInfo={isCustomTxInfo(txDetails.txInfo) ? txDetails.txInfo.to : txDetails.txData?.to}
-                />
-              </Box>
-            </TxData>
-          </ErrorBoundary>
+          <div className={css.txData}>
+            <ErrorBoundary fallback={<div>Error parsing data</div>}>
+              <TxData
+                txData={txDetails.txData}
+                txInfo={txDetails.txInfo}
+                txDetails={txDetails}
+                trusted={isTrustedTransfer}
+                imitation={isImitationTransaction}
+              >
+                <Box ref={decodedDataRef}>
+                  <DecodedData
+                    txData={txDetails.txData}
+                    toInfo={isCustomTxInfo(txDetails.txInfo) ? txDetails.txInfo.to : txDetails.txData?.to}
+                  />
+                </Box>
+              </TxData>
+            </ErrorBoundary>
+          </div>
         </div>
 
         {/* Module information*/}

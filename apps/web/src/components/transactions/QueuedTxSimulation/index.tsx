@@ -30,11 +30,13 @@ const CompactSimulationButton = ({
       sx={{
         display: 'flex',
         alignItems: 'center',
-        gap: 1,
+        gap: 0.5,
         flexDirection: 'row',
         borderRadius: '8px',
         backgroundColor: 'background.main',
         padding: '4px 16px',
+        // This is required as the icon otherwise disappears when the first tx accordion is closed
+        visibility: 'visible !important',
       }}
       onClick={onClick}
     >

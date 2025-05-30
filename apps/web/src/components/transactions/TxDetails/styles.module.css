@@ -4,6 +4,10 @@
   overflow-x: auto;
 }
 
+.detailsWrapper {
+  position: relative;
+}
+
 .details {
   width: 66.6%;
   display: flex;
@@ -15,7 +19,9 @@
   display: flex;
   justify-content: flex-end;
   margin: var(--space-2);
-  margin-bottom: -40px;
+  position: absolute;
+  right: 0;
+  top: 0;
   z-index: 1;
 }
 
