@@ -80,11 +80,9 @@ describe('create/logic', () => {
 
       const expectedSaltNonce = 69
       const expectedThreshold = 1
-      const proxyFactoryAddress = await (await getReadOnlyProxyFactoryContract(latestSafeVersion)).getAddress()
+      const proxyFactoryAddress = (await getReadOnlyProxyFactoryContract(latestSafeVersion)).getAddress()
       const readOnlyFallbackHandlerContract = await getReadOnlyFallbackHandlerContract(latestSafeVersion)
-      const safeContractAddress = await (
-        await getReadOnlyGnosisSafeContract(mockChainInfo, latestSafeVersion)
-      ).getAddress()
+      const safeContractAddress = (await getReadOnlyGnosisSafeContract(mockChainInfo, latestSafeVersion)).getAddress()
 
       const undeployedSafeProps: ReplayedSafeProps = {
         safeAccountConfig: {
@@ -92,7 +90,7 @@ describe('create/logic', () => {
           threshold: 1,
           data: EMPTY_DATA,
           to: ZERO_ADDRESS,
-          fallbackHandler: await readOnlyFallbackHandlerContract.getAddress(),
+          fallbackHandler: readOnlyFallbackHandlerContract.getAddress(),
           paymentReceiver: ZERO_ADDRESS,
           payment: 0,
           paymentToken: ZERO_ADDRESS,
@@ -108,7 +106,7 @@ describe('create/logic', () => {
         expectedThreshold,
         ZERO_ADDRESS,
         EMPTY_DATA,
-        await readOnlyFallbackHandlerContract.getAddress(),
+        readOnlyFallbackHandlerContract.getAddress(),
         ZERO_ADDRESS,
         0,
         ZERO_ADDRESS,

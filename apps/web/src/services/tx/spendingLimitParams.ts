@@ -1,5 +1,5 @@
 import { getReadOnlyGnosisSafeContract } from '@/services/contracts/safeContracts'
-import type { MetaTransactionData } from '@safe-global/safe-core-sdk-types'
+import type { MetaTransactionData } from '@safe-global/types-kit'
 import { getSpendingLimitInterface } from '@/services/contracts/spendingLimitContracts'
 import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
 

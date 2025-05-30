@@ -48,11 +48,11 @@ import { AppRoutes } from '@/config/routes'
 import { type ReplayedSafeProps } from '@safe-global/utils/features/counterfactual/store/types'
 import { predictAddressBasedOnReplayData } from '@/features/multichain/utils/utils'
 import { createWeb3ReadOnly, getRpcServiceUrl } from '@/hooks/wallets/web3'
-import { type DeploySafeProps } from '@safe-global/protocol-kit'
 import { updateAddressBook } from '../../logic/address-book'
 import chains from '@/config/chains'
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 import { PayMethod } from '@safe-global/utils/features/counterfactual/types'
+import { type TransactionOptions } from '@safe-global/types-kit'
 
 export const NetworkFee = ({
   totalFee,
@@ -247,10 +247,12 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
           customRpcUrl || getRpcServiceUrl(chain.rpcUri),
           {
             safeAccountConfig: replayedSafeWithNonce.safeAccountConfig,
-            saltNonce: nextAvailableNonce,
+            safeDeploymentConfig: {
+              saltNonce: nextAvailableNonce,
+              safeVersion: replayedSafeWithNonce.safeVersion,
+            },
           },
           chain,
-          replayedSafeWithNonce.safeVersion,
         )
       } else {
         safeAddress = await predictAddressBasedOnReplayData(replayedSafeWithNonce, provider)
@@ -307,7 +309,7 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
         return
       }
 
-      const options: DeploySafeProps['options'] = isEIP1559
+      const options: TransactionOptions = isEIP1559
         ? {
             maxFeePerGas: maxFeePerGas?.toString(),
             maxPriorityFeePerGas: maxPriorityFeePerGas?.toString(),
@@ -344,7 +346,6 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
         await createNewSafe(
           wallet.provider,
           props,
-          data.safeVersion,
           chain,
           options,
           (txHash) => {

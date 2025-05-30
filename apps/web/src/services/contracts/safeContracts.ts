@@ -96,7 +96,6 @@ export const getReadOnlyProxyFactoryContract = async (safeVersion: SafeState['ve
   return getSafeProxyFactoryContractInstance(
     _getValidatedGetContractProps(safeVersion).safeVersion,
     safeProvider,
-    safeProvider.getExternalProvider(),
     contractAddress,
   )
 }

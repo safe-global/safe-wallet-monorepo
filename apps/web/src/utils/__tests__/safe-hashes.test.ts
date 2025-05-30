@@ -1,7 +1,7 @@
 import { faker } from '@faker-js/faker'
 import { getDomainHash, getSafeMessageMessageHash, getSafeTxMessageHash } from '../safe-hashes'
 import { AbiCoder, hashMessage, keccak256, TypedDataEncoder } from 'ethers'
-import type { SafeTransactionData, SafeVersion } from '@safe-global/safe-core-sdk-types'
+import type { SafeTransactionData, SafeVersion } from '@safe-global/types-kit'
 
 // <= 1.2.0
 // keccak256("EIP712Domain(address verifyingContract)");

@@ -1,5 +1,5 @@
 import { getExplorerLink } from '@safe-global/utils/utils/gateway'
-import type { SafeVersion } from '@safe-global/safe-core-sdk-types'
+import type { SafeVersion } from '@safe-global/types-kit'
 import { getSafeSingletonDeployment } from '@safe-global/safe-deployments'
 import semverSatisfies from 'semver/functions/satisfies'
 import { LATEST_SAFE_VERSION } from '@safe-global/utils/config/constants'

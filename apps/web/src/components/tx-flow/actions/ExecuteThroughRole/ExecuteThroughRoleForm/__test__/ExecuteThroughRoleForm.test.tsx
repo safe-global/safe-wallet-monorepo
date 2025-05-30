@@ -1,5 +1,5 @@
 import { createMockSafeTransaction } from '@/tests/transactions'
-import { OperationType } from '@safe-global/safe-core-sdk-types'
+import { OperationType } from '@safe-global/types-kit'
 import { type ReactElement } from 'react'
 import * as zodiacRoles from 'zodiac-roles-deployments'
 import { fireEvent, render, waitFor, mockWeb3Provider } from '@/tests/test-utils'

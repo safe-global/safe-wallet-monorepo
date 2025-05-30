@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { Stack } from '@mui/material'
 import { TxDataRow, generateDataRowValue } from '../TxDataRow'
-import { type SafeTransactionData, type SafeVersion } from '@safe-global/safe-core-sdk-types'
+import { type SafeTransactionData, type SafeVersion } from '@safe-global/types-kit'
 import { calculateSafeTransactionHash } from '@safe-global/protocol-kit/dist/src/utils'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { getDomainHash, getSafeTxMessageHash } from '@/utils/safe-hashes'

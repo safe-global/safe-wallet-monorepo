@@ -3,7 +3,7 @@ import { getCompatibilityFallbackHandlerDeployments } from '@safe-global/safe-de
 import { hasMatchingDeployment } from '@safe-global/utils/services/contracts/deployments'
 
 import { getSafeMigrationDeployment } from '@safe-global/safe-deployments'
-import { type MetaTransactionData, OperationType, type SafeVersion } from '@safe-global/safe-core-sdk-types'
+import { type MetaTransactionData, OperationType, type SafeVersion } from '@safe-global/types-kit'
 import type { ChainInfo, TransactionData } from '@safe-global/safe-gateway-typescript-sdk'
 
 import { LATEST_SAFE_VERSION } from '@safe-global/utils/config/constants'

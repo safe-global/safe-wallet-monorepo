@@ -4,7 +4,7 @@ import { TxSimulation, TxSimulationMessage } from '@/components/tx/security/tend
 import TxCard from '@/components/tx-flow/common/TxCard'
 import { Box, Typography } from '@mui/material'
 
-import type { SafeTransaction, MetaTransactionData } from '@safe-global/safe-core-sdk-types'
+import type { SafeTransaction, MetaTransactionData } from '@safe-global/types-kit'
 
 import css from './styles.module.css'
 import { FEATURES } from '@safe-global/utils/utils/chains'

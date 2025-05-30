@@ -1,5 +1,5 @@
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
-import type { SafeTransaction } from '@safe-global/safe-core-sdk-types'
+import type { SafeTransaction } from '@safe-global/types-kit'
 import { type SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 

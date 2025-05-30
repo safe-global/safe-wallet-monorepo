@@ -1,6 +1,6 @@
 import type { ChainInfo, SafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
-import type { MetaTransactionData, SafeTransaction } from '@safe-global/safe-core-sdk-types'
+import type { MetaTransactionData, SafeTransaction } from '@safe-global/types-kit'
 import {
   TENDERLY_ORG_NAME,
   TENDERLY_PROJECT_NAME,
