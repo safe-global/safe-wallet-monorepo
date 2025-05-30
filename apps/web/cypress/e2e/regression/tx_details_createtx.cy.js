@@ -40,7 +40,7 @@ describe('Transaction details create tests', { defaultCommandTimeout: 30000 }, (
     safeapps.verifyUntrustedHandllerWarningVisible()
   })
 
-  it.only('Verify that when the tx contains the action with an official 1.4.1 fallbackhandler contract there is no error', () => {
+  it('Verify that when the tx contains the action with an official 1.4.1 fallbackhandler contract there is no error', () => {
     cy.visit(`/apps/open?safe=${staticSafes.SEP_STATIC_SAFE_36}&appUrl=${encodeURIComponent(appUrl)}`)
     cy.enter(iframeSelector).then((getBody) => {
       getBody().findByLabelText(safeapps.enterAddressStr).type(staticSafes.SEP_STATIC_SAFE_36)
