@@ -25,7 +25,7 @@ describe('Transaction details create tests', { defaultCommandTimeout: 30000 }, (
     staticSafes = await getSafes(CATEGORIES.static)
   })
 
-  it.only('Verify that there is an error if tx contain unofficial fallbackhandler on tx confirmation screen', () => {
+  it('Verify that there is an error if tx contain unofficial fallbackhandler on tx confirmation screen', () => {
     cy.visit(`/apps/open?safe=${staticSafes.SEP_STATIC_SAFE_36}&appUrl=${encodeURIComponent(appUrl)}`)
     cy.enter(iframeSelector).then((getBody) => {
       getBody().findByLabelText(safeapps.enterAddressStr).type(staticSafes.SEP_STATIC_SAFE_36)
