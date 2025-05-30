@@ -38,13 +38,13 @@ describe('Create transactions tests 2', () => {
     createtx.verifyAndSubmitExecutionParams()
   })
 
-  it('Verify a transaction shows relayer and addToBatch button', () => {
+  it('Verify a transaction shows relayer attempts', () => {
     happyPathToStepTwo()
     createtx.verifySubmitBtnIsEnabled()
     createtx.verifyNativeTokenTransfer()
-    createtx.verifyAddToBatchBtnIsEnabled()
     createtx.changeNonce('5')
     createtx.clickOnContinueSignTransactionBtn()
+    createtx.selectComboButtonOption('Execute')
     createtx.verifyRelayerAttemptsAvailable()
   })
 })
