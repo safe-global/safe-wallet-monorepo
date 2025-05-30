@@ -1,12 +1,6 @@
-import { renderHook, waitFor } from '@/tests/test-utils'
-import { type JsonRpcProvider, keccak256, parseEther, toUtf8Bytes, toBeHex, AbiCoder } from 'ethers'
-import useSafeTokenAllocation, {
-  type VestingData,
-  _getRedeemDeadline,
-  useSafeVotingPower,
-  type Vesting,
-} from '../useSafeTokenAllocation'
-import * as web3 from '../wallets/web3'
+import { mockWeb3Provider, renderHook, waitFor } from '@/tests/test-utils'
+import { parseEther, toBeHex, AbiCoder } from 'ethers'
+import useSafeTokenAllocation, { useSafeVotingPower, type Vesting } from '../useSafeTokenAllocation'
 import * as useSafeInfoHook from '@/hooks/useSafeInfo'
 import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
 
@@ -20,44 +14,6 @@ const setupFetchStub =
     })
   }
 
-describe('_getRedeemDeadline', () => {
-  const mockProvider = {
-    call: jest.fn(),
-  } as unknown as JsonRpcProvider
-
-  beforeEach(() => {
-    // Clear memoization cache
-    _getRedeemDeadline.cache.clear?.()
-
-    jest.clearAllMocks()
-  })
-
-  it('should only call the provider once per address on a chain', async () => {
-    for (let i = 0; i < 10; i++) {
-      await _getRedeemDeadline({ chainId: 1, contract: toBeHex('0x1', 20) } as VestingData, mockProvider)
-    }
-
-    expect(mockProvider.call).toHaveBeenCalledTimes(1)
-  })
-
-  it('should not memoize different addresses on the same chain', async () => {
-    const chainId = 1
-
-    await _getRedeemDeadline({ chainId, contract: toBeHex('0x1', 20) } as VestingData, mockProvider)
-    await _getRedeemDeadline({ chainId, contract: toBeHex('0x2', 20) } as VestingData, mockProvider)
-
-    expect(mockProvider.call).toHaveBeenCalledTimes(2)
-  })
-
-  it('should not memoize the same address on difference chains', async () => {
-    for await (const i of Array.from({ length: 10 }, (_, i) => i + 1)) {
-      await _getRedeemDeadline({ chainId: i, contract: toBeHex('0x1', 20) } as VestingData, mockProvider)
-    }
-
-    expect(mockProvider.call).toHaveBeenCalledTimes(10)
-  })
-})
-
 const originalGlobalFetch = global.fetch
 describe('Allocations', () => {
   afterAll(() => {
@@ -66,9 +22,6 @@ describe('Allocations', () => {
 
   beforeEach(() => {
     jest.resetAllMocks()
-    // Clear memoization cache
-    _getRedeemDeadline.cache.clear?.()
-
     jest.spyOn(useSafeInfoHook, 'default').mockImplementation(
       () =>
         ({
@@ -102,19 +55,11 @@ describe('Allocations', () => {
       })
     })
 
-    it('should return an empty array without web3Provider', async () => {
-      global.fetch = jest.fn().mockImplementation(setupFetchStub('', 404))
-      const { result } = renderHook(() => useSafeTokenAllocation())
-
-      await waitFor(() => {
-        expect(result.current[1]).toBeFalsy()
-        expect(result.current[0]).toStrictEqual([])
-      })
-    })
-
     it('should return an empty array if no allocations exist', async () => {
       global.fetch = jest.fn().mockImplementation(setupFetchStub('', 404))
       const mockFetch = jest.spyOn(global, 'fetch')
+
+      mockWeb3Provider([])
 
       const { result } = renderHook(() => useSafeTokenAllocation())
 
@@ -144,29 +89,16 @@ describe('Allocations', () => {
       global.fetch = jest.fn().mockImplementation(setupFetchStub(mockAllocations, 200))
       const mockFetch = jest.spyOn(global, 'fetch')
 
-      jest.spyOn(web3, 'getWeb3ReadOnly').mockImplementation(
-        () =>
-          ({
-            call: (transaction: any) => {
-              const vestingsSigHash = keccak256(toUtf8Bytes('vestings(bytes32)')).slice(0, 10)
-              const redeemDeadlineSigHash = keccak256(toUtf8Bytes('redeemDeadline()')).slice(0, 10)
-
-              if (transaction.data?.startsWith(vestingsSigHash)) {
-                return Promise.resolve(
-                  AbiCoder.defaultAbiCoder().encode(
-                    ['address', 'uint8', 'bool', 'uint16', 'uint64', 'uint128', 'uint128', 'uint64', 'bool'],
-                    [ZERO_ADDRESS, '0x1', false, 208, 1657231200, 2000, 0, 0, false],
-                  ),
-                )
-              }
-              if (transaction.data?.startsWith(redeemDeadlineSigHash)) {
-                // 30th Nov 2022
-                return Promise.resolve(AbiCoder.defaultAbiCoder().encode(['uint64'], [1669766400]))
-              }
-              return Promise.resolve('0x')
-            },
-          }) as any,
-      )
+      mockWeb3Provider([
+        {
+          signature: 'vestings(bytes32)',
+          returnType: 'raw',
+          returnValue: AbiCoder.defaultAbiCoder().encode(
+            ['address', 'uint8', 'bool', 'uint16', 'uint64', 'uint128', 'uint128', 'uint64', 'bool'],
+            [ZERO_ADDRESS, '0x1', false, 208, 1657231200, 2000, 0, 0, false],
+          ),
+        },
+      ])
 
       const { result } = renderHook(() => useSafeTokenAllocation())
 
@@ -203,29 +135,16 @@ describe('Allocations', () => {
       global.fetch = jest.fn().mockImplementation(setupFetchStub(mockAllocation, 200))
       const mockFetch = jest.spyOn(global, 'fetch')
 
-      jest.spyOn(web3, 'getWeb3ReadOnly').mockImplementation(
-        () =>
-          ({
-            call: (transaction: any) => {
-              const vestingsSigHash = keccak256(toUtf8Bytes('vestings(bytes32)')).slice(0, 10)
-              const redeemDeadlineSigHash = keccak256(toUtf8Bytes('redeemDeadline()')).slice(0, 10)
-
-              if (transaction.data?.startsWith(vestingsSigHash)) {
-                return Promise.resolve(
-                  AbiCoder.defaultAbiCoder().encode(
-                    ['address', 'uint8', 'bool', 'uint16', 'uint64', 'uint128', 'uint128', 'uint64', 'bool'],
-                    [toBeHex('0x2', 20), '0x1', false, 208, 1657231200, 2000, 0, 0, false],
-                  ),
-                )
-              }
-              if (transaction.data?.startsWith(redeemDeadlineSigHash)) {
-                // 08.Dec 2200
-                return Promise.resolve(AbiCoder.defaultAbiCoder().encode(['uint64'], [7287610110]))
-              }
-              return Promise.resolve('0x')
-            },
-          }) as any,
-      )
+      mockWeb3Provider([
+        {
+          signature: 'vestings(bytes32)',
+          returnType: 'raw',
+          returnValue: AbiCoder.defaultAbiCoder().encode(
+            ['address', 'uint8', 'bool', 'uint16', 'uint64', 'uint128', 'uint128', 'uint64', 'bool'],
+            [toBeHex('0x2', 20), '0x1', false, 208, 1657231200, 2000, 0, 0, false],
+          ),
+        },
+      ])
 
       const { result } = renderHook(() => useSafeTokenAllocation())
 
@@ -275,49 +194,39 @@ describe('Allocations', () => {
     })
 
     it('should return total balance of tokens held and tokens in locking contract if no allocation exists', async () => {
-      jest.spyOn(web3, 'getWeb3ReadOnly').mockImplementation(
-        () =>
-          ({
-            call: (transaction: any) => {
-              const balanceOfSigHash = keccak256(toUtf8Bytes('balanceOf(address)')).slice(0, 10)
-              const lockingBalanceSigHash = keccak256(toUtf8Bytes('getUserTokenBalance(address)')).slice(0, 10)
-
-              if (transaction.data?.startsWith(balanceOfSigHash)) {
-                return Promise.resolve('0x' + parseEther('100').toString(16))
-              }
-              if (transaction.data?.startsWith(lockingBalanceSigHash)) {
-                return Promise.resolve('0x' + parseEther('100').toString(16))
-              }
-              return Promise.resolve('0x')
-            },
-          }) as any,
-      )
+      mockWeb3Provider([
+        {
+          signature: 'balanceOf(address)',
+          returnType: 'uint256',
+          returnValue: parseEther('100'),
+        },
+        {
+          signature: 'getUserTokenBalance(address)',
+          returnType: 'uint256',
+          returnValue: parseEther('100'),
+        },
+      ])
 
       const { result } = renderHook(() => useSafeVotingPower())
       await waitFor(() => {
-        expect(result.current[0] === parseEther('200')).toBeTruthy()
+        expect(result.current[0]).toBe(parseEther('200'))
         expect(result.current[1]).toBeFalsy()
       })
     })
 
     test('formula: allocation - claimed + token balance + locking balance', async () => {
-      jest.spyOn(web3, 'getWeb3ReadOnly').mockImplementation(
-        () =>
-          ({
-            call: (transaction: any) => {
-              const balanceOfSigHash = keccak256(toUtf8Bytes('balanceOf(address)')).slice(0, 10)
-              const lockingBalanceSigHash = keccak256(toUtf8Bytes('getUserTokenBalance(address)')).slice(0, 10)
-
-              if (transaction.data?.startsWith(balanceOfSigHash)) {
-                return Promise.resolve('0x' + BigInt('400').toString(16))
-              }
-              if (transaction.data?.startsWith(lockingBalanceSigHash)) {
-                return Promise.resolve('0x' + BigInt('200').toString(16))
-              }
-              return Promise.resolve('0x')
-            },
-          }) as any,
-      )
+      mockWeb3Provider([
+        {
+          signature: 'balanceOf(address)',
+          returnType: 'uint256',
+          returnValue: '400',
+        },
+        {
+          signature: 'getUserTokenBalance(address)',
+          returnType: 'uint256',
+          returnValue: '200',
+        },
+      ])
 
       const mockAllocation: Vesting[] = [
         {
@@ -346,23 +255,18 @@ describe('Allocations', () => {
     })
 
     test('formula: allocation - claimed + token balance + locking balance, everything claimed and no balance', async () => {
-      jest.spyOn(web3, 'getWeb3ReadOnly').mockImplementation(
-        () =>
-          ({
-            call: (transaction: any) => {
-              const balanceOfSigHash = keccak256(toUtf8Bytes('balanceOf(address)')).slice(0, 10)
-              const lockingBalanceSigHash = keccak256(toUtf8Bytes('getUserTokenBalance(address)')).slice(0, 10)
-
-              if (transaction.data?.startsWith(balanceOfSigHash)) {
-                return Promise.resolve('0x' + BigInt('0').toString(16))
-              }
-              if (transaction.data?.startsWith(lockingBalanceSigHash)) {
-                return Promise.resolve('0x' + BigInt('0').toString(16))
-              }
-              return Promise.resolve('0x')
-            },
-          }) as any,
-      )
+      mockWeb3Provider([
+        {
+          signature: 'balanceOf(address)',
+          returnType: 'uint256',
+          returnValue: parseEther('0'),
+        },
+        {
+          signature: 'getUserTokenBalance(address)',
+          returnType: 'uint256',
+          returnValue: parseEther('0'),
+        },
+      ])
 
       const mockAllocation: Vesting[] = [
         {

@@ -56,7 +56,7 @@ export const useApprovalInfos = (payload: {
 
           if (!tokenInfo) {
             try {
-              tokenInfo = await getERC20TokenInfoOnChain(approval.tokenAddress)
+              tokenInfo = (await getERC20TokenInfoOnChain(approval.tokenAddress))?.[0]
             } catch (e) {
               const isErc721 = await isErc721Token(approval.tokenAddress)
               const symbol = await getErc721Symbol(approval.tokenAddress)
