@@ -3,6 +3,7 @@
   "name": "@safe-global/safe-wallet",
   "version": "1.0.0",
   "workspaces": [
+    "expo-plugins/*",
     "apps/*",
     "config/*",
     "packages/*"

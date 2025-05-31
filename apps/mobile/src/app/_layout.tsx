@@ -23,13 +23,19 @@ import Logger, { LogLevel } from '@/src/utils/logger'
 import { useInitWeb3 } from '@/src/hooks/useInitWeb3'
 import { useInitSafeCoreSDK } from '@/src/hooks/coreSDK/useInitSafeCoreSDK'
 import NotificationsService from '@/src/services/notifications/NotificationService'
+import { startNotificationExtensionSync } from '@/src/services/notifications/extensionSync'
 import { StatusBar } from 'expo-status-bar'
 import { useScreenTracking } from '@/src/hooks/useScreenTracking'
 import { DataFetchProvider } from '../theme/provider/DataFetchProvider'
+import { Platform } from 'react-native'
 
 Logger.setLevel(__DEV__ ? LogLevel.TRACE : LogLevel.ERROR)
 // Initialize all notification handlers
 NotificationsService.initializeNotificationHandlers()
+
+if (Platform.OS === 'ios') {
+  startNotificationExtensionSync()
+}
 
 configureReanimatedLogger({
   level: ReanimatedLogLevel.warn,
