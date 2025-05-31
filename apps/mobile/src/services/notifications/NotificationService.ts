@@ -325,7 +325,7 @@ class NotificationsService {
    * Initializes all notification handlers
    */
   initializeNotificationHandlers(): void {
-    this.registerNotifeeBackgroundHandler()
+    // this.registerNotifeeBackgroundHandler()
     this.registerFirebaseBackgroundHandler()
     this.registerExpoTasks()
     this.listenForMessagesForeground()
@@ -408,30 +408,30 @@ class NotificationsService {
     )
 
     // Register Firebase task
-    TaskManager.defineTask(
-      'ReactNativeFirebaseMessagingHeadlessTask',
-      async (taskData: TaskManager.TaskManagerTaskBody<unknown>) => {
-        const { data, error } = taskData
+    // TaskManager.defineTask(
+    //   'ReactNativeFirebaseMessagingHeadlessTask',
+    //   async (taskData: TaskManager.TaskManagerTaskBody<unknown>) => {
+    //     const { data, error } = taskData
 
-        if (error) {
-          Logger.error('Firebase messaging task error:', error)
-          return
-        }
+    //     if (error) {
+    //       Logger.error('Firebase messaging task error:', error)
+    //       return
+    //     }
 
-        if (data && typeof data === 'object' && 'message' in data) {
-          const fcmData = data as { message: FirebaseMessagingTypes.RemoteMessage }
-          const remoteMessage = fcmData.message
+    //     if (data && typeof data === 'object' && 'message' in data) {
+    //       const fcmData = data as { message: FirebaseMessagingTypes.RemoteMessage }
+    //       const remoteMessage = fcmData.message
 
-          const parsed = parseNotification(remoteMessage.data)
-          await this.displayNotification({
-            channelId: ChannelId.DEFAULT_NOTIFICATION_CHANNEL_ID,
-            title: parsed?.title || remoteMessage.notification?.title || '',
-            body: parsed?.body || remoteMessage.notification?.body || '',
-            data: remoteMessage.data,
-          })
-        }
-      },
-    )
+    //       const parsed = parseNotification(remoteMessage.data)
+    //       await this.displayNotification({
+    //         channelId: ChannelId.DEFAULT_NOTIFICATION_CHANNEL_ID,
+    //         title: parsed?.title || remoteMessage.notification?.title || '',
+    //         body: parsed?.body || remoteMessage.notification?.body || '',
+    //         data: remoteMessage.data,
+    //       })
+    //     }
+    //   },
+    // )
   }
 }
 
