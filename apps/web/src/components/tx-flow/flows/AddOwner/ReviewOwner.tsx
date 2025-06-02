@@ -43,7 +43,7 @@ export const ReviewOwner = ({
     promise.then(setSafeTx).catch(setSafeTxError)
   }, [removedOwner, newOwner, threshold, setSafeTx, setSafeTxError, chain, safe.deployed])
 
-  const addAddressBookEntryAndSubmit = () => {
+  const addAddressBookEntry = () => {
     if (typeof newOwner.name !== 'undefined') {
       dispatch(
         upsertAddressBookEntries({
@@ -59,7 +59,7 @@ export const ReviewOwner = ({
   }
 
   const handleSubmit = () => {
-    addAddressBookEntryAndSubmit()
+    addAddressBookEntry()
     onSubmit?.()
   }
 

@@ -1,6 +1,6 @@
 // `assert` does not work with arrow functions
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
-import type { SafeTransaction } from '@safe-global/safe-core-sdk-types'
+import type { SafeTransaction } from '@safe-global/types-kit'
 import { type ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import type { OnboardAPI } from '@web3-onboard/core'
 import type { Eip1193Provider } from 'ethers'

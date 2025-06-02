@@ -15,5 +15,10 @@
   "dependencies": {
     "@cowprotocol/app-data": "^2.5.1",
     "ts-node": "^10.9.2"
+  },
+  "peerDependencies": {
+    "@safe-global/protocol-kit": "^5.x",
+    "@safe-global/types-kit": "^1.x",
+    "ethers": "^6.x"
   }
 }

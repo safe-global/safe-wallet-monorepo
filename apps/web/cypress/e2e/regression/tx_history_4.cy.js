@@ -79,6 +79,7 @@ describe('Incoming tx history details tests', () => {
     address_book.typeInName(senderName)
     address_book.clickOnSaveEntryBtn()
     cy.visit(constants.addressBookUrl + safe)
+    cy.get('body').should('be.visible')
     cy.contains(senderName)
   })
 })

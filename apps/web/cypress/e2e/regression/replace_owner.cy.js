@@ -96,7 +96,6 @@ describe('Replace Owners tests', () => {
     createTx.changeNonce(0)
     owner.clickOnNextBtn()
     createTx.clickOnContinueSignTransactionBtn()
-    createTx.clickOnAcknowledgement()
     createTx.clickOnSignTransactionBtn()
     createTx.clickViewTransaction()
     createTx.verifyReplacedSigner(ownerName)

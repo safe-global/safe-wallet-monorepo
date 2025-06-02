@@ -1,7 +1,7 @@
 import type { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { type GetContractProps, SafeProvider } from '@safe-global/protocol-kit'
 import { getSafeContractInstance } from '@safe-global/protocol-kit/dist/src/contracts/contractInstances'
-import type { SafeVersion } from '@safe-global/safe-core-sdk-types'
+import type { SafeVersion } from '@safe-global/types-kit'
 import { assertValidSafeVersion } from '@safe-global/utils/services/contracts/utils'
 
 // `UNKNOWN` is returned if the mastercopy does not match supported ones

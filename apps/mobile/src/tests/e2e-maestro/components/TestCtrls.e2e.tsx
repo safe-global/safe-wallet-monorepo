@@ -5,7 +5,7 @@ import { addSafe } from '@/src/store/safesSlice'
 import { setActiveSafe } from '@/src/store/activeSafeSlice'
 import { useRouter } from 'expo-router'
 import { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
-import { SafeInfo } from '@/src/types/address'
+import { SafeInfo, Address } from '@/src/types/address'
 
 LogBox.ignoreAllLogs()
 
@@ -39,7 +39,12 @@ export function TestCtrls() {
   const dispatch = useDispatch()
   const router = useRouter()
   const onPressOnboardedAccount = async () => {
-    dispatch(addSafe({ SafeInfo: mockedActiveSafeInfo, chains: [mockedActiveSafeInfo.chainId] }))
+    dispatch(
+      addSafe({
+        address: mockedActiveSafeInfo.address.value as Address,
+        info: { [mockedActiveSafeInfo.chainId]: mockedActiveSafeInfo },
+      }),
+    )
     dispatch(setActiveSafe(mockedActiveAccount))
     router.replace('/(tabs)')
   }

@@ -90,14 +90,14 @@ exports[`SettingsChange should display the SettingsChange component with newOwne
     style="--Paper-shadow: none;"
   >
     <p
-      class="MuiTypography-root MuiTypography-body1 css-14yu9oo-MuiTypography-root"
+      class="MuiTypography-root MuiTypography-body1 css-1950vt0-MuiTypography-root"
     >
       <mock-icon
         aria-hidden=""
         class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-1hr8a3z-MuiSvgIcon-root"
         focusable="false"
       />
-      New signer
+      Add owner
     </p>
     <div
       class="container"
@@ -181,14 +181,14 @@ exports[`SettingsChange should display the SettingsChange component with owner d
     style="--Paper-shadow: none;"
   >
     <p
-      class="MuiTypography-root MuiTypography-body1 css-14yu9oo-MuiTypography-root"
+      class="MuiTypography-root MuiTypography-body1 css-1950vt0-MuiTypography-root"
     >
       <mock-icon
         aria-hidden=""
         class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-1hr8a3z-MuiSvgIcon-root"
         focusable="false"
       />
-      New signer
+      Add owner
     </p>
     <div
       class="container"

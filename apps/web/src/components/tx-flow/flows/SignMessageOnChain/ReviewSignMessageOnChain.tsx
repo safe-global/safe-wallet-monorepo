@@ -6,7 +6,7 @@ import { Box } from '@mui/system'
 import { Typography, SvgIcon } from '@mui/material'
 import WarningIcon from '@/public/images/notifications/warning.svg'
 import { type EIP712TypedData, Methods, type RequestId } from '@safe-global/safe-apps-sdk'
-import { OperationType } from '@safe-global/safe-core-sdk-types'
+import { OperationType } from '@safe-global/types-kit'
 
 import SendFromBlock from '@/components/tx/SendFromBlock'
 import { InfoDetails } from '@/components/transactions/InfoDetails'
@@ -51,7 +51,7 @@ const ReviewSignMessageOnChain = ({ message, method, children, ...props }: SignM
 
   useEffect(() => {
     if (!readOnlySignMessageLibContract) return
-    readOnlySignMessageLibContract.getAddress().then(setSignMessageAddress)
+    setSignMessageAddress(readOnlySignMessageLibContract.getAddress())
   }, [readOnlySignMessageLibContract])
 
   const [decodedMessage, readableMessage] = useMemo(() => {
@@ -70,7 +70,9 @@ const ReviewSignMessageOnChain = ({ message, method, children, ...props }: SignM
     if (!readOnlySignMessageLibContract) return
 
     if (isTextMessage) {
-      txData = readOnlySignMessageLibContract.encode('signMessage', [hashMessage(getDecodedMessage(message))])
+      txData = readOnlySignMessageLibContract.encode('signMessage', [
+        hashMessage(getDecodedMessage(message)) as `0x${string}`,
+      ])
     } else if (isTypedMessage) {
       const typesCopy = { ...message.types }
 

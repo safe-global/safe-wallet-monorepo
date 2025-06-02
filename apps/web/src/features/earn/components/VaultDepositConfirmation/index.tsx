@@ -6,7 +6,6 @@ import { vaultTypeToLabel } from '@/features/earn/utils'
 import { formatPercentage } from '@safe-global/utils/utils/formatters'
 import { DataTable } from '@/components/common/Table/DataTable'
 import { DataRow } from '@/components/common/Table/DataRow'
-import ExternalLink from '@/components/common/ExternalLink'
 import IframeIcon from '@/components/common/IframeIcon'
 import { InfoTooltip } from '@/features/stake/components/InfoTooltip'
 import { BRAND_NAME } from '@/config/constants'
@@ -136,12 +135,12 @@ const VaultDepositConfirmation = ({
           <>{!isTxDetails && <ConfirmationHeader txInfo={txInfo} />}</>,
 
           <DataRow key="Deposit via" title="Deposit via">
-            <ExternalLink href={txInfo.vaultInfo.dashboardUri!}>
+            <Stack direction="row" alignItems="center">
               <IframeIcon src={txInfo.vaultInfo.logoUri} alt="Morpho logo" width={24} height={24} />
               <Typography component="span" ml={1} fontWeight="bold">
                 {txInfo.vaultInfo.name}
               </Typography>
-            </ExternalLink>
+            </Stack>
           </DataRow>,
 
           <DataRow key="Expected annual reward" title="Exp. annual reward">

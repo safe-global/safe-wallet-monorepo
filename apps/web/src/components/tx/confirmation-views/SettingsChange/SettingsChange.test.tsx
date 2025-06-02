@@ -17,7 +17,7 @@ describe('SettingsChange', () => {
     )
 
     expect(container).toMatchSnapshot()
-    expect(getByText('New signer')).toBeInTheDocument()
+    expect(getByText('Add owner')).toBeInTheDocument()
     expect(getByText(ownerAddress)).toBeInTheDocument()
   })
 

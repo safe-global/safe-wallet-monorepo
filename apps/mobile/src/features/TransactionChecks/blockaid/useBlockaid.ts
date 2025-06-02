@@ -2,7 +2,7 @@ import type { TypedData } from '@safe-global/store/gateway/AUTO_GENERATED/messag
 import { useHasFeature } from '@/src/hooks/useHasFeature'
 import useSafeInfo from '@/src/hooks/useSafeInfo'
 import type { SecurityResponse } from '@safe-global/utils/services/security/modules/types'
-import type { SafeTransaction } from '@safe-global/safe-core-sdk-types'
+import type { SafeTransaction } from '@safe-global/types-kit'
 
 import { useCallback, useState } from 'react'
 import {

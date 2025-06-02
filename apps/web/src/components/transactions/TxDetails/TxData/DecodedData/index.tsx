@@ -60,7 +60,7 @@ export const DecodedData = ({ txData, toInfo, isTxExecuted = false }: Props): Re
       {txData.dataDecoded ? (
         <MethodDetails data={txData.dataDecoded} hexData={txData.hexData} addressInfoIndex={txData.addressInfoIndex} />
       ) : txData.hexData ? (
-        <Typography variant="body2" component="div">
+        <Typography data-testid="hexData" variant="body2" component="div">
           <HexEncodedData title="Data" hexData={txData.hexData} />
         </Typography>
       ) : null}

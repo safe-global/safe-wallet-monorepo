@@ -3,6 +3,8 @@ import { useState } from 'react'
 import Clipboard from '@react-native-clipboard/clipboard'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { storePrivateKey } from '@/src/hooks/useSign/useSign'
+import useDelegate from '@/src/hooks/useDelegate'
+import Logger from '@/src/utils/logger'
 
 const ERROR_MESSAGE = 'Invalid private key.'
 export const useImportPrivateKey = () => {
@@ -11,6 +13,7 @@ export const useImportPrivateKey = () => {
   const local = useLocalSearchParams<{ safeAddress: string; chainId: string; import_safe: string }>()
   const [error, setError] = useState<string>()
   const router = useRouter()
+  const { createDelegate } = useDelegate()
 
   const handlePrivateKeyChange = (text: string) => {
     setPrivateKey(text)
@@ -29,7 +32,23 @@ export const useImportPrivateKey = () => {
     }
 
     try {
+      // Store the private key
       await storePrivateKey(wallet.address, privateKey)
+
+      // Create a delegate for this owner
+      try {
+        // We don't want to fail the private key import if delegate creation fails
+        const delegateResult = await createDelegate(privateKey, local.safeAddress ? local.safeAddress : null)
+
+        if (!delegateResult.success) {
+          Logger.error('Failed to create delegate during private key import', delegateResult.error)
+        }
+      } catch (delegateError) {
+        // Log the error but continue with the import
+        Logger.error('Error creating delegate during private key import', delegateError)
+      }
+
+      // Continue with normal flow
       router.push({
         pathname: '/import-signers/loading',
         params: {

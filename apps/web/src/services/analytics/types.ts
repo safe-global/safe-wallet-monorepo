@@ -61,6 +61,7 @@ export enum TxFlowType {
   SETUP_RECOVERY = 'setup-recovery',
   SETUP_SPENDING_LIMIT = 'setup-spending-limit',
   SIGN_MESSAGE_ON_CHAIN = 'sign-message-on-chain',
+  SIGNERS_STRUCTURE = 'signers-structure',
   START_RECOVERY = 'propose-recovery',
   TOKEN_TRANSFER = 'token-transfer',
   UPDATE_SAFE = 'update-safe',

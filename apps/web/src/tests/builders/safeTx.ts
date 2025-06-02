@@ -1,6 +1,6 @@
 import { Builder, type IBuilder } from '@/tests/Builder'
 import { faker } from '@faker-js/faker'
-import { type SafeTransactionData, type SafeSignature, type SafeTransaction } from '@safe-global/safe-core-sdk-types'
+import { type SafeTransactionData, type SafeSignature, type SafeTransaction } from '@safe-global/types-kit'
 import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
 import {
   type Custom,

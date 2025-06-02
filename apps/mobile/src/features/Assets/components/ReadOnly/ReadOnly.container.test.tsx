@@ -23,8 +23,7 @@ describe('ReadOnlyContainer', () => {
   const createInitialState = (signers: Record<string, AddressInfo>, safeInfo: SafeOverview): Partial<RootState> => ({
     safes: {
       [mockSafeAddress]: {
-        SafeInfo: safeInfo,
-        chains: ['1'],
+        '1': safeInfo,
       },
     },
     signers: signers,

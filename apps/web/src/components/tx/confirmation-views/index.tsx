@@ -1,6 +1,6 @@
 import type { TransactionPreview } from '@safe-global/safe-gateway-typescript-sdk'
 import { type TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
-import type { SafeTransaction } from '@safe-global/safe-core-sdk-types'
+import type { SafeTransaction } from '@safe-global/types-kit'
 import {
   isAnyStakingTxInfo,
   isCustomTxInfo,
@@ -20,7 +20,7 @@ import SettingsChange from './SettingsChange'
 import ChangeThreshold from './ChangeThreshold'
 import BatchTransactions from './BatchTransactions'
 import { TxModalContext } from '@/components/tx-flow'
-import { isSettingsChangeView, isChangeThresholdView, isConfirmBatchView } from './utils'
+import { isSettingsChangeView, isChangeThresholdView, isConfirmBatchView, isManageSignersView } from './utils'
 import { OnChainConfirmation } from '@/components/transactions/TxDetails/TxData/NestedTransaction/OnChainConfirmation'
 import { ExecTransaction } from '@/components/transactions/TxDetails/TxData/NestedTransaction/ExecTransaction'
 import { type ReactElement } from 'react'
@@ -36,6 +36,7 @@ import Summary from '@/components/transactions/TxDetails/Summary'
 import TxData from '@/components/transactions/TxDetails/TxData'
 import { isMultiSendCalldata } from '@/utils/transaction-calldata'
 import useChainId from '@/hooks/useChainId'
+import { ManageSigners } from './ManageSigners'
 import { TransactionWarnings } from '../TransactionWarnings'
 import { Box } from '@mui/material'
 import DecodedData from '@/components/transactions/TxDetails/TxData/DecodedData'
@@ -48,6 +49,7 @@ type ConfirmationViewProps = {
   isApproval?: boolean
   isCreation?: boolean
   children?: ReactNode
+  withDecodedData?: boolean
 }
 
 const getConfirmationViewComponent = ({
@@ -55,6 +57,8 @@ const getConfirmationViewComponent = ({
   txData,
   txFlow,
 }: NarrowConfirmationViewProps & { txFlow?: ReactElement }) => {
+  if (txData && isManageSignersView(txInfo, txData)) return <ManageSigners txInfo={txInfo} txData={txData} />
+
   if (isChangeThresholdView(txInfo)) return <ChangeThreshold txInfo={txInfo} />
 
   if (isConfirmBatchView(txFlow)) return <BatchTransactions />
@@ -88,7 +92,13 @@ const getConfirmationViewComponent = ({
   return null
 }
 
-const ConfirmationView = ({ safeTx, txPreview, txDetails, ...props }: ConfirmationViewProps) => {
+const ConfirmationView = ({
+  safeTx,
+  txPreview,
+  txDetails,
+  withDecodedData = true,
+  ...props
+}: ConfirmationViewProps) => {
   const { txFlow } = useContext(TxModalContext)
   const details = txDetails ?? txPreview
   const chainId = useChainId()
@@ -121,17 +131,18 @@ const ConfirmationView = ({ safeTx, txPreview, txDetails, ...props }: Confirmati
   return (
     <>
       <TransactionWarnings txData={details?.txData} />
-      {ConfirmationViewComponent ||
-        (details && showTxDetails && (
-          <TxData txData={details?.txData} txInfo={details?.txInfo} txDetails={txDetails} imitation={false} trusted>
-            <Box ref={decodedDataRef}>
-              <DecodedData
-                txData={details.txData}
-                toInfo={isCustomTxInfo(details.txInfo) ? details.txInfo.to : details.txData?.to}
-              />
-            </Box>
-          </TxData>
-        ))}
+      {withDecodedData &&
+        (ConfirmationViewComponent ||
+          (details && showTxDetails && (
+            <TxData txData={details?.txData} txInfo={details?.txInfo} txDetails={txDetails} imitation={false} trusted>
+              <Box ref={decodedDataRef}>
+                <DecodedData
+                  txData={details.txData}
+                  toInfo={isCustomTxInfo(details.txInfo) ? details.txInfo.to : details.txData?.to}
+                />
+              </Box>
+            </TxData>
+          )))}
 
       {props.children}
 
