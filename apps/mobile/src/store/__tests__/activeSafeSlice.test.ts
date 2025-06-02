@@ -9,7 +9,6 @@ describe('activeSafeSlice', () => {
 
   it('should set the active safe', () => {
     const state = activeSafeReducer(undefined, setActiveSafe(safe))
-    console.log(state)
     expect(state).toEqual(safe)
   })
 
