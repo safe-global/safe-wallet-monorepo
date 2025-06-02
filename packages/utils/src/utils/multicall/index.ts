@@ -1,14 +1,10 @@
 import { Contract, AbstractProvider } from 'ethers'
+import { CANONICAL_MULTICALL_ADDRESSS, MULTICALL_DEPLOYMENTS } from './deployments'
 
 // Multicall contract ABI
 export const MULTICALL_ABI = [
   'function aggregate3(tuple(address target, bool allowFailure, bytes callData)[] calls) payable returns (tuple(bool success, bytes returnData)[] returnData)',
 ]
-
-const CANONICAL_MULTICALL_ADDRESSS = '0xca11bde05977b3631167028862be2a173976ca11'
-
-// TODO: Check if there is a deployment list we could use instead of hardcoding
-const UNSUPPORTED_CHAINS = ['324', '232']
 
 /**
  * Get the multicall contract address for a given chain ID
@@ -16,10 +12,11 @@ const UNSUPPORTED_CHAINS = ['324', '232']
  * @returns The multicall contract address for the given chain ID
  */
 export const getMultiCallAddress = (chainId: string): string | null => {
-  if (UNSUPPORTED_CHAINS.includes(chainId)) {
+  const deployment = MULTICALL_DEPLOYMENTS.find((deployment) => deployment.chainId.toString() === chainId)
+  if (!deployment) {
     return null
   }
-  return CANONICAL_MULTICALL_ADDRESSS
+  return deployment.address ?? CANONICAL_MULTICALL_ADDRESSS
 }
 
 export type Aggregate3Response = { success: boolean; returnData: string }

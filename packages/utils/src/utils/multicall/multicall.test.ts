@@ -1,14 +1,9 @@
 import { ethers } from 'ethers'
 import { faker } from '@faker-js/faker'
-import { multicall, getMultiCallAddress, MULTICALL_ABI } from '../multicall'
+import { multicall, getMultiCallAddress, MULTICALL_ABI } from '.'
 import { createMockWeb3Provider } from '@safe-global/utils/tests/web3Provider'
 
 const MULTICALL_INTERFACE = new ethers.Interface(MULTICALL_ABI)
-
-function encodeResult(result: { success: boolean; returnData: string }[]): string {
-  return MULTICALL_INTERFACE.encodeFunctionResult('aggregate3', [result])
-}
-
 describe('multicall', () => {
   beforeEach(() => {
     jest.clearAllMocks()
@@ -41,7 +36,7 @@ describe('multicall', () => {
         },
       ],
       undefined,
-      '324',
+      '232',
     )
 
     const result = await multicall(mockProvider, calls)
@@ -114,8 +109,7 @@ describe('multicall', () => {
 
 describe('getMultiCallAddress', () => {
   it('should return null for unsupported chains', () => {
-    expect(getMultiCallAddress('324')).toBeNull() // zkSync Era
-    expect(getMultiCallAddress('232')).toBeNull() // Other unsupported chain
+    expect(getMultiCallAddress('232')).toBeNull() // Lens
   })
 
   it('should return canonical address for supported chains', () => {
