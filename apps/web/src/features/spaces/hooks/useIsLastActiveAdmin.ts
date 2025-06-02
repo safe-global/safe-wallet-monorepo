@@ -9,11 +9,9 @@ export const useAdminCount = (members?: Member[]) => {
   return useMemo(() => membersToUse.filter(isAdmin).length, [membersToUse])
 }
 
-export const useIsLastActiveAdmin = (member?: Member) => {
+export const useIsLastActiveAdmin = () => {
   const adminCount = useAdminCount()
   const currentMembership = useCurrentMembership()
 
-  const memberToUse = member ?? currentMembership
-
-  return adminCount === 1 && !!memberToUse && isActiveAdmin(memberToUse)
+  return adminCount === 1 && !!currentMembership && isActiveAdmin(currentMembership)
 }
