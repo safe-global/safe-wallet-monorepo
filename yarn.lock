@@ -8415,6 +8415,7 @@ __metadata:
   resolution: "@safe-global/utils@workspace:packages/utils"
   dependencies:
     "@cowprotocol/app-data": "npm:^2.5.1"
+    "@faker-js/faker": "npm:^9.0.3"
     "@types/jest": "npm:^29.5.14"
     ethers: "npm:^6.13.4"
     jest: "npm:^29.7.0"
