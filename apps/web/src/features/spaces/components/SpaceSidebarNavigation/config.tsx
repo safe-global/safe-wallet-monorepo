@@ -15,7 +15,6 @@ export type DynamicNavItem = {
   href: string
   tag?: ReactElement
   disabled?: boolean
-  adminOnly?: boolean
   activeMemberOnly?: boolean
 }
 
