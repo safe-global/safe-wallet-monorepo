@@ -8181,7 +8181,7 @@ __metadata:
     react-native-draggable-flatlist: "npm:^4.0.1"
     react-native-gesture-handler: "npm:^2.25.0"
     react-native-keychain: "npm:^10.0.0"
-    react-native-mmkv: "npm:^3.1.0"
+    react-native-mmkv: "npm:^3.2.0"
     react-native-pager-view: "npm:6.7.1"
     react-native-progress: "npm:^5.0.1"
     react-native-qrcode-styled: "patch:react-native-qrcode-styled@npm%3A0.3.3#~/.yarn/patches/react-native-qrcode-styled-npm-0.3.3-b5336fc77c.patch"
@@ -27464,13 +27464,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-mmkv@npm:^3.1.0":
-  version: 3.1.0
-  resolution: "react-native-mmkv@npm:3.1.0"
+"react-native-mmkv@npm:^3.2.0":
+  version: 3.2.0
+  resolution: "react-native-mmkv@npm:3.2.0"
   peerDependencies:
     react: "*"
     react-native: "*"
-  checksum: 10/e601f3c36e3617402542b0dcbb59f039789fb4a409c3492d98444bad3173f8c07cf2dcf5c6ed1377e1f1c2162c3d834f80f3949fbc3d53e33c19b8c48862714c
+  checksum: 10/a024b8d7e1ef6a1934f961cb2505a5b855c261c9ce5bcb4b7e7bd95714a152f3bc10bf5d32cd3ab01324ff6a67c47190b330d3f5bc42a9b3896c706d11cc0598
   languageName: node
   linkType: hard
 
