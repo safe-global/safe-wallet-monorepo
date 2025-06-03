@@ -20,6 +20,7 @@ jest.mock('react-native-vision-camera', () => ({
 
 // Mock React Navigation
 jest.mock('@react-navigation/native', () => ({
+  ...jest.requireActual('@react-navigation/native'),
   useFocusEffect: jest.fn((callback: () => (() => void) | void) => {
     mockFocusCallback = callback
     // Don't call the callback immediately - only store it for manual testing
