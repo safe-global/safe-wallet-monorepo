@@ -10,7 +10,7 @@ const EarnView = () => {
   const router = useRouter()
   const { asset_id } = router.query
 
-  if (infoHidden) return <EarnWidget asset={String(asset_id)} />
+  if (infoHidden) return <EarnWidget asset={asset_id ? String(asset_id) : undefined} />
 
   return <EarnInfo onGetStarted={() => setInfoHidden(true)} />
 }
