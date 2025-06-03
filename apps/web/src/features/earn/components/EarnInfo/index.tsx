@@ -150,7 +150,7 @@ const EarnInfo = ({ onGetStarted }: { onGetStarted: () => void }) => {
 
               return (
                 <Card key={asset.tokenInfo.address} sx={{ p: 2 }}>
-                  <Stack direction="row" justifyContent="space-between" alignItems="center">
+                  <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={1}>
                     <Stack direction="row" spacing={2} alignItems="center">
                       <TokenIcon logoUri={asset.tokenInfo.logoUri} tokenSymbol={asset.tokenInfo.symbol} size={32} />
                       <Box>
