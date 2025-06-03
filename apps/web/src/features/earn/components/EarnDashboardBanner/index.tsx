@@ -16,8 +16,7 @@ import useIsEarnFeatureEnabled from '@/features/earn/hooks/useIsEarnFeatureEnabl
 import Track from '@/components/common/Track'
 import { EARN_EVENTS, EARN_LABELS } from '@/services/analytics/events/earn'
 import ExternalLink from '@/components/common/ExternalLink'
-import { EARN_HELP_ARTICLE, VaultAPYs } from '@/features/earn/constants'
-import useChainId from '@/hooks/useChainId'
+import { APYDisclaimer, EARN_HELP_ARTICLE, HighRangeAPY, LowRangeAPY } from '@/features/earn/constants'
 import { formatPercentage } from '@safe-global/utils/utils/formatters'
 
 export const EarnPoweredBy = () => {
@@ -52,22 +51,19 @@ export const EarnPoweredBy = () => {
 }
 
 export const EarnBannerCopy = () => {
-  const chainId = useChainId()
   const isDarkMode = useDarkMode()
-
-  const highestAPY = Math.max(...Object.values(VaultAPYs[chainId])) / 100
 
   return (
     <>
       <Typography variant="h2" className={classNames(css.header, { [css.gradientText]: isDarkMode })}>
-        Earn up to{' '}
+        Earn{' '}
         <Typography
           className={classNames({ [css.gradientText]: isDarkMode })}
           variant="h2"
           component="span"
           sx={{ backgroundColor: 'background.main', padding: '0 4px', borderRadius: '8px' }}
         >
-          {formatPercentage(highestAPY)}*
+          {formatPercentage(LowRangeAPY)} - {formatPercentage(HighRangeAPY)}*
         </Typography>{' '}
         and get MORPHO rewards
       </Typography>
@@ -147,7 +143,9 @@ const EarnDashboardBanner = () => {
             </Track>
           </Grid>
         </Grid>
-        <Typography variant="caption">* as of 03.06.2025</Typography>
+        <Typography variant="caption" zIndex={2}>
+          {APYDisclaimer}
+        </Typography>
       </Grid>
     </Card>
   )

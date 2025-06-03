@@ -10,6 +10,8 @@ export const widgetAppData = {
   chainIds: ['1', '8453'],
 }
 
+export const hideEarnInfoStorageKey = 'hideEarnInfoV2'
+
 export const EligibleEarnTokens: Record<string, string[]> = {
   '1': [
     '0xdAC17F958D2ee523a2206206994597C13D831ec7', // USDT
@@ -38,3 +40,7 @@ export const VaultAPYs: Record<string, Record<string, number>> = {
     '0x4200000000000000000000000000000000000006': 2.87,
   },
 }
+
+export const LowRangeAPY = 0.035
+export const HighRangeAPY = 0.081
+export const APYDisclaimer = '* based on historic averages of USD stablecoin and ETH Morpho vaults'

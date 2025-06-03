@@ -11,7 +11,7 @@ import FiatIcon from '@/public/images/common/fiat.svg'
 import Track from '@/components/common/Track'
 import { EARN_EVENTS, EARN_LABELS } from '@/services/analytics/events/earn'
 import useBalances from '@/hooks/useBalances'
-import { EligibleEarnTokens, VaultAPYs } from '@/features/earn/constants'
+import { APYDisclaimer, EligibleEarnTokens, VaultAPYs } from '@/features/earn/constants'
 import useChainId from '@/hooks/useChainId'
 import TokenIcon from '@/components/common/TokenIcon'
 import TokenAmount from '@/components/common/TokenAmount'
@@ -50,6 +50,10 @@ const EarnInfo = ({ onGetStarted }: { onGetStarted: () => void }) => {
                 </Track>
               </Grid>
             </Grid>
+
+            <Typography variant="caption" zIndex={2}>
+              {APYDisclaimer}
+            </Typography>
           </Grid>
 
           <Grid
