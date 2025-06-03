@@ -19,7 +19,3 @@
   background: var(--color-text-disabled);
   border-radius: 4px;
 }
-
-.button {
-  margin-left: var(--space-2);
-}

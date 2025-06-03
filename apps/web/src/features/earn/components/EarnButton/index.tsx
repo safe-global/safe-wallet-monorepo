@@ -10,6 +10,7 @@ import EarnIcon from '@/public/images/common/earn.svg'
 import { EARN_EVENTS, type EARN_LABELS } from '@/services/analytics/events/earn'
 import { useCurrentChain } from '@/hooks/useChains'
 import css from './styles.module.css'
+import classnames from 'classnames'
 
 const EarnButton = ({
   tokenInfo,
@@ -37,7 +38,7 @@ const EarnButton = ({
       {(isOk) => (
         <Track {...EARN_EVENTS.OPEN_EARN_PAGE} label={trackingLabel}>
           <Button
-            className={css.button}
+            className={classnames(css.button, { [css.buttonDisabled]: !isOk })}
             data-testid="earn-btn"
             aria-label="Earn"
             variant="text"

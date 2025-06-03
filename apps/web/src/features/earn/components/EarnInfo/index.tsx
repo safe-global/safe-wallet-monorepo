@@ -80,9 +80,9 @@ const EarnInfo = ({ onGetStarted }: { onGetStarted: () => void }) => {
                 </Box>
                 <Box>
                   <Typography fontWeight="bold" mb={0.5}>
-                    Collect earnings every day
+                    Never leave the app
                   </Typography>
-                  <Typography>Your balance keeps working for you</Typography>
+                  <Typography>Interact with your assets right in Safe Wallet UI.</Typography>
                 </Box>
               </Stack>
 
@@ -92,9 +92,9 @@ const EarnInfo = ({ onGetStarted }: { onGetStarted: () => void }) => {
                 </Box>
                 <Box>
                   <Typography fontWeight="bold" mb={0.5}>
-                    Extra rewards
+                    Collect earnings every day
                   </Typography>
-                  <Typography>Earn MORPHO tokens on top</Typography>
+                  <Typography>Your balance keeps working for you.</Typography>
                 </Box>
               </Stack>
 
@@ -104,9 +104,9 @@ const EarnInfo = ({ onGetStarted }: { onGetStarted: () => void }) => {
                 </Box>
                 <Box>
                   <Typography fontWeight="bold" mb={0.5}>
-                    Cash out whenever you want
+                    Understand every transaction
                   </Typography>
-                  <Typography>Zero lock-ups, zero penalties</Typography>
+                  <Typography>User-friendly transactions that are easy to understand for all signers.</Typography>
                 </Box>
               </Stack>
 
@@ -116,9 +116,9 @@ const EarnInfo = ({ onGetStarted }: { onGetStarted: () => void }) => {
                 </Box>
                 <Box>
                   <Typography fontWeight="bold" mb={0.5}>
-                    Retain complete self-custody
+                    Cash out whenever you want
                   </Typography>
-                  <Typography>Your Safe, your crypto</Typography>
+                  <Typography>Zero lock-ups, zero penalties.</Typography>
                 </Box>
               </Stack>
             </Stack>
@@ -167,17 +167,17 @@ const EarnInfo = ({ onGetStarted }: { onGetStarted: () => void }) => {
                         </Typography>
                       </Box>
                     </Stack>
-                    <Box>
+                    <Stack direction="row" spacing={2} alignItems="center">
                       <Tooltip title="as of 03.06.2025">
                         <Typography variant="caption" className={css.apy}>
                           Up to {vaultAPY}*
                         </Typography>
                       </Tooltip>
 
-                      <Button variant="outlined" size="small" className={css.button} onClick={onEarnClick}>
+                      <Button variant="outlined" size="small" onClick={onEarnClick}>
                         Earn
                       </Button>
-                    </Box>
+                    </Stack>
                   </Stack>
                 </Card>
               )

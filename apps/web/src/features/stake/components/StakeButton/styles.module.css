@@ -10,3 +10,7 @@
   margin-left: 0;
   margin-right: 4px;
 }
+
+.buttonDisabled {
+  border-color: var(--color-text-disabled);
+}
