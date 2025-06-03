@@ -53,8 +53,7 @@
 }
 
 .header {
-  padding-right: var(--space-8);
-  max-width: 550px;
+  max-width: 600px;
   font-weight: bold;
 }
 

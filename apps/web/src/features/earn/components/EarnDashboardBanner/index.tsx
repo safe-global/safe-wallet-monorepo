@@ -16,7 +16,9 @@ import useIsEarnFeatureEnabled from '@/features/earn/hooks/useIsEarnFeatureEnabl
 import Track from '@/components/common/Track'
 import { EARN_EVENTS, EARN_LABELS } from '@/services/analytics/events/earn'
 import ExternalLink from '@/components/common/ExternalLink'
-import { EARN_HELP_ARTICLE } from '@/features/earn/constants'
+import { EARN_HELP_ARTICLE, VaultAPYs } from '@/features/earn/constants'
+import useChainId from '@/hooks/useChainId'
+import { formatPercentage } from '@safe-global/utils/utils/formatters'
 
 export const EarnPoweredBy = () => {
   const isDarkMode = useDarkMode()
@@ -46,6 +48,37 @@ export const EarnPoweredBy = () => {
         className={classNames(css.kilnIcon, { [css.kilnIconDarkMode]: isDarkMode })}
       />
     </Stack>
+  )
+}
+
+export const EarnBannerCopy = () => {
+  const chainId = useChainId()
+  const isDarkMode = useDarkMode()
+
+  const highestAPY = Math.max(...Object.values(VaultAPYs[chainId])) / 100
+
+  return (
+    <>
+      <Typography variant="h2" className={classNames(css.header, { [css.gradientText]: isDarkMode })}>
+        Earn up to{' '}
+        <Typography
+          className={classNames({ [css.gradientText]: isDarkMode })}
+          variant="h2"
+          component="span"
+          sx={{ backgroundColor: 'background.main', padding: '0 4px', borderRadius: '8px' }}
+        >
+          {formatPercentage(highestAPY)}*
+        </Typography>{' '}
+        and get MORPHO rewards
+      </Typography>
+
+      <Typography variant="body1" className={css.content} mt={2}>
+        Deposit stablecoins, wstETH, ETH, and WBTC straight from your account and let your assets compound in minutes.{' '}
+        <Track {...EARN_EVENTS.OPEN_EARN_LEARN_MORE} label={EARN_LABELS.safe_dashboard_banner}>
+          <ExternalLink href={EARN_HELP_ARTICLE}>Learn more</ExternalLink>
+        </Track>
+      </Typography>
+    </>
   )
 }
 
@@ -83,24 +116,12 @@ const EarnDashboardBanner = () => {
       </Box>
 
       <Grid container rowSpacing={2}>
-        <Grid size={{ xs: 12 }} mb={1} zIndex={2}>
+        <Grid size={{ xs: 12 }} mb={2} zIndex={2}>
           <EarnPoweredBy />
         </Grid>
 
         <Grid size={{ xs: 12 }} zIndex={2}>
-          <Typography variant="h2" className={classNames(css.header, { [css.gradientText]: isDarkMode })}>
-            Introducing enterprise-grade yields for treasuries via Morpho
-          </Typography>
-        </Grid>
-
-        <Grid size={{ xs: 12, sm: 6 }} mb={1} zIndex={2}>
-          <Typography variant="body1" className={css.content}>
-            Deposit stablecoins, wstETH, ETH, and WBTC straight from your account and let your assets compound in
-            minutes.{' '}
-            <Track {...EARN_EVENTS.OPEN_EARN_LEARN_MORE} label={EARN_LABELS.safe_dashboard_banner}>
-              <ExternalLink href={EARN_HELP_ARTICLE}>Learn more</ExternalLink>
-            </Track>
-          </Typography>
+          <EarnBannerCopy />
         </Grid>
 
         <Grid container size={{ xs: 12 }} textAlign="center" spacing={2}>
@@ -126,6 +147,7 @@ const EarnDashboardBanner = () => {
             </Track>
           </Grid>
         </Grid>
+        <Typography variant="caption">* as of 03.06.2025</Typography>
       </Grid>
     </Card>
   )

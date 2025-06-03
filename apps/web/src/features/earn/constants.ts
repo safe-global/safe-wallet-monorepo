@@ -23,3 +23,18 @@ export const EligibleEarnTokens: Record<string, string[]> = {
     '0x4200000000000000000000000000000000000006', // WETH
   ],
 }
+
+// Vault APYs as of 03.06.2025
+export const VaultAPYs: Record<string, Record<string, number>> = {
+  '1': {
+    '0xdAC17F958D2ee523a2206206994597C13D831ec7': 3.55,
+    '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2': 3.89,
+    '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48': 3.78,
+    '0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0': 0.68,
+    '0x2260fac5e5542a773aa44fbcfedf7c193bc2c599': 0.34,
+  },
+  '8453': {
+    '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913': 5.6,
+    '0x4200000000000000000000000000000000000006': 2.87,
+  },
+}

@@ -24,4 +24,5 @@ export enum EARN_LABELS {
   sidebar = 'sidebar',
   info_banner = 'info_banner',
   asset = 'asset',
+  info_asset = 'info_asset',
 }
