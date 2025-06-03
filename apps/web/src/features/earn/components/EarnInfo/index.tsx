@@ -50,10 +50,6 @@ const EarnInfo = ({ onGetStarted }: { onGetStarted: () => void }) => {
                 </Track>
               </Grid>
             </Grid>
-
-            <Typography variant="caption" zIndex={2}>
-              {APYDisclaimer}
-            </Typography>
           </Grid>
 
           <Grid
@@ -185,6 +181,10 @@ const EarnInfo = ({ onGetStarted }: { onGetStarted: () => void }) => {
           </Stack>
         </Grid>
       </Grid>
+
+      <Typography component="div" variant="caption" zIndex={2} mt={2}>
+        {APYDisclaimer}
+      </Typography>
     </Box>
   )
 }
