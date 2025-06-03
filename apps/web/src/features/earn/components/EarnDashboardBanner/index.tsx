@@ -12,7 +12,7 @@ import { AppRoutes } from '@/config/routes'
 import Image from 'next/image'
 import { OVERVIEW_EVENTS, trackEvent } from '@/services/analytics'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
-import useIsEarnBannerEnabled from '@/features/earn/hooks/useIsEarnBannerEnabled'
+import useIsEarnFeatureEnabled from '@/features/earn/hooks/useIsEarnFeatureEnabled'
 import Track from '@/components/common/Track'
 import { EARN_EVENTS, EARN_LABELS } from '@/services/analytics/events/earn'
 import ExternalLink from '@/components/common/ExternalLink'
@@ -56,7 +56,7 @@ const EarnDashboardBanner = () => {
 
   const isDarkMode = useDarkMode()
   const router = useRouter()
-  const isEarnBannerEnabled = useIsEarnBannerEnabled()
+  const isEarnBannerEnabled = useIsEarnFeatureEnabled()
 
   const tryEarn = () => {
     trackEvent(OVERVIEW_EVENTS.OPEN_EARN_WIDGET)

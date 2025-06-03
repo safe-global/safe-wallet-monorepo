@@ -4,52 +4,50 @@ import { AppRoutes } from '@/config/routes'
 import useSpendingLimit from '@/hooks/useSpendingLimit'
 import { Button } from '@mui/material'
 import type { TokenInfo } from '@safe-global/safe-gateway-typescript-sdk'
-import { TokenType } from '@safe-global/safe-gateway-typescript-sdk'
 import { useRouter } from 'next/router'
 import type { ReactElement } from 'react'
-import StakeIcon from '@/public/images/common/stake.svg'
-import type { STAKE_LABELS } from '@/services/analytics/events/stake'
-import { STAKE_EVENTS } from '@/services/analytics/events/stake'
+import EarnIcon from '@/public/images/common/earn.svg'
+import { EARN_EVENTS, type EARN_LABELS } from '@/services/analytics/events/earn'
 import { useCurrentChain } from '@/hooks/useChains'
 import css from './styles.module.css'
 
-const StakeButton = ({
+const EarnButton = ({
   tokenInfo,
   trackingLabel,
 }: {
   tokenInfo: TokenInfo
-  trackingLabel: STAKE_LABELS
+  trackingLabel: EARN_LABELS
 }): ReactElement => {
   const spendingLimit = useSpendingLimit(tokenInfo)
   const chain = useCurrentChain()
   const router = useRouter()
 
+  const onEarnClick = () => {
+    router.push({
+      pathname: AppRoutes.earn,
+      query: {
+        ...router.query,
+        asset_id: `${chain?.chainId}_${tokenInfo.address}`,
+      },
+    })
+  }
+
   return (
     <CheckWallet allowSpendingLimit={!!spendingLimit}>
       {(isOk) => (
-        <Track {...STAKE_EVENTS.OPEN_STAKE} label={trackingLabel}>
+        <Track {...EARN_EVENTS.OPEN_EARN_PAGE} label={trackingLabel}>
           <Button
             className={css.button}
-            data-testid="stake-btn"
-            aria-label="Stake"
+            data-testid="earn-btn"
+            aria-label="Earn"
             variant="text"
             color="info"
             size="small"
-            startIcon={<StakeIcon />}
-            onClick={() => {
-              router.push({
-                pathname: AppRoutes.stake,
-                query: {
-                  ...router.query,
-                  asset: `${chain?.shortName}_${
-                    tokenInfo.type === TokenType.NATIVE_TOKEN ? 'NATIVE_TOKEN' : tokenInfo.address
-                  }`,
-                },
-              })
-            }}
+            startIcon={<EarnIcon />}
+            onClick={onEarnClick}
             disabled={!isOk}
           >
-            Stake
+            Earn
           </Button>
         </Track>
       )}
@@ -57,4 +55,4 @@ const StakeButton = ({
   )
 }
 
-export default StakeButton
+export default EarnButton

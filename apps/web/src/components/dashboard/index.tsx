@@ -17,7 +17,7 @@ import { UnsupportedMastercopyWarning } from '@/features/multichain/components/U
 import SpacesDashboardWidget from 'src/features/spaces/components/SpacesDashboardWidget'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import EarnDashboardBanner from '@/features/earn/components/EarnDashboardBanner'
-import useIsEarnBannerEnabled from '@/features/earn/hooks/useIsEarnBannerEnabled'
+import useIsEarnFeatureEnabled from '@/features/earn/hooks/useIsEarnFeatureEnabled'
 import classnames from 'classnames'
 
 const RecoveryHeader = dynamic(() => import('@/features/recovery/components/RecoveryHeader'))
@@ -30,7 +30,7 @@ const Dashboard = (): ReactElement => {
   const showSafeApps = useHasFeature(FEATURES.SAFE_APPS)
   const isSpacesFeatureEnabled = useHasFeature(FEATURES.SPACES)
   const isStakingBannerEnabled = useIsStakingBannerEnabled()
-  const isEarnBannerEnabled = useIsEarnBannerEnabled()
+  const isEarnBannerEnabled = useIsEarnFeatureEnabled()
   const supportsRecovery = useIsRecoverySupported()
 
   return (

@@ -8,9 +8,9 @@ const hideEarnInfoStorageKey = 'hideEarnInfo'
 const EarnView = () => {
   const [infoHidden = false, setInfoHidden] = useLocalStorage<boolean>(hideEarnInfoStorageKey)
   const router = useRouter()
-  const { asset } = router.query
+  const { asset_id } = router.query
 
-  if (infoHidden) return <EarnWidget asset={String(asset)} />
+  if (infoHidden) return <EarnWidget asset={String(asset_id)} />
 
   return <EarnInfo onGetStarted={() => setInfoHidden(true)} />
 }
