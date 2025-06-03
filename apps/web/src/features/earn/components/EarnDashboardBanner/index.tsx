@@ -1,7 +1,8 @@
 import { Typography, Card, SvgIcon, Grid2 as Grid, Button, Box, Stack } from '@mui/material'
 import css from './styles.module.css'
-import Kiln from '@/public/images/common/kiln.svg'
-import Morpho from '@/public/images/common/morpho.svg'
+import Kiln from '@/public/images/common/kiln-symbol.svg'
+import Morpho from '@/public/images/common/morpho-symbol.svg'
+import Cross from '@/public/images/common/cross.svg'
 import EarnIllustrationLight from '@/public/images/common/earn-illustration-light.png'
 import classNames from 'classnames'
 import { useDarkMode } from '@/hooks/useDarkMode'
@@ -22,7 +23,7 @@ export const EarnPoweredBy = () => {
 
   return (
     <Stack spacing={1} direction="row">
-      <Typography variant="overline" color="primary.light">
+      <Typography variant="overline" color="text.secondary" fontWeight="bold">
         Powered by
       </Typography>
       <SvgIcon
@@ -31,9 +32,13 @@ export const EarnPoweredBy = () => {
         color="border"
         className={classNames(css.morphoIcon, { [css.kilnIconDarkMode]: isDarkMode })}
       />
-      <Typography variant="overline" color="primary.light" textTransform="none">
-        via
-      </Typography>
+      <SvgIcon
+        component={Cross}
+        inheritViewBox
+        color="border"
+        sx={{ width: 12, height: 12 }}
+        className={classNames({ [css.kilnIconDarkMode]: isDarkMode })}
+      />
       <SvgIcon
         component={Kiln}
         inheritViewBox
