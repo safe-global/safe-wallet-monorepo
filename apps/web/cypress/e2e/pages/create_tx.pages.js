@@ -138,7 +138,7 @@ export const recordedTxNote = 'Tx note one'
 const comboButton = '[data-testid="combo-submit-dropdown"]'
 const comboButtonPopover = '[data-testid="combo-submit-popover"]'
 const comboButtonOptions = {
-  sign: 'Sing',
+  sign: 'Sign',
   execute: 'Execute',
   addToBatch: 'Add to batch',
 }
