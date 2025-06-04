@@ -101,7 +101,7 @@ const isOverwriteThreshold = (params: SimulationTxParams) => {
     return false
   }
   const tx = params.transactions
-  const hasOwnerSig = tx.signatures.has(params.executionOwner)
+  const hasOwnerSig = tx.signatures.has(params.executionOwner) || tx.signatures.has(params.executionOwner.toLowerCase())
   const effectiveSigs = tx.signatures.size + (hasOwnerSig ? 0 : 1)
   return params.safe.threshold > effectiveSigs
 }
