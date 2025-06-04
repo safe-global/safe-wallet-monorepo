@@ -109,8 +109,11 @@ export const ImportProgressScreen = () => {
         if (data.keys) {
           for (const key of data.keys) {
             try {
-              // Store the private key
-              await storePrivateKey(key.address, key.key)
+              // Convert private key from base64 to hex format
+              const hexPrivateKey = `0x${Buffer.from(key.key, 'base64').toString('hex')}`
+
+              // Store the private key in hex format
+              await storePrivateKey(key.address, hexPrivateKey)
 
               // Add signer to Redux
               const signerInfo: AddressInfo = {
