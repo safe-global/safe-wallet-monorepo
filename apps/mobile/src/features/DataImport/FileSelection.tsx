@@ -41,12 +41,12 @@ export const FileSelection = () => {
   }, [handleFileSelect])
 
   return (
-    <YStack flex={1} testID="file-selection-screen">
+    <YStack flex={1} testID="file-selection-screen" paddingBottom={insets.bottom}>
       <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
 
       {/* Content */}
       <YStack flex={1} paddingHorizontal="$4" justifyContent="space-between" marginTop={'$4'}>
-        <YStack gap="$6">
+        <YStack gap="$4" flex={1}>
           {/* Title */}
           <H2 fontWeight={'600'} textAlign="center" marginHorizontal={'$4'}>
             Almost there! Import file to the new app
@@ -56,17 +56,19 @@ export const FileSelection = () => {
           <StyledText>Locate the exported file from the old app to continue.</StyledText>
 
           {/* Image - Tappable */}
-          <TouchableOpacity onPress={handleImagePress} activeOpacity={0.8}>
-            <Image
-              source={colorScheme === 'dark' ? ImportDataSelectFilesDark : ImportDataSelectFilesLight}
-              alignSelf="center"
-              marginVertical="$4"
-            />
-          </TouchableOpacity>
+          <YStack flex={1} justifyContent="center" alignItems="center">
+            <TouchableOpacity onPress={handleImagePress} activeOpacity={0.8}>
+              <Image
+                source={colorScheme === 'dark' ? ImportDataSelectFilesDark : ImportDataSelectFilesLight}
+                alignSelf="center"
+                marginVertical="$4"
+              />
+            </TouchableOpacity>
+          </YStack>
         </YStack>
 
         {/* Bottom Actions */}
-        <YStack gap="$4" paddingBottom={insets.bottom}>
+        <YStack gap="$4">
           <PrivacyText>Don't worry, all your data will stay private and secure during the transfer.</PrivacyText>
           <SafeButton primary testID="select-file-to-import-button" onPress={handleFileSelect}>
             Select file to import
