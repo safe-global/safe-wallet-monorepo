@@ -19,8 +19,8 @@ export const DataTransfer = () => {
   const insets = useSafeAreaInsets()
   const colorScheme = useColorScheme()
   const onPressTransferData = useCallback(() => {
-    // Navigate to data import flow (to be implemented)
-    router.navigate('/(import-accounts)')
+    // Navigate to help import flow
+    router.navigate('/import-data/help-import')
   }, [router])
 
   const onPressStartFresh = useCallback(() => {

@@ -29,7 +29,7 @@ export const GetStarted = () => {
 
   const onPressImportAccount = useCallback(async () => {
     await enableCrashlytics()
-    router.navigate('/data-transfer')
+    router.navigate('/import-data')
   }, [router])
 
   return (

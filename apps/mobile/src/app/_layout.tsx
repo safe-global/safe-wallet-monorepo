@@ -102,12 +102,9 @@ function RootLayout() {
                           <Stack.Screen name="import-signers" options={{ headerShown: false }} />
 
                           <Stack.Screen
-                            name="data-transfer"
+                            name="import-data"
                             options={{
-                              headerShown: true,
-                              title: '',
-                              presentation: 'modal',
-                              headerShadowVisible: false,
+                              headerShown: false,
                             }}
                           />
                           <Stack.Screen name="app-settings" options={{ headerShown: true, title: '' }} />
