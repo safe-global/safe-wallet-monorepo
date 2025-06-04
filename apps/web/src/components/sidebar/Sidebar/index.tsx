@@ -37,8 +37,6 @@ const Sidebar = (): ReactElement => {
         {/* Address, balance, copy button, etc */}
         <SidebarHeader />
 
-        <Divider />
-
         {/* Nav menu */}
         <SidebarNavigation />
 

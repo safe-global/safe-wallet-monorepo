@@ -70,7 +70,7 @@ const IndexingStatus = () => {
         href={STATUS_PAGE}
         target="_blank"
         startIcon={
-          <Box width={10} height={10} borderRadius="50%" border={`2px solid var(--color-${status.color}-main)`} />
+          <Box width={16} height={16} borderRadius="50%" border={`2px solid var(--color-${status.color}-main)`} />
         }
         endIcon={<SvgIcon component={OpenInNewRounded} fontSize="small" inheritViewBox sx={{ color: 'border.main' }} />}
         sx={{
