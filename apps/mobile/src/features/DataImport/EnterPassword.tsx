@@ -21,6 +21,9 @@ export const EnterPassword = () => {
     if (result) {
       // Navigate back to complete the import flow
       router.back()
+    } else {
+      // Navigate to error screen when import fails
+      router.push('/import-data/import-error')
     }
   }, [handleImport, router])
 

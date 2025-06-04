@@ -41,6 +41,12 @@ export default function ImportDataLayout() {
             headerTitle: () => titleStep(3),
           }}
         />
+        <Stack.Screen
+          name="import-error"
+          options={{
+            headerShown: false,
+          }}
+        />
       </Stack>
     </DataImportProvider>
   )
