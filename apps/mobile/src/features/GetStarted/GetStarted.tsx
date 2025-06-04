@@ -27,6 +27,11 @@ export const GetStarted = () => {
     router.navigate('/(import-accounts)')
   }, [])
 
+  const onPressImportAccount = useCallback(async () => {
+    await enableCrashlytics()
+    router.navigate('/data-transfer')
+  }, [router])
+
   return (
     <YStack justifyContent={'flex-end'} flex={1} testID={'get-started-screen'}>
       <BlurView intensity={100} style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
@@ -65,6 +70,16 @@ export const GetStarted = () => {
         >
           Add account
         </SafeButton>
+
+        <SafeButton
+          outlined
+          icon={<SafeFontIcon name={'transaction-incoming'} />}
+          testID={'import-account-button'}
+          onPress={onPressImportAccount}
+        >
+          Import account
+        </SafeButton>
+
         <View
           paddingHorizontal={'$10'}
           marginTop={'$2'}

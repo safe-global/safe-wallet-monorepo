@@ -7435,6 +7435,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@react-native-masked-view/masked-view@npm:0.3.2":
+  version: 0.3.2
+  resolution: "@react-native-masked-view/masked-view@npm:0.3.2"
+  peerDependencies:
+    react: ">=16"
+    react-native: ">=0.57"
+  checksum: 10/04ffbc01083aa563ca1e2d7ef6759e7b326b8129f5bb1aa5f3142348adab06d5e321a400cf70a5434324dfa906add383f8214640697c48c9e5311b30bfea03d9
+  languageName: node
+  linkType: hard
+
 "@react-native-menu/menu@npm:^1.2.3":
   version: 1.2.3
   resolution: "@react-native-menu/menu@npm:1.2.3"
@@ -8101,6 +8111,7 @@ __metadata:
     "@react-native-firebase/app": "npm:^22.1.0"
     "@react-native-firebase/crashlytics": "npm:^22.1.0"
     "@react-native-firebase/messaging": "npm:^22.1.0"
+    "@react-native-masked-view/masked-view": "npm:0.3.2"
     "@react-native-menu/menu": "npm:^1.2.3"
     "@react-native/babel-preset": "npm:^0.76.2"
     "@react-navigation/material-top-tabs": "npm:^7.2.10"
