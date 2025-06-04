@@ -13,8 +13,10 @@ export const CREDENTIAL_ROUTES = [
   /\/v2\/chains\/[^\/]+\/notifications\/devices/,
 ]
 
+const IS_BEHIND_IAP = process.env.NEXT_PUBLIC_IS_BEHIND_IAP === 'true'
+
 export function isCredentialRoute(url: string) {
-  return CREDENTIAL_ROUTES.some((route) => url.match(route))
+  return IS_BEHIND_IAP || CREDENTIAL_ROUTES.some((route) => url.match(route))
 }
 
 let baseUrl: null | string = null
