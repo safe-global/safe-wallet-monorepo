@@ -54,6 +54,12 @@ export default function ImportDataLayout() {
             headerShown: false,
           }}
         />
+        <Stack.Screen
+          name="import-success"
+          options={{
+            headerShown: false,
+          }}
+        />
       </Stack>
     </DataImportProvider>
   )

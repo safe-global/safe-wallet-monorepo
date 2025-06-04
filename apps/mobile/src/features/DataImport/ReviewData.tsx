@@ -69,10 +69,8 @@ export const ReviewData = () => {
   }, [importedData])
 
   const handleContinue = () => {
-    // TODO: Implement actual import logic
-    console.log('Continuing with import...')
-    // Complete the import and navigate back to complete the flow
-    router.back()
+    // Navigate to import progress screen to start the actual import
+    router.push('/import-data/import-progress')
   }
 
   return (
