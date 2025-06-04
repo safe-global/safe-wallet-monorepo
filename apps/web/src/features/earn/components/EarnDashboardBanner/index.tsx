@@ -57,13 +57,8 @@ export const EarnBannerCopy = () => {
     <>
       <Typography variant="h2" className={classNames(css.header, { [css.gradientText]: isDarkMode })}>
         Earn up to{' '}
-        <Typography
-          className={classNames({ [css.gradientText]: isDarkMode })}
-          variant="h2"
-          component="span"
-          sx={{ backgroundColor: 'background.main', padding: '0 4px', borderRadius: '8px' }}
-        >
-          {formatPercentage(ApproximateAPY)}*
+        <Typography className={classNames({ [css.gradientText]: isDarkMode })} variant="h2" component="span">
+          {formatPercentage(ApproximateAPY)} APY*
         </Typography>{' '}
         and get MORPHO rewards
       </Typography>

@@ -64,7 +64,7 @@ const EarnInfo = ({ onGetStarted }: { onGetStarted: () => void }) => {
       </Card>
 
       <Grid container spacing={3}>
-        <Grid size={{ xs: 12, md: 6 }}>
+        <Grid size={{ xs: 12, md: 'grow' }}>
           <Typography variant="h3" mt={3} mb={2} fontWeight="bold">
             Your benefits
           </Typography>
@@ -121,65 +121,67 @@ const EarnInfo = ({ onGetStarted }: { onGetStarted: () => void }) => {
           </Card>
         </Grid>
 
-        <Grid size={{ xs: 12, md: 6 }}>
-          <Typography variant="h3" mt={3} mb={2} fontWeight="bold">
-            Eligible assets
-          </Typography>
+        {eligibleAssets.length > 0 && (
+          <Grid size={{ xs: 12, md: 'grow' }}>
+            <Typography variant="h3" mt={3} mb={2} fontWeight="bold">
+              Eligible assets
+            </Typography>
 
-          <Stack spacing={2}>
-            {eligibleAssets.map((asset) => {
-              const vaultAPY = formatPercentage(VaultAPYs[chainId][asset.tokenInfo.address] / 100)
+            <Stack spacing={2}>
+              {eligibleAssets.map((asset) => {
+                const vaultAPY = formatPercentage(VaultAPYs[chainId][asset.tokenInfo.address] / 100)
 
-              const onEarnClick = () => {
-                onGetStarted()
+                const onEarnClick = () => {
+                  onGetStarted()
 
-                trackEvent({ ...EARN_EVENTS.OPEN_EARN_PAGE, label: EARN_LABELS.info_asset })
+                  trackEvent({ ...EARN_EVENTS.OPEN_EARN_PAGE, label: EARN_LABELS.info_asset })
 
-                router.push({
-                  pathname: AppRoutes.earn,
-                  query: {
-                    ...router.query,
-                    asset_id: `${chainId}_${asset.tokenInfo.address}`,
-                  },
-                })
-              }
+                  router.push({
+                    pathname: AppRoutes.earn,
+                    query: {
+                      ...router.query,
+                      asset_id: `${chainId}_${asset.tokenInfo.address}`,
+                    },
+                  })
+                }
 
-              return (
-                <Card key={asset.tokenInfo.address} sx={{ p: 2 }}>
-                  <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={1}>
-                    <Stack direction="row" spacing={2} alignItems="center">
-                      <TokenIcon logoUri={asset.tokenInfo.logoUri} tokenSymbol={asset.tokenInfo.symbol} size={32} />
-                      <Box>
-                        <Typography variant="body2">
-                          <TokenAmount
-                            value={asset.balance}
-                            decimals={asset.tokenInfo.decimals}
-                            tokenSymbol={asset.tokenInfo.symbol}
-                            logoUri={undefined}
-                          />
-                        </Typography>
-                        <Typography variant="body2">
-                          <FiatValue value={asset.fiatBalance} />
-                        </Typography>
-                      </Box>
+                return (
+                  <Card key={asset.tokenInfo.address} sx={{ p: 2 }}>
+                    <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={1}>
+                      <Stack direction="row" spacing={2} alignItems="center">
+                        <TokenIcon logoUri={asset.tokenInfo.logoUri} tokenSymbol={asset.tokenInfo.symbol} size={32} />
+                        <Box>
+                          <Typography variant="body2">
+                            <TokenAmount
+                              value={asset.balance}
+                              decimals={asset.tokenInfo.decimals}
+                              tokenSymbol={asset.tokenInfo.symbol}
+                              logoUri={undefined}
+                            />
+                          </Typography>
+                          <Typography variant="body2">
+                            <FiatValue value={asset.fiatBalance} />
+                          </Typography>
+                        </Box>
+                      </Stack>
+                      <Stack direction="row" spacing={2} alignItems="center">
+                        <Tooltip title="as of 03.06.2025">
+                          <Typography variant="caption" className={css.apy}>
+                            Up to {vaultAPY}*
+                          </Typography>
+                        </Tooltip>
+
+                        <Button variant="outlined" size="small" onClick={onEarnClick}>
+                          Earn
+                        </Button>
+                      </Stack>
                     </Stack>
-                    <Stack direction="row" spacing={2} alignItems="center">
-                      <Tooltip title="as of 03.06.2025">
-                        <Typography variant="caption" className={css.apy}>
-                          Up to {vaultAPY}*
-                        </Typography>
-                      </Tooltip>
-
-                      <Button variant="outlined" size="small" onClick={onEarnClick}>
-                        Earn
-                      </Button>
-                    </Stack>
-                  </Stack>
-                </Card>
-              )
-            })}
-          </Stack>
-        </Grid>
+                  </Card>
+                )
+              })}
+            </Stack>
+          </Grid>
+        )}
       </Grid>
 
       <Typography component="div" variant="caption" zIndex={2} mt={2}>
