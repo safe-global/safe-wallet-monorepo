@@ -5,13 +5,13 @@ import { createExistingTx } from '@/services/tx/tx-sender'
 import useChainId from '@/hooks/useChainId'
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import { useSimulation } from '@/components/tx/security/tenderly/useSimulation'
-import { getSimulationStatus } from '@/components/tx/security/tenderly/utils'
 import TenderlyIcon from '@/public/images/transactions/tenderly-small.svg'
 import { ButtonBase, CircularProgress, Stack, SvgIcon, Typography } from '@mui/material'
 import { useSigner } from '@/hooks/wallets/useWallet'
 import ExternalLink from '@/components/common/ExternalLink'
 import CheckIcon from '@/public/images/common/check.svg'
 import CloseIcon from '@/public/images/common/close.svg'
+import { getSimulationStatus } from '@safe-global/utils/components/tx/security/tenderly/utils'
 
 const CompactSimulationButton = ({
   label,

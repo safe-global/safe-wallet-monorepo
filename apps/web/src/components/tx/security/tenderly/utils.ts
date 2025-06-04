@@ -20,9 +20,6 @@ import {
   isSingleTransactionSimulation,
 } from '@safe-global/utils/components/tx/security/tenderly/utils'
 
-import { FETCH_STATUS, type TenderlySimulation } from '@safe-global/utils/components/tx/security/tenderly/types'
-import type { UseSimulationReturn } from '@safe-global/utils/components/tx/security/tenderly/useSimulation'
-
 export const _getSingleTransactionPayload = async (
   params: SingleTransactionSimulationParams,
 ): Promise<Pick<TenderlySimulatePayload, 'to' | 'input'>> => {
@@ -107,43 +104,5 @@ export const getSimulationPayload = async (params: SimulationTxParams): Promise<
         : undefined,
     save: true,
     save_if_fails: true,
-  }
-}
-
-export const getCallTraceErrors = (simulation?: TenderlySimulation) => {
-  if (!simulation || !simulation.simulation.status) {
-    return []
-  }
-
-  return simulation.transaction.call_trace.filter((call) => call.error)
-}
-
-export type SimulationStatus = {
-  isLoading: boolean
-  isFinished: boolean
-  isSuccess: boolean
-  isCallTraceError: boolean
-  isError: boolean
-}
-
-export const getSimulationStatus = (simulation: UseSimulationReturn): SimulationStatus => {
-  const isLoading = simulation._simulationRequestStatus === FETCH_STATUS.LOADING
-
-  const isFinished =
-    simulation._simulationRequestStatus === FETCH_STATUS.SUCCESS ||
-    simulation._simulationRequestStatus === FETCH_STATUS.ERROR
-
-  const isSuccess = simulation.simulation?.simulation.status || false
-
-  // Safe can emit failure event even though Tenderly simulation succeeds
-  const isCallTraceError = isSuccess && getCallTraceErrors(simulation.simulation).length > 0
-  const isError = simulation._simulationRequestStatus === FETCH_STATUS.ERROR
-
-  return {
-    isLoading,
-    isFinished,
-    isSuccess,
-    isCallTraceError,
-    isError,
   }
 }
