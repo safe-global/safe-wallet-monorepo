@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react'
 import { useRouter } from 'expo-router'
-import { Text, YStack, XStack, H1, styled, H2 } from 'tamagui'
+import { Text, YStack, XStack, styled, H2 } from 'tamagui'
 import { SafeButton } from '@/src/components/SafeButton'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { StatusBar } from 'expo-status-bar'
@@ -31,8 +31,8 @@ export const HelpImport = () => {
   const colorScheme = useColorScheme()
 
   const onPressProceedToImport = useCallback(() => {
-    // Navigate to actual import flow
-    router.navigate('/(import-accounts)')
+    // Navigate to file selection screen
+    router.push('/import-data/file-selection')
   }, [router])
 
   const onPressNeedHelp = useCallback(() => {
@@ -40,7 +40,7 @@ export const HelpImport = () => {
   }, [])
 
   return (
-    <YStack flex={1} backgroundColor="$background" testID="help-import-screen">
+    <YStack flex={1} testID="help-import-screen">
       <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
 
       {/* Content */}

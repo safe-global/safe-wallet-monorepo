@@ -213,11 +213,35 @@ jest.mock('react-native-quick-crypto', () => ({
       update: jest.fn().mockReturnThis(),
       digest: jest.fn(() => Buffer.from('mockedHash')),
     })),
+    pbkdf2Sync: jest.fn(() => Buffer.alloc(32)),
+    createCipheriv: jest.fn(() => ({
+      update: jest.fn(() => Buffer.from([])),
+      final: jest.fn(() => Buffer.from([])),
+      getAuthTag: jest.fn(() => Buffer.alloc(16)),
+      setAuthTag: jest.fn(),
+    })),
+    createDecipheriv: jest.fn(() => ({
+      update: jest.fn(() => Buffer.from([])),
+      final: jest.fn(() => Buffer.from([])),
+      setAuthTag: jest.fn(),
+    })),
   },
   randomBytes: jest.fn((size) => Buffer.alloc(size)),
   createHash: jest.fn(() => ({
     update: jest.fn().mockReturnThis(),
     digest: jest.fn(() => Buffer.from('mockedHash')),
+  })),
+  pbkdf2Sync: jest.fn(() => Buffer.alloc(32)),
+  createCipheriv: jest.fn(() => ({
+    update: jest.fn(() => Buffer.from([])),
+    final: jest.fn(() => Buffer.from([])),
+    getAuthTag: jest.fn(() => Buffer.alloc(16)),
+    setAuthTag: jest.fn(),
+  })),
+  createDecipheriv: jest.fn(() => ({
+    update: jest.fn(() => Buffer.from([])),
+    final: jest.fn(() => Buffer.from([])),
+    setAuthTag: jest.fn(),
   })),
 }))
 

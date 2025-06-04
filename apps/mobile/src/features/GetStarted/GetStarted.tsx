@@ -70,16 +70,9 @@ export const GetStarted = () => {
         >
           Add account
         </SafeButton>
-
-        <SafeButton
-          outlined
-          icon={<SafeFontIcon name={'transaction-incoming'} />}
-          testID={'import-account-button'}
-          onPress={onPressImportAccount}
-        >
+        <SafeButton outlined icon={<SafeFontIcon name={'upload'} />} onPress={onPressImportAccount}>
           Import account
         </SafeButton>
-
         <View
           paddingHorizontal={'$10'}
           marginTop={'$2'}

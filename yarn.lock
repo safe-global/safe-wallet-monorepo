@@ -8167,6 +8167,8 @@ __metadata:
     expo-constants: "npm:~17.1.5"
     expo-dev-client: "npm:~5.1.8"
     expo-device: "npm:~7.1.4"
+    expo-document-picker: "npm:^13.1.5"
+    expo-file-system: "npm:^18.1.10"
     expo-font: "npm:~13.3.1"
     expo-image: "npm:~2.1.6"
     expo-linear-gradient: "npm:~14.1.4"
@@ -18725,6 +18727,25 @@ __metadata:
   peerDependencies:
     expo: "*"
   checksum: 10/7ac5d0af134c2dff036de55e412d89e2158a31fad76ff751c8de8a08c9411e448498b50e5c92c13bb2a9866f0508b2bc072e8f7fc7d974cdd769940744af8a67
+  languageName: node
+  linkType: hard
+
+"expo-document-picker@npm:^13.1.5":
+  version: 13.1.5
+  resolution: "expo-document-picker@npm:13.1.5"
+  peerDependencies:
+    expo: "*"
+  checksum: 10/a404cd1fbc6f187d94e7ec7bc549beed9231cd7ea91d3cf6cbb16ea202b2c30df9cfb804a834c14cc72d55ff4eec85387dd1647d13557ed1314a52ef204fef24
+  languageName: node
+  linkType: hard
+
+"expo-file-system@npm:^18.1.10":
+  version: 18.1.10
+  resolution: "expo-file-system@npm:18.1.10"
+  peerDependencies:
+    expo: "*"
+    react-native: "*"
+  checksum: 10/b6f848df07ad04791f2ea20438bb9408cebb98a4ffc4e137298d78929df70aa67628a204c52416551359be3179a1e296380e936888a329a39c6f043f02288750
   languageName: node
   linkType: hard
 

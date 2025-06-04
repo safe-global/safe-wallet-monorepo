@@ -1,6 +1,7 @@
 import { Stack } from 'expo-router'
 import { getDefaultScreenOptions } from '@/src/navigation/hooks/utils'
 import { Text } from 'tamagui'
+import { DataImportProvider } from '@/src/features/DataImport/DataImportProvider'
 
 const titleStep = (step: number) => {
   return (
@@ -9,21 +10,38 @@ const titleStep = (step: number) => {
     </Text>
   )
 }
+
 export default function ImportDataLayout() {
   return (
-    <Stack
-      screenOptions={({ navigation }) => ({
-        ...getDefaultScreenOptions(navigation.goBack),
-      })}
-    >
-      <Stack.Screen name="index" options={{ headerShown: true, title: '' }} />
-      <Stack.Screen
-        name="help-import"
-        options={{
-          headerShown: true,
-          headerTitle: () => titleStep(1),
-        }}
-      />
-    </Stack>
+    <DataImportProvider>
+      <Stack
+        screenOptions={({ navigation }) => ({
+          ...getDefaultScreenOptions(navigation.goBack),
+        })}
+      >
+        <Stack.Screen name="index" options={{ headerShown: true, title: '' }} />
+        <Stack.Screen
+          name="help-import"
+          options={{
+            headerShown: true,
+            headerTitle: () => titleStep(1),
+          }}
+        />
+        <Stack.Screen
+          name="file-selection"
+          options={{
+            headerShown: true,
+            headerTitle: () => titleStep(2),
+          }}
+        />
+        <Stack.Screen
+          name="enter-password"
+          options={{
+            headerShown: true,
+            headerTitle: () => titleStep(3),
+          }}
+        />
+      </Stack>
+    </DataImportProvider>
   )
 }
