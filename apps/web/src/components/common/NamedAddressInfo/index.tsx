@@ -22,10 +22,12 @@ const useIsUnverifiedContract = (address?: string, error?: Error): boolean => {
 
 export function useAddressName(address?: string, name?: string | null, customAvatar?: string) {
   const chainId = useChainId()
+  const safeAddress = useSafeAddress()
+  const displayName = sameAddress(address, safeAddress) ? 'This Safe Account' : name
 
   const [contract, error] = useAsync(
-    () => (!name && address ? getContract(chainId, address) : undefined),
-    [address, chainId, name],
+    () => (!displayName && address ? getContract(chainId, address) : undefined),
+    [address, chainId, displayName],
     false,
   )
 
@@ -34,19 +36,18 @@ export function useAddressName(address?: string, name?: string | null, customAva
   return useMemo(
     () => ({
       name:
-        name || contract?.displayName || contract?.name || (isUnverifiedContract ? 'Unverified contract' : undefined),
+        displayName ||
+        contract?.displayName ||
+        contract?.name ||
+        (isUnverifiedContract ? 'Unverified contract' : undefined),
       logoUri: customAvatar || contract?.logoUri,
       isUnverifiedContract,
     }),
-    [name, contract, customAvatar, isUnverifiedContract],
+    [displayName, contract, customAvatar, isUnverifiedContract],
   )
 }
 
 const NamedAddressInfo = ({ address, name, customAvatar, ...props }: EthHashInfoProps) => {
-  const safeAddress = useSafeAddress()
-
-  name = sameAddress(address, safeAddress) ? 'This Safe Account' : name
-
   const { name: finalName, logoUri: finalAvatar } = useAddressName(address, name, customAvatar)
 
   return <EthHashInfo address={address} name={finalName} customAvatar={finalAvatar} {...props} />
