@@ -1,0 +1,16 @@
+.button {
+  padding: 0 4px;
+  border: 1px solid var(--color-info-light);
+  color: var(--color-info-dark);
+  border-radius: 100px;
+  font-size: 13px;
+}
+
+.button :global .MuiButton-startIcon {
+  margin-left: 0;
+  margin-right: 4px;
+}
+
+.buttonDisabled {
+  border-color: var(--color-text-disabled);
+}

@@ -32,6 +32,7 @@ const SwapButton = ({
             color="primary"
             size="small"
             startIcon={<SwapIcon />}
+            sx={{ height: 32, px: 2 }}
             onClick={() => {
               router.push({
                 pathname: AppRoutes.swap,

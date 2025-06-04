@@ -14,12 +14,7 @@ import {
   ExecutionOptions,
   Status,
 } from 'zodiac-roles-deployments'
-import {
-  OperationType,
-  type Transaction,
-  type MetaTransactionData,
-  type SafeTransaction,
-} from '@safe-global/safe-core-sdk-types'
+import { OperationType, type Transaction, type MetaTransactionData, type SafeTransaction } from '@safe-global/types-kit'
 import { type JsonRpcProvider } from 'ethers'
 import { KnownContracts, getModuleInstance } from '@gnosis.pm/zodiac'
 import useWallet from '@/hooks/wallets/useWallet'

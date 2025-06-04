@@ -1,5 +1,5 @@
 import { getModuleInstance, KnownContracts } from '@gnosis.pm/zodiac'
-import type { SafeTransaction } from '@safe-global/safe-core-sdk-types'
+import type { SafeTransaction } from '@safe-global/types-kit'
 
 import useWallet from '../../../hooks/wallets/useWallet'
 import { useWeb3ReadOnly } from '../../../hooks/wallets/web3'

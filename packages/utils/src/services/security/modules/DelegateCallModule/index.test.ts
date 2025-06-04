@@ -1,4 +1,4 @@
-import { OperationType } from '@safe-global/safe-core-sdk-types'
+import { OperationType } from '@safe-global/types-kit'
 import { getMultiSendCallOnlyDeployment } from '@safe-global/safe-deployments'
 import { toBeHex } from 'ethers'
 

@@ -1,14 +1,13 @@
 import { getSafeTokenAddress, getSafeLockingAddress } from '@/components/common/SafeTokenWidget'
 import { IS_PRODUCTION } from '@/config/constants'
 import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
-import { isPast } from 'date-fns'
-import { AbiCoder, Interface, type JsonRpcProvider } from 'ethers'
+import { AbiCoder, Interface } from 'ethers'
 import { useMemo } from 'react'
 import useAsync, { type AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import useSafeInfo from './useSafeInfo'
 import { getWeb3ReadOnly } from './wallets/web3'
-import memoize from 'lodash/memoize'
 import { cgwDebugStorage } from '@/config/gateway'
+import { multicall } from '../../../../packages/utils/src/utils/multicall'
 
 export const VESTING_URL =
   IS_PRODUCTION || cgwDebugStorage.get()
@@ -43,49 +42,42 @@ const tokenInterface = new Interface(['function balanceOf(address _owner) public
 const safeLockingInterface = new Interface([
   'function getUserTokenBalance(address holder) external view returns (uint96 amount)',
 ])
-
-export const _getRedeemDeadline = memoize(
-  async (allocation: VestingData, web3ReadOnly: JsonRpcProvider): Promise<string> => {
-    return web3ReadOnly.call({
-      to: allocation.contract,
-      data: airdropInterface.encodeFunctionData('redeemDeadline'),
-    })
-  },
-  ({ chainId, contract }) => chainId + contract,
-)
-
 /**
  * Add on-chain information to allocation.
  * Fetches if the redeem deadline is expired and the claimed tokens from on-chain
  */
-const completeAllocation = async (allocation: VestingData): Promise<Vesting> => {
+const completeAllocations = async (allocations: VestingData[]): Promise<Vesting[]> => {
   const web3ReadOnly = getWeb3ReadOnly()
   if (!web3ReadOnly) {
-    throw new Error('Cannot fetch vesting without web3 provider')
+    throw new Error('Cannot fetch vestings without web3 provider')
   }
-  const onChainVestingData = await web3ReadOnly.call({
+
+  const calls = allocations.map((allocation) => ({
     to: allocation.contract,
     data: airdropInterface.encodeFunctionData('vestings', [allocation.vestingId]),
+  }))
+  const results = await multicall(web3ReadOnly, calls)
+
+  return allocations.map((allocation, index) => {
+    const result = results[index]
+    if (!result.success) {
+      throw new Error(`Failed to fetch vesting data for ${allocation.vestingId}`)
+    }
+
+    const decodedVestingData = AbiCoder.defaultAbiCoder().decode(
+      // account, curveType, managed, durationWeeks, startDate, amount, amountClaimed, pausingDate, cancelled}
+      ['address', 'uint8', 'bool', 'uint16', 'uint64', 'uint128', 'uint128', 'uint64', 'bool'],
+      result.returnData,
+    )
+
+    const isRedeemed = decodedVestingData[0].toLowerCase() !== ZERO_ADDRESS.toLowerCase()
+    if (isRedeemed) {
+      return { ...allocation, isRedeemed, isExpired: false, amountClaimed: decodedVestingData[6] }
+    }
+
+    // All allocations are expired by now. We do not load the redeem deadline anymore
+    return { ...allocation, isRedeemed, isExpired: true, amountClaimed: '0' }
   })
-
-  const decodedVestingData = AbiCoder.defaultAbiCoder().decode(
-    // account, curveType, managed, durationWeeks, startDate, amount, amountClaimed, pausingDate, cancelled}
-    ['address', 'uint8', 'bool', 'uint16', 'uint64', 'uint128', 'uint128', 'uint64', 'bool'],
-    onChainVestingData,
-  )
-
-  const isRedeemed = decodedVestingData[0].toLowerCase() !== ZERO_ADDRESS.toLowerCase()
-  if (isRedeemed) {
-    return { ...allocation, isRedeemed, isExpired: false, amountClaimed: decodedVestingData[6] }
-  }
-
-  // Allocation is not yet redeemed => check the redeemDeadline
-  const redeemDeadline = await _getRedeemDeadline(allocation, web3ReadOnly)
-
-  const redeemDeadlineDate = new Date(Number(BigInt(redeemDeadline) * BigInt(1000)))
-
-  // Allocation is valid if redeem deadline is in future
-  return { ...allocation, isRedeemed, isExpired: isPast(redeemDeadlineDate), amountClaimed: '0' }
 }
 
 const fetchAllocation = async (chainId: string, safeAddress: string): Promise<VestingData[]> => {
@@ -116,41 +108,41 @@ const useSafeTokenAllocation = (): AsyncResult<Vesting[]> => {
   return useAsync<Vesting[] | undefined>(async () => {
     if (!safeAddress) return
     return Promise.all(
-      await fetchAllocation(chainId, safeAddress).then((allocations) =>
-        allocations.map((allocation) => completeAllocation(allocation)),
-      ),
+      await fetchAllocation(chainId, safeAddress).then((allocations) => completeAllocations(allocations)),
     )
     // If the history tag changes we could have claimed / redeemed tokens
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chainId, safeAddress, safe.txHistoryTag])
 }
 
-const fetchTokenBalance = async (chainId: string, safeAddress: string): Promise<string> => {
+const fetchTokenBalances = async (chainId: string, safeAddress: string): Promise<[bigint, bigint]> => {
   try {
     const web3ReadOnly = getWeb3ReadOnly()
     const safeTokenAddress = getSafeTokenAddress(chainId)
-    if (!safeTokenAddress || !web3ReadOnly) return '0'
-
-    return await web3ReadOnly.call({
-      to: safeTokenAddress,
-      data: tokenInterface.encodeFunctionData('balanceOf', [safeAddress]),
-    })
-  } catch (err) {
-    throw Error(`Error fetching Safe Token balance:  ${err}`)
-  }
-}
-const fetchLockingContractBalance = async (chainId: string, safeAddress: string): Promise<string> => {
-  try {
-    const web3ReadOnly = getWeb3ReadOnly()
     const safeLockingAddress = getSafeLockingAddress(chainId)
-    if (!safeLockingAddress || !web3ReadOnly) return '0'
 
-    return await web3ReadOnly.call({
-      to: safeLockingAddress,
-      data: safeLockingInterface.encodeFunctionData('getUserTokenBalance', [safeAddress]),
-    })
+    if (!web3ReadOnly || !safeTokenAddress || !safeLockingAddress) return [BigInt(0), BigInt(0)]
+
+    const calls = [
+      {
+        to: safeTokenAddress,
+        data: tokenInterface.encodeFunctionData('balanceOf', [safeAddress]),
+      },
+      {
+        to: safeLockingAddress,
+        data: safeLockingInterface.encodeFunctionData('getUserTokenBalance', [safeAddress]),
+      },
+    ]
+
+    const [balanceResponse, lockedResponse] = await multicall(web3ReadOnly, calls)
+
+    if (!balanceResponse.success || !lockedResponse.success) {
+      throw new Error('Failed to fetch token balances')
+    }
+
+    return [BigInt(balanceResponse.returnData), BigInt(lockedResponse.returnData)]
   } catch (err) {
-    throw Error(`Error fetching Safe Token balance in locking contract:  ${err}`)
+    throw Error(`Error fetching Safe Token balances: ${err}`)
   }
 }
 
@@ -162,18 +154,11 @@ export const useSafeVotingPower = (allocationData?: Vesting[]): AsyncResult<bigi
   const { safe, safeAddress } = useSafeInfo()
   const chainId = safe.chainId
 
-  const [balance, balanceError, balanceLoading] = useAsync<bigint>(() => {
+  const [balance, balanceError, balanceLoading] = useAsync<bigint | undefined>(async () => {
     if (!safeAddress) return
-    const tokenBalancePromise = fetchTokenBalance(chainId, safeAddress)
-    const lockingContractBalancePromise = fetchLockingContractBalance(chainId, safeAddress)
-    return Promise.all([tokenBalancePromise, lockingContractBalancePromise]).then(
-      ([tokenBalance, lockingContractBalance]) => {
-        return BigInt(tokenBalance) + BigInt(lockingContractBalance)
-      },
-    )
-    // If the history tag changes we could have claimed / redeemed tokens
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [chainId, safeAddress, safe.txHistoryTag])
+    const [tokenBalance, lockingContractBalance] = await fetchTokenBalances(chainId, safeAddress)
+    return tokenBalance + lockingContractBalance
+  }, [chainId, safeAddress])
 
   const allocation = useMemo(() => {
     if (balance === undefined) {

@@ -22,7 +22,9 @@ export function usePreventNavigation(onNavigate?: () => boolean): void {
       const target = e.target as HTMLElement
       const link = target.closest('a')
       const href = link?.getAttribute('href')
-      if (!link || !href) return
+      const targetAttr = link?.getAttribute('target')
+
+      if (!link || !href || targetAttr?.toLowerCase() === '_blank') return
 
       const isAllowedToNavigate = onNavigate()
       if (isAllowedToNavigate) {

@@ -68,7 +68,8 @@ export const addressBookSlice = createSlice({
   },
 })
 
-export const { addContact, removeContact, updateContact, addContacts, upsertContact } = addressBookSlice.actions
+export const { addContact, removeContact, selectContact, updateContact, addContacts, upsertContact } =
+  addressBookSlice.actions
 
 export const selectAddressBookState = (state: RootState) => state.addressBook
 
