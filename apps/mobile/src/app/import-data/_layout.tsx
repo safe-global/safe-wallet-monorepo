@@ -42,6 +42,13 @@ export default function ImportDataLayout() {
           }}
         />
         <Stack.Screen
+          name="review-data"
+          options={{
+            headerShown: true,
+            headerTitle: () => titleStep(3),
+          }}
+        />
+        <Stack.Screen
           name="import-error"
           options={{
             headerShown: false,

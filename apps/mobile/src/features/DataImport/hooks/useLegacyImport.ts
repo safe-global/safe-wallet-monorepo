@@ -2,7 +2,7 @@ import { useState } from 'react'
 import * as DocumentPicker from 'expo-document-picker'
 import * as FileSystem from 'expo-file-system'
 import Logger from '@/src/utils/logger'
-import { decodeLegacyData, SecuredDataFile } from '@/src/utils/legacyData'
+import { decodeLegacyData, SecuredDataFile, SerializedDataFile } from '@/src/utils/legacyData'
 
 export function useLegacyImport() {
   const [fileName, setFileName] = useState<string | null>(null)
@@ -10,6 +10,7 @@ export function useLegacyImport() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string>()
   const [isLoading, setIsLoading] = useState(false)
+  const [importedData, setImportedData] = useState<SerializedDataFile | null>(null)
 
   const pickFile = async (): Promise<boolean> => {
     try {
@@ -62,6 +63,7 @@ export function useLegacyImport() {
       const decoded = decodeLegacyData(secured, password)
 
       console.log('Imported data:', decoded)
+      setImportedData(decoded)
       return decoded
     } catch (e) {
       Logger.error('Failed to import legacy data', e)
@@ -84,6 +86,7 @@ export function useLegacyImport() {
     setPassword('')
     setError(undefined)
     setIsLoading(false)
+    setImportedData(null)
   }
 
   return {
@@ -96,5 +99,6 @@ export function useLegacyImport() {
     error,
     isLoading,
     hasFile: !!fileUri,
+    importedData,
   }
 }

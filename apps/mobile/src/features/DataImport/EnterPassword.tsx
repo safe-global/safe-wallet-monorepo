@@ -19,8 +19,8 @@ export const EnterPassword = () => {
     const result = await handleImport()
     console.log('result', result)
     if (result) {
-      // Navigate back to complete the import flow
-      router.back()
+      // Navigate to review data screen to show what will be imported
+      router.push('/import-data/review-data')
     } else {
       // Navigate to error screen when import fails
       router.push('/import-data/import-error')
