@@ -15,6 +15,11 @@ import useIsSwapFeatureEnabled from '@/features/swap/hooks/useIsSwapFeatureEnabl
 import { FiatBalance } from '@/components/balances/AssetsTable/FiatBalance'
 import { type Balances } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import { FiatChange } from '@/components/balances/AssetsTable/FiatChange'
+import { isEligibleEarnToken } from '@/features/earn/utils'
+import EarnButton from '@/features/earn/components/EarnButton'
+import { EARN_LABELS } from '@/services/analytics/events/earn'
+import useIsEarnFeatureEnabled from '@/features/earn/hooks/useIsEarnFeatureEnabled'
+import useChainId from '@/hooks/useChainId'
 
 const MAX_ASSETS = 5
 
@@ -44,7 +49,17 @@ const NoAssets = () => (
   </Paper>
 )
 
-const AssetRow = ({ item, showSwap }: { item: Balances['items'][number]; showSwap?: boolean }) => (
+const AssetRow = ({
+  item,
+  chainId,
+  showSwap,
+  showEarn,
+}: {
+  item: Balances['items'][number]
+  chainId: string
+  showSwap?: boolean
+  showEarn?: boolean
+}) => (
   <Box className={css.container} key={item.tokenInfo.address}>
     <Box flex={1}>
       <TokenAmount
@@ -55,11 +70,17 @@ const AssetRow = ({ item, showSwap }: { item: Balances['items'][number]; showSwa
       />
     </Box>
 
-    <Box flex={1} display={['none', 'block']} pr={4}>
+    {showEarn && isEligibleEarnToken(chainId, item.tokenInfo.address) && (
+      <Box>
+        <EarnButton tokenInfo={item.tokenInfo} trackingLabel={EARN_LABELS.dashboard_asset} />
+      </Box>
+    )}
+
+    <Box flex={1} display={['none', 'block']} textAlign="right">
       <FiatBalance balanceItem={item} />
     </Box>
 
-    <Box flex={1} display={['none', 'block']} pr={4}>
+    <Box display={['none', 'block']} textAlign="right">
       <FiatChange balanceItem={item} />
     </Box>
 
@@ -75,11 +96,19 @@ const AssetRow = ({ item, showSwap }: { item: Balances['items'][number]; showSwa
 
 const AssetList = ({ items }: { items: Balances['items'] }) => {
   const isSwapFeatureEnabled = useIsSwapFeatureEnabled()
+  const isEarnFeatureEnabled = useIsEarnFeatureEnabled()
+  const chainId = useChainId()
 
   return (
     <Box display="flex" flexDirection="column" gap={1}>
       {items.map((item) => (
-        <AssetRow item={item} key={item.tokenInfo.address} showSwap={isSwapFeatureEnabled} />
+        <AssetRow
+          item={item}
+          key={item.tokenInfo.address}
+          chainId={chainId}
+          showSwap={isSwapFeatureEnabled}
+          showEarn={isEarnFeatureEnabled}
+        />
       ))}
     </Box>
   )
