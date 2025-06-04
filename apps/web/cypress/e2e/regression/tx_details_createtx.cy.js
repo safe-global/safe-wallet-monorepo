@@ -17,7 +17,8 @@ const contracts = {
   '1_4_1': '0xfd0732dc9e303f09fcef3a7388ad10a83459ec99',
 }
 const appUrl = constants.TX_Builder_url
-const iframeSelector = `iframe[id="iframe-${appUrl}"]`
+const iframeSelector = `iframe[id="iframe-${encodeURIComponent(appUrl)}"]`
+//iframeSelector = `iframe[id="iframe-${encodeURIComponent(constants.safeTestAppurl)}"]`
 
 describe('Transaction details create tests', { defaultCommandTimeout: 30000 }, () => {
   before(async () => {

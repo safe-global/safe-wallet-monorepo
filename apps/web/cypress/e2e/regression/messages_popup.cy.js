@@ -19,7 +19,7 @@ describe('Messages popup window tests', () => {
 
   beforeEach(() => {
     cy.visit(constants.appsCustomUrl + staticSafes.SEP_STATIC_SAFE_10)
-    iframeSelector = `iframe[id="iframe-${constants.safeTestAppurl}"]`
+    iframeSelector = `iframe[id="iframe-${encodeURIComponent(constants.safeTestAppurl)}"]`
   })
 
   it('Verify off-chain message popup window can be triggered', () => {
@@ -55,7 +55,8 @@ describe('Messages popup window tests', () => {
     apps.clickOnApp(safeApp)
     apps.clickOnOpenSafeAppBtn()
     main.getIframeBody(iframeSelector).within(() => {
-      messages.enterOnchainMessage(onchainMessage)
+      apps.enterMessage(onchainMessage)
+      //messages.enterOnchainMessage(onchainMessage)
       apps.triggetOnChainTx()
     })
     msg_confirmation_modal.verifyConfirmationWindowTitle(modal.modalTitiles.confirmMsg)

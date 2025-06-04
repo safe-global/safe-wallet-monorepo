@@ -23,31 +23,34 @@ describe('[SMOKE] Add Owners tests', () => {
   // TODO: Check if this test is covered with unit tests
   it('[SMOKE] Verify relevant error messages are displayed in Address input', () => {
     wallet.connectSigner(signer)
-    owner.openAddOwnerWindow()
-    owner.typeOwnerAddress(main.generateRandomString(10))
+    owner.openManageSignersWindow()
+    owner.clickOnAddSignerBtn()
+
+    owner.typeOwnerAddressManage(1, main.generateRandomString(10))
+
     owner.verifyErrorMsgInvalidAddress(constants.addressBookErrrMsg.invalidFormat)
 
-    owner.typeOwnerAddress(constants.addresBookContacts.user1.address.toUpperCase())
+    owner.typeOwnerAddressManage(1, constants.addresBookContacts.user1.address.toUpperCase())
     owner.verifyErrorMsgInvalidAddress(constants.addressBookErrrMsg.invalidChecksum)
 
-    owner.typeOwnerAddress(staticSafes.SEP_STATIC_SAFE_4)
-    owner.verifyErrorMsgInvalidAddress(constants.addressBookErrrMsg.ownSafe)
+    owner.typeOwnerAddressManage(1, staticSafes.SEP_STATIC_SAFE_4)
+    owner.verifyErrorMsgInvalidAddress(constants.addressBookErrrMsg.ownSafeManage)
 
-    owner.typeOwnerAddress(constants.addresBookContacts.user1.address.replace('F', 'f'))
+    owner.typeOwnerAddressManage(1, constants.addresBookContacts.user1.address.replace('F', 'f'))
     owner.verifyErrorMsgInvalidAddress(constants.addressBookErrrMsg.invalidChecksum)
 
-    owner.typeOwnerAddress(constants.DEFAULT_OWNER_ADDRESS)
-    owner.verifyErrorMsgInvalidAddress(constants.addressBookErrrMsg.alreadyAdded)
+    owner.typeOwnerAddressManage(1, constants.DEFAULT_OWNER_ADDRESS)
+    owner.verifyErrorMsgInvalidAddress(constants.addressBookErrrMsg.ownerAdded)
   })
 
-  it('[SMOKE] Verify the presence of "Add Owner" button', () => {
+  it('[SMOKE] Verify the presence of "Manage Signers" button', () => {
     wallet.connectSigner(signer)
-    owner.verifyAddOwnerBtnIsEnabled()
+    owner.verifyManageSignersBtnIsEnabled()
   })
 
-  it('[SMOKE] Verify “Add new owner” button is disabled for Non-Owner', () => {
+  it('[SMOKE] Verify "Manage Signers" button is disabled for Non-Owner', () => {
     cy.visit(constants.setupUrl + staticSafes.SEP_STATIC_SAFE_3)
     main.waitForHistoryCallToComplete()
-    owner.verifyAddOwnerBtnIsDisabled()
+    owner.verifyManageSignersBtnIsDisabled()
   })
 })

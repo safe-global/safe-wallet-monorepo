@@ -9,7 +9,7 @@ import * as useWallet from '@/hooks/wallets/useWallet'
 import { type ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import { act, fireEvent, screen } from '@testing-library/react'
 import { LATEST_SAFE_VERSION } from '@safe-global/utils/config/constants'
-import { type SafeVersion } from '@safe-global/safe-core-sdk-types'
+import { type SafeVersion } from '@safe-global/types-kit'
 
 const mockChainInfo = {
   chainId: '100',

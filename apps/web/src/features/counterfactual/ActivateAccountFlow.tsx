@@ -22,7 +22,6 @@ import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { useAppSelector } from '@/store'
 import { hasRemainingRelays } from '@/utils/relaying'
 import { Box, Button, CircularProgress, Divider, Grid, Typography } from '@mui/material'
-import type { DeploySafeProps } from '@safe-global/protocol-kit'
 import React, { useContext, useMemo, useState } from 'react'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { useEstimateSafeCreationGas } from '@/components/new-safe/create/useEstimateSafeCreationGas'
@@ -30,8 +29,9 @@ import useIsWrongChain from '@/hooks/useIsWrongChain'
 import NetworkWarning from '@/components/new-safe/create/NetworkWarning'
 import CheckWallet from '@/components/common/CheckWallet'
 import { getSafeToL2SetupDeployment } from '@safe-global/safe-deployments'
-import { FEATURES, getLatestSafeVersion, hasFeature } from '@safe-global/utils/utils/chains'
+import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 import type { UndeployedSafe } from '@safe-global/utils/features/counterfactual/store/types'
+import type { TransactionOptions } from '@safe-global/types-kit'
 
 const useActivateAccount = (undeployedSafe: UndeployedSafe | undefined) => {
   const chain = useCurrentChain()
@@ -48,7 +48,7 @@ const useActivateAccount = (undeployedSafe: UndeployedSafe | undefined) => {
   const maxFeePerGas = gasPrice?.maxFeePerGas
   const maxPriorityFeePerGas = gasPrice?.maxPriorityFeePerGas
 
-  const options: DeploySafeProps['options'] = isEIP1559
+  const options: TransactionOptions = isEIP1559
     ? {
         maxFeePerGas: maxFeePerGas?.toString(),
         maxPriorityFeePerGas: maxPriorityFeePerGas?.toString(),
@@ -93,7 +93,7 @@ const ActivateAccountFlow = () => {
 
   if (!undeployedSafe || !undeployedSafeSetup) return null
 
-  const { owners, threshold, safeVersion } = undeployedSafeSetup
+  const { owners, threshold } = undeployedSafeSetup
 
   const safeToL2SetupDeployment = getSafeToL2SetupDeployment({ version: '1.4.1', network: chain?.chainId })
   const safeToL2SetupAddress = safeToL2SetupDeployment?.defaultAddress
@@ -128,7 +128,6 @@ const ActivateAccountFlow = () => {
         await createNewSafe(
           wallet.provider,
           undeployedSafe.props,
-          safeVersion ?? getLatestSafeVersion(chain),
           chain,
           options,
           onSubmit,

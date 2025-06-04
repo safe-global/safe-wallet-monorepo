@@ -226,7 +226,7 @@ exports[`BatchTransactions should render a list of batch transactions 1`] = `
                         style="word-break: break-word;"
                       >
                         <span
-                          class="MuiTypography-root MuiTypography-body1 css-shf88x-MuiTypography-root"
+                          class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
                         >
                           Created:
                         </span>

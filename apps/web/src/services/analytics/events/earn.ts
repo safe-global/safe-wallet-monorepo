@@ -23,4 +23,6 @@ export enum EARN_LABELS {
   safe_dashboard_banner = 'safe_dashboard_banner',
   sidebar = 'sidebar',
   info_banner = 'info_banner',
+  asset = 'asset',
+  info_asset = 'info_asset',
 }

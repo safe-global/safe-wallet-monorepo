@@ -43,10 +43,12 @@ export const getAvailableSaltNonce = async (
         rpcUrl,
         {
           safeAccountConfig: replayedSafe.safeAccountConfig,
-          saltNonce: replayedSafe.saltNonce,
+          safeDeploymentConfig: {
+            saltNonce: replayedSafe.saltNonce,
+            safeVersion: replayedSafe.safeVersion,
+          },
         },
         chain,
-        replayedSafe.safeVersion,
       )
     } else {
       safeAddress = await predictAddressBasedOnReplayData(replayedSafe, web3ReadOnly)

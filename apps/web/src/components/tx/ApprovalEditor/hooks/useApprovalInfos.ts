@@ -4,7 +4,7 @@ import useBalances from '@/hooks/useBalances'
 import { type Approval, ApprovalModule } from '@safe-global/utils/services/security/modules/ApprovalModule'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { getERC20TokenInfoOnChain, getErc721Symbol, isErc721Token } from '@/utils/tokens'
-import { type SafeTransaction } from '@safe-global/safe-core-sdk-types'
+import { type SafeTransaction } from '@safe-global/types-kit'
 import { TokenType } from '@safe-global/safe-gateway-typescript-sdk'
 import { useMemo } from 'react'
 import { PSEUDO_APPROVAL_VALUES } from '../utils/approvals'
@@ -56,7 +56,7 @@ export const useApprovalInfos = (payload: {
 
           if (!tokenInfo) {
             try {
-              tokenInfo = await getERC20TokenInfoOnChain(approval.tokenAddress)
+              tokenInfo = (await getERC20TokenInfoOnChain(approval.tokenAddress))?.[0]
             } catch (e) {
               const isErc721 = await isErc721Token(approval.tokenAddress)
               const symbol = await getErc721Symbol(approval.tokenAddress)

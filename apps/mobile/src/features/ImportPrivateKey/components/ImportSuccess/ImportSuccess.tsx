@@ -5,33 +5,20 @@ import { SafeButton } from '@/src/components/SafeButton'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { LargeHeaderTitle } from '@/src/components/Title'
 import { SignersCard } from '@/src/components/transactions-list/Card/SignersCard'
-import { useAppSelector } from '@/src/store/hooks'
-import { selectAppNotificationStatus } from '@/src/store/notificationsSlice'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { ScrollView } from 'react-native'
 import { Button, Text, View } from 'tamagui'
-import { useNotificationManager } from '@/src/hooks/useNotificationManager'
 import { ToastViewport } from '@tamagui/toast'
 import { useCopyAndDispatchToast } from '@/src/hooks/useCopyAndDispatchToast'
 import Logger from '@/src/utils/logger'
 
 export function ImportSuccess() {
-  const isAppNotificationEnabled = useAppSelector(selectAppNotificationStatus)
   const { address, name } = useLocalSearchParams<{ address: `0x${string}`; name: string }>()
   const router = useRouter()
   const copy = useCopyAndDispatchToast()
 
-  const { updateNotificationPermissions } = useNotificationManager()
-
-  const updatePermissions = async () => {
-    if (isAppNotificationEnabled) {
-      await updateNotificationPermissions()
-    }
-  }
-
   const handleContinuePress = async () => {
     try {
-      await updatePermissions()
       router.dismissAll()
       router.back()
     } catch (error) {

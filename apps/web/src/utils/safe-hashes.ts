@@ -1,7 +1,7 @@
 import { TypedDataEncoder } from 'ethers'
 import semverSatisfies from 'semver/functions/satisfies'
 import { getEip712MessageTypes, getEip712TxTypes } from '@safe-global/protocol-kit/dist/src/utils'
-import type { SafeTransactionData, SafeVersion } from '@safe-global/safe-core-sdk-types'
+import type { SafeTransactionData, SafeVersion } from '@safe-global/types-kit'
 import type { MessageItem } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import { generateSafeMessageMessage } from '@safe-global/utils/utils/safe-messages'
 

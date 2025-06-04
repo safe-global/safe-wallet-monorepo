@@ -9,9 +9,11 @@ import { DataRow } from '@/components/common/Table/DataRow'
 import IframeIcon from '@/components/common/IframeIcon'
 
 const AdditionalRewards = ({ txInfo }: { txInfo: VaultRedeemTransactionInfo }) => {
+  if (!txInfo.additionalRewards[0]) return null
+
   const additionalRewardsClaimable = Number(txInfo.additionalRewards[0].claimable) > 0
 
-  if (!additionalRewardsClaimable || !txInfo.additionalRewards[0]) return null
+  if (!additionalRewardsClaimable) return null
 
   return (
     <Stack sx={{ border: '1px solid #ddd', borderRadius: '6px', padding: '12px', mt: 1 }}>

@@ -478,13 +478,9 @@ describe('txSender', () => {
       const expectedData = '0xfefe'
 
       const multisendContractMock = {
-        contract: {
-          interface: {
-            encodeFunctionData: jest.fn(() => expectedData),
-          },
-        } as any,
-        getAddress: async () => mockMultisendAddress,
-      } as MultiSendCallOnlyContractImplementationType
+        encode: jest.fn(() => expectedData),
+        getAddress: () => mockMultisendAddress,
+      } as unknown as MultiSendCallOnlyContractImplementationType
 
       jest
         .spyOn(safeContracts, 'getReadOnlyMultiSendCallOnlyContract')

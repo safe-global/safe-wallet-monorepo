@@ -37,6 +37,7 @@ export type AddressInputProps = TextFieldProps & {
   onAddressBookClick?: () => void
   chain?: ChainInfo
   showPrefix?: boolean
+  onReset?: () => void
 }
 
 const AddressInput = ({
@@ -49,6 +50,7 @@ const AddressInput = ({
   deps,
   chain,
   showPrefix = true,
+  onReset,
   ...props
 }: AddressInputProps): ReactElement => {
   const {
@@ -150,6 +152,7 @@ const AddressInput = ({
   const resetName = () => {
     if (!props.disabled && addressBook[watchedValue]) {
       setValue(name, '')
+      onReset?.()
     }
   }
 

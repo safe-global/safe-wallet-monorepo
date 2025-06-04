@@ -27,9 +27,9 @@
 }
 
 .kilnIcon {
-  height: 14px;
+  height: 20px;
   width: inherit;
-  margin-top: -2px !important;
+  margin-top: -5px !important;
 }
 
 .kilnIconDarkMode path {
@@ -37,9 +37,9 @@
 }
 
 .morphoIcon {
-  height: 16px;
+  height: 20px;
   width: inherit;
-  margin-top: -2px !important;
+  margin-top: -5px !important;
 }
 
 .morphoIconDarkMode path {
@@ -53,8 +53,7 @@
 }
 
 .header {
-  padding-right: var(--space-8);
-  max-width: 550px;
+  max-width: 600px;
   font-weight: bold;
 }
 

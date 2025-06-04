@@ -11,9 +11,12 @@ const changeThresholdBtn = 'span[data-track="settings: Change threshold"] > butt
 const tooltip = 'div[role="tooltip"]'
 const expandMoreIcon = 'svg[data-testid="ExpandMoreIcon"]'
 const sentinelStart = 'div[data-testid="sentinelStart"]'
+const addNewSigner = '[data-testid="add-new-signer"]'
 const newOwnerName = 'input[name="newOwner.name"]'
 const newOwnerAddress = 'input[name="newOwner.address"]'
 const newOwnerNonceInput = 'input[name="nonce"]'
+const signerNameField = '[data-testid="owner-name"]'
+const signerAddressField = '[data-testid="address-item"]'
 const thresholdInput = 'input[name="threshold"]'
 const thresHoldDropDownIcon = 'svg[data-testid="ArrowDropDownIcon"]'
 const thresholdList = 'ul[role="listbox"]'
@@ -23,7 +26,8 @@ const existingOwnerAddressInput = (index) => `input[name="owners.${index}.addres
 const existingOwnerNameInput = (index) => `input[name="owners.${index}.name"]`
 const singleOwnerNameInput = 'input[name="name"]'
 const finishTransactionBtn = '[data-testid="finish-transaction-btn"]'
-const addOwnerBtn = '[data-testid="add-owner-btn"]'
+const manageSignersBtn = '[data-testid="manage-signers-btn"]'
+const submitNextBt = '[data-testid="submit-next"]'
 const addOwnerNextBtn = '[data-testid="add-owner-next-btn"]'
 const modalHeader = '[data-testid="modal-header"]'
 const addressToBeRemoved = '[aria-label="Copy to clipboard"] span'
@@ -166,16 +170,16 @@ export function hoverOverReplaceOwnerBtn() {
   cy.get(replaceOwnerBtn).trigger('mouseover', { force: true })
 }
 
-export function verifyAddOwnerBtnIsEnabled() {
-  cy.get(addOwnerBtn).should('exist').and('not.be.disabled')
+export function verifyManageSignersBtnIsEnabled() {
+  cy.get(manageSignersBtn).should('exist').and('not.be.disabled')
 }
 
-export function verifyAddOwnerBtnIsDisabled() {
-  cy.get(addOwnerBtn).should('exist').and('be.disabled')
+export function verifyManageSignersBtnIsDisabled() {
+  cy.get(manageSignersBtn).should('exist').and('be.disabled')
 }
 
-export function hoverOverAddOwnerBtn() {
-  cy.get(addOwnerBtn).trigger('mouseover')
+export function hoverOverManageSignersBtn() {
+  cy.get(manageSignersBtn).trigger('mouseover')
 }
 
 export function verifyTooltiptext(text) {
@@ -200,15 +204,17 @@ export function waitForConnectionStatus() {
   cy.get(createWallet.accountInfoHeader).should('exist')
 }
 
+export function clickOnManageSignersBtn() {
+  cy.get(manageSignersBtn).should('be.enabled').click()
+}
+export function openManageSignersWindow() {
+  clickOnManageSignersBtn()
+  cy.get(signerNameField).should('be.visible')
+  cy.get(signerAddressField).should('be.visible')
+}
 export function clickOnAddSignerBtn() {
-  cy.get(addOwnerBtn).should('be.enabled').click()
+  cy.get(addNewSigner).should('be.enabled').click()
 }
-export function openAddOwnerWindow() {
-  clickOnAddSignerBtn()
-  cy.get(newOwnerName).should('be.visible')
-  cy.get(newOwnerAddress).should('be.visible')
-}
-
 export function verifyNonceInputValue(value) {
   cy.get(newOwnerNonceInput).should('not.be.disabled')
   main.verifyInputValue(newOwnerNonceInput, value)
@@ -221,7 +227,7 @@ export function verifyErrorMsgInvalidAddress(errorMsg) {
 export function verifyValidWalletName(errorMsg) {
   cy.get('label').contains(errorMsg).should('not.exist')
 }
-
+//Type owner address on the manage signers form
 export function typeOwnerAddress(address) {
   cy.get(newOwnerAddress)
     .clear()
@@ -232,10 +238,20 @@ export function typeOwnerAddress(address) {
     })
   cy.wait(1000)
 }
-
+//Type the signer address into the 'Signer Address' field on the Manage Signers page, defined by the index (owners.index.address)
+export function typeOwnerAddressManage(index, address) {
+  cy.get(existingOwnerAddressInput(index)).clear().type(address)
+}
+//Type the signer name for one field pages
 export function typeOwnerName(name) {
   cy.get(newOwnerName).clear().type(name)
   main.verifyInputValue(newOwnerName, name)
+}
+
+//Type the signer name into the "Signer Name" field for manage signers
+export function typeOwnerNameManage(index, name) {
+  cy.get(existingOwnerNameInput(index)).clear().type(name)
+  main.verifyInputValue(existingOwnerNameInput(index), name)
 }
 
 export function selectNewOwner(name) {
@@ -245,7 +261,11 @@ export function selectNewOwner(name) {
 export function verifyNewOwnerName(name) {
   cy.get(addressBook.addressBookRecipient).should('include.text', name)
 }
-
+//next button on Manage signers
+export function clickOnNextBtnManage() {
+  cy.get(submitNextBt).should('be.enabled').click()
+}
+//Next button for usual tx flow
 export function clickOnNextBtn() {
   cy.get(addOwnerNextBtn).should('be.enabled').click()
 }

@@ -115,22 +115,6 @@ describe('NameChip', () => {
     expect(screen.queryByText(txInfoName)).not.toBeInTheDocument()
   })
 
-  it('should render with background when withBackground prop is true', () => {
-    const mockAddress = faker.finance.ethereumAddress()
-    mockUseAddressName.mockReturnValue({ name: 'Test Contract', logoUri: undefined, isUnverifiedContract: false })
-    mockUseAddressBook.mockReturnValue({})
-
-    const txData = txDataBuilder()
-      .with({
-        to: { value: mockAddress },
-      })
-      .build()
-
-    render(<NameChip txData={txData} withBackground />)
-    const chip = screen.getByTestId('name-chip')
-    expect(chip).toHaveStyle({ backgroundColor: 'rgb(244, 244, 244)' })
-  })
-
   it('should display name and logo when provided', () => {
     const mockAddress = faker.finance.ethereumAddress()
     mockUseAddressName.mockReturnValue({ name: 'Test Contract', logoUri: 'test-logo.png', isUnverifiedContract: false })

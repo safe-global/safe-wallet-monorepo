@@ -115,6 +115,7 @@ export const OwnerRow = ({
               label="Signer"
               validate={validateOwnerAddress}
               deps={deps}
+              onReset={() => setValue(`${fieldName}.name`, '')}
             />
           </FormControl>
         )}
