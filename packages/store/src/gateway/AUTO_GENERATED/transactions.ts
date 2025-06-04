@@ -524,7 +524,7 @@ export type BridgeAndSwapTransactionInfo = {
   fromToken: TokenInfo
   recipient: AddressInfo
   explorerUrl?: object
-  status: 'NOT_FOUND' | 'INVALID' | 'PENDING' | 'DONE' | 'FAILED' | 'UNKNOWN'
+  status: 'NOT_FOUND' | 'INVALID' | 'PENDING' | 'DONE' | 'FAILED' | 'UNKNOWN' | 'AWAITING_EXECUTION'
   substatus:
     | 'WAIT_SOURCE_CONFIRMATIONS'
     | 'WAIT_DESTINATION_TRANSACTION'
@@ -542,6 +542,7 @@ export type BridgeAndSwapTransactionInfo = {
     | 'SLIPPAGE_EXCEEDED'
     | 'UNKNOWN_FAILED_ERROR'
     | 'UNKNOWN'
+    | 'AWAITING_EXECUTION'
   fees: BridgeFee | null
   fromAmount: string
   toChain: string
