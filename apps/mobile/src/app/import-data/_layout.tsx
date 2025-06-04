@@ -55,6 +55,12 @@ export default function ImportDataLayout() {
           }}
         />
         <Stack.Screen
+          name="import-progress"
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
           name="import-success"
           options={{
             headerShown: false,

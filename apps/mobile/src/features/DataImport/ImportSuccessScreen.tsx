@@ -17,7 +17,6 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 export const ImportSuccessScreen = () => {
   const router = useRouter()
   const insets = useSafeAreaInsets()
-  const colorScheme = useColorScheme()
   const dispatch = useAppDispatch()
   const allSafes = useAppSelector(selectAllSafes) as SafesSlice
   const theme = useTheme()
@@ -63,7 +62,6 @@ export const ImportSuccessScreen = () => {
           <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
             <View flex={1} flexGrow={1} alignItems="center" justifyContent="center" paddingHorizontal="$3">
               <Badge
-                // circleProps={{ backgroundColor: '#1B2A22' }}
                 themeName="badge_success_variant1"
                 circleSize={64}
                 content={<SafeFontIcon size={32} name="check-filled" />}
@@ -91,46 +89,6 @@ export const ImportSuccessScreen = () => {
         </View>
       </View>
     </View>
-  )
-
-  return (
-    <ScrollView contentContainerStyle={{ flex: 1 }}>
-      <YStack flex={1} testID="import-success-screen">
-        <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
-
-        {/* Content */}
-        <YStack flex={1} paddingHorizontal="$4" justifyContent="space-between" marginTop={'$4'}>
-          <YStack gap="$6" alignItems="center" justifyContent="center" flex={1}>
-            {/* Success Icon */}
-            <YStack marginBottom="$4">
-              <Badge
-                themeName="badge_success"
-                circleSize={64}
-                content={<SafeFontIcon name="check" size={32} color="white" />}
-              />
-            </YStack>
-
-            {/* Title */}
-            <H2 fontWeight={'600'} textAlign="center">
-              Import complete!
-            </H2>
-
-            {/* Subtitle */}
-            <Text fontSize="$4" textAlign="center" marginHorizontal={'$4'} color="$colorSecondary">
-              Your accounts, signers and address book contacts are now ready to use with better signing experience!
-            </Text>
-          </YStack>
-
-          {/* Bottom section */}
-          <YStack gap="$4" paddingBottom={insets.bottom}>
-            {/* Continue button */}
-            <SafeButton primary testID="continue-button" onPress={handleContinue}>
-              Continue
-            </SafeButton>
-          </YStack>
-        </YStack>
-      </YStack>
-    </ScrollView>
   )
 }
 

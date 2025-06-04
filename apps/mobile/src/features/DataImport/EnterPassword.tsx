@@ -17,7 +17,6 @@ export const EnterPassword = () => {
 
   const handleDecrypt = useCallback(async () => {
     const result = await handleImport()
-    console.log('result', result)
     if (result) {
       // Navigate to review data screen to show what will be imported
       router.push('/import-data/review-data')

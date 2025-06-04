@@ -1,15 +1,13 @@
 import React, { useEffect, useState, useRef } from 'react'
 import { useRouter } from 'expo-router'
 import { Text, YStack, H2, ScrollView, View } from 'tamagui'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { StatusBar } from 'expo-status-bar'
 import { useColorScheme, Animated } from 'react-native'
 import { useDataImportContext } from './DataImportProvider'
-import { Container } from '@/src/components/Container'
 import { useAppDispatch } from '@/src/store/hooks'
 import { addSafe } from '@/src/store/safesSlice'
 import { addSignerWithEffects } from '@/src/store/signersSlice'
-import { addContacts } from '@/src/store/addressBookSlice'
+import { addContact, addContacts } from '@/src/store/addressBookSlice'
 import { storePrivateKey } from '@/src/hooks/useSign/useSign'
 import { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
@@ -39,13 +37,11 @@ interface LegacyDataStructure {
 
 export const ImportProgressScreen = () => {
   const router = useRouter()
-  const insets = useSafeAreaInsets()
   const colorScheme = useColorScheme()
   const { importedData } = useDataImportContext()
   const dispatch = useAppDispatch()
 
   const [progress, setProgress] = useState(0)
-  const [importedSafes, setImportedSafes] = useState<SafeOverview[]>([])
   const progressAnimation = useRef(new Animated.Value(0)).current
 
   useEffect(() => {
@@ -57,16 +53,8 @@ export const ImportProgressScreen = () => {
     const performImport = async () => {
       try {
         const data = importedData.data as LegacyDataStructure
-        let currentProgress = 0
-        const totalSteps = 3 // Safes, Signers/Keys, Contacts
-
-        // Animate progress bar
-        const animateProgress = (targetProgress: number) => {
-          setProgress(targetProgress)
-        }
 
         // Step 1: Import Safe Accounts
-        await new Promise((resolve) => setTimeout(resolve, 500)) // Simulate loading
         if (data.safes) {
           const safesToImport: SafeOverview[] = []
 
@@ -82,7 +70,7 @@ export const ImportProgressScreen = () => {
                 value: owner,
                 name: null,
               })),
-              fiatTotal: '',
+              fiatTotal: '0',
               queued: 0,
               awaitingConfirmation: null,
             }
@@ -94,15 +82,20 @@ export const ImportProgressScreen = () => {
               }),
             )
 
+            dispatch(
+              addContact({
+                value: safe.address,
+                name: safe.name,
+              }),
+            )
+
             safesToImport.push(safeOverview)
           }
 
-          setImportedSafes(safesToImport)
           Logger.info(`Imported ${data.safes.length} safes`)
         }
 
-        currentProgress = 33
-        animateProgress(currentProgress)
+        setProgress(33)
         await new Promise((resolve) => setTimeout(resolve, 800))
 
         // Step 2: Import Signers/Private Keys
@@ -129,8 +122,7 @@ export const ImportProgressScreen = () => {
           }
         }
 
-        currentProgress = 66
-        animateProgress(currentProgress)
+        setProgress(66)
         await new Promise((resolve) => setTimeout(resolve, 800))
 
         // Step 3: Import Address Book/Contacts
@@ -144,8 +136,7 @@ export const ImportProgressScreen = () => {
           Logger.info(`Imported ${data.contacts.length} contacts`)
         }
 
-        currentProgress = 100
-        animateProgress(currentProgress)
+        setProgress(100)
         await new Promise((resolve) => setTimeout(resolve, 1000))
 
         // Navigate to success screen

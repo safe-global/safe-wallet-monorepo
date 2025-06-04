@@ -20,8 +20,6 @@ export function useLegacyImport() {
         copyToCacheDirectory: true,
       })
 
-      console.log('res', res)
-
       // Check if the result is success type and has assets
       if (res.canceled === false && res.assets && res.assets.length > 0) {
         const asset = res.assets[0]
