@@ -2,6 +2,7 @@ import { render, waitFor } from '@/tests/test-utils'
 import NamedAddressInfo from '.'
 import { faker } from '@faker-js/faker'
 import { getContract, type ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import { shortenAddress } from '@safe-global/utils/utils/formatters'
 
 const mockChainInfo = {
   chainId: '4',
@@ -39,6 +40,13 @@ describe('NamedAddressInfo', () => {
     )
 
     expect(result.getByText('TestAddressName')).toBeVisible()
+    expect(getContractMock).not.toHaveBeenCalled()
+  })
+
+  it('should not fetch contract info if the address is not a valid address', async () => {
+    const address = faker.string.hexadecimal({ length: 64 })
+    const result = render(<NamedAddressInfo address={address} />)
+    expect(result.getByText(shortenAddress(address))).toBeVisible()
     expect(getContractMock).not.toHaveBeenCalled()
   })
 
