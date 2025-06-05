@@ -4,7 +4,7 @@ import { useColorScheme } from 'react-native'
 import { useDataImportContext } from './context/DataImportProvider'
 import { useAppDispatch } from '@/src/store/hooks'
 import Logger from '@/src/utils/logger'
-import { transformSafes, transformKeys, transformContacts, LegacyDataStructure } from './helpers/transforms'
+import { storeSafes, storeKeys, storeContacts, LegacyDataStructure } from './helpers/transforms'
 import { ImportProgressScreenView } from './components/ImportProgressScreenView'
 
 export const ImportProgressScreen = () => {
@@ -26,19 +26,19 @@ export const ImportProgressScreen = () => {
         const data = importedData.data as LegacyDataStructure
 
         // Step 1: Import Safe Accounts
-        transformSafes(data, dispatch)
+        storeSafes(data, dispatch)
 
         setProgress(33)
         await new Promise((resolve) => setTimeout(resolve, 800))
 
         // Step 2: Import Signers/Private Keys
-        await transformKeys(data, dispatch)
+        await storeKeys(data, dispatch)
 
         setProgress(66)
         await new Promise((resolve) => setTimeout(resolve, 800))
 
         // Step 3: Import Address Book/Contacts
-        transformContacts(data, dispatch)
+        storeContacts(data, dispatch)
 
         setProgress(100)
         await new Promise((resolve) => setTimeout(resolve, 1000))
