@@ -1,10 +1,9 @@
 import React from 'react'
 import { useRouter } from 'expo-router'
-import { Text, YStack, H2, ScrollView, H3, useTheme, View } from 'tamagui'
+import { Text, YStack, H2, ScrollView, useTheme, View } from 'tamagui'
 import { SafeButton } from '@/src/components/SafeButton'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { StatusBar } from 'expo-status-bar'
-import { useColorScheme, StyleSheet } from 'react-native'
+import { StyleSheet } from 'react-native'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { Badge } from '@/src/components/Badge'
 import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
@@ -12,7 +11,6 @@ import { selectAllSafes, SafesSlice } from '@/src/store/safesSlice'
 import { setActiveSafe } from '@/src/store/activeSafeSlice'
 import { SafeInfo } from '@/src/types/address'
 import { LinearGradient } from 'expo-linear-gradient'
-import { SafeAreaView } from 'react-native-safe-area-context'
 
 export const ImportSuccessScreen = () => {
   const router = useRouter()

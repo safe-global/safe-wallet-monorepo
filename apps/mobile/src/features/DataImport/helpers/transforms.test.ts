@@ -1,0 +1,87 @@
+import { transformSafes, transformKeys, transformContacts, LegacyDataStructure } from './transforms'
+import { addSafe } from '@/src/store/safesSlice'
+import { addContact, addContacts, Contact } from '@/src/store/addressBookSlice'
+import { addSignerWithEffects } from '@/src/store/signersSlice'
+import { storePrivateKey } from '@/src/hooks/useSign/useSign'
+
+jest.mock('@/src/hooks/useSign/useSign', () => ({
+  storePrivateKey: jest.fn(),
+}))
+
+jest.mock('@/src/store/signersSlice', () => ({
+  addSignerWithEffects: jest.fn(() => ({ type: 'addSignerWithEffects' })),
+}))
+
+describe('Data import helpers', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+  })
+
+  it('dispatches addSafe and addContact for safes', () => {
+    const dispatch = jest.fn()
+    const data: LegacyDataStructure = {
+      safes: [
+        {
+          address: '0x1',
+          chain: '1',
+          name: 'Test Safe',
+          threshold: 2,
+          owners: ['0x2'],
+        },
+      ],
+    }
+
+    transformSafes(data, dispatch)
+
+    const expectedSafeOverview = {
+      address: { value: '0x1', name: 'Test Safe' },
+      chainId: '1',
+      threshold: 2,
+      owners: [{ value: '0x2', name: null }],
+      fiatTotal: '0',
+      queued: 0,
+      awaitingConfirmation: null,
+    }
+
+    expect(dispatch).toHaveBeenCalledWith(addSafe({ address: '0x1', info: { '1': expectedSafeOverview } }))
+    expect(dispatch).toHaveBeenCalledWith(addContact({ value: '0x1', name: 'Test Safe' }))
+  })
+
+  it('stores keys and dispatches addSignerWithEffects', async () => {
+    const dispatch = jest.fn()
+    const key = Buffer.from('abcd', 'hex').toString('base64')
+    const data: LegacyDataStructure = {
+      keys: [
+        {
+          address: '0x1',
+          name: 'Owner',
+          key,
+        },
+      ],
+    }
+
+    await transformKeys(data, dispatch)
+
+    expect(storePrivateKey).toHaveBeenCalledWith('0x1', '0xabcd')
+    expect(addSignerWithEffects).toHaveBeenCalledWith({ value: '0x1', name: 'Owner' })
+    expect(dispatch).toHaveBeenCalledWith({ type: 'addSignerWithEffects' })
+  })
+
+  it('dispatches addContacts', () => {
+    const dispatch = jest.fn()
+    const contacts: Contact[] = [
+      { value: '0x1', name: 'Alice' },
+      { value: '0x2', name: 'Bob' },
+    ]
+    const data: LegacyDataStructure = {
+      contacts: [
+        { address: '0x1', name: 'Alice', chain: '1' },
+        { address: '0x2', name: 'Bob', chain: '1' },
+      ],
+    }
+
+    transformContacts(data, dispatch)
+
+    expect(dispatch).toHaveBeenCalledWith(addContacts(contacts))
+  })
+})

@@ -5,35 +5,9 @@ import { StatusBar } from 'expo-status-bar'
 import { useColorScheme, Animated } from 'react-native'
 import { useDataImportContext } from './DataImportProvider'
 import { useAppDispatch } from '@/src/store/hooks'
-import { addSafe } from '@/src/store/safesSlice'
-import { addSignerWithEffects } from '@/src/store/signersSlice'
-import { addContact, addContacts } from '@/src/store/addressBookSlice'
-import { storePrivateKey } from '@/src/hooks/useSign/useSign'
-import { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
-import { AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { Contact } from '@/src/store/addressBookSlice'
 import Logger from '@/src/utils/logger'
+import { transformSafes, transformKeys, transformContacts, LegacyDataStructure } from './helpers/transforms'
 import { Bar } from 'react-native-progress'
-
-interface LegacyDataStructure {
-  safes?: Array<{
-    address: string
-    chain: string
-    name: string
-    threshold?: number
-    owners?: string[]
-  }>
-  contacts?: Array<{
-    address: string
-    name: string
-    chain: string
-  }>
-  keys?: Array<{
-    address: string
-    name: string
-    key: string
-  }>
-}
 
 export const ImportProgressScreen = () => {
   const router = useRouter()
@@ -55,86 +29,19 @@ export const ImportProgressScreen = () => {
         const data = importedData.data as LegacyDataStructure
 
         // Step 1: Import Safe Accounts
-        if (data.safes) {
-          const safesToImport: SafeOverview[] = []
-
-          for (const safe of data.safes) {
-            const safeOverview: SafeOverview = {
-              address: {
-                value: safe.address,
-                name: safe.name || null,
-              },
-              chainId: safe.chain,
-              threshold: safe.threshold || 1,
-              owners: (safe.owners || []).map((owner) => ({
-                value: owner,
-                name: null,
-              })),
-              fiatTotal: '0',
-              queued: 0,
-              awaitingConfirmation: null,
-            }
-
-            dispatch(
-              addSafe({
-                address: safe.address as `0x${string}`,
-                info: { [safe.chain]: safeOverview },
-              }),
-            )
-
-            dispatch(
-              addContact({
-                value: safe.address,
-                name: safe.name,
-              }),
-            )
-
-            safesToImport.push(safeOverview)
-          }
-
-          Logger.info(`Imported ${data.safes.length} safes`)
-        }
+        transformSafes(data, dispatch)
 
         setProgress(33)
         await new Promise((resolve) => setTimeout(resolve, 800))
 
         // Step 2: Import Signers/Private Keys
-        if (data.keys) {
-          for (const key of data.keys) {
-            try {
-              // Convert private key from base64 to hex format
-              const hexPrivateKey = `0x${Buffer.from(key.key, 'base64').toString('hex')}`
-
-              // Store the private key in hex format
-              await storePrivateKey(key.address, hexPrivateKey)
-
-              // Add signer to Redux
-              const signerInfo: AddressInfo = {
-                value: key.address,
-                name: key.name || null,
-              }
-
-              dispatch(addSignerWithEffects(signerInfo))
-              Logger.info(`Imported signer: ${key.address}`)
-            } catch (error) {
-              Logger.error(`Failed to import signer ${key.address}:`, error)
-            }
-          }
-        }
+        await transformKeys(data, dispatch)
 
         setProgress(66)
         await new Promise((resolve) => setTimeout(resolve, 800))
 
         // Step 3: Import Address Book/Contacts
-        if (data.contacts) {
-          const contactsToAdd: Contact[] = data.contacts.map((contact) => ({
-            value: contact.address,
-            name: contact.name,
-          }))
-
-          dispatch(addContacts(contactsToAdd))
-          Logger.info(`Imported ${data.contacts.length} contacts`)
-        }
+        transformContacts(data, dispatch)
 
         setProgress(100)
         await new Promise((resolve) => setTimeout(resolve, 1000))
