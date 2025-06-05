@@ -17,7 +17,6 @@ export const ImportSuccessScreen = () => {
   const colors: [string, string] = [theme.success.get(), 'transparent']
 
   const handleContinue = () => {
-    // Find the first imported safe and set it as active
     const safeAddresses = Object.keys(allSafes)
 
     if (safeAddresses.length > 0) {
