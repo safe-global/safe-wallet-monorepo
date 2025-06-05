@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useRouter } from 'expo-router'
 import { Text, YStack, H2, ScrollView, View } from 'tamagui'
 import { StatusBar } from 'expo-status-bar'
@@ -16,7 +16,6 @@ export const ImportProgressScreen = () => {
   const dispatch = useAppDispatch()
 
   const [progress, setProgress] = useState(0)
-  const progressAnimation = useRef(new Animated.Value(0)).current
 
   useEffect(() => {
     if (!importedData?.data) {
@@ -56,7 +55,7 @@ export const ImportProgressScreen = () => {
     }
 
     performImport()
-  }, [importedData, dispatch, router, progressAnimation])
+  }, [importedData, dispatch, router])
 
   return (
     <ScrollView contentContainerStyle={{ flex: 1 }}>
