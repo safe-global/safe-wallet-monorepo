@@ -17,6 +17,7 @@ const TokenAmount = ({
   fallbackSrc,
   preciseAmount,
   iconSize,
+  chainId,
 }: {
   value: string
   decimals?: number | null
@@ -26,6 +27,7 @@ const TokenAmount = ({
   fallbackSrc?: string
   preciseAmount?: boolean
   iconSize?: number
+  chainId?: string
 }): ReactElement => {
   const sign = direction === TransferDirection.OUTGOING ? '-' : ''
   const amount =
@@ -37,10 +39,17 @@ const TokenAmount = ({
   return (
     <Tooltip title={fullAmount}>
       <span className={classNames(css.container, { [css.verticalAlign]: logoUri })}>
-        {logoUri && <TokenIcon logoUri={logoUri} tokenSymbol={tokenSymbol} fallbackSrc={fallbackSrc} size={iconSize} />}
+        {logoUri && (
+          <TokenIcon
+            logoUri={logoUri}
+            tokenSymbol={tokenSymbol}
+            fallbackSrc={fallbackSrc}
+            size={iconSize}
+            chainId={chainId}
+          />
+        )}
         <b className={css.tokenText}>
-          {sign}
-          {amount} {tokenSymbol}
+          {sign} {amount} {tokenSymbol}
         </b>
       </span>
     </Tooltip>
