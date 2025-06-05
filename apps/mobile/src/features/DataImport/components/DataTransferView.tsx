@@ -1,5 +1,5 @@
 import React from 'react'
-import { Text, YStack, Image, styled, H2, H5 } from 'tamagui'
+import { Text, YStack, Image, styled, H2, H5, getTokenValue } from 'tamagui'
 import { SafeButton } from '@/src/components/SafeButton'
 import { StatusBar } from 'expo-status-bar'
 import TransferOldAppDark from '@/assets/images/transfer-old-app-dark.png'
@@ -34,7 +34,7 @@ export const DataTransferView = ({
         <YStack gap="$4" alignItems="center">
           {colorScheme === 'dark' ? (
             <GradientText
-              colors={['#5FDDFF', '#12FF80']}
+              colors={[getTokenValue('$color.infoMainDark'), getTokenValue('$color.primaryMainDark')]}
               fontWeight={'600'}
               color="$green9"
               fontSize="$5"
