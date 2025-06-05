@@ -4,7 +4,7 @@ import { ReviewData } from '../ReviewData.container'
 import { useDataImportContext } from '../context/DataImportProvider'
 import { useRouter } from 'expo-router'
 
-jest.mock('../DataImportProvider', () => ({
+jest.mock('../context/DataImportProvider', () => ({
   useDataImportContext: jest.fn(),
 }))
 

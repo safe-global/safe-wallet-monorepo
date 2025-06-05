@@ -6,7 +6,7 @@ import { useRouter } from 'expo-router'
 import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
 import { storePrivateKey } from '@/src/hooks/useSign/useSign'
 
-jest.mock('../DataImportProvider', () => ({
+jest.mock('../context/DataImportProvider', () => ({
   useDataImportContext: jest.fn(),
 }))
 
@@ -23,7 +23,7 @@ jest.mock('@/src/hooks/useSign/useSign', () => ({
   storePrivateKey: jest.fn(),
 }))
 
-describe.only('ImportProgressScreen', () => {
+describe('ImportProgressScreen', () => {
   const pushMock = jest.fn()
   const dispatchMock = jest.fn()
 
@@ -37,7 +37,7 @@ describe.only('ImportProgressScreen', () => {
     jest.mocked(storePrivateKey).mockResolvedValue(undefined)
   })
 
-  it.only('dispatches actions and navigates on success', async () => {
+  it('dispatches actions and navigates on success', async () => {
     jest.mocked(useDataImportContext).mockReturnValue({
       importedData: {
         data: {
