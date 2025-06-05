@@ -1,12 +1,10 @@
-import React, { useCallback } from 'react'
-import { useRouter } from 'expo-router'
+import React from 'react'
 import { Text, YStack, Image, styled, H2, H5 } from 'tamagui'
 import { SafeButton } from '@/src/components/SafeButton'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { StatusBar } from 'expo-status-bar'
 import TransferOldAppDark from '@/assets/images/transfer-old-app-dark.png'
 import TransferOldAppLight from '@/assets/images/transfer-old-app-light.png'
-import { useColorScheme } from 'react-native'
+import { ColorSchemeName } from 'react-native'
 import { GradientText } from '@/src/components/GradientText'
 
 const StyledText = styled(Text, {
@@ -14,23 +12,19 @@ const StyledText = styled(Text, {
   textAlign: 'center',
 })
 
-export const DataTransfer = () => {
-  const router = useRouter()
-  const insets = useSafeAreaInsets()
-  const colorScheme = useColorScheme()
-  const onPressTransferData = useCallback(() => {
-    // Navigate to help import flow
-    router.navigate('/import-data/help-import')
-  }, [router])
+interface DataTransferViewProps {
+  colorScheme: ColorSchemeName
+  bottomInset: number
+  onPressTransferData: () => void
+  onPressStartFresh: () => void
+}
 
-  const onPressStartFresh = useCallback(() => {
-    // Go back to previous screen and then navigate to import accounts
-    router.back()
-    setTimeout(() => {
-      router.navigate('/(import-accounts)')
-    }, 100)
-  }, [router])
-
+export const DataTransferView = ({
+  colorScheme,
+  bottomInset,
+  onPressTransferData,
+  onPressStartFresh,
+}: DataTransferViewProps) => {
   return (
     <YStack flex={1} paddingTop={'$4'} testID="data-transfer-screen">
       <StatusBar style="light" />
@@ -71,7 +65,7 @@ export const DataTransfer = () => {
       </YStack>
 
       {/* Bottom Buttons */}
-      <YStack gap="$3" paddingHorizontal="$4" paddingBottom={insets.bottom} paddingTop="$4">
+      <YStack gap="$3" paddingHorizontal="$4" paddingBottom={bottomInset} paddingTop="$4">
         <SafeButton primary testID="transfer-data-button" onPress={onPressTransferData}>
           Transfer data
         </SafeButton>

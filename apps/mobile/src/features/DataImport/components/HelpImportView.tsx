@@ -1,13 +1,9 @@
-import React, { useCallback } from 'react'
-import { useRouter } from 'expo-router'
+import React from 'react'
 import { Text, YStack, XStack, styled, H2 } from 'tamagui'
 import { SafeButton } from '@/src/components/SafeButton'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { StatusBar } from 'expo-status-bar'
-import { useColorScheme, Linking } from 'react-native'
-import { TouchableOpacity } from 'react-native'
+import { ColorSchemeName, TouchableOpacity } from 'react-native'
 import { Badge } from '@/src/components/Badge'
-import { HELP_CENTER_URL } from '@safe-global/utils/config/constants'
 
 const StepText = styled(Text, {
   fontSize: '$4',
@@ -25,20 +21,19 @@ const StepBadge = ({ step }: { step: string }) => {
   return <Badge themeName="badge_background" content={step} textContentProps={{ fontWeight: 600 }} />
 }
 
-export const HelpImport = () => {
-  const router = useRouter()
-  const insets = useSafeAreaInsets()
-  const colorScheme = useColorScheme()
+interface HelpImportViewProps {
+  colorScheme: ColorSchemeName
+  bottomInset: number
+  onPressProceedToImport: () => void
+  onPressNeedHelp: () => void
+}
 
-  const onPressProceedToImport = useCallback(() => {
-    // Navigate to file selection screen
-    router.push('/import-data/file-selection')
-  }, [router])
-
-  const onPressNeedHelp = useCallback(() => {
-    Linking.openURL(HELP_CENTER_URL)
-  }, [])
-
+export const HelpImportView = ({
+  colorScheme,
+  bottomInset,
+  onPressProceedToImport,
+  onPressNeedHelp,
+}: HelpImportViewProps) => {
   return (
     <YStack flex={1} testID="help-import-screen">
       <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
@@ -81,7 +76,7 @@ export const HelpImport = () => {
         </YStack>
 
         {/* Bottom Actions */}
-        <YStack gap="$4" paddingBottom={insets.bottom}>
+        <YStack gap="$4" paddingBottom={bottomInset}>
           <SafeButton primary testID="proceed-to-import-button" onPress={onPressProceedToImport}>
             Proceed to import
           </SafeButton>

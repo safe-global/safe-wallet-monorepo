@@ -1,7 +1,7 @@
-export { DataTransfer } from './DataTransfer'
-export { EnterPassword } from './EnterPassword'
-export { FileSelection } from './FileSelection'
-export { HelpImport } from './HelpImport'
-export { ReviewData } from './ReviewData'
+export { DataTransfer } from './DataTransfer.container'
+export { EnterPassword } from './EnterPassword.container'
+export { FileSelection } from './FileSelection.container'
+export { HelpImport } from './HelpImport.container'
+export { ReviewData } from './ReviewData.container'
 
-export { DataImportProvider, useDataImportContext } from './DataImportProvider'
+export { DataImportProvider, useDataImportContext } from './context/DataImportProvider'

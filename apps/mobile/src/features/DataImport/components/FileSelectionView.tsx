@@ -1,13 +1,10 @@
-import React, { useCallback } from 'react'
-import { useRouter } from 'expo-router'
+import React from 'react'
 import { Text, YStack, Image, styled, H2 } from 'tamagui'
 import { SafeButton } from '@/src/components/SafeButton'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { StatusBar } from 'expo-status-bar'
 import ImportDataSelectFilesDark from '@/assets/images/import-data-select-files-dark.png'
 import ImportDataSelectFilesLight from '@/assets/images/import-data-select-files-light.png'
-import { useColorScheme, TouchableOpacity } from 'react-native'
-import { useDataImportContext } from './DataImportProvider'
+import { ColorSchemeName, TouchableOpacity } from 'react-native'
 
 const StyledText = styled(Text, {
   fontSize: '$4',
@@ -22,26 +19,16 @@ const PrivacyText = styled(Text, {
   paddingHorizontal: '$4',
 })
 
-export const FileSelection = () => {
-  const router = useRouter()
-  const insets = useSafeAreaInsets()
-  const colorScheme = useColorScheme()
-  const { pickFile } = useDataImportContext()
+interface FileSelectionViewProps {
+  colorScheme: ColorSchemeName
+  bottomInset: number
+  onFileSelect: () => void
+  onImagePress: () => void
+}
 
-  const handleFileSelect = useCallback(async () => {
-    const fileSelected = await pickFile()
-    // Only navigate if a file was actually selected
-    if (fileSelected) {
-      router.push('/import-data/enter-password')
-    }
-  }, [pickFile, router])
-
-  const handleImagePress = useCallback(() => {
-    handleFileSelect()
-  }, [handleFileSelect])
-
+export const FileSelectionView = ({ colorScheme, bottomInset, onFileSelect, onImagePress }: FileSelectionViewProps) => {
   return (
-    <YStack flex={1} testID="file-selection-screen" paddingBottom={insets.bottom}>
+    <YStack flex={1} testID="file-selection-screen" paddingBottom={bottomInset}>
       <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
 
       {/* Content */}
@@ -57,7 +44,7 @@ export const FileSelection = () => {
 
           {/* Image - Tappable */}
           <YStack flex={1} justifyContent="center" alignItems="center">
-            <TouchableOpacity onPress={handleImagePress} activeOpacity={0.8}>
+            <TouchableOpacity onPress={onImagePress} activeOpacity={0.8}>
               <Image
                 source={colorScheme === 'dark' ? ImportDataSelectFilesDark : ImportDataSelectFilesLight}
                 alignSelf="center"
@@ -70,7 +57,7 @@ export const FileSelection = () => {
         {/* Bottom Actions */}
         <YStack gap="$4">
           <PrivacyText>Don't worry, all your data will stay private and secure during the transfer.</PrivacyText>
-          <SafeButton primary testID="select-file-to-import-button" onPress={handleFileSelect}>
+          <SafeButton primary testID="select-file-to-import-button" onPress={onFileSelect}>
             Select file to import
           </SafeButton>
         </YStack>

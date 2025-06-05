@@ -1,21 +1,21 @@
 import { StyleSheet } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 import React from 'react'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { ScrollView, Text, useTheme, View, YStack } from 'tamagui'
+import { ScrollView, Text, View, YStack } from 'tamagui'
 import { Badge } from '@/src/components/Badge'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { LargeHeaderTitle } from '@/src/components/Title'
 import { SafeButton } from '@/src/components/SafeButton'
-import { router } from 'expo-router'
 
-export default function ImportError() {
-  const theme = useTheme()
-  const colors: [string, string] = [theme.errorDark.get(), 'transparent']
-  const insets = useSafeAreaInsets()
+interface ImportErrorViewProps {
+  colors: [string, string]
+  bottomInset: number
+  onTryAgain: () => void
+}
 
+export const ImportErrorView = ({ colors, bottomInset, onTryAgain }: ImportErrorViewProps) => {
   return (
-    <YStack flex={1} testID="import-error-screen" paddingBottom={insets.bottom}>
+    <YStack flex={1} testID="import-error-screen" paddingBottom={bottomInset}>
       <LinearGradient colors={colors} style={styles.background} />
       <View flex={1} justifyContent="space-between">
         <View flex={1}>
@@ -48,7 +48,7 @@ export default function ImportError() {
         </View>
 
         <View paddingHorizontal="$4" gap="$4">
-          <SafeButton onPress={router.back}>Try again</SafeButton>
+          <SafeButton onPress={onTryAgain}>Try again</SafeButton>
         </View>
       </View>
     </YStack>

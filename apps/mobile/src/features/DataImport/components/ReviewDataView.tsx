@@ -1,11 +1,8 @@
-import React, { useMemo } from 'react'
-import { useRouter } from 'expo-router'
+import React from 'react'
 import { Text, YStack, H2, XStack, ScrollView } from 'tamagui'
 import { SafeButton } from '@/src/components/SafeButton'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { StatusBar } from 'expo-status-bar'
-import { useColorScheme } from 'react-native'
-import { useDataImportContext } from './DataImportProvider'
+import { ColorSchemeName } from 'react-native'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { Container } from '@/src/components/Container'
 import { Badge } from '@/src/components/Badge'
@@ -16,63 +13,21 @@ interface ImportSummary {
   addressBookCount: number
 }
 
-interface LegacyDataStructure {
-  safes?: Array<{
-    address: string
-    chain: string
-    name: string
-  }>
-  contacts?: Array<{
-    address: string
-    name: string
-    chain: string
-  }>
-  keys?: Array<{
-    address: string
-    name: string
-    key: string
-  }>
+interface ReviewDataViewProps {
+  colorScheme: ColorSchemeName
+  bottomInset: number
+  importSummary: ImportSummary
+  isImportDataAvailable: boolean
+  onContinue: () => void
 }
 
-export const ReviewData = () => {
-  const router = useRouter()
-  const insets = useSafeAreaInsets()
-  const colorScheme = useColorScheme()
-  const { importedData } = useDataImportContext()
-
-  const importSummary = useMemo<ImportSummary>(() => {
-    if (!importedData?.data) {
-      return { safeAccountsCount: 0, signersCount: 0, addressBookCount: 0 }
-    }
-
-    const data = importedData.data as LegacyDataStructure
-
-    // Count Safe Accounts from addedSafes
-    const safeAccountsCount = data.safes ? data.safes.length : 0
-
-    // Count signers from addedSafes owners
-    const allSigners = new Set<string>()
-    if (data.keys) {
-      data.keys.forEach((key) => {
-        allSigners.add(key.address)
-      })
-    }
-
-    // Count address book entries
-    const addressBookCount = data.contacts ? Object.keys(data.contacts).length : 0
-
-    return {
-      safeAccountsCount,
-      signersCount: allSigners.size,
-      addressBookCount,
-    }
-  }, [importedData])
-
-  const handleContinue = () => {
-    // Navigate to import progress screen to start the actual import
-    router.push('/import-data/import-progress')
-  }
-
+export const ReviewDataView = ({
+  colorScheme,
+  bottomInset,
+  importSummary,
+  isImportDataAvailable,
+  onContinue,
+}: ReviewDataViewProps) => {
   return (
     <ScrollView contentContainerStyle={{ flex: 1 }}>
       <YStack flex={1} testID="review-data-screen">
@@ -176,7 +131,7 @@ export const ReviewData = () => {
           </YStack>
 
           {/* Bottom section */}
-          <YStack gap="$4" paddingBottom={insets.bottom}>
+          <YStack gap="$4" paddingBottom={bottomInset}>
             {/* Privacy notice */}
             <Text
               color="$colorSecondary"
@@ -192,9 +147,9 @@ export const ReviewData = () => {
             <SafeButton
               primary
               testID="continue-button"
-              onPress={handleContinue}
-              disabled={!importedData}
-              opacity={!importedData ? 0.5 : 1}
+              onPress={onContinue}
+              disabled={!isImportDataAvailable}
+              opacity={!isImportDataAvailable ? 0.5 : 1}
             >
               Continue
             </SafeButton>

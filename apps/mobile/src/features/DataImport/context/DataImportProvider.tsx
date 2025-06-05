@@ -1,5 +1,5 @@
 import React, { createContext, useContext, ReactNode } from 'react'
-import { useLegacyImport } from './hooks/useLegacyImport'
+import { useLegacyImport } from '../hooks/useLegacyImport'
 
 type DataImportContextType = ReturnType<typeof useLegacyImport>
 

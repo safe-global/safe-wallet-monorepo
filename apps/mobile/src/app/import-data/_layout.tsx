@@ -1,7 +1,7 @@
 import { Stack } from 'expo-router'
 import { getDefaultScreenOptions } from '@/src/navigation/hooks/utils'
 import { Text } from 'tamagui'
-import { DataImportProvider } from '@/src/features/DataImport/DataImportProvider'
+import { DataImportProvider } from '@/src/features/DataImport/context/DataImportProvider'
 
 const titleStep = (step: number) => {
   return (

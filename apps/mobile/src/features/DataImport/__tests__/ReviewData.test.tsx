@@ -1,7 +1,7 @@
 import React from 'react'
 import { fireEvent, render, within } from '@/src/tests/test-utils'
-import { ReviewData } from '../ReviewData'
-import { useDataImportContext } from '../DataImportProvider'
+import { ReviewData } from '../ReviewData.container'
+import { useDataImportContext } from '../context/DataImportProvider'
 import { useRouter } from 'expo-router'
 
 jest.mock('../DataImportProvider', () => ({
