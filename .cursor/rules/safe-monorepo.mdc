@@ -33,7 +33,7 @@ TypeScript and Zod Usage
 
 Syntax and Formatting
 
-- Use the `const` keyword for pure functions.
+- Use the `const` instead of `function` for pure functions.
 - Write declarative JSX with clear and readable structure.
 
 UI and Styling
@@ -66,7 +66,7 @@ Performance Optimization
 
 Monorepo Management
 
-- Follow best practices using Yarn for monorepo setups.
+- Follow best practices using Yarn v4 for monorepo setups.
 - Ensure packages are properly isolated and dependencies are correctly managed.
 - Use shared configurations and scripts where appropriate.
 - Utilize the workspace structure as defined in the root `package.json`.
