@@ -48,8 +48,6 @@ describe('ImportProgressScreen', () => {
       },
     } as unknown as ReturnType<typeof useDataImportContext>)
 
-    jest.useFakeTimers()
-
     render(<ImportProgressScreen />)
 
     // Not sure why we need to run all timers 3 times, my guess is that
@@ -65,7 +63,5 @@ describe('ImportProgressScreen', () => {
     })
     expect(dispatchMock).toHaveBeenCalled()
     expect(pushMock).toHaveBeenCalledWith('/import-data/import-success')
-
-    jest.useRealTimers()
   })
 })
