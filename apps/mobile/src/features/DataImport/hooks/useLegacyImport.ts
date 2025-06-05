@@ -57,10 +57,11 @@ export function useLegacyImport() {
 
       const content = await FileSystem.readAsStringAsync(fileUri)
       const secured: SecuredDataFile = JSON.parse(content)
-      console.log('secured', secured, password)
-      const decoded = decodeLegacyData(secured, password)
+      Logger.trace('Legacy secured data loaded')
 
-      console.log('Imported data:', decoded)
+      const decoded = decodeLegacyData(secured, password)
+      Logger.trace('Legacy data successfully decoded')
+
       setImportedData(decoded)
       return decoded
     } catch (e) {
