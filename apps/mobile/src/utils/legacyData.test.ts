@@ -24,4 +24,28 @@ describe('decodeLegacyData', () => {
     const decoded = decodeLegacyData(file, password)
     expect(decoded).toEqual(data)
   })
+
+  it('throws error for unsupported version', () => {
+    const file: SecuredDataFile = {
+      version: '2.0' as any, // Invalid version
+      algo: 'aes-256-gcm',
+      salt: 'dGVzdC1zYWx0',
+      rounds: 100000,
+      data: 'dGVzdC1kYXRh',
+    }
+
+    expect(() => decodeLegacyData(file, 'password')).toThrow('Unsupported file format')
+  })
+
+  it('throws error for unsupported algorithm', () => {
+    const file: SecuredDataFile = {
+      version: '1.0',
+      algo: 'aes-128-cbc' as any, // Invalid algorithm
+      salt: 'dGVzdC1zYWx0',
+      rounds: 100000,
+      data: 'dGVzdC1kYXRh',
+    }
+
+    expect(() => decodeLegacyData(file, 'password')).toThrow('Unsupported file format')
+  })
 })
