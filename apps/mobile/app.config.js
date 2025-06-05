@@ -128,7 +128,7 @@ const config = {
       '@safe-global/notification-service-ios',
       {
         iosDeploymentTarget: '15.1',
-        apsEnvMode: 'development',
+        apsEnvMode: IS_DEV ? 'development' : 'production',
         appleDevTeamId: appleDevTeamId,
       },
     ],
