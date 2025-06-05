@@ -7,7 +7,7 @@ const config = {
   name: IS_DEV ? 'Safe{Wallet} MVP - Development' : 'Safe{Wallet} MVP',
   slug: 'safe-mobileapp',
   owner: 'safeglobal',
-  version: '1.0.0',
+  version: '1.0.1',
   extra: {
     storybookEnabled: process.env.STORYBOOK_ENABLED,
     eas: {
