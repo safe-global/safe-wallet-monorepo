@@ -12,8 +12,12 @@
 
 .listItemButton {
   border-radius: 6px;
-  padding-top: 6px;
-  padding-bottom: 6px;
+  padding-top: var(--space-1);
+  padding-bottom: var(--space-1);
+}
+
+.listItemButton :global .MuiListItemText-root {
+  margin: 0;
 }
 
 .list :global .MuiListItemButton-root {
