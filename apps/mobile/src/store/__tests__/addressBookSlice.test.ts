@@ -11,7 +11,7 @@ import type { Contact } from '../addressBookSlice'
 
 describe('addressBookSlice', () => {
   it('upserts a contact', () => {
-    const contact: Contact = { value: '0x1', name: 'Alice' }
+    const contact: Contact = { value: '0x1', name: 'Alice', chainIds: [] }
     const state = addressBookSlice.reducer(undefined, upsertContact(contact))
 
     expect(state.contacts['0x1']).toEqual(contact)
@@ -19,10 +19,10 @@ describe('addressBookSlice', () => {
 
   it('updates an existing contact', () => {
     const initial = {
-      contacts: { '0x1': { value: '0x1', name: 'Alice' } },
+      contacts: { '0x1': { value: '0x1', name: 'Alice', chainIds: [] } },
       selectedContact: null,
     }
-    const updated: Contact = { value: '0x1', name: 'Alice B' }
+    const updated: Contact = { value: '0x1', name: 'Alice B', chainIds: [] }
     const state = addressBookSlice.reducer(initial, upsertContact(updated))
 
     expect(state.contacts['0x1']).toEqual(updated)
@@ -30,7 +30,7 @@ describe('addressBookSlice', () => {
 
   it('removes a contact', () => {
     const initial = {
-      contacts: { '0x1': { value: '0x1', name: 'Alice' } },
+      contacts: { '0x1': { value: '0x1', name: 'Alice', chainIds: [] } },
       selectedContact: null,
     }
     const state = addressBookSlice.reducer(initial, removeContact('0x1'))
@@ -39,7 +39,7 @@ describe('addressBookSlice', () => {
   })
 
   it('clears selectedContact when removed', () => {
-    const contact: Contact = { value: '0x1', name: 'Alice' }
+    const contact: Contact = { value: '0x1', name: 'Alice', chainIds: [] }
     const initial = { contacts: { '0x1': contact }, selectedContact: contact }
     const state = addressBookSlice.reducer(initial, removeContact('0x1'))
 
@@ -47,7 +47,7 @@ describe('addressBookSlice', () => {
   })
 
   it('adds a contact', () => {
-    const contact: Contact = { value: '0x1', name: 'Alice' }
+    const contact: Contact = { value: '0x1', name: 'Alice', chainIds: [] }
     const state = addressBookSlice.reducer(undefined, addContact(contact))
 
     expect(state.contacts['0x1']).toEqual(contact)
@@ -55,9 +55,9 @@ describe('addressBookSlice', () => {
 
   it('adds multiple contacts', () => {
     const contacts: Contact[] = [
-      { value: '0x1', name: 'Alice' },
-      { value: '0x2', name: 'Bob' },
-      { value: '0x3', name: 'Charlie' },
+      { value: '0x1', name: 'Alice', chainIds: [] },
+      { value: '0x2', name: 'Bob', chainIds: ['1'] },
+      { value: '0x3', name: 'Charlie', chainIds: ['1', '137'] },
     ]
     const state = addressBookSlice.reducer(undefined, addContacts(contacts))
 
@@ -67,7 +67,7 @@ describe('addressBookSlice', () => {
   })
 
   it('selects a contact by address', () => {
-    const contact: Contact = { value: '0x1', name: 'Alice' }
+    const contact: Contact = { value: '0x1', name: 'Alice', chainIds: [] }
     const initial = {
       contacts: { '0x1': contact },
       selectedContact: null,
@@ -88,7 +88,7 @@ describe('addressBookSlice', () => {
   })
 
   it('deselects contact when selecting null', () => {
-    const contact: Contact = { value: '0x1', name: 'Alice' }
+    const contact: Contact = { value: '0x1', name: 'Alice', chainIds: [] }
     const initial = {
       contacts: { '0x1': contact },
       selectedContact: contact,
@@ -99,24 +99,24 @@ describe('addressBookSlice', () => {
   })
 
   it('updates an existing contact', () => {
-    const original: Contact = { value: '0x1', name: 'Alice' }
+    const original: Contact = { value: '0x1', name: 'Alice', chainIds: [] }
     const initial = {
       contacts: { '0x1': original },
       selectedContact: null,
     }
-    const updated: Contact = { value: '0x1', name: 'Alice Updated' }
+    const updated: Contact = { value: '0x1', name: 'Alice Updated', chainIds: ['1'] }
     const state = addressBookSlice.reducer(initial, updateContact(updated))
 
     expect(state.contacts['0x1']).toEqual({ ...original, ...updated })
   })
 
   it('updates selectedContact when updating the selected contact', () => {
-    const original: Contact = { value: '0x1', name: 'Alice' }
+    const original: Contact = { value: '0x1', name: 'Alice', chainIds: [] }
     const initial = {
       contacts: { '0x1': original },
       selectedContact: original,
     }
-    const updated: Contact = { value: '0x1', name: 'Alice Updated' }
+    const updated: Contact = { value: '0x1', name: 'Alice Updated', chainIds: ['1'] }
     const state = addressBookSlice.reducer(initial, updateContact(updated))
 
     expect(state.selectedContact).toEqual({ ...original, ...updated })
@@ -127,7 +127,7 @@ describe('addressBookSlice', () => {
       contacts: {},
       selectedContact: null,
     }
-    const contact: Contact = { value: '0x1', name: 'Alice' }
+    const contact: Contact = { value: '0x1', name: 'Alice', chainIds: [] }
     const state = addressBookSlice.reducer(initial, updateContact(contact))
 
     expect(state.contacts['0x1']).toBeUndefined()

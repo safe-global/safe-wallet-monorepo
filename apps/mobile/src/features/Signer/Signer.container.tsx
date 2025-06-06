@@ -55,7 +55,7 @@ export const SignerContainer = () => {
   })
 
   const onSubmit: SubmitHandler<FormValues> = (data) => {
-    dispatch(upsertContact({ ...contact, value: address, name: data.name }))
+    dispatch(upsertContact({ ...contact, value: address, name: data.name, chainIds: contact?.chainIds || [] }))
 
     clearErrors()
     reset(data, { keepValues: true })

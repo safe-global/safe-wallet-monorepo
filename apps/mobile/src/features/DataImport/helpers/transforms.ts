@@ -49,6 +49,7 @@ export const transformContactData = (contact: NonNullable<LegacyDataStructure['c
   return {
     value: contact.address,
     name: contact.name,
+    chainIds: [],
   }
 }
 
@@ -88,6 +89,7 @@ export const storeSafes = (data: LegacyDataStructure, dispatch: AppDispatch): vo
       addContact({
         value: safe.address,
         name: safe.name,
+        chainIds: [],
       }),
     )
   }

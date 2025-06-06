@@ -92,7 +92,7 @@ describe('MyAccountsContainer', () => {
       initialStore: {
         addressBook: {
           contacts: {
-            [mockSafeItem.address]: { name: 'Test Safe', value: mockSafeItem.address },
+            [mockSafeItem.address]: { name: 'Test Safe', value: mockSafeItem.address, chainIds: [] },
           },
           selectedContact: null,
         },

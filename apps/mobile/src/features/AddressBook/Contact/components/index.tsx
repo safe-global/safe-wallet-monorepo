@@ -1,0 +1,8 @@
+export { ContactFormContainer as ContactForm } from '../ContactForm.container'
+
+// Modular components
+export { ContactActionButton } from './ContactActionButton'
+export { ContactAddressField } from './ContactAddressField'
+export { ContactHeader } from './ContactHeader'
+export { ContactNameField } from './ContactNameField'
+export { ContactNetworkRow } from './ContactNetworkRow'

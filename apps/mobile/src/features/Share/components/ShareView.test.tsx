@@ -43,7 +43,7 @@ describe('ShareView', () => {
       initialStore: {
         addressBook: {
           contacts: {
-            [activeSafe.address]: { name: 'Test Safe', value: activeSafe.address },
+            [activeSafe.address]: { name: 'Test Safe', value: activeSafe.address, chainIds: [] },
           },
           selectedContact: null,
         },

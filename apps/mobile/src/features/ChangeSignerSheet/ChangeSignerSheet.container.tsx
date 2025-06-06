@@ -17,7 +17,7 @@ import { formatValue } from '@/src/utils/formatters'
 import { useTransactionsGetTransactionByIdV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { RouteProp, useRoute } from '@react-navigation/native'
 import { extractAppSigners } from '../ConfirmTx/utils'
-import { ContactContainer } from '../AddressBook/Contact.container'
+import { ContactDisplayNameContainer } from '../AddressBook'
 
 export const ChangeSignerSheetContainer = () => {
   const dispatch = useAppDispatch()
@@ -79,7 +79,7 @@ export const ChangeSignerSheetContainer = () => {
           <SignersCard
             transparent
             onPress={onSignerPress(item, onClose)}
-            name={<ContactContainer address={item.value as Address} />}
+            name={<ContactDisplayNameContainer address={item.value as Address} />}
             address={item.value as Address}
             rightNode={
               <Text>
