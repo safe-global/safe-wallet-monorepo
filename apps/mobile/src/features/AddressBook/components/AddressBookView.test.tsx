@@ -4,8 +4,8 @@ import { AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transacti
 import React from 'react'
 
 // Only mock the complex components with dependencies
-jest.mock('./List/AddressBookList', () => ({
-  AddressBookList: ({ contacts, onSelectContact }: any) => {
+jest.mock('./List/AddressBookList.container', () => ({
+  AddressBookListContainer: ({ contacts, onSelectContact }: any) => {
     const React = require('react')
     return React.createElement(
       'View',

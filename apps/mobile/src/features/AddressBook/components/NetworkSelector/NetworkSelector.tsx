@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from 'react'
-import { BottomSheetModal, BottomSheetView, BottomSheetScrollView } from '@gorhom/bottom-sheet'
+import { BottomSheetModal, BottomSheetScrollView } from '@gorhom/bottom-sheet'
 import { getVariable, Text, View, useTheme } from 'tamagui'
 import { TouchableOpacity } from 'react-native'
 import { useAppSelector } from '@/src/store/hooks'
@@ -45,7 +45,9 @@ export const NetworkSelector = ({
   }, [isVisible])
 
   const handleChainToggle = (chainId: string) => {
-    if (isReadOnly) return // Don't allow changes in read-only mode
+    if (isReadOnly) {
+      return // Don't allow changes in read-only mode
+    }
 
     let newSelection: string[]
 
@@ -67,7 +69,9 @@ export const NetworkSelector = ({
   const isAllChainsSelected = selectedChainIds.length === 0
 
   const handleSelectAll = () => {
-    if (isReadOnly) return // Don't allow changes in read-only mode
+    if (isReadOnly) {
+      return // Don't allow changes in read-only mode
+    }
     onSelectionChange([]) // Empty array means all chains
   }
 
@@ -102,7 +106,9 @@ export const NetworkSelector = ({
 
   const renderAllChainsItem = () => {
     // Only show "All Networks" option in edit mode and when all chains are selected
-    if (isReadOnly || !isAllChainsSelected) return null
+    if (isReadOnly || !isAllChainsSelected) {
+      return null
+    }
 
     return (
       <TouchableOpacity style={{ width: '100%' }} onPress={handleSelectAll}>

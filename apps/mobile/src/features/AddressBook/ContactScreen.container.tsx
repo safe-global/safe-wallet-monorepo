@@ -1,4 +1,4 @@
-import React, { useState, useLayoutEffect, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { useLocalSearchParams, router, useNavigation } from 'expo-router'
 import { Alert, TouchableOpacity } from 'react-native'
 import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
@@ -54,7 +54,9 @@ export const ContactScreenContainer = () => {
   )
 
   const handleDeletePress = () => {
-    if (!contact) return
+    if (!contact) {
+      return
+    }
 
     Alert.alert(
       'Delete Contact',
@@ -75,7 +77,9 @@ export const ContactScreenContainer = () => {
   }
 
   const handleDeleteConfirm = () => {
-    if (!contact) return
+    if (!contact) {
+      return
+    }
 
     dispatch(removeContact(contact.value))
     setIsEditing(false)

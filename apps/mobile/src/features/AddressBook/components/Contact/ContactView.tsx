@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { ScrollView, View, Text } from 'tamagui'
+import { ScrollView, View } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { KeyboardAvoidingView } from 'react-native'
 import { useForm, FormProvider } from 'react-hook-form'
@@ -14,7 +14,6 @@ import {
   ContactNetworkRow,
 } from './components'
 import { NetworkSelector } from '../NetworkSelector/NetworkSelector'
-import { InfoSheet } from '@/src/components/InfoSheet'
 
 interface ContactViewProps {
   contact?: Contact | null

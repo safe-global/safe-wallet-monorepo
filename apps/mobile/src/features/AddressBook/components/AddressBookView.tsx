@@ -4,7 +4,7 @@ import React from 'react'
 import { NoContacts } from './List/NoContacts'
 import { View } from 'tamagui'
 import SafeSearchBar from '@/src/components/SafeSearchBar/SafeSearchBar'
-import { AddressBookList } from './List/AddressBookList'
+import { AddressBookListContainer } from './List/AddressBookList.container'
 import { LargeHeaderTitle } from '@/src/components/Title'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { SafeButton } from '@/src/components/SafeButton'
@@ -32,7 +32,7 @@ export const AddressBookView = ({ contacts, filteredContacts, onSearch, onSelect
         </View>
         {contacts.length === 0 && <NoContacts />}
         {contacts.length > 0 && filteredContacts.length === 0 && <NoContactsFound />}
-        <AddressBookList contacts={filteredContacts} onSelectContact={onSelectContact} />
+        <AddressBookListContainer contacts={filteredContacts} onSelectContact={onSelectContact} />
       </View>
       {/* Add Contact Button */}
       <View paddingTop="$4" paddingHorizontal="$4">

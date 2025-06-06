@@ -1,6 +1,6 @@
 import React from 'react'
 import { useColorScheme } from 'react-native'
-import { H3, Text, View } from 'tamagui'
+import { Text, View } from 'tamagui'
 import EmptyAddressBookLight from './EmptyAddressBookLight'
 import EmptyAddressBookDark from './EmptyAddressBookDark'
 
