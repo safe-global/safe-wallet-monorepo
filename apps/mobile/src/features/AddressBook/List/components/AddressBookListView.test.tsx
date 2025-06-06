@@ -5,12 +5,18 @@ import React from 'react'
 
 // Only mock the complex components with dependencies
 jest.mock('../ContactItemActions.container', () => ({
-  ContactItemActionsContainer: ({ contacts, onSelectContact }: any) => {
+  ContactItemActionsContainer: ({
+    contacts,
+    onSelectContact,
+  }: {
+    contacts: AddressInfo[]
+    onSelectContact: (contact: AddressInfo) => void
+  }) => {
     const React = require('react')
     return React.createElement(
       'View',
       { testID: 'address-book-list' },
-      contacts.map((contact: any) =>
+      contacts.map((contact: AddressInfo) =>
         React.createElement(
           'Pressable',
           {

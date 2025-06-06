@@ -1,6 +1,6 @@
 import React from 'react'
-import { render, fireEvent } from '@/src/tests/test-utils'
-import { FormProvider, useForm } from 'react-hook-form'
+import { render } from '@/src/tests/test-utils'
+import { FormProvider, useForm, Control, FieldErrors } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { faker } from '@faker-js/faker'
 import { ContactAddressField } from '../ContactAddressField'
@@ -13,7 +13,13 @@ const TestWrapper = ({
   defaultValues = { name: '', address: '' },
   renderWithControl = false,
 }: {
-  children: React.ReactNode | ((control: any, errors: any, dirtyFields: any) => React.ReactNode)
+  children:
+    | React.ReactNode
+    | ((
+        control: Control<ContactFormData>,
+        errors: FieldErrors<ContactFormData>,
+        dirtyFields: Partial<Record<keyof ContactFormData, boolean>>,
+      ) => React.ReactNode)
   defaultValues?: ContactFormData
   renderWithControl?: boolean
 }) => {
@@ -133,7 +139,7 @@ describe('ContactAddressField', () => {
         // Create a scenario where validation will fail
         const { getByTestId, getByText } = render(
           <TestWrapper defaultValues={{ name: 'Test', address: invalidAddress }} renderWithControl>
-            {(control, errors, dirtyFields) => {
+            {(control, _errors, dirtyFields) => {
               // Manually set dirty state for address field
               const mockDirtyFields = { ...dirtyFields, address: true }
               const mockErrors = { address: { message: 'Invalid Ethereum address format', type: 'custom' } }
@@ -161,7 +167,7 @@ describe('ContactAddressField', () => {
       it('should show success state when field is dirty, has no errors, and has value', () => {
         const { getByTestId } = render(
           <TestWrapper defaultValues={{ name: 'Test', address: validAddress }} renderWithControl>
-            {(control, errors, dirtyFields) => {
+            {(control, _errors, dirtyFields) => {
               const mockDirtyFields = { ...dirtyFields, address: true }
 
               return (
@@ -169,7 +175,7 @@ describe('ContactAddressField', () => {
                   isEditing={true}
                   contact={null}
                   control={control}
-                  errors={errors}
+                  errors={_errors}
                   dirtyFields={mockDirtyFields}
                 />
               )
@@ -184,7 +190,7 @@ describe('ContactAddressField', () => {
       it('should not show success state when field is dirty but value is empty', () => {
         const { getByTestId } = render(
           <TestWrapper defaultValues={{ name: 'Test', address: '' }} renderWithControl>
-            {(control, errors, dirtyFields) => {
+            {(control, _errors, dirtyFields) => {
               const mockDirtyFields = { ...dirtyFields, address: true }
 
               return (
@@ -192,7 +198,7 @@ describe('ContactAddressField', () => {
                   isEditing={true}
                   contact={null}
                   control={control}
-                  errors={errors}
+                  errors={_errors}
                   dirtyFields={mockDirtyFields}
                 />
               )
@@ -207,7 +213,7 @@ describe('ContactAddressField', () => {
       it('should not show success state when field is dirty but value is only whitespace', () => {
         const { getByTestId } = render(
           <TestWrapper defaultValues={{ name: 'Test', address: '   ' }} renderWithControl>
-            {(control, errors, dirtyFields) => {
+            {(control, _errors, dirtyFields) => {
               const mockDirtyFields = { ...dirtyFields, address: true }
 
               return (
@@ -215,7 +221,7 @@ describe('ContactAddressField', () => {
                   isEditing={true}
                   contact={null}
                   control={control}
-                  errors={errors}
+                  errors={_errors}
                   dirtyFields={mockDirtyFields}
                 />
               )
@@ -227,36 +233,29 @@ describe('ContactAddressField', () => {
         expect(container).toBeDefined()
       })
 
-      it('should not show validation states when field is not dirty', () => {
+      it('should not show success state when field is not dirty', () => {
         const { getByTestId } = render(
-          <TestWrapper defaultValues={{ name: 'Test', address: invalidAddress }} renderWithControl>
-            {(control, errors, dirtyFields) => {
-              const mockDirtyFields = { ...dirtyFields, address: false }
-              const mockErrors = { address: { message: 'Invalid Ethereum address format', type: 'custom' } }
-
-              return (
-                <ContactAddressField
-                  isEditing={true}
-                  contact={null}
-                  control={control}
-                  errors={mockErrors}
-                  dirtyFields={mockDirtyFields}
-                />
-              )
-            }}
+          <TestWrapper defaultValues={{ name: 'Test', address: validAddress }} renderWithControl>
+            {(control, _errors, dirtyFields) => (
+              <ContactAddressField
+                isEditing={true}
+                contact={null}
+                control={control}
+                errors={_errors}
+                dirtyFields={dirtyFields}
+              />
+            )}
           </TestWrapper>,
         )
 
         const container = getByTestId('safe-input-with-label')
         expect(container).toBeDefined()
       })
-    })
 
-    describe('error display', () => {
-      it('should display error message when validation fails', () => {
+      it('should display error message when there are errors', () => {
         const { getByText } = render(
           <TestWrapper renderWithControl>
-            {(control, errors, dirtyFields) => {
+            {(control, _errors, dirtyFields) => {
               const mockErrors = { address: { message: 'Invalid Ethereum address format', type: 'custom' } }
 
               return (
@@ -279,7 +278,7 @@ describe('ContactAddressField', () => {
       it('should not display error message when no errors', () => {
         const { queryByText } = render(
           <TestWrapper renderWithControl>
-            {(control, errors, dirtyFields) => (
+            {(control, _errors, dirtyFields) => (
               <ContactAddressField
                 isEditing={true}
                 contact={null}
@@ -358,7 +357,7 @@ describe('ContactAddressField', () => {
     it('should handle contact with null value', () => {
       const contactWithNullValue: Contact = {
         ...mockContact,
-        value: null as any,
+        value: null as unknown as string,
       }
 
       const { getByTestId } = render(<ContactAddressField isEditing={false} contact={contactWithNullValue} />)

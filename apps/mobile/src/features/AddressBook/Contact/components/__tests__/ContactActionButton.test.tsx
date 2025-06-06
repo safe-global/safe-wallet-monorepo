@@ -24,13 +24,13 @@ describe('ContactActionButton', () => {
     const { getByText } = render(<ContactActionButton isEditing={true} isValid={false} onSave={mockOnSave} />)
 
     // Find button by traversing from text to its parent containers until we find the button
-    let buttonElement: any = getByText('Save contact')
-    while (buttonElement && buttonElement.props.role !== 'button') {
-      buttonElement = buttonElement.parent
+    let buttonElement: unknown = getByText('Save contact')
+    while (buttonElement && (buttonElement as { props?: { role?: string } }).props?.role !== 'button') {
+      buttonElement = (buttonElement as { parent?: unknown }).parent
     }
 
     expect(buttonElement).toBeTruthy()
-    expect(buttonElement.props.pointerEvents).toBe('none')
+    expect((buttonElement as { props?: { pointerEvents?: string } }).props?.pointerEvents).toBe('none')
   })
 
   it('calls onEdit when Edit button is pressed', () => {

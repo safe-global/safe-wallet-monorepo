@@ -3,13 +3,16 @@ import { render, fireEvent } from '@/src/tests/test-utils'
 import { Keyboard } from 'react-native'
 import { ContactNetworkRow } from '../ContactNetworkRow'
 import { useContactNetworkData } from '../../hooks/useContactNetworkData'
+import { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 
 // Mock the useContactNetworkData hook
 jest.mock('../../hooks/useContactNetworkData')
 const mockUseContactNetworkData = useContactNetworkData as jest.MockedFunction<typeof useContactNetworkData>
 
 // Mock Keyboard.dismiss using jest.spyOn
-const mockKeyboardDismiss = jest.spyOn(Keyboard, 'dismiss').mockImplementation(() => {})
+const mockKeyboardDismiss = jest.spyOn(Keyboard, 'dismiss').mockImplementation(() => {
+  // Mock implementation for Keyboard.dismiss
+})
 
 describe('ContactNetworkRow', () => {
   const mockOnPress = jest.fn()
@@ -46,7 +49,7 @@ describe('ContactNetworkRow', () => {
     const mockDisplayText = 'Ethereum Mainnet'
     mockUseContactNetworkData.mockReturnValue({
       displayText: mockDisplayText,
-      selectedChains: [{ chainName: 'Ethereum Mainnet', chainId: '1' } as any],
+      selectedChains: [{ chainName: 'Ethereum Mainnet', chainId: '1' } as Chain],
     })
 
     const { getByText } = render(<ContactNetworkRow onPress={mockOnPress} chainIds={['1']} />)

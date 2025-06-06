@@ -3,6 +3,7 @@ import { AddressBookListContainer } from './AddressBookList.container'
 import { Contact } from '@/src/store/addressBookSlice'
 import * as router from 'expo-router'
 import React from 'react'
+import { AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
 // Mock expo-router
 jest.mock('expo-router', () => ({
@@ -13,7 +14,19 @@ jest.mock('expo-router', () => ({
 
 // Mock the AddressBookListView component
 jest.mock('./components/AddressBookListView', () => ({
-  AddressBookListView: ({ contacts, filteredContacts, onSearch, onSelectContact, onAddContact }: any) => {
+  AddressBookListView: ({
+    contacts,
+    filteredContacts,
+    onSearch,
+    onSelectContact,
+    onAddContact,
+  }: {
+    contacts: AddressInfo[]
+    filteredContacts: AddressInfo[]
+    onSearch: (query: string) => void
+    onSelectContact: (contact: AddressInfo) => void
+    onAddContact: () => void
+  }) => {
     const React = require('react')
     return React.createElement(
       'View',
@@ -26,7 +39,7 @@ jest.mock('./components/AddressBookListView', () => ({
         { testID: 'add-contact-btn', onPress: onAddContact },
         React.createElement('Text', null, 'Add Contact'),
       ),
-      filteredContacts.map((contact: any) =>
+      filteredContacts.map((contact: AddressInfo) =>
         React.createElement(
           'Pressable',
           {

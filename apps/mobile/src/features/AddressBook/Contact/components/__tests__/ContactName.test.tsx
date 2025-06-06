@@ -53,10 +53,10 @@ describe('ContactName', () => {
   })
 
   it('should use address when name is falsy', () => {
-    const falsyValues = [null, undefined, '']
+    const falsyValues: (string | undefined)[] = [undefined, '']
 
     falsyValues.forEach((falsyName) => {
-      const { queryByText } = render(<ContactName name={falsyName as any} address={mockAddress} />)
+      const { queryByText } = render(<ContactName name={falsyName} address={mockAddress} />)
 
       // Should not render any falsy name values
       if (falsyName) {

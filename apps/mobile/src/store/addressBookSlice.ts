@@ -29,6 +29,7 @@ export const addressBookSlice = createSlice({
 
     removeContact: (state, action: PayloadAction<string>) => {
       const addressValue = action.payload
+      // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
       delete state.contacts[addressValue]
 
       if (state.selectedContact?.value === addressValue) {
