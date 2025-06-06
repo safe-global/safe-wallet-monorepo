@@ -12,6 +12,12 @@ jest.mock('expo-router', () => ({
   },
 }))
 
+// Mock the store hooks
+jest.mock('@/src/store/hooks', () => ({
+  useAppSelector: jest.fn(),
+  useAppDispatch: jest.fn(() => jest.fn()),
+}))
+
 // Mock the AddressBookListView component
 jest.mock('./components/AddressBookListView', () => ({
   AddressBookListView: ({
@@ -54,51 +60,6 @@ jest.mock('./components/AddressBookListView', () => ({
   },
 }))
 
-// Mock the actual useAppSelector
-jest.mock('@/src/store/hooks', () => ({
-  useAppSelector: jest.fn(),
-}))
-
-// Mock the ListView component
-jest.mock('./components/ListView', () => ({
-  ListView: ({
-    _contacts,
-    filteredContacts,
-    _onSearch,
-    onSelectContact,
-    onAddContact,
-  }: {
-    _contacts: AddressInfo[]
-    filteredContacts: AddressInfo[]
-    _onSearch: (query: string) => void
-    onSelectContact: (contact: AddressInfo) => void
-    onAddContact: () => void
-  }) => {
-    const React = require('react')
-    return React.createElement(
-      'View',
-      { testID: 'list-view' },
-      React.createElement('Text', null, 'Search'),
-      React.createElement(
-        'Pressable',
-        { onPress: onAddContact, testID: 'add-contact-button' },
-        React.createElement('Text', null, 'Add Contact'),
-      ),
-      filteredContacts.map((contact: AddressInfo) =>
-        React.createElement(
-          'Pressable',
-          {
-            key: contact.value,
-            testID: `contact-${contact.value}`,
-            onPress: () => onSelectContact(contact),
-          },
-          React.createElement('Text', null, contact.name),
-        ),
-      ),
-    )
-  },
-}))
-
 describe('AddressBookListContainer', () => {
   const mockContacts: Contact[] = [
     {
@@ -127,10 +88,28 @@ describe('AddressBookListContainer', () => {
       },
       selectedContact: null,
     },
+    settings: {
+      onboardingVersionSeen: '',
+      themePreference: 'auto' as const,
+      env: {
+        rpc: {},
+        tenderly: {
+          url: '',
+          accessToken: '',
+        },
+      },
+    },
   }
 
   beforeEach(() => {
     jest.clearAllMocks()
+    const { useAppSelector } = require('@/src/store/hooks')
+    useAppSelector.mockImplementation((selector: any) => {
+      if (selector.toString().includes('selectAllContacts')) {
+        return mockContacts
+      }
+      return selector(mockStore)
+    })
   })
 
   it('should render with contacts from Redux store', () => {
@@ -241,10 +220,45 @@ describe('AddressBookListContainer', () => {
   })
 
   it('should handle empty contacts array from store', () => {
+    const { useAppSelector } = require('@/src/store/hooks')
+    useAppSelector.mockImplementation((selector: any) => {
+      if (selector.toString().includes('selectAllContacts')) {
+        return []
+      }
+      return selector({
+        addressBook: {
+          contacts: {},
+          selectedContact: null,
+        },
+        settings: {
+          onboardingVersionSeen: '',
+          themePreference: 'auto' as const,
+          env: {
+            rpc: {},
+            tenderly: {
+              url: '',
+              accessToken: '',
+            },
+          },
+        },
+      })
+    })
+
     const emptyStore = {
       addressBook: {
         contacts: {},
         selectedContact: null,
+      },
+      settings: {
+        onboardingVersionSeen: '',
+        themePreference: 'auto' as const,
+        env: {
+          rpc: {},
+          tenderly: {
+            url: '',
+            accessToken: '',
+          },
+        },
       },
     }
 
@@ -261,12 +275,49 @@ describe('AddressBookListContainer', () => {
       chainIds: ['1'],
     }
 
+    const { useAppSelector } = require('@/src/store/hooks')
+    useAppSelector.mockImplementation((selector: any) => {
+      if (selector.toString().includes('selectAllContacts')) {
+        return [contactWithoutName]
+      }
+      return selector({
+        addressBook: {
+          contacts: {
+            '0x1234567890123456789012345678901234567890': contactWithoutName,
+          },
+          selectedContact: null,
+        },
+        settings: {
+          onboardingVersionSeen: '',
+          themePreference: 'auto' as const,
+          env: {
+            rpc: {},
+            tenderly: {
+              url: '',
+              accessToken: '',
+            },
+          },
+        },
+      })
+    })
+
     const storeWithUnnamedContacts = {
       addressBook: {
         contacts: {
           '0x1234567890123456789012345678901234567890': contactWithoutName,
         },
         selectedContact: null,
+      },
+      settings: {
+        onboardingVersionSeen: '',
+        themePreference: 'auto' as const,
+        env: {
+          rpc: {},
+          tenderly: {
+            url: '',
+            accessToken: '',
+          },
+        },
       },
     }
 
