@@ -1,4 +1,4 @@
-import type { ChainInfo, SafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import type { SafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { MetaTransactionData, SafeTransaction } from '@safe-global/types-kit'
 import {
@@ -7,13 +7,15 @@ import {
   TENDERLY_SIMULATE_ENDPOINT_URL,
 } from '@safe-global/utils/config/constants'
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
-import type {
-  StateObject,
-  TenderlySimulatePayload,
-  TenderlySimulation,
+import {
+  FETCH_STATUS,
+  type StateObject,
+  type TenderlySimulatePayload,
+  type TenderlySimulation,
 } from '@safe-global/utils/components/tx/security/tenderly/types'
 import type { EnvState } from '@safe-global/store/settingsSlice'
 import { toBeHex, ZeroAddress } from 'ethers'
+import { UseSimulationReturn } from './useSimulation'
 
 export const getSimulationLink = (simulationId: string): string => {
   return `https://dashboard.tenderly.co/public/${TENDERLY_ORG_NAME}/${TENDERLY_PROJECT_NAME}/simulator/${simulationId}`
@@ -101,7 +103,7 @@ const isOverwriteThreshold = (params: SimulationTxParams) => {
     return false
   }
   const tx = params.transactions
-  const hasOwnerSig = tx.signatures.has(params.executionOwner)
+  const hasOwnerSig = tx.signatures.has(params.executionOwner) || tx.signatures.has(params.executionOwner.toLowerCase())
   const effectiveSigs = tx.signatures.size + (hasOwnerSig ? 0 : 1)
   return params.safe.threshold > effectiveSigs
 }
@@ -149,4 +151,42 @@ export const getStateOverwrites = (params: SimulationTxParams) => {
   }
 
   return storageOverwrites
+}
+
+export const getCallTraceErrors = (simulation?: TenderlySimulation) => {
+  if (!simulation || !simulation.simulation.status) {
+    return []
+  }
+
+  return simulation.transaction.call_trace.filter((call) => call.error)
+}
+
+export type SimulationStatus = {
+  isLoading: boolean
+  isFinished: boolean
+  isSuccess: boolean
+  isCallTraceError: boolean
+  isError: boolean
+}
+
+export const getSimulationStatus = (simulation: UseSimulationReturn): SimulationStatus => {
+  const isLoading = simulation._simulationRequestStatus === FETCH_STATUS.LOADING
+
+  const isFinished =
+    simulation._simulationRequestStatus === FETCH_STATUS.SUCCESS ||
+    simulation._simulationRequestStatus === FETCH_STATUS.ERROR
+
+  const isSuccess = simulation.simulation?.simulation.status || false
+
+  // Safe can emit failure event even though Tenderly simulation succeeds
+  const isCallTraceError = isSuccess && getCallTraceErrors(simulation.simulation).length > 0
+  const isError = simulation._simulationRequestStatus === FETCH_STATUS.ERROR
+
+  return {
+    isLoading,
+    isFinished,
+    isSuccess,
+    isCallTraceError,
+    isError,
+  }
 }
