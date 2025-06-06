@@ -10,7 +10,7 @@ import {
   removeContact,
   type Contact,
 } from '@/src/store/addressBookSlice'
-import { ContactForm } from './components/ContactForm'
+import { ContactFormContainer } from './ContactForm.container'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { usePreventLeaveScreen } from '@/src/hooks/usePreventLeaveScreen'
 
@@ -136,5 +136,5 @@ export const ContactDetailContainer = () => {
     }
   }
 
-  return <ContactForm contact={contact} isEditing={isEditing} onSave={handleSave} onEdit={handleEdit} />
+  return <ContactFormContainer contact={contact} isEditing={isEditing} onSave={handleSave} onEdit={handleEdit} />
 }

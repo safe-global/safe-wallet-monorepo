@@ -5,7 +5,7 @@ import { KeyboardAvoidingView } from 'react-native'
 import { useForm, FormProvider } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { type Contact } from '@/src/store/addressBookSlice'
-import { contactSchema, type ContactFormData } from '../schemas'
+import { contactSchema, type ContactFormData } from './schemas'
 import {
   ContactActionButton,
   ContactAddressField,
@@ -13,7 +13,7 @@ import {
   ContactNameField,
   ContactNetworkRow,
 } from '@/src/features/AddressBook/Contact/components'
-import { NetworkSelector } from '../NetworkSelector/NetworkSelector'
+import { NetworkSelector } from './NetworkSelector/NetworkSelector'
 
 interface ContactFormProps {
   contact?: Contact | null
@@ -22,7 +22,7 @@ interface ContactFormProps {
   onEdit?: () => void
 }
 
-export const ContactForm = ({ contact, isEditing, onSave, onEdit }: ContactFormProps) => {
+export const ContactFormContainer = ({ contact, isEditing, onSave, onEdit }: ContactFormProps) => {
   const insets = useSafeAreaInsets()
   const [isNetworkSelectorVisible, setIsNetworkSelectorVisible] = useState(false)
   const [selectedChainIds, setSelectedChainIds] = useState<string[]>(contact?.chainIds || [])
