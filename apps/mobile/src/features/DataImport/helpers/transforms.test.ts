@@ -63,6 +63,7 @@ describe('Data import helpers', () => {
       expect(result).toEqual({
         value: '0x1',
         name: 'Alice',
+        chainIds: [],
       })
     })
 
@@ -115,7 +116,7 @@ describe('Data import helpers', () => {
       }
 
       expect(dispatch).toHaveBeenCalledWith(addSafe({ address: '0x1', info: { '1': expectedSafeOverview } }))
-      expect(dispatch).toHaveBeenCalledWith(addContact({ value: '0x1', name: 'Test Safe' }))
+      expect(dispatch).toHaveBeenCalledWith(addContact({ value: '0x1', name: 'Test Safe', chainIds: [] }))
     })
 
     it('stores keys and dispatches addSignerWithEffects', async () => {
@@ -141,8 +142,8 @@ describe('Data import helpers', () => {
     it('dispatches addContacts', () => {
       const dispatch = jest.fn()
       const contacts: Contact[] = [
-        { value: '0x1', name: 'Alice' },
-        { value: '0x2', name: 'Bob' },
+        { value: '0x1', name: 'Alice', chainIds: [] },
+        { value: '0x2', name: 'Bob', chainIds: [] },
       ]
       const data: LegacyDataStructure = {
         contacts: [
