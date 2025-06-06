@@ -1,5 +1,5 @@
 import { render, userEvent } from '@/src/tests/test-utils'
-import { AddressBookContainer } from './AddressBook.container'
+import { ListContainer } from './List.container'
 import { Contact } from '@/src/store/addressBookSlice'
 import * as router from 'expo-router'
 import React from 'react'
@@ -11,9 +11,9 @@ jest.mock('expo-router', () => ({
   },
 }))
 
-// Mock the AddressBookView component
-jest.mock('./components/AddressBookView', () => ({
-  AddressBookView: ({ contacts, filteredContacts, onSearch, onSelectContact, onAddContact }: any) => {
+// Mock the ListView component
+jest.mock('./components/ListView', () => ({
+  ListView: ({ contacts, filteredContacts, onSearch, onSelectContact, onAddContact }: any) => {
     const React = require('react')
     return React.createElement(
       'View',
@@ -41,7 +41,7 @@ jest.mock('./components/AddressBookView', () => ({
   },
 }))
 
-describe('AddressBookContainer', () => {
+describe('ListContainer', () => {
   const mockContacts: Contact[] = [
     {
       value: '0x1234567890123456789012345678901234567890',
@@ -76,7 +76,7 @@ describe('AddressBookContainer', () => {
   })
 
   it('should render with contacts from Redux store', () => {
-    const container = render(<AddressBookContainer />, { initialStore: mockStore })
+    const container = render(<ListContainer />, { initialStore: mockStore })
 
     expect(container.getByTestId('address-book-view')).toBeTruthy()
     expect(container.getByTestId('total-contacts')).toHaveTextContent('3')
@@ -85,7 +85,7 @@ describe('AddressBookContainer', () => {
 
   it('should filter contacts by name when searching', async () => {
     const user = userEvent.setup()
-    const container = render(<AddressBookContainer />, { initialStore: mockStore })
+    const container = render(<ListContainer />, { initialStore: mockStore })
 
     const searchInput = container.getByTestId('search-input')
     await user.type(searchInput, 'Alice')
@@ -98,7 +98,7 @@ describe('AddressBookContainer', () => {
 
   it('should filter contacts by address when searching', async () => {
     const user = userEvent.setup()
-    const container = render(<AddressBookContainer />, { initialStore: mockStore })
+    const container = render(<ListContainer />, { initialStore: mockStore })
 
     const searchInput = container.getByTestId('search-input')
     await user.type(searchInput, '0x0987654321')
@@ -111,7 +111,7 @@ describe('AddressBookContainer', () => {
 
   it('should show all contacts when search is empty', async () => {
     const user = userEvent.setup()
-    const container = render(<AddressBookContainer />, { initialStore: mockStore })
+    const container = render(<ListContainer />, { initialStore: mockStore })
 
     const searchInput = container.getByTestId('search-input')
 
@@ -126,7 +126,7 @@ describe('AddressBookContainer', () => {
 
   it('should be case insensitive when searching', async () => {
     const user = userEvent.setup()
-    const container = render(<AddressBookContainer />, { initialStore: mockStore })
+    const container = render(<ListContainer />, { initialStore: mockStore })
 
     const searchInput = container.getByTestId('search-input')
     await user.type(searchInput, 'ALICE')
@@ -139,7 +139,7 @@ describe('AddressBookContainer', () => {
   it('should navigate to contact view when selecting a contact', async () => {
     const user = userEvent.setup()
     const mockPush = jest.spyOn(router.router, 'push')
-    const container = render(<AddressBookContainer />, { initialStore: mockStore })
+    const container = render(<ListContainer />, { initialStore: mockStore })
 
     const selectContactBtn = container.getByTestId('select-contact-0x1234567890123456789012345678901234567890')
     await user.press(selectContactBtn)
@@ -156,7 +156,7 @@ describe('AddressBookContainer', () => {
   it('should navigate to add contact when pressing add contact button', async () => {
     const user = userEvent.setup()
     const mockPush = jest.spyOn(router.router, 'push')
-    const container = render(<AddressBookContainer />, { initialStore: mockStore })
+    const container = render(<ListContainer />, { initialStore: mockStore })
 
     const addContactBtn = container.getByTestId('add-contact-btn')
     await user.press(addContactBtn)
@@ -171,7 +171,7 @@ describe('AddressBookContainer', () => {
 
   it('should show empty results when search matches nothing', async () => {
     const user = userEvent.setup()
-    const container = render(<AddressBookContainer />, { initialStore: mockStore })
+    const container = render(<ListContainer />, { initialStore: mockStore })
 
     const searchInput = container.getByTestId('search-input')
     await user.type(searchInput, 'NonexistentName')
@@ -190,7 +190,7 @@ describe('AddressBookContainer', () => {
       },
     }
 
-    const container = render(<AddressBookContainer />, { initialStore: emptyStore })
+    const container = render(<ListContainer />, { initialStore: emptyStore })
 
     expect(container.getByTestId('total-contacts')).toHaveTextContent('0')
     expect(container.getByTestId('filtered-contacts')).toHaveTextContent('0')
@@ -213,7 +213,7 @@ describe('AddressBookContainer', () => {
     }
 
     const user = userEvent.setup()
-    const container = render(<AddressBookContainer />, { initialStore: storeWithUnnamedContacts })
+    const container = render(<ListContainer />, { initialStore: storeWithUnnamedContacts })
 
     const searchInput = container.getByTestId('search-input')
     await user.type(searchInput, '0x1234')

@@ -1,3 +1,6 @@
+export { ContactView } from './ContactView'
+
+// Modular components
 export { ContactActionButton } from './ContactActionButton'
 export { ContactAddressField } from './ContactAddressField'
 export { ContactHeader } from './ContactHeader'

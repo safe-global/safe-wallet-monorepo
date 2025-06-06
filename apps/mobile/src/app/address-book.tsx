@@ -1,8 +1,6 @@
 import React from 'react'
-import { AddressBookContainer } from '@/src/features/AddressBook'
+import { ListContainer } from '@/src/features/AddressBook'
 
-function AddressBookScreen() {
-  return <AddressBookContainer />
+export default function AddressBookScreen() {
+  return <ListContainer />
 }
-
-export default AddressBookScreen

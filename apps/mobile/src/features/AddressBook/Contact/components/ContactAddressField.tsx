@@ -2,7 +2,7 @@ import React from 'react'
 import { Text, View } from 'tamagui'
 import { SafeInputWithLabel } from '@/src/components/SafeInput/SafeInputWithLabel'
 import { Controller, Control, FieldErrors } from 'react-hook-form'
-import { ContactFormData } from '../../../schemas'
+import { ContactFormData } from '../schemas'
 import { type Contact } from '@/src/store/addressBookSlice'
 
 interface ContactAddressFieldProps {

@@ -5,7 +5,7 @@ import { useAppDispatch } from '@/src/store/hooks'
 import { removeContact } from '@/src/store/addressBookSlice'
 import { useCopyAndDispatchToast } from '@/src/hooks/useCopyAndDispatchToast'
 import { useContactActions } from './hooks/useContactActions'
-import { AddressBookList } from './AddressBookList'
+import { AddressBookList } from './components/List/AddressBookList'
 
 interface AddressBookListContainerProps {
   contacts: AddressInfo[]

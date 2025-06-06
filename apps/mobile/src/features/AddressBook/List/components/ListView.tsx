@@ -4,7 +4,7 @@ import React from 'react'
 import { NoContacts } from './List/NoContacts'
 import { View } from 'tamagui'
 import SafeSearchBar from '@/src/components/SafeSearchBar/SafeSearchBar'
-import { AddressBookListContainer } from './List/AddressBookList.container'
+import { AddressBookListContainer } from '../AddressBookList.container'
 import { LargeHeaderTitle } from '@/src/components/Title'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { SafeButton } from '@/src/components/SafeButton'
@@ -18,7 +18,7 @@ type Props = {
   onAddContact: () => void
 }
 
-export const AddressBookView = ({ contacts, filteredContacts, onSearch, onSelectContact, onAddContact }: Props) => {
+export const ListView = ({ contacts, filteredContacts, onSearch, onSelectContact, onAddContact }: Props) => {
   const insets = useSafeAreaInsets()
 
   return (

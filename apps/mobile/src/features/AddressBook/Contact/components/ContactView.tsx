@@ -5,14 +5,14 @@ import { KeyboardAvoidingView } from 'react-native'
 import { useForm, FormProvider } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { type Contact } from '@/src/store/addressBookSlice'
-import { contactSchema, type ContactFormData } from '../../schemas'
+import { contactSchema, type ContactFormData } from '../schemas'
 import {
   ContactActionButton,
   ContactAddressField,
   ContactHeader,
   ContactNameField,
   ContactNetworkRow,
-} from './components'
+} from '@/src/features/AddressBook/Contact/components'
 import { NetworkSelector } from '../NetworkSelector/NetworkSelector'
 
 interface ContactViewProps {

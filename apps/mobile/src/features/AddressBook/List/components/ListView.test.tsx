@@ -1,5 +1,5 @@
 import { render, userEvent } from '@/src/tests/test-utils'
-import { AddressBookView } from './AddressBookView'
+import { ListView } from './ListView'
 import { AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import React from 'react'
 
@@ -25,7 +25,7 @@ jest.mock('./List/AddressBookList.container', () => ({
   },
 }))
 
-describe('AddressBookView', () => {
+describe('ListView', () => {
   const mockContacts: AddressInfo[] = [
     {
       value: '0x1234567890123456789012345678901234567890',
@@ -50,7 +50,7 @@ describe('AddressBookView', () => {
   })
 
   it('should render the address book view with all elements', () => {
-    const container = render(<AddressBookView {...defaultProps} />)
+    const container = render(<ListView {...defaultProps} />)
 
     expect(container.getByText('Address book')).toBeTruthy()
     expect(container.getByPlaceholderText('Name, address')).toBeTruthy()
@@ -66,7 +66,7 @@ describe('AddressBookView', () => {
       filteredContacts: [],
     }
 
-    const container = render(<AddressBookView {...props} />)
+    const container = render(<ListView {...props} />)
 
     expect(container.getByText('No contacts yet')).toBeTruthy()
     expect(container.getByText('This account has no contacts added.')).toBeTruthy()
@@ -81,7 +81,7 @@ describe('AddressBookView', () => {
       filteredContacts: [], // But search returned empty
     }
 
-    const container = render(<AddressBookView {...props} />)
+    const container = render(<ListView {...props} />)
 
     expect(container.getByText('No contacts found matching your search.')).toBeTruthy()
     expect(container.queryByText('No contacts yet')).not.toBeTruthy()
@@ -97,7 +97,7 @@ describe('AddressBookView', () => {
       onSearch: mockOnSearch,
     }
 
-    const container = render(<AddressBookView {...props} />)
+    const container = render(<ListView {...props} />)
     const searchInput = container.getByPlaceholderText('Name, address')
 
     await user.type(searchInput, 'Alice')
@@ -118,7 +118,7 @@ describe('AddressBookView', () => {
       onAddContact: mockOnAddContact,
     }
 
-    const container = render(<AddressBookView {...props} />)
+    const container = render(<ListView {...props} />)
     const addButton = container.getByText('Add contact')
 
     await user.press(addButton)
@@ -133,7 +133,7 @@ describe('AddressBookView', () => {
       filteredContacts,
     }
 
-    const container = render(<AddressBookView {...props} />)
+    const container = render(<ListView {...props} />)
 
     expect(container.getByTestId('address-book-list')).toBeTruthy()
     expect(container.getByTestId('contact-0x1234567890123456789012345678901234567890')).toBeTruthy()
@@ -147,7 +147,7 @@ describe('AddressBookView', () => {
       onSelectContact: mockOnSelectContact,
     }
 
-    render(<AddressBookView {...props} />)
+    render(<ListView {...props} />)
 
     // The mock component should receive the callback
     // This tests that the prop is correctly passed down
@@ -155,14 +155,14 @@ describe('AddressBookView', () => {
   })
 
   it('should have correct search bar placeholder', () => {
-    const container = render(<AddressBookView {...defaultProps} />)
+    const container = render(<ListView {...defaultProps} />)
     const searchBar = container.getByPlaceholderText('Name, address')
 
     expect(searchBar).toBeTruthy()
   })
 
   it('should not show no contacts found when there are filtered contacts', () => {
-    const container = render(<AddressBookView {...defaultProps} />)
+    const container = render(<ListView {...defaultProps} />)
 
     expect(container.queryByText('No contacts found matching your search.')).not.toBeTruthy()
     expect(container.queryByText('No contacts yet')).not.toBeTruthy()

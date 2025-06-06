@@ -2,11 +2,11 @@ import React, { useCallback, useState, useMemo } from 'react'
 import { router } from 'expo-router'
 
 import { useAppSelector } from '@/src/store/hooks'
-import { AddressBookView } from './components/AddressBookView'
+import { ListView } from './components/ListView'
 import { selectAllContacts } from '@/src/store/addressBookSlice'
 import { AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
-export const AddressBookContainer = () => {
+export const ListContainer = () => {
   const contacts = useAppSelector(selectAllContacts)
   const [searchQuery, setSearchQuery] = useState('')
 
@@ -48,7 +48,7 @@ export const AddressBookContainer = () => {
   }, [])
 
   return (
-    <AddressBookView
+    <ListView
       contacts={contacts}
       filteredContacts={filteredContacts}
       onSearch={handleSearch}
