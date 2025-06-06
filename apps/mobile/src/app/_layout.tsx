@@ -65,9 +65,9 @@ function RootLayout() {
         <DataFetchProvider>
           <NotificationsProvider>
             <PortalProvider shouldAddRootHost>
-              <BottomSheetModalProvider>
-                <PersistGate loading={null} persistor={persistor}>
-                  <SafeThemeProvider>
+              <PersistGate loading={null} persistor={persistor}>
+                <SafeThemeProvider>
+                  <BottomSheetModalProvider>
                     <SafeToastProvider>
                       <NavigationGuardHOC>
                         <HooksInitializer />
@@ -104,6 +104,7 @@ function RootLayout() {
                           <Stack.Screen name="transaction-actions" options={{ headerShown: true, title: '' }} />
                           <Stack.Screen name="action-details" options={{ headerShown: true, title: '' }} />
                           <Stack.Screen name="address-book" options={{ headerShown: true, title: '' }} />
+                          <Stack.Screen name="contact" options={{ headerShown: true, title: '' }} />
                           <Stack.Screen name="signers" options={{ headerShown: false }} />
                           <Stack.Screen name="import-signers" options={{ headerShown: false }} />
 
@@ -188,9 +189,9 @@ function RootLayout() {
                         <StatusBar />
                       </NavigationGuardHOC>
                     </SafeToastProvider>
-                  </SafeThemeProvider>
-                </PersistGate>
-              </BottomSheetModalProvider>
+                  </BottomSheetModalProvider>
+                </SafeThemeProvider>
+              </PersistGate>
             </PortalProvider>
           </NotificationsProvider>
         </DataFetchProvider>
