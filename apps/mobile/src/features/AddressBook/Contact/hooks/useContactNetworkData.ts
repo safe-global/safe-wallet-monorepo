@@ -9,7 +9,7 @@ export const useContactNetworkData = (chainIds: string[]) => {
       return 'All Networks'
     }
     if (chainIds.length === 1) {
-      return selectedChains[0]?.chainName || 'Unknown Network'
+      return selectedChains[0].chainName
     }
     return `${chainIds.length} Networks`
   }
