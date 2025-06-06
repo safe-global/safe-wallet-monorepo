@@ -15,14 +15,14 @@ import {
 } from '@/src/features/AddressBook/Contact/components'
 import { NetworkSelector } from '../NetworkSelector/NetworkSelector'
 
-interface ContactViewProps {
+interface ContactFormProps {
   contact?: Contact | null
   isEditing: boolean
   onSave: (contact: Contact) => void
   onEdit?: () => void
 }
 
-export const ContactView = ({ contact, isEditing, onSave, onEdit }: ContactViewProps) => {
+export const ContactForm = ({ contact, isEditing, onSave, onEdit }: ContactFormProps) => {
   const insets = useSafeAreaInsets()
   const [isNetworkSelectorVisible, setIsNetworkSelectorVisible] = useState(false)
   const [selectedChainIds, setSelectedChainIds] = useState<string[]>(contact?.chainIds || [])

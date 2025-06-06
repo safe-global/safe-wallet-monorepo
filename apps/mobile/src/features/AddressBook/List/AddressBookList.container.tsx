@@ -1,72 +1,59 @@
-import React, { useCallback } from 'react'
-import { Alert } from 'react-native'
+import React, { useCallback, useState, useMemo } from 'react'
+import { router } from 'expo-router'
+
+import { useAppSelector } from '@/src/store/hooks'
+import { AddressBookListView } from './components/AddressBookListView'
+import { selectAllContacts } from '@/src/store/addressBookSlice'
 import { AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { useAppDispatch } from '@/src/store/hooks'
-import { removeContact } from '@/src/store/addressBookSlice'
-import { useCopyAndDispatchToast } from '@/src/hooks/useCopyAndDispatchToast'
-import { useContactActions } from './hooks/useContactActions'
-import { AddressBookList } from './components/List/AddressBookList'
 
-interface AddressBookListContainerProps {
-  contacts: AddressInfo[]
-  onSelectContact: (contact: AddressInfo) => void
-}
+export const AddressBookListContainer = () => {
+  const contacts = useAppSelector(selectAllContacts)
+  const [searchQuery, setSearchQuery] = useState('')
 
-export const AddressBookListContainer: React.FC<AddressBookListContainerProps> = ({ contacts, onSelectContact }) => {
-  const dispatch = useAppDispatch()
-  const copy = useCopyAndDispatchToast()
-  const actions = useContactActions()
+  // Memoized filtered contacts for performance
+  const filteredContacts = useMemo(() => {
+    if (!searchQuery.trim()) {
+      return contacts
+    }
 
-  const handleDeleteContact = useCallback(
-    (contact: AddressInfo) => {
-      Alert.alert(
-        'Delete Contact',
-        'Do you really want to delete this contact?',
-        [
-          {
-            text: 'Cancel',
-            style: 'cancel',
-          },
-          {
-            text: 'Delete',
-            style: 'destructive',
-            onPress: () => {
-              dispatch(removeContact(contact.value))
-            },
-          },
-        ],
-        { cancelable: true },
-      )
-    },
-    [dispatch],
-  )
+    const lowercaseQuery = searchQuery.toLowerCase()
+    return contacts.filter((contact) => {
+      const matchesName = contact.name?.toLowerCase().includes(lowercaseQuery)
+      const matchesAddress = contact.value.toLowerCase().includes(lowercaseQuery)
+      return matchesName || matchesAddress
+    })
+  }, [contacts, searchQuery])
 
-  const handleCopyContact = useCallback(
-    (contact: AddressInfo) => {
-      copy(contact.value as string)
-    },
-    [copy],
-  )
+  const handleSearch = useCallback((query: string) => {
+    setSearchQuery(query)
+  }, [])
 
-  const handleMenuAction = useCallback(
-    (contact: AddressInfo, actionId: string) => {
-      if (actionId === 'copy') {
-        return handleCopyContact(contact)
-      }
+  const handleSelectContact = useCallback((contact: AddressInfo) => {
+    router.push({
+      pathname: '/contact',
+      params: {
+        address: contact.value,
+        mode: 'view',
+      },
+    })
+  }, [])
 
-      if (actionId === 'delete') {
-        return handleDeleteContact(contact)
-      }
-    },
-    [handleCopyContact, handleDeleteContact],
-  )
+  const handleAddContact = useCallback(() => {
+    router.push({
+      pathname: '/contact',
+      params: {
+        mode: 'new',
+      },
+    })
+  }, [])
 
   return (
-    <AddressBookList
+    <AddressBookListView
       contacts={contacts}
-      onSelectContact={onSelectContact}
-      onMenuAction={handleMenuAction}
-      menuActions={actions}
+      filteredContacts={filteredContacts}
+      onSearch={handleSearch}
+      onSelectContact={handleSelectContact}
+      onAddContact={handleAddContact}
     />
   )
 }

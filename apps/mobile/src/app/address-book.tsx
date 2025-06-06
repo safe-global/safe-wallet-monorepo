@@ -1,6 +1,6 @@
 import React from 'react'
-import { ListContainer } from '@/src/features/AddressBook'
+import { AddressBookListContainer } from '@/src/features/AddressBook'
 
 export default function AddressBookScreen() {
-  return <ListContainer />
+  return <AddressBookListContainer />
 }

@@ -10,7 +10,7 @@ import { getTokenValue, Text, View, type TextProps } from 'tamagui'
 import { EthAddress } from '@/src/components/EthAddress'
 import { type Address } from '@/src/types/address'
 
-interface AddressBookListProps {
+interface ContactListItemsProps {
   contacts: AddressInfo[]
   onSelectContact: (contact: AddressInfo) => void
   onMenuAction: (contact: AddressInfo, actionId: string) => void
@@ -112,7 +112,7 @@ const ContactItem: React.FC<AddressBookContactItemProps> = ({ contact, onPress, 
   )
 }
 
-export const AddressBookList: React.FC<AddressBookListProps> = ({
+export const ContactListItems: React.FC<ContactListItemsProps> = ({
   contacts,
   onSelectContact,
   onMenuAction,

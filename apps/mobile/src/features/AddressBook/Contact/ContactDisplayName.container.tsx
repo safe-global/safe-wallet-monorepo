@@ -8,7 +8,7 @@ type Props = {
   textProps?: Partial<TextProps>
 }
 
-export const ContactNameContainer = ({ address, textProps }: Props) => {
+export const ContactDisplayNameContainer = ({ address, textProps }: Props) => {
   const contact = useAppSelector(selectContactByAddress(address))
   return <ContactName name={contact?.name} address={address} textProps={textProps} />
 }

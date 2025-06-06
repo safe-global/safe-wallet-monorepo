@@ -4,7 +4,7 @@ import React from 'react'
 import { NoContacts } from './List/NoContacts'
 import { View } from 'tamagui'
 import SafeSearchBar from '@/src/components/SafeSearchBar/SafeSearchBar'
-import { AddressBookListContainer } from '../AddressBookList.container'
+import { ContactItemActionsContainer } from '../ContactItemActions.container'
 import { LargeHeaderTitle } from '@/src/components/Title'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { SafeButton } from '@/src/components/SafeButton'
@@ -18,7 +18,7 @@ type Props = {
   onAddContact: () => void
 }
 
-export const ListView = ({ contacts, filteredContacts, onSearch, onSelectContact, onAddContact }: Props) => {
+export const AddressBookListView = ({ contacts, filteredContacts, onSearch, onSelectContact, onAddContact }: Props) => {
   const insets = useSafeAreaInsets()
 
   return (
@@ -32,7 +32,7 @@ export const ListView = ({ contacts, filteredContacts, onSearch, onSelectContact
         </View>
         {contacts.length === 0 && <NoContacts />}
         {contacts.length > 0 && filteredContacts.length === 0 && <NoContactsFound />}
-        <AddressBookListContainer contacts={filteredContacts} onSelectContact={onSelectContact} />
+        <ContactItemActionsContainer contacts={filteredContacts} onSelectContact={onSelectContact} />
       </View>
       {/* Add Contact Button */}
       <View paddingTop="$4" paddingHorizontal="$4">

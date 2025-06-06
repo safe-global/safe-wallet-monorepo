@@ -1,6 +1,6 @@
 import React from 'react'
 import { Stack, useLocalSearchParams } from 'expo-router'
-import { ContactContainer } from '@/src/features/AddressBook'
+import { ContactDetailContainer } from '@/src/features/AddressBook'
 
 function ContactScreen() {
   const { mode } = useLocalSearchParams<{ mode?: 'view' | 'edit' | 'new' }>()
@@ -20,7 +20,7 @@ function ContactScreen() {
   return (
     <>
       <Stack.Screen options={{ title: getTitle() }} />
-      <ContactContainer />
+      <ContactDetailContainer />
     </>
   )
 }

@@ -1,4 +1,4 @@
-export { ContactView } from './ContactView'
+export { ContactForm } from './ContactForm'
 
 // Modular components
 export { ContactActionButton } from './ContactActionButton'

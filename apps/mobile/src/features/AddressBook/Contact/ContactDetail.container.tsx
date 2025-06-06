@@ -10,11 +10,11 @@ import {
   removeContact,
   type Contact,
 } from '@/src/store/addressBookSlice'
-import { ContactView } from './components/ContactView'
+import { ContactForm } from './components/ContactForm'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { usePreventLeaveScreen } from '@/src/hooks/usePreventLeaveScreen'
 
-export const ContactContainer = () => {
+export const ContactDetailContainer = () => {
   const { address, mode } = useLocalSearchParams<{
     address?: string
     mode?: 'view' | 'edit' | 'new'
@@ -136,5 +136,5 @@ export const ContactContainer = () => {
     }
   }
 
-  return <ContactView contact={contact} isEditing={isEditing} onSave={handleSave} onEdit={handleEdit} />
+  return <ContactForm contact={contact} isEditing={isEditing} onSave={handleSave} onEdit={handleEdit} />
 }

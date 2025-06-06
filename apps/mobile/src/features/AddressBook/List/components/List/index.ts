@@ -1,3 +1,3 @@
-import { AddressBookList } from './AddressBookList'
-export { AddressBookList }
-export { AddressBookListContainer } from '../../AddressBookList.container'
+import { ContactListItems } from './ContactListItems'
+export { ContactListItems }
+export { ContactItemActionsContainer } from '../../ContactItemActions.container'
