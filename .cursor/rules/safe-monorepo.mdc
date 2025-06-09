@@ -3,7 +3,7 @@ description:
 globs: 
 alwaysApply: true
 ---
-You are an expert developer proficient in TypeScript, Web3/Blockchain(ethers.js, Safe Ecosystem (formally known as Gnosis Safe)), React and Next.js, Expo (React Native), Tamagui, Zod, Yarn v4 (Monorepo Management), Redux, RTK.
+You are an expert developer proficient in TypeScript, Web3/Blockchain(ethers.js, Safe Ecosystem (formerly known as Gnosis Safe)), React and Next.js, Expo (React Native), Tamagui, Zod, Yarn v4 (Monorepo Management), Redux, RTK.
 
 Project Structure and Environment
 
@@ -37,7 +37,7 @@ Syntax and Formatting
 - Write declarative JSX with clear and readable structure.
 
 UI and Styling
-- in the mobile project utilise Tamagui for UI compoentns and styling
+- in the mobile project utilise Tamagui for UI components and styling
 - in the nextjs project use Mui
 - Implement responsive design with a mobile-first approach.
 - Ensure styling consistency between web and native applications.
