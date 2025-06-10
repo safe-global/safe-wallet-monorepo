@@ -12,14 +12,14 @@ import Link from 'next/link'
 const SpacesBanner = ({ onDismiss }: { onDismiss: () => void }) => {
   return (
     <Card className={css.banner}>
-      <Stack direction={{ xs: 'column', md: 'row' }} alignItems="center" spacing={2}>
-        <Image src={SpacesIllustration} alt="Spaces illustration" width={95} height={95} />
+      <Stack direction={{ xs: 'column', md: 'row' }} alignItems={{ xs: 'flex-start', md: 'center' }} spacing={2}>
+        <Image className={css.bannerImage} src={SpacesIllustration} alt="Spaces illustration" width={95} height={95} />
         <Box>
-          <Typography variant="h4" fontWeight="bold" color="static.main">
+          <Typography variant="h4" fontWeight="bold" color="static.main" className={css.bannerText}>
             New! Improved Spaces.
           </Typography>
 
-          <Typography variant="body2" color="static.light">
+          <Typography variant="body2" color="static.light" className={css.bannerText}>
             All your Safe Accounts, finally organized. Streamlined for teams and solo users alike
           </Typography>
 
@@ -41,7 +41,7 @@ const SpacesBanner = ({ onDismiss }: { onDismiss: () => void }) => {
 
       <Track {...SPACE_EVENTS.HIDE_DASHBOARD_WIDGET}>
         <IconButton className={css.closeButton} aria-label="close" onClick={onDismiss}>
-          <CloseIcon fontSize="small" />
+          <CloseIcon fontSize="small" color="border" />
         </IconButton>
       </Track>
     </Card>
