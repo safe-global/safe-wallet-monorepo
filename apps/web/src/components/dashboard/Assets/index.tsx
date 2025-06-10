@@ -26,6 +26,7 @@ import StakeButton from '@/features/stake/components/StakeButton'
 import { STAKE_LABELS } from '@/services/analytics/events/stake'
 import useIsStakingFeatureEnabled from '@/features/stake/hooks/useIsStakingFeatureEnabled'
 import { formatPercentage } from '@safe-global/utils/utils/formatters'
+import { percentageOfTotal } from '@safe-global/utils/utils/formatNumber'
 
 const MAX_ASSETS = 5
 
@@ -70,9 +71,8 @@ const AssetRow = ({
   showEarn?: boolean
   showStake?: boolean
 }) => {
-  const fiatTotalNumber = Number(fiatTotal)
-  const percentageOfTotal = Number(item.fiatBalance) / fiatTotalNumber
-  const percentage = formatPercentage(percentageOfTotal)
+  const assetPercentage = percentageOfTotal(item.fiatBalance, fiatTotal)
+  const readablePercentage = formatPercentage(assetPercentage)
 
   return (
     <Box className={css.container} key={item.tokenInfo.address}>
@@ -88,9 +88,9 @@ const AssetRow = ({
 
       <Stack display={['none', 'flex']} direction="row" alignItems="center" gap={1}>
         <Box className={css.bar}>
-          <Typography className={css.barPercentage} component="span" width={`${percentageOfTotal * 100}%`} />
+          <Typography className={css.barPercentage} component="span" width={`${assetPercentage * 100}%`} />
         </Box>
-        <Typography variant="body2">{percentage}</Typography>
+        <Typography variant="body2">{readablePercentage}</Typography>
       </Stack>
 
       <Box flex={1} display="block" textAlign="right">
