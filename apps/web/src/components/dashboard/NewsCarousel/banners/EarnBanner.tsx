@@ -15,14 +15,14 @@ const EarnBanner = ({ onDismiss }: { onDismiss: () => void }) => {
 
   return (
     <Card className={css.banner}>
-      <Stack direction={{ xs: 'column', md: 'row' }} alignItems="center" spacing={2}>
-        <Image src={EarnIllustrationLight} alt="Earn illustration" width={95} height={95} />
+      <Stack direction={{ xs: 'column', md: 'row' }} alignItems={{ xs: 'flex-start', md: 'center' }} spacing={2}>
+        <Image className={css.bannerImage} src={EarnIllustrationLight} alt="Earn illustration" width={95} height={95} />
         <Box>
-          <Typography variant="h4" fontWeight="bold" color="static.main">
+          <Typography variant="h4" fontWeight="bold" color="static.main" className={css.bannerText}>
             Try enterprise-grade yields with up to 8.10% APY
           </Typography>
 
-          <Typography variant="body2" color="static.light">
+          <Typography variant="body2" color="static.light" className={css.bannerText}>
             Deposit stablecoins, wstETH, ETH, and WBTC and let your assets compound in minutes.
           </Typography>
 
@@ -44,7 +44,7 @@ const EarnBanner = ({ onDismiss }: { onDismiss: () => void }) => {
 
       <Track {...EARN_EVENTS.HIDE_EARN_BANNER}>
         <IconButton className={css.closeButton} aria-label="close" onClick={onDismiss}>
-          <CloseIcon fontSize="small" />
+          <CloseIcon fontSize="small" color="border" />
         </IconButton>
       </Track>
     </Card>

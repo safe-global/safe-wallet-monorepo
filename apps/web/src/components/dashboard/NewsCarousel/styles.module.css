@@ -1,9 +1,19 @@
 .overlay {
   position: absolute;
   top: 0;
-  left: 0;
   right: 0;
-  bottom: 0;
-  cursor: pointer;
-  background: linear-gradient(270deg, var(--color-background-main) 70%, transparent)
+  background: linear-gradient(270deg, var(--color-background-paper) 15%, transparent);
+  height: 100%;
+  width: 15%;
+  margin: 0 !important;
+  z-index: 0;
+}
+
+.slider {
+  overflow: hidden;
+  width: 100%;
+  touch-action: none;
+  display: flex;
+  gap: var(--space-2);
+  cursor: grab;
 }
