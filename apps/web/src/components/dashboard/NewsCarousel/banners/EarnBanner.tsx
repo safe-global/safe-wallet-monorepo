@@ -10,16 +10,16 @@ import { AppRoutes } from '@/config/routes'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import { useRouter } from 'next/router'
 
-const EarnBanner = ({ onDismiss }: { onDismiss?: () => void }) => {
+const EarnBanner = ({ onDismiss }: { onDismiss: () => void }) => {
   const router = useRouter()
 
   const onHide = () => {
-    onDismiss?.()
+    onDismiss()
   }
 
   return (
     <Card className={css.banner}>
-      <Stack direction="row" alignItems="center" spacing={2}>
+      <Stack direction={{ xs: 'column', md: 'row' }} alignItems="center" spacing={2}>
         <Image src={EarnIllustrationLight} alt="Earn illustration" width={95} height={95} />
         <Box>
           <Typography variant="h4" fontWeight="bold" color="static.main">

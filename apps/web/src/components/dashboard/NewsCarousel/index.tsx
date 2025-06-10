@@ -1,6 +1,7 @@
-import { cloneElement, useEffect, useMemo, useState, type ReactElement } from 'react'
+import { createElement, useEffect, useMemo, useState } from 'react'
 import { Box, Fade, Stack } from '@mui/material'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
+import css from './styles.module.css'
 
 export interface NewsBannerProps {
   onDismiss: () => void
@@ -8,7 +9,7 @@ export interface NewsBannerProps {
 
 export interface BannerItem {
   id: string
-  element: ReactElement<NewsBannerProps>
+  element: React.ComponentType<NewsBannerProps>
 }
 
 export interface NewsCarouselProps {
@@ -53,17 +54,12 @@ const NewsCarousel = ({ banners }: NewsCarouselProps) => {
           {items.map((item, idx) => (
             <Fade in key={item.id} timeout={150} style={{ width: `${ITEM_WIDTH_VW}vw`, flexShrink: 0 }}>
               <Box width="100%" position="relative">
-                {cloneElement(item.element, { onDismiss: () => dismissItem(item.id) })}
+                {createElement(item.element, { onDismiss: () => dismissItem(item.id) })}
                 {idx !== activeIndex && (
                   <Box
+                    className={css.overlay}
                     data-testid={`carousel-item-overlay-${idx}`}
                     onClick={() => setActiveIndex(idx)}
-                    position="absolute"
-                    top={0}
-                    left={0}
-                    right={0}
-                    bottom={0}
-                    sx={{ cursor: 'pointer', background: 'linear-gradient(270deg, #ffffff 70%, transparent)' }}
                   />
                 )}
               </Box>

@@ -1,7 +1,6 @@
-import { useTheme } from '@mui/material/styles'
 import { usePathname, useSearchParams } from 'next/navigation'
 import Link, { type LinkProps } from 'next/link'
-import { Alert, Box, Button, ButtonBase, Typography, useMediaQuery } from '@mui/material'
+import { Alert, Box, Button, ButtonBase, Typography } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
 import { SafeAppsTag } from '@/config/constants'
 import { AppRoutes } from '@/config/routes'
