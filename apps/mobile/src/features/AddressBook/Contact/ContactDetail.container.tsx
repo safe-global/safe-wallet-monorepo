@@ -7,12 +7,12 @@ import {
   selectAllContacts,
   addContact,
   updateContact,
-  removeContact,
   type Contact,
 } from '@/src/store/addressBookSlice'
 import { ContactFormContainer } from './ContactForm.container'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { usePreventLeaveScreen } from '@/src/hooks/usePreventLeaveScreen'
+import { useDeleteContact } from './hooks/useDeleteContact'
 
 export const ContactDetailContainer = () => {
   const { address, mode } = useLocalSearchParams<{
@@ -28,6 +28,8 @@ export const ContactDetailContainer = () => {
 
   const [isEditing, setIsEditing] = useState(mode === 'edit' || mode === 'new')
   usePreventLeaveScreen(isEditing)
+
+  const { handleDeletePress } = useDeleteContact({ contact, setIsEditing })
 
   // Set up navigation header with delete button when editing existing contact
   useEffect(() => {
@@ -52,41 +54,6 @@ export const ContactDetailContainer = () => {
     },
     [allContacts],
   )
-
-  const handleDeletePress = () => {
-    if (!contact) {
-      return
-    }
-
-    Alert.alert(
-      'Delete Contact',
-      'Do you really want to delete this contact?',
-      [
-        {
-          text: 'Cancel',
-          style: 'cancel',
-        },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: handleDeleteConfirm,
-        },
-      ],
-      { cancelable: true },
-    )
-  }
-
-  const handleDeleteConfirm = () => {
-    if (!contact) {
-      return
-    }
-
-    dispatch(removeContact(contact.value))
-    setIsEditing(false)
-    setTimeout(() => {
-      router.back()
-    }, 100)
-  }
 
   const handleEdit = () => {
     setIsEditing(true)
