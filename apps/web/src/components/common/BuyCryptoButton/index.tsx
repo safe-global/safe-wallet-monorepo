@@ -31,7 +31,7 @@ const useBuyCryptoHref = (): LinkProps['href'] | undefined => {
 }
 
 const buttonStyles = {
-  minHeight: '37.5px',
+  height: '42px',
 }
 
 const BuyCryptoOption = ({ name, children }: { name: string; children: ReactNode }) => {
@@ -69,9 +69,6 @@ const _BuyCryptoOptions = ({ rampLink }: { rampLink?: LinkProps['href'] }) => {
 }
 
 const InternalBuyCryptoButton = ({ href, pagePath }: { href?: LinkProps['href']; pagePath: string }) => {
-  const theme = useTheme()
-  const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'))
-
   if (!href) return null
 
   return (
@@ -80,9 +77,9 @@ const InternalBuyCryptoButton = ({ href, pagePath }: { href?: LinkProps['href'];
         <Link href={href} passHref>
           <Button
             variant="contained"
-            size={isSmallScreen ? 'medium' : 'small'}
+            size="compact"
             sx={buttonStyles}
-            startIcon={<AddIcon />}
+            startIcon={<AddIcon fontSize="small" />}
             className={css.buyCryptoButton}
             fullWidth
           >

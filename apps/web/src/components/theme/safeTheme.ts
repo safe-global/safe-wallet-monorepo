@@ -54,6 +54,7 @@ declare module '@mui/material/Button' {
 
   export interface ButtonPropsColorOverrides {
     background: true
+    static: true
   }
 
   export interface ButtonPropsVariantOverrides {
@@ -104,7 +105,7 @@ const createSafeTheme = (mode: PaletteMode): Theme => {
           {
             props: { size: 'compact' },
             style: {
-              padding: '8px 12px',
+              padding: '8px 16px',
             },
           },
           {

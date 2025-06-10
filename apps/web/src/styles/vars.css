@@ -38,6 +38,7 @@
   --color-logo-main: #121312;
   --color-logo-background: #eeeff0;
   --color-static-main: #121312;
+  --color-static-light: #636669;
   --space-1: 8px;
   --space-2: 16px;
   --space-3: 24px;
@@ -90,6 +91,7 @@
   --color-logo-main: #ffffff;
   --color-logo-background: #303033;
   --color-static-main: #121312;
+  --color-static-light: #636669;
 }
 
 /* The same as above for the brief moment before JS loads */
@@ -132,5 +134,6 @@
     --color-logo-main: #ffffff;
     --color-logo-background: #303033;
     --color-static-main: #121312;
+    --color-static-light: #636669;
   }
 }
