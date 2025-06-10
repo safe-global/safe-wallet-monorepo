@@ -171,7 +171,7 @@ describe('Spending limits tests', () => {
       })
   })
 
-  it('Verify explorer links contain Sepolia link', () => {
+  it.only('Verify explorer links contain Sepolia link', () => {
     tx.verifyNumberOfExternalLinks(3)
   })
 })

@@ -89,6 +89,7 @@ const recipientsCount = '[data-testid="recipients-count"]'
 const maxBtn = '[data-testid="max-btn"]'
 const tokenAmountSection = '[data-testid="token-amount-section"]'
 const insufficientBalanceError = '[data-testid="insufficient-balance-error"]'
+const signerList = '[data-testid="signer-list"]'
 
 const insufficientFundsErrorStr = 'Insufficient funds'
 const viewTransactionBtn = 'View transaction'
@@ -438,7 +439,7 @@ export function verifyNumberOfCopyIcons(number) {
 }
 
 export function verifyNumberOfExternalLinks(number) {
-  cy.get(explorerBtn)
+  cy.get(signerList).find(explorerBtn)
     //.parent()
     // .parent()
     // .next()
