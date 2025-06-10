@@ -31,7 +31,7 @@ import {
   Typography,
 } from '@mui/material'
 import type { Delegate } from '@safe-global/safe-gateway-typescript-sdk/dist/types/delegates'
-import { type BaseSyntheticEvent, useCallback, useState } from 'react'
+import { type BaseSyntheticEvent, useCallback, useMemo, useState } from 'react'
 import { FormProvider, useForm, type Validate } from 'react-hook-form'
 import useSafeInfo from '@/hooks/useSafeInfo'
 
@@ -70,14 +70,13 @@ const UpsertProposer = ({ onClose, onSuccess, proposer }: UpsertProposerProps) =
     mode: 'onChange',
   })
 
+  const safeOwnerAddresses = useMemo(() => safe.owners.map((owner) => owner.value), [safe.owners])
+
   const validateAddress = useCallback<Validate<string>>(
     (value) =>
       addressIsNotCurrentSafe(safeAddress, 'Cannot add Safe Account itself as proposer')(value) ??
-      addressIsNotOwner(
-        safe.owners.map((owner) => owner.value),
-        'Cannot add Safe Owner as proposer',
-      )(value),
-    [safe.owners, safeAddress],
+      addressIsNotOwner(safeOwnerAddresses, 'Cannot add Safe Owner as proposer')(value),
+    [safeAddress, safeOwnerAddresses],
   )
 
   const { handleSubmit, formState } = methods
