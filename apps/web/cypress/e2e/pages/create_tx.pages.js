@@ -439,7 +439,7 @@ export function verifyNumberOfCopyIcons(number) {
 }
 
 export function verifyNumberOfExternalLinks(number) {
-  cy.get(signerList).find(explorerBtn)
+  cy.get('main').find(explorerBtn)
     //.parent()
     // .parent()
     // .next()
