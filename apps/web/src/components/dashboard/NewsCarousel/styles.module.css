@@ -1,0 +1,9 @@
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  cursor: pointer;
+  background: linear-gradient(270deg, var(--color-background-main) 70%, transparent)
+}

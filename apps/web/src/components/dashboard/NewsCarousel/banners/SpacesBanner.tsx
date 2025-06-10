@@ -9,14 +9,14 @@ import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import { AppRoutes } from '@/config/routes'
 import Link from 'next/link'
 
-const SpacesBanner = ({ onDismiss }: { onDismiss?: () => void }) => {
+const SpacesBanner = ({ onDismiss }: { onDismiss: () => void }) => {
   const onHide = () => {
-    onDismiss?.()
+    onDismiss()
   }
 
   return (
     <Card className={css.banner}>
-      <Stack direction="row" alignItems="center" spacing={2}>
+      <Stack direction={{ xs: 'column', md: 'row' }} alignItems="center" spacing={2}>
         <Image src={SpacesIllustration} alt="Spaces illustration" width={95} height={95} />
         <Box>
           <Typography variant="h4" fontWeight="bold" color="static.main">

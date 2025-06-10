@@ -18,7 +18,7 @@ import { useRouter } from 'next/router'
 import { type ReactElement, useContext } from 'react'
 import { SWAP_EVENTS, SWAP_LABELS } from '@/services/analytics/events/swaps'
 import useIsSwapFeatureEnabled from '@/features/swap/hooks/useIsSwapFeatureEnabled'
-import NewsCarousel, { BannerItem } from '@/components/dashboard/NewsCarousel'
+import NewsCarousel, { type BannerItem } from '@/components/dashboard/NewsCarousel'
 import EarnBanner from '@/components/dashboard/NewsCarousel/banners/EarnBanner'
 import SpacesBanner from '@/components/dashboard/NewsCarousel/banners/SpacesBanner'
 import useIsEarnFeatureEnabled from '@/features/earn/hooks/useIsEarnFeatureEnabled'
@@ -66,8 +66,8 @@ const Overview = (): ReactElement => {
   const isSpacesFeatureEnabled = useHasFeature(FEATURES.SPACES)
 
   const banners = [
-    isEarnFeatureEnabled && { id: 'earnBanner', element: <EarnBanner /> },
-    isSpacesFeatureEnabled && { id: 'spacesBanner', element: <SpacesBanner /> },
+    isEarnFeatureEnabled && { id: 'earnBanner', element: EarnBanner },
+    isSpacesFeatureEnabled && { id: 'spacesBanner', element: SpacesBanner },
   ].filter(Boolean) as BannerItem[]
 
   const isInitialState = !safeLoaded && !safeLoading
@@ -84,7 +84,11 @@ const Overview = (): ReactElement => {
         {isLoading ? (
           SkeletonOverview
         ) : (
-          <Stack direction="row" justifyContent="space-between">
+          <Stack
+            direction={{ xs: 'column', md: 'row' }}
+            alignItems={{ xs: 'flex-start', md: 'center' }}
+            justifyContent="space-between"
+          >
             <Box>
               <Typography color="primary.light" fontWeight="bold" mb={1}>
                 Total asset value
@@ -103,23 +107,32 @@ const Overview = (): ReactElement => {
             </Box>
 
             {safe.deployed && (
-              <Stack direction="row" alignItems="center" spacing={1}>
+              <Stack
+                direction="row"
+                alignItems={{ xs: 'flex-start', md: 'center' }}
+                flexWrap={{ xs: 'wrap', md: 'nowrap' }}
+                gap={1}
+                width={{ xs: 1, md: 'auto' }}
+                mt={{ xs: 2, md: 0 }}
+              >
                 <Box flexShrink="0">
                   <BuyCryptoButton />
                 </Box>
 
-                <Button
-                  onClick={handleOnSend}
-                  size="compact"
-                  variant="contained"
-                  color="background"
-                  disableElevation
-                  startIcon={<ArrowIconNW fontSize="small" />}
-                  sx={{ height: '42px' }}
-                  fullWidth
-                >
-                  Send
-                </Button>
+                <Box flexShrink="0">
+                  <Button
+                    onClick={handleOnSend}
+                    size="compact"
+                    variant="contained"
+                    color="background"
+                    disableElevation
+                    startIcon={<ArrowIconNW fontSize="small" />}
+                    sx={{ height: '42px' }}
+                    fullWidth
+                  >
+                    Send
+                  </Button>
+                </Box>
 
                 <Track {...OVERVIEW_EVENTS.SHOW_QR} label="dashboard">
                   <QrCodeButton>

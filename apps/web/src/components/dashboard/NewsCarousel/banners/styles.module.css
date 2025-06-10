@@ -4,6 +4,7 @@
   background: linear-gradient(90deg, #B0FFC9, #D7F6FF);
   border: 0;
   border-radius: 12px;
+  height: 100%;
 }
 
 .closeButton {
@@ -11,4 +12,10 @@
   position: absolute;
   top: var(--space-2);
   right: var(--space-2);
+}
+
+@media (max-width: 599.95px) {
+  .banner {
+    padding: var(--space-2);
+  }
 }
