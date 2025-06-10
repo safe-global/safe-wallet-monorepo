@@ -13,7 +13,10 @@ const tokenAddressInput = 'input[name="recipients.0.tokenAddress"]'
 const amountInput = 'input[name="recipients.0.amount"]'
 const amountInput_ = (index) => `input[name="recipients.${index}.amount"]`
 const nonceInput = 'input[name="nonce"]'
+const walletNonceInput = '[name="userNonce"]'
 const gasLimitInput = '[name="gasLimit"]'
+const maxPriorityFee = '[name="maxPriorityFeePerGas"]'
+const maxFee = '[name="maxFeePerGas"]'
 const rotateLeftIcon = '[data-testid="RotateLeftIcon"]'
 export const transactionItem = '[data-testid="transaction-item"]'
 export const connectedWalletExecMethod = '[data-testid="connected-wallet-execution-method"]'
@@ -141,6 +144,13 @@ const comboButtonOptions = {
   sign: 'Sign',
   execute: 'Execute',
   addToBatch: 'Add to batch',
+}
+
+const advancedParametersValues = {
+  walletNonce: '5500',
+  maxPriorityFee: '0.1234',
+  maxFee: '0.5678',
+  gasLimit: '300001',
 }
 
 // Transaction details on Tx creation
@@ -759,8 +769,12 @@ export function clickOnYesOption() {
   cy.contains(yesStr).should('exist').click()
 }
 
-export function openExecutionParamsModal() {
+export function displayAdvncedDetails() {
   cy.contains(estimatedFeeStr).click()
+}
+
+export function openExecutionParamsModal() {
+  displayAdvncedDetails()
   cy.contains(editBtnStr).click()
 }
 
@@ -776,6 +790,26 @@ export function verifyAndSubmitExecutionParams() {
   cy.get('@Paramsform').find(gasLimitInput).clear().type('300000').invoke('prop', 'value').should('equal', '300000')
   cy.get('@Paramsform').find(gasLimitInput).parent('div').find(rotateLeftIcon).click()
   cy.get('@Paramsform').submit()
+}
+
+export function setAdvncedExecutionParams() {
+  cy.contains(executionParamsStr).parents('form').as('Paramsform')
+  const arrayNames = ['Wallet nonce', 'Max priority fee (Gwei)', 'Max fee (Gwei)', 'Gas limit']
+  arrayNames.forEach((element) => {
+    cy.get('@Paramsform').find('label').contains(`${element}`).next().find('input').should('not.be.disabled')
+  })
+  cy.get('@Paramsform').find(gasLimitInput).clear().type(advancedParametersValues.gasLimit)
+  cy.get('@Paramsform').find(maxPriorityFee).clear().type(advancedParametersValues.maxPriorityFee)
+  cy.get('@Paramsform').find(maxFee).clear().type(advancedParametersValues.maxFee)
+  cy.get('@Paramsform').find(walletNonceInput).clear().type(advancedParametersValues.walletNonce)
+  cy.get('@Paramsform').submit()
+}
+
+export function verifyEditedExutionParams() {
+  cy.contains('Wallet nonce').next().should('contain', advancedParametersValues.walletNonce)
+  cy.contains('Gas limit').next().should('contain', advancedParametersValues.gasLimit)
+  cy.contains('Max priority fee (Gwei)').next().should('contain', advancedParametersValues.maxPriorityFee)
+  cy.contains('Max fee (Gwei)').next().should('contain', advancedParametersValues.maxFee)
 }
 
 export function clickOnNoLaterOption() {
