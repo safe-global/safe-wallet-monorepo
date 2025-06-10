@@ -9,11 +9,15 @@ import { formatArrayValue } from '../formatters/arrayValue'
 import { Badge } from '@/src/components/Badge'
 
 interface formatParametersProps {
-  txData: TransactionDetails['txData']
+  txData?: TransactionDetails['txData']
 }
 const badgeProps: CircleProps = { borderRadius: '$2', paddingHorizontal: '$2', paddingVertical: '$1' }
 
 const formatParameters = ({ txData }: formatParametersProps): ListTableItem[] => {
+  if (!txData) {
+    return []
+  }
+
   const items: ListTableItem[] = [
     {
       label: txData?.dataDecoded?.method ? 'Call' : 'Interacted with',
