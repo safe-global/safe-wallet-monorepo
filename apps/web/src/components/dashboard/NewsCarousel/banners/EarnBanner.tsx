@@ -13,10 +13,6 @@ import { useRouter } from 'next/router'
 const EarnBanner = ({ onDismiss }: { onDismiss: () => void }) => {
   const router = useRouter()
 
-  const onHide = () => {
-    onDismiss()
-  }
-
   return (
     <Card className={css.banner}>
       <Stack direction={{ xs: 'column', md: 'row' }} alignItems="center" spacing={2}>
@@ -47,7 +43,7 @@ const EarnBanner = ({ onDismiss }: { onDismiss: () => void }) => {
       </Stack>
 
       <Track {...EARN_EVENTS.HIDE_EARN_BANNER}>
-        <IconButton className={css.closeButton} aria-label="close" onClick={onHide}>
+        <IconButton className={css.closeButton} aria-label="close" onClick={onDismiss}>
           <CloseIcon fontSize="small" />
         </IconButton>
       </Track>

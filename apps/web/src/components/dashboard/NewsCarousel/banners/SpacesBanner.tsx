@@ -10,10 +10,6 @@ import { AppRoutes } from '@/config/routes'
 import Link from 'next/link'
 
 const SpacesBanner = ({ onDismiss }: { onDismiss: () => void }) => {
-  const onHide = () => {
-    onDismiss()
-  }
-
   return (
     <Card className={css.banner}>
       <Stack direction={{ xs: 'column', md: 'row' }} alignItems="center" spacing={2}>
@@ -44,7 +40,7 @@ const SpacesBanner = ({ onDismiss }: { onDismiss: () => void }) => {
       </Stack>
 
       <Track {...SPACE_EVENTS.HIDE_DASHBOARD_WIDGET}>
-        <IconButton className={css.closeButton} aria-label="close" onClick={onHide}>
+        <IconButton className={css.closeButton} aria-label="close" onClick={onDismiss}>
           <CloseIcon fontSize="small" />
         </IconButton>
       </Track>
