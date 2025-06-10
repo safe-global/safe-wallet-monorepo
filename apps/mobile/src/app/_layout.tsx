@@ -178,6 +178,13 @@ function RootLayout() {
                             }}
                           />
                           <Stack.Screen
+                            name="currency"
+                            options={{
+                              headerShown: true,
+                              title: 'Currency',
+                            }}
+                          />
+                          <Stack.Screen
                             name="share"
                             options={{
                               headerShown: false,

@@ -2,7 +2,7 @@ import React from 'react'
 import { View, Text, YStack } from 'tamagui'
 import { CurrencyItem } from '../CurrencyItem'
 import { CURRENCY_DATA } from '@/src/config/currencies'
-import type { CurrencySectionProps } from '../CurrencyScreen.types'
+import type { CurrencySectionProps } from '../Currency.types'
 
 export const CurrencySection: React.FC<CurrencySectionProps> = ({
   title,

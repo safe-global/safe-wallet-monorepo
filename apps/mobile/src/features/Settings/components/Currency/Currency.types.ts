@@ -19,7 +19,6 @@ export interface CurrencyViewProps {
   selectedCurrency: string
   cryptoCurrencies: string[]
   fiatCurrencies: string[]
-  searchQuery: string
   onSearchQueryChange: (query: string) => void
   onCurrencySelect: (currency: string) => void
 }

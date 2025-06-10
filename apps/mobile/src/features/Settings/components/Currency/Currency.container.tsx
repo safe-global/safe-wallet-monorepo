@@ -48,7 +48,6 @@ export const CurrencyContainer = () => {
       selectedCurrency={selectedCurrency}
       cryptoCurrencies={cryptoCurrencies}
       fiatCurrencies={fiatCurrencies}
-      searchQuery={searchQuery}
       onSearchQueryChange={setSearchQuery}
       onCurrencySelect={handleCurrencySelect}
     />

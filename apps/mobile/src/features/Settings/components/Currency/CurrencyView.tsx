@@ -1,15 +1,14 @@
 import React from 'react'
-import { View, ScrollView, Input, YStack, Theme } from 'tamagui'
+import { View, ScrollView, YStack, Theme } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { SafeFontIcon } from '@/src/components/SafeFontIcon/SafeFontIcon'
+import SafeSearchBar from '@/src/components/SafeSearchBar/SafeSearchBar'
 import { CurrencySection } from './CurrencySection'
-import type { CurrencyViewProps } from './CurrencyScreen.types'
+import type { CurrencyViewProps } from './Currency.types'
 
 export const CurrencyView: React.FC<CurrencyViewProps> = ({
   selectedCurrency,
   cryptoCurrencies,
   fiatCurrencies,
-  searchQuery,
   onSearchQueryChange,
   onCurrencySelect,
 }) => {
@@ -22,27 +21,7 @@ export const CurrencyView: React.FC<CurrencyViewProps> = ({
         <View backgroundColor="$background" paddingTop="$4">
           {/* Search Bar */}
           <View paddingHorizontal="$4" paddingBottom="$4">
-            <View
-              backgroundColor="rgba(118,118,128,0.12)"
-              borderRadius="$3"
-              paddingHorizontal="$3"
-              paddingVertical="$2"
-              flexDirection="row"
-              alignItems="center"
-            >
-              <SafeFontIcon name="search" size={16} color="$colorSecondary" style={{ marginRight: 8 }} />
-              <Input
-                flex={1}
-                placeholder="Search"
-                placeholderTextColor="$colorSecondary"
-                value={searchQuery}
-                onChangeText={onSearchQueryChange}
-                fontSize="$4"
-                borderWidth={0}
-                backgroundColor="transparent"
-                color="$color"
-              />
-            </View>
+            <SafeSearchBar placeholder="Search" onSearch={onSearchQueryChange} />
           </View>
         </View>
 

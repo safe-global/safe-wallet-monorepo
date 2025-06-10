@@ -2,7 +2,7 @@ import React from 'react'
 import { View, Text } from 'tamagui'
 import { Pressable } from 'react-native'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon/SafeFontIcon'
-import type { CurrencyItemProps } from '../CurrencyScreen.types'
+import type { CurrencyItemProps } from '../Currency.types'
 
 export const CurrencyItem: React.FC<CurrencyItemProps> = ({ code, symbol, name, isSelected, onPress }) => (
   <Pressable onPress={onPress}>
