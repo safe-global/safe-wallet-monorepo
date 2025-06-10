@@ -104,7 +104,7 @@ describe('AddressBookListContainer', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     const { useAppSelector } = require('@/src/store/hooks')
-    useAppSelector.mockImplementation((selector: any) => {
+    useAppSelector.mockImplementation((selector: (state: unknown) => unknown) => {
       if (selector.toString().includes('selectAllContacts')) {
         return mockContacts
       }
@@ -221,7 +221,7 @@ describe('AddressBookListContainer', () => {
 
   it('should handle empty contacts array from store', () => {
     const { useAppSelector } = require('@/src/store/hooks')
-    useAppSelector.mockImplementation((selector: any) => {
+    useAppSelector.mockImplementation((selector: (state: unknown) => unknown) => {
       if (selector.toString().includes('selectAllContacts')) {
         return []
       }
@@ -276,7 +276,7 @@ describe('AddressBookListContainer', () => {
     }
 
     const { useAppSelector } = require('@/src/store/hooks')
-    useAppSelector.mockImplementation((selector: any) => {
+    useAppSelector.mockImplementation((selector: (state: unknown) => unknown) => {
       if (selector.toString().includes('selectAllContacts')) {
         return [contactWithoutName]
       }
