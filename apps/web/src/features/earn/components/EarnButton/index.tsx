@@ -15,9 +15,11 @@ import classnames from 'classnames'
 const EarnButton = ({
   tokenInfo,
   trackingLabel,
+  compact = true,
 }: {
   tokenInfo: TokenInfo
   trackingLabel: EARN_LABELS
+  compact?: boolean
 }): ReactElement => {
   const spendingLimit = useSpendingLimit(tokenInfo)
   const chain = useCurrentChain()
@@ -38,12 +40,13 @@ const EarnButton = ({
       {(isOk) => (
         <Track {...EARN_EVENTS.OPEN_EARN_PAGE} label={trackingLabel}>
           <Button
-            className={classnames(css.button, { [css.buttonDisabled]: !isOk })}
+            className={classnames({ [css.button]: compact, [css.buttonDisabled]: !isOk })}
             data-testid="earn-btn"
             aria-label="Earn"
-            variant="text"
-            color="info"
-            size="small"
+            variant={compact ? 'text' : 'contained'}
+            color={compact ? 'info' : 'background.paper'}
+            size={compact ? 'small' : 'compact'}
+            disableElevation
             startIcon={<EarnIcon />}
             onClick={onEarnClick}
             disabled={!isOk}
