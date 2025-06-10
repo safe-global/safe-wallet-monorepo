@@ -7,40 +7,51 @@ interface NetworkSelectorHeaderProps {
   selectedChainCount: number
 }
 
+interface TitleProps {
+  isReadOnly: boolean
+}
+
+interface SubtitleProps {
+  isReadOnly: boolean
+  isAllChainsSelected: boolean
+  selectedChainCount: number
+}
+
+const Title = ({ isReadOnly }: TitleProps) => {
+  const title = isReadOnly ? 'Available Networks' : 'Select Networks'
+
+  return (
+    <Text fontSize="$6" fontWeight="600" color="$color">
+      {title}
+    </Text>
+  )
+}
+
+const Subtitle = ({ isReadOnly, isAllChainsSelected, selectedChainCount }: SubtitleProps) => {
+  const prefix = isReadOnly ? 'Contact is available on' : 'Contact available on'
+
+  return (
+    <Text fontSize="$3" color="$colorSecondary" textAlign="center" marginTop="$2">
+      {isAllChainsSelected
+        ? `${prefix} all networks`
+        : `${prefix} ${selectedChainCount} ${selectedChainCount === 1 ? 'network' : 'networks'}`}
+    </Text>
+  )
+}
+
 export const NetworkSelectorHeader = ({
   isReadOnly,
   isAllChainsSelected,
   selectedChainCount,
 }: NetworkSelectorHeaderProps) => {
-  const getTitle = () => {
-    if (isReadOnly) {
-      return 'Available Networks'
-    }
-    return 'Select Networks'
-  }
-
-  const getSubtitle = () => {
-    if (isReadOnly) {
-      if (isAllChainsSelected) {
-        return 'Contact is available on all networks'
-      }
-      return `Contact is available on ${selectedChainCount} network${selectedChainCount === 1 ? '' : 's'}`
-    }
-
-    if (isAllChainsSelected) {
-      return 'Contact available on all networks'
-    }
-    return `Contact available on ${selectedChainCount} network${selectedChainCount === 1 ? '' : 's'}`
-  }
-
   return (
     <View alignItems="center" paddingHorizontal="$4" paddingVertical="$4">
-      <Text fontSize="$6" fontWeight="600" color="$color">
-        {getTitle()}
-      </Text>
-      <Text fontSize="$3" color="$colorSecondary" textAlign="center" marginTop="$2">
-        {getSubtitle()}
-      </Text>
+      <Title isReadOnly={isReadOnly} />
+      <Subtitle
+        isReadOnly={isReadOnly}
+        isAllChainsSelected={isAllChainsSelected}
+        selectedChainCount={selectedChainCount}
+      />
     </View>
   )
 }
