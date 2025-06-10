@@ -94,7 +94,7 @@ export function verifyMandatoryTokensExist() {
 
 export function selectToken(token) {
   clickOnTokenDropdown()
-  cy.get(tokenItem).contains(token).click()
+  cy.get(tokenItem).contains(token).click({ force: true })
   main.verifyValuesExist(tokenBalance, [token])
 }
 
