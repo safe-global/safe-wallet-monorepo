@@ -51,7 +51,8 @@ export default function TransactionsLayout() {
         },
       }}
     >
-      <MaterialTopTabs.Screen initialParams={{ txId }} name="index" options={{ title: 'Parameters' }} />
+      <MaterialTopTabs.Screen initialParams={{ txId }} name="index" options={{ title: 'Data' }} />
+      <MaterialTopTabs.Screen initialParams={{ txId }} name="parameters" options={{ title: 'Parameters' }} />
     </MaterialTopTabs>
   )
 }

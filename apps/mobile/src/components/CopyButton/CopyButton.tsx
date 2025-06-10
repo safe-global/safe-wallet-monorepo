@@ -1,6 +1,7 @@
-import { Button, TextProps } from 'tamagui'
+import { TextProps } from 'tamagui'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon/SafeFontIcon'
 import { useCopyAndDispatchToast } from '@/src/hooks/useCopyAndDispatchToast'
+import { TouchableOpacity } from 'react-native'
 
 interface CopyButtonProps {
   value: string
@@ -12,14 +13,12 @@ interface CopyButtonProps {
 export const CopyButton = ({ value, color, size = 13, text }: CopyButtonProps) => {
   const copyAndDispatchToast = useCopyAndDispatchToast(text)
   return (
-    <Button
+    <TouchableOpacity
       onPress={() => {
         copyAndDispatchToast(value)
       }}
-      height={20}
-      backgroundColor={'transparent'}
     >
       <SafeFontIcon name={'copy'} size={size} color={color as string} />
-    </Button>
+    </TouchableOpacity>
   )
 }

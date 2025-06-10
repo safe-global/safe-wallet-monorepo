@@ -21,7 +21,7 @@ export function ParametersButton({ txId }: ParametersButtonProps) {
         height="$10"
         borderRadius="$3"
         backgroundColor="$borderLight"
-        fontWeight="500"
+        fontWeight="600"
         size="$5"
         fullscreen
         onPress={goToAdvancedDetails}
