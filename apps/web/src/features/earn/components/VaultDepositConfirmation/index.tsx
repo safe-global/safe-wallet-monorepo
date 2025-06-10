@@ -29,7 +29,7 @@ const AdditionalRewards = ({ txInfo }: { txInfo: VaultDepositTransactionInfo }) 
             {formatPercentage(txInfo.additionalRewardsNrr / 100)}
           </DataRow>,
 
-          <DataRow key="Fees" title="Fees">
+          <DataRow key="Fee" title="Fee">
             0%
           </DataRow>,
 
