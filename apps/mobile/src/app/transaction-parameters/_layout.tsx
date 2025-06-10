@@ -16,7 +16,7 @@ export default function TransactionsParametersLayout() {
           headerTitle: (props) => (
             <View width="100%" flex={1} marginTop={2}>
               <H2 fontWeight={600} {...props}>
-                Advanced details
+                Transaction details
               </H2>
             </View>
           ),
