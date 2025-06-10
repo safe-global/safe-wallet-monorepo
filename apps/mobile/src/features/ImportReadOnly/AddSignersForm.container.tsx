@@ -14,6 +14,7 @@ import { SignerSection } from '@/src/features/Signers/components/SignersList/Sig
 import { extractSignersFromSafes } from '@/src/features/ImportReadOnly/helpers/safes'
 import { AddSignersFormView } from '@/src/features/ImportReadOnly/components/AddSignersFormView'
 import { upsertContact } from '@/src/store/addressBookSlice'
+import { selectCurrency } from '@/src/store/settingsSlice'
 
 export const AddSignersFormContainer = () => {
   const params = useLocalSearchParams<{ safeAddress: string; safeName: string }>()
@@ -21,9 +22,10 @@ export const AddSignersFormContainer = () => {
   const chainIds = useAppSelector(selectAllChainsIds)
   const appSigners = useAppSelector(selectSigners)
   const activeSafe = useAppSelector(selectActiveSafe)
+  const currency = useAppSelector(selectCurrency)
   const { currentData, isFetching } = useSafesGetOverviewForManyQuery({
     safes: chainIds.map((chainId: string) => makeSafeId(chainId, params.safeAddress)),
-    currency: 'usd',
+    currency,
     trusted: true,
     excludeSpam: true,
   })

@@ -12,6 +12,8 @@ import { TouchableOpacity, useColorScheme } from 'react-native'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { Skeleton } from 'moti/skeleton'
+import { useAppSelector } from '@/src/store/hooks'
+import { selectCurrency } from '@/src/store/settingsSlice'
 
 interface BalanceProps {
   activeChainId: string
@@ -34,6 +36,7 @@ export function Balance({
 }: BalanceProps) {
   const router = useRouter()
   const colorScheme = useColorScheme()
+  const currency = useAppSelector(selectCurrency)
 
   const showSkeleton = isLoading || !balanceAmount
 
@@ -63,7 +66,7 @@ export function Balance({
         )}
         <Skeleton.Group show={showSkeleton}>
           <Skeleton colorMode={colorScheme === 'dark' ? 'dark' : 'light'} width={220}>
-            <Fiat value={balanceAmount} currency="usd" precise={shouldDisplayPreciseBalance(balanceAmount)} />
+            <Fiat value={balanceAmount} currency={currency} precise={shouldDisplayPreciseBalance(balanceAmount)} />
           </Skeleton>
         </Skeleton.Group>
       </View>

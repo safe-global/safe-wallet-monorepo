@@ -28,6 +28,7 @@ describe('useNotificationPayload', () => {
     settings: {
       themePreference: 'light',
       onboardingVersionSeen: '1.0.0',
+      currency: 'usd',
       env: {
         rpc: {},
         tenderly: {

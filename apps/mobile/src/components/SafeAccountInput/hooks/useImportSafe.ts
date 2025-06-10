@@ -8,17 +8,13 @@ import { selectAllChainsIds } from '@/src/store/chains'
 import { useLazySafesGetOverviewForManyQuery } from '@safe-global/store/gateway/safes'
 import { FormValues } from '@/src/features/ImportReadOnly/types'
 import debounce from 'lodash/debounce'
-
-const params = {
-  currency: 'usd',
-  trusted: true,
-  excludeSpam: true,
-}
+import { selectCurrency } from '@/src/store/settingsSlice'
 
 const NO_SAFE_DEPLOYMENT_ERROR = 'No Safe deployment found for this address'
 
 export const useImportSafe = () => {
   const chainIds = useAppSelector(selectAllChainsIds)
+  const currency = useAppSelector(selectCurrency)
   const {
     watch,
     getFieldState,
@@ -41,7 +37,9 @@ export const useImportSafe = () => {
       if (isValid) {
         trigger({
           safes: chainIds.map((chainId: string) => makeSafeId(chainId, address)),
-          ...params,
+          currency,
+          trusted: true,
+          excludeSpam: true,
         })
       } else {
         setValue('importedSafeResult', undefined)
