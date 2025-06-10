@@ -10,28 +10,30 @@ export const CurrencySection: React.FC<CurrencySectionProps> = ({
   selectedCurrency,
   onCurrencySelect,
 }) => (
-  <YStack space="$2">
-    <View paddingHorizontal="$4" paddingVertical="$2">
+  <YStack marginBottom="$4">
+    <View paddingVertical="$2">
       <Text fontSize="$4" fontWeight="500" color="$colorSecondary">
         {title}
       </Text>
     </View>
-    {currencies.map((currency) => {
-      const currencyInfo = CURRENCY_DATA[currency.toUpperCase()]
-      if (!currencyInfo) {
-        return null
-      }
+    <YStack gap="$4">
+      {currencies.map((currency) => {
+        const currencyInfo = CURRENCY_DATA[currency.toUpperCase()]
+        if (!currencyInfo) {
+          return null
+        }
 
-      return (
-        <CurrencyItem
-          key={currency}
-          code={currency.toUpperCase()}
-          symbol={currencyInfo.symbol}
-          name={currencyInfo.name}
-          isSelected={selectedCurrency.toUpperCase() === currency.toUpperCase()}
-          onPress={() => onCurrencySelect(currency.toLowerCase())}
-        />
-      )
-    })}
+        return (
+          <CurrencyItem
+            key={currency}
+            code={currency.toUpperCase()}
+            symbol={currencyInfo.symbol}
+            name={currencyInfo.name}
+            isSelected={selectedCurrency.toUpperCase() === currency.toUpperCase()}
+            onPress={() => onCurrencySelect(currency.toLowerCase())}
+          />
+        )
+      })}
+    </YStack>
   </YStack>
 )
