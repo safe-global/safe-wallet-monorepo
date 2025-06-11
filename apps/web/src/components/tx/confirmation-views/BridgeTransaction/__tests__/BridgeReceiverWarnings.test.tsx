@@ -29,14 +29,14 @@ const mockTxInfo: BridgeAndSwapTransactionInfo = {
     trusted: true,
   },
   recipient: { value: mockSafeInfo.address.value },
-  explorerUrl: undefined,
+  explorerUrl: null,
   status: 'PENDING',
   substatus: 'WAIT_SOURCE_CONFIRMATIONS',
   fees: null,
   fromAmount: '1000000000000000000',
   toChain: mockDestinationChain.chainId,
-  toToken: undefined,
-  toAmount: undefined,
+  toToken: null,
+  toAmount: null,
 }
 
 describe('BridgeReceiverWarnings', () => {
