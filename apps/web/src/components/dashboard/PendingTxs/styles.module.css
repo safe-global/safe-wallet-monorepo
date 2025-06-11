@@ -2,14 +2,16 @@
   width: 100%;
   padding: 11px 16px;
   background-color: var(--color-background-paper);
-  border: 1px solid var(--color-background-paper);
   border-radius: 8px;
   flex-wrap: nowrap;
-  display: flex;
+  display: grid;
+  grid-template-columns: 200px 1fr 1fr;
   align-items: center;
   gap: var(--space-2);
   min-height: 50px;
+  position: relative;
 }
+
 .innerContainer {
   min-width: 0;
   flex-grow: 1;
@@ -19,9 +21,14 @@
   align-items: center;
   gap: var(--space-2);
 }
+
 .container:hover {
-  background-color: var(--color-background-light);
-  border-color: var(--color-secondary-light);
+  background-color: var(--color-background-main);
+}
+
+.tokenAmount * {
+  font-weight: normal;
+  color: var(--color-primary-light);
 }
 
 .list {
@@ -41,10 +48,46 @@
   justify-content: space-between;
 }
 
+.assetButtons {
+  position: absolute;
+  right: 16px;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s;
+  background-color: var(--color-background-main);
+  border-radius: var(--space-1);
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  width: calc(100% - 200px);
+}
+
+.container:hover .assetButtons {
+  opacity: 1;
+  visibility: visible;
+}
+
+.bar {
+  height: 4px;
+  border-radius: 4px;
+  background-color: var(--color-border-light);
+  width: 100px;
+}
+
+.barPercentage {
+  display: block;
+  border-radius: 4px;
+  height: 100%;
+  background: linear-gradient(225deg, #5FDDFF 12.5%, #12FF80 88.07%);
+}
+
 @media (max-width: 600px) {
   .container {
     flex-direction: column;
     align-items: start;
     flex-wrap: wrap;
+    grid-template-columns: 1fr 1fr;
   }
 }
