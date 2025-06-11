@@ -79,7 +79,7 @@ const Overview = (): ReactElement => {
   }
 
   return (
-    <Card sx={{ border: 0, p: 3 }}>
+    <Card sx={{ border: 0, p: 3 }} component="section">
       <Box>
         {isLoading ? (
           SkeletonOverview
