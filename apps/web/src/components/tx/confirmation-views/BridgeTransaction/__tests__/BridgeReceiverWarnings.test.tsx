@@ -1,5 +1,5 @@
 import { render, waitFor } from '@/tests/test-utils'
-import { BridgeReceiverWarnings, BridgeWarnings } from '../BridgeReceiverWarnings'
+import { BridgeReceiverWarnings } from '../BridgeReceiverWarnings'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import * as useSafeInfoHook from '@/hooks/useSafeInfo'
 import * as useChainsHook from '@/hooks/useChains'
@@ -114,7 +114,12 @@ describe('BridgeReceiverWarnings', () => {
 
     const { getByText } = render(<BridgeReceiverWarnings txInfo={mockTxInfo} />)
     await waitFor(() => {
-      expect(getByText(BridgeWarnings.DIFFERENT_SETUP)).toBeInTheDocument()
+      expect(getByText('Different Safe setup on target chain')).toBeInTheDocument()
+      expect(
+        getByText(
+          'Your Safe exists on the target chain but with a different configuration. Review carefully before proceeding. Funds sent may be inaccessible if the setup is incorrect.',
+        ),
+      ).toBeInTheDocument()
     })
   })
 
@@ -125,7 +130,12 @@ describe('BridgeReceiverWarnings', () => {
 
     const { getByText } = render(<BridgeReceiverWarnings txInfo={mockTxInfo} />)
     await waitFor(() => {
-      expect(getByText(BridgeWarnings.NO_MULTICHAIN_SUPPORT)).toBeInTheDocument()
+      expect(getByText('Incompatible Safe version')).toBeInTheDocument()
+      expect(
+        getByText(
+          'This Safe account cannot add new networks. You will not be able to claim ownership of the same address on other networks. Funds sent may be inaccessible.',
+        ),
+      ).toBeInTheDocument()
     })
   })
 
@@ -164,7 +174,12 @@ describe('BridgeReceiverWarnings', () => {
 
     const { getByText } = render(<BridgeReceiverWarnings txInfo={mockTxInfo} />)
     await waitFor(() => {
-      expect(getByText(BridgeWarnings.SAFE_NOT_DEPLOYED)).toBeInTheDocument()
+      expect(getByText('No ownership on target chain')).toBeInTheDocument()
+      expect(
+        getByText(
+          'This Safe account is not activated on the target chain. First, create the Safe, execute a test transaction, and then proceed with bridging. Funds sent may be inaccessible.',
+        ),
+      ).toBeInTheDocument()
     })
   })
 
@@ -176,7 +191,12 @@ describe('BridgeReceiverWarnings', () => {
 
     const { getByText } = render(<BridgeReceiverWarnings txInfo={differentAddressTxInfo} />)
     await waitFor(() => {
-      expect(getByText(BridgeWarnings.DIFFERENT_ADDRESS)).toBeInTheDocument()
+      expect(getByText('Unknown address')).toBeInTheDocument()
+      expect(
+        getByText(
+          'The receiver is not a Safe you own or a known recipient in your address book. If this address is incorrect, your funds could be lost permanently.',
+        ),
+      ).toBeInTheDocument()
     })
   })
 
@@ -209,7 +229,12 @@ describe('BridgeReceiverWarnings', () => {
 
     const { getByText } = render(<BridgeReceiverWarnings txInfo={unsupportedChainTxInfo} />)
     await waitFor(() => {
-      expect(getByText(BridgeWarnings.UNKNOWN_CHAIN)).toBeInTheDocument()
+      expect(getByText('The target network is not supported')).toBeInTheDocument()
+      expect(
+        getByText(
+          'app.safe.global does not support the network. Unless you have a wallet deployed there, we recommend not to bridge. Funds sent may be inaccessible.',
+        ),
+      ).toBeInTheDocument()
     })
   })
 })
