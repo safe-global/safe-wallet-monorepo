@@ -3,6 +3,7 @@ import { Box, Stack } from '@mui/material'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import css from './styles.module.css'
 import classnames from 'classnames'
+import { getSlidePosition } from '@/components/dashboard/NewsCarousel/utils'
 
 export interface NewsBannerProps {
   onDismiss: (e: MouseEvent<HTMLButtonElement>) => void
@@ -46,7 +47,8 @@ const NewsCarousel = ({ banners }: NewsCarouselProps) => {
     if (!isDragging) return
 
     const { scrollLeft } = sliderRef.current
-    const adjustedScrollLeft = getAdjustedScrollLeft(scrollLeft) ?? scrollLeft
+    const itemWidth = getItemWidth()
+    const adjustedScrollLeft = getSlidePosition(prevScrollLeft, scrollLeft, itemWidth) ?? scrollLeft
 
     setIsDragging(false)
     setPrevClientX(e.pageX)
@@ -70,14 +72,7 @@ const NewsCarousel = ({ banners }: NewsCarouselProps) => {
     sliderRef.current.scrollLeft = newScrollLeft
   }
 
-  const getAdjustedScrollLeft = (scrollLeft: number) => {
-    const swipeWidth = getSwipeWidth()
-    if (swipeWidth === undefined) return
-
-    return Math.round(scrollLeft / swipeWidth) * swipeWidth
-  }
-
-  const getSwipeWidth = () => {
+  const getItemWidth = () => {
     if (!sliderRef.current) return
     return sliderRef.current.clientWidth * (ITEM_WIDTH_PERCENT / 100)
   }
