@@ -2,25 +2,60 @@ import { useSafeCreationData } from '@/features/multichain/hooks/useSafeCreation
 import { areOwnersMatching } from '@/features/multichain/utils/utils'
 import useChains from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { Alert } from '@mui/material'
+import { Alert, AlertTitle } from '@mui/material'
 import { useSafesGetSafeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { useMemo } from 'react'
 import { type BridgeAndSwapTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import useAddressBook from '@/hooks/useAddressBook'
 
-export const BridgeWarnings = {
-  DIFFERENT_SETUP:
-    'Your Safe account has a different setup on the destination chain. Please make sure that you have control over the account.',
-  NO_MULTICHAIN_SUPPORT:
-    'This Safe account does not support adding networks. Please bridge to a different account address.',
-  SAFE_NOT_DEPLOYED:
-    'Your Safe account does not exist on the destination chain. We recommend to first create the Safe account, execute a test transaction and then bridge to it.',
-  DIFFERENT_ADDRESS:
-    'You are bridging to a different account address. Please check that you are bridging to the correct account.',
-  UNKNOWN_CHAIN:
-    "You are sending funds to your Safe's address on a chain that is not supported. You won't be able to recover / use those funds through this interface. You should select a different receiver address.",
+type WarningSeverity = 'warning' | 'error'
+
+interface BridgeWarning {
+  title: string
+  description: string
+  severity: WarningSeverity
+}
+
+export const BridgeWarnings: Record<string, BridgeWarning> = {
+  DIFFERENT_SETUP: {
+    title: 'Different Safe setup on target chain',
+    description:
+      'Your Safe exists on the target chain but with a different configuration. Review carefully before proceeding. Funds sent may be inaccessible if the setup is incorrect.',
+    severity: 'warning',
+  },
+  NO_MULTICHAIN_SUPPORT: {
+    title: 'Incompatible Safe version',
+    description:
+      'This Safe account cannot add new networks. You will not be able to claim ownership of the same address on other networks. Funds sent may be inaccessible.',
+    severity: 'error',
+  },
+  SAFE_NOT_DEPLOYED: {
+    title: 'No ownership on target chain',
+    description:
+      'This Safe account is not activated on the target chain. First, create the Safe, execute a test transaction, and then proceed with bridging. Funds sent may be inaccessible.',
+    severity: 'warning',
+  },
+  DIFFERENT_ADDRESS: {
+    title: 'Unknown address',
+    description:
+      'The receiver is not a Safe you own or a known recipient in your address book. If this address is incorrect, your funds could be lost permanently.',
+    severity: 'warning',
+  },
+  UNKNOWN_CHAIN: {
+    title: 'The target network is not supported',
+    description:
+      'app.safe.global does not support the network. Unless you have a wallet deployed there, we recommend not to bridge. Funds sent may be inaccessible.',
+    severity: 'warning',
+  },
 } as const
+
+const WarningAlert = ({ warning }: { warning: BridgeWarning }) => (
+  <Alert severity={warning.severity}>
+    <AlertTitle>{warning.title}</AlertTitle>
+    {warning.description}
+  </Alert>
+)
 
 export const BridgeReceiverWarnings = ({ txInfo }: { txInfo: BridgeAndSwapTransactionInfo }) => {
   const { safe } = useSafeInfo()
@@ -55,23 +90,23 @@ export const BridgeReceiverWarnings = ({ txInfo }: { txInfo: BridgeAndSwapTransa
 
   if (isSameAddress) {
     if (!isDestinationChainSupported) {
-      return <Alert severity="error">{BridgeWarnings.UNKNOWN_CHAIN}</Alert>
+      return <WarningAlert warning={BridgeWarnings.UNKNOWN_CHAIN} />
     }
 
     if (otherSafeExists) {
       if (hasSameSetup) {
         return null
       }
-      return <Alert severity="warning">{BridgeWarnings.DIFFERENT_SETUP}</Alert>
+      return <WarningAlert warning={BridgeWarnings.DIFFERENT_SETUP} />
     }
     if (!isMultiChainSafe) {
-      return <Alert severity="error">{BridgeWarnings.NO_MULTICHAIN_SUPPORT}</Alert>
+      return <WarningAlert warning={BridgeWarnings.NO_MULTICHAIN_SUPPORT} />
     }
-    return <Alert severity="warning">{BridgeWarnings.SAFE_NOT_DEPLOYED}</Alert>
+    return <WarningAlert warning={BridgeWarnings.SAFE_NOT_DEPLOYED} />
   }
 
   if (!isRecipientInAddressBook) {
-    return <Alert severity="warning">{BridgeWarnings.DIFFERENT_ADDRESS}</Alert>
+    return <WarningAlert warning={BridgeWarnings.DIFFERENT_ADDRESS} />
   }
 
   return null

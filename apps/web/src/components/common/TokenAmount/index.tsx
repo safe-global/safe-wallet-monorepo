@@ -49,7 +49,8 @@ const TokenAmount = ({
           />
         )}
         <b className={css.tokenText}>
-          {sign} {amount} {tokenSymbol}
+          {sign}
+          {amount} {tokenSymbol}
         </b>
       </span>
     </Tooltip>
