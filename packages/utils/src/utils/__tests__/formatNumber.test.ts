@@ -116,7 +116,7 @@ describe('formatNumber', () => {
     })
 
     it('handles non-numeric balances by returning 0', () => {
-      expect(percentageOfTotal('NaN', 100)).toBe(0)
+      expect(percentageOfTotal(NaN, 100)).toBe(0)
     })
 
     it('handles extremely large totals without throwing', () => {
