@@ -36,8 +36,9 @@ describe('Create transactions tests 2', () => {
     createtx.selectComboButtonOption('execute')
     createtx.selectCurrentWallet()
     createtx.openExecutionParamsModal()
-    createtx.verifyAndSubmitExecutionParams()
-    createtx.verifyExecutionParamsSaved()
+    createtx.setAdvncedExecutionParams()
+    createtx.displayAdvncedDetails()
+    createtx.verifyEditedExutionParams()
   }
   )
 
@@ -48,9 +49,7 @@ describe('Create transactions tests 2', () => {
     createtx.selectComboButtonOption('execute')
     createtx.selectCurrentWallet()
     createtx.openExecutionParamsModal()
-    createtx.setAdvncedExecutionParams()
-    createtx.displayAdvncedDetails()
-    createtx.verifyEditedExutionParams()
+    createtx.verifyAndSubmitExecutionParams()
   })
 
   it('Verify a transaction shows relayer attempts', () => {

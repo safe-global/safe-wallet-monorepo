@@ -127,6 +127,7 @@ const enabledBulkExecuteBtnTooltip = 'All highlighted transactions will be inclu
 const bulkExecuteBtnStr = 'Bulk execute'
 
 const batchModalTitle = 'Batch'
+const gasLimit21000 = 'Gas limit must be at least 21000'
 export const swapOrder = 'Swap order settlement'
 export const bulkTxs = 'Bulk transactions'
 export const txStr = 'Transactions'
@@ -152,6 +153,13 @@ const advancedParametersValues = {
   maxFee: '0.5678',
   gasLimit: '300001',
 }
+const advancedParametersInputNames = {
+  walletNonce: 'Wallet nonce',
+  maxPriorityFee: 'Max priority fee (Gwei)',
+  maxFee: 'Max fee (Gwei)',
+  gasLimit: 'Gas limit',
+}
+
 
 // Transaction details on Tx creation
 export const txAccordionDetails = '[data-testid="decoded-tx-details"]'
@@ -780,13 +788,16 @@ export function openExecutionParamsModal() {
 
 export function verifyAndSubmitExecutionParams() {
   cy.contains(executionParamsStr).parents('form').as('Paramsform')
-  const arrayNames = ['Wallet nonce', 'Max priority fee (Gwei)', 'Max fee (Gwei)', 'Gas limit']
+  const arrayNames = [advancedParametersInputNames.walletNonce,
+  advancedParametersInputNames.maxPriorityFee,
+  advancedParametersInputNames.maxFee,
+  advancedParametersInputNames.gasLimit]
   arrayNames.forEach((element) => {
     cy.get('@Paramsform').find('label').contains(`${element}`).next().find('input').should('not.be.disabled')
   })
 
   cy.get('@Paramsform').find(gasLimitInput).clear().type('100').invoke('prop', 'value').should('equal', '100')
-  cy.contains('Gas limit must be at least 21000').should('be.visible')
+  cy.contains(gasLimit21000).should('be.visible')
   cy.get('@Paramsform').find(gasLimitInput).clear().type('300000').invoke('prop', 'value').should('equal', '300000')
   cy.get('@Paramsform').find(gasLimitInput).parent('div').find(rotateLeftIcon).click()
   cy.get('@Paramsform').submit()
@@ -794,10 +805,6 @@ export function verifyAndSubmitExecutionParams() {
 
 export function setAdvncedExecutionParams() {
   cy.contains(executionParamsStr).parents('form').as('Paramsform')
-  const arrayNames = ['Wallet nonce', 'Max priority fee (Gwei)', 'Max fee (Gwei)', 'Gas limit']
-  arrayNames.forEach((element) => {
-    cy.get('@Paramsform').find('label').contains(`${element}`).next().find('input').should('not.be.disabled')
-  })
   cy.get('@Paramsform').find(gasLimitInput).clear().type(advancedParametersValues.gasLimit)
   cy.get('@Paramsform').find(maxPriorityFee).clear().type(advancedParametersValues.maxPriorityFee)
   cy.get('@Paramsform').find(maxFee).clear().type(advancedParametersValues.maxFee)
@@ -806,10 +813,10 @@ export function setAdvncedExecutionParams() {
 }
 
 export function verifyEditedExutionParams() {
-  cy.contains('Wallet nonce').next().should('contain', advancedParametersValues.walletNonce)
-  cy.contains('Gas limit').next().should('contain', advancedParametersValues.gasLimit)
-  cy.contains('Max priority fee (Gwei)').next().should('contain', advancedParametersValues.maxPriorityFee)
-  cy.contains('Max fee (Gwei)').next().should('contain', advancedParametersValues.maxFee)
+  cy.contains(advancedParametersInputNames.walletNonce).next().should('contain', advancedParametersValues.walletNonce)
+  cy.contains(advancedParametersInputNames.gasLimit).next().should('contain', advancedParametersValues.gasLimit)
+  cy.contains(advancedParametersInputNames.maxPriorityFee).next().should('contain', advancedParametersValues.maxPriorityFee)
+  cy.contains(advancedParametersInputNames.maxFee).next().should('contain', advancedParametersValues.maxFee)
 }
 
 export function clickOnNoLaterOption() {
