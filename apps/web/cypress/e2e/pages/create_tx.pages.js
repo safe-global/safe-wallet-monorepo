@@ -777,12 +777,12 @@ export function clickOnYesOption() {
   cy.contains(yesStr).should('exist').click()
 }
 
-export function displayAdvncedDetails() {
+export function displayAdvancedDetails() {
   cy.contains(estimatedFeeStr).click()
 }
 
 export function openExecutionParamsModal() {
-  displayAdvncedDetails()
+  displayAdvancedDetails()
   cy.contains(editBtnStr).click()
 }
 
@@ -803,7 +803,7 @@ export function verifyAndSubmitExecutionParams() {
   cy.get('@Paramsform').submit()
 }
 
-export function setAdvncedExecutionParams() {
+export function setAdvancedExecutionParams() {
   cy.contains(executionParamsStr).parents('form').as('Paramsform')
   cy.get('@Paramsform').find(gasLimitInput).clear().type(advancedParametersValues.gasLimit)
   cy.get('@Paramsform').find(maxPriorityFee).clear().type(advancedParametersValues.maxPriorityFee)
@@ -812,7 +812,7 @@ export function setAdvncedExecutionParams() {
   cy.get('@Paramsform').submit()
 }
 
-export function verifyEditedExutionParams() {
+export function verifyEditedExcutionParams() {
   cy.contains(advancedParametersInputNames.walletNonce).next().should('contain', advancedParametersValues.walletNonce)
   cy.contains(advancedParametersInputNames.gasLimit).next().should('contain', advancedParametersValues.gasLimit)
   cy.contains(advancedParametersInputNames.maxPriorityFee).next().should('contain', advancedParametersValues.maxPriorityFee)
