@@ -6,6 +6,7 @@ import {
   isBridgeOrderTxInfo,
   isCustomTxInfo,
   isExecTxData,
+  isLifiSwapTxInfo,
   isOnChainConfirmationTxData,
   isOnChainSignMessageTxData,
   isSafeMigrationTxData,
@@ -42,6 +43,7 @@ import { TransactionWarnings } from '../TransactionWarnings'
 import { Box } from '@mui/material'
 import DecodedData from '@/components/transactions/TxDetails/TxData/DecodedData'
 import BridgeTransaction from './BridgeTransaction'
+import { LifiSwapTransaction } from './LifiSwapTransaction'
 
 type ConfirmationViewProps = {
   txDetails?: TransactionDetails
@@ -66,6 +68,8 @@ const getConfirmationViewComponent = ({
   if (isConfirmBatchView(txFlow)) return <BatchTransactions />
 
   if (isBridgeOrderTxInfo(txInfo)) return <BridgeTransaction txInfo={txInfo} />
+
+  if (isLifiSwapTxInfo(txInfo)) return <LifiSwapTransaction txInfo={txInfo} />
 
   if (isSettingsChangeView(txInfo)) return <SettingsChange txInfo={txInfo} />
 
