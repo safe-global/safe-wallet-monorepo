@@ -115,11 +115,11 @@ const Overview = (): ReactElement => {
                 width={{ xs: 1, md: 'auto' }}
                 mt={{ xs: 2, md: 0 }}
               >
-                <Box flexShrink="0">
+                <Box flexShrink="0" width={{ xs: 1, md: 'auto' }}>
                   <BuyCryptoButton />
                 </Box>
 
-                <Box flexShrink="0">
+                <Box flex={1}>
                   <Button
                     onClick={handleOnSend}
                     size="compact"
@@ -134,39 +134,43 @@ const Overview = (): ReactElement => {
                   </Button>
                 </Box>
 
-                <Track {...OVERVIEW_EVENTS.SHOW_QR} label="dashboard">
-                  <QrCodeButton>
-                    <Button
-                      size="compact"
-                      variant="contained"
-                      color="background"
-                      disableElevation
-                      startIcon={<ArrowIconSE fontSize="small" />}
-                      sx={{ height: '42px' }}
-                      fullWidth
-                    >
-                      Receive
-                    </Button>
-                  </QrCodeButton>
-                </Track>
-
-                {isSwapFeatureEnabled && (
-                  <Track {...SWAP_EVENTS.OPEN_SWAPS} label={SWAP_LABELS.dashboard}>
-                    <Link href={{ pathname: AppRoutes.swap, query: router.query }} passHref type="button">
+                <Box flex={1}>
+                  <Track {...OVERVIEW_EVENTS.SHOW_QR} label="dashboard">
+                    <QrCodeButton>
                       <Button
-                        data-testid="overview-swap-btn"
                         size="compact"
                         variant="contained"
                         color="background"
                         disableElevation
-                        startIcon={<SwapIcon fontSize="small" />}
+                        startIcon={<ArrowIconSE fontSize="small" />}
                         sx={{ height: '42px' }}
                         fullWidth
                       >
-                        Swap
+                        Receive
                       </Button>
-                    </Link>
+                    </QrCodeButton>
                   </Track>
+                </Box>
+
+                {isSwapFeatureEnabled && (
+                  <Box flex={1}>
+                    <Track {...SWAP_EVENTS.OPEN_SWAPS} label={SWAP_LABELS.dashboard}>
+                      <Link href={{ pathname: AppRoutes.swap, query: router.query }} passHref type="button">
+                        <Button
+                          data-testid="overview-swap-btn"
+                          size="compact"
+                          variant="contained"
+                          color="background"
+                          disableElevation
+                          startIcon={<SwapIcon fontSize="small" />}
+                          sx={{ height: '42px' }}
+                          fullWidth
+                        >
+                          Swap
+                        </Button>
+                      </Link>
+                    </Track>
+                  </Box>
                 )}
               </Stack>
             )}
