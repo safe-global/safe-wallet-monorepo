@@ -523,7 +523,7 @@ export type BridgeAndSwapTransactionInfo = {
   humanDescription?: string | null
   fromToken: TokenInfo
   recipient: AddressInfo
-  explorerUrl?: object
+  explorerUrl: string | null
   status: 'NOT_FOUND' | 'INVALID' | 'PENDING' | 'DONE' | 'FAILED' | 'UNKNOWN' | 'AWAITING_EXECUTION'
   substatus:
     | 'WAIT_SOURCE_CONFIRMATIONS'
@@ -546,12 +546,18 @@ export type BridgeAndSwapTransactionInfo = {
   fees: BridgeFee | null
   fromAmount: string
   toChain: string
-  toToken?: TokenInfo
-  toAmount?: string
+  toToken: TokenInfo | null
+  toAmount: string | null
 }
 export type SwapTransactionInfo = {
   type: 'Swap'
   humanDescription?: string | null
+  recipient: AddressInfo
+  fees: BridgeFee | null
+  fromToken: TokenInfo
+  fromAmount: string
+  toToken: TokenInfo
+  toAmount: string
 }
 export type SwapTransferTransactionInfo = {
   type: 'SwapTransfer'
@@ -846,7 +852,6 @@ export type TxsMultisigTransaction = {
   to: string
   value: string
   data: object
-  dataDecoded: object
   operation: number
   gasToken: object
   safeTxGas: object
@@ -1045,7 +1050,6 @@ export type TxsCreationTransaction = {
   masterCopy: object
   setupData: object
   saltNonce: object
-  dataDecoded: object
 }
 export const {
   useTransactionsGetTransactionByIdV1Query,

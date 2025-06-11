@@ -2,7 +2,7 @@ import { useSafeCreationData } from '@/features/multichain/hooks/useSafeCreation
 import { areOwnersMatching } from '@/features/multichain/utils/utils'
 import useChains from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { Alert, AlertTitle } from '@mui/material'
+import { Alert, AlertTitle, Typography } from '@mui/material'
 import { useSafesGetSafeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { useMemo } from 'react'
@@ -46,13 +46,15 @@ export const BridgeWarnings: Record<string, BridgeWarning> = {
     title: 'The target network is not supported',
     description:
       'app.safe.global does not support the network. Unless you have a wallet deployed there, we recommend not to bridge. Funds sent may be inaccessible.',
-    severity: 'warning',
+    severity: 'error',
   },
 } as const
 
 const WarningAlert = ({ warning }: { warning: BridgeWarning }) => (
   <Alert severity={warning.severity}>
-    <AlertTitle>{warning.title}</AlertTitle>
+    <AlertTitle>
+      <Typography fontWeight="700">{warning.title}</Typography>
+    </AlertTitle>
     {warning.description}
   </Alert>
 )
