@@ -8,6 +8,7 @@ import {
 import { withLayoutContext } from 'expo-router'
 import { ParamListBase, TabNavigationState } from '@react-navigation/native'
 import { useTheme } from 'tamagui'
+import { getMaterialTopTabBarScreenOptions } from '@/src/theme/helpers/tabBarStyles'
 
 const { Navigator } = createMaterialTopTabNavigator()
 
@@ -22,34 +23,7 @@ export default function TransactionsLayout() {
   const theme = useTheme()
 
   return (
-    <MaterialTopTabs
-      screenOptions={{
-        tabBarButtonTestID: 'tab-bar-buttons',
-        tabBarStyle: {
-          backgroundColor: 'transparent',
-          shadowColor: 'transparent',
-        },
-        tabBarItemStyle: {
-          backgroundColor: 'transparent',
-          shadowColor: 'transparent',
-          width: 104,
-          alignSelf: 'center',
-          borderBottomWidth: 0,
-          left: -6,
-        },
-        tabBarIndicatorStyle: {
-          backgroundColor: theme?.color?.get(),
-          width: 78,
-          marginLeft: 6,
-          alignItems: 'center',
-        },
-        tabBarLabelStyle: {
-          color: theme?.color?.get(),
-          fontSize: 14,
-          fontWeight: '600',
-        },
-      }}
-    >
+    <MaterialTopTabs screenOptions={getMaterialTopTabBarScreenOptions({ theme })}>
       <MaterialTopTabs.Screen name="index" options={{ title: 'History' }} />
       <MaterialTopTabs.Screen name="messages" options={{ title: 'Messages' }} />
     </MaterialTopTabs>

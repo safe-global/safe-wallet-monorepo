@@ -8,6 +8,7 @@ import {
 import { useLocalSearchParams, withLayoutContext } from 'expo-router'
 import { ParamListBase, TabNavigationState } from '@react-navigation/native'
 import { useTheme } from 'tamagui'
+import { getMaterialTopTabBarScreenOptions } from '@/src/theme/helpers/tabBarStyles'
 
 const { Navigator } = createMaterialTopTabNavigator()
 
@@ -24,32 +25,14 @@ export default function TransactionsLayout() {
 
   return (
     <MaterialTopTabs
-      screenOptions={{
-        tabBarButtonTestID: 'tab-bar-buttons',
-        tabBarStyle: {
-          backgroundColor: 'transparent',
-          shadowColor: 'transparent',
-        },
-        tabBarItemStyle: {
-          width: 124,
-          backgroundColor: 'transparent',
-          shadowColor: 'transparent',
-          alignSelf: 'center',
-          borderBottomWidth: 0,
-          left: -10,
-        },
-        tabBarIndicatorStyle: {
-          backgroundColor: theme?.color?.get(),
-          width: 94,
-          marginLeft: 6,
-          alignItems: 'center',
-        },
-        tabBarLabelStyle: {
-          color: theme?.color?.get(),
-          fontSize: 16,
-          fontWeight: '700',
-        },
-      }}
+      screenOptions={getMaterialTopTabBarScreenOptions({
+        theme,
+        tabBarItemWidth: 124,
+        tabBarIndicatorWidth: 94,
+        tabBarLabelFontSize: 16,
+        tabBarLabelFontWeight: '700',
+        tabBarItemLeft: -10,
+      })}
     >
       <MaterialTopTabs.Screen initialParams={{ txId }} name="index" options={{ title: 'Data' }} />
       <MaterialTopTabs.Screen initialParams={{ txId }} name="parameters" options={{ title: 'Parameters' }} />
