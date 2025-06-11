@@ -1,14 +1,16 @@
 import React from 'react'
-
-import { SafeAreaView } from 'react-native-safe-area-context'
+import { View } from 'tamagui'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { TxParametersContainer } from '@/src/features/AdvancedDetails'
 
 function TransactionParameters() {
+  const insets = useSafeAreaInsets()
+
   return (
-    <SafeAreaView edges={['bottom']} style={{ flex: 1 }}>
+    <View flex={1} paddingBottom={insets.bottom}>
       <TxParametersContainer />
-    </SafeAreaView>
+    </View>
   )
 }
 
