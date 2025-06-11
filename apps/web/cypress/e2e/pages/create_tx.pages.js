@@ -89,6 +89,7 @@ const recipientsCount = '[data-testid="recipients-count"]'
 const maxBtn = '[data-testid="max-btn"]'
 const tokenAmountSection = '[data-testid="token-amount-section"]'
 const insufficientBalanceError = '[data-testid="insufficient-balance-error"]'
+const signerList = '[data-testid="signer-list"]'
 
 const insufficientFundsErrorStr = 'Insufficient funds'
 const viewTransactionBtn = 'View transaction'
@@ -137,6 +138,11 @@ export const recordedTxNote = 'Tx note one'
 
 const comboButton = '[data-testid="combo-submit-dropdown"]'
 const comboButtonPopover = '[data-testid="combo-submit-popover"]'
+const comboButtonOptions = {
+  sign: 'Sign',
+  execute: 'Execute',
+  addToBatch: 'Add to batch',
+}
 
 // Transaction details on Tx creation
 export const txAccordionDetails = '[data-testid="decoded-tx-details"]'
@@ -433,7 +439,8 @@ export function verifyNumberOfCopyIcons(number) {
 }
 
 export function verifyNumberOfExternalLinks(number) {
-  cy.get(explorerBtn)
+  cy.get('main')
+    .find(explorerBtn)
     //.parent()
     // .parent()
     // .next()
@@ -970,5 +977,5 @@ export function checkMaxRecipientReached(attempt = 0) {
 
 export function selectComboButtonOption(option) {
   cy.get(comboButton).click()
-  cy.get(comboButtonPopover).findByText(option).click()
+  cy.get(comboButtonPopover).findByText(comboButtonOptions[option]).click()
 }

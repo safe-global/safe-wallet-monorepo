@@ -1,4 +1,4 @@
-import { useMembersGetUsersV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { useMembersGetUsersV1Query, type Member } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useCurrentSpaceId } from 'src/features/spaces/hooks/useCurrentSpaceId'
 import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
@@ -14,6 +14,10 @@ export enum MemberRole {
   ADMIN = 'ADMIN',
   MEMBER = 'MEMBER',
 }
+
+export const isAdmin = (member: Member) => member.role === MemberRole.ADMIN
+
+export const isActiveAdmin = (member: Member) => isAdmin(member) && member.status === MemberStatus.ACTIVE
 
 const useAllMembers = (spaceId?: number) => {
   const currentSpaceId = useCurrentSpaceId()
@@ -34,15 +38,20 @@ export const useSpaceMembersByStatus = () => {
   return { activeMembers, invitedMembers }
 }
 
-const useCurrentMembership = (spaceId?: number) => {
+export const useCurrentMembership = (spaceId?: number) => {
   const allMembers = useAllMembers(spaceId)
   const { currentData: user } = useUsersGetWithWalletsV1Query()
   return allMembers.find((member) => member.user.id === user?.id)
 }
 
+export const useIsActiceMember = (spaceId?: number) => {
+  const currentMembership = useCurrentMembership(spaceId)
+  return !!currentMembership && currentMembership.status === MemberStatus.ACTIVE
+}
+
 export const useIsAdmin = (spaceId?: number) => {
   const currentMembership = useCurrentMembership(spaceId)
-  return currentMembership?.role === MemberRole.ADMIN && currentMembership?.status === MemberStatus.ACTIVE
+  return !!currentMembership && isActiveAdmin(currentMembership)
 }
 
 export const useIsInvited = () => {

@@ -16,7 +16,7 @@ import useIsEarnFeatureEnabled from '@/features/earn/hooks/useIsEarnFeatureEnabl
 import Track from '@/components/common/Track'
 import { EARN_EVENTS, EARN_LABELS } from '@/services/analytics/events/earn'
 import ExternalLink from '@/components/common/ExternalLink'
-import { APYDisclaimer, EARN_HELP_ARTICLE, HighRangeAPY, LowRangeAPY } from '@/features/earn/constants'
+import { APYDisclaimer, EARN_HELP_ARTICLE, ApproximateAPY } from '@/features/earn/constants'
 import { formatPercentage } from '@safe-global/utils/utils/formatters'
 
 export const EarnPoweredBy = () => {
@@ -56,14 +56,9 @@ export const EarnBannerCopy = () => {
   return (
     <>
       <Typography variant="h2" className={classNames(css.header, { [css.gradientText]: isDarkMode })}>
-        Earn{' '}
-        <Typography
-          className={classNames({ [css.gradientText]: isDarkMode })}
-          variant="h2"
-          component="span"
-          sx={{ backgroundColor: 'background.main', padding: '0 4px', borderRadius: '8px' }}
-        >
-          {formatPercentage(LowRangeAPY)} - {formatPercentage(HighRangeAPY)}*
+        Earn up to{' '}
+        <Typography className={classNames({ [css.gradientText]: isDarkMode })} variant="h2" component="span">
+          {formatPercentage(ApproximateAPY)} APY*
         </Typography>{' '}
         and get MORPHO rewards
       </Typography>
@@ -99,55 +94,58 @@ const EarnDashboardBanner = () => {
   if (!isEarnBannerEnabled || widgetHidden) return null
 
   return (
-    <Card className={css.bannerWrapper}>
-      <Box mr={{ sm: -8, md: -4, lg: 0 }} display={{ xs: 'none', sm: 'block' }} position="relative">
-        <Box className={classNames(css.gradientShadow, { [css.gradientShadowDarkMode]: isDarkMode })} />
-        <Image
-          className={css.earnIllustration}
-          src={EarnIllustrationLight}
-          alt="Earn illustration"
-          width={239}
-          height={239}
-        />
-      </Box>
+    <>
+      <Card className={css.bannerWrapper}>
+        <Box mr={{ sm: -8, md: -4, lg: 0 }} display={{ xs: 'none', sm: 'block' }} position="relative">
+          <Box className={classNames(css.gradientShadow, { [css.gradientShadowDarkMode]: isDarkMode })} />
+          <Image
+            className={css.earnIllustration}
+            src={EarnIllustrationLight}
+            alt="Earn illustration"
+            width={239}
+            height={239}
+          />
+        </Box>
 
-      <Grid container rowSpacing={2}>
-        <Grid size={{ xs: 12 }} mb={2} zIndex={2}>
-          <EarnPoweredBy />
-        </Grid>
+        <Grid container rowSpacing={2}>
+          <Grid size={{ xs: 12 }} mb={2} zIndex={2}>
+            <EarnPoweredBy />
+          </Grid>
 
-        <Grid size={{ xs: 12 }} zIndex={2}>
-          <EarnBannerCopy />
-        </Grid>
+          <Grid size={{ xs: 12 }} zIndex={2}>
+            <EarnBannerCopy />
+          </Grid>
 
-        <Grid container size={{ xs: 12 }} textAlign="center" spacing={2}>
-          <Grid size={{ xs: 12, md: 'auto' }}>
-            <Track {...EARN_EVENTS.OPEN_EARN_PAGE} label={EARN_LABELS.safe_dashboard_banner}>
-              <NextLink
-                href={AppRoutes.earn && { pathname: AppRoutes.earn, query: { safe: router.query.safe } }}
-                passHref
-                rel="noreferrer"
-                onClick={tryEarn}
-              >
-                <Button fullWidth variant="contained">
-                  Try now
+          <Grid container size={{ xs: 12 }} textAlign="center" spacing={2}>
+            <Grid size={{ xs: 12, md: 'auto' }}>
+              <Track {...EARN_EVENTS.OPEN_EARN_PAGE} label={EARN_LABELS.safe_dashboard_banner}>
+                <NextLink
+                  href={AppRoutes.earn && { pathname: AppRoutes.earn, query: { safe: router.query.safe } }}
+                  passHref
+                  rel="noreferrer"
+                  onClick={tryEarn}
+                >
+                  <Button fullWidth variant="contained">
+                    Try now
+                  </Button>
+                </NextLink>
+              </Track>
+            </Grid>
+            <Grid size={{ xs: 12, md: 'auto' }}>
+              <Track {...EARN_EVENTS.HIDE_EARN_BANNER}>
+                <Button variant="text" onClick={hideEarn}>
+                  Don&apos;t show again
                 </Button>
-              </NextLink>
-            </Track>
-          </Grid>
-          <Grid size={{ xs: 12, md: 'auto' }}>
-            <Track {...EARN_EVENTS.HIDE_EARN_BANNER}>
-              <Button variant="text" onClick={hideEarn}>
-                Don&apos;t show again
-              </Button>
-            </Track>
+              </Track>
+            </Grid>
           </Grid>
         </Grid>
-        <Typography variant="caption" zIndex={2}>
-          {APYDisclaimer}
-        </Typography>
-      </Grid>
-    </Card>
+      </Card>
+
+      <Typography component="div" variant="caption" mt={1} color="text.secondary">
+        {APYDisclaimer}
+      </Typography>
+    </>
   )
 }
 

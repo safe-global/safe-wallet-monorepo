@@ -1,8 +1,9 @@
 {
   "private": true,
   "name": "@safe-global/safe-wallet",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "workspaces": [
+    "expo-plugins/*",
     "apps/*",
     "config/*",
     "packages/*"

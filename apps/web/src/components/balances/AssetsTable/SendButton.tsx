@@ -29,7 +29,7 @@ const SendButton = ({ tokenInfo, isOutlined }: { tokenInfo: TokenInfo; isOutline
             startIcon={<ArrowIconNW />}
             onClick={onSendClick}
             disabled={!isOk}
-            sx={{ height: '37.5px' }}
+            sx={{ height: 32, px: 2 }}
           >
             Send
           </Button>

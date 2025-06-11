@@ -23,13 +23,19 @@ import Logger, { LogLevel } from '@/src/utils/logger'
 import { useInitWeb3 } from '@/src/hooks/useInitWeb3'
 import { useInitSafeCoreSDK } from '@/src/hooks/coreSDK/useInitSafeCoreSDK'
 import NotificationsService from '@/src/services/notifications/NotificationService'
+import { startNotificationExtensionSync } from '@/src/services/notifications/extensionSync'
 import { StatusBar } from 'expo-status-bar'
 import { useScreenTracking } from '@/src/hooks/useScreenTracking'
 import { DataFetchProvider } from '../theme/provider/DataFetchProvider'
+import { Platform } from 'react-native'
 
 Logger.setLevel(__DEV__ ? LogLevel.TRACE : LogLevel.ERROR)
 // Initialize all notification handlers
 NotificationsService.initializeNotificationHandlers()
+
+if (Platform.OS === 'ios') {
+  startNotificationExtensionSync()
+}
 
 configureReanimatedLogger({
   level: ReanimatedLogLevel.warn,
@@ -59,9 +65,9 @@ function RootLayout() {
         <DataFetchProvider>
           <NotificationsProvider>
             <PortalProvider shouldAddRootHost>
-              <BottomSheetModalProvider>
-                <PersistGate loading={null} persistor={persistor}>
-                  <SafeThemeProvider>
+              <PersistGate loading={null} persistor={persistor}>
+                <SafeThemeProvider>
+                  <BottomSheetModalProvider>
                     <SafeToastProvider>
                       <NavigationGuardHOC>
                         <HooksInitializer />
@@ -98,9 +104,16 @@ function RootLayout() {
                           <Stack.Screen name="transaction-actions" options={{ headerShown: true, title: '' }} />
                           <Stack.Screen name="action-details" options={{ headerShown: true, title: '' }} />
                           <Stack.Screen name="address-book" options={{ headerShown: true, title: '' }} />
+                          <Stack.Screen name="contact" options={{ headerShown: true, title: '' }} />
                           <Stack.Screen name="signers" options={{ headerShown: false }} />
                           <Stack.Screen name="import-signers" options={{ headerShown: false }} />
 
+                          <Stack.Screen
+                            name="import-data"
+                            options={{
+                              headerShown: false,
+                            }}
+                          />
                           <Stack.Screen name="app-settings" options={{ headerShown: true, title: '' }} />
                           <Stack.Screen
                             name="conflict-transaction-sheet"
@@ -176,9 +189,9 @@ function RootLayout() {
                         <StatusBar />
                       </NavigationGuardHOC>
                     </SafeToastProvider>
-                  </SafeThemeProvider>
-                </PersistGate>
-              </BottomSheetModalProvider>
+                  </BottomSheetModalProvider>
+                </SafeThemeProvider>
+              </PersistGate>
             </PortalProvider>
           </NotificationsProvider>
         </DataFetchProvider>

@@ -37,7 +37,7 @@ export function addToBatch(EOA, currentNonce, amount) {
   setNonceAndProceed(currentNonce)
   clickOnContinueSignTransactionBtn()
 
-  selectComboButtonOption('Add to batch')
+  selectComboButtonOption('addToBatch')
 
   addToBatchButton()
   cy.contains(transactionAddedToBatchStr).click().should('not.be.visible')

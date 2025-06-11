@@ -41,7 +41,6 @@ export const VaultAPYs: Record<string, Record<string, number>> = {
   },
 }
 
-export const LowRangeAPY = 0.035
-export const HighRangeAPY = 0.081
+export const ApproximateAPY = 0.081
 export const APYDisclaimer =
   '* based on historic averages of USD stablecoin and ETH Morpho vaults. Yields are variable and subject to change. Past performance is not a guarantee of future returns. The Kiln DeFi, Morpho Borrow and Vault products and features described herein are not offered or controlled by Core Contributors GmbH, Safe Ecosystem Foundation, and/or its affiliates.'

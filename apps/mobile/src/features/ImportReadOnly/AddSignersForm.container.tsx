@@ -42,7 +42,7 @@ export const AddSignersFormContainer = () => {
       return
     }
     const hasActiveSafe = !!activeSafe
-    dispatch(upsertContact({ value: params.safeAddress, name: params.safeName }))
+    dispatch(upsertContact({ value: params.safeAddress, name: params.safeName, chainIds: [] }))
     const info = currentData.reduce<Record<string, SafeOverview>>((acc, safe) => {
       acc[safe.chainId] = safe
       return acc

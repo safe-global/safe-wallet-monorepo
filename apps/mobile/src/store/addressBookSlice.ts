@@ -5,6 +5,7 @@ import { RootState } from '.'
 
 export type Contact = Omit<AddressInfo, 'name'> & {
   name: string
+  chainIds: string[]
 }
 
 interface AddressBookState {
@@ -28,8 +29,8 @@ export const addressBookSlice = createSlice({
 
     removeContact: (state, action: PayloadAction<string>) => {
       const addressValue = action.payload
-      const { [addressValue]: _, ...remainingContacts } = state.contacts
-      state.contacts = remainingContacts
+      // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
+      delete state.contacts[addressValue]
 
       if (state.selectedContact?.value === addressValue) {
         state.selectedContact = null

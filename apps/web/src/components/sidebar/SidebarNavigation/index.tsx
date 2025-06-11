@@ -31,7 +31,13 @@ const getSubdirectory = (pathname: string): string => {
 
 const geoBlockedRoutes = [AppRoutes.bridge, AppRoutes.swap, AppRoutes.stake, AppRoutes.earn]
 
-const undeployedSafeBlockedRoutes = [AppRoutes.bridge, AppRoutes.swap, AppRoutes.stake, AppRoutes.apps.index]
+const undeployedSafeBlockedRoutes = [
+  AppRoutes.bridge,
+  AppRoutes.swap,
+  AppRoutes.stake,
+  AppRoutes.apps.index,
+  AppRoutes.earn,
+]
 
 const customSidebarEvents: { [key: string]: { event: any; label: string } } = {
   [AppRoutes.bridge]: { event: BRIDGE_EVENTS.OPEN_BRIDGE, label: BRIDGE_LABELS.sidebar },

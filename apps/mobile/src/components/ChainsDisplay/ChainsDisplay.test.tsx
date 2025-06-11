@@ -23,8 +23,6 @@ describe('ChainsDisplay', () => {
       <ChainsDisplay chains={mockedChains as unknown as Chain[]} max={2} activeChainId={mockedChains[2].chainId} />,
     )
 
-    expect(container.getAllByTestId('chain-display')[0].children[0].props.accessibilityLabel).toBe(
-      mockedChains[2].chainName,
-    )
+    expect(container.getByLabelText(mockedChains[2].chainName)).toBeTruthy()
   })
 })

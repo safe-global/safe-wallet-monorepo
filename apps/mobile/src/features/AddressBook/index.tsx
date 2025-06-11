@@ -1,4 +1,3 @@
-import { AddressBookContainer } from './AddressBook.container'
-export { AddressBookContainer }
-
-export { ContactContainer as Contact } from './Contact.container'
+export { AddressBookListContainer } from './List/AddressBookList.container'
+export { ContactDetailContainer } from './Contact/ContactDetail.container'
+export { ContactDisplayNameContainer } from './Contact/ContactDisplayName.container'
