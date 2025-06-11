@@ -230,7 +230,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     width: CORNER_SIZE,
     height: CORNER_SIZE,
-    borderColor: '#00FF00',
   },
   topLeft: {
     top: 0,
