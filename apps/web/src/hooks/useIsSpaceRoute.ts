@@ -7,6 +7,7 @@ const SPACES_ROUTES = [
   AppRoutes.spaces.settings,
   AppRoutes.spaces.members,
   AppRoutes.spaces.safeAccounts,
+  AppRoutes.spaces.pro,
 ]
 
 export const useIsSpaceRoute = (): boolean => {

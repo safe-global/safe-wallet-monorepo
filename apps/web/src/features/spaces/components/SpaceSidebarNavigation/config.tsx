@@ -7,6 +7,7 @@ import HomeIcon from '@/public/images/sidebar/home.svg'
 import SettingsIcon from '@/public/images/sidebar/settings.svg'
 import MembersIcon from '@/public/images/sidebar/members.svg'
 import AccountsIcon from '@/public/images/sidebar/wallet.svg'
+import LockIcon from '@/public/images/sidebar/lock.svg'
 import { SvgIcon } from '@mui/material'
 
 export type DynamicNavItem = {
@@ -47,6 +48,12 @@ export const navItems: DynamicNavItem[] = [
     href: '', // TODO: Replace with empty page
     disabled: true,
     tag: <Chip label="Soon" sx={{ backgroundColor: 'background.main', color: 'primary.light' }} />,
+  },
+  {
+    label: 'Pro',
+    icon: <SvgIcon component={LockIcon} inheritViewBox />,
+    href: AppRoutes.spaces.pro,
+    tag: <Chip label="Paid" sx={{ backgroundColor: 'background.main', color: 'primary.light' }} />,
   },
   {
     label: 'Settings',

@@ -45,6 +45,7 @@ export const AppRoutes = {
     safeApps: {
       index: '/settings/safe-apps',
     },
+    subscription: '/settings/manage-subscription',
   },
   share: {
     safeApp: '/share/safe-app',
@@ -54,6 +55,7 @@ export const AppRoutes = {
     safeAccounts: '/spaces/safe-accounts',
     members: '/spaces/members',
     index: '/spaces',
+    pro: '/spaces/pro',
   },
   transactions: {
     tx: '/transactions/tx',

@@ -91,6 +91,7 @@ const Navigation = (): ReactElement => {
   return (
     <SidebarList>
       {visibleNavItems.map((item) => {
+        console.log('item', item)
         const isSelected = currentSubdirectory === getSubdirectory(item.href)
         const isDisabled = item.disabled || !enabledNavItems.includes(item)
         let ItemTag = item.tag ? item.tag : null
