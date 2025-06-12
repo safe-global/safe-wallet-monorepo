@@ -3,8 +3,8 @@ import { useMemo } from 'react'
 import { useRouter } from 'next/router'
 import dynamic from 'next/dynamic'
 import { getLatestTransactions } from '@/utils/tx-list'
-import { Box, Skeleton, Typography } from '@mui/material'
-import { Card, ViewAllLink, WidgetBody, WidgetContainer } from '../styled'
+import { Box, Skeleton, Typography, Card, Stack } from '@mui/material'
+import { ViewAllLink } from '../styled'
 import PendingTxListItem from './PendingTxListItem'
 import useTxQueue from '@/hooks/useTxQueue'
 import { AppRoutes } from '@/config/routes'
@@ -104,16 +104,13 @@ const PendingTxsList = (): ReactElement | null => {
   )
 
   return (
-    <WidgetContainer data-testid="pending-tx-widget">
-      <div className={css.title}>
-        <Typography component="h2" variant="subtitle1" fontWeight={700} mb={2}>
-          Pending transactions
-        </Typography>
-
+    <Card data-testid="pending-tx-widget" sx={{ px: 1.5, py: 2.5, height: 1 }} component="section">
+      <Stack direction="row" justifyContent="space-between" sx={{ px: 1.5, mb: 1 }}>
+        <Typography fontWeight={700}>Pending transactions</Typography>
         {totalTxs > 0 && <ViewAllLink url={queueUrl} />}
-      </div>
+      </Stack>
 
-      <WidgetBody>
+      <Box>
         {loading ? (
           <LoadingState />
         ) : totalTxs > 0 ? (
@@ -129,8 +126,8 @@ const PendingTxsList = (): ReactElement | null => {
         ) : (
           <EmptyState />
         )}
-      </WidgetBody>
-    </WidgetContainer>
+      </Box>
+    </Card>
   )
 }
 

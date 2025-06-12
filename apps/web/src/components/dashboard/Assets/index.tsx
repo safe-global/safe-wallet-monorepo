@@ -5,7 +5,7 @@ import TokenAmount from '@/components/common/TokenAmount'
 import SwapButton from '@/features/swap/components/SwapButton'
 import { AppRoutes } from '@/config/routes'
 import { ViewAllLink } from '../styled'
-import css from '../PendingTxs/styles.module.css'
+import css from './styles.module.css'
 import { useRouter } from 'next/router'
 import { SWAP_LABELS } from '@/services/analytics/events/swaps'
 import { useVisibleAssets } from '@/components/balances/AssetsTable/useHideAssets'
@@ -28,7 +28,7 @@ import useIsStakingFeatureEnabled from '@/features/stake/hooks/useIsStakingFeatu
 import { formatPercentage } from '@safe-global/utils/utils/formatters'
 import { percentageOfTotal } from '@safe-global/utils/utils/formatNumber'
 
-const MAX_ASSETS = 5
+const MAX_ASSETS = 4
 
 const AssetsDummy = () => (
   <Box className={css.container}>
@@ -93,7 +93,7 @@ const AssetRow = ({
         <Typography variant="body2">{readablePercentage}</Typography>
       </Stack>
 
-      <Box flex={1} display="block" textAlign="right">
+      <Box flex={1} display="block" textAlign="right" height="44px">
         <FiatBalance balanceItem={item} />
         <FiatChange balanceItem={item} inline />
       </Box>
