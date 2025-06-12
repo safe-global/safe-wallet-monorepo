@@ -59,8 +59,7 @@ export const QueuedTxSimulation = ({ transaction }: { transaction: TransactionDe
     [chainId, transaction],
   )
 
-  // If not a Safe owner, use the first owner as execution owner
-  const executionOwner = isSafeOwner ? signer!.address : safe.owners[0]!.value
+  const executionOwner = signer!.address
 
   const simulation = useSimulation()
   const { simulationLink, simulateTransaction } = simulation
@@ -72,7 +71,7 @@ export const QueuedTxSimulation = ({ transaction }: { transaction: TransactionDe
     }
   }
 
-  if (safeTransactionError) {
+  if (safeTransactionError || !isSafeOwner || !executionOwner) {
     return null
   }
 
