@@ -55,3 +55,23 @@ export const createBiometricsToggleEvent = (enabled: boolean) => ({
   ...SETTINGS_EVENTS.BIOMETRICS.TOGGLE,
   eventLabel: enabled,
 })
+
+/**
+ * Track when user opens app settings from the settings menu
+ */
+export const createAppSettingsOpenEvent = () => ({
+  eventName: EventType.META,
+  eventCategory: SETTINGS_CATEGORY,
+  eventAction: 'Safe settings opened',
+  eventLabel: 'Settings menu button pressed',
+})
+
+/**
+ * Track when user selects an action from the settings menu
+ */
+export const createSettingsMenuActionEvent = (action: 'rename' | 'explorer' | 'share' | 'remove') => ({
+  eventName: EventType.META,
+  eventCategory: SETTINGS_CATEGORY,
+  eventAction: 'Settings menu action',
+  eventLabel: action,
+})

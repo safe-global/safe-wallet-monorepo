@@ -14,6 +14,8 @@ import { type Address } from '@/src/types/address'
 import { router } from 'expo-router'
 import { FloatingMenu } from '../FloatingMenu'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { trackEvent } from '@/src/services/analytics/firebaseAnalytics'
+import { createAppSettingsOpenEvent, createSettingsMenuActionEvent } from '@/src/services/analytics/events/settings'
 type Props = {
   safeAddress: string | undefined
 }
@@ -60,6 +62,12 @@ export const SettingsMenu = ({ safeAddress }: Props) => {
             testID={'settings-screen-header-app-settings-button'}
             hitSlop={{ top: 40, bottom: 40, left: 40 }}
             onPressIn={() => {
+              try {
+                const event = createAppSettingsOpenEvent()
+                trackEvent(event)
+              } catch (error) {
+                console.error('Error tracking app settings open event:', error)
+              }
               router.push('/app-settings')
             }}
           >
@@ -69,6 +77,18 @@ export const SettingsMenu = ({ safeAddress }: Props) => {
 
         <FloatingMenu
           onPressAction={({ nativeEvent }) => {
+            const action = nativeEvent.event as 'rename' | 'explorer' | 'copy' | 'share' | 'remove'
+
+            // Track analytics for supported actions (copy is already tracked via useCopyAndDispatchToast)
+            if (action !== 'copy') {
+              try {
+                const event = createSettingsMenuActionEvent(action)
+                trackEvent(event)
+              } catch (error) {
+                console.error('Error tracking settings menu action:', error)
+              }
+            }
+
             if (nativeEvent.event === 'rename') {
               router.push({
                 pathname: '/signers/[address]',
