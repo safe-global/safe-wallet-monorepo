@@ -25,7 +25,7 @@ const SafeAppsDashboardSection = () => {
 
     setCanScrollLeft(list.scrollLeft > 0)
     setCanScrollRight(list.scrollLeft + list.clientWidth < list.scrollWidth)
-  }, [])
+  }, [rankedSafeApps.length])
 
   const scrollList = (direction: 'left' | 'right') => {
     const list = listRef.current
