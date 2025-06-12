@@ -153,7 +153,6 @@ export const SafeAppCardContainer = ({
   onClickSafeApp,
   height,
   className,
-  compact,
 }: SafeAppCardContainerProps) => {
   const handleClickSafeApp = (event: SyntheticEvent) => {
     if (onClickSafeApp) {
