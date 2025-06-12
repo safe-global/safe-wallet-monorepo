@@ -13,6 +13,8 @@ import DecoderLinks from './DecoderLinks'
 import isEqual from 'lodash/isEqual'
 import Multisend from '../TxData/DecodedData/Multisend'
 import { isMultiSendCalldata } from '@/utils/transaction-calldata'
+import useSafeInfo from '@/hooks/useSafeInfo'
+import useChainId from '@/hooks/useChainId'
 
 interface Props {
   safeTxData?: SafeTransactionData
@@ -31,6 +33,8 @@ const Summary = ({
   showMultisend = true,
   showDecodedData = true,
 }: Props): ReactElement => {
+  const { safe } = useSafeInfo()
+  const chainId = useChainId()
   const { txHash, executedAt } = txDetails ?? {}
   const customTxInfo = txInfo && isCustomTxInfo(txInfo) ? txInfo : undefined
   const toInfo = customTxInfo?.to || txData?.addressInfoIndex?.[txData?.to.value] || txData?.to
@@ -97,7 +101,25 @@ const Summary = ({
                   Advanced details
                 </Typography>
 
-                <DecoderLinks />
+                <DecoderLinks 
+                  transaction={{
+                    to: safeTxData.to,
+                    value: safeTxData.value,
+                    data: safeTxData.data,
+                    operation: safeTxData.operation.toString(),
+                    safeTxGas: safeTxData.safeTxGas,
+                    baseGas: safeTxData.baseGas,
+                    gasPrice: safeTxData.gasPrice,
+                    gasToken: safeTxData.gasToken,
+                    refundReceiver: safeTxData.refundReceiver
+                  }}
+                  safeWallet={{
+                    safeAddress: safe.address.value,
+                    chainId,
+                    safeVersion: safe.version,
+                    nonce: safeTxData.nonce
+                  }}
+                />
 
                 <Receipt
                   safeTxData={safeTxData}
