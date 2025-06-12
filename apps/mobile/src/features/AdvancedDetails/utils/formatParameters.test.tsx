@@ -1,3 +1,4 @@
+import { TransactionData } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { formatParameters } from './formatParameters'
 
 // Mock dependencies with minimal implementation
@@ -29,7 +30,7 @@ const { formatValueTemplate } = require('../formatters/singleValue')
 const { formatArrayValue } = require('../formatters/arrayValue')
 
 // Mock data helper to bypass strict typing for tests
-const createMockTxData = (data: any) => data as any
+const createMockTxData = (data: unknown) => data as TransactionData
 
 describe('formatParameters', () => {
   beforeEach(() => {

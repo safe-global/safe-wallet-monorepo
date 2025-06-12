@@ -71,7 +71,7 @@ describe('formatTxDetails', () => {
   })
 
   it('should return empty array when txDetails is null', () => {
-    const result = formatTxDetails({ txDetails: null })
+    const result = formatTxDetails({ txDetails: null as unknown as TransactionDetails })
     expect(result).toEqual([])
   })
 
@@ -146,7 +146,7 @@ describe('formatTxDetails', () => {
     }
 
     const txDetails = createMockTxDetails({
-      detailedExecutionInfo: mockExecutionInfo as TransactionDetails['detailedExecutionInfo'],
+      detailedExecutionInfo: mockExecutionInfo as unknown as TransactionDetails['detailedExecutionInfo'],
     })
 
     isMultisigDetailedExecutionInfo.mockReturnValue(true)
@@ -182,12 +182,12 @@ describe('formatTxDetails', () => {
     const txDetails = createMockTxDetails({
       txData: {
         to: { value: faker.finance.ethereumAddress() },
-        value: null, // No value
-        operation: undefined, // No operation
+        value: null,
+        operation: undefined,
         hexData: null,
         dataDecoded: null,
       },
-    })
+    } as unknown as TransactionDetails)
 
     isMultisigDetailedExecutionInfo.mockReturnValue(false)
 
@@ -218,7 +218,7 @@ describe('formatTxDetails', () => {
     }
 
     const txDetails = createMockTxDetails({
-      detailedExecutionInfo: mockExecutionInfo as TransactionDetails['detailedExecutionInfo'],
+      detailedExecutionInfo: mockExecutionInfo as unknown as TransactionDetails['detailedExecutionInfo'],
     })
 
     isMultisigDetailedExecutionInfo.mockReturnValue(true)
@@ -255,7 +255,7 @@ describe('formatTxDetails', () => {
         hexData: null,
         dataDecoded: null,
       },
-      detailedExecutionInfo: mockExecutionInfo as TransactionDetails['detailedExecutionInfo'],
+      detailedExecutionInfo: mockExecutionInfo as unknown as TransactionDetails['detailedExecutionInfo'],
       txHash: faker.string.hexadecimal({ length: 64 }),
     })
 
