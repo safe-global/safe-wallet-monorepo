@@ -1,4 +1,4 @@
-import signersReducer, { addSigner, addSignerWithEffects, selectSigners } from '../signersSlice'
+import signersReducer, { addSigner, addSignerWithEffects, selectSigners, selectTotalSignerCount } from '../signersSlice'
 import { AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { selectActiveSigner } from '../activeSignerSlice'
 import { configureStore } from '@reduxjs/toolkit'
@@ -200,6 +200,48 @@ describe('signersSlice', () => {
       expect(selectSigners(state)[signer2.value]).toEqual(signer2)
       expect(selectActiveSigner(state, safeAddress1)).toEqual(signer1) // Still the first signer
       expect(selectActiveSigner(state, safeAddress2)).toBeUndefined() // No active signer for safe 2
+    })
+  })
+
+  describe('selectTotalSignerCount', () => {
+    it('should return 0 for empty signers state', () => {
+      const state = { signers: {} } as RootState
+      expect(selectTotalSignerCount(state)).toBe(0)
+    })
+
+    it('should return correct count for single signer', () => {
+      const signer = generateAddressInfo()
+      const state = { signers: { [signer.value]: signer } } as RootState
+      expect(selectTotalSignerCount(state)).toBe(1)
+    })
+
+    it('should return correct count for multiple signers', () => {
+      const signer1 = generateAddressInfo()
+      const signer2 = generateAddressInfo()
+      const signer3 = generateAddressInfo()
+
+      const state = {
+        signers: {
+          [signer1.value]: signer1,
+          [signer2.value]: signer2,
+          [signer3.value]: signer3,
+        },
+      } as RootState
+
+      expect(selectTotalSignerCount(state)).toBe(3)
+    })
+
+    it('should update count when signers are added via reducer', () => {
+      let state = signersReducer(undefined, { type: 'INIT' })
+      expect(selectTotalSignerCount({ signers: state } as RootState)).toBe(0)
+
+      const signer1 = generateAddressInfo()
+      state = signersReducer(state, addSigner(signer1))
+      expect(selectTotalSignerCount({ signers: state } as RootState)).toBe(1)
+
+      const signer2 = generateAddressInfo()
+      state = signersReducer(state, addSigner(signer2))
+      expect(selectTotalSignerCount({ signers: state } as RootState)).toBe(2)
     })
   })
 })

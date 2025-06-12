@@ -5,6 +5,7 @@ import { TransactionConfirmationStrategy } from '@/src/store/middleware/analytic
 import { SafeViewedStrategy } from '@/src/store/middleware/analytics/strategies/SafeViewedStrategy'
 import { SettingsStrategy } from '@/src/store/middleware/analytics/strategies/SettingsStrategy'
 import { SafeManagementStrategy } from '@/src/store/middleware/analytics/strategies/SafeManagementStrategy'
+import { SignerTrackingStrategy } from '@/src/store/middleware/analytics/strategies/SignerTrackingStrategy'
 
 export class AnalyticsStrategyManager extends StrategyManager<RootState, MiddlewareAPI<Dispatch, RootState>> {
   constructor() {
@@ -26,5 +27,8 @@ export class AnalyticsStrategyManager extends StrategyManager<RootState, Middlew
     // Intercept safe management actions for safe creation/removal tracking
     this.registerStrategy('safes/addSafe', new SafeManagementStrategy())
     this.registerStrategy('safes/removeSafe', new SafeManagementStrategy())
+
+    // Intercept signer addition actions for signer tracking
+    this.registerStrategy('signers/addSigner', new SignerTrackingStrategy())
   }
 }
