@@ -1,6 +1,5 @@
 import { SafeCreationEvent, safeCreationSubscribe } from '@/features/counterfactual/services/safeCreationEvents'
 import useWallet from '@/hooks/wallets/useWallet'
-import { useGetAllOwnedSafesQuery } from '@/store/api/gateway'
 import { getBlockExplorerLink } from '@safe-global/utils/utils/chains'
 import { skipToken } from '@reduxjs/toolkit/query'
 import { useEffect } from 'react'
@@ -10,6 +9,10 @@ import { useAppDispatch } from '@/store'
 import { useCurrentChain } from '@/hooks/useChains'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import { isWalletRejection } from '@/utils/wallets'
+import {
+  OwnersGetAllSafesByOwnerV2ApiArg,
+  useOwnersGetAllSafesByOwnerV2Query,
+} from '@safe-global/store/gateway/AUTO_GENERATED/owners'
 
 const SafeCreationNotifications = {
   [SafeCreationEvent.PROCESSING]: 'Validating...',
@@ -30,7 +33,9 @@ const usePendingSafeNotifications = (): void => {
   const chain = useCurrentChain()
   const safeAddress = useSafeAddress()
   const { address = '' } = useWallet() || {}
-  const { refetch } = useGetAllOwnedSafesQuery(address === '' ? skipToken : { walletAddress: address })
+  const { refetch } = useOwnersGetAllSafesByOwnerV2Query(
+    address === '' ? (skipToken as unknown as OwnersGetAllSafesByOwnerV2ApiArg) : { ownerAddress: address }, //todo: can we do lazy here?
+  )
 
   useEffect(() => {
     if (!chain) return
