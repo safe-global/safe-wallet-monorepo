@@ -4,6 +4,7 @@ import { StrategyManager } from '@/src/store/utils/strategy/StrategyManager'
 import { TransactionConfirmationStrategy } from '@/src/store/middleware/analytics/strategies/TransactionConfirmationStrategy'
 import { SafeViewedStrategy } from '@/src/store/middleware/analytics/strategies/SafeViewedStrategy'
 import { SettingsStrategy } from '@/src/store/middleware/analytics/strategies/SettingsStrategy'
+import { SafeManagementStrategy } from '@/src/store/middleware/analytics/strategies/SafeManagementStrategy'
 
 export class AnalyticsStrategyManager extends StrategyManager<RootState, MiddlewareAPI<Dispatch, RootState>> {
   constructor() {
@@ -21,5 +22,9 @@ export class AnalyticsStrategyManager extends StrategyManager<RootState, Middlew
 
     // Intercept settings changes for comprehensive settings tracking
     this.registerStrategy('settings/updateSettings', new SettingsStrategy())
+
+    // Intercept safe management actions for safe creation/removal tracking
+    this.registerStrategy('safes/addSafe', new SafeManagementStrategy())
+    this.registerStrategy('safes/removeSafe', new SafeManagementStrategy())
   }
 }

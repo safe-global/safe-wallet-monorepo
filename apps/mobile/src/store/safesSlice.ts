@@ -70,4 +70,8 @@ export const selectSafeFiatTotal = createSelector([selectSafeInfo], (safe) => {
   return total.toString()
 })
 
+export const selectTotalSafeCount = createSelector([selectAllSafes], (safes): number => {
+  return Object.keys(safes).length
+})
+
 export default safesSlice.reducer
