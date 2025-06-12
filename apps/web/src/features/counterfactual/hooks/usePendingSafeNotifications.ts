@@ -9,10 +9,8 @@ import { useAppDispatch } from '@/store'
 import { useCurrentChain } from '@/hooks/useChains'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import { isWalletRejection } from '@/utils/wallets'
-import {
-  OwnersGetAllSafesByOwnerV2ApiArg,
-  useOwnersGetAllSafesByOwnerV2Query,
-} from '@safe-global/store/gateway/AUTO_GENERATED/owners'
+import { useOwnersGetAllSafesByOwnerV2Query } from '@safe-global/store/gateway/AUTO_GENERATED/owners'
+import type { OwnersGetAllSafesByOwnerV2ApiArg } from '@safe-global/store/gateway/AUTO_GENERATED/owners'
 
 const SafeCreationNotifications = {
   [SafeCreationEvent.PROCESSING]: 'Validating...',

@@ -1,9 +1,9 @@
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
-import {
+import type {
   OwnersGetAllSafesByOwnerV2ApiArg,
   OwnersGetAllSafesByOwnerV2ApiResponse,
-  useOwnersGetAllSafesByOwnerV2Query,
 } from '@safe-global/store/gateway/AUTO_GENERATED/owners'
+import { useOwnersGetAllSafesByOwnerV2Query } from '@safe-global/store/gateway/AUTO_GENERATED/owners'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { skipToken } from '@reduxjs/toolkit/query'
 

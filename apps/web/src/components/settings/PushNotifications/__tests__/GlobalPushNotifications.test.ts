@@ -17,7 +17,7 @@ import {
 } from '../GlobalPushNotifications'
 import type { AddedSafesState } from '@/store/addedSafesSlice'
 import type { UndeployedSafe } from '@safe-global/utils/features/counterfactual/store/types'
-import { OwnersGetAllSafesByOwnerV2ApiResponse as AllOwnedSafes } from '@safe-global/store/gateway/AUTO_GENERATED/owners'
+import type { OwnersGetAllSafesByOwnerV2ApiResponse as AllOwnedSafes } from '@safe-global/store/gateway/AUTO_GENERATED/owners'
 
 describe('GlobalPushNotifications', () => {
   describe('transformAddedSafes', () => {
