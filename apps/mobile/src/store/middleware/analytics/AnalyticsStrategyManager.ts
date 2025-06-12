@@ -6,6 +6,7 @@ import { SafeViewedStrategy } from '@/src/store/middleware/analytics/strategies/
 import { SettingsStrategy } from '@/src/store/middleware/analytics/strategies/SettingsStrategy'
 import { SafeManagementStrategy } from '@/src/store/middleware/analytics/strategies/SafeManagementStrategy'
 import { SignerTrackingStrategy } from '@/src/store/middleware/analytics/strategies/SignerTrackingStrategy'
+import { AddressBookTrackingStrategy } from '@/src/store/middleware/analytics/strategies/AddressBookTrackingStrategy'
 
 export class AnalyticsStrategyManager extends StrategyManager<RootState, MiddlewareAPI<Dispatch, RootState>> {
   constructor() {
@@ -30,5 +31,10 @@ export class AnalyticsStrategyManager extends StrategyManager<RootState, Middlew
 
     // Intercept signer addition actions for signer tracking
     this.registerStrategy('signers/addSigner', new SignerTrackingStrategy())
+
+    // Intercept address book actions for contact tracking
+    this.registerStrategy('addressBook/addContact', new AddressBookTrackingStrategy())
+    this.registerStrategy('addressBook/updateContact', new AddressBookTrackingStrategy())
+    this.registerStrategy('addressBook/removeContact', new AddressBookTrackingStrategy())
   }
 }

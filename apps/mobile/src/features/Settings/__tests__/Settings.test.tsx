@@ -22,6 +22,7 @@ jest.mock('expo-router', () => ({
     dispatch: jest.fn(),
   }),
   useSegments: () => ['test'],
+  usePathname: () => '/test-path',
 }))
 
 const mockSafeState: SafeState = {

@@ -84,4 +84,6 @@ export const selectAllContacts = createSelector(selectAddressBookState, (address
 export const selectContactByAddress = (address: string) =>
   createSelector(selectAddressBookState, (addressBook): Contact | null => addressBook.contacts[address] || null)
 
+export const selectTotalContactCount = (state: RootState) => Object.keys(state.addressBook.contacts).length
+
 export default addressBookSlice.reducer

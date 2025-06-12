@@ -4,12 +4,18 @@ import { Contact } from '@/src/store/addressBookSlice'
 import * as router from 'expo-router'
 import React from 'react'
 import { AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { trackEvent } from '@/src/services/analytics'
 
 // Mock expo-router
 jest.mock('expo-router', () => ({
   router: {
     push: jest.fn(),
   },
+}))
+
+// Mock analytics tracking
+jest.mock('@/src/services/analytics', () => ({
+  trackEvent: jest.fn(),
 }))
 
 // Mock the AddressBookListView component
@@ -233,5 +239,17 @@ describe('AddressBookListContainer', () => {
 
     // Should still find the contact by address
     expect(container.getByTestId('filtered-contacts')).toHaveTextContent('1')
+  })
+
+  it('should track address book screen visit analytics on render', () => {
+    render(<AddressBookListContainer />, { initialStore: mockStore })
+
+    // Should track screen visit with correct contact count
+    expect(trackEvent).toHaveBeenCalledWith({
+      eventName: 'metadata',
+      eventCategory: 'address-book',
+      eventAction: 'Screen visited',
+      eventLabel: '3',
+    })
   })
 })
