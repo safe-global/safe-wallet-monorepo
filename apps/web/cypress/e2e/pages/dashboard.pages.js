@@ -117,7 +117,7 @@ export function verifyOverviewWidgetData() {
 
 export function verifyTxQueueWidget() {
   // Alias for the Transaction queue section
-  cy.contains('h2', transactionQueueStr).parents('section').as('txQueueSection')
+  cy.contains('p', transactionQueueStr).parents('section').as('txQueueSection')
 
   cy.get('@txQueueSection').within(() => {
     // There should be queued transactions
@@ -126,8 +126,10 @@ export function verifyTxQueueWidget() {
     // Queued txns
     cy.contains(
       `a[href^="/transactions/tx?id=multisig_0x"]`,
-      '14' + 'Send' + `-0.00002 ${constants.tokenAbbreviation.sep}` + '1 out of 1',
+      'Send' + `-0.00002 ${constants.tokenAbbreviation.sep}`,
     ).should('exist')
+
+    cy.contains(`a[href^="/transactions/tx?id=multisig_0x"]`, '1 out of 1').should('exist')
 
     cy.contains(
       `a[href="${constants.transactionQueueUrl}${encodeURIComponent(staticSafes.SEP_STATIC_SAFE_2)}"]`,

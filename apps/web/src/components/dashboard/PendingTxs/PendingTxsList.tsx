@@ -104,7 +104,7 @@ const PendingTxsList = (): ReactElement | null => {
   )
 
   return (
-    <Card data-testid="pending-tx-widget" sx={{ px: 1.5, py: 2.5, height: 1 }}>
+    <Card data-testid="pending-tx-widget" sx={{ px: 1.5, py: 2.5, height: 1 }} component="section">
       <Stack direction="row" justifyContent="space-between" sx={{ px: 1.5, mb: 1 }}>
         <Typography fontWeight={700}>Pending transactions</Typography>
         {totalTxs > 0 && <ViewAllLink url={queueUrl} />}
