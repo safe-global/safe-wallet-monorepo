@@ -6,7 +6,7 @@ import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { BlurView } from 'expo-blur'
 import { getCrashlytics } from '@react-native-firebase/crashlytics'
-import { getAnalytics } from '@react-native-firebase/analytics'
+import { setAnalyticsCollectionEnabled } from '@/src/services/analytics'
 
 const StyledText = styled(Text, {
   fontSize: '$3',
@@ -19,7 +19,7 @@ export const GetStarted = () => {
 
   const enableCrashlytics = async () => {
     await getCrashlytics().setCrashlyticsCollectionEnabled(true)
-    await getAnalytics().setAnalyticsCollectionEnabled(true)
+    await setAnalyticsCollectionEnabled(true)
   }
 
   const onPressAddAccount = useCallback(async () => {

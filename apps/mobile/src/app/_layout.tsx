@@ -26,6 +26,7 @@ import NotificationsService from '@/src/services/notifications/NotificationServi
 import { startNotificationExtensionSync } from '@/src/services/notifications/extensionSync'
 import { StatusBar } from 'expo-status-bar'
 import { useScreenTracking } from '@/src/hooks/useScreenTracking'
+import { useAnalytics } from '@/src/hooks/useAnalytics'
 import { DataFetchProvider } from '../theme/provider/DataFetchProvider'
 import { Platform } from 'react-native'
 
@@ -45,6 +46,7 @@ configureReanimatedLogger({
 const HooksInitializer = () => {
   useInitWeb3()
   useInitSafeCoreSDK()
+  useAnalytics() // Tracks activeSafe changes, but only once analytics is enabled in GetStarted screen
   return null
 }
 

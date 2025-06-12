@@ -49,6 +49,7 @@ export function SignTransaction() {
       })
     } catch (error) {
       logger.error('Error signing transaction:', error)
+      setSignStepStatus('error')
     }
   }, [activeChain, activeSafe, txId, signerAddress])
 
