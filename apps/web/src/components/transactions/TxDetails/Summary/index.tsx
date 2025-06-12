@@ -42,7 +42,7 @@ const Summary = ({
 
   let baseGas, gasPrice, gasToken, safeTxGas, refundReceiver, submittedAt, nonce
   if (txDetails && isMultisigDetailedExecutionInfo(txDetails.detailedExecutionInfo)) {
-    ;({ baseGas, gasPrice, gasToken, safeTxGas, submittedAt, nonce } = txDetails.detailedExecutionInfo)
+    ; ({ baseGas, gasPrice, gasToken, safeTxGas, submittedAt, nonce } = txDetails.detailedExecutionInfo)
     refundReceiver = txDetails.detailedExecutionInfo.refundReceiver?.value
   }
 
@@ -101,7 +101,7 @@ const Summary = ({
                   Advanced details
                 </Typography>
 
-                <DecoderLinks 
+                <DecoderLinks
                   transaction={{
                     to: safeTxData.to,
                     value: safeTxData.value,
@@ -116,7 +116,7 @@ const Summary = ({
                   safeWallet={{
                     safeAddress: safe.address.value,
                     chainId,
-                    safeVersion: safe.version,
+                    safeVersion: safe.version ?? undefined,
                     nonce: safeTxData.nonce
                   }}
                 />
