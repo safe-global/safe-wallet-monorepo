@@ -26,6 +26,7 @@ type SafeAppCardProps = {
   onBookmarkSafeApp?: (safeAppId: number) => void
   removeCustomApp?: (safeApp: SafeAppData) => void
   openPreviewDrawer?: (safeApp: SafeAppData) => void
+  compact?: boolean
 }
 
 const SafeAppCard = ({
@@ -35,6 +36,7 @@ const SafeAppCard = ({
   onBookmarkSafeApp,
   removeCustomApp,
   openPreviewDrawer,
+  compact = false,
 }: SafeAppCardProps) => {
   const router = useRouter()
 
@@ -49,6 +51,7 @@ const SafeAppCard = ({
       removeCustomApp={removeCustomApp}
       onClickSafeApp={onClickSafeApp}
       openPreviewDrawer={openPreviewDrawer}
+      compact={compact}
     />
   )
 }
@@ -64,14 +67,8 @@ export const getSafeAppUrl = (router: NextRouter, safeAppUrl: string) => {
   return resolveHref(router, shareUrlObj)
 }
 
-type SafeAppCardViewProps = {
-  safeApp: SafeAppData
-  onClickSafeApp?: (e: SyntheticEvent) => void
+type SafeAppCardViewProps = SafeAppCardProps & {
   safeAppUrl: string
-  isBookmarked?: boolean
-  onBookmarkSafeApp?: (safeAppId: number) => void
-  removeCustomApp?: (safeApp: SafeAppData) => void
-  openPreviewDrawer?: (safeApp: SafeAppData) => void
 }
 
 const SafeAppCardGridView = ({
@@ -82,9 +79,16 @@ const SafeAppCardGridView = ({
   onBookmarkSafeApp,
   removeCustomApp,
   openPreviewDrawer,
+  compact,
 }: SafeAppCardViewProps) => {
   return (
-    <SafeAppCardContainer safeAppUrl={safeAppUrl} onClickSafeApp={onClickSafeApp} height="100%">
+    <SafeAppCardContainer
+      className={compact ? css.compactContainer : undefined}
+      safeAppUrl={safeAppUrl}
+      onClickSafeApp={onClickSafeApp}
+      height="100%"
+      compact={compact}
+    >
       {/* Safe App Header */}
       <CardHeader
         className={css.safeAppHeader}
@@ -108,6 +112,7 @@ const SafeAppCardGridView = ({
               onBookmarkSafeApp={onBookmarkSafeApp}
               removeCustomApp={removeCustomApp}
               openPreviewDrawer={openPreviewDrawer}
+              compact={compact}
             />
           </>
         }
@@ -120,12 +125,14 @@ const SafeAppCardGridView = ({
         </Typography>
 
         {/* Safe App Description */}
-        <Typography className={css.safeAppDescription} variant="body2" color="text.secondary">
-          {safeApp.description}
-        </Typography>
+        {!compact && (
+          <Typography className={css.safeAppDescription} variant="body2" color="text.secondary">
+            {safeApp.description}
+          </Typography>
+        )}
 
         {/* Safe App Tags */}
-        <SafeAppTags tags={safeApp.tags} />
+        <SafeAppTags tags={safeApp.tags} compact={compact} />
       </CardContent>
     </SafeAppCardContainer>
   )
@@ -137,6 +144,7 @@ type SafeAppCardContainerProps = {
   children: ReactNode
   height?: string
   className?: string
+  compact?: boolean
 }
 
 export const SafeAppCardContainer = ({
@@ -145,6 +153,7 @@ export const SafeAppCardContainer = ({
   onClickSafeApp,
   height,
   className,
+  compact,
 }: SafeAppCardContainerProps) => {
   const handleClickSafeApp = (event: SyntheticEvent) => {
     if (onClickSafeApp) {

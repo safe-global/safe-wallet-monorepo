@@ -19,6 +19,7 @@ type SafeAppActionButtonsProps = {
   onBookmarkSafeApp?: (safeAppId: number) => void
   removeCustomApp?: (safeApp: SafeAppData) => void
   openPreviewDrawer?: (safeApp: SafeAppData) => void
+  compact?: boolean
 }
 
 const SafeAppActionButtons = ({
@@ -27,6 +28,7 @@ const SafeAppActionButtons = ({
   onBookmarkSafeApp,
   removeCustomApp,
   openPreviewDrawer,
+  compact,
 }: SafeAppActionButtonsProps) => {
   const isCustomApp = safeApp.id < 1
   const shareSafeAppUrl = useShareSafeAppUrl(safeApp.url)
@@ -39,7 +41,7 @@ const SafeAppActionButtons = ({
   return (
     <Box display="flex" gap={1} alignItems="center">
       {/* Open the preview drawer */}
-      {openPreviewDrawer && (
+      {openPreviewDrawer && !compact && (
         <IconButton
           size="small"
           onClick={(event) => {
@@ -53,15 +55,17 @@ const SafeAppActionButtons = ({
       )}
 
       {/* Copy share Safe App url button */}
-      <CopyButton
-        initialToolTipText={`Copy share URL for ${safeApp.name}`}
-        onCopy={handleCopyShareSafeAppUrl}
-        text={shareSafeAppUrl}
-      >
-        <IconButton data-testid="copy-btn-icon" size="small">
-          <SvgIcon component={ShareIcon} inheritViewBox color="border" fontSize="small" />
-        </IconButton>
-      </CopyButton>
+      {!compact && (
+        <CopyButton
+          initialToolTipText={`Copy share URL for ${safeApp.name}`}
+          onCopy={handleCopyShareSafeAppUrl}
+          text={shareSafeAppUrl}
+        >
+          <IconButton data-testid="copy-btn-icon" size="small">
+            <SvgIcon component={ShareIcon} inheritViewBox color="border" fontSize="small" />
+          </IconButton>
+        </CopyButton>
+      )}
 
       {/* Bookmark Safe App button */}
       {onBookmarkSafeApp && (
