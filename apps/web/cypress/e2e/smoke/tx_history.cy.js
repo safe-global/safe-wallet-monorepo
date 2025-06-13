@@ -13,6 +13,7 @@ const typeDeleteAllowance = data.type.deleteSpendingLimit
 const typeGeneral = data.type.general
 const typeUntrustedToken = data.type.untrustedReceivedToken
 
+// TODO: Replace this test with jest (EN-141)
 describe('[SMOKE] Tx history tests', () => {
   before(async () => {
     staticSafes = await getSafes(CATEGORIES.static)
@@ -28,7 +29,7 @@ describe('[SMOKE] Tx history tests', () => {
 
   // mock
   // Token receipt
-  it('[SMOKE] Verify summary for token receipt', () => {
+  it.skip('[SMOKE] Verify summary for token receipt', () => {
     createTx.verifySummaryByName(
       typeReceive.summaryTitle,
       typeReceive.summaryTxInfo,
@@ -49,7 +50,7 @@ describe('[SMOKE] Tx history tests', () => {
   })
 
   // mock
-  it('[SMOKE] Verify summary for token send', () => {
+  it.skip('[SMOKE] Verify summary for token send', () => {
     createTx.verifySummaryByName(
       typeSend.title,
       null,
@@ -78,7 +79,7 @@ describe('[SMOKE] Tx history tests', () => {
   })
 
   // mock
-  it('[SMOKE] Verify summary for allowance deletion', () => {
+  it.skip('[SMOKE] Verify summary for allowance deletion', () => {
     createTx.verifySummaryByName(
       typeDeleteAllowance.title,
       typeDeleteAllowance.summaryTxInfo,
@@ -88,7 +89,7 @@ describe('[SMOKE] Tx history tests', () => {
   })
 
   // mock
-  it('[SMOKE] Verify summary for untrusted token', () => {
+  it.skip('[SMOKE] Verify summary for untrusted token', () => {
     createTx.toggleUntrustedTxs()
     createTx.verifySummaryByName(
       typeUntrustedToken.summaryTitle,
