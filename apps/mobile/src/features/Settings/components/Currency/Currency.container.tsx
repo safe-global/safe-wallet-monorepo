@@ -6,6 +6,8 @@ import useCurrencies from '@/src/hooks/useCurrencies'
 import { useRouter } from 'expo-router'
 import { getCurrencyName, getCurrencySymbol } from '@/src/utils/currency'
 
+const CRYPTO_CURRENCIES = ['BTC', 'ETH']
+
 export const CurrencyContainer = () => {
   const router = useRouter()
   const dispatch = useAppDispatch()
@@ -38,8 +40,8 @@ export const CurrencyContainer = () => {
   }, [supportedCurrencies, searchQuery])
 
   // Separate crypto and fiat currencies
-  const cryptoCurrencies = filteredCurrencies.filter((currency) => ['BTC', 'ETH'].includes(currency.toUpperCase()))
-  const fiatCurrencies = filteredCurrencies.filter((currency) => !['BTC', 'ETH'].includes(currency.toUpperCase()))
+  const cryptoCurrencies = filteredCurrencies.filter((currency) => CRYPTO_CURRENCIES.includes(currency.toUpperCase()))
+  const fiatCurrencies = filteredCurrencies.filter((currency) => !CRYPTO_CURRENCIES.includes(currency.toUpperCase()))
 
   return (
     <CurrencyView
