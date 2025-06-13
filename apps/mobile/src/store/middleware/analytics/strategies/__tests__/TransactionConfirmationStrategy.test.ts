@@ -1,7 +1,8 @@
 import { TransactionConfirmationStrategy } from '../TransactionConfirmationStrategy'
 import { trackEvent } from '@/src/services/analytics'
 import { createTxConfirmEvent } from '@/src/services/analytics/events/transactions'
-import { ANALYTICS_LABELS, EventType } from '@/src/services/analytics/types'
+import { ANALYTICS_LABELS } from '@/src/services/analytics/constants'
+import { EventType } from '@/src/services/analytics/types'
 import type { RootState } from '@/src/store'
 import type { ActionWithPayload } from '@/src/store/utils/strategy/Strategy'
 import { MiddlewareAPI, Dispatch } from '@reduxjs/toolkit'
@@ -16,14 +17,10 @@ jest.mock('@/src/services/analytics/events/transactions', () => ({
 
 jest.mock('@/src/services/analytics/types', () => ({
   ...jest.requireActual('@/src/services/analytics/types'),
-  getTransactionAnalyticsLabel: jest.fn(),
 }))
 
 const mockTrackEvent = jest.mocked(trackEvent)
 const mockCreateTxConfirmEvent = jest.mocked(createTxConfirmEvent)
-const mockGetTransactionAnalyticsLabel = jest.mocked(
-  require('@/src/services/analytics/types').getTransactionAnalyticsLabel,
-)
 
 describe('TransactionConfirmationStrategy', () => {
   let strategy: TransactionConfirmationStrategy
@@ -72,12 +69,10 @@ describe('TransactionConfirmationStrategy', () => {
       }
 
       // Mock the function calls
-      mockGetTransactionAnalyticsLabel.mockReturnValue(ANALYTICS_LABELS.TRANSFER_TYPES.ERC20)
       mockCreateTxConfirmEvent.mockReturnValue(mockEventData)
 
       strategy.execute(mockStore, action)
 
-      expect(mockGetTransactionAnalyticsLabel).toHaveBeenCalledWith(mockTransaction.txInfo)
       expect(mockCreateTxConfirmEvent).toHaveBeenCalledWith(ANALYTICS_LABELS.TRANSFER_TYPES.ERC20)
       expect(mockTrackEvent).toHaveBeenCalledWith(mockEventData)
     })
@@ -108,12 +103,10 @@ describe('TransactionConfirmationStrategy', () => {
         eventLabel: ANALYTICS_LABELS.BASE_TYPES.Custom,
       }
 
-      mockGetTransactionAnalyticsLabel.mockReturnValue(ANALYTICS_LABELS.BASE_TYPES.Custom)
       mockCreateTxConfirmEvent.mockReturnValue(mockEventData)
 
       strategy.execute(mockStore, action)
 
-      expect(mockGetTransactionAnalyticsLabel).toHaveBeenCalledWith(mockTransaction.txInfo)
       expect(mockCreateTxConfirmEvent).toHaveBeenCalledWith(ANALYTICS_LABELS.BASE_TYPES.Custom)
       expect(mockTrackEvent).toHaveBeenCalledWith(mockEventData)
     })
@@ -130,7 +123,6 @@ describe('TransactionConfirmationStrategy', () => {
 
       strategy.execute(mockStore, action)
 
-      expect(mockGetTransactionAnalyticsLabel).not.toHaveBeenCalled()
       expect(mockCreateTxConfirmEvent).not.toHaveBeenCalled()
       expect(mockTrackEvent).not.toHaveBeenCalled()
     })
@@ -143,7 +135,6 @@ describe('TransactionConfirmationStrategy', () => {
 
       strategy.execute(mockStore, action)
 
-      expect(mockGetTransactionAnalyticsLabel).not.toHaveBeenCalled()
       expect(mockCreateTxConfirmEvent).not.toHaveBeenCalled()
       expect(mockTrackEvent).not.toHaveBeenCalled()
     })
@@ -156,7 +147,6 @@ describe('TransactionConfirmationStrategy', () => {
 
       strategy.execute(mockStore, action)
 
-      expect(mockGetTransactionAnalyticsLabel).not.toHaveBeenCalled()
       expect(mockCreateTxConfirmEvent).not.toHaveBeenCalled()
       expect(mockTrackEvent).not.toHaveBeenCalled()
     })
@@ -191,12 +181,10 @@ describe('TransactionConfirmationStrategy', () => {
         eventLabel: ANALYTICS_LABELS.TRANSFER_TYPES.ERC721,
       }
 
-      mockGetTransactionAnalyticsLabel.mockReturnValue(ANALYTICS_LABELS.TRANSFER_TYPES.ERC721)
       mockCreateTxConfirmEvent.mockReturnValue(mockEventData)
 
       strategy.execute(mockStore, action)
 
-      expect(mockGetTransactionAnalyticsLabel).toHaveBeenCalledWith(mockTransaction.txInfo)
       expect(mockCreateTxConfirmEvent).toHaveBeenCalledWith(ANALYTICS_LABELS.TRANSFER_TYPES.ERC721)
       expect(mockTrackEvent).toHaveBeenCalledWith(mockEventData)
     })
@@ -232,12 +220,10 @@ describe('TransactionConfirmationStrategy', () => {
         eventLabel: ANALYTICS_LABELS.SETTINGS_TYPES.ADD_OWNER,
       }
 
-      mockGetTransactionAnalyticsLabel.mockReturnValue(ANALYTICS_LABELS.SETTINGS_TYPES.ADD_OWNER)
       mockCreateTxConfirmEvent.mockReturnValue(mockEventData)
 
       strategy.execute(mockStore, action)
 
-      expect(mockGetTransactionAnalyticsLabel).toHaveBeenCalledWith(mockTransaction.txInfo)
       expect(mockCreateTxConfirmEvent).toHaveBeenCalledWith(ANALYTICS_LABELS.SETTINGS_TYPES.ADD_OWNER)
       expect(mockTrackEvent).toHaveBeenCalledWith(mockEventData)
     })
@@ -268,12 +254,10 @@ describe('TransactionConfirmationStrategy', () => {
         eventLabel: ANALYTICS_LABELS.ENHANCED.rejection,
       }
 
-      mockGetTransactionAnalyticsLabel.mockReturnValue(ANALYTICS_LABELS.ENHANCED.rejection)
       mockCreateTxConfirmEvent.mockReturnValue(mockEventData)
 
       strategy.execute(mockStore, action)
 
-      expect(mockGetTransactionAnalyticsLabel).toHaveBeenCalledWith(mockTransaction.txInfo)
       expect(mockCreateTxConfirmEvent).toHaveBeenCalledWith(ANALYTICS_LABELS.ENHANCED.rejection)
       expect(mockTrackEvent).toHaveBeenCalledWith(mockEventData)
     })
