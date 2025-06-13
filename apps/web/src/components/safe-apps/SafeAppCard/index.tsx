@@ -106,14 +106,15 @@ const SafeAppCardGridView = ({
         action={
           <>
             {/* Safe App Action Buttons */}
-            <SafeAppActionButtons
-              safeApp={safeApp}
-              isBookmarked={isBookmarked}
-              onBookmarkSafeApp={onBookmarkSafeApp}
-              removeCustomApp={removeCustomApp}
-              openPreviewDrawer={openPreviewDrawer}
-              compact={compact}
-            />
+            {!compact && (
+              <SafeAppActionButtons
+                safeApp={safeApp}
+                isBookmarked={isBookmarked}
+                onBookmarkSafeApp={onBookmarkSafeApp}
+                removeCustomApp={removeCustomApp}
+                openPreviewDrawer={openPreviewDrawer}
+              />
+            )}
           </>
         }
       />
