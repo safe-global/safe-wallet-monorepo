@@ -92,7 +92,7 @@ const recipientsCount = '[data-testid="recipients-count"]'
 const maxBtn = '[data-testid="max-btn"]'
 const tokenAmountSection = '[data-testid="token-amount-section"]'
 const insufficientBalanceError = '[data-testid="insufficient-balance-error"]'
-const signerList = '[data-testid="signer-list"]'
+const proposeTransactionBtn = '[data-testid="sign-btn"]'
 
 const insufficientFundsErrorStr = 'Insufficient funds'
 const viewTransactionBtn = 'View transaction'
@@ -827,6 +827,10 @@ export function clickOnNoLaterOption() {
 
 export function clickOnSignTransactionBtn() {
   cy.get(signBtn).click()
+}
+
+export function clickOnProposeTransactionBtn() {
+  cy.get(proposeTransactionBtn).click()
 }
 
 export function clickOnContinueSignTransactionBtn() {
