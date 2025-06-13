@@ -10,7 +10,7 @@ export const CurrencyItem: React.FC<CurrencyItemProps> = ({ code, symbol, name, 
       <View flexDirection="row" justifyContent="space-between" alignItems="center">
         <View flex={1}>
           <Text fontSize="$5" fontWeight="600" color="$color">
-            {code} - {symbol}
+            {code} {code !== symbol && `- ${symbol}`}
           </Text>
           <Text fontSize="$4" color="$colorSecondary">
             {name}

@@ -1,8 +1,17 @@
+const cryptoFallBackNames = {
+  BTC: 'Bitcoin',
+  ETH: 'Ethereum',
+}
+
 export const getCurrencyName = (currency: string, locale = 'en') => {
   try {
     if (typeof Intl.DisplayNames === 'function') {
       const displayNames = new Intl.DisplayNames([locale], { type: 'currency' })
-      return displayNames.of(currency) || currency
+      const name = displayNames.of(currency)
+      if (cryptoFallBackNames[name as keyof typeof cryptoFallBackNames]) {
+        return cryptoFallBackNames[name as keyof typeof cryptoFallBackNames]
+      }
+      return name || currency
     }
   } catch (_e) {
     // Fallback to code if Intl.DisplayNames fails
