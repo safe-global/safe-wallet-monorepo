@@ -18,7 +18,6 @@ export interface NewsCarouselProps {
   banners: BannerItem[]
 }
 
-const ITEM_WIDTH_PERCENT = 80 // width of each banner in viewport width
 const STORAGE_KEY = 'dismissedNewsBanners'
 
 const isInteractive = (element: HTMLElement | null) => !!element?.closest('button, a, input, textarea, select')
@@ -78,6 +77,7 @@ const NewsCarousel = ({ banners }: NewsCarouselProps) => {
   }
 
   const items = useMemo(() => banners.filter((b) => !dismissed.includes(b.id)), [banners, dismissed])
+  const ITEM_WIDTH_PERCENT = items.length === 1 ? 100 : 80
 
   const dismissItem = (id: string) => {
     setDismissed((prev = []) => Array.from(new Set([...prev, id])))

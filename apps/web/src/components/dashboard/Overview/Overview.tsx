@@ -13,17 +13,23 @@ import ArrowIconNW from '@/public/images/common/arrow-top-right.svg'
 import ArrowIconSE from '@/public/images/common/arrow-se.svg'
 import FiatValue from '@/components/common/FiatValue'
 import { AppRoutes } from '@/config/routes'
-import { Button, Card, Grid, Box, Skeleton, Typography, Stack } from '@mui/material'
+import { Button, Card, Grid, Box, Skeleton, Typography, Stack, SvgIcon } from '@mui/material'
 import { useRouter } from 'next/router'
-import { type ReactElement, useContext } from 'react'
+import { type ReactElement, useContext, useMemo } from 'react'
 import { SWAP_EVENTS, SWAP_LABELS } from '@/services/analytics/events/swaps'
 import useIsSwapFeatureEnabled from '@/features/swap/hooks/useIsSwapFeatureEnabled'
 import NewsCarousel, { type BannerItem } from '@/components/dashboard/NewsCarousel'
 import EarnBanner from '@/components/dashboard/NewsCarousel/banners/EarnBanner'
 import SpacesBanner from '@/components/dashboard/NewsCarousel/banners/SpacesBanner'
 import useIsEarnFeatureEnabled from '@/features/earn/hooks/useIsEarnFeatureEnabled'
-import { useHasFeature } from '@/hooks/useChains'
+import { useCurrentChain, useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
+import FiatIcon from '@/public/images/common/fiat2.svg'
+import CopyIcon from '@/public/images/common/copy.svg'
+import CopyTooltip from '@/components/common/CopyTooltip'
+import { useAppSelector } from '@/store'
+import { selectSettings } from '@/store/settingsSlice'
+import useSafeAddress from '@/hooks/useSafeAddress'
 
 const SkeletonOverview = (
   <>
@@ -56,6 +62,60 @@ const SkeletonOverview = (
   </>
 )
 
+const AddFundsToGetStarted = () => {
+  const safeAddress = useSafeAddress()
+  const settings = useAppSelector(selectSettings)
+  const chain = useCurrentChain()
+
+  const addressCopyText = settings.shortName.copy && chain ? `${chain.shortName}:${safeAddress}` : safeAddress
+
+  return (
+    <Stack
+      direction={{ xs: 'column', md: 'row' }}
+      sx={{ backgroundColor: 'info.light' }}
+      p={2}
+      gap={2}
+      alignItems={{ xs: 'flex-start', md: 'center' }}
+      borderRadius={1}
+      mt={3}
+    >
+      <Box
+        width="40px"
+        height="40px"
+        bgcolor="background.paper"
+        display="flex"
+        alignItems="center"
+        justifyContent="center"
+        borderRadius="6px"
+        flexShrink="0"
+      >
+        <SvgIcon component={FiatIcon} inheritViewBox fontSize="small" />
+      </Box>
+      <Box>
+        <Typography fontWeight="bold" color="static.main">
+          Add funds to get started
+        </Typography>
+        <Typography variant="body2" color="primary.light">
+          Onramp crypto or send tokens directly to your address from a different wallet.{' '}
+        </Typography>
+      </Box>
+      <Box ml={{ xs: 0, md: 'auto' }}>
+        <CopyTooltip text={addressCopyText}>
+          <Button
+            variant="contained"
+            color="background.paper"
+            startIcon={<SvgIcon component={CopyIcon} inheritViewBox fontSize="small" />}
+            size="small"
+            disableElevation
+          >
+            Copy address
+          </Button>
+        </CopyTooltip>
+      </Box>
+    </Stack>
+  )
+}
+
 const Overview = (): ReactElement => {
   const { safe, safeLoading, safeLoaded } = useSafeInfo()
   const { balances, loading: balancesLoading } = useVisibleBalances()
@@ -77,6 +137,12 @@ const Overview = (): ReactElement => {
     setTxFlow(<NewTxFlow />, undefined, false)
     trackEvent(OVERVIEW_EVENTS.NEW_TRANSACTION)
   }
+
+  const items = useMemo(() => {
+    return balances.items.filter((item) => item.balance !== '0')
+  }, [balances.items])
+
+  const noAssets = !isLoading && items.length === 0
 
   return (
     <Card sx={{ border: 0, p: 3 }} component="section">
@@ -119,20 +185,22 @@ const Overview = (): ReactElement => {
                   <BuyCryptoButton />
                 </Box>
 
-                <Box flex={1}>
-                  <Button
-                    onClick={handleOnSend}
-                    size="compact"
-                    variant="contained"
-                    color="background"
-                    disableElevation
-                    startIcon={<ArrowIconNW fontSize="small" />}
-                    sx={{ height: '42px' }}
-                    fullWidth
-                  >
-                    Send
-                  </Button>
-                </Box>
+                {!noAssets && (
+                  <Box flex={1}>
+                    <Button
+                      onClick={handleOnSend}
+                      size="compact"
+                      variant="contained"
+                      color="background"
+                      disableElevation
+                      startIcon={<ArrowIconNW fontSize="small" />}
+                      sx={{ height: '42px' }}
+                      fullWidth
+                    >
+                      Send
+                    </Button>
+                  </Box>
+                )}
 
                 <Box flex={1}>
                   <Track {...OVERVIEW_EVENTS.SHOW_QR} label="dashboard">
@@ -152,7 +220,7 @@ const Overview = (): ReactElement => {
                   </Track>
                 </Box>
 
-                {isSwapFeatureEnabled && (
+                {isSwapFeatureEnabled && !noAssets && (
                   <Box flex={1}>
                     <Track {...SWAP_EVENTS.OPEN_SWAPS} label={SWAP_LABELS.dashboard}>
                       <Link href={{ pathname: AppRoutes.swap, query: router.query }} passHref type="button">
@@ -178,7 +246,7 @@ const Overview = (): ReactElement => {
         )}
       </Box>
 
-      <NewsCarousel banners={banners} />
+      {noAssets ? <AddFundsToGetStarted /> : <NewsCarousel banners={banners} />}
     </Card>
   )
 }

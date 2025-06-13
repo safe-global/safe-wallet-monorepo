@@ -12,6 +12,18 @@
   position: relative;
 }
 
+.recoveryContainer {
+  grid-template-columns: 1fr 170px;
+}
+
+.pendingTxHeader :global .MuiBadge-root {
+  margin-left: var(--space-1);
+}
+
+.pendingTxHeader :global .MuiBadge-badge {
+  position: relative;
+}
+
 .innerContainer {
   min-width: 0;
   flex-grow: 1;
@@ -103,6 +115,7 @@
 .txDescription img {
   width: 24px;
   height: 24px;
+  object-fit: contain;
 }
 
 .confirmations {

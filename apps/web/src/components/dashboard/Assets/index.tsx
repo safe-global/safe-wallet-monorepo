@@ -9,7 +9,6 @@ import css from './styles.module.css'
 import { useRouter } from 'next/router'
 import { SWAP_LABELS } from '@/services/analytics/events/swaps'
 import { useVisibleAssets } from '@/components/balances/AssetsTable/useHideAssets'
-import BuyCryptoButton from '@/components/common/BuyCryptoButton'
 import SendButton from '@/components/balances/AssetsTable/SendButton'
 import useIsSwapFeatureEnabled from '@/features/swap/hooks/useIsSwapFeatureEnabled'
 import { FiatBalance } from '@/components/balances/AssetsTable/FiatBalance'
@@ -25,8 +24,7 @@ import { TokenType } from '@safe-global/safe-gateway-typescript-sdk'
 import StakeButton from '@/features/stake/components/StakeButton'
 import { STAKE_LABELS } from '@/services/analytics/events/stake'
 import useIsStakingFeatureEnabled from '@/features/stake/hooks/useIsStakingFeatureEnabled'
-import { formatPercentage } from '@safe-global/utils/utils/formatters'
-import { percentageOfTotal } from '@safe-global/utils/utils/formatNumber'
+import NoAssetsIcon from '@/public/images/common/no-assets.svg'
 
 const MAX_ASSETS = 4
 
@@ -41,56 +39,44 @@ const AssetsDummy = () => (
 )
 
 const NoAssets = () => (
-  <Paper elevation={0} sx={{ p: 5 }}>
-    <Typography variant="h3" fontWeight="bold" mb={1}>
-      Add funds to get started
+  <Paper elevation={0} sx={{ p: 5, textAlign: 'center' }}>
+    <NoAssetsIcon />
+
+    <Typography mb={0.5} mt={3}>
+      No assets yet
     </Typography>
 
-    <Typography>
-      Add funds directly from your bank account or copy your address to send tokens from a different account.
-    </Typography>
-
-    <Box display="flex" mt={2}>
-      <BuyCryptoButton />
-    </Box>
+    <Typography color="primary.light">Onramp crypto or deposit from another wallet to get started.</Typography>
   </Paper>
 )
 
 const AssetRow = ({
-  fiatTotal,
   item,
   chainId,
   showSwap,
   showEarn,
   showStake,
 }: {
-  fiatTotal: string
   item: Balances['items'][number]
   chainId: string
   showSwap?: boolean
   showEarn?: boolean
   showStake?: boolean
 }) => {
-  const assetPercentage = percentageOfTotal(item.fiatBalance, fiatTotal)
-  const readablePercentage = formatPercentage(assetPercentage)
-
   return (
     <Box className={css.container} key={item.tokenInfo.address}>
       <Stack direction="row" gap={1.5} alignItems="center">
         <TokenIcon tokenSymbol={item.tokenInfo.symbol} logoUri={item.tokenInfo.logoUri ?? undefined} size={32} />
         <Box>
-          <Typography>{item.tokenInfo.name}</Typography>
-          <Typography variant="body2" className={css.tokenAmount}>
-            <TokenAmount value={item.balance} decimals={item.tokenInfo.decimals} tokenSymbol={item.tokenInfo.symbol} />
-          </Typography>
+          <Typography fontWeight="600">{item.tokenInfo.name}</Typography>
+          <Typography variant="body2">{item.tokenInfo.symbol}</Typography>
         </Box>
       </Stack>
 
       <Stack display={['none', 'flex']} direction="row" alignItems="center" gap={1}>
-        <Box className={css.bar}>
-          <Typography className={css.barPercentage} component="span" width={`${assetPercentage * 100}%`} />
-        </Box>
-        <Typography variant="body2">{readablePercentage}</Typography>
+        <Typography className={css.tokenAmount}>
+          <TokenAmount value={item.balance} decimals={item.tokenInfo.decimals} tokenSymbol={item.tokenInfo.symbol} />
+        </Typography>
       </Stack>
 
       <Box flex={1} display="block" textAlign="right" height="44px">
@@ -117,7 +103,7 @@ const AssetRow = ({
   )
 }
 
-const AssetList = ({ items, fiatTotal }: { items: Balances['items']; fiatTotal: string }) => {
+const AssetList = ({ items }: { items: Balances['items'] }) => {
   const isSwapFeatureEnabled = useIsSwapFeatureEnabled()
   const isEarnFeatureEnabled = useIsEarnFeatureEnabled()
   const isStakingFeatureEnabled = useIsStakingFeatureEnabled()
@@ -127,7 +113,6 @@ const AssetList = ({ items, fiatTotal }: { items: Balances['items']; fiatTotal: 
     <Box display="flex" flexDirection="column">
       {items.map((item) => (
         <AssetRow
-          fiatTotal={fiatTotal}
           item={item}
           key={item.tokenInfo.address}
           chainId={chainId}
@@ -140,12 +125,12 @@ const AssetList = ({ items, fiatTotal }: { items: Balances['items']; fiatTotal: 
   )
 }
 
-const isNonZeroBalance = (item: Balances['items'][number]) => item.balance !== '0'
+export const isNonZeroBalance = (item: Balances['items'][number]) => item.balance !== '0'
 
 const AssetsWidget = () => {
   const router = useRouter()
   const { safe } = router.query
-  const { loading, balances } = useBalances()
+  const { loading } = useBalances()
   const visibleAssets = useVisibleAssets()
 
   const items = useMemo(() => {
@@ -165,18 +150,10 @@ const AssetsWidget = () => {
       <Stack direction="row" justifyContent="space-between" sx={{ px: 1.5, mb: 1 }}>
         <Typography fontWeight={700}>Top assets</Typography>
 
-        {items.length > 0 && <ViewAllLink url={viewAllUrl} text={`View all (${visibleAssets.length})`} />}
+        {items.length > 0 && <ViewAllLink url={viewAllUrl} text="View all" />}
       </Stack>
 
-      <Box>
-        {loading ? (
-          <AssetsDummy />
-        ) : items.length > 0 ? (
-          <AssetList items={items} fiatTotal={balances.fiatTotal} />
-        ) : (
-          <NoAssets />
-        )}
-      </Box>
+      <Box>{loading ? <AssetsDummy /> : items.length > 0 ? <AssetList items={items} /> : <NoAssets />}</Box>
     </Card>
   )
 }

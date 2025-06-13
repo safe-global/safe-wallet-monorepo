@@ -9,6 +9,4 @@
 
 .compact {
   padding-top: var(--space-1);
-  flex-wrap: nowrap;
-  overflow-x: auto;
 }
