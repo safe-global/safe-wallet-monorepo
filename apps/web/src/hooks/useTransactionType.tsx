@@ -12,11 +12,6 @@ import StakeIcon from '@/public/images/common/stake.svg'
 import EarnIcon from '@/public/images/common/earn.svg'
 import NestedSafeIcon from '@/public/images/transactions/nestedTx.svg'
 import BatchIcon from '@/public/images/common/multisend.svg'
-import SettingsIcon from '@/public/images/transactions/settings.svg'
-import OutgoingIcon from '@/public/images/transactions/outgoing.svg'
-import IncomingIcon from '@/public/images/transactions/incoming.svg'
-import CustomIcon from '@/public/images/transactions/custom.svg'
-import RedCircleIcon from '@/public/images/transactions/circle-cross-red.svg'
 
 import {
   isCancellationTxInfo,
@@ -59,24 +54,17 @@ export const getTransactionType = (tx: TransactionSummary, addressBook: AddressB
 
   switch (tx.txInfo.type) {
     case TransactionInfoType.CREATION: {
-      const altText = 'Safe creation'
-
       return {
-        icon: toAddress?.logoUri || <SvgIcon component={SettingsIcon} inheritViewBox fontSize="small" alt={altText} />,
+        icon: toAddress?.logoUri || '/images/transactions/settings.svg',
         text: 'Safe Account created',
       }
     }
     case TransactionInfoType.SWAP_TRANSFER:
     case TransactionInfoType.TRANSFER: {
       const isSendTx = isOutgoingTransfer(tx.txInfo)
-      const altText = isSendTx ? 'Sent' : 'Received'
 
       return {
-        icon: isSendTx ? (
-          <SvgIcon component={OutgoingIcon} inheritViewBox fontSize="small" alt={altText} />
-        ) : (
-          <SvgIcon component={IncomingIcon} inheritViewBox fontSize="small" alt={altText} />
-        ),
+        icon: isSendTx ? '/images/transactions/outgoing.svg' : '/images/transactions/incoming.svg',
         text: isSendTx ? (isTxQueued(tx.txStatus) ? 'Send' : 'Sent') : 'Received',
       }
     }
@@ -84,10 +72,9 @@ export const getTransactionType = (tx: TransactionSummary, addressBook: AddressB
       // deleteGuard doesn't exist in Solidity
       // It is decoded as 'setGuard' with a settingsInfo.type of 'DELETE_GUARD'
       const isDeleteGuard = tx.txInfo.settingsInfo?.type === SettingsInfoType.DELETE_GUARD
-      const altText = 'Delete Guard'
 
       return {
-        icon: <SvgIcon component={SettingsIcon} inheritViewBox fontSize="small" alt={altText} />,
+        icon: '/images/transactions/settings.svg',
         text: isDeleteGuard ? 'deleteGuard' : tx.txInfo.dataDecoded.method,
       }
     }
@@ -155,16 +142,14 @@ export const getTransactionType = (tx: TransactionSummary, addressBook: AddressB
 
       if (isModuleExecutionInfo(tx.executionInfo)) {
         return {
-          icon: toAddress?.logoUri || (
-            <SvgIcon component={CustomIcon} inheritViewBox fontSize="small" alt="Module transaction" />
-          ),
+          icon: toAddress?.logoUri || '/images/transactions/custom.svg',
           text: toAddress?.name || 'Contract interaction',
         }
       }
 
       if (isCancellationTxInfo(tx.txInfo)) {
         return {
-          icon: <SvgIcon component={RedCircleIcon} inheritViewBox fontSize="small" alt="On-chain rejection" />,
+          icon: '/images/transactions/circle-cross-red.svg',
           text: 'On-chain rejection',
         }
       }
@@ -177,15 +162,13 @@ export const getTransactionType = (tx: TransactionSummary, addressBook: AddressB
       }
 
       return {
-        icon: toAddress?.logoUri || (
-          <SvgIcon component={CustomIcon} inheritViewBox fontSize="small" alt="Contract interaction" />
-        ),
+        icon: toAddress?.logoUri || '/images/transactions/custom.svg',
         text: addressBookName || toAddress?.name || 'Contract interaction',
       }
     }
     default: {
       return {
-        icon: <SvgIcon component={CustomIcon} inheritViewBox fontSize="small" alt="Contract interaction" />,
+        icon: '/images/transactions/custom.svg',
         text: addressBookName || 'Contract interaction',
       }
     }

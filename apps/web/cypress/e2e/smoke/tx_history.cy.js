@@ -29,7 +29,7 @@ describe('[SMOKE] Tx history tests', () => {
 
   // mock
   // Token receipt
-  it.skip('[SMOKE] Verify summary for token receipt', () => {
+  it('[SMOKE] Verify summary for token receipt', () => {
     createTx.verifySummaryByName(
       typeReceive.summaryTitle,
       typeReceive.summaryTxInfo,
@@ -50,7 +50,7 @@ describe('[SMOKE] Tx history tests', () => {
   })
 
   // mock
-  it.skip('[SMOKE] Verify summary for token send', () => {
+  it('[SMOKE] Verify summary for token send', () => {
     createTx.verifySummaryByName(
       typeSend.title,
       null,
@@ -79,7 +79,7 @@ describe('[SMOKE] Tx history tests', () => {
   })
 
   // mock
-  it.skip('[SMOKE] Verify summary for allowance deletion', () => {
+  it('[SMOKE] Verify summary for allowance deletion', () => {
     createTx.verifySummaryByName(
       typeDeleteAllowance.title,
       typeDeleteAllowance.summaryTxInfo,
@@ -89,7 +89,7 @@ describe('[SMOKE] Tx history tests', () => {
   })
 
   // mock
-  it.skip('[SMOKE] Verify summary for untrusted token', () => {
+  it('[SMOKE] Verify summary for untrusted token', () => {
     createTx.toggleUntrustedTxs()
     createTx.verifySummaryByName(
       typeUntrustedToken.summaryTitle,
