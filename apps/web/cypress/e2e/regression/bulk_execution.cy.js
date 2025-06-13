@@ -32,7 +32,7 @@ describe('Bulk execution', () => {
     create_tx.verifyEnabledBulkExecuteBtnTooltip()
   })
 
-  it.only(
+  it(
     'Verify that "Confirm bulk execution" screen contains only available for execution txs in the actions list',
     { defaultCommandTimeout: 30000 },
     () => {
