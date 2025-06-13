@@ -8,13 +8,38 @@ import { configureStore } from '@reduxjs/toolkit'
 import { FLUSH, PAUSE, PERSIST, PURGE, REGISTER, REHYDRATE } from 'redux-persist'
 import { cgwClient } from '@safe-global/store/gateway/cgwClient'
 import { web3API } from '@/src/store/signersBalance'
+import type { SettingsState } from '@/src/store/settingsSlice'
 
 export type RootState = ReturnType<typeof rootReducer>
 type getProvidersArgs = (initialStoreState?: Partial<RootState>) => React.FC<{ children: React.ReactNode }>
 
+// Default settings slice for tests
+const defaultSettings: SettingsState = {
+  onboardingVersionSeen: '',
+  themePreference: 'auto',
+  currency: 'usd',
+  env: {
+    rpc: {},
+    tenderly: {
+      url: '',
+      accessToken: '',
+    },
+  },
+}
+
 const getProviders: getProvidersArgs = (initialStoreState) =>
   function ProviderComponent({ children }: { children: React.ReactNode }) {
-    const store = initialStoreState
+    // Inject default settings if not provided
+    const storeWithDefaults = initialStoreState
+      ? ({
+          ...initialStoreState,
+          settings: {
+            ...defaultSettings,
+            ...(initialStoreState.settings || {}),
+          },
+        } as Partial<RootState>)
+      : undefined
+    const store = storeWithDefaults
       ? configureStore({
           reducer: rootReducer,
           middleware: (getDefaultMiddleware) =>
@@ -23,7 +48,7 @@ const getProviders: getProvidersArgs = (initialStoreState) =>
                 ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
               },
             }).concat(cgwClient.middleware, web3API.middleware),
-          preloadedState: initialStoreState,
+          preloadedState: storeWithDefaults,
         })
       : makeStore()
 
