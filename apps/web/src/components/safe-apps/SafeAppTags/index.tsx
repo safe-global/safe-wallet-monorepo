@@ -3,17 +3,19 @@ import Chip from '@mui/material/Chip'
 
 import { filterInternalCategories } from '@/components/safe-apps/utils'
 import css from './styles.module.css'
+import classnames from 'classnames'
 
 type SafeAppTagsProps = {
   tags: string[]
+  compact?: boolean
 }
 
-const SafeAppTags = ({ tags = [] }: SafeAppTagsProps) => {
+const SafeAppTags = ({ tags = [], compact }: SafeAppTagsProps) => {
   const displayedTags = filterInternalCategories(tags)
 
   return (
     <Stack
-      className={css.safeAppTagContainer}
+      className={classnames(css.safeAppTagContainer, { [css.compact]: compact })}
       sx={{
         flexDirection: 'row',
         gap: 1,

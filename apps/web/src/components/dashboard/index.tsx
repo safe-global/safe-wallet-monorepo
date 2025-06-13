@@ -17,9 +17,6 @@ import { UnsupportedMastercopyWarning } from '@/features/multichain/components/U
 import { FEATURES } from '@safe-global/utils/utils/chains'
 
 const RecoveryHeader = dynamic(() => import('@/features/recovery/components/RecoveryHeader'))
-const GovernanceSection = dynamic(() => import('@/components/dashboard/GovernanceSection/GovernanceSection'), {
-  ssr: false,
-})
 
 const Dashboard = (): ReactElement => {
   const { safe } = useSafeInfo()
@@ -69,10 +66,6 @@ const Dashboard = (): ReactElement => {
                 <SafeAppsDashboardSection />
               </Grid>
             )}
-
-            <Grid item xs={12} className={css.hideIfEmpty}>
-              <GovernanceSection />
-            </Grid>
           </>
         )}
       </Grid>

@@ -10,8 +10,8 @@ const overviewStr = 'Total asset value'
 const sendStr = 'Send'
 const receiveStr = 'Receive'
 const viewAllStr = 'View all'
-const safeAppStr = 'Safe Apps'
-const exploreSafeApps = 'Explore Safe Apps'
+const safeAppStr = 'Featured Apps'
+const oneInchSafeApp = '1inch Network'
 export const copiedAppUrl = 'share/safe-app?appUrl'
 
 const copyShareBtn = '[data-testid="copy-btn-icon"]'
@@ -139,6 +139,6 @@ export function verifyTxQueueWidget() {
 }
 
 export function verifySafeAppsSection() {
-  cy.contains('h2', safeAppStr).parents('section').as('safeAppsSection')
-  cy.get('@safeAppsSection').contains(exploreSafeApps)
+  cy.contains('p', safeAppStr).parents('section').as('safeAppsSection')
+  cy.get('@safeAppsSection').contains(oneInchSafeApp)
 }
