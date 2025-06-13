@@ -4,7 +4,7 @@ import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
 import { selectCurrency, setCurrency } from '@/src/store/settingsSlice'
 import useCurrencies from '@/src/hooks/useCurrencies'
 import { useRouter } from 'expo-router'
-import { CURRENCY_DATA } from '@/src/config/currencies'
+import { getCurrencyName, getCurrencySymbol } from '@/src/utils/currency'
 
 export const CurrencyContainer = () => {
   const router = useRouter()
@@ -25,16 +25,14 @@ export const CurrencyContainer = () => {
     }
 
     return supportedCurrencies.filter((currency) => {
-      const currencyInfo = CURRENCY_DATA[currency.toUpperCase()]
-      if (!currencyInfo) {
-        return false
-      }
-
+      const currencyCode = currency.toUpperCase()
+      const currencyName = getCurrencyName(currencyCode)
+      const currencySymbol = getCurrencySymbol(currencyCode)
       const searchLower = searchQuery.toLowerCase()
       return (
         currency.toLowerCase().includes(searchLower) ||
-        currencyInfo.name.toLowerCase().includes(searchLower) ||
-        currencyInfo.symbol.toLowerCase().includes(searchLower)
+        currencyName.toLowerCase().includes(searchLower) ||
+        currencySymbol.toLowerCase().includes(searchLower)
       )
     })
   }, [supportedCurrencies, searchQuery])

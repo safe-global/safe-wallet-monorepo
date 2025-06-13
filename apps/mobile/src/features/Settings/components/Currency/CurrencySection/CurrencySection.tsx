@@ -1,7 +1,7 @@
 import React from 'react'
 import { View, Text, YStack } from 'tamagui'
 import { CurrencyItem } from '../CurrencyItem'
-import { CURRENCY_DATA } from '@/src/config/currencies'
+import { getCurrencyName, getCurrencySymbol } from '@/src/utils/currency'
 import type { CurrencySectionProps } from '../Currency.types'
 
 export const CurrencySection: React.FC<CurrencySectionProps> = ({
@@ -18,8 +18,9 @@ export const CurrencySection: React.FC<CurrencySectionProps> = ({
     </View>
     <YStack gap="$4">
       {currencies.map((currency) => {
-        const currencyInfo = CURRENCY_DATA[currency.toUpperCase()]
-        if (!currencyInfo) {
+        const currencyName = getCurrencyName(currency)
+        const currencySymbol = getCurrencySymbol(currency)
+        if (!currencyName || !currencySymbol) {
           return null
         }
 
@@ -27,8 +28,8 @@ export const CurrencySection: React.FC<CurrencySectionProps> = ({
           <CurrencyItem
             key={currency}
             code={currency.toUpperCase()}
-            symbol={currencyInfo.symbol}
-            name={currencyInfo.name}
+            symbol={currencySymbol}
+            name={currencyName}
             isSelected={selectedCurrency.toUpperCase() === currency.toUpperCase()}
             onPress={() => onCurrencySelect(currency.toLowerCase())}
           />

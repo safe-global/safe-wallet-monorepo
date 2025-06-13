@@ -42,6 +42,7 @@
     "@ethersproject/shims": "^5.7.0",
     "@expo/config-plugins": "~10.0.0",
     "@expo/vector-icons": "^14.1.0",
+    "@formatjs/intl-displaynames": "^6.8.11",
     "@formatjs/intl-getcanonicallocales": "^2.5.4",
     "@formatjs/intl-locale": "^4.2.10",
     "@formatjs/intl-numberformat": "^8.15.3",
