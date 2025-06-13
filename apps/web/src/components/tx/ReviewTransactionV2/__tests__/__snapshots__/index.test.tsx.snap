@@ -200,7 +200,7 @@ exports[`ReviewTransaction should display a confirmation screen 1`] = `
                             target="_blank"
                           >
                             <span
-                              class="MuiBox-root css-1vqf8mi"
+                              class="MuiBox-root css-u9xrjn"
                             >
                               Safe Utils
                               <svg
@@ -225,7 +225,7 @@ exports[`ReviewTransaction should display a confirmation screen 1`] = `
                             target="_blank"
                           >
                             <span
-                              class="MuiBox-root css-1vqf8mi"
+                              class="MuiBox-root css-u9xrjn"
                             >
                               Transaction Decoder
                               <svg
