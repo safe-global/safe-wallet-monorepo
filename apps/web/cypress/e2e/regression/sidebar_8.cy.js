@@ -110,7 +110,7 @@ describe('Sidebar tests 8', () => {
     sideBar.clickOnAddSafeBtn()
   })
 
-  it('Verify "blockchain sync" status is shown at the bottom pointing to the network statuses', () => {
+  it.only('Verify "blockchain sync" status is shown at the bottom pointing to the network statuses', () => {
     cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_7)
     sideBar.verifyIndexStatusPresent()
   })

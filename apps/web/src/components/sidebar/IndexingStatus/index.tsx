@@ -68,6 +68,7 @@ const IndexingStatus = () => {
         size="small"
         href={STATUS_PAGE}
         target="_blank"
+        data-testid="index-status"
         startIcon={
           <Box width={16} height={16} borderRadius="50%" border={`2px solid var(--color-${status.color}-main)`} />
         }

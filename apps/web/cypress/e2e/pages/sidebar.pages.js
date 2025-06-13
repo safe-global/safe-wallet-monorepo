@@ -176,7 +176,7 @@ export function checkSearchResults(number) {
 }
 
 export function checkNeedHelpBtnLink() {
-  cy.get(needHelpBtn).find('a').should('have.attr', 'href', needHelpLink)
+  cy.get(needHelpBtn).should('have.attr', 'href', needHelpLink)
 }
 
 export const multichainSafes = {
@@ -234,9 +234,7 @@ export function verifyCurrentSafeReadOnly(number) {
 }
 
 export function verifyIndexStatusPresent() {
-  cy.get(indexStatusSection).within(() => {
-    cy.get('a').should('have.attr', 'href', constants.indexStatusUrl)
-  })
+  cy.get(indexStatusSection).should('have.attr', 'href', constants.indexStatusUrl)
 }
 
 export function clickOnAddSafeBtn() {
