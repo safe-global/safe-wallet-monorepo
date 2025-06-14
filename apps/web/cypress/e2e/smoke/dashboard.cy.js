@@ -5,10 +5,10 @@ import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 
 let staticSafes = []
 
-const txData = ['14', 'Send', '-0.00002 ETH', '1 out of 1']
-const txaddOwner = ['5', 'addOwnerWithThreshold', '1 out of 2']
-const txMultiSendCall3 = ['4', 'Batch', '3 actions', '1 out of 2']
-const txMultiSendCall2 = ['6', 'Batch', '2 actions', '1 out of 2']
+const txData = ['Send', '-0.00002 ETH', '1 out of 1']
+const txaddOwner = ['addOwnerWithThreshold', '1 out of 2']
+const txMultiSendCall3 = ['Batch', '3 actions', '1 out of 2']
+const txMultiSendCall2 = ['Batch', '2 actions', '1 out of 2']
 
 describe('[SMOKE] Dashboard tests', { defaultCommandTimeout: 60000 }, () => {
   before(async () => {

@@ -49,6 +49,7 @@ const lightPalette = {
     main: '#F4F4F4',
     paper: '#FFFFFF',
     light: '#EFFFF4',
+    lightGrey: '#DDDEE0',
   },
   backdrop: {
     main: '#636669',
@@ -59,6 +60,7 @@ const lightPalette = {
   },
   static: {
     main: '#121312',
+    light: '#636669',
   },
 }
 

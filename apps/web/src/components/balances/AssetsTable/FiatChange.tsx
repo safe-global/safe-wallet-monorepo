@@ -4,7 +4,7 @@ import { formatPercentage } from '@safe-global/utils/utils/formatters'
 import ArrowDown from '@/public/images/balances/change-down.svg'
 import ArrowUp from '@/public/images/balances/change-up.svg'
 
-export const FiatChange = ({ balanceItem }: { balanceItem: Balance }) => {
+export const FiatChange = ({ balanceItem, inline = false }: { balanceItem: Balance; inline?: boolean }) => {
   if (!balanceItem.fiatBalance24hChange) {
     return (
       <Typography variant="caption" color="text.secondary" paddingLeft={3} display="block">
@@ -26,9 +26,11 @@ export const FiatChange = ({ balanceItem }: { balanceItem: Balance }) => {
       <Chip
         size="small"
         sx={{
-          backgroundColor,
+          backgroundColor: inline ? 'transparent' : backgroundColor,
           color,
-          padding: '2px 8px',
+          padding: inline ? '0' : '2px 8px',
+          height: inline ? '20px' : 'inherit',
+          '& .MuiChip-label': { pr: inline ? 0 : 1 },
         }}
         label={changeLabel}
         icon={

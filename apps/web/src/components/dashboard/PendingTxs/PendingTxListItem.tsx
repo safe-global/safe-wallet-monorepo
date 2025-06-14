@@ -4,13 +4,14 @@ import type { ReactElement } from 'react'
 import { useMemo } from 'react'
 import ChevronRight from '@mui/icons-material/ChevronRight'
 import type { TransactionSummary } from '@safe-global/safe-gateway-typescript-sdk'
-import { Box } from '@mui/material'
+import { Box, Stack, Typography } from '@mui/material'
 import { isMultisigExecutionInfo } from '@/utils/transaction-guards'
 import TxInfo from '@/components/transactions/TxInfo'
-import TxType from '@/components/transactions/TxType'
+import { TxTypeIcon, TxTypeText } from '@/components/transactions/TxType'
 import css from './styles.module.css'
 import { AppRoutes } from '@/config/routes'
 import TxConfirmations from '@/components/transactions/TxConfirmations'
+import { DateTime } from '@/components/common/DateTime/DateTime'
 
 type PendingTxType = {
   transaction: TransactionSummary
@@ -34,21 +35,22 @@ const PendingTx = ({ transaction }: PendingTxType): ReactElement => {
   return (
     <NextLink data-testid="tx-pending-item" href={url} passHref>
       <Box className={css.container}>
-        <Box className={css.innerContainer}>
-          <Box sx={{ minWidth: 30 }}>
-            {isMultisigExecutionInfo(transaction.executionInfo) && transaction.executionInfo.nonce}
+        <Stack direction="row" gap={1.5} alignItems="center">
+          <Box className={css.iconWrapper}>
+            <TxTypeIcon tx={transaction} />
           </Box>
-
-          <Box sx={{ minWidth: 62 }}>
-            <TxType tx={transaction} />
+          <Box>
+            <Typography className={css.txDescription}>
+              <TxTypeText tx={transaction} />
+              <TxInfo info={transaction.txInfo} />
+            </Typography>
+            <Typography variant="body2" color="primary.light">
+              <DateTime value={transaction.timestamp} showDateTime={false} showTime={false} />
+            </Typography>
           </Box>
+        </Stack>
 
-          <Box sx={{ minWidth: 0, flexGrow: 1 }}>
-            <TxInfo info={transaction.txInfo} />
-          </Box>
-        </Box>
-
-        <Box alignSelf="flex-start" display="flex" flexWrap="nowrap" alignItems="center" gap={1.5}>
+        <Box className={css.confirmations}>
           {isMultisigExecutionInfo(transaction.executionInfo) && (
             <TxConfirmations
               submittedConfirmations={transaction.executionInfo.confirmationsSubmitted}
@@ -56,7 +58,7 @@ const PendingTx = ({ transaction }: PendingTxType): ReactElement => {
             />
           )}
 
-          <ChevronRight color="border" />
+          <ChevronRight color="border" fontSize="small" />
         </Box>
       </Box>
     </NextLink>
