@@ -15,7 +15,7 @@
   ],
   "license": "MIT",
   "devDependencies": {
-    "expo-module-scripts": "^3.5.2",
+    "expo-module-scripts": "^4.1.7",
     "typescript": "5.1.6"
   }
 }
