@@ -18,6 +18,7 @@ type ChainIndicatorProps = {
   onlyLogo?: boolean
   responsive?: boolean
   fiatValue?: string
+  imageSize?: number
 }
 
 const fallbackChainConfig = {
@@ -39,6 +40,7 @@ const ChainIndicator = ({
   showLogo = true,
   responsive = false,
   onlyLogo = false,
+  imageSize = 24,
 }: ChainIndicatorProps): ReactElement | null => {
   const currentChainId = useChainId()
   const id = chainId || currentChainId
@@ -75,8 +77,8 @@ const ChainIndicator = ({
         <img
           src={chainConfig.chainLogoUri ?? undefined}
           alt={`${chainConfig.chainName} Logo`}
-          width={24}
-          height={24}
+          width={imageSize}
+          height={imageSize}
           loading="lazy"
         />
       )}

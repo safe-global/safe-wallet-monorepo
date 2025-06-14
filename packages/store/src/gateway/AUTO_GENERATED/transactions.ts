@@ -513,6 +513,52 @@ export type SwapOrderTransactionInfo = {
   /** The App Data for this order */
   fullAppData?: object | null
 }
+export type BridgeFee = {
+  tokenAddress: string
+  integratorFee: string
+  lifiFee: string
+}
+export type BridgeAndSwapTransactionInfo = {
+  type: 'SwapAndBridge'
+  humanDescription?: string | null
+  fromToken: TokenInfo
+  recipient: AddressInfo
+  explorerUrl: string | null
+  status: 'NOT_FOUND' | 'INVALID' | 'PENDING' | 'DONE' | 'FAILED' | 'UNKNOWN' | 'AWAITING_EXECUTION'
+  substatus:
+    | 'WAIT_SOURCE_CONFIRMATIONS'
+    | 'WAIT_DESTINATION_TRANSACTION'
+    | 'BRIDGE_NOT_AVAILABLE'
+    | 'CHAIN_NOT_AVAILABLE'
+    | 'REFUND_IN_PROGRESS'
+    | 'UNKNOWN_ERROR'
+    | 'COMPLETED'
+    | 'PARTIAL'
+    | 'REFUNDED'
+    | 'INSUFFICIENT_ALLOWANCE'
+    | 'INSUFFICIENT_BALANCE'
+    | 'OUT_OF_GAS'
+    | 'EXPIRED'
+    | 'SLIPPAGE_EXCEEDED'
+    | 'UNKNOWN_FAILED_ERROR'
+    | 'UNKNOWN'
+    | 'AWAITING_EXECUTION'
+  fees: BridgeFee | null
+  fromAmount: string
+  toChain: string
+  toToken: TokenInfo | null
+  toAmount: string | null
+}
+export type SwapTransactionInfo = {
+  type: 'Swap'
+  humanDescription?: string | null
+  recipient: AddressInfo
+  fees: BridgeFee | null
+  fromToken: TokenInfo
+  fromAmount: string
+  toToken: TokenInfo
+  toAmount: string
+}
 export type SwapTransferTransactionInfo = {
   type: 'SwapTransfer'
   humanDescription?: string | null
@@ -782,6 +828,8 @@ export type TransactionDetails = {
     | SettingsChangeTransaction
     | TransferTransactionInfo
     | SwapOrderTransactionInfo
+    | BridgeAndSwapTransactionInfo
+    | SwapTransactionInfo
     | SwapTransferTransactionInfo
     | TwapOrderTransactionInfo
     | NativeStakingDepositTransactionInfo
@@ -855,6 +903,8 @@ export type Transaction = {
     | SettingsChangeTransaction
     | TransferTransactionInfo
     | SwapOrderTransactionInfo
+    | BridgeAndSwapTransactionInfo
+    | SwapTransactionInfo
     | SwapTransferTransactionInfo
     | TwapOrderTransactionInfo
     | NativeStakingDepositTransactionInfo
@@ -915,6 +965,8 @@ export type TransactionPreview = {
     | SettingsChangeTransaction
     | TransferTransactionInfo
     | SwapOrderTransactionInfo
+    | BridgeAndSwapTransactionInfo
+    | SwapTransactionInfo
     | SwapTransferTransactionInfo
     | TwapOrderTransactionInfo
     | NativeStakingDepositTransactionInfo
