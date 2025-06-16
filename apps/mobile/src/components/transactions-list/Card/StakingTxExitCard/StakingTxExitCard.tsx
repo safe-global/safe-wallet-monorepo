@@ -1,6 +1,6 @@
 import type { NativeStakingValidatorsExitTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { SafeListItem } from '@/src/components/SafeListItem'
-import { Logo } from '@/src/components/Logo'
+import { TokenIcon } from '@/src/components/TokenIcon'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
 import { Text } from 'tamagui'
 
@@ -15,7 +15,7 @@ export const StakingTxExitCard = ({ info }: { info: NativeStakingValidatorsExitT
           {info.numValidators} Validator{maybePlural(info.numValidators)}
         </Text>
       }
-      leftNode={<Logo logoUri={info.tokenInfo.logoUri} accessibilityLabel={info.tokenInfo.symbol} />}
+      leftNode={<TokenIcon logoUri={info.tokenInfo.logoUri} accessibilityLabel={info.tokenInfo.symbol} />}
     />
   )
 }

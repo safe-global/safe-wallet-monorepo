@@ -1,7 +1,7 @@
 import React from 'react'
 import { Text, View, H5 } from 'tamagui'
 import { Container } from '@/src/components/Container'
-import { Logo } from '@/src/components/Logo'
+import { TokenIcon } from '@/src/components/TokenIcon'
 import { ellipsis, formatValue } from '@/src/utils/formatters'
 import { Badge } from '@/src/components/Badge'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
@@ -33,7 +33,7 @@ export function SwapOrderHeader({ txInfo, executionInfo }: SwapOrderHeaderProps)
       <View flexDirection="row" gap="$2" position="relative">
         <Container flex={1} padding="$4" borderRadius="$3">
           <View alignItems="center" gap="$2">
-            <Logo logoUri={sellToken.logoUri} size="$10" />
+            <TokenIcon logoUri={sellToken.logoUri} size="$10" accessibilityLabel={sellToken.symbol} />
             <Text color="$textSecondaryLight">Sell</Text>
             <H5 fontWeight={600}>
               {ellipsis(sellTokenValue, 9)} {sellToken.symbol}
@@ -67,7 +67,7 @@ export function SwapOrderHeader({ txInfo, executionInfo }: SwapOrderHeaderProps)
 
         <Container flex={1} padding="$4" borderRadius="$3">
           <View alignItems="center" gap="$2">
-            <Logo logoUri={buyToken.logoUri} size="$10" />
+            <TokenIcon logoUri={buyToken.logoUri} size="$10" accessibilityLabel={buyToken.symbol} />
             <Text color="$textSecondaryLight">For at least</Text>
             <H5 fontWeight={600}>
               {ellipsis(buyTokenValue, 9)} {buyToken.symbol}

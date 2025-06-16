@@ -156,7 +156,7 @@ exports[`VaultTxDepositCard renders correctly 1`] = `
                 }
                 testID="logo-fallback-icon"
               >
-                
+                
               </Text>
             </View>
           </View>

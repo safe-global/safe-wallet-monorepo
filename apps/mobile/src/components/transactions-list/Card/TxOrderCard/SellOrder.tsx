@@ -1,6 +1,7 @@
 import { SafeListItem } from '@/src/components/SafeListItem'
-import { Avatar, Text, Theme, View } from 'tamagui'
+import { Text, Theme, View } from 'tamagui'
 import { ellipsis, formatValue } from '@/src/utils/formatters'
+import { TokenIcon } from '@/src/components/TokenIcon'
 import React from 'react'
 import {
   SwapOrderTransactionInfo,
@@ -30,27 +31,23 @@ export function SellOrder({ order, type, bordered, executionInfo, inQueue, onPre
       leftNode={
         <Theme name="logo">
           <View position="relative" width="$10" height="$10">
-            <Avatar circular size="$7" position="absolute" top={0}>
-              {order.sellToken.logoUri && (
-                <Avatar.Image
-                  backgroundColor="$background"
-                  accessibilityLabel={order.sellToken.name}
-                  src={order.sellToken.logoUri}
-                />
-              )}
-              <Avatar.Fallback backgroundColor="$background" />
-            </Avatar>
+            <View position="absolute" top={0}>
+              <TokenIcon
+                logoUri={order.sellToken.logoUri}
+                accessibilityLabel={order.sellToken.name}
+                size="$7"
+                imageBackground="$background"
+              />
+            </View>
 
-            <Avatar circular size="$7" position="absolute" bottom={0} right={0} backgroundColor="$color">
-              {order.buyToken.logoUri && (
-                <Avatar.Image
-                  accessibilityLabel={order.buyToken.name}
-                  backgroundColor="$background"
-                  src={order.buyToken.logoUri}
-                />
-              )}
-              <Avatar.Fallback backgroundColor="$background" />
-            </Avatar>
+            <View position="absolute" bottom={0} right={0}>
+              <TokenIcon
+                logoUri={order.buyToken.logoUri}
+                accessibilityLabel={order.buyToken.name}
+                size="$7"
+                imageBackground="$background"
+              />
+            </View>
           </View>
         </Theme>
       }
