@@ -160,7 +160,7 @@
     "@types/node": "^22.13.1",
     "@types/qrcode": "^1.5.5",
     "@types/react": "~19.0.10",
-    "babel-loader": "^8.4.1",
+    "babel-loader": "^10.0.0",
     "eslint": "^9.29.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.2.1",
