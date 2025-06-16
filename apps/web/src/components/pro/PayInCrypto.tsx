@@ -188,10 +188,6 @@ export const PayinCryptoSelector = ({ planId }: { planId: string }) => {
       <Button disabled={!safe || !selectedToken} variant="contained" onClick={() => onNewTxClick()}>
         Pay
       </Button>
-
-      {payInCryptoState === PayInCryptoState.PAYING && (
-        
-      )}
     </div>
   )
 }

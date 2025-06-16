@@ -12,9 +12,11 @@ import useAsync from '@safe-global/utils/hooks/useAsync'
 import { useContext, useState } from 'react'
 import { SafeTxContext } from '../../SafeTxProvider'
 import { TxFlowContext } from '../../TxFlowProvider'
+import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
 
 const PayInCryptoReview = (props: ReviewTransactionProps) => {
   const { safe, safeLoaded } = useSafeInfo()
+  const spaceId = useCurrentSpaceId()
   const { data } = useContext(TxFlowContext)
   const { safeTx } = useContext(SafeTxContext)
   const tokenInfo = data.tokenInfo as GetTokenInfoDto
@@ -42,7 +44,7 @@ const PayInCryptoReview = (props: ReviewTransactionProps) => {
         console.log('No safe transaction available')
         return
       }
-      await updateCryptoPaymentIntent(data.subscriptionId, safeTx.data)
+      await updateCryptoPaymentIntent(spaceId as string, data.subscriptionId, safeTx.data)
       setIsValid(true)
     } catch (error) {
       console.error('Error updating crypto payment intent:', error)

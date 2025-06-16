@@ -70,9 +70,9 @@ const createCryptoPaymentIntent = async (
     },
     body: JSON.stringify({
       planId,
-      customerId,
       tokenAddress,
       chainId,
+      spaceId: customerId, // Assuming spaceId is the same as customerId
     }),
   })
   if (!response.ok) {
@@ -105,22 +105,28 @@ const createSubscriptionIntent = async (
   return { subscriptionId: data.subscriptionId, clientSecret: data.clientSecret }
 }
 
-const updateCryptoPaymentIntent = async (subscriptionId: string, safeTxData: SafeTransactionData) => {
-  const FETCH_CREATE_CRYPO_PAYMENT_URL = process.env.NEXT_PUBLIC_BILLING_BACKEND_URL + '/api/crypto/update-subscription'
+const updateCryptoPaymentIntent = async (
+  customerId: string,
+  subscriptionId: string,
+  safeTxData: SafeTransactionData,
+) => {
+  const FETCH_UPDATE_CRYPO_PAYMENT_URL = process.env.NEXT_PUBLIC_BILLING_BACKEND_URL + '/api/crypto/update-subscription'
+  const body = JSON.stringify({
+    subscriptionId,
+    spaceId: customerId, // Assuming spaceId is the same as customerId
+    safeTxData: {
+      ...safeTxData,
+      nonce: safeTxData.nonce.toString(), // Ensure nonce is a string
+      safeTxHash: '0x', // TODO: Add safeTxHash if needed
+    },
+  })
 
-  const response = await fetch(`${FETCH_CREATE_CRYPO_PAYMENT_URL}`, {
+  const response = await fetch(`${FETCH_UPDATE_CRYPO_PAYMENT_URL}`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({
-      subscriptionId,
-      safeTxData: {
-        ...safeTxData,
-        nonce: safeTxData.nonce.toString(), // Ensure nonce is a string
-        safeTxHash: '0x', // TODO: Add safeTxHash if needed
-      },
-    }),
+    body: body,
   })
   if (!response.ok) {
     throw new Error('Failed to update subscription')
