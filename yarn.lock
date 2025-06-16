@@ -9588,7 +9588,7 @@ __metadata:
     "@storybook/addon-essentials": "npm:^8.4.6"
     "@storybook/addon-interactions": "npm:^8.4.6"
     "@storybook/addon-onboarding": "npm:^8.4.6"
-    "@storybook/addon-ondevice-actions": "npm:^8.4.4"
+    "@storybook/addon-ondevice-actions": "npm:^9.0.9"
     "@storybook/addon-ondevice-controls": "npm:^8.4.2"
     "@storybook/addon-react-native-web": "npm:^0.0.26"
     "@storybook/addon-webpack5-compiler-babel": "npm:^3.0.3"
@@ -10469,7 +10469,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@storybook/addon-actions@npm:8.4.7, @storybook/addon-actions@npm:^8.4.2":
+"@storybook/addon-actions@npm:8.4.7":
   version: 8.4.7
   resolution: "@storybook/addon-actions@npm:8.4.7"
   dependencies:
@@ -10639,18 +10639,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@storybook/addon-ondevice-actions@npm:^8.4.4":
-  version: 8.4.4
-  resolution: "@storybook/addon-ondevice-actions@npm:8.4.4"
+"@storybook/addon-ondevice-actions@npm:^9.0.9":
+  version: 9.0.9
+  resolution: "@storybook/addon-ondevice-actions@npm:9.0.9"
   dependencies:
-    "@storybook/addon-actions": "npm:^8.4.2"
-    "@storybook/core": "npm:^8.4.2"
     "@storybook/global": "npm:^5.0.0"
     fast-deep-equal: "npm:^2.0.1"
   peerDependencies:
     react: "*"
     react-native: "*"
-  checksum: 10/1a2947db3f7d2a0784c90a951cfb21aa9ff6d8c8dd289655a8660a14d86ef1a5be7382edda5b93e9d824b78258a4646c60b25e9c860cd6c78f004acd1ae2f1ec
+    storybook: ^9.0.9
+  checksum: 10/42f0ed13e1159718e5d29b39e5acaf7da0228492d48da6caeab6fcd52e6143b125c991b2b8ad10abbebca80bf38b1a948db7398c853805d74f86d6eb685d5846
   languageName: node
   linkType: hard
 
