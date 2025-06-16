@@ -54,7 +54,7 @@ const SelectPlan: React.FC<SelectPlanProps> = ({ customerId, onPlanSelected }) =
 
   const createSubscriptionIntentCrypto = async (priceId: string, safeAddress: string) => {
     // TODO: Use chainId
-    const { clientSecret, subscriptionId } = await createCryptoPaymentIntent(priceId, safeAddress, 'crypto', '1')
+    const { clientSecret, subscriptionId } = await createCryptoPaymentIntent(priceId, safeAddress, 'crypto', 1)
     onPlanSelected('', '', 'crypto', priceId)
   }
 

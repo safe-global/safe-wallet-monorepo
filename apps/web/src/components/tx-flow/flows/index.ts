@@ -24,6 +24,7 @@ export const SignMessageOnChainFlow = dynamic(() => import('./SignMessageOnChain
 export const SuccessScreenFlow = dynamic(() => import('./SuccessScreen'))
 export const NestedTxSuccessScreenFlow = dynamic(() => import('./NestedTxSuccessScreen'))
 export const TokenTransferFlow = dynamic(() => import('./TokenTransfer'))
+export const PayInCryptoFlow = dynamic(() => import('./Pro/PayInCryptoFlow'))
 export const UpdateSafeFlow = dynamic(() => import('./UpdateSafe'))
 export const MigrateSafeL2Flow = dynamic(() => import('./MigrateSafeL2'))
 export const UpsertRecoveryFlow = dynamic(() => import('./UpsertRecovery'))

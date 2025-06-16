@@ -1,110 +1,106 @@
 import { useCurrentChain } from '@/hooks/useChains'
-import useSafeInfo from '@/hooks/useSafeInfo'
-import { createCryptoPaymentIntent, getTokenAddresses, updateCryptoPaymentIntent } from '@/services/pro/api'
-import { createMultiSendCallOnlyTx, createTx } from '@/services/tx/tx-sender'
-import type { MetaTransactionData } from '@safe-global/safe-core-sdk-types'
+import { createCryptoPaymentIntent, getTokenAddresses } from '@/services/pro/api'
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import { ERC20__factory } from '@safe-global/utils/types/contracts'
 import { parseUnits } from 'ethers'
 import { useContext, useEffect, useState } from 'react'
-import { SafeTxContext } from '../tx-flow/SafeTxProvider'
-import type { ReviewTransactionProps } from '../tx/ReviewTransactionV2'
-import ReviewTransaction from '../tx/ReviewTransactionV2'
 import type { GetTokenInfoDto } from './types'
-import { TxFlow } from '../tx-flow/TxFlow'
-import { TxFlowType } from '@/services/analytics'
-import { TxFlowContext } from '../tx-flow/TxFlowProvider'
 import { Alert, Button } from '@mui/material'
 import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
+import { useSpaceSafes } from '@/features/spaces/hooks/useSpaceSafes'
+import { PayInCryptoFlow } from '../tx-flow/flows'
+import { trackEvent } from '@/services/analytics'
+import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
+import { gtmSetSafeAddress } from '@/services/analytics/gtm'
+import router from 'next/router'
+import { TxModalContext } from '../tx-flow'
+import { networks } from '@safe-global/protocol-kit/dist/src/utils/eip-3770/config'
+import { SafeItem } from '@/features/myAccounts/hooks/useAllSafes'
 
-const PayincryptoReview = (props: ReviewTransactionProps) => {
-  const { safe, safeLoaded } = useSafeInfo()
-  const { data } = useContext(TxFlowContext)
-  const { safeTx } = useContext(SafeTxContext)
-  const tokenInfo = data.tokenInfo as GetTokenInfoDto
-  const chain = useCurrentChain()
-  const { setSafeTx, setSafeTxError } = useContext(SafeTxContext)
-  const [isValid, setIsValid] = useState<boolean>(false)
+type Chains = Record<string, string>
 
-  useAsync(async () => {
-    const txs: MetaTransactionData[] = [
-      {
-        to: tokenInfo.address,
-        value: '0',
-        data: data.callData,
-        operation: 0, // CALL operation
-      },
-    ]
-    const safeTxPromise = txs.length > 1 ? createMultiSendCallOnlyTx(txs) : createTx(txs[0])
+const chains = networks.reduce<Chains>((result, { shortName, chainId }) => {
+  result[chainId.toString()] = shortName.toString()
+  return result
+}, {})
 
-    safeTxPromise.then(setSafeTx).catch(setSafeTxError)
-  }, [safe, safeLoaded, chain, setSafeTx, setSafeTxError, data.callData])
-
-  useAsync(async () => {
-    try {
-      if (!safeTx) {
-        console.log('No safe transaction available')
-        return
-      }
-      await updateCryptoPaymentIntent(data.subscriptionId, safeTx?.data)
-      setIsValid(true)
-    } catch (error) {
-      console.error('Error updating crypto payment intent:', error)
-      setIsValid(false)
-      setSafeTxError(new Error('Failed to update crypto payment intent'))
-    }
-  }, [safeTx])
-
-  return (
-    <div>
-      {isValid ? (
-        <Alert severity="success" style={{ marginBottom: '1em' }}>
-          Your payment intent has been successfully created. You can now proceed with the transaction.
-        </Alert>
-      ) : (
-        <Alert severity="warning" style={{ marginBottom: '1em' }}>
-          Your payment intent is not valid. Please check the details and try again.
-        </Alert>
-      )}
-      <ReviewTransaction {...props} />
-    </div>
-  )
-}
-
-export const PayinCrypto = ({
-  subscriptionId,
-  tokenInfo,
-  callData,
-}: {
-  subscriptionId: string
-  tokenInfo: GetTokenInfoDto
-  callData: string
-}) => {
-  return (
-    <div>
-      <TxFlow
-        initialData={{ subscriptionId, tokenInfo, callData }}
-        eventCategory={TxFlowType.TOKEN_TRANSFER}
-        isBatchable={false}
-        hideNonce={true}
-        subtitle="User pays in crypto"
-        ReviewTransactionComponent={PayincryptoReview}
-      />
-    </div>
-  )
+const enum PayInCryptoState {
+  SELECT_TOKEN = 'SELECT_TOKEN',
+  SELECT_SAFE = 'SELECT_SAFE',
+  READY_TO_PAY = 'READY_TO_PAY',
+  PAYING = 'PAYING',
+  PENDING_PAYMENT = 'PENDING_PAYMENT',
+  PAYMENT_SUCCESS = 'PAYMENT_SUCCESS',
+  PAYMENT_FAILED = 'PAYMENT_FAILED',
+  PAYMENT_CANCELLED = 'PAYMENT_CANCELLED',
+  PAYMENT_ERROR = 'PAYMENT_ERROR',
 }
 
 export const PayinCryptoSelector = ({ planId }: { planId: string }) => {
   const spaceId = useCurrentSpaceId()
+  const { allSafes } = useSpaceSafes()
+  const [payInCryptoState, setPayInCryptoState] = useState<PayInCryptoState>(PayInCryptoState.SELECT_TOKEN)
   const [tokenAddresses, setTokenAddresses] = useState<GetTokenInfoDto[]>([])
   const [selectedToken, setSelectedToken] = useState<GetTokenInfoDto>()
+  const [safe, setSafe] = useState<SafeItem>()
   const [subscriptionId, setSubscriptionId] = useState<string>('')
   const chain = useCurrentChain()
   const RECEIVER_ADDRESS = process.env.NEXT_PUBLIC_PRO_RECEIVER_ADDRESS as string
   const PRICE = '1'
   const ERC20_INTERFACE = ERC20__factory.createInterface()
   const [calldata, setCallData] = useState<string>('0x')
-  const [showPay, setShowPay] = useState(false)
+  const { setTxFlow } = useContext(TxModalContext)
+
+  const onNewTxClick = async () => {
+    if (!safe) {
+      console.error('Safe is not selected')
+      return
+    }
+
+    if (!selectedToken) {
+      console.error('Selected token is not set')
+      return
+    }
+
+    await setActiveSafe()
+    // We have to set it explicitly otherwise its missing in the trackEvent below
+    gtmSetSafeAddress(safe.address)
+    trackEvent(SPACE_EVENTS.CREATE_SPACE_TX)
+
+    setTxFlow(
+      <PayInCryptoFlow subscriptionId={subscriptionId} tokenInfo={selectedToken} callData={calldata} />,
+      resetActiveSafe,
+      false,
+    )
+  }
+
+  const setActiveSafe = async () => {
+    if (!safe) {
+      console.error('Safe is not selected')
+      return
+    }
+    const shortname = chains[safe.chainId]
+
+    await router.replace({
+      pathname: router.pathname,
+      query: {
+        ...router.query,
+        safe: `${shortname}:${safe.address}`,
+        chain: shortname,
+      },
+    })
+  }
+
+  const resetActiveSafe = async () => {
+    await router.replace({
+      pathname: router.pathname,
+      query: {
+        ...router.query,
+        safe: undefined,
+        chain: undefined,
+      },
+    })
+  }
 
   useAsync(async () => {
     if (!chain) return
@@ -113,26 +109,57 @@ export const PayinCryptoSelector = ({ planId }: { planId: string }) => {
   }, [chain])
 
   useEffect(() => {
-    if (selectedToken) {
+    if (selectedToken && safe) {
       const callData = ERC20_INTERFACE.encodeFunctionData('transfer', [
         RECEIVER_ADDRESS,
         parseUnits(PRICE, selectedToken.decimals),
       ])
       setCallData(callData)
     }
-  }, [selectedToken])
+  }, [selectedToken, safe])
 
   const onHandleClickPay = async (tokenInfo: GetTokenInfoDto) => {
     setSelectedToken(tokenInfo)
-    setShowPay(false)
     if (!chain) return
-    const result = await createCryptoPaymentIntent(planId, spaceId as string, tokenInfo.address, chain.chainId)
+    const result = await createCryptoPaymentIntent(
+      planId,
+      spaceId as string,
+      tokenInfo.address,
+      parseInt(chain.chainId),
+    )
     setSubscriptionId(result.subscriptionId)
+  }
+
+  const onSelectSafe = async (selectedSafe: SafeItem) => {
+    setSafe(selectedSafe)
+  }
+
+  const getSafeList = (): any => {
+    if (allSafes.length === 0) {
+      return <Alert severity="info">No safes found in this space. Please add a safe to proceed.</Alert>
+    }
+
+    return (
+      <div>
+        <h3>Select Safe</h3>
+        {allSafes.map((safe) => (
+          <Button
+            key={safe.address}
+            variant="outlined"
+            // TODO: Fix the type casting here
+            onClick={() => onSelectSafe(safe as SafeItem)}
+            style={{ marginRight: 8, marginBottom: 8 }}
+          >
+            {safe.name || safe.address}
+          </Button>
+        ))}
+      </div>
+    )
   }
 
   return (
     <div>
-      {!showPay && (
+      {
         <div>
           <h2>Pay in Crypto</h2>
           {tokenAddresses.map((tokenInfo) => (
@@ -148,20 +175,22 @@ export const PayinCryptoSelector = ({ planId }: { planId: string }) => {
             </Button>
           ))}
         </div>
-      )}
+      }
 
-      {selectedToken && !showPay && (
+      {getSafeList()}
+
+      {selectedToken && (
         <div style={{ margin: '1em 0' }}>
           Price: {PRICE} {selectedToken.symbol}
         </div>
       )}
-      {selectedToken && !showPay && (
-        <Button variant="contained" onClick={() => setShowPay(true)}>
-          Pay
-        </Button>
-      )}
-      {selectedToken && showPay && (
-        <PayinCrypto subscriptionId={subscriptionId} callData={calldata} tokenInfo={selectedToken} />
+
+      <Button disabled={!safe || !selectedToken} variant="contained" onClick={() => onNewTxClick()}>
+        Pay
+      </Button>
+
+      {payInCryptoState === PayInCryptoState.PAYING && (
+        
       )}
     </div>
   )

@@ -11,6 +11,7 @@ import type {
   GetSubscriptionsInputDto,
 } from '@/components/pro/types'
 import { KEY_CUSTOMER_ID } from '@/components/pro/types'
+import { SafeTransactionData } from '@safe-global/safe-core-sdk-types'
 
 const fetchCustomerSubscriptions = async (spaceId: string) => {
   const FETCH_SAFE_SUBSCRIPTIONS_CUSTOMER_URL =
@@ -58,7 +59,7 @@ const createCryptoPaymentIntent = async (
   planId: string,
   customerId: string,
   tokenAddress: string,
-  chainId: string,
+  chainId: number,
 ): Promise<{ clientSecret: string; subscriptionId: string }> => {
   const FETCH_CREATE_CRYPO_PAYMENT_URL = process.env.NEXT_PUBLIC_BILLING_BACKEND_URL + '/api/crypto/payment-intent'
 
@@ -104,9 +105,8 @@ const createSubscriptionIntent = async (
   return { subscriptionId: data.subscriptionId, clientSecret: data.clientSecret }
 }
 
-const updateCryptoPaymentIntent = async (subscriptionId: string, safeTxData: any) => {
-  const FETCH_CREATE_CRYPO_PAYMENT_URL =
-    process.env.NEXT_PUBLIC_BILLING_BACKEND_URL + '/api/crypto/update-payment-intent'
+const updateCryptoPaymentIntent = async (subscriptionId: string, safeTxData: SafeTransactionData) => {
+  const FETCH_CREATE_CRYPO_PAYMENT_URL = process.env.NEXT_PUBLIC_BILLING_BACKEND_URL + '/api/crypto/update-subscription'
 
   const response = await fetch(`${FETCH_CREATE_CRYPO_PAYMENT_URL}`, {
     method: 'POST',
@@ -115,7 +115,11 @@ const updateCryptoPaymentIntent = async (subscriptionId: string, safeTxData: any
     },
     body: JSON.stringify({
       subscriptionId,
-      safeTxData,
+      safeTxData: {
+        ...safeTxData,
+        nonce: safeTxData.nonce.toString(), // Ensure nonce is a string
+        safeTxHash: '0x', // TODO: Add safeTxHash if needed
+      },
     }),
   })
   if (!response.ok) {

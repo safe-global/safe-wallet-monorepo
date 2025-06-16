@@ -64,17 +64,19 @@ const ProPage: React.FC<ProPageProps> = ({
             </Grid>
           )}
 
-          <Grid size={{ xs: 12, md: 4 }}>
-            <ActionCard
-              title="Billing History"
-              description="View and download your invoices and payment history for your Safe Pro subscription."
-              icon={<ReceiptIcon />}
-              buttonText="View Invoices"
-              buttonColor="secondary"
-              buttonVariant="outlined"
-              onClick={onViewInvoices}
-            />
-          </Grid>
+          {isRegistered && (
+            <Grid size={{ xs: 12, md: 4 }}>
+              <ActionCard
+                title="Billing History"
+                description="View and download your invoices and payment history for your Safe Pro subscription."
+                icon={<ReceiptIcon />}
+                buttonText="View Invoices"
+                buttonColor="secondary"
+                buttonVariant="outlined"
+                onClick={onViewInvoices}
+              />
+            </Grid>
+          )}
 
           {isRegistered && (
             <Grid size={{ xs: 12, md: 4 }}>
