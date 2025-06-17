@@ -3,6 +3,7 @@ import {
   isStakingTxExitInfo,
   isBridgeOrderTxInfo,
   isExecTxData,
+  isLifiSwapTxInfo,
   isOnChainConfirmationTxData,
   isSafeUpdateTxData,
   isStakingTxWithdrawInfo,
@@ -41,6 +42,7 @@ import DecodedData from './DecodedData'
 import { ErrorBoundary } from '@sentry/react'
 import Multisend from './DecodedData/Multisend'
 import BridgeTransaction from '@/components/tx/confirmation-views/BridgeTransaction'
+import { LifiSwapTransaction } from '@/components/tx/confirmation-views/LifiSwapTransaction'
 
 const TxData = ({
   txInfo,
@@ -86,6 +88,10 @@ const TxData = ({
 
   if (isBridgeOrderTxInfo(txInfo)) {
     return <BridgeTransaction txInfo={txInfo} />
+  }
+
+  if (isLifiSwapTxInfo(txInfo)) {
+    return <LifiSwapTransaction txInfo={txInfo} isPreview={false} />
   }
 
   if (isTransferTxInfo(txInfo)) {
