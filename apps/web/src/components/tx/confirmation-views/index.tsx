@@ -69,7 +69,7 @@ const getConfirmationViewComponent = ({
 
   if (isBridgeOrderTxInfo(txInfo)) return <BridgeTransaction txInfo={txInfo} />
 
-  if (isLifiSwapTxInfo(txInfo)) return <LifiSwapTransaction txInfo={txInfo} />
+  if (isLifiSwapTxInfo(txInfo)) return <LifiSwapTransaction txInfo={txInfo} isPreview={true} />
 
   if (isSettingsChangeView(txInfo)) return <SettingsChange txInfo={txInfo} />
 
