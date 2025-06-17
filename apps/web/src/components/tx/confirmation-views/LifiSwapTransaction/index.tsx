@@ -1,36 +1,73 @@
 import { DataTable } from '@/components/common/Table/DataTable'
-import { Stack } from '@mui/material'
+import { Stack, Typography } from '@mui/material'
 import { type SwapTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { formatUnits } from 'ethers'
 import SwapTokens from '@/features/swap/components/SwapTokens'
 import NamedAddressInfo from '@/components/common/NamedAddressInfo'
 import { DataRow } from '@/components/common/Table/DataRow'
 import { formatAmount } from '@safe-global/utils/utils/formatNumber'
+import TokenAmount from '@/components/common/TokenAmount'
 
-export const LifiSwapTransaction = ({ txInfo }: { txInfo: SwapTransactionInfo }) => {
+const PreviewSwapAmount = ({ txInfo }: { txInfo: SwapTransactionInfo }) => (
+  <div key="amount">
+    <SwapTokens
+      first={{
+        value: txInfo.fromAmount,
+        label: 'Sell',
+        tokenInfo: txInfo.fromToken,
+      }}
+      second={{
+        value: txInfo.toAmount,
+        label: 'For at least',
+        tokenInfo: txInfo.toToken,
+      }}
+    />
+  </div>
+)
+
+const ListSwapAmount = ({ txInfo }: { txInfo: SwapTransactionInfo }) => (
+  <DataRow datatestid="amount" key="amount" title="Amount">
+    <Stack>
+      <Typography display="flex" alignItems="center" flexDirection="row" gap={1}>
+        Sell{' '}
+        <TokenAmount
+          value={txInfo.fromAmount}
+          decimals={txInfo.fromToken.decimals}
+          logoUri={txInfo.fromToken.logoUri ?? ''}
+          tokenSymbol={txInfo.fromToken.symbol}
+        />
+      </Typography>
+      <Typography display="flex" alignItems="center" flexDirection="row" gap={1}>
+        For{' '}
+        <TokenAmount
+          value={txInfo.toAmount}
+          decimals={txInfo.toToken.decimals}
+          logoUri={txInfo.toToken.logoUri ?? ''}
+          tokenSymbol={txInfo.toToken.symbol}
+        />
+      </Typography>
+    </Stack>
+  </DataRow>
+)
+
+export const LifiSwapTransaction = ({ txInfo, isPreview }: { txInfo: SwapTransactionInfo; isPreview: boolean }) => {
   const totalFee = formatUnits(
     BigInt(txInfo.fees?.integratorFee ?? 0n) + BigInt(txInfo.fees?.lifiFee ?? 0n),
     txInfo.fromToken.decimals,
   )
 
+  const fromAmountDecimals = formatUnits(txInfo.fromAmount, txInfo.fromToken.decimals)
+  const toAmountDecimals = formatUnits(txInfo.toAmount, txInfo.toToken.decimals)
+  const exchangeRate = Number(toAmountDecimals) / Number(fromAmountDecimals)
+
   return (
     <Stack>
       <DataTable
         rows={[
-          <div key="amount">
-            <SwapTokens
-              first={{
-                value: txInfo.fromAmount,
-                label: 'Sell',
-                tokenInfo: txInfo.fromToken,
-              }}
-              second={{
-                value: txInfo.toAmount,
-                label: 'For at least',
-                tokenInfo: txInfo.toToken,
-              }}
-            />
-          </div>,
+          isPreview ? <PreviewSwapAmount txInfo={txInfo} /> : <ListSwapAmount txInfo={txInfo} />,
+          <DataRow datatestid="price" key="price" title="Price">
+            1 {txInfo.fromToken.symbol} = {formatAmount(exchangeRate)} {txInfo.toToken!.symbol}
+          </DataRow>,
           <DataRow datatestid="receiver" key="Receiver" title="Receiver">
             <NamedAddressInfo
               address={txInfo.recipient.value}
