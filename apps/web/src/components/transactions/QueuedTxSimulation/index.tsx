@@ -59,14 +59,14 @@ export const QueuedTxSimulation = ({ transaction }: { transaction: TransactionDe
     [chainId, transaction],
   )
 
-  const executionOwner = signer!.address
+  const executionOwner = signer?.address
 
   const simulation = useSimulation()
   const { simulationLink, simulateTransaction } = simulation
   const status = simulation ? getSimulationStatus(simulation) : undefined
 
   const handleSimulation = () => {
-    if (safeTransaction) {
+    if (safeTransaction && executionOwner) {
       simulateTransaction({ executionOwner, transactions: safeTransaction, safe: safe as SafeInfo })
     }
   }
