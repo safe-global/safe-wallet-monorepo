@@ -11,7 +11,7 @@ const changeThresholdBtn = 'span[data-track="settings: Change threshold"] > butt
 const tooltip = 'div[role="tooltip"]'
 const expandMoreIcon = 'svg[data-testid="ExpandMoreIcon"]'
 const sentinelStart = 'div[data-testid="sentinelStart"]'
-const addNewSigner = '[data-testid="add-new-signer"]'
+const addNewSigner = '[data-testid="add-owner-btn"]'
 const newOwnerName = 'input[name="newOwner.name"]'
 const newOwnerAddress = 'input[name="newOwner.address"]'
 const newOwnerNonceInput = 'input[name="nonce"]'
