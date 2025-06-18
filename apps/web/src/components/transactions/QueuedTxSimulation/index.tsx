@@ -12,6 +12,7 @@ import ExternalLink from '@/components/common/ExternalLink'
 import CheckIcon from '@/public/images/common/check.svg'
 import CloseIcon from '@/public/images/common/close.svg'
 import { getSimulationStatus } from '@safe-global/utils/components/tx/security/tenderly/utils'
+import { useSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
 
 const CompactSimulationButton = ({
   label,
@@ -53,10 +54,11 @@ export const QueuedTxSimulation = ({ transaction }: { transaction: TransactionDe
   const isSafeOwner = useIsSafeOwner()
   const chainId = useChainId()
   const signer = useSigner()
+  const sdk = useSafeSDK()
 
   const [safeTransaction, safeTransactionError] = useAsync(
-    () => createExistingTx(chainId, transaction.txId, transaction),
-    [chainId, transaction],
+    () => (sdk ? createExistingTx(chainId, transaction.txId, transaction) : undefined),
+    [chainId, transaction, sdk],
   )
 
   const executionOwner = signer?.address
