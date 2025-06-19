@@ -13,6 +13,9 @@ import CheckIcon from '@/public/images/common/check.svg'
 import CloseIcon from '@/public/images/common/close.svg'
 import { getSimulationStatus } from '@safe-global/utils/components/tx/security/tenderly/utils'
 import { useSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
+import { useIsNestedSafeOwner } from '@/hooks/useIsNestedSafeOwner'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
+import { useMemo } from 'react'
 
 const CompactSimulationButton = ({
   label,
@@ -52,16 +55,23 @@ const CompactSimulationButton = ({
 export const QueuedTxSimulation = ({ transaction }: { transaction: TransactionDetails }) => {
   const { safe } = useSafeInfo()
   const isSafeOwner = useIsSafeOwner()
+  const isNestedSafeOwner = useIsNestedSafeOwner()
   const chainId = useChainId()
   const signer = useSigner()
   const sdk = useSafeSDK()
+
+  const canSimulate = isSafeOwner || isNestedSafeOwner
 
   const [safeTransaction, safeTransactionError] = useAsync(
     () => (sdk ? createExistingTx(chainId, transaction.txId, transaction) : undefined),
     [chainId, transaction, sdk],
   )
 
-  const executionOwner = signer?.address
+  const executionOwner = useMemo(
+    () =>
+      safe.owners.some((owner) => sameAddress(owner.value, signer?.address)) ? signer?.address : safe.owners[0]?.value,
+    [safe.owners, signer?.address],
+  )
 
   const simulation = useSimulation()
   const { simulationLink, simulateTransaction } = simulation
@@ -73,7 +83,7 @@ export const QueuedTxSimulation = ({ transaction }: { transaction: TransactionDe
     }
   }
 
-  if (safeTransactionError || !isSafeOwner || !executionOwner) {
+  if (safeTransactionError || !canSimulate || !executionOwner) {
     return null
   }
 
