@@ -558,6 +558,7 @@ export type SwapTransactionInfo = {
   fromAmount: string
   toToken: TokenInfo
   toAmount: string
+  lifiExplorerUrl: string | null
 }
 export type SwapTransferTransactionInfo = {
   type: 'SwapTransfer'

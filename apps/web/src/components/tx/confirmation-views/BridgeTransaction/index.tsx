@@ -11,6 +11,7 @@ import { type BridgeAndSwapTransactionInfo } from '@safe-global/store/gateway/AU
 import { formatAmount } from '@safe-global/utils/utils/formatNumber'
 import { formatUnits } from 'ethers'
 import { BridgeReceiverWarnings } from './BridgeReceiverWarnings'
+import ExternalLink from '@/components/common/ExternalLink'
 
 interface BridgeTransactionProps {
   txInfo: BridgeAndSwapTransactionInfo
@@ -161,6 +162,14 @@ function BridgeTransaction({ txInfo }: BridgeTransactionProps) {
       {formatAmount(totalFee)} {txInfo.fromToken.symbol}
     </DataRow>,
   )
+
+  if (txInfo.explorerUrl) {
+    rows.push(
+      <DataRow datatestid="lifi-explorer-url" key="lifi-explorer-url" title="Lifi Explorer">
+        <ExternalLink href={txInfo.explorerUrl}>View in LiFi explorer</ExternalLink>
+      </DataRow>,
+    )
+  }
 
   return (
     <Stack>
