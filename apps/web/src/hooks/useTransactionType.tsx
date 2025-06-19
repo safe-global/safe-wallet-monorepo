@@ -8,6 +8,7 @@ import {
   type TransactionSummary,
 } from '@safe-global/safe-gateway-typescript-sdk'
 import SwapIcon from '@/public/images/common/swap.svg'
+import BridgeIcon from '@/public/images/common/bridge.svg'
 import StakeIcon from '@/public/images/common/stake.svg'
 import EarnIcon from '@/public/images/common/earn.svg'
 import NestedSafeIcon from '@/public/images/transactions/nestedTx.svg'
@@ -125,6 +126,23 @@ export const getTransactionType = (tx: TransactionSummary, addressBook: AddressB
         text: 'Withdraw',
       }
     }
+
+    // @ts-ignore TODO: Add types to old SDK or switch to auto-generated
+    case 'SwapAndBridge': {
+      return {
+        icon: <SvgIcon component={BridgeIcon} inheritViewBox fontSize="small" alt="Swap and Bridge" />,
+        text: 'Bridge',
+      }
+    }
+
+    // @ts-ignore TODO: Add types to old SDK or switch to auto-generated
+    case 'Swap': {
+      return {
+        icon: <SvgIcon component={SwapIcon} inheritViewBox fontSize="small" alt="Swap" />,
+        text: 'Swap',
+      }
+    }
+
     case TransactionInfoType.CUSTOM: {
       if (tx.safeAppInfo) {
         return {

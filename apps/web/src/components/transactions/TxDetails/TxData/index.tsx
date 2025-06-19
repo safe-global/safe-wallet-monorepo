@@ -1,7 +1,9 @@
 import SettingsChangeTxInfo from '@/components/transactions/TxDetails/TxData/SettingsChange'
 import type { SpendingLimitMethods } from '@/utils/transaction-guards'
 import {
+  isBridgeOrderTxInfo,
   isExecTxData,
+  isLifiSwapTxInfo,
   isOnChainConfirmationTxData,
   isSafeUpdateTxData,
   isStakingTxWithdrawInfo,
@@ -38,6 +40,8 @@ import SafeUpdate from './SafeUpdate'
 import VaultDepositTxDetails from '@/features/earn/components/VaultDepositTxDetails'
 import VaultRedeemTxDetails from '@/features/earn/components/VaultRedeemTxDetails'
 import DecodedData from './DecodedData'
+import BridgeTransaction from '@/components/tx/confirmation-views/BridgeTransaction'
+import { LifiSwapTransaction } from '@/components/tx/confirmation-views/LifiSwapTransaction'
 
 const TxData = ({
   txInfo,
@@ -79,6 +83,14 @@ const TxData = ({
   // @ts-ignore: TODO: Fix this type
   if (isVaultRedeemTxInfo(txInfo)) {
     return <VaultRedeemTxDetails info={txInfo} />
+  }
+
+  if (isBridgeOrderTxInfo(txInfo)) {
+    return <BridgeTransaction txInfo={txInfo} />
+  }
+
+  if (isLifiSwapTxInfo(txInfo)) {
+    return <LifiSwapTransaction txInfo={txInfo} isPreview={false} />
   }
 
   if (isTransferTxInfo(txInfo)) {

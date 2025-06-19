@@ -75,6 +75,8 @@ import { decodeMultiSendData } from '@safe-global/protocol-kit/dist/src/utils'
 import { OperationType } from '@safe-global/types-kit'
 import { LATEST_SAFE_VERSION } from '@safe-global/utils/config/constants'
 import type {
+  BridgeAndSwapTransactionInfo,
+  SwapTransactionInfo,
   TransactionDetails,
   VaultDepositTransactionInfo,
   VaultRedeemTransactionInfo,
@@ -195,6 +197,14 @@ export const isMigrateToL2TxInfo = (value: TransactionInfo): value is Custom => 
 
 export const isSwapOrderTxInfo = (value: TransactionInfo): value is SwapOrder => {
   return value.type === TransactionInfoType.SWAP_ORDER
+}
+
+export const isBridgeOrderTxInfo = (value: any): value is BridgeAndSwapTransactionInfo => {
+  return (value.type as string) === 'SwapAndBridge'
+}
+
+export const isLifiSwapTxInfo = (value: any): value is SwapTransactionInfo => {
+  return (value.type as string) === 'Swap'
 }
 
 export const isTwapOrderTxInfo = (value: TransactionInfo): value is TwapOrder => {
