@@ -3,7 +3,7 @@ import { Box, Stack } from '@mui/material'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import css from './styles.module.css'
 import classnames from 'classnames'
-import { getSlidePosition } from '@/components/dashboard/NewsCarousel/utils'
+import { getSlidePosition, NEWS_BANNER_STORAGE_KEY } from '@/components/dashboard/NewsCarousel/utils'
 
 export interface NewsBannerProps {
   onDismiss: (e: MouseEvent<HTMLButtonElement>) => void
@@ -18,12 +18,10 @@ export interface NewsCarouselProps {
   banners: BannerItem[]
 }
 
-const STORAGE_KEY = 'dismissedNewsBanners'
-
 const isInteractive = (element: HTMLElement | null) => !!element?.closest('button, a, input, textarea, select')
 
 const NewsCarousel = ({ banners }: NewsCarouselProps) => {
-  const [dismissed = [], setDismissed] = useLocalStorage<string[]>(STORAGE_KEY)
+  const [dismissed = [], setDismissed] = useLocalStorage<string[]>(NEWS_BANNER_STORAGE_KEY)
 
   const [isDragging, setIsDragging] = useState(false)
   const [prevScrollLeft, setPrevScrollLeft] = useState(0)

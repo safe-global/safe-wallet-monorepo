@@ -28,16 +28,6 @@ import NoAssetsIcon from '@/public/images/common/no-assets.svg'
 
 const MAX_ASSETS = 4
 
-const AssetsDummy = () => (
-  <Box className={css.container}>
-    <Skeleton variant="circular" width={26} height={26} />
-    {Array.from({ length: 2 }).map((_, index) => (
-      <Skeleton variant="text" sx={{ flex: 1 }} key={index} />
-    ))}
-    <Skeleton variant="text" width={88} />
-  </Box>
-)
-
 const NoAssets = () => (
   <Paper elevation={0} sx={{ p: 5, textAlign: 'center' }}>
     <NoAssetsIcon />
@@ -145,6 +135,8 @@ const AssetsWidget = () => {
     [safe],
   )
 
+  if (loading) return <Skeleton height={338} variant="rounded" />
+
   return (
     <Card data-testid="assets-widget" sx={{ px: 1.5, py: 2.5 }}>
       <Stack direction="row" justifyContent="space-between" sx={{ px: 1.5, mb: 1 }}>
@@ -153,7 +145,7 @@ const AssetsWidget = () => {
         {items.length > 0 && <ViewAllLink url={viewAllUrl} text="View all" />}
       </Stack>
 
-      <Box>{loading ? <AssetsDummy /> : items.length > 0 ? <AssetList items={items} /> : <NoAssets />}</Box>
+      <Box>{items.length > 0 ? <AssetList items={items} /> : <NoAssets />}</Box>
     </Card>
   )
 }

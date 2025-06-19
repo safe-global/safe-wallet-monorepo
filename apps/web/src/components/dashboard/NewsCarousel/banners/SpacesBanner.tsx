@@ -9,6 +9,8 @@ import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import { AppRoutes } from '@/config/routes'
 import Link from 'next/link'
 
+export const spacesBannerID = 'spacesBanner'
+
 const SpacesBanner = ({ onDismiss }: { onDismiss: () => void }) => {
   return (
     <Card className={css.banner}>

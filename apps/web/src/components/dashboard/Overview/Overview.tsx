@@ -13,14 +13,14 @@ import ArrowIconNW from '@/public/images/common/arrow-top-right.svg'
 import ArrowIconSE from '@/public/images/common/arrow-se.svg'
 import FiatValue from '@/components/common/FiatValue'
 import { AppRoutes } from '@/config/routes'
-import { Button, Card, Grid, Box, Skeleton, Typography, Stack, SvgIcon } from '@mui/material'
+import { Button, Card, Box, Skeleton, Typography, Stack, SvgIcon } from '@mui/material'
 import { useRouter } from 'next/router'
 import { type ReactElement, useContext, useMemo } from 'react'
 import { SWAP_EVENTS, SWAP_LABELS } from '@/services/analytics/events/swaps'
 import useIsSwapFeatureEnabled from '@/features/swap/hooks/useIsSwapFeatureEnabled'
 import NewsCarousel, { type BannerItem } from '@/components/dashboard/NewsCarousel'
-import EarnBanner from '@/components/dashboard/NewsCarousel/banners/EarnBanner'
-import SpacesBanner from '@/components/dashboard/NewsCarousel/banners/SpacesBanner'
+import EarnBanner, { earnBannerID } from '@/components/dashboard/NewsCarousel/banners/EarnBanner'
+import SpacesBanner, { spacesBannerID } from '@/components/dashboard/NewsCarousel/banners/SpacesBanner'
 import useIsEarnFeatureEnabled from '@/features/earn/hooks/useIsEarnFeatureEnabled'
 import { useCurrentChain, useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
@@ -30,37 +30,8 @@ import CopyTooltip from '@/components/common/CopyTooltip'
 import { useAppSelector } from '@/store'
 import { selectSettings } from '@/store/settingsSlice'
 import useSafeAddress from '@/hooks/useSafeAddress'
-
-const SkeletonOverview = (
-  <>
-    <Grid
-      container
-      sx={{
-        gap: 2,
-        alignItems: 'center',
-        justifyContent: 'space-between',
-      }}
-    >
-      <Grid item>
-        <Skeleton variant="text" width={100} height={30} />
-        <Skeleton variant="rounded" width={160} height={40} />
-      </Grid>
-
-      <Grid item>
-        <Grid
-          container
-          sx={{
-            gap: 1,
-            flexWrap: 'wrap',
-          }}
-        >
-          <Skeleton variant="rounded" width="115px" height="40px" />
-          <Skeleton variant="rounded" width="115px" height="40px" />
-        </Grid>
-      </Grid>
-    </Grid>
-  </>
-)
+import StakeBanner, { stakeBannerID } from '@/components/dashboard/NewsCarousel/banners/StakeBanner'
+import useIsStakingBannerVisible from '@/components/dashboard/StakingBanner/useIsStakingBannerVisible'
 
 const AddFundsToGetStarted = () => {
   const safeAddress = useSafeAddress()
@@ -124,10 +95,12 @@ const Overview = (): ReactElement => {
   const isSwapFeatureEnabled = useIsSwapFeatureEnabled()
   const isEarnFeatureEnabled = useIsEarnFeatureEnabled()
   const isSpacesFeatureEnabled = useHasFeature(FEATURES.SPACES)
+  const isStakingBannerVisible = useIsStakingBannerVisible()
 
   const banners = [
-    isEarnFeatureEnabled && { id: 'earnBanner', element: EarnBanner },
-    isSpacesFeatureEnabled && { id: 'spacesBanner', element: SpacesBanner },
+    isEarnFeatureEnabled && { id: earnBannerID, element: EarnBanner },
+    isSpacesFeatureEnabled && { id: spacesBannerID, element: SpacesBanner },
+    isStakingBannerVisible && { id: stakeBannerID, element: StakeBanner },
   ].filter(Boolean) as BannerItem[]
 
   const isInitialState = !safeLoaded && !safeLoading
@@ -144,106 +117,104 @@ const Overview = (): ReactElement => {
 
   const noAssets = !isLoading && items.length === 0
 
+  if (isLoading) return <Skeleton height={269} variant="rounded" />
+
   return (
     <Card sx={{ border: 0, p: 3 }} component="section">
       <Box>
-        {isLoading ? (
-          SkeletonOverview
-        ) : (
-          <Stack
-            direction={{ xs: 'column', md: 'row' }}
-            alignItems={{ xs: 'flex-start', md: 'center' }}
-            justifyContent="space-between"
-          >
-            <Box>
-              <Typography color="primary.light" fontWeight="bold" mb={1}>
-                Total asset value
-              </Typography>
-              <Typography component="div" variant="h1" fontSize="44px" lineHeight="40px">
-                {safe.deployed ? (
-                  <FiatValue value={balances.fiatTotal} maxLength={20} precise />
-                ) : (
-                  <TokenAmount
-                    value={balances.items[0]?.balance}
-                    decimals={balances.items[0]?.tokenInfo.decimals}
-                    tokenSymbol={balances.items[0]?.tokenInfo.symbol}
-                  />
-                )}
-              </Typography>
-            </Box>
+        <Stack
+          direction={{ xs: 'column', md: 'row' }}
+          alignItems={{ xs: 'flex-start', md: 'center' }}
+          justifyContent="space-between"
+        >
+          <Box>
+            <Typography color="primary.light" fontWeight="bold" mb={1}>
+              Total asset value
+            </Typography>
+            <Typography component="div" variant="h1" fontSize="44px" lineHeight="40px">
+              {safe.deployed ? (
+                <FiatValue value={balances.fiatTotal} maxLength={20} precise />
+              ) : (
+                <TokenAmount
+                  value={balances.items[0]?.balance}
+                  decimals={balances.items[0]?.tokenInfo.decimals}
+                  tokenSymbol={balances.items[0]?.tokenInfo.symbol}
+                />
+              )}
+            </Typography>
+          </Box>
 
-            {safe.deployed && (
-              <Stack
-                direction="row"
-                alignItems={{ xs: 'flex-start', md: 'center' }}
-                flexWrap={{ xs: 'wrap', md: 'nowrap' }}
-                gap={1}
-                width={{ xs: 1, md: 'auto' }}
-                mt={{ xs: 2, md: 0 }}
-              >
-                <Box flexShrink="0" width={{ xs: 1, md: 'auto' }}>
-                  <BuyCryptoButton />
+          {safe.deployed && (
+            <Stack
+              direction="row"
+              alignItems={{ xs: 'flex-start', md: 'center' }}
+              flexWrap={{ xs: 'wrap', md: 'nowrap' }}
+              gap={1}
+              width={{ xs: 1, md: 'auto' }}
+              mt={{ xs: 2, md: 0 }}
+            >
+              <Box flexShrink="0" width={{ xs: 1, md: 'auto' }}>
+                <BuyCryptoButton />
+              </Box>
+
+              {!noAssets && (
+                <Box flex={1}>
+                  <Button
+                    onClick={handleOnSend}
+                    size="compact"
+                    variant="contained"
+                    color="background"
+                    disableElevation
+                    startIcon={<ArrowIconNW fontSize="small" />}
+                    sx={{ height: '42px' }}
+                    fullWidth
+                  >
+                    Send
+                  </Button>
                 </Box>
+              )}
 
-                {!noAssets && (
-                  <Box flex={1}>
+              <Box flex={1}>
+                <Track {...OVERVIEW_EVENTS.SHOW_QR} label="dashboard">
+                  <QrCodeButton>
                     <Button
-                      onClick={handleOnSend}
                       size="compact"
                       variant="contained"
                       color="background"
                       disableElevation
-                      startIcon={<ArrowIconNW fontSize="small" />}
+                      startIcon={<ArrowIconSE fontSize="small" />}
                       sx={{ height: '42px' }}
                       fullWidth
                     >
-                      Send
+                      Receive
                     </Button>
-                  </Box>
-                )}
+                  </QrCodeButton>
+                </Track>
+              </Box>
 
+              {isSwapFeatureEnabled && !noAssets && (
                 <Box flex={1}>
-                  <Track {...OVERVIEW_EVENTS.SHOW_QR} label="dashboard">
-                    <QrCodeButton>
+                  <Track {...SWAP_EVENTS.OPEN_SWAPS} label={SWAP_LABELS.dashboard}>
+                    <Link href={{ pathname: AppRoutes.swap, query: router.query }} passHref type="button">
                       <Button
+                        data-testid="overview-swap-btn"
                         size="compact"
                         variant="contained"
                         color="background"
                         disableElevation
-                        startIcon={<ArrowIconSE fontSize="small" />}
+                        startIcon={<SwapIcon fontSize="small" />}
                         sx={{ height: '42px' }}
                         fullWidth
                       >
-                        Receive
+                        Swap
                       </Button>
-                    </QrCodeButton>
+                    </Link>
                   </Track>
                 </Box>
-
-                {isSwapFeatureEnabled && !noAssets && (
-                  <Box flex={1}>
-                    <Track {...SWAP_EVENTS.OPEN_SWAPS} label={SWAP_LABELS.dashboard}>
-                      <Link href={{ pathname: AppRoutes.swap, query: router.query }} passHref type="button">
-                        <Button
-                          data-testid="overview-swap-btn"
-                          size="compact"
-                          variant="contained"
-                          color="background"
-                          disableElevation
-                          startIcon={<SwapIcon fontSize="small" />}
-                          sx={{ height: '42px' }}
-                          fullWidth
-                        >
-                          Swap
-                        </Button>
-                      </Link>
-                    </Track>
-                  </Box>
-                )}
-              </Stack>
-            )}
-          </Stack>
-        )}
+              )}
+            </Stack>
+          )}
+        </Stack>
       </Box>
 
       {noAssets ? <AddFundsToGetStarted /> : <NewsCarousel banners={banners} />}

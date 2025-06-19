@@ -8,20 +8,18 @@ import AssetsWidget from '@/components/dashboard/Assets'
 import Overview from '@/components/dashboard/Overview/Overview'
 import SafeAppsDashboardSection from '@/components/dashboard/SafeAppsDashboardSection/SafeAppsDashboardSection'
 import { useIsRecoverySupported } from '@/features/recovery/hooks/useIsRecoverySupported'
-import StakingBanner from '@/components/dashboard/StakingBanner'
 import { useHasFeature } from '@/hooks/useChains'
 import css from './styles.module.css'
 import { InconsistentSignerSetupWarning } from '@/features/multichain/components/SignerSetupWarning/InconsistentSignerSetupWarning'
-import useIsStakingBannerEnabled from '@/features/stake/hooks/useIsStakingBannerEnabled'
 import { UnsupportedMastercopyWarning } from '@/features/multichain/components/UnsupportedMastercopyWarning/UnsupportedMasterCopyWarning'
 import { FEATURES } from '@safe-global/utils/utils/chains'
+import NewsDisclaimers from '@/components/dashboard/NewsCarousel/NewsDisclaimers'
 
 const RecoveryHeader = dynamic(() => import('@/features/recovery/components/RecoveryHeader'))
 
 const Dashboard = (): ReactElement => {
   const { safe } = useSafeInfo()
   const showSafeApps = useHasFeature(FEATURES.SAFE_APPS)
-  const isStakingBannerEnabled = useIsStakingBannerEnabled()
   const supportsRecovery = useIsRecoverySupported()
 
   return (
@@ -47,12 +45,6 @@ const Dashboard = (): ReactElement => {
 
         {safe.deployed && (
           <>
-            {isStakingBannerEnabled && (
-              <Grid item xs={12} className={css.hideIfEmpty}>
-                <StakingBanner hideLocalStorageKey="hideStakingBannerDashboard" large />
-              </Grid>
-            )}
-
             <Grid item xs={12} lg={6}>
               <AssetsWidget />
             </Grid>
@@ -66,6 +58,10 @@ const Dashboard = (): ReactElement => {
                 <SafeAppsDashboardSection />
               </Grid>
             )}
+
+            <Grid item xs={12}>
+              <NewsDisclaimers />
+            </Grid>
           </>
         )}
       </Grid>

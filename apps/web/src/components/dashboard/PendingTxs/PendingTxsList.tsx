@@ -3,7 +3,7 @@ import { useMemo } from 'react'
 import { useRouter } from 'next/router'
 import dynamic from 'next/dynamic'
 import { getLatestTransactions } from '@/utils/tx-list'
-import { Box, Typography, Card, Stack, Paper } from '@mui/material'
+import { Box, Typography, Card, Stack, Paper, Skeleton } from '@mui/material'
 import { ViewAllLink } from '../styled'
 import PendingTxListItem from './PendingTxListItem'
 import useTxQueue, { useQueuedTxsLength } from '@/hooks/useTxQueue'
@@ -73,7 +73,7 @@ export function _getTransactionsToDisplay({
 
 const PendingTxsList = (): ReactElement | null => {
   const router = useRouter()
-  const { page } = useTxQueue()
+  const { page, loading } = useTxQueue()
   const { safe } = useSafeInfo()
   const wallet = useWallet()
   const queuedTxns = useMemo(() => getLatestTransactions(page?.results), [page?.results])
@@ -98,6 +98,8 @@ const PendingTxsList = (): ReactElement | null => {
     }),
     [router.query.safe],
   )
+
+  if (loading) return <Skeleton variant="rounded" height={338} />
 
   return (
     <Card data-testid="pending-tx-widget" sx={{ px: 1.5, py: 2.5, height: 1 }} component="section">

@@ -1,3 +1,5 @@
+export const NEWS_BANNER_STORAGE_KEY = 'dismissedNewsBanners'
+
 export const getSlidePosition = (start: number, end: number, width: number | undefined, threshold = 0.1) => {
   if (!width) return start
 
