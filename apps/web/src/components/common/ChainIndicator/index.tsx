@@ -5,9 +5,10 @@ import { useAppSelector } from '@/store'
 import { selectChainById, selectChains } from '@/store/chainsSlice'
 import css from './styles.module.css'
 import useChainId from '@/hooks/useChainId'
-import { Skeleton, Stack, Typography } from '@mui/material'
+import { Skeleton, Stack, SvgIcon, Typography } from '@mui/material'
 import isEmpty from 'lodash/isEmpty'
 import FiatValue from '../FiatValue'
+import UnknownChainIcon from '@/public/images/common/unknown.svg'
 
 type ChainIndicatorProps = {
   chainId?: string
@@ -59,6 +60,18 @@ const ChainIndicator = ({
     }
   }, [chainConfig])
 
+  const logoComponent = chainConfig?.chainLogoUri ? (
+    <img
+      src={chainConfig.chainLogoUri ?? undefined}
+      alt={`${chainConfig.chainName} Logo`}
+      width={imageSize}
+      height={imageSize}
+      loading="lazy"
+    />
+  ) : (
+    <SvgIcon component={UnknownChainIcon} inheritViewBox sx={{ height: imageSize, width: imageSize }} />
+  )
+
   return noChains ? (
     <Skeleton width="100%" height="22px" variant="rectangular" sx={{ flexShrink: 0 }} />
   ) : chainConfig ? (
@@ -73,15 +86,7 @@ const ChainIndicator = ({
         [css.onlyLogo]: onlyLogo,
       })}
     >
-      {showLogo && (
-        <img
-          src={chainConfig.chainLogoUri ?? undefined}
-          alt={`${chainConfig.chainName} Logo`}
-          width={imageSize}
-          height={imageSize}
-          loading="lazy"
-        />
-      )}
+      {showLogo && logoComponent}
       {!onlyLogo && (
         <Stack>
           <span className={css.name}>{chainConfig.chainName}</span>
