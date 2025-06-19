@@ -7,6 +7,7 @@ import NamedAddressInfo from '@/components/common/NamedAddressInfo'
 import { DataRow } from '@/components/common/Table/DataRow'
 import { formatAmount } from '@safe-global/utils/utils/formatNumber'
 import TokenAmount from '@/components/common/TokenAmount'
+import ExternalLink from '@/components/common/ExternalLink'
 
 const PreviewSwapAmount = ({ txInfo }: { txInfo: SwapTransactionInfo }) => (
   <div key="amount">
@@ -60,27 +61,36 @@ export const LifiSwapTransaction = ({ txInfo, isPreview }: { txInfo: SwapTransac
   const toAmountDecimals = formatUnits(txInfo.toAmount, txInfo.toToken.decimals)
   const exchangeRate = Number(toAmountDecimals) / Number(fromAmountDecimals)
 
+  const rows = [
+    isPreview ? <PreviewSwapAmount txInfo={txInfo} /> : <ListSwapAmount txInfo={txInfo} />,
+    <DataRow datatestid="price" key="price" title="Price">
+      1 {txInfo.fromToken.symbol} = {formatAmount(exchangeRate)} {txInfo.toToken!.symbol}
+    </DataRow>,
+    <DataRow datatestid="receiver" key="Receiver" title="Receiver">
+      <NamedAddressInfo
+        address={txInfo.recipient.value}
+        name={txInfo.recipient.name}
+        hasExplorer
+        avatarSize={24}
+        showCopyButton
+      />
+    </DataRow>,
+    <DataRow datatestid="total-fee" key="fees" title="Fees">
+      {formatAmount(totalFee)} {txInfo.fromToken.symbol}
+    </DataRow>,
+  ]
+
+  if (txInfo.lifiExplorerUrl) {
+    rows.push(
+      <DataRow datatestid="lifi-explorer-url" key="lifi-explorer-url" title="Lifi Explorer">
+        <ExternalLink href={txInfo.lifiExplorerUrl}>View in LiFi explorer</ExternalLink>
+      </DataRow>,
+    )
+  }
+
   return (
     <Stack>
-      <DataTable
-        rows={[
-          isPreview ? <PreviewSwapAmount txInfo={txInfo} /> : <ListSwapAmount txInfo={txInfo} />,
-          <DataRow datatestid="price" key="price" title="Price">
-            1 {txInfo.fromToken.symbol} = {formatAmount(exchangeRate)} {txInfo.toToken!.symbol}
-          </DataRow>,
-          <DataRow datatestid="receiver" key="Receiver" title="Receiver">
-            <NamedAddressInfo
-              address={txInfo.recipient.value}
-              name={txInfo.recipient.name}
-              hasExplorer
-              avatarSize={24}
-            />
-          </DataRow>,
-          <DataRow datatestid="total-fee" key="fees" title="Fees">
-            {formatAmount(totalFee)} {txInfo.fromToken.symbol}
-          </DataRow>,
-        ]}
-      />
+      <DataTable rows={rows} />
     </Stack>
   )
 }
