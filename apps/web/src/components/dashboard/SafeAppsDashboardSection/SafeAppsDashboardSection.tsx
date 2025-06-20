@@ -47,28 +47,36 @@ const SafeAppsDashboardSection = () => {
     setCanScrollRight(newScrollLeft + list.clientWidth < list.scrollWidth)
   }
 
+  if (rankedSafeApps.length === 0) return null
+
+  const showNav = canScrollLeft || canScrollRight
+
   return (
     <Card sx={{ px: 3, py: 2.5 }} component="section">
       <Stack direction="row" justifyContent="space-between" mb={2}>
         <Typography fontWeight={700}>Featured Apps</Typography>
-        <div className={css.carouselNav}>
-          <IconButton
-            aria-label="previous apps"
-            onClick={() => scrollList('left')}
-            disabled={!canScrollLeft}
-            size="small"
-          >
-            <KeyboardArrowLeftIcon fontSize="small" />
-          </IconButton>
-          <IconButton
-            aria-label="next apps"
-            onClick={() => scrollList('right')}
-            disabled={!canScrollRight}
-            size="small"
-          >
-            <KeyboardArrowRightIcon fontSize="small" />
-          </IconButton>
-        </div>
+        {showNav && (
+          <>
+            <div className={css.carouselNav}>
+              <IconButton
+                aria-label="previous apps"
+                onClick={() => scrollList('left')}
+                disabled={!canScrollLeft}
+                size="medium"
+              >
+                <KeyboardArrowLeftIcon fontSize="small" />
+              </IconButton>
+              <IconButton
+                aria-label="next apps"
+                onClick={() => scrollList('right')}
+                disabled={!canScrollRight}
+                size="medium"
+              >
+                <KeyboardArrowRightIcon fontSize="small" />
+              </IconButton>
+            </div>
+          </>
+        )}
       </Stack>
 
       <div className={css.carouselWrapper}>

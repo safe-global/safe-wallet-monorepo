@@ -77,6 +77,7 @@ const InternalBuyCryptoButton = ({ href, pagePath }: { href?: LinkProps['href'];
           <Button
             variant="contained"
             size="compact"
+            color="background"
             sx={buttonStyles}
             startIcon={<AddIcon fontSize="small" />}
             className={css.buyCryptoButton}

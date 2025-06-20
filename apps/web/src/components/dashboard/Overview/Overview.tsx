@@ -34,11 +34,14 @@ import StakeBanner, { stakeBannerID } from '@/components/dashboard/NewsCarousel/
 import useIsStakingBannerVisible from '@/components/dashboard/StakingBanner/useIsStakingBannerVisible'
 
 const AddFundsToGetStarted = () => {
+  const { safe } = useSafeInfo()
   const safeAddress = useSafeAddress()
   const settings = useAppSelector(selectSettings)
   const chain = useCurrentChain()
 
   const addressCopyText = settings.shortName.copy && chain ? `${chain.shortName}:${safeAddress}` : safeAddress
+
+  if (!safe.deployed) return null
 
   return (
     <Stack
@@ -115,7 +118,7 @@ const Overview = (): ReactElement => {
     return balances.items.filter((item) => item.balance !== '0')
   }, [balances.items])
 
-  const noAssets = !isLoading && items.length === 0
+  const noAssets = !balancesLoading && items.length === 0
 
   if (isLoading) return <Skeleton height={269} variant="rounded" />
 
@@ -153,17 +156,12 @@ const Overview = (): ReactElement => {
               width={{ xs: 1, md: 'auto' }}
               mt={{ xs: 2, md: 0 }}
             >
-              <Box flexShrink="0" width={{ xs: 1, md: 'auto' }}>
-                <BuyCryptoButton />
-              </Box>
-
               {!noAssets && (
                 <Box flex={1}>
                   <Button
                     onClick={handleOnSend}
                     size="compact"
                     variant="contained"
-                    color="background"
                     disableElevation
                     startIcon={<ArrowIconNW fontSize="small" />}
                     sx={{ height: '42px' }}
@@ -173,24 +171,6 @@ const Overview = (): ReactElement => {
                   </Button>
                 </Box>
               )}
-
-              <Box flex={1}>
-                <Track {...OVERVIEW_EVENTS.SHOW_QR} label="dashboard">
-                  <QrCodeButton>
-                    <Button
-                      size="compact"
-                      variant="contained"
-                      color="background"
-                      disableElevation
-                      startIcon={<ArrowIconSE fontSize="small" />}
-                      sx={{ height: '42px' }}
-                      fullWidth
-                    >
-                      Receive
-                    </Button>
-                  </QrCodeButton>
-                </Track>
-              </Box>
 
               {isSwapFeatureEnabled && !noAssets && (
                 <Box flex={1}>
@@ -212,6 +192,28 @@ const Overview = (): ReactElement => {
                   </Track>
                 </Box>
               )}
+
+              <Box flexShrink="0" width={{ xs: 1, md: 'auto' }}>
+                <BuyCryptoButton />
+              </Box>
+
+              <Box flex={1}>
+                <Track {...OVERVIEW_EVENTS.SHOW_QR} label="dashboard">
+                  <QrCodeButton>
+                    <Button
+                      size="compact"
+                      variant="contained"
+                      color="background"
+                      disableElevation
+                      startIcon={<ArrowIconSE fontSize="small" />}
+                      sx={{ height: '42px' }}
+                      fullWidth
+                    >
+                      Receive
+                    </Button>
+                  </QrCodeButton>
+                </Track>
+              </Box>
             </Stack>
           )}
         </Stack>
