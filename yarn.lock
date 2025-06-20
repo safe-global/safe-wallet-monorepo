@@ -9330,6 +9330,7 @@ __metadata:
     storybook: "npm:^8.4.6"
     tamagui: "npm:^1.126.3"
     timezone-mock: "npm:^1.3.6"
+    totp-generator: "npm:^1.0.0"
     ts-node: "npm:^10.9.2"
     tsconfig-paths-webpack-plugin: "npm:^4.2.0"
     typescript: "npm:5.8.3"
@@ -24496,6 +24497,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"jssha@npm:^3.3.1":
+  version: 3.3.1
+  resolution: "jssha@npm:3.3.1"
+  checksum: 10/ecc3440abe95149b5c17ea38c1b8b831dbe5149e56d417dd4fb930f65bfb5a80842f3b25408957f357deb9cd8c513931b446fea6d204a111d934165a89139d7f
+  languageName: node
+  linkType: hard
+
 "jsx-ast-utils@npm:^2.4.1 || ^3.0.0, jsx-ast-utils@npm:^3.3.5":
   version: 3.3.5
   resolution: "jsx-ast-utils@npm:3.3.5"
@@ -32991,6 +32999,15 @@ __metadata:
   version: 3.0.1
   resolution: "totalist@npm:3.0.1"
   checksum: 10/5132d562cf88ff93fd710770a92f31dbe67cc19b5c6ccae2efc0da327f0954d211bbfd9456389655d726c624f284b4a23112f56d1da931ca7cfabbe1f45e778a
+  languageName: node
+  linkType: hard
+
+"totp-generator@npm:^1.0.0":
+  version: 1.0.0
+  resolution: "totp-generator@npm:1.0.0"
+  dependencies:
+    jssha: "npm:^3.3.1"
+  checksum: 10/333d3c8a16c22b9842f7d3fcf3b0b03752c4a52e4ec7b1994defa1ce9b7ba25d8b42fca4eb80d883a92d5fae7ee265deb026dad6f7da69c38cf9525cbcc02ce8
   languageName: node
   linkType: hard
 
