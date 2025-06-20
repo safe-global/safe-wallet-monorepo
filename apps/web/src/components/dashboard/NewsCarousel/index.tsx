@@ -115,32 +115,10 @@ const NewsCarousel = ({ banners }: NewsCarouselProps) => {
     setCanScrollRight(activeIndex < items.length - 1)
   }, [activeIndex, items.length])
 
-  const showNav = canScrollLeft || canScrollRight
-
   if (!items.length) return null
 
   return (
-    <Stack spacing={1} alignItems="center" mt={4} position="relative">
-      {items.length > 1 && showNav && (
-        <div className={css.carouselNav}>
-          <IconButton
-            aria-label="previous banner"
-            onClick={() => scrollSlides('left')}
-            disabled={!canScrollLeft}
-            size="medium"
-          >
-            <KeyboardArrowLeftIcon fontSize="small" />
-          </IconButton>
-          <IconButton
-            aria-label="next banner"
-            onClick={() => scrollSlides('right')}
-            disabled={!canScrollRight}
-            size="medium"
-          >
-            <KeyboardArrowRightIcon fontSize="small" />
-          </IconButton>
-        </div>
-      )}
+    <Stack spacing={1} alignItems="center" mt={3} position="relative">
       <div
         className={classnames(css.slider, { [css.grabbing]: isDragging })}
         ref={sliderRef}
@@ -167,6 +145,15 @@ const NewsCarousel = ({ banners }: NewsCarouselProps) => {
 
       {items.length > 1 && (
         <div className={css.dots}>
+          <IconButton
+            aria-label="previous banner"
+            onClick={() => scrollSlides('left')}
+            disabled={!canScrollLeft}
+            size="medium"
+          >
+            <KeyboardArrowLeftIcon fontSize="small" />
+          </IconButton>
+
           {items.map((item, index) => (
             <button
               key={item.id}
@@ -176,6 +163,15 @@ const NewsCarousel = ({ banners }: NewsCarouselProps) => {
               onClick={() => goToSlide(index)}
             />
           ))}
+
+          <IconButton
+            aria-label="next banner"
+            onClick={() => scrollSlides('right')}
+            disabled={!canScrollRight}
+            size="medium"
+          >
+            <KeyboardArrowRightIcon fontSize="small" />
+          </IconButton>
         </div>
       )}
     </Stack>

@@ -82,6 +82,7 @@ const InternalBuyCryptoButton = ({ href, pagePath }: { href?: LinkProps['href'];
             startIcon={<AddIcon fontSize="small" />}
             className={css.buyCryptoButton}
             fullWidth
+            disableElevation
           >
             Buy crypto
           </Button>
