@@ -26,7 +26,6 @@ const flattenObject = (obj: Record<string, any>, prefix = ''): ListTableItem[] =
 
 const updateCode = (key: string) => {
   let { otp: token } = TOTP.generate(key, { timestamp: Date.now() })
-  console.log(token)
   token = token.replace(/(\d{3})(\d{3})/, '$1 $2')
   return token
 }
@@ -44,7 +43,6 @@ export const AuthenticatorView = ({ data, safeTxHash }: AuthenticatorViewProps) 
 
     deriveBase32Key(SECRET, safeTxHash).then((k) => {
       setKey(k)
-      console.log('ASD')
       setCurrentCode(updateCode(k))
     })
   }, [safeTxHash])
@@ -53,17 +51,18 @@ export const AuthenticatorView = ({ data, safeTxHash }: AuthenticatorViewProps) 
     const updateTime = () => {
       const epoch = Date.now()
       const expire = 30000 - (epoch % 30000)
-      setTimer(Math.floor(expire / 1000) + 1)
-
-      if (expire === 30000) {
+      const newTime = Math.floor(expire / 1000) + 1
+      setTimer(newTime)
+      if (newTime === 30) {
         setCurrentCode(updateCode(key))
       }
     }
+
     const interval = setInterval(updateTime, 1000)
     updateTime()
 
     return () => clearInterval(interval)
-  }, [])
+  }, [key])
 
   return (
     <View flex={1} paddingHorizontal={'$4'} paddingVertical={'$4'}>

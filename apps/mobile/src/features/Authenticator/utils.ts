@@ -1,3 +1,5 @@
+import QuickCrypto from 'react-native-quick-crypto'
+
 const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567'
 
 const encodeBase32 = (bytes: number[] | Uint8Array) => {
@@ -29,20 +31,12 @@ export const deriveBase32Key = async (secretBase32: string, hexInput: string): P
   const hexBytes = new Uint8Array(hexInput.match(/.{1,2}/g)!.map((byte) => parseInt(byte, 16)))
   // Import key material for HKDF
 
-  const keyMaterial = await crypto.subtle.importKey('raw', new Uint8Array(secretBytes), { name: 'HKDF' }, false, [
-    'deriveBits',
-  ])
-
-  // Perform HKDF
-  const derivedBits = await crypto.subtle.deriveBits(
-    {
-      name: 'HKDF',
-      hash: 'SHA-256',
-      salt: hexBytes,
-      info: new TextEncoder().encode('TOTP-key-derivation'),
-    },
-    keyMaterial,
-    80, // 10 bytes * 8 bits per byte
+  const derivedBits = await QuickCrypto.pbkdf2Sync(
+    new Uint8Array(secretBytes),
+    new Uint8Array(hexBytes),
+    10000,
+    80,
+    'SHA-256',
   )
 
   // Convert derived bits to Base32
