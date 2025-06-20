@@ -64,7 +64,9 @@ const WcInput = ({ uri }: { uri: string }) => {
 
   // Insert a pre-filled uri
   useEffect(() => {
-    onInput(uri)
+    if (uri) {
+      onInput(uri)
+    }
   }, [onInput, uri])
 
   const onPaste = useCallback(async () => {
