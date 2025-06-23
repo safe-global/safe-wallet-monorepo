@@ -9397,6 +9397,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@safe-global/safe-deployments@npm:^1.37.36":
+  version: 1.37.36
+  resolution: "@safe-global/safe-deployments@npm:1.37.36"
+  dependencies:
+    semver: "npm:^7.6.2"
+  checksum: 10/d8f9447353e65009ccb9a09753f79e4d2390926783c3d056979ede875a500ee4d53829cad82996cd1c6ad622a9806842ea99b2a720abe0fe55034b34137e65c3
+  languageName: node
+  linkType: hard
+
 "@safe-global/safe-gateway-typescript-sdk@npm:3.23.1":
   version: 3.23.1
   resolution: "@safe-global/safe-gateway-typescript-sdk@npm:3.23.1"
@@ -9534,7 +9543,7 @@ __metadata:
     "@safe-global/protocol-kit": "npm:^5.2.8"
     "@safe-global/safe-apps-sdk": "npm:^9.1.0"
     "@safe-global/safe-client-gateway-sdk": "npm:v1.60.1"
-    "@safe-global/safe-deployments": "npm:^1.37.35"
+    "@safe-global/safe-deployments": "npm:^1.37.36"
     "@safe-global/safe-gateway-typescript-sdk": "npm:3.23.1"
     "@safe-global/safe-modules-deployments": "npm:^2.2.10"
     "@safe-global/store": "workspace:^"
