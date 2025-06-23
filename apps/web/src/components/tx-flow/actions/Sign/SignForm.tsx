@@ -19,6 +19,7 @@ import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
 import { TxCardActions } from '@/components/tx-flow/common/TxCard'
 import SplitMenuButton from '@/components/common/SplitMenuButton'
 import type { SlotComponentProps, SlotName } from '../../slots'
+import { TxAuthentication } from '@/components/tx/TxAuthentication'
 
 export const SignForm = ({
   safeTx,
@@ -121,6 +122,8 @@ export const SignForm = ({
       {cannotPropose && <NonOwnerError />}
 
       <Box>
+        <TxAuthentication />
+
         <Divider className={commonCss.nestedDivider} />
 
         {/* Submit button */}

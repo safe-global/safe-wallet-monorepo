@@ -1,0 +1,15 @@
+.codeDigit {
+  border-radius: 6px;
+  width: var(--space-4);
+  height: var(--space-6);
+  border: 1px solid var(--color-border-main);
+  font-size: 16px;
+  line-height: 22px;
+  letter-spacing: 0.15px;
+  text-align: center;
+}
+
+.codeDigit:valid,
+.codeDigit:focus-visible {
+  outline: 1px solid var(--color-primary-main);
+}
