@@ -9233,7 +9233,7 @@ __metadata:
     "@react-navigation/native": "npm:^7.1.6"
     "@reduxjs/toolkit": "npm:^2.8.2"
     "@rtk-query/codegen-openapi": "npm:^2.0.0"
-    "@safe-global/protocol-kit": "npm:^5.2.8"
+    "@safe-global/protocol-kit": "npm:^5.2.9"
     "@safe-global/store": "workspace:^"
     "@safe-global/test": "workspace:^"
     "@safe-global/types-kit": "npm:^1.0.5"
@@ -9348,7 +9348,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@safe-global/protocol-kit@npm:^5.1.1, @safe-global/protocol-kit@npm:^5.2.8":
+"@safe-global/protocol-kit@npm:^5.1.1":
   version: 5.2.8
   resolution: "@safe-global/protocol-kit@npm:5.2.8"
   dependencies:
@@ -9366,6 +9366,27 @@ __metadata:
     "@peculiar/asn1-schema":
       optional: true
   checksum: 10/cc034131572fd32ad53d9d1b389082cac477ec88a6ccbe8bd7fe144f0ebdf290a2b99e0c74eca33afc3b02dca00d80a95f9d09bbeed568ed78552c71e75dcf81
+  languageName: node
+  linkType: hard
+
+"@safe-global/protocol-kit@npm:^5.2.9":
+  version: 5.2.9
+  resolution: "@safe-global/protocol-kit@npm:5.2.9"
+  dependencies:
+    "@noble/curves": "npm:^1.6.0"
+    "@peculiar/asn1-schema": "npm:^2.3.13"
+    "@safe-global/safe-deployments": "npm:^1.37.36"
+    "@safe-global/safe-modules-deployments": "npm:^2.2.10"
+    "@safe-global/types-kit": "npm:^1.0.5"
+    abitype: "npm:^1.0.2"
+    semver: "npm:^7.6.3"
+    viem: "npm:^2.21.8"
+  dependenciesMeta:
+    "@noble/curves":
+      optional: true
+    "@peculiar/asn1-schema":
+      optional: true
+  checksum: 10/688c6d2542b5d91902fbf0952ea4a6426b667101147140062fd96a7c42943a06c6f2cb55bf921b4915c6e9238058ff0c626bf6268d39a1eef511093066e86e82
   languageName: node
   linkType: hard
 
@@ -9540,7 +9561,7 @@ __metadata:
     "@reduxjs/toolkit": "npm:^2.8.2"
     "@reown/walletkit": "npm:^1.2.1"
     "@safe-global/api-kit": "npm:^2.4.6"
-    "@safe-global/protocol-kit": "npm:^5.2.8"
+    "@safe-global/protocol-kit": "npm:^5.2.9"
     "@safe-global/safe-apps-sdk": "npm:^9.1.0"
     "@safe-global/safe-client-gateway-sdk": "npm:v1.60.1"
     "@safe-global/safe-deployments": "npm:^1.37.36"
