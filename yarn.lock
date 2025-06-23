@@ -8512,14 +8512,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-native-firebase/analytics@npm:^22.1.0":
-  version: 22.1.0
-  resolution: "@react-native-firebase/analytics@npm:22.1.0"
+"@react-native-firebase/analytics@npm:^22.2.1":
+  version: 22.2.1
+  resolution: "@react-native-firebase/analytics@npm:22.2.1"
   dependencies:
     superstruct: "npm:^2.0.2"
   peerDependencies:
-    "@react-native-firebase/app": 22.1.0
-  checksum: 10/62f49e02f3e1a3f7788bd10de4549fa11939690e551de36b6c10db38b52f335e254a499f3108f3fd833880f5f4c4d45aed0ec93e79cb0d1e18712e10b71afe5e
+    "@react-native-firebase/app": 22.2.1
+  checksum: 10/b1665e2b72c36f32ae49c52201edd6a9acf5cfd3d23620bd10b59aa976ecfa8e47a1fc971fbab4554f94170fffdad7a534107a8ae05cc274bcfa2bffdf9bfeaf
   languageName: node
   linkType: hard
 
@@ -9222,7 +9222,7 @@ __metadata:
     "@react-native-community/blur": "npm:^4.4.1"
     "@react-native-community/datetimepicker": "npm:8.3.0"
     "@react-native-community/slider": "npm:4.5.6"
-    "@react-native-firebase/analytics": "npm:^22.1.0"
+    "@react-native-firebase/analytics": "npm:^22.2.1"
     "@react-native-firebase/app": "npm:^22.1.0"
     "@react-native-firebase/crashlytics": "npm:^22.1.0"
     "@react-native-firebase/messaging": "npm:^22.1.0"
