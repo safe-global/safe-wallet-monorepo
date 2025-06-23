@@ -29,17 +29,10 @@ export const deriveBase32Key = async (secretBase32: string, hexInput: string): P
 
   // Convert hex string into bytes
   const hexBytes = new Uint8Array(hexInput.match(/.{1,2}/g)!.map((byte) => parseInt(byte, 16)))
-  // Import key material for HKDF
 
-  const derivedBits = await QuickCrypto.pbkdf2Sync(
-    new Uint8Array(secretBytes),
-    new Uint8Array(hexBytes),
-    10000,
-    80,
-    'SHA-256',
-  )
+  const derivedKey = QuickCrypto.Hmac('SHA-256', new Uint8Array(secretBytes)).update(hexBytes).digest()
+  const derivedKeyBytes = new Uint8Array(derivedKey)
 
   // Convert derived bits to Base32
-  const derivedKeyBytes = new Uint8Array(derivedBits)
   return encodeBase32(derivedKeyBytes).replace(/=/g, '') // Remove padding
 }
