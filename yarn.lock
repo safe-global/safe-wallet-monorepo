@@ -9320,7 +9320,7 @@ __metadata:
     react-native-screens: "npm:^4.10.0"
     react-native-share: "npm:^12.0.9"
     react-native-svg: "npm:15.11.2"
-    react-native-vision-camera: "npm:^4.6.4"
+    react-native-vision-camera: "npm:^4.7.0"
     react-native-web: "npm:^0.20.0"
     react-redux: "npm:^9.1.2"
     redux: "npm:^5.0.1"
@@ -29600,9 +29600,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-vision-camera@npm:^4.6.4":
-  version: 4.6.4
-  resolution: "react-native-vision-camera@npm:4.6.4"
+"react-native-vision-camera@npm:^4.7.0":
+  version: 4.7.0
+  resolution: "react-native-vision-camera@npm:4.7.0"
   peerDependencies:
     "@shopify/react-native-skia": "*"
     react: "*"
@@ -29616,7 +29616,7 @@ __metadata:
       optional: true
     react-native-worklets-core:
       optional: true
-  checksum: 10/9de4166aae94f72d29ab6dc2b04066a8216b5d630508345da7cedfa300196b8c2500dd2b5c0076731357c0b9695961d4e71fe891b2714fffb278a410b081c3b5
+  checksum: 10/099828e9580da4da57688d15d07067c2e4962c38602c7e1b75bd77644faf4c1b9f1ea9aef06db740675be890a9ff3d985a574b935396ddfc29c2996adc291b40
   languageName: node
   linkType: hard
 
