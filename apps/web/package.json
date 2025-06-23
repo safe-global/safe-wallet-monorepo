@@ -157,7 +157,7 @@
     "remark-frontmatter": "^5.0.0",
     "remark-gfm": "^4.0.0",
     "remark-heading-id": "^1.0.1",
-    "remark-mdx-frontmatter": "^5.0.0",
+    "remark-mdx-frontmatter": "^5.2.0",
     "storybook": "^8.3.4",
     "ts-prune": "^0.10.3",
     "typechain": "^8.3.2",

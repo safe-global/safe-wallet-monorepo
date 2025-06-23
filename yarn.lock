@@ -9619,7 +9619,7 @@ __metadata:
     remark-frontmatter: "npm:^5.0.0"
     remark-gfm: "npm:^4.0.0"
     remark-heading-id: "npm:^1.0.1"
-    remark-mdx-frontmatter: "npm:^5.0.0"
+    remark-mdx-frontmatter: "npm:^5.2.0"
     semver: "npm:^7.7.1"
     storybook: "npm:^8.3.4"
     ts-prune: "npm:^0.10.3"
@@ -30312,17 +30312,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"remark-mdx-frontmatter@npm:^5.0.0":
-  version: 5.0.0
-  resolution: "remark-mdx-frontmatter@npm:5.0.0"
+"remark-mdx-frontmatter@npm:^5.2.0":
+  version: 5.2.0
+  resolution: "remark-mdx-frontmatter@npm:5.2.0"
   dependencies:
     "@types/mdast": "npm:^4.0.0"
-    estree-util-is-identifier-name: "npm:^3.0.0"
     estree-util-value-to-estree: "npm:^3.0.0"
     toml: "npm:^3.0.0"
     unified: "npm:^11.0.0"
+    unist-util-mdx-define: "npm:^1.0.0"
     yaml: "npm:^2.0.0"
-  checksum: 10/533f89b4a1ddde50e3443b8c8a730cb86a3845addf3502fd1c0b16860f1addd26058f8ce2edd11b0e615e9b704557ed7f1559a599d65fd53a2b16ba2fdeac6de
+  checksum: 10/95c4e4e2fdcfca95605fb2e217431e967976081602f299fa0dbc15d8441ff982807c9c3a177d65555691abd317a550dbd6fbda45e9675e150a8fc0a6bd073abe
   languageName: node
   linkType: hard
 
@@ -33911,6 +33911,21 @@ __metadata:
   dependencies:
     "@types/unist": "npm:^3.0.0"
   checksum: 10/edd6a93fb2255addf4b9eeb304c1da63c62179aef793169dd64ab955cf2f6814885fe25f95f8105893e3562dead348af535718d7a84333826e0491c04bf42511
+  languageName: node
+  linkType: hard
+
+"unist-util-mdx-define@npm:^1.0.0":
+  version: 1.1.2
+  resolution: "unist-util-mdx-define@npm:1.1.2"
+  dependencies:
+    "@types/estree": "npm:^1.0.0"
+    "@types/hast": "npm:^3.0.0"
+    "@types/mdast": "npm:^4.0.0"
+    estree-util-is-identifier-name: "npm:^3.0.0"
+    estree-util-scope: "npm:^1.0.0"
+    estree-walker: "npm:^3.0.0"
+    vfile: "npm:^6.0.0"
+  checksum: 10/6720770469e1ebe2df3c0f988ff9fdf9bd02676e02ccfadae50a7464b3fc28f376069117ae7fd0453809d72955da2aa853bf3b052e3f609634d688360c1bb774
   languageName: node
   linkType: hard
 
