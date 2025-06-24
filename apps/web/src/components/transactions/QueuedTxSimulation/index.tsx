@@ -11,11 +11,12 @@ import { useSigner } from '@/hooks/wallets/useWallet'
 import ExternalLink from '@/components/common/ExternalLink'
 import CheckIcon from '@/public/images/common/check.svg'
 import CloseIcon from '@/public/images/common/close.svg'
-import { getSimulationStatus } from '@safe-global/utils/components/tx/security/tenderly/utils'
+import { getSimulationStatus, isTxSimulationEnabled } from '@safe-global/utils/components/tx/security/tenderly/utils'
 import { useSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
 import { useIsNestedSafeOwner } from '@/hooks/useIsNestedSafeOwner'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { useMemo } from 'react'
+import { useCurrentChain } from '@/hooks/useChains'
 
 const CompactSimulationButton = ({
   label,
@@ -52,7 +53,7 @@ const CompactSimulationButton = ({
   )
 }
 
-export const QueuedTxSimulation = ({ transaction }: { transaction: TransactionDetails }) => {
+const InlineTxSimulation = ({ transaction }: { transaction: TransactionDetails }) => {
   const { safe } = useSafeInfo()
   const isSafeOwner = useIsSafeOwner()
   const isNestedSafeOwner = useIsNestedSafeOwner()
@@ -128,4 +129,14 @@ export const QueuedTxSimulation = ({ transaction }: { transaction: TransactionDe
   }
 
   return null
+}
+
+export const QueuedTxSimulation = ({ transaction }: { transaction: TransactionDetails }) => {
+  const chain = useCurrentChain()
+
+  if (!chain || !isTxSimulationEnabled(chain)) {
+    return null
+  }
+
+  return <InlineTxSimulation transaction={transaction} />
 }
