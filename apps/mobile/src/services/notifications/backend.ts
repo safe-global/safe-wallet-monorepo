@@ -148,15 +148,24 @@ export const unregisterForNotificationsOnBackEnd = async ({
   const deviceUuid = await getDeviceUuid()
 
   for (const chainId of chainIds) {
-    await getStore()
-      .dispatch(
-        notificationsApi.endpoints.notificationsDeleteSubscriptionV2.initiate({
-          deviceUuid,
-          chainId,
-          safeAddress,
-        }),
-      )
-      .unwrap()
+    try {
+      await getStore()
+        .dispatch(
+          notificationsApi.endpoints.notificationsDeleteSubscriptionV2.initiate({
+            deviceUuid,
+            chainId,
+            safeAddress,
+          }),
+        )
+        .unwrap()
+    } catch (error: unknown) {
+      // Treat 404 errors as successful unregistration since the safe was already unsubscribed
+      if (error && typeof error === 'object' && 'status' in error && error.status === 404) {
+        Logger.info('Safe was already unsubscribed from notifications', { safeAddress, chainId })
+      } else {
+        throw error
+      }
+    }
     await withTimeout(Promise.resolve(), 200)
   }
 }
