@@ -8523,9 +8523,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-native-firebase/app@npm:^22.1.0":
-  version: 22.1.0
-  resolution: "@react-native-firebase/app@npm:22.1.0"
+"@react-native-firebase/app@npm:^22.2.1":
+  version: 22.2.1
+  resolution: "@react-native-firebase/app@npm:22.2.1"
   dependencies:
     firebase: "npm:11.3.1"
   peerDependencies:
@@ -8535,35 +8535,35 @@ __metadata:
   peerDependenciesMeta:
     expo:
       optional: true
-  checksum: 10/479f57f5a08d9779b85c502578aa907854c6ef70b36c51c606fe85a69dbe5e4908616121d4ddceb7810a42152a0ee7d6cc7a0c0f5dac5d0796280dcd3a170470
+  checksum: 10/93ac1c5e45f9ca1c93b8b8e1d53f53688d48b5614e24983a87a5141f1671a5c46329277d4dbaa2248b734a69b6fb428464b52d4aca2c1f1a777c81db440a0d1d
   languageName: node
   linkType: hard
 
-"@react-native-firebase/crashlytics@npm:^22.1.0":
-  version: 22.1.0
-  resolution: "@react-native-firebase/crashlytics@npm:22.1.0"
+"@react-native-firebase/crashlytics@npm:^22.2.1":
+  version: 22.2.1
+  resolution: "@react-native-firebase/crashlytics@npm:22.2.1"
   dependencies:
     stacktrace-js: "npm:^2.0.2"
   peerDependencies:
-    "@react-native-firebase/app": 22.1.0
+    "@react-native-firebase/app": 22.2.1
     expo: ">=47.0.0"
   peerDependenciesMeta:
     expo:
       optional: true
-  checksum: 10/3e810595048ef31626f097da329c70b9da6b1582b9821f8b35fcf2f78e185aba96e479f8a10ac9e6f643969dc733ff2973861946d46035bde1a743b1595cc08f
+  checksum: 10/b6eb0a16fba273bfab5bb0901a03b1318d9dccf5a823735054a60a9d625cf19c1eceef76dbbf6bd9259fc9401a8423c45f249e74b2d46e67ee328057b370624d
   languageName: node
   linkType: hard
 
-"@react-native-firebase/messaging@npm:^22.1.0":
-  version: 22.1.0
-  resolution: "@react-native-firebase/messaging@npm:22.1.0"
+"@react-native-firebase/messaging@npm:^22.2.1":
+  version: 22.2.1
+  resolution: "@react-native-firebase/messaging@npm:22.2.1"
   peerDependencies:
-    "@react-native-firebase/app": 22.1.0
+    "@react-native-firebase/app": 22.2.1
     expo: ">=47.0.0"
   peerDependenciesMeta:
     expo:
       optional: true
-  checksum: 10/f6122d1be53455c1d9cc8b2130907b19ad9246d19ef513590b2c35211980d75c70e028bd6fd5ac3f76e6538c4c530571309a51764b6e24957acc89d51ffb1ca8
+  checksum: 10/e2cd1cb1df8d9f902ea66c807463b66182bb672602fb24751681d971cde1eada261b8238068a884797efc3291bd28e917828adc2cdd7ee2da58037b419070bf6
   languageName: node
   linkType: hard
 
@@ -9223,9 +9223,9 @@ __metadata:
     "@react-native-community/datetimepicker": "npm:8.3.0"
     "@react-native-community/slider": "npm:4.5.6"
     "@react-native-firebase/analytics": "npm:^22.2.1"
-    "@react-native-firebase/app": "npm:^22.1.0"
-    "@react-native-firebase/crashlytics": "npm:^22.1.0"
-    "@react-native-firebase/messaging": "npm:^22.1.0"
+    "@react-native-firebase/app": "npm:^22.2.1"
+    "@react-native-firebase/crashlytics": "npm:^22.2.1"
+    "@react-native-firebase/messaging": "npm:^22.2.1"
     "@react-native-masked-view/masked-view": "npm:0.3.2"
     "@react-native-menu/menu": "npm:^1.2.3"
     "@react-native/babel-preset": "npm:^0.76.2"
