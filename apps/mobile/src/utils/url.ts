@@ -22,3 +22,19 @@ export function isIpOrLocalhostUrl(urlString: string): boolean {
     return false
   }
 }
+
+/**
+ * Determines if a URL string uses the HTTPS protocol
+ * @param urlString - URL as string
+ * @returns true if the URL uses HTTPS protocol, false otherwise
+ */
+export function isHttpsUrl(urlString: string): boolean {
+  try {
+    const urlObj = new URL(urlString)
+    return urlObj.protocol === 'https:'
+  } catch (error) {
+    // If we can't parse the URL, assume it's not HTTPS for safety
+    console.error('Error parsing URL:', error)
+    return false
+  }
+}
