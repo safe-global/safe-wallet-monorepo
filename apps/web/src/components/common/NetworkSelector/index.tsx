@@ -68,7 +68,7 @@ const ChainIndicatorWithFiatBalance = ({
 
   const fiatValue = isCurrentChain ? balances.fiatTotal : safeOverview?.fiatTotal
 
-  return <ChainIndicator responsive={isSelected} chainId={chain.chainId} fiatValue={fiatValue || undefined} inline />
+  return <ChainIndicator responsive={isSelected} chainId={chain.chainId} fiatValue={fiatValue} inline />
 }
 
 export const getNetworkLink = (router: NextRouter, safeAddress: string, networkShortName: string) => {
