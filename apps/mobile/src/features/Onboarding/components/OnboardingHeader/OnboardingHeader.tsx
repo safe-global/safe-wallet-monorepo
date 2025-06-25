@@ -15,7 +15,7 @@ export function OnboardingHeader() {
         borderTopRightRadius={'$6'}
         paddingVertical={'$6'}
       >
-        <SafeWalletLogo />
+        <SafeWalletLogo testID="safe-wallet-logo" />
       </View>
     </View>
   )
