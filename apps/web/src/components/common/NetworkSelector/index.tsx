@@ -24,7 +24,6 @@ import useChains, { useCurrentChain } from '@/hooks/useChains'
 import type { NextRouter } from 'next/router'
 import { useRouter } from 'next/router'
 import css from './styles.module.css'
-import { useChainId } from '@/hooks/useChainId'
 import { type ReactElement, useCallback, useMemo, useState, useEffect } from 'react'
 import { OVERVIEW_EVENTS, OVERVIEW_LABELS, trackEvent } from '@/services/analytics'
 
@@ -39,12 +38,13 @@ import PlusIcon from '@/public/images/common/plus.svg'
 import useAddressBook from '@/hooks/useAddressBook'
 import { CreateSafeOnSpecificChain } from '@/features/multichain/components/CreateSafeOnNewChain'
 import { useLazyGetSafeOverviewQuery } from '@/store/api/gateway'
+import useChainId from '@/hooks/useChainId'
 import useBalances from '@/hooks/useBalances'
 import { InfoOutlined } from '@mui/icons-material'
 import { selectUndeployedSafe } from '@/store/slices'
 import { hasMultiChainAddNetworkFeature } from '@/features/multichain/utils/utils'
 
-const ChainIndicatorWithFiatBalance = ({
+export const ChainIndicatorWithFiatBalance = ({
   isSelected,
   chain,
   safeAddress,
