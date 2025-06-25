@@ -138,7 +138,7 @@ export const assetsStr = 'Assets'
 export const topAssetsStr = 'Top assets'
 export const getStartedStr = 'Get started'
 export const txNoteWarningMessage = 'Notes are publicly visible.Do not share any private or sensitive details'
-const recordedTxNote = 'Tx note one'
+export const recordedTxNote = 'Tx note one'
 
 const comboButton = '[data-testid="combo-submit-dropdown"]'
 const comboButtonPopover = '[data-testid="combo-submit-popover"]'
@@ -160,7 +160,6 @@ const advancedParametersInputNames = {
   maxFee: 'Max fee (Gwei)',
   gasLimit: 'Gas limit',
 }
-
 
 // Transaction details on Tx creation
 export const txAccordionDetails = '[data-testid="decoded-tx-details"]'
@@ -256,7 +255,7 @@ export function typeNoteText(text) {
 
 export function checkMaxNoteLength() {
   typeNoteText(main.generateRandomString(61))
-  cy.get(noteTextField).contains('60/60').should('be.visible')
+  cy.get(noteTextField).should('exist').contains('60/60').should('be.visible')
 }
 
 export function checkNoteWarningMsg() {
@@ -791,8 +790,8 @@ export function openExecutionParamsModal() {
 export function verifyAndSubmitExecutionParams() {
   cy.contains(executionParamsStr).parents('form').as('Paramsform')
   const arrayNames = [advancedParametersInputNames.walletNonce,
-  advancedParametersInputNames.maxPriorityFee,
-  advancedParametersInputNames.maxFee,
+    advancedParametersInputNames.maxPriorityFee,
+    advancedParametersInputNames.maxFee,
   advancedParametersInputNames.gasLimit]
   arrayNames.forEach((element) => {
     cy.get('@Paramsform').find('label').contains(`${element}`).next().find('input').should('not.be.disabled')
