@@ -49,6 +49,7 @@ import { useVisitedSafes } from '@/features/myAccounts/hooks/useVisitedSafes'
 import OutreachPopup from '@/features/targetedOutreach/components/OutreachPopup'
 import { GATEWAY_URL } from '@/config/gateway'
 import { useDatadog } from '@/services/datadog'
+import { usePylon } from '@/hooks/usePylon'
 
 const reduxStore = makeStore()
 
@@ -74,6 +75,7 @@ const InitApp = (): null => {
   useSafeMsgTracking()
   useBeamer()
   useVisitedSafes()
+  usePylon()
 
   return null
 }

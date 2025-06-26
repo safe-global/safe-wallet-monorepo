@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Pylon Test</title>
+</head>
+<body>
+    <h1>Pylon Chat Test</h1>
+    <p>Check the browser console for Pylon status</p>
+    
+    <script>
+        // Initialize window.pylon.chat_settings
+        window.pylon = {
+            chat_settings: {
+                app_id: "a7747e4d-f1b2-478e-96c8-852bf36b8d25", // Replace this with your actual Pylon app ID
+                email: "test@safewallet.com",
+                name: "Test User"
+            }
+        };
+    </script>
+    
+    <!-- Load the Pylon chat widget -->
+    <script>
+        (function(){var e=window;var t=document;var n=function(){n.e(arguments)};n.q=[];n.e=function(e){n.q.push(e)};e.Pylon=n;var r=function(){var e=t.createElement("script");e.setAttribute("type","text/javascript");e.setAttribute("async","true");e.setAttribute("src","https://widget.usepylon.com/widget/" + window.pylon.chat_settings.app_id);var n=t.getElementsByTagName("script")[0];n.parentNode.insertBefore(e,n)};if(t.readyState==="complete"){r()}else if(e.addEventListener){e.addEventListener("load",r,false)}})();
+    </script>
+    
+    <script>
+        // Debug logging
+        setTimeout(() => {
+            console.log('Pylon loaded?', !!window.Pylon);
+            console.log('Pylon settings:', window.pylon?.chat_settings);
+            if (window.Pylon) {
+                console.log('Showing Pylon chat');
+                window.Pylon('show');
+                window.Pylon('open');
+            }
+        }, 2000);
+    </script>
+</body>
+</html> 

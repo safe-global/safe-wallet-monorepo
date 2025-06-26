@@ -12,17 +12,17 @@ const isCypress = Boolean(typeof window !== 'undefined' && window.Cypress)
  */
 export const ContentSecurityPolicy = `
  default-src 'self';
- connect-src 'self' *;
- script-src 'self' 'unsafe-inline' https://*.getbeamer.com https://www.googletagmanager.com https://*.ingest.sentry.io https://sentry.io ${
+ connect-src 'self' * https://*.usepylon.com wss://*.pusher.com;
+ script-src 'self' 'unsafe-inline' https://*.getbeamer.com https://www.googletagmanager.com https://*.ingest.sentry.io https://sentry.io https://widget.usepylon.com ${
    !IS_PRODUCTION || isCypress
      ? "'unsafe-eval'" // Dev server and cypress need unsafe-eval
      : "'wasm-unsafe-eval'"
  };
  frame-src http: https:;
- style-src 'self' 'unsafe-inline' https://*.getbeamer.com https://*.googleapis.com;
- font-src 'self' data:;
+ style-src 'self' 'unsafe-inline' https://*.getbeamer.com https://*.googleapis.com https://*.usepylon.com;
+ font-src 'self' data: https://*.usepylon.com;
  worker-src 'self' blob:;
- img-src * data:;
+ img-src * data: https://pylon-avatars.s3.us-west-1.amazonaws.com https://d3vl36l12sfx26.cloudfront.net;
 `
   .replace(/\s{2,}/g, ' ')
   .trim()

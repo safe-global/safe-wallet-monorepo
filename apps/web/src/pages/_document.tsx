@@ -2,10 +2,12 @@
  * This file is needed to embed MUI theme CSS into the pre-built HTML files
  * @see https://github.com/mui/material-ui/tree/master/examples/nextjs-with-typescript
  */
-import type { DocumentContext } from 'next/document'
-import Document, { Html, Head, Main, NextScript } from 'next/document'
+import Document, { Html, Head, Main, NextScript, DocumentContext } from 'next/document'
+import Script from 'next/script'
 import createEmotionServer from '@emotion/server/create-instance'
 import createEmotionCache from '@/utils/createEmotionCache'
+
+const PYLON_APP_ID = process.env.NEXT_PUBLIC_PYLON_APP_ID
 
 export default class WebCoreDocument extends Document {
   render() {
@@ -18,6 +20,40 @@ export default class WebCoreDocument extends Document {
         <body>
           <Main />
           <NextScript />
+          
+          {/* Pylon Chat Widget Integration */}
+          {PYLON_APP_ID && (
+            <>
+              {/* Initialize window.pylon.chat_settings */}
+              <script
+                id="pylon-chat-widget-initialize-window"
+                type="text/javascript"
+                dangerouslySetInnerHTML={{
+                  __html: `
+                    window.pylon = {
+                      chat_settings: {
+                        app_id: "${PYLON_APP_ID}",
+                        email: "user@safewallet.com",
+                        name: "Safe User"
+                      }
+                    };
+                  `
+                }}
+              />
+              
+              {/* Load the Pylon chat widget */}
+              <script
+                id="pylon-chat-widget"
+                type="text/javascript"
+                async
+                dangerouslySetInnerHTML={{
+                  __html: `
+                    (function(){var e=window;var t=document;var n=function(){n.e(arguments)};n.q=[];n.e=function(e){n.q.push(e)};e.Pylon=n;var r=function(){var e=t.createElement("script");e.setAttribute("type","text/javascript");e.setAttribute("async","true");e.setAttribute("src","https://widget.usepylon.com/widget/${PYLON_APP_ID}");var n=t.getElementsByTagName("script")[0];n.parentNode.insertBefore(e,n)};if(t.readyState==="complete"){r()}else if(e.addEventListener){e.addEventListener("load",r,false)}})();
+                  `
+                }}
+              />
+            </>
+          )}
         </body>
       </Html>
     )
