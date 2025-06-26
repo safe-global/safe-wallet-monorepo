@@ -28,6 +28,7 @@ declare module '@mui/material/styles' {
   export interface TypeBackground {
     main: string
     light: string
+    lightGrey: string
   }
 
   // Custom color properties
@@ -54,6 +55,8 @@ declare module '@mui/material/Button' {
 
   export interface ButtonPropsColorOverrides {
     background: true
+    static: true
+    'background.paper': true
   }
 
   export interface ButtonPropsVariantOverrides {
@@ -104,7 +107,7 @@ const createSafeTheme = (mode: PaletteMode): Theme => {
           {
             props: { size: 'compact' },
             style: {
-              padding: '8px 12px',
+              padding: '8px 16px',
             },
           },
           {
@@ -112,6 +115,27 @@ const createSafeTheme = (mode: PaletteMode): Theme => {
             style: {
               padding: '12px 48px',
             },
+          },
+          {
+            props: { color: 'background.paper' },
+            style: ({ theme }) => ({
+              backgroundColor: theme.palette.background.paper,
+              color: theme.palette.text.primary,
+              '&:hover': {
+                backgroundColor: theme.palette.background.main,
+              },
+            }),
+          },
+
+          {
+            props: { color: 'background' },
+            style: ({ theme }) => ({
+              backgroundColor: theme.palette.background.main,
+              color: theme.palette.text.primary,
+              '&:hover': {
+                backgroundColor: theme.palette.background.lightGrey,
+              },
+            }),
           },
           {
             props: { variant: 'danger' },

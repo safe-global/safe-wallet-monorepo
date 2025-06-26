@@ -1,4 +1,10 @@
-import { formatAmountPrecise, formatAmount, formatCurrency, formatCurrencyPrecise } from '@safe-global/utils/utils/formatNumber'
+import {
+  formatAmountPrecise,
+  formatAmount,
+  formatCurrency,
+  formatCurrencyPrecise,
+  percentageOfTotal,
+} from '@safe-global/utils/utils/formatNumber'
 
 describe('formatNumber', () => {
   describe('formatAmountPrecise', () => {
@@ -88,6 +94,33 @@ describe('formatNumber', () => {
     it('should return "NaN" for invalid number input', () => {
       const result = formatCurrencyPrecise('invalid-number', 'USD')
       expect(result).toBe('$NaN ')
+    })
+  })
+
+  describe('percentageOfTotal', () => {
+    it('returns the correct fraction for typical inputs', () => {
+      expect(percentageOfTotal(30, 100)).toBeCloseTo(0.3)
+      expect(percentageOfTotal('75', '150')).toBeCloseTo(0.5)
+    })
+
+    it('handles a zero total by returning 0 (avoids division by 0)', () => {
+      expect(percentageOfTotal(10, 0)).toBe(0)
+    })
+
+    it('handles a negative total by returning 0', () => {
+      expect(percentageOfTotal(10, -50)).toBe(0)
+    })
+
+    it('handles non-numeric totals by returning 0', () => {
+      expect(percentageOfTotal(10, 'not-a-number')).toBe(0)
+    })
+
+    it('handles non-numeric balances by returning 0', () => {
+      expect(percentageOfTotal(NaN, 100)).toBe(0)
+    })
+
+    it('handles extremely large totals without throwing', () => {
+      expect(percentageOfTotal(1, Number.MAX_SAFE_INTEGER)).toBeCloseTo(1 / Number.MAX_SAFE_INTEGER)
     })
   })
 })

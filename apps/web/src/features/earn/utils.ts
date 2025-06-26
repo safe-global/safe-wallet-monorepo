@@ -6,5 +6,5 @@ export const vaultTypeToLabel = {
 }
 
 export const isEligibleEarnToken = (chainId: string, tokenAddress: string) => {
-  return EligibleEarnTokens[chainId].includes(tokenAddress)
+  return EligibleEarnTokens[chainId]?.includes(tokenAddress)
 }

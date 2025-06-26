@@ -38,7 +38,8 @@ export const useImportPrivateKey = () => {
       // Create a delegate for this owner
       try {
         // We don't want to fail the private key import if delegate creation fails
-        const delegateResult = await createDelegate(privateKey, local.safeAddress ? local.safeAddress : null)
+        // by passing null as the safe address, we are creating a delegate for the chain and not for the safe
+        const delegateResult = await createDelegate(privateKey, null)
 
         if (!delegateResult.success) {
           Logger.error('Failed to create delegate during private key import', delegateResult.error)

@@ -11,6 +11,12 @@ const DEPS_TO_CHECK = [
   'prettier',
   'jest',
   '@types/jest',
+  '@safe-global/protocol-kit',
+  '@safe-global/safe-apps-sdk',
+  '@safe-global/safe-client-gateway-sdk',
+  '@safe-global/safe-deployments',
+  '@safe-global/safe-gateway-typescript-sdk',
+  '@safe-global/safe-modules-deployments',
 ]
 
 /**

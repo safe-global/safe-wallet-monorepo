@@ -1,13 +1,15 @@
-import type { AllOwnedSafes } from '@safe-global/safe-gateway-typescript-sdk'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
-import { useGetAllOwnedSafesQuery } from '@/store/api/gateway'
+import type { OwnersGetAllSafesByOwnerV2ApiResponse } from '@safe-global/store/gateway/AUTO_GENERATED/owners'
+import { useOwnersGetAllSafesByOwnerV2Query } from '@safe-global/store/gateway/AUTO_GENERATED/owners'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
-import { skipToken } from '@reduxjs/toolkit/query'
 
-const useAllOwnedSafes = (address: string): AsyncResult<AllOwnedSafes> => {
-  const { data, error, isLoading } = useGetAllOwnedSafesQuery(address === '' ? skipToken : { walletAddress: address })
+const useAllOwnedSafes = (address: string): AsyncResult<OwnersGetAllSafesByOwnerV2ApiResponse> => {
+  const { currentData, error, isLoading } = useOwnersGetAllSafesByOwnerV2Query(
+    { ownerAddress: address },
+    { skip: address === '' },
+  )
 
-  return [address ? data : undefined, asError(error), isLoading]
+  return [address ? currentData : undefined, asError(error), isLoading]
 }
 
 export default useAllOwnedSafes

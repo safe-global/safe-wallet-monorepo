@@ -1,7 +1,7 @@
 import React from 'react'
 import { Text, View } from 'tamagui'
 import { SafeListItem } from '@/src/components/SafeListItem'
-import { Logo } from '@/src/components/Logo'
+import { TokenIcon } from '@/src/components/TokenIcon'
 import { ellipsis } from '@/src/utils/formatters'
 
 interface AssetsCardProps {
@@ -39,7 +39,9 @@ export function AssetsCard({
         </View>
       }
       transparent={transparent}
-      leftNode={<Logo imageBackground={imageBackground} logoUri={logoUri} accessibilityLabel={accessibilityLabel} />}
+      leftNode={
+        <TokenIcon imageBackground={imageBackground} logoUri={logoUri} accessibilityLabel={accessibilityLabel} />
+      }
       rightNode={
         typeof rightNode === 'string' ? (
           <Text fontSize="$4" fontWeight={400} color="$color">

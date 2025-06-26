@@ -26,14 +26,16 @@ const config = {
     infoPlist: {
       NSFaceIDUsageDescription: 'Enabling Face ID allows you to create/access secure keys.',
       UIBackgroundModes: ['remote-notification'],
-      AppGroup: 'group.global.safe.mobileapp',
+      AppGroup: IS_DEV ? 'group.global.safe.mobileapp.dev' : 'group.global.safe.mobileapp',
     },
     supportsTablet: false,
     appleTeamId: appleDevTeamId,
     bundleIdentifier: IS_DEV ? 'global.safe.mobileapp.dev' : 'global.safe.mobileapp',
     entitlements: {
-      'aps-environment': 'production',
-      'com.apple.security.application-groups': ['group.global.safe.mobileapp'],
+      'aps-environment': IS_DEV ? 'development' : 'production',
+      'com.apple.security.application-groups': [
+        IS_DEV ? 'group.global.safe.mobileapp.dev' : 'group.global.safe.mobileapp',
+      ],
     },
     googleServicesFile: IS_DEV ? process.env.GOOGLE_SERVICES_PLIST_DEV : process.env.GOOGLE_SERVICES_PLIST,
   },
@@ -130,6 +132,7 @@ const config = {
         iosDeploymentTarget: '15.1',
         apsEnvMode: IS_DEV ? 'development' : 'production',
         appleDevTeamId: appleDevTeamId,
+        appGroupIdentifier: IS_DEV ? 'group.global.safe.mobileapp.dev' : 'group.global.safe.mobileapp',
       },
     ],
   ],

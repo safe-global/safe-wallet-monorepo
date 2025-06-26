@@ -4,6 +4,10 @@
   overflow-x: auto;
 }
 
+.detailsWrapper {
+  position: relative;
+}
+
 .details {
   width: 66.6%;
   display: flex;
@@ -16,6 +20,16 @@
   justify-content: flex-end;
   margin: var(--space-1);
   margin-bottom: -40px;
+}
+
+.inlineSimulation {
+  display: flex;
+  justify-content: flex-end;
+  margin: var(--space-2);
+  position: absolute;
+  right: 0;
+  top: 0;
+  z-index: 1;
 }
 
 .txNote {
@@ -97,5 +111,11 @@
     width: 100%;
     border-left: 0;
     border-top: 1px solid var(--color-border-light);
+  }
+}
+
+@media (max-width: 1350px) {
+  .inlineSimulation {
+    position: relative;
   }
 }

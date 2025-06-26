@@ -34,10 +34,12 @@
   --color-background-main: #f4f4f4;
   --color-background-paper: #ffffff;
   --color-background-light: #effff4;
+  --color-background-lightGrey: #dddee0;
   --color-backdrop-main: #636669;
   --color-logo-main: #121312;
   --color-logo-background: #eeeff0;
   --color-static-main: #121312;
+  --color-static-light: #636669;
   --space-1: 8px;
   --space-2: 16px;
   --space-3: 24px;
@@ -86,10 +88,12 @@
   --color-background-main: #121312;
   --color-background-paper: #1c1c1c;
   --color-background-light: #1b2a22;
+  --color-background-lightGrey: #303033;
   --color-backdrop-main: #636669;
   --color-logo-main: #ffffff;
   --color-logo-background: #303033;
   --color-static-main: #121312;
+  --color-static-light: #636669;
 }
 
 /* The same as above for the brief moment before JS loads */
@@ -128,9 +132,11 @@
     --color-background-main: #121312;
     --color-background-paper: #1c1c1c;
     --color-background-light: #1b2a22;
+    --color-background-lightGrey: #303033;
     --color-backdrop-main: #636669;
     --color-logo-main: #ffffff;
     --color-logo-background: #303033;
     --color-static-main: #121312;
+    --color-static-light: #636669;
   }
 }

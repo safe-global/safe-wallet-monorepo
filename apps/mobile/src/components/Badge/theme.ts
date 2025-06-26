@@ -7,7 +7,7 @@ export const badgeTheme = {
   },
   dark_badge_success: {
     color: tokens.color.backgroundMainDark,
-    background: tokens.color.primaryMainDark,
+    background: tokens.color.backgroundLightDark,
   },
   light_badge_success_variant1: {
     background: tokens.color.successBackgroundLight,

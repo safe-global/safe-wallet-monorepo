@@ -1,16 +1,9 @@
 import { createContext, type ReactElement } from 'react'
 
 import { useSimulation } from '@/components/tx/security/tenderly/useSimulation'
-import { FETCH_STATUS, type TenderlySimulation } from '@safe-global/utils/components/tx/security/tenderly/types'
+import { FETCH_STATUS } from '@safe-global/utils/components/tx/security/tenderly/types'
 import type { UseSimulationReturn } from '@safe-global/utils/components/tx/security/tenderly/useSimulation'
-
-const getCallTraceErrors = (simulation?: TenderlySimulation) => {
-  if (!simulation || !simulation.simulation.status) {
-    return []
-  }
-
-  return simulation.transaction.call_trace.filter((call) => call.error)
-}
+import { getSimulationStatus } from '@safe-global/utils/components/tx/security/tenderly/utils'
 
 type SimulationStatus = {
   isLoading: boolean
@@ -52,28 +45,6 @@ export const TxInfoContext = createContext<{
     status: initialStatus,
   },
 })
-
-const getSimulationStatus = (simulation: UseSimulationReturn): SimulationStatus => {
-  const isLoading = simulation._simulationRequestStatus === FETCH_STATUS.LOADING
-
-  const isFinished =
-    simulation._simulationRequestStatus === FETCH_STATUS.SUCCESS ||
-    simulation._simulationRequestStatus === FETCH_STATUS.ERROR
-
-  const isSuccess = simulation.simulation?.simulation.status || false
-
-  // Safe can emit failure event even though Tenderly simulation succeeds
-  const isCallTraceError = isSuccess && getCallTraceErrors(simulation.simulation).length > 0
-  const isError = simulation._simulationRequestStatus === FETCH_STATUS.ERROR
-
-  return {
-    isLoading,
-    isFinished,
-    isSuccess,
-    isCallTraceError,
-    isError,
-  }
-}
 
 export const TxInfoProvider = ({ children }: { children: ReactElement }) => {
   const simulation = useSimulation()

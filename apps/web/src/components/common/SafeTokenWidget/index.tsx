@@ -7,19 +7,13 @@ import type { Vesting } from '@/hooks/useSafeTokenAllocation'
 import useSafeTokenAllocation, { useSafeVotingPower } from '@/hooks/useSafeTokenAllocation'
 import { OVERVIEW_EVENTS } from '@/services/analytics'
 import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
-import { Box, ButtonBase, Divider, Skeleton, SvgIcon, Tooltip, Typography } from '@mui/material'
+import { Box, ButtonBase, Skeleton, Tooltip, Typography } from '@mui/material'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import Track from '../Track'
 import SafeTokenIcon from '@/public/images/common/safe-token.svg'
-import SafePassStar from '@/public/images/common/safe-pass-star.svg'
 import css from './styles.module.css'
 import { useSanctionedAddress } from '@/hooks/useSanctionedAddress'
-import useSafeAddress from '@/hooks/useSafeAddress'
-import { skipToken } from '@reduxjs/toolkit/query/react'
-import { useDarkMode } from '@/hooks/useDarkMode'
-import { useGetOwnGlobalCampaignRankQuery } from '@/store/api/safePass'
-import { formatAmount } from '@safe-global/utils/utils/formatNumber'
 
 const TOKEN_DECIMALS = 18
 
@@ -47,19 +41,13 @@ const GOVERNANCE_APP_URL = IS_PRODUCTION ? 'https://community.safe.global' : 'ht
 
 const SafeTokenWidget = () => {
   const chainId = useChainId()
-  const safeAddress = useSafeAddress()
   const query = useSearchParams()
-  const darkMode = useDarkMode()
   const isSafeOwner = useIsSafeOwner()
 
   const [allocationData, , allocationDataLoading] = useSafeTokenAllocation()
   const [allocation, , allocationLoading] = useSafeVotingPower(allocationData)
 
   const sanctionedAddress = useSanctionedAddress()
-  const { data: ownGlobalRank, isLoading: ownGlobalRankLoading } = useGetOwnGlobalCampaignRankQuery(
-    chainId !== '1' && chainId !== '11155111' ? skipToken : { chainId, safeAddress },
-    { refetchOnFocus: false },
-  )
 
   const tokenAddress = getSafeTokenAddress(chainId)
   if (!tokenAddress || Boolean(sanctionedAddress)) {
@@ -110,28 +98,6 @@ const SafeTokenWidget = () => {
                       flooredSafeBalance
                     )}
                   </UnreadBadge>
-                </Typography>
-
-                <Divider orientation="vertical" />
-                <SvgIcon
-                  component={SafePassStar}
-                  width={24}
-                  height={24}
-                  inheritViewBox
-                  color={darkMode ? 'primary' : undefined}
-                />
-                <Typography
-                  component="div"
-                  variant="body2"
-                  lineHeight="20px"
-                  // Badge does not accept className so must be here
-                  className={css.allocationBadge}
-                >
-                  {ownGlobalRankLoading ? (
-                    <Skeleton width="16px" animation="wave" />
-                  ) : (
-                    formatAmount(Math.floor(ownGlobalRank?.totalBoostedPoints ?? 0), 0)
-                  )}
                 </Typography>
               </ButtonBase>
             </Link>

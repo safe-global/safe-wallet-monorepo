@@ -29,36 +29,34 @@ export function OnboardingCarousel({ items }: OnboardingCarouselProps) {
   }
 
   return (
-    <View
-      testID="carrousel"
-      flex={1}
-      justifyContent={'space-between'}
-      position="relative"
-      paddingBottom={insets.bottom + getTokenValue('$4')}
-      backgroundColor={getTokenValue('$color.textContrastDark')}
-    >
-      <StatusBar style="light" />
+    <View backgroundColor={getTokenValue('$color.textContrastDark')} flex={1}>
       <View
-        backgroundColor={'white'}
+        testID="carrousel"
         flex={1}
+        justifyContent={'space-between'}
+        position="relative"
+        marginBottom={insets.bottom}
+        backgroundColor={'white'}
         borderBottomLeftRadius="$6"
         borderBottomRightRadius="$6"
         paddingBottom={'$4'}
         paddingTop={'$4'}
       >
-        <Tabs.Container
-          onTabChange={(event) => setActiveTab(event.tabName)}
-          initialTabName={items[0].name}
-          renderTabBar={() => <></>}
-        >
-          {items.map((item, index) => (
-            <Tabs.Tab name={item.name} key={`${item.name}-${index}`}>
-              <CarouselItem key={index} item={item} testID={'carousel-item-' + index} />
-            </Tabs.Tab>
-          ))}
-        </Tabs.Container>
-
-        <View paddingHorizontal={20}>
+        <StatusBar style="light" />
+        <View flex={1}>
+          <Tabs.Container
+            onTabChange={(event) => setActiveTab(event.tabName)}
+            initialTabName={items[0].name}
+            renderTabBar={() => <></>}
+          >
+            {items.map((item, index) => (
+              <Tabs.Tab name={item.name} key={`${item.name}-${index}`}>
+                <CarouselItem key={index} item={item} testID={'carousel-item-' + index} />
+              </Tabs.Tab>
+            ))}
+          </Tabs.Container>
+        </View>
+        <View paddingHorizontal={'$5'}>
           <View gap="$1" flexDirection="row" alignItems="center" justifyContent="center" marginBottom="$6">
             {items.map((item) => (
               <CarouselFeedback key={item.name} isActive={activeTab === item.name} />

@@ -1,8 +1,5 @@
 import { SafeCreationEvent, safeCreationSubscribe } from '@/features/counterfactual/services/safeCreationEvents'
-import useWallet from '@/hooks/wallets/useWallet'
-import { useGetAllOwnedSafesQuery } from '@/store/api/gateway'
 import { getBlockExplorerLink } from '@safe-global/utils/utils/chains'
-import { skipToken } from '@reduxjs/toolkit/query'
 import { useEffect } from 'react'
 import { formatError } from '@safe-global/utils/utils/formatters'
 import { showNotification } from '@/store/notificationsSlice'
@@ -10,6 +7,7 @@ import { useAppDispatch } from '@/store'
 import { useCurrentChain } from '@/hooks/useChains'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import { isWalletRejection } from '@/utils/wallets'
+import { cgwApi } from '@safe-global/store/gateway/AUTO_GENERATED/owners'
 
 const SafeCreationNotifications = {
   [SafeCreationEvent.PROCESSING]: 'Validating...',
@@ -29,8 +27,6 @@ const usePendingSafeNotifications = (): void => {
   const dispatch = useAppDispatch()
   const chain = useCurrentChain()
   const safeAddress = useSafeAddress()
-  const { address = '' } = useWallet() || {}
-  const { refetch } = useGetAllOwnedSafesQuery(address === '' ? skipToken : { walletAddress: address })
 
   useEffect(() => {
     if (!chain) return
@@ -50,7 +46,7 @@ const usePendingSafeNotifications = (): void => {
 
         // Fetch all owned safes after the Safe has been deployed
         if (isSuccess) {
-          refetch()
+          dispatch(cgwApi.util.invalidateTags(['owners']))
         }
 
         dispatch(
@@ -69,7 +65,7 @@ const usePendingSafeNotifications = (): void => {
     return () => {
       unsubFns.forEach((unsub) => unsub())
     }
-  }, [dispatch, safeAddress, chain, refetch])
+  }, [dispatch, safeAddress, chain])
 }
 
 export default usePendingSafeNotifications

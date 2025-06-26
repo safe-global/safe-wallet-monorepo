@@ -2,24 +2,84 @@ import { Card, Box, Grid2 as Grid, Typography, Button, SvgIcon, Stack, Tooltip }
 import Image from 'next/image'
 import EarnIllustrationLight from '@/public/images/common/earn-illustration-light.png'
 
-import css from './styles.module.css'
-import { EarnBannerCopy, EarnPoweredBy } from '@/features/earn/components/EarnDashboardBanner'
 import CheckIcon from '@/public/images/common/check.svg'
 import StarIcon from '@/public/images/common/star.svg'
 import EyeIcon from '@/public/images/common/eye.svg'
 import FiatIcon from '@/public/images/common/fiat.svg'
 import Track from '@/components/common/Track'
-import { EARN_EVENTS, EARN_LABELS } from '@/services/analytics/events/earn'
 import useBalances from '@/hooks/useBalances'
-import { APYDisclaimer, EligibleEarnTokens, VaultAPYs } from '@/features/earn/constants'
+import { EligibleEarnTokens, VaultAPYs } from '@/features/earn/constants'
 import useChainId from '@/hooks/useChainId'
 import TokenIcon from '@/components/common/TokenIcon'
 import TokenAmount from '@/components/common/TokenAmount'
 import FiatValue from '@/components/common/FiatValue'
 import { formatPercentage } from '@safe-global/utils/utils/formatters'
-import { AppRoutes } from '@/config/routes'
+import css from './styles.module.css'
+import Kiln from '@/public/images/common/kiln-symbol.svg'
+import Morpho from '@/public/images/common/morpho-symbol.svg'
+import Cross from '@/public/images/common/cross.svg'
+import classNames from 'classnames'
+import { useDarkMode } from '@/hooks/useDarkMode'
 import { useRouter } from 'next/router'
+import { AppRoutes } from '@/config/routes'
 import { trackEvent } from '@/services/analytics'
+import { EARN_EVENTS, EARN_LABELS } from '@/services/analytics/events/earn'
+import ExternalLink from '@/components/common/ExternalLink'
+import { APYDisclaimer, EARN_HELP_ARTICLE, ApproximateAPY } from '@/features/earn/constants'
+
+export const EarnPoweredBy = () => {
+  const isDarkMode = useDarkMode()
+
+  return (
+    <Stack spacing={1} direction="row">
+      <Typography variant="overline" color="text.secondary" fontWeight="bold">
+        Powered by
+      </Typography>
+      <SvgIcon
+        component={Morpho}
+        inheritViewBox
+        color="border"
+        className={classNames(css.morphoIcon, { [css.kilnIconDarkMode]: isDarkMode })}
+      />
+      <SvgIcon
+        component={Cross}
+        inheritViewBox
+        color="border"
+        sx={{ width: 12, height: 12 }}
+        className={classNames({ [css.kilnIconDarkMode]: isDarkMode })}
+      />
+      <SvgIcon
+        component={Kiln}
+        inheritViewBox
+        color="border"
+        className={classNames(css.kilnIcon, { [css.kilnIconDarkMode]: isDarkMode })}
+      />
+    </Stack>
+  )
+}
+
+export const EarnBannerCopy = () => {
+  const isDarkMode = useDarkMode()
+
+  return (
+    <>
+      <Typography variant="h2" className={classNames(css.header, { [css.gradientText]: isDarkMode })}>
+        Earn up to{' '}
+        <Typography className={classNames({ [css.gradientText]: isDarkMode })} variant="h2" component="span">
+          {formatPercentage(ApproximateAPY)} APY*
+        </Typography>{' '}
+        and get MORPHO rewards
+      </Typography>
+
+      <Typography variant="body1" className={css.content} mt={2}>
+        Deposit stablecoins, wstETH, ETH, and WBTC straight from your account and let your assets compound in minutes.{' '}
+        <Track {...EARN_EVENTS.OPEN_EARN_LEARN_MORE} label={EARN_LABELS.safe_dashboard_banner}>
+          <ExternalLink href={EARN_HELP_ARTICLE}>Learn more</ExternalLink>
+        </Track>
+      </Typography>
+    </>
+  )
+}
 
 const EarnInfo = ({ onGetStarted }: { onGetStarted: () => void }) => {
   const { balances } = useBalances()
