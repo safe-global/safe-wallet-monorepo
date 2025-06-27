@@ -84,7 +84,7 @@ function BiometricsOptIn() {
       <OptIn
         testID="biometrics-opt-in-screen"
         title="Simplify access, enhance security"
-        description="Enable biometrics to unlock the app quickly and confirm transactions securely using Face ID."
+        description="Enable biometrics to unlock the app quickly and confirm transactions securely using your device's biometric authentication."
         image={image}
         isVisible
         isLoading={isLoading}
