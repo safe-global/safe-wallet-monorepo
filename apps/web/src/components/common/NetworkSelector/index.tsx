@@ -24,9 +24,8 @@ import useChains, { useCurrentChain } from '@/hooks/useChains'
 import type { NextRouter } from 'next/router'
 import { useRouter } from 'next/router'
 import css from './styles.module.css'
-import { type ReactElement, useCallback, useMemo, useState, useEffect } from 'react'
+import { type ReactElement, useCallback, useMemo, useState } from 'react'
 import { OVERVIEW_EVENTS, OVERVIEW_LABELS, trackEvent } from '@/services/analytics'
-
 import { useAllSafesGrouped } from '@/features/myAccounts/hooks/useAllSafesGrouped'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
@@ -37,9 +36,10 @@ import { type ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import PlusIcon from '@/public/images/common/plus.svg'
 import useAddressBook from '@/hooks/useAddressBook'
 import { CreateSafeOnSpecificChain } from '@/features/multichain/components/CreateSafeOnNewChain'
-import { useLazyGetSafeOverviewQuery } from '@/store/api/gateway'
+import { useGetSafeOverviewQuery } from '@/store/api/gateway'
 import useChainId from '@/hooks/useChainId'
 import useBalances from '@/hooks/useBalances'
+import { skipToken } from '@reduxjs/toolkit/query'
 import { InfoOutlined } from '@mui/icons-material'
 import { selectUndeployedSafe } from '@/store/slices'
 import { hasMultiChainAddNetworkFeature } from '@/features/multichain/utils/utils'
@@ -58,14 +58,9 @@ export const ChainIndicatorWithFiatBalance = ({
   const isCurrentChain = currentChainId === chain.chainId
 
   const { balances } = useBalances()
-  const [trigger, { data: safeOverview }] = useLazyGetSafeOverviewQuery()
-
-  useEffect(() => {
-    if (!isCurrentChain && !undeployedSafe) {
-      trigger({ safeAddress, chainId: chain.chainId })
-    }
-  }, [trigger, isCurrentChain, undeployedSafe, safeAddress, chain.chainId])
-
+  const { data: safeOverview } = useGetSafeOverviewQuery(
+    !isCurrentChain && !undeployedSafe ? { safeAddress, chainId: chain.chainId } : skipToken,
+  )
   const fiatValue = isCurrentChain ? balances.fiatTotal : safeOverview?.fiatTotal
 
   return <ChainIndicator responsive={isSelected} chainId={chain.chainId} fiatValue={fiatValue} inline />

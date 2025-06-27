@@ -99,7 +99,6 @@ export const {
   useCreateSubmissionMutation,
   useGetSafeQuery,
   useGetSafeOverviewQuery,
-  useLazyGetSafeOverviewQuery,
   useGetMultipleSafeOverviewsQuery,
   useGetAllOwnedSafesQuery,
   useGetOwnedSafesQuery,
