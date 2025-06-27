@@ -64,7 +64,6 @@ describe('Transaction Builder happy path tests', { defaultCommandTimeout: 20000 
       })
 
       createtx.clickOnContinueSignTransactionBtn()
-      createtx.clickOnAcknowledgement()
       createtx.clickOnSignTransactionBtn()
       createtx.clickViewTransaction()
       navigation.clickOnWalletExpandMoreIcon()
@@ -73,9 +72,7 @@ describe('Transaction Builder happy path tests', { defaultCommandTimeout: 20000 
       wallet.connectSigner(signer2)
       navigation.verifyTxBtnStatus(constants.enabledStates.enabled)
       createtx.clickOnConfirmTransactionBtn()
-      createtx.clickOnNoLaterOption()
       createtx.clickOnContinueSignTransactionBtn()
-      createtx.clickOnAcknowledgement()
       createtx.clickOnSignTransactionBtn()
       navigation.clickOnWalletExpandMoreIcon()
       navigation.clickOnDisconnectBtn()
