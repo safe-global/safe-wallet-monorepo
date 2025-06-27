@@ -71,7 +71,7 @@ export const GetStarted = () => {
           Add account
         </SafeButton>
         <SafeButton outlined icon={<SafeFontIcon name={'upload'} />} onPress={onPressImportAccount}>
-          Import account
+          Migrate old app
         </SafeButton>
         <View
           paddingHorizontal={'$10'}
