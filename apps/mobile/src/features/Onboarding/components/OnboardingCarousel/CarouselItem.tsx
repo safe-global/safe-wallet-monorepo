@@ -28,7 +28,7 @@ export const CarouselItem = ({
       <YStack gap={gap} paddingHorizontal="$5" flex={1}>
         <YStack>{title}</YStack>
 
-        <Text textAlign="center" fontSize={'$4'} color={getTokenValue('$color.textContrastDark')}>
+        <Text textAlign="center" maxWidth={331} fontSize={'$5'} color={getTokenValue('$color.textContrastDark')}>
           {description}
         </Text>
       </YStack>
