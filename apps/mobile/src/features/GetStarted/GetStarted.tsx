@@ -7,6 +7,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { BlurView } from 'expo-blur'
 import { getCrashlytics } from '@react-native-firebase/crashlytics'
 import { setAnalyticsCollectionEnabled } from '@/src/services/analytics'
+import { isAndroid } from '@/src/config/constants'
 
 const StyledText = styled(Text, {
   fontSize: '$3',
@@ -70,9 +71,11 @@ export const GetStarted = () => {
         >
           Add account
         </SafeButton>
-        <SafeButton outlined icon={<SafeFontIcon name={'upload'} />} onPress={onPressImportAccount}>
-          Import account
-        </SafeButton>
+        {!isAndroid && (
+          <SafeButton outlined icon={<SafeFontIcon name={'upload'} />} onPress={onPressImportAccount}>
+            Import account
+          </SafeButton>
+        )}
         <View
           paddingHorizontal={'$10'}
           marginTop={'$2'}
