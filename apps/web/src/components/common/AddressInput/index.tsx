@@ -179,9 +179,9 @@ const AddressInput = ({
             <InputAdornment position="end" sx={{ ml: 0 }}>
               <Box mr={1}>
                 {watchedValue && !fieldError ? (
-                  <Identicon address={watchedValue} size={32} />
+                  <Identicon address={watchedValue} size={40} />
                 ) : (
-                  <Skeleton variant="circular" width={32} height={32} animation={false} />
+                  <Skeleton variant="circular" width={40} height={40} animation={false} />
                 )}
               </Box>
 
