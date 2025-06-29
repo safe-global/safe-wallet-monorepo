@@ -7,6 +7,7 @@ import { useAppSelector } from '@/src/store/hooks'
 import { selectContactByAddress } from '@/src/store/addressBookSlice'
 import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
 import { selectActiveChain } from '@/src/store/chains'
+import { isValidMasterCopy, isMigrationToL2Possible } from '@safe-global/utils/services/contracts/safeContracts'
 
 export const SettingsContainer = () => {
   const { chainId, address } = useDefinedActiveSafe()
@@ -19,6 +20,8 @@ export const SettingsContainer = () => {
     chainId: chainId,
     safeAddress: address,
   })
+
+  const isUnsupportedMasterCopy = !isValidMasterCopy(data.implementationVersionState) && isMigrationToL2Possible(data)
 
   const needsUpdate = data.implementationVersionState === 'OUTDATED'
   const isLatestVersion = data.version && !needsUpdate
@@ -42,6 +45,7 @@ export const SettingsContainer = () => {
       contact={contact}
       isLatestVersion={!!isLatestVersion}
       latestSafeVersion={latestSafeVersion}
+      isUnsupportedMasterCopy={isUnsupportedMasterCopy}
     />
   )
 }

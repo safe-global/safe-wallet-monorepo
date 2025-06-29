@@ -12,6 +12,7 @@ import { IdenticonWithBadge } from '@/src/features/Settings/components/Identicon
 
 import { Navbar } from '@/src/features/Settings/components/Navbar/Navbar'
 import { type Contact } from '@/src/store/addressBookSlice'
+import { Alert2 } from '@/src/components/Alert2'
 
 interface SettingsProps {
   data: SafeState
@@ -21,6 +22,7 @@ interface SettingsProps {
   contact: Contact | null
   isLatestVersion: boolean
   latestSafeVersion: string
+  isUnsupportedMasterCopy: boolean
 }
 
 export const Settings = ({
@@ -31,6 +33,7 @@ export const Settings = ({
   contact,
   isLatestVersion,
   latestSafeVersion,
+  isUnsupportedMasterCopy,
 }: SettingsProps) => {
   const { owners = [], threshold, implementation } = data
   const colorScheme = useColorScheme()
@@ -197,6 +200,17 @@ export const Settings = ({
                 {implementation?.name} {isLatestVersion ? `(Latest version)` : `(Latest version: ${latestSafeVersion})`}
               </Text>
             </Pressable>
+
+            {isUnsupportedMasterCopy && (
+              <View flex={1} padding="$5">
+                <Alert2
+                  type="warning"
+                  message="Your Safe Account's base contract is not supported. You should migrate it to a compatible
+              version. Use the web app for this."
+                  title="Base contract is not supported"
+                />
+              </View>
+            )}
           </YStack>
         </ScrollView>
       </Theme>
