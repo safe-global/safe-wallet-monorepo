@@ -59,7 +59,6 @@ describe('Remove Owners tests', () => {
     owner.verifyOwnerDeletionWindowDisplayed()
     createTx.changeNonce(10)
     createTx.clickOnContinueSignTransactionBtn()
-    createTx.clickOnAcknowledgement()
     createTx.clickOnSignTransactionBtn()
     createTx.waitForProposeRequest()
     createTx.clickViewTransaction()
