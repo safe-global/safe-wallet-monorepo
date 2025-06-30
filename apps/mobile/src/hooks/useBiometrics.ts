@@ -1,4 +1,4 @@
-import { useState, useCallback, useLayoutEffect, useEffect, useRef } from 'react'
+import { useState, useCallback, useLayoutEffect } from 'react'
 import * as Keychain from 'react-native-keychain'
 import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
 import {
@@ -7,7 +7,7 @@ import {
   setBiometricsType,
   setUserAttempts,
 } from '@/src/store/biometricsSlice'
-import { Platform, Linking, AppState } from 'react-native'
+import { Platform, Linking } from 'react-native'
 import Logger from '@/src/utils/logger'
 import { RootState } from '../store'
 
@@ -21,7 +21,6 @@ export function useBiometrics() {
   // even when the app is in background then comes back to foreground
   // with biometrics enabled and the app settings was disabled
   // and the user has not interacted with config
-  const hasInteractedRef = useRef(false)
   const isEnabled = useAppSelector((state: RootState) => state.biometrics.isEnabled)
   const biometricsType = useAppSelector((state: RootState) => state.biometrics.type)
   const userAttempts = useAppSelector((state: RootState) => state.biometrics.userAttempts)
@@ -173,9 +172,6 @@ export function useBiometrics() {
 
   const toggleBiometricsFromUser = useCallback(
     async (newValue: boolean) => {
-      if (newValue) {
-        hasInteractedRef.current = true
-      }
       return toggleBiometrics(newValue, true)
     },
     [toggleBiometrics],
@@ -204,35 +200,6 @@ export function useBiometrics() {
     }
     checkBiometrics()
   }, [])
-
-  // Sync biometrics state when app becomes active
-  useEffect(() => {
-    const handleAppStateChange = async (nextAppState: string) => {
-      if (nextAppState === 'active') {
-        try {
-          const isSupported = await checkBiometricsSupport()
-          const { biometricsEnabled: isEnabledAtOSLevel } = await checkBiometricsOSSettingsStatus()
-
-          hasInteractedRef.current = false
-
-          // If biometrics is not available at OS level, disable it
-          if (!isSupported || !isEnabledAtOSLevel) {
-            await disableBiometrics()
-            return
-          }
-
-          if (hasInteractedRef.current) {
-            await enableBiometrics()
-          }
-        } catch (error) {
-          Logger.info('Error syncing biometrics state:', error)
-        }
-      }
-    }
-
-    const subscription = AppState.addEventListener('change', handleAppStateChange)
-    return () => subscription?.remove()
-  }, [checkBiometricsSupport, checkBiometricsOSSettingsStatus, toggleBiometrics])
 
   return {
     toggleBiometrics: toggleBiometricsFromUser,
