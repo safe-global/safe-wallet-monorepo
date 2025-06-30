@@ -117,7 +117,7 @@ const TxData = ({
   }
 
   if (isExecTxData(txData)) {
-    return <ExecTransaction data={txData} />
+    return <ExecTransaction data={txData} isExecuted={!!txDetails?.executedAt} />
   }
 
   if (isSafeUpdateTxData(txData)) {
