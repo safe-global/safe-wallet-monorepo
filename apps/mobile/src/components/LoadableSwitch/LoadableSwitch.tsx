@@ -1,6 +1,6 @@
 import React from 'react'
 import { Switch, StyleSheet } from 'react-native'
-import { View, Text } from 'tamagui'
+import { View } from 'tamagui'
 import { Loader } from '../Loader'
 
 interface LoadableSwitchProps {
