@@ -75,12 +75,12 @@ export const SafeButton = styled(Button, {
     size: {
       $md: () => ({
         height: 'auto',
-        paddingVertical: 14,
+        paddingVertical: 16,
         paddingHorizontal: 20,
         margin: 0,
-        fontWeight: 600,
+        fontWeight: 700,
         letterSpacing: -0.1,
-        fontSize: 14,
+        fontSize: 16,
         scaleIcon: 0.9,
         scaleSpace: 0.3,
         textProps: {
