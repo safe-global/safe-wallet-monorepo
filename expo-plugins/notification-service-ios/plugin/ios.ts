@@ -10,6 +10,7 @@ import * as fs from 'fs'
 import * as path from 'path'
 import {
   APP_VERSION_STRING,
+  APP_GROUPS_PLACEHOLDER,
   BACKGROUND_MODES_TO_ENABLE,
   BUNDLE_IDENTIFIER_STRING,
   DEFAULT_APP_VERSION,
@@ -19,6 +20,7 @@ import {
   EXTENSION_SERVICE_NAME,
   FILES_TO_ADD,
   IOS_BUILD_NUMBER_STRING,
+  NOTIFICATION_APP_GROUP_IDENTIFIER_STRING,
   PODFILE_MODIF_NEEDED,
   PODFILE_TARGET_STRING,
   TARGET_DEVICES,
@@ -99,7 +101,21 @@ const addNotificationServiceFilesToProject: ConfigPlugin<NotifeeExpoPluginProps>
             file = file.replace(APP_VERSION_STRING, appVersion)
             file = file.replace(IOS_BUILD_NUMBER_STRING, buildNumber)
           } else if (fileName === EXTENSION_SERVICE_NAME + '.entitlements') {
-            file = file.replace(BUNDLE_IDENTIFIER_STRING, bundleIdentifier)
+            // Build the app groups array for entitlements
+            const defaultNotifeeGroup = bundleIdentifier
+            const mainAppGroup = props.appGroupIdentifier || `group.${config.ios?.bundleIdentifier}`
+            const additionalGroups = props.additionalAppGroups || []
+
+            // Combine all app groups (notifee group + main app group + additional groups)
+            const allAppGroups = [defaultNotifeeGroup, mainAppGroup, ...additionalGroups]
+
+            // Remove duplicates
+            const uniqueAppGroups = Array.from(new Set(allAppGroups))
+
+            // Generate the XML string for app groups
+            const appGroupsXml = uniqueAppGroups.map((group) => `\t\t<string>${group}</string>`).join('\n')
+
+            file = file.replace(APP_GROUPS_PLACEHOLDER, appGroupsXml)
           }
           fs.writeFileSync(pathWhereToWrite, file)
         }
@@ -127,7 +143,15 @@ const addNotificationServiceFilesToProject: ConfigPlugin<NotifeeExpoPluginProps>
           : path.join(serviceExtensionFilesFolderPath, EXTENSION_SERVICE_FILE)
         const pathWhereToWriteNotificationService = path.join(p, EXTENSION_SERVICE_NAME, EXTENSION_SERVICE_FILE)
 
-        const notificationServiceFile = fs.readFileSync(notificationServicePath)
+        // Determine the app group identifier to use
+        const appGroupIdentifier = props.appGroupIdentifier || `group.${config.ios?.bundleIdentifier}`
+
+        let notificationServiceFile = fs.readFileSync(notificationServicePath, 'utf8')
+        // Replace the app group identifier placeholder
+        notificationServiceFile = notificationServiceFile.replaceAll(
+          NOTIFICATION_APP_GROUP_IDENTIFIER_STRING,
+          appGroupIdentifier,
+        )
         fs.writeFileSync(pathWhereToWriteNotificationService, notificationServiceFile)
 
         log('Added NotificationService files!')
