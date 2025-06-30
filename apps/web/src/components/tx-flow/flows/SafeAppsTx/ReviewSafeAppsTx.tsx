@@ -40,8 +40,12 @@ const ReviewSafeAppsTx = ({
       return tx
     }
 
-    createSafeTx().then(setSafeTx).catch(setSafeTxError)
-    setTxOrigin(getTxOrigin(app))
+    createSafeTx()
+      .then((tx) => {
+        setSafeTx(tx)
+        setTxOrigin(getTxOrigin(app))
+      })
+      .catch(setSafeTxError)
   }, [txs, setSafeTx, setSafeTxError, setTxOrigin, app, params])
 
   const error = !isTxValid(txs)
