@@ -102,7 +102,6 @@ export function useBiometrics() {
       setIsLoading(true)
 
       try {
-        await new Promise((resolve) => setTimeout(resolve, 3000))
         const isSupported = await checkBiometricsSupport()
         const { biometricsEnabled: isEnabledAtOSLevel } = await checkBiometricsOSSettingsStatus()
 
