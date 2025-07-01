@@ -75,7 +75,7 @@ exports[`TxSettingCard should render the default markup 1`] = `
             ]
           }
         >
-          
+          
         </Text>
       </View>
       <View>

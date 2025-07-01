@@ -145,7 +145,7 @@ exports[`TxBatchCard should render the default markup 1`] = `
                 ]
               }
             >
-              
+              
             </Text>
           </View>
         </View>
@@ -181,7 +181,7 @@ exports[`TxBatchCard should render the default markup 1`] = `
             }
             testID="safe-list-batch-icon"
           >
-            
+            
           </Text>
           <Text
             style={

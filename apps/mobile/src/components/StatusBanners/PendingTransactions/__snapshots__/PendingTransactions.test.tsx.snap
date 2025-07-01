@@ -149,7 +149,7 @@ exports[`PendingTransactions should render the pending transactions in fullWidth
               ]
             }
           >
-            
+            
           </Text>
         </View>
       </View>

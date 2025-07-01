@@ -156,7 +156,7 @@ exports[`StakingTxExitCard renders correctly 1`] = `
                 }
                 testID="logo-fallback-icon"
               >
-                
+                
               </Text>
             </View>
           </View>
@@ -193,7 +193,7 @@ exports[`StakingTxExitCard renders correctly 1`] = `
             }
             testID="safe-list-transaction-stake-icon"
           >
-            
+            
           </Text>
           <Text
             style={
