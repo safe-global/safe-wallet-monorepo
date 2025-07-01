@@ -14,9 +14,6 @@ import useTxPreview from '@/components/tx/confirmation-views/useTxPreview'
 import TxData from '../..'
 import { TxSimulation, TxSimulationMessage } from '@/components/tx/security/tenderly'
 import useSafeAddress from '@/hooks/useSafeAddress'
-import { isMultiSendTxInfo, isOrderTxInfo } from '@/utils/transaction-guards'
-import Multisend from '../../DecodedData/Multisend'
-import { ErrorBoundary } from '@sentry/react'
 
 const safeInterface = Safe__factory.createInterface()
 
@@ -49,11 +46,9 @@ const extractTransactionData = (data: string): SafeTransaction | undefined => {
 export const ExecTransaction = ({
   data,
   isConfirmationView = false,
-  isExecuted = false,
 }: {
   data?: TransactionData
   isConfirmationView?: boolean
-  isExecuted?: boolean
 }) => {
   const chain = useCurrentChain()
   const safeAddress = useSafeAddress()
@@ -76,15 +71,7 @@ export const ExecTransaction = ({
   )
 
   const decodedNestedTxDataBlock = txPreview ? (
-    <>
-      <TxData txData={txPreview.txData} txInfo={txPreview.txInfo} trusted imitation={false} />
-
-      {(isMultiSendTxInfo(txPreview.txInfo) || isOrderTxInfo(txPreview.txInfo)) && (
-        <ErrorBoundary fallback={<div>Error parsing data</div>}>
-          <Multisend txData={txPreview.txData} isExecuted={isExecuted} />
-        </ErrorBoundary>
-      )}
-    </>
+    <TxData txData={txPreview.txData} txInfo={txPreview.txInfo} trusted imitation={false} />
   ) : null
 
   return (

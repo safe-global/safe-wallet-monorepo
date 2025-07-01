@@ -56,8 +56,7 @@ const getConfirmationViewComponent = ({
   txInfo,
   txData,
   txFlow,
-  isExecuted,
-}: NarrowConfirmationViewProps & { txFlow?: ReactElement; isExecuted?: boolean }) => {
+}: NarrowConfirmationViewProps & { txFlow?: ReactElement }) => {
   if (txData && isManageSignersView(txInfo, txData)) return <ManageSigners txInfo={txInfo} txData={txData} />
 
   if (isChangeThresholdView(txInfo)) return <ChangeThreshold txInfo={txInfo} />
@@ -68,7 +67,7 @@ const getConfirmationViewComponent = ({
 
   if (isOnChainConfirmationTxData(txData)) return <OnChainConfirmation data={txData} isConfirmationView />
 
-  if (isExecTxData(txData)) return <ExecTransaction data={txData} isExecuted={isExecuted} isConfirmationView />
+  if (isExecTxData(txData)) return <ExecTransaction data={txData} isConfirmationView />
 
   if (isSwapOrderTxInfo(txInfo) || isTwapOrderTxInfo(txInfo)) return <SwapOrder txInfo={txInfo} txData={txData} />
 
@@ -119,7 +118,6 @@ const ConfirmationView = ({
       ? getConfirmationViewComponent({
           txInfo: details.txInfo,
           txData: details.txData,
-          isExecuted: !!txDetails?.executedAt,
           txFlow,
         })
       : undefined
