@@ -1,20 +1,18 @@
 export type IconName =
-  | 'face-id'
-  | 'magic'
-  | 'signature'
-  | 'star'
-  | 'twitter-x'
   | 'add-owner'
+  | 'address-book-empty-list'
   | 'address-book'
   | 'alert-triangle'
   | 'alert'
   | 'appearance'
   | 'apps'
+  | 'arrow-down-1'
   | 'arrow-down'
   | 'arrow-left'
+  | 'arrow-right'
   | 'arrow-sort'
   | 'arrow-up'
-  | 'arrow-right'
+  | 'arrrow-right'
   | 'batch'
   | 'bell'
   | 'block'
@@ -25,6 +23,7 @@ export type IconName =
   | 'camera'
   | 'chat'
   | 'check-filled'
+  | 'check-notifications'
   | 'check-oulined'
   | 'check'
   | 'chevron-down'
@@ -52,8 +51,11 @@ export type IconName =
   | 'external-link'
   | 'eye-n'
   | 'eye-off'
+  | 'eye-on'
+  | 'face-id'
   | 'file'
   | 'filter'
+  | 'fingerprint'
   | 'hardware'
   | 'home'
   | 'info'
@@ -63,6 +65,7 @@ export type IconName =
   | 'lightbulb'
   | 'link'
   | 'lock'
+  | 'magic'
   | 'mobile'
   | 'nft'
   | 'options-horizontal'
@@ -92,6 +95,8 @@ export type IconName =
   | 'shield-crossed'
   | 'shield'
   | 'sign'
+  | 'signature'
+  | 'star'
   | 'tag'
   | 'token'
   | 'transaction-batch'
@@ -105,6 +110,7 @@ export type IconName =
   | 'transaction-stake'
   | 'transaction-swap'
   | 'transactions'
+  | 'twitter-x'
   | 'unlock'
   | 'update'
   | 'upload'
@@ -112,22 +118,20 @@ export type IconName =
   | 'what-is-new'
 
 export const iconNames: IconName[] = [
-  'face-id',
-  'magic',
-  'signature',
-  'star',
-  'twitter-x',
   'add-owner',
+  'address-book-empty-list',
   'address-book',
   'alert-triangle',
   'alert',
   'appearance',
   'apps',
+  'arrow-down-1',
   'arrow-down',
   'arrow-left',
+  'arrow-right',
   'arrow-sort',
   'arrow-up',
-  'arrow-right',
+  'arrrow-right',
   'batch',
   'bell',
   'block',
@@ -138,6 +142,7 @@ export const iconNames: IconName[] = [
   'camera',
   'chat',
   'check-filled',
+  'check-notifications',
   'check-oulined',
   'check',
   'chevron-down',
@@ -165,8 +170,11 @@ export const iconNames: IconName[] = [
   'external-link',
   'eye-n',
   'eye-off',
+  'eye-on',
+  'face-id',
   'file',
   'filter',
+  'fingerprint',
   'hardware',
   'home',
   'info',
@@ -176,6 +184,7 @@ export const iconNames: IconName[] = [
   'lightbulb',
   'link',
   'lock',
+  'magic',
   'mobile',
   'nft',
   'options-horizontal',
@@ -205,6 +214,8 @@ export const iconNames: IconName[] = [
   'shield-crossed',
   'shield',
   'sign',
+  'signature',
+  'star',
   'tag',
   'token',
   'transaction-batch',
@@ -218,6 +229,7 @@ export const iconNames: IconName[] = [
   'transaction-stake',
   'transaction-swap',
   'transactions',
+  'twitter-x',
   'unlock',
   'update',
   'upload',
