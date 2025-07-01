@@ -7,6 +7,7 @@ import { isMultisigExecutionInfo } from '@/src/utils/transaction-guards'
 import { Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { Badge } from '../Badge'
 import { Tag } from '../Tag'
+import { ProposalBadge } from '../ProposalBadge'
 
 interface SafeListItemProps {
   type?: string
@@ -113,24 +114,6 @@ export function SafeListItem({
 
       {children}
     </Container>
-  )
-}
-
-const ProposalBadge = function ProposalBadge() {
-  return (
-    <Badge
-      circular={false}
-      content={
-        <View alignItems="center" flexDirection="row" gap="$1">
-          <SafeFontIcon size={12} name="info" />
-
-          <Text fontWeight={600} color={'$color'}>
-            Proposal
-          </Text>
-        </View>
-      }
-      themeName="badge_background"
-    />
   )
 }
 
