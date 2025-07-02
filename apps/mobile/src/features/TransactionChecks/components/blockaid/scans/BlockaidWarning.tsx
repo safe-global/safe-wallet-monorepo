@@ -5,9 +5,10 @@ import { BlockaidModuleResponse } from '@safe-global/utils/services/security/mod
 import { BlockaidMessage } from './BlockaidMessage'
 import { ContractChangeWarning } from './ContractChangeWarning'
 import { PoweredByBlockaid } from '../PoweredByBlockaid'
-import { Alert, AlertType } from '@/src/components/Alert'
+import { AlertType } from '@/src/components/Alert'
 import { BlockaidError } from '@/src/features/TransactionChecks/components/blockaid/scans/BlockaidError'
 import { ResultDescription } from '@/src/features/TransactionChecks/components/blockaid/ResultDescription'
+import { Alert2 } from '@/src/components/Alert2'
 
 type BlockaidWarningProps = {
   blockaidResponse?: {
@@ -39,17 +40,15 @@ export const BlockaidWarning = ({ blockaidResponse }: BlockaidWarningProps) => {
     <YStack gap="$3">
       {blockaidResponse.severity ? (
         <View>
-          <Alert
+          <Alert2
             type={type as AlertType}
             message={
-              <ResultDescription
-                classification={payload?.classification}
-                reason={payload?.reason}
-                description={payload?.description}
-              />
-            }
-            info={
               <>
+                <ResultDescription
+                  classification={payload?.classification}
+                  reason={payload?.reason}
+                  description={payload?.description}
+                />
                 <BlockaidMessage blockaidResponse={blockaidResponse} />
                 <PoweredByBlockaid />
               </>

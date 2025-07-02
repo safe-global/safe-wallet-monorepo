@@ -14,16 +14,16 @@ exports[`TxSettingCard should render the default markup 1`] = `
     onStartShouldSetResponder={[Function]}
     style={
       {
-        "alignItems": "center",
+        "alignItems": "flex-start",
         "backgroundColor": "#FFFFFF",
         "borderBottomLeftRadius": 7,
         "borderBottomRightRadius": 7,
         "borderTopLeftRadius": 7,
         "borderTopRightRadius": 7,
-        "flexDirection": "row",
+        "flexDirection": "column",
         "flexWrap": "wrap",
         "gap": 12,
-        "justifyContent": "space-between",
+        "justifyContent": "flex-start",
         "paddingBottom": 16,
         "paddingLeft": 16,
         "paddingRight": 16,
@@ -36,85 +36,96 @@ exports[`TxSettingCard should render the default markup 1`] = `
         {
           "alignItems": "center",
           "flexDirection": "row",
-          "gap": 12,
-          "maxWidth": "100%",
+          "justifyContent": "space-between",
+          "width": "100%",
         }
       }
     >
       <View
         style={
           {
-            "backgroundColor": "#EEEFF0",
-            "borderBottomLeftRadius": 100,
-            "borderBottomRightRadius": 100,
-            "borderTopLeftRadius": 100,
-            "borderTopRightRadius": 100,
-            "paddingBottom": 8,
-            "paddingLeft": 8,
-            "paddingRight": 8,
-            "paddingTop": 8,
+            "alignItems": "center",
+            "flexDirection": "row",
+            "gap": 12,
+            "maxWidth": "100%",
           }
         }
       >
-        <Text
-          allowFontScaling={false}
-          selectable={false}
-          style={
-            [
-              {
-                "color": "#121312",
-                "fontSize": 24,
-              },
-              undefined,
-              {
-                "fontFamily": "SafeIcons",
-                "fontStyle": "normal",
-                "fontWeight": "normal",
-              },
-              {},
-            ]
-          }
-        >
-          
-        </Text>
-      </View>
-      <View>
         <View
           style={
             {
-              "alignItems": "center",
-              "flexDirection": "row",
-              "gap": 4,
-              "marginBottom": 4,
+              "backgroundColor": "#EEEFF0",
+              "borderBottomLeftRadius": 100,
+              "borderBottomRightRadius": 100,
+              "borderTopLeftRadius": 100,
+              "borderTopRightRadius": 100,
+              "paddingBottom": 8,
+              "paddingLeft": 8,
+              "paddingRight": 8,
+              "paddingTop": 8,
             }
           }
         >
           <Text
+            allowFontScaling={false}
+            selectable={false}
+            style={
+              [
+                {
+                  "color": "#121312",
+                  "fontSize": 24,
+                },
+                undefined,
+                {
+                  "fontFamily": "SafeIcons",
+                  "fontStyle": "normal",
+                  "fontWeight": "normal",
+                },
+                {},
+              ]
+            }
+          >
+            
+          </Text>
+        </View>
+        <View>
+          <View
             style={
               {
-                "color": "#A1A3A7",
-                "fontFamily": "DM Sans",
-                "fontSize": 13,
-                "marginBottom": 2,
+                "alignItems": "center",
+                "flexDirection": "row",
+                "gap": 4,
+                "marginBottom": 4,
+              }
+            }
+          >
+            <Text
+              style={
+                {
+                  "color": "#A1A3A7",
+                  "fontFamily": "DM Sans",
+                  "fontSize": 13,
+                  "marginBottom": 2,
+                }
+              }
+              suppressHighlighting={true}
+            >
+              Settings change
+            </Text>
+          </View>
+          <Text
+            style={
+              {
+                "color": "#121312",
+                "fontFamily": "DMSans-SemiBold",
+                "fontSize": 14,
               }
             }
             suppressHighlighting={true}
           >
-            Settings change
+            mockMethod
           </Text>
         </View>
-        <Text
-          style={
-            {
-              "color": "#121312",
-              "fontFamily": "DMSans-SemiBold",
-              "fontSize": 14,
-            }
-          }
-          suppressHighlighting={true}
-        >
-          mockMethod
-        </Text>
       </View>
     </View>
   </View>

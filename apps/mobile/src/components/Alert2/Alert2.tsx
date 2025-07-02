@@ -25,8 +25,8 @@ const icons = {
 
 export interface Alert2Props {
   type: AlertType
-  title: string
-  message: string
+  title?: string
+  message: string | React.ReactNode
   iconName?: IconName
   testID?: string
 }
@@ -51,12 +51,18 @@ export const Alert2 = ({ type, title, message, iconName, testID }: Alert2Props) 
         </View>
 
         <View flex={1} gap="$1">
-          <Text fontSize="$4" fontWeight="600" fontFamily="$body">
-            {title}
-          </Text>
-          <Text fontSize="$3" fontFamily="$body">
-            {message}
-          </Text>
+          {title && (
+            <Text fontSize="$4" fontWeight="600" fontFamily="$body">
+              {title}
+            </Text>
+          )}
+          {typeof message === 'string' ? (
+            <Text fontSize="$3" fontFamily="$body">
+              {message}
+            </Text>
+          ) : (
+            message
+          )}
         </View>
       </View>
     </Theme>

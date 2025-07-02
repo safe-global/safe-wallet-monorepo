@@ -14,16 +14,16 @@ exports[`TxBatchCard should render the default markup 1`] = `
     onStartShouldSetResponder={[Function]}
     style={
       {
-        "alignItems": "center",
+        "alignItems": "flex-start",
         "backgroundColor": "#FFFFFF",
         "borderBottomLeftRadius": 7,
         "borderBottomRightRadius": 7,
         "borderTopLeftRadius": 7,
         "borderTopRightRadius": 7,
-        "flexDirection": "row",
+        "flexDirection": "column",
         "flexWrap": "wrap",
         "gap": 12,
-        "justifyContent": "space-between",
+        "justifyContent": "flex-start",
         "paddingBottom": 16,
         "paddingLeft": 16,
         "paddingRight": 16,
@@ -36,8 +36,8 @@ exports[`TxBatchCard should render the default markup 1`] = `
         {
           "alignItems": "center",
           "flexDirection": "row",
-          "gap": 12,
-          "maxWidth": "100%",
+          "justifyContent": "space-between",
+          "width": "100%",
         }
       }
     >
@@ -45,84 +45,129 @@ exports[`TxBatchCard should render the default markup 1`] = `
         style={
           {
             "alignItems": "center",
-            "borderBottomLeftRadius": 100000,
-            "borderBottomRightRadius": 100000,
-            "borderTopLeftRadius": 100000,
-            "borderTopRightRadius": 100000,
-            "flexDirection": "column",
-            "height": 40,
-            "justifyContent": "center",
-            "maxHeight": 40,
-            "maxWidth": 40,
-            "minHeight": 40,
-            "minWidth": 40,
-            "overflow": "hidden",
-            "paddingBottom": 0,
-            "paddingLeft": 0,
-            "paddingRight": 0,
-            "paddingTop": 0,
-            "position": "relative",
-            "width": 40,
+            "flexDirection": "row",
+            "gap": 12,
+            "maxWidth": "100%",
           }
         }
       >
         <View
           style={
             {
-              "bottom": 0,
+              "alignItems": "center",
+              "borderBottomLeftRadius": 100000,
+              "borderBottomRightRadius": 100000,
+              "borderTopLeftRadius": 100000,
+              "borderTopRightRadius": 100000,
               "flexDirection": "column",
-              "left": 0,
-              "position": "absolute",
-              "right": 0,
-              "top": 0,
-              "zIndex": 1,
-            }
-          }
-        >
-          <Image
-            accessibilityLabel="Cam"
-            fullscreen={true}
-            onError={[Function]}
-            onLoad={[Function]}
-            source={
-              {
-                "uri": "http://myAsset.com/asset.png",
-              }
-            }
-            style={
-              {
-                "height": 40,
-                "width": 40,
-              }
-            }
-          />
-        </View>
-        <View
-          style={
-            {
-              "backgroundColor": "#DCDEE0",
-              "bottom": 0,
-              "flexDirection": "column",
-              "left": 0,
-              "position": "absolute",
-              "right": 0,
-              "top": 0,
-              "zIndex": 0,
+              "height": 40,
+              "justifyContent": "center",
+              "maxHeight": 40,
+              "maxWidth": 40,
+              "minHeight": 40,
+              "minWidth": 40,
+              "overflow": "hidden",
+              "paddingBottom": 0,
+              "paddingLeft": 0,
+              "paddingRight": 0,
+              "paddingTop": 0,
+              "position": "relative",
+              "width": 40,
             }
           }
         >
           <View
             style={
               {
-                "backgroundColor": "#303033",
-                "borderBottomLeftRadius": 100,
-                "borderBottomRightRadius": 100,
-                "borderTopLeftRadius": 100,
-                "borderTopRightRadius": 100,
-                "paddingBottom": 8,
-                "paddingLeft": 8,
-                "paddingRight": 8,
-                "paddingTop": 8,
+                "bottom": 0,
+                "flexDirection": "column",
+                "left": 0,
+                "position": "absolute",
+                "right": 0,
+                "top": 0,
+                "zIndex": 1,
+              }
+            }
+          >
+            <Image
+              accessibilityLabel="Cam"
+              fullscreen={true}
+              onError={[Function]}
+              onLoad={[Function]}
+              source={
+                {
+                  "uri": "http://myAsset.com/asset.png",
+                }
+              }
+              style={
+                {
+                  "height": 40,
+                  "width": 40,
+                }
+              }
+            />
+          </View>
+          <View
+            style={
+              {
+                "backgroundColor": "#DCDEE0",
+                "bottom": 0,
+                "flexDirection": "column",
+                "left": 0,
+                "position": "absolute",
+                "right": 0,
+                "top": 0,
+                "zIndex": 0,
+              }
+            }
+          >
+            <View
+              style={
+                {
+                  "backgroundColor": "#303033",
+                  "borderBottomLeftRadius": 100,
+                  "borderBottomRightRadius": 100,
+                  "borderTopLeftRadius": 100,
+                  "borderTopRightRadius": 100,
+                  "paddingBottom": 8,
+                  "paddingLeft": 8,
+                  "paddingRight": 8,
+                  "paddingTop": 8,
+                }
+              }
+            >
+              <Text
+                allowFontScaling={false}
+                selectable={false}
+                style={
+                  [
+                    {
+                      "color": "#121312",
+                      "fontSize": 24,
+                    },
+                    undefined,
+                    {
+                      "fontFamily": "SafeIcons",
+                      "fontStyle": "normal",
+                      "fontWeight": "normal",
+                    },
+                    {},
+                  ]
+                }
+              >
+                
+              </Text>
+            </View>
+          </View>
+        </View>
+        <View>
+          <View
+            style={
+              {
+                "alignItems": "center",
+                "flexDirection": "row",
+                "gap": 4,
+                "marginBottom": 4,
               }
             }
           >
@@ -132,8 +177,8 @@ exports[`TxBatchCard should render the default markup 1`] = `
               style={
                 [
                   {
-                    "color": "#121312",
-                    "fontSize": 24,
+                    "color": "#A1A3A7",
+                    "fontSize": 10,
                   },
                   undefined,
                   {
@@ -144,71 +189,37 @@ exports[`TxBatchCard should render the default markup 1`] = `
                   {},
                 ]
               }
+              testID="safe-list-batch-icon"
             >
               
             </Text>
-          </View>
-        </View>
-      </View>
-      <View>
-        <View
-          style={
-            {
-              "alignItems": "center",
-              "flexDirection": "row",
-              "gap": 4,
-              "marginBottom": 4,
-            }
-          }
-        >
-          <Text
-            allowFontScaling={false}
-            selectable={false}
-            style={
-              [
+            <Text
+              style={
                 {
                   "color": "#A1A3A7",
-                  "fontSize": 10,
-                },
-                undefined,
-                {
-                  "fontFamily": "SafeIcons",
-                  "fontStyle": "normal",
-                  "fontWeight": "normal",
-                },
-                {},
-              ]
-            }
-            testID="safe-list-batch-icon"
-          >
-            
-          </Text>
+                  "fontFamily": "DM Sans",
+                  "fontSize": 13,
+                  "marginBottom": 2,
+                }
+              }
+              suppressHighlighting={true}
+            >
+              Batch
+            </Text>
+          </View>
           <Text
             style={
               {
-                "color": "#A1A3A7",
-                "fontFamily": "DM Sans",
-                "fontSize": 13,
-                "marginBottom": 2,
+                "color": "#121312",
+                "fontFamily": "DMSans-SemiBold",
+                "fontSize": 14,
               }
             }
             suppressHighlighting={true}
           >
-            Batch
+            2 actions
           </Text>
         </View>
-        <Text
-          style={
-            {
-              "color": "#121312",
-              "fontFamily": "DMSans-SemiBold",
-              "fontSize": 14,
-            }
-          }
-          suppressHighlighting={true}
-        >
-          2 actions
-        </Text>
       </View>
     </View>
   </View>

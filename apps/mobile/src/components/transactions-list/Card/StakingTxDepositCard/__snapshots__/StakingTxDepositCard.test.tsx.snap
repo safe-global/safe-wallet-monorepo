@@ -5,16 +5,16 @@ exports[`StakingTxDepositCard renders correctly 1`] = `
   <View
     style={
       {
-        "alignItems": "center",
+        "alignItems": "flex-start",
         "backgroundColor": "#FFFFFF",
         "borderBottomLeftRadius": 7,
         "borderBottomRightRadius": 7,
         "borderTopLeftRadius": 7,
         "borderTopRightRadius": 7,
-        "flexDirection": "row",
+        "flexDirection": "column",
         "flexWrap": "wrap",
         "gap": 12,
-        "justifyContent": "space-between",
+        "justifyContent": "flex-start",
         "paddingBottom": 16,
         "paddingLeft": 16,
         "paddingRight": 16,
@@ -27,49 +27,24 @@ exports[`StakingTxDepositCard renders correctly 1`] = `
         {
           "alignItems": "center",
           "flexDirection": "row",
-          "gap": 12,
-          "maxWidth": "55%",
+          "justifyContent": "space-between",
+          "width": "100%",
         }
       }
     >
       <View
         style={
           {
-            "width": 40,
+            "alignItems": "center",
+            "flexDirection": "row",
+            "gap": 12,
+            "maxWidth": "55%",
           }
         }
       >
         <View
           style={
             {
-              "position": "absolute",
-              "right": -10,
-              "top": -10,
-              "zIndex": 1,
-            }
-          }
-        />
-        <View
-          style={
-            {
-              "alignItems": "center",
-              "borderBottomLeftRadius": 100000,
-              "borderBottomRightRadius": 100000,
-              "borderTopLeftRadius": 100000,
-              "borderTopRightRadius": 100000,
-              "flexDirection": "column",
-              "height": 40,
-              "justifyContent": "center",
-              "maxHeight": 40,
-              "maxWidth": 40,
-              "minHeight": 40,
-              "minWidth": 40,
-              "overflow": "hidden",
-              "paddingBottom": 0,
-              "paddingLeft": 0,
-              "paddingRight": 0,
-              "paddingTop": 0,
-              "position": "relative",
               "width": 40,
             }
           }
@@ -77,165 +52,201 @@ exports[`StakingTxDepositCard renders correctly 1`] = `
           <View
             style={
               {
-                "bottom": 0,
-                "flexDirection": "column",
-                "left": 0,
                 "position": "absolute",
-                "right": 0,
-                "top": 0,
+                "right": -10,
+                "top": -10,
                 "zIndex": 1,
               }
             }
-          >
-            <Image
-              accessibilityLabel="ETH"
-              fullscreen={true}
-              onError={[Function]}
-              onLoad={[Function]}
-              source={
-                {
-                  "uri": "https://example.com/eth-logo.png",
-                }
-              }
-              style={
-                {
-                  "backgroundColor": "#121312",
-                  "height": 40,
-                  "width": 40,
-                }
-              }
-              testID="logo-image"
-            />
-          </View>
+          />
           <View
             style={
               {
-                "backgroundColor": "#EEEFF0",
-                "bottom": 0,
+                "alignItems": "center",
+                "borderBottomLeftRadius": 100000,
+                "borderBottomRightRadius": 100000,
+                "borderTopLeftRadius": 100000,
+                "borderTopRightRadius": 100000,
                 "flexDirection": "column",
-                "left": 0,
-                "position": "absolute",
-                "right": 0,
-                "top": 0,
-                "zIndex": 0,
+                "height": 40,
+                "justifyContent": "center",
+                "maxHeight": 40,
+                "maxWidth": 40,
+                "minHeight": 40,
+                "minWidth": 40,
+                "overflow": "hidden",
+                "paddingBottom": 0,
+                "paddingLeft": 0,
+                "paddingRight": 0,
+                "paddingTop": 0,
+                "position": "relative",
+                "width": 40,
               }
             }
           >
             <View
               style={
                 {
-                  "backgroundColor": "#EEEFF0",
-                  "borderBottomLeftRadius": 100,
-                  "borderBottomRightRadius": 100,
-                  "borderTopLeftRadius": 100,
-                  "borderTopRightRadius": 100,
-                  "paddingBottom": 8,
-                  "paddingLeft": 8,
-                  "paddingRight": 8,
-                  "paddingTop": 8,
+                  "bottom": 0,
+                  "flexDirection": "column",
+                  "left": 0,
+                  "position": "absolute",
+                  "right": 0,
+                  "top": 0,
+                  "zIndex": 1,
                 }
               }
             >
-              <Text
-                allowFontScaling={false}
-                selectable={false}
-                style={
-                  [
-                    {
-                      "color": "#A1A3A7",
-                      "fontSize": 24,
-                    },
-                    undefined,
-                    {
-                      "fontFamily": "SafeIcons",
-                      "fontStyle": "normal",
-                      "fontWeight": "normal",
-                    },
-                    {},
-                  ]
+              <Image
+                accessibilityLabel="ETH"
+                fullscreen={true}
+                onError={[Function]}
+                onLoad={[Function]}
+                source={
+                  {
+                    "uri": "https://example.com/eth-logo.png",
+                  }
                 }
-                testID="logo-fallback-icon"
+                style={
+                  {
+                    "backgroundColor": "#121312",
+                    "height": 40,
+                    "width": 40,
+                  }
+                }
+                testID="logo-image"
+              />
+            </View>
+            <View
+              style={
+                {
+                  "backgroundColor": "#EEEFF0",
+                  "bottom": 0,
+                  "flexDirection": "column",
+                  "left": 0,
+                  "position": "absolute",
+                  "right": 0,
+                  "top": 0,
+                  "zIndex": 0,
+                }
+              }
+            >
+              <View
+                style={
+                  {
+                    "backgroundColor": "#EEEFF0",
+                    "borderBottomLeftRadius": 100,
+                    "borderBottomRightRadius": 100,
+                    "borderTopLeftRadius": 100,
+                    "borderTopRightRadius": 100,
+                    "paddingBottom": 8,
+                    "paddingLeft": 8,
+                    "paddingRight": 8,
+                    "paddingTop": 8,
+                  }
+                }
               >
-                
-              </Text>
+                <Text
+                  allowFontScaling={false}
+                  selectable={false}
+                  style={
+                    [
+                      {
+                        "color": "#A1A3A7",
+                        "fontSize": 24,
+                      },
+                      undefined,
+                      {
+                        "fontFamily": "SafeIcons",
+                        "fontStyle": "normal",
+                        "fontWeight": "normal",
+                      },
+                      {},
+                    ]
+                  }
+                  testID="logo-fallback-icon"
+                >
+                  
+                </Text>
+              </View>
             </View>
           </View>
         </View>
-      </View>
-      <View>
-        <View
-          style={
-            {
-              "alignItems": "center",
-              "flexDirection": "row",
-              "gap": 4,
-              "marginBottom": 4,
-            }
-          }
-        >
-          <Text
-            allowFontScaling={false}
-            selectable={false}
+        <View>
+          <View
             style={
-              [
+              {
+                "alignItems": "center",
+                "flexDirection": "row",
+                "gap": 4,
+                "marginBottom": 4,
+              }
+            }
+          >
+            <Text
+              allowFontScaling={false}
+              selectable={false}
+              style={
+                [
+                  {
+                    "color": "#A1A3A7",
+                    "fontSize": 10,
+                  },
+                  undefined,
+                  {
+                    "fontFamily": "SafeIcons",
+                    "fontStyle": "normal",
+                    "fontWeight": "normal",
+                  },
+                  {},
+                ]
+              }
+              testID="safe-list-transaction-stake-icon"
+            >
+              
+            </Text>
+            <Text
+              style={
                 {
                   "color": "#A1A3A7",
-                  "fontSize": 10,
-                },
-                undefined,
-                {
-                  "fontFamily": "SafeIcons",
-                  "fontStyle": "normal",
-                  "fontWeight": "normal",
-                },
-                {},
-              ]
-            }
-            testID="safe-list-transaction-stake-icon"
-          >
-            
-          </Text>
+                  "fontFamily": "DM Sans",
+                  "fontSize": 13,
+                  "marginBottom": 2,
+                }
+              }
+              suppressHighlighting={true}
+            >
+              Stake
+            </Text>
+          </View>
           <Text
             style={
               {
-                "color": "#A1A3A7",
-                "fontFamily": "DM Sans",
-                "fontSize": 13,
-                "marginBottom": 2,
+                "color": "#121312",
+                "fontFamily": "DMSans-SemiBold",
+                "fontSize": 14,
               }
             }
             suppressHighlighting={true}
           >
-            Stake
+            Deposit
           </Text>
         </View>
-        <Text
-          style={
-            {
-              "color": "#121312",
-              "fontFamily": "DMSans-SemiBold",
-              "fontSize": 14,
-            }
-          }
-          suppressHighlighting={true}
-        >
-          Deposit
-        </Text>
       </View>
-    </View>
-    <Text
-      style={
-        {
-          "color": "#121312",
-          "fontFamily": "DMSans-Bold",
+      <Text
+        style={
+          {
+            "color": "#121312",
+            "fontFamily": "DMSans-Bold",
+          }
         }
-      }
-      suppressHighlighting={true}
-    >
-      1
-       
-      ETH
-    </Text>
+        suppressHighlighting={true}
+      >
+        1
+         
+        ETH
+      </Text>
+    </View>
   </View>
 </View>
 `;

@@ -5,16 +5,16 @@ exports[`SafeListItem should render a list item with a custom label template 1`]
   <View
     style={
       {
-        "alignItems": "center",
+        "alignItems": "flex-start",
         "backgroundColor": "#FFFFFF",
         "borderBottomLeftRadius": 7,
         "borderBottomRightRadius": 7,
         "borderTopLeftRadius": 7,
         "borderTopRightRadius": 7,
-        "flexDirection": "row",
+        "flexDirection": "column",
         "flexWrap": "wrap",
         "gap": 12,
-        "justifyContent": "space-between",
+        "justifyContent": "flex-start",
         "paddingBottom": 16,
         "paddingLeft": 16,
         "paddingRight": 16,
@@ -27,82 +27,191 @@ exports[`SafeListItem should render a list item with a custom label template 1`]
         {
           "alignItems": "center",
           "flexDirection": "row",
-          "gap": 12,
-          "maxWidth": "100%",
+          "justifyContent": "space-between",
+          "width": "100%",
         }
       }
     >
-      <Text
+      <View
         style={
           {
-            "color": "#121312",
-            "fontFamily": "DM Sans",
+            "alignItems": "center",
+            "flexDirection": "row",
+            "gap": 12,
+            "maxWidth": "100%",
           }
         }
-        suppressHighlighting={true}
       >
-        Left node
-      </Text>
-      <View>
-        <View
+        <Text
           style={
             {
-              "alignItems": "center",
-              "flexDirection": "row",
-              "gap": 4,
-              "marginBottom": 4,
+              "color": "#121312",
+              "fontFamily": "DM Sans",
             }
           }
+          suppressHighlighting={true}
         >
-          <Text
-            allowFontScaling={false}
-            selectable={false}
-            style={
-              [
-                {
-                  "color": "#A1A3A7",
-                  "fontSize": 10,
-                },
-                undefined,
-                {
-                  "fontFamily": "SafeIcons",
-                  "fontStyle": "normal",
-                  "fontWeight": "normal",
-                },
-                {},
-              ]
-            }
-            testID="safe-list-add-owner-icon"
-          >
-            
-          </Text>
-          <Text
+          Left node
+        </Text>
+        <View>
+          <View
             style={
               {
-                "color": "#A1A3A7",
-                "fontFamily": "DM Sans",
-                "fontSize": 13,
-                "marginBottom": 2,
+                "alignItems": "center",
+                "flexDirection": "row",
+                "gap": 4,
+                "marginBottom": 4,
               }
             }
-            suppressHighlighting={true}
           >
-            some type
-          </Text>
+            <Text
+              allowFontScaling={false}
+              selectable={false}
+              style={
+                [
+                  {
+                    "color": "#A1A3A7",
+                    "fontSize": 10,
+                  },
+                  undefined,
+                  {
+                    "fontFamily": "SafeIcons",
+                    "fontStyle": "normal",
+                    "fontWeight": "normal",
+                  },
+                  {},
+                ]
+              }
+              testID="safe-list-add-owner-icon"
+            >
+              
+            </Text>
+            <Text
+              style={
+                {
+                  "color": "#A1A3A7",
+                  "fontFamily": "DM Sans",
+                  "fontSize": 13,
+                  "marginBottom": 2,
+                }
+              }
+              suppressHighlighting={true}
+            >
+              some type
+            </Text>
+          </View>
+          <View>
+            <Text
+              style={
+                {
+                  "color": "#121312",
+                  "fontFamily": "DM Sans",
+                }
+              }
+              suppressHighlighting={true}
+            >
+              Here is my label
+            </Text>
+          </View>
         </View>
+      </View>
+    </View>
+  </View>
+</View>
+`;
+
+exports[`SafeListItem should render bottomContent with proper styling and layout 1`] = `
+<View>
+  <View
+    style={
+      {
+        "alignItems": "flex-start",
+        "backgroundColor": "#FFFFFF",
+        "borderBottomLeftRadius": 7,
+        "borderBottomRightRadius": 7,
+        "borderTopLeftRadius": 7,
+        "borderTopRightRadius": 7,
+        "flexDirection": "column",
+        "flexWrap": "wrap",
+        "gap": 12,
+        "justifyContent": "flex-start",
+        "paddingBottom": 16,
+        "paddingLeft": 16,
+        "paddingRight": 16,
+        "paddingTop": 16,
+      }
+    }
+  >
+    <View
+      style={
+        {
+          "alignItems": "center",
+          "flexDirection": "row",
+          "justifyContent": "space-between",
+          "width": "100%",
+        }
+      }
+    >
+      <View
+        style={
+          {
+            "alignItems": "center",
+            "flexDirection": "row",
+            "gap": 12,
+            "maxWidth": "100%",
+          }
+        }
+      >
+        <Text
+          style={
+            {
+              "color": "#121312",
+              "fontFamily": "DM Sans",
+            }
+          }
+          suppressHighlighting={true}
+        >
+          Left node
+        </Text>
         <View>
           <Text
             style={
               {
                 "color": "#121312",
-                "fontFamily": "DM Sans",
+                "fontFamily": "DMSans-SemiBold",
+                "fontSize": 14,
               }
             }
             suppressHighlighting={true}
           >
-            Here is my label
+            A label
           </Text>
         </View>
+      </View>
+    </View>
+    <View
+      style={
+        {
+          "marginTop": 12,
+          "width": "100%",
+        }
+      }
+    >
+      <View
+        testID="bottom-content-container"
+      >
+        <Text
+          style={
+            {
+              "color": "#121312",
+              "fontFamily": "DM Sans",
+            }
+          }
+          suppressHighlighting={true}
+          testID="bottom-warning"
+        >
+          Transaction warning message
+        </Text>
       </View>
     </View>
   </View>
