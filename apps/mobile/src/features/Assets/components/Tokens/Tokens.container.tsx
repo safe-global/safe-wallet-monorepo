@@ -77,6 +77,7 @@ export function TokensContainer() {
       data={data?.items}
       renderItem={renderItem}
       keyExtractor={(item, index): string => item.tokenInfo.name + index}
+      style={{ marginTop: 8 }}
     />
   )
 }

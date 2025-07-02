@@ -51,11 +51,11 @@ export const badgeTheme = {
   },
   dark_badge_background: {
     color: tokens.color.textPrimaryDark,
-    background: tokens.color.logoBackgroundDark,
+    background: tokens.color.backgroundSecondaryLight,
   },
   light_badge_background: {
     color: tokens.color.textPrimaryLight,
-    background: tokens.color.logoBackgroundLight,
+    background: tokens.color.backgroundSecondaryLight,
     borderColor: tokens.color.logoBackgroundLight,
   },
   light_badge_error: {

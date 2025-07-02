@@ -60,6 +60,7 @@ export function NFTsContainer() {
       renderItem={NFTItem}
       ListFooterComponent={isFetching ? <Loader size={24} /> : undefined}
       keyExtractor={(item) => item.id}
+      style={{ marginTop: 8 }}
     />
   )
 }
