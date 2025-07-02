@@ -6,6 +6,7 @@ import {
   TransactionData,
   TransactionDetails,
   TransferTransactionInfo,
+  VaultDepositTransactionInfo,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { TokenTransfer } from '../confirmation-views/TokenTransfer'
 import { AddSigner } from '../confirmation-views/AddSigner'
@@ -18,6 +19,8 @@ import { OrderTransactionInfo } from '@safe-global/store/gateway/types'
 import { RemoveSigner } from '../confirmation-views/RemoveSigner'
 import { GenericView } from '../confirmation-views/GenericView'
 import { NormalizedSettingsChangeTransaction } from './types'
+import { VaultDeposit } from '@/src/features/ConfirmTx/components/confirmation-views/VaultDeposit'
+
 interface ConfirmationViewProps {
   txDetails: TransactionDetails
 }
@@ -73,6 +76,14 @@ export function ConfirmationView({ txDetails }: ConfirmationViewProps) {
           txId={txDetails.txId}
           executionInfo={txDetails.detailedExecutionInfo as MultisigExecutionDetails}
           txInfo={txDetails.txInfo as CustomTransactionInfo}
+        />
+      )
+    case ETxType.EARN_DEPOSIT:
+      return (
+        <VaultDeposit
+          txId={txDetails.txId}
+          executionInfo={txDetails.detailedExecutionInfo as MultisigExecutionDetails}
+          txInfo={txDetails.txInfo as VaultDepositTransactionInfo}
         />
       )
     default:
