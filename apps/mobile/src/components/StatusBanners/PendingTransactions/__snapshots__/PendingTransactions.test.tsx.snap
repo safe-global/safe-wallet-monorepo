@@ -58,10 +58,10 @@ exports[`PendingTransactions should render the pending transactions in fullWidth
             "flexDirection": "row",
             "gap": 12,
             "justifyContent": "center",
-            "paddingBottom": 12,
-            "paddingLeft": 16,
-            "paddingRight": 16,
-            "paddingTop": 12,
+            "paddingBottom": 8,
+            "paddingLeft": 8,
+            "paddingRight": 8,
+            "paddingTop": 8,
             "width": "100%",
           }
         }
@@ -79,17 +79,17 @@ exports[`PendingTransactions should render the pending transactions in fullWidth
                 "borderTopLeftRadius": 100000,
                 "borderTopRightRadius": 100000,
                 "flexDirection": "column",
-                "height": 28,
+                "height": 24,
                 "justifyContent": "center",
-                "maxHeight": 28,
-                "maxWidth": 28,
-                "minHeight": 28,
-                "minWidth": 28,
+                "maxHeight": 24,
+                "maxWidth": 24,
+                "minHeight": 24,
+                "minWidth": 24,
                 "paddingBottom": 0,
                 "paddingLeft": 0,
                 "paddingRight": 0,
                 "paddingTop": 0,
-                "width": 28,
+                "width": 24,
               }
             }
           >
@@ -97,7 +97,7 @@ exports[`PendingTransactions should render the pending transactions in fullWidth
               style={
                 {
                   "color": "#121312",
-                  "fontFamily": "DM Sans",
+                  "fontFamily": "DMSans-SemiBold",
                   "fontSize": 14,
                 }
               }
