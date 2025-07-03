@@ -191,9 +191,9 @@ exports[`VaultTxDepositCard renders correctly 1`] = `
                 {},
               ]
             }
-            testID="safe-list-transaction-stake-icon"
+            testID="safe-list-transaction-earn-icon"
           >
-            
+            
           </Text>
           <Text
             style={

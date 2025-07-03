@@ -193,7 +193,7 @@ exports[`StakingTxDepositCard renders correctly 1`] = `
             }
             testID="safe-list-transaction-stake-icon"
           >
-            
+            
           </Text>
           <Text
             style={
