@@ -51,7 +51,7 @@ export const badgeTheme = {
   },
   dark_badge_background: {
     color: tokens.color.textPrimaryDark,
-    background: tokens.color.backgroundSecondaryLight,
+    background: tokens.color.backgroundSecondaryDark,
   },
   light_badge_background: {
     color: tokens.color.textPrimaryLight,
