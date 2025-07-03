@@ -39,11 +39,11 @@ export const getTransactionType = ({ txInfo }: { txInfo: Transaction['txInfo'] }
   }
 
   if (isVaultDepositTxInfo(txInfo)) {
-    return ETxType.EARN_DEPOSIT
+    return ETxType.VAULT_DEPOSIT
   }
 
   if (isVaultRedeemTxInfo(txInfo)) {
-    return ETxType.EARN_REDEEM
+    return ETxType.VAULT_REDEEM
   }
 
   return null

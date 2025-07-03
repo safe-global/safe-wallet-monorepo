@@ -78,7 +78,7 @@ export function ConfirmationView({ txDetails }: ConfirmationViewProps) {
           txInfo={txDetails.txInfo as CustomTransactionInfo}
         />
       )
-    case ETxType.EARN_DEPOSIT:
+    case ETxType.VAULT_DEPOSIT:
       return (
         <VaultDeposit
           txId={txDetails.txId}
