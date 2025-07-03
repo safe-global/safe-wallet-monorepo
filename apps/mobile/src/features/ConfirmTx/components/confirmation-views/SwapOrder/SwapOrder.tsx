@@ -12,7 +12,7 @@ import { isTwapOrderTxInfo } from '@/src/utils/transaction-guards'
 import { isSettingTwapFallbackHandler } from '@safe-global/utils/features/swap/helpers/utils'
 import { TwapFallbackHandlerWarning } from '@/src/features/ConfirmTx/components/confirmation-views/SwapOrder/TwapFallbackHandlerWarning'
 import { Alert2 } from '@/src/components/Alert2'
-import { useRecipientItems } from './hooks'
+import { useRecipientItem } from './hooks'
 
 interface SwapOrderProps {
   executionInfo: MultisigExecutionDetails
@@ -36,7 +36,7 @@ export function SwapOrder({ executionInfo, txInfo, decodedData }: SwapOrderProps
 
   const isChangingFallbackHandler = decodedData && isSettingTwapFallbackHandler(decodedData)
 
-  const recipientItems = useRecipientItems(order)
+  const recipientItems = useRecipientItem(order)
 
   const showRecipientWarning = order.receiver && order.owner !== order.receiver
 

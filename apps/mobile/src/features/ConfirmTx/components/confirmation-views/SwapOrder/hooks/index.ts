@@ -1,1 +1,1 @@
-export { useRecipientItems } from './useRecipientItems'
+export { useRecipientItem } from './useRecipientItem'

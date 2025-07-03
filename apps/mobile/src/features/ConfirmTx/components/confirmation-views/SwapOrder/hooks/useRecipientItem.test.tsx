@@ -1,5 +1,5 @@
 import React from 'react'
-import { useRecipientItems } from './useRecipientItems'
+import { useRecipientItem } from './useRecipientItem'
 import { OrderTransactionInfo } from '@safe-global/store/gateway/types'
 
 // Mock the useOpenExplorer hook
@@ -79,7 +79,7 @@ const createMockOrder = (
   },
 })
 
-describe('useRecipientItems', () => {
+describe('useRecipientItem', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     // Mock useMemo to return the result of the callback immediately
@@ -89,7 +89,7 @@ describe('useRecipientItems', () => {
   it('should return empty array when receiver is undefined', () => {
     const mockOrder = createMockOrder()
 
-    const result = useRecipientItems(mockOrder)
+    const result = useRecipientItem(mockOrder)
 
     expect(result).toEqual([])
   })
@@ -98,7 +98,7 @@ describe('useRecipientItems', () => {
     const owner = '0x1234567890123456789012345678901234567890'
     const mockOrder = createMockOrder(owner, owner)
 
-    const result = useRecipientItems(mockOrder)
+    const result = useRecipientItem(mockOrder)
 
     expect(result).toEqual([])
   })
@@ -108,7 +108,7 @@ describe('useRecipientItems', () => {
     const receiver = '0x9876543210987654321098765432109876543210'
     const mockOrder = createMockOrder(receiver, owner)
 
-    const result = useRecipientItems(mockOrder)
+    const result = useRecipientItem(mockOrder)
 
     expect(result).toHaveLength(1)
     expect(result[0]).toHaveProperty('label')
@@ -125,7 +125,7 @@ describe('useRecipientItems', () => {
 
     const { useOpenExplorer } = require('@/src/features/ConfirmTx/hooks/useOpenExplorer')
 
-    useRecipientItems(mockOrder)
+    useRecipientItem(mockOrder)
 
     expect(useOpenExplorer).toHaveBeenCalledWith(receiver)
   })
@@ -135,7 +135,7 @@ describe('useRecipientItems', () => {
 
     const { useOpenExplorer } = require('@/src/features/ConfirmTx/hooks/useOpenExplorer')
 
-    useRecipientItems(mockOrder)
+    useRecipientItem(mockOrder)
 
     expect(useOpenExplorer).toHaveBeenCalledWith('')
   })
@@ -146,7 +146,7 @@ describe('useRecipientItems', () => {
       receiver: null,
     } as OrderTransactionInfo & { receiver: null }
 
-    const result = useRecipientItems(mockOrder)
+    const result = useRecipientItem(mockOrder)
 
     expect(result).toEqual([])
   })
@@ -156,7 +156,7 @@ describe('useRecipientItems', () => {
     const receiver = '0x9876543210987654321098765432109876543210'
     const mockOrder = createMockOrder(receiver, owner)
 
-    const result = useRecipientItems(mockOrder)
+    const result = useRecipientItem(mockOrder)
 
     // Test the actual hook result structure
     expect(result).toHaveLength(1)
@@ -192,7 +192,7 @@ describe('useRecipientItems', () => {
     const receiver = '0x9876543210987654321098765432109876543210'
     const mockOrder = createMockOrder(receiver, owner)
 
-    useRecipientItems(mockOrder)
+    useRecipientItem(mockOrder)
 
     expect(mockUseMemo).toHaveBeenCalled()
     expect(mockUseMemo).toHaveBeenCalledWith(expect.any(Function), [
