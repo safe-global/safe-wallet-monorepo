@@ -175,7 +175,15 @@ function TxInfoComponent({ tx, bordered, inQueue, onPress }: TxInfoProps) {
   }
 
   if (isVaultRedeemTxInfo(txInfo)) {
-    return <VaultTxRedeemCard info={txInfo} />
+    return (
+      <VaultTxRedeemCard
+        info={txInfo}
+        onPress={onCardPress}
+        bordered={bordered}
+        executionInfo={tx.executionInfo}
+        inQueue={inQueue}
+      />
+    )
   }
 
   return <></>
