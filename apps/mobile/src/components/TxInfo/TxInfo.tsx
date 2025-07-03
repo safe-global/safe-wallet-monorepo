@@ -151,7 +151,7 @@ function TxInfoComponent({ tx, bordered, inQueue, onPress }: TxInfoProps) {
   }
 
   if (isStakingTxDepositInfo(txInfo)) {
-    return <StakingTxDepositCard info={txInfo} />
+    return <StakingTxDepositCard info={txInfo} onPress={onCardPress} />
   }
 
   if (isStakingTxExitInfo(txInfo)) {

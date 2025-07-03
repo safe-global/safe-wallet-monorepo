@@ -1,77 +1,76 @@
-import { Badge } from '@/src/components/Badge'
-import { Logo } from '@/src/components/Logo'
-import { SafeFontIcon } from '@/src/components/SafeFontIcon'
-import { ellipsis } from '@/src/utils/formatters'
+import { TokenAmount } from '@/src/components/TokenAmount'
+
+import { formatCurrency } from '@safe-global/utils/utils/formatNumber'
+import { formatDurationFromMilliseconds } from '@safe-global/utils/utils/formatters'
 import { Text, View } from 'tamagui'
+import { NativeStakingDepositTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { ListTableItem } from '../../ListTable'
 
-const MOCKED_LOGO = 'https://safe-transaction-assets.safe.global/chains/1/chain_logo.png'
+const CURRENCY = 'USD'
 
-// TODO: this function will be replaced for the staking item
-export const formatStakingItems = () => {
+export const stakingTypeToLabel = {
+  NativeStakingDeposit: 'Deposit',
+  NativeStakingValidatorsExit: 'Withdraw request',
+  NativeStakingWithdraw: 'Claim',
+} as const
+
+export const formatStakingDepositItems = (txInfo: NativeStakingDepositTransactionInfo): ListTableItem[] => {
+  // Fee is returned in decimal format, multiply by 100 for percentage
+  const fee = (txInfo.fee * 100).toFixed(2)
+
   return [
     {
       label: 'Rewards rate',
-      value: '1.27%',
+      value: `${txInfo.annualNrr.toFixed(3)}%`,
     },
     {
-      label: 'Surplus',
+      label: 'Net annual rewards',
       render: () => (
-        <View flexDirection="row" alignItems="center" gap="$2">
-          <Text>0.41ETH</Text>
-          <Text color="$textSecondaryLight">($1.089.25)</Text>
+        <View flexDirection="row" alignItems="center" gap="$1">
+          <TokenAmount
+            value={txInfo.expectedAnnualReward}
+            tokenSymbol={txInfo.tokenInfo.symbol}
+            decimals={txInfo.tokenInfo.decimals}
+            textProps={{ fontWeight: 400 }}
+          />
+          <Text color="$textSecondaryLight">({formatCurrency(txInfo.expectedFiatAnnualReward, CURRENCY)})</Text>
         </View>
       ),
     },
     {
-      label: 'Expiry',
+      label: 'Net monthly rewards',
       render: () => (
-        <View flexDirection="row" alignItems="center" gap="$2">
-          <Text>0.03 ETH</Text>
-          <Text color="$textSecondaryLight">($90.25)</Text>
+        <View flexDirection="row" alignItems="center" gap="$1">
+          <TokenAmount
+            value={txInfo.expectedMonthlyReward}
+            tokenSymbol={txInfo.tokenInfo.symbol}
+            decimals={txInfo.tokenInfo.decimals}
+            textProps={{ fontWeight: 400 }}
+          />
+          <Text color="$textSecondaryLight">({formatCurrency(txInfo.expectedFiatMonthlyReward, CURRENCY)})</Text>
         </View>
       ),
     },
     {
       label: 'Widget fee',
-      value: '0.07%',
+      value: `${fee}%`,
+    },
+  ]
+}
+
+export const formatStakingValidatorItems = (txInfo: NativeStakingDepositTransactionInfo): ListTableItem[] => {
+  return [
+    {
+      label: 'Validator',
+      value: `${txInfo.numValidators}`,
     },
     {
-      label: 'Contract',
-      render: () => (
-        <View flexDirection="row" alignItems="center" gap="$2">
-          <Logo logoUri={MOCKED_LOGO} size="$6" />
-          <Text fontSize="$4">{ellipsis(' Kiln Vault (Aave V3 USDC)', 10)}</Text>
-          <SafeFontIcon name="copy" size={14} color="$textSecondaryLight" />
-          <SafeFontIcon name="external-link" size={14} color="$textSecondaryLight" />
-        </View>
-      ),
+      label: 'Activation time',
+      value: formatDurationFromMilliseconds(txInfo.estimatedEntryTime),
     },
     {
-      label: 'Network',
-      render: () => (
-        <View flexDirection="row" alignItems="center" gap="$2">
-          <Logo logoUri={MOCKED_LOGO} size="$6" />
-          <Text fontSize="$4">Ethereum</Text>
-        </View>
-      ),
-    },
-    {
-      label: 'Status',
-      render: () => (
-        <View flexDirection="row" alignItems="center" gap="$2">
-          <Badge
-            circular={false}
-            themeName="badge_warning_variant1"
-            textContentProps={{ fontWeight: 500 }}
-            content={
-              <View flexDirection="row" alignItems="center" gap="$2">
-                <SafeFontIcon name="sign" size={14} color="$color" />
-                <Text color="$color">Signature needed</Text>
-              </View>
-            }
-          />
-        </View>
-      ),
+      label: 'Rewards',
+      value: 'Approx. every 5 days after activation',
     },
   ]
 }
