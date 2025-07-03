@@ -16,6 +16,7 @@ import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { NoFunds } from '@/src/features/Assets/components/NoFunds'
 import { AssetError } from '../../Assets.error'
 import { Loader } from '@/src/components/Loader'
+import { getTokenValue } from 'tamagui'
 
 export function NFTsContainer() {
   const activeSafe = useDefinedActiveSafe()
@@ -60,7 +61,7 @@ export function NFTsContainer() {
       renderItem={NFTItem}
       ListFooterComponent={isFetching ? <Loader size={24} /> : undefined}
       keyExtractor={(item) => item.id}
-      style={{ marginTop: 8 }}
+      style={{ marginTop: getTokenValue('$2') }}
     />
   )
 }
