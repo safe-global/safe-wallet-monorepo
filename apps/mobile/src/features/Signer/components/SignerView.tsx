@@ -5,7 +5,7 @@ import React from 'react'
 import { Container } from '@/src/components/Container'
 import { CopyButton } from '@/src/components/CopyButton'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon/SafeFontIcon'
-import { Pressable, TouchableOpacity } from 'react-native'
+import { KeyboardAvoidingView, Pressable, TouchableOpacity } from 'react-native'
 import { SafeButton } from '@/src/components/SafeButton'
 import { SafeInputWithLabel } from '@/src/components/SafeInput/SafeInputWithLabel'
 import { Controller, FieldNamesMarkedBoolean, type Control, type FieldErrors } from 'react-hook-form'
@@ -23,6 +23,8 @@ type Props = {
   dirtyFields: FieldNamesMarkedBoolean<FormValues>
 }
 
+const CUSTOM_VERTICAL_OFFSET = 50
+
 export const SignerView = ({
   control,
   errors,
@@ -34,7 +36,8 @@ export const SignerView = ({
   editMode,
   name,
 }: Props) => {
-  const { bottom } = useSafeAreaInsets()
+  const { bottom, top } = useSafeAreaInsets()
+
   return (
     <YStack flex={1}>
       <ScrollView flex={1}>
@@ -89,15 +92,17 @@ export const SignerView = ({
           </XStack>
         </Container>
       </ScrollView>
-      <View paddingHorizontal={'$4'} paddingTop={'$2'} paddingBottom={bottom ?? 60}>
-        {editMode ? (
-          <SafeButton onPress={onPressEdit}>Save</SafeButton>
-        ) : (
-          <SafeButton danger={true} onPress={onPressDelete}>
-            Remove signer
-          </SafeButton>
-        )}
-      </View>
+      <KeyboardAvoidingView behavior="padding" keyboardVerticalOffset={top + CUSTOM_VERTICAL_OFFSET}>
+        <View paddingHorizontal={'$4'} paddingTop={'$2'} paddingBottom={bottom ?? 60}>
+          {editMode ? (
+            <SafeButton onPress={onPressEdit}>Save</SafeButton>
+          ) : (
+            <SafeButton danger={true} onPress={onPressDelete}>
+              Remove signer
+            </SafeButton>
+          )}
+        </View>
+      </KeyboardAvoidingView>
     </YStack>
   )
 }
