@@ -1,6 +1,5 @@
 import React from 'react'
 import { render } from '@/src/tests/test-utils'
-
 jest.mock('react-native-capture-protection')
 
 const { __mockPrevent: mockPrevent, __mockAllow: mockAllow } = require('react-native-capture-protection')
@@ -27,7 +26,7 @@ jest.mock('react-native-safe-area-context', () => ({
   useSafeAreaInsets: () => ({ bottom: 0 }),
 }))
 
-import PrivateKeyImport from './private-key'
+import PrivateKeyImport from '@/src/app/import-signers/private-key'
 
 describe('PrivateKeyImport Screen - Capture Protection', () => {
   beforeEach(() => {
