@@ -73,6 +73,16 @@ export const SafeButton = styled(Button, {
     },
 
     size: {
+      $xl: () => ({
+        fontSize: 14,
+        fontWeight: 700,
+        height: 'auto',
+        margin: 0,
+        paddingVertical: '$3',
+        textProps: {
+          lineHeight: 24,
+        },
+      }),
       $md: () => ({
         height: 'auto',
         paddingVertical: 14,
