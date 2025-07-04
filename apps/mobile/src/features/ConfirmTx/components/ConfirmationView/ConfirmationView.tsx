@@ -8,6 +8,7 @@ import {
   TransferTransactionInfo,
   VaultDepositTransactionInfo,
   VaultRedeemTransactionInfo,
+  NativeStakingDepositTransactionInfo,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { TokenTransfer } from '../confirmation-views/TokenTransfer'
 import { AddSigner } from '../confirmation-views/AddSigner'
@@ -22,6 +23,7 @@ import { GenericView } from '../confirmation-views/GenericView'
 import { NormalizedSettingsChangeTransaction } from './types'
 import { VaultDeposit } from '@/src/features/ConfirmTx/components/confirmation-views/VaultDeposit'
 import { VaultRedeem } from '../confirmation-views/VaultRedeem'
+import { StakingDeposit } from '../confirmation-views/Stake'
 
 interface ConfirmationViewProps {
   txDetails: TransactionDetails
@@ -78,6 +80,14 @@ export function ConfirmationView({ txDetails }: ConfirmationViewProps) {
           txId={txDetails.txId}
           executionInfo={txDetails.detailedExecutionInfo as MultisigExecutionDetails}
           txInfo={txDetails.txInfo as CustomTransactionInfo}
+        />
+      )
+    case ETxType.STAKE_DEPOSIT:
+      return (
+        <StakingDeposit
+          txId={txDetails.txId}
+          executionInfo={txDetails.detailedExecutionInfo as MultisigExecutionDetails}
+          txInfo={txDetails.txInfo as NativeStakingDepositTransactionInfo}
         />
       )
     case ETxType.VAULT_DEPOSIT:

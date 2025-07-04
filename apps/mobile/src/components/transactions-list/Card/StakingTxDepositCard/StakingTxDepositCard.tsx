@@ -3,7 +3,13 @@ import { TokenAmount } from '@/src/components/TokenAmount'
 import { SafeListItem } from '@/src/components/SafeListItem'
 import { TokenIcon } from '@/src/components/TokenIcon'
 
-export const StakingTxDepositCard = ({ info }: { info: NativeStakingDepositTransactionInfo }) => {
+export const StakingTxDepositCard = ({
+  info,
+  onPress,
+}: {
+  info: NativeStakingDepositTransactionInfo
+  onPress: () => void
+}) => {
   return (
     <SafeListItem
       label={`Deposit`}
@@ -13,6 +19,7 @@ export const StakingTxDepositCard = ({ info }: { info: NativeStakingDepositTrans
         <TokenAmount value={info.value} tokenSymbol={info.tokenInfo.symbol} decimals={info.tokenInfo.decimals} />
       }
       leftNode={<TokenIcon logoUri={info.tokenInfo.logoUri} accessibilityLabel={info.tokenInfo.symbol} />}
+      onPress={onPress}
     />
   )
 }

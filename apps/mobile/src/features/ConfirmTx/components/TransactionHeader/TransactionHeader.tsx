@@ -28,7 +28,7 @@ export function TransactionHeader({
   isIdenticon,
   submittedAt,
 }: TransactionHeaderProps) {
-  const date = formatWithSchema(submittedAt, 'MMM d yyyy')
+  const date = formatWithSchema(submittedAt, 'd MMM yyyy')
   const time = formatWithSchema(submittedAt, 'hh:mm a')
 
   return (
@@ -47,7 +47,7 @@ export function TransactionHeader({
       <View alignItems="center" gap="$1">
         {typeof title === 'string' ? <H3 fontWeight={600}>{title}</H3> : title}
         <Text color="$textSecondaryLight">
-          {date} at {time}
+          {date}, {time}
         </Text>
       </View>
     </YStack>

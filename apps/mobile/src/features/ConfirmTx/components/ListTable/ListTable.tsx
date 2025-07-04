@@ -45,11 +45,17 @@ export const ListTable = ({ items, children }: ListTableProps) => {
               item.renderRow()
             ) : (
               <>
-                <Text color="$textSecondaryLight" fontSize="$4">
+                <Text color="$textSecondaryLight" fontSize="$4" flex={1}>
                   {item.label}
                 </Text>
 
-                {item.render ? item.render() : <Text fontSize="$4">{item.value}</Text>}
+                {item.render ? (
+                  item.render()
+                ) : (
+                  <Text fontSize="$4" flex={2} textAlign="right">
+                    {item.value}
+                  </Text>
+                )}
               </>
             )}
           </View>
