@@ -68,9 +68,17 @@ export const SafeInputWithLabel = ({
         error={error}
         gap={'$1'}
       >
-        <Text color={'$colorSecondary'}>{label}</Text>
-        <View flex={1} flexDirection="row">
-          <StyledInput size="$5" flex={1} placeholder={placeholder} {...props} />
+        <View flex={1} flexDirection="row" alignItems="center">
+          {left ? <View marginRight={'$2'}>{left}</View> : null}
+
+          <View flex={1}>
+            <Text color={'$colorSecondary'}>{label}</Text>
+            <View flex={1} flexDirection="row" alignItems="center">
+              <StyledInput size="$5" flex={1} placeholder={placeholder} {...props} />
+            </View>
+          </View>
+
+          {right ? <View marginLeft={'$2'}>{right}</View> : null}
         </View>
       </StyledInputContainer>
     </Theme>
