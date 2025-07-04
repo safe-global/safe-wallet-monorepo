@@ -40,7 +40,7 @@ export const getTransactionType = ({ txInfo }: { txInfo: Transaction['txInfo'] }
   }
 
   if (isStakingTxDepositInfo(txInfo)) {
-    return ETxType.STAKE
+    return ETxType.STAKE_DEPOSIT
   }
 
   if (isVaultDepositTxInfo(txInfo)) {

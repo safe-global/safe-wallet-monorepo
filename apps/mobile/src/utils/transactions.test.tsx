@@ -3,7 +3,7 @@ import { ETxType } from '../types/txType'
 import { NativeStakingDepositTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
 describe('getTransactionType', () => {
-  it('should return STAKE for NativeStakingDeposit transactions', () => {
+  it('should return STAKE_DEPOSIT for NativeStakingDeposit transactions', () => {
     const stakingDepositTxInfo: NativeStakingDepositTransactionInfo = {
       type: 'NativeStakingDeposit',
       humanDescription: 'Deposit ETH for staking',
@@ -32,7 +32,7 @@ describe('getTransactionType', () => {
     }
 
     const result = getTransactionType({ txInfo: stakingDepositTxInfo })
-    expect(result).toBe(ETxType.STAKE)
+    expect(result).toBe(ETxType.STAKE_DEPOSIT)
   })
 
   it('should return null for unknown transaction types', () => {

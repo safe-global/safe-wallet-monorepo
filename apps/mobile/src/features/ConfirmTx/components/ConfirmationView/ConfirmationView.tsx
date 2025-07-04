@@ -82,7 +82,7 @@ export function ConfirmationView({ txDetails }: ConfirmationViewProps) {
           txInfo={txDetails.txInfo as CustomTransactionInfo}
         />
       )
-    case ETxType.STAKE:
+    case ETxType.STAKE_DEPOSIT:
       return (
         <StakingDeposit
           txId={txDetails.txId}
