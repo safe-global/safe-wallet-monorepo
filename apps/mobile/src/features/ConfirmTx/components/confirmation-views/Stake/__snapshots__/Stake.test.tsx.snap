@@ -247,7 +247,7 @@ exports[`StakingDeposit matches snapshot 1`] = `
         >
           1 Jan 2023
           , 
-          01:00 AM
+          12:00 AM
         </Text>
       </View>
     </View>
