@@ -135,6 +135,12 @@ const config = {
         appGroupIdentifier: IS_DEV ? 'group.global.safe.mobileapp.dev' : 'group.global.safe.mobileapp',
       },
     ],
+    [
+      'react-native-capture-protection',
+      {
+        captureType: 'fullMediaCapture',
+      },
+    ],
   ],
   experiments: {
     typedRoutes: true,
