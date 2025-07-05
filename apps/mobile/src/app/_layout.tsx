@@ -29,6 +29,8 @@ import { useScreenTracking } from '@/src/hooks/useScreenTracking'
 import { useAnalytics } from '@/src/hooks/useAnalytics'
 import { DataFetchProvider } from '../theme/provider/DataFetchProvider'
 import { Platform } from 'react-native'
+import { config, actions } from '@/src/platform/security'
+import { useFreeRasp } from 'freerasp-react-native'
 
 Logger.setLevel(__DEV__ ? LogLevel.TRACE : LogLevel.ERROR)
 // Initialize all notification handlers
@@ -59,6 +61,7 @@ persistor.subscribe(() => {
 })
 
 function RootLayout() {
+  useFreeRasp(config, actions)
   useScreenTracking()
 
   return (

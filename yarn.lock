@@ -9333,6 +9333,7 @@ __metadata:
     expo-system-ui: "npm:~5.0.7"
     expo-task-manager: "npm:~13.1.5"
     expo-web-browser: "npm:~14.1.6"
+    freerasp-react-native: "npm:^4.1.0"
     glob: "npm:^11.0.1"
     globals: "npm:^15.14.0"
     jest: "npm:^29.7.0"
@@ -21513,6 +21514,20 @@ __metadata:
   version: 2.0.0
   resolution: "freeport-async@npm:2.0.0"
   checksum: 10/c0bc71eb48a9b60277e55f1b4c7b0c14d385e9a6b3f0870a1d8b1ae441504afd481380fe7923506364d6fb765546a5cef821dcc5fe7ec2ae17bb8902c94d49b9
+  languageName: node
+  linkType: hard
+
+"freerasp-react-native@npm:^4.1.0":
+  version: 4.1.0
+  resolution: "freerasp-react-native@npm:4.1.0"
+  peerDependencies:
+    expo: ">=47.0.0"
+    react: "*"
+    react-native: "*"
+  peerDependenciesMeta:
+    expo:
+      optional: true
+  checksum: 10/f1c672b6db9fe07ff469a0b968d1dd4388fe4f62983903c720c4ffc049488f42b0d586ba0eb098fae99ce688aabe08e5da810cf11fae1cb6bf514cbd9821c251
   languageName: node
   linkType: hard
 
