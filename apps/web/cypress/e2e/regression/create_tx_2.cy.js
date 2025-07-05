@@ -29,16 +29,16 @@ describe('Create transactions tests 2', () => {
     createtx.clickOnSendTokensBtn()
   })
 
-  it('Verify advance parameters are saved after editing', () => {
+  it.only('Verify advance parameters are saved after editing', () => {
     happyPathToStepTwo()
     createtx.changeNonce('5')
     createtx.clickOnContinueSignTransactionBtn()
     createtx.selectComboButtonOption('execute')
     createtx.selectCurrentWallet()
     createtx.openExecutionParamsModal()
-    createtx.setAdvncedExecutionParams()
-    createtx.displayAdvncedDetails()
-    createtx.verifyEditedExutionParams()
+    createtx.setAdvancedExecutionParams()
+    createtx.displayAdvancedDetails()
+    createtx.verifyEditedExecutionParams()
   }
   )
 
