@@ -2,7 +2,14 @@ import { useState } from 'react'
 import * as DocumentPicker from 'expo-document-picker'
 import * as FileSystem from 'expo-file-system'
 import Logger from '@/src/utils/logger'
-import { decodeLegacyData, SecuredDataFile, SerializedDataFile } from '@/src/utils/legacyData'
+import {
+  decodeLegacyData,
+  SecuredDataFile,
+  SerializedDataFile,
+  LegacyDataPasswordError,
+  LegacyDataFormatError,
+  LegacyDataCorruptedError,
+} from '@/src/utils/legacyData'
 
 export function useLegacyImport() {
   const [fileName, setFileName] = useState<string | null>(null)
@@ -65,11 +72,15 @@ export function useLegacyImport() {
       setImportedData(decoded)
       return decoded
     } catch (e) {
-      Logger.error('Failed to import legacy data', e)
-      const errorMessage = (e as Error).message
-      if (errorMessage.includes('decrypt') || errorMessage.includes('password')) {
+      Logger.error('Failed to import legacy data', {
+        errorType: e instanceof Error ? e.constructor.name : 'Unknown',
+      })
+
+      if (e instanceof LegacyDataPasswordError) {
         setError('Incorrect password. Please try again.')
-      } else if (errorMessage.includes('JSON')) {
+      } else if (e instanceof LegacyDataFormatError || e instanceof LegacyDataCorruptedError) {
+        setError('Invalid file format. Please select a valid export file.')
+      } else if (e instanceof Error && e.message.includes('JSON')) {
         setError('Invalid file format. Please select a valid export file.')
       } else {
         setError('Failed to import data. Please check your file and password.')
