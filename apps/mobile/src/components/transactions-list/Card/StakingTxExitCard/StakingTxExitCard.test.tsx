@@ -1,5 +1,5 @@
 import React from 'react'
-import { render } from '@/src/tests/test-utils'
+import { render, fireEvent } from '@/src/tests/test-utils'
 import { StakingTxExitCard } from './StakingTxExitCard'
 import { NativeStakingValidatorsExitTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
@@ -54,11 +54,9 @@ describe('StakingTxExitCard', () => {
   it('calls onPress when pressed', () => {
     const screen = render(<StakingTxExitCard info={mockInfo} onPress={mockOnPress} />)
 
-    // Find the touchable component by test ID or role
-    const touchableComponent = screen.getByRole('button')
+    const card = screen.getByText('Withdraw')
 
-    // Simulate press
-    touchableComponent.props.onPress()
+    fireEvent.press(card)
 
     expect(mockOnPress).toHaveBeenCalledTimes(1)
   })

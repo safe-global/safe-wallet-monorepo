@@ -1,5 +1,5 @@
 import React from 'react'
-import { render } from '@/src/tests/test-utils'
+import { render, fireEvent } from '@/src/tests/test-utils'
 import { StakingTxWithdrawCard } from './StakingTxWithdrawCard'
 import { NativeStakingWithdrawTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
@@ -40,8 +40,7 @@ describe('StakingTxWithdrawCard', () => {
     const screen = render(<StakingTxWithdrawCard info={mockInfo} onPress={mockOnPress} />)
     const card = screen.getByText('Claim')
 
-    // Touch the card
-    card.props.onPress?.()
+    fireEvent.press(card)
 
     expect(mockOnPress).toHaveBeenCalledTimes(1)
   })
