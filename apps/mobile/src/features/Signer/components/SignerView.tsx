@@ -23,8 +23,6 @@ type Props = {
   dirtyFields: FieldNamesMarkedBoolean<FormValues>
 }
 
-const CUSTOM_VERTICAL_OFFSET = 50
-
 export const SignerView = ({
   control,
   errors,
@@ -92,7 +90,7 @@ export const SignerView = ({
           </XStack>
         </Container>
       </ScrollView>
-      <KeyboardAvoidingView behavior="padding" keyboardVerticalOffset={top + CUSTOM_VERTICAL_OFFSET}>
+      <KeyboardAvoidingView behavior="padding" keyboardVerticalOffset={top + bottom}>
         <View paddingHorizontal={'$4'} paddingTop={'$2'} paddingBottom={bottom ?? 60}>
           {editMode ? (
             <SafeButton onPress={onPressEdit}>Save</SafeButton>
