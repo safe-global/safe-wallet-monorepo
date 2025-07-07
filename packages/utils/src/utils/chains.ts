@@ -42,6 +42,7 @@ export enum FEATURES {
   MASS_PAYOUTS = 'MASS_PAYOUTS',
   SPACES = 'SPACES',
   EARN = 'EARN',
+  MIXPANEL = 'MIXPANEL',
 }
 
 const MIN_SAFE_VERSION = '1.3.0'
