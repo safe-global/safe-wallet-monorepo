@@ -11,6 +11,7 @@ import { formatWithSchema } from '@/src/utils/date'
 
 interface TransactionHeaderProps {
   logo?: string
+  customLogo?: React.ReactNode
   badgeIcon: IconName
   badgeThemeName?: BadgeThemeTypes
   badgeColor: string
@@ -21,6 +22,7 @@ interface TransactionHeaderProps {
 
 export function TransactionHeader({
   logo,
+  customLogo,
   badgeIcon,
   badgeThemeName,
   badgeColor,
@@ -36,12 +38,14 @@ export function TransactionHeader({
       {isIdenticon ? (
         <Identicon address={logo as Address} size={44} />
       ) : (
-        <Logo
-          logoUri={logo}
-          size="$10"
-          badgeContent={<SafeFontIcon name={badgeIcon} color={badgeColor} size={12} />}
-          badgeThemeName={badgeThemeName}
-        />
+        (customLogo ?? (
+          <Logo
+            logoUri={logo}
+            size="$10"
+            badgeContent={<SafeFontIcon name={badgeIcon} color={badgeColor} size={12} />}
+            badgeThemeName={badgeThemeName}
+          />
+        ))
       )}
 
       <View alignItems="center" gap="$1">

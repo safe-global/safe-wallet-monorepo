@@ -24,6 +24,7 @@ import { NormalizedSettingsChangeTransaction } from './types'
 import { VaultDeposit } from '@/src/features/ConfirmTx/components/confirmation-views/VaultDeposit'
 import { VaultRedeem } from '../confirmation-views/VaultRedeem'
 import { StakingDeposit } from '../confirmation-views/Stake'
+import { CancelTx } from '@/src/features/ConfirmTx/components/confirmation-views/CancelTx'
 
 interface ConfirmationViewProps {
   txDetails: TransactionDetails
@@ -72,6 +73,14 @@ export function ConfirmationView({ txDetails }: ConfirmationViewProps) {
           executionInfo={txDetails.detailedExecutionInfo as MultisigExecutionDetails}
           txInfo={txDetails.txInfo as OrderTransactionInfo}
           decodedData={txDetails.txData?.dataDecoded}
+        />
+      )
+    case ETxType.CANCEL_TX:
+      return (
+        <CancelTx
+          txId={txDetails.txId}
+          executionInfo={txDetails.detailedExecutionInfo as MultisigExecutionDetails}
+          txInfo={txDetails.txInfo as CustomTransactionInfo}
         />
       )
     case ETxType.CONTRACT_INTERACTION:
