@@ -143,7 +143,7 @@ export const CreateTokenTransfer = ({ txNonce }: CreateTokenTransferProps): Reac
 
     append({
       recipient: '',
-      tokenAddress: ZERO_ADDRESS,
+      tokenAddress: balancesItems.length > 0 ? balancesItems[0].tokenInfo.address : ZERO_ADDRESS,
       amount: '',
     })
   }

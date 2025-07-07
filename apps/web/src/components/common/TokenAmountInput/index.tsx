@@ -2,15 +2,16 @@ import NumberField from '@/components/common/NumberField'
 import { AutocompleteItem } from '@/components/tx-flow/flows/TokenTransfer/CreateTokenTransfer'
 import { safeFormatUnits, safeParseUnits } from '@safe-global/utils/utils/formatters'
 import { validateDecimalLength, validateLimitedAmount } from '@safe-global/utils/utils/validation'
-import { Button, Divider, FormControl, InputLabel, MenuItem, TextField } from '@mui/material'
+import { Button, Divider, FormControl, InputLabel, MenuItem, TextField, Typography } from '@mui/material'
 import { type SafeBalanceResponse } from '@safe-global/safe-gateway-typescript-sdk'
 import classNames from 'classnames'
-import { useCallback } from 'react'
+import { useCallback, useMemo } from 'react'
 import { get, useFormContext } from 'react-hook-form'
 import type { FieldArrayPath, FieldValues } from 'react-hook-form'
 import css from './styles.module.css'
 import { MultiTokenTransferFields, type MultiTokenTransferParams } from '@/components/tx-flow/flows/TokenTransfer'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
+import FiatValue from '@/components/common/FiatValue'
 
 export enum TokenAmountFields {
   tokenAddress = 'tokenAddress',
@@ -54,8 +55,28 @@ const TokenAmountInput = ({
   const amountField = getFieldName(TokenAmountFields.amount, fieldArray)
 
   const tokenAddress = watch(tokenAddressField)
+  const amount = watch(amountField)
 
   const isAmountError = !!get(errors, tokenAddressField) || !!get(errors, amountField)
+
+  // Calculate USD equivalent
+  const usdEquivalent = useMemo(() => {
+    if (!amount || !selectedToken || !selectedToken.fiatConversion || selectedToken.fiatConversion === '0') {
+      return null
+    }
+
+    try {
+      const amountBigInt = safeParseUnits(amount, selectedToken.tokenInfo.decimals)
+      if (!amountBigInt) return null
+
+      const amountInBaseUnits = safeFormatUnits(amountBigInt.toString(), selectedToken.tokenInfo.decimals)
+      const fiatValue = parseFloat(amountInBaseUnits) * parseFloat(selectedToken.fiatConversion)
+
+      return isNaN(fiatValue) ? null : fiatValue.toString()
+    } catch {
+      return null
+    }
+  }, [amount, selectedToken])
 
   const validateAmount = useCallback(
     (value: string) => {
@@ -119,10 +140,24 @@ const TokenAmountInput = ({
           variant="standard"
           InputProps={{
             disableUnderline: true,
-            endAdornment: maxAmount !== undefined && (
-              <Button data-testid="max-btn" className={css.max} onClick={onMaxAmountClick}>
-                Max
-              </Button>
+            endAdornment: (
+              <div className={css.endAdornment}>
+                {usdEquivalent && (
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    className={css.usdEquivalent}
+                    data-testid="usd-equivalent"
+                  >
+                    ≈ <FiatValue value={usdEquivalent} />
+                  </Typography>
+                )}
+                {maxAmount !== undefined && (
+                  <Button data-testid="max-btn" className={css.max} onClick={onMaxAmountClick}>
+                    Max
+                  </Button>
+                )}
+              </div>
             ),
           }}
           className={css.amount}
