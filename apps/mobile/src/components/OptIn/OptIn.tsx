@@ -48,7 +48,7 @@ export const OptIn: React.FC<OptInProps> = React.memo(
     return (
       <View testID={testID} style={[styles.wrapper]} paddingTop={'$10'}>
         <View flex={1} justifyContent="space-between" alignItems="center">
-          <View gap={'$4'} paddingHorizontal={20}>
+          <View gap={'$4'} paddingHorizontal={'$4'}>
             {kicker && (
               <Text textAlign="center" fontWeight={700} fontSize="$4" lineHeight="$6">
                 {kicker}
@@ -80,7 +80,7 @@ export const OptIn: React.FC<OptInProps> = React.memo(
           {image && <Image style={styles.image} source={image} />}
         </View>
 
-        <View testID="notifications-opt-in-cta-buttons" flexDirection="column" paddingHorizontal={20} gap="$4">
+        <View testID="notifications-opt-in-cta-buttons" flexDirection="column" paddingHorizontal={'$4'} gap="$4">
           <SafeButton onPress={ctaButton.onPress} marginBottom={'$3'} testID={'opt-in-primary-button'} size="$xl">
             {!isLoading ? (
               ctaButton.label
