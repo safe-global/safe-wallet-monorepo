@@ -12,6 +12,7 @@ import { apiSliceWithChainsConfig } from '@safe-global/store/gateway/chains'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet'
 import { PortalProvider } from '@tamagui/portal'
+import { View } from 'tamagui'
 import { NotificationsProvider } from '@/src/context/NotificationsContext'
 import { SafeToastProvider } from '@/src/theme/provider/toastProvider'
 import { configureReanimatedLogger, ReanimatedLogLevel } from 'react-native-reanimated'
@@ -180,6 +181,7 @@ function RootLayout() {
                             name="confirm-transaction"
                             options={{
                               title: 'Confirm transaction',
+                              headerRight: () => <View width={16} />,
                             }}
                           />
                           <Stack.Screen
