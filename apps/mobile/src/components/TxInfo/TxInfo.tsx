@@ -155,11 +155,11 @@ function TxInfoComponent({ tx, bordered, inQueue, onPress }: TxInfoProps) {
   }
 
   if (isStakingTxExitInfo(txInfo)) {
-    return <StakingTxExitCard info={txInfo} />
+    return <StakingTxExitCard info={txInfo} onPress={onCardPress} />
   }
 
   if (isStakingTxWithdrawInfo(txInfo)) {
-    return <StakingTxWithdrawCard info={txInfo} />
+    return <StakingTxWithdrawCard info={txInfo} onPress={onCardPress} />
   }
 
   if (isVaultDepositTxInfo(txInfo)) {

@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { StakingDeposit } from './Stake'
+import { StakingDeposit } from './Deposit'
 import {
   NativeStakingDepositTransactionInfo,
   MultisigExecutionDetails,
@@ -109,21 +109,5 @@ export const MultipleValidators: Story = {
     },
     executionInfo: mockExecutionInfo,
     txId: 'test-staking-tx-multi',
-  },
-}
-
-export const HighRewardRate: Story = {
-  args: {
-    txInfo: {
-      ...mockStakingDepositInfo,
-      annualNrr: 12.5, // 12.5% annual return
-      monthlyNrr: 1.04, // ~1% monthly return
-      expectedAnnualReward: '4000000000000000000', // 4 ETH
-      expectedMonthlyReward: '333000000000000000', // ~0.33 ETH
-      expectedFiatAnnualReward: 12000, // $12,000
-      expectedFiatMonthlyReward: 1000, // $1,000
-    },
-    executionInfo: mockExecutionInfo,
-    txId: 'test-staking-tx-high-reward',
   },
 }

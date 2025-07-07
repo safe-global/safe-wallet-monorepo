@@ -1,14 +1,14 @@
 import React, { useMemo } from 'react'
-import { ListTable } from '../../ListTable'
-import { formatStakingDepositItems, formatStakingValidatorItems } from './utils'
+import { ListTable } from '../../../ListTable'
+import { formatStakingDepositItems, formatStakingValidatorItems } from '../utils'
 import { YStack, Text, XStack } from 'tamagui'
-import { TransactionHeader } from '../../TransactionHeader'
+import { TransactionHeader } from '../../../TransactionHeader'
 import {
   MultisigExecutionDetails,
   NativeStakingDepositTransactionInfo,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { TokenAmount } from '@/src/components/TokenAmount'
-import { ParametersButton } from '../../ParametersButton'
+import { ParametersButton } from '../../../ParametersButton'
 
 interface StakingDepositProps {
   txInfo: NativeStakingDepositTransactionInfo
