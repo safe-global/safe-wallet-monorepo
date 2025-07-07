@@ -13,6 +13,7 @@ import { SecurityResponse } from '@safe-global/utils/services/security/modules/t
 import { BlockaidModuleResponse } from '@safe-global/utils/services/security/modules/BlockaidModule'
 import { BlockaidBalanceChanges } from './blockaid/balance/BlockaidBalanceChanges'
 import { BlockaidWarning } from './blockaid/scans/BlockaidWarning'
+import { InfoSheet } from '@/src/components/InfoSheet'
 
 type Props = {
   tenderly: {
@@ -70,8 +71,15 @@ export const TransactionChecksView = ({ tenderly, blockaid }: Props) => {
           {enabled ? (
             <>
               <XStack justifyContent="space-between">
-                <Text fontWeight={600}>Transaction simulation</Text>
-                {tenderly?.simulation?.simulation.status && (
+                <XStack gap={'$2'}>
+                  <Text fontWeight={600}>Transaction simulation</Text>
+                  <InfoSheet
+                    title="Simulation"
+                    info="The transaction can be simulated before execution to ensure that it will succeed. You can view a full detailed report on Tenderly."
+                  />
+                </XStack>
+
+                {tenderly?.simulation?.simulation.status ? (
                   <Badge
                     circular={false}
                     themeName="badge_success_variant1"
@@ -82,6 +90,8 @@ export const TransactionChecksView = ({ tenderly, blockaid }: Props) => {
                       </XStack>
                     }
                   />
+                ) : (
+                  <Badge circular={false} themeName="badge_error" content={<Text fontSize={12}>Failed</Text>} />
                 )}
               </XStack>
               {tenderly.fetchStatus === FETCH_STATUS.SUCCESS && (
