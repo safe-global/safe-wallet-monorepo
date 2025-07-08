@@ -8,6 +8,7 @@ import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { useMemo } from 'react'
 import { type BridgeAndSwapTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import useAddressBook from '@/hooks/useAddressBook'
+import useOwnedSafes from '@/hooks/useOwnedSafes'
 
 type WarningSeverity = 'warning' | 'error'
 
@@ -39,7 +40,7 @@ export const BridgeWarnings: Record<string, BridgeWarning> = {
   DIFFERENT_ADDRESS: {
     title: 'Unknown address',
     description:
-      'The receiver is not a Safe you own or a known recipient in your address book. If this address is incorrect, your funds could be lost permanently.',
+      'The recipient is not a Safe you own or a known recipient in your address book. If this address is incorrect, your funds could be lost permanently.',
     severity: 'warning',
   },
   UNKNOWN_CHAIN: {
@@ -59,12 +60,13 @@ const WarningAlert = ({ warning }: { warning: BridgeWarning }) => (
   </Alert>
 )
 
-export const BridgeReceiverWarnings = ({ txInfo }: { txInfo: BridgeAndSwapTransactionInfo }) => {
+export const BridgeRecipientWarnings = ({ txInfo }: { txInfo: BridgeAndSwapTransactionInfo }) => {
   const { safe } = useSafeInfo()
   const { configs } = useChains()
   const [_creationData, creationError] = useSafeCreationData(safe.address.value, configs)
   const isSameAddress = sameAddress(txInfo.recipient.value, safe.address.value)
   const destinationAddressBook = useAddressBook(txInfo.toChain)
+  const destinationOwnedSafes = useOwnedSafes(txInfo.toChain)
 
   const isMultiChainSafe = creationError === undefined
 
@@ -89,6 +91,9 @@ export const BridgeReceiverWarnings = ({ txInfo }: { txInfo: BridgeAndSwapTransa
 
   const isDestinationChainSupported = configs.some((chain) => chain.chainId === txInfo.toChain)
   const isRecipientInAddressBook = destinationAddressBook[txInfo.recipient.value] !== undefined
+  const isRecipientOwnedSafe = destinationOwnedSafes[txInfo.toChain]?.some((ownedSafeAddress) =>
+    sameAddress(ownedSafeAddress, txInfo.recipient.value),
+  )
 
   if (isSameAddress) {
     if (!isDestinationChainSupported) {
@@ -107,7 +112,7 @@ export const BridgeReceiverWarnings = ({ txInfo }: { txInfo: BridgeAndSwapTransa
     return <WarningAlert warning={BridgeWarnings.SAFE_NOT_DEPLOYED} />
   }
 
-  if (!isRecipientInAddressBook) {
+  if (!isRecipientInAddressBook && !isRecipientOwnedSafe) {
     return <WarningAlert warning={BridgeWarnings.DIFFERENT_ADDRESS} />
   }
 
