@@ -30,11 +30,7 @@ function TxConflictingComponent({ transactions, inQueue, onPress }: TxConflictin
     <View backgroundColor={isDark ? '$warningDarkDark' : '$warningBackgroundLight'} padding="$2" borderRadius="$2">
       <TouchableOpacity onPress={() => onPress()}>
         <View>
-          <Alert
-            type="warning"
-            bgcolor={isDark ? '$background' : '$backgroundDefaultLight'}
-            message="Conflicting transactions"
-          />
+          <Alert type="warning" message="Conflicting transactions" />
         </View>
       </TouchableOpacity>
 

@@ -19,7 +19,6 @@ interface AlertProps {
   onPress?: () => void
   testID?: string
   orientation?: AlertOrientation
-  bgcolor?: string
 }
 
 const icons = {
@@ -84,7 +83,6 @@ export const Alert = ({
   testID,
   info,
   orientation = 'center',
-  bgcolor = '$background',
 }: AlertProps) => {
   const Icon = getAlertIcon(type, iconName, displayIcon)
   const containerAlignment = getContainerAlignment(orientation)
@@ -100,7 +98,7 @@ export const Alert = ({
             width={fullWidth ? '100%' : 'auto'}
             flexDirection="row"
             justifyContent={contentAlignment}
-            backgroundColor={bgcolor}
+            backgroundColor="$background"
             padding="$2"
             borderRadius={'$2'}
           >
