@@ -38,7 +38,7 @@
     "ios": "expo run:ios"
   },
   "dependencies": {
-    "@cowprotocol/app-data": "^2.3.0",
+    "@cowprotocol/app-data": "^3.1.0",
     "@ethersproject/shims": "^5.7.0",
     "@expo/config-plugins": "~10.0.0",
     "@expo/vector-icons": "^14.1.0",
