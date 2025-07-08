@@ -5,7 +5,7 @@ import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 
 /**
- * Initializes Mixpanel analytics for the web app.
+ * Initializes Mixpanel analytics for the web app for analytics.
  * Should be called once at app startup.
  */
 const useMixpanel = () => {
