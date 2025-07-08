@@ -29,7 +29,7 @@ const PreviewSwapAmount = ({ txInfo }: { txInfo: SwapTransactionInfo }) => (
 
 const ListSwapAmount = ({ txInfo }: { txInfo: SwapTransactionInfo }) => (
   <DataRow datatestid="amount" key="amount" title="Amount">
-    <Stack>
+    <Stack spacing={0.5}>
       <Typography display="flex" alignItems="center" flexDirection="row" gap={1}>
         Sell{' '}
         <TokenAmount
