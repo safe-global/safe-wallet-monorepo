@@ -2,7 +2,7 @@ import React, { useCallback } from 'react'
 import { useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useColorScheme, Linking } from 'react-native'
-import { HELP_CENTER_URL } from '@safe-global/utils/config/constants'
+import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 import { HelpImportView } from './components/HelpImportView'
 
 export const HelpImport = () => {
@@ -16,7 +16,7 @@ export const HelpImport = () => {
   }, [router])
 
   const onPressNeedHelp = useCallback(() => {
-    Linking.openURL(HELP_CENTER_URL)
+    Linking.openURL(HelpCenterArticle.BULK_IMPORT_OLD_DATA)
   }, [])
 
   return (
