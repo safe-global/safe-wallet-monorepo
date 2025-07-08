@@ -42,6 +42,7 @@
   },
   "packageManager": "yarn@4.6.0",
   "dependencies": {
-    "@yarnpkg/types": "^4.0.1"
+    "@yarnpkg/types": "^4.0.1",
+    "mixpanel-browser": "^2.65.0"
   }
 }
