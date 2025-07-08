@@ -132,6 +132,12 @@ const WcProposalForm = ({ proposal, onApprove, onReject }: ProposalFormProps): R
       <Divider flexItem className={css.divider} />
 
       <div className={css.buttons}>
+        {!isUnsupportedChain && (
+          <Button variant="contained" onClick={onApprove} className={css.button} disabled={disabled}>
+            {loading === WCLoadingState.APPROVE ? <CircularProgress size={20} /> : 'Approve'}
+          </Button>
+        )}
+
         <Button
           variant={isUnsupportedChain ? 'text' : 'danger'}
           onClick={onReject}
@@ -140,12 +146,6 @@ const WcProposalForm = ({ proposal, onApprove, onReject }: ProposalFormProps): R
         >
           {loading === WCLoadingState.REJECT ? <CircularProgress size={20} /> : isUnsupportedChain ? 'Close' : 'Reject'}
         </Button>
-
-        {!isUnsupportedChain && (
-          <Button variant="contained" onClick={onApprove} className={css.button} disabled={disabled}>
-            {loading === WCLoadingState.APPROVE ? <CircularProgress size={20} /> : 'Approve'}
-          </Button>
-        )}
       </div>
     </div>
   )
