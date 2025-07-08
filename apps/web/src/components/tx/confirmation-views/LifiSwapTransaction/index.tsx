@@ -8,6 +8,7 @@ import { DataRow } from '@/components/common/Table/DataRow'
 import { formatAmount } from '@safe-global/utils/utils/formatNumber'
 import TokenAmount from '@/components/common/TokenAmount'
 import ExternalLink from '@/components/common/ExternalLink'
+import css from './styles.module.css'
 
 const PreviewSwapAmount = ({ txInfo }: { txInfo: SwapTransactionInfo }) => (
   <div key="amount">
@@ -71,7 +72,8 @@ export const LifiSwapTransaction = ({ txInfo, isPreview }: { txInfo: SwapTransac
         address={txInfo.recipient.value}
         name={txInfo.recipient.name}
         hasExplorer
-        avatarSize={24}
+        showAvatar={false}
+        onlyName
         showCopyButton
       />
     </DataRow>,
@@ -83,7 +85,9 @@ export const LifiSwapTransaction = ({ txInfo, isPreview }: { txInfo: SwapTransac
   if (txInfo.lifiExplorerUrl) {
     rows.push(
       <DataRow datatestid="lifi-explorer-url" key="lifi-explorer-url" title="Lifi Explorer">
-        <ExternalLink href={txInfo.lifiExplorerUrl}>View in LiFi explorer</ExternalLink>
+        <ExternalLink className={css.externalLink} href={txInfo.lifiExplorerUrl}>
+          View in LiFi explorer
+        </ExternalLink>
       </DataRow>,
     )
   }

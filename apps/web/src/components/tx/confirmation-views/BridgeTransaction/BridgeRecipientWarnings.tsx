@@ -52,7 +52,7 @@ export const BridgeWarnings: Record<string, BridgeWarning> = {
 } as const
 
 const WarningAlert = ({ warning }: { warning: BridgeWarning }) => (
-  <Alert severity={warning.severity}>
+  <Alert severity={warning.severity} sx={{ marginTop: '16px' }}>
     <AlertTitle>
       <Typography fontWeight="700">{warning.title}</Typography>
     </AlertTitle>
