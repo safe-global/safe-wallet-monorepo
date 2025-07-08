@@ -17,6 +17,10 @@ export const GATEWAY_URL_PRODUCTION =
 export const GATEWAY_URL_STAGING = process.env.EXPO_PUBLIC_GATEWAY_URL_STAGING || 'https://safe-client.staging.5afe.dev'
 export const GATEWAY_URL = isProduction ? GATEWAY_URL_PRODUCTION : GATEWAY_URL_STAGING
 
+export const SECURITY_CERTIFICATE_HASH_BASE64 = process.env.EXPO_PUBLIC_SECURITY_SERTIFICATE_HASH_BASE64
+export const SECURITY_WATCHER_MAIL = process.env.EXPO_PUBLIC_SECURITY_WATCHER_MAIL
+export const SECURITY_RASP_ENABLED = process.env.EXPO_PUBLIC_SECURITY_RASP_ENABLED === 'true'
+
 /**
  * The version of the onboarding flow.
  * If we change it and need all users to see it again, we can bump the version here.

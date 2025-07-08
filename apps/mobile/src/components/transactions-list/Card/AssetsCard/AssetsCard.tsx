@@ -30,17 +30,22 @@ export function AssetsCard({
       onPress={onPress}
       label={
         <View>
-          <Text fontSize="$4" fontWeight={600}>
+          <Text fontSize="$4" fontWeight={600} lineHeight={20}>
             {name}
           </Text>
-          <Text fontSize="$4" color="$colorSecondary" fontWeight={400}>
+          <Text fontSize="$4" color="$colorSecondary" fontWeight={400} lineHeight={20}>
             {description}
           </Text>
         </View>
       }
       transparent={transparent}
       leftNode={
-        <TokenIcon imageBackground={imageBackground} logoUri={logoUri} accessibilityLabel={accessibilityLabel} />
+        <TokenIcon
+          imageBackground={imageBackground}
+          logoUri={logoUri}
+          accessibilityLabel={accessibilityLabel}
+          size={'$8'}
+        />
       }
       rightNode={
         typeof rightNode === 'string' ? (
@@ -51,6 +56,7 @@ export function AssetsCard({
           rightNode
         )
       }
+      paddingVertical={'$2'}
     />
   )
 }

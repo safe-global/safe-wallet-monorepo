@@ -151,23 +151,39 @@ function TxInfoComponent({ tx, bordered, inQueue, onPress }: TxInfoProps) {
   }
 
   if (isStakingTxDepositInfo(txInfo)) {
-    return <StakingTxDepositCard info={txInfo} />
+    return <StakingTxDepositCard info={txInfo} onPress={onCardPress} />
   }
 
   if (isStakingTxExitInfo(txInfo)) {
-    return <StakingTxExitCard info={txInfo} />
+    return <StakingTxExitCard info={txInfo} onPress={onCardPress} />
   }
 
   if (isStakingTxWithdrawInfo(txInfo)) {
-    return <StakingTxWithdrawCard info={txInfo} />
+    return <StakingTxWithdrawCard info={txInfo} onPress={onCardPress} />
   }
 
   if (isVaultDepositTxInfo(txInfo)) {
-    return <VaultTxDepositCard info={txInfo} />
+    return (
+      <VaultTxDepositCard
+        info={txInfo}
+        onPress={onCardPress}
+        bordered={bordered}
+        executionInfo={tx.executionInfo}
+        inQueue={inQueue}
+      />
+    )
   }
 
   if (isVaultRedeemTxInfo(txInfo)) {
-    return <VaultTxRedeemCard info={txInfo} />
+    return (
+      <VaultTxRedeemCard
+        info={txInfo}
+        onPress={onCardPress}
+        bordered={bordered}
+        executionInfo={tx.executionInfo}
+        inQueue={inQueue}
+      />
+    )
   }
 
   return <></>

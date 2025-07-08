@@ -1,7 +1,7 @@
 import SettingsChangeTxInfo from '@/components/transactions/TxDetails/TxData/SettingsChange'
-import type { SpendingLimitMethods } from '@/utils/transaction-guards'
 import {
   isBridgeOrderTxInfo,
+  isStakingTxExitInfo,
   isExecTxData,
   isLifiSwapTxInfo,
   isOnChainConfirmationTxData,
@@ -9,19 +9,18 @@ import {
   isStakingTxWithdrawInfo,
   isVaultDepositTxInfo,
   isVaultRedeemTxInfo,
-} from '@/utils/transaction-guards'
-import { isStakingTxExitInfo } from '@/utils/transaction-guards'
-import {
   isCancellationTxInfo,
   isCustomTxInfo,
   isMigrateToL2TxData,
   isMultisigDetailedExecutionInfo,
+  isMultiSendTxInfo,
   isOrderTxInfo,
   isSettingsChangeTxInfo,
   isSpendingLimitMethod,
   isStakingTxDepositInfo,
   isSupportedSpendingLimitAddress,
   isTransferTxInfo,
+  type SpendingLimitMethods,
 } from '@/utils/transaction-guards'
 import { SpendingLimits } from '@/components/transactions/TxDetails/TxData/SpendingLimits'
 import { TransactionStatus, type TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
@@ -42,6 +41,8 @@ import VaultRedeemTxDetails from '@/features/earn/components/VaultRedeemTxDetail
 import DecodedData from './DecodedData'
 import BridgeTransaction from '@/components/tx/confirmation-views/BridgeTransaction'
 import { LifiSwapTransaction } from '@/components/tx/confirmation-views/LifiSwapTransaction'
+import { ErrorBoundary } from '@sentry/react'
+import Multisend from './DecodedData/Multisend'
 
 const TxData = ({
   txInfo,
@@ -139,7 +140,15 @@ const TxData = ({
   return !!children ? (
     <>{children}</>
   ) : (
-    <DecodedData txData={txData} toInfo={isCustomTxInfo(txInfo) ? txInfo.to : txData?.to} />
+    <>
+      <DecodedData txData={txData} toInfo={isCustomTxInfo(txInfo) ? txInfo.to : txData?.to} />
+
+      {(isMultiSendTxInfo(txInfo) || isOrderTxInfo(txInfo)) && (
+        <ErrorBoundary fallback={<div>Error parsing data</div>}>
+          <Multisend txData={txData} isExecuted={!!txDetails?.executedAt} />
+        </ErrorBoundary>
+      )}
+    </>
   )
 }
 

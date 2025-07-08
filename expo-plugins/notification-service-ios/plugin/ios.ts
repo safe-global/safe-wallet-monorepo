@@ -415,7 +415,10 @@ const addNotifeeTargetToExpoAppExtensions: ConfigPlugin<NotifeeExpoPluginProps> 
     targetName: EXTENSION_SERVICE_NAME,
     bundleIdentifier,
     entitlements: {
-      'com.apple.security.application-groups': [`group.${c.ios?.bundleIdentifier}.notifee`],
+      'com.apple.security.application-groups': [
+        `group.${c.ios?.bundleIdentifier}.notifee`,
+        `group.${c.ios?.bundleIdentifier}`,
+      ],
     },
   }
 

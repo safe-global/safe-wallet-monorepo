@@ -11,6 +11,8 @@ import { selectChainById } from '@/src/store/chains'
 import { isTwapOrderTxInfo } from '@/src/utils/transaction-guards'
 import { isSettingTwapFallbackHandler } from '@safe-global/utils/features/swap/helpers/utils'
 import { TwapFallbackHandlerWarning } from '@/src/features/ConfirmTx/components/confirmation-views/SwapOrder/TwapFallbackHandlerWarning'
+import { Alert2 } from '@/src/components/Alert2'
+import { useRecipientItem } from './hooks'
 
 interface SwapOrderProps {
   executionInfo: MultisigExecutionDetails
@@ -34,13 +36,27 @@ export function SwapOrder({ executionInfo, txInfo, decodedData }: SwapOrderProps
 
   const isChangingFallbackHandler = decodedData && isSettingTwapFallbackHandler(decodedData)
 
+  const recipientItems = useRecipientItem(order)
+
+  const showRecipientWarning = order.receiver && order.owner !== order.receiver
+
   return (
     <YStack gap="$4">
       {isChangingFallbackHandler && <TwapFallbackHandlerWarning />}
       <SwapOrderHeader executionInfo={executionInfo} txInfo={txInfo} />
 
       <ListTable items={swapItems} />
+      {recipientItems.length > 0 && <ListTable items={recipientItems} />}
       {isTwapOrder && <ListTable items={twapItems} />}
+
+      {showRecipientWarning && (
+        <Alert2
+          type="warning"
+          title="Order recipient address differs from order owner."
+          message="Double check the address to prevent fund loss."
+          testID="recipient-warning-alert"
+        />
+      )}
     </YStack>
   )
 }

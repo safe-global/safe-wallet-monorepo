@@ -1,40 +1,39 @@
 export type IconName =
-  | 'face-id'
-  | 'magic'
-  | 'signature'
-  | 'star'
-  | 'twitter-x'
   | 'add-owner'
   | 'address-book'
-  | 'alert-triangle'
+  | 'address-book-empty-list'
   | 'alert'
+  | 'alert-triangle'
   | 'appearance'
   | 'apps'
   | 'arrow-down'
+  | 'arrow-down-1'
   | 'arrow-left'
+  | 'arrow-right'
   | 'arrow-sort'
   | 'arrow-up'
-  | 'arrow-right'
+  | 'arrrow-right'
   | 'batch'
   | 'bell'
   | 'block'
-  | 'blocks-1'
   | 'blocks'
-  | 'bookmark-filled'
+  | 'blocks-1'
   | 'bookmark'
+  | 'bookmark-filled'
   | 'camera'
   | 'chat'
-  | 'check-filled'
-  | 'check-oulined'
   | 'check'
+  | 'check-filled'
+  | 'check-notifications'
+  | 'check-oulined'
   | 'chevron-down'
   | 'chevron-left'
   | 'chevron-right'
   | 'chevron-up'
   | 'clock'
+  | 'close'
   | 'close-filled'
   | 'close-outlined'
-  | 'close'
   | 'code-blocks'
   | 'copy'
   | 'dapp-logo'
@@ -44,16 +43,19 @@ export type IconName =
   | 'double-arrow'
   | 'download'
   | 'dropdown-arrow-small'
-  | 'edit-owner'
   | 'edit'
+  | 'edit-owner'
   | 'element-drag'
   | 'experimental'
   | 'export'
   | 'external-link'
   | 'eye-n'
   | 'eye-off'
+  | 'eye-on'
+  | 'face-id'
   | 'file'
   | 'filter'
+  | 'fingerprint'
   | 'hardware'
   | 'home'
   | 'info'
@@ -63,40 +65,44 @@ export type IconName =
   | 'lightbulb'
   | 'link'
   | 'lock'
+  | 'magic'
   | 'mobile'
   | 'nft'
   | 'options-horizontal'
   | 'options-vertical'
   | 'owners'
   | 'paste'
+  | 'plus'
   | 'plus-filled'
   | 'plus-outlined'
-  | 'plus'
   | 'points'
-  | 'qr-code-1'
   | 'qr-code'
+  | 'qr-code-1'
   | 'question'
   | 'repeat'
   | 'replace-owner'
+  | 'rows'
   | 'rows-1'
   | 'rows-2'
-  | 'rows'
   | 'safe'
-  | 'scan-1'
   | 'scan'
+  | 'scan-1'
   | 'search'
   | 'seed'
   | 'send-to'
   | 'settings'
   | 'share'
-  | 'shield-crossed'
   | 'shield'
+  | 'shield-crossed'
   | 'sign'
+  | 'signature'
+  | 'star'
   | 'tag'
   | 'token'
   | 'transaction-batch'
   | 'transaction-change-settings'
   | 'transaction-contract'
+  | 'transaction-earn'
   | 'transaction-execute'
   | 'transaction-incoming'
   | 'transaction-outgoing'
@@ -105,6 +111,7 @@ export type IconName =
   | 'transaction-stake'
   | 'transaction-swap'
   | 'transactions'
+  | 'twitter-x'
   | 'unlock'
   | 'update'
   | 'upload'
@@ -112,42 +119,41 @@ export type IconName =
   | 'what-is-new'
 
 export const iconNames: IconName[] = [
-  'face-id',
-  'magic',
-  'signature',
-  'star',
-  'twitter-x',
   'add-owner',
   'address-book',
-  'alert-triangle',
+  'address-book-empty-list',
   'alert',
+  'alert-triangle',
   'appearance',
   'apps',
   'arrow-down',
+  'arrow-down-1',
   'arrow-left',
+  'arrow-right',
   'arrow-sort',
   'arrow-up',
-  'arrow-right',
+  'arrrow-right',
   'batch',
   'bell',
   'block',
-  'blocks-1',
   'blocks',
-  'bookmark-filled',
+  'blocks-1',
   'bookmark',
+  'bookmark-filled',
   'camera',
   'chat',
-  'check-filled',
-  'check-oulined',
   'check',
+  'check-filled',
+  'check-notifications',
+  'check-oulined',
   'chevron-down',
   'chevron-left',
   'chevron-right',
   'chevron-up',
   'clock',
+  'close',
   'close-filled',
   'close-outlined',
-  'close',
   'code-blocks',
   'copy',
   'dapp-logo',
@@ -157,16 +163,19 @@ export const iconNames: IconName[] = [
   'double-arrow',
   'download',
   'dropdown-arrow-small',
-  'edit-owner',
   'edit',
+  'edit-owner',
   'element-drag',
   'experimental',
   'export',
   'external-link',
   'eye-n',
   'eye-off',
+  'eye-on',
+  'face-id',
   'file',
   'filter',
+  'fingerprint',
   'hardware',
   'home',
   'info',
@@ -176,40 +185,44 @@ export const iconNames: IconName[] = [
   'lightbulb',
   'link',
   'lock',
+  'magic',
   'mobile',
   'nft',
   'options-horizontal',
   'options-vertical',
   'owners',
   'paste',
+  'plus',
   'plus-filled',
   'plus-outlined',
-  'plus',
   'points',
-  'qr-code-1',
   'qr-code',
+  'qr-code-1',
   'question',
   'repeat',
   'replace-owner',
+  'rows',
   'rows-1',
   'rows-2',
-  'rows',
   'safe',
-  'scan-1',
   'scan',
+  'scan-1',
   'search',
   'seed',
   'send-to',
   'settings',
   'share',
-  'shield-crossed',
   'shield',
+  'shield-crossed',
   'sign',
+  'signature',
+  'star',
   'tag',
   'token',
   'transaction-batch',
   'transaction-change-settings',
   'transaction-contract',
+  'transaction-earn',
   'transaction-execute',
   'transaction-incoming',
   'transaction-outgoing',
@@ -218,6 +231,7 @@ export const iconNames: IconName[] = [
   'transaction-stake',
   'transaction-swap',
   'transactions',
+  'twitter-x',
   'unlock',
   'update',
   'upload',

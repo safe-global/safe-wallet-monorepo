@@ -1,7 +1,7 @@
 import React from 'react'
 import { ListRenderItem } from 'react-native'
 import { useSelector } from 'react-redux'
-import { Text } from 'tamagui'
+import { getTokenValue, Text } from 'tamagui'
 
 import { SafeTab } from '@/src/components/SafeTab'
 import { AssetsCard } from '@/src/components/transactions-list/Card/AssetsCard'
@@ -42,7 +42,9 @@ export function TokensContainer() {
         <AssetsCard
           name={item.tokenInfo.name}
           logoUri={item.tokenInfo.logoUri}
-          description={`${formatVisualAmount(item.balance, item.tokenInfo.decimals as number)} ${item.tokenInfo.symbol}`}
+          description={`${formatVisualAmount(item.balance, item.tokenInfo.decimals as number)} ${
+            item.tokenInfo.symbol
+          }`}
           rightNode={
             <Text fontSize="$4" fontWeight={600} color="$color">
               {shouldDisplayPreciseBalance(fiatBalance, 7)
@@ -77,6 +79,7 @@ export function TokensContainer() {
       data={data?.items}
       renderItem={renderItem}
       keyExtractor={(item, index): string => item.tokenInfo.name + index}
+      style={{ marginTop: getTokenValue('$2') }}
     />
   )
 }

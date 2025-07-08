@@ -9,7 +9,6 @@ export const EXTENSION_SERVICE_FILE = 'NotificationService.swift'
 export const FILES_TO_ADD = [
   `NotifeeNotificationServiceExtension-Info.plist`,
   `NotifeeNotificationServiceExtension.entitlements`,
-  'NotificationService.swift',
 ]
 
 export const PODFILE_MODIF_NEEDED = `

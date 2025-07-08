@@ -298,6 +298,7 @@ class NotificationsService {
           channelId: channelId ?? ChannelId.DEFAULT_NOTIFICATION_CHANNEL_ID,
           importance: AndroidImportance.HIGH,
           visibility: AndroidVisibility.PUBLIC,
+          smallIcon: 'ic_notification',
           pressAction: {
             id: PressActionId.OPEN_NOTIFICATIONS_VIEW,
             launchActivity: LAUNCH_ACTIVITY,
