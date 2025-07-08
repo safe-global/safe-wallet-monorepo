@@ -52,7 +52,6 @@ export function SwapOrder({ executionInfo, txInfo, decodedData, txId }: SwapOrde
     })
   }
 
-  console.log('txInfo', txInfo)
   return (
     <YStack gap="$4">
       {isChangingFallbackHandler && <TwapFallbackHandlerWarning />}
