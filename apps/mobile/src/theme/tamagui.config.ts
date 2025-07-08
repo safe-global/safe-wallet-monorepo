@@ -9,7 +9,7 @@ import { inputTheme, inputWithLabelTheme } from '../components/SafeInput/theme'
 import { safeTabTheme } from '@/src/components/SafeTab/theme'
 import { SafeListItemTheme } from '@/src/components/SafeListItem/theme'
 import { alertTheme } from '@/src/components/Alert/theme'
-import { conflictTheme } from '@/src/components/transactions-list/Card/TxConflictingCard/theme'
+
 const DmSansFont = createDmSansFont({
   face: {
     500: { normal: 'DMSans-Medium', italic: 'DMSans-MediumItalic' },
@@ -69,7 +69,6 @@ export const config = createTamagui({
     ...navbarTheme,
     ...safeTabTheme,
     ...inputWithLabelTheme,
-    ...conflictTheme,
     dark_success_light: {},
     light_logo: {
       background: tokens.color.logoBackgroundLight,

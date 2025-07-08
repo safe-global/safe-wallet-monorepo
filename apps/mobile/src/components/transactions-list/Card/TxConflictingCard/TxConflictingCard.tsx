@@ -5,6 +5,7 @@ import { Alert } from '@/src/components/Alert'
 import { TransactionQueuedItem } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { TxCardPress } from '@/src/components/TxInfo/types'
 import { TouchableOpacity, useColorScheme } from 'react-native'
+
 interface TxConflictingCard {
   transactions: TransactionQueuedItem[]
   inQueue?: boolean
@@ -34,7 +35,7 @@ function TxConflictingComponent({ transactions, inQueue, onPress }: TxConflictin
         </View>
       </TouchableOpacity>
 
-      <Theme name="conflict_warning">
+      <Theme name="warning">
         {transactions.map((item, index) => (
           <View
             backgroundColor="$background"

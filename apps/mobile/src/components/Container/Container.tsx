@@ -7,6 +7,9 @@ const StyledYStack = styled(YStack, {
         borderColor: '#303033',
         borderWidth: 1,
       },
+      false: {
+        backgroundColor: '$background',
+      },
     },
     transparent: {
       true: {
