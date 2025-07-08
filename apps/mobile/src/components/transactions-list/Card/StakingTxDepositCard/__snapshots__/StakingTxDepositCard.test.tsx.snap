@@ -15,6 +15,7 @@ exports[`StakingTxDepositCard renders correctly 1`] = `
     style={
       {
         "alignItems": "flex-start",
+        "backgroundColor": "#FFFFFF",
         "borderBottomLeftRadius": 7,
         "borderBottomRightRadius": 7,
         "borderTopLeftRadius": 7,
