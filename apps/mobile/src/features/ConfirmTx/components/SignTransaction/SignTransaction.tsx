@@ -57,12 +57,17 @@ export function SignTransaction() {
     sign()
   }, [sign])
 
+  const retrySignAfterError = useCallback(() => {
+    setSignStepStatus('loading')
+    sign()
+  }, [sign])
+
   if (signStepStatus === 'error') {
-    return <SignError onRetryPress={sign} description="There was an error signing the transaction." />
+    return <SignError onRetryPress={retrySignAfterError} description="There was an error signing the transaction." />
   }
 
   if (isError) {
-    return <SignError onRetryPress={sign} />
+    return <SignError onRetryPress={retrySignAfterError} />
   }
 
   if (isLoading || !data) {
