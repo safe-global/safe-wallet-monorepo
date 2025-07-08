@@ -1,5 +1,5 @@
 import { render, waitFor } from '@/tests/test-utils'
-import { BridgeReceiverWarnings } from '../BridgeReceiverWarnings'
+import { BridgeRecipientWarnings, BridgeWarnings } from '../BridgeRecipientWarnings'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import * as useSafeInfoHook from '@/hooks/useSafeInfo'
 import * as useChainsHook from '@/hooks/useChains'
@@ -10,6 +10,7 @@ import { type ReplayedSafeProps } from '@safe-global/utils/features/counterfactu
 import { type AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import * as useSafesGetSafeV1QueryHook from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import * as useAddressBookHook from '@/hooks/useAddressBook'
+import * as useOwnedSafesHook from '@/hooks/useOwnedSafes'
 import { faker } from '@faker-js/faker'
 
 const mockSafeInfo = extendedSafeInfoBuilder().build()
@@ -39,7 +40,7 @@ const mockTxInfo: BridgeAndSwapTransactionInfo = {
   toAmount: null,
 }
 
-describe('BridgeReceiverWarnings', () => {
+describe('BridgeRecipientWarnings', () => {
   beforeEach(() => {
     jest.spyOn(useSafeInfoHook, 'default').mockImplementation(() => ({
       safe: mockSafeInfo,
@@ -70,6 +71,10 @@ describe('BridgeReceiverWarnings', () => {
     }))
 
     jest.spyOn(useAddressBookHook, 'default').mockImplementation(() => ({}))
+
+    jest.spyOn(useOwnedSafesHook, 'default').mockImplementation(() => ({
+      [mockDestinationChain.chainId]: [faker.finance.ethereumAddress(), faker.finance.ethereumAddress()],
+    }))
   })
 
   it('should not show warning when bridging to same address with same setup', async () => {
@@ -87,7 +92,7 @@ describe('BridgeReceiverWarnings', () => {
       refetch: jest.fn(),
     }))
 
-    const { container } = render(<BridgeReceiverWarnings txInfo={mockTxInfo} />)
+    const { container } = render(<BridgeRecipientWarnings txInfo={mockTxInfo} />)
     await waitFor(() => {
       expect(container).toBeEmptyDOMElement()
     })
@@ -112,14 +117,10 @@ describe('BridgeReceiverWarnings', () => {
       refetch: jest.fn(),
     }))
 
-    const { getByText } = render(<BridgeReceiverWarnings txInfo={mockTxInfo} />)
+    const { getByText } = render(<BridgeRecipientWarnings txInfo={mockTxInfo} />)
     await waitFor(() => {
       expect(getByText('Different Safe setup on target chain')).toBeInTheDocument()
-      expect(
-        getByText(
-          'Your Safe exists on the target chain but with a different configuration. Review carefully before proceeding. Funds sent may be inaccessible if the setup is incorrect.',
-        ),
-      ).toBeInTheDocument()
+      expect(getByText(BridgeWarnings.DIFFERENT_SETUP.description)).toBeInTheDocument()
     })
   })
 
@@ -128,14 +129,10 @@ describe('BridgeReceiverWarnings', () => {
       .spyOn(useSafeCreationDataHook, 'useSafeCreationData')
       .mockImplementation(() => [undefined, new Error('Not supported'), false] as AsyncResult<ReplayedSafeProps>)
 
-    const { getByText } = render(<BridgeReceiverWarnings txInfo={mockTxInfo} />)
+    const { getByText } = render(<BridgeRecipientWarnings txInfo={mockTxInfo} />)
     await waitFor(() => {
       expect(getByText('Incompatible Safe version')).toBeInTheDocument()
-      expect(
-        getByText(
-          'This Safe account cannot add new networks. You will not be able to claim ownership of the same address on other networks. Funds sent may be inaccessible.',
-        ),
-      ).toBeInTheDocument()
+      expect(getByText(BridgeWarnings.NO_MULTICHAIN_SUPPORT.description)).toBeInTheDocument()
     })
   })
 
@@ -172,14 +169,10 @@ describe('BridgeReceiverWarnings', () => {
       refetch: jest.fn(),
     }))
 
-    const { getByText } = render(<BridgeReceiverWarnings txInfo={mockTxInfo} />)
+    const { getByText } = render(<BridgeRecipientWarnings txInfo={mockTxInfo} />)
     await waitFor(() => {
       expect(getByText('No ownership on target chain')).toBeInTheDocument()
-      expect(
-        getByText(
-          'This Safe account is not activated on the target chain. First, create the Safe, execute a test transaction, and then proceed with bridging. Funds sent may be inaccessible.',
-        ),
-      ).toBeInTheDocument()
+      expect(getByText(BridgeWarnings.SAFE_NOT_DEPLOYED.description)).toBeInTheDocument()
     })
   })
 
@@ -189,14 +182,10 @@ describe('BridgeReceiverWarnings', () => {
       recipient: { value: '0x0000000000000000000000000000000000000001' },
     }
 
-    const { getByText } = render(<BridgeReceiverWarnings txInfo={differentAddressTxInfo} />)
+    const { getByText } = render(<BridgeRecipientWarnings txInfo={differentAddressTxInfo} />)
     await waitFor(() => {
       expect(getByText('Unknown address')).toBeInTheDocument()
-      expect(
-        getByText(
-          'The receiver is not a Safe you own or a known recipient in your address book. If this address is incorrect, your funds could be lost permanently.',
-        ),
-      ).toBeInTheDocument()
+      expect(getByText(BridgeWarnings.DIFFERENT_ADDRESS.description)).toBeInTheDocument()
     })
   })
 
@@ -215,7 +204,24 @@ describe('BridgeReceiverWarnings', () => {
       return {}
     })
 
-    const { container } = render(<BridgeReceiverWarnings txInfo={differentAddressTxInfo} />)
+    const { container } = render(<BridgeRecipientWarnings txInfo={differentAddressTxInfo} />)
+    await waitFor(() => {
+      expect(container).toBeEmptyDOMElement()
+    })
+  })
+
+  it('should not show warning when bridging to different address that is owned on target chain', async () => {
+    const ownedAddress = faker.finance.ethereumAddress()
+    const differentAddressTxInfo = {
+      ...mockTxInfo,
+      recipient: { value: ownedAddress },
+    }
+
+    jest.spyOn(useOwnedSafesHook, 'default').mockImplementation(() => ({
+      [mockDestinationChain.chainId]: [faker.finance.ethereumAddress(), ownedAddress, faker.finance.ethereumAddress()],
+    }))
+
+    const { container } = render(<BridgeRecipientWarnings txInfo={differentAddressTxInfo} />)
     await waitFor(() => {
       expect(container).toBeEmptyDOMElement()
     })
@@ -227,14 +233,10 @@ describe('BridgeReceiverWarnings', () => {
       toChain: mockUnsupportedChain.chainId,
     }
 
-    const { getByText } = render(<BridgeReceiverWarnings txInfo={unsupportedChainTxInfo} />)
+    const { getByText } = render(<BridgeRecipientWarnings txInfo={unsupportedChainTxInfo} />)
     await waitFor(() => {
       expect(getByText('The target network is not supported')).toBeInTheDocument()
-      expect(
-        getByText(
-          'app.safe.global does not support the network. Unless you have a wallet deployed there, we recommend not to bridge. Funds sent may be inaccessible.',
-        ),
-      ).toBeInTheDocument()
+      expect(getByText(BridgeWarnings.UNKNOWN_CHAIN.description)).toBeInTheDocument()
     })
   })
 })
