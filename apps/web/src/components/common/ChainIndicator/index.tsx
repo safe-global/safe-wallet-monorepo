@@ -23,7 +23,7 @@ type ChainIndicatorProps = {
 }
 
 const fallbackChainConfig = {
-  chainName: 'Unknown chain',
+  chainName: 'Unknown network',
   chainId: '-1',
   theme: {
     backgroundColor: '#ddd',
@@ -69,7 +69,16 @@ const ChainIndicator = ({
       loading="lazy"
     />
   ) : (
-    <SvgIcon component={UnknownChainIcon} inheritViewBox sx={{ height: imageSize, width: imageSize }} />
+    <SvgIcon
+      component={UnknownChainIcon}
+      inheritViewBox
+      sx={{
+        height: imageSize,
+        width: imageSize,
+        backgroundColor: (theme) => theme.palette.background.main,
+        borderRadius: '100%',
+      }}
+    />
   )
 
   return noChains ? (

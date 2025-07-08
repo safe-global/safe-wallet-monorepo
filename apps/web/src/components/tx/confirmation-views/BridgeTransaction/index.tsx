@@ -12,13 +12,14 @@ import { formatAmount } from '@safe-global/utils/utils/formatNumber'
 import { formatUnits } from 'ethers'
 import { BridgeRecipientWarnings } from './BridgeRecipientWarnings'
 import ExternalLink from '@/components/common/ExternalLink'
+import css from './styles.module.css'
 
 interface BridgeTransactionProps {
   txInfo: BridgeAndSwapTransactionInfo
   showWarnings?: boolean
 }
 
-const BridgeTxReceiverRow = ({ txInfo }: BridgeTransactionProps) => {
+const BridgeTxRecipientRow = ({ txInfo }: BridgeTransactionProps) => {
   return (
     <DataRow datatestid="recipient" key="recipient" title="Recipient">
       <Stack>
@@ -26,7 +27,9 @@ const BridgeTxReceiverRow = ({ txInfo }: BridgeTransactionProps) => {
           address={txInfo.recipient.value}
           showCopyButton
           hasExplorer
-          avatarSize={24}
+          showAvatar={false}
+          onlyName
+          showPrefix
           chainId={txInfo.toChain}
         />
       </Stack>
@@ -158,7 +161,7 @@ function BridgeTransaction({ txInfo, showWarnings = false }: BridgeTransactionPr
     )
   }
   rows.push(
-    <BridgeTxReceiverRow txInfo={txInfo} />,
+    <BridgeTxRecipientRow txInfo={txInfo} />,
     <DataRow datatestid="total-fee" key="fees" title="Fees">
       {formatAmount(totalFee)} {txInfo.fromToken.symbol}
     </DataRow>,
@@ -167,7 +170,9 @@ function BridgeTransaction({ txInfo, showWarnings = false }: BridgeTransactionPr
   if (txInfo.explorerUrl) {
     rows.push(
       <DataRow datatestid="lifi-explorer-url" key="lifi-explorer-url" title="Lifi Explorer">
-        <ExternalLink href={txInfo.explorerUrl}>View in LiFi explorer</ExternalLink>
+        <ExternalLink className={css.externalLink} href={txInfo.explorerUrl}>
+          View in LiFi Explorer
+        </ExternalLink>
       </DataRow>,
     )
   }
