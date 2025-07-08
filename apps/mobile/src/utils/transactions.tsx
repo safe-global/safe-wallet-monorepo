@@ -10,6 +10,8 @@ import {
   isVaultDepositTxInfo,
   isVaultRedeemTxInfo,
   isStakingTxDepositInfo,
+  isStakingTxExitInfo,
+  isStakingTxWithdrawInfo,
   isCancellationTxInfo,
 } from '@/src/utils/transaction-guards'
 import { Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
@@ -46,6 +48,14 @@ export const getTransactionType = ({ txInfo }: { txInfo: Transaction['txInfo'] }
 
   if (isStakingTxDepositInfo(txInfo)) {
     return ETxType.STAKE_DEPOSIT
+  }
+
+  if (isStakingTxExitInfo(txInfo)) {
+    return ETxType.STAKE_WITHDRAW_REQUEST
+  }
+
+  if (isStakingTxWithdrawInfo(txInfo)) {
+    return ETxType.STAKE_EXIT
   }
 
   if (isVaultDepositTxInfo(txInfo)) {

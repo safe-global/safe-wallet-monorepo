@@ -1,8 +1,17 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`StakingTxWithdrawCard renders correctly 1`] = `
+exports[`StakingTxWithdrawCard matches snapshot 1`] = `
 <View>
   <View
+    onBlur={[Function]}
+    onClick={[Function]}
+    onFocus={[Function]}
+    onResponderGrant={[Function]}
+    onResponderMove={[Function]}
+    onResponderRelease={[Function]}
+    onResponderTerminate={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
     style={
       {
         "alignItems": "flex-start",
@@ -104,7 +113,7 @@ exports[`StakingTxWithdrawCard renders correctly 1`] = `
                 onLoad={[Function]}
                 source={
                   {
-                    "uri": "https://example.com/eth-logo.png",
+                    "uri": "https://safe-transaction-assets.safe.global/chains/1/chain_logo.png",
                   }
                 }
                 style={
@@ -243,7 +252,7 @@ exports[`StakingTxWithdrawCard renders correctly 1`] = `
         suppressHighlighting={true}
         testID="token-amount"
       >
-        1
+        32
          
         ETH
       </Text>

@@ -1,8 +1,17 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`StakingTxExitCard renders correctly 1`] = `
+exports[`StakingTxExitCard matches snapshot 1`] = `
 <View>
   <View
+    onBlur={[Function]}
+    onClick={[Function]}
+    onFocus={[Function]}
+    onResponderGrant={[Function]}
+    onResponderMove={[Function]}
+    onResponderRelease={[Function]}
+    onResponderTerminate={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
     style={
       {
         "alignItems": "flex-start",
@@ -104,7 +113,7 @@ exports[`StakingTxExitCard renders correctly 1`] = `
                 onLoad={[Function]}
                 source={
                   {
-                    "uri": "https://example.com/eth-logo.png",
+                    "uri": "https://safe-transaction-assets.safe.global/chains/1/chain_logo.png",
                   }
                 }
                 style={
@@ -243,9 +252,8 @@ exports[`StakingTxExitCard renders correctly 1`] = `
         }
         suppressHighlighting={true}
       >
-        2
+        1
          Validator
-        s
       </Text>
     </View>
   </View>

@@ -3,7 +3,10 @@ import { TokenAmount } from '@/src/components/TokenAmount'
 import { formatCurrency } from '@safe-global/utils/utils/formatNumber'
 import { formatDurationFromMilliseconds } from '@safe-global/utils/utils/formatters'
 import { Text, View } from 'tamagui'
-import { NativeStakingDepositTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import {
+  NativeStakingDepositTransactionInfo,
+  NativeStakingValidatorsExitTransactionInfo,
+} from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { ListTableItem } from '../../ListTable'
 
 const CURRENCY = 'USD'
@@ -71,6 +74,37 @@ export const formatStakingValidatorItems = (txInfo: NativeStakingDepositTransact
     {
       label: 'Rewards',
       value: 'Approx. every 5 days after activation',
+    },
+  ]
+}
+
+export const formatStakingWithdrawRequestItems = (
+  txInfo: NativeStakingValidatorsExitTransactionInfo,
+): ListTableItem[] => {
+  const withdrawIn = formatDurationFromMilliseconds(txInfo.estimatedExitTime + txInfo.estimatedWithdrawalTime, [
+    'days',
+    'hours',
+  ])
+
+  return [
+    {
+      label: 'Exit',
+      value: `${txInfo.numValidators} Validator${txInfo.numValidators !== 1 ? 's' : ''}`,
+    },
+    {
+      label: 'Receive',
+      render: () => (
+        <TokenAmount
+          value={txInfo.value}
+          tokenSymbol={txInfo.tokenInfo.symbol}
+          decimals={txInfo.tokenInfo.decimals}
+          textProps={{ fontWeight: 600 }}
+        />
+      ),
+    },
+    {
+      label: 'Withdraw in',
+      value: `Up to ${withdrawIn}`,
     },
   ]
 }

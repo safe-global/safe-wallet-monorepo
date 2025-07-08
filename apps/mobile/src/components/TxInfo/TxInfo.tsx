@@ -119,11 +119,11 @@ function TxInfoComponent({ tx, onPress, ...rest }: TxInfoProps) {
   }
 
   if (isStakingTxExitInfo(txInfo)) {
-    return <StakingTxExitCard info={txInfo} {...rest} />
+    return <StakingTxExitCard info={txInfo} onPress={onCardPress} {...rest} />
   }
 
   if (isStakingTxWithdrawInfo(txInfo)) {
-    return <StakingTxWithdrawCard info={txInfo} {...rest} />
+    return <StakingTxWithdrawCard info={txInfo} onPress={onCardPress} {...rest} />
   }
 
   if (isVaultDepositTxInfo(txInfo)) {

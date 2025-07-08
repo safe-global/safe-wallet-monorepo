@@ -111,7 +111,9 @@ export const storeKeys = async (data: LegacyDataStructure, dispatch: AppDispatch
 
       Logger.info(`Imported signer: ${address}`)
     } catch (error) {
-      Logger.error(`Failed to import signer ${key.address}:`, error)
+      Logger.error('Failed to import signer during data import', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+      })
     }
   }
 }
