@@ -180,13 +180,13 @@ export function useBiometrics() {
   const getBiometricsUIInfo = useCallback(() => {
     switch (biometricsType) {
       case 'FACE_ID':
-        return { label: 'Biometrics', icon: 'face-id' }
+        return { label: 'Enable biometrics', icon: 'face-id' }
       case 'TOUCH_ID':
-        return { label: 'Biometrics', icon: 'fingerprint' }
+        return { label: 'Enable biometrics', icon: 'fingerprint' }
       case 'FINGERPRINT':
-        return { label: 'Biometrics', icon: 'fingerprint' }
+        return { label: 'Enable biometrics', icon: 'fingerprint' }
       default:
-        return { label: 'Biometrics', icon: 'face-id' }
+        return { label: 'Enable biometrics', icon: 'face-id' }
     }
   }, [biometricsType])
 
