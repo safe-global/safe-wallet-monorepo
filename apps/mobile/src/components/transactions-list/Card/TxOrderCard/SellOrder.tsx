@@ -6,28 +6,20 @@ import React from 'react'
 import {
   SwapOrderTransactionInfo,
   SwapTransferTransactionInfo,
-  Transaction,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { SafeListItemProps } from '@/src/components/SafeListItem/SafeListItem'
 
-interface TxSellOrderCardProps {
+type TxSellOrderCardProps = {
   order: SwapOrderTransactionInfo | SwapTransferTransactionInfo
-  bordered?: boolean
-  inQueue?: boolean
-  executionInfo?: Transaction['executionInfo']
-  onPress: () => void
   type: string
-}
+} & Partial<SafeListItemProps>
 
-export function SellOrder({ order, type, bordered, executionInfo, inQueue, onPress }: TxSellOrderCardProps) {
+export function SellOrder({ order, type, ...rest }: TxSellOrderCardProps) {
   return (
     <SafeListItem
       label={`${order.sellToken.symbol} > ${order.buyToken.symbol}`}
       icon="transaction-swap"
       type={type}
-      executionInfo={executionInfo}
-      bordered={bordered}
-      onPress={onPress}
-      inQueue={inQueue}
       leftNode={
         <Theme name="logo">
           <View position="relative" width="$10" height="$10">
@@ -61,6 +53,7 @@ export function SellOrder({ order, type, bordered, executionInfo, inQueue, onPre
           </Text>
         </View>
       }
+      {...rest}
     />
   )
 }

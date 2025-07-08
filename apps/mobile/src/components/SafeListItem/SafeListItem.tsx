@@ -9,7 +9,7 @@ import { Badge } from '../Badge'
 import { Tag } from '../Tag'
 import { ProposalBadge } from '../ProposalBadge'
 
-interface SafeListItemProps {
+export interface SafeListItemProps {
   type?: string
   label: string | React.ReactNode
   icon?: IconProps['name']

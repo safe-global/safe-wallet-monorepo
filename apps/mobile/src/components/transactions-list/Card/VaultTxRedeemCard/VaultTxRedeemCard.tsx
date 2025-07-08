@@ -1,30 +1,24 @@
-import { Transaction, VaultRedeemTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { VaultRedeemTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { TokenAmount } from '@/src/components/TokenAmount'
 import { SafeListItem } from '@/src/components/SafeListItem'
 import { TokenIcon } from '@/src/components/TokenIcon'
+import { SafeListItemProps } from '@/src/components/SafeListItem/SafeListItem'
 
-interface VaultTxRedeemCardProps {
-  bordered?: boolean
-  inQueue?: boolean
+type VaultTxRedeemCardProps = {
   info: VaultRedeemTransactionInfo
-  executionInfo?: Transaction['executionInfo']
-  onPress?: () => void
-}
+} & Partial<SafeListItemProps>
 
-export const VaultTxRedeemCard = ({ info, bordered, executionInfo, inQueue, onPress }: VaultTxRedeemCardProps) => {
+export const VaultTxRedeemCard = ({ info, ...rest }: VaultTxRedeemCardProps) => {
   return (
     <SafeListItem
       label={'Withdraw'}
       icon="transaction-earn"
       type={'Earn'}
-      onPress={onPress}
-      bordered={bordered}
-      executionInfo={executionInfo}
-      inQueue={inQueue}
       rightNode={
         <TokenAmount value={info.value} tokenSymbol={info.tokenInfo.symbol} decimals={info.tokenInfo.decimals} />
       }
       leftNode={<TokenIcon logoUri={info.tokenInfo.logoUri} accessibilityLabel={info.tokenInfo.symbol} />}
+      {...rest}
     />
   )
 }
