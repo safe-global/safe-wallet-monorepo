@@ -6,7 +6,7 @@ import type { RootState } from '@/src/store'
 type StoreLike = Pick<Store<RootState>, 'dispatch' | 'getState'>
 import { selectSafeInfo } from '@/src/store/safesSlice'
 import { selectSigners } from '@/src/store/signersSlice'
-import { selectFirstDelegateForAnySafeOwner } from '@/src/store/delegatesSlice'
+import { selectAllDelegatesForSafeOwners, selectFirstDelegateForAnySafeOwner } from '@/src/store/delegatesSlice'
 import { notificationChannels, withTimeout, getSigner } from '@/src/utils/notifications'
 import { getAccountType } from '@/src/utils/notifications/accountType'
 import FCMService from './FCMService'
@@ -40,21 +40,46 @@ export const getNotificationAccountType = (safeAddress: string) => {
 
 export async function registerSafe(store: StoreLike, address: string, chainIds: string[]): Promise<void> {
   try {
-    const delegate = selectFirstDelegateForAnySafeOwner(store.getState(), address as `0x${string}`)
-    const { signer } = await getDelegateSigner(delegate)
+    const allDelegates = selectAllDelegatesForSafeOwners(store.getState(), address as `0x${string}`)
     const { accountType } = getNotificationAccountType(address)
 
     const fcmToken = await FCMService.initNotification()
     await withTimeout(NotificationService.createChannel(notificationChannels[0]), 5000)
 
-    await registerForNotificationsOnBackEnd({
-      safeAddress: address,
-      signer,
-      chainIds,
-      fcmToken: fcmToken || '',
-      notificationAccountType: accountType,
-    })
+    // If no delegates found, try to register without a signer (for owner-based notifications)
+    if (allDelegates.length === 0) {
+      Logger.warn(`No delegates found for Safe ${address}, registering without delegate signer`)
+      await registerForNotificationsOnBackEnd({
+        safeAddress: address,
+        signer: null,
+        chainIds,
+        fcmToken: fcmToken || '',
+        notificationAccountType: accountType,
+      })
+    } else {
+      // Register each delegate for notifications
+      const registrationPromises = allDelegates.map(async (delegate) => {
+        try {
+          const { signer } = await getDelegateSigner(delegate)
+          await registerForNotificationsOnBackEnd({
+            safeAddress: address,
+            signer,
+            chainIds,
+            fcmToken: fcmToken || '',
+            notificationAccountType: accountType,
+          })
+          Logger.info(`Successfully registered delegate ${delegate.delegateAddress} for Safe ${address}`)
+        } catch (err) {
+          Logger.error(`Failed to register delegate ${delegate.delegateAddress} for Safe ${address}`, err)
+          // Don't throw here - we want to continue with other delegates
+        }
+      })
 
+      // Wait for all registrations to complete
+      await Promise.allSettled(registrationPromises)
+    }
+
+    // Update subscription status for all chains
     chainIds.forEach((chainId) =>
       store.dispatch(setSafeSubscriptionStatus({ safeAddress: address, chainId, subscribed: true })),
     )

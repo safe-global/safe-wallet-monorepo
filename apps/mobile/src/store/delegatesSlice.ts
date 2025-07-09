@@ -64,6 +64,38 @@ export const selectDelegates = (state: RootState): DelegatesSliceState => state.
 export const selectDelegatesByOwner = (state: RootState, ownerAddress: string) => state.delegates[ownerAddress] || {}
 
 /**
+ * Gets all delegates for all owners of a Safe
+ * @param state Redux state
+ * @param safeAddress Safe address to check owners for
+ * @returns Array of all delegates found for all owners
+ */
+export const selectAllDelegatesForSafeOwners = (state: RootState, safeAddress: Address) => {
+  const safeInfoItem = selectSafeInfo(state, safeAddress)
+  if (!safeInfoItem) {
+    return []
+  }
+
+  // Collect all unique owners across all chain deployments
+  const allOwners = new Set<string>()
+  Object.values(safeInfoItem).forEach((deployment) => {
+    deployment.owners.forEach((owner) => allOwners.add(owner.value))
+  })
+
+  // Collect all delegates for all owners
+  const allDelegates: { owner: string; delegateAddress: string }[] = []
+  for (const ownerAddress of allOwners) {
+    const delegates = selectDelegatesByOwner(state, ownerAddress)
+    const delegateAddresses = Object.keys(delegates)
+
+    for (const delegateAddress of delegateAddresses) {
+      allDelegates.push({ owner: ownerAddress, delegateAddress })
+    }
+  }
+
+  return allDelegates
+}
+
+/**
  * Finds the first delegate for any owner of a safe
  * @param state Redux state
  * @param safeAddress Safe address to check owners for
