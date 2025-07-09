@@ -11,6 +11,7 @@ import { formatPercentage } from '@safe-global/utils/utils/formatters'
 import { ParametersButton } from '../../ParametersButton'
 import { vaultTypeToLabel, formatVaultDepositItems } from './utils'
 import { Container } from '@/src/components/Container'
+import { Image } from 'expo-image'
 
 const AdditionalRewards = ({ txInfo }: { txInfo: VaultDepositTransactionInfo }) => {
   const reward = txInfo.additionalRewards[0]
@@ -41,6 +42,7 @@ const AdditionalRewards = ({ txInfo }: { txInfo: VaultDepositTransactionInfo }) 
         <Text fontSize={12} color="$colorSecondary">
           Powered by
         </Text>
+        <Image source={{ uri: txInfo.vaultInfo.logoUri }} style={{ width: 16, height: 16 }} />
         <Text fontSize={12} color="$colorSecondary">
           Morpho
         </Text>
