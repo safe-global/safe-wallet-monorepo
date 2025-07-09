@@ -1750,6 +1750,28 @@
         "tags": ["notifications"]
       }
     },
+    "/v2/notifications/subscriptions": {
+      "delete": {
+        "operationId": "notificationsDeleteAllSubscriptionsV2",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeleteAllSubscriptionsDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": ["notifications"]
+      }
+    },
     "/v2/chains/{chainId}/notifications/devices/{deviceUuid}": {
       "delete": {
         "operationId": "notificationsDeleteDeviceV2",
@@ -1937,6 +1959,7 @@
     },
     "/v1/register/notifications": {
       "post": {
+        "deprecated": true,
         "operationId": "notificationsRegisterDeviceV1",
         "parameters": [],
         "requestBody": {
@@ -1954,11 +1977,13 @@
             "description": ""
           }
         },
+        "summary": "",
         "tags": ["notifications"]
       }
     },
     "/v1/chains/{chainId}/notifications/devices/{uuid}": {
       "delete": {
+        "deprecated": true,
         "operationId": "notificationsUnregisterDeviceV1",
         "parameters": [
           {
@@ -1983,11 +2008,13 @@
             "description": ""
           }
         },
+        "summary": "",
         "tags": ["notifications"]
       }
     },
     "/v1/chains/{chainId}/notifications/devices/{uuid}/safes/{safeAddress}": {
       "delete": {
+        "deprecated": true,
         "operationId": "notificationsUnregisterSafeV1",
         "parameters": [
           {
@@ -2020,6 +2047,7 @@
             "description": ""
           }
         },
+        "summary": "",
         "tags": ["notifications"]
       }
     },
@@ -2226,6 +2254,9 @@
               }
             }
           },
+          "400": {
+            "description": "Address book items limit exceeded."
+          },
           "401": {
             "description": "Signer address not provided"
           },
@@ -2234,6 +2265,41 @@
           },
           "404": {
             "description": "User, member or space not found"
+          }
+        },
+        "tags": ["spaces"]
+      }
+    },
+    "/v1/spaces/{spaceId}/address-book/{address}": {
+      "delete": {
+        "operationId": "addressBooksDeleteByAddressV1",
+        "parameters": [
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "address",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Address book item deleted"
+          },
+          "403": {
+            "description": "Signer address not present or not authorized"
+          },
+          "404": {
+            "description": "User, member or Space not found"
           }
         },
         "tags": ["spaces"]
@@ -2793,6 +2859,45 @@
         "tags": ["spaces"]
       }
     },
+    "/v1/spaces/{spaceId}/members/alias": {
+      "patch": {
+        "description": "Update the alias of the authenticated member in a space. Users can only update their own alias.",
+        "operationId": "membersUpdateAliasV1",
+        "parameters": [
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateMemberAliasDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Alias updated"
+          },
+          "403": {
+            "description": "Signer not authorized"
+          },
+          "404": {
+            "description": "Signer, space or member not found"
+          }
+        },
+        "summary": "Update member alias",
+        "tags": ["spaces"]
+      }
+    },
     "/v1/spaces/{spaceId}/members/{userId}": {
       "delete": {
         "operationId": "membersRemoveUserV1",
@@ -2872,6 +2977,7 @@
     },
     "/v1/owners/{ownerAddress}/safes": {
       "get": {
+        "deprecated": true,
         "operationId": "ownersGetAllSafesByOwnerV1",
         "parameters": [
           {
@@ -2895,6 +3001,7 @@
             }
           }
         },
+        "summary": "Deprecated",
         "tags": ["owners"]
       }
     },
@@ -3385,6 +3492,7 @@
     },
     "/v1/chains/{chainId}/multisig-transactions/{safeTxHash}/raw": {
       "get": {
+        "deprecated": true,
         "operationId": "transactionsGetDomainMultisigTransactionBySafeTxHashV1",
         "parameters": [
           {
@@ -3416,11 +3524,13 @@
             }
           }
         },
+        "summary": "Deprecated",
         "tags": ["transactions"]
       }
     },
     "/v1/chains/{chainId}/safes/{safeAddress}/multisig-transactions/raw": {
       "get": {
+        "deprecated": true,
         "operationId": "transactionsGetDomainMultisigTransactionsV1",
         "parameters": [
           {
@@ -3660,6 +3770,7 @@
             }
           }
         },
+        "summary": "Deprecated",
         "tags": ["transactions"]
       }
     },
@@ -4259,6 +4370,7 @@
     },
     "/v1/chains/{chainId}/safes/{safeAddress}/creation/raw": {
       "get": {
+        "deprecated": true,
         "operationId": "transactionsGetDomainCreationTransactionV1",
         "parameters": [
           {
@@ -4290,6 +4402,7 @@
             }
           }
         },
+        "summary": "Deprecated",
         "tags": ["transactions"]
       }
     }
@@ -5793,6 +5906,35 @@
         },
         "required": ["cloudMessagingToken", "safes", "deviceType"]
       },
+      "DeleteAllSubscriptionItemDto": {
+        "type": "object",
+        "properties": {
+          "chainId": {
+            "type": "string"
+          },
+          "deviceUuid": {
+            "type": "string"
+          },
+          "safeAddress": {
+            "type": "string"
+          }
+        },
+        "required": ["chainId", "deviceUuid", "safeAddress"]
+      },
+      "DeleteAllSubscriptionsDto": {
+        "type": "object",
+        "properties": {
+          "subscriptions": {
+            "minItems": 1,
+            "description": "At least one subscription is required",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DeleteAllSubscriptionItemDto"
+            }
+          }
+        },
+        "required": ["subscriptions"]
+      },
       "TypedDataParameter": {
         "type": "object",
         "properties": {
@@ -6536,6 +6678,10 @@
           "name": {
             "type": "string"
           },
+          "alias": {
+            "type": "string",
+            "nullable": true
+          },
           "invitedBy": {
             "type": "string",
             "nullable": true
@@ -6575,6 +6721,16 @@
           }
         },
         "required": ["role"]
+      },
+      "UpdateMemberAliasDto": {
+        "type": "object",
+        "properties": {
+          "alias": {
+            "type": "string",
+            "description": "The new alias for the member"
+          }
+        },
+        "required": ["alias"]
       },
       "SafeList": {
         "type": "object",
@@ -6917,12 +7073,15 @@
           "type": {
             "type": "string",
             "enum": [
+              "Bridge",
               "Creation",
               "Custom",
               "NativeStakingDeposit",
               "NativeStakingValidatorsExit",
               "NativeStakingWithdraw",
               "SettingsChange",
+              "Swap",
+              "SwapAndBridge",
               "SwapOrder",
               "SwapTransfer",
               "Transfer",
@@ -7353,6 +7512,21 @@
         },
         "required": ["type", "sender", "recipient", "direction", "transferInfo"]
       },
+      "BridgeFee": {
+        "type": "object",
+        "properties": {
+          "tokenAddress": {
+            "type": "string"
+          },
+          "integratorFee": {
+            "type": "string"
+          },
+          "lifiFee": {
+            "type": "string"
+          }
+        },
+        "required": ["tokenAddress", "integratorFee", "lifiFee"]
+      },
       "TokenInfo": {
         "type": "object",
         "properties": {
@@ -7383,6 +7557,94 @@
           }
         },
         "required": ["address", "decimals", "name", "symbol", "trusted"]
+      },
+      "BridgeAndSwapTransactionInfo": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": ["SwapAndBridge"]
+          },
+          "humanDescription": {
+            "type": "string",
+            "nullable": true
+          },
+          "fromToken": {
+            "$ref": "#/components/schemas/TokenInfo"
+          },
+          "recipient": {
+            "$ref": "#/components/schemas/AddressInfo"
+          },
+          "explorerUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "enum": ["NOT_FOUND", "INVALID", "PENDING", "DONE", "FAILED", "UNKNOWN", "AWAITING_EXECUTION"]
+          },
+          "substatus": {
+            "type": "string",
+            "enum": [
+              "WAIT_SOURCE_CONFIRMATIONS",
+              "WAIT_DESTINATION_TRANSACTION",
+              "BRIDGE_NOT_AVAILABLE",
+              "CHAIN_NOT_AVAILABLE",
+              "REFUND_IN_PROGRESS",
+              "UNKNOWN_ERROR",
+              "COMPLETED",
+              "PARTIAL",
+              "REFUNDED",
+              "INSUFFICIENT_ALLOWANCE",
+              "INSUFFICIENT_BALANCE",
+              "OUT_OF_GAS",
+              "EXPIRED",
+              "SLIPPAGE_EXCEEDED",
+              "UNKNOWN_FAILED_ERROR",
+              "UNKNOWN",
+              "AWAITING_EXECUTION"
+            ]
+          },
+          "fees": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/BridgeFee"
+              }
+            ]
+          },
+          "fromAmount": {
+            "type": "string"
+          },
+          "toChain": {
+            "type": "string"
+          },
+          "toToken": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TokenInfo"
+              }
+            ]
+          },
+          "toAmount": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "type",
+          "fromToken",
+          "recipient",
+          "explorerUrl",
+          "status",
+          "substatus",
+          "fees",
+          "fromAmount",
+          "toChain",
+          "toToken",
+          "toAmount"
+        ]
       },
       "SwapOrderTransactionInfo": {
         "type": "object",
@@ -7491,6 +7753,47 @@
           "executedFeeToken",
           "owner"
         ]
+      },
+      "SwapTransactionInfo": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": ["Swap"]
+          },
+          "humanDescription": {
+            "type": "string",
+            "nullable": true
+          },
+          "recipient": {
+            "$ref": "#/components/schemas/AddressInfo"
+          },
+          "fees": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/BridgeFee"
+              }
+            ]
+          },
+          "fromToken": {
+            "$ref": "#/components/schemas/TokenInfo"
+          },
+          "fromAmount": {
+            "type": "string"
+          },
+          "toToken": {
+            "$ref": "#/components/schemas/TokenInfo"
+          },
+          "toAmount": {
+            "type": "string"
+          },
+          "lifiExplorerUrl": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": ["type", "recipient", "fees", "fromToken", "fromAmount", "toToken", "toAmount", "lifiExplorerUrl"]
       },
       "SwapTransferTransactionInfo": {
         "type": "object",
@@ -8384,6 +8687,12 @@
                 "$ref": "#/components/schemas/SwapOrderTransactionInfo"
               },
               {
+                "$ref": "#/components/schemas/BridgeAndSwapTransactionInfo"
+              },
+              {
+                "$ref": "#/components/schemas/SwapTransactionInfo"
+              },
+              {
                 "$ref": "#/components/schemas/SwapTransferTransactionInfo"
               },
               {
@@ -8478,9 +8787,6 @@
           "data": {
             "type": "object"
           },
-          "dataDecoded": {
-            "type": "object"
-          },
           "operation": {
             "type": "number"
           },
@@ -8566,7 +8872,6 @@
           "to",
           "value",
           "data",
-          "dataDecoded",
           "operation",
           "gasToken",
           "safeTxGas",
@@ -8677,6 +8982,12 @@
               },
               {
                 "$ref": "#/components/schemas/SwapOrderTransactionInfo"
+              },
+              {
+                "$ref": "#/components/schemas/BridgeAndSwapTransactionInfo"
+              },
+              {
+                "$ref": "#/components/schemas/SwapTransactionInfo"
               },
               {
                 "$ref": "#/components/schemas/SwapTransferTransactionInfo"
@@ -8921,6 +9232,12 @@
               },
               {
                 "$ref": "#/components/schemas/SwapOrderTransactionInfo"
+              },
+              {
+                "$ref": "#/components/schemas/BridgeAndSwapTransactionInfo"
+              },
+              {
+                "$ref": "#/components/schemas/SwapTransactionInfo"
               },
               {
                 "$ref": "#/components/schemas/SwapTransferTransactionInfo"
@@ -9207,21 +9524,9 @@
           },
           "saltNonce": {
             "type": "object"
-          },
-          "dataDecoded": {
-            "type": "object"
           }
         },
-        "required": [
-          "created",
-          "creator",
-          "transactionHash",
-          "factoryAddress",
-          "masterCopy",
-          "setupData",
-          "saltNonce",
-          "dataDecoded"
-        ]
+        "required": ["created", "creator", "transactionHash", "factoryAddress", "masterCopy", "setupData", "saltNonce"]
       }
     }
   }

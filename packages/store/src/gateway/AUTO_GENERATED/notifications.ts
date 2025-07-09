@@ -36,6 +36,17 @@ const injectedRtkApi = api
         }),
         invalidatesTags: ['notifications'],
       }),
+      notificationsDeleteAllSubscriptionsV2: build.mutation<
+        NotificationsDeleteAllSubscriptionsV2ApiResponse,
+        NotificationsDeleteAllSubscriptionsV2ApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/v2/notifications/subscriptions`,
+          method: 'DELETE',
+          body: queryArg.deleteAllSubscriptionsDto,
+        }),
+        invalidatesTags: ['notifications'],
+      }),
       notificationsDeleteDeviceV2: build.mutation<
         NotificationsDeleteDeviceV2ApiResponse,
         NotificationsDeleteDeviceV2ApiArg
@@ -93,6 +104,10 @@ export type NotificationsDeleteSubscriptionV2ApiArg = {
   chainId: string
   safeAddress: string
 }
+export type NotificationsDeleteAllSubscriptionsV2ApiResponse = unknown
+export type NotificationsDeleteAllSubscriptionsV2ApiArg = {
+  deleteAllSubscriptionsDto: DeleteAllSubscriptionsDto
+}
 export type NotificationsDeleteDeviceV2ApiResponse = unknown
 export type NotificationsDeleteDeviceV2ApiArg = {
   chainId: string
@@ -133,6 +148,15 @@ export type UpsertSubscriptionsDto = {
   deviceType: DeviceType
   deviceUuid?: string | null
 }
+export type DeleteAllSubscriptionItemDto = {
+  chainId: string
+  deviceUuid: string
+  safeAddress: string
+}
+export type DeleteAllSubscriptionsDto = {
+  /** At least one subscription is required */
+  subscriptions: DeleteAllSubscriptionItemDto[]
+}
 export type SafeRegistration = {
   chainId: string
   safes: string[]
@@ -153,6 +177,7 @@ export const {
   useNotificationsGetSafeSubscriptionV2Query,
   useLazyNotificationsGetSafeSubscriptionV2Query,
   useNotificationsDeleteSubscriptionV2Mutation,
+  useNotificationsDeleteAllSubscriptionsV2Mutation,
   useNotificationsDeleteDeviceV2Mutation,
   useNotificationsRegisterDeviceV1Mutation,
   useNotificationsUnregisterDeviceV1Mutation,
