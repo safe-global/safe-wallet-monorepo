@@ -108,6 +108,7 @@ export function ConfirmationView({ txDetails }: ConfirmationViewProps) {
           txId={txDetails.txId}
           executionInfo={txDetails.detailedExecutionInfo as MultisigExecutionDetails}
           txInfo={txDetails.txInfo as VaultDepositTransactionInfo}
+          decodedData={txDetails.txData?.dataDecoded}
         />
       )
     case ETxType.VAULT_REDEEM:

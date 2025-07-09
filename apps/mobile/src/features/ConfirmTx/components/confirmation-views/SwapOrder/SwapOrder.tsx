@@ -8,7 +8,7 @@ import { OrderTransactionInfo } from '@safe-global/store/gateway/types'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { useAppSelector } from '@/src/store/hooks'
 import { selectChainById } from '@/src/store/chains'
-import { isTwapOrderTxInfo } from '@/src/utils/transaction-guards'
+import { isMultiSendData, isTwapOrderTxInfo } from '@/src/utils/transaction-guards'
 import { isSettingTwapFallbackHandler } from '@safe-global/utils/features/swap/helpers/utils'
 import { TwapFallbackHandlerWarning } from '@/src/features/ConfirmTx/components/confirmation-views/SwapOrder/TwapFallbackHandlerWarning'
 import { Alert2 } from '@/src/components/Alert2'
@@ -70,7 +70,7 @@ export function SwapOrder({ executionInfo, txInfo, decodedData, txId }: SwapOrde
         />
       )}
 
-      {decodedData && (
+      {decodedData && isMultiSendData(decodedData) && (
         <SafeListItem
           label="Actions"
           rightNode={

@@ -35,6 +35,7 @@ import type {
   NativeStakingWithdrawTransactionInfo,
   VaultDepositTransactionInfo,
   VaultRedeemTransactionInfo,
+  DataDecoded,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
 import { HistoryTransactionItems, PendingTransactionItems } from '@safe-global/store/gateway/types'
@@ -118,6 +119,10 @@ export const isMultiSendTxInfo = (value: Transaction['txInfo']): value is MultiS
     value.methodName === 'multiSend' &&
     typeof value.actionCount === 'number'
   )
+}
+
+export const isMultiSendData = (value: DataDecoded) => {
+  return value.method === 'multiSend'
 }
 
 export const isSwapOrderTxInfo = (value: TransactionInfo): value is SwapOrderTransactionInfo => {
