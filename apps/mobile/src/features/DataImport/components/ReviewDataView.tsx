@@ -1,11 +1,10 @@
 import React from 'react'
 import { Text, YStack, H2, XStack, ScrollView } from 'tamagui'
 import { SafeButton } from '@/src/components/SafeButton'
-import { StatusBar } from 'expo-status-bar'
-import { ColorSchemeName } from 'react-native'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { Container } from '@/src/components/Container'
 import { Badge } from '@/src/components/Badge'
+import { SafeStatusBar } from '@/src/theme/SafeStatusBar'
 
 interface ImportSummary {
   safeAccountsCount: number
@@ -14,7 +13,6 @@ interface ImportSummary {
 }
 
 interface ReviewDataViewProps {
-  colorScheme: ColorSchemeName
   bottomInset: number
   importSummary: ImportSummary
   isImportDataAvailable: boolean
@@ -22,7 +20,6 @@ interface ReviewDataViewProps {
 }
 
 export const ReviewDataView = ({
-  colorScheme,
   bottomInset,
   importSummary,
   isImportDataAvailable,
@@ -31,7 +28,7 @@ export const ReviewDataView = ({
   return (
     <ScrollView contentContainerStyle={{ flex: 1 }}>
       <YStack flex={1} testID="review-data-screen">
-        <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
+        <SafeStatusBar />
 
         {/* Content */}
         <YStack flex={1} paddingHorizontal="$4" justifyContent="space-between" marginTop={'$4'}>

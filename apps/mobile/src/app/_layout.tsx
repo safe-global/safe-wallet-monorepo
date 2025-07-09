@@ -25,13 +25,13 @@ import { useInitWeb3 } from '@/src/hooks/useInitWeb3'
 import { useInitSafeCoreSDK } from '@/src/hooks/coreSDK/useInitSafeCoreSDK'
 import NotificationsService from '@/src/services/notifications/NotificationService'
 import { startNotificationExtensionSync } from '@/src/services/notifications/extensionSync'
-import { StatusBar } from 'expo-status-bar'
 import { useScreenTracking } from '@/src/hooks/useScreenTracking'
 import { useAnalytics } from '@/src/hooks/useAnalytics'
 import { DataFetchProvider } from '../theme/provider/DataFetchProvider'
 import { Platform } from 'react-native'
 import { config, actions } from '@/src/platform/security'
 import { useFreeRasp } from 'freerasp-react-native'
+import { SafeStatusBar } from '@/src/theme/SafeStatusBar'
 
 Logger.setLevel(__DEV__ ? LogLevel.TRACE : LogLevel.ERROR)
 // Initialize all notification handlers
@@ -200,7 +200,7 @@ function RootLayout() {
                           />
                           <Stack.Screen name="+not-found" />
                         </Stack>
-                        <StatusBar />
+                        <SafeStatusBar />
                       </NavigationGuardHOC>
                     </SafeToastProvider>
                   </BottomSheetModalProvider>
