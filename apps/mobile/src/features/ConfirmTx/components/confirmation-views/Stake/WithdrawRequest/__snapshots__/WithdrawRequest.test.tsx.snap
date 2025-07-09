@@ -494,7 +494,7 @@ exports[`StakingWithdrawRequest matches snapshot 1`] = `
         style={
           {
             "alignItems": "flex-start",
-            "backgroundColor": "#fff0e0",
+            "backgroundColor": "#FFECC2",
             "borderBottomLeftRadius": 5,
             "borderBottomRightRadius": 5,
             "borderTopLeftRadius": 5,
@@ -570,7 +570,7 @@ exports[`StakingWithdrawRequest matches snapshot 1`] = `
           <Text
             style={
               {
-                "color": "#121312",
+                "color": "#6C2D19",
                 "fontFamily": "DM Sans",
                 "fontSize": 13,
               }

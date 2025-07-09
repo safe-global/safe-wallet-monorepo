@@ -50,7 +50,7 @@ exports[`PendingTransactions should render the pending transactions in fullWidth
         style={
           {
             "alignItems": "center",
-            "backgroundColor": "#fff0e0",
+            "backgroundColor": "#FFECC2",
             "borderBottomLeftRadius": 5,
             "borderBottomRightRadius": 5,
             "borderTopLeftRadius": 5,
@@ -96,7 +96,7 @@ exports[`PendingTransactions should render the pending transactions in fullWidth
             <Text
               style={
                 {
-                  "color": "#121312",
+                  "color": "#6C2D19",
                   "fontFamily": "DMSans-SemiBold",
                   "fontSize": 14,
                 }
@@ -117,7 +117,7 @@ exports[`PendingTransactions should render the pending transactions in fullWidth
           <Text
             style={
               {
-                "color": "#121312",
+                "color": "#6C2D19",
                 "fontFamily": "DMSans-SemiBold",
                 "fontSize": 14,
               }
@@ -136,7 +136,7 @@ exports[`PendingTransactions should render the pending transactions in fullWidth
             style={
               [
                 {
-                  "color": "#121312",
+                  "color": "#6C2D19",
                   "fontSize": 20,
                 },
                 undefined,
