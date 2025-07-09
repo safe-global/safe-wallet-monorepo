@@ -87,7 +87,7 @@ describe('useDeployGasLimit hook', () => {
       getContractManager: () =>
         ({
           contractNetworks: {},
-        }) as any,
+        } as any),
       getContractVersion: () => Promise.resolve('1.3.0'),
       createSafeDeploymentTransaction: () =>
         Promise.resolve({

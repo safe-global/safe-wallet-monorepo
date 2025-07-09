@@ -20,7 +20,16 @@ const useMixpanel = () => {
 
     const token = process.env.NEXT_PUBLIC_MIXPANEL_TOKEN
     if (!token) return
-    mixpanel.init(token, { debug: !IS_PRODUCTION, autocapture: true })
+
+    mixpanel.init(token, {
+      debug: !IS_PRODUCTION,
+      autocapture: true,
+      // Enable people tracking for user attributes
+      track_pageview: true,
+      persistence: 'localStorage',
+    })
+
+    // Track initial page view
     mixpanel.track('Page Viewed Safe Test', {
       page: window.location.pathname,
       url: window.location.href,

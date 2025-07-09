@@ -8498,6 +8498,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@react-native-async-storage/async-storage@npm:^1.21.0":
+  version: 1.24.0
+  resolution: "@react-native-async-storage/async-storage@npm:1.24.0"
+  dependencies:
+    merge-options: "npm:^3.0.4"
+  peerDependencies:
+    react-native: ^0.0.0-0 || >=0.60 <1.0
+  checksum: 10/5a6b7ac8bd7a9e537a53a3f2301530c284fd885a45ce4a4e0014859bc0f7c89bee5c4b5a6b3740b8d83751561159b237474d18f32fad75ea7d56d4ddb2180d91
+  languageName: node
+  linkType: hard
+
 "@react-native-clipboard/clipboard@npm:^1.15.0":
   version: 1.15.0
   resolution: "@react-native-clipboard/clipboard@npm:1.15.0"
@@ -9352,6 +9363,7 @@ __metadata:
     jest: "npm:^29.7.0"
     jest-expo: "npm:~53.0.4"
     lodash: "npm:^4.17.21"
+    mixpanel-react-native: "npm:^3.1.2"
     moti: "npm:^0.29.0"
     react: "npm:^19.0.0"
     react-dom: "npm:19.0.0"
@@ -9508,7 +9520,7 @@ __metadata:
     "@yarnpkg/types": "npm:^4.0.1"
     husky: "npm:^9.1.6"
     lint-staged: "npm:^15.2.10"
-    mixpanel-browser: "npm:^2.65.0"
+    mixpanel-browser: "npm:^2.66.0"
     msw: "npm:^2.7.3"
     prettier: "npm:^3.4.2"
   dependenciesMeta:
@@ -9647,7 +9659,7 @@ __metadata:
     "@types/js-cookie": "npm:^3.0.6"
     "@types/lodash": "npm:^4.14.182"
     "@types/mdx": "npm:^2.0.13"
-    "@types/mixpanel-browser": "npm:^2"
+    "@types/mixpanel-browser": "npm:^2.60.0"
     "@types/node": "npm:22.13.1"
     "@types/qrcode": "npm:^1.5.5"
     "@types/react": "npm:^19.0.0"
@@ -13254,7 +13266,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/mixpanel-browser@npm:^2":
+"@types/mixpanel-browser@npm:^2.60.0":
   version: 2.60.0
   resolution: "@types/mixpanel-browser@npm:2.60.0"
   checksum: 10/99c1f4601f5d56e86635237ff086d46593bbe826da1c0ff53e28cec146b63b8a70d15ab7fc0950c955f9e75213bac80299938478d1118c1ca3ac8b46c2b9244a
@@ -20986,6 +20998,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"fast-base64-decode@npm:^1.0.0":
+  version: 1.0.0
+  resolution: "fast-base64-decode@npm:1.0.0"
+  checksum: 10/4c59eb1775a7f132333f296c5082476fdcc8f58d023c42ed6d378d2e2da4c328c7a71562f271181a725dd17cdaa8f2805346cc330cdbad3b8e4b9751508bd0a3
+  languageName: node
+  linkType: hard
+
 "fast-deep-equal@npm:^2.0.1":
   version: 2.0.1
   resolution: "fast-deep-equal@npm:2.0.1"
@@ -26881,6 +26900,26 @@ __metadata:
   languageName: node
   linkType: hard
 
+"mixpanel-browser@npm:^2.66.0":
+  version: 2.66.0
+  resolution: "mixpanel-browser@npm:2.66.0"
+  dependencies:
+    rrweb: "npm:2.0.0-alpha.18"
+  checksum: 10/e968608d9c41e3c8dfdf3ca154e55e483a5f5d4e97533b1698b5153eb247701d8c77825c15a3a7d0dd50e12361828487d8bb61e5b63bce88c4b4c7ad4a39ebc6
+  languageName: node
+  linkType: hard
+
+"mixpanel-react-native@npm:^3.1.2":
+  version: 3.1.2
+  resolution: "mixpanel-react-native@npm:3.1.2"
+  dependencies:
+    "@react-native-async-storage/async-storage": "npm:^1.21.0"
+    react-native-get-random-values: "npm:^1.9.0"
+    uuid: "npm:3.3.2"
+  checksum: 10/d733a3189117707c9c08393ed8f586aaa2c8509008b0b6e9767b114c8f1f368041424dfbb99b236ad2ab0f8c2b2aec9f9cf01ce2e8e41ec66f28c6970239e68a
+  languageName: node
+  linkType: hard
+
 "mkdirp@npm:^0.5.1":
   version: 0.5.6
   resolution: "mkdirp@npm:0.5.6"
@@ -29650,6 +29689,17 @@ __metadata:
     react: "*"
     react-native: "*"
   checksum: 10/780c53e90b41c8bc151c5b4dc908386d5709e7b8e5eaf44e8bbadc02b39d7b07ec15c3865e08f30463bd1fbfcac14a79ff8238752712e6f15a0f98b7a658afd3
+  languageName: node
+  linkType: hard
+
+"react-native-get-random-values@npm:^1.9.0":
+  version: 1.11.0
+  resolution: "react-native-get-random-values@npm:1.11.0"
+  dependencies:
+    fast-base64-decode: "npm:^1.0.0"
+  peerDependencies:
+    react-native: ">=0.56"
+  checksum: 10/eb04833ce2b66309d737f1447ab01ad32aca00a8d1cc4de7b4e751c23f4d9f8059a2643bb16e0b6f3e6b074a9e57e769bb2bf2afc50a912c5661d80a6ce4de34
   languageName: node
   linkType: hard
 
@@ -34608,6 +34658,15 @@ __metadata:
   version: 1.0.1
   resolution: "utils-merge@npm:1.0.1"
   checksum: 10/5d6949693d58cb2e636a84f3ee1c6e7b2f9c16cb1d42d0ecb386d8c025c69e327205aa1c69e2868cc06a01e5e20681fbba55a4e0ed0cce913d60334024eae798
+  languageName: node
+  linkType: hard
+
+"uuid@npm:3.3.2":
+  version: 3.3.2
+  resolution: "uuid@npm:3.3.2"
+  bin:
+    uuid: ./bin/uuid
+  checksum: 10/3834a826020a23fca314116c2becddc7f5d756b0280d630b58a65e700afeefd89d78ae97ddbdea5dcad497666cda6e9b0390ba74508e650d43d83a32d1e7cd19
   languageName: node
   linkType: hard
 
