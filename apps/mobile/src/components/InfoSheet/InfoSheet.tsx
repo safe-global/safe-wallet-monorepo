@@ -11,10 +11,12 @@ export const InfoSheet = ({
   info,
   title,
   displayIcon = true,
+  children,
 }: {
   info: string
   title?: string
   displayIcon?: boolean
+  children?: string | React.ReactElement
 }) => {
   const bottomSheetModalRef = useRef<BottomSheetModal>(null)
   const insets = useSafeAreaInsets()
@@ -28,7 +30,8 @@ export const InfoSheet = ({
   return (
     <>
       <TouchableOpacity onPress={handlePresentModalPress}>
-        <SafeFontIcon name="info" size={16} color="$colorSecondary" />
+        {!children && <SafeFontIcon name="info" size={16} color="$colorSecondary" />}
+        {children}
       </TouchableOpacity>
 
       <BottomSheetModal
