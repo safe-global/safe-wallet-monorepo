@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react'
-import { YStack, Text, XStack } from 'tamagui'
+import { YStack, Text, XStack, View } from 'tamagui'
 import {
+  DataDecoded,
   MultisigExecutionDetails,
   VaultDepositTransactionInfo,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
@@ -11,6 +12,12 @@ import { formatPercentage } from '@safe-global/utils/utils/formatters'
 import { ParametersButton } from '../../ParametersButton'
 import { vaultTypeToLabel, formatVaultDepositItems } from './utils'
 import { Container } from '@/src/components/Container'
+import { Image } from 'expo-image'
+import { isMultiSendData } from '@/src/utils/transaction-guards'
+import { SafeListItem } from '@/src/components/SafeListItem'
+import { Badge } from '@/src/components/Badge'
+import { SafeFontIcon } from '@/src/components/SafeFontIcon'
+import { useRouter } from 'expo-router'
 
 const AdditionalRewards = ({ txInfo }: { txInfo: VaultDepositTransactionInfo }) => {
   const reward = txInfo.additionalRewards[0]
@@ -41,6 +48,7 @@ const AdditionalRewards = ({ txInfo }: { txInfo: VaultDepositTransactionInfo }) 
         <Text fontSize={12} color="$colorSecondary">
           Powered by
         </Text>
+        <Image source={{ uri: txInfo.vaultInfo.logoUri }} style={{ width: 16, height: 16 }} />
         <Text fontSize={12} color="$colorSecondary">
           Morpho
         </Text>
@@ -53,11 +61,20 @@ interface VaultDepositProps {
   txInfo: VaultDepositTransactionInfo
   executionInfo: MultisigExecutionDetails
   txId: string
+  decodedData?: DataDecoded | null
 }
 
-export function VaultDeposit({ txInfo, executionInfo, txId }: VaultDepositProps) {
+export function VaultDeposit({ txInfo, executionInfo, txId, decodedData }: VaultDepositProps) {
+  const router = useRouter()
   const totalNrr = (txInfo.baseNrr + txInfo.additionalRewardsNrr) / 100
   const items = useMemo(() => formatVaultDepositItems(txInfo), [txInfo])
+
+  const handleViewActions = () => {
+    router.push({
+      pathname: '/transaction-actions',
+      params: { txId },
+    })
+  }
 
   return (
     <YStack gap="$4">
@@ -85,6 +102,29 @@ export function VaultDeposit({ txInfo, executionInfo, txId }: VaultDepositProps)
       <AdditionalRewards txInfo={txInfo} />
 
       <Text color="$textSecondaryLight">{txInfo.vaultInfo.description}</Text>
+
+      {decodedData && isMultiSendData(decodedData) && (
+        <SafeListItem
+          label="Actions"
+          rightNode={
+            <View flexDirection="row" alignItems="center" gap="$2">
+              {decodedData.parameters?.[0]?.valueDecoded && (
+                <Badge
+                  themeName="badge_background_inverted"
+                  content={
+                    Array.isArray(decodedData.parameters[0].valueDecoded)
+                      ? decodedData.parameters[0].valueDecoded.length.toString()
+                      : '1'
+                  }
+                />
+              )}
+
+              <SafeFontIcon name={'chevron-right'} />
+            </View>
+          }
+          onPress={handleViewActions}
+        />
+      )}
     </YStack>
   )
 }

@@ -1,5 +1,5 @@
 import React, { useCallback, useRef } from 'react'
-import { BottomSheetView } from '@gorhom/bottom-sheet'
+import { BottomSheetScrollView } from '@gorhom/bottom-sheet'
 import { SafeFontIcon } from '../SafeFontIcon'
 import { BottomSheetModal, TouchableOpacity } from '@gorhom/bottom-sheet'
 import { getVariable, Text, View, useTheme, H4, YStack } from 'tamagui'
@@ -11,10 +11,12 @@ export const InfoSheet = ({
   info,
   title,
   displayIcon = true,
+  children,
 }: {
   info: string
   title?: string
   displayIcon?: boolean
+  children?: string | React.ReactElement
 }) => {
   const bottomSheetModalRef = useRef<BottomSheetModal>(null)
   const insets = useSafeAreaInsets()
@@ -28,7 +30,8 @@ export const InfoSheet = ({
   return (
     <>
       <TouchableOpacity onPress={handlePresentModalPress}>
-        <SafeFontIcon name="info" size={16} color="$colorSecondary" />
+        {!children && <SafeFontIcon name="info" size={16} color="$colorSecondary" />}
+        {children}
       </TouchableOpacity>
 
       <BottomSheetModal
@@ -39,7 +42,7 @@ export const InfoSheet = ({
         enableDynamicSizing
         handleIndicatorStyle={{ backgroundColor: getVariable(theme.borderMain) }}
       >
-        <BottomSheetView style={{ paddingBottom: insets.bottom }}>
+        <BottomSheetScrollView contentContainerStyle={{ paddingBottom: insets.bottom }}>
           <YStack gap="$4" padding="$4" alignItems="center" justifyContent="center">
             {displayIcon && (
               <Badge
@@ -53,7 +56,7 @@ export const InfoSheet = ({
               <Text textAlign="center">{info}</Text>
             </View>
           </YStack>
-        </BottomSheetView>
+        </BottomSheetScrollView>
       </BottomSheetModal>
     </>
   )

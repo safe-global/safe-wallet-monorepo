@@ -4,6 +4,7 @@ import { VaultRedeemTransactionInfo } from '@safe-global/store/gateway/AUTO_GENE
 import { TokenAmount } from '@/src/components/TokenAmount'
 import { formatPercentage } from '@safe-global/utils/utils/formatters'
 import { ListTableItem } from '../../ListTable'
+import { Image } from 'expo-image'
 
 export const formatVaultRedeemItems = (txInfo: VaultRedeemTransactionInfo, totalNrr: number): ListTableItem[] => {
   return [
@@ -21,6 +22,7 @@ export const formatVaultRedeemItems = (txInfo: VaultRedeemTransactionInfo, total
       label: 'Withdraw from',
       render: () => (
         <View flexDirection="row" alignItems="center" gap="$2">
+          <Image source={{ uri: txInfo.vaultInfo.logoUri }} style={{ width: 24, height: 24 }} />
           <Text fontWeight="700" fontSize="$4">
             {txInfo.vaultInfo.name}
           </Text>

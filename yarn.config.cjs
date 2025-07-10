@@ -17,6 +17,7 @@ const DEPS_TO_CHECK = [
   '@safe-global/safe-deployments',
   '@safe-global/safe-gateway-typescript-sdk',
   '@safe-global/safe-modules-deployments',
+  '@cowprotocol/app-data',
 ]
 
 /**

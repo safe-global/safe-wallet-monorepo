@@ -2,14 +2,14 @@ import type { NativeStakingDepositTransactionInfo } from '@safe-global/store/gat
 import { TokenAmount } from '@/src/components/TokenAmount'
 import { SafeListItem } from '@/src/components/SafeListItem'
 import { TokenIcon } from '@/src/components/TokenIcon'
+import { SafeListItemProps } from '@/src/components/SafeListItem/SafeListItem'
 
 export const StakingTxDepositCard = ({
   info,
-  onPress,
+  ...rest
 }: {
   info: NativeStakingDepositTransactionInfo
-  onPress: () => void
-}) => {
+} & Partial<SafeListItemProps>) => {
   return (
     <SafeListItem
       label={`Deposit`}
@@ -19,7 +19,7 @@ export const StakingTxDepositCard = ({
         <TokenAmount value={info.value} tokenSymbol={info.tokenInfo.symbol} decimals={info.tokenInfo.decimals} />
       }
       leftNode={<TokenIcon logoUri={info.tokenInfo.logoUri} accessibilityLabel={info.tokenInfo.symbol} />}
-      onPress={onPress}
+      {...rest}
     />
   )
 }

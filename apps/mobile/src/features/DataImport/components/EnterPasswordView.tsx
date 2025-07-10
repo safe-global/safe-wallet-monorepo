@@ -1,13 +1,12 @@
 import React from 'react'
 import { Text, YStack, H2, XStack, ScrollView } from 'tamagui'
 import { SafeButton } from '@/src/components/SafeButton'
-import { StatusBar } from 'expo-status-bar'
-import { ColorSchemeName, KeyboardAvoidingView } from 'react-native'
+import { KeyboardAvoidingView } from 'react-native'
 import { Alert } from '@/src/components/Alert'
 import { SafeInput } from '@/src/components/SafeInput'
+import { SafeStatusBar } from '@/src/theme/SafeStatusBar'
 
 interface EnterPasswordViewProps {
-  colorScheme: ColorSchemeName
   topInset: number
   bottomInset: number
   password: string
@@ -18,7 +17,6 @@ interface EnterPasswordViewProps {
 }
 
 export const EnterPasswordView = ({
-  colorScheme,
   topInset,
   bottomInset,
   password,
@@ -31,7 +29,7 @@ export const EnterPasswordView = ({
     <KeyboardAvoidingView behavior="padding" style={{ flex: 1 }} keyboardVerticalOffset={bottomInset + topInset}>
       <ScrollView contentContainerStyle={{ flex: 1 }}>
         <YStack flex={1} testID="enter-password-screen">
-          <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
+          <SafeStatusBar />
 
           {/* Content */}
           <YStack flex={1} paddingHorizontal="$4" justifyContent="space-between" marginTop={'$4'}>

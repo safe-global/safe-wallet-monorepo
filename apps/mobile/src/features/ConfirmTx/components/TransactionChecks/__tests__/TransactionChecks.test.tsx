@@ -187,4 +187,14 @@ describe('TransactionChecks', () => {
 
     expect(mockUseTransactionSecurity).toHaveBeenCalledWith(undefined)
   })
+
+  it('should not render bottomContent if security is disabled', () => {
+    const security = createSecurityState({ enabled: false, hasIssues: true })
+    mockUseTransactionSecurity.mockReturnValue(security)
+
+    const { queryByTestId } = render(<TransactionChecks txId="test-tx-id" />)
+
+    const bottomContent = queryByTestId('transaction-checks-bottom-content')
+    expect(bottomContent).toBeNull()
+  })
 })

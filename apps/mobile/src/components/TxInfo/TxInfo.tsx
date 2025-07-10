@@ -30,14 +30,14 @@ import { StakingTxDepositCard } from '../transactions-list/Card/StakingTxDeposit
 import { StakingTxExitCard } from '../transactions-list/Card/StakingTxExitCard'
 import { VaultTxDepositCard } from '@/src/components/transactions-list/Card/VaultTxDepositCard'
 import { VaultTxRedeemCard } from '@/src/components/transactions-list/Card/VaultTxRedeemCard'
-interface TxInfoProps {
-  tx: Transaction
-  bordered?: boolean
-  inQueue?: boolean
-  onPress?: (tx: TxCardPress) => void
-}
+import { SafeListItemProps } from '@/src/components/SafeListItem/SafeListItem'
 
-function TxInfoComponent({ tx, bordered, inQueue, onPress }: TxInfoProps) {
+type TxInfoProps = {
+  tx: Transaction
+  onPress?: (tx: TxCardPress) => void
+} & Partial<SafeListItemProps>
+
+function TxInfoComponent({ tx, onPress, ...rest }: TxInfoProps) {
   const txType = useTransactionType(tx)
   const txInfo = tx.txInfo
 
@@ -53,37 +53,27 @@ function TxInfoComponent({ tx, bordered, inQueue, onPress }: TxInfoProps) {
   if (isTransferTxInfo(txInfo)) {
     return (
       <TxTokenCard
+        onPress={onCardPress}
         executionInfo={tx.executionInfo}
-        inQueue={inQueue}
-        bordered={bordered}
         txInfo={txInfo}
         txStatus={tx.txStatus}
-        onPress={onCardPress}
+        {...rest}
       />
     )
   }
 
   if (isSettingsChangeTxInfo(txInfo)) {
-    return (
-      <TxSettingsCard
-        onPress={onCardPress}
-        executionInfo={tx.executionInfo}
-        inQueue={inQueue}
-        bordered={bordered}
-        txInfo={txInfo}
-      />
-    )
+    return <TxSettingsCard onPress={onCardPress} executionInfo={tx.executionInfo} txInfo={txInfo} {...rest} />
   }
 
   if (isMultiSendTxInfo(txInfo) && tx.txInfo.type === TransactionInfoType.CUSTOM) {
     return (
       <TxBatchCard
-        executionInfo={tx.executionInfo}
-        inQueue={inQueue}
         onPress={onCardPress}
-        bordered={bordered}
+        executionInfo={tx.executionInfo}
         txInfo={txInfo}
         safeAppInfo={tx.safeAppInfo}
+        {...rest}
       />
     )
   }
@@ -91,104 +81,66 @@ function TxInfoComponent({ tx, bordered, inQueue, onPress }: TxInfoProps) {
   if (isMultiSendTxInfo(txInfo) && tx.safeAppInfo) {
     return (
       <TxSafeAppCard
-        executionInfo={tx.executionInfo}
-        inQueue={inQueue}
         onPress={onCardPress}
-        bordered={bordered}
+        executionInfo={tx.executionInfo}
         txInfo={txInfo}
         safeAppInfo={tx.safeAppInfo}
+        {...rest}
       />
     )
   }
 
   if (isCreationTxInfo(txInfo)) {
-    return (
-      <TxCreationCard
-        onPress={onCardPress}
-        executionInfo={tx.executionInfo}
-        inQueue={inQueue}
-        bordered={bordered}
-        txInfo={txInfo}
-      />
-    )
+    return <TxCreationCard onPress={onCardPress} executionInfo={tx.executionInfo} txInfo={txInfo} {...rest} />
   }
 
   if (isCancellationTxInfo(txInfo)) {
-    return (
-      <TxRejectionCard
-        onPress={onCardPress}
-        executionInfo={tx.executionInfo}
-        inQueue={inQueue}
-        bordered={bordered}
-        txInfo={txInfo}
-      />
-    )
+    return <TxRejectionCard onPress={onCardPress} executionInfo={tx.executionInfo} txInfo={txInfo} {...rest} />
   }
 
   if (isMultiSendTxInfo(txInfo) || isCustomTxInfo(txInfo)) {
     return (
       <TxContractInteractionCard
-        executionInfo={tx.executionInfo}
         onPress={onCardPress}
-        inQueue={inQueue}
-        bordered={bordered}
+        executionInfo={tx.executionInfo}
         txInfo={txInfo}
         safeAppInfo={tx.safeAppInfo}
+        {...rest}
       />
     )
   }
 
   if (isOrderTxInfo(txInfo)) {
-    return (
-      <TxOrderCard
-        bordered={bordered}
-        onPress={onCardPress}
-        executionInfo={tx.executionInfo}
-        inQueue={inQueue}
-        txInfo={txInfo}
-      />
-    )
+    return <TxOrderCard onPress={onCardPress} executionInfo={tx.executionInfo} txInfo={txInfo} {...rest} />
   }
 
   if (isStakingTxDepositInfo(txInfo)) {
-    return <StakingTxDepositCard info={txInfo} onPress={onCardPress} />
+    return <StakingTxDepositCard info={txInfo} onPress={onCardPress} {...rest} />
   }
 
   if (isStakingTxExitInfo(txInfo)) {
-    return <StakingTxExitCard info={txInfo} onPress={onCardPress} />
+    return <StakingTxExitCard info={txInfo} onPress={onCardPress} {...rest} />
   }
 
   if (isStakingTxWithdrawInfo(txInfo)) {
-    return <StakingTxWithdrawCard info={txInfo} onPress={onCardPress} />
+    return <StakingTxWithdrawCard info={txInfo} onPress={onCardPress} {...rest} />
   }
 
   if (isVaultDepositTxInfo(txInfo)) {
-    return (
-      <VaultTxDepositCard
-        info={txInfo}
-        onPress={onCardPress}
-        bordered={bordered}
-        executionInfo={tx.executionInfo}
-        inQueue={inQueue}
-      />
-    )
+    return <VaultTxDepositCard info={txInfo} onPress={onCardPress} executionInfo={tx.executionInfo} {...rest} />
   }
 
   if (isVaultRedeemTxInfo(txInfo)) {
-    return (
-      <VaultTxRedeemCard
-        info={txInfo}
-        onPress={onCardPress}
-        bordered={bordered}
-        executionInfo={tx.executionInfo}
-        inQueue={inQueue}
-      />
-    )
+    return <VaultTxRedeemCard info={txInfo} onPress={onCardPress} executionInfo={tx.executionInfo} {...rest} />
   }
 
   return <></>
 }
 
 export const TxInfo = React.memo(TxInfoComponent, (prevProps, nextProps) => {
-  return prevProps.tx.txHash === nextProps.tx.txHash
+  return (
+    prevProps.tx.txHash === nextProps.tx.txHash &&
+    prevProps.bordered === nextProps.bordered &&
+    prevProps.inQueue === nextProps.inQueue
+  )
 })

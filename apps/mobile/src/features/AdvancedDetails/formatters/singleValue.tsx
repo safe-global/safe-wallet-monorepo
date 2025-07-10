@@ -6,6 +6,7 @@ import { CopyButton } from '@/src/components/CopyButton'
 import { EthAddress } from '@/src/components/EthAddress'
 import { Address } from '@/src/types/address'
 import { Identicon } from '@/src/components/Identicon'
+import { InfoSheet } from '@/src/components/InfoSheet'
 
 export const characterDisplayLimit = 15
 
@@ -46,8 +47,14 @@ export const formatValueTemplate = (param: DataDecodedParameter): ListTableItem 
     }
   }
 
+  const value = String(param.value)
+
   return {
     label: param.name,
-    render: () => <DisplayValue type={param.type} value={String(param.value)} />,
+    render: () => (
+      <InfoSheet title={param.name} info={value}>
+        <DisplayValue type={param.type} value={value} />
+      </InfoSheet>
+    ),
   }
 }

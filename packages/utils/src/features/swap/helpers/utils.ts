@@ -1,9 +1,10 @@
 import type { OrderTransactionInfo as SwapOrder } from '@safe-global/store/gateway/types'
 import type { DataDecoded } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { formatUnits } from 'ethers'
-import type { AnyAppDataDocVersion, latest, LatestAppDataDocVersion } from '@cowprotocol/app-data'
+import type { AnyAppDataDocVersion, latest } from '@cowprotocol/app-data'
 
 import { TradeType, UiOrderType } from '@safe-global/utils/features/swap/types'
+import { getOrderFeeBps as getOrderFeeBpsHelper } from '@safe-global/utils/features/swap/helpers/fee'
 
 type Quantity = {
   amount: string | number | bigint
@@ -169,10 +170,7 @@ export const getOrderClass = (order: Pick<SwapOrder, 'fullAppData'>): latest.Ord
 }
 
 export const getOrderFeeBps = (order: Pick<SwapOrder, 'fullAppData'>): number => {
-  const fullAppData = order.fullAppData as unknown as LatestAppDataDocVersion
-  const basisPoints = (fullAppData?.metadata?.partnerFee as latest.PartnerFee)?.bps
-
-  return Number(basisPoints) || 0
+  return getOrderFeeBpsHelper(order)
 }
 
 export const isOrderPartiallyFilled = (

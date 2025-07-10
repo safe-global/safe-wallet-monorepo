@@ -1,5 +1,5 @@
 import type { SwapOrderConfirmationView, TwapOrderConfirmationView } from '@safe-global/safe-gateway-typescript-sdk'
-import { getOrderFeeBps } from '@/features/swap/helpers/utils'
+import { getOrderFeeBps } from '@safe-global/utils/features/swap/helpers/utils'
 import { DataRow } from '@/components/common/Table/DataRow'
 import { BRAND_NAME } from '@/config/constants'
 import { HelpIconTooltip } from '@/features/swap/components/HelpIconTooltip'

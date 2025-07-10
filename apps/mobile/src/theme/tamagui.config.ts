@@ -9,6 +9,7 @@ import { inputTheme, inputWithLabelTheme } from '../components/SafeInput/theme'
 import { safeTabTheme } from '@/src/components/SafeTab/theme'
 import { SafeListItemTheme } from '@/src/components/SafeListItem/theme'
 import { alertTheme } from '@/src/components/Alert/theme'
+
 const DmSansFont = createDmSansFont({
   face: {
     500: { normal: 'DMSans-Medium', italic: 'DMSans-MediumItalic' },

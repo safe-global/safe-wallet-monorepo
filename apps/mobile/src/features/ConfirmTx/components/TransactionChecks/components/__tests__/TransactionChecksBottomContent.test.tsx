@@ -40,13 +40,6 @@ describe('TransactionChecksBottomContent', () => {
     ...overrides,
   })
 
-  it('should render nothing when security is disabled', () => {
-    const security = createSecurityState({ enabled: false, hasIssues: true })
-    const { queryByTestId } = render(<TransactionChecksBottomContent security={security} />)
-
-    expect(queryByTestId('alert')).toBeFalsy()
-  })
-
   it('should render nothing when no conditions are met', () => {
     const security = createSecurityState()
     const { queryByTestId } = render(<TransactionChecksBottomContent security={security} />)

@@ -1,44 +1,29 @@
 import React from 'react'
 import { OrderTransactionInfo } from '@safe-global/store/gateway/types'
-import { Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { isSwapOrderTxInfo, isSwapTransferOrderTxInfo, isTwapOrderTxInfo } from '@/src/utils/transaction-guards'
 import { SellOrder } from '@/src/components/transactions-list/Card/TxOrderCard/SellOrder'
 import { TwapOrder } from '@/src/components/transactions-list/Card/TxOrderCard/TwapOrder'
 import { getOrderClass } from '@/src/hooks/useTransactionType'
+import { SafeListItemProps } from '@/src/components/SafeListItem/SafeListItem'
 
-interface TxSwapCardProps {
+type TxSwapCardProps = {
   txInfo: OrderTransactionInfo
-  bordered?: boolean
-  inQueue?: boolean
-  executionInfo?: Transaction['executionInfo']
-  onPress: () => void
-}
+} & Partial<SafeListItemProps>
 
-export function TxOrderCard({ txInfo, bordered, executionInfo, inQueue, onPress }: TxSwapCardProps) {
+export function TxOrderCard({ txInfo, ...rest }: TxSwapCardProps) {
   if (!txInfo) {
     return null
   }
 
   if (isTwapOrderTxInfo(txInfo)) {
-    return (
-      <TwapOrder order={txInfo} bordered={bordered} executionInfo={executionInfo} inQueue={inQueue} onPress={onPress} />
-    )
+    return <TwapOrder order={txInfo} {...rest} />
   }
 
   if (isSwapOrderTxInfo(txInfo) || isSwapTransferOrderTxInfo(txInfo)) {
     const orderClass = getOrderClass(txInfo)
     const type = orderClass === 'limit' ? 'Limit order' : 'Swap order'
 
-    return (
-      <SellOrder
-        order={txInfo}
-        type={type}
-        bordered={bordered}
-        executionInfo={executionInfo}
-        inQueue={inQueue}
-        onPress={onPress}
-      />
-    )
+    return <SellOrder order={txInfo} type={type} {...rest} />
   }
   return null
 }

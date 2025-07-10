@@ -4,7 +4,7 @@ import { SafeListItem } from '@/src/components/SafeListItem'
 import { useRouter } from 'expo-router'
 import { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { useTransactionSecurity } from './hooks/useTransactionSecurity'
-import { getTransactionChecksLabel } from './utils/transactionChecksUtils'
+import { getTransactionChecksLabel, shouldShowBottomContent } from './utils/transactionChecksUtils'
 import { TransactionChecksLeftNode } from './components/TransactionChecksLeftNode'
 import { TransactionChecksBottomContent } from './components/TransactionChecksBottomContent'
 
@@ -30,7 +30,7 @@ export function TransactionChecks({ txId, txDetails }: TransactionChecksProps) {
       leftNode={<TransactionChecksLeftNode security={security} />}
       label={getTransactionChecksLabel(security.isScanning)}
       rightNode={<SafeFontIcon name="chevron-right" />}
-      bottomContent={<TransactionChecksBottomContent security={security} />}
+      bottomContent={shouldShowBottomContent(security) ? <TransactionChecksBottomContent security={security} /> : null}
     />
   )
 }

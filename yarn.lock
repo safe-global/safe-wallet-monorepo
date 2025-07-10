@@ -2847,9 +2847,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@cowprotocol/app-data@npm:^2.3.0, @cowprotocol/app-data@npm:^2.4.0":
-  version: 2.4.0
-  resolution: "@cowprotocol/app-data@npm:2.4.0"
+"@cowprotocol/app-data@npm:^3.1.0":
+  version: 3.1.0
+  resolution: "@cowprotocol/app-data@npm:3.1.0"
   dependencies:
     ajv: "npm:^8.11.0"
     cross-fetch: "npm:^3.1.5"
@@ -2861,25 +2861,7 @@ __metadata:
     ethers: ^5.0.0
     ipfs-only-hash: ^4.x
     multiformats: ^9.x
-  checksum: 10/3b585f32011d68f2dce1be2003c849f797ffc6ac5eb199f39dc2aeb7ab2d77f8491f52d56857809a3b41dc62ac7c22151d1789bb5ab7048a4321b317f3dbd4ce
-  languageName: node
-  linkType: hard
-
-"@cowprotocol/app-data@npm:^2.5.1":
-  version: 2.5.1
-  resolution: "@cowprotocol/app-data@npm:2.5.1"
-  dependencies:
-    ajv: "npm:^8.11.0"
-    cross-fetch: "npm:^3.1.5"
-    ipfs-only-hash: "npm:^4.0.0"
-    json-stringify-deterministic: "npm:^1.0.8"
-    multiformats: "npm:^9.6.4"
-  peerDependencies:
-    cross-fetch: ^3.x
-    ethers: ^5.0.0
-    ipfs-only-hash: ^4.x
-    multiformats: ^9.x
-  checksum: 10/c3f12caad56bd0f5bff8e3f6a399a89fdea2b3f01c9d5ed553c79bca2920cfe66254b17c2070d4d3b6a0e1e8ee41de2f172d0697bca697d704b62ffff78353d0
+  checksum: 10/cd540b7f7578917be115454d307df333f39101614c59a839ff31278a98c70d9a8f3aaf5fcf08f34075f537710a7db1de265249dae6b7ddda08bcba890b423856
   languageName: node
   linkType: hard
 
@@ -9313,7 +9295,7 @@ __metadata:
     "@babel/core": "npm:^7.25.2"
     "@babel/preset-env": "npm:^7.26.0"
     "@babel/preset-react": "npm:^7.26.3"
-    "@cowprotocol/app-data": "npm:^2.3.0"
+    "@cowprotocol/app-data": "npm:^3.1.0"
     "@eslint/js": "npm:^9.18.0"
     "@ethersproject/shims": "npm:^5.7.0"
     "@expo/config-plugins": "npm:~10.0.0"
@@ -9627,7 +9609,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@safe-global/utils@workspace:packages/utils"
   dependencies:
-    "@cowprotocol/app-data": "npm:^2.5.1"
+    "@cowprotocol/app-data": "npm:^3.1.0"
     "@faker-js/faker": "npm:^9.0.3"
     "@types/jest": "npm:^29.5.14"
     ethers: "npm:^6.14.3"
@@ -9645,7 +9627,7 @@ __metadata:
   resolution: "@safe-global/web@workspace:apps/web"
   dependencies:
     "@chromatic-com/storybook": "npm:^1.3.1"
-    "@cowprotocol/app-data": "npm:^2.4.0"
+    "@cowprotocol/app-data": "npm:^3.1.0"
     "@cowprotocol/widget-react": "npm:^0.13.0"
     "@datadog/browser-logs": "npm:^6.6.3"
     "@ducanh2912/next-pwa": "npm:^10.2.9"

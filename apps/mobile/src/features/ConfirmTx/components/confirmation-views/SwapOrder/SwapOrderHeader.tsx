@@ -15,12 +15,14 @@ interface SwapOrderHeaderProps {
 }
 
 export function SwapOrderHeader({ txInfo, executionInfo }: SwapOrderHeaderProps) {
-  const { sellToken, buyToken, sellAmount, buyAmount } = txInfo
+  const { sellToken, buyToken, sellAmount, buyAmount, kind } = txInfo
   const date = formatWithSchema(executionInfo.submittedAt, 'MMM d yyyy')
   const time = formatWithSchema(executionInfo.submittedAt, 'hh:mm a')
 
   const sellTokenValue = formatValue(sellAmount, sellToken.decimals)
   const buyTokenValue = formatValue(buyAmount, buyToken.decimals)
+
+  const isSellOrder = kind === 'sell'
 
   return (
     <>
@@ -34,7 +36,7 @@ export function SwapOrderHeader({ txInfo, executionInfo }: SwapOrderHeaderProps)
         <Container flex={1} padding="$4" borderRadius="$3">
           <View alignItems="center" gap="$2">
             <TokenIcon logoUri={sellToken.logoUri} size="$10" accessibilityLabel={sellToken.symbol} />
-            <Text color="$textSecondaryLight">Sell</Text>
+            <Text color="$textSecondaryLight">{isSellOrder ? 'Sell' : 'For at most'}</Text>
             <H5 fontWeight={600}>
               {ellipsis(sellTokenValue, 9)} {sellToken.symbol}
             </H5>
@@ -68,7 +70,7 @@ export function SwapOrderHeader({ txInfo, executionInfo }: SwapOrderHeaderProps)
         <Container flex={1} padding="$4" borderRadius="$3">
           <View alignItems="center" gap="$2">
             <TokenIcon logoUri={buyToken.logoUri} size="$10" accessibilityLabel={buyToken.symbol} />
-            <Text color="$textSecondaryLight">For at least</Text>
+            <Text color="$textSecondaryLight">{isSellOrder ? 'For at least' : 'Buy exactly'}</Text>
             <H5 fontWeight={600}>
               {ellipsis(buyTokenValue, 9)} {buyToken.symbol}
             </H5>

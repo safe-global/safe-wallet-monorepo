@@ -1,16 +1,12 @@
 import React from 'react'
 import { Alert } from '@/src/components/Alert'
-import { getAlertType, shouldShowBottomContent, SecurityState } from '../utils/transactionChecksUtils'
+import { getAlertType, SecurityState } from '../utils/transactionChecksUtils'
 
 interface TransactionChecksBottomContentProps {
   security: SecurityState
 }
 
 export const TransactionChecksBottomContent = ({ security }: TransactionChecksBottomContentProps) => {
-  if (!shouldShowBottomContent(security)) {
-    return null
-  }
-
   // Show warnings for security issues (malicious/warning)
   if (security.hasIssues) {
     return (
