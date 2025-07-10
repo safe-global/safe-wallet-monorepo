@@ -69,6 +69,7 @@ export function PendingTxListContainer({
       renderSectionHeader={({ section: { title } }) => <SafeListItem.Header title={title} />}
       onScroll={handleScroll}
       scrollEventThrottle={16}
+      contentContainerStyle={{ paddingHorizontal: 12 }}
     />
   )
 }

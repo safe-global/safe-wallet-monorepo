@@ -1,7 +1,5 @@
 import { Stack } from 'expo-router'
 import React from 'react'
-import { View } from 'tamagui'
-import { LargeHeaderTitle } from '@/src/components/Title'
 
 export default function TransactionsParametersLayout() {
   return (
