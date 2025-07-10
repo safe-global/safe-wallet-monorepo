@@ -1,9 +1,9 @@
 import React from 'react'
 import { Text, YStack, XStack, styled, H2 } from 'tamagui'
 import { SafeButton } from '@/src/components/SafeButton'
-import { StatusBar } from 'expo-status-bar'
-import { ColorSchemeName, TouchableOpacity } from 'react-native'
+import { TouchableOpacity } from 'react-native'
 import { Badge } from '@/src/components/Badge'
+import { SafeStatusBar } from '@/src/theme/SafeStatusBar'
 
 const StepText = styled(Text, {
   fontSize: '$4',
@@ -22,21 +22,15 @@ const StepBadge = ({ step }: { step: string }) => {
 }
 
 interface HelpImportViewProps {
-  colorScheme: ColorSchemeName
   bottomInset: number
   onPressProceedToImport: () => void
   onPressNeedHelp: () => void
 }
 
-export const HelpImportView = ({
-  colorScheme,
-  bottomInset,
-  onPressProceedToImport,
-  onPressNeedHelp,
-}: HelpImportViewProps) => {
+export const HelpImportView = ({ bottomInset, onPressProceedToImport, onPressNeedHelp }: HelpImportViewProps) => {
   return (
     <YStack flex={1} testID="help-import-screen">
-      <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
+      <SafeStatusBar />
 
       {/* Content */}
       <YStack flex={1} paddingHorizontal="$4" justifyContent="space-between" marginTop={'$4'}>

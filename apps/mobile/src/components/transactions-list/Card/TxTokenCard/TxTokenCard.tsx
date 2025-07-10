@@ -6,16 +6,14 @@ import { TransferTransactionInfo, Transaction } from '@safe-global/store/gateway
 import { TokenIcon } from '@/src/components/TokenIcon'
 import { useTokenDetails } from '@/src/hooks/useTokenDetails'
 import { TokenAmount } from '@/src/components/TokenAmount'
-interface TxTokenCardProps {
-  bordered?: boolean
-  txStatus: Transaction['txStatus']
-  inQueue?: boolean
-  txInfo: TransferTransactionInfo
-  executionInfo?: Transaction['executionInfo']
-  onPress?: () => void
-}
+import { SafeListItemProps } from '@/src/components/SafeListItem/SafeListItem'
 
-export function TxTokenCard({ bordered, inQueue, txStatus, executionInfo, txInfo, onPress }: TxTokenCardProps) {
+type TxTokenCardProps = {
+  txStatus: Transaction['txStatus']
+  txInfo: TransferTransactionInfo
+} & Partial<SafeListItemProps>
+
+export function TxTokenCard({ inQueue, txStatus, txInfo, ...rest }: TxTokenCardProps) {
   const isSendTx = isOutgoingTransfer(txInfo)
   const icon = isSendTx ? 'transaction-outgoing' : 'transaction-incoming'
   const type = isSendTx ? (isTxQueued(txStatus) ? 'Send' : 'Sent') : 'Received'
@@ -26,12 +24,9 @@ export function TxTokenCard({ bordered, inQueue, txStatus, executionInfo, txInfo
   return (
     <SafeListItem
       inQueue={inQueue}
-      executionInfo={executionInfo}
       label={inQueue ? <TokenAmount value={value} decimals={decimals} tokenSymbol={tokenSymbol} preciseAmount /> : name}
       icon={icon}
       type={type}
-      onPress={onPress}
-      bordered={bordered}
       leftNode={<TokenIcon logoUri={logoUri} accessibilityLabel={name} />}
       rightNode={
         <TokenAmount
@@ -44,6 +39,7 @@ export function TxTokenCard({ bordered, inQueue, txStatus, executionInfo, txInfo
           textProps={{ color: isOutgoing ? '$color' : '$primary', textAlign: 'right', fontWeight: 400 }}
         />
       }
+      {...rest}
     />
   )
 }

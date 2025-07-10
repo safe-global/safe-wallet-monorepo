@@ -1,5 +1,5 @@
 import type { TwapOrder } from '@safe-global/safe-gateway-typescript-sdk'
-import { getOrderFeeBps } from '@/features/swap/helpers/utils'
+import { getOrderFeeBps } from '@safe-global/utils/features/swap/helpers/utils'
 import { DataRow } from '@/components/common/Table/DataRow'
 import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
 import { HelpIconTooltip } from '@/features/swap/components/HelpIconTooltip'

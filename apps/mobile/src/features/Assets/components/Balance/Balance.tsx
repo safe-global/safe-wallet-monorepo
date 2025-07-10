@@ -7,7 +7,6 @@ import { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 
 import { ChainsDisplay } from '@/src/components/ChainsDisplay'
 import { useRouter } from 'expo-router'
-import { shouldDisplayPreciseBalance } from '@/src/utils/balance'
 import { TouchableOpacity, useColorScheme } from 'react-native'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
@@ -44,19 +43,21 @@ export function Balance({
     <View>
       <View marginBottom="$4">
         {activeChainId && (
-          <XStack paddingBottom={'$4'} alignItems={'center'}>
+          <XStack paddingBottom={'$4'} gap={'$1'} alignItems={'center'}>
             <DropdownLabel
               label={chainName}
               leftNode={<ChainsDisplay activeChainId={activeChainId} chains={chains} max={1} />}
               onPress={() => {
                 router.push('/networks-sheet')
               }}
-              labelProps={{ fontWeight: 600 }}
+              labelProps={{ fontWeight: 600, fontSize: '$4' }}
               displayDropDownIcon={chains.length > 1}
             />
             <TouchableOpacity onPress={onPressAddressCopy}>
               <XStack alignItems={'center'} paddingLeft={'$1'}>
-                <Text color={'$colorSecondary'}>{shortenAddress(safeAddress)}</Text>
+                <Text color={'$colorSecondary'} fontSize={'$4'}>
+                  {shortenAddress(safeAddress)}
+                </Text>
                 <View paddingLeft={'$1'}>
                   <SafeFontIcon name={'copy'} size={13} color={'$colorSecondary'} />
                 </View>
@@ -66,7 +67,7 @@ export function Balance({
         )}
         <Skeleton.Group show={showSkeleton}>
           <Skeleton colorMode={colorScheme === 'dark' ? 'dark' : 'light'} width={220}>
-            <Fiat value={balanceAmount} currency={currency} precise={shouldDisplayPreciseBalance(balanceAmount)} />
+            <Fiat value={balanceAmount} currency={currency} precise />
           </Skeleton>
         </Skeleton.Group>
       </View>

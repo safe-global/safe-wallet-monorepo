@@ -287,10 +287,10 @@ export function verifyEachRowHasCheckbox(state) {
     cy.get('tbody').within(() => {
       cy.get('tr').each(($row) => {
         if (state) {
-          cy.wrap($row).find('td').eq(3).find(hiddenTokenCheckbox).should('exist').should(state)
+          cy.wrap($row).find('td').eq(4).find(hiddenTokenCheckbox).should('exist').should(state)
           return
         }
-        cy.wrap($row).find('td').eq(3).find(hiddenTokenCheckbox).should('exist')
+        cy.wrap($row).find('td').eq(4).find(hiddenTokenCheckbox).should('exist')
       })
     })
   })

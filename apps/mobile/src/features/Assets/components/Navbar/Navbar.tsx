@@ -55,8 +55,9 @@ export const Navbar = () => {
             <IdenticonWithBadge
               testID="threshold-info-badge"
               variant="sm"
-              size={40}
-              fontSize={10}
+              size={30}
+              badgeSize={18}
+              fontSize={8}
               address={activeSafe.address}
               badgeContent={`${chainSafe?.threshold}/${chainSafe?.owners.length}`}
             />
@@ -69,17 +70,17 @@ export const Navbar = () => {
         <View
           style={{
             flexDirection: 'row',
-            gap: 12,
+            gap: 16,
             alignItems: 'center',
             justifyContent: 'center',
           }}
         >
           <Link href={'/share'} asChild>
-            <Pressable hitSlop={{ top: 20, bottom: 20, left: 20 }}>
+            <Pressable hitSlop={4}>
               <SafeFontIcon name="qr-code-1" size={16} />
             </Pressable>
           </Link>
-          <Pressable onPressIn={handleNotificationAccess} hitSlop={{ top: 20, bottom: 20, right: 20 }}>
+          <Pressable onPressIn={handleNotificationAccess} hitSlop={2}>
             <SafeFontIcon name="bell" size={20} />
           </Pressable>
         </View>

@@ -42,6 +42,7 @@ export const HelpCenterArticle = {
   PUSH_NOTIFICATIONS: `${HELP_CENTER_URL}/en/articles/99197-how-to-start-receiving-web-push-notifications-in-the-web-wallet`,
   SWAP_WIDGET_FEES: `${HELP_CENTER_URL}/en/articles/178530-how-does-the-widget-fee-work-for-native-swaps`,
   VERIFY_TX_DETAILS: `${HELP_CENTER_URL}/en/articles/276343-how-to-perform-basic-transactions-checks-on-safe-wallet`,
+  BULK_IMPORT_OLD_DATA: `${HELP_CENTER_URL}/en/articles/359254-new-mobile-apps-bulk-import-of-old-app-data-ios-only`,
 } as const
 export const HelperCenterArticleTitles = {
   RECOVERY: 'Learn more about the Account recovery process',
@@ -49,3 +50,4 @@ export const HelperCenterArticleTitles = {
 // Social
 export const DISCORD_URL = 'https://chat.safe.global'
 export const TWITTER_URL = 'https://twitter.com/safe'
+export const SAFE_TO_L2_MIGRATION_VERSION = '1.4.1'

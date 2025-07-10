@@ -7,6 +7,12 @@ import {
   isERC721Transfer,
   isRemoveSignerTxInfo,
   isOrderTxInfo,
+  isVaultDepositTxInfo,
+  isVaultRedeemTxInfo,
+  isStakingTxDepositInfo,
+  isStakingTxExitInfo,
+  isStakingTxWithdrawInfo,
+  isCancellationTxInfo,
 } from '@/src/utils/transaction-guards'
 import { Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { ETxType } from '../types/txType'
@@ -28,12 +34,36 @@ export const getTransactionType = ({ txInfo }: { txInfo: Transaction['txInfo'] }
     return ETxType.REMOVE_SIGNER
   }
 
+  if (isCancellationTxInfo(txInfo)) {
+    return ETxType.CANCEL_TX
+  }
+
   if (isMultiSendTxInfo(txInfo) || isCustomTxInfo(txInfo)) {
     return ETxType.CONTRACT_INTERACTION
   }
 
   if (isOrderTxInfo(txInfo)) {
     return ETxType.SWAP_ORDER
+  }
+
+  if (isStakingTxDepositInfo(txInfo)) {
+    return ETxType.STAKE_DEPOSIT
+  }
+
+  if (isStakingTxExitInfo(txInfo)) {
+    return ETxType.STAKE_WITHDRAW_REQUEST
+  }
+
+  if (isStakingTxWithdrawInfo(txInfo)) {
+    return ETxType.STAKE_EXIT
+  }
+
+  if (isVaultDepositTxInfo(txInfo)) {
+    return ETxType.VAULT_DEPOSIT
+  }
+
+  if (isVaultRedeemTxInfo(txInfo)) {
+    return ETxType.VAULT_REDEEM
   }
 
   return null

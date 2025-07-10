@@ -1,13 +1,11 @@
 import { SignerView } from '@/src/features/Signer/components/SignerView'
 import { useLocalSearchParams } from 'expo-router'
-import { useNavigation } from '@react-navigation/native'
 import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
 import { selectContactByAddress, upsertContact } from '@/src/store/addressBookSlice'
-import React, { useCallback, useEffect, useState } from 'react'
-import { Alert, Linking, TouchableOpacity } from 'react-native'
+import React, { useCallback, useState } from 'react'
+import { Alert, Linking } from 'react-native'
 import { selectActiveChain } from '@/src/store/chains'
 import { getHashedExplorerUrl } from '@safe-global/utils/utils/gateway'
-import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { usePreventLeaveScreen } from '@/src/hooks/usePreventLeaveScreen'
 import { SubmitHandler, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -16,7 +14,6 @@ import { formSchema } from '@/src/features/Signer/schema'
 import { COMING_SOON_MESSAGE, COMING_SOON_TITLE } from '@/src/config/constants'
 
 export const SignerContainer = () => {
-  const navigation = useNavigation()
   const { address } = useLocalSearchParams<{ address: string }>()
   const dispatch = useAppDispatch()
   const activeChain = useAppSelector(selectActiveChain)
@@ -86,18 +83,6 @@ export const SignerContainer = () => {
     setEditMode(() => !editMode)
   }, [editMode, handleSubmit, onSubmit, isValid])
 
-  useEffect(() => {
-    navigation.setOptions({
-      headerRight: () => {
-        return (
-          <TouchableOpacity onPress={onPressEdit} hitSlop={100}>
-            <SafeFontIcon name={editMode ? 'check' : 'edit'} size={20} />
-          </TouchableOpacity>
-        )
-      },
-    })
-  }, [onPressEdit, editMode])
-
   const formName = watch('name')
 
   return (
@@ -105,6 +90,7 @@ export const SignerContainer = () => {
       signerAddress={address}
       onPressDelete={onPressDelete}
       onPressExplorer={onPressExplorer}
+      onPressEdit={onPressEdit}
       editMode={editMode}
       control={control}
       dirtyFields={dirtyFields}

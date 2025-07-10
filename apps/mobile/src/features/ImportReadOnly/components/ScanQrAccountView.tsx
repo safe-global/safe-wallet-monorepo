@@ -44,6 +44,7 @@ export const QrCameraView = ({
               icon={<SafeFontIcon name="copy" size={18} />}
               onPress={onEnterManuallyPress}
               testID={'enter-manually'}
+              size="$sm"
             >
               Enter manually
             </SafeButton>
