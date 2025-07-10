@@ -2,14 +2,15 @@ import { Tabs } from 'expo-router'
 import React from 'react'
 import { TabBarIcon } from '@/src/components/navigation/TabBarIcon'
 import { Navbar as AssetsNavbar } from '@/src/features/Assets/components/Navbar/Navbar'
-import { Pressable, StyleSheet, useColorScheme } from 'react-native'
+import { Pressable, StyleSheet } from 'react-native'
 import { getTokenValue } from 'tamagui'
+import { useTheme } from '@/src/theme/hooks/useTheme'
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme()
+  const { currentTheme } = useTheme()
 
   let activeTintColor, inactiveTintColor, borderTopColor
-  if (colorScheme === 'light') {
+  if (currentTheme === 'light') {
     activeTintColor = getTokenValue('$color.textPrimaryLight')
     inactiveTintColor = getTokenValue('$color.primaryLightLight')
     borderTopColor = getTokenValue('$color.borderLightLight')
