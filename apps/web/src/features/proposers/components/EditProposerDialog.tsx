@@ -24,8 +24,8 @@ const EditProposerDialog = ({ proposer }: { proposer: Delegate }) => {
                 isOk && canEdit
                   ? 'Edit proposer'
                   : isOk && !canEdit
-                  ? 'Only the owner of this proposer can edit them'
-                  : undefined
+                    ? 'Only the owner of this proposer can edit them'
+                    : undefined
               }
             >
               <span>
