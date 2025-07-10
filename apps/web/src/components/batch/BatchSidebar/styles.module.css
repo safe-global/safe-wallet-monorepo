@@ -98,6 +98,7 @@
 
 .accordion {
   opacity: 1 !important;
+  width: 100%;
 }
 
 .accordion :global .MuiAccordionSummary-content {

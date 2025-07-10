@@ -2,16 +2,19 @@ import { createSelector, createSlice, type PayloadAction } from '@reduxjs/toolki
 import type { RootState } from '.'
 import { selectChainIdAndSafeAddress } from '@/store/common'
 import type { MetaTransactionData, OperationType } from '@safe-global/types-kit'
+import { type TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
 
 export type CallOnlyTxData = MetaTransactionData & { operation: OperationType.Call }
 
 export type DraftBatchItem = {
   id: string
   timestamp: number
+  // For Backwards compatibility we handle txDetails as well
+  txDetails?: TransactionDetails
   txData: CallOnlyTxData
 }
 
-type BatchTxsState = {
+export type BatchTxsState = {
   [chainId: string]: {
     [safeAddress: string]: DraftBatchItem[]
   }
