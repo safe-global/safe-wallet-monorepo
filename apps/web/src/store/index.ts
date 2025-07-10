@@ -127,7 +127,9 @@ export const _hydrationReducer: typeof rootReducer = (state, action) => {
     }
 
     // Migrate batchSlice txDetails to txData
-    nextState[slices.batchSlice.name] = migrateBatchTxs(nextState[slices.batchSlice.name])
+    if (nextState[slices.batchSlice.name]) {
+      nextState[slices.batchSlice.name] = migrateBatchTxs(nextState[slices.batchSlice.name])
+    }
 
     return nextState
   }
