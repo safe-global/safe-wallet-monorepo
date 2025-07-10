@@ -1,3 +1,6 @@
+import { trackEvent } from '@/src/services/analytics'
+import { createProtectedRouteAttemptEvent } from '@/src/services/analytics/events/nativeIntent'
+
 const protectedRoutes: string[] = [
   'sign-transaction',
   'import-signers',
@@ -16,6 +19,8 @@ export function redirectSystemPath({ path, initial: _initial }: { path: string; 
     const isProtectedRoute = protectedRoutes.some((route) => path.includes(route))
     if (isProtectedRoute) {
       console.log('trying to navigate to protected route', path)
+      // Log to Firebase Analytics
+      trackEvent(createProtectedRouteAttemptEvent(path))
       return '/'
     }
     return path
