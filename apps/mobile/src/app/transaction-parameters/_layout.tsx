@@ -14,13 +14,7 @@ export default function TransactionsParametersLayout() {
       <Stack.Screen
         name="(tabs)"
         options={() => ({
-          headerTitle: (props) => (
-            <View width="100%" flex={1} marginTop={2}>
-              <LargeHeaderTitle fontWeight={600} {...props}>
-                Transaction details
-              </LargeHeaderTitle>
-            </View>
-          ),
+          headerShown: false,
         })}
       />
     </Stack>

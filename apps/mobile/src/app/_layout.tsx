@@ -108,7 +108,10 @@ function RootLayout() {
                             <Stack.Screen name="pending-transactions" options={{ headerShown: true, title: '' }} />
                             <Stack.Screen name="notifications-center" options={{ headerShown: true, title: '' }} />
                             <Stack.Screen name="notifications-settings" options={{ headerShown: true, title: '' }} />
-                            <Stack.Screen name="transaction-parameters" options={{ headerShown: true, title: '' }} />
+                            <Stack.Screen
+                              name="transaction-parameters"
+                              options={{ headerShown: true, title: 'Transaction Details' }}
+                            />
                             <Stack.Screen name="transaction-actions" options={{ headerShown: true, title: '' }} />
                             <Stack.Screen name="action-details" options={{ headerShown: true, title: '' }} />
                             <Stack.Screen name="address-book" options={{ headerShown: true, title: '' }} />

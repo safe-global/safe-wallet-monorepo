@@ -1,5 +1,4 @@
 import React from 'react'
-import { View } from 'tamagui'
 
 import { PendingTxContainer } from '@/src/features/PendingTx'
 
