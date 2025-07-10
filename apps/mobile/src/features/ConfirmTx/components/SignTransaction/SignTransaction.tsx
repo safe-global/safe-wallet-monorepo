@@ -1,78 +1,52 @@
 import { LoadingScreen } from '@/src/components/LoadingScreen'
-import React, { useCallback, useLayoutEffect, useState } from 'react'
-import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
-import { useAppSelector } from '@/src/store/hooks'
-import { selectChainById } from '@/src/store/chains'
-import { RootState } from '@/src/store'
-import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import React, { useEffect } from 'react'
 import { useLocalSearchParams } from 'expo-router'
-import { getPrivateKey } from '@/src/hooks/useSign/useSign'
 import SignError from './SignError'
 import SignSuccess from './SignSuccess'
-import { signTx } from '@/src/services/tx/tx-sender/sign'
-import { useTransactionsAddConfirmationV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import logger from '@/src/utils/logger'
+import { useSigningGuard } from './hooks/useSigningGuard'
+import { useTransactionSigning } from './hooks/useTransactionSigning'
 
 export function SignTransaction() {
   const { txId, signerAddress } = useLocalSearchParams<{ txId: string; signerAddress: string }>()
-  const [signStepStatus, setSignStepStatus] = useState<'error' | 'success' | 'loading'>('loading')
-  const activeSafe = useDefinedActiveSafe()
-  const activeChain = useAppSelector((state: RootState) => selectChainById(state, activeSafe.chainId))
 
-  const [addConfirmation, { isLoading, data, isError }] = useTransactionsAddConfirmationV1Mutation()
-
-  const sign = useCallback(async () => {
-    try {
-      const privateKey = await getPrivateKey(signerAddress)
-
-      if (!privateKey) {
-        setSignStepStatus('error')
-        return
-      }
-
-      const signedTx = await signTx({
-        chain: activeChain as ChainInfo,
-        activeSafe,
-        txId,
-        privateKey,
-      })
-
-      // Now call the mutation with the signed transaction data
-      await addConfirmation({
-        chainId: activeSafe.chainId,
-        safeTxHash: signedTx.safeTransactionHash,
-        addConfirmationDto: {
-          // TODO: we need to add this signature type in the auto generated types, because it was included recently in CGW
-          // @ts-ignore
-          signature: signedTx.signature,
-        },
-      })
-    } catch (error) {
-      logger.error('Error signing transaction:', error)
-      setSignStepStatus('error')
+  if (!txId || !signerAddress) {
+    const handleRetry = () => {
+      // Cannot retry missing parameters - this is a configuration error
+      console.error('Cannot retry: missing transaction parameters')
     }
-  }, [activeChain, activeSafe, txId, signerAddress])
-
-  useLayoutEffect(() => {
-    sign()
-  }, [sign])
-
-  const retrySignAfterError = useCallback(() => {
-    setSignStepStatus('loading')
-    sign()
-  }, [sign])
-
-  if (signStepStatus === 'error') {
-    return <SignError onRetryPress={retrySignAfterError} description="There was an error signing the transaction." />
+    return <SignError description="Missing transaction ID or signer address" onRetryPress={handleRetry} />
   }
 
-  if (isError) {
-    return <SignError onRetryPress={retrySignAfterError} />
+  const { canSign } = useSigningGuard()
+  const { status, executeSign, retry, isApiLoading, isApiError } = useTransactionSigning({ txId, signerAddress })
+
+  // Auto-sign when component mounts if user can sign
+  useEffect(() => {
+    if (canSign && status === 'idle') {
+      executeSign()
+    }
+  }, [canSign, status, executeSign])
+
+  // Handle API errors
+  if (isApiError) {
+    return <SignError onRetryPress={retry} description="Failed to submit transaction confirmation" />
   }
 
-  if (isLoading || !data) {
+  // Handle signing errors
+  if (status === 'error') {
+    return <SignError onRetryPress={retry} description="There was an error signing the transaction." />
+  }
+
+  // Handle success
+  if (status === 'success') {
+    return <SignSuccess />
+  }
+
+  // Show loading state
+  if (status === 'loading' || isApiLoading) {
     return <LoadingScreen title="Signing transaction..." description="It may take a few seconds..." />
   }
 
-  return <SignSuccess />
+  // This should rarely be reached (idle state while authorized)
+  return <LoadingScreen title="Preparing to sign..." description="Initializing signing process..." />
 }
