@@ -21,5 +21,9 @@ export const SafeStatusBar = () => {
 
   const isDarkScreen = DARK_SCREENS.includes(currentRoute)
 
-  return <StatusBar style={isDarkScreen ? 'light' : currentTheme === 'dark' ? 'light' : 'dark'} />
+  if (isDarkScreen) {
+    return <StatusBar style="light" />
+  }
+
+  return <StatusBar style={currentTheme === 'dark' ? 'light' : 'dark'} />
 }
