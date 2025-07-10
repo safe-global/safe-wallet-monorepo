@@ -41,7 +41,7 @@ export function ConfirmationsInfo({ detailedExecutionInfo, txId }: Confirmations
                 </Text>
               </View>
             }
-            themeName={hasEnoughConfirmations ? 'badge_success_variant1' : 'badge_warning_variant1'}
+            themeName={hasEnoughConfirmations ? 'badge_success_variant1' : 'badge_warning'}
           />
 
           <SafeFontIcon name="chevron-right" />

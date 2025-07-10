@@ -58,7 +58,8 @@ export function AccountCard({
           <IdenticonWithBadge
             testID="threshold-info-badge"
             size={40}
-            fontSize={owners > 9 ? 8 : 12}
+            badgeSize={24}
+            fontSize={owners > 9 ? 9 : 12}
             address={address}
             badgeContent={`${threshold}/${owners}`}
           />

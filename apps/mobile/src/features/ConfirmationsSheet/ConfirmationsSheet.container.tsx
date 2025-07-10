@@ -76,7 +76,7 @@ export const ConfirmationsSheetContainer = () => {
                     </Text>
                   </View>
                 }
-                themeName={hasSigned ? 'badge_success_variant1' : 'badge_warning_variant1'}
+                themeName={hasSigned ? 'badge_success_variant1' : 'badge_warning'}
               />
             }
           />

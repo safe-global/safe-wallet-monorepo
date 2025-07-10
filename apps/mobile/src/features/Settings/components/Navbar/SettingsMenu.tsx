@@ -47,18 +47,21 @@ export const SettingsMenu = ({ safeAddress }: Props) => {
           alignItems: 'center',
           justifyContent: 'flex-end',
           gap: 10,
+          zIndex: 1,
         }}
       >
         <Pressable
           testID={'settings-screen-header-app-settings-button'}
           hitSlop={6}
           onPressIn={() => {
+            console.log('Starting to press')
             try {
               const event = createAppSettingsOpenEvent()
               trackEvent(event)
             } catch (error) {
               console.error('Error tracking app settings open event:', error)
             }
+            console.log('Navigating')
             router.push('/app-settings')
           }}
         >
