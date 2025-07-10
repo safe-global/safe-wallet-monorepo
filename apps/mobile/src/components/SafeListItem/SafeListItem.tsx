@@ -109,7 +109,7 @@ export function SafeListItem({
                 themeName={
                   executionInfo?.confirmationsRequired === executionInfo?.confirmationsSubmitted
                     ? 'badge_success_variant1'
-                    : 'badge_warning_variant1'
+                    : 'badge_warning'
                 }
               />
             )}

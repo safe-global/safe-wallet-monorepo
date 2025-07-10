@@ -28,7 +28,13 @@ function TxConflictingComponent({ transactions, inQueue, onPress }: TxConflictin
   )
 
   return (
-    <View backgroundColor={isDark ? '$warningDarkDark' : '$warningBackgroundLight'} padding="$2" borderRadius="$2">
+    <View
+      backgroundColor={isDark ? '$backgroundPaper' : '$background'}
+      borderColor={'$warning'}
+      borderWidth={2}
+      padding="$2"
+      borderRadius={8}
+    >
       <TouchableOpacity onPress={() => onPress()}>
         <View>
           <Alert type="warning" message="Conflicting transactions" />
@@ -37,13 +43,7 @@ function TxConflictingComponent({ transactions, inQueue, onPress }: TxConflictin
 
       <Theme name="warning">
         {transactions.map((item, index) => (
-          <View
-            backgroundColor="$background"
-            width="100%"
-            key={`${item.transaction.id}-${index}`}
-            marginTop={12}
-            borderRadius="$2"
-          >
+          <View backgroundColor="$background" width="100%" key={`${item.transaction.id}-${index}`} borderRadius={8}>
             <TxInfo
               inQueue={inQueue}
               tx={item.transaction}
