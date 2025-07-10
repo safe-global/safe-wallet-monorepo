@@ -33,7 +33,7 @@ export const formatAddSignerItems = (
 ) => {
   const newSignerAddress = getSignerName(txInfo)
 
-  return [
+  const items = [
     {
       label: 'New signer',
       render: () => (
@@ -49,6 +49,19 @@ export const formatAddSignerItems = (
       ),
     },
     {
+      label: 'Network',
+      render: () => (
+        <View flexDirection="row" alignItems="center" gap="$2">
+          <Logo logoUri={chain.chainLogoUri} size="$6" />
+          <Text fontSize="$4">{chain.chainName}</Text>
+        </View>
+      ),
+    },
+  ]
+
+  const hasThresholdChanged = txInfo.settingsInfo?.threshold !== executionInfo.confirmationsRequired
+  if (hasThresholdChanged) {
+    items.push({
       label: 'Threshold change',
       render: () => (
         <View flexDirection="row" alignItems="center" gap="$2">
@@ -60,15 +73,8 @@ export const formatAddSignerItems = (
           </Text>
         </View>
       ),
-    },
-    {
-      label: 'Network',
-      render: () => (
-        <View flexDirection="row" alignItems="center" gap="$2">
-          <Logo logoUri={chain.chainLogoUri} size="$6" />
-          <Text fontSize="$4">{chain.chainName}</Text>
-        </View>
-      ),
-    },
-  ]
+    })
+  }
+
+  return items
 }
