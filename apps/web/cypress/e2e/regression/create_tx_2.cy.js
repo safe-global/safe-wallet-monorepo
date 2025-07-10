@@ -39,8 +39,7 @@ describe('Create transactions tests 2', () => {
     createtx.setAdvncedExecutionParams()
     createtx.displayAdvncedDetails()
     createtx.verifyEditedExutionParams()
-  }
-  )
+  })
 
   it('Verify advance parameters gas limit input', () => {
     happyPathToStepTwo()

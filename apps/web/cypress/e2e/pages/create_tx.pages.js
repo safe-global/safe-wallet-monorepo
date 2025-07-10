@@ -789,10 +789,12 @@ export function openExecutionParamsModal() {
 
 export function verifyAndSubmitExecutionParams() {
   cy.contains(executionParamsStr).parents('form').as('Paramsform')
-  const arrayNames = [advancedParametersInputNames.walletNonce,
+  const arrayNames = [
+    advancedParametersInputNames.walletNonce,
     advancedParametersInputNames.maxPriorityFee,
     advancedParametersInputNames.maxFee,
-  advancedParametersInputNames.gasLimit]
+    advancedParametersInputNames.gasLimit,
+  ]
   arrayNames.forEach((element) => {
     cy.get('@Paramsform').find('label').contains(`${element}`).next().find('input').should('not.be.disabled')
   })
@@ -816,7 +818,9 @@ export function setAdvancedExecutionParams() {
 export function verifyEditedExcutionParams() {
   cy.contains(advancedParametersInputNames.walletNonce).next().should('contain', advancedParametersValues.walletNonce)
   cy.contains(advancedParametersInputNames.gasLimit).next().should('contain', advancedParametersValues.gasLimit)
-  cy.contains(advancedParametersInputNames.maxPriorityFee).next().should('contain', advancedParametersValues.maxPriorityFee)
+  cy.contains(advancedParametersInputNames.maxPriorityFee)
+    .next()
+    .should('contain', advancedParametersValues.maxPriorityFee)
   cy.contains(advancedParametersInputNames.maxFee).next().should('contain', advancedParametersValues.maxFee)
 }
 
