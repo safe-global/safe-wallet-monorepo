@@ -1,0 +1,1 @@
+export { TxBridgeCard } from './TxBridgeCard'

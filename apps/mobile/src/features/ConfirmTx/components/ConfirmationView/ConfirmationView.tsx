@@ -11,6 +11,8 @@ import {
   NativeStakingDepositTransactionInfo,
   NativeStakingValidatorsExitTransactionInfo,
   NativeStakingWithdrawTransactionInfo,
+  BridgeAndSwapTransactionInfo,
+  SwapTransactionInfo,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { TokenTransfer } from '../confirmation-views/TokenTransfer'
 import { AddSigner } from '../confirmation-views/AddSigner'
@@ -27,6 +29,8 @@ import { VaultDeposit } from '@/src/features/ConfirmTx/components/confirmation-v
 import { VaultRedeem } from '../confirmation-views/VaultRedeem'
 import { CancelTx } from '@/src/features/ConfirmTx/components/confirmation-views/CancelTx'
 import { StakingDeposit, StakingWithdrawRequest, StakingExit } from '../confirmation-views/Stake'
+import { BridgeTransaction } from '../confirmation-views/BridgeTransaction'
+import { LifiSwapTransaction } from '../confirmation-views/LifiSwapTransaction'
 
 interface ConfirmationViewProps {
   txDetails: TransactionDetails
@@ -133,6 +137,22 @@ export function ConfirmationView({ txDetails }: ConfirmationViewProps) {
           txId={txDetails.txId}
           executionInfo={txDetails.detailedExecutionInfo as MultisigExecutionDetails}
           txInfo={txDetails.txInfo as NativeStakingWithdrawTransactionInfo}
+        />
+      )
+    case ETxType.BRIDGE_ORDER:
+      return (
+        <BridgeTransaction
+          _txId={txDetails.txId}
+          _executionInfo={txDetails.detailedExecutionInfo as MultisigExecutionDetails}
+          txInfo={txDetails.txInfo as BridgeAndSwapTransactionInfo}
+        />
+      )
+    case ETxType.LIFI_SWAP:
+      return (
+        <LifiSwapTransaction
+          _txId={txDetails.txId}
+          _executionInfo={txDetails.detailedExecutionInfo as MultisigExecutionDetails}
+          txInfo={txDetails.txInfo as SwapTransactionInfo}
         />
       )
     default:

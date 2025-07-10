@@ -60,6 +60,9 @@ const extractTxInfo = (
         return txDetails.txData?.value ?? '0'
       case 'SwapOrder':
         return txDetails.txData?.value ?? '0'
+      case 'SwapAndBridge':
+      case 'Swap':
+        return txDetails.txData?.value ?? '0'
       case 'NativeStakingDeposit':
       case 'NativeStakingValidatorsExit':
       case 'NativeStakingWithdraw':
@@ -89,6 +92,8 @@ const extractTxInfo = (
         }
       case 'SwapOrder':
       case 'TwapOrder':
+      case 'SwapAndBridge':
+      case 'Swap':
       case 'NativeStakingDeposit':
       case 'NativeStakingValidatorsExit':
       case 'NativeStakingWithdraw':

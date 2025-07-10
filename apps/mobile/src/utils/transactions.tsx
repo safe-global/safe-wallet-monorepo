@@ -13,6 +13,8 @@ import {
   isStakingTxExitInfo,
   isStakingTxWithdrawInfo,
   isCancellationTxInfo,
+  isBridgeOrderTxInfo,
+  isLifiSwapTxInfo,
 } from '@/src/utils/transaction-guards'
 import { Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { ETxType } from '../types/txType'
@@ -44,6 +46,14 @@ export const getTransactionType = ({ txInfo }: { txInfo: Transaction['txInfo'] }
 
   if (isOrderTxInfo(txInfo)) {
     return ETxType.SWAP_ORDER
+  }
+
+  if (isBridgeOrderTxInfo(txInfo)) {
+    return ETxType.BRIDGE_ORDER
+  }
+
+  if (isLifiSwapTxInfo(txInfo)) {
+    return ETxType.LIFI_SWAP
   }
 
   if (isStakingTxDepositInfo(txInfo)) {

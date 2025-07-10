@@ -36,6 +36,8 @@ import type {
   VaultDepositTransactionInfo,
   VaultRedeemTransactionInfo,
   DataDecoded,
+  BridgeAndSwapTransactionInfo,
+  SwapTransactionInfo,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
 import { HistoryTransactionItems, PendingTransactionItems } from '@safe-global/store/gateway/types'
@@ -216,4 +218,12 @@ export const isAnyEarnTxInfo = (
   value: TransactionDetails['txInfo'],
 ): value is VaultDepositTransactionInfo | VaultRedeemTransactionInfo => {
   return isVaultDepositTxInfo(value) || isVaultRedeemTxInfo(value)
+}
+
+export const isBridgeOrderTxInfo = (value: Transaction['txInfo']): value is BridgeAndSwapTransactionInfo => {
+  return value.type === 'SwapAndBridge'
+}
+
+export const isLifiSwapTxInfo = (value: Transaction['txInfo']): value is SwapTransactionInfo => {
+  return value.type === 'Swap'
 }
