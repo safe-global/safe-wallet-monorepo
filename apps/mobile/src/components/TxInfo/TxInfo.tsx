@@ -17,6 +17,8 @@ import {
   isTransferTxInfo,
   isVaultDepositTxInfo,
   isVaultRedeemTxInfo,
+  isBridgeOrderTxInfo,
+  isLifiSwapTxInfo,
 } from '@/src/utils/transaction-guards'
 import { TxBatchCard } from '@/src/components/transactions-list/Card/TxBatchCard'
 import { TxSafeAppCard } from '@/src/components/transactions-list/Card/TxSafeAppCard'
@@ -30,6 +32,8 @@ import { StakingTxDepositCard } from '../transactions-list/Card/StakingTxDeposit
 import { StakingTxExitCard } from '../transactions-list/Card/StakingTxExitCard'
 import { VaultTxDepositCard } from '@/src/components/transactions-list/Card/VaultTxDepositCard'
 import { VaultTxRedeemCard } from '@/src/components/transactions-list/Card/VaultTxRedeemCard'
+import { TxBridgeCard } from '@/src/components/transactions-list/Card/TxBridgeCard'
+import { TxLifiSwapCard } from '@/src/components/transactions-list/Card/TxLifiSwapCard'
 interface TxInfoProps {
   tx: Transaction
   bordered?: boolean
@@ -178,6 +182,30 @@ function TxInfoComponent({ tx, bordered, inQueue, onPress }: TxInfoProps) {
     return (
       <VaultTxRedeemCard
         info={txInfo}
+        onPress={onCardPress}
+        bordered={bordered}
+        executionInfo={tx.executionInfo}
+        inQueue={inQueue}
+      />
+    )
+  }
+
+  if (isBridgeOrderTxInfo(txInfo)) {
+    return (
+      <TxBridgeCard
+        txInfo={txInfo}
+        onPress={onCardPress}
+        bordered={bordered}
+        executionInfo={tx.executionInfo}
+        inQueue={inQueue}
+      />
+    )
+  }
+
+  if (isLifiSwapTxInfo(txInfo)) {
+    return (
+      <TxLifiSwapCard
+        txInfo={txInfo}
         onPress={onCardPress}
         bordered={bordered}
         executionInfo={tx.executionInfo}

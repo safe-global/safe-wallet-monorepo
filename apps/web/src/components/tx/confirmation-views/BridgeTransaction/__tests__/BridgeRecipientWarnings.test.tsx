@@ -1,5 +1,6 @@
 import { render, waitFor } from '@/tests/test-utils'
-import { BridgeRecipientWarnings, BridgeWarnings } from '../BridgeRecipientWarnings'
+import { BridgeRecipientWarnings } from '../BridgeRecipientWarnings'
+import { BridgeWarnings } from '@safe-global/utils/components/confirmation-views/BridgeTransaction/BridgeWarnings'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import * as useSafeInfoHook from '@/hooks/useSafeInfo'
 import * as useChainsHook from '@/hooks/useChains'
