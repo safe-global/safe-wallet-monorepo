@@ -61,18 +61,20 @@ const BatchTxItem = ({
     <ListItem disablePadding sx={{ gap: 2, alignItems: 'flex-start' }}>
       <div className={css.number}>{count}</div>
       {txDecoded ? (
-        <SingleTxDecoded
-          actionTitle=""
-          tx={txDecoded}
-          txData={transactionDetails}
-          actions={
-            onDelete ? (
-              <ButtonBase onClick={handleDelete} title="Delete transaction" sx={{ p: 0.5 }}>
-                <SvgIcon component={DeleteIcon} inheritViewBox fontSize="small" />
-              </ButtonBase>
-            ) : undefined
-          }
-        />
+        <div className={css.accordion}>
+          <SingleTxDecoded
+            actionTitle=""
+            tx={txDecoded}
+            txData={transactionDetails}
+            actions={
+              onDelete ? (
+                <ButtonBase onClick={handleDelete} title="Delete transaction" sx={{ p: 0.5 }}>
+                  <SvgIcon component={DeleteIcon} inheritViewBox fontSize="small" />
+                </ButtonBase>
+              ) : undefined
+            }
+          />
+        </div>
       ) : (
         <Skeleton width="100%" height="56px" />
       )}

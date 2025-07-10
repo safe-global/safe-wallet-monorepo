@@ -31,6 +31,7 @@ import { version as termsVersion } from '@/markdown/terms/version'
 import { cgwClient, setBaseUrl } from '@safe-global/store/gateway/cgwClient'
 import { GATEWAY_URL } from '@/config/gateway'
 import { setupListeners } from '@reduxjs/toolkit/query'
+import { migrateBatchTxs } from '@/services/ls-migration/batch'
 
 const rootReducer = combineReducers({
   [slices.chainsSlice.name]: slices.chainsSlice.reducer,
@@ -124,6 +125,9 @@ export const _hydrationReducer: typeof rootReducer = (state, action) => {
         ...cookiesAndTermsInitialState,
       }
     }
+
+    // Migrate batchSlice txDetails to txData
+    nextState[slices.batchSlice.name] = migrateBatchTxs(nextState[slices.batchSlice.name])
 
     return nextState
   }
