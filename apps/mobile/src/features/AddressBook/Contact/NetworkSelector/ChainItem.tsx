@@ -27,7 +27,6 @@ export const ChainItem = ({ chain, isSelected, isReadOnly, onToggle }: ChainItem
         <AssetsCard
           name={chain.chainName}
           logoUri={chain.chainLogoUri}
-          description={chain.description || `Chain ID: ${chain.chainId}`}
           rightNode={!isReadOnly && isSelected && <SafeFontIcon name="check" color="$color" />}
         />
       </View>

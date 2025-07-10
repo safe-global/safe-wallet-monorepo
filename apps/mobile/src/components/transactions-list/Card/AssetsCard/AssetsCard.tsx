@@ -6,7 +6,7 @@ import { ellipsis } from '@/src/utils/formatters'
 
 interface AssetsCardProps {
   name: string
-  description: string
+  description?: string
   logoUri?: string | null
   rightNode?: string | React.ReactNode
   accessibilityLabel?: string
@@ -33,9 +33,11 @@ export function AssetsCard({
           <Text fontSize="$4" fontWeight={600} lineHeight={20}>
             {name}
           </Text>
-          <Text fontSize="$4" color="$colorSecondary" fontWeight={400} lineHeight={20}>
-            {description}
-          </Text>
+          {description && (
+            <Text fontSize="$4" color="$colorSecondary" fontWeight={400} lineHeight={20}>
+              {description}
+            </Text>
+          )}
         </View>
       }
       transparent={transparent}

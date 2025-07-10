@@ -37,7 +37,7 @@ export const ContactNetworkRow = ({ onPress, chainIds }: ContactNetworkRowProps)
             <Text fontSize="$4" fontWeight="400" color="$colorSecondary">
               {displayText}
             </Text>
-            <SafeFontIcon name="chevron-right" color="$colorTransparent" size={16} />
+            <SafeFontIcon name="chevron-right" size={16} />
           </View>
         </View>
       </Pressable>
