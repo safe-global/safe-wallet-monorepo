@@ -73,14 +73,14 @@ export const trackEvent = async (eventData: AnalyticsEvent): Promise<void> => {
     // Prepare event parameters
     const eventParams: Record<string, string | number | boolean> = {
       ...commonEventParams,
-      eventCategory: eventData.eventCategory,
-      eventAction: eventData.eventAction,
+      eventCategory: truncateParam(eventData.eventCategory) ?? '',
+      eventAction: truncateParam(eventData.eventAction) ?? '',
       chainId: eventData.chainId || commonEventParams.chainId,
     }
 
     // Add event label if provided
     if (eventData.eventLabel !== undefined) {
-      eventParams.eventLabel = String(eventData.eventLabel)
+      eventParams.eventLabel = truncateParam(String(eventData.eventLabel)) ?? ''
     }
 
     // Log the event
@@ -95,6 +95,14 @@ export const trackEvent = async (eventData: AnalyticsEvent): Promise<void> => {
   } catch (error) {
     console.error('[Firebase Analytics] - Error tracking event:', error)
   }
+}
+
+// Helper to truncate parameter values to 100 characters
+function truncateParam(value: string | undefined): string | undefined {
+  if (typeof value === 'string' && value.length > 100) {
+    return value.slice(0, 100)
+  }
+  return value
 }
 
 /**
