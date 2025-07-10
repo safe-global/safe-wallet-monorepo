@@ -18,6 +18,10 @@ type PriceImprovementFee = {
   recipient: v1_4_0.PartnerAccount
 }
 
+// Add proper type definitions that account for undefined
+type LegacyPartnerFee = v1_3_0.PartnerFee | undefined
+type ModernPartnerFee = v1_4_0.PartnerFee | v1_4_0.PartnerFee[] | undefined
+
 function isVolumeFee(fee: v1_4_0.PartnerFee): fee is VolumeFee {
   return typeof (fee as VolumeFee).volumeBps === 'number'
 }
@@ -50,13 +54,29 @@ function resolveNewPartnerFeeBps(fee: v1_4_0.PartnerFee): number | null {
 export const getOrderFeeBps = (order: Pick<SwapOrder, 'fullAppData'>): number => {
   const fullAppData = order.fullAppData as unknown as LatestAppDataDocVersion
 
-  const oldPartnerFee = fullAppData?.metadata?.partnerFee as unknown as v1_3_0.PartnerFee
+  if (!fullAppData?.metadata) {
+    return 0
+  }
 
-  if (typeof oldPartnerFee.bps === 'number') {
+  // Handle legacy partner fee format (v1.3.0) with proper null checks
+  const oldPartnerFee = fullAppData.metadata.partnerFee as unknown as LegacyPartnerFee
+
+  // Check if it's the legacy format and has bps property
+  if (
+    oldPartnerFee &&
+    typeof oldPartnerFee === 'object' &&
+    'bps' in oldPartnerFee &&
+    typeof oldPartnerFee.bps === 'number'
+  ) {
     return Number(oldPartnerFee.bps)
   }
 
-  const newPartnerFee = fullAppData?.metadata?.partnerFee as unknown as v1_4_0.PartnerFee
+  // Handle modern partner fee format (v1.4.0) with proper null checks
+  const newPartnerFee = fullAppData.metadata.partnerFee as unknown as ModernPartnerFee
+
+  if (!newPartnerFee) {
+    return 0
+  }
 
   if (Array.isArray(newPartnerFee)) {
     return newPartnerFee.reduce((acc, fee) => {

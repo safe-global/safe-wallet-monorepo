@@ -7,6 +7,7 @@ import {
   isOrderPartiallyFilled,
   isSettingTwapFallbackHandler,
   TWAP_FALLBACK_HANDLER,
+  getOrderFeeBps,
 } from '../utils'
 import type {
   DataDecoded,
@@ -423,6 +424,239 @@ describe('Swap helpers', () => {
         ],
       } as unknown as DataDecoded
       expect(isSettingTwapFallbackHandler(decodedData)).toBe(false)
+    })
+  })
+
+  describe('getOrderFeeBps', () => {
+    describe('undefined partnerFee cases', () => {
+      it('should return 0 when fullAppData is null', () => {
+        const mockOrder = {
+          fullAppData: null,
+        } as unknown as SwapOrder
+
+        const result = getOrderFeeBps(mockOrder)
+        expect(result).toBe(0)
+      })
+
+      it('should return 0 when fullAppData is undefined', () => {
+        const mockOrder = {
+          fullAppData: undefined,
+        } as unknown as SwapOrder
+
+        const result = getOrderFeeBps(mockOrder)
+        expect(result).toBe(0)
+      })
+
+      it('should return 0 when metadata is missing', () => {
+        const mockOrder = {
+          fullAppData: {},
+        } as unknown as SwapOrder
+
+        const result = getOrderFeeBps(mockOrder)
+        expect(result).toBe(0)
+      })
+
+      it('should return 0 when metadata is null', () => {
+        const mockOrder = {
+          fullAppData: {
+            metadata: null,
+          },
+        } as unknown as SwapOrder
+
+        const result = getOrderFeeBps(mockOrder)
+        expect(result).toBe(0)
+      })
+
+      it('should return 0 when partnerFee is undefined', () => {
+        const mockOrder = {
+          fullAppData: {
+            metadata: {
+              partnerFee: undefined,
+            },
+          },
+        } as unknown as SwapOrder
+
+        const result = getOrderFeeBps(mockOrder)
+        expect(result).toBe(0)
+      })
+
+      it('should return 0 when partnerFee is null', () => {
+        const mockOrder = {
+          fullAppData: {
+            metadata: {
+              partnerFee: null,
+            },
+          },
+        } as unknown as SwapOrder
+
+        const result = getOrderFeeBps(mockOrder)
+        expect(result).toBe(0)
+      })
+    })
+
+    describe('legacy partnerFee format (v1.3.0)', () => {
+      it('should return bps value for valid legacy partnerFee', () => {
+        const mockOrder = {
+          fullAppData: {
+            metadata: {
+              partnerFee: {
+                bps: 25,
+                recipient: '0x1234567890123456789012345678901234567890',
+              },
+            },
+          },
+        } as unknown as SwapOrder
+
+        const result = getOrderFeeBps(mockOrder)
+        expect(result).toBe(25)
+      })
+
+      it('should return 0 when legacy partnerFee has no bps property', () => {
+        const mockOrder = {
+          fullAppData: {
+            metadata: {
+              partnerFee: {
+                recipient: '0x1234567890123456789012345678901234567890',
+              },
+            },
+          },
+        } as unknown as SwapOrder
+
+        const result = getOrderFeeBps(mockOrder)
+        expect(result).toBe(0)
+      })
+
+      it('should return 0 when legacy partnerFee bps is not a number', () => {
+        const mockOrder = {
+          fullAppData: {
+            metadata: {
+              partnerFee: {
+                bps: 'invalid',
+                recipient: '0x1234567890123456789012345678901234567890',
+              },
+            },
+          },
+        } as unknown as SwapOrder
+
+        const result = getOrderFeeBps(mockOrder)
+        expect(result).toBe(0)
+      })
+    })
+
+    describe('modern partnerFee format (v1.4.0)', () => {
+      it('should return volumeBps for volume fee', () => {
+        const mockOrder = {
+          fullAppData: {
+            metadata: {
+              partnerFee: {
+                volumeBps: 30,
+                recipient: '0x1234567890123456789012345678901234567890',
+              },
+            },
+          },
+        } as unknown as SwapOrder
+
+        const result = getOrderFeeBps(mockOrder)
+        expect(result).toBe(30)
+      })
+
+      it('should return 0 for surplus fee (not volume fee)', () => {
+        const mockOrder = {
+          fullAppData: {
+            metadata: {
+              partnerFee: {
+                surplusBps: 25,
+                maxVolumeBps: 50,
+                recipient: '0x1234567890123456789012345678901234567890',
+              },
+            },
+          },
+        } as unknown as SwapOrder
+
+        const result = getOrderFeeBps(mockOrder)
+        expect(result).toBe(0)
+      })
+
+      it('should return 0 for price improvement fee (not volume fee)', () => {
+        const mockOrder = {
+          fullAppData: {
+            metadata: {
+              partnerFee: {
+                priceImprovementBps: 15,
+                maxVolumeBps: 40,
+                recipient: '0x1234567890123456789012345678901234567890',
+              },
+            },
+          },
+        } as unknown as SwapOrder
+
+        const result = getOrderFeeBps(mockOrder)
+        expect(result).toBe(0)
+      })
+
+      it('should sum volumeBps from array of fees', () => {
+        const mockOrder = {
+          fullAppData: {
+            metadata: {
+              partnerFee: [
+                {
+                  volumeBps: 20,
+                  recipient: '0x1234567890123456789012345678901234567890',
+                },
+                {
+                  volumeBps: 15,
+                  recipient: '0x0987654321098765432109876543210987654321',
+                },
+                {
+                  surplusBps: 10, // This should be ignored
+                  maxVolumeBps: 30,
+                  recipient: '0x1111111111111111111111111111111111111111',
+                },
+              ],
+            },
+          },
+        } as unknown as SwapOrder
+
+        const result = getOrderFeeBps(mockOrder)
+        expect(result).toBe(35) // 20 + 15, surplus fee ignored
+      })
+
+      it('should return 0 for array with no volume fees', () => {
+        const mockOrder = {
+          fullAppData: {
+            metadata: {
+              partnerFee: [
+                {
+                  surplusBps: 25,
+                  maxVolumeBps: 50,
+                  recipient: '0x1234567890123456789012345678901234567890',
+                },
+                {
+                  priceImprovementBps: 15,
+                  maxVolumeBps: 40,
+                  recipient: '0x0987654321098765432109876543210987654321',
+                },
+              ],
+            },
+          },
+        } as unknown as SwapOrder
+
+        const result = getOrderFeeBps(mockOrder)
+        expect(result).toBe(0)
+      })
+
+      it('should return 0 for empty array', () => {
+        const mockOrder = {
+          fullAppData: {
+            metadata: {
+              partnerFee: [],
+            },
+          },
+        } as unknown as SwapOrder
+
+        const result = getOrderFeeBps(mockOrder)
+        expect(result).toBe(0)
+      })
     })
   })
 })
