@@ -4,7 +4,6 @@ import { SafeButton } from '@/src/components/SafeButton'
 import { KeyboardAvoidingView } from 'react-native'
 import { Alert } from '@/src/components/Alert'
 import { SafeInput } from '@/src/components/SafeInput'
-import { SafeStatusBar } from '@/src/theme/SafeStatusBar'
 
 interface EnterPasswordViewProps {
   topInset: number
@@ -29,8 +28,6 @@ export const EnterPasswordView = ({
     <KeyboardAvoidingView behavior="padding" style={{ flex: 1 }} keyboardVerticalOffset={bottomInset + topInset}>
       <ScrollView contentContainerStyle={{ flex: 1 }}>
         <YStack flex={1} testID="enter-password-screen">
-          <SafeStatusBar />
-
           {/* Content */}
           <YStack flex={1} paddingHorizontal="$4" justifyContent="space-between" marginTop={'$4'}>
             <YStack gap="$6">

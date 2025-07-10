@@ -9,7 +9,6 @@ import { useRouter } from 'expo-router'
 import { useAppDispatch } from '@/src/store/hooks'
 import { updateSettings } from '@/src/store/settingsSlice'
 import { ONBOARDING_VERSION } from '@/src/config/constants'
-import { StatusBar } from 'expo-status-bar'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 interface OnboardingCarouselProps {
@@ -42,7 +41,6 @@ export function OnboardingCarousel({ items }: OnboardingCarouselProps) {
         paddingBottom={'$4'}
         paddingTop={'$4'}
       >
-        <StatusBar style="light" />
         <View flex={1}>
           <Tabs.Container
             onTabChange={(event) => setActiveTab(event.tabName)}

@@ -3,12 +3,10 @@ import React from 'react'
 import { TabBarIcon } from '@/src/components/navigation/TabBarIcon'
 import { Navbar as AssetsNavbar } from '@/src/features/Assets/components/Navbar/Navbar'
 import { Pressable, StyleSheet, Platform } from 'react-native'
-import { StatusBar } from 'expo-status-bar'
 
 export default function TabLayout() {
   return (
     <>
-      <StatusBar style="auto" />
       <Tabs screenOptions={{ tabBarShowLabel: false }}>
         <Tabs.Screen
           name="index"

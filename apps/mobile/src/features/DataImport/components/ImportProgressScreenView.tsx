@@ -1,7 +1,6 @@
 import React from 'react'
 import { Text, YStack, H2, ScrollView, View } from 'tamagui'
 import { Bar } from 'react-native-progress'
-import { SafeStatusBar } from '@/src/theme/SafeStatusBar'
 
 interface ImportProgressScreenViewProps {
   progress: number
@@ -11,8 +10,6 @@ export const ImportProgressScreenView = ({ progress }: ImportProgressScreenViewP
   return (
     <ScrollView contentContainerStyle={{ flex: 1 }}>
       <YStack flex={1} testID="import-progress-screen">
-        <SafeStatusBar />
-
         {/* Content */}
         <YStack flex={1} paddingHorizontal="$4" justifyContent="center" alignItems="center">
           <YStack gap="$6" alignItems="center" maxWidth={300}>
