@@ -47,6 +47,10 @@ const TxActionItem = ({ action, index, addressInfoIndex, txData }: TxActionItemP
     txData?.tokenInfoIndex ?? {},
   )
 
+  if (!tx) {
+    return null
+  }
+
   return (
     <>
       <View alignItems="center" flexDirection="row" justifyContent="space-between" gap={'$2'} flexWrap="wrap">
@@ -60,9 +64,9 @@ const TxActionItem = ({ action, index, addressInfoIndex, txData }: TxActionItemP
                 Send {formatVisualAmount(transferTokenInfo.transferValue, transferTokenInfo?.tokenInfo?.decimals, 6)}{' '}
                 {transferTokenInfo.tokenInfo.symbol} to
               </Text>
-              <Identicon address={tx?.to as `0x${string}`} size={20} />{' '}
+              <Identicon address={tx.to as `0x${string}`} size={20} />{' '}
               <Text fontSize="$4" numberOfLines={1} ellipsizeMode="tail" flexShrink={1}>
-                {tx?.to}
+                {shortenAddress(tx.to)}
               </Text>
             </View>
           ) : (
