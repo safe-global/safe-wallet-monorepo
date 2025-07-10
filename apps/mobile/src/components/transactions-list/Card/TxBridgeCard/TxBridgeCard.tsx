@@ -21,7 +21,7 @@ export function TxBridgeCard({ txInfo, bordered, executionInfo, inQueue, onPress
 
   const fromAmountFormatted = formatUnits(actualFromAmount, txInfo.fromToken.decimals)
   const toAmountFormatted =
-    txInfo.toAmount && txInfo.toToken ? formatUnits(txInfo.toAmount, txInfo.toToken.decimals) : '?'
+    txInfo.toAmount && txInfo.toToken ? formatUnits(txInfo.toAmount, txInfo.toToken.decimals) : ''
 
   const statusText = (() => {
     switch (txInfo.status) {
@@ -81,9 +81,11 @@ export function TxBridgeCard({ txInfo, bordered, executionInfo, inQueue, onPress
       }
       rightNode={
         <View alignItems="flex-end">
-          <Text color="$primary">
-            +{ellipsis(toAmountFormatted, 10)} {txInfo.toToken?.symbol ?? '?'}
-          </Text>
+          {(txInfo.toAmount || txInfo.toToken) && (
+            <Text color="$primary">
+              +{ellipsis(toAmountFormatted, 10)} {txInfo.toToken?.symbol ?? ''}
+            </Text>
+          )}
           <Text fontSize="$3">
             −{ellipsis(fromAmountFormatted, 10)} {txInfo.fromToken.symbol}
           </Text>

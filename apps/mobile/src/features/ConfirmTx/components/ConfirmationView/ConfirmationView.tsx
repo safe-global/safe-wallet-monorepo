@@ -142,16 +142,16 @@ export function ConfirmationView({ txDetails }: ConfirmationViewProps) {
     case ETxType.BRIDGE_ORDER:
       return (
         <BridgeTransaction
-          _txId={txDetails.txId}
-          _executionInfo={txDetails.detailedExecutionInfo as MultisigExecutionDetails}
+          txId={txDetails.txId}
+          executionInfo={txDetails.detailedExecutionInfo as MultisigExecutionDetails}
           txInfo={txDetails.txInfo as BridgeAndSwapTransactionInfo}
         />
       )
     case ETxType.LIFI_SWAP:
       return (
         <LifiSwapTransaction
-          _txId={txDetails.txId}
-          _executionInfo={txDetails.detailedExecutionInfo as MultisigExecutionDetails}
+          txId={txDetails.txId}
+          executionInfo={txDetails.detailedExecutionInfo as MultisigExecutionDetails}
           txInfo={txDetails.txInfo as SwapTransactionInfo}
         />
       )

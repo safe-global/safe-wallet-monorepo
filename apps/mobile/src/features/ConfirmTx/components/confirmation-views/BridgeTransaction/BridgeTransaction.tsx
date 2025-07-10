@@ -15,14 +15,15 @@ import { type ListTableItem } from '../../ListTable'
 import { Alert2 } from '@/src/components/Alert2'
 import { BridgeRecipientWarnings } from './BridgeRecipientWarnings'
 import { ChainIndicator } from '@/src/components/ChainIndicator'
+import { ParametersButton } from '../../ParametersButton'
 
 interface BridgeTransactionProps {
-  _txId: string
-  _executionInfo: MultisigExecutionDetails
+  txId: string
+  executionInfo: MultisigExecutionDetails
   txInfo: BridgeAndSwapTransactionInfo
 }
 
-export function BridgeTransaction({ _txId, _executionInfo, txInfo }: BridgeTransactionProps) {
+export function BridgeTransaction({ txId, txInfo }: BridgeTransactionProps) {
   const activeSafe = useDefinedActiveSafe()
   const chain = useAppSelector((state) => selectChainById(state, activeSafe.chainId))
 
@@ -153,7 +154,9 @@ export function BridgeTransaction({ _txId, _executionInfo, txInfo }: BridgeTrans
 
   return (
     <YStack gap="$4">
-      <ListTable items={bridgeItems} />
+      <ListTable items={bridgeItems}>
+        <ParametersButton txId={txId} />
+      </ListTable>
 
       <BridgeRecipientWarnings txInfo={txInfo} />
 
