@@ -59,7 +59,7 @@ export type AnalyticsLabel =
 
 /**
  * MixPanel User Attributes for Safe Wallet (Mobile)
- * 
+ *
  * These attributes are used for cohort analysis and user segmentation
  * Shared with web app for consistency
  */
@@ -102,5 +102,5 @@ export interface SafeEventProperties {
   'Safe ID': string
   'Safe Version': string
   Network: string
-  [key: string]: any
+  [key: string]: unknown
 }

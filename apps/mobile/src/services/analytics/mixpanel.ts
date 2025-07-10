@@ -64,7 +64,7 @@ const safeMixPanelOperation = (operation: () => void | Promise<void>, operationN
  * Prepare user attributes for MixPanel
  * Converts Date objects to ISO strings for compatibility
  */
-const prepareMixPanelUserAttributes = (attributes: SafeUserAttributes): Record<string, any> => {
+const prepareMixPanelUserAttributes = (attributes: SafeUserAttributes): Record<string, unknown> => {
   return {
     ...attributes,
     created_at: attributes.created_at instanceof Date ? attributes.created_at.toISOString() : attributes.created_at,
@@ -77,7 +77,9 @@ const prepareMixPanelUserAttributes = (attributes: SafeUserAttributes): Record<s
  */
 export const setMixPanelUserAttributes = (attributes: SafeUserAttributes): void => {
   safeMixPanelOperation(() => {
-    if (!mixpanel) return
+    if (!mixpanel) {
+      return
+    }
 
     const mixpanelAttributes = prepareMixPanelUserAttributes(attributes)
     mixpanel.getPeople().set(mixpanelAttributes)
@@ -93,7 +95,9 @@ export const setMixPanelUserAttributes = (attributes: SafeUserAttributes): void 
  */
 export const setMixPanelUserAttributesOnce = (attributes: Partial<SafeUserAttributes>): void => {
   safeMixPanelOperation(() => {
-    if (!mixpanel) return
+    if (!mixpanel) {
+      return
+    }
 
     const mixpanelAttributes = prepareMixPanelUserAttributes(attributes as SafeUserAttributes)
     mixpanel.getPeople().setOnce(mixpanelAttributes)
@@ -108,12 +112,14 @@ export const setMixPanelUserAttributesOnce = (attributes: Partial<SafeUserAttrib
  * Increment numerical user attributes
  */
 export const incrementMixPanelUserAttributes = (
-  attributes: Partial<Pick<SafeUserAttributes, 'total_tx_count' | 'module_count'>>,
+  attributes: Partial<Pick<SafeUserAttributes, 'total_tx_count'>>,
 ): void => {
   safeMixPanelOperation(() => {
     Object.entries(attributes).forEach(([key, value]) => {
       if (typeof value === 'number') {
-        if (!mixpanel) return
+        if (!mixpanel) {
+          return
+        }
         mixpanel.getPeople().increment(key, value)
       }
     })
@@ -133,7 +139,9 @@ export const appendMixPanelUserAttributes = (
   safeMixPanelOperation(() => {
     Object.entries(attributes).forEach(([key, value]) => {
       if (Array.isArray(value)) {
-        if (!mixpanel) return
+        if (!mixpanel) {
+          return
+        }
         mixpanel.getPeople().append(key, value)
       }
     })
@@ -153,7 +161,9 @@ export const unionMixPanelUserAttributes = (
   safeMixPanelOperation(() => {
     Object.entries(attributes).forEach(([key, value]) => {
       if (Array.isArray(value)) {
-        if (!mixpanel) return
+        if (!mixpanel) {
+          return
+        }
         mixpanel.getPeople().union(key, value)
       }
     })
@@ -169,7 +179,9 @@ export const unionMixPanelUserAttributes = (
  */
 export const trackMixPanelEvent = (eventName: string, properties: SafeEventProperties): void => {
   safeMixPanelOperation(() => {
-    if (!mixpanel) return
+    if (!mixpanel) {
+      return
+    }
 
     mixpanel.track(eventName, properties)
 
@@ -184,7 +196,9 @@ export const trackMixPanelEvent = (eventName: string, properties: SafeEventPrope
  */
 export const identifyMixPanelUser = (safeAddress: string): void => {
   safeMixPanelOperation(() => {
-    if (!mixpanel) return
+    if (!mixpanel) {
+      return
+    }
 
     mixpanel.identify(safeAddress)
 
@@ -197,9 +211,11 @@ export const identifyMixPanelUser = (safeAddress: string): void => {
 /**
  * Register super properties for all events
  */
-export const registerMixPanelSuperProperties = (properties: Record<string, any>): void => {
+export const registerMixPanelSuperProperties = (properties: Record<string, unknown>): void => {
   safeMixPanelOperation(() => {
-    if (!mixpanel) return
+    if (!mixpanel) {
+      return
+    }
 
     mixpanel.registerSuperProperties(properties)
 
@@ -228,7 +244,7 @@ export const resetMixPanel = (): Promise<void> => {
         if (__DEV__) {
           console.info('[MixPanel Mobile] - Reset - previous user data cleared')
         }
-        
+
         // Add a small delay to ensure reset is processed
         setTimeout(() => {
           resolve()
@@ -246,7 +262,9 @@ export const resetMixPanel = (): Promise<void> => {
  */
 export const flushMixPanelRequests = (): void => {
   safeMixPanelOperation(() => {
-    if (!mixpanel) return
+    if (!mixpanel) {
+      return
+    }
 
     mixpanel.flush()
 
