@@ -2,12 +2,33 @@ import { Tabs } from 'expo-router'
 import React from 'react'
 import { TabBarIcon } from '@/src/components/navigation/TabBarIcon'
 import { Navbar as AssetsNavbar } from '@/src/features/Assets/components/Navbar/Navbar'
-import { Pressable, StyleSheet } from 'react-native'
+import { Pressable, StyleSheet, useColorScheme } from 'react-native'
+import { getTokenValue } from 'tamagui'
 
 export default function TabLayout() {
+  const colorScheme = useColorScheme()
+
+  let activeTintColor, inactiveTintColor, borderTopColor
+  if (colorScheme === 'light') {
+    activeTintColor = getTokenValue('$color.textPrimaryLight')
+    inactiveTintColor = getTokenValue('$color.primaryLightLight')
+    borderTopColor = getTokenValue('$color.borderLightLight')
+  } else {
+    activeTintColor = getTokenValue('$color.textPrimaryDark')
+    inactiveTintColor = getTokenValue('$color.primaryLightDark')
+    borderTopColor = getTokenValue('$color.borderLightDark')
+  }
+
   return (
     <>
-      <Tabs screenOptions={{ tabBarShowLabel: false, tabBarStyle: styles.tabBar }}>
+      <Tabs
+        screenOptions={{
+          tabBarStyle: { ...styles.tabBar, borderTopColor },
+          tabBarLabelStyle: styles.label,
+          tabBarActiveTintColor: activeTintColor,
+          tabBarInactiveTintColor: inactiveTintColor,
+        }}
+      >
         <Tabs.Screen
           name="index"
           options={{
@@ -21,7 +42,7 @@ export default function TabLayout() {
                 </Pressable>
               )
             },
-            tabBarIcon: ({ color }) => <TabBarIcon name={'token'} color={color} />,
+            tabBarIcon: ({ color }) => <TabBarIcon name={'home'} color={color} />,
           }}
         />
 
@@ -46,9 +67,9 @@ export default function TabLayout() {
           name="settings"
           options={() => {
             return {
-              title: 'Settings',
+              title: 'Account',
               headerShown: false,
-              tabBarButtonTestID: 'settings-tab',
+              tabBarButtonTestID: 'account-tab',
               tabBarButton: ({ children, ...rest }) => {
                 return (
                   <Pressable {...rest} style={styles.tabButton}>
@@ -70,9 +91,19 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    padding: 8,
   },
   tabBar: {
-    width: '60%',
+    width: '100%',
     margin: 'auto',
+    height: 64,
+    boxSizing: 'content-box',
+    borderTopWidth: 1,
+  },
+  label: {
+    fontSize: 12,
+    fontWeight: 400,
+    lineHeight: 16,
+    marginTop: 8,
   },
 })
