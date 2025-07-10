@@ -64,7 +64,7 @@ export const SignerView = ({
                   error={dirtyFields.name && !!errors.name}
                   success={dirtyFields.name && !errors.name}
                   right={
-                    <TouchableOpacity onPress={onPressEdit} hitSlop={100}>
+                    <TouchableOpacity onPress={onPressEdit} hitSlop={8}>
                       <SafeFontIcon name={editMode ? 'close' : 'edit'} color="$textSecondaryLight" size={16} />
                     </TouchableOpacity>
                   }
@@ -80,9 +80,9 @@ export const SignerView = ({
           <XStack columnGap={'$3'}>
             <Text flex={1}>{signerAddress}</Text>
             <YStack justifyContent={'flex-start'}>
-              <XStack alignItems={'center'}>
-                <CopyButton value={signerAddress} color={'$colorSecondary'} />
-                <Pressable onPress={onPressExplorer}>
+              <XStack alignItems={'center'} gap="$1">
+                <CopyButton value={signerAddress} color={'$colorSecondary'} hitSlop={2} />
+                <Pressable onPress={onPressExplorer} hitSlop={2}>
                   <SafeFontIcon name={'external-link'} size={14} color={'$colorSecondary'} />
                 </Pressable>
               </XStack>

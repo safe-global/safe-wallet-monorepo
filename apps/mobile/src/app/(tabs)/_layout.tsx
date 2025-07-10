@@ -2,12 +2,12 @@ import { Tabs } from 'expo-router'
 import React from 'react'
 import { TabBarIcon } from '@/src/components/navigation/TabBarIcon'
 import { Navbar as AssetsNavbar } from '@/src/features/Assets/components/Navbar/Navbar'
-import { Pressable, StyleSheet, Platform } from 'react-native'
+import { Pressable, StyleSheet } from 'react-native'
 
 export default function TabLayout() {
   return (
     <>
-      <Tabs screenOptions={{ tabBarShowLabel: false }}>
+      <Tabs screenOptions={{ tabBarShowLabel: false, tabBarStyle: styles.tabBar }}>
         <Tabs.Screen
           name="index"
           options={{
@@ -16,7 +16,7 @@ export default function TabLayout() {
             tabBarButtonTestID: 'home-tab',
             tabBarButton: ({ children, ...rest }) => {
               return (
-                <Pressable {...rest} style={styles.homeTab}>
+                <Pressable {...rest} style={styles.tabButton}>
                   {children}
                 </Pressable>
               )
@@ -31,8 +31,12 @@ export default function TabLayout() {
             title: 'Transactions',
             headerShown: false,
             tabBarButtonTestID: 'transactions-tab',
-            tabBarItemStyle: {
-              paddingTop: Platform.OS === 'android' ? 6 : 10,
+            tabBarButton: ({ children, ...rest }) => {
+              return (
+                <Pressable {...rest} style={styles.tabButton}>
+                  {children}
+                </Pressable>
+              )
             },
             tabBarIcon: ({ color }) => <TabBarIcon name={'transactions'} color={color} />,
           }}
@@ -47,7 +51,7 @@ export default function TabLayout() {
               tabBarButtonTestID: 'settings-tab',
               tabBarButton: ({ children, ...rest }) => {
                 return (
-                  <Pressable {...rest} style={styles.settingsTab}>
+                  <Pressable {...rest} style={styles.tabButton}>
                     {children}
                   </Pressable>
                 )
@@ -62,14 +66,13 @@ export default function TabLayout() {
 }
 
 const styles = StyleSheet.create({
-  homeTab: {
+  tabButton: {
     flex: 1,
-    alignItems: 'flex-end',
-    paddingTop: Platform.OS === 'android' ? 10 : 15,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  settingsTab: {
-    flex: 1,
-    alignItems: 'flex-start',
-    paddingTop: Platform.OS === 'android' ? 10 : 15,
+  tabBar: {
+    width: '60%',
+    margin: 'auto',
   },
 })

@@ -12,6 +12,7 @@ type DropdownLabelProps = {
   }
   displayDropDownIcon?: boolean
   onPress?: () => void
+  hitSlop?: number
 }
 const defaultLabelProps = {
   fontSize: '$4',
@@ -24,9 +25,10 @@ export const DropdownLabel = ({
   leftNode,
   onPress,
   labelProps = defaultLabelProps,
+  hitSlop = 0,
 }: DropdownLabelProps) => {
   return (
-    <Pressable testID="dropdown-label-view" onPress={onPress}>
+    <Pressable testID="dropdown-label-view" onPress={onPress} hitSlop={hitSlop}>
       <View flexDirection="row" columnGap="$2" justifyContent="space-between" alignItems="center">
         {leftNode}
 

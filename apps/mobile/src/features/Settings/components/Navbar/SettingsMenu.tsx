@@ -46,34 +46,33 @@ export const SettingsMenu = ({ safeAddress }: Props) => {
           marginRight: 4,
           alignItems: 'center',
           justifyContent: 'flex-end',
-          right: -10,
+          gap: 10,
         }}
       >
-        <View
-          backgroundColor={'$backgroundSkeleton'}
-          alignItems={'center'}
-          justifyContent={'center'}
-          borderRadius={16}
-          height={32}
-          width={32}
-          marginRight={4}
+        <Pressable
+          testID={'settings-screen-header-app-settings-button'}
+          hitSlop={6}
+          onPressIn={() => {
+            try {
+              const event = createAppSettingsOpenEvent()
+              trackEvent(event)
+            } catch (error) {
+              console.error('Error tracking app settings open event:', error)
+            }
+            router.push('/app-settings')
+          }}
         >
-          <Pressable
-            testID={'settings-screen-header-app-settings-button'}
-            hitSlop={{ top: 40, bottom: 40, left: 40 }}
-            onPressIn={() => {
-              try {
-                const event = createAppSettingsOpenEvent()
-                trackEvent(event)
-              } catch (error) {
-                console.error('Error tracking app settings open event:', error)
-              }
-              router.push('/app-settings')
-            }}
+          <View
+            backgroundColor={'$backgroundSkeleton'}
+            alignItems={'center'}
+            justifyContent={'center'}
+            borderRadius={16}
+            height={32}
+            width={32}
           >
             <SafeFontIcon name={'settings'} size={20} color={'$color'} />
-          </Pressable>
-        </View>
+          </View>
+        </Pressable>
 
         <FloatingMenu
           onPressAction={({ nativeEvent }) => {
@@ -181,16 +180,12 @@ export const SettingsMenu = ({ safeAddress }: Props) => {
             },
           ]}
         >
-          <Pressable
-            hitSlop={{ top: 40, bottom: 40, right: 40 }}
-            testID={'settings-screen-header-more-settings-button'}
-          >
+          <Pressable hitSlop={6} testID={'settings-screen-header-more-settings-button'}>
             <View
               backgroundColor={'$backgroundSkeleton'}
               alignItems={'center'}
               justifyContent={'center'}
               borderRadius={16}
-              marginLeft={4}
               height={32}
               width={32}
             >
