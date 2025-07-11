@@ -56,7 +56,7 @@ const SafeTokenWidget = () => {
 
   const url = {
     pathname: AppRoutes.apps.open,
-    query: { safe: query?.get('safe'), appUrl: GOVERNANCE_APP_URL },
+    query: { safe: query?.get('safe'), appUrl: GOVERNANCE_APP_URL, from: 'safe_token' },
   }
 
   const flooredSafeBalance = formatVisualAmount(allocation || BigInt(0), TOKEN_DECIMALS, 0)
