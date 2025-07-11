@@ -399,7 +399,7 @@ describe('SignMessage', () => {
       () =>
         ({
           address: zeroPadValue('0x07', 20),
-        }) as ConnectedWallet,
+        } as ConnectedWallet),
     )
     jest.spyOn(useIsSafeOwnerHook, 'default').mockImplementation(() => false)
     jest.spyOn(useSafeMessage, 'default').mockImplementation(() => [undefined, jest.fn(), undefined])
@@ -428,7 +428,7 @@ describe('SignMessage', () => {
       () =>
         ({
           address: zeroPadValue('0x02', 20),
-        }) as ConnectedWallet,
+        } as ConnectedWallet),
     )
     const messageText = 'Hello world!'
     const messageHash = generateSafeMessageHash(
@@ -474,7 +474,7 @@ describe('SignMessage', () => {
       () =>
         ({
           address: zeroPadValue('0x03', 20),
-        }) as ConnectedWallet,
+        } as ConnectedWallet),
     )
 
     jest.spyOn(useSafeMessage, 'default').mockReturnValue([undefined, jest.fn(), undefined])
@@ -516,7 +516,7 @@ describe('SignMessage', () => {
       () =>
         ({
           address: zeroPadValue('0x03', 20),
-        }) as ConnectedWallet,
+        } as ConnectedWallet),
     )
 
     const messageText = 'Hello world!'
@@ -580,7 +580,7 @@ describe('SignMessage', () => {
       () =>
         ({
           address: zeroPadValue('0x03', 20),
-        }) as ConnectedWallet,
+        } as ConnectedWallet),
     )
 
     const messageText = 'Hello world!'
