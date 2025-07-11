@@ -9325,7 +9325,7 @@ __metadata:
     "@react-navigation/native": "npm:^7.1.6"
     "@reduxjs/toolkit": "npm:^2.8.2"
     "@rtk-query/codegen-openapi": "npm:^2.0.0"
-    "@safe-global/protocol-kit": "npm:^5.2.9"
+    "@safe-global/protocol-kit": "npm:^5.2.10"
     "@safe-global/store": "workspace:^"
     "@safe-global/test": "workspace:^"
     "@safe-global/types-kit": "npm:^1.0.5"
@@ -9463,14 +9463,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@safe-global/protocol-kit@npm:^5.2.9":
-  version: 5.2.9
-  resolution: "@safe-global/protocol-kit@npm:5.2.9"
+"@safe-global/protocol-kit@npm:^5.2.10":
+  version: 5.2.10
+  resolution: "@safe-global/protocol-kit@npm:5.2.10"
   dependencies:
     "@noble/curves": "npm:^1.6.0"
     "@peculiar/asn1-schema": "npm:^2.3.13"
-    "@safe-global/safe-deployments": "npm:^1.37.36"
-    "@safe-global/safe-modules-deployments": "npm:^2.2.10"
+    "@safe-global/safe-deployments": "npm:^1.37.37"
+    "@safe-global/safe-modules-deployments": "npm:^2.2.11"
     "@safe-global/types-kit": "npm:^1.0.5"
     abitype: "npm:^1.0.2"
     semver: "npm:^7.6.3"
@@ -9480,7 +9480,7 @@ __metadata:
       optional: true
     "@peculiar/asn1-schema":
       optional: true
-  checksum: 10/688c6d2542b5d91902fbf0952ea4a6426b667101147140062fd96a7c42943a06c6f2cb55bf921b4915c6e9238058ff0c626bf6268d39a1eef511093066e86e82
+  checksum: 10/90391d207515dd873d3a87c1d8ea99fcc56b2f6b58d334f3e25b46bf9c18cdd31fd6fb5b797de8890ab37e074779a245cd96eaccd53072c406adbfd9b8c60e1a
   languageName: node
   linkType: hard
 
@@ -9509,15 +9509,6 @@ __metadata:
   dependencies:
     semver: "npm:^7.6.2"
   checksum: 10/a1683e22d9a6e6ea6bdf32b8edfa03f67b79b0884cfa5132b4e01ce0830ebb4479cff6635fcebeaf6ac198119c10b8e679cda6dbb4b81f5dd045494f79ee7a4b
-  languageName: node
-  linkType: hard
-
-"@safe-global/safe-deployments@npm:^1.37.36":
-  version: 1.37.36
-  resolution: "@safe-global/safe-deployments@npm:1.37.36"
-  dependencies:
-    semver: "npm:^7.6.2"
-  checksum: 10/d8f9447353e65009ccb9a09753f79e4d2390926783c3d056979ede875a500ee4d53829cad82996cd1c6ad622a9806842ea99b2a720abe0fe55034b34137e65c3
   languageName: node
   linkType: hard
 
@@ -9671,7 +9662,7 @@ __metadata:
     "@reduxjs/toolkit": "npm:^2.8.2"
     "@reown/walletkit": "npm:^1.2.7"
     "@safe-global/api-kit": "npm:^2.4.6"
-    "@safe-global/protocol-kit": "npm:^5.2.9"
+    "@safe-global/protocol-kit": "npm:^5.2.10"
     "@safe-global/safe-apps-sdk": "npm:^9.1.0"
     "@safe-global/safe-client-gateway-sdk": "npm:v1.60.1"
     "@safe-global/safe-deployments": "npm:^1.37.37"
