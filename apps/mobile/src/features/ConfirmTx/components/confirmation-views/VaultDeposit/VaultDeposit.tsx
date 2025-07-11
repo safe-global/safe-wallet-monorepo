@@ -27,15 +27,19 @@ const AdditionalRewards = ({ txInfo }: { txInfo: VaultDepositTransactionInfo }) 
 
   return (
     <Container padding="$4" gap="$2">
-      <Text fontWeight="600">Additional reward</Text>
+      <Text fontWeight="600" marginBottom="$2">
+        Additional reward
+      </Text>
       <ListTable
+        padding="0"
+        gap="$4"
         items={[
           {
             label: 'Token',
             value: `${reward.tokenInfo.name} ${reward.tokenInfo.symbol}`,
           },
           {
-            label: 'Reward rate',
+            label: 'Earn',
             value: formatPercentage(txInfo.additionalRewardsNrr / 100),
           },
           {
@@ -44,7 +48,7 @@ const AdditionalRewards = ({ txInfo }: { txInfo: VaultDepositTransactionInfo }) 
           },
         ]}
       />
-      <XStack alignItems="center" gap="$1">
+      <XStack alignItems="center" gap="$1" marginTop="$2">
         <Text fontSize={12} color="$colorSecondary">
           Powered by
         </Text>
@@ -95,7 +99,7 @@ export function VaultDeposit({ txInfo, executionInfo, txId, decodedData }: Vault
         submittedAt={executionInfo.submittedAt}
       />
 
-      <ListTable items={[{ label: 'Earn (after fees)', value: formatPercentage(totalNrr) }, ...items]}>
+      <ListTable items={[{ label: 'Earn (after fees)', value: formatPercentage(totalNrr) }, ...items]} gap="$4">
         <ParametersButton txId={txId} />
       </ListTable>
 

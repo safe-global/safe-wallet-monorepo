@@ -22,15 +22,17 @@ export type ListTableItem = RenderRowItem | LabelValueItem
 interface ListTableProps {
   items: ListTableItem[]
   children?: React.ReactNode
+  padding?: string
+  gap?: string
 }
 
 const isRenderRowItem = (item: ListTableItem): item is RenderRowItem => {
   return (item as RenderRowItem).renderRow !== undefined
 }
 
-export const ListTable = ({ items, children }: ListTableProps) => {
+export const ListTable = ({ items, children, padding = '$4', gap = '$5' }: ListTableProps) => {
   return (
-    <Container padding="$4" gap="$5" borderRadius="$3">
+    <Container padding={padding} gap={gap} borderRadius="$3">
       {items.map((item, index) => {
         return (
           <View

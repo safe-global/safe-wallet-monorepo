@@ -12,11 +12,11 @@ export default function TabLayout() {
   let activeTintColor, inactiveTintColor, borderTopColor
   if (currentTheme === 'light') {
     activeTintColor = getTokenValue('$color.textPrimaryLight')
-    inactiveTintColor = getTokenValue('$color.primaryLightLight')
+    inactiveTintColor = getTokenValue('$color.borderMainLight')
     borderTopColor = getTokenValue('$color.borderLightLight')
   } else {
     activeTintColor = getTokenValue('$color.textPrimaryDark')
-    inactiveTintColor = getTokenValue('$color.primaryLightDark')
+    inactiveTintColor = getTokenValue('$color.borderMainDark')
     borderTopColor = getTokenValue('$color.borderLightDark')
   }
 
