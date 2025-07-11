@@ -30,6 +30,7 @@ import { useSanctionedAddress } from '@/hooks/useSanctionedAddress'
 import BlockedAddress from '@/components/common/BlockedAddress'
 import { isSafePassApp } from '@/features/walletconnect/services/utils'
 import { BRAND_NAME } from '@/config/constants'
+import { useMixPanelSafeAppsTracking } from '@/hooks/analytics/useMixPanelUserTracking'
 
 const UNKNOWN_APP_NAME = 'Unknown Safe App'
 
@@ -62,6 +63,7 @@ const AppFrame = ({ appUrl, allowedFeaturesList, safeAppFromManifest, isNativeEm
   useAnalyticsFromSafeApp(iframeRef)
   const { permissionsRequest, setPermissionsRequest, confirmPermissionRequest, getPermissions, hasPermission } =
     useSafePermissions()
+  const { trackAppLaunched } = useMixPanelSafeAppsTracking()
 
   const communicator = useCustomAppCommunicator(iframeRef, remoteApp || safeAppFromManifest, chain, {
     onGetPermissions: getPermissions,
@@ -106,7 +108,16 @@ const AppFrame = ({ appUrl, allowedFeaturesList, safeAppFromManifest, isNativeEm
     if (!isNativeEmbed) {
       gtmTrackPageview(`${router.pathname}?appUrl=${router.query.appUrl}`, router.asPath)
     }
-  }, [appUrl, iframeRef, setAppIsLoading, router, isNativeEmbed])
+
+    // Track AppLaunched event with MixPanel
+    const app = remoteApp || safeAppFromManifest
+    if (app) {
+      const appCategory = app.tags?.length > 0 ? app.tags[0] : 'unknown'
+      const entryPoint = router.query.from ? String(router.query.from) : 'direct'
+
+      trackAppLaunched(app.name, appCategory, entryPoint)
+    }
+  }, [appUrl, iframeRef, setAppIsLoading, router, isNativeEmbed, remoteApp, safeAppFromManifest, trackAppLaunched])
 
   if (!safeLoaded) {
     return <div />

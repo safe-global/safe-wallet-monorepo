@@ -10,6 +10,7 @@ import {
   registerMixPanelSuperProperties,
   resetMixPanel,
   useMixPanelEnabled,
+  trackMixPanelEvent,
 } from '@/services/analytics/mixpanel-tracking'
 import { useAppSelector } from '@/store'
 import { selectTxHistory } from '@/store/txHistorySlice'
@@ -227,6 +228,67 @@ export const useMixPanelSafeManagementTracking = () => {
   return {
     isTracking,
     getSafeManagementEventProperties,
+    userAttributes,
+  }
+}
+
+/**
+ * Hook to track Safe Apps events with MixPanel
+ * Use this hook in Safe Apps related components
+ */
+export const useMixPanelSafeAppsTracking = () => {
+  const { userAttributes, isTracking } = useMixPanelUserTracking()
+  const currentChain = useCurrentChain()
+
+  const getSafeAppsEventProperties = (
+    app_name: string,
+    app_category?: string,
+    entry_point?: string,
+    additionalProps: Record<string, any> = {},
+  ) => {
+    if (!userAttributes || !currentChain) return null
+
+    return {
+      safe_id: userAttributes.safe_id,
+      network: currentChain.chainName.toLowerCase(),
+      app_name,
+      app_category: app_category || 'unknown',
+      entry_point: entry_point || 'unknown',
+      'Safe ID': userAttributes.safe_id,
+      'Safe Version': userAttributes.safe_version,
+      Network: currentChain.chainName.toLowerCase(),
+      'Number of Signers': userAttributes.num_signers,
+      Threshold: userAttributes.threshold,
+      'Total Transaction Count': userAttributes.total_tx_count,
+      ...additionalProps,
+    }
+  }
+
+  const trackAppClicked = (app_name: string, app_category?: string, entry_point?: string) => {
+    if (!isTracking) return
+
+    const eventProperties = getSafeAppsEventProperties(app_name, app_category, entry_point)
+
+    if (eventProperties) {
+      trackMixPanelEvent('AppClicked', eventProperties)
+    }
+  }
+
+  const trackAppLaunched = (app_name: string, app_category?: string, entry_point?: string) => {
+    if (!isTracking) return
+
+    const eventProperties = getSafeAppsEventProperties(app_name, app_category, entry_point)
+
+    if (eventProperties) {
+      trackMixPanelEvent('AppLaunched', eventProperties)
+    }
+  }
+
+  return {
+    isTracking,
+    getSafeAppsEventProperties,
+    trackAppClicked,
+    trackAppLaunched,
     userAttributes,
   }
 }
