@@ -237,7 +237,7 @@ export const useMixPanelSafeManagementTracking = () => {
  * Use this hook in Safe Apps related components
  */
 export const useMixPanelSafeAppsTracking = () => {
-  const { userAttributes, isTracking } = useMixPanelUserTracking()
+  const { userAttributes, isTracking, safeAddress } = useMixPanelUserTracking()
   const currentChain = useCurrentChain()
 
   const getSafeAppsEventProperties = (
@@ -246,42 +246,34 @@ export const useMixPanelSafeAppsTracking = () => {
     entry_point?: string,
     additionalProps: Record<string, any> = {},
   ) => {
-    if (!userAttributes || !currentChain) return null
+    // Always return event properties, use fallbacks when data is missing
+    const safeId = userAttributes?.safe_id || safeAddress || 'unknown'
+    const networkName = currentChain?.chainName?.toLowerCase() || 'unknown'
 
     return {
-      safe_id: userAttributes.safe_id,
-      network: currentChain.chainName.toLowerCase(),
+      safe_id: safeId,
+      network: networkName,
       app_name,
       app_category: app_category || 'unknown',
       entry_point: entry_point || 'unknown',
-      'Safe ID': userAttributes.safe_id,
-      'Safe Version': userAttributes.safe_version,
-      Network: currentChain.chainName.toLowerCase(),
-      'Number of Signers': userAttributes.num_signers,
-      Threshold: userAttributes.threshold,
-      'Total Transaction Count': userAttributes.total_tx_count,
+      'Safe ID': safeId,
+      'Safe Version': userAttributes?.safe_version || 'unknown',
+      Network: networkName,
+      'Number of Signers': userAttributes?.num_signers || 0,
+      Threshold: userAttributes?.threshold || 0,
+      'Total Transaction Count': userAttributes?.total_tx_count || 0,
       ...additionalProps,
     }
   }
 
   const trackAppClicked = (app_name: string, app_category?: string, entry_point?: string) => {
-    if (!isTracking) return
-
     const eventProperties = getSafeAppsEventProperties(app_name, app_category, entry_point)
-
-    if (eventProperties) {
-      trackMixPanelEvent('AppClicked', eventProperties)
-    }
+    trackMixPanelEvent('AppClicked', eventProperties)
   }
 
   const trackAppLaunched = (app_name: string, app_category?: string, entry_point?: string) => {
-    if (!isTracking) return
-
     const eventProperties = getSafeAppsEventProperties(app_name, app_category, entry_point)
-
-    if (eventProperties) {
-      trackMixPanelEvent('AppLaunched', eventProperties)
-    }
+    trackMixPanelEvent('AppLaunched', eventProperties)
   }
 
   return {
