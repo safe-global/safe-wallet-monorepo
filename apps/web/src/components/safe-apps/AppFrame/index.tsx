@@ -113,7 +113,21 @@ const AppFrame = ({ appUrl, allowedFeaturesList, safeAppFromManifest, isNativeEm
     const app = remoteApp || safeAppFromManifest
     if (app) {
       const appCategory = app.tags?.length > 0 ? app.tags[0] : 'unknown'
-      const entryPoint = router.query.from ? String(router.query.from) : 'direct'
+      let entryPoint = router.query.from ? String(router.query.from) : 'direct'
+      
+      // Detect native widgets by checking if this is a native embed and the current route
+      if (isNativeEmbed) {
+        const currentPath = router.pathname
+        if (currentPath.includes('/swap')) {
+          entryPoint = 'native_widget'
+        } else if (currentPath.includes('/bridge')) {
+          entryPoint = 'native_widget'
+        } else if (currentPath.includes('/stake')) {
+          entryPoint = 'native_widget'
+        } else if (currentPath.includes('/earn')) {
+          entryPoint = 'native_widget'
+        }
+      }
 
       trackAppLaunched(app.name, appCategory, entryPoint)
     }

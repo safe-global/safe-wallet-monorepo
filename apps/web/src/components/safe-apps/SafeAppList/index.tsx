@@ -60,11 +60,18 @@ const SafeAppList = ({
 
         // Track with MixPanel (new) - tracks the click event for previously opened apps
         const appCategory = safeApp.tags?.length > 0 ? safeApp.tags[0] : 'unknown'
-        const entryPoint = eventLabel === SAFE_APPS_LABELS.dashboard ? 'dashboard' : 'apps_list'
+        let entryPoint = 'apps_list'
+        if (eventLabel === SAFE_APPS_LABELS.dashboard) {
+          entryPoint = 'dashboard'
+        } else if (eventLabel === SAFE_APPS_LABELS.apps_custom) {
+          entryPoint = 'custom_apps'
+        } else if (isFiltered || query) {
+          entryPoint = 'search'
+        }
         trackAppClicked(safeApp.name, appCategory, entryPoint)
       }
     },
-    [eventLabel, openPreviewDrawer, openedSafeAppIds, trackAppClicked],
+    [eventLabel, openPreviewDrawer, openedSafeAppIds, trackAppClicked, isFiltered, query],
   )
 
   return (
