@@ -23,9 +23,7 @@ const useMixpanel = () => {
 
     mixpanel.init(token, {
       debug: !IS_PRODUCTION,
-      autocapture: true,
-      // Enable people tracking for user attributes
-      track_pageview: true,
+      autocapture: false,
     })
 
     // Track initial page view
