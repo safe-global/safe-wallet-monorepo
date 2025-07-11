@@ -1,6 +1,5 @@
 import { renderHook } from '@testing-library/react'
-import { trackMixPanelEvent } from '@/services/analytics/mixpanel-tracking'
-import { useMixPanelSafeAppsTracking, useMixPanelUserTracking } from '../useMixPanelUserTracking'
+import { useMixPanelSafeAppsTracking } from '../useMixPanelUserTracking'
 
 // Mock dependencies
 jest.mock('@/services/analytics/mixpanel-tracking', () => ({
@@ -69,8 +68,9 @@ jest.mock('@/services/analytics/user-attributes', () => ({
 }))
 
 describe('useMixPanelSafeAppsTracking', () => {
-  const mockTrackMixPanelEvent = trackMixPanelEvent as jest.MockedFunction<typeof trackMixPanelEvent>
-  const mockUseMixPanelSafeAppsTrackingFn = useMixPanelSafeAppsTracking as jest.MockedFunction<typeof useMixPanelSafeAppsTracking>
+  const mockUseMixPanelSafeAppsTrackingFn = useMixPanelSafeAppsTracking as jest.MockedFunction<
+    typeof useMixPanelSafeAppsTracking
+  >
 
   beforeEach(() => {
     jest.clearAllMocks()
@@ -78,7 +78,7 @@ describe('useMixPanelSafeAppsTracking', () => {
 
   it('should track AppLaunched event with correct properties', () => {
     const mockTrackAppLaunched = jest.fn()
-    
+
     // Mock the hook to return the functions we want to test
     mockUseMixPanelSafeAppsTrackingFn.mockReturnValue({
       isTracking: true,
@@ -103,7 +103,7 @@ describe('useMixPanelSafeAppsTracking', () => {
 
     // Check if tracking is enabled
     expect(result.current.isTracking).toBe(true)
-    
+
     // Call trackAppLaunched
     result.current.trackAppLaunched('Test App', 'defi', 'dashboard')
 
@@ -113,7 +113,7 @@ describe('useMixPanelSafeAppsTracking', () => {
 
   it('should not track AppLaunched event when tracking is disabled', () => {
     const mockTrackAppLaunched = jest.fn()
-    
+
     // Mock the hook to return tracking disabled
     mockUseMixPanelSafeAppsTrackingFn.mockReturnValue({
       isTracking: false,
@@ -145,7 +145,7 @@ describe('useMixPanelSafeAppsTracking', () => {
 
   it('should use default values for missing parameters', () => {
     const mockTrackAppLaunched = jest.fn()
-    
+
     // Mock the hook to return tracking enabled
     mockUseMixPanelSafeAppsTrackingFn.mockReturnValue({
       isTracking: true,
