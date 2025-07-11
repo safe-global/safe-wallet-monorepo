@@ -66,3 +66,61 @@ export enum TxFlowType {
   TOKEN_TRANSFER = 'token-transfer',
   UPDATE_SAFE = 'update-safe',
 }
+
+/**
+ * MixPanel User Attributes for Safe Wallet
+ *
+ * These attributes are used for cohort analysis and user segmentation
+ */
+export interface SafeUserAttributes {
+  /** On-chain address of the Safe (Primary key for cohort analysis) */
+  safe_id: string
+
+  /** Timestamp when the Safe was deployed (Life of user) */
+  created_at: Date
+
+  /** Each version has different properties (Filter out older Safes) */
+  safe_version: string
+
+  /** Total number of wallet addresses/signers on this Safe (Engagement metric) */
+  num_signers: number
+
+  /** Number of signatures required to execute a transaction (Setup intent) */
+  threshold: number
+
+  /** Blockchain networks (Context for segmentation) */
+  networks: string[]
+
+  /** Timestamp of most recent transaction (Churn alerting) */
+  last_tx_at: Date | null
+
+  /** ID of parent Space if the Safe is grouped in a Space (Space-level grouping) */
+  space_id: string | null
+
+  /** Array of child Safe IDs that this Safe contains (Nested safes grouping) */
+  nested_safe_ids: string[]
+
+  /** Lifetime number of transactions executed by this Safe (Engagement metric) */
+  total_tx_count: number
+}
+
+/**
+ * MixPanel User Profile Update payload
+ */
+export interface MixPanelUserProfileUpdate {
+  $set?: Partial<SafeUserAttributes>
+  $set_once?: Partial<SafeUserAttributes>
+  $add?: Partial<Pick<SafeUserAttributes, 'total_tx_count'>>
+  $append?: Partial<Pick<SafeUserAttributes, 'networks' | 'nested_safe_ids'>>
+  $union?: Partial<Pick<SafeUserAttributes, 'networks' | 'nested_safe_ids'>>
+}
+
+/**
+ * Event tracking types for MixPanel with humanized property names
+ */
+export interface SafeEventProperties {
+  'Safe ID': string
+  'Safe Version': string
+  Network: string
+  [key: string]: any
+}
