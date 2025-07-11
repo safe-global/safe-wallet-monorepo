@@ -273,7 +273,7 @@ export const useMixPanelSafeAppsTracking = () => {
 
   const trackAppLaunched = (app_name: string, app_category?: string, entry_point?: string) => {
     const eventProperties = getSafeAppsEventProperties(app_name, app_category, entry_point)
-    trackMixPanelEvent('AppLaunched', eventProperties)
+    trackMixPanelEvent('SafeStoreAppLaunched', eventProperties)
   }
 
   return {
