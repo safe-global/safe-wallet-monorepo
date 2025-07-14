@@ -47,7 +47,7 @@ const StyledInput = styled(Input, {
   padding: 0,
 
   style: {
-    boxSizing: Platform.OS === 'android' ? 'content-box' : 'initial',
+    boxSizing: Platform.OS === 'android' ? 'content-box' : undefined,
     borderWidth: 0,
     backgroundColor: '$borderColorHover',
     paddingLeft: 0,
