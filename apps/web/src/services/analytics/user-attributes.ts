@@ -117,9 +117,9 @@ export const useSafeUserAttributes = (
       const userAttributes: SafeUserAttributes = {
         safe_id: safeAddress,
         created_at: createdAt,
-        safe_version: safeInfo.version || '1.0.0',
-        num_signers: safeInfo.owners?.length || 0,
-        threshold: safeInfo.threshold || 1,
+        safe_version: safeInfo.version,
+        num_signers: safeInfo.owners.length,
+        threshold: safeInfo.threshold,
         networks,
         last_tx_at: lastTxTimestamp,
         space_id: null, // TODO: Implement Space detection when available
@@ -167,7 +167,7 @@ export const getSafeEventProperties = (safeInfo: ExtendedSafeInfo | null, chainN
 
   return {
     'Safe Address': safeInfo.address.value,
-    'Safe Version': safeInfo.version || '1.0.0',
+    'Safe Version': safeInfo.version,
     Network: chainName.toLowerCase(),
   }
 }
