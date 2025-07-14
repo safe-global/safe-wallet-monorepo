@@ -6,13 +6,19 @@ const { __mockPrevent: mockPrevent, __mockAllow: mockAllow } = require('react-na
 
 // Mock useFocusEffect but allow us to capture and execute the callback
 let focusEffectCallback: (() => (() => void) | void) | null = null
-jest.mock('@react-navigation/native', () => ({
-  ...jest.requireActual('@react-navigation/native'),
-  useFocusEffect: jest.fn((callback: () => (() => void) | void) => {
-    focusEffectCallback = callback
-    // Don't execute automatically - let tests control when it runs
-  }),
-}))
+jest.mock('expo-router', () => {
+  const React = require('react')
+  return {
+    __esModule: true,
+    // Provide a simple Stack stub that just renders children
+    Stack: Object.assign(({ children }: { children: React.ReactNode }) => <>{children}</>, {
+      Screen: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+    }),
+    useFocusEffect: jest.fn((callback: () => (() => void) | void) => {
+      focusEffectCallback = callback
+    }),
+  }
+})
 
 // Mock ImportPrivateKey component to avoid complex dependencies
 jest.mock('@/src/features/ImportPrivateKey', () => {
@@ -26,32 +32,25 @@ jest.mock('react-native-safe-area-context', () => ({
   useSafeAreaInsets: () => ({ bottom: 0 }),
 }))
 
-import PrivateKeyImport from '@/src/app/import-signers/private-key'
+import ImportSignersLayout from '@/src/app/import-signers/_layout'
 
-describe('PrivateKeyImport Screen - Capture Protection', () => {
+describe('ImportSignersLayout - Capture Protection', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     focusEffectCallback = null
   })
 
-  it('should render the private key import screen', () => {
-    const { getByTestId } = render(<PrivateKeyImport />)
-
-    expect(getByTestId('import-private-key')).toBeTruthy()
-  })
-
   it('should setup useFocusEffect hook', () => {
-    const mockUseFocusEffect = require('@react-navigation/native').useFocusEffect
+    const mockUseFocusEffect = require('expo-router').useFocusEffect
 
-    render(<PrivateKeyImport />)
+    render(<ImportSignersLayout />)
 
-    // Verify useFocusEffect was called
     expect(mockUseFocusEffect).toHaveBeenCalledTimes(1)
     expect(focusEffectCallback).toBeTruthy()
   })
 
   it('should call CaptureProtection.prevent when focus effect is triggered', () => {
-    render(<PrivateKeyImport />)
+    render(<ImportSignersLayout />)
 
     // Verify focus effect callback was stored
     expect(focusEffectCallback).toBeTruthy()
@@ -71,7 +70,7 @@ describe('PrivateKeyImport Screen - Capture Protection', () => {
   })
 
   it('should call CaptureProtection.allow when cleanup function is executed', () => {
-    render(<PrivateKeyImport />)
+    render(<ImportSignersLayout />)
 
     // Execute the focus effect callback and get the cleanup function
     let cleanup: (() => void) | undefined
@@ -96,7 +95,7 @@ describe('PrivateKeyImport Screen - Capture Protection', () => {
   })
 
   it('should have proper focus effect lifecycle (prevent on focus, allow on unfocus)', () => {
-    render(<PrivateKeyImport />)
+    render(<ImportSignersLayout />)
 
     // Execute focus effect (simulate screen focus)
     let cleanup: (() => void) | undefined
