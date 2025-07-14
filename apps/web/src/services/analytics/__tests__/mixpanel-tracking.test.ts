@@ -70,9 +70,9 @@ describe('MixPanel Tracking', () => {
 
       expect(mixpanel.people.set).toHaveBeenCalledWith(
         expect.objectContaining({
-          'Safe ID': '0x123',
-          'Created At': '2022-01-01T00:00:00.000Z',
-          'Last Transaction At': '2023-01-01T00:00:00.000Z',
+          'Safe Address': '0x123',
+          'Created at': '2022-01-01T00:00:00.000Z',
+          'Last Transaction at': '2023-01-01T00:00:00.000Z',
         }),
       )
     })
@@ -99,8 +99,8 @@ describe('MixPanel Tracking', () => {
 
       expect(mixpanel.people.set_once).toHaveBeenCalledWith(
         expect.objectContaining({
-          'Safe ID': '0x123',
-          'Created At': '2022-01-01T00:00:00.000Z',
+          'Safe Address': '0x123',
+          'Created at': '2022-01-01T00:00:00.000Z',
         }),
       )
     })
@@ -159,7 +159,7 @@ describe('MixPanel Tracking', () => {
   describe('trackMixPanelEvent', () => {
     it('should track event with properties', () => {
       const eventProperties = {
-        'Safe ID': '0x123',
+        'Safe Address': '0x123',
         'Safe Version': '1.3.0',
         Network: 'ethereum',
       }
