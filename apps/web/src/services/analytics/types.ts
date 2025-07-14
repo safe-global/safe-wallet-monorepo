@@ -119,7 +119,7 @@ export interface MixPanelUserProfileUpdate {
  * Event tracking types for MixPanel with humanized property names
  */
 export interface SafeEventProperties {
-  'Safe ID': string
+  'Safe Address': string
   'Safe Version': string
   Network: string
   [key: string]: any

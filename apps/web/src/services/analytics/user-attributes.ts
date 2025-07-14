@@ -143,13 +143,13 @@ export const useSafeUserAttributes = (
  */
 export const prepareMixPanelUserAttributes = (attributes: SafeUserAttributes) => {
   return {
-    'Safe ID': attributes.safe_id,
-    'Created At': attributes.created_at.toISOString(),
+    'Safe Address': attributes.safe_id,
+    'Created at': attributes.created_at?.toISOString() || null,
     'Safe Version': attributes.safe_version,
     'Number of Signers': attributes.num_signers,
     Threshold: attributes.threshold,
     Networks: attributes.networks,
-    'Last Transaction At': attributes.last_tx_at?.toISOString() || null,
+    'Last Transaction at': attributes.last_tx_at?.toISOString() || null,
     'Space ID': attributes.space_id,
     'Nested Safe IDs': attributes.nested_safe_ids,
     'Total Transaction Count': attributes.total_tx_count,
@@ -166,7 +166,7 @@ export const getSafeEventProperties = (safeInfo: ExtendedSafeInfo | null, chainN
   if (!safeInfo) return null
 
   return {
-    'Safe ID': safeInfo.address.value,
+    'Safe Address': safeInfo.address.value,
     'Safe Version': safeInfo.version || '1.0.0',
     Network: chainName.toLowerCase(),
   }

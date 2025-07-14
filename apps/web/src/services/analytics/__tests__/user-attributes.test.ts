@@ -103,9 +103,9 @@ describe('prepareMixPanelUserAttributes', () => {
 
     const result = prepareMixPanelUserAttributes(attributes)
 
-    expect(result['Created At']).toBe('2022-01-01T00:00:00.000Z')
-    expect(result['Last Transaction At']).toBe('2023-01-01T00:00:00.000Z')
-    expect(result['Safe ID']).toBe('0x123')
+    expect(result['Created at']).toBe('2022-01-01T00:00:00.000Z')
+    expect(result['Last Transaction at']).toBe('2023-01-01T00:00:00.000Z')
+    expect(result['Safe Address']).toBe('0x123')
   })
 
   it('should handle null last_tx_at', () => {
@@ -124,7 +124,7 @@ describe('prepareMixPanelUserAttributes', () => {
 
     const result = prepareMixPanelUserAttributes(attributes)
 
-    expect(result['Last Transaction At']).toBeNull()
+    expect(result['Last Transaction at']).toBeNull()
   })
 })
 
@@ -140,7 +140,7 @@ describe('getSafeEventProperties', () => {
     const result = getSafeEventProperties(mockSafeInfo, 'Ethereum')
 
     expect(result).toEqual({
-      'Safe ID': '0x123',
+      'Safe Address': '0x123',
       'Safe Version': '1.3.0',
       Network: 'ethereum',
     })

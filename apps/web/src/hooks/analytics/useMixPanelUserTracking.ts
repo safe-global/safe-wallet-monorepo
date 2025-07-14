@@ -78,27 +78,16 @@ export const useMixPanelUserTracking = () => {
 
           // Set attributes that should only be set once
           setMixPanelUserAttributesOnce({
-            'Safe ID': userAttributes.safe_id,
-            'Created at': userAttributes.created_at,
+            safe_id: userAttributes.safe_id,
+            created_at: userAttributes.created_at,
           })
 
-          // Set all current attributes with human-readable names
-          setMixPanelUserAttributes({
-            'Safe ID': userAttributes.safe_id,
-            'Created at': userAttributes.created_at,
-            'Safe Version': userAttributes.safe_version,
-            'Number of Signers': userAttributes.num_signers,
-            Threshold: userAttributes.threshold,
-            Networks: userAttributes.networks,
-            'Space IDs': userAttributes.space_ids,
-            'Nested Safe IDs': userAttributes.nested_safe_ids,
-            'Total Transaction Count': userAttributes.total_tx_count,
-            'Last Transaction at': userAttributes.last_tx_at,
-          })
+          // Set all current attributes
+          setMixPanelUserAttributes(userAttributes)
 
           // Register super properties for events
           registerMixPanelSuperProperties({
-            'Safe ID': userAttributes.safe_id,
+            'Safe Address': userAttributes.safe_id,
             'Safe Version': userAttributes.safe_version,
             Network: currentChain?.chainName.toLowerCase() || 'unknown',
           })
@@ -128,13 +117,13 @@ export const useMixPanelUserTracking = () => {
       // Update configuration-related attributes
       setMixPanelUserAttributes({
         ...userAttributes,
-        Threshold: userAttributes.threshold,
-        'Number of Signers': userAttributes.num_signers,
+        threshold: userAttributes.threshold,
+        num_signers: userAttributes.num_signers,
       })
 
       // Update super properties
       registerMixPanelSuperProperties({
-        'Safe ID': userAttributes.safe_id,
+        'Safe Address': userAttributes.safe_id,
         'Safe Version': userAttributes.safe_version,
         Network: currentChain?.chainName.toLowerCase() || 'unknown',
       })
@@ -154,8 +143,8 @@ export const useMixPanelUserTracking = () => {
       // Update transaction-related attributes
       setMixPanelUserAttributes({
         ...userAttributes,
-        'Total Transaction Count': userAttributes.total_tx_count,
-        'Last Transaction at': userAttributes.last_tx_at,
+        total_tx_count: userAttributes.total_tx_count,
+        last_tx_at: userAttributes.last_tx_at,
       })
 
       lastTxCountRef.current = userAttributes.total_tx_count
@@ -169,7 +158,7 @@ export const useMixPanelUserTracking = () => {
     // Update network-related attributes
     setMixPanelUserAttributes({
       ...userAttributes,
-      Networks: userAttributes.networks,
+      networks: userAttributes.networks,
     })
 
     // Update super properties with new network
@@ -198,7 +187,7 @@ export const useMixPanelTransactionTracking = () => {
     if (!userAttributes || !currentChain) return null
 
     return {
-      'Safe ID': userAttributes.safe_id,
+      'Safe Address': userAttributes.safe_id,
       'Safe Version': userAttributes.safe_version,
       Network: currentChain.chainName.toLowerCase(),
       'Number of Signers': userAttributes.num_signers,
@@ -227,7 +216,7 @@ export const useMixPanelSafeManagementTracking = () => {
     if (!userAttributes || !currentChain) return null
 
     return {
-      'Safe ID': userAttributes.safe_id,
+      'Safe Address': userAttributes.safe_id,
       'Safe Version': userAttributes.safe_version,
       Network: currentChain.chainName.toLowerCase(),
       'Number of Signers': userAttributes.num_signers,
@@ -262,7 +251,7 @@ export const useMixPanelSafeAppsTracking = () => {
     const networkName = currentChain?.chainName?.toLowerCase() || 'unknown'
 
     return {
-      'Safe ID': safeId,
+      'Safe Address': safeId,
       Network: networkName,
       'App Name': app_name,
       'App Category': app_category || 'unknown',
@@ -282,7 +271,7 @@ export const useMixPanelSafeAppsTracking = () => {
 
   const trackAppLaunched = (app_name: string, app_category?: string, entry_point?: string) => {
     const eventProperties = getSafeAppsEventProperties(app_name, app_category, entry_point)
-    trackMixPanelEvent('Safe Store App Launched', eventProperties)
+    trackMixPanelEvent('Safe App Launched', eventProperties)
   }
 
   return {
