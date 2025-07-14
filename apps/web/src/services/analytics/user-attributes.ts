@@ -117,7 +117,7 @@ export const useSafeUserAttributes = (
       const userAttributes: SafeUserAttributes = {
         safe_id: safeAddress,
         created_at: createdAt,
-        safe_version: safeInfo.version,
+        safe_version: safeInfo.version || 'null',
         num_signers: safeInfo.owners.length,
         threshold: safeInfo.threshold,
         networks,
