@@ -1,10 +1,7 @@
 import React, { useMemo } from 'react'
 import { YStack, Text, View } from 'tamagui'
 import { ListTable } from '../../ListTable'
-import {
-  MultisigExecutionDetails,
-  BridgeAndSwapTransactionInfo,
-} from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { BridgeAndSwapTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { useAppSelector } from '@/src/store/hooks'
 import { selectChainById } from '@/src/store/chains'
@@ -19,7 +16,6 @@ import { ParametersButton } from '../../ParametersButton'
 
 interface BridgeTransactionProps {
   txId: string
-  executionInfo: MultisigExecutionDetails
   txInfo: BridgeAndSwapTransactionInfo
 }
 
