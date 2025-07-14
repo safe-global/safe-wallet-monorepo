@@ -11,18 +11,7 @@ import { prepareMixPanelUserAttributes } from './user-attributes'
  */
 const isMixPanelReady = (): boolean => {
   if (typeof window === 'undefined') return false
-  if (!mixpanel) return false
-
-  try {
-    // Check if MixPanel is initialized by checking for required methods
-    return (
-      typeof mixpanel.track === 'function' &&
-      typeof mixpanel.people === 'object' &&
-      typeof mixpanel.identify === 'function'
-    )
-  } catch (error) {
-    return false
-  }
+  return !!mixpanel
 }
 
 /**
@@ -31,14 +20,14 @@ const isMixPanelReady = (): boolean => {
  * @param operationName Name of the operation for logging
  */
 const safeMixPanelOperation = (operation: () => void, operationName: string) => {
-  try {
-    if (!isMixPanelReady()) {
-      if (!IS_PRODUCTION) {
-        console.warn(`MixPanel not ready for operation: ${operationName}`)
-      }
-      return
+  if (!isMixPanelReady()) {
+    if (!IS_PRODUCTION) {
+      console.warn(`MixPanel not ready for operation: ${operationName}`)
     }
+    return
+  }
 
+  try {
     // Check if user has opted in to tracking
     // Deactivated for testing
     // if (!mixpanel.has_opted_in_tracking()) {
