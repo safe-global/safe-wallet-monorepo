@@ -39,7 +39,6 @@ export function ImportPrivateKey() {
               onChangeText={handlePrivateKeyChange}
               placeholder="Paste here or type..."
               secureTextEntry={true}
-              // multiline
               success={!!wallet}
               textAlign="center"
               error={error}
