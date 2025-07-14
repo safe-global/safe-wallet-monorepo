@@ -28,13 +28,6 @@ export function ReviewAndConfirmView({ txDetails, signerAddress }: ReviewAndConf
       labelStyle={{ color: theme.color.get(), fontSize: 16, fontWeight: '600' }}
       activeColor={theme.color.get()}
       inactiveColor={theme.colorSecondary.get()}
-      tabBarItemStyle={{
-        tabBarItemWidth: 100,
-        tabBarIndicatorWidth: 94,
-        tabBarLabelFontSize: 16,
-        tabBarLabelFontWeight: '700',
-        tabBarItemLeft: -10,
-      }}
       width={200}
     />
   )

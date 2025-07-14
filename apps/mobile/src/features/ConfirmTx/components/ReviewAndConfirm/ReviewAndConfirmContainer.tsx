@@ -44,5 +44,5 @@ export function ReviewAndConfirmContainer() {
     )
   }
 
-  return <ReviewAndConfirmView txDetails={txDetails} signerAddress={signerAddress || ''} />
+  return <ReviewAndConfirmView txDetails={txDetails} signerAddress={signerAddress} />
 }
