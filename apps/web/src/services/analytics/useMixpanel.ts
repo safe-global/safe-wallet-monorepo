@@ -25,12 +25,6 @@ const useMixpanel = () => {
       debug: !IS_PRODUCTION,
       autocapture: false,
     })
-
-    // Track initial page view
-    mixpanel.track('Page Viewed Safe Test', {
-      page: window.location.pathname,
-      url: window.location.href,
-    })
   }, [isMixpanelEnabled])
 }
 
