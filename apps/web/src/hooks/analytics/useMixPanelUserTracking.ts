@@ -1,29 +1,25 @@
-import { useEffect, useRef, useState } from 'react'
 import { useCurrentChain } from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useWallet from '@/hooks/wallets/useWallet'
 import { useSafeUserAttributes } from '@/services/analytics/user-attributes'
-import {
-  setMixPanelUserAttributes,
-  setMixPanelUserAttributesOnce,
-  identifyMixPanelUser,
-  registerMixPanelSuperProperties,
-  resetMixPanel,
-  useMixPanelEnabled,
-  trackMixPanelEvent,
-} from '@/services/analytics/mixpanel-tracking'
+import { useMixPanelEnabled, trackMixPanelEvent } from '@/services/analytics/mixpanel-tracking'
 import { useAppSelector } from '@/store'
 import { selectTxHistory } from '@/store/txHistorySlice'
+import {
+  useMixPanelIdentity,
+  useMixPanelConfigurationTracking,
+  useMixPanelTransactionCountTracking,
+  useMixPanelNetworkTracking,
+} from '@/hooks/analytics/mixpanel'
 
 /**
  * Hook to track Safe user attributes in MixPanel
  *
- * This hook:
- * 1. Collects user attributes from Safe data
- * 2. Identifies the user using Safe address
- * 3. Sets user attributes in MixPanel
- * 4. Updates attributes when Safe data changes
- * 5. Registers super properties for events
+ * This hook orchestrates smaller hooks to:
+ * 1. Identify users and handle Safe switching
+ * 2. Track configuration changes (threshold, signers)
+ * 3. Track transaction count changes
+ * 4. Track network/chain changes
  */
 export const useMixPanelUserTracking = () => {
   const isMixPanelEnabled = useMixPanelEnabled()
@@ -32,145 +28,46 @@ export const useMixPanelUserTracking = () => {
   const currentChain = useCurrentChain()
   const txHistory = useAppSelector(selectTxHistory)
 
-  // Add initialization delay to ensure MixPanel is ready
-  const [isInitialized, setIsInitialized] = useState(false)
-
   // Track user attributes based on current Safe
   const userAttributes = useSafeUserAttributes(safe, wallet?.address)
 
-  // Refs to track previous values and prevent unnecessary updates
-  const lastSafeAddressRef = useRef<string>('')
-  const lastTxCountRef = useRef<number>(0)
-  const lastThresholdRef = useRef<number>(0)
-  const lastSignersCountRef = useRef<number>(0)
-  const identifiedRef = useRef<boolean>(false)
+  // Handle user identification and Safe switching
+  const { isIdentified } = useMixPanelIdentity({
+    isMixPanelEnabled,
+    safeAddress,
+    userAttributes,
+    currentChain,
+    safeLoaded,
+  })
 
-  // Wait for MixPanel to be properly initialized
-  useEffect(() => {
-    if (isMixPanelEnabled) {
-      // Small delay to ensure MixPanel is fully initialized
-      const timer = setTimeout(() => {
-        setIsInitialized(true)
-      }, 1000)
+  // Track Safe configuration changes
+  useMixPanelConfigurationTracking({
+    isMixPanelEnabled,
+    isIdentified,
+    userAttributes,
+    currentChain,
+  })
 
-      return () => clearTimeout(timer)
-    } else {
-      setIsInitialized(false)
-    }
-  }, [isMixPanelEnabled])
+  // Track transaction count changes
+  useMixPanelTransactionCountTracking({
+    isMixPanelEnabled,
+    isIdentified,
+    userAttributes,
+    txHistory,
+  })
 
-  // Effect to identify user and set initial attributes
-  useEffect(() => {
-    if (!isInitialized || !isMixPanelEnabled || !safeLoaded || !userAttributes || !safeAddress) return
-
-    const isNewSafe = lastSafeAddressRef.current !== safeAddress
-
-    if (isNewSafe) {
-      // Async function to handle reset and setup sequence
-      const setupNewSafe = async () => {
-        try {
-          // Reset MixPanel to clear previous user data when switching Safes
-          await resetMixPanel()
-
-          // Identify user with Safe address for cohort analysis
-          identifyMixPanelUser(safeAddress)
-          identifiedRef.current = true
-
-          // Set attributes that should only be set once
-          setMixPanelUserAttributesOnce({
-            safe_id: userAttributes.safe_id,
-            created_at: userAttributes.created_at,
-          })
-
-          // Set all current attributes
-          setMixPanelUserAttributes(userAttributes)
-
-          // Register super properties for events
-          registerMixPanelSuperProperties({
-            'Safe Address': userAttributes.safe_id,
-            'Safe Version': userAttributes.safe_version,
-            Network: currentChain?.chainName.toLowerCase() || 'unknown',
-          })
-
-          lastSafeAddressRef.current = safeAddress
-          lastTxCountRef.current = userAttributes.total_tx_count
-          lastThresholdRef.current = userAttributes.threshold
-          lastSignersCountRef.current = userAttributes.num_signers
-        } catch (error) {
-          console.error('Error setting up new Safe tracking:', error)
-        }
-      }
-
-      setupNewSafe()
-    }
-  }, [isInitialized, isMixPanelEnabled, safeLoaded, userAttributes, safeAddress, currentChain])
-
-  // Effect to update attributes when Safe configuration changes
-  useEffect(() => {
-    if (!isInitialized || !isMixPanelEnabled || !identifiedRef.current || !userAttributes) return
-
-    const hasConfigurationChanged =
-      lastThresholdRef.current !== userAttributes.threshold ||
-      lastSignersCountRef.current !== userAttributes.num_signers
-
-    if (hasConfigurationChanged) {
-      // Update configuration-related attributes
-      setMixPanelUserAttributes({
-        ...userAttributes,
-        threshold: userAttributes.threshold,
-        num_signers: userAttributes.num_signers,
-      })
-
-      // Update super properties
-      registerMixPanelSuperProperties({
-        'Safe Address': userAttributes.safe_id,
-        'Safe Version': userAttributes.safe_version,
-        Network: currentChain?.chainName.toLowerCase() || 'unknown',
-      })
-
-      lastThresholdRef.current = userAttributes.threshold
-      lastSignersCountRef.current = userAttributes.num_signers
-    }
-  }, [isInitialized, isMixPanelEnabled, userAttributes, currentChain])
-
-  // Effect to update transaction-related attributes
-  useEffect(() => {
-    if (!isInitialized || !isMixPanelEnabled || !identifiedRef.current || !userAttributes) return
-
-    const hasTxCountChanged = lastTxCountRef.current !== userAttributes.total_tx_count
-
-    if (hasTxCountChanged) {
-      // Update transaction-related attributes
-      setMixPanelUserAttributes({
-        ...userAttributes,
-        total_tx_count: userAttributes.total_tx_count,
-        last_tx_at: userAttributes.last_tx_at,
-      })
-
-      lastTxCountRef.current = userAttributes.total_tx_count
-    }
-  }, [isInitialized, isMixPanelEnabled, userAttributes, txHistory])
-
-  // Effect to update network-related attributes when chain changes
-  useEffect(() => {
-    if (!isInitialized || !isMixPanelEnabled || !identifiedRef.current || !userAttributes || !currentChain) return
-
-    // Update network-related attributes
-    setMixPanelUserAttributes({
-      ...userAttributes,
-      networks: userAttributes.networks,
-    })
-
-    // Update super properties with new network
-    registerMixPanelSuperProperties({
-      Network: currentChain.chainName.toLowerCase(),
-    })
-  }, [isInitialized, isMixPanelEnabled, userAttributes, currentChain])
+  // Track network/chain changes
+  useMixPanelNetworkTracking({
+    isMixPanelEnabled,
+    isIdentified,
+    userAttributes,
+    currentChain,
+  })
 
   // Return current user attributes for use in components
   return {
     userAttributes,
-    isTracking: isInitialized && isMixPanelEnabled && identifiedRef.current,
+    isTracking: isMixPanelEnabled && isIdentified,
     safeAddress,
   }
 }
