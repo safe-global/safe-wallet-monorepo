@@ -81,7 +81,7 @@ const SafeAppLanding = ({ appUrl, chain }: Props) => {
                 <TryDemo
                   demoUrl={{
                     pathname: AppRoutes.apps.open,
-                    query: { safe: SAFE_APPS_DEMO_SAFE_MAINNET, appUrl },
+                    query: { safe: SAFE_APPS_DEMO_SAFE_MAINNET, appUrl, from: 'shared_link' },
                   }}
                   onClick={handleDemoClick}
                 />

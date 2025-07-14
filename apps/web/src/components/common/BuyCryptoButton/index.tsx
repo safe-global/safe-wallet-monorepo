@@ -25,7 +25,7 @@ const useBuyCryptoHref = (): LinkProps['href'] | undefined => {
 
   return useMemo(() => {
     if (!safe || !appUrl) return undefined
-    return { pathname: AppRoutes.apps.open, query: { safe, appUrl } }
+    return { pathname: AppRoutes.apps.open, query: { safe, appUrl, from: 'buy_crypto' } }
   }, [safe, appUrl])
 }
 

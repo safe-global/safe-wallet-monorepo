@@ -49,6 +49,8 @@ import { useVisitedSafes } from '@/features/myAccounts/hooks/useVisitedSafes'
 import OutreachPopup from '@/features/targetedOutreach/components/OutreachPopup'
 import { GATEWAY_URL } from '@/config/gateway'
 import { useDatadog } from '@/services/datadog'
+import useMixpanel from '@/services/analytics/useMixpanel'
+import { useMixPanelUserTracking } from '@/hooks/analytics/useMixPanelUserTracking'
 
 const reduxStore = makeStore()
 
@@ -59,6 +61,8 @@ const InitApp = (): null => {
   useAdjustUrl()
   useDatadog()
   useGtm()
+  useMixpanel()
+  useMixPanelUserTracking()
   useNotificationTracking()
   useInitSession()
   useLoadableStores()

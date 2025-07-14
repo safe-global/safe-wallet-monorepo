@@ -13,6 +13,7 @@ import { useOpenedSafeApps } from '@/hooks/safe-apps/useOpenedSafeApps'
 import NativeSwapsCard from '@/components/safe-apps/NativeSwapsCard'
 import { SAFE_APPS_EVENTS, SAFE_APPS_LABELS, trackSafeAppEvent } from '@/services/analytics'
 import { useSafeApps } from '@/hooks/safe-apps/useSafeApps'
+import { useMixPanelSafeAppsTracking } from '@/hooks/analytics/useMixPanelUserTracking'
 
 type SafeAppListProps = {
   safeAppsList: SafeAppData[]
@@ -42,6 +43,7 @@ const SafeAppList = ({
   const { togglePin } = useSafeApps()
   const { isPreviewDrawerOpen, previewDrawerApp, openPreviewDrawer, closePreviewDrawer } = useSafeAppPreviewDrawer()
   const { openedSafeAppIds } = useOpenedSafeApps()
+  const { trackAppClicked } = useMixPanelSafeAppsTracking()
 
   const showZeroResultsPlaceholder = query && safeAppsList.length === 0
 
@@ -55,9 +57,21 @@ const SafeAppList = ({
       } else {
         // We only track if not previously opened as it is then tracked in preview drawer
         trackSafeAppEvent({ ...SAFE_APPS_EVENTS.OPEN_APP, label: eventLabel }, safeApp.name)
+
+        // Track with MixPanel (new) - tracks the click event for previously opened apps
+        const appCategory = safeApp.tags?.length > 0 ? safeApp.tags[0] : 'unknown'
+        let entryPoint = 'apps_list'
+        if (eventLabel === SAFE_APPS_LABELS.dashboard) {
+          entryPoint = 'dashboard'
+        } else if (eventLabel === SAFE_APPS_LABELS.apps_custom) {
+          entryPoint = 'custom_apps'
+        } else if (isFiltered || query) {
+          entryPoint = 'search'
+        }
+        trackAppClicked(safeApp.name, appCategory, entryPoint)
       }
     },
-    [eventLabel, openPreviewDrawer, openedSafeAppIds],
+    [eventLabel, openPreviewDrawer, openedSafeAppIds, trackAppClicked, isFiltered, query],
   )
 
   return (

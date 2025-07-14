@@ -14,6 +14,10 @@ export const SAFE_APPS_EVENTS = {
     ...SAFE_APPS_EVENT_DATA,
     action: 'Open Safe App',
   },
+  APP_LAUNCHED: {
+    ...SAFE_APPS_EVENT_DATA,
+    action: 'App Launched',
+  },
   PIN: {
     ...SAFE_APPS_EVENT_DATA,
     action: 'Pin Safe App',

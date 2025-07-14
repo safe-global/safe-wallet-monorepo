@@ -93,6 +93,7 @@ const SafeAppsDashboardSection = () => {
                 }}
                 openPreviewDrawer={openPreviewDrawer}
                 compact
+                entryPoint="dashboard"
               />
             </li>
           ))}
@@ -105,6 +106,7 @@ const SafeAppsDashboardSection = () => {
         isBookmarked={previewDrawerApp && pinnedSafeAppIds.has(previewDrawerApp.id)}
         onClose={closePreviewDrawer}
         onBookmark={(appId) => togglePin(appId, SAFE_APPS_LABELS.apps_sidebar)}
+        entryPoint="dashboard"
       />
     </Card>
   )

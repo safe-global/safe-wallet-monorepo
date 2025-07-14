@@ -57,7 +57,7 @@ const AppActions = ({ wallet, onConnectWallet, chain, appUrl, app }: Props): Rea
       const safe = `${safeToUse?.shortName}:${safeToUse?.address}`
       const href: UrlObject = {
         pathname: AppRoutes.apps.open,
-        query: { safe, appUrl },
+        query: { safe, appUrl, from: 'shared_link' },
       }
 
       button = (

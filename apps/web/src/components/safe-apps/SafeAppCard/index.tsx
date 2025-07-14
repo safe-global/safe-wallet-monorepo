@@ -27,6 +27,7 @@ type SafeAppCardProps = {
   removeCustomApp?: (safeApp: SafeAppData) => void
   openPreviewDrawer?: (safeApp: SafeAppData) => void
   compact?: boolean
+  entryPoint?: string
 }
 
 const SafeAppCard = ({
@@ -37,10 +38,11 @@ const SafeAppCard = ({
   removeCustomApp,
   openPreviewDrawer,
   compact = false,
+  entryPoint = 'apps_list',
 }: SafeAppCardProps) => {
   const router = useRouter()
 
-  const safeAppUrl = getSafeAppUrl(router, safeApp.url)
+  const safeAppUrl = getSafeAppUrl(router, safeApp.url, { from: entryPoint })
 
   return (
     <SafeAppCardGridView
@@ -58,10 +60,10 @@ const SafeAppCard = ({
 
 export default SafeAppCard
 
-export const getSafeAppUrl = (router: NextRouter, safeAppUrl: string) => {
+export const getSafeAppUrl = (router: NextRouter, safeAppUrl: string, additionalQuery?: Record<string, string>) => {
   const shareUrlObj: UrlObject = {
     pathname: AppRoutes.apps.open,
-    query: { safe: router.query.safe, appUrl: safeAppUrl },
+    query: { safe: router.query.safe, appUrl: safeAppUrl, ...additionalQuery },
   }
 
   return resolveHref(router, shareUrlObj)

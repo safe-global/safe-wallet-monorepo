@@ -19,6 +19,7 @@ import CloseIcon from '@/public/images/common/close.svg'
 import { useOpenedSafeApps } from '@/hooks/safe-apps/useOpenedSafeApps'
 import css from './styles.module.css'
 import { SAFE_APPS_EVENTS, SAFE_APPS_LABELS, trackSafeAppEvent } from '@/services/analytics'
+import { useMixPanelSafeAppsTracking } from '@/hooks/analytics/useMixPanelUserTracking'
 
 type SafeAppPreviewDrawerProps = {
   safeApp?: SafeAppData
@@ -26,17 +27,31 @@ type SafeAppPreviewDrawerProps = {
   isBookmarked?: boolean
   onClose: () => void
   onBookmark?: (safeAppId: number) => void
+  entryPoint?: string
 }
 
-const SafeAppPreviewDrawer = ({ isOpen, safeApp, isBookmarked, onClose, onBookmark }: SafeAppPreviewDrawerProps) => {
+const SafeAppPreviewDrawer = ({
+  isOpen,
+  safeApp,
+  isBookmarked,
+  onClose,
+  onBookmark,
+  entryPoint = 'preview_drawer',
+}: SafeAppPreviewDrawerProps) => {
   const { markSafeAppOpened } = useOpenedSafeApps()
   const router = useRouter()
-  const safeAppUrl = getSafeAppUrl(router, safeApp?.url || '')
+  const safeAppUrl = getSafeAppUrl(router, safeApp?.url || '', { from: entryPoint })
+  const { trackAppClicked } = useMixPanelSafeAppsTracking()
 
   const onOpenSafe = () => {
     if (safeApp) {
       markSafeAppOpened(safeApp.id)
+      // Track with GTM (existing)
       trackSafeAppEvent({ ...SAFE_APPS_EVENTS.OPEN_APP, label: SAFE_APPS_LABELS.apps_sidebar }, safeApp.name)
+
+      // Track with MixPanel (new) - tracks the click event
+      const appCategory = safeApp.tags?.length > 0 ? safeApp.tags[0] : 'unknown'
+      trackAppClicked(safeApp.name, appCategory, entryPoint)
     }
   }
 

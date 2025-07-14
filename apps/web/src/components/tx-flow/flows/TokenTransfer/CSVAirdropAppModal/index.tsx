@@ -38,6 +38,7 @@ const CSVAirdropAppModal = ({ onClose, appUrl }: { onClose: () => void; appUrl?:
               query: {
                 safe: router.query.safe,
                 appUrl,
+                from: 'token_transfer',
               },
             }}
             passHref
