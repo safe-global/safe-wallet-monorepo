@@ -21,7 +21,7 @@ export const StakingTxExitCard = ({ info, onPress }: StakingTxExitCardProps) => 
           {info.numValidators} Validator{maybePlural(info.numValidators)}
         </Text>
       }
-      leftNode={<TokenIcon logoUri={info.tokenInfo.logoUri} accessibilityLabel={info.tokenInfo.symbol} />}
+      leftNode={<TokenIcon logoUri={info.tokenInfo.logoUri} accessibilityLabel={info.tokenInfo.symbol} size="$8" />}
     />
   )
 }

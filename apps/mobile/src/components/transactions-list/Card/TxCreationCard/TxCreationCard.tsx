@@ -18,7 +18,7 @@ export function TxCreationCard({ txInfo, ...rest }: TxCreationCardProps) {
       leftNode={
         <Theme name="logo">
           <View backgroundColor="$background" padding="$2" borderRadius={100}>
-            <SafeFontIcon name="plus" />
+            <SafeFontIcon name="plus" size={16} />
           </View>
         </Theme>
       }

@@ -1,5 +1,4 @@
 import React, { useCallback } from 'react'
-import { TransactionInfoType } from '@safe-global/store/gateway/types'
 import { type Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { useTransactionType } from '@/src/hooks/useTransactionType'
 import { TxTokenCard } from '@/src/components/transactions-list/Card/TxTokenCard'
@@ -70,7 +69,7 @@ function TxInfoComponent({ tx, onPress, ...rest }: TxInfoProps) {
     return <TxSettingsCard onPress={onCardPress} executionInfo={tx.executionInfo} txInfo={txInfo} {...rest} />
   }
 
-  if (isMultiSendTxInfo(txInfo) && tx.txInfo.type === TransactionInfoType.CUSTOM) {
+  if (isMultiSendTxInfo(txInfo)) {
     return (
       <TxBatchCard
         onPress={onCardPress}

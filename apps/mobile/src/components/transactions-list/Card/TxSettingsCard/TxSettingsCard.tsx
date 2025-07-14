@@ -27,7 +27,7 @@ export function TxSettingsCard({ txInfo, onPress, ...rest }: TxSettingsCardProps
       leftNode={
         <Theme name="logo">
           <View backgroundColor="$background" padding="$2" borderRadius={100}>
-            <SafeFontIcon name="transaction-change-settings" />
+            <SafeFontIcon name="transaction-change-settings" size={16} />
           </View>
         </Theme>
       }

@@ -33,7 +33,7 @@ export function TxLifiSwapCard({ txInfo, bordered, executionInfo, inQueue, onPre
               <TokenIcon
                 logoUri={txInfo.fromToken.logoUri}
                 accessibilityLabel={txInfo.fromToken.name}
-                size="$7"
+                size="$6"
                 imageBackground="$background"
               />
             </View>
@@ -42,7 +42,7 @@ export function TxLifiSwapCard({ txInfo, bordered, executionInfo, inQueue, onPre
               <TokenIcon
                 logoUri={txInfo.toToken.logoUri}
                 accessibilityLabel={txInfo.toToken.name}
-                size="$7"
+                size="$6"
                 imageBackground="$background"
               />
             </View>

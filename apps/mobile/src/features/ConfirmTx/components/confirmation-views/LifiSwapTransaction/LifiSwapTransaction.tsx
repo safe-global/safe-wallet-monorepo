@@ -7,6 +7,7 @@ import { EthAddress } from '@/src/components/EthAddress'
 import { type ListTableItem } from '../../ListTable'
 import { LifiSwapHeader } from './LifiSwapHeader'
 import { ParametersButton } from '../../ParametersButton'
+import { formatAmount } from '@safe-global/utils/utils/formatNumber'
 
 interface LifiSwapTransactionProps {
   txId: string
@@ -27,7 +28,7 @@ export function LifiSwapTransaction({ txId, executionInfo, txInfo }: LifiSwapTra
       label: 'Price',
       render: () => (
         <Text>
-          1 {txInfo.fromToken.symbol} = {exchangeRate.toFixed(6)} {txInfo.toToken.symbol}
+          1 {txInfo.fromToken.symbol} = {formatAmount(exchangeRate)} {txInfo.toToken.symbol}
         </Text>
       ),
     })

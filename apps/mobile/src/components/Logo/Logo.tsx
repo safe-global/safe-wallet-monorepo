@@ -3,6 +3,7 @@ import { Avatar, Theme, View } from 'tamagui'
 import { IconProps, SafeFontIcon } from '../SafeFontIcon/SafeFontIcon'
 import { Badge } from '../Badge/Badge'
 import { badgeTheme } from '../Badge/theme'
+import useValidLogoUri from '@/src/hooks/useValidLogoUri'
 
 type BadgeThemeKeys = keyof typeof badgeTheme
 type ExtractAfterUnderscore<T extends string> = T extends `${string}_${infer Rest}` ? Rest : never
@@ -27,6 +28,8 @@ export function Logo({
   badgeContent,
   badgeThemeName = 'badge_background',
 }: LogoProps) {
+  const validUri = useValidLogoUri(logoUri)
+
   return (
     <Theme name="logo">
       <View width={size}>
@@ -37,18 +40,26 @@ export function Logo({
         </View>
 
         <Avatar circular size={size}>
-          {logoUri && (
+          {validUri && (
             <Avatar.Image
               testID="logo-image"
               backgroundColor={imageBackground}
               accessibilityLabel={accessibilityLabel}
-              source={{ uri: logoUri }}
+              source={{ uri: validUri }}
             />
           )}
 
           <Avatar.Fallback backgroundColor="$background">
-            <View backgroundColor="$background" padding="$2" borderRadius={100}>
-              <SafeFontIcon testID="logo-fallback-icon" name={fallbackIcon} color="$colorSecondary" />
+            <View
+              backgroundColor="$background"
+              borderRadius={0}
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+              height={size}
+              width={size}
+            >
+              <SafeFontIcon testID="logo-fallback-icon" name={fallbackIcon} color="$colorSecondary" size={16} />
             </View>
           </Avatar.Fallback>
         </Avatar>

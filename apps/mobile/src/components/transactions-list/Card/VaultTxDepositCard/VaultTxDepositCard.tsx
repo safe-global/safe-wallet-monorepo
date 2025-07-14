@@ -17,7 +17,14 @@ export const VaultTxDepositCard = ({ info, ...rest }: VaultTxDepositCardProps) =
       rightNode={
         <TokenAmount value={info.value} tokenSymbol={info.tokenInfo.symbol} decimals={info.tokenInfo.decimals} />
       }
-      leftNode={<TokenIcon logoUri={info.tokenInfo.logoUri} accessibilityLabel={info.tokenInfo.symbol} />}
+      leftNode={
+        <TokenIcon
+          logoUri={info.tokenInfo.logoUri}
+          accessibilityLabel={info.tokenInfo.symbol}
+          size="$8"
+          imageBackground="$background"
+        />
+      }
       {...rest}
     />
   )

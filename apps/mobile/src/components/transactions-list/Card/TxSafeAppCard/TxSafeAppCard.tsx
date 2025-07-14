@@ -1,10 +1,10 @@
 import React from 'react'
-import { Avatar, Text, View } from 'tamagui'
+import { Text } from 'tamagui'
 import { SafeListItem } from '@/src/components/SafeListItem'
-import { SafeFontIcon } from '@/src/components/SafeFontIcon/SafeFontIcon'
 import type { MultiSend } from '@safe-global/store/gateway/types'
 import type { SafeAppInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { SafeListItemProps } from '@/src/components/SafeListItem/SafeListItem'
+import { Logo } from '@/src/components/Logo'
 
 type TxSafeAppCardProps = {
   safeAppInfo: SafeAppInfo
@@ -17,19 +17,7 @@ export function TxSafeAppCard({ safeAppInfo, txInfo, ...rest }: TxSafeAppCardPro
       label={safeAppInfo.name}
       icon="transaction-contract"
       type="Safe app"
-      leftNode={
-        <Avatar circular size="$10">
-          {safeAppInfo.logoUri && (
-            <Avatar.Image testID="safe-app-image" accessibilityLabel={safeAppInfo.name} src={safeAppInfo.logoUri} />
-          )}
-
-          <Avatar.Fallback backgroundColor="$borderLight">
-            <View backgroundColor="$borderLightDark" padding="$2" borderRadius={100}>
-              <SafeFontIcon testID="safe-app-fallback" name="code-blocks" color="$color" />
-            </View>
-          </Avatar.Fallback>
-        </Avatar>
-      }
+      leftNode={<Logo logoUri={safeAppInfo.logoUri} size="$8" fallbackIcon="code-blocks" />}
       rightNode={<Text>{txInfo.methodName}</Text>}
       {...rest}
     />

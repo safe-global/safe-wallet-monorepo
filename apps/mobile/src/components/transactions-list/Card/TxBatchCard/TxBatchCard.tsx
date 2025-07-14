@@ -1,5 +1,5 @@
 import React from 'react'
-import { Avatar, View } from 'tamagui'
+import { Theme, View } from 'tamagui'
 import { SafeListItem } from '@/src/components/SafeListItem'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon/SafeFontIcon'
 import type { MultiSend } from '@safe-global/store/gateway/types'
@@ -12,23 +12,17 @@ type TxBatchCardProps = {
 } & Partial<SafeListItemProps>
 
 export function TxBatchCard({ txInfo, safeAppInfo, ...rest }: TxBatchCardProps) {
-  const logoUri = safeAppInfo?.logoUri || txInfo.to.logoUri
-
   return (
     <SafeListItem
       label={`${txInfo.actionCount} actions`}
       icon="batch"
       type={safeAppInfo?.name || 'Batch'}
       leftNode={
-        <Avatar circular size="$10">
-          {logoUri && <Avatar.Image accessibilityLabel="Cam" src={logoUri} />}
-
-          <Avatar.Fallback backgroundColor="$borderLight">
-            <View backgroundColor="$borderLightDark" padding="$2" borderRadius={100}>
-              <SafeFontIcon color="$primary" name="batch" />
-            </View>
-          </Avatar.Fallback>
-        </Avatar>
+        <Theme name="logo">
+          <View backgroundColor="$background" padding="$2" borderRadius={100}>
+            <SafeFontIcon name="batch" size={16} />
+          </View>
+        </Theme>
       }
       {...rest}
     />

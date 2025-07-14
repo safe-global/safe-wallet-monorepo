@@ -73,7 +73,7 @@ export const ChainIndicator = ({
         <YStack flex={1}>
           <Text
             testID="chain-name"
-            fontSize="$3"
+            fontSize="$4"
             fontWeight="600"
             color="$color"
             numberOfLines={1}
@@ -91,7 +91,7 @@ export const ChainIndicator = ({
     <View testID="chain-indicator">
       <XStack
         alignItems="center"
-        gap={showLogo ? '$2' : 0}
+        gap={showLogo ? '$1' : 0}
         minWidth={onlyLogo ? undefined : showLogo ? 115 : 70}
         justifyContent={showLogo ? 'flex-start' : 'center'}
       >

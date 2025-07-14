@@ -140,7 +140,13 @@ export function ConfirmationView({ txDetails }: ConfirmationViewProps) {
         />
       )
     case ETxType.BRIDGE_ORDER:
-      return <BridgeTransaction txId={txDetails.txId} txInfo={txDetails.txInfo as BridgeAndSwapTransactionInfo} />
+      return (
+        <BridgeTransaction
+          txId={txDetails.txId}
+          txInfo={txDetails.txInfo as BridgeAndSwapTransactionInfo}
+          decodedData={txDetails.txData?.dataDecoded}
+        />
+      )
     case ETxType.LIFI_SWAP:
       return (
         <LifiSwapTransaction
