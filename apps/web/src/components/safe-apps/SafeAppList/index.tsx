@@ -16,8 +16,9 @@ import {
   SAFE_APPS_LABELS,
   trackSafeAppEvent,
   trackMixPanelEvent,
-  SAFE_APP_LAUNCHED,
+  MixPanelEvent,
   safeAppToMixPanelEventProperties,
+  SafeAppLaunchLocation,
 } from '@/services/analytics'
 import { useSafeApps } from '@/hooks/safe-apps/useSafeApps'
 
@@ -62,7 +63,10 @@ const SafeAppList = ({
       } else {
         // We only track if not previously opened as it is then tracked in preview drawer
         trackSafeAppEvent({ ...SAFE_APPS_EVENTS.OPEN_APP, label: eventLabel }, safeApp.name)
-        trackMixPanelEvent(SAFE_APP_LAUNCHED, safeAppToMixPanelEventProperties(safeApp))
+        trackMixPanelEvent(
+          MixPanelEvent.SAFE_APP_LAUNCHED,
+          safeAppToMixPanelEventProperties(safeApp, SafeAppLaunchLocation.SAFE_APPS_LIST),
+        )
       }
     },
     [eventLabel, openPreviewDrawer, openedSafeAppIds],

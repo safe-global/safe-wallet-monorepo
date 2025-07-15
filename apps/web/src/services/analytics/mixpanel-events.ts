@@ -2,11 +2,24 @@
  * MixPanel event constants
  */
 
-export const SAFE_APP_LAUNCHED = 'Safe App Launched'
+export enum MixPanelEvent {
+  SAFE_APP_LAUNCHED = 'Safe App Launched',
+}
 
 /**
  * MixPanel user property constants
  */
 
-export const WALLET_LABEL = 'Wallet Label'
-export const WALLET_ADDRESS = 'Wallet Address'
+export enum MixPanelUserProperty {
+  WALLET_LABEL = 'Wallet Label',
+  WALLET_ADDRESS = 'Wallet Address',
+}
+
+/**
+ * MixPanel launch location constants
+ */
+
+export enum SafeAppLaunchLocation {
+  PREVIEW_DRAWER = 'Preview Drawer',
+  SAFE_APPS_LIST = 'Safe Apps List',
+}
