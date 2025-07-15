@@ -22,7 +22,7 @@ export function SellOrder({ order, type, ...rest }: TxSellOrderCardProps) {
       type={type}
       leftNode={
         <Theme name="logo">
-          <View position="relative" width="$10" height="$10">
+          <View position="relative" width="$8" height="$10">
             <View position="absolute" top={0}>
               <TokenIcon
                 logoUri={order.sellToken.logoUri}

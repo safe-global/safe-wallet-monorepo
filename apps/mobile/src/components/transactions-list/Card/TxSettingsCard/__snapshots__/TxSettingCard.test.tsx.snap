@@ -73,7 +73,7 @@ exports[`TxSettingCard should render the default markup 1`] = `
               [
                 {
                   "color": "#121312",
-                  "fontSize": 24,
+                  "fontSize": 16,
                 },
                 undefined,
                 {
@@ -95,7 +95,6 @@ exports[`TxSettingCard should render the default markup 1`] = `
                 "alignItems": "center",
                 "flexDirection": "row",
                 "gap": 4,
-                "marginBottom": 4,
               }
             }
           >
@@ -104,8 +103,8 @@ exports[`TxSettingCard should render the default markup 1`] = `
                 {
                   "color": "#A1A3A7",
                   "fontFamily": "DM Sans",
-                  "fontSize": 13,
-                  "marginBottom": 2,
+                  "fontSize": 12,
+                  "lineHeight": 20,
                 }
               }
               suppressHighlighting={true}
@@ -119,6 +118,7 @@ exports[`TxSettingCard should render the default markup 1`] = `
                 "color": "#121312",
                 "fontFamily": "DMSans-SemiBold",
                 "fontSize": 14,
+                "lineHeight": 20,
               }
             }
             suppressHighlighting={true}

@@ -54,111 +54,39 @@ exports[`TxBatchCard should render the default markup 1`] = `
         <View
           style={
             {
-              "alignItems": "center",
-              "borderBottomLeftRadius": 100000,
-              "borderBottomRightRadius": 100000,
-              "borderTopLeftRadius": 100000,
-              "borderTopRightRadius": 100000,
-              "flexDirection": "column",
-              "height": 40,
-              "justifyContent": "center",
-              "maxHeight": 40,
-              "maxWidth": 40,
-              "minHeight": 40,
-              "minWidth": 40,
-              "overflow": "hidden",
-              "paddingBottom": 0,
-              "paddingLeft": 0,
-              "paddingRight": 0,
-              "paddingTop": 0,
-              "position": "relative",
-              "width": 40,
+              "backgroundColor": "#EEEFF0",
+              "borderBottomLeftRadius": 100,
+              "borderBottomRightRadius": 100,
+              "borderTopLeftRadius": 100,
+              "borderTopRightRadius": 100,
+              "paddingBottom": 8,
+              "paddingLeft": 8,
+              "paddingRight": 8,
+              "paddingTop": 8,
             }
           }
         >
-          <View
+          <Text
+            allowFontScaling={false}
+            selectable={false}
             style={
-              {
-                "bottom": 0,
-                "flexDirection": "column",
-                "left": 0,
-                "position": "absolute",
-                "right": 0,
-                "top": 0,
-                "zIndex": 1,
-              }
+              [
+                {
+                  "color": "#121312",
+                  "fontSize": 16,
+                },
+                undefined,
+                {
+                  "fontFamily": "SafeIcons",
+                  "fontStyle": "normal",
+                  "fontWeight": "normal",
+                },
+                {},
+              ]
             }
           >
-            <Image
-              accessibilityLabel="Cam"
-              fullscreen={true}
-              onError={[Function]}
-              onLoad={[Function]}
-              source={
-                {
-                  "uri": "http://myAsset.com/asset.png",
-                }
-              }
-              style={
-                {
-                  "height": 40,
-                  "width": 40,
-                }
-              }
-            />
-          </View>
-          <View
-            style={
-              {
-                "backgroundColor": "#DCDEE0",
-                "bottom": 0,
-                "flexDirection": "column",
-                "left": 0,
-                "position": "absolute",
-                "right": 0,
-                "top": 0,
-                "zIndex": 0,
-              }
-            }
-          >
-            <View
-              style={
-                {
-                  "backgroundColor": "#303033",
-                  "borderBottomLeftRadius": 100,
-                  "borderBottomRightRadius": 100,
-                  "borderTopLeftRadius": 100,
-                  "borderTopRightRadius": 100,
-                  "paddingBottom": 8,
-                  "paddingLeft": 8,
-                  "paddingRight": 8,
-                  "paddingTop": 8,
-                }
-              }
-            >
-              <Text
-                allowFontScaling={false}
-                selectable={false}
-                style={
-                  [
-                    {
-                      "color": "#121312",
-                      "fontSize": 24,
-                    },
-                    undefined,
-                    {
-                      "fontFamily": "SafeIcons",
-                      "fontStyle": "normal",
-                      "fontWeight": "normal",
-                    },
-                    {},
-                  ]
-                }
-              >
-                
-              </Text>
-            </View>
-          </View>
+            
+          </Text>
         </View>
         <View>
           <View
@@ -167,7 +95,6 @@ exports[`TxBatchCard should render the default markup 1`] = `
                 "alignItems": "center",
                 "flexDirection": "row",
                 "gap": 4,
-                "marginBottom": 4,
               }
             }
           >
@@ -198,8 +125,8 @@ exports[`TxBatchCard should render the default markup 1`] = `
                 {
                   "color": "#A1A3A7",
                   "fontFamily": "DM Sans",
-                  "fontSize": 13,
-                  "marginBottom": 2,
+                  "fontSize": 12,
+                  "lineHeight": 20,
                 }
               }
               suppressHighlighting={true}
@@ -213,6 +140,7 @@ exports[`TxBatchCard should render the default markup 1`] = `
                 "color": "#121312",
                 "fontFamily": "DMSans-SemiBold",
                 "fontSize": 14,
+                "lineHeight": 20,
               }
             }
             suppressHighlighting={true}

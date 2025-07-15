@@ -60,7 +60,6 @@ exports[`SafeListItem should render a list item with a custom label template 1`]
                 "alignItems": "center",
                 "flexDirection": "row",
                 "gap": 4,
-                "marginBottom": 4,
               }
             }
           >
@@ -91,8 +90,8 @@ exports[`SafeListItem should render a list item with a custom label template 1`]
                 {
                   "color": "#A1A3A7",
                   "fontFamily": "DM Sans",
-                  "fontSize": 13,
-                  "marginBottom": 2,
+                  "fontSize": 12,
+                  "lineHeight": 20,
                 }
               }
               suppressHighlighting={true}
@@ -180,6 +179,7 @@ exports[`SafeListItem should render bottomContent with proper styling and layout
                 "color": "#121312",
                 "fontFamily": "DMSans-SemiBold",
                 "fontSize": 14,
+                "lineHeight": 20,
               }
             }
             suppressHighlighting={true}

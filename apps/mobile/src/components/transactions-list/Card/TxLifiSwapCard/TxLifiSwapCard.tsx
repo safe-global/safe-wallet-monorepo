@@ -28,7 +28,7 @@ export function TxLifiSwapCard({ txInfo, bordered, executionInfo, inQueue, onPre
       inQueue={inQueue}
       leftNode={
         <Theme name="logo">
-          <View position="relative" width="$10" height="$10">
+          <View position="relative" width="$8" height="$10">
             <View position="absolute" top={0}>
               <TokenIcon
                 logoUri={txInfo.fromToken.logoUri}
