@@ -86,6 +86,34 @@ describe('MixPanel Integration', () => {
     })
   })
 
+  describe('Safe address handling', () => {
+    it('should set safe address without removing 0x prefix', () => {
+      const { mixpanelInit, mixpanelSetSafeAddress } = require('../mixpanel')
+
+      mixpanelInit()
+
+      const testAddress = '0x1234567890abcdef1234567890abcdef12345678'
+      mixpanelSetSafeAddress(testAddress)
+
+      expect(mockMixpanel.register).toHaveBeenCalledWith({
+        'Safe Address': testAddress,
+      })
+    })
+
+    it('should handle safe address without 0x prefix', () => {
+      const { mixpanelInit, mixpanelSetSafeAddress } = require('../mixpanel')
+
+      mixpanelInit()
+
+      const testAddress = '1234567890abcdef1234567890abcdef12345678'
+      mixpanelSetSafeAddress(testAddress)
+
+      expect(mockMixpanel.register).toHaveBeenCalledWith({
+        'Safe Address': testAddress,
+      })
+    })
+  })
+
   describe('Separate tracking', () => {
     it('should track with GA only when using trackEvent', () => {
       const { mixpanelInit } = require('../mixpanel')
