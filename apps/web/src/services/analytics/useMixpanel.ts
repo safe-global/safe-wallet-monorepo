@@ -21,7 +21,7 @@ import { FEATURES } from '@safe-global/utils/utils/chains'
 import useChainId from '@/hooks/useChainId'
 import { useMediaQuery } from '@mui/material'
 import { DeviceType } from './types'
-import { WALLET_LABEL, WALLET_ADDRESS } from './mixpanel-events'
+import { MixPanelUserProperty } from './mixpanel-events'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import useWallet from '@/hooks/wallets/useWallet'
 import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
@@ -94,7 +94,7 @@ const useMixpanel = () => {
     if (!isMixpanelEnabled) return
 
     if (wallet?.label) {
-      mixpanelSetUserProperty(WALLET_LABEL, wallet.label)
+      mixpanelSetUserProperty(MixPanelUserProperty.WALLET_LABEL, wallet.label)
     }
   }, [wallet?.label, isMixpanelEnabled])
 
@@ -102,7 +102,7 @@ const useMixpanel = () => {
     if (!isMixpanelEnabled) return
 
     if (wallet?.address) {
-      mixpanelSetUserProperty(WALLET_ADDRESS, wallet.address)
+      mixpanelSetUserProperty(MixPanelUserProperty.WALLET_ADDRESS, wallet.address)
     }
   }, [wallet?.address, isMixpanelEnabled])
 }

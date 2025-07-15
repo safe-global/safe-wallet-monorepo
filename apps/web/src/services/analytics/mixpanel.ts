@@ -131,12 +131,21 @@ export const mixpanelSetUserProperty = (name: string, value: string): void => {
 /**
  * Convert SafeApp object to MixPanel event properties
  */
-export const safeAppToMixPanelEventProperties = (safeApp: SafeAppData): Record<string, any> => {
-  return {
+export const safeAppToMixPanelEventProperties = (
+  safeApp: SafeAppData,
+  launchLocation?: string,
+): Record<string, any> => {
+  const properties: Record<string, any> = {
     'Safe App Name': safeApp.name,
     'Safe App ID': safeApp.id,
     'Safe App Tags': safeApp.tags,
   }
+
+  if (launchLocation) {
+    properties['Launch Location'] = launchLocation
+  }
+
+  return properties
 }
 
 /**

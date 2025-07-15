@@ -1,4 +1,10 @@
-import { trackEvent, trackMixPanelEvent, SAFE_APP_LAUNCHED, safeAppToMixPanelEventProperties } from '../index'
+import {
+  trackEvent,
+  trackMixPanelEvent,
+  MixPanelEvent,
+  safeAppToMixPanelEventProperties,
+  SafeAppLaunchLocation,
+} from '../index'
 
 // Mock mixpanel-browser
 jest.mock('mixpanel-browser', () => ({
@@ -63,7 +69,7 @@ describe('MixPanel Integration', () => {
 
       mixpanelInit()
 
-      mixpanelTrack(SAFE_APP_LAUNCHED, {
+      mixpanelTrack(MixPanelEvent.SAFE_APP_LAUNCHED, {
         'Safe App Name': 'Test App',
         'Safe App ID': 123,
         'Custom Property': 'value',
@@ -102,7 +108,7 @@ describe('MixPanel Integration', () => {
 
       mixpanelInit()
 
-      trackMixPanelEvent(SAFE_APP_LAUNCHED, {
+      trackMixPanelEvent(MixPanelEvent.SAFE_APP_LAUNCHED, {
         'Safe App Name': 'Test App',
         'Safe App Version': '1.0.0',
       })
@@ -138,6 +144,56 @@ describe('MixPanel Integration', () => {
         'Safe App Name': 'Test App',
         'Safe App ID': 123,
         'Safe App Tags': ['defi', 'swap'],
+      })
+    })
+
+    it('should convert SafeApp to MixPanel properties with launch location', () => {
+      const mockSafeApp = {
+        id: 123,
+        name: 'Test App',
+        url: 'https://test-app.com',
+        description: 'A test app',
+        iconUrl: 'https://test-app.com/icon.png',
+        developerWebsite: 'https://developer.com',
+        chainIds: ['1', '5'],
+        socialProfiles: [],
+        tags: ['defi', 'swap'],
+        accessControl: { type: 'NO_RESTRICTIONS' as const },
+        features: [],
+      }
+
+      const properties = safeAppToMixPanelEventProperties(mockSafeApp as any, SafeAppLaunchLocation.PREVIEW_DRAWER)
+
+      expect(properties).toEqual({
+        'Safe App Name': 'Test App',
+        'Safe App ID': 123,
+        'Safe App Tags': ['defi', 'swap'],
+        'Launch Location': 'Preview Drawer',
+      })
+    })
+
+    it('should convert SafeApp to MixPanel properties with Safe App List launch location', () => {
+      const mockSafeApp = {
+        id: 123,
+        name: 'Test App',
+        url: 'https://test-app.com',
+        description: 'A test app',
+        iconUrl: 'https://test-app.com/icon.png',
+        developerWebsite: 'https://developer.com',
+        chainIds: ['1', '5'],
+        socialProfiles: [],
+        tags: ['defi', 'swap'],
+        accessControl: { type: 'NO_RESTRICTIONS' as const },
+        features: [],
+      }
+
+      const properties = safeAppToMixPanelEventProperties(mockSafeApp as any, SafeAppLaunchLocation.SAFE_APPS_LIST)
+
+      expect(properties).toEqual({
+        'Safe App Name': 'Test App',
+        'Safe App ID': 123,
+        'Safe App Tags': ['defi', 'swap'],
+        'Launch Location': 'Safe App List',
       })
     })
   })
