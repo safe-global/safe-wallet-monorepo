@@ -12,9 +12,14 @@
  * `trackEvent(ADDRESS_BOOK_EVENTS.EXPORT)`
  */
 import { gtmTrack, gtmTrackSafeApp } from './gtm'
+import { mixpanelTrack, safeAppToMixPanelEventProperties } from './mixpanel'
 
 export const trackEvent = gtmTrack
 export const trackSafeAppEvent = gtmTrackSafeApp
 
+export const trackMixPanelEvent = mixpanelTrack
+export { safeAppToMixPanelEventProperties }
+
 export * from './types'
 export * from './events'
+export * from './mixpanel-events'
