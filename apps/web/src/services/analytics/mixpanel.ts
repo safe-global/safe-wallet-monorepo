@@ -81,7 +81,7 @@ export const mixpanelSetDeviceType = (type: DeviceType): void => {
  * Set safe address for all MixPanel events
  */
 export const mixpanelSetSafeAddress = (safeAddress: string): void => {
-  commonEventParams['Safe Address'] = safeAddress.slice(2) // Remove 0x prefix
+  commonEventParams['Safe Address'] = safeAddress
 
   if (isMixPanelInitialized) {
     mixpanel.register({ 'Safe Address': commonEventParams['Safe Address'] })
