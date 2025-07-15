@@ -193,7 +193,7 @@ describe('MixPanel Integration', () => {
         'Safe App Name': 'Test App',
         'Safe App ID': 123,
         'Safe App Tags': ['defi', 'swap'],
-        'Launch Location': 'Safe App List',
+        'Launch Location': 'Safe Apps List',
       })
     })
   })
