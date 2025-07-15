@@ -23,8 +23,9 @@ import {
   SAFE_APPS_LABELS,
   trackSafeAppEvent,
   trackMixPanelEvent,
-  SAFE_APP_LAUNCHED,
+  MixPanelEvent,
   safeAppToMixPanelEventProperties,
+  SafeAppLaunchLocation,
 } from '@/services/analytics'
 
 type SafeAppPreviewDrawerProps = {
@@ -44,7 +45,10 @@ const SafeAppPreviewDrawer = ({ isOpen, safeApp, isBookmarked, onClose, onBookma
     if (safeApp) {
       markSafeAppOpened(safeApp.id)
       trackSafeAppEvent({ ...SAFE_APPS_EVENTS.OPEN_APP, label: SAFE_APPS_LABELS.apps_sidebar }, safeApp.name)
-      trackMixPanelEvent(SAFE_APP_LAUNCHED, safeAppToMixPanelEventProperties(safeApp))
+      trackMixPanelEvent(
+        MixPanelEvent.SAFE_APP_LAUNCHED,
+        safeAppToMixPanelEventProperties(safeApp, SafeAppLaunchLocation.PREVIEW_DRAWER),
+      )
     }
   }
 
