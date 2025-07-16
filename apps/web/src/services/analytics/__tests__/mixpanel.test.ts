@@ -71,7 +71,6 @@ describe('MixPanel Integration', () => {
 
       mixpanelTrack(MixPanelEvent.SAFE_APP_LAUNCHED, {
         'Safe App Name': 'Test App',
-        'Safe App ID': 123,
         'Custom Property': 'value',
       })
 
@@ -79,7 +78,6 @@ describe('MixPanel Integration', () => {
         'Safe App Launched',
         expect.objectContaining({
           'Safe App Name': 'Test App',
-          'Safe App ID': 123,
           'Custom Property': 'value',
         }),
       )
@@ -183,7 +181,6 @@ describe('MixPanel Integration', () => {
 
       expect(properties).toEqual({
         'Safe App Name': 'Test App',
-        'Safe App ID': 123,
         'Safe App Tags': ['defi', 'swap'],
       })
     })
@@ -207,7 +204,6 @@ describe('MixPanel Integration', () => {
 
       expect(properties).toEqual({
         'Safe App Name': 'Test App',
-        'Safe App ID': 123,
         'Safe App Tags': ['defi', 'swap'],
         'Launch Location': 'Preview Drawer',
       })
@@ -232,7 +228,6 @@ describe('MixPanel Integration', () => {
 
       expect(properties).toEqual({
         'Safe App Name': 'Test App',
-        'Safe App ID': 123,
         'Safe App Tags': ['defi', 'swap'],
         'Launch Location': 'Safe Apps List',
       })
