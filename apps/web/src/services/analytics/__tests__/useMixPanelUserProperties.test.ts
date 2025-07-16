@@ -21,6 +21,7 @@ jest.mock('@/hooks/useSafeInfo', () => ({
         { value: '0x0987654321098765432109876543210987654321' },
       ],
       threshold: 2,
+      nonce: 42,
     },
     safeLoaded: true,
   })),
@@ -33,15 +34,15 @@ jest.mock('@/store', () => ({
         {
           type: 'TRANSACTION',
           transaction: {
-            id: 'tx1',
-            timestamp: 1640995200000, // Jan 1, 2022
+            id: 'tx2',
+            timestamp: 1672531200000, // Jan 1, 2023 (most recent first)
           },
         },
         {
           type: 'TRANSACTION',
           transaction: {
-            id: 'tx2',
-            timestamp: 1672531200000, // Jan 1, 2023
+            id: 'tx1',
+            timestamp: 1640995200000, // Jan 1, 2022
           },
         },
       ],
@@ -63,7 +64,7 @@ describe('useMixPanelUserProperties', () => {
         [MixPanelUserProperty.SAFE_VERSION]: '1.3.0',
         [MixPanelUserProperty.NUM_SIGNERS]: 2,
         [MixPanelUserProperty.THRESHOLD]: 2,
-        [MixPanelUserProperty.TOTAL_TX_COUNT]: 2,
+        [MixPanelUserProperty.TOTAL_TX_COUNT]: 42,
         [MixPanelUserProperty.LAST_TX_AT]: new Date(1672531200000).toISOString(),
       },
       networks: ['ethereum'],
@@ -90,6 +91,7 @@ describe('useMixPanelUserProperties', () => {
         version: null,
         owners: [{ value: '0x1234567890123456789012345678901234567890' }],
         threshold: 1,
+        nonce: 5,
       },
       safeLoaded: true,
     })
@@ -100,16 +102,28 @@ describe('useMixPanelUserProperties', () => {
   })
 
   it('should handle empty transaction history', () => {
+    const useSafeInfo = require('@/hooks/useSafeInfo').default
+    useSafeInfo.mockReturnValueOnce({
+      safe: {
+        address: { value: '0x1234567890123456789012345678901234567890' },
+        version: '1.3.0',
+        owners: [{ value: '0x1234567890123456789012345678901234567890' }],
+        threshold: 1,
+        nonce: 10, // nonce is still used for total_tx_count
+      },
+      safeLoaded: true,
+    })
+
     const { useAppSelector } = require('@/store')
     useAppSelector.mockReturnValueOnce({
       data: {
-        results: [],
+        results: [], // empty transaction history
       },
     })
 
     const { result } = renderHook(() => useMixPanelUserProperties())
 
-    expect(result.current?.properties[MixPanelUserProperty.TOTAL_TX_COUNT]).toBe(0)
-    expect(result.current?.properties[MixPanelUserProperty.LAST_TX_AT]).toBeNull()
+    expect(result.current?.properties[MixPanelUserProperty.TOTAL_TX_COUNT]).toBe(10) // from nonce
+    expect(result.current?.properties[MixPanelUserProperty.LAST_TX_AT]).toBeNull() // from empty tx history
   })
 })

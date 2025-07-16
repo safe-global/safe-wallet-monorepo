@@ -41,25 +41,18 @@ export const useMixPanelUserProperties = (): MixPanelUserPropertiesFormatted | n
     // Get current network name from chain
     const currentNetworkName = currentChain.chainName.toLowerCase()
 
-    // Calculate transaction count and last transaction from history
-    let totalTxCount = 0
+    // Use safe.nonce for total transaction count (represents all executed transactions)
+    const totalTxCount = safe.nonce
+
+    // Calculate last transaction timestamp from history (limited to recent transactions)
     let lastTxAt: Date | null = null
 
     if (txHistory.data?.results) {
       const transactions = txHistory.data.results.filter(isTransactionListItem).map((item) => item.transaction)
 
-      totalTxCount = transactions.length
-
-      // Find the most recent transaction timestamp
-      if (transactions.length > 0) {
-        const timestamps = transactions
-          .map((tx) => tx.timestamp)
-          .filter((timestamp) => timestamp !== null)
-          .sort((a, b) => b - a) // Sort descending (most recent first)
-
-        if (timestamps.length > 0) {
-          lastTxAt = new Date(timestamps[0])
-        }
+      // The first transaction is always the most recent (transactions are sorted by timestamp descending)
+      if (transactions.length > 0 && transactions[0].timestamp) {
+        lastTxAt = new Date(transactions[0].timestamp)
       }
     }
 
