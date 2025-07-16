@@ -13,6 +13,13 @@ export enum MixPanelEvent {
 export enum MixPanelUserProperty {
   WALLET_LABEL = 'Wallet Label',
   WALLET_ADDRESS = 'Wallet Address',
+  SAFE_ADDRESS = 'Safe Address',
+  SAFE_VERSION = 'Safe Version',
+  NUM_SIGNERS = 'Number of Signers',
+  THRESHOLD = 'Threshold',
+  NETWORKS = 'Networks',
+  TOTAL_TX_COUNT = 'Total Transaction Count',
+  LAST_TX_AT = 'Last Transaction at',
 }
 
 /**
