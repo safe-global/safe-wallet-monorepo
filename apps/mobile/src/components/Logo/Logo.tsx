@@ -1,5 +1,5 @@
 import React from 'react'
-import { Avatar, AvatarImageProps, Theme, View } from 'tamagui'
+import { Avatar, Theme, View } from 'tamagui'
 import { IconProps, SafeFontIcon } from '../SafeFontIcon/SafeFontIcon'
 import { Badge } from '../Badge/Badge'
 import { badgeTheme } from '../Badge/theme'
@@ -7,9 +7,6 @@ import { badgeTheme } from '../Badge/theme'
 type BadgeThemeKeys = keyof typeof badgeTheme
 type ExtractAfterUnderscore<T extends string> = T extends `${string}_${infer Rest}` ? Rest : never
 export type BadgeThemeTypes = ExtractAfterUnderscore<BadgeThemeKeys>
-
-// Local loading status type
-type LoadingStatus = Parameters<Exclude<AvatarImageProps['onLoadingStatusChange'], undefined>>[0]
 
 interface LogoProps {
   logoUri?: string | null
@@ -32,15 +29,6 @@ export function Logo({
   badgeContent,
   badgeThemeName = 'badge_background',
 }: LogoProps) {
-  const [status, setStatus] = React.useState<LoadingStatus>('idle')
-
-  // Reset status when logoUri changes
-  React.useEffect(() => {
-    setStatus('idle')
-  }, [logoUri])
-
-  const shouldShowImage = logoUri && status !== 'error'
-
   return (
     <Theme name="logo">
       <View width={size}>
@@ -51,13 +39,12 @@ export function Logo({
         </View>
 
         <Avatar circular size={size}>
-          {shouldShowImage && (
+          {logoUri && (
             <Avatar.Image
               testID="logo-image"
               backgroundColor={imageBackground}
               accessibilityLabel={accessibilityLabel}
-              src={logoUri}
-              onLoadingStatusChange={setStatus}
+              source={{ uri: logoUri }}
             />
           )}
 
