@@ -9,7 +9,8 @@ import {
   mixpanelSetChainId,
   mixpanelSetDeviceType,
   mixpanelSetSafeAddress,
-  mixpanelSetUserProperty,
+  mixpanelSetUserProperties,
+  mixpanelUnionUserProperty,
   mixpanelEnableTracking,
   mixpanelDisableTracking,
   mixpanelIdentify,
@@ -25,6 +26,8 @@ import { MixPanelUserProperty } from './mixpanel-events'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import useWallet from '@/hooks/wallets/useWallet'
 import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
+import { useMixPanelUserProperties } from './useMixPanelUserProperties'
+import { useCurrentChain } from '@/hooks/useChains'
 
 const useMixpanel = () => {
   const chainId = useChainId()
@@ -38,6 +41,8 @@ const useMixpanel = () => {
   const safeAddress = useSafeAddress()
   const wallet = useWallet()
   const isSpaceRoute = useIsSpaceRoute()
+  const userProperties = useMixPanelUserProperties()
+  const currentChain = useCurrentChain()
 
   // Initialize MixPanel (only if feature is enabled)
   useEffect(() => {
@@ -94,7 +99,7 @@ const useMixpanel = () => {
     if (!isMixpanelEnabled) return
 
     if (wallet?.label) {
-      mixpanelSetUserProperty(MixPanelUserProperty.WALLET_LABEL, wallet.label)
+      mixpanelSetUserProperties(MixPanelUserProperty.WALLET_LABEL, wallet.label)
     }
   }, [wallet?.label, isMixpanelEnabled])
 
@@ -102,9 +107,27 @@ const useMixpanel = () => {
     if (!isMixpanelEnabled) return
 
     if (wallet?.address) {
-      mixpanelSetUserProperty(MixPanelUserProperty.WALLET_ADDRESS, wallet.address)
+      mixpanelSetUserProperties(MixPanelUserProperty.WALLET_ADDRESS, wallet.address)
     }
   }, [wallet?.address, isMixpanelEnabled])
+
+  // Set Safe-related user properties
+  useEffect(() => {
+    if (!isMixpanelEnabled || !userProperties) return
+
+    // Set regular properties (already formatted with string keys)
+    mixpanelSetUserProperties(userProperties.properties)
+  }, [userProperties, isMixpanelEnabled])
+
+  // Set networks using union operation
+  useEffect(() => {
+    if (!isMixpanelEnabled || !currentChain) return
+
+    const currentNetworkName = currentChain.chainName.toLowerCase()
+
+    // Use union for networks to append without duplicates
+    mixpanelUnionUserProperty(MixPanelUserProperty.NETWORKS, [currentNetworkName])
+  }, [currentChain, isMixpanelEnabled])
 }
 
 export default useMixpanel

@@ -116,15 +116,38 @@ export const mixpanelDisableTracking = (): void => {
 }
 
 /**
- * Set user properties
+ * Set user properties (single property or multiple properties)
  */
-export const mixpanelSetUserProperty = (name: string, value: string): void => {
+export const mixpanelSetUserProperties = (properties: Record<string, any> | string, value?: any): void => {
   if (!isMixPanelInitialized) return
 
-  mixpanel.people.set({ [name]: value })
+  let props: Record<string, any>
+
+  if (typeof properties === 'string') {
+    // Single property usage: mixpanelSetUserProperties('key', 'value')
+    props = { [properties]: value }
+  } else {
+    // Multiple properties usage: mixpanelSetUserProperties({ key1: 'value1', key2: 'value2' })
+    props = properties
+  }
+
+  mixpanel.people.set(props)
 
   if (!IS_PRODUCTION) {
-    console.info('[MixPanel] - User property set:', name, '=', value)
+    console.info('[MixPanel] - User properties set:', props)
+  }
+}
+
+/**
+ * Union values to a list property (append without duplicates)
+ */
+export const mixpanelUnionUserProperty = (property: string, values: string[]): void => {
+  if (!isMixPanelInitialized) return
+
+  mixpanel.people.union({ [property]: values })
+
+  if (!IS_PRODUCTION) {
+    console.info('[MixPanel] - User property union:', property, 'with', values)
   }
 }
 
