@@ -14,6 +14,8 @@ export const ANALYTICS_LABELS = {
     NativeStakingWithdraw: 'native_staking_withdraw',
     VaultDeposit: 'vault_deposit',
     VaultRedeem: 'vault_redeem',
+    SwapAndBridge: 'swap_and_bridge',
+    Swap: 'swap',
   } as const satisfies Record<TransactionInfoType, string>,
 
   TRANSFER_TYPES: {

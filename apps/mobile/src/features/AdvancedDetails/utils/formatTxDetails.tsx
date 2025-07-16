@@ -13,6 +13,7 @@ import { Operation } from '@safe-global/safe-gateway-typescript-sdk'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { TouchableOpacity } from 'react-native'
 import { Receiver } from '../components/Receiver'
+import { InfoSheet } from '@/src/components/InfoSheet'
 
 interface formatTxDetailsProps {
   txDetails?: TransactionDetails
@@ -138,10 +139,12 @@ const formatTxDetails = ({ txDetails }: formatTxDetailsProps): ListTableItem[] =
       items.push({
         label: 'Safe Tx Hash',
         render: () => (
-          <View flexDirection="row" alignItems="center" gap="$1">
-            <Text>{shortenText(executionInfo.safeTxHash || '', characterDisplayLimit)}</Text>
-            <CopyButton value={executionInfo.safeTxHash || ''} color={'$textSecondaryLight'} text="Hash copied." />
-          </View>
+          <InfoSheet title="Safe Tx Hash" info={executionInfo.safeTxHash}>
+            <View flexDirection="row" alignItems="center" gap="$1">
+              <Text>{shortenText(executionInfo.safeTxHash || '', characterDisplayLimit)}</Text>
+              <CopyButton value={executionInfo.safeTxHash || ''} color={'$textSecondaryLight'} text="Hash copied." />
+            </View>
+          </InfoSheet>
         ),
       })
     }
@@ -152,10 +155,12 @@ const formatTxDetails = ({ txDetails }: formatTxDetailsProps): ListTableItem[] =
     items.push({
       label: 'Transaction Hash',
       render: () => (
-        <View flexDirection="row" alignItems="center" gap="$1">
-          <Text>{shortenText(txDetails.txHash || '', characterDisplayLimit)}</Text>
-          <CopyButton value={txDetails.txHash || ''} color={'$textSecondaryLight'} text="Hash copied." />
-        </View>
+        <InfoSheet title="Transaction Hash" info={txDetails.txHash || ''}>
+          <View flexDirection="row" alignItems="center" gap="$1">
+            <Text>{shortenText(txDetails.txHash || '', characterDisplayLimit)}</Text>
+            <CopyButton value={txDetails.txHash || ''} color={'$textSecondaryLight'} text="Hash copied." />
+          </View>
+        </InfoSheet>
       ),
     })
   }

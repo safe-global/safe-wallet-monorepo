@@ -16,7 +16,6 @@ export const useBalances = (poll = false, pollingInterval = POLLING_INTERVAL) =>
           chainId: activeSafe.chainId,
           fiatCode: currency.toUpperCase(),
           safeAddress: activeSafe.address,
-          excludeSpam: false,
           trusted: true,
         },
     {

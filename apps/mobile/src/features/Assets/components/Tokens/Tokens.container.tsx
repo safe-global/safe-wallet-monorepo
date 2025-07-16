@@ -27,7 +27,6 @@ export function TokensContainer() {
           chainId: activeSafe.chainId,
           fiatCode: currency,
           safeAddress: activeSafe.address,
-          excludeSpam: false,
           trusted: true,
         },
     {

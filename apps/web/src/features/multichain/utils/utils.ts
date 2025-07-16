@@ -8,6 +8,7 @@ import {
   type ReplayedSafeProps,
 } from '@safe-global/utils/features/counterfactual/store/types'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
+import { areOwnersMatching } from '@safe-global/utils/utils/safe-setup-comparison'
 import { Safe_proxy_factory__factory } from '@safe-global/utils/types/contracts'
 import { extractCounterfactualSafeSetup } from '@/features/counterfactual/utils'
 import { encodeSafeSetupCall } from '@/components/new-safe/create/logic'
@@ -36,9 +37,6 @@ export const isMultiChainSafeItem = (safe: SafeItem | MultiChainSafeItem): safe 
 export const isSafeItem = (safe: SafeItem | MultiChainSafeItem): safe is SafeItem => {
   return !isMultiChainSafeItem(safe)
 }
-
-const areOwnersMatching = (owners1: string[], owners2: string[]) =>
-  owners1.length === owners2.length && owners1.every((owner) => owners2.some((owner2) => sameAddress(owner, owner2)))
 
 export const getSafeSetups = (
   safes: SafeItem[],

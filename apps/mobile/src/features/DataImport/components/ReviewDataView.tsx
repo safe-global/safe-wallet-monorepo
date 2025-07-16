@@ -4,7 +4,6 @@ import { SafeButton } from '@/src/components/SafeButton'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { Container } from '@/src/components/Container'
 import { Badge } from '@/src/components/Badge'
-import { SafeStatusBar } from '@/src/theme/SafeStatusBar'
 
 interface ImportSummary {
   safeAccountsCount: number
@@ -28,8 +27,6 @@ export const ReviewDataView = ({
   return (
     <ScrollView contentContainerStyle={{ flex: 1 }}>
       <YStack flex={1} testID="review-data-screen">
-        <SafeStatusBar />
-
         {/* Content */}
         <YStack flex={1} paddingHorizontal="$4" justifyContent="space-between" marginTop={'$4'}>
           <YStack gap="$6">

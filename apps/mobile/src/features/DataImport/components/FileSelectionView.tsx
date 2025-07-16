@@ -4,7 +4,6 @@ import { SafeButton } from '@/src/components/SafeButton'
 import ImportDataSelectFilesDark from '@/assets/images/import-data-select-files-dark.png'
 import ImportDataSelectFilesLight from '@/assets/images/import-data-select-files-light.png'
 import { ColorSchemeName, TouchableOpacity } from 'react-native'
-import { SafeStatusBar } from '@/src/theme/SafeStatusBar'
 
 const StyledText = styled(Text, {
   fontSize: '$4',
@@ -29,8 +28,6 @@ interface FileSelectionViewProps {
 export const FileSelectionView = ({ colorScheme, bottomInset, onFileSelect, onImagePress }: FileSelectionViewProps) => {
   return (
     <YStack flex={1} testID="file-selection-screen" paddingBottom={bottomInset}>
-      <SafeStatusBar />
-
       {/* Content */}
       <YStack flex={1} paddingHorizontal="$4" justifyContent="space-between" marginTop={'$4'}>
         <YStack gap="$4" flex={1}>

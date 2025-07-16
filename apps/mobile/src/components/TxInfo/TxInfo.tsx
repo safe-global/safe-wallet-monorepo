@@ -17,6 +17,8 @@ import {
   isTransferTxInfo,
   isVaultDepositTxInfo,
   isVaultRedeemTxInfo,
+  isBridgeOrderTxInfo,
+  isLifiSwapTxInfo,
 } from '@/src/utils/transaction-guards'
 import { TxBatchCard } from '@/src/components/transactions-list/Card/TxBatchCard'
 import { TxSafeAppCard } from '@/src/components/transactions-list/Card/TxSafeAppCard'
@@ -31,6 +33,8 @@ import { StakingTxExitCard } from '../transactions-list/Card/StakingTxExitCard'
 import { VaultTxDepositCard } from '@/src/components/transactions-list/Card/VaultTxDepositCard'
 import { VaultTxRedeemCard } from '@/src/components/transactions-list/Card/VaultTxRedeemCard'
 import { SafeListItemProps } from '@/src/components/SafeListItem/SafeListItem'
+import { TxBridgeCard } from '@/src/components/transactions-list/Card/TxBridgeCard'
+import { TxLifiSwapCard } from '@/src/components/transactions-list/Card/TxLifiSwapCard'
 
 type TxInfoProps = {
   tx: Transaction
@@ -132,6 +136,14 @@ function TxInfoComponent({ tx, onPress, ...rest }: TxInfoProps) {
 
   if (isVaultRedeemTxInfo(txInfo)) {
     return <VaultTxRedeemCard info={txInfo} onPress={onCardPress} executionInfo={tx.executionInfo} {...rest} />
+  }
+
+  if (isBridgeOrderTxInfo(txInfo)) {
+    return <TxBridgeCard txInfo={txInfo} onPress={onCardPress} executionInfo={tx.executionInfo} />
+  }
+
+  if (isLifiSwapTxInfo(txInfo)) {
+    return <TxLifiSwapCard txInfo={txInfo} onPress={onCardPress} executionInfo={tx.executionInfo} />
   }
 
   return <></>

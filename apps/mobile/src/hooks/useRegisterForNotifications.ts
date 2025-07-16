@@ -13,6 +13,9 @@ import '@safe-global/store/gateway/AUTO_GENERATED/notifications'
 import { registerSafe, unregisterSafe } from '@/src/services/notifications/registration'
 import { store } from '@/src/store'
 import { selectAllChainsIds } from '../store/chains'
+import FCMService from '@/src/services/notifications/FCMService'
+import NotificationService from '@/src/services/notifications/NotificationService'
+import { notificationChannels, withTimeout } from '@/src/utils/notifications'
 
 export type RegisterForNotificationsProps = {
   loading: boolean
@@ -41,19 +44,27 @@ const useRegisterForNotifications = (): NotificationsProps => {
         setLoading(true)
         setError(null)
 
-        if (!activeSafe) {
-          setLoading(false)
-          setError(ERROR_MSG)
-          return { loading, error }
-        }
-
-        await registerSafe(store, activeSafe.address, allChainIds)
-
+        // For the initial opt-in, we perform global FCM setup and let the middleware handle all safe registrations
         if (updateNotificationSettings) {
+          // Initialize FCM and create notification channels (global setup)
+          await FCMService.initNotification()
+          await withTimeout(NotificationService.createChannel(notificationChannels[0]), 5000)
+
+          // Dispatch the global toggle - this will trigger the middleware to register all safes
           dispatch(toggleAppNotifications(true))
           dispatch(updatePromptAttempts(0))
           dispatch(updateLastTimePromptAttempted(0))
+        } else {
+          // For individual safe registration (used by toggle notification state), register only the active safe
+          if (!activeSafe) {
+            setLoading(false)
+            setError(ERROR_MSG)
+            return { loading, error }
+          }
+
+          await registerSafe(store, activeSafe.address, allChainIds)
         }
+
         setLoading(false)
         setError(null)
       } catch (err) {
@@ -63,7 +74,7 @@ const useRegisterForNotifications = (): NotificationsProps => {
       }
       return { loading, error }
     },
-    [activeSafe, dispatch],
+    [activeSafe, dispatch, allChainIds],
   )
 
   const unregisterForNotifications = useCallback(

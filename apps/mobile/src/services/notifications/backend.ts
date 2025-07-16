@@ -3,27 +3,13 @@ import { SiweMessage } from 'siwe'
 import { Wallet, HDNodeWallet } from 'ethers'
 
 import { NOTIFICATION_ACCOUNT_TYPE, ERROR_MSG } from '@/src/store/constants'
-import { withTimeout, REGULAR_NOTIFICATIONS, OWNER_NOTIFICATIONS } from '@/src/utils/notifications'
+import { REGULAR_NOTIFICATIONS, OWNER_NOTIFICATIONS } from '@/src/utils/notifications'
 import { cgwApi as authApi } from '@safe-global/store/gateway/AUTO_GENERATED/auth'
 import { cgwApi as notificationsApi } from '@safe-global/store/gateway/AUTO_GENERATED/notifications'
 import { convertToUuid } from '@/src/utils/uuid'
-import { isAndroid } from '@/src/config/constants'
+import { isAndroid, GATEWAY_URL } from '@/src/config/constants'
 import Logger from '@/src/utils/logger'
 import { getStore } from '@/src/store/utils/singletonStore'
-
-const AUTH_CACHE_EXPIRY_MS = 60000 // 60 seconds
-
-type AuthCacheEntry = {
-  timestamp: number
-  chainId: string
-}
-
-let authCache: Record<string, AuthCacheEntry> = {}
-
-// This is only used in testing as it turned mega hard to do jest.resetModules()
-export function clearAuthCache() {
-  authCache = {}
-}
 
 export const getDeviceUuid = async () => {
   const deviceId = await DeviceInfo.getUniqueId()
@@ -37,14 +23,16 @@ const getNotificationRegisterPayload = async ({
   signer: Wallet | HDNodeWallet
   chainId: string
 }) => {
-  const { nonce } = await getStore()
-    .dispatch(
-      authApi.endpoints.authGetNonceV1.initiate(undefined, {
-        // don't use cached nonce
-        forceRefetch: true,
-      }),
-    )
-    .unwrap()
+  const nonceResponse = await fetch(`${GATEWAY_URL}/v1/auth/nonce`, {
+    method: 'GET',
+    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+  })
+
+  if (!nonceResponse.ok) {
+    throw new Error(`Failed to get nonce: ${nonceResponse.status} ${nonceResponse.statusText}`)
+  }
+
+  const { nonce } = await nonceResponse.json()
 
   if (!nonce) {
     throw new Error(ERROR_MSG)
@@ -70,14 +58,6 @@ export const authenticateSigner = async (signer: Wallet | HDNodeWallet | null, c
   }
 
   const signerAddress = signer.address
-  const cacheKey = `${signerAddress.toLowerCase()}`
-  const cachedAuth = authCache[cacheKey]
-
-  const now = Date.now()
-  if (cachedAuth && cachedAuth.chainId === chainId && now - cachedAuth.timestamp < AUTH_CACHE_EXPIRY_MS) {
-    Logger.info('Using cached authentication for signer', { signerAddress })
-    return
-  }
 
   const { siweMessage } = await getNotificationRegisterPayload({ signer, chainId })
   const signature = await signer.signMessage(siweMessage)
@@ -90,11 +70,7 @@ export const authenticateSigner = async (signer: Wallet | HDNodeWallet | null, c
     )
     .unwrap()
 
-  authCache[cacheKey] = {
-    timestamp: now,
-    chainId,
-  }
-  Logger.info('Authenticated signer and updated cache', { signerAddress })
+  Logger.info('Authenticated signer', { signerAddress })
 }
 
 export const registerForNotificationsOnBackEnd = async ({
@@ -144,28 +120,53 @@ export const unregisterForNotificationsOnBackEnd = async ({
   safeAddress: string
   chainIds: string[]
 }) => {
+  // Validate input parameters
+  if (!chainIds || chainIds.length === 0) {
+    Logger.warn('No chainIds provided for unregistering notifications', { safeAddress })
+    return
+  }
+
   await authenticateSigner(signer, chainIds[0])
   const deviceUuid = await getDeviceUuid()
 
-  for (const chainId of chainIds) {
-    try {
-      await getStore()
-        .dispatch(
-          notificationsApi.endpoints.notificationsDeleteSubscriptionV2.initiate({
-            deviceUuid,
-            chainId,
-            safeAddress,
-          }),
-        )
-        .unwrap()
-    } catch (error: unknown) {
-      // Treat 404 errors as successful unregistration since the safe was already unsubscribed
-      if (error && typeof error === 'object' && 'status' in error && error.status === 404) {
-        Logger.info('Safe was already unsubscribed from notifications', { safeAddress, chainId })
-      } else {
-        throw error
-      }
+  // Ensure we have all required data
+  if (!deviceUuid || !safeAddress) {
+    throw new Error('Missing required parameters for unregistering notifications')
+  }
+
+  // Use the new bulk delete endpoint for better efficiency
+  const subscriptions = chainIds.map((chainId) => ({
+    chainId: chainId,
+    deviceUuid: deviceUuid,
+    safeAddress: safeAddress,
+  }))
+
+  // Ensure we have valid subscriptions array
+  if (!Array.isArray(subscriptions) || subscriptions.length === 0) {
+    throw new Error('No valid subscriptions to delete')
+  }
+
+  const deleteAllSubscriptionsDto = {
+    subscriptions: subscriptions,
+  }
+
+  Logger.info('Unregistering notifications for subscriptions', { deleteAllSubscriptionsDto })
+
+  try {
+    await getStore()
+      .dispatch(
+        notificationsApi.endpoints.notificationsDeleteAllSubscriptionsV2.initiate({
+          deleteAllSubscriptionsDto,
+        }),
+      )
+      .unwrap()
+  } catch (error: unknown) {
+    // Treat 404 errors as successful unregistration since the safe was already unsubscribed
+    if (error && typeof error === 'object' && 'status' in error && error.status === 404) {
+      Logger.info('Safe was already unsubscribed from notifications', { safeAddress, chainIds })
+    } else {
+      Logger.error('Failed to unregister notifications', { error, safeAddress, chainIds })
+      throw error
     }
-    await withTimeout(Promise.resolve(), 200)
   }
 }

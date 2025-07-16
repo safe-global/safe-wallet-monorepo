@@ -18,6 +18,7 @@ export const EnterPassword = () => {
       // Navigate to error screen when import fails
       router.push('/import-data/import-error')
     }
+    handlePasswordChange('')
   }, [handleImport, router])
 
   return (

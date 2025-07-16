@@ -2,11 +2,10 @@ import React from 'react'
 import { View, Text } from 'tamagui'
 import { VaultRedeemTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { TokenAmount } from '@/src/components/TokenAmount'
-import { formatPercentage } from '@safe-global/utils/utils/formatters'
 import { ListTableItem } from '../../ListTable'
 import { Image } from 'expo-image'
 
-export const formatVaultRedeemItems = (txInfo: VaultRedeemTransactionInfo, totalNrr: number): ListTableItem[] => {
+export const formatVaultRedeemItems = (txInfo: VaultRedeemTransactionInfo): ListTableItem[] => {
   return [
     {
       label: 'Current reward',
@@ -28,10 +27,6 @@ export const formatVaultRedeemItems = (txInfo: VaultRedeemTransactionInfo, total
           </Text>
         </View>
       ),
-    },
-    {
-      label: 'Reward rate',
-      value: formatPercentage(totalNrr),
     },
   ]
 }

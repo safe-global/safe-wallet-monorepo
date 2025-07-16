@@ -18,34 +18,20 @@ import { InfoSheet } from '@/src/components/InfoSheet'
 type Props = {
   tenderly: {
     enabled: boolean
-  } & (
-    | {
-        enabled: true
-        fetchStatus: FETCH_STATUS
-        simulationLink: string
-        simulation?: TenderlySimulation
-      }
-    | {
-        enabled: false
-      }
-  )
-  blockaid?: {
+    fetchStatus: FETCH_STATUS
+    simulationLink: string
+    simulation?: TenderlySimulation
+  }
+  blockaid: {
     enabled: boolean
-  } & (
-    | {
-        enabled: boolean
-        loading: boolean
-        error?: Error
-        payload?: SecurityResponse<BlockaidModuleResponse>
-      }
-    | {
-        enabled: false
-      }
-  )
+    loading: boolean
+    error?: Error
+    payload?: SecurityResponse<BlockaidModuleResponse>
+  }
 }
 
 export const TransactionChecksView = ({ tenderly, blockaid }: Props) => {
-  const { enabled } = tenderly
+  const { enabled, fetchStatus } = tenderly
   const { handleScroll } = useScrollableHeader({
     children: <NavBarTitle>Transaction checks</NavBarTitle>,
   })
@@ -56,17 +42,13 @@ export const TransactionChecksView = ({ tenderly, blockaid }: Props) => {
         <LargeHeaderTitle marginBottom={'$5'}>Transaction checks</LargeHeaderTitle>
       </View>
       <YStack gap={'$4'}>
-        {blockaid && (
-          <>
-            <Container gap={'$3'}>
-              {blockaid.enabled ? (
-                <BlockaidBalanceChanges blockaidResponse={blockaid.payload} fetchStatusLoading={blockaid.loading} />
-              ) : (
-                <Text>Security check is disabled</Text>
-              )}
-            </Container>
-          </>
-        )}
+        <Container gap={'$3'}>
+          {blockaid.enabled ? (
+            <BlockaidBalanceChanges blockaidResponse={blockaid.payload} fetchStatusLoading={blockaid.loading} />
+          ) : (
+            <Text>Security check is disabled</Text>
+          )}
+        </Container>
         <Container gap={'$3'}>
           {enabled ? (
             <>
@@ -79,7 +61,17 @@ export const TransactionChecksView = ({ tenderly, blockaid }: Props) => {
                   />
                 </XStack>
 
-                {tenderly?.simulation?.simulation.status ? (
+                {fetchStatus === FETCH_STATUS.LOADING ? (
+                  <Badge
+                    circular={false}
+                    content={
+                      <XStack gap={'$2'} justifyContent="center" alignItems="center">
+                        <CircleSnail size={12} borderWidth={0} thickness={1} />
+                        <Text fontSize={12}>Loading</Text>
+                      </XStack>
+                    }
+                  />
+                ) : tenderly.simulation?.simulation.status ? (
                   <Badge
                     circular={false}
                     themeName="badge_success_variant1"
@@ -117,7 +109,7 @@ export const TransactionChecksView = ({ tenderly, blockaid }: Props) => {
           )}
         </Container>
 
-        {blockaid && blockaid.enabled && <BlockaidWarning blockaidResponse={blockaid.payload} />}
+        {blockaid.enabled && <BlockaidWarning blockaidResponse={blockaid.payload} />}
       </YStack>
     </ScrollView>
   )

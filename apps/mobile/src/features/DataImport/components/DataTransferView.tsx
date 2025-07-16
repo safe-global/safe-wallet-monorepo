@@ -1,7 +1,6 @@
 import React from 'react'
 import { Text, YStack, Image, styled, H2, H5, getTokenValue } from 'tamagui'
 import { SafeButton } from '@/src/components/SafeButton'
-import { StatusBar } from 'expo-status-bar'
 import TransferOldAppDark from '@/assets/images/transfer-old-app-dark.png'
 import TransferOldAppLight from '@/assets/images/transfer-old-app-light.png'
 import { ColorSchemeName } from 'react-native'
@@ -27,8 +26,6 @@ export const DataTransferView = ({
 }: DataTransferViewProps) => {
   return (
     <YStack flex={1} paddingTop={'$4'} testID="data-transfer-screen">
-      <StatusBar style="light" />
-
       {/* Content */}
       <YStack flex={1} paddingHorizontal="$4" justifyContent="space-between" marginBottom={'$4'}>
         <YStack gap="$4" alignItems="center">

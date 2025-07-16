@@ -2,14 +2,34 @@ import { Tabs } from 'expo-router'
 import React from 'react'
 import { TabBarIcon } from '@/src/components/navigation/TabBarIcon'
 import { Navbar as AssetsNavbar } from '@/src/features/Assets/components/Navbar/Navbar'
-import { Pressable, StyleSheet, Platform } from 'react-native'
-import { StatusBar } from 'expo-status-bar'
+import { Pressable, StyleSheet } from 'react-native'
+import { getTokenValue } from 'tamagui'
+import { useTheme } from '@/src/theme/hooks/useTheme'
 
 export default function TabLayout() {
+  const { currentTheme } = useTheme()
+
+  let activeTintColor, inactiveTintColor, borderTopColor
+  if (currentTheme === 'light') {
+    activeTintColor = getTokenValue('$color.textPrimaryLight')
+    inactiveTintColor = getTokenValue('$color.borderMainLight')
+    borderTopColor = getTokenValue('$color.borderLightLight')
+  } else {
+    activeTintColor = getTokenValue('$color.textPrimaryDark')
+    inactiveTintColor = getTokenValue('$color.borderMainDark')
+    borderTopColor = getTokenValue('$color.borderLightDark')
+  }
+
   return (
     <>
-      <StatusBar style="auto" />
-      <Tabs screenOptions={{ tabBarShowLabel: false }}>
+      <Tabs
+        screenOptions={{
+          tabBarStyle: { ...styles.tabBar, borderTopColor },
+          tabBarLabelStyle: styles.label,
+          tabBarActiveTintColor: activeTintColor,
+          tabBarInactiveTintColor: inactiveTintColor,
+        }}
+      >
         <Tabs.Screen
           name="index"
           options={{
@@ -18,12 +38,12 @@ export default function TabLayout() {
             tabBarButtonTestID: 'home-tab',
             tabBarButton: ({ children, ...rest }) => {
               return (
-                <Pressable {...rest} style={styles.homeTab}>
+                <Pressable {...rest} style={styles.tabButton}>
                   {children}
                 </Pressable>
               )
             },
-            tabBarIcon: ({ color }) => <TabBarIcon name={'token'} color={color} />,
+            tabBarIcon: ({ color }) => <TabBarIcon name={'home'} color={color} />,
           }}
         />
 
@@ -33,8 +53,12 @@ export default function TabLayout() {
             title: 'Transactions',
             headerShown: false,
             tabBarButtonTestID: 'transactions-tab',
-            tabBarItemStyle: {
-              paddingTop: Platform.OS === 'android' ? 6 : 10,
+            tabBarButton: ({ children, ...rest }) => {
+              return (
+                <Pressable {...rest} style={styles.tabButton}>
+                  {children}
+                </Pressable>
+              )
             },
             tabBarIcon: ({ color }) => <TabBarIcon name={'transactions'} color={color} />,
           }}
@@ -44,12 +68,12 @@ export default function TabLayout() {
           name="settings"
           options={() => {
             return {
-              title: 'Settings',
+              title: 'Account',
               headerShown: false,
-              tabBarButtonTestID: 'settings-tab',
+              tabBarButtonTestID: 'account-tab',
               tabBarButton: ({ children, ...rest }) => {
                 return (
-                  <Pressable {...rest} style={styles.settingsTab}>
+                  <Pressable {...rest} style={styles.tabButton}>
                     {children}
                   </Pressable>
                 )
@@ -64,14 +88,23 @@ export default function TabLayout() {
 }
 
 const styles = StyleSheet.create({
-  homeTab: {
+  tabButton: {
     flex: 1,
-    alignItems: 'flex-end',
-    paddingTop: Platform.OS === 'android' ? 10 : 15,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 8,
   },
-  settingsTab: {
-    flex: 1,
-    alignItems: 'flex-start',
-    paddingTop: Platform.OS === 'android' ? 10 : 15,
+  tabBar: {
+    width: '100%',
+    margin: 'auto',
+    height: 64,
+    boxSizing: 'content-box',
+    borderTopWidth: 1,
+  },
+  label: {
+    fontSize: 12,
+    fontWeight: 400,
+    lineHeight: 16,
+    marginTop: 8,
   },
 })

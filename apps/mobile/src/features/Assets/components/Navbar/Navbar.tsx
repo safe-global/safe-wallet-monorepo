@@ -62,25 +62,25 @@ export const Navbar = () => {
               badgeContent={`${chainSafe?.threshold}/${chainSafe?.owners.length}`}
             />
           }
-          // leftNode={<Identicon address={activeSafe.address} size={30} />}
           onPress={() => {
             router.push('/accounts-sheet')
           }}
+          hitSlop={4}
         />
         <View
           style={{
             flexDirection: 'row',
-            gap: 16,
+            gap: 18,
             alignItems: 'center',
             justifyContent: 'center',
           }}
         >
           <Link href={'/share'} asChild>
-            <Pressable hitSlop={4}>
+            <Pressable hitSlop={10}>
               <SafeFontIcon name="qr-code-1" size={16} />
             </Pressable>
           </Link>
-          <Pressable onPressIn={handleNotificationAccess} hitSlop={2}>
+          <Pressable onPressIn={handleNotificationAccess} hitSlop={8}>
             <SafeFontIcon name="bell" size={20} />
           </Pressable>
         </View>
