@@ -26,7 +26,8 @@ import useSafeAddress from '@/hooks/useSafeAddress'
 import useWallet from '@/hooks/wallets/useWallet'
 import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
 import { useMixPanelUserProperties } from './useMixPanelUserProperties'
-import { useCurrentChain } from '@/hooks/useChains'
+import { useChain } from '@/hooks/useChains'
+import useSafeInfo from '@/hooks/useSafeInfo'
 
 const useMixpanel = () => {
   const isMixpanelEnabled = useHasFeature(FEATURES.MIXPANEL)
@@ -42,7 +43,8 @@ const useMixpanel = () => {
   const wallet = useWallet()
   const isSpaceRoute = useIsSpaceRoute()
   const userProperties = useMixPanelUserProperties()
-  const currentChain = useCurrentChain()
+  const { safe } = useSafeInfo()
+  const currentChain = useChain(safe?.chainId || '')
 
   // Initialize MixPanel (only if feature is enabled)
   useEffect(() => {
