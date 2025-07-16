@@ -200,7 +200,9 @@ describe('MixPanel Integration', () => {
         features: [],
       }
 
-      const properties = safeAppToMixPanelEventProperties(mockSafeApp as any, SafeAppLaunchLocation.PREVIEW_DRAWER)
+      const properties = safeAppToMixPanelEventProperties(mockSafeApp as any, {
+        launchLocation: SafeAppLaunchLocation.PREVIEW_DRAWER,
+      })
 
       expect(properties).toEqual({
         'Safe App Name': 'Test App',
@@ -224,12 +226,42 @@ describe('MixPanel Integration', () => {
         features: [],
       }
 
-      const properties = safeAppToMixPanelEventProperties(mockSafeApp as any, SafeAppLaunchLocation.SAFE_APPS_LIST)
+      const properties = safeAppToMixPanelEventProperties(mockSafeApp as any, {
+        launchLocation: SafeAppLaunchLocation.SAFE_APPS_LIST,
+      })
 
       expect(properties).toEqual({
         'Safe App Name': 'Test App',
         'Safe App Tags': ['defi', 'swap'],
         'Launch Location': 'Safe Apps List',
+      })
+    })
+
+    it('should convert SafeApp to MixPanel properties with chain name', () => {
+      const mockSafeApp = {
+        id: 123,
+        name: 'Test App',
+        url: 'https://test-app.com',
+        description: 'A test app',
+        iconUrl: 'https://test-app.com/icon.png',
+        developerWebsite: 'https://developer.com',
+        chainIds: ['1', '5'],
+        socialProfiles: [],
+        tags: ['defi', 'swap'],
+        accessControl: { type: 'NO_RESTRICTIONS' as const },
+        features: [],
+      }
+
+      const properties = safeAppToMixPanelEventProperties(mockSafeApp as any, {
+        launchLocation: SafeAppLaunchLocation.PREVIEW_DRAWER,
+        chainName: 'Ethereum',
+      })
+
+      expect(properties).toEqual({
+        'Safe App Name': 'Test App',
+        'Safe App Tags': ['defi', 'swap'],
+        'Launch Location': 'Preview Drawer',
+        'Blockchain Network': 'Ethereum',
       })
     })
   })

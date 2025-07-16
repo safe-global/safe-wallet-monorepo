@@ -21,6 +21,8 @@ import {
   SafeAppLaunchLocation,
 } from '@/services/analytics'
 import { useSafeApps } from '@/hooks/safe-apps/useSafeApps'
+import useSafeInfo from '@/hooks/useSafeInfo'
+import { useChain } from '@/hooks/useChains'
 
 type SafeAppListProps = {
   safeAppsList: SafeAppData[]
@@ -50,6 +52,8 @@ const SafeAppList = ({
   const { togglePin } = useSafeApps()
   const { isPreviewDrawerOpen, previewDrawerApp, openPreviewDrawer, closePreviewDrawer } = useSafeAppPreviewDrawer()
   const { openedSafeAppIds } = useOpenedSafeApps()
+  const { safe } = useSafeInfo()
+  const currentChain = useChain(safe?.chainId || '')
 
   const showZeroResultsPlaceholder = query && safeAppsList.length === 0
 
@@ -65,11 +69,14 @@ const SafeAppList = ({
         trackSafeAppEvent({ ...SAFE_APPS_EVENTS.OPEN_APP, label: eventLabel }, safeApp.name)
         trackMixPanelEvent(
           MixPanelEvent.SAFE_APP_LAUNCHED,
-          safeAppToMixPanelEventProperties(safeApp, SafeAppLaunchLocation.SAFE_APPS_LIST),
+          safeAppToMixPanelEventProperties(safeApp, {
+            launchLocation: SafeAppLaunchLocation.SAFE_APPS_LIST,
+            chainName: currentChain?.chainName,
+          }),
         )
       }
     },
-    [eventLabel, openPreviewDrawer, openedSafeAppIds],
+    [eventLabel, openPreviewDrawer, openedSafeAppIds, currentChain],
   )
 
   return (
