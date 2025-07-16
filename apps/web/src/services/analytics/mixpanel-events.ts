@@ -23,6 +23,17 @@ export enum MixPanelUserProperty {
 }
 
 /**
+ * MixPanel event parameters constants
+ */
+
+export enum MixPanelEventParams {
+  APP_VERSION = 'App Version',
+  CHAIN_ID = 'Chain ID',
+  DEVICE_TYPE = 'Device Type',
+  SAFE_ADDRESS = 'Safe Address',
+}
+
+/**
  * MixPanel launch location constants
  */
 
