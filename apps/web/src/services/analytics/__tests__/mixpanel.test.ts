@@ -114,6 +114,19 @@ describe('MixPanel Integration', () => {
     })
   })
 
+  describe('User property operations', () => {
+    it('should union values to a list property', () => {
+      const { mixpanelInit, mixpanelUnionUserProperty } = require('../mixpanel')
+      mixpanelInit()
+
+      mixpanelUnionUserProperty('Networks', ['ethereum', 'polygon'])
+
+      expect(mockMixpanel.people.union).toHaveBeenCalledWith({
+        Networks: ['ethereum', 'polygon'],
+      })
+    })
+  })
+
   describe('Separate tracking', () => {
     it('should track with GA only when using trackEvent', () => {
       const { mixpanelInit } = require('../mixpanel')
