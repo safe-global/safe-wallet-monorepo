@@ -64,6 +64,8 @@
   width: 100%;
   display: flex;
   justify-content: space-between;
+  /* The button order is reversed to prioritize the primary action on the right for better UX. */
+  flex-direction: row-reverse;
 }
 
 .button {

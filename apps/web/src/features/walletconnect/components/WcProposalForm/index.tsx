@@ -117,7 +117,7 @@ const WcProposalForm = ({ proposal, onApprove, onReject }: ProposalFormProps): R
         <CompatibilityWarning proposal={proposal} chainIds={chainIds} />
       </div>
 
-      {!isBlocked && isHighRisk && (
+      {!isBlocked && isHighRisk && !isUnsupportedChain && (
         <FormControlLabel
           className={css.checkbox}
           control={<Checkbox checked={understandsRisk} onChange={onCheckboxClick} />}
@@ -132,12 +132,19 @@ const WcProposalForm = ({ proposal, onApprove, onReject }: ProposalFormProps): R
       <Divider flexItem className={css.divider} />
 
       <div className={css.buttons}>
-        <Button variant="danger" onClick={onReject} className={css.button} disabled={!!loading}>
-          {loading === WCLoadingState.REJECT ? <CircularProgress size={20} /> : 'Reject'}
-        </Button>
+        {!isUnsupportedChain && (
+          <Button variant="contained" onClick={onApprove} className={css.button} disabled={disabled}>
+            {loading === WCLoadingState.APPROVE ? <CircularProgress size={20} /> : 'Approve'}
+          </Button>
+        )}
 
-        <Button variant="contained" onClick={onApprove} className={css.button} disabled={disabled}>
-          {loading === WCLoadingState.APPROVE ? <CircularProgress size={20} /> : 'Approve'}
+        <Button
+          variant={isUnsupportedChain ? 'text' : 'danger'}
+          onClick={onReject}
+          className={css.button}
+          disabled={!!loading}
+        >
+          {loading === WCLoadingState.REJECT ? <CircularProgress size={20} /> : isUnsupportedChain ? 'Close' : 'Reject'}
         </Button>
       </div>
     </div>
