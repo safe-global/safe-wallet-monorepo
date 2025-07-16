@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { useCurrentChain } from '@/hooks/useChains'
+import { useChain } from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useAppSelector } from '@/store'
 import { selectTxHistory } from '@/store/txHistorySlice'
@@ -30,7 +30,7 @@ export interface MixPanelUserPropertiesFormatted {
  */
 export const useMixPanelUserProperties = (): MixPanelUserPropertiesFormatted | null => {
   const { safe, safeLoaded } = useSafeInfo()
-  const currentChain = useCurrentChain()
+  const currentChain = useChain(safe?.chainId || '')
   const txHistory = useAppSelector(selectTxHistory)
 
   return useMemo(() => {
