@@ -100,6 +100,7 @@ describe('AddressInput tests', () => {
     expect(input.value).toBe(`eth:${TEST_ADDRESS_A}`)
   })
 
+  // TODO: This test is flaky and regularly times out after 5000ms
   it('should validate the address on input', async () => {
     const { input, utils } = setup('')
 
@@ -149,6 +150,7 @@ describe('AddressInput tests', () => {
     await waitFor(() => expect(utils.getByLabelText(`${TEST_ADDRESS_B} is wrong`, { exact: false })).toBeDefined())
   })
 
+  // TODO: This test is flaky and regularly times out after 5000ms
   it('should show a spinner when validation is in progress', async () => {
     const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
 
