@@ -11,13 +11,14 @@ import mixpanel from 'mixpanel-browser'
 import type { SafeAppData } from '@safe-global/safe-gateway-typescript-sdk'
 import { IS_PRODUCTION } from '@/config/constants'
 import { DeviceType } from './types'
+import { MixPanelEventParams } from './mixpanel-events'
 import packageJson from '../../../package.json'
 
 const commonEventParams = {
-  'App Version': packageJson.version,
-  'Chain ID': '',
-  'Device Type': DeviceType.DESKTOP,
-  'Safe Address': '',
+  [MixPanelEventParams.APP_VERSION]: packageJson.version,
+  [MixPanelEventParams.CHAIN_ID]: '',
+  [MixPanelEventParams.DEVICE_TYPE]: DeviceType.DESKTOP,
+  [MixPanelEventParams.SAFE_ADDRESS]: '',
 }
 
 let isMixPanelInitialized = false
@@ -59,10 +60,10 @@ export const mixpanelInit = (): void => {
  * Set chain ID for all MixPanel events
  */
 export const mixpanelSetChainId = (chainId: string): void => {
-  commonEventParams['Chain ID'] = chainId
+  commonEventParams[MixPanelEventParams.CHAIN_ID] = chainId
 
   if (isMixPanelInitialized) {
-    mixpanel.register({ 'Chain ID': chainId })
+    mixpanel.register({ [MixPanelEventParams.CHAIN_ID]: chainId })
   }
 }
 
@@ -70,10 +71,10 @@ export const mixpanelSetChainId = (chainId: string): void => {
  * Set device type for all MixPanel events
  */
 export const mixpanelSetDeviceType = (type: DeviceType): void => {
-  commonEventParams['Device Type'] = type
+  commonEventParams[MixPanelEventParams.DEVICE_TYPE] = type
 
   if (isMixPanelInitialized) {
-    mixpanel.register({ 'Device Type': type })
+    mixpanel.register({ [MixPanelEventParams.DEVICE_TYPE]: type })
   }
 }
 
@@ -81,10 +82,10 @@ export const mixpanelSetDeviceType = (type: DeviceType): void => {
  * Set safe address for all MixPanel events
  */
 export const mixpanelSetSafeAddress = (safeAddress: string): void => {
-  commonEventParams['Safe Address'] = safeAddress
+  commonEventParams[MixPanelEventParams.SAFE_ADDRESS] = safeAddress
 
   if (isMixPanelInitialized) {
-    mixpanel.register({ 'Safe Address': commonEventParams['Safe Address'] })
+    mixpanel.register({ [MixPanelEventParams.SAFE_ADDRESS]: commonEventParams[MixPanelEventParams.SAFE_ADDRESS] })
   }
 }
 
@@ -200,11 +201,4 @@ export const mixpanelIdentify = (userId: string): void => {
   if (!IS_PRODUCTION) {
     console.info('[MixPanel] - User identified:', userId)
   }
-}
-
-/**
- * Check if MixPanel is initialized
- */
-export const isMixPanelReady = (): boolean => {
-  return isMixPanelInitialized
 }
