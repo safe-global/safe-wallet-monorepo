@@ -5,6 +5,7 @@ import { useAppSelector } from '@/store'
 import { selectTxHistory } from '@/store/txHistorySlice'
 import { isTransactionListItem } from '@/utils/transaction-guards'
 import { MixPanelUserProperty } from '@/services/analytics/mixpanel-events'
+import { useNetworksOfSafe } from '@/features/myAccounts/hooks/useNetworksOfSafe'
 
 export interface MixPanelUserProperties {
   safe_address: string
@@ -32,37 +33,27 @@ export const useMixPanelUserProperties = (): MixPanelUserPropertiesFormatted | n
   const { safe, safeLoaded } = useSafeInfo()
   const currentChain = useChain(safe?.chainId || '')
   const txHistory = useAppSelector(selectTxHistory)
+  const allNetworks = useNetworksOfSafe(safe?.address?.value || '')
 
   return useMemo(() => {
     if (!safeLoaded || !safe || !currentChain) {
       return null
     }
 
-    // Get current network name from chain
-    const currentNetworkName = currentChain.chainName.toLowerCase()
+    const networks = allNetworks.length > 0 ? allNetworks : [currentChain.chainName]
 
-    // Use safe.nonce for total transaction count (represents all executed transactions)
     const totalTxCount = safe.nonce
 
-    // Calculate last transaction timestamp from history (limited to recent transactions)
     let lastTxAt: Date | null = null
 
     if (txHistory.data?.results) {
       const transactions = txHistory.data.results.filter(isTransactionListItem).map((item) => item.transaction)
 
-      // The first transaction is always the most recent (transactions are sorted by timestamp descending)
       if (transactions.length > 0 && transactions[0].timestamp) {
         lastTxAt = new Date(transactions[0].timestamp)
       }
     }
 
-    // Create networks array with current network
-    // Note: This starts with current network, but should be extended to include
-    // all networks where this Safe has been active. For now, we append the current
-    // network to any existing networks to avoid overwriting.
-    const networks = [currentNetworkName]
-
-    // Create MixPanel properties object with string keys
     const properties = {
       [MixPanelUserProperty.SAFE_ADDRESS]: safe.address.value,
       [MixPanelUserProperty.SAFE_VERSION]: safe.version || 'unknown',
@@ -70,11 +61,12 @@ export const useMixPanelUserProperties = (): MixPanelUserPropertiesFormatted | n
       [MixPanelUserProperty.THRESHOLD]: safe.threshold,
       [MixPanelUserProperty.TOTAL_TX_COUNT]: totalTxCount,
       [MixPanelUserProperty.LAST_TX_AT]: lastTxAt?.toISOString() || null,
+      [MixPanelUserProperty.NETWORKS]: networks,
     }
 
     return {
       properties,
       networks,
     }
-  }, [safe, safeLoaded, currentChain, txHistory])
+  }, [safe, safeLoaded, currentChain, txHistory, allNetworks])
 }
