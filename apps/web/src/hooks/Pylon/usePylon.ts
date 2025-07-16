@@ -102,21 +102,21 @@ export const usePylon = () => {
           if (checkCount++ < maxChecks) {
             setTimeout(tryUpdate, 100)
           } else {
-            console.error('[Pylon] Timeout waiting for Pylon to load after 10 seconds')
+            // Pylon failed to load within timeout
           }
           return
         }
         
         // Additional check to ensure Pylon is fully initialized
         if (!window.pylon?.chat_settings?.app_id) {
-          console.warn('[Pylon] Pylon loaded but chat_settings not initialized yet')
+          // Pylon chat_settings not yet initialized
           if (checkCount++ < maxChecks) {
             setTimeout(tryUpdate, 100)
           }
           return
         }
         
-        console.log('[Pylon] Pylon fully loaded and ready - initializing for session')
+        // Pylon fully loaded and ready
       
         // Update chat settings
         if (window.pylon?.chat_settings) {
@@ -174,25 +174,17 @@ export const usePylon = () => {
             return fields
           })()
           
-          console.log('[Pylon] Setting initial custom fields:', customFields)
-          console.log('[Pylon] Custom fields keys:', Object.keys(customFields))
+          // Setting initial custom fields
           
           // Try setting custom fields with error handling
           try {
             window.Pylon('setNewIssueCustomFields', customFields)
-            console.log('[Pylon] Initial custom fields set successfully')
-            
-            // Verify by trying to get current settings (if available)
-            if (window.pylon?.chat_settings) {
-              console.log('[Pylon] Current chat_settings:', window.pylon.chat_settings)
-            }
+            // Initial custom fields set successfully
           } catch (fieldError) {
-            console.error('[Pylon] Failed to set custom fields:', fieldError)
-            console.error('[Pylon] This might mean custom fields are not configured in your Pylon workspace')
-            console.error('[Pylon] Make sure to create these custom fields in Pylon with the correct slugs:', Object.keys(customFields))
+            // Failed to set custom fields - may need configuration in Pylon workspace
           }
         } catch (error) {
-          console.error('[Pylon] Failed to update:', error)
+          // Failed to update Pylon
         }
       }
       
@@ -208,7 +200,7 @@ export const usePylon = () => {
   useEffect(() => {
     if (!userContext.isValid) return
     
-    console.log('[Pylon] User context is valid, initializing Pylon for this session')
+    // User context is valid, initializing Pylon
     const cleanup = initializePylon()
     
     return cleanup
@@ -218,7 +210,7 @@ export const usePylon = () => {
   useEffect(() => {
     const handleRefresh = () => {
       if (userContext.isValid && window.Pylon) {
-        console.log('[Pylon] Manual refresh triggered - re-initializing')
+        // Manual refresh triggered
         const cleanup = initializePylon()
         // Clean up the timeout if needed
         if (cleanup) {
@@ -263,13 +255,10 @@ export const pylonHelpers = {
   
   // Update custom fields for new issues
   setCustomFields: (fields: Record<string, any>) => {
-    console.log('[Pylon] Manually setting custom fields:', fields)
     try {
       window.Pylon?.('setNewIssueCustomFields', fields)
-      console.log('[Pylon] Manual setCustomFields - success')
     } catch (error) {
-      console.error('[Pylon] Manual setCustomFields - failed:', error)
-      console.error('[Pylon] Make sure these custom fields exist in your Pylon workspace:', Object.keys(fields))
+      // Failed to set custom fields - may need configuration in Pylon workspace
     }
   },
   
@@ -286,7 +275,6 @@ export const pylonHelpers = {
       window.dispatchEvent(event)
       return true
     } catch (error) {
-      console.error('[Pylon] Failed to refresh custom fields:', error)
       return false
     }
   },
@@ -294,7 +282,6 @@ export const pylonHelpers = {
   // Test function to verify custom fields are working
   testCustomFields: () => {
     if (!window.Pylon) {
-      console.error('[Pylon] Pylon not loaded')
       return false
     }
     
@@ -302,21 +289,16 @@ export const pylonHelpers = {
       test_field: 'test_value_' + Date.now()
     }
     
-    console.log('[Pylon] Testing custom fields with:', testFields)
-    
     try {
       window.Pylon('setNewIssueCustomFields', testFields)
-      console.log('[Pylon] Test custom fields set successfully')
-      console.log('[Pylon] Note: For this to work, you need a custom field with slug "test_field" in your Pylon workspace')
       return true
     } catch (error) {
-      console.error('[Pylon] Test custom fields failed:', error)
       return false
     }
   },
 }
 
-// Make helpers available in console for debugging in development
+// Make helpers available in console for debugging in development only
 if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
   (window as any).pylonHelpers = pylonHelpers
 }
