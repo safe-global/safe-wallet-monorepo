@@ -15,6 +15,7 @@ interface LogoProps {
   logoUri?: string | null
   accessibilityLabel?: string
   fallbackIcon?: IconProps['name']
+  fallbackContent?: React.ReactNode
   imageBackground?: string
   size?: string
   badgeContent?: React.ReactElement
@@ -27,6 +28,7 @@ export function Logo({
   size = '$10',
   imageBackground = '$color',
   fallbackIcon = 'nft',
+  fallbackContent,
   badgeContent,
   badgeThemeName = 'badge_background',
 }: LogoProps) {
@@ -60,9 +62,11 @@ export function Logo({
           )}
 
           <Avatar.Fallback backgroundColor="$background">
-            <View backgroundColor="$background" padding="$2" borderRadius={100}>
-              <SafeFontIcon testID="logo-fallback-icon" name={fallbackIcon} color="$colorSecondary" />
-            </View>
+            {fallbackContent || (
+              <View backgroundColor="$background" padding="$2" borderRadius={100}>
+                <SafeFontIcon testID="logo-fallback-icon" name={fallbackIcon} color="$colorSecondary" />
+              </View>
+            )}
           </Avatar.Fallback>
         </Avatar>
       </View>
