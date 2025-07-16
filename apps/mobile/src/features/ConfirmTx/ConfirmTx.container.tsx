@@ -54,7 +54,7 @@ function ConfirmTxContainer() {
         <View paddingHorizontal="$4">
           <ConfirmationView txDetails={data} />
         </View>
-        <TransactionInfo txId={txId} detailedExecutionInfo={detailedExecutionInfo} />
+        <TransactionInfo txId={txId} detailedExecutionInfo={detailedExecutionInfo} txDetails={data} />
       </ScrollView>
 
       <View paddingTop="$1">

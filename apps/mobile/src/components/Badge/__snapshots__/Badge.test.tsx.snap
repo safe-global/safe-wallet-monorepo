@@ -6,7 +6,7 @@ exports[`Badge renders badge with custom size and theme 1`] = `
     style={
       {
         "alignItems": "center",
-        "backgroundColor": "#81C784",
+        "backgroundColor": "#3B7A54",
         "borderBottomLeftRadius": 100000,
         "borderBottomRightRadius": 100000,
         "borderTopLeftRadius": 100000,
@@ -49,7 +49,7 @@ exports[`Badge renders circular badge 1`] = `
     style={
       {
         "alignItems": "center",
-        "backgroundColor": "#FFF1E0",
+        "backgroundColor": "#FFECC2",
         "borderBottomLeftRadius": 100000,
         "borderBottomRightRadius": 100000,
         "borderTopLeftRadius": 100000,
@@ -92,7 +92,7 @@ exports[`Badge renders non-circular badge 1`] = `
     style={
       {
         "alignSelf": "flex-start",
-        "backgroundColor": "#FFF1E0",
+        "backgroundColor": "#FFECC2",
         "borderBottomLeftRadius": 50,
         "borderBottomRightRadius": 50,
         "borderTopLeftRadius": 50,

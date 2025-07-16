@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react'
 import { useRouter } from 'expo-router'
-import { useColorScheme } from 'react-native'
 import { useDataImportContext } from './context/DataImportProvider'
 import { useAppDispatch } from '@/src/store/hooks'
 import Logger from '@/src/utils/logger'
@@ -9,7 +8,6 @@ import { ImportProgressScreenView } from './components/ImportProgressScreenView'
 
 export const ImportProgressScreen = () => {
   const router = useRouter()
-  const colorScheme = useColorScheme()
   const { importedData } = useDataImportContext()
   const dispatch = useAppDispatch()
 
@@ -55,5 +53,5 @@ export const ImportProgressScreen = () => {
     performImport()
   }, [importedData, dispatch, router])
 
-  return <ImportProgressScreenView colorScheme={colorScheme} progress={progress} />
+  return <ImportProgressScreenView progress={progress} />
 }

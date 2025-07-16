@@ -24,14 +24,19 @@ export function ChainsDisplay({ chains, activeChainId, max }: ChainsDisplayProps
         <View
           key={chainId}
           testID="chain-display"
-          marginRight={showBadge || index !== slicedChains.length - 1 ? -8 : 0}
+          marginRight={showBadge || index !== slicedChains.length - 1 ? -6 : 0}
         >
-          <Logo size="$7" logoUri={chainLogoUri} accessibilityLabel={chainName} />
+          <Logo size="$6" logoUri={chainLogoUri} accessibilityLabel={chainName} />
         </View>
       ))}
 
       {showBadge && (
-        <Badge testID="more-chains-badge" content={`+${chains.length - max}`} themeName="badge_background" />
+        <Badge
+          testID="more-chains-badge"
+          circleSize="$6"
+          content={`+${chains.length - max}`}
+          themeName="badge_background"
+        />
       )}
     </View>
   )

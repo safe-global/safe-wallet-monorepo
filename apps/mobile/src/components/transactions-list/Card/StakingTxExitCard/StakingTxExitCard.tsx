@@ -4,12 +4,18 @@ import { TokenIcon } from '@/src/components/TokenIcon'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
 import { Text } from 'tamagui'
 
-export const StakingTxExitCard = ({ info }: { info: NativeStakingValidatorsExitTransactionInfo }) => {
+interface StakingTxExitCardProps {
+  info: NativeStakingValidatorsExitTransactionInfo
+  onPress: () => void
+}
+
+export const StakingTxExitCard = ({ info, onPress }: StakingTxExitCardProps) => {
   return (
     <SafeListItem
       label={`Withdraw`}
       icon="transaction-stake"
       type={'Stake'}
+      onPress={onPress}
       rightNode={
         <Text color="$color" fontWeight={600} textAlign="right">
           {info.numValidators} Validator{maybePlural(info.numValidators)}

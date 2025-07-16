@@ -48,4 +48,16 @@ export type NotifeeExpoPluginProps = {
    * the necessary configurations for Notifee along with any additional customizations.
    */
   customNotificationServiceFilePath?: string
+
+  /**
+   * Specifies the app group identifier to use for sharing data between the main app and the notification service extension.
+   * If not provided, defaults to the main app's bundle identifier app group (group.{bundleIdentifier}).
+   */
+  appGroupIdentifier?: string
+
+  /**
+   * Specifies additional app groups that the notification service extension should have access to.
+   * These will be added to the entitlements in addition to the default notifee app group.
+   */
+  additionalAppGroups?: string[]
 }

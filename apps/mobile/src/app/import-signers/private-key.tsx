@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 function PrivateKeyImport() {
   const insets = useSafeAreaInsets()
+
   return (
     <View paddingHorizontal={'$4'} flex={1} paddingBottom={insets.bottom}>
       <ImportPrivateKey />

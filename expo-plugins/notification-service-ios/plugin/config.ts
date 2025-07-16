@@ -9,7 +9,6 @@ export const EXTENSION_SERVICE_FILE = 'NotificationService.swift'
 export const FILES_TO_ADD = [
   `NotifeeNotificationServiceExtension-Info.plist`,
   `NotifeeNotificationServiceExtension.entitlements`,
-  'NotificationService.swift',
 ]
 
 export const PODFILE_MODIF_NEEDED = `
@@ -25,6 +24,8 @@ export const PODFILE_TARGET_STRING = "target 'NotifeeNotificationServiceExtensio
 export const APP_VERSION_STRING = '[IF_YOU_SEE_THIS_YOU_FORGOT_TO_ADD_APP_VERSION_IN_EXPO_CONFIG]'
 export const BUNDLE_IDENTIFIER_STRING = '[IF_YOU_SEE_THIS_YOU_FORGOT_TO_ADD_BUNDLE_IDENTIFIER_IN_IOS_EXPO_CONFIG]'
 export const IOS_BUILD_NUMBER_STRING = '[IF_YOU_SEE_THIS_YOU_FORGOT_TO_ADD_BUILD_NUMBER_IN_IOS_EXPO_CONFIG]'
+export const NOTIFICATION_APP_GROUP_IDENTIFIER_STRING = '[NOTIFICATION_APP_GROUP_IDENTIFIER]'
+export const APP_GROUPS_PLACEHOLDER = '[APP_GROUPS_PLACEHOLDER]'
 
 export const BACKGROUND_MODES_TO_ENABLE = ['remote-notification']
 export const USER_ACTIVITY_TYPES_KEYS = ['INSendMessageIntent']

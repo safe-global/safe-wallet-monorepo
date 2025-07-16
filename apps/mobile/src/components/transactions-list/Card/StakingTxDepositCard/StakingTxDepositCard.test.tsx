@@ -4,6 +4,8 @@ import { StakingTxDepositCard } from './StakingTxDepositCard'
 import { NativeStakingDepositTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
 describe('StakingTxDepositCard', () => {
+  const mockOnPress = jest.fn()
+
   const mockInfo = {
     value: '1000000000000000000',
     tokenInfo: {
@@ -32,12 +34,12 @@ describe('StakingTxDepositCard', () => {
   } as NativeStakingDepositTransactionInfo
 
   it('renders correctly', () => {
-    const { toJSON } = render(<StakingTxDepositCard info={mockInfo} />)
+    const { toJSON } = render(<StakingTxDepositCard info={mockInfo} onPress={mockOnPress} />)
     expect(toJSON()).toMatchSnapshot()
   })
 
   it('renders correctly with given info', () => {
-    const screen = render(<StakingTxDepositCard info={mockInfo} />)
+    const screen = render(<StakingTxDepositCard info={mockInfo} onPress={mockOnPress} />)
 
     // Check that important props are passed correctly
     expect(screen.getByText('Deposit')).toBeTruthy()

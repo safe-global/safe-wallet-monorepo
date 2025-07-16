@@ -99,9 +99,7 @@ export const Alert = ({
             flexDirection="row"
             justifyContent={contentAlignment}
             backgroundColor="$background"
-            paddingLeft="$4"
-            paddingRight="$4"
-            paddingVertical="$3"
+            padding="$2"
             borderRadius={'$2'}
           >
             {startIcon ? <View testID="alert-start-icon">{startIcon}</View> : Icon}

@@ -60,10 +60,16 @@ const extractTxInfo = (
         return txDetails.txData?.value ?? '0'
       case 'SwapOrder':
         return txDetails.txData?.value ?? '0'
+      case 'SwapAndBridge':
+      case 'Swap':
+        return txDetails.txData?.value ?? '0'
       case 'NativeStakingDeposit':
       case 'NativeStakingValidatorsExit':
       case 'NativeStakingWithdraw':
         return txDetails.txData?.value ?? '0'
+      case 'VaultDeposit':
+      case 'VaultRedeem':
+        return txDetails.txInfo?.value ?? '0'
       case 'Custom':
         return txDetails.txInfo.value
       case 'Creation':
@@ -86,9 +92,13 @@ const extractTxInfo = (
         }
       case 'SwapOrder':
       case 'TwapOrder':
+      case 'SwapAndBridge':
+      case 'Swap':
       case 'NativeStakingDeposit':
       case 'NativeStakingValidatorsExit':
-      case 'NativeStakingWithdraw': {
+      case 'NativeStakingWithdraw':
+      case 'VaultDeposit':
+      case 'VaultRedeem': {
         const toValue = txDetails.txData?.to.value
         if (!toValue) {
           throw new Error('Tx data does not have a `to` field')

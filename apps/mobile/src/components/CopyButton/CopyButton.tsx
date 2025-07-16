@@ -8,15 +8,17 @@ interface CopyButtonProps {
   color: TextProps['color']
   size?: number
   text?: string
+  hitSlop?: number
 }
 
-export const CopyButton = ({ value, color, size = 13, text }: CopyButtonProps) => {
+export const CopyButton = ({ value, color, size = 13, text, hitSlop = 0 }: CopyButtonProps) => {
   const copyAndDispatchToast = useCopyAndDispatchToast(text)
   return (
     <TouchableOpacity
       onPress={() => {
         copyAndDispatchToast(value)
       }}
+      hitSlop={hitSlop}
     >
       <SafeFontIcon name={'copy'} size={size} color={color as string} />
     </TouchableOpacity>

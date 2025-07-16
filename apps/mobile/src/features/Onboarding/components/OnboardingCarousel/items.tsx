@@ -8,7 +8,8 @@ import { CarouselItem } from './CarouselItem'
 import React from 'react'
 
 const windowHeight = Dimensions.get('window').height
-
+const windowWidth = Dimensions.get('window').width
+const maxGoodWidth = 375
 const styles = StyleSheet.create({
   image: {
     width: '100%',
@@ -62,7 +63,7 @@ export const items: CarouselItem[] = [
     ),
     title: (
       <>
-        <H1 style={styles.textContainer} fontWeight={600}>
+        <H1 style={styles.textContainer} fontWeight={600} marginHorizontal={windowWidth <= maxGoodWidth ? -10 : 0}>
           Sign transaction
         </H1>
 

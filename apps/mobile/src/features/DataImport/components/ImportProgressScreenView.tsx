@@ -1,20 +1,15 @@
 import React from 'react'
 import { Text, YStack, H2, ScrollView, View } from 'tamagui'
-import { StatusBar } from 'expo-status-bar'
-import { ColorSchemeName } from 'react-native'
 import { Bar } from 'react-native-progress'
 
 interface ImportProgressScreenViewProps {
-  colorScheme: ColorSchemeName
   progress: number
 }
 
-export const ImportProgressScreenView = ({ colorScheme, progress }: ImportProgressScreenViewProps) => {
+export const ImportProgressScreenView = ({ progress }: ImportProgressScreenViewProps) => {
   return (
     <ScrollView contentContainerStyle={{ flex: 1 }}>
       <YStack flex={1} testID="import-progress-screen">
-        <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
-
         {/* Content */}
         <YStack flex={1} paddingHorizontal="$4" justifyContent="center" alignItems="center">
           <YStack gap="$6" alignItems="center" maxWidth={300}>

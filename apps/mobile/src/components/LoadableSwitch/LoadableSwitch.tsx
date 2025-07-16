@@ -21,21 +21,26 @@ export const LoadableSwitch: React.FC<LoadableSwitchProps> = ({
   testID,
   trackColor = { true: '$primary' },
 }) => {
-  if (isLoading) {
-    return (
-      <View style={styles.loaderContainer}>
-        <Loader size={24} color={value ? trackColor.true : '#ccc'} />
-      </View>
-    )
-  }
-
-  return <Switch testID={testID} onChange={onChange} value={value} trackColor={trackColor} />
+  return (
+    <View position="relative">
+      {isLoading && (
+        <View style={styles.loaderContainer} backgroundColor="$background">
+          <Loader size={24} color={value ? trackColor.true : '#ccc'} />
+        </View>
+      )}
+      <Switch testID={testID} onValueChange={onChange} value={value} trackColor={trackColor} />
+    </View>
+  )
 }
 
 const styles = StyleSheet.create({
   loaderContainer: {
     width: 51,
     height: 31,
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    zIndex: 10,
     justifyContent: 'center',
     alignItems: 'center',
   },

@@ -81,7 +81,7 @@ describe('Transaction queue Reject button tests', { defaultCommandTimeout: 30000
     create_tx.verifyTxRejectModalVisible()
     create_tx.clickOnRejectionChoiceBtn(1)
     create_tx.clickOnContinueSignTransactionBtn()
-    create_tx.checkThatComboButtonOptionIsNotPresent(comboButtonOptions.addToBatch)
+    create_tx.checkThatComboButtonOptionIsNotPresent(create_tx.comboButtonOptions.addToBatch)
     navigation.clickOnWalletExpandMoreIcon()
     navigation.clickOnDisconnectBtn()
   })

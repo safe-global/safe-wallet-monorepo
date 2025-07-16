@@ -2,7 +2,7 @@
   "name": "@safe-global/web",
   "homepage": "https://github.com/safe-global/safe-wallet-web",
   "license": "GPL-3.0",
-  "version": "1.63.0",
+  "version": "1.64.0",
   "type": "module",
   "scripts": {
     "dev": "next dev",
@@ -95,7 +95,7 @@
   },
   "devDependencies": {
     "@chromatic-com/storybook": "^1.3.1",
-    "@cowprotocol/app-data": "^2.4.0",
+    "@cowprotocol/app-data": "^3.1.0",
     "@eslint/eslintrc": "^3.3.1",
     "@eslint/js": "^9.18.0",
     "@faker-js/faker": "^9.0.3",

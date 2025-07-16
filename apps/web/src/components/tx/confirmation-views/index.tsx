@@ -3,8 +3,10 @@ import { type TransactionDetails } from '@safe-global/safe-gateway-typescript-sd
 import type { SafeTransaction } from '@safe-global/types-kit'
 import {
   isAnyStakingTxInfo,
+  isBridgeOrderTxInfo,
   isCustomTxInfo,
   isExecTxData,
+  isLifiSwapTxInfo,
   isOnChainConfirmationTxData,
   isOnChainSignMessageTxData,
   isSafeMigrationTxData,
@@ -40,6 +42,8 @@ import { ManageSigners } from './ManageSigners'
 import { TransactionWarnings } from '../TransactionWarnings'
 import { Box } from '@mui/material'
 import DecodedData from '@/components/transactions/TxDetails/TxData/DecodedData'
+import BridgeTransaction from './BridgeTransaction'
+import { LifiSwapTransaction } from './LifiSwapTransaction'
 
 type ConfirmationViewProps = {
   txDetails?: TransactionDetails
@@ -62,6 +66,10 @@ const getConfirmationViewComponent = ({
   if (isChangeThresholdView(txInfo)) return <ChangeThreshold txInfo={txInfo} />
 
   if (isConfirmBatchView(txFlow)) return <BatchTransactions />
+
+  if (isBridgeOrderTxInfo(txInfo)) return <BridgeTransaction txInfo={txInfo} showWarnings />
+
+  if (isLifiSwapTxInfo(txInfo)) return <LifiSwapTransaction txInfo={txInfo} isPreview={true} />
 
   if (isSettingsChangeView(txInfo)) return <SettingsChange txInfo={txInfo} />
 

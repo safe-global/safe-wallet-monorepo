@@ -86,6 +86,14 @@ const injectedRtkApi = api
         }),
         invalidatesTags: ['spaces'],
       }),
+      membersUpdateAliasV1: build.mutation<MembersUpdateAliasV1ApiResponse, MembersUpdateAliasV1ApiArg>({
+        query: (queryArg) => ({
+          url: `/v1/spaces/${queryArg.spaceId}/members/alias`,
+          method: 'PATCH',
+          body: queryArg.updateMemberAliasDto,
+        }),
+        invalidatesTags: ['spaces'],
+      }),
       membersRemoveUserV1: build.mutation<MembersRemoveUserV1ApiResponse, MembersRemoveUserV1ApiArg>({
         query: (queryArg) => ({ url: `/v1/spaces/${queryArg.spaceId}/members/${queryArg.userId}`, method: 'DELETE' }),
         invalidatesTags: ['spaces'],
@@ -158,6 +166,11 @@ export type MembersUpdateRoleV1ApiArg = {
   spaceId: number
   userId: number
   updateRoleDto: UpdateRoleDto
+}
+export type MembersUpdateAliasV1ApiResponse = unknown
+export type MembersUpdateAliasV1ApiArg = {
+  spaceId: number
+  updateMemberAliasDto: UpdateMemberAliasDto
 }
 export type MembersRemoveUserV1ApiResponse = unknown
 export type MembersRemoveUserV1ApiArg = {
@@ -245,6 +258,7 @@ export type Member = {
   role: 'ADMIN' | 'MEMBER'
   status: 'INVITED' | 'ACTIVE' | 'DECLINED'
   name: string
+  alias?: string | null
   invitedBy?: string | null
   createdAt: string
   updatedAt: string
@@ -255,6 +269,10 @@ export type MembersDto = {
 }
 export type UpdateRoleDto = {
   role: 'ADMIN' | 'MEMBER'
+}
+export type UpdateMemberAliasDto = {
+  /** The new alias for the member */
+  alias: string
 }
 export const {
   useSpacesCreateV1Mutation,
@@ -276,5 +294,6 @@ export const {
   useLazyMembersGetUsersV1Query,
   useMembersSelfRemoveV1Mutation,
   useMembersUpdateRoleV1Mutation,
+  useMembersUpdateAliasV1Mutation,
   useMembersRemoveUserV1Mutation,
 } = injectedRtkApi

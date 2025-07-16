@@ -1,41 +1,63 @@
 import React from 'react'
-import { render } from '@/src/tests/test-utils'
+import { render, fireEvent } from '@/src/tests/test-utils'
 import { StakingTxExitCard } from './StakingTxExitCard'
 import { NativeStakingValidatorsExitTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
-describe('StakingTxExitCard', () => {
-  const mockInfo = {
-    numValidators: 2,
-    tokenInfo: {
-      symbol: 'ETH',
-      decimals: 18,
-      logoUri: 'https://example.com/eth-logo.png',
-      name: 'Ethereum',
-      address: '0x0000000000000000000000000000000000000000',
-    },
-  } as NativeStakingValidatorsExitTransactionInfo
+const mockInfo: NativeStakingValidatorsExitTransactionInfo = {
+  type: 'NativeStakingValidatorsExit',
+  humanDescription: null,
+  status: 'ACTIVE',
+  estimatedExitTime: 1234567890,
+  estimatedWithdrawalTime: 1234567890,
+  value: '32000000000000000000',
+  numValidators: 1,
+  tokenInfo: {
+    address: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
+    decimals: 18,
+    logoUri: 'https://safe-transaction-assets.safe.global/chains/1/chain_logo.png',
+    name: 'Ethereum',
+    symbol: 'ETH',
+    trusted: true,
+  },
+  validators: ['0x123...abc'],
+}
 
-  it('renders correctly', () => {
-    const { toJSON } = render(<StakingTxExitCard info={mockInfo} />)
+const mockOnPress = jest.fn()
+
+describe('StakingTxExitCard', () => {
+  beforeEach(() => {
+    mockOnPress.mockClear()
+  })
+
+  it('matches snapshot', () => {
+    const { toJSON } = render(<StakingTxExitCard info={mockInfo} onPress={mockOnPress} />)
     expect(toJSON()).toMatchSnapshot()
   })
 
-  it('renders correctly with given info', () => {
-    const screen = render(<StakingTxExitCard info={mockInfo} />)
-
-    // Check that important props are passed correctly
+  it('renders correctly', () => {
+    const screen = render(<StakingTxExitCard info={mockInfo} onPress={mockOnPress} />)
     expect(screen.getByText('Withdraw')).toBeTruthy()
-    expect(screen.getByText('2 Validators')).toBeTruthy()
-    expect(screen.getByTestId('logo-image')).toBeTruthy()
+    expect(screen.getByText('1 Validator')).toBeTruthy()
   })
 
-  it('renders singular form for one validator', () => {
+  it('renders multiple validators correctly', () => {
     const singleValidatorInfo = {
       ...mockInfo,
-      numValidators: 1,
-    } as NativeStakingValidatorsExitTransactionInfo
+      numValidators: 3,
+    }
 
-    const screen = render(<StakingTxExitCard info={singleValidatorInfo} />)
-    expect(screen.getByText('1 Validator')).toBeTruthy()
+    const screen = render(<StakingTxExitCard info={singleValidatorInfo} onPress={mockOnPress} />)
+    expect(screen.getByText('Withdraw')).toBeTruthy()
+    expect(screen.getByText('3 Validators')).toBeTruthy()
+  })
+
+  it('calls onPress when pressed', () => {
+    const screen = render(<StakingTxExitCard info={mockInfo} onPress={mockOnPress} />)
+
+    const card = screen.getByText('Withdraw')
+
+    fireEvent.press(card)
+
+    expect(mockOnPress).toHaveBeenCalledTimes(1)
   })
 })

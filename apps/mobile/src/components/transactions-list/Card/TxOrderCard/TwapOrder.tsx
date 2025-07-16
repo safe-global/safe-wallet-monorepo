@@ -1,28 +1,21 @@
-import { Transaction, TwapOrderTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { TwapOrderTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { SafeListItem } from '@/src/components/SafeListItem'
 import { Text, Theme, View } from 'tamagui'
 import { ellipsis, formatValue } from '@/src/utils/formatters'
 import { TokenIcon } from '@/src/components/TokenIcon'
 import React from 'react'
+import { SafeListItemProps } from '@/src/components/SafeListItem/SafeListItem'
 
-interface TxTwappOrderCardProps {
+type TxTwappOrderCardProps = {
   order: TwapOrderTransactionInfo
-  bordered?: boolean
-  inQueue?: boolean
-  executionInfo?: Transaction['executionInfo']
-  onPress: () => void
-}
+} & Partial<SafeListItemProps>
 
-export const TwapOrder = ({ order, bordered, executionInfo, inQueue, onPress }: TxTwappOrderCardProps) => {
+export const TwapOrder = ({ order, ...rest }: TxTwappOrderCardProps) => {
   return (
     <SafeListItem
       label={`${order.sellToken.symbol} > ${order.buyToken.symbol}`}
       icon="transaction-swap"
       type="Twap order"
-      executionInfo={executionInfo}
-      bordered={bordered}
-      onPress={onPress}
-      inQueue={inQueue}
       leftNode={
         <Theme name="logo">
           <View position="relative" width="$10" height="$10">
@@ -56,6 +49,7 @@ export const TwapOrder = ({ order, bordered, executionInfo, inQueue, onPress }: 
           </Text>
         </View>
       }
+      {...rest}
     />
   )
 }

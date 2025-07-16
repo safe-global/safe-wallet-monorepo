@@ -1,0 +1,587 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`StakingWithdrawRequest matches snapshot 1`] = `
+<View>
+  <View
+    style={
+      {
+        "flexDirection": "column",
+        "gap": 16,
+      }
+    }
+  >
+    <View
+      style={
+        {
+          "alignItems": "center",
+          "flexDirection": "column",
+          "gap": 8,
+          "marginTop": 16,
+          "position": "relative",
+        }
+      }
+    >
+      <View
+        style={
+          {
+            "width": 40,
+          }
+        }
+      >
+        <View
+          style={
+            {
+              "position": "absolute",
+              "right": -10,
+              "top": -10,
+              "zIndex": 1,
+            }
+          }
+        >
+          <View
+            style={
+              {
+                "alignItems": "center",
+                "backgroundColor": "#DDDEE0",
+                "borderBottomColor": "#EEEFF0",
+                "borderBottomLeftRadius": 100000,
+                "borderBottomRightRadius": 100000,
+                "borderBottomWidth": 1,
+                "borderLeftColor": "#EEEFF0",
+                "borderLeftWidth": 1,
+                "borderRightColor": "#EEEFF0",
+                "borderRightWidth": 1,
+                "borderStyle": "solid",
+                "borderTopColor": "#EEEFF0",
+                "borderTopLeftRadius": 100000,
+                "borderTopRightRadius": 100000,
+                "borderTopWidth": 1,
+                "flexDirection": "column",
+                "height": 24,
+                "justifyContent": "center",
+                "maxHeight": 24,
+                "maxWidth": 24,
+                "minHeight": 24,
+                "minWidth": 24,
+                "paddingBottom": 0,
+                "paddingLeft": 0,
+                "paddingRight": 0,
+                "paddingTop": 0,
+                "width": 24,
+              }
+            }
+          >
+            <Text
+              allowFontScaling={false}
+              selectable={false}
+              style={
+                [
+                  {
+                    "color": "#A1A3A7",
+                    "fontSize": 12,
+                  },
+                  undefined,
+                  {
+                    "fontFamily": "SafeIcons",
+                    "fontStyle": "normal",
+                    "fontWeight": "normal",
+                  },
+                  {},
+                ]
+              }
+            >
+              
+            </Text>
+          </View>
+        </View>
+        <View
+          style={
+            {
+              "alignItems": "center",
+              "borderBottomLeftRadius": 100000,
+              "borderBottomRightRadius": 100000,
+              "borderTopLeftRadius": 100000,
+              "borderTopRightRadius": 100000,
+              "flexDirection": "column",
+              "height": 40,
+              "justifyContent": "center",
+              "maxHeight": 40,
+              "maxWidth": 40,
+              "minHeight": 40,
+              "minWidth": 40,
+              "overflow": "hidden",
+              "paddingBottom": 0,
+              "paddingLeft": 0,
+              "paddingRight": 0,
+              "paddingTop": 0,
+              "position": "relative",
+              "width": 40,
+            }
+          }
+        >
+          <View
+            style={
+              {
+                "bottom": 0,
+                "flexDirection": "column",
+                "left": 0,
+                "position": "absolute",
+                "right": 0,
+                "top": 0,
+                "zIndex": 1,
+              }
+            }
+          >
+            <Image
+              fullscreen={true}
+              onError={[Function]}
+              onLoad={[Function]}
+              source={
+                {
+                  "uri": "https://safe-transaction-assets.safe.global/chains/1/chain_logo.png",
+                }
+              }
+              style={
+                {
+                  "backgroundColor": "#121312",
+                  "height": 40,
+                  "width": 40,
+                }
+              }
+              testID="logo-image"
+            />
+          </View>
+          <View
+            style={
+              {
+                "backgroundColor": "#EEEFF0",
+                "bottom": 0,
+                "flexDirection": "column",
+                "left": 0,
+                "position": "absolute",
+                "right": 0,
+                "top": 0,
+                "zIndex": 0,
+              }
+            }
+          >
+            <View
+              style={
+                {
+                  "backgroundColor": "#EEEFF0",
+                  "borderBottomLeftRadius": 100,
+                  "borderBottomRightRadius": 100,
+                  "borderTopLeftRadius": 100,
+                  "borderTopRightRadius": 100,
+                  "paddingBottom": 8,
+                  "paddingLeft": 8,
+                  "paddingRight": 8,
+                  "paddingTop": 8,
+                }
+              }
+            >
+              <Text
+                allowFontScaling={false}
+                selectable={false}
+                style={
+                  [
+                    {
+                      "color": "#A1A3A7",
+                      "fontSize": 24,
+                    },
+                    undefined,
+                    {
+                      "fontFamily": "SafeIcons",
+                      "fontStyle": "normal",
+                      "fontWeight": "normal",
+                    },
+                    {},
+                  ]
+                }
+                testID="logo-fallback-icon"
+              >
+                
+              </Text>
+            </View>
+          </View>
+        </View>
+      </View>
+      <View
+        style={
+          {
+            "alignItems": "center",
+            "gap": 4,
+          }
+        }
+      >
+        <View
+          style={
+            {
+              "flexDirection": "row",
+              "gap": 4,
+            }
+          }
+        >
+          <Text
+            style={
+              {
+                "color": "#121312",
+                "fontFamily": "DM Sans",
+              }
+            }
+            suppressHighlighting={true}
+          >
+            Receive
+          </Text>
+          <Text
+            style={
+              {
+                "color": "#121312",
+                "fontFamily": "DMSans-Bold",
+              }
+            }
+            suppressHighlighting={true}
+          >
+            32
+             
+            ETH
+          </Text>
+        </View>
+        <Text
+          style={
+            {
+              "color": "#A1A3A7",
+              "fontFamily": "DM Sans",
+            }
+          }
+          suppressHighlighting={true}
+        >
+          15 Jan 1970
+          , 
+          06:56 AM
+        </Text>
+      </View>
+    </View>
+    <View
+      style={
+        {
+          "backgroundColor": "#FFFFFF",
+          "borderBottomLeftRadius": 7,
+          "borderBottomRightRadius": 7,
+          "borderTopLeftRadius": 7,
+          "borderTopRightRadius": 7,
+          "flexDirection": "column",
+          "gap": 20,
+          "paddingBottom": 16,
+          "paddingLeft": 16,
+          "paddingRight": 16,
+          "paddingTop": 16,
+        }
+      }
+    >
+      <View
+        style={
+          {
+            "alignItems": "center",
+            "flexDirection": "row",
+            "flexWrap": "wrap",
+            "gap": 8,
+            "justifyContent": "space-between",
+          }
+        }
+      >
+        <Text
+          style={
+            {
+              "color": "#A1A3A7",
+              "flex": 1,
+              "fontFamily": "DM Sans",
+              "fontSize": 14,
+            }
+          }
+          suppressHighlighting={true}
+        >
+          Exit
+        </Text>
+        <Text
+          style={
+            {
+              "color": "#121312",
+              "flex": 2,
+              "fontFamily": "DM Sans",
+              "fontSize": 14,
+              "textAlign": "right",
+            }
+          }
+          suppressHighlighting={true}
+        >
+          1 Validator
+        </Text>
+      </View>
+      <View
+        style={
+          {
+            "alignItems": "center",
+            "flexDirection": "row",
+            "flexWrap": "wrap",
+            "gap": 8,
+            "justifyContent": "space-between",
+          }
+        }
+      >
+        <Text
+          style={
+            {
+              "color": "#A1A3A7",
+              "flex": 1,
+              "fontFamily": "DM Sans",
+              "fontSize": 14,
+            }
+          }
+          suppressHighlighting={true}
+        >
+          Receive
+        </Text>
+        <Text
+          style={
+            {
+              "color": "#121312",
+              "fontFamily": "DMSans-SemiBold",
+            }
+          }
+          suppressHighlighting={true}
+        >
+          32
+           
+          ETH
+        </Text>
+      </View>
+      <View
+        style={
+          {
+            "alignItems": "center",
+            "flexDirection": "row",
+            "flexWrap": "wrap",
+            "gap": 8,
+            "justifyContent": "space-between",
+          }
+        }
+      >
+        <Text
+          style={
+            {
+              "color": "#A1A3A7",
+              "flex": 1,
+              "fontFamily": "DM Sans",
+              "fontSize": 14,
+            }
+          }
+          suppressHighlighting={true}
+        >
+          Withdraw in
+        </Text>
+        <Text
+          style={
+            {
+              "color": "#121312",
+              "flex": 2,
+              "fontFamily": "DM Sans",
+              "fontSize": 14,
+              "textAlign": "right",
+            }
+          }
+          suppressHighlighting={true}
+        >
+          Up to 1 day
+        </Text>
+      </View>
+      <View
+        style={
+          {
+            "alignItems": "center",
+            "height": 40,
+          }
+        }
+      >
+        <View
+          focusVisibleStyle={{}}
+          focusable={true}
+          onBlur={[Function]}
+          onClick={[Function]}
+          onFocus={[Function]}
+          onResponderGrant={[Function]}
+          onResponderMove={[Function]}
+          onResponderRelease={[Function]}
+          onResponderTerminate={[Function]}
+          onResponderTerminationRequest={[Function]}
+          onStartShouldSetResponder={[Function]}
+          role="button"
+          style={
+            {
+              "alignItems": "center",
+              "backgroundColor": "#DCDEE0",
+              "borderBottomColor": "transparent",
+              "borderBottomLeftRadius": 7,
+              "borderBottomRightRadius": 7,
+              "borderBottomWidth": 1,
+              "borderLeftColor": "transparent",
+              "borderLeftWidth": 1,
+              "borderRightColor": "transparent",
+              "borderRightWidth": 1,
+              "borderStyle": "solid",
+              "borderTopColor": "transparent",
+              "borderTopLeftRadius": 7,
+              "borderTopRightRadius": 7,
+              "borderTopWidth": 1,
+              "bottom": 0,
+              "flexDirection": "row",
+              "flexWrap": "nowrap",
+              "fontWeight": "600",
+              "height": 40,
+              "justifyContent": "center",
+              "left": 0,
+              "paddingLeft": 8,
+              "paddingRight": 8,
+              "position": "absolute",
+              "right": 0,
+              "top": 0,
+            }
+          }
+        >
+          <Text
+            lineBreakMode="clip"
+            numberOfLines={1}
+            style={
+              {
+                "color": "#121312",
+                "flexGrow": 0,
+                "flexShrink": 1,
+                "fontFamily": "DMSans-SemiBold",
+                "fontSize": 16,
+                "letterSpacing": 0,
+                "lineHeight": 17.6,
+                "userSelect": "none",
+              }
+            }
+            suppressHighlighting={true}
+          >
+            Transaction details
+          </Text>
+        </View>
+      </View>
+      <Text
+        style={
+          {
+            "color": "#A1A3A7",
+            "fontFamily": "DM Sans",
+            "fontSize": 13,
+          }
+        }
+        suppressHighlighting={true}
+      >
+        The selected amount and any rewards will be withdrawn from Dedicated Staking for ETH after the validator exit.
+      </Text>
+    </View>
+    <View
+      style={
+        {
+          "flexDirection": "column",
+          "gap": 12,
+        }
+      }
+    >
+      <View
+        style={
+          {
+            "alignItems": "flex-start",
+            "backgroundColor": "#FFECC2",
+            "borderBottomLeftRadius": 5,
+            "borderBottomRightRadius": 5,
+            "borderTopLeftRadius": 5,
+            "borderTopRightRadius": 5,
+            "flexDirection": "row",
+            "gap": 12,
+            "paddingBottom": 12,
+            "paddingLeft": 16,
+            "paddingRight": 16,
+            "paddingTop": 12,
+          }
+        }
+      >
+        <View
+          style={
+            {
+              "alignItems": "center",
+              "justifyContent": "center",
+            }
+          }
+          testID="alert-start-icon"
+        >
+          <View
+            style={
+              {
+                "alignItems": "center",
+                "backgroundColor": "#FF8C00",
+                "borderBottomLeftRadius": 34,
+                "borderBottomRightRadius": 34,
+                "borderTopLeftRadius": 34,
+                "borderTopRightRadius": 34,
+                "display": "flex",
+                "justifyContent": "center",
+                "paddingBottom": 4,
+                "paddingLeft": 4,
+                "paddingRight": 4,
+                "paddingTop": 4,
+              }
+            }
+          >
+            <Text
+              allowFontScaling={false}
+              selectable={false}
+              style={
+                [
+                  {
+                    "color": "#FFFFFF",
+                    "fontSize": 16,
+                  },
+                  undefined,
+                  {
+                    "fontFamily": "SafeIcons",
+                    "fontStyle": "normal",
+                    "fontWeight": "normal",
+                  },
+                  {},
+                ]
+              }
+              testID="warning-icon"
+            >
+              
+            </Text>
+          </View>
+        </View>
+        <View
+          style={
+            {
+              "flex": 1,
+              "gap": 4,
+            }
+          }
+        >
+          <Text
+            style={
+              {
+                "color": "#6C2D19",
+                "fontFamily": "DM Sans",
+                "fontSize": 13,
+              }
+            }
+            suppressHighlighting={true}
+          >
+            This transaction is a withdrawal request. After it's executed, you'll need to complete a separate withdrawal transaction.
+          </Text>
+        </View>
+      </View>
+    </View>
+  </View>
+</View>
+`;

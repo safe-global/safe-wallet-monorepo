@@ -10,7 +10,7 @@ struct ExtensionStore: Codable {
 }
 
 func loadExtensionStore() -> ExtensionStore? {
-    guard let groupDir = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.global.safe.mobileapp")?.path else {
+    guard let groupDir = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "[NOTIFICATION_APP_GROUP_IDENTIFIER]")?.path else {
         NSLog("[NotifeeDebug] Failed to get app group directory")
         return nil
     }
@@ -74,7 +74,7 @@ func parseNotification(userInfo: [AnyHashable: Any], store: ExtensionStore) -> (
 }
 
 class NotificationService: UNNotificationServiceExtension {
-    let appGroup = "group.global.safe.mobileapp"
+    let appGroup = "[NOTIFICATION_APP_GROUP_IDENTIFIER]"
     var contentHandler: ((UNNotificationContent) -> Void)?
     var bestAttemptContent: UNMutableNotificationContent?
     

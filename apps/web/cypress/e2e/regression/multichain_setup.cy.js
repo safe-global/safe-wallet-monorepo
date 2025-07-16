@@ -54,17 +54,10 @@ describe('Multichain setup tests', { defaultCommandTimeout: 60000 }, () => {
 
   it('Verify warning on add owner for one safe in the group', () => {
     cy.visit(constants.setupUrl + staticSafes.MATIC_STATIC_SAFE_28)
-    owner.openAddOwnerWindow()
-    owner.typeOwnerAddress(constants.SEPOLIA_OWNER_2)
-    owner.clickOnNextBtn()
-    sideBar.checkInconsistentSignersMsgDisplayedConfirmTxView(constants.networks.polygon)
-  })
-
-  it('Verify warning on add owner for one safe in the group', () => {
-    cy.visit(constants.setupUrl + staticSafes.MATIC_STATIC_SAFE_28)
-    owner.openAddOwnerWindow()
-    owner.typeOwnerAddress(constants.SEPOLIA_OWNER_2)
-    owner.clickOnNextBtn()
+    owner.openManageSignersWindow()
+    owner.clickOnAddSignerBtn()
+    owner.typeOwnerAddressManage(1, constants.SEPOLIA_OWNER_2)
+    owner.clickOnNextBtnManage()
     sideBar.checkInconsistentSignersMsgDisplayedConfirmTxView(constants.networks.polygon)
   })
 

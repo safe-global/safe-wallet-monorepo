@@ -1,12 +1,16 @@
 import React, { useMemo } from 'react'
 import { Text, View, YStack } from 'tamagui'
-import { TransactionDetails, MultiSend } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { TransactionDetails, MultiSend, NativeToken } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { ActionValueDecoded, AddressInfoIndex } from '@safe-global/store/gateway/types'
-import { shortenAddress } from '@safe-global/utils/utils/formatters'
+import { formatVisualAmount, shortenAddress } from '@safe-global/utils/utils/formatters'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { router } from 'expo-router'
 import { useLocalSearchParams } from 'expo-router'
 import { Container } from '@/src/components/Container'
+import { useTxTokenInfo } from '@safe-global/utils/hooks/useTxTokenInfo'
+import { useAppSelector } from '@/src/store/hooks'
+import { selectActiveChainCurrency } from '@/src/store/chains'
+import { Identicon } from '@/src/components/Identicon'
 
 interface TxActionsListProps {
   txDetails: TransactionDetails
@@ -21,6 +25,61 @@ export const getActionName = (action: ActionValueDecoded | MultiSend, addressInf
   }
 
   return contractName ? `${contractName}: ${name}` : action.dataDecoded?.method || 'contract interaction'
+}
+
+interface TxActionItemProps {
+  action: ActionValueDecoded | MultiSend
+  index: number
+  addressInfoIndex?: AddressInfoIndex
+  txData: TransactionDetails['txData']
+}
+
+const TxActionItem = ({ action, index, addressInfoIndex, txData }: TxActionItemProps) => {
+  const valueDecoded = txData?.dataDecoded?.parameters?.[0].valueDecoded
+  const tx = Array.isArray(valueDecoded) ? valueDecoded[index] : undefined
+  const nativeCurrency = useAppSelector(selectActiveChainCurrency)
+
+  const transferTokenInfo = useTxTokenInfo(
+    tx?.data?.toString() || undefined,
+    tx?.value || undefined,
+    tx?.to || '',
+    nativeCurrency as NativeToken,
+    txData?.tokenInfoIndex ?? {},
+  )
+
+  if (!tx) {
+    return null
+  }
+
+  return (
+    <>
+      <View alignItems="center" flexDirection="row" justifyContent="space-between" gap={'$2'} flexWrap="wrap">
+        <View flexDirection="row" alignItems="center" gap={'$2'} maxWidth="80%">
+          <SafeFontIcon name="transaction-contract" color="$colorSecondary" size={18} />
+          <Text>{index + 1}</Text>
+
+          {transferTokenInfo?.tokenInfo?.symbol ? (
+            <View flexDirection="row" alignItems="center" gap={'$2'}>
+              <Text fontSize="$4" flex={1} numberOfLines={1} ellipsizeMode="tail">
+                Send {formatVisualAmount(transferTokenInfo.transferValue, transferTokenInfo?.tokenInfo?.decimals, 6)}{' '}
+                {transferTokenInfo.tokenInfo.symbol} to
+              </Text>
+              <Identicon address={tx.to as `0x${string}`} size={20} />{' '}
+              <Text fontSize="$4" numberOfLines={1} ellipsizeMode="tail" flexShrink={1}>
+                {shortenAddress(tx.to)}
+              </Text>
+            </View>
+          ) : (
+            <Text fontSize="$4" flexShrink={1} flexWrap="wrap">
+              {getActionName(action, addressInfoIndex as AddressInfoIndex)}
+            </Text>
+          )}
+        </View>
+
+        <SafeFontIcon name="chevron-right" size={18} />
+      </View>
+    </>
+  )
 }
 
 export function TxActionsList({ txDetails }: TxActionsListProps) {
@@ -58,18 +117,7 @@ export function TxActionsList({ txDetails }: TxActionsListProps) {
             borderRadius="$3"
             onPress={() => onActionPress(action)}
           >
-            <View alignItems="center" flexDirection="row" justifyContent="space-between" gap={'$2'} flexWrap="wrap">
-              <View flexDirection="row" alignItems="center" gap={'$3'} maxWidth="90%">
-                <SafeFontIcon name="transaction-contract" color="$colorSecondary" size={18} />
-                <Text marginRight={'$2'}>{index + 1}</Text>
-
-                <Text fontSize="$4" flexShrink={1} flexWrap="wrap">
-                  {getActionName(action, addressInfoIndex as AddressInfoIndex)}
-                </Text>
-              </View>
-
-              <SafeFontIcon name="chevron-right" size={18} />
-            </View>
+            <TxActionItem txData={txDetails.txData} action={action} index={index} />
           </Container>
         )
       })}

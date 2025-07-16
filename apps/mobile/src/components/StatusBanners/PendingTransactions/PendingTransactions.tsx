@@ -16,7 +16,7 @@ export const PendingTransactions = ({ number, isLoading, fullWidth, onPress }: P
   const startIcon = isLoading ? (
     <Loader size={24} color="$warning1ContrastTextDark" />
   ) : (
-    <Badge content={number} themeName="badge_warning_variant2" />
+    <Badge content={number} themeName="badge_warning_variant2" circleSize="$6" textContentProps={{ fontWeight: 600 }} />
   )
   const endIcon = <SafeFontIcon name="chevron-right" size={20} />
 

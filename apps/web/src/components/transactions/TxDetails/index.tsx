@@ -17,6 +17,8 @@ import {
   isOpenSwapOrder,
   isTxQueued,
   isCustomTxInfo,
+  isBridgeOrderTxInfo,
+  isLifiSwapTxInfo,
 } from '@/utils/transaction-guards'
 import { InfoDetails } from '@/components/transactions/InfoDetails'
 import NamedAddressInfo from '@/components/common/NamedAddressInfo'
@@ -151,7 +153,10 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
           </ErrorBoundary>
         </div>
 
-        {(isMultiSendTxInfo(txDetails.txInfo) || isOrderTxInfo(txDetails.txInfo)) && (
+        {(isMultiSendTxInfo(txDetails.txInfo) ||
+          isOrderTxInfo(txDetails.txInfo) ||
+          isBridgeOrderTxInfo(txDetails.txInfo) ||
+          isLifiSwapTxInfo(txDetails.txInfo)) && (
           <div className={css.multiSend}>
             <ErrorBoundary fallback={<div>Error parsing data</div>}>
               <Multisend txData={txDetails.txData} isExecuted={!!txDetails.executedAt} />

@@ -1,7 +1,6 @@
 import React, { useCallback, useMemo } from 'react'
 import { useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { useColorScheme } from 'react-native'
 import { useDataImportContext } from './context/DataImportProvider'
 import { ReviewDataView } from './components/ReviewDataView'
 import { LegacyDataStructure } from './helpers/transforms'
@@ -9,7 +8,6 @@ import { LegacyDataStructure } from './helpers/transforms'
 export const ReviewData = () => {
   const router = useRouter()
   const insets = useSafeAreaInsets()
-  const colorScheme = useColorScheme()
   const { importedData } = useDataImportContext()
 
   const importSummary = useMemo(() => {
@@ -47,7 +45,6 @@ export const ReviewData = () => {
 
   return (
     <ReviewDataView
-      colorScheme={colorScheme}
       bottomInset={insets.bottom}
       importSummary={importSummary}
       isImportDataAvailable={!!importedData}

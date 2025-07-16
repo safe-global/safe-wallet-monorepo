@@ -1,6 +1,6 @@
 import type { DataDecoded, Order as SwapOrder } from '@safe-global/safe-gateway-typescript-sdk'
 import { formatUnits } from 'ethers'
-import type { AnyAppDataDocVersion, latest, LatestAppDataDocVersion } from '@cowprotocol/app-data'
+import type { AnyAppDataDocVersion, latest } from '@cowprotocol/app-data'
 
 import { TradeType, UiOrderType } from '@safe-global/utils/features/swap/types'
 
@@ -165,13 +165,6 @@ export const getOrderClass = (order: Pick<SwapOrder, 'fullAppData'>): latest.Ord
   const orderClass = (fullAppData?.metadata?.orderClass as latest.OrderClass)?.orderClass
 
   return orderClass || 'market'
-}
-
-export const getOrderFeeBps = (order: Pick<SwapOrder, 'fullAppData'>): number => {
-  const fullAppData = order.fullAppData as unknown as LatestAppDataDocVersion
-  const basisPoints = (fullAppData?.metadata?.partnerFee as latest.PartnerFee)?.bps
-
-  return Number(basisPoints) || 0
 }
 
 export const isOrderPartiallyFilled = (
