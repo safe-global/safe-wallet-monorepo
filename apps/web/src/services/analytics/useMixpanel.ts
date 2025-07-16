@@ -46,14 +46,12 @@ const useMixpanel = () => {
   const { safe } = useSafeInfo()
   const currentChain = useChain(safe?.chainId || '')
 
-  // Initialize MixPanel (only if feature is enabled)
   useEffect(() => {
     if (isMixpanelEnabled) {
       mixpanelInit()
     }
   }, [isMixpanelEnabled])
 
-  // Enable/disable tracking based on consent
   useEffect(() => {
     setPrevAnalytics((prev) => {
       if (isAnalyticsEnabled === prev) return prev
@@ -68,29 +66,24 @@ const useMixpanel = () => {
     })
   }, [isAnalyticsEnabled])
 
-  // Set the blockchain network for all MixPanel events
   useEffect(() => {
     if (currentChain) {
       mixpanelSetBlockchainNetwork(currentChain.chainName)
     }
   }, [currentChain])
 
-  // Set device type for all MixPanel events
   useEffect(() => {
     mixpanelSetDeviceType(deviceType)
   }, [deviceType])
 
-  // Set safe address for all MixPanel events and identify user
   useEffect(() => {
     mixpanelSetSafeAddress(safeAddress)
 
     if (safeAddress && !isSpaceRoute) {
-      // Identify user by safe address for better user tracking
       mixpanelIdentify(safeAddress)
     }
   }, [safeAddress, isSpaceRoute])
 
-  // Set wallet properties
   useEffect(() => {
     if (wallet?.label) {
       mixpanelSetUserProperties(MixPanelUserProperty.WALLET_LABEL, wallet.label)
@@ -100,21 +93,17 @@ const useMixpanel = () => {
     }
   }, [wallet?.label, wallet?.address])
 
-  // Set Safe-related user properties
   useEffect(() => {
     if (!userProperties) return
 
-    // Set regular properties (already formatted with string keys)
     mixpanelSetUserProperties(userProperties.properties)
   }, [userProperties])
 
-  // Set networks using union operation
   useEffect(() => {
     if (!currentChain) return
 
     const currentNetworkName = currentChain.chainName.toLowerCase()
 
-    // Use union for networks to append without duplicates
     mixpanelUnionUserProperty(MixPanelUserProperty.NETWORKS, [currentNetworkName])
   }, [currentChain])
 }
