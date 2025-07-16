@@ -58,6 +58,10 @@ jest.mock('@/utils/transaction-guards', () => ({
   isTransactionListItem: jest.fn((item) => item.type === 'TRANSACTION'),
 }))
 
+jest.mock('@/features/myAccounts/hooks/useNetworksOfSafe', () => ({
+  useNetworksOfSafe: jest.fn(() => ['ethereum', 'polygon']),
+}))
+
 describe('useMixPanelUserProperties', () => {
   it('should return correct user properties', () => {
     const { result } = renderHook(() => useMixPanelUserProperties())
@@ -70,8 +74,9 @@ describe('useMixPanelUserProperties', () => {
         [MixPanelUserProperty.THRESHOLD]: 2,
         [MixPanelUserProperty.TOTAL_TX_COUNT]: 42,
         [MixPanelUserProperty.LAST_TX_AT]: new Date(1672531200000).toISOString(),
+        [MixPanelUserProperty.NETWORKS]: ['ethereum', 'polygon'],
       },
-      networks: ['ethereum'],
+      networks: ['ethereum', 'polygon'],
     })
   })
 
@@ -131,5 +136,14 @@ describe('useMixPanelUserProperties', () => {
 
     expect(result.current?.properties[MixPanelUserProperty.TOTAL_TX_COUNT]).toBe(10) // from nonce
     expect(result.current?.properties[MixPanelUserProperty.LAST_TX_AT]).toBeNull() // from empty tx history
+  })
+
+  it('should fallback to current chain when useNetworksOfSafe returns empty array', () => {
+    const { useNetworksOfSafe } = require('@/features/myAccounts/hooks/useNetworksOfSafe')
+    useNetworksOfSafe.mockReturnValueOnce([])
+
+    const { result } = renderHook(() => useMixPanelUserProperties())
+
+    expect(result.current?.networks).toEqual(['Ethereum'])
   })
 })
