@@ -6,7 +6,7 @@ import { useEffect, useState, useMemo } from 'react'
 import { useTheme } from '@mui/material/styles'
 import {
   mixpanelInit,
-  mixpanelSetChainId,
+  mixpanelSetBlockchainNetwork,
   mixpanelSetDeviceType,
   mixpanelSetSafeAddress,
   mixpanelSetUserProperties,
@@ -19,7 +19,6 @@ import { useAppSelector } from '@/store'
 import { CookieAndTermType, hasConsentFor } from '@/store/cookiesAndTermsSlice'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
-import useChainId from '@/hooks/useChainId'
 import { useMediaQuery } from '@mui/material'
 import { DeviceType } from './types'
 import { MixPanelUserProperty } from './mixpanel-events'
@@ -30,7 +29,6 @@ import { useMixPanelUserProperties } from './useMixPanelUserProperties'
 import { useCurrentChain } from '@/hooks/useChains'
 
 const useMixpanel = () => {
-  const chainId = useChainId()
   const isMixpanelEnabled = useHasFeature(FEATURES.MIXPANEL)
   const isAnalyticsEnabled = useAppSelector((state) => hasConsentFor(state, CookieAndTermType.ANALYTICS))
   const [, setPrevAnalytics] = useState(isAnalyticsEnabled)
@@ -68,10 +66,12 @@ const useMixpanel = () => {
     })
   }, [isAnalyticsEnabled])
 
-  // Set the chain ID for all MixPanel events
+  // Set the blockchain network for all MixPanel events
   useEffect(() => {
-    mixpanelSetChainId(chainId)
-  }, [chainId])
+    if (currentChain) {
+      mixpanelSetBlockchainNetwork(currentChain.chainName)
+    }
+  }, [currentChain])
 
   // Set device type for all MixPanel events
   useEffect(() => {

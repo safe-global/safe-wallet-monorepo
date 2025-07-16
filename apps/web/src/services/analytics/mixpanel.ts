@@ -16,7 +16,7 @@ import packageJson from '../../../package.json'
 
 const commonEventParams = {
   [MixPanelEventParams.APP_VERSION]: packageJson.version,
-  [MixPanelEventParams.CHAIN_ID]: '',
+  [MixPanelEventParams.BLOCKCHAIN_NETWORK]: '',
   [MixPanelEventParams.DEVICE_TYPE]: DeviceType.DESKTOP,
   [MixPanelEventParams.SAFE_ADDRESS]: '',
 }
@@ -57,13 +57,13 @@ export const mixpanelInit = (): void => {
 }
 
 /**
- * Set chain ID for all MixPanel events
+ * Set blockchain network for all MixPanel events
  */
-export const mixpanelSetChainId = (chainId: string): void => {
-  commonEventParams[MixPanelEventParams.CHAIN_ID] = chainId
+export const mixpanelSetBlockchainNetwork = (networkName: string): void => {
+  commonEventParams[MixPanelEventParams.BLOCKCHAIN_NETWORK] = networkName
 
   if (isMixPanelInitialized) {
-    mixpanel.register({ [MixPanelEventParams.CHAIN_ID]: chainId })
+    mixpanel.register({ [MixPanelEventParams.BLOCKCHAIN_NETWORK]: networkName })
   }
 }
 

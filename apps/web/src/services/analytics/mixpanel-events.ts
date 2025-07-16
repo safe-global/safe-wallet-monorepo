@@ -28,7 +28,7 @@ export enum MixPanelUserProperty {
 
 export enum MixPanelEventParams {
   APP_VERSION = 'App Version',
-  CHAIN_ID = 'Chain ID',
+  BLOCKCHAIN_NETWORK = 'Blockchain Network',
   DEVICE_TYPE = 'Device Type',
   SAFE_ADDRESS = 'Safe Address',
 }
