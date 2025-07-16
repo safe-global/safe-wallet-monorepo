@@ -161,7 +161,6 @@ export const safeAppToMixPanelEventProperties = (
 ): Record<string, any> => {
   const properties: Record<string, any> = {
     'Safe App Name': safeApp.name,
-    'Safe App ID': safeApp.id,
     'Safe App Tags': safeApp.tags,
   }
 
