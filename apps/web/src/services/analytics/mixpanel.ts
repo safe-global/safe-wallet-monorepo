@@ -157,15 +157,22 @@ export const mixpanelUnionUserProperty = (property: string, values: string[]): v
  */
 export const safeAppToMixPanelEventProperties = (
   safeApp: SafeAppData,
-  launchLocation?: string,
+  options?: {
+    launchLocation?: string
+    chainName?: string
+  },
 ): Record<string, any> => {
   const properties: Record<string, any> = {
     'Safe App Name': safeApp.name,
     'Safe App Tags': safeApp.tags,
   }
 
-  if (launchLocation) {
-    properties['Launch Location'] = launchLocation
+  if (options?.launchLocation) {
+    properties['Launch Location'] = options.launchLocation
+  }
+
+  if (options?.chainName) {
+    properties[MixPanelEventParams.BLOCKCHAIN_NETWORK] = options.chainName
   }
 
   return properties
