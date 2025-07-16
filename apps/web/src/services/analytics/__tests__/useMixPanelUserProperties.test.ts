@@ -4,10 +4,13 @@ import { MixPanelUserProperty } from '@/services/analytics/mixpanel-events'
 
 // Mock dependencies
 jest.mock('@/hooks/useChains', () => ({
-  useCurrentChain: jest.fn(() => ({
-    chainName: 'Ethereum',
-    chainId: '1',
-  })),
+  useChain: jest.fn((chainId: string) => {
+    const chains: Record<string, { chainName: string; chainId: string }> = {
+      '1': { chainName: 'Ethereum', chainId: '1' },
+      '137': { chainName: 'Polygon', chainId: '137' },
+    }
+    return chains[chainId] || null
+  }),
 }))
 
 jest.mock('@/hooks/useSafeInfo', () => ({
@@ -22,6 +25,7 @@ jest.mock('@/hooks/useSafeInfo', () => ({
       ],
       threshold: 2,
       nonce: 42,
+      chainId: '1',
     },
     safeLoaded: true,
   })),
@@ -92,6 +96,7 @@ describe('useMixPanelUserProperties', () => {
         owners: [{ value: '0x1234567890123456789012345678901234567890' }],
         threshold: 1,
         nonce: 5,
+        chainId: '1',
       },
       safeLoaded: true,
     })
@@ -110,6 +115,7 @@ describe('useMixPanelUserProperties', () => {
         owners: [{ value: '0x1234567890123456789012345678901234567890' }],
         threshold: 1,
         nonce: 10, // nonce is still used for total_tx_count
+        chainId: '1',
       },
       safeLoaded: true,
     })
