@@ -17,6 +17,13 @@ export default function SignersLayout() {
           headerTitle: SignerHeader,
         }}
       />
+      <Stack.Screen
+        name="[address]/private-key"
+        options={{
+          headerShown: true,
+          headerTitle: 'Private Key',
+        }}
+      />
     </Stack>
   )
 }

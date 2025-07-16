@@ -11,6 +11,13 @@ import { isAndroid, GATEWAY_URL } from '@/src/config/constants'
 import Logger from '@/src/utils/logger'
 import { getStore } from '@/src/store/utils/singletonStore'
 
+// Type for RTK Query options with our custom property
+interface CustomRTKQueryOptions {
+  track?: boolean
+  fixedCacheKey?: string
+  forceOmitCredentials?: boolean
+}
+
 export const getDeviceUuid = async () => {
   const deviceId = await DeviceInfo.getUniqueId()
   return convertToUuid(deviceId)
@@ -79,34 +86,43 @@ export const registerForNotificationsOnBackEnd = async ({
   chainIds,
   fcmToken,
   notificationAccountType,
+  noAuth = false,
 }: {
   safeAddress: string
   signer: Wallet | HDNodeWallet | null
   chainIds: string[]
   fcmToken: string
   notificationAccountType: NOTIFICATION_ACCOUNT_TYPE
+  noAuth?: boolean
 }) => {
   const isOwner = notificationAccountType === NOTIFICATION_ACCOUNT_TYPE.OWNER
   const deviceUuid = await getDeviceUuid()
 
-  await authenticateSigner(signer, chainIds[0])
+  if (!noAuth) {
+    await authenticateSigner(signer, chainIds[0])
+  }
 
   const NOTIFICATIONS_GRANTED = isOwner ? OWNER_NOTIFICATIONS : REGULAR_NOTIFICATIONS
 
   await getStore()
     .dispatch(
-      notificationsApi.endpoints.notificationsUpsertSubscriptionsV2.initiate({
-        upsertSubscriptionsDto: {
-          cloudMessagingToken: fcmToken,
-          safes: chainIds.map((chainId) => ({
-            chainId,
-            address: safeAddress,
-            notificationTypes: NOTIFICATIONS_GRANTED,
-          })),
-          deviceType: isAndroid ? 'ANDROID' : 'IOS',
-          deviceUuid,
+      notificationsApi.endpoints.notificationsUpsertSubscriptionsV2.initiate(
+        {
+          upsertSubscriptionsDto: {
+            cloudMessagingToken: fcmToken,
+            safes: chainIds.map((chainId) => ({
+              chainId,
+              address: safeAddress,
+              notificationTypes: NOTIFICATIONS_GRANTED,
+            })),
+            deviceType: isAndroid ? 'ANDROID' : 'IOS',
+            deviceUuid,
+          },
         },
-      }),
+        {
+          forceOmitCredentials: noAuth,
+        } as CustomRTKQueryOptions,
+      ),
     )
     .unwrap()
 }

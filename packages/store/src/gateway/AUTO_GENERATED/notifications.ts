@@ -152,6 +152,11 @@ export type DeleteAllSubscriptionItemDto = {
   chainId: string
   deviceUuid: string
   safeAddress: string
+  /** Optional signer address filter:
+    • Omitted (undefined): Deletes subscriptions regardless of signer address
+    • null: Deletes only subscriptions with no signer address
+    • Valid address: Deletes only subscriptions with that specific signer address */
+  signerAddress?: string | null
 }
 export type DeleteAllSubscriptionsDto = {
   /** At least one subscription is required */

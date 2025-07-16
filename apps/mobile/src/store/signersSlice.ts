@@ -15,6 +15,10 @@ const signersSlice = createSlice({
 
       return state
     },
+    removeSigner: (state, action: PayloadAction<string>) => {
+      const { [action.payload]: _, ...newState } = state
+      return newState
+    },
   },
 })
 
@@ -29,9 +33,21 @@ export const addSignerWithEffects =
     }
   }
 
-export const { addSigner } = signersSlice.actions
+export const { addSigner, removeSigner } = signersSlice.actions
 
 export const selectSigners = (state: RootState) => state.signers
+
+/**
+ * Selector to get signers by address
+ */
+export const selectSignersByAddress = (state: RootState) => state.signers
+
+/**
+ * Selector to check if a signer has an imported private key
+ */
+export const selectSignerHasPrivateKey = (address: string) => (state: RootState) => {
+  return !!state.signers[address]
+}
 
 /**
  * Selector to get the total number of signers managed by the app

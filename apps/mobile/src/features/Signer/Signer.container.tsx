@@ -1,7 +1,8 @@
 import { SignerView } from '@/src/features/Signer/components/SignerView'
-import { useLocalSearchParams } from 'expo-router'
+import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
 import { selectContactByAddress, upsertContact } from '@/src/store/addressBookSlice'
+import { selectSignerHasPrivateKey } from '@/src/store/signersSlice'
 import React, { useCallback, useState } from 'react'
 import { Alert, Linking } from 'react-native'
 import { selectActiveChain } from '@/src/store/chains'
@@ -11,14 +12,15 @@ import { SubmitHandler, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { FormValues } from '@/src/features/Signer/types'
 import { formSchema } from '@/src/features/Signer/schema'
-import { COMING_SOON_MESSAGE, COMING_SOON_TITLE } from '@/src/config/constants'
 
 export const SignerContainer = () => {
   const { address } = useLocalSearchParams<{ address: string }>()
+  const router = useRouter()
   const dispatch = useAppDispatch()
   const activeChain = useAppSelector(selectActiveChain)
   const local = useLocalSearchParams<{ editMode: string }>()
   const contact = useAppSelector(selectContactByAddress(address))
+  const hasPrivateKey = useAppSelector(selectSignerHasPrivateKey(address))
   const [editMode, setEditMode] = useState(Boolean(local.editMode))
 
   usePreventLeaveScreen(editMode)
@@ -31,9 +33,9 @@ export const SignerContainer = () => {
     Linking.openURL(url)
   }, [address, activeChain])
 
-  const onPressDelete = useCallback(() => {
-    Alert.alert(COMING_SOON_TITLE, COMING_SOON_MESSAGE)
-  }, [])
+  const onPressViewPrivateKey = useCallback(() => {
+    router.push(`/signers/${address}/private-key`)
+  }, [address, router])
 
   // Initialize the form with React Hook Form and Zod schema resolver
   const {
@@ -88,10 +90,11 @@ export const SignerContainer = () => {
   return (
     <SignerView
       signerAddress={address}
-      onPressDelete={onPressDelete}
       onPressExplorer={onPressExplorer}
       onPressEdit={onPressEdit}
+      onPressViewPrivateKey={hasPrivateKey ? onPressViewPrivateKey : undefined}
       editMode={editMode}
+      hasPrivateKey={hasPrivateKey}
       control={control}
       dirtyFields={dirtyFields}
       errors={errors}
