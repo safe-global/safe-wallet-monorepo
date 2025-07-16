@@ -22,7 +22,13 @@ export function TxContractInteractionCard({ txInfo, safeAppInfo, ...rest }: TxCo
       type={safeAppInfo?.name || txInfo.methodName || ''}
       leftNode={
         <Theme name="logo">
-          <Logo size="$8" logoUri={logoUri || ''} fallbackIcon="code-blocks" imageBackground="$background" />
+          <Logo
+            size="$8"
+            logoUri={logoUri || ''}
+            fallbackIcon="code-blocks"
+            imageBackground="$background"
+            accessibilityLabel={label}
+          />
         </Theme>
       }
       rightNode={<Text>{txInfo.methodName}</Text>}

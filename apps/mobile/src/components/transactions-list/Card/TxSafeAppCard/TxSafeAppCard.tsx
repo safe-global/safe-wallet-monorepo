@@ -17,7 +17,14 @@ export function TxSafeAppCard({ safeAppInfo, txInfo, ...rest }: TxSafeAppCardPro
       label={safeAppInfo.name}
       icon="transaction-contract"
       type="Safe app"
-      leftNode={<Logo logoUri={safeAppInfo.logoUri} size="$8" fallbackIcon="code-blocks" />}
+      leftNode={
+        <Logo
+          logoUri={safeAppInfo.logoUri}
+          size="$8"
+          fallbackIcon="code-blocks"
+          accessibilityLabel={safeAppInfo.name}
+        />
+      }
       rightNode={<Text>{txInfo.methodName}</Text>}
       {...rest}
     />

@@ -54,7 +54,7 @@ exports[`StakingTxDepositCard renders correctly 1`] = `
         <View
           style={
             {
-              "width": 40,
+              "width": 32,
             }
           }
         >
@@ -77,19 +77,19 @@ exports[`StakingTxDepositCard renders correctly 1`] = `
                 "borderTopLeftRadius": 100000,
                 "borderTopRightRadius": 100000,
                 "flexDirection": "column",
-                "height": 40,
+                "height": 32,
                 "justifyContent": "center",
-                "maxHeight": 40,
-                "maxWidth": 40,
-                "minHeight": 40,
-                "minWidth": 40,
+                "maxHeight": 32,
+                "maxWidth": 32,
+                "minHeight": 32,
+                "minWidth": 32,
                 "overflow": "hidden",
                 "paddingBottom": 0,
                 "paddingLeft": 0,
                 "paddingRight": 0,
                 "paddingTop": 0,
                 "position": "relative",
-                "width": 40,
+                "width": 32,
               }
             }
           >
@@ -119,8 +119,8 @@ exports[`StakingTxDepositCard renders correctly 1`] = `
                 style={
                   {
                     "backgroundColor": "#121312",
-                    "height": 40,
-                    "width": 40,
+                    "height": 32,
+                    "width": 32,
                   }
                 }
                 testID="logo-image"
@@ -143,15 +143,16 @@ exports[`StakingTxDepositCard renders correctly 1`] = `
               <View
                 style={
                   {
+                    "alignItems": "center",
                     "backgroundColor": "#EEEFF0",
-                    "borderBottomLeftRadius": 100,
-                    "borderBottomRightRadius": 100,
-                    "borderTopLeftRadius": 100,
-                    "borderTopRightRadius": 100,
-                    "paddingBottom": 8,
-                    "paddingLeft": 8,
-                    "paddingRight": 8,
-                    "paddingTop": 8,
+                    "borderBottomLeftRadius": 0,
+                    "borderBottomRightRadius": 0,
+                    "borderTopLeftRadius": 0,
+                    "borderTopRightRadius": 0,
+                    "display": "flex",
+                    "height": 32,
+                    "justifyContent": "center",
+                    "width": 32,
                   }
                 }
               >
@@ -162,7 +163,7 @@ exports[`StakingTxDepositCard renders correctly 1`] = `
                     [
                       {
                         "color": "#A1A3A7",
-                        "fontSize": 24,
+                        "fontSize": 16,
                       },
                       undefined,
                       {
@@ -188,7 +189,6 @@ exports[`StakingTxDepositCard renders correctly 1`] = `
                 "alignItems": "center",
                 "flexDirection": "row",
                 "gap": 4,
-                "marginBottom": 4,
               }
             }
           >
@@ -219,8 +219,8 @@ exports[`StakingTxDepositCard renders correctly 1`] = `
                 {
                   "color": "#A1A3A7",
                   "fontFamily": "DM Sans",
-                  "fontSize": 13,
-                  "marginBottom": 2,
+                  "fontSize": 12,
+                  "lineHeight": 20,
                 }
               }
               suppressHighlighting={true}
@@ -234,6 +234,7 @@ exports[`StakingTxDepositCard renders correctly 1`] = `
                 "color": "#121312",
                 "fontFamily": "DMSans-SemiBold",
                 "fontSize": 14,
+                "lineHeight": 20,
               }
             }
             suppressHighlighting={true}

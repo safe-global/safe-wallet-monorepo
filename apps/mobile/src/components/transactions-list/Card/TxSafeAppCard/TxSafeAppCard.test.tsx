@@ -35,7 +35,7 @@ describe('TxSafeAppCard', () => {
 
     expect(getByText('Transaction Builder')).toBeTruthy()
     expect(getByText('Safe app')).toBeTruthy()
-    expect(queryByTestId('safe-app-image')).not.toBeTruthy()
-    expect(getByTestId('safe-app-fallback')).toBeTruthy()
+    expect(queryByTestId('logo-image')).not.toBeTruthy()
+    expect(getByTestId('logo-fallback-icon')).toBeTruthy()
   })
 })
