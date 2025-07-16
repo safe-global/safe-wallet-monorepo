@@ -2,7 +2,7 @@
  * Track analytics events using MixPanel
  * This hook mirrors the useGtm hook for consistency
  */
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { useTheme } from '@mui/material/styles'
 import {
   mixpanelInit,
@@ -37,7 +37,9 @@ const useMixpanel = () => {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
   const isTablet = useMediaQuery(theme.breakpoints.down('md'))
-  const deviceType = isMobile ? DeviceType.MOBILE : isTablet ? DeviceType.TABLET : DeviceType.DESKTOP
+  const deviceType = useMemo(() => {
+    return isMobile ? DeviceType.MOBILE : isTablet ? DeviceType.TABLET : DeviceType.DESKTOP
+  }, [isMobile, isTablet])
   const safeAddress = useSafeAddress()
   const wallet = useWallet()
   const isSpaceRoute = useIsSpaceRoute()
@@ -53,8 +55,6 @@ const useMixpanel = () => {
 
   // Enable/disable tracking based on consent
   useEffect(() => {
-    if (!isMixpanelEnabled) return
-
     setPrevAnalytics((prev) => {
       if (isAnalyticsEnabled === prev) return prev
 
@@ -66,68 +66,55 @@ const useMixpanel = () => {
 
       return isAnalyticsEnabled
     })
-  }, [isAnalyticsEnabled, isMixpanelEnabled])
+  }, [isAnalyticsEnabled])
 
   // Set the chain ID for all MixPanel events
   useEffect(() => {
-    if (isMixpanelEnabled) {
-      mixpanelSetChainId(chainId)
-    }
-  }, [chainId, isMixpanelEnabled])
+    mixpanelSetChainId(chainId)
+  }, [chainId])
 
   // Set device type for all MixPanel events
   useEffect(() => {
-    if (isMixpanelEnabled) {
-      mixpanelSetDeviceType(deviceType)
-    }
-  }, [deviceType, isMixpanelEnabled])
+    mixpanelSetDeviceType(deviceType)
+  }, [deviceType])
 
   // Set safe address for all MixPanel events and identify user
   useEffect(() => {
-    if (!isMixpanelEnabled) return
-
     mixpanelSetSafeAddress(safeAddress)
 
     if (safeAddress && !isSpaceRoute) {
       // Identify user by safe address for better user tracking
       mixpanelIdentify(safeAddress)
     }
-  }, [safeAddress, isSpaceRoute, isMixpanelEnabled])
+  }, [safeAddress, isSpaceRoute])
 
-  // Set user properties
+  // Set wallet properties
   useEffect(() => {
-    if (!isMixpanelEnabled) return
-
     if (wallet?.label) {
       mixpanelSetUserProperties(MixPanelUserProperty.WALLET_LABEL, wallet.label)
     }
-  }, [wallet?.label, isMixpanelEnabled])
-
-  useEffect(() => {
-    if (!isMixpanelEnabled) return
-
     if (wallet?.address) {
       mixpanelSetUserProperties(MixPanelUserProperty.WALLET_ADDRESS, wallet.address)
     }
-  }, [wallet?.address, isMixpanelEnabled])
+  }, [wallet?.label, wallet?.address])
 
   // Set Safe-related user properties
   useEffect(() => {
-    if (!isMixpanelEnabled || !userProperties) return
+    if (!userProperties) return
 
     // Set regular properties (already formatted with string keys)
     mixpanelSetUserProperties(userProperties.properties)
-  }, [userProperties, isMixpanelEnabled])
+  }, [userProperties])
 
   // Set networks using union operation
   useEffect(() => {
-    if (!isMixpanelEnabled || !currentChain) return
+    if (!currentChain) return
 
     const currentNetworkName = currentChain.chainName.toLowerCase()
 
     // Use union for networks to append without duplicates
     mixpanelUnionUserProperty(MixPanelUserProperty.NETWORKS, [currentNetworkName])
-  }, [currentChain, isMixpanelEnabled])
+  }, [currentChain])
 }
 
 export default useMixpanel
