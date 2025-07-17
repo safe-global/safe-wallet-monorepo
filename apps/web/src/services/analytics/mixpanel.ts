@@ -44,6 +44,7 @@ export const mixpanelInit = (): void => {
       autocapture: false,
       batch_requests: true,
       opt_out_tracking_by_default: true,
+      ip: false,
     })
 
     isMixPanelInitialized = true
@@ -145,7 +146,7 @@ export const mixpanelSetUserProperties = (properties: Record<string, any> | stri
 export const mixpanelUnionUserProperty = (property: string, values: string[]): void => {
   if (!isMixPanelInitialized) return
 
-  mixpanel.people.union({ [property]: values })
+  mixpanel.people.union(property, values)
 
   if (!IS_PRODUCTION) {
     console.info('[MixPanel] - User property union:', property, 'with', values)
