@@ -7,15 +7,10 @@ import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 interface AllNetworksItemProps {
   isSelected: boolean
   isReadOnly: boolean
-  isVisible: boolean
   onSelectAll: () => void
 }
 
-export const AllNetworksItem = ({ isSelected, isReadOnly, isVisible, onSelectAll }: AllNetworksItemProps) => {
-  if (!isVisible) {
-    return null
-  }
-
+export const AllNetworksItem = ({ isSelected, isReadOnly, onSelectAll }: AllNetworksItemProps) => {
   return (
     <TouchableOpacity style={{ width: '100%' }} onPress={onSelectAll} disabled={isReadOnly}>
       <View
