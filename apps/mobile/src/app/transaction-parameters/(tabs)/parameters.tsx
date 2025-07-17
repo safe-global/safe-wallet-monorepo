@@ -8,7 +8,7 @@ function TransactionParameters() {
   const insets = useSafeAreaInsets()
 
   return (
-    <View flex={1} paddingBottom={insets.bottom}>
+    <View flex={1} paddingBottom={insets.bottom} paddingHorizontal={16}>
       <TxParametersContainer />
     </View>
   )

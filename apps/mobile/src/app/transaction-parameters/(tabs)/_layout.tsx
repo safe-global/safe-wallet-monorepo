@@ -31,7 +31,7 @@ export default function TransactionsLayout() {
         tabBarIndicatorWidth: 94,
         tabBarLabelFontSize: 16,
         tabBarLabelFontWeight: '700',
-        tabBarItemLeft: -10,
+        tabBarItemLeft: 0,
       })}
     >
       <MaterialTopTabs.Screen initialParams={{ txId }} name="index" options={{ title: 'Data' }} />

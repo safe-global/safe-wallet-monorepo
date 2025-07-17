@@ -34,7 +34,7 @@ export const getMaterialTopTabBarScreenOptions = ({
   tabBarIndicatorStyle: {
     backgroundColor: theme?.color?.get(),
     width: tabBarIndicatorWidth,
-    marginLeft: 6,
+    marginLeft: 16,
     alignItems: 'center' as const,
   },
   tabBarLabelStyle: {
