@@ -1,11 +1,12 @@
 import React from 'react'
 import { render } from '@/src/tests/test-utils'
-jest.mock('react-native-capture-protection')
 
-const { __mockPrevent: mockPrevent, __mockAllow: mockAllow } = require('react-native-capture-protection')
+jest.mock('@/src/hooks/useScreenProtection', () => ({
+  useScreenProtection: jest.fn(),
+}))
 
-// Mock useFocusEffect but allow us to capture and execute the callback
-let focusEffectCallback: (() => (() => void) | void) | null = null
+const mockUseScreenProtection = jest.requireMock('@/src/hooks/useScreenProtection').useScreenProtection
+
 jest.mock('expo-router', () => {
   const React = require('react')
   return {
@@ -14,13 +15,9 @@ jest.mock('expo-router', () => {
     Stack: Object.assign(({ children }: { children: React.ReactNode }) => <>{children}</>, {
       Screen: ({ children }: { children: React.ReactNode }) => <>{children}</>,
     }),
-    useFocusEffect: jest.fn((callback: () => (() => void) | void) => {
-      focusEffectCallback = callback
-    }),
   }
 })
 
-// Mock ImportPrivateKey component to avoid complex dependencies
 jest.mock('@/src/features/ImportPrivateKey', () => {
   const { View } = require('react-native')
   return {
@@ -34,89 +31,35 @@ jest.mock('react-native-safe-area-context', () => ({
 
 import ImportSignersLayout from '@/src/app/import-signers/_layout'
 
-describe('ImportSignersLayout - Capture Protection', () => {
+describe('ImportSignersLayout - Screen Protection', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    focusEffectCallback = null
   })
 
-  it('should setup useFocusEffect hook', () => {
-    const mockUseFocusEffect = require('expo-router').useFocusEffect
-
+  it('should use the useScreenProtection hook', () => {
     render(<ImportSignersLayout />)
 
-    expect(mockUseFocusEffect).toHaveBeenCalledTimes(1)
-    expect(focusEffectCallback).toBeTruthy()
+    expect(mockUseScreenProtection).toHaveBeenCalledTimes(1)
+    expect(mockUseScreenProtection).toHaveBeenCalledWith()
   })
 
-  it('should call CaptureProtection.prevent when focus effect is triggered', () => {
-    render(<ImportSignersLayout />)
+  it('should render the layout with Stack navigation', () => {
+    const { queryByTestId } = render(<ImportSignersLayout />)
 
-    // Verify focus effect callback was stored
-    expect(focusEffectCallback).toBeTruthy()
-
-    // Execute the focus effect callback to simulate screen focus
-    if (focusEffectCallback) {
-      focusEffectCallback()
-    }
-
-    // Verify CaptureProtection.prevent was called with correct parameters
-    expect(mockPrevent).toHaveBeenCalledTimes(1)
-    expect(mockPrevent).toHaveBeenCalledWith({
-      screenshot: true,
-      record: true,
-      appSwitcher: true,
-    })
+    // Verify the component renders without crashing
+    expect(queryByTestId).toBeTruthy()
+    expect(mockUseScreenProtection).toHaveBeenCalledTimes(1)
   })
 
-  it('should call CaptureProtection.allow when cleanup function is executed', () => {
-    render(<ImportSignersLayout />)
+  it('should call useScreenProtection only once per render', () => {
+    const { rerender } = render(<ImportSignersLayout />)
 
-    // Execute the focus effect callback and get the cleanup function
-    let cleanup: (() => void) | undefined
-    if (focusEffectCallback) {
-      cleanup = focusEffectCallback() as (() => void) | undefined
-    }
+    expect(mockUseScreenProtection).toHaveBeenCalledTimes(1)
 
-    // Verify cleanup function exists
-    expect(cleanup).toBeTruthy()
-    expect(typeof cleanup).toBe('function')
+    // Rerender the component
+    rerender(<ImportSignersLayout />)
 
-    // Clear previous calls
-    jest.clearAllMocks()
-
-    // Execute cleanup function to simulate screen unfocus
-    if (cleanup) {
-      cleanup()
-    }
-
-    // Verify CaptureProtection.allow was called
-    expect(mockAllow).toHaveBeenCalledTimes(1)
-  })
-
-  it('should have proper focus effect lifecycle (prevent on focus, allow on unfocus)', () => {
-    render(<ImportSignersLayout />)
-
-    // Execute focus effect (simulate screen focus)
-    let cleanup: (() => void) | undefined
-    if (focusEffectCallback) {
-      cleanup = focusEffectCallback() as (() => void) | undefined
-    }
-
-    // Verify prevent was called
-    expect(mockPrevent).toHaveBeenCalledTimes(1)
-    expect(mockPrevent).toHaveBeenCalledWith({
-      screenshot: true,
-      record: true,
-      appSwitcher: true,
-    })
-
-    // Execute cleanup (simulate screen unfocus)
-    if (cleanup) {
-      cleanup()
-    }
-
-    // Verify allow was called
-    expect(mockAllow).toHaveBeenCalledTimes(1)
+    // Should be called again on rerender
+    expect(mockUseScreenProtection).toHaveBeenCalledTimes(2)
   })
 })

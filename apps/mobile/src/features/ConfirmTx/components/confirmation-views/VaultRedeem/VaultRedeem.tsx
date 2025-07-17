@@ -27,20 +27,24 @@ const AdditionalRewards = ({ txInfo }: { txInfo: VaultRedeemTransactionInfo }) =
 
   return (
     <Container bordered padding="$4" gap="$2">
-      <Text fontWeight="600">Additional reward</Text>
+      <Text fontWeight="600" marginBottom="$2">
+        Additional reward
+      </Text>
       <ListTable
+        padding="0"
+        gap="$4"
         items={[
           {
             label: 'Token',
             value: `${reward.tokenInfo.name} ${reward.tokenInfo.symbol}`,
           },
           {
-            label: 'Reward rate',
+            label: 'Earn',
             value: formatPercentage(txInfo.additionalRewardsNrr / 100),
           },
         ]}
       />
-      <XStack alignItems="center" gap="$1">
+      <XStack alignItems="center" gap="$1" marginTop="$2">
         <Text fontSize={12} color="$colorSecondary">
           Powered by
         </Text>
@@ -60,8 +64,7 @@ interface VaultRedeemProps {
 }
 
 export function VaultRedeem({ txInfo, executionInfo, txId }: VaultRedeemProps) {
-  const totalNrr = (txInfo.baseNrr + txInfo.additionalRewardsNrr) / 100
-  const items = useMemo(() => formatVaultRedeemItems(txInfo, totalNrr), [txInfo, totalNrr])
+  const items = useMemo(() => formatVaultRedeemItems(txInfo), [txInfo])
 
   return (
     <YStack gap="$4">
@@ -84,7 +87,7 @@ export function VaultRedeem({ txInfo, executionInfo, txId }: VaultRedeemProps) {
         submittedAt={executionInfo.submittedAt}
       />
 
-      <ListTable items={items}>
+      <ListTable items={items} gap="$4">
         <ParametersButton txId={txId} />
       </ListTable>
 

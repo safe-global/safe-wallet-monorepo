@@ -26,7 +26,7 @@ export const EnterPasswordView = ({
 }: EnterPasswordViewProps) => {
   return (
     <KeyboardAvoidingView behavior="padding" style={{ flex: 1 }} keyboardVerticalOffset={bottomInset + topInset}>
-      <ScrollView contentContainerStyle={{ flex: 1 }}>
+      <ScrollView contentContainerStyle={{ flex: 1 }} keyboardShouldPersistTaps="handled">
         <YStack flex={1} testID="enter-password-screen">
           {/* Content */}
           <YStack flex={1} paddingHorizontal="$4" justifyContent="space-between" marginTop={'$4'}>

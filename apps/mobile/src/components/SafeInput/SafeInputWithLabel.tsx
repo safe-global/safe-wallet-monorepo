@@ -1,5 +1,6 @@
 import { Input, InputProps, styled, View, Text, Theme } from 'tamagui'
 import React from 'react'
+import { Platform } from 'react-native'
 
 interface Props {
   label: string
@@ -43,8 +44,10 @@ const StyledInput = styled(Input, {
   color: '$inputTextColor',
   placeholderTextColor: '$placeholderColor',
   borderWidth: 0,
+  padding: 0,
 
   style: {
+    boxSizing: Platform.OS === 'android' ? 'content-box' : undefined,
     borderWidth: 0,
     backgroundColor: '$borderColorHover',
     paddingLeft: 0,

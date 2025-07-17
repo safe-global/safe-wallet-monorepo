@@ -11,7 +11,10 @@ jest.mock('@/hooks/useCompatibilityFallbackHandlerDeployments')
 jest.mock('@/hooks/useSafeInfo')
 jest.mock('@/features/swap/hooks/useIsTWAPFallbackHandler')
 
-const fallbackHandlerAddress = getCompatibilityFallbackHandlerDeployment({ network: '1' })?.defaultAddress!
+const fallbackHandlerAddress = getCompatibilityFallbackHandlerDeployment({
+  network: '1',
+  version: '1.4.1',
+})?.defaultAddress!
 
 describe('useHasUntrustedFallbackHandler', () => {
   beforeEach(() => {

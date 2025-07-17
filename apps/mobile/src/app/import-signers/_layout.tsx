@@ -1,23 +1,9 @@
-import { Stack, useFocusEffect } from 'expo-router'
+import { Stack } from 'expo-router'
 import { getDefaultScreenOptions } from '@/src/navigation/hooks/utils'
-import { useCallback } from 'react'
-import { CaptureProtection } from 'react-native-capture-protection'
-export default function ImportSignersLayout() {
-  // Enable capture protection when the whole group is focused
-  // and disable when the group is unfocused
-  useFocusEffect(
-    useCallback(() => {
-      CaptureProtection.prevent({
-        screenshot: true,
-        record: true,
-        appSwitcher: true,
-      })
+import { useScreenProtection } from '@/src/hooks/useScreenProtection'
 
-      return () => {
-        CaptureProtection.allow()
-      }
-    }, []),
-  )
+export default function ImportSignersLayout() {
+  useScreenProtection()
 
   return (
     <Stack

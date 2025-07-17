@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import * as DocumentPicker from 'expo-document-picker'
 import * as FileSystem from 'expo-file-system'
 import Logger from '@/src/utils/logger'
@@ -10,6 +10,7 @@ import {
   LegacyDataFormatError,
   LegacyDataCorruptedError,
 } from '@/src/utils/legacyData'
+import { NotImportedKey } from '../helpers/transforms'
 
 export function useLegacyImport() {
   const [fileName, setFileName] = useState<string | null>(null)
@@ -18,6 +19,7 @@ export function useLegacyImport() {
   const [error, setError] = useState<string>()
   const [isLoading, setIsLoading] = useState(false)
   const [importedData, setImportedData] = useState<SerializedDataFile | null>(null)
+  const [notImportedKeys, setNotImportedKeys] = useState<NotImportedKey[]>([])
 
   const pickFile = async (): Promise<boolean> => {
     try {
@@ -90,6 +92,10 @@ export function useLegacyImport() {
     }
   }
 
+  const updateNotImportedKeys = useCallback((keys: NotImportedKey[]) => {
+    setNotImportedKeys(keys)
+  }, [])
+
   const reset = () => {
     setFileName(null)
     setFileUri(null)
@@ -97,12 +103,14 @@ export function useLegacyImport() {
     setError(undefined)
     setIsLoading(false)
     setImportedData(null)
+    setNotImportedKeys([])
   }
 
   return {
     pickFile,
     handlePasswordChange,
     handleImport,
+    updateNotImportedKeys,
     reset,
     fileName,
     password,
@@ -110,5 +118,6 @@ export function useLegacyImport() {
     isLoading,
     hasFile: !!fileUri,
     importedData,
+    notImportedKeys,
   }
 }

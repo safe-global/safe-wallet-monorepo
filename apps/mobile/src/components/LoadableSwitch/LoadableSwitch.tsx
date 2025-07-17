@@ -1,6 +1,6 @@
 import React from 'react'
 import { Switch, StyleSheet } from 'react-native'
-import { View } from 'tamagui'
+import { getTokenValue, useTheme, View } from 'tamagui'
 import { Loader } from '../Loader'
 
 interface LoadableSwitchProps {
@@ -21,11 +21,22 @@ export const LoadableSwitch: React.FC<LoadableSwitchProps> = ({
   testID,
   trackColor = { true: '$primary' },
 }) => {
+  const theme = useTheme()
+
+  const resolveThemeColor = (color: string) => {
+    if (color.startsWith('$')) {
+      const themeKey = color.slice(1) // remove the '$' prefix
+      const themeValue = theme[themeKey as keyof typeof theme]
+      return themeValue?.get() || getTokenValue(color as unknown as 'auto') || color
+    }
+    return color
+  }
+
   return (
     <View position="relative">
       {isLoading && (
         <View style={styles.loaderContainer} backgroundColor="$background">
-          <Loader size={24} color={value ? trackColor.true : '#ccc'} />
+          <Loader size={24} color={value ? resolveThemeColor(trackColor.true) : '#ccc'} />
         </View>
       )}
       <Switch testID={testID} onValueChange={onChange} value={value} trackColor={trackColor} />

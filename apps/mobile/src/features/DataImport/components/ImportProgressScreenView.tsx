@@ -4,9 +4,10 @@ import { Bar } from 'react-native-progress'
 
 interface ImportProgressScreenViewProps {
   progress: number
+  message?: string
 }
 
-export const ImportProgressScreenView = ({ progress }: ImportProgressScreenViewProps) => {
+export const ImportProgressScreenView = ({ progress, message }: ImportProgressScreenViewProps) => {
   return (
     <ScrollView contentContainerStyle={{ flex: 1 }}>
       <YStack flex={1} testID="import-progress-screen">
@@ -22,6 +23,13 @@ export const ImportProgressScreenView = ({ progress }: ImportProgressScreenViewP
             <Text fontSize="$4" textAlign="center" color="$colorSecondary">
               Hang on, it may take a few seconds
             </Text>
+
+            {/* Progress Message */}
+            {message && (
+              <Text fontSize="$3" textAlign="center" color="$colorSecondary" marginTop="$4">
+                {message}
+              </Text>
+            )}
 
             {/* Progress Bar Container */}
             <View width="100%" height={8} borderRadius="$2" overflow="hidden" marginTop="$8">

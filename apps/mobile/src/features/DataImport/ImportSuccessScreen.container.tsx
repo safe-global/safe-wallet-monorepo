@@ -7,12 +7,14 @@ import { selectAllSafes, SafesSlice } from '@/src/store/safesSlice'
 import { setActiveSafe } from '@/src/store/activeSafeSlice'
 import { SafeInfo } from '@/src/types/address'
 import { ImportSuccessScreenView } from './components/ImportSuccessScreenView'
+import { useDataImportContext } from './context/DataImportProvider'
 
 export const ImportSuccessScreen = () => {
   const router = useRouter()
   const insets = useSafeAreaInsets()
   const dispatch = useAppDispatch()
   const allSafes = useAppSelector(selectAllSafes) as SafesSlice
+  const { notImportedKeys } = useDataImportContext()
   const theme = useTheme()
   const colors: [string, string] = [theme.success.get(), 'transparent']
 
@@ -47,5 +49,12 @@ export const ImportSuccessScreen = () => {
     router.replace('/(tabs)')
   }
 
-  return <ImportSuccessScreenView bottomInset={insets.bottom} gradientColors={colors} onContinue={handleContinue} />
+  return (
+    <ImportSuccessScreenView
+      bottomInset={insets.bottom}
+      gradientColors={colors}
+      onContinue={handleContinue}
+      notImportedKeys={notImportedKeys}
+    />
+  )
 }

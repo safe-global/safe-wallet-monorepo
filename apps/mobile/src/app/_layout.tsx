@@ -190,6 +190,13 @@ function RootLayout() {
                               }}
                             />
                             <Stack.Screen
+                              name="review-and-confirm"
+                              options={{
+                                title: 'Review and confirm',
+                                headerRight: () => <View width={16} />,
+                              }}
+                            />
+                            <Stack.Screen
                               name="currency"
                               options={{
                                 headerShown: true,

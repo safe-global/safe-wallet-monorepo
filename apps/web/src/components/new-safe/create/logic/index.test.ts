@@ -42,10 +42,6 @@ const latestSafeVersion = getLatestSafeVersion(
   chainBuilder().with({ chainId: '1', recommendedMasterCopyVersion: '1.4.1' }).build(),
 )
 
-const safeToL2SetupDeployment = getSafeToL2SetupDeployment()
-const safeToL2SetupAddress = safeToL2SetupDeployment?.defaultAddress
-const safeToL2SetupInterface = Safe_to_l2_setup__factory.createInterface()
-
 describe('create/logic', () => {
   describe('createNewSafeViaRelayer', () => {
     const owner1 = toBeHex('0x1', 20)
@@ -287,23 +283,24 @@ describe('create/logic', () => {
         owners: [faker.finance.ethereumAddress()],
         threshold: 1,
       }
+      const chainSetup = chainBuilder()
+        .with({ chainId: '137' })
+        // Multichain creation is toggled on
+        .with({ features: [FEATURES.COUNTERFACTUAL, FEATURES.MULTI_CHAIN_SAFE_CREATION] as any })
+        .with({ recommendedMasterCopyVersion: '1.4.1' })
+        .with({ l2: true })
+        .build()
+
       const safeL2SingletonDeployment = getSafeL2SingletonDeployment({
         version: '1.4.1',
         network: '137',
       })?.defaultAddress
-      expect(
-        createNewUndeployedSafeWithoutSalt(
-          '1.4.1',
-          safeSetup,
-          chainBuilder()
-            .with({ chainId: '137' })
-            // Multichain creation is toggled on
-            .with({ features: [FEATURES.COUNTERFACTUAL, FEATURES.MULTI_CHAIN_SAFE_CREATION] as any })
-            .with({ recommendedMasterCopyVersion: '1.4.1' })
-            .with({ l2: true })
-            .build(),
-        ),
-      ).toEqual({
+
+      const safeToL2SetupDeployment = getSafeToL2SetupDeployment({ version: '1.4.1', network: chainSetup.chainId })
+      const safeToL2SetupAddress = safeToL2SetupDeployment?.networkAddresses[chainSetup.chainId]
+      const safeToL2SetupInterface = Safe_to_l2_setup__factory.createInterface()
+
+      expect(createNewUndeployedSafeWithoutSalt('1.4.1', safeSetup, chainSetup)).toEqual({
         safeAccountConfig: {
           ...safeSetup,
           fallbackHandler: getFallbackHandlerDeployment({ version: '1.4.1', network: '137' })?.defaultAddress,

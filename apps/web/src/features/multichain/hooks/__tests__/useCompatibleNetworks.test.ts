@@ -69,7 +69,7 @@ describe('useCompatibleNetworks', () => {
     expect(result.current.every((config) => config.available)).toEqual(false)
   })
 
-  it('should set everything to available except zkSync and GnosisChain Chiado for 1.4.1 Safes', () => {
+  it('should set everything to available except GnosisChain Chiado for 1.4.1 Safes', () => {
     const callData = {
       owners: [faker.finance.ethereumAddress()],
       threshold: 1,
@@ -91,7 +91,7 @@ describe('useCompatibleNetworks', () => {
       const { result } = renderHook(() => useCompatibleNetworks(creationData))
       expect(result.current).toHaveLength(6)
       expect(result.current.map((chain) => chain.chainId)).toEqual(['1', '10', '100', '324', '480', '10200'])
-      expect(result.current.map((chain) => chain.available)).toEqual([true, true, true, false, true, false])
+      expect(result.current.map((chain) => chain.available)).toEqual([true, true, true, true, true, false])
     }
 
     {
@@ -105,7 +105,7 @@ describe('useCompatibleNetworks', () => {
       const { result } = renderHook(() => useCompatibleNetworks(creationData))
       expect(result.current).toHaveLength(6)
       expect(result.current.map((chain) => chain.chainId)).toEqual(['1', '10', '100', '324', '480', '10200'])
-      expect(result.current.map((chain) => chain.available)).toEqual([true, true, true, false, true, false])
+      expect(result.current.map((chain) => chain.available)).toEqual([true, true, true, true, true, false])
     }
   })
 
@@ -133,7 +133,7 @@ describe('useCompatibleNetworks', () => {
       const { result } = renderHook(() => useCompatibleNetworks(creationData))
       expect(result.current).toHaveLength(6)
       expect(result.current.map((chain) => chain.chainId)).toEqual(['1', '10', '100', '324', '480', '10200'])
-      expect(result.current.map((chain) => chain.available)).toEqual([true, true, true, false, true, false])
+      expect(result.current.map((chain) => chain.available)).toEqual([true, true, true, true, true, false])
     }
 
     // 1.3.0, L2 and canonical
@@ -148,7 +148,7 @@ describe('useCompatibleNetworks', () => {
       const { result } = renderHook(() => useCompatibleNetworks(creationData))
       expect(result.current).toHaveLength(6)
       expect(result.current.map((chain) => chain.chainId)).toEqual(['1', '10', '100', '324', '480', '10200'])
-      expect(result.current.map((chain) => chain.available)).toEqual([true, true, true, false, true, true])
+      expect(result.current.map((chain) => chain.available)).toEqual([true, true, true, true, true, true])
     }
 
     // 1.3.0, L1 and EIP155 is not available on Worldchain and Chiado
@@ -163,7 +163,7 @@ describe('useCompatibleNetworks', () => {
       const { result } = renderHook(() => useCompatibleNetworks(creationData))
       expect(result.current).toHaveLength(6)
       expect(result.current.map((chain) => chain.chainId)).toEqual(['1', '10', '100', '324', '480', '10200'])
-      expect(result.current.map((chain) => chain.available)).toEqual([true, true, true, false, true, false])
+      expect(result.current.map((chain) => chain.available)).toEqual([true, true, true, true, true, false])
     }
 
     // 1.3.0, L2 and EIP155
@@ -178,7 +178,7 @@ describe('useCompatibleNetworks', () => {
       const { result } = renderHook(() => useCompatibleNetworks(creationData))
       expect(result.current).toHaveLength(6)
       expect(result.current.map((chain) => chain.chainId)).toEqual(['1', '10', '100', '324', '480', '10200'])
-      expect(result.current.map((chain) => chain.available)).toEqual([true, true, true, false, true, false])
+      expect(result.current.map((chain) => chain.available)).toEqual([true, true, true, true, true, false])
     }
   })
 

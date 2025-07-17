@@ -36,18 +36,22 @@ const safesSlice = createSlice({
       if (!data?.length) {
         return
       }
-      const address = data[0].address.value as Address
 
-      if (!state[address]) {
-        return
+      // Process each safe in the response individually
+      for (const safeOverview of data) {
+        const address = safeOverview.address.value as Address
+
+        if (!state[address]) {
+          continue // Skip if safe doesn't exist in state
+        }
+
+        const current = state[address] || {}
+        // Update the specific chain for this safe
+        state[address] = {
+          ...current,
+          [safeOverview.chainId]: safeOverview,
+        }
       }
-
-      const current = state[address] || {}
-      const byChain = data.reduce<SafesSliceItem>((acc, safe) => {
-        acc[safe.chainId] = safe
-        return acc
-      }, {})
-      state[address] = { ...current, ...byChain }
     })
   },
 })

@@ -6,6 +6,8 @@ import { getVariable, Text, View, useTheme, H4, YStack } from 'tamagui'
 import { BackdropComponent, BackgroundComponent } from '@/src/components/Dropdown/sheetComponents'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Badge } from '@/src/components/Badge'
+import { Platform } from 'react-native'
+import { FullWindowOverlay } from 'react-native-screens'
 
 export const InfoSheet = ({
   info,
@@ -35,6 +37,8 @@ export const InfoSheet = ({
       </TouchableOpacity>
 
       <BottomSheetModal
+        // @ts-expect-error - FullWindowOverlay is not typed
+        containerComponent={Platform.OS === 'ios' ? FullWindowOverlay : undefined}
         ref={bottomSheetModalRef}
         backgroundComponent={BackgroundComponent}
         backdropComponent={() => <BackdropComponent shouldNavigateBack={false} />}

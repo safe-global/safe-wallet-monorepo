@@ -11,13 +11,15 @@ import { SafeInputWithLabel } from '@/src/components/SafeInput/SafeInputWithLabe
 import { Controller, FieldNamesMarkedBoolean, type Control, type FieldErrors } from 'react-hook-form'
 import { type FormValues } from '@/src/features/Signer/types'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { SafeListItem } from '@/src/components/SafeListItem'
 type Props = {
   signerAddress: string
   onPressExplorer: () => void
-  onPressDelete: () => void
   onPressEdit: () => void
+  onPressViewPrivateKey?: () => void
   editMode: boolean
   name: string
+  hasPrivateKey: boolean
   control: Control<FormValues>
   errors: FieldErrors<FormValues>
   dirtyFields: FieldNamesMarkedBoolean<FormValues>
@@ -28,11 +30,12 @@ export const SignerView = ({
   errors,
   dirtyFields,
   signerAddress,
-  onPressDelete,
   onPressExplorer,
   onPressEdit,
+  onPressViewPrivateKey,
   editMode,
   name,
+  hasPrivateKey,
 }: Props) => {
   const { bottom, top } = useSafeAreaInsets()
 
@@ -89,16 +92,21 @@ export const SignerView = ({
             </YStack>
           </XStack>
         </Container>
+
+        {hasPrivateKey && !editMode && (
+          <View marginTop={'$4'} borderTopWidth={1} borderColor={'$borderLight'} paddingTop={'$4'}>
+            <SafeListItem
+              label="View private key"
+              rightNode={<SafeFontIcon name="chevron-right" />}
+              onPress={onPressViewPrivateKey}
+              pressStyle={{ opacity: 0.2 }}
+            />
+          </View>
+        )}
       </ScrollView>
       <KeyboardAvoidingView behavior="padding" keyboardVerticalOffset={top + bottom}>
         <View paddingHorizontal={'$4'} paddingTop={'$2'} paddingBottom={bottom ?? 60}>
-          {editMode ? (
-            <SafeButton onPress={onPressEdit}>Save</SafeButton>
-          ) : (
-            <SafeButton danger={true} onPress={onPressDelete}>
-              Remove signer
-            </SafeButton>
-          )}
+          {editMode ? <SafeButton onPress={onPressEdit}>Save</SafeButton> : null}
         </View>
       </KeyboardAvoidingView>
     </YStack>
