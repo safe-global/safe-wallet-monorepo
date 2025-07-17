@@ -88,6 +88,7 @@ export const TransactionChecksView = ({ tenderly, blockaid }: Props) => {
               </XStack>
               {tenderly.fetchStatus === FETCH_STATUS.SUCCESS && (
                 <SafeButton
+                  size="$sm"
                   secondary
                   onPress={() => {
                     Linking.openURL(tenderly.simulationLink)

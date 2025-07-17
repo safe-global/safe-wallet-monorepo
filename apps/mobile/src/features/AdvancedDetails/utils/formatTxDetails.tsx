@@ -37,7 +37,7 @@ const formatTxDetails = ({ txDetails }: formatTxDetailsProps): ListTableItem[] =
         <View width="100%">
           <Receiver txData={txDetails.txData} />
         </View>
-        <View width="100%" flexDirection="row" alignItems="center" gap="$4">
+        <View width="100%" flexDirection="row" alignItems="center" gap="$2">
           <Identicon address={txDetails.txData?.to.value as Address} size={24} />
 
           <View flexDirection="row" justifyContent="space-between" alignItems="center">
@@ -46,10 +46,10 @@ const formatTxDetails = ({ txDetails }: formatTxDetailsProps): ListTableItem[] =
             </Text>
 
             <View flexDirection="row" alignItems="center" gap="$3">
-              <CopyButton value={txDetails.txData?.to.value || ''} size={14} color={'$textSecondaryLight'} />
+              <CopyButton value={txDetails.txData?.to.value || ''} size={16} color={'$textSecondaryLight'} />
 
               <TouchableOpacity onPress={() => null}>
-                <SafeFontIcon name="external-link" size={14} color="$textSecondaryLight" />
+                <SafeFontIcon name="external-link" size={16} color="$textSecondaryLight" />
               </TouchableOpacity>
             </View>
           </View>
@@ -75,7 +75,8 @@ const formatTxDetails = ({ txDetails }: formatTxDetailsProps): ListTableItem[] =
         <Badge
           circleProps={badgeProps}
           themeName="badge_background"
-          fontSize={12}
+          fontSize={13}
+          textContentProps={{ fontFamily: 'DM Mono' }}
           circular={false}
           content={operationText}
         />

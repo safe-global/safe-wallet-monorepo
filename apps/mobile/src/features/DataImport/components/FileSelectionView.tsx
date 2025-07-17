@@ -28,18 +28,14 @@ interface FileSelectionViewProps {
 export const FileSelectionView = ({ colorScheme, bottomInset, onFileSelect, onImagePress }: FileSelectionViewProps) => {
   return (
     <YStack flex={1} testID="file-selection-screen" paddingBottom={bottomInset}>
-      {/* Content */}
       <YStack flex={1} paddingHorizontal="$4" justifyContent="space-between" marginTop={'$4'}>
         <YStack gap="$4" flex={1}>
-          {/* Title */}
           <H2 fontWeight={'600'} textAlign="center" marginHorizontal={'$4'}>
-            Almost there! Import file to the new app
+            Import your file
           </H2>
 
-          {/* Subtitle */}
-          <StyledText>Locate the exported file from the old app to continue.</StyledText>
+          <StyledText>Find the exported file from your old app to continue.</StyledText>
 
-          {/* Image - Tappable */}
           <YStack flex={1} justifyContent="center" alignItems="center">
             <TouchableOpacity onPress={onImagePress} activeOpacity={0.8}>
               <Image
@@ -51,11 +47,9 @@ export const FileSelectionView = ({ colorScheme, bottomInset, onFileSelect, onIm
           </YStack>
         </YStack>
 
-        {/* Bottom Actions */}
         <YStack gap="$4">
-          <PrivacyText>Don't worry, all your data will stay private and secure during the transfer.</PrivacyText>
           <SafeButton primary testID="select-file-to-import-button" onPress={onFileSelect}>
-            Select file to import
+            Select from files
           </SafeButton>
         </YStack>
       </YStack>

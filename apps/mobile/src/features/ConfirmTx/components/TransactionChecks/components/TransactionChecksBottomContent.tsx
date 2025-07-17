@@ -1,6 +1,8 @@
 import React from 'react'
 import { Alert } from '@/src/components/Alert'
 import { getAlertType, SecurityState } from '../utils/transactionChecksUtils'
+import { View } from 'tamagui'
+import { InfoSheet } from '@/src/components/InfoSheet'
 
 interface TransactionChecksBottomContentProps {
   security: SecurityState
@@ -16,7 +18,13 @@ export const TransactionChecksBottomContent = ({ security }: TransactionChecksBo
 
   // Show warnings for contract management changes (proxy upgrades, ownership changes, etc.)
   if (security.hasContractManagement) {
-    return <Alert type="warning" info="Review details first" message="Contract changes detected!" />
+    return (
+      <View>
+        <InfoSheet title="Proceed with caution" info="Review details first">
+          <Alert type="warning" message="Contract changes detected" />
+        </InfoSheet>
+      </View>
+    )
   }
 
   // Show error if blockaid check failed

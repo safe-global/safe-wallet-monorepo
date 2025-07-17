@@ -55,9 +55,9 @@ export function Contract({ txInfo, executionInfo, txId }: ContractProps) {
           label="Actions"
           rightNode={
             <View flexDirection="row" alignItems="center" gap="$2">
-              <Badge themeName="badge_background_inverted" content={txInfo.actionCount.toString()} />
+              <Badge themeName="badge_background_inverted" content={txInfo.actionCount.toString()} circleSize="$6" />
 
-              <SafeFontIcon name={'chevron-right'} />
+              <SafeFontIcon name={'chevron-right'} size={16} />
             </View>
           }
           onPress={handleViewActions}

@@ -61,7 +61,7 @@ export function CancelTx({ txInfo, executionInfo, txId }: CancelTxProps) {
           label="Actions"
           rightNode={
             <View flexDirection="row" alignItems="center" gap="$2">
-              <Badge themeName="badge_background_inverted" content={txInfo.actionCount.toString()} />
+              <Badge themeName="badge_background_inverted" content={txInfo.actionCount.toString()} circleSize="$6" />
 
               <SafeFontIcon name={'chevron-right'} />
             </View>

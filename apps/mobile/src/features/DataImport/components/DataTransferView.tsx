@@ -48,13 +48,10 @@ export const DataTransferView = ({
           )}
 
           <H2 fontWeight={'600'} textAlign="center">
-            Transfer your data for a quick start
+            Import old app data
           </H2>
 
-          <StyledText>
-            Easily bring over your Safe accounts, signers, and address book from the old app for a smooth start, if you
-            have used it before.
-          </StyledText>
+          <StyledText>Move your Safe accounts, signers, and address book in minutes.</StyledText>
         </YStack>
 
         {/* Phone Mockup */}
@@ -64,7 +61,7 @@ export const DataTransferView = ({
       {/* Bottom Buttons */}
       <YStack gap="$3" paddingHorizontal="$4" paddingBottom={bottomInset} paddingTop="$4">
         <SafeButton primary testID="transfer-data-button" onPress={onPressTransferData}>
-          Transfer data
+          Import data
         </SafeButton>
 
         <SafeButton text testID="start-fresh-button" onPress={onPressStartFresh}>

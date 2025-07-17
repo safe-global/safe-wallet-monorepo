@@ -53,10 +53,12 @@ export const badgeTheme = {
   light_badge_error: {
     color: tokens.color.errorMainLight,
     background: tokens.color.errorBackgroundLight,
+    borderColor: tokens.color.borderBackgroundLight,
   },
   dark_badge_error: {
     color: tokens.color.errorMainDark,
-    background: tokens.color.errorDarkDark,
+    background: tokens.color.errorBackgroundDark,
+    borderColor: tokens.color.borderBackgroundDark,
   },
   light_badge_background_inverted: {
     color: tokens.color.logoBackgroundLight,

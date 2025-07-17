@@ -32,7 +32,7 @@ export const FungibleBalanceChange = ({
 
   return (
     <XStack alignItems="center" gap="$2">
-      <Logo size={'$5'} logoUri={logoUri} />
+      <Logo size={'$5'} logoUri={logoUri} imageBackground="$background" />
       <Text fontSize={14} fontWeight="700" marginLeft="$1">
         {asset.symbol}
       </Text>

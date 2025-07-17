@@ -63,7 +63,7 @@ export function GenericView({ txInfo, txData, executionInfo, txId }: GenericView
           onPress={handleViewActions}
           rightNode={
             <View flexDirection="row" alignItems="center" gap="$2">
-              <Badge themeName="badge_background_inverted" content={txInfo.actionCount as string} />
+              <Badge themeName="badge_background_inverted" content={txInfo.actionCount as string} circleSize="$6" />
 
               <SafeFontIcon name={'chevron-right'} />
             </View>
