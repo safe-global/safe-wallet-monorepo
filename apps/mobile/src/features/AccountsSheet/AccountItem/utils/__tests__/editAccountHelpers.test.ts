@@ -13,7 +13,6 @@ import { keyStorageService } from '@/src/services/key-storage'
 import { removeSigner } from '@/src/store/signersSlice'
 import Logger from '@/src/utils/logger'
 
-// Mock dependencies
 jest.mock('@/src/services/key-storage', () => ({
   keyStorageService: {
     getPrivateKey: jest.fn(),

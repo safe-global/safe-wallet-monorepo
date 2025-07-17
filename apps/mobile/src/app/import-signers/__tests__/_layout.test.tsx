@@ -1,12 +1,10 @@
 import React from 'react'
 import { render } from '@/src/tests/test-utils'
 
-// Mock useScreenProtection hook
 jest.mock('@/src/hooks/useScreenProtection', () => ({
   useScreenProtection: jest.fn(),
 }))
 
-// Get the mocked function
 const mockUseScreenProtection = jest.requireMock('@/src/hooks/useScreenProtection').useScreenProtection
 
 jest.mock('expo-router', () => {
@@ -20,7 +18,6 @@ jest.mock('expo-router', () => {
   }
 })
 
-// Mock ImportPrivateKey component to avoid complex dependencies
 jest.mock('@/src/features/ImportPrivateKey', () => {
   const { View } = require('react-native')
   return {
