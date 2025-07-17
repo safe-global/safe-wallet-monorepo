@@ -97,7 +97,6 @@ await setUserProperty(AnalyticsUserProperties.WALLET_ADDRESS, 'abcd1234...') // 
 ```typescript
 // In any component that displays safe information
 const SafeComponent = () => {
-
   const handleTransaction = async () => {
     await trackEvent(createTxConfirmEvent(TX_TYPES.transfer_token))
     // Automatically includes correct safeAddress and chainId
@@ -156,7 +155,6 @@ export * from './newCategory'
 import { trackEvent, NEW_CATEGORY_EVENTS } from '@/src/services/analytics'
 
 const MyComponent = () => {
-
   const handleAction = async () => {
     await trackEvent(NEW_CATEGORY_EVENTS.NEW_ACTION)
   }

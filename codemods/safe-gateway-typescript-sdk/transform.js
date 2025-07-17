@@ -6,7 +6,7 @@
  * - importMapping: Object mapping old imports to new module/name pairs
  * - enumLiteralMappings: Object mapping enum names to their literal values
  * - sourcePackage: String identifying the source package to transform
- * 
+ *
  * then pass the mappings object to the transformer.
  */
 export default function createTransformer(mappings) {
@@ -28,7 +28,7 @@ export default function createTransformer(mappings) {
         if (enumMappings[propName]) {
           const newNode = j.tsAsExpression(
             j.stringLiteral(enumMappings[propName]),
-            j.tsTypeReference(j.identifier('const'))
+            j.tsTypeReference(j.identifier('const')),
           )
           j(path).replaceWith(newNode)
         }
@@ -36,39 +36,37 @@ export default function createTransformer(mappings) {
     })
 
     // Transform imports
-    root
-      .find(j.ImportDeclaration, { source: { value: mappings.sourcePackage } })
-      .forEach((path) => {
-        const baseImportKind = path.node.importKind || 'value'
-        const transformedSpecifiers = []
+    root.find(j.ImportDeclaration, { source: { value: mappings.sourcePackage } }).forEach((path) => {
+      const baseImportKind = path.node.importKind || 'value'
+      const transformedSpecifiers = []
 
-        path.node.specifiers.forEach((specifier) => {
-          if (specifier.type !== 'ImportSpecifier') return
+      path.node.specifiers.forEach((specifier) => {
+        if (specifier.type !== 'ImportSpecifier') return
 
-          const importedName = specifier.imported.name
-          const mapping = mappings.importMapping[importedName]
-          if (!mapping) return
+        const importedName = specifier.imported.name
+        const mapping = mappings.importMapping[importedName]
+        if (!mapping) return
 
-          const specifierImportKind = specifier.importKind || baseImportKind
-          const key = `${mapping.module}|${specifierImportKind}`
-          if (!newImportsMap.has(key)) newImportsMap.set(key, [])
+        const specifierImportKind = specifier.importKind || baseImportKind
+        const key = `${mapping.module}|${specifierImportKind}`
+        if (!newImportsMap.has(key)) newImportsMap.set(key, [])
 
-          const localName = specifier.local.name !== importedName ? specifier.local.name : undefined
-          if (localName) {
-            newImportsMap.get(key).push(j.importSpecifier(j.identifier(mapping.newName), j.identifier(localName)))
-          } else {
-            newImportsMap.get(key).push(j.importSpecifier(j.identifier(mapping.newName)))
-          }
-
-          transformedSpecifiers.push(specifier)
-        })
-
-        if (transformedSpecifiers.length === path.node.specifiers.length) {
-          importsToRemove.push(path)
+        const localName = specifier.local.name !== importedName ? specifier.local.name : undefined
+        if (localName) {
+          newImportsMap.get(key).push(j.importSpecifier(j.identifier(mapping.newName), j.identifier(localName)))
         } else {
-          path.node.specifiers = path.node.specifiers.filter((spec) => !transformedSpecifiers.includes(spec))
+          newImportsMap.get(key).push(j.importSpecifier(j.identifier(mapping.newName)))
         }
+
+        transformedSpecifiers.push(specifier)
       })
+
+      if (transformedSpecifiers.length === path.node.specifiers.length) {
+        importsToRemove.push(path)
+      } else {
+        path.node.specifiers = path.node.specifiers.filter((spec) => !transformedSpecifiers.includes(spec))
+      }
+    })
 
     importsToRemove.forEach((p) => j(p).remove())
 
@@ -106,4 +104,4 @@ export default function createTransformer(mappings) {
 
     return root.toSource({ quote: 'single', trailingComma: true })
   }
-} 
+}

@@ -23,8 +23,6 @@
     "lint": "tsc && npm run eslint",
     "eslint": "eslint src/*",
     "eslint:fix": "npm run lint -- --fix",
-    "prettier": "prettier --check \"**/*.{js,jsx,ts,tsx,json,md}\"",
-    "prettier:fix": "prettier --write \"**/*.{js,jsx,ts,tsx,json,md}\"",
     "storybook-generate": "sb-rn-get-stories",
     "generate:icons": "node ./scripts/generateIconTypes.js",
     "prepare": "husky",

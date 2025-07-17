@@ -41,7 +41,9 @@ export function TokensContainer() {
         <AssetsCard
           name={item.tokenInfo.name}
           logoUri={item.tokenInfo.logoUri}
-          description={`${formatVisualAmount(item.balance, item.tokenInfo.decimals as number)} ${item.tokenInfo.symbol}`}
+          description={`${formatVisualAmount(item.balance, item.tokenInfo.decimals as number)} ${
+            item.tokenInfo.symbol
+          }`}
           rightNode={
             <Text fontSize="$4" fontWeight={600} color="$color">
               {shouldDisplayPreciseBalance(fiatBalance, 7)
