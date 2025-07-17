@@ -57,9 +57,6 @@ export const classifyNotificationError = (error: unknown): NotificationCleanupEr
   }
 }
 
-/**
- * Gets all safes affected by removing a delegate (pure function)
- */
 export const getAffectedSafes = (
   ownerAddress: Address,
   allSafes: RootState['safes'],
@@ -95,9 +92,6 @@ export const getAffectedSafes = (
   return affectedSafes
 }
 
-/**
- * Checks if a safe has other delegates besides the one being removed (pure function)
- */
 export const hasOtherDelegates = (
   safeAddress: Address,
   excludeDelegateAddress: Address,
@@ -107,9 +101,6 @@ export const hasOtherDelegates = (
   return allSafeDelegates.some((delegate) => delegate.delegateAddress !== excludeDelegateAddress)
 }
 
-/**
- * Creates subscription data for API calls
- */
 export const createSubscriptionData = async (
   safeAddress: string,
   chainIds: string[],

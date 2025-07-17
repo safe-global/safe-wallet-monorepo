@@ -48,17 +48,12 @@ export const withRetry = async <T>(operation: () => Promise<T>, options: RetryOp
   throw lastError
 }
 
-/**
- * Check if an error is rate-limit related
- */
 function isRateLimitError(error: unknown): boolean {
   if (error && typeof error === 'object') {
-    // Check status code
     if ('status' in error && (error as { status: number }).status === 429) {
       return true
     }
 
-    // Check error message
     if ('message' in error) {
       const message = (error as { message: string }).message.toLowerCase()
       return message.includes('429') || message.includes('rate limit') || message.includes('too many requests')
@@ -68,16 +63,10 @@ function isRateLimitError(error: unknown): boolean {
   return false
 }
 
-/**
- * Check if an error should be retried
- */
 function isRetryableError(error: unknown): boolean {
   return isRateLimitError(error)
 }
 
-/**
- * Calculate delay based on attempt and error type
- */
 function calculateDelay(attempt: number, baseDelay: number, enableJitter: boolean, isRateLimit: boolean): number {
   if (isRateLimit) {
     // Exponential backoff for rate limits
@@ -90,7 +79,6 @@ function calculateDelay(attempt: number, baseDelay: number, enableJitter: boolea
   }
 }
 
-// Convenience functions for common use cases
 export const withRateLimitRetry = <T>(operation: () => Promise<T>, maxRetries = 3) =>
   withRetry(operation, { maxRetries, enableJitter: true })
 

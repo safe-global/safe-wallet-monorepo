@@ -38,6 +38,9 @@ interface KeychainCleanupResult {
 /**
  * Cleans up notifications for all delegates of a given owner
  * This is a critical step that must succeed before proceeding with delegate removal
+ *
+ * If we don't manage to unsubscribe the user, but just proceed and delete the key
+ * the user is going to receive push notifications for this safe, which can get quite annoying
  */
 export const cleanupDelegateNotifications = async (
   ownerAddress: Address,
@@ -95,10 +98,6 @@ export const cleanupDelegateNotifications = async (
   }
 }
 
-/**
- * Removes delegates from the backend transaction service across all chains
- * Uses rate limiting and retry logic to handle 429 errors and improve reliability
- */
 export const removeDelegatesFromBackend = async (
   ownerAddress: Address,
   delegateAddresses: Address[],
@@ -120,24 +119,18 @@ export const removeDelegatesFromBackend = async (
           await sleep(500 * delegateIndex)
         }
 
-        // Remove delegate from all chains with improved rate limiting
         const chainRemovalPromises = allChains.map(async (chain, chainIndex) => {
           try {
-            // Progressive delay based on chain index and delegate index
             const baseDelay = 300 * chainIndex + 100 * delegateIndex
             if (baseDelay > 0) {
               await sleep(baseDelay)
             }
 
-            // Use retry logic for chain-specific operations
             const result = await withGeneralRetry(async () => {
-              // Generate typed data for deletion
               const typedData = getDelegateTypedData(chain.chainId, delegateAddress)
 
-              // Sign the message with the owner's wallet
               const signature = await ownerWallet.signTypedData(typedData.domain, typedData.types, typedData.message)
 
-              // Delete delegate from the backend
               await deleteDelegate({
                 chainId: chain.chainId,
                 delegateAddress,
@@ -157,10 +150,8 @@ export const removeDelegatesFromBackend = async (
           }
         })
 
-        // Wait for all chain removals to complete for this delegate
         const chainResults = await Promise.all(chainRemovalPromises)
 
-        // Check if any chain removal failed
         const failedChains = chainResults.filter((result) => !result.success)
         const successfulChains = chainResults.filter((result) => result.success).length
 
@@ -186,10 +177,8 @@ export const removeDelegatesFromBackend = async (
       }
     })
 
-    // Wait for all delegate removals to complete
     const delegateResults = await Promise.all(removalPromises)
 
-    // Check if any delegate removal failed
     const failedDelegates = delegateResults
       .filter((result) => !result.success)
       .map((result) => result.delegateAddress)
@@ -220,10 +209,6 @@ export const removeDelegatesFromBackend = async (
   }
 }
 
-/**
- * Removes delegate private keys from the keychain
- * This is a cleanup step that should not fail the entire process
- */
 export const cleanupDelegateKeychain = async (
   ownerAddress: Address,
   delegateAddresses: Address[],
@@ -246,7 +231,6 @@ export const cleanupDelegateKeychain = async (
 
     const keychainResults = await Promise.all(keychainCleanupPromises)
 
-    // Check if any keychain cleanup failed
     const failedDelegates = keychainResults
       .filter((result) => !result.success)
       .map((result) => result.delegateAddress)
@@ -255,7 +239,7 @@ export const cleanupDelegateKeychain = async (
     if (failedDelegates.length > 0) {
       Logger.warn(`Some delegate keys failed to be removed from keychain`, failedDelegates)
       // Note: We don't fail the entire process for keychain cleanup failures
-      // as they are not critical for the user experience
+      // as delegate remove on the backend is not critical for the user experience
     }
 
     return { success: true, failedDelegates }
@@ -263,7 +247,7 @@ export const cleanupDelegateKeychain = async (
     Logger.error('Delegate keychain cleanup failed', error)
     const errorMsg = error instanceof Error ? error.message : String(error)
     return {
-      success: true, // Still return success as keychain cleanup is not critical
+      success: true, // Still return success as delegate removal on the backend is not critical
       error: errorMsg,
       failedDelegates: delegateAddresses,
     }

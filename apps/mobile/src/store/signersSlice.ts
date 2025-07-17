@@ -37,21 +37,12 @@ export const { addSigner, removeSigner } = signersSlice.actions
 
 export const selectSigners = (state: RootState) => state.signers
 
-/**
- * Selector to get signers by address
- */
 export const selectSignersByAddress = (state: RootState) => state.signers
 
-/**
- * Selector to check if a signer has an imported private key
- */
 export const selectSignerHasPrivateKey = (address: string) => (state: RootState) => {
   return !!state.signers[address]
 }
 
-/**
- * Selector to get the total number of signers managed by the app
- */
 export const selectTotalSignerCount = (state: RootState) => Object.keys(state.signers).length
 
 export default signersSlice.reducer

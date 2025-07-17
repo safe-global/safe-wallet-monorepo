@@ -52,18 +52,13 @@ export const useDelegateCleanup = (): UseDelegateCleanupProps => {
   })
   const dispatch = useAppDispatch()
 
-  // Get all available chains
   const allChains = useAppSelector(selectAllChains)
-  // Get all delegates from Redux store
   const allDelegates = useAppSelector(selectDelegates)
 
-  // Get notification cleanup functionality
   const { cleanupNotificationsForDelegate } = useNotificationCleanup()
 
-  // Access API endpoints
   const [deleteDelegate] = cgwApi.useDelegatesDeleteDelegateV2Mutation()
 
-  // Create the service instance with dependencies
   const cleanupService = useMemo(() => {
     return new DelegateCleanupService({
       allChains,
@@ -86,7 +81,6 @@ export const useDelegateCleanup = (): UseDelegateCleanupProps => {
         const result = await cleanupService.removeAllDelegatesForOwner(ownerAddress, ownerPrivateKey)
 
         if (!result.success) {
-          // Convert standardized error back to DelegateCleanupError for backward compatibility
           const cleanupError: DelegateCleanupError = {
             type: mapErrorTypeToCleanupErrorType(result.error?.type),
             message: result.error?.message || 'Unknown error',

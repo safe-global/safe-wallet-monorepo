@@ -23,23 +23,20 @@ export interface SafeNavigationConfig {
   dispatch: AppDispatch
 }
 
-// Helper function to check if an owner is a signer in other safes
 export const isOwnerInOtherSafes = (
   ownerAddress: Address,
   excludeSafeAddress: Address,
   allSafesInfo: SafesCollection,
 ): boolean => {
-  // Check all other safes to see if this owner is a signer
   return Object.entries(allSafesInfo).some(([safeAddr, safeInfo]) => {
     if (safeAddr === excludeSafeAddress) {
-      return false // Skip the safe being deleted
+      return false
     }
 
     return Object.values(safeInfo).some((deployment) => deployment.owners.some((owner) => owner.value === ownerAddress))
   })
 }
 
-// Helper function to check if a safe has owners with private keys
 export const getSafeOwnersWithPrivateKeys = (
   safeAddress: Address,
   allSafesInfo: SafesCollection,
@@ -52,7 +49,6 @@ export const getSafeOwnersWithPrivateKeys = (
 
   const ownersWithPrivateKeys: Address[] = []
 
-  // Check all deployments of this safe
   Object.values(safeInfo).forEach((deployment) => {
     deployment.owners.forEach((owner) => {
       const hasPrivateKey = !!allSigners[owner.value]
@@ -65,7 +61,6 @@ export const getSafeOwnersWithPrivateKeys = (
   return ownersWithPrivateKeys
 }
 
-// Helper function to get owners that can be safely deleted (not used in other safes)
 export const getOwnersToDelete = (
   safeAddress: Address,
   allSafesInfo: SafesCollection,
@@ -76,7 +71,6 @@ export const getOwnersToDelete = (
   return ownersWithPrivateKeys.filter((ownerAddress) => !isOwnerInOtherSafes(ownerAddress, safeAddress, allSafesInfo))
 }
 
-// Core private key cleanup logic for a single owner
 export const cleanupSinglePrivateKey = async (
   ownerAddress: Address,
   removeAllDelegatesForOwner: (
@@ -86,7 +80,6 @@ export const cleanupSinglePrivateKey = async (
   dispatch: AppDispatch,
 ): Promise<StandardErrorResult<{ success: true }>> => {
   try {
-    // Get the private key for delegate cleanup
     const privateKey = await keyStorageService.getPrivateKey(ownerAddress)
     if (!privateKey) {
       return createErrorResult(ErrorType.STORAGE_ERROR, 'Private key not found for the specified address', null, {
@@ -120,7 +113,6 @@ export const cleanupSinglePrivateKey = async (
   }
 }
 
-// Helper function to clean up private keys for multiple owners
 export const cleanupPrivateKeysForOwners = async (
   ownerAddresses: Address[],
   removeAllDelegatesForOwner: (
@@ -154,7 +146,6 @@ export const cleanupPrivateKeysForOwners = async (
   return createSuccessResult({ processedCount, failures })
 }
 
-// Helper function to create deletion confirmation message
 export const createDeletionMessage = (ownersWithPrivateKeys: Address[], ownersToDelete: Address[]): string => {
   let message = `This account has ${ownersWithPrivateKeys.length} owner(s) with private keys stored on this device.`
 
@@ -171,7 +162,6 @@ export const createDeletionMessage = (ownersWithPrivateKeys: Address[], ownersTo
   return message
 }
 
-// Helper function to proceed with safe deletion after cleanup
 export const proceedWithSafeDeletion = (
   address: Address,
   { navigation, activeSafe, safes, dispatch }: SafeNavigationConfig,
@@ -217,11 +207,9 @@ interface HandleConfirmedDeletionParams {
   reject: (error: Error) => void
 }
 
-// Helper function to handle confirmed deletion with private key cleanup
 const handleConfirmedDeletion = async (params: HandleConfirmedDeletionParams) => {
   const { address, ownersToDelete, removeAllDelegatesForOwner, navigationConfig, resolve, reject } = params
   try {
-    // Early return if no cleanup needed
     if (ownersToDelete.length === 0) {
       proceedWithSafeDeletion(address, navigationConfig)
       resolve()
@@ -261,13 +249,11 @@ interface HandleSafeDeletionParams {
   navigationConfig: SafeNavigationConfig
 }
 
-// Helper function to handle safe deletion with confirmation
 export const handleSafeDeletion = async (params: HandleSafeDeletionParams): Promise<void> => {
   const { address, allSafesInfo, allSigners, removeAllDelegatesForOwner, navigationConfig } = params
   const ownersWithPrivateKeys = getSafeOwnersWithPrivateKeys(address, allSafesInfo, allSigners)
   const ownersToDelete = getOwnersToDelete(address, allSafesInfo, allSigners)
 
-  // Early return for simple case - no private keys to clean up
   if (ownersWithPrivateKeys.length === 0) {
     proceedWithSafeDeletion(address, navigationConfig)
     return

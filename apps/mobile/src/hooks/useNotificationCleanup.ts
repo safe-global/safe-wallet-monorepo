@@ -50,16 +50,13 @@ export const useNotificationCleanup = (): UseNotificationCleanupProps => {
           return { success: true }
         }
 
-        // Process each affected safe in parallel
         const cleanupPromises = affectedSafes.map(async (safe) => {
           try {
-            // Check if there are other delegates for this safe (pure function)
             const hasOthers = hasOtherDelegates(safe.address as Address, delegateAddress, {
               safes: allSafes,
               delegates,
             })
 
-            // Clean up notifications for this safe (atomic operation)
             await cleanupSafeNotifications(safe.address, safe.chainIds, delegateAddress, hasOthers)
 
             return { success: true }
@@ -69,7 +66,6 @@ export const useNotificationCleanup = (): UseNotificationCleanupProps => {
           }
         })
 
-        // Execute all cleanup operations
         await Promise.all(cleanupPromises)
 
         setIsLoading(false)

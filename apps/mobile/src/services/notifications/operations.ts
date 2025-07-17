@@ -7,9 +7,6 @@ import { createSubscriptionData, clearAuthBeforeUnauthenticatedCall } from '@/sr
 import { withRateLimitRetry } from '@/src/utils/retry'
 import Logger from '@/src/utils/logger'
 
-/**
- * Unsubscribe a specific delegate from notifications (no authentication required)
- */
 export const unsubscribeDelegateFromNotifications = async (
   safeAddress: string,
   delegateAddress: string,
@@ -35,9 +32,6 @@ export const unsubscribeDelegateFromNotifications = async (
   })
 }
 
-/**
- * Subscribe to regular notifications without delegate authentication
- */
 export const subscribeToRegularNotifications = async (safeAddress: string, chainIds: string[]): Promise<void> => {
   const fcmToken = await FCMService.getFCMToken()
 
@@ -64,9 +58,6 @@ export const subscribeToRegularNotifications = async (safeAddress: string, chain
   })
 }
 
-/**
- * Clean up notifications for a single safe
- */
 export const cleanupSafeNotifications = async (
   safeAddress: string,
   chainIds: string[],

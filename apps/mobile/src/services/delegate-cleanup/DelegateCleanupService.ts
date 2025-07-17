@@ -81,7 +81,6 @@ export class DelegateCleanupService {
         })
       }
 
-      // Get all delegates for this owner from Redux store
       const delegates = this.config.allDelegates[ownerAddress]
 
       if (!delegates || Object.keys(delegates).length === 0) {
