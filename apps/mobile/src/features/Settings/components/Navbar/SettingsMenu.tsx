@@ -116,13 +116,11 @@ export const SettingsMenu = ({ safeAddress }: Props) => {
                   onPress: async () => {
                     try {
                       await deleteSafe(safeAddress as Address)
-                      // Only show toast if we reach this point (deletion was successful)
                       toast.show(`The safe with address ${safeAddress} was deleted.`, {
                         native: true,
                         duration: 2000,
                       })
                     } catch (error) {
-                      // Handle any errors during deletion
                       if (error instanceof Error && error.message === 'User cancelled deletion') {
                         return
                       }
