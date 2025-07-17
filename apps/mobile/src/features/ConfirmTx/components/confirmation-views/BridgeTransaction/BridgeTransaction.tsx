@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react'
 import { YStack, Text, View } from 'tamagui'
 import { ListTable } from '../../ListTable'
-import { BridgeAndSwapTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { BridgeAndSwapTransactionInfo, DataDecoded } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { useAppSelector } from '@/src/store/hooks'
 import { selectChainById } from '@/src/store/chains'
@@ -9,19 +9,26 @@ import { TokenAmount } from '@/src/components/TokenAmount'
 import { formatUnits } from 'ethers'
 import { EthAddress } from '@/src/components/EthAddress'
 import { type ListTableItem } from '../../ListTable'
-import { Alert2 } from '@/src/components/Alert2'
 import { BridgeRecipientWarnings } from './BridgeRecipientWarnings'
 import { ChainIndicator } from '@/src/components/ChainIndicator'
 import { ParametersButton } from '../../ParametersButton'
+import { useRouter } from 'expo-router'
+import { isMultiSendData } from '@/src/utils/transaction-guards'
+import { SafeListItem } from '@/src/components/SafeListItem'
+import { Badge } from '@/src/components/Badge'
+import { SafeFontIcon } from '@/src/components/SafeFontIcon'
+import { formatAmount } from '@safe-global/utils/utils/formatNumber'
 
 interface BridgeTransactionProps {
   txId: string
   txInfo: BridgeAndSwapTransactionInfo
+  decodedData?: DataDecoded | null
 }
 
-export function BridgeTransaction({ txId, txInfo }: BridgeTransactionProps) {
+export function BridgeTransaction({ txId, txInfo, decodedData }: BridgeTransactionProps) {
   const activeSafe = useDefinedActiveSafe()
   const chain = useAppSelector((state) => selectChainById(state, activeSafe.chainId))
+  const router = useRouter()
 
   const bridgeItems = useMemo(() => {
     const items: ListTableItem[] = []
@@ -109,7 +116,7 @@ export function BridgeTransaction({ txId, txInfo }: BridgeTransactionProps) {
           label: 'Exchange Rate',
           render: () => (
             <Text>
-              1 {txInfo.fromToken.symbol} = {exchangeRate.toFixed(6)} {txInfo.toToken?.symbol}
+              1 {txInfo.fromToken.symbol} = {formatAmount(exchangeRate)} {txInfo.toToken?.symbol}
             </Text>
           ),
         })
@@ -146,7 +153,12 @@ export function BridgeTransaction({ txId, txInfo }: BridgeTransactionProps) {
     return items
   }, [txInfo, chain])
 
-  const showWarnings = txInfo.status === 'AWAITING_EXECUTION'
+  const handleViewActions = () => {
+    router.push({
+      pathname: '/transaction-actions',
+      params: { txId },
+    })
+  }
 
   return (
     <YStack gap="$4">
@@ -156,12 +168,26 @@ export function BridgeTransaction({ txId, txInfo }: BridgeTransactionProps) {
 
       <BridgeRecipientWarnings txInfo={txInfo} />
 
-      {showWarnings && (
-        <Alert2
-          type="warning"
-          title="Bridge transaction pending"
-          message="This bridge transaction is awaiting execution. Please check the LiFi explorer for more details."
-          testID="bridge-warning-alert"
+      {decodedData && isMultiSendData(decodedData) && (
+        <SafeListItem
+          label="Actions"
+          rightNode={
+            <View flexDirection="row" alignItems="center" gap="$2">
+              {decodedData.parameters?.[0]?.valueDecoded && (
+                <Badge
+                  themeName="badge_background_inverted"
+                  content={
+                    Array.isArray(decodedData.parameters[0].valueDecoded)
+                      ? decodedData.parameters[0].valueDecoded.length.toString()
+                      : '1'
+                  }
+                />
+              )}
+
+              <SafeFontIcon name={'chevron-right'} />
+            </View>
+          }
+          onPress={handleViewActions}
         />
       )}
     </YStack>

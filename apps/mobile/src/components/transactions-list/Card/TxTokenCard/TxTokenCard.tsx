@@ -27,7 +27,7 @@ export function TxTokenCard({ inQueue, txStatus, txInfo, ...rest }: TxTokenCardP
       label={inQueue ? <TokenAmount value={value} decimals={decimals} tokenSymbol={tokenSymbol} preciseAmount /> : name}
       icon={icon}
       type={type}
-      leftNode={<TokenIcon logoUri={logoUri} accessibilityLabel={name} />}
+      leftNode={<TokenIcon logoUri={logoUri} accessibilityLabel={name} size="$8" imageBackground="$background" />}
       rightNode={
         <TokenAmount
           value={value}

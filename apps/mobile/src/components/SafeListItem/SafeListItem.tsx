@@ -73,18 +73,18 @@ export function SafeListItem({
 
           <View>
             {type && (
-              <View flexDirection="row" alignItems="center" gap={4} marginBottom={4}>
+              <View flexDirection="row" alignItems="center" gap={4}>
                 {icon && (
                   <SafeFontIcon testID={`safe-list-${icon}-icon`} name={icon} size={10} color="$colorSecondary" />
                 )}
-                <Text fontSize="$3" color="$colorSecondary" marginBottom={2}>
+                <Text fontSize="$2" lineHeight={20} color="$colorSecondary">
                   {type}
                 </Text>
               </View>
             )}
 
             {typeof label === 'string' ? (
-              <Text fontSize="$4" fontWeight={600}>
+              <Text fontSize="$4" lineHeight={20} fontWeight={600}>
                 {ellipsis(label, rightNode || inQueue ? 21 : 30)}
               </Text>
             ) : (

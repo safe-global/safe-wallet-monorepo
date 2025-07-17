@@ -18,7 +18,7 @@ export function TxRejectionCard({ txInfo, ...rest }: TxRejectionCardProps) {
       label={txInfo.methodName || 'On-chain rejection'}
       leftNode={
         <View borderRadius={100} padding="$2" backgroundColor="$errorDark">
-          <SafeFontIcon color="$error" name="close-outlined" />
+          <SafeFontIcon color="$error" name="close-outlined" size={16} />
         </View>
       }
       {...rest}

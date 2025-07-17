@@ -41,10 +41,12 @@ export function TxBridgeCard({ txInfo, bordered, executionInfo, inQueue, onPress
     <SafeListItem
       label={
         <View flexDirection="row" alignItems="center" gap="$2">
-          <Text>{txInfo.fromToken.symbol}</Text>
+          <Text fontSize="$4" lineHeight={20}>
+            {txInfo.fromToken.symbol}
+          </Text>
           <View flexDirection="row" alignItems="center" gap="$2">
-            <Text>→</Text>
-            {txInfo.toToken?.symbol && <Text>{txInfo.toToken?.symbol}</Text>}
+            <Text lineHeight={20}>→</Text>
+            {txInfo.toToken?.symbol && <Text lineHeight={20}>{txInfo.toToken?.symbol}</Text>}
             <ChainIndicator chainId={txInfo.toChain} onlyLogo={!!txInfo.toToken} imageSize="$4" />
           </View>
         </View>
@@ -57,12 +59,12 @@ export function TxBridgeCard({ txInfo, bordered, executionInfo, inQueue, onPress
       inQueue={inQueue}
       leftNode={
         <Theme name="logo">
-          <View position="relative" width="$10" height="$10">
+          <View position="relative" width="$8" height="$8">
             <View position="absolute" top={0}>
               <TokenIcon
                 logoUri={txInfo.fromToken.logoUri}
                 accessibilityLabel={txInfo.fromToken.name}
-                size="$7"
+                size="$8"
                 imageBackground="$background"
               />
             </View>
@@ -71,7 +73,7 @@ export function TxBridgeCard({ txInfo, bordered, executionInfo, inQueue, onPress
                 <TokenIcon
                   logoUri={txInfo.toToken.logoUri}
                   accessibilityLabel={txInfo.toToken.name}
-                  size="$7"
+                  size="$8"
                   imageBackground="$background"
                 />
               </View>

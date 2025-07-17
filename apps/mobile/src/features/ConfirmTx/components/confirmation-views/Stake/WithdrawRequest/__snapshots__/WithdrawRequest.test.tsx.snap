@@ -168,15 +168,16 @@ exports[`StakingWithdrawRequest matches snapshot 1`] = `
             <View
               style={
                 {
+                  "alignItems": "center",
                   "backgroundColor": "#EEEFF0",
-                  "borderBottomLeftRadius": 100,
-                  "borderBottomRightRadius": 100,
-                  "borderTopLeftRadius": 100,
-                  "borderTopRightRadius": 100,
-                  "paddingBottom": 8,
-                  "paddingLeft": 8,
-                  "paddingRight": 8,
-                  "paddingTop": 8,
+                  "borderBottomLeftRadius": 0,
+                  "borderBottomRightRadius": 0,
+                  "borderTopLeftRadius": 0,
+                  "borderTopRightRadius": 0,
+                  "display": "flex",
+                  "height": 40,
+                  "justifyContent": "center",
+                  "width": 40,
                 }
               }
             >
@@ -187,7 +188,7 @@ exports[`StakingWithdrawRequest matches snapshot 1`] = `
                   [
                     {
                       "color": "#A1A3A7",
-                      "fontSize": 24,
+                      "fontSize": 16,
                     },
                     undefined,
                     {

@@ -23,7 +23,7 @@ export const StakingTxWithdrawCard = ({ info, onPress }: StakingTxWithdrawCardPr
           decimals={info.tokenInfo.decimals}
         />
       }
-      leftNode={<TokenIcon logoUri={info.tokenInfo.logoUri} accessibilityLabel={info.tokenInfo.symbol} />}
+      leftNode={<TokenIcon logoUri={info.tokenInfo.logoUri} accessibilityLabel={info.tokenInfo.symbol} size="$8" />}
     />
   )
 }
