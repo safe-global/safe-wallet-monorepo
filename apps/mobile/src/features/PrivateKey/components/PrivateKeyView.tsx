@@ -17,7 +17,7 @@ type Props = {
 }
 
 // Generate a fake 64-character hex string for display when key is hidden
-const MASKED_PRIVATE_KEY = '0x' + '•'.repeat(64)
+const MASKED_PRIVATE_KEY = '•'.repeat(64)
 
 export const PrivateKeyView = ({
   isKeyVisible,
