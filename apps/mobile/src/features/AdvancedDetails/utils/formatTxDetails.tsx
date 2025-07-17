@@ -14,6 +14,7 @@ import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { TouchableOpacity } from 'react-native'
 import { Receiver } from '../components/Receiver'
 import { InfoSheet } from '@/src/components/InfoSheet'
+import { useOpenExplorer } from '@/src/features/ConfirmTx/hooks/useOpenExplorer'
 
 interface formatTxDetailsProps {
   txDetails?: TransactionDetails
@@ -24,6 +25,7 @@ const characterDisplayLimit = 15
 
 const formatTxDetails = ({ txDetails }: formatTxDetailsProps): ListTableItem[] => {
   const items: ListTableItem[] = []
+  const viewOnExplorer = useOpenExplorer(txDetails?.txData?.to.value || '')
 
   if (!txDetails) {
     return items
@@ -48,7 +50,7 @@ const formatTxDetails = ({ txDetails }: formatTxDetailsProps): ListTableItem[] =
             <View flexDirection="row" alignItems="center" gap="$3">
               <CopyButton value={txDetails.txData?.to.value || ''} size={16} color={'$textSecondaryLight'} />
 
-              <TouchableOpacity onPress={() => null}>
+              <TouchableOpacity onPress={viewOnExplorer}>
                 <SafeFontIcon name="external-link" size={16} color="$textSecondaryLight" />
               </TouchableOpacity>
             </View>
