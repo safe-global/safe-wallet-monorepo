@@ -69,16 +69,8 @@ function TxInfoComponent({ tx, onPress, ...rest }: TxInfoProps) {
     return <TxSettingsCard onPress={onCardPress} executionInfo={tx.executionInfo} txInfo={txInfo} {...rest} />
   }
 
-  if (isMultiSendTxInfo(txInfo)) {
-    return (
-      <TxBatchCard
-        onPress={onCardPress}
-        executionInfo={tx.executionInfo}
-        txInfo={txInfo}
-        safeAppInfo={tx.safeAppInfo}
-        {...rest}
-      />
-    )
+  if (isMultiSendTxInfo(txInfo) && !tx.safeAppInfo) {
+    return <TxBatchCard onPress={onCardPress} executionInfo={tx.executionInfo} txInfo={txInfo} {...rest} />
   }
 
   if (isMultiSendTxInfo(txInfo) && tx.safeAppInfo) {

@@ -22,6 +22,7 @@ export function TxSafeAppCard({ safeAppInfo, txInfo, ...rest }: TxSafeAppCardPro
           logoUri={safeAppInfo.logoUri}
           size="$8"
           fallbackIcon="code-blocks"
+          imageBackground="$background"
           accessibilityLabel={safeAppInfo.name}
         />
       }
