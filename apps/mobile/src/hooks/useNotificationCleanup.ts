@@ -2,6 +2,7 @@ import { useCallback, useState } from 'react'
 import { useAppSelector } from '@/src/store/hooks'
 import { selectAllChains } from '@/src/store/chains'
 import { selectAllSafes } from '@/src/store/safesSlice'
+import { selectDelegates } from '@/src/store/delegatesSlice'
 import { type Address } from '@/src/types/address'
 import {
   classifyNotificationError,
@@ -33,7 +34,7 @@ export const useNotificationCleanup = (): UseNotificationCleanupProps => {
   const allChains = useAppSelector(selectAllChains)
   const allSafes = useAppSelector(selectAllSafes)
   const safeSubscriptions = useAppSelector((state) => state.safeSubscriptions)
-  const fullState = useAppSelector((state) => state)
+  const delegates = useAppSelector(selectDelegates)
 
   const cleanupNotificationsForDelegate = useCallback(
     async (ownerAddress: Address, delegateAddress: Address): Promise<NotificationCleanupResult> => {
@@ -53,7 +54,10 @@ export const useNotificationCleanup = (): UseNotificationCleanupProps => {
         const cleanupPromises = affectedSafes.map(async (safe) => {
           try {
             // Check if there are other delegates for this safe (pure function)
-            const hasOthers = hasOtherDelegates(safe.address as Address, delegateAddress, fullState)
+            const hasOthers = hasOtherDelegates(safe.address as Address, delegateAddress, {
+              safes: allSafes,
+              delegates,
+            })
 
             // Clean up notifications for this safe (atomic operation)
             await cleanupSafeNotifications(safe.address, safe.chainIds, delegateAddress, hasOthers)
@@ -86,7 +90,7 @@ export const useNotificationCleanup = (): UseNotificationCleanupProps => {
         }
       }
     },
-    [allChains, allSafes, safeSubscriptions, fullState],
+    [allChains, allSafes, safeSubscriptions, delegates],
   )
 
   return {

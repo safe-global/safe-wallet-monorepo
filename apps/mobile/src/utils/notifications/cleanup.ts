@@ -98,7 +98,11 @@ export const getAffectedSafes = (
 /**
  * Checks if a safe has other delegates besides the one being removed (pure function)
  */
-export const hasOtherDelegates = (safeAddress: Address, excludeDelegateAddress: Address, state: RootState): boolean => {
+export const hasOtherDelegates = (
+  safeAddress: Address,
+  excludeDelegateAddress: Address,
+  state: Pick<RootState, 'safes' | 'delegates'>,
+): boolean => {
   const allSafeDelegates = selectAllDelegatesForSafeOwners(state, safeAddress)
   return allSafeDelegates.some((delegate) => delegate.delegateAddress !== excludeDelegateAddress)
 }
