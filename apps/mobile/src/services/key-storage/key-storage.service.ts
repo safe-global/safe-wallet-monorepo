@@ -51,6 +51,19 @@ export class KeyStorageService implements IKeyStorageService {
     }
   }
 
+  async removePrivateKey(
+    userId: string,
+    options: PrivateKeyStorageOptions = { requireAuthentication: true },
+  ): Promise<void> {
+    try {
+      const { requireAuthentication = true } = options
+      await this.removeKey(userId, requireAuthentication)
+    } catch (err) {
+      Logger.error('Error removing private key:', err instanceof Error ? err.message : 'Unknown error')
+      throw new Error('Failed to remove private key')
+    }
+  }
+
   private getKeyNameDeviceCrypto(userId: string): string {
     return `signer_address_${userId}`
   }
@@ -68,7 +81,7 @@ export class KeyStorageService implements IKeyStorageService {
 
       return keyName
     } catch (error) {
-      Logger.error('Error creating key:', error)
+      Logger.error('Error creating key:', error instanceof Error ? error.message : 'Unknown error')
       throw new Error('Failed to create encryption key')
     }
   }
@@ -84,7 +97,7 @@ export class KeyStorageService implements IKeyStorageService {
         invalidateOnNewBiometry: requireAuth,
       })
     } catch (error) {
-      Logger.error('Error creating symmetric encryption key:', error)
+      Logger.error('Error creating symmetric encryption key:', error instanceof Error ? error.message : 'Unknown error')
       throw new Error('Failed to create symmetric key')
     }
   }
@@ -126,5 +139,36 @@ export class KeyStorageService implements IKeyStorageService {
     const { encryptedPassword, iv } = JSON.parse(result.password)
 
     return DeviceCrypto.decrypt(keyName, encryptedPassword, iv, this.BIOMETRIC_PROMPTS.STANDARD)
+  }
+
+  private async removeKey(userId: string, requireAuth: boolean): Promise<void> {
+    const keyName = this.getKeyNameDeviceCrypto(userId)
+    const service = this.getKeyService(userId)
+
+    // First, try to delete from keychain (requires authentication if enabled)
+    const keychainOptions: Keychain.GetOptions = { service }
+    if (requireAuth) {
+      keychainOptions.accessControl = Keychain.ACCESS_CONTROL.BIOMETRY_CURRENT_SET_OR_DEVICE_PASSCODE
+    }
+
+    try {
+      // Check if the key exists in keychain
+      const result = await Keychain.getGenericPassword(keychainOptions)
+      if (result) {
+        // Delete from keychain
+        await Keychain.resetGenericPassword({ service })
+      }
+    } catch (error) {
+      // If key doesn't exist, that's fine - we still want to try to remove from device crypto
+      Logger.warn('Key not found in keychain or authentication failed:', error)
+    }
+
+    // Try to remove the encryption key from device crypto
+    try {
+      await DeviceCrypto.deleteKey(keyName)
+    } catch (error) {
+      // If the key doesn't exist in device crypto, that's acceptable
+      Logger.warn('Key not found in device crypto:', error)
+    }
   }
 }

@@ -1,6 +1,6 @@
 import React from 'react'
 import { Container } from '../Container'
-import { Text, Theme, ThemeName, View, YStackProps } from 'tamagui'
+import { Text, Theme, ThemeName, View, ViewProps, YStackProps } from 'tamagui'
 import { IconProps, SafeFontIcon } from '../SafeFontIcon/SafeFontIcon'
 import { ellipsis } from '@/src/utils/formatters'
 import { isMultisigExecutionInfo } from '@/src/utils/transaction-guards'
@@ -26,6 +26,7 @@ export interface SafeListItemProps {
   tag?: string
   paddingVertical?: YStackProps['paddingVertical']
   bottomContent?: React.ReactNode
+  pressStyle?: ViewProps['pressStyle']
 }
 
 export function SafeListItem({
@@ -45,6 +46,7 @@ export function SafeListItem({
   tag,
   paddingVertical = '$4',
   bottomContent,
+  pressStyle,
 }: SafeListItemProps) {
   // TODO: Replace this with proposedByDelegate once EN-149 is implemented
   const isProposedTx = isMultisigExecutionInfo(executionInfo) ? executionInfo.confirmationsSubmitted === 0 : false
@@ -62,6 +64,8 @@ export function SafeListItem({
       flexDirection="column"
       justifyContent="flex-start"
       paddingVertical={paddingVertical}
+      // If just set pressStyle to undefined, then the onPress doesn't work, that's why we need this hack
+      {...(pressStyle ? { pressStyle } : {})}
     >
       <View flexDirection="row" width="100%" alignItems="center" justifyContent="space-between">
         <View flexDirection="row" maxWidth={rightNode ? '55%' : '100%'} alignItems="center" gap={12}>

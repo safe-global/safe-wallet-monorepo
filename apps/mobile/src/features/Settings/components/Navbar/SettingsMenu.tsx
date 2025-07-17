@@ -113,13 +113,23 @@ export const SettingsMenu = ({ safeAddress }: Props) => {
                 },
                 {
                   text: 'Remove',
-                  onPress: () => {
-                    deleteSafe(safeAddress as Address)
-
-                    toast.show(`The safe with address ${safeAddress} was deleted.`, {
-                      native: true,
-                      duration: 2000,
-                    })
+                  onPress: async () => {
+                    try {
+                      await deleteSafe(safeAddress as Address)
+                      toast.show(`The safe with address ${safeAddress} was deleted.`, {
+                        native: true,
+                        duration: 2000,
+                      })
+                    } catch (error) {
+                      if (error instanceof Error && error.message === 'User cancelled deletion') {
+                        return
+                      }
+                      console.error('Error deleting safe:', error)
+                      toast.show('Failed to delete safe. Please try again.', {
+                        native: true,
+                        duration: 3000,
+                      })
+                    }
                   },
                   style: 'destructive',
                 },
