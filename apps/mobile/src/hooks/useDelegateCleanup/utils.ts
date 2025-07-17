@@ -6,6 +6,7 @@ import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { type DelegatesDeleteDelegateV2ApiArg } from '@safe-global/store/gateway/AUTO_GENERATED/delegates'
 import { keyStorageService } from '@/src/services/key-storage'
 import { getDelegateKeyId } from '@/src/utils/delegate'
+import { withGeneralRetry } from '@/src/utils/retry'
 
 // Types for cleanup results
 interface CleanupResult {
@@ -111,43 +112,6 @@ export const removeDelegatesFromBackend = async (
 
   const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
-  // Retry function with exponential backoff
-  const retryWithBackoff = async <T>(fn: () => Promise<T>, maxRetries = 3, baseDelay = 1000): Promise<T> => {
-    let lastError: Error | null = null
-
-    for (let attempt = 0; attempt <= maxRetries; attempt++) {
-      try {
-        return await fn()
-      } catch (error) {
-        lastError = error as Error
-
-        if (attempt === maxRetries) {
-          throw lastError
-        }
-
-        // Check if it's a rate limit error
-        const isRateLimitError =
-          lastError.message.includes('429') ||
-          lastError.message.includes('rate limit') ||
-          lastError.message.includes('too many requests')
-
-        if (isRateLimitError) {
-          // Exponential backoff with jitter for rate limit errors
-          const delay = baseDelay * Math.pow(2, attempt) + Math.random() * 1000
-          Logger.warn(`Rate limit hit, retrying in ${delay}ms (attempt ${attempt + 1}/${maxRetries + 1})`)
-          await sleep(delay)
-        } else if (attempt < maxRetries) {
-          // Regular backoff for other errors
-          const delay = baseDelay * (attempt + 1)
-          Logger.warn(`API call failed, retrying in ${delay}ms (attempt ${attempt + 1}/${maxRetries + 1})`, error)
-          await sleep(delay)
-        }
-      }
-    }
-
-    throw lastError
-  }
-
   try {
     const removalPromises = delegateAddresses.map(async (delegateAddress, delegateIndex) => {
       try {
@@ -166,29 +130,25 @@ export const removeDelegatesFromBackend = async (
             }
 
             // Use retry logic for chain-specific operations
-            const result = await retryWithBackoff(
-              async () => {
-                // Generate typed data for deletion
-                const typedData = getDelegateTypedData(chain.chainId, delegateAddress)
+            const result = await withGeneralRetry(async () => {
+              // Generate typed data for deletion
+              const typedData = getDelegateTypedData(chain.chainId, delegateAddress)
 
-                // Sign the message with the owner's wallet
-                const signature = await ownerWallet.signTypedData(typedData.domain, typedData.types, typedData.message)
+              // Sign the message with the owner's wallet
+              const signature = await ownerWallet.signTypedData(typedData.domain, typedData.types, typedData.message)
 
-                // Delete delegate from the backend
-                await deleteDelegate({
-                  chainId: chain.chainId,
-                  delegateAddress,
-                  deleteDelegateV2Dto: {
-                    delegator: ownerAddress,
-                    signature,
-                  },
-                })
+              // Delete delegate from the backend
+              await deleteDelegate({
+                chainId: chain.chainId,
+                delegateAddress,
+                deleteDelegateV2Dto: {
+                  delegator: ownerAddress,
+                  signature,
+                },
+              })
 
-                return { success: true, chainId: chain.chainId }
-              },
-              3,
-              1000,
-            )
+              return { success: true, chainId: chain.chainId }
+            }, 3)
 
             return result
           } catch (error) {

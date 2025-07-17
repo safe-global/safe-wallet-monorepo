@@ -58,28 +58,6 @@ export const classifyNotificationError = (error: unknown): NotificationCleanupEr
 }
 
 /**
- * Utility for retrying operations with exponential backoff
- */
-export const withRetry = async <T>(operation: () => Promise<T>, maxRetries = 3, baseDelay = 1000): Promise<T> => {
-  for (let attempt = 1; attempt <= maxRetries; attempt++) {
-    try {
-      return await operation()
-    } catch (error) {
-      if (error && typeof error === 'object' && 'status' in error && (error as { status: number }).status === 429) {
-        if (attempt < maxRetries) {
-          const delay = baseDelay * Math.pow(2, attempt - 1) // Exponential backoff
-          Logger.info(`Rate limited, retrying in ${delay}ms (attempt ${attempt}/${maxRetries})`)
-          await new Promise((resolve) => setTimeout(resolve, delay))
-          continue
-        }
-      }
-      throw error
-    }
-  }
-  throw new Error('Should not reach here')
-}
-
-/**
  * Gets all safes affected by removing a delegate (pure function)
  */
 export const getAffectedSafes = (

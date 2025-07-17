@@ -3,11 +3,8 @@ import { getDeviceUuid, registerForNotificationsOnBackEnd } from '@/src/services
 import FCMService from '@/src/services/notifications/FCMService'
 import { NOTIFICATION_ACCOUNT_TYPE } from '@/src/store/constants'
 import { getStore } from '@/src/store/utils/singletonStore'
-import {
-  withRetry,
-  createSubscriptionData,
-  clearAuthBeforeUnauthenticatedCall,
-} from '@/src/utils/notifications/cleanup'
+import { createSubscriptionData, clearAuthBeforeUnauthenticatedCall } from '@/src/utils/notifications/cleanup'
+import { withRateLimitRetry } from '@/src/utils/retry'
 import Logger from '@/src/utils/logger'
 
 /**
@@ -21,7 +18,7 @@ export const unsubscribeDelegateFromNotifications = async (
   const deviceUuid = await getDeviceUuid()
   const subscriptions = await createSubscriptionData(safeAddress, chainIds, deviceUuid, delegateAddress)
 
-  await withRetry(async () => {
+  await withRateLimitRetry(async () => {
     await getStore()
       .dispatch(
         notificationsApi.endpoints.notificationsDeleteAllSubscriptionsV2.initiate({
