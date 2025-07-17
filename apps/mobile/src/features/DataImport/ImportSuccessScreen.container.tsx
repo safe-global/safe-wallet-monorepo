@@ -1,6 +1,6 @@
 import React from 'react'
 import { useRouter } from 'expo-router'
-import { getTokenValue, useTheme } from 'tamagui'
+import { getTokenValue } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
 import { selectAllSafes, SafesSlice } from '@/src/store/safesSlice'
@@ -15,7 +15,6 @@ export const ImportSuccessScreen = () => {
   const dispatch = useAppDispatch()
   const allSafes = useAppSelector(selectAllSafes) as SafesSlice
   const { notImportedKeys } = useDataImportContext()
-  const theme = useTheme()
   const colors: [string, string] = [getTokenValue('$color.successBackgroundLight'), 'transparent']
 
   const handleContinue = () => {

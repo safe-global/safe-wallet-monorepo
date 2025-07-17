@@ -11,13 +11,6 @@ const StyledText = styled(Text, {
   color: '$colorSecondary',
 })
 
-const PrivacyText = styled(Text, {
-  fontSize: '$3',
-  textAlign: 'center',
-  color: '$colorSecondary',
-  paddingHorizontal: '$4',
-})
-
 interface FileSelectionViewProps {
   colorScheme: ColorSchemeName
   bottomInset: number

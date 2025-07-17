@@ -211,7 +211,7 @@ exports[`StakingExit matches snapshot 1`] = `
         style={
           {
             "alignItems": "center",
-            "gap": 4,
+            "gap": 8,
           }
         }
       >
@@ -242,6 +242,8 @@ exports[`StakingExit matches snapshot 1`] = `
             {
               "color": "#A1A3A7",
               "fontFamily": "DM Sans",
+              "fontSize": 12,
+              "lineHeight": 16,
             }
           }
           suppressHighlighting={true}
@@ -333,23 +335,23 @@ exports[`StakingExit matches snapshot 1`] = `
               "alignItems": "center",
               "backgroundColor": "#DCDEE0",
               "borderBottomColor": "transparent",
-              "borderBottomLeftRadius": 7,
-              "borderBottomRightRadius": 7,
-              "borderBottomWidth": 1,
+              "borderBottomLeftRadius": 8,
+              "borderBottomRightRadius": 8,
+              "borderBottomWidth": 0,
               "borderLeftColor": "transparent",
-              "borderLeftWidth": 1,
+              "borderLeftWidth": 0,
               "borderRightColor": "transparent",
-              "borderRightWidth": 1,
+              "borderRightWidth": 0,
               "borderStyle": "solid",
               "borderTopColor": "transparent",
-              "borderTopLeftRadius": 7,
-              "borderTopRightRadius": 7,
-              "borderTopWidth": 1,
+              "borderTopLeftRadius": 8,
+              "borderTopRightRadius": 8,
+              "borderTopWidth": 0,
               "bottom": 0,
               "flexDirection": "row",
               "flexWrap": "nowrap",
-              "fontWeight": "600",
-              "height": 40,
+              "fontWeight": "700",
+              "height": 36,
               "justifyContent": "center",
               "left": 0,
               "paddingLeft": 8,
@@ -368,10 +370,10 @@ exports[`StakingExit matches snapshot 1`] = `
                 "color": "#121312",
                 "flexGrow": 0,
                 "flexShrink": 1,
-                "fontFamily": "DMSans-SemiBold",
-                "fontSize": 16,
+                "fontFamily": "DMSans-Bold",
+                "fontSize": 14,
                 "letterSpacing": 0,
-                "lineHeight": 17.6,
+                "lineHeight": 15.400000000000002,
                 "userSelect": "none",
               }
             }

@@ -179,6 +179,7 @@ exports[`SafeListItem should render bottomContent with proper styling and layout
                 "color": "#121312",
                 "fontFamily": "DMSans-SemiBold",
                 "fontSize": 14,
+                "letterSpacing": -0.01,
                 "lineHeight": 20,
               }
             }
