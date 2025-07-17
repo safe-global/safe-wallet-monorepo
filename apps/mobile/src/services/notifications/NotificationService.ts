@@ -14,7 +14,7 @@ import { updatePromptAttempts, updateLastTimePromptAttempted } from '@/src/store
 import { toggleAppNotifications, toggleDeviceNotifications } from '@/src/store/notificationsSlice'
 import { HandleNotificationCallback, LAUNCH_ACTIVITY, PressActionId } from '@/src/store/constants'
 import { getMessaging } from '@react-native-firebase/messaging'
-import * as TaskManager from 'expo-task-manager'
+import { NotificationNavigationHandler } from './notificationNavigationHandler'
 
 import { ChannelId, notificationChannels, withTimeout } from '@/src/utils/notifications'
 import Logger from '@/src/utils/logger'
@@ -204,19 +204,35 @@ class NotificationsService {
   }
 
   async incrementBadgeCount(incrementBy?: number) {
-    return await notifee.incrementBadgeCount(incrementBy)
+    await notifee.incrementBadgeCount(incrementBy)
+    const newCount = await notifee.getBadgeCount()
+    Logger.info(`Badge incremented by ${incrementBy || 1}, new count: ${newCount}`)
   }
 
   async decrementBadgeCount(decrementBy?: number) {
-    return await notifee.decrementBadgeCount(decrementBy)
+    await notifee.decrementBadgeCount(decrementBy)
+    const newCount = await notifee.getBadgeCount()
+    Logger.info(`Badge decremented by ${decrementBy || 1}, new count: ${newCount}`)
   }
 
   async setBadgeCount(count: number) {
-    return await notifee.setBadgeCount(count)
+    await notifee.setBadgeCount(count)
+    Logger.info(`Badge count set to: ${count}`)
   }
 
   async getBadgeCount() {
-    return await notifee.getBadgeCount()
+    const count = await notifee.getBadgeCount()
+    Logger.info(`Current badge count: ${count}`)
+    return count
+  }
+
+  async clearAllBadges() {
+    try {
+      await this.setBadgeCount(0)
+      Logger.info('All badges cleared manually')
+    } catch (error) {
+      Logger.error('Failed to clear badges manually', error)
+    }
   }
 
   async handleNotificationPress({
@@ -226,12 +242,17 @@ class NotificationsService {
     detail: EventDetail
     callback?: (remoteMessage: FirebaseMessagingTypes.RemoteMessage) => void
   }) {
-    this.decrementBadgeCount(1)
+    await this.clearAllBadges()
+
     if (detail?.notification?.id) {
       await this.cancelTriggerNotification(detail.notification.id)
     }
 
     if (detail?.notification?.data) {
+      await NotificationNavigationHandler.handleNotificationPress(
+        detail.notification.data as FirebaseMessagingTypes.RemoteMessage['data'],
+      )
+
       callback?.(detail.notification as FirebaseMessagingTypes.RemoteMessage)
     }
   }
@@ -326,11 +347,15 @@ class NotificationsService {
    * Initializes all notification handlers
    */
   initializeNotificationHandlers(): void {
-    this.registerNotifeeBackgroundHandler()
-    this.registerFirebaseBackgroundHandler()
-    this.registerExpoTasks()
-    this.listenForMessagesForeground()
-    Logger.info('NotificationService: Successfully initialized all notification handlers')
+    // Core Firebase handlers
+    this.listenForMessagesForeground() // FCM foreground messages
+    this.registerFirebaseBackgroundHandler() // FCM background messages
+    this.registerFirebaseNotificationOpenedHandler() // App opened from notification
+
+    // Core Notifee handlers
+    this.registerNotifeeBackgroundHandler() // Notifee interactions (press, dismiss, etc.)
+
+    Logger.info('NotificationService: Successfully initialized simplified notification handlers')
   }
 
   /**
@@ -364,6 +389,39 @@ class NotificationsService {
   }
 
   /**
+   * Registers Firebase messaging handlers for when app is opened from notification
+   */
+  private registerFirebaseNotificationOpenedHandler(): void {
+    // Handle notification opened app when app is in background
+    getMessaging().onNotificationOpenedApp(async (remoteMessage: FirebaseMessagingTypes.RemoteMessage) => {
+      Logger.info('Notification caused app to open from background state:', remoteMessage)
+
+      await this.clearAllBadges()
+
+      if (remoteMessage.data) {
+        await NotificationNavigationHandler.handleNotificationPress(remoteMessage.data)
+      }
+    })
+
+    // Handle notification opened app when app was quit
+    getMessaging()
+      .getInitialNotification()
+      .then(async (remoteMessage: FirebaseMessagingTypes.RemoteMessage | null) => {
+        if (remoteMessage) {
+          Logger.info('Notification caused app to open from quit state:', remoteMessage)
+          if (remoteMessage.data) {
+            // Add extra delay for app startup from killed state
+            setTimeout(async () => {
+              // Clear badge when app is opened from notification
+              await this.clearAllBadges()
+              await NotificationNavigationHandler.handleNotificationPress(remoteMessage.data)
+            }, 1000) // Wait 1 second for app to fully initialize
+          }
+        }
+      })
+  }
+
+  /**
    * Registers the Firebase messaging background handler
    */
   private registerFirebaseBackgroundHandler(): void {
@@ -381,58 +439,6 @@ class NotificationsService {
 
       return Promise.resolve()
     })
-  }
-
-  /**
-   * Registers Expo background tasks
-   */
-  private registerExpoTasks(): void {
-    // Register Notifee task
-    TaskManager.defineTask(
-      'app.notifee.notification-event',
-      async (taskData: TaskManager.TaskManagerTaskBody<unknown>) => {
-        const { data, error } = taskData
-
-        if (error) {
-          Logger.error('Notification task error:', error)
-          return
-        }
-
-        // Process the notification event with type casting
-        if (data && typeof data === 'object' && 'type' in data) {
-          const notificationData = data as { type: EventType; detail: EventDetail }
-          if (notificationData.type === EventType.PRESS && notificationData.detail) {
-            await this.handleNotificationPress({ detail: notificationData.detail })
-          }
-        }
-      },
-    )
-
-    // Register Firebase task
-    TaskManager.defineTask(
-      'ReactNativeFirebaseMessagingHeadlessTask',
-      async (taskData: TaskManager.TaskManagerTaskBody<unknown>) => {
-        const { data, error } = taskData
-
-        if (error) {
-          Logger.error('Firebase messaging task error:', error)
-          return
-        }
-
-        if (data && typeof data === 'object' && 'message' in data) {
-          const fcmData = data as { message: FirebaseMessagingTypes.RemoteMessage }
-          const remoteMessage = fcmData.message
-
-          const parsed = parseNotification(remoteMessage.data)
-          await this.displayNotification({
-            channelId: ChannelId.DEFAULT_NOTIFICATION_CHANNEL_ID,
-            title: parsed?.title || remoteMessage.notification?.title || '',
-            body: parsed?.body || remoteMessage.notification?.body || '',
-            data: remoteMessage.data,
-          })
-        }
-      },
-    )
   }
 }
 
