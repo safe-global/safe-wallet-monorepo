@@ -1,12 +1,12 @@
 import React, { useMemo } from 'react'
 import { SectionList } from 'react-native'
-
+import { View } from 'tamagui'
 import { SafeListItem } from '@/src/components/SafeListItem'
 import { TransactionItem } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { getTxHash, GroupedTxsWithTitle, groupTxsByDate } from '@/src/features/TxHistory/utils'
 import { HistoryTransactionItems } from '@safe-global/store/gateway/types'
 import { renderItem } from '@/src/features/TxHistory/utils'
-import { Loader } from '@/src/components/Loader'
+import { TxHistorySkeleton, TxHistorySkeletonItem } from '../TxHistorySkeleton'
 
 interface TxHistoryList {
   transactions?: HistoryTransactionItems[]
@@ -21,6 +21,39 @@ export function TxHistoryList({ transactions, onEndReached, isLoading, refreshin
     return groupTxsByDate(transactions || [])
   }, [transactions])
 
+  const hasTransactions = transactions && transactions.length > 0
+  const isInitialLoading = isLoading && !hasTransactions && !refreshing
+
+  // ListEmptyComponent for initial loading state
+  const renderEmptyComponent = () => {
+    if (isInitialLoading) {
+      return (
+        <View
+          flex={1}
+          alignItems="flex-start"
+          justifyContent="flex-start"
+          paddingTop="$4"
+          testID="tx-history-initial-loader"
+        >
+          <TxHistorySkeleton />
+        </View>
+      )
+    }
+    return null
+  }
+
+  // ListFooterComponent for pagination loading (bottom loading)
+  const renderFooterComponent = () => {
+    if (isLoading && hasTransactions) {
+      return (
+        <View testID="tx-history-pagination-loader" marginTop="$4">
+          <TxHistorySkeletonItem />
+        </View>
+      )
+    }
+    return null
+  }
+
   return (
     <SectionList
       testID="tx-history-list"
@@ -30,6 +63,7 @@ export function TxHistoryList({ transactions, onEndReached, isLoading, refreshin
       keyExtractor={(item, index) => (Array.isArray(item) ? getTxHash(item[0]) + index : getTxHash(item) + index)}
       renderItem={renderItem}
       onEndReached={onEndReached}
+      onEndReachedThreshold={0.1}
       refreshing={refreshing}
       onRefresh={onRefresh}
       contentContainerStyle={{
@@ -37,7 +71,8 @@ export function TxHistoryList({ transactions, onEndReached, isLoading, refreshin
         paddingTop: 8,
         marginTop: 32,
       }}
-      ListFooterComponent={isLoading ? <Loader size={24} color="$color" /> : undefined}
+      ListEmptyComponent={renderEmptyComponent}
+      ListFooterComponent={renderFooterComponent}
       renderSectionHeader={({ section: { title } }) => <SafeListItem.Header title={title} />}
     />
   )
