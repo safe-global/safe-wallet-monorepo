@@ -40,37 +40,35 @@ export function Balance({
   const showSkeleton = isLoading || !balanceAmount
 
   return (
-    <View>
-      <View marginBottom="$4">
-        {activeChainId && (
-          <XStack paddingBottom={'$4'} gap={'$1'} alignItems={'center'}>
-            <DropdownLabel
-              label={chainName}
-              leftNode={<ChainsDisplay activeChainId={activeChainId} chains={chains} max={1} />}
-              onPress={() => {
-                router.push('/networks-sheet')
-              }}
-              labelProps={{ fontWeight: 600, fontSize: '$4' }}
-              displayDropDownIcon={chains.length > 1}
-            />
-            <TouchableOpacity onPress={onPressAddressCopy}>
-              <XStack alignItems={'center'} paddingLeft={'$1'}>
-                <Text color={'$colorSecondary'} fontSize={'$4'}>
-                  {shortenAddress(safeAddress)}
-                </Text>
-                <View paddingLeft={'$1'}>
-                  <SafeFontIcon name={'copy'} size={13} color={'$colorSecondary'} />
-                </View>
-              </XStack>
-            </TouchableOpacity>
-          </XStack>
-        )}
-        <Skeleton.Group show={showSkeleton}>
-          <Skeleton colorMode={colorScheme === 'dark' ? 'dark' : 'light'} width={220}>
-            <Fiat value={balanceAmount} currency={currency} precise />
-          </Skeleton>
-        </Skeleton.Group>
-      </View>
+    <View marginBottom="$4">
+      {activeChainId && (
+        <XStack paddingBottom={'$4'} gap={'$1'} alignItems={'center'}>
+          <DropdownLabel
+            label={chainName}
+            leftNode={<ChainsDisplay activeChainId={activeChainId} chains={chains} max={1} />}
+            onPress={() => {
+              router.push('/networks-sheet')
+            }}
+            labelProps={{ fontWeight: 600, fontSize: '$4' }}
+            displayDropDownIcon={chains.length > 1}
+          />
+          <TouchableOpacity onPress={onPressAddressCopy}>
+            <XStack alignItems={'center'} paddingLeft={'$1'}>
+              <Text color={'$colorSecondary'} fontSize={'$4'}>
+                {shortenAddress(safeAddress)}
+              </Text>
+              <View paddingLeft={'$1'}>
+                <SafeFontIcon name={'copy'} size={13} color={'$colorSecondary'} />
+              </View>
+            </XStack>
+          </TouchableOpacity>
+        </XStack>
+      )}
+      <Skeleton.Group show={showSkeleton}>
+        <Skeleton colorMode={colorScheme === 'dark' ? 'dark' : 'light'} width={220}>
+          <Fiat value={balanceAmount} currency={currency} precise />
+        </Skeleton>
+      </Skeleton.Group>
     </View>
   )
 }

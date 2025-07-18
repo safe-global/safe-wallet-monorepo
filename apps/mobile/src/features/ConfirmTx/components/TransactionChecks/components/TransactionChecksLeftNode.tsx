@@ -12,5 +12,5 @@ export const TransactionChecksLeftNode = ({ security }: TransactionChecksLeftNod
     return <CircleSnail size={16} borderWidth={0} thickness={1} />
   }
 
-  return <SafeFontIcon name={getTransactionChecksIcon(security)} />
+  return <SafeFontIcon name={getTransactionChecksIcon(security)} size={16} />
 }

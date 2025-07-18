@@ -16,7 +16,7 @@ export const ImportProgressScreenView = ({ progress, message }: ImportProgressSc
           <YStack gap="$6" alignItems="center" maxWidth={300}>
             {/* Title */}
             <H2 fontWeight={'600'} textAlign="center">
-              Your file is being securely imported
+              Importing data...
             </H2>
 
             {/* Subtitle */}

@@ -40,7 +40,7 @@ export const ImportErrorView = ({ colors, bottomInset, onTryAgain }: ImportError
                 </LargeHeaderTitle>
 
                 <Text textAlign="center" fontSize="$4" width="80%">
-                  {'The file could not be processed. Ensure the data meets the required specifications.'}
+                  The file could not be processed. Please check the file details and try again.
                 </Text>
               </View>
             </View>

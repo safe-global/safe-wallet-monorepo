@@ -66,7 +66,8 @@ export const formatActionDetails = ({ txData, action }: formatActionDetailsRetur
         <Badge
           circleProps={badgeProps}
           themeName="badge_background"
-          fontSize={12}
+          fontSize={13}
+          textContentProps={{ fontFamily: 'DM Mono' }}
           circular={false}
           content={getActionName(action)}
         />

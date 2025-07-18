@@ -18,11 +18,12 @@ export function ParametersButton({ txId }: ParametersButtonProps) {
     <View height="$10" alignItems="center">
       <Button
         paddingHorizontal="$2"
-        height="$10"
-        borderRadius="$3"
+        height="$9"
+        borderRadius={8}
+        borderWidth={0}
         backgroundColor="$borderLight"
-        fontWeight="600"
-        size="$5"
+        fontWeight="700"
+        size="$4"
         fullscreen
         onPress={goToAdvancedDetails}
       >

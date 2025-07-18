@@ -7,6 +7,7 @@ import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { Alert } from '@/src/components/Alert'
 import { LoadingTx } from '../ConfirmTx/components/LoadingTx'
 import { formatTxDetails } from './utils/formatTxDetails'
+import { useOpenExplorer } from '@/src/features/ConfirmTx/hooks/useOpenExplorer'
 
 export function TxDataContainer() {
   const activeSafe = useDefinedActiveSafe()
@@ -21,7 +22,9 @@ export function TxDataContainer() {
     id: txId,
   })
 
-  const parameters = useMemo(() => formatTxDetails({ txDetails }), [txDetails])
+  const viewOnExplorer = useOpenExplorer(txDetails?.txData?.to.value || '')
+
+  const parameters = useMemo(() => formatTxDetails({ txDetails, viewOnExplorer }), [txDetails, viewOnExplorer])
 
   if (isError) {
     return (
@@ -32,7 +35,7 @@ export function TxDataContainer() {
   }
 
   return (
-    <ScrollView marginTop="$4">
+    <ScrollView marginTop="$2">
       {isFetching || !txDetails ? <LoadingTx /> : <ListTable items={parameters} />}
     </ScrollView>
   )

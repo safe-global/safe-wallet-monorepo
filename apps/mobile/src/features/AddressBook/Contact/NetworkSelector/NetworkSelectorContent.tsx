@@ -29,8 +29,6 @@ export const NetworkSelectorContent = ({
     return selectedChainIds.includes(chainId)
   }
 
-  const shouldShowAllNetworksItem = !isReadOnly && isAllChainsSelected
-
   return (
     <BottomSheetScrollView
       contentContainerStyle={{
@@ -39,12 +37,8 @@ export const NetworkSelectorContent = ({
       }}
     >
       <>
-        <AllNetworksItem
-          isSelected={isAllChainsSelected}
-          isReadOnly={isReadOnly}
-          isVisible={shouldShowAllNetworksItem}
-          onSelectAll={onSelectAll}
-        />
+        <AllNetworksItem isSelected={isAllChainsSelected} isReadOnly={isReadOnly} onSelectAll={onSelectAll} />
+
         {chainsToDisplay.map((chain) => (
           <ChainItem
             key={chain.chainId}

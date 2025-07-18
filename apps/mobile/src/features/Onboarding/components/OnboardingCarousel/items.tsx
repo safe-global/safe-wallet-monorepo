@@ -52,7 +52,7 @@ export const items: CarouselItem[] = [
         </H1>
       </>
     ),
-    description: 'Easily track balances and get real-time updates on account activity - anytime.',
+    description: 'Easily track balances and get real-time updates on account activity — anytime.',
   },
   {
     name: 'signing',
@@ -64,14 +64,11 @@ export const items: CarouselItem[] = [
     title: (
       <>
         <H1 style={styles.textContainer} fontWeight={600} marginHorizontal={windowWidth <= maxGoodWidth ? -10 : 0}>
-          Sign transaction
+          Sign transactions
         </H1>
 
         <H1 style={styles.textContainer} fontWeight={600}>
-          securely on-
-        </H1>
-        <H1 style={styles.textContainer} fontWeight={600}>
-          the-go..
+          on the go
         </H1>
       </>
     ),
@@ -87,10 +84,10 @@ export const items: CarouselItem[] = [
     title: (
       <>
         <H1 style={styles.textContainer} fontWeight={600}>
-          ...and get
+          Get
         </H1>
         <H1 style={styles.textContainer} fontWeight={600}>
-          personalised
+          personalized
         </H1>
         <H1 style={styles.textContainer} fontWeight={600}>
           updates

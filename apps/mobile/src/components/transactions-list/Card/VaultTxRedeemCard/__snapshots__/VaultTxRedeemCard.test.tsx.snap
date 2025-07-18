@@ -225,6 +225,7 @@ exports[`VaultTxRedeemCard renders correctly 1`] = `
                 "color": "#121312",
                 "fontFamily": "DMSans-SemiBold",
                 "fontSize": 14,
+                "letterSpacing": -0.01,
                 "lineHeight": 20,
               }
             }

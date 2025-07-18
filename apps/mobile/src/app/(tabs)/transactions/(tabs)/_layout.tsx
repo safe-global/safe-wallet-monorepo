@@ -23,7 +23,16 @@ export default function TransactionsLayout() {
   const theme = useTheme()
 
   return (
-    <MaterialTopTabs screenOptions={getMaterialTopTabBarScreenOptions({ theme })}>
+    <MaterialTopTabs
+      screenOptions={getMaterialTopTabBarScreenOptions({
+        theme,
+        tabBarItemWidth: 124,
+        tabBarIndicatorWidth: 94,
+        tabBarLabelFontSize: 16,
+        tabBarLabelFontWeight: '700',
+        tabBarItemLeft: 0,
+      })}
+    >
       <MaterialTopTabs.Screen name="index" options={{ title: 'History' }} />
       <MaterialTopTabs.Screen name="messages" options={{ title: 'Messages' }} />
     </MaterialTopTabs>

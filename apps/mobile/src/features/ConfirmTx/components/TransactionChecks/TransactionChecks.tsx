@@ -29,7 +29,7 @@ export function TransactionChecks({ txId, txDetails }: TransactionChecksProps) {
       onPress={handleTransactionChecksPress}
       leftNode={<TransactionChecksLeftNode security={security} />}
       label={getTransactionChecksLabel(security.isScanning)}
-      rightNode={<SafeFontIcon name="chevron-right" />}
+      rightNode={<SafeFontIcon name="chevron-right" size={16} />}
       bottomContent={shouldShowBottomContent(security) ? <TransactionChecksBottomContent security={security} /> : null}
     />
   )
