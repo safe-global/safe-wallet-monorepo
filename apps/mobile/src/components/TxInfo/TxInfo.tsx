@@ -130,11 +130,11 @@ function TxInfoComponent({ tx, onPress, ...rest }: TxInfoProps) {
   }
 
   if (isBridgeOrderTxInfo(txInfo)) {
-    return <TxBridgeCard txInfo={txInfo} onPress={onCardPress} executionInfo={tx.executionInfo} />
+    return <TxBridgeCard txInfo={txInfo} onPress={onCardPress} executionInfo={tx.executionInfo} {...rest} />
   }
 
   if (isLifiSwapTxInfo(txInfo)) {
-    return <TxLifiSwapCard txInfo={txInfo} onPress={onCardPress} executionInfo={tx.executionInfo} />
+    return <TxLifiSwapCard txInfo={txInfo} onPress={onCardPress} executionInfo={tx.executionInfo} {...rest} />
   }
 
   return <></>
