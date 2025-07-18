@@ -65,13 +65,15 @@ describe('formatTxDetails', () => {
     jest.clearAllMocks()
   })
 
+  const viewOnExplorer = jest.fn()
+
   it('should return empty array when txDetails is undefined', () => {
-    const result = formatTxDetails({ txDetails: undefined })
+    const result = formatTxDetails({ txDetails: undefined, viewOnExplorer })
     expect(result).toEqual([])
   })
 
   it('should return empty array when txDetails is null', () => {
-    const result = formatTxDetails({ txDetails: null as unknown as TransactionDetails })
+    const result = formatTxDetails({ txDetails: null as unknown as TransactionDetails, viewOnExplorer })
     expect(result).toEqual([])
   })
 
@@ -87,7 +89,7 @@ describe('formatTxDetails', () => {
       },
     })
 
-    const result = formatTxDetails({ txDetails })
+    const result = formatTxDetails({ txDetails, viewOnExplorer })
 
     expect(result.length).toBeGreaterThanOrEqual(1)
     // Check that we have a 'To' field
@@ -105,7 +107,7 @@ describe('formatTxDetails', () => {
       },
     })
 
-    const result = formatTxDetails({ txDetails })
+    const result = formatTxDetails({ txDetails, viewOnExplorer })
 
     // Check that we have a 'Value' field
     expect(result.some((item) => 'label' in item && item.label === 'Value')).toBe(true)
@@ -122,7 +124,7 @@ describe('formatTxDetails', () => {
       },
     })
 
-    const result = formatTxDetails({ txDetails })
+    const result = formatTxDetails({ txDetails, viewOnExplorer })
 
     // Check that we have an 'Operation' field
     expect(result.some((item) => 'label' in item && item.label === 'Operation')).toBe(true)
@@ -151,7 +153,7 @@ describe('formatTxDetails', () => {
 
     isMultisigDetailedExecutionInfo.mockReturnValue(true)
 
-    const result = formatTxDetails({ txDetails })
+    const result = formatTxDetails({ txDetails, viewOnExplorer })
 
     // Check for gas-related fields
     expect(result.some((item) => 'label' in item && item.label === 'SafeTxGas')).toBe(true)
@@ -172,7 +174,7 @@ describe('formatTxDetails', () => {
     // Ensure multisig check returns false for this test
     isMultisigDetailedExecutionInfo.mockReturnValue(false)
 
-    const result = formatTxDetails({ txDetails })
+    const result = formatTxDetails({ txDetails, viewOnExplorer })
 
     // Check that we have a 'Transaction Hash' field
     expect(result.some((item) => 'label' in item && item.label === 'Transaction Hash')).toBe(true)
@@ -191,7 +193,7 @@ describe('formatTxDetails', () => {
 
     isMultisigDetailedExecutionInfo.mockReturnValue(false)
 
-    const result = formatTxDetails({ txDetails })
+    const result = formatTxDetails({ txDetails, viewOnExplorer })
 
     // Should only have the 'To' field
     expect(result).toHaveLength(1)
@@ -223,7 +225,7 @@ describe('formatTxDetails', () => {
 
     isMultisigDetailedExecutionInfo.mockReturnValue(true)
 
-    const result = formatTxDetails({ txDetails })
+    const result = formatTxDetails({ txDetails, viewOnExplorer })
 
     // Should have gas fields but not safe tx hash
     expect(result.some((item) => 'label' in item && item.label === 'SafeTxGas')).toBe(true)
@@ -261,7 +263,7 @@ describe('formatTxDetails', () => {
 
     isMultisigDetailedExecutionInfo.mockReturnValue(true)
 
-    const result = formatTxDetails({ txDetails })
+    const result = formatTxDetails({ txDetails, viewOnExplorer })
 
     // Should have all possible fields
     expect(result.some((item) => 'label' in item && item.label === 'To')).toBe(true)
