@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react'
-import { SectionList } from 'react-native'
+import { Tabs } from 'react-native-collapsible-tab-view'
 import { View } from 'tamagui'
 import { SafeListItem } from '@/src/components/SafeListItem'
 import { TransactionItem } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
@@ -55,7 +55,7 @@ export function TxHistoryList({ transactions, onEndReached, isLoading, refreshin
   }
 
   return (
-    <SectionList
+    <Tabs.SectionList
       testID="tx-history-list"
       stickySectionHeadersEnabled
       contentInsetAdjustmentBehavior="automatic"
@@ -66,10 +66,11 @@ export function TxHistoryList({ transactions, onEndReached, isLoading, refreshin
       onEndReachedThreshold={0.1}
       refreshing={refreshing}
       onRefresh={onRefresh}
+      style={{ marginTop: -16 }} // Compensate for SafeTab container marginTop
       contentContainerStyle={{
         paddingHorizontal: 16,
         paddingTop: 8,
-        marginTop: 32,
+        marginTop: 16,
       }}
       ListEmptyComponent={renderEmptyComponent}
       ListFooterComponent={renderFooterComponent}
