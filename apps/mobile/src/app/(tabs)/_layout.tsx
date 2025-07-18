@@ -5,6 +5,7 @@ import { Navbar as AssetsNavbar } from '@/src/features/Assets/components/Navbar/
 import { Pressable, StyleSheet } from 'react-native'
 import { getTokenValue } from 'tamagui'
 import { useTheme } from '@/src/theme/hooks/useTheme'
+import TransactionHeader from '@/src/features/TxHistory/components/TransactionHeader'
 
 export default function TabLayout() {
   const { currentTheme } = useTheme()
@@ -51,8 +52,11 @@ export default function TabLayout() {
           name="transactions"
           options={{
             title: 'Transactions',
-            headerShown: false,
+            headerTitle: () => <TransactionHeader />,
+            headerStyle: { shadowColor: 'transparent' },
+            headerLeftContainerStyle: { flexGrow: 0 },
             tabBarButtonTestID: 'transactions-tab',
+            tabBarLabel: 'Transactions',
             tabBarButton: ({ children, ...rest }) => {
               return (
                 <Pressable {...rest} style={styles.tabButton}>

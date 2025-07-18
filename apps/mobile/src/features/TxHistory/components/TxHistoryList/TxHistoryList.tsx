@@ -35,6 +35,7 @@ export function TxHistoryList({ transactions, onEndReached, isLoading, refreshin
       contentContainerStyle={{
         paddingHorizontal: 16,
         paddingTop: 8,
+        marginTop: 32,
       }}
       ListFooterComponent={isLoading ? <Loader size={24} color="$color" /> : undefined}
       renderSectionHeader={({ section: { title } }) => <SafeListItem.Header title={title} />}
