@@ -1,10 +1,10 @@
 /* eslint-disable no-undef */
 const IS_DEV = process.env.APP_VARIANT === 'development'
 
-const appleDevTeamId = 'MXRS32BBL4'
+const appleDevTeamId = '86487MHG6V'
 
 const config = {
-  name: IS_DEV ? 'Safe{Wallet} MVP - Development' : 'Safe{Wallet} MVP',
+  name: IS_DEV ? 'Safe Mobile - Development' : 'Safe Mobile',
   slug: 'safe-mobileapp',
   owner: 'safeglobal',
   version: '1.0.1',
@@ -26,15 +26,15 @@ const config = {
     infoPlist: {
       NSFaceIDUsageDescription: 'Enabling Face ID allows you to create/access secure keys.',
       UIBackgroundModes: ['remote-notification'],
-      AppGroup: IS_DEV ? 'group.global.safe.mobileapp.dev' : 'group.global.safe.mobileapp',
+      AppGroup: IS_DEV ? 'group.global.safe.mobileapp.ios.dev' : 'group.global.safe.mobileapp.ios',
     },
     supportsTablet: false,
     appleTeamId: appleDevTeamId,
-    bundleIdentifier: IS_DEV ? 'global.safe.mobileapp.dev' : 'global.safe.mobileapp',
+    bundleIdentifier: IS_DEV ? 'global.safe.mobileapp.ios.dev' : 'global.safe.mobileapp.ios',
     entitlements: {
       'aps-environment': IS_DEV ? 'development' : 'production',
       'com.apple.security.application-groups': [
-        IS_DEV ? 'group.global.safe.mobileapp.dev' : 'group.global.safe.mobileapp',
+        IS_DEV ? 'group.global.safe.mobileapp.ios.dev' : 'group.global.safe.mobileapp.ios',
       ],
     },
     googleServicesFile: IS_DEV ? process.env.GOOGLE_SERVICES_PLIST_DEV : process.env.GOOGLE_SERVICES_PLIST,
@@ -132,7 +132,7 @@ const config = {
         iosDeploymentTarget: '15.1',
         apsEnvMode: IS_DEV ? 'development' : 'production',
         appleDevTeamId: appleDevTeamId,
-        appGroupIdentifier: IS_DEV ? 'group.global.safe.mobileapp.dev' : 'group.global.safe.mobileapp',
+        appGroupIdentifier: IS_DEV ? 'group.global.safe.mobileapp.ios.dev' : 'group.global.safe.mobileapp.ios',
       },
     ],
     [
