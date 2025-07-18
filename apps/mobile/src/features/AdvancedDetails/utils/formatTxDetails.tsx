@@ -14,18 +14,17 @@ import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { TouchableOpacity } from 'react-native'
 import { Receiver } from '../components/Receiver'
 import { InfoSheet } from '@/src/components/InfoSheet'
-import { useOpenExplorer } from '@/src/features/ConfirmTx/hooks/useOpenExplorer'
 
 interface formatTxDetailsProps {
   txDetails?: TransactionDetails
+  viewOnExplorer: () => void
 }
 
 const badgeProps: CircleProps = { borderRadius: '$2', paddingHorizontal: '$2', paddingVertical: '$1' }
 const characterDisplayLimit = 15
 
-const formatTxDetails = ({ txDetails }: formatTxDetailsProps): ListTableItem[] => {
+const formatTxDetails = ({ txDetails, viewOnExplorer }: formatTxDetailsProps): ListTableItem[] => {
   const items: ListTableItem[] = []
-  const viewOnExplorer = useOpenExplorer(txDetails?.txData?.to.value || '')
 
   if (!txDetails) {
     return items
