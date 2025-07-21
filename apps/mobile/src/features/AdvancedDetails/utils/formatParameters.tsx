@@ -27,7 +27,8 @@ const formatParameters = ({ txData }: formatParametersProps): ListTableItem[] =>
         <Badge
           circleProps={badgeProps}
           themeName="badge_background"
-          fontSize={12}
+          fontSize={13}
+          textContentProps={{ fontFamily: 'DM Mono' }}
           circular={false}
           content={String(txData?.dataDecoded?.method || txData?.to.value)}
         />

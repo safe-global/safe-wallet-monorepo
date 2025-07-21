@@ -48,9 +48,15 @@ export function TransactionHeader({
         ))
       )}
 
-      <View alignItems="center" gap="$1">
-        {typeof title === 'string' ? <H3 fontWeight={600}>{title}</H3> : title}
-        <Text color="$textSecondaryLight">
+      <View alignItems="center" gap="$2">
+        {typeof title === 'string' ? (
+          <H3 fontWeight={600} fontSize="$7">
+            {title}
+          </H3>
+        ) : (
+          title
+        )}
+        <Text color="$textSecondaryLight" fontSize="$2" lineHeight={16}>
           {date}, {time}
         </Text>
       </View>

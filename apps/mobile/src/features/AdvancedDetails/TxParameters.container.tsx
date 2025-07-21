@@ -32,7 +32,7 @@ export function TxParametersContainer() {
   }
 
   return (
-    <ScrollView marginTop="$4">
+    <ScrollView marginTop="$2">
       {isFetching || !txDetails ? <LoadingTx /> : <ListTable items={parameters} />}
     </ScrollView>
   )

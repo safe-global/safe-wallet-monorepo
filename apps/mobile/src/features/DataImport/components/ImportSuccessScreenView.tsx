@@ -44,8 +44,9 @@ export const ImportSuccessScreenView = ({
 
                 {/* Subtitle */}
                 <Text fontSize="$4" textAlign="center" marginHorizontal={'$4'} color="$colorSecondary">
-                  Your data has been successfully imported. However, some signers are not associated with your Safe
-                  accounts and won't be added
+                  {notImportedKeys.length > 0
+                    ? "Your data has been successfully imported. However, some signers are not associated with your Safe accounts and won't be added"
+                    : 'Your accounts, signers, and contacts are ready to use.'}
                 </Text>
 
                 {/* Not Imported Keys Section */}

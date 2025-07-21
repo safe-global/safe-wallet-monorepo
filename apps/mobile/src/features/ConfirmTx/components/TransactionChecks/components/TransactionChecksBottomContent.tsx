@@ -16,7 +16,7 @@ export const TransactionChecksBottomContent = ({ security }: TransactionChecksBo
 
   // Show warnings for contract management changes (proxy upgrades, ownership changes, etc.)
   if (security.hasContractManagement) {
-    return <Alert type="warning" info="Review details first" message="Contract changes detected!" />
+    return <Alert type="warning" info="Review details first" message="Contract changes detected!" orientation="left" />
   }
 
   // Show error if blockaid check failed

@@ -84,7 +84,7 @@ export function SafeListItem({
             )}
 
             {typeof label === 'string' ? (
-              <Text fontSize="$4" lineHeight={20} fontWeight={600}>
+              <Text fontSize="$4" lineHeight={20} fontWeight={600} letterSpacing={-0.01}>
                 {ellipsis(label, rightNode || inQueue ? 21 : 30)}
               </Text>
             ) : (
@@ -95,17 +95,18 @@ export function SafeListItem({
         </View>
 
         {inQueue && executionInfo && isMultisigExecutionInfo(executionInfo) ? (
-          <View alignItems="center" flexDirection="row">
+          <View alignItems="center" flexDirection="row" gap="$2">
             {isProposedTx ? (
               <ProposalBadge />
             ) : (
               <Badge
+                circleProps={{ paddingHorizontal: 8, paddingVertical: 2 }}
                 circular={false}
                 content={
                   <View alignItems="center" flexDirection="row" gap="$1">
                     <SafeFontIcon size={12} name="owners" />
 
-                    <Text fontWeight={600} color={'$color'}>
+                    <Text fontWeight={600} color={'$color'} fontSize="$2" lineHeight={18}>
                       {executionInfo?.confirmationsSubmitted}/{executionInfo?.confirmationsRequired}
                     </Text>
                   </View>
@@ -118,7 +119,7 @@ export function SafeListItem({
               />
             )}
 
-            <SafeFontIcon name="chevron-right" />
+            <SafeFontIcon name="chevron-right" size={16} />
           </View>
         ) : (
           rightNode

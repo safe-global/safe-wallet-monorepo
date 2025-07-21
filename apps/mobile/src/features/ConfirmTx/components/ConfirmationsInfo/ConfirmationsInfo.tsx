@@ -29,14 +29,15 @@ export function ConfirmationsInfo({ detailedExecutionInfo, txId }: Confirmations
       label="Confirmations"
       onPress={onConfirmationsPress}
       rightNode={
-        <View alignItems="center" flexDirection="row">
+        <View alignItems="center" flexDirection="row" gap="$2">
           <Badge
+            circleProps={{ paddingHorizontal: 8, paddingVertical: 2 }}
             circular={false}
             content={
               <View alignItems="center" flexDirection="row" gap="$1">
                 <SafeFontIcon size={12} name="owners" />
 
-                <Text fontWeight={600} color={'$color'}>
+                <Text fontWeight={600} color={'$color'} fontSize="$2" lineHeight={18}>
                   {detailedExecutionInfo?.confirmations?.length}/{detailedExecutionInfo?.confirmationsRequired}
                 </Text>
               </View>
@@ -44,7 +45,7 @@ export function ConfirmationsInfo({ detailedExecutionInfo, txId }: Confirmations
             themeName={hasEnoughConfirmations ? 'badge_success_variant1' : 'badge_warning'}
           />
 
-          <SafeFontIcon name="chevron-right" />
+          <SafeFontIcon name="chevron-right" size={16} />
         </View>
       }
     />
