@@ -10,6 +10,9 @@ const commonEventParams = {
   [MixPanelEventParams.BLOCKCHAIN_NETWORK]: '',
   [MixPanelEventParams.DEVICE_TYPE]: DeviceType.DESKTOP,
   [MixPanelEventParams.SAFE_ADDRESS]: '',
+  [MixPanelEventParams.EOA_WALLET_LABEL]: '',
+  [MixPanelEventParams.EOA_WALLET_ADDRESS]: '',
+  [MixPanelEventParams.EOA_WALLET_NETWORK]: '',
 }
 
 let isMixPanelInitialized = false
@@ -97,6 +100,30 @@ export const mixpanelSetUserProperties = (properties: Record<string, any>): void
 
   if (!IS_PRODUCTION) {
     console.info('[MixPanel] - User properties set:', properties)
+  }
+}
+
+export const mixpanelSetEOAWalletLabel = (label: string): void => {
+  commonEventParams[MixPanelEventParams.EOA_WALLET_LABEL] = label
+
+  if (isMixPanelInitialized) {
+    mixpanel.register({ [MixPanelEventParams.EOA_WALLET_LABEL]: label })
+  }
+}
+
+export const mixpanelSetEOAWalletAddress = (address: string): void => {
+  commonEventParams[MixPanelEventParams.EOA_WALLET_ADDRESS] = address
+
+  if (isMixPanelInitialized) {
+    mixpanel.register({ [MixPanelEventParams.EOA_WALLET_ADDRESS]: address })
+  }
+}
+
+export const mixpanelSetEOAWalletNetwork = (network: string): void => {
+  commonEventParams[MixPanelEventParams.EOA_WALLET_NETWORK] = network
+
+  if (isMixPanelInitialized) {
+    mixpanel.register({ [MixPanelEventParams.EOA_WALLET_NETWORK]: network })
   }
 }
 
