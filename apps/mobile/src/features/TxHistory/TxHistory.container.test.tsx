@@ -236,25 +236,6 @@ describe('TxHistoryContainer', () => {
     })
   })
 
-  it('does not show initial skeleton when refreshing', async () => {
-    render(<TxHistoryContainer />)
-
-    // Wait for initial transactions to load
-    await waitFor(() => {
-      expect(screen.getByText('Received')).toBeTruthy()
-    })
-
-    // Trigger refresh
-    const list = screen.getByTestId('tx-history-list')
-
-    await act(async () => {
-      fireEvent(list, 'onRefresh')
-    })
-
-    // Should not show initial skeleton during refresh
-    expect(screen.queryByTestId('tx-history-initial-loader')).toBeNull()
-  })
-
   it('resets list when active safe changes', async () => {
     const { rerender } = render(<TxHistoryContainer />)
 
@@ -275,5 +256,199 @@ describe('TxHistoryContainer', () => {
       const transfers = screen.getAllByText('Received')
       expect(transfers).toHaveLength(1)
     })
+  })
+
+  describe('refresh functionality', () => {
+    it('triggers refresh functionality when onRefresh is called', async () => {
+      render(<TxHistoryContainer />)
+
+      // Wait for initial transactions to load
+      await waitFor(() => {
+        expect(screen.getByText('Received')).toBeTruthy()
+      })
+
+      const list = screen.getByTestId('tx-history-list')
+
+      // Verify refresh control is properly configured
+      expect(list).toBeTruthy()
+
+      // Trigger refresh and verify it works without errors
+      await act(async () => {
+        fireEvent(list, 'onRefresh')
+      })
+
+      // The refresh should complete successfully (no errors)
+      await waitFor(() => {
+        expect(screen.getByText('Received')).toBeTruthy()
+      })
+
+      // Verify the list is still rendered after refresh
+      expect(screen.getByTestId('tx-history-list')).toBeTruthy()
+    })
+
+    it('shows progress indicator when refreshing', async () => {
+      render(<TxHistoryContainer />)
+
+      // Wait for initial transactions to load
+      await waitFor(() => {
+        expect(screen.getByText('Received')).toBeTruthy()
+      })
+
+      // Reset server to use delayed response for refresh, so we can capture the refreshing state
+      server.use(
+        http.get(`${GATEWAY_URL}/v1/chains/:chainId/safes/:safeAddress/transactions/history`, async () => {
+          // Add longer delay to capture refreshing state
+          await new Promise((resolve) => setTimeout(resolve, 200))
+          return HttpResponse.json({
+            next: null,
+            previous: null,
+            results: mockTransactions,
+          })
+        }),
+      )
+
+      const list = screen.getByTestId('tx-history-list')
+
+      // Trigger refresh
+      await act(async () => {
+        fireEvent(list, 'onRefresh')
+      })
+
+      // Check if custom progress indicator is shown during refresh
+      await waitFor(
+        () => {
+          expect(screen.getByTestId('tx-history-progress-indicator')).toBeTruthy()
+        },
+        { timeout: 150 },
+      )
+
+      // Wait for refresh to complete and progress indicator to disappear
+      await waitFor(
+        () => {
+          expect(screen.queryByTestId('tx-history-progress-indicator')).toBeNull()
+        },
+        { timeout: 1000 },
+      )
+
+      // Verify the list is still functional after refresh
+      expect(screen.getByText('Received')).toBeTruthy()
+    })
+
+    it('does not show initial skeleton when refreshing', async () => {
+      render(<TxHistoryContainer />)
+
+      // Wait for initial transactions to load
+      await waitFor(() => {
+        expect(screen.getByText('Received')).toBeTruthy()
+      })
+
+      // Trigger refresh
+      const list = screen.getByTestId('tx-history-list')
+
+      await act(async () => {
+        fireEvent(list, 'onRefresh')
+      })
+
+      // Should not show initial skeleton during refresh
+      expect(screen.queryByTestId('tx-history-initial-loader')).toBeNull()
+    })
+  })
+
+  it('handles empty state when no transactions exist', async () => {
+    server.use(
+      http.get(`${GATEWAY_URL}/v1/chains/:chainId/safes/:safeAddress/transactions/history`, () => {
+        return HttpResponse.json({
+          next: null,
+          previous: null,
+          results: [],
+        })
+      }),
+    )
+
+    render(<TxHistoryContainer />)
+
+    // Wait for loading to complete
+    await waitFor(() => {
+      expect(screen.queryByTestId('tx-history-initial-loader')).toBeNull()
+    })
+
+    // Should not show any transaction items
+    expect(screen.queryByText('Received')).toBeNull()
+
+    // List should still be rendered but empty
+    expect(screen.getByTestId('tx-history-list')).toBeTruthy()
+  })
+
+  it('renders section headers for date grouping', async () => {
+    // Mock with transactions on different dates
+    const multiDateTransactions = [
+      { type: 'DATE_LABEL', timestamp: 1742830570000 }, // Jan 21, 2025
+      {
+        type: 'TRANSACTION',
+        transaction: {
+          ...mockTransactions[1].transaction,
+          id: 'tx1',
+          timestamp: 1742830570000,
+        },
+        conflictType: 'None',
+      },
+      { type: 'DATE_LABEL', timestamp: 1737029389000 }, // Jan 15, 2025
+      {
+        type: 'TRANSACTION',
+        transaction: {
+          ...mockTransactions[1].transaction,
+          id: 'tx2',
+          timestamp: 1737029389000,
+        },
+        conflictType: 'None',
+      },
+    ]
+
+    server.use(
+      http.get(`${GATEWAY_URL}/v1/chains/:chainId/safes/:safeAddress/transactions/history`, () => {
+        return HttpResponse.json({
+          next: null,
+          previous: null,
+          results: multiDateTransactions,
+        })
+      }),
+    )
+
+    render(<TxHistoryContainer />)
+
+    // Wait for transactions to load
+    await waitFor(() => {
+      const transfers = screen.getAllByText('Received')
+      expect(transfers).toHaveLength(2)
+    })
+
+    // Should render the SectionList which handles section headers
+    expect(screen.getByTestId('tx-history-list')).toBeTruthy()
+  })
+
+  it('handles multiple rapid interactions gracefully', async () => {
+    render(<TxHistoryContainer />)
+
+    // Wait for initial transactions to load
+    await waitFor(() => {
+      expect(screen.getByText('Received')).toBeTruthy()
+    })
+
+    const list = screen.getByTestId('tx-history-list')
+
+    // Trigger multiple rapid interactions
+    await act(async () => {
+      fireEvent(list, 'onRefresh')
+      fireEvent(list, 'onEndReached')
+      fireEvent(list, 'onRefresh')
+    })
+
+    // Should handle gracefully without errors
+    await waitFor(() => {
+      expect(screen.getByText('Received')).toBeTruthy()
+    })
+
+    // List should still be functional
+    expect(screen.getByTestId('tx-history-list')).toBeTruthy()
   })
 })
