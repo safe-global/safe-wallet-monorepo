@@ -1,12 +1,3 @@
-/**
- * MixPanel-related functions.
- *
- * Initializes MixPanel and provides event tracking functions.
- * This service mirrors the GTM implementation for consistency.
- *
- * This service should NOT be used directly by components. Use the `analytics` service instead.
- */
-
 import mixpanel from 'mixpanel-browser'
 import type { SafeAppData } from '@safe-global/safe-gateway-typescript-sdk'
 import { IS_PRODUCTION } from '@/config/constants'
@@ -23,9 +14,6 @@ const commonEventParams = {
 
 let isMixPanelInitialized = false
 
-/**
- * Initialize MixPanel
- */
 export const mixpanelInit = (): void => {
   if (typeof window === 'undefined' || isMixPanelInitialized) return
 
@@ -57,9 +45,6 @@ export const mixpanelInit = (): void => {
   }
 }
 
-/**
- * Set blockchain network for all MixPanel events
- */
 export const mixpanelSetBlockchainNetwork = (networkName: string): void => {
   commonEventParams[MixPanelEventParams.BLOCKCHAIN_NETWORK] = networkName
 
@@ -68,9 +53,6 @@ export const mixpanelSetBlockchainNetwork = (networkName: string): void => {
   }
 }
 
-/**
- * Set device type for all MixPanel events
- */
 export const mixpanelSetDeviceType = (type: DeviceType): void => {
   commonEventParams[MixPanelEventParams.DEVICE_TYPE] = type
 
@@ -79,9 +61,6 @@ export const mixpanelSetDeviceType = (type: DeviceType): void => {
   }
 }
 
-/**
- * Set safe address for all MixPanel events
- */
 export const mixpanelSetSafeAddress = (safeAddress: string): void => {
   commonEventParams[MixPanelEventParams.SAFE_ADDRESS] = safeAddress
 
@@ -90,9 +69,6 @@ export const mixpanelSetSafeAddress = (safeAddress: string): void => {
   }
 }
 
-/**
- * Enable MixPanel tracking (opt-in)
- */
 export const mixpanelEnableTracking = (): void => {
   if (!isMixPanelInitialized) return
 
@@ -103,9 +79,6 @@ export const mixpanelEnableTracking = (): void => {
   }
 }
 
-/**
- * Disable MixPanel tracking (opt-out)
- */
 export const mixpanelDisableTracking = (): void => {
   if (!isMixPanelInitialized) return
 
@@ -117,9 +90,6 @@ export const mixpanelDisableTracking = (): void => {
   }
 }
 
-/**
- * Set user properties
- */
 export const mixpanelSetUserProperties = (properties: Record<string, any>): void => {
   if (!isMixPanelInitialized) return
 
@@ -151,9 +121,6 @@ export const safeAppToMixPanelEventProperties = (
   return properties
 }
 
-/**
- * Track event with MixPanel
- */
 export const mixpanelTrack = (eventName: string, properties?: Record<string, any>): void => {
   if (!isMixPanelInitialized) return
 
@@ -169,9 +136,6 @@ export const mixpanelTrack = (eventName: string, properties?: Record<string, any
   }
 }
 
-/**
- * Identify user in MixPanel
- */
 export const mixpanelIdentify = (userId: string): void => {
   if (!isMixPanelInitialized) return
 
