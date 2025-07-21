@@ -85,11 +85,17 @@ const useMixpanel = () => {
 
   useEffect(() => {
     if (wallet) {
+      const walletProperties: Record<string, any> = {}
+
       if (wallet.label) {
-        mixpanelSetUserProperties(MixPanelUserProperty.WALLET_LABEL, wallet.label)
+        walletProperties[MixPanelUserProperty.WALLET_LABEL] = wallet.label
       }
       if (wallet.address) {
-        mixpanelSetUserProperties(MixPanelUserProperty.WALLET_ADDRESS, wallet.address)
+        walletProperties[MixPanelUserProperty.WALLET_ADDRESS] = wallet.address
+      }
+
+      if (Object.keys(walletProperties).length > 0) {
+        mixpanelSetUserProperties(walletProperties)
       }
     }
   }, [wallet])
