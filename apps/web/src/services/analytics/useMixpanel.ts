@@ -1,7 +1,3 @@
-/**
- * Track analytics events using MixPanel
- * This hook mirrors the useGtm hook for consistency
- */
 import { useEffect, useState, useMemo } from 'react'
 import { useTheme } from '@mui/material/styles'
 import {
