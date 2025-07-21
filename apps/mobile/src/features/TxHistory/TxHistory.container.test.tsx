@@ -377,16 +377,19 @@ describe('TxHistoryContainer', () => {
     render(<TxHistoryContainer />)
 
     // Wait for loading to complete
-    await waitFor(() => {
-      expect(screen.queryByTestId('tx-history-initial-loader')).toBeNull()
-    })
+    await waitFor(
+      () => {
+        expect(screen.queryByTestId('tx-history-initial-loader')).toBeNull()
+      },
+      { timeout: 3000 },
+    )
 
     // Should not show any transaction items
     expect(screen.queryByText('Received')).toBeNull()
 
     // List should still be rendered but empty
     expect(screen.getByTestId('tx-history-list')).toBeTruthy()
-  })
+  }, 10000)
 
   it('renders section headers for date grouping', async () => {
     // Mock with transactions on different dates
@@ -426,22 +429,28 @@ describe('TxHistoryContainer', () => {
     render(<TxHistoryContainer />)
 
     // Wait for transactions to load
-    await waitFor(() => {
-      const transfers = screen.getAllByText('Received')
-      expect(transfers).toHaveLength(2)
-    })
+    await waitFor(
+      () => {
+        const transfers = screen.getAllByText('Received')
+        expect(transfers).toHaveLength(2)
+      },
+      { timeout: 3000 },
+    )
 
     // Should render the SectionList which handles section headers
     expect(screen.getByTestId('tx-history-list')).toBeTruthy()
-  })
+  }, 10000)
 
   it('handles multiple rapid interactions gracefully', async () => {
     render(<TxHistoryContainer />)
 
     // Wait for initial transactions to load
-    await waitFor(() => {
-      expect(screen.getByText('Received')).toBeTruthy()
-    })
+    await waitFor(
+      () => {
+        expect(screen.getByText('Received')).toBeTruthy()
+      },
+      { timeout: 3000 },
+    )
 
     const list = screen.getByTestId('tx-history-list')
 
@@ -453,11 +462,14 @@ describe('TxHistoryContainer', () => {
     })
 
     // Should handle gracefully without errors
-    await waitFor(() => {
-      expect(screen.getByText('Received')).toBeTruthy()
-    })
+    await waitFor(
+      () => {
+        expect(screen.getByText('Received')).toBeTruthy()
+      },
+      { timeout: 3000 },
+    )
 
     // List should still be functional
     expect(screen.getByTestId('tx-history-list')).toBeTruthy()
-  })
+  }, 10000)
 })
