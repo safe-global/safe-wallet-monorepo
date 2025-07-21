@@ -49,7 +49,6 @@ describe('MixPanel Integration', () => {
         persistence: 'localStorage',
         autocapture: false,
         batch_requests: true,
-        opt_out_tracking_by_default: true,
         ip: false,
       })
     })
