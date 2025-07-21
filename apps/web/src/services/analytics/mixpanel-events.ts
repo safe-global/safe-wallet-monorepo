@@ -1,14 +1,6 @@
-/**
- * MixPanel event constants
- */
-
 export enum MixPanelEvent {
   SAFE_APP_LAUNCHED = 'Safe App Launched',
 }
-
-/**
- * MixPanel user property constants
- */
 
 export enum MixPanelUserProperty {
   WALLET_LABEL = 'Wallet Label',
@@ -22,20 +14,12 @@ export enum MixPanelUserProperty {
   LAST_TX_AT = 'Last Transaction at',
 }
 
-/**
- * MixPanel event parameters constants
- */
-
 export enum MixPanelEventParams {
   APP_VERSION = 'App Version',
   BLOCKCHAIN_NETWORK = 'Blockchain Network',
   DEVICE_TYPE = 'Device Type',
   SAFE_ADDRESS = 'Safe Address',
 }
-
-/**
- * MixPanel launch location constants
- */
 
 export enum SafeAppLaunchLocation {
   PREVIEW_DRAWER = 'Preview Drawer',
