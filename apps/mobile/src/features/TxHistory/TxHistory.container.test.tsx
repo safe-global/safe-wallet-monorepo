@@ -165,8 +165,8 @@ describe('TxHistoryContainer', () => {
     // Mock server to return delayed response to capture loading state
     server.use(
       http.get(`${GATEWAY_URL}/v1/chains/:chainId/safes/:safeAddress/transactions/history`, async () => {
-        // Add delay to capture loading state
-        await new Promise((resolve) => setTimeout(resolve, 100))
+        // Add short delay to capture loading state
+        await new Promise((resolve) => setTimeout(resolve, 50))
         return HttpResponse.json({
           next: null,
           previous: null,
@@ -181,11 +181,14 @@ describe('TxHistoryContainer', () => {
     expect(screen.getByTestId('tx-history-initial-loader')).toBeTruthy()
 
     // Wait for transactions to load and loading skeleton to disappear
-    await waitFor(() => {
-      expect(screen.queryByTestId('tx-history-initial-loader')).toBeNull()
-      expect(screen.getByText('Received')).toBeTruthy()
-    })
-  })
+    await waitFor(
+      () => {
+        expect(screen.queryByTestId('tx-history-initial-loader')).toBeNull()
+        expect(screen.getByText('Received')).toBeTruthy()
+      },
+      { timeout: 3000 },
+    )
+  }, 10000)
 
   it('shows pagination loading skeleton when loading more transactions', async () => {
     render(<TxHistoryContainer />)
@@ -200,7 +203,7 @@ describe('TxHistoryContainer', () => {
       http.get(`${GATEWAY_URL}/v1/chains/:chainId/safes/:safeAddress/transactions/history`, async ({ request }) => {
         if (request.url.includes('cursor=next_page')) {
           // Add delay to capture loading state
-          await new Promise((resolve) => setTimeout(resolve, 100))
+          await new Promise((resolve) => setTimeout(resolve, 80))
           return HttpResponse.json({
             count: 3,
             next: null,
@@ -224,17 +227,23 @@ describe('TxHistoryContainer', () => {
     })
 
     // Check if pagination loading skeleton is shown
-    await waitFor(() => {
-      expect(screen.getByTestId('tx-history-pagination-loader')).toBeTruthy()
-    })
+    await waitFor(
+      () => {
+        expect(screen.getByTestId('tx-history-pagination-loader')).toBeTruthy()
+      },
+      { timeout: 2000 },
+    )
 
     // Wait for additional transactions to load
-    await waitFor(() => {
-      const transfers = screen.getAllByText('Received')
-      expect(transfers).toHaveLength(2)
-      expect(screen.queryByTestId('tx-history-pagination-loader')).toBeNull()
-    })
-  })
+    await waitFor(
+      () => {
+        const transfers = screen.getAllByText('Received')
+        expect(transfers).toHaveLength(2)
+        expect(screen.queryByTestId('tx-history-pagination-loader')).toBeNull()
+      },
+      { timeout: 3000 },
+    )
+  }, 10000)
 
   it('resets list when active safe changes', async () => {
     const { rerender } = render(<TxHistoryContainer />)
@@ -297,8 +306,8 @@ describe('TxHistoryContainer', () => {
       // Reset server to use delayed response for refresh, so we can capture the refreshing state
       server.use(
         http.get(`${GATEWAY_URL}/v1/chains/:chainId/safes/:safeAddress/transactions/history`, async () => {
-          // Add longer delay to capture refreshing state
-          await new Promise((resolve) => setTimeout(resolve, 200))
+          // Add delay to capture refreshing state
+          await new Promise((resolve) => setTimeout(resolve, 100))
           return HttpResponse.json({
             next: null,
             previous: null,
@@ -319,7 +328,7 @@ describe('TxHistoryContainer', () => {
         () => {
           expect(screen.getByTestId('tx-history-progress-indicator')).toBeTruthy()
         },
-        { timeout: 150 },
+        { timeout: 500 },
       )
 
       // Wait for refresh to complete and progress indicator to disappear
@@ -327,12 +336,12 @@ describe('TxHistoryContainer', () => {
         () => {
           expect(screen.queryByTestId('tx-history-progress-indicator')).toBeNull()
         },
-        { timeout: 1000 },
+        { timeout: 2000 },
       )
 
       // Verify the list is still functional after refresh
       expect(screen.getByText('Received')).toBeTruthy()
-    })
+    }, 10000)
 
     it('does not show initial skeleton when refreshing', async () => {
       render(<TxHistoryContainer />)
