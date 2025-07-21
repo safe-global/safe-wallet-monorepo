@@ -10,7 +10,6 @@ import {
   mixpanelSetDeviceType,
   mixpanelSetSafeAddress,
   mixpanelSetUserProperties,
-  mixpanelUnionUserProperty,
   mixpanelEnableTracking,
   mixpanelDisableTracking,
   mixpanelIdentify,
@@ -85,27 +84,21 @@ const useMixpanel = () => {
   }, [safeAddress, isSpaceRoute])
 
   useEffect(() => {
-    if (wallet?.label) {
-      mixpanelSetUserProperties(MixPanelUserProperty.WALLET_LABEL, wallet.label)
+    if (wallet) {
+      if (wallet.label) {
+        mixpanelSetUserProperties(MixPanelUserProperty.WALLET_LABEL, wallet.label)
+      }
+      if (wallet.address) {
+        mixpanelSetUserProperties(MixPanelUserProperty.WALLET_ADDRESS, wallet.address)
+      }
     }
-    if (wallet?.address) {
-      mixpanelSetUserProperties(MixPanelUserProperty.WALLET_ADDRESS, wallet.address)
-    }
-  }, [wallet?.label, wallet?.address])
+  }, [wallet])
 
   useEffect(() => {
     if (!userProperties) return
 
     mixpanelSetUserProperties(userProperties.properties)
   }, [userProperties])
-
-  useEffect(() => {
-    if (!currentChain) return
-
-    const currentNetworkName = currentChain.chainName.toLowerCase()
-
-    mixpanelUnionUserProperty(MixPanelUserProperty.NETWORKS, [currentNetworkName])
-  }, [currentChain])
 }
 
 export default useMixpanel
