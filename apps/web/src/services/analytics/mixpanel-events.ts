@@ -19,6 +19,9 @@ export enum MixPanelEventParams {
   BLOCKCHAIN_NETWORK = 'Blockchain Network',
   DEVICE_TYPE = 'Device Type',
   SAFE_ADDRESS = 'Safe Address',
+  EOA_WALLET_LABEL = 'EOA Wallet Label',
+  EOA_WALLET_ADDRESS = 'EOA Wallet Address',
+  EOA_WALLET_NETWORK = 'EOA Wallet Network',
 }
 
 export enum SafeAppLaunchLocation {

@@ -9,6 +9,9 @@ import {
   mixpanelEnableTracking,
   mixpanelDisableTracking,
   mixpanelIdentify,
+  mixpanelSetEOAWalletLabel,
+  mixpanelSetEOAWalletAddress,
+  mixpanelSetEOAWalletNetwork,
 } from './mixpanel'
 import { useAppSelector } from '@/store'
 import { CookieAndTermType, hasConsentFor } from '@/store/cookiesAndTermsSlice'
@@ -40,6 +43,7 @@ const useMixpanel = () => {
   const userProperties = useMixPanelUserProperties()
   const { safe } = useSafeInfo()
   const currentChain = useChain(safe?.chainId || '')
+  const walletChain = useChain(wallet?.chainId || '')
 
   useEffect(() => {
     if (isMixpanelEnabled) {
@@ -93,8 +97,23 @@ const useMixpanel = () => {
       if (Object.keys(walletProperties).length > 0) {
         mixpanelSetUserProperties(walletProperties)
       }
+
+      if (wallet.label) {
+        mixpanelSetEOAWalletLabel(wallet.label)
+      }
+      if (wallet.address) {
+        mixpanelSetEOAWalletAddress(wallet.address)
+      }
+      if (walletChain) {
+        mixpanelSetEOAWalletNetwork(walletChain.chainName)
+      }
+    } else {
+      // Clear event properties when disconnected
+      mixpanelSetEOAWalletLabel('')
+      mixpanelSetEOAWalletAddress('')
+      mixpanelSetEOAWalletNetwork('')
     }
-  }, [wallet])
+  }, [wallet, walletChain])
 
   useEffect(() => {
     if (!userProperties) return
