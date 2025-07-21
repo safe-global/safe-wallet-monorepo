@@ -141,19 +141,6 @@ export const mixpanelSetUserProperties = (properties: Record<string, any> | stri
 }
 
 /**
- * Union values to a list property (append without duplicates)
- */
-export const mixpanelUnionUserProperty = (property: string, values: string[]): void => {
-  if (!isMixPanelInitialized) return
-
-  mixpanel.people.union(property, values)
-
-  if (!IS_PRODUCTION) {
-    console.info('[MixPanel] - User property union:', property, 'with', values)
-  }
-}
-
-/**
  * Convert SafeApp object to MixPanel event properties
  */
 export const safeAppToMixPanelEventProperties = (
