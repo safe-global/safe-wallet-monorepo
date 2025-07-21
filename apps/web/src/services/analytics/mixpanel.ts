@@ -34,7 +34,6 @@ export const mixpanelInit = (): void => {
       persistence: 'localStorage',
       autocapture: false,
       batch_requests: true,
-      opt_out_tracking_by_default: true,
       ip: false,
     })
 
@@ -69,27 +68,6 @@ export const mixpanelSetSafeAddress = (safeAddress: string): void => {
 
   if (isMixPanelInitialized) {
     mixpanel.register({ [MixPanelEventParams.SAFE_ADDRESS]: commonEventParams[MixPanelEventParams.SAFE_ADDRESS] })
-  }
-}
-
-export const mixpanelEnableTracking = (): void => {
-  if (!isMixPanelInitialized) return
-
-  mixpanel.opt_in_tracking()
-
-  if (!IS_PRODUCTION) {
-    console.info('[MixPanel] - Tracking enabled')
-  }
-}
-
-export const mixpanelDisableTracking = (): void => {
-  if (!isMixPanelInitialized) return
-
-  mixpanel.opt_out_tracking()
-  mixpanel.reset()
-
-  if (!IS_PRODUCTION) {
-    console.info('[MixPanel] - Tracking disabled')
   }
 }
 
