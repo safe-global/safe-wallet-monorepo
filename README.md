@@ -1,162 +1,146 @@
-# <img src="https://github.com/user-attachments/assets/b8249113-d515-4c91-a12a-f134813614e8" height="60" valign="middle" alt="Safe{Wallet}" style="background: #fff; padding: 20px; margin: 0 -20px" />
+from pathlib import Path
+import zipfile
 
-# Safe{Wallet} monorepo
+# Define README content
+readme_content = """# 🛡️ Safe Wallet
 
-🌐 [Safe{Wallet} web app](/apps/web/README.md) ・ 📱 [Safe{Wallet} mobile app](/apps/mobile/README.md)
+🌐 [Web App](/apps/web/README.md) ・ 📱 [Mobile App](/apps/mobile/README.md)
 
-## Overview
+---
 
-Welcome to the Safe{Wallet} monorepo! This repository houses multiple applications and packages managed under a unified
-structure using Yarn Workspaces. The monorepo setup simplifies dependency management and ensures consistent development
-practices across projects.
+## 🧭 Overview
 
-### Key components
+Welcome to the **Safe Wallet** monorepo – a secure, multichain, automated wallet interface powered by [Gnosis Safe](https://safe.global/) and extended with GitHub, Slack, and Discord integrations.
 
-- **apps/**: Contains application projects (e.g., `mobile` for the Safe{Wallet} mobile app).
-- **packages/**: Shared libraries and utilities.
-- **config/**: Configuration files for the monorepo.
+This monorepo manages multiple full-stack apps under a unified development environment using **Yarn Workspaces**. It simplifies dependency management and ensures consistent tooling across web, mobile, and package workspaces.
 
-## Getting started
+---
 
-To get started, ensure you have the required tools installed and follow these steps:
+## 📁 Project Structure
 
-### Prerequisites
+```
+Safe-wallet/
+├── apps/
+│   ├── web/           # Next.js Safe Dashboard (UI)
+│   └── mobile/        # Expo-based React Native wallet
+├── packages/          # Shared SDKs, utilities, logic
+├── config/            # Shared TS, ESLint, Prettier configs
+├── .github/           # GitHub Actions, workflows, webhooks
+└── README.md          # You are here!
+```
 
-- **Node.js**: Install the latest stable version from [Node.js](https://nodejs.org/).
-- **Yarn**: Use Yarn version 4.5.3 or later
+---
 
-to install it with the latest node version you can simply do
+## ⚙️ Prerequisites
+
+Before starting, install:
+
+- **Node.js**: v18.x or later → [nodejs.org](https://nodejs.org/)
+- **Yarn** (v4.5.3+) via Corepack:
 
 ```bash
 corepack enable
 ```
 
-and then just run
+---
+
+## 🚀 Getting Started
+
+### 1️⃣ Clone the Repo
 
 ```bash
-yarn
+git clone https://github.com/thegoodeth12/Safe-wallet.git
+cd Safe-wallet
 ```
 
-This will install the required version of yarn and resolve all dependencies.
-
-> [!NOTE]
->
-> Corepack is a tool to help with managing versions of your package managers. It exposes binary proxies for each supported package manager that, when called, will identify whatever package manager is
-> configured for the current project, download it if needed, and finally run it.
-
-### Initial setup
-
-1. Clone the repository:
-
-```bash
-git clone <repo-url>
-cd monorepo
-```
-
-2. Install dependencies:
+### 2️⃣ Install Dependencies
 
 ```bash
 yarn install
 ```
 
-## Monorepo commands
+This installs all workspaces and prepares your environment.
 
-Here are some essential commands to help you navigate the monorepo:
+### 3️⃣ Configure Environment Variables
 
-### Workspace management
+Create `.env` files for each app:
 
-- **Run a script in a specific workspace:**
+```bash
+cp apps/web/.env.example apps/web/.env.local
+cp apps/mobile/.env.example apps/mobile/.env
+```
+
+Add required keys like:
+
+```env
+NEXT_PUBLIC_SAFE_NETWORK=mainnet
+NEXT_PUBLIC_INFURA_API_KEY=your-key
+SLACK_WEBHOOK_URL=https://hooks.slack.com/services/...
+DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/...
+```
+
+---
+
+## 🧪 Monorepo Commands
+
+### 🔁 Workspace Scripts
+
+Run scripts within a workspace:
 
 ```bash
 yarn workspace <workspace-name> <script>
 ```
 
-Example:
+#### Examples:
 
 ```bash
-yarn workspace @safe-global/web start
+yarn workspace web dev         # Run the web app
+yarn workspace mobile start    # Start the mobile app
+yarn workspace web lint        # Lint the web code
 ```
-
-- **Add a dependency to a specific workspace:**
-
-```bash
-yarn workspace <workspace-name> add <package-name>
-```
-
-- **Remove a dependency from a specific workspace:**
-
-```bash
-yarn workspace <workspace-name> remove <package-name>
-```
-
-> [!Note]
->
-> Yarn treats commands that contain a colon as global commands. For example if you have a
-> command in a workspace that has a colon and there isn't another workspace that has the same command,
-> you can run the command without specifying the workspace name. For example:
->
-> ```bash
-> yarn cypress:open
-> ```
->
-> is equivalent to:
->
-> ```bash
-> yarn workspace @safe-global/web cypress:open
-> ```
-
-### Linting and formatting
-
-- **Run ESLint across all workspaces:**
-
-```bash
-yarn lint
-```
-
-### Testing
-
-- **Run unit tests across all workspaces:**
-
-```bash
-yarn test
-```
-
-## Contributing
-
-### Adding a new workspace
-
-1. Create a new directory under `apps/` or `packages/`.
-2. Add a `package.json` file with the appropriate configuration.
-3. Run:
-
-```bash
-yarn install
-```
-
-### Best practices
-
-- Use Yarn Workspaces commands for managing dependencies.
-- Ensure tests and linting pass before pushing changes.
-- Follow the commit message guidelines.
-
-### Tools & configurations
-
-- **Husky**: Pre-commit hooks for linting and tests.
-- **ESLint & Prettier**: Enforce coding standards and formatting.
-- **Jest**: Unit testing framework.
-- **Expo**: Mobile app framework for the `mobile` workspace.
-- **Next.js**: React framework for the `web` workspace.
-
-## Useful links
-
-- [Yarn Workspaces Documentation](https://classic.yarnpkg.com/en/docs/workspaces/)
-- [Expo Documentation](https://docs.expo.dev/)
-- [Next.js Documentation](https://nextjs.org/docs)
-- [Jest Documentation](https://jestjs.io/)
-- [ESLint Documentation](https://eslint.org/)
-- [Prettier Documentation](https://prettier.io/)
 
 ---
 
-If you have any questions or run into issues, feel free to open a discussion or contact the maintainers. Happy coding!
-🚀
+## 💬 Slack & Discord Notifications
+
+This repo includes GitHub Actions to notify **Slack and Discord** when:
+
+- A Safe proposal is created
+- A transaction is signed or executed
+- A GitHub PR triggers a proposal
+
+> You must add these as GitHub secrets:
+
+- `SLACK_WEBHOOK_URL`
+- `DISCORD_WEBHOOK_URL`
+
+See `.github/workflows/proposal-notify.yml` for implementation.
+
+---
+
+## 🛠 Developer Tools
+
+| Tool         | Purpose                        |
+|--------------|--------------------------------|
+| **Yarn**     | Workspace dependency manager   |
+| **Husky**    | Git hooks for lint/test        |
+| **ESLint**   | Code linting                   |
+| **Prettier** | Code formatting                |
+| **Jest**     | Unit testing                   |
+| **Next.js**  | Web dashboard framework        |
+| **Expo**     | Mobile runtime engine          |
+| **Safe SDK** | Gnosis Safe interactions       |
+"""
+
+# Create a temp directory and write README.md
+temp_dir = Path("/mnt/data/safe_wallet_readme")
+temp_dir.mkdir(parents=True, exist_ok=True)
+readme_path = temp_dir / "README.md"
+readme_path.write_text(readme_content, encoding="utf-8")
+
+# Create a zip file
+zip_path = Path("/mnt/data/SafeWallet_Readme.zip")
+with zipfile.ZipFile(zip_path, 'w') as zipf:
+    zipf.write(readme_path, arcname="README.md")
+
+zip_path
