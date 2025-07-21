@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useTheme } from '@mui/material/styles'
 import {
   mixpanelInit,
@@ -6,8 +6,6 @@ import {
   mixpanelSetDeviceType,
   mixpanelSetSafeAddress,
   mixpanelSetUserProperties,
-  mixpanelEnableTracking,
-  mixpanelDisableTracking,
   mixpanelIdentify,
   mixpanelSetEOAWalletLabel,
   mixpanelSetEOAWalletAddress,
@@ -30,7 +28,6 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 const useMixpanel = () => {
   const isMixpanelEnabled = useHasFeature(FEATURES.MIXPANEL)
   const isAnalyticsEnabled = useAppSelector((state) => hasConsentFor(state, CookieAndTermType.ANALYTICS))
-  const [, setPrevAnalytics] = useState(isAnalyticsEnabled)
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
   const isTablet = useMediaQuery(theme.breakpoints.down('md'))
@@ -46,24 +43,10 @@ const useMixpanel = () => {
   const walletChain = useChain(wallet?.chainId || '')
 
   useEffect(() => {
-    if (isMixpanelEnabled) {
+    if (isMixpanelEnabled && isAnalyticsEnabled) {
       mixpanelInit()
     }
-  }, [isMixpanelEnabled])
-
-  useEffect(() => {
-    setPrevAnalytics((prev) => {
-      if (isAnalyticsEnabled === prev) return prev
-
-      if (isAnalyticsEnabled) {
-        mixpanelEnableTracking()
-      } else {
-        mixpanelDisableTracking()
-      }
-
-      return isAnalyticsEnabled
-    })
-  }, [isAnalyticsEnabled])
+  }, [isMixpanelEnabled, isAnalyticsEnabled])
 
   useEffect(() => {
     if (currentChain) {
