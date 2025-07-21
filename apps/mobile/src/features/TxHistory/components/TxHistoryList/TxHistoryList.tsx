@@ -29,7 +29,7 @@ export function TxHistoryList({ transactions, onEndReached, isLoading, refreshin
   const isInitialLoading = isLoading && !hasTransactions && !refreshing
 
   // ListEmptyComponent for initial loading state
-  const renderEmptyComponent = () => {
+  const renderEmptyComponent = useMemo(() => {
     if (isInitialLoading) {
       return (
         <View
@@ -44,10 +44,10 @@ export function TxHistoryList({ transactions, onEndReached, isLoading, refreshin
       )
     }
     return null
-  }
+  }, [isInitialLoading])
 
   // ListFooterComponent for pagination loading (bottom loading)
-  const renderFooterComponent = () => {
+  const renderFooterComponent = useMemo(() => {
     if (isLoading && hasTransactions) {
       return (
         <View testID="tx-history-pagination-loader" marginTop="$4">
@@ -56,7 +56,7 @@ export function TxHistoryList({ transactions, onEndReached, isLoading, refreshin
       )
     }
     return null
-  }
+  }, [isLoading, hasTransactions])
 
   return (
     <View position="relative" flex={1}>
