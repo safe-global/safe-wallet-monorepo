@@ -160,7 +160,6 @@ export const safeAppToMixPanelEventProperties = (
   safeApp: SafeAppData,
   options?: {
     launchLocation?: string
-    chainName?: string
   },
 ): Record<string, any> => {
   const properties: Record<string, any> = {
@@ -170,10 +169,6 @@ export const safeAppToMixPanelEventProperties = (
 
   if (options?.launchLocation) {
     properties['Launch Location'] = options.launchLocation
-  }
-
-  if (options?.chainName) {
-    properties[MixPanelEventParams.BLOCKCHAIN_NETWORK] = options.chainName
   }
 
   return properties
