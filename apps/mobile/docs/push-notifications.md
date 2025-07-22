@@ -86,6 +86,7 @@ When the app starts, `NotificationService.initializeNotificationHandlers()` sets
 ### iOS
 
 - Uses a **Notification Service Extension** (`NotificationService.swift`) to intercept the push payload when the app is in the background. The extension reads data stored via `startNotificationExtensionSync` and rewrites the notification title/body.
+- None of the background tasks are being executed as the notification service is intercepting the notifications before they reach the background tasks
 - Opening the notification settings uses `Linking.openURL('app-settings:')`.
 - iOS badges are updated with `notifee` and can show a banner or list presentation when the app is active.
 
@@ -94,6 +95,7 @@ When the app starts, `NotificationService.initializeNotificationHandlers()` sets
 - Notifications are handled directly by Notifee using FCM. There is no additional extension layer.
 - Device settings are opened with `Linking.openSettings()`.
 - Android uses channels defined in `notificationChannels` with importance `HIGH` and visibility `PUBLIC` to display alerts.
+- When the app is in background or in quit state the background handlers are being executed in headless mode.
 
 Both platforms share the same subscription logic and redux state but differ in how the underlying OS displays and processes the notification payload.
 

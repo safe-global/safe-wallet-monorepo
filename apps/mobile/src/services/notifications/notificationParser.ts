@@ -4,10 +4,59 @@ import { selectChainById } from '@/src/store/chains'
 import { shortenAddress } from '@/src/utils/formatters'
 import { selectContactByAddress } from '@/src/store/addressBookSlice'
 import { getStore } from '@/src/store/utils/singletonStore'
+import { getExtensionData } from './store-sync/read'
+import Logger from '@/src/utils/logger'
 
 export interface ParsedNotification {
   title: string
   body: string
+}
+
+interface NotificationMetadata {
+  chainName: string
+  chainSymbol: string
+  chainDecimals: number
+  safeName: string
+}
+
+const getNotificationMetadata = (chainId?: string, address?: string): NotificationMetadata => {
+  let chainData: { name?: string; symbol?: string; decimals?: number } | null = null
+  let contactName: string | undefined = undefined
+
+  try {
+    // Try to use Redux store first (foreground mode)
+    const state = getStore().getState()
+    const chain = chainId ? selectChainById(state, chainId) : null
+    chainData = chain
+      ? {
+          name: chain.chainName,
+          symbol: chain.nativeCurrency?.symbol,
+          decimals: chain.nativeCurrency?.decimals,
+        }
+      : null
+    contactName = selectContactByAddress(address as `0x${string}`)(state)?.name
+  } catch (_error) {
+    // Fallback to extension MMKV storage (background|quit mode)
+    Logger.info('parseNotification: Redux store not available, using extension storage fallback')
+    const extensionData = getExtensionData()
+    const extChainData = chainId ? extensionData?.chains[chainId] : undefined
+    chainData = extChainData
+      ? {
+          name: extChainData.name,
+          symbol: extChainData.symbol,
+          decimals: extChainData.decimals,
+        }
+      : null
+    contactName = address && extensionData?.contacts[address]
+  }
+
+  // Set variables based on fetched data
+  return {
+    chainName: chainData?.name ?? `Chain Id ${chainId}`,
+    chainSymbol: chainData?.symbol ?? 'ETH',
+    chainDecimals: chainData?.decimals ?? 18,
+    safeName: contactName ?? (address ? shortenAddress(address) : ''),
+  }
 }
 
 export const parseNotification = (data?: Record<string, unknown>): ParsedNotification | null => {
@@ -21,22 +70,14 @@ export const parseNotification = (data?: Record<string, unknown>): ParsedNotific
   const chainId = strData.chainId
   const address = strData.address
 
-  const state = getStore().getState()
-  const chain = chainId ? selectChainById(state, chainId) : null
-
-  const chainName = chain?.chainName ?? `Chain Id ${chainId}`
-
-  const safeName =
-    selectContactByAddress(address as `0x${string}`)(state)?.name ?? (address ? shortenAddress(address) : '')
+  const { chainName, chainSymbol, chainDecimals, safeName } = getNotificationMetadata(chainId, address)
 
   switch (type) {
     case 'INCOMING_ETHER': {
-      const symbol = chain?.nativeCurrency?.symbol ?? 'ETH'
-      const decimals = chain?.nativeCurrency?.decimals ?? 18
-      const value = strData.value ? formatUnits(strData.value, decimals) : ''
+      const value = strData.value ? formatUnits(strData.value, chainDecimals) : ''
       return {
-        title: `Incoming ${symbol} (${chainName})`,
-        body: `${safeName}: ${value} ${symbol} received`,
+        title: `Incoming ${chainSymbol} (${chainName})`,
+        body: `${safeName}: ${value} ${chainSymbol} received`,
       }
     }
     case 'INCOMING_TOKEN': {

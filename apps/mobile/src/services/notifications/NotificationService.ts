@@ -349,30 +349,9 @@ class NotificationsService {
   initializeNotificationHandlers(): void {
     // Core Firebase handlers
     this.listenForMessagesForeground() // FCM foreground messages
-    this.registerFirebaseBackgroundHandler() // FCM background messages
     this.registerFirebaseNotificationOpenedHandler() // App opened from notification
 
-    // Core Notifee handlers
-    this.registerNotifeeBackgroundHandler() // Notifee interactions (press, dismiss, etc.)
-
     Logger.info('NotificationService: Successfully initialized simplified notification handlers')
-  }
-
-  /**
-   * Registers the Notifee background event handler
-   */
-  private registerNotifeeBackgroundHandler(): void {
-    notifee.onBackgroundEvent(async ({ type, detail }) => {
-      if (type === EventType.PRESS) {
-        await this.handleNotificationPress({ detail })
-      } else if (type === EventType.DELIVERED) {
-        await this.incrementBadgeCount(1)
-      } else if (type === EventType.DISMISSED) {
-        Logger.info('User dismissed notification:', detail.notification?.id)
-      }
-
-      return Promise.resolve()
-    })
   }
 
   private listenForMessagesForeground = (): UnsubscribeFunc => {
@@ -419,26 +398,6 @@ class NotificationsService {
           }
         }
       })
-  }
-
-  /**
-   * Registers the Firebase messaging background handler
-   */
-  private registerFirebaseBackgroundHandler(): void {
-    getMessaging().setBackgroundMessageHandler(async (remoteMessage) => {
-      Logger.info('Message handled in the background!', remoteMessage)
-
-      // Display the notification using Notifee
-      const parsed = parseNotification(remoteMessage.data)
-      await this.displayNotification({
-        channelId: ChannelId.DEFAULT_NOTIFICATION_CHANNEL_ID,
-        title: parsed?.title || remoteMessage.notification?.title || '',
-        body: parsed?.body || remoteMessage.notification?.body || '',
-        data: remoteMessage.data,
-      })
-
-      return Promise.resolve()
-    })
   }
 }
 
