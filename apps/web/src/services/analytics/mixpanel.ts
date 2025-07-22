@@ -2,7 +2,8 @@ import mixpanel from 'mixpanel-browser'
 import type { SafeAppData } from '@safe-global/safe-gateway-typescript-sdk'
 import { IS_PRODUCTION } from '@/config/constants'
 import { DeviceType } from './types'
-import { MixPanelEventParams } from './mixpanel-events'
+import { MixPanelEventParams, MixPanelEvent } from './mixpanel-events'
+import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import packageJson from '../../../package.json'
 
 const commonEventParams = {
@@ -149,4 +150,14 @@ export const mixpanelIdentify = (userId: string): void => {
   if (!IS_PRODUCTION) {
     console.info('[MixPanel] - User identified:', userId)
   }
+}
+
+export const mixpanelTrackWalletConnected = (wallet: ConnectedWallet, networkName: string): void => {
+  const eventProperties = {
+    [MixPanelEventParams.EOA_WALLET_LABEL]: wallet.label,
+    [MixPanelEventParams.EOA_WALLET_ADDRESS]: wallet.address,
+    [MixPanelEventParams.EOA_WALLET_NETWORK]: networkName,
+  }
+
+  mixpanelTrack(MixPanelEvent.WALLET_CONNECTED, eventProperties)
 }
