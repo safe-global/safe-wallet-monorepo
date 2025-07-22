@@ -1,5 +1,4 @@
 import notificationSyncMiddleware from '../notificationSync'
-import { syncNotificationExtensionData } from '@/src/services/notifications/store-sync/sync'
 import { addressBookSlice } from '@/src/store/addressBookSlice'
 import { apiSliceWithChainsConfig } from '@safe-global/store/gateway/chains'
 import { configureStore, Action } from '@reduxjs/toolkit'
@@ -11,12 +10,14 @@ jest.mock('@/src/services/notifications/store-sync/sync', () => ({
   syncNotificationExtensionData: jest.fn(),
 }))
 
-// Define test gateway URL
-const TEST_GATEWAY_URL = 'https://safe-client.staging.5afe.dev'
+import { syncNotificationExtensionData } from '@/src/services/notifications/store-sync/sync'
 
 const mockSyncNotificationExtensionData = syncNotificationExtensionData as jest.MockedFunction<
   typeof syncNotificationExtensionData
 >
+
+// Define test gateway URL
+const TEST_GATEWAY_URL = 'https://safe-client.staging.5afe.dev'
 
 describe('notificationSyncMiddleware', () => {
   let store: { getState: jest.Mock; dispatch: jest.Mock }
@@ -50,6 +51,7 @@ describe('notificationSyncMiddleware', () => {
 
       expect(next).toHaveBeenCalledWith(action)
       expect(mockSyncNotificationExtensionData).toHaveBeenCalledTimes(1)
+      expect(mockSyncNotificationExtensionData).toHaveBeenCalledWith(store)
     })
 
     it('should sync when removeContact action is dispatched', () => {
@@ -59,6 +61,7 @@ describe('notificationSyncMiddleware', () => {
 
       expect(next).toHaveBeenCalledWith(action)
       expect(mockSyncNotificationExtensionData).toHaveBeenCalledTimes(1)
+      expect(mockSyncNotificationExtensionData).toHaveBeenCalledWith(store)
     })
 
     it('should sync when updateContact action is dispatched', () => {
@@ -72,6 +75,7 @@ describe('notificationSyncMiddleware', () => {
 
       expect(next).toHaveBeenCalledWith(action)
       expect(mockSyncNotificationExtensionData).toHaveBeenCalledTimes(1)
+      expect(mockSyncNotificationExtensionData).toHaveBeenCalledWith(store)
     })
 
     it('should NOT sync when selectContact action is dispatched', () => {
@@ -93,6 +97,7 @@ describe('notificationSyncMiddleware', () => {
 
       expect(next).toHaveBeenCalledWith(action)
       expect(mockSyncNotificationExtensionData).toHaveBeenCalledTimes(1)
+      expect(mockSyncNotificationExtensionData).toHaveBeenCalledWith(store)
     })
 
     it('should sync when upsertContact action is dispatched', () => {
@@ -106,6 +111,7 @@ describe('notificationSyncMiddleware', () => {
 
       expect(next).toHaveBeenCalledWith(action)
       expect(mockSyncNotificationExtensionData).toHaveBeenCalledTimes(1)
+      expect(mockSyncNotificationExtensionData).toHaveBeenCalledWith(store)
     })
   })
 
@@ -277,6 +283,7 @@ describe('notificationSyncMiddleware', () => {
       middleware(action)
 
       expect(mockSyncNotificationExtensionData).toHaveBeenCalledTimes(1)
+      expect(mockSyncNotificationExtensionData).toHaveBeenCalledWith(store)
     })
 
     it('should process multiple relevant actions independently', async () => {

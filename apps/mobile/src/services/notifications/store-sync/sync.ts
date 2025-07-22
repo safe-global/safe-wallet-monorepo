@@ -1,8 +1,8 @@
-import { store } from '@/src/store'
 import { selectAllContacts } from '@/src/store/addressBookSlice'
 import { selectAllChains } from '@/src/store/chains'
 import { STORAGE_IDS } from '@/src/store/constants'
 import { extensionStorage } from './const'
+import type { AppStore } from '@/src/store'
 
 /**
  * On iOS we need to intercept the push notification payload and
@@ -13,7 +13,7 @@ import { extensionStorage } from './const'
  * On Android we run in a Headless service, we could theoretically init the redux store,
  * but using MMKV directly for the push notifications is easier.
  */
-export function syncNotificationExtensionData() {
+export function syncNotificationExtensionData(store: AppStore) {
   const state = store.getState()
   const contacts = selectAllContacts(state)
   const chains = selectAllChains(state)

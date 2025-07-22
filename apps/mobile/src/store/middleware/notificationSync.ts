@@ -2,12 +2,13 @@ import type { Middleware } from '@reduxjs/toolkit'
 import { syncNotificationExtensionData } from '@/src/services/notifications/store-sync/sync'
 import { apiSliceWithChainsConfig } from '@safe-global/store/gateway/chains'
 import { addressBookSlice } from '@/src/store/addressBookSlice'
+import type { AppStore } from '@/src/store'
 
-const notificationSyncMiddleware: Middleware = (_store) => (next) => (action) => {
+const notificationSyncMiddleware: Middleware = (store) => (next) => (action) => {
   const result = next(action)
 
   if (shouldSyncNotificationData(action)) {
-    syncNotificationExtensionData()
+    syncNotificationExtensionData(store as AppStore)
   }
 
   return result

@@ -58,7 +58,7 @@ persistor.subscribe(() => {
     store.dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfig.initiate(undefined, { forceRefetch: true }))
 
     // Run initial notification extension sync after store is rehydrated
-    syncNotificationExtensionData()
+    syncNotificationExtensionData(store)
   }
 })
 
