@@ -22,6 +22,12 @@ jest.mock('@/src/store/addressBookSlice', () => ({
   removeContact: jest.fn(),
 }))
 
+// Mock the notification sync middleware to avoid import issues
+jest.mock('@/src/store/middleware/notificationSync', () => ({
+  __esModule: true,
+  default: () => (next: (action: unknown) => unknown) => (action: unknown) => next(action),
+}))
+
 const mockDispatch = jest.fn()
 const mockSetIsEditing = jest.fn()
 
