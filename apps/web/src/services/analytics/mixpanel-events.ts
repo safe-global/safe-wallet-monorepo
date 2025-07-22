@@ -2,6 +2,7 @@ export enum MixPanelEvent {
   SAFE_APP_LAUNCHED = 'Safe App Launched',
   SAFE_CREATED = 'Safe Created',
   SAFE_ACTIVATED = 'Safe Activated',
+  WALLET_CONNECTED = 'Wallet Connected',
 }
 
 export enum MixPanelUserProperty {
