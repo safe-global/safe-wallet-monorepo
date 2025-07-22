@@ -1,4 +1,4 @@
-import messaging from '@react-native-firebase/messaging'
+import { getMessaging } from '@react-native-firebase/messaging'
 import notifee from '@notifee/react-native'
 
 /**
@@ -6,7 +6,7 @@ import notifee from '@notifee/react-native'
  * On iOS, the Notification Service Extension is intercepting the notifications and those
  * functions here never get called.
  */
-messaging().setBackgroundMessageHandler(async (remoteMessage) => {
+getMessaging().setBackgroundMessageHandler(async (remoteMessage) => {
   const messageId = remoteMessage.messageId || `${remoteMessage.data?.type}-${Date.now()}`
   console.log('[Firebase Background] Processing message:', messageId)
 
