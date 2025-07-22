@@ -315,7 +315,6 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
         replayCounterfactualSafeDeployment(chain.chainId, safeAddress, props, data.name, dispatch, payMethod)
         trackEvent({ ...CREATE_SAFE_EVENTS.CREATED_SAFE, label: 'counterfactual' })
 
-        // Track MixPanel event for Safe creation
         trackMixPanelEvent(MixPanelEvent.SAFE_CREATED, {
           [MixPanelEventParams.SAFE_ADDRESS]: safeAddress,
           [MixPanelEventParams.BLOCKCHAIN_NETWORK]: chain.chainName,
@@ -356,7 +355,6 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
         trackEvent(CREATE_SAFE_EVENTS.SUBMIT_CREATE_SAFE)
         trackEvent({ ...OVERVIEW_EVENTS.PROCEED_WITH_TX, label: 'deployment', category: CREATE_SAFE_CATEGORY })
 
-        // Track MixPanel event for Safe creation (direct deployment)
         trackMixPanelEvent(MixPanelEvent.SAFE_CREATED, {
           [MixPanelEventParams.SAFE_ADDRESS]: safeAddress,
           [MixPanelEventParams.BLOCKCHAIN_NETWORK]: chain.chainName,

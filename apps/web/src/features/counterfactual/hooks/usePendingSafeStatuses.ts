@@ -133,7 +133,6 @@ const usePendingSafeStatus = (): void => {
             trackEvent(CREATE_SAFE_EVENTS.CREATED_SAFE)
           }
 
-          // Track MixPanel event for Safe activation
           const undeployedSafe = undeployedSafes[creationChainId]?.[detail.safeAddress]
           if (undeployedSafe) {
             const safeSetup = extractCounterfactualSafeSetup(undeployedSafe, creationChainId)
