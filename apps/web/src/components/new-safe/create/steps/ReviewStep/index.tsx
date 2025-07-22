@@ -321,8 +321,8 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
           [MixPanelEventParams.NUMBER_OF_OWNERS]: props.safeAccountConfig.owners.length,
           [MixPanelEventParams.THRESHOLD]: props.safeAccountConfig.threshold,
           [MixPanelEventParams.ENTRY_POINT]: document.referrer || 'Direct',
-          [MixPanelEventParams.DEPLOYMENT_TYPE]: 'counterfactual',
-          [MixPanelEventParams.PAYMENT_METHOD]: willRelay ? 'sponsored' : 'self-paid',
+          [MixPanelEventParams.DEPLOYMENT_TYPE]: 'Counterfactual',
+          [MixPanelEventParams.PAYMENT_METHOD]: 'Pay-later',
         })
 
         return
@@ -362,7 +362,7 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
           [MixPanelEventParams.THRESHOLD]: props.safeAccountConfig.threshold,
           [MixPanelEventParams.ENTRY_POINT]: document.referrer || 'Direct',
           [MixPanelEventParams.DEPLOYMENT_TYPE]: 'direct',
-          [MixPanelEventParams.PAYMENT_METHOD]: willRelay ? 'sponsored' : 'self-paid',
+          [MixPanelEventParams.PAYMENT_METHOD]: willRelay ? 'Sponsored' : 'Self-paid',
         })
 
         onSubmit(data)

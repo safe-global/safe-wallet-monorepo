@@ -143,8 +143,8 @@ const usePendingSafeStatus = (): void => {
                 [MixPanelEventParams.NUMBER_OF_OWNERS]: safeSetup.owners.length,
                 [MixPanelEventParams.THRESHOLD]: safeSetup.threshold,
                 [MixPanelEventParams.ENTRY_POINT]: 'Counterfactual Activation',
-                [MixPanelEventParams.DEPLOYMENT_TYPE]: 'counterfactual',
-                [MixPanelEventParams.PAYMENT_METHOD]: 'self-paid', // Activation is always self-paid
+                [MixPanelEventParams.DEPLOYMENT_TYPE]: 'Counterfactual',
+                [MixPanelEventParams.PAYMENT_METHOD]: 'Self-paid', // Activation is always self-paid
               })
             }
           }
