@@ -36,8 +36,3 @@ export function syncNotificationExtensionData() {
   const data = JSON.stringify({ chains: chainMap, contacts: contactMap })
   extensionStorage.set(STORAGE_IDS.NOTIFICATION_EXTENSION_DATA, data)
 }
-
-export function startNotificationExtensionSync() {
-  syncNotificationExtensionData()
-  store.subscribe(syncNotificationExtensionData)
-}
