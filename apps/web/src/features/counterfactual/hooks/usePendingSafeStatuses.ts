@@ -13,13 +13,21 @@ import { checkSafeActionViaRelay, checkSafeActivation } from '@/features/counter
 import useChainId from '@/hooks/useChainId'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
-import { CREATE_SAFE_EVENTS, trackEvent } from '@/services/analytics'
+import {
+  CREATE_SAFE_EVENTS,
+  trackEvent,
+  trackMixPanelEvent,
+  MixPanelEvent,
+  MixPanelEventParams,
+} from '@/services/analytics'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { useEffect, useRef } from 'react'
 import { isSmartContract } from '@/utils/wallets'
 import { gtmSetSafeAddress } from '@/services/analytics/gtm'
 import { PendingSafeStatus } from '@safe-global/utils/features/counterfactual/store/types'
 import { PayMethod } from '@safe-global/utils/features/counterfactual/types'
+import { extractCounterfactualSafeSetup } from '@/features/counterfactual/utils'
+import { useCurrentChain } from '@/hooks/useChains'
 
 export const safeCreationPendingStatuses: Partial<Record<SafeCreationEvent, PendingSafeStatus | null>> = {
   [SafeCreationEvent.AWAITING_EXECUTION]: PendingSafeStatus.AWAITING_EXECUTION,
@@ -84,6 +92,8 @@ const usePendingSafeStatus = (): void => {
   const { safe, safeAddress } = useSafeInfo()
   const chainId = useChainId()
   const provider = useWeb3ReadOnly()
+  const chain = useCurrentChain()
+  const undeployedSafes = useAppSelector(selectUndeployedSafes)
 
   usePendingSafeMonitor()
 
@@ -121,6 +131,23 @@ const usePendingSafeStatus = (): void => {
           // Not a counterfactual deployment
           if ('type' in detail && detail.type === PayMethod.PayNow) {
             trackEvent(CREATE_SAFE_EVENTS.CREATED_SAFE)
+          }
+
+          // Track MixPanel event for Safe activation
+          const undeployedSafe = undeployedSafes[creationChainId]?.[detail.safeAddress]
+          if (undeployedSafe) {
+            const safeSetup = extractCounterfactualSafeSetup(undeployedSafe, creationChainId)
+            if (safeSetup) {
+              trackMixPanelEvent(MixPanelEvent.SAFE_ACTIVATED, {
+                [MixPanelEventParams.SAFE_ADDRESS]: detail.safeAddress,
+                [MixPanelEventParams.BLOCKCHAIN_NETWORK]: chain?.chainName || '',
+                [MixPanelEventParams.NUMBER_OF_OWNERS]: safeSetup.owners.length,
+                [MixPanelEventParams.THRESHOLD]: safeSetup.threshold,
+                [MixPanelEventParams.ENTRY_POINT]: 'Counterfactual Activation',
+                [MixPanelEventParams.DEPLOYMENT_TYPE]: 'counterfactual',
+                [MixPanelEventParams.PAYMENT_METHOD]: 'self-paid', // Activation is always self-paid
+              })
+            }
           }
 
           pollSafeInfo(creationChainId, detail.safeAddress).finally(() => {
@@ -172,7 +199,7 @@ const usePendingSafeStatus = (): void => {
     return () => {
       unsubFns.forEach((unsub) => unsub())
     }
-  }, [chainId, dispatch, provider])
+  }, [chainId, dispatch, provider, chain?.chainName, undeployedSafes])
 }
 
 export default usePendingSafeStatus

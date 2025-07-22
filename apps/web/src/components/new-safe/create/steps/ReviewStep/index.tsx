@@ -27,7 +27,15 @@ import useIsWrongChain from '@/hooks/useIsWrongChain'
 import { useLeastRemainingRelays } from '@/hooks/useRemainingRelays'
 import useWalletCanPay from '@/hooks/useWalletCanPay'
 import useWallet from '@/hooks/wallets/useWallet'
-import { CREATE_SAFE_CATEGORY, CREATE_SAFE_EVENTS, OVERVIEW_EVENTS, trackEvent } from '@/services/analytics'
+import {
+  CREATE_SAFE_CATEGORY,
+  CREATE_SAFE_EVENTS,
+  OVERVIEW_EVENTS,
+  trackEvent,
+  trackMixPanelEvent,
+  MixPanelEvent,
+  MixPanelEventParams,
+} from '@/services/analytics'
 import { gtmSetChainId, gtmSetSafeAddress } from '@/services/analytics/gtm'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { useAppDispatch, useAppSelector } from '@/store'
@@ -306,6 +314,18 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
         trackEvent({ ...OVERVIEW_EVENTS.PROCEED_WITH_TX, label: 'counterfactual', category: CREATE_SAFE_CATEGORY })
         replayCounterfactualSafeDeployment(chain.chainId, safeAddress, props, data.name, dispatch, payMethod)
         trackEvent({ ...CREATE_SAFE_EVENTS.CREATED_SAFE, label: 'counterfactual' })
+
+        // Track MixPanel event for Safe creation
+        trackMixPanelEvent(MixPanelEvent.SAFE_CREATED, {
+          [MixPanelEventParams.SAFE_ADDRESS]: safeAddress,
+          [MixPanelEventParams.BLOCKCHAIN_NETWORK]: chain.chainName,
+          [MixPanelEventParams.NUMBER_OF_OWNERS]: props.safeAccountConfig.owners.length,
+          [MixPanelEventParams.THRESHOLD]: props.safeAccountConfig.threshold,
+          [MixPanelEventParams.ENTRY_POINT]: document.referrer || 'Direct',
+          [MixPanelEventParams.DEPLOYMENT_TYPE]: 'counterfactual',
+          [MixPanelEventParams.PAYMENT_METHOD]: willRelay ? 'sponsored' : 'self-paid',
+        })
+
         return
       }
 
@@ -335,6 +355,17 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
 
         trackEvent(CREATE_SAFE_EVENTS.SUBMIT_CREATE_SAFE)
         trackEvent({ ...OVERVIEW_EVENTS.PROCEED_WITH_TX, label: 'deployment', category: CREATE_SAFE_CATEGORY })
+
+        // Track MixPanel event for Safe creation (direct deployment)
+        trackMixPanelEvent(MixPanelEvent.SAFE_CREATED, {
+          [MixPanelEventParams.SAFE_ADDRESS]: safeAddress,
+          [MixPanelEventParams.BLOCKCHAIN_NETWORK]: chain.chainName,
+          [MixPanelEventParams.NUMBER_OF_OWNERS]: props.safeAccountConfig.owners.length,
+          [MixPanelEventParams.THRESHOLD]: props.safeAccountConfig.threshold,
+          [MixPanelEventParams.ENTRY_POINT]: document.referrer || 'Direct',
+          [MixPanelEventParams.DEPLOYMENT_TYPE]: 'direct',
+          [MixPanelEventParams.PAYMENT_METHOD]: willRelay ? 'sponsored' : 'self-paid',
+        })
 
         onSubmit(data)
       }
