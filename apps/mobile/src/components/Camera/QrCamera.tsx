@@ -64,13 +64,9 @@ function CameraLens({
   onActivateCamera: () => void
   isCameraActive: boolean
 }) {
-  const { colorScheme } = useTheme()
+  const { isDark } = useTheme()
 
-  let color = getTokenValue('$color.textPrimaryDark')
-
-  if (colorScheme === 'light') {
-    color = getTokenValue('$color.textPrimaryLight')
-  }
+  const color = isDark ? getTokenValue('$color.textPrimaryDark') : getTokenValue('$color.textPrimaryLight')
 
   const handleGrantOrActivatePress = useCallback(async () => {
     if (!hasPermission) {

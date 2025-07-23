@@ -15,7 +15,7 @@ interface ReviewAndConfirmViewProps {
 }
 
 export function ReviewAndConfirmView({ txDetails, signerAddress }: ReviewAndConfirmViewProps) {
-  const { colorScheme } = useCurrentTheme()
+  const { isDark } = useCurrentTheme()
   const theme = useTheme()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const renderTabBar = (props: any) => (
@@ -24,7 +24,7 @@ export function ReviewAndConfirmView({ txDetails, signerAddress }: ReviewAndConf
       indicatorStyle={{
         backgroundColor: theme.color.get(),
       }}
-      style={{ backgroundColor: colorScheme === 'light' ? theme.backgroundPaper.get() : theme.background.get() }}
+      style={{ backgroundColor: isDark ? theme.background.get() : theme.backgroundPaper.get() }}
       labelStyle={{ color: theme.color.get(), fontSize: 16, fontWeight: '600' }}
       activeColor={theme.color.get()}
       inactiveColor={theme.colorSecondary.get()}
