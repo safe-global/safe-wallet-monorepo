@@ -54,7 +54,6 @@ export const mixpanelInit = (): void => {
 
     isMixPanelInitialized = true
 
-    // Register initial common parameters
     mixpanel.register({
       [MixPanelEventParams.APP_VERSION]: packageJson.version,
       [MixPanelEventParams.DEVICE_TYPE]: DeviceType.DESKTOP,
