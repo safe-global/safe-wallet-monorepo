@@ -5,14 +5,14 @@ import { config } from '@/src/theme/tamagui.config'
 import { NavDarkTheme, NavLightTheme } from '@/src/theme/navigation'
 import { FontProvider } from '@/src/theme/provider/font'
 import { View } from 'tamagui'
-import { useColorScheme } from 'react-native'
+import { useTheme } from '@/src/theme/hooks/useTheme'
 
 interface StorybookThemeProviderProps {
   children: React.ReactNode
 }
 
 export const StorybookThemeProvider = ({ children }: StorybookThemeProviderProps) => {
-  const colorScheme = useColorScheme()
+  const { colorScheme } = useTheme()
 
   return (
     <FontProvider>

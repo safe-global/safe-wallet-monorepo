@@ -1,10 +1,10 @@
 import React from 'react'
-import { useColorScheme } from 'react-native'
+import { useTheme } from '@/src/theme/hooks/useTheme'
 import Svg, { Path } from 'react-native-svg'
 import { getTokenValue } from 'tamagui'
 
 function EmptyNft() {
-  const colorScheme = useColorScheme()
+  const { colorScheme } = useTheme()
   let color = getTokenValue('$color.backgroundMainDark')
 
   if (colorScheme === 'light') {

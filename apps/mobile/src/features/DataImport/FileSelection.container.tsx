@@ -1,14 +1,14 @@
 import React, { useCallback } from 'react'
 import { useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { useColorScheme } from 'react-native'
+import { useTheme } from '@/src/theme/hooks/useTheme'
 import { useDataImportContext } from './context/DataImportProvider'
 import { FileSelectionView } from './components/FileSelectionView'
 
 export const FileSelection = () => {
   const router = useRouter()
   const insets = useSafeAreaInsets()
-  const colorScheme = useColorScheme()
+  const { colorScheme } = useTheme()
   const { pickFile } = useDataImportContext()
 
   const handleFileSelect = useCallback(async () => {

@@ -7,7 +7,7 @@ import { LargeHeaderTitle } from '@/src/components/Title/LargeHeaderTitle'
 import { useScrollableHeader } from '@/src/navigation/useScrollableHeader'
 import SafeSearchBar from '@/src/components/SafeSearchBar/SafeSearchBar'
 import type { CurrencyViewProps } from './Currency.types'
-import { useColorScheme } from 'react-native'
+import { useTheme } from '@/src/theme/hooks/useTheme'
 
 export const CurrencyView: React.FC<CurrencyViewProps> = ({
   selectedCurrency,
@@ -17,7 +17,7 @@ export const CurrencyView: React.FC<CurrencyViewProps> = ({
   onSearchQueryChange,
 }) => {
   const insets = useSafeAreaInsets()
-  const colorScheme = useColorScheme()
+  const { colorScheme } = useTheme()
   const isDark = colorScheme === 'dark'
 
   const { handleScroll } = useScrollableHeader({

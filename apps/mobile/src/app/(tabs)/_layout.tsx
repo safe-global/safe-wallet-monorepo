@@ -8,10 +8,10 @@ import { useTheme } from '@/src/theme/hooks/useTheme'
 import TransactionHeader from '@/src/features/TxHistory/components/TransactionHeader'
 
 export default function TabLayout() {
-  const { currentTheme } = useTheme()
+  const { colorScheme } = useTheme()
 
   let activeTintColor, inactiveTintColor, borderTopColor
-  if (currentTheme === 'light') {
+  if (colorScheme === 'light') {
     activeTintColor = getTokenValue('$color.textPrimaryLight')
     inactiveTintColor = getTokenValue('$color.borderMainLight')
     borderTopColor = getTokenValue('$color.borderLightLight')

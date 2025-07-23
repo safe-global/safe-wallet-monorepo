@@ -1,11 +1,11 @@
 import React from 'react'
-import { useColorScheme } from 'react-native'
+import { useTheme } from '@/src/theme/hooks/useTheme'
 import { Text, View } from 'tamagui'
 import EmptyAddressBookLight from './EmptyAddressBookLight'
 import EmptyAddressBookDark from './EmptyAddressBookDark'
 
 export const NoContactsFound = () => {
-  const colorScheme = useColorScheme()
+  const { colorScheme } = useTheme()
 
   const EmptyAddress = colorScheme === 'dark' ? <EmptyAddressBookDark /> : <EmptyAddressBookLight />
 

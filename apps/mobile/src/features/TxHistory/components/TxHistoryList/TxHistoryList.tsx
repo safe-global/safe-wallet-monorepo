@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react'
 import { Tabs } from 'react-native-collapsible-tab-view'
-import { View, useTheme } from 'tamagui'
+import { useTheme, View } from 'tamagui'
 import { SafeListItem } from '@/src/components/SafeListItem'
 import { TransactionItem } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { getTxHash, GroupedTxsWithTitle, groupTxsByDate } from '@/src/features/TxHistory/utils'

@@ -1,13 +1,13 @@
 import React, { useCallback } from 'react'
 import { useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { useColorScheme } from 'react-native'
+import { useTheme } from '@/src/theme/hooks/useTheme'
 import { DataTransferView } from './components/DataTransferView'
 
 export const DataTransfer = () => {
   const router = useRouter()
   const insets = useSafeAreaInsets()
-  const colorScheme = useColorScheme()
+  const { colorScheme } = useTheme()
 
   const onPressTransferData = useCallback(() => {
     // Navigate to help import flow
