@@ -13,6 +13,7 @@ import {
   SafeAppLaunchLocation,
 } from '../index'
 import { mixpanelInit, mixpanelTrack, mixpanelSetSafeAddress } from '../mixpanel'
+import packageJson from '../../../../package.json'
 
 // Mock GTM
 jest.mock('../gtm', () => ({
@@ -62,7 +63,7 @@ describe('MixPanel Integration', () => {
 
       // Should register initial params
       expect(mockMixpanel.register).toHaveBeenCalledWith({
-        'App Version': '1.63.0',
+        'App Version': packageJson.version,
         'Device Type': 'desktop',
       })
     })
