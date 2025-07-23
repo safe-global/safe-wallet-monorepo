@@ -100,9 +100,6 @@ export const mixpanelSetEOAWalletNetwork = (network: string): void => {
   safeMixPanelRegister({ [MixPanelEventParams.EOA_WALLET_NETWORK]: network })
 }
 
-/**
- * Convert SafeApp object to MixPanel event properties
- */
 export const safeAppToMixPanelEventProperties = (
   safeApp: SafeAppData,
   options?: {
