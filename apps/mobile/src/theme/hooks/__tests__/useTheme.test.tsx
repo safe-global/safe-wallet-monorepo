@@ -1,6 +1,5 @@
 import { renderHook, act } from '@testing-library/react-native'
 import { useTheme } from '../useTheme'
-import React from 'react'
 
 // Mock React Native dependencies
 jest.mock('react-native', () => ({
@@ -149,7 +148,7 @@ describe('useTheme', () => {
     it('should dispatch updateSettings when app becomes active', () => {
       let appStateChangeHandler: (nextAppState: string) => void
 
-      mockAppStateAddEventListener.mockImplementation((event: any, handler: any) => {
+      mockAppStateAddEventListener.mockImplementation((event: string, handler: (nextAppState: string) => void) => {
         if (event === 'change') {
           appStateChangeHandler = handler
         }
@@ -165,7 +164,9 @@ describe('useTheme', () => {
 
       // Simulate app state change to active
       act(() => {
-        appStateChangeHandler!('active')
+        if (appStateChangeHandler) {
+          appStateChangeHandler('active')
+        }
       })
 
       expect(mockDispatch).toHaveBeenCalledWith(mockUpdateSettings({ themePreference: 'dark' }))
@@ -174,7 +175,7 @@ describe('useTheme', () => {
     it.each(['background', 'inactive'])('should not dispatch updateSettings when app goes to %s', (appState) => {
       let appStateChangeHandler: (nextAppState: string) => void
 
-      mockAppStateAddEventListener.mockImplementation((event: any, handler: any) => {
+      mockAppStateAddEventListener.mockImplementation((event: string, handler: (nextAppState: string) => void) => {
         if (event === 'change') {
           appStateChangeHandler = handler
         }
@@ -188,7 +189,9 @@ describe('useTheme', () => {
 
       // Simulate app state change
       act(() => {
-        appStateChangeHandler!(appState)
+        if (appStateChangeHandler) {
+          appStateChangeHandler(appState)
+        }
       })
 
       expect(mockUpdateSettings).not.toHaveBeenCalled()
