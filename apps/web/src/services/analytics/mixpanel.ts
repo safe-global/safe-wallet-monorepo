@@ -18,6 +18,30 @@ const commonEventParams = {
 
 let isMixPanelInitialized = false
 
+const safeMixPanelRegister = (properties: Record<string, any>): void => {
+  if (isMixPanelInitialized) {
+    mixpanel.register(properties)
+  }
+}
+
+const safeMixPanelPeopleSet = (properties: Record<string, any>): void => {
+  if (isMixPanelInitialized) {
+    mixpanel.people.set(properties)
+  }
+}
+
+const safeMixPanelTrack = (eventName: string, properties?: Record<string, any>): void => {
+  if (isMixPanelInitialized) {
+    mixpanel.track(eventName, properties)
+  }
+}
+
+const safeMixPanelIdentify = (userId: string): void => {
+  if (isMixPanelInitialized) {
+    mixpanel.identify(userId)
+  }
+}
+
 export const mixpanelInit = (): void => {
   if (typeof window === 'undefined' || isMixPanelInitialized) return
 
@@ -50,60 +74,40 @@ export const mixpanelInit = (): void => {
 
 export const mixpanelSetBlockchainNetwork = (networkName: string): void => {
   commonEventParams[MixPanelEventParams.BLOCKCHAIN_NETWORK] = networkName
-
-  if (isMixPanelInitialized) {
-    mixpanel.register({ [MixPanelEventParams.BLOCKCHAIN_NETWORK]: networkName })
-  }
+  safeMixPanelRegister({ [MixPanelEventParams.BLOCKCHAIN_NETWORK]: networkName })
 }
 
 export const mixpanelSetDeviceType = (type: DeviceType): void => {
   commonEventParams[MixPanelEventParams.DEVICE_TYPE] = type
-
-  if (isMixPanelInitialized) {
-    mixpanel.register({ [MixPanelEventParams.DEVICE_TYPE]: type })
-  }
+  safeMixPanelRegister({ [MixPanelEventParams.DEVICE_TYPE]: type })
 }
 
 export const mixpanelSetSafeAddress = (safeAddress: string): void => {
   commonEventParams[MixPanelEventParams.SAFE_ADDRESS] = safeAddress
-
-  if (isMixPanelInitialized) {
-    mixpanel.register({ [MixPanelEventParams.SAFE_ADDRESS]: commonEventParams[MixPanelEventParams.SAFE_ADDRESS] })
-  }
+  safeMixPanelRegister({ [MixPanelEventParams.SAFE_ADDRESS]: safeAddress })
 }
 
 export const mixpanelSetUserProperties = (properties: Record<string, any>): void => {
-  if (!isMixPanelInitialized) return
+  safeMixPanelPeopleSet(properties)
 
-  mixpanel.people.set(properties)
-
-  if (!IS_PRODUCTION) {
+  if (!IS_PRODUCTION && isMixPanelInitialized) {
     console.info('[MixPanel] - User properties set:', properties)
   }
 }
 
 export const mixpanelSetEOAWalletLabel = (label: string): void => {
   commonEventParams[MixPanelEventParams.EOA_WALLET_LABEL] = label
-
-  if (isMixPanelInitialized) {
-    mixpanel.register({ [MixPanelEventParams.EOA_WALLET_LABEL]: label })
-  }
+  safeMixPanelRegister({ [MixPanelEventParams.EOA_WALLET_LABEL]: label })
 }
 
 export const mixpanelSetEOAWalletAddress = (address: string): void => {
   commonEventParams[MixPanelEventParams.EOA_WALLET_ADDRESS] = address
-
-  if (isMixPanelInitialized) {
-    mixpanel.register({ [MixPanelEventParams.EOA_WALLET_ADDRESS]: address })
-  }
+  safeMixPanelRegister({ [MixPanelEventParams.EOA_WALLET_ADDRESS]: address })
 }
 
 export const mixpanelSetEOAWalletNetwork = (network: string): void => {
   commonEventParams[MixPanelEventParams.EOA_WALLET_NETWORK] = network
-
-  if (isMixPanelInitialized) {
-    mixpanel.register({ [MixPanelEventParams.EOA_WALLET_NETWORK]: network })
-  }
+  safeMixPanelRegister({ [MixPanelEventParams.EOA_WALLET_NETWORK]: network })
 }
 
 /**
@@ -128,26 +132,22 @@ export const safeAppToMixPanelEventProperties = (
 }
 
 export const mixpanelTrack = (eventName: string, properties?: Record<string, any>): void => {
-  if (!isMixPanelInitialized) return
-
   const eventProperties: Record<string, any> = {
     ...commonEventParams,
     ...properties,
   }
 
-  mixpanel.track(eventName, eventProperties)
+  safeMixPanelTrack(eventName, eventProperties)
 
-  if (!IS_PRODUCTION) {
+  if (!IS_PRODUCTION && isMixPanelInitialized) {
     console.info('[MixPanel] - Event tracked:', eventName, eventProperties)
   }
 }
 
 export const mixpanelIdentify = (userId: string): void => {
-  if (!isMixPanelInitialized) return
+  safeMixPanelIdentify(userId)
 
-  mixpanel.identify(userId)
-
-  if (!IS_PRODUCTION) {
+  if (!IS_PRODUCTION && isMixPanelInitialized) {
     console.info('[MixPanel] - User identified:', userId)
   }
 }
