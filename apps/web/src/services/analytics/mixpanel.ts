@@ -5,16 +5,6 @@ import { DeviceType } from './types'
 import { MixPanelEventParams } from './mixpanel-events'
 import packageJson from '../../../package.json'
 
-const commonEventParams = {
-  [MixPanelEventParams.APP_VERSION]: packageJson.version,
-  [MixPanelEventParams.BLOCKCHAIN_NETWORK]: '',
-  [MixPanelEventParams.DEVICE_TYPE]: DeviceType.DESKTOP,
-  [MixPanelEventParams.SAFE_ADDRESS]: '',
-  [MixPanelEventParams.EOA_WALLET_LABEL]: '',
-  [MixPanelEventParams.EOA_WALLET_ADDRESS]: '',
-  [MixPanelEventParams.EOA_WALLET_NETWORK]: '',
-}
-
 let isMixPanelInitialized = false
 
 const safeMixPanelRegister = (properties: Record<string, any>): void => {
@@ -59,12 +49,19 @@ export const mixpanelInit = (): void => {
       autocapture: false,
       batch_requests: true,
       ip: false,
+      opt_out_tracking_by_default: true,
     })
 
     isMixPanelInitialized = true
 
+    // Register initial common parameters
+    mixpanel.register({
+      [MixPanelEventParams.APP_VERSION]: packageJson.version,
+      [MixPanelEventParams.DEVICE_TYPE]: DeviceType.DESKTOP,
+    })
+
     if (!IS_PRODUCTION) {
-      console.info('[MixPanel] - Initialized')
+      console.info('[MixPanel] - Initialized (opted out by default)')
     }
   } catch (error) {
     console.error('[MixPanel] - Initialization failed:', error)
@@ -72,17 +69,14 @@ export const mixpanelInit = (): void => {
 }
 
 export const mixpanelSetBlockchainNetwork = (networkName: string): void => {
-  commonEventParams[MixPanelEventParams.BLOCKCHAIN_NETWORK] = networkName
   safeMixPanelRegister({ [MixPanelEventParams.BLOCKCHAIN_NETWORK]: networkName })
 }
 
 export const mixpanelSetDeviceType = (type: DeviceType): void => {
-  commonEventParams[MixPanelEventParams.DEVICE_TYPE] = type
   safeMixPanelRegister({ [MixPanelEventParams.DEVICE_TYPE]: type })
 }
 
 export const mixpanelSetSafeAddress = (safeAddress: string): void => {
-  commonEventParams[MixPanelEventParams.SAFE_ADDRESS] = safeAddress
   safeMixPanelRegister({ [MixPanelEventParams.SAFE_ADDRESS]: safeAddress })
 }
 
@@ -95,17 +89,14 @@ export const mixpanelSetUserProperties = (properties: Record<string, any>): void
 }
 
 export const mixpanelSetEOAWalletLabel = (label: string): void => {
-  commonEventParams[MixPanelEventParams.EOA_WALLET_LABEL] = label
   safeMixPanelRegister({ [MixPanelEventParams.EOA_WALLET_LABEL]: label })
 }
 
 export const mixpanelSetEOAWalletAddress = (address: string): void => {
-  commonEventParams[MixPanelEventParams.EOA_WALLET_ADDRESS] = address
   safeMixPanelRegister({ [MixPanelEventParams.EOA_WALLET_ADDRESS]: address })
 }
 
 export const mixpanelSetEOAWalletNetwork = (network: string): void => {
-  commonEventParams[MixPanelEventParams.EOA_WALLET_NETWORK] = network
   safeMixPanelRegister({ [MixPanelEventParams.EOA_WALLET_NETWORK]: network })
 }
 
@@ -131,15 +122,10 @@ export const safeAppToMixPanelEventProperties = (
 }
 
 export const mixpanelTrack = (eventName: string, properties?: Record<string, any>): void => {
-  const eventProperties: Record<string, any> = {
-    ...commonEventParams,
-    ...properties,
-  }
-
-  safeMixPanelTrack(eventName, eventProperties)
+  safeMixPanelTrack(eventName, properties)
 
   if (!IS_PRODUCTION && isMixPanelInitialized) {
-    console.info('[MixPanel] - Event tracked:', eventName, eventProperties)
+    console.info('[MixPanel] - Event tracked:', eventName, properties)
   }
 }
 

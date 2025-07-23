@@ -50,6 +50,13 @@ describe('MixPanel Integration', () => {
         autocapture: false,
         batch_requests: true,
         ip: false,
+        opt_out_tracking_by_default: true,
+      })
+
+      // Should register initial params
+      expect(mockMixpanel.register).toHaveBeenCalledWith({
+        'App Version': '1.63.0',
+        'Device Type': 'desktop',
       })
     })
 
