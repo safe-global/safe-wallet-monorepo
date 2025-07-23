@@ -1,5 +1,6 @@
 import { useEffect, useMemo } from 'react'
 import { useTheme } from '@mui/material/styles'
+import mixpanel from 'mixpanel-browser'
 import {
   mixpanelInit,
   mixpanelSetBlockchainNetwork,
@@ -15,6 +16,7 @@ import { useAppSelector } from '@/store'
 import { CookieAndTermType, hasConsentFor } from '@/store/cookiesAndTermsSlice'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
+import { IS_PRODUCTION } from '@/config/constants'
 import { useMediaQuery } from '@mui/material'
 import { DeviceType } from './types'
 import { MixPanelUserProperty } from './mixpanel-events'
@@ -43,8 +45,24 @@ const useMixpanel = () => {
   const walletChain = useChain(wallet?.chainId || '')
 
   useEffect(() => {
-    if (isMixpanelEnabled && isAnalyticsEnabled) {
+    if (isMixpanelEnabled) {
       mixpanelInit()
+    }
+  }, [isMixpanelEnabled])
+
+  useEffect(() => {
+    if (!isMixpanelEnabled) return
+
+    if (isAnalyticsEnabled) {
+      mixpanel.opt_in_tracking()
+      if (!IS_PRODUCTION) {
+        console.info('[MixPanel] - User opted in')
+      }
+    } else {
+      mixpanel.opt_out_tracking()
+      if (!IS_PRODUCTION) {
+        console.info('[MixPanel] - User opted out')
+      }
     }
   }, [isMixpanelEnabled, isAnalyticsEnabled])
 
