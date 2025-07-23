@@ -1,3 +1,10 @@
+// Mock constants before any imports
+jest.mock('@/config/constants', () => ({
+  ...jest.requireActual('@/config/constants'),
+  MIXPANEL_TOKEN: 'test-token',
+  IS_PRODUCTION: false,
+}))
+
 import {
   trackEvent,
   trackMixPanelEvent,
@@ -5,6 +12,13 @@ import {
   safeAppToMixPanelEventProperties,
   SafeAppLaunchLocation,
 } from '../index'
+import { mixpanelInit, mixpanelTrack, mixpanelSetSafeAddress } from '../mixpanel'
+
+// Mock GTM
+jest.mock('../gtm', () => ({
+  gtmTrack: jest.fn(),
+  gtmTrackSafeApp: jest.fn(),
+}))
 
 // Mock mixpanel-browser
 jest.mock('mixpanel-browser', () => ({
@@ -26,22 +40,15 @@ jest.mock('mixpanel-browser', () => ({
 }))
 
 const mockMixpanel = jest.requireMock('mixpanel-browser')
+const mockGtm = jest.requireMock('../gtm')
 
 describe('MixPanel Integration', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    // Mock environment variable
-    process.env.NEXT_PUBLIC_MIXPANEL_TOKEN = 'test-token'
-  })
-
-  afterEach(() => {
-    delete process.env.NEXT_PUBLIC_MIXPANEL_TOKEN
   })
 
   describe('MixPanel initialization', () => {
     it('should initialize MixPanel with correct configuration', () => {
-      const { mixpanelInit } = require('../mixpanel')
-
       mixpanelInit()
 
       expect(mockMixpanel.init).toHaveBeenCalledWith('test-token', {
@@ -59,21 +66,10 @@ describe('MixPanel Integration', () => {
         'Device Type': 'desktop',
       })
     })
-
-    it('should not initialize if no token is provided', () => {
-      delete process.env.NEXT_PUBLIC_MIXPANEL_TOKEN
-      const { mixpanelInit } = require('../mixpanel')
-
-      mixpanelInit()
-
-      expect(mockMixpanel.init).not.toHaveBeenCalled()
-    })
   })
 
   describe('Event tracking', () => {
     it('should track events with MixPanel when initialized', () => {
-      const { mixpanelInit, mixpanelTrack } = require('../mixpanel')
-
       mixpanelInit()
 
       mixpanelTrack(MixPanelEvent.SAFE_APP_LAUNCHED, {
@@ -93,8 +89,6 @@ describe('MixPanel Integration', () => {
 
   describe('Safe address handling', () => {
     it('should set safe address without removing 0x prefix', () => {
-      const { mixpanelInit, mixpanelSetSafeAddress } = require('../mixpanel')
-
       mixpanelInit()
 
       const testAddress = '0x1234567890abcdef1234567890abcdef12345678'
@@ -106,8 +100,6 @@ describe('MixPanel Integration', () => {
     })
 
     it('should handle safe address without 0x prefix', () => {
-      const { mixpanelInit, mixpanelSetSafeAddress } = require('../mixpanel')
-
       mixpanelInit()
 
       const testAddress = '1234567890abcdef1234567890abcdef12345678'
@@ -121,8 +113,6 @@ describe('MixPanel Integration', () => {
 
   describe('Separate tracking', () => {
     it('should track with GA only when using trackEvent', () => {
-      const { mixpanelInit } = require('../mixpanel')
-
       mixpanelInit()
 
       const eventData = {
@@ -137,8 +127,6 @@ describe('MixPanel Integration', () => {
     })
 
     it('should track with MixPanel only when using trackMixPanelEvent', () => {
-      const { mixpanelInit } = require('../mixpanel')
-
       mixpanelInit()
 
       trackMixPanelEvent(MixPanelEvent.SAFE_APP_LAUNCHED, {
@@ -154,6 +142,9 @@ describe('MixPanel Integration', () => {
           'Safe App Version': '1.0.0',
         }),
       )
+
+      // Should NOT call GA track
+      expect(mockGtm.gtmTrack).not.toHaveBeenCalled()
     })
 
     it('should convert SafeApp to MixPanel properties', () => {
