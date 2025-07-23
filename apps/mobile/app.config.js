@@ -157,9 +157,6 @@ const config = {
     'app.notifee.notification-event': {
       backgroundMode: ['processing', 'remote-notification'],
     },
-    ReactNativeFirebaseMessagingHeadlessTask: {
-      backgroundMode: ['processing', 'remote-notification'],
-    },
   },
 }
 

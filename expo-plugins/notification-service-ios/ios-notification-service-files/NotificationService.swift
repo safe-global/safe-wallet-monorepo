@@ -4,8 +4,14 @@ import MMKV
 import SwiftCryptoTokenFormatter
 import BigInt
 
+struct ChainInfo: Codable {
+    let name: String
+    let symbol: String
+    let decimals: Int
+}
+
 struct ExtensionStore: Codable {
-    let chains: [String: String]
+    let chains: [String: ChainInfo]
     let contacts: [String: String]
 }
 
@@ -44,17 +50,20 @@ func parseNotification(userInfo: [AnyHashable: Any], store: ExtensionStore) -> (
     
     NSLog("[NotifeeDebug] ChainId: \(chainId ?? "nil"), Address: \(address ?? "nil")")
 
-    let chainName = chainId.flatMap { store.chains[$0] } ?? (chainId != nil ? "Chain Id \(chainId!)" : "")
+    let chainInfo = chainId.flatMap { store.chains[$0] }
+    let chainName = chainInfo?.name ?? (chainId != nil ? "Chain Id \(chainId!)" : "")
     let safeName = address.flatMap { store.contacts[$0] } ?? (address ?? "")
     
     NSLog("[NotifeeDebug] Resolved chainName: \(chainName), safeName: \(safeName)")
 
     switch type {
     case "INCOMING_ETHER":
-        let symbol = userInfo["symbol"] as? String ?? "ETH"
+        // Use chain symbol if available, otherwise fall back to userInfo or default
+        let symbol = chainInfo?.symbol ?? userInfo["symbol"] as? String ?? "ETH"
         let formatter = TokenFormatter()
         let value = userInfo["value"] as? String ?? ""
-        let decimals = Int(18)
+        // Use chain decimals if available, otherwise fall back to userInfo or default
+        let decimals = chainInfo?.decimals ?? Int(userInfo["decimals"] as? String ?? "18") ?? 18
         let amount = formatter.string(
             from: BigDecimal(BigInt(value) ?? BigInt(0), decimals),
             decimalSeparator: Locale.autoupdatingCurrent.decimalSeparator ?? ".",

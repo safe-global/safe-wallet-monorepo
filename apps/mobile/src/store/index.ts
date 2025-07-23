@@ -22,6 +22,7 @@ import { createFilter } from '@safe-global/store/utils/persistTransformFilter'
 import { setupMobileCookieHandling } from './utils/cookieHandling'
 import notificationsMiddleware from './middleware/notifications'
 import analyticsMiddleware from './middleware/analytics'
+import notificationSyncMiddleware from './middleware/notificationSync'
 import { setBackendStore } from '@/src/store/utils/singletonStore'
 
 setSDKBaseURL(GATEWAY_URL)
@@ -76,7 +77,13 @@ export const makeStore = () =>
         serializableCheck: {
           ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
         },
-      }).concat(cgwClient.middleware, web3API.middleware, notificationsMiddleware, analyticsMiddleware),
+      }).concat(
+        cgwClient.middleware,
+        web3API.middleware,
+        notificationsMiddleware,
+        analyticsMiddleware,
+        notificationSyncMiddleware,
+      ),
     enhancers: (getDefaultEnhancers) => {
       if (isTestingEnv) {
         return getDefaultEnhancers()
@@ -94,3 +101,4 @@ export const persistor = persistStore(store)
 
 export type RootState = ReturnType<typeof rootReducer>
 export type AppDispatch = typeof store.dispatch
+export type AppStore = typeof store
