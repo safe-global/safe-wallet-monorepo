@@ -5,7 +5,7 @@ import { SafeStatusBar } from '../SafeStatusBar'
 
 const mockUseTheme = jest.fn()
 jest.mock('@/src/theme/hooks/useTheme', () => ({
-  useTheme: () => ({ currentTheme: mockUseTheme() }),
+  useTheme: () => ({ colorScheme: mockUseTheme() }),
 }))
 
 const mockUseSegments = jest.fn()

@@ -39,6 +39,5 @@ export const useTheme = () => {
     themePreference,
     setThemePreference,
     colorScheme: themePreference === 'auto' ? colorScheme : themePreference,
-    currentTheme: themePreference === 'auto' ? colorScheme : themePreference,
   }
 }

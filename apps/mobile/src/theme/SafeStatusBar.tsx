@@ -15,7 +15,7 @@ const DARK_SCREENS = [
 ]
 
 export const SafeStatusBar = () => {
-  const { currentTheme } = useTheme()
+  const { colorScheme } = useTheme()
   const segments = useSegments()
   const currentRoute = segments[segments.length - 1]
 
@@ -25,5 +25,5 @@ export const SafeStatusBar = () => {
     return <StatusBar style="light" />
   }
 
-  return <StatusBar style={currentTheme === 'dark' ? 'light' : 'dark'} />
+  return <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
 }
