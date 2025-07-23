@@ -7,6 +7,9 @@ import { ThemePreference } from '@/src/types/theme'
 
 export const useTheme = () => {
   const dispatch = useAppDispatch()
+
+  // The logical OR is intentional to ensure colorSchemeOS is never `null`.
+  // This makes it easier to use in the rest of the codebase without having to check for null.
   const colorSchemeOS = useColorScheme() || undefined
 
   const themePreference = useAppSelector(
