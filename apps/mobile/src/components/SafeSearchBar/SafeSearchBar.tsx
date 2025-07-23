@@ -53,6 +53,7 @@ const SafeSearchBar: React.FC<SafeSearchBarProps> = ({ placeholder, onSearch, th
         <TextInput
           style={styles.input}
           placeholder={placeholder}
+          placeholderTextColor="#99999980"
           value={searchQuery}
           onChangeText={handleSearchChange}
           clearButtonMode="never"
