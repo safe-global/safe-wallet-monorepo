@@ -109,7 +109,6 @@ const useMixpanel = () => {
         mixpanelSetEOAWalletNetwork(walletChain.chainName)
       }
     } else {
-      // Clear event properties when disconnected
       mixpanelSetEOAWalletLabel('')
       mixpanelSetEOAWalletAddress('')
       mixpanelSetEOAWalletNetwork('')
