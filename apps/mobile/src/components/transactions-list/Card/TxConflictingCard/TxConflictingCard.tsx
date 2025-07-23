@@ -14,8 +14,7 @@ interface TxConflictingCard {
 }
 
 function TxConflictingComponent({ transactions, inQueue, onPress }: TxConflictingCard) {
-  const { colorScheme } = useTheme()
-  const isDark = colorScheme === 'dark'
+  const { isDark } = useTheme()
 
   const handleConflictTxPress = useCallback(
     (transaction?: TransactionQueuedItem) => {

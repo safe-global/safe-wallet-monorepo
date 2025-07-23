@@ -14,17 +14,17 @@ interface SafeThemeProviderProps {
 }
 
 export const SafeThemeProvider = ({ children }: SafeThemeProviderProps) => {
-  const { colorScheme } = useTheme()
+  const { colorScheme, isDark } = useTheme()
 
   const themeProvider = isStorybookEnv ? (
     <View
-      backgroundColor={colorScheme === 'dark' ? NavDarkTheme.colors.background : NavLightTheme.colors.background}
+      backgroundColor={isDark ? NavDarkTheme.colors.background : NavLightTheme.colors.background}
       style={{ flex: 1 }}
     >
       {children}
     </View>
   ) : (
-    <ThemeProvider value={colorScheme === 'dark' ? NavDarkTheme : NavLightTheme}>{children}</ThemeProvider>
+    <ThemeProvider value={isDark ? NavDarkTheme : NavLightTheme}>{children}</ThemeProvider>
   )
 
   return (

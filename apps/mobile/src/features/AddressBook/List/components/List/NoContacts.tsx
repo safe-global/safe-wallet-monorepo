@@ -5,9 +5,9 @@ import EmptyAddressBookLight from './EmptyAddressBookLight'
 import EmptyAddressBookDark from './EmptyAddressBookDark'
 
 export const NoContacts = () => {
-  const { colorScheme } = useTheme()
+  const { isDark } = useTheme()
 
-  const EmptyAddress = colorScheme === 'dark' ? <EmptyAddressBookDark /> : <EmptyAddressBookLight />
+  const EmptyAddress = isDark ? <EmptyAddressBookDark /> : <EmptyAddressBookLight />
 
   return (
     <View testID="empty-token" alignItems="center" flex={1} justifyContent="center" gap="$4">

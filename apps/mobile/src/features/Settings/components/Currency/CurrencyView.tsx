@@ -17,8 +17,7 @@ export const CurrencyView: React.FC<CurrencyViewProps> = ({
   onSearchQueryChange,
 }) => {
   const insets = useSafeAreaInsets()
-  const { colorScheme } = useTheme()
-  const isDark = colorScheme === 'dark'
+  const { isDark } = useTheme()
 
   const { handleScroll } = useScrollableHeader({
     children: <NavBarTitle>Currency</NavBarTitle>,

@@ -40,7 +40,7 @@ function BiometricsOptIn() {
     }
   }, [local.caller])
 
-  const { colorScheme } = useTheme()
+  const { colorScheme, isDark } = useTheme()
   const toast = useToastController()
 
   useEffect(() => {
@@ -76,7 +76,7 @@ function BiometricsOptIn() {
       ? require('@/assets/images/biometrics-light.png')
       : require('@/assets/images/biometrics-light-android.png')
 
-  const image = colorScheme === 'dark' ? darkImage : lightImage
+  const image = isDark ? darkImage : lightImage
 
   const infoMessage = 'Biometrics is required to import a signer.'
 

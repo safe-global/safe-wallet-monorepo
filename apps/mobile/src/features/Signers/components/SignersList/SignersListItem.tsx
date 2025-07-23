@@ -21,7 +21,7 @@ interface SignersListItemProps {
 }
 
 function SignersListItem({ item, index, signersGroup }: SignersListItemProps) {
-  const { colorScheme } = useTheme()
+  const { isDark } = useTheme()
   const contact = useAppSelector(selectContactByAddress(item.value))
   const local = useLocalSearchParams<{ safeAddress: string; chainId: string; import_safe: string }>()
 
@@ -82,7 +82,7 @@ function SignersListItem({ item, index, signersGroup }: SignersListItemProps) {
     <View position="relative">
       <TouchableOpacity onPress={handleItemPress} testID={`signer-${item.value}`}>
         <View
-          backgroundColor={colorScheme === 'dark' ? '$backgroundPaper' : '$background'}
+          backgroundColor={isDark ? '$backgroundPaper' : '$background'}
           borderTopRightRadius={index === 0 ? '$4' : undefined}
           borderTopLeftRadius={index === 0 ? '$4' : undefined}
           borderBottomRightRadius={isLastItem ? '$4' : undefined}

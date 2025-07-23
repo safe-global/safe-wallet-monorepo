@@ -12,14 +12,14 @@ interface StorybookThemeProviderProps {
 }
 
 export const StorybookThemeProvider = ({ children }: StorybookThemeProviderProps) => {
-  const { colorScheme } = useTheme()
+  const { colorScheme, isDark } = useTheme()
 
   return (
     <FontProvider>
       <TamaguiProvider config={config} defaultTheme={colorScheme ?? 'light'}>
-        <ThemeProvider value={colorScheme === 'dark' ? NavDarkTheme : NavLightTheme}>
+        <ThemeProvider value={isDark ? NavDarkTheme : NavLightTheme}>
           <View
-            backgroundColor={colorScheme === 'dark' ? NavDarkTheme.colors.background : NavLightTheme.colors.background}
+            backgroundColor={isDark ? NavDarkTheme.colors.background : NavLightTheme.colors.background}
             style={{ flex: 1 }}
           >
             {children}

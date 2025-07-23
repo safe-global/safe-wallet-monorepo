@@ -7,7 +7,7 @@ import { ThemePreference } from '@/src/types/theme'
 
 export const useTheme = () => {
   const dispatch = useAppDispatch()
-  const colorScheme = useColorScheme() || undefined
+  const colorSchemeOS = useColorScheme() || undefined
 
   const themePreference = useAppSelector(
     (state) => selectSettings(state, 'themePreference') ?? 'auto',
@@ -35,9 +35,12 @@ export const useTheme = () => {
     }
   }, [themePreference])
 
+  const colorScheme = themePreference === 'auto' ? colorSchemeOS : themePreference
+
   return {
     themePreference,
     setThemePreference,
-    colorScheme: themePreference === 'auto' ? colorScheme : themePreference,
+    colorScheme,
+    isDark: colorScheme === 'dark',
   }
 }
