@@ -1,4 +1,5 @@
 import { renderHook } from '@testing-library/react'
+import { faker } from '@faker-js/faker'
 import { useMixPanelUserProperties } from '../useMixPanelUserProperties'
 import { MixPanelUserProperty } from '@/services/analytics/mixpanel-events'
 
@@ -15,20 +16,7 @@ jest.mock('@/hooks/useChains', () => ({
 
 jest.mock('@/hooks/useSafeInfo', () => ({
   __esModule: true,
-  default: jest.fn(() => ({
-    safe: {
-      address: { value: '0x1234567890123456789012345678901234567890' },
-      version: '1.3.0',
-      owners: [
-        { value: '0x1234567890123456789012345678901234567890' },
-        { value: '0x0987654321098765432109876543210987654321' },
-      ],
-      threshold: 2,
-      nonce: 42,
-      chainId: '1',
-    },
-    safeLoaded: true,
-  })),
+  default: jest.fn(),
 }))
 
 jest.mock('@/store', () => ({
@@ -63,12 +51,33 @@ jest.mock('@/features/myAccounts/hooks/useNetworksOfSafe', () => ({
 }))
 
 describe('useMixPanelUserProperties', () => {
+  // Generate test addresses
+  const safeAddress = faker.finance.ethereumAddress()
+  const owner1Address = faker.finance.ethereumAddress()
+  const owner2Address = faker.finance.ethereumAddress()
+
+  // Update mocks with generated addresses
+  beforeEach(() => {
+    const useSafeInfo = require('@/hooks/useSafeInfo').default
+    useSafeInfo.mockReturnValue({
+      safe: {
+        address: { value: safeAddress },
+        version: '1.3.0',
+        owners: [{ value: owner1Address }, { value: owner2Address }],
+        threshold: 2,
+        nonce: 42,
+        chainId: '1',
+      },
+      safeLoaded: true,
+    })
+  })
+
   it('should return correct user properties', () => {
     const { result } = renderHook(() => useMixPanelUserProperties())
 
     expect(result.current).toEqual({
       properties: {
-        [MixPanelUserProperty.SAFE_ADDRESS]: '0x1234567890123456789012345678901234567890',
+        [MixPanelUserProperty.SAFE_ADDRESS]: safeAddress,
         [MixPanelUserProperty.SAFE_VERSION]: '1.3.0',
         [MixPanelUserProperty.NUM_SIGNERS]: 2,
         [MixPanelUserProperty.THRESHOLD]: 2,
@@ -96,9 +105,9 @@ describe('useMixPanelUserProperties', () => {
     const useSafeInfo = require('@/hooks/useSafeInfo').default
     useSafeInfo.mockReturnValueOnce({
       safe: {
-        address: { value: '0x1234567890123456789012345678901234567890' },
+        address: { value: safeAddress },
         version: null,
-        owners: [{ value: '0x1234567890123456789012345678901234567890' }],
+        owners: [{ value: owner1Address }],
         threshold: 1,
         nonce: 5,
         chainId: '1',
@@ -115,9 +124,9 @@ describe('useMixPanelUserProperties', () => {
     const useSafeInfo = require('@/hooks/useSafeInfo').default
     useSafeInfo.mockReturnValueOnce({
       safe: {
-        address: { value: '0x1234567890123456789012345678901234567890' },
+        address: { value: safeAddress },
         version: '1.3.0',
-        owners: [{ value: '0x1234567890123456789012345678901234567890' }],
+        owners: [{ value: owner1Address }],
         threshold: 1,
         nonce: 10, // nonce is still used for total_tx_count
         chainId: '1',
