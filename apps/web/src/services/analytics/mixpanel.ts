@@ -1,6 +1,6 @@
 import mixpanel from 'mixpanel-browser'
 import type { SafeAppData } from '@safe-global/safe-gateway-typescript-sdk'
-import { IS_PRODUCTION } from '@/config/constants'
+import { IS_PRODUCTION, MIXPANEL_TOKEN } from '@/config/constants'
 import { DeviceType } from './types'
 import { MixPanelEventParams, MixPanelEvent } from './mixpanel-events'
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
@@ -35,8 +35,7 @@ const safeMixPanelIdentify = (userId: string): void => {
 export const mixpanelInit = (): void => {
   if (typeof window === 'undefined' || isMixPanelInitialized) return
 
-  const token = process.env.NEXT_PUBLIC_MIXPANEL_TOKEN
-  if (!token) {
+  if (!MIXPANEL_TOKEN) {
     if (!IS_PRODUCTION) {
       console.warn('[MixPanel] - No token provided')
     }
@@ -44,7 +43,7 @@ export const mixpanelInit = (): void => {
   }
 
   try {
-    mixpanel.init(token, {
+    mixpanel.init(MIXPANEL_TOKEN, {
       debug: !IS_PRODUCTION,
       persistence: 'localStorage',
       autocapture: false,
