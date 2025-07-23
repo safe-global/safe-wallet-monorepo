@@ -11,7 +11,15 @@ import css from './styles.module.css'
 import { Skeleton } from '@mui/material'
 import { useOpenedSafeApps } from '@/hooks/safe-apps/useOpenedSafeApps'
 import NativeSwapsCard from '@/components/safe-apps/NativeSwapsCard'
-import { SAFE_APPS_EVENTS, SAFE_APPS_LABELS, trackSafeAppEvent } from '@/services/analytics'
+import {
+  SAFE_APPS_EVENTS,
+  SAFE_APPS_LABELS,
+  trackSafeAppEvent,
+  trackMixPanelEvent,
+  MixPanelEvent,
+  safeAppToMixPanelEventProperties,
+  SafeAppLaunchLocation,
+} from '@/services/analytics'
 import { useSafeApps } from '@/hooks/safe-apps/useSafeApps'
 
 type SafeAppListProps = {
@@ -55,6 +63,12 @@ const SafeAppList = ({
       } else {
         // We only track if not previously opened as it is then tracked in preview drawer
         trackSafeAppEvent({ ...SAFE_APPS_EVENTS.OPEN_APP, label: eventLabel }, safeApp.name)
+        trackMixPanelEvent(
+          MixPanelEvent.SAFE_APP_LAUNCHED,
+          safeAppToMixPanelEventProperties(safeApp, {
+            launchLocation: SafeAppLaunchLocation.SAFE_APPS_LIST,
+          }),
+        )
       }
     },
     [eventLabel, openPreviewDrawer, openedSafeAppIds],

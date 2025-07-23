@@ -7,6 +7,7 @@ import useChains, { useCurrentChain } from '@/hooks/useChains'
 import ExternalStore from '@safe-global/utils/services/ExternalStore'
 import { logError, Errors } from '@/services/exceptions'
 import { trackEvent, WALLET_EVENTS } from '@/services/analytics'
+import { mixpanelTrackWalletConnected } from '@/services/analytics/mixpanel'
 import { useAppSelector, useAppDispatch } from '@/store'
 import { selectRpc } from '@/store/settingsSlice'
 import { formatAmount } from '@safe-global/utils/utils/formatNumber'
@@ -89,7 +90,7 @@ export const getWalletConnectLabel = (wallet: ConnectedWallet): string | undefin
   return peerWalletV2 || UNKNOWN_PEER
 }
 
-const trackWalletType = (wallet: ConnectedWallet) => {
+export const trackWalletType = (wallet: ConnectedWallet, configs: ChainInfo[]) => {
   trackEvent({ ...WALLET_EVENTS.CONNECT, label: wallet.label })
 
   const wcLabel = getWalletConnectLabel(wallet)
@@ -99,8 +100,11 @@ const trackWalletType = (wallet: ConnectedWallet) => {
       label: wcLabel,
     })
   }
-}
 
+  const chainInfo = configs.find((config) => config.chainId === wallet.chainId)
+  const networkName = chainInfo?.chainName || `Chain ${wallet.chainId}`
+  mixpanelTrackWalletConnected(wallet, networkName)
+}
 let isConnecting = false
 
 // Wrapper that tracks/sets the last used wallet
@@ -194,7 +198,7 @@ export const useInitOnboard = () => {
         if (newWallet.label !== lastConnectedWallet) {
           lastConnectedWallet = newWallet.label
           saveLastWallet(lastConnectedWallet)
-          trackWalletType(newWallet)
+          trackWalletType(newWallet, configs)
         }
       } else if (lastConnectedWallet) {
         lastConnectedWallet = ''
@@ -206,7 +210,7 @@ export const useInitOnboard = () => {
     return () => {
       walletSubscription.unsubscribe()
     }
-  }, [onboard, dispatch])
+  }, [onboard, dispatch, configs])
 }
 
 export default useStore

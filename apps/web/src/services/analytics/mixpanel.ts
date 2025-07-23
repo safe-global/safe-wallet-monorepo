@@ -1,0 +1,163 @@
+import mixpanel from 'mixpanel-browser'
+import type { SafeAppData } from '@safe-global/safe-gateway-typescript-sdk'
+import { IS_PRODUCTION } from '@/config/constants'
+import { DeviceType } from './types'
+import { MixPanelEventParams, MixPanelEvent } from './mixpanel-events'
+import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
+import packageJson from '../../../package.json'
+
+const commonEventParams = {
+  [MixPanelEventParams.APP_VERSION]: packageJson.version,
+  [MixPanelEventParams.BLOCKCHAIN_NETWORK]: '',
+  [MixPanelEventParams.DEVICE_TYPE]: DeviceType.DESKTOP,
+  [MixPanelEventParams.SAFE_ADDRESS]: '',
+  [MixPanelEventParams.EOA_WALLET_LABEL]: '',
+  [MixPanelEventParams.EOA_WALLET_ADDRESS]: '',
+  [MixPanelEventParams.EOA_WALLET_NETWORK]: '',
+}
+
+let isMixPanelInitialized = false
+
+export const mixpanelInit = (): void => {
+  if (typeof window === 'undefined' || isMixPanelInitialized) return
+
+  const token = process.env.NEXT_PUBLIC_MIXPANEL_TOKEN
+  if (!token) {
+    if (!IS_PRODUCTION) {
+      console.warn('[MixPanel] - No token provided')
+    }
+    return
+  }
+
+  try {
+    mixpanel.init(token, {
+      debug: !IS_PRODUCTION,
+      persistence: 'localStorage',
+      autocapture: false,
+      batch_requests: true,
+      ip: false,
+    })
+
+    isMixPanelInitialized = true
+
+    if (!IS_PRODUCTION) {
+      console.info('[MixPanel] - Initialized')
+    }
+  } catch (error) {
+    console.error('[MixPanel] - Initialization failed:', error)
+  }
+}
+
+export const mixpanelSetBlockchainNetwork = (networkName: string): void => {
+  commonEventParams[MixPanelEventParams.BLOCKCHAIN_NETWORK] = networkName
+
+  if (isMixPanelInitialized) {
+    mixpanel.register({ [MixPanelEventParams.BLOCKCHAIN_NETWORK]: networkName })
+  }
+}
+
+export const mixpanelSetDeviceType = (type: DeviceType): void => {
+  commonEventParams[MixPanelEventParams.DEVICE_TYPE] = type
+
+  if (isMixPanelInitialized) {
+    mixpanel.register({ [MixPanelEventParams.DEVICE_TYPE]: type })
+  }
+}
+
+export const mixpanelSetSafeAddress = (safeAddress: string): void => {
+  commonEventParams[MixPanelEventParams.SAFE_ADDRESS] = safeAddress
+
+  if (isMixPanelInitialized) {
+    mixpanel.register({ [MixPanelEventParams.SAFE_ADDRESS]: commonEventParams[MixPanelEventParams.SAFE_ADDRESS] })
+  }
+}
+
+export const mixpanelSetUserProperties = (properties: Record<string, any>): void => {
+  if (!isMixPanelInitialized) return
+
+  mixpanel.people.set(properties)
+
+  if (!IS_PRODUCTION) {
+    console.info('[MixPanel] - User properties set:', properties)
+  }
+}
+
+export const mixpanelSetEOAWalletLabel = (label: string): void => {
+  commonEventParams[MixPanelEventParams.EOA_WALLET_LABEL] = label
+
+  if (isMixPanelInitialized) {
+    mixpanel.register({ [MixPanelEventParams.EOA_WALLET_LABEL]: label })
+  }
+}
+
+export const mixpanelSetEOAWalletAddress = (address: string): void => {
+  commonEventParams[MixPanelEventParams.EOA_WALLET_ADDRESS] = address
+
+  if (isMixPanelInitialized) {
+    mixpanel.register({ [MixPanelEventParams.EOA_WALLET_ADDRESS]: address })
+  }
+}
+
+export const mixpanelSetEOAWalletNetwork = (network: string): void => {
+  commonEventParams[MixPanelEventParams.EOA_WALLET_NETWORK] = network
+
+  if (isMixPanelInitialized) {
+    mixpanel.register({ [MixPanelEventParams.EOA_WALLET_NETWORK]: network })
+  }
+}
+
+/**
+ * Convert SafeApp object to MixPanel event properties
+ */
+export const safeAppToMixPanelEventProperties = (
+  safeApp: SafeAppData,
+  options?: {
+    launchLocation?: string
+  },
+): Record<string, any> => {
+  const properties: Record<string, any> = {
+    'Safe App Name': safeApp.name,
+    'Safe App Tags': safeApp.tags,
+  }
+
+  if (options?.launchLocation) {
+    properties['Launch Location'] = options.launchLocation
+  }
+
+  return properties
+}
+
+export const mixpanelTrack = (eventName: string, properties?: Record<string, any>): void => {
+  if (!isMixPanelInitialized) return
+
+  const eventProperties: Record<string, any> = {
+    ...commonEventParams,
+    ...properties,
+  }
+
+  mixpanel.track(eventName, eventProperties)
+
+  if (!IS_PRODUCTION) {
+    console.info('[MixPanel] - Event tracked:', eventName, eventProperties)
+  }
+}
+
+export const mixpanelIdentify = (userId: string): void => {
+  if (!isMixPanelInitialized) return
+
+  mixpanel.identify(userId)
+
+  if (!IS_PRODUCTION) {
+    console.info('[MixPanel] - User identified:', userId)
+  }
+}
+
+export const mixpanelTrackWalletConnected = (wallet: ConnectedWallet, networkName: string): void => {
+  const eventProperties = {
+    [MixPanelEventParams.EOA_WALLET_LABEL]: wallet.label,
+    [MixPanelEventParams.EOA_WALLET_ADDRESS]: wallet.address,
+    [MixPanelEventParams.EOA_WALLET_NETWORK]: networkName,
+  }
+
+  mixpanelTrack(MixPanelEvent.WALLET_CONNECTED, eventProperties)
+}
