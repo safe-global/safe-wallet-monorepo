@@ -6,7 +6,7 @@ import { TransactionItem } from '@safe-global/store/gateway/AUTO_GENERATED/trans
 import { getTxHash, GroupedTxsWithTitle, groupTxsByDate } from '@/src/features/TxHistory/utils'
 import { HistoryTransactionItems } from '@safe-global/store/gateway/types'
 import { renderItem } from '@/src/features/TxHistory/utils'
-import { TxHistorySkeleton, TxHistorySkeletonItem } from '../TxHistorySkeleton'
+import { TransactionSkeleton, TransactionSkeletonItem } from '@/src/components/TransactionSkeleton'
 import { RefreshControl } from 'react-native'
 import { CircleSnail } from 'react-native-progress'
 
@@ -39,7 +39,7 @@ export function TxHistoryList({ transactions, onEndReached, isLoading, refreshin
           paddingTop="$4"
           testID="tx-history-initial-loader"
         >
-          <TxHistorySkeleton />
+          <TransactionSkeleton count={6} sectionTitles={['Recent transactions']} />
         </View>
       )
     }
@@ -51,7 +51,7 @@ export function TxHistoryList({ transactions, onEndReached, isLoading, refreshin
     if (isLoading && hasTransactions) {
       return (
         <View testID="tx-history-pagination-loader" marginTop="$4">
-          <TxHistorySkeletonItem />
+          <TransactionSkeletonItem />
         </View>
       )
     }

@@ -7,7 +7,7 @@ import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 const usePendingTxs = () => {
   const activeSafe = useDefinedActiveSafe()
 
-  const { currentData, fetchNextPage, hasNextPage, isFetching, isLoading, isUninitialized } =
+  const { currentData, fetchNextPage, hasNextPage, isFetching, isLoading, isUninitialized, refetch } =
     useGetPendingTxsInfiniteQuery(
       {
         chainId: activeSafe.chainId,
@@ -44,6 +44,7 @@ const usePendingTxs = () => {
     fetchMoreTx,
     isLoading: isLoading || isUninitialized,
     isFetching: isFetching,
+    refetch,
   }
 }
 

@@ -8,7 +8,7 @@ import {
   isTransactionListItem,
 } from '@/src/utils/transaction-guards'
 import { groupBulkTxs } from '@/src/utils/transactions'
-import { type PendingTransactionItems, TransactionListItemType } from '@safe-global/store//src/gateway/types'
+import { type PendingTransactionItems, TransactionListItemType } from '@safe-global/store/gateway/types'
 import { View } from 'tamagui'
 import { TxGroupedCard } from '@/src/components/transactions-list/Card/TxGroupedCard'
 import { TxConflictingCard } from '@/src/components/transactions-list/Card/TxConflictingCard'
@@ -28,6 +28,15 @@ export const groupTxs = (list: PendingTransactionItems[]) => {
 
 export const groupPendingTxs = (list: PendingTransactionItems[]) => {
   const transactions = groupTxs(list)
+
+  if (transactions.length === 0) {
+    return {
+      pointer: -1,
+      amount: 0,
+      sections: [],
+    }
+  }
+
   const sections = ['Next', 'Queued']
 
   const txSections: {
@@ -43,7 +52,7 @@ export const groupPendingTxs = (list: PendingTransactionItems[]) => {
     ],
   }
 
-  return transactions.reduce((acc, item) => {
+  const result = transactions.reduce((acc, item) => {
     if ('type' in item && isLabelListItem(item)) {
       acc.pointer = sections.indexOf(item.label)
     } else if (
@@ -57,6 +66,12 @@ export const groupPendingTxs = (list: PendingTransactionItems[]) => {
 
     return acc
   }, txSections)
+
+  // Filter out sections that have no data
+  return {
+    ...result,
+    sections: result.sections.filter((section) => section.data.length > 0),
+  }
 }
 
 export const groupConflictingTxs = (list: PendingTransactionItems[]): GroupedTxs =>

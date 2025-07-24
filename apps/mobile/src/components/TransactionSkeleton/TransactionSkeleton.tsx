@@ -5,11 +5,13 @@ import { Container } from '@/src/components/Container'
 import random from 'lodash/random'
 import { useTheme } from '@/src/theme/hooks/useTheme'
 
-interface TxHistorySkeletonProps {
+interface TransactionSkeletonProps {
   count?: number
+  showSections?: boolean
+  sectionTitles?: string[]
 }
 
-export const TxHistorySkeletonItem = () => {
+export const TransactionSkeletonItem = () => {
   const { colorScheme } = useTheme()
 
   // Memoize random widths to prevent re-renders and maintain consistent skeleton appearance
@@ -38,7 +40,7 @@ export const TxHistorySkeletonItem = () => {
           </View>
         </View>
 
-        {/* Right side skeleton */}
+        {/* Right side skeleton - value, status, or buttons */}
         <View alignItems="flex-end" gap="$2">
           <Skeleton colorMode={colorScheme} height={16} width={widths.rightSide} />
         </View>
@@ -47,20 +49,39 @@ export const TxHistorySkeletonItem = () => {
   )
 }
 
-export const TxHistorySkeleton = ({ count = 6 }: TxHistorySkeletonProps) => {
+export const TransactionSkeleton = ({
+  count = 6,
+  showSections = true,
+  sectionTitles = ['Recent transactions'],
+}: TransactionSkeletonProps) => {
   const { colorScheme } = useTheme()
+
+  // For pending transactions, we typically have 2 sections (Next, In queue)
+  // For history, we typically have date-based sections
+  const sections = showSections ? sectionTitles : ['']
+  const itemsPerSection = Math.ceil(count / sections.length)
 
   return (
     <Skeleton.Group show={true}>
       <View gap="$4">
-        {/* Date header skeleton */}
-        <View>
-          <Skeleton colorMode={colorScheme} height={20} width={100} />
-        </View>
+        {sections.map((sectionTitle, sectionIndex) => (
+          <View key={sectionIndex}>
+            {/* Section header skeleton - only show if we have a title */}
+            {showSections && sectionTitle && (
+              <View marginBottom="$2">
+                <Skeleton
+                  colorMode={colorScheme}
+                  height={20}
+                  width={sectionTitle === 'Recent transactions' ? 120 : random(80, 120)}
+                />
+              </View>
+            )}
 
-        {/* Transaction items skeleton */}
-        {Array.from({ length: count }).map((_, index) => (
-          <TxHistorySkeletonItem key={index} />
+            {/* Transaction items skeleton */}
+            {Array.from({ length: itemsPerSection }).map((_, itemIndex) => (
+              <TransactionSkeletonItem key={`${sectionIndex}-${itemIndex}`} />
+            ))}
+          </View>
         ))}
       </View>
     </Skeleton.Group>
