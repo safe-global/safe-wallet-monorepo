@@ -1,16 +1,16 @@
 import React from 'react'
 import { View } from 'tamagui'
-import { useColorScheme } from 'react-native'
 import { Skeleton } from 'moti/skeleton'
 import { Container } from '@/src/components/Container'
 import random from 'lodash/random'
+import { useTheme } from '@/src/theme/hooks/useTheme'
 
 interface TxHistorySkeletonProps {
   count?: number
 }
 
 export const TxHistorySkeletonItem = () => {
-  const colorScheme = useColorScheme() || undefined
+  const { colorScheme } = useTheme()
 
   // Memoize random widths to prevent re-renders and maintain consistent skeleton appearance
   const widths = React.useMemo(
@@ -48,7 +48,7 @@ export const TxHistorySkeletonItem = () => {
 }
 
 export const TxHistorySkeleton = ({ count = 6 }: TxHistorySkeletonProps) => {
-  const colorScheme = useColorScheme() || undefined
+  const { colorScheme } = useTheme()
 
   return (
     <Skeleton.Group show={true}>

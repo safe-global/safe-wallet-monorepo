@@ -7,12 +7,13 @@ import { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 
 import { ChainsDisplay } from '@/src/components/ChainsDisplay'
 import { useRouter } from 'expo-router'
-import { TouchableOpacity, useColorScheme } from 'react-native'
+import { TouchableOpacity } from 'react-native'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { Skeleton } from 'moti/skeleton'
 import { useAppSelector } from '@/src/store/hooks'
 import { selectCurrency } from '@/src/store/settingsSlice'
+import { useTheme } from '@/src/theme/hooks/useTheme'
 
 interface BalanceProps {
   activeChainId: string
@@ -34,7 +35,7 @@ export function Balance({
   onPressAddressCopy,
 }: BalanceProps) {
   const router = useRouter()
-  const colorScheme = useColorScheme()
+  const { colorScheme } = useTheme()
   const currency = useAppSelector(selectCurrency)
 
   const showSkeleton = isLoading || !balanceAmount
@@ -65,7 +66,7 @@ export function Balance({
         </XStack>
       )}
       <Skeleton.Group show={showSkeleton}>
-        <Skeleton colorMode={colorScheme === 'dark' ? 'dark' : 'light'} width={220}>
+        <Skeleton colorMode={colorScheme} width={220}>
           <Fiat value={balanceAmount} currency={currency} precise />
         </Skeleton>
       </Skeleton.Group>

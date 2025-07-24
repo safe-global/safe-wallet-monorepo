@@ -7,7 +7,7 @@ import { AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transacti
 import { SignerSection } from './SignersList'
 import { View } from 'tamagui'
 import { TouchableOpacity } from 'react-native-gesture-handler'
-import { useColorScheme } from 'react-native'
+import { useTheme } from '@/src/theme/hooks/useTheme'
 import { useAppSelector } from '@/src/store/hooks'
 import { selectContactByAddress } from '@/src/store/addressBookSlice'
 import { useCopyAndDispatchToast } from '@/src/hooks/useCopyAndDispatchToast'
@@ -21,7 +21,7 @@ interface SignersListItemProps {
 }
 
 function SignersListItem({ item, index, signersGroup }: SignersListItemProps) {
-  const colorScheme = useColorScheme()
+  const { isDark } = useTheme()
   const contact = useAppSelector(selectContactByAddress(item.value))
   const local = useLocalSearchParams<{ safeAddress: string; chainId: string; import_safe: string }>()
 
@@ -82,7 +82,7 @@ function SignersListItem({ item, index, signersGroup }: SignersListItemProps) {
     <View position="relative">
       <TouchableOpacity onPress={handleItemPress} testID={`signer-${item.value}`}>
         <View
-          backgroundColor={colorScheme === 'dark' ? '$backgroundPaper' : '$background'}
+          backgroundColor={isDark ? '$backgroundPaper' : '$background'}
           borderTopRightRadius={index === 0 ? '$4' : undefined}
           borderTopLeftRadius={index === 0 ? '$4' : undefined}
           borderBottomRightRadius={isLastItem ? '$4' : undefined}

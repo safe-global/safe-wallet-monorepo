@@ -13,7 +13,7 @@ jest.mock('@/src/store/hooks', () => ({
 
 // Mock the useTheme hook
 jest.mock('@/src/theme/hooks/useTheme', () => ({
-  useTheme: jest.fn(() => ({ currentTheme: 'light' })),
+  useTheme: jest.fn(() => ({ colorScheme: 'light' })),
 }))
 
 describe('Receiver', () => {

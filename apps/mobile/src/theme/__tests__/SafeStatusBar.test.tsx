@@ -5,7 +5,7 @@ import { SafeStatusBar } from '../SafeStatusBar'
 
 const mockUseTheme = jest.fn()
 jest.mock('@/src/theme/hooks/useTheme', () => ({
-  useTheme: () => ({ currentTheme: mockUseTheme() }),
+  useTheme: () => ({ isDark: mockUseTheme() }),
 }))
 
 const mockUseSegments = jest.fn()
@@ -19,7 +19,7 @@ describe('SafeStatusBar', () => {
   })
 
   it('renders light style for dark screens regardless of theme', () => {
-    mockUseTheme.mockReturnValue('dark')
+    mockUseTheme.mockReturnValue(true)
     mockUseSegments.mockReturnValue(['root', 'onboarding'])
     const { UNSAFE_getByType } = render(<SafeStatusBar />)
 
@@ -27,7 +27,7 @@ describe('SafeStatusBar', () => {
   })
 
   it('renders light style when theme is dark and not dark screen', () => {
-    mockUseTheme.mockReturnValue('dark')
+    mockUseTheme.mockReturnValue(true)
     mockUseSegments.mockReturnValue(['home'])
     const { UNSAFE_getByType } = render(<SafeStatusBar />)
 
@@ -35,7 +35,7 @@ describe('SafeStatusBar', () => {
   })
 
   it('renders dark style when theme is light and not dark screen', () => {
-    mockUseTheme.mockReturnValue('light')
+    mockUseTheme.mockReturnValue(false)
     mockUseSegments.mockReturnValue(['home'])
     const { UNSAFE_getByType } = render(<SafeStatusBar />)
 

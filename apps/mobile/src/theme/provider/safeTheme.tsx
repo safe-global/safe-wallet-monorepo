@@ -14,22 +14,22 @@ interface SafeThemeProviderProps {
 }
 
 export const SafeThemeProvider = ({ children }: SafeThemeProviderProps) => {
-  const { currentTheme } = useTheme()
+  const { colorScheme, isDark } = useTheme()
 
   const themeProvider = isStorybookEnv ? (
     <View
-      backgroundColor={currentTheme === 'dark' ? NavDarkTheme.colors.background : NavLightTheme.colors.background}
+      backgroundColor={isDark ? NavDarkTheme.colors.background : NavLightTheme.colors.background}
       style={{ flex: 1 }}
     >
       {children}
     </View>
   ) : (
-    <ThemeProvider value={currentTheme === 'dark' ? NavDarkTheme : NavLightTheme}>{children}</ThemeProvider>
+    <ThemeProvider value={isDark ? NavDarkTheme : NavLightTheme}>{children}</ThemeProvider>
   )
 
   return (
     <FontProvider>
-      <TamaguiProvider config={config} defaultTheme={currentTheme ?? 'light'}>
+      <TamaguiProvider config={config} defaultTheme={colorScheme ?? 'light'}>
         {themeProvider}
       </TamaguiProvider>
     </FontProvider>
