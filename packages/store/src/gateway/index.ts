@@ -5,3 +5,4 @@ export {
 } from './AUTO_GENERATED/transactions'
 
 export { useGetTxsHistoryInfiniteQuery, useGetPendingTxsInfiniteQuery } from './transactions'
+export { useGetCollectiblesInfiniteQuery } from './collectibles'
