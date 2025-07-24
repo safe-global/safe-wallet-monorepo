@@ -15,6 +15,7 @@ import {
   useBridgeWarningLogic,
   type BridgeWarningData,
 } from '@safe-global/utils/components/confirmation-views/BridgeTransaction/useBridgeWarningLogic'
+import { useSafeCreationData } from '@/src/hooks/useSafeCreationData'
 
 interface WarningAlertProps {
   warning: BridgeWarning
@@ -38,6 +39,7 @@ export const BridgeRecipientWarnings = ({ txInfo }: BridgeRecipientWarningsProps
   const allChains = useAppSelector(selectAllChains)
   const activeSafeInfo = useAppSelector((state) => selectSafeInfo(state, activeSafe.address as Address))
   const destinationContact = useAppSelector((state) => selectContactByAddress(txInfo.recipient.value)(state))
+  const [_creationData, creationError] = useSafeCreationData()
 
   const isSameAddress = sameAddress(txInfo.recipient.value, activeSafe.address)
 
@@ -46,7 +48,7 @@ export const BridgeRecipientWarnings = ({ txInfo }: BridgeRecipientWarningsProps
 
   // For simplicity in mobile, we'll assume modern Safes support multichain
   // This could be enhanced with version checking in the future
-  const isMultiChainSafe = true
+  const isMultiChainSafe = creationError === undefined
 
   const { data: otherSafe, error: otherSafeError } = useSafesGetSafeV1Query(
     { chainId: txInfo.toChain, safeAddress: activeSafe.address },
