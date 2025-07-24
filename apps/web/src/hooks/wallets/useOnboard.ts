@@ -6,8 +6,7 @@ import { getAddress } from 'ethers'
 import useChains, { useCurrentChain } from '@/hooks/useChains'
 import ExternalStore from '@safe-global/utils/services/ExternalStore'
 import { logError, Errors } from '@/services/exceptions'
-import { trackEvent, WALLET_EVENTS } from '@/services/analytics'
-import { mixpanelTrackWalletConnected } from '@/services/analytics/mixpanel'
+import { trackEvent, WALLET_EVENTS, MixPanelEventParams } from '@/services/analytics'
 import { useAppSelector, useAppDispatch } from '@/store'
 import { selectRpc } from '@/store/settingsSlice'
 import { formatAmount } from '@safe-global/utils/utils/formatNumber'
@@ -91,7 +90,17 @@ export const getWalletConnectLabel = (wallet: ConnectedWallet): string | undefin
 }
 
 export const trackWalletType = (wallet: ConnectedWallet, configs: ChainInfo[]) => {
-  trackEvent({ ...WALLET_EVENTS.CONNECT, label: wallet.label })
+  const chainInfo = configs.find((config) => config.chainId === wallet.chainId)
+  const networkName = chainInfo?.chainName || `Chain ${wallet.chainId}`
+
+  trackEvent(
+    { ...WALLET_EVENTS.CONNECT, label: wallet.label },
+    {
+      [MixPanelEventParams.EOA_WALLET_LABEL]: wallet.label,
+      [MixPanelEventParams.EOA_WALLET_ADDRESS]: wallet.address,
+      [MixPanelEventParams.EOA_WALLET_NETWORK]: networkName,
+    },
+  )
 
   const wcLabel = getWalletConnectLabel(wallet)
   if (wcLabel) {
@@ -100,10 +109,6 @@ export const trackWalletType = (wallet: ConnectedWallet, configs: ChainInfo[]) =
       label: wcLabel,
     })
   }
-
-  const chainInfo = configs.find((config) => config.chainId === wallet.chainId)
-  const networkName = chainInfo?.chainName || `Chain ${wallet.chainId}`
-  mixpanelTrackWalletConnected(wallet, networkName)
 }
 let isConnecting = false
 

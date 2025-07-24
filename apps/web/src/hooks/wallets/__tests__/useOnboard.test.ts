@@ -1,6 +1,7 @@
 import { faker } from '@faker-js/faker'
 import type { EIP1193Provider, OnboardAPI, WalletState } from '@web3-onboard/core'
 import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import { RPC_AUTHENTICATION } from '@safe-global/safe-gateway-typescript-sdk'
 import { getConnectedWallet, switchWallet, trackWalletType } from '../useOnboard'
 import type { ConnectedWallet } from '../useOnboard'
 
@@ -16,10 +17,11 @@ jest.mock('@/services/analytics', () => ({
     CONNECT: { event: 'wallet_connect' },
     WALLET_CONNECT: { event: 'wallet_connect_type' },
   },
-}))
-
-jest.mock('@/services/analytics/mixpanel', () => ({
-  mixpanelTrackWalletConnected: jest.fn(),
+  MixPanelEventParams: {
+    EOA_WALLET_LABEL: 'EOA Wallet Label',
+    EOA_WALLET_ADDRESS: 'EOA Wallet Address',
+    EOA_WALLET_NETWORK: 'EOA Wallet Network',
+  },
 }))
 
 jest.mock('@/utils/wallets', () => ({
@@ -151,12 +153,10 @@ describe('useOnboard', () => {
 
   describe('trackWalletType', () => {
     let mockTrackEvent: jest.Mock
-    let mockMixpanelTrackWalletConnected: jest.Mock
     let mockIsWalletConnect: jest.Mock
 
     beforeEach(() => {
       mockTrackEvent = jest.requireMock('@/services/analytics').trackEvent
-      mockMixpanelTrackWalletConnected = jest.requireMock('@/services/analytics/mixpanel').mixpanelTrackWalletConnected
       mockIsWalletConnect = jest.requireMock('@/utils/wallets').isWalletConnect
       jest.clearAllMocks()
     })
@@ -173,24 +173,44 @@ describe('useOnboard', () => {
 
       const configs: ChainInfo[] = [
         {
+          transactionService: 'https://safe-transaction.mainnet.gnosis.io',
           chainId: '1',
           chainName: 'Ethereum',
+          chainLogoUri: '',
           description: 'Ethereum Mainnet',
           shortName: 'eth',
           l2: false,
-          rpcUri: { authentication: 'NO_AUTHENTICATION', value: 'https://rpc.url' },
-          safeAppsRpcUri: { authentication: 'NO_AUTHENTICATION', value: 'https://rpc.url' },
-          publicRpcUri: { authentication: 'NO_AUTHENTICATION', value: 'https://rpc.url' },
+          isTestnet: false,
+          rpcUri: { authentication: RPC_AUTHENTICATION.NO_AUTHENTICATION, value: 'https://rpc.url' },
+          safeAppsRpcUri: { authentication: RPC_AUTHENTICATION.NO_AUTHENTICATION, value: 'https://rpc.url' },
+          publicRpcUri: { authentication: RPC_AUTHENTICATION.NO_AUTHENTICATION, value: 'https://rpc.url' },
           blockExplorerUriTemplate: {
             address: 'https://etherscan.io/address/{{address}}',
             txHash: 'https://etherscan.io/tx/{{txHash}}',
+            api: 'https://api.etherscan.io/api?module={{module}}&action={{action}}&address={{address}}&apiKey={{apiKey}}',
           },
           nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18, logoUri: 'eth.svg' },
           theme: { textColor: '#001428', backgroundColor: '#E8663D' },
           ensRegistryAddress: '0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e',
+          contractAddresses: {
+            createCallAddress: null,
+            fallbackHandlerAddress: null,
+            multiSendAddress: null,
+            multiSendCallOnlyAddress: null,
+            safeProxyFactoryAddress: null,
+            safeSingletonAddress: null,
+            safeWebAuthnSignerFactoryAddress: null,
+            signMessageLibAddress: null,
+            simulateTxAccessorAddress: null,
+          },
           gasPrice: [],
           disabledWallets: [],
           features: [],
+          balancesProvider: {
+            chainName: null,
+            enabled: false,
+          },
+          recommendedMasterCopyVersion: '1.4.1',
         },
       ]
 
@@ -198,12 +218,17 @@ describe('useOnboard', () => {
 
       trackWalletType(wallet, configs)
 
-      expect(mockTrackEvent).toHaveBeenCalledWith({
-        event: 'wallet_connect',
-        label: 'MetaMask',
-      })
-
-      expect(mockMixpanelTrackWalletConnected).toHaveBeenCalledWith(wallet, 'Ethereum')
+      expect(mockTrackEvent).toHaveBeenCalledWith(
+        {
+          event: 'wallet_connect',
+          label: 'MetaMask',
+        },
+        {
+          'EOA Wallet Label': 'MetaMask',
+          'EOA Wallet Address': '0x1234567890123456789012345678901234567890',
+          'EOA Wallet Network': 'Ethereum',
+        },
+      )
     })
 
     it('should track WalletConnect events when wallet is WalletConnect', () => {
@@ -228,24 +253,44 @@ describe('useOnboard', () => {
 
       const configs: ChainInfo[] = [
         {
+          transactionService: 'https://safe-transaction.polygon.gnosis.io',
           chainId: '137',
           chainName: 'Polygon',
+          chainLogoUri: '',
           description: 'Polygon Mainnet',
           shortName: 'matic',
           l2: false,
-          rpcUri: { authentication: 'NO_AUTHENTICATION', value: 'https://rpc.url' },
-          safeAppsRpcUri: { authentication: 'NO_AUTHENTICATION', value: 'https://rpc.url' },
-          publicRpcUri: { authentication: 'NO_AUTHENTICATION', value: 'https://rpc.url' },
+          isTestnet: false,
+          rpcUri: { authentication: RPC_AUTHENTICATION.NO_AUTHENTICATION, value: 'https://rpc.url' },
+          safeAppsRpcUri: { authentication: RPC_AUTHENTICATION.NO_AUTHENTICATION, value: 'https://rpc.url' },
+          publicRpcUri: { authentication: RPC_AUTHENTICATION.NO_AUTHENTICATION, value: 'https://rpc.url' },
           blockExplorerUriTemplate: {
             address: 'https://polygonscan.com/address/{{address}}',
             txHash: 'https://polygonscan.com/tx/{{txHash}}',
+            api: 'https://api.polygonscan.com/api?module={{module}}&action={{action}}&address={{address}}&apiKey={{apiKey}}',
           },
           nativeCurrency: { name: 'Matic', symbol: 'MATIC', decimals: 18, logoUri: 'matic.svg' },
           theme: { textColor: '#ffffff', backgroundColor: '#8248E5' },
           ensRegistryAddress: null,
+          contractAddresses: {
+            createCallAddress: null,
+            fallbackHandlerAddress: null,
+            multiSendAddress: null,
+            multiSendCallOnlyAddress: null,
+            safeProxyFactoryAddress: null,
+            safeSingletonAddress: null,
+            safeWebAuthnSignerFactoryAddress: null,
+            signMessageLibAddress: null,
+            simulateTxAccessorAddress: null,
+          },
           gasPrice: [],
           disabledWallets: [],
           features: [],
+          balancesProvider: {
+            chainName: null,
+            enabled: false,
+          },
+          recommendedMasterCopyVersion: '1.4.1',
         },
       ]
 
@@ -253,17 +298,22 @@ describe('useOnboard', () => {
 
       trackWalletType(wallet, configs)
 
-      expect(mockTrackEvent).toHaveBeenCalledWith({
-        event: 'wallet_connect',
-        label: 'WalletConnect',
-      })
+      expect(mockTrackEvent).toHaveBeenCalledWith(
+        {
+          event: 'wallet_connect',
+          label: 'WalletConnect',
+        },
+        {
+          'EOA Wallet Label': 'WalletConnect',
+          'EOA Wallet Address': '0x1234567890123456789012345678901234567890',
+          'EOA Wallet Network': 'Polygon',
+        },
+      )
 
       expect(mockTrackEvent).toHaveBeenCalledWith({
         event: 'wallet_connect_type',
         label: 'Trust Wallet',
       })
-
-      expect(mockMixpanelTrackWalletConnected).toHaveBeenCalledWith(wallet, 'Polygon')
     })
 
     it('should use fallback network name when chain config not found', () => {
@@ -278,24 +328,44 @@ describe('useOnboard', () => {
 
       const configs: ChainInfo[] = [
         {
+          transactionService: 'https://safe-transaction.mainnet.gnosis.io',
           chainId: '1',
           chainName: 'Ethereum',
+          chainLogoUri: '',
           description: 'Ethereum Mainnet',
           shortName: 'eth',
           l2: false,
-          rpcUri: { authentication: 'NO_AUTHENTICATION', value: 'https://rpc.url' },
-          safeAppsRpcUri: { authentication: 'NO_AUTHENTICATION', value: 'https://rpc.url' },
-          publicRpcUri: { authentication: 'NO_AUTHENTICATION', value: 'https://rpc.url' },
+          isTestnet: false,
+          rpcUri: { authentication: RPC_AUTHENTICATION.NO_AUTHENTICATION, value: 'https://rpc.url' },
+          safeAppsRpcUri: { authentication: RPC_AUTHENTICATION.NO_AUTHENTICATION, value: 'https://rpc.url' },
+          publicRpcUri: { authentication: RPC_AUTHENTICATION.NO_AUTHENTICATION, value: 'https://rpc.url' },
           blockExplorerUriTemplate: {
             address: 'https://etherscan.io/address/{{address}}',
             txHash: 'https://etherscan.io/tx/{{txHash}}',
+            api: 'https://api.etherscan.io/api?module={{module}}&action={{action}}&address={{address}}&apiKey={{apiKey}}',
           },
           nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18, logoUri: 'eth.svg' },
           theme: { textColor: '#001428', backgroundColor: '#E8663D' },
           ensRegistryAddress: '0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e',
+          contractAddresses: {
+            createCallAddress: null,
+            fallbackHandlerAddress: null,
+            multiSendAddress: null,
+            multiSendCallOnlyAddress: null,
+            safeProxyFactoryAddress: null,
+            safeSingletonAddress: null,
+            safeWebAuthnSignerFactoryAddress: null,
+            signMessageLibAddress: null,
+            simulateTxAccessorAddress: null,
+          },
           gasPrice: [],
           disabledWallets: [],
           features: [],
+          balancesProvider: {
+            chainName: null,
+            enabled: false,
+          },
+          recommendedMasterCopyVersion: '1.4.1',
         },
       ]
 
@@ -303,12 +373,17 @@ describe('useOnboard', () => {
 
       trackWalletType(wallet, configs)
 
-      expect(mockTrackEvent).toHaveBeenCalledWith({
-        event: 'wallet_connect',
-        label: 'MetaMask',
-      })
-
-      expect(mockMixpanelTrackWalletConnected).toHaveBeenCalledWith(wallet, 'Chain 999')
+      expect(mockTrackEvent).toHaveBeenCalledWith(
+        {
+          event: 'wallet_connect',
+          label: 'MetaMask',
+        },
+        {
+          'EOA Wallet Label': 'MetaMask',
+          'EOA Wallet Address': '0x1234567890123456789012345678901234567890',
+          'EOA Wallet Network': 'Chain 999',
+        },
+      )
     })
 
     it('should handle WalletConnect without peer metadata', () => {
@@ -333,24 +408,44 @@ describe('useOnboard', () => {
 
       const configs: ChainInfo[] = [
         {
+          transactionService: 'https://safe-transaction.mainnet.gnosis.io',
           chainId: '1',
           chainName: 'Ethereum',
+          chainLogoUri: '',
           description: 'Ethereum Mainnet',
           shortName: 'eth',
           l2: false,
-          rpcUri: { authentication: 'NO_AUTHENTICATION', value: 'https://rpc.url' },
-          safeAppsRpcUri: { authentication: 'NO_AUTHENTICATION', value: 'https://rpc.url' },
-          publicRpcUri: { authentication: 'NO_AUTHENTICATION', value: 'https://rpc.url' },
+          isTestnet: false,
+          rpcUri: { authentication: RPC_AUTHENTICATION.NO_AUTHENTICATION, value: 'https://rpc.url' },
+          safeAppsRpcUri: { authentication: RPC_AUTHENTICATION.NO_AUTHENTICATION, value: 'https://rpc.url' },
+          publicRpcUri: { authentication: RPC_AUTHENTICATION.NO_AUTHENTICATION, value: 'https://rpc.url' },
           blockExplorerUriTemplate: {
             address: 'https://etherscan.io/address/{{address}}',
             txHash: 'https://etherscan.io/tx/{{txHash}}',
+            api: 'https://api.etherscan.io/api?module={{module}}&action={{action}}&address={{address}}&apiKey={{apiKey}}',
           },
           nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18, logoUri: 'eth.svg' },
           theme: { textColor: '#001428', backgroundColor: '#E8663D' },
           ensRegistryAddress: '0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e',
+          contractAddresses: {
+            createCallAddress: null,
+            fallbackHandlerAddress: null,
+            multiSendAddress: null,
+            multiSendCallOnlyAddress: null,
+            safeProxyFactoryAddress: null,
+            safeSingletonAddress: null,
+            safeWebAuthnSignerFactoryAddress: null,
+            signMessageLibAddress: null,
+            simulateTxAccessorAddress: null,
+          },
           gasPrice: [],
           disabledWallets: [],
           features: [],
+          balancesProvider: {
+            chainName: null,
+            enabled: false,
+          },
+          recommendedMasterCopyVersion: '1.4.1',
         },
       ]
 
@@ -358,17 +453,22 @@ describe('useOnboard', () => {
 
       trackWalletType(wallet, configs)
 
-      expect(mockTrackEvent).toHaveBeenCalledWith({
-        event: 'wallet_connect',
-        label: 'WalletConnect',
-      })
+      expect(mockTrackEvent).toHaveBeenCalledWith(
+        {
+          event: 'wallet_connect',
+          label: 'WalletConnect',
+        },
+        {
+          'EOA Wallet Label': 'WalletConnect',
+          'EOA Wallet Address': '0x1234567890123456789012345678901234567890',
+          'EOA Wallet Network': 'Ethereum',
+        },
+      )
 
       expect(mockTrackEvent).toHaveBeenCalledWith({
         event: 'wallet_connect_type',
         label: 'Unknown',
       })
-
-      expect(mockMixpanelTrackWalletConnected).toHaveBeenCalledWith(wallet, 'Ethereum')
     })
   })
 })

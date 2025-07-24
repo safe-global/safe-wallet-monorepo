@@ -13,13 +13,7 @@ import { checkSafeActionViaRelay, checkSafeActivation } from '@/features/counter
 import useChainId from '@/hooks/useChainId'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
-import {
-  CREATE_SAFE_EVENTS,
-  trackEvent,
-  trackMixPanelEvent,
-  MixPanelEvent,
-  MixPanelEventParams,
-} from '@/services/analytics'
+import { CREATE_SAFE_EVENTS, trackEvent, MixPanelEventParams } from '@/services/analytics'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { useEffect, useRef } from 'react'
 import { isSmartContract } from '@/utils/wallets'
@@ -126,8 +120,6 @@ const usePendingSafeStatus = (): void => {
           gtmSetSafeAddress(detail.safeAddress)
 
           // TODO: Possible to add a label with_tx, without_tx?
-          trackEvent(CREATE_SAFE_EVENTS.ACTIVATED_SAFE)
-
           // Not a counterfactual deployment
           if ('type' in detail && detail.type === PayMethod.PayNow) {
             trackEvent(CREATE_SAFE_EVENTS.CREATED_SAFE)
@@ -137,16 +129,21 @@ const usePendingSafeStatus = (): void => {
           if (undeployedSafe) {
             const safeSetup = extractCounterfactualSafeSetup(undeployedSafe, creationChainId)
             if (safeSetup) {
-              trackMixPanelEvent(MixPanelEvent.SAFE_ACTIVATED, {
+              trackEvent(CREATE_SAFE_EVENTS.ACTIVATED_SAFE, {
                 [MixPanelEventParams.SAFE_ADDRESS]: detail.safeAddress,
                 [MixPanelEventParams.BLOCKCHAIN_NETWORK]: chain?.chainName || '',
                 [MixPanelEventParams.NUMBER_OF_OWNERS]: safeSetup.owners.length,
                 [MixPanelEventParams.THRESHOLD]: safeSetup.threshold,
                 [MixPanelEventParams.ENTRY_POINT]: 'Counterfactual Activation',
                 [MixPanelEventParams.DEPLOYMENT_TYPE]: 'Counterfactual',
-                [MixPanelEventParams.PAYMENT_METHOD]: detail.type === PayMethod.PayLater ? 'Sponsored' : 'Self-paid',
+                [MixPanelEventParams.PAYMENT_METHOD]:
+                  'type' in detail && detail.type === PayMethod.PayLater ? 'Sponsored' : 'Self-paid',
               })
+            } else {
+              trackEvent(CREATE_SAFE_EVENTS.ACTIVATED_SAFE)
             }
+          } else {
+            trackEvent(CREATE_SAFE_EVENTS.ACTIVATED_SAFE)
           }
 
           pollSafeInfo(creationChainId, detail.safeAddress).finally(() => {
