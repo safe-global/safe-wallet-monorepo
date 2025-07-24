@@ -104,7 +104,7 @@ export const Alert = ({
           >
             {startIcon ? <View testID="alert-start-icon">{startIcon}</View> : Icon}
 
-            <View gap={'$1'} flex={orientation !== 'center' ? 1 : undefined}>
+            <View gap={'$1'} flexShrink={1}>
               {typeof message === 'string' ? <AlertTitleStyled message={message} /> : message}
               {info && typeof info === 'string' ? (
                 <Text fontSize={'$3'} fontFamily={'$body'}>
