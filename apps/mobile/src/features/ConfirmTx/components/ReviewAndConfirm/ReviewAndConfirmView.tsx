@@ -6,15 +6,14 @@ import { ReviewHeader } from './ReviewHeader'
 import { ReviewFooter } from './ReviewFooter'
 import { DataTab } from './tabs/DataTab'
 import { JSONTab } from './tabs/JSONTab'
-import { Address } from '@/src/types/address'
 import { useTheme as useCurrentTheme } from '@/src/theme/hooks/useTheme'
 
 interface ReviewAndConfirmViewProps {
   txDetails: TransactionDetails
-  signerAddress: Address
+  txId: string
 }
 
-export function ReviewAndConfirmView({ txDetails, signerAddress }: ReviewAndConfirmViewProps) {
+export function ReviewAndConfirmView({ txDetails, txId }: ReviewAndConfirmViewProps) {
   const { isDark } = useCurrentTheme()
   const theme = useTheme()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -53,7 +52,7 @@ export function ReviewAndConfirmView({ txDetails, signerAddress }: ReviewAndConf
         </Tabs.Tab>
       </Tabs.Container>
 
-      <ReviewFooter signerAddress={signerAddress} txId={txDetails.txId} />
+      <ReviewFooter txId={txId} />
     </View>
   )
 }
