@@ -18,6 +18,15 @@ jest.mock('./hooks/useTransactionSigning', () => ({
   useTransactionSigning: jest.fn(),
 }))
 
+// Mock Redux hooks
+jest.mock('@/src/store/hooks', () => ({
+  useAppSelector: jest.fn(),
+}))
+
+jest.mock('@/src/store/hooks/activeSafe', () => ({
+  useDefinedActiveSafe: jest.fn(),
+}))
+
 // Mock the child components using string components instead of React Native components
 jest.mock('./SignError', () => ({
   __esModule: true,
@@ -56,9 +65,25 @@ const mockUseLocalSearchParams = useLocalSearchParams as jest.MockedFunction<typ
 const mockUseSigningGuard = useSigningGuard as jest.MockedFunction<typeof useSigningGuard>
 const mockUseTransactionSigning = useTransactionSigning as jest.MockedFunction<typeof useTransactionSigning>
 
+// Get the mocked Redux hooks
+const { useAppSelector } = require('@/src/store/hooks')
+const { useDefinedActiveSafe } = require('@/src/store/hooks/activeSafe')
+const mockUseAppSelector = useAppSelector as jest.MockedFunction<typeof useAppSelector>
+const mockUseDefinedActiveSafe = useDefinedActiveSafe as jest.MockedFunction<typeof useDefinedActiveSafe>
+
 describe('SignTransaction', () => {
   const mockExecuteSign = jest.fn()
   const mockRetry = jest.fn()
+  const mockActiveSafe = {
+    address: '0x123',
+    chainId: '1',
+    threshold: 2,
+    owners: ['0x456', '0x789'],
+  }
+  const mockActiveSigner = {
+    value: '0x456',
+    type: 'EOA' as const,
+  }
 
   beforeEach(() => {
     jest.clearAllMocks()
@@ -66,8 +91,10 @@ describe('SignTransaction', () => {
     // Default mocks
     mockUseLocalSearchParams.mockReturnValue({
       txId: 'test-tx-id',
-      signerAddress: '0x456',
     })
+
+    mockUseDefinedActiveSafe.mockReturnValue(mockActiveSafe)
+    mockUseAppSelector.mockReturnValue(mockActiveSigner)
 
     mockUseSigningGuard.mockReturnValue({
       canSign: true,
@@ -87,35 +114,32 @@ describe('SignTransaction', () => {
 
   describe('parameter validation', () => {
     it('should render error when txId is missing', () => {
-      mockUseLocalSearchParams.mockReturnValue({
-        txId: '',
-        signerAddress: '0x456',
-      })
-
-      render(<SignTransaction />)
-
-      expect(screen.getByTestId('sign-error')).toBeOnTheScreen()
-      expect(screen.getByTestId('error-description')).toHaveTextContent('Missing transaction ID or signer address')
-    })
-
-    it('should render error when signerAddress is missing', () => {
-      mockUseLocalSearchParams.mockReturnValue({
-        txId: 'test-tx-id',
-        signerAddress: '',
-      })
-
-      render(<SignTransaction />)
-
-      expect(screen.getByTestId('sign-error')).toBeOnTheScreen()
-      expect(screen.getByTestId('error-description')).toHaveTextContent('Missing transaction ID or signer address')
-    })
-
-    it('should render error when both parameters are missing', () => {
       mockUseLocalSearchParams.mockReturnValue({})
 
       render(<SignTransaction />)
 
       expect(screen.getByTestId('sign-error')).toBeOnTheScreen()
+      expect(screen.getByTestId('error-description')).toHaveTextContent('Missing transaction ID')
+    })
+
+    it('should render error when active signer is missing', () => {
+      mockUseAppSelector.mockReturnValue(null)
+
+      render(<SignTransaction />)
+
+      expect(screen.getByTestId('sign-error')).toBeOnTheScreen()
+      expect(screen.getByTestId('error-description')).toHaveTextContent('No signer selected')
+    })
+
+    it('should render error when txId is empty string', () => {
+      mockUseLocalSearchParams.mockReturnValue({
+        txId: '',
+      })
+
+      render(<SignTransaction />)
+
+      expect(screen.getByTestId('sign-error')).toBeOnTheScreen()
+      expect(screen.getByTestId('error-description')).toHaveTextContent('Missing transaction ID')
     })
   })
 
@@ -164,6 +188,22 @@ describe('SignTransaction', () => {
         isApiError: false,
         hasTriggeredAutoSign: false,
       })
+
+      render(<SignTransaction />)
+
+      expect(mockExecuteSign).not.toHaveBeenCalled()
+    })
+
+    it('should not call executeSign when txId is missing', () => {
+      mockUseLocalSearchParams.mockReturnValue({})
+
+      render(<SignTransaction />)
+
+      expect(mockExecuteSign).not.toHaveBeenCalled()
+    })
+
+    it('should not call executeSign when activeSigner is missing', () => {
+      mockUseAppSelector.mockReturnValue(null)
 
       render(<SignTransaction />)
 
@@ -325,6 +365,21 @@ describe('SignTransaction', () => {
       render(<SignTransaction />)
 
       expect(mockUseSigningGuard).toHaveBeenCalledWith()
+    })
+
+    it('should call useDefinedActiveSafe with no parameters', () => {
+      render(<SignTransaction />)
+
+      expect(mockUseDefinedActiveSafe).toHaveBeenCalledWith()
+    })
+
+    it('should call useAppSelector with selectActiveSigner', () => {
+      render(<SignTransaction />)
+
+      expect(mockUseAppSelector).toHaveBeenCalled()
+      // The selector function is called with state and safe address
+      const selectorCall = mockUseAppSelector.mock.calls[0][0]
+      expect(typeof selectorCall).toBe('function')
     })
   })
 })

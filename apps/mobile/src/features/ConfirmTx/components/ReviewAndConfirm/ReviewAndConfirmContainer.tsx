@@ -1,32 +1,22 @@
 import React from 'react'
 import { useLocalSearchParams } from 'expo-router'
-import { useTransactionsGetTransactionByIdV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { useAppSelector } from '@/src/store/hooks'
-import { selectActiveSafe } from '@/src/store/activeSafeSlice'
 import { Loader } from '@/src/components/Loader'
 import { Text, View } from 'tamagui'
 import { ReviewAndConfirmView } from './ReviewAndConfirmView'
-import { Address } from '@/src/types/address'
+import { useTransactionData } from '../../hooks/useTransactionData'
 
 export function ReviewAndConfirmContainer() {
-  const { txId, signerAddress } = useLocalSearchParams<{
-    txId: string
-    signerAddress: Address
-  }>()
+  const { txId } = useLocalSearchParams<{ txId: string }>()
 
-  const activeSafe = useAppSelector(selectActiveSafe)
+  const { data: txDetails, isFetching: isLoading, isError } = useTransactionData(txId || '')
 
-  const {
-    data: txDetails,
-    isFetching: isLoading,
-    isError: error,
-  } = useTransactionsGetTransactionByIdV1Query(
-    {
-      chainId: activeSafe?.chainId || '',
-      id: txId || '',
-    },
-    { skip: !txId || !activeSafe?.chainId },
-  )
+  if (!txId) {
+    return (
+      <View flex={1} justifyContent="center" alignItems="center">
+        <Text>Missing transaction ID</Text>
+      </View>
+    )
+  }
 
   if (isLoading) {
     return (
@@ -36,7 +26,7 @@ export function ReviewAndConfirmContainer() {
     )
   }
 
-  if (error || !txDetails) {
+  if (isError || !txDetails) {
     return (
       <View flex={1} justifyContent="center" alignItems="center">
         <Text>Error loading transaction details</Text>
@@ -44,5 +34,5 @@ export function ReviewAndConfirmContainer() {
     )
   }
 
-  return <ReviewAndConfirmView txDetails={txDetails} signerAddress={signerAddress} />
+  return <ReviewAndConfirmView txDetails={txDetails} txId={txId} />
 }
