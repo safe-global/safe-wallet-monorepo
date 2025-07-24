@@ -12,7 +12,8 @@ import { IdenticonWithBadge } from '@/src/features/Settings/components/Identicon
 
 import { Navbar } from '@/src/features/Settings/components/Navbar/Navbar'
 import { type Contact } from '@/src/store/addressBookSlice'
-import { Alert2 } from '@/src/components/Alert2'
+import { Alert } from '@/src/components/Alert'
+
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { useCopyAndDispatchToast } from '@/src/hooks/useCopyAndDispatchToast'
 
@@ -214,11 +215,11 @@ export const Settings = ({
 
             {isUnsupportedMasterCopy && (
               <View flex={1} padding="$5">
-                <Alert2
+                <Alert
                   type="warning"
-                  message="Your Safe Account's base contract is not supported. You should migrate it to a compatible
+                  info="Your Safe Account's base contract is not supported. You should migrate it to a compatible
               version. Use the web app for this."
-                  title="Base contract is not supported"
+                  message="Base contract is not supported"
                 />
               </View>
             )}

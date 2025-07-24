@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react'
-import { Alert2 } from '@/src/components/Alert2'
+import { Alert } from '@/src/components/Alert'
 import { BridgeAndSwapTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { useAppSelector } from '@/src/store/hooks'
@@ -21,10 +21,10 @@ interface WarningAlertProps {
 }
 
 const WarningAlert = ({ warning }: WarningAlertProps) => (
-  <Alert2
+  <Alert
     type={warning.severity}
-    title={warning.title}
-    message={warning.description}
+    message={warning.title}
+    info={warning.description}
     testID={`bridge-warning-${warning.severity}`}
   />
 )

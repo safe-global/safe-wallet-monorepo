@@ -11,7 +11,7 @@ import { selectChainById } from '@/src/store/chains'
 import { isMultiSendData, isTwapOrderTxInfo } from '@/src/utils/transaction-guards'
 import { isSettingTwapFallbackHandler } from '@safe-global/utils/features/swap/helpers/utils'
 import { TwapFallbackHandlerWarning } from '@/src/features/ConfirmTx/components/confirmation-views/SwapOrder/TwapFallbackHandlerWarning'
-import { Alert2 } from '@/src/components/Alert2'
+import { Alert } from '@/src/components/Alert'
 import { useRecipientItem } from './hooks'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { Badge } from '@/src/components/Badge'
@@ -65,10 +65,10 @@ export function SwapOrder({ executionInfo, txInfo, decodedData, txId }: SwapOrde
       {isTwapOrder && <ListTable items={twapItems} />}
 
       {showRecipientWarning && (
-        <Alert2
+        <Alert
           type="warning"
-          title="Order recipient address differs from order owner."
-          message="Double check the address to prevent fund loss."
+          message="Order recipient address differs from order owner."
+          info="Double check the address to prevent fund loss."
           testID="recipient-warning-alert"
         />
       )}

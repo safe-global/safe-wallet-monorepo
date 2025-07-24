@@ -8,7 +8,7 @@ import { PoweredByBlockaid } from '../PoweredByBlockaid'
 import { AlertType } from '@/src/components/Alert'
 import { BlockaidError } from '@/src/features/TransactionChecks/components/blockaid/scans/BlockaidError'
 import { ResultDescription } from '@/src/features/TransactionChecks/components/blockaid/ResultDescription'
-import { Alert2 } from '@/src/components/Alert2'
+import { Alert } from '@/src/components/Alert'
 
 type BlockaidWarningProps = {
   blockaidResponse?: {
@@ -40,18 +40,21 @@ export const BlockaidWarning = ({ blockaidResponse }: BlockaidWarningProps) => {
     <YStack gap="$3">
       {blockaidResponse.severity ? (
         <View>
-          <Alert2
+          <Alert
+            orientation="left"
             type={type as AlertType}
-            message={
+            info={
               <>
-                <ResultDescription
-                  classification={payload?.classification}
-                  reason={payload?.reason}
-                  description={payload?.description}
-                />
                 <BlockaidMessage blockaidResponse={blockaidResponse} />
                 <PoweredByBlockaid />
               </>
+            }
+            message={
+              <ResultDescription
+                classification={payload?.classification}
+                reason={payload?.reason}
+                description={payload?.description}
+              />
             }
           />
         </View>

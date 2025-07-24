@@ -9,7 +9,7 @@ import {
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { TokenAmount } from '@/src/components/TokenAmount'
 import { ParametersButton } from '../../../ParametersButton'
-import { Alert2 } from '@/src/components/Alert2'
+import { Alert } from '@/src/components/Alert'
 
 interface StakingWithdrawRequestProps {
   txInfo: NativeStakingValidatorsExitTransactionInfo
@@ -47,7 +47,7 @@ export function StakingWithdrawRequest({ txInfo, executionInfo, txId }: StakingW
       </ListTable>
 
       <YStack gap="$3">
-        <Alert2
+        <Alert
           type="warning"
           message="This transaction is a withdrawal request. After it's executed, you'll need to complete a separate withdrawal transaction."
         />
