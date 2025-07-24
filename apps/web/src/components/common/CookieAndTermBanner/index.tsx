@@ -148,9 +148,7 @@ export const CookieAndTermBanner = ({
                     checked={watch(CookieAndTermType.ANALYTICS)}
                   />
                   <br />
-                  <Typography variant="body2">
-                    Opt in for Google Analytics cookies to help us analyze app usage patterns.
-                  </Typography>
+                  <Typography variant="body2">Analytics tools to understand usage patterns.</Typography>
                 </Box>
               </Grid>
             </Grid>
