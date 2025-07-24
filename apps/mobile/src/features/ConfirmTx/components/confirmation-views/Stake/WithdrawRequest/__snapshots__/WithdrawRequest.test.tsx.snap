@@ -494,94 +494,131 @@ exports[`StakingWithdrawRequest matches snapshot 1`] = `
       }
     >
       <View
+        accessibilityState={
+          {
+            "busy": undefined,
+            "checked": undefined,
+            "disabled": true,
+            "expanded": undefined,
+            "selected": undefined,
+          }
+        }
+        accessibilityValue={
+          {
+            "max": undefined,
+            "min": undefined,
+            "now": undefined,
+            "text": undefined,
+          }
+        }
+        accessible={true}
+        collapsable={false}
+        focusable={false}
+        onClick={[Function]}
+        onResponderGrant={[Function]}
+        onResponderMove={[Function]}
+        onResponderRelease={[Function]}
+        onResponderTerminate={[Function]}
+        onResponderTerminationRequest={[Function]}
+        onStartShouldSetResponder={[Function]}
         style={
           {
-            "alignItems": "flex-start",
-            "backgroundColor": "#FFECC2",
-            "borderBottomLeftRadius": 5,
-            "borderBottomRightRadius": 5,
-            "borderTopLeftRadius": 5,
-            "borderTopRightRadius": 5,
-            "flexDirection": "row",
-            "gap": 12,
-            "paddingBottom": 12,
-            "paddingLeft": 16,
-            "paddingRight": 16,
-            "paddingTop": 12,
+            "opacity": 1,
           }
         }
       >
         <View
           style={
             {
-              "alignItems": "center",
+              "flexDirection": "row",
               "justifyContent": "center",
+              "width": "100%",
             }
           }
-          testID="alert-start-icon"
         >
           <View
             style={
               {
                 "alignItems": "center",
-                "backgroundColor": "#FF8C00",
-                "borderBottomLeftRadius": 34,
-                "borderBottomRightRadius": 34,
-                "borderTopLeftRadius": 34,
-                "borderTopRightRadius": 34,
-                "display": "flex",
+                "backgroundColor": "#FFECC2",
+                "borderBottomLeftRadius": 5,
+                "borderBottomRightRadius": 5,
+                "borderTopLeftRadius": 5,
+                "borderTopRightRadius": 5,
+                "flexDirection": "row",
+                "gap": 12,
                 "justifyContent": "center",
-                "paddingBottom": 4,
-                "paddingLeft": 4,
-                "paddingRight": 4,
-                "paddingTop": 4,
+                "paddingBottom": 8,
+                "paddingLeft": 16,
+                "paddingRight": 16,
+                "paddingTop": 8,
+                "width": "100%",
               }
             }
           >
-            <Text
-              allowFontScaling={false}
-              selectable={false}
+            <View
               style={
-                [
-                  {
-                    "color": "#FFFFFF",
-                    "fontSize": 16,
-                  },
-                  undefined,
-                  {
-                    "fontFamily": "SafeIcons",
-                    "fontStyle": "normal",
-                    "fontWeight": "normal",
-                  },
-                  {},
-                ]
+                {
+                  "alignItems": "center",
+                  "backgroundColor": "#FF8C00",
+                  "borderBottomLeftRadius": 34,
+                  "borderBottomRightRadius": 34,
+                  "borderTopLeftRadius": 34,
+                  "borderTopRightRadius": 34,
+                  "display": "flex",
+                  "justifyContent": "center",
+                  "paddingBottom": 4,
+                  "paddingLeft": 4,
+                  "paddingRight": 4,
+                  "paddingTop": 4,
+                }
               }
-              testID="warning-icon"
             >
-              
-            </Text>
-          </View>
-        </View>
-        <View
-          style={
-            {
-              "flex": 1,
-              "gap": 4,
-            }
-          }
-        >
-          <Text
-            style={
-              {
-                "color": "#6C2D19",
-                "fontFamily": "DM Sans",
-                "fontSize": 13,
+              <Text
+                allowFontScaling={false}
+                selectable={false}
+                style={
+                  [
+                    {
+                      "color": "#FFFFFF",
+                      "fontSize": 16,
+                    },
+                    undefined,
+                    {
+                      "fontFamily": "SafeIcons",
+                      "fontStyle": "normal",
+                      "fontWeight": "normal",
+                    },
+                    {},
+                  ]
+                }
+                testID="warning-icon"
+              >
+                
+              </Text>
+            </View>
+            <View
+              style={
+                {
+                  "flexShrink": 1,
+                  "gap": 4,
+                }
               }
-            }
-            suppressHighlighting={true}
-          >
-            This transaction is a withdrawal request. After it's executed, you'll need to complete a separate withdrawal transaction.
-          </Text>
+            >
+              <Text
+                style={
+                  {
+                    "color": "#6C2D19",
+                    "fontFamily": "DMSans-SemiBold",
+                    "fontSize": 14,
+                  }
+                }
+                suppressHighlighting={true}
+              >
+                This transaction is a withdrawal request. After it's executed, you'll need to complete a separate withdrawal transaction.
+              </Text>
+            </View>
+          </View>
         </View>
       </View>
     </View>

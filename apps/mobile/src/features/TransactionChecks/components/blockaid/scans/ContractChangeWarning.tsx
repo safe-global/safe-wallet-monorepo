@@ -8,7 +8,7 @@ import type {
 import { EthAddress } from '@/src/components/EthAddress'
 import { Address } from '@/src/types/address'
 import { CONTRACT_CHANGE_TITLES_MAPPING } from '@safe-global/utils/components/tx/security/blockaid/utils'
-import { Alert2 } from '@/src/components/Alert2'
+import { Alert } from '@/src/components/Alert'
 
 const ProxyUpgradeSummary = ({ beforeAddress, afterAddress }: { beforeAddress: string; afterAddress: string }) => {
   return (
@@ -52,5 +52,5 @@ export const ContractChangeWarning = ({
     </>
   )
 
-  return <Alert2 type="warning" title={title} message={warningContent} />
+  return <Alert type="warning" message={title} info={warningContent} />
 }

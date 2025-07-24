@@ -59,8 +59,8 @@ exports[`PendingTransactions should render the pending transactions in fullWidth
             "gap": 12,
             "justifyContent": "center",
             "paddingBottom": 8,
-            "paddingLeft": 8,
-            "paddingRight": 8,
+            "paddingLeft": 16,
+            "paddingRight": 16,
             "paddingTop": 8,
             "width": "100%",
           }
@@ -110,6 +110,7 @@ exports[`PendingTransactions should render the pending transactions in fullWidth
         <View
           style={
             {
+              "flexShrink": 1,
               "gap": 4,
             }
           }
