@@ -108,7 +108,6 @@ describe('NotificationNavigationHandler', () => {
     NotificationNavigationHandler = require('../notificationNavigationHandler').NotificationNavigationHandler
   })
 
-
   describe('switchToSafe', () => {
     it('should switch to the correct safe successfully', async () => {
       await NotificationNavigationHandler.switchToSafe(mockAddress, mockChainId)
@@ -151,7 +150,10 @@ describe('NotificationNavigationHandler', () => {
 
       await NotificationNavigationHandler.navigateToTransactionHistory()
 
-      expect(safeNavigateMock).toHaveBeenCalledWith('/transactions')
+      expect(safeNavigateMock).toHaveBeenCalledWith({
+        pathname: '/transactions',
+        params: { fromNotification: expect.any(String) },
+      })
 
       // Restore original
       NotificationNavigationHandler.safeNavigate = originalSafeNavigate
