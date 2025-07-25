@@ -6,7 +6,7 @@ import { HistoryTransactionItems } from '@safe-global/store/gateway/types'
 import { TxGroupedCard } from '@/src/components/transactions-list/Card/TxGroupedCard'
 import { TxInfo } from '@/src/components/TxInfo'
 import { TransactionSkeleton, TransactionSkeletonItem } from '@/src/components/TransactionSkeleton'
-import { RefreshControl } from 'react-native'
+import { Platform, RefreshControl, SectionList, SectionListProps } from 'react-native'
 import { CircleSnail } from 'react-native-progress'
 import { formatWithSchema } from '@/src/utils/date'
 import { isDateLabel } from '@/src/utils/transaction-guards'
@@ -156,6 +156,7 @@ export function TxHistoryList({
   }, [transactions])
 
   const stickyHeaderIndices = useMemo(() => calculateStickyHeaderIndices(flatList), [flatList])
+  const isIOS = Platform.OS === 'ios'
 
   const hasTransactions = !!(transactions && transactions.length > 0)
   const isInitialLoading = !!(isLoading && !hasTransactions && !refreshing)
@@ -178,7 +179,7 @@ export function TxHistoryList({
 
   return (
     <View position="relative" flex={1}>
-      {!!refreshing && (
+      {!!refreshing && isIOS && (
         <View
           position="absolute"
           top={64}
@@ -208,16 +209,14 @@ export function TxHistoryList({
           <RefreshControl
             refreshing={!!refreshing}
             onRefresh={onRefresh}
-            tintColor="transparent" // Hide default spinner
-            colors={['transparent']} // Hide default spinner on Android
-            progressBackgroundColor="transparent"
-            style={{ backgroundColor: 'transparent' }}
+            tintColor={isIOS ? 'transparent' : undefined} // Hide default spinner on iOS
+            colors={isIOS ? ['transparent'] : undefined} // Hide default spinner on iOS
+            progressBackgroundColor={isIOS ? 'transparent' : undefined}
+            progressViewOffset={isIOS ? undefined : 40}
+            style={isIOS ? { backgroundColor: 'transparent' } : undefined}
           />
         }
-        contentContainerStyle={{
-          paddingHorizontal: 16,
-          paddingTop: 8,
-        }}
+        contentContainerStyle={{ paddingHorizontal: 16 }}
         ListEmptyComponent={renderEmptyComponent}
         ListHeaderComponent={renderHeaderComponent}
         ListFooterComponent={renderFooterComponent}
