@@ -50,7 +50,12 @@ export const formatValueTemplate = (param: DataDecodedParameter): ListTableItem 
   const value = String(param.value)
 
   return {
-    label: param.name,
+    label: (
+      <View display="flex" flexDirection="row" gap="$1">
+        <Text color="$colorSecondary">{param.name}</Text>
+        <Text color="$colorLight">{param.type}</Text>
+      </View>
+    ),
     render: () => (
       <InfoSheet title={param.name} info={value}>
         <DisplayValue type={param.type} value={value} />

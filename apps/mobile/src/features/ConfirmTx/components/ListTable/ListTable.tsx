@@ -12,7 +12,7 @@ type RenderRowItem = BaseItem & {
 }
 
 type LabelValueItem = BaseItem & {
-  label: string
+  label: string | React.ReactNode
   value?: string
   render?: () => React.ReactNode
 }

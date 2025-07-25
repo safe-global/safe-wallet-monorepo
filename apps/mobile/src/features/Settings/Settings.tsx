@@ -61,7 +61,7 @@ export const Settings = ({
             marginTop: -15,
           }}
         >
-          <YStack flex={1} padding="$2" paddingTop={'$10'}>
+          <YStack flex={1} paddingTop={'$10'}>
             <Skeleton.Group show={!owners.length}>
               <YStack alignItems="center" space="$3" marginBottom="$6">
                 <IdenticonWithBadge
@@ -127,7 +127,7 @@ export const Settings = ({
                 </YStack>
               </XStack>
 
-              <YStack space="$4">
+              <YStack>
                 <View padding="$4" borderRadius="$3" gap={'$2'}>
                   <Text color="$colorSecondary" fontWeight={500}>
                     Members

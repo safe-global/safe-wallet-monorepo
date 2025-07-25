@@ -27,7 +27,12 @@ const renderArrayValue = (value: object, index?: number): ReactElement => {
 
 export const formatArrayValue = (param: DataDecodedParameter): ListTableItem => {
   return {
-    label: param.name,
+    label: (
+      <View display="flex" flexDirection="row" gap="$1">
+        <Text color="$colorSecondary">{param.name}</Text>
+        <Text color="$colorLight">{param.type}</Text>
+      </View>
+    ),
     render: () => renderArrayValue(param.value),
     direction: 'column',
     alignItems: 'flex-start',
