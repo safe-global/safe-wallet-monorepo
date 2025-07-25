@@ -3,8 +3,7 @@ import { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { ReplayedSafeProps } from '@safe-global/utils/features/counterfactual/store/types'
 import { useLazyTransactionsGetCreationTransactionV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { useAppSelector } from '@/src/store/hooks'
-import { selectAllChains } from '@/src/store/chains'
-import { asError } from '@safe-global/utils/services/exceptions/utils'
+import { selectChainById } from '@/src/store/chains'
 import Logger from '@/src/utils/logger'
 import ErrorCodes from '@safe-global/utils/services/exceptions/ErrorCodes'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
@@ -20,6 +19,7 @@ import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { createWeb3ReadOnly } from '@/src/hooks/wallets/web3'
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import type { SafeVersion } from '@safe-global/types-kit'
+import { RootState } from '@/src/store'
 
 export const SAFE_CREATION_DATA_ERRORS = {
   TX_NOT_FOUND: 'The Safe creation transaction could not be found. Please retry later.',
@@ -94,7 +94,7 @@ const proxyFactoryInterface = Safe_proxy_factory__factory.createInterface()
 const createProxySelector = proxyFactoryInterface.getFunction('createProxyWithNonce').selector
 
 /**
- * Loads the creation data from the CGW or infers it from an undeployed Safe.
+ * Loads the creation data from the CGW and checks it against
  *
  * Throws errors for the reasons in {@link SAFE_CREATION_DATA_ERRORS}.
  * Checking the cheap cases not requiring RPC calls first.
@@ -138,7 +138,6 @@ const getCreationDataForChain = async (
     throw new Error(SAFE_CREATION_DATA_ERRORS.UNSUPPORTED_SAFE_CREATION)
   }
 
-  // decode tx
   const [masterCopy, initializer, saltNonce] = proxyFactoryInterface.decodeFunctionData(
     'createProxyWithNonce',
     `0x${txData.slice(startOfTx)}`,
@@ -162,28 +161,21 @@ const getCreationDataForChain = async (
   }
 }
 
-export const useSafeCreationData = () => {
+/**
+ * Checks for a given chainId if the active safe can be recreated on that chain
+ * @param chainId
+ */
+export const useSafeCreationData = (chainId: string) => {
   const getCreationTransaction = useLazyTransactionsGetCreationTransactionV1Query()
-  const allChains = useAppSelector(selectAllChains)
+  const destinationChain = useAppSelector((state: RootState) => selectChainById(state, chainId))
   const activeSafe = useDefinedActiveSafe()
 
   return useAsync<ReplayedSafeProps | undefined>(async () => {
-    let lastError: Error | undefined = undefined
     try {
-      for (const chain of allChains) {
-        try {
-          return await getCreationDataForChain(chain, activeSafe.address, getCreationTransaction)
-        } catch (err) {
-          lastError = asError(err)
-        }
-      }
-      if (lastError) {
-        // We want to know why the creation was not possible by throwing one of the errors
-        throw lastError
-      }
+      return await getCreationDataForChain(destinationChain, activeSafe.address, getCreationTransaction)
     } catch (err) {
       Logger.error(ErrorCodes._816, err)
       throw err
     }
-  }, [allChains, activeSafe.address])
+  }, [destinationChain, activeSafe.address])
 }

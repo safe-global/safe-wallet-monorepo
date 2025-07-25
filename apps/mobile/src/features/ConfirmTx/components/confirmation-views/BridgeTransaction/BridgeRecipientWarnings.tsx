@@ -39,15 +39,13 @@ export const BridgeRecipientWarnings = ({ txInfo }: BridgeRecipientWarningsProps
   const allChains = useAppSelector(selectAllChains)
   const activeSafeInfo = useAppSelector((state) => selectSafeInfo(state, activeSafe.address as Address))
   const destinationContact = useAppSelector((state) => selectContactByAddress(txInfo.recipient.value)(state))
-  const [_creationData, creationError] = useSafeCreationData()
+  const [_creationData, creationError] = useSafeCreationData(txInfo.toChain)
 
   const isSameAddress = sameAddress(txInfo.recipient.value, activeSafe.address)
 
   // Check if destination chain is supported
   const isDestinationChainSupported = allChains?.some((chain) => chain.chainId === txInfo.toChain) ?? false
 
-  // For simplicity in mobile, we'll assume modern Safes support multichain
-  // This could be enhanced with version checking in the future
   const isMultiChainSafe = creationError === undefined
 
   const { data: otherSafe, error: otherSafeError } = useSafesGetSafeV1Query(
