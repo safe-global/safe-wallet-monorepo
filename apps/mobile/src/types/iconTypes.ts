@@ -1,4 +1,5 @@
 export type IconName =
+  | 'arrow-left-1'
   | 'add-owner'
   | 'address-book'
   | 'address-book-empty-list'
@@ -12,7 +13,6 @@ export type IconName =
   | 'arrow-right'
   | 'arrow-sort'
   | 'arrow-up'
-  | 'arrrow-right'
   | 'batch'
   | 'bell'
   | 'block'
@@ -119,6 +119,7 @@ export type IconName =
   | 'what-is-new'
 
 export const iconNames: IconName[] = [
+  'arrow-left-1',
   'add-owner',
   'address-book',
   'address-book-empty-list',
@@ -132,7 +133,6 @@ export const iconNames: IconName[] = [
   'arrow-right',
   'arrow-sort',
   'arrow-up',
-  'arrrow-right',
   'batch',
   'bell',
   'block',
