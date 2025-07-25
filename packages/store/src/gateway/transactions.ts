@@ -17,6 +17,7 @@ export const txHistoryApi = api.injectEndpoints({
       infiniteQueryOptions: {
         initialPageParam: null,
         getNextPageParam,
+        // TODO: Add maxPages and getPreviousPageParam for bidirectional infinite query that is memory efficient
       },
 
       query: ({ queryArg, pageParam }) => ({

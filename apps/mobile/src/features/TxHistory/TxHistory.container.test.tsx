@@ -17,8 +17,8 @@ jest.mock('@/src/store/hooks/activeSafe', () => ({
 }))
 
 jest.mock('react-native-collapsible-tab-view', () => {
-  const { SectionList } = require('react-native')
-  return { Tabs: { SectionList } }
+  const { FlatList } = require('react-native')
+  return { Tabs: { FlashList: FlatList } }
 })
 
 const sender = faker.finance.ethereumAddress()
@@ -229,7 +229,7 @@ describe('TxHistoryContainer', () => {
     // Check if pagination loading skeleton is shown
     await waitFor(
       () => {
-        expect(screen.getByTestId('tx-history-pagination-loader')).toBeTruthy()
+        expect(screen.getByTestId('tx-history-next-loader')).toBeTruthy()
       },
       { timeout: 2000 },
     )
@@ -239,7 +239,7 @@ describe('TxHistoryContainer', () => {
       () => {
         const transfers = screen.getAllByText('Received')
         expect(transfers).toHaveLength(2)
-        expect(screen.queryByTestId('tx-history-pagination-loader')).toBeNull()
+        expect(screen.queryByTestId('tx-history-next-loader')).toBeNull()
       },
       { timeout: 3000 },
     )

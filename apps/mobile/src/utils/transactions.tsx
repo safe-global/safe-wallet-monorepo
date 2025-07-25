@@ -1,4 +1,3 @@
-import { GroupedTxs } from '@/src/features/TxHistory/utils'
 import {
   isTransferTxInfo,
   isAddSignerTxInfo,
@@ -78,6 +77,8 @@ export const getTransactionType = ({ txInfo }: { txInfo: Transaction['txInfo'] }
 
   return null
 }
+
+export type GroupedTxs<T> = (T | T[])[]
 
 export const groupBulkTxs = <T extends { type: string; transaction?: Transaction }>(
   list: GroupedTxs<T>,

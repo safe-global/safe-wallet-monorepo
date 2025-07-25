@@ -140,10 +140,4 @@ function TxInfoComponent({ tx, onPress, ...rest }: TxInfoProps) {
   return <></>
 }
 
-export const TxInfo = React.memo(TxInfoComponent, (prevProps, nextProps) => {
-  return (
-    prevProps.tx.txHash === nextProps.tx.txHash &&
-    prevProps.bordered === nextProps.bordered &&
-    prevProps.inQueue === nextProps.inQueue
-  )
-})
+export const TxInfo = React.memo(TxInfoComponent)
