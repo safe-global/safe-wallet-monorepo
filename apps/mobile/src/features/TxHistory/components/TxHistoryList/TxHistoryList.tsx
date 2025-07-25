@@ -7,7 +7,7 @@ import { getTxHash, GroupedTxsWithTitle, groupTxsByDate } from '@/src/features/T
 import { HistoryTransactionItems } from '@safe-global/store/gateway/types'
 import { renderItem } from '@/src/features/TxHistory/utils'
 import { TransactionSkeleton, TransactionSkeletonItem } from '@/src/components/TransactionSkeleton'
-import { RefreshControl } from 'react-native'
+import { Platform, RefreshControl, SectionList, SectionListProps } from 'react-native'
 import { CircleSnail } from 'react-native-progress'
 
 interface TxHistoryList {
@@ -27,6 +27,7 @@ export function TxHistoryList({ transactions, onEndReached, isLoading, refreshin
 
   const hasTransactions = transactions && transactions.length > 0
   const isInitialLoading = isLoading && !hasTransactions && !refreshing
+  const isIOS = Platform.OS === 'ios'
 
   // ListEmptyComponent for initial loading state
   const renderEmptyComponent = useMemo(() => {
@@ -60,7 +61,7 @@ export function TxHistoryList({ transactions, onEndReached, isLoading, refreshin
 
   return (
     <View position="relative" flex={1}>
-      {!!refreshing && (
+      {!!refreshing && isIOS && (
         <View
           position="absolute"
           top={64}
@@ -88,18 +89,14 @@ export function TxHistoryList({ transactions, onEndReached, isLoading, refreshin
           <RefreshControl
             refreshing={!!refreshing}
             onRefresh={onRefresh}
-            tintColor="transparent" // Hide default spinner
-            colors={['transparent']} // Hide default spinner on Android
-            progressBackgroundColor="transparent"
-            style={{ backgroundColor: 'transparent' }}
+            tintColor={isIOS ? 'transparent' : undefined} // Hide default spinner on iOS
+            colors={isIOS ? ['transparent'] : undefined} // Hide default spinner on iOS
+            progressBackgroundColor={isIOS ? 'transparent' : undefined}
+            progressViewOffset={isIOS ? undefined : 40}
+            style={isIOS ? { backgroundColor: 'transparent' } : undefined}
           />
         }
-        style={{ marginTop: -16 }} // Compensate for SafeTab container marginTop
-        contentContainerStyle={{
-          paddingHorizontal: 16,
-          paddingTop: 8,
-          marginTop: 16,
-        }}
+        contentContainerStyle={{ paddingHorizontal: 16 }}
         ListEmptyComponent={renderEmptyComponent}
         ListFooterComponent={renderFooterComponent}
         renderSectionHeader={({ section: { title } }) => <SafeListItem.Header title={title} />}
