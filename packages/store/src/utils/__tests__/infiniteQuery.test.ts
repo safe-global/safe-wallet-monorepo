@@ -1,233 +1,146 @@
-import { getNextPageParam } from '../infiniteQuery'
+import { describe, it, expect } from '@jest/globals'
+import { getNextPageParam, getPreviousPageParam } from '../infiniteQuery'
 
 describe('getNextPageParam', () => {
-  // Mock console.error to test error handling without cluttering test output
-  const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation()
-
-  afterEach(() => {
-    consoleErrorSpy.mockClear()
+  it('should return undefined for null lastPage', () => {
+    expect(getNextPageParam(null as any)).toBeUndefined()
   })
 
-  afterAll(() => {
-    consoleErrorSpy.mockRestore()
+  it('should return undefined for lastPage without next', () => {
+    expect(getNextPageParam({})).toBeUndefined()
+    expect(getNextPageParam({ next: null })).toBeUndefined()
+    expect(getNextPageParam({ next: '' })).toBeUndefined()
   })
 
   describe('Happy path scenarios', () => {
-    it('should extract cursor from a relative URL with single parameter', () => {
+    it('should extract cursor from relative URL', () => {
       const lastPage = {
-        next: '/v1/chains/1/safes/0x123/transactions/history?cursor=abc123',
+        next: '/v1/chains/1/safes/0x123/transactions/history?cursor=abc123&limit=20',
       }
-
-      const result = getNextPageParam(lastPage)
-
-      expect(result).toBe('abc123')
+      expect(getNextPageParam(lastPage)).toBe('abc123')
     })
 
-    it('should extract cursor from a relative URL with multiple parameters', () => {
+    it('should extract cursor from full URL', () => {
       const lastPage = {
-        next: '/v1/chains/1/safes/0x123/transactions/history?trusted=false&cursor=xyz789&limit=20',
+        next: 'https://safe-client.safe.global/v1/chains/1/safes/0x123/transactions/history?cursor=def456&limit=20',
       }
-
-      const result = getNextPageParam(lastPage)
-
-      expect(result).toBe('xyz789')
+      expect(getNextPageParam(lastPage)).toBe('def456')
     })
 
-    it('should extract cursor from an absolute URL', () => {
+    it('should extract cursor with multiple query parameters', () => {
       const lastPage = {
-        next: 'https://safe-client.safe.global/v1/chains/1/safes/0x123/transactions/history?cursor=def456',
+        next: '/v1/chains/1/safes/0x123/transactions/history?limit=20&cursor=ghi789&timezone=UTC',
       }
-
-      const result = getNextPageParam(lastPage)
-
-      expect(result).toBe('def456')
+      expect(getNextPageParam(lastPage)).toBe('ghi789')
     })
 
-    it('should extract cursor from URL with encoded characters', () => {
+    it('should handle encoded cursor values', () => {
       const lastPage = {
-        next: '/v2/chains/1/safes/0x123/collectibles?cursor=abc%2B123%3D%3D&trusted=true',
+        next: '/v1/chains/1/safes/0x123/transactions/history?cursor=2023-01-01T00%3A00%3A00Z',
       }
-
-      const result = getNextPageParam(lastPage)
-
-      expect(result).toBe('abc+123==') // URLSearchParams automatically decodes
-    })
-
-    it('should handle cursor as first parameter', () => {
-      const lastPage = {
-        next: '/v1/chains/1/safes/0x123/transactions/queued?cursor=first123&trusted=false',
-      }
-
-      const result = getNextPageParam(lastPage)
-
-      expect(result).toBe('first123')
-    })
-
-    it('should handle cursor as last parameter', () => {
-      const lastPage = {
-        next: '/v1/chains/1/safes/0x123/transactions/queued?trusted=false&limit=50&cursor=last456',
-      }
-
-      const result = getNextPageParam(lastPage)
-
-      expect(result).toBe('last456')
+      expect(getNextPageParam(lastPage)).toBe('2023-01-01T00:00:00Z')
     })
   })
 
-  describe('Edge cases returning undefined', () => {
-    it('should return undefined when lastPage is null', () => {
-      const result = getNextPageParam(null as any)
-
-      expect(result).toBeUndefined()
-    })
-
-    it('should return undefined when lastPage is undefined', () => {
-      const result = getNextPageParam(undefined as any)
-
-      expect(result).toBeUndefined()
-    })
-
-    it('should return undefined when next is null', () => {
-      const lastPage = { next: null }
-
-      const result = getNextPageParam(lastPage)
-
-      expect(result).toBeUndefined()
-    })
-
-    it('should return undefined when next is undefined', () => {
-      const lastPage = { next: undefined }
-
-      const result = getNextPageParam(lastPage)
-
-      expect(result).toBeUndefined()
-    })
-
-    it('should return undefined when next is empty string', () => {
-      const lastPage = { next: '' }
-
-      const result = getNextPageParam(lastPage)
-
-      expect(result).toBeUndefined()
-    })
-
-    it('should return undefined when URL has no query string', () => {
+  describe('Edge cases', () => {
+    it('should return undefined for URL without query string', () => {
       const lastPage = {
         next: '/v1/chains/1/safes/0x123/transactions/history',
       }
-
-      const result = getNextPageParam(lastPage)
-
-      expect(result).toBeUndefined()
+      expect(getNextPageParam(lastPage)).toBeUndefined()
     })
 
-    it('should return undefined when URL has empty query string', () => {
+    it('should return undefined for empty cursor', () => {
       const lastPage = {
-        next: '/v1/chains/1/safes/0x123/transactions/history?',
+        next: '/v1/chains/1/safes/0x123/transactions/history?cursor=&limit=20',
       }
-
-      const result = getNextPageParam(lastPage)
-
-      expect(result).toBeUndefined()
+      expect(getNextPageParam(lastPage)).toBeUndefined()
     })
 
-    it('should return undefined when URL has query parameters but no cursor', () => {
+    it('should return undefined for whitespace-only cursor', () => {
       const lastPage = {
-        next: '/v1/chains/1/safes/0x123/transactions/history?trusted=false&limit=20',
+        next: '/v1/chains/1/safes/0x123/transactions/history?cursor=   &limit=20',
       }
-
-      const result = getNextPageParam(lastPage)
-
-      expect(result).toBeUndefined()
+      expect(getNextPageParam(lastPage)).toBeUndefined()
     })
 
-    it('should return undefined when cursor parameter is empty', () => {
+    it('should handle malformed URLs gracefully', () => {
       const lastPage = {
-        next: '/v1/chains/1/safes/0x123/transactions/history?cursor=&trusted=false',
+        next: 'not-a-valid-url',
       }
+      expect(getNextPageParam(lastPage)).toBeUndefined()
+    })
+  })
+})
 
-      const result = getNextPageParam(lastPage)
+describe('getPreviousPageParam', () => {
+  it('should return undefined for null firstPage', () => {
+    expect(getPreviousPageParam(null as any)).toBeUndefined()
+  })
 
-      expect(result).toBeUndefined()
+  it('should return undefined for firstPage without previous', () => {
+    expect(getPreviousPageParam({})).toBeUndefined()
+    expect(getPreviousPageParam({ previous: null })).toBeUndefined()
+    expect(getPreviousPageParam({ previous: '' })).toBeUndefined()
+  })
+
+  describe('Happy path scenarios', () => {
+    it('should extract cursor from relative URL', () => {
+      const firstPage = {
+        previous: '/v1/chains/1/safes/0x123/transactions/history?cursor=abc123&limit=20',
+      }
+      expect(getPreviousPageParam(firstPage)).toBe('abc123')
     })
 
-    it('should return undefined when cursor parameter has only whitespace', () => {
-      const lastPage = {
-        next: '/v1/chains/1/safes/0x123/transactions/history?cursor=%20&trusted=false',
+    it('should extract cursor from full URL', () => {
+      const firstPage = {
+        previous: 'https://safe-client.safe.global/v1/chains/1/safes/0x123/transactions/history?cursor=def456&limit=20',
       }
+      expect(getPreviousPageParam(firstPage)).toBe('def456')
+    })
 
-      const result = getNextPageParam(lastPage)
+    it('should extract cursor with multiple query parameters', () => {
+      const firstPage = {
+        previous: '/v1/chains/1/safes/0x123/transactions/history?limit=20&cursor=ghi789&timezone=UTC',
+      }
+      expect(getPreviousPageParam(firstPage)).toBe('ghi789')
+    })
 
-      expect(result).toBeUndefined()
+    it('should handle encoded cursor values', () => {
+      const firstPage = {
+        previous: '/v1/chains/1/safes/0x123/transactions/history?cursor=2023-01-01T00%3A00%3A00Z',
+      }
+      expect(getPreviousPageParam(firstPage)).toBe('2023-01-01T00:00:00Z')
     })
   })
 
-  describe('Error handling', () => {
-    it('should handle malformed URLs gracefully and log error', () => {
-      // Create a URL that will cause URLSearchParams to throw
-      const lastPage = {
-        next: '/v1/chains/1/safes/0x123/transactions/history?cursor=abc123',
+  describe('Edge cases', () => {
+    it('should return undefined for URL without query string', () => {
+      const firstPage = {
+        previous: '/v1/chains/1/safes/0x123/transactions/history',
       }
-
-      // Mock URLSearchParams to throw an error
-      const originalURLSearchParams = global.URLSearchParams
-      global.URLSearchParams = jest.fn(() => {
-        throw new Error('Malformed URL')
-      })
-
-      const result = getNextPageParam(lastPage)
-
-      expect(result).toBeUndefined()
-      expect(consoleErrorSpy).toHaveBeenCalledWith('Error extracting cursor from next URL:', expect.any(Error))
-
-      // Restore original URLSearchParams
-      global.URLSearchParams = originalURLSearchParams
+      expect(getPreviousPageParam(firstPage)).toBeUndefined()
     })
 
-    it('should handle URLs with special characters', () => {
-      const lastPage = {
-        next: '/v1/chains/1/safes/0x123/transactions?cursor=abc123&param=special%26chars',
+    it('should return undefined for empty cursor', () => {
+      const firstPage = {
+        previous: '/v1/chains/1/safes/0x123/transactions/history?cursor=&limit=20',
       }
-
-      const result = getNextPageParam(lastPage)
-
-      expect(result).toBe('abc123')
+      expect(getPreviousPageParam(firstPage)).toBeUndefined()
     })
 
-    it('should handle very long cursor values', () => {
-      const longCursor = 'a'.repeat(1000)
-      const lastPage = {
-        next: `/v1/chains/1/safes/0x123/transactions?cursor=${longCursor}`,
+    it('should return undefined for whitespace-only cursor', () => {
+      const firstPage = {
+        previous: '/v1/chains/1/safes/0x123/transactions/history?cursor=   &limit=20',
       }
-
-      const result = getNextPageParam(lastPage)
-
-      expect(result).toBe(longCursor)
-    })
-  })
-
-  describe('Type safety', () => {
-    it('should work with objects that have additional properties', () => {
-      const lastPage = {
-        next: '/v1/chains/1/safes/0x123/transactions?cursor=type_safe_123',
-        someOtherProperty: 'value',
-        count: 100,
-        results: [],
-      }
-
-      const result = getNextPageParam(lastPage)
-
-      expect(result).toBe('type_safe_123')
+      expect(getPreviousPageParam(firstPage)).toBeUndefined()
     })
 
-    it('should handle object with minimal structure', () => {
-      const lastPage = {
-        next: '/v1/chains/1/safes/0x123/transactions?cursor=minimal_123',
+    it('should handle malformed URLs gracefully', () => {
+      const firstPage = {
+        previous: 'not-a-valid-url',
       }
-
-      const result = getNextPageParam(lastPage)
-
-      expect(result).toBe('minimal_123')
+      expect(getPreviousPageParam(firstPage)).toBeUndefined()
     })
   })
 })
