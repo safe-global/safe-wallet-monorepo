@@ -18,12 +18,12 @@ const SUPPORTED_VERSIONS: SafeVersion[] = ['1.4.1', '1.3.0']
 /**
  * Returns all chains where the creations's masterCopy and factory are deployed.
  * @param creation
+ * @param chains
  */
 export const useCompatibleNetworks = (
   creation: ReplayedSafeProps | undefined,
+  chains: ChainInfo[],
 ): (ChainInfo & { available: boolean })[] => {
-  const { configs } = useChains()
-
   if (!creation) {
     return []
   }
@@ -32,7 +32,7 @@ export const useCompatibleNetworks = (
 
   const { fallbackHandler, to } = safeAccountConfig
 
-  return configs.map((config) => {
+  return chains.map((config) => {
     const isL1MasterCopy = hasMatchingDeployment(
       getSafeSingletonDeployments,
       masterCopy,
