@@ -226,7 +226,7 @@ const SwapWidget = ({ sell }: Params) => {
         handler: (newTradeParams: OnTradeParamsPayload) => {
           const { orderType: tradeType, recipient, sellToken, buyToken } = newTradeParams
 
-          const newFeeBps = feeEnabled ? calculateFeePercentageInBps(newTradeParams) : 0
+          const newFeeBps = feeEnabled ? calculateFeePercentageInBps(newTradeParams, chainId) : 0
 
           setParams((params) => ({
             ...params,
@@ -251,7 +251,7 @@ const SwapWidget = ({ sell }: Params) => {
         },
       },
     ]
-  }, [dispatch, feeEnabled])
+  }, [dispatch, feeEnabled, chainId])
 
   useEffect(() => {
     setParams((params) => ({
