@@ -55,7 +55,9 @@ export const useBlockaid = (
   const errorMsg = useMemo(() => blockaidErrors ?? blockaidPayload?.payload?.error, [blockaidErrors, blockaidPayload])
 
   useEffect(() => {
-    logError(Errors._201, errorMsg)
+    if (errorMsg) {
+      logError(Errors._201, errorMsg)
+    }
   }, [errorMsg])
 
   return [blockaidPayload, errorMsg, loading]
