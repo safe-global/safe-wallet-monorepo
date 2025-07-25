@@ -217,24 +217,24 @@ export function TxHistoryList({
     onEndReached({ distanceFromEnd: 0 })
   }, [onEndReached])
 
-  const customRefreshIndicator = useMemo(() => {
-    if (!isIOS) return undefined
-
-    return (
-      <View
-        position="absolute"
-        top={64}
-        alignSelf="center"
-        zIndex={1000}
-        backgroundColor="$background"
-        borderRadius={20}
-        padding="$2"
-        testID="tx-history-progress-indicator"
-      >
-        <CircleSnail size={24} color={theme.color.get()} thickness={2} duration={600} spinDuration={1500} />
-      </View>
-    )
-  }, [isIOS, theme])
+  const customRefreshIndicator = useMemo(
+    () =>
+      isIOS ? (
+        <View
+          position="absolute"
+          top={64}
+          alignSelf="center"
+          zIndex={1000}
+          backgroundColor="$background"
+          borderRadius={20}
+          padding="$2"
+          testID="tx-history-progress-indicator"
+        >
+          <CircleSnail size={24} color={theme.color.get()} thickness={2} duration={600} spinDuration={1500} />
+        </View>
+      ) : undefined,
+    [isIOS, theme],
+  )
 
   return (
     <View position="relative" flex={1}>
