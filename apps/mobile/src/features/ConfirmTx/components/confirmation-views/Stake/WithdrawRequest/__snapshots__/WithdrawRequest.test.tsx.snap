@@ -594,7 +594,7 @@ exports[`StakingWithdrawRequest matches snapshot 1`] = `
                 }
                 testID="warning-icon"
               >
-                
+                
               </Text>
             </View>
             <View
