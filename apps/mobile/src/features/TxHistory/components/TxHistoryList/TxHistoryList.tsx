@@ -11,12 +11,12 @@ import { DefaultSectionT, Platform, RefreshControl, SectionListProps } from 'rea
 import { CircleSnail } from 'react-native-progress'
 
 // Custom SectionList wrapper with optional custom refresh indicator
-interface SectionListWithCustomRefreshProps<ItemT = any, SectionT = DefaultSectionT>
+interface SectionListWithCustomRefreshProps<ItemT, SectionT = DefaultSectionT>
   extends SectionListProps<ItemT, SectionT> {
   refreshLoadingIndicator?: React.ReactNode
 }
 
-const SectionListWithCustomRefresh = (props: SectionListWithCustomRefreshProps) => {
+function SectionListWithCustomRefresh<ItemT>(props: SectionListWithCustomRefreshProps<ItemT>) {
   const { refreshLoadingIndicator, refreshControl, ...restProps } = props
 
   // Extract refresh props from refreshControl if it exists
@@ -98,24 +98,24 @@ export function TxHistoryList({ transactions, onEndReached, isLoading, refreshin
     return null
   }, [isLoading, hasTransactions])
 
-  const customRefreshIndicator = useMemo(() => {
-    if (!isIOS) return undefined
-
-    return (
-      <View
-        position="absolute"
-        top={64}
-        alignSelf="center"
-        zIndex={1000}
-        backgroundColor="$background"
-        borderRadius={20}
-        padding="$2"
-        testID="tx-history-progress-indicator"
-      >
-        <CircleSnail size={24} color={theme.color.get()} thickness={2} duration={600} spinDuration={1500} />
-      </View>
-    )
-  }, [isIOS, theme])
+  const customRefreshIndicator = useMemo(
+    () =>
+      isIOS ? (
+        <View
+          position="absolute"
+          top={64}
+          alignSelf="center"
+          zIndex={1000}
+          backgroundColor="$background"
+          borderRadius={20}
+          padding="$2"
+          testID="tx-history-progress-indicator"
+        >
+          <CircleSnail size={24} color={theme.color.get()} thickness={2} duration={600} spinDuration={1500} />
+        </View>
+      ) : undefined,
+    [isIOS, theme],
+  )
 
   return (
     <View position="relative" flex={1}>
