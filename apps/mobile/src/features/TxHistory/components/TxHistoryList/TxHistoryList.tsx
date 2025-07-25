@@ -7,8 +7,47 @@ import { getTxHash, GroupedTxsWithTitle, groupTxsByDate } from '@/src/features/T
 import { HistoryTransactionItems } from '@safe-global/store/gateway/types'
 import { renderItem } from '@/src/features/TxHistory/utils'
 import { TransactionSkeleton, TransactionSkeletonItem } from '@/src/components/TransactionSkeleton'
-import { Platform, RefreshControl, SectionList, SectionListProps } from 'react-native'
+import { DefaultSectionT, Platform, RefreshControl, SectionListProps } from 'react-native'
 import { CircleSnail } from 'react-native-progress'
+
+// Custom SectionList wrapper with optional custom refresh indicator
+interface SectionListWithCustomRefreshProps<ItemT = any, SectionT = DefaultSectionT>
+  extends SectionListProps<ItemT, SectionT> {
+  refreshLoadingIndicator?: React.ReactNode
+}
+
+const SectionListWithCustomRefresh = (props: SectionListWithCustomRefreshProps) => {
+  const { refreshLoadingIndicator, refreshControl, ...restProps } = props
+
+  // Extract refresh props from refreshControl if it exists
+  const refreshing = refreshControl?.props?.refreshing || false
+  const onRefresh = refreshControl?.props?.onRefresh
+
+  // Create hidden refresh control when custom indicator is provided
+  const hiddenRefreshControl = useMemo(() => {
+    if (!refreshLoadingIndicator) {
+      return refreshControl
+    }
+
+    return (
+      <RefreshControl
+        refreshing={refreshing}
+        onRefresh={onRefresh}
+        tintColor="transparent"
+        colors={['transparent']}
+        progressBackgroundColor="transparent"
+        style={{ backgroundColor: 'transparent' }}
+      />
+    )
+  }, [refreshLoadingIndicator, refreshControl, refreshing, onRefresh])
+
+  return (
+    <>
+      {refreshing && refreshLoadingIndicator}
+      <Tabs.SectionList {...restProps} refreshControl={hiddenRefreshControl} />
+    </>
+  )
+}
 
 interface TxHistoryList {
   transactions?: HistoryTransactionItems[]
@@ -59,24 +98,28 @@ export function TxHistoryList({ transactions, onEndReached, isLoading, refreshin
     return null
   }, [isLoading, hasTransactions])
 
+  const customRefreshIndicator = useMemo(() => {
+    if (!isIOS) return undefined
+
+    return (
+      <View
+        position="absolute"
+        top={64}
+        alignSelf="center"
+        zIndex={1000}
+        backgroundColor="$background"
+        borderRadius={20}
+        padding="$2"
+        testID="tx-history-progress-indicator"
+      >
+        <CircleSnail size={24} color={theme.color.get()} thickness={2} duration={600} spinDuration={1500} />
+      </View>
+    )
+  }, [isIOS, theme])
+
   return (
     <View position="relative" flex={1}>
-      {!!refreshing && isIOS && (
-        <View
-          position="absolute"
-          top={64}
-          alignSelf="center"
-          zIndex={1000}
-          backgroundColor="$background"
-          borderRadius={20}
-          padding="$2"
-          testID="tx-history-progress-indicator"
-        >
-          <CircleSnail size={24} color={theme.color.get()} thickness={2} duration={600} spinDuration={1500} />
-        </View>
-      )}
-
-      <Tabs.SectionList
+      <SectionListWithCustomRefresh
         testID="tx-history-list"
         stickySectionHeadersEnabled
         contentInsetAdjustmentBehavior="automatic"
@@ -85,17 +128,8 @@ export function TxHistoryList({ transactions, onEndReached, isLoading, refreshin
         renderItem={renderItem}
         onEndReached={onEndReached}
         onEndReachedThreshold={0.1}
-        refreshControl={
-          <RefreshControl
-            refreshing={!!refreshing}
-            onRefresh={onRefresh}
-            tintColor={isIOS ? 'transparent' : undefined} // Hide default spinner on iOS
-            colors={isIOS ? ['transparent'] : undefined} // Hide default spinner on iOS
-            progressBackgroundColor={isIOS ? 'transparent' : undefined}
-            progressViewOffset={isIOS ? undefined : 40}
-            style={isIOS ? { backgroundColor: 'transparent' } : undefined}
-          />
-        }
+        refreshControl={<RefreshControl refreshing={!!refreshing} onRefresh={onRefresh} />}
+        refreshLoadingIndicator={customRefreshIndicator}
         contentContainerStyle={{ paddingHorizontal: 16 }}
         ListEmptyComponent={renderEmptyComponent}
         ListFooterComponent={renderFooterComponent}
