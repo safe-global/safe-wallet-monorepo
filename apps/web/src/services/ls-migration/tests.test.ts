@@ -1,5 +1,11 @@
 import { migrateAddressBook } from './addressBook'
 import { migrateAddedSafes, migrateAddedSafesOwners } from './addedSafes'
+import { migrateBatchTxs } from './batch'
+import { type BatchTxsState } from '@/store/batchSlice'
+import { OperationType } from '@safe-global/types-kit'
+import { Operation, TransactionStatus, type TransactionInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import { faker } from '@faker-js/faker'
+import { ERC20_INTERFACE } from '@safe-global/utils/components/tx/ApprovalEditor/utils/approvals'
 
 describe('Local storage migration', () => {
   describe('migrateAddressBook', () => {
@@ -275,6 +281,116 @@ describe('Local storage migration', () => {
       })
 
       expect(newData).toEqual(undefined)
+    })
+  })
+
+  describe('migrateBatchTxs', () => {
+    it('should migrate empty state', () => {
+      const oldStorage: BatchTxsState = {}
+
+      const newData = migrateBatchTxs(oldStorage)
+
+      expect(newData).toEqual(oldStorage)
+    })
+
+    it('should migrate state with new txData', () => {
+      const oldStorage: BatchTxsState = {
+        '1': {
+          '0x1F2504De05f5167650bE5B28c472601Be434b60A': [
+            {
+              id: '123',
+              timestamp: Date.now(),
+              txData: {
+                to: '0x1F2504De05f5167650bE5B28c472601Be434b60A',
+                value: '0',
+                data: '0x',
+                operation: OperationType.Call,
+              },
+            },
+          ],
+        },
+      }
+
+      const newData = migrateBatchTxs(oldStorage)
+
+      expect(newData).toEqual(oldStorage)
+    })
+
+    it('should migrate txDetails to txData', () => {
+      const to1 = faker.finance.ethereumAddress()
+      const erc20Token = faker.finance.ethereumAddress()
+      const to2 = faker.finance.ethereumAddress()
+      const timestamp = Date.now()
+
+      const oldStorage = {
+        '1': {
+          '0x1F2504De05f5167650bE5B28c472601Be434b60A': [
+            {
+              id: '123',
+              timestamp,
+              txDetails: {
+                safeAddress: '0x1F2504De05f5167650bE5B28c472601Be434b60A',
+                txId: '123',
+                txStatus: TransactionStatus.AWAITING_CONFIRMATIONS,
+                txInfo: {} as unknown as TransactionInfo,
+                txData: {
+                  to: { value: to1 },
+                  value: '420',
+                  hexData: '0x',
+                  operation: Operation.CALL,
+                  trustedDelegateCallTarget: false,
+                },
+              },
+            },
+            {
+              id: '234',
+              timestamp,
+              txDetails: {
+                safeAddress: '0x1F2504De05f5167650bE5B28c472601Be434b60A',
+                txId: '234',
+                txStatus: TransactionStatus.AWAITING_CONFIRMATIONS,
+                txInfo: {} as unknown as TransactionInfo,
+                txData: {
+                  to: { value: erc20Token },
+                  value: '0',
+                  hexData: ERC20_INTERFACE.encodeFunctionData('transfer', [to2, '69']),
+                  operation: Operation.CALL,
+                  trustedDelegateCallTarget: false,
+                },
+              },
+            },
+          ],
+        },
+      }
+
+      const newData = migrateBatchTxs(oldStorage as unknown as BatchTxsState)
+
+      expect(newData).toEqual({
+        '1': {
+          '0x1F2504De05f5167650bE5B28c472601Be434b60A': [
+            {
+              id: '123',
+              timestamp,
+              txData: {
+                to: to1,
+                value: '420',
+                data: '0x',
+                operation: OperationType.Call,
+              },
+            },
+            {
+              id: '234',
+              timestamp,
+              txData: {
+                to: erc20Token,
+                value: '0',
+                data: ERC20_INTERFACE.encodeFunctionData('transfer', [to2, '69']),
+                operation: OperationType.Call,
+              },
+            },
+          ],
+        },
+      })
     })
   })
 })
