@@ -1,5 +1,5 @@
 import { fakerChecksummedAddress, renderHook, waitFor } from '@/tests/test-utils'
-import { SAFE_CREATION_DATA_ERRORS, useSafeCreationData } from '../useSafeCreationData'
+import { useSafeCreationData } from '../useSafeCreationData'
 import { faker } from '@faker-js/faker'
 import { PendingSafeStatus, type UndeployedSafe } from '@safe-global/utils/features/counterfactual/store/types'
 import { chainBuilder } from '@/tests/builders/chains'
@@ -14,6 +14,7 @@ import { type ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import { EMPTY_DATA, ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
 import { getSafeSingletonDeployment, getSafeToL2SetupDeployment } from '@safe-global/safe-deployments'
 import { PayMethod } from '@safe-global/utils/features/counterfactual/types'
+import { SAFE_CREATION_DATA_ERRORS } from '@safe-global/utils/utils/safe'
 
 const setupToL2Address = getSafeToL2SetupDeployment({ version: '1.4.1' })?.defaultAddress!
 

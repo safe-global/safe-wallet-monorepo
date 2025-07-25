@@ -16,7 +16,7 @@ export const BridgeWarnings: Record<string, BridgeWarning> = {
   NO_MULTICHAIN_SUPPORT: {
     title: 'Incompatible Safe version',
     description:
-      'This Safe account cannot add new networks. You will not be able to claim ownership of the same address on other networks. Funds sent may be inaccessible.',
+      'This Safe account cannot be created on the destination chain. You will not be able to claim ownership of the same address. Funds sent may be inaccessible.',
     severity: 'error',
   },
   SAFE_NOT_DEPLOYED: {

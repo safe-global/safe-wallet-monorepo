@@ -1,4 +1,3 @@
-import useChains from '@/hooks/useChains'
 import { hasCanonicalDeployment, hasMatchingDeployment } from '@safe-global/utils/services/contracts/deployments'
 import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
 import { type SafeVersion } from '@safe-global/types-kit'
@@ -18,12 +17,12 @@ const SUPPORTED_VERSIONS: SafeVersion[] = ['1.4.1', '1.3.0']
 /**
  * Returns all chains where the creations's masterCopy and factory are deployed.
  * @param creation
+ * @param chains
  */
 export const useCompatibleNetworks = (
   creation: ReplayedSafeProps | undefined,
+  chains: ChainInfo[],
 ): (ChainInfo & { available: boolean })[] => {
-  const { configs } = useChains()
-
   if (!creation) {
     return []
   }
@@ -32,7 +31,7 @@ export const useCompatibleNetworks = (
 
   const { fallbackHandler, to } = safeAccountConfig
 
-  return configs.map((config) => {
+  return chains.map((config) => {
     const isL1MasterCopy = hasMatchingDeployment(
       getSafeSingletonDeployments,
       masterCopy,

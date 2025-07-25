@@ -269,7 +269,7 @@ export const CreateSafeOnNewChain = ({
   )
 
   const safeCreationResult = useSafeCreationData(safeAddress, deployedChains)
-  const allCompatibleChains = useCompatibleNetworks(safeCreationResult[0])
+  const allCompatibleChains = useCompatibleNetworks(safeCreationResult[0], configs)
   const isUnsupportedSafeCreationVersion = Boolean(!allCompatibleChains?.length)
   const replayableChains = useMemo(
     () =>
