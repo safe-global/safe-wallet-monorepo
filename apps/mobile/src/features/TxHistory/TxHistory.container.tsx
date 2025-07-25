@@ -4,11 +4,13 @@ import { useGetTxsHistoryInfiniteQuery } from '@safe-global/store/gateway'
 import type { TransactionItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { TxHistoryList } from '@/src/features/TxHistory/components/TxHistoryList'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
+import { useLocalSearchParams } from 'expo-router'
 import Logger from '@/src/utils/logger'
 
 export function TxHistoryContainer() {
   const activeSafe = useDefinedActiveSafe()
   const [isRefreshing, setIsRefreshing] = React.useState(false)
+  const { fromNotification } = useLocalSearchParams<{ fromNotification?: string }>()
 
   // Using the infinite query hook
   const { currentData, fetchNextPage, hasNextPage, isFetching, isLoading, isUninitialized, refetch } =
@@ -16,6 +18,14 @@ export function TxHistoryContainer() {
       chainId: activeSafe.chainId,
       safeAddress: activeSafe.address,
     })
+
+  // Force refetch when coming from push notification
+  React.useEffect(() => {
+    if (fromNotification) {
+      Logger.info('TxHistoryContainer: Refetching data due to push notification navigation', { fromNotification })
+      refetch()
+    }
+  }, [fromNotification, refetch])
 
   // Flatten all pages into a single transactions array
   const transactions = React.useMemo(() => {

@@ -155,7 +155,10 @@ export const NotificationNavigationHandler = {
   },
 
   async navigateToTransactionHistory(): Promise<void> {
-    await this.safeNavigate('/transactions')
+    await this.safeNavigate({
+      pathname: '/transactions',
+      params: { fromNotification: Date.now().toString() },
+    })
   },
 
   async navigateToConfirmTransaction(safeTxHash?: string): Promise<void> {
