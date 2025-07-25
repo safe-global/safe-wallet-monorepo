@@ -12,7 +12,7 @@ type VerificationStatusProps = {
 export const VerificationStatus: React.FC<VerificationStatusProps> = ({ isLoading, data, isEnteredAddressValid }) => {
   if (isLoading) {
     return (
-      <XStack marginTop={'$5'} gap={'$1'}>
+      <XStack marginTop={'$4'} gap={'$1'}>
         <Loader size={16} />
         <Text marginLeft={'$1'}>Verifying address...</Text>
       </XStack>
@@ -24,7 +24,7 @@ export const VerificationStatus: React.FC<VerificationStatusProps> = ({ isLoadin
   }
 
   return (
-    <XStack marginTop={'$5'} gap={'$1'}>
+    <XStack marginTop={'$4'} gap={'$1'}>
       {isEnteredAddressValid && <Text color={'$error'}>No Safe deployment found for this this address</Text>}
     </XStack>
   )
