@@ -6,11 +6,51 @@ import { HistoryTransactionItems } from '@safe-global/store/gateway/types'
 import { TxGroupedCard } from '@/src/components/transactions-list/Card/TxGroupedCard'
 import { TxInfo } from '@/src/components/TxInfo'
 import { TransactionSkeleton, TransactionSkeletonItem } from '@/src/components/TransactionSkeleton'
-import { Platform, RefreshControl, SectionList, SectionListProps } from 'react-native'
+import { Platform, RefreshControl } from 'react-native'
 import { CircleSnail } from 'react-native-progress'
 import { formatWithSchema } from '@/src/utils/date'
 import { isDateLabel } from '@/src/utils/transaction-guards'
 import { groupBulkTxs } from '@/src/utils/transactions'
+import { FlashListProps } from '@shopify/flash-list'
+
+// Custom FlashList wrapper with optional custom refresh indicator
+interface FlashListWithCustomRefreshProps<ItemT> extends FlashListProps<ItemT> {
+  /** Optional custom loading indicator to display during refresh operations */
+  refreshLoadingIndicator?: React.ReactNode
+}
+
+export function FlashListWithCustomRefresh<ItemT>(props: FlashListWithCustomRefreshProps<ItemT>) {
+  const { refreshLoadingIndicator, refreshControl, ...restProps } = props
+
+  // Extract refresh props from refreshControl if it exists
+  const refreshing = (refreshControl?.props as { refreshing?: boolean })?.refreshing || false
+  const onRefresh = (refreshControl?.props as { onRefresh?: () => void })?.onRefresh
+
+  // Create hidden refresh control when custom indicator is provided
+  const hiddenRefreshControl = useMemo(() => {
+    if (!refreshLoadingIndicator) {
+      return refreshControl
+    }
+
+    return (
+      <RefreshControl
+        refreshing={refreshing}
+        onRefresh={onRefresh}
+        tintColor="transparent"
+        colors={['transparent']}
+        progressBackgroundColor="transparent"
+        style={{ backgroundColor: 'transparent' }}
+      />
+    )
+  }, [refreshLoadingIndicator, refreshControl, refreshing, onRefresh])
+
+  return (
+    <>
+      {refreshing && refreshLoadingIndicator}
+      <Tabs.FlashList {...restProps} refreshControl={hiddenRefreshControl} />
+    </>
+  )
+}
 
 interface TxHistoryList {
   transactions?: HistoryTransactionItems[]
@@ -177,24 +217,28 @@ export function TxHistoryList({
     onEndReached({ distanceFromEnd: 0 })
   }, [onEndReached])
 
+  const customRefreshIndicator = useMemo(() => {
+    if (!isIOS) return undefined
+
+    return (
+      <View
+        position="absolute"
+        top={64}
+        alignSelf="center"
+        zIndex={1000}
+        backgroundColor="$background"
+        borderRadius={20}
+        padding="$2"
+        testID="tx-history-progress-indicator"
+      >
+        <CircleSnail size={24} color={theme.color.get()} thickness={2} duration={600} spinDuration={1500} />
+      </View>
+    )
+  }, [isIOS, theme])
+
   return (
     <View position="relative" flex={1}>
-      {!!refreshing && isIOS && (
-        <View
-          position="absolute"
-          top={64}
-          alignSelf="center"
-          zIndex={1000}
-          backgroundColor="$background"
-          borderRadius={20}
-          padding="$2"
-          testID="tx-history-progress-indicator"
-        >
-          <CircleSnail size={24} color={theme.color.get()} thickness={2} duration={600} spinDuration={1500} />
-        </View>
-      )}
-
-      <Tabs.FlashList
+      <FlashListWithCustomRefresh
         testID="tx-history-list"
         data={flatList}
         renderItem={renderItem}
@@ -205,17 +249,8 @@ export function TxHistoryList({
         estimatedFirstItemOffset={TAB_BAR_HEIGHT}
         onEndReached={handleEndReached}
         onEndReachedThreshold={0.5}
-        refreshControl={
-          <RefreshControl
-            refreshing={!!refreshing}
-            onRefresh={onRefresh}
-            tintColor={isIOS ? 'transparent' : undefined} // Hide default spinner on iOS
-            colors={isIOS ? ['transparent'] : undefined} // Hide default spinner on iOS
-            progressBackgroundColor={isIOS ? 'transparent' : undefined}
-            progressViewOffset={isIOS ? undefined : 40}
-            style={isIOS ? { backgroundColor: 'transparent' } : undefined}
-          />
-        }
+        refreshControl={<RefreshControl refreshing={!!refreshing} onRefresh={onRefresh} />}
+        refreshLoadingIndicator={customRefreshIndicator}
         contentContainerStyle={{ paddingHorizontal: 16 }}
         ListEmptyComponent={renderEmptyComponent}
         ListHeaderComponent={renderHeaderComponent}
