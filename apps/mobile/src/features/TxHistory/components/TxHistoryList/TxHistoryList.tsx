@@ -7,8 +7,47 @@ import { getTxHash, GroupedTxsWithTitle, groupTxsByDate } from '@/src/features/T
 import { HistoryTransactionItems } from '@safe-global/store/gateway/types'
 import { renderItem } from '@/src/features/TxHistory/utils'
 import { TransactionSkeleton, TransactionSkeletonItem } from '@/src/components/TransactionSkeleton'
-import { RefreshControl } from 'react-native'
+import { DefaultSectionT, Platform, RefreshControl, SectionListProps } from 'react-native'
 import { CircleSnail } from 'react-native-progress'
+
+// Custom SectionList wrapper with optional custom refresh indicator
+interface SectionListWithCustomRefreshProps<ItemT, SectionT = DefaultSectionT>
+  extends SectionListProps<ItemT, SectionT> {
+  refreshLoadingIndicator?: React.ReactNode
+}
+
+function SectionListWithCustomRefresh<ItemT>(props: SectionListWithCustomRefreshProps<ItemT>) {
+  const { refreshLoadingIndicator, refreshControl, ...restProps } = props
+
+  // Extract refresh props from refreshControl if it exists
+  const refreshing = refreshControl?.props?.refreshing || false
+  const onRefresh = refreshControl?.props?.onRefresh
+
+  // Create hidden refresh control when custom indicator is provided
+  const hiddenRefreshControl = useMemo(() => {
+    if (!refreshLoadingIndicator) {
+      return refreshControl
+    }
+
+    return (
+      <RefreshControl
+        refreshing={refreshing}
+        onRefresh={onRefresh}
+        tintColor="transparent"
+        colors={['transparent']}
+        progressBackgroundColor="transparent"
+        style={{ backgroundColor: 'transparent' }}
+      />
+    )
+  }, [refreshLoadingIndicator, refreshControl, refreshing, onRefresh])
+
+  return (
+    <>
+      {refreshing && refreshLoadingIndicator}
+      <Tabs.SectionList {...restProps} refreshControl={hiddenRefreshControl} />
+    </>
+  )
+}
 
 interface TxHistoryList {
   transactions?: HistoryTransactionItems[]
@@ -27,6 +66,7 @@ export function TxHistoryList({ transactions, onEndReached, isLoading, refreshin
 
   const hasTransactions = transactions && transactions.length > 0
   const isInitialLoading = isLoading && !hasTransactions && !refreshing
+  const isIOS = Platform.OS === 'ios'
 
   // ListEmptyComponent for initial loading state
   const renderEmptyComponent = useMemo(() => {
@@ -58,9 +98,9 @@ export function TxHistoryList({ transactions, onEndReached, isLoading, refreshin
     return null
   }, [isLoading, hasTransactions])
 
-  return (
-    <View position="relative" flex={1}>
-      {!!refreshing && (
+  const customRefreshIndicator = useMemo(
+    () =>
+      isIOS ? (
         <View
           position="absolute"
           top={64}
@@ -73,9 +113,13 @@ export function TxHistoryList({ transactions, onEndReached, isLoading, refreshin
         >
           <CircleSnail size={24} color={theme.color.get()} thickness={2} duration={600} spinDuration={1500} />
         </View>
-      )}
+      ) : undefined,
+    [isIOS, theme],
+  )
 
-      <Tabs.SectionList
+  return (
+    <View position="relative" flex={1}>
+      <SectionListWithCustomRefresh
         testID="tx-history-list"
         stickySectionHeadersEnabled
         contentInsetAdjustmentBehavior="automatic"
@@ -84,22 +128,9 @@ export function TxHistoryList({ transactions, onEndReached, isLoading, refreshin
         renderItem={renderItem}
         onEndReached={onEndReached}
         onEndReachedThreshold={0.1}
-        refreshControl={
-          <RefreshControl
-            refreshing={!!refreshing}
-            onRefresh={onRefresh}
-            tintColor="transparent" // Hide default spinner
-            colors={['transparent']} // Hide default spinner on Android
-            progressBackgroundColor="transparent"
-            style={{ backgroundColor: 'transparent' }}
-          />
-        }
-        style={{ marginTop: -16 }} // Compensate for SafeTab container marginTop
-        contentContainerStyle={{
-          paddingHorizontal: 16,
-          paddingTop: 8,
-          marginTop: 16,
-        }}
+        refreshControl={<RefreshControl refreshing={!!refreshing} onRefresh={onRefresh} />}
+        refreshLoadingIndicator={customRefreshIndicator}
+        contentContainerStyle={{ paddingHorizontal: 16 }}
         ListEmptyComponent={renderEmptyComponent}
         ListFooterComponent={renderFooterComponent}
         renderSectionHeader={({ section: { title } }) => <SafeListItem.Header title={title} />}
