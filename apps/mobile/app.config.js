@@ -4,7 +4,7 @@ const IS_DEV = process.env.APP_VARIANT === 'development'
 const appleDevTeamId = '86487MHG6V'
 
 const config = {
-  name: IS_DEV ? 'Safe Mobile - Development' : 'Safe Mobile',
+  name: IS_DEV ? 'Dev-Safe{Mobile}' : 'Safe{Mobile}',
   slug: 'safe-mobileapp',
   owner: 'safeglobal',
   version: '1.0.1',
@@ -40,11 +40,6 @@ const config = {
     googleServicesFile: IS_DEV ? process.env.GOOGLE_SERVICES_PLIST_DEV : process.env.GOOGLE_SERVICES_PLIST,
   },
   android: {
-    adaptiveIcon: {
-      foregroundImage: './assets/images/adaptive-icon.png',
-      backgroundColor: '#000000',
-      monochromeImage: './assets/images/monochrome-icon.png',
-    },
     package: IS_DEV ? 'global.safe.mobileapp.dev' : 'global.safe.mobileapp',
     googleServicesFile: IS_DEV ? process.env.GOOGLE_SERVICES_JSON_DEV : process.env.GOOGLE_SERVICES_JSON,
     permissions: [
@@ -73,23 +68,11 @@ const config = {
     [
       'expo-splash-screen',
       {
-        image: './assets/images/splash.png',
-        enableFullScreenImage_legacy: true,
-        backgroundColor: '#000000',
+        image: './assets/images/icon-dark.png',
+        backgroundColor: '#f4f4f4',
         dark: {
-          image: './assets/images/splash.png',
-          backgroundColor: '#000000',
-        },
-        android: {
-          image: './assets/images/icon.png',
-          imageWidth: 124,
-          imageHeight: 124,
-          imageResizeMode: 'contain',
-          backgroundColor: '#000000',
-        },
-        ios: {
-          image: './assets/images/splash.png',
-          imageResizeMode: 'contain',
+          image: './assets/images/icon-light.png',
+          backgroundColor: '#121312',
         },
       },
     ],
@@ -146,7 +129,7 @@ const config = {
     typedRoutes: true,
   },
   notification: {
-    icon: './assets/images/ic_notification.png',
+    icon: './assets/images/icon.png',
     color: '#FFFFFF',
     androidMode: 'default',
     androidCollapsedTitle: 'Updates from Safe Wallet',
