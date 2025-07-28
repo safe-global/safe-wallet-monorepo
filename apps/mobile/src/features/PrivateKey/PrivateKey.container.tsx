@@ -28,7 +28,7 @@ export const PrivateKeyContainer = ({ signerAddress }: Props) => {
       const key = await keyStorageService.getPrivateKey(signerAddress)
 
       if (!key) {
-        Alert.alert('Error', 'Private key not found')
+        Alert.alert('Error', 'Biometric authentication failed. Please try again.')
         return
       }
 
