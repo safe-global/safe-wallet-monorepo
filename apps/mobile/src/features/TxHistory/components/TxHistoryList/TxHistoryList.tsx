@@ -1,5 +1,5 @@
 import React, { useMemo, useCallback } from 'react'
-import { useTheme, View, Text, getTokenValue } from 'tamagui'
+import { View, Text, getTokenValue } from 'tamagui'
 import { Tabs } from 'react-native-collapsible-tab-view'
 import { getGroupHash, getTxHash } from '@/src/features/TxHistory/utils'
 import { HistoryTransactionItems } from '@safe-global/store/gateway/types'
@@ -7,7 +7,6 @@ import { TxGroupedCard } from '@/src/components/transactions-list/Card/TxGrouped
 import { TxInfo } from '@/src/components/TxInfo'
 import { TransactionSkeleton, TransactionSkeletonItem } from '@/src/components/TransactionSkeleton'
 import { Platform, RefreshControl } from 'react-native'
-import { CircleSnail } from 'react-native-progress'
 import { formatWithSchema } from '@/src/utils/date'
 import { isDateLabel } from '@/src/utils/transaction-guards'
 import { groupBulkTxs } from '@/src/utils/transactions'
@@ -150,7 +149,6 @@ export function TxHistoryList({
   refreshing,
   onRefresh,
 }: TxHistoryList) {
-  const theme = useTheme()
   const { bottom } = useSafeAreaInsets()
   const flatList: (HistoryTransactionItems | HistoryTransactionItems[])[] = useMemo(() => {
     return groupBulkTxs(transactions || [])
@@ -179,21 +177,6 @@ export function TxHistoryList({
 
   return (
     <View position="relative" flex={1}>
-      {!!refreshing && (
-        <View
-          position="absolute"
-          top={64}
-          alignSelf="center"
-          zIndex={1000}
-          backgroundColor="$background"
-          borderRadius={20}
-          padding="$2"
-          testID="tx-history-progress-indicator"
-        >
-          <CircleSnail size={24} color={theme.color.get()} thickness={2} duration={600} spinDuration={1500} />
-        </View>
-      )}
-
       {Platform.OS === 'android' && <View style={{ height: TAB_BAR_HEIGHT }}></View>}
       <Tabs.FlashList
         testID="tx-history-list"
@@ -206,16 +189,7 @@ export function TxHistoryList({
         estimatedFirstItemOffset={Platform.OS === 'ios' ? TAB_BAR_HEIGHT : 0}
         onEndReached={handleEndReached}
         onEndReachedThreshold={0.5}
-        refreshControl={
-          <RefreshControl
-            refreshing={!!refreshing}
-            onRefresh={onRefresh}
-            tintColor="transparent" // Hide default spinner
-            colors={['transparent']} // Hide default spinner on Android
-            progressBackgroundColor="transparent"
-            style={{ backgroundColor: 'transparent' }}
-          />
-        }
+        refreshControl={<RefreshControl refreshing={!!refreshing} onRefresh={onRefresh} />}
         contentContainerStyle={{
           paddingHorizontal: 16,
           paddingTop: 8,

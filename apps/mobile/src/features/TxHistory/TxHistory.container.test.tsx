@@ -295,54 +295,6 @@ describe('TxHistoryContainer', () => {
       expect(screen.getByTestId('tx-history-list')).toBeTruthy()
     })
 
-    it('shows progress indicator when refreshing', async () => {
-      render(<TxHistoryContainer />)
-
-      // Wait for initial transactions to load
-      await waitFor(() => {
-        expect(screen.getByText('Received')).toBeTruthy()
-      })
-
-      // Reset server to use delayed response for refresh, so we can capture the refreshing state
-      server.use(
-        http.get(`${GATEWAY_URL}/v1/chains/:chainId/safes/:safeAddress/transactions/history`, async () => {
-          // Add delay to capture refreshing state
-          await new Promise((resolve) => setTimeout(resolve, 100))
-          return HttpResponse.json({
-            next: null,
-            previous: null,
-            results: mockTransactions,
-          })
-        }),
-      )
-
-      const list = screen.getByTestId('tx-history-list')
-
-      // Trigger refresh
-      await act(async () => {
-        fireEvent(list, 'onRefresh')
-      })
-
-      // Check if custom progress indicator is shown during refresh
-      await waitFor(
-        () => {
-          expect(screen.getByTestId('tx-history-progress-indicator')).toBeTruthy()
-        },
-        { timeout: 500 },
-      )
-
-      // Wait for refresh to complete and progress indicator to disappear
-      await waitFor(
-        () => {
-          expect(screen.queryByTestId('tx-history-progress-indicator')).toBeNull()
-        },
-        { timeout: 2000 },
-      )
-
-      // Verify the list is still functional after refresh
-      expect(screen.getByText('Received')).toBeTruthy()
-    }, 10000)
-
     it('does not show initial skeleton when refreshing', async () => {
       render(<TxHistoryContainer />)
 
