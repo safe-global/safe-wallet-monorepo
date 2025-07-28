@@ -201,7 +201,6 @@ const UndeployedNetworks = ({
   )
 
   const noAvailableNetworks = useMemo(() => availableNetworks.every((config) => !config.available), [availableNetworks])
-  console.log('NO AVAILABLE', availableNetworks)
 
   const onSelect = (chain: ChainInfo) => {
     setReplayOnChain(chain)
