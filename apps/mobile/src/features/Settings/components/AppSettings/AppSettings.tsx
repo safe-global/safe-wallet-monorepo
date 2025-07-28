@@ -1,4 +1,4 @@
-import { ScrollView, Text, Theme, View, YStack } from 'tamagui'
+import { ScrollView, Text, Theme, View, YStack, getTokenValue } from 'tamagui'
 import { SafeListItem } from '@/src/components/SafeListItem'
 import { SafeFontIcon as Icon } from '@/src/components/SafeFontIcon/SafeFontIcon'
 import { Pressable } from 'react-native'
@@ -25,6 +25,7 @@ export const AppSettings = ({ sections }: AppSettingsProps) => {
       <ScrollView
         contentContainerStyle={{
           paddingTop: 10,
+          paddingBottom: insets.bottom + getTokenValue('$4'),
         }}
         contentInset={{ bottom: insets.bottom }}
         keyboardShouldPersistTaps="handled"

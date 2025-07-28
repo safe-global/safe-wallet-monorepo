@@ -1,16 +1,17 @@
 import React, { useMemo, useCallback } from 'react'
-import { useTheme, View, Text } from 'tamagui'
+import { useTheme, View, Text, getTokenValue } from 'tamagui'
 import { Tabs } from 'react-native-collapsible-tab-view'
 import { getGroupHash, getTxHash } from '@/src/features/TxHistory/utils'
 import { HistoryTransactionItems } from '@safe-global/store/gateway/types'
 import { TxGroupedCard } from '@/src/components/transactions-list/Card/TxGroupedCard'
 import { TxInfo } from '@/src/components/TxInfo'
 import { TransactionSkeleton, TransactionSkeletonItem } from '@/src/components/TransactionSkeleton'
-import { RefreshControl } from 'react-native'
+import { Platform, RefreshControl } from 'react-native'
 import { CircleSnail } from 'react-native-progress'
 import { formatWithSchema } from '@/src/utils/date'
 import { isDateLabel } from '@/src/utils/transaction-guards'
 import { groupBulkTxs } from '@/src/utils/transactions'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 interface TxHistoryList {
   transactions?: HistoryTransactionItems[]
@@ -54,7 +55,7 @@ const renderItem = ({
         paddingTop={'$2'}
         paddingBottom={isSticky ? '$2' : '0'}
         paddingHorizontal={isSticky ? '$4' : '0'}
-        transform={[{ translateY: isSticky ? TAB_BAR_HEIGHT : 0 }]}
+        transform={Platform.OS === 'ios' ? [{ translateY: isSticky ? TAB_BAR_HEIGHT : 0 }] : undefined}
       >
         <Text fontWeight={500} color="$colorSecondary">
           {dateTitle}
@@ -150,7 +151,7 @@ export function TxHistoryList({
   onRefresh,
 }: TxHistoryList) {
   const theme = useTheme()
-
+  const { bottom } = useSafeAreaInsets()
   const flatList: (HistoryTransactionItems | HistoryTransactionItems[])[] = useMemo(() => {
     return groupBulkTxs(transactions || [])
   }, [transactions])
@@ -193,6 +194,7 @@ export function TxHistoryList({
         </View>
       )}
 
+      {Platform.OS === 'android' && <View style={{ height: TAB_BAR_HEIGHT }}></View>}
       <Tabs.FlashList
         testID="tx-history-list"
         data={flatList}
@@ -201,7 +203,7 @@ export function TxHistoryList({
         getItemType={getItemType}
         stickyHeaderIndices={stickyHeaderIndices}
         estimatedItemSize={100}
-        estimatedFirstItemOffset={TAB_BAR_HEIGHT}
+        estimatedFirstItemOffset={Platform.OS === 'ios' ? TAB_BAR_HEIGHT : 0}
         onEndReached={handleEndReached}
         onEndReachedThreshold={0.5}
         refreshControl={
@@ -217,6 +219,7 @@ export function TxHistoryList({
         contentContainerStyle={{
           paddingHorizontal: 16,
           paddingTop: 8,
+          paddingBottom: bottom + getTokenValue('$4'),
         }}
         ListEmptyComponent={renderEmptyComponent}
         ListHeaderComponent={renderHeaderComponent}

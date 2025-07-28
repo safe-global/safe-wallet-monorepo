@@ -4,6 +4,7 @@ import { TxHistoryContainer } from '@/src/features/TxHistory'
 import { ComingSoon } from '@/src/components/ComingSoon/ComingSoon'
 import { useNavigation } from 'expo-router'
 import TransactionHeader from '@/src/features/TxHistory/components/TransactionHeader'
+import { Platform } from 'react-native'
 
 const tabItems = [
   {
@@ -26,5 +27,11 @@ export default function TransactionScreen() {
       headerTitle: () => <TransactionHeader title={tabItems[index].title} />,
     })
   }
-  return <SafeTab items={tabItems} containerStyle={{ marginTop: 16 }} onIndexChange={onIndexChange} />
+  return (
+    <SafeTab
+      items={tabItems}
+      containerStyle={{ marginTop: Platform.OS === 'ios' ? 8 : 0 }}
+      onIndexChange={onIndexChange}
+    />
+  )
 }

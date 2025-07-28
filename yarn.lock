@@ -6477,9 +6477,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@gorhom/bottom-sheet@npm:^5.1.1":
-  version: 5.1.1
-  resolution: "@gorhom/bottom-sheet@npm:5.1.1"
+"@gorhom/bottom-sheet@npm:^5.1.8":
+  version: 5.1.8
+  resolution: "@gorhom/bottom-sheet@npm:5.1.8"
   dependencies:
     "@gorhom/portal": "npm:1.0.14"
     invariant: "npm:^2.2.4"
@@ -6489,13 +6489,13 @@ __metadata:
     react: "*"
     react-native: "*"
     react-native-gesture-handler: ">=2.16.1"
-    react-native-reanimated: ">=3.16.0"
+    react-native-reanimated: "*"
   peerDependenciesMeta:
     "@types/react":
       optional: true
     "@types/react-native":
       optional: true
-  checksum: 10/6da29c3927f6a0b6d2a459e2a1cae48ce7c0fce41663b46b0aba98490af15199e31248f83ca18753eeb439faf2c1dd957f26e4eacc9796b4962df44170b1a2d3
+  checksum: 10/16c0de9d0902c994bb099dc173c0d0cf984fd0b47f823e05186b090bd46d885d5b271682dddd0aad1b76d80509c23dddba559d1dc3c39afa0673e5c8ff08d9a1
   languageName: node
   linkType: hard
 
@@ -9327,7 +9327,7 @@ __metadata:
     "@formatjs/intl-locale": "npm:^4.2.10"
     "@formatjs/intl-numberformat": "npm:^8.15.3"
     "@formatjs/intl-pluralrules": "npm:^5.4.3"
-    "@gorhom/bottom-sheet": "npm:^5.1.1"
+    "@gorhom/bottom-sheet": "npm:^5.1.8"
     "@hookform/resolvers": "npm:^4.1.3"
     "@notifee/react-native": "npm:^9.1.8"
     "@react-native-async-storage/async-storage": "npm:2.1.2"
