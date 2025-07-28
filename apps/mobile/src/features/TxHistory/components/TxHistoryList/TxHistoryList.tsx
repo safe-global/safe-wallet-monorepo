@@ -6,7 +6,7 @@ import { HistoryTransactionItems } from '@safe-global/store/gateway/types'
 import { TxGroupedCard } from '@/src/components/transactions-list/Card/TxGroupedCard'
 import { TxInfo } from '@/src/components/TxInfo'
 import { TransactionSkeleton, TransactionSkeletonItem } from '@/src/components/TransactionSkeleton'
-import { RefreshControl } from 'react-native'
+import { Platform, RefreshControl } from 'react-native'
 import { CircleSnail } from 'react-native-progress'
 import { formatWithSchema } from '@/src/utils/date'
 import { isDateLabel } from '@/src/utils/transaction-guards'
@@ -54,7 +54,7 @@ const renderItem = ({
         paddingTop={'$2'}
         paddingBottom={isSticky ? '$2' : '0'}
         paddingHorizontal={isSticky ? '$4' : '0'}
-        transform={[{ translateY: isSticky ? TAB_BAR_HEIGHT : 0 }]}
+        transform={Platform.OS === 'ios' ? [{ translateY: isSticky ? TAB_BAR_HEIGHT : 0 }] : undefined}
       >
         <Text fontWeight={500} color="$colorSecondary">
           {dateTitle}
@@ -193,6 +193,7 @@ export function TxHistoryList({
         </View>
       )}
 
+      {Platform.OS === 'android' && <View style={{ height: TAB_BAR_HEIGHT }}></View>}
       <Tabs.FlashList
         testID="tx-history-list"
         data={flatList}
@@ -201,7 +202,7 @@ export function TxHistoryList({
         getItemType={getItemType}
         stickyHeaderIndices={stickyHeaderIndices}
         estimatedItemSize={100}
-        estimatedFirstItemOffset={TAB_BAR_HEIGHT}
+        estimatedFirstItemOffset={Platform.OS === 'ios' ? TAB_BAR_HEIGHT : 0}
         onEndReached={handleEndReached}
         onEndReachedThreshold={0.5}
         refreshControl={
