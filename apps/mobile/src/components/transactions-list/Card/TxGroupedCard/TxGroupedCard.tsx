@@ -52,6 +52,4 @@ function TxGroupedCardComponent({ transactions, inQueue }: TxGroupedCard) {
   )
 }
 
-export const TxGroupedCard = React.memo(TxGroupedCardComponent, (prevProps, nextProps) => {
-  return prevProps.transactions.length === nextProps.transactions.length
-})
+export const TxGroupedCard = React.memo(TxGroupedCardComponent)

@@ -9351,7 +9351,7 @@ __metadata:
     "@safe-global/test": "workspace:^"
     "@safe-global/types-kit": "npm:^1.0.5"
     "@safe-global/utils": "workspace:^"
-    "@shopify/flash-list": "npm:1.7.6"
+    "@shopify/flash-list": "npm:^1.8.3"
     "@storybook/addon-essentials": "npm:^8.4.6"
     "@storybook/addon-interactions": "npm:^8.4.6"
     "@storybook/addon-onboarding": "npm:^8.4.6"
@@ -10049,9 +10049,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@shopify/flash-list@npm:1.7.6":
-  version: 1.7.6
-  resolution: "@shopify/flash-list@npm:1.7.6"
+"@shopify/flash-list@npm:^1.8.3":
+  version: 1.8.3
+  resolution: "@shopify/flash-list@npm:1.8.3"
   dependencies:
     recyclerlistview: "npm:4.2.3"
     tslib: "npm:2.8.1"
@@ -10059,7 +10059,7 @@ __metadata:
     "@babel/runtime": "*"
     react: "*"
     react-native: "*"
-  checksum: 10/2c635a3719013db2c8fd284593d6d5f6e495862c60bcafb5e56d0818e58cb8d202b19d80decb14df35041f957aa498223abcb76e642d91626e0a96056675c548
+  checksum: 10/6e57686db342104e85d4cc1ee6cbf0323cda48895d03daa3fee3b26a7cd74bab433fe37cf8d6c2d21fd7acdcf4bc2b87ad9e2ec6948656a7b00e951e005d15ba
   languageName: node
   linkType: hard
 
