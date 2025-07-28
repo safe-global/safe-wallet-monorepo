@@ -1,11 +1,12 @@
-import { router, useLocalSearchParams } from 'expo-router'
+import { useLocalSearchParams, useNavigation } from 'expo-router'
+import { CommonActions } from '@react-navigation/native'
 import React, { useMemo } from 'react'
 import { makeSafeId } from '@/src/utils/formatters'
 import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
 import { selectAllChainsIds } from '@/src/store/chains'
 import { useSafesGetOverviewForManyQuery } from '@safe-global/store/gateway/safes'
 import { addSafe } from '@/src/store/safesSlice'
-import { selectActiveSafe, setActiveSafe } from '@/src/store/activeSafeSlice'
+import { setActiveSafe } from '@/src/store/activeSafeSlice'
 import { Address } from '@/src/types/address'
 import { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { groupSigners } from '@/src/features/Signers/hooks/useSignersGroupService'
@@ -18,10 +19,10 @@ import { selectCurrency } from '@/src/store/settingsSlice'
 
 export const AddSignersFormContainer = () => {
   const params = useLocalSearchParams<{ safeAddress: string; safeName: string }>()
+  const navigation = useNavigation()
   const dispatch = useAppDispatch()
   const chainIds = useAppSelector(selectAllChainsIds)
   const appSigners = useAppSelector(selectSigners)
-  const activeSafe = useAppSelector(selectActiveSafe)
   const currency = useAppSelector(selectCurrency)
   const { currentData, isFetching } = useSafesGetOverviewForManyQuery({
     safes: chainIds.map((chainId: string) => makeSafeId(chainId, params.safeAddress)),
@@ -43,7 +44,6 @@ export const AddSignersFormContainer = () => {
     if (!currentData) {
       return
     }
-    const hasActiveSafe = !!activeSafe
     dispatch(upsertContact({ value: params.safeAddress, name: params.safeName, chainIds: [] }))
     const info = currentData.reduce<Record<string, SafeOverview>>((acc, safe) => {
       acc[safe.chainId] = safe
@@ -57,16 +57,11 @@ export const AddSignersFormContainer = () => {
       }),
     )
 
-    // Navigates to first screen in stack
-    router.dismissAll()
-    // closes first screen in stack
-    router.back()
-    if (!hasActiveSafe) {
-      router.replace('/(tabs)')
-    } else {
-      // closes the "my accounts" screen modal
-      router.back()
-    }
+    navigation.dispatch(
+      CommonActions.reset({
+        routes: [{ key: '(tabs)', name: '(tabs)' }],
+      }),
+    )
   }
 
   return (
