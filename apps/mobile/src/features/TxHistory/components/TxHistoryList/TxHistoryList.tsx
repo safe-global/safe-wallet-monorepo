@@ -1,5 +1,5 @@
 import React, { useMemo, useCallback } from 'react'
-import { useTheme, View, Text, getTokenValue } from 'tamagui'
+import { View, Text, getTokenValue } from 'tamagui'
 import { Tabs } from 'react-native-collapsible-tab-view'
 import { getGroupHash, getTxHash } from '@/src/features/TxHistory/utils'
 import { HistoryTransactionItems } from '@safe-global/store/gateway/types'
@@ -149,7 +149,6 @@ export function TxHistoryList({
   refreshing,
   onRefresh,
 }: TxHistoryList) {
-  const theme = useTheme()
   const { bottom } = useSafeAreaInsets()
   const flatList: (HistoryTransactionItems | HistoryTransactionItems[])[] = useMemo(() => {
     return groupBulkTxs(transactions || [])
