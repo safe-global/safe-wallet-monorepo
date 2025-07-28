@@ -3,7 +3,7 @@ import { ScrollView, View, Text, YStack } from 'tamagui'
 import { Container } from '@/src/components/Container'
 import { CopyButton } from '@/src/components/CopyButton'
 import { SafeButton } from '@/src/components/SafeButton'
-import { KeyboardAvoidingView, ActivityIndicator } from 'react-native'
+import { KeyboardAvoidingView, ActivityIndicator, Platform, StyleSheet } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { SafeInput } from '@/src/components/SafeInput'
 
@@ -41,7 +41,7 @@ export const PrivateKeyView = ({
             editable={false}
             multiline
             numberOfLines={4}
-            style={{ fontFamily: 'monospace' }}
+            style={styles.input}
             right={
               isKeyVisible && privateKey ? (
                 <CopyButton value={privateKey} color={'$colorSecondary'} hitSlop={2} text={'Private key copied'} />
@@ -73,3 +73,12 @@ export const PrivateKeyView = ({
     </YStack>
   )
 }
+
+const styles = StyleSheet.create({
+  input: {
+    fontFamily: 'monospace',
+    boxSizing: Platform.OS === 'android' ? 'content-box' : undefined,
+    paddingBottom: 0,
+    paddingTop: Platform.OS === 'android' ? 0 : 8,
+  },
+})
