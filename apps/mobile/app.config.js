@@ -4,7 +4,7 @@ const IS_DEV = process.env.APP_VARIANT === 'development'
 const appleDevTeamId = '86487MHG6V'
 
 const config = {
-  name: IS_DEV ? 'Safe Mobile - Development' : 'Safe Mobile',
+  name: IS_DEV ? 'Dev-Safe{Mobile}' : 'Safe{Mobile}',
   slug: 'safe-mobileapp',
   owner: 'safeglobal',
   version: '1.0.1',
@@ -41,9 +41,9 @@ const config = {
   },
   android: {
     adaptiveIcon: {
-      foregroundImage: './assets/images/adaptive-icon.png',
+      foregroundImage: './assets/images/icon.png',
       backgroundColor: '#000000',
-      monochromeImage: './assets/images/monochrome-icon.png',
+      monochromeImage: './assets/images/icon.png',
     },
     package: IS_DEV ? 'global.safe.mobileapp.dev' : 'global.safe.mobileapp',
     googleServicesFile: IS_DEV ? process.env.GOOGLE_SERVICES_JSON_DEV : process.env.GOOGLE_SERVICES_JSON,
@@ -146,7 +146,7 @@ const config = {
     typedRoutes: true,
   },
   notification: {
-    icon: './assets/images/ic_notification.png',
+    icon: './assets/images/icon.png',
     color: '#FFFFFF',
     androidMode: 'default',
     androidCollapsedTitle: 'Updates from Safe Wallet',

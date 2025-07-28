@@ -25,5 +25,6 @@ const styles = StyleSheet.create({
     right: 0,
     top: 0,
     height: 300,
+    opacity: 0.1,
   },
 })
