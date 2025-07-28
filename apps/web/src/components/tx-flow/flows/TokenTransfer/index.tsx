@@ -7,6 +7,7 @@ import { useMemo } from 'react'
 import { TxFlowType } from '@/services/analytics'
 import { TxFlow } from '../../TxFlow'
 import { TxFlowStep } from '../../TxFlowStep'
+import { useVisibleTokens } from './utils'
 
 export enum TokenTransferType {
   multiSig = 'multiSig',
@@ -42,18 +43,23 @@ type MultiTokenTransferFlowProps = {
   txNonce?: number
 }
 
-const defaultParams: MultiTokenTransferParams = {
-  recipients: [
-    {
-      recipient: '',
-      tokenAddress: ZERO_ADDRESS,
-      amount: '',
-    },
-  ],
-  type: TokenTransferType.multiSig,
-}
-
 const TokenTransferFlow = ({ txNonce, ...params }: MultiTokenTransferFlowProps) => {
+  const balancesItems = useVisibleTokens()
+
+  const defaultParams: MultiTokenTransferParams = useMemo(
+    () => ({
+      recipients: [
+        {
+          recipient: '',
+          tokenAddress: balancesItems.length > 0 ? balancesItems[0].tokenInfo.address : ZERO_ADDRESS,
+          amount: '',
+        },
+      ],
+      type: TokenTransferType.multiSig,
+    }),
+    [balancesItems],
+  )
+
   const initialData = useMemo<MultiTokenTransferParams>(
     () => ({
       ...defaultParams,
@@ -64,7 +70,7 @@ const TokenTransferFlow = ({ txNonce, ...params }: MultiTokenTransferFlowProps) 
           }))
         : defaultParams.recipients,
     }),
-    [params.recipients],
+    [params.recipients, defaultParams],
   )
 
   return (
