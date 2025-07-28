@@ -1,6 +1,5 @@
 import React, { useMemo, useCallback } from 'react'
 import { useTheme, View, Text } from 'tamagui'
-import { Tabs } from 'react-native-collapsible-tab-view'
 import { getGroupHash, getTxHash } from '@/src/features/TxHistory/utils'
 import { HistoryTransactionItems } from '@safe-global/store/gateway/types'
 import { TxGroupedCard } from '@/src/components/transactions-list/Card/TxGroupedCard'
@@ -11,46 +10,7 @@ import { CircleSnail } from 'react-native-progress'
 import { formatWithSchema } from '@/src/utils/date'
 import { isDateLabel } from '@/src/utils/transaction-guards'
 import { groupBulkTxs } from '@/src/utils/transactions'
-import { FlashListProps } from '@shopify/flash-list'
-
-// Custom FlashList wrapper with optional custom refresh indicator
-interface FlashListWithCustomRefreshProps<ItemT> extends FlashListProps<ItemT> {
-  /** Optional custom loading indicator to display during refresh operations */
-  refreshLoadingIndicator?: React.ReactNode
-}
-
-export function FlashListWithCustomRefresh<ItemT>(props: FlashListWithCustomRefreshProps<ItemT>) {
-  const { refreshLoadingIndicator, refreshControl, ...restProps } = props
-
-  // Extract refresh props from refreshControl if it exists
-  const refreshing = (refreshControl?.props as { refreshing?: boolean })?.refreshing || false
-  const onRefresh = (refreshControl?.props as { onRefresh?: () => void })?.onRefresh
-
-  // Create hidden refresh control when custom indicator is provided
-  const hiddenRefreshControl = useMemo(() => {
-    if (!refreshLoadingIndicator) {
-      return refreshControl
-    }
-
-    return (
-      <RefreshControl
-        refreshing={refreshing}
-        onRefresh={onRefresh}
-        tintColor="transparent"
-        colors={['transparent']}
-        progressBackgroundColor="transparent"
-        style={{ backgroundColor: 'transparent' }}
-      />
-    )
-  }, [refreshLoadingIndicator, refreshControl, refreshing, onRefresh])
-
-  return (
-    <>
-      {refreshing && refreshLoadingIndicator}
-      <Tabs.FlashList {...restProps} refreshControl={hiddenRefreshControl} />
-    </>
-  )
-}
+import { FlashListWithCustomRefresh } from './FlashListWithCustomRefresh'
 
 interface TxHistoryList {
   transactions?: HistoryTransactionItems[]
