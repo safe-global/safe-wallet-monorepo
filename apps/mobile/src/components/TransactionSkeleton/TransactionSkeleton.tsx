@@ -63,9 +63,9 @@ export const TransactionSkeleton = ({
 
   return (
     <Skeleton.Group show={true}>
-      <View gap="$4">
+      <View>
         {sections.map((sectionTitle, sectionIndex) => (
-          <View key={sectionIndex}>
+          <View key={sectionIndex} gap="$4">
             {/* Section header skeleton - only show if we have a title */}
             {showSections && sectionTitle && (
               <View marginBottom="$2">
