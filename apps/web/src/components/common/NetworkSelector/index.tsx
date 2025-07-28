@@ -175,6 +175,8 @@ const UndeployedNetworks = ({
   const [replayOnChain, setReplayOnChain] = useState<ChainInfo>()
   const addressBook = useAddressBook()
   const safeName = addressBook[safeAddress]
+  const { configs } = useChains()
+
   const deployedChainInfos = useMemo(
     () => chains.filter((chain) => deployedChains.includes(chain.chainId)),
     [chains, deployedChains],
@@ -182,7 +184,7 @@ const UndeployedNetworks = ({
   const safeCreationResult = useSafeCreationData(safeAddress, deployedChainInfos)
   const [safeCreationData, safeCreationDataError, safeCreationLoading] = safeCreationResult
 
-  const allCompatibleChains = useCompatibleNetworks(safeCreationData)
+  const allCompatibleChains = useCompatibleNetworks(safeCreationData, configs)
   const isUnsupportedSafeCreationVersion = Boolean(!allCompatibleChains?.length)
 
   const availableNetworks = useMemo(
