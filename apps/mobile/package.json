@@ -136,7 +136,7 @@
     "@babel/preset-react": "^7.26.3",
     "@eslint/js": "^9.18.0",
     "@faker-js/faker": "^9.0.3",
-    "@gorhom/bottom-sheet": "^5.1.1",
+    "@gorhom/bottom-sheet": "^5.1.8",
     "@react-native-async-storage/async-storage": "2.1.2",
     "@react-native-community/datetimepicker": "8.3.0",
     "@react-native-community/slider": "4.5.6",

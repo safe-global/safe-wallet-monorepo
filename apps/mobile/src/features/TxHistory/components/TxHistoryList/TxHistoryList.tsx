@@ -1,5 +1,5 @@
 import React, { useMemo, useCallback } from 'react'
-import { useTheme, View, Text } from 'tamagui'
+import { useTheme, View, Text, getTokenValue } from 'tamagui'
 import { Tabs } from 'react-native-collapsible-tab-view'
 import { getGroupHash, getTxHash } from '@/src/features/TxHistory/utils'
 import { HistoryTransactionItems } from '@safe-global/store/gateway/types'
@@ -11,6 +11,7 @@ import { CircleSnail } from 'react-native-progress'
 import { formatWithSchema } from '@/src/utils/date'
 import { isDateLabel } from '@/src/utils/transaction-guards'
 import { groupBulkTxs } from '@/src/utils/transactions'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 interface TxHistoryList {
   transactions?: HistoryTransactionItems[]
@@ -150,7 +151,7 @@ export function TxHistoryList({
   onRefresh,
 }: TxHistoryList) {
   const theme = useTheme()
-
+  const { bottom } = useSafeAreaInsets()
   const flatList: (HistoryTransactionItems | HistoryTransactionItems[])[] = useMemo(() => {
     return groupBulkTxs(transactions || [])
   }, [transactions])
@@ -218,6 +219,7 @@ export function TxHistoryList({
         contentContainerStyle={{
           paddingHorizontal: 16,
           paddingTop: 8,
+          paddingBottom: bottom + getTokenValue('$4'),
         }}
         ListEmptyComponent={renderEmptyComponent}
         ListHeaderComponent={renderHeaderComponent}

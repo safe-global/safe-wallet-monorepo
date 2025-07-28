@@ -9,7 +9,7 @@ import BottomSheet, {
   BottomSheetFooter,
 } from '@gorhom/bottom-sheet'
 import DraggableFlatList, { DragEndParams, RenderItemParams, ScaleDecorator } from 'react-native-draggable-flatlist'
-import { StyleSheet } from 'react-native'
+import { Platform, StyleSheet } from 'react-native'
 import { useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { LoadingTx } from '@/src/features/ConfirmTx/components/LoadingTx'
@@ -97,7 +97,7 @@ export function SafeBottomSheet<T>({
   const renderFooter: React.FC<BottomSheetFooterProps> = useCallback(
     (props) => {
       return (
-        <BottomSheetFooter animatedFooterPosition={props.animatedFooterPosition}>
+        <BottomSheetFooter animatedFooterPosition={props.animatedFooterPosition} bottomInset={insets.bottom}>
           <View
             onLayout={(e) => {
               setFooterHeight(e.nativeEvent.layout.height)
@@ -111,6 +111,7 @@ export function SafeBottomSheet<T>({
     [FooterComponent, setFooterHeight],
   )
 
+  console.log('insets.bottom', insets.bottom)
   return (
     <BottomSheet
       ref={ref}
@@ -124,16 +125,10 @@ export function SafeBottomSheet<T>({
       backdropComponent={() => <BackdropComponent />}
       footerComponent={isSortable ? undefined : renderFooter}
       topInset={insets.top}
+      // bottomInset={Platform.OS === 'android' ? insets.bottom : 0}
       handleIndicatorStyle={{ backgroundColor: getVariable(theme.borderMain) }}
     >
-      <BottomSheetView
-        style={[
-          styles.contentContainer,
-          {
-            paddingBottom: insets.bottom,
-          },
-        ]}
-      >
+      <BottomSheetView style={[styles.contentContainer]}>
         {title && <TitleHeader />}
         {isSortable ? (
           <DraggableFlatList<T>
@@ -148,7 +143,8 @@ export function SafeBottomSheet<T>({
         ) : (
           <BottomSheetScrollView
             style={{
-              marginBottom: (!sortable && FooterComponent ? footerHeight : 0) + 12,
+              marginBottom:
+                (!sortable && FooterComponent ? footerHeight : 0) + getTokenValue(Platform.OS === 'ios' ? '$4' : '$8'),
             }}
             contentContainerStyle={[styles.scrollInnerContainer]}
           >

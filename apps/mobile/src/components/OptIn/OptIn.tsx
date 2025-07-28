@@ -1,5 +1,5 @@
 import React from 'react'
-import { ColorSchemeName, ImageSourcePropType, StyleSheet } from 'react-native'
+import { ColorSchemeName, ImageSourcePropType, Platform, StyleSheet } from 'react-native'
 import { H2, Image, Text, getTokenValue, View } from 'tamagui'
 import { SafeButton } from '@/src/components/SafeButton'
 import { WINDOW_HEIGHT } from '@/src/store/constants'
@@ -111,6 +111,7 @@ const styles = StyleSheet.create({
     flex: 1,
     gap: getTokenValue('$4', 'space'),
     justifyContent: 'space-between',
+    paddingBottom: getTokenValue(Platform.OS === 'ios' ? '$0' : '$4'),
   },
   image: {
     width: '100%',

@@ -1,7 +1,7 @@
 import { SafeListItem } from '@/src/components/SafeListItem'
 import React, { useMemo } from 'react'
 import { SectionList, RefreshControl } from 'react-native'
-import { useTheme, View, Text } from 'tamagui'
+import { useTheme, View, Text, getTokenValue } from 'tamagui'
 import { Badge } from '@/src/components/Badge'
 import { NavBarTitle } from '@/src/components/Title/NavBarTitle'
 import { LargeHeaderTitle } from '@/src/components/Title/LargeHeaderTitle'
@@ -12,6 +12,7 @@ import { keyExtractor, renderItem } from '@/src/features/PendingTx/utils'
 import { Loader } from '@/src/components/Loader'
 import { TransactionSkeleton, TransactionSkeletonItem } from '@/src/components/TransactionSkeleton'
 import { CircleSnail } from 'react-native-progress'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 export interface GroupedPendingTxsWithTitle {
   title: string
@@ -38,6 +39,7 @@ export function PendingTxListContainer({
   onRefresh,
 }: PendingTxListContainerProps) {
   const theme = useTheme()
+  const { bottom } = useSafeAreaInsets()
   const { handleScroll } = useScrollableHeader({
     children: (
       <>
@@ -154,7 +156,10 @@ export function PendingTxListContainer({
         renderSectionHeader={({ section: { title } }) => <SafeListItem.Header title={title} />}
         onScroll={handleScroll}
         scrollEventThrottle={16}
-        contentContainerStyle={{ paddingHorizontal: 12 }}
+        contentContainerStyle={{
+          paddingHorizontal: 12,
+          paddingBottom: bottom + getTokenValue('$4'),
+        }}
       />
     </>
   )
