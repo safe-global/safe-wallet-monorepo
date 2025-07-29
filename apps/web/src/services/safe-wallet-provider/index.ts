@@ -44,6 +44,7 @@ type GetCallsResult = {
   id: `0x${string}`
   chainId: `0x${string}`
   status: number // See "Status Codes"
+  atomic: boolean
   receipts?: Array<{
     logs: TransactionReceipt['logs']
     status: `0x${string}` // Hex 1 or 0 for success or failure, respectively
@@ -417,6 +418,7 @@ export class SafeWalletProvider {
       id: safeTxHash,
       chainId: numberToHex(this.safe.chainId),
       status: BundleTxStatuses[tx.txStatus],
+      atomic: true,
     }
 
     if (!tx.txHash) {
