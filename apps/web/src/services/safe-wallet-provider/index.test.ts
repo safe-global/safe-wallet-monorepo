@@ -833,6 +833,9 @@ describe('SafeWalletProvider', () => {
               atomicBatch: {
                 supported: true,
               },
+              atomic: {
+                status: 'supported',
+              },
             },
           },
         })
