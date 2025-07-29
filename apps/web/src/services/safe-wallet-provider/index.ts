@@ -22,6 +22,7 @@ type SendCallsParams = {
   id?: string
   from?: `0x${string}`
   chainId: `0x${string}`
+  atomicRequired: boolean
   calls: Array<{
     to?: `0x${string}`
     data?: `0x${string}`
