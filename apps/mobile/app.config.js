@@ -3,6 +3,17 @@ const IS_DEV = process.env.APP_VARIANT === 'development'
 
 const appleDevTeamId = '86487MHG6V'
 
+const sslPinningDomains = {
+  'safe-client.staging.5afe.dev': [
+    'qrOvKCFoIx4FHtyP9qY8vHF2hjnLwujZUkuOrsFG5Gc=', // 🍃 Leaf cert (Valid: Nov 22 00:00:00 2024 GMT → Dec 21 23:59:59 2025 GMT)
+    'vxRon/El5KuI4vx5ey1DgmsYmRY0nDd5Cg4GfJ8S+bg=', // 🔗 Intermediate (Valid: Aug 23 22:25:30 2022 GMT → Aug 23 22:25:30 2030 GMT)
+  ],
+  'safe-client.safe.global': [
+    'VOstDe9L/YZ7RKPPd7iwAMbsAwCqqblfg3l1IqjUvuE=', // 🍃 Leaf cert (Valid: Jul 12 00:00:00 2025 GMT → Aug 10 23:59:59 2026 GMT)
+    '18tkPyr2nckv4fgo0dhAkaUtJ2hu2831xlO2SKhq8dg=', // 🔗 Intermediate cert (Valid: Aug 23 22:25:30 2022 GMT → Aug 23 22:25:30 2030 GMT)
+  ],
+}
+
 const config = {
   name: IS_DEV ? 'Dev-Safe{Mobile}' : 'Safe{Mobile}',
   slug: 'safe-mobileapp',
@@ -58,6 +69,12 @@ const config = {
   },
   plugins: [
     ['./expo-plugins/withNotificationIcons.js'],
+    [
+      './expo-plugins/ssl-pinning/withSSLPinning.js',
+      {
+        domains: sslPinningDomains,
+      },
+    ],
     'expo-router',
     [
       'expo-font',
