@@ -264,6 +264,9 @@ export const WalletConnectProvider = ({ children }: { children: ReactNode }) => 
               atomicBatch: {
                 supported: true,
               },
+              atomic: {
+                status: 'supported',
+              },
             },
           },
         }),
