@@ -18,7 +18,7 @@ type Capability = {
 }
 
 type SendCallsParams = {
-  version: '1.0'
+  version: string
   id?: string
   from?: `0x${string}`
   chainId: `0x${string}`
@@ -412,7 +412,7 @@ export class SafeWalletProvider {
     }
 
     const result: GetCallsResult = {
-      version: '1.0',
+      version: '2.0.0',
       id: safeTxHash,
       chainId: numberToHex(this.safe.chainId),
       status: BundleTxStatuses[tx.txStatus],
