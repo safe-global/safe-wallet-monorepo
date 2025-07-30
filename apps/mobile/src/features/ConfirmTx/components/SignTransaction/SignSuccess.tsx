@@ -1,8 +1,5 @@
-import { StyleSheet } from 'react-native'
-import { LinearGradient } from 'expo-linear-gradient'
 import React from 'react'
-import { SafeAreaView } from 'react-native-safe-area-context'
-import { H3, ScrollView, useTheme, View } from 'tamagui'
+import { getTokenValue, H3, ScrollView, View } from 'tamagui'
 import { Badge } from '@/src/components/Badge'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { SafeButton } from '@/src/components/SafeButton'
@@ -10,12 +7,12 @@ import { cgwApi } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
 import { router } from 'expo-router'
 import { useDispatch } from 'react-redux'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { AbsoluteLinearGradient } from '@/src/components/LinearGradient'
 
 export default function SignSuccess() {
   const dispatch = useDispatch()
-  const theme = useTheme()
-  const colors: [string, string] = [theme.success.get(), 'transparent']
-
+  const { bottom } = useSafeAreaInsets()
   const handleDonePress = () => {
     dispatch(cgwApi.util.invalidateTags(['transactions']))
 
@@ -25,13 +22,14 @@ export default function SignSuccess() {
   }
 
   return (
-    <SafeAreaView edges={['bottom']} style={{ flex: 1 }}>
-      <LinearGradient colors={colors} style={styles.background} />
+    <View style={{ flex: 1 }} paddingBottom={Math.max(bottom, getTokenValue('$4'))}>
+      <AbsoluteLinearGradient />
       <View flex={1} justifyContent="space-between">
         <View flex={1}>
           <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
             <View flex={1} flexGrow={1} alignItems="center" justifyContent="center" paddingHorizontal="$3">
               <Badge
+                circleProps={{ backgroundColor: '$backgroundLightLight' }}
                 themeName="badge_success"
                 circleSize={64}
                 content={<SafeFontIcon size={32} color="$primary" name="check-filled" />}
@@ -50,16 +48,6 @@ export default function SignSuccess() {
           <SafeButton onPress={handleDonePress}>Done</SafeButton>
         </View>
       </View>
-    </SafeAreaView>
+    </View>
   )
 }
-
-const styles = StyleSheet.create({
-  background: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    top: 0,
-    height: 300,
-  },
-})
