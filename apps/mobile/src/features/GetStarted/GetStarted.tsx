@@ -7,7 +7,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { BlurView } from 'expo-blur'
 import { getCrashlytics } from '@react-native-firebase/crashlytics'
 import { setAnalyticsCollectionEnabled } from '@/src/services/analytics'
-import { isAndroid } from '@/src/config/constants'
+import { isAndroid, PRIVACY_POLICY_URL, TERMS_OF_USE_URL } from '@/src/config/constants'
 import { Platform } from 'react-native'
 
 const StyledText = styled(Text, {
@@ -100,11 +100,11 @@ export const GetStarted = () => {
           justifyContent="center"
         >
           <StyledText>By continuing, you agree to our </StyledText>
-          <Link href={'https://app.safe.global/terms'} target={'_blank'} asChild>
+          <Link href={TERMS_OF_USE_URL} target={'_blank'} asChild>
             <StyledText textDecorationLine={'underline'}>User Terms</StyledText>
           </Link>
           <StyledText> and </StyledText>
-          <Link href={'https://app.safe.global/privacy'} target={'_blank'} asChild>
+          <Link href={PRIVACY_POLICY_URL} target={'_blank'} asChild>
             <StyledText textDecorationLine={'underline'}>Privacy Policy</StyledText>
           </Link>
           <StyledText>.</StyledText>
