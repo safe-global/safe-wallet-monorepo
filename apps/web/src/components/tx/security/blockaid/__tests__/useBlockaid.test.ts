@@ -15,6 +15,7 @@ import { safeInfoBuilder } from '@/tests/builders/safe'
 import { renderHook, waitFor } from '@/tests/test-utils'
 import { type SignerWallet } from '@/components/common/WalletProvider'
 import { CLASSIFICATION_MAPPING, REASON_MAPPING } from '@safe-global/utils/components/tx/security/blockaid/utils'
+import { Errors, logError } from '@/services/exceptions'
 
 const setupFetchStub = (data: any) => () => {
   return Promise.resolve({
@@ -36,8 +37,10 @@ enum TEST_CASES {
 }
 
 jest.mock('@/hooks/useSafeInfo')
+jest.mock('@/services/exceptions')
 
 const mockUseSafeInfo = useSafeInfo as jest.MockedFunction<typeof useSafeInfo>
+const mockLogError = logError as jest.MockedFunction<typeof logError>
 
 describe.each([TEST_CASES.MESSAGE, TEST_CASES.TRANSACTION])('useBlockaid for %s', (testCase) => {
   let mockUseSigner: jest.SpyInstance<SignerWallet | null, []>
@@ -58,6 +61,7 @@ describe.each([TEST_CASES.MESSAGE, TEST_CASES.TRANSACTION])('useBlockaid for %s'
       safeLoading: false,
     })
 
+    mockLogError.mockClear()
     global.fetch = jest.fn()
   })
 
@@ -242,6 +246,82 @@ describe.each([TEST_CASES.MESSAGE, TEST_CASES.TRANSACTION])('useBlockaid for %s'
       expect(response?.payload?.balanceChange[0]).toEqual(accountDiff)
       expect(result.current[2]).toBeFalsy()
       expect(mockFetch).toHaveBeenCalledTimes(1)
+    })
+  })
+
+  it('should log errors when errorMsg is truthy', async () => {
+    const walletAddress = toBeHex('0x1', 20)
+    const errorMessage = 'Blockaid API error'
+
+    mockUseSigner.mockImplementation(() => ({
+      address: walletAddress,
+      chainId: '1',
+      label: 'Testwallet',
+      provider: {} as any,
+    }))
+
+    jest.spyOn(useChains, 'useHasFeature').mockReturnValue(true)
+
+    // Mock fetch to reject with an error
+    const mockFetch = jest.spyOn(global, 'fetch')
+    mockFetch.mockImplementation(() => Promise.reject(new Error(errorMessage)))
+
+    renderHook(() => useBlockaid(mockPayload))
+
+    await waitFor(() => {
+      expect(mockLogError).toHaveBeenCalledWith(Errors._201, new Error(errorMessage))
+    })
+  })
+
+  it('should not log errors when errorMsg is falsy', async () => {
+    const walletAddress = toBeHex('0x1', 20)
+
+    mockUseSigner.mockImplementation(() => ({
+      address: walletAddress,
+      chainId: '1',
+      label: 'Testwallet',
+      provider: {} as any,
+    }))
+
+    jest.spyOn(useChains, 'useHasFeature').mockReturnValue(true)
+
+    const mockBlockaidResponse: TransactionScanResponse = {
+      chain: '1',
+      block: faker.number.int().toString(),
+      simulation: {
+        status: 'Success',
+        assets_diffs: {},
+        account_summary: {
+          assets_diffs: [],
+          exposures: [],
+          total_usd_diff: {
+            in: '0',
+            out: '0',
+            total: '0',
+          },
+          total_usd_exposure: {},
+        },
+        address_details: {},
+        exposures: {},
+        total_usd_diff: {},
+        total_usd_exposure: {},
+      },
+      validation: {
+        status: 'Success',
+        features: [],
+        result_type: 'Benign',
+        classification: '',
+        description: '',
+        reason: '',
+      },
+    }
+
+    global.fetch = jest.fn().mockImplementation(setupFetchStub(mockBlockaidResponse))
+
+    renderHook(() => useBlockaid(mockPayload))
+
+    await waitFor(() => {
+      expect(mockLogError).not.toHaveBeenCalled()
     })
   })
 })
