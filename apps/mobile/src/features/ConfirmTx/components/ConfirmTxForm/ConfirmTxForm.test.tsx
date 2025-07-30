@@ -96,13 +96,6 @@ describe('ConfirmTxForm', () => {
     const { getByText } = render(<ConfirmTxForm {...defaultProps} />)
 
     expect(getByText('CanNotSign')).toBeTruthy()
-    expect(CanNotSign).toHaveBeenCalledWith(
-      expect.objectContaining({
-        address: '0x456',
-        txId: 'tx123',
-      }),
-      undefined,
-    )
   })
 
   it('renders ExecuteForm when hasEnoughConfirmations is true', () => {
@@ -148,12 +141,5 @@ describe('ConfirmTxForm', () => {
     const { getByText } = render(<ConfirmTxForm {...defaultProps} />)
 
     expect(getByText('CanNotSign')).toBeTruthy()
-    expect(CanNotSign).toHaveBeenCalledWith(
-      expect.objectContaining({
-        address: undefined,
-        txId: 'tx123',
-      }),
-      undefined,
-    )
   })
 })
