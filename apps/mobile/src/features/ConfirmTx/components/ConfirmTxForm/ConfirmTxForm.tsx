@@ -1,4 +1,3 @@
-import { Address } from '@/src/types/address'
 import { SignForm } from '../SignForm'
 import React from 'react'
 import { ExecuteForm } from '../ExecuteForm'
@@ -30,7 +29,7 @@ export function ConfirmTxForm({ hasEnoughConfirmations, isExpired, txId }: Confi
   }
 
   if (!canSign) {
-    return <CanNotSign address={activeSigner?.value as Address | undefined} txId={txId} />
+    return <CanNotSign />
   }
 
   if (hasEnoughConfirmations) {
