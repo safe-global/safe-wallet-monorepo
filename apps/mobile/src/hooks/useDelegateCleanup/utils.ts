@@ -7,6 +7,7 @@ import { type DelegatesDeleteDelegateV2ApiArg } from '@safe-global/store/gateway
 import { keyStorageService } from '@/src/services/key-storage'
 import { getDelegateKeyId } from '@/src/utils/delegate'
 import { withGeneralRetry } from '@/src/utils/retry'
+import { asError } from '@safe-global/utils/services/exceptions/utils'
 
 // Types for cleanup results
 interface CleanupResult {
@@ -77,7 +78,9 @@ export const cleanupDelegateNotifications = async (
         (_, index) => notificationCleanupResults[index].status === 'rejected',
       )
 
-      const errorMsg = `Cannot delete private key: ${failedCleanups.join(', ')}. Please check your internet connection and try again.`
+      const errorMsg = `Cannot delete private key: ${failedCleanups.join(
+        ', ',
+      )}. Please check your internet connection and try again.`
 
       return {
         success: false,
@@ -89,7 +92,7 @@ export const cleanupDelegateNotifications = async (
     return { success: true }
   } catch (error) {
     Logger.error('Delegate notification cleanup failed', error)
-    const errorMsg = error instanceof Error ? error.message : String(error)
+    const errorMsg = asError(error).message
     return {
       success: false,
       error: errorMsg,
@@ -200,7 +203,7 @@ export const removeDelegatesFromBackend = async (
     return { success: true }
   } catch (error) {
     Logger.error('Delegate backend removal failed', error)
-    const errorMsg = error instanceof Error ? error.message : String(error)
+    const errorMsg = asError(error).message
     return {
       success: false,
       error: errorMsg,
@@ -245,7 +248,7 @@ export const cleanupDelegateKeychain = async (
     return { success: true, failedDelegates }
   } catch (error) {
     Logger.error('Delegate keychain cleanup failed', error)
-    const errorMsg = error instanceof Error ? error.message : String(error)
+    const errorMsg = asError(error).message
     return {
       success: true, // Still return success as delegate removal on the backend is not critical
       error: errorMsg,

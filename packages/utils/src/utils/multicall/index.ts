@@ -1,5 +1,6 @@
 import { Contract, AbstractProvider } from 'ethers'
 import { CANONICAL_MULTICALL_ADDRESSS, MULTICALL_DEPLOYMENTS } from './deployments'
+import { asError } from '../../services/exceptions/utils'
 
 // Multicall contract ABI
 export const MULTICALL_ABI = [
@@ -68,6 +69,6 @@ export const multicall = async (
     const resolverResults: Aggregate3Response[] = await multicallContract.aggregate3.staticCall(calls3)
     return resolverResults
   } catch (error) {
-    throw new Error(`Multicall failed: ${error instanceof Error ? error.message : String(error)}`)
+    throw new Error(`Multicall failed: ${asError(error).message}`)
   }
 }

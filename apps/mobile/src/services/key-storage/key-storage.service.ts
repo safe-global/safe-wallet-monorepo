@@ -4,6 +4,7 @@ import DeviceInfo from 'react-native-device-info'
 import { IKeyStorageService, PrivateKeyStorageOptions } from './types'
 import Logger from '@/src/utils/logger'
 import { Platform } from 'react-native'
+import { asError } from '@safe-global/utils/services/exceptions/utils'
 
 export class KeyStorageService implements IKeyStorageService {
   private storeTries = 0
@@ -38,7 +39,7 @@ export class KeyStorageService implements IKeyStorageService {
       const isEmulator = Platform.OS === 'android' ? false : await DeviceInfo.isEmulator()
       await this.storeKey(userId, privateKey, requireAuthentication, isEmulator)
     } catch (err) {
-      Logger.error('Error storing private key:', err)
+      Logger.error('Error storing private key:', asError(err).message)
       throw new Error('Failed to store private key')
     }
   }
@@ -50,7 +51,7 @@ export class KeyStorageService implements IKeyStorageService {
     try {
       return await this.getKey(userId, options.requireAuthentication ?? true)
     } catch (err) {
-      Logger.error('Error getting private key:', err)
+      Logger.error('Error getting private key:', asError(err).message)
       return undefined
     }
   }
@@ -63,7 +64,7 @@ export class KeyStorageService implements IKeyStorageService {
       const { requireAuthentication = true } = options
       await this.removeKey(userId, requireAuthentication)
     } catch (err) {
-      Logger.error('Error removing private key:', err instanceof Error ? err.message : 'Unknown error')
+      Logger.error('Error removing private key:', asError(err).message)
       throw new Error('Failed to remove private key')
     }
   }
@@ -85,7 +86,7 @@ export class KeyStorageService implements IKeyStorageService {
 
       return keyName
     } catch (error) {
-      Logger.error('Error creating key:', error instanceof Error ? error.message : 'Unknown error')
+      Logger.error('Error creating key:', asError(error).message)
       throw new Error('Failed to create encryption key')
     }
   }
@@ -101,7 +102,7 @@ export class KeyStorageService implements IKeyStorageService {
         invalidateOnNewBiometry: requireAuth,
       })
     } catch (error) {
-      Logger.error('Error creating symmetric encryption key:', error instanceof Error ? error.message : 'Unknown error')
+      Logger.error('Error creating symmetric encryption key:', asError(error).message)
       throw new Error('Failed to create symmetric key')
     }
   }
@@ -168,7 +169,7 @@ export class KeyStorageService implements IKeyStorageService {
   }
 
   private isKeyPermanentlyInvalidatedError(error: unknown): boolean {
-    const errorMessage = error instanceof Error ? error.message : String(error)
+    const errorMessage = asError(error).message
     return errorMessage.includes('Key permanently invalidated')
   }
 
@@ -196,7 +197,7 @@ export class KeyStorageService implements IKeyStorageService {
       }
     } catch (error) {
       // If key doesn't exist, that's fine - we still want to try to remove from device crypto
-      Logger.warn('Key not found in keychain or authentication failed:', error)
+      Logger.warn('Key not found in keychain or authentication failed:', asError(error).message)
     }
 
     // Try to remove the encryption key from device crypto
@@ -204,7 +205,7 @@ export class KeyStorageService implements IKeyStorageService {
       await DeviceCrypto.deleteKey(keyName)
     } catch (error) {
       // If the key doesn't exist in device crypto, that's acceptable
-      Logger.warn('Key not found in device crypto:', error)
+      Logger.warn('Key not found in device crypto:', asError(error).message)
     }
   }
 }

@@ -8,6 +8,7 @@ import { cgwApi } from '@safe-global/store/gateway/AUTO_GENERATED/delegates'
 import Logger from '@/src/utils/logger'
 import { getDelegateTypedData } from '@safe-global/utils/services/delegates'
 import { getDelegateKeyId } from '@/src/utils/delegate'
+import { asError } from '@safe-global/utils/services/exceptions/utils'
 
 interface UseDelegateProps {
   createDelegate: (
@@ -121,7 +122,7 @@ export const useDelegate = (): UseDelegateProps => {
       } catch (error) {
         Logger.error('Delegate creation failed', error)
         setIsLoading(false)
-        const errorMsg = error instanceof Error ? error.message : String(error)
+        const errorMsg = asError(error).message
         setError(errorMsg)
         return { success: false, error: errorMsg }
       }

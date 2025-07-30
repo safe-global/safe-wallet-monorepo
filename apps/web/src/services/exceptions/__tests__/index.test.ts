@@ -46,10 +46,14 @@ describe('CodedException', () => {
   })
 
   it('creates an error with an extra message from an object', () => {
-    const err = new CodedException(Errors._100, { address: '0x123' })
-    expect(err.message).toBe('Code 100: Invalid input in the address field ({"address":"0x123"})')
+    const err = new CodedException(Errors._100, { secretKey: '0x123' })
+    expect(err.message).toBe('Code 100: Invalid input in the address field (Non-Error object of type: object)')
     expect(err.code).toBe(100)
     expect(err.content).toBe(Errors._100)
+
+    // Verify it does NOT expose object contents (security test)
+    expect(err.message).not.toContain('0x123')
+    expect(err.message).not.toContain('secretKey')
   })
 
   it('creates an error with an extra message', () => {
