@@ -9,7 +9,7 @@ import {
   getSafeToL2MigrationDeployments,
   getSafeToL2SetupDeployments,
 } from '@safe-global/safe-deployments'
-import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import { type Chain as ChainInfo } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { ReplayedSafeProps } from '@safe-global/utils/features/counterfactual/store/types'
 
 const SUPPORTED_VERSIONS: SafeVersion[] = ['1.4.1', '1.3.0']
