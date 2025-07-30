@@ -1,10 +1,11 @@
 import { renderHook } from '@/tests/test-utils'
-import { useCompatibleNetworks } from '../useCompatibleNetworks'
+import { useCompatibleNetworks } from '@safe-global/utils/features/multichain/hooks/useCompatibleNetworks'
 import { type ReplayedSafeProps } from '@safe-global/utils/features/counterfactual/store/types'
 import { faker } from '@faker-js/faker'
 import { EMPTY_DATA, ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
 import { ECOSYSTEM_ID_ADDRESS } from '@/config/constants'
 import { chainBuilder } from '@/tests/builders/chains'
+import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import {
   getSafeSingletonDeployments,
   getSafeL2SingletonDeployments,
@@ -44,7 +45,7 @@ describe('useCompatibleNetworks', () => {
   })
 
   it('should return empty list without any creation data', () => {
-    const { result } = renderHook(() => useCompatibleNetworks(undefined, mockChains))
+    const { result } = renderHook(() => useCompatibleNetworks(undefined, mockChains as Chain[]))
     expect(result.current).toHaveLength(0)
   })
 
@@ -67,7 +68,7 @@ describe('useCompatibleNetworks', () => {
       safeAccountConfig: callData,
       safeVersion: '1.4.1',
     }
-    const { result } = renderHook(() => useCompatibleNetworks(creationData, mockChains))
+    const { result } = renderHook(() => useCompatibleNetworks(creationData, mockChains as Chain[]))
     expect(result.current.every((config) => config.available)).toEqual(false)
   })
 
@@ -90,7 +91,7 @@ describe('useCompatibleNetworks', () => {
         safeAccountConfig: callData,
         safeVersion: '1.4.1',
       }
-      const { result } = renderHook(() => useCompatibleNetworks(creationData, mockChains))
+      const { result } = renderHook(() => useCompatibleNetworks(creationData, mockChains as Chain[]))
       expect(result.current).toHaveLength(6)
       expect(result.current.map((chain) => chain.chainId)).toEqual(['1', '10', '100', '324', '480', '10200'])
       expect(result.current.map((chain) => chain.available)).toEqual([true, true, true, true, true, false])
@@ -104,7 +105,7 @@ describe('useCompatibleNetworks', () => {
         safeAccountConfig: callData,
         safeVersion: '1.4.1',
       }
-      const { result } = renderHook(() => useCompatibleNetworks(creationData, mockChains))
+      const { result } = renderHook(() => useCompatibleNetworks(creationData, mockChains as Chain[]))
       expect(result.current).toHaveLength(6)
       expect(result.current.map((chain) => chain.chainId)).toEqual(['1', '10', '100', '324', '480', '10200'])
       expect(result.current.map((chain) => chain.available)).toEqual([true, true, true, true, true, false])
@@ -132,7 +133,7 @@ describe('useCompatibleNetworks', () => {
         safeAccountConfig: { ...callData, fallbackHandler: FALLBACK_HANDLER_130_DEPLOYMENTS?.canonical?.address! },
         safeVersion: '1.3.0',
       }
-      const { result } = renderHook(() => useCompatibleNetworks(creationData, mockChains))
+      const { result } = renderHook(() => useCompatibleNetworks(creationData, mockChains as Chain[]))
       expect(result.current).toHaveLength(6)
       expect(result.current.map((chain) => chain.chainId)).toEqual(['1', '10', '100', '324', '480', '10200'])
       expect(result.current.map((chain) => chain.available)).toEqual([true, true, true, true, true, false])
@@ -147,7 +148,7 @@ describe('useCompatibleNetworks', () => {
         safeAccountConfig: { ...callData, fallbackHandler: FALLBACK_HANDLER_130_DEPLOYMENTS?.canonical?.address! },
         safeVersion: '1.3.0',
       }
-      const { result } = renderHook(() => useCompatibleNetworks(creationData, mockChains))
+      const { result } = renderHook(() => useCompatibleNetworks(creationData, mockChains as Chain[]))
       expect(result.current).toHaveLength(6)
       expect(result.current.map((chain) => chain.chainId)).toEqual(['1', '10', '100', '324', '480', '10200'])
       expect(result.current.map((chain) => chain.available)).toEqual([true, true, true, true, true, true])
@@ -162,7 +163,7 @@ describe('useCompatibleNetworks', () => {
         safeAccountConfig: { ...callData, fallbackHandler: FALLBACK_HANDLER_130_DEPLOYMENTS?.eip155?.address! },
         safeVersion: '1.3.0',
       }
-      const { result } = renderHook(() => useCompatibleNetworks(creationData, mockChains))
+      const { result } = renderHook(() => useCompatibleNetworks(creationData, mockChains as Chain[]))
       expect(result.current).toHaveLength(6)
       expect(result.current.map((chain) => chain.chainId)).toEqual(['1', '10', '100', '324', '480', '10200'])
       expect(result.current.map((chain) => chain.available)).toEqual([true, true, true, true, true, false])
@@ -177,7 +178,7 @@ describe('useCompatibleNetworks', () => {
         safeAccountConfig: { ...callData, fallbackHandler: FALLBACK_HANDLER_130_DEPLOYMENTS?.eip155?.address! },
         safeVersion: '1.3.0',
       }
-      const { result } = renderHook(() => useCompatibleNetworks(creationData, mockChains))
+      const { result } = renderHook(() => useCompatibleNetworks(creationData, mockChains as Chain[]))
       expect(result.current).toHaveLength(6)
       expect(result.current.map((chain) => chain.chainId)).toEqual(['1', '10', '100', '324', '480', '10200'])
       expect(result.current.map((chain) => chain.available)).toEqual([true, true, true, true, true, false])
@@ -203,7 +204,7 @@ describe('useCompatibleNetworks', () => {
       safeAccountConfig: callData,
       safeVersion: '1.1.1',
     }
-    const { result } = renderHook(() => useCompatibleNetworks(creationData, mockChains))
+    const { result } = renderHook(() => useCompatibleNetworks(creationData, mockChains as Chain[]))
     expect(result.current).toHaveLength(6)
     expect(result.current.map((chain) => chain.chainId)).toEqual(['1', '10', '100', '324', '480', '10200'])
     expect(result.current.map((chain) => chain.available)).toEqual([false, false, false, false, false, false])

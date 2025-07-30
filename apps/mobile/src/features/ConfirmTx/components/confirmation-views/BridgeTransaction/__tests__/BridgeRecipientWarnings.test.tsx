@@ -26,7 +26,7 @@ jest.mock('@/src/hooks/useSafeCreationData', () => ({
   useSafeCreationData: jest.fn(),
 }))
 
-jest.mock('@safe-global/web/src/features/multichain/hooks/useCompatibleNetworks', () => ({
+jest.mock('@safe-global/utils/features/multichain/hooks/useCompatibleNetworks', () => ({
   useCompatibleNetworks: jest.fn(),
 }))
 
@@ -34,7 +34,7 @@ const { useSafesGetSafeV1Query } = require('@safe-global/store/gateway/AUTO_GENE
 const { useDefinedActiveSafe } = require('@/src/store/hooks/activeSafe')
 const { useAppSelector } = require('@/src/store/hooks')
 const { useSafeCreationData } = require('@/src/hooks/useSafeCreationData')
-const { useCompatibleNetworks } = require('@safe-global/web/src/features/multichain/hooks/useCompatibleNetworks')
+const { useCompatibleNetworks } = require('@safe-global/utils/features/multichain/hooks/useCompatibleNetworks')
 
 // Helper to wrap component with required providers
 const renderWithProviders = (ui: React.ReactElement) => {

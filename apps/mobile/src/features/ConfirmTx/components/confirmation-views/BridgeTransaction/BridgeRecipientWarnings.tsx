@@ -16,9 +16,8 @@ import {
   type BridgeWarningData,
 } from '@safe-global/utils/components/confirmation-views/BridgeTransaction/useBridgeWarningLogic'
 import { useSafeCreationData } from '@/src/hooks/useSafeCreationData'
-import { useCompatibleNetworks } from '@safe-global/web/src/features/multichain/hooks/useCompatibleNetworks'
+import { useCompatibleNetworks } from '@safe-global/utils/features/multichain/hooks/useCompatibleNetworks'
 import { RootState } from '@/src/store'
-import { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
 
 interface WarningAlertProps {
   warning: BridgeWarning
@@ -44,7 +43,7 @@ export const BridgeRecipientWarnings = ({ txInfo }: BridgeRecipientWarningsProps
   const destinationContact = useAppSelector((state) => selectContactByAddress(txInfo.recipient.value)(state))
   const destinationChain = useAppSelector((state: RootState) => selectChainById(state, txInfo.toChain))
   const [creationData] = useSafeCreationData(activeSafe.chainId)
-  const compatibleNetworks = useCompatibleNetworks(creationData, [destinationChain as ChainInfo])
+  const compatibleNetworks = useCompatibleNetworks(creationData, [destinationChain])
 
   const isSameAddress = sameAddress(txInfo.recipient.value, activeSafe.address)
 
