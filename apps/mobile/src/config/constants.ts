@@ -31,3 +31,8 @@ export const SAFE_WEB_URL = 'https://app.safe.global'
 export const SAFE_WEB_TRANSACTIONS_URL = `${SAFE_WEB_URL}/transactions/tx?safe=:safeAddressWithChainPrefix&id=:txId`
 export const SAFE_WEB_FEEDBACK_URL =
   'https://docs.google.com/forms/d/e/1FAIpQLSfJXkNNsZqVtg3w3dwk-YrTNutQ00n3MMfLtH-dN8zSHaJu5Q/viewform?usp=dialog'
+
+export const PRIVACY_POLICY_URL =
+  'https://s3.eu-central-1.amazonaws.com/mobile.app.safe.global/SafeLabsGmbHPrivacyPolicy_v1.0.html'
+export const TERMS_OF_USE_URL =
+  'https://s3.eu-central-1.amazonaws.com/mobile.app.safe.global/MobileTermsAndConditions_v1.0.html'
