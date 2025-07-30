@@ -53,6 +53,11 @@ const config = {
   android: {
     package: IS_DEV ? 'global.safe.mobileapp.dev' : 'global.safe.mobileapp',
     googleServicesFile: IS_DEV ? process.env.GOOGLE_SERVICES_JSON_DEV : process.env.GOOGLE_SERVICES_JSON,
+    adaptiveIcon: {
+      foregroundImage: './assets/images/android-adaptive-icon-foreground.png',
+      backgroundImage: './assets/images/android-adaptive-icon-background.png',
+      monochromeImage: './assets/images/android-adaptive-icon-monochrome.png',
+    },
     permissions: [
       'android.permission.CAMERA',
       'android.permission.POST_NOTIFICATIONS',
