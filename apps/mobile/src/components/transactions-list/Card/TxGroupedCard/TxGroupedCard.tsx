@@ -1,12 +1,12 @@
 import React from 'react'
-import { Theme, View } from 'tamagui'
-import { SafeListItem } from '@/src/components/SafeListItem'
+import { Theme, Text, View } from 'tamagui'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon/SafeFontIcon'
 import { TxInfo } from '@/src/components/TxInfo'
 import { getOrderClass } from '@/src/hooks/useTransactionType'
 import { isSwapTransferOrderTxInfo } from '@/src/utils/transaction-guards'
 import { OrderTransactionInfo } from '@safe-global/store/gateway/types'
 import { TransactionQueuedItem, TransactionItem } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { Container } from '@/src/components/Container'
 
 interface TxGroupedCard {
   transactions: (TransactionItem | TransactionQueuedItem)[]
@@ -31,24 +31,33 @@ function TxGroupedCardComponent({ transactions, inQueue }: TxGroupedCard) {
   const label = isSwapTransfer ? getSettlementOrderTitle(firstTxInfo) : 'Bulk transactions'
 
   return (
-    <SafeListItem
-      label={label}
-      leftNode={
+    <Container>
+      <View flexDirection="row" alignItems="center" gap="$2">
         <Theme name="logo">
-          <View backgroundColor="$background" padding="$2" borderRadius={100}>
-            <SafeFontIcon name="batch" />
+          <View
+            backgroundColor="$background"
+            padding="$2"
+            borderRadius={100}
+            height={32}
+            width={32}
+            justifyContent="center"
+            alignItems="center"
+          >
+            <SafeFontIcon name="batch" size={16} />
           </View>
         </Theme>
-      }
-    >
-      <View width="100%">
+        <Text fontSize="$4" fontWeight={600}>
+          {label}
+        </Text>
+      </View>
+      <View>
         {transactions.map((item, index) => (
-          <View width="100%" testID="tx-group-info" key={`${item.transaction.id}-${index}`} marginTop={12}>
+          <View testID="tx-group-info" key={`${item.transaction.id}-${index}`} marginTop={12}>
             <TxInfo inQueue={inQueue} bordered tx={item.transaction} />
           </View>
         ))}
       </View>
-    </SafeListItem>
+    </Container>
   )
 }
 
