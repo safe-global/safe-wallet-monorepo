@@ -46,6 +46,7 @@ const useMixpanel = () => {
 
   useEffect(() => {
     if (isMixpanelEnabled) {
+      console.log('mixpanelInit')
       mixpanelInit()
     }
   }, [isMixpanelEnabled])
@@ -59,6 +60,7 @@ const useMixpanel = () => {
         console.info('[MixPanel] - User opted in')
       }
     } else {
+      console.log('opt_out_tracking', mixpanel, isMixpanelEnabled)
       mixpanel.opt_out_tracking()
       if (!IS_PRODUCTION) {
         console.info('[MixPanel] - User opted out')

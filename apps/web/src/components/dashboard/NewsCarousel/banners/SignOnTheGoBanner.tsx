@@ -28,7 +28,7 @@ const SignOnTheGoBanner = ({ onDismiss }: { onDismiss: () => void }) => {
           </Typography>
 
           <Typography variant="body2" color="static.light" className={css.bannerText} sx={{ mb: 2 }}>
-            Sign transactions instantly, wherever you are. The all-new Safe{'{Mobile}'} app is here
+            Sign transactions instantly, wherever you are. The all-new Safe{'{Mobile}'} app is here.
           </Typography>
 
           <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>

@@ -22,7 +22,7 @@ const SpacesBanner = ({ onDismiss }: { onDismiss: () => void }) => {
           </Typography>
 
           <Typography variant="body2" color="static.light" className={css.bannerText}>
-            All your Safe Accounts, finally organized. Streamlined for teams and solo users alike
+            All your Safe Accounts, finally organized. Streamlined for teams and solo users alike.
           </Typography>
 
           <Track {...SPACE_EVENTS.OPEN_SPACE_LIST_PAGE} label={SPACE_LABELS.safe_dashboard_banner}>
