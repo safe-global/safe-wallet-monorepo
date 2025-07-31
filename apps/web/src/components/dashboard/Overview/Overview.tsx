@@ -32,6 +32,7 @@ import { selectSettings } from '@/store/settingsSlice'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import StakeBanner, { stakeBannerID } from '@/components/dashboard/NewsCarousel/banners/StakeBanner'
 import useIsStakingBannerVisible from '@/components/dashboard/StakingBanner/useIsStakingBannerVisible'
+import SignOnTheGoBanner, { signOnTheGoBannerID } from '@/components/dashboard/NewsCarousel/banners/SignOnTheGoBanner'
 
 const AddFundsToGetStarted = () => {
   const { safe } = useSafeInfo()
@@ -99,8 +100,10 @@ const Overview = (): ReactElement => {
   const isEarnFeatureEnabled = useIsEarnFeatureEnabled()
   const isSpacesFeatureEnabled = useHasFeature(FEATURES.SPACES)
   const isStakingBannerVisible = useIsStakingBannerVisible()
+  const isMobileAppAvailable = useHasFeature(FEATURES.NEW_MOBILE_APP_AVAILABLE)
 
   const banners = [
+    isMobileAppAvailable && { id: signOnTheGoBannerID, element: SignOnTheGoBanner },
     isEarnFeatureEnabled && { id: earnBannerID, element: EarnBanner },
     isSpacesFeatureEnabled && { id: spacesBannerID, element: SpacesBanner },
     isStakingBannerVisible && { id: stakeBannerID, element: StakeBanner },

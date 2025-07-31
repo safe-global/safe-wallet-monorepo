@@ -51,3 +51,7 @@ export const HelperCenterArticleTitles = {
 export const DISCORD_URL = 'https://chat.safe.global'
 export const TWITTER_URL = 'https://twitter.com/safe'
 export const SAFE_TO_L2_MIGRATION_VERSION = '1.4.1'
+
+// Mobile app download URLs
+export const IOS_APP_STORE_URL = 'https://apps.apple.com/us/app/safe-mobile/id6748754793'
+export const ANDROID_PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=global.safe.mobileapp&pli=1'
