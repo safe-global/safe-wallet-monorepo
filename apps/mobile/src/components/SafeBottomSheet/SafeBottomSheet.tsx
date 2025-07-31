@@ -66,11 +66,17 @@ export function SafeBottomSheet<T>({
 
   const TitleHeader = useCallback(
     () => (
-      <View justifyContent="center" marginTop="$3" marginBottom="$4" alignItems="center">
-        <H5 fontWeight={600}>{title}</H5>
+      <View
+        justifyContent="center"
+        paddingTop="$3"
+        paddingBottom="$4"
+        alignItems="center"
+        backgroundColor="$backgroundPaper"
+      >
+        <H5 fontWeight={700}>{title}</H5>
 
         {actions && (
-          <View position="absolute" right={'$4'} top={'$1'}>
+          <View position="absolute" right={'$4'} top={'$3'} justifyContent="center" alignItems="center">
             {actions}
           </View>
         )}
@@ -128,9 +134,9 @@ export function SafeBottomSheet<T>({
       // bottomInset={Platform.OS === 'android' ? insets.bottom : 0}
       handleIndicatorStyle={{ backgroundColor: getVariable(theme.borderMain) }}
     >
-      <BottomSheetView style={[styles.contentContainer]}>
-        {title && <TitleHeader />}
-        {isSortable ? (
+      {isSortable ? (
+        <BottomSheetView style={[styles.contentContainer]}>
+          {title && <TitleHeader />}
           <DraggableFlatList<T>
             data={items}
             style={{ marginBottom: insets.bottom }}
@@ -140,30 +146,32 @@ export function SafeBottomSheet<T>({
             keyExtractor={(item, index) => (keyExtractor ? keyExtractor({ item, index }) : index.toString())}
             renderItem={renderItem}
           />
-        ) : (
-          <BottomSheetScrollView
-            style={{
-              marginBottom:
-                (!sortable && FooterComponent ? footerHeight : 0) + getTokenValue(Platform.OS === 'ios' ? '$4' : '$8'),
-            }}
-            contentContainerStyle={[styles.scrollInnerContainer]}
-          >
-            <View minHeight={200} alignItems="center" paddingVertical="$3">
-              <View alignItems="flex-start" paddingBottom="$4" width="100%">
-                {loading ? (
-                  <LoadingTx />
-                ) : hasCustomItems ? (
-                  items.map((item, index) => (
-                    <Render key={keyExtractor ? keyExtractor({ item, index }) : index} item={item} onClose={onClose} />
-                  ))
-                ) : (
-                  children
-                )}
-              </View>
+        </BottomSheetView>
+      ) : (
+        <BottomSheetScrollView
+          style={{
+            marginBottom:
+              (!sortable && FooterComponent ? footerHeight : 0) + getTokenValue(Platform.OS === 'ios' ? '$4' : '$8'),
+          }}
+          contentContainerStyle={[styles.scrollInnerContainer]}
+          stickyHeaderIndices={[0]}
+        >
+          {title && <TitleHeader />}
+          <View minHeight={200} alignItems="center" paddingVertical="$3">
+            <View alignItems="flex-start" paddingBottom="$4" width="100%">
+              {loading ? (
+                <LoadingTx />
+              ) : hasCustomItems ? (
+                items.map((item, index) => (
+                  <Render key={keyExtractor ? keyExtractor({ item, index }) : index} item={item} onClose={onClose} />
+                ))
+              ) : (
+                children
+              )}
             </View>
-          </BottomSheetScrollView>
-        )}
-      </BottomSheetView>
+          </View>
+        </BottomSheetScrollView>
+      )}
     </BottomSheet>
   )
 }
