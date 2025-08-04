@@ -3,7 +3,8 @@ import Head from 'next/head'
 import useTxHistory from '@/hooks/useTxHistory'
 import PaginatedTxns from '@/components/common/PaginatedTxns'
 import TxHeader from '@/components/transactions/TxHeader'
-import { Box } from '@mui/material'
+import { Box, SvgIcon } from '@mui/material'
+import ExportIcon from '@/public/images/common/export.svg'
 import { useState } from 'react'
 import Button from '@mui/material/Button'
 import ExpandLessIcon from '@mui/icons-material/ExpandLess'
@@ -34,6 +35,14 @@ const History: NextPage = () => {
 
         <Button variant="outlined" onClick={toggleFilter} size="small" endIcon={<ExpandIcon />}>
           {filter?.type ?? 'Filter'}
+        </Button>
+        <Button
+          variant="contained"
+          onClick={() => {}}
+          size="small"
+          startIcon={<SvgIcon component={ExportIcon} inheritViewBox fontSize="small" />}
+        >
+          Export CSV
         </Button>
       </TxHeader>
 
