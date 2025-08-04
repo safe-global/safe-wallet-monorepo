@@ -1,9 +1,9 @@
-import React from 'react'
-import { Avatar, Theme, View } from 'tamagui'
+import React, { useState } from 'react'
+import { Theme, View } from 'tamagui'
+import { Image } from 'expo-image'
 import { IconProps, SafeFontIcon } from '../SafeFontIcon/SafeFontIcon'
 import { Badge } from '../Badge/Badge'
 import { badgeTheme } from '../Badge/theme'
-import useValidLogoUri from '@/src/hooks/useValidLogoUri'
 
 type BadgeThemeKeys = keyof typeof badgeTheme
 type ExtractAfterUnderscore<T extends string> = T extends `${string}_${infer Rest}` ? Rest : never
@@ -24,13 +24,15 @@ export function Logo({
   logoUri,
   accessibilityLabel,
   size = '$10',
-  imageBackground = '$color',
+  imageBackground = '$background',
   fallbackIcon = 'nft',
   fallbackContent,
   badgeContent,
   badgeThemeName = 'badge_background',
 }: LogoProps) {
-  const validUri = useValidLogoUri(logoUri)
+  const [showFallback, setShowFallback] = useState(false)
+
+  const displayFallback = showFallback || !logoUri
 
   return (
     <Theme name="logo">
@@ -41,21 +43,24 @@ export function Logo({
           )}
         </View>
 
-        <Avatar circular size={size}>
-          {validUri && (
-            <Avatar.Image
+        <View backgroundColor={imageBackground} width={size} height={size} borderRadius="50%">
+          {logoUri && !showFallback && (
+            <Image
               testID="logo-image"
-              backgroundColor={imageBackground}
+              source={logoUri}
+              style={{
+                flex: 1,
+                borderRadius: 50,
+              }}
               accessibilityLabel={accessibilityLabel}
-              source={{ uri: validUri }}
+              onError={() => setShowFallback(true)}
             />
           )}
-
-          <Avatar.Fallback backgroundColor="$background">
-            {fallbackContent || (
+          {displayFallback &&
+            (fallbackContent || (
               <View
                 backgroundColor="$background"
-                borderRadius={0}
+                borderRadius="50%"
                 display="flex"
                 alignItems="center"
                 justifyContent="center"
@@ -64,9 +69,8 @@ export function Logo({
               >
                 <SafeFontIcon testID="logo-fallback-icon" name={fallbackIcon} color="$colorSecondary" size={16} />
               </View>
-            )}
-          </Avatar.Fallback>
-        </Avatar>
+            ))}
+        </View>
       </View>
     </Theme>
   )

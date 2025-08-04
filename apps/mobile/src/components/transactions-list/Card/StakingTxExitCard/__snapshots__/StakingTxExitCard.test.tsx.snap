@@ -71,115 +71,50 @@ exports[`StakingTxExitCard matches snapshot 1`] = `
           <View
             style={
               {
-                "alignItems": "center",
-                "borderBottomLeftRadius": 100000,
-                "borderBottomRightRadius": 100000,
-                "borderTopLeftRadius": 100000,
-                "borderTopRightRadius": 100000,
-                "flexDirection": "column",
+                "backgroundColor": "#EEEFF0",
+                "borderBottomLeftRadius": "50%",
+                "borderBottomRightRadius": "50%",
+                "borderTopLeftRadius": "50%",
+                "borderTopRightRadius": "50%",
                 "height": 32,
-                "justifyContent": "center",
-                "maxHeight": 32,
-                "maxWidth": 32,
-                "minHeight": 32,
-                "minWidth": 32,
-                "overflow": "hidden",
-                "paddingBottom": 0,
-                "paddingLeft": 0,
-                "paddingRight": 0,
-                "paddingTop": 0,
-                "position": "relative",
                 "width": 32,
               }
             }
           >
-            <View
-              style={
+            <ViewManagerAdapter_ExpoImage
+              accessibilityLabel="ETH"
+              borderRadius={50}
+              containerViewRef={"[React.ref]"}
+              contentFit="cover"
+              contentPosition={
                 {
-                  "bottom": 0,
-                  "flexDirection": "column",
-                  "left": 0,
-                  "position": "absolute",
-                  "right": 0,
-                  "top": 0,
-                  "zIndex": 1,
+                  "left": "50%",
+                  "top": "50%",
                 }
               }
-            >
-              <Image
-                accessibilityLabel="ETH"
-                fullscreen={true}
-                onError={[Function]}
-                onLoad={[Function]}
-                source={
+              flex={1}
+              nativeViewRef={"[React.ref]"}
+              onError={[Function]}
+              onLoad={[Function]}
+              onLoadStart={[Function]}
+              onProgress={[Function]}
+              placeholder={[]}
+              source={
+                [
                   {
                     "uri": "https://safe-transaction-assets.safe.global/chains/1/chain_logo.png",
-                  }
-                }
-                style={
-                  {
-                    "backgroundColor": "#121312",
-                    "height": 32,
-                    "width": 32,
-                  }
-                }
-                testID="logo-image"
-              />
-            </View>
-            <View
+                  },
+                ]
+              }
               style={
                 {
-                  "backgroundColor": "#EEEFF0",
-                  "bottom": 0,
-                  "flexDirection": "column",
-                  "left": 0,
-                  "position": "absolute",
-                  "right": 0,
-                  "top": 0,
-                  "zIndex": 0,
+                  "borderRadius": 50,
+                  "flex": 1,
                 }
               }
-            >
-              <View
-                style={
-                  {
-                    "alignItems": "center",
-                    "backgroundColor": "#EEEFF0",
-                    "borderBottomLeftRadius": 0,
-                    "borderBottomRightRadius": 0,
-                    "borderTopLeftRadius": 0,
-                    "borderTopRightRadius": 0,
-                    "display": "flex",
-                    "height": 32,
-                    "justifyContent": "center",
-                    "width": 32,
-                  }
-                }
-              >
-                <Text
-                  allowFontScaling={false}
-                  selectable={false}
-                  style={
-                    [
-                      {
-                        "color": "#A1A3A7",
-                        "fontSize": 16,
-                      },
-                      undefined,
-                      {
-                        "fontFamily": "SafeIcons",
-                        "fontStyle": "normal",
-                        "fontWeight": "normal",
-                      },
-                      {},
-                    ]
-                  }
-                  testID="logo-fallback-icon"
-                >
-                  
-                </Text>
-              </View>
-            </View>
+              testID="logo-image"
+              transition={null}
+            />
           </View>
         </View>
         <View>

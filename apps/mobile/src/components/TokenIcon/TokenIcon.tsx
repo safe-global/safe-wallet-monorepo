@@ -18,7 +18,7 @@ export function TokenIcon({
   logoUri,
   accessibilityLabel,
   size = '$10',
-  imageBackground = '$color',
+  imageBackground = '$background',
   fallbackIcon = 'token',
   badgeContent,
   badgeThemeName = 'badge_background',
