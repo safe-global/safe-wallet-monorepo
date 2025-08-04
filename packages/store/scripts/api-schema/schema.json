@@ -1261,6 +1261,95 @@
         ]
       }
     },
+    "/v1/export/chains/{chainId}/{safeAddress}": {
+      "post": {
+        "operationId": "csvExportLaunchExportV1",
+        "parameters": [
+          {
+            "name": "chainId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "safeAddress",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "Transaction export request",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TransactionExportDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JobStatusDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "export"
+        ]
+      }
+    },
+    "/v1/export/{jobId}/status": {
+      "get": {
+        "operationId": "csvExportGetExportStatusV1",
+        "parameters": [
+          {
+            "name": "jobId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "CSV export status retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JobStatusDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "CSV export not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JobStatusErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "export"
+        ]
+      }
+    },
     "/v1/chains/{chainId}/data-decoder": {
       "post": {
         "operationId": "dataDecodedGetDataDecodedV1",
@@ -6022,6 +6111,111 @@
           "displayName",
           "logoUri",
           "trustedForDelegateCall"
+        ]
+      },
+      "TransactionExportDto": {
+        "type": "object",
+        "properties": {
+          "executionDateGte": {
+            "type": "string",
+            "description": "Execution date greater than or equal to (ISO date string)"
+          },
+          "executionDateLte": {
+            "type": "string",
+            "description": "Execution date less than or equal to (ISO date string)"
+          },
+          "limit": {
+            "type": "number",
+            "description": "Maximum number of transactions to export"
+          },
+          "offset": {
+            "type": "number",
+            "description": "Number of transactions to skip"
+          }
+        }
+      },
+      "JobStatusDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Job ID"
+          },
+          "name": {
+            "type": "string",
+            "description": "Job name"
+          },
+          "data": {
+            "type": "object",
+            "description": "Job data payload"
+          },
+          "timestamp": {
+            "type": "number",
+            "description": "Timestamp when the job was created"
+          },
+          "progress": {
+            "description": "Job progress",
+            "oneOf": [
+              {
+                "type": "number",
+                "example": 50
+              },
+              {
+                "type": "string",
+                "example": "50%"
+              },
+              {
+                "type": "boolean",
+                "example": false
+              },
+              {
+                "type": "object",
+                "example": {
+                  "current": 5,
+                  "total": 10
+                }
+              }
+            ]
+          },
+          "processedOn": {
+            "type": "number",
+            "description": "Timestamp when job processing started"
+          },
+          "finishedOn": {
+            "type": "number",
+            "description": "Timestamp when job finished"
+          },
+          "failedReason": {
+            "type": "string",
+            "description": "Reason for job failure"
+          },
+          "returnValue": {
+            "type": "object",
+            "description": "Job return value"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "data",
+          "timestamp",
+          "progress",
+          "processedOn",
+          "finishedOn",
+          "failedReason",
+          "returnValue"
+        ]
+      },
+      "JobStatusErrorDto": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string",
+            "description": "Error message"
+          }
+        },
+        "required": [
+          "error"
         ]
       },
       "TransactionDataDto": {
