@@ -34,14 +34,6 @@ jest.mock('react-native-mmkv', () => ({
   },
 }))
 
-// Mock Image.getSize globally as it's used by `useValidLogoUri`
-import { Image } from 'react-native'
-jest.spyOn(Image, 'getSize').mockImplementation((_uri, success) => {
-  if (typeof success === 'function') {
-    success(1, 1)
-  }
-})
-
 jest.mock('react-native-device-info', () => mockRNDeviceInfo)
 jest.mock('react-native-device-crypto', () => {
   return {
