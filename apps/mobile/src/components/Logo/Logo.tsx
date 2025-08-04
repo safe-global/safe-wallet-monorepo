@@ -32,6 +32,8 @@ export function Logo({
 }: LogoProps) {
   const [showFallback, setShowFallback] = useState(false)
 
+  const displayFallback = showFallback || !logoUri
+
   return (
     <Theme name="logo">
       <View width={size}>
@@ -54,7 +56,7 @@ export function Logo({
               onError={() => setShowFallback(true)}
             />
           )}
-          {showFallback &&
+          {displayFallback &&
             (fallbackContent || (
               <View
                 backgroundColor="$background"

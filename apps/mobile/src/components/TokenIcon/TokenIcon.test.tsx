@@ -7,7 +7,9 @@ describe('TokenIcon', () => {
     const container = render(<TokenIcon logoUri={thumbnailUrl} accessibilityLabel="Token logo" />)
 
     const logoImage = container.getByTestId('logo-image')
-    expect(logoImage.props.source.uri).toBe('https://coin-images.coingecko.com/coins/images/25244/large/Optimism.png')
+    expect(logoImage.props.source[0].uri).toBe(
+      'https://coin-images.coingecko.com/coins/images/25244/large/Optimism.png',
+    )
   })
 
   it('should pass through non-CoinGecko URLs unchanged', () => {
@@ -15,7 +17,7 @@ describe('TokenIcon', () => {
     const container = render(<TokenIcon logoUri={regularUrl} accessibilityLabel="Token logo" />)
 
     const logoImage = container.getByTestId('logo-image')
-    expect(logoImage.props.source.uri).toBe(regularUrl)
+    expect(logoImage.props.source[0].uri).toBe(regularUrl)
   })
 
   it('should render fallback icon when no logoUri is provided', () => {

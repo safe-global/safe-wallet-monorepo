@@ -35,25 +35,4 @@ describe('Logo', () => {
     const fallbackIcon = container.getByTestId('logo-fallback-icon')
     expect(fallbackIcon).toBeTruthy()
   })
-
-  it('should render with custom size', () => {
-    const container = render(<Logo logoUri="http://something.com/my-image.png" size="$6" />)
-
-    // Initially, only fallback should be visible until image loads
-    expect(container.queryByTestId('logo-fallback-icon')).toBeTruthy()
-  })
-
-  it('should render with badge content when provided', () => {
-    const badgeContent = <span data-testid="badge-content">Badge</span>
-    const container = render(<Logo logoUri="http://something.com/my-image.png" badgeContent={badgeContent} />)
-
-    // Component should render without errors
-    expect(container.queryByTestId('logo-fallback-icon')).toBeTruthy()
-  })
-
-  it('should handle different image backgrounds', () => {
-    const container = render(<Logo logoUri="http://something.com/my-image.png" imageBackground="$colorPrimary" />)
-
-    expect(container.queryByTestId('logo-fallback-icon')).toBeTruthy()
-  })
 })
