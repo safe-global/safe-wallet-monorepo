@@ -143,7 +143,7 @@ const config = {
     [
       'react-native-capture-protection',
       {
-        captureType: 'fullMediaCapture',
+        captureType: 'restrictedCapture',
       },
     ],
   ],
