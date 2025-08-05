@@ -25,6 +25,8 @@ export const useTransactionSecurity = (txDetails?: TransactionDetails) => {
 
       try {
         const { txParams, signatures } = extractTxInfo(txDetails, activeSafe.address)
+
+        // TODO: There is now a hook useSafeTx to get this so it can be refactored
         const safeTx = await createExistingTx(txParams, signatures)
         const executionOwner = safeInfo.safe.owners[0].value
 
