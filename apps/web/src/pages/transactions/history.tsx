@@ -13,11 +13,13 @@ import TxFilterForm from '@/components/transactions/TxFilterForm'
 import TrustedToggle from '@/components/transactions/TrustedToggle'
 import { useTxFilter } from '@/utils/tx-history-filter'
 import { BRAND_NAME } from '@/config/constants'
+import CsvExportModal from '@/components/transactions/CsvExportModal'
 
 const History: NextPage = () => {
   const [filter] = useTxFilter()
 
   const [showFilter, setShowFilter] = useState(false)
+  const [openExportModal, setOpenExportModal] = useState(false)
 
   const toggleFilter = () => {
     setShowFilter((prev) => !prev)
@@ -37,10 +39,10 @@ const History: NextPage = () => {
           {filter?.type ?? 'Filter'}
         </Button>
         <Button
-          variant="contained"
-          onClick={() => {}}
+          variant="contained" //TODO looks smaller than outlined
+          onClick={() => setOpenExportModal(true)}
           size="small"
-          startIcon={<SvgIcon component={ExportIcon} inheritViewBox fontSize="small" />}
+          endIcon={<SvgIcon component={ExportIcon} inheritViewBox fontSize="small" />}
         >
           Export CSV
         </Button>
@@ -53,6 +55,7 @@ const History: NextPage = () => {
           <PaginatedTxns useTxns={useTxHistory} />
         </Box>
       </main>
+      {openExportModal && <CsvExportModal onClose={() => setOpenExportModal(false)} hasActiveFilter={!!filter} />}
     </>
   )
 }
