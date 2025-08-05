@@ -15,7 +15,7 @@ type Props = {
 
 export const NotificationsSettingsView = ({ onChange, value, isLoading = false }: Props) => {
   const activeSafe = useAppSelector(selectActiveSafe)
-  const { getAccountType } = useNotificationGTWPermissions(activeSafe?.address as `0x${string}`)
+  const { getAccountType } = useNotificationGTWPermissions(activeSafe?.address as `0x${string}`, activeSafe?.chainId)
 
   return (
     <View paddingHorizontal="$4" marginTop="$2" style={{ flex: 1 }} testID={'notifications-popup-screen'}>

@@ -9,7 +9,7 @@ import { TwapOrderTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERA
 import { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { formatAmount } from '@safe-global/utils/utils/formatNumber'
 import { CopyButton } from '@/src/components/CopyButton'
-import { getExecutionPrice } from '@safe-global/utils/features/swap/helpers/utils'
+import { getExecutionPrice, getSlippageInPercent, getOrderClass } from '@safe-global/utils/features/swap/helpers/utils'
 import { getOrderFeeBps } from '@safe-global/utils/features/swap/helpers/utils'
 import StatusLabel from '@/src/features/ConfirmTx/components/confirmation-views/SwapOrder/StatusLabel'
 import { TouchableOpacity, Linking } from 'react-native'
@@ -53,6 +53,8 @@ export const surplusFee = (order: Pick<Order, 'fullAppData' | 'executedFee' | 'e
 
 export const formatSwapOrderItems = (txInfo: Order, chain: Chain): ListTableItem[] => {
   const expiresAt = formatWithSchema(txInfo.validUntil * 1000, 'dd/MM/yyyy, HH:mm')
+  const orderClass = getOrderClass(txInfo)
+  const slippage = getSlippageInPercent(txInfo)
 
   const openCowExplorer = () => {
     if ('uid' in txInfo) {
@@ -65,6 +67,12 @@ export const formatSwapOrderItems = (txInfo: Order, chain: Chain): ListTableItem
       label: 'Expiry',
       value: expiresAt,
     },
+    orderClass !== 'limit'
+      ? {
+          label: 'Slippage',
+          value: `${slippage}%`,
+        }
+      : null,
     'uid' in txInfo
       ? {
           label: 'Order ID',

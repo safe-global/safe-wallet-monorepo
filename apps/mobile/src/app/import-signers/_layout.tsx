@@ -1,7 +1,10 @@
 import { Stack } from 'expo-router'
 import { getDefaultScreenOptions } from '@/src/navigation/hooks/utils'
+import { useScreenProtection } from '@/src/hooks/useScreenProtection'
 
 export default function ImportSignersLayout() {
+  useScreenProtection()
+
   return (
     <Stack
       screenOptions={({ navigation }) => ({

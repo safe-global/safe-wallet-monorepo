@@ -7,3 +7,27 @@
   gap: var(--space-1);
   padding: var(--space-2);
 }
+
+.carouselWrapper {
+  position: relative;
+}
+
+.carouselNav {
+  display: flex;
+  justify-content: flex-end;
+  gap: 4px
+}
+
+.carouselList {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 250px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+}
+
+.carouselList::-webkit-scrollbar {
+  display: none;
+}

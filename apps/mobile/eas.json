@@ -79,7 +79,7 @@
   "submit": {
     "development": {
       "ios": {
-        "ascAppId": "6741803832"
+        "ascAppId": "6748754891"
       },
       "android": {
         "applicationId": "global.safe.mobileapp.dev",
@@ -88,7 +88,7 @@
     },
     "production": {
       "ios": {
-        "ascAppId": "6738784305"
+        "ascAppId": "6748754793"
       },
       "android": {
         "releaseStatus": "draft"

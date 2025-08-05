@@ -10,6 +10,7 @@ export const FeatureRoutes = {
   [AppRoutes.balances.nfts]: FEATURES.ERC721,
   [AppRoutes.settings.notifications]: FEATURES.PUSH_NOTIFICATIONS,
   [AppRoutes.bridge]: FEATURES.BRIDGE,
+  [AppRoutes.earn]: FEATURES.EARN,
 }
 
 export const getBlockExplorerLink = (

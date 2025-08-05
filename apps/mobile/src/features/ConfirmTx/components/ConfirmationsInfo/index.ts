@@ -1,0 +1,1 @@
+export { ConfirmationsInfo } from './ConfirmationsInfo'

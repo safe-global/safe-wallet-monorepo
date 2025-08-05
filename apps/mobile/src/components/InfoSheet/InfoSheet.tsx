@@ -1,12 +1,25 @@
 import React, { useCallback, useRef } from 'react'
-import { BottomSheetView } from '@gorhom/bottom-sheet'
+import { BottomSheetScrollView } from '@gorhom/bottom-sheet'
 import { SafeFontIcon } from '../SafeFontIcon'
 import { BottomSheetModal, TouchableOpacity } from '@gorhom/bottom-sheet'
-import { getVariable, Text, View, useTheme } from 'tamagui'
+import { getVariable, Text, View, useTheme, H4, YStack } from 'tamagui'
 import { BackdropComponent, BackgroundComponent } from '@/src/components/Dropdown/sheetComponents'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { Badge } from '@/src/components/Badge'
+import { Platform } from 'react-native'
+import { FullWindowOverlay } from 'react-native-screens'
 
-export const InfoSheet = ({ info }: { info: string }) => {
+export const InfoSheet = ({
+  info,
+  title,
+  displayIcon = true,
+  children,
+}: {
+  info: string
+  title?: string
+  displayIcon?: boolean
+  children?: string | React.ReactElement
+}) => {
   const bottomSheetModalRef = useRef<BottomSheetModal>(null)
   const insets = useSafeAreaInsets()
   const theme = useTheme()
@@ -19,23 +32,35 @@ export const InfoSheet = ({ info }: { info: string }) => {
   return (
     <>
       <TouchableOpacity onPress={handlePresentModalPress}>
-        <SafeFontIcon name="info" size={16} color="$colorSecondary" />
+        {!children && <SafeFontIcon name="info" size={16} color="$colorSecondary" />}
+        {children}
       </TouchableOpacity>
 
       <BottomSheetModal
+        // @ts-expect-error - FullWindowOverlay is not typed
+        containerComponent={Platform.OS === 'ios' ? FullWindowOverlay : undefined}
         ref={bottomSheetModalRef}
         backgroundComponent={BackgroundComponent}
         backdropComponent={() => <BackdropComponent shouldNavigateBack={false} />}
         topInset={insets.top}
-        bottomInset={insets.bottom}
         enableDynamicSizing
         handleIndicatorStyle={{ backgroundColor: getVariable(theme.borderMain) }}
       >
-        <BottomSheetView>
-          <View alignItems="center" padding="$4">
-            <Text>{info}</Text>
-          </View>
-        </BottomSheetView>
+        <BottomSheetScrollView contentContainerStyle={{ paddingBottom: insets.bottom }}>
+          <YStack gap="$4" padding="$4" alignItems="center" justifyContent="center">
+            {displayIcon && (
+              <Badge
+                themeName="badge_background"
+                circleSize="$10"
+                content={<SafeFontIcon name="info" size={24} color="$color" />}
+              />
+            )}
+            <View gap="$2" alignItems="center">
+              {title && <H4 fontWeight="600">{title}</H4>}
+              <Text textAlign="center">{info}</Text>
+            </View>
+          </YStack>
+        </BottomSheetScrollView>
       </BottomSheetModal>
     </>
   )

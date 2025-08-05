@@ -1,10 +1,11 @@
 import React from 'react'
-import { getTokenValue, Image, View } from 'tamagui'
-import SafeWalletLogo from '@/assets/images/safe-wallet.png'
+import { getTokenValue, View } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { SafeWalletLogo } from '@/src/components/SVGs/SafeWalletLogo'
 
 export function OnboardingHeader() {
   const insets = useSafeAreaInsets()
+
   return (
     <View paddingTop={insets.top} backgroundColor={getTokenValue('$color.textContrastDark')}>
       <View
@@ -14,7 +15,7 @@ export function OnboardingHeader() {
         borderTopRightRadius={'$6'}
         paddingVertical={'$6'}
       >
-        <Image accessibilityLabel="Safe Wallet" source={SafeWalletLogo} />
+        <SafeWalletLogo testID="safe-wallet-logo" />
       </View>
     </View>
   )

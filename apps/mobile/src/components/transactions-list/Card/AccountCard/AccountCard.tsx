@@ -8,6 +8,8 @@ import { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { ChainsDisplay } from '@/src/components/ChainsDisplay'
 import { shouldDisplayPreciseBalance } from '@/src/utils/balance'
 import { formatCurrency, formatCurrencyPrecise } from '@safe-global/utils/utils/formatNumber'
+import { useAppSelector } from '@/src/store/hooks'
+import { selectCurrency } from '@/src/store/settingsSlice'
 
 interface AccountCardProps {
   name: string | Address
@@ -32,9 +34,10 @@ export function AccountCard({
   threshold,
   rightNode,
 }: AccountCardProps) {
+  const currency = useAppSelector(selectCurrency)
   const formattedBalance = shouldDisplayPreciseBalance(balance, 8)
-    ? formatCurrencyPrecise(balance, 'usd')
-    : formatCurrency(balance, 'usd')
+    ? formatCurrencyPrecise(balance, currency)
+    : formatCurrency(balance, currency)
 
   return (
     <SafeListItem
@@ -55,7 +58,8 @@ export function AccountCard({
           <IdenticonWithBadge
             testID="threshold-info-badge"
             size={40}
-            fontSize={owners > 9 ? 8 : 12}
+            badgeSize={24}
+            fontSize={owners > 9 ? 9 : 12}
             address={address}
             badgeContent={`${threshold}/${owners}`}
           />

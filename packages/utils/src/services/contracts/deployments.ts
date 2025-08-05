@@ -12,7 +12,7 @@ import {
 import type { SingletonDeployment, DeploymentFilter, SingletonDeploymentV2 } from '@safe-global/safe-deployments'
 import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import { type SafeVersion } from '@safe-global/safe-core-sdk-types'
+import { type SafeVersion } from '@safe-global/types-kit'
 import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
 import { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 

@@ -1,0 +1,26 @@
+.banner {
+  position: relative;
+  padding: var(--space-2) var(--space-8) var(--space-2) var(--space-2);
+  background: linear-gradient(90deg, #B0FFC9, #D7F6FF);
+  border: 0;
+  border-radius: 12px;
+  height: 100%;
+}
+
+.closeButton {
+  color: var(--color-static-main);
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-2);
+}
+
+.bannerImage, .bannerText {
+  pointer-events: none;
+  user-select: none;
+}
+
+@media (max-width: 599.95px) {
+  .banner {
+    padding: var(--space-2);
+  }
+}

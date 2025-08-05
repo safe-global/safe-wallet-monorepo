@@ -10,6 +10,7 @@ import {
   isSwapOrderTxInfo,
   isAnyStakingTxInfo,
   isNestedConfirmationTxInfo,
+  isAnyEarnTxInfo,
 } from '@/utils/transaction-guards'
 import { BRIDGE_WIDGET_URL } from '@/features/bridge/components/BridgeWidget'
 import { SWAP_WIDGET_URL } from '@/features/swap/components/FallbackSwapWidget'
@@ -52,6 +53,11 @@ export const getTransactionTrackingType = (
 
   if (isAnyStakingTxInfo(txInfo)) {
     return txInfo.type
+  }
+
+  //@ts-ignore TODO: Fix types after removing old sdk
+  if (isAnyEarnTxInfo(txInfo)) {
+    return TX_TYPES.native_earn
   }
 
   if (isSettingsChangeTxInfo(txInfo)) {

@@ -37,8 +37,8 @@ const limitOrderExpiryItem = (item) => `div[data-valuetext="${item}"]`
 const tokenBlock = '[data-testid="block-label"]'
 const confirmPriceImpactInput = '[id="confirm-modal-input"]'
 const confirmPriceImpactBtn = '[id="confirm-modal-button"]'
-const tokenBalance = 'div[class*="TokenMetadata"]'
-const tokenItem = 'div[class*="TokenItem"]'
+const tokenBalance = 'span[class*="TokenBalance"]'
+const tokenItem = 'div[class*="TokenDetails"]'
 
 const limitStrBtn = 'Limit'
 const swapStrBtn = 'Swap'

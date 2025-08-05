@@ -2,6 +2,7 @@ import { AppRoutes } from '@/config/routes'
 import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
 import { usePathname } from 'next/navigation'
 import { useRouter } from 'next/router'
+import { useEffect, useState } from 'react'
 
 const NO_SIDEBAR_ROUTES = [
   AppRoutes.share.safeApp,
@@ -29,11 +30,17 @@ export function useIsSidebarRoute(pathname?: string): [boolean, boolean] {
   const router = useRouter()
   const clientPathname = usePathname()
   const isSpaceRoute = useIsSpaceRoute()
+  const [hasSafe, setHasSafe] = useState(false)
+
   const route = pathname || clientPathname || ''
   const sidebarQuery = router.query.sidebar === 'true'
   const noSidebar = NO_SIDEBAR_ROUTES.includes(route) && !sidebarQuery
   const toggledSidebar = TOGGLE_SIDEBAR_ROUTES.includes(route) && !sidebarQuery
-  const hasSafe = !router.isReady || !!router.query.safe
+
+  useEffect(() => {
+    if (!router.isReady) return
+    setHasSafe(!!router.query.safe)
+  }, [router.isReady, router.query.safe])
 
   const displaySidebar = (!noSidebar && hasSafe) || isSpaceRoute
 

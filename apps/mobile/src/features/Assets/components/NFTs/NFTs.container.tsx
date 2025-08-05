@@ -1,41 +1,48 @@
-import { safelyDecodeURIComponent } from 'expo-router/build/fork/getStateFromPath-forks'
-import React, { useState } from 'react'
+import React from 'react'
 
 import { SafeTab } from '@/src/components/SafeTab'
 import { POLLING_INTERVAL } from '@/src/config/constants'
-import {
-  Collectible,
-  CollectiblePage,
-  useCollectiblesGetCollectiblesV2Query,
-} from '@safe-global/store/gateway/AUTO_GENERATED/collectibles'
+import { Collectible, CollectiblePage } from '@safe-global/store/gateway/AUTO_GENERATED/collectibles'
+import { useGetCollectiblesInfiniteQuery } from '@safe-global/store/gateway'
 
 import { Fallback } from '../Fallback'
 import { NFTItem } from './NFTItem'
-import { useInfiniteScroll } from '@/src/hooks/useInfiniteScroll'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { NoFunds } from '@/src/features/Assets/components/NoFunds'
 import { AssetError } from '../../Assets.error'
 import { Loader } from '@/src/components/Loader'
+import { getTokenValue } from 'tamagui'
 
 export function NFTsContainer() {
   const activeSafe = useDefinedActiveSafe()
-  const [pageUrl, setPageUrl] = useState<string>()
 
-  const { data, isFetching, error, refetch } = useCollectiblesGetCollectiblesV2Query(
-    {
-      chainId: activeSafe.chainId,
-      safeAddress: activeSafe.address,
-      cursor: pageUrl && safelyDecodeURIComponent(pageUrl?.split('cursor=')[1]),
-    },
-    {
-      pollingInterval: POLLING_INTERVAL,
-    },
-  )
-  const { list, onEndReached } = useInfiniteScroll<CollectiblePage, Collectible>({
-    refetch,
-    setPageUrl,
-    data,
-  })
+  // Using the infinite query hook
+  const { currentData, fetchNextPage, hasNextPage, isFetching, isLoading, isUninitialized, error, refetch } =
+    useGetCollectiblesInfiniteQuery(
+      {
+        chainId: activeSafe.chainId,
+        safeAddress: activeSafe.address,
+      },
+      {
+        pollingInterval: POLLING_INTERVAL,
+      },
+    )
+
+  // Flatten all pages into a single collectibles array
+  const allCollectibles = React.useMemo(() => {
+    if (!currentData?.pages) {
+      return []
+    }
+
+    // Combine results from all pages
+    return currentData.pages.flatMap((page: CollectiblePage) => page.results || [])
+  }, [currentData?.pages])
+
+  const onEndReached = () => {
+    if (hasNextPage && !isFetching) {
+      fetchNextPage()
+    }
+  }
 
   if (error) {
     return (
@@ -45,9 +52,9 @@ export function NFTsContainer() {
     )
   }
 
-  if (!list?.results.length) {
+  if (!allCollectibles.length) {
     return (
-      <Fallback loading={isFetching || !list}>
+      <Fallback loading={isFetching || isLoading || isUninitialized}>
         <NoFunds fundsType={'nft'} />
       </Fallback>
     )
@@ -56,10 +63,11 @@ export function NFTsContainer() {
   return (
     <SafeTab.FlatList<Collectible>
       onEndReached={onEndReached}
-      data={list?.results}
+      data={allCollectibles}
       renderItem={NFTItem}
       ListFooterComponent={isFetching ? <Loader size={24} /> : undefined}
-      keyExtractor={(item) => item.id}
+      keyExtractor={(item, index) => `${item.address}-${index}`}
+      style={{ marginTop: getTokenValue('$2') }}
     />
   )
 }

@@ -14,6 +14,8 @@ import { type Address } from '@/src/types/address'
 import { router } from 'expo-router'
 import { FloatingMenu } from '../FloatingMenu'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { trackEvent } from '@/src/services/analytics/firebaseAnalytics'
+import { createAppSettingsOpenEvent, createSettingsMenuActionEvent } from '@/src/services/analytics/events/settings'
 type Props = {
   safeAddress: string | undefined
 }
@@ -44,31 +46,49 @@ export const SettingsMenu = ({ safeAddress }: Props) => {
           marginRight: 4,
           alignItems: 'center',
           justifyContent: 'flex-end',
-          right: -10,
+          gap: 10,
+          zIndex: 1,
         }}
       >
-        <View
-          backgroundColor={'$backgroundSkeleton'}
-          alignItems={'center'}
-          justifyContent={'center'}
-          borderRadius={16}
-          height={32}
-          width={32}
-          marginRight={4}
+        <Pressable
+          testID={'settings-screen-header-app-settings-button'}
+          hitSlop={6}
+          onPressIn={() => {
+            try {
+              const event = createAppSettingsOpenEvent()
+              trackEvent(event)
+            } catch (error) {
+              console.error('Error tracking app settings open event:', error)
+            }
+            router.push('/app-settings')
+          }}
         >
-          <Pressable
-            testID={'settings-screen-header-app-settings-button'}
-            hitSlop={{ top: 40, bottom: 40, left: 40 }}
-            onPressIn={() => {
-              router.push('/app-settings')
-            }}
+          <View
+            backgroundColor={'$backgroundSkeleton'}
+            alignItems={'center'}
+            justifyContent={'center'}
+            borderRadius={16}
+            height={32}
+            width={32}
           >
             <SafeFontIcon name={'settings'} size={20} color={'$color'} />
-          </Pressable>
-        </View>
+          </View>
+        </Pressable>
 
         <FloatingMenu
           onPressAction={({ nativeEvent }) => {
+            const action = nativeEvent.event as 'rename' | 'explorer' | 'copy' | 'share' | 'remove'
+
+            // Track analytics for supported actions (copy is already tracked via useCopyAndDispatchToast)
+            if (action !== 'copy') {
+              try {
+                const event = createSettingsMenuActionEvent(action)
+                trackEvent(event)
+              } catch (error) {
+                console.error('Error tracking settings menu action:', error)
+              }
+            }
+
             if (nativeEvent.event === 'rename') {
               router.push({
                 pathname: '/signers/[address]',
@@ -93,13 +113,23 @@ export const SettingsMenu = ({ safeAddress }: Props) => {
                 },
                 {
                   text: 'Remove',
-                  onPress: () => {
-                    deleteSafe(safeAddress as Address)
-
-                    toast.show(`The safe with address ${safeAddress} was deleted.`, {
-                      native: true,
-                      duration: 2000,
-                    })
+                  onPress: async () => {
+                    try {
+                      await deleteSafe(safeAddress as Address)
+                      toast.show(`The safe with address ${safeAddress} was deleted.`, {
+                        native: true,
+                        duration: 2000,
+                      })
+                    } catch (error) {
+                      if (error instanceof Error && error.message === 'User cancelled deletion') {
+                        return
+                      }
+                      console.error('Error deleting safe:', error)
+                      toast.show('Failed to delete safe. Please try again.', {
+                        native: true,
+                        duration: 3000,
+                      })
+                    }
                   },
                   style: 'destructive',
                 },
@@ -161,16 +191,12 @@ export const SettingsMenu = ({ safeAddress }: Props) => {
             },
           ]}
         >
-          <Pressable
-            hitSlop={{ top: 40, bottom: 40, right: 40 }}
-            testID={'settings-screen-header-more-settings-button'}
-          >
+          <Pressable hitSlop={6} testID={'settings-screen-header-more-settings-button'}>
             <View
               backgroundColor={'$backgroundSkeleton'}
               alignItems={'center'}
               justifyContent={'center'}
               borderRadius={16}
-              marginLeft={4}
               height={32}
               width={32}
             >

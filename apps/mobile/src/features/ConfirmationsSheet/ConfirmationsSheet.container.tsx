@@ -14,7 +14,7 @@ import {
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { selectSigners } from '@/src/store/signersSlice'
 import { useAppSelector } from '@/src/store/hooks'
-import { ContactContainer } from '../AddressBook/Contact.container'
+import { ContactDisplayNameContainer } from '../AddressBook'
 
 export const ConfirmationsSheetContainer = () => {
   const activeSafe = useDefinedActiveSafe()
@@ -61,7 +61,7 @@ export const ConfirmationsSheetContainer = () => {
       return (
         <View width="100%">
           <SignersCard
-            name={<ContactContainer address={item.value as Address} />}
+            name={<ContactDisplayNameContainer address={item.value as Address} />}
             getSignerTag={getSignerTag}
             address={item.value as Address}
             rightNode={
@@ -76,7 +76,7 @@ export const ConfirmationsSheetContainer = () => {
                     </Text>
                   </View>
                 }
-                themeName={hasSigned ? 'badge_success_variant1' : 'badge_warning_variant1'}
+                themeName={hasSigned ? 'badge_success_variant1' : 'badge_warning'}
               />
             }
           />

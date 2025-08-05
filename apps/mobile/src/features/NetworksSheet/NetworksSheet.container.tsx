@@ -12,16 +12,18 @@ import { POLLING_INTERVAL } from '@/src/config/constants'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { formatCurrency, formatCurrencyPrecise } from '@safe-global/utils/utils/formatNumber'
 import { shouldDisplayPreciseBalance } from '@/src/utils/balance'
+import { selectCurrency } from '@/src/store/settingsSlice'
 
 export const NetworksSheetContainer = () => {
   const dispatch = useAppDispatch()
   const chains = useAppSelector(selectAllChains)
   const activeSafe = useDefinedActiveSafe()
   const activeChain = useAppSelector((state: RootState) => selectChainById(state, activeSafe.chainId))
+  const currency = useAppSelector(selectCurrency)
   const { data } = useSafesGetOverviewForManyQuery<SafeOverviewResult>(
     {
       safes: chains.map((chain) => makeSafeId(chain.chainId, activeSafe.address)),
-      currency: 'usd',
+      currency: currency.toLowerCase(),
       trusted: true,
       excludeSpam: true,
     },
@@ -49,8 +51,8 @@ export const NetworksSheetContainer = () => {
           activeChain={activeChain}
           fiatTotal={
             shouldDisplayPreciseBalance(item.fiatTotal, 8)
-              ? formatCurrencyPrecise(item.fiatTotal, 'usd')
-              : formatCurrency(item.fiatTotal, 'usd')
+              ? formatCurrencyPrecise(item.fiatTotal, currency)
+              : formatCurrency(item.fiatTotal, currency)
           }
           chains={chains}
           chainId={item.chainId}

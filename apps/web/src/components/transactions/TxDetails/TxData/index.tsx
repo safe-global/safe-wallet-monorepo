@@ -1,27 +1,30 @@
 import SettingsChangeTxInfo from '@/components/transactions/TxDetails/TxData/SettingsChange'
-import type { SpendingLimitMethods } from '@/utils/transaction-guards'
 import {
+  isStakingTxExitInfo,
+  isBridgeOrderTxInfo,
   isExecTxData,
+  isLifiSwapTxInfo,
   isOnChainConfirmationTxData,
   isSafeUpdateTxData,
   isStakingTxWithdrawInfo,
-} from '@/utils/transaction-guards'
-import { isStakingTxExitInfo } from '@/utils/transaction-guards'
-import {
+  isVaultDepositTxInfo,
+  isVaultRedeemTxInfo,
   isCancellationTxInfo,
   isCustomTxInfo,
   isMigrateToL2TxData,
   isMultisigDetailedExecutionInfo,
+  isMultiSendTxInfo,
   isOrderTxInfo,
   isSettingsChangeTxInfo,
   isSpendingLimitMethod,
   isStakingTxDepositInfo,
   isSupportedSpendingLimitAddress,
   isTransferTxInfo,
+  type SpendingLimitMethods,
 } from '@/utils/transaction-guards'
 import { SpendingLimits } from '@/components/transactions/TxDetails/TxData/SpendingLimits'
 import { TransactionStatus, type TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
-import { type ReactElement } from 'react'
+import type { PropsWithChildren, ReactElement } from 'react'
 import RejectionTxInfo from '@/components/transactions/TxDetails/TxData/Rejection'
 import TransferTxInfo from '@/components/transactions/TxDetails/TxData/Transfer'
 import useChainId from '@/hooks/useChainId'
@@ -33,7 +36,13 @@ import StakingTxWithdrawDetails from '@/features/stake/components/StakingTxWithd
 import { OnChainConfirmation } from './NestedTransaction/OnChainConfirmation'
 import { ExecTransaction } from './NestedTransaction/ExecTransaction'
 import SafeUpdate from './SafeUpdate'
+import VaultDepositTxDetails from '@/features/earn/components/VaultDepositTxDetails'
+import VaultRedeemTxDetails from '@/features/earn/components/VaultRedeemTxDetails'
 import DecodedData from './DecodedData'
+import { ErrorBoundary } from '@sentry/react'
+import Multisend from './DecodedData/Multisend'
+import BridgeTransaction from '@/components/tx/confirmation-views/BridgeTransaction'
+import { LifiSwapTransaction } from '@/components/tx/confirmation-views/LifiSwapTransaction'
 
 const TxData = ({
   txInfo,
@@ -41,13 +50,14 @@ const TxData = ({
   txDetails,
   trusted,
   imitation,
-}: {
+  children,
+}: PropsWithChildren<{
   txInfo: TransactionDetails['txInfo']
   txData: TransactionDetails['txData']
   txDetails?: TransactionDetails
   trusted: boolean
   imitation: boolean
-}): ReactElement => {
+}>): ReactElement => {
   const chainId = useChainId()
 
   if (isOrderTxInfo(txInfo)) {
@@ -64,6 +74,24 @@ const TxData = ({
 
   if (isStakingTxWithdrawInfo(txInfo)) {
     return <StakingTxWithdrawDetails info={txInfo} />
+  }
+
+  // @ts-ignore: TODO: Fix this type
+  if (isVaultDepositTxInfo(txInfo)) {
+    return <VaultDepositTxDetails info={txInfo} />
+  }
+
+  // @ts-ignore: TODO: Fix this type
+  if (isVaultRedeemTxInfo(txInfo)) {
+    return <VaultRedeemTxDetails info={txInfo} />
+  }
+
+  if (isBridgeOrderTxInfo(txInfo)) {
+    return <BridgeTransaction txInfo={txInfo} />
+  }
+
+  if (isLifiSwapTxInfo(txInfo)) {
+    return <LifiSwapTransaction txInfo={txInfo} isPreview={false} />
   }
 
   if (isTransferTxInfo(txInfo)) {
@@ -109,7 +137,19 @@ const TxData = ({
     return <SafeUpdate txData={txData} />
   }
 
-  return <DecodedData txData={txData} toInfo={txData?.to} />
+  return !!children ? (
+    <>{children}</>
+  ) : (
+    <>
+      <DecodedData txData={txData} toInfo={isCustomTxInfo(txInfo) ? txInfo.to : txData?.to} />
+
+      {(isMultiSendTxInfo(txInfo) || isOrderTxInfo(txInfo)) && (
+        <ErrorBoundary fallback={<div>Error parsing data</div>}>
+          <Multisend txData={txData} isExecuted={!!txDetails?.executedAt} />
+        </ErrorBoundary>
+      )}
+    </>
+  )
 }
 
 export default TxData

@@ -1,6 +1,6 @@
 import { getModuleInstance, KnownContracts } from '@gnosis.pm/zodiac'
 import { type SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
-import type { SafeTransaction } from '@safe-global/safe-core-sdk-types'
+import type { SafeTransaction } from '@safe-global/types-kit'
 import type { TransactionAddedEvent } from '@gnosis.pm/zodiac/dist/cjs/types/Delay'
 import type { Eip1193Provider, Overrides, TransactionResponse } from 'ethers'
 

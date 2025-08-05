@@ -8,12 +8,14 @@ import type { EnvState } from '@safe-global/store/settingsSlice'
 export interface SettingsState {
   onboardingVersionSeen: string
   themePreference: ThemePreference
+  currency: string
   env: EnvState
 }
 
 const initialState: SettingsState = {
   onboardingVersionSeen: '',
   themePreference: 'auto' as ThemePreference,
+  currency: 'usd',
   env: {
     rpc: {},
     tenderly: {
@@ -32,6 +34,9 @@ const settingsSlice = createSlice({
     },
     resetSettings() {
       return initialState
+    },
+    setCurrency: (state, { payload }: PayloadAction<SettingsState['currency']>) => {
+      state.currency = payload
     },
     setRpc: (state, { payload }: PayloadAction<{ chainId: string; rpc: string }>) => {
       const { chainId, rpc } = payload
@@ -52,11 +57,16 @@ export const selectSettings = (state: RootState, setting: keyof SettingsState) =
 
 export const selectSettingsState = (state: RootState) => state.settings
 
+export const selectCurrency = createSelector(
+  selectSettingsState,
+  (settings) => settings.currency || initialState.currency,
+)
+
 export const selectRpc = createSelector(selectSettingsState, (settings) => {
   return settings?.env?.rpc
 })
 
 export const selectTenderly = createSelector(selectSettingsState, (settings) => settings?.env?.tenderly)
 
-export const { updateSettings, resetSettings } = settingsSlice.actions
+export const { updateSettings, resetSettings, setCurrency } = settingsSlice.actions
 export default settingsSlice.reducer

@@ -84,7 +84,7 @@ export const ReviewBatch = ({ params }: { params: ExecuteBatchFlowProps }) => {
 
   const [multisendContractAddress = ''] = useAsync(async () => {
     if (!multiSendContract) return ''
-    return await multiSendContract.getAddress()
+    return multiSendContract.getAddress()
   }, [multiSendContract])
 
   const [multiSendTxs] = useAsync(async () => {
@@ -94,7 +94,7 @@ export const ReviewBatch = ({ params }: { params: ExecuteBatchFlowProps }) => {
 
   const multiSendTxData = useMemo(() => {
     if (!txsWithDetails || !multiSendTxs) return
-    return encodeMultiSendData(multiSendTxs)
+    return encodeMultiSendData(multiSendTxs) as `0x${string}`
   }, [txsWithDetails, multiSendTxs])
 
   const onExecute = async () => {
@@ -113,7 +113,6 @@ export const ReviewBatch = ({ params }: { params: ExecuteBatchFlowProps }) => {
       multiSendTxData,
       wallet.provider,
       wallet.address,
-      safe.address.value,
       overrides as Overrides & { nonce: number },
       safe.nonce,
     )

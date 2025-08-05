@@ -1,50 +1,103 @@
-import { useRouter } from 'next/router'
-import Typography from '@mui/material/Typography'
-import Grid from '@mui/material/Grid'
-import Button from '@mui/material/Button'
-
-import { WidgetContainer } from '../styled'
+import { Typography, Card, Stack } from '@mui/material'
 import { useSafeApps } from '@/hooks/safe-apps/useSafeApps'
 import useSafeAppPreviewDrawer from '@/hooks/safe-apps/useSafeAppPreviewDrawer'
 import SafeAppPreviewDrawer from '@/components/safe-apps/SafeAppPreviewDrawer'
-import SafeAppCard, { SafeAppCardContainer } from '@/components/safe-apps/SafeAppCard'
-import { AppRoutes } from '@/config/routes'
-import ExploreSafeAppsIcon from '@/public/images/apps/explore.svg'
+import SafeAppCard from '@/components/safe-apps/SafeAppCard'
 import { SAFE_APPS_LABELS } from '@/services/analytics'
-
 import css from './styles.module.css'
+import IconButton from '@mui/material/IconButton'
+import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeftRounded'
+import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRightRounded'
+import { useEffect, useRef, useState } from 'react'
+
+const ITEM_GAP = 16
 
 const SafeAppsDashboardSection = () => {
   const { rankedSafeApps, togglePin, pinnedSafeAppIds } = useSafeApps()
   const { isPreviewDrawerOpen, previewDrawerApp, openPreviewDrawer, closePreviewDrawer } = useSafeAppPreviewDrawer()
+  const listRef = useRef<HTMLUListElement>(null)
+  const [canScrollLeft, setCanScrollLeft] = useState(false)
+  const [canScrollRight, setCanScrollRight] = useState(false)
+
+  useEffect(() => {
+    const list = listRef.current
+    if (!list) return
+
+    setCanScrollLeft(list.scrollLeft > 0)
+    setCanScrollRight(list.scrollLeft + list.clientWidth < list.scrollWidth)
+  }, [rankedSafeApps.length])
+
+  const scrollList = (direction: 'left' | 'right') => {
+    const list = listRef.current
+    if (!list) return
+
+    const firstItem = list.firstElementChild as HTMLElement | null
+    if (!firstItem) return
+
+    const itemWidth = firstItem.offsetWidth + ITEM_GAP
+    const itemsInView = Math.max(1, Math.floor(list.clientWidth / itemWidth))
+    const scrollAmount = itemWidth * itemsInView
+    const newScrollLeft =
+      direction === 'left'
+        ? Math.max(0, list.scrollLeft - scrollAmount)
+        : Math.min(list.scrollWidth - list.clientWidth, list.scrollLeft + scrollAmount)
+
+    list.scrollBy({ left: direction === 'left' ? -scrollAmount : scrollAmount, behavior: 'smooth' })
+    setCanScrollLeft(newScrollLeft > 0)
+    setCanScrollRight(newScrollLeft + list.clientWidth < list.scrollWidth)
+  }
+
+  if (rankedSafeApps.length === 0) return null
+
+  const showNav = canScrollLeft || canScrollRight
 
   return (
-    <WidgetContainer>
-      <Typography component="h2" variant="subtitle1" fontWeight={700} mb={2}>
-        Safe Apps
-      </Typography>
+    <Card sx={{ px: 3, py: 2.5 }} component="section">
+      <Stack direction="row" justifyContent="space-between" mb={2}>
+        <Typography fontWeight={700}>Featured Apps</Typography>
+        {showNav && (
+          <>
+            <div className={css.carouselNav}>
+              <IconButton
+                aria-label="previous apps"
+                onClick={() => scrollList('left')}
+                disabled={!canScrollLeft}
+                size="medium"
+              >
+                <KeyboardArrowLeftIcon fontSize="small" />
+              </IconButton>
+              <IconButton
+                aria-label="next apps"
+                onClick={() => scrollList('right')}
+                disabled={!canScrollRight}
+                size="medium"
+              >
+                <KeyboardArrowRightIcon fontSize="small" />
+              </IconButton>
+            </div>
+          </>
+        )}
+      </Stack>
 
-      <Grid container spacing={3}>
-        {rankedSafeApps.map((rankedSafeApp) => (
-          <Grid key={rankedSafeApp.id} item xs={12} sm={6} md={4} xl={4}>
-            <SafeAppCard
-              safeApp={rankedSafeApp}
-              onBookmarkSafeApp={(appId) => togglePin(appId, SAFE_APPS_LABELS.dashboard)}
-              isBookmarked={pinnedSafeAppIds.has(rankedSafeApp.id)}
-              onClickSafeApp={(e) => {
-                // Don't open link
-                e.preventDefault()
-                openPreviewDrawer(rankedSafeApp)
-              }}
-              openPreviewDrawer={openPreviewDrawer}
-            />
-          </Grid>
-        ))}
-
-        <Grid item xs={12} sm={6} md={4} xl={4}>
-          <ExploreSafeAppsCard />
-        </Grid>
-      </Grid>
+      <div className={css.carouselWrapper}>
+        <ul className={css.carouselList} ref={listRef} style={{ gap: ITEM_GAP }}>
+          {rankedSafeApps.map((rankedSafeApp) => (
+            <li key={rankedSafeApp.id}>
+              <SafeAppCard
+                safeApp={rankedSafeApp}
+                onBookmarkSafeApp={(appId) => togglePin(appId, SAFE_APPS_LABELS.dashboard)}
+                isBookmarked={pinnedSafeAppIds.has(rankedSafeApp.id)}
+                onClickSafeApp={(e) => {
+                  e.preventDefault()
+                  openPreviewDrawer(rankedSafeApp)
+                }}
+                openPreviewDrawer={openPreviewDrawer}
+                compact
+              />
+            </li>
+          ))}
+        </ul>
+      </div>
 
       <SafeAppPreviewDrawer
         isOpen={isPreviewDrawerOpen}
@@ -53,23 +106,8 @@ const SafeAppsDashboardSection = () => {
         onClose={closePreviewDrawer}
         onBookmark={(appId) => togglePin(appId, SAFE_APPS_LABELS.apps_sidebar)}
       />
-    </WidgetContainer>
+    </Card>
   )
 }
 
 export default SafeAppsDashboardSection
-
-const ExploreSafeAppsCard = () => {
-  const router = useRouter()
-  const safeAppsLink = `${AppRoutes.apps.index}?safe=${router.query.safe}`
-
-  return (
-    <SafeAppCardContainer safeAppUrl={safeAppsLink} className={css.container}>
-      <ExploreSafeAppsIcon alt="Explore Safe Apps icon" />
-
-      <Button data-testid="explore-apps-btn" variant="contained" size="small">
-        Explore Safe Apps
-      </Button>
-    </SafeAppCardContainer>
-  )
-}

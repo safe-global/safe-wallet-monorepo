@@ -7,7 +7,7 @@ import * as data from '../../fixtures/txhistory_data_data.json'
 import * as wallet from '../../support/utils/wallet.js'
 import * as navigation from '../pages/navigation.page'
 import { disconnectedUserErrorMsg } from '../pages/owners.pages'
-import { checkAddToBatchBtnDisabled } from '../pages/batches.pages'
+import { comboButtonOptions } from '../pages/create_tx.pages'
 
 let staticSafes = []
 
@@ -80,7 +80,8 @@ describe('Transaction queue Reject button tests', { defaultCommandTimeout: 30000
     create_tx.clickOnRejectBtn()
     create_tx.verifyTxRejectModalVisible()
     create_tx.clickOnRejectionChoiceBtn(1)
-    checkAddToBatchBtnDisabled()
+    create_tx.clickOnContinueSignTransactionBtn()
+    create_tx.checkThatComboButtonOptionIsNotPresent(create_tx.comboButtonOptions.addToBatch)
     navigation.clickOnWalletExpandMoreIcon()
     navigation.clickOnDisconnectBtn()
   })

@@ -5,9 +5,10 @@ import { BlockaidModuleResponse } from '@safe-global/utils/services/security/mod
 import { BlockaidMessage } from './BlockaidMessage'
 import { ContractChangeWarning } from './ContractChangeWarning'
 import { PoweredByBlockaid } from '../PoweredByBlockaid'
-import { Alert, AlertType } from '@/src/components/Alert'
+import { AlertType } from '@/src/components/Alert'
 import { BlockaidError } from '@/src/features/TransactionChecks/components/blockaid/scans/BlockaidError'
 import { ResultDescription } from '@/src/features/TransactionChecks/components/blockaid/ResultDescription'
+import { Alert } from '@/src/components/Alert'
 
 type BlockaidWarningProps = {
   blockaidResponse?: {
@@ -40,19 +41,20 @@ export const BlockaidWarning = ({ blockaidResponse }: BlockaidWarningProps) => {
       {blockaidResponse.severity ? (
         <View>
           <Alert
+            orientation="left"
             type={type as AlertType}
+            info={
+              <>
+                <BlockaidMessage blockaidResponse={blockaidResponse} />
+                <PoweredByBlockaid />
+              </>
+            }
             message={
               <ResultDescription
                 classification={payload?.classification}
                 reason={payload?.reason}
                 description={payload?.description}
               />
-            }
-            info={
-              <>
-                <BlockaidMessage blockaidResponse={blockaidResponse} />
-                <PoweredByBlockaid />
-              </>
             }
           />
         </View>

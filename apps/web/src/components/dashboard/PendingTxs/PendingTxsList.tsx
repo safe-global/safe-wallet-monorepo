@@ -1,14 +1,13 @@
-import type { ReactElement } from 'react'
+import React, { type ReactElement } from 'react'
 import { useMemo } from 'react'
 import { useRouter } from 'next/router'
 import dynamic from 'next/dynamic'
 import { getLatestTransactions } from '@/utils/tx-list'
-import { Box, Skeleton, Typography } from '@mui/material'
-import { Card, ViewAllLink, WidgetBody, WidgetContainer } from '../styled'
+import { Box, Typography, Card, Stack, Paper, Skeleton } from '@mui/material'
+import { ViewAllLink } from '../styled'
 import PendingTxListItem from './PendingTxListItem'
-import useTxQueue from '@/hooks/useTxQueue'
+import useTxQueue, { useQueuedTxsLength } from '@/hooks/useTxQueue'
 import { AppRoutes } from '@/config/routes'
-import NoTransactionsIcon from '@/public/images/transactions/no-transactions.svg'
 import css from './styles.module.css'
 import { isSignableBy, isExecutable } from '@/utils/transaction-guards'
 import useWallet from '@/hooks/wallets/useWallet'
@@ -17,6 +16,8 @@ import { useRecoveryQueue } from '@/features/recovery/hooks/useRecoveryQueue'
 import type { Transaction } from '@safe-global/safe-gateway-typescript-sdk'
 import type { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import type { RecoveryQueueItem } from '@/features/recovery/services/recovery-state'
+import NoTxsIcon from '@/public/images/common/no-txs.svg'
+import { SidebarListItemCounter } from '@/components/sidebar/SidebarList'
 
 const PendingRecoveryListItem = dynamic(() => import('./PendingRecoveryListItem'))
 
@@ -24,25 +25,19 @@ const MAX_TXS = 4
 
 const EmptyState = () => {
   return (
-    <Card>
-      <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" height="100%" gap={2}>
-        <NoTransactionsIcon data-testid="no-tx-icon" />
+    <Paper elevation={0} sx={{ p: 5, textAlign: 'center' }}>
+      <NoTxsIcon data-testid="no-tx-icon" />
 
-        <Typography data-testid="no-tx-text" variant="body1" color="primary.light">
-          This Safe Account has no queued transactions
-        </Typography>
-      </Box>
-    </Card>
+      <Typography mb={0.5} mt={3}>
+        No transactions to sign
+      </Typography>
+
+      <Typography data-testid="no-tx-text" variant="body1" color="primary.light">
+        Once you create pending transactions, they will appear here
+      </Typography>
+    </Paper>
   )
 }
-
-const LoadingState = () => (
-  <div className={css.list}>
-    {Array.from(Array(MAX_TXS).keys()).map((key) => (
-      <Skeleton key={key} variant="rectangular" height={52} />
-    ))}
-  </div>
-)
 
 function getActionableTransactions(txs: Transaction[], safe: SafeState, walletAddress?: string): Transaction[] {
   if (!walletAddress) {
@@ -83,6 +78,7 @@ const PendingTxsList = (): ReactElement | null => {
   const wallet = useWallet()
   const queuedTxns = useMemo(() => getLatestTransactions(page?.results), [page?.results])
   const recoveryQueue = useRecoveryQueue()
+  const queueSize = useQueuedTxsLength()
 
   const [recoveryTxs, queuedTxs] = useMemo(() => {
     return _getTransactionsToDisplay({
@@ -103,20 +99,19 @@ const PendingTxsList = (): ReactElement | null => {
     [router.query.safe],
   )
 
+  if (loading) return <Skeleton variant="rounded" height={338} />
+
   return (
-    <WidgetContainer data-testid="pending-tx-widget">
-      <div className={css.title}>
-        <Typography component="h2" variant="subtitle1" fontWeight={700} mb={2}>
-          Pending transactions
+    <Card data-testid="pending-tx-widget" sx={{ px: 1.5, py: 2.5, height: 1 }} component="section">
+      <Stack direction="row" justifyContent="space-between" sx={{ px: 1.5, mb: 1 }}>
+        <Typography fontWeight={700} className={css.pendingTxHeader}>
+          Pending transactions <SidebarListItemCounter count={queueSize} />
         </Typography>
-
         {totalTxs > 0 && <ViewAllLink url={queueUrl} />}
-      </div>
+      </Stack>
 
-      <WidgetBody>
-        {loading ? (
-          <LoadingState />
-        ) : totalTxs > 0 ? (
+      <Box>
+        {totalTxs > 0 ? (
           <div className={css.list}>
             {recoveryTxs.map((tx) => (
               <PendingRecoveryListItem transaction={tx} key={tx.transactionHash} />
@@ -129,8 +124,8 @@ const PendingTxsList = (): ReactElement | null => {
         ) : (
           <EmptyState />
         )}
-      </WidgetBody>
-    </WidgetContainer>
+      </Box>
+    </Card>
   )
 }
 

@@ -21,20 +21,20 @@ describe('Nested safes review step tests', () => {
     nsafes.clickOnAddNestedSafeBtn()
   })
 
-  it('Verify review step with Fund new assets', () => {
+  it('Verify middle step with Fund new assets in create nestedsafe tx flow', () => {
     nsafes.clickOnFundAssetBtn()
     nsafes.setMaxAmountValue(0)
     nsafes.clickOnAddNextBtn()
-    createTx.clickOnNoLaterOption()
     nsafes.actionsExist(nsafes.fundAssetsActions)
-    nsafes.checkAddTobatchBtnStatus(constants.enabledStates.disabled)
+    createTx.clickOnAdvancedDetails()
+    createTx.verifytxAccordionDetails(createTx.MultisendData)
   })
 
-  it('Verify review step without Fund new assets', () => {
+  it('Verify review step without Fund new assets in create nestedsafe tx flow', () => {
     nsafes.clickOnAddNextBtn()
     nsafes.clickOnAdvancedDetails()
     createTx.clickOnNoLaterOption()
     nsafes.actionsExist(nsafes.nonfundAssetsActions)
-    nsafes.checkAddTobatchBtnStatus(constants.enabledStates.enabled)
+    //nsafes.checkAddTobatchBtnStatus(constants.enabledStates.enabled) - The button is commented out until we have a final decision about its position.
   })
 })

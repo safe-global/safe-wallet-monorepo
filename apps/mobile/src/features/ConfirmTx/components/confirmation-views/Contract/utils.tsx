@@ -22,7 +22,8 @@ export const formatContractItems = (txInfo: CustomTransactionInfo, chain: Chain,
         <Badge
           circleProps={mintBadgeProps}
           themeName="badge_background"
-          fontSize={12}
+          fontSize={13}
+          textContentProps={{ fontFamily: 'DM Mono' }}
           circular={false}
           content={txInfo.methodName ?? ''}
         />

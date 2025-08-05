@@ -5,7 +5,7 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import { useSigner } from '@/hooks/wallets/useWallet'
 import { MODALS_EVENTS, trackEvent } from '@/services/analytics'
 import type { SecurityResponse } from '@safe-global/utils/services/security/modules/types'
-import type { SafeTransaction } from '@safe-global/safe-core-sdk-types'
+import type { SafeTransaction } from '@safe-global/types-kit'
 
 import { useEffect, useMemo } from 'react'
 import {
@@ -55,7 +55,9 @@ export const useBlockaid = (
   const errorMsg = useMemo(() => blockaidErrors ?? blockaidPayload?.payload?.error, [blockaidErrors, blockaidPayload])
 
   useEffect(() => {
-    logError(Errors._201, errorMsg)
+    if (errorMsg) {
+      logError(Errors._201, errorMsg)
+    }
   }, [errorMsg])
 
   return [blockaidPayload, errorMsg, loading]

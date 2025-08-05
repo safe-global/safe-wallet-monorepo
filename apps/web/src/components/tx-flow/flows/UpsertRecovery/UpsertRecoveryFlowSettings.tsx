@@ -114,14 +114,14 @@ export function UpsertRecoveryFlowSettings({ delayModifier }: { delayModifier?: 
   const isEdit = !!delayModifier
 
   const handleSubmit = async () => {
-    const addressType = await getAddressType(data?.recoverer ?? '', chainId)
+    const addressType = await getAddressType(recoverer, chainId)
     const creationEvent = isEdit ? RECOVERY_EVENTS.SUBMIT_RECOVERY_EDIT : RECOVERY_EVENTS.SUBMIT_RECOVERY_CREATE
     const settings = `delay_${delay},expiry_${expiry},type_${addressType}`
 
     trackEvent({ ...creationEvent })
     trackEvent({ ...RECOVERY_EVENTS.RECOVERY_SETTINGS, label: settings })
 
-    onNext({ expiry, delay, customDelay, selectedDelay, recoverer })
+    onNext({ expiry, delay, customDelay, selectedDelay, recoverer, moduleAddress: data?.moduleAddress })
   }
 
   return (

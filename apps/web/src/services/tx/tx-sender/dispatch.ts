@@ -11,7 +11,7 @@ import type {
   Transaction,
   TransactionOptions,
   TransactionResult,
-} from '@safe-global/safe-core-sdk-types'
+} from '@safe-global/types-kit'
 import { didRevert } from '@/utils/ethers-utils'
 import { type SpendingLimitTxParams } from '@/components/tx-flow/flows/TokenTransfer/ReviewSpendingLimitTx'
 import { getSpendingLimitContract } from '@/services/contracts/spendingLimitContracts'
@@ -226,7 +226,7 @@ export const dispatchSafeTxSpeedUp = async (
     txHash: result.hash,
     signerAddress,
     signerNonce,
-    gasLimit: txOptions.gasLimit,
+    gasLimit: txOptions.gasLimit?.toString(),
     txType: 'SafeTx',
   })
 
@@ -317,7 +317,7 @@ export const dispatchTxExecution = async (
     txHash: result.hash,
     signerAddress,
     signerNonce,
-    gasLimit: txOptions.gasLimit,
+    gasLimit: txOptions.gasLimit?.toString(),
     txType: 'SafeTx',
   })
 
@@ -327,16 +327,15 @@ export const dispatchTxExecution = async (
 export const dispatchBatchExecution = async (
   txs: TransactionDetails[],
   multiSendContract: MultiSendCallOnlyContractImplementationType,
-  multiSendTxData: string,
+  multiSendTxData: `0x${string}`,
   provider: Eip1193Provider,
   signerAddress: string,
-  safeAddress: string,
   overrides: Omit<Overrides, 'nonce'> & { nonce: number },
   nonce: number,
 ) => {
   const groupKey = multiSendTxData
 
-  let result: ContractTransactionResponse
+  let result: TransactionResponse
   const txIds = txs.map((tx) => tx.txId)
   let signerNonce = overrides.nonce
   let txData = multiSendContract.encode('multiSend', [multiSendTxData])
@@ -346,8 +345,13 @@ export const dispatchBatchExecution = async (
       signerNonce = await getUserNonce(signerAddress)
     }
     const signer = await getUncheckedSigner(provider)
-    // @ts-ignore
-    result = await multiSendContract.contract.connect(signer).multiSend(multiSendTxData, overrides)
+
+    result = await signer.sendTransaction({
+      to: multiSendContract.getAddress(),
+      value: '0',
+      data: txData,
+      ...overrides,
+    })
 
     txIds.forEach((txId) => {
       txDispatch(TxEvent.EXECUTING, { txId, groupKey, nonce })
@@ -358,7 +362,7 @@ export const dispatchBatchExecution = async (
     })
     throw err
   }
-  const txTo = await multiSendContract.getAddress()
+  const txTo = multiSendContract.getAddress()
 
   txIds.forEach((txId) => {
     txDispatch(TxEvent.PROCESSING, {
@@ -508,7 +512,7 @@ export const dispatchTxRelay = async (
   safe: SafeState,
   txId: string,
   chain: ChainInfo,
-  gasLimit?: string | number,
+  gasLimit?: string | number | bigint,
 ) => {
   const readOnlySafeContract = await getReadOnlyCurrentGnosisSafeContract(safe)
 
@@ -552,13 +556,14 @@ export const dispatchTxRelay = async (
 export const dispatchBatchExecutionRelay = async (
   txs: TransactionDetails[],
   multiSendContract: MultiSendCallOnlyContractImplementationType,
-  multiSendTxData: string,
+  multiSendTxData: `0x${string}`,
   chainId: string,
   safeAddress: string,
   safeVersion: string,
 ) => {
-  const to = await multiSendContract.getAddress()
-  const data = multiSendContract.contract.interface.encodeFunctionData('multiSend', [multiSendTxData])
+  const to = multiSendContract.getAddress()
+
+  const data = multiSendContract.encode('multiSend', [multiSendTxData])
   const groupKey = multiSendTxData
 
   let relayResponse

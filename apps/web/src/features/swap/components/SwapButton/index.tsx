@@ -14,10 +14,12 @@ const SwapButton = ({
   tokenInfo,
   amount,
   trackingLabel,
+  light = false,
 }: {
   tokenInfo: TokenInfo
   amount: string
   trackingLabel: SWAP_LABELS
+  light?: boolean
 }): ReactElement => {
   const spendingLimit = useSpendingLimit(tokenInfo)
   const router = useRouter()
@@ -28,10 +30,11 @@ const SwapButton = ({
         <Track {...SWAP_EVENTS.OPEN_SWAPS} label={trackingLabel}>
           <Button
             data-testid="swap-btn"
-            variant="outlined"
-            color="primary"
-            size="small"
+            variant="contained"
+            color={light ? 'background.paper' : 'primary'}
+            size="compact"
             startIcon={<SwapIcon />}
+            disableElevation
             onClick={() => {
               router.push({
                 pathname: AppRoutes.swap,

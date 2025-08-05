@@ -26,7 +26,7 @@
   bottom: var(--space-3);
 }
 
-.step :global(.MuiCard-root:first-child) {
+.step > :global(.MuiCard-root:first-child) {
   border-top-right-radius: 0;
   border-top-left-radius: 0;
   margin-top: 0;

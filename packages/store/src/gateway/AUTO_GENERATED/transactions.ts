@@ -513,6 +513,53 @@ export type SwapOrderTransactionInfo = {
   /** The App Data for this order */
   fullAppData?: object | null
 }
+export type BridgeFee = {
+  tokenAddress: string
+  integratorFee: string
+  lifiFee: string
+}
+export type BridgeAndSwapTransactionInfo = {
+  type: 'SwapAndBridge'
+  humanDescription?: string | null
+  fromToken: TokenInfo
+  recipient: AddressInfo
+  explorerUrl: string | null
+  status: 'NOT_FOUND' | 'INVALID' | 'PENDING' | 'DONE' | 'FAILED' | 'UNKNOWN' | 'AWAITING_EXECUTION'
+  substatus:
+    | 'WAIT_SOURCE_CONFIRMATIONS'
+    | 'WAIT_DESTINATION_TRANSACTION'
+    | 'BRIDGE_NOT_AVAILABLE'
+    | 'CHAIN_NOT_AVAILABLE'
+    | 'REFUND_IN_PROGRESS'
+    | 'UNKNOWN_ERROR'
+    | 'COMPLETED'
+    | 'PARTIAL'
+    | 'REFUNDED'
+    | 'INSUFFICIENT_ALLOWANCE'
+    | 'INSUFFICIENT_BALANCE'
+    | 'OUT_OF_GAS'
+    | 'EXPIRED'
+    | 'SLIPPAGE_EXCEEDED'
+    | 'UNKNOWN_FAILED_ERROR'
+    | 'UNKNOWN'
+    | 'AWAITING_EXECUTION'
+  fees: BridgeFee | null
+  fromAmount: string
+  toChain: string
+  toToken: TokenInfo | null
+  toAmount: string | null
+}
+export type SwapTransactionInfo = {
+  type: 'Swap'
+  humanDescription?: string | null
+  recipient: AddressInfo
+  fees: BridgeFee | null
+  fromToken: TokenInfo
+  fromAmount: string
+  toToken: TokenInfo
+  toAmount: string
+  lifiExplorerUrl: string | null
+}
 export type SwapTransferTransactionInfo = {
   type: 'SwapTransfer'
   humanDescription?: string | null
@@ -664,26 +711,44 @@ export type NativeStakingWithdrawTransactionInfo = {
   tokenInfo: TokenInfo
   validators: string[]
 }
-export type VaultDepositAdditionalRewards = {
+export type VaultInfo = {
+  address: string
+  name: string
+  description: string
+  dashboardUri?: string | null
+  logoUri: string
+}
+export type VaultExtraReward = {
   tokenInfo: TokenInfo
-  returnRate: number
+  nrr: number
+  claimable: string
+  claimableNext: string
 }
 export type VaultDepositTransactionInfo = {
   type: 'VaultDeposit'
   humanDescription?: string | null
-  chainId: string
-  expectedMonthlyReward: number
-  expectedAnnualReward: number
+  value: string
+  baseNrr: number
+  fee: number
   tokenInfo: TokenInfo
-  value: number
-  returnRate: number
-  vaultAddress: string
-  vaultName: string
-  vaultDisplayName: string
-  vaultDescription: string
-  vaultDashboardURL: string | null
-  vaultTVL: number
-  additionalRewards?: VaultDepositAdditionalRewards[]
+  vaultInfo: VaultInfo
+  currentReward: string
+  additionalRewardsNrr: number
+  additionalRewards: VaultExtraReward[]
+  expectedMonthlyReward: string
+  expectedAnnualReward: string
+}
+export type VaultRedeemTransactionInfo = {
+  type: 'VaultRedeem'
+  humanDescription?: string | null
+  value: string
+  baseNrr: number
+  fee: number
+  tokenInfo: TokenInfo
+  vaultInfo: VaultInfo
+  currentReward: string
+  additionalRewardsNrr: number
+  additionalRewards: VaultExtraReward[]
 }
 export type NativeToken = {
   address: string
@@ -764,12 +829,15 @@ export type TransactionDetails = {
     | SettingsChangeTransaction
     | TransferTransactionInfo
     | SwapOrderTransactionInfo
+    | BridgeAndSwapTransactionInfo
+    | SwapTransactionInfo
     | SwapTransferTransactionInfo
     | TwapOrderTransactionInfo
     | NativeStakingDepositTransactionInfo
     | NativeStakingValidatorsExitTransactionInfo
     | NativeStakingWithdrawTransactionInfo
     | VaultDepositTransactionInfo
+    | VaultRedeemTransactionInfo
   safeAddress: string
   txId: string
   executedAt?: number | null
@@ -785,7 +853,6 @@ export type TxsMultisigTransaction = {
   to: string
   value: string
   data: object
-  dataDecoded: object
   operation: number
   gasToken: object
   safeTxGas: object
@@ -837,12 +904,15 @@ export type Transaction = {
     | SettingsChangeTransaction
     | TransferTransactionInfo
     | SwapOrderTransactionInfo
+    | BridgeAndSwapTransactionInfo
+    | SwapTransactionInfo
     | SwapTransferTransactionInfo
     | TwapOrderTransactionInfo
     | NativeStakingDepositTransactionInfo
     | NativeStakingValidatorsExitTransactionInfo
     | NativeStakingWithdrawTransactionInfo
     | VaultDepositTransactionInfo
+    | VaultRedeemTransactionInfo
   id: string
   txHash?: string | null
   timestamp: number
@@ -896,12 +966,15 @@ export type TransactionPreview = {
     | SettingsChangeTransaction
     | TransferTransactionInfo
     | SwapOrderTransactionInfo
+    | BridgeAndSwapTransactionInfo
+    | SwapTransactionInfo
     | SwapTransferTransactionInfo
     | TwapOrderTransactionInfo
     | NativeStakingDepositTransactionInfo
     | NativeStakingValidatorsExitTransactionInfo
     | NativeStakingWithdrawTransactionInfo
     | VaultDepositTransactionInfo
+    | VaultRedeemTransactionInfo
   txData: TransactionData
 }
 export type PreviewTransactionDto = {
@@ -978,7 +1051,6 @@ export type TxsCreationTransaction = {
   masterCopy: object
   setupData: object
   saltNonce: object
-  dataDecoded: object
 }
 export const {
   useTransactionsGetTransactionByIdV1Query,

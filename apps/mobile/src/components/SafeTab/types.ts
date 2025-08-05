@@ -1,4 +1,4 @@
-export interface safeTabItem {
+export interface safeTabItem<T> {
   label: string
-  Component: React.FC
+  Component: React.FC<T>
 }

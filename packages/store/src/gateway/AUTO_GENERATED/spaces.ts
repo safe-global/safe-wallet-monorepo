@@ -140,11 +140,23 @@ const injectedRtkApi = api
         query: (queryArg) => ({ url: `/v1/spaces/${queryArg.spaceId}/members` }),
         providesTags: ['spaces'],
       }),
+      membersSelfRemoveV1: build.mutation<MembersSelfRemoveV1ApiResponse, MembersSelfRemoveV1ApiArg>({
+        query: (queryArg) => ({ url: `/v1/spaces/${queryArg.spaceId}/members`, method: 'DELETE' }),
+        invalidatesTags: ['spaces'],
+      }),
       membersUpdateRoleV1: build.mutation<MembersUpdateRoleV1ApiResponse, MembersUpdateRoleV1ApiArg>({
         query: (queryArg) => ({
           url: `/v1/spaces/${queryArg.spaceId}/members/${queryArg.userId}/role`,
           method: 'PATCH',
           body: queryArg.updateRoleDto,
+        }),
+        invalidatesTags: ['spaces'],
+      }),
+      membersUpdateAliasV1: build.mutation<MembersUpdateAliasV1ApiResponse, MembersUpdateAliasV1ApiArg>({
+        query: (queryArg) => ({
+          url: `/v1/spaces/${queryArg.spaceId}/members/alias`,
+          method: 'PATCH',
+          body: queryArg.updateMemberAliasDto,
         }),
         invalidatesTags: ['spaces'],
       }),
@@ -248,11 +260,20 @@ export type MembersGetUsersV1ApiResponse = /** status 200 Space and members list
 export type MembersGetUsersV1ApiArg = {
   spaceId: number
 }
+export type MembersSelfRemoveV1ApiResponse = unknown
+export type MembersSelfRemoveV1ApiArg = {
+  spaceId: number
+}
 export type MembersUpdateRoleV1ApiResponse = unknown
 export type MembersUpdateRoleV1ApiArg = {
   spaceId: number
   userId: number
   updateRoleDto: UpdateRoleDto
+}
+export type MembersUpdateAliasV1ApiResponse = unknown
+export type MembersUpdateAliasV1ApiArg = {
+  spaceId: number
+  updateMemberAliasDto: UpdateMemberAliasDto
 }
 export type MembersRemoveUserV1ApiResponse = unknown
 export type MembersRemoveUserV1ApiArg = {
@@ -369,6 +390,7 @@ export type Member = {
   role: 'ADMIN' | 'MEMBER'
   status: 'INVITED' | 'ACTIVE' | 'DECLINED'
   name: string
+  alias?: string | null
   invitedBy?: string | null
   createdAt: string
   updatedAt: string
@@ -379,6 +401,10 @@ export type MembersDto = {
 }
 export type UpdateRoleDto = {
   role: 'ADMIN' | 'MEMBER'
+}
+export type UpdateMemberAliasDto = {
+  /** The new alias for the member */
+  alias: string
 }
 export const {
   useAddressBooksGetAddressBookV1Query,
@@ -407,6 +433,8 @@ export const {
   useMembersDeclineInviteV1Mutation,
   useMembersGetUsersV1Query,
   useLazyMembersGetUsersV1Query,
+  useMembersSelfRemoveV1Mutation,
   useMembersUpdateRoleV1Mutation,
+  useMembersUpdateAliasV1Mutation,
   useMembersRemoveUserV1Mutation,
 } = injectedRtkApi

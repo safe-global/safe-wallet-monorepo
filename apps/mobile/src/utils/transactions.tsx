@@ -1,4 +1,3 @@
-import { GroupedTxs } from '@/src/features/TxHistory/utils'
 import {
   isTransferTxInfo,
   isAddSignerTxInfo,
@@ -7,6 +6,14 @@ import {
   isERC721Transfer,
   isRemoveSignerTxInfo,
   isOrderTxInfo,
+  isVaultDepositTxInfo,
+  isVaultRedeemTxInfo,
+  isStakingTxDepositInfo,
+  isStakingTxExitInfo,
+  isStakingTxWithdrawInfo,
+  isCancellationTxInfo,
+  isBridgeOrderTxInfo,
+  isLifiSwapTxInfo,
 } from '@/src/utils/transaction-guards'
 import { Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { ETxType } from '../types/txType'
@@ -28,6 +35,10 @@ export const getTransactionType = ({ txInfo }: { txInfo: Transaction['txInfo'] }
     return ETxType.REMOVE_SIGNER
   }
 
+  if (isCancellationTxInfo(txInfo)) {
+    return ETxType.CANCEL_TX
+  }
+
   if (isMultiSendTxInfo(txInfo) || isCustomTxInfo(txInfo)) {
     return ETxType.CONTRACT_INTERACTION
   }
@@ -36,8 +47,38 @@ export const getTransactionType = ({ txInfo }: { txInfo: Transaction['txInfo'] }
     return ETxType.SWAP_ORDER
   }
 
+  if (isBridgeOrderTxInfo(txInfo)) {
+    return ETxType.BRIDGE_ORDER
+  }
+
+  if (isLifiSwapTxInfo(txInfo)) {
+    return ETxType.LIFI_SWAP
+  }
+
+  if (isStakingTxDepositInfo(txInfo)) {
+    return ETxType.STAKE_DEPOSIT
+  }
+
+  if (isStakingTxExitInfo(txInfo)) {
+    return ETxType.STAKE_WITHDRAW_REQUEST
+  }
+
+  if (isStakingTxWithdrawInfo(txInfo)) {
+    return ETxType.STAKE_EXIT
+  }
+
+  if (isVaultDepositTxInfo(txInfo)) {
+    return ETxType.VAULT_DEPOSIT
+  }
+
+  if (isVaultRedeemTxInfo(txInfo)) {
+    return ETxType.VAULT_REDEEM
+  }
+
   return null
 }
+
+export type GroupedTxs<T> = (T | T[])[]
 
 export const groupBulkTxs = <T extends { type: string; transaction?: Transaction }>(
   list: GroupedTxs<T>,

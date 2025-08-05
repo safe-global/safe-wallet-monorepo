@@ -36,7 +36,7 @@ describe('Bulk execution', () => {
     'Verify that "Confirm bulk execution" screen contains only available for execution txs in the actions list',
     { defaultCommandTimeout: 30000 },
     () => {
-      const actions = ['1transfer', '2removeOwner']
+      const actions = ['1Send', '2removeOwner']
 
       cy.visit(constants.transactionQueueUrl + fundsSafes.SEP_FUNDS_SAFE_14)
       wallet.connectSigner(signer)

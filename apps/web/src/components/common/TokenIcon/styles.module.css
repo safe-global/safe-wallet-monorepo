@@ -8,3 +8,15 @@
   border-radius: 4px;
   padding: 2px;
 }
+
+.chainIcon {
+  position: absolute;
+  bottom: 0px;
+  right: -8px;
+  background-color: var(--color-background-paper);
+  border: 1px solid var(--color-border-background);
+  border-radius: 100%;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+}

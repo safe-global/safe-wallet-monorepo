@@ -2,7 +2,7 @@ import { faker } from '@faker-js/faker'
 import rolePermissionsConfig, { Permission, Role } from './config'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import type useWallet from '@/hooks/wallets/useWallet'
-import type { SafeTransaction } from '@safe-global/safe-core-sdk-types'
+import type { SafeTransaction } from '@safe-global/types-kit'
 import type { SpendingLimitState } from '@/store/spendingLimitsSlice'
 
 describe('RolePermissionsConfig', () => {

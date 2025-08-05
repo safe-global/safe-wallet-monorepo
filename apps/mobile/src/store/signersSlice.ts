@@ -15,6 +15,10 @@ const signersSlice = createSlice({
 
       return state
     },
+    removeSigner: (state, action: PayloadAction<string>) => {
+      const { [action.payload]: _, ...newState } = state
+      return newState
+    },
   },
 })
 
@@ -29,8 +33,16 @@ export const addSignerWithEffects =
     }
   }
 
-export const { addSigner } = signersSlice.actions
+export const { addSigner, removeSigner } = signersSlice.actions
 
 export const selectSigners = (state: RootState) => state.signers
+
+export const selectSignersByAddress = (state: RootState) => state.signers
+
+export const selectSignerHasPrivateKey = (address: string) => (state: RootState) => {
+  return !!state.signers[address]
+}
+
+export const selectTotalSignerCount = (state: RootState) => Object.keys(state.signers).length
 
 export default signersSlice.reducer

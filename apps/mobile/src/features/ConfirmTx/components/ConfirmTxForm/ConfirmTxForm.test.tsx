@@ -7,9 +7,11 @@ import { AlreadySigned } from '../confirmation-views/AlreadySigned'
 import { CanNotSign } from '../CanNotSign'
 import { ExecuteForm } from '../ExecuteForm'
 import { SignForm } from '../SignForm'
+import { useTransactionSigner } from '../../hooks/useTransactionSigner'
 
 // Mock the hooks and components
 jest.mock('@/src/store/hooks/activeSafe')
+jest.mock('../../hooks/useTransactionSigner')
 jest.mock('../confirmation-views/AlreadySigned')
 jest.mock('../CanNotSign')
 jest.mock('../ExecuteForm')
@@ -21,12 +23,23 @@ describe('ConfirmTxForm', () => {
     chainId: '1',
   }
 
+  const mockSignerState = {
+    activeSigner: { value: '0x456' },
+    hasSigned: false,
+    canSign: true,
+  }
+
   beforeEach(() => {
     // Reset all mocks before each test
     jest.clearAllMocks()
 
     // Mock the useDefinedActiveSafe hook
     ;(useDefinedActiveSafe as jest.Mock).mockReturnValue(mockActiveSafe)
+
+    // Mock the useTransactionSigner hook
+    ;(useTransactionSigner as jest.Mock).mockReturnValue({
+      signerState: mockSignerState,
+    })
 
     // Mock the components to return React Native components
     ;(AlreadySigned as jest.Mock).mockReturnValue(
@@ -53,16 +66,16 @@ describe('ConfirmTxForm', () => {
 
   const defaultProps = {
     hasEnoughConfirmations: false,
-    activeSigner: { value: '0x456' },
     isExpired: false,
     txId: 'tx123',
-    hasSigned: false,
-    canSign: true,
   }
 
   it('renders AlreadySigned when hasSigned is true', () => {
-    const props = { ...defaultProps, hasSigned: true }
-    const { getByText } = render(<ConfirmTxForm {...props} />)
+    ;(useTransactionSigner as jest.Mock).mockReturnValue({
+      signerState: { ...mockSignerState, hasSigned: true },
+    })
+
+    const { getByText } = render(<ConfirmTxForm {...defaultProps} />)
 
     expect(getByText('AlreadySigned')).toBeTruthy()
     expect(AlreadySigned).toHaveBeenCalledWith(
@@ -76,22 +89,17 @@ describe('ConfirmTxForm', () => {
   })
 
   it('renders CanNotSign when canSign is false', () => {
-    const props = { ...defaultProps, canSign: false }
-    const { getByText } = render(<ConfirmTxForm {...props} />)
+    ;(useTransactionSigner as jest.Mock).mockReturnValue({
+      signerState: { ...mockSignerState, canSign: false },
+    })
+
+    const { getByText } = render(<ConfirmTxForm {...defaultProps} />)
 
     expect(getByText('CanNotSign')).toBeTruthy()
-    expect(CanNotSign).toHaveBeenCalledWith(
-      expect.objectContaining({
-        address: '0x456',
-        txId: 'tx123',
-      }),
-      undefined,
-    )
   })
 
   it('renders ExecuteForm when hasEnoughConfirmations is true', () => {
-    const props = { ...defaultProps, hasEnoughConfirmations: true }
-    const { getByText } = render(<ConfirmTxForm {...props} />)
+    const { getByText } = render(<ConfirmTxForm {...defaultProps} hasEnoughConfirmations={true} />)
 
     expect(getByText('ExecuteForm')).toBeTruthy()
     expect(ExecuteForm).toHaveBeenCalledWith(
@@ -104,45 +112,34 @@ describe('ConfirmTxForm', () => {
   })
 
   it('renders SignForm when activeSigner exists and not expired', () => {
-    const props = { ...defaultProps }
-    const { getByText } = render(<ConfirmTxForm {...props} />)
+    const { getByText } = render(<ConfirmTxForm {...defaultProps} />)
 
     expect(getByText('SignForm')).toBeTruthy()
     expect(SignForm).toHaveBeenCalledWith(
       expect.objectContaining({
         txId: 'tx123',
-        address: '0x456',
       }),
       undefined,
     )
   })
 
   it('renders null when no conditions are met', () => {
-    const props = {
-      ...defaultProps,
-      activeSigner: undefined,
-      isExpired: true,
-    }
-    const { toJSON } = render(<ConfirmTxForm {...props} />)
+    ;(useTransactionSigner as jest.Mock).mockReturnValue({
+      signerState: { ...mockSignerState, activeSigner: undefined },
+    })
+
+    const { toJSON } = render(<ConfirmTxForm {...defaultProps} isExpired={true} />)
 
     expect(toJSON()).toBeNull()
   })
 
   it('handles undefined activeSigner in CanNotSign', () => {
-    const props = {
-      ...defaultProps,
-      canSign: false,
-      activeSigner: undefined,
-    }
-    const { getByText } = render(<ConfirmTxForm {...props} />)
+    ;(useTransactionSigner as jest.Mock).mockReturnValue({
+      signerState: { ...mockSignerState, canSign: false, activeSigner: undefined },
+    })
+
+    const { getByText } = render(<ConfirmTxForm {...defaultProps} />)
 
     expect(getByText('CanNotSign')).toBeTruthy()
-    expect(CanNotSign).toHaveBeenCalledWith(
-      expect.objectContaining({
-        address: undefined,
-        txId: 'tx123',
-      }),
-      undefined,
-    )
   })
 })

@@ -34,8 +34,9 @@ git push
 ```
 
 Once pushed:
-* Create a PR from `release` to `main`.
-* Add the PR to the Wallet project and set the status to `Ready for QA`
+
+- Create a PR from `release` to `main`.
+- Add the PR to the Wallet project and set the status to `Ready for QA`
 
 ### QA
 

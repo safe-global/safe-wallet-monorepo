@@ -1,5 +1,5 @@
 import { type ChainInfo, type TransactionData } from '@safe-global/safe-gateway-typescript-sdk'
-import { OperationType } from '@safe-global/safe-core-sdk-types'
+import { OperationType } from '@safe-global/types-kit'
 import { Safe_migration__factory } from '@safe-global/utils/types/contracts'
 import { faker } from '@faker-js/faker'
 

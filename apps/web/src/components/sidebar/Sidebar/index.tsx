@@ -6,7 +6,6 @@ import ChainIndicator from '@/components/common/ChainIndicator'
 import SidebarHeader from '@/components/sidebar/SidebarHeader'
 import SidebarNavigation from '@/components/sidebar/SidebarNavigation'
 import SidebarFooter from '@/components/sidebar/SidebarFooter'
-import IndexingStatus from '@/components/sidebar/IndexingStatus'
 
 import css from './styles.module.css'
 import { trackEvent, OVERVIEW_EVENTS } from '@/services/analytics'
@@ -38,8 +37,6 @@ const Sidebar = (): ReactElement => {
         {/* Address, balance, copy button, etc */}
         <SidebarHeader />
 
-        <Divider />
-
         {/* Nav menu */}
         <SidebarNavigation />
 
@@ -51,12 +48,7 @@ const Sidebar = (): ReactElement => {
 
         <Divider flexItem />
 
-        {/* What's new + Need help? */}
         <SidebarFooter />
-
-        <Divider flexItem />
-
-        <IndexingStatus />
       </div>
       <Drawer variant="temporary" anchor="left" open={isDrawerOpen} onClose={onDrawerToggle}>
         <div className={css.drawer}>

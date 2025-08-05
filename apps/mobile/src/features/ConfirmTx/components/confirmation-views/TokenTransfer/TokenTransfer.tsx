@@ -18,13 +18,16 @@ import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { Address } from '@/src/types/address'
 import { TokenAmount } from '@/src/components/TokenAmount'
 import { useOpenExplorer } from '@/src/features/ConfirmTx/hooks/useOpenExplorer'
+import { ParametersButton } from '../../ParametersButton'
+
 interface TokenTransferProps {
+  txId: string
   txInfo: TransferTransactionInfo
   executionInfo: MultisigExecutionDetails
   executedAt: number
 }
 
-export function TokenTransfer({ txInfo, executionInfo, executedAt }: TokenTransferProps) {
+export function TokenTransfer({ txId, txInfo, executionInfo, executedAt }: TokenTransferProps) {
   const activeSafe = useDefinedActiveSafe()
   const activeChain = useAppSelector((state: RootState) => selectChainById(state, activeSafe.chainId))
   const { value, tokenSymbol, logoUri, decimals } = useTokenDetails(txInfo)
@@ -60,20 +63,18 @@ export function TokenTransfer({ txInfo, executionInfo, executedAt }: TokenTransf
             <View alignItems="center" flexDirection="row" justifyContent="space-between">
               <Text color="$textSecondaryLight">To</Text>
 
-              <View flexDirection="row" alignItems="center">
-                <View flexDirection="row" alignItems="center" gap="$2">
-                  <Identicon address={recipientAddress} size={24} />
-                  <EthAddress
-                    address={recipientAddress}
-                    copy
-                    copyProps={{ color: '$textSecondaryLight', size: 18 }}
-                    textProps={{ fontSize: '$4' }}
-                  />
-                </View>
+              <View flexDirection="row" alignItems="center" gap="$2">
+                <Identicon address={recipientAddress} size={24} />
+                <EthAddress
+                  address={recipientAddress}
+                  copy
+                  copyProps={{ color: '$textSecondaryLight', size: 18 }}
+                  textProps={{ fontSize: '$4' }}
+                />
                 <Button
                   onPress={viewOnExplorer}
+                  marginLeft={-10}
                   height={18}
-                  style={{ marginLeft: -12 }}
                   pressStyle={{ backgroundColor: 'transparent' }}
                 >
                   <SafeFontIcon name="external-link" color="$textSecondaryLight" size={16} />
@@ -89,6 +90,8 @@ export function TokenTransfer({ txInfo, executionInfo, executedAt }: TokenTransf
                 <Text fontSize="$4">{activeChain?.chainName}</Text>
               </View>
             </View>
+
+            <ParametersButton txId={txId} />
           </Container>
         </YStack>
       </View>

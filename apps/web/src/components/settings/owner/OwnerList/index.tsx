@@ -1,14 +1,15 @@
 import { jsonToCSV } from 'react-papaparse'
 import { type SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import EthHashInfo from '@/components/common/EthHashInfo'
-import { AddOwnerFlow, ReplaceOwnerFlow, RemoveOwnerFlow } from '@/components/tx-flow/flows'
+import { ReplaceOwnerFlow, RemoveOwnerFlow } from '@/components/tx-flow/flows'
 import useAddressBook from '@/hooks/useAddressBook'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { Box, Grid, Typography, Button, SvgIcon, Tooltip, IconButton } from '@mui/material'
 import { useContext, useMemo } from 'react'
 import { EditOwnerDialog } from '../EditOwnerDialog'
 import EnhancedTable from '@/components/common/EnhancedTable'
-import AddIcon from '@/public/images/common/add.svg'
+import EditOwnerIcon from '@/public/images/common/edit-owner.svg'
+import { ManageSignersFlow } from '@/components/tx-flow/flows/ManagerSigners'
 import Track from '@/components/common/Track'
 import { SETTINGS_EVENTS } from '@/services/analytics/events/settings'
 import CheckWallet from '@/components/common/CheckWallet'
@@ -114,23 +115,23 @@ export const OwnerList = () => {
 
           <Box
             sx={{
-              pt: 2,
+              py: 2,
               display: 'flex',
               justifyContent: 'space-between',
             }}
           >
             <CheckWallet>
               {(isOk) => (
-                <Track {...SETTINGS_EVENTS.SETUP.ADD_OWNER}>
+                <Track {...SETTINGS_EVENTS.SETUP.MANAGE_SIGNERS}>
                   <Button
-                    data-testid="add-owner-btn"
-                    onClick={() => setTxFlow(<AddOwnerFlow />)}
+                    data-testid="manage-signers-btn"
+                    onClick={() => setTxFlow(<ManageSignersFlow />)}
                     variant="text"
-                    startIcon={<SvgIcon component={AddIcon} inheritViewBox fontSize="small" />}
+                    startIcon={<SvgIcon component={EditOwnerIcon} inheritViewBox />}
                     disabled={!isOk}
                     size="compact"
                   >
-                    Add signer
+                    Manage signers
                   </Button>
                 </Track>
               )}

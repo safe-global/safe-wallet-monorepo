@@ -13,7 +13,10 @@ const tokenAddressInput = 'input[name="recipients.0.tokenAddress"]'
 const amountInput = 'input[name="recipients.0.amount"]'
 const amountInput_ = (index) => `input[name="recipients.${index}.amount"]`
 const nonceInput = 'input[name="nonce"]'
+const walletNonceInput = '[name="userNonce"]'
 const gasLimitInput = '[name="gasLimit"]'
+const maxPriorityFee = '[name="maxPriorityFeePerGas"]'
+const maxFee = '[name="maxFeePerGas"]'
 const rotateLeftIcon = '[data-testid="RotateLeftIcon"]'
 export const transactionItem = '[data-testid="transaction-item"]'
 export const connectedWalletExecMethod = '[data-testid="connected-wallet-execution-method"]'
@@ -57,7 +60,7 @@ const deleteTxModalBtn = '[data-testid="delete-tx-btn"]'
 const toggleUntrustedBtn = '[data-testid="toggle-untrusted"]'
 const simulateTxBtn = '[data-testid="simulate-btn"]'
 const simulateSuccess = '[data-testid="simulation-success-msg"]'
-const signBtn = '[data-testid="sign-btn"]'
+const signBtn = '[data-testid="combo-submit-sign"]'
 const continueSignBtn = '[data-testid="continue-sign-btn"]'
 export const altImgDai = 'img[alt="DAI"]'
 export const altImgCow = 'img[alt="COW"]'
@@ -89,6 +92,7 @@ const recipientsCount = '[data-testid="recipients-count"]'
 const maxBtn = '[data-testid="max-btn"]'
 const tokenAmountSection = '[data-testid="token-amount-section"]'
 const insufficientBalanceError = '[data-testid="insufficient-balance-error"]'
+const proposeTransactionBtn = '[data-testid="sign-btn"]'
 
 const insufficientFundsErrorStr = 'Insufficient funds'
 const viewTransactionBtn = 'View transaction'
@@ -124,6 +128,7 @@ const enabledBulkExecuteBtnTooltip = 'All highlighted transactions will be inclu
 const bulkExecuteBtnStr = 'Bulk execute'
 
 const batchModalTitle = 'Batch'
+const gasLimit21000 = 'Gas limit must be at least 21000'
 export const swapOrder = 'Swap order settlement'
 export const bulkTxs = 'Bulk transactions'
 export const txStr = 'Transactions'
@@ -132,8 +137,35 @@ export const settingsStr = 'Settings'
 export const assetsStr = 'Assets'
 export const topAssetsStr = 'Top assets'
 export const getStartedStr = 'Get started'
-export const txNoteWarningMessage = 'The notes are publicly visible, do not share any private or sensitive details'
+export const txNoteWarningMessage = 'Notes are publicly visible.Do not share any private or sensitive details'
 export const recordedTxNote = 'Tx note one'
+
+const comboButton = '[data-testid="combo-submit-dropdown"]'
+const comboButtonPopover = '[data-testid="combo-submit-popover"]'
+export const comboButtonOptions = {
+  sign: 'Sign',
+  execute: 'Execute',
+  addToBatch: 'Add to batch',
+}
+
+const advancedParametersValues = {
+  walletNonce: '5500',
+  maxPriorityFee: '0.1234',
+  maxFee: '0.5678',
+  gasLimit: '300001',
+}
+const advancedParametersInputNames = {
+  walletNonce: 'Wallet nonce',
+  maxPriorityFee: 'Max priority fee (Gwei)',
+  maxFee: 'Max fee (Gwei)',
+  gasLimit: 'Gas limit',
+}
+
+// Transaction details on Tx creation
+export const txAccordionDetails = '[data-testid="decoded-tx-details"]'
+
+//Arrays for the Transaction Details on Tx creation for different type of txs
+export const MultisendData = ['Call', 'multiSend', 'on', 'Safe: MultiSendCallOnly 1.4.1']
 
 export const tx_status = {
   execution_needed: 'Execution needed',
@@ -223,7 +255,7 @@ export function typeNoteText(text) {
 
 export function checkMaxNoteLength() {
   typeNoteText(main.generateRandomString(61))
-  cy.get(noteTextField).contains('60/60').should('be.visible')
+  cy.get(noteTextField).should('exist').contains('60/60').should('be.visible')
 }
 
 export function checkNoteWarningMsg() {
@@ -424,11 +456,12 @@ export function verifyNumberOfCopyIcons(number) {
 }
 
 export function verifyNumberOfExternalLinks(number) {
-  cy.get(copyIcon)
-    .parent()
-    .parent()
-    .next()
-    .children('a')
+  cy.get('main')
+    .find(explorerBtn)
+    //.parent()
+    // .parent()
+    // .next()
+    //.children('a')
     .then(($links) => {
       expect($links.length).to.be.at.least(number)
       for (let i = 0; i < number; i++) {
@@ -480,7 +513,8 @@ export function clickOnExpandableAction(data) {
 }
 
 export function clickOnAdvancedDetails() {
-  cy.get(advancedDetails).click({ force: true })
+  cy.get(advancedDetails).click()
+  //({ force: true })
 }
 
 export function expandAdvancedDetails(data) {
@@ -488,6 +522,14 @@ export function expandAdvancedDetails(data) {
   data.forEach((row) => {
     cy.get('div').contains(row).should('be.visible')
   })
+}
+//The whole block inside Transaction details accordion: data-root and advanced details together
+export function verifytxAccordionDetails(data) {
+  main.checkTextsExistWithinElement(txAccordionDetails, data)
+}
+// Function to check elements inside Transaction details/DecodedDataRoot
+export function checkDataDecodingRoot(data) {
+  main.checkTextsExistWithinElement(decodedDataTop, data)
 }
 
 export function switchView(view) {
@@ -736,23 +778,50 @@ export function clickOnYesOption() {
   cy.contains(yesStr).should('exist').click()
 }
 
-export function openExecutionParamsModal() {
+export function displayAdvancedDetails() {
   cy.contains(estimatedFeeStr).click()
+}
+
+export function openExecutionParamsModal() {
+  displayAdvancedDetails()
   cy.contains(editBtnStr).click()
 }
 
 export function verifyAndSubmitExecutionParams() {
   cy.contains(executionParamsStr).parents('form').as('Paramsform')
-  const arrayNames = ['Wallet nonce', 'Max priority fee (Gwei)', 'Max fee (Gwei)', 'Gas limit']
+  const arrayNames = [
+    advancedParametersInputNames.walletNonce,
+    advancedParametersInputNames.maxPriorityFee,
+    advancedParametersInputNames.maxFee,
+    advancedParametersInputNames.gasLimit,
+  ]
   arrayNames.forEach((element) => {
     cy.get('@Paramsform').find('label').contains(`${element}`).next().find('input').should('not.be.disabled')
   })
 
   cy.get('@Paramsform').find(gasLimitInput).clear().type('100').invoke('prop', 'value').should('equal', '100')
-  cy.contains('Gas limit must be at least 21000').should('be.visible')
+  cy.contains(gasLimit21000).should('be.visible')
   cy.get('@Paramsform').find(gasLimitInput).clear().type('300000').invoke('prop', 'value').should('equal', '300000')
   cy.get('@Paramsform').find(gasLimitInput).parent('div').find(rotateLeftIcon).click()
   cy.get('@Paramsform').submit()
+}
+
+export function setAdvancedExecutionParams() {
+  cy.contains(executionParamsStr).parents('form').as('Paramsform')
+  cy.get('@Paramsform').find(gasLimitInput).clear().type(advancedParametersValues.gasLimit)
+  cy.get('@Paramsform').find(maxPriorityFee).clear().type(advancedParametersValues.maxPriorityFee)
+  cy.get('@Paramsform').find(maxFee).clear().type(advancedParametersValues.maxFee)
+  cy.get('@Paramsform').find(walletNonceInput).clear().type(advancedParametersValues.walletNonce)
+  cy.get('@Paramsform').submit()
+}
+
+export function verifyEditedExcutionParams() {
+  cy.contains(advancedParametersInputNames.walletNonce).next().should('contain', advancedParametersValues.walletNonce)
+  cy.contains(advancedParametersInputNames.gasLimit).next().should('contain', advancedParametersValues.gasLimit)
+  cy.contains(advancedParametersInputNames.maxPriorityFee)
+    .next()
+    .should('contain', advancedParametersValues.maxPriorityFee)
+  cy.contains(advancedParametersInputNames.maxFee).next().should('contain', advancedParametersValues.maxFee)
 }
 
 export function clickOnNoLaterOption() {
@@ -761,6 +830,10 @@ export function clickOnNoLaterOption() {
 
 export function clickOnSignTransactionBtn() {
   cy.get(signBtn).click()
+}
+
+export function clickOnProposeTransactionBtn() {
+  cy.get(proposeTransactionBtn).click()
 }
 
 export function clickOnContinueSignTransactionBtn() {
@@ -947,5 +1020,25 @@ export function checkMaxRecipientReached(attempt = 0) {
     clickOnAddRecipientBtn()
     checkNumberOfRecipients(`${attempt + 2}/5`)
     checkMaxRecipientReached(attempt + 1)
+  })
+}
+
+export function selectComboButtonOption(option) {
+  cy.get(comboButton).click()
+  cy.get(comboButtonPopover).findByText(comboButtonOptions[option]).click()
+}
+
+export function checkThatComboButtonOptionIsNotPresent(option) {
+  cy.get('body').then(($body) => {
+    if ($body.find(comboButton).length > 0) {
+      cy.get(comboButton).then(($dropdown) => {
+        if ($dropdown.is(':visible')) {
+          cy.get(comboButton).click()
+          cy.get(comboButtonPopover).should('be.visible')
+          cy.get(comboButtonPopover).should('not.contain.text', option)
+          cy.get('body').click(0, 0)
+        }
+      })
+    }
   })
 }

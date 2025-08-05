@@ -2,7 +2,7 @@ import { useCurrentChain } from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useEffect, useMemo, useContext } from 'react'
 import { useSelector } from 'react-redux'
-import { Typography, Alert } from '@mui/material'
+import { Typography, Alert, Box } from '@mui/material'
 
 import SpendingLimitLabel from '@/components/common/SpendingLimitLabel'
 import { getResetTimeOptions } from '@/components/transactions/TxDetails/TxData/SpendingLimits'
@@ -96,7 +96,7 @@ export const ReviewSpendingLimit = ({ onSubmit, children }: ReviewTransactionPro
     : undefined
 
   return (
-    <ReviewTransaction onSubmit={onFormSubmit}>
+    <ReviewTransaction onSubmit={onFormSubmit} withDecodedData={false}>
       {token && (
         <SendAmountBlock amountInWei={amountInWei} tokenInfo={token.tokenInfo} title="Amount">
           {existingAmount && existingAmount !== data?.amount && (
@@ -116,14 +116,15 @@ export const ReviewSpendingLimit = ({ onSubmit, children }: ReviewTransactionPro
       )}
 
       <TxDetailsRow label="Beneficiary" grid>
-        <EthHashInfo
-          data-testid="beneficiary-address"
-          address={data?.beneficiary || ''}
-          shortAddress={false}
-          hasExplorer
-          showCopyButton
-          showAvatar={false}
-        />
+        <Box data-testid="beneficiary-address">
+          <EthHashInfo
+            address={data?.beneficiary || ''}
+            shortAddress={false}
+            hasExplorer
+            showCopyButton
+            showAvatar={false}
+          />
+        </Box>
       </TxDetailsRow>
 
       <TxDetailsRow label="Reset time" grid>

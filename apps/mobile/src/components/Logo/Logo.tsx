@@ -1,5 +1,6 @@
-import React from 'react'
-import { Avatar, Theme, View } from 'tamagui'
+import React, { useState } from 'react'
+import { Theme, View } from 'tamagui'
+import { Image } from 'expo-image'
 import { IconProps, SafeFontIcon } from '../SafeFontIcon/SafeFontIcon'
 import { Badge } from '../Badge/Badge'
 import { badgeTheme } from '../Badge/theme'
@@ -12,6 +13,7 @@ interface LogoProps {
   logoUri?: string | null
   accessibilityLabel?: string
   fallbackIcon?: IconProps['name']
+  fallbackContent?: React.ReactNode
   imageBackground?: string
   size?: string
   badgeContent?: React.ReactElement
@@ -22,11 +24,16 @@ export function Logo({
   logoUri,
   accessibilityLabel,
   size = '$10',
-  imageBackground = '$color',
+  imageBackground = '$background',
   fallbackIcon = 'nft',
+  fallbackContent,
   badgeContent,
   badgeThemeName = 'badge_background',
 }: LogoProps) {
+  const [showFallback, setShowFallback] = useState(false)
+
+  const displayFallback = showFallback || !logoUri
+
   return (
     <Theme name="logo">
       <View width={size}>
@@ -36,22 +43,34 @@ export function Logo({
           )}
         </View>
 
-        <Avatar circular size={size}>
-          {logoUri && (
-            <Avatar.Image
+        <View backgroundColor={imageBackground} width={size} height={size} borderRadius="50%">
+          {logoUri && !showFallback && (
+            <Image
               testID="logo-image"
-              backgroundColor={imageBackground}
+              source={logoUri}
+              style={{
+                flex: 1,
+                borderRadius: 50,
+              }}
               accessibilityLabel={accessibilityLabel}
-              source={{ uri: logoUri }}
+              onError={() => setShowFallback(true)}
             />
           )}
-
-          <Avatar.Fallback backgroundColor="$background">
-            <View backgroundColor="$background" padding="$2" borderRadius={100}>
-              <SafeFontIcon testID="logo-fallback-icon" name={fallbackIcon} color="$colorSecondary" />
-            </View>
-          </Avatar.Fallback>
-        </Avatar>
+          {displayFallback &&
+            (fallbackContent || (
+              <View
+                backgroundColor="$background"
+                borderRadius="50%"
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+                height={size}
+                width={size}
+              >
+                <SafeFontIcon testID="logo-fallback-icon" name={fallbackIcon} color="$colorSecondary" size={16} />
+              </View>
+            ))}
+        </View>
       </View>
     </Theme>
   )

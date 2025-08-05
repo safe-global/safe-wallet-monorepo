@@ -1,7 +1,8 @@
 import { blo } from 'blo'
 import { View } from 'tamagui'
 import { Image } from 'expo-image'
-import { Dimensions, StyleSheet, useColorScheme } from 'react-native'
+import { Dimensions, StyleSheet } from 'react-native'
+import { useTheme } from '@/src/theme/hooks/useTheme'
 import { BlurView } from 'expo-blur'
 import React from 'react'
 import { Address } from '@/src/types/address'
@@ -13,7 +14,7 @@ type Props = {
 }
 export const BlurredIdenticonBackground = ({ address, height = 125, children }: Props) => {
   const blockie = blo(address)
-  const colorScheme = useColorScheme()
+  const { colorScheme } = useTheme()
 
   return (
     <View>

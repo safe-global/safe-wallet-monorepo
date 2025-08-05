@@ -9,12 +9,27 @@ import { SafeFontIcon as Icon } from '@/src/components/SafeFontIcon/SafeFontIcon
 import { FloatingMenu } from '../FloatingMenu'
 import { LoadableSwitch } from '@/src/components/LoadableSwitch'
 import { useBiometrics } from '@/src/hooks/useBiometrics'
+import { useNotificationManager } from '@/src/hooks/useNotificationManager'
+import { useAppSelector } from '@/src/store/hooks'
+import { selectAppNotificationStatus } from '@/src/store/notificationsSlice'
+import { selectCurrency } from '@/src/store/settingsSlice'
 import { capitalize } from '@/src/utils/formatters'
 import { SAFE_WEB_FEEDBACK_URL } from '@/src/config/constants'
 
 export const AppSettingsContainer = () => {
-  const { toggleBiometrics, isBiometricsEnabled, isLoading, getBiometricsUIInfo } = useBiometrics()
+  const { toggleBiometrics, isBiometricsEnabled, isLoading: isBiometricsLoading, getBiometricsUIInfo } = useBiometrics()
+  const { enableNotification, disableNotification, isLoading: isNotificationsLoading } = useNotificationManager()
+  const isAppNotificationEnabled = useAppSelector(selectAppNotificationStatus)
+  const currency = useAppSelector(selectCurrency)
   const { themePreference, setThemePreference } = useTheme()
+
+  const handleToggleNotifications = () => {
+    if (isAppNotificationEnabled) {
+      disableNotification()
+    } else {
+      enableNotification()
+    }
+  }
 
   const settingsSections = [
     {
@@ -23,9 +38,14 @@ export const AppSettingsContainer = () => {
         {
           label: 'Currency',
           leftIcon: 'token',
-          onPress: () => console.log('currency'),
-          disabled: true,
-          tag: 'Coming soon',
+          onPress: () => router.push('/currency'),
+          disabled: false,
+          rightNode: (
+            <View flexDirection="row" alignItems="center" gap={4}>
+              <Text color="$colorSecondary">{currency.toUpperCase()}</Text>
+              <Icon name={'chevron-right'} />
+            </View>
+          ),
         },
         {
           label: 'Appearance',
@@ -75,7 +95,7 @@ export const AppSettingsContainer = () => {
               testID="toggle-app-biometrics"
               onChange={() => toggleBiometrics(!isBiometricsEnabled)}
               value={isBiometricsEnabled}
-              isLoading={isLoading}
+              isLoading={isBiometricsLoading}
               trackColor={{ true: '$primary' }}
             />
           ),
@@ -98,6 +118,21 @@ export const AppSettingsContainer = () => {
           leftIcon: 'address-book',
           type: 'menu',
           onPress: () => router.push('/address-book'),
+          disabled: false,
+        },
+        {
+          label: 'Allow notifications',
+          leftIcon: 'bell',
+          type: 'switch',
+          rightNode: (
+            <LoadableSwitch
+              testID="toggle-global-notifications"
+              onChange={handleToggleNotifications}
+              value={isAppNotificationEnabled}
+              isLoading={isNotificationsLoading}
+              trackColor={{ true: '$primary' }}
+            />
+          ),
           disabled: false,
         },
       ],

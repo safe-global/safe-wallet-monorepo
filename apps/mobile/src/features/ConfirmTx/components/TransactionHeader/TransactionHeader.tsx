@@ -11,6 +11,7 @@ import { formatWithSchema } from '@/src/utils/date'
 
 interface TransactionHeaderProps {
   logo?: string
+  customLogo?: React.ReactNode
   badgeIcon: IconName
   badgeThemeName?: BadgeThemeTypes
   badgeColor: string
@@ -21,6 +22,7 @@ interface TransactionHeaderProps {
 
 export function TransactionHeader({
   logo,
+  customLogo,
   badgeIcon,
   badgeThemeName,
   badgeColor,
@@ -28,7 +30,7 @@ export function TransactionHeader({
   isIdenticon,
   submittedAt,
 }: TransactionHeaderProps) {
-  const date = formatWithSchema(submittedAt, 'MMM d yyyy')
+  const date = formatWithSchema(submittedAt, 'd MMM yyyy')
   const time = formatWithSchema(submittedAt, 'hh:mm a')
 
   return (
@@ -36,18 +38,26 @@ export function TransactionHeader({
       {isIdenticon ? (
         <Identicon address={logo as Address} size={44} />
       ) : (
-        <Logo
-          logoUri={logo}
-          size="$10"
-          badgeContent={<SafeFontIcon name={badgeIcon} color={badgeColor} size={12} />}
-          badgeThemeName={badgeThemeName}
-        />
+        (customLogo ?? (
+          <Logo
+            logoUri={logo}
+            size="$10"
+            badgeContent={<SafeFontIcon name={badgeIcon} color={badgeColor} size={12} />}
+            badgeThemeName={badgeThemeName}
+          />
+        ))
       )}
 
-      <View alignItems="center" gap="$1">
-        {typeof title === 'string' ? <H3 fontWeight={600}>{title}</H3> : title}
-        <Text color="$textSecondaryLight">
-          {date} at {time}
+      <View alignItems="center" gap="$2">
+        {typeof title === 'string' ? (
+          <H3 fontWeight={600} fontSize="$7">
+            {title}
+          </H3>
+        ) : (
+          title
+        )}
+        <Text color="$textSecondaryLight" fontSize="$2" lineHeight={16}>
+          {date}, {time}
         </Text>
       </View>
     </YStack>

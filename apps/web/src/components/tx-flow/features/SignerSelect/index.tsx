@@ -13,8 +13,8 @@ const useShouldRegisterSlot = () => {
 
 const SignerSelectSlot = withSlot({
   Component: () => {
-    const { willExecute } = useContext(TxFlowContext)
-    return <SignerForm willExecute={willExecute} />
+    const { willExecute, txId } = useContext(TxFlowContext)
+    return <SignerForm willExecute={willExecute} txId={txId} />
   },
   slotName: SlotName.Feature,
   id: 'signerSelect',

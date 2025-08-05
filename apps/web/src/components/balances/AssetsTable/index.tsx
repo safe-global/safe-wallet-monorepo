@@ -1,6 +1,6 @@
 import CheckBalance from '@/features/counterfactual/CheckBalance'
 import { type ReactElement } from 'react'
-import { Box, IconButton, Checkbox, Skeleton, Tooltip, Typography } from '@mui/material'
+import { Box, Checkbox, IconButton, Skeleton, Tooltip, Typography } from '@mui/material'
 import css from './styles.module.css'
 import TokenAmount from '@/components/common/TokenAmount'
 import TokenIcon from '@/components/common/TokenIcon'
@@ -24,6 +24,11 @@ import { FiatBalance } from './FiatBalance'
 import { TokenType } from '@safe-global/safe-gateway-typescript-sdk'
 import { type Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import { FiatChange } from './FiatChange'
+import useIsEarnFeatureEnabled from '@/features/earn/hooks/useIsEarnFeatureEnabled'
+import EarnButton from '@/features/earn/components/EarnButton'
+import { EARN_LABELS } from '@/services/analytics/events/earn'
+import { isEligibleEarnToken } from '@/features/earn/utils'
+import useChainId from '@/hooks/useChainId'
 
 const skeletonCells: EnhancedTableProps['rows'][0]['cells'] = {
   asset: {
@@ -113,8 +118,10 @@ const AssetsTable = ({
   setShowHiddenAssets: (hidden: boolean) => void
 }): ReactElement => {
   const { balances, loading } = useBalances()
+  const chainId = useChainId()
   const isSwapFeatureEnabled = useIsSwapFeatureEnabled()
   const isStakingFeatureEnabled = useIsStakingFeatureEnabled()
+  const isEarnFeatureEnabled = useIsEarnFeatureEnabled()
 
   const { isAssetSelected, toggleAsset, hidingAsset, hideAsset, cancel, deselectAll, saveChanges } = useHideAssets(() =>
     setShowHiddenAssets(false),
@@ -150,6 +157,10 @@ const AssetsTable = ({
 
                   {isStakingFeatureEnabled && item.tokenInfo.type === TokenType.NATIVE_TOKEN && (
                     <StakeButton tokenInfo={item.tokenInfo} trackingLabel={STAKE_LABELS.asset} />
+                  )}
+
+                  {isEarnFeatureEnabled && isEligibleEarnToken(chainId, item.tokenInfo.address) && (
+                    <EarnButton tokenInfo={item.tokenInfo} trackingLabel={EARN_LABELS.asset} />
                   )}
 
                   {!isNative && <TokenExplorerLink address={item.tokenInfo.address} />}

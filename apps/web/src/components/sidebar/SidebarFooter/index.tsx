@@ -1,25 +1,18 @@
-import type { ReactElement } from 'react'
-import { useEffect } from 'react'
-
-import {
-  SidebarList,
-  SidebarListItemButton,
-  SidebarListItemIcon,
-  SidebarListItemText,
-} from '@/components/sidebar/SidebarList'
+import { type ReactElement, useEffect } from 'react'
 import { BEAMER_SELECTOR, loadBeamer } from '@/services/beamer'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { CookieAndTermType, hasConsentFor } from '@/store/cookiesAndTermsSlice'
 import { openCookieBanner } from '@/store/popupSlice'
 import BeamerIcon from '@/public/images/sidebar/whats-new.svg'
 import HelpCenterIcon from '@/public/images/sidebar/help-center.svg'
-import { ListItem } from '@mui/material'
+import { Divider, IconButton, ListItem, Stack, SvgIcon, Box } from '@mui/material'
 import DebugToggle from '../DebugToggle'
 import { IS_PRODUCTION } from '@/config/constants'
 import Track from '@/components/common/Track'
 import { OVERVIEW_EVENTS } from '@/services/analytics/events/overview'
 import { useCurrentChain } from '@/hooks/useChains'
 import { HELP_CENTER_URL } from '@safe-global/utils/config/constants'
+import IndexingStatus from '@/components/sidebar/IndexingStatus'
 
 const SidebarFooter = (): ReactElement => {
   const dispatch = useAppDispatch()
@@ -40,41 +33,35 @@ const SidebarFooter = (): ReactElement => {
   }
 
   return (
-    <SidebarList>
+    <>
       {!IS_PRODUCTION && (
-        <ListItem disablePadding>
-          <DebugToggle />
-        </ListItem>
+        <>
+          <ListItem disablePadding>
+            <DebugToggle />
+          </ListItem>
+
+          <Divider flexItem />
+        </>
       )}
 
-      <Track {...OVERVIEW_EVENTS.WHATS_NEW}>
-        <ListItem disablePadding>
-          <SidebarListItemButton id={BEAMER_SELECTOR} onClick={handleBeamer}>
-            <SidebarListItemIcon color="primary">
-              <BeamerIcon />
-            </SidebarListItemIcon>
-            <SidebarListItemText data-testid="list-item-whats-new" bold>
-              What&apos;s new
-            </SidebarListItemText>
-          </SidebarListItemButton>
-        </ListItem>
-      </Track>
+      <Stack direction="row" alignItems="center" spacing={1} my={0.5} mx={1}>
+        <IndexingStatus />
 
-      <Track {...OVERVIEW_EVENTS.HELP_CENTER}>
-        <ListItem data-testid="need-help-btn" disablePadding>
-          <a target="_blank" rel="noopener noreferrer" href={HELP_CENTER_URL} style={{ width: '100%' }}>
-            <SidebarListItemButton>
-              <SidebarListItemIcon color="primary">
-                <HelpCenterIcon />
-              </SidebarListItemIcon>
-              <SidebarListItemText data-testid="list-item-need-help" bold>
-                Need help?
-              </SidebarListItemText>
-            </SidebarListItemButton>
-          </a>
-        </ListItem>
-      </Track>
-    </SidebarList>
+        <Box ml="auto !important">
+          <Track {...OVERVIEW_EVENTS.WHATS_NEW}>
+            <IconButton onClick={handleBeamer} id={BEAMER_SELECTOR} data-testid="list-item-whats-new" color="primary">
+              <SvgIcon component={BeamerIcon} inheritViewBox fontSize="small" />
+            </IconButton>
+          </Track>
+        </Box>
+
+        <Track {...OVERVIEW_EVENTS.HELP_CENTER}>
+          <IconButton href={HELP_CENTER_URL} target="_blank" data-testid="list-item-need-help" color="primary">
+            <SvgIcon component={HelpCenterIcon} inheritViewBox fontSize="small" />
+          </IconButton>
+        </Track>
+      </Stack>
+    </>
   )
 }
 

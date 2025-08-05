@@ -11,10 +11,6 @@ export const WidgetContainer = styled.section`
   height: 100%;
 `
 
-export const WidgetTitle = styled.h2`
-  margin-top: 0;
-`
-
 export const WidgetBody = styled.div`
   display: flex;
   flex-direction: column;
@@ -37,20 +33,22 @@ export const Card = styled.div`
   }
 `
 
-const StyledLink = styled(Link)`
-  text-decoration: none;
-  font-weight: bold;
-  display: flex;
-  align-items: center;
-  gap: var(--space-1);
-  margin-bottom: 10px;
-  padding-right: 17px;
-`
-
 export const ViewAllLink = ({ url, text }: { url: LinkProps['href']; text?: string }): ReactElement => (
   <NextLink href={url} passHref legacyBehavior>
-    <StyledLink data-testid="view-all-link">
-      {text || 'View all'} <ChevronRightIcon />
-    </StyledLink>
+    <Link
+      data-testid="view-all-link"
+      sx={{
+        textDecoration: 'none',
+        fontWeight: 'bold',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '4px',
+        color: 'primary.light',
+        fontSize: '14px',
+        '&:hover': { color: 'primary.main' },
+      }}
+    >
+      {text || 'View all'} <ChevronRightIcon fontSize="small" />
+    </Link>
   </NextLink>
 )

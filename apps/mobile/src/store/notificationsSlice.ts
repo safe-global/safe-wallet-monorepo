@@ -1,7 +1,16 @@
 import { createSlice } from '@reduxjs/toolkit'
 import { RootState } from '.'
 
-const initialState = {
+export interface NotificationsSliceItem {
+  isDeviceNotificationsEnabled: boolean
+  isAppNotificationsEnabled: boolean
+  fcmToken: string | null
+  remoteMessages: string[]
+  promptAttempts: number
+  lastTimePromptAttempted: number | null
+}
+
+const initialState: NotificationsSliceItem = {
   isDeviceNotificationsEnabled: false,
   isAppNotificationsEnabled: false,
   fcmToken: null,

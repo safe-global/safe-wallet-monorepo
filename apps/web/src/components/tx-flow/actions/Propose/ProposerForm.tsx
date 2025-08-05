@@ -2,7 +2,7 @@ import WalletRejectionError from '@/components/tx/SignOrExecuteForm/WalletReject
 import { isWalletRejection } from '@/utils/wallets'
 import { type ReactElement, type SyntheticEvent, useContext, useState } from 'react'
 import { Box, Button, CircularProgress, Divider, Typography } from '@mui/material'
-import type { SafeTransaction } from '@safe-global/safe-core-sdk-types'
+import type { SafeTransaction } from '@safe-global/types-kit'
 import CheckWallet from '@/components/common/CheckWallet'
 import { TxModalContext } from '@/components/tx-flow'
 import commonCss from '@/components/tx-flow/common/styles.module.css'
