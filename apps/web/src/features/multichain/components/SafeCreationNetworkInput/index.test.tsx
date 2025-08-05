@@ -26,6 +26,7 @@ const TestForm = ({ isAdvancedFlow = false }: { isAdvancedFlow?: boolean }) => {
   )
 }
 
+// TODO: Some of these tests are flaky and sometimes time out
 describe('NetworkMultiSelector', () => {
   const mockChains = [
     chainBuilder()
