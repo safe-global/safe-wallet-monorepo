@@ -14,7 +14,7 @@ import {
   FormLabel,
   Alert,
 } from '@mui/material'
-import { subDays, subMonths, startOfYear, isBefore, isAfter, startOfDay } from 'date-fns'
+import { subDays, subMonths, startOfYear, isBefore, isAfter, startOfDay, addMonths } from 'date-fns'
 import ExportIcon from '@/public/images/common/export.svg'
 import ModalDialog from '@/components/common/ModalDialog'
 import DatePickerInput from '@/components/common/DatePickerInput'
@@ -112,7 +112,7 @@ const CsvExportModal = ({ onClose, onExport, hasActiveFilter }: CsvExportModalPr
         transactionExportDto: { executionDateGte, executionDateLte },
       }).unwrap()
       onExport?.(job)
-      console.log('Export launched: ', job)
+      console.info('Export launched: ', job)
     } catch (e) {
       //TODO proper handling
       console.error(e)
@@ -179,8 +179,14 @@ const CsvExportModal = ({ onClose, onExport, hasActiveFilter }: CsvExportModalPr
                       deps={['from']}
                       validate={(val) => {
                         const fromDate = getValues('from')
-                        if (val && fromDate && isAfter(startOfDay(fromDate), startOfDay(val))) {
-                          return 'Must be after "From" date'
+                        if (val && fromDate) {
+                          if (isAfter(startOfDay(fromDate), startOfDay(val))) {
+                            return 'Must be after "From" date'
+                          }
+                          //TODO check for the last active field if possible
+                          if (val > addMonths(fromDate, 12)) {
+                            return 'Date range cannot exceed 12 months'
+                          }
                         }
                       }}
                     />
