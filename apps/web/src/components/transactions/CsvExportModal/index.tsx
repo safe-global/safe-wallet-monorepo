@@ -20,6 +20,7 @@ import ModalDialog from '@/components/common/ModalDialog'
 import DatePickerInput from '@/components/common/DatePickerInput'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import useChainId from '@/hooks/useChainId'
+import type { JobStatusDto } from '@safe-global/store/gateway/AUTO_GENERATED/csv-export'
 import { useCsvExportLaunchExportV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/csv-export'
 
 enum DateRangeOption {
@@ -46,10 +47,11 @@ type CsvExportForm = {
 
 type CsvExportModalProps = {
   onClose: () => void
+  onExport?: (job: JobStatusDto) => void
   hasActiveFilter?: boolean
 }
 
-const CsvExportModal = ({ onClose, hasActiveFilter }: CsvExportModalProps): ReactElement => {
+const CsvExportModal = ({ onClose, onExport, hasActiveFilter }: CsvExportModalProps): ReactElement => {
   const safeAddress = useSafeAddress()
   const chainId = useChainId()
   const [launchExport] = useCsvExportLaunchExportV1Mutation()
@@ -82,6 +84,7 @@ const CsvExportModal = ({ onClose, hasActiveFilter }: CsvExportModalProps): Reac
     let executionDateGte: string | undefined
     let executionDateLte: string | undefined = now.toISOString()
 
+    //TODO check for range not null ?
     switch (range) {
       case DateRangeOption.LAST_30_DAYS:
         executionDateGte = subDays(now, 30).toISOString() //TODO should be 1 month instead of exact 30 days
@@ -103,12 +106,13 @@ const CsvExportModal = ({ onClose, hasActiveFilter }: CsvExportModalProps): Reac
 
     //TODO store response for later use in polling status
     try {
-      const response = await launchExport({
+      const job = await launchExport({
         chainId,
         safeAddress,
         transactionExportDto: { executionDateGte, executionDateLte },
-      })
-      console.log('Export launched: ', response.data)
+      }).unwrap()
+      onExport?.(job)
+      console.log('Export launched: ', job)
     } catch (e) {
       //TODO proper handling
       console.error(e)
