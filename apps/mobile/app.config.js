@@ -18,7 +18,7 @@ const config = {
   name: IS_DEV ? 'Dev-Safe{Mobile}' : 'Safe{Mobile}',
   slug: 'safe-mobileapp',
   owner: 'safeglobal',
-  version: '1.0.1',
+  version: '1.0.2',
   extra: {
     storybookEnabled: process.env.STORYBOOK_ENABLED,
     eas: {
