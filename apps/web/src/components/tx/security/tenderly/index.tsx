@@ -21,6 +21,7 @@ import sharedCss from '@/components/tx/security/shared/styles.module.css'
 import { TxInfoContext } from '@/components/tx-flow/TxInfoProvider'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import InfoIcon from '@/public/images/notifications/info.svg'
+import WarningIcon from '@/public/images/notifications/warning.svg'
 import Track from '@/components/common/Track'
 import { MODALS_EVENTS } from '@/services/analytics'
 import useAsync from '@safe-global/utils/hooks/useAsync'
@@ -83,7 +84,7 @@ const TxSimulationBlock = ({
     }
   }
 
-  const { isFinished, isError, isSuccess, isCallTraceError, isLoading } = !!nestedSafe ? nestedTx.status : status
+  const { isFinished, isError, isSuccess, isLoading, isCallTraceError } = !!nestedSafe ? nestedTx.status : status
 
   // Reset simulation if safeTx changes
   useEffect(() => {
@@ -136,7 +137,7 @@ const TxSimulationBlock = ({
               }}
             />
           ) : isFinished ? (
-            !isSuccess || isError || isCallTraceError ? (
+            !isSuccess || isError ? (
               <Typography
                 variant="body2"
                 className={sharedCss.result}
@@ -151,6 +152,23 @@ const TxSimulationBlock = ({
                   sx={{ verticalAlign: 'middle', mr: 1 }}
                 />
                 Error
+              </Typography>
+            ) : isCallTraceError ? (
+              <Typography
+                data-testid="simulation-warning-msg"
+                variant="body2"
+                className={sharedCss.result}
+                sx={{
+                  color: 'warning.main',
+                }}
+              >
+                <SvgIcon
+                  component={WarningIcon}
+                  inheritViewBox
+                  fontSize="small"
+                  sx={{ verticalAlign: 'middle', mr: 1 }}
+                />
+                Warning
               </Typography>
             ) : (
               <Typography
@@ -205,13 +223,13 @@ export const TxSimulationMessage = ({ isNested = false }: { isNested?: boolean }
   const txInfo = useContext(TxInfoContext)
 
   const { isFinished, isError, isSuccess, isCallTraceError } = isNested ? txInfo.nestedTx.status : txInfo.status
-  const { simulationLink, simulation, requestError } = isNested ? txInfo.nestedTx.simulation : txInfo.simulation
+  const { simulationLink, simulationData, requestError } = isNested ? txInfo.nestedTx.simulation : txInfo.simulation
 
   if (!isFinished) {
     return null
   }
 
-  if (!isSuccess || isError || isCallTraceError) {
+  if (!isSuccess || isError) {
     return (
       <Alert severity="error" sx={{ border: 'unset' }}>
         <Typography variant="body1" fontWeight={700}>
@@ -223,15 +241,9 @@ export const TxSimulationMessage = ({ isNested = false }: { isNested?: boolean }
           </Typography>
         ) : (
           <Typography variant="body2">
-            {isCallTraceError ? (
-              <>The transaction failed during the simulation.</>
-            ) : (
-              <>
-                The transaction failed during the simulation throwing error{' '}
-                <b>{simulation?.transaction.error_message}</b> in the contract at{' '}
-                <b>{simulation?.transaction.error_info?.address}</b>.
-              </>
-            )}{' '}
+            The transaction failed during the simulation throwing error{' '}
+            <b>{simulationData?.transaction.error_message}</b> in the contract at{' '}
+            <b>{simulationData?.transaction.error_info?.address}</b>.{' '}
             Full simulation report is available <ExternalLink href={simulationLink}>on Tenderly</ExternalLink>.
           </Typography>
         )}
@@ -239,9 +251,22 @@ export const TxSimulationMessage = ({ isNested = false }: { isNested?: boolean }
     )
   }
 
+  if (isCallTraceError) {
+    return (
+      <Alert severity="warning" sx={{ border: 'unset' }}>
+        <Typography fontWeight={700}>
+          Simulation successful with warnings
+        </Typography>
+        Transaction will execute successfully on-chain, but contains internal reverts.
+        Some contract logic may not execute as expected. Full simulation report available{' '}
+        <ExternalLink href={simulationLink}>on Tenderly</ExternalLink>.
+      </Alert>
+    )
+  }
+
   return (
     <Alert severity="info" sx={{ border: 'unset' }}>
-      <Typography variant="body2" fontWeight={700}>
+      <Typography fontWeight={700}>
         Simulation successful
       </Typography>
       Full simulation report is available <ExternalLink href={simulationLink}>on Tenderly</ExternalLink>.
