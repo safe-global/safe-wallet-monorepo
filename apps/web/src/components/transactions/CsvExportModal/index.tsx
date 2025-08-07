@@ -1,0 +1,254 @@
+import { type ReactElement } from 'react'
+import { useForm, Controller, FormProvider } from 'react-hook-form'
+import {
+  DialogContent,
+  DialogActions,
+  Button,
+  Typography,
+  TextField,
+  MenuItem,
+  Box,
+  Grid,
+  SvgIcon,
+  FormControl,
+  Alert,
+} from '@mui/material'
+import { subMonths, startOfYear, isBefore, isAfter, startOfDay, addMonths } from 'date-fns'
+import ExportIcon from '@/public/images/common/export.svg'
+import ModalDialog from '@/components/common/ModalDialog'
+import DatePickerInput from '@/components/common/DatePickerInput'
+import useSafeAddress from '@/hooks/useSafeAddress'
+import { useAppDispatch } from '@/store'
+import useChainId from '@/hooks/useChainId'
+import type { JobStatusDto } from '@safe-global/store/gateway/AUTO_GENERATED/csv-export'
+import { useCsvExportLaunchExportV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/csv-export'
+import { showNotification } from '@/store/notificationsSlice'
+
+enum DateRangeOption {
+  LAST_30_DAYS = '30d',
+  LAST_6_MONTHS = '6m',
+  LAST_12_MONTHS = '12m',
+  YTD = 'ytd',
+  CUSTOM = 'custom',
+}
+
+const DATE_RANGE_LABELS: Record<DateRangeOption, string> = {
+  [DateRangeOption.LAST_30_DAYS]: 'Last 30 days',
+  [DateRangeOption.LAST_6_MONTHS]: 'Last 6 months',
+  [DateRangeOption.LAST_12_MONTHS]: 'Last 12 months',
+  [DateRangeOption.YTD]: 'Year to date (YTD)',
+  [DateRangeOption.CUSTOM]: 'Custom',
+}
+
+type CsvExportForm = {
+  range: DateRangeOption | ''
+  from: Date | null
+  to: Date | null
+}
+
+type CsvExportModalProps = {
+  onClose: () => void
+  onExport?: (job: JobStatusDto) => void
+  hasActiveFilter?: boolean
+}
+
+const YearRangeAlert = ({ isOverYear }: { isOverYear: boolean }) => {
+  const { severity, message } = isOverYear
+    ? {
+        severity: 'warning' as const,
+        message: 'Date range cannot exceed 12 months.',
+      }
+    : {
+        severity: 'info' as const,
+        message: 'You can select up to 12 months.',
+      }
+
+  return <Alert severity={severity}>{message}</Alert>
+}
+
+const CsvExportModal = ({ onClose, onExport, hasActiveFilter }: CsvExportModalProps): ReactElement => {
+  const dispatch = useAppDispatch()
+  const safeAddress = useSafeAddress()
+  const chainId = useChainId()
+  const [launchExport] = useCsvExportLaunchExportV1Mutation()
+
+  const successNotification = () => {
+    dispatch(
+      showNotification({
+        variant: 'success',
+        groupKey: 'export-csv-started',
+        title: 'Generating CSV export',
+        message: 'This might take a few minutes.',
+      }),
+    )
+  }
+
+  const errorNotification = () => {
+    dispatch(
+      showNotification({
+        variant: 'error',
+        groupKey: 'export-csv-error',
+        title: 'Something went wrong',
+        message: 'Please try exporting the CSV again.',
+      }),
+    )
+  }
+
+  const methods = useForm<CsvExportForm>({
+    mode: 'onChange',
+    shouldUnregister: true,
+    defaultValues: {
+      range: '',
+      from: null,
+      to: null,
+    },
+  })
+
+  const {
+    control,
+    handleSubmit,
+    watch,
+    getValues,
+    formState: { errors },
+  } = methods
+
+  const selectedRange = watch('range')
+  const from = watch('from')
+  const to = watch('to')
+
+  const isOverYear = !!(from && to && isAfter(to, addMonths(from, 12)))
+  const isExportDisabled =
+    !selectedRange ||
+    (selectedRange === DateRangeOption.CUSTOM && (!from || !to || !!errors.from || !!errors.to)) ||
+    isOverYear
+
+  const onSubmit = handleSubmit(async ({ range, from, to }) => {
+    const now = new Date()
+    let executionDateGte: string | undefined
+    let executionDateLte: string | undefined = now.toISOString()
+
+    switch (range) {
+      case DateRangeOption.LAST_30_DAYS:
+        executionDateGte = subMonths(now, 1).toISOString()
+        break
+      case DateRangeOption.LAST_6_MONTHS:
+        executionDateGte = subMonths(now, 6).toISOString()
+        break
+      case DateRangeOption.LAST_12_MONTHS:
+        executionDateGte = subMonths(now, 12).toISOString()
+        break
+      case DateRangeOption.YTD:
+        executionDateGte = startOfYear(now).toISOString()
+        break
+      case DateRangeOption.CUSTOM:
+        executionDateGte = from ? from.toISOString() : undefined
+        executionDateLte = to ? to.toISOString() : undefined
+        break
+    }
+
+    try {
+      console.info('Export launched with params:', { chainId, safeAddress, executionDateGte, executionDateLte })
+      const job = await launchExport({
+        chainId,
+        safeAddress,
+        transactionExportDto: { executionDateGte, executionDateLte },
+      }).unwrap()
+
+      onExport?.(job)
+      successNotification()
+    } catch (e) {
+      errorNotification()
+    }
+
+    onClose()
+  })
+
+  return (
+    <ModalDialog open onClose={onClose} dialogTitle="Export CSV" hideChainIndicator>
+      <FormProvider {...methods}>
+        <form onSubmit={onSubmit}>
+          <DialogContent sx={{ p: '24px !important' }}>
+            <Typography mb={3}>
+              The CSV includes transactions from the selected period, suitable for reporting.
+            </Typography>
+
+            {hasActiveFilter && (
+              <Alert severity="info" color="background" sx={{ mb: 3 }}>
+                Transaction history filters won&apos;t apply here.
+              </Alert>
+            )}
+
+            <FormControl fullWidth sx={{ mb: 1 }}>
+              <Controller
+                name="range"
+                control={control}
+                render={({ field }) => (
+                  <TextField select focused={false} label="Date range" fullWidth {...field}>
+                    {Object.values(DateRangeOption).map((option) => (
+                      <MenuItem key={option} value={option}>
+                        {DATE_RANGE_LABELS[option]}
+                      </MenuItem>
+                    ))}
+                  </TextField>
+                )}
+              />
+            </FormControl>
+
+            {selectedRange === DateRangeOption.CUSTOM && (
+              <Box mt={2} mb={1} display="flex" flexDirection="column" gap={3}>
+                <Grid container spacing={3}>
+                  <Grid item xs={12} md={6}>
+                    <DatePickerInput
+                      name="from"
+                      label="From"
+                      deps={['to']}
+                      // fontSize={14}
+                      validate={(val) => {
+                        const toDate = getValues('to')
+                        if (val && toDate && isBefore(startOfDay(toDate), startOfDay(val))) {
+                          return 'Must be before "To" date'
+                        }
+                      }}
+                    />
+                  </Grid>
+                  <Grid item xs={12} md={6}>
+                    <DatePickerInput
+                      name="to"
+                      label="To"
+                      deps={['from']}
+                      validate={(val) => {
+                        const fromDate = getValues('from')
+                        if (val && fromDate && isAfter(startOfDay(fromDate), startOfDay(val))) {
+                          return 'Must be after "From" date'
+                        }
+                      }}
+                    />
+                  </Grid>
+                </Grid>
+                <YearRangeAlert isOverYear={isOverYear} />
+              </Box>
+            )}
+          </DialogContent>
+
+          <DialogActions>
+            <Button variant="text" size="small" onClick={onClose} disableElevation>
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              variant="contained"
+              size="small"
+              disabled={isExportDisabled}
+              disableElevation
+              startIcon={<SvgIcon component={ExportIcon} inheritViewBox fontSize="small" />}
+            >
+              Export
+            </Button>
+          </DialogActions>
+        </form>
+      </FormProvider>
+    </ModalDialog>
+  )
+}
+
+export default CsvExportModal
