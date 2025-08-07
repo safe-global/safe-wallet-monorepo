@@ -21,6 +21,7 @@ import sharedCss from '@/components/tx/security/shared/styles.module.css'
 import { TxInfoContext } from '@/components/tx-flow/TxInfoProvider'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import InfoIcon from '@/public/images/notifications/info.svg'
+import WarningIcon from '@/public/images/notifications/warning.svg'
 import Track from '@/components/common/Track'
 import { MODALS_EVENTS } from '@/services/analytics'
 import useAsync from '@safe-global/utils/hooks/useAsync'
@@ -83,7 +84,7 @@ const TxSimulationBlock = ({
     }
   }
 
-  const { isFinished, isError, isSuccess, isCallTraceError, isLoading } = !!nestedSafe ? nestedTx.status : status
+  const { isFinished, isError, isSuccess, isCallTraceError, isLoading, isPartialRevert } = !!nestedSafe ? nestedTx.status : status
 
   // Reset simulation if safeTx changes
   useEffect(() => {
@@ -136,7 +137,7 @@ const TxSimulationBlock = ({
               }}
             />
           ) : isFinished ? (
-            !isSuccess || isError || isCallTraceError ? (
+            !isSuccess || isError || (isCallTraceError && !isPartialRevert) ? (
               <Typography
                 variant="body2"
                 className={sharedCss.result}
@@ -151,6 +152,23 @@ const TxSimulationBlock = ({
                   sx={{ verticalAlign: 'middle', mr: 1 }}
                 />
                 Error
+              </Typography>
+            ) : isPartialRevert ? (
+              <Typography
+                data-testid="simulation-warning-msg"
+                variant="body2"
+                className={sharedCss.result}
+                sx={{
+                  color: 'warning.main',
+                }}
+              >
+                <SvgIcon
+                  component={WarningIcon}
+                  inheritViewBox
+                  fontSize="small"
+                  sx={{ verticalAlign: 'middle', mr: 1 }}
+                />
+                Warning
               </Typography>
             ) : (
               <Typography
@@ -204,14 +222,14 @@ export const TxSimulation = (props: TxSimulationProps): ReactElement | null => {
 export const TxSimulationMessage = ({ isNested = false }: { isNested?: boolean }) => {
   const txInfo = useContext(TxInfoContext)
 
-  const { isFinished, isError, isSuccess, isCallTraceError } = isNested ? txInfo.nestedTx.status : txInfo.status
+  const { isFinished, isError, isSuccess, isCallTraceError, isPartialRevert } = isNested ? txInfo.nestedTx.status : txInfo.status
   const { simulationLink, simulation, requestError } = isNested ? txInfo.nestedTx.simulation : txInfo.simulation
 
   if (!isFinished) {
     return null
   }
 
-  if (!isSuccess || isError || isCallTraceError) {
+  if (!isSuccess || isError || (isCallTraceError && !isPartialRevert)) {
     return (
       <Alert severity="error" sx={{ border: 'unset' }}>
         <Typography variant="body1" fontWeight={700}>
@@ -223,7 +241,7 @@ export const TxSimulationMessage = ({ isNested = false }: { isNested?: boolean }
           </Typography>
         ) : (
           <Typography variant="body2">
-            {isCallTraceError ? (
+            {isCallTraceError && !isPartialRevert ? (
               <>The transaction failed during the simulation.</>
             ) : (
               <>
@@ -239,9 +257,21 @@ export const TxSimulationMessage = ({ isNested = false }: { isNested?: boolean }
     )
   }
 
+  if (isPartialRevert) {
+    return (
+      <Alert severity="warning" sx={{ border: 'unset' }}>
+        <Typography fontWeight={700}>
+          Simulation successful with warnings
+        </Typography>
+        This transaction will execute successfully but contains internal reverts. You can proceed with the transaction.
+        Full simulation report is available <ExternalLink href={simulationLink}>on Tenderly</ExternalLink>.
+      </Alert>
+    )
+  }
+
   return (
     <Alert severity="info" sx={{ border: 'unset' }}>
-      <Typography variant="body2" fontWeight={700}>
+      <Typography fontWeight={700}>
         Simulation successful
       </Typography>
       Full simulation report is available <ExternalLink href={simulationLink}>on Tenderly</ExternalLink>.
