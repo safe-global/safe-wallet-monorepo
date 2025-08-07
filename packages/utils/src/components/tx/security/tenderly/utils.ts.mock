@@ -1,0 +1,57 @@
+// TEMPORARY MOCK - Copy this into getSimulation function for testing
+
+  // Mock partial revert response
+  return {
+    simulation: {
+      id: 'mock-partial-revert-test',
+      status: true, // Overall transaction succeeds
+      network_id: '1',
+      created_at: new Date(),
+      block_number: 18000000,
+      transaction_index: 0,
+      from: tx.from,
+      to: tx.to,
+      input: tx.input,
+      gas: tx.gas,
+      gas_price: tx.gas_price || '0',
+      value: tx.value || '0',
+      method: 'execTransaction',
+      project_id: 'test',
+      owner_id: 'test',
+      access_list: null,
+      queue_origin: '',
+    },
+    transaction: {
+      hash: '0x123',
+      status: true,
+      block_number: 18000000,
+      from: tx.from,
+      to: tx.to,
+      value: tx.value || '0',
+      gas: tx.gas,
+      gas_used: 80000,
+      gas_price: 1000000000,
+      method: 'execTransaction',
+      call_trace: [
+        { input: '0x1', error: undefined }, // Success
+        { input: '0x2', error: 'Execution reverted: ERC20: transfer amount exceeds balance' }, // Partial revert!
+        { input: '0x3', error: undefined }, // Success
+      ],
+      network_id: '1',
+      addresses: [],
+      contract_ids: [],
+      index: 0,
+      block_hash: '0x',
+      gas_fee_cap: 0,
+      gas_tip_cap: 0,
+      cumulative_gas_used: 0,
+      effective_gas_price: 0,
+      nonce: 0,
+      function_selector: '',
+      transaction_info: {} as any,
+      timestamp: new Date(),
+      decoded_input: null,
+    },
+    contracts: [],
+    generated_access_list: [],
+  } as TenderlySimulation
