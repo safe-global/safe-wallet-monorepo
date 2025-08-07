@@ -1,4 +1,4 @@
-import { useCallback, useContext, useMemo, useState, type ReactElement } from 'react'
+import { useCallback, useContext, useMemo, useState } from 'react'
 import NestedSafeIcon from '@/public/images/sidebar/nested-safes-icon.svg'
 import { ReviewNestedSafe } from '@/components/tx-flow/flows/CreateNestedSafe/ReviewNestedSafe'
 import { SetUpNestedSafe } from '@/components/tx-flow/flows/CreateNestedSafe/SetupNestedSafe'
@@ -11,7 +11,7 @@ import { TxFlowStep } from '../../TxFlowStep'
 import type ReviewTransaction from '@/components/tx/ReviewTransactionV2'
 import { TxFlowContext, type TxFlowContextType } from '../../TxFlowProvider'
 
-export function CreateNestedSafe(): ReactElement {
+const CreateNestedSafe = () => {
   const dispatch = useAppDispatch()
   const { safe } = useSafeInfo()
   const [predictedSafeAddress, setPredictedSafeAddress] = useState<string | undefined>()
@@ -64,3 +64,5 @@ export function CreateNestedSafe(): ReactElement {
     </TxFlow>
   )
 }
+
+export default CreateNestedSafe

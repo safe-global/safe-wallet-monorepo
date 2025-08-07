@@ -4,7 +4,7 @@ import type { ReactElement } from 'react'
 
 import AddIcon from '@/public/images/common/add.svg'
 import { ModalDialogTitle } from '@/components/common/ModalDialog'
-import { CreateNestedSafe } from '@/components/tx-flow/flows/CreateNestedSafe'
+import { CreateNestedSafeFlow } from '@/components/tx-flow/flows'
 import { TxModalContext } from '@/components/tx-flow'
 import { NestedSafesList } from '@/components/sidebar/NestedSafesList'
 import { NestedSafeInfo } from '@/components/sidebar/NestedSafeInfo'
@@ -26,7 +26,7 @@ export function NestedSafesPopover({
   const { setTxFlow } = useContext(TxModalContext)
 
   const onAdd = () => {
-    setTxFlow(<CreateNestedSafe />)
+    setTxFlow(<CreateNestedSafeFlow />)
     onClose()
   }
 
