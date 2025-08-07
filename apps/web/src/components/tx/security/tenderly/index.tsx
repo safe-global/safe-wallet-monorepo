@@ -263,8 +263,9 @@ export const TxSimulationMessage = ({ isNested = false }: { isNested?: boolean }
         <Typography fontWeight={700}>
           Simulation successful with warnings
         </Typography>
-        This transaction will execute successfully but contains internal reverts. You can proceed with the transaction.
-        Full simulation report is available <ExternalLink href={simulationLink}>on Tenderly</ExternalLink>.
+        Transaction will execute successfully on-chain, but contains internal reverts.
+        Some contract logic may not execute as expected. Full simulation report available{' '}
+        <ExternalLink href={simulationLink}>on Tenderly</ExternalLink>.
       </Alert>
     )
   }
