@@ -1,4 +1,5 @@
 import * as constants from '../../support/constants'
+import * as main from './main.page'
 import { clickOnContinueSignTransactionBtn, selectComboButtonOption } from './create_tx.pages'
 
 const tokenSelectorText = 'G(ö|oe)rli Ether'
@@ -21,6 +22,8 @@ export const batchedTransactionsStr = 'Batched transactions'
 export const addInitialTransactionStr = 'Add an initial transaction to the batch'
 export const transactionAddedToBatchStr = 'Transaction is added to batch'
 export const addNewStransactionStr = 'Add new transaction'
+export const allActionsSection = '[data-testid="all-actions"]'
+export const accordionActionItem = '[data-testid="action-item"]'
 
 const recipientInput = 'input[name^="recipients."][name$=".recipient"]'
 const tokenBalance = '[data-testid="token-balance"]'
@@ -128,4 +131,7 @@ export function isTxExpanded(index, option) {
     .within(() => {
       cy.get('li').eq(index).find(item)
     })
+}
+export function verifyCountOfActions(count) {
+  main.verifyElementsCount(accordionActionItem, count)
 }
