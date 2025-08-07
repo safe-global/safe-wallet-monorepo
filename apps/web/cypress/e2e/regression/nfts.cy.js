@@ -96,7 +96,6 @@ describe('NFTs tests', () => {
     createTx.changeNonce(2)
     nfts.clikOnNextBtn()
     createTx.clickOnContinueSignTransactionBtn()
-    createTx.clickOnAcknowledgement()
     createTx.clickOnSignTransactionBtn()
     createTx.waitForProposeRequest()
     createTx.clickViewTransaction()

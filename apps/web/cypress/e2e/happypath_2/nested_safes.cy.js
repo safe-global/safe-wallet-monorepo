@@ -36,9 +36,7 @@ describe('Nested safes happy path tests', () => {
     owner.verifyErrorMsgInvalidAddress(constants.addressBookErrrMsg.exceedChars)
     nsafes.typeName(safe)
     nsafes.clickOnAddNextBtn()
-    txs.selectExecuteLater()
     createTx.clickOnContinueSignTransactionBtn()
-    createTx.clickOnAcknowledgement()
     createTx.clickOnSignTransactionBtn()
     createTx.clickViewTransaction()
     main.verifyValuesExist(createTx.transactionItem, [
