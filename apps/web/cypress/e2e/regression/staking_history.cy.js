@@ -2,6 +2,7 @@ import * as constants from '../../support/constants.js'
 import * as create_tx from '../pages/create_tx.pages.js'
 import * as staking from '../pages/staking.page.js'
 import * as staking_data from '../../fixtures/staking_data.json'
+import * as main from '../pages/main.page.js'
 
 const safe = 'eth:0xAD1Cf279D18f34a13c3Bf9b79F4D427D5CD9505B'
 const historyData = staking_data.type.history
@@ -9,6 +10,7 @@ const historyData = staking_data.type.history
 describe('Staking history tests', { defaultCommandTimeout: 30000 }, () => {
   it('Verify Claim tx shows amount received', () => {
     cy.visit(constants.transactionUrl + safe + staking.stakingTxs.claim)
+    main.waitForElementByTextInContainer(create_tx.transactionItem, historyData.claim)
     staking.checkTxHeaderData([historyData.ETH_3205184, historyData.claim])
     create_tx.verifyExpandedDetails([historyData.ETH_3205184, historyData.received])
     create_tx.clickOnAdvancedDetails()
