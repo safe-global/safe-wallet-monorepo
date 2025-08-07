@@ -11,11 +11,12 @@ type SimulationStatus = {
   isSuccess: boolean
   isCallTraceError: boolean
   isError: boolean
+  isPartialRevert: boolean
 }
 
 const initialSimulation: UseSimulationReturn = {
   simulateTransaction: () => {},
-  simulation: undefined,
+  simulationData: undefined,
   _simulationRequestStatus: FETCH_STATUS.NOT_ASKED,
   simulationLink: '',
   requestError: undefined,
@@ -28,6 +29,7 @@ const initialStatus: SimulationStatus = {
   isSuccess: false,
   isCallTraceError: false,
   isError: false,
+  isPartialRevert: false,
 }
 
 export const TxInfoContext = createContext<{

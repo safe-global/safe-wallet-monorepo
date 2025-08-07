@@ -11,6 +11,7 @@ import { useSigner } from '@/hooks/wallets/useWallet'
 import ExternalLink from '@/components/common/ExternalLink'
 import CheckIcon from '@/public/images/common/check.svg'
 import CloseIcon from '@/public/images/common/close.svg'
+import WarningIcon from '@/public/images/notifications/warning.svg'
 import { getSimulationStatus, isTxSimulationEnabled } from '@safe-global/utils/components/tx/security/tenderly/utils'
 import { useSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
 import { useIsNestedSafeOwner } from '@/hooks/useIsNestedSafeOwner'
@@ -108,12 +109,12 @@ const InlineTxSimulation = ({ transaction }: { transaction: TransactionDetails }
       <ExternalLink href={simulationLink}>
         <Stack direction="row" alignItems="center" gap={0.5}>
           <SvgIcon
-            color={status.isSuccess ? 'success' : 'error'}
-            component={status.isSuccess ? CheckIcon : CloseIcon}
+            color={status.isPartialRevert ? 'warning' : status.isSuccess ? 'success' : 'error'}
+            component={status.isPartialRevert ? WarningIcon : status.isSuccess ? CheckIcon : CloseIcon}
             inheritViewBox
             sx={{ height: '16px' }}
           />
-          {status.isSuccess ? 'Simulation successful' : 'Simulation failed'}
+          {status.isPartialRevert ? 'Can execute (with warnings)' : status.isSuccess ? 'Simulation successful' : 'Simulation failed'}
         </Stack>
       </ExternalLink>
     )
