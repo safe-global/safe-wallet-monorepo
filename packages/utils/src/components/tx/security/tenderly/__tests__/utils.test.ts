@@ -173,7 +173,7 @@ describe('getSimulationStatus', () => {
   it('should return loading status', () => {
     const simulation: UseSimulationReturn = {
       _simulationRequestStatus: FETCH_STATUS.LOADING,
-      simulation: undefined,
+      simulationData: undefined,
     } as any
     const status = getSimulationStatus(simulation)
     expect(status).toEqual({
@@ -189,7 +189,7 @@ describe('getSimulationStatus', () => {
   it('should return error status', () => {
     const simulation: UseSimulationReturn = {
       _simulationRequestStatus: FETCH_STATUS.ERROR,
-      simulation: undefined,
+      simulationData: undefined,
     } as any
     const status = getSimulationStatus(simulation)
     expect(status).toEqual({
@@ -205,7 +205,7 @@ describe('getSimulationStatus', () => {
   it('should return success status without errors', () => {
     const simulation: UseSimulationReturn = {
       _simulationRequestStatus: FETCH_STATUS.SUCCESS,
-      simulation: {
+      simulationData: {
         simulation: { status: true },
         transaction: { call_trace: [] },
       } as any,
@@ -224,7 +224,7 @@ describe('getSimulationStatus', () => {
   it('should return partial revert status when simulation succeeds with call trace errors', () => {
     const simulation: UseSimulationReturn = {
       _simulationRequestStatus: FETCH_STATUS.SUCCESS,
-      simulation: {
+      simulationData: {
         simulation: { status: true },
         transaction: {
           call_trace: [
@@ -248,7 +248,7 @@ describe('getSimulationStatus', () => {
   it('should return failed status when simulation status is false', () => {
     const simulation: UseSimulationReturn = {
       _simulationRequestStatus: FETCH_STATUS.SUCCESS,
-      simulation: {
+      simulationData: {
         simulation: { status: false },
         transaction: { call_trace: [] },
       } as any,
