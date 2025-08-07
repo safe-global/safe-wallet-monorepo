@@ -50,7 +50,7 @@ describe('Incoming tx history details tests', () => {
       typeReceive.altTokenNFT,
     )
     createTx.verifyExpandedDetails([
-      typeReceive.Proxy,
+      //typeReceive.Proxy, - the check for contract name is hidden for
       typeReceive.ProxyAddress,
       typeReceive.nftHash,
       typeReceive.executionDateNFT,
