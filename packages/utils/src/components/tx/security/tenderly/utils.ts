@@ -167,6 +167,7 @@ export type SimulationStatus = {
   isSuccess: boolean
   isCallTraceError: boolean
   isError: boolean
+  isPartialRevert: boolean
 }
 
 export const getSimulationStatus = (simulation: UseSimulationReturn): SimulationStatus => {
@@ -182,11 +183,15 @@ export const getSimulationStatus = (simulation: UseSimulationReturn): Simulation
   const isCallTraceError = isSuccess && getCallTraceErrors(simulation.simulation).length > 0
   const isError = simulation._simulationRequestStatus === FETCH_STATUS.ERROR
 
+  // Partial revert: simulation succeeds overall but has internal errors
+  const isPartialRevert = isSuccess && isCallTraceError
+
   return {
     isLoading,
     isFinished,
     isSuccess,
     isCallTraceError,
     isError,
+    isPartialRevert,
   }
 }
