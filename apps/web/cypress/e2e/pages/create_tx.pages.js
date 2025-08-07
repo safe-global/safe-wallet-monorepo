@@ -840,10 +840,6 @@ export function clickOnContinueSignTransactionBtn() {
   cy.get(continueSignBtn).click()
 }
 
-export function clickOnAcknowledgement() {
-  cy.contains(txAcknowledgementStr).click()
-}
-
 export function clickOnConfirmTransactionBtn() {
   cy.get('button').contains(confirmBtnStr).click()
 }
