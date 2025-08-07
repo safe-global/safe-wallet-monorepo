@@ -223,7 +223,7 @@ export const TxSimulationMessage = ({ isNested = false }: { isNested?: boolean }
   const txInfo = useContext(TxInfoContext)
 
   const { isFinished, isError, isSuccess, isCallTraceError, isPartialRevert } = isNested ? txInfo.nestedTx.status : txInfo.status
-  const { simulationLink, simulation, requestError } = isNested ? txInfo.nestedTx.simulation : txInfo.simulation
+  const { simulationLink, simulationData, requestError } = isNested ? txInfo.nestedTx.simulation : txInfo.simulation
 
   if (!isFinished) {
     return null
@@ -246,8 +246,8 @@ export const TxSimulationMessage = ({ isNested = false }: { isNested?: boolean }
             ) : (
               <>
                 The transaction failed during the simulation throwing error{' '}
-                <b>{simulation?.transaction.error_message}</b> in the contract at{' '}
-                <b>{simulation?.transaction.error_info?.address}</b>.
+                <b>{simulationData?.transaction.error_message}</b> in the contract at{' '}
+                <b>{simulationData?.transaction.error_info?.address}</b>.
               </>
             )}{' '}
             Full simulation report is available <ExternalLink href={simulationLink}>on Tenderly</ExternalLink>.

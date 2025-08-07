@@ -4,7 +4,7 @@ import type { SimulationTxParams } from '@safe-global/utils/components/tx/securi
 export type UseSimulationReturn =
   | {
       _simulationRequestStatus: FETCH_STATUS.NOT_ASKED | FETCH_STATUS.ERROR | FETCH_STATUS.LOADING
-      simulation: undefined
+      simulationData: undefined
       simulateTransaction: (params: SimulationTxParams) => void
       simulationLink: string
       requestError?: string
@@ -12,7 +12,7 @@ export type UseSimulationReturn =
     }
   | {
       _simulationRequestStatus: FETCH_STATUS.SUCCESS
-      simulation: TenderlySimulation
+      simulationData: TenderlySimulation
       simulateTransaction: (params: SimulationTxParams) => void
       simulationLink: string
       requestError?: string
