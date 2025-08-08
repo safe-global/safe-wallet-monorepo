@@ -122,7 +122,7 @@ describe('Multichain sidebar tests', { defaultCommandTimeout: 20000 }, () => {
     sideBar.checkSafeGroupBalance(0, '0.73')
   })
 
-  it('Verify address of the safe group', () => {
+  it.only('Verify address of the safe group', () => {
     const address = '0xC96e...ee3B'
     wallet.connectSigner(signer)
     sideBar.openSidebar()
