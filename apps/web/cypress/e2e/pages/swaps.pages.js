@@ -592,7 +592,7 @@ export function checkInputValue(direction, value) {
 
 export function checkInsufficientBalanceMessageDisplayed(token) {
   const text = getInsufficientBalanceStr(token)
-  cy.get('button').contains(text).should('be.disabled')
+  cy.get('button').should('contain.text', text).and('be.disabled')
 }
 
 export function checkSmallSellAmountMessageDisplayed() {

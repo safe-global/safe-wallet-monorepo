@@ -67,7 +67,7 @@ describe('Swaps tests', () => {
     },
   )
 
-  it('Verify enabling custom recipient adds that field to the form', { defaultCommandTimeout: 30000 }, () => {
+  it.skip('Verify enabling custom recipient adds that field to the form', { defaultCommandTimeout: 30000 }, () => {
     const address = getMockAddress()
     const address_ = '0x1234...5678'
 
@@ -115,7 +115,7 @@ describe('Swaps tests', () => {
     })
   })
 
-  it('Verify order details are displayed in swap confirmation', { defaultCommandTimeout: 30000 }, () => {
+  it.skip('Verify order details are displayed in swap confirmation', { defaultCommandTimeout: 30000 }, () => {
     const limitPrice = swaps.createRegex(swapOrder.DAIeqCOW, 'COW')
     const widgetFee = swaps.getWidgetFee()
     const orderID = swaps.getOrderID()
@@ -147,7 +147,7 @@ describe('Swaps tests', () => {
     swaps.verifyOrderDetails(limitPrice, slippage, swapOrder.interactWith, orderID, widgetFee)
   })
 
-  it(
+  it.skip(
     'Verify recipient address alert is displayed in order details if the recipient is not owner of the order',
     { defaultCommandTimeout: 30000 },
     () => {

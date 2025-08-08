@@ -23,7 +23,7 @@ describe('Sidebar tests 3', () => {
 
   it('Verify the empty state of the pinned safes list', () => {
     cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_9)
-    cy.intercept('GET', constants.safeListEndpoint, {})
+    cy.intercept('GET', constants.safeListEndpoint, { 1: [], 137: [], 143: [], 17000: null, 560048: [], 11155111: [] })
     wallet.connectSigner(signer)
     sideBar.openSidebar()
     sideBar.verifyPinnedListIsEmpty()

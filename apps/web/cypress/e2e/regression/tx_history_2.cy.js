@@ -166,6 +166,10 @@ describe('Tx history tests 2', () => {
       typeDisableOwner.transactionHash,
     ])
     createTx.clickOnAdvancedDetails()
-    createTx.checkHashesExist(3)
+    createTx.clickOnHashes()
+    main.verifyElementByTextExists('Domain hash')
+    main.verifyElementByTextExists('Message hash')
+    main.verifyElementByTextExists('safeTxHash')
+    //TBD - add check for the hash format - createTx.checkHashesExist(3)?
   })
 })

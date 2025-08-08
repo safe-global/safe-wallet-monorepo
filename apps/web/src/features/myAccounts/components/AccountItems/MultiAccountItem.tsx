@@ -279,7 +279,7 @@ const MultiAccountItem = ({ onLinkClick, multiSafeAccountItem, isSpaceSafe = fal
               <SafeIcon address={address} owners={sharedSetup?.owners.length} threshold={sharedSetup?.threshold} />
             </Box>
 
-            <Typography variant="body2" component="div" className={css.safeAddress}>
+            <Typography variant="body2" component="div" data-testid="group-address" className={css.safeAddress}>
               <EthHashInfo
                 address={address}
                 name={multiSafeAccountItem.name}
