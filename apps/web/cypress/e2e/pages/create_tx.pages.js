@@ -98,6 +98,7 @@ const insufficientFundsErrorStr = 'Insufficient funds'
 const viewTransactionBtn = 'View transaction'
 const transactionDetailsTitle = 'Transaction details'
 const QueueLabel = 'needs to be executed first'
+export const hashesText = 'Hashes'
 const TransactionSummary = 'Send '
 const transactionsPerHrStr = 'free transactions left today'
 const txHashesStr = 'Transaction hashes'
@@ -187,9 +188,9 @@ export const advancedDetailsViewOptions = {
   table: 'table',
   grid: 'grid',
 }
-
+//tbr - will check if it should be removed ( we can cound by data-testid="tx-hexData" elements)
 export function checkHashesExist(count) {
-  cy.contains(txHashesStr)
+  cy.contains(txAccordionDetails)
     .next()
     .within(() => {
       main.verifyElementsCount(txHexDataRow, count)
@@ -199,6 +200,10 @@ export function checkHashesExist(count) {
           .should('match', /0x[a-fA-F0-9]{64}/)
       })
     })
+}
+
+export function clickOnHashes() {
+  cy.contains(hashesText).click()
 }
 export function clickOnReplaceTxOption() {
   cy.get(replaceChoiceBtn).find('button').click()
