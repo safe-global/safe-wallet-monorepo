@@ -1,11 +1,77 @@
 import { cgwClient as api } from '../cgwClient'
-export const addTagTypes = ['spaces'] as const
+export const addTagTypes = ['accounts', 'spaces'] as const
 const injectedRtkApi = api
   .enhanceEndpoints({
     addTagTypes,
   })
   .injectEndpoints({
     endpoints: (build) => ({
+      addressBooksGetAddressBookV1: build.query<
+        AddressBooksGetAddressBookV1ApiResponse,
+        AddressBooksGetAddressBookV1ApiArg
+      >({
+        query: (queryArg) => ({ url: `/v1/accounts/${queryArg.address}/address-books/${queryArg.chainId}` }),
+        providesTags: ['accounts'],
+      }),
+      addressBooksCreateAddressBookItemV1: build.mutation<
+        AddressBooksCreateAddressBookItemV1ApiResponse,
+        AddressBooksCreateAddressBookItemV1ApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/v1/accounts/${queryArg.address}/address-books/${queryArg.chainId}`,
+          method: 'POST',
+          body: queryArg.createAddressBookItemDto,
+        }),
+        invalidatesTags: ['accounts'],
+      }),
+      addressBooksDeleteAddressBookV1: build.mutation<
+        AddressBooksDeleteAddressBookV1ApiResponse,
+        AddressBooksDeleteAddressBookV1ApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/v1/accounts/${queryArg.address}/address-books/${queryArg.chainId}`,
+          method: 'DELETE',
+        }),
+        invalidatesTags: ['accounts'],
+      }),
+      addressBooksDeleteAddressBookItemV1: build.mutation<
+        AddressBooksDeleteAddressBookItemV1ApiResponse,
+        AddressBooksDeleteAddressBookItemV1ApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/v1/accounts/${queryArg.address}/address-books/${queryArg.chainId}/${queryArg.addressBookItemId}`,
+          method: 'DELETE',
+        }),
+        invalidatesTags: ['accounts'],
+      }),
+      addressBooksGetAddressBookItemsV1: build.query<
+        AddressBooksGetAddressBookItemsV1ApiResponse,
+        AddressBooksGetAddressBookItemsV1ApiArg
+      >({
+        query: (queryArg) => ({ url: `/v1/spaces/${queryArg.spaceId}/address-book` }),
+        providesTags: ['spaces'],
+      }),
+      addressBooksUpsertAddressBookItemsV1: build.mutation<
+        AddressBooksUpsertAddressBookItemsV1ApiResponse,
+        AddressBooksUpsertAddressBookItemsV1ApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/v1/spaces/${queryArg.spaceId}/address-book`,
+          method: 'PUT',
+          body: queryArg.upsertAddressBookItemsDto,
+        }),
+        invalidatesTags: ['spaces'],
+      }),
+      addressBooksDeleteByAddressV1: build.mutation<
+        AddressBooksDeleteByAddressV1ApiResponse,
+        AddressBooksDeleteByAddressV1ApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/v1/spaces/${queryArg.spaceId}/address-book/${queryArg.address}`,
+          method: 'DELETE',
+        }),
+        invalidatesTags: ['spaces'],
+      }),
       spacesCreateV1: build.mutation<SpacesCreateV1ApiResponse, SpacesCreateV1ApiArg>({
         query: (queryArg) => ({ url: `/v1/spaces`, method: 'POST', body: queryArg.createSpaceDto }),
         invalidatesTags: ['spaces'],
@@ -102,6 +168,43 @@ const injectedRtkApi = api
     overrideExisting: false,
   })
 export { injectedRtkApi as cgwApi }
+export type AddressBooksGetAddressBookV1ApiResponse = /** status 200  */ AddressBook
+export type AddressBooksGetAddressBookV1ApiArg = {
+  address: string
+  chainId: string
+}
+export type AddressBooksCreateAddressBookItemV1ApiResponse = /** status 200  */ AddressBookItem
+export type AddressBooksCreateAddressBookItemV1ApiArg = {
+  address: string
+  chainId: string
+  createAddressBookItemDto: CreateAddressBookItemDto
+}
+export type AddressBooksDeleteAddressBookV1ApiResponse = unknown
+export type AddressBooksDeleteAddressBookV1ApiArg = {
+  address: string
+  chainId: string
+}
+export type AddressBooksDeleteAddressBookItemV1ApiResponse = unknown
+export type AddressBooksDeleteAddressBookItemV1ApiArg = {
+  address: string
+  chainId: string
+  addressBookItemId: number
+}
+export type AddressBooksGetAddressBookItemsV1ApiResponse =
+  /** status 200 Address Book Items found */ SpaceAddressBookDto
+export type AddressBooksGetAddressBookItemsV1ApiArg = {
+  spaceId: number
+}
+export type AddressBooksUpsertAddressBookItemsV1ApiResponse = /** status 200 Address Book updated */ SpaceAddressBookDto
+export type AddressBooksUpsertAddressBookItemsV1ApiArg = {
+  spaceId: number
+  upsertAddressBookItemsDto: UpsertAddressBookItemsDto
+}
+export type AddressBooksDeleteByAddressV1ApiResponse = unknown
+export type AddressBooksDeleteByAddressV1ApiArg = {
+  spaceId: number
+  address: string
+}
 export type SpacesCreateV1ApiResponse = /** status 200 Space created */ CreateSpaceResponse
 export type SpacesCreateV1ApiArg = {
   createSpaceDto: CreateSpaceDto
@@ -176,6 +279,35 @@ export type MembersRemoveUserV1ApiResponse = unknown
 export type MembersRemoveUserV1ApiArg = {
   spaceId: number
   userId: number
+}
+export type AddressBookItem = {
+  name: string
+  address: string
+  chainIds: string[]
+}
+export type AddressBook = {
+  id: string
+  accountId: string
+  chainId: string
+  data: AddressBookItem[]
+}
+export type CreateAddressBookItemDto = {
+  name: string
+  address: string
+}
+export type SpaceAddressBookItemDto = {
+  name: string
+  address: string
+  chainIds: string[]
+  createdBy: string
+  lastUpdatedBy: string
+}
+export type SpaceAddressBookDto = {
+  spaceId: string
+  data: SpaceAddressBookItemDto[]
+}
+export type UpsertAddressBookItemsDto = {
+  items: AddressBookItem[]
 }
 export type CreateSpaceResponse = {
   name: string
@@ -275,6 +407,15 @@ export type UpdateMemberAliasDto = {
   alias: string
 }
 export const {
+  useAddressBooksGetAddressBookV1Query,
+  useLazyAddressBooksGetAddressBookV1Query,
+  useAddressBooksCreateAddressBookItemV1Mutation,
+  useAddressBooksDeleteAddressBookV1Mutation,
+  useAddressBooksDeleteAddressBookItemV1Mutation,
+  useAddressBooksGetAddressBookItemsV1Query,
+  useLazyAddressBooksGetAddressBookItemsV1Query,
+  useAddressBooksUpsertAddressBookItemsV1Mutation,
+  useAddressBooksDeleteByAddressV1Mutation,
   useSpacesCreateV1Mutation,
   useSpacesGetV1Query,
   useLazySpacesGetV1Query,
