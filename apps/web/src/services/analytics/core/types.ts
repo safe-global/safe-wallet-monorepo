@@ -30,6 +30,8 @@ export type EventContext = {
   appVersion?: string
   source?: 'web' | 'mobile' | 'server'
   test?: boolean // True during E2E tests
+  chainId?: string // Blockchain network identifier
+  safeAddress?: string // Safe wallet address
 }
 
 export type AnalyticsEvent<K extends string = string, P extends Record<string, unknown> = Record<string, unknown>> = {
@@ -44,8 +46,12 @@ export type ProviderInitOptions = {
   defaultContext?: EventContext
 }
 
-export type ConsentCategories = 'analytics' | 'marketing' | 'functional' | 'personalization'
+export type ConsentCategories = 'analytics' | 'marketing' | 'functional' | 'personalization' | 'necessary'
 export type ConsentState = Partial<Record<ConsentCategories, boolean>> & { updatedAt?: number }
+
+// Backwards compatibility aliases for tests
+export type ConsentSettings = ConsentState
+export type ConsentCategory = ConsentCategories
 
 // Provider routing configuration
 export type RouteDecision = {
@@ -77,3 +83,18 @@ export type AnalyticsOptions<E extends SafeEventMap> = {
 export function shallowMerge<T extends object>(base: T, patch?: Partial<T>): T {
   return Object.assign({}, base, patch || {}) as T
 }
+
+/**
+ * Legacy/simple middleware function signature expected in some tests
+ * Provided for typing compatibility in test utilities
+ */
+export type MiddlewareFunction = (
+  event: AnalyticsEvent<any, any>,
+  context?: EventContext,
+) => AnalyticsEvent<any, any> | null
+
+// Test compatibility types
+export type QueuedEvent = AnalyticsEvent<any, any>
+
+// Re-export some interfaces here for tests importing from '../types'
+export type { BaseProvider } from './provider'

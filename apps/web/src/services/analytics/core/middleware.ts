@@ -3,7 +3,7 @@
  * Allows event transformation, filtering, and processing.
  */
 
-import type { AnalyticsEvent, SafeEventMap } from './types'
+import type { AnalyticsEvent, SafeEventMap, MiddlewareFunction, EventContext } from './types'
 
 export type Middleware<E extends SafeEventMap> = (
   event: AnalyticsEvent<keyof E & string, E[keyof E & string]>,
@@ -13,13 +13,13 @@ export type Middleware<E extends SafeEventMap> = (
 /**
  * Chain of Responsibility implementation for middleware processing
  */
-export class MiddlewareChain<E extends SafeEventMap> {
-  private chain: Middleware<E>[] = []
+export class MiddlewareChain<_E extends SafeEventMap = SafeEventMap> {
+  private chain: MiddlewareFunction[] = []
 
   /**
    * Add middleware to the chain
    */
-  use(middleware: Middleware<E>): this {
+  use(middleware: MiddlewareFunction): this {
     this.chain.push(middleware)
     return this
   }
@@ -27,27 +27,29 @@ export class MiddlewareChain<E extends SafeEventMap> {
   /**
    * Execute the middleware chain
    */
-  run(event: AnalyticsEvent<any, any>, terminal: (e: AnalyticsEvent<any, any>) => void): void {
-    let index = -1
+  run(event: AnalyticsEvent<any, any>, terminal: (e: AnalyticsEvent<any, any>) => void, context?: EventContext): void {
+    const processed = this.process(event, context)
+    if (processed) terminal(processed)
+  }
 
-    const dispatch = (i: number, e: AnalyticsEvent<any, any>) => {
-      if (i <= index) {
-        throw new Error('next() called multiple times in middleware')
-      }
+  /**
+   * Compatibility helpers for tests that expect size/isEmpty/process
+   */
+  size(): number {
+    return this.chain.length
+  }
 
-      index = i
-      const middleware = this.chain[i]
+  isEmpty(): boolean {
+    return this.chain.length === 0
+  }
 
-      if (!middleware) {
-        // No more middleware, call terminal function
-        return terminal(e)
-      }
-
-      // Execute current middleware
-      middleware(e, (nextEvent) => dispatch(i + 1, nextEvent))
+  process(event: AnalyticsEvent<any, any>, context?: EventContext): AnalyticsEvent<any, any> | null {
+    let current: AnalyticsEvent<any, any> | null = event
+    for (const middleware of this.chain) {
+      if (current == null) return null
+      current = middleware(current, context)
     }
-
-    dispatch(0, event)
+    return current
   }
 
   /**
@@ -62,5 +64,64 @@ export class MiddlewareChain<E extends SafeEventMap> {
    */
   clear(): void {
     this.chain = []
+  }
+}
+
+// Built-in middleware factories for tests
+export const createLoggingMiddleware = (options?: {
+  enabled?: boolean
+  prefix?: string
+  includeContext?: boolean
+}): MiddlewareFunction => {
+  const { enabled = true, prefix = '[Analytics]', includeContext = false } = options || {}
+  return (event, ctx) => {
+    if (enabled) {
+      if (includeContext) {
+        console.log(prefix, 'Event:', event.name, 'Payload:', event.payload, 'Context:', ctx)
+      } else {
+        console.log(prefix, 'Event:', event.name, 'Payload:', event.payload)
+      }
+    }
+    return event
+  }
+}
+
+export const createSamplingMiddleware = (options: {
+  rate: number
+  eventRates?: Record<string, number>
+}): MiddlewareFunction => {
+  const { rate, eventRates } = options
+  return (event) => {
+    const eventRate = eventRates && eventRates[event.name as string]
+    const effectiveRate = typeof eventRate === 'number' ? eventRate : rate
+    const pass = Math.random() < effectiveRate
+    if (!pass) return null
+    return { ...event, context: { ...(event.context || {}), sampled: true, sampleRate: effectiveRate } }
+  }
+}
+
+export const createPiiScrubberMiddleware = (options?: {
+  piiFields?: string[]
+  replaceWith?: string
+}): MiddlewareFunction => {
+  const { piiFields = ['email'], replaceWith } = options || {}
+  const scrub = (value: any): any => {
+    if (Array.isArray(value)) return value.map(scrub)
+    if (value && typeof value === 'object') {
+      const result: any = {}
+      for (const [k, v] of Object.entries(value)) {
+        if (piiFields.includes(k)) {
+          result[k] = replaceWith ?? undefined
+        } else {
+          result[k] = scrub(v)
+        }
+      }
+      return result
+    }
+    return value
+  }
+  return (event) => {
+    if (!event.payload) return event
+    return { ...event, payload: scrub(event.payload) }
   }
 }

@@ -86,4 +86,40 @@ export class ConsentManager {
   lastUpdated(): number | undefined {
     return this.state.updatedAt
   }
+
+  /**
+   * Compatibility API expected by existing tests
+   */
+  hasConsent(category: ConsentCategories): boolean {
+    return this.allows(category)
+  }
+
+  hasAllConsents(categories: ConsentCategories[]): boolean {
+    return categories.every((c) => this.allows(c))
+  }
+
+  hasAnyConsent(categories: ConsentCategories[]): boolean {
+    return categories.some((c) => this.allows(c))
+  }
+
+  setConsent(consent: Partial<ConsentState>): void {
+    this.update(consent as ConsentState)
+  }
+
+  setConsentForCategory(category: ConsentCategories, value: boolean): void {
+    this.update({ [category]: value } as ConsentState)
+  }
+
+  getAllConsents(): ConsentState {
+    return this.get()
+  }
+
+  getConsentFor(categories: ConsentCategories[]): Partial<ConsentState> {
+    const all = this.get()
+    const result: Partial<ConsentState> = {}
+    categories.forEach((c) => {
+      if (c in all) result[c] = all[c]
+    })
+    return result
+  }
 }

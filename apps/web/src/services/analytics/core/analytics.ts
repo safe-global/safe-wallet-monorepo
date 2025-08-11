@@ -27,8 +27,8 @@ type ProviderEntry<E extends SafeEventMap> = {
 /**
  * Main analytics orchestrator class
  */
-export class Analytics<E extends SafeEventMap> {
-  private providers = new Map<string, ProviderEntry<E>>()
+export class Analytics<E extends SafeEventMap = SafeEventMap> {
+  private providerMap = new Map<string, ProviderEntry<E>>()
   private middlewares = new MiddlewareChain<E>()
   private queue: PersistentQueue
   private consent: ConsentManager
@@ -36,7 +36,12 @@ export class Analytics<E extends SafeEventMap> {
   private onError?: (err: unknown, event?: AnalyticsEvent) => void
   private router?: Router<E>
 
-  constructor(options?: AnalyticsOptions<E>) {
+  constructor(
+    options?: AnalyticsOptions<E> & {
+      providers?: BaseProvider<E>[]
+      middleware?: Array<(event: AnalyticsEvent<any, any>, context?: EventContext) => AnalyticsEvent<any, any> | null>
+    },
+  ) {
     this.defaultContext = options?.defaultContext || {}
     this.consent = new ConsentManager(options?.consent)
     this.queue = new PersistentQueue(
@@ -46,6 +51,12 @@ export class Analytics<E extends SafeEventMap> {
     )
     this.onError = options?.onError
     this.router = options?.router
+
+    // Register initial providers
+    options?.providers?.forEach((p) => this.addProvider(p))
+
+    // Register initial middleware
+    options?.middleware?.forEach((m) => this.use(m))
 
     // Auto-flush queue when coming back online
     if (typeof window !== 'undefined') {
@@ -57,7 +68,7 @@ export class Analytics<E extends SafeEventMap> {
    * Add a provider to the analytics system
    */
   addProvider(provider: BaseProvider<E>): this {
-    this.providers.set(provider.id, { provider, enabled: true })
+    this.providerMap.set(provider.id, { provider, enabled: true })
 
     // Initialize provider with current consent and context
     provider.init?.({
@@ -72,10 +83,10 @@ export class Analytics<E extends SafeEventMap> {
    * Remove a provider from the system
    */
   removeProvider(id: string): this {
-    const entry = this.providers.get(id)
+    const entry = this.providerMap.get(id)
     if (entry) {
       entry.provider.shutdown?.()
-      this.providers.delete(id)
+      this.providerMap.delete(id)
     }
     return this
   }
@@ -84,7 +95,7 @@ export class Analytics<E extends SafeEventMap> {
    * Enable a specific provider
    */
   enableProvider(id: string): this {
-    const entry = this.providers.get(id)
+    const entry = this.providerMap.get(id)
     if (entry) {
       entry.enabled = true
       entry.provider.setEnabled(true)
@@ -96,7 +107,7 @@ export class Analytics<E extends SafeEventMap> {
    * Disable a specific provider
    */
   disableProvider(id: string): this {
-    const entry = this.providers.get(id)
+    const entry = this.providerMap.get(id)
     if (entry) {
       entry.enabled = false
       entry.provider.setEnabled(false)
@@ -107,11 +118,7 @@ export class Analytics<E extends SafeEventMap> {
   /**
    * Add middleware to the processing chain
    */
-  use(
-    middleware: typeof this.middlewares extends MiddlewareChain<infer U>
-      ? Parameters<MiddlewareChain<U>['use']>[0]
-      : never,
-  ): this {
+  use(middleware: (event: AnalyticsEvent<any, any>, context?: EventContext) => AnalyticsEvent<any, any> | null): this {
     this.middlewares.use(middleware)
     return this
   }
@@ -131,7 +138,7 @@ export class Analytics<E extends SafeEventMap> {
     this.consent.update(consentPatch)
 
     // Notify all providers of consent change
-    for (const { provider } of this.providers.values()) {
+    for (const { provider } of this.providerMap.values()) {
       provider.init?.({
         consent: this.consent.get(),
         defaultContext: this.defaultContext,
@@ -153,7 +160,7 @@ export class Analytics<E extends SafeEventMap> {
    * Identify a user across providers
    */
   identify(userId: string, traits?: Record<string, unknown>): void {
-    for (const { provider, enabled } of this.providers.values()) {
+    for (const { provider, enabled } of this.providerMap.values()) {
       if (!enabled || !provider.isEnabled()) continue
 
       if (hasIdentifyCapability(provider)) {
@@ -170,7 +177,7 @@ export class Analytics<E extends SafeEventMap> {
    * Associate user with a group/organization
    */
   group(groupId: string, traits?: Record<string, unknown>): void {
-    for (const { provider, enabled } of this.providers.values()) {
+    for (const { provider, enabled } of this.providerMap.values()) {
       if (!enabled || !provider.isEnabled()) continue
 
       if (hasGroupCapability(provider)) {
@@ -187,7 +194,7 @@ export class Analytics<E extends SafeEventMap> {
    * Track page views
    */
   page(context?: PageContext): void {
-    for (const { provider, enabled } of this.providers.values()) {
+    for (const { provider, enabled } of this.providerMap.values()) {
       if (!enabled || !provider.isEnabled()) continue
 
       if (hasPageCapability(provider)) {
@@ -203,17 +210,11 @@ export class Analytics<E extends SafeEventMap> {
   /**
    * Track events through the middleware pipeline
    */
-  track<K extends keyof E & string>(
-    name: K,
-    payload: E[K],
-    context?: Partial<EventContext>,
-    options?: TrackOptions,
-  ): void {
-    const event: AnalyticsEvent<K, E[K]> = {
-      name,
-      payload,
-      context: shallowMerge(this.defaultContext, context),
-      timestamp: Date.now(),
+  track(event: AnalyticsEvent<any, any>, options?: TrackOptions): void {
+    const enriched: AnalyticsEvent<any, any> = {
+      ...event,
+      context: shallowMerge(this.defaultContext, event.context),
+      timestamp: event.timestamp ?? Date.now(),
     }
 
     const dispatch = (processedEvent: AnalyticsEvent<any, any>) => {
@@ -232,14 +233,14 @@ export class Analytics<E extends SafeEventMap> {
       }
 
       // Resolve provider routing
-      const routerDecision = this.router?.(processedEvent) || {}
+      const routerDecision = this.router?.(processedEvent as any) || {}
       const optionsDecision = options || {}
 
       const includeProviders = routerDecision.includeProviders || optionsDecision.includeProviders
       const excludeProviders = [...(routerDecision.excludeProviders || []), ...(optionsDecision.excludeProviders || [])]
 
       // Send to providers
-      for (const { provider, enabled } of this.providers.values()) {
+      for (const { provider, enabled } of this.providerMap.values()) {
         if (!enabled || !provider.isEnabled()) continue
 
         // Apply routing rules
@@ -267,7 +268,8 @@ export class Analytics<E extends SafeEventMap> {
     }
 
     // Run through middleware pipeline
-    this.middlewares.run(event, dispatch)
+    const processed = this.middlewares.process(enriched, enriched.context)
+    if (processed) dispatch(processed)
   }
 
   /**
@@ -276,7 +278,7 @@ export class Analytics<E extends SafeEventMap> {
   async flush(): Promise<void> {
     const promises: Promise<void>[] = []
 
-    for (const { provider } of this.providers.values()) {
+    for (const { provider } of this.providerMap.values()) {
       if (provider.flush) {
         promises.push(Promise.resolve(provider.flush()))
       }
@@ -298,7 +300,7 @@ export class Analytics<E extends SafeEventMap> {
     while (batch.length > 0) {
       for (const event of batch) {
         // Process directly without middleware to avoid double-processing
-        for (const { provider, enabled } of this.providers.values()) {
+        for (const { provider, enabled } of this.providerMap.values()) {
           if (!enabled || !provider.isEnabled()) continue
 
           try {
@@ -332,6 +334,31 @@ export class Analytics<E extends SafeEventMap> {
    * Get list of active provider IDs
    */
   getProviders(): string[] {
-    return Array.from(this.providers.keys())
+    return Array.from(this.providerMap.keys())
+  }
+
+  /**
+   * Initialize providers. Present for API compatibility in tests.
+   */
+  async init(): Promise<void> {
+    // Nothing to do eagerly; providers receive init on addProvider and consent changes
+  }
+
+  /**
+   * Shutdown all providers gracefully
+   */
+  async shutdown(): Promise<void> {
+    const promises: Promise<void>[] = []
+    for (const { provider } of this.providerMap.values()) {
+      if (provider.shutdown) promises.push(Promise.resolve(provider.shutdown()))
+    }
+    await Promise.all(promises)
+  }
+
+  /**
+   * Public providers list for tests and consumers
+   */
+  get providers(): BaseProvider<E>[] {
+    return Array.from(this.providerMap.values()).map((e) => e.provider)
   }
 }
