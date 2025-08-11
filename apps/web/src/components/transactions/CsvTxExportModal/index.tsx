@@ -1,4 +1,4 @@
-import { type ReactElement } from 'react'
+import { useMemo, type ReactElement } from 'react'
 import { useForm, Controller, FormProvider } from 'react-hook-form'
 import {
   DialogContent,
@@ -40,33 +40,58 @@ const DATE_RANGE_LABELS: Record<DateRangeOption, string> = {
   [DateRangeOption.CUSTOM]: 'Custom',
 }
 
-type CsvExportForm = {
-  range: DateRangeOption | ''
-  from: Date | null
-  to: Date | null
+enum CsvTxExportField {
+  RANGE = 'range',
+  FROM = 'from',
+  TO = 'to',
 }
 
-type CsvExportModalProps = {
+const MAX_RANGE_MONTHS = 12
+
+const getExportDates = (
+  range: DateRangeOption,
+  from: Date | null,
+  to: Date | null,
+  now = new Date(),
+): { executionDateGte?: string; executionDateLte?: string } => {
+  let executionDateGte: string | undefined
+  let executionDateLte: string | undefined = now.toISOString()
+
+  switch (range) {
+    case DateRangeOption.LAST_30_DAYS:
+      executionDateGte = subMonths(now, 1).toISOString()
+      break
+    case DateRangeOption.LAST_6_MONTHS:
+      executionDateGte = subMonths(now, 6).toISOString()
+      break
+    case DateRangeOption.LAST_12_MONTHS:
+      executionDateGte = subMonths(now, 12).toISOString()
+      break
+    case DateRangeOption.YTD:
+      executionDateGte = startOfYear(now).toISOString()
+      break
+    case DateRangeOption.CUSTOM:
+      executionDateGte = from ? from.toISOString() : undefined
+      executionDateLte = to ? to.toISOString() : undefined
+      break
+  }
+
+  return { executionDateGte, executionDateLte }
+}
+
+type CsvTxExportForm = {
+  [CsvTxExportField.RANGE]: DateRangeOption | ''
+  [CsvTxExportField.FROM]: Date | null
+  [CsvTxExportField.TO]: Date | null
+}
+
+type CsvTxExportModalProps = {
   onClose: () => void
   onExport?: (job: JobStatusDto) => void
   hasActiveFilter?: boolean
 }
 
-const YearRangeAlert = ({ isOverYear }: { isOverYear: boolean }) => {
-  const { severity, message } = isOverYear
-    ? {
-        severity: 'warning' as const,
-        message: 'Date range cannot exceed 12 months.',
-      }
-    : {
-        severity: 'info' as const,
-        message: 'You can select up to 12 months.',
-      }
-
-  return <Alert severity={severity}>{message}</Alert>
-}
-
-const CsvExportModal = ({ onClose, onExport, hasActiveFilter }: CsvExportModalProps): ReactElement => {
+const CsvTxExportModal = ({ onClose, onExport, hasActiveFilter }: CsvTxExportModalProps): ReactElement => {
   const dispatch = useAppDispatch()
   const safeAddress = useSafeAddress()
   const chainId = useChainId()
@@ -94,13 +119,13 @@ const CsvExportModal = ({ onClose, onExport, hasActiveFilter }: CsvExportModalPr
     )
   }
 
-  const methods = useForm<CsvExportForm>({
+  const methods = useForm<CsvTxExportForm>({
     mode: 'onChange',
     shouldUnregister: true,
     defaultValues: {
-      range: '',
-      from: null,
-      to: null,
+      [CsvTxExportField.RANGE]: '',
+      [CsvTxExportField.FROM]: null,
+      [CsvTxExportField.TO]: null,
     },
   })
 
@@ -112,48 +137,29 @@ const CsvExportModal = ({ onClose, onExport, hasActiveFilter }: CsvExportModalPr
     formState: { errors },
   } = methods
 
-  const selectedRange = watch('range')
-  const from = watch('from')
-  const to = watch('to')
+  const selectedRange = watch(CsvTxExportField.RANGE)
+  const from = watch(CsvTxExportField.FROM)
+  const to = watch(CsvTxExportField.TO)
 
-  const isOverYear = !!(from && to && isAfter(to, addMonths(from, 12)))
-  const isExportDisabled =
-    !selectedRange ||
-    (selectedRange === DateRangeOption.CUSTOM && (!from || !to || !!errors.from || !!errors.to)) ||
-    isOverYear
+  const isOverYear = !!(from && to && isAfter(to, addMonths(from, MAX_RANGE_MONTHS)))
+
+  const isExportDisabled = useMemo(() => {
+    return (
+      !selectedRange ||
+      (selectedRange === DateRangeOption.CUSTOM && (!from || !to || !!errors.from || !!errors.to)) ||
+      isOverYear
+    )
+  }, [selectedRange, from, to, errors.from, errors.to, isOverYear])
 
   const onSubmit = handleSubmit(async ({ range, from, to }) => {
-    const now = new Date()
-    let executionDateGte: string | undefined
-    let executionDateLte: string | undefined = now.toISOString()
-
-    switch (range) {
-      case DateRangeOption.LAST_30_DAYS:
-        executionDateGte = subMonths(now, 1).toISOString()
-        break
-      case DateRangeOption.LAST_6_MONTHS:
-        executionDateGte = subMonths(now, 6).toISOString()
-        break
-      case DateRangeOption.LAST_12_MONTHS:
-        executionDateGte = subMonths(now, 12).toISOString()
-        break
-      case DateRangeOption.YTD:
-        executionDateGte = startOfYear(now).toISOString()
-        break
-      case DateRangeOption.CUSTOM:
-        executionDateGte = from ? from.toISOString() : undefined
-        executionDateLte = to ? to.toISOString() : undefined
-        break
-    }
+    const { executionDateGte, executionDateLte } = getExportDates(range as DateRangeOption, from, to)
 
     try {
-      console.info('Export launched with params:', { chainId, safeAddress, executionDateGte, executionDateLte })
       const job = await launchExport({
         chainId,
         safeAddress,
         transactionExportDto: { executionDateGte, executionDateLte },
       }).unwrap()
-
       onExport?.(job)
       successNotification()
     } catch (e) {
@@ -174,13 +180,13 @@ const CsvExportModal = ({ onClose, onExport, hasActiveFilter }: CsvExportModalPr
 
             {hasActiveFilter && (
               <Alert severity="info" color="background" sx={{ mb: 3 }}>
-                Transaction history filters won&apos;t apply here.
+                Transaction history filter won&apos;t apply here.
               </Alert>
             )}
 
             <FormControl fullWidth sx={{ mb: 1 }}>
               <Controller
-                name="range"
+                name={CsvTxExportField.RANGE}
                 control={control}
                 render={({ field }) => (
                   <TextField select focused={false} label="Date range" fullWidth {...field}>
@@ -199,12 +205,11 @@ const CsvExportModal = ({ onClose, onExport, hasActiveFilter }: CsvExportModalPr
                 <Grid container spacing={3}>
                   <Grid item xs={12} md={6}>
                     <DatePickerInput
-                      name="from"
+                      name={CsvTxExportField.FROM}
                       label="From"
-                      deps={['to']}
-                      // fontSize={14}
+                      deps={[CsvTxExportField.TO]}
                       validate={(val) => {
-                        const toDate = getValues('to')
+                        const toDate = getValues(CsvTxExportField.TO)
                         if (val && toDate && isBefore(startOfDay(toDate), startOfDay(val))) {
                           return 'Must be before "To" date'
                         }
@@ -213,11 +218,11 @@ const CsvExportModal = ({ onClose, onExport, hasActiveFilter }: CsvExportModalPr
                   </Grid>
                   <Grid item xs={12} md={6}>
                     <DatePickerInput
-                      name="to"
+                      name={CsvTxExportField.TO}
                       label="To"
-                      deps={['from']}
+                      deps={[CsvTxExportField.FROM]}
                       validate={(val) => {
-                        const fromDate = getValues('from')
+                        const fromDate = getValues(CsvTxExportField.FROM)
                         if (val && fromDate && isAfter(startOfDay(fromDate), startOfDay(val))) {
                           return 'Must be after "From" date'
                         }
@@ -251,4 +256,18 @@ const CsvExportModal = ({ onClose, onExport, hasActiveFilter }: CsvExportModalPr
   )
 }
 
-export default CsvExportModal
+const YearRangeAlert = ({ isOverYear }: { isOverYear: boolean }): ReactElement => {
+  const { severity, message } = isOverYear
+    ? {
+        severity: 'warning' as const,
+        message: 'Date range cannot exceed 12 months.',
+      }
+    : {
+        severity: 'info' as const,
+        message: 'You can select up to 12 months.',
+      }
+
+  return <Alert severity={severity}>{message}</Alert>
+}
+
+export default CsvTxExportModal
