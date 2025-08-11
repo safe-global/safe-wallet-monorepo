@@ -17,6 +17,7 @@ import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
 import { useChain } from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
 
+import type { Analytics } from '@/services/analytics/core'
 import { AnalyticsBuilder } from '@/services/analytics/core'
 import { GoogleAnalyticsProvider } from '@/services/analytics/providers/GoogleAnalyticsProvider'
 import { MixpanelProvider } from '@/services/analytics/providers/MixpanelProvider'
@@ -38,7 +39,7 @@ export interface UseAnalyticsConfig {
  */
 export interface UseAnalyticsResult<E extends SafeEventMap = SafeEventMap> {
   /** Track an analytics event */
-  track: <K extends keyof E>(event: AnalyticsEvent<K, E[K]>) => void
+  track: <K extends Extract<keyof E, string>>(event: AnalyticsEvent<K, E[K]>) => void
   /** Identify a user with optional traits */
   identify: (userId: string, traits?: Record<string, unknown>) => void
   /** Track a page view */
@@ -55,7 +56,7 @@ export interface UseAnalyticsResult<E extends SafeEventMap = SafeEventMap> {
 export const useAnalytics = <E extends SafeEventMap = SafeEventMap>(
   config: UseAnalyticsConfig = {},
 ): UseAnalyticsResult<E> => {
-  const analyticsRef = useRef<ReturnType<typeof AnalyticsBuilder.create> | null>(null)
+  const analyticsRef = useRef<Analytics<any> | null>(null)
 
   // Consent and feature flags
   const isAnalyticsEnabled = useAppSelector((state) => hasConsentFor(state, CookieAndTermType.ANALYTICS))
@@ -67,7 +68,7 @@ export const useAnalytics = <E extends SafeEventMap = SafeEventMap>(
   const wallet = useWallet()
   const isSpaceRoute = useIsSpaceRoute()
   const { safe } = useSafeInfo()
-  const currentChain = useChain(safe?.chainId || '')
+  useChain(safe?.chainId || '')
   const walletChain = useChain(wallet?.chainId || '')
 
   // Device detection
@@ -94,7 +95,7 @@ export const useAnalytics = <E extends SafeEventMap = SafeEventMap>(
   useEffect(() => {
     if (!isAnalyticsEnabled) return
 
-    const builder = AnalyticsBuilder.create()
+    const builder = AnalyticsBuilder.create<E>()
 
     // Always add Google Analytics provider
     const gaProvider = new GoogleAnalyticsProvider({
@@ -174,7 +175,7 @@ export const useAnalytics = <E extends SafeEventMap = SafeEventMap>(
 
   // Analytics methods
   const track = useCallback(
-    <K extends keyof E>(event: AnalyticsEvent<K, E[K]>) => {
+    <K extends Extract<keyof E, string>>(event: AnalyticsEvent<K, E[K]>) => {
       if (!analyticsRef.current || !isAnalyticsEnabled) return
 
       analyticsRef.current.track(event)
