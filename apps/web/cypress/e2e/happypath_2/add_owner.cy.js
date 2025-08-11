@@ -23,7 +23,7 @@ describe('Happy path Add Owners tests', () => {
     cy.contains(owner.safeAccountNonceStr, { timeout: 10000 })
   })
 
-  it.only(
+  it(
     'Verify creation, confirmation and deletion of Add owner tx. GA tx_confirm',
     { defaultCommandTimeout: 30000 },
     () => {
@@ -44,25 +44,14 @@ describe('Happy path Add Owners tests', () => {
         navigation.clickOnWalletExpandMoreIcon()
         navigation.clickOnDisconnectBtn()
 
-        /**owner.clickOnAddSignerBtn()
-    owner.typeOwnerAddressManage(1, constants.SEPOLIA_OWNER_2)
-    owner.clickOnNextBtnManage()
-    owner.verifyConfirmTransactionWindowDisplayed()
-    owner.clickOnBackBtn()
-    owner.typeOwnerAddressManage(1, staticSafes.SEP_STATIC_SAFE_3)
-    owner.clickOnNextBtnManage()
-    owner.verifyConfirmTransactionWindowDisplayed() */
-
         cy.visit(constants.setupUrl + staticSafes.SEP_STATIC_SAFE_24)
         wallet.connectSigner(signer2)
         owner.waitForConnectionStatus()
         owner.openManageSignersWindow()
         owner.clickOnAddSignerBtn()
         owner.typeOwnerAddressManage(2, constants.SEPOLIA_OWNER_2)
-        //owner.typeOwnerAddress(constants.SEPOLIA_OWNER_2)
         createTx.changeNonce(1)
         owner.clickOnNextBtnManage()
-        //owner.clickOnNextBtn()
         owner.verifyConfirmTransactionWindowDisplayed()
         createTx.clickOnContinueSignTransactionBtn()
         createTx.clickOnSignTransactionBtn()
@@ -99,7 +88,6 @@ describe('Happy path Add Owners tests', () => {
           step2()
         } else {
           createTx.clickOnConfirmTransactionBtn()
-          //createTx.clickOnNoLaterOption()
           createTx.clickOnContinueSignTransactionBtn()
           createTx.clickOnSignTransactionBtn()
 
