@@ -84,7 +84,7 @@ const TxSimulationBlock = ({
     }
   }
 
-  const { isFinished, isError, isSuccess, isCallTraceError, isLoading, isPartialRevert } = !!nestedSafe ? nestedTx.status : status
+  const { isFinished, isError, isSuccess, isLoading, isCallTraceError } = !!nestedSafe ? nestedTx.status : status
 
   // Reset simulation if safeTx changes
   useEffect(() => {
@@ -137,7 +137,7 @@ const TxSimulationBlock = ({
               }}
             />
           ) : isFinished ? (
-            !isSuccess || isError || (isCallTraceError && !isPartialRevert) ? (
+            !isSuccess || isError ? (
               <Typography
                 variant="body2"
                 className={sharedCss.result}
@@ -153,7 +153,7 @@ const TxSimulationBlock = ({
                 />
                 Error
               </Typography>
-            ) : isPartialRevert ? (
+            ) : isCallTraceError ? (
               <Typography
                 data-testid="simulation-warning-msg"
                 variant="body2"
@@ -222,14 +222,14 @@ export const TxSimulation = (props: TxSimulationProps): ReactElement | null => {
 export const TxSimulationMessage = ({ isNested = false }: { isNested?: boolean }) => {
   const txInfo = useContext(TxInfoContext)
 
-  const { isFinished, isError, isSuccess, isCallTraceError, isPartialRevert } = isNested ? txInfo.nestedTx.status : txInfo.status
+  const { isFinished, isError, isSuccess, isCallTraceError } = isNested ? txInfo.nestedTx.status : txInfo.status
   const { simulationLink, simulationData, requestError } = isNested ? txInfo.nestedTx.simulation : txInfo.simulation
 
   if (!isFinished) {
     return null
   }
 
-  if (!isSuccess || isError || (isCallTraceError && !isPartialRevert)) {
+  if (!isSuccess || isError) {
     return (
       <Alert severity="error" sx={{ border: 'unset' }}>
         <Typography variant="body1" fontWeight={700}>
@@ -241,15 +241,9 @@ export const TxSimulationMessage = ({ isNested = false }: { isNested?: boolean }
           </Typography>
         ) : (
           <Typography variant="body2">
-            {isCallTraceError && !isPartialRevert ? (
-              <>The transaction failed during the simulation.</>
-            ) : (
-              <>
-                The transaction failed during the simulation throwing error{' '}
-                <b>{simulationData?.transaction.error_message}</b> in the contract at{' '}
-                <b>{simulationData?.transaction.error_info?.address}</b>.
-              </>
-            )}{' '}
+            The transaction failed during the simulation throwing error{' '}
+            <b>{simulationData?.transaction.error_message}</b> in the contract at{' '}
+            <b>{simulationData?.transaction.error_info?.address}</b>.{' '}
             Full simulation report is available <ExternalLink href={simulationLink}>on Tenderly</ExternalLink>.
           </Typography>
         )}
@@ -257,7 +251,7 @@ export const TxSimulationMessage = ({ isNested = false }: { isNested?: boolean }
     )
   }
 
-  if (isPartialRevert) {
+  if (isCallTraceError) {
     return (
       <Alert severity="warning" sx={{ border: 'unset' }}>
         <Typography fontWeight={700}>

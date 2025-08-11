@@ -11,7 +11,6 @@ type SimulationStatus = {
   isSuccess: boolean
   isCallTraceError: boolean
   isError: boolean
-  isPartialRevert: boolean
 }
 
 const initialSimulation: UseSimulationReturn = {
@@ -29,7 +28,6 @@ const initialStatus: SimulationStatus = {
   isSuccess: false,
   isCallTraceError: false,
   isError: false,
-  isPartialRevert: false,
 }
 
 export const TxInfoContext = createContext<{

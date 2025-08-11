@@ -109,12 +109,12 @@ const InlineTxSimulation = ({ transaction }: { transaction: TransactionDetails }
       <ExternalLink href={simulationLink}>
         <Stack direction="row" alignItems="center" gap={0.5}>
           <SvgIcon
-            color={status.isPartialRevert ? 'warning' : status.isSuccess ? 'success' : 'error'}
-            component={status.isPartialRevert ? WarningIcon : status.isSuccess ? CheckIcon : CloseIcon}
+            color={status.isCallTraceError ? 'warning' : status.isSuccess ? 'success' : 'error'}
+            component={status.isCallTraceError ? WarningIcon : status.isSuccess ? CheckIcon : CloseIcon}
             inheritViewBox
             sx={{ height: '16px' }}
           />
-          {status.isPartialRevert ? 'Can execute (with warnings)' : status.isSuccess ? 'Simulation successful' : 'Simulation failed'}
+          {status.isCallTraceError ? 'Can execute (with warnings)' : status.isSuccess ? 'Simulation successful' : 'Simulation failed'}
         </Stack>
       </ExternalLink>
     )

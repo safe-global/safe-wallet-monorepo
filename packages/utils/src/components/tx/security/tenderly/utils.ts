@@ -47,7 +47,7 @@ export const isTxSimulationEnabled = (chain?: Pick<Chain, 'features'>): boolean 
 export const getSimulation = async (
   tx: TenderlySimulatePayload,
   customTenderly: EnvState['tenderly'] | undefined,
-): Promise<TenderlySimulation> => {
+): Promise<TenderlySimulation> => {  
   // MOCK: Uncomment to test partial revert locally
   /*
   console.log('🧪 MOCK: Returning partial revert simulation')
@@ -90,6 +90,7 @@ export const getSimulation = async (
   } as TenderlySimulation
   */
   
+
   const requestObject: RequestInit = {
     method: 'POST',
     body: JSON.stringify(tx),
@@ -209,7 +210,6 @@ export type SimulationStatus = {
   isSuccess: boolean
   isCallTraceError: boolean
   isError: boolean
-  isPartialRevert: boolean
 }
 
 export const getSimulationStatus = (simulationResult: UseSimulationReturn): SimulationStatus => {
@@ -224,11 +224,9 @@ export const getSimulationStatus = (simulationResult: UseSimulationReturn): Simu
   const isSuccess = tenderlyResponse?.simulation.status || false
 
   // Safe can emit failure event even though Tenderly simulation succeeds
+
   const isCallTraceError = isSuccess && getCallTraceErrors(tenderlyResponse).length > 0
   const isError = simulationResult._simulationRequestStatus === FETCH_STATUS.ERROR
-
-  // Partial revert: simulation succeeds overall but has internal errors
-  const isPartialRevert = isSuccess && isCallTraceError
 
   return {
     isLoading,
@@ -236,6 +234,5 @@ export const getSimulationStatus = (simulationResult: UseSimulationReturn): Simu
     isSuccess,
     isCallTraceError,
     isError,
-    isPartialRevert,
   }
 }

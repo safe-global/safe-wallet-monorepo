@@ -182,7 +182,6 @@ describe('getSimulationStatus', () => {
       isSuccess: false,
       isCallTraceError: false,
       isError: false,
-      isPartialRevert: false,
     })
   })
 
@@ -198,7 +197,6 @@ describe('getSimulationStatus', () => {
       isSuccess: false,
       isCallTraceError: false,
       isError: true,
-      isPartialRevert: false,
     })
   })
 
@@ -217,7 +215,6 @@ describe('getSimulationStatus', () => {
       isSuccess: true,
       isCallTraceError: false,
       isError: false,
-      isPartialRevert: false,
     })
   })
 
@@ -241,7 +238,6 @@ describe('getSimulationStatus', () => {
       isSuccess: true,
       isCallTraceError: true,
       isError: false,
-      isPartialRevert: true,
     })
   })
 
@@ -260,7 +256,6 @@ describe('getSimulationStatus', () => {
       isSuccess: false,
       isCallTraceError: false,
       isError: false,
-      isPartialRevert: false,
     })
   })
 })
