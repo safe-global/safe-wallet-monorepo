@@ -6,7 +6,7 @@ runs:
   using: 'composite'
   steps:
     # We require yarn v4 and installing through corepack is the easiest way to get it
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
 
     - uses: ./.github/actions/corepack
 
