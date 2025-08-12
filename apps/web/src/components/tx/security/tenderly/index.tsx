@@ -243,8 +243,8 @@ export const TxSimulationMessage = ({ isNested = false }: { isNested?: boolean }
           <Typography variant="body2">
             The transaction failed during the simulation throwing error{' '}
             <b>{simulationData?.transaction.error_message}</b> in the contract at{' '}
-            <b>{simulationData?.transaction.error_info?.address}</b>.{' '}
-            Full simulation report is available <ExternalLink href={simulationLink}>on Tenderly</ExternalLink>.
+            <b>{simulationData?.transaction.error_info?.address}</b>. Full simulation report is available{' '}
+            <ExternalLink href={simulationLink}>on Tenderly</ExternalLink>.
           </Typography>
         )}
       </Alert>
@@ -254,11 +254,9 @@ export const TxSimulationMessage = ({ isNested = false }: { isNested?: boolean }
   if (isCallTraceError) {
     return (
       <Alert severity="warning" sx={{ border: 'unset' }}>
-        <Typography fontWeight={700}>
-          Simulation successful with warnings
-        </Typography>
-        Transaction will execute successfully on-chain, but contains internal reverts.
-        Some contract logic may not execute as expected. Full simulation report available{' '}
+        <Typography fontWeight={700}>Simulation successful with warnings</Typography>
+        Transaction will execute successfully on-chain, but contains internal reverts. Some contract logic may not
+        execute as expected. Full simulation report available{' '}
         <ExternalLink href={simulationLink}>on Tenderly</ExternalLink>.
       </Alert>
     )
@@ -266,9 +264,7 @@ export const TxSimulationMessage = ({ isNested = false }: { isNested?: boolean }
 
   return (
     <Alert severity="info" sx={{ border: 'unset' }}>
-      <Typography fontWeight={700}>
-        Simulation successful
-      </Typography>
+      <Typography fontWeight={700}>Simulation successful</Typography>
       Full simulation report is available <ExternalLink href={simulationLink}>on Tenderly</ExternalLink>.
     </Alert>
   )

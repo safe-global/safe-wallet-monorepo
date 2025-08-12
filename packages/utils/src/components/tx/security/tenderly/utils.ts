@@ -48,47 +48,7 @@ export const getSimulation = async (
   tx: TenderlySimulatePayload,
   customTenderly: EnvState['tenderly'] | undefined,
 ): Promise<TenderlySimulation> => {  
-  // MOCK: Uncomment to test partial revert locally
-  /*
-  console.log('🧪 MOCK: Returning partial revert simulation')
-  return {
-    simulation: { 
-      status: true,
-      id: 'mock-simulation-123'
-    } as any,
-    transaction: {
-      status: true,
-      hash: '0x123',
-      block_number: 1,
-      call_trace: [
-        { 
-          from: '0x123',
-          to: '0x456',
-          input: '0x',
-          output: '0x',
-          gas: 21000,
-          gas_used: 21000,
-          value: '0',
-          error: undefined 
-        },
-        { 
-          from: '0x789',
-          to: '0xabc',
-          input: '0x',
-          output: '0x',
-          gas: 50000,
-          gas_used: 30000,
-          value: '0',
-          error: 'execution reverted' // This creates a partial revert
-        }
-      ] as any,
-      error_message: null,
-      error_info: null
-    } as any,
-    contracts: [],
-    generated_access_list: []
-  } as TenderlySimulation
-  */
+  
   
 
   const requestObject: RequestInit = {
@@ -96,7 +56,7 @@ export const getSimulation = async (
     body: JSON.stringify(tx),
   }
 
-  if (customTenderly && customTenderly.accessToken) {
+  if (customTenderly?.accessToken) {
     requestObject.headers = {
       'content-type': 'application/JSON',
       'X-Access-Key': customTenderly.accessToken,
@@ -219,13 +179,10 @@ export const getSimulationStatus = (simulationResult: UseSimulationReturn): Simu
     simulationResult._simulationRequestStatus === FETCH_STATUS.SUCCESS ||
     simulationResult._simulationRequestStatus === FETCH_STATUS.ERROR
 
-  // Extract the nested status more clearly
-  const tenderlyResponse = simulationResult.simulationData
-  const isSuccess = tenderlyResponse?.simulation.status || false
+  const isSuccess = simulationResult.simulationData?.simulation.status || false
 
   // Safe can emit failure event even though Tenderly simulation succeeds
-
-  const isCallTraceError = isSuccess && getCallTraceErrors(tenderlyResponse).length > 0
+  const isCallTraceError = isSuccess && getCallTraceErrors(simulationResult.simulationData).length > 0
   const isError = simulationResult._simulationRequestStatus === FETCH_STATUS.ERROR
 
   return {
