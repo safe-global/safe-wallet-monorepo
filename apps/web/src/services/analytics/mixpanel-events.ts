@@ -1,5 +1,7 @@
 export enum MixPanelEvent {
   SAFE_APP_LAUNCHED = 'Safe App Launched',
+  CSV_TX_EXPORT_CLICKED = 'Export CSV Clicked',
+  CSV_TX_EXPORT_SUBMITTED = 'CSV Exported',
 }
 
 export enum MixPanelUserProperty {
