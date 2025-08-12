@@ -2,6 +2,91 @@
 
 ---
 
+## Architecture Overview
+
+This analytics system is designed as a **pluggable, type-safe abstraction layer** that sits between your application and multiple analytics providers (Google Analytics, Mixpanel, etc.). It follows SOLID principles and common design patterns to ensure maintainability, extensibility, and testability.
+
+### High-Level Architecture
+
+```mermaid
+graph TB
+    subgraph "Application Layer"
+        App[Application Code]
+        Hook[useAnalytics Hook]
+        Builder[AnalyticsBuilder]
+    end
+    
+    subgraph "Analytics Core"
+        Analytics[Analytics Orchestrator]
+        ProviderMap[Provider Registry Map]
+        MiddlewareChain[Middleware Chain]
+        Router[Event Router Logic]
+    end
+    
+    subgraph "Infrastructure"
+        Queue[Persistent Queue]
+        Consent[Consent Manager]
+        Storage[(localStorage)]
+        CookieStore[(Cookie Store)]
+    end
+    
+    subgraph "Provider Layer"
+        Provider1[Google Analytics Adapter]
+        Provider2[Mixpanel Adapter]
+        Provider3[Custom Provider]
+        GA4[GA4 gtag API]
+        MP[Mixpanel JS SDK]
+        CustomAPI[Custom API]
+    end
+    
+    %% Application flow
+    App --> Hook
+    Hook --> Analytics
+    Builder --> Analytics
+    
+    %% Core orchestration
+    Analytics --> ProviderMap
+    Analytics --> MiddlewareChain
+    Analytics --> Router
+    Analytics --> Queue
+    Analytics --> Consent
+    
+    %% Infrastructure connections
+    Queue --> Storage
+    Consent --> CookieStore
+    
+    %% Provider connections
+    ProviderMap --> Provider1
+    ProviderMap --> Provider2
+    ProviderMap --> Provider3
+    Provider1 --> GA4
+    Provider2 --> MP
+    Provider3 --> CustomAPI
+    
+    %% Event flow styling
+    classDef coreClass fill:#e1f5fe
+    classDef infraClass fill:#f3e5f5
+    classDef providerClass fill:#e8f5e8
+    
+    class Analytics,ProviderMap,MiddlewareChain,Router coreClass
+    class Queue,Consent,Storage,CookieStore infraClass
+    class Provider1,Provider2,Provider3,GA4,MP,CustomAPI providerClass
+```
+
+### Key Components & Their Purpose
+
+| Component | Purpose | Design Pattern |
+|-----------|---------|----------------|
+| **Analytics Core** | Orchestrates event flow, manages providers | Composite, Mediator |
+| **Provider Adapters** | Translate events to provider-specific formats | Adapter |
+| **Middleware Chain** | Transform/filter events before sending | Chain of Responsibility |
+| **Event Router** | Route events to specific providers | Strategy |
+| **Builder** | Construct analytics instances ergonomically | Builder |
+| **Consent Manager** | Handle privacy compliance | State Machine |
+| **Persistent Queue** | Handle offline scenarios & retries | Command Queue |
+
+---
+
 ## Goals
 
 - **SOLID + DRY** principles
@@ -10,6 +95,76 @@
 - **Middleware pipeline** (Chain of Responsibility pattern)
 - **Consent gating, sampling, PII scrubbing** examples
 - **Offline queue** with localStorage + retry on reconnect
+
+### Event Processing Flow
+
+```mermaid
+sequenceDiagram
+    participant App as Application
+    participant Analytics as Analytics Core
+    participant Middleware as Middleware Chain
+    participant Consent as Consent Manager
+    participant Queue as Persistent Queue
+    participant GA as Google Analytics
+    participant MP as Mixpanel
+    
+    App->>Analytics: track(event, options)
+    
+    Note over Analytics: Step 1: Event Enrichment
+    Analytics->>Analytics: Add default context, timestamp
+    
+    Note over Analytics: Step 2: Middleware Processing
+    Analytics->>Middleware: process(enrichedEvent, context)
+    
+    alt Middleware allows event
+        Middleware-->>Analytics: processedEvent
+        
+        Note over Analytics: Step 3: Consent Check
+        Analytics->>Consent: allowsAnalytics()
+        
+        alt Consent granted & online
+            Note over Analytics: Step 4: Event Routing
+            Analytics->>Analytics: Apply router + options rules
+            
+            Note over Analytics: Step 5: Provider Dispatch
+            loop For each enabled provider
+                alt Provider matches routing rules
+                    Analytics->>GA: provider.track(event)
+                    Analytics->>MP: provider.track(event)
+                end
+            end
+            
+        else No consent or offline
+            Note over Analytics: Step 6: Queue for Later
+            Analytics->>Queue: enqueue(processedEvent)
+        end
+        
+    else Middleware drops event
+        Note over Analytics: Step 7: Event Dropped
+        Middleware-->>Analytics: null (event filtered)
+    end
+    
+    Note over Queue,MP: Background: Consent granted or reconnect
+    Queue->>Analytics: flushQueue()
+    Analytics->>GA: Replay queued events
+    Analytics->>MP: Replay queued events
+```
+
+**The 7-Step Event Processing Pipeline:**
+1. **Event Enrichment**: Merges default context (user, device, session) with event-specific context and adds timestamp
+2. **Middleware Processing**: Runs event through Chain of Responsibility pattern for transformations (sampling, PII scrubbing, filtering)
+3. **Consent Check**: Verifies analytics consent and online status before processing
+4. **Event Routing**: Applies router rules and track options to determine which providers should receive the event
+5. **Provider Dispatch**: Sends event to each enabled provider that matches routing rules, with async error handling
+6. **Queue Management**: Stores events in persistent localStorage queue when offline or consent is pending
+7. **Background Processing**: Automatically flushes queued events when consent is granted or connection is restored
+
+**Why this architecture matters:**
+- **Type Safety**: Compile-time checking of event names and payloads
+- **Privacy First**: Default-deny consent with retroactive processing
+- **Resilience**: Offline-first with automatic retry and queue management
+- **Flexibility**: Middleware pipeline allows custom transformations
+- **Performance**: Async provider dispatch with error isolation
 
 ## Implementation Notes for GA4 & Mixpanel
 
@@ -61,46 +216,91 @@
 
 ---
 
-## Code Implementation
+## Component Deep Dive
 
-### types.ts
+This section explains each component in detail, including its purpose, implementation, and how it fits into the larger architecture.
+
+---
+
+### Core Type System (`types.ts`)
+
+**Purpose:** Provides type safety and structure for the entire analytics system. Defines contracts that ensure compile-time safety and runtime consistency.
+
+**Why it matters:** TypeScript's type system catches errors early, provides IntelliSense, and documents expected data shapes. A well-designed type system is crucial for maintainable analytics code.
+
+```mermaid
+graph LR
+    EventMap[EventMap] --> AnalyticsEvent[AnalyticsEvent]
+    EventContext[EventContext] --> AnalyticsEvent
+    DeviceInfo[DeviceInfo] --> EventContext
+    PageContext[PageContext] --> EventContext
+    
+    AnalyticsEvent --> Provider[BaseProvider.track]
+    AnalyticsEvent --> Middleware[Middleware Chain]
+```
 
 ```typescript
+// Represents JSON-serializable data - ensures all analytics data can be transmitted
 export type Json = string | number | boolean | null | Json[] | { [k: string]: Json };
 
-// Your app defines a strongly-typed catalog of events.
-// Example at bottom shows how to define AppEvents.
+/**
+ * EventMap: The foundation of type safety
+ * Define your app's events as a type to get compile-time checking
+ * Example: { 'User Signed Up': { method: 'google' | 'email', plan?: 'free' | 'pro' } }
+ */
 export type EventMap = Record<string, Record<string, unknown>>;
 
+/**
+ * DeviceInfo: Contextual information about the user's device
+ * Used for segmentation and understanding user behavior patterns
+ */
 export type DeviceInfo = {
-  userAgent?: string;
-  screen?: { width?: number; height?: number; pixelRatio?: number };
+  userAgent?: string;  // Browser/device identification
+  screen?: { width?: number; height?: number; pixelRatio?: number };  // Display characteristics
 };
 
+/**
+ * PageContext: Information about the current page/screen
+ * Essential for understanding user journey and page performance
+ */
 export type PageContext = {
-  url?: string;
-  referrer?: string;
-  title?: string;
-  path?: string;
+  url?: string;      // Full URL
+  referrer?: string; // Previous page
+  title?: string;    // Page title
+  path?: string;     // URL path only
 };
 
+/**
+ * EventContext: Rich contextual data attached to every event
+ * Provides the "who, what, when, where" for comprehensive analytics
+ */
 export type EventContext = {
-  userId?: string; // known user id (post-identify). Do NOT send PII like emails.
-  anonymousId?: string; // cookie/local id before identify
-  sessionId?: string;
-  page?: PageContext;
-  device?: DeviceInfo;
-  locale?: string;
-  appVersion?: string;
-  source?: 'web' | 'mobile' | 'server';
-  test?: boolean; // e.g., true during e2e tests
+  userId?: string;        // Post-login identifier (NO PII!)
+  anonymousId?: string;   // Pre-login cookie ID
+  sessionId?: string;     // Current session identifier
+  page?: PageContext;     // Page/screen context
+  device?: DeviceInfo;    // Device characteristics
+  locale?: string;        // User's language/region
+  appVersion?: string;    // App version for A/B testing
+  source?: 'web' | 'mobile' | 'server';  // Platform identifier
+  test?: boolean;         // Filter out test events
 };
 
-export type AnalyticsEvent<K extends string = string, P extends Record<string, unknown> = Record<string, unknown>> = {
-  name: K;
-  payload: P;
-  context?: EventContext;
-  timestamp?: number; // epoch ms
+/**
+ * AnalyticsEvent: The core event structure
+ * Generic types ensure type safety between event names and their expected payloads
+ * 
+ * @template K - Event name (must be a key in your EventMap)
+ * @template P - Payload structure (must match EventMap[K])
+ */
+export type AnalyticsEvent<
+  K extends string = string, 
+  P extends Record<string, unknown> = Record<string, unknown>
+> = {
+  name: K;                    // Event identifier (e.g., 'User Signed Up')
+  payload: P;                 // Event-specific data
+  context?: EventContext;     // Additional contextual information
+  timestamp?: number;         // Unix timestamp (auto-generated if not provided)
 };
 
 export type ProviderInitOptions = {
@@ -117,65 +317,187 @@ function shallowMerge<T extends object>(base: T, patch?: Partial<T>): T {
 }
 ```
 
-### provider.ts — Provider contracts (ISP-friendly)
+---
+
+### Provider System (`provider.ts`)
+
+**Purpose:** Defines contracts for analytics providers using Interface Segregation Principle (ISP). Providers only implement capabilities they actually support.
+
+**Why it matters:** Different analytics services have different capabilities. GA4 might not support user grouping, while Mixpanel excels at it. ISP allows providers to opt-into only the features they support, preventing interface bloat and making testing easier.
+
+**Design Pattern:** Adapter Pattern + Interface Segregation
+
+```mermaid
+graph TB
+    BaseProvider[BaseProvider] --> GA[GoogleAnalyticsProvider]
+    BaseProvider --> MP[MixpanelProvider]
+    BaseProvider --> Custom[CustomProvider]
+    
+    IdentifyCapable[IdentifyCapable] --> GA
+    IdentifyCapable --> MP
+    
+    PageCapable[PageCapable] --> GA
+    PageCapable --> MP
+    
+    GroupCapable[GroupCapable] --> MP
+    GroupCapable --> Custom
+    
+    GA --> GA4API[GA4 gtag API]
+    MP --> MPAPI[Mixpanel JS SDK]
+    Custom --> CustomAPI[Your Custom API]
+```
 
 ```typescript
+/**
+ * BaseProvider: Minimum interface all providers must implement
+ * Every provider can track events and be enabled/disabled
+ */
 export interface BaseProvider<E extends EventMap = EventMap> {
-  /** Unique stable id, e.g., 'ga' or 'mixpanel' */
-  readonly id: string;
-  init?(opts: ProviderInitOptions): Promise<void> | void;
-  /** Core capability: track */
+  readonly id: string;                    // Unique identifier for routing
+  init?(opts: ProviderInitOptions): Promise<void> | void;  // Initialize with consent/context
+  
+  // Core capability: every provider must be able to track events
   track<K extends keyof E & string>(event: AnalyticsEvent<K, E[K]>): void | Promise<void>;
-  /** Control */
+  
+  // Control capabilities: enable/disable provider
   isEnabled(): boolean;
   setEnabled(enabled: boolean): void;
-  flush?(): Promise<void>;
-  shutdown?(): Promise<void>;
+  
+  // Optional cleanup methods
+  flush?(): Promise<void>;    // Force send any buffered events
+  shutdown?(): Promise<void>; // Clean shutdown
 }
 
-// Interface Segregation: opt-in extra capabilities per provider
+/**
+ * Optional capability interfaces (Interface Segregation Principle)
+ * Providers implement only the capabilities they support
+ */
+
+// User identification capability (most providers support this)
 export interface IdentifyCapable {
   identify(userId: string, traits?: Record<string, unknown>): void | Promise<void>;
 }
 
+// Group/organization tracking (mainly for B2B analytics like Mixpanel)
 export interface GroupCapable {
   group(groupId: string, traits?: Record<string, unknown>): void | Promise<void>;
 }
 
+// Page view tracking (web-focused providers)
 export interface PageCapable {
   page(ctx?: PageContext): void | Promise<void>;
 }
 ```
 
-### middleware.ts — Chain of Responsibility
+---
+
+### Middleware System (`middleware.ts`)
+
+**Purpose:** Implements Chain of Responsibility pattern to transform, filter, or enrich events before they reach providers. Middleware can modify events, add context, filter out events, or perform side effects.
+
+**Why it matters:** Real-world analytics needs preprocessing - sampling for high-volume events, PII scrubbing for compliance, event renaming for taxonomy alignment. Middleware makes this composable and testable.
+
+**Design Pattern:** Chain of Responsibility
+
+```mermaid
+graph LR
+    Event[Raw Event] --> M1[Sampling Middleware]
+    M1 --> M2[PII Scrubber]
+    M2 --> M3[Event Mapper]
+    M3 --> M4[Custom Middleware]
+    M4 --> Provider[Provider.track()]
+    
+    M1 -. may drop event .-> X[❌ Dropped]
+    M2 -. removes sensitive data .-> M2
+    M3 -. renames events .-> M3
+    M4 -. custom logic .-> M4
+```
+
+**Common Use Cases:**
+- **Sampling**: Drop 90% of high-volume events to reduce costs
+- **PII Scrubbing**: Remove emails, phone numbers for GDPR compliance
+- **Event Mapping**: Rename events to match different provider taxonomies
+- **Enrichment**: Add computed fields or lookup data
+- **Filtering**: Block test events or internal user actions
 
 ```typescript
+/**
+ * Middleware function signature
+ * Can transform the event and call next(), or stop the chain by not calling next()
+ */
 export type Middleware<E extends EventMap> = (
   event: AnalyticsEvent<keyof E & string, E[keyof E & string]>,
   next: (event: AnalyticsEvent<any, any>) => void
 ) => void;
 
+/**
+ * MiddlewareChain: Manages and executes the middleware pipeline
+ * Implements the Chain of Responsibility pattern
+ */
 class MiddlewareChain<E extends EventMap> {
   private chain: Middleware<E>[] = [];
+  
+  // Add middleware to the end of the chain
   use(mw: Middleware<E>): this {
     this.chain.push(mw);
     return this;
   }
+  
+  // Execute the middleware chain
   run(event: AnalyticsEvent<any, any>, terminal: (e: AnalyticsEvent<any, any>) => void) {
-    let idx = -1;
+    let idx = -1;  // Track middleware execution to prevent double-calling
+    
     const dispatch = (i: number, e: AnalyticsEvent<any, any>) => {
       if (i <= idx) throw new Error('next() called multiple times');
       idx = i;
+      
       const mw = this.chain[i];
-      if (!mw) return terminal(e);
+      if (!mw) {
+        // End of chain - call terminal function (provider.track)
+        return terminal(e);
+      }
+      
+      // Execute middleware with next function
       mw(e, (e2) => dispatch(i + 1, e2));
     };
+    
     dispatch(0, event);
   }
 }
 ```
 
-### queue.ts — localStorage-backed resilient queue
+---
+
+### Persistent Queue (`queue.ts`)
+
+**Purpose:** Handles offline scenarios and consent-gated events by storing them in localStorage until they can be sent. Ensures no analytics data is lost due to network issues or privacy compliance.
+
+**Why it matters:** Users go offline, consent might not be granted immediately, or providers might be temporarily unavailable. A queue ensures resilient analytics that doesn't lose data.
+
+**Design Pattern:** Command Queue + Persistent Storage
+
+```mermaid
+stateDiagram-v2
+    [*] --> Online: App starts
+    Online --> Queue: Network error
+    Online --> Queue: No consent
+    Queue --> Process: Network restored
+    Queue --> Process: Consent granted
+    Process --> Online: Events sent
+    
+    state Queue {
+        [*] --> localStorage: Store events
+        localStorage --> TTLCheck: Periodically
+        TTLCheck --> Cleanup: Remove expired
+        Cleanup --> localStorage
+    }
+```
+
+**Key Features:**
+- **Automatic TTL cleanup**: Removes old events to prevent storage bloat
+- **Size limits**: Prevents unbounded growth
+- **Atomic operations**: Safe concurrent access
+- **JSON serialization**: Survives browser restarts
 
 ```typescript
 type QueuedItem = { e: AnalyticsEvent; ts: number };
@@ -219,12 +541,48 @@ class PersistentQueue {
   }
 
   clear() {
-    try { localStorage.removeItem(this.key); } catch {}
+    try { localStorage.removeItem(this.key); } catch {}  // Graceful fallback
   }
 }
+
+/**
+ * Usage scenarios:
+ * 1. Offline: Events queued until navigator.onLine = true
+ * 2. No consent: Events queued until user grants analytics permission
+ * 3. Provider failure: Events queued for retry
+ * 4. Rate limiting: Events queued to respect API limits
+ */
 ```
 
-### consent.ts — simple consent tracker
+---
+
+### Consent Manager (`consent.ts`)
+
+**Purpose:** Manages user privacy preferences and ensures GDPR/CCPA compliance. Acts as a gatekeeper for all analytics operations.
+
+**Why it matters:** Privacy regulations require explicit user consent for analytics. The consent manager centralizes this logic and ensures consistent behavior across all providers.
+
+**Design Pattern:** State Machine + Observer
+
+```mermaid
+stateDiagram-v2
+    [*] --> NoConsent: Default state
+    NoConsent --> ConsentGranted: User accepts
+    ConsentGranted --> ConsentRevoked: User withdraws
+    ConsentRevoked --> ConsentGranted: User re-accepts
+    
+    NoConsent --> QueueEvents: Track called
+    ConsentGranted --> SendEvents: Track called
+    ConsentRevoked --> QueueEvents: Track called
+    
+    QueueEvents --> FlushQueue: Consent granted
+```
+
+**Compliance Features:**
+- **Default-deny**: No consent assumed initially
+- **Granular control**: Different consent types (analytics, marketing, etc.)
+- **Audit trail**: Tracks when consent was granted/revoked
+- **Retroactive processing**: Flushes queued events when consent is granted
 
 ```typescript
 class ConsentManager {
@@ -237,10 +595,17 @@ class ConsentManager {
   }
   get(): ConsentState { return this.state; }
   allows(category: ConsentCategories): boolean {
-    // Default-deny unless explicitly granted
+    // Default-deny unless explicitly granted - GDPR compliant
     return !!this.state[category];
   }
 }
+
+/**
+ * Integration with Cookie Consent Management Platforms (CMPs):
+ * - OneTrust: Listen for OneTrust.OnConsentChanged events
+ * - Cookiebot: Subscribe to Cookiebot.consent.changed
+ * - Custom: Hook into your consent modal's accept/reject handlers
+ */
 ```
 
 ### routing.ts — optional provider router
@@ -250,7 +615,50 @@ export type RouteDecision = { includeProviders?: string[]; excludeProviders?: st
 export type Router<E extends EventMap> = (event: AnalyticsEvent<keyof E & string, E[keyof E & string]>) => RouteDecision | void;
 ```
 
-### analytics.ts — Core orchestrator
+---
+
+### Analytics Core (`analytics.ts`)
+
+**Purpose:** The main orchestrator that coordinates all components. Implements Composite pattern to manage multiple providers and Mediator pattern to coordinate between components.
+
+**Why it matters:** This is the central hub that brings everything together - providers, middleware, consent, queue, routing. It provides a clean, unified API while managing complex interactions behind the scenes.
+
+**Design Patterns:** Composite + Mediator + Command
+
+```mermaid
+graph TB
+    subgraph "Analytics Core"
+        Analytics[Analytics Instance]
+        Analytics --> ProviderMap[Provider Registry]
+        Analytics --> MiddlewareChain[Middleware Chain]
+        Analytics --> Queue[Persistent Queue]
+        Analytics --> Consent[Consent Manager]
+        Analytics --> Router[Event Router]
+    end
+    
+    subgraph "External Components"
+        App[Application] --> Analytics
+        GA[Google Analytics] --> ProviderMap
+        MP[Mixpanel] --> ProviderMap
+        LocalStorage[(localStorage)] --> Queue
+        CMP[Consent Platform] --> Consent
+    end
+    
+    Analytics --> ProcessFlow{Process Event}
+    ProcessFlow --> Enrich[Enrich Context]
+    Enrich --> MiddlewareChain
+    MiddlewareChain --> ConsentCheck{Check Consent}
+    ConsentCheck -->|Granted| RouteEvent[Route to Providers]
+    ConsentCheck -->|Denied| Queue
+    RouteEvent --> SendToProviders[Send to Providers]
+```
+
+**Key Responsibilities:**
+1. **Event Orchestration**: Coordinates the flow from track() call to provider delivery
+2. **Provider Management**: Registers, enables/disables, and routes events to providers
+3. **Context Management**: Merges default context with event-specific context
+4. **Resilience**: Handles failures gracefully with queuing and retries
+5. **Lifecycle Management**: Initialization, shutdown, and cleanup
 
 ```typescript
 type ProviderEntry<E extends EventMap> = { provider: BaseProvider<E>; enabled: boolean };
@@ -377,54 +785,73 @@ export class Analytics<E extends EventMap> {
     }
   }
 
+  /**
+   * track: The main event processing method
+   * This is where the magic happens - demonstrates the entire architecture working together
+   */
   track(event: AnalyticsEvent<any, any>, options?: TrackOptions): void {
+    // Step 1: Enrich event with default context (device info, user data, etc.)
     const enriched: AnalyticsEvent<any, any> = {
       ...event,
       context: shallowMerge(this.defaultContext, event.context),
       timestamp: event.timestamp ?? Date.now(),
     };
 
-    const dispatch = (e: AnalyticsEvent<any, any>) => {
-      // Consent gate: only send analytics events if allowed
+    // Step 2: Define dispatch function (called after middleware processing)
+    const dispatch = (processedEvent: AnalyticsEvent<any, any>) => {
+      
+      // Step 3: Consent gate - GDPR compliance checkpoint
       if (!this.consent.allows('analytics')) {
-        // store but do not send; can be flushed later when consent is granted
-        this.queue.enqueue(e);
+        // Queue for later processing when consent is granted
+        this.queue.enqueue(processedEvent);
         return;
       }
 
+      // Step 4: Online check - handle offline scenarios
       const online = typeof navigator !== 'undefined' ? navigator.onLine !== false : true;
       if (!online) {
-        this.queue.enqueue(e);
+        this.queue.enqueue(processedEvent);
         return;
       }
 
-      // Resolve routing: merge router(event) with per-call opts. include wins over exclude.
-      const routeA = this.router ? this.router(e) || {} : {};
-      const routeB = opts || {};
-      const include = (routeA.includeProviders || routeB.includeProviders) as string[] | undefined;
-      const exclude = [...(routeA.excludeProviders || []), ...(routeB.excludeProviders || [])];
+      // Step 5: Event routing - determine which providers should receive this event
+      const routerDecision = this.router?.(processedEvent) || {};
+      const optionsDecision = options || {};
+      
+      // Merge routing decisions (per-call options override router)
+      const includeProviders = optionsDecision.includeProviders || routerDecision.includeProviders;
+      const excludeProviders = [...(routerDecision.excludeProviders || []), ...(optionsDecision.excludeProviders || [])];
 
+      // Step 6: Send to each eligible provider
       for (const { provider, enabled } of this.providers.values()) {
+        // Skip disabled providers
         if (!enabled || !provider.isEnabled()) continue;
-        if (include && include.length && !include.includes(provider.id)) continue; // not in allowlist
-        if (exclude.includes(provider.id)) continue; // explicitly excluded
+        
+        // Apply routing rules
+        if (includeProviders && !includeProviders.includes(provider.id)) continue;
+        if (excludeProviders.includes(provider.id)) continue;
 
+        // Send to provider with error handling
         try {
-          const maybePromise = provider.track(e);
-          if (maybePromise && typeof (maybePromise as Promise<void>).then === 'function') {
-            (maybePromise as Promise<void>).catch((err) => {
-              this.queue.enqueue(e); // retry later if a provider fails transiently
-              this.onError?.(err, e);
+          const result = provider.track(processedEvent);
+          
+          // Handle async providers
+          if (result && typeof result.then === 'function') {
+            result.catch((err) => {
+              this.queue.enqueue(processedEvent); // Retry later
+              this.onError?.(err, processedEvent);
             });
           }
         } catch (err) {
-          this.queue.enqueue(e);
-          this.onError?.(err, e);
+          // Sync error handling
+          this.queue.enqueue(processedEvent);
+          this.onError?.(err, processedEvent);
         }
       }
     };
 
-    this.middlewares.run(event, dispatch);
+    // Step 7: Run through middleware pipeline (Chain of Responsibility)
+    this.middlewares.run(enriched, dispatch);
   }
 
   async flush() {
@@ -754,6 +1181,180 @@ export function demoUsage() {
   }, { excludeProviders: ['ga'] });
 }
 ```
+
+---
+
+## Real-World Usage Example
+
+This example demonstrates all architectural components working together in a realistic Safe wallet scenario:
+
+```mermaid
+sequenceDiagram
+    participant User as Safe Wallet User
+    participant App as React App
+    participant Hook as useAnalytics
+    participant Analytics as Analytics Core
+    participant Middleware as Middleware Chain
+    participant Consent as Consent Manager
+    participant Queue as Persistent Queue
+    participant GA as Google Analytics
+    participant MP as Mixpanel
+
+    User->>App: Performs transaction
+    App->>Hook: track('Transaction Created', { amount, asset })
+    Hook->>Analytics: track(enrichedEvent)
+    
+    Note over Analytics: Step 1: Context Enrichment
+    Analytics->>Analytics: Add device info, user ID, chain info
+    
+    Note over Analytics: Step 2: Middleware Processing
+    Analytics->>Middleware: process(event)
+    Middleware->>Middleware: Apply sampling (keep 10% of tx events)
+    Middleware->>Middleware: Scrub PII if any
+    Middleware->>Middleware: Rename for GA4 compatibility
+    
+    Note over Analytics: Step 3: Consent & Routing
+    Middleware->>Consent: Check if analytics allowed
+    
+    alt Consent granted
+        Consent->>Analytics: ✅ Allowed
+        Analytics->>GA: Send transaction_created event
+        Analytics->>MP: Send Transaction Created event
+        GA-->>Analytics: ✅ Success
+        MP-->>Analytics: ❌ Network error
+        Analytics->>Queue: Store failed Mixpanel event
+    else No consent
+        Consent->>Queue: Store event for later
+    end
+    
+    Note over Queue: Later: User grants consent
+    Queue->>MP: Flush stored events
+```
+
+### Complete Implementation
+
+```typescript
+// 1. Define your event catalog
+type SafeEvents = {
+  'Transaction Created': {
+    amount: string;
+    asset: string;
+    chainId: number;
+    safeAddress: string;
+    txType: 'send' | 'receive' | 'contract_interaction';
+  };
+  'Safe Created': {
+    owners: number;
+    threshold: number;
+    chainId: number;
+  };
+  'App Connected': {
+    appUrl: string;
+    category: string;
+  };
+};
+
+// 2. Set up the analytics system
+const analytics = AnalyticsBuilder.create<SafeEvents>({
+  defaultContext: {
+    source: 'web',
+    appVersion: '1.2.0',
+    locale: navigator.language,
+  }
+})
+// Add providers with different configurations
+.addProvider(new GoogleAnalyticsProvider({
+  measurementId: 'G-XXXXX',
+  debugMode: process.env.NODE_ENV === 'development'
+}))
+.addProvider(new MixpanelProvider({
+  token: 'your-mixpanel-token',
+  apiHost: 'https://api-eu.mixpanel.com', // EU compliance
+  initOptions: { batch_requests: true }
+}))
+
+// Add middleware pipeline
+.addMiddleware(createSamplingMiddleware({ 
+  rate: 0.1  // Only track 10% of events to reduce costs
+}))
+.addMiddleware(createPiiScrubberMiddleware({
+  piiFields: ['email', 'ip', 'userAgent'] // Remove sensitive data
+}))
+.addMiddleware((event, next) => {
+  // Custom middleware: Add chain name
+  const chainNames = { 1: 'Ethereum', 137: 'Polygon' };
+  const chainName = chainNames[event.payload.chainId as keyof typeof chainNames];
+  
+  next({
+    ...event,
+    payload: { ...event.payload, chainName }
+  });
+})
+
+// Set up routing: Send high-value transactions to both providers
+.withRouter((event) => {
+  if (event.name === 'Transaction Created') {
+    const amount = parseFloat(event.payload.amount);
+    if (amount > 10000) {
+      return { includeProviders: ['ga', 'mixpanel'] }; // High-value: send everywhere
+    }
+    return { includeProviders: ['ga'] }; // Regular: just GA4
+  }
+  return {}; // Default: send to all providers
+})
+
+// Handle errors gracefully
+.withErrorHandler((error, event) => {
+  console.warn('[Analytics] Provider error:', error);
+  // Could send to error tracking service here
+})
+
+.build();
+
+// 3. Use in your React app
+function TransactionFlow() {
+  const { track, isEnabled } = useAnalytics<SafeEvents>();
+  
+  const handleTransaction = async (txData: TransactionData) => {
+    // Your transaction logic here
+    const result = await executeTransaction(txData);
+    
+    // Track the event (only if consent is granted)
+    if (isEnabled) {
+      track({
+        name: 'Transaction Created',
+        payload: {
+          amount: txData.amount,
+          asset: txData.token.symbol,
+          chainId: txData.chainId,
+          safeAddress: txData.safeAddress,
+          txType: determineTxType(txData)
+        },
+        context: {
+          page: {
+            url: window.location.href,
+            title: document.title,
+            path: window.location.pathname
+          }
+        }
+      });
+    }
+  };
+  
+  return <TransactionComponent onSubmit={handleTransaction} />;
+}
+```
+
+### Why This Architecture Excels
+
+1. **🔒 Privacy-First**: Consent gating ensures GDPR compliance
+2. **🚀 Performance**: Sampling and async processing prevent UI blocking  
+3. **🛠️ Maintainable**: SOLID principles make it easy to add/modify providers
+4. **🔄 Resilient**: Offline queue and error handling prevent data loss
+5. **📊 Flexible**: Routing allows different events to go to different providers
+6. **🧪 Testable**: Dependency injection makes unit testing straightforward
+7. **📈 Scalable**: Middleware pipeline handles complex transformations
+8. **🎯 Type-Safe**: Compile-time checking prevents runtime errors
 
 ---
 
