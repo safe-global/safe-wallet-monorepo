@@ -158,7 +158,7 @@ sequenceDiagram
 - **Privacy First**: Default-deny consent with retroactive processing
 - **Resilience**: Offline-first with automatic retry and queue management
 - **Flexibility**: Middleware pipeline allows custom transformations
-- **Performance**: Async provider dispatch with error isolation
+- **Performance**: Optimized with consent caching, provider filtering, and async dispatch with error isolation
 
 ## Implementation Notes for GA4 & Mixpanel
 
@@ -664,6 +664,13 @@ graph TB
 3. **Context Management**: Merges default context with event-specific context
 4. **Resilience**: Handles failures gracefully with queuing and retries
 5. **Lifecycle Management**: Initialization, shutdown, and cleanup
+
+**Performance Optimizations:**
+
+- **Provider Filtering**: `getEnabledProviders()` method filters providers once per operation instead of checking `isEnabled()` repeatedly in loops
+- **Consent Caching**: `hasConsentCached()` method caches consent state with timestamp-based invalidation to avoid redundant consent checks on consecutive track calls
+- **Smart Cache Invalidation**: Consent cache is automatically invalidated when `setConsent()` is called, ensuring consistency
+- **Async Error Handling**: Provider failures are isolated and queued for retry without blocking other providers
 
 ```typescript
 type ProviderEntry<E extends EventMap> = { provider: BaseProvider<E>; enabled: boolean }
@@ -1404,13 +1411,20 @@ function TransactionFlow() {
 ### Why This Architecture Excels
 
 1. **🔒 Privacy-First**: Consent gating ensures GDPR compliance
-2. **🚀 Performance**: Sampling and async processing prevent UI blocking
+2. **🚀 Performance**: Optimized with consent caching, provider filtering, sampling and async processing prevent UI blocking
 3. **🛠️ Maintainable**: SOLID principles make it easy to add/modify providers
 4. **🔄 Resilient**: Offline queue and error handling prevent data loss
 5. **📊 Flexible**: Routing allows different events to go to different providers
 6. **🧪 Testable**: Dependency injection makes unit testing straightforward
 7. **📈 Scalable**: Middleware pipeline handles complex transformations
 8. **🎯 Type-Safe**: Compile-time checking prevents runtime errors
+
+#### Performance Optimizations in Detail
+
+- **Consent Caching**: Eliminates redundant `consent.allowsAnalytics()` calls by caching results with timestamp-based invalidation. Particularly beneficial for high-frequency tracking scenarios.
+- **Provider Filtering**: `getEnabledProviders()` method pre-filters enabled providers once per operation, reducing `O(n×methods)` enabled checks to `O(1×methods)`.
+- **Smart Cache Management**: Consent cache is automatically invalidated when consent state changes via `setConsent()`, ensuring data consistency.
+- **Isolated Error Handling**: Provider failures don't affect other providers and failed events are automatically queued for retry.
 
 ---
 

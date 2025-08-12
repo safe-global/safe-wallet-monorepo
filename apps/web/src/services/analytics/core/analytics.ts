@@ -35,6 +35,7 @@ export class Analytics<E extends SafeEventMap = SafeEventMap> {
   private defaultContext: EventContext
   private onError?: (err: unknown, event?: AnalyticsEvent) => void
   private router?: Router<E>
+  private consentCache: { allowed: boolean; timestamp: number } | null = null
 
   constructor(
     options?: AnalyticsOptions<E> & {
@@ -137,9 +138,13 @@ export class Analytics<E extends SafeEventMap = SafeEventMap> {
   setConsent(consentPatch: Parameters<ConsentManager['update']>[0]): this {
     this.consent.update(consentPatch)
 
+    // Invalidate consent cache since consent state changed
+    this.consentCache = null
+
     // Notify all providers of consent change
-    for (const { provider } of this.providerMap.values()) {
-      provider.init?.({
+    const entries = Array.from(this.providerMap.values())
+    for (const entry of entries) {
+      entry.provider.init?.({
         consent: this.consent.get(),
         defaultContext: this.defaultContext,
       })
@@ -157,12 +162,45 @@ export class Analytics<E extends SafeEventMap = SafeEventMap> {
   }
 
   /**
+   * Get all currently enabled providers
+   */
+  private getEnabledProviders(): BaseProvider<E>[] {
+    const enabledProviders: BaseProvider<E>[] = []
+    const entries = Array.from(this.providerMap.values())
+    for (const entry of entries) {
+      if (entry.enabled && entry.provider.isEnabled()) {
+        enabledProviders.push(entry.provider)
+      }
+    }
+    return enabledProviders
+  }
+
+  /**
+   * Check if analytics consent is granted with caching optimization
+   */
+  private hasConsentCached(): boolean {
+    const consentState = this.consent.get()
+    const currentTimestamp = consentState.updatedAt || 0
+
+    // If cache is valid (consent hasn't changed), return cached result
+    if (this.consentCache && this.consentCache.timestamp === currentTimestamp) {
+      return this.consentCache.allowed
+    }
+
+    // Consent state changed, update cache
+    const allowed = this.consent.allowsAnalytics()
+    this.consentCache = { allowed, timestamp: currentTimestamp }
+    
+    return allowed
+  }
+
+  /**
    * Identify a user across providers
    */
   identify(userId: string, traits?: Record<string, unknown>): void {
-    for (const { provider, enabled } of this.providerMap.values()) {
-      if (!enabled || !provider.isEnabled()) continue
-
+    const enabledProviders = this.getEnabledProviders()
+    
+    for (const provider of enabledProviders) {
       if (hasIdentifyCapability(provider)) {
         try {
           provider.identify(userId, traits)
@@ -177,9 +215,9 @@ export class Analytics<E extends SafeEventMap = SafeEventMap> {
    * Associate user with a group/organization
    */
   group(groupId: string, traits?: Record<string, unknown>): void {
-    for (const { provider, enabled } of this.providerMap.values()) {
-      if (!enabled || !provider.isEnabled()) continue
-
+    const enabledProviders = this.getEnabledProviders()
+    
+    for (const provider of enabledProviders) {
       if (hasGroupCapability(provider)) {
         try {
           provider.group(groupId, traits)
@@ -194,9 +232,9 @@ export class Analytics<E extends SafeEventMap = SafeEventMap> {
    * Track page views
    */
   page(context?: PageContext): void {
-    for (const { provider, enabled } of this.providerMap.values()) {
-      if (!enabled || !provider.isEnabled()) continue
-
+    const enabledProviders = this.getEnabledProviders()
+    
+    for (const provider of enabledProviders) {
       if (hasPageCapability(provider)) {
         try {
           provider.page(context)
@@ -219,7 +257,7 @@ export class Analytics<E extends SafeEventMap = SafeEventMap> {
 
     const dispatch = (processedEvent: AnalyticsEvent<any, any>) => {
       // Check consent before processing
-      if (!this.consent.allowsAnalytics()) {
+      if (!this.hasConsentCached()) {
         // Queue for later processing when consent is granted
         this.queue.enqueue(processedEvent)
         return
@@ -240,9 +278,9 @@ export class Analytics<E extends SafeEventMap = SafeEventMap> {
       const excludeProviders = [...(routerDecision.excludeProviders || []), ...(optionsDecision.excludeProviders || [])]
 
       // Send to providers
-      for (const { provider, enabled } of this.providerMap.values()) {
-        if (!enabled || !provider.isEnabled()) continue
-
+      const enabledProviders = this.getEnabledProviders()
+      
+      for (const provider of enabledProviders) {
         // Apply routing rules
         if (includeProviders && includeProviders.length > 0) {
           if (!includeProviders.includes(provider.id)) continue
@@ -278,9 +316,10 @@ export class Analytics<E extends SafeEventMap = SafeEventMap> {
   async flush(): Promise<void> {
     const promises: Promise<void>[] = []
 
-    for (const { provider } of this.providerMap.values()) {
-      if (provider.flush) {
-        promises.push(Promise.resolve(provider.flush()))
+    const entries = Array.from(this.providerMap.values())
+    for (const entry of entries) {
+      if (entry.provider.flush) {
+        promises.push(Promise.resolve(entry.provider.flush()))
       }
     }
 
@@ -291,18 +330,18 @@ export class Analytics<E extends SafeEventMap = SafeEventMap> {
    * Process queued events
    */
   flushQueue(maxBatch: number = 200): void {
-    if (!this.consent.allowsAnalytics()) {
+    if (!this.hasConsentCached()) {
       return // Still waiting for consent
     }
 
     let batch = this.queue.drain(maxBatch)
 
     while (batch.length > 0) {
+      const enabledProviders = this.getEnabledProviders()
+      
       for (const event of batch) {
         // Process directly without middleware to avoid double-processing
-        for (const { provider, enabled } of this.providerMap.values()) {
-          if (!enabled || !provider.isEnabled()) continue
-
+        for (const provider of enabledProviders) {
           try {
             provider.track(event as AnalyticsEvent<any, any>)
           } catch (error) {
@@ -349,8 +388,11 @@ export class Analytics<E extends SafeEventMap = SafeEventMap> {
    */
   async shutdown(): Promise<void> {
     const promises: Promise<void>[] = []
-    for (const { provider } of this.providerMap.values()) {
-      if (provider.shutdown) promises.push(Promise.resolve(provider.shutdown()))
+    const entries = Array.from(this.providerMap.values())
+    for (const entry of entries) {
+      if (entry.provider.shutdown) {
+        promises.push(Promise.resolve(entry.provider.shutdown()))
+      }
     }
     await Promise.all(promises)
   }
