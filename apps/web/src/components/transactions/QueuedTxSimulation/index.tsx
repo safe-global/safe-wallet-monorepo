@@ -114,7 +114,11 @@ const InlineTxSimulation = ({ transaction }: { transaction: TransactionDetails }
             inheritViewBox
             sx={{ height: '16px' }}
           />
-          {status.isCallTraceError ? 'Can execute (with warnings)' : status.isSuccess ? 'Simulation successful' : 'Simulation failed'}
+          {status.isCallTraceError
+            ? 'Can execute (with warnings)'
+            : status.isSuccess
+              ? 'Simulation successful'
+              : 'Simulation failed'}
         </Stack>
       </ExternalLink>
     )
