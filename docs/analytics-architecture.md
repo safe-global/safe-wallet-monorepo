@@ -15,21 +15,21 @@ graph TB
         Hook[useAnalytics Hook]
         Builder[AnalyticsBuilder]
     end
-    
+
     subgraph "Analytics Core"
         Analytics[Analytics Orchestrator]
         ProviderMap[Provider Registry Map]
         MiddlewareChain[Middleware Chain]
         Router[Event Router Logic]
     end
-    
+
     subgraph "Infrastructure"
         Queue[Persistent Queue]
         Consent[Consent Manager]
         Storage[(localStorage)]
         CookieStore[(Cookie Store)]
     end
-    
+
     subgraph "Provider Layer"
         Provider1[Google Analytics Adapter]
         Provider2[Mixpanel Adapter]
@@ -38,23 +38,23 @@ graph TB
         MP[Mixpanel JS SDK]
         CustomAPI[Custom API]
     end
-    
+
     %% Application flow
     App --> Hook
     Hook --> Analytics
     Builder --> Analytics
-    
+
     %% Core orchestration
     Analytics --> ProviderMap
     Analytics --> MiddlewareChain
     Analytics --> Router
     Analytics --> Queue
     Analytics --> Consent
-    
+
     %% Infrastructure connections
     Queue --> Storage
     Consent --> CookieStore
-    
+
     %% Provider connections
     ProviderMap --> Provider1
     ProviderMap --> Provider2
@@ -62,28 +62,20 @@ graph TB
     Provider1 --> GA4
     Provider2 --> MP
     Provider3 --> CustomAPI
-    
-    %% Event flow styling
-    classDef coreClass fill:#e1f5fe
-    classDef infraClass fill:#f3e5f5
-    classDef providerClass fill:#e8f5e8
-    
-    class Analytics,ProviderMap,MiddlewareChain,Router coreClass
-    class Queue,Consent,Storage,CookieStore infraClass
-    class Provider1,Provider2,Provider3,GA4,MP,CustomAPI providerClass
+
 ```
 
 ### Key Components & Their Purpose
 
-| Component | Purpose | Design Pattern |
-|-----------|---------|----------------|
-| **Analytics Core** | Orchestrates event flow, manages providers | Composite, Mediator |
-| **Provider Adapters** | Translate events to provider-specific formats | Adapter |
-| **Middleware Chain** | Transform/filter events before sending | Chain of Responsibility |
-| **Event Router** | Route events to specific providers | Strategy |
-| **Builder** | Construct analytics instances ergonomically | Builder |
-| **Consent Manager** | Handle privacy compliance | State Machine |
-| **Persistent Queue** | Handle offline scenarios & retries | Command Queue |
+| Component             | Purpose                                       | Design Pattern          |
+| --------------------- | --------------------------------------------- | ----------------------- |
+| **Analytics Core**    | Orchestrates event flow, manages providers    | Composite, Mediator     |
+| **Provider Adapters** | Translate events to provider-specific formats | Adapter                 |
+| **Middleware Chain**  | Transform/filter events before sending        | Chain of Responsibility |
+| **Event Router**      | Route events to specific providers            | Strategy                |
+| **Builder**           | Construct analytics instances ergonomically   | Builder                 |
+| **Consent Manager**   | Handle privacy compliance                     | State Machine           |
+| **Persistent Queue**  | Handle offline scenarios & retries            | Command Queue           |
 
 ---
 
@@ -107,25 +99,25 @@ sequenceDiagram
     participant Queue as Persistent Queue
     participant GA as Google Analytics
     participant MP as Mixpanel
-    
+
     App->>Analytics: track(event, options)
-    
+
     Note over Analytics: Step 1: Event Enrichment
     Analytics->>Analytics: Add default context, timestamp
-    
+
     Note over Analytics: Step 2: Middleware Processing
     Analytics->>Middleware: process(enrichedEvent, context)
-    
+
     alt Middleware allows event
         Middleware-->>Analytics: processedEvent
-        
+
         Note over Analytics: Step 3: Consent Check
         Analytics->>Consent: allowsAnalytics()
-        
+
         alt Consent granted & online
             Note over Analytics: Step 4: Event Routing
             Analytics->>Analytics: Apply router + options rules
-            
+
             Note over Analytics: Step 5: Provider Dispatch
             loop For each enabled provider
                 alt Provider matches routing rules
@@ -133,17 +125,17 @@ sequenceDiagram
                     Analytics->>MP: provider.track(event)
                 end
             end
-            
+
         else No consent or offline
             Note over Analytics: Step 6: Queue for Later
             Analytics->>Queue: enqueue(processedEvent)
         end
-        
+
     else Middleware drops event
         Note over Analytics: Step 7: Event Dropped
         Middleware-->>Analytics: null (event filtered)
     end
-    
+
     Note over Queue,MP: Background: Consent granted or reconnect
     Queue->>Analytics: flushQueue()
     Analytics->>GA: Replay queued events
@@ -151,6 +143,7 @@ sequenceDiagram
 ```
 
 **The 7-Step Event Processing Pipeline:**
+
 1. **Event Enrichment**: Merges default context (user, device, session) with event-specific context and adds timestamp
 2. **Middleware Processing**: Runs event through Chain of Responsibility pattern for transformations (sampling, PII scrubbing, filtering)
 3. **Consent Check**: Verifies analytics consent and online status before processing
@@ -160,6 +153,7 @@ sequenceDiagram
 7. **Background Processing**: Automatically flushes queued events when consent is granted or connection is restored
 
 **Why this architecture matters:**
+
 - **Type Safety**: Compile-time checking of event names and payloads
 - **Privacy First**: Default-deny consent with retroactive processing
 - **Resilience**: Offline-first with automatic retry and queue management
@@ -202,7 +196,7 @@ sequenceDiagram
 
 ### File Layout Hint
 
-*All in one file for demo; split into modules in prod:*
+_All in one file for demo; split into modules in prod:_
 
 - **types** (events, context)
 - **provider contracts** (ISP-friendly capabilities)
@@ -234,86 +228,83 @@ graph LR
     EventContext[EventContext] --> AnalyticsEvent
     DeviceInfo[DeviceInfo] --> EventContext
     PageContext[PageContext] --> EventContext
-    
+
     AnalyticsEvent --> Provider[BaseProvider.track]
     AnalyticsEvent --> Middleware[Middleware Chain]
 ```
 
 ```typescript
 // Represents JSON-serializable data - ensures all analytics data can be transmitted
-export type Json = string | number | boolean | null | Json[] | { [k: string]: Json };
+export type Json = string | number | boolean | null | Json[] | { [k: string]: Json }
 
 /**
  * EventMap: The foundation of type safety
  * Define your app's events as a type to get compile-time checking
  * Example: { 'User Signed Up': { method: 'google' | 'email', plan?: 'free' | 'pro' } }
  */
-export type EventMap = Record<string, Record<string, unknown>>;
+export type EventMap = Record<string, Record<string, unknown>>
 
 /**
  * DeviceInfo: Contextual information about the user's device
  * Used for segmentation and understanding user behavior patterns
  */
 export type DeviceInfo = {
-  userAgent?: string;  // Browser/device identification
-  screen?: { width?: number; height?: number; pixelRatio?: number };  // Display characteristics
-};
+  userAgent?: string // Browser/device identification
+  screen?: { width?: number; height?: number; pixelRatio?: number } // Display characteristics
+}
 
 /**
  * PageContext: Information about the current page/screen
  * Essential for understanding user journey and page performance
  */
 export type PageContext = {
-  url?: string;      // Full URL
-  referrer?: string; // Previous page
-  title?: string;    // Page title
-  path?: string;     // URL path only
-};
+  url?: string // Full URL
+  referrer?: string // Previous page
+  title?: string // Page title
+  path?: string // URL path only
+}
 
 /**
  * EventContext: Rich contextual data attached to every event
  * Provides the "who, what, when, where" for comprehensive analytics
  */
 export type EventContext = {
-  userId?: string;        // Post-login identifier (NO PII!)
-  anonymousId?: string;   // Pre-login cookie ID
-  sessionId?: string;     // Current session identifier
-  page?: PageContext;     // Page/screen context
-  device?: DeviceInfo;    // Device characteristics
-  locale?: string;        // User's language/region
-  appVersion?: string;    // App version for A/B testing
-  source?: 'web' | 'mobile' | 'server';  // Platform identifier
-  test?: boolean;         // Filter out test events
-};
+  userId?: string // Post-login identifier (NO PII!)
+  anonymousId?: string // Pre-login cookie ID
+  sessionId?: string // Current session identifier
+  page?: PageContext // Page/screen context
+  device?: DeviceInfo // Device characteristics
+  locale?: string // User's language/region
+  appVersion?: string // App version for A/B testing
+  source?: 'web' | 'mobile' | 'server' // Platform identifier
+  test?: boolean // Filter out test events
+}
 
 /**
  * AnalyticsEvent: The core event structure
  * Generic types ensure type safety between event names and their expected payloads
- * 
+ *
  * @template K - Event name (must be a key in your EventMap)
  * @template P - Payload structure (must match EventMap[K])
  */
-export type AnalyticsEvent<
-  K extends string = string, 
-  P extends Record<string, unknown> = Record<string, unknown>
-> = {
-  name: K;                    // Event identifier (e.g., 'User Signed Up')
-  payload: P;                 // Event-specific data
-  context?: EventContext;     // Additional contextual information
-  timestamp?: number;         // Unix timestamp (auto-generated if not provided)
-};
+export type AnalyticsEvent<K extends string = string, P extends Record<string, unknown> = Record<string, unknown>> = {
+  name: K // Event identifier (e.g., 'User Signed Up')
+  payload: P // Event-specific data
+  context?: EventContext // Additional contextual information
+  timestamp?: number // Unix timestamp (auto-generated if not provided)
+}
 
 export type ProviderInitOptions = {
-  consent?: ConsentState;
-  defaultContext?: EventContext;
-};
+  consent?: ConsentState
+  defaultContext?: EventContext
+}
 
-export type ConsentCategories = 'analytics' | 'marketing' | 'functional' | 'personalization';
-export type ConsentState = Partial<Record<ConsentCategories, boolean>> & { updatedAt?: number };
+export type ConsentCategories = 'analytics' | 'marketing' | 'functional' | 'personalization'
+export type ConsentState = Partial<Record<ConsentCategories, boolean>> & { updatedAt?: number }
 
 // Utility to deep-merge shallowish objects safely
 function shallowMerge<T extends object>(base: T, patch?: Partial<T>): T {
-  return Object.assign({}, base, patch || {}) as T;
+  return Object.assign({}, base, patch || {}) as T
 }
 ```
 
@@ -332,16 +323,16 @@ graph TB
     BaseProvider[BaseProvider] --> GA[GoogleAnalyticsProvider]
     BaseProvider --> MP[MixpanelProvider]
     BaseProvider --> Custom[CustomProvider]
-    
+
     IdentifyCapable[IdentifyCapable] --> GA
     IdentifyCapable --> MP
-    
+
     PageCapable[PageCapable] --> GA
     PageCapable --> MP
-    
+
     GroupCapable[GroupCapable] --> MP
     GroupCapable --> Custom
-    
+
     GA --> GA4API[GA4 gtag API]
     MP --> MPAPI[Mixpanel JS SDK]
     Custom --> CustomAPI[Your Custom API]
@@ -353,19 +344,19 @@ graph TB
  * Every provider can track events and be enabled/disabled
  */
 export interface BaseProvider<E extends EventMap = EventMap> {
-  readonly id: string;                    // Unique identifier for routing
-  init?(opts: ProviderInitOptions): Promise<void> | void;  // Initialize with consent/context
-  
+  readonly id: string // Unique identifier for routing
+  init?(opts: ProviderInitOptions): Promise<void> | void // Initialize with consent/context
+
   // Core capability: every provider must be able to track events
-  track<K extends keyof E & string>(event: AnalyticsEvent<K, E[K]>): void | Promise<void>;
-  
+  track<K extends keyof E & string>(event: AnalyticsEvent<K, E[K]>): void | Promise<void>
+
   // Control capabilities: enable/disable provider
-  isEnabled(): boolean;
-  setEnabled(enabled: boolean): void;
-  
+  isEnabled(): boolean
+  setEnabled(enabled: boolean): void
+
   // Optional cleanup methods
-  flush?(): Promise<void>;    // Force send any buffered events
-  shutdown?(): Promise<void>; // Clean shutdown
+  flush?(): Promise<void> // Force send any buffered events
+  shutdown?(): Promise<void> // Clean shutdown
 }
 
 /**
@@ -375,17 +366,17 @@ export interface BaseProvider<E extends EventMap = EventMap> {
 
 // User identification capability (most providers support this)
 export interface IdentifyCapable {
-  identify(userId: string, traits?: Record<string, unknown>): void | Promise<void>;
+  identify(userId: string, traits?: Record<string, unknown>): void | Promise<void>
 }
 
 // Group/organization tracking (mainly for B2B analytics like Mixpanel)
 export interface GroupCapable {
-  group(groupId: string, traits?: Record<string, unknown>): void | Promise<void>;
+  group(groupId: string, traits?: Record<string, unknown>): void | Promise<void>
 }
 
 // Page view tracking (web-focused providers)
 export interface PageCapable {
-  page(ctx?: PageContext): void | Promise<void>;
+  page(ctx?: PageContext): void | Promise<void>
 }
 ```
 
@@ -406,7 +397,7 @@ graph LR
     M2 --> M3[Event Mapper]
     M3 --> M4[Custom Middleware]
     M4 --> Provider[Provider.track()]
-    
+
     M1 -. may drop event .-> X[❌ Dropped]
     M2 -. removes sensitive data .-> M2
     M3 -. renames events .-> M3
@@ -414,6 +405,7 @@ graph LR
 ```
 
 **Common Use Cases:**
+
 - **Sampling**: Drop 90% of high-volume events to reduce costs
 - **PII Scrubbing**: Remove emails, phone numbers for GDPR compliance
 - **Event Mapping**: Rename events to match different provider taxonomies
@@ -427,41 +419,41 @@ graph LR
  */
 export type Middleware<E extends EventMap> = (
   event: AnalyticsEvent<keyof E & string, E[keyof E & string]>,
-  next: (event: AnalyticsEvent<any, any>) => void
-) => void;
+  next: (event: AnalyticsEvent<any, any>) => void,
+) => void
 
 /**
  * MiddlewareChain: Manages and executes the middleware pipeline
  * Implements the Chain of Responsibility pattern
  */
 class MiddlewareChain<E extends EventMap> {
-  private chain: Middleware<E>[] = [];
-  
+  private chain: Middleware<E>[] = []
+
   // Add middleware to the end of the chain
   use(mw: Middleware<E>): this {
-    this.chain.push(mw);
-    return this;
+    this.chain.push(mw)
+    return this
   }
-  
+
   // Execute the middleware chain
   run(event: AnalyticsEvent<any, any>, terminal: (e: AnalyticsEvent<any, any>) => void) {
-    let idx = -1;  // Track middleware execution to prevent double-calling
-    
+    let idx = -1 // Track middleware execution to prevent double-calling
+
     const dispatch = (i: number, e: AnalyticsEvent<any, any>) => {
-      if (i <= idx) throw new Error('next() called multiple times');
-      idx = i;
-      
-      const mw = this.chain[i];
+      if (i <= idx) throw new Error('next() called multiple times')
+      idx = i
+
+      const mw = this.chain[i]
       if (!mw) {
         // End of chain - call terminal function (provider.track)
-        return terminal(e);
+        return terminal(e)
       }
-      
+
       // Execute middleware with next function
-      mw(e, (e2) => dispatch(i + 1, e2));
-    };
-    
-    dispatch(0, event);
+      mw(e, (e2) => dispatch(i + 1, e2))
+    }
+
+    dispatch(0, event)
   }
 }
 ```
@@ -484,7 +476,7 @@ stateDiagram-v2
     Queue --> Process: Network restored
     Queue --> Process: Consent granted
     Process --> Online: Events sent
-    
+
     state Queue {
         [*] --> localStorage: Store events
         localStorage --> TTLCheck: Periodically
@@ -494,54 +486,61 @@ stateDiagram-v2
 ```
 
 **Key Features:**
+
 - **Automatic TTL cleanup**: Removes old events to prevent storage bloat
 - **Size limits**: Prevents unbounded growth
 - **Atomic operations**: Safe concurrent access
 - **JSON serialization**: Survives browser restarts
 
 ```typescript
-type QueuedItem = { e: AnalyticsEvent; ts: number };
+type QueuedItem = { e: AnalyticsEvent; ts: number }
 
 class PersistentQueue {
-  constructor(private key: string, private max = 1000, private ttlMs = 7 * 24 * 60 * 60 * 1000) {}
+  constructor(
+    private key: string,
+    private max = 1000,
+    private ttlMs = 7 * 24 * 60 * 60 * 1000,
+  ) {}
 
   private load(): QueuedItem[] {
     try {
-      const raw = localStorage.getItem(this.key);
-      if (!raw) return [];
-      const arr = JSON.parse(raw) as QueuedItem[];
-      const now = Date.now();
-      const fresh = arr.filter((x) => now - x.ts <= this.ttlMs);
-      if (fresh.length !== arr.length) this.save(fresh);
-      return fresh;
+      const raw = localStorage.getItem(this.key)
+      if (!raw) return []
+      const arr = JSON.parse(raw) as QueuedItem[]
+      const now = Date.now()
+      const fresh = arr.filter((x) => now - x.ts <= this.ttlMs)
+      if (fresh.length !== arr.length) this.save(fresh)
+      return fresh
     } catch {
-      return [];
+      return []
     }
   }
 
   private save(items: QueuedItem[]) {
     try {
-      localStorage.setItem(this.key, JSON.stringify(items.slice(-this.max)));
+      localStorage.setItem(this.key, JSON.stringify(items.slice(-this.max)))
     } catch {
       // Swallow; storage may be full or blocked
     }
   }
 
   enqueue(e: AnalyticsEvent) {
-    const items = this.load();
-    items.push({ e, ts: Date.now() });
-    this.save(items);
+    const items = this.load()
+    items.push({ e, ts: Date.now() })
+    this.save(items)
   }
 
   drain(maxItems = 100): AnalyticsEvent[] {
-    const items = this.load();
-    const slice = items.slice(0, maxItems);
-    this.save(items.slice(maxItems));
-    return slice.map((x) => x.e);
+    const items = this.load()
+    const slice = items.slice(0, maxItems)
+    this.save(items.slice(maxItems))
+    return slice.map((x) => x.e)
   }
 
   clear() {
-    try { localStorage.removeItem(this.key); } catch {}  // Graceful fallback
+    try {
+      localStorage.removeItem(this.key)
+    } catch {} // Graceful fallback
   }
 }
 
@@ -570,15 +569,16 @@ stateDiagram-v2
     NoConsent --> ConsentGranted: User accepts
     ConsentGranted --> ConsentRevoked: User withdraws
     ConsentRevoked --> ConsentGranted: User re-accepts
-    
+
     NoConsent --> QueueEvents: Track called
     ConsentGranted --> SendEvents: Track called
     ConsentRevoked --> QueueEvents: Track called
-    
+
     QueueEvents --> FlushQueue: Consent granted
 ```
 
 **Compliance Features:**
+
 - **Default-deny**: No consent assumed initially
 - **Granular control**: Different consent types (analytics, marketing, etc.)
 - **Audit trail**: Tracks when consent was granted/revoked
@@ -586,17 +586,19 @@ stateDiagram-v2
 
 ```typescript
 class ConsentManager {
-  private state: ConsentState;
+  private state: ConsentState
   constructor(initial?: ConsentState) {
-    this.state = { updatedAt: Date.now(), ...initial };
+    this.state = { updatedAt: Date.now(), ...initial }
   }
   update(patch: ConsentState) {
-    this.state = { ...this.state, ...patch, updatedAt: Date.now() };
+    this.state = { ...this.state, ...patch, updatedAt: Date.now() }
   }
-  get(): ConsentState { return this.state; }
+  get(): ConsentState {
+    return this.state
+  }
   allows(category: ConsentCategories): boolean {
     // Default-deny unless explicitly granted - GDPR compliant
-    return !!this.state[category];
+    return !!this.state[category]
   }
 }
 
@@ -611,8 +613,10 @@ class ConsentManager {
 ### routing.ts — optional provider router
 
 ```typescript
-export type RouteDecision = { includeProviders?: string[]; excludeProviders?: string[] };
-export type Router<E extends EventMap> = (event: AnalyticsEvent<keyof E & string, E[keyof E & string]>) => RouteDecision | void;
+export type RouteDecision = { includeProviders?: string[]; excludeProviders?: string[] }
+export type Router<E extends EventMap> = (
+  event: AnalyticsEvent<keyof E & string, E[keyof E & string]>,
+) => RouteDecision | void
 ```
 
 ---
@@ -635,7 +639,7 @@ graph TB
         Analytics --> Consent[Consent Manager]
         Analytics --> Router[Event Router]
     end
-    
+
     subgraph "External Components"
         App[Application] --> Analytics
         GA[Google Analytics] --> ProviderMap
@@ -643,7 +647,7 @@ graph TB
         LocalStorage[(localStorage)] --> Queue
         CMP[Consent Platform] --> Consent
     end
-    
+
     Analytics --> ProcessFlow{Process Event}
     ProcessFlow --> Enrich[Enrich Context]
     Enrich --> MiddlewareChain
@@ -654,6 +658,7 @@ graph TB
 ```
 
 **Key Responsibilities:**
+
 1. **Event Orchestration**: Coordinates the flow from track() call to provider delivery
 2. **Provider Management**: Registers, enables/disables, and routes events to providers
 3. **Context Management**: Merges default context with event-specific context
@@ -661,126 +666,142 @@ graph TB
 5. **Lifecycle Management**: Initialization, shutdown, and cleanup
 
 ```typescript
-type ProviderEntry<E extends EventMap> = { provider: BaseProvider<E>; enabled: boolean };
+type ProviderEntry<E extends EventMap> = { provider: BaseProvider<E>; enabled: boolean }
 
 export type AnalyticsOptions<E extends EventMap> = {
-  defaultContext?: EventContext;
-  consent?: ConsentState;
-  queueKey?: string; // localStorage key
-  queueTtlMs?: number;
-  queueMax?: number;
-  onError?: (err: unknown, event?: AnalyticsEvent) => void;
-  router?: Router<E>; // optional event router for provider-level routing
-};
+  defaultContext?: EventContext
+  consent?: ConsentState
+  queueKey?: string // localStorage key
+  queueTtlMs?: number
+  queueMax?: number
+  onError?: (err: unknown, event?: AnalyticsEvent) => void
+  router?: Router<E> // optional event router for provider-level routing
+}
 
-export type TrackOptions = RouteDecision; // per-call routing overrides
+export type TrackOptions = RouteDecision // per-call routing overrides
 
 export class Analytics<E extends EventMap> {
-  private providers = new Map<string, ProviderEntry<E>>();
-  private middlewares = new MiddlewareChain<E>();
-  private queue: PersistentQueue;
-  private consent: ConsentManager;
-  private defaultContext: EventContext;
-  private onError?: (err: unknown, event?: AnalyticsEvent) => void;
-  private router?: Router<E>;
+  private providers = new Map<string, ProviderEntry<E>>()
+  private middlewares = new MiddlewareChain<E>()
+  private queue: PersistentQueue
+  private consent: ConsentManager
+  private defaultContext: EventContext
+  private onError?: (err: unknown, event?: AnalyticsEvent) => void
+  private router?: Router<E>
 
   constructor(opts?: AnalyticsOptions<E>) {
-    this.defaultContext = opts?.defaultContext || {};
-    this.consent = new ConsentManager(opts?.consent);
-    this.queue = new PersistentQueue(opts?.queueKey || '**analytics_queue**', opts?.queueMax || 1000, opts?.queueTtlMs || 7 * 24 * 60 * 60 * 1000);
-    this.onError = opts?.onError;
-    this.router = opts?.router;
+    this.defaultContext = opts?.defaultContext || {}
+    this.consent = new ConsentManager(opts?.consent)
+    this.queue = new PersistentQueue(
+      opts?.queueKey || '**analytics_queue**',
+      opts?.queueMax || 1000,
+      opts?.queueTtlMs || 7 * 24 * 60 * 60 * 1000,
+    )
+    this.onError = opts?.onError
+    this.router = opts?.router
 
     // Flush on reconnect
     if (typeof window !== 'undefined') {
-      window.addEventListener('online', () => this.flushQueue());
+      window.addEventListener('online', () => this.flushQueue())
     }
   }
 
   /** Dependency Inversion: accept abstractions (providers), not concretes */
   addProvider(p: BaseProvider<E>): this {
-    this.providers.set(p.id, { provider: p, enabled: true });
-    p.init?.({ consent: this.consent.get(), defaultContext: this.defaultContext });
-    return this;
+    this.providers.set(p.id, { provider: p, enabled: true })
+    p.init?.({ consent: this.consent.get(), defaultContext: this.defaultContext })
+    return this
   }
 
   removeProvider(id: string): this {
-    const entry = this.providers.get(id);
+    const entry = this.providers.get(id)
     if (entry) {
-      entry.provider.shutdown?.();
-      this.providers.delete(id);
+      entry.provider.shutdown?.()
+      this.providers.delete(id)
     }
-    return this;
+    return this
   }
 
-  enableProvider(id: string): this { 
-    const e = this.providers.get(id); 
-    if (e) { 
-      e.enabled = true; 
-      e.provider.setEnabled(true); 
-    } 
-    return this; 
+  enableProvider(id: string): this {
+    const e = this.providers.get(id)
+    if (e) {
+      e.enabled = true
+      e.provider.setEnabled(true)
+    }
+    return this
   }
 
-  disableProvider(id: string): this { 
-    const e = this.providers.get(id); 
-    if (e) { 
-      e.enabled = false; 
-      e.provider.setEnabled(false); 
-    } 
-    return this; 
+  disableProvider(id: string): this {
+    const e = this.providers.get(id)
+    if (e) {
+      e.enabled = false
+      e.provider.setEnabled(false)
+    }
+    return this
   }
 
-  use(mw: Middleware<E>): this { 
-    this.middlewares.use(mw); 
-    return this; 
+  use(mw: Middleware<E>): this {
+    this.middlewares.use(mw)
+    return this
   }
 
-  setRouter(router: Router<E>): this { 
-    this.router = router; 
-    return this; 
+  setRouter(router: Router<E>): this {
+    this.router = router
+    return this
   }
 
   setConsent(patch: ConsentState): this {
-    this.consent.update(patch);
+    this.consent.update(patch)
     // bubble to providers
     for (const { provider } of this.providers.values()) {
-      provider.init?.({ consent: this.consent.get(), defaultContext: this.defaultContext });
+      provider.init?.({ consent: this.consent.get(), defaultContext: this.defaultContext })
     }
-    return this;
+    return this
   }
 
   setDefaultContext(ctx: Partial<EventContext>): this {
-    this.defaultContext = shallowMerge(this.defaultContext, ctx);
-    return this;
+    this.defaultContext = shallowMerge(this.defaultContext, ctx)
+    return this
   }
 
   identify(userId: string, traits?: Record<string, unknown>) {
     for (const { provider, enabled } of this.providers.values()) {
-      if (!enabled || !provider.isEnabled()) continue;
-      const maybe = provider as unknown as IdentifyCapable;
+      if (!enabled || !provider.isEnabled()) continue
+      const maybe = provider as unknown as IdentifyCapable
       if (typeof (maybe as IdentifyCapable).identify === 'function') {
-        try { maybe.identify(userId, traits); } catch (err) { this.onError?.(err); }
+        try {
+          maybe.identify(userId, traits)
+        } catch (err) {
+          this.onError?.(err)
+        }
       }
     }
   }
 
   group(groupId: string, traits?: Record<string, unknown>) {
     for (const { provider, enabled } of this.providers.values()) {
-      if (!enabled || !provider.isEnabled()) continue;
-      const maybe = provider as unknown as GroupCapable;
+      if (!enabled || !provider.isEnabled()) continue
+      const maybe = provider as unknown as GroupCapable
       if (typeof maybe.group === 'function') {
-        try { maybe.group(groupId, traits); } catch (err) { this.onError?.(err); }
+        try {
+          maybe.group(groupId, traits)
+        } catch (err) {
+          this.onError?.(err)
+        }
       }
     }
   }
 
   page(ctx?: PageContext) {
     for (const { provider, enabled } of this.providers.values()) {
-      if (!enabled || !provider.isEnabled()) continue;
-      const maybe = provider as unknown as PageCapable;
+      if (!enabled || !provider.isEnabled()) continue
+      const maybe = provider as unknown as PageCapable
       if (typeof maybe.page === 'function') {
-        try { maybe.page(ctx); } catch (err) { this.onError?.(err); }
+        try {
+          maybe.page(ctx)
+        } catch (err) {
+          this.onError?.(err)
+        }
       }
     }
   }
@@ -795,83 +816,86 @@ export class Analytics<E extends EventMap> {
       ...event,
       context: shallowMerge(this.defaultContext, event.context),
       timestamp: event.timestamp ?? Date.now(),
-    };
+    }
 
     // Step 2: Define dispatch function (called after middleware processing)
     const dispatch = (processedEvent: AnalyticsEvent<any, any>) => {
-      
       // Step 3: Consent gate - GDPR compliance checkpoint
       if (!this.consent.allows('analytics')) {
         // Queue for later processing when consent is granted
-        this.queue.enqueue(processedEvent);
-        return;
+        this.queue.enqueue(processedEvent)
+        return
       }
 
       // Step 4: Online check - handle offline scenarios
-      const online = typeof navigator !== 'undefined' ? navigator.onLine !== false : true;
+      const online = typeof navigator !== 'undefined' ? navigator.onLine !== false : true
       if (!online) {
-        this.queue.enqueue(processedEvent);
-        return;
+        this.queue.enqueue(processedEvent)
+        return
       }
 
       // Step 5: Event routing - determine which providers should receive this event
-      const routerDecision = this.router?.(processedEvent) || {};
-      const optionsDecision = options || {};
-      
+      const routerDecision = this.router?.(processedEvent) || {}
+      const optionsDecision = options || {}
+
       // Merge routing decisions (per-call options override router)
-      const includeProviders = optionsDecision.includeProviders || routerDecision.includeProviders;
-      const excludeProviders = [...(routerDecision.excludeProviders || []), ...(optionsDecision.excludeProviders || [])];
+      const includeProviders = optionsDecision.includeProviders || routerDecision.includeProviders
+      const excludeProviders = [...(routerDecision.excludeProviders || []), ...(optionsDecision.excludeProviders || [])]
 
       // Step 6: Send to each eligible provider
       for (const { provider, enabled } of this.providers.values()) {
         // Skip disabled providers
-        if (!enabled || !provider.isEnabled()) continue;
-        
+        if (!enabled || !provider.isEnabled()) continue
+
         // Apply routing rules
-        if (includeProviders && !includeProviders.includes(provider.id)) continue;
-        if (excludeProviders.includes(provider.id)) continue;
+        if (includeProviders && !includeProviders.includes(provider.id)) continue
+        if (excludeProviders.includes(provider.id)) continue
 
         // Send to provider with error handling
         try {
-          const result = provider.track(processedEvent);
-          
+          const result = provider.track(processedEvent)
+
           // Handle async providers
           if (result && typeof result.then === 'function') {
             result.catch((err) => {
-              this.queue.enqueue(processedEvent); // Retry later
-              this.onError?.(err, processedEvent);
-            });
+              this.queue.enqueue(processedEvent) // Retry later
+              this.onError?.(err, processedEvent)
+            })
           }
         } catch (err) {
           // Sync error handling
-          this.queue.enqueue(processedEvent);
-          this.onError?.(err, processedEvent);
+          this.queue.enqueue(processedEvent)
+          this.onError?.(err, processedEvent)
         }
       }
-    };
+    }
 
     // Step 7: Run through middleware pipeline (Chain of Responsibility)
-    this.middlewares.run(enriched, dispatch);
+    this.middlewares.run(enriched, dispatch)
   }
 
   async flush() {
     for (const { provider } of this.providers.values()) {
-      await provider.flush?.();
+      await provider.flush?.()
     }
   }
 
   flushQueue(maxBatch = 200) {
-    if (!this.consent.allows('analytics')) return; // still gated
-    let batch = this.queue.drain(maxBatch);
+    if (!this.consent.allows('analytics')) return // still gated
+    let batch = this.queue.drain(maxBatch)
     while (batch.length) {
       for (const e of batch) {
         // bypass middlewares on replay to avoid double processing
         for (const { provider, enabled } of this.providers.values()) {
-          if (!enabled || !provider.isEnabled()) continue;
-          try { provider.track(e); } catch { /* swallow, requeue next time on error */ }
+          if (!enabled || !provider.isEnabled()) continue
+          try {
+            provider.track(e)
+          } catch {
+            /* swallow, requeue next time on error */
+          }
         }
       }
-      batch = this.queue.drain(maxBatch);
+      batch = this.queue.drain(maxBatch)
     }
   }
 }
@@ -879,7 +903,7 @@ export class Analytics<E extends EventMap> {
 // Builder for ergonomic construction (Open/Closed: add providers without modifying Analytics)
 export class AnalyticsBuilder<E extends EventMap> {
   static create<T extends SafeEventMap = SafeEventMap>(options?: AnalyticsOptions<T>): AnalyticsBuilder<T>
-  
+
   addProvider(provider: BaseProvider<E>): this
   addProviders(providers: BaseProvider<E>[]): this
   withDefaultContext(context: Partial<EventContext>): this
@@ -900,35 +924,44 @@ export class AnalyticsBuilder<E extends EventMap> {
 
 ```typescript
 declare global {
-  interface Window { gtag?: (...args: any[]) => void; mixpanel?: any }
+  interface Window {
+    gtag?: (...args: any[]) => void
+    mixpanel?: any
+  }
 }
 
 export type GoogleAnalyticsOptions = {
-  measurementId: string;
-  gtag?: (...args: any[]) => void; // DI for testing
-};
+  measurementId: string
+  gtag?: (...args: any[]) => void // DI for testing
+}
 
-export class GoogleAnalyticsProvider<E extends EventMap = EventMap> implements BaseProvider<E>, IdentifyCapable, PageCapable {
-  readonly id = 'ga';
-  private _enabled = true;
-  private gtag?: (...args: any[]) => void;
-  private measurementId: string;
+export class GoogleAnalyticsProvider<E extends EventMap = EventMap>
+  implements BaseProvider<E>, IdentifyCapable, PageCapable
+{
+  readonly id = 'ga'
+  private _enabled = true
+  private gtag?: (...args: any[]) => void
+  private measurementId: string
 
   constructor(opts: GoogleAnalyticsOptions) {
-    this.measurementId = opts.measurementId;
-    this.gtag = opts.gtag || (typeof window !== 'undefined' ? window.gtag : undefined);
+    this.measurementId = opts.measurementId
+    this.gtag = opts.gtag || (typeof window !== 'undefined' ? window.gtag : undefined)
   }
 
-  isEnabled() { return this._enabled; }
-  setEnabled(enabled: boolean) { this._enabled = enabled; }
+  isEnabled() {
+    return this._enabled
+  }
+  setEnabled(enabled: boolean) {
+    this._enabled = enabled
+  }
 
   init() {
     // If gtag is not present, developer must add GA script in the app shell.
     if (!this.gtag) {
-      console.warn('[GA] gtag not found. Did you include the GA script?');
+      console.warn('[GA] gtag not found. Did you include the GA script?')
     } else {
       // We manually control page_view in SPA flows; keep it disabled by default here.
-      this.gtag('config', this.measurementId, { send_page_view: false });
+      this.gtag('config', this.measurementId, { send_page_view: false })
     }
   }
 
@@ -937,18 +970,18 @@ export class GoogleAnalyticsProvider<E extends EventMap = EventMap> implements B
    * WITHOUT sending an automatic page_view.
    */
   identify(userId: string) {
-    if (!this._enabled || !this.gtag) return;
-    this.gtag('config', this.measurementId, { user_id: userId, send_page_view: false });
+    if (!this._enabled || !this.gtag) return
+    this.gtag('config', this.measurementId, { user_id: userId, send_page_view: false })
   }
 
   page(ctx?: PageContext) {
-    if (!this._enabled || !this.gtag) return;
+    if (!this._enabled || !this.gtag) return
     this.gtag('event', 'page_view', {
       page_title: ctx?.title,
       page_location: ctx?.url,
       page_path: ctx?.path,
       referrer: ctx?.referrer,
-    });
+    })
   }
 
   private toGaEventName(name: string): string {
@@ -956,12 +989,12 @@ export class GoogleAnalyticsProvider<E extends EventMap = EventMap> implements B
       .toLowerCase()
       .replace(/[^a-z0-9_]+/g, '_') // only letters, numbers, underscores
       .replace(/^_+|\_+$/g, '')
-      .slice(0, 40); // GA4 limit
+      .slice(0, 40) // GA4 limit
   }
 
   track(event: AnalyticsEvent) {
-    if (!this._enabled || !this.gtag) return;
-    const gaName = this.toGaEventName(event.name);
+    if (!this._enabled || !this.gtag) return
+    const gaName = this.toGaEventName(event.name)
     // GA4 expects snake_case-ish event names and specific reserved param keys.
     // Keep payload tidy and ≤25 params.
     this.gtag('event', gaName, {
@@ -971,7 +1004,7 @@ export class GoogleAnalyticsProvider<E extends EventMap = EventMap> implements B
       page_location: event?.context?.page?.url,
       page_title: event?.context?.page?.title,
       page_path: event?.context?.page?.path,
-    });
+    })
   }
 }
 ```
@@ -980,34 +1013,40 @@ export class GoogleAnalyticsProvider<E extends EventMap = EventMap> implements B
 
 ```typescript
 export type MixpanelOptions = {
-  token: string;
-  apiHost?: string; // e.g., 'https://api-eu.mixpanel.com' for EU residency
-  initOptions?: Record<string, unknown>; // extra init options, e.g., track_pageview: 'url-with-path'
-  mixpanel?: any; // DI for testing
-};
+  token: string
+  apiHost?: string // e.g., 'https://api-eu.mixpanel.com' for EU residency
+  initOptions?: Record<string, unknown> // extra init options, e.g., track_pageview: 'url-with-path'
+  mixpanel?: any // DI for testing
+}
 
-export class MixpanelProvider<E extends EventMap = EventMap> implements BaseProvider<E>, IdentifyCapable, GroupCapable, PageCapable {
-  readonly id = 'mixpanel';
-  private _enabled = true;
-  private mp: any;
-  private token: string;
-  private apiHost?: string;
-  private initOptions?: Record<string, unknown>;
+export class MixpanelProvider<E extends EventMap = EventMap>
+  implements BaseProvider<E>, IdentifyCapable, GroupCapable, PageCapable
+{
+  readonly id = 'mixpanel'
+  private _enabled = true
+  private mp: any
+  private token: string
+  private apiHost?: string
+  private initOptions?: Record<string, unknown>
 
   constructor(opts: MixpanelOptions) {
-    this.token = opts.token;
-    this.apiHost = opts.apiHost;
-    this.initOptions = opts.initOptions;
-    this.mp = opts.mixpanel || (typeof window !== 'undefined' ? window.mixpanel : undefined);
+    this.token = opts.token
+    this.apiHost = opts.apiHost
+    this.initOptions = opts.initOptions
+    this.mp = opts.mixpanel || (typeof window !== 'undefined' ? window.mixpanel : undefined)
   }
 
-  isEnabled() { return this._enabled; }
-  setEnabled(enabled: boolean) { this._enabled = enabled; }
+  isEnabled() {
+    return this._enabled
+  }
+  setEnabled(enabled: boolean) {
+    this._enabled = enabled
+  }
 
   init() {
     if (!this.mp) {
-      console.warn('[Mixpanel] global mixpanel not found. Did you load the SDK?');
-      return;
+      console.warn('[Mixpanel] global mixpanel not found. Did you load the SDK?')
+      return
     }
     if (!this.mp.__loaded) {
       try {
@@ -1015,51 +1054,51 @@ export class MixpanelProvider<E extends EventMap = EventMap> implements BaseProv
           batch_requests: true,
           ...(this.apiHost ? { api_host: this.apiHost } : {}),
           ...(this.initOptions || {}),
-        });
+        })
       } catch {}
     }
   }
 
   identify(userId: string, traits?: Record<string, unknown>) {
-    if (!this._enabled || !this.mp) return;
+    if (!this._enabled || !this.mp) return
     try {
-      this.mp.identify(userId);
-      if (traits && this.mp?.people?.set) this.mp.people.set(traits);
+      this.mp.identify(userId)
+      if (traits && this.mp?.people?.set) this.mp.people.set(traits)
     } catch {}
   }
 
   group(groupId: string, traits?: Record<string, unknown>) {
-    if (!this._enabled || !this.mp) return;
+    if (!this._enabled || !this.mp) return
     try {
       // Attach user to the group, then set group profile traits
-      if (this.mp?.set_group) this.mp.set_group('company', groupId);
-      if (traits && this.mp?.get_group) this.mp.get_group('company', groupId).set(traits);
+      if (this.mp?.set_group) this.mp.set_group('company', groupId)
+      if (traits && this.mp?.get_group) this.mp.get_group('company', groupId).set(traits)
     } catch {}
   }
 
   page(ctx?: PageContext) {
-    if (!this._enabled || !this.mp) return;
+    if (!this._enabled || !this.mp) return
     try {
       if (typeof this.mp.track_pageview === 'function') {
-        this.mp.track_pageview({ title: ctx?.title, page: ctx?.path, referrer: ctx?.referrer, url: ctx?.url });
+        this.mp.track_pageview({ title: ctx?.title, page: ctx?.path, referrer: ctx?.referrer, url: ctx?.url })
       } else {
         // Fallback if using a minimal build; avoid naming collisions with your taxonomy
-        this.mp.track('Page View', { title: ctx?.title, url: ctx?.url, path: ctx?.path, referrer: ctx?.referrer });
+        this.mp.track('Page View', { title: ctx?.title, url: ctx?.url, path: ctx?.path, referrer: ctx?.referrer })
       }
     } catch {}
   }
 
   track(event: AnalyticsEvent) {
-    if (!this._enabled || !this.mp) return;
+    if (!this._enabled || !this.mp) return
     try {
       // Avoid reserved property prefixes ($, mp_) in payload keys.
-      this.mp.track(event.name, { ...event.payload, ...flattenContext(event.context) });
+      this.mp.track(event.name, { ...event.payload, ...flattenContext(event.context) })
     } catch {}
   }
 }
 
 function flattenContext(ctx?: EventContext) {
-  if (!ctx) return {} as Record<string, unknown>;
+  if (!ctx) return {} as Record<string, unknown>
   return {
     userId: ctx.userId,
     anonymousId: ctx.anonymousId,
@@ -1071,7 +1110,7 @@ function flattenContext(ctx?: EventContext) {
     appVersion: ctx.appVersion,
     source: ctx.source,
     test: ctx.test,
-  } as Record<string, unknown>;
+  } as Record<string, unknown>
 }
 ```
 
@@ -1081,36 +1120,36 @@ function flattenContext(ctx?: EventContext) {
 
 ```typescript
 export function samplingMiddleware<E extends EventMap>(rate: number): Middleware<E> {
-  const p = Math.max(0, Math.min(1, rate));
+  const p = Math.max(0, Math.min(1, rate))
   return (event, next) => {
-    if (Math.random() < p) next(event); // keep
+    if (Math.random() < p) next(event) // keep
     // else drop silently
-  };
+  }
 }
 
-const EMAIL_RE = /([a-zA-Z0-9*._+-]+)@([a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+)/g;
+const EMAIL_RE = /([a-zA-Z0-9*._+-]+)@([a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+)/g
 export function scrubPIIMiddleware<E extends EventMap>(): Middleware<E> {
   return (event, next) => {
     const scrub = (obj: any): any => {
-      if (!obj || typeof obj !== 'object') return obj;
-      const out: any = Array.isArray(obj) ? [] : {};
+      if (!obj || typeof obj !== 'object') return obj
+      const out: any = Array.isArray(obj) ? [] : {}
       for (const k of Object.keys(obj)) {
-        const v = (obj as any)[k];
-        if (typeof v === 'string') out[k] = v.replace(EMAIL_RE, '[redacted]');
-        else out[k] = scrub(v);
+        const v = (obj as any)[k]
+        if (typeof v === 'string') out[k] = v.replace(EMAIL_RE, '[redacted]')
+        else out[k] = scrub(v)
       }
-      return out;
-    };
-    next({ ...event, payload: scrub(event.payload) });
-  };
+      return out
+    }
+    next({ ...event, payload: scrub(event.payload) })
+  }
 }
 
 // Example: rename event names or map payload keys per taxonomy alignment
 export function renameEventMiddleware<E extends EventMap>(map: Record<string, string>): Middleware<E> {
   return (event, next) => {
-    const newName = map[event.name] || event.name;
-    next({ ...event, name: newName });
-  };
+    const newName = map[event.name] || event.name
+    next({ ...event, name: newName })
+  }
 }
 ```
 
@@ -1121,18 +1160,21 @@ export function renameEventMiddleware<E extends EventMap>(map: Record<string, st
 ```typescript
 // 1) Define your event catalog for compile-time safety
 export type AppEvents = {
-  'User Signed In': { method: 'password' | 'wallet'; experiment?: string };
-  'Clicked CTA': { label: string; page: string };
-  'Funds Transferred': { amount: number; asset: string; network?: string };
-  'Error Shown': { code: string; message?: string };
-};
+  'User Signed In': { method: 'password' | 'wallet'; experiment?: string }
+  'Clicked CTA': { label: string; page: string }
+  'Funds Transferred': { amount: number; asset: string; network?: string }
+  'Error Shown': { code: string; message?: string }
+}
 
 // 2) Build the instance
 export const analytics = AnalyticsBuilder.create<AppEvents>({
   defaultContext: {
     device: {
       userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : undefined,
-      screen: typeof window !== 'undefined' ? { width: window.innerWidth, height: window.innerHeight, pixelRatio: window.devicePixelRatio } : undefined,
+      screen:
+        typeof window !== 'undefined'
+          ? { width: window.innerWidth, height: window.innerHeight, pixelRatio: window.devicePixelRatio }
+          : undefined,
     },
     source: 'web',
   },
@@ -1142,43 +1184,57 @@ export const analytics = AnalyticsBuilder.create<AppEvents>({
   router: (event) => {
     switch (event.name) {
       case 'Funds Transferred':
-        return { includeProviders: ['mixpanel'] }; // business-critical to Mixpanel only
+        return { includeProviders: ['mixpanel'] } // business-critical to Mixpanel only
       case 'Clicked CTA':
-        return { includeProviders: ['ga'] }; // send to GA only
+        return { includeProviders: ['ga'] } // send to GA only
       default:
-        return; // send to all enabled providers
+        return // send to all enabled providers
     }
-  }
+  },
 })
-.addProvider(new GoogleAnalyticsProvider({ measurementId: 'G-XXXXXXX' }))
-.addProvider(new MixpanelProvider({ token: 'mixpanel-token', apiHost: 'https://api-eu.mixpanel.com', initOptions: { /* track_pageview: 'url-with-path' */ } }))
-.addMiddleware(samplingMiddleware<AppEvents>(1.0)) // set to <1 for sampling in high-traffic flows
-.addMiddleware(scrubPIIMiddleware<AppEvents>())
-// Optional: align taxonomy names across tools
-.addMiddleware(renameEventMiddleware<AppEvents>({ 'Clicked CTA': 'cta_click' }))
-.build();
+  .addProvider(new GoogleAnalyticsProvider({ measurementId: 'G-XXXXXXX' }))
+  .addProvider(
+    new MixpanelProvider({
+      token: 'mixpanel-token',
+      apiHost: 'https://api-eu.mixpanel.com',
+      initOptions: {
+        /* track_pageview: 'url-with-path' */
+      },
+    }),
+  )
+  .addMiddleware(samplingMiddleware<AppEvents>(1.0)) // set to <1 for sampling in high-traffic flows
+  .addMiddleware(scrubPIIMiddleware<AppEvents>())
+  // Optional: align taxonomy names across tools
+  .addMiddleware(renameEventMiddleware<AppEvents>({ 'Clicked CTA': 'cta_click' }))
+  .build()
 
 // 3) Use it in your app
 export function demoUsage() {
-  analytics.page({ title: document.title, url: location.href, path: location.pathname, referrer: document.referrer });
-  analytics.identify('user_123', { plan: 'pro' });
+  analytics.page({ title: document.title, url: location.href, path: location.pathname, referrer: document.referrer })
+  analytics.identify('user_123', { plan: 'pro' })
   analytics.track({
     name: 'User Signed In',
     payload: { method: 'wallet' },
-    context: { locale: 'en-US' }
-  });
+    context: { locale: 'en-US' },
+  })
 
   // Route per-call: only GA
-  analytics.track({
-    name: 'Clicked CTA',
-    payload: { label: 'Get Started', page: 'Home' }
-  }, { includeProviders: ['ga'] });
+  analytics.track(
+    {
+      name: 'Clicked CTA',
+      payload: { label: 'Get Started', page: 'Home' },
+    },
+    { includeProviders: ['ga'] },
+  )
 
   // Route per-call: exclude GA
-  analytics.track({
-    name: 'Funds Transferred',
-    payload: { amount: 1.2, asset: 'ETH', network: 'Base' }
-  }, { excludeProviders: ['ga'] });
+  analytics.track(
+    {
+      name: 'Funds Transferred',
+      payload: { amount: 1.2, asset: 'ETH', network: 'Base' },
+    },
+    { excludeProviders: ['ga'] },
+  )
 }
 ```
 
@@ -1203,19 +1259,19 @@ sequenceDiagram
     User->>App: Performs transaction
     App->>Hook: track('Transaction Created', { amount, asset })
     Hook->>Analytics: track(enrichedEvent)
-    
+
     Note over Analytics: Step 1: Context Enrichment
     Analytics->>Analytics: Add device info, user ID, chain info
-    
+
     Note over Analytics: Step 2: Middleware Processing
     Analytics->>Middleware: process(event)
     Middleware->>Middleware: Apply sampling (keep 10% of tx events)
     Middleware->>Middleware: Scrub PII if any
     Middleware->>Middleware: Rename for GA4 compatibility
-    
+
     Note over Analytics: Step 3: Consent & Routing
     Middleware->>Consent: Check if analytics allowed
-    
+
     alt Consent granted
         Consent->>Analytics: ✅ Allowed
         Analytics->>GA: Send transaction_created event
@@ -1226,7 +1282,7 @@ sequenceDiagram
     else No consent
         Consent->>Queue: Store event for later
     end
-    
+
     Note over Queue: Later: User grants consent
     Queue->>MP: Flush stored events
 ```
@@ -1274,7 +1330,7 @@ const analytics = AnalyticsBuilder.create<SafeEvents>({
 }))
 
 // Add middleware pipeline
-.addMiddleware(createSamplingMiddleware({ 
+.addMiddleware(createSamplingMiddleware({
   rate: 0.1  // Only track 10% of events to reduce costs
 }))
 .addMiddleware(createPiiScrubberMiddleware({
@@ -1284,7 +1340,7 @@ const analytics = AnalyticsBuilder.create<SafeEvents>({
   // Custom middleware: Add chain name
   const chainNames = { 1: 'Ethereum', 137: 'Polygon' };
   const chainName = chainNames[event.payload.chainId as keyof typeof chainNames];
-  
+
   next({
     ...event,
     payload: { ...event.payload, chainName }
@@ -1314,11 +1370,11 @@ const analytics = AnalyticsBuilder.create<SafeEvents>({
 // 3. Use in your React app
 function TransactionFlow() {
   const { track, isEnabled } = useAnalytics<SafeEvents>();
-  
+
   const handleTransaction = async (txData: TransactionData) => {
     // Your transaction logic here
     const result = await executeTransaction(txData);
-    
+
     // Track the event (only if consent is granted)
     if (isEnabled) {
       track({
@@ -1340,7 +1396,7 @@ function TransactionFlow() {
       });
     }
   };
-  
+
   return <TransactionComponent onSubmit={handleTransaction} />;
 }
 ```
@@ -1348,7 +1404,7 @@ function TransactionFlow() {
 ### Why This Architecture Excels
 
 1. **🔒 Privacy-First**: Consent gating ensures GDPR compliance
-2. **🚀 Performance**: Sampling and async processing prevent UI blocking  
+2. **🚀 Performance**: Sampling and async processing prevent UI blocking
 3. **🛠️ Maintainable**: SOLID principles make it easy to add/modify providers
 4. **🔄 Resilient**: Offline queue and error handling prevent data loss
 5. **📊 Flexible**: Routing allows different events to go to different providers
@@ -1362,15 +1418,27 @@ function TransactionFlow() {
 
 ```typescript
 class NewProvider<E extends EventMap> implements BaseProvider<E>, IdentifyCapable, PageCapable {
-  readonly id = 'newprovider';
-  private _enabled = true;
+  readonly id = 'newprovider'
+  private _enabled = true
   constructor(private options: { apiKey: string }) {}
-  init() { /* load SDK or configure */ }
-  isEnabled() { return this._enabled; }
-  setEnabled(e: boolean) { this._enabled = e; }
-  identify(userId: string) { /* ... */ }
-  page(ctx?: PageContext) { /* ... */ }
-  track(event: AnalyticsEvent) { /* map event.name/payload/context to SDK */ }
+  init() {
+    /* load SDK or configure */
+  }
+  isEnabled() {
+    return this._enabled
+  }
+  setEnabled(e: boolean) {
+    this._enabled = e
+  }
+  identify(userId: string) {
+    /* ... */
+  }
+  page(ctx?: PageContext) {
+    /* ... */
+  }
+  track(event: AnalyticsEvent) {
+    /* map event.name/payload/context to SDK */
+  }
 }
 // Register: AnalyticsBuilder.create<AppEvents>().addProvider(new NewProvider({ apiKey: '...' }))
 ```
@@ -1382,17 +1450,21 @@ class NewProvider<E extends EventMap> implements BaseProvider<E>, IdentifyCapabl
 ### SOLID Principles
 
 - **S (Single Responsibility)**:
+
   - Providers only know how to talk to their SDK.
   - Analytics orchestrates dispatch + consent + queue + routing.
   - Middlewares transform events.
 
 - **O (Open/Closed)**:
+
   - Add new providers or middlewares without changing core.
 
 - **L (Liskov Substitution)**:
+
   - All providers conform to BaseProvider and can be swapped.
 
 - **I (Interface Segregation)**:
+
   - Identify/Page/Group are optional capability interfaces.
 
 - **D (Dependency Inversion)**:
