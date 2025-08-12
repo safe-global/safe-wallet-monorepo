@@ -93,10 +93,7 @@ describe('AnalyticsBuilder', () => {
     })
 
     it('should add multiple middleware at once', () => {
-      const middleware: MiddlewareFunction[] = [
-        (event) => event,
-        (event) => event,
-      ]
+      const middleware: MiddlewareFunction[] = [(event) => event, (event) => event]
 
       const result = builder.addMiddlewares(middleware)
 
@@ -136,10 +133,7 @@ describe('AnalyticsBuilder', () => {
       const context = { userId: 'test-user' }
       const consent = { analytics: true }
 
-      const result = builder
-        .withDefaultContext(context)
-        .withConsent(consent)
-        .withDebugMode(true)
+      const result = builder.withDefaultContext(context).withConsent(consent).withDebugMode(true)
 
       expect(result).toBe(builder)
     })

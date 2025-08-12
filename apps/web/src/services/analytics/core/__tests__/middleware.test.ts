@@ -2,17 +2,22 @@
  * Unit tests for Middleware system
  */
 
-import { MiddlewareChain, createLoggingMiddleware, createSamplingMiddleware, createPiiScrubberMiddleware } from '../middleware'
+import {
+  MiddlewareChain,
+  createLoggingMiddleware,
+  createSamplingMiddleware,
+  createPiiScrubberMiddleware,
+} from '../middleware'
 import type { MiddlewareFunction, AnalyticsEvent, EventContext, SafeEventMap } from '../types'
 
 // Test event types
 type TestEvents = SafeEventMap & {
-  'Test Event': { 
-    testProperty: string; 
-    value: number; 
-    email?: string;
-    userId?: string;
-    sensitive?: string;
+  'Test Event': {
+    testProperty: string
+    value: number
+    email?: string
+    userId?: string
+    sensitive?: string
   }
   'Another Event': { data: string }
 }
@@ -101,7 +106,7 @@ describe('MiddlewareChain', () => {
 
       const result = middlewareChain.process(mockEvent, mockContext)
 
-      expect(result.payload).toMatchObject({
+      expect(result?.payload).toMatchObject({
         testProperty: 'test',
         value: 123,
         processed: true,
@@ -128,7 +133,7 @@ describe('MiddlewareChain', () => {
 
       const result = middlewareChain.process(mockEvent, mockContext)
 
-      expect(result.payload).toMatchObject({
+      expect(result?.payload).toMatchObject({
         testProperty: 'test',
         value: 123,
         step1: true,
@@ -140,8 +145,8 @@ describe('MiddlewareChain', () => {
     it('should pass context to middleware', () => {
       const contextCheckingMiddleware: MiddlewareFunction = (event, context) => ({
         ...event,
-        payload: { 
-          ...event.payload, 
+        payload: {
+          ...event.payload,
           contextUserId: context?.userId,
           contextSource: context?.source,
         },
@@ -151,7 +156,7 @@ describe('MiddlewareChain', () => {
 
       const result = middlewareChain.process(mockEvent, mockContext)
 
-      expect(result.payload).toMatchObject({
+      expect(result?.payload).toMatchObject({
         contextUserId: 'user-123',
         contextSource: 'web',
       })
@@ -165,7 +170,7 @@ describe('MiddlewareChain', () => {
 
       const contextConsumingMiddleware: MiddlewareFunction = (event, context) => ({
         ...event,
-        payload: { 
+        payload: {
           ...event.payload,
           wasContextModified: (context as any)?.modified === true,
         },
@@ -175,7 +180,7 @@ describe('MiddlewareChain', () => {
 
       const result = middlewareChain.process(mockEvent, mockContext)
 
-      expect(result.payload).toMatchObject({
+      expect(result?.payload).toMatchObject({
         wasContextModified: true,
       })
     })
@@ -191,8 +196,8 @@ describe('MiddlewareChain', () => {
 
       const result = middlewareChain.process(mockEvent, mockContext)
 
-      expect(result.name).toBe('Transformed Event')
-      expect(result.payload).toEqual({ transformed: true })
+      expect(result?.name).toBe('Transformed Event')
+      expect(result?.payload).toEqual({ transformed: true })
     })
 
     it('should handle middleware that filters out events', () => {
@@ -235,10 +240,10 @@ describe('MiddlewareChain', () => {
 
       // Should not throw and should continue with remaining middleware
       const result = middlewareChain.process(mockEvent, mockContext)
-      
+
       expect(result).toBeDefined()
       // The safe middleware should still run
-      expect(result.payload).toMatchObject({ afterError: true })
+      expect(result?.payload).toMatchObject({ afterError: true })
     })
 
     it('should handle multiple failing middleware', () => {
@@ -258,8 +263,8 @@ describe('MiddlewareChain', () => {
       middlewareChain.use(errorMiddleware1).use(errorMiddleware2).use(safeMiddleware)
 
       const result = middlewareChain.process(mockEvent, mockContext)
-      
-      expect(result.payload).toMatchObject({ safe: true })
+
+      expect(result?.payload).toMatchObject({ safe: true })
     })
 
     it('should handle middleware returning invalid values', () => {
@@ -275,7 +280,7 @@ describe('MiddlewareChain', () => {
       middlewareChain.use(invalidMiddleware).use(validMiddleware)
 
       const result = middlewareChain.process(mockEvent, mockContext)
-      
+
       // Should handle gracefully and continue
       expect(result).toBeDefined()
     })
@@ -289,8 +294,8 @@ describe('Built-in Middleware', () => {
   beforeEach(() => {
     mockEvent = {
       name: 'Test Event',
-      payload: { 
-        testProperty: 'test', 
+      payload: {
+        testProperty: 'test',
         value: 123,
         email: 'user@example.com',
         userId: 'user-123',
@@ -317,24 +322,18 @@ describe('Built-in Middleware', () => {
 
     it('should log events when created with default options', () => {
       const loggingMiddleware = createLoggingMiddleware()
-      
+
       const result = loggingMiddleware(mockEvent, mockContext)
 
-      expect(consoleSpy).toHaveBeenCalledWith(
-        '[Analytics]',
-        'Event:',
-        mockEvent.name,
-        'Payload:',
-        mockEvent.payload
-      )
+      expect(consoleSpy).toHaveBeenCalledWith('[Analytics]', 'Event:', mockEvent.name, 'Payload:', mockEvent.payload)
       expect(result).toEqual(mockEvent)
     })
 
     it('should log events with custom prefix', () => {
-      const loggingMiddleware = createLoggingMiddleware({ 
-        prefix: '[Custom Analytics]' 
+      const loggingMiddleware = createLoggingMiddleware({
+        prefix: '[Custom Analytics]',
       })
-      
+
       loggingMiddleware(mockEvent, mockContext)
 
       expect(consoleSpy).toHaveBeenCalledWith(
@@ -342,13 +341,13 @@ describe('Built-in Middleware', () => {
         'Event:',
         mockEvent.name,
         'Payload:',
-        mockEvent.payload
+        mockEvent.payload,
       )
     })
 
     it('should not log when disabled', () => {
       const loggingMiddleware = createLoggingMiddleware({ enabled: false })
-      
+
       const result = loggingMiddleware(mockEvent, mockContext)
 
       expect(consoleSpy).not.toHaveBeenCalled()
@@ -356,10 +355,10 @@ describe('Built-in Middleware', () => {
     })
 
     it('should include context in logs when specified', () => {
-      const loggingMiddleware = createLoggingMiddleware({ 
-        includeContext: true 
+      const loggingMiddleware = createLoggingMiddleware({
+        includeContext: true,
       })
-      
+
       loggingMiddleware(mockEvent, mockContext)
 
       expect(consoleSpy).toHaveBeenCalledWith(
@@ -369,7 +368,7 @@ describe('Built-in Middleware', () => {
         'Payload:',
         mockEvent.payload,
         'Context:',
-        mockContext
+        mockContext,
       )
     })
   })
@@ -377,7 +376,7 @@ describe('Built-in Middleware', () => {
   describe('Sampling Middleware', () => {
     it('should always pass events with 100% sample rate', () => {
       const samplingMiddleware = createSamplingMiddleware({ rate: 1.0 })
-      
+
       // Test multiple times to ensure consistency
       for (let i = 0; i < 10; i++) {
         const result = samplingMiddleware(mockEvent, mockContext)
@@ -387,7 +386,7 @@ describe('Built-in Middleware', () => {
 
     it('should never pass events with 0% sample rate', () => {
       const samplingMiddleware = createSamplingMiddleware({ rate: 0.0 })
-      
+
       // Test multiple times to ensure consistency
       for (let i = 0; i < 10; i++) {
         const result = samplingMiddleware(mockEvent, mockContext)
@@ -397,7 +396,7 @@ describe('Built-in Middleware', () => {
 
     it('should add sampling information to event', () => {
       const samplingMiddleware = createSamplingMiddleware({ rate: 1.0 })
-      
+
       const result = samplingMiddleware(mockEvent, mockContext)
 
       expect(result?.context).toMatchObject({
@@ -418,7 +417,7 @@ describe('Built-in Middleware', () => {
       expect(result).toEqual(expect.objectContaining(mockEvent))
 
       // Test with different event
-      const otherEvent = { ...mockEvent, name: 'Other Event' }
+      const _otherEvent = { ...mockEvent, name: 'Other Event' }
       // Note: This test might be flaky due to randomness
       // In a real implementation, you might want to make the randomness deterministic for tests
     })
@@ -427,7 +426,7 @@ describe('Built-in Middleware', () => {
   describe('PII Scrubber Middleware', () => {
     it('should remove email fields', () => {
       const piiScrubberMiddleware = createPiiScrubberMiddleware()
-      
+
       const result = piiScrubberMiddleware(mockEvent, mockContext)
 
       expect(result?.payload).toMatchObject({
@@ -443,7 +442,7 @@ describe('Built-in Middleware', () => {
       const piiScrubberMiddleware = createPiiScrubberMiddleware({
         piiFields: ['email', 'sensitive', 'userId'],
       })
-      
+
       const result = piiScrubberMiddleware(mockEvent, mockContext)
 
       expect(result?.payload).toMatchObject({
@@ -459,7 +458,7 @@ describe('Built-in Middleware', () => {
       const piiScrubberMiddleware = createPiiScrubberMiddleware({
         replaceWith: '[REDACTED]',
       })
-      
+
       const result = piiScrubberMiddleware(mockEvent, mockContext)
 
       expect((result?.payload as any).email).toBe('[REDACTED]')
@@ -478,7 +477,7 @@ describe('Built-in Middleware', () => {
       }
 
       const piiScrubberMiddleware = createPiiScrubberMiddleware()
-      
+
       const result = piiScrubberMiddleware(eventWithNestedPii, mockContext)
 
       expect((result?.payload as any).user.email).toBeUndefined()
@@ -498,7 +497,7 @@ describe('Built-in Middleware', () => {
       }
 
       const piiScrubberMiddleware = createPiiScrubberMiddleware()
-      
+
       const result = piiScrubberMiddleware(eventWithArrayPii, mockContext)
 
       const users = (result?.payload as any).users
@@ -515,7 +514,7 @@ describe('Built-in Middleware', () => {
       }
 
       const piiScrubberMiddleware = createPiiScrubberMiddleware()
-      
+
       const result = piiScrubberMiddleware(eventWithNoPayload, mockContext)
 
       expect(result).toEqual(eventWithNoPayload)

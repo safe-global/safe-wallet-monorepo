@@ -2,8 +2,9 @@
  * Unit tests for useAnalytics hook
  */
 
-import { renderHook } from '@testing-library/react'
+import { renderHook, waitFor } from '@testing-library/react'
 import { useAnalytics } from '../useAnalytics'
+import type { SafeEventMap, AnalyticsEvent } from '@/services/analytics/core/types'
 
 // Mock dependencies
 jest.mock('@mui/material/styles', () => ({
@@ -23,10 +24,6 @@ jest.mock('@/store', () => ({
 }))
 
 jest.mock('@/store/cookiesAndTermsSlice', () => ({
-  CookieAndTermType: {
-    ANALYTICS: 'analytics',
-    NECESSARY: 'necessary',
-  },
   hasConsentFor: jest.fn(),
 }))
 
@@ -63,7 +60,7 @@ jest.mock('@/services/analytics/providers/MixpanelProvider', () => ({
 
 import { useMediaQuery } from '@mui/material'
 import { useAppSelector } from '@/store'
-import { hasConsentFor, CookieAndTermType } from '@/store/cookiesAndTermsSlice'
+import { hasConsentFor } from '@/store/cookiesAndTermsSlice'
 import { useHasFeature, useChain } from '@/hooks/useChains'
 import useChainId from '@/hooks/useChainId'
 import useSafeAddress from '@/hooks/useSafeAddress'
@@ -101,9 +98,20 @@ const mockAnalyticsInstance = {
 }
 
 const mockBuilder = {
+  providers: [],
+  middlewares: [],
+  debugMode: false,
   addProvider: jest.fn().mockReturnThis(),
+  addProviders: jest.fn().mockReturnThis(),
   withDefaultContext: jest.fn().mockReturnThis(),
   withConsent: jest.fn().mockReturnThis(),
+  withRouter: jest.fn().mockReturnThis(),
+  withErrorHandler: jest.fn().mockReturnThis(),
+  withDebug: jest.fn().mockReturnThis(),
+  withDebugMode: jest.fn().mockReturnThis(),
+  use: jest.fn().mockReturnThis(),
+  addMiddleware: jest.fn().mockReturnThis(),
+  addMiddlewares: jest.fn().mockReturnThis(),
   build: jest.fn().mockReturnValue(mockAnalyticsInstance),
 }
 
@@ -130,6 +138,7 @@ describe('useAnalytics', () => {
       label: 'MetaMask',
       address: '0x456...def',
       chainId: '1',
+      provider: {} as any,
     })
     mockUseIsSpaceRoute.mockReturnValue(false)
     mockUseSafeInfo.mockReturnValue({
@@ -139,11 +148,11 @@ describe('useAnalytics', () => {
     mockUseChain.mockReturnValue({
       chainId: '1',
       chainName: 'Ethereum',
-    })
+    } as any)
 
-    mockAnalyticsBuilder.mockReturnValue(mockBuilder)
-    mockGoogleAnalyticsProvider.mockImplementation(() => ({ id: 'ga' } as any))
-    mockMixpanelProvider.mockImplementation(() => ({ id: 'mixpanel' } as any))
+    mockAnalyticsBuilder.mockReturnValue(mockBuilder as any)
+    mockGoogleAnalyticsProvider.mockImplementation(() => ({ id: 'ga' }) as any)
+    mockMixpanelProvider.mockImplementation(() => ({ id: 'mixpanel' }) as any)
     mockAnalyticsInstance.providers = [{ id: 'ga' }, { id: 'mixpanel' }] as any
   })
 
@@ -205,7 +214,7 @@ describe('useAnalytics', () => {
     })
 
     it('should merge custom default context', async () => {
-      const customContext = { test: 'value' }
+      const customContext = { test: true }
 
       renderHook(() => useAnalytics({ defaultContext: customContext }))
 
@@ -224,7 +233,7 @@ describe('useAnalytics', () => {
 
   describe('Device Detection', () => {
     it('should detect mobile device', async () => {
-      mockUseMediaQuery.mockImplementation((query) => query.includes('600px'))
+      mockUseMediaQuery.mockImplementation((query) => typeof query === 'string' && query.includes('600px'))
 
       const { result } = renderHook(() => useAnalytics())
 
@@ -237,7 +246,9 @@ describe('useAnalytics', () => {
     })
 
     it('should detect tablet device', async () => {
-      mockUseMediaQuery.mockImplementation((query) => query.includes('960px') && !query.includes('600px'))
+      mockUseMediaQuery.mockImplementation(
+        (query) => typeof query === 'string' && query.includes('960px') && !query.includes('600px'),
+      )
 
       renderHook(() => useAnalytics())
 
@@ -438,6 +449,7 @@ describe('useAnalytics', () => {
         label: 'WalletConnect',
         address: '0x789...ghi',
         chainId: '1',
+        provider: {} as any,
       })
       rerender()
 
