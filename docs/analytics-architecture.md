@@ -33,7 +33,7 @@
 
 - You can route specific events to only some providers without creating multiple analytics objects.
 - **Two mechanisms:**
-  1. **Per-call options**: `analytics.track(name, payload, context, { includeProviders: ['mixpanel'] })`
+  1. **Per-call options**: `analytics.track(event, { includeProviders: ['mixpanel'] })`
   2. **Router function**: `builder.withRouter((event) => ({ includeProviders:['ga'] }))`
 - `includeProviders` wins over `excludeProviders`.
 
@@ -43,7 +43,7 @@
 
 1. **Define your EventMap type** (compile-time safety)
 2. **Build the analytics instance** with providers and middlewares
-3. **Call** `analytics.track()`, `analytics.identify()`, `analytics.page()`
+3. **Call** `analytics.track(event)`, `analytics.identify()`, `analytics.page()`
 
 ### File Layout Hint
 
@@ -377,12 +377,11 @@ export class Analytics<E extends EventMap> {
     }
   }
 
-  track<K extends keyof E & string>(name: K, payload: E[K], context?: Partial<EventContext>, opts?: TrackOptions) {
-    const event: AnalyticsEvent<K, E[K]> = {
-      name,
-      payload,
-      context: shallowMerge(this.defaultContext, context),
-      timestamp: Date.now(),
+  track(event: AnalyticsEvent<any, any>, options?: TrackOptions): void {
+    const enriched: AnalyticsEvent<any, any> = {
+      ...event,
+      context: shallowMerge(this.defaultContext, event.context),
+      timestamp: event.timestamp ?? Date.now(),
     };
 
     const dispatch = (e: AnalyticsEvent<any, any>) => {
@@ -452,14 +451,19 @@ export class Analytics<E extends EventMap> {
 
 // Builder for ergonomic construction (Open/Closed: add providers without modifying Analytics)
 export class AnalyticsBuilder<E extends EventMap> {
-  private instance: Analytics<E>;
-  constructor(opts?: AnalyticsOptions<E>) { this.instance = new Analytics<E>(opts); }
-  withProvider(p: BaseProvider<E>): this { this.instance.addProvider(p); return this; }
-  withMiddleware(mw: Middleware<E>): this { this.instance.use(mw); return this; }
-  withDefaultContext(ctx: Partial<EventContext>): this { this.instance.setDefaultContext(ctx); return this; }
-  withConsent(consent: ConsentState): this { this.instance.setConsent(consent); return this; }
-  withRouter(router: Router<E>): this { this.instance.setRouter(router); return this; }
-  build(): Analytics<E> { return this.instance; }
+  static create<T extends SafeEventMap = SafeEventMap>(options?: AnalyticsOptions<T>): AnalyticsBuilder<T>
+  
+  addProvider(provider: BaseProvider<E>): this
+  addProviders(providers: BaseProvider<E>[]): this
+  withDefaultContext(context: Partial<EventContext>): this
+  withConsent(consent: ConsentState): this
+  withRouter(router: Router<E>): this
+  withErrorHandler(handler: (err: unknown, event?: AnalyticsEvent) => void): this
+  withDebugMode(enabled: boolean): this
+  use(middleware: MiddlewareFunction): this
+  addMiddleware(middleware: MiddlewareFunction): this
+  addMiddlewares(middlewares: MiddlewareFunction[]): this
+  build(): Analytics<E>
 }
 ```
 
@@ -697,7 +701,7 @@ export type AppEvents = {
 };
 
 // 2) Build the instance
-export const analytics = new AnalyticsBuilder<AppEvents>({
+export const analytics = AnalyticsBuilder.create<AppEvents>({
   defaultContext: {
     device: {
       userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : undefined,
@@ -719,25 +723,35 @@ export const analytics = new AnalyticsBuilder<AppEvents>({
     }
   }
 })
-.withProvider(new GoogleAnalyticsProvider({ measurementId: 'G-XXXXXXX' }))
-.withProvider(new MixpanelProvider({ token: 'mixpanel-token', apiHost: 'https://api-eu.mixpanel.com', initOptions: { /* track_pageview: 'url-with-path' */ } }))
-.withMiddleware(samplingMiddleware<AppEvents>(1.0)) // set to <1 for sampling in high-traffic flows
-.withMiddleware(scrubPIIMiddleware<AppEvents>())
+.addProvider(new GoogleAnalyticsProvider({ measurementId: 'G-XXXXXXX' }))
+.addProvider(new MixpanelProvider({ token: 'mixpanel-token', apiHost: 'https://api-eu.mixpanel.com', initOptions: { /* track_pageview: 'url-with-path' */ } }))
+.addMiddleware(samplingMiddleware<AppEvents>(1.0)) // set to <1 for sampling in high-traffic flows
+.addMiddleware(scrubPIIMiddleware<AppEvents>())
 // Optional: align taxonomy names across tools
-.withMiddleware(renameEventMiddleware<AppEvents>({ 'Clicked CTA': 'cta_click' }))
+.addMiddleware(renameEventMiddleware<AppEvents>({ 'Clicked CTA': 'cta_click' }))
 .build();
 
 // 3) Use it in your app
 export function demoUsage() {
   analytics.page({ title: document.title, url: location.href, path: location.pathname, referrer: document.referrer });
   analytics.identify('user_123', { plan: 'pro' });
-  analytics.track('User Signed In', { method: 'wallet' }, { locale: 'en-US' });
+  analytics.track({
+    name: 'User Signed In',
+    payload: { method: 'wallet' },
+    context: { locale: 'en-US' }
+  });
 
   // Route per-call: only GA
-  analytics.track('Clicked CTA', { label: 'Get Started', page: 'Home' }, undefined, { includeProviders: ['ga'] });
+  analytics.track({
+    name: 'Clicked CTA',
+    payload: { label: 'Get Started', page: 'Home' }
+  }, { includeProviders: ['ga'] });
 
   // Route per-call: exclude GA
-  analytics.track('Funds Transferred', { amount: 1.2, asset: 'ETH', network: 'Base' }, undefined, { excludeProviders: ['ga'] });
+  analytics.track({
+    name: 'Funds Transferred',
+    payload: { amount: 1.2, asset: 'ETH', network: 'Base' }
+  }, { excludeProviders: ['ga'] });
 }
 ```
 
@@ -757,7 +771,7 @@ class NewProvider<E extends EventMap> implements BaseProvider<E>, IdentifyCapabl
   page(ctx?: PageContext) { /* ... */ }
   track(event: AnalyticsEvent) { /* map event.name/payload/context to SDK */ }
 }
-// Register: new AnalyticsBuilder<AppEvents>().withProvider(new NewProvider({ apiKey: '...' }))
+// Register: AnalyticsBuilder.create<AppEvents>().addProvider(new NewProvider({ apiKey: '...' }))
 ```
 
 ---
