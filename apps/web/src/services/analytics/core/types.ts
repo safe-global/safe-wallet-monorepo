@@ -3,9 +3,17 @@
  * Defines the event system, context, and provider interfaces.
  */
 
+// Re-export the new type system
+export type { EventName, EventMap, EventUnion } from '../events/catalog'
+export type { ProviderId, RouteDecision, Router, TrackOptions } from '../providers/constants'
+
+// Import types for inline usage
+import type { EventUnion } from '../events/catalog'
+import type { Router } from '../providers/constants'
+
 export type Json = string | number | boolean | null | Json[] | { [k: string]: Json }
 
-// Safe-specific event catalog for type safety
+// Backwards compatibility - use EventMap instead
 export type SafeEventMap = Record<string, Record<string, unknown>>
 
 export type DeviceInfo = {
@@ -34,6 +42,7 @@ export type EventContext = {
   safeAddress?: string // Safe wallet address
 }
 
+// Legacy event type for backwards compatibility
 export type AnalyticsEvent<K extends string = string, P extends Record<string, unknown> = Record<string, unknown>> = {
   name: K
   payload: P
@@ -53,27 +62,14 @@ export type ConsentState = Partial<Record<ConsentCategories, boolean>> & { updat
 export type ConsentSettings = ConsentState
 export type ConsentCategory = ConsentCategories
 
-// Provider routing configuration
-export type RouteDecision = {
-  includeProviders?: string[]
-  excludeProviders?: string[]
-}
-
-export type Router<E extends SafeEventMap> = (
-  event: AnalyticsEvent<keyof E & string, E[keyof E & string]>,
-) => RouteDecision | void
-
-// Per-call routing overrides
-export type TrackOptions = RouteDecision
-
-// Analytics configuration
-export type AnalyticsOptions<E extends SafeEventMap> = {
+// Analytics configuration using new typed system
+export type AnalyticsOptions<E extends Record<string, Record<string, unknown>>> = {
   defaultContext?: EventContext
   consent?: ConsentState
   queueKey?: string // localStorage key for offline queue
   queueTtlMs?: number // Queue item TTL
   queueMax?: number // Max queue size
-  onError?: (err: unknown, event?: AnalyticsEvent) => void
+  onError?: (err: unknown, event?: EventUnion<E>) => void
   router?: Router<E> // Global event routing
 }
 
@@ -96,5 +92,5 @@ export type MiddlewareFunction = (
 // Test compatibility types
 export type QueuedEvent = AnalyticsEvent<any, any>
 
-// Re-export some interfaces here for tests importing from '../types'
+// Re-export provider interfaces
 export type { BaseProvider } from './provider'

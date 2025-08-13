@@ -4,19 +4,21 @@
  */
 
 import type { AnalyticsEvent, SafeEventMap, ProviderInitOptions, PageContext } from './types'
+import type { EventUnion } from '../events/catalog'
+import type { ProviderId } from '../providers/constants'
 
 /**
  * Base provider interface - all providers must implement this
  */
-export interface BaseProvider<E extends SafeEventMap = SafeEventMap> {
+export interface BaseProvider<E extends Record<string, Record<string, unknown>> = Record<string, Record<string, unknown>>> {
   /** Unique stable identifier (e.g., 'ga', 'mixpanel') */
-  readonly id: string
+  readonly id: ProviderId
 
   /** Initialize the provider with consent and context */
   init?(opts: ProviderInitOptions): Promise<void> | void
 
-  /** Core capability: track events */
-  track<K extends keyof E & string>(event: AnalyticsEvent<K, E[K]>): void | Promise<void>
+  /** Core capability: track events - new typed version */
+  track(event: EventUnion<E>): void | Promise<void>
 
   /** Check if provider is currently enabled */
   isEnabled(): boolean
@@ -30,6 +32,8 @@ export interface BaseProvider<E extends SafeEventMap = SafeEventMap> {
   /** Clean shutdown */
   shutdown?(): Promise<void>
 }
+
+
 
 /**
  * Optional capability: User identification

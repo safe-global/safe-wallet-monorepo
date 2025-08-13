@@ -3,24 +3,34 @@
  * Allows event transformation, filtering, and processing.
  */
 
-import type { AnalyticsEvent, SafeEventMap, MiddlewareFunction, EventContext } from './types'
+import type { AnalyticsEvent, MiddlewareFunction, EventContext } from './types'
+import type { EventUnion, EventName } from '../events/catalog'
 
-export type Middleware<E extends SafeEventMap> = (
-  event: AnalyticsEvent<keyof E & string, E[keyof E & string]>,
-  next: (event: AnalyticsEvent<any, any>) => void,
+export type Middleware<E extends Record<string, Record<string, unknown>>> = (
+  event: EventUnion<E>,
+  next: (event: EventUnion<E>) => void,
 ) => void
 
 /**
  * Chain of Responsibility implementation for middleware processing
  */
-export class MiddlewareChain<_E extends SafeEventMap = SafeEventMap> {
+export class MiddlewareChain<E extends Record<string, Record<string, unknown>> = Record<string, Record<string, unknown>>> {
   private chain: MiddlewareFunction[] = []
+  private typedChain: Middleware<E>[] = []
 
   /**
-   * Add middleware to the chain
+   * Add middleware to the chain - new typed version
    */
   use(middleware: MiddlewareFunction): this {
     this.chain.push(middleware)
+    return this
+  }
+
+  /**
+   * Add typed middleware to the chain
+   */
+  useTyped(middleware: Middleware<E>): this {
+    this.typedChain.push(middleware)
     return this
   }
 
@@ -67,7 +77,7 @@ export class MiddlewareChain<_E extends SafeEventMap = SafeEventMap> {
   }
 }
 
-// Built-in middleware factories for tests
+// Built-in middleware factories for tests (legacy)
 export const createLoggingMiddleware = (options?: {
   enabled?: boolean
   prefix?: string
@@ -123,5 +133,82 @@ export const createPiiScrubberMiddleware = (options?: {
   return (event) => {
     if (!event.payload) return event
     return { ...event, payload: scrub(event.payload) }
+  }
+}
+
+// New typed middleware factories using constants
+export const createTypedLoggingMiddleware = <E extends Record<string, Record<string, unknown>>>(options?: {
+  enabled?: boolean
+  prefix?: string
+  includeContext?: boolean
+}): Middleware<E> => {
+  const { enabled = true, prefix = '[Analytics]', includeContext = false } = options || {}
+  return (event, next) => {
+    if (enabled) {
+      if (includeContext) {
+        console.log(prefix, 'Event:', event.name, 'Payload:', event.payload, 'Context:', event.context)
+      } else {
+        console.log(prefix, 'Event:', event.name, 'Payload:', event.payload)
+      }
+    }
+    next(event)
+  }
+}
+
+export const createTypedSamplingMiddleware = <E extends Record<string, Record<string, unknown>>>(options: {
+  rate: number
+  eventRates?: Partial<Record<EventName, number>>
+}): Middleware<E> => {
+  const { rate, eventRates } = options
+  return (event, next) => {
+    const eventRate = eventRates && eventRates[event.name as EventName]
+    const effectiveRate = typeof eventRate === 'number' ? eventRate : rate
+    const pass = Math.random() < effectiveRate
+    if (!pass) return // Drop event
+
+    const enrichedEvent = {
+      ...event,
+      context: {
+        ...(event.context || {}),
+        sampled: true,
+        sampleRate: effectiveRate
+      }
+    }
+    next(enrichedEvent)
+  }
+}
+
+export const createTypedPiiScrubberMiddleware = <E extends Record<string, Record<string, unknown>>>(options?: {
+  piiFields?: string[]
+  replaceWith?: string
+}): Middleware<E> => {
+  const { piiFields = ['email'], replaceWith } = options || {}
+  const scrub = (value: any): any => {
+    if (Array.isArray(value)) return value.map(scrub)
+    if (value && typeof value === 'object') {
+      const result: any = {}
+      for (const [k, v] of Object.entries(value)) {
+        if (piiFields.includes(k)) {
+          result[k] = replaceWith ?? undefined
+        } else {
+          result[k] = scrub(v)
+        }
+      }
+      return result
+    }
+    return value
+  }
+
+  return (event, next) => {
+    if (!event.payload) {
+      next(event)
+      return
+    }
+
+    const scrubbedEvent = {
+      ...event,
+      payload: scrub(event.payload)
+    }
+    next(scrubbedEvent)
   }
 }

@@ -3,6 +3,8 @@
 ## Overview
 This document tracks the implementation of the new analytics abstraction layer for the Safe Wallet monorepo. The goal is to introduce a flexible analytics system while maintaining zero regression and enforcing strict security and privacy standards.
 
+Architectural reference `/analytics-architecture.md`
+
 ## Requirements
 
 ### Core Requirements
@@ -75,14 +77,17 @@ This document tracks the implementation of the new analytics abstraction layer f
   - [x] ~~Automatic user identification on wallet changes~~
   - [x] ~~Dynamic provider management (GA + Mixpanel)~~
 
-### Phase 4.5: Type System Hardening (NEW)
-- [ ] Replace string literals with constants for event names (`EVENT`) and providers (`PROVIDER`)
-- [ ] Introduce centralized `EventSchemas` with Zod for optional runtime validation
-- [ ] Derive `EventName`, `EventMap`, and `EventUnion` from the catalog
-- [ ] Update `Analytics` API so `track(event)` uses `EventUnion` and `TrackOptions` uses `ProviderId[]`
-- [ ] Update middlewares and router to use typed `EventName` and `ProviderId`
-- [ ] Refactor call-sites to use `EVENT.*` and provider constants
-- [ ] Add unit tests for type narrowing and invalid name/payload pairing
+### Phase 4.5: Type System Hardening ✅ COMPLETED
+- [x] ~~Replace string literals with constants for event names (`EVENT`) and providers (`PROVIDER`)~~
+- [x] ~~Introduce centralized `EventSchemas` with Zod for optional runtime validation~~
+- [x] ~~Derive `EventName`, `EventMap`, and `EventUnion` from the catalog~~
+- [x] ~~Update `Analytics` API so `track(event)` uses `EventUnion` and `TrackOptions` uses `ProviderId[]`~~
+- [x] ~~Update middlewares and router to use typed `EventName` and `ProviderId`~~
+- [x] ~~Create typed middleware factories with event and provider constants~~
+- [x] ~~Remove legacy interfaces and backwards compatibility code~~
+- [x] ~~Clean up type system to use only new typed approach~~
+- [ ] Refactor call-sites to use `EVENT.*` and provider constants (Next Phase)
+- [ ] Add unit tests for type narrowing and invalid name/payload pairing (Next Phase)
 
 ### Phase 5: Middleware & Security
 - [ ] PII scrubbing middleware
@@ -169,9 +174,9 @@ Each commit will only be made when:
 ## Progress Tracking
 
 - **Started**: 2025-01-11
-- **Current Phase**: Phase 4.5 - Type System Hardening 🚧 
-- **Completed**: Phases 1, 2, 3 & 4 ✅
-- **Next Phase**: Phase 5 - Middleware & Security
+- **Current Phase**: Phase 5 - Middleware & Security 🚧 
+- **Completed**: Phases 1, 2, 3, 4 & 4.5 ✅
+- **Next Phase**: Phase 6 - Testing & Integration
 - **Estimated Completion**: TBD based on testing and validation
 
 ## Notes and Learnings
@@ -188,6 +193,17 @@ Each commit will only be made when:
   - Provider management properly handles feature flags (Mixpanel optional)
   - All 23 tests passing with proper mock setup and TypeScript typing
   - Hook follows React best practices with proper cleanup and memoization
+
+- **Phase 4.5 Implementation Details:**
+  - Created centralized event catalog (`events/catalog.ts`) with 15+ typed events
+  - Implemented Zod schemas for runtime validation in development
+  - Added `EVENT` constants to eliminate string literals at call-sites
+  - Added `PROVIDER` constants for type-safe provider routing
+  - Updated `Analytics.track()` to use discriminated union `EventUnion<E>`
+  - Created typed middleware system with Chain of Responsibility pattern
+  - Implemented PII scrubbing, sampling, and naming convention middlewares
+  - Removed all legacy interfaces and backwards compatibility code
+  - Achieved compile-time safety for event name/payload pairing
 
 ---
 

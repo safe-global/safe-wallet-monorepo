@@ -9,9 +9,9 @@ import type {
   EventContext,
   PageContext,
   AnalyticsOptions,
-  TrackOptions,
-  Router,
 } from './types'
+import type { EventUnion } from '../events/catalog'
+import type { ProviderId, TrackOptions, Router } from '../providers/constants'
 import type { BaseProvider } from './provider'
 import { hasIdentifyCapability, hasGroupCapability, hasPageCapability } from './provider'
 import { MiddlewareChain } from './middleware'
@@ -27,13 +27,13 @@ type ProviderEntry<E extends SafeEventMap> = {
 /**
  * Main analytics orchestrator class
  */
-export class Analytics<E extends SafeEventMap = SafeEventMap> {
-  private providerMap = new Map<string, ProviderEntry<E>>()
+export class Analytics<E extends Record<string, Record<string, unknown>> = Record<string, Record<string, unknown>>> {
+  private providerMap = new Map<ProviderId, ProviderEntry<E>>()
   private middlewares = new MiddlewareChain<E>()
   private queue: PersistentQueue
   private consent: ConsentManager
   private defaultContext: EventContext
-  private onError?: (err: unknown, event?: AnalyticsEvent) => void
+  private onError?: (err: unknown, event?: EventUnion<E>) => void
   private router?: Router<E>
   private consentCache: { allowed: boolean; timestamp: number } | null = null
 
@@ -69,7 +69,7 @@ export class Analytics<E extends SafeEventMap = SafeEventMap> {
    * Add a provider to the analytics system
    */
   addProvider(provider: BaseProvider<E>): this {
-    this.providerMap.set(provider.id, { provider, enabled: true })
+    this.providerMap.set(provider.id as ProviderId, { provider, enabled: true })
 
     // Initialize provider with current consent and context
     provider.init?.({
@@ -83,7 +83,7 @@ export class Analytics<E extends SafeEventMap = SafeEventMap> {
   /**
    * Remove a provider from the system
    */
-  removeProvider(id: string): this {
+  removeProvider(id: ProviderId): this {
     const entry = this.providerMap.get(id)
     if (entry) {
       entry.provider.shutdown?.()
@@ -95,7 +95,7 @@ export class Analytics<E extends SafeEventMap = SafeEventMap> {
   /**
    * Enable a specific provider
    */
-  enableProvider(id: string): this {
+  enableProvider(id: ProviderId): this {
     const entry = this.providerMap.get(id)
     if (entry) {
       entry.enabled = true
@@ -107,7 +107,7 @@ export class Analytics<E extends SafeEventMap = SafeEventMap> {
   /**
    * Disable a specific provider
    */
-  disableProvider(id: string): this {
+  disableProvider(id: ProviderId): this {
     const entry = this.providerMap.get(id)
     if (entry) {
       entry.enabled = false
@@ -190,7 +190,7 @@ export class Analytics<E extends SafeEventMap = SafeEventMap> {
     // Consent state changed, update cache
     const allowed = this.consent.allowsAnalytics()
     this.consentCache = { allowed, timestamp: currentTimestamp }
-    
+
     return allowed
   }
 
@@ -199,7 +199,7 @@ export class Analytics<E extends SafeEventMap = SafeEventMap> {
    */
   identify(userId: string, traits?: Record<string, unknown>): void {
     const enabledProviders = this.getEnabledProviders()
-    
+
     for (const provider of enabledProviders) {
       if (hasIdentifyCapability(provider)) {
         try {
@@ -216,7 +216,7 @@ export class Analytics<E extends SafeEventMap = SafeEventMap> {
    */
   group(groupId: string, traits?: Record<string, unknown>): void {
     const enabledProviders = this.getEnabledProviders()
-    
+
     for (const provider of enabledProviders) {
       if (hasGroupCapability(provider)) {
         try {
@@ -233,7 +233,7 @@ export class Analytics<E extends SafeEventMap = SafeEventMap> {
    */
   page(context?: PageContext): void {
     const enabledProviders = this.getEnabledProviders()
-    
+
     for (const provider of enabledProviders) {
       if (hasPageCapability(provider)) {
         try {
@@ -246,32 +246,32 @@ export class Analytics<E extends SafeEventMap = SafeEventMap> {
   }
 
   /**
-   * Track events through the middleware pipeline
+   * Track events through the middleware pipeline - new typed version
    */
-  track(event: AnalyticsEvent<any, any>, options?: TrackOptions): void {
-    const enriched: AnalyticsEvent<any, any> = {
+  track(event: EventUnion<E>, options?: TrackOptions): void {
+    const enriched: EventUnion<E> = {
       ...event,
       context: shallowMerge(this.defaultContext, event.context),
       timestamp: event.timestamp ?? Date.now(),
     }
 
-    const dispatch = (processedEvent: AnalyticsEvent<any, any>) => {
+    const dispatch = (processedEvent: EventUnion<E>) => {
       // Check consent before processing
       if (!this.hasConsentCached()) {
         // Queue for later processing when consent is granted
-        this.queue.enqueue(processedEvent)
+        this.queue.enqueue(processedEvent as any)
         return
       }
 
       // Check online status
       const isOnline = typeof navigator !== 'undefined' ? navigator.onLine !== false : true
       if (!isOnline) {
-        this.queue.enqueue(processedEvent)
+        this.queue.enqueue(processedEvent as any)
         return
       }
 
       // Resolve provider routing
-      const routerDecision = this.router?.(processedEvent as any) || {}
+      const routerDecision = this.router?.(processedEvent) || {}
       const optionsDecision = options || {}
 
       const includeProviders = routerDecision.includeProviders || optionsDecision.includeProviders
@@ -279,36 +279,38 @@ export class Analytics<E extends SafeEventMap = SafeEventMap> {
 
       // Send to providers
       const enabledProviders = this.getEnabledProviders()
-      
+
       for (const provider of enabledProviders) {
         // Apply routing rules
         if (includeProviders && includeProviders.length > 0) {
-          if (!includeProviders.includes(provider.id)) continue
+          if (!includeProviders.includes(provider.id as ProviderId)) continue
         }
 
-        if (excludeProviders.includes(provider.id)) continue
+        if (excludeProviders.includes(provider.id as ProviderId)) continue
 
         try {
-          const result = provider.track(processedEvent as AnalyticsEvent<any, any>)
+          const result = provider.track(processedEvent as any)
 
           // Handle async providers
           if (result && typeof result.then === 'function') {
             result.catch((error) => {
-              this.queue.enqueue(processedEvent) // Retry later
+              this.queue.enqueue(processedEvent as any) // Retry later
               this.onError?.(error, processedEvent)
             })
           }
         } catch (error) {
-          this.queue.enqueue(processedEvent) // Retry later
+          this.queue.enqueue(processedEvent as any) // Retry later
           this.onError?.(error, processedEvent)
         }
       }
     }
 
     // Run through middleware pipeline
-    const processed = this.middlewares.process(enriched, enriched.context)
-    if (processed) dispatch(processed)
+    const processed = this.middlewares.process(enriched as any, enriched.context)
+    if (processed) dispatch(processed as EventUnion<E>)
   }
+
+
 
   /**
    * Flush all providers
@@ -338,7 +340,7 @@ export class Analytics<E extends SafeEventMap = SafeEventMap> {
 
     while (batch.length > 0) {
       const enabledProviders = this.getEnabledProviders()
-      
+
       for (const event of batch) {
         // Process directly without middleware to avoid double-processing
         for (const provider of enabledProviders) {
