@@ -533,13 +533,11 @@ describe('WalletConnectProvider', () => {
 
       await waitFor(() => {
         expect(approveSessionSpy).toHaveBeenCalledWith(mockSessionProposal, '5', testSafeAddress, {
+          atomic: JSON.stringify({ status: 'supported' }),
           capabilities: JSON.stringify({
             [testSafeAddress]: {
               [`0x${Number(5).toString(16)}`]: {
                 atomicBatch: { supported: true },
-                atomic: {
-                  status: 'supported',
-                },
               },
             },
           }),
