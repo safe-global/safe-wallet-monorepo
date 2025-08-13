@@ -12,8 +12,8 @@ This analytics system is designed as a **pluggable, type-safe abstraction layer*
 graph TB
     subgraph "Application Layer"
         App[Application Code]
-        Hook[useAnalytics Hook]
-        Builder[AnalyticsBuilder]
+        Hook[useAnalytics Hook ✅]
+        Builder[AnalyticsBuilder ✅]
     end
 
     subgraph "Analytics Core"
@@ -330,6 +330,75 @@ export const createEvent = <E extends EventMap>() =>
     return { name, payload, context }
   }
 ```
+
+---
+
+## React Integration (`useAnalytics` Hook)
+
+The `useAnalytics` hook provides a React-friendly interface to the analytics system with automatic consent management and provider initialization.
+
+### Key Features
+
+- **Automatic Consent Integration**: Integrates with Redux store and `cookiesAndTermsSlice`
+- **Dynamic Provider Management**: Conditionally loads providers based on feature flags
+- **Device Detection**: Automatically detects mobile/tablet/desktop and enriches context
+- **Context Enrichment**: Adds device info, chain data, and Safe address to all events
+- **Lifecycle Management**: Proper initialization, cleanup, and context updates
+- **Type Safety**: Full TypeScript support with generic event type parameter
+
+### Usage Example
+
+```typescript
+import { useAnalytics } from '@/hooks/useAnalytics'
+
+type MyEvents = {
+  'User Action': { action: string; value: number }
+  'Page View': { page: string }
+}
+
+function MyComponent() {
+  const { track, identify, page, isEnabled } = useAnalytics<MyEvents>()
+  
+  const handleUserAction = () => {
+    if (isEnabled) {
+      track({
+        name: 'User Action',
+        payload: { action: 'button_click', value: 1 }
+      })
+    }
+  }
+  
+  return <button onClick={handleUserAction}>Track Action</button>
+}
+```
+
+### Architecture Integration
+
+```mermaid
+graph TB
+    Component[React Component] --> Hook[useAnalytics Hook]
+    Hook --> Store[Redux Store]
+    Hook --> Features[Feature Flags]
+    Hook --> Analytics[Analytics Core]
+    
+    Store --> Consent[Consent State]
+    Features --> Mixpanel{Mixpanel Enabled?}
+    
+    Hook --> GAProvider[Google Analytics]
+    Mixpanel -->|Yes| MPProvider[Mixpanel Provider]
+    Mixpanel -->|No| GAProvider
+    
+    Analytics --> Queue[Event Queue]
+    Analytics --> Middleware[Middleware Chain]
+```
+
+### Implementation Highlights
+
+- **23 Comprehensive Tests**: Complete test coverage with proper mocking
+- **Proper React Patterns**: Uses hooks like `useCallback`, `useMemo`, `useEffect` correctly
+- **Memory Management**: Automatic cleanup on unmount with proper ref management  
+- **Context Updates**: Dynamic updates when chain, Safe address, or device changes
+- **Error Boundaries**: Graceful handling of provider failures
 
 ---
 

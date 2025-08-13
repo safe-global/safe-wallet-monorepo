@@ -24,6 +24,32 @@ import { MixpanelProvider } from '@/services/analytics/providers/MixpanelProvide
 import type { SafeEventMap, AnalyticsEvent, EventContext } from '@/services/analytics/core'
 import { DeviceType } from '@/services/analytics/types'
 
+// Browser environment detection
+const isBrowserEnvironment = typeof window !== 'undefined'
+const isNavigatorAvailable = typeof navigator !== 'undefined'
+const isDocumentAvailable = typeof document !== 'undefined'
+
+/**
+ * Creates device information object for analytics context
+ */
+const createDeviceInfo = () => {
+  if (!isNavigatorAvailable || !isBrowserEnvironment) {
+    return {
+      userAgent: undefined,
+      screen: undefined,
+    }
+  }
+
+  return {
+    userAgent: navigator.userAgent,
+    screen: {
+      width: window.innerWidth,
+      height: window.innerHeight,
+      pixelRatio: window.devicePixelRatio,
+    },
+  }
+}
+
 /**
  * Analytics hook configuration
  */
@@ -86,14 +112,18 @@ export const useAnalytics = <E extends SafeEventMap = SafeEventMap>(
       safeAddress: safeAddress || undefined,
       userId: safeAddress || undefined, // Use safe address as user ID
       source: 'web' as const,
-      locale: typeof navigator !== 'undefined' ? navigator.language : undefined,
+      locale: isNavigatorAvailable ? navigator.language : undefined,
+      device: createDeviceInfo(),
       ...config.defaultContext,
     }
   }, [chainId, safeAddress, config.defaultContext])
 
   // Initialize analytics system
   useEffect(() => {
-    if (!isAnalyticsEnabled) return
+    if (!isAnalyticsEnabled) {
+      analyticsRef.current = null
+      return
+    }
 
     const builder = AnalyticsBuilder.create<E>()
 
@@ -111,12 +141,13 @@ export const useAnalytics = <E extends SafeEventMap = SafeEventMap>(
       builder.addProvider(mixpanelProvider)
     }
 
-    // Build analytics instance
+    // Build analytics instance with proper consent mapping
     const analytics = builder
       .withDefaultContext(defaultContext)
       .withConsent({
-        [CookieAndTermType.ANALYTICS]: isAnalyticsEnabled,
-        [CookieAndTermType.NECESSARY]: true, // Always true for necessary cookies
+        analytics: isAnalyticsEnabled,
+        necessary: true, // Always true for necessary cookies
+        updatedAt: Date.now(),
       })
       .build()
 
@@ -139,15 +170,10 @@ export const useAnalytics = <E extends SafeEventMap = SafeEventMap>(
     const contextUpdate = {
       chainId: chainId || undefined,
       safeAddress: safeAddress || undefined,
-      deviceType,
     }
 
-    // Update providers with new context
-    analyticsRef.current.providers.forEach((provider) => {
-      if ('updateContext' in provider && typeof provider.updateContext === 'function') {
-        provider.updateContext(contextUpdate)
-      }
-    })
+    // Update the analytics default context
+    analyticsRef.current.setDefaultContext(contextUpdate)
   }, [chainId, safeAddress, deviceType])
 
   // Identify user when wallet changes
@@ -197,9 +223,9 @@ export const useAnalytics = <E extends SafeEventMap = SafeEventMap>(
       if (!analyticsRef.current || !isAnalyticsEnabled || isSpaceRoute) return
 
       analyticsRef.current.page({
-        path: path || (typeof window !== 'undefined' ? window.location.pathname : undefined),
-        title: title || (typeof document !== 'undefined' ? document.title : undefined),
-        url: typeof window !== 'undefined' ? window.location.href : undefined,
+        path: path || (isBrowserEnvironment ? window.location.pathname : undefined),
+        title: title || (isDocumentAvailable ? document.title : undefined),
+        url: isBrowserEnvironment ? window.location.href : undefined,
       })
     },
     [isAnalyticsEnabled, isSpaceRoute],
@@ -211,7 +237,7 @@ export const useAnalytics = <E extends SafeEventMap = SafeEventMap>(
 
       if (providerId === 'mixpanel' && !isMixpanelEnabled) return false
 
-      return analyticsRef.current.providers.some((provider) => provider.id === providerId)
+      return analyticsRef.current.getProviders().includes(providerId)
     },
     [isAnalyticsEnabled, isMixpanelEnabled],
   )

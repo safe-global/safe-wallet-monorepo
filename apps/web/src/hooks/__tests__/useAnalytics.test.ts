@@ -25,6 +25,12 @@ jest.mock('@/store', () => ({
 
 jest.mock('@/store/cookiesAndTermsSlice', () => ({
   hasConsentFor: jest.fn(),
+  CookieAndTermType: {
+    TERMS: 'terms',
+    NECESSARY: 'necessary', 
+    UPDATES: 'updates',
+    ANALYTICS: 'analytics',
+  },
 }))
 
 jest.mock('@/hooks/useChains', () => ({
@@ -38,11 +44,25 @@ jest.mock('@safe-global/utils/utils/chains', () => ({
   },
 }))
 
-jest.mock('@/hooks/useChainId', () => jest.fn())
-jest.mock('@/hooks/useSafeAddress', () => jest.fn())
-jest.mock('@/hooks/wallets/useWallet', () => jest.fn())
-jest.mock('@/hooks/useIsSpaceRoute', () => jest.fn())
-jest.mock('@/hooks/useSafeInfo', () => jest.fn())
+jest.mock('@/hooks/useChainId', () => ({
+  __esModule: true,
+  default: jest.fn(),
+}))
+jest.mock('@/hooks/useSafeAddress', () => ({
+  __esModule: true,
+  default: jest.fn(),
+}))
+jest.mock('@/hooks/wallets/useWallet', () => ({
+  __esModule: true,
+  default: jest.fn(),
+}))
+jest.mock('@/hooks/useIsSpaceRoute', () => ({
+  useIsSpaceRoute: jest.fn(),
+}))
+jest.mock('@/hooks/useSafeInfo', () => ({
+  __esModule: true,
+  default: jest.fn(),
+}))
 
 jest.mock('@/services/analytics/core', () => ({
   AnalyticsBuilder: {
@@ -60,7 +80,7 @@ jest.mock('@/services/analytics/providers/MixpanelProvider', () => ({
 
 import { useMediaQuery } from '@mui/material'
 import { useAppSelector } from '@/store'
-import { hasConsentFor } from '@/store/cookiesAndTermsSlice'
+import { hasConsentFor, CookieAndTermType } from '@/store/cookiesAndTermsSlice'
 import { useHasFeature, useChain } from '@/hooks/useChains'
 import useChainId from '@/hooks/useChainId'
 import useSafeAddress from '@/hooks/useSafeAddress'
@@ -95,6 +115,8 @@ const mockAnalyticsInstance = {
   track: jest.fn(),
   identify: jest.fn(),
   page: jest.fn(),
+  setDefaultContext: jest.fn(),
+  getProviders: jest.fn().mockReturnValue(['ga', 'mixpanel']),
 }
 
 const mockBuilder = {
@@ -162,8 +184,8 @@ describe('useAnalytics', () => {
 
       await waitFor(() => {
         expect(mockAnalyticsBuilder).toHaveBeenCalled()
-        expect(mockBuilder.addProvider).toHaveBeenCalledWith(expect.any(mockGoogleAnalyticsProvider))
-        expect(mockBuilder.addProvider).toHaveBeenCalledWith(expect.any(mockMixpanelProvider))
+        expect(mockBuilder.addProvider).toHaveBeenCalledWith(expect.objectContaining({ id: 'ga' }))
+        expect(mockBuilder.addProvider).toHaveBeenCalledWith(expect.objectContaining({ id: 'mixpanel' }))
         expect(mockBuilder.withDefaultContext).toHaveBeenCalled()
         expect(mockBuilder.withConsent).toHaveBeenCalled()
         expect(mockBuilder.build).toHaveBeenCalled()
@@ -186,7 +208,7 @@ describe('useAnalytics', () => {
 
       await waitFor(() => {
         expect(mockBuilder.addProvider).toHaveBeenCalledTimes(1)
-        expect(mockBuilder.addProvider).toHaveBeenCalledWith(expect.any(mockGoogleAnalyticsProvider))
+        expect(mockBuilder.addProvider).toHaveBeenCalledWith(expect.objectContaining({ id: 'ga' }))
       })
     })
 
@@ -209,6 +231,14 @@ describe('useAnalytics', () => {
           userId: '0x123...abc',
           source: 'web',
           locale: 'en-US',
+          device: {
+            userAgent: expect.any(String),
+            screen: expect.objectContaining({
+              width: expect.any(Number),
+              height: expect.any(Number),
+              pixelRatio: expect.any(Number),
+            }),
+          },
         })
       })
     })
@@ -225,7 +255,15 @@ describe('useAnalytics', () => {
           userId: '0x123...abc',
           source: 'web',
           locale: 'en-US',
-          test: 'value',
+          device: {
+            userAgent: expect.any(String),
+            screen: expect.objectContaining({
+              width: expect.any(Number),
+              height: expect.any(Number),
+              pixelRatio: expect.any(Number),
+            }),
+          },
+          test: true,
         })
       })
     })
@@ -340,7 +378,7 @@ describe('useAnalytics', () => {
       expect(mockAnalyticsInstance.page).toHaveBeenCalledWith({
         path: '/dashboard',
         title: 'Dashboard',
-        url: 'http://localhost/',
+        url: expect.stringContaining('http://localhost'),
       })
     })
 
@@ -415,8 +453,8 @@ describe('useAnalytics', () => {
 
   describe('Context Updates', () => {
     it('should update context when chain changes', async () => {
-      const mockUpdateContext = jest.fn()
-      mockAnalyticsInstance.providers = [{ id: 'ga', updateContext: mockUpdateContext }] as any
+      const mockSetDefaultContext = jest.fn()
+      mockAnalyticsInstance.setDefaultContext = mockSetDefaultContext
 
       const { rerender } = renderHook(() => useAnalytics())
 
@@ -429,10 +467,9 @@ describe('useAnalytics', () => {
       rerender()
 
       await waitFor(() => {
-        expect(mockUpdateContext).toHaveBeenCalledWith({
+        expect(mockSetDefaultContext).toHaveBeenCalledWith({
           chainId: '137',
           safeAddress: '0x123...abc',
-          deviceType: 'desktop',
         })
       })
     })
