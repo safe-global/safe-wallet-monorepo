@@ -188,6 +188,151 @@ sequenceDiagram
 
 ---
 
+### Type System Hardening (avoid string literals and enums)
+
+To strengthen type safety and eliminate stringly-typed usage:
+
+- Prefer const objects + literal unions over enums (better tree-shaking, zero runtime).
+- Centralize event names and payload schemas in a single catalog (with optional Zod validation).
+- Type provider IDs via constants to avoid free-form strings in routing.
+- Make `track` accept a discriminated union that binds `name` to its exact `payload` type.
+
+#### Recommended patterns
+
+```typescript
+// events/catalog.ts
+import { z } from 'zod'
+
+// 1) Single source of truth: runtime + compile-time
+export const EventSchemas = {
+  user_signed_in: z.object({
+    method: z.enum(['password', 'wallet']),
+    experiment: z.string().optional(),
+  }),
+  clicked_cta: z.object({
+    label: z.string(),
+    page: z.string(),
+  }),
+  funds_transferred: z.object({
+    amount: z.number(),
+    asset: z.string(),
+    network: z.string().optional(),
+  }),
+} as const
+
+// 2) Canonical keys for use everywhere
+export const EVENT = {
+  UserSignedIn: 'user_signed_in',
+  ClickedCta: 'clicked_cta',
+  FundsTransferred: 'funds_transferred',
+} as const
+
+export type EventName = typeof EVENT[keyof typeof EVENT]
+export type EventMap = { [K in EventName]: z.infer<(typeof EventSchemas)[K]> }
+
+// 3) Discriminated union for exact name→payload pairing
+export type EventUnion<E extends Record<string, Record<string, unknown>>> =
+  { [K in keyof E & string]: { name: K; payload: E[K]; context?: EventContext; timestamp?: number } }[keyof E & string]
+
+// 4) Optional runtime validation (compile-time is already enforced)
+export const validateEvent = <K extends EventName>(name: K, payload: unknown) => {
+  (EventSchemas[name] as z.ZodTypeAny).parse(payload)
+}
+```
+
+Typed providers and routing (no string literals for IDs):
+
+```typescript
+// analytics/providers.ts
+export const PROVIDER = {
+  GA: 'ga',
+  Mixpanel: 'mixpanel',
+} as const
+export type ProviderId = typeof PROVIDER[keyof typeof PROVIDER]
+
+export type RouteDecision = {
+  includeProviders?: readonly ProviderId[]
+  excludeProviders?: readonly ProviderId[]
+}
+export type Router<E extends Record<string, Record<string, unknown>>> =
+  (event: EventUnion<E>) => RouteDecision | void
+```
+
+Strengthen the Analytics API types so `track` binds `name` to `payload` and routing uses `ProviderId`:
+
+```typescript
+export interface AnalyticsOptions<E extends Record<string, Record<string, unknown>>> {
+  defaultContext?: EventContext
+  consent?: ConsentState
+  queueKey?: string
+  queueTtlMs?: number
+  queueMax?: number
+  onError?: (err: unknown, event?: EventUnion<E>) => void
+  router?: Router<E>
+}
+
+export type TrackOptions = RouteDecision
+
+export class Analytics<E extends Record<string, Record<string, unknown>>> {
+  // ... ctor, providers, middlewares, queue, consent, etc.
+  track(event: EventUnion<E>, options?: TrackOptions): void {
+    // enrich, middleware, consent/online checks, routing, dispatch
+  }
+}
+```
+
+Avoid string literals at call-sites by using constants:
+
+```typescript
+// example usage
+import { EVENT, EventMap, EventUnion } from './events/catalog'
+import { PROVIDER } from './analytics/providers'
+
+type AppEvents = EventMap
+
+declare const analytics: { track: (e: EventUnion<AppEvents>, o?: { includeProviders?: readonly typeof PROVIDER[keyof typeof PROVIDER][] }) => void }
+
+analytics.track({
+  name: EVENT.ClickedCta,
+  payload: { label: 'Get Started', page: 'Home' },
+})
+
+analytics.track(
+  { name: EVENT.FundsTransferred, payload: { amount: 1.2, asset: 'ETH' } },
+  { includeProviders: [PROVIDER.GA] as const },
+)
+```
+
+Typed middleware and rename maps keyed by `EventName` to prevent typos:
+
+```typescript
+// middlewares/rename.ts
+import type { EventName } from '../events/catalog'
+
+export const renameEventMiddleware = <E extends Record<string, Record<string, unknown>>>(
+  map: Partial<Record<EventName, string>>,
+) => (event: EventUnion<E>, next: (e: EventUnion<E>) => void) => {
+  const newName = (map as Record<string, string>)[event.name] ?? event.name
+  next({ ...event, name: newName } as EventUnion<E>)
+}
+```
+
+Optional compile-time safe event creators for better ergonomics:
+
+```typescript
+// events/creator.ts
+import type { EventMap, EventUnion, EventName } from './catalog'
+import { validateEvent } from './catalog'
+
+export const createEvent = <E extends EventMap>() =>
+  <K extends EventName>(name: K, payload: E[K], context?: EventContext): EventUnion<E> => {
+    if (process.env.NODE_ENV !== 'production') validateEvent(name, payload)
+    return { name, payload, context }
+  }
+```
+
+---
+
 ## How to Use (Quick Start)
 
 1. **Define your EventMap type** (compile-time safety)

@@ -26,6 +26,10 @@ This document tracks the implementation of the new analytics abstraction layer f
 - ✅ Comprehensive test coverage for new code
 - ✅ Update architecture documentation as implementation progresses
 - ✅ Provider-specific routing and filtering
+- ✅ Strong type system without enums: const objects + literal unions for events/providers
+- ✅ Centralized event catalog with optional Zod runtime validation
+- ✅ `track` accepts discriminated union tying `name` ↔ `payload`
+- ✅ No string literals at call-sites (use `EVENT.*`, `PROVIDER.*`)
 
 ## Implementation Steps
 
@@ -66,6 +70,15 @@ This document tracks the implementation of the new analytics abstraction layer f
   - [ ] Integrate with existing consent management
   - [ ] Handle provider initialization
   - [ ] Provide type-safe event tracking
+
+### Phase 4.5: Type System Hardening (NEW)
+- [ ] Replace string literals with constants for event names (`EVENT`) and providers (`PROVIDER`)
+- [ ] Introduce centralized `EventSchemas` with Zod for optional runtime validation
+- [ ] Derive `EventName`, `EventMap`, and `EventUnion` from the catalog
+- [ ] Update `Analytics` API so `track(event)` uses `EventUnion` and `TrackOptions` uses `ProviderId[]`
+- [ ] Update middlewares and router to use typed `EventName` and `ProviderId`
+- [ ] Refactor call-sites to use `EVENT.*` and provider constants
+- [ ] Add unit tests for type narrowing and invalid name/payload pairing
 
 ### Phase 5: Middleware & Security
 - [ ] PII scrubbing middleware
@@ -128,6 +141,7 @@ Based on analysis of the codebase, these are the currently tracked Mixpanel even
 - No hardcoded tokens or secrets
 - Secure error handling to prevent data leaks
 - Input validation on all event parameters
+- Compile-time guarantees for event name/payload matching; optional runtime validation via Zod in non-production builds
 
 ## Commit Strategy
 
