@@ -32,6 +32,7 @@ export function ChainsDisplay({ chains, activeChainId, max }: ChainsDisplayProps
 
       {showBadge && (
         <Badge
+          fontSize={String(chains.length).length > 1 ? 12 : 14}
           testID="more-chains-badge"
           circleSize="$6"
           content={`+${chains.length - max}`}

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { View, TextInput, StyleSheet, TouchableOpacity, Platform, KeyboardAvoidingView } from 'react-native'
 import { SafeFontIcon } from '../SafeFontIcon'
+import { useTheme } from 'tamagui'
 
 interface SafeSearchBarProps {
   placeholder: string
@@ -11,6 +12,7 @@ interface SafeSearchBarProps {
 const SafeSearchBar: React.FC<SafeSearchBarProps> = ({ placeholder, onSearch, throttleTime = 300 }) => {
   const [searchQuery, setSearchQuery] = useState('')
   const [timer, setTimer] = useState<ReturnType<typeof setTimeout> | null>(null)
+  const theme = useTheme()
 
   const throttleSearch = useCallback(
     (query: string) => {
@@ -45,14 +47,17 @@ const SafeSearchBar: React.FC<SafeSearchBarProps> = ({ placeholder, onSearch, th
     onSearch('')
   }
 
+  const colorSecondary = theme.colorSecondary.get()
+
   return (
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container}>
-      <View style={styles.searchBar}>
-        <SafeFontIcon name="search" size={18} color="#999" />
+      <View style={[styles.searchBar, { backgroundColor: theme.backgroundSecondary.get() }]}>
+        <SafeFontIcon name="search" size={18} color={colorSecondary} />
 
         <TextInput
-          style={styles.input}
+          style={[styles.input, { color: theme.color.get() }]}
           placeholder={placeholder}
+          placeholderTextColor={colorSecondary}
           value={searchQuery}
           onChangeText={handleSearchChange}
           clearButtonMode="never"
@@ -63,7 +68,7 @@ const SafeSearchBar: React.FC<SafeSearchBarProps> = ({ placeholder, onSearch, th
 
         {searchQuery.length > 0 && (
           <TouchableOpacity onPress={handleClearSearch} style={styles.clearButton}>
-            <SafeFontIcon name="close-outlined" size={18} color="#999" />
+            <SafeFontIcon name="close-outlined" size={18} color={colorSecondary} />
           </TouchableOpacity>
         )}
       </View>
@@ -80,7 +85,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     borderRadius: 10,
-    backgroundColor: '#7676801F',
     paddingHorizontal: 8,
     height: 36,
   },
@@ -94,7 +98,6 @@ const styles = StyleSheet.create({
     flex: 1,
     height: '100%',
     fontSize: 16,
-    color: '#999',
     marginLeft: 8,
   },
   clearButton: {

@@ -59,7 +59,7 @@ const formatParameters = ({ txData }: formatParametersProps): ListTableItem[] =>
     const hexData = txData.hexData
 
     items.push({
-      label: 'Hex Data:',
+      label: 'Hex Data',
       render: () => (
         <InfoSheet title="Hex Data" info={hexData}>
           <View flexDirection="row" alignItems="center" gap="$1">

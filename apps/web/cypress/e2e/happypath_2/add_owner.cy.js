@@ -49,11 +49,11 @@ describe('Happy path Add Owners tests', () => {
         owner.waitForConnectionStatus()
         owner.openManageSignersWindow()
         owner.clickOnAddSignerBtn()
-        owner.typeOwnerAddress(constants.SEPOLIA_OWNER_2)
+        owner.typeOwnerAddressManage(2, constants.SEPOLIA_OWNER_2)
         createTx.changeNonce(1)
-        owner.clickOnNextBtn()
+        owner.clickOnNextBtnManage()
+        owner.verifyConfirmTransactionWindowDisplayed()
         createTx.clickOnContinueSignTransactionBtn()
-        createTx.clickOnAcknowledgement()
         createTx.clickOnSignTransactionBtn()
         createTx.clickViewTransaction()
 
@@ -66,7 +66,6 @@ describe('Happy path Add Owners tests', () => {
         createTx.clickOnConfirmTransactionBtn()
         createTx.clickOnNoLaterOption()
         createTx.clickOnContinueSignTransactionBtn()
-        createTx.clickOnAcknowledgement()
         createTx.clickOnSignTransactionBtn()
 
         navigation.clickOnWalletExpandMoreIcon()
@@ -89,9 +88,7 @@ describe('Happy path Add Owners tests', () => {
           step2()
         } else {
           createTx.clickOnConfirmTransactionBtn()
-          createTx.clickOnNoLaterOption()
           createTx.clickOnContinueSignTransactionBtn()
-          createTx.clickOnAcknowledgement()
           createTx.clickOnSignTransactionBtn()
 
           navigation.clickOnWalletExpandMoreIcon()

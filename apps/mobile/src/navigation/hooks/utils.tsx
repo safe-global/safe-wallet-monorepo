@@ -24,7 +24,7 @@ export const getDefaultScreenOptions = (goBack: () => void) => {
                 height={32}
                 width={32}
               >
-                <SafeFontIcon name={'arrow-left'} size={16} color={'$color'} />
+                <SafeFontIcon name={'arrow-left-1'} size={16} color={'$color'} />
               </View>
             )
           }}

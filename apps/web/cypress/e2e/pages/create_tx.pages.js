@@ -98,6 +98,7 @@ const insufficientFundsErrorStr = 'Insufficient funds'
 const viewTransactionBtn = 'View transaction'
 const transactionDetailsTitle = 'Transaction details'
 const QueueLabel = 'needs to be executed first'
+export const hashesText = 'Hashes'
 const TransactionSummary = 'Send '
 const transactionsPerHrStr = 'free transactions left today'
 const txHashesStr = 'Transaction hashes'
@@ -166,6 +167,7 @@ export const txAccordionDetails = '[data-testid="decoded-tx-details"]'
 
 //Arrays for the Transaction Details on Tx creation for different type of txs
 export const MultisendData = ['Call', 'multiSend', 'on', 'Safe: MultiSendCallOnly 1.4.1']
+export const SafeProxy = ['Call', 'createProxyWithNonce', 'on', 'SafeProxyFactory 1.4.1']
 
 export const tx_status = {
   execution_needed: 'Execution needed',
@@ -186,9 +188,9 @@ export const advancedDetailsViewOptions = {
   table: 'table',
   grid: 'grid',
 }
-
+//tbr - will check if it should be removed ( we can cound by data-testid="tx-hexData" elements)
 export function checkHashesExist(count) {
-  cy.contains(txHashesStr)
+  cy.contains(txAccordionDetails)
     .next()
     .within(() => {
       main.verifyElementsCount(txHexDataRow, count)
@@ -198,6 +200,10 @@ export function checkHashesExist(count) {
           .should('match', /0x[a-fA-F0-9]{64}/)
       })
     })
+}
+
+export function clickOnHashes() {
+  cy.contains(hashesText).click()
 }
 export function clickOnReplaceTxOption() {
   cy.get(replaceChoiceBtn).find('button').click()
@@ -838,10 +844,6 @@ export function clickOnProposeTransactionBtn() {
 
 export function clickOnContinueSignTransactionBtn() {
   cy.get(continueSignBtn).click()
-}
-
-export function clickOnAcknowledgement() {
-  cy.contains(txAcknowledgementStr).click()
 }
 
 export function clickOnConfirmTransactionBtn() {

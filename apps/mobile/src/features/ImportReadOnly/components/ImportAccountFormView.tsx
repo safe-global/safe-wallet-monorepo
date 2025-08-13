@@ -61,7 +61,7 @@ export const ImportAccountFormView: React.FC<ImportAccountFormViewProps> = ({ is
             />
           </View>
 
-          <View marginTop={'$4'}>
+          <View>
             <SafeAccountInput />
           </View>
 

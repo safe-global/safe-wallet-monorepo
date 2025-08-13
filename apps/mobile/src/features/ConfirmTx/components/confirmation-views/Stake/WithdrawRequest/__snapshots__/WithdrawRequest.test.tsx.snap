@@ -97,114 +97,49 @@ exports[`StakingWithdrawRequest matches snapshot 1`] = `
         <View
           style={
             {
-              "alignItems": "center",
-              "borderBottomLeftRadius": 100000,
-              "borderBottomRightRadius": 100000,
-              "borderTopLeftRadius": 100000,
-              "borderTopRightRadius": 100000,
-              "flexDirection": "column",
+              "backgroundColor": "#EEEFF0",
+              "borderBottomLeftRadius": "50%",
+              "borderBottomRightRadius": "50%",
+              "borderTopLeftRadius": "50%",
+              "borderTopRightRadius": "50%",
               "height": 40,
-              "justifyContent": "center",
-              "maxHeight": 40,
-              "maxWidth": 40,
-              "minHeight": 40,
-              "minWidth": 40,
-              "overflow": "hidden",
-              "paddingBottom": 0,
-              "paddingLeft": 0,
-              "paddingRight": 0,
-              "paddingTop": 0,
-              "position": "relative",
               "width": 40,
             }
           }
         >
-          <View
-            style={
+          <ViewManagerAdapter_ExpoImage
+            borderRadius={50}
+            containerViewRef={"[React.ref]"}
+            contentFit="cover"
+            contentPosition={
               {
-                "bottom": 0,
-                "flexDirection": "column",
-                "left": 0,
-                "position": "absolute",
-                "right": 0,
-                "top": 0,
-                "zIndex": 1,
+                "left": "50%",
+                "top": "50%",
               }
             }
-          >
-            <Image
-              fullscreen={true}
-              onError={[Function]}
-              onLoad={[Function]}
-              source={
+            flex={1}
+            nativeViewRef={"[React.ref]"}
+            onError={[Function]}
+            onLoad={[Function]}
+            onLoadStart={[Function]}
+            onProgress={[Function]}
+            placeholder={[]}
+            source={
+              [
                 {
                   "uri": "https://safe-transaction-assets.safe.global/chains/1/chain_logo.png",
-                }
-              }
-              style={
-                {
-                  "backgroundColor": "#121312",
-                  "height": 40,
-                  "width": 40,
-                }
-              }
-              testID="logo-image"
-            />
-          </View>
-          <View
+                },
+              ]
+            }
             style={
               {
-                "backgroundColor": "#EEEFF0",
-                "bottom": 0,
-                "flexDirection": "column",
-                "left": 0,
-                "position": "absolute",
-                "right": 0,
-                "top": 0,
-                "zIndex": 0,
+                "borderRadius": 50,
+                "flex": 1,
               }
             }
-          >
-            <View
-              style={
-                {
-                  "alignItems": "center",
-                  "backgroundColor": "#EEEFF0",
-                  "borderBottomLeftRadius": 0,
-                  "borderBottomRightRadius": 0,
-                  "borderTopLeftRadius": 0,
-                  "borderTopRightRadius": 0,
-                  "display": "flex",
-                  "height": 40,
-                  "justifyContent": "center",
-                  "width": 40,
-                }
-              }
-            >
-              <Text
-                allowFontScaling={false}
-                selectable={false}
-                style={
-                  [
-                    {
-                      "color": "#A1A3A7",
-                      "fontSize": 16,
-                    },
-                    undefined,
-                    {
-                      "fontFamily": "SafeIcons",
-                      "fontStyle": "normal",
-                      "fontWeight": "normal",
-                    },
-                    {},
-                  ]
-                }
-                testID="logo-fallback-icon"
-              >
-                
-              </Text>
-            </View>
-          </View>
+            testID="logo-image"
+            transition={null}
+          />
         </View>
       </View>
       <View
@@ -494,94 +429,131 @@ exports[`StakingWithdrawRequest matches snapshot 1`] = `
       }
     >
       <View
+        accessibilityState={
+          {
+            "busy": undefined,
+            "checked": undefined,
+            "disabled": true,
+            "expanded": undefined,
+            "selected": undefined,
+          }
+        }
+        accessibilityValue={
+          {
+            "max": undefined,
+            "min": undefined,
+            "now": undefined,
+            "text": undefined,
+          }
+        }
+        accessible={true}
+        collapsable={false}
+        focusable={false}
+        onClick={[Function]}
+        onResponderGrant={[Function]}
+        onResponderMove={[Function]}
+        onResponderRelease={[Function]}
+        onResponderTerminate={[Function]}
+        onResponderTerminationRequest={[Function]}
+        onStartShouldSetResponder={[Function]}
         style={
           {
-            "alignItems": "flex-start",
-            "backgroundColor": "#FFECC2",
-            "borderBottomLeftRadius": 5,
-            "borderBottomRightRadius": 5,
-            "borderTopLeftRadius": 5,
-            "borderTopRightRadius": 5,
-            "flexDirection": "row",
-            "gap": 12,
-            "paddingBottom": 12,
-            "paddingLeft": 16,
-            "paddingRight": 16,
-            "paddingTop": 12,
+            "opacity": 1,
           }
         }
       >
         <View
           style={
             {
-              "alignItems": "center",
+              "flexDirection": "row",
               "justifyContent": "center",
+              "width": "100%",
             }
           }
-          testID="alert-start-icon"
         >
           <View
             style={
               {
                 "alignItems": "center",
-                "backgroundColor": "#FF8C00",
-                "borderBottomLeftRadius": 34,
-                "borderBottomRightRadius": 34,
-                "borderTopLeftRadius": 34,
-                "borderTopRightRadius": 34,
-                "display": "flex",
+                "backgroundColor": "#FFECC2",
+                "borderBottomLeftRadius": 5,
+                "borderBottomRightRadius": 5,
+                "borderTopLeftRadius": 5,
+                "borderTopRightRadius": 5,
+                "flexDirection": "row",
+                "gap": 12,
                 "justifyContent": "center",
-                "paddingBottom": 4,
-                "paddingLeft": 4,
-                "paddingRight": 4,
-                "paddingTop": 4,
+                "paddingBottom": 8,
+                "paddingLeft": 16,
+                "paddingRight": 16,
+                "paddingTop": 8,
+                "width": "100%",
               }
             }
           >
-            <Text
-              allowFontScaling={false}
-              selectable={false}
+            <View
               style={
-                [
-                  {
-                    "color": "#FFFFFF",
-                    "fontSize": 16,
-                  },
-                  undefined,
-                  {
-                    "fontFamily": "SafeIcons",
-                    "fontStyle": "normal",
-                    "fontWeight": "normal",
-                  },
-                  {},
-                ]
+                {
+                  "alignItems": "center",
+                  "backgroundColor": "#FF8C00",
+                  "borderBottomLeftRadius": 34,
+                  "borderBottomRightRadius": 34,
+                  "borderTopLeftRadius": 34,
+                  "borderTopRightRadius": 34,
+                  "display": "flex",
+                  "justifyContent": "center",
+                  "paddingBottom": 4,
+                  "paddingLeft": 4,
+                  "paddingRight": 4,
+                  "paddingTop": 4,
+                }
               }
-              testID="warning-icon"
             >
-              
-            </Text>
-          </View>
-        </View>
-        <View
-          style={
-            {
-              "flex": 1,
-              "gap": 4,
-            }
-          }
-        >
-          <Text
-            style={
-              {
-                "color": "#6C2D19",
-                "fontFamily": "DM Sans",
-                "fontSize": 13,
+              <Text
+                allowFontScaling={false}
+                selectable={false}
+                style={
+                  [
+                    {
+                      "color": "#FFFFFF",
+                      "fontSize": 16,
+                    },
+                    undefined,
+                    {
+                      "fontFamily": "SafeIcons",
+                      "fontStyle": "normal",
+                      "fontWeight": "normal",
+                    },
+                    {},
+                  ]
+                }
+                testID="warning-icon"
+              >
+                
+              </Text>
+            </View>
+            <View
+              style={
+                {
+                  "flexShrink": 1,
+                  "gap": 4,
+                }
               }
-            }
-            suppressHighlighting={true}
-          >
-            This transaction is a withdrawal request. After it's executed, you'll need to complete a separate withdrawal transaction.
-          </Text>
+            >
+              <Text
+                style={
+                  {
+                    "color": "#6C2D19",
+                    "fontFamily": "DMSans-SemiBold",
+                    "fontSize": 14,
+                  }
+                }
+                suppressHighlighting={true}
+              >
+                This transaction is a withdrawal request. After it's executed, you'll need to complete a separate withdrawal transaction.
+              </Text>
+            </View>
+          </View>
         </View>
       </View>
     </View>

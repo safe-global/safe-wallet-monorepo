@@ -1,8 +1,7 @@
 import { render as nativeRender, renderHook } from '@testing-library/react-native'
 import { SafeThemeProvider } from '@/src/theme/provider/safeTheme'
 import { Provider } from 'react-redux'
-import { makeStore, rootReducer } from '../store'
-import { PortalProvider } from 'tamagui'
+import { rootReducer } from '../store'
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet'
 import { configureStore } from '@reduxjs/toolkit'
 import { FLUSH, PAUSE, PERSIST, PURGE, REGISTER, REHYDRATE } from 'redux-persist'
@@ -13,10 +12,9 @@ import type { SettingsState } from '@/src/store/settingsSlice'
 export type RootState = ReturnType<typeof rootReducer>
 type getProvidersArgs = (initialStoreState?: Partial<RootState>) => React.FC<{ children: React.ReactNode }>
 
-// Default settings slice for tests
 const defaultSettings: SettingsState = {
   onboardingVersionSeen: '',
-  themePreference: 'auto',
+  themePreference: 'light',
   currency: 'usd',
   env: {
     rpc: {},
@@ -29,36 +27,32 @@ const defaultSettings: SettingsState = {
 
 const getProviders: getProvidersArgs = (initialStoreState) =>
   function ProviderComponent({ children }: { children: React.ReactNode }) {
-    // Inject default settings if not provided
-    const storeWithDefaults = initialStoreState
-      ? ({
-          ...initialStoreState,
-          settings: {
-            ...defaultSettings,
-            ...(initialStoreState.settings || {}),
+    // Always inject default settings to ensure themes work properly
+    const storeWithDefaults = {
+      ...initialStoreState,
+      settings: {
+        ...defaultSettings,
+        ...(initialStoreState?.settings || {}),
+      },
+    } as Partial<RootState>
+
+    // Always use configured store with defaults to ensure consistent test environment
+    const store = configureStore({
+      reducer: rootReducer,
+      middleware: (getDefaultMiddleware) =>
+        getDefaultMiddleware({
+          serializableCheck: {
+            ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
           },
-        } as Partial<RootState>)
-      : undefined
-    const store = storeWithDefaults
-      ? configureStore({
-          reducer: rootReducer,
-          middleware: (getDefaultMiddleware) =>
-            getDefaultMiddleware({
-              serializableCheck: {
-                ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
-              },
-            }).concat(cgwClient.middleware, web3API.middleware),
-          preloadedState: storeWithDefaults,
-        })
-      : makeStore()
+        }).concat(cgwClient.middleware, web3API.middleware),
+      preloadedState: storeWithDefaults,
+    })
 
     return (
       <BottomSheetModalProvider>
-        <PortalProvider shouldAddRootHost>
-          <Provider store={store}>
-            <SafeThemeProvider>{children}</SafeThemeProvider>
-          </Provider>
-        </PortalProvider>
+        <Provider store={store}>
+          <SafeThemeProvider>{children}</SafeThemeProvider>
+        </Provider>
       </BottomSheetModalProvider>
     )
   }

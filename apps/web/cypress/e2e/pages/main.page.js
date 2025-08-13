@@ -426,3 +426,17 @@ export function getSafeAddressFromUrl(url) {
 export function shortenAddress(address) {
   return `${address.slice(0, 6)}...${address.slice(-4)}`
 }
+
+// Waits for an element with given text to be visible inside a specific container (by ID)
+export function waitForElementByTextInContainer(containerSelector, elementText) {
+  cy.get(containerSelector) // Wait for container to exist
+    .should('exist')
+    .should('be.visible')
+    .contains(elementText, { timeout: 10000 }) // Then find text inside
+    .should('exist')
+    .should('be.visible')
+}
+
+export function verifyElementByTextExists(text) {
+  cy.contains(text).should('exist')
+}

@@ -3,18 +3,16 @@ import { SafeAreaView } from 'react-native'
 import { View } from 'tamagui'
 import { SafeButton } from '@/src/components/SafeButton'
 import { router } from 'expo-router'
-import { Address } from '@/src/types/address'
 
 export interface SignFormProps {
-  address: Address
   txId: string
 }
 
-export function SignForm({ address, txId }: SignFormProps) {
+export function SignForm({ txId }: SignFormProps) {
   const onSignPress = () => {
     router.push({
       pathname: '/review-and-confirm',
-      params: { txId, signerAddress: address },
+      params: { txId },
     })
   }
 

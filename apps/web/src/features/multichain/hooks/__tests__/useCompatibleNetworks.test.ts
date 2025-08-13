@@ -1,10 +1,11 @@
 import { renderHook } from '@/tests/test-utils'
-import { useCompatibleNetworks } from '../useCompatibleNetworks'
+import { useCompatibleNetworks } from '@safe-global/utils/features/multichain/hooks/useCompatibleNetworks'
 import { type ReplayedSafeProps } from '@safe-global/utils/features/counterfactual/store/types'
 import { faker } from '@faker-js/faker'
 import { EMPTY_DATA, ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
 import { ECOSYSTEM_ID_ADDRESS } from '@/config/constants'
 import { chainBuilder } from '@/tests/builders/chains'
+import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import {
   getSafeSingletonDeployments,
   getSafeL2SingletonDeployments,
@@ -27,22 +28,24 @@ const PROXY_FACTORY_141_DEPLOYMENTS = getProxyFactoryDeployments({ version: '1.4
 const FALLBACK_HANDLER_130_DEPLOYMENTS = getCompatibilityFallbackHandlerDeployments({ version: '1.3.0' })?.deployments
 const FALLBACK_HANDLER_141_DEPLOYMENTS = getCompatibilityFallbackHandlerDeployments({ version: '1.4.1' })?.deployments
 
+const mockChains = [
+  chainBuilder().with({ chainId: '1', l2: false }).build(),
+  chainBuilder().with({ chainId: '10', l2: true }).build(), // This has the eip155 and then the canonical addresses
+  chainBuilder().with({ chainId: '100', l2: true }).build(), // This has the canonical and then the eip155 addresses
+  chainBuilder().with({ chainId: '324', l2: true }).build(), // ZkSync has different addresses for all versions
+  chainBuilder().with({ chainId: '480', l2: true }).build(), // Worldchain has 1.4.1 but not 1.1.1
+  chainBuilder().with({ chainId: '10200', l2: true }).build(), // Gnosis Chiado has no migration contracts
+]
+
 describe('useCompatibleNetworks', () => {
   beforeAll(() => {
     jest.spyOn(useChains, 'default').mockReturnValue({
-      configs: [
-        chainBuilder().with({ chainId: '1', l2: false }).build(),
-        chainBuilder().with({ chainId: '10', l2: true }).build(), // This has the eip155 and then the canonical addresses
-        chainBuilder().with({ chainId: '100', l2: true }).build(), // This has the canonical and then the eip155 addresses
-        chainBuilder().with({ chainId: '324', l2: true }).build(), // ZkSync has different addresses for all versions
-        chainBuilder().with({ chainId: '480', l2: true }).build(), // Worldchain has 1.4.1 but not 1.1.1
-        chainBuilder().with({ chainId: '10200', l2: true }).build(), // Gnosis Chiado has no migration contracts
-      ],
+      configs: mockChains,
     })
   })
 
   it('should return empty list without any creation data', () => {
-    const { result } = renderHook(() => useCompatibleNetworks(undefined))
+    const { result } = renderHook(() => useCompatibleNetworks(undefined, mockChains as Chain[]))
     expect(result.current).toHaveLength(0)
   })
 
@@ -65,7 +68,7 @@ describe('useCompatibleNetworks', () => {
       safeAccountConfig: callData,
       safeVersion: '1.4.1',
     }
-    const { result } = renderHook(() => useCompatibleNetworks(creationData))
+    const { result } = renderHook(() => useCompatibleNetworks(creationData, mockChains as Chain[]))
     expect(result.current.every((config) => config.available)).toEqual(false)
   })
 
@@ -88,7 +91,7 @@ describe('useCompatibleNetworks', () => {
         safeAccountConfig: callData,
         safeVersion: '1.4.1',
       }
-      const { result } = renderHook(() => useCompatibleNetworks(creationData))
+      const { result } = renderHook(() => useCompatibleNetworks(creationData, mockChains as Chain[]))
       expect(result.current).toHaveLength(6)
       expect(result.current.map((chain) => chain.chainId)).toEqual(['1', '10', '100', '324', '480', '10200'])
       expect(result.current.map((chain) => chain.available)).toEqual([true, true, true, true, true, false])
@@ -102,7 +105,7 @@ describe('useCompatibleNetworks', () => {
         safeAccountConfig: callData,
         safeVersion: '1.4.1',
       }
-      const { result } = renderHook(() => useCompatibleNetworks(creationData))
+      const { result } = renderHook(() => useCompatibleNetworks(creationData, mockChains as Chain[]))
       expect(result.current).toHaveLength(6)
       expect(result.current.map((chain) => chain.chainId)).toEqual(['1', '10', '100', '324', '480', '10200'])
       expect(result.current.map((chain) => chain.available)).toEqual([true, true, true, true, true, false])
@@ -130,7 +133,7 @@ describe('useCompatibleNetworks', () => {
         safeAccountConfig: { ...callData, fallbackHandler: FALLBACK_HANDLER_130_DEPLOYMENTS?.canonical?.address! },
         safeVersion: '1.3.0',
       }
-      const { result } = renderHook(() => useCompatibleNetworks(creationData))
+      const { result } = renderHook(() => useCompatibleNetworks(creationData, mockChains as Chain[]))
       expect(result.current).toHaveLength(6)
       expect(result.current.map((chain) => chain.chainId)).toEqual(['1', '10', '100', '324', '480', '10200'])
       expect(result.current.map((chain) => chain.available)).toEqual([true, true, true, true, true, false])
@@ -145,7 +148,7 @@ describe('useCompatibleNetworks', () => {
         safeAccountConfig: { ...callData, fallbackHandler: FALLBACK_HANDLER_130_DEPLOYMENTS?.canonical?.address! },
         safeVersion: '1.3.0',
       }
-      const { result } = renderHook(() => useCompatibleNetworks(creationData))
+      const { result } = renderHook(() => useCompatibleNetworks(creationData, mockChains as Chain[]))
       expect(result.current).toHaveLength(6)
       expect(result.current.map((chain) => chain.chainId)).toEqual(['1', '10', '100', '324', '480', '10200'])
       expect(result.current.map((chain) => chain.available)).toEqual([true, true, true, true, true, true])
@@ -160,7 +163,7 @@ describe('useCompatibleNetworks', () => {
         safeAccountConfig: { ...callData, fallbackHandler: FALLBACK_HANDLER_130_DEPLOYMENTS?.eip155?.address! },
         safeVersion: '1.3.0',
       }
-      const { result } = renderHook(() => useCompatibleNetworks(creationData))
+      const { result } = renderHook(() => useCompatibleNetworks(creationData, mockChains as Chain[]))
       expect(result.current).toHaveLength(6)
       expect(result.current.map((chain) => chain.chainId)).toEqual(['1', '10', '100', '324', '480', '10200'])
       expect(result.current.map((chain) => chain.available)).toEqual([true, true, true, true, true, false])
@@ -175,7 +178,7 @@ describe('useCompatibleNetworks', () => {
         safeAccountConfig: { ...callData, fallbackHandler: FALLBACK_HANDLER_130_DEPLOYMENTS?.eip155?.address! },
         safeVersion: '1.3.0',
       }
-      const { result } = renderHook(() => useCompatibleNetworks(creationData))
+      const { result } = renderHook(() => useCompatibleNetworks(creationData, mockChains as Chain[]))
       expect(result.current).toHaveLength(6)
       expect(result.current.map((chain) => chain.chainId)).toEqual(['1', '10', '100', '324', '480', '10200'])
       expect(result.current.map((chain) => chain.available)).toEqual([true, true, true, true, true, false])
@@ -201,7 +204,7 @@ describe('useCompatibleNetworks', () => {
       safeAccountConfig: callData,
       safeVersion: '1.1.1',
     }
-    const { result } = renderHook(() => useCompatibleNetworks(creationData))
+    const { result } = renderHook(() => useCompatibleNetworks(creationData, mockChains as Chain[]))
     expect(result.current).toHaveLength(6)
     expect(result.current.map((chain) => chain.chainId)).toEqual(['1', '10', '100', '324', '480', '10200'])
     expect(result.current.map((chain) => chain.available)).toEqual([false, false, false, false, false, false])

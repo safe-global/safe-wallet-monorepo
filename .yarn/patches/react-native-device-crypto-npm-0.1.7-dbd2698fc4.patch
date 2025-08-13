@@ -1,5 +1,5 @@
 diff --git a/android/src/main/java/com/reactnativedevicecrypto/Helpers.java b/android/src/main/java/com/reactnativedevicecrypto/Helpers.java
-index 03fd79e8a389f33a2841ecf0e177ffc9ea01b78c..681f07efab020e078ee75d697434a1d3ce414f32 100644
+index 03fd79e8a389f33a2841ecf0e177ffc9ea01b78c..d903b5dc4b0110dab9a8c1a648d349200dd4e20f 100644
 --- a/android/src/main/java/com/reactnativedevicecrypto/Helpers.java
 +++ b/android/src/main/java/com/reactnativedevicecrypto/Helpers.java
 @@ -39,6 +39,7 @@ public class Helpers {
@@ -75,7 +75,22 @@ index 03fd79e8a389f33a2841ecf0e177ffc9ea01b78c..681f07efab020e078ee75d697434a1d3
      public static boolean isKeyExists(@NonNull String alias, @KeyType.Types int keyType) throws Exception {
          KeyStore keyStore = Helpers.getKeyStore();
          if (!keyStore.containsAlias(alias)) {
-@@ -143,8 +202,10 @@ public class Helpers {
+@@ -134,17 +193,22 @@ public class Helpers {
+           case AccessLevel.AUTHENTICATION_REQUIRED:
+             // Sets whether this key is authorized to be used only if the user has been authenticated.
+             builder.setUserAuthenticationRequired(true);
++
+             // Allow pin/pass as a fallback on API 30+
+-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+-              builder.setUserAuthenticationParameters(0, KeyProperties.AUTH_DEVICE_CREDENTIAL | KeyProperties.AUTH_BIOMETRIC_STRONG);
+-            }
++            // Disabled this as it prevents invalidation of the user removes the biometric
++            // if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
++            //   builder.setUserAuthenticationParameters(0, KeyProperties.AUTH_DEVICE_CREDENTIAL | KeyProperties.AUTH_BIOMETRIC_STRONG);
++            // }
++
+             // Invalidate the keys if the user has registered a new biometric
+             // credential. The variable "invalidatedByBiometricEnrollment" is true by default.
              if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                builder.setInvalidatedByBiometricEnrollment(invalidateOnNewBiometry);
              }

@@ -24,7 +24,7 @@ const SafeImprint = () => (
       10179 Berlin, Germany
     </Typography>
     <Typography mb={4}>
-      Managing director: Richard Meißner
+      Managing director: Tobias Schubotz
       <br />
       Contact:{' '}
       <Link href="mailto:info@cc0x.dev" passHref legacyBehavior>

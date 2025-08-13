@@ -30,9 +30,10 @@ import { useAllSafesGrouped } from '@/features/myAccounts/hooks/useAllSafesGroup
 import useSafeAddress from '@/hooks/useSafeAddress'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import uniq from 'lodash/uniq'
-import { useCompatibleNetworks } from '@/features/multichain/hooks/useCompatibleNetworks'
+import { useCompatibleNetworks } from '@safe-global/utils/features/multichain/hooks/useCompatibleNetworks'
 import { useSafeCreationData } from '@/features/multichain/hooks/useSafeCreationData'
 import { type ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import PlusIcon from '@/public/images/common/plus.svg'
 import useAddressBook from '@/hooks/useAddressBook'
 import { CreateSafeOnSpecificChain } from '@/features/multichain/components/CreateSafeOnNewChain'
@@ -98,9 +99,9 @@ const UndeployedNetworkMenuItem = ({
   isSelected = false,
   onSelect,
 }: {
-  chain: ChainInfo & { available: boolean }
+  chain: Chain & { available: boolean }
   isSelected?: boolean
-  onSelect: (chain: ChainInfo) => void
+  onSelect: (chain: Chain) => void
 }) => {
   const isDisabled = !chain.available
 
@@ -172,9 +173,11 @@ const UndeployedNetworks = ({
   closeNetworkSelect: () => void
 }) => {
   const [open, setOpen] = useState(false)
-  const [replayOnChain, setReplayOnChain] = useState<ChainInfo>()
+  const [replayOnChain, setReplayOnChain] = useState<Chain>()
   const addressBook = useAddressBook()
   const safeName = addressBook[safeAddress]
+  const { configs } = useChains()
+
   const deployedChainInfos = useMemo(
     () => chains.filter((chain) => deployedChains.includes(chain.chainId)),
     [chains, deployedChains],
@@ -182,13 +185,13 @@ const UndeployedNetworks = ({
   const safeCreationResult = useSafeCreationData(safeAddress, deployedChainInfos)
   const [safeCreationData, safeCreationDataError, safeCreationLoading] = safeCreationResult
 
-  const allCompatibleChains = useCompatibleNetworks(safeCreationData)
+  const allCompatibleChains = useCompatibleNetworks(safeCreationData, configs as Chain[])
   const isUnsupportedSafeCreationVersion = Boolean(!allCompatibleChains?.length)
 
   const availableNetworks = useMemo(
     () =>
       allCompatibleChains?.filter(
-        (config) => !deployedChains.includes(config.chainId) && hasMultiChainAddNetworkFeature(config),
+        (config) => !deployedChains.includes(config.chainId) && hasMultiChainAddNetworkFeature(config as ChainInfo),
       ) || [],
     [allCompatibleChains, deployedChains],
   )
@@ -200,7 +203,7 @@ const UndeployedNetworks = ({
 
   const noAvailableNetworks = useMemo(() => availableNetworks.every((config) => !config.available), [availableNetworks])
 
-  const onSelect = (chain: ChainInfo) => {
+  const onSelect = (chain: Chain) => {
     setReplayOnChain(chain)
   }
 
@@ -316,7 +319,7 @@ const UndeployedNetworks = ({
       </Collapse>
       {replayOnChain && safeCreationData && (
         <CreateSafeOnSpecificChain
-          chain={replayOnChain}
+          chain={replayOnChain as ChainInfo}
           safeAddress={safeAddress}
           open
           onClose={onFormClose}

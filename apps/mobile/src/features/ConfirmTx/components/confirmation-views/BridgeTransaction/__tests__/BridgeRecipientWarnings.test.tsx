@@ -22,9 +22,19 @@ jest.mock('@/src/store/hooks', () => ({
   useAppSelector: jest.fn(),
 }))
 
+jest.mock('@/src/hooks/useSafeCreationData', () => ({
+  useSafeCreationData: jest.fn(),
+}))
+
+jest.mock('@safe-global/utils/features/multichain/hooks/useCompatibleNetworks', () => ({
+  useCompatibleNetworks: jest.fn(),
+}))
+
 const { useSafesGetSafeV1Query } = require('@safe-global/store/gateway/AUTO_GENERATED/safes')
 const { useDefinedActiveSafe } = require('@/src/store/hooks/activeSafe')
 const { useAppSelector } = require('@/src/store/hooks')
+const { useSafeCreationData } = require('@/src/hooks/useSafeCreationData')
+const { useCompatibleNetworks } = require('@safe-global/utils/features/multichain/hooks/useCompatibleNetworks')
 
 // Helper to wrap component with required providers
 const renderWithProviders = (ui: React.ReactElement) => {
@@ -58,12 +68,16 @@ const mockTxInfo: BridgeAndSwapTransactionInfo = {
   toAmount: null,
 }
 
+const mockReplayedSafeProps = {}
+
 describe('BridgeRecipientWarnings', () => {
   beforeEach(() => {
     // Reset all mocks
     jest.clearAllMocks()
 
     useDefinedActiveSafe.mockReturnValue(mockActiveSafe)
+    useSafeCreationData.mockReturnValue([mockReplayedSafeProps])
+    useCompatibleNetworks.mockReturnValue([])
 
     useSafesGetSafeV1Query.mockReturnValue({
       data: undefined,
@@ -101,6 +115,10 @@ describe('BridgeRecipientWarnings', () => {
       // Mock selectContactByAddress to return null (no contact)
       if (selector.toString().includes('selectContactByAddress')) {
         return null
+      }
+
+      if (selector.toString().includes('selectChainById')) {
+        return { chainId: '1', chainName: 'Ethereum' }
       }
       return null
     })

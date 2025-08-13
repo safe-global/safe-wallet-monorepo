@@ -1,5 +1,4 @@
 import { useMemo } from 'react'
-import type { ReactElement } from 'react'
 
 import SaveAddressIcon from '@/public/images/common/save-address.svg'
 import useSafeInfo from '@/hooks/useSafeInfo'
@@ -20,7 +19,7 @@ export type ManageSignersForm = {
   [ManageSignersFormFields.owners]: Array<NamedAddress>
 }
 
-export function ManageSignersFlow(): ReactElement {
+const ManageSignersFlow = () => {
   const { safe } = useSafeInfo()
 
   const defaultValues = useMemo(() => {
@@ -49,3 +48,5 @@ export function ManageSignersFlow(): ReactElement {
     </TxFlow>
   )
 }
+
+export default ManageSignersFlow

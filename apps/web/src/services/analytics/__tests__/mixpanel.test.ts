@@ -62,7 +62,7 @@ describe('MixPanel Integration', () => {
 
       // Should register initial params
       expect(mockMixpanel.register).toHaveBeenCalledWith({
-        'App Version': '1.63.0',
+        'App Version': packageJson.version,
         'Device Type': 'desktop',
       })
     })

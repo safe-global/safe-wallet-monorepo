@@ -36,7 +36,7 @@ export const AccountsSheetContainer = () => {
       onDragEnd={onDragEnd}
       actions={
         <TouchableOpacity onPress={toggleEditMode}>
-          <H6 fontWeight={600}>{isEdit ? 'Done' : 'Edit'}</H6>
+          <H6 fontWeight={700}>{isEdit ? 'Done' : 'Edit'}</H6>
         </TouchableOpacity>
       }
     />

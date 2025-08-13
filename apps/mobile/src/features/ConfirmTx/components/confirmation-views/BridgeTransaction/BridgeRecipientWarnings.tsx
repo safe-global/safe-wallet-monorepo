@@ -1,9 +1,9 @@
 import React, { useMemo } from 'react'
-import { Alert2 } from '@/src/components/Alert2'
+import { Alert } from '@/src/components/Alert'
 import { BridgeAndSwapTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { useAppSelector } from '@/src/store/hooks'
-import { selectAllChains } from '@/src/store/chains'
+import { selectAllChains, selectChainById } from '@/src/store/chains'
 import { selectSafeInfo } from '@/src/store/safesSlice'
 import { selectContactByAddress } from '@/src/store/addressBookSlice'
 import { useSafesGetSafeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
@@ -15,16 +15,19 @@ import {
   useBridgeWarningLogic,
   type BridgeWarningData,
 } from '@safe-global/utils/components/confirmation-views/BridgeTransaction/useBridgeWarningLogic'
+import { useSafeCreationData } from '@/src/hooks/useSafeCreationData'
+import { useCompatibleNetworks } from '@safe-global/utils/features/multichain/hooks/useCompatibleNetworks'
+import { RootState } from '@/src/store'
 
 interface WarningAlertProps {
   warning: BridgeWarning
 }
 
 const WarningAlert = ({ warning }: WarningAlertProps) => (
-  <Alert2
+  <Alert
     type={warning.severity}
-    title={warning.title}
-    message={warning.description}
+    message={warning.title}
+    info={warning.description}
     testID={`bridge-warning-${warning.severity}`}
   />
 )
@@ -38,15 +41,17 @@ export const BridgeRecipientWarnings = ({ txInfo }: BridgeRecipientWarningsProps
   const allChains = useAppSelector(selectAllChains)
   const activeSafeInfo = useAppSelector((state) => selectSafeInfo(state, activeSafe.address as Address))
   const destinationContact = useAppSelector((state) => selectContactByAddress(txInfo.recipient.value)(state))
+  const destinationChain = useAppSelector((state: RootState) => selectChainById(state, txInfo.toChain))
+  const [creationData] = useSafeCreationData(activeSafe.chainId)
+  const compatibleNetworks = useCompatibleNetworks(creationData, [destinationChain])
 
   const isSameAddress = sameAddress(txInfo.recipient.value, activeSafe.address)
 
   // Check if destination chain is supported
   const isDestinationChainSupported = allChains?.some((chain) => chain.chainId === txInfo.toChain) ?? false
 
-  // For simplicity in mobile, we'll assume modern Safes support multichain
-  // This could be enhanced with version checking in the future
-  const isMultiChainSafe = true
+  // Current safe can be created on the destination chain
+  const isMultiChainSafe = compatibleNetworks.length > 0
 
   const { data: otherSafe, error: otherSafeError } = useSafesGetSafeV1Query(
     { chainId: txInfo.toChain, safeAddress: activeSafe.address },

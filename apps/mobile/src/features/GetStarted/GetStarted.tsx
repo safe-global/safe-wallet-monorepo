@@ -1,13 +1,14 @@
 import React, { useCallback } from 'react'
 import { Link, useRouter } from 'expo-router'
-import { View, Text, YStack, styled } from 'tamagui'
+import { View, Text, YStack, styled, getTokenValue } from 'tamagui'
 import { SafeButton } from '@/src/components/SafeButton'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { BlurView } from 'expo-blur'
 import { getCrashlytics } from '@react-native-firebase/crashlytics'
 import { setAnalyticsCollectionEnabled } from '@/src/services/analytics'
-import { isAndroid } from '@/src/config/constants'
+import { isAndroid, PRIVACY_POLICY_URL, TERMS_OF_USE_URL } from '@/src/config/constants'
+import { Platform } from 'react-native'
 
 const StyledText = styled(Text, {
   fontSize: '$3',
@@ -35,7 +36,21 @@ export const GetStarted = () => {
 
   return (
     <YStack justifyContent={'flex-end'} flex={1} testID={'get-started-screen'}>
-      <BlurView intensity={100} style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
+      <BlurView
+        intensity={100}
+        style={[
+          {
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+          },
+          Platform.OS === 'android' && {
+            backgroundColor: 'rgba(0, 0, 0, 0.9)',
+          },
+        ]}
+      >
         <View
           flex={1}
           onPress={() => {
@@ -47,7 +62,7 @@ export const GetStarted = () => {
         gap={'$3'}
         paddingHorizontal={'$4'}
         backgroundColor={'$background'}
-        paddingBottom={insets.bottom}
+        paddingBottom={insets.bottom + getTokenValue(Platform.OS === 'ios' ? '$0' : '$4')}
         paddingTop={'$5'}
         borderTopLeftRadius={'$9'}
         borderTopRightRadius={'$9'}
@@ -85,11 +100,11 @@ export const GetStarted = () => {
           justifyContent="center"
         >
           <StyledText>By continuing, you agree to our </StyledText>
-          <Link href={'https://app.safe.global/terms'} target={'_blank'} asChild>
+          <Link href={TERMS_OF_USE_URL} target={'_blank'} asChild>
             <StyledText textDecorationLine={'underline'}>User Terms</StyledText>
           </Link>
           <StyledText> and </StyledText>
-          <Link href={'https://app.safe.global/privacy'} target={'_blank'} asChild>
+          <Link href={PRIVACY_POLICY_URL} target={'_blank'} asChild>
             <StyledText textDecorationLine={'underline'}>Privacy Policy</StyledText>
           </Link>
           <StyledText>.</StyledText>

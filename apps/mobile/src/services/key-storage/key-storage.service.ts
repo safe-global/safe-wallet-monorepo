@@ -4,8 +4,10 @@ import DeviceInfo from 'react-native-device-info'
 import { IKeyStorageService, PrivateKeyStorageOptions } from './types'
 import Logger from '@/src/utils/logger'
 import { Platform } from 'react-native'
+import { asError } from '@safe-global/utils/services/exceptions/utils'
 
 export class KeyStorageService implements IKeyStorageService {
+  private storeTries = 0
   private readonly BIOMETRIC_PROMPTS = {
     SKIP: {
       biometryTitle: '',
@@ -29,12 +31,15 @@ export class KeyStorageService implements IKeyStorageService {
     privateKey: string,
     options: PrivateKeyStorageOptions = { requireAuthentication: true },
   ): Promise<void> {
+    this.storeTries = 0
     try {
       const { requireAuthentication = true } = options
-      const isEmulator = await DeviceInfo.isEmulator()
+      // On the Android emulator there is no Strongbox, but the library can work without it
+      // On iOS simulator we can't use the secureEnclave as there is none
+      const isEmulator = Platform.OS === 'android' ? false : await DeviceInfo.isEmulator()
       await this.storeKey(userId, privateKey, requireAuthentication, isEmulator)
     } catch (err) {
-      Logger.error('Error storing private key:', err)
+      Logger.error('Error storing private key:', asError(err).message)
       throw new Error('Failed to store private key')
     }
   }
@@ -46,7 +51,7 @@ export class KeyStorageService implements IKeyStorageService {
     try {
       return await this.getKey(userId, options.requireAuthentication ?? true)
     } catch (err) {
-      Logger.error('Error getting private key:', err)
+      Logger.error('Error getting private key:', asError(err).message)
       return undefined
     }
   }
@@ -59,7 +64,7 @@ export class KeyStorageService implements IKeyStorageService {
       const { requireAuthentication = true } = options
       await this.removeKey(userId, requireAuthentication)
     } catch (err) {
-      Logger.error('Error removing private key:', err instanceof Error ? err.message : 'Unknown error')
+      Logger.error('Error removing private key:', asError(err).message)
       throw new Error('Failed to remove private key')
     }
   }
@@ -81,7 +86,7 @@ export class KeyStorageService implements IKeyStorageService {
 
       return keyName
     } catch (error) {
-      Logger.error('Error creating key:', error instanceof Error ? error.message : 'Unknown error')
+      Logger.error('Error creating key:', asError(error).message)
       throw new Error('Failed to create encryption key')
     }
   }
@@ -97,7 +102,7 @@ export class KeyStorageService implements IKeyStorageService {
         invalidateOnNewBiometry: requireAuth,
       })
     } catch (error) {
-      Logger.error('Error creating symmetric encryption key:', error instanceof Error ? error.message : 'Unknown error')
+      Logger.error('Error creating symmetric encryption key:', asError(error).message)
       throw new Error('Failed to create symmetric key')
     }
   }
@@ -111,16 +116,32 @@ export class KeyStorageService implements IKeyStorageService {
       await this.getOrCreateKeyIOS(keyName, requireAuth, isEmulator)
     }
 
-    const encryptedPrivateKey = await DeviceCrypto.encrypt(keyName, privateKey, this.BIOMETRIC_PROMPTS.SAVE)
+    try {
+      const encryptedPrivateKey = await DeviceCrypto.encrypt(keyName, privateKey, this.BIOMETRIC_PROMPTS.SAVE)
 
-    await Keychain.setGenericPassword(
-      'signer_address',
-      JSON.stringify({
-        encryptedPassword: encryptedPrivateKey.encryptedText,
-        iv: encryptedPrivateKey.iv,
-      }),
-      { accessible: Keychain.ACCESSIBLE.WHEN_UNLOCKED_THIS_DEVICE_ONLY, service: this.getKeyService(userId) },
-    )
+      await Keychain.setGenericPassword(
+        'signer_address',
+        JSON.stringify({
+          encryptedPassword: encryptedPrivateKey.encryptedText,
+          iv: encryptedPrivateKey.iv,
+        }),
+        { accessible: Keychain.ACCESSIBLE.WHEN_UNLOCKED_THIS_DEVICE_ONLY, service: this.getKeyService(userId) },
+      )
+
+      // Reset retry counter on successful storage
+      this.storeTries = 0
+    } catch (error) {
+      if (this.isKeyPermanentlyInvalidatedError(error)) {
+        try {
+          await this.handleKeyInvalidation(userId, requireAuth)
+          this.storeTries++
+          return await this.storeKey(userId, privateKey, requireAuth, isEmulator)
+        } catch (_error) {
+          throw new Error('Failed to store private key')
+        }
+      }
+      throw new Error('Failed to store private key')
+    }
   }
 
   private async getKey(userId: string, requireAuth: boolean): Promise<string> {
@@ -138,7 +159,23 @@ export class KeyStorageService implements IKeyStorageService {
 
     const { encryptedPassword, iv } = JSON.parse(result.password)
 
-    return DeviceCrypto.decrypt(keyName, encryptedPassword, iv, this.BIOMETRIC_PROMPTS.STANDARD)
+    const decryptedPrivateKey = await DeviceCrypto.decrypt(
+      keyName,
+      encryptedPassword,
+      iv,
+      this.BIOMETRIC_PROMPTS.STANDARD,
+    )
+    return decryptedPrivateKey
+  }
+
+  private isKeyPermanentlyInvalidatedError(error: unknown): boolean {
+    const errorMessage = asError(error).message
+    return errorMessage.includes('Key permanently invalidated')
+  }
+
+  private async handleKeyInvalidation(userId: string, requireAuth: boolean): Promise<void> {
+    Logger.warn('Key has been permanently invalidated, removing key')
+    await this.removeKey(userId, requireAuth)
   }
 
   private async removeKey(userId: string, requireAuth: boolean): Promise<void> {
@@ -160,7 +197,7 @@ export class KeyStorageService implements IKeyStorageService {
       }
     } catch (error) {
       // If key doesn't exist, that's fine - we still want to try to remove from device crypto
-      Logger.warn('Key not found in keychain or authentication failed:', error)
+      Logger.warn('Key not found in keychain or authentication failed:', asError(error).message)
     }
 
     // Try to remove the encryption key from device crypto
@@ -168,7 +205,7 @@ export class KeyStorageService implements IKeyStorageService {
       await DeviceCrypto.deleteKey(keyName)
     } catch (error) {
       // If the key doesn't exist in device crypto, that's acceptable
-      Logger.warn('Key not found in device crypto:', error)
+      Logger.warn('Key not found in device crypto:', asError(error).message)
     }
   }
 }

@@ -3,11 +3,22 @@ const IS_DEV = process.env.APP_VARIANT === 'development'
 
 const appleDevTeamId = '86487MHG6V'
 
+const sslPinningDomains = {
+  'safe-client.staging.5afe.dev': [
+    'qrOvKCFoIx4FHtyP9qY8vHF2hjnLwujZUkuOrsFG5Gc=', // 🍃 Leaf cert (Valid: Nov 22 00:00:00 2024 GMT → Dec 21 23:59:59 2025 GMT)
+    'vxRon/El5KuI4vx5ey1DgmsYmRY0nDd5Cg4GfJ8S+bg=', // 🔗 Intermediate (Valid: Aug 23 22:25:30 2022 GMT → Aug 23 22:25:30 2030 GMT)
+  ],
+  'safe-client.safe.global': [
+    'VOstDe9L/YZ7RKPPd7iwAMbsAwCqqblfg3l1IqjUvuE=', // 🍃 Leaf cert (Valid: Jul 12 00:00:00 2025 GMT → Aug 10 23:59:59 2026 GMT)
+    '18tkPyr2nckv4fgo0dhAkaUtJ2hu2831xlO2SKhq8dg=', // 🔗 Intermediate cert (Valid: Aug 23 22:25:30 2022 GMT → Aug 23 22:25:30 2030 GMT)
+  ],
+}
+
 const config = {
-  name: IS_DEV ? 'Safe Mobile - Development' : 'Safe Mobile',
+  name: IS_DEV ? 'Dev-Safe{Mobile}' : 'Safe{Mobile}',
   slug: 'safe-mobileapp',
   owner: 'safeglobal',
-  version: '1.0.1',
+  version: '1.0.2',
   extra: {
     storybookEnabled: process.env.STORYBOOK_ENABLED,
     eas: {
@@ -40,13 +51,13 @@ const config = {
     googleServicesFile: IS_DEV ? process.env.GOOGLE_SERVICES_PLIST_DEV : process.env.GOOGLE_SERVICES_PLIST,
   },
   android: {
-    adaptiveIcon: {
-      foregroundImage: './assets/images/adaptive-icon.png',
-      backgroundColor: '#000000',
-      monochromeImage: './assets/images/monochrome-icon.png',
-    },
     package: IS_DEV ? 'global.safe.mobileapp.dev' : 'global.safe.mobileapp',
     googleServicesFile: IS_DEV ? process.env.GOOGLE_SERVICES_JSON_DEV : process.env.GOOGLE_SERVICES_JSON,
+    adaptiveIcon: {
+      foregroundImage: './assets/images/android-adaptive-icon-foreground.png',
+      backgroundImage: './assets/images/android-adaptive-icon-background.png',
+      monochromeImage: './assets/images/android-adaptive-icon-monochrome.png',
+    },
     permissions: [
       'android.permission.CAMERA',
       'android.permission.POST_NOTIFICATIONS',
@@ -63,6 +74,12 @@ const config = {
   },
   plugins: [
     ['./expo-plugins/withNotificationIcons.js'],
+    [
+      './expo-plugins/ssl-pinning/withSSLPinning.js',
+      {
+        domains: sslPinningDomains,
+      },
+    ],
     'expo-router',
     [
       'expo-font',
@@ -73,23 +90,11 @@ const config = {
     [
       'expo-splash-screen',
       {
-        image: './assets/images/splash.png',
-        enableFullScreenImage_legacy: true,
-        backgroundColor: '#000000',
+        image: './assets/images/icon-dark.png',
+        backgroundColor: '#f4f4f4',
         dark: {
-          image: './assets/images/splash.png',
-          backgroundColor: '#000000',
-        },
-        android: {
-          image: './assets/images/icon.png',
-          imageWidth: 124,
-          imageHeight: 124,
-          imageResizeMode: 'contain',
-          backgroundColor: '#000000',
-        },
-        ios: {
-          image: './assets/images/splash.png',
-          imageResizeMode: 'contain',
+          image: './assets/images/icon-light.png',
+          backgroundColor: '#121312',
         },
       },
     ],
@@ -138,7 +143,7 @@ const config = {
     [
       'react-native-capture-protection',
       {
-        captureType: 'fullMediaCapture',
+        captureType: 'restrictedCapture',
       },
     ],
   ],
@@ -146,7 +151,7 @@ const config = {
     typedRoutes: true,
   },
   notification: {
-    icon: './assets/images/ic_notification.png',
+    icon: './assets/images/icon.png',
     color: '#FFFFFF',
     androidMode: 'default',
     androidCollapsedTitle: 'Updates from Safe Wallet',
