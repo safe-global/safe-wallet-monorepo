@@ -13,6 +13,7 @@ import {
   SafeAppLaunchLocation,
 } from '../index'
 import { mixpanelInit, mixpanelTrack, mixpanelSetSafeAddress } from '../mixpanel'
+import packageJson from '../../../../package.json'
 
 // Mock GTM
 jest.mock('../gtm', () => ({

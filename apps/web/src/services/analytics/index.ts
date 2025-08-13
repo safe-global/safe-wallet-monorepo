@@ -72,9 +72,6 @@ export const trackSafeAppEvent = (
 export const trackMixPanelEvent = mixpanelTrack
 export { safeAppToMixPanelEventProperties }
 
-export const trackMixPanelEvent = mixpanelTrack
-export { safeAppToMixPanelEventProperties }
-
 export * from './types'
 export * from './events'
 export * from './mixpanel-events'
