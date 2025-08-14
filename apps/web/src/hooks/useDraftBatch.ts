@@ -13,6 +13,40 @@ import { isMultiSendCalldata } from '@/utils/transaction-calldata'
 import { decodeMultiSendData } from '@safe-global/protocol-kit/dist/src/utils'
 import { OperationType } from '@safe-global/types-kit'
 
+/**
+ * Get the call-only transactions from the transaction details
+ * @param txDetails - The transaction details
+ * @returns The call-only transactions
+ */
+const getCallOnlyTxsFromDetails = (txDetails: TransactionDetails): CallOnlyTxData[] => {
+  const hexData = txDetails.txData?.hexData
+
+  // If it is a multisend, we decode the data to get the individual transactions
+  if (hexData && isMultiSendCalldata(hexData)) {
+    const decodedTxs = decodeMultiSendData(hexData)
+    return decodedTxs.map((tx) => ({
+      to: tx.to,
+      value: tx.value,
+      data: tx.data,
+      operation: OperationType.Call,
+    }))
+  }
+
+  // If it is a single transaction, we return the transaction data
+  if (txDetails.txData) {
+    return [
+      {
+        to: txDetails.txData.to.value,
+        value: txDetails.txData.value ?? '0',
+        operation: OperationType.Call,
+        data: txDetails.txData.hexData ?? '0x',
+      },
+    ]
+  }
+
+  return []
+}
+
 export const useUpdateBatch = () => {
   const chainId = useChainId()
   const safeAddress = useSafeAddress()
@@ -20,28 +54,7 @@ export const useUpdateBatch = () => {
 
   const onAdd = useCallback(
     async (txDetails: TransactionDetails): Promise<void> => {
-      let txs: CallOnlyTxData[]
-      // If it is a multisend, we decode the data to get the individual transactions
-      if (txDetails.txData?.hexData && isMultiSendCalldata(txDetails.txData?.hexData)) {
-        const decodedTxs = decodeMultiSendData(txDetails.txData?.hexData)
-        txs = decodedTxs.map((tx) => ({
-          to: tx.to,
-          value: tx.value,
-          data: tx.data,
-          operation: OperationType.Call,
-        }))
-      } else {
-        txs = txDetails.txData
-          ? [
-              {
-                to: txDetails.txData.to.value,
-                value: txDetails.txData.value ?? '0',
-                operation: OperationType.Call,
-                data: txDetails.txData.hexData ?? '0x',
-              },
-            ]
-          : []
-      }
+      const txs: CallOnlyTxData[] = getCallOnlyTxsFromDetails(txDetails)
       txs.forEach((tx) => {
         dispatch(
           addTx({
