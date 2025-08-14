@@ -37,7 +37,7 @@ describe('Transaction notes tests', () => {
     staticSafes = await getSafes(CATEGORIES.static)
   })
 
-  it.only('Verify the tx notes field only allows 60 characters', () => {
+  it('Verify the tx notes field only allows 60 characters', () => {
     cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_6)
     wallet.connectSigner(signer)
     createtx.clickOnNewtransactionBtn()
