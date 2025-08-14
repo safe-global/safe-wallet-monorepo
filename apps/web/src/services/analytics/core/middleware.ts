@@ -14,7 +14,9 @@ export type Middleware<E extends Record<string, Record<string, unknown>>> = (
 /**
  * Chain of Responsibility implementation for middleware processing
  */
-export class MiddlewareChain<E extends Record<string, Record<string, unknown>> = Record<string, Record<string, unknown>>> {
+export class MiddlewareChain<
+  E extends Record<string, Record<string, unknown>> = Record<string, Record<string, unknown>>,
+> {
   private chain: MiddlewareFunction[] = []
   private typedChain: Middleware<E>[] = []
 
@@ -171,8 +173,8 @@ export const createTypedSamplingMiddleware = <E extends Record<string, Record<st
       context: {
         ...(event.context || {}),
         sampled: true,
-        sampleRate: effectiveRate
-      }
+        sampleRate: effectiveRate,
+      },
     }
     next(enrichedEvent)
   }
@@ -207,7 +209,7 @@ export const createTypedPiiScrubberMiddleware = <E extends Record<string, Record
 
     const scrubbedEvent = {
       ...event,
-      payload: scrub(event.payload)
+      payload: scrub(event.payload),
     }
     next(scrubbedEvent)
   }

@@ -10,7 +10,9 @@ import type { ProviderId } from '../providers/constants'
 /**
  * Base provider interface - all providers must implement this
  */
-export interface BaseProvider<E extends Record<string, Record<string, unknown>> = Record<string, Record<string, unknown>>> {
+export interface BaseProvider<
+  E extends Record<string, Record<string, unknown>> = Record<string, Record<string, unknown>>,
+> {
   /** Unique stable identifier (e.g., 'ga', 'mixpanel') */
   readonly id: ProviderId
 
@@ -32,8 +34,6 @@ export interface BaseProvider<E extends Record<string, Record<string, unknown>> 
   /** Clean shutdown */
   shutdown?(): Promise<void>
 }
-
-
 
 /**
  * Optional capability: User identification

@@ -27,7 +27,7 @@ jest.mock('@/store/cookiesAndTermsSlice', () => ({
   hasConsentFor: jest.fn(),
   CookieAndTermType: {
     TERMS: 'terms',
-    NECESSARY: 'necessary', 
+    NECESSARY: 'necessary',
     UPDATES: 'updates',
     ANALYTICS: 'analytics',
   },
