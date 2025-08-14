@@ -256,8 +256,9 @@ export function verifyDeleteChoiceBtnStatus(option) {
 }
 
 export function typeNoteText(text) {
-  cy.get(noteTextField).find('input').clear()
-  cy.get(noteTextField).find('input').type(text)
+  const input = cy.get(noteTextField).find('input')
+  input.clear()
+  input.type(text)
 }
 
 export function checkMaxNoteLength() {
