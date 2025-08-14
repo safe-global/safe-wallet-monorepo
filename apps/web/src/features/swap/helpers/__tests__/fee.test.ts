@@ -210,7 +210,7 @@ describe('calculateFeePercentageInBps', () => {
 
       const resultOmitted = calculateFeePercentageInBps(orderParams)
       const resultFalse = calculateFeePercentageInBps(orderParams, false)
-      
+
       expect(resultOmitted).toBe(resultFalse)
       expect(resultOmitted).toBe(35) // Both should return default regular tier 1 fee
     })
