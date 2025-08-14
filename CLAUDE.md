@@ -1,0 +1,1 @@
+- only run linting and typechecking with yarn lint. all other commands will produce errors.

@@ -17,15 +17,15 @@ import SafeAppTags from '@/components/safe-apps/SafeAppTags'
 import SafeAppSocialLinksCard from '@/components/safe-apps/SafeAppSocialLinksCard'
 import CloseIcon from '@/public/images/common/close.svg'
 import { useOpenedSafeApps } from '@/hooks/safe-apps/useOpenedSafeApps'
+import { useCurrentChain } from '@/hooks/useChains'
 import css from './styles.module.css'
 import {
   SAFE_APPS_EVENTS,
   SAFE_APPS_LABELS,
   trackSafeAppEvent,
-  trackMixPanelEvent,
-  MixPanelEvent,
   safeAppToMixPanelEventProperties,
   SafeAppLaunchLocation,
+  safeAnalytics,
 } from '@/services/analytics'
 
 type SafeAppPreviewDrawerProps = {
@@ -39,18 +39,23 @@ type SafeAppPreviewDrawerProps = {
 const SafeAppPreviewDrawer = ({ isOpen, safeApp, isBookmarked, onClose, onBookmark }: SafeAppPreviewDrawerProps) => {
   const { markSafeAppOpened } = useOpenedSafeApps()
   const router = useRouter()
+  const currentChain = useCurrentChain()
   const safeAppUrl = getSafeAppUrl(router, safeApp?.url || '')
 
   const onOpenSafe = () => {
     if (safeApp) {
       markSafeAppOpened(safeApp.id)
       trackSafeAppEvent({ ...SAFE_APPS_EVENTS.OPEN_APP, label: SAFE_APPS_LABELS.apps_sidebar }, safeApp.name)
-      trackMixPanelEvent(
-        MixPanelEvent.SAFE_APP_LAUNCHED,
-        safeAppToMixPanelEventProperties(safeApp, {
+      safeAnalytics.safeAppLaunched({
+        safe_app_name: safeApp.name,
+        launch_location: SafeAppLaunchLocation.PREVIEW_DRAWER,
+        chain_id: currentChain?.chainId || '',
+        chain_name: currentChain?.chainName || '',
+        safe_app_url: safeApp.url,
+        ...safeAppToMixPanelEventProperties(safeApp, {
           launchLocation: SafeAppLaunchLocation.PREVIEW_DRAWER,
         }),
-      )
+      })
     }
   }
 

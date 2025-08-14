@@ -15,12 +15,12 @@ import {
   SAFE_APPS_EVENTS,
   SAFE_APPS_LABELS,
   trackSafeAppEvent,
-  trackMixPanelEvent,
-  MixPanelEvent,
   safeAppToMixPanelEventProperties,
   SafeAppLaunchLocation,
+  safeAnalytics,
 } from '@/services/analytics'
 import { useSafeApps } from '@/hooks/safe-apps/useSafeApps'
+import { useCurrentChain } from '@/hooks/useChains'
 
 type SafeAppListProps = {
   safeAppsList: SafeAppData[]
@@ -50,6 +50,7 @@ const SafeAppList = ({
   const { togglePin } = useSafeApps()
   const { isPreviewDrawerOpen, previewDrawerApp, openPreviewDrawer, closePreviewDrawer } = useSafeAppPreviewDrawer()
   const { openedSafeAppIds } = useOpenedSafeApps()
+  const currentChain = useCurrentChain()
 
   const showZeroResultsPlaceholder = query && safeAppsList.length === 0
 
@@ -63,15 +64,19 @@ const SafeAppList = ({
       } else {
         // We only track if not previously opened as it is then tracked in preview drawer
         trackSafeAppEvent({ ...SAFE_APPS_EVENTS.OPEN_APP, label: eventLabel }, safeApp.name)
-        trackMixPanelEvent(
-          MixPanelEvent.SAFE_APP_LAUNCHED,
-          safeAppToMixPanelEventProperties(safeApp, {
+        safeAnalytics.safeAppLaunched({
+          safe_app_name: safeApp.name,
+          launch_location: SafeAppLaunchLocation.SAFE_APPS_LIST,
+          chain_id: currentChain?.chainId || '',
+          chain_name: currentChain?.chainName || '',
+          safe_app_url: safeApp.url,
+          ...safeAppToMixPanelEventProperties(safeApp, {
             launchLocation: SafeAppLaunchLocation.SAFE_APPS_LIST,
           }),
-        )
+        })
       }
     },
-    [eventLabel, openPreviewDrawer, openedSafeAppIds],
+    [eventLabel, openPreviewDrawer, openedSafeAppIds, currentChain],
   )
 
   return (

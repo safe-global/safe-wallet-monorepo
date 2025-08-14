@@ -13,43 +13,37 @@
  */
 import type { AnalyticsEvent } from './types'
 import { gtmTrack, gtmTrackSafeApp } from './gtm'
-import { mixpanelTrack, safeAppToMixPanelEventProperties } from './mixpanel'
-import { MixPanelEventParams } from './mixpanel-events'
-import { GA_TO_MIXPANEL_MAPPING, ENABLED_MIXPANEL_EVENTS } from './ga-mixpanel-mapping'
+// Moved from deleted mixpanel.ts for backward compatibility
+const safeAppToMixPanelEventProperties = (safeApp: any, options?: { launchLocation?: string }) => {
+  const properties: Record<string, any> = {}
 
-const convertGAToMixpanelProperties = (
-  eventData: AnalyticsEvent,
-  additionalParameters?: Record<string, any>,
-): Record<string, any> => {
-  const baseProperties: Record<string, any> = {
-    category: eventData.category,
-    action: eventData.action,
+  if (safeApp?.name) {
+    properties['Safe App Name'] = safeApp.name
   }
 
-  if (eventData.label !== undefined) {
-    baseProperties.label = eventData.label
+  if (safeApp?.tags && Array.isArray(safeApp.tags)) {
+    properties['Safe App Tags'] = safeApp.tags
   }
 
-  if (eventData.chainId) {
-    baseProperties[MixPanelEventParams.BLOCKCHAIN_NETWORK] = eventData.chainId
+  if (options?.launchLocation) {
+    // Convert enum-like values to readable strings
+    const locationMap: Record<string, string> = {
+      PREVIEW_DRAWER: 'Preview Drawer',
+      SAFE_APPS_LIST: 'Safe Apps List',
+      apps_list: 'Safe Apps List',
+      apps_sidebar: 'Preview Drawer',
+    }
+    properties['Launch Location'] = locationMap[options.launchLocation] || options.launchLocation
   }
 
-  return {
-    ...baseProperties,
-    ...additionalParameters,
-  }
+  return properties
 }
 
 export const trackEvent = (eventData: AnalyticsEvent, additionalParameters?: Record<string, any>): void => {
   gtmTrack(eventData)
-
-  const mixpanelEventName =
-    GA_TO_MIXPANEL_MAPPING[eventData.action] || (eventData.event ? GA_TO_MIXPANEL_MAPPING[eventData.event] : undefined)
-
-  if (mixpanelEventName && ENABLED_MIXPANEL_EVENTS.includes(mixpanelEventName as any)) {
-    const mixpanelProperties = convertGAToMixpanelProperties(eventData, additionalParameters)
-    mixpanelTrack(mixpanelEventName, mixpanelProperties)
-  }
+  // Note: Mixpanel tracking removed - use new analytics system instead
+  // additionalParameters kept for backward compatibility but not used
+  void additionalParameters
 }
 
 export const trackSafeAppEvent = (
@@ -59,19 +53,18 @@ export const trackSafeAppEvent = (
 ): void => {
   const appName = safeApp?.name
   gtmTrackSafeApp(eventData, appName, options?.sdkEventData)
-
-  const mixpanelEventName =
-    GA_TO_MIXPANEL_MAPPING[eventData.action] || (eventData.event ? GA_TO_MIXPANEL_MAPPING[eventData.event] : undefined)
-
-  if (mixpanelEventName && ENABLED_MIXPANEL_EVENTS.includes(mixpanelEventName as any) && safeApp) {
-    const mixpanelProperties = safeAppToMixPanelEventProperties(safeApp, options)
-    mixpanelTrack(mixpanelEventName, mixpanelProperties)
-  }
+  // Note: Mixpanel tracking removed - use new analytics system instead
 }
 
-export const trackMixPanelEvent = mixpanelTrack
+// Deprecated: Use new analytics system instead
+export const trackMixPanelEvent = () => {
+  console.warn('trackMixPanelEvent is deprecated. Use analytics.track() from analytics instead.')
+}
 export { safeAppToMixPanelEventProperties }
+
+// Export the new analytics system as the primary interface
+export { analytics, safeAnalytics, analyticsDevTools, useAnalytics } from './unified-analytics'
 
 export * from './types'
 export * from './events'
-export * from './mixpanel-events'
+export * from './mixpanel-events' // Still needed for safeAppToMixPanelEventProperties compatibility
