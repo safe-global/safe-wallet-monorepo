@@ -13,7 +13,7 @@
  */
 import type { AnalyticsEvent } from './types'
 import { gtmTrack, gtmTrackSafeApp } from './gtm'
-// Moved from deleted mixpanel.ts for backward compatibility
+
 const safeAppToMixPanelEventProperties = (safeApp: any, options?: { launchLocation?: string }) => {
   const properties: Record<string, any> = {}
 
@@ -26,7 +26,6 @@ const safeAppToMixPanelEventProperties = (safeApp: any, options?: { launchLocati
   }
 
   if (options?.launchLocation) {
-    // Convert enum-like values to readable strings
     const locationMap: Record<string, string> = {
       PREVIEW_DRAWER: 'Preview Drawer',
       SAFE_APPS_LIST: 'Safe Apps List',
@@ -56,10 +55,6 @@ export const trackSafeAppEvent = (
   // Note: Mixpanel tracking removed - use new analytics system instead
 }
 
-// Deprecated: Use new analytics system instead
-export const trackMixPanelEvent = () => {
-  console.warn('trackMixPanelEvent is deprecated. Use analytics.track() from analytics instead.')
-}
 export { safeAppToMixPanelEventProperties }
 
 // Export the new analytics system as the primary interface

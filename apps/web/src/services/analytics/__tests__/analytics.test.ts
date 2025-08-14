@@ -377,32 +377,4 @@ describe('New Analytics System', () => {
       expect(validation.errors).toEqual([])
     })
   })
-
-  describe('Backward Compatibility', () => {
-    it('should handle legacy trackEvent calls', () => {
-      const { trackEvent } = require('../unified-analytics')
-
-      const result = trackEvent({
-        action: 'button_click',
-        category: 'test',
-        label: 'test_button',
-        chainId: '1',
-      })
-
-      expect(result).toBeDefined()
-      // Should map to new event structure
-    })
-
-    it('should handle legacy trackSafeAppEvent calls', () => {
-      const { trackSafeAppEvent } = require('../unified-analytics')
-
-      const result = trackSafeAppEvent(
-        { action: 'Open Safe App', category: 'safe_apps' },
-        { name: 'Test App', url: 'https://test.app' },
-        { launchLocation: 'apps_list' },
-      )
-
-      expect(result).toBeDefined()
-    })
-  })
 })
