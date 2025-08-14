@@ -2,6 +2,7 @@
  * Provider constants to replace string literals in routing and configuration.
  * This ensures type safety and prevents typos in provider IDs.
  */
+import type { EventUnion } from '../events/catalog'
 
 /**
  * Provider ID constants - use these instead of string literals
@@ -29,9 +30,7 @@ export type RouteDecision = {
 /**
  * Router function type that uses typed events and provider IDs
  */
-export type Router<E extends Record<string, Record<string, unknown>>> = (
-  event: import('../events/catalog').EventUnion<E>,
-) => RouteDecision | void
+export type Router<E extends Record<string, Record<string, unknown>>> = (event: EventUnion<E>) => RouteDecision | void
 
 /**
  * Track options type for per-call routing overrides

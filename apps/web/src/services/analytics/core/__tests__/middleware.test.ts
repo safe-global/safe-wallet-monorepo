@@ -2,10 +2,7 @@
  * Unit tests for Middleware system
  */
 
-import {
-  MiddlewareChain,
-  createLoggingMiddleware,
-} from '../middleware'
+import { MiddlewareChain, createLoggingMiddleware } from '../middleware'
 import type { MiddlewareFunction, AnalyticsEvent, EventContext, SafeEventMap } from '../types'
 
 // Test event types
@@ -370,5 +367,4 @@ describe('Built-in Middleware', () => {
       )
     })
   })
-
 })

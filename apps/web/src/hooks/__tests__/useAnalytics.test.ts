@@ -80,7 +80,7 @@ jest.mock('@/services/analytics/providers/MixpanelProvider', () => ({
 
 import { useMediaQuery } from '@mui/material'
 import { useAppSelector } from '@/store'
-import { hasConsentFor, CookieAndTermType } from '@/store/cookiesAndTermsSlice'
+import { hasConsentFor } from '@/store/cookiesAndTermsSlice'
 import { useHasFeature, useChain } from '@/hooks/useChains'
 import useChainId from '@/hooks/useChainId'
 import useSafeAddress from '@/hooks/useSafeAddress'

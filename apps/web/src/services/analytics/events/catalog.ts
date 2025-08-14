@@ -4,6 +4,7 @@
  */
 
 import { z } from 'zod'
+import type { EventContext } from '../core/types'
 
 /**
  * Event schemas with Zod for optional runtime validation
@@ -230,7 +231,7 @@ export type EventUnion<E extends Record<string, Record<string, unknown>> = Event
   [K in keyof E & string]: {
     name: K
     payload: E[K]
-    context?: import('../core/types').EventContext
+    context?: EventContext
     timestamp?: number
   }
 }[keyof E & string]
@@ -256,7 +257,7 @@ export const validateEvent = <K extends EventName>(name: K, payload: unknown): v
  */
 export const createEvent =
   <E extends EventMap = EventMap>() =>
-  <K extends EventName>(name: K, payload: E[K], context?: import('../core/types').EventContext): EventUnion<E> => {
+  <K extends EventName>(name: K, payload: E[K], context?: EventContext): EventUnion<E> => {
     // Validate in development
     validateEvent(name, payload)
 

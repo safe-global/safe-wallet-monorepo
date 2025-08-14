@@ -4,7 +4,7 @@
  */
 
 import type { AnalyticsEvent, MiddlewareFunction, EventContext } from './types'
-import type { EventUnion, EventName } from '../events/catalog'
+import type { EventUnion } from '../events/catalog'
 
 export type Middleware<E extends Record<string, Record<string, unknown>>> = (
   event: EventUnion<E>,
@@ -57,9 +57,19 @@ export class MiddlewareChain<
 
   process(event: AnalyticsEvent<any, any>, context?: EventContext): AnalyticsEvent<any, any> | null {
     let current: AnalyticsEvent<any, any> | null = event
+    let currentContext = context
     for (const middleware of this.chain) {
       if (current == null) return null
-      current = middleware(current, context)
+      try {
+        current = middleware(current, currentContext)
+        // Update context if middleware modified the event's context
+        if (current && current.context !== undefined) {
+          currentContext = current.context
+        }
+      } catch (error) {
+        // Continue with next middleware if one fails
+        continue
+      }
     }
     return current
   }
@@ -98,7 +108,6 @@ export const createLoggingMiddleware = (options?: {
   }
 }
 
-
 // New typed middleware factories using constants
 export const createTypedLoggingMiddleware = <E extends Record<string, Record<string, unknown>>>(options?: {
   enabled?: boolean
@@ -117,4 +126,3 @@ export const createTypedLoggingMiddleware = <E extends Record<string, Record<str
     next(event)
   }
 }
-

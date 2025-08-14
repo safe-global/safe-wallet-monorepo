@@ -3,7 +3,7 @@
  * Base capabilities are required, extended capabilities are opt-in.
  */
 
-import type { AnalyticsEvent, SafeEventMap, ProviderInitOptions, PageContext } from './types'
+import type { ProviderInitOptions, PageContext } from './types'
 import type { EventUnion } from '../events/catalog'
 import type { ProviderId } from '../providers/constants'
 

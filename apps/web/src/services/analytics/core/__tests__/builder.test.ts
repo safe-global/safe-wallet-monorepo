@@ -4,11 +4,17 @@
 
 import { AnalyticsBuilder } from '../builder'
 import type { BaseProvider, MiddlewareFunction, SafeEventMap } from '../types'
+import type { ProviderId } from '../../providers/constants'
+import { PROVIDER } from '../../providers/constants'
 
 // Mock provider
 class MockProvider implements BaseProvider {
-  readonly id = 'mock'
+  readonly id: ProviderId
   private enabled = true
+
+  constructor(id: ProviderId = PROVIDER.Mock) {
+    this.id = id
+  }
 
   isEnabled(): boolean {
     return this.enabled
@@ -52,8 +58,8 @@ describe('AnalyticsBuilder', () => {
 
   describe('Provider Management', () => {
     it('should add providers', () => {
-      const provider1 = new MockProvider()
-      const provider2 = new MockProvider()
+      const provider1 = new MockProvider('mock1' as ProviderId)
+      const provider2 = new MockProvider('mock2' as ProviderId)
 
       const result = builder.addProvider(provider1).addProvider(provider2)
 
@@ -61,7 +67,7 @@ describe('AnalyticsBuilder', () => {
     })
 
     it('should add multiple providers at once', () => {
-      const providers = [new MockProvider(), new MockProvider()]
+      const providers = [new MockProvider('mock1' as ProviderId), new MockProvider('mock2' as ProviderId)]
 
       const result = builder.addProviders(providers)
 
@@ -148,8 +154,8 @@ describe('AnalyticsBuilder', () => {
     })
 
     it('should build analytics instance with providers', () => {
-      const provider1 = new MockProvider()
-      const provider2 = new MockProvider()
+      const provider1 = new MockProvider('mock1' as ProviderId)
+      const provider2 = new MockProvider('mock2' as ProviderId)
 
       const analytics = builder.addProvider(provider1).addProvider(provider2).build()
 
@@ -230,8 +236,8 @@ describe('AnalyticsBuilder', () => {
     })
 
     it('should build multiple independent instances', () => {
-      const provider1 = new MockProvider()
-      const provider2 = new MockProvider()
+      const provider1 = new MockProvider('mock1' as ProviderId)
+      const provider2 = new MockProvider('mock2' as ProviderId)
 
       const analytics1 = builder.addProvider(provider1).build()
       const analytics2 = AnalyticsBuilder.create().addProvider(provider2).build()
