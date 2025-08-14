@@ -32,7 +32,8 @@ describe('Transaction Builder 3 tests', { defaultCommandTimeout: 20000 }, () => 
       getBody().findByText(safeapps.sendBatchStr).click()
     })
     safeapps.clickOnAdvancedDetails()
-    main.verifyElementsIsVisible([`${txAccordionDetails} ${safeapps.cowFallBackHandlerTitle}`])
+    //Commented for now because decoder service doesn't index contracts if the "to" is the safe
+    //main.verifyElementsIsVisible([`${txAccordionDetails} ${safeapps.cowFallBackHandlerTitle}`])
     safeapps.verifyUntrustedHandllerWarningDoesNotExist()
   })
 })
