@@ -3,7 +3,8 @@ import NetworkInput from '@/components/common/NetworkInput'
 import { updateAddressBook } from '@/components/new-safe/create/logic/address-book'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import useAddressBook from '@/hooks/useAddressBook'
-import { CREATE_SAFE_CATEGORY, CREATE_SAFE_EVENTS, OVERVIEW_EVENTS, trackEvent } from '@/services/analytics'
+import { CREATE_SAFE_CATEGORY, OVERVIEW_EVENTS, trackEvent } from '@/services/analytics'
+import { safeAnalytics } from '@/services/analytics/unified-analytics'
 import { gtmSetChainId } from '@/services/analytics/gtm'
 import { showNotification } from '@/store/notificationsSlice'
 import { Box, Button, CircularProgress, DialogActions, DialogContent, Stack, Typography } from '@mui/material'
@@ -113,7 +114,16 @@ const ReplaySafeDialog = ({
       )
 
       trackEvent({ ...OVERVIEW_EVENTS.PROCEED_WITH_TX, label: 'counterfactual', category: CREATE_SAFE_CATEGORY })
-      trackEvent({ ...CREATE_SAFE_EVENTS.CREATED_SAFE, label: 'counterfactual' })
+      safeAnalytics.safeCreated({
+        chain_id: selectedChain.chainId,
+        deployment_type: 'counterfactual',
+        payment_method: 'relay',
+        threshold: safeCreationData.safeAccountConfig.threshold,
+        num_owners: safeCreationData.safeAccountConfig.owners.length,
+        safe_version: safeCreationData.safeVersion,
+        user_experience_flow: 'multichain_replay',
+        creation_source: 'replay_existing_safe',
+      })
 
       router.push({
         query: {

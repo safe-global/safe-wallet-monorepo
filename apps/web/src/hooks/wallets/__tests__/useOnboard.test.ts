@@ -24,6 +24,14 @@ jest.mock('@/services/analytics', () => ({
   },
 }))
 
+// mock new analytics
+jest.mock('@/services/analytics/unified-analytics', () => ({
+  safeAnalytics: {
+    walletConnected: jest.fn(),
+    setWalletContext: jest.fn(),
+  },
+}))
+
 jest.mock('@/utils/wallets', () => ({
   isWalletConnect: jest.fn(),
 }))
@@ -154,10 +162,15 @@ describe('useOnboard', () => {
   describe('trackWalletType', () => {
     let mockTrackEvent: jest.Mock
     let mockIsWalletConnect: jest.Mock
+    let mockSafeAnalytics: {
+      walletConnected: jest.Mock
+      setWalletContext: jest.Mock
+    }
 
     beforeEach(() => {
       mockTrackEvent = jest.requireMock('@/services/analytics').trackEvent
       mockIsWalletConnect = jest.requireMock('@/utils/wallets').isWalletConnect
+      mockSafeAnalytics = jest.requireMock('@/services/analytics/unified-analytics').safeAnalytics
       jest.clearAllMocks()
     })
 
@@ -218,16 +231,17 @@ describe('useOnboard', () => {
 
       trackWalletType(wallet, configs)
 
-      expect(mockTrackEvent).toHaveBeenCalledWith(
-        {
-          event: 'wallet_connect',
-          label: 'MetaMask',
-        },
-        {
-          'EOA Wallet Label': 'MetaMask',
-          'EOA Wallet Address': '0x1234567890123456789012345678901234567890',
-          'EOA Wallet Network': 'Ethereum',
-        },
+      expect(mockSafeAnalytics.walletConnected).toHaveBeenCalledWith({
+        wallet_type: 'MetaMask',
+        chain_id: '1',
+        wallet_address: '0x1234567890123456789012345678901234567890',
+        network_name: 'Ethereum',
+        connection_method: 'direct',
+      })
+
+      expect(mockSafeAnalytics.setWalletContext).toHaveBeenCalledWith(
+        'MetaMask',
+        '0x1234567890123456789012345678901234567890',
       )
     })
 
@@ -298,16 +312,17 @@ describe('useOnboard', () => {
 
       trackWalletType(wallet, configs)
 
-      expect(mockTrackEvent).toHaveBeenCalledWith(
-        {
-          event: 'wallet_connect',
-          label: 'WalletConnect',
-        },
-        {
-          'EOA Wallet Label': 'WalletConnect',
-          'EOA Wallet Address': '0x1234567890123456789012345678901234567890',
-          'EOA Wallet Network': 'Polygon',
-        },
+      expect(mockSafeAnalytics.walletConnected).toHaveBeenCalledWith({
+        wallet_type: 'WalletConnect',
+        chain_id: '137',
+        wallet_address: '0x1234567890123456789012345678901234567890',
+        network_name: 'Polygon',
+        connection_method: 'walletconnect',
+      })
+
+      expect(mockSafeAnalytics.setWalletContext).toHaveBeenCalledWith(
+        'WalletConnect',
+        '0x1234567890123456789012345678901234567890',
       )
 
       expect(mockTrackEvent).toHaveBeenCalledWith({
@@ -373,16 +388,17 @@ describe('useOnboard', () => {
 
       trackWalletType(wallet, configs)
 
-      expect(mockTrackEvent).toHaveBeenCalledWith(
-        {
-          event: 'wallet_connect',
-          label: 'MetaMask',
-        },
-        {
-          'EOA Wallet Label': 'MetaMask',
-          'EOA Wallet Address': '0x1234567890123456789012345678901234567890',
-          'EOA Wallet Network': 'Chain 999',
-        },
+      expect(mockSafeAnalytics.walletConnected).toHaveBeenCalledWith({
+        wallet_type: 'MetaMask',
+        chain_id: '999',
+        wallet_address: '0x1234567890123456789012345678901234567890',
+        network_name: 'Chain 999',
+        connection_method: 'direct',
+      })
+
+      expect(mockSafeAnalytics.setWalletContext).toHaveBeenCalledWith(
+        'MetaMask',
+        '0x1234567890123456789012345678901234567890',
       )
     })
 
@@ -453,16 +469,17 @@ describe('useOnboard', () => {
 
       trackWalletType(wallet, configs)
 
-      expect(mockTrackEvent).toHaveBeenCalledWith(
-        {
-          event: 'wallet_connect',
-          label: 'WalletConnect',
-        },
-        {
-          'EOA Wallet Label': 'WalletConnect',
-          'EOA Wallet Address': '0x1234567890123456789012345678901234567890',
-          'EOA Wallet Network': 'Ethereum',
-        },
+      expect(mockSafeAnalytics.walletConnected).toHaveBeenCalledWith({
+        wallet_type: 'WalletConnect',
+        chain_id: '1',
+        wallet_address: '0x1234567890123456789012345678901234567890',
+        network_name: 'Ethereum',
+        connection_method: 'walletconnect',
+      })
+
+      expect(mockSafeAnalytics.setWalletContext).toHaveBeenCalledWith(
+        'WalletConnect',
+        '0x1234567890123456789012345678901234567890',
       )
 
       expect(mockTrackEvent).toHaveBeenCalledWith({

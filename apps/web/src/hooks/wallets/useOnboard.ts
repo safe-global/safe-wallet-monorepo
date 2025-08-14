@@ -6,7 +6,8 @@ import { getAddress } from 'ethers'
 import useChains, { useCurrentChain } from '@/hooks/useChains'
 import ExternalStore from '@safe-global/utils/services/ExternalStore'
 import { logError, Errors } from '@/services/exceptions'
-import { trackEvent, WALLET_EVENTS, MixPanelEventParams } from '@/services/analytics'
+import { trackEvent, WALLET_EVENTS } from '@/services/analytics'
+import { safeAnalytics } from '@/services/analytics/unified-analytics'
 import { useAppSelector, useAppDispatch } from '@/store'
 import { selectRpc } from '@/store/settingsSlice'
 import { formatAmount } from '@safe-global/utils/utils/formatNumber'
@@ -93,14 +94,15 @@ export const trackWalletType = (wallet: ConnectedWallet, configs: ChainInfo[]) =
   const chainInfo = configs.find((config) => config.chainId === wallet.chainId)
   const networkName = chainInfo?.chainName || `Chain ${wallet.chainId}`
 
-  trackEvent(
-    { ...WALLET_EVENTS.CONNECT, label: wallet.label },
-    {
-      [MixPanelEventParams.EOA_WALLET_LABEL]: wallet.label,
-      [MixPanelEventParams.EOA_WALLET_ADDRESS]: wallet.address,
-      [MixPanelEventParams.EOA_WALLET_NETWORK]: networkName,
-    },
-  )
+  safeAnalytics.walletConnected({
+    wallet_type: wallet.label,
+    chain_id: wallet.chainId,
+    wallet_address: wallet.address,
+    network_name: networkName,
+    connection_method: isWalletConnect(wallet) ? 'walletconnect' : 'direct',
+  })
+  // Set wallet context for future events
+  safeAnalytics.setWalletContext(wallet.label, wallet.address)
 
   const wcLabel = getWalletConnectLabel(wallet)
   if (wcLabel) {

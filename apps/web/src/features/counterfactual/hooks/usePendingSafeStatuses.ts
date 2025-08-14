@@ -13,7 +13,8 @@ import { checkSafeActionViaRelay, checkSafeActivation } from '@/features/counter
 import useChainId from '@/hooks/useChainId'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
-import { CREATE_SAFE_EVENTS, trackEvent, MixPanelEventParams } from '@/services/analytics'
+import '@/services/analytics'
+import { safeAnalytics } from '@/services/analytics/unified-analytics'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { useEffect, useRef } from 'react'
 import { isSmartContract } from '@/utils/wallets'
@@ -122,28 +123,43 @@ const usePendingSafeStatus = (): void => {
           // TODO: Possible to add a label with_tx, without_tx?
           // Not a counterfactual deployment
           if ('type' in detail && detail.type === PayMethod.PayNow) {
-            trackEvent(CREATE_SAFE_EVENTS.CREATED_SAFE)
+            safeAnalytics.safeCreated({
+              chain_id: creationChainId,
+              deployment_type: 'standard',
+              payment_method: 'wallet',
+              threshold: 1, // Default when data not available
+              num_owners: 1, // Default when data not available
+              safe_address: detail.safeAddress,
+            })
           }
 
           const undeployedSafe = undeployedSafes[creationChainId]?.[detail.safeAddress]
           if (undeployedSafe) {
             const safeSetup = extractCounterfactualSafeSetup(undeployedSafe, creationChainId)
             if (safeSetup) {
-              trackEvent(CREATE_SAFE_EVENTS.ACTIVATED_SAFE, {
-                [MixPanelEventParams.SAFE_ADDRESS]: detail.safeAddress,
-                [MixPanelEventParams.BLOCKCHAIN_NETWORK]: chain?.chainName || '',
-                [MixPanelEventParams.NUMBER_OF_OWNERS]: safeSetup.owners.length,
-                [MixPanelEventParams.THRESHOLD]: safeSetup.threshold,
-                [MixPanelEventParams.ENTRY_POINT]: 'Counterfactual Activation',
-                [MixPanelEventParams.DEPLOYMENT_TYPE]: 'Counterfactual',
-                [MixPanelEventParams.PAYMENT_METHOD]:
-                  'type' in detail && detail.type === PayMethod.PayLater ? 'Sponsored' : 'Self-paid',
+              safeAnalytics.safeActivated({
+                chain_id: creationChainId,
+                safe_address: detail.safeAddress,
+                deployment_type: 'counterfactual',
+                num_owners: safeSetup.owners.length,
+                threshold: safeSetup.threshold,
+                entry_point: 'Counterfactual Activation',
+                payment_method: 'type' in detail && detail.type === PayMethod.PayLater ? 'sponsored' : 'self_paid',
+                network_name: chain?.chainName || '',
               })
             } else {
-              trackEvent(CREATE_SAFE_EVENTS.ACTIVATED_SAFE)
+              safeAnalytics.safeActivated({
+                chain_id: creationChainId,
+                safe_address: detail.safeAddress,
+                deployment_type: 'counterfactual',
+              })
             }
           } else {
-            trackEvent(CREATE_SAFE_EVENTS.ACTIVATED_SAFE)
+            safeAnalytics.safeActivated({
+              chain_id: creationChainId,
+              safe_address: detail.safeAddress,
+              deployment_type: 'standard',
+            })
           }
 
           pollSafeInfo(creationChainId, detail.safeAddress).finally(() => {
