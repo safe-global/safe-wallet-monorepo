@@ -1,13 +1,3 @@
-/**
- * Analytics Manager
- *
- * Central orchestrator for all analytics providers. This class:
- * - Manages multiple analytics providers (GA, Mixpanel, etc.)
- * - Routes events to appropriate providers based on configuration
- * - Handles provider-specific transformations and filtering
- * - Provides a unified API for components to use
- */
-
 import type {
   AnalyticsProvider,
   AnalyticsEvent,
@@ -28,15 +18,11 @@ export class AnalyticsManager {
     this.config = config
   }
 
-  /**
-   * Initialize all providers and the manager
-   */
   initialize(): void {
     if (this.isInitialized || !this.config.enabled) {
       return
     }
 
-    // Initialize all registered providers
     this.providers.forEach((provider) => {
       try {
         provider.initialize()
@@ -48,7 +34,6 @@ export class AnalyticsManager {
       }
     })
 
-    // Load event configurations
     this.loadEventConfigurations()
 
     this.isInitialized = true
@@ -58,9 +43,6 @@ export class AnalyticsManager {
     }
   }
 
-  /**
-   * Add an analytics provider
-   */
   addProvider(provider: AnalyticsProvider): void {
     this.providers.set(provider.name, provider)
 
@@ -69,9 +51,6 @@ export class AnalyticsManager {
     }
   }
 
-  /**
-   * Remove an analytics provider
-   */
   removeProvider(providerName: string): void {
     this.providers.delete(providerName)
 
@@ -80,16 +59,10 @@ export class AnalyticsManager {
     }
   }
 
-  /**
-   * Get a specific provider
-   */
   getProvider(providerName: string): AnalyticsProvider | undefined {
     return this.providers.get(providerName)
   }
 
-  /**
-   * Track an event using the configured providers
-   */
   track(eventKey: string, properties: Record<string, any> = {}): TrackingResult {
     if (!this.isInitialized || !this.config.enabled) {
       if (this.config.debug) {
@@ -109,14 +82,12 @@ export class AnalyticsManager {
     const results: Record<string, ProviderResult> = {}
     let overallSuccess = true
 
-    // Enhanced properties with metadata
     const enhancedProperties = {
       ...properties,
       event_key: eventKey,
       timestamp: Date.now(),
     }
 
-    // Send to GA if configured
     if (eventConfig.providers.ga?.enabled) {
       const gaProvider = this.providers.get('ga')
       if (gaProvider) {
@@ -134,7 +105,6 @@ export class AnalyticsManager {
       }
     }
 
-    // Send to Mixpanel if configured
     if (eventConfig.providers.mixpanel?.enabled) {
       const mixpanelProvider = this.providers.get('mixpanel')
       if (mixpanelProvider) {
@@ -165,16 +135,10 @@ export class AnalyticsManager {
     }
   }
 
-  /**
-   * Track multiple events in batch
-   */
   trackBatch(events: Array<{ eventKey: string; properties?: Record<string, any> }>): TrackingResult[] {
     return events.map(({ eventKey, properties }) => this.track(eventKey, properties))
   }
 
-  /**
-   * Identify a user across all providers
-   */
   identify(userId: string, traits?: Record<string, any>): void {
     if (!this.isInitialized) {
       return
@@ -193,9 +157,6 @@ export class AnalyticsManager {
     }
   }
 
-  /**
-   * Set a user property across all providers
-   */
   setUserProperty(key: string, value: any): void {
     if (!this.isInitialized) {
       return
@@ -210,9 +171,6 @@ export class AnalyticsManager {
     })
   }
 
-  /**
-   * Set a global property across all providers
-   */
   setGlobalProperty(key: string, value: any): void {
     if (!this.isInitialized) {
       return
@@ -227,9 +185,6 @@ export class AnalyticsManager {
     })
   }
 
-  /**
-   * Enable or disable tracking across all providers
-   */
   setTrackingEnabled(enabled: boolean): void {
     this.providers.forEach((provider, name) => {
       try {
@@ -244,16 +199,10 @@ export class AnalyticsManager {
     }
   }
 
-  /**
-   * Check if all providers are ready
-   */
   areAllProvidersReady(): boolean {
     return Array.from(this.providers.values()).every((provider) => provider.isReady())
   }
 
-  /**
-   * Get status of all providers
-   */
   getProviderStatuses(): Record<string, { ready: boolean; name: string }> {
     const statuses: Record<string, { ready: boolean; name: string }> = {}
 
@@ -267,16 +216,10 @@ export class AnalyticsManager {
     return statuses
   }
 
-  /**
-   * Get event configuration for debugging
-   */
   getEventConfiguration(eventKey: string): EventConfiguration | undefined {
     return this.eventConfigurations.get(eventKey)
   }
 
-  /**
-   * Get all available event keys
-   */
   getAvailableEvents(): string[] {
     return Array.from(this.eventConfigurations.keys())
   }
@@ -288,7 +231,6 @@ export class AnalyticsManager {
   ): ProviderResult {
     const gaConfig = eventConfig.providers.ga!
 
-    // Skip if no event name is configured (for disabled events)
     if (!gaConfig.eventName) {
       return {
         success: false,
@@ -296,13 +238,11 @@ export class AnalyticsManager {
       }
     }
 
-    // Apply transformation if configured
     let transformedProperties = properties
     if (gaConfig.transform) {
       transformedProperties = gaConfig.transform(properties)
     }
 
-    // For GA, we rely on the provider to filter parameters
     const event: AnalyticsEvent = {
       name: gaConfig.eventName,
       properties: transformedProperties,
@@ -329,7 +269,6 @@ export class AnalyticsManager {
   ): ProviderResult {
     const mixpanelConfig = eventConfig.providers.mixpanel!
 
-    // Skip if no event name is configured (for disabled events)
     if (!mixpanelConfig.eventName) {
       return {
         success: false,
@@ -339,12 +278,10 @@ export class AnalyticsManager {
 
     let enrichedProperties = properties
 
-    // Apply property enrichment if configured
     if (mixpanelConfig.enrichProperties) {
       enrichedProperties = mixpanelConfig.enrichProperties(properties)
     }
 
-    // Apply transformation if configured
     if (mixpanelConfig.transform) {
       enrichedProperties = mixpanelConfig.transform(enrichedProperties)
     }
@@ -369,7 +306,6 @@ export class AnalyticsManager {
   }
 
   private loadEventConfigurations(): void {
-    // Load configurations from the config
     Object.entries(this.config.events).forEach(([eventKey, config]) => {
       this.eventConfigurations.set(eventKey, config)
     })
@@ -379,13 +315,6 @@ export class AnalyticsManager {
     }
   }
 
-  /**
-   * Convenience methods for common tracking patterns
-   */
-
-  /**
-   * Track a page view
-   */
   page(path: string, properties?: Record<string, any>): TrackingResult {
     return this.track(StandardEvents.PAGE_VIEW, {
       page_path: path,
@@ -394,9 +323,6 @@ export class AnalyticsManager {
     })
   }
 
-  /**
-   * Track a button click
-   */
   click(buttonName: string, properties?: Record<string, any>): TrackingResult {
     return this.track(StandardEvents.BUTTON_CLICK, {
       button_name: buttonName,
@@ -404,9 +330,6 @@ export class AnalyticsManager {
     })
   }
 
-  /**
-   * Track an error
-   */
   error(errorMessage: string, properties?: Record<string, any>): TrackingResult {
     return this.track(StandardEvents.ERROR_OCCURRED, {
       error_message: errorMessage,
@@ -415,9 +338,6 @@ export class AnalyticsManager {
     })
   }
 
-  /**
-   * Track feature usage
-   */
   feature(featureName: string, properties?: Record<string, any>): TrackingResult {
     return this.track(StandardEvents.FEATURE_USED, {
       feature_name: featureName,

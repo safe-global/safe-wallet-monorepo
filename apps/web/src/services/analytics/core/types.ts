@@ -5,7 +5,6 @@
  * supporting different provider requirements (GA4 with registered parameters,
  * Mixpanel with dynamic properties).
  */
-
 export interface AnalyticsEvent {
   /** The event name/identifier */
   name: string

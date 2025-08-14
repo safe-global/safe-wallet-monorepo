@@ -1,11 +1,3 @@
-/**
- * Mixpanel Analytics Provider
- *
- * Implements the AnalyticsProvider interface for Mixpanel.
- * Unlike GA4, Mixpanel accepts any properties without pre-registration,
- * making it ideal for detailed event tracking with rich context.
- */
-
 import mixpanel from 'mixpanel-browser'
 import { IS_PRODUCTION } from '@/config/constants'
 import type { AnalyticsProvider, AnalyticsEvent } from '../../core/types'
@@ -36,7 +28,6 @@ export class MixpanelProvider implements AnalyticsProvider {
       ...config,
     }
 
-    // Set default global properties
     this.setDefaultGlobalProperties()
   }
 
@@ -56,13 +47,12 @@ export class MixpanelProvider implements AnalyticsProvider {
       mixpanel.init(this.config.token, {
         debug: this.config.debug,
         persistence: this.config.persistence,
-        autocapture: false, // We handle events manually
+        autocapture: false,
         batch_requests: true,
-        ip: false, // Don't collect IP for privacy
+        ip: false,
         opt_out_tracking_by_default: this.config.optOutByDefault,
       })
 
-      // Register global properties
       mixpanel.register(this.globalProperties)
 
       this.isInitialized = true
@@ -84,16 +74,12 @@ export class MixpanelProvider implements AnalyticsProvider {
     }
 
     try {
-      // Combine all properties - Mixpanel accepts everything
       const allProperties = {
         ...this.globalProperties,
         ...event.properties,
-        // Add event metadata
         event_timestamp: event.metadata?.timestamp || Date.now(),
         event_source: event.metadata?.source || 'unknown',
       }
-
-      // Clean up properties for Mixpanel
       const cleanedProperties = this.cleanProperties(allProperties)
 
       mixpanel.track(event.name, cleanedProperties)
@@ -117,12 +103,9 @@ export class MixpanelProvider implements AnalyticsProvider {
     try {
       mixpanel.identify(userId)
 
-      // Set user properties if provided
       if (traits) {
         const cleanedTraits = this.cleanProperties(traits)
         mixpanel.people.set(cleanedTraits)
-
-        // Store locally
         Object.assign(this.userProperties, cleanedTraits)
       }
 
@@ -141,11 +124,7 @@ export class MixpanelProvider implements AnalyticsProvider {
 
     try {
       const cleanedValue = this.cleanValue(value)
-
-      // Store locally
       this.userProperties[key] = cleanedValue
-
-      // Set in Mixpanel
       mixpanel.people.set({ [key]: cleanedValue })
 
       if (this.config.debug) {
@@ -158,11 +137,8 @@ export class MixpanelProvider implements AnalyticsProvider {
 
   setGlobalProperty(key: string, value: any): void {
     const cleanedValue = this.cleanValue(value)
-
-    // Store locally
     this.globalProperties[key] = cleanedValue
 
-    // Register in Mixpanel (applies to all future events)
     if (this.isInitialized) {
       try {
         mixpanel.register({ [key]: cleanedValue })
@@ -202,47 +178,32 @@ export class MixpanelProvider implements AnalyticsProvider {
     return this.isInitialized && !!mixpanel
   }
 
-  /**
-   * Check if tracking is currently enabled
-   */
   isTrackingEnabled(): boolean {
     if (!this.isInitialized) {
       return false
     }
 
     try {
-      // Mixpanel's has_opted_in_tracking returns true if user has opted in
       return mixpanel.has_opted_in_tracking()
     } catch {
-      // If there's an error, assume tracking is disabled
       return false
     }
   }
 
-  /**
-   * Get current user properties
-   */
   getUserProperties(): Record<string, any> {
     return { ...this.userProperties }
   }
 
-  /**
-   * Get current global properties
-   */
   getGlobalProperties(): Record<string, any> {
     return { ...this.globalProperties }
   }
 
-  /**
-   * Track user registration/signup
-   */
   trackSignup(userId: string, properties?: Record<string, any>): void {
     if (!this.isInitialized || !this.config.enabled) {
       return
     }
 
     try {
-      mixpanel.alias(userId)
       this.track({
         name: 'Sign Up',
         properties: {
@@ -255,18 +216,14 @@ export class MixpanelProvider implements AnalyticsProvider {
     }
   }
 
-  /**
-   * Increment a numeric user property
-   */
   incrementUserProperty(property: string, value: number = 1): void {
     if (!this.isInitialized || !this.config.enabled) {
       return
     }
 
     try {
-      mixpanel.people.increment({ [property]: value })
+      mixpanel.people.increment(property, value)
 
-      // Update local copy
       if (typeof this.userProperties[property] === 'number') {
         this.userProperties[property] += value
       } else {
@@ -277,9 +234,6 @@ export class MixpanelProvider implements AnalyticsProvider {
     }
   }
 
-  /**
-   * Set user property only if it doesn't exist
-   */
   setUserPropertyOnce(key: string, value: any): void {
     if (!this.isInitialized || !this.config.enabled) {
       return
@@ -293,9 +247,6 @@ export class MixpanelProvider implements AnalyticsProvider {
     }
   }
 
-  /**
-   * Reset Mixpanel data (useful for logout)
-   */
   reset(): void {
     if (!this.isInitialized) {
       return
@@ -304,8 +255,6 @@ export class MixpanelProvider implements AnalyticsProvider {
     try {
       mixpanel.reset()
       this.userProperties = {}
-
-      // Re-register global properties
       mixpanel.register(this.globalProperties)
 
       if (this.config.debug) {
@@ -320,7 +269,6 @@ export class MixpanelProvider implements AnalyticsProvider {
     this.globalProperties = {
       'App Version': packageJson.version,
       'Device Type': this.getDeviceType(),
-      // Mixpanel allows spaces and special characters in property names
       $browser: this.getBrowser(),
       $os: this.getOS(),
     }
@@ -365,9 +313,6 @@ export class MixpanelProvider implements AnalyticsProvider {
     return 'Unknown'
   }
 
-  /**
-   * Clean properties for Mixpanel
-   */
   private cleanProperties(properties: Record<string, any>): Record<string, any> {
     const cleaned: Record<string, any> = {}
 
@@ -378,31 +323,23 @@ export class MixpanelProvider implements AnalyticsProvider {
     return cleaned
   }
 
-  /**
-   * Clean individual values for Mixpanel compatibility
-   */
   private cleanValue(value: any): any {
-    // Null/undefined handling
     if (value === null || value === undefined) {
       return null
     }
 
-    // Mixpanel supports most data types natively
     if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
       return value
     }
 
-    // Handle dates
     if (value instanceof Date) {
       return value.toISOString()
     }
 
-    // Handle arrays - Mixpanel supports arrays
     if (Array.isArray(value)) {
       return value.map((item) => this.cleanValue(item))
     }
 
-    // Handle objects - Mixpanel supports nested objects to some extent
     if (typeof value === 'object') {
       const cleaned: Record<string, any> = {}
       Object.entries(value).forEach(([key, val]) => {

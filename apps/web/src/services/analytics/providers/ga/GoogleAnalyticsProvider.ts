@@ -1,13 +1,3 @@
-/**
- * Google Analytics Provider
- *
- * Implements the AnalyticsProvider interface for Google Analytics 4.
- * This provider handles GA4-specific requirements:
- * - Parameter filtering (only registered parameters are sent)
- * - Event name formatting
- * - Value transformation for GA4 compatibility
- */
-
 import { sendGAEvent } from '@next/third-parties/google'
 import { IS_PRODUCTION } from '@/config/constants'
 import type { AnalyticsProvider, AnalyticsEvent } from '../../core/types'
@@ -38,7 +28,6 @@ export class GoogleAnalyticsProvider implements AnalyticsProvider {
     }
     this.parameterRegistry = new GAParameterRegistry()
 
-    // Set default global properties
     this.setDefaultGlobalProperties()
   }
 
@@ -47,8 +36,6 @@ export class GoogleAnalyticsProvider implements AnalyticsProvider {
       return
     }
 
-    // GA4 is initialized by Next.js third-parties package
-    // We just need to set up our consent and configuration
     this.setupConsent()
     this.isInitialized = true
 
@@ -66,16 +53,13 @@ export class GoogleAnalyticsProvider implements AnalyticsProvider {
     }
 
     try {
-      // Combine all properties
       const allProperties = {
         ...this.globalProperties,
         ...event.properties,
       }
 
-      // Filter to only registered parameters
       const filteredProperties = this.parameterRegistry.filterParameters(allProperties)
 
-      // Send event to GA4
       sendGAEvent('event', event.name, {
         send_to: this.config.trackingId,
         ...filteredProperties,
@@ -101,12 +85,10 @@ export class GoogleAnalyticsProvider implements AnalyticsProvider {
     }
 
     try {
-      // Set user ID in GA4
       window.gtag?.('config', this.config.trackingId, {
         user_id: userId,
       })
 
-      // Set user properties if provided
       if (traits) {
         Object.entries(traits).forEach(([key, value]) => {
           this.setUserProperty(key, value)
@@ -127,10 +109,8 @@ export class GoogleAnalyticsProvider implements AnalyticsProvider {
     }
 
     try {
-      // Store locally
       this.userProperties[key] = value
 
-      // Set in GA4
       window.gtag?.('set', 'user_properties', {
         [key]: value,
       })
@@ -144,7 +124,6 @@ export class GoogleAnalyticsProvider implements AnalyticsProvider {
   }
 
   setGlobalProperty(key: string, value: any): void {
-    // Only set if it's a registered parameter
     if (this.parameterRegistry.isRegistered(key)) {
       this.globalProperties[key] = value
 
@@ -160,12 +139,10 @@ export class GoogleAnalyticsProvider implements AnalyticsProvider {
     this.config.enabled = enabled
 
     if (!enabled) {
-      // Disable GA4 tracking
       window.gtag?.('consent', 'update', {
         analytics_storage: 'denied',
       })
     } else {
-      // Enable GA4 tracking
       window.gtag?.('consent', 'update', {
         analytics_storage: 'granted',
       })
@@ -180,29 +157,19 @@ export class GoogleAnalyticsProvider implements AnalyticsProvider {
     return this.isInitialized && !!window.gtag
   }
 
-  /**
-   * Get information about registered vs unregistered parameters
-   */
   getParameterInfo(properties: Record<string, any> = {}) {
     return this.parameterRegistry.getParameterInfo(properties)
   }
 
-  /**
-   * Get all registered parameters
-   */
   getRegisteredParameters(): string[] {
     return this.parameterRegistry.getRegisteredParameters()
   }
 
-  /**
-   * Check if a parameter is registered
-   */
   isParameterRegistered(parameter: string): boolean {
     return this.parameterRegistry.isRegistered(parameter)
   }
 
   private setDefaultGlobalProperties(): void {
-    // Set common properties that should be included with all events
     this.globalProperties = {
       app_version: packageJson.version,
       device_type: this.getDeviceType(),
@@ -222,7 +189,6 @@ export class GoogleAnalyticsProvider implements AnalyticsProvider {
   }
 
   private setupConsent(): void {
-    // Set default consent state
     window.gtag?.('consent', 'default', {
       analytics_storage: 'denied', // Start with denied, will be updated based on user consent
       ad_storage: 'denied',
@@ -236,9 +202,6 @@ export class GoogleAnalyticsProvider implements AnalyticsProvider {
     }
   }
 
-  /**
-   * Enable analytics storage consent
-   */
   enableConsent(): void {
     window.gtag?.('consent', 'update', {
       analytics_storage: 'granted',
@@ -249,9 +212,6 @@ export class GoogleAnalyticsProvider implements AnalyticsProvider {
     }
   }
 
-  /**
-   * Disable analytics storage consent
-   */
   disableConsent(): void {
     window.gtag?.('consent', 'update', {
       analytics_storage: 'denied',
@@ -262,9 +222,6 @@ export class GoogleAnalyticsProvider implements AnalyticsProvider {
     }
   }
 
-  /**
-   * Track a page view
-   */
   trackPageView(path: string, title?: string): void {
     if (!this.isInitialized || !this.config.enabled) {
       return
@@ -285,9 +242,6 @@ export class GoogleAnalyticsProvider implements AnalyticsProvider {
     }
   }
 
-  /**
-   * Set common Safe-related properties
-   */
   setSafeContext(safeAddress: string, chainId: string, safeVersion?: string): void {
     this.setGlobalProperty('safe_address', safeAddress.toLowerCase())
     this.setGlobalProperty('chain_id', chainId)
@@ -296,9 +250,6 @@ export class GoogleAnalyticsProvider implements AnalyticsProvider {
     }
   }
 
-  /**
-   * Set wallet-related properties
-   */
   setWalletContext(walletType: string, walletAddress?: string): void {
     this.setGlobalProperty('wallet_type', walletType)
     if (walletAddress) {

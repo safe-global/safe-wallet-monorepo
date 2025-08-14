@@ -1,14 +1,3 @@
-/**
- * Event Configuration
- *
- * Defines how each analytics event should be handled by different providers.
- * This configuration determines:
- * - Which providers receive which events
- * - Provider-specific event names and transformations
- * - Parameter filtering for GA (only registered parameters)
- * - Property enrichment for Mixpanel
- */
-
 import type { EventConfiguration } from '../core/types'
 import { StandardEvents, PropertyKeys } from '../core/types'
 import { MixPanelEvent, MixPanelEventParams } from '../mixpanel-events'
