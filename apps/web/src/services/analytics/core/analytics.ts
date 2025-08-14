@@ -177,54 +177,130 @@ export class Analytics<E extends Record<string, Record<string, unknown>> = Recor
   }
 
   /**
-   * Identify a user across providers
+   * Check if event should be processed based on consent and online status
    */
-  identify(userId: string, traits?: Record<string, unknown>): void {
+  private shouldProcessEvent(): boolean {
+    // Check consent before processing
+    if (!this.hasConsentCached()) {
+      return false
+    }
+
+    // Check online status
+    const isOnline = typeof navigator !== 'undefined' ? navigator.onLine !== false : true
+    if (!isOnline) {
+      return false
+    }
+
+    return true
+  }
+
+  /**
+   * Resolve provider routing decisions
+   */
+  private resolveProviderRouting(event: EventUnion<E>, options?: TrackOptions) {
+    const routerDecision = this.router?.(event) || {}
+    const optionsDecision = options || {}
+
+    const includeProviders = routerDecision.includeProviders || optionsDecision.includeProviders
+    const excludeProviders = [...(routerDecision.excludeProviders || []), ...(optionsDecision.excludeProviders || [])]
+
+    return { includeProviders, excludeProviders }
+  }
+
+  /**
+   * Filter providers based on routing rules
+   */
+  private filterProviders(
+    includeProviders?: readonly ProviderId[],
+    excludeProviders: readonly ProviderId[] = [],
+  ): BaseProvider<E>[] {
+    const enabledProviders = this.getEnabledProviders()
+
+    return enabledProviders.filter((provider) => {
+      // Apply include filter
+      if (includeProviders && includeProviders.length > 0) {
+        if (!includeProviders.includes(provider.id as ProviderId)) return false
+      }
+
+      // Apply exclude filter
+      if (excludeProviders.includes(provider.id as ProviderId)) return false
+
+      return true
+    })
+  }
+
+  /**
+   * Handle execution result with async promise error handling
+   */
+  private handleExecutionResult(result: any, errorContext?: any): void {
+    const isPromise = result && typeof result.then === 'function'
+    if (isPromise) {
+      result.catch((error: any) => {
+        this.onError?.(error, errorContext)
+      })
+    }
+  }
+
+  /**
+   * Execute an operation on providers that have a specific capability
+   */
+  private executeOnCapableProviders(
+    capabilityCheck: (provider: BaseProvider<E>) => boolean,
+    operation: (provider: any) => void | Promise<void>,
+  ): void {
     const enabledProviders = this.getEnabledProviders()
 
     for (const provider of enabledProviders) {
-      if (hasIdentifyCapability(provider)) {
+      if (capabilityCheck(provider)) {
         try {
-          provider.identify(userId, traits)
+          const result = operation(provider)
+          this.handleExecutionResult(result)
         } catch (error) {
           this.onError?.(error)
         }
       }
     }
+  }
+
+  /**
+   * Execute event tracking on filtered providers
+   */
+  private executeOnProviders(
+    event: EventUnion<E>,
+    includeProviders?: readonly ProviderId[],
+    excludeProviders: readonly ProviderId[] = [],
+  ): void {
+    const filteredProviders = this.filterProviders(includeProviders, excludeProviders)
+
+    for (const provider of filteredProviders) {
+      try {
+        const result = provider.track(event as any)
+        this.handleExecutionResult(result, event)
+      } catch (error) {
+        this.onError?.(error, event)
+      }
+    }
+  }
+
+  /**
+   * Identify a user across providers
+   */
+  identify(userId: string, traits?: Record<string, unknown>): void {
+    this.executeOnCapableProviders(hasIdentifyCapability, (provider) => provider.identify(userId, traits))
   }
 
   /**
    * Associate user with a group/organization
    */
   group(groupId: string, traits?: Record<string, unknown>): void {
-    const enabledProviders = this.getEnabledProviders()
-
-    for (const provider of enabledProviders) {
-      if (hasGroupCapability(provider)) {
-        try {
-          provider.group(groupId, traits)
-        } catch (error) {
-          this.onError?.(error)
-        }
-      }
-    }
+    this.executeOnCapableProviders(hasGroupCapability, (provider) => provider.group(groupId, traits))
   }
 
   /**
    * Track page views
    */
   page(context?: PageContext): void {
-    const enabledProviders = this.getEnabledProviders()
-
-    for (const provider of enabledProviders) {
-      if (hasPageCapability(provider)) {
-        try {
-          provider.page(context)
-        } catch (error) {
-          this.onError?.(error)
-        }
-      }
-    }
+    this.executeOnCapableProviders(hasPageCapability, (provider) => provider.page(context))
   }
 
   /**
@@ -238,50 +314,12 @@ export class Analytics<E extends Record<string, Record<string, unknown>> = Recor
     }
 
     const dispatch = (processedEvent: EventUnion<E>) => {
-      // Check consent before processing
-      if (!this.hasConsentCached()) {
-        // Drop event - no consent granted
+      if (!this.shouldProcessEvent()) {
         return
       }
 
-      // Check online status
-      const isOnline = typeof navigator !== 'undefined' ? navigator.onLine !== false : true
-      if (!isOnline) {
-        // Drop event - offline
-        return
-      }
-
-      // Resolve provider routing
-      const routerDecision = this.router?.(processedEvent) || {}
-      const optionsDecision = options || {}
-
-      const includeProviders = routerDecision.includeProviders || optionsDecision.includeProviders
-      const excludeProviders = [...(routerDecision.excludeProviders || []), ...(optionsDecision.excludeProviders || [])]
-
-      // Send to providers
-      const enabledProviders = this.getEnabledProviders()
-
-      for (const provider of enabledProviders) {
-        // Apply routing rules
-        if (includeProviders && includeProviders.length > 0) {
-          if (!includeProviders.includes(provider.id as ProviderId)) continue
-        }
-
-        if (excludeProviders.includes(provider.id as ProviderId)) continue
-
-        try {
-          const result = provider.track(processedEvent as any)
-
-          // Handle async providers
-          if (result && typeof result.then === 'function') {
-            result.catch((error) => {
-              this.onError?.(error, processedEvent)
-            })
-          }
-        } catch (error) {
-          this.onError?.(error, processedEvent)
-        }
-      }
+      const { includeProviders, excludeProviders } = this.resolveProviderRouting(processedEvent, options)
+      this.executeOnProviders(processedEvent, includeProviders, excludeProviders)
     }
 
     // Run through middleware pipeline
