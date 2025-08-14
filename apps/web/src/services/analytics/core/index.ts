@@ -7,7 +7,6 @@
 export { Analytics } from './analytics'
 export { AnalyticsBuilder, createAnalytics } from './builder'
 export { MiddlewareChain } from './middleware'
-export { PersistentQueue } from './queue'
 export { ConsentManager } from './consent'
 
 // Provider contracts

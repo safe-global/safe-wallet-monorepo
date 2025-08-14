@@ -3,19 +3,12 @@
  * Manages multiple providers, middleware pipeline, and event routing.
  */
 
-import type {
-  SafeEventMap,
-  AnalyticsEvent,
-  EventContext,
-  PageContext,
-  AnalyticsOptions,
-} from './types'
+import type { SafeEventMap, AnalyticsEvent, EventContext, PageContext, AnalyticsOptions } from './types'
 import type { EventUnion } from '../events/catalog'
 import type { ProviderId, TrackOptions, Router } from '../providers/constants'
 import type { BaseProvider } from './provider'
 import { hasIdentifyCapability, hasGroupCapability, hasPageCapability } from './provider'
 import { MiddlewareChain } from './middleware'
-import { PersistentQueue } from './queue'
 import { ConsentManager } from './consent'
 import { shallowMerge } from './types'
 
@@ -30,7 +23,6 @@ type ProviderEntry<E extends SafeEventMap> = {
 export class Analytics<E extends Record<string, Record<string, unknown>> = Record<string, Record<string, unknown>>> {
   private providerMap = new Map<ProviderId, ProviderEntry<E>>()
   private middlewares = new MiddlewareChain<E>()
-  private queue: PersistentQueue
   private consent: ConsentManager
   private defaultContext: EventContext
   private onError?: (err: unknown, event?: EventUnion<E>) => void
@@ -45,11 +37,6 @@ export class Analytics<E extends Record<string, Record<string, unknown>> = Recor
   ) {
     this.defaultContext = options?.defaultContext || {}
     this.consent = new ConsentManager(options?.consent)
-    this.queue = new PersistentQueue(
-      options?.queueKey || 'safe_analytics_queue',
-      options?.queueMax || 1000,
-      options?.queueTtlMs || 7 * 24 * 60 * 60 * 1000, // 7 days
-    )
     this.onError = options?.onError
     this.router = options?.router
 
@@ -58,11 +45,6 @@ export class Analytics<E extends Record<string, Record<string, unknown>> = Recor
 
     // Register initial middleware
     options?.middleware?.forEach((m) => this.use(m))
-
-    // Auto-flush queue when coming back online
-    if (typeof window !== 'undefined') {
-      window.addEventListener('online', () => this.flushQueue())
-    }
   }
 
   /**
@@ -258,15 +240,14 @@ export class Analytics<E extends Record<string, Record<string, unknown>> = Recor
     const dispatch = (processedEvent: EventUnion<E>) => {
       // Check consent before processing
       if (!this.hasConsentCached()) {
-        // Queue for later processing when consent is granted
-        this.queue.enqueue(processedEvent as any)
+        // Drop event - no consent granted
         return
       }
 
       // Check online status
       const isOnline = typeof navigator !== 'undefined' ? navigator.onLine !== false : true
       if (!isOnline) {
-        this.queue.enqueue(processedEvent as any)
+        // Drop event - offline
         return
       }
 
@@ -294,12 +275,10 @@ export class Analytics<E extends Record<string, Record<string, unknown>> = Recor
           // Handle async providers
           if (result && typeof result.then === 'function') {
             result.catch((error) => {
-              this.queue.enqueue(processedEvent as any) // Retry later
               this.onError?.(error, processedEvent)
             })
           }
         } catch (error) {
-          this.queue.enqueue(processedEvent as any) // Retry later
           this.onError?.(error, processedEvent)
         }
       }
@@ -309,8 +288,6 @@ export class Analytics<E extends Record<string, Record<string, unknown>> = Recor
     const processed = this.middlewares.process(enriched as any, enriched.context)
     if (processed) dispatch(processed as EventUnion<E>)
   }
-
-
 
   /**
    * Flush all providers
@@ -326,49 +303,6 @@ export class Analytics<E extends Record<string, Record<string, unknown>> = Recor
     }
 
     await Promise.all(promises)
-  }
-
-  /**
-   * Process queued events
-   */
-  flushQueue(maxBatch: number = 200): void {
-    if (!this.hasConsentCached()) {
-      return // Still waiting for consent
-    }
-
-    let batch = this.queue.drain(maxBatch)
-
-    while (batch.length > 0) {
-      const enabledProviders = this.getEnabledProviders()
-
-      for (const event of batch) {
-        // Process directly without middleware to avoid double-processing
-        for (const provider of enabledProviders) {
-          try {
-            provider.track(event as AnalyticsEvent<any, any>)
-          } catch (error) {
-            // Silently fail queued events to avoid infinite retry loops
-            console.warn('[Analytics] Failed to process queued event:', error)
-          }
-        }
-      }
-
-      batch = this.queue.drain(maxBatch)
-    }
-  }
-
-  /**
-   * Get current queue size
-   */
-  getQueueSize(): number {
-    return this.queue.size()
-  }
-
-  /**
-   * Clear the event queue
-   */
-  clearQueue(): void {
-    this.queue.clear()
   }
 
   /**

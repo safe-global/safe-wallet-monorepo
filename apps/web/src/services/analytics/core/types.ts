@@ -66,9 +66,6 @@ export type ConsentCategory = ConsentCategories
 export type AnalyticsOptions<E extends Record<string, Record<string, unknown>>> = {
   defaultContext?: EventContext
   consent?: ConsentState
-  queueKey?: string // localStorage key for offline queue
-  queueTtlMs?: number // Queue item TTL
-  queueMax?: number // Max queue size
   onError?: (err: unknown, event?: EventUnion<E>) => void
   router?: Router<E> // Global event routing
 }
@@ -88,9 +85,6 @@ export type MiddlewareFunction = (
   event: AnalyticsEvent<any, any>,
   context?: EventContext,
 ) => AnalyticsEvent<any, any> | null
-
-// Test compatibility types
-export type QueuedEvent = AnalyticsEvent<any, any>
 
 // Re-export provider interfaces
 export type { BaseProvider } from './provider'

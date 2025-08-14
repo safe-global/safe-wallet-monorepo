@@ -24,9 +24,7 @@ graph TB
     end
 
     subgraph "Infrastructure"
-        Queue[Persistent Queue]
         Consent[Consent Manager]
-        Storage[(localStorage)]
         CookieStore[(Cookie Store)]
     end
 
@@ -48,11 +46,9 @@ graph TB
     Analytics --> ProviderMap
     Analytics --> MiddlewareChain
     Analytics --> Router
-    Analytics --> Queue
     Analytics --> Consent
 
     %% Infrastructure connections
-    Queue --> Storage
     Consent --> CookieStore
 
     %% Provider connections
@@ -75,7 +71,6 @@ graph TB
 | **Event Router**      | Route events to specific providers            | Strategy                |
 | **Builder**           | Construct analytics instances ergonomically   | Builder                 |
 | **Consent Manager**   | Handle privacy compliance                     | State Machine           |
-| **Persistent Queue**  | Handle offline scenarios & retries            | Command Queue           |
 
 ---
 
@@ -86,7 +81,6 @@ graph TB
 - **Type-safe events** via an EventMap
 - **Middleware pipeline** (Chain of Responsibility pattern)
 - **Consent gating, sampling, PII scrubbing** examples
-- **Offline queue** with localStorage + retry on reconnect
 
 ### Event Processing Flow
 
@@ -96,7 +90,6 @@ sequenceDiagram
     participant Analytics as Analytics Core
     participant Middleware as Middleware Chain
     participant Consent as Consent Manager
-    participant Queue as Persistent Queue
     participant GA as Google Analytics
     participant MP as Mixpanel
 
@@ -127,8 +120,8 @@ sequenceDiagram
             end
 
         else No consent or offline
-            Note over Analytics: Step 6: Queue for Later
-            Analytics->>Queue: enqueue(processedEvent)
+            Note over Analytics: Step 6: Event Dropped
+            Analytics->>Analytics: Drop event (no queue)
         end
 
     else Middleware drops event
@@ -136,10 +129,6 @@ sequenceDiagram
         Middleware-->>Analytics: null (event filtered)
     end
 
-    Note over Queue,MP: Background: Consent granted or reconnect
-    Queue->>Analytics: flushQueue()
-    Analytics->>GA: Replay queued events
-    Analytics->>MP: Replay queued events
 ```
 
 **The 7-Step Event Processing Pipeline:**
@@ -149,16 +138,15 @@ sequenceDiagram
 3. **Consent Check**: Verifies analytics consent and online status before processing
 4. **Event Routing**: Applies router rules and track options to determine which providers should receive the event
 5. **Provider Dispatch**: Sends event to each enabled provider that matches routing rules, with async error handling
-6. **Queue Management**: Stores events in persistent localStorage queue when offline or consent is pending
-7. **Background Processing**: Automatically flushes queued events when consent is granted or connection is restored
+6. **Event Dropping**: Drops events when offline or consent is pending (no persistent storage)
 
 **Why this architecture matters:**
 
 - **Type Safety**: Compile-time checking of event names and payloads
 - **Privacy First**: Default-deny consent with retroactive processing
-- **Resilience**: Offline-first with automatic retry and queue management
+- **Simplicity**: Drops events when offline or consent is unavailable
 - **Flexibility**: Middleware pipeline allows custom transformations
-- **Performance**: Optimized with consent caching, provider filtering, and async dispatch with error isolation
+- **Performance**: Optimized with consent caching, provider filtering, and async dispatch
 
 ## Implementation Notes for GA4 & Mixpanel
 
@@ -193,7 +181,7 @@ sequenceDiagram
 The analytics system now uses a fully typed approach that eliminates string literals and provides compile-time safety:
 
 - **Event Constants**: `EVENT` object with all event names as constants
-- **Provider Constants**: `PROVIDER` object with typed provider IDs  
+- **Provider Constants**: `PROVIDER` object with typed provider IDs
 - **Centralized Catalog**: Single source of truth in `events/catalog.ts` with Zod schemas
 - **Discriminated Unions**: `EventUnion<E>` type ensures correct name/payload pairing
 - **Runtime Validation**: Optional Zod validation in development builds
@@ -228,16 +216,17 @@ export const EVENT = {
   FundsTransferred: 'funds_transferred',
 } as const
 
-export type EventName = typeof EVENT[keyof typeof EVENT]
+export type EventName = (typeof EVENT)[keyof typeof EVENT]
 export type EventMap = { [K in EventName]: z.infer<(typeof EventSchemas)[K]> }
 
 // 3) Discriminated union for exact name→payload pairing
-export type EventUnion<E extends Record<string, Record<string, unknown>>> =
-  { [K in keyof E & string]: { name: K; payload: E[K]; context?: EventContext; timestamp?: number } }[keyof E & string]
+export type EventUnion<E extends Record<string, Record<string, unknown>>> = {
+  [K in keyof E & string]: { name: K; payload: E[K]; context?: EventContext; timestamp?: number }
+}[keyof E & string]
 
 // 4) Optional runtime validation (compile-time is already enforced)
 export const validateEvent = <K extends EventName>(name: K, payload: unknown) => {
-  (EventSchemas[name] as z.ZodTypeAny).parse(payload)
+  ;(EventSchemas[name] as z.ZodTypeAny).parse(payload)
 }
 ```
 
@@ -249,14 +238,13 @@ export const PROVIDER = {
   GA: 'ga',
   Mixpanel: 'mixpanel',
 } as const
-export type ProviderId = typeof PROVIDER[keyof typeof PROVIDER]
+export type ProviderId = (typeof PROVIDER)[keyof typeof PROVIDER]
 
 export type RouteDecision = {
   includeProviders?: readonly ProviderId[]
   excludeProviders?: readonly ProviderId[]
 }
-export type Router<E extends Record<string, Record<string, unknown>>> =
-  (event: EventUnion<E>) => RouteDecision | void
+export type Router<E extends Record<string, Record<string, unknown>>> = (event: EventUnion<E>) => RouteDecision | void
 ```
 
 Strengthen the Analytics API types so `track` binds `name` to `payload` and routing uses `ProviderId`:
@@ -291,7 +279,12 @@ import { PROVIDER } from './analytics/providers'
 
 type AppEvents = EventMap
 
-declare const analytics: { track: (e: EventUnion<AppEvents>, o?: { includeProviders?: readonly typeof PROVIDER[keyof typeof PROVIDER][] }) => void }
+declare const analytics: {
+  track: (
+    e: EventUnion<AppEvents>,
+    o?: { includeProviders?: readonly (typeof PROVIDER)[keyof typeof PROVIDER][] },
+  ) => void
+}
 
 analytics.track({
   name: EVENT.ClickedCta,
@@ -310,12 +303,12 @@ Typed middleware and rename maps keyed by `EventName` to prevent typos:
 // middlewares/rename.ts
 import type { EventName } from '../events/catalog'
 
-export const renameEventMiddleware = <E extends Record<string, Record<string, unknown>>>(
-  map: Partial<Record<EventName, string>>,
-) => (event: EventUnion<E>, next: (e: EventUnion<E>) => void) => {
-  const newName = (map as Record<string, string>)[event.name] ?? event.name
-  next({ ...event, name: newName } as EventUnion<E>)
-}
+export const renameEventMiddleware =
+  <E extends Record<string, Record<string, unknown>>>(map: Partial<Record<EventName, string>>) =>
+  (event: EventUnion<E>, next: (e: EventUnion<E>) => void) => {
+    const newName = (map as Record<string, string>)[event.name] ?? event.name
+    next({ ...event, name: newName } as EventUnion<E>)
+  }
 ```
 
 Optional compile-time safe event creators for better ergonomics:
@@ -325,7 +318,8 @@ Optional compile-time safe event creators for better ergonomics:
 import type { EventMap, EventUnion, EventName } from './catalog'
 import { validateEvent } from './catalog'
 
-export const createEvent = <E extends EventMap>() =>
+export const createEvent =
+  <E extends EventMap>() =>
   <K extends EventName>(name: K, payload: E[K], context?: EventContext): EventUnion<E> => {
     if (process.env.NODE_ENV !== 'production') validateEvent(name, payload)
     return { name, payload, context }
@@ -359,7 +353,7 @@ type MyEvents = {
 
 function MyComponent() {
   const { track, identify, page, isEnabled } = useAnalytics<MyEvents>()
-  
+
   const handleUserAction = () => {
     if (isEnabled) {
       track({
@@ -368,7 +362,7 @@ function MyComponent() {
       })
     }
   }
-  
+
   return <button onClick={handleUserAction}>Track Action</button>
 }
 ```
@@ -381,15 +375,14 @@ graph TB
     Hook --> Store[Redux Store]
     Hook --> Features[Feature Flags]
     Hook --> Analytics[Analytics Core]
-    
+
     Store --> Consent[Consent State]
     Features --> Mixpanel{Mixpanel Enabled?}
-    
+
     Hook --> GAProvider[Google Analytics]
     Mixpanel -->|Yes| MPProvider[Mixpanel Provider]
     Mixpanel -->|No| GAProvider
-    
-    Analytics --> Queue[Event Queue]
+
     Analytics --> Middleware[Middleware Chain]
 ```
 
@@ -397,7 +390,7 @@ graph TB
 
 - **23 Comprehensive Tests**: Complete test coverage with proper mocking
 - **Proper React Patterns**: Uses hooks like `useCallback`, `useMemo`, `useEffect` correctly
-- **Memory Management**: Automatic cleanup on unmount with proper ref management  
+- **Memory Management**: Automatic cleanup on unmount with proper ref management
 - **Context Updates**: Dynamic updates when chain, Safe address, or device changes
 - **Error Boundaries**: Graceful handling of provider failures
 
@@ -416,7 +409,6 @@ _All in one file for demo; split into modules in prod:_
 - **types** (events, context)
 - **provider contracts** (ISP-friendly capabilities)
 - **middleware contracts & helpers**
-- **queue implementation** (localStorage-backed)
 - **consent manager**
 - **core**: Analytics + Builder (+ Router)
 - **provider adapters**: Google Analytics (gtag), Mixpanel
@@ -675,101 +667,6 @@ class MiddlewareChain<E extends EventMap> {
 
 ---
 
-### Persistent Queue (`queue.ts`)
-
-**Purpose:** Handles offline scenarios and consent-gated events by storing them in localStorage until they can be sent. Ensures no analytics data is lost due to network issues or privacy compliance.
-
-**Why it matters:** Users go offline, consent might not be granted immediately, or providers might be temporarily unavailable. A queue ensures resilient analytics that doesn't lose data.
-
-**Design Pattern:** Command Queue + Persistent Storage
-
-```mermaid
-stateDiagram-v2
-    [*] --> Online: App starts
-    Online --> Queue: Network error
-    Online --> Queue: No consent
-    Queue --> Process: Network restored
-    Queue --> Process: Consent granted
-    Process --> Online: Events sent
-
-    state Queue {
-        [*] --> localStorage: Store events
-        localStorage --> TTLCheck: Periodically
-        TTLCheck --> Cleanup: Remove expired
-        Cleanup --> localStorage
-    }
-```
-
-**Key Features:**
-
-- **Automatic TTL cleanup**: Removes old events to prevent storage bloat
-- **Size limits**: Prevents unbounded growth
-- **Atomic operations**: Safe concurrent access
-- **JSON serialization**: Survives browser restarts
-
-```typescript
-type QueuedItem = { e: AnalyticsEvent; ts: number }
-
-class PersistentQueue {
-  constructor(
-    private key: string,
-    private max = 1000,
-    private ttlMs = 7 * 24 * 60 * 60 * 1000,
-  ) {}
-
-  private load(): QueuedItem[] {
-    try {
-      const raw = localStorage.getItem(this.key)
-      if (!raw) return []
-      const arr = JSON.parse(raw) as QueuedItem[]
-      const now = Date.now()
-      const fresh = arr.filter((x) => now - x.ts <= this.ttlMs)
-      if (fresh.length !== arr.length) this.save(fresh)
-      return fresh
-    } catch {
-      return []
-    }
-  }
-
-  private save(items: QueuedItem[]) {
-    try {
-      localStorage.setItem(this.key, JSON.stringify(items.slice(-this.max)))
-    } catch {
-      // Swallow; storage may be full or blocked
-    }
-  }
-
-  enqueue(e: AnalyticsEvent) {
-    const items = this.load()
-    items.push({ e, ts: Date.now() })
-    this.save(items)
-  }
-
-  drain(maxItems = 100): AnalyticsEvent[] {
-    const items = this.load()
-    const slice = items.slice(0, maxItems)
-    this.save(items.slice(maxItems))
-    return slice.map((x) => x.e)
-  }
-
-  clear() {
-    try {
-      localStorage.removeItem(this.key)
-    } catch {} // Graceful fallback
-  }
-}
-
-/**
- * Usage scenarios:
- * 1. Offline: Events queued until navigator.onLine = true
- * 2. No consent: Events queued until user grants analytics permission
- * 3. Provider failure: Events queued for retry
- * 4. Rate limiting: Events queued to respect API limits
- */
-```
-
----
-
 ### Consent Manager (`consent.ts`)
 
 **Purpose:** Manages user privacy preferences and ensures GDPR/CCPA compliance. Acts as a gatekeeper for all analytics operations.
@@ -893,9 +790,6 @@ type ProviderEntry<E extends EventMap> = { provider: BaseProvider<E>; enabled: b
 export type AnalyticsOptions<E extends EventMap> = {
   defaultContext?: EventContext
   consent?: ConsentState
-  queueKey?: string // localStorage key
-  queueTtlMs?: number
-  queueMax?: number
   onError?: (err: unknown, event?: AnalyticsEvent) => void
   router?: Router<E> // optional event router for provider-level routing
 }
@@ -905,7 +799,6 @@ export type TrackOptions = RouteDecision // per-call routing overrides
 export class Analytics<E extends EventMap> {
   private providers = new Map<string, ProviderEntry<E>>()
   private middlewares = new MiddlewareChain<E>()
-  private queue: PersistentQueue
   private consent: ConsentManager
   private defaultContext: EventContext
   private onError?: (err: unknown, event?: AnalyticsEvent) => void
@@ -914,18 +807,8 @@ export class Analytics<E extends EventMap> {
   constructor(opts?: AnalyticsOptions<E>) {
     this.defaultContext = opts?.defaultContext || {}
     this.consent = new ConsentManager(opts?.consent)
-    this.queue = new PersistentQueue(
-      opts?.queueKey || '**analytics_queue**',
-      opts?.queueMax || 1000,
-      opts?.queueTtlMs || 7 * 24 * 60 * 60 * 1000,
-    )
     this.onError = opts?.onError
     this.router = opts?.router
-
-    // Flush on reconnect
-    if (typeof window !== 'undefined') {
-      window.addEventListener('online', () => this.flushQueue())
-    }
   }
 
   /** Dependency Inversion: accept abstractions (providers), not concretes */
@@ -1044,15 +927,14 @@ export class Analytics<E extends EventMap> {
     const dispatch = (processedEvent: AnalyticsEvent<any, any>) => {
       // Step 3: Consent gate - GDPR compliance checkpoint
       if (!this.consent.allows('analytics')) {
-        // Queue for later processing when consent is granted
-        this.queue.enqueue(processedEvent)
+        // Drop event - no consent granted
         return
       }
 
       // Step 4: Online check - handle offline scenarios
       const online = typeof navigator !== 'undefined' ? navigator.onLine !== false : true
       if (!online) {
-        this.queue.enqueue(processedEvent)
+        // Drop event - offline
         return
       }
 
@@ -1080,13 +962,11 @@ export class Analytics<E extends EventMap> {
           // Handle async providers
           if (result && typeof result.then === 'function') {
             result.catch((err) => {
-              this.queue.enqueue(processedEvent) // Retry later
               this.onError?.(err, processedEvent)
             })
           }
         } catch (err) {
           // Sync error handling
-          this.queue.enqueue(processedEvent)
           this.onError?.(err, processedEvent)
         }
       }
@@ -1099,25 +979,6 @@ export class Analytics<E extends EventMap> {
   async flush() {
     for (const { provider } of this.providers.values()) {
       await provider.flush?.()
-    }
-  }
-
-  flushQueue(maxBatch = 200) {
-    if (!this.consent.allows('analytics')) return // still gated
-    let batch = this.queue.drain(maxBatch)
-    while (batch.length) {
-      for (const e of batch) {
-        // bypass middlewares on replay to avoid double processing
-        for (const { provider, enabled } of this.providers.values()) {
-          if (!enabled || !provider.isEnabled()) continue
-          try {
-            provider.track(e)
-          } catch {
-            /* swallow, requeue next time on error */
-          }
-        }
-      }
-      batch = this.queue.drain(maxBatch)
     }
   }
 }
@@ -1401,7 +1262,6 @@ export const analytics = AnalyticsBuilder.create<AppEvents>({
     source: 'web',
   },
   consent: { analytics: true }, // default allow; wire to your CMP
-  queueKey: '**myapp_analytics_queue**',
   // Global router example: route by event name
   router: (event) => {
     switch (event.name) {
@@ -1474,7 +1334,6 @@ sequenceDiagram
     participant Analytics as Analytics Core
     participant Middleware as Middleware Chain
     participant Consent as Consent Manager
-    participant Queue as Persistent Queue
     participant GA as Google Analytics
     participant MP as Mixpanel
 
@@ -1500,13 +1359,10 @@ sequenceDiagram
         Analytics->>MP: Send Transaction Created event
         GA-->>Analytics: ✅ Success
         MP-->>Analytics: ❌ Network error
-        Analytics->>Queue: Store failed Mixpanel event
+        Analytics->>Analytics: ❌ Drop failed event
     else No consent
-        Consent->>Queue: Store event for later
+        Consent->>Analytics: Drop event (no storage)
     end
-
-    Note over Queue: Later: User grants consent
-    Queue->>MP: Flush stored events
 ```
 
 ### Complete Implementation
@@ -1628,18 +1484,17 @@ function TransactionFlow() {
 1. **🔒 Privacy-First**: Consent gating ensures GDPR compliance
 2. **🚀 Performance**: Optimized with consent caching, provider filtering, sampling and async processing prevent UI blocking
 3. **🛠️ Maintainable**: SOLID principles make it easy to add/modify providers
-4. **🔄 Resilient**: Offline queue and error handling prevent data loss
-5. **📊 Flexible**: Routing allows different events to go to different providers
-6. **🧪 Testable**: Dependency injection makes unit testing straightforward
-7. **📈 Scalable**: Middleware pipeline handles complex transformations
-8. **🎯 Type-Safe**: Compile-time checking prevents runtime errors
+4. **📊 Flexible**: Routing allows different events to go to different providers
+5. **🧪 Testable**: Dependency injection makes unit testing straightforward
+6. **📈 Scalable**: Middleware pipeline handles complex transformations
+7. **🎯 Type-Safe**: Compile-time checking prevents runtime errors
 
 #### Performance Optimizations in Detail
 
 - **Consent Caching**: Eliminates redundant `consent.allowsAnalytics()` calls by caching results with timestamp-based invalidation. Particularly beneficial for high-frequency tracking scenarios.
 - **Provider Filtering**: `getEnabledProviders()` method pre-filters enabled providers once per operation, reducing `O(n×methods)` enabled checks to `O(1×methods)`.
 - **Smart Cache Management**: Consent cache is automatically invalidated when consent state changes via `setConsent()`, ensuring data consistency.
-- **Isolated Error Handling**: Provider failures don't affect other providers and failed events are automatically queued for retry.
+- **Isolated Error Handling**: Provider failures don't affect other providers but failed events are dropped.
 
 ---
 
