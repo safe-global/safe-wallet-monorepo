@@ -98,45 +98,6 @@ export const createLoggingMiddleware = (options?: {
   }
 }
 
-export const createSamplingMiddleware = (options: {
-  rate: number
-  eventRates?: Record<string, number>
-}): MiddlewareFunction => {
-  const { rate, eventRates } = options
-  return (event) => {
-    const eventRate = eventRates && eventRates[event.name as string]
-    const effectiveRate = typeof eventRate === 'number' ? eventRate : rate
-    const pass = Math.random() < effectiveRate
-    if (!pass) return null
-    return { ...event, context: { ...(event.context || {}), sampled: true, sampleRate: effectiveRate } }
-  }
-}
-
-export const createPiiScrubberMiddleware = (options?: {
-  piiFields?: string[]
-  replaceWith?: string
-}): MiddlewareFunction => {
-  const { piiFields = ['email'], replaceWith } = options || {}
-  const scrub = (value: any): any => {
-    if (Array.isArray(value)) return value.map(scrub)
-    if (value && typeof value === 'object') {
-      const result: any = {}
-      for (const [k, v] of Object.entries(value)) {
-        if (piiFields.includes(k)) {
-          result[k] = replaceWith ?? undefined
-        } else {
-          result[k] = scrub(v)
-        }
-      }
-      return result
-    }
-    return value
-  }
-  return (event) => {
-    if (!event.payload) return event
-    return { ...event, payload: scrub(event.payload) }
-  }
-}
 
 // New typed middleware factories using constants
 export const createTypedLoggingMiddleware = <E extends Record<string, Record<string, unknown>>>(options?: {
@@ -157,60 +118,3 @@ export const createTypedLoggingMiddleware = <E extends Record<string, Record<str
   }
 }
 
-export const createTypedSamplingMiddleware = <E extends Record<string, Record<string, unknown>>>(options: {
-  rate: number
-  eventRates?: Partial<Record<EventName, number>>
-}): Middleware<E> => {
-  const { rate, eventRates } = options
-  return (event, next) => {
-    const eventRate = eventRates && eventRates[event.name as EventName]
-    const effectiveRate = typeof eventRate === 'number' ? eventRate : rate
-    const pass = Math.random() < effectiveRate
-    if (!pass) return // Drop event
-
-    const enrichedEvent = {
-      ...event,
-      context: {
-        ...(event.context || {}),
-        sampled: true,
-        sampleRate: effectiveRate,
-      },
-    }
-    next(enrichedEvent)
-  }
-}
-
-export const createTypedPiiScrubberMiddleware = <E extends Record<string, Record<string, unknown>>>(options?: {
-  piiFields?: string[]
-  replaceWith?: string
-}): Middleware<E> => {
-  const { piiFields = ['email'], replaceWith } = options || {}
-  const scrub = (value: any): any => {
-    if (Array.isArray(value)) return value.map(scrub)
-    if (value && typeof value === 'object') {
-      const result: any = {}
-      for (const [k, v] of Object.entries(value)) {
-        if (piiFields.includes(k)) {
-          result[k] = replaceWith ?? undefined
-        } else {
-          result[k] = scrub(v)
-        }
-      }
-      return result
-    }
-    return value
-  }
-
-  return (event, next) => {
-    if (!event.payload) {
-      next(event)
-      return
-    }
-
-    const scrubbedEvent = {
-      ...event,
-      payload: scrub(event.payload),
-    }
-    next(scrubbedEvent)
-  }
-}

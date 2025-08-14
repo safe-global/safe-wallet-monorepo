@@ -80,7 +80,7 @@ graph TB
 - **Easy to add/remove providers** (Adapter + Strategy + Composite patterns)
 - **Type-safe events** via an EventMap
 - **Middleware pipeline** (Chain of Responsibility pattern)
-- **Consent gating, sampling, PII scrubbing** examples
+- **Consent gating and logging** examples
 
 ### Event Processing Flow
 
@@ -134,7 +134,7 @@ sequenceDiagram
 **The 7-Step Event Processing Pipeline:**
 
 1. **Event Enrichment**: Merges default context (user, device, session) with event-specific context and adds timestamp
-2. **Middleware Processing**: Runs event through Chain of Responsibility pattern for transformations (sampling, PII scrubbing, filtering)
+2. **Middleware Processing**: Runs event through Chain of Responsibility pattern for transformations (logging, filtering)
 3. **Consent Check**: Verifies analytics consent and online status before processing
 4. **Event Routing**: Applies router rules and track options to determine which providers should receive the event
 5. **Provider Dispatch**: Sends event to each enabled provider that matches routing rules, with async error handling
@@ -593,28 +593,25 @@ export interface PageCapable {
 
 **Purpose:** Implements Chain of Responsibility pattern to transform, filter, or enrich events before they reach providers. Middleware can modify events, add context, filter out events, or perform side effects.
 
-**Why it matters:** Real-world analytics needs preprocessing - sampling for high-volume events, PII scrubbing for compliance, event renaming for taxonomy alignment. Middleware makes this composable and testable.
+**Why it matters:** Real-world analytics needs preprocessing - event logging for debugging, event renaming for taxonomy alignment. Middleware makes this composable and testable.
 
 **Design Pattern:** Chain of Responsibility
 
 ```mermaid
 graph LR
-    Event[Raw Event] --> M1[Sampling Middleware]
-    M1 --> M2[PII Scrubber]
-    M2 --> M3[Event Mapper]
-    M3 --> M4[Custom Middleware]
-    M4 --> Provider[Provider.track()]
+    Event[Raw Event] --> M1[Logging Middleware]
+    M1 --> M2[Event Mapper]
+    M2 --> M3[Custom Middleware]
+    M3 --> Provider[Provider.track()]
 
-    M1 -. may drop event .-> X[❌ Dropped]
-    M2 -. removes sensitive data .-> M2
-    M3 -. renames events .-> M3
-    M4 -. custom logic .-> M4
+    M1 -. logs events .-> M1
+    M2 -. renames events .-> M2
+    M3 -. custom logic .-> M3
 ```
 
 **Common Use Cases:**
 
-- **Sampling**: Drop 90% of high-volume events to reduce costs
-- **PII Scrubbing**: Remove emails, phone numbers for GDPR compliance
+- **Logging**: Debug and monitor analytics events during development
 - **Event Mapping**: Rename events to match different provider taxonomies
 - **Enrichment**: Add computed fields or lookup data
 - **Filtering**: Block test events or internal user actions
@@ -1199,31 +1196,25 @@ function flattenContext(ctx?: EventContext) {
 
 ## Example Middlewares
 
-### middlewares — examples (sampling, PII scrub, rename)
+### middlewares — examples (logging, rename)
 
 ```typescript
-export function samplingMiddleware<E extends EventMap>(rate: number): Middleware<E> {
-  const p = Math.max(0, Math.min(1, rate))
+// Logging middleware for debugging and development
+export function loggingMiddleware<E extends EventMap>(options?: {
+  enabled?: boolean
+  prefix?: string
+  includeContext?: boolean
+}): Middleware<E> {
+  const { enabled = true, prefix = '[Analytics]', includeContext = false } = options || {}
   return (event, next) => {
-    if (Math.random() < p) next(event) // keep
-    // else drop silently
-  }
-}
-
-const EMAIL_RE = /([a-zA-Z0-9*._+-]+)@([a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+)/g
-export function scrubPIIMiddleware<E extends EventMap>(): Middleware<E> {
-  return (event, next) => {
-    const scrub = (obj: any): any => {
-      if (!obj || typeof obj !== 'object') return obj
-      const out: any = Array.isArray(obj) ? [] : {}
-      for (const k of Object.keys(obj)) {
-        const v = (obj as any)[k]
-        if (typeof v === 'string') out[k] = v.replace(EMAIL_RE, '[redacted]')
-        else out[k] = scrub(v)
+    if (enabled) {
+      if (includeContext) {
+        console.log(prefix, 'Event:', event.name, 'Payload:', event.payload, 'Context:', event.context)
+      } else {
+        console.log(prefix, 'Event:', event.name, 'Payload:', event.payload)
       }
-      return out
     }
-    next({ ...event, payload: scrub(event.payload) })
+    next(event)
   }
 }
 
@@ -1284,8 +1275,7 @@ export const analytics = AnalyticsBuilder.create<AppEvents>({
       },
     }),
   )
-  .addMiddleware(samplingMiddleware<AppEvents>(1.0)) // set to <1 for sampling in high-traffic flows
-  .addMiddleware(scrubPIIMiddleware<AppEvents>())
+  .addMiddleware(loggingMiddleware<AppEvents>({ enabled: process.env.NODE_ENV === 'development' }))
   // Optional: align taxonomy names across tools
   .addMiddleware(renameEventMiddleware<AppEvents>({ 'Clicked CTA': 'cta_click' }))
   .build()
@@ -1346,8 +1336,7 @@ sequenceDiagram
 
     Note over Analytics: Step 2: Middleware Processing
     Analytics->>Middleware: process(event)
-    Middleware->>Middleware: Apply sampling (keep 10% of tx events)
-    Middleware->>Middleware: Scrub PII if any
+    Middleware->>Middleware: Log event for debugging
     Middleware->>Middleware: Rename for GA4 compatibility
 
     Note over Analytics: Step 3: Consent & Routing
@@ -1408,11 +1397,9 @@ const analytics = AnalyticsBuilder.create<SafeEvents>({
 }))
 
 // Add middleware pipeline
-.addMiddleware(createSamplingMiddleware({
-  rate: 0.1  // Only track 10% of events to reduce costs
-}))
-.addMiddleware(createPiiScrubberMiddleware({
-  piiFields: ['email', 'ip', 'userAgent'] // Remove sensitive data
+.addMiddleware(createLoggingMiddleware({
+  enabled: process.env.NODE_ENV === 'development',
+  prefix: '[Safe Analytics]'
 }))
 .addMiddleware((event, next) => {
   // Custom middleware: Add chain name
