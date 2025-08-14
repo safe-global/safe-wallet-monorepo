@@ -89,7 +89,7 @@ export class MiddlewareChain<
   }
 }
 
-// Built-in middleware factories for tests (legacy)
+// Built-in middleware factories
 export const createLoggingMiddleware = (options?: {
   enabled?: boolean
   prefix?: string
@@ -105,24 +105,5 @@ export const createLoggingMiddleware = (options?: {
       }
     }
     return event
-  }
-}
-
-// New typed middleware factories using constants
-export const createTypedLoggingMiddleware = <E extends Record<string, Record<string, unknown>>>(options?: {
-  enabled?: boolean
-  prefix?: string
-  includeContext?: boolean
-}): Middleware<E> => {
-  const { enabled = true, prefix = '[Analytics]', includeContext = false } = options || {}
-  return (event, next) => {
-    if (enabled) {
-      if (includeContext) {
-        console.log(prefix, 'Event:', event.name, 'Payload:', event.payload, 'Context:', event.context)
-      } else {
-        console.log(prefix, 'Event:', event.name, 'Payload:', event.payload)
-      }
-    }
-    next(event)
   }
 }
