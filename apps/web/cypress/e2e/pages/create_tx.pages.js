@@ -256,7 +256,9 @@ export function verifyDeleteChoiceBtnStatus(option) {
 }
 
 export function typeNoteText(text) {
-  cy.get(noteTextField).find('input').clear()
+  const input = cy.get(noteTextField).find('input')
+  input.clear()
+  input.type(text)
   cy.get(noteTextField).find('input').type(text)
 }
 
