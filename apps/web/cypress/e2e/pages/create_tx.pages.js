@@ -256,12 +256,14 @@ export function verifyDeleteChoiceBtnStatus(option) {
 }
 
 export function typeNoteText(text) {
-  cy.get(noteTextField).find('input').clear().type(text)
+  cy.get(noteTextField).find('input').clear()
+  cy.get(noteTextField).find('input').type(text)
 }
 
 export function checkMaxNoteLength() {
   typeNoteText(main.generateRandomString(61))
-  cy.get(noteTextField).should('exist').contains('60/60').should('be.visible')
+  cy.get(noteTextField).should('exist')
+  cy.get(noteTextField).contains('60/60').should('be.visible')
 }
 
 export function checkNoteWarningMsg() {
