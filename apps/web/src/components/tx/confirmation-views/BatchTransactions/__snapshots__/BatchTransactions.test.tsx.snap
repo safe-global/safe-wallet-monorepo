@@ -260,13 +260,17 @@ exports[`BatchTransactions should render a list of batch transactions 1`] = `
                             <div
                               class="MuiBox-root css-axw7ok"
                             >
-                              <img
-                                alt="ETH"
-                                class="image"
-                                height="26"
-                                loading="lazy"
-                                referrerpolicy="no-referrer"
-                              />
+                              <div
+                                class="MuiBox-root css-olq4e8"
+                              >
+                                <img
+                                  alt="ETH"
+                                  class="image"
+                                  height="26"
+                                  loading="lazy"
+                                  referrerpolicy="no-referrer"
+                                />
+                              </div>
                               <p
                                 class="MuiTypography-root MuiTypography-body2 css-1ct9qkn-MuiTypography-root"
                               >
