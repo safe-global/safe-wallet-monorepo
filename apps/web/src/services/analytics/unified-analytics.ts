@@ -102,7 +102,7 @@ export const safeAnalytics = {
   safeCreated: (properties: {
     chain_id: string
     deployment_type: 'standard' | 'counterfactual'
-    payment_method: 'wallet' | 'relay'
+    payment_method: string
     threshold: number
     num_owners: number
     safe_version?: string

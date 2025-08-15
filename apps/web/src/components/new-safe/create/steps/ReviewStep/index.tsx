@@ -32,7 +32,7 @@ import {
   CREATE_SAFE_EVENTS,
   OVERVIEW_EVENTS,
   trackEvent,
-  MixPanelEventParams,
+  safeAnalytics,
 } from '@/services/analytics'
 import { gtmSetChainId, gtmSetSafeAddress } from '@/services/analytics/gtm'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
@@ -311,18 +311,17 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
 
         trackEvent({ ...OVERVIEW_EVENTS.PROCEED_WITH_TX, label: 'counterfactual', category: CREATE_SAFE_CATEGORY })
         replayCounterfactualSafeDeployment(chain.chainId, safeAddress, props, data.name, dispatch, payMethod)
-        trackEvent(
-          { ...CREATE_SAFE_EVENTS.CREATED_SAFE, label: 'counterfactual' },
-          {
-            [MixPanelEventParams.SAFE_ADDRESS]: safeAddress,
-            [MixPanelEventParams.BLOCKCHAIN_NETWORK]: chain.chainName,
-            [MixPanelEventParams.NUMBER_OF_OWNERS]: props.safeAccountConfig.owners.length,
-            [MixPanelEventParams.THRESHOLD]: props.safeAccountConfig.threshold,
-            [MixPanelEventParams.ENTRY_POINT]: document.referrer || 'Direct',
-            [MixPanelEventParams.DEPLOYMENT_TYPE]: 'Counterfactual',
-            [MixPanelEventParams.PAYMENT_METHOD]: 'Pay-later',
-          },
-        )
+
+        safeAnalytics.safeCreated({
+          chain_id: chain.chainId,
+          safe_address: safeAddress,
+          deployment_type: 'counterfactual',
+          threshold: props.safeAccountConfig.threshold,
+          num_owners: props.safeAccountConfig.owners.length,
+          safe_version: props.safeVersion,
+          payment_method: 'Pay-later',
+          network_name: chain.chainName,
+        })
 
         return
       }
@@ -354,14 +353,15 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
         trackEvent(CREATE_SAFE_EVENTS.SUBMIT_CREATE_SAFE)
         trackEvent({ ...OVERVIEW_EVENTS.PROCEED_WITH_TX, label: 'deployment', category: CREATE_SAFE_CATEGORY })
 
-        trackEvent(CREATE_SAFE_EVENTS.CREATED_SAFE, {
-          [MixPanelEventParams.SAFE_ADDRESS]: safeAddress,
-          [MixPanelEventParams.BLOCKCHAIN_NETWORK]: chain.chainName,
-          [MixPanelEventParams.NUMBER_OF_OWNERS]: props.safeAccountConfig.owners.length,
-          [MixPanelEventParams.THRESHOLD]: props.safeAccountConfig.threshold,
-          [MixPanelEventParams.ENTRY_POINT]: document.referrer || 'Direct',
-          [MixPanelEventParams.DEPLOYMENT_TYPE]: 'direct',
-          [MixPanelEventParams.PAYMENT_METHOD]: willRelay ? 'Sponsored' : 'Self-paid',
+        safeAnalytics.safeCreated({
+          chain_id: chain.chainId,
+          safe_address: safeAddress,
+          deployment_type: 'standard',
+          threshold: props.safeAccountConfig.threshold,
+          num_owners: props.safeAccountConfig.owners.length,
+          safe_version: props.safeVersion,
+          payment_method: willRelay ? 'Sponsored' : 'Self-paid',
+          network_name: chain.chainName,
         })
 
         onSubmit(data)

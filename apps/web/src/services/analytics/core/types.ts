@@ -87,11 +87,8 @@ export interface MixpanelProviderConfig {
   /** Mixpanel-specific event name (may differ from canonical name) */
   eventName?: string
 
-  /** Optional function to enrich properties for Mixpanel */
-  enrichProperties?: (properties: Record<string, any>) => Record<string, any>
-
-  /** Optional transformation function for Mixpanel-specific formatting */
-  transform?: (properties: Record<string, any>) => Record<string, any>
+  /** Optional function to create exactly the properties that should be sent to Mixpanel */
+  createProperties?: (properties: Record<string, any>) => Record<string, any>
 }
 
 /**
@@ -197,6 +194,8 @@ export enum PropertyKeys {
   // Deployment properties
   DEPLOYMENT_TYPE = 'deployment_type',
   PAYMENT_METHOD = 'payment_method',
+
+  NETWORK_NAME = 'network_name',
 }
 
 /**

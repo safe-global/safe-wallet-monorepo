@@ -84,29 +84,20 @@ export class MixpanelProvider implements AnalyticsProvider {
     }
 
     try {
-      let properties = {
+      const baseProperties = {
         ...this.globalProperties,
         ...event.properties,
         event_timestamp: event.metadata?.timestamp || Date.now(),
         event_source: event.metadata?.source || 'unknown',
       }
 
-      // Apply Mixpanel-specific enrichProperties if provided
-      if (eventConfig.enrichProperties) {
-        const enrichedProps = eventConfig.enrichProperties(properties)
-        properties = {
-          ...properties,
-          ...enrichedProps,
-        }
-      }
-
-      // Apply Mixpanel-specific transformation if provided
-      if (eventConfig.transform) {
-        const transformedProps = eventConfig.transform(properties)
-        properties = {
-          ...properties,
-          ...transformedProps,
-        }
+      // Create properties using the optional createProperties function
+      let properties: Record<string, any>
+      if (eventConfig.createProperties) {
+        properties = eventConfig.createProperties(baseProperties)
+      } else {
+        // Fallback: use original properties if no createProperties function
+        properties = baseProperties
       }
 
       const cleanedProperties = this.cleanProperties(properties)
@@ -120,6 +111,11 @@ export class MixpanelProvider implements AnalyticsProvider {
         console.group(`[MixpanelProvider] Event: ${eventName}`)
         console.log('Properties sent:', cleanedProperties)
         console.log('Total properties:', Object.keys(cleanedProperties).length)
+        if (eventConfig.createProperties) {
+          console.log('Used createProperties function for property transformation')
+        } else {
+          console.log('No createProperties function - using original properties')
+        }
         console.groupEnd()
       }
     } catch (error) {

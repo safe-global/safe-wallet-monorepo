@@ -217,9 +217,9 @@ export class AnalyticsDevTools {
       const mixpanelConfig = config.providers.mixpanel
       let enrichedProperties = { ...properties }
 
-      // Apply enrichment if configured
-      if (mixpanelConfig.enrichProperties) {
-        enrichedProperties = mixpanelConfig.enrichProperties(properties)
+      // Apply property transformation if configured
+      if (mixpanelConfig.createProperties) {
+        enrichedProperties = mixpanelConfig.createProperties(properties)
       }
 
       result.mixpanel = {
@@ -361,9 +361,9 @@ export class AnalyticsDevTools {
 
     let finalProperties = { ...properties }
 
-    // Apply enrichment if configured
-    if (mixpanelConfig.enrichProperties) {
-      finalProperties = mixpanelConfig.enrichProperties(properties)
+    // Apply property transformation if configured
+    if (mixpanelConfig.createProperties) {
+      finalProperties = mixpanelConfig.createProperties(properties)
     }
 
     console.log('  📦 All properties sent to Mixpanel:')

@@ -266,9 +266,10 @@ describe('New Analytics System', () => {
           TEST_EVENT: {
             enabled: true,
             eventName: 'Test Event Mixpanel',
-            enrichProperties: (props: any) => ({
-              ...props,
-              enriched_timestamp: Date.now(),
+            createProperties: (props: any) => ({
+              'Chain ID': props.chain_id,
+              'Safe Address': props.safe_address,
+              'Creation Timestamp': Date.now(),
             }),
           },
         },
@@ -349,10 +350,13 @@ describe('New Analytics System', () => {
     it('should provide convenience methods for Safe events', () => {
       const result = safeAnalytics.safeCreated({
         chain_id: '1',
+        safe_address: '0x123',
         deployment_type: 'standard',
         payment_method: 'wallet',
         threshold: 2,
         num_owners: 3,
+        safe_version: '1.4.1',
+        network_name: 'Ethereum',
       })
 
       expect(result.success).toBe(true)

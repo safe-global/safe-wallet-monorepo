@@ -116,13 +116,13 @@ const ReplaySafeDialog = ({
       trackEvent({ ...OVERVIEW_EVENTS.PROCEED_WITH_TX, label: 'counterfactual', category: CREATE_SAFE_CATEGORY })
       safeAnalytics.safeCreated({
         chain_id: selectedChain.chainId,
+        safe_address: safeAddress,
         deployment_type: 'counterfactual',
         payment_method: 'relay',
         threshold: safeCreationData.safeAccountConfig.threshold,
         num_owners: safeCreationData.safeAccountConfig.owners.length,
         safe_version: safeCreationData.safeVersion,
-        user_experience_flow: 'multichain_replay',
-        creation_source: 'replay_existing_safe',
+        network_name: selectedChain.chainName,
       })
 
       router.push({

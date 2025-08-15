@@ -1,6 +1,6 @@
 import type { EventConfiguration } from '../core/types'
 import { StandardEvents, PropertyKeys } from '../core/types'
-import { MixPanelEvent, MixPanelEventParams } from '../mixpanel-events'
+import { MixpanelEvents, MixpanelProperties } from '../constants/mixpanel'
 import packageJson from '../../../../package.json'
 
 /**
@@ -32,20 +32,18 @@ export const ANALYTICS_EVENTS: Record<string, EventConfiguration> = {
       },
       mixpanel: {
         enabled: true,
-        eventName: MixPanelEvent.SAFE_CREATED,
-        enrichProperties: (properties) => ({
-          ...properties,
-          // Mixpanel gets all properties plus enrichments
-          creation_timestamp: Date.now(),
-          app_version: packageJson.version,
-          creation_source: 'web-app',
-          // Include detailed deployment information
-          is_counterfactual: properties[PropertyKeys.DEPLOYMENT_TYPE] === 'counterfactual',
-          estimated_gas_cost: properties.estimated_gas_cost,
-          actual_gas_cost: properties.actual_gas_cost,
-          creation_duration_ms: properties.creation_duration_ms,
-          network_name: properties.network_name,
-          user_experience_flow: properties.user_experience_flow,
+        eventName: MixpanelEvents.SAFE_CREATED,
+        createProperties: (properties) => ({
+          [MixpanelProperties.CHAIN_ID]: properties[PropertyKeys.CHAIN_ID],
+          [MixpanelProperties.SAFE_ADDRESS]: properties[PropertyKeys.SAFE_ADDRESS],
+          [MixpanelProperties.DEPLOYMENT_TYPE]: properties[PropertyKeys.DEPLOYMENT_TYPE],
+          [MixpanelProperties.PAYMENT_METHOD]: properties[PropertyKeys.PAYMENT_METHOD],
+          [MixpanelProperties.THRESHOLD]: properties[PropertyKeys.THRESHOLD],
+          [MixpanelProperties.NUM_OWNERS]: properties[PropertyKeys.NUM_OWNERS],
+          [MixpanelProperties.SAFE_VERSION]: properties[PropertyKeys.SAFE_VERSION],
+          [MixpanelProperties.NETWORK_NAME]: properties[PropertyKeys.NETWORK_NAME],
+          [MixpanelProperties.CREATION_TIMESTAMP]: Date.now(),
+          [MixpanelProperties.IS_COUNTERFACTUAL]: properties[PropertyKeys.DEPLOYMENT_TYPE] === 'counterfactual',
         }),
       },
     },
@@ -66,12 +64,14 @@ export const ANALYTICS_EVENTS: Record<string, EventConfiguration> = {
       },
       mixpanel: {
         enabled: true,
-        eventName: MixPanelEvent.SAFE_ACTIVATED,
-        enrichProperties: (properties) => ({
-          ...properties,
-          activation_timestamp: Date.now(),
-          time_to_activation_hours: properties.time_to_activation_hours,
-          first_transaction_type: properties.first_transaction_type,
+        eventName: MixpanelEvents.SAFE_ACTIVATED,
+        createProperties: (properties) => ({
+          [MixpanelProperties.CHAIN_ID]: properties[PropertyKeys.CHAIN_ID],
+          [MixpanelProperties.SAFE_ADDRESS]: properties[PropertyKeys.SAFE_ADDRESS],
+          [MixpanelProperties.SAFE_VERSION]: properties[PropertyKeys.SAFE_VERSION],
+          [MixpanelProperties.DEPLOYMENT_TYPE]: properties[PropertyKeys.DEPLOYMENT_TYPE],
+          [MixpanelProperties.CREATION_TIMESTAMP]: Date.now(),
+          [MixpanelProperties.CREATION_DURATION_MS]: properties.time_to_activation_hours * 3600000, // Convert hours to ms
         }),
       },
     },
@@ -102,7 +102,11 @@ export const ANALYTICS_EVENTS: Record<string, EventConfiguration> = {
       },
       mixpanel: {
         enabled: true,
-        eventName: MixPanelEvent.WALLET_CONNECTED,
+        eventName: MixpanelEvents.WALLET_CONNECTED,
+        createProperties: (properties) => ({
+          [MixpanelProperties.WALLET_TYPE]: properties[PropertyKeys.WALLET_TYPE],
+          [MixpanelProperties.CHAIN_ID]: properties[PropertyKeys.CHAIN_ID],
+        }),
       },
     },
   },
@@ -180,13 +184,10 @@ export const ANALYTICS_EVENTS: Record<string, EventConfiguration> = {
       mixpanel: {
         enabled: true,
         eventName: 'Transaction Failed',
-        enrichProperties: (properties) => ({
-          ...properties,
-          failure_timestamp: Date.now(),
-          error_code: properties.error_code,
-          error_message: properties.error_message,
-          gas_estimation_error: properties.gas_estimation_error,
-          user_rejected: properties.user_rejected || false,
+        createProperties: (properties) => ({
+          [MixpanelProperties.TRANSACTION_TYPE]: properties[PropertyKeys.TX_TYPE],
+          [MixpanelProperties.CHAIN_ID]: properties[PropertyKeys.CHAIN_ID],
+          [MixpanelProperties.CREATION_TIMESTAMP]: Date.now(),
         }),
       },
     },
@@ -203,17 +204,14 @@ export const ANALYTICS_EVENTS: Record<string, EventConfiguration> = {
       },
       mixpanel: {
         enabled: true,
-        eventName: MixPanelEvent.SAFE_APP_LAUNCHED,
-        enrichProperties: (properties) => ({
-          ...properties,
-          launch_timestamp: Date.now(),
-          app_version: packageJson.version,
-          safe_app_url: properties[PropertyKeys.SAFE_APP_URL],
-          safe_app_tags: properties.safe_app_tags,
-          is_custom_app: properties.is_custom_app || false,
-          previous_apps_used: properties.previous_apps_used || [],
-          // Use chain name for Mixpanel's Blockchain Network property
-          [MixPanelEventParams.BLOCKCHAIN_NETWORK]: properties.chain_name || 'Unknown',
+        eventName: MixpanelEvents.SAFE_APP_LAUNCHED,
+        createProperties: (properties) => ({
+          [MixpanelProperties.SAFE_APP_NAME]: properties[PropertyKeys.SAFE_APP_NAME],
+          [MixpanelProperties.SAFE_APP_URL]: properties[PropertyKeys.SAFE_APP_URL],
+          [MixpanelProperties.LAUNCH_LOCATION]: properties[PropertyKeys.LAUNCH_LOCATION],
+          [MixpanelProperties.CHAIN_ID]: properties[PropertyKeys.CHAIN_ID],
+          [MixpanelProperties.CREATION_TIMESTAMP]: Date.now(),
+          [MixpanelProperties.APP_VERSION]: packageJson.version,
         }),
       },
     },
@@ -230,12 +228,11 @@ export const ANALYTICS_EVENTS: Record<string, EventConfiguration> = {
       mixpanel: {
         enabled: true,
         eventName: 'Safe App Transaction',
-        enrichProperties: (properties) => ({
-          ...properties,
-          transaction_timestamp: Date.now(),
-          sdk_version: properties.sdk_version,
-          transaction_value: properties.transaction_value,
-          gas_estimate: properties.gas_estimate,
+        createProperties: (properties) => ({
+          [MixpanelProperties.SAFE_APP_NAME]: properties[PropertyKeys.SAFE_APP_NAME],
+          [MixpanelProperties.TRANSACTION_TYPE]: properties[PropertyKeys.TX_TYPE],
+          [MixpanelProperties.CHAIN_ID]: properties[PropertyKeys.CHAIN_ID],
+          [MixpanelProperties.CREATION_TIMESTAMP]: Date.now(),
         }),
       },
     },
@@ -301,12 +298,10 @@ export const ANALYTICS_EVENTS: Record<string, EventConfiguration> = {
       mixpanel: {
         enabled: true,
         eventName: 'Feature Used',
-        enrichProperties: (properties) => ({
-          ...properties,
-          usage_timestamp: Date.now(),
-          feature_category: properties.feature_category,
-          user_segment: properties.user_segment,
-          is_first_use: properties.is_first_use || false,
+        createProperties: (properties) => ({
+          [MixpanelProperties.CHAIN_ID]: properties[PropertyKeys.CHAIN_ID],
+          [MixpanelProperties.SAFE_ADDRESS]: properties[PropertyKeys.SAFE_ADDRESS],
+          [MixpanelProperties.CREATION_TIMESTAMP]: Date.now(),
         }),
       },
     },
@@ -328,13 +323,9 @@ export const ANALYTICS_EVENTS: Record<string, EventConfiguration> = {
       mixpanel: {
         enabled: true,
         eventName: 'Error Occurred',
-        enrichProperties: (properties) => ({
-          ...properties,
-          error_timestamp: Date.now(),
-          error_stack: properties.error_stack,
-          error_component: properties.error_component,
-          user_agent: typeof navigator !== 'undefined' ? navigator.userAgent : 'unknown',
-          page_url: typeof window !== 'undefined' ? window.location.href : 'unknown',
+        createProperties: (properties) => ({
+          [MixpanelProperties.CHAIN_ID]: properties[PropertyKeys.CHAIN_ID],
+          [MixpanelProperties.CREATION_TIMESTAMP]: Date.now(),
         }),
       },
     },
