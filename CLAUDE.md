@@ -16,7 +16,8 @@ Yarn workspace with Next.js TypeScript web app and mobile app. Run commands from
 
 ## Rules
 1. **Always use workspace commands** from root directory
-2. **Test & lint after every change** as the last task
+2. **Test & lint after every change** as the last task. 
+  - When working on web, run `yarn workspace @safe-global/web test:changed` first, make sure they pass, then make sure `yarn workspace @safe-global/web lint:changed` passes.
 3. **Use :changed scripts** for web after modifications
 4. **Only lint files you touched** - Never lint/change files out of scope
 
