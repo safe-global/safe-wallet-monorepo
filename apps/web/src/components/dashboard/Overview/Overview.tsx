@@ -13,7 +13,7 @@ import ArrowIconNW from '@/public/images/common/arrow-top-right.svg'
 import ArrowIconSE from '@/public/images/common/arrow-se.svg'
 import FiatValue from '@/components/common/FiatValue'
 import { AppRoutes } from '@/config/routes'
-import { Button, Card, Box, Skeleton, Typography, Stack, SvgIcon } from '@mui/material'
+import { Button, Card, Box, Typography, Stack, SvgIcon } from '@mui/material'
 import { useRouter } from 'next/router'
 import { type ReactElement, useContext, useMemo } from 'react'
 import { SWAP_EVENTS, SWAP_LABELS } from '@/services/analytics/events/swaps'
@@ -32,6 +32,7 @@ import { selectSettings } from '@/store/settingsSlice'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import StakeBanner, { stakeBannerID } from '@/components/dashboard/NewsCarousel/banners/StakeBanner'
 import useIsStakingBannerVisible from '@/components/dashboard/StakingBanner/useIsStakingBannerVisible'
+import OverviewSkeleton from './OverviewSkeleton'
 
 const AddFundsToGetStarted = () => {
   const { safe } = useSafeInfo()
@@ -120,7 +121,7 @@ const Overview = (): ReactElement => {
 
   const noAssets = !balancesLoading && items.length === 0
 
-  if (isLoading) return <Skeleton height={269} variant="rounded" />
+  if (isLoading) return <OverviewSkeleton />
 
   return (
     <Card sx={{ border: 0, p: 3 }} component="section">
