@@ -70,6 +70,12 @@ declare module '@mui/material/IconButton' {
   }
 }
 
+declare module '@mui/material/Chip' {
+  export interface ChipPropsSizeOverrides {
+    tiny: true
+  }
+}
+
 const createSafeTheme = (mode: PaletteMode): Theme => {
   const isDarkMode = mode === 'dark'
   const colors = isDarkMode ? darkPalette : palette
@@ -316,6 +322,16 @@ const createSafeTheme = (mode: PaletteMode): Theme => {
             backgroundColor: theme.palette.secondary.light,
             height: '24px',
           }),
+          //@ts-ignore this is not detected even though it is declared above
+          sizeTiny: {
+            fontSize: '11px',
+            height: 'auto',
+            lineHeight: '16px',
+
+            '& .MuiChip-label': {
+              padding: '2px 4px',
+            },
+          },
         },
       },
       MuiAlert: {

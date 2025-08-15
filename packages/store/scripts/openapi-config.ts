@@ -70,6 +70,9 @@ const config: ConfigFile = {
     '../src/gateway/AUTO_GENERATED/spaces.ts': {
       filterEndpoints: [/^(spaces|members|spaceSafes)/],
     },
+    '../src/gateway/AUTO_GENERATED/positions.ts': {
+      filterEndpoints: [/^positions/],
+    },
   },
 }
 

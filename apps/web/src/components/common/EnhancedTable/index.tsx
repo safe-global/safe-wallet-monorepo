@@ -36,6 +36,7 @@ type EnhancedHeadCell = {
   width?: string
   align?: string
   sticky?: boolean
+  disableSort?: boolean
 }
 
 function descendingComparator(a: string | number, b: string | number) {
@@ -91,7 +92,9 @@ function EnhancedTableHead(props: EnhancedTableHeadProps) {
             }}
             className={classNames({ sticky: headCell.sticky })}
           >
-            {headCell.label && (
+            {headCell.disableSort ? (
+              headCell.label
+            ) : (
               <>
                 <TableSortLabel
                   active={orderBy === headCell.id}
@@ -119,11 +122,12 @@ export type EnhancedTableProps = {
   rows: EnhancedRow[]
   headCells: EnhancedHeadCell[]
   mobileVariant?: boolean
+  compact?: boolean
 }
 
 const pageSizes = [10, 25, 100]
 
-function EnhancedTable({ rows, headCells, mobileVariant }: EnhancedTableProps) {
+function EnhancedTable({ rows, headCells, mobileVariant, compact }: EnhancedTableProps) {
   const [order, setOrder] = useState<'asc' | 'desc'>('asc')
   const [orderBy, setOrderBy] = useState<string>('')
   const [page, setPage] = useState<number>(0)
@@ -150,7 +154,10 @@ function EnhancedTable({ rows, headCells, mobileVariant }: EnhancedTableProps) {
   return (
     <Box sx={{ width: '100%' }}>
       <TableContainer data-testid="table-container" component={Paper} sx={{ width: '100%', mb: 2 }}>
-        <Table aria-labelledby="tableTitle" className={mobileVariant ? css.mobileColumn : undefined}>
+        <Table
+          aria-labelledby="tableTitle"
+          className={classNames({ [css.mobileColumn]: mobileVariant, [css.compactTable]: compact })}
+        >
           <EnhancedTableHead headCells={headCells} order={order} orderBy={orderBy} onRequestSort={handleRequestSort} />
           <TableBody>
             {pagedRows.length > 0 ? (

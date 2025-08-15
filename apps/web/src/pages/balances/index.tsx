@@ -15,6 +15,8 @@ import StakingBanner from '@/components/dashboard/StakingBanner'
 import useIsStakingBannerEnabled from '@/features/stake/hooks/useIsStakingBannerEnabled'
 import { Box } from '@mui/material'
 import { BRAND_NAME } from '@/config/constants'
+import Positions from '@/features/positions'
+import TotalAssetValue from '@/components/balances/TotalAssetValue'
 
 const Balances: NextPage = () => {
   const { error } = useBalances()
@@ -36,7 +38,7 @@ const Balances: NextPage = () => {
 
       <main>
         {isStakingBannerEnabled && (
-          <Box mb={2}>
+          <Box mb={2} sx={{ ':empty': { display: 'none' } }}>
             <StakingBanner />
           </Box>
         )}
@@ -44,7 +46,13 @@ const Balances: NextPage = () => {
         {error ? (
           <PagePlaceholder img={<NoAssetsIcon />} text="There was an error loading your assets" />
         ) : (
-          <AssetsTable setShowHiddenAssets={setShowHiddenAssets} showHiddenAssets={showHiddenAssets} />
+          <>
+            <Box mb={2}>
+              <TotalAssetValue />
+            </Box>
+            <AssetsTable setShowHiddenAssets={setShowHiddenAssets} showHiddenAssets={showHiddenAssets} />
+            <Positions />
+          </>
         )}
       </main>
     </>

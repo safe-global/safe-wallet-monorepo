@@ -1,6 +1,6 @@
 import FirstSteps from '@/components/dashboard/FirstSteps'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { type ReactElement } from 'react'
+import { type ReactElement, useMemo } from 'react'
 import dynamic from 'next/dynamic'
 import { Grid } from '@mui/material'
 import PendingTxsList from '@/components/dashboard/PendingTxs/PendingTxsList'
@@ -14,6 +14,15 @@ import { InconsistentSignerSetupWarning } from '@/features/multichain/components
 import { UnsupportedMastercopyWarning } from '@/features/multichain/components/UnsupportedMastercopyWarning/UnsupportedMasterCopyWarning'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import NewsDisclaimers from '@/components/dashboard/NewsCarousel/NewsDisclaimers'
+import NewsCarousel, { type BannerItem } from '@/components/dashboard/NewsCarousel'
+import { useVisibleBalances } from '@/hooks/useVisibleBalances'
+import useIsEarnFeatureEnabled from '@/features/earn/hooks/useIsEarnFeatureEnabled'
+import useIsStakingBannerVisible from '@/components/dashboard/StakingBanner/useIsStakingBannerVisible'
+import EarnBanner, { earnBannerID } from '@/components/dashboard/NewsCarousel/banners/EarnBanner'
+import SpacesBanner, { spacesBannerID } from '@/components/dashboard/NewsCarousel/banners/SpacesBanner'
+import StakeBanner, { stakeBannerID } from '@/components/dashboard/NewsCarousel/banners/StakeBanner'
+import AddFundsToGetStarted from '@/components/dashboard/AddFundsBanner'
+import PositionsWidget from '@/features/positions/PositionsWidget'
 
 const RecoveryHeader = dynamic(() => import('@/features/recovery/components/RecoveryHeader'))
 
@@ -22,9 +31,26 @@ const Dashboard = (): ReactElement => {
   const showSafeApps = useHasFeature(FEATURES.SAFE_APPS)
   const supportsRecovery = useIsRecoverySupported()
 
+  const { balances, loading: balancesLoading } = useVisibleBalances()
+  const items = useMemo(() => {
+    return balances.items.filter((item) => item.balance !== '0')
+  }, [balances.items])
+
+  const isEarnFeatureEnabled = useIsEarnFeatureEnabled()
+  const isSpacesFeatureEnabled = useHasFeature(FEATURES.SPACES)
+  const isStakingBannerVisible = useIsStakingBannerVisible()
+
+  const banners = [
+    isEarnFeatureEnabled && { id: earnBannerID, element: EarnBanner },
+    isSpacesFeatureEnabled && { id: spacesBannerID, element: SpacesBanner },
+    isStakingBannerVisible && { id: stakeBannerID, element: StakeBanner },
+  ].filter(Boolean) as BannerItem[]
+
+  const noAssets = !balancesLoading && items.length === 0
+
   return (
     <>
-      <Grid container spacing={3}>
+      <Grid container spacing={3} pt={3}>
         {supportsRecovery && <RecoveryHeader />}
 
         <Grid item xs={12} className={css.hideIfEmpty} sx={{ '& > div': { m: 0 } }}>
@@ -34,36 +60,48 @@ const Dashboard = (): ReactElement => {
         <Grid item xs={12} className={css.hideIfEmpty}>
           <UnsupportedMastercopyWarning />
         </Grid>
+      </Grid>
 
-        <Grid item xs={12}>
-          <Overview />
-        </Grid>
+      <Grid container spacing={3} alignItems="flex-start">
+        <Grid item container xs={12} lg={8} spacing={3}>
+          <Grid item width={1}>
+            <Overview />
+          </Grid>
 
-        <Grid item xs={12} className={css.hideIfEmpty}>
-          <FirstSteps />
-        </Grid>
+          <Grid item width={1}>
+            {noAssets ? <AddFundsToGetStarted /> : <NewsCarousel banners={banners} />}
+          </Grid>
 
-        {safe.deployed && (
-          <>
-            <Grid item xs={12} lg={6}>
-              <AssetsWidget />
-            </Grid>
+          <Grid item width={1} className={css.hideIfEmpty}>
+            <FirstSteps />
+          </Grid>
 
-            <Grid item xs={12} lg={6}>
-              <PendingTxsList />
-            </Grid>
-
-            {showSafeApps && (
-              <Grid item xs={12}>
-                <SafeAppsDashboardSection />
+          {safe.deployed && (
+            <>
+              <Grid item width={1}>
+                <AssetsWidget />
               </Grid>
-            )}
 
-            <Grid item xs={12}>
-              <NewsDisclaimers />
-            </Grid>
-          </>
-        )}
+              <Grid item width={1}>
+                <PositionsWidget />
+              </Grid>
+
+              {showSafeApps && (
+                <Grid item width={1}>
+                  <SafeAppsDashboardSection />
+                </Grid>
+              )}
+
+              <Grid item width={1}>
+                <NewsDisclaimers />
+              </Grid>
+            </>
+          )}
+        </Grid>
+
+        <Grid item container xs={12} lg={4}>
+          <PendingTxsList />
+        </Grid>
       </Grid>
     </>
   )
